@@ -22,7 +22,11 @@
 
 module hello_world;
 
+`ifdef VCS
+  import uvm_pkg::*;
+`else
   `include "uvm.svh"
+`endif
 
   `include "packet.sv"
   `include "producer.sv"

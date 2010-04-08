@@ -83,7 +83,11 @@ class uvm_queue #(type T=int) extends uvm_object;
   // and returned.
 
   virtual function T get (int index);
+`ifdef VCS
+    T default_value;
+`else
     const T default_value;
+`endif
     if (index >= size() || index < 0) begin
       uvm_report_warning("QUEUEGET",
         $psprintf("get: given index out of range for queue of size %0d. Ignoring get request",size()));

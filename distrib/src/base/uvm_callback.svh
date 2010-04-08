@@ -85,8 +85,8 @@ class uvm_callbacks #(type T=int, CB=int) extends uvm_pool #(T,uvm_queue #(CB));
   // that users can override in subtypes.
   
   typedef uvm_callbacks #(T,CB) this_type;
-  typedef uvm_pool #(T,CB) pool_t;
   typedef uvm_queue #(CB) queue_t;
+  typedef uvm_pool #(T,queue_t) pool_t;
 
   static uvm_reporter reporter = new("cb_tracer");
 

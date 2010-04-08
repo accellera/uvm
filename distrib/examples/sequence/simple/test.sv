@@ -20,7 +20,12 @@
 //----------------------------------------------------------------------
 module test;
 
+`ifdef VCS
+  import uvm_pkg::*;
+`else
   `include "uvm.svh"
+`endif
+
   `include "simple_item.sv"
   `include "simple_sequencer.sv"
   `include "simple_driver.sv"

@@ -171,7 +171,9 @@ class sequenceA #(type REQ = uvm_sequence_item,
 
     `uvm_info("sequenceA", "Starting sequence", UVM_MEDIUM)
     
+`ifndef VCS
     `uvm_info("sequenceA", "  sequence %0d", my_id);
+`endif
     
     for(int unsigned i = 0; i < `num_loops; i++) begin
       req = new();

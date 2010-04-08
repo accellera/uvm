@@ -159,7 +159,6 @@
    begin \
      uvm_callbacks #(T,CB) cbs = uvm_callbacks #(T,CB)::get_global_cbs(); \
      uvm_queue #(CB) cbq; \
-     cbq = new cbq; \
      if (!cbs.exists(OBJ)) \
        return 1-VAL; \
      cbq = cbs.get(OBJ); \
@@ -211,7 +210,6 @@
   begin \
      uvm_callbacks #(T,CB) cbs = uvm_callbacks #(T,CB)::get_global_cbs(); \
      uvm_queue #(CB) cbq; \
-     cbq = new cbq; \
      if (cbs.exists(OBJ)) begin\
        cbq = cbs.get(OBJ); \
        fork begin \
