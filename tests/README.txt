@@ -23,7 +23,7 @@ names. The higher the 2-digit numbers, the later the test will run.
 The first test to be run is named "00basic/00hello/test.sv". The last
 test to be run is "99final/99final/test.sv".
 
-Simple tests within a group shoudl be located in a directory with a
+Simple tests within a group should be located in a directory with a
 low 2-digit number. A group of testcases related to more basic
 features should be located in a directory with a low 2-digit number.
 
@@ -61,12 +61,13 @@ It is a dummy simulation that simply creates a "pass" condition in the
 
 2.3 What is the "clean" tool?
 
-It is a dummy simulation that simple deletes all "*.log" files and
-other temporary files often left behidn my text editors, such as "*~"
+It is a dummy simulation that simply deletes all "*.log" files and
+other temporary files often left behind by text editors, such as "*~"
 files.
 
 It does not delete temporary or output files created by
-simulators. Use the the '-c' option with the specific tool for that.
+simulators. Use the the '-c' option with the specific tool name for
+that.
 
 Example:
 
@@ -77,7 +78,7 @@ Example:
 
 Re-run the testcase using the '-d' and '-v' options. This will leave
 behind all files created by the simulation tool and display the result
-of the simulation to stdout in addition to the usual log file.
+of the simulation to stdout, in addition to the usual log file.
 
 
 
@@ -86,10 +87,14 @@ of the simulation to stdout in addition to the usual log file.
 The test must be written in a class named "test" extended from
 "uvm_test".
 
-The test must be ENTIRELY self-checking. if is is succesful, it MUST
+The test must be ENTIRELY self-checking. If is is succesful, it MUST
 produce the string "TEST PASS" somewhere in its output log file.
 
 The test may be module-based or program-based.
 
 The package containing the UVM library will have been previously
 compiled. However, may need to be imported.
+
+Make sure all testcase source files contain the Apache 2.0 copyright
+statement header. If you modify a source file, add your copyright
+claim to the copyright statement header.
