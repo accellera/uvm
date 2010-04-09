@@ -54,7 +54,7 @@ require "getopts.pl"
 
 $testdir = shift(@ARGV);
 
-$uvm_home = "../distrib";
+$uvm_home = "../../../distrib";
 $uvm_home = $opt_u if $opt_u;
 
 $sv  = "$testdir/test.sv";
