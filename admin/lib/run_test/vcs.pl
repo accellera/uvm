@@ -25,7 +25,8 @@
 
 #
 # Run the test implemented by the file named "test.sv" located
-# in the specified directory.
+# in the specified directory, using the specified compile-time
+# and run-time command-line options
 #
 # The specified directory must also be used as the CWD for the
 # simulation run.
@@ -33,15 +34,15 @@
 # Run silently, unless $opt_v is specified.
 #
 sub run_the_test {
-  local($testdir, $_) = @_;
+  local($testdir, $vcs_opts, $simv_opts, $_) = @_;
 
-  $vcs = "vcs -sverilog -timescale=1ns/1ns +incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv test.sv -l vcs.log";
+  $vcs = "vcs -sverilog -timescale=1ns/1ns +incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv test.sv -l vcs.log $vcs_opts";
   $vcs .= " > /dev/null 2>&1" unless $opt_v;
 
   system("cd $testdir; rm -f simv; $vcs");
 
   if (-e "$testdir/simv") {
-    $simv = "simv -l simv.log +UVM_TESTNAME=test";
+    $simv = "simv -l simv.log +UVM_TESTNAME=test $simv_opts";
     $simv .= " > /dev/null 2>&1" unless $opt_v;
 
     system("cd $testdir; $simv");

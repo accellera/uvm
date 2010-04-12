@@ -44,7 +44,7 @@ USAGE
 }
 
 require "getopts.pl"
-&Getopts("cdhu:v");
+&Getopts("cC:dhR:u:v");
 &usage if $opt_h || $#ARGV < 0;
 
 $uvm_home = "../distrib";
@@ -94,12 +94,21 @@ $| = 1;
 #
 # Run the individual tests
 #
-$rc = 0;
+$failures = 0;
 foreach $dir (@dirs) {
    $dots = substr(".......................................", 0, 40-length($dir));
-   $rc |= &run_one_test($dir);
+   $failures += &run_one_test($dir);
 }
-exit($rc);
+print "-----------------------------------------------------------------\n";
+$txt = sprintf("Total of %d tests ", $#dirs+1);
+$dots = substr(".......................................", 0, 41-length($txt));
+print $txt, $dots;
+if ($failures > 0) {
+  print " FAILED $failures tests\n";
+} else {
+   print " PASSED all tests.\n";
+}
+exit($failures);
 
 
 #
@@ -126,7 +135,7 @@ sub run_one_test {
    if (!$opt_c) {
      print "<running>\n" if $opt_v;
 
-     &run_the_test($testdir);
+     &run_the_test($testdir, $opt_C, $opt_R);
 
      print "$testdir $dots " if $opt_v;
    }  
@@ -200,12 +209,17 @@ sub check_test {
      return 1;
    }
    $pass = 0;
+   $exp_errs = 0; # No errors expected by default
    $in_summary = 0;
    undef($n_errs);
    undef($n_fatals);
    while ($_ = <LOG>) {
      if (m/TEST PASS/) {
        $pass = 1;
+       next;
+     }
+     if (m/UVM TEST EXPECT (\d+) UVM_ERROR/) {
+       $exp_errs = $1;
        next;
      }
      if (m/UVM Report Summary/) {
@@ -228,18 +242,27 @@ sub check_test {
      $pass = 0;
    }
 
-   # Should NEVER have any UVM_ERROR or UVM_FATAL messages
-   if ($n_errs > 0) {
-     print "**FAIL** (UVM_ERRORs)\n";
+   # Should have the expected number of UVM_ERROR messages
+   if ($n_errs != $exp_errs) {
+     if ($exp_errs > 0) {
+       print "**FAIL** ($n_errs vs $exp_errs UVM_ERRORs)\n";
+     } else {
+       print "**FAIL** (UVM_ERRORs)\n";
+     }
      return 1;
    }
+   # Should NEVER have any UVM_FATAL messages
    if ($n_fatals > 0) {
      print "**FAIL** (UVM_FATALs)\n";
      return 1;
    }
 
    if ($pass) {
-     print "pass.\n";
+     if ($n_errs > 0) {
+       print "pass (with UVM_ERRORs)\n";
+     } else {
+       print "pass.\n";
+     }
      return 0;
    }
 

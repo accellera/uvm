@@ -25,7 +25,8 @@
 
 #
 # Run the test implemented by the file named "test.sv" located
-# in the specified directory.
+# in the specified directory, using the specified compile-time
+# and run-time command-line options
 #
 # The specified directory must also be used as the CWD for the
 # simulation run.
@@ -33,9 +34,9 @@
 # Run silently, unless $opt_v is specified.
 #
 sub run_the_test {
-  local($testdir, $_) = @_;
+  local($testdir, $comptime, $runtime, $_) = @_;
 
-  system("cd $testdir; rm -f *.log *~ *.bak #*#");
+  system("cd $testdir; rm -f $comptime *.log *~ *.bak #*#");
 }
 
 
