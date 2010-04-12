@@ -28,6 +28,21 @@ low 2-digit number. A group of testcases related to more basic
 features should be located in a directory with a low 2-digit number.
 
 
+1.2 What is the XXfail test group?
+
+It is a group of test designed to test the failure detected mechanism
+of the run_tests script. These tests are not run by default and can only
+be run by explicitly specifying the test group to the run_tests script.
+
+Note that these tests will not fail when using the "clean" or "echo"
+pseudo tools.
+
+Example:
+
+   % run_test vcs XXfail
+
+
+
 2.0 How do I run a test
 
 First, you must be in the "tests" directory.

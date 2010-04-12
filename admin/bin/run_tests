@@ -200,14 +200,44 @@ sub check_test {
      return 1;
    }
    $pass = 0;
+   $in_summary = 0;
+   undef($n_errs);
+   undef($n_fatals);
    while ($_ = <LOG>) {
      if (m/TEST PASS/) {
        $pass = 1;
-       last;   
+       next;
+     }
+     if (m/UVM Report Summary/) {
+       $in_summary = 1;
+       next;
+     }
+     if ($in_summary && m/^UVM_ERROR :\s+(\d+)\s*$/) {
+       $n_errs = $1;
+       next;
+     }
+     if ($in_summary && m/^UVM_FATAL :\s+(\d+)\s*$/) {
+       $n_fatals = $1;
+       next;
      }
    }
    close(LOG);
-  
+
+   # Check for odd logs
+   if (!$in_summary || !defined($n_errs) || !defined($n_fatals)) {
+     $pass = 0;
+   }
+
+   # Should NEVER have any UVM_ERROR or UVM_FATAL messages
+   if ($n_errs > 0) {
+     print "**FAIL** (UVM_ERRORs)\n";
+     return 1;
+   }
+   if ($n_fatals > 0) {
+     print "**FAIL** (UVM_FATALs)\n";
+     return 1;
+   }
+
    if ($pass) {
      print "pass.\n";
      return 0;
@@ -216,7 +246,7 @@ sub check_test {
    # Maybe the run-time errors were expected...   
    @errs = &get_runtime_errors($testdir);
    if ($#errs == -1) {
-     print "**FAIL** (No run-time log file)\n";
+     print "**FAIL** (Did not pass)\n";
      return 1;
    }
    
