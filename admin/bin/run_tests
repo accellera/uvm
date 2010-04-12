@@ -1,0 +1,289 @@
+eval 'exec perl -S $0 ${1+"$@"}' 
+if 0;
+
+##---------------------------------------------------------------------- 
+##   Copyright 2010 Synopsys, Inc. 
+##   All Rights Reserved Worldwide 
+## 
+##   Licensed under the Apache License, Version 2.0 (the 
+##   "License"); you may not use this file except in 
+##   compliance with the License.  You may obtain a copy of 
+##   the License at 
+## 
+##       http://www.apache.org/licenses/LICENSE-2.0 
+## 
+##   Unless required by applicable law or agreed to in 
+##   writing, software distributed under the License is 
+##   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+##   CONDITIONS OF ANY KIND, either express or implied.  See 
+##   the License for the specific language governing 
+##   permissions and limitations under the License. 
+##----------------------------------------------------------------------
+
+#
+# Run and summarize a set of tests
+#
+
+sub usage {
+
+print STDERR <<USAGE;
+Usage: $0 [options] tool {dir}
+
+   tool     Name of the tool to run the tests on
+   dir      Name of the directies containing the UVM testcases
+
+Options:
+   -c       Do not run. Only clean-up tool-generated files.
+   -d       Do not remove tool-generated files
+   -h       Print this message
+   -u dir   Use the UVM distribution in the specified directory
+   -v       Display the output of the testcase on stdout
+
+USAGE
+   exit(1);
+}
+
+require "getopts.pl"
+&Getopts("cdhu:v");
+&usage if $opt_h || $#ARGV < 0;
+
+$uvm_home = "../distrib";
+$uvm_home = $opt_u if $opt_u;
+
+$libdir = $0;
+$libdir =~ s#bin/run_tests#lib/run_test#;
+if (! -e $libdir) {
+   print STDERR "Tool-specific library \"$libdir\" does not exists.\n";
+   exit(1);
+}
+push(@INC, $libdir);
+
+$tool = shift(@ARGV);
+require "$tool.pl";
+
+
+#
+# The '-c' option is redundent for the "clean" pseudo-tool
+#
+$opt_c = 0 if $tool eq "clean";
+
+#
+# Find all of the test directories in the supplied arguments
+#
+if ($#ARGV == -1) {
+   @ARGV = <[0-9][0-9]*>;
+}
+foreach $dir (@ARGV) {
+  if (! -d $dir) {
+    print STDERR "test directory \"$dir\" does not exist.\n";
+    exit(1);
+  }
+
+  @subs = <$dir/[0-9][0-9]*>;
+  if ($#subs == -1) {
+    push(@dirs, $dir);
+    next;
+  }
+
+  push(@dirs, @subs);
+}
+
+$| = 1;
+
+
+#
+# Run the individual tests
+#
+$rc = 0;
+foreach $dir (@dirs) {
+   $dots = substr(".......................................", 0, 40-length($dir));
+   $rc |= &run_one_test($dir);
+}
+exit($rc);
+
+
+#
+# Run one test in the specified directory
+#
+# Return non-zero if the test fails.
+#
+sub run_one_test {
+   local($testdir, $_) = @_;
+
+   print "$testdir $dots ";
+
+   if (! -d $testdir) {
+     print "**FAIL** ($testdir not exist)\n";
+     return 1;
+   }
+
+   local($sv) = ("$testdir/test.sv");
+   if (! -e $sv) {
+     print "**FAIL** ($sv does not exist)\n";
+     return 1;
+   }
+
+   if (!$opt_c) {
+     print "<running>\n" if $opt_v;
+
+     &run_the_test($testdir);
+
+     print "$testdir $dots " if $opt_v;
+   }  
+ 
+   #
+   # Clean up all temporary files, except the log file
+   #
+   if (!$opt_d) {
+     &cleanup_test($testdir);
+  
+     if ($opt_c) {
+       print "$tool clean.\n";
+       return 0;
+     }
+   }
+
+   #
+   # Check if the test was succesful
+   #
+   return &check_test($testdir);
+}
+
+
+#
+# Checkif the test passed or failed.
+#
+# Display on STDOUT the status of the test and
+# return non-zero if it failed.
+#
+sub check_test {
+   local($testdir, $_) = @_;
+
+   local($log, $pass, @errs);
+   $log = "$testdir/" . &runtime_log_fname();
+
+   # Special "clean" logfile
+   if ($log =~ m|/!$|) {
+     print "clean.\n";
+     return 0;
+   }
+
+   # If there is no run-time logfile, it could be an expected compile-time
+   # failure...
+   if (! -e $log) {
+     $log = "$testdir/" . &comptime_log_fname();
+     if (! -e $log) {
+       print "**FAIL** (No compile-time or run-time log files)\n";
+       return 1;
+     }
+
+     @errs = &get_compiletime_errors($testdir);
+     if ($#errs == -1) {
+       print "**FAIL** (No run-time log file)\n";
+       return 1;
+     }
+
+     foreach $err (@errs) {
+       $err =~ m/^(.*)#(\d+)$/;
+       if (&check_comptime_error($testdir, $1, $2)) {
+	 print "**FAIL** (Compile-time error)\n";
+	 return 1;
+       }
+     }
+
+     print "pass (with syntax error(s))\n";
+     return 0;
+   }
+
+   if (!open(LOG, "<$log")) {
+     print "**FAIL** (cannot read $log)\n";
+     return 1;
+   }
+   $pass = 0;
+   while ($_ = <LOG>) {
+     if (m/TEST PASS/) {
+       $pass = 1;
+       last;   
+     }
+   }
+   close(LOG);
+  
+   if ($pass) {
+     print "pass.\n";
+     return 0;
+   }
+
+   # Maybe the run-time errors were expected...   
+   @errs = &get_runtime_errors($testdir);
+   if ($#errs == -1) {
+     print "**FAIL** (No run-time log file)\n";
+     return 1;
+   }
+   
+   foreach $err (@errs) {
+     $err =~ m/^(.*)#(\d+)$/;
+     if (&check_runtime_error($testdir, $1, $2)) {
+       print "**FAIL** (Run-time error)\n";
+       return 1;
+     }
+   }
+
+   print "pass (with runtime error(s))\n";
+   return 0;
+}
+
+
+#
+# Check that a compile-time error was expected on the
+# specified line in the specified file
+#
+# returns non-zero if the error was NOT expected
+#
+sub check_comptime_error {
+  local($testdir, $fname, $line, $_) = @_;
+
+  $fname = "$testdir/$fname";
+  if (!open(SV, "< $fname")) {
+     return 1;
+  }
+
+  $_ = "";
+  while ($line > 0) {
+    $_ = <SV>;
+    $line--;
+  }
+  # OK if magic comment found on line in question
+  return 0 if m/UVM TEST COMPILE-TIME FAILURE/;
+
+  close(SV);
+
+  return 1;
+}
+
+
+#
+# Check that a run-time error was expected on the
+# specified line in the specified file
+#
+# returns non-zero if the error was NOT expected
+#
+sub check_runtime_error {
+  local($testdir, $fname, $line, $_) = @_;
+
+  $fname = "$testdir/$fname";
+  if (!open(SV, "< $fname")) {
+     return 1;
+  }
+
+  $_ = "";
+  while ($line > 0) {
+    $_ = <SV>;
+    $line--;
+  }
+  # OK if magic comment found on line in question
+  return 0 if m/UVM TEST RUN-TIME FAILURE/;
+
+  close(SV);
+
+  return 1;
+}

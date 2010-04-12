@@ -30,16 +30,20 @@ features should be located in a directory with a low 2-digit number.
 
 2.0 How do I run a test
 
-A single test can be run on a specific tool by using the tool-specific
-"run_test.toolname" script, specifying the name of the directory that
+First, you must be in the "tests" directory.
+
+A single test can be run on a specific tool by using the "run_tests"
+script, specifying the name of the tool to use and directory that
 contains the "test.sv" file.
 
 Example:
 
-   % run_test.echo 00basic/00hello
+   % run_test echo 00basic/00hello
 
 
-2.1 How do I run a series of tests?
+2.1 How do I run multiple tests
+
+First, you must be in the "tests" directory.
 
 A series of tests can be run on a specific tool by using the
 "run_tests" script and specifying the name of the tool to use and the
@@ -98,3 +102,34 @@ compiled. However, may need to be imported.
 Make sure all testcase source files contain the Apache 2.0 copyright
 statement header. If you modify a source file, add your copyright
 claim to the copyright statement header.
+
+
+3.1 How do I write a test that must fail with a compile-time error?
+
+If the objective of the test is to make sure that a compile-time error
+is detected, implement the test as per the above and add the following
+line comment on the line(s) where the compile-time error is(are)
+expected:
+
+   // UVM TEST COMPILE-TIME FAILURE
+
+See the test 00basic/01compfail for an example.
+
+
+3.1 How do I write a test that must fail with a run-time error?
+
+If the run-time error is reported using the UVM report mechanism,
+use the Report Catcher mechanism to trap the error at run-time an
+implement the test normally.
+
+See the test ?? for an example.
+
+If the objective of the test is to make sure that a run-time error is
+detected by the simulator, implement the test as per the above and
+add the following line comment on the line(s) where the run-time
+error is(are) expected:
+
+   // UVM TEST RUN-TIME FAILURE
+
+See the test 00basic/02runfail for an example.
+
