@@ -52,7 +52,7 @@ require "getopts.pl"
 &Getopts("cC:df:F:hR:u:v");
 &usage if $opt_h || $#ARGV < 0;
 
-$uvm_home = "../distrib";
+$uvm_home = "../../../distrib";
 $uvm_home = $opt_u if $opt_u;
 
 $libdir = $0;
