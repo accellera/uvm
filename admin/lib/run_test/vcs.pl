@@ -39,7 +39,7 @@ sub run_the_test {
   $vcs = "vcs -sverilog -timescale=1ns/1ns +incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv test.sv -l vcs.log $vcs_opts";
   $vcs .= " > /dev/null 2>&1" unless $opt_v;
 
-  system("cd $testdir; rm -f simv; $vcs");
+  system("cd $testdir; rm -f simv vcs.log simv.log; $vcs");
 
   if (-e "$testdir/simv") {
     $simv = "simv -l simv.log +UVM_TESTNAME=test $simv_opts";
@@ -88,11 +88,20 @@ sub get_compiletime_errors {
 
   while ($_ = <LOG>) {
     if (m/^Error-\[/) {
-      $lf = <LOG>;
-      if ($lf !~ m/^(\S+), (\d+)$/) {
-	print STDERR "Invalid VCS compile-time error: \n$_$lf";
+      while ($lf = <LOG>) {
+	if ($lf =~ m/^\s+"(\S+)", (\d+)\s/) {
+	  $fname = $1; $line = $2;
+	  last;
+	}
+	if ($lf =~ m/^(\S+), (\d+)$/) {
+	  $fname = $1; $line = $2;
+	  last;
+	}
+      }
+      if ($lf) {
+	push(@errs, "$fname#$line");
       } else {
-	push(@errs, "$1#$2");
+	print STDERR "Invalid VCS compile-time error: \n$_$lf";
       }
     }
   }
@@ -126,11 +135,20 @@ sub get_runtime_errors {
 
   while ($_ = <LOG>) {
     if (m/^Error-\[/) {
-      $lf = <LOG>;
-      if ($lf !~ m/^(\S+), (\d+)$/) {
-	print STDERR "Invalid VCS run-time error: \n$_$lf";
+      while ($lf = <LOG>) {
+	if ($lf =~ m/^\s+"(\S+)", (\d+)\s/) {
+	  $fname = $1; $line = $2;
+	  last;
+	}
+	if ($lf =~ m/^(\S+), (\d+)$/) {
+	  $fname = $1; $line = $2;
+	  last;
+	}
+      }
+      if ($lf) {
+	push(@errs, "$fname#$line");
       } else {
-	push(@errs, "$1#$2");
+	print STDERR "Invalid VCS run-time error: \n$_$lf";
       }
     }
   }

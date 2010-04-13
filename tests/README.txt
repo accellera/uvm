@@ -100,6 +100,23 @@ behind all files created by the simulation tool and display the result
 of the simulation to stdout, in addition to the usual log file.
 
 
+2.5 How do I simulate only the previously-failing tests?
+
+A list of tests that were identified as failing is automatically written
+to a file named "tool.fails". To re-run only those tests (presumably after
+fixing the cause of failure), specify that file using the -f option.
+
+Rinse. Repeat.
+
+Example:
+
+   % run_tests vcs
+   % <edit>
+   % run_tests -f vcs.fails vcs
+   % <edit>
+   % run_tests -f vcs.fails vcs
+   % run_tests vcs  # Make sure nothing else broke
+
 
 3.0 How do I write a test?
 

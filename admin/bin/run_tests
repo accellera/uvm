@@ -30,12 +30,17 @@ print STDERR <<USAGE;
 Usage: $0 [options] tool {dir}
 
    tool     Name of the tool to run the tests on
-   dir      Name of the directies containing the UVM testcases
+   dir      Name of the directories containing the UVM testcases
 
 Options:
    -c       Do not run. Only clean-up tool-generated files.
+   -C opts  Add the specified options to the compilation command
    -d       Do not remove tool-generated files
+   -f fname Execute tests listed in specified file (one per line)
+   -F fname Write list of failing tests in specfied file instead of
+               "tool.fails" (can later be used with -f)
    -h       Print this message
+   -R opts  Add the specified options to the simulation command
    -u dir   Use the UVM distribution in the specified directory
    -v       Display the output of the testcase on stdout
 
@@ -44,7 +49,7 @@ USAGE
 }
 
 require "getopts.pl"
-&Getopts("cC:dhR:u:v");
+&Getopts("cC:df:F:hR:u:v");
 &usage if $opt_h || $#ARGV < 0;
 
 $uvm_home = "../distrib";
@@ -61,6 +66,10 @@ push(@INC, $libdir);
 $tool = shift(@ARGV);
 require "$tool.pl";
 
+#
+# Always keep a list of failed tests
+#
+$opt_F = "$tool.fails" unless $opt_F;
 
 #
 # The '-c' option is redundent for the "clean" pseudo-tool
@@ -70,34 +79,56 @@ $opt_c = 0 if $tool eq "clean";
 #
 # Find all of the test directories in the supplied arguments
 #
-if ($#ARGV == -1) {
-   @ARGV = <[0-9][0-9]*>;
-}
-foreach $dir (@ARGV) {
-  if (! -d $dir) {
-    print STDERR "test directory \"$dir\" does not exist.\n";
+if ($opt_f) {
+  if (!open(F, "< $opt_f")) {
+    print STDERR "Cannot open \"$opt_f\" for reading: $!\n";
     exit(1);
   }
-
-  @subs = <$dir/[0-9][0-9]*>;
-  if ($#subs == -1) {
-    push(@dirs, $dir);
-    next;
+  while ($_ = <F>) {
+    chomp($_);
+    push(@dirs, $_);
   }
-
-  push(@dirs, @subs);
+  close(F);
+} else {
+  if ($#ARGV == -1) {
+    @ARGV = <[0-9][0-9]*>;
+  }
+  foreach $dir (@ARGV) {
+    if (! -d $dir) {
+      print STDERR "test directory \"$dir\" does not exist.\n";
+      exit(1);
+    }
+    
+    @subs = <$dir/[0-9][0-9]*>;
+    if ($#subs == -1) {
+      push(@dirs, $dir);
+      next;
+    }
+    
+    push(@dirs, @subs);
+  }
 }
 
 $| = 1;
 
+if ($opt_F) {
+  if (!open(Fout, "> $opt_F")) {
+    print STDERR "Cannot open \"$opt_F\" for writing: $!\n";
+    exit(1);
+  }
+}
 
 #
 # Run the individual tests
 #
 $failures = 0;
 foreach $dir (@dirs) {
-   $dots = substr(".......................................", 0, 40-length($dir));
-   $failures += &run_one_test($dir);
+  if (&run_one_test($dir)) {
+    $failures++;
+    if ($opt_F) {
+      print Fout "$dir\n";
+    }
+  }
 }
 print "-----------------------------------------------------------------\n";
 $txt = sprintf("Total of %d tests ", $#dirs+1);
@@ -108,6 +139,7 @@ if ($failures > 0) {
 } else {
    print " PASSED all tests.\n";
 }
+close(Fout) if $opt_F;
 exit($failures);
 
 
@@ -119,6 +151,7 @@ exit($failures);
 sub run_one_test {
    local($testdir, $_) = @_;
 
+   $dots = substr(".......................................", 0, 40-length($dir));
    print "$testdir $dots ";
 
    if (! -d $testdir) {
@@ -160,7 +193,7 @@ sub run_one_test {
 
 
 #
-# Checkif the test passed or failed.
+# Check if the test passed or failed.
 #
 # Display on STDOUT the status of the test and
 # return non-zero if it failed.
