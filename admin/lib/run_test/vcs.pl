@@ -18,10 +18,38 @@
 ##----------------------------------------------------------------------
 
 #
-# Simulator-Specific test running script
+# VCS-Specific test running script
 #
-# Run a testcase using VCS
+
 #
+# Make sure the version of VSC can run these tests
+#
+$vcs = `vcs -id`;
+if ($vcs !~ m/Compiler version = VCS (\S+)/) {
+  print STDERR "Unable to run VCS: $vcs";
+  exit(1);
+}
+$vcs_version = $1;
+if ($vcs_version !~ m/(\d\d\d\d)\.(\d\d)(-(.+))?$/) {
+   print stderr "Unknown VCS version number \"$vcs_version\".\n";
+   exit(1);
+}
+$vcs_yr = $1;
+$vcs_mo = $2;
+$vcs_rl = $4;
+if ($vcs_yr < 2009) { &vcs_too_old($vcs_version); }
+if ($vcs_yr == 2009 && $vcs_mo < 12) { &vcs_too_old($vcs_version); }
+if ($vcs_yr == 2009 && $vcs_mo == 12) {
+  if ($vcs_rl !~ m/^\d+/ || $vcs_rl < 3) { &vcs_too_old($vcs_version); }
+}
+
+sub vcs_too_old {
+   local($v, $_) = @_;
+   print STDERR "VCS $v cannot run the UVM library.\n";
+   print STDERR "Version 2009.12-3 or later is required.\n";
+   exit(1);
+}
+
 
 #
 # Run the test implemented by the file named "test.sv" located
