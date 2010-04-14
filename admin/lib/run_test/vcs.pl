@@ -42,11 +42,16 @@ if ($vcs_yr == 2009 && $vcs_mo < 12) { &vcs_too_old($vcs_version); }
 if ($vcs_yr == 2009 && $vcs_mo == 12) {
   if ($vcs_rl !~ m/^\d+/ || $vcs_rl < 3) { &vcs_too_old($vcs_version); }
 }
+if ($vcs_yr == 2009 && $vcs_mo < 12) { &vcs_too_old($vcs_version); }
+if ($vcs_yr == 2010 && $vcs_mo == 06) { 
+  if ($vcs_rl eq "B") { &vcs_too_old($vcs_version); }
+}
 
 sub vcs_too_old {
    local($v, $_) = @_;
    print STDERR "VCS $v cannot run the UVM library.\n";
    print STDERR "Version 2009.12-3 or later is required.\n";
+   print STDERR "Version 2010.06-B1 or later is required.\n";
    exit(1);
 }
 
