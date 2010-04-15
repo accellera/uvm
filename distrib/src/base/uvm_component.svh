@@ -1395,7 +1395,9 @@ virtual class uvm_component extends uvm_report_object;
   extern static  function uvm_component get_component    (int ele);
   extern static  function int           get_num_components ();
 
-  `include "compatibility/urm_message_compatibility.svh"
+  int unsigned recording_detail = UVM_NONE;
+
+  extern         function void   do_print(uvm_printer printer);
 
 endclass : uvm_component
 

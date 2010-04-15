@@ -714,8 +714,6 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   endfunction
   
 
-  `include "compatibility/urm_port_compatibility.svh"
-
   // Function: get_if
   //
   // Returns the implementation (imp) port at the given index from the array of

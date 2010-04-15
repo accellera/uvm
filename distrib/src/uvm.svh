@@ -25,6 +25,5 @@
   `include "base/base.svh"
   `include "uvm_tlm/uvm_tlm.svh"
   `include "methodology/methodology.svh"
-  `include "compatibility/compatibility.svh"
   //`include "uvm_globals.svh"
 `endif // UVM_SVH

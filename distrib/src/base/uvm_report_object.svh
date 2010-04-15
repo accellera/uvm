@@ -491,53 +491,7 @@ virtual class uvm_report_object extends uvm_object;
     return this;
   endfunction
 
-
-  //----------------------------------------------------------------------------
-  //                          DEPRECATED MEMBERS
-  //                      *** Do not use in new code ***
-  //                  Convert existing code when appropriate.
-  //----------------------------------------------------------------------------
-
-  function void avm_report_message( string id,
-                                    string message,
-                                    int verbosity = UVM_MEDIUM,
-                                    string filename = "",
-                                    int line = 0);
-    m_rh.report(UVM_INFO, get_full_name(), id, message, verbosity,
-                filename, line, this);
-  endfunction
-
-  function void avm_report_warning( string id,
-                                    string message,
-                                    int verbosity = UVM_MEDIUM,
-                                    string filename = "",
-                                    int line = 0);
-    m_rh.report(UVM_WARNING, get_full_name(), id, message, verbosity,
-                filename, line, this);
-  endfunction
-
-  function void avm_report_error( string id,
-                                  string message,
-                                  int verbosity = UVM_LOW,
-                                  string filename = "",
-                                  int line = 0);
-    m_rh.report(UVM_ERROR, get_full_name(), id, message, verbosity,
-                filename, line, this);
-  endfunction
-
-  function void avm_report_fatal( string id,
-                                  string message,
-                                  int verbosity = UVM_NONE,
-                                  string filename = "",
-                                  int line = 0);
-    m_rh.report(UVM_FATAL, get_full_name(), id, message, verbosity,
-                filename, line, this);
-  endfunction
-
-
 endclass
-
-
 
 //------------------------------------------------------------------------------
 //

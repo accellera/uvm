@@ -23,8 +23,6 @@
 `ifndef UVM_MISC_SVH
 `define UVM_MISC_SVH
 
-// Used to indicate "no valid default value" in a parameter
-virtual class avm_virtual_class; endclass
 
 //------------------------------------------------------------------------------
 //

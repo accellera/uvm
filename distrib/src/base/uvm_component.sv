@@ -100,7 +100,7 @@ function uvm_component::new (string name, uvm_component parent);
   // Now that inst name is established, reseed (if use_uvm_seeding is set)
   reseed();
 
-  // Do local configuration settings (URM backward compatibility)
+  // Do local configuration settings
   void'(get_config_int("recording_detail", recording_detail));
 
   // Deprecated container of top-levels (replaced by uvm_top)
@@ -1419,6 +1419,36 @@ function void uvm_component::print_config_settings (string field="",
       while(cc.m_children.next(v));
     depth--;
   end
+endfunction
+
+
+// do_print (override)
+// --------
+
+function void uvm_component::do_print(uvm_printer printer);
+  string v;
+  super.do_print(printer);
+
+  // It is printed only if its value is other than the default (UVM_NONE)
+  if(uvm_verbosity'(recording_detail) != UVM_NONE)
+    case (recording_detail)
+      UVM_LOW : printer.print_generic("recording_detail", "uvm_verbosity", 
+        $bits(recording_detail), "UVM_LOW");
+      UVM_MEDIUM : printer.print_generic("recording_detail", "uvm_verbosity", 
+        $bits(recording_detail), "UVM_MEDIUM");
+      UVM_HIGH : printer.print_generic("recording_detail", "uvm_verbosity", 
+        $bits(recording_detail), "UVM_HIGH");
+      UVM_FULL : printer.print_generic("recording_detail", "uvm_verbosity", 
+        $bits(recording_detail), "UVM_FULL");
+      default : printer.print_field("recording_detail", recording_detail, 
+        $bits(recording_detail), UVM_DEC, , "integral");
+    endcase
+
+  if (enable_stop_interrupt != 0) begin
+    printer.print_field("enable_stop_interrupt", enable_stop_interrupt,
+                        $bits(enable_stop_interrupt), UVM_BIN, ".", "bit");
+  end
+
 endfunction
 
 //------------------------------------------------------------------------------

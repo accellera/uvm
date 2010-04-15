@@ -45,9 +45,6 @@ package uvm_pkg;
   `include "uvm_macros.svh"
   `include "base/base.svh"
   `include "methodology/methodology_noparm.svh"
-
-// Include for backwards compatibility
-  `include "compatibility/base_compatibility.svh"
 `endif
 endpackage
 

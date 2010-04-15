@@ -45,9 +45,6 @@
 `include "macros/uvm_sequence_defines.svh"
 `include "macros/uvm_callback_defines.svh"
 
-`include "compatibility/urm_macro_compatibility.svh"
-`include "compatibility/urm_message_defines.svh"
-
 `include "macros/uvm_layered_stimulus_defines.svh"
 
 `endif
