@@ -1,7 +1,7 @@
-// $Id: uvm_extern_report_server.svh,v 1.1.1.1.12.5 2010/04/08 07:54:28 nitina Exp $
+// $Id: uvm_extern_report_server.svh,v 1.18 2010/03/16 23:56:02 redelman Exp $
 //----------------------------------------------------------------------
 //   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2009 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -76,18 +76,14 @@
     else
       report_ok = 1;
 
-    if(report_ok)
-      report_ok = uvm_report_catcher::process_all_report_catchers(
-                     this, client, severity, name, id, message,
-                     verbosity_level, a, filename, line);
-
-    if(report_ok) begin	
+    if(report_ok) begin
       m = compose_message(severity, name, id, message, filename, line); 
       process_report(severity, name, id, message, a, f, filename,
                      line, m, verbosity_level, client);
     end
     
   endfunction
+
 
   //--------------------------------------------------------------------
   // process_report
