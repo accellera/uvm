@@ -1,7 +1,7 @@
-// $Id: uvm_report_server.svh,v 1.22 2009/12/17 00:03:35 redelman Exp $
+// $Id: uvm_report_server.svh,v 1.1.1.1.12.2 2010/04/05 13:32:33 nitina Exp $
 //------------------------------------------------------------------------------
 //   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2009 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -37,6 +37,7 @@ typedef class uvm_report_object;
 //
 //------------------------------------------------------------------------------
 
+typedef class uvm_report_catcher;
 class uvm_report_server;
 
   local int max_quit_count; 
@@ -257,7 +258,7 @@ class uvm_report_server;
     string id;
     string name;
     string output_str;
-
+    uvm_report_catcher::summarize_report_catcher(file);
     f_display(file, "");
     f_display(file, "--- UVM Report Summary ---");
     f_display(file, "");
@@ -406,5 +407,6 @@ class uvm_report_global_server;
   endfunction
 
 endclass
+
 
 `endif // UVM_REPORT_SERVER_SVH
