@@ -231,7 +231,7 @@ virtual class uvm_report_catcher extends uvm_object;
   //
   //
 
-  static function void add_report_default_catcher(uvm_report_catcher catcher);
+  static function void add_report_default_catcher(uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
     sev_id_struct sev_id;
     if(catcher == null) begin
       uvm_top.uvm_report_error("RPTCTHR", "NULL uvm_report_catcher object passed to uvm_report_catcher::add_report_default_catcher()", UVM_NONE, `__FILE__, `__LINE__);
@@ -243,39 +243,19 @@ virtual class uvm_report_catcher extends uvm_object;
       return;
     end    
 
-    m_catcher_q.push_back(catcher);
+    if (ordering == UVM_APPEND) m_catcher_q.push_back(catcher);
+    else m_catcher_q.push_front(catcher);
 
     sev_id.is_on             = 1;
     m_sev_id_array[catcher]  = sev_id;
   endfunction
 
-  //push_report_default_catcher
-  //
-  //
-  
-  static function void push_report_default_catcher(uvm_report_catcher catcher);
-    sev_id_struct sev_id;
-    if(catcher == null) begin
-      uvm_top.uvm_report_error("RPTCTHR", "NULL uvm_report_catcher object passed to uvm_report_catcher::push_report_default_catcher()", UVM_NONE, `__FILE__, `__LINE__);
-      return;
-    end
-    
-    if(m_sev_id_array.exists(catcher)) begin
-      catcher.uvm_report_warning("RPTCTHR", "Catcher instance already registered. Ignoring subsequent call to uvm_report_catcher::push_report_default_catcher()", UVM_NONE, `__FILE__, `__LINE__);   
-      return;
-    end    
-
-    m_catcher_q.push_front(catcher);
-
-    sev_id.is_on             = 1;
-    m_sev_id_array[catcher]  = sev_id;
-  endfunction
   
   //add_report_severity_catcher
   //
   //
 
-  static function void add_report_severity_catcher(uvm_severity severity, uvm_report_catcher catcher);
+  static function void add_report_severity_catcher(uvm_severity severity, uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
     sev_id_struct sev_id;
     if(catcher == null) begin
       uvm_top.uvm_report_error("RPTCTHR", "NULL uvm_report_catcher object passed to uvm_report_catcher::add_report_severity_catcher()", UVM_NONE, `__FILE__, `__LINE__);
@@ -287,7 +267,8 @@ virtual class uvm_report_catcher extends uvm_object;
       return;
     end    
 
-    m_catcher_q.push_back(catcher);
+    if (ordering == UVM_APPEND) m_catcher_q.push_back(catcher);
+    else m_catcher_q.push_front(catcher);
 
     sev_id.sev_specified     = 1;
     sev_id.sev               = severity;
@@ -295,35 +276,12 @@ virtual class uvm_report_catcher extends uvm_object;
     m_sev_id_array[catcher]  = sev_id;
   endfunction
 
-  //push_report_severity_catcher
-  //
-  //
-
-  static function void push_report_severity_catcher(uvm_severity severity, uvm_report_catcher catcher);
-    sev_id_struct sev_id;
-    if(catcher == null) begin
-      uvm_top.uvm_report_error("RPTCTHR", "NULL uvm_report_catcher object passed to uvm_report_catcher::push_report_severity_catcher()", UVM_NONE, `__FILE__, `__LINE__);
-      return;
-    end
-
-    if(m_sev_id_array.exists(catcher)) begin
-      catcher.uvm_report_warning("RPTCTHR", "Catcher instance already registered. Ignoring subsequent call to uvm_report_catcher::push_report_severity_catcher()", UVM_NONE, `__FILE__, `__LINE__);   
-      return;
-    end    
-
-    m_catcher_q.push_front(catcher);
-
-    sev_id.sev_specified     = 1;
-    sev_id.sev               = severity;
-    sev_id.is_on             = 1;
-    m_sev_id_array[catcher]  = sev_id;
-  endfunction
 
   //add_report_id_catcher
   //
   //
 
-  static function void add_report_id_catcher(string id, uvm_report_catcher catcher);
+  static function void add_report_id_catcher(string id, uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
     sev_id_struct sev_id;
     if(catcher == null) begin
       uvm_top.uvm_report_error("RPTCTHR", "NULL uvm_report_catcher object passed to uvm_report_catcher::add_report_id_catcher()", UVM_NONE, `__FILE__, `__LINE__);
@@ -340,7 +298,8 @@ virtual class uvm_report_catcher extends uvm_object;
       return;
     end  
 
-    m_catcher_q.push_back(catcher);
+    if (ordering == UVM_APPEND) m_catcher_q.push_back(catcher);
+    else m_catcher_q.push_front(catcher);
 
     sev_id.id_specified      = 1;
     sev_id.id                = id;
@@ -348,40 +307,12 @@ virtual class uvm_report_catcher extends uvm_object;
     m_sev_id_array[catcher]  = sev_id;
   endfunction
 
-  //push_report_severity_catcher
-  //
-  //
-
-  static function void push_report_id_catcher(string id, uvm_report_catcher catcher);
-    sev_id_struct sev_id;
-    if(catcher == null) begin
-      uvm_top.uvm_report_error("RPTCTHR", "NULL uvm_report_catcher object passed to uvm_report_catcher::push_report_id_catcher()", UVM_NONE, `__FILE__, `__LINE__);
-      return;
-    end
-    
-    if(m_sev_id_array.exists(catcher)) begin
-      catcher.uvm_report_warning("RPTCTHR", "Catcher instance already registered. Ignoring subsequent call to uvm_report_catcher::push_report_id_catcher()", UVM_NONE, `__FILE__, `__LINE__);   
-      return;
-    end    
-
-    if(id == "") begin
-      catcher.uvm_report_error("RPTCTHR", "Empty id string passed to uvm_report_catcher::push_report_id_catcher().", UVM_NONE, `__FILE__, `__LINE__);
-      return;
-    end  
-
-    m_catcher_q.push_front(catcher);
-
-    sev_id.id_specified      = 1;
-    sev_id.id                = id;
-    sev_id.is_on             = 1;
-    m_sev_id_array[catcher]  = sev_id;
-  endfunction
   
   //add_report_severity_id_catcher
   //
   //
   
-  static function void add_report_severity_id_catcher(uvm_severity severity, string id, uvm_report_catcher catcher);
+  static function void add_report_severity_id_catcher(uvm_severity severity, string id, uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
     sev_id_struct sev_id;
     if(catcher == null) begin
       uvm_top.uvm_report_error("RPTCTHR", "NULL uvm_report_catcher object passed to uvm_report_catcher::add_report_severity_id_catcher()", UVM_NONE, `__FILE__, `__LINE__);
@@ -398,38 +329,8 @@ virtual class uvm_report_catcher extends uvm_object;
       return;
     end  
 
-    m_catcher_q.push_back(catcher);
-
-    sev_id.id_specified      = 1;
-    sev_id.id                = id;
-    sev_id.sev_specified     = 1;
-    sev_id.sev               = severity;
-    sev_id.is_on             = 1;
-    m_sev_id_array[catcher]  = sev_id;
-  endfunction
-  
-  //push_report_severity_id_catcher
-  //
-  //
-  
-  static function void push_report_severity_id_catcher(uvm_severity severity, string id, uvm_report_catcher catcher);
-    sev_id_struct sev_id;
-    if(catcher == null) begin
-      uvm_top.uvm_report_error("RPTCTHR", "NULL uvm_report_catcher object passed to uvm_report_catcher::push_report_severity_id_catcher()", UVM_NONE, `__FILE__, `__LINE__); 
-      return;
-    end
-    
-    if(m_sev_id_array.exists(catcher)) begin
-      catcher.uvm_report_warning("RPTCTHR", "Catcher instance already registered. Ignoring subsequent call to uvm_report_catcher::push_report_severity_id_catcher()", UVM_NONE, `__FILE__, `__LINE__);   
-      return;
-    end    
-
-    if(id == "") begin
-      catcher.uvm_report_error("RPTCTHR", "Empty id string passed to uvm_report_catcher::push_report_severity_id_catcher.", UVM_NONE, `__FILE__, `__LINE__);
-      return;
-    end  
-
-    m_catcher_q.push_front(catcher);
+    if (ordering == UVM_APPEND) m_catcher_q.push_back(catcher);
+    else m_catcher_q.push_front(catcher);
 
     sev_id.id_specified      = 1;
     sev_id.id                = id;
