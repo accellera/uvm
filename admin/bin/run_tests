@@ -139,7 +139,10 @@ if ($failures > 0) {
 } else {
    print " PASSED all tests.\n";
 }
-close(Fout) if $opt_F;
+if ($opt_F) {
+  close(Fout);
+  unlink($opt_F) unless $failures;
+}
 exit($failures);
 
 
@@ -168,7 +171,56 @@ sub run_one_test {
    if (!$opt_c) {
      print "<running>\n" if $opt_v;
 
-     &run_the_test($testdir, $opt_C, $opt_R);
+     if (-e "$testdir/$tool.comp.args") {
+       if (!open(ARGS, "< $testdir/$tool.comp.args")) {
+	 print "**FAIL** (Cannot read $tool.comp.args)\n";
+       }
+       $comp_args = "";
+       while ($_ = <ARGS>) {
+         chomp;
+         $comp_args .= " $_";
+       }
+       close(ARGS);
+     }
+
+     if (-e "$testdir/test.defines") {
+       if (!open(ARGS, "< $testdir/test.defines")) {
+	 print "**FAIL** (Cannot read test.defines)\n";
+       }
+       $defss = "";
+       while ($_ = <ARGS>) {
+         chomp;
+         $defs .= " $_";
+       }
+       close(ARGS);
+     }
+
+     if (-e "$testdir/$tool.run.args") {
+       if (!open(ARGS, "< $testdir/$tool.run.args")) {
+	 print "**FAIL** (Cannot read $tool.run.args)\n";
+       }
+       $run_args = "";
+       while ($_ = <ARGS>) {
+         chomp;
+         $run_args .= " $_";
+       }
+       close(ARGS);
+     }
+
+     if (-e "$testdir/test.plusargs") {
+       if (!open(ARGS, "< $testdir/test.plusargs")) {
+	 print "**FAIL** (Cannot read test.plusargs)\n";
+       }
+       $plusargs = "";
+       while ($_ = <ARGS>) {
+         chomp;
+         $plusargs .= " $_";
+       }
+       close(ARGS);
+     }
+
+     &run_the_test($testdir, "$comp_args $opt_C $defs",
+		   "$run_args $opt_R $plusargs");
 
      print "$testdir $dots " if $opt_v;
    }  
@@ -237,6 +289,26 @@ sub check_test {
      return 0;
    }
 
+   # If the file "post_test.pl" exists, run it to determine success
+   # or failure. Required when the testcse produces some external
+   # output whose presence and format is part of the test's success
+   if (-e "$testdir/post_test.pl") {
+      $post_test = 0;
+      $failed = do "$testdir/post_test.pl";
+      if (!defined($failed) || $@) {
+         print "**FAIL** (Invalid post_test.pl)\n";
+         return 1;
+      }
+      if ($failed ne "0") {
+        $post_test = "post_test: $failed" unless $post_test;
+	print "**FAIL** ($post_test)\n";
+      } else {
+        $post_test = "from post_test.pl" unless $post_test;
+	print "pass ($post_test)\n";
+      }	
+      return $failed;
+   }
+
    if (!open(LOG, "<$log")) {
      print "**FAIL** (cannot read $log)\n";
      return 1;
@@ -247,7 +319,11 @@ sub check_test {
    undef($n_errs);
    undef($n_fatals);
    while ($_ = <LOG>) {
-     if (m/TEST PASS/) {
+     if (m/UVM TEST FAILED/) {
+       print "**FAIL** (Explicitly failed)\n";
+       return 1;
+     }
+     if (m/UVM TEST PASSED/) {
        $pass = 1;
        next;
      }

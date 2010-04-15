@@ -124,7 +124,9 @@ The test must be written in a class named "test" extended from
 "uvm_test".
 
 The test must be ENTIRELY self-checking. If is is succesful, it MUST
-produce the string "TEST PASS" somewhere in its output log file.
+produce the string "UVM TEST PASSED" somewhere in its output log file.
+If the string "UVM TEST FAILED" is seen anywhere in the output log
+file, the test is immediately declared a failure.
 
 The test may be module-based or program-based.
 
@@ -148,7 +150,7 @@ expected:
 See the test 00basic/01compfail for an example.
 
 
-3.1 How do I write a test that must fail with a run-time error?
+3.2 How do I write a test that must fail with a run-time error?
 
 If the run-time error is reported using the UVM report mechanism,
 use the Report Catcher mechanism to trap the error at run-time an
@@ -165,3 +167,42 @@ error is(are) expected:
 
 See the test 00basic/02runfail for an example.
 
+
+3.3 How do I write a test that produces external output?
+
+If the output of the test cannot be caught at run-time and must be
+checked after the test has completed (e.g. to check the content of an
+output file), it is necessary to use a post-processing step to determine
+the correctness of the testcase.
+
+If the file "post_test.pl" is found in the testcase directory, it is
+executed instead of the normal testcase checking process, immediately
+after the presence of the run-time log file has been ascertained.
+
+The correctness of the testcase is then determined by the value of the
+last expression executed in that file. If it is "0", then the test is
+assumed to have passed. Otherwise, the test is assumed to have failed.
+
+The script may set the variable $post_test to a short description of
+the cause of failure or success.
+
+The script will find the name of the run-time log file in the $log
+variable and the name of the testcase in the $testdir variable. The
+script run in the same context (i.e. variables & workign directory) as
+the run_tests script.
+
+
+3.4 How do I pass additional command-line arguments?
+
+If this is a transient need (e.g. for debugging, use the -C or -R
+command-line option of the run_tests script to pass compile-time and
+run-time command-line options to the underlying tool.
+
+If these arguments are required by a specific tool, add compile-time
+and run-time options in a file named "tool.comp.args" or
+"tool.run.args" respectively in the test directory, where "tool" is
+the name of the underlying tool used.
+
+If these are compile-time "plus-defines" or run-time "plusargs"
+required to be used by all tools, add them to the "test.defines" or
+"test.plusargs" files respectively in the test directory.

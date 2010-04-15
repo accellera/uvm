@@ -72,12 +72,14 @@ sub run_the_test {
   $vcs = "vcs -sverilog -timescale=1ns/1ns +incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv test.sv -l vcs.log $vcs_opts";
   $vcs .= " > /dev/null 2>&1" unless $opt_v;
 
+  print "$vcs\n" if $opt_v;
   system("cd $testdir; rm -f simv vcs.log simv.log; $vcs");
 
   if (-e "$testdir/simv") {
     $simv = "simv -l simv.log +UVM_TESTNAME=test $simv_opts";
     $simv .= " > /dev/null 2>&1" unless $opt_v;
 
+    print "$simv\n" if $opt_v;
     system("cd $testdir; $simv");
   }
 

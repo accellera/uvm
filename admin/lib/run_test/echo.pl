@@ -36,10 +36,15 @@
 sub run_the_test {
   local($testdir, $comptime, $runtime, $_) = @_;
 
-  $echo = "echo ** UVM TEST PASS **";
+  $echo = "echo \'** UVM TEST PASSED **\'";
 
-  system("cd $testdir; $echo > echo.log");
   print $echo,"\n" if $opt_v;
+  system("cd $testdir; $echo > echo.log");
+  system("cd $testdir; echo \'Cargs: \"$comptime\"\' >> echo.log");
+  system("cd $testdir; echo \'Rargs: \"$runtime\"\' >> echo.log");
+  system("cd $testdir; echo '--- UVM Report Summary ---' >> echo.log");
+  system("cd $testdir; echo 'UVM_ERROR : 0' >> echo.log");
+  system("cd $testdir; echo 'UVM_FATAL : 0' >> echo.log");
 }
 
 
