@@ -52,8 +52,23 @@ require "getopts.pl"
 &Getopts("cC:df:F:hR:u:v");
 &usage if $opt_h || $#ARGV < 0;
 
-$uvm_home = "../../../distrib";
-$uvm_home = $opt_u if $opt_u;
+if (!$opt_u) {
+  # Find "distrib" directory
+  $opt_u = "distrib";
+  for($_ = 0; $_ < 10; $_++) {
+    last if -e $opt_u;
+    $opt_u = "../$opt_u";
+  }
+  if (!-e $opt_u) {
+    print STDERR "ERROR: Cannot locate UVM distribution. Use the -u option to specify its location.\n";
+    exit(1);
+  }
+}
+if (! -e "$opt_u/src/uvm_pkg.sv") {
+  print STDERR "ERROR: \"$opt_u\" does not appear to contain a valid UVM distribution.\n";
+  exit(1);
+}
+$uvm_home = $opt_u;
 
 $libdir = $0;
 $libdir =~ s#bin/run_tests#lib/run_test#;
@@ -98,15 +113,25 @@ if ($opt_f) {
       print STDERR "test directory \"$dir\" does not exist.\n";
       exit(1);
     }
-    
-    @subs = <$dir/[0-9][0-9]*>;
-    if ($#subs == -1) {
-      push(@dirs, $dir);
-      next;
-    }
-    
-    push(@dirs, @subs);
+    push(@dirs, &get_testdirs($dir));
   }
+}
+
+sub get_testdirs {
+  local($dir, $_, @subs, @dirs) = @_;
+
+    @dirs = ();
+    if (-e "$dir/test.sv") {
+      push(@dirs, $dir);
+    }
+
+    @subs = <$dir/[0-9][0-9]*>;
+    return @dirs if $#subs == -1;
+
+    foreach $_ (@subs) {
+      push(@dirs, &get_testdirs($_));
+    }    
+    return @dirs;
 }
 
 $| = 1;
@@ -169,6 +194,15 @@ sub run_one_test {
    }
 
    if (!$opt_c) {
+     # If UVM path is absolute, no need to correct it
+     if ($opt_u !~ m|^[/\$]|) {
+       $uvm_home = $opt_u;
+       $_ = $testdir;
+       while ($_ =~ s|/?[^/]+$||) {
+	 $uvm_home = "../" . $uvm_home;
+       }
+     }
+     
      print "<running>\n" if $opt_v;
 
      if (-e "$testdir/$tool.comp.args") {

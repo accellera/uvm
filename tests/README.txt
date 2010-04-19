@@ -13,6 +13,11 @@ Each testcase is located in the file
 "NNgroupname/MMtestname/test.sv". It may include some other files
 located in (or relative to) the same directory as necessary.
 
+For more complex sets of features, there may be subgroups (and
+sub-subgroups and sub-sub-subgroup etc) of tests, using the same
+numeric ordering convention
+(e.g. NNgroup/MMsubgroup/KKsubsubgroup/IItestname/test.sv).
+
 
 1.1 What are these 2-digit numeric prefixes?
 
