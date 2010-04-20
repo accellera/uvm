@@ -37,7 +37,7 @@
 // 
 // This policy class is used to compare built-in types.
 //
-// Provides a comp method that compares, AVM-style, the built-in type,
+// Provides a comp method that compares the built-in type,
 // T, for which the == operator is defined.
 //----------------------------------------------------------------------
 

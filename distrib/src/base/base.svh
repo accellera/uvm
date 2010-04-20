@@ -73,8 +73,4 @@
 
   `include "base/uvm_extern_report_server.svh"
 
-  // for urm message compatibility. Must be included otherwise uvm_component will not compile
-  `include "compatibility/urm_message.sv"
-
-
 `endif // UVM_BASE_SVH

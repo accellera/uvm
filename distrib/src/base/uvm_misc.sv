@@ -42,7 +42,7 @@ uvm_seed_map uvm_random_seed_table_lookup [string];
 //
 // uvm_instance_scope;
 //
-// A function that returns the scope that the urm library lives in, either
+// A function that returns the scope that the UVM library lives in, either
 // an instance, a module, or a package.
 
 function string uvm_instance_scope();

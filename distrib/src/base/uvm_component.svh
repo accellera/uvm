@@ -1299,7 +1299,6 @@ virtual class uvm_component extends uvm_report_object;
   // tions are freely available via the open-source license.
   //----------------------------------------------------------------------------
 
-  extern       function void do_print(uvm_printer printer);
   extern       function void set_int_local (string field_name, 
                                uvm_bitstream_t value,
                                bit recurse=1);
@@ -1359,6 +1358,7 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual task restart ();
 
   int unsigned recording_detail = UVM_NONE;
+  extern         function void   do_print(uvm_printer printer);
 
 endclass : uvm_component
 

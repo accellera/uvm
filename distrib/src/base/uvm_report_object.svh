@@ -493,5 +493,4 @@ class uvm_report_object extends uvm_object;
 
 endclass
 
-
 `endif // UVM_REPORT_CLIENT_SVH
