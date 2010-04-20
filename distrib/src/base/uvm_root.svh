@@ -567,7 +567,6 @@ endfunction
 
 function void uvm_root::run_global_func_phase(uvm_phase phase=null, bit upto=0);
 
-  time timeout;
   bit run_all_phases;
 
   //Get the master phase in case the input phase is an alias.
@@ -723,6 +722,10 @@ task uvm_root::run_global_phase(uvm_phase phase=null, bit upto=0);
 
     // TASK-based phase
     if (m_curr_phase.is_task()) begin
+      // Before starting a phase see if a timeout has been configured, and
+      // if so, use it. Doing this just before the timeout is used allows
+      // the timeout to be configured in preceeding function based phases.
+      void'(get_config_int("timeout", phase_timeout));
 
       timeout = (phase_timeout==0) ?  `UVM_DEFAULT_TIMEOUT - $time :
                                       phase_timeout;
