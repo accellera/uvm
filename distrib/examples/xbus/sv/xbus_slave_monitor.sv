@@ -209,7 +209,7 @@ class xbus_slave_monitor extends uvm_monitor;
 
   // check_transfer_size
   protected function void check_transfer_size();
-    check_transfer_size : assert(trans_collected.size == 1 || 
+    assert_transfer_size : assert(trans_collected.size == 1 || 
       trans_collected.size == 2 || trans_collected.size == 4 || 
       trans_collected.size == 8) else begin
       `uvm_error(get_type_name(),

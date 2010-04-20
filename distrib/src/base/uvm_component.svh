@@ -1346,9 +1346,8 @@ virtual class uvm_component extends uvm_report_object;
 
   `ifdef UVM_USE_FPC
   protected process m_phase_process;
-  `else
-  protected event m_kill_request;
   `endif
+  protected event m_kill_request;
 
   string m_name;
 

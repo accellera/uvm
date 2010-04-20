@@ -23,40 +23,51 @@
 `ifndef UVM_MACROS_SVH
 `define UVM_MACROS_SVH
 
+
 //
 // Any vendor specific defines go here.
 //
 `ifdef VCS
   `define _protected protected   
-  `define uvm_clear_queue(Q) \
-    Q = '{};
+  `define const      const
+  `define uvm_clear_queue(Q) Q.delete();
   `define UVM_USE_FPC
+  `define UVM_USE_P_FORMAT
   `define UVM_USE_FILE_LINE
-`else
+  `undef  UVM_USE_ALT_PHASING
+  `undef  UVM_USE_AAOFAA_WA
+`endif
+
 `ifdef QUESTA
   `define _protected protected   
-  `define uvm_clear_queue(Q) \
-    Q = '{};
+  `define const      const
+  `define uvm_clear_queue(Q) Q = '{};
   `define UVM_USE_FPC
   `define UVM_USE_P_FORMAT
   `define UVM_USE_FILE_LINE
-`else
+  `undef  UVM_USE_ALT_PHASING
+  `undef  UVM_USE_AAOFAA_WA
+`endif
+
 `ifdef INCA
-  `define _protected 
-  `define uvm_clear_queue(Q) \
-    Q.delete();  //SV 2008
+  `define _protected
+  `define const
+  `define uvm_clear_queue(Q) Q.delete();
+  `undef  UVM_USE_FPC
+  `undef  UVM_USE_P_FORMAT
+  `undef  UVM_USE_FILE_LINE
   `define UVM_USE_ALT_PHASING
   `define UVM_USE_AAOFAA_WA
-`else
-  `define _protected protected
-  `define uvm_clear_queue(Q) \
-    Q = '{};  //SV 2005 and 2008
-  `define UVM_USE_FPC
-  `define UVM_USE_P_FORMAT
-  `define UVM_USE_FILE_LINE
-`endif  //IUS
-`endif  //QUESTA
-`endif  //VCS
+`endif
+
+`ifndef VCS
+  `ifndef QUESTA
+    `ifndef INCA
+      // Throw a syntax error if `VCS, `QUESTA and `INCA are undefined
+      ERROR Must_define_VCS_QUESTA_or_INCA
+    `endif
+  `endif
+`endif
 
 `include "macros/uvm_version_defines.svh"
 `include "macros/uvm_message_defines.svh"

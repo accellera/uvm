@@ -168,8 +168,6 @@ class sequenceA #(type REQ = uvm_sequence_item,
 
     `uvm_info("sequenceA", "Starting sequence", UVM_MEDIUM)
     
-    `uvm_info("sequenceA", "  sequence %0d", my_id);
-    
     for(int unsigned i = 0; i < `num_loops; i++) begin
       req = new();
       req.addr = (my_id * `num_loops) + i;
