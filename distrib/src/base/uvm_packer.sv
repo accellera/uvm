@@ -1,7 +1,7 @@
-// $Id: uvm_packer.sv,v 1.15 2009/10/30 15:29:21 jlrose Exp $
+//
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -259,11 +259,7 @@ endfunction
 function void uvm_packer::pack_object(uvm_object value);
 
   if(scope.in_hierarchy(value)) begin
-    `ifdef INCA
-    uvm_report_warning("CYCFND", $psprintf("Cycle detected for object @%0d during pack", this), UVM_NONE);
-    `else
-    uvm_report_warning("CYCFND", $psprintf("Cycle detected during pack"), UVM_NONE);
-    `endif
+    uvm_report_warning("CYCFND", $psprintf("Cycle detected for object @%0d during pack", value.get_inst_id()), UVM_NONE);
     return;
   end
 
@@ -371,11 +367,7 @@ function void uvm_packer::unpack_object(uvm_object value);
   byte is_non_null; is_non_null = 1;
 
   if(scope.in_hierarchy(value)) begin
-    `ifdef INCA
-    uvm_report_warning("CYCFND", $psprintf("Cycle detected for object @%0d during unpack", this), UVM_NONE);
-    `else
-    uvm_report_warning("CYCFND", $psprintf("Cycle detected during unpack", this), UVM_NONE);
-    `endif
+    uvm_report_warning("CYCFND", $psprintf("Cycle detected for object @%0d during unpack", value.get_inst_id()), UVM_NONE);
     return;
   end
 

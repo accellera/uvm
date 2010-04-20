@@ -1,8 +1,7 @@
-//dvt/vtech/dev/main/uvm/src/base/uvm_root.svh#53 - edit change 2114340 (xtext)
-// $Id: uvm_root.svh,v 1.39 2010/03/12 20:52:36 jlrose Exp $
+//
 //------------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -232,10 +231,6 @@ class uvm_root extends uvm_component;
   extern virtual function void raised (uvm_objection objection, 
            uvm_object source_obj, int count);
 
-  /*** DEPRECATED - Do not use in new code.  Convert code when appropriate ***/
-  extern function void print_unit_list (uvm_component comp=null);
-  extern function void print_unit      (string name, uvm_printer printer=null);
-  extern function void print_units     (uvm_printer printer=null);
   extern function void print_topology  (uvm_printer printer=null);
 
 endclass
@@ -290,20 +285,6 @@ extract_phase             #(uvm_component) extract_ph;
 check_phase               #(uvm_component) check_ph;
 report_phase              #(uvm_component) report_ph;
 
-// DEPRECATED PHASES - DO NOT USE IN NEW CODE
-
-`uvm_phase_func_decl(post_new,0)
-`uvm_phase_func_decl(export_connections,0)
-`uvm_phase_func_decl(import_connections,1)
-`uvm_phase_func_decl(pre_run,0)
-`uvm_phase_func_decl(configure,0)
-post_new_phase            #(uvm_component) post_new_ph;
-export_connections_phase  #(uvm_component) export_connections_ph;
-import_connections_phase  #(uvm_component) import_connections_ph;
-pre_run_phase             #(uvm_component) pre_run_ph;
-configure_phase           #(uvm_component) configure_ph;
-
-
 //-----------------------------------------------------------------------------
 //
 // IMPLEMENTATION
@@ -337,28 +318,18 @@ function uvm_root::new();
   report_header();
   print_enabled=0;
   build_ph = new;
-  post_new_ph = new;
-  export_connections_ph = new;
   connect_ph = new;
-  import_connections_ph = new;
-  configure_ph = new;
   end_of_elaboration_ph = new;
   start_of_simulation_ph = new;
-  pre_run_ph = new;
   run_ph = new;
   extract_ph = new;
   check_ph = new;
   report_ph = new;
   insert_phase(build_ph,              null);
-  insert_phase(post_new_ph,           build_ph);
-  insert_phase(export_connections_ph, post_new_ph);
-  insert_phase(connect_ph,            export_connections_ph);
-  insert_phase(import_connections_ph, connect_ph);
-  insert_phase(configure_ph,          import_connections_ph);
-  insert_phase(end_of_elaboration_ph, configure_ph);
+  insert_phase(connect_ph,            build_ph);
+  insert_phase(end_of_elaboration_ph, connect_ph);
   insert_phase(start_of_simulation_ph,end_of_elaboration_ph);
-  insert_phase(pre_run_ph,            start_of_simulation_ph);
-  insert_phase(run_ph,                pre_run_ph);
+  insert_phase(run_ph,                start_of_simulation_ph);
   insert_phase(extract_ph,            run_ph);
   insert_phase(check_ph,              extract_ph);
   insert_phase(report_ph,             check_ph);
@@ -426,18 +397,10 @@ endfunction
 // This is the top-level that governs phase execution and provides component
 // search interface. See <uvm_root> for more information.
 
-`const uvm_root uvm_top = uvm_root::get();
+const uvm_root uvm_top = uvm_root::get();
 
 // for backward compatibility
-`const uvm_root _global_reporter = uvm_root::get();
-
-
-//------------------------------------------------------------------------------
-
-
-
-/* deprecated */ uvm_component uvm_test_top;
-/* deprecated */ bit uvm_enable_print_topology = 0;
+const uvm_root _global_reporter = uvm_root::get();
 
 
 //------------------------------------------------------------------------------
@@ -454,18 +417,13 @@ task uvm_root::run_test(string test_name="");
   uvm_factory factory = uvm_factory::get();
   bit testname_plusarg;
   string msg;
+  uvm_component uvm_test_top;
 
   testname_plusarg = 0;
 
   // plusarg overrides argument
   if ($value$plusargs("UVM_TESTNAME=%s", test_name))
     testname_plusarg = 1;
-
-  if ($value$plusargs("TESTNAME=%s", test_name)) begin
-    uvm_report_warning("DPRFT",
-          "+TESTNAME is deprecated. Use +UVM_TESTNAME instead.", UVM_NONE);
-    testname_plusarg = 1;
-  end
 
   // if test now defined, create it using common factory
   if (test_name != "") begin
@@ -641,7 +599,7 @@ function void uvm_root::run_global_func_phase(uvm_phase phase=null, bit upto=0);
         return;
       end
 
-      if (enable_print_topology || uvm_enable_print_topology)
+      if (enable_print_topology)
         print_topology();
     end
 
@@ -727,10 +685,7 @@ task uvm_root::run_global_phase(uvm_phase phase=null, bit upto=0);
       timeout = (phase_timeout==0) ?  `UVM_DEFAULT_TIMEOUT - $time :
                                       phase_timeout;
 
-       `ifdef INCA
-       `define ALT_PHASING
-       `endif
-      `ifdef ALT_PHASING
+      `ifdef UVM_USE_ALT_PHASING
 
         // IUS does not support disabling named fork blocks, so we isolate the
         // inner fork block so we can kill it using disable fork
@@ -779,7 +734,7 @@ task uvm_root::run_global_phase(uvm_phase phase=null, bit upto=0);
         join_any
         disable task_based_phase;
 
-      `endif // INCA-QUESTA
+      `endif // UVM_USE_ALT_PHASING
 
       if(uvm_test_done.get_objection_total(uvm_root::get()) != 0) begin
         uvm_test_done.uvm_report_warning("OBJOUT", $psprintf("%0d objection(s) are still outstanding", uvm_test_done.get_objection_total(uvm_root::get())));
@@ -811,7 +766,7 @@ task uvm_root::run_global_phase(uvm_phase phase=null, bit upto=0);
             // this forces that process to start, preventing us from continuing
       end
 
-      if (enable_print_topology || uvm_enable_print_topology)
+      if (enable_print_topology)
         print_topology();
     end
 
@@ -978,7 +933,7 @@ task uvm_root::m_stop_request(time timeout=0);
 
   // IUS does not support disabling named fork blocks, so we isolate the
   // inner fork block so we can kill it using disable fork
-  `ifdef INCA
+  `ifdef UVM_USE_FPC
 
   fork begin // guard process
     fork
@@ -1019,7 +974,7 @@ task uvm_root::m_stop_request(time timeout=0);
   join_any
   disable stop_tasks;
 
-  `endif // INCA
+  `endif // UVM_USE_FPC
 
   // all stop processes have completed, or a timeout has occured
   this.do_kill_all();
@@ -1253,86 +1208,5 @@ function void uvm_root::print_topology(uvm_printer printer=null);
 
 endfunction
 
-
-//------------------------------------------------------------------------------
-//
-// REVIEW FOR DEPRECATION OR REMOVAL
-//
-//------------------------------------------------------------------------------
-
-// print_unit
-// ----------
-
-function void uvm_root::print_unit (string name, uvm_printer printer=null);
-
-  uvm_component comp;
-  static bit issued=0;
-
-  if (!issued) begin
-    issued=1;
-    uvm_report_warning("deprecated",
-      {"uvm_root::print_unit() is an internal method that has been deprecated.",
-      " It is replaced by comp=uvm_top.find(name); comp.print(printer);"}, UVM_NONE);
-  end
-  comp = find(name);
-  if (comp != null)
-    comp.print(printer);
-endfunction
-
-
-// print_units
-// -----------
-
-function void uvm_root::print_units (uvm_printer printer=null);
-
-  string s;
-  static bit issued=0;
-
-  if (!issued) begin
-    issued=1;
-    uvm_report_warning("deprecated",
-      {"uvm_root::print_units() is an internal method that ",
-      "has been deprecated. It can be replaced by uvm_top.print(printer);"}, UVM_NONE);
-  end
-
-  print_topology(printer);
-
-endfunction
-
-
-// print_unit_list
-// ---------------
-
-function void uvm_root::print_unit_list(uvm_component comp=null);
-
-  string name;
-  static bit issued=0;
-
-  if (!issued) begin
-    issued=1;
-    uvm_report_warning("deprecated",
-      {"uvm_root::print_unit_list() is an internal method that ",
-      "has been deprecated."}, UVM_NONE);
-  end
-
-  if (comp==null) begin
-    comp = this;
-    if (m_children.num()==0) begin
-      uvm_report_warning("NOUNIT","No UVM components to print. ", UVM_NONE);
-      return;
-    end
-    $display("List of uvm components");
-  end
-  else begin
-    $display("%s (%s)", comp.get_full_name(), comp.get_type_name());
-  end
-
-  if (comp.get_first_child(name))
-    do begin
-      this.print_unit_list(comp.get_child(name));
-    end
-    while (comp.get_next_child(name));
-
-endfunction
 
 `endif //UVM_ROOT_SVH

@@ -1,7 +1,7 @@
-// $Id: uvm_misc.svh,v 1.21 2009/06/15 20:36:31 redelman Exp $
+//
 //------------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //

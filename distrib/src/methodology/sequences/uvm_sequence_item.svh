@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -304,11 +304,7 @@ bit        print_sequence_info = 0;
     end
     
     target_seqr.wait_for_grant(this_seq, set_priority);
-`ifdef INCA
-    void'(target_seqr.begin_tr(this, "aggregate items"));
-`else // QUESTA
     void'(target_seqr.begin_tr(this, "aggregate_items"));
-`endif // INCA-QUESTA
     sequence_ptr.pre_do(1);
   endtask  
 

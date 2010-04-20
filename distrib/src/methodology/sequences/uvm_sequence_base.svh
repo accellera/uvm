@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -41,7 +41,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // sequencers, each sequence_id is managed seperately
   protected int m_sqr_seq_ids[int];
 
-  `ifndef INCA
+  `ifdef UVM_USE_FPC
   protected process  m_sequence_process;
   `else
   protected bit m_sequence_started = 0;
@@ -653,7 +653,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   endfunction
 
   function void m_kill();
-`ifndef INCA
+`ifdef UVM_USE_FPC
     if (m_sequence_process != null) begin
       m_sequence_process.kill;
       m_sequence_process = null;
@@ -678,7 +678,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // method.
 
   function void kill();
-`ifndef INCA
+`ifdef UVM_USE_FPC
     if (m_sequence_process != null) begin
 `else
     if (m_sequence_started != 0) begin

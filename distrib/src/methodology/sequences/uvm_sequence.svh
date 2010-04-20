@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -135,13 +135,13 @@ protected bit      response_queue_error_report_disabled = 0;
       void'(m_sequencer.register_sequence(this));
     end
     
-    `ifdef INCA
+    `ifndef UVM_USE_FPC
     fork begin //wrap the fork/join_any to only effect this block
     `endif
 
     fork
       begin
-        `ifndef INCA
+        `ifdef UVM_USE_FPC
         m_sequence_process = process::self();
         `endif
 
@@ -177,7 +177,7 @@ protected bit      response_queue_error_report_disabled = 0;
         #0;
 
       end
-    `ifndef INCA
+    `ifdef UVM_USE_FPC
     join
     `else
       begin

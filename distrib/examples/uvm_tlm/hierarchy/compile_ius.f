@@ -1,4 +1,4 @@
 -ovmhome ../../..
 
-../../../src/uvm_base_pkg.sv
+../../../src/uvm_pkg.sv
 hierarchy.sv

@@ -1,7 +1,7 @@
-// $Id: uvm_object.svh,v 1.33 2009/12/14 22:39:41 jlrose Exp $
+//
 //-----------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -24,15 +24,6 @@
 `ifndef UVM_OBJECT_SVH
 `define UVM_OBJECT_SVH
 
-/*
-typedef class uvm_printer;
-typedef class uvm_table_printer;
-typedef class uvm_tree_printer;
-typedef class uvm_line_printer;
-typedef class uvm_comparer;
-typedef class uvm_packer;
-typedef class uvm_recorder;
-*/
 typedef class uvm_report_object;
 typedef class uvm_object_wrapper;
 typedef class uvm_objection;
@@ -831,9 +822,6 @@ virtual class uvm_object extends uvm_void;
   static protected int m_field_array[string];
   extern protected function void m_do_field_check(string field);
   extern static protected function void m_delete_field_array();
-
-  // deprecated - do not use
-  extern virtual function string do_sprint (uvm_printer printer); 
 
 endclass
 

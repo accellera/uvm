@@ -1,7 +1,8 @@
-// $Id: uvm_recorder.svh,v 1.2 2009/12/14 22:39:41 jlrose Exp $
+//
 //-----------------------------------------------------------------------------
-//   Copyright 2007-2008 Mentor Graphics Corporation
-//   Copyright 2007-2008 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -152,11 +153,7 @@ class uvm_recorder;
     if(scope.in_hierarchy(value)) return;
 
     if(identifier) begin 
-      `ifdef INCA
-        $swrite(str, "%0d", value);
-      `else
-        str = "";
-      `endif
+      $swrite(str, "%0d", value.get_inst_id());
       v = str.atoi(); 
       scope.set_arg(name);
       uvm_set_attribute_by_name(tr_handle, scope.get_arg(), v, "'s");

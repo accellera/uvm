@@ -1,6 +1,7 @@
+//
 //------------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -83,7 +84,7 @@ class uvm_queue #(type T=int) extends uvm_object;
   // and returned.
 
   virtual function T get (int index);
-    T default_value;
+    const T default_value;
     if (index >= size() || index < 0) begin
       uvm_report_warning("QUEUEGET",
         $psprintf("get: given index out of range for queue of size %0d. Ignoring get request",size()));
@@ -191,8 +192,16 @@ class uvm_queue #(type T=int) extends uvm_object;
   endfunction
   
   virtual function string convert2string();
-    `ifndef INCA
+    `ifdef UVM_USE_P_FORMAT
       return $sformatf("%p",queue);
+    `else
+      if(queue.size() == 0) convert2string = "{}";
+      else if(queue.size() == 1) $swrite(convert2string, "{", queue[0], "}");
+      else begin
+        $swrite(convert2string, "{", queue[0]);
+        for(int i=1; i<queue.size(); ++i) $swrite(convert2string, "%s, ", convert2string, queue[i]);
+        $swrite(convert2string, "%s}", convert2string);
+      end
     `endif
   endfunction
 

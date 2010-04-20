@@ -1,7 +1,7 @@
-// $Id: hierarchy.sv,v 1.8 2009/10/29 23:19:13 redelman Exp $
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -44,28 +44,6 @@ At *top* env, the *producer*, *consumer*, and the the *listener* will be connect
 
 
 
-
-
-// $Id: hierarchy.sv,v 1.8 2009/10/29 23:19:13 redelman Exp $
-//----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
-//   All Rights Reserved Worldwide
-//
-//   Licensed under the Apache License, Version 2.0 (the
-//   "License"); you may not use this file except in
-//   compliance with the License.  You may obtain a copy of
-//   the License at
-//
-//       http://www.apache.org/licenses/LICENSE-2.0
-//
-//   Unless required by applicable law or agreed to in
-//   writing, software distributed under the License is
-//   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-//   CONDITIONS OF ANY KIND, either express or implied.  See
-//   the License for the specific language governing
-//   permissions and limitations under the License.
-//----------------------------------------------------------------------
 package user_pkg;
 
 import uvm_pkg::*;
@@ -104,9 +82,10 @@ endclass
 //----------------------------------------------------------------------
 // component gen
 //----------------------------------------------------------------------
+
 class gen extends uvm_component;
 
-  uvm_blocking_put_port #(transaction) put_port;
+  uvm_pkg::uvm_blocking_put_port #(transaction) put_port;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -275,13 +254,13 @@ endpackage
 //----------------------------------------------------------------------
 // begin codeblock topmod
 module top;
-
+  import uvm_pkg::*;
   import user_pkg::*;
   env e;
 
   initial begin
     e = new("e");
-    e.run_test();
+    run_test();
   end
 
 endmodule

@@ -1,7 +1,7 @@
-// $Id: test.sv,v 1.17 2009/05/01 14:34:38 redelman Exp $
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -101,7 +101,7 @@ endclass
 
 class mydata extends uvm_object;
   `uvm_object_registry(mydata,"mydata")
-  function uvm_object create(string name);
+  function uvm_object create(string name="mydata");
     mydata d; d=new; d.set_name(name);
     return d;
   endfunction

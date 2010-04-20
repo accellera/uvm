@@ -1,7 +1,7 @@
-// $Id: classC.svh,v 1.10 2009/05/01 14:34:38 redelman Exp $
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -30,9 +30,13 @@ class C extends uvm_component;
   endfunction
 
   function void build();
+    string str;
     super.build();
     void'(get_config_int("v", v));
     void'(get_config_int("s", s));
+    if(get_config_string("myaa[foo]", str)) myaa["foo"] = str;
+    if(get_config_string("myaa[bar]", str)) myaa["bar"] = str;
+    if(get_config_string("myaa[foobar]", str)) myaa["foobar"] = str;
   endfunction
 
   function string get_type_name();

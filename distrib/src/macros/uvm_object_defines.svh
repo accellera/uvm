@@ -1,6 +1,6 @@
 //------------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -1445,96 +1445,10 @@
    endfunction 
 
 
-// uvm_register_self_func
-// ----------------------
-
-`ifndef INCA
-`define USE_PARAMETERIZED_WRAPPER
-`endif
-
-`ifndef USE_PARAMETERIZED_WRAPPER
-`define uvm_register_self_func(T) \
-  \
-  local static type_id me = get(); \
-  \
-  static function type_id get(); \
-    uvm_factory f; \
-    f = uvm_factory::get(); \
-    if (me == null) begin \
-      me = new(); \
-      factory.register(me); \
-    end \
-    return me; \
-  endfunction
-`else
-`define uvm_register_self_func(T)
-`endif
-
-
-`ifndef USE_PARAMETERIZED_WRAPPER
-`define uvm_factory_override_func \
-  static function void set_type_override(uvm_object_wrapper override, bit replace=1); \
-    factory.set_type_override_by_type(get(),override,replace); \
-  endfunction \
-\
-  static function void set_inst_override(uvm_object_wrapper override, \
-                                         string inst_path, \
-                                         uvm_component parent=null); \
-    string full_inst_path; \
-    if (parent != null) begin \
-      if (inst_path == "") \
-        inst_path = parent.get_full_name(); \
-      else \
-        inst_path = {parent.get_full_name(),".",inst_path}; \
-    end \
-    factory.set_inst_override_by_type(get(),override,inst_path); \
-  endfunction
-`else
-`define uvm_factory_override_func
-`endif
- 
-
 // uvm_object_derived_wrapper_class
 // --------------------------------
 
 //Requires S to be a constant string
-`ifndef USE_PARAMETERIZED_WRAPPER
-`define uvm_object_registry(T,S) \
-   class type_id extends uvm_object_wrapper; \
-     const static string type_name = S; \
-     virtual function string get_type_name (); \
-       return type_name; \
-     endfunction \
-     `uvm_object_factory_create_func(T) \
-     `uvm_factory_override_func \
-     `uvm_register_self_func(T) \
-   endclass  \
-   static function type_id get_type(); \
-     return type_id::get(); \
-   endfunction \
-   virtual function uvm_object_wrapper get_object_type(); \
-     return type_id::get(); \
-   endfunction 
-//This is needed due to an issue in IUS of passing down strings
-//created by args to lower level macros.
-`define uvm_object_registry_internal(T,S) \
-   class type_id extends uvm_object_wrapper; \
-     const static string type_name = `"S`"; \
-     virtual function string get_type_name (); \
-       return type_name; \
-     endfunction \
-     `uvm_object_factory_create_func(T) \
-     `uvm_factory_override_func \
-     `uvm_register_self_func(T) \
-   endclass  \
-   static function type_id get_type(); \
-     return type_id::get(); \
-   endfunction \
-   virtual function uvm_object_wrapper get_object_type(); \
-     return type_id::get(); \
-   endfunction 
-`else
-`ifndef SVPP
 `define uvm_object_registry(T,S) \
    typedef uvm_object_registry#(T,S) type_id; \
    static function type_id get_type(); \
@@ -1553,32 +1467,11 @@
    virtual function uvm_object_wrapper get_object_type(); \
      return type_id::get(); \
    endfunction 
-`endif //SVPP
-`endif //USE_PARAMETERIZED_WRAPPER
 
 
 // versions of the uvm_object_registry macros above which are to be used
 // with parameterized classes
 
-`ifndef USE_PARAMETERIZED_WRAPPER
-`define uvm_object_registry_param(T) \
-   class type_id extends uvm_object_wrapper; \
-     const static string type_name = "<unknown>"; \
-     virtual function string get_type_name (); \
-       return type_name; \
-     endfunction \
-     `uvm_object_factory_create_func(T) \
-     `uvm_factory_override_func \
-     `uvm_register_self_func(T) \
-   endclass  \
-   static function type_id get_type(); \
-     return type_id::get(); \
-   endfunction \
-   virtual function uvm_object_wrapper get_object_type(); \
-     return type_id::get(); \
-   endfunction 
-`else
-`ifndef SVPP
 `define uvm_object_registry_param(T) \
    typedef uvm_object_registry #(T) type_id; \
    static function type_id get_type(); \
@@ -1587,50 +1480,11 @@
    virtual function uvm_object_wrapper get_object_type(); \
      return type_id::get(); \
    endfunction 
-`endif //SVPP
-`endif //USE_PARAMETERIZED_WRAPPER
 
 
 // uvm_component_derived_wrapper_class
 // ---------------------------------
 
-`ifndef USE_PARAMETERIZED_WRAPPER
-`define uvm_component_registry(T,S) \
-   class type_id extends uvm_object_wrapper; \
-     const static string type_name = S; \
-     virtual function string get_type_name (); \
-       return type_name; \
-     endfunction \
-     `uvm_component_factory_create_func(T) \
-     `uvm_factory_override_func \
-     `uvm_register_self_func(T) \
-   endclass  \
-   static function type_id get_type(); \
-     return type_id::get(); \
-   endfunction \
-   virtual function uvm_object_wrapper get_object_type(); \
-     return type_id::get(); \
-   endfunction 
-//This is needed due to an issue in IUS of passing down strings
-//created by args to lower level macros.
-`define uvm_component_registry_internal(T,S) \
-   class type_id extends uvm_object_wrapper; \
-     const static string type_name = `"S`"; \
-     virtual function string get_type_name (); \
-       return type_name; \
-     endfunction \
-     `uvm_component_factory_create_func(T) \
-     `uvm_factory_override_func \
-     `uvm_register_self_func(T) \
-   endclass  \
-   static function type_id get_type(); \
-     return type_id::get(); \
-   endfunction \
-   virtual function uvm_object_wrapper get_object_type(); \
-     return type_id::get(); \
-   endfunction 
-`else
-`ifndef SVPP
 `define uvm_component_registry(T,S) \
    typedef uvm_component_registry #(T,S) type_id; \
    static function type_id get_type(); \
@@ -1649,31 +1503,10 @@
    virtual function uvm_object_wrapper get_object_type(); \
      return type_id::get(); \
    endfunction
-`endif //SVPP
-`endif //USE_PARAMETERIZED_WRAPPER
 
 // versions of the uvm_component_registry macros to be used with
 // parameterized classes
 
-`ifndef USE_PARAMETERIZED_WRAPPER
-`define uvm_component_registry_param(T) \
-   class type_id extends uvm_object_wrapper; \
-     const static string type_name = "<unknown>"; \
-     virtual function string get_type_name (); \
-       return type_name; \
-     endfunction \
-     `uvm_component_factory_create_func(T) \
-     `uvm_factory_override_func \
-     `uvm_register_self_func(T) \
-   endclass  \
-   static function type_id get_type(); \
-     return type_id::get(); \
-   endfunction \
-   virtual function uvm_object_wrapper get_object_type(); \
-     return type_id::get(); \
-   endfunction
-`else
-`ifndef SVPP
 `define uvm_component_registry_param(T) \
    typedef uvm_component_registry #(T) type_id; \
    static function type_id get_type(); \
@@ -1682,8 +1515,6 @@
    virtual function uvm_object_wrapper get_object_type(); \
      return type_id::get(); \
    endfunction
-`endif //SVPP
-`endif //USE_PARAMETERIZED_WRAPPER
 
 
 // uvm_print_msg_enum
