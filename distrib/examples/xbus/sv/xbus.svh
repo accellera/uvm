@@ -23,12 +23,8 @@
 `ifndef XBUS_SVH
 `define XBUS_SVH
 
-`ifdef USE_SVPP
-`include "uvm.svh"
-`else
 import uvm_pkg::*;
 `include "uvm_macros.svh"
-`endif
 
 `include "xbus_transfer.sv"
 
