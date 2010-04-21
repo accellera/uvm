@@ -486,17 +486,6 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
         add_sequence("uvm_simple_sequence");
   endfunction
 
-
-  // *** Deprecated Compat
-
-  /* deprecated */ function void set_num_last_items(int unsigned max);
-    set_num_last_reqs(max);
-  endfunction
-
-  /* deprecated */ function uvm_sequence_item last(int unsigned n);
-    return last_req(n);
-  endfunction
-
 endclass
 
   

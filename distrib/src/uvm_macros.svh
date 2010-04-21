@@ -24,36 +24,31 @@
 `define UVM_MACROS_SVH
 
 
+// Default settings
+`define _protected protected   
+`define uvm_clear_queue(Q) Q.delete();
+`define UVM_USE_FPC
+`define UVM_USE_P_FORMAT
+`define UVM_USE_FILE_LINE
+`define UVM_USE_ALT_PHASING
+
 //
 // Any vendor specific defines go here.
 //
 `ifdef VCS
-  `define _protected protected   
-  `define uvm_clear_queue(Q) Q.delete();
-  `define UVM_USE_FPC
-  `define UVM_USE_P_FORMAT
-  `define UVM_USE_FILE_LINE
-  `undef  UVM_USE_ALT_PHASING
-  `undef  UVM_USE_AAOFAA_WA
 `endif
 
 `ifdef QUESTA
-  `define _protected protected   
+  `undef  uvm_clear_queue
   `define uvm_clear_queue(Q) Q = '{};
-  `define UVM_USE_FPC
-  `define UVM_USE_P_FORMAT
-  `define UVM_USE_FILE_LINE
   `undef  UVM_USE_ALT_PHASING
-  `undef  UVM_USE_AAOFAA_WA
 `endif
 
 `ifdef INCA
   `ifndef INCA_PROTECTED_CTOR
+    `undef _protected
     `define _protected 
-  `else
-    `define _protected protected
   `endif
-  `define uvm_clear_queue(Q) Q.delete();
   `ifndef INCA_UVM_USE_FPC
     `undef  UVM_USE_FPC
   `endif
@@ -63,24 +58,8 @@
   `ifndef INCA_UVM_USE_FILE_LINE
     `undef  UVM_USE_FILE_LINE
   `endif
-  `define UVM_USE_ALT_PHASING
   `ifndef INCA_UVM_USE_AAOFAA
     `define UVM_USE_AAOFAA_WA
-  `endif
-`endif
-
-`ifndef VCS
-  `ifndef QUESTA
-    `ifndef INCA
-      // Set defaults for general p1800 compliant tools.
-      `define _protected protected   
-      `define uvm_clear_queue(Q) Q.delete();
-      `define UVM_USE_FPC
-      `define UVM_USE_P_FORMAT
-      `define UVM_USE_FILE_LINE
-      `define UVM_USE_ALT_PHASING
-      `undef  UVM_USE_AAOFAA_WA
-    `endif
   `endif
 `endif
 

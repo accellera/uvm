@@ -152,21 +152,4 @@
    end
 
 
-
-
-// DEPRECATED - The following macros are deprecated in favor of the `uvm_info,
-// `uvm_warning, `uvm_error, and `uvm_fatal.
-
-`define UVM_REPORT_INFO(ID,MSG) \
-  uvm_report_info(ID,MSG,UVM_MEDIUM,`uvm_file,`uvm_line)
-
-`define UVM_REPORT_WARNING(ID,MSG) \
-  uvm_report_warning(ID,MSG,UVM_MEDIUM,`uvm_file,`uvm_line)
-
-`define UVM_REPORT_ERROR(ID,MSG) \
-  uvm_report_error(ID,MSG,UVM_LOW,`uvm_file,`uvm_line)
-
-`define UVM_REPORT_FATAL(ID,MSG) \
-  uvm_report_fatal(ID,MSG,UVM_NONE,`uvm_file,`uvm_line)
-
 `endif //UVM_MESSAGE_DEFINES_SVH

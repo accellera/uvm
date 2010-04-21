@@ -785,7 +785,7 @@ endfunction
 function string uvm_object_value_str(uvm_object v);
   if(v == null) return "<null>";
   uvm_object_value_str.itoa(v.get_inst_id());
-  uvm_object_value_str = {v.get_name(),"@",uvm_object_value_str};
+  uvm_object_value_str = {"@",uvm_object_value_str};
 endfunction
 
 // print_value_object

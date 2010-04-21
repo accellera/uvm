@@ -22,9 +22,6 @@
 
   typedef class uvm_sequence_base;
 
-  /* deprecated */ typedef class uvm_seq_prod_if;
-  /* deprecated */ typedef class uvm_seq_cons_if;
-
   typedef uvm_seq_item_pull_port #(uvm_sequence_item, uvm_sequence_item) uvm_seq_item_prod_if;
 
 
@@ -62,12 +59,6 @@ class uvm_sequencer #(type REQ = uvm_sequence_item,
   uvm_seq_item_pull_imp #(REQ, RSP, this_type) seq_item_export;
 
 
-  // Deprecated Members, do not use
-  /* deprecated */ uvm_seq_item_pull_imp #(REQ, RSP, this_type) seq_item_cons_if;
-  /* deprecated */ uvm_seq_prod_if seq_prod_if;
-  /* deprecated */ uvm_seq_cons_if seq_cons_if[string];
-
-
   // Function: new
   //
   // Creates and initializes an instance of this class using the normal
@@ -78,9 +69,6 @@ class uvm_sequencer #(type REQ = uvm_sequence_item,
     super.new(name, parent);
 
     seq_item_export         = new ("seq_item_export", this);
-    seq_item_cons_if             = seq_item_export;
-    $cast(seq_prod_if, create_component("uvm_seq_prod_if", "seq_prod_if"));
-    seq_prod_if.print_enabled = 0;
   endfunction // new
   
   // return proper type name string
@@ -289,161 +277,7 @@ class uvm_sequencer #(type REQ = uvm_sequence_item,
     return last_rsp(0);
   endfunction
 
-
-  // Function- add_seqs_cons_if
-  //
-  // private
-
-  virtual function void add_seq_cons_if(string if_name);
-    seq_cons_if[if_name] = null;
-    $cast(seq_cons_if[if_name], create_component("uvm_seq_cons_if", 
-      {"seq_cons_if[\"", if_name, "\"]"}));
-    seq_cons_if[if_name].print_enabled = 0;
-  endfunction  
-
 endclass  
 
 typedef uvm_sequencer #(uvm_sequence_item) uvm_virtual_sequencer;
-
-
-//============================================================================
-//
-// Deprecated Classes - do not use
-//
-//============================================================================
-
-class uvm_seq_prod_if extends uvm_component;
-
-  string producer_name = "NOT CONNECTED";
-
-  // constructor
-  function new (string name="", uvm_component parent = null);
-    super.new(name, parent);
-  endfunction
-
-  // data method do_print
-  function void do_print (uvm_printer printer);
-    super.do_print(printer);
-    printer.print_string("sequence producer", producer_name);
-  endfunction
-
-  // polymorphic create method
-  function uvm_object create (string name="");
-    uvm_seq_prod_if i; i=new(name);
-    return i;
-  endfunction
-
-  // return proper type name string
-  virtual function string get_type_name();
-    return "uvm_seq_prod_if";
-  endfunction 
-
-  // connect interface method for producer to consumer
-  function void connect_if(uvm_seq_cons_if seq_if);
-    uvm_component temp_comp;
-    $cast(seq_if.consumer_seqr, get_parent());
-    temp_comp = seq_if.get_parent();
-    producer_name = temp_comp.get_full_name();
-  endfunction
-
-  // Macro to enable factory creation
-  `uvm_component_registry(uvm_seq_prod_if, "uvm_seq_prod_if")
-
-endclass
-
-// Deprecated Class
-class uvm_seq_cons_if extends uvm_component;
-
-  // variable to hold the sequence consumer as an uvm_sequencer if the
-  // consumer is that type
-  uvm_sequencer #(uvm_sequence_item) consumer_seqr;
-
-  // constructor
-  function new (string name="", uvm_component parent = null);
-    super.new(name, parent);
-  endfunction
-
-  // do_print for this object
-  function void do_print (uvm_printer printer);
-    super.do_print(printer);
-    if (consumer_seqr != null)
-      printer.print_string("sequence consumer", consumer_seqr.get_full_name());
-    else
-      printer.print_string("sequence consumer", "NOT_CONNECTED");
-  endfunction
-
-  // polymorphic creation
-  function uvm_object create (string name="");
-    uvm_seq_cons_if i; i=new(name);
-    return i;
-  endfunction
-
-  // get_type_name implementation
-  virtual function string get_type_name();
-    return "uvm_seq_cons_if";
-  endfunction 
-
-  // method to connect this object to an uvm_sequence_prod_if
-  function void connect_if(uvm_seq_prod_if seq_if);
-    $cast(consumer_seqr, seq_if.get_parent());;
-  endfunction
-
-  // method to query who the current grabber of the connected sequencer is
-  function uvm_sequence_base current_grabber();
-    return consumer_seqr.current_grabber();
-  endfunction
- 
-  // method to query if the connected sequencer is grabbed
-  function bit is_grabbed();
-    return consumer_seqr.is_grabbed();
-  endfunction
-
-  // method to start a sequence on the connected sequencer
-  task start_sequence(uvm_sequence_base this_seq);
-    consumer_seqr.start_sequence(this_seq);
-  endtask
-
-  // method to grab the connected sequencer
-  virtual task grab(uvm_sequence_base this_seq);
-    consumer_seqr.grab(this_seq);
-  endtask
-
-  // method to ungrab the connected sequencer
-  virtual function void ungrab(uvm_sequence_base this_seq);
-    consumer_seqr.ungrab(this_seq);
-  endfunction
-
-  // method to query if this interface object is connected
-  function bit is_connected();
-    if (consumer_seqr != null)
-      return 1;
-    else
-      return 0;
-  endfunction
-
-  // method to query whether this interface is connected to a virtual sequencer
-  // or sequencer
-  function bit is_virtual_sequencer();
-    uvm_virtual_sequencer vseqr;
-    if (consumer_seqr == null)
-      uvm_report_fatal("UNCSQR", "Cannot call connected_sequencer_type() on this unconnected interface.", UVM_NONE);
-    else if (!$cast(vseqr, consumer_seqr))
-      return 0;
-    else
-      return 1;
-  endfunction
-
-  // method to get the connecte sequencer's type name
-  function string get_sequencer_type_name();
-    if(consumer_seqr != null)
-      return consumer_seqr.get_type_name();
-    else
-      return "NOT_CONNECTED";
-  endfunction
-
-  // Macro to enable factory creation
-  `uvm_component_registry(uvm_seq_cons_if, "uvm_seq_cons_if")
-
-endclass
-
 

@@ -32,21 +32,6 @@
   task peek(output REQ req_arg); imp.peek(req_arg); endtask \
   task put(input RSP rsp_arg); imp.put(rsp_arg); endtask
 
-//  function void connect_if(uvm_port_base #(sqr_if_base#(REQ, RSP)) seq_item_port); endtask
-
-// `define SEQ_ITEM_UNI_PULL_IMP(imp, T, arg) \
-//   task get_next_item(output T arg); imp.get_next_item(arg); endtask \
-//   task try_next_item(output T arg); imp.try_next_item(arg); endtask \
-//   function void item_done(input T arg = null); imp.item_done(arg); endfunction \
-//   task wait_for_sequences(); imp.wait_for_sequences(); endtask \
-//   function bit has_do_available(); return imp.has_do_available(); endfunction \
-//   task get(output T arg); imp.get(arg); endtask \
-//   task peek(output T arg); imp.peek(arg); endtask
-
-// `define SEQ_ITEM_PUSH_IMP(imp, T, arg) \
-//   task put(input T arg); imp.put(arg); endtask
-
-
 //-----------------------------------------------------------------------------
 //
 // CLASS: uvm_seq_item_pull_port #(REQ,RSP)
@@ -65,13 +50,6 @@ class uvm_seq_item_pull_port #(type REQ=int, type RSP=REQ)
 
   bit print_enabled = 0;
     
-  // provided for backwards compatibility
-  function void connect_if(uvm_port_base#(sqr_if_base#(REQ,RSP)) provider);
-    super.connect(provider);
-    uvm_report_warning("deprecated",
-                       "uvm_seq_item_pull_port.connect_if has been deprecated");
-  endfunction // void
-
 endclass
 
 
@@ -104,13 +82,6 @@ class uvm_seq_item_pull_imp #(type REQ=int, type RSP=REQ, type IMP=int)
   extends uvm_port_base #(sqr_if_base #(REQ, RSP));
   `UVM_IMP_COMMON(`SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_imp",IMP)
   `SEQ_ITEM_PULL_IMP(m_imp, REQ, RSP, t, t)
-
-  // provided for backwards compatibility of connect_if call
-  function void connect_if(uvm_port_base#(sqr_if_base#(REQ,RSP)) provider);
-    provider.connect(this);
-    uvm_report_warning("deprecated",
-                       "uvm_seq_item_pull_imp.connect_if has been deprecated");
-  endfunction // void
 
 endclass
 

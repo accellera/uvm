@@ -1242,34 +1242,5 @@ endfunction // uvm_sequence_base
     return;
   endfunction
 
-
-//
-//
-// Deprecated Methods
-//
-//
-
-  // See has_lock.
-  function bit is_locked(uvm_sequence_base sequence_ptr);
-    return has_lock(sequence_ptr);
-  endfunction
-
-
-
-  virtual task start_sequence(uvm_sequence_base seq_base);
-    static bit issued=0;
-    if (!issued) begin
-      issued=1;
-      uvm_report_warning("deprecated",
-        {"uvm_sequencer_base::start_sequence() has been deprecated and ",
-        "replaced by the start() task, which becomes the only means ",
-        "of starting sequences."}, UVM_NONE);
-    end
-
-    fork
-      seq_base.start(this);
-    join_none
-  endtask // start_sequence
-
 endclass
 

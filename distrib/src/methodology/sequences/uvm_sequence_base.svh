@@ -70,33 +70,10 @@ class uvm_sequence_base extends uvm_sequence_item;
   //
   // The constructor for uvm_sequence_base. 
   //
-  // The sequencer_ptr and parent_seq arguments are deprecated in favor of
-  // their being set in the start method.  
 
-  function new (string name = "uvm_sequence", 
-                uvm_sequencer_base sequencer_ptr = null, 
-                uvm_sequence_base parent_seq = null);
-    static bit issued1=0,issued2=0;
+  function new (string name = "uvm_sequence");
 
     super.new(name);
-    if (sequencer_ptr != null) begin
-      if (!issued1) begin
-        issued1=1;
-        uvm_report_warning("deprecated",
-          {"uvm_sequence::new()'s sequencer_ptr argument has been deprecated. ",
-          "The sequencer is now specified at the time a sequence is started ",
-          "using the start() task."});
-      end
-    end
-    if (parent_seq != null) begin
-      if (!issued2) begin
-        issued2=1;
-        uvm_report_warning("deprecated",
-          {"uvm_sequence::new()'s parent_seq argument has been deprecated. ",
-          "The parent sequence is now specified at the time a sequence is started ",
-          "using the start() task."});
-      end
-    end
     m_sequence_state = CREATED;
     m_wait_for_grant_semaphore = 0;
   endfunction
@@ -436,7 +413,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // operations on the sequencer>
 
   function bit has_lock();
-    return(m_sequencer.is_locked(this));
+    return(m_sequencer.has_lock(this));
   endfunction
 
 
@@ -800,31 +777,6 @@ class uvm_sequence_base extends uvm_sequence_item;
     m_sqr_seq_ids[sequencer_id] = sequence_id;
     set_sequence_id(sequence_id);
   endfunction
-
-
-  //-----------------------------------------------------------------
-  // Deprecated: UVM Layered stimulus backward compatibility
-  //-----------------------------------------------------------------
-
-  /* deprecated */ function int get_id();
-    return (get_sequence_id());
-  endfunction
-
-  /* deprecated */ function uvm_sequence_base get_parent_scenario();
-    return (m_parent_sequence);
-  endfunction
-
-  /* deprecated */ virtual task pre_apply();
-    return;
-  endtask
-
-  /* deprecated */ virtual task mid_apply();
-    return;
-  endtask
-
-  /* deprecated */ virtual task post_apply();
-    return;
-  endtask
 
 endclass                
 

@@ -46,34 +46,9 @@ protected bit      response_queue_error_report_disabled = 0;
   //
   // Creates and initializes a new sequence object.
   //
-  // The ~sequencer_ptr~ and ~parent_seq~ arguments are deprecated in favor of
-  // their being set in the start method.  
 
-  function new (string name = "uvm_sequence", 
-                uvm_sequencer_base sequencer_ptr = null, 
-                uvm_sequence_base parent_seq = null);
-    static bit issued1=0,issued2=0;
+  function new (string name = "uvm_sequence");
     super.new(name);
-    if (sequencer_ptr != null) begin
-      if (!issued1) begin
-        issued1=1;
-        uvm_report_warning("deprecated",
-          {"uvm_sequence::new()'s sequencer_ptr argument has been deprecated. ",
-          "The sequencer is now specified at the time a sequence is started ",
-          "using the start() task."}, UVM_NONE);
-      end
-      m_sequencer = sequencer_ptr;
-    end
-    if (parent_seq != null) begin
-      if (!issued2) begin
-        issued2=1;
-        uvm_report_warning("deprecated",
-          {"uvm_sequence::new()'s parent_seq argument has been deprecated. ",
-          "The parent sequence is now specified at the time a sequence is started ",
-          "using the start() task."}, UVM_NONE);
-      end
-      m_parent_sequence = parent_seq;
-    end
   endfunction // new
 
   function void do_print (uvm_printer printer);

@@ -23,7 +23,7 @@
 `include "base/uvm_component.svh"
 `include "base/uvm_root.svh"
 
-uvm_component uvm_top_levels[$]; // don't use
+uvm_component uvm_top_levels[$];
 
 
 //------------------------------------------------------------------------------
@@ -103,7 +103,6 @@ function uvm_component::new (string name, uvm_component parent);
   // Do local configuration settings
   void'(get_config_int("recording_detail", recording_detail));
 
-  // Deprecated container of top-levels (replaced by uvm_top)
   if (parent == uvm_top)
     uvm_top_levels.push_back(this);
 

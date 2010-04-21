@@ -50,34 +50,10 @@ bit        print_sequence_info = 0;
 
   // Function: new
   //
-  // The constructor method for uvm_sequence_item. The sequencer and
-  // parent_sequence may be specified in the constructor, or directly using
-  // uvm_sequence_item methods.
+  // The constructor method for uvm_sequence_item. 
   
-  function new (string             name = "uvm_sequence_item",
-                uvm_sequencer_base sequencer = null,
-                uvm_sequence_base  parent_sequence = null);
+  function new (string             name = "uvm_sequence_item");
     super.new(name);
-    if (sequencer != null) begin
-      if (!issued1) begin
-        issued1=1;
-        uvm_report_warning("deprecated",
-                           {"uvm_sequence_item::new()'s sequencer_ptr argument has been deprecated. ",
-                            "The sequencer is now specified at the time a sequence is started ",
-                            "using the start() task."});
-      end
-      m_sequencer = sequencer;
-    end
-    if (parent_sequence != null) begin
-      if (!issued2) begin
-        issued2=1;
-        uvm_report_warning("deprecated",
-          {"uvm_sequence_item::new()'s parent_sequence argument has been deprecated. ",
-           "The parent sequence is now specified at the time a sequence is started ",
-           "using the start() task."});
-      end
-      m_parent_sequence = parent_sequence;
-    end
   endfunction // new
 
   function string get_type_name();
@@ -432,35 +408,6 @@ bit        print_sequence_info = 0;
       printer.print_string("sequencer", temp_str1);
     end
   endfunction
-
-
-  //----------------------------------------------------------------------------
-  // Deprecated Methods
-  // 
-  // These methods, which are sequence-centric, were moved to uvm_sequence_base.
-  //----------------------------------------------------------------------------
-
-  function void set_parent_seq(uvm_sequence_base parent);
-    static bit issued=0;
-    if (!issued) begin
-      issued=1;
-      uvm_report_warning("deprecated",
-        {"uvm_sequence_item::set_parent_seq() has been deprecated and ",
-        "replaced by set_parent_sequence()"});
-    end
-    set_parent_sequence(parent);
-  endfunction
-
-  function uvm_sequence_base get_parent_seq();
-    static bit issued=0;
-    if (!issued) begin
-      issued=1;
-      uvm_report_warning("deprecated",
-        {"uvm_sequence_item::get_parent_seq() has been deprecated and ",
-        "replaced by get_parent_sequence()"});
-    end
-    return(get_parent_sequence());
-  endfunction // uvm_sequence_base
 
   virtual task pre_do(bit is_item);
     return;
