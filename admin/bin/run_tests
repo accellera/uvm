@@ -1,0 +1,485 @@
+eval 'exec perl -S $0 ${1+"$@"}' 
+if 0;
+
+##---------------------------------------------------------------------- 
+##   Copyright 2010 Synopsys, Inc. 
+##   All Rights Reserved Worldwide 
+## 
+##   Licensed under the Apache License, Version 2.0 (the 
+##   "License"); you may not use this file except in 
+##   compliance with the License.  You may obtain a copy of 
+##   the License at 
+## 
+##       http://www.apache.org/licenses/LICENSE-2.0 
+## 
+##   Unless required by applicable law or agreed to in 
+##   writing, software distributed under the License is 
+##   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+##   CONDITIONS OF ANY KIND, either express or implied.  See 
+##   the License for the specific language governing 
+##   permissions and limitations under the License. 
+##----------------------------------------------------------------------
+
+#
+# Run and summarize a set of tests
+#
+
+sub usage {
+
+print STDERR <<USAGE;
+Usage: $0 [options] tool {dir}
+
+   tool     Name of the tool to run the tests on
+   dir      Name of the directories containing the UVM testcases
+
+Options:
+   -c       Do not run. Only clean-up tool-generated files.
+   -C opts  Add the specified options to the compilation command
+   -d       Do not remove tool-generated files
+   -f fname Execute tests listed in specified file (one per line)
+   -F fname Write list of failing tests in specfied file instead of
+               "tool.fails" (can later be used with -f)
+   -h       Print this message
+   -R opts  Add the specified options to the simulation command
+   -u dir   Use the UVM distribution in the specified directory
+   -v       Display the output of the testcase on stdout
+
+USAGE
+   exit(1);
+}
+
+require "getopts.pl"
+&Getopts("cC:df:F:hR:u:v");
+&usage if $opt_h || $#ARGV < 0;
+
+if (!$opt_u) {
+  # Find "distrib" directory
+  $opt_u = "distrib";
+  for($_ = 0; $_ < 10; $_++) {
+    last if -e $opt_u;
+    $opt_u = "../$opt_u";
+  }
+  if (!-e $opt_u) {
+    print STDERR "ERROR: Cannot locate UVM distribution. Use the -u option to specify its location.\n";
+    exit(1);
+  }
+}
+if (! -e "$opt_u/src/uvm_pkg.sv") {
+  print STDERR "ERROR: \"$opt_u\" does not appear to contain a valid UVM distribution.\n";
+  exit(1);
+}
+$uvm_home = $opt_u;
+
+$libdir = $0;
+$libdir =~ s#bin/run_tests#lib/run_test#;
+if (! -e $libdir) {
+   print STDERR "Tool-specific library \"$libdir\" does not exists.\n";
+   exit(1);
+}
+push(@INC, $libdir);
+
+$tool = shift(@ARGV);
+require "$tool.pl";
+
+#
+# Always keep a list of failed tests
+#
+$opt_F = "$tool.fails" unless $opt_F;
+
+#
+# The '-c' option is redundent for the "clean" pseudo-tool
+#
+$opt_c = 0 if $tool eq "clean";
+
+#
+# Find all of the test directories in the supplied arguments
+#
+if ($opt_f) {
+  if (!open(F, "< $opt_f")) {
+    print STDERR "Cannot open \"$opt_f\" for reading: $!\n";
+    exit(1);
+  }
+  while ($_ = <F>) {
+    chomp($_);
+    push(@dirs, $_);
+  }
+  close(F);
+} else {
+  if ($#ARGV == -1) {
+    @ARGV = <[0-9][0-9]*>;
+  }
+  foreach $dir (@ARGV) {
+    if (! -d $dir) {
+      print STDERR "test directory \"$dir\" does not exist.\n";
+      exit(1);
+    }
+    push(@dirs, &get_testdirs($dir));
+  }
+}
+
+sub get_testdirs {
+  local($dir, $_, @subs, @dirs) = @_;
+
+    @dirs = ();
+    if (-e "$dir/test.sv") {
+      push(@dirs, $dir);
+    }
+
+    @subs = <$dir/[0-9][0-9]*>;
+    return @dirs if $#subs == -1;
+
+    foreach $_ (@subs) {
+      push(@dirs, &get_testdirs($_));
+    }    
+    return @dirs;
+}
+
+$| = 1;
+
+if ($opt_F) {
+  if (!open(Fout, "> $opt_F")) {
+    print STDERR "Cannot open \"$opt_F\" for writing: $!\n";
+    exit(1);
+  }
+}
+
+#
+# Run the individual tests
+#
+$failures = 0;
+foreach $dir (@dirs) {
+  if (&run_one_test($dir)) {
+    $failures++;
+    if ($opt_F) {
+      print Fout "$dir\n";
+    }
+  }
+}
+print "-----------------------------------------------------------------\n";
+$txt = sprintf("Total of %d tests ", $#dirs+1);
+$dots = substr(".......................................", 0, 41-length($txt));
+print $txt, $dots;
+if ($failures > 0) {
+  print " FAILED $failures tests\n";
+} else {
+   print " PASSED all tests.\n";
+}
+if ($opt_F) {
+  close(Fout);
+  unlink($opt_F) unless $failures;
+}
+exit($failures);
+
+
+#
+# Run one test in the specified directory
+#
+# Return non-zero if the test fails.
+#
+sub run_one_test {
+   local($testdir, $_) = @_;
+
+   $dots = substr(".......................................", 0, 40-length($dir));
+   print "$testdir $dots ";
+
+   if (! -d $testdir) {
+     print "**FAIL** ($testdir not exist)\n";
+     return 1;
+   }
+
+   local($sv) = ("$testdir/test.sv");
+   if (! -e $sv) {
+     print "**FAIL** ($sv does not exist)\n";
+     return 1;
+   }
+
+   if (!$opt_c) {
+     # If UVM path is absolute, no need to correct it
+     if ($opt_u !~ m|^[/\$]|) {
+       $uvm_home = $opt_u;
+       $_ = $testdir;
+       while ($_ =~ s|/?[^/]+$||) {
+	 $uvm_home = "../" . $uvm_home;
+       }
+     }
+     
+     print "<running>\n" if $opt_v;
+
+     if (-e "$testdir/$tool.comp.args") {
+       if (!open(ARGS, "< $testdir/$tool.comp.args")) {
+	 print "**FAIL** (Cannot read $tool.comp.args)\n";
+       }
+       $comp_args = "";
+       while ($_ = <ARGS>) {
+         chomp;
+         $comp_args .= " $_";
+       }
+       close(ARGS);
+     }
+
+     if (-e "$testdir/test.defines") {
+       if (!open(ARGS, "< $testdir/test.defines")) {
+	 print "**FAIL** (Cannot read test.defines)\n";
+       }
+       $defss = "";
+       while ($_ = <ARGS>) {
+         chomp;
+         $defs .= " $_";
+       }
+       close(ARGS);
+     }
+
+     if (-e "$testdir/$tool.run.args") {
+       if (!open(ARGS, "< $testdir/$tool.run.args")) {
+	 print "**FAIL** (Cannot read $tool.run.args)\n";
+       }
+       $run_args = "";
+       while ($_ = <ARGS>) {
+         chomp;
+         $run_args .= " $_";
+       }
+       close(ARGS);
+     }
+
+     if (-e "$testdir/test.plusargs") {
+       if (!open(ARGS, "< $testdir/test.plusargs")) {
+	 print "**FAIL** (Cannot read test.plusargs)\n";
+       }
+       $plusargs = "";
+       while ($_ = <ARGS>) {
+         chomp;
+         $plusargs .= " $_";
+       }
+       close(ARGS);
+     }
+
+     &run_the_test($testdir, "$comp_args $opt_C $defs",
+		   "$run_args $opt_R $plusargs");
+
+     print "$testdir $dots " if $opt_v;
+   }  
+ 
+   #
+   # Clean up all temporary files, except the log file
+   #
+   if (!$opt_d) {
+     &cleanup_test($testdir);
+  
+     if ($opt_c) {
+       print "$tool clean.\n";
+       return 0;
+     }
+   }
+
+   #
+   # Check if the test was succesful
+   #
+   return &check_test($testdir);
+}
+
+
+#
+# Check if the test passed or failed.
+#
+# Display on STDOUT the status of the test and
+# return non-zero if it failed.
+#
+sub check_test {
+   local($testdir, $_) = @_;
+
+   local($log, $pass, @errs);
+   $log = "$testdir/" . &runtime_log_fname();
+
+   # Special "clean" logfile
+   if ($log =~ m|/!$|) {
+     print "clean.\n";
+     return 0;
+   }
+
+   # If there is no run-time logfile, it could be an expected compile-time
+   # failure...
+   if (! -e $log) {
+     $log = "$testdir/" . &comptime_log_fname();
+     if (! -e $log) {
+       print "**FAIL** (No compile-time or run-time log files)\n";
+       return 1;
+     }
+
+     @errs = &get_compiletime_errors($testdir);
+     if ($#errs == -1) {
+       print "**FAIL** (No run-time log file)\n";
+       return 1;
+     }
+
+     foreach $err (@errs) {
+       $err =~ m/^(.*)#(\d+)$/;
+       if (&check_comptime_error($testdir, $1, $2)) {
+	 print "**FAIL** (Compile-time error)\n";
+	 return 1;
+       }
+     }
+
+     print "pass (with syntax error(s))\n";
+     return 0;
+   }
+
+   # If the file "post_test.pl" exists, run it to determine success
+   # or failure. Required when the testcse produces some external
+   # output whose presence and format is part of the test's success
+   if (-e "$testdir/post_test.pl") {
+      $post_test = 0;
+      $failed = do "$testdir/post_test.pl";
+      if (!defined($failed) || $@) {
+         print "**FAIL** (Invalid post_test.pl)\n";
+         return 1;
+      }
+      if ($failed ne "0") {
+        $post_test = "post_test: $failed" unless $post_test;
+	print "**FAIL** ($post_test)\n";
+      } else {
+        $post_test = "from post_test.pl" unless $post_test;
+	print "pass ($post_test)\n";
+      }	
+      return $failed;
+   }
+
+   if (!open(LOG, "<$log")) {
+     print "**FAIL** (cannot read $log)\n";
+     return 1;
+   }
+   $pass = 0;
+   $exp_errs = 0; # No errors expected by default
+   $in_summary = 0;
+   undef($n_errs);
+   undef($n_fatals);
+   while ($_ = <LOG>) {
+     if (m/UVM TEST FAILED/) {
+       print "**FAIL** (Explicitly failed)\n";
+       return 1;
+     }
+     if (m/UVM TEST PASSED/) {
+       $pass = 1;
+       next;
+     }
+     if (m/UVM TEST EXPECT (\d+) UVM_ERROR/) {
+       $exp_errs = $1;
+       next;
+     }
+     if (m/UVM Report Summary/) {
+       $in_summary = 1;
+       next;
+     }
+     if ($in_summary && m/^UVM_ERROR :\s+(\d+)\s*$/) {
+       $n_errs = $1;
+       next;
+     }
+     if ($in_summary && m/^UVM_FATAL :\s+(\d+)\s*$/) {
+       $n_fatals = $1;
+       next;
+     }
+   }
+   close(LOG);
+
+   # Check for odd logs
+   if (!$in_summary || !defined($n_errs) || !defined($n_fatals)) {
+     $pass = 0;
+   }
+
+   # Should have the expected number of UVM_ERROR messages
+   if ($n_errs != $exp_errs) {
+     if ($exp_errs > 0) {
+       print "**FAIL** ($n_errs vs $exp_errs UVM_ERRORs)\n";
+     } else {
+       print "**FAIL** (UVM_ERRORs)\n";
+     }
+     return 1;
+   }
+   # Should NEVER have any UVM_FATAL messages
+   if ($n_fatals > 0) {
+     print "**FAIL** (UVM_FATALs)\n";
+     return 1;
+   }
+
+   if ($pass) {
+     if ($n_errs > 0) {
+       print "pass (with UVM_ERRORs)\n";
+     } else {
+       print "pass.\n";
+     }
+     return 0;
+   }
+
+   # Maybe the run-time errors were expected...   
+   @errs = &get_runtime_errors($testdir);
+   if ($#errs == -1) {
+     print "**FAIL** (Did not pass)\n";
+     return 1;
+   }
+   
+   foreach $err (@errs) {
+     $err =~ m/^(.*)#(\d+)$/;
+     if (&check_runtime_error($testdir, $1, $2)) {
+       print "**FAIL** (Run-time error)\n";
+       return 1;
+     }
+   }
+
+   print "pass (with runtime error(s))\n";
+   return 0;
+}
+
+
+#
+# Check that a compile-time error was expected on the
+# specified line in the specified file
+#
+# returns non-zero if the error was NOT expected
+#
+sub check_comptime_error {
+  local($testdir, $fname, $line, $_) = @_;
+
+  $fname = "$testdir/$fname";
+  if (!open(SV, "< $fname")) {
+     return 1;
+  }
+
+  $_ = "";
+  while ($line > 0) {
+    $_ = <SV>;
+    $line--;
+  }
+  # OK if magic comment found on line in question
+  return 0 if m/UVM TEST COMPILE-TIME FAILURE/;
+
+  close(SV);
+
+  return 1;
+}
+
+
+#
+# Check that a run-time error was expected on the
+# specified line in the specified file
+#
+# returns non-zero if the error was NOT expected
+#
+sub check_runtime_error {
+  local($testdir, $fname, $line, $_) = @_;
+
+  $fname = "$testdir/$fname";
+  if (!open(SV, "< $fname")) {
+     return 1;
+  }
+
+  $_ = "";
+  while ($line > 0) {
+    $_ = <SV>;
+    $line--;
+  }
+  # OK if magic comment found on line in question
+  return 0 if m/UVM TEST RUN-TIME FAILURE/;
+
+  close(SV);
+
+  return 1;
+}

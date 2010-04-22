@@ -42,6 +42,9 @@ virtual class avm_virtual_class; endclass
 virtual class uvm_void;
 endclass
 
+// Append/prepend symbolic values for order-dependent APIs
+typedef enum {UVM_APPEND, UVM_PREPEND} uvm_apprepend;
+
 // Forward declaration since scope stack uses uvm_objects now
 typedef class uvm_object;
 
