@@ -228,9 +228,9 @@ class uvm_root extends uvm_component;
   bit m_executing_stop_processes = 0;
 
   extern virtual task all_dropped (uvm_objection objection, 
-           uvm_object source_obj, int count);
+           uvm_object source_obj, string description, int count);
   extern virtual function void raised (uvm_objection objection, 
-           uvm_object source_obj, int count);
+           uvm_object source_obj, string description, int count);
 
   /*** DEPRECATED - Do not use in new code.  Convert code when appropriate ***/
   extern function void print_unit_list (uvm_component comp=null);
@@ -1064,9 +1064,11 @@ endtask
 //
 
 function void uvm_root::raised (uvm_objection objection, uvm_object source_obj, 
-                              int count);
-  if (m_executing_stop_processes)
-    uvm_report_warning("ILLRAISE", "An uvm_test_done objection was raised during the execution of component stop processes for the stop_request. The objection is ignored by the stop process.", UVM_NONE);
+                              string description, int count);
+  if (m_executing_stop_processes) begin
+    string desc = description == "" ? "" : {" (\"", description, "\") "};
+    uvm_report_warning("ILLRAISE", {"An uvm_test_done objection ", desc, "was raised during the execution of component stop processes for the stop_request. The objection is ignored by the stop process."}, UVM_NONE);
+  end
   else
     m_objections_outstanding = 1;
 endfunction
@@ -1077,7 +1079,7 @@ endfunction
 //
 
 task uvm_root::all_dropped (uvm_objection objection, uvm_object source_obj, 
-                          int count);
+                          string description, int count);
   m_objections_outstanding = 0;
 endtask
 

@@ -55,13 +55,13 @@ virtual class uvm_report_catcher extends uvm_object;
 
   typedef enum { UNKNOWN_ACTION, THROW, CAUGHT} action_e;
 
-  typedef struct {
+  class sev_id_struct;
     bit sev_specified ;
     bit id_specified ;
     uvm_severity sev ;
     string  id ;
     bit is_on ;
-  } sev_id_struct;    
+  endclass
 
   local static uvm_severity m_modified_severity;
   local static int m_modified_verbosity;
@@ -246,6 +246,7 @@ virtual class uvm_report_catcher extends uvm_object;
     if (ordering == UVM_APPEND) m_catcher_q.push_back(catcher);
     else m_catcher_q.push_front(catcher);
 
+    sev_id = new;
     sev_id.is_on             = 1;
     m_sev_id_array[catcher]  = sev_id;
   endfunction
@@ -270,6 +271,7 @@ virtual class uvm_report_catcher extends uvm_object;
     if (ordering == UVM_APPEND) m_catcher_q.push_back(catcher);
     else m_catcher_q.push_front(catcher);
 
+    sev_id = new;
     sev_id.sev_specified     = 1;
     sev_id.sev               = severity;
     sev_id.is_on             = 1;
@@ -301,6 +303,7 @@ virtual class uvm_report_catcher extends uvm_object;
     if (ordering == UVM_APPEND) m_catcher_q.push_back(catcher);
     else m_catcher_q.push_front(catcher);
 
+    sev_id = new;
     sev_id.id_specified      = 1;
     sev_id.id                = id;
     sev_id.is_on             = 1;
@@ -332,6 +335,7 @@ virtual class uvm_report_catcher extends uvm_object;
     if (ordering == UVM_APPEND) m_catcher_q.push_back(catcher);
     else m_catcher_q.push_front(catcher);
 
+    sev_id = new;
     sev_id.id_specified      = 1;
     sev_id.id                = id;
     sev_id.sev_specified     = 1;
