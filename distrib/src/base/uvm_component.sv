@@ -1,7 +1,7 @@
-// $Id: uvm_component.sv,v 1.94 2009/12/15 18:00:51 jlrose Exp $
+//
 //------------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -23,7 +23,7 @@
 `include "base/uvm_component.svh"
 `include "base/uvm_root.svh"
 
-uvm_component uvm_top_levels[$]; // don't use
+uvm_component uvm_top_levels[$];
 
 
 //------------------------------------------------------------------------------
@@ -100,10 +100,9 @@ function uvm_component::new (string name, uvm_component parent);
   // Now that inst name is established, reseed (if use_uvm_seeding is set)
   reseed();
 
-  // Do local configuration settings (URM backward compatibility)
+  // Do local configuration settings
   void'(get_config_int("recording_detail", recording_detail));
 
-  // Deprecated container of top-levels (replaced by uvm_top)
   if (parent == uvm_top)
     uvm_top_levels.push_back(this);
 
@@ -554,16 +553,10 @@ endfunction
 task uvm_component::do_task_phase (uvm_phase phase);
 
   m_curr_phase = phase;
-  `ifndef INCA  
-
-    //fork
-      //begin
+  `ifdef UVM_USE_FPC  
         m_phase_process = process::self();
         phase.call_task(this);
         @m_kill_request;
-      //end
-    //join
-
   `else
   // don't use fine grained process control
    fork begin // isolate inner fork so can safely kill via disable fork
@@ -599,7 +592,7 @@ endfunction
 // ----
 
 function void uvm_component::kill();
-  `ifndef INCA
+  `ifdef UVM_USE_FPC
     if (m_phase_process != null) begin
       m_phase_process.kill;
       m_phase_process = null;
@@ -614,11 +607,11 @@ endfunction
 // -------
 
 task uvm_component::suspend();
-  `ifndef INCA
-  if(m_phase_process != null)
-    m_phase_process.suspend;
+  `ifdef UVM_USE_FPC
+    if(m_phase_process != null)
+      m_phase_process.suspend;
   `else
-  uvm_report_error("UNIMP", "suspend not implemented", UVM_NONE);
+    uvm_report_error("UNIMP", "suspend not implemented", UVM_NONE);
   `endif
 endtask
 
@@ -627,11 +620,11 @@ endtask
 // ------
 
 task uvm_component::resume();
-  `ifndef INCA
-  if(m_phase_process!=null) 
-    m_phase_process.resume;
+  `ifdef UVM_USE_FPC
+    if(m_phase_process!=null) 
+      m_phase_process.resume;
   `else
-   uvm_report_error("UNIMP", "resume not implemented", UVM_NONE);
+     uvm_report_error("UNIMP", "resume not implemented", UVM_NONE);
   `endif
 endtask
 
@@ -650,17 +643,17 @@ endtask
 
 function string uvm_component::status();
 
-  `ifndef INCA
-  process::state ps;
+  `ifdef UVM_USE_FPC
+    process::state ps;
 
-  if(m_phase_process == null)
-    return "<unknown>";
+    if(m_phase_process == null)
+      return "<unknown>";
 
-  ps = m_phase_process.status();
+    ps = m_phase_process.status();
 
-  return ps.name();
+    return ps.name();
   `else
-   uvm_report_error("UNIMP", "status not implemented", UVM_NONE);
+     uvm_report_error("UNIMP", "status not implemented", UVM_NONE);
   `endif
 
 endfunction
@@ -1093,11 +1086,7 @@ endfunction
 function void uvm_component::m_component_path(ref uvm_component path[$]);
   uvm_component comp;
   comp = this;
-  `ifdef INCA
-  path.delete();
-  `else
-  path = '{};
-  `endif
+  `uvm_clear_queue(path)
   while(comp != null) begin
     path.push_front(comp);
     comp = comp.get_parent();
@@ -1117,11 +1106,7 @@ function void uvm_component::m_get_config_matches(
 
   comp = this;
 
-  `ifdef INCA
-  cfg_matches.delete();
-  `else
-  cfg_matches = '{};
-  `endif
+  `uvm_clear_queue(cfg_matches)
 
 
   //Get the path up to the root. Since configs are done in groups for a comp,
@@ -1421,130 +1406,51 @@ function void uvm_component::print_config_settings (string field="",
   end
 endfunction
 
-//------------------------------------------------------------------------------
-//
-// DEPRECATED - DO NOT USE
-//
-//------------------------------------------------------------------------------
 
-// global_stop_request (static, deprecated)
-// -------------------
-
-function void uvm_component::global_stop_request();
-  uvm_root top;
-  top = uvm_root::get();
-  top.stop_request();
-endfunction
-
-
-// post_new (deprecated)
+// do_print (override)
 // --------
 
-function void uvm_component::post_new();
-  return;
-endfunction
+function void uvm_component::do_print(uvm_printer printer);
+  string v;
+  super.do_print(printer);
 
+  // It is printed only if its value is other than the default (UVM_NONE)
+  if(uvm_verbosity'(recording_detail) != UVM_NONE)
+    case (recording_detail)
+      UVM_LOW : printer.print_generic("recording_detail", "uvm_verbosity", 
+        $bits(recording_detail), "UVM_LOW");
+      UVM_MEDIUM : printer.print_generic("recording_detail", "uvm_verbosity", 
+        $bits(recording_detail), "UVM_MEDIUM");
+      UVM_HIGH : printer.print_generic("recording_detail", "uvm_verbosity", 
+        $bits(recording_detail), "UVM_HIGH");
+      UVM_FULL : printer.print_generic("recording_detail", "uvm_verbosity", 
+        $bits(recording_detail), "UVM_FULL");
+      default : printer.print_field("recording_detail", recording_detail, 
+        $bits(recording_detail), UVM_DEC, , "integral");
+    endcase
 
-// export_connections (deprecated)
-// ------------------
-
-function void uvm_component::export_connections();
-  return;
-endfunction
-
-
-// import_connections (deprecated)
-// ------------------
-
-function void uvm_component::import_connections();
-  return;
-endfunction
-
-
-// configure (deprecated)
-// ---------
-
-function void uvm_component::configure();
-  return;
-endfunction
-
-
-// pre_run (deprecated)
-// -------
-
-function void uvm_component::pre_run();
-  return;
-endfunction
-
-
-// find_component (deprecated)
-// --------------
-
-function uvm_component uvm_component::find_component (string comp_match);
-  static bit issued=0;
-  if (!issued) begin
-    issued=1;
-    uvm_top.uvm_report_warning("deprecated",
-      {"uvm_component::find_component() is deprecated and replaced by ",
-      "uvm_top.find()"}, UVM_NONE);
+  if (enable_stop_interrupt != 0) begin
+    printer.print_field("enable_stop_interrupt", enable_stop_interrupt,
+                        $bits(enable_stop_interrupt), UVM_BIN, ".", "bit");
   end
-  return uvm_top.find(comp_match);
+
 endfunction
 
 
-// find_components (deprecated)
-// ---------------
-
-function void uvm_component::find_components (string comp_match,
-                                              ref uvm_component comps[$]);
-  static bit issued=0;
-  if (!issued) begin
-    issued=1;
-    uvm_top.uvm_report_warning("deprecated",
-      {"uvm_component::find_components() is deprecated and replaced by ",
-      "uvm_top.find_all()"}, UVM_NONE);
-  end
-  uvm_top.find_all(comp_match,comps);
-endfunction
-
-
-// get_component (deprecated)
+// set_int_local (override)
 // -------------
 
-function uvm_component uvm_component::get_component (int ele);
-  uvm_component m__comps[$];
-  static bit issued=0;
-  if (!issued) begin
-    issued=1;
-    uvm_top.uvm_report_warning("deprecated",
-      {"uvm_component::get_component() is an internal method that has been ",
-      "deprecated. uvm_top's find, find_all, and uvm_component's lookup ",
-      "method provide similar functionality."}, UVM_NONE);
-  end
-  if (m__comps.size()==0)
-    uvm_top.find_all("*",m__comps);
-  if (ele < m__comps.size())
-    return m__comps[ele];
-  return null;
+function void uvm_component::set_int_local (string field_name,
+                             uvm_bitstream_t value,
+                             bit recurse=1);
+
+  //call the super function to get child recursion and any registered fields
+  super.set_int_local(field_name, value, recurse);
+
+  //set the local properties
+  if(uvm_is_match(field_name, "recording_detail"))
+    recording_detail = value;
+
 endfunction
 
-
-// get_num_components (deprecated)
-// ------------------
-
-function int uvm_component::get_num_components ();
-  uvm_component m__comps[$]; 
-  static bit issued=0;
-  if (!issued) begin
-    issued=1;
-    uvm_top.uvm_report_warning("deprecated",
-      {"uvm_component::get_num_components() is an internal method that has ",
-      "been deprecated. The number of components in the testbench can be ",
-      "obtained using the uvm_top.find_all() method."}, UVM_NONE);
-  end
-  while (m__comps.size()!=0)
-    m__comps.delete(0);
-  uvm_top.find_all("*",m__comps);
-  get_num_components = m__comps.size();
-endfunction
 

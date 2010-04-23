@@ -1,7 +1,7 @@
-// $Id: uvm_policies.svh,v 1.11 2009/12/14 22:39:41 jlrose Exp $
+//
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -37,7 +37,7 @@
 // 
 // This policy class is used to compare built-in types.
 //
-// Provides a comp method that compares, AVM-style, the built-in type,
+// Provides a comp method that compares the built-in type,
 // T, for which the == operator is defined.
 //----------------------------------------------------------------------
 
@@ -63,7 +63,7 @@ class uvm_built_in_converter #(type T=int);
 
   static function string convert2string(input T t);
     string s;
-`ifdef INCA
+`ifndef UVM_USE_P_FORMAT
     $swrite(s, t);
 `else
     $sformat( s , "%p" , t );

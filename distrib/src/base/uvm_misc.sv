@@ -1,7 +1,7 @@
-// $Id: uvm_misc.sv,v 1.25 2009/06/02 22:53:38 redelman Exp $
+//
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -22,7 +22,7 @@
 
 `include "base/uvm_misc.svh"
 
-// Create a seed which is based off of the ius seed which can be used to seed
+// Create a seed which is based off of the global seed which can be used to seed
 // srandom processes but will change if the command line seed setting is 
 // changed.
 
@@ -42,7 +42,7 @@ uvm_seed_map uvm_random_seed_table_lookup [string];
 //
 // uvm_instance_scope;
 //
-// A function that returns the scope that the urm library lives in, either
+// A function that returns the scope that the UVM library lives in, either
 // an instance, a module, or a package.
 
 function string uvm_instance_scope();

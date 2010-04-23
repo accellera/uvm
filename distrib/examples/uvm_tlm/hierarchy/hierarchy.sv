@@ -1,8 +1,8 @@
 
-// $Id: hierarchy.sv,v 1.17 2009/11/02 18:47:35 redelman Exp $
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -197,9 +197,6 @@ module test;
     function void connect();
       g.put_port.connect(f.blocking_put_export);  // A
       c.get_port.connect(f.blocking_get_export);  // B
-    endfunction
-    
-    function void import_connections();
       c.put_port.connect(put_port); // C
       c.ap.connect(ap);
     endfunction
@@ -223,11 +220,8 @@ module test;
       b = new("bfm", this);
     endfunction
     
-    function void export_connections();
-      put_export.connect(f.blocking_put_export);
-    endfunction
-    
     function void connect();
+      put_export.connect(f.blocking_put_export);
       b.get_port.connect(f.blocking_get_export);
     endfunction
     
@@ -284,7 +278,7 @@ module test;
 
   initial begin
     e = new("e");
-    e.run_test();
+    run_test();
   end
 
 endmodule // test

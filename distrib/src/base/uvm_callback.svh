@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics, Corp.
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics, Corp.
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -88,7 +88,7 @@ class uvm_callbacks #(type T=int, CB=int) extends uvm_pool #(T,uvm_queue #(CB));
   typedef uvm_queue #(CB) queue_t;
   typedef uvm_pool #(T,queue_t) pool_t;
 
-  static uvm_reporter reporter = new("cb_tracer");
+  static uvm_report_object reporter = new("cb_tracer");
 
   `uvm_object_param_utils(this_type)
 
@@ -256,7 +256,7 @@ endclass
 
 class uvm_callback extends uvm_object;
 
-  static uvm_reporter reporter = new("cb_tracer");
+  static uvm_report_object reporter = new("cb_tracer");
 
   protected bit m_enabled = 1;
 

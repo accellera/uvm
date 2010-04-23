@@ -1,7 +1,7 @@
-// $Id: uvm_env.svh,v 1.22 2009/05/18 22:14:17 redelman Exp $
+//
 //------------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -47,71 +47,6 @@ virtual class uvm_env extends uvm_component;
   virtual function string get_type_name ();
     return type_name;
   endfunction
-
-  //----------------------------------------------------------------------------
-
-  // deprectead functionality - do not use
-  //----------------------------------------------------------------------------
-
-  /* deprecated */ bit m_do_test_mode = 0;
-
-  /* deprecated */ task do_task_phase (uvm_phase phase);
-  
-    // Top-level env has special run-phase semantic when in 'do_test' mode.
-    // In all other cases, uvm_env's run phase behaves like any other.
-
-    m_curr_phase = phase;
-
-    if (!(m_do_test_mode && phase == run_ph && m_parent == uvm_top)) begin
-      super.do_task_phase(phase);
-      return;
-    end
-
-    // Delay 1 delta to ensure this env's process starts last, thus
-    // allowing sub-tree of components to initialize before this
-    // run-task starts.
-
-    #0;
-
-    // QUESTA
-    `ifndef INCA  
-
-       m_phase_process = process::self();
-       phase.call_task(this);
-
-    // INCISIVE
-    `else
-
-       // isolate inner process so it can be safely killed via disable fork,
-       fork
-       begin
-         fork : task_phase
-           phase.call_task(this);
-           @m_kill_request;
-         join_any
-         disable task_phase;
-       end
-       join
-
-    `endif
-
-    uvm_top.stop_request(); // ends run phase
-
-  endtask
-
-  /* deprecated */ task do_test();
-   uvm_report_warning("deprecated", {"do_test mode is deprecated. Use ",
-                     "run_test to start simulation phasing, and be ",
-                     "sure to call global_stop_request() to end the ",
-                     "run phase and any other task-based phase."});
-    m_do_test_mode=1;
-    uvm_top.run_global_phase();
-    report_summarize();
-  endtask
-
-  /* deprecated */ task run_test(string name="");
-    uvm_top.run_test(name);
-  endtask
 
 endclass
 

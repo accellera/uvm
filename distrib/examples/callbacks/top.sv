@@ -1,5 +1,7 @@
 //------------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics, Corp.
+//   Copyright 2007-2010 Mentor Graphics, Corp.
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -252,6 +254,8 @@ endclass
 //------------------------------------------------------------------------------
 
 module top;
+  import uvm_pkg::*;
+  import bus_driver_pkg::*;
 
   bus_tr            tr     = new;
   bus_driver        driver = new("driver");

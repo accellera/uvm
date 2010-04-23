@@ -1,7 +1,7 @@
-// $Id: uvm_transaction.sv,v 1.13 2009/10/29 23:19:13 redelman Exp $
+//
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -137,10 +137,7 @@ function void uvm_transaction::do_print (uvm_printer printer);
     printer.print_time("end_time", end_time);
   if(initiator != null) begin
     tmp_initiator = initiator;
-`ifdef INCA
-    $swrite(str,"@%0d", tmp_initiator);
-`else
-`endif
+    $swrite(str,"@%0d", tmp_initiator.get_inst_id());
     printer.print_generic("initiator", initiator.get_type_name(), -1, str);
   end
 endfunction

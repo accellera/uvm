@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -1241,35 +1241,6 @@ endfunction // uvm_sequence_base
   virtual function void send_request(uvm_sequence_base sequence_ptr, uvm_sequence_item t, bit rerandomize = 0);
     return;
   endfunction
-
-
-//
-//
-// Deprecated Methods
-//
-//
-
-  // See has_lock.
-  function bit is_locked(uvm_sequence_base sequence_ptr);
-    return has_lock(sequence_ptr);
-  endfunction
-
-
-
-  virtual task start_sequence(uvm_sequence_base seq_base);
-    static bit issued=0;
-    if (!issued) begin
-      issued=1;
-      uvm_report_warning("deprecated",
-        {"uvm_sequencer_base::start_sequence() has been deprecated and ",
-        "replaced by the start() task, which becomes the only means ",
-        "of starting sequences."}, UVM_NONE);
-    end
-
-    fork
-      seq_base.start(this);
-    join_none
-  endtask // start_sequence
 
 endclass
 

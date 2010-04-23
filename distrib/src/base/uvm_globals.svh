@@ -1,7 +1,8 @@
-// $Id: uvm_globals.svh,v 1.7 2009/12/17 00:03:35 redelman Exp $
+// 
 //------------------------------------------------------------------------------
-//   Copyright 2007-2008 Mentor Graphics Corporation
-//   Copyright 2007-2008 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -86,39 +87,6 @@ function void set_global_stop_timeout(time timeout);
   top = uvm_root::get();
   top.stop_timeout = timeout;
 endfunction
-
-
-// uvm_find_component (deprecated)
-// ------------------
-
-function uvm_component uvm_find_component (string comp_name);
-  uvm_root top;
-  static bit issued=0;
-  if (!issued) begin
-    issued=1;
-    uvm_report_warning("deprecated",
-      {"uvm_find_component() is deprecated and replaced by ",
-      "uvm_top.find(comp_name)"}, UVM_NONE);
-  end
-  top = uvm_root::get();
-  return top.find(comp_name);
-endfunction
-
-
-// uvm_print_topology (deprecated)
-// ------------------
-
-function void uvm_print_topology(uvm_printer printer=null);
-  static bit issued=0;
-  if (!issued) begin
-    issued=1;
-    uvm_report_warning("deprecated",
-      {"uvm_print_topology() is deprecated and replaced by ",
-      "uvm_top.print_topology()"}, UVM_NONE);
-  end
-  uvm_top.print_topology(printer);
-endfunction
-
 
 
 //----------------------------------------------------------------------------

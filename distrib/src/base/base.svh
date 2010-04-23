@@ -1,7 +1,7 @@
-// $Id: base.svh,v 1.25 2009/12/14 21:13:19 redelman Exp $
+//
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -22,8 +22,6 @@
 
 `ifndef UVM_BASE_SVH
 `define UVM_BASE_SVH
-
-  `const string s_deprecated_3_0 = "Deprecated in AVM 3.0 and later";
 
   // Miscellaneous classes and functions. uvm_void is defined in uvm_misc,
   // along with some auxillary functions that UVM needs but are not really
@@ -75,9 +73,5 @@
   `include "base/uvm_globals.svh"
 
   `include "base/uvm_extern_report_server.svh"
-
-  // for urm message compatibility. Must be included otherwise uvm_component will not compile
-  `include "compatibility/urm_message.sv"
-
 
 `endif // UVM_BASE_SVH

@@ -1,7 +1,7 @@
-// $Id: uvm_ports.svh,v 1.13 2009/10/30 15:29:22 jlrose Exp $
+//
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -71,7 +71,6 @@
 //|                uvm_component parent,
 //|                int min_size=1,
 //|                int max_size=1)
-
 
 class uvm_blocking_put_port #(type T=int)
   extends uvm_port_base #(uvm_tlm_if_base #(T,T));

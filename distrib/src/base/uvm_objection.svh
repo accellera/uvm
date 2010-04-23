@@ -1,6 +1,7 @@
+//
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corp.
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corp.
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -68,7 +69,6 @@ class uvm_objection extends uvm_report_object;
   // Internal method for reporting count updates
 
   function void m_report(uvm_object obj, uvm_object source_obj, int count, string action);
-    // workaround to array lookup in IUS?
     int _count = m_source_count.exists(obj) ? m_source_count[obj] : 0;
     int _total = m_total_count[obj];
     if (source_obj == obj)
