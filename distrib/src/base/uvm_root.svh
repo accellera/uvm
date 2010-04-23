@@ -1065,6 +1065,7 @@ endtask
 
 function void uvm_root::raised (uvm_objection objection, uvm_object source_obj, 
                               string description, int count);
+  if(objection != uvm_test_done_objection::get()) return;
   if (m_executing_stop_processes) begin
     string desc = description == "" ? "" : {" (\"", description, "\") "};
     uvm_report_warning("ILLRAISE", {"An uvm_test_done objection ", desc, "was raised during the execution of component stop processes for the stop_request. The objection is ignored by the stop process."}, UVM_NONE);
@@ -1080,6 +1081,7 @@ endfunction
 
 task uvm_root::all_dropped (uvm_objection objection, uvm_object source_obj, 
                           string description, int count);
+  if(objection != uvm_test_done_objection::get()) return;
   m_objections_outstanding = 0;
 endtask
 

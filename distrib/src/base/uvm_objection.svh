@@ -22,11 +22,35 @@
 `ifndef UVM_OBJECTION_SVH
 `define UVM_OBJECTION_SVH
 
-//Assumes access to uvm via an import of uvm_pkg or `include of uvm.svh
-
 typedef class uvm_objection;
 typedef class uvm_sequence_base;
+typedef class uvm_objection_cb;
+typedef uvm_callbacks #(uvm_objection,uvm_objection_cb) uvm_objection_cbs_t;
 
+
+//------------------------------------------------------------------------------
+//
+// Class: uvm_objection_cb
+//
+//------------------------------------------------------------------------------
+// This class allows for external consumers to attach to the various
+// objection callbacks, <uvm_objection::raised>, <uvm_objection::dropped> and 
+// <uvm_objection::all_dropped>.
+
+class uvm_objection_cb extends uvm_callback;
+  function new(string name);
+    super.new(name);
+  endfunction
+  virtual function void raised (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+  endfunction
+  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+  endfunction
+  virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+  endtask
+endclass
 
 //------------------------------------------------------------------------------
 //
@@ -48,6 +72,9 @@ typedef class uvm_sequence_base;
 //------------------------------------------------------------------------------
 
 class uvm_objection extends uvm_report_object;
+  static protected uvm_objection_cbs_t m_global_cbs = uvm_objection_cbs_t::get_global_cbs();
+  protected uvm_objection_cbs_t::queue_t m_cb_q;
+
   protected bit  m_trace_mode=0;
 
   protected int  m_source_count[uvm_object];
@@ -67,6 +94,7 @@ class uvm_objection extends uvm_report_object;
 
   function new(string name="");
     super.new(name);
+    m_cb_q = m_global_cbs.get(this);
     set_report_verbosity_level(top.get_report_verbosity_level());
 
     // Get the command line trace mode setting
@@ -471,9 +499,15 @@ class uvm_objection extends uvm_report_object;
 
   virtual function void raised (uvm_object obj, uvm_object source_obj, 
       string description, int count);
+    uvm_objection_cb cb;
     uvm_component comp;
     if ($cast(comp,obj))    
       comp.raised(this, source_obj, description, count);
+    for(int i=0; i<m_cb_q.size(); ++i) begin
+      cb = m_cb_q.get(i);
+      if(cb.is_enabled())
+        cb.raised(obj,source_obj,description,count);
+    end
   endfunction
 
 
@@ -484,9 +518,15 @@ class uvm_objection extends uvm_report_object;
 
   virtual function void dropped (uvm_object obj, uvm_object source_obj, 
       string description, int count);
+    uvm_objection_cb cb;
     uvm_component comp;
     if($cast(comp,obj))    
       comp.dropped(this, source_obj, description, count);
+    for(int i=0; i<m_cb_q.size(); ++i) begin
+      cb = m_cb_q.get(i);
+      if(cb.is_enabled())
+        cb.dropped(obj,source_obj,description,count);
+    end
   endfunction
 
 
@@ -499,9 +539,15 @@ class uvm_objection extends uvm_report_object;
 
   virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
       string description, int count);
+    uvm_objection_cb cb;
     uvm_component comp;
     if($cast(comp,obj))    
       comp.all_dropped(this, source_obj, description, count);
+    for(int i=0; i<m_cb_q.size(); ++i) begin
+      cb = m_cb_q.get(i);
+      if(cb.is_enabled())
+        cb.all_dropped(obj,source_obj,description,count);
+    end
   endtask
 
 

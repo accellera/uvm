@@ -44,6 +44,7 @@ module top;
     function new(string name, uvm_component parent);
       super.new(name,parent);
       tc = new("tc", this);
+      uvm_top.set_report_id_action_hier("TIMOUT", UVM_NO_ACTION);
     endfunction
     function void report();
       if($time == 33ms) $display("** UVM TEST PASSED **");
@@ -54,6 +55,7 @@ module top;
   initial run_test("test");
 
   initial begin
+    
     //safety check
     #34ms  $display("** UVM TEST FAILED **");
   end

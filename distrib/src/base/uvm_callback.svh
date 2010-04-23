@@ -71,7 +71,6 @@
 //------------------------------------------------------------------------------
 
 class uvm_callbacks #(type T=int, CB=int) extends uvm_pool #(T,uvm_queue #(CB));
-
   // Parameter: T
   //
   // This type parameter specifies the base object type with which the
