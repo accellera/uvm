@@ -58,7 +58,7 @@ class uvm_heartbeat extends uvm_object;
   protected uvm_component   m_hblist[$];
   protected uvm_event       m_event=null;
   protected bit             m_started=0;
-  protected bit             m_stopped=0;
+  protected event           m_stop_event;
 
   // Function: new
   //
@@ -168,7 +168,7 @@ class uvm_heartbeat extends uvm_object;
         UVM_NONE);
       return;
     end
-    if(m_event != null && e != m_event && m_started) begin
+    if((m_event != null) && (e != m_event) && m_started) begin
       m_cntxt.uvm_report_error("ILHBVNT", { "start() was called for: ",
         get_name(), " with trigger ", e.get_name(), " which is different ",
         "from the original trigger ", m_event.get_name() }, UVM_NONE);
@@ -186,28 +186,26 @@ class uvm_heartbeat extends uvm_object;
   // event trigger to start the monitoring.
 
   function void stop ();
-    m_stopped = 1;
+    m_started = 0;
+    ->m_stop_event;
     m_disable_cb();
   endfunction
 
   function void m_start_hb_process();
     if(m_started) return;
-    m_stopped = 0;
+    m_started = 1;
     fork
       m_hb_process;
     join_none
-    m_started = 1;
   endfunction
 
   function void m_enable_cb;
-    bit found = 0;
+    static bit added = 0;
     m_cb.callback_mode(1);
     m_cb_q = m_global_cbs.get(m_objection);
-    for(int i=0; i<m_cb_q.size(); ++i) begin
-      if(m_cb_q.get(i) == m_cb) found = 1;
-    end
-    if(!found) 
+    if(!added) 
       m_global_cbs.add_cb(m_objection, m_cb);
+    added = 1;
   endfunction
 
   function void m_disable_cb;
@@ -220,6 +218,9 @@ class uvm_heartbeat extends uvm_object;
     time last_trigger=0;
     fork
       begin
+        // The process waits for the event trigger. The first trigger is
+        // ignored, but sets the first start window. On susequent triggers
+        // the monitor tests that the mode criteria was full-filled.
         while(1) begin
           m_event.wait_trigger();
           if(triggered) begin
@@ -237,11 +238,11 @@ class uvm_heartbeat extends uvm_object;
                 end 
               UVM_ANY_ACTIVE:              
                 begin
-                  if(!m_cb.objects_triggered()) begin
+                  if(m_cb.cnt.num() && !m_cb.objects_triggered()) begin
                     string s;
                     foreach(m_cb.cnt[idx]) begin
                       obj = idx;
-                      s={s,"\n",obj.get_full_name()};
+                      s={s,"\n  ",obj.get_full_name()};
                     end
                     m_cntxt.uvm_report_fatal("HBFAIL", $sformatf("Did not recieve an update of %s on any component since last event trigger at time %0t. The list of registered components is:%s",
                       m_objection.get_name(), last_trigger, s), UVM_NONE); 
@@ -249,13 +250,23 @@ class uvm_heartbeat extends uvm_object;
                 end 
               UVM_ONE_ACTIVE:              
                 begin
-                  if(m_cb.objects_triggered() != 1) begin
+                  if(m_cb.objects_triggered() > 1) begin
                     string s;
                     foreach(m_cb.cnt[idx])  begin
                       obj = idx;
-                      if(m_cb.cnt[obj]) s={s,"\n",obj.get_full_name()};
+                      if(m_cb.cnt[obj]) $swrite(s,"%s\n  %s (updated: %0t)",
+                         s, obj.get_full_name(), m_cb.last_trigger[obj]);
                     end
                     m_cntxt.uvm_report_fatal("HBFAIL", $sformatf("Recieved update of %s from more than one component since last event trigger at time %0t. The list of triggered components is:%s",
+                      m_objection.get_name(), last_trigger, s), UVM_NONE); 
+                  end
+                  if(m_cb.cnt.num() && !m_cb.objects_triggered()) begin
+                    string s;
+                    foreach(m_cb.cnt[idx]) begin
+                      obj = idx;
+                      s={s,"\n  ",obj.get_full_name()};
+                    end
+                    m_cntxt.uvm_report_fatal("HBFAIL", $sformatf("Did not recieve an update of %s on any component since last event trigger at time %0t. The list of registered components is:%s",
                       m_objection.get_name(), last_trigger, s), UVM_NONE); 
                   end
                 end 
@@ -266,10 +277,9 @@ class uvm_heartbeat extends uvm_object;
           triggered = 1;
         end
       end
-      wait(m_stopped == 1);
+      @(m_stop_event);
     join_any
     disable fork;
-    m_started = 0;
   endtask
 endclass
 
