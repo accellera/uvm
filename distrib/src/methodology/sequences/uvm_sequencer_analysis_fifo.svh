@@ -20,9 +20,9 @@
 //----------------------------------------------------------------------
 
 
-class sequencer_analysis_fifo #(type RSP = uvm_sequence_item) extends uvm_tlm_fifo #(RSP);
+class uvm_sequencer_analysis_fifo #(type RSP = uvm_sequence_item) extends uvm_tlm_fifo #(RSP);
 
-  uvm_analysis_imp #(RSP, sequencer_analysis_fifo #(RSP)) analysis_export;
+  uvm_analysis_imp #(RSP, uvm_sequencer_analysis_fifo #(RSP)) analysis_export;
   uvm_sequencer_base sequencer_ptr;
 
   function new (string name, uvm_component parent = null);

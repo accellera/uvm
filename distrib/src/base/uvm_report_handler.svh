@@ -597,7 +597,7 @@ endclass : uvm_report_handler
 
 //------------------------------------------------------------------------------
 
-class default_report_server;
+class uvm_default_report_server;
 
   uvm_report_global_server glob;
 

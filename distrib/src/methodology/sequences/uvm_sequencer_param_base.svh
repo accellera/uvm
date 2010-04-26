@@ -65,7 +65,7 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   uvm_analysis_export #(RSP) rsp_export;
 
 
-  sequencer_analysis_fifo #(RSP) sqr_rsp_analysis_fifo;
+  uvm_sequencer_analysis_fifo #(RSP) sqr_rsp_analysis_fifo;
 
   // Variable- m_req_fifo
   //
