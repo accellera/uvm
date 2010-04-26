@@ -27,6 +27,72 @@
 // Group: Callback Macros
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+// MACRO: `uvm_register_cb
+//
+// Registers the given ~CB~ callback type with the given ~T~ object type. If
+// a type-callback pair is not registered then a warning is issued if an
+// attempt is made to use the pair (add, delete, etc.).
+//
+// The registration will typically occur in the component that executes the
+// given type of callback. For instance:
+//
+//| virtual class mycb;
+//|   virtual function void doit();
+//| endclass
+//|
+//| class my_comp extends uvm_component;
+//|   `uvm_register_cb(my_comp,mycb)
+//|   ...
+//|   task run;
+//|     ...
+//|     `uvm_do_callbacks(mycb, my_comp, doit())
+//|   endtask
+//| endclass
+//-----------------------------------------------------------------------------
+
+`define uvm_register_cb(T,CB) \
+  static local bit m_register_cb_``CB = uvm_callbacks#(T,CB)::register_pair();
+
+
+//-----------------------------------------------------------------------------
+// MACRO: `uvm_register_derived_cb
+//
+// Maps the callback queue for the ~CB~-~T~ pair to the queue for the super
+// types. This is needed for cases where a derived class and its super
+// class are sharing callback types and callbacks registered to the 
+// derived class need to be able to run on the super class. When using
+// this registration.
+//
+// The registration will typically occur in the component that executes the
+// given type of callback. For instance:
+//
+//| virtual class mycb;
+//|   virtual function void doit();
+//| endclass
+//|
+//| class my_comp extends uvm_component;
+//|   `uvm_register_cb(my_comp,mycb)
+//|   ...
+//|   task run;
+//|     ...
+//|     `uvm_do_callbacks(mycb, my_comp, doit())
+//|   endtask
+//| endclass
+//|
+//| class my_derived_comp extends my_comp;
+//|   `uvm_register_derived_cb(my_derived_comp,mycb,my_comp,mycb)
+//|   ...
+//|   task run;
+//|     ...
+//|     `uvm_do_callbacks(mycb, my_comp, doit())
+//|   endtask
+//| endclass
+//-----------------------------------------------------------------------------
+
+`define uvm_register_derived_cb(T,CB,ST,SCB) \
+  static local bit m_register_cb_``CB = uvm_callbacks#(T,CB,ST,SCB)::register_derived_pair();
+
 
 //-----------------------------------------------------------------------------
 // MACRO: `uvm_do_callbacks
@@ -82,17 +148,11 @@
 
 `define uvm_do_obj_callbacks(CB,T,OBJ,METHOD_CALL) \
    begin \
-     uvm_callbacks #(T,CB) cbs = uvm_callbacks #(T,CB)::get_global_cbs(); \
-     uvm_queue #(CB) cbq; \
-     if (!cbs.exists(OBJ)) \
-       return; \
-     /* Make a copy of the queue in case the user tries changing the queue */ \
-     /* inside the callback. For example, for a one-shot callback. */ \
-     cbq = cbs.get(OBJ); \
-     cbq = new cbq; \
-     for (int i=0; i<cbq.size();i++) begin \
-       CB cb = cbq.get(i); \
-       if (cb.is_enabled()) \
+     int iter; \
+     CB cb; \
+     for(cb = uvm_callbacks#(T,CB)::get_first_cb(iter,OBJ); \
+       cb != null; cb = uvm_callbacks#(T,CB)::get_next_cb(iter,OBJ) ) \
+     begin \
          cb.METHOD_CALL; \
      end \
    end
@@ -157,14 +217,12 @@
 
 `define uvm_do_obj_callbacks_exit_on(CB,T,OBJ,METHOD_CALL,VAL) \
    begin \
-     uvm_callbacks #(T,CB) cbs = uvm_callbacks #(T,CB)::get_global_cbs(); \
-     uvm_queue #(CB) cbq; \
-     if (!cbs.exists(OBJ)) \
-       return 1-VAL; \
-     cbq = cbs.get(OBJ); \
-     for (int i=0; i<cbq.size();i++) begin \
-       CB cb = cbq.get(i); \
-       if (cb.is_enabled() && cb.METHOD_CALL == VAL) \
+     int iter; \
+     CB cb; \
+     for(cb = uvm_callbacks#(T,CB)::get_first_cb(iter,OBJ); \
+       cb != null; cb = uvm_callbacks#(T,CB)::get_next_cb(iter,OBJ) ) \
+     begin \
+       if (cb.METHOD_CALL == VAL) \
          return VAL; \
      end \
      return 1-VAL; \

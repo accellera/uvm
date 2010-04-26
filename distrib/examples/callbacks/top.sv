@@ -252,6 +252,8 @@ endclass
 //------------------------------------------------------------------------------
 
 module top;
+  import uvm_pkg::*;
+  import bus_driver_pkg::*;
 
   bus_tr            tr     = new;
   bus_driver        driver = new("driver");

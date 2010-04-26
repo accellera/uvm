@@ -1,4 +1,4 @@
-// $Id: uvm_report_object.svh,v 1.30 2010/03/16 23:56:02 redelman Exp $
+//
 //------------------------------------------------------------------------------
 //   Copyright 2007-2009 Mentor Graphics Corporation
 //   Copyright 2007-2009 Cadence Design Systems, Inc. 
@@ -78,7 +78,7 @@ typedef class uvm_root;
 //
 //------------------------------------------------------------------------------
 
-virtual class uvm_report_object extends uvm_object;
+class uvm_report_object extends uvm_object;
 
   uvm_report_handler m_rh;
 
