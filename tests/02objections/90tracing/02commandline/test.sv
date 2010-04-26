@@ -7,19 +7,18 @@ module top;
   `include "uvm_macros.svh"
 
   class my_catcher extends uvm_report_catcher;
+     static int msg_cnt = 0;
      int id_cnt[string];
-     int msg_cnt[string];
      int client_cnt[uvm_report_object];
      virtual function action_e catch();
         if(get_id()!="OBJTN_TRC") return THROW;
         if(!id_cnt.exists(get_id())) id_cnt[get_id()] = 0;
         id_cnt[get_id()]++;
 
-        if(!msg_cnt.exists(get_message())) msg_cnt[get_message()] = 0;
-        msg_cnt[get_message()]++;
-
         if(!client_cnt.exists(get_client())) client_cnt[get_client()] = 0;
         client_cnt[get_client()]++;
+        issue();
+        msg_cnt++;
         return CAUGHT;
      endfunction
   endclass
@@ -78,15 +77,10 @@ module top;
     endfunction
 
     function void report();
-      int msg_cnt=0, cli_cnt=0;
-      string s = "Object uvm_test_top.tc.mc dropped 1 objection(s), count=2  total=6";
+      int cli_cnt=0;
 
       foreach(ctchr.id_cnt[idx]) begin
         $display("ID: %0s : %0d", idx, ctchr.id_cnt[idx]);
-      end
-      foreach(ctchr.msg_cnt[idx]) begin
-        $display("MSG: %0s : %0d", idx, ctchr.msg_cnt[idx]);
-        msg_cnt += ctchr.msg_cnt[idx];
       end
       foreach(ctchr.client_cnt[idx]) begin
         uvm_report_object obj = idx;
@@ -94,19 +88,18 @@ module top;
         cli_cnt += ctchr.client_cnt[idx];
       end
       if(ctchr.id_cnt["OBJTN_TRC"] != 148) begin
-        $display("** UVM TEST FAILED **");
+        $display("** UVM TEST FAILED ** Saw %0d OBJTN_TRC messages instead of 148", ctchr.id_cnt["OBJTN_TRC"]);
         return;
       end
-      if(msg_cnt != 148 || cli_cnt != 148) begin
-        $display("** UVM TEST FAILED **");
+      if(my_catcher::msg_cnt != 148) begin
+        $display("** UVM TEST FAILED ** Saw %0d messages instead of 148", my_catcher::msg_cnt);
         return;
       end
-      //pick an arbitrary message to look at
-      if(ctchr.msg_cnt[s] != 1) 
-      begin
-        $display("** UVM TEST FAILED **");
+      if(cli_cnt != 148) begin
+        $display("** UVM TEST FAILED ** Saw %0d clients instead of 148", cli_cnt);
         return;
       end
+
       $display("** UVM TEST PASSED **");
     endfunction
 
