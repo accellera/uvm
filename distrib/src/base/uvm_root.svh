@@ -1063,6 +1063,7 @@ endtask
 //
 //
 
+typedef class uvm_test_done_objection;
 function void uvm_root::raised (uvm_objection objection, uvm_object source_obj, 
                               string description, int count);
   if(objection != uvm_test_done_objection::get()) return;

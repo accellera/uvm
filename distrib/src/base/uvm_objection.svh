@@ -73,7 +73,7 @@ endclass
 
 class uvm_objection extends uvm_report_object;
   static protected uvm_objection_cbs_t m_global_cbs = uvm_objection_cbs_t::get_global_cbs();
-  protected uvm_objection_cbs_t::queue_t m_cb_q;
+  protected uvm_queue#(uvm_objection_cb) m_cb_q;
 
   protected bit  m_trace_mode=0;
 

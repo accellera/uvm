@@ -89,7 +89,7 @@ class uvm_callbacks #(type T=int, CB=int) extends uvm_pool #(T,uvm_queue #(CB));
 
   static uvm_reporter reporter = new("cb_tracer");
 
-  `uvm_object_param_utils(this_type)
+  // `uvm_object_param_utils(this_type)
 
   // Function: new
   //
