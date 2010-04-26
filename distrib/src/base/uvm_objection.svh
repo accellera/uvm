@@ -290,6 +290,11 @@ class uvm_objection extends uvm_report_object;
       m_report(obj,source_obj,description,count,"raised");
 
     raised(obj, source_obj, description, count);
+    for(int i=0; i<m_cb_q.size(); ++i) begin
+      uvm_objection_cb cb = m_cb_q.get(i);
+      if(cb.is_enabled())
+        cb.raised(obj,source_obj,description,count);
+    end
 
     // If this object is still draining from a previous drop, then
     // raise the count and return. Any propagation will be handled
@@ -401,6 +406,11 @@ class uvm_objection extends uvm_report_object;
       m_report(obj,source_obj,description,count,"dropped");
     
     dropped(obj, source_obj, description, count);
+    for(int i=0; i<m_cb_q.size(); ++i) begin
+      uvm_objection_cb cb = m_cb_q.get(i);
+      if(cb.is_enabled())
+        cb.dropped(obj,source_obj,description,count);
+    end
   
     // if count != 0, no reason to fork
     if (m_total_count[obj] != 0) begin
@@ -431,6 +441,11 @@ class uvm_objection extends uvm_report_object;
                      m_report(obj,source_obj,description,count,"all_dropped");
     
                   all_dropped(obj,source_obj,description, count);
+                  for(int i=0; i<m_cb_q.size(); ++i) begin
+	            uvm_objection_cb cb = m_cb_q.get(i);
+                    if(cb.is_enabled())
+                      cb.all_dropped(obj,source_obj,description,count);
+                  end
   
                   // wait for all_dropped cbs to complete
                   wait fork;
@@ -499,15 +514,9 @@ class uvm_objection extends uvm_report_object;
 
   virtual function void raised (uvm_object obj, uvm_object source_obj, 
       string description, int count);
-    uvm_objection_cb cb;
     uvm_component comp;
     if ($cast(comp,obj))    
       comp.raised(this, source_obj, description, count);
-    for(int i=0; i<m_cb_q.size(); ++i) begin
-      cb = m_cb_q.get(i);
-      if(cb.is_enabled())
-        cb.raised(obj,source_obj,description,count);
-    end
   endfunction
 
 
@@ -518,15 +527,9 @@ class uvm_objection extends uvm_report_object;
 
   virtual function void dropped (uvm_object obj, uvm_object source_obj, 
       string description, int count);
-    uvm_objection_cb cb;
     uvm_component comp;
     if($cast(comp,obj))    
       comp.dropped(this, source_obj, description, count);
-    for(int i=0; i<m_cb_q.size(); ++i) begin
-      cb = m_cb_q.get(i);
-      if(cb.is_enabled())
-        cb.dropped(obj,source_obj,description,count);
-    end
   endfunction
 
 
@@ -539,15 +542,9 @@ class uvm_objection extends uvm_report_object;
 
   virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
       string description, int count);
-    uvm_objection_cb cb;
     uvm_component comp;
     if($cast(comp,obj))    
       comp.all_dropped(this, source_obj, description, count);
-    for(int i=0; i<m_cb_q.size(); ++i) begin
-      cb = m_cb_q.get(i);
-      if(cb.is_enabled())
-        cb.all_dropped(obj,source_obj,description,count);
-    end
   endtask
 
 
