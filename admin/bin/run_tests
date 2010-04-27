@@ -205,6 +205,7 @@ sub run_one_test {
      
      print "<running>\n" if $opt_v;
 
+     $comp_args = "";
      if (-e "$testdir/$tool.comp.args") {
        if (!open(ARGS, "< $testdir/$tool.comp.args")) {
 	 print "**FAIL** (Cannot read $tool.comp.args)\n";
@@ -217,11 +218,11 @@ sub run_one_test {
        close(ARGS);
      }
 
+     $defs = "";
      if (-e "$testdir/test.defines") {
        if (!open(ARGS, "< $testdir/test.defines")) {
 	 print "**FAIL** (Cannot read test.defines)\n";
        }
-       $defss = "";
        while ($_ = <ARGS>) {
          chomp;
          $defs .= " $_";
@@ -229,11 +230,11 @@ sub run_one_test {
        close(ARGS);
      }
 
+     $run_args = "";
      if (-e "$testdir/$tool.run.args") {
        if (!open(ARGS, "< $testdir/$tool.run.args")) {
 	 print "**FAIL** (Cannot read $tool.run.args)\n";
        }
-       $run_args = "";
        while ($_ = <ARGS>) {
          chomp;
          $run_args .= " $_";
@@ -241,11 +242,11 @@ sub run_one_test {
        close(ARGS);
      }
 
+     $plusargs = "";
      if (-e "$testdir/test.plusargs") {
        if (!open(ARGS, "< $testdir/test.plusargs")) {
 	 print "**FAIL** (Cannot read test.plusargs)\n";
        }
-       $plusargs = "";
        while ($_ = <ARGS>) {
          chomp;
          $plusargs .= " $_";
