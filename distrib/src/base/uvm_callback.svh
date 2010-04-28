@@ -634,7 +634,6 @@ class uvm_callback_iter#(type CB = int, type T = int);
    function CB first();
       if (m_obj == null) return null;
       m_cb = uvm_callbacks#(T,CB)::get_first(m_i, m_obj);
-$display("GOT FIRST: %0d", m_cb);
       return m_cb;
    endfunction
 
