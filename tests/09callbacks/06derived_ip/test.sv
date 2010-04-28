@@ -36,6 +36,7 @@ module test;
       uvm_top.stop_request();
 
     endtask
+  endclass 
 
   class mycb extends cb_base;
     `uvm_object_utils(mycb)

@@ -216,8 +216,8 @@ class uvm_callbacks #(type T=uvm_object, CB=uvm_callback, ST=uvm_object)
   // callback queue accessing all of the enabled callbacks:
   //
   //| int iter;
-  //| for (mycb cb = uvm_callbacks#(mytype,mycb)::get_first_cb(iter,this);
-  //|           cb != null; cb = uvm_callbacks#(mytype,mycb)::get_next_cb(iter,this))
+  //| for (mycb cb = uvm_callbacks#(mytype,mycb)::get_first(iter,this);
+  //|           cb != null; cb = uvm_callbacks#(mytype,mycb)::get_next(iter,this))
   //|   begin
   //|     cb.do_cb_function();
   //|   end
@@ -268,14 +268,14 @@ class uvm_callbacks #(type T=uvm_object, CB=uvm_callback, ST=uvm_object)
   endfunction
 
 
-  //Function: get_first_cb
+  //Function: get_first
   //
   //Returns the first enabled callback of type ~CB~ (or derivative) that lives
   //in the callback queue. If no callback is found then null is returned.
   //The ~iter~ object is set to the location in the queue where the callback
   //was found. 
 
-  static function CB get_first_cb(ref int iter, input T obj);
+  static function CB get_first(ref int iter, input T obj);
     uvm_callback cb;
     CB scb;
     generic_queue_t q = m_inst.m_pool.get(obj);
@@ -291,14 +291,14 @@ class uvm_callbacks #(type T=uvm_object, CB=uvm_callback, ST=uvm_object)
   endfunction
 
 
-  //Function: get_next_cb
+  //Function: get_next
   //
   //Returns the next enabled callback of type ~CB~ (or derivative) that lives
   //in the callback queue using ~iter~ as the starting point for the search. 
   //If no callback is found then null is returned. The ~iter~ object is set to the 
   //location in the queue where the callback was found. 
 
-  static function CB get_next_cb(ref int iter, input T obj);
+  static function CB get_next(ref int iter, input T obj);
     uvm_callback cb;
     CB scb;
     generic_queue_t q = m_inst.m_pool.get(obj);
@@ -584,6 +584,97 @@ class uvm_callbacks #(type T=uvm_object, CB=uvm_callback, ST=uvm_object)
   endfunction
   
 endclass
+
+
+//------------------------------------------------------------------------------
+// CLASS: uvm_callback_iter
+//
+// The ~uvm_callback_iter~ class is an iterator class for iterating over
+// callback queues of a specific callback type. The typical usage of
+// the class is:
+//
+//| uvm_callback_iter#(mycb,mycomp) iter = new(this);
+//| for(mycb cb = iter.first(); cb != null; cb = iter.next())
+//|    cb.dosomething();
+//
+//------------------------------------------------------------------------------
+
+class uvm_callback_iter#(type CB = int, type T = int);
+
+   local int m_i;
+   local T   m_obj;
+   local CB  m_cb;
+
+   // Function: new
+   //
+   // Creates a new callback iterator object. It is required that the object
+   // context be provided.
+
+   function new(T obj);
+//Why is this required? Shouldn't users be allowed to iterate over
+//typewide callbacks?
+      if (obj == null) begin
+         uvm_top.uvm_report_error("CALLBACK", "Cannot create iterator without a context object", UVM_LOW);
+         m_cb = null;
+         return;
+      end
+    
+      m_obj = obj;
+      void'(first());  //For valid get_cb(). Should we really do this? this would
+                       //mean that calling next() without calling first() will
+                       //provide a real callback, just the wrong one.
+   endfunction
+
+   // Function: first
+   //
+   // Returns the first valid (enabled) callback of the callback type (or
+   // a derivative) that is in the queue of the context object. If the
+   // queue is empty then null is returned.
+
+   function CB first();
+      if (m_obj == null) return null;
+      m_cb = uvm_callbacks#(T,CB)::get_first(m_i, m_obj);
+$display("GOT FIRST: %0d", m_cb);
+      return m_cb;
+   endfunction
+
+   // Function: next
+   //
+   // Returns the first valid (enabled) callback of the callback type (or
+   // a derivative) that is in the queue of the context object. If the
+   // queue is empty then null is returned.
+
+   function CB next();
+      if (m_obj == null) return null;
+      m_cb = uvm_callbacks#(T,CB)::get_next(m_i, m_obj);
+      return m_cb;
+   endfunction
+
+   // Function: get_cb
+   //
+   // Returns the last callback accessed via a first() or next()
+   // call. 
+
+   function CB get_cb();
+      return m_cb;
+   endfunction
+
+/****
+   function void trace(uvm_object obj = null);
+      if (m_cb != null && T::cbs::get_debug_flags() & UVM_CALLBACK_TRACE) begin
+         uvm_report_object reporter = null;
+         string who = "Executing ";
+         void'($cast(reporter, obj));
+         if (reporter == null) void'($cast(reporter, m_obj));
+         if (reporter == null) reporter = uvm_top;
+         if (obj != null) who = {obj.get_full_name(), " is executing "};
+         else if (m_obj != null) who = {m_obj.get_full_name(), " is executing "};
+         reporter.uvm_report_info("CLLBK_TRC", {who, "callback ", m_cb.get_name()}, UVM_LOW);
+      end
+   endfunction
+****/
+endclass
+
 
 
 //------------------------------------------------------------------------------

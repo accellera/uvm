@@ -147,12 +147,11 @@
 
 `define uvm_do_obj_callbacks(CB,T,OBJ,METHOD_CALL) \
    begin \
-     int iter; \
-     CB cb; \
-     for(cb = uvm_callbacks#(T,CB)::get_first_cb(iter,OBJ); \
-       cb != null; cb = uvm_callbacks#(T,CB)::get_next_cb(iter,OBJ) ) \
-     begin \
-         cb.METHOD_CALL; \
+     uvm_callback_iter#(CB,T) iter = new(OBJ); \
+     CB cb = iter.first(); \
+     while(cb != null) begin \
+       cb.METHOD_CALL; \
+       cb = iter.next(); \
      end \
    end
 
@@ -216,13 +215,12 @@
 
 `define uvm_do_obj_callbacks_exit_on(CB,T,OBJ,METHOD_CALL,VAL) \
    begin \
-     int iter; \
-     CB cb; \
-     for(cb = uvm_callbacks#(T,CB)::get_first_cb(iter,OBJ); \
-       cb != null; cb = uvm_callbacks#(T,CB)::get_next_cb(iter,OBJ) ) \
-     begin \
+     uvm_callback_iter#(CB,T) iter = new(OBJ); \
+     CB cb = iter.first(); \
+     while(cb != null) begin \
        if (cb.METHOD_CALL == VAL) \
          return VAL; \
+       cb = iter.next(); \
      end \
      return 1-VAL; \
    end
@@ -267,15 +265,16 @@
 
 `define uvm_do_obj_task_callbacks(CB,T,OBJ,METHOD_CALL) \
   begin \
-     int iter; \
-     CB cb; \
      fork begin \
-       for(cb = uvm_callbacks#(T,CB)::get_first_cb(iter,OBJ); \
-         cb != null; cb = uvm_callbacks#(T,CB)::get_next_cb(iter,OBJ) ) \
-           fork begin \
-             `uvm_cb_trace(cb,OBJ,`"fork/join_none METHOD_CALL`") \
-             cb.METHOD_CALL; \
-           end join_none \
+       uvm_callback_iter#(CB,T) iter = new(OBJ); \
+       CB cb = iter.first(); \
+       while(cb != null) begin \
+         fork begin \
+           `uvm_cb_trace(cb,OBJ,`"fork/join_none METHOD_CALL`") \
+           cb.METHOD_CALL; \
+         end join_none \
+         cb = iter.next(); \
+       end \
        wait fork; \
      end join \
    end
