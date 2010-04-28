@@ -1,0 +1,20 @@
+
+Title: Synchronization Classes
+
+(see ovm_ref_sync.gif)
+
+The OVM provides event and barrier synchronization classes
+for managing concurrent processes. 
+
+- <ovm_event> - OVM's event class augments the SystemVerilog
+event datatype with such services as setting callbacks and data delivery.
+
+- <ovm_barrier> - A barrier is used to prevent a pre-configured number of
+processes from continuing until all have reached a certain point in simulation. 
+
+- <ovm_event_pool> and <ovm_barrier_pool> -
+The event and barrier pool classes are used to store collections of events and
+barriers, all indexed by string name.  Each pool class contains a static,
+"global" pool instance for sharing across all processes.
+
+

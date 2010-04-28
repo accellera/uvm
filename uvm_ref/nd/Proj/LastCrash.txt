@@ -1,0 +1,17 @@
+Crash Message:
+
+   Couldn't save menu file /u/aerickso/p4/all/ovm/docs/ovm_ref/nd/Proj/Menu.txt
+
+Natural Docs version Development Release 01-12-2008 (1.35 base)
+Perl version 5.8.5 on linux
+
+Command Line:
+
+   -do -ro -i ../../../src -i .. -img ./Images -p ./Proj -o FramedHTML ../../html
+
+Stack Trace:
+
+   NaturalDocs::Error::CatchDeath, called from
+   NaturalDocs::Menu::SaveMenuFile, line 977, called from
+   NaturalDocs::Menu::Save, line 499, called from
+   (eval), line 378 of /u/aerickso/p4/all/natural_docs/NaturalDocs

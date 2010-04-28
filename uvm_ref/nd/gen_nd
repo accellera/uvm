@@ -1,0 +1,83 @@
+#!/bin/csh
+
+#-------------------------------------------------------------------------------
+# This script runs Naturals Docs to generate the OVM Reference Documentation
+# from comments embedded in the OVM source.
+#
+# Before running, you must define the ND environment variable to point to the
+# NaturalDocs source tree. 
+#
+# > setenv ND /prod/3p/natural_docs
+# > ./gen_nd
+#
+# Before running NaturalDocs, this script will remove any existing html output
+# directory, which is fixed at $OVM_HOME/docs/html. It then copies the OVM logo,
+# banner, other gifs from the $ND source dir to the outdir. NaturalDocs will not
+# do this for us, as we've customized the page layout.
+#
+# Next, the script runs NaturalDocs proper, which requires that perl be in your
+# search PATH. The command line uses the following options: 
+#
+# -do  - include only source files that contain documentation
+#
+# -ro  - rebuild the output from scratch each time (this actually isn't needed
+#        since we delete any previously existing output before running
+#
+# -i   - sets the input directories from which to gather documentation,
+#        $OVM_HOME/src and $OVM_HOME/docs/ovm_ref. The latter directory
+#        contains various overview text files.
+#
+# -img - sets the directories from which to find the images referenced in the
+#        source documentation: (see <filename>.gif). We have one such input
+#        directory, ./Images
+#
+# -p   - sets the project directory into which the Menu.txt, Languages.txt,
+#        and Topics.txt files are written. Only the Menu.txt is of interest.
+#
+# -o   - sets the output directory into which self-contained HTML documentation
+#        is written. We choose to use the FramedHTML option so the menu is
+#        always present on the left hand side of the browser window.
+#
+# To learn more on these and other NatualDocs options, type 'perl NaturalDocs -h'
+# You can also visit naturaldocs.org.
+#
+# NaturalDocs will finish with an error if the Proj/* files are not writable.
+# That's OK if you have not added any source files with documentation and only
+# want to regenerate the HTML.
+#
+# If you have added source files with documentation, you will need to 'check out'
+# the Proj/Menu.txt file so that NaturalDocs can update it with initial entries
+# for each added file. You then edit the Menu.txt to move the entries to the
+# desired location in the menu. You should always "lock-in" the name of each
+# menu item by adding the 'no auto-title' option as shown in all current entries
+# in Menu.txt.
+#
+#
+#-------------------------------------------------------------------------------
+
+set nd_dir = $ND;
+set outdir = ../../distrib/docs/html
+
+echo "Output dir is $outdir"
+
+
+rm -rf $outdir
+
+mkdir -p $outdir/images
+
+
+cp -r $nd_dir/images/b* $outdir/images
+cp -r $nd_dir/images/logo* $outdir/images
+cp    $nd_dir/logo.html $outdir
+
+# Run ND
+
+perl $nd_dir/NaturalDocs \
+  -do \
+  -ro \
+  -i ../../distrib/src \
+  -i .. \
+  -img ./Images \
+  -p ./Proj \
+  -o FramedHTML $outdir
+
