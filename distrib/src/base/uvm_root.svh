@@ -1189,7 +1189,6 @@ function void uvm_root::find_all(string comp_match, ref uvm_component comps[$],
       this.find_all(comp_match,comps,comp.get_child(name));
     end
     while (comp.get_next_child(name));
-
   if (uvm_is_match(comp_match, comp.get_full_name()) &&
        comp.get_name() != "") /* uvm_top */
     comps.push_back(comp);

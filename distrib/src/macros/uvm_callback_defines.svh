@@ -61,8 +61,7 @@
 // Maps the callback queue for the ~CB~-~T~ pair to the queue for the super
 // types. This is needed for cases where a derived class and its super
 // class are sharing callback types and callbacks registered to the 
-// derived class need to be able to run on the super class. When using
-// this registration.
+// derived class need to be able to run on the super class. 
 //
 // The registration will typically occur in the component that executes the
 // given type of callback. For instance:
@@ -81,7 +80,7 @@
 //| endclass
 //|
 //| class my_derived_comp extends my_comp;
-//|   `uvm_register_derived_cb(my_derived_comp,mycb,my_comp,mycb)
+//|   `uvm_register_derived_cb(my_derived_comp,mycb,my_comp)
 //|   ...
 //|   task run;
 //|     ...
@@ -90,8 +89,8 @@
 //| endclass
 //-----------------------------------------------------------------------------
 
-`define uvm_register_derived_cb(T,CB,ST,SCB) \
-  static local bit m_register_cb_``CB = uvm_callbacks#(T,CB,ST,SCB)::register_derived_pair();
+`define uvm_register_derived_cb(T,CB,ST) \
+  static local bit m_register_cb_``T``CB``ST = uvm_callbacks#(T,CB,ST)::register_derived_pair(); 
 
 
 //-----------------------------------------------------------------------------
@@ -238,7 +237,9 @@
 // This macro is the same as the <uvm_do_callbacks> macro except that each
 // callback is executed inside of its own thread. The threads are concurrent,
 // but the execution order of the threads is simulator dependent. The macro
-// does not return until all forked callbacks have completed.
+// does not return until all forked callbacks have completed. To have all
+// of the tasks run sequentially (i.e. not in their own parallel threads),
+// the <uvm_do_callbacks> macro should be used.
 //
 //| virtual class mycb extends uvm_cb;
 //|   pure task my_task(mycomp, int addr, int data);
@@ -266,23 +267,17 @@
 
 `define uvm_do_obj_task_callbacks(CB,T,OBJ,METHOD_CALL) \
   begin \
-     uvm_callbacks #(T,CB) cbs = uvm_callbacks #(T,CB)::get_global_cbs(); \
-     uvm_queue #(CB) cbq; \
-     if (cbs.exists(OBJ)) begin\
-       cbq = cbs.get(OBJ); \
-       fork begin \
-         for (int i=0; i<cbq.size();i++) begin \
-           CB cb = cbq.get(i); \
-           if (cb.is_enabled()) begin \
-             fork begin \
-               `uvm_cb_trace(cb,OBJ,`"fork/join_none METHOD_CALL`") \
-               cb.METHOD_CALL; \
-             end join_none \
-           end \
-         end \
-         wait fork; \
-       end join \
-     end \
+     int iter; \
+     CB cb; \
+     fork begin \
+       for(cb = uvm_callbacks#(T,CB)::get_first_cb(iter,OBJ); \
+         cb != null; cb = uvm_callbacks#(T,CB)::get_next_cb(iter,OBJ) ) \
+           fork begin \
+             `uvm_cb_trace(cb,OBJ,`"fork/join_none METHOD_CALL`") \
+             cb.METHOD_CALL; \
+           end join_none \
+       wait fork; \
+     end join \
    end
 
 
