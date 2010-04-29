@@ -249,6 +249,7 @@ sub run_one_test {
        if (!open(ARGS, "< $testdir/test.plusargs")) {
 	 print "**FAIL** (Cannot read test.plusargs)\n";
        }
+       $plusargs = "";
        while ($_ = <ARGS>) {
          chomp;
          $plusargs .= " $_";
