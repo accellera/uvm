@@ -106,7 +106,7 @@ class uvm_callbacks #(type T=uvm_object, CB=uvm_callback, ST=uvm_object)
   // Setup the singleton instance. The facade uses the static interface, so
   // the singleton object is intended just for the internal functions. The
   // instance is type-unsafe so type checking is done dynamically.
-  static generic_type m_inst = get_inst();
+  static generic_type m_inst;
   static function generic_type get_inst();
     if(m_inst == null) begin
       m_inst = new;

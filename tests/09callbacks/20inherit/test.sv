@@ -1,0 +1,383 @@
+//----------------------------------------------------------------------
+//   Copyright 2010 Synopsys, Inc. 
+//   All Rights Reserved Worldwide 
+// 
+//   Licensed under the Apache License, Version 2.0 (the 
+//   "License"); you may not use this file except in 
+//   compliance with the License.  You may obtain a copy of 
+//   the License at 
+// 
+//       http://www.apache.org/licenses/LICENSE-2.0 
+// 
+//   Unless required by applicable law or agreed to in 
+//   writing, software distributed under the License is 
+//   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+//   CONDITIONS OF ANY KIND, either express or implied.  See 
+//   the License for the specific language governing 
+//   permissions and limitations under the License. 
+//----------------------------------------------------------------------
+
+
+//
+// Test that inherited callback classes are properly executed
+// by inherited components
+//
+
+program top;
+
+import uvm_pkg::*;
+
+virtual class base_cb extends uvm_callback;
+   function new(string name = "base_cb");
+      super.new(name);
+   endfunction
+
+   virtual function void base_f(ref string q[$]);
+   endfunction
+endclass
+
+
+virtual class a_cb extends base_cb;
+   function new(string name = "a_cb");
+      super.new(name);
+   endfunction
+
+   virtual function void a_f(ref string q[$]);
+   endfunction
+endclass
+
+
+virtual class b_cb extends base_cb;
+   function new(string name = "b_cb");
+      super.new(name);
+   endfunction
+
+   virtual function void b_f(ref string q[$]);
+   endfunction
+endclass
+
+
+virtual class ax_cb extends a_cb;
+   function new(string name = "ax_cb");
+      super.new(name);
+   endfunction
+
+   virtual function void ax_f(ref string q[$]);
+   endfunction
+endclass
+
+
+virtual class z_cb extends uvm_callback;
+   function new(string name = "z_cb");
+      super.new(name);
+   endfunction
+
+   virtual function void z_f(ref string q[$]);
+   endfunction
+endclass
+
+
+class base_comp extends uvm_component;
+   string q[$];
+
+   function new(string name = "base_comp", uvm_component parent = null);
+      super.new(name, parent);
+   endfunction
+
+   `uvm_component_utils(base_comp)
+   `uvm_register_cb(base_comp, base_cb)
+
+   virtual task run();
+      `uvm_do_callbacks(base_cb, base_comp, base_f(q))
+   endtask
+endclass
+
+
+class a_comp extends base_comp;
+   function new(string name = "a_comp", uvm_component parent = null);
+      super.new(name, parent);
+   endfunction
+
+   `uvm_component_utils(a_comp)
+   `uvm_register_cb(a_comp, a_cb)
+   `uvm_register_cb(a_comp, z_cb)
+
+   virtual task run();
+      super.run();
+      `uvm_do_callbacks(a_cb, a_comp, a_f(q))
+      `uvm_do_callbacks(z_cb, a_comp, z_f(q))
+   endtask
+endclass
+
+
+class ax_comp extends a_comp;
+   function new(string name = "ax_comp", uvm_component parent = null);
+      super.new(name, parent);
+   endfunction
+
+   `uvm_component_utils(ax_comp)
+   `uvm_register_derived_cb(ax_comp, ax_cb, a_comp)
+
+   virtual task run();
+      super.run();
+      `uvm_do_callbacks(ax_cb, ax_comp, ax_f(q))
+   endtask
+endclass
+
+
+class b_comp extends base_comp;
+   function new(string name = "b_comp", uvm_component parent = null);
+      super.new(name, parent);
+   endfunction
+
+   `uvm_component_utils(b_comp)
+   `uvm_register_derived_cb(b_comp, b_cb, base_comp)
+
+   virtual task run();
+      super.run();
+      `uvm_do_callbacks(b_cb, b_comp, b_f(q))
+   endtask
+endclass
+
+
+class my_base_cb extends base_cb;
+   string m_id;
+
+   function new(string id);
+      m_id = id;
+   endfunction
+
+   virtual function void base_f(ref string q[$]);
+      q.push_back({"my_base_cb::base_f(", m_id, ")"});
+   endfunction
+endclass
+
+
+class my_a_cb extends a_cb;
+   string m_id;
+
+   function new(string id);
+      m_id = id;
+   endfunction
+
+   virtual function void base_f(ref string q[$]);
+      q.push_back({"my_a_cb::base_f(", m_id, ")"});
+   endfunction
+
+   virtual function void a_f(ref string q[$]);
+      q.push_back({"my_a_cb::a_f(", m_id, ")"});
+   endfunction
+endclass
+
+
+class my_b_cb extends b_cb;
+   string m_id;
+
+   function new(string id);
+      m_id = id;
+   endfunction
+
+   virtual function void base_f(ref string q[$]);
+      q.push_back({"my_b_cb::base_f(", m_id, ")"});
+   endfunction
+
+   virtual function void b_f(ref string q[$]);
+      q.push_back({"my_b_cb::b_f(", m_id, ")"});
+   endfunction
+endclass
+
+
+class my_ax_cb extends ax_cb;
+   string m_id;
+
+   function new(string id);
+      m_id = id;
+   endfunction
+
+   virtual function void base_f(ref string q[$]);
+      q.push_back({"my_ax_cb::base_f(", m_id, ")"});
+   endfunction
+
+   virtual function void a_f(ref string q[$]);
+      q.push_back({"my_ax_cb::a_f(", m_id, ")"});
+   endfunction
+
+   virtual function void ax_f(ref string q[$]);
+      q.push_back({"my_ax_cb::ax_f(", m_id, ")"});
+   endfunction
+endclass
+
+
+class my_z_cb extends z_cb;
+   string m_id;
+
+   function new(string id);
+      m_id = id;
+   endfunction
+
+   virtual function void z_f(ref string q[$]);
+      q.push_back({"my_z_cb::z_f(", m_id, ")"});
+   endfunction
+endclass
+
+
+class test extends uvm_test;
+
+   bit pass = 1;
+
+   a_comp  a1,  a2;
+   ax_comp ax1, ax2;
+   b_comp  b1,  b2;
+
+   `uvm_component_utils(test)
+
+   function new(string name, uvm_component parent = null);
+      super.new(name, parent);
+   endfunction
+
+   virtual function void build();
+      my_base_cb  base;
+      my_a_cb  a;
+      my_z_cb  z;
+      my_ax_cb ax;
+      my_b_cb  b;
+
+      a1  = new("a1", this);
+      a2  = new("a2", this);
+      ax1 = new("ax1", this);
+      ax2 = new("ax2", this);
+      b1  = new("b1", this);
+      b2  = new("b2", this);
+
+      base = new("a1");
+      uvm_callbacks#(base_comp, base_cb)::add(a1, base);
+      base = new("*");
+      uvm_callbacks#(base_comp, base_cb)::add(null, base); // All components
+      a    = new("a1");
+      uvm_callbacks#(a_comp, a_cb)::add(a1, a);
+      a    = new("a*");
+      uvm_callbacks#(a_comp, a_cb)::add(null, a);       // a1, a2, ax1 & ax2
+      z    = new("a1");
+      uvm_callbacks#(a_comp, z_cb)::add(a1, z);
+      z    = new("a*");
+      uvm_callbacks#(a_comp, z_cb)::add(null, z);      // a1, a2, ax1 & ax2
+      b    = new("b1");
+      uvm_callbacks#(b_comp, b_cb)::add(b1, b);
+      b    = new("b*");
+      uvm_callbacks#(b_comp, b_cb)::add(null, b);      // b1 & b2
+      ax    = new("ax1");
+      uvm_callbacks#(ax_comp, ax_cb)::add(ax1, ax);
+      ax    = new("ax*");
+      uvm_callbacks#(ax_comp, ax_cb)::add(null, ax);    // ax1 & ax2
+   endfunction
+
+   virtual task run();
+      uvm_top.stop_request();
+   endtask
+
+   virtual function void check();
+      string p[$];
+
+      uvm_callbacks#(base_comp, base_cb)::display_cbs();
+      uvm_callbacks#(a_comp, a_cb)::display_cbs();
+      uvm_callbacks#(a_comp, z_cb)::display_cbs();
+      uvm_callbacks#(b_comp, b_cb)::display_cbs();
+      uvm_callbacks#(ax_comp, ax_cb)::display_cbs();
+
+      print_trace("a1", a1.q);
+      print_trace("a2", a2.q);
+      print_trace("ax1", ax1.q);
+      print_trace("ax2", ax2.q);
+      print_trace("b1", b1.q);
+      print_trace("b2", b2.q);
+
+      p = '{"my_base_cb::base_f(a1)",
+            "my_base_cb::base_f(*)",
+            "my_a_cb::base_f(a1)",
+            "my_a_cb::a_f(a1)",
+            "my_a_cb::a_f(a*)",
+            "my_z_cb::z_f(a1)",
+            "my_z_cb::z_f(a*)"};
+      if (a1.q != p) begin
+         `uvm_error("TEST", "a1 did not execute expected callback sequence");
+         print_trace("observed:", a1.q);
+         print_trace("expected:", p);
+         pass = 0;
+      end
+
+      p = '{"my_base_cb::base_f(*)",
+            "my_a_cb::a_f(a*)",
+            "my_z_cb::z_f(a*)"};
+      if (a2.q != p) begin
+         `uvm_error("TEST", "a2 did not execute expected callback sequence");
+         print_trace("observed:", a2.q);
+         print_trace("expected:", p);
+         pass = 0;
+      end
+
+      p = '{"my_base_cb::base_f(*)",
+            "my_ax_cb::base_f(ax1)",
+            "my_a_cb::a_f(a*)",
+            "my_ax_cb::a_f(ax1)",
+            "my_z_cb::z_f(a*)",
+            "my_ax_cb::ax_f(ax1)",
+            "my_ax_cb::ax_f(ax*)"};
+      if (ax1.q != p) begin
+         `uvm_error("TEST", "ax1 did not execute expected callback sequence");
+         print_trace("observed:", ax1.q);
+         print_trace("expected:", p);
+         pass = 0;
+      end
+
+      p = '{"my_base_cb::base_f(*)",
+            "my_a_cb::a_f(a*)",
+            "my_z_cb::z_f(a*)",
+            "my_ax_cb::ax_f(ax*)"};
+      if (ax2.q != p) begin
+         `uvm_error("TEST", "ax2 did not execute expected callback sequence");
+         print_trace("observed:", ax2.q);
+         print_trace("expected:", p);
+         pass = 0;
+      end
+
+      p = '{"my_base_cb::base_f(*)",
+            "my_b_cb::base_f(b1)",
+            "my_b_cb::b_f(b1)",
+            "my_b_cb::b_f(b*)"};
+      if (b1.q != p) begin
+         `uvm_error("TEST", "b1 did not execute expected callback sequence");
+         print_trace("observed:", b1.q);
+         print_trace("expected:", p);
+         pass = 0;
+      end
+
+      p = '{"my_base_cb::base_f(*)",
+            "my_b_cb::b_f(b*)"};
+      if (b2.q != p) begin
+         `uvm_error("TEST", "b2 did not execute expected callback sequence");
+         print_trace("observed:", b2.q);
+         print_trace("expected:", p);
+         pass = 0;
+      end
+   endfunction
+
+   function void print_trace(string name, ref string q[$]);
+      $write("%s:", name);
+      foreach (q[i]) begin
+         $write(" \"%s\"", q[i]);
+      end
+      $write("\n");
+   endfunction
+
+   virtual function void report();
+      $write("** UVM TEST %s **\n", (pass) ? "PASSED" : "FAILED");
+   endfunction
+endclass
+
+
+initial
+  begin
+     run_test();
+  end
+
+endprogram
