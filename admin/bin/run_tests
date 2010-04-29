@@ -148,6 +148,8 @@ if ($opt_F) {
 #
 $failures = 0;
 foreach $dir (@dirs) {
+  # trailing '/'s confuse this script
+  $dir =~ s|/$||;
   if (&run_one_test($dir)) {
     $failures++;
     if ($opt_F) {
