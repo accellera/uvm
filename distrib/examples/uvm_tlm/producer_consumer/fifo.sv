@@ -1,7 +1,7 @@
-// $Id: fifo.sv,v 1.20 2009/11/02 18:47:35 redelman Exp $
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -40,11 +40,7 @@ two thrads *producer* and *consumer* will use uvm_blocking_put port and uvm_bloc
 //----------------------------------------------------------------------
 module test;
 
-`ifdef INCA
-  `include "uvm.svh"
-`else 
   import uvm_pkg::*;
-`endif
   
   //----------------------------------------------------------------------
   // class producer
@@ -132,7 +128,7 @@ module test;
   
   initial begin
     e = new();
-    e.run_test();
+    run_test();
     //$finish;
   end
 

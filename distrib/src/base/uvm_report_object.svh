@@ -1,7 +1,7 @@
-// $Id: uvm_report_object.svh,v 1.30 2010/03/16 23:56:02 redelman Exp $
+//
 //------------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -78,7 +78,7 @@ typedef class uvm_root;
 //
 //------------------------------------------------------------------------------
 
-virtual class uvm_report_object extends uvm_object;
+class uvm_report_object extends uvm_object;
 
   uvm_report_handler m_rh;
 
@@ -489,90 +489,6 @@ virtual class uvm_report_object extends uvm_object;
 
   protected virtual function uvm_report_object m_get_report_object();
     return this;
-  endfunction
-
-
-  //----------------------------------------------------------------------------
-  //                          DEPRECATED MEMBERS
-  //                      *** Do not use in new code ***
-  //                  Convert existing code when appropriate.
-  //----------------------------------------------------------------------------
-
-  function void avm_report_message( string id,
-                                    string message,
-                                    int verbosity = UVM_MEDIUM,
-                                    string filename = "",
-                                    int line = 0);
-    m_rh.report(UVM_INFO, get_full_name(), id, message, verbosity,
-                filename, line, this);
-  endfunction
-
-  function void avm_report_warning( string id,
-                                    string message,
-                                    int verbosity = UVM_MEDIUM,
-                                    string filename = "",
-                                    int line = 0);
-    m_rh.report(UVM_WARNING, get_full_name(), id, message, verbosity,
-                filename, line, this);
-  endfunction
-
-  function void avm_report_error( string id,
-                                  string message,
-                                  int verbosity = UVM_LOW,
-                                  string filename = "",
-                                  int line = 0);
-    m_rh.report(UVM_ERROR, get_full_name(), id, message, verbosity,
-                filename, line, this);
-  endfunction
-
-  function void avm_report_fatal( string id,
-                                  string message,
-                                  int verbosity = UVM_NONE,
-                                  string filename = "",
-                                  int line = 0);
-    m_rh.report(UVM_FATAL, get_full_name(), id, message, verbosity,
-                filename, line, this);
-  endfunction
-
-
-endclass
-
-
-
-//------------------------------------------------------------------------------
-//
-// CLASS- uvm_reporter (DEPRECATED)
-//
-// This class is deprecated. Reporting from outside uvm_component-based objects
-// should be done through <uvm_top> and the global uvm_report_* functions.
-//
-// The uvm_reporter extends <uvm_report_object> and is used as a standalone
-// reporter. Objects that are not <uvm_components> may use this to issue reports
-// that leverage the same configuration and formatting features as components. 
-//
-//------------------------------------------------------------------------------
-
-class uvm_reporter extends uvm_report_object;
-
-  const static string type_name = "uvm_reporter";
-
-  // Function: new
-  //
-  // Creates a new reporter instance with the given name.
-
-  function new(string name = "reporter");
-    super.new(name);
-  endfunction
-
-  virtual function string get_type_name ();
-    return type_name;
-  endfunction
-
-  virtual function uvm_object create (string name = "");
-    uvm_reporter r; 
-    if(name=="") name="reporter"; 
-    r=new(name);
-    return r;
   endfunction
 
 endclass

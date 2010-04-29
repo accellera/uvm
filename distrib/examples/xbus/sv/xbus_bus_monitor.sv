@@ -1,7 +1,7 @@
-// $Id: xbus_bus_monitor.sv,v 1.18 2009/12/17 00:03:35 redelman Exp $
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -336,12 +336,7 @@ class xbus_bus_monitor extends uvm_monitor;
   // check_transfer_size
   function void check_transfer_size();
    if (trans_collected.read_write != NOP) begin
-`ifdef VCS
-    assert_transfer_size :
-`else
-    check_transfer_size :
-`endif
-      assert(trans_collected.size == 1 || 
+    assert_transfer_size : assert(trans_collected.size == 1 || 
       trans_collected.size == 2 || trans_collected.size == 4 || 
       trans_collected.size == 8) else begin
       `uvm_error(get_type_name(),

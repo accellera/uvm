@@ -1,7 +1,7 @@
-// $Id: uvm_factory.sv,v 1.29 2009/10/30 15:29:21 jlrose Exp $
+// 
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -42,22 +42,6 @@ endfunction
 // ---
 
 function uvm_factory::new ();
-endfunction
-
-
-// auto_register (static)
-// -------------
-
-function void uvm_factory::auto_register (uvm_object_wrapper obj);
-  static bit issued=0;
-  if (!issued) begin
-    issued=1;
-    uvm_report_warning("deprecated",
-      {"uvm_factory::auto_register() has been deprecated and replaced by ",
-      "factory.register()"}, UVM_NONE);
-  end
-  m_inst = uvm_factory::get();
-  m_inst.register(obj);
 endfunction
 
 
@@ -107,25 +91,6 @@ function void uvm_factory::register (uvm_object_wrapper obj);
 
   end
 
-endfunction
-
-
-
-// set_type_override (static)
-// -----------------
-
-function void uvm_factory::set_type_override (string original_type_name,
-                                              string override_type_name,
-                                              bit replace=1);
-  static bit issued=0;
-  if (!issued) begin
-    issued=1;
-    uvm_report_warning("deprecated",
-      {"uvm_factory::set_type_override() has been deprecated and replaced by ",
-      "factory.set_type_override_by_name()"}, UVM_NONE);
-  end
-  m_inst = uvm_factory::get();
-  m_inst.set_type_override_by_name (original_type_name, override_type_name, replace);
 endfunction
 
 
@@ -263,24 +228,6 @@ function void uvm_factory::set_type_override_by_name (string original_type_name,
 endfunction
 
 
-// set_inst_override (static)
-// -----------------
-
-function void uvm_factory::set_inst_override (string full_inst_path,
-                                              string original_type_name,
-                                              string override_type_name);
-  static bit issued=0;
-  if (!issued) begin
-    issued=1;
-    uvm_report_warning("deprecated",
-      {"uvm_factory::set_inst_override() has been deprecated and replaced by ",
-      "factory.set_inst_override_by_name()"}, UVM_NONE);
-  end
-  m_inst = uvm_factory::get();
-  m_inst.set_inst_override_by_name (original_type_name, override_type_name, full_inst_path);
-endfunction
-
-
 // check_inst_override_exists
 // --------------------------
 function bit uvm_factory::check_inst_override_exists (uvm_object_wrapper original_type,
@@ -408,23 +355,6 @@ function bit uvm_factory::m_has_wildcard(string nm);
   return 0;
 endfunction
 
-// create_object (static)
-// -------------
-
-function uvm_object uvm_factory::create_object (string requested_type_name,  
-                                                string parent_inst_path="", 
-                                                string name="");
-  static bit issued=0;
-  if (!issued) begin
-    issued=1;
-    uvm_report_warning("deprecated",
-      {"uvm_factory::create_object() has been deprecated and replaced by ",
-      "factory.create_object_by_name()"}, UVM_NONE);
-  end
-  m_inst = uvm_factory::get();
-  return m_inst.create_object_by_name(requested_type_name, parent_inst_path, name);
-endfunction
-
 
 // create_object_by_name
 // ---------------------
@@ -484,25 +414,6 @@ function uvm_object uvm_factory::create_object_by_type (uvm_object_wrapper reque
 
   return requested_type.create_object(name);
 
-endfunction
-
-
-// create_component (static)
-// ----------------
-
-function uvm_component uvm_factory::create_component (string requested_type_name,  
-                                                      string parent_inst_path="", 
-                                                      string name, 
-                                                      uvm_component parent);
-  static bit issued=0;
-  if (!issued) begin
-    issued=1;
-    uvm_report_warning("deprecated",
-      {"uvm_factory::create_component() has been deprecated and replaced by ",
-      "factory.create_component_by_name()"}, UVM_NONE);
-  end
-  m_inst = uvm_factory::get();
-  return m_inst.create_component_by_name(requested_type_name, parent_inst_path, name, parent);
 endfunction
 
 
@@ -758,22 +669,6 @@ function uvm_object_wrapper uvm_factory::find_override_by_type(uvm_object_wrappe
 endfunction
 
 
-// print_all_overrides (static)
-// -------------------
-
-function void  uvm_factory::print_all_overrides (int all_types=0);
-  static bit issued=0;
-  if (!issued) begin
-    issued=1;
-    uvm_report_warning("deprecated",
-      {"uvm_factory::print_all_overrides() has been deprecated and replaced by ",
-      "factory.print()"}, UVM_NONE);
-  end
-  m_inst = uvm_factory::get();
-  m_inst.print(all_types);
-endfunction
-
-
 // print
 // -----
 
@@ -896,24 +791,6 @@ function void uvm_factory::print (int all_types=1);
 
   $display("\n####\n");
 
-endfunction
-
-
-// print_override_info (static)
-// -------------------
-
-function void  uvm_factory::print_override_info (string requested_type_name,
-                                                 string parent_inst_path="",
-                                                 string name="");
-  static bit issued=0;
-  if (!issued) begin
-    issued=1;
-    uvm_report_warning("deprecated",
-      {"uvm_factory::print_override_info() has been deprecated and replaced by ",
-      "factory.debug_create_by_name()"}, UVM_NONE);
-  end
-  m_inst = uvm_factory::get();
-  m_inst.m_debug_create(requested_type_name, null, parent_inst_path, name);
 endfunction
 
 

@@ -1,7 +1,8 @@
-// $Id: uvm_config.sv,v 1.5 2009/10/30 15:29:21 jlrose Exp $
+//
 //----------------------------------------------------------------------
-//   Copyright 2007-2008 Mentor Graphics Corporation
-//   Copyright 2007-2008 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -241,11 +242,7 @@ function string uvm_object_config_setting::matches_string(uvm_component to, uvm_
 endfunction
 
 function string uvm_object_config_setting::value_string();
-`ifdef INCA
-  $swrite(value_string, "@%0d", m_value);
-`else
-  return "<object handle>";
-`endif
+  $swrite(value_string, "@%0d", m_value.get_inst_id());
 endfunction
 
 function string uvm_object_config_setting::type_string();

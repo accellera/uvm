@@ -1,7 +1,8 @@
-// $Id: fifo.sv,v 1.7 2009/05/01 14:34:38 redelman Exp $
+//
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -123,14 +124,14 @@ endpackage
 // module top
 //----------------------------------------------------------------------
 module top;
-
+  import uvm_pkg::*;
   import user_pkg::*;
 
   env e;
 
   initial begin
     e = new("env", null);
-    e.run_test();
+    run_test();
     //$finish;
   end
 

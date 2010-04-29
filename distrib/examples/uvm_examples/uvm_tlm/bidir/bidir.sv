@@ -1,7 +1,8 @@
-// $Id: bidir.sv,v 1.11 2009/10/29 23:19:13 redelman Exp $
+//
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -156,12 +157,12 @@ import user_pkg::*;
 // module top
 //----------------------------------------------------------------------
 module top;
-
+  import uvm_pkg::*;
   bidir_env env;
 
   initial begin
     env = new("env", null);
-    env.run_test();
+    run_test();
   end
   
 endmodule

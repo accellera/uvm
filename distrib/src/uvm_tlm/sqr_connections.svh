@@ -1,7 +1,7 @@
-// $Id: sqr_connections.svh,v 1.10 2009/06/15 20:36:31 redelman Exp $
+//
 //-----------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -32,21 +32,6 @@
   task peek(output REQ req_arg); imp.peek(req_arg); endtask \
   task put(input RSP rsp_arg); imp.put(rsp_arg); endtask
 
-//  function void connect_if(uvm_port_base #(sqr_if_base#(REQ, RSP)) seq_item_port); endtask
-
-// `define SEQ_ITEM_UNI_PULL_IMP(imp, T, arg) \
-//   task get_next_item(output T arg); imp.get_next_item(arg); endtask \
-//   task try_next_item(output T arg); imp.try_next_item(arg); endtask \
-//   function void item_done(input T arg = null); imp.item_done(arg); endfunction \
-//   task wait_for_sequences(); imp.wait_for_sequences(); endtask \
-//   function bit has_do_available(); return imp.has_do_available(); endfunction \
-//   task get(output T arg); imp.get(arg); endtask \
-//   task peek(output T arg); imp.peek(arg); endtask
-
-// `define SEQ_ITEM_PUSH_IMP(imp, T, arg) \
-//   task put(input T arg); imp.put(arg); endtask
-
-
 //-----------------------------------------------------------------------------
 //
 // CLASS: uvm_seq_item_pull_port #(REQ,RSP)
@@ -59,19 +44,12 @@
 //-----------------------------------------------------------------------------
 
 class uvm_seq_item_pull_port #(type REQ=int, type RSP=REQ)
-  extends uvm_port_base #(sqr_if_base #(REQ, RSP));
+  extends uvm_port_base #(uvm_sqr_if_base #(REQ, RSP));
   `UVM_SEQ_PORT(`SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_port")
   `SEQ_ITEM_PULL_IMP(this.m_if, REQ, RSP, t, t)
 
   bit print_enabled = 0;
     
-  // provided for backwards compatibility
-  function void connect_if(uvm_port_base#(sqr_if_base#(REQ,RSP)) provider);
-    super.connect(provider);
-    uvm_report_warning("deprecated",
-                       "uvm_seq_item_pull_port.connect_if has been deprecated");
-  endfunction // void
-
 endclass
 
 
@@ -85,7 +63,7 @@ endclass
 //-----------------------------------------------------------------------------
 
 class uvm_seq_item_pull_export #(type REQ=int, type RSP=REQ)
-  extends uvm_port_base #(sqr_if_base #(REQ, RSP));
+  extends uvm_port_base #(uvm_sqr_if_base #(REQ, RSP));
   `UVM_EXPORT_COMMON(`SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_export")
   `SEQ_ITEM_PULL_IMP(this.m_if, REQ, RSP, t, t)
 endclass
@@ -101,16 +79,9 @@ endclass
 //-----------------------------------------------------------------------------
 
 class uvm_seq_item_pull_imp #(type REQ=int, type RSP=REQ, type IMP=int)
-  extends uvm_port_base #(sqr_if_base #(REQ, RSP));
+  extends uvm_port_base #(uvm_sqr_if_base #(REQ, RSP));
   `UVM_IMP_COMMON(`SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_imp",IMP)
   `SEQ_ITEM_PULL_IMP(m_imp, REQ, RSP, t, t)
-
-  // provided for backwards compatibility of connect_if call
-  function void connect_if(uvm_port_base#(sqr_if_base#(REQ,RSP)) provider);
-    provider.connect(this);
-    uvm_report_warning("deprecated",
-                       "uvm_seq_item_pull_imp.connect_if has been deprecated");
-  endfunction // void
 
 endclass
 

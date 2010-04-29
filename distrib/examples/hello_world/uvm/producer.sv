@@ -1,7 +1,7 @@
-// $Id: producer.sv,v 1.9 2009/10/30 15:29:21 jlrose Exp $
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -61,7 +61,7 @@ class producer #(type T=packet) extends uvm_component;
 
       `uvm_info("producer", $sformatf("Sending %s",p.get_name()), UVM_MEDIUM)
 
-      if (`uvm_msg_detail(UVM_HIGH))
+      if(uvm_report_enabled(UVM_HIGH,UVM_INFO,""))
         p.print();
 
       out.put(p);

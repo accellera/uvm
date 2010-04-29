@@ -1,7 +1,7 @@
-// $Id: uvm_pair.svh,v 1.10 2009/12/14 22:39:41 jlrose Exp $
+//
 //-----------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -136,7 +136,7 @@ class uvm_built_in_pair #(type T1=int, T2=T1) extends uvm_transaction;
 
   virtual function string convert2string;
     string s;
-    `ifndef INCA
+    `ifdef UVM_USE_P_FORMAT
       $sformat(s, "built-in pair : %p, %p", first, second);
     `else
       $swrite( s, "built-in pair : ", first, ", ", second);

@@ -1,7 +1,7 @@
-// $Id: uvm_report_handler.svh,v 1.28 2009/06/01 21:48:46 redelman Exp $
+//
 //------------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -27,7 +27,7 @@ typedef class uvm_report_object;
 typedef class uvm_report_server;
 typedef class uvm_report_global_server;
 
-`ifdef INCA
+`ifdef UVM_USE_AAOFAA_WA
     class uvm_hash #(type T=int, I1=int, I2=int);
       local T d[string];
       function void set(I1 i1, I2 i2, T t);
@@ -90,7 +90,7 @@ class uvm_report_handler;
 
   uvm_action severity_actions[uvm_severity];
 
-  `ifndef INCA
+  `ifndef UVM_USE_AAOFAA_WA
   id_actions_array id_actions;
   id_actions_array severity_id_actions[uvm_severity];
 
@@ -101,7 +101,7 @@ class uvm_report_handler;
   id_file_array severity_id_file_handles[uvm_severity];
   `endif
 
-  `ifdef INCA
+  `ifdef UVM_USE_AAOFAA_WA
   uvm_action id_actions[string];
   uvm_hash #(uvm_action,uvm_severity,string) severity_id_actions = new;
 
@@ -226,7 +226,7 @@ class uvm_report_handler;
 
   local function UVM_FILE get_severity_id_file(uvm_severity severity, string id);
 
-   `ifndef INCA
+   `ifndef UVM_USE_AAOFAA_WA
     id_file_array array;
 
     if(severity_id_file_handles.exists(severity)) begin
@@ -280,7 +280,7 @@ class uvm_report_handler;
 
   function uvm_action get_action(uvm_severity severity, string id);
 
-   `ifndef INCA
+   `ifndef UVM_USE_AAOFAA_WA
     id_actions_array array;
 
     if(severity_id_actions.exists(severity)) begin
@@ -415,7 +415,7 @@ class uvm_report_handler;
   function void set_severity_id_action(uvm_severity severity,
                                        string id,
                                        uvm_action action);
-    `ifndef INCA
+    `ifndef UVM_USE_AAOFAA_WA
     severity_id_actions[severity][id] = action;
     `else
     severity_id_actions.set(severity,id,action);
@@ -445,7 +445,7 @@ class uvm_report_handler;
   function void set_severity_id_file(uvm_severity severity,
                                      string id, UVM_FILE file);
   
-    `ifndef INCA
+    `ifndef UVM_USE_AAOFAA_WA
     severity_id_file_handles[severity][id] = file;
     `else
     severity_id_file_handles.set(severity,id,file);
@@ -466,7 +466,7 @@ class uvm_report_handler;
     UVM_FILE file;
     uvm_report_server srvr;
  
-   `ifndef INCA
+   `ifndef UVM_USE_AAOFAA_WA
      id_actions_array id_a_ary;
      id_file_array id_f_ary;
    `else
@@ -511,7 +511,7 @@ class uvm_report_handler;
     srvr.f_display(0, "");
     srvr.f_display(0, "*** actions by id and severity");
 
-    `ifndef INCA
+    `ifndef UVM_USE_AAOFAA_WA
     foreach( severity_id_actions[severity] ) begin
       // ADAM: is id_a_ary __copied__?
       id_a_ary = severity_id_actions[severity];
@@ -565,7 +565,7 @@ class uvm_report_handler;
     srvr.f_display(0, "");
     srvr.f_display(0, "*** files by id and severity");
 
-    `ifndef INCA
+    `ifndef UVM_USE_AAOFAA_WA
     foreach( severity_id_file_handles[severity] ) begin
       id_f_ary = severity_id_file_handles[severity];
       foreach ( id_f_ary[idx] ) begin
@@ -597,7 +597,7 @@ endclass : uvm_report_handler
 
 //------------------------------------------------------------------------------
 
-class default_report_server;
+class uvm_default_report_server;
 
   uvm_report_global_server glob;
 

@@ -1,7 +1,7 @@
-// $Id: xbus_version.svh,v 1.7 2009/05/01 14:34:38 redelman Exp $
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -18,5 +18,5 @@
 //   the License for the specific language governing
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
-`define XBUS_KIT_VERSION "2.0a"
-`define XBUS_KIT_DATE "2008-08-22"
+`define XBUS_KIT_VERSION "1.0ea"
+`define XBUS_KIT_DATE "2010-04-30"

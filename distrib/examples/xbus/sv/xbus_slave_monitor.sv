@@ -1,7 +1,7 @@
-// $Id: xbus_slave_monitor.sv,v 1.18 2009/12/15 20:10:49 jlrose Exp $
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -209,12 +209,7 @@ class xbus_slave_monitor extends uvm_monitor;
 
   // check_transfer_size
   protected function void check_transfer_size();
-`ifdef VCS
-    assert_transfer_size :
-`else
-    check_transfer_size :
-`endif
-    assert(trans_collected.size == 1 || 
+    assert_transfer_size : assert(trans_collected.size == 1 || 
       trans_collected.size == 2 || trans_collected.size == 4 || 
       trans_collected.size == 8) else begin
       `uvm_error(get_type_name(),
