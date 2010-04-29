@@ -50,7 +50,7 @@ typedef class uvm_hb_callback;
 class uvm_heartbeat extends uvm_object;
   static protected uvm_objection_cbs_t m_global_cbs = uvm_objection_cbs_t::get_global_cbs();
 
-  protected uvm_objection_cbs_t::queue_t m_cb_q;
+  protected uvm_queue#(uvm_objection_cb) m_cb_q;
   protected uvm_objection   m_objection = null;
   protected uvm_hb_callback m_cb = null;
   protected uvm_component   m_cntxt;
