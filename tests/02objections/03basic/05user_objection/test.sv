@@ -11,8 +11,8 @@ module test;
     task run;
       uvm_test_done.raise_objection(this);
       repeat(10) begin
-        #0 myobjection.raise_objection(this);
-        #20 myobjection.drop_objection(this);
+        #1 myobjection.raise_objection(this);
+        #19 myobjection.drop_objection(this);
       end
       uvm_test_done.drop_objection(this);
     endtask
