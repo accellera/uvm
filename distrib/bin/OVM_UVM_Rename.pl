@@ -34,6 +34,7 @@ if 0;
 ## % perl OVM_UVM_Rename.pl -help
 ##----------------------------------------------------------------------
 
+
 use strict;
 use warnings;
 use Getopt::Long;
@@ -49,6 +50,12 @@ sub replace_string
 {
 	
 	my $filename = shift;
+	my $path = $ENV{'PWD'};
+
+	if ((! ($filename =~ /$path/)) && ( !($filename =~ /^[\~|\/]/)))
+	{
+		$filename = $path."/".$filename;
+	}
 
 	if (!(-d $filename) )
 	{
@@ -100,7 +107,7 @@ if ($top_dir eq '')
 	chomp($top_dir);
 }
 
-print "\nReplacing ovm/tlm to uvm/uvm_tlm in all v/vh/sv/svh files....\n\n";
+print "\nReplacing ovm/tlm to uvm/uvm_tlm in all files....\n\n";
 replace_dir_file_name($top_dir);
 
 print "\n...Replaced all class names from ovm_* and tlm_* to uvm_* and uvm_tlm_* respectively.\n";
