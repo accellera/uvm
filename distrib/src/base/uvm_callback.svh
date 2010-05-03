@@ -331,7 +331,9 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
       end
     end
     if(!cbq.size()) begin
-      $display("No callbacks registered for instance %s of type %s", obj.get_full_name(), tname);
+      if(obj == null) str = "*";
+      else str = obj.get_full_name();
+      $display("No callbacks registered for instance %s of type %s", str, tname);
     end
 
     foreach (cbq[i]) begin
@@ -403,6 +405,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   static string m_typename="";
   static string m_cb_typename="";
   static uvm_report_object reporter = new("cb_tracer");
+
 
   // `uvm_object_param_utils(this_type)
 
@@ -482,7 +485,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
        uvm_report_warning("CBUNREG", { "Callback ", cb.get_name(), " cannot be registered with object ",
          nm, " because callback type ", cb.get_type_name(),
          " is not registered with object type ", tnm }, UVM_NONE);
-       return;
+//       return;
     end
     if(obj == null) begin
       m_base_inst.m_add_tw_cbs(cb,ordering);
@@ -508,7 +511,6 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
       end
     end
   endfunction
-
 
   // Function: add_by_name
   //
@@ -571,6 +573,21 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
         nm, " because it is not currently registered to that object." }, UVM_NONE);
     end
   endfunction
+
+
+  //ovm compatibility
+  static function this_type get_global_cbs();
+    return get();
+  endfunction
+
+  static function void add_cb(T obj, uvm_callback cb, uvm_apprepend ordering=UVM_APPEND);
+    add(obj,cb,ordering);
+  endfunction
+
+  static function void delete_cb(T obj, uvm_callback cb);
+    delete(obj,cb);
+  endfunction
+
 
   // Function: delete_by_name
   //
