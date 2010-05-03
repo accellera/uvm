@@ -115,9 +115,13 @@ class uvm_callbacks_base extends uvm_object;
     return 0;
   endfunction
 
+  virtual function uvm_queue#(uvm_callback) m_get_twq(uvm_object obj);
+    return null;
+  endfunction
   virtual function void m_add_tw_cbs(uvm_callback cb, uvm_apprepend ordering);
   endfunction
   virtual function bit m_delete_tw_cbs(uvm_callback cb);
+    return 0;
   endfunction
 
 endclass
@@ -155,6 +159,21 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
     return($cast(this_type,obj));
   endfunction
 
+  //Gettting the typewide queue
+  virtual function uvm_queue#(uvm_callback) m_get_twq(uvm_object obj);
+    if(m_am_i_a(obj)) begin
+      foreach(m_derived_types[i]) begin
+        uvm_callbacks_base dt;
+        dt = uvm_typeid_base::typeid_map[m_derived_types[i] ];
+        if(dt != null && dt != this) begin
+          m_get_twq = dt.m_get_twq(obj);
+          if(m_get_twq != null) return m_get_twq;
+        end
+      end
+      return m_twcb;
+    end
+    else return null;
+  endfunction
 
   static function int m_cb_find(uvm_queue#(uvm_callback) q, uvm_callback cb);
     for(int i=0; i<q.size(); ++i) begin
@@ -593,7 +612,10 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     uvm_queue#(uvm_callback) q;
     CB cb;
     if(!m_pool.exists(obj)) begin //no instance specific
-      q = m_twcb;
+      if(obj == null) 
+        q = m_twcb;
+      else 
+        q = m_base_inst.m_get_twq(obj); //get the most derivative queue
     end 
     else begin
       q = m_pool.get(obj);
@@ -622,7 +644,10 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     CB cb;
     get_next = null;
     if(!m_pool.exists(obj)) begin //no instance specific
-      q = m_twcb;
+      if(obj == null) 
+        q = m_twcb;
+      else 
+        q = m_base_inst.m_get_twq(obj); //get the most derivative queue
     end 
     else begin
       q = m_pool.get(obj);

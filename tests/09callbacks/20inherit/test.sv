@@ -146,7 +146,8 @@ endclass
 class my_base_cb extends base_cb;
    string m_id;
 
-   function new(string id);
+   function new(string nm, string id);
+      super.new(nm);
       m_id = id;
    endfunction
 
@@ -159,7 +160,8 @@ endclass
 class my_a_cb extends a_cb;
    string m_id;
 
-   function new(string id);
+   function new(string nm, string id);
+      super.new(nm);
       m_id = id;
    endfunction
 
@@ -176,7 +178,8 @@ endclass
 class my_b_cb extends b_cb;
    string m_id;
 
-   function new(string id);
+   function new(string nm, string id);
+      super.new(nm);
       m_id = id;
    endfunction
 
@@ -193,7 +196,8 @@ endclass
 class my_ax_cb extends ax_cb;
    string m_id;
 
-   function new(string id);
+   function new(string nm, string id);
+      super.new(nm);
       m_id = id;
    endfunction
 
@@ -214,7 +218,8 @@ endclass
 class my_z_cb extends z_cb;
    string m_id;
 
-   function new(string id);
+   function new(string nm, string id);
+      super.new(nm);
       m_id = id;
    endfunction
 
@@ -252,25 +257,25 @@ class test extends uvm_test;
       b1  = new("b1", this);
       b2  = new("b2", this);
 
-      base = new("a1");
+      base = new("my_base_a1","a1");
       uvm_callbacks#(base_comp, base_cb)::add(a1, base);
-      base = new("*");
+      base = new("my_base_*","*");
       uvm_callbacks#(base_comp, base_cb)::add(null, base); // All components
-      a    = new("a1");
+      a    = new("my_a_a1", "a1");
       uvm_callbacks#(a_comp, a_cb)::add(a1, a);
-      a    = new("a*");
+      a    = new("my_a_*","a*");
       uvm_callbacks#(a_comp, a_cb)::add(null, a);       // a1, a2, ax1 & ax2
-      z    = new("a1");
+      z    = new("my_z_a1", "a1");
       uvm_callbacks#(a_comp, z_cb)::add(a1, z);
-      z    = new("a*");
+      z    = new("my_z_*", "a*");
       uvm_callbacks#(a_comp, z_cb)::add(null, z);      // a1, a2, ax1 & ax2
-      b    = new("b1");
+      b    = new("my_b_b1", "b1");
       uvm_callbacks#(b_comp, b_cb)::add(b1, b);
-      b    = new("b*");
+      b    = new("my_b_*", "b*");
       uvm_callbacks#(b_comp, b_cb)::add(null, b);      // b1 & b2
-      ax    = new("ax1");
+      ax    = new("my_ax_ax1","ax1");
       uvm_callbacks#(ax_comp, ax_cb)::add(ax1, ax);
-      ax    = new("ax*");
+      ax    = new("my_ax_*","ax*");
       uvm_callbacks#(ax_comp, ax_cb)::add(null, ax);    // ax1 & ax2
    endfunction
 
@@ -310,6 +315,7 @@ class test extends uvm_test;
 
       `uvm_clear_queue(p);
       p.push_back("my_base_cb::base_f(*)");
+      p.push_back("my_a_cb::base_f(a*)"); //----
       p.push_back("my_a_cb::a_f(a*)");
       p.push_back("my_z_cb::z_f(a*)");
       if (a2.q != p) begin
@@ -339,7 +345,10 @@ class test extends uvm_test;
 
       `uvm_clear_queue(p);
       p.push_back("my_base_cb::base_f(*)");
+      p.push_back("my_a_cb::base_f(a*)"); 
+      p.push_back("my_ax_cb::base_f(ax*)");
       p.push_back("my_a_cb::a_f(a*)");
+      p.push_back("my_ax_cb::a_f(ax*)");
       p.push_back("my_z_cb::z_f(a*)");
       p.push_back("my_ax_cb::ax_f(ax*)");
       if (ax2.q != p) begin
@@ -364,6 +373,7 @@ class test extends uvm_test;
 
       `uvm_clear_queue(p);
       p.push_back("my_base_cb::base_f(*)");
+      p.push_back("my_b_cb::base_f(b*)"); //----
       p.push_back("my_b_cb::b_f(b*)");
       if (b2.q != p) begin
          `uvm_error("TEST", "b2 did not execute expected callback sequence");
