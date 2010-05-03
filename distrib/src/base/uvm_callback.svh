@@ -393,10 +393,11 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   // of <uvm_callback>.
   
   typedef uvm_callbacks#(T,CB) this_type;
+  typedef uvm_callbacks#(T,uvm_callback) that_type;
  
   // Singleton instance is used for type checking
-  static this_type m_inst = get();
-  static uvm_callbacks#(T,uvm_callback) m_base_inst = uvm_callbacks#(T,uvm_callback)::get();
+  static this_type m_inst = this_type::get();
+  static uvm_callbacks#(T,uvm_callback) m_base_inst = that_type::get();
 
   // typeinfo
   static uvm_typeid_base m_typeid = uvm_typeid#(T)::get();
@@ -733,7 +734,7 @@ class uvm_derived_callbacks#(type T=uvm_object, type ST=uvm_object, type CB=uvm_
     u_inst.m_super_type = m_s_typeid;
     u_inst.m_base_inst.m_super_type = m_s_typeid;
 
-    s_obj = uvm_typeid::typeid_map[m_s_typeid];
+    s_obj = uvm_typeid_base::typeid_map[m_s_typeid];
     s_obj.m_derived_types.push_back(m_typeid);
     return 1;
   endfunction
