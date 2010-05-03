@@ -41,6 +41,7 @@ Options:
                "tool.fails" (can later be used with -f)
    -h       Print this message
    -R opts  Add the specified options to the simulation command
+   -S       Do not skip tests
    -u dir   Use the UVM distribution in the specified directory
    -v       Display the output of the testcase on stdout
 
@@ -49,7 +50,7 @@ USAGE
 }
 
 require "getopts.pl"
-&Getopts("cC:df:F:hR:u:v");
+&Getopts("cC:df:F:hR:Su:v");
 &usage if $opt_h || $#ARGV < 0;
 
 if (!$opt_u) {
@@ -196,6 +197,11 @@ sub run_one_test {
    local($sv) = ("$testdir/test.sv");
    if (! -e $sv) {
      print "**FAIL** ($sv does not exist)\n";
+     return 1;
+   }
+
+   if (!$opt_S && !$opt_c && -e "$testdir/$tool.skip") {
+     print "SKIP (Use -S to force execution)\n";
      return 1;
    }
 
