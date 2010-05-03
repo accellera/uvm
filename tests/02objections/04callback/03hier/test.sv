@@ -29,10 +29,10 @@ module test;
     endfunction
     task run;
       repeat(20) begin
-        // The #0 is to make sure nothing gets cancelled. Normally
+        // The #1 is to make sure nothing gets cancelled. Normally
         // cancelling is okay, but for this test I want all drops
         // propagated.
-        #0 uvm_test_done.raise_objection(this);
+        #1 uvm_test_done.raise_objection(this);
         #del
         uvm_test_done.drop_objection(this);
       end
@@ -51,7 +51,7 @@ module test;
     endfunction
     task run;
       repeat(20) begin
-        #0 uvm_test_done.raise_objection(this);
+        #1 uvm_test_done.raise_objection(this);
         #del
         uvm_test_done.drop_objection(this);
       end
@@ -70,7 +70,7 @@ module test;
     endfunction
     task run;
       repeat(20) begin
-        #0 uvm_test_done.raise_objection(this);
+        #1 uvm_test_done.raise_objection(this);
         #del
         uvm_test_done.drop_objection(this);
       end
@@ -89,7 +89,7 @@ module test;
     endfunction
     task run;
       repeat(20) begin
-        #0 uvm_test_done.raise_objection(this);
+        #1 uvm_test_done.raise_objection(this);
         #del
         uvm_test_done.drop_objection(this);
       end
@@ -108,7 +108,7 @@ module test;
     endfunction
     task run;
       repeat(20) begin
-        #0 uvm_test_done.raise_objection(this);
+        #1 uvm_test_done.raise_objection(this);
         #del
         uvm_test_done.drop_objection(this);
       end
@@ -131,7 +131,7 @@ module test;
     endfunction
     task run;
       repeat(20) begin
-        #0 uvm_test_done.raise_objection(this);
+        #1 uvm_test_done.raise_objection(this);
         #del
         uvm_test_done.drop_objection(this);
       end

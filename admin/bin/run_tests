@@ -159,7 +159,7 @@ foreach $dir (@dirs) {
 }
 print "-----------------------------------------------------------------\n";
 $txt = sprintf("Total of %d tests ", $#dirs+1);
-$dots = substr(".......................................", 0, 41-length($txt));
+$dots = substr("............................................", 0, 46-length($txt));
 print $txt, $dots;
 if ($failures > 0) {
   print " FAILED $failures tests\n";
@@ -181,8 +181,12 @@ exit($failures);
 sub run_one_test {
    local($testdir, $_) = @_;
 
-   $dots = substr(".......................................", 0, 40-length($dir));
-   print "$testdir $dots ";
+   local($dir) = $testdir;
+   if (length($dir) > 43) {
+     $dir = substr($dir, 0, 43) . "*";
+   }
+   $dots = substr("............................................", 0, 45-length($dir));
+   print "$dir $dots ";
 
    if (! -d $testdir) {
      print "**FAIL** ($testdir not exist)\n";
