@@ -84,7 +84,7 @@ module test;
     // dropped (or all dropped). This example prints some information on each
     // drop.
     virtual function void dropped (uvm_objection objection, 
-        uvm_object source_obj, int count);
+        uvm_object source_obj, string description, int count);
       uvm_report_info("dropped", 
         $sformatf("%d objection(s) dropped from %s, total count is now %0d", 
         count, source_obj.get_full_name, objection.get_objection_total(this)), 
