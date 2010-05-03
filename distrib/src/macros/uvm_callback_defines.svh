@@ -229,62 +229,6 @@
    end
 
 
-//-----------------------------------------------------------------------------
-// MACRO: `uvm_do_task_callbacks
-//
-// Calls the given ~METHOD~ of all callbacks of type ~CB~ registered with
-// the calling object (i.e. ~this~ object), which is or is based on type ~T~.
-//
-// This macro is the same as the <uvm_do_callbacks> macro except that each
-// callback is executed inside of its own thread. The threads are concurrent,
-// but the execution order of the threads is simulator dependent. The macro
-// does not return until all forked callbacks have completed. To have all
-// of the tasks run sequentially (i.e. not in their own parallel threads),
-// the <uvm_do_callbacks> macro should be used.
-//
-//| virtual class mycb extends uvm_cb;
-//|   pure task my_task(mycomp, int addr, int data);
-//| endclass
-//
-//| task mycomp::run(); 
-//|    int curr_addr, curr_data;
-//|    ...
-//|    `uvm_callback(mycb, mycomp, my_task(this, curr_addr, curr_data))
-//|    ...
-//| endtask
-//-----------------------------------------------------------------------------
-
-`define uvm_do_task_callbacks(CB,T,METHOD_CALL) \
-  `uvm_do_obj_task_callbacks(CB,T,this,METHOD_CALL)
-
-
-//-----------------------------------------------------------------------------
-// MACRO: `uvm_do_ext_task_callbacks
-//
-// This macro is identical to <uvm_do_task_callbacks> macro except there is an
-// additional ~OBJ~ argument that allows the user to execute callbacks associated
-// with an external object instance ~OBJ~ instead of the calling (~this~) object.
-//-----------------------------------------------------------------------------
-
-`define uvm_do_obj_task_callbacks(CB,T,OBJ,METHOD_CALL) \
-  begin \
-     fork begin \
-       uvm_callback_iter#(CB,T) iter = new(OBJ); \
-       CB cb = iter.first(); \
-       while(cb != null) begin \
-         fork begin \
-           `uvm_cb_trace(cb,OBJ,`"fork/join_none METHOD_CALL`") \
-           cb.METHOD_CALL; \
-         end join_none \
-         cb = iter.next(); \
-       end \
-       wait fork; \
-     end join \
-   end
-
-
-
-
 // callback trace macros can be turned on via +define+UVM_CB_TRACE_ON
 
 `ifdef UVM_CB_TRACE_ON

@@ -576,20 +576,6 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   endfunction
 
 
-  //ovm compatibility
-  static function this_type get_global_cbs();
-    return get();
-  endfunction
-
-  static function void add_cb(T obj, uvm_callback cb, uvm_apprepend ordering=UVM_APPEND);
-    add(obj,cb,ordering);
-  endfunction
-
-  static function void delete_cb(T obj, uvm_callback cb);
-    delete(obj,cb);
-  endfunction
-
-
   // Function: delete_by_name
   //
   // Removes the given callback object, ~cb~, associated with one or more 
