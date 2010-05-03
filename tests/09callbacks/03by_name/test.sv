@@ -72,13 +72,13 @@ module top;
     typedef uvm_callbacks#(ip_comp,cb_base) cbtype;
     function void end_of_elaboration();
       cb = new("*1");
-      cbtype::add_by_name(cb, "*1",this);
+      cbtype::add_by_name("*1", cb, this);
       cb = new("*.ip1");
-      cbtype::add_by_name(cb, "*.ip1",this);
+      cbtype::add_by_name("*.ip1", cb, this);
       cb = new("*.der1");
-      cbtype::add_by_name(cb, "*.der1",this);
+      cbtype::add_by_name("*.der1", cb, this);
 
-      cbtype::delete_by_name(cb, "*m1.de*",this);
+      cbtype::delete_by_name("*m1.de*",cb,this);
 
       uvm_callbacks#(ip_comp,cb_base)::display_cbs();
     endfunction

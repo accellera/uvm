@@ -76,11 +76,13 @@ class special_comp #(int N = 0) extends generic_comp;
       super.new(name, parent);
    endfunction
 
-   `uvm_component_param_utils(special_comp)
-   typedef special_comp#(N) this_type;
-   typedef special_cb#(N) cb_type;
-   `uvm_register_derived_cb(this_type, cb_type, generic_comp)
-   `uvm_register_derived_cb(this_type, specific_cb, generic_comp)
+   typedef special_comp#(N) special_comp_type;
+   typedef special_cb#(N) special_cb_type;
+
+   `uvm_component_param_utils(special_comp#(N))
+   `uvm_set_super_type(special_comp_type, generic_comp)
+   `uvm_register_cb(special_comp_type, special_cb_type)
+   `uvm_register_cb(special_comp_type, specific_cb)
 
    virtual task run();
       super.run();
@@ -174,20 +176,19 @@ class test extends uvm_test;
    virtual function void check();
       string p[$];
 
-      uvm_callbacks#(generic_comp, generic_cb)::display_cbs();
-      uvm_callbacks#(special_comp#(1), special_cb#(1))::display_cbs();
-      uvm_callbacks#(special_comp#(1), specific_cb)::display_cbs();
-      uvm_callbacks#(special_comp#(2), special_cb#(2))::display_cbs();
-      uvm_callbacks#(special_comp#(2), specific_cb)::display_cbs();
+      uvm_callbacks::display_cbs();
+      uvm_callbacks#(generic_comp)::display_cbs();
+      uvm_callbacks#(special_comp#(1))::display_cbs();
+      uvm_callbacks#(special_comp#(2))::display_cbs();
 
       print_trace("a1", a1.q);
       print_trace("a2", a2.q);
 
-      p = '{"my_generic_cb::generic_f(a1)",
-            "my_generic_cb::generic_f(*)",
-            "my_special_cb::specific_f(a1)",
-            "my_specific_cb::specific_f(*)",
-            "my_special_cb::special#(1)_f(a1)"};
+      p.push_back("my_generic_cb::generic_f(a1)");
+      p.push_back("my_generic_cb::generic_f(*)");
+      p.push_back("my_special_cb::specific_f(a1)");
+      p.push_back("my_specific_cb::specific_f(*)");
+      p.push_back("my_special_cb::special#(1)_f(a1)");
       if (a1.q != p) begin
          `uvm_error("TEST", "a1 did not execute expected callback sequence");
          print_trace("observed:", a1.q);
@@ -195,9 +196,10 @@ class test extends uvm_test;
          pass = 0;
       end
 
-      p = '{"my_generic_cb::generic_f(*)",
-            "my_special_cb::specific_f(a2)",
-            "my_special_cb::special#(2)_f(a2)"};
+      `uvm_clear_queue(p)
+      p.push_back("my_generic_cb::generic_f(*)");
+      p.push_back("my_special_cb::specific_f(a2)");
+      p.push_back("my_special_cb::special#(2)_f(a2)");
       if (a2.q != p) begin
          `uvm_error("TEST", "a2 did not execute expected callback sequence");
          print_trace("observed:", a2.q);

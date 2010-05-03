@@ -52,16 +52,15 @@
 //-----------------------------------------------------------------------------
 
 `define uvm_register_cb(T,CB) \
-  static local bit m_register_cb_``CB = uvm_callbacks#(T,CB)::register_pair();
+  static local bit m_register_cb_``CB = uvm_callbacks#(T,CB)::register_pair(`"T`",`"CB`");
 
 
 //-----------------------------------------------------------------------------
-// MACRO: `uvm_register_derived_cb
+// MACRO: `uvm_set_super_type
 //
-// Maps the callback queue for the ~CB~-~T~ pair to the queue for the super
-// types. This is needed for cases where a derived class and its super
-// class are sharing callback types and callbacks registered to the 
-// derived class need to be able to run on the super class. 
+// Defines the super type of T to be ST. This allows for derived class
+// objects to inherit typewide objects that are registered with the base
+// class.
 //
 // The registration will typically occur in the component that executes the
 // given type of callback. For instance:
@@ -80,7 +79,7 @@
 //| endclass
 //|
 //| class my_derived_comp extends my_comp;
-//|   `uvm_register_derived_cb(my_derived_comp,mycb,my_comp)
+//|   `uvm_set_super_type(my_derived_comp,my_comp)
 //|   ...
 //|   task run;
 //|     ...
@@ -89,8 +88,8 @@
 //| endclass
 //-----------------------------------------------------------------------------
 
-`define uvm_register_derived_cb(T,CB,ST) \
-  static local bit m_register_cb_``T``CB``ST = uvm_callbacks#(T,CB,ST)::register_derived_pair(); 
+`define uvm_set_super_type(T,ST) \
+  static local bit m_register_``T``ST = uvm_derived_callbacks#(T,ST)::register_super_type(`"T`",`"ST`"); 
 
 
 //-----------------------------------------------------------------------------
@@ -150,6 +149,7 @@
      uvm_callback_iter#(CB,T) iter = new(OBJ); \
      CB cb = iter.first(); \
      while(cb != null) begin \
+       `uvm_cb_trace(cb,OBJ,$sformatf(`"CB (%s) T (%s) METHOD_CALL`",cb.get_name(), OBJ.get_full_name())) \
        cb.METHOD_CALL; \
        cb = iter.next(); \
      end \
@@ -218,8 +218,11 @@
      uvm_callback_iter#(CB,T) iter = new(OBJ); \
      CB cb = iter.first(); \
      while(cb != null) begin \
-       if (cb.METHOD_CALL == VAL) \
+       if (cb.METHOD_CALL == VAL) begin \
+         `uvm_cb_trace(cb,OBJ,$sformatf(`"CB (%s) T (%s) METHOD_CALL returned VAL`",cb.get_name(), OBJ.get_full_name())) \
          return VAL; \
+       end \
+       `uvm_cb_trace(cb,OBJ,$sformatf(`"CB (%s) T (%s) METHOD_CALL did not return VAL`",cb.get_name(), OBJ.get_full_name())) \
        cb = iter.next(); \
      end \
      return 1-VAL; \
@@ -287,19 +290,19 @@
 `ifdef UVM_CB_TRACE_ON
 
 `define uvm_cb_trace(OBJ,CB,OPER) \
-  if(reporter.get_report_action(UVM_INFO,"UVMCB_TRC") & UVM_DISPLAY) begin \
+  begin \
     string msg; \
     msg = (OBJ == null) ? "null" : $sformatf("%s (%s@%0d)", \
       OBJ.get_full_name(), OBJ.get_type_name(), OBJ.get_inst_id()); \
-    reporter.uvm_report_info("UVMCB_TRC", $sformatf("%s: callback %s (%s@%0d) : to object %s",  \
-       OPER, CB.get_name(), CB.get_type_name(), CB.get_inst_id(), msg), UVM_NONE); \
+    `uvm_info("UVMCB_TRC", $sformatf("%s: callback %s (%s@%0d) : to object %s",  \
+       OPER, CB.get_name(), CB.get_type_name(), CB.get_inst_id(), msg), UVM_NONE) \
   end
 
 `define uvm_cb_trace_noobj(CB,OPER) \
-  if(reporter.get_report_action(UVM_INFO,"UVMCB_TRC") & UVM_DISPLAY) \
-    reporter.uvm_report_info("UVMCB_TRC", $sformatf("%s: callback %s (%s@%0d)" ,  \
-       OPER, CB.get_name(), CB.get_type_name(), CB.get_inst_id()), UVM_NONE);
-
+  begin \
+    `uvm_info("UVMCB_TRC", $sformatf("%s: callback %s (%s@%0d)" ,  \
+       OPER, CB.get_name(), CB.get_type_name(), CB.get_inst_id()), UVM_NONE) \
+  end
 `else
 
 `define uvm_cb_trace_noobj(CB,OPER) /* null */

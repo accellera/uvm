@@ -121,6 +121,8 @@ class bus_driver extends uvm_component;
 
   uvm_blocking_put_imp #(bus_tr,bus_driver) in;
 
+  `uvm_register_cb(bus_driver, bus_driver_cb)
+
   function new (string name, uvm_component parent=null);
     super.new(name,parent);
     in = new("in",this);
@@ -260,12 +262,10 @@ module top;
   my_bus_driver_cb  cb1    = new("cb1");
   my_bus_driver_cb2 cb2    = new("cb2");
 
-  bus_driver_cbs_t cbs = bus_driver_cbs_t::get_global_cbs();
-
   initial begin
-    cbs.add_cb(driver,cb1);
-    cbs.add_cb(driver,cb2);
-    cbs.display_cbs();
+    bus_driver_cbs_t::add(driver,cb1);
+    bus_driver_cbs_t::add(driver,cb2);
+    bus_driver_cbs_t::display_cbs();
     for (int i=1; i<=5; i++) begin
       tr.addr = i;
       tr.data = 6-i;

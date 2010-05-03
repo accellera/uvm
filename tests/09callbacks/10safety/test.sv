@@ -65,12 +65,15 @@ endclass
 
 
 class my_a_cb extends a_cb;
+   `uvm_object_utils(my_a_cb)
 endclass
 
 class my_b1_cb extends b1_cb;
+   `uvm_object_utils(my_b1_cb)
 endclass
 
 class my_b2_cb extends b2_cb;
+   `uvm_object_utils(my_b2_cb)
 endclass
 
 

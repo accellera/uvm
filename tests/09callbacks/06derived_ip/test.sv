@@ -22,7 +22,8 @@ module test;
 
   class ip_ext extends ip_base;
     `uvm_component_utils(ip_ext)
-    `uvm_register_derived_cb(ip_ext,cb_base,ip_base)
+    `uvm_set_super_type(ip_ext,ip_base)
+    `uvm_register_cb(ip_ext,cb_base)
     function new(string name,uvm_component parent);
       super.new(name,parent);
     endfunction
@@ -87,8 +88,8 @@ module test;
       $write("\n");
       foreach(comp.q[i]) 
         if(comp.q[i] != exp[i]) begin
-           $display("ERROR: expected: comp.q[%0d]", i, exp[i]);
-           $display("       got:      comp.q[%0d]", i, comp.q[i]);
+           $display("ERROR: expected: comp.q[%0d] %s", i, exp[i]);
+           $display("       got:      comp.q[%0d] %s", i, comp.q[i]);
            failed = 1;
         end
       if(failed)
