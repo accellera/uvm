@@ -17,6 +17,29 @@
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
 
+//////////////distrib/src/base/uvm_object_globals.svh////////////////////////////
+//////// uvm_severity   
+////////
+///////typedef enum uvm_severity
+///////{
+///////  UVM_INFO,
+///////  UVM_WARNING,
+///////  UVM_ERROR,
+///////  UVM_FATAL
+/////////} uvm_severity_type;
+//////////////////////////
+
+
+///////uvm_misc.svh////////////
+/////////
+////// typedef enum {UVM_APPEND, UVM_PREPEND} uvm_apprepend;
+///////////////////////////////
+///////////////////////////////
+
+////`define uvm_info(ID, MSG, VERBOSITY)
+//// `define uvm_warning(ID,MSG)
+///// `define uvm_error(ID,MSG)
+///// `define uvm_fatal(ID,MSG)
 
 program top;
 

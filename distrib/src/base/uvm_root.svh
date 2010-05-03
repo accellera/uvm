@@ -227,9 +227,9 @@ class uvm_root extends uvm_component;
   bit m_executing_stop_processes = 0;
 
   extern virtual task all_dropped (uvm_objection objection, 
-           uvm_object source_obj, int count);
+           uvm_object source_obj, string description, int count);
   extern virtual function void raised (uvm_objection objection, 
-           uvm_object source_obj, int count);
+           uvm_object source_obj, string description, int count);
 
   extern function void print_topology  (uvm_printer printer=null);
 
@@ -525,7 +525,6 @@ endfunction
 
 function void uvm_root::run_global_func_phase(uvm_phase phase=null, bit upto=0);
 
-  time timeout;
   bit run_all_phases;
 
   //Get the master phase in case the input phase is an alias.
@@ -670,7 +669,6 @@ task uvm_root::run_global_phase(uvm_phase phase=null, bit upto=0);
       m_curr_phase = m_first_phase;
     else
       m_curr_phase = m_phase_q[m_curr_phase];
-
     // Trigger phase's in_progress event.
     // The #0 allows any waiting processes to resume before we continue.
     m_curr_phase.m_set_in_progress();
@@ -681,6 +679,10 @@ task uvm_root::run_global_phase(uvm_phase phase=null, bit upto=0);
 
     // TASK-based phase
     if (m_curr_phase.is_task()) begin
+      // Before starting a phase see if a timeout has been configured, and
+      // if so, use it. Doing this just before the timeout is used allows
+      // the timeout to be configured in preceeding function based phases.
+      void'(get_config_int("timeout", phase_timeout));
 
       timeout = (phase_timeout==0) ?  `UVM_DEFAULT_TIMEOUT - $time :
                                       phase_timeout;
@@ -817,7 +819,6 @@ function void uvm_root::m_do_phase (uvm_component comp, uvm_phase phase);
       curr_phase = m_first_phase;
     else
       curr_phase = m_phase_q[curr_phase];
-
     // bottom-up
     if (!curr_phase.is_top_down()) begin
       string name;
@@ -1014,10 +1015,14 @@ endtask
 //
 //
 
+typedef class uvm_test_done_objection;
 function void uvm_root::raised (uvm_objection objection, uvm_object source_obj, 
-                              int count);
-  if (m_executing_stop_processes)
-    uvm_report_warning("ILLRAISE", "An uvm_test_done objection was raised during the execution of component stop processes for the stop_request. The objection is ignored by the stop process.", UVM_NONE);
+                              string description, int count);
+  if(objection != uvm_test_done_objection::get()) return;
+  if (m_executing_stop_processes) begin
+    string desc = description == "" ? "" : {" (\"", description, "\") "};
+    uvm_report_warning("ILLRAISE", {"An uvm_test_done objection ", desc, "was raised during the execution of component stop processes for the stop_request. The objection is ignored by the stop process."}, UVM_NONE);
+  end
   else
     m_objections_outstanding = 1;
 endfunction
@@ -1028,7 +1033,8 @@ endfunction
 //
 
 task uvm_root::all_dropped (uvm_objection objection, uvm_object source_obj, 
-                          int count);
+                          string description, int count);
+  if(objection != uvm_test_done_objection::get()) return;
   m_objections_outstanding = 0;
 endtask
 
@@ -1083,6 +1089,7 @@ function void uvm_root::insert_phase(uvm_phase new_phase,
     master_ph.add_alias(new_phase, exist_phase);
     return;
   end
+  else
 
   if (m_phase_q.exists(new_phase)) begin
     if ((exist_phase == null && m_first_phase != new_phase) ||

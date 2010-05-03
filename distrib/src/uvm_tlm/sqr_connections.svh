@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
 
 class uvm_seq_item_pull_port #(type REQ=int, type RSP=REQ)
-  extends uvm_port_base #(sqr_if_base #(REQ, RSP));
+  extends uvm_port_base #(uvm_sqr_if_base #(REQ, RSP));
   `UVM_SEQ_PORT(`SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_port")
   `SEQ_ITEM_PULL_IMP(this.m_if, REQ, RSP, t, t)
 
@@ -63,7 +63,7 @@ endclass
 //-----------------------------------------------------------------------------
 
 class uvm_seq_item_pull_export #(type REQ=int, type RSP=REQ)
-  extends uvm_port_base #(sqr_if_base #(REQ, RSP));
+  extends uvm_port_base #(uvm_sqr_if_base #(REQ, RSP));
   `UVM_EXPORT_COMMON(`SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_export")
   `SEQ_ITEM_PULL_IMP(this.m_if, REQ, RSP, t, t)
 endclass
@@ -79,7 +79,7 @@ endclass
 //-----------------------------------------------------------------------------
 
 class uvm_seq_item_pull_imp #(type REQ=int, type RSP=REQ, type IMP=int)
-  extends uvm_port_base #(sqr_if_base #(REQ, RSP));
+  extends uvm_port_base #(uvm_sqr_if_base #(REQ, RSP));
   `UVM_IMP_COMMON(`SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_imp",IMP)
   `SEQ_ITEM_PULL_IMP(m_imp, REQ, RSP, t, t)
 

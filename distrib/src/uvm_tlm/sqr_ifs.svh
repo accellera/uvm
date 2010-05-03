@@ -26,7 +26,7 @@
 
 //------------------------------------------------------------------------------
 //
-// CLASS: sqr_if_base #(REQ,RSP)
+// CLASS: uvm_sqr_if_base #(REQ,RSP)
 //
 // This class defines an interface for sequence drivers to communicate with
 // sequencers. The driver requires the interface via a port, and the sequencer
@@ -34,7 +34,7 @@
 //
 //------------------------------------------------------------------------------
 
-virtual class sqr_if_base #(type T1=uvm_object, T2=T1);
+virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
 
   // Task: get_next_item
   //
