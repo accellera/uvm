@@ -1,7 +1,7 @@
-// $Id: uvm_phase_defines.svh,v 1.12 2009/05/01 14:34:38 redelman Exp $
+//
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -20,19 +20,10 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef SVPP
-`ifndef INCA
 `define uvm_phase_type_name_decl(NAME) \
     virtual function string get_type_name (); \
       return `"NAME``_phase #(PARENT)`"; \
     endfunction
-`else
-`define uvm_phase_type_name_decl(NAME) \
-    virtual function string get_type_name (); \
-      return `"NAME``_phase`"; \
-    endfunction
-`endif
-`endif
 
 `define uvm_phase_func_decl(NAME,TOP_DOWN) \
   class NAME``_phase #(type PARENT=int) extends uvm_phase; \

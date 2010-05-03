@@ -148,6 +148,8 @@ if ($opt_F) {
 #
 $failures = 0;
 foreach $dir (@dirs) {
+  # trailing '/'s confuse this script
+  $dir =~ s|/$||;
   if (&run_one_test($dir)) {
     $failures++;
     if ($opt_F) {
@@ -157,7 +159,7 @@ foreach $dir (@dirs) {
 }
 print "-----------------------------------------------------------------\n";
 $txt = sprintf("Total of %d tests ", $#dirs+1);
-$dots = substr(".......................................", 0, 41-length($txt));
+$dots = substr("............................................", 0, 46-length($txt));
 print $txt, $dots;
 if ($failures > 0) {
   print " FAILED $failures tests\n";
@@ -179,8 +181,12 @@ exit($failures);
 sub run_one_test {
    local($testdir, $_) = @_;
 
-   $dots = substr(".......................................", 0, 40-length($dir));
-   print "$testdir $dots ";
+   local($dir) = $testdir;
+   if (length($dir) > 43) {
+     $dir = substr($dir, 0, 43) . "*";
+   }
+   $dots = substr("............................................", 0, 45-length($dir));
+   print "$dir $dots ";
 
    if (! -d $testdir) {
      print "**FAIL** ($testdir not exist)\n";
@@ -205,6 +211,7 @@ sub run_one_test {
      
      print "<running>\n" if $opt_v;
 
+     $comp_args = "";
      if (-e "$testdir/$tool.comp.args") {
        if (!open(ARGS, "< $testdir/$tool.comp.args")) {
 	 print "**FAIL** (Cannot read $tool.comp.args)\n";
@@ -217,11 +224,11 @@ sub run_one_test {
        close(ARGS);
      }
 
+     $defs = "";
      if (-e "$testdir/test.defines") {
        if (!open(ARGS, "< $testdir/test.defines")) {
 	 print "**FAIL** (Cannot read test.defines)\n";
        }
-       $defss = "";
        while ($_ = <ARGS>) {
          chomp;
          $defs .= " $_";
@@ -229,11 +236,11 @@ sub run_one_test {
        close(ARGS);
      }
 
+     $run_args = "";
      if (-e "$testdir/$tool.run.args") {
        if (!open(ARGS, "< $testdir/$tool.run.args")) {
 	 print "**FAIL** (Cannot read $tool.run.args)\n";
        }
-       $run_args = "";
        while ($_ = <ARGS>) {
          chomp;
          $run_args .= " $_";
@@ -241,6 +248,7 @@ sub run_one_test {
        close(ARGS);
      }
 
+     $plusargs = "";
      if (-e "$testdir/test.plusargs") {
        if (!open(ARGS, "< $testdir/test.plusargs")) {
 	 print "**FAIL** (Cannot read test.plusargs)\n";

@@ -1,7 +1,7 @@
-// $Id: uvm_component.svh,v 1.54 2010/03/16 23:56:02 redelman Exp $
+//
 //------------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -250,11 +250,6 @@ virtual class uvm_component extends uvm_report_object;
   // The latter causes each component's <stop> task to get called back if
   // its <enable_stop_interrupt> bit is set. After all components' stop tasks
   // return, the UVM will end the phase.
-  //
-  // Note- the post_new, export_connections, import_connections, configure,
-  // and pre_run phases are deprecated. <build> replaces post_new, <connect>
-  // replaces both import_ and export_connections, and <start_of_simulation>
-  // replaces pre_run.
   //
   //----------------------------------------------------------------------------
 
@@ -804,7 +799,7 @@ virtual class uvm_component extends uvm_report_object;
   // to indicate a number of objections which were raised.
 
   virtual function void raised (uvm_objection objection, uvm_object source_obj, 
-      int count);
+      string description, int count);
   endfunction
 
 
@@ -816,7 +811,7 @@ virtual class uvm_component extends uvm_report_object;
   // to indicate a number of objections which were dropped.
 
   virtual function void dropped (uvm_objection objection, uvm_object source_obj, 
-      int count);
+      string description, int count);
   endfunction
 
 
@@ -830,7 +825,7 @@ virtual class uvm_component extends uvm_report_object;
   // up to the object's parent until the callback returns.
 
   virtual task all_dropped (uvm_objection objection, uvm_object source_obj, 
-      int count);
+      string description, int count);
   endtask
 
 
@@ -1304,6 +1299,9 @@ virtual class uvm_component extends uvm_report_object;
   // tions are freely available via the open-source license.
   //----------------------------------------------------------------------------
 
+  extern       function void set_int_local (string field_name, 
+                               uvm_bitstream_t value,
+                               bit recurse=1);
   extern local function void m_component_path (ref uvm_component path[$]);
   extern local function void m_get_config_matches
                              (ref uvm_config_setting cfg_matches[$], 
@@ -1346,7 +1344,7 @@ virtual class uvm_component extends uvm_report_object;
               string stream_name="main", string label="",
               string desc="", time begin_time=0);
 
-  `ifndef INCA
+  `ifdef UVM_USE_FPC
   protected process m_phase_process;
   `endif
   protected event m_kill_request;
@@ -1358,49 +1356,10 @@ virtual class uvm_component extends uvm_report_object;
 
   extern virtual task restart ();
 
-  //----------------------------------------------------------------------------
-  //                          DEPRECATED MEMBERS
-  //                      *** Do not use in new code ***
-  //                  Convert existing code when appropriate.
-  //----------------------------------------------------------------------------
-  // Deprecated static methods:
-  // 
-  // global_stop_request
-  //   replaced by uvm_top.stop_request
-  //
-  // Deprecated phases:
-  //
-  // post_new
-  //   replaced by build (top-down)
-  //
-  // import/export_connections
-  //   Consolidated into the connect phase; deferred binding enforcement
-  //   via resolve_bindings allows connections to be order-independent
-  //
-  // pre_run
-  //   replaced by start_of_simulation
-  //----------------------------------------------------------------------------
-
-  extern static  function  void  global_stop_request();
-
-  extern virtual function  void  post_new ();
-  extern virtual function  void  import_connections ();
-  extern virtual function  void  configure ();
-  extern virtual function  void  export_connections ();
-  extern virtual function  void  pre_run (); 
-
-  extern static  function uvm_component find_component   (string comp_match);
-  extern static  function void          find_components  (string comp_match, 
-                                                    ref uvm_component comps[$]);
-  extern static  function uvm_component get_component    (int ele);
-  extern static  function int           get_num_components ();
-
-  `include "compatibility/urm_message_compatibility.svh"
+  int unsigned recording_detail = UVM_NONE;
+  extern         function void   do_print(uvm_printer printer);
 
 endclass : uvm_component
 
-// for backward compatibility
-typedef uvm_component uvm_threaded_component;
-            
 `endif // UVM_COMPONENT_SVH
 

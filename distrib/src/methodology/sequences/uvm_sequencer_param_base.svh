@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -65,7 +65,7 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   uvm_analysis_export #(RSP) rsp_export;
 
 
-  sequencer_analysis_fifo #(RSP) sqr_rsp_analysis_fifo;
+  uvm_sequencer_analysis_fifo #(RSP) sqr_rsp_analysis_fifo;
 
   // Variable- m_req_fifo
   //
@@ -484,17 +484,6 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
     if(add_simple == 1)
       if(!sequence_ids.exists("uvm_simple_sequence"))
         add_sequence("uvm_simple_sequence");
-  endfunction
-
-
-  // *** Deprecated Compat
-
-  /* deprecated */ function void set_num_last_items(int unsigned max);
-    set_num_last_reqs(max);
-  endfunction
-
-  /* deprecated */ function uvm_sequence_item last(int unsigned n);
-    return last_req(n);
   endfunction
 
 endclass

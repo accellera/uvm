@@ -402,6 +402,9 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
 
   static string m_typename="";
   static string m_cb_typename="";
+  static uvm_report_object reporter = new("cb_tracer");
+
+  // `uvm_object_param_utils(this_type)
 
   static function this_type get();
     if(m_inst == null) begin

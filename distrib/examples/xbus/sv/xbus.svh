@@ -1,7 +1,7 @@
-// $Id: xbus.svh,v 1.6 2009/06/02 21:23:09 jlrose Exp $
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -23,12 +23,8 @@
 `ifndef XBUS_SVH
 `define XBUS_SVH
 
-`ifdef USE_SVPP
-`include "uvm.svh"
-`else
 import uvm_pkg::*;
 `include "uvm_macros.svh"
-`endif
 
 `include "xbus_transfer.sv"
 

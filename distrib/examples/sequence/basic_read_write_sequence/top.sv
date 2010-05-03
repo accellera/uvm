@@ -1,6 +1,7 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -22,11 +23,7 @@
 
 package user_pkg;
 
-`ifdef INCA
-  `include "uvm.svh"
-`else
   import uvm_pkg::*;
-`endif
 
   typedef enum { BUS_READ, BUS_WRITE } bus_op_t;
   typedef enum { STATUS_OK, STATUS_NOT_OK } status_t;
@@ -171,10 +168,6 @@ class sequenceA #(type REQ = uvm_sequence_item,
 
     `uvm_info("sequenceA", "Starting sequence", UVM_MEDIUM)
     
-`ifndef VCS
-    `uvm_info("sequenceA", "  sequence %0d", my_id);
-`endif
-    
     for(int unsigned i = 0; i < `num_loops; i++) begin
       req = new();
       req.addr = (my_id * `num_loops) + i;
@@ -248,15 +241,13 @@ endpackage
 
 module top;
   import user_pkg::*;
-`ifndef INCA
   import uvm_pkg::*;
-`endif
   env e;
 
   initial begin
     `uvm_info("top","In top initial block",UVM_MEDIUM);
     e = new("env", null);
-    e.run_test();
+    run_test();
   end
 endmodule
 

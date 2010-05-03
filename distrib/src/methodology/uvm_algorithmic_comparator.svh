@@ -1,7 +1,8 @@
-// $Id: uvm_algorithmic_comparator.svh,v 1.7 2009/05/12 21:02:29 redelman Exp $
+//
 //------------------------------------------------------------------------------
-//   Copyright 2007-2008 Mentor Graphics Corporation
-//   Copyright 2007-2008 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the

@@ -1,7 +1,7 @@
-// $Id: uvm_packer.svh,v 1.15 2010/03/12 20:52:36 jlrose Exp $
+//
 //------------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //

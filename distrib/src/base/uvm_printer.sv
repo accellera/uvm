@@ -1,7 +1,7 @@
-// $Id: uvm_printer.sv,v 1.28 2009/12/14 22:39:41 jlrose Exp $
+//
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -280,11 +280,8 @@ endfunction
 function void uvm_printer::print_value_object (uvm_object value);
   string str;
   if(!knobs.reference) return;
-`ifdef INCA
   str = uvm_object_value_str(value);
   write_stream({"(", str, ")"});
-`else
-`endif
 endfunction
 
 
@@ -785,15 +782,10 @@ endfunction
 // uvm_object_value_str 
 // ---------------------
 
-// This function is needed to work around a but in $swrite
 function string uvm_object_value_str(uvm_object v);
   if(v == null) return "<null>";
-`ifdef INCA
-  $swrite(uvm_object_value_str, "@%0d",v);
-`else
   uvm_object_value_str.itoa(v.get_inst_id());
-  uvm_object_value_str = {v.get_name(),"@",uvm_object_value_str};
-`endif
+  uvm_object_value_str = {"@",uvm_object_value_str};
 endfunction
 
 // print_value_object
@@ -1016,15 +1008,11 @@ function void uvm_tree_printer::print_value_object (uvm_object value);
       print_scope_open();
     return;
   end
-`ifdef INCA
   str = uvm_object_value_str(value);
   if(value == null)
     write_stream(" <null>) "); 
   else
     write_stream({str, ") "}); 
-`else
-  write_stream(") ");
-`endif
   if(value!=null)
     print_scope_open();
 endfunction

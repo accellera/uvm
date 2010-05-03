@@ -1,6 +1,7 @@
+//
 //------------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -17,10 +18,10 @@
 //   under the License.
 //------------------------------------------------------------------------------
 
-`const int UVM_UNBOUNDED_CONNECTIONS = -1;
-`const string s_connection_error_id = "Connection Error";
-`const string s_connection_warning_id = "Connection Warning";
-`const string s_spaces = "                       ";
+const int UVM_UNBOUNDED_CONNECTIONS = -1;
+const string s_connection_error_id = "Connection Error";
+const string s_connection_warning_id = "Connection Warning";
+const string s_spaces = "                       ";
 
 typedef class uvm_port_component_base;
 typedef uvm_port_component_base uvm_port_list[string];
@@ -97,11 +98,6 @@ class uvm_port_component #(type PORT=uvm_object) extends uvm_port_component_base
     return m_port;
   endfunction
 
-  function void do_display (int max_level=-1, int level=0,
-                            bit display_connectors=0);
-    m_port.do_display(max_level,level,display_connectors);
-  endfunction
-
   virtual function void get_connected_to(ref uvm_port_list list);
     m_port.get_connected_to(list);
   endfunction
@@ -141,8 +137,8 @@ endclass
 //   IF  - The interface type implemented by the subtype to this base port
 //
 // The UVM provides a complete set of ports, exports, and imps for the OSCI-
-// standard TLM interfaces. They can be found in the ../src/uvm_tlm/ directory.
-// For the TLM interfaces, the IF parameter is always <uvm_tlm_if_base #(T1,T2)>.
+// standard TLM interfaces. They can be found in the ../src/tlm/ directory.
+// For the TLM interfaces, the IF parameter is always <tlm_if_base #(T1,T2)>.
 //
 // Just before <uvm_component::end_of_elaboration>, an internal
 // <uvm_component::resolve_bindings> process occurs, after which each port and
@@ -714,8 +710,6 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   endfunction
   
 
-  `include "compatibility/urm_port_compatibility.svh"
-
   // Function: get_if
   //
   // Returns the implementation (imp) port at the given index from the array of
@@ -740,34 +734,6 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
         return m_imp_list[nm];
       index--;
     end
-  endfunction
-
-
-
-  //------------------------------------
-  // Deprecated members below this point
-
-
-  function this_type lookup_indexed_if(int i=0);
-    return get_if(i);
-  endfunction
-
-  function void do_display (int max_level=-1, int level=0,
-                            bit display_connectors=0);
-    if (display_connectors)
-      m_comp.uvm_report_info("hierarchy debug" , "" , 1000 );
-  endfunction
-
-  function void remove();
-    return;
-  endfunction
-
-  local function bit check_phase (this_type provider);
-    return 1;
-  endfunction
-
-  local function void check_min_connection_size ();
-    return;
   endfunction
 
 endclass

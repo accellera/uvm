@@ -1,7 +1,7 @@
-// $Id: sqr_ifs.svh,v 1.6 2009/10/30 15:29:22 jlrose Exp $
+//
 //------------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -26,7 +26,7 @@
 
 //------------------------------------------------------------------------------
 //
-// CLASS: sqr_if_base #(REQ,RSP)
+// CLASS: uvm_sqr_if_base #(REQ,RSP)
 //
 // This class defines an interface for sequence drivers to communicate with
 // sequencers. The driver requires the interface via a port, and the sequencer
@@ -34,7 +34,7 @@
 //
 //------------------------------------------------------------------------------
 
-virtual class sqr_if_base #(type T1=uvm_object, T2=T1);
+virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
 
   // Task: get_next_item
   //

@@ -1,7 +1,7 @@
-// $Id: uvm_object.sv,v 1.48 2010/03/12 20:52:36 jlrose Exp $
+//
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -150,17 +150,6 @@ function string uvm_object::sprint(uvm_printer printer=null);
 endfunction
 
 
-// do_sprint (deprecated)
-// ---------
-
-function string uvm_object::do_sprint(uvm_printer printer);
-  uvm_top.uvm_report_warning("deprecated",
-      {"uvm_object::do_sprint() is deprecated and replaced by ",
-      "uvm_object::convert2string()"}, UVM_NONE);
-  return convert2string();
-endfunction
-
-
 // convert2string (virtual)
 // --------------
 
@@ -248,11 +237,7 @@ function void  uvm_object::set_string_local (string field_name,
   m_field_automation(null, UVM_SETSTR, field_name);
 
   if(m_sc.warning && !this.m_sc.status) begin
-`ifdef INCA
-    uvm_report_error("NOMTC", $psprintf("did not find a match for field %s (@%0d)", field_name, this), UVM_NONE);
-`else
-    uvm_report_error("NOMTC", $psprintf("did not find a match for field %s", field_name), UVM_NONE);
-`endif
+    uvm_report_error("NOMTC", $psprintf("did not find a match for field %s (@%0d)", field_name, this.get_inst_id()), UVM_NONE);
   end
 endfunction
 
@@ -541,15 +526,9 @@ function bit  uvm_object::compare (uvm_object rhs,
     end
     else begin
       comparer.print_msg_object(this, rhs);
-`ifdef INCA
       uvm_report_info("MISCMP",
            $psprintf("%0d Miscompare(s) for object %s@%0d vs. @%0d", 
-           comparer.result, get_name(), this, rhs), uvm_auto_options_object.comparer.verbosity);
-`else
-      uvm_report_info("MISCMP",
-           $psprintf("%0d Miscompare(s) for object %s", 
-           comparer.result, get_name()), uvm_auto_options_object.comparer.verbosity);
-`endif
+           comparer.result, get_name(), this.get_inst_id(), rhs.get_inst_id()), uvm_auto_options_object.comparer.verbosity);
       done = 1;
     end
   end

@@ -1,7 +1,7 @@
-// $Id: uvm_factory.svh,v 1.17 2009/10/30 15:29:21 jlrose Exp $
+//
 //------------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -292,42 +292,6 @@ class uvm_factory;
   // types.
 
   extern function void print (int all_types=1);
-
-
-  //-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
-
-  // name-based static methods - deprecated
-
-  extern static
-      function void         set_type_override (string original_type_name,
-                                               string override_type_name,
-                                               bit    replace=1);
-
-  extern static
-      function void         set_inst_override (string full_inst_path,
-                                               string original_type_name,
-                                               string override_type_name);
-
-  extern static
-      function uvm_object    create_object    (string requested_type_name,  
-                                               string parent_inst_path="",
-                                               string name="");
-
-  extern static
-      function uvm_component create_component (string requested_type_name,
-                                               string parent_inst_path="",
-                                               string name, 
-                                               uvm_component parent);
-
-
-  extern static
-      function void       print_override_info (string requested_type_name,
-                                               string parent_inst_path="",
-                                               string name="");
-
-  extern static function void  print_all_overrides(int all_types=0);
-
-  extern static function void  auto_register (uvm_object_wrapper obj);
 
 
   //----------------------------------------------------------------------------
@@ -751,6 +715,6 @@ endclass
 // our singleton factory; it is statically initialized
 //-----------------------------------------------------------------------------
 
-`const uvm_factory factory = uvm_factory::get();
+const uvm_factory factory = uvm_factory::get();
 
 `endif // UVM_FACTORY_SVH

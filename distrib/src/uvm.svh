@@ -1,7 +1,7 @@
-// $Id: uvm.svh,v 1.18 2009/05/12 21:02:29 redelman Exp $
+//
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
-//   Copyright 2007-2009 Cadence Design Systems, Inc. 
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -25,6 +25,4 @@
   `include "base/base.svh"
   `include "uvm_tlm/uvm_tlm.svh"
   `include "methodology/methodology.svh"
-  `include "compatibility/compatibility.svh"
-  //`include "uvm_globals.svh"
 `endif // UVM_SVH

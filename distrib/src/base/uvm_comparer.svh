@@ -1,7 +1,7 @@
-// $Id: uvm_comparer.svh,v 1.5 2009/12/14 22:39:41 jlrose Exp $
 //-----------------------------------------------------------------------------
-//   Copyright 2007-2008 Mentor Graphics Corporation
-//   Copyright 2007-2008 Cadence Design Systems, Inc.
+//   Copyright 2007-2010 Mentor Graphics Corporation
+//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -367,33 +367,18 @@ class uvm_comparer;
            $swrite(msg, "%0d Miscompare(s) for object ", result);
 
         case (sev)
-  `ifdef INCA
           UVM_WARNING: begin 
                      uvm_report_warning("MISCMP", $psprintf("%s%s@%0d vs. %s@%0d", msg,
-                        lhs.get_name(), lhs, rhs.get_name(), rhs), UVM_NONE);
+                        lhs.get_name(), lhs.get_inst_id(), rhs.get_name(), rhs.get_inst_id()), UVM_NONE);
                    end
           UVM_ERROR: begin 
                      uvm_report_error("MISCMP", $psprintf("%s%s@%0d vs. %s@%0d", msg,
-                        lhs.get_name(), lhs, rhs.get_name(), rhs), UVM_NONE);
+                        lhs.get_name(), lhs.get_inst_id(), rhs.get_name(), rhs.get_inst_id()), UVM_NONE);
                    end
           default: begin 
                      uvm_report_info("MISCMP", $psprintf("%s%s@%0d vs. %s@%0d", msg,
-                        lhs.get_name(), lhs, rhs.get_name(), rhs), UVM_LOW);
+                        lhs.get_name(), lhs.get_inst_id(), rhs.get_name(), rhs.get_inst_id()), UVM_LOW);
                    end
-  `else
-          UVM_WARNING: begin 
-                     uvm_report_warning("MISCMP", $psprintf("%s%s vs. %s", msg,
-                        lhs.get_name(), rhs.get_name()), UVM_NONE);
-                   end
-          UVM_ERROR: begin 
-                     uvm_report_error("MISCMP", $psprintf("%s%s vs. %s", msg,
-                        lhs.get_name(), rhs.get_name()), UVM_NONE);
-                   end
-          default: begin 
-                     uvm_report_info("MISCMP", $psprintf("%s%s vs. %s", msg,
-                        lhs.get_name(), rhs.get_name()), UVM_LOW);
-                   end
-  `endif
         endcase
       end
     end
@@ -405,23 +390,13 @@ class uvm_comparer;
 
   function void print_msg_object(uvm_object lhs, uvm_object rhs);
     result++;
-  `ifdef INCA
     if(result <= show_max) begin
       uvm_report_info("MISCMP", 
         $psprintf("Miscompare for %0s: lhs = @%0d : rhs = @%0d", 
-        scope.get_arg(), lhs, rhs), verbosity);
+        scope.get_arg(), lhs.get_inst_id(), rhs.get_inst_id()), verbosity);
     end
     $swrite(miscompares, "%s%s: lhs = @%0d : rhs = @%0d",
-        miscompares, scope.get_arg(), lhs, rhs);
-  `else
-    if(result <= show_max) begin
-      uvm_report_info("MISCMP", 
-        $psprintf("Miscompare for %0s",
-        scope.get_arg()), verbosity);
-    end
-    $swrite(miscompares, "%s%s:",
-        miscompares, scope.get_arg());
-  `endif
+        miscompares, scope.get_arg(), lhs.get_inst_id(), rhs.get_inst_id());
   endfunction
 
 
