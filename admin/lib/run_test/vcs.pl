@@ -24,16 +24,14 @@
 
 # If $vcs_bin has already been defined (say, to VCSi) then use the 
 # specified binary name instead. Otherwise, default to "vcs".
-$vcs_bin = $vcs_bin ? $vcs_bin : "vcs";
-$compiler_string = $compiler_string ? $compiler_string : 
-                                      "Compiler version = VCS";
+$vcs_bin = "vcs" unless $vcs_bin;
 
 #
 # Make sure the version of VSC can run these tests
 #
 
 $vcs = `$vcs_bin -id`;
-if ($vcs !~ m/$compiler_string (\S+)/) {
+if ($vcs !~ m/Compiler version = VCS\S* (\S+)/) {
   print STDERR "Unable to run VCS: $vcs";
   exit(1);
 }
