@@ -560,7 +560,6 @@ virtual class uvm_report_catcher extends uvm_object;
   );
   
     int thrown = 1;
-    int index;
     uvm_severity orig_severity;
     static bit in_catcher;
 
@@ -588,8 +587,8 @@ virtual class uvm_report_catcher extends uvm_object;
     m_orig_message   = message;      
     
     foreach(m_catcher_q[i]) begin
-      index = i;
-      thrown = m_catcher_q[i].process_report_catcher(m_catcher_q[index]); 
+      if (!m_catcher_q[i].is_enabled()) continue;
+      thrown = m_catcher_q[i].process_report_catcher(); 
 
       if(thrown == 0) begin 
         case(orig_severity)
@@ -630,12 +629,12 @@ virtual class uvm_report_catcher extends uvm_object;
   //internal method to call user catch() method
   //
 
-  local static function int process_report_catcher(uvm_report_catcher catcher);
+  local function int process_report_catcher();
 
     action_e act;
     sev_id_struct sev_id;
 
-    sev_id = m_sev_id_array[catcher];
+    sev_id = m_sev_id_array[this];
 
     if(!sev_id.is_on) 
       return 1;
@@ -646,10 +645,10 @@ virtual class uvm_report_catcher extends uvm_object;
     if(sev_id.id_specified && (sev_id.id != m_modified_id))
       return 1;
        
-    act = catcher.catch();
+    act = this.catch();
 
     if(act == UNKNOWN_ACTION)
-      catcher.uvm_report_error("RPTCTHR", {"uvm_report_catcher.catch() in cacther instance ", catcher.get_name(), " must return THROW or CAUGHT"}, UVM_NONE, `uvm_file, `uvm_line);
+      this.uvm_report_error("RPTCTHR", {"uvm_report_this.catch() in cacther instance ", this.get_name(), " must return THROW or CAUGHT"}, UVM_NONE, `uvm_file, `uvm_line);
 
     if(m_debug_flags & DO_NOT_MODIFY) begin
       m_modified_severity    = m_orig_severity;
