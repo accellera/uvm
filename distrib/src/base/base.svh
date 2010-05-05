@@ -69,6 +69,7 @@
 
   `include "base/uvm_callback.svh"
   `include "base/uvm_objection.svh"
+  `include "base/uvm_heartbeat.svh"
 
   `include "base/uvm_globals.svh"
 

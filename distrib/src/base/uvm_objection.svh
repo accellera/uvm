@@ -23,11 +23,35 @@
 `ifndef UVM_OBJECTION_SVH
 `define UVM_OBJECTION_SVH
 
-//Assumes access to uvm via an import of uvm_pkg or `include of uvm.svh
-
 typedef class uvm_objection;
 typedef class uvm_sequence_base;
+typedef class uvm_objection_cb;
+typedef uvm_callbacks #(uvm_objection,uvm_objection_cb) uvm_objection_cbs_t;
 
+
+//------------------------------------------------------------------------------
+//
+// Class: uvm_objection_cb
+//
+//------------------------------------------------------------------------------
+// This class allows for external consumers to attach to the various
+// objection callbacks, <uvm_objection::raised>, <uvm_objection::dropped> and 
+// <uvm_objection::all_dropped>.
+
+class uvm_objection_cb extends uvm_callback;
+  function new(string name);
+    super.new(name);
+  endfunction
+  virtual function void raised (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+  endfunction
+  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+  endfunction
+  virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+  endtask
+endclass
 
 //------------------------------------------------------------------------------
 //
@@ -41,9 +65,15 @@ typedef class uvm_sequence_base;
 // end the <uvm_component::run> phase.  When all participating components have
 // dropped their raised objections with ~uvm_test_done~, an implicit call to
 // ~global_stop_request~ is issued.
+//
+// Tracing of objection activity can be turned on to follow the activity of
+// the objection mechanism. It may be turned on for a specific objection
+// instance with <uvm_objection::trace_mode>, or it can be set for all 
+// objections from the command line using the option +UVM_OBJECTION_TRACE.
 //------------------------------------------------------------------------------
 
 class uvm_objection extends uvm_report_object;
+  protected bit  m_trace_mode=0;
 
   protected int  m_source_count[uvm_object];
   protected int  m_total_count [uvm_object];
@@ -52,34 +82,72 @@ class uvm_objection extends uvm_report_object;
 
   protected bit m_hier_mode = 1;
 
+  `uvm_register_cb(uvm_objection, uvm_objection_cb)
   uvm_root top = uvm_root::get();
 
   // Function: new
   //
-  // Creates a new objection instance.
+  // Creates a new objection instance. Accesses the command line
+  // argument +UVM_OBJECTION_TRACE to turn tracing on for
+  // all objection objects.
 
   function new(string name="");
     super.new(name);
     set_report_verbosity_level(top.get_report_verbosity_level());
+
+    // Get the command line trace mode setting
+    if($test$plusargs("UVM_OBJECTION_TRACE")) begin
+      m_trace_mode=1;
+    end
   endfunction
 
+  // Function: trace_mode
+  //
+  // Set or get the trace mode for the objection object. If no
+  // argument is specified (or an argument other than 0 or 1)
+  // the current trace mode is unaffected. A trace_mode of
+  // 0 turns tracing off. A trace mode of 1 turns tracing on.
+  // The return value is the mode prior to being reset.
+
+   function bit trace_mode (int mode=-1);
+    trace_mode = m_trace_mode;
+    if(mode == 0) m_trace_mode = 0;
+    else if(mode == 1) m_trace_mode = 1;
+   endfunction
 
   // Function- m_report
   //
   // Internal method for reporting count updates
 
-  function void m_report(uvm_object obj, uvm_object source_obj, int count, string action);
+  function void m_report(uvm_object obj, uvm_object source_obj, string description, int count, string action);
+    string desc;
     int _count = m_source_count.exists(obj) ? m_source_count[obj] : 0;
     int _total = m_total_count[obj];
+    if (!uvm_report_enabled(UVM_NONE,UVM_INFO,"OBJTN_TRC") || !m_trace_mode) return;
+
+    desc = description == "" ? "" : {" - (", description, ")" };
     if (source_obj == obj)
-      uvm_report_info("OBJTN_CNT", 
-        $sformatf("Object %0s %0s %0d objection(s), count=%0d  total=%0d",
-           obj.get_full_name()==""?"uvm_top":obj.get_full_name(), action, count, _count, _total), UVM_HIGH);
+
+      uvm_report_info("OBJTN_TRC", 
+        $sformatf("Object %0s %0s %0d objection(s), count=%0d  total=%0d%s",
+           obj.get_full_name()==""?"uvm_top":obj.get_full_name(), action, count, _count, _total,desc), UVM_NONE);
     else begin
-      uvm_report_info("OBJTN_CNT",
-        $sformatf("Object %0s %0s %0d objection(s) from its total (%s from source object %s), count=%0d  total=%0d",
+      int cpath = 0, last_dot=0;
+      string sname = source_obj.get_full_name(), nm = obj.get_full_name();
+      int max = sname.len() > nm.len() ? nm.len() : sname.len();
+
+      // For readability, only print the part of the source obj hierarchy underneath
+      // the current object.
+      while((sname[cpath] == nm[cpath]) && (cpath < max)) begin
+        if(sname[cpath] == ".") last_dot = cpath;
+        cpath++;
+      end 
+
+      if(last_dot) sname = sname.substr(last_dot+1, sname.len());
+      uvm_report_info("OBJTN_TRC",
+        $sformatf("Object %0s %0s %0d objection(s) from its total (%s from source object %s), count=%0d  total=%0d%s",
            obj.get_full_name()==""?"uvm_top":obj.get_full_name(), action=="raised"?"added":"subtracted",
-            count, action, source_obj.get_full_name(), _count, _total), UVM_HIGH);
+            count, action, sname, _count, _total, desc), UVM_NONE);
     end
   endfunction
 
@@ -120,13 +188,14 @@ class uvm_objection extends uvm_report_object;
   // raise : indicator of whether the objection is being raised or lowered. A
   //   1 indicates the objection is being raised.
 
-  function void m_propagate (uvm_object obj, uvm_object source_obj, int count, bit raise);
+  function void m_propagate (uvm_object obj, uvm_object source_obj, 
+       string description, int count, bit raise);
     if (obj != null && obj != top) begin
       obj = m_get_parent(obj);
       if(raise)
-        m_raise(obj, source_obj, count);
+        m_raise(obj, source_obj, description, count);
       else
-        m_drop(obj, source_obj, count);
+        m_drop(obj, source_obj, description, count);
     end
   endfunction
 
@@ -180,21 +249,24 @@ class uvm_objection extends uvm_report_object;
   // Rasing an objection causes the following.
   //
   // - The source and total objection counts for ~object~ are increased by
-  //   ~count~.
+  //   ~count~. ~description~ is a string that marks a specific objection
+  //   and is used in tracing/debug.
   //
   // - The objection's <raised> virtual method is called, which calls the
   //   <uvm_component::raised> method for all of the components up the 
   //   hierarchy.
   //
 
-  function void raise_objection (uvm_object obj=null, int count=1);
-    m_raise (obj, obj, count);
+  function void raise_objection (uvm_object obj=null, string description="",
+       int count=1);
+    m_raise (obj, obj, description, count);
   endfunction
 
 
   // Function- m_raise
 
-  function void m_raise (uvm_object obj, uvm_object source_obj, int count=1);
+  function void m_raise (uvm_object obj, uvm_object source_obj, 
+       string description="", int count=1);
 
     if (obj == null)
       obj = top;
@@ -212,10 +284,11 @@ class uvm_objection extends uvm_report_object;
       source_obj = obj;
     end
   
-    if (uvm_report_enabled(UVM_FULL,UVM_INFO,"OBJTN_CNT"))
-      m_report(obj,source_obj,count,"raised");
+    if (m_trace_mode)
+      m_report(obj,source_obj,description,count,"raised");
 
-    raised(obj, source_obj, count);
+    raised(obj, source_obj, description, count);
+    `uvm_do_callbacks(uvm_objection_cb,uvm_objection,raised(obj,source_obj,description,count))
 
     // If this object is still draining from a previous drop, then
     // raise the count and return. Any propagation will be handled
@@ -224,9 +297,9 @@ class uvm_objection extends uvm_report_object;
       return;
 
     if (!m_hier_mode && obj != top)
-      m_raise(top,source_obj,count);
+      m_raise(top,source_obj,description,count);
     else if (obj != top)
-      m_propagate(obj, source_obj, count, 1);
+      m_propagate(obj, source_obj, description, count, 1);
   
   endfunction
   
@@ -290,14 +363,16 @@ class uvm_objection extends uvm_report_object;
   // registered callbacks, the forked process can be skipped and propagation
   // proceeds immediately to the parent as described. 
 
-  function void drop_objection (uvm_object obj=null, int count=1);
-    m_drop (obj, obj, count);
+  function void drop_objection (uvm_object obj=null, string description="", 
+       int count=1);
+    m_drop (obj, obj, description, count);
   endfunction
 
 
   // Function- m_drop
 
-  function void m_drop (uvm_object obj, uvm_object source_obj, int count=1);
+  function void m_drop (uvm_object obj, uvm_object source_obj, 
+       string description="", int count=1);
 
     if (obj == null)
       obj = top;
@@ -321,18 +396,19 @@ class uvm_objection extends uvm_report_object;
       source_obj = obj;
     end
   
-    if (uvm_report_enabled(UVM_FULL,UVM_INFO,"OBJTN_CNT"))
-      m_report(obj,source_obj,count,"dropped");
+    if (m_trace_mode)
+      m_report(obj,source_obj,description,count,"dropped");
     
-    dropped(obj, source_obj, count);
+    dropped(obj, source_obj, description, count);
+    `uvm_do_callbacks(uvm_objection_cb,uvm_objection,dropped(obj,source_obj,description,count))
   
     // if count != 0, no reason to fork
     if (m_total_count[obj] != 0) begin
 
       if (!m_hier_mode && obj != top)
-        m_drop(top,source_obj,count);
+        m_drop(top,source_obj,description, count);
       else if (obj != top)
-        this.m_propagate(obj, source_obj, count, 0);
+        this.m_propagate(obj, source_obj, description, count, 0);
 
     end
     else begin
@@ -351,7 +427,11 @@ class uvm_objection extends uvm_report_object;
                   if (m_drain_time.exists(obj))
                     #(m_drain_time[obj]);
 
-                  all_dropped(obj,source_obj,count);
+                   if (m_trace_mode)
+                     m_report(obj,source_obj,description,count,"all_dropped");
+    
+                  all_dropped(obj,source_obj,description, count);
+                  `uvm_do_callbacks(uvm_objection_cb,uvm_objection,all_dropped(obj,source_obj,description,count))
   
                   // wait for all_dropped cbs to complete
                   wait fork;
@@ -375,13 +455,13 @@ class uvm_objection extends uvm_report_object;
 
             if (!m_hier_mode && obj != top) begin
               if (reraise)
-                m_raise(top,source_obj,diff_count);
+                m_raise(top,source_obj,description,diff_count);
               else
-                m_drop(top,source_obj,diff_count);
+                m_drop(top,source_obj,description, diff_count);
             end
             else
               if (obj != top) begin
-                this.m_propagate(obj, source_obj, diff_count, reraise);
+                this.m_propagate(obj, source_obj, description, diff_count, reraise);
               end
           end
 
@@ -418,10 +498,11 @@ class uvm_objection extends uvm_report_object;
   // Objection callback that is called when a <raise_objection> has reached ~obj~.
   // The default implementation calls <uvm_component::raised>.
 
-  virtual function void raised (uvm_object obj, uvm_object source_obj, int count);
+  virtual function void raised (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
     uvm_component comp;
     if ($cast(comp,obj))    
-      comp.raised(this, source_obj, count);
+      comp.raised(this, source_obj, description, count);
   endfunction
 
 
@@ -430,10 +511,11 @@ class uvm_objection extends uvm_report_object;
   // Objection callback that is called when a <drop_objection> has reached ~obj~.
   // The default implementation calls <uvm_component::dropped>.
 
-  virtual function void dropped (uvm_object obj, uvm_object source_obj, int count);
+  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
     uvm_component comp;
     if($cast(comp,obj))    
-      comp.dropped(this, source_obj, count);
+      comp.dropped(this, source_obj, description, count);
   endfunction
 
 
@@ -444,10 +526,11 @@ class uvm_objection extends uvm_report_object;
   // after the drain time associated with ~obj~. The default implementation 
   // calls <uvm_component::all_dropped>.
 
-  virtual task all_dropped (uvm_object obj, uvm_object source_obj, int count);
+  virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
     uvm_component comp;
     if($cast(comp,obj))    
-      comp.all_dropped(this, source_obj, count);
+      comp.all_dropped(this, source_obj, description, count);
   endtask
 
 
@@ -651,15 +734,16 @@ class uvm_test_done_objection extends uvm_objection;
   // Checks that the given ~object~ is derived from either <uvm_component> or
   // <uvm_sequence_base>.
 
-  virtual function void qualify(uvm_object obj=null, bit is_raise);
+  virtual function void qualify(uvm_object obj=null, bit is_raise, string description);
     uvm_component c;
     uvm_sequence_base s;
     string nm = is_raise ? "raise_objection" : "drop_objection";
+    string desc = description == "" ? "" : {" (\"", description, "\")"};
     if(! ($cast(c,obj) || $cast(s,obj))) begin
       uvm_report_error("TEST_DONE_NOHIER", {"A non-hierarchical object, '",
         obj.get_full_name(), "' (", obj.get_type_name(),") was used in a call ",
         "to uvm_test_done.", nm,"(). For this objection, a sequence ",
-        "or component is required." });
+        "or component is required.", desc });
     end
   endfunction
 
@@ -672,8 +756,9 @@ class uvm_test_done_objection extends uvm_objection;
   // Thus, after calling <uvm_objection::all_dropped>, this method will call
   // <global_stop_request> to stop the current task-based phase (e.g. run).
   
-  virtual task all_dropped (uvm_object obj, uvm_object source_obj, int count);
-    super.all_dropped(obj,source_obj,count);
+  virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+    super.all_dropped(obj,source_obj,description,count);
     if (obj == top) begin
       string msg = "", msg2 = "";
       if (!m_forced)
@@ -695,12 +780,13 @@ class uvm_test_done_objection extends uvm_objection;
   // If the ~object~ is not provided or is ~null~, then the implicit top-level
   // component, ~uvm_top~, is chosen.
 
-  virtual function void raise_objection (uvm_object obj=null, int count=1);
+  virtual function void raise_objection (uvm_object obj=null, 
+      string description="", int count=1);
     if(obj==null)
       obj=top;
     else
-      qualify(obj, 1);
-    super.raise_objection(obj,count);
+      qualify(obj, 1, description);
+    super.raise_objection(obj,description,count);
   endfunction
 
 
@@ -710,12 +796,13 @@ class uvm_test_done_objection extends uvm_objection;
   // If the ~object~ is not provided or is ~null~, then the implicit top-level
   // component, ~uvm_top~, is chosen.
 
-  virtual function void drop_objection (uvm_object obj=null, int count=1);
+  virtual function void drop_objection (uvm_object obj=null, 
+      string description="", int count=1);
     if(obj==null)
       obj=top;
     else
-      qualify(obj, 0);
-    super.drop_objection(obj,count);
+      qualify(obj, 0, description);
+    super.drop_objection(obj,description,count);
   endfunction
 
 
@@ -732,7 +819,7 @@ class uvm_test_done_objection extends uvm_objection;
     m_forced = 1;
     uvm_report_warning("FORCE_STOP",{"Object '",name,"' called force_stop. ",
        "Ending run phase"});
-    all_dropped(uvm_top, obj, 0);
+    all_dropped(uvm_top, obj, "", 0);
     m_forced = 0;
   endtask
 

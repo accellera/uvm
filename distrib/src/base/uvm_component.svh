@@ -799,7 +799,7 @@ virtual class uvm_component extends uvm_report_object;
   // to indicate a number of objections which were raised.
 
   virtual function void raised (uvm_objection objection, uvm_object source_obj, 
-      int count);
+      string description, int count);
   endfunction
 
 
@@ -811,7 +811,7 @@ virtual class uvm_component extends uvm_report_object;
   // to indicate a number of objections which were dropped.
 
   virtual function void dropped (uvm_objection objection, uvm_object source_obj, 
-      int count);
+      string description, int count);
   endfunction
 
 
@@ -825,7 +825,7 @@ virtual class uvm_component extends uvm_report_object;
   // up to the object's parent until the callback returns.
 
   virtual task all_dropped (uvm_objection objection, uvm_object source_obj, 
-      int count);
+      string description, int count);
   endtask
 
 

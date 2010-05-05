@@ -41,6 +41,7 @@ Options:
                "tool.fails" (can later be used with -f)
    -h       Print this message
    -R opts  Add the specified options to the simulation command
+   -S       Do not skip tests
    -u dir   Use the UVM distribution in the specified directory
    -v       Display the output of the testcase on stdout
 
@@ -49,7 +50,7 @@ USAGE
 }
 
 require "getopts.pl"
-&Getopts("cC:df:F:hR:u:v");
+&Getopts("cC:df:F:hR:Su:v");
 &usage if $opt_h || $#ARGV < 0;
 
 if (!$opt_u) {
@@ -148,6 +149,8 @@ if ($opt_F) {
 #
 $failures = 0;
 foreach $dir (@dirs) {
+  # trailing '/'s confuse this script
+  $dir =~ s|/$||;
   if (&run_one_test($dir)) {
     $failures++;
     if ($opt_F) {
@@ -157,7 +160,7 @@ foreach $dir (@dirs) {
 }
 print "-----------------------------------------------------------------\n";
 $txt = sprintf("Total of %d tests ", $#dirs+1);
-$dots = substr(".......................................", 0, 41-length($txt));
+$dots = substr("............................................", 0, 46-length($txt));
 print $txt, $dots;
 if ($failures > 0) {
   print " FAILED $failures tests\n";
@@ -179,8 +182,12 @@ exit($failures);
 sub run_one_test {
    local($testdir, $_) = @_;
 
-   $dots = substr(".......................................", 0, 40-length($dir));
-   print "$testdir $dots ";
+   local($dir) = $testdir;
+   if (length($dir) > 43) {
+     $dir = substr($dir, 0, 43) . "*";
+   }
+   $dots = substr("............................................", 0, 45-length($dir));
+   print "$dir $dots ";
 
    if (! -d $testdir) {
      print "**FAIL** ($testdir not exist)\n";
@@ -190,6 +197,11 @@ sub run_one_test {
    local($sv) = ("$testdir/test.sv");
    if (! -e $sv) {
      print "**FAIL** ($sv does not exist)\n";
+     return 1;
+   }
+
+   if (!$opt_S && !$opt_c && -e "$testdir/$tool.skip") {
+     print "SKIP (Use -S to force execution)\n";
      return 1;
    }
 
@@ -247,6 +259,7 @@ sub run_one_test {
        if (!open(ARGS, "< $testdir/test.plusargs")) {
 	 print "**FAIL** (Cannot read test.plusargs)\n";
        }
+       $plusargs = "";
        while ($_ = <ARGS>) {
          chomp;
          $plusargs .= " $_";

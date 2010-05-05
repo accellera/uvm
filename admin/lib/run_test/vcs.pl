@@ -1,5 +1,6 @@
 ##---------------------------------------------------------------------- 
 ##   Copyright 2010 Synopsys, Inc. 
+##   Copyright 2010 Verilab, Inc.
 ##   All Rights Reserved Worldwide 
 ## 
 ##   Licensed under the Apache License, Version 2.0 (the 
@@ -21,11 +22,16 @@
 # VCS-Specific test running script
 #
 
+# If $vcs_bin has already been defined (say, to VCSi) then use the 
+# specified binary name instead. Otherwise, default to "vcs".
+$vcs_bin = "vcs" unless $vcs_bin;
+
 #
 # Make sure the version of VSC can run these tests
 #
-$vcs = `vcs -id`;
-if ($vcs !~ m/Compiler version = VCS (\S+)/) {
+
+$vcs = `$vcs_bin -id`;
+if ($vcs !~ m/Compiler version = VCS\S* (\S+)/) {
   print STDERR "Unable to run VCS: $vcs";
   exit(1);
 }
@@ -69,10 +75,9 @@ sub vcs_too_old {
 sub run_the_test {
   local($testdir, $vcs_opts, $simv_opts, $_) = @_;
 
-  $vcs = "vcs -sverilog -timescale=1ns/1ns +incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv test.sv -l vcs.log $vcs_opts";
+  $vcs = "$vcs_bin -sverilog -timescale=1ns/1ns +incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv test.sv -l vcs.log $vcs_opts";
   $vcs .= " > /dev/null 2>&1" unless $opt_v;
 
-  print "$vcs\n" if $opt_v;
   system("cd $testdir; rm -f simv vcs.log simv.log; $vcs");
 
   if (-e "$testdir/simv") {
@@ -80,7 +85,7 @@ sub run_the_test {
     $simv .= " > /dev/null 2>&1" unless $opt_v;
 
     print "$simv\n" if $opt_v;
-    system("cd $testdir; $simv");
+    system("cd $testdir; ./$simv");
   }
 
   return 0;

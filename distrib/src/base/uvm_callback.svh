@@ -24,22 +24,325 @@
 `ifndef UVM_CALLBACK_SVH
 `define UVM_CALLBACK_SVH
 
-// Internal convenience macros used in implementation. Not for users.
-`define _UVM_CB_MSG_NULL_OBJ(FUNC) \
-   `"uvm_callback::FUNC - Object argument is null`"
+typedef class uvm_callback;
+typedef class uvm_callbacks;
+typedef class uvm_callbacks_base;
 
-`define _UVM_CB_MSG_NULL_CB(FUNC) \
-   $sformatf(`"uvm_callback::FUNC - Callback argument for object '%s' is null`", \
-    (obj==null?"null":obj.get_full_name()))
+// Class - uvm_typeid_base
+// Class - uvm_typeid#(T)
+//
+// Simple typeid interface. Need this to set up the base-super mapping.
+// This is similar to the factory, but much simpler. The idea of this
+// interface is that each object type T has a typeid that can be
+// used for mapping type relationships. This is not a user visible class.
+class uvm_typeid_base;
+  static string typename="";
+  static uvm_callbacks_base typeid_map[uvm_typeid_base];
+  static uvm_typeid_base type_map[uvm_callbacks_base];
+endclass
+class uvm_typeid#(type T=uvm_object) extends uvm_typeid_base;
+  static uvm_typeid#(T) m_b_inst = get();
+  static function uvm_typeid#(T) get();
+    if(m_b_inst == null) begin
+      m_b_inst = new;
+    end
+    return m_b_inst;
+  endfunction
+endclass
 
-`define _UVM_CB_MSG_NO_CBS(FUNC)  \
-   $sformatf(`"uvm_callback::FUNC - No callbacks registered with object '%s'`",\
-    (obj==null?"null":obj.get_full_name()))
+// Class - uvm_callbacks_base
+//
+// Base class singleton that holds generic queues for all instance
+// specific objects. This is an internal class. This class contains a
+// global pool that has all of the instance specific callback queues in it. 
+// All of the typewide callback queues live in the derivative class
+// uvm_typed_callbacks#(T). This is not a user visible class.
+//
+// This class holds the class inheritance hierarchy information
+// (super types and derivative types).
+//
+// Note, all derivative uvm_callbacks#() class singletons access this
+// global m_pool object in order to get access to their specific
+// instance queue.
 
-`define _UVM_CB_MSG_NOT_REG(FUNC) \
-   $sformatf(`"uvm_callback::FUNC - Callback '%s' not registered with object '%s'`",cb.get_name(), \
-    (obj==null?"null":obj.get_full_name()))
+class uvm_callbacks_base extends uvm_object;
+  static uvm_callbacks_base m_b_inst;
+  static uvm_pool#(uvm_object,uvm_queue#(uvm_callback)) m_pool = m_get_pool();
+  static function uvm_pool#(uvm_object,uvm_queue#(uvm_callback)) m_get_pool();
+    if(m_pool == null) m_pool = new;
+    return m_pool;
+  endfunction
 
+  //Type checking inteface
+  uvm_callbacks_base m_this_type[$];  //one to many T->T/CB
+  uvm_typeid_base m_super_type;       //one to one relation 
+  uvm_typeid_base m_derived_types[$]; //one to many relation
+
+  virtual function bit m_am_i_a(uvm_object obj);
+    return 0;
+  endfunction
+  virtual function bit m_is_for_me(uvm_callback cb);
+    return 0;
+  endfunction
+  virtual function bit m_is_registered(uvm_object obj, uvm_callback cb);
+    return 0;
+  endfunction
+
+  //Check registration. To test registration, start at this class and
+  //work down the class hierarchy. If any class returns true then
+  //the pair is legal.
+  function bit check_registration(uvm_object obj, uvm_callback cb);
+    uvm_callbacks_base st, dt;
+    if(m_is_registered(obj,cb)) begin
+      return 1;
+    end
+    // Need to look at all possible T/CB pairs of this type
+    foreach(m_this_type[i]) begin
+      if(m_b_inst != m_this_type[i])
+        if( m_this_type[i].m_is_registered(obj,cb)) begin
+          return 1;
+        end
+    end
+
+    if(obj == null) begin
+      foreach(m_derived_types[i]) begin
+        dt = uvm_typeid_base::typeid_map[m_derived_types[i] ];
+        if(dt != null && dt.check_registration(null,cb))
+          return 1;
+      end
+    end
+
+    return 0;
+  endfunction
+
+  virtual function uvm_queue#(uvm_callback) m_get_twq(uvm_object obj);
+    return null;
+  endfunction
+  virtual function void m_add_tw_cbs(uvm_callback cb, uvm_apprepend ordering);
+  endfunction
+  virtual function bit m_delete_tw_cbs(uvm_callback cb);
+    return 0;
+  endfunction
+
+endclass
+
+// Class - uvm_typed_callbacks#(T)
+//
+// Another internal class. This contains the queue of typewide
+// callbacks. It also contains some of the public interface methods,
+// but those methods are accessed via the uvm_callbacks#() class
+// so they are documented in that class even though the implementation
+// is in this class. 
+//
+// The add, delete, and display methods are implemented in this class.
+
+class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
+  static uvm_queue#(uvm_callback) m_twcb = new("typewide_queue");
+  static string m_typename;
+
+
+  //The actual global object from the derivative class. Note that this is
+  //just a reference to the object that is generated in the derived class.
+  static uvm_typed_callbacks#(T) m_inst;
+
+  static function uvm_queue#(uvm_callback) m_get_tw_queue();
+    if(m_twcb == null) begin
+      m_twcb = new;
+    end
+    return m_twcb;
+  endfunction
+
+  //Type checking interface
+  virtual function bit m_am_i_a(uvm_object obj);
+    T this_type;
+    if(obj == null) return 1;
+    return($cast(this_type,obj));
+  endfunction
+
+  //Gettting the typewide queue
+  virtual function uvm_queue#(uvm_callback) m_get_twq(uvm_object obj);
+    if(m_am_i_a(obj)) begin
+      foreach(m_derived_types[i]) begin
+        uvm_callbacks_base dt;
+        dt = uvm_typeid_base::typeid_map[m_derived_types[i] ];
+        if(dt != null && dt != this) begin
+          m_get_twq = dt.m_get_twq(obj);
+          if(m_get_twq != null) return m_get_twq;
+        end
+      end
+      return m_twcb;
+    end
+    else return null;
+  endfunction
+
+  static function int m_cb_find(uvm_queue#(uvm_callback) q, uvm_callback cb);
+    for(int i=0; i<q.size(); ++i) begin
+      if(q.get(i) == cb) return i;
+    end
+    return -1;
+  endfunction
+
+  //For a typewide callback, need to add to derivative types as well.
+  virtual function void m_add_tw_cbs(uvm_callback cb, uvm_apprepend ordering);
+    uvm_callbacks_base cb_pair;
+    uvm_object obj;
+    T me;
+    uvm_queue#(uvm_callback) q;
+    if(m_cb_find(m_twcb,cb) == -1) begin
+      m_twcb.push_back(cb);
+    end
+    if(m_pool.first(obj)) begin
+      do begin
+        if($cast(me,obj)) begin
+          q = m_pool.get(obj);
+          if(m_cb_find(q,cb) == -1) begin
+            if(ordering == UVM_APPEND)
+              q.push_back(cb);
+            else
+              q.push_front(cb);
+          end
+        end
+      end while(m_pool.next(obj));
+    end
+    foreach(m_derived_types[i]) begin
+      cb_pair = uvm_typeid_base::typeid_map[m_derived_types[i] ];
+      if(cb_pair != this) begin
+        cb_pair.m_add_tw_cbs(cb,ordering);
+      end
+    end
+  endfunction
+
+
+  //For a typewide callback, need to remove from derivative types as well.
+  virtual function bit m_delete_tw_cbs(uvm_callback cb);
+    uvm_callbacks_base cb_pair;
+    uvm_object obj;
+    uvm_queue#(uvm_callback) q;
+    int pos = m_cb_find(m_twcb,cb);
+
+    if(pos != -1) begin
+      m_twcb.delete(pos);
+      m_delete_tw_cbs = 1;
+    end
+
+    if(m_pool.first(obj)) begin
+      do begin
+        q = m_pool.get(obj);
+        pos = m_cb_find(q,cb);
+        if(pos != -1) begin
+          q.delete(pos);
+          m_delete_tw_cbs = 1;
+        end
+      end while(m_pool.next(obj));
+    end
+    foreach(m_derived_types[i]) begin
+      cb_pair = uvm_typeid_base::typeid_map[m_derived_types[i] ];
+      if(cb_pair != this)
+        m_delete_tw_cbs |= cb_pair.m_delete_tw_cbs(cb);
+    end
+  endfunction
+
+
+  static function void display_cbs(T obj=null);
+    T me;
+    uvm_callbacks_base ib = m_inst;
+    string cbq[$];
+    string inst_q[$];
+    string mode_q[$];
+    uvm_callback cb;
+    string blanks = "                             ";
+    uvm_object bobj = obj;
+
+    uvm_queue#(uvm_callback) q;
+    string tname, str;
+
+    int max_cb_name=0, max_inst_name=0;
+
+    if(m_typename != "") tname = m_typename;
+    else if(obj != null) tname = obj.get_type_name();
+    else tname = "*";
+
+    q = m_inst.m_twcb;
+    for(int i=0; i<q.size(); ++i) begin
+      cb = q.get(i);
+      cbq.push_back(cb.get_name());
+      inst_q.push_back("(*)");
+      if(cb.is_enabled()) mode_q.push_back("ON");
+      else mode_q.push_back("OFF");
+
+      str = cb.get_name();
+      max_cb_name = max_cb_name > str.len() ? max_cb_name : str.len();
+      str = "(*)";
+      max_inst_name = max_inst_name > str.len() ? max_inst_name : str.len();
+    end
+
+    if(obj ==null) begin
+      if(m_inst.m_pool.first(bobj)) begin
+        do
+          if($cast(me,bobj)) break;
+        while(m_inst.m_pool.next(bobj));
+      end
+      if(me != null || m_inst.m_twcb.size()) begin
+        $display("Registered callbacks for all instances of %s", tname); 
+        $display("---------------------------------------------------------------");
+      end
+      if(me != null) begin
+        do begin
+          if($cast(me,bobj)) begin
+            q = m_inst.m_pool.get(bobj);
+            for(int i=0; i<q.size(); ++i) begin
+              cb = q.get(i);
+              cbq.push_back(cb.get_name());
+              inst_q.push_back(bobj.get_full_name());
+              if(cb.is_enabled()) mode_q.push_back("ON");
+              else mode_q.push_back("OFF");
+  
+              str = cb.get_name();
+              max_cb_name = max_cb_name > str.len() ? max_cb_name : str.len();
+              str = bobj.get_full_name();
+              max_inst_name = max_inst_name > str.len() ? max_inst_name : str.len();
+            end
+          end
+        end while (m_inst.m_pool.next(bobj));
+      end
+      else begin
+        $display("No callbacks registered for any instances of type %s", tname);
+      end
+    end
+    else begin
+      if(m_inst.m_pool.exists(bobj) || m_inst.m_twcb.size()) begin
+        $display("Registered callbacks for instance %s of %s", obj.get_full_name(), tname); 
+        $display("---------------------------------------------------------------");
+      end
+      if(m_inst.m_pool.exists(bobj)) begin
+        q = m_inst.m_pool.get(bobj);
+        for(int i=0; i<q.size(); ++i) begin
+          cb = q.get(i);
+          cbq.push_back(cb.get_name());
+          inst_q.push_back(bobj.get_full_name());
+          if(cb.is_enabled()) mode_q.push_back("ON");
+          else mode_q.push_back("OFF");
+
+          str = cb.get_name();
+          max_cb_name = max_cb_name > str.len() ? max_cb_name : str.len();
+          str = bobj.get_full_name();
+          max_inst_name = max_inst_name > str.len() ? max_inst_name : str.len();
+        end
+      end
+    end
+    if(!cbq.size()) begin
+      if(obj == null) str = "*";
+      else str = obj.get_full_name();
+      $display("No callbacks registered for instance %s of type %s", str, tname);
+    end
+
+    foreach (cbq[i]) begin
+      $display("%s  %s on %s  %s", cbq[i], blanks.substr(0,max_cb_name-cbq[i].len()-1), inst_q[i], blanks.substr(0,max_inst_name - inst_q[i].len()-1), mode_q[i]);
+    end
+
+  endfunction
+
+endclass
 
 //------------------------------------------------------------------------------
 //
@@ -55,7 +358,10 @@
 // 
 // To enable compile-time type-safety, the class is parameterized on both the
 // user-defined callback interface implementation as well as the object type
-// associated with the callback. 
+// associated with the callback. The object type-callback type pair are
+// associated together using the <`uvm_register_callback> macro to define
+// a valid pairing; valid pairings are checked when a user attempts to add
+// a callback to an object.
 //
 // To provide the most flexibility for end-user customization and reuse, it
 // is recommended that the component developer also define a corresponding set
@@ -68,173 +374,436 @@
 // registered callbacks, or to not call the base implementation, effectively
 // disabling that particalar hook. A demonstration of this methodology is
 // provided in an example included in the kit.
-//------------------------------------------------------------------------------
 
-class uvm_callbacks #(type T=int, CB=int) extends uvm_pool #(T,uvm_queue #(CB));
+class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
+    extends uvm_typed_callbacks#(T);
 
   // Parameter: T
   //
   // This type parameter specifies the base object type with which the
-  // <CB> callback objects will be registered.
+  // <CB> callback objects will be registered. This object must be
+  // a derivative of ~uvm_object~.
 
   // Parameter: CB
   //
   // This type parameter specifies the base callback type that will be
   // managed by this callback class. The callback type is typically a
   // interface class, which defines one or more virtual method prototypes 
-  // that users can override in subtypes.
+  // that users can override in subtypes. This type must be a derivative
+  // of <uvm_callback>.
   
-  typedef uvm_callbacks #(T,CB) this_type;
-  typedef uvm_queue #(CB) queue_t;
-  typedef uvm_pool #(T,queue_t) pool_t;
+  typedef uvm_callbacks#(T,CB) this_type;
+  typedef uvm_callbacks#(T,uvm_callback) that_type;
+ 
+  // Singleton instance is used for type checking
+  static this_type m_inst = this_type::get();
+  static uvm_callbacks#(T,uvm_callback) m_base_inst = that_type::get();
 
+  // typeinfo
+  static uvm_typeid_base m_typeid = uvm_typeid#(T)::get();
+  static uvm_typeid_base m_cb_typeid = uvm_typeid#(CB)::get();
+
+  static string m_typename="";
+  static string m_cb_typename="";
   static uvm_report_object reporter = new("cb_tracer");
 
-  `uvm_object_param_utils(this_type)
 
-  // Function: new
-  //
-  // Creates a new uvm_callbacks object, giving it an optional ~name~.
+  // `uvm_object_param_utils(this_type)
 
-  function new(string name="uvm_callback");
-    super.new(name);
+  static function this_type get();
+    if(m_inst == null) begin
+      uvm_callbacks_base b;
+      m_inst = new;
+
+      m_base_inst = uvm_callbacks#(T,uvm_callback)::get();
+      uvm_typed_callbacks#(T)::m_inst = m_base_inst;
+
+      m_b_inst = m_base_inst;
+
+      m_typeid = uvm_typeid#(T)::get();
+      b = m_b_inst; 
+      m_b_inst.m_this_type.push_back(m_inst);
+
+      if(!uvm_typeid_base::typeid_map.exists(m_typeid)) begin
+        uvm_typeid_base::typeid_map[m_typeid] = m_base_inst; 
+        if(!uvm_typeid_base::type_map.exists(b))
+          uvm_typeid_base::type_map[b] = m_typeid;
+      end
+    end
+    return m_inst;
   endfunction
 
+  // Register valid callback type
+  bit m_registered = 0;
+  static function bit register_pair(string tname="", cbname="");
+    this_type inst = get();
 
-  // Function: get_global_cbs
-  //
-  // Returns the global callback pool for this type.
-  //
-  // This allows items to be shared amongst components throughout the
-  // verification environment.
+    m_typename = tname;
+    uvm_typed_callbacks#(T)::m_typename = tname;
+    m_cb_typename = cbname;
 
-  static this_type m_global_cbs;
+    m_typeid.typename = tname;
+    m_cb_typeid.typename = cbname;
 
-  static function this_type get_global_cbs ();
-    if (m_global_cbs==null)
-      m_global_cbs = new("pool");
-    return m_global_cbs;
+    inst.m_registered = 1; 
   endfunction
 
+  virtual function bit m_is_registered(uvm_object obj, uvm_callback cb);
+    if(m_is_for_me(cb) && m_am_i_a(obj))
+      return m_registered;
+  endfunction
 
-  // Function: add_cb
+  //Does type check to see if the callback is valid for this type
+  virtual function bit m_is_for_me(uvm_callback cb);
+    CB this_cb;
+    return($cast(this_cb,cb));
+  endfunction
+
+  // Group: Add/delete inteface
+
+  // Function: add
   //
   // Registers the given callback object, ~cb~, with the given
   // ~obj~ handle. The ~obj~ handle can be null, which allows 
   // registration of callbacks without an object context. If
-  // ~append~ is 1 (default), the callback will be executed
+  // ~ordreing~ is UVM_APPEND (default), the callback will be executed
   // after previously added callbacks, else  the callback
-  // will be executed ahead of previously added callbacks.
-
-  virtual function void add_cb(T obj, CB cb, bit append=1);
-    queue_t cbq;
-    if (obj == null) begin
-      uvm_report_error("NULL_OBJ",`_UVM_CB_MSG_NULL_OBJ(add_cb));
-      return;
-    end
-    if (cb == null) begin
-      uvm_report_error("NULL_CB",`_UVM_CB_MSG_NULL_CB(add_cb));
-      return;
-    end
-    cbq = get(obj);
-    if (append)
-      cbq.push_back(cb);
-    else
-      cbq.push_front(cb);
-    `uvm_cb_trace(obj,cb,"add callback")
-  endfunction
-
-  
-  // Function: delete_cb
+  // will be executed ahead of previously added callbacks. The ~cb~
+  // is the callback handle; it must be non-null, and if the callback
+  // has already been added to the object instance then a warning is
+  // issued. Note that the CB parameter is optional. For example, the 
+  // following are equivalent:
   //
-  // Removes a previously registered callback, ~cb~, for the given
-  // object, ~obj~. 
+  //| uvm_callbacks#(my_comp)::add(comp_a, cb);
+  //| uvm_callbacks#(my_comp, my_callback)::add(comp_a,cb);
 
-  virtual function void delete_cb(T obj, CB cb);
-    queue_t cbq;
-    bit found;
-    if (obj == null) begin
-      uvm_report_error("NULL_OBJ",`_UVM_CB_MSG_NULL_OBJ(add_cb));
-      return;
+  static function void add(T obj, uvm_callback cb, uvm_apprepend ordering=UVM_APPEND);
+    uvm_queue#(uvm_callback) q;
+    string nm,tnm; 
+    if(!m_base_inst.check_registration(obj,cb)) begin
+       if(obj==null) nm = "(*)"; else nm = obj.get_full_name();
+       if(m_base_inst.m_typename!="") tnm = m_base_inst.m_typename; else if(obj != null) tnm = obj.get_type_name(); else tnm = "uvm_object";
+       uvm_report_warning("CBUNREG", { "Callback ", cb.get_name(), " cannot be registered with object ",
+         nm, " because callback type ", cb.get_type_name(),
+         " is not registered with object type ", tnm }, UVM_NONE);
+//       return;
     end
-    if (!exists(obj)) begin
-      uvm_report_warning("NO_CBS",`_UVM_CB_MSG_NO_CBS(delete_cb));
-      return;
-    end
-    if (cb == null) begin
-      uvm_report_error("NULL_CB",`_UVM_CB_MSG_NULL_CB(delete_cb));
-      return;
-    end
-    cbq = get(obj);
-    for (int i=cbq.size()-1; i >= 0; i--) begin
-      if (cbq.get(i) == cb) begin
-        cbq.delete(i);
-        `uvm_cb_trace(obj,cb,$sformatf("delete callback from positon %0d", i))
-        found=1;
-      end
-    end
-    if (!found)
-      uvm_report_error("CB_NOT_REG",`_UVM_CB_MSG_NOT_REG(delete_cb));
-    else
-      if(cbq.size() == 0)
-        delete(obj);
-
-  endfunction
-
-
-  // Function: trace_mode
-  //
-  // This function takes a single argument to turn on (1) or off (0) tracing.
-  // The default is to turn tracing on.
-
-  function void trace_mode(bit mode);
-    if(mode)
-      reporter.set_report_id_action("TRACE_CB", UVM_DISPLAY|UVM_LOG);
-    else
-      reporter.set_report_id_action("TRACE_CB", UVM_NO_ACTION);
-  endfunction
-
-
-  // Function: display_cbs
-  //
-  // Displays information about all registered callbacks for the
-  // given ~obj~ handle. If ~obj~ is not provided or is null, then
-  // information about all callbacks for all objects is displayed.
-
-  function void display_cbs(T obj=null);
-
-    if (obj == null) begin
-      if (first(obj))
-        do 
-          display_cbs(obj);
-        while (next(obj));
-      else
-        uvm_report_info("SHOWCBQ", "No callbacks registered", UVM_NONE);
-      return;
-    end
-
-    if (exists(obj)) begin
-      queue_t cbq;
-      cbq = get(obj);
-      uvm_report_info("SHOWCBQ", 
-        $sformatf("The callback queue for object '%s' has %0d elements",
-         (obj==null?"null":obj.get_full_name()), cbq.size()), UVM_NONE);
-      for (int i=0;i<cbq.size();i++) begin
-        CB cb;
-        cb = cbq.get(i);
-        $display("    %0d:  name=%s type=%s (%s)",
-          i, cb.get_name(), cb.get_type_name(),
-          cb.is_enabled() ? "enabled" : "disabled");
-      end
+    if(obj == null) begin
+      m_base_inst.m_add_tw_cbs(cb,ordering);
     end
     else begin
-      uvm_report_info("SHOWCBQ",
-        {"The callback queue for object '", obj.get_full_name(),
-          "' is empty."}, UVM_NONE);
+      q = m_pool.get(obj);
+      if(q.size() == 0)
+        for(int i=0; i<m_twcb.size(); ++i)  begin
+          q.push_back(m_twcb.get(i)); 
+        end
+      //check if already exists in the queue
+      if(m_cb_find(q,cb) != -1) begin
+        uvm_report_warning("CBPREG", { "Callback object ", cb.get_name(), " is already registered",
+          " with object ", obj.get_full_name() }, UVM_NONE);
+      end
+      else begin
+        if(ordering == UVM_APPEND) begin
+          q.push_back(cb);
+        end
+        else begin
+          q.push_front(cb);
+        end
+      end
     end
   endfunction
-  
+
+  // Function: add_by_name
+  //
+  // Registers the given callback object, ~cb~, with one or more uvm_components.
+  // The components must already exist and must be type T or a derivative. As
+  // with <add> the CB parameter is optional. ~root~ specifies the location in
+  // the component hierarchy to start the search for ~name~. See <uvm_root::find_all>
+  // for more details on searching by name.
+
+  static function void add_by_name(string name, uvm_callback cb,
+     uvm_component root, uvm_apprepend ordering=UVM_APPEND);
+    uvm_component cq[$];
+    T t;
+    void'(uvm_top.find_all(name,cq,root));
+    if(cq.size() == 0) begin
+      uvm_report_warning("CBNOMTC", { "add_by_name failed to find any components matching the name ",
+        name, ", callback ", cb.get_name(), " will not be registered." }, UVM_NONE);
+    end
+    foreach(cq[i]) begin
+      if($cast(t,cq[i])) begin 
+        add(t,cb,ordering); 
+      end
+    end
+  endfunction
+
+
+  // Function: delete
+  //
+  // Deletes the given callback object, ~cb~, from the queue associated with
+  //  the given ~obj~ handle. The ~obj~ handle can be null, which allows 
+  // de-registration of callbacks without an object context. 
+  // The ~cb~ is the callback handle; it must be non-null, and if the callback
+  // has already been removed to the object instance then a warning is
+  // issued. Note that the CB parameter is optional. For example, the 
+  // following are equivalent:
+  //
+  //| uvm_callbacks#(my_comp)::remove(comp_a, cb);
+  //| uvm_callbacks#(my_comp, my_callback)::remove(comp_a,cb);
+
+  static function void delete(T obj, uvm_callback cb);
+    uvm_object b_obj = obj;
+    uvm_queue#(uvm_callback) q;
+    bit found = 0;
+    int pos;
+    if(obj == null) begin
+      found = m_base_inst.m_delete_tw_cbs(cb);
+    end
+    else begin
+      q = m_pool.get(b_obj);
+      pos = m_cb_find(q,cb);
+      if(pos != -1) begin
+        q.delete(pos);
+        found = 1;
+      end
+    end
+    if(!found) begin
+      string nm;
+      if(obj==null) nm = "(*)"; else nm = obj.get_full_name();
+      uvm_report_warning("CBUNREG", { "Callback ", cb.get_name(), " cannot be removed from object ",
+        nm, " because it is not currently registered to that object." }, UVM_NONE);
+    end
+  endfunction
+
+
+  // Function: delete_by_name
+  //
+  // Removes the given callback object, ~cb~, associated with one or more 
+  // uvm_component callback queues. As with <delete> the CB parameter is 
+  // optional. ~root~ specifies the location in the component hierarchy to start 
+  // the search for ~name~. See <uvm_root::find_all> for more details on searching 
+  // by name.
+
+  static function void delete_by_name(string name, uvm_callback cb,
+     uvm_component root);
+    uvm_component cq[$];
+    T t;
+    void'(uvm_top.find_all(name,cq,root));
+    if(cq.size() == 0) begin
+      uvm_report_warning("CBNOMTC", { "delete_by_name failed to find any components matching the name ",
+        name, ", callback ", cb.get_name(), " will not be unregistered." }, UVM_NONE);
+    end
+    foreach(cq[i]) begin
+      if($cast(t,cq[i])) begin 
+        delete(t,cb); 
+      end
+    end
+  endfunction
+
+
+  // Group: Iterator interface
+  // This set of functions provide an iterator interface for callback queues. A facade
+  // class, <uvm_callback_iter> is also available, and is the generally preferred way to
+  // iterate over callback queues.
+
+  // Function: get_first
+  //
+  // returns the first enabled callback of type CB which resides in the queue for ~obj~.
+  // If ~obj~ is null then the typewide queue for T is searched. ~itr~ is the iterator;
+  // it will be updated with a value that can be supplied to <get_next> to get the next
+  // callback object.
+  //
+  // If the queue is empty then null is returned.
+
+  static function CB get_first (ref int itr, input T obj);
+    uvm_queue#(uvm_callback) q;
+    CB cb;
+    if(!m_pool.exists(obj)) begin //no instance specific
+      if(obj == null) 
+        q = m_twcb;
+      else 
+        q = m_base_inst.m_get_twq(obj); //get the most derivative queue
+    end 
+    else begin
+      q = m_pool.get(obj);
+    end
+    for(itr = 0; itr<q.size(); ++itr) begin
+      if($cast(cb, q.get(itr))) begin
+        if(cb.callback_mode()) begin
+          return cb;
+        end
+      end
+    end
+    return null;
+  endfunction
+
+  // Function: get_next
+  //
+  // returns the next enabled callback of type CB which resides in the queue for ~obj~,
+  // using ~itr~ as the starting point. If ~obj~ is null then the typewide queue for T 
+  // is searched. ~itr~ is the iterator; it will be updated with a value that can be 
+  // supplied to <get_next> to get the next callback object.
+  //
+  // If no more callbacks exist in the queue, then null is returned.
+
+  static function CB get_next (ref int itr, input T obj);
+    uvm_queue#(uvm_callback) q;
+    CB cb;
+    get_next = null;
+    if(!m_pool.exists(obj)) begin //no instance specific
+      if(obj == null) 
+        q = m_twcb;
+      else 
+        q = m_base_inst.m_get_twq(obj); //get the most derivative queue
+    end 
+    else begin
+      q = m_pool.get(obj);
+    end
+    for(itr = itr+1; itr<q.size(); ++itr) begin
+      if($cast(cb, q.get(itr))) begin
+        if(cb.is_enabled()) begin
+          return cb;
+        end
+      end
+    end
+    return null;
+  endfunction
+
 endclass
+
+// This type is not really expected to be used directly by the user, instead they are 
+// expected to use the macro `uvm_set_super_type. The sole purpose of this type is to
+// allow for setting up of the derived_type/super_type mapping.
+
+class uvm_derived_callbacks#(type T=uvm_object, type ST=uvm_object, type CB=uvm_callback)
+    extends uvm_callbacks#(T,CB);
+
+  typedef uvm_derived_callbacks#(T,ST,CB) this_type;
+  typedef uvm_callbacks#(T,CB)            this_user_type;
+  typedef uvm_callbacks#(ST,CB)           this_super_type;
+ 
+  // Singleton instance is used for type checking
+  static this_type m_inst = get();
+  static this_user_type m_user_inst = this_user_type::get();
+  static this_super_type m_super_inst = this_super_type::get();
+
+  // typeinfo
+  static uvm_typeid_base m_s_typeid = uvm_typeid#(ST)::get();
+
+  static function this_type get();
+    this_user_type m_user_inst = this_user_type::get();
+    this_super_type m_super_inst = this_super_type::get();
+    if(m_inst == null) begin
+      m_inst = new;
+    end
+    return m_inst;
+  endfunction
+
+  static function bit register_super_type(string tname="", sname="");
+    this_user_type u_inst = this_user_type::get();
+    this_type      inst = this_type::get();
+    uvm_callbacks_base s_obj;
+
+    this_user_type::m_inst.m_typename = tname;
+
+    if(sname != "") m_s_typeid.typename = sname;
+
+    if(u_inst.m_super_type != null) begin
+      if(u_inst.m_super_type == m_s_typeid) return 1;
+      uvm_report_warning("CBTPREG", { "Type ", tname, " is already registered to super type ", 
+        this_super_type::m_inst.m_typename, ". Ignoring attempt to register to super type ",
+        sname}, UVM_NONE); 
+      return 1;
+    end
+    if(this_super_type::m_inst.m_typename == "")
+      this_super_type::m_inst.m_typename = sname;
+    u_inst.m_super_type = m_s_typeid;
+    u_inst.m_base_inst.m_super_type = m_s_typeid;
+
+    s_obj = uvm_typeid_base::typeid_map[m_s_typeid];
+    s_obj.m_derived_types.push_back(m_typeid);
+    return 1;
+  endfunction
+
+endclass
+
+//------------------------------------------------------------------------------
+// CLASS: uvm_callback_iter
+//
+// The ~uvm_callback_iter~ class is an iterator class for iterating over
+// callback queues of a specific callback type. The typical usage of
+// the class is:
+//
+//| uvm_callback_iter#(mycb,mycomp) iter = new(this);
+//| for(mycb cb = iter.first(); cb != null; cb = iter.next())
+//|    cb.dosomething();
+//
+//------------------------------------------------------------------------------
+
+class uvm_callback_iter#(type CB = int, type T = int);
+
+   local int m_i;
+   local T   m_obj;
+   local CB  m_cb;
+
+   // Function: new
+   //
+   // Creates a new callback iterator object. It is required that the object
+   // context be provided.
+
+   function new(T obj);
+      m_obj = obj;
+   endfunction
+
+   // Function: first
+   //
+   // Returns the first valid (enabled) callback of the callback type (or
+   // a derivative) that is in the queue of the context object. If the
+   // queue is empty then null is returned.
+
+   function CB first();
+      if (m_obj == null) return null;
+      m_cb = uvm_callbacks#(T,CB)::get_first(m_i, m_obj);
+      return m_cb;
+   endfunction
+
+   // Function: next
+   //
+   // Returns the first valid (enabled) callback of the callback type (or
+   // a derivative) that is in the queue of the context object. If the
+   // queue is empty then null is returned.
+
+   function CB next();
+      if (m_obj == null) return null;
+      m_cb = uvm_callbacks#(T,CB)::get_next(m_i, m_obj);
+      return m_cb;
+   endfunction
+
+   // Function: get_cb
+   //
+   // Returns the last callback accessed via a first() or next()
+   // call. 
+
+   function CB get_cb();
+      return m_cb;
+   endfunction
+
+/****
+   function void trace(uvm_object obj = null);
+      if (m_cb != null && T::cbs::get_debug_flags() & UVM_CALLBACK_TRACE) begin
+         uvm_report_object reporter = null;
+         string who = "Executing ";
+         void'($cast(reporter, obj));
+         if (reporter == null) void'($cast(reporter, m_obj));
+         if (reporter == null) reporter = uvm_top;
+         if (obj != null) who = {obj.get_full_name(), " is executing "};
+         else if (m_obj != null) who = {m_obj.get_full_name(), " is executing "};
+         reporter.uvm_report_info("CLLBK_TRC", {who, "callback ", m_cb.get_name()}, UVM_LOW);
+      end
+   endfunction
+****/
+endclass
+
 
 
 //------------------------------------------------------------------------------
@@ -272,10 +841,12 @@ class uvm_callback extends uvm_object;
   //
   // Enable/disable callbacks (modeled like rand_mode and constraint_mode).
 
-  function void callback_mode(bit on);
+  function bit callback_mode(int on=-1);
     `uvm_cb_trace_noobj(this,$sformatf("callback_mode(%0d) %s (%s)",
-                         on, get_name(), get_type_name(), this))
-    m_enabled = on;
+                         on, get_name(), get_type_name()))
+    callback_mode = m_enabled;
+    if(on==0) m_enabled=0;
+    if(on==1) m_enabled=1;
   endfunction
 
   // Function: is_enabled
