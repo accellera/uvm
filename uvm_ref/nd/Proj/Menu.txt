@@ -159,7 +159,7 @@ Group: Macros  {
    File: Report Macros  (no auto-title, /cygdrive/c/Sourceforge/UVM/uvm/distrib/src/macros/uvm_message_defines.svh)
    File: Component and Object  (no auto-title, /cygdrive/c/Sourceforge/UVM/uvm/distrib/src/macros/uvm_object_defines.svh)
    File: Sequence and Do Action  (no auto-title, /cygdrive/c/Sourceforge/UVM/uvm/distrib/src/macros/uvm_sequence_defines.svh)
-   File: uvm_callback_defines.svh  (/cygdrive/c/Sourceforge/UVM/uvm/distrib/src/macros/uvm_callback_defines.svh)
+   File: Callbacks  (no auto-title, /cygdrive/c/Sourceforge/UVM/uvm/distrib/src/macros/uvm_callback_defines.svh)
    File: TLM Implementation Port Declaration Macros  (/cygdrive/c/Sourceforge/UVM/uvm/distrib/src/macros/uvm_tlm_defines.svh)
    }  # Group: Macros
 
