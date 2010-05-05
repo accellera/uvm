@@ -73,9 +73,6 @@ endclass
 //------------------------------------------------------------------------------
 
 class uvm_objection extends uvm_report_object;
-  static protected uvm_objection_cbs_t m_global_cbs = uvm_objection_cbs_t::get_global_cbs();
-  protected uvm_queue#(uvm_objection_cb) m_cb_q;
-
   protected bit  m_trace_mode=0;
 
   protected int  m_source_count[uvm_object];
@@ -85,6 +82,7 @@ class uvm_objection extends uvm_report_object;
 
   protected bit m_hier_mode = 1;
 
+  `uvm_register_cb(uvm_objection, uvm_objection_cb)
   uvm_root top = uvm_root::get();
 
   // Function: new
@@ -95,7 +93,6 @@ class uvm_objection extends uvm_report_object;
 
   function new(string name="");
     super.new(name);
-    m_cb_q = m_global_cbs.get(this);
     set_report_verbosity_level(top.get_report_verbosity_level());
 
     // Get the command line trace mode setting
@@ -291,11 +288,7 @@ class uvm_objection extends uvm_report_object;
       m_report(obj,source_obj,description,count,"raised");
 
     raised(obj, source_obj, description, count);
-    for(int i=0; i<m_cb_q.size(); ++i) begin
-      uvm_objection_cb cb = m_cb_q.get(i);
-      if(cb.is_enabled())
-        cb.raised(obj,source_obj,description,count);
-    end
+    `uvm_do_callbacks(uvm_objection_cb,uvm_objection,raised(obj,source_obj,description,count))
 
     // If this object is still draining from a previous drop, then
     // raise the count and return. Any propagation will be handled
@@ -407,11 +400,7 @@ class uvm_objection extends uvm_report_object;
       m_report(obj,source_obj,description,count,"dropped");
     
     dropped(obj, source_obj, description, count);
-    for(int i=0; i<m_cb_q.size(); ++i) begin
-      uvm_objection_cb cb = m_cb_q.get(i);
-      if(cb.is_enabled())
-        cb.dropped(obj,source_obj,description,count);
-    end
+    `uvm_do_callbacks(uvm_objection_cb,uvm_objection,dropped(obj,source_obj,description,count))
   
     // if count != 0, no reason to fork
     if (m_total_count[obj] != 0) begin
@@ -442,11 +431,7 @@ class uvm_objection extends uvm_report_object;
                      m_report(obj,source_obj,description,count,"all_dropped");
     
                   all_dropped(obj,source_obj,description, count);
-                  for(int i=0; i<m_cb_q.size(); ++i) begin
-	            uvm_objection_cb cb = m_cb_q.get(i);
-                    if(cb.is_enabled())
-                      cb.all_dropped(obj,source_obj,description,count);
-                  end
+                  `uvm_do_callbacks(uvm_objection_cb,uvm_objection,all_dropped(obj,source_obj,description,count))
   
                   // wait for all_dropped cbs to complete
                   wait fork;

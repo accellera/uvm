@@ -48,9 +48,7 @@ typedef enum {
 
 typedef class uvm_hb_callback;
 class uvm_heartbeat extends uvm_object;
-  static protected uvm_objection_cbs_t m_global_cbs = uvm_objection_cbs_t::get_global_cbs();
 
-  protected uvm_queue#(uvm_objection_cb) m_cb_q;
   protected uvm_objection   m_objection = null;
   protected uvm_hb_callback m_cb = null;
   protected uvm_component   m_cntxt;
@@ -201,15 +199,14 @@ class uvm_heartbeat extends uvm_object;
 
   function void m_enable_cb;
     static bit added = 0;
-    m_cb.callback_mode(1);
-    m_cb_q = m_global_cbs.get(m_objection);
+    void'(m_cb.callback_mode(1));
     if(!added) 
-      m_global_cbs.add_cb(m_objection, m_cb);
+      uvm_callbacks#(uvm_objection,uvm_objection_cb)::add(m_objection, m_cb);
     added = 1;
   endfunction
 
   function void m_disable_cb;
-    m_cb.callback_mode(0);
+    void'(m_cb.callback_mode(0));
   endfunction
 
   task m_hb_process;

@@ -27,6 +27,70 @@
 // Group: Callback Macros
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+// MACRO: `uvm_register_cb
+//
+// Registers the given ~CB~ callback type with the given ~T~ object type. If
+// a type-callback pair is not registered then a warning is issued if an
+// attempt is made to use the pair (add, delete, etc.).
+//
+// The registration will typically occur in the component that executes the
+// given type of callback. For instance:
+//
+//| virtual class mycb;
+//|   virtual function void doit();
+//| endclass
+//|
+//| class my_comp extends uvm_component;
+//|   `uvm_register_cb(my_comp,mycb)
+//|   ...
+//|   task run;
+//|     ...
+//|     `uvm_do_callbacks(mycb, my_comp, doit())
+//|   endtask
+//| endclass
+//-----------------------------------------------------------------------------
+
+`define uvm_register_cb(T,CB) \
+  static local bit m_register_cb_``CB = uvm_callbacks#(T,CB)::register_pair(`"T`",`"CB`");
+
+
+//-----------------------------------------------------------------------------
+// MACRO: `uvm_set_super_type
+//
+// Defines the super type of T to be ST. This allows for derived class
+// objects to inherit typewide objects that are registered with the base
+// class.
+//
+// The registration will typically occur in the component that executes the
+// given type of callback. For instance:
+//
+//| virtual class mycb;
+//|   virtual function void doit();
+//| endclass
+//|
+//| class my_comp extends uvm_component;
+//|   `uvm_register_cb(my_comp,mycb)
+//|   ...
+//|   task run;
+//|     ...
+//|     `uvm_do_callbacks(mycb, my_comp, doit())
+//|   endtask
+//| endclass
+//|
+//| class my_derived_comp extends my_comp;
+//|   `uvm_set_super_type(my_derived_comp,my_comp)
+//|   ...
+//|   task run;
+//|     ...
+//|     `uvm_do_callbacks(mycb, my_comp, doit())
+//|   endtask
+//| endclass
+//-----------------------------------------------------------------------------
+
+`define uvm_set_super_type(T,ST) \
+  static local bit m_register_``T``ST = uvm_derived_callbacks#(T,ST)::register_super_type(`"T`",`"ST`"); 
+
 
 //-----------------------------------------------------------------------------
 // MACRO: `uvm_do_callbacks
@@ -82,18 +146,12 @@
 
 `define uvm_do_obj_callbacks(CB,T,OBJ,METHOD_CALL) \
    begin \
-     uvm_callbacks #(T,CB) cbs = uvm_callbacks #(T,CB)::get_global_cbs(); \
-     uvm_queue #(CB) cbq; \
-     if (!cbs.exists(OBJ)) \
-       return; \
-     /* Make a copy of the queue in case the user tries changing the queue */ \
-     /* inside the callback. For example, for a one-shot callback. */ \
-     cbq = cbs.get(OBJ); \
-     cbq = new cbq; \
-     for (int i=0; i<cbq.size();i++) begin \
-       CB cb = cbq.get(i); \
-       if (cb.is_enabled()) \
-         cb.METHOD_CALL; \
+     uvm_callback_iter#(CB,T) iter = new(OBJ); \
+     CB cb = iter.first(); \
+     while(cb != null) begin \
+       `uvm_cb_trace(cb,OBJ,$sformatf(`"CB (%s) T (%s) METHOD_CALL`",cb.get_name(), OBJ.get_full_name())) \
+       cb.METHOD_CALL; \
+       cb = iter.next(); \
      end \
    end
 
@@ -157,77 +215,18 @@
 
 `define uvm_do_obj_callbacks_exit_on(CB,T,OBJ,METHOD_CALL,VAL) \
    begin \
-     uvm_callbacks #(T,CB) cbs = uvm_callbacks #(T,CB)::get_global_cbs(); \
-     uvm_queue #(CB) cbq; \
-     if (!cbs.exists(OBJ)) \
-       return 1-VAL; \
-     cbq = cbs.get(OBJ); \
-     for (int i=0; i<cbq.size();i++) begin \
-       CB cb = cbq.get(i); \
-       if (cb.is_enabled() && cb.METHOD_CALL == VAL) \
+     uvm_callback_iter#(CB,T) iter = new(OBJ); \
+     CB cb = iter.first(); \
+     while(cb != null) begin \
+       if (cb.METHOD_CALL == VAL) begin \
+         `uvm_cb_trace(cb,OBJ,$sformatf(`"CB (%s) T (%s) METHOD_CALL returned VAL`",cb.get_name(), OBJ.get_full_name())) \
          return VAL; \
+       end \
+       `uvm_cb_trace(cb,OBJ,$sformatf(`"CB (%s) T (%s) METHOD_CALL did not return VAL`",cb.get_name(), OBJ.get_full_name())) \
+       cb = iter.next(); \
      end \
      return 1-VAL; \
    end
-
-
-//-----------------------------------------------------------------------------
-// MACRO: `uvm_do_task_callbacks
-//
-// Calls the given ~METHOD~ of all callbacks of type ~CB~ registered with
-// the calling object (i.e. ~this~ object), which is or is based on type ~T~.
-//
-// This macro is the same as the <uvm_do_callbacks> macro except that each
-// callback is executed inside of its own thread. The threads are concurrent,
-// but the execution order of the threads is simulator dependent. The macro
-// does not return until all forked callbacks have completed.
-//
-//| virtual class mycb extends uvm_cb;
-//|   pure task my_task(mycomp, int addr, int data);
-//| endclass
-//
-//| task mycomp::run(); 
-//|    int curr_addr, curr_data;
-//|    ...
-//|    `uvm_callback(mycb, mycomp, my_task(this, curr_addr, curr_data))
-//|    ...
-//| endtask
-//-----------------------------------------------------------------------------
-
-`define uvm_do_task_callbacks(CB,T,METHOD_CALL) \
-  `uvm_do_obj_task_callbacks(CB,T,this,METHOD_CALL)
-
-
-//-----------------------------------------------------------------------------
-// MACRO: `uvm_do_ext_task_callbacks
-//
-// This macro is identical to <uvm_do_task_callbacks> macro except there is an
-// additional ~OBJ~ argument that allows the user to execute callbacks associated
-// with an external object instance ~OBJ~ instead of the calling (~this~) object.
-//-----------------------------------------------------------------------------
-
-`define uvm_do_obj_task_callbacks(CB,T,OBJ,METHOD_CALL) \
-  begin \
-     uvm_callbacks #(T,CB) cbs = uvm_callbacks #(T,CB)::get_global_cbs(); \
-     uvm_queue #(CB) cbq; \
-     if (cbs.exists(OBJ)) begin\
-       cbq = cbs.get(OBJ); \
-       fork begin \
-         for (int i=0; i<cbq.size();i++) begin \
-           CB cb = cbq.get(i); \
-           if (cb.is_enabled()) begin \
-             fork begin \
-               `uvm_cb_trace(cb,OBJ,`"fork/join_none METHOD_CALL`") \
-               cb.METHOD_CALL; \
-             end join_none \
-           end \
-         end \
-         wait fork; \
-       end join \
-     end \
-   end
-
-
 
 
 // callback trace macros can be turned on via +define+UVM_CB_TRACE_ON
@@ -235,19 +234,19 @@
 `ifdef UVM_CB_TRACE_ON
 
 `define uvm_cb_trace(OBJ,CB,OPER) \
-  if(reporter.get_report_action(UVM_INFO,"UVMCB_TRC") & UVM_DISPLAY) begin \
+  begin \
     string msg; \
     msg = (OBJ == null) ? "null" : $sformatf("%s (%s@%0d)", \
       OBJ.get_full_name(), OBJ.get_type_name(), OBJ.get_inst_id()); \
-    reporter.uvm_report_info("UVMCB_TRC", $sformatf("%s: callback %s (%s@%0d) : to object %s",  \
-       OPER, CB.get_name(), CB.get_type_name(), CB.get_inst_id(), msg), UVM_NONE); \
+    `uvm_info("UVMCB_TRC", $sformatf("%s: callback %s (%s@%0d) : to object %s",  \
+       OPER, CB.get_name(), CB.get_type_name(), CB.get_inst_id(), msg), UVM_NONE) \
   end
 
 `define uvm_cb_trace_noobj(CB,OPER) \
-  if(reporter.get_report_action(UVM_INFO,"UVMCB_TRC") & UVM_DISPLAY) \
-    reporter.uvm_report_info("UVMCB_TRC", $sformatf("%s: callback %s (%s@%0d)" ,  \
-       OPER, CB.get_name(), CB.get_type_name(), CB.get_inst_id()), UVM_NONE);
-
+  begin \
+    `uvm_info("UVMCB_TRC", $sformatf("%s: callback %s (%s@%0d)" ,  \
+       OPER, CB.get_name(), CB.get_type_name(), CB.get_inst_id()), UVM_NONE) \
+  end
 `else
 
 `define uvm_cb_trace_noobj(CB,OPER) /* null */

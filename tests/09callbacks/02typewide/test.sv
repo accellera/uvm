@@ -1,0 +1,118 @@
+module test;
+  import uvm_pkg::*;
+
+  virtual class cb_base extends uvm_callback;
+    function new(string name=""); super.new(name); endfunction
+    pure virtual function void  doit(ref string q[$]);
+  endclass
+
+  class ip_comp extends uvm_component;
+    string q[$];
+    `uvm_component_utils(ip_comp)
+    `uvm_register_cb(ip_comp,cb_base)
+    function new(string name,uvm_component parent);
+      super.new(name,parent);
+    endfunction
+    task run;
+      int i;
+      uvm_report_info("EXCB","executing callbacks",UVM_NONE);
+      `uvm_do_callbacks(cb_base,ip_comp,doit(q))
+    endtask
+  endclass
+
+  class mycb extends cb_base;
+    `uvm_object_utils(mycb)
+    function new(string name=""); super.new(name); endfunction
+    virtual function void  doit(ref string q[$]);
+      q.push_back(get_name());
+    endfunction
+  endclass
+
+  class test extends uvm_component;
+    mycb cb, rcb;
+    ip_comp comp, comp1;
+    `uvm_component_utils(test)
+    function new(string name,uvm_component parent);
+      super.new(name,parent);
+      comp = new("comp",this);
+
+      cb = new("comp_cb0");
+      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
+      cb = new("tw_cb0");
+      uvm_callbacks#(ip_comp,cb_base)::add(null,cb);
+    endfunction
+
+    function void build();
+      comp1 = new("comp1",this);
+
+      cb = new("comp1_cb0");
+      uvm_callbacks#(ip_comp,cb_base)::add(comp1,cb);
+
+      cb = new("disabled_cb1");
+      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
+      cb.callback_mode(0);
+      uvm_callbacks#(ip_comp,cb_base)::add(comp1,cb);
+  
+      cb = new("cb2");
+      rcb = cb;
+      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
+      uvm_callbacks#(ip_comp,cb_base)::add(comp1,cb);
+  
+      cb = new("cb3");
+      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
+ 
+      //delete type wide 
+      uvm_callbacks#(ip_comp,cb_base)::delete(null,rcb);
+   
+      cb = new("tw_cb4");
+      uvm_callbacks#(ip_comp,cb_base)::add(null,cb);
+  
+      uvm_callbacks#(ip_comp,cb_base)::display_cbs();
+    endfunction
+
+    task run;
+      #100 uvm_top.stop_request();
+    endtask
+
+    function void report();
+      int failed = 0;
+      string exp[$], exp1[$];
+      //cb2 was deleted and cb1 was disabled
+
+      exp.push_back("comp_cb0");  exp.push_back("tw_cb0"); 
+      exp.push_back("cb3");  exp.push_back("tw_cb4");
+
+      exp1.push_back("tw_cb0"); 
+      exp1.push_back("comp1_cb0");  exp1.push_back("tw_cb4");
+
+      $write("comp CBS: ");
+      foreach(comp.q[i]) $write("%s ",comp.q[i]);
+      $write("\n");
+      $write("comp1 CBS: ");
+      foreach(comp1.q[i]) $write("%s ",comp1.q[i]);
+      $write("\n");
+
+      foreach(comp.q[i]) 
+        if(comp.q[i] != exp[i]) begin
+           $display("ERROR: expected: comp.q[%0d] = %s", i, exp[i]);
+           $display("       got:      comp.q[%0d] = %s", i, comp.q[i]);
+           failed = 1;
+        end
+      foreach(comp1.q[i]) 
+        if(comp1.q[i] != exp1[i]) begin
+           $display("ERROR: expected: comp1.q[%0d] = %s", i, exp1[i]);
+           $display("       got:      comp1.q[%0d] = %s", i, comp1.q[i]);
+           failed = 1;
+        end
+      if(failed)
+        $write("** UVM TEST FAILED! **\n");
+      else
+        $write("** UVM TEST PASSED! **\n");
+    endfunction
+  endclass
+
+  initial begin
+    run_test();
+  end
+  
+endmodule
