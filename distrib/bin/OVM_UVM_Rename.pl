@@ -22,7 +22,7 @@ if 0;
 
 ##----------------------------------------------------------------------
 ## Script usage is as follows:
-## % perl OVM_UVM_Rename.pl [--top_dir 'TOP_DIRECTORY_NAME'] [--help]
+## % perl OVM_UVM_Rename.pl [--all] [--top_dir 'TOP_DIRECTORY_NAME'] [--help]
 
 
 ## For e.g:
@@ -30,6 +30,9 @@ if 0;
 
 ## If no top directory is specified, then current directory is taken as top. 
 
+## The --all switch is used to force processing of all text files. By
+## default, only System verilog files, denoted with one of the extensions,
+## .v, .vh, .sv, .svh are processed.
 ## To see the usemodel:
 ## % perl OVM_UVM_Rename.pl -help
 ##----------------------------------------------------------------------
@@ -40,6 +43,9 @@ use warnings;
 use Getopt::Long;
 use File::Find;
 
+# for processing all files, not just verilog.
+my $all = 0;
+
 sub replace_dir_file_name 
 {
 	my ($dir) = shift; 
@@ -49,7 +55,8 @@ sub replace_dir_file_name
 sub replace_string 
 {
 	
-	my $filename = shift;
+	my $filename = shift; 
+        my $outfile = ".tmpfile";
 	my $path = $ENV{'PWD'};
 
 	if ((! ($filename =~ /$path/)) && ( !($filename =~ /^[\~|\/]/)))
@@ -59,10 +66,29 @@ sub replace_string
 
 	if (!(-d $filename) )
 	{
-		system ("sed -i 's/ovm/uvm/g' $filename");
-		system ("sed -i 's/tlm/uvm_tlm/g' $filename");
-		system ("sed -i 's/OVM/UVM/g' $filename");
-		system ("sed -i 's/TLM_/UVM_TLM_/g' $filename");
+		open (INFILE, "$filename") || die "Can't open file, $filename";
+		open (OUTFILE, ">$outfile") || die "Can't open file, $outfile";
+
+		my $fid = 
+		my $bfile = `basename $filename`; chomp $bfile;
+		my $dfile = `dirname $filename`; chomp $dfile;
+		my $bmod = $bfile;
+		$bmod =~ s/ovm/uvm/g;
+		$bmod =~ s/OVM/UVM/g;
+
+		while(<INFILE>)
+		{
+			$_ =~ s/ovm/uvm/g;
+			$_ =~ s/tlm/uvm_tlm/g;
+			$_ =~ s/OVM/UVM/g;
+			$_ =~ s/TLM_/UVM_TLM_/g;
+			print OUTFILE "$_";
+		}
+		system("mv $outfile $filename");
+		if ("$bfile" ne "$bmod")
+		{
+			system("mv $filename $dfile/$bmod");
+		}
 	}
 
 }
@@ -76,7 +102,7 @@ sub pattern
 
 	if (!(-d $filename) )
 	{
-		if (!($filename =~ m/(\.v|\.vh|\.sv|\.svh)$/))
+		if (!$all && !($filename =~ m/(\.v|\.vh|\.sv|\.svh)$/))
 		{
 			return;
 		}
@@ -90,13 +116,13 @@ my $top_dir = '';
 my $help = 0;
 
 
-GetOptions ('top_dir=s' => \$top_dir, 'help+' => \$help) or die "\nIncorrect usage of script. The following is the correct usage: \n\n$0 [--top_dir '<TOP DIR PATH>'] [--help]\n\n" ;
+GetOptions ('all+' => \$all, 'top_dir=s' => \$top_dir, 'help+' => \$help) or die "\nIncorrect usage of script. The following is the correct usage: \n\n$0 [--top_dir '<TOP DIR PATH>'] [--help]\n\n" ;
 
 
 if ($help != 0)
 {
 	print "\n\nScript usage is as follows:\n";
-	print "\n$0 [--top_dir 'TOP_DIRECTORY_NAME'] [--help]\n\n";
+	print "\n$0 [--all] [--top_dir 'TOP_DIRECTORY_NAME'] [--help]\n\n";
 	exit;
 }
 
@@ -106,8 +132,19 @@ if ($top_dir eq '')
 	$top_dir = `pwd`; 
 	chomp($top_dir);
 }
+else
+{
+  $top_dir = `cd $top_dir; pwd`; chomp($top_dir);
+}
 
-print "\nReplacing ovm/tlm to uvm/uvm_tlm in all files....\n\n";
+if ($all)
+{
+  print "\nReplacing ovm/tlm to uvm/uvm_tlm in all files....\n\n";
+}
+else
+{
+  print "\nReplacing ovm/tlm to uvm/uvm_tlm in all v/vh/sv/svh files....\n\n";
+}
 replace_dir_file_name($top_dir);
 
 print "\n...Replaced all class names from ovm_* and tlm_* to uvm_* and uvm_tlm_* respectively.\n";

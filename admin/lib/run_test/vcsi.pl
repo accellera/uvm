@@ -26,7 +26,6 @@
 # Make sure the version of VSC can run these tests
 #
 $vcs_bin = "vcsi";
-$compiler_string = "Compiler version = VCS-MXi";
 
 # Redefine $tool so it points to VCS so as not to break things like
 # file names for compile arguments (vcs.comp.args) used in the main
