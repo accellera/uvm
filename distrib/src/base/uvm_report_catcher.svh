@@ -648,7 +648,7 @@ virtual class uvm_report_catcher extends uvm_object;
     act = this.catch();
 
     if(act == UNKNOWN_ACTION)
-      this.uvm_report_error("RPTCTHR", {"uvm_report_this.catch() in cacther instance ", this.get_name(), " must return THROW or CAUGHT"}, UVM_NONE, `uvm_file, `uvm_line);
+      this.uvm_report_error("RPTCTHR", {"uvm_report_this.catch() in catcher instance ", this.get_name(), " must return THROW or CAUGHT"}, UVM_NONE, `uvm_file, `uvm_line);
 
     if(m_debug_flags & DO_NOT_MODIFY) begin
       m_modified_severity    = m_orig_severity;
