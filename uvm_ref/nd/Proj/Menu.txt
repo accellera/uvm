@@ -80,6 +80,7 @@ Group: Synchronization  {
    File: uvm_event_callback  (no auto-title, /cygdrive/c/Sourceforge/UVM/uvm/distrib/src/base/uvm_event_callback.svh)
    File: uvm_barrier  (no auto-title, /cygdrive/c/Sourceforge/UVM/uvm/distrib/src/base/uvm_barrier.svh)
    File: uvm_objection  (no auto-title, /cygdrive/c/Sourceforge/UVM/uvm/distrib/src/base/uvm_objection.svh)
+   File: uvm_heartbeat  (no auto-title, /cygdrive/c/Sourceforge/UVM/uvm/distrib/src/base/uvm_heartbeat.svh)
    }  # Group: Synchronization
 
 Group: Containers  {
