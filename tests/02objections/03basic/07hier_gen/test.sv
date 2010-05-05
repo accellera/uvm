@@ -2,8 +2,8 @@
 import uvm_pkg::*;
 
 `define NUM_LOOPS 10
-`define MAX_WIDTH 2
-`define MAX_DEPTH 12
+`define MAX_WIDTH 3
+`define MAX_DEPTH 4
 
 int objection_counter = 0;
 
