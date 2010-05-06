@@ -206,7 +206,7 @@ sub get_runtime_errors {
 sub cleanup_test {
   local($testdir, $_) = @_;
 
-  system("cd $testdir; rm -rf simv simv.daidir csrc ucli.* vc_hdrs.h .vcs*");
+  system("cd $testdir; rm -rf simv simv.daidir simv.vdb csrc ucli.* vc_hdrs.h .vcs*");
 }
 
 1;
