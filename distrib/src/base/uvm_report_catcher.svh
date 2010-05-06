@@ -53,10 +53,11 @@ typedef class uvm_report_server;
 
 typedef class uvm_report_catcher;
 
-typedef uvm_callbacks#(uvm_report_server,uvm_report_catcher) uvm_report_cb;
-typedef uvm_callback_iter#(uvm_report_server, uvm_report_catcher) uvm_report_cb_iter;
+typedef uvm_callbacks#(uvm_report_object,uvm_report_catcher) uvm_report_cb;
+typedef uvm_callback_iter#(uvm_report_object, uvm_report_catcher) uvm_report_cb_iter;
 
 virtual class uvm_report_catcher extends uvm_callback;
+  `uvm_register_cb(uvm_report_object,uvm_report_catcher)
 
   typedef enum { UNKNOWN_ACTION, THROW, CAUGHT} action_e;
 
@@ -211,7 +212,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   //
   
   static function uvm_report_catcher get_report_catcher(string name);
-    static uvm_callback_iter#(uvm_report_server,uvm_report_catcher) iter = new(null);
+    static uvm_report_cb_iter iter = new(null);
     get_report_catcher = iter.first();
     while(get_report_catcher != null) begin
       if(get_report_catcher.get_name() == name)
@@ -219,19 +220,6 @@ virtual class uvm_report_catcher extends uvm_callback;
       get_report_catcher = iter.next();
     end
     return null;
-  endfunction
-
-  // delete_all_report_catchers
-  //
-  //
-
-  static function void delete_all_report_catchers();
-    uvm_report_cb_iter iter = new(null);
-    uvm_report_catcher c = iter.first();    
-    while(c != null) begin
-      uvm_report_cb::delete(null,c);
-      c = iter.first(); //since we removed the first, there is a new one
-    end
   endfunction
 
 
@@ -243,7 +231,7 @@ virtual class uvm_report_catcher extends uvm_callback;
     string msg;
     string enabled;
     uvm_report_catcher catcher;
-    static uvm_callback_iter#(uvm_report_server,uvm_report_catcher) iter = new(null);
+    static uvm_report_cb_iter iter = new(null);
 
     f_display(file, "-------------UVM REPORT CATCHERS----------------------------");
 
@@ -397,7 +385,7 @@ virtual class uvm_report_catcher extends uvm_callback;
     input string filename,
     input int line 
   );
-    static uvm_callback_iter#(uvm_report_server,uvm_report_catcher) iter = new(null);
+    uvm_report_cb_iter iter = new(client);
     uvm_report_catcher catcher;
 
     int thrown = 1;

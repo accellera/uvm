@@ -39,7 +39,6 @@ typedef class uvm_report_object;
 
 typedef class uvm_report_catcher;
 class uvm_report_server extends uvm_object;
-  `uvm_register_cb(uvm_report_server,uvm_report_catcher)
 
   local int max_quit_count; 
   local int quit_count;

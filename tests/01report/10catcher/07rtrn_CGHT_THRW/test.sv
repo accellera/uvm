@@ -158,7 +158,6 @@ class test extends uvm_test;
             
         end // begin
 
-      //uvm_report_catcher::remove_all_report_catchers();
       $write("UVM TEST EXPECT 1 UVM_ERROR\n");
       uvm_top.stop_request();
    endtask

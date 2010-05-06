@@ -82,7 +82,7 @@ module test;
       super.new(name,parent);
       env = new("env", this);
       mc = new;
-      uvm_report_catcher::add_report_default_catcher(mc);
+      uvm_report_cb::add(null,mc);
     endfunction 
     function void report;
       uvm_report_object r;
