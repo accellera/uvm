@@ -722,7 +722,7 @@ task uvm_root::run_global_phase(uvm_phase phase=null, bit upto=0);
         end
         join // end guard process
 
-      `else // QUESTA
+      `else // UVM_USE_ALT_PHASING
 
         fork : task_based_phase
           m_stop_process();
