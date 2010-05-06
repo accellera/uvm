@@ -25,7 +25,7 @@
 `define UVM_CALLBACK_SVH
 
 typedef class uvm_callback;
-typedef class uvm_callbacks;
+//typedef class uvm_callbacks;
 typedef class uvm_callbacks_base;
 
 // Class - uvm_typeid_base
@@ -139,6 +139,12 @@ endclass
 class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
   static uvm_queue#(uvm_callback) m_twcb = new("typewide_queue");
   static string m_typename;
+
+  static uvm_pool#(uvm_object,uvm_queue#(uvm_callback)) m_pool = m_get_pool();
+  static function uvm_pool#(uvm_object,uvm_queue#(uvm_callback)) m_get_pool();
+    if(m_pool == null) m_pool = new;
+    return m_pool;
+  endfunction
 
 
   //The actual global object from the derivative class. Note that this is
@@ -395,27 +401,17 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   typedef uvm_callbacks#(T,CB) this_type;
   typedef uvm_callbacks#(T,uvm_callback) that_type;
  
-  // Singleton instance is used for type checking
-  static this_type m_inst = this_type::get();
-  static uvm_callbacks#(T,uvm_callback) m_base_inst = that_type::get();
-
-  // typeinfo
-  static uvm_typeid_base m_typeid = uvm_typeid#(T)::get();
-  static uvm_typeid_base m_cb_typeid = uvm_typeid#(CB)::get();
-
-  static string m_typename="";
-  static string m_cb_typename="";
-  static uvm_report_object reporter = new("cb_tracer");
-
-
-  // `uvm_object_param_utils(this_type)
 
   static function this_type get();
+
+    that_type m_base_inst;
+    uvm_typeid#(T) m_typeid;
+
     if(m_inst == null) begin
       uvm_callbacks_base b;
       m_inst = new;
 
-      m_base_inst = uvm_callbacks#(T,uvm_callback)::get();
+      m_base_inst = that_type::get();
       uvm_typed_callbacks#(T)::m_inst = m_base_inst;
 
       m_b_inst = m_base_inst;
@@ -433,6 +429,22 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     return m_inst;
   endfunction
 
+  // Singleton instance is used for type checking
+  static this_type m_inst = this_type::get();
+  static uvm_callbacks#(T,uvm_callback) m_base_inst = that_type::get();
+
+  // typeinfo
+  static uvm_typeid_base m_typeid = uvm_typeid#(T)::get();
+  static uvm_typeid_base m_cb_typeid = uvm_typeid#(CB)::get();
+
+  static string m_typename="";
+  static string m_cb_typename="";
+  static uvm_report_object reporter = new("cb_tracer");
+
+
+  // `uvm_object_param_utils(this_type)
+
+
   // Register valid callback type
   bit m_registered = 0;
   static function bit register_pair(string tname="", cbname="");
@@ -446,6 +458,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     m_cb_typeid.typename = cbname;
 
     inst.m_registered = 1; 
+
+    return 1;
   endfunction
 
   virtual function bit m_is_registered(uvm_object obj, uvm_callback cb);

@@ -66,6 +66,8 @@
 //
 //------------------------------------------------------------------------------
 
+typedef class uvm_test_done_objection;
+
 class uvm_root extends uvm_component;
 
   extern static function uvm_root get();
@@ -230,7 +232,7 @@ class uvm_root extends uvm_component;
            uvm_object source_obj, string description, int count);
   extern virtual function void raised (uvm_objection objection, 
            uvm_object source_obj, string description, int count);
-
+  extern function uvm_test_done_objection test_done_objection();
   extern function void print_topology  (uvm_printer printer=null);
 
 endclass
@@ -1015,10 +1017,9 @@ endtask
 //
 //
 
-typedef class uvm_test_done_objection;
 function void uvm_root::raised (uvm_objection objection, uvm_object source_obj, 
                               string description, int count);
-  if(objection != uvm_test_done_objection::get()) return;
+  if(objection != test_done_objection()) return;
   if (m_executing_stop_processes) begin
     string desc = description == "" ? "" : {" (\"", description, "\") "};
     uvm_report_warning("ILLRAISE", {"An uvm_test_done objection ", desc, "was raised during the execution of component stop processes for the stop_request. The objection is ignored by the stop process."}, UVM_NONE);
@@ -1034,7 +1035,7 @@ endfunction
 
 task uvm_root::all_dropped (uvm_objection objection, uvm_object source_obj, 
                           string description, int count);
-  if(objection != uvm_test_done_objection::get()) return;
+  if(objection != test_done_objection()) return;
   m_objections_outstanding = 0;
 endtask
 

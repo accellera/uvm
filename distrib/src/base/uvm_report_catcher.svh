@@ -51,17 +51,18 @@ typedef class uvm_report_server;
 // was lowered. These statistics are reported in the summary of the uvm_report_server.
 //------------------------------------------------------------------------------
 
+class sev_id_struct;
+  bit sev_specified ;
+  bit id_specified ;
+  uvm_severity sev ;
+  string  id ;
+  bit is_on ;
+endclass
+
 virtual class uvm_report_catcher extends uvm_object;
 
   typedef enum { UNKNOWN_ACTION, THROW, CAUGHT} action_e;
 
-  class sev_id_struct;
-    bit sev_specified ;
-    bit id_specified ;
-    uvm_severity sev ;
-    string  id ;
-    bit is_on ;
-  endclass
 
   local static uvm_severity m_modified_severity;
   local static int m_modified_verbosity;

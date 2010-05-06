@@ -49,8 +49,8 @@
   `include "base/uvm_barrier.svh"
 
   // Reporting interface
-  `include "base/uvm_report_server.svh"
   `include "base/uvm_report_catcher.svh"
+  `include "base/uvm_report_server.svh"
   `include "base/uvm_report_handler.svh"
   `include "base/uvm_report_object.svh"
 
