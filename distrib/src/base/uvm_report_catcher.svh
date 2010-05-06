@@ -51,17 +51,14 @@ typedef class uvm_report_server;
 // was lowered. These statistics are reported in the summary of the uvm_report_server.
 //------------------------------------------------------------------------------
 
-virtual class uvm_report_catcher extends uvm_object;
+typedef class uvm_report_catcher;
+
+typedef uvm_callbacks#(uvm_report_server,uvm_report_catcher) uvm_report_cb;
+typedef uvm_callback_iter#(uvm_report_server, uvm_report_catcher) uvm_report_cb_iter;
+
+virtual class uvm_report_catcher extends uvm_callback;
 
   typedef enum { UNKNOWN_ACTION, THROW, CAUGHT} action_e;
-
-  class sev_id_struct;
-    bit sev_specified ;
-    bit id_specified ;
-    uvm_severity sev ;
-    string  id ;
-    bit is_on ;
-  endclass
 
   local static uvm_severity m_modified_severity;
   local static int m_modified_verbosity;
@@ -74,9 +71,6 @@ virtual class uvm_report_catcher extends uvm_object;
   local static uvm_report_server m_server;
   local static string m_name;
   
-  local static sev_id_struct m_sev_id_array[uvm_report_catcher];
-  local static uvm_report_catcher m_catcher_q[$];
-
   local static int m_demoted_fatal   = 0;
   local static int m_demoted_error   = 0; 
   local static int m_demoted_warning = 0; 
@@ -106,21 +100,6 @@ virtual class uvm_report_catcher extends uvm_object;
     do_report = 1;
   endfunction    
 
-  //catcher_mode
-  //
-  //
-  
-  function void catcher_mode(bit on=1);
-    this.m_sev_id_array[this].is_on = on;
-  endfunction
-  
-  //is_enabled
-  //
-  //
-  
-  function bit is_enabled();
-    return this.m_sev_id_array[this].is_on;
-  endfunction      
 
   //get_client
   //
@@ -227,158 +206,34 @@ virtual class uvm_report_catcher extends uvm_object;
   endfunction
   
        
-  //add_report_default_catcher
-  //
-  //
-
-  static function void add_report_default_catcher(uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
-    sev_id_struct sev_id;
-    if(catcher == null) begin
-      uvm_top.uvm_report_error("RPTCTHR", "NULL uvm_report_catcher object passed to uvm_report_catcher::add_report_default_catcher()", UVM_NONE, `uvm_file, `uvm_line);
-      return;
-    end
-    
-    if(m_sev_id_array.exists(catcher)) begin
-      catcher.uvm_report_warning("RPTCTHR", "Catcher instance already registered. Ignoring subsequent call to uvm_report_catcher::add_report_default_catcher()", UVM_NONE, `uvm_file, `uvm_line);   
-      return;
-    end    
-
-    if (ordering == UVM_APPEND) m_catcher_q.push_back(catcher);
-    else m_catcher_q.push_front(catcher);
-
-    sev_id = new;
-    sev_id.is_on             = 1;
-    m_sev_id_array[catcher]  = sev_id;
-  endfunction
-
-  
-  //add_report_severity_catcher
-  //
-  //
-
-  static function void add_report_severity_catcher(uvm_severity severity, uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
-    sev_id_struct sev_id;
-    if(catcher == null) begin
-      uvm_top.uvm_report_error("RPTCTHR", "NULL uvm_report_catcher object passed to uvm_report_catcher::add_report_severity_catcher()", UVM_NONE, `uvm_file, `uvm_line);
-      return;
-    end
-    
-    if(m_sev_id_array.exists(catcher)) begin
-      catcher.uvm_report_warning("RPTCTHR", "Catcher instance already registered. Ignoring subsequent call to uvm_report_catcher::add_report_severity_catcher()", UVM_NONE, `uvm_file, `uvm_line);   
-      return;
-    end    
-
-    if (ordering == UVM_APPEND) m_catcher_q.push_back(catcher);
-    else m_catcher_q.push_front(catcher);
-
-    sev_id = new;
-    sev_id.sev_specified     = 1;
-    sev_id.sev               = severity;
-    sev_id.is_on             = 1;
-    m_sev_id_array[catcher]  = sev_id;
-  endfunction
-
-
-  //add_report_id_catcher
-  //
-  //
-
-  static function void add_report_id_catcher(string id, uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
-    sev_id_struct sev_id;
-    if(catcher == null) begin
-      uvm_top.uvm_report_error("RPTCTHR", "NULL uvm_report_catcher object passed to uvm_report_catcher::add_report_id_catcher()", UVM_NONE, `uvm_file, `uvm_line);
-      return;
-    end
-    
-    if(m_sev_id_array.exists(catcher)) begin
-      catcher.uvm_report_warning("RPTCTHR", "Catcher instance already registered. Ignoring subsequent call to uvm_report_catcher::add_report_id_catcher()", UVM_NONE, `uvm_file, `uvm_line);   
-      return;
-    end    
-
-    if(id == "") begin
-      catcher.uvm_report_error("RPTCTHR", "Empty id string passed to uvm_report_catcher::add_report_id_catcher(). ", UVM_NONE, `uvm_file, `uvm_line);
-      return;
-    end  
-
-    if (ordering == UVM_APPEND) m_catcher_q.push_back(catcher);
-    else m_catcher_q.push_front(catcher);
-
-    sev_id = new;
-    sev_id.id_specified      = 1;
-    sev_id.id                = id;
-    sev_id.is_on             = 1;
-    m_sev_id_array[catcher]  = sev_id;
-  endfunction
-
-  
-  //add_report_severity_id_catcher
-  //
-  //
-  
-  static function void add_report_severity_id_catcher(uvm_severity severity, string id, uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
-    sev_id_struct sev_id;
-    if(catcher == null) begin
-      uvm_top.uvm_report_error("RPTCTHR", "NULL uvm_report_catcher object passed to uvm_report_catcher::add_report_severity_id_catcher()", UVM_NONE, `uvm_file, `uvm_line);
-      return;
-    end
-    
-    if(m_sev_id_array.exists(catcher)) begin
-      catcher.uvm_report_warning("RPTCTHR", "Catcher instance already registered. Ignoring subsequent call to uvm_report_catcher::add_report_severity_id_catcher()", UVM_NONE, `uvm_file, `uvm_line);   
-      return;
-    end    
-
-    if(id == "") begin
-      catcher.uvm_report_error("RPTCTHR", "Empty id string passed to uvm_report_catcher::add_report_severity_id_catcher().", UVM_NONE, `uvm_file, `uvm_line);    
-      return;
-    end  
-
-    if (ordering == UVM_APPEND) m_catcher_q.push_back(catcher);
-    else m_catcher_q.push_front(catcher);
-
-    sev_id = new;
-    sev_id.id_specified      = 1;
-    sev_id.id                = id;
-    sev_id.sev_specified     = 1;
-    sev_id.sev               = severity;
-    sev_id.is_on             = 1;
-    m_sev_id_array[catcher]  = sev_id;
-  endfunction
-  
   //get_report_catcher
   //
   //
   
   static function uvm_report_catcher get_report_catcher(string name);
-    foreach(m_catcher_q[i]) begin
-      if(m_catcher_q[i].get_name() == name)
-        return m_catcher_q[i];
+    static uvm_callback_iter#(uvm_report_server,uvm_report_catcher) iter = new(null);
+    get_report_catcher = iter.first();
+    while(get_report_catcher != null) begin
+      if(get_report_catcher.get_name() == name)
+        return get_report_catcher;
+      get_report_catcher = iter.next();
     end
     return null;
   endfunction
-  
-  //remove_report_catcher(uvm_report_catcher catcher)
+
+  // delete_all_report_catchers
   //
   //
 
-  static function bit remove_report_catcher(uvm_report_catcher catcher);
-    foreach(m_catcher_q[i]) begin
-      if(m_catcher_q[i] == catcher) begin
-        m_catcher_q.delete(i);
-        m_sev_id_array.delete(catcher);
-        return 1;    
-      end
+  static function void delete_all_report_catchers();
+    uvm_report_cb_iter iter = new(null);
+    uvm_report_catcher c = iter.first();    
+    while(c != null) begin
+      uvm_report_cb::delete(null,c);
+      c = iter.first(); //since we removed the first, there is a new one
     end
-    return 0;  
   endfunction
 
-  //remove_all_report_catchers
-  //
-  //
-
-  static function void remove_all_report_catchers();
-    m_catcher_q.delete();
-    m_sev_id_array.delete();
-  endfunction
 
   //print_catchers()
   //
@@ -386,39 +241,23 @@ virtual class uvm_report_catcher extends uvm_object;
 
   static function void print_catcher(UVM_FILE file=0);
     string msg;
-    sev_id_struct sev_id;
+    string enabled;
     uvm_report_catcher catcher;
+    static uvm_callback_iter#(uvm_report_server,uvm_report_catcher) iter = new(null);
 
     f_display(file, "-------------UVM REPORT CATCHERS----------------------------");
 
-    foreach(m_catcher_q[i]) begin
-      string id         = "*";
-      string sev_name   = " *    ";
-      string enabled    = "ON ";
-
-      catcher = m_catcher_q[i];
-      sev_id  = m_sev_id_array[catcher];
-
-      if(sev_id.sev_specified) begin
-        case(sev_id.sev)
-          UVM_NONE  : sev_name = "NONE  ";
-          UVM_LOW   : sev_name = "LOW   ";
-          UVM_MEDIUM: sev_name = "MEDIUM";
-          UVM_HIGH  : sev_name = "HIGH  ";
-          UVM_FULL  : sev_name = "FULL  ";
-          default   : $swrite(sev_name, "%6d", sev_id.sev);
-        endcase
-      end  
-
-      if(sev_id.id_specified)
-        id = sev_id.id;    
-
-       if(!sev_id.is_on)
+    catcher = iter.first();
+    while(catcher != null) begin
+       if(catcher.callback_mode())
+        enabled = "ON";        
+       else
         enabled = "OFF";        
       
-      $swrite(msg, "%20s : %s : %16s : %s", m_catcher_q[i].get_name(),
-              enabled, id, sev_name);
+      $swrite(msg, "%20s : %s", catcher.get_name(),
+              enabled);
       f_display(file, msg);
+      catcher = iter.next();
     end
     f_display(file, "--------------------------------------------------------------");
   endfunction
@@ -558,7 +397,9 @@ virtual class uvm_report_catcher extends uvm_object;
     input string filename,
     input int line 
   );
-  
+    static uvm_callback_iter#(uvm_report_server,uvm_report_catcher) iter = new(null);
+    uvm_report_catcher catcher;
+
     int thrown = 1;
     uvm_severity orig_severity;
     static bit in_catcher;
@@ -585,10 +426,11 @@ virtual class uvm_report_catcher extends uvm_object;
     m_orig_verbosity = verbosity_level;
     m_orig_action    = action;
     m_orig_message   = message;      
-    
-    foreach(m_catcher_q[i]) begin
-      if (!m_catcher_q[i].is_enabled()) continue;
-      thrown = m_catcher_q[i].process_report_catcher(); 
+
+    catcher = iter.first();
+    while(catcher != null) begin
+      if (!catcher.callback_mode()) continue;
+      thrown = catcher.process_report_catcher(); 
 
       if(thrown == 0) begin 
         case(orig_severity)
@@ -598,7 +440,8 @@ virtual class uvm_report_catcher extends uvm_object;
          endcase   
          break;
       end 
-    end //foreach   
+      catcher = iter.next();
+    end //while
 
     //update counters if message was returned with demoted severity
     case(orig_severity)
@@ -632,19 +475,7 @@ virtual class uvm_report_catcher extends uvm_object;
   local function int process_report_catcher();
 
     action_e act;
-    sev_id_struct sev_id;
 
-    sev_id = m_sev_id_array[this];
-
-    if(!sev_id.is_on) 
-      return 1;
-
-    if(sev_id.sev_specified && (sev_id.sev != m_modified_severity))
-      return 1;
-
-    if(sev_id.id_specified && (sev_id.id != m_modified_id))
-      return 1;
-       
     act = this.catch();
 
     if(act == UNKNOWN_ACTION)

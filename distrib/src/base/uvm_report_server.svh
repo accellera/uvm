@@ -38,12 +38,18 @@ typedef class uvm_report_object;
 //------------------------------------------------------------------------------
 
 typedef class uvm_report_catcher;
-class uvm_report_server;
+class uvm_report_server extends uvm_object;
+  `uvm_register_cb(uvm_report_server,uvm_report_catcher)
 
   local int max_quit_count; 
   local int quit_count;
   local int severity_count[uvm_severity];
 
+  // Needed for callbacks
+  function string get_type_name();
+    return "uvm_report_server";
+  endfunction
+ 
   // Variable: id_count
   //
   // An associative array holding the number of occurences
@@ -60,6 +66,7 @@ class uvm_report_server;
   // nothing. The constructor is protected to enforce a singleton.
 
   function new();
+    set_name("uvm_report_server");
     set_max_quit_count(0);
     reset_quit_count();
     reset_severity_counts();

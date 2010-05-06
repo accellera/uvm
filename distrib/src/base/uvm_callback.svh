@@ -480,16 +480,28 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   static function void add(T obj, uvm_callback cb, uvm_apprepend ordering=UVM_APPEND);
     uvm_queue#(uvm_callback) q;
     string nm,tnm; 
+    if(cb==null) begin
+       if(obj==null) nm = "(*)"; else nm = obj.get_full_name();
+       if(m_base_inst.m_typename!="") tnm = m_base_inst.m_typename; else if(obj != null) tnm = obj.get_type_name(); else tnm = "uvm_object";
+       uvm_report_error("CBUNREG", { "Null callback object cannot be registered with object ",
+         nm, " (", tnm, ")" }, UVM_NONE);
+       return;
+    end
     if(!m_base_inst.check_registration(obj,cb)) begin
        if(obj==null) nm = "(*)"; else nm = obj.get_full_name();
        if(m_base_inst.m_typename!="") tnm = m_base_inst.m_typename; else if(obj != null) tnm = obj.get_type_name(); else tnm = "uvm_object";
        uvm_report_warning("CBUNREG", { "Callback ", cb.get_name(), " cannot be registered with object ",
          nm, " because callback type ", cb.get_type_name(),
          " is not registered with object type ", tnm }, UVM_NONE);
-//       return;
     end
     if(obj == null) begin
-      m_base_inst.m_add_tw_cbs(cb,ordering);
+      if(m_cb_find(m_twcb,cb) != -1) begin
+        if(m_base_inst.m_typename!="") tnm = m_base_inst.m_typename; else if(obj != null) tnm = obj.get_type_name(); else tnm = "uvm_object";
+        uvm_report_warning("CBPREG", { "Callback object ", cb.get_name(), " is already registered with type ", tnm }, UVM_NONE);
+      end
+      else begin
+        m_base_inst.m_add_tw_cbs(cb,ordering);
+      end
     end
     else begin
       q = m_pool.get(obj);
@@ -525,6 +537,11 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
      uvm_component root, uvm_apprepend ordering=UVM_APPEND);
     uvm_component cq[$];
     T t;
+    if(cb==null) begin
+       uvm_report_error("CBUNREG", { "Null callback object cannot be registered with object(s) ",
+         name }, UVM_NONE);
+       return;
+    end
     void'(uvm_top.find_all(name,cq,root));
     if(cq.size() == 0) begin
       uvm_report_warning("CBNOMTC", { "add_by_name failed to find any components matching the name ",
@@ -619,9 +636,10 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     uvm_queue#(uvm_callback) q;
     CB cb;
     if(!m_pool.exists(obj)) begin //no instance specific
-      if(obj == null) 
+      if(obj == null) begin
         q = m_twcb;
-      else 
+      end
+      else
         q = m_base_inst.m_get_twq(obj); //get the most derivative queue
     end 
     else begin
@@ -734,13 +752,13 @@ endclass
 // callback queues of a specific callback type. The typical usage of
 // the class is:
 //
-//| uvm_callback_iter#(mycb,mycomp) iter = new(this);
+//| uvm_callback_iter#(mycomp,mycb) iter = new(this);
 //| for(mycb cb = iter.first(); cb != null; cb = iter.next())
 //|    cb.dosomething();
 //
 //------------------------------------------------------------------------------
 
-class uvm_callback_iter#(type CB = int, type T = int);
+class uvm_callback_iter#(type T = uvm_object, type CB = uvm_callback);
 
    local int m_i;
    local T   m_obj;
@@ -762,7 +780,6 @@ class uvm_callback_iter#(type CB = int, type T = int);
    // queue is empty then null is returned.
 
    function CB first();
-      if (m_obj == null) return null;
       m_cb = uvm_callbacks#(T,CB)::get_first(m_i, m_obj);
       return m_cb;
    endfunction
@@ -774,7 +791,6 @@ class uvm_callback_iter#(type CB = int, type T = int);
    // queue is empty then null is returned.
 
    function CB next();
-      if (m_obj == null) return null;
       m_cb = uvm_callbacks#(T,CB)::get_next(m_i, m_obj);
       return m_cb;
    endfunction

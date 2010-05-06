@@ -65,6 +65,7 @@ class test extends uvm_test;
    endfunction
 
    virtual task run();
+      my_catcher ctchr = new;
       $write("UVM TEST EXPECT 2 UVM_ERROR\n");
       `uvm_error("Test", "Error 1...");
       if (my_catcher::seen != 0) begin
@@ -72,9 +73,7 @@ class test extends uvm_test;
          pass = 0;
       end
       begin
-         my_catcher ctchr = new;
-          uvm_report_catcher::add_report_default_catcher(ctchr);
-
+          uvm_report_cb::add(null,ctchr);
          `uvm_error("Test", "Error 2...");
          if (my_catcher::seen != 1) begin
             $write("ERROR: Message was NOT caught with default catcher installed!\n");
@@ -91,7 +90,7 @@ class test extends uvm_test;
             pass = 0;
          end
       end
-      uvm_report_catcher::remove_all_report_catchers();
+      uvm_report_catcher::delete_all_report_catchers();
       `uvm_error("Test", "Error 3...");
       if (my_catcher::seen != 3) begin
          $write("ERROR: Message was caught after all catcher removed!\n");
