@@ -848,6 +848,10 @@ class uvm_test_done_objection extends uvm_objection;
 
 endclass
 
+typedef class uvm_root;
+function uvm_test_done_objection uvm_root::test_done_objection();
+  return uvm_test_done_objection::get();
+endfunction
 
 `endif
 
