@@ -400,15 +400,24 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   
   typedef uvm_callbacks#(T,CB) this_type;
   typedef uvm_callbacks#(T,uvm_callback) that_type;
- 
+
+
+   // Singleton instance is used for type checking
+  static this_type m_inst;
+  static bit b = initialize(); 
 
   static function this_type get();
+    if(m_inst == null) begin
+      create_m_inst();
+    end
+    return m_inst;
+  endfunction
 
+  static function void create_m_inst();
     that_type m_base_inst;
     uvm_typeid#(T) m_typeid;
 
-    if(m_inst == null) begin
-      uvm_callbacks_base b;
+    uvm_callbacks_base b;
       m_inst = new;
 
       m_base_inst = that_type::get();
@@ -425,12 +434,14 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
         if(!uvm_typeid_base::type_map.exists(b))
           uvm_typeid_base::type_map[b] = m_typeid;
       end
-    end
-    return m_inst;
   endfunction
 
-  // Singleton instance is used for type checking
-  static this_type m_inst = this_type::get();
+  static function bit initialize();
+    create_m_inst();
+    assert( m_inst != null );
+    return 1;
+  endfunction
+
   static uvm_callbacks#(T,uvm_callback) m_base_inst = that_type::get();
 
   // typeinfo
