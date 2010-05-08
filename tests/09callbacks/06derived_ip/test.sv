@@ -16,7 +16,7 @@ module test;
     task run;
       int i;
       $display("executing callbacks from ip_base");
-      `uvm_do_callbacks(cb_base,ip_base,doit(q))
+      `uvm_do_callbacks(ip_base,cb_base,doit(q))
     endtask
   endclass
 
@@ -32,7 +32,7 @@ module test;
 //Since we are executing the same callbacks, they should happen
 //in both places.
       $display("executing callbacks from derived class");
-      `uvm_do_callbacks(cb_base,ip_ext,doit(q))
+      `uvm_do_callbacks(ip_ext,cb_base,doit(q))
       super.run();
       uvm_top.stop_request();
 
@@ -74,7 +74,7 @@ module test;
   
       uvm_callbacks#(ip_base,cb_base)::delete(comp,rcb);
    
-      uvm_callbacks#(ip_base,cb_base)::display_cbs();
+      uvm_callbacks#(ip_base,cb_base)::display();
     endfunction
 
     function void report();

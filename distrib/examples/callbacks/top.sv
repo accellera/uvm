@@ -137,11 +137,11 @@ class bus_driver extends uvm_component;
   endfunction
 
   virtual function bit trans_received(bus_tr tr);
-    `uvm_do_callbacks_exit_on(bus_driver_cb,bus_driver,trans_received(this,tr),1)
+    `uvm_do_callbacks_exit_on(bus_driver,bus_driver_cb,trans_received(this,tr),1)
   endfunction
 
   virtual task trans_executed(bus_tr tr);
-    `uvm_do_callbacks(bus_driver_cb,bus_driver,trans_executed(this,tr))
+    `uvm_do_callbacks(bus_driver,bus_driver_cb,trans_executed(this,tr))
   endtask
 
   virtual task put(bus_tr t);
@@ -250,7 +250,7 @@ endclass
 // To register the callbacks with the driver, we get the global callback pool
 // that is typed to our specific driver-callback combination. We associate
 // (register) the callback objects with driver using the callback pool's 
-// ~add_cb~ method. After calling ~display_cbs~ just to show that the
+// ~add_cb~ method. After calling ~display~ just to show that the
 // registration was successful, we push several transactions into the driver.
 // Our custom callbacks get called as the driver receives each transaction.
 //------------------------------------------------------------------------------
@@ -267,7 +267,7 @@ module top;
   initial begin
     bus_driver_cbs_t::add(driver,cb1);
     bus_driver_cbs_t::add(driver,cb2);
-    bus_driver_cbs_t::display_cbs();
+    bus_driver_cbs_t::display();
     for (int i=1; i<=5; i++) begin
       tr.addr = i;
       tr.data = 6-i;

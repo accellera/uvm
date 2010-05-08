@@ -43,7 +43,7 @@ class a_comp extends uvm_component;
    `uvm_register_cb(a_comp, a_cb)
 
    virtual task run();
-      `uvm_do_callbacks(a_cb, a_comp, f(q));
+      `uvm_do_callbacks(a_comp, a_cb, f(q));
    endtask
 endclass
 

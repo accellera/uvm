@@ -47,7 +47,7 @@ class generic_comp extends uvm_component;
    `uvm_register_cb(generic_comp, generic_cb)
 
    virtual task run();
-      `uvm_do_callbacks(generic_cb, generic_comp, generic_f(q))
+      `uvm_do_callbacks(generic_comp, generic_cb, generic_f(q))
    endtask
 endclass
 
@@ -86,8 +86,8 @@ class special_comp #(int N = 0) extends generic_comp;
 
    virtual task run();
       super.run();
-      `uvm_do_callbacks(specific_cb, special_comp#(N), specific_f(q))
-      `uvm_do_callbacks(special_cb#(N), special_comp#(N), special_f(q, N))
+      `uvm_do_callbacks(special_comp#(N), specific_cb, specific_f(q))
+      `uvm_do_callbacks(special_comp#(N), special_cb#(N), special_f(q, N))
    endtask
 endclass
 
@@ -176,10 +176,10 @@ class test extends uvm_test;
    virtual function void check();
       string p[$];
 
-      uvm_callbacks::display_cbs();
-      uvm_callbacks#(generic_comp)::display_cbs();
-      uvm_callbacks#(special_comp#(1))::display_cbs();
-      uvm_callbacks#(special_comp#(2))::display_cbs();
+      uvm_callbacks::display();
+      uvm_callbacks#(generic_comp)::display();
+      uvm_callbacks#(special_comp#(1))::display();
+      uvm_callbacks#(special_comp#(2))::display();
 
       print_trace("a1", a1.q);
       print_trace("a2", a2.q);

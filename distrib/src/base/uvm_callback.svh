@@ -243,7 +243,7 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
   endfunction
 
 
-  static function void display_cbs(T obj=null);
+  static function void display(T obj=null);
     T me;
     uvm_callbacks_base ib = m_inst;
     string cbq[$];
