@@ -58,6 +58,7 @@ module test;
       uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
   
       uvm_callbacks#(ip_comp,cb_base)::display_cbs();
+
     endfunction
 
     task run;

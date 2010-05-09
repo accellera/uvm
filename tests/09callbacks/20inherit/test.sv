@@ -399,6 +399,10 @@ endclass
 
 initial
   begin
+$display("BASE_COMP: %0d", uvm_typeid#(base_comp)::get());
+$display("A_COMP: %0d", uvm_typeid#(a_comp)::get());
+$display("AX_COMP: %0d", uvm_typeid#(ax_comp)::get());
+$display("B_COMP: %0d", uvm_typeid#(b_comp)::get());
      run_test();
   end
 

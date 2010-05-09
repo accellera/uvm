@@ -74,16 +74,6 @@ endclass
   endclass
 
   
-///Verbosity is defined as: 
-///typedef enum {
-///  UVM_NONE   = 0,
-///  UVM_LOW    = 100,
-///  UVM_MEDIUM = 200,
-///  UVM_HIGH   = 300,
-///  UVM_FULL   = 400,
-///  UVM_DEBUG  = 500
-///} uvm_verbosity;
-
   class my_catcher3 extends uvm_report_catcher; // Severity Catcher modifying the message severity
    
   virtual function action_e catch();
@@ -133,16 +123,14 @@ class test extends uvm_test;
     $write("UVM TEST - Changing catcher severity, id, message, action, verbosity \n");
         
     //add_report_default_catcher(uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
-    uvm_report_catcher::add_report_default_catcher(ctchr);
+    uvm_report_cb::add(null,ctchr);
     `uvm_info("ctchr", "SQUARE", UVM_MEDIUM);
     
-    //add_report_severity_catcher(uvm_severity severity, uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
-     uvm_report_catcher::add_report_severity_catcher(UVM_WARNING, ctchr1);
+     uvm_report_cb::add(null, ctchr1);
     `uvm_warning("ctchr1", "MSG2");
 
     
-    //add_report_id_catcher(string id, uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
-     uvm_report_catcher::add_report_id_catcher("Orion", ctchr2);
+     uvm_report_cb::add(null, ctchr2);
     `uvm_info("Orion", "MSG3", UVM_MEDIUM);
 
     $write("Calling a message CIRCLE so the Default catcher modify its actions to UNKNOWN_ACTION");
@@ -150,13 +138,11 @@ class test extends uvm_test;
     `uvm_info("ctchr", "CIRCLE", UVM_MEDIUM);
     
    
-    //add_report_severity_id_catcher(uvm_severity severity, string id, uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
-    uvm_report_catcher::add_report_severity_id_catcher(UVM_INFO,"MyOtherID" ,ctchr3); 
+    uvm_report_cb::add(null,ctchr3); 
     `uvm_info("MyOtherID", "Message1 Sending a UVM_MEDIUM message", UVM_MEDIUM);
     `uvm_info("MyOtherID", "Message2 Sending a UVM_FULL message", UVM_FULL);
  
       end
-      uvm_report_catcher::remove_all_report_catchers();
       
       $write("UVM TEST EXPECT 2 UVM_ERROR\n");
       uvm_top.stop_request();

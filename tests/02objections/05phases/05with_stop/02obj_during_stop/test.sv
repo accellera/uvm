@@ -125,7 +125,7 @@ module test;
   endclass : test
 
   initial begin
-    uvm_report_catcher::add_report_default_catcher(ctchr);
+    uvm_report_cb::add(null,ctchr);
     run_test("test");
   end
 endmodule

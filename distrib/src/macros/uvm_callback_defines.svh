@@ -146,7 +146,7 @@
 
 `define uvm_do_obj_callbacks(CB,T,OBJ,METHOD_CALL) \
    begin \
-     uvm_callback_iter#(CB,T) iter = new(OBJ); \
+     uvm_callback_iter#(T,CB) iter = new(OBJ); \
      CB cb = iter.first(); \
      while(cb != null) begin \
        `uvm_cb_trace(cb,OBJ,$sformatf(`"CB (%s) T (%s) METHOD_CALL`",cb.get_name(), OBJ.get_full_name())) \
@@ -215,7 +215,7 @@
 
 `define uvm_do_obj_callbacks_exit_on(CB,T,OBJ,METHOD_CALL,VAL) \
    begin \
-     uvm_callback_iter#(CB,T) iter = new(OBJ); \
+     uvm_callback_iter#(T,CB) iter = new(OBJ); \
      CB cb = iter.first(); \
      while(cb != null) begin \
        if (cb.METHOD_CALL == VAL) begin \
