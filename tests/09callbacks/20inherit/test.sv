@@ -287,7 +287,7 @@ class test extends uvm_test;
    virtual function void check();
       string p[$];
 
-      uvm_callbacks#(uvm_object)::display_cbs();
+      uvm_callbacks#(uvm_object)::display();
       uvm_callbacks#(a_comp)::display();
       uvm_callbacks#(b_comp)::display();
       uvm_callbacks#(ax_comp)::display();
