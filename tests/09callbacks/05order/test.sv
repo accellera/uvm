@@ -21,6 +21,7 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 virtual class a_cb extends uvm_callback;
    function new(string name = "a_cb");

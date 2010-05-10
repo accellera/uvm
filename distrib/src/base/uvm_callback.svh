@@ -85,6 +85,7 @@ class uvm_callbacks_base extends uvm_object;
     return 0;
   endfunction
   virtual function bit m_is_registered(uvm_object obj, uvm_callback cb);
+    $display("should never be called");
     return 0;
   endfunction
 
@@ -97,6 +98,7 @@ class uvm_callbacks_base extends uvm_object;
       return 1;
     end
     // Need to look at all possible T/CB pairs of this type
+    $display("m_this_type.size() = %0d", m_this_type.size());
     foreach(m_this_type[i]) begin
       if(m_b_inst != m_this_type[i])
         if( m_this_type[i].m_is_registered(obj,cb)) begin
@@ -139,13 +141,6 @@ endclass
 class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
   static uvm_queue#(uvm_callback) m_twcb = new("typewide_queue");
   static string m_typename;
-
-  static uvm_pool#(uvm_object,uvm_queue#(uvm_callback)) m_pool = m_get_pool();
-  static function uvm_pool#(uvm_object,uvm_queue#(uvm_callback)) m_get_pool();
-    if(m_pool == null) m_pool = new;
-    return m_pool;
-  endfunction
-
 
   //The actual global object from the derivative class. Note that this is
   //just a reference to the object that is generated in the derived class.
@@ -197,10 +192,10 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
     if(m_cb_find(m_twcb,cb) == -1) begin
       m_twcb.push_back(cb);
     end
-    if(m_pool.first(obj)) begin
+    if(this.m_pool.first(obj)) begin
       do begin
         if($cast(me,obj)) begin
-          q = m_pool.get(obj);
+          q = this.m_pool.get(obj);
           if(m_cb_find(q,cb) == -1) begin
             if(ordering == UVM_APPEND)
               q.push_back(cb);
@@ -208,7 +203,7 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
               q.push_front(cb);
           end
         end
-      end while(m_pool.next(obj));
+      end while(this.m_pool.next(obj));
     end
     foreach(m_derived_types[i]) begin
       cb_pair = uvm_typeid_base::typeid_map[m_derived_types[i] ];
@@ -231,15 +226,15 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
       m_delete_tw_cbs = 1;
     end
 
-    if(m_pool.first(obj)) begin
+    if(this.m_pool.first(obj)) begin
       do begin
-        q = m_pool.get(obj);
+        q = this.m_pool.get(obj);
         pos = m_cb_find(q,cb);
         if(pos != -1) begin
           q.delete(pos);
           m_delete_tw_cbs = 1;
         end
-      end while(m_pool.next(obj));
+      end while(this.m_pool.next(obj));
     end
     foreach(m_derived_types[i]) begin
       cb_pair = uvm_typeid_base::typeid_map[m_derived_types[i] ];
@@ -406,6 +401,16 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   static this_type m_inst;
   static bit b = initialize(); 
 
+  // typeinfo
+  static uvm_typeid_base m_typeid = uvm_typeid#(T)::get();
+  static uvm_typeid_base m_cb_typeid = uvm_typeid#(CB)::get();
+
+  static string m_typename="";
+  static string m_cb_typename="";
+  static uvm_report_object reporter = new("cb_tracer");
+
+  // `uvm_object_param_utils(this_type)
+
   static function this_type get();
     if(m_inst == null) begin
       create_m_inst();
@@ -413,9 +418,9 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     return m_inst;
   endfunction
 
+  static uvm_callbacks#(T,uvm_callback) m_base_inst = that_type::get();
+
   static function void create_m_inst();
-    that_type m_base_inst;
-    uvm_typeid#(T) m_typeid;
 
     uvm_callbacks_base b;
       m_inst = new;
@@ -427,6 +432,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
 
       m_typeid = uvm_typeid#(T)::get();
       b = m_b_inst; 
+      $display("m_inst %s m_b_inst", ((m_inst == m_b_inst)?"=":"!="));
       m_b_inst.m_this_type.push_back(m_inst);
 
       if(!uvm_typeid_base::typeid_map.exists(m_typeid)) begin
@@ -441,19 +447,6 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     assert( m_inst != null );
     return 1;
   endfunction
-
-  static uvm_callbacks#(T,uvm_callback) m_base_inst = that_type::get();
-
-  // typeinfo
-  static uvm_typeid_base m_typeid = uvm_typeid#(T)::get();
-  static uvm_typeid_base m_cb_typeid = uvm_typeid#(CB)::get();
-
-  static string m_typename="";
-  static string m_cb_typename="";
-  static uvm_report_object reporter = new("cb_tracer");
-
-
-  // `uvm_object_param_utils(this_type)
 
 
   // Register valid callback type
@@ -474,8 +467,11 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   endfunction
 
   virtual function bit m_is_registered(uvm_object obj, uvm_callback cb);
-    if(m_is_for_me(cb) && m_am_i_a(obj))
+    $display("m_is_for_me = %0d, m_am_i_a = %0d", m_is_for_me(cb), m_am_i_a(obj));
+    if(m_is_for_me(cb) && m_am_i_a(obj)) begin
+      $display("is_reg = %0b", m_registered);
       return m_registered;
+    end
   endfunction
 
   //Does type check to see if the callback is valid for this type
@@ -727,15 +723,17 @@ class uvm_derived_callbacks#(type T=uvm_object, type ST=uvm_object, type CB=uvm_
  
   // Singleton instance is used for type checking
   static this_type m_inst = get();
-  static this_user_type m_user_inst = this_user_type::get();
-  static this_super_type m_super_inst = this_super_type::get();
+  static this_user_type m_user_inst;
+  static this_super_type m_super_inst;
 
   // typeinfo
   static uvm_typeid_base m_s_typeid = uvm_typeid#(ST)::get();
 
   static function this_type get();
-    this_user_type m_user_inst = this_user_type::get();
-    this_super_type m_super_inst = this_super_type::get();
+    m_user_inst = this_user_type::get();
+    m_super_inst = this_super_type::get();
+    m_s_typeid = uvm_typeid#(ST)::get();
+
     if(m_inst == null) begin
       m_inst = new;
     end

@@ -1,5 +1,6 @@
 module test;
   import uvm_pkg::*;
+  `include "uvm_macros.svh"
 
   virtual class cb_base extends uvm_callback;
     function new(string name=""); super.new(name); endfunction
@@ -63,7 +64,7 @@ module test;
 
       cb = new("cb1");
       uvm_callbacks#(ip_ext,cb_base)::add(comp,cb);
-      cb.callback_mode(0);
+      void'(cb.callback_mode(0));
   
       cb = new("cb2");
       rcb = cb;

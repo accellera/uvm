@@ -26,6 +26,7 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 virtual class base_cb extends uvm_callback;
    function new(string name = "base_cb");
@@ -286,7 +287,7 @@ class test extends uvm_test;
    virtual function void check();
       string p[$];
 
-      uvm_callbacks::display();
+      uvm_callbacks#(uvm_object)::display_cbs();
       uvm_callbacks#(a_comp)::display();
       uvm_callbacks#(b_comp)::display();
       uvm_callbacks#(ax_comp)::display();

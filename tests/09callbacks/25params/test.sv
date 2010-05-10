@@ -26,6 +26,7 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 virtual class generic_cb extends uvm_callback;
    function new(string name = "generic_cb");
@@ -176,10 +177,10 @@ class test extends uvm_test;
    virtual function void check();
       string p[$];
 
-      uvm_callbacks::display();
-      uvm_callbacks#(generic_comp)::display();
-      uvm_callbacks#(special_comp#(1))::display();
-      uvm_callbacks#(special_comp#(2))::display();
+      uvm_callbacks#(uvm_object)::display_cbs();
+      uvm_callbacks#(generic_comp)::display_cbs();
+      uvm_callbacks#(special_comp#(1))::display_cbs();
+      uvm_callbacks#(special_comp#(2))::display_cbs();
 
       print_trace("a1", a1.q);
       print_trace("a2", a2.q);
