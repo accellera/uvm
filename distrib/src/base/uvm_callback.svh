@@ -242,7 +242,7 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
   endfunction
 
 
-  static function void display_cbs(T obj=null);
+  static function void display(T obj=null);
     T me;
     uvm_callbacks_base ib = m_t_inst;
     string cbq[$];
@@ -400,8 +400,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   static bit b = initialize(); 
 
   // typeinfo
-  static uvm_typeid_base m_typeid = uvm_typeid#(T)::get();
-  static uvm_typeid_base m_cb_typeid = uvm_typeid#(CB)::get();
+  static uvm_typeid_base m_typeid;
+  static uvm_typeid_base m_cb_typeid;
 
   static string m_typename="";
   static string m_cb_typename="";
@@ -425,15 +425,20 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     uvm_typeid#(CB) _this_cb_type = uvm_typeid#(CB)::get();
     uvm_typeid_base this_cb_type = _this_cb_type;
 
-    m_inst = new;
     m_typeid = uvm_typeid#(T)::get();
+    m_cb_typeid = uvm_typeid#(CB)::get();
+
+    if(m_inst != null)
+      return;
+
+    m_inst = new;
 
     if(cb_base_type == this_cb_type) begin
       $cast(m_base_inst, m_inst);
       // The base inst in the super class gets set to this base inst
-      uvm_typed_callbacks#(T)::m_t_inst = m_base_inst;
+      m_t_inst = m_base_inst;
       // The base inst the most super class gets set to the base inst
-      uvm_callbacks_base::m_b_inst = m_base_inst;
+      m_b_inst = m_base_inst;
 
       uvm_typeid_base::typeid_map[m_typeid] = m_inst; 
       uvm_typeid_base::type_map[m_b_inst] = m_typeid;
@@ -451,7 +456,6 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     assert( m_inst != null );
     return 1;
   endfunction
-
 
   // Register valid callback type
   bit m_registered = 0;
@@ -729,7 +733,7 @@ class uvm_derived_callbacks#(type T=uvm_object, type ST=uvm_object, type CB=uvm_
   static this_super_type m_super_inst;
 
   // typeinfo
-  static uvm_typeid_base m_s_typeid = uvm_typeid#(ST)::get();
+  static uvm_typeid_base m_s_typeid;
 
   static function this_type get();
     m_user_inst = this_user_type::get();

@@ -21,6 +21,7 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 virtual class a_cb extends uvm_callback;
    function new(string name = "a_cb");
@@ -43,7 +44,7 @@ class a_comp extends uvm_component;
    `uvm_register_cb(a_comp, a_cb)
 
    virtual task run();
-      `uvm_do_callbacks(a_cb, a_comp, f(q));
+      `uvm_do_callbacks(a_comp, a_cb, f(q));
    endtask
 endclass
 

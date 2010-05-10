@@ -21,6 +21,7 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 class my_catcher extends uvm_report_catcher; //Default Catcher modifying the message
    

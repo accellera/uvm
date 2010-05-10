@@ -30,28 +30,73 @@ typedef class uvm_report_server;
 //------------------------------------------------------------------------------
 //
 // CLASS: uvm_report_catcher
-// The uvm_report_catcher is used to catch messages reports issued by the uvm report
-// server. Multiple report catchers can be registered with the report server.
-// The catchers can be registered as default catchers which catch all uvm reports,
-// based on id, based on serverity and both severity and id. User extensions of
-// uvm_report_catcher must implement the catch() method in which the action to be
-// taken on catching the report is specified. The catch method can return CAUGHT
-// ,in which case further processing of the report is immediately stopped, or return
-// TRHOW in which case the (possibly modified) report is passed on to other registered
-// catchers. The catchers are processed in the order in which they are registered.
 //
-// On catching a report the catch() method can modify the severity, id, action,
+// The uvm_report_catcher is used to catch messages issued by the uvm report
+// server. Catchers are <uvm_callbacks#(T,CB)> objects, so all factilities in the
+// <uvm_callback> and <uvm_callbacks#(T,CB)> classes are available for registering
+// catchers and controlling catcher state. Multiple report catchers can be 
+// registered with a report object. The catchers can be registered as default 
+// catchers which catch all reports on all <uvm_report_object> reporters,
+// or catchers can be attached to specific report objects (i.e. components). 
+//
+// User extensions of uvm_report_catcher must implement the <catch> method in 
+// which the action to be taken on catching the report is specified. The catch 
+// method can return CAUGHT, in which case further processing of the report is 
+// immediately stopped, or return THROW in which case the (possibly modified) report 
+// is passed on to other registered catchers. The catchers are processed in the order 
+// in which they are registered.
+//
+// On catching a report the <catch> method can modify the severity, id, action,
 // verbosity or the report string itself before the report is finally issued by
-// the report server.
-// The report can be immediately issued from within the catcher class by calling the
-// issue method
+// the report server. The report can be immediately issued from within the catcher 
+// class by calling the issue method.
 //
 // The catcher maintains a count of all reports with FATAL,ERROR or WARNING severity
 // and a count of all reports with FATAL, ERROR or WARNING severity whose severity
-// was lowered. These statistics are reported in the summary of the uvm_report_server.
+// was lowered. These statistics are reported in the summary of the <uvm_report_server>.
+//
+// This example shows the basic concept of creating a report catching
+// callback and attaching it to all messages that get emitted:
+//
+//| class my_error_demoter extends uvm_report_catcher;
+//|   function new(string name="my_error_demoter");
+//|     super.new(name);
+//|   endfunction
+//|   //This example demotes the error "MY_ID" to an info message
+//|   function action_e catch();
+//|     if(get_severity() == UVM_ERROR && get_id() == "MY_ID")
+//|       set_severity(UVM_INFO);
+//|     return THROW;
+//|   endfunction
+//| endclass
+//|
+//| my_error_demoter demoter = new;
+//| initial begin
+//|  // Catchers are callbacks on report objects (components are report 
+//|  // objects, so catchers can be attached to components).
+//|
+//|  // To effect all reporters, use null for the object
+//|  uvm_report_cb::add(null, demoter); 
+//|
+//|  // To effect some specific object use the specific reporter
+//|  uvm_report_cb::add(mytest.myenv.myagent.mydriver, demoter);
+//|
+//|  // To effect some set of components using the component name
+//|  uvm_report_cb::add_by_name("*.*driver", demoter);
+//| end
+//
+//
 //------------------------------------------------------------------------------
 
 typedef class uvm_report_catcher;
+
+class sev_id_struct;
+  bit sev_specified ;
+  bit id_specified ;
+  uvm_severity sev ;
+  string  id ;
+  bit is_on ;
+endclass
 
 typedef uvm_callbacks#(uvm_report_object,uvm_report_catcher) uvm_report_cb;
 typedef uvm_callback_iter#(uvm_report_object, uvm_report_catcher) uvm_report_cb_iter;
@@ -91,9 +136,10 @@ virtual class uvm_report_catcher extends uvm_callback;
 
   local static  bit do_report = 0;
   
-  // new
+  // Function: new
   //
-  //
+  // Create a new report object. The name argument is optional, but
+  // should generally be provided to aid in debugging.
 
   function new(string name = "uvm_report_catcher");
     super.new(name);
@@ -101,115 +147,140 @@ virtual class uvm_report_catcher extends uvm_callback;
     do_report = 1;
   endfunction    
 
+  // Group: Current Message State
 
-  //get_client
+  // Function: get_client
   //
-  //
+  // Returns the <uvm_report_object> that has generated the message that
+  // is currently being processes.
 
   function uvm_report_object get_client();
     return this.m_client; 
   endfunction
 
-  //get_severity
+  // Function: get_severity
   //
-  //
+  // Returns the <uvm_severity> of the message that is currently being
+  // processed. If the severity was modified by a previously executed
+  // report object (which re-threw the message), then the returned 
+  // severity is the modified value.
 
   function uvm_severity get_severity();
     return this.m_modified_severity;
   endfunction
   
-  //get_verbosity
+  // Function: get_verbosity
   //
-  //
+  // Returns the verbosity of the message that is currently being
+  // processed. If the verbosity was modified by a previously executed
+  // report object (which re-threw the message), then the returned 
+  // verbosity is the modified value.
   
   function int get_verbosity();
     return this.m_modified_verbosity;
   endfunction
   
-  //get_id
+  // Function: get_id
   //
-  //
+  // Returns the string id of the message that is currently being
+  // processed. If the id was modified by a previously executed
+  // report object (which re-threw the message), then the returned 
+  // id is the modified value.
   
   function string get_id();
     return this.m_modified_id;
   endfunction
   
-  //get_message
+  // Function: get_message
   //
-  //
+  // Returns the string message of the message that is currently being
+  // processed. If the message was modified by a previously executed
+  // report object (which re-threw the message), then the returned 
+  // message is the modified value.
   
   function string get_message();
      return this.m_modified_message;
   endfunction
   
-  //get_action
+  // Function: get_action
   //
-  //
+  // Returns the <uvm_action> of the message that is currently being
+  // processed. If the action was modified by a previously executed
+  // report object (which re-threw the message), then the returned 
+  // action is the modified value.
   
   function uvm_action get_action();
     return this.m_modified_action;
   endfunction
   
-  //get_fname
+  // Function: get_fname
   //
-  //
+  // Returns the file name of the message.
   
   function string get_fname();
     return this.m_file_name;
   endfunction             
 
-  //get_line
+  // Function: get_line
   //
-  //
+  // Returns the line number of the message.
 
   function int get_line();
     return this.m_line_number;
   endfunction
   
-  //set_severity
+  // Group: Change Message State
+
+  // Funciton: set_severity
   //
-  //
+  // Change the severity of the message to ~severity~. Any other
+  // report catchers will see the modified value.
   
   protected function void set_severity(uvm_severity severity);
     this.m_modified_severity = severity;
   endfunction
   
-  //set_verbosity
+  // Function: set_verbosity
   //
-  //
+  // Change the verbosity of the message to ~verbosity~. Any other
+  // report catchers will see the modified value.
 
   protected function void set_verbosity(int verbosity);
     this.m_modified_verbosity = verbosity;
   endfunction      
 
-  //set_id
+  // Function: set_id
   //
-  //
+  // Change the id of the message to ~id~. Any other
+  // report catchers will see the modified value.
 
   protected function void set_id(string id);
     this.m_modified_id = id;
   endfunction
   
-  //set_message
+  // Function: set_message
   //
-  //
+  // Change the text of the message to ~message~. Any other
+  // report catchers will see the modified value.
 
   protected function void set_message(string message);
     this.m_modified_message = message;
   endfunction
   
-  //set_action
+  // Function: set_action
   //
-  //
+  // Change the action of the message to ~action~. Any other
+  // report catchers will see the modified value.
   
   protected function void set_action(uvm_action action);
     this.m_modified_action = action;
   endfunction
   
-       
-  //get_report_catcher
+  // Group: Debug
+     
+  // Function: get_report_catcher
   //
-  //
+  // Returns the first report catcher that has ~name~. 
   
   static function uvm_report_catcher get_report_catcher(string name);
     static uvm_report_cb_iter iter = new(null);
@@ -223,9 +294,11 @@ virtual class uvm_report_catcher extends uvm_callback;
   endfunction
 
 
-  //print_catchers()
+  // Function: print_catchers()
   //
-  //
+  // Prints information about all of the report catchers that are 
+  // registered. For finer grained detail, the <uvm_callbacks::display>
+  // method can be used by calling uvm_report_cb::display(<report_object>).
 
   static function void print_catcher(UVM_FILE file=0);
     string msg;
@@ -250,24 +323,35 @@ virtual class uvm_report_catcher extends uvm_callback;
     f_display(file, "--------------------------------------------------------------");
   endfunction
   
-  //debug_report_catcher
+  // Funciton: debug_report_catcher
   //
-  //
+  // Turn on report catching debug information. ~what~ is a bitwise and of
+  // * DO_NOT_CATCH  -- forces catch to be ignored so that all catchers see the
+  //   the reports.
+  // * DO_NOT_MODIFY -- forces the message to remain unchanged
 
   static function void debug_report_catcher(int what= 0);
     m_debug_flags = what;
   endfunction        
-   
-   //catch
-   //
-   //
+  
+  // Group: Callback Interface
+ 
+  // Function: catch
+  //
+  // This is the method that is called for each registered report catcher.
+  // There are no arguments to this function. The <Current Message State>
+  // interface methods can be used to access information about the 
+  // current message being processed.
 
-   pure virtual function action_e catch();
+  pure virtual function action_e catch();
      
 
-   //uvm_report_fatal
+  // Group: Reporting
+
+   // Function: uvm_report_fatal
    //
-   //
+   // Issues a fatal message using the current messages report object.
+   // This message will bypass any message catching callbacks.
    
    protected function void uvm_report_fatal(string id, string message, int verbosity, string fname = "", int line = 0 );
      string m;
@@ -285,9 +369,11 @@ virtual class uvm_report_catcher extends uvm_callback;
    endfunction  
 
 
-   //uvm_report_error
+   // Function: uvm_report_error
    //
-   //
+   // Issues a error message using the current messages report object.
+   // This message will bypass any message catching callbacks.
+   
    
    protected function void uvm_report_error(string id, string message, int verbosity, string fname = "", int line = 0 );
      string m;
@@ -305,9 +391,10 @@ virtual class uvm_report_catcher extends uvm_callback;
    endfunction  
 
 
-   //uvm_report_warning
+   // Function: uvm_report_warning
    //
-   //
+   // Issues a warning message using the current messages report object.
+   // This message will bypass any message catching callbacks.
    
    protected function void uvm_report_warning(string id, string message, int verbosity, string fname = "", int line = 0 );
      string m;
@@ -325,9 +412,10 @@ virtual class uvm_report_catcher extends uvm_callback;
    endfunction  
 
 
-   //uvm_report_info
+   // Function: uvm_report_info
    //
-   //
+   // Issues a info message using the current messages report object.
+   // This message will bypass any message catching callbacks.
    
    protected function void uvm_report_info(string id, string message, int verbosity, string fname = "", int line = 0 );
      string m;
@@ -344,9 +432,12 @@ virtual class uvm_report_catcher extends uvm_callback;
                                   m, verbosity, this.m_client);
   endfunction  
 
-  //issue
-  //immediately issue the message if called from within catch
-  //issuing a message will update the report_server stats, possibly multiple times
+  // Funciton: issue
+  // Immediately issues the message which is currently being processed. This
+  // is useful if the message is being <CAUGHT> but should still be emitted.
+  //
+  // Issuing a message will update the report_server stats, possibly multiple 
+  // times if the message is not <CAUGHT>.
 
   protected function void issue();
      string m;
@@ -496,9 +587,10 @@ virtual class uvm_report_catcher extends uvm_callback;
       $fdisplay(file, str);
   endfunction
 
-  //summarize_report_catcher
-  //called in uvm_report_server::summarize()
-  //prints the stats for the catcher
+  // Function: summarize_report_catcher
+  //
+  // This function is called automatically by <uvm_report_server::summarize()>.
+  // It prints the statistics for the active catchers.
 
   static function void summarize_report_catcher(UVM_FILE file);
     string s;

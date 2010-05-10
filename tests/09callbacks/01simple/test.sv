@@ -1,5 +1,6 @@
 module test;
   import uvm_pkg::*;
+  `include "uvm_macros.svh"
 
   virtual class cb_base extends uvm_callback;
     function new(string name=""); super.new(name); endfunction
@@ -13,10 +14,10 @@ module test;
     function new(string name,uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
+>>>    task run;
       int i;
       $display("executing callbacks");
-      `uvm_do_callbacks(cb_base,ip_comp,doit(q))
+      `uvm_do_callbacks(ip_comp,cb_base,doit(q))
     endtask
   endclass
 
@@ -57,7 +58,7 @@ module test;
       cb = new("cb4");
       uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
   
-      uvm_callbacks#(ip_comp,cb_base)::display_cbs();
+      uvm_callbacks#(ip_comp,cb_base)::display();
 
     endfunction
 

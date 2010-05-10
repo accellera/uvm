@@ -41,6 +41,7 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 class my_catcher_info extends uvm_report_catcher;
   function new(string name); super.new(name); endfunction 

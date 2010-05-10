@@ -21,6 +21,7 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 class my_catcher extends uvm_report_catcher;
    static int seen = 0;
