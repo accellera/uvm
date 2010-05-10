@@ -16,7 +16,7 @@ module test;
     task run;
       int i;
       uvm_report_info("EXCB","executing callbacks",UVM_NONE);
-      `uvm_do_callbacks(cb_base,ip_comp,doit(q))
+      `uvm_do_callbacks(ip_comp,cb_base,doit(q))
     endtask
   endclass
 
@@ -67,7 +67,7 @@ module test;
       cb = new("tw_cb4");
       uvm_callbacks#(ip_comp,cb_base)::add(null,cb);
   
-      uvm_callbacks#(ip_comp,cb_base)::display_cbs();
+      uvm_callbacks#(ip_comp,cb_base)::display();
     endfunction
 
     task run;

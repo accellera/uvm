@@ -16,7 +16,7 @@ module top;
     task run;
       int i;
       $display("executing callbacks");
-      `uvm_do_callbacks(cb_base,ip_comp,doit(q))
+      `uvm_do_callbacks(ip_comp,cb_base,doit(q))
     endtask
   endclass
 
@@ -80,7 +80,7 @@ module top;
 
       cbtype::delete_by_name("*m1.de*",cb,this);
 
-      uvm_callbacks#(ip_comp,cb_base)::display_cbs();
+      uvm_callbacks#(ip_comp,cb_base)::display();
     endfunction
     task run;
       #10 uvm_top.stop_request();

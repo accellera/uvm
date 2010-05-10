@@ -288,7 +288,7 @@ class uvm_objection extends uvm_report_object;
       m_report(obj,source_obj,description,count,"raised");
 
     raised(obj, source_obj, description, count);
-    `uvm_do_callbacks(uvm_objection_cb,uvm_objection,raised(obj,source_obj,description,count))
+    `uvm_do_callbacks(uvm_objection,uvm_objection_cb,raised(obj,source_obj,description,count))
 
     // If this object is still draining from a previous drop, then
     // raise the count and return. Any propagation will be handled
@@ -400,7 +400,7 @@ class uvm_objection extends uvm_report_object;
       m_report(obj,source_obj,description,count,"dropped");
     
     dropped(obj, source_obj, description, count);
-    `uvm_do_callbacks(uvm_objection_cb,uvm_objection,dropped(obj,source_obj,description,count))
+    `uvm_do_callbacks(uvm_objection,uvm_objection_cb,dropped(obj,source_obj,description,count))
   
     // if count != 0, no reason to fork
     if (m_total_count[obj] != 0) begin
@@ -431,7 +431,7 @@ class uvm_objection extends uvm_report_object;
                      m_report(obj,source_obj,description,count,"all_dropped");
     
                   all_dropped(obj,source_obj,description, count);
-                  `uvm_do_callbacks(uvm_objection_cb,uvm_objection,all_dropped(obj,source_obj,description,count))
+                  `uvm_do_callbacks(uvm_objection,uvm_objection_cb,all_dropped(obj,source_obj,description,count))
   
                   // wait for all_dropped cbs to complete
                   wait fork;

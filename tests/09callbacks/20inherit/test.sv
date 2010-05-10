@@ -88,7 +88,7 @@ class base_comp extends uvm_component;
    `uvm_register_cb(base_comp, base_cb)
 
    virtual task run();
-      `uvm_do_callbacks(base_cb, base_comp, base_f(q))
+      `uvm_do_callbacks(base_comp, base_cb, base_f(q))
    endtask
 endclass
 
@@ -105,8 +105,8 @@ class a_comp extends base_comp;
 
    virtual task run();
       super.run();
-      `uvm_do_callbacks(a_cb, a_comp, a_f(q))
-      `uvm_do_callbacks(z_cb, a_comp, z_f(q))
+      `uvm_do_callbacks(a_comp, a_cb, a_f(q))
+      `uvm_do_callbacks(a_comp, z_cb, z_f(q))
    endtask
 endclass
 
@@ -122,7 +122,7 @@ class ax_comp extends a_comp;
 
    virtual task run();
       super.run();
-      `uvm_do_callbacks(ax_cb, ax_comp, ax_f(q))
+      `uvm_do_callbacks(ax_comp, ax_cb, ax_f(q))
    endtask
 endclass
 
@@ -138,7 +138,7 @@ class b_comp extends base_comp;
 
    virtual task run();
       super.run();
-      `uvm_do_callbacks(b_cb, b_comp, b_f(q))
+      `uvm_do_callbacks(b_comp, b_cb, b_f(q))
    endtask
 endclass
 
@@ -286,10 +286,10 @@ class test extends uvm_test;
    virtual function void check();
       string p[$];
 
-      uvm_callbacks::display_cbs();
-      uvm_callbacks#(a_comp)::display_cbs();
-      uvm_callbacks#(b_comp)::display_cbs();
-      uvm_callbacks#(ax_comp)::display_cbs();
+      uvm_callbacks::display();
+      uvm_callbacks#(a_comp)::display();
+      uvm_callbacks#(b_comp)::display();
+      uvm_callbacks#(ax_comp)::display();
 
       print_trace("a1", a1.q);
       print_trace("a2", a2.q);
