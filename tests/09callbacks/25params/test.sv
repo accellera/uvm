@@ -177,7 +177,7 @@ class test extends uvm_test;
    virtual function void check();
       string p[$];
 
-      uvm_callbacks#(uvm_object)::display();
+      uvm_pkg::uvm_callbacks#(uvm_object)::display();
       uvm_callbacks#(generic_comp)::display();
       uvm_callbacks#(special_comp#(1))::display();
       uvm_callbacks#(special_comp#(2))::display();

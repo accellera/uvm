@@ -14,7 +14,7 @@ module test;
     function new(string name,uvm_component parent);
       super.new(name,parent);
     endfunction
->>>    task run;
+    task run;
       int i;
       $display("executing callbacks");
       `uvm_do_callbacks(ip_comp,cb_base,doit(q))
