@@ -1,3 +1,4 @@
+
 //----------------------------------------------------------------------
 //   Copyright 2010 Synopsys, Inc. 
 //   All Rights Reserved Worldwide 
@@ -17,11 +18,42 @@
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
 
+// Test: 20inherit
+// Purpose: Test a complex inheritence hierarchy with different types
+//   of callbacks used at each level of the hierarchy, mixing typewide
+//   and instance specific callbacks.
+// API tested:
+//   `uvm_do_callbacks
+//   `uvm_register_cb
+//   `uvm_set_super_type
+//   uvm_callbacks#(T,CB)::add(comp,cb); //append
+//   uvm_callbacks#(T,CB)::display();
+//
+// Callback Class hierarchy
+//
+//         base_cb               z_cb
+//    ^       ^    ^              ^
+//   /        |     \             |
+// my_base_cb |      |          my_z_cb
+//           a_cb   b_cb
+//          ^  ^     ^
+//         /   |      \     
+//    my_a__cb |     my_b_cb
+//            ax_cb
+//             ^
+//             |
+//           my_ax_cb
+//
+// Component Class Hierarchy (and callbacks they use)
+//
+//          base_comp (base_cb)
+//          ^       ^
+//        /          \
+//    a_comp (a_cb)  b_comp (b_cb)
+//      ^    (z_cb)
+//      |
+//    ax_comp (ax_cb)
 
-//
-// Test that inherited callback classes are properly executed
-// by inherited components
-//
 
 program top;
 
