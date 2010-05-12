@@ -70,11 +70,11 @@ interesting ways to produce realistic stimulus to your DUT.
 See <Sequence Classes> for more information.
 
 Macros - The UVM provides several macros to help increase user productivity.
-See <Utility and Field Macros> and <Sequence and Do Action Macros> for a
+See ~Utility and Field Macros~ and <Sequence and Do Action Macros> for a
 complete list.
 
 Globals - This category defines a small list of types, variables, functions,
-and tasks defined in ~uvm_pkg~ scope.  These items are accessible from
-any scope that imports the ~uvm_pkg~. See ~Types and Enumerations~ and
+and tasks defined in ~<uvm_pkg~ scope.  These items are accessible from
+any scope that imports the ~uvm_pkg~. See <Types and Enumerations> and
 <Globals> for details.
 

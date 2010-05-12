@@ -3,12 +3,7 @@ Universal Verification Methodology
 
 May 2010
 
-Copyright© 2010 by Accellera. All rights reserved.
-Copyright© 2008–2010 Cadence Design Systems, Inc. (Cadence). All rights reserved.
-Copyright© 2008–2010 Mentor Graphics, Corp. (Mentor). All rights reserved.
-
-This product is licensed under the Apache Software Foundation’s Apache License, Version 2.0, January 
-2004. The full license is available at: http://www.apache.org/licenses/.
+Copyright© 2010 Accellera. All rights reserved.
 
 Notices
 
