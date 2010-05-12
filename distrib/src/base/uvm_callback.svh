@@ -536,10 +536,22 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
       `uvm_cb_trace_noobj(cb,$sformatf("Add (%s) callback %0s to object %0s ",
                       ordering.name(), cb.get_name(), obj.get_full_name()))
       q = m_base_inst.m_pool.get(obj);
-      if(q.size() == 0)
+      if(q.size() == 0) begin
+        // Need to make sure that registered report catchers are added. This
+        // way users don't need to set up uvm_report_object as a super type.
+        uvm_report_object o; 
+        if($cast(o,obj)) begin
+          uvm_queue#(uvm_callback) qr;
+          qr = uvm_callbacks#(uvm_report_object,uvm_callback)::m_t_inst.m_twcb;
+          for(int i=0; i<qr.size(); ++i)  begin
+              q.push_back(qr.get(i)); 
+          end
+        end
+
         for(int i=0; i<m_t_inst.m_twcb.size(); ++i)  begin
           q.push_back(m_t_inst.m_twcb.get(i)); 
         end
+      end
       //check if already exists in the queue
       if(m_cb_find(q,cb) != -1) begin
         uvm_report_warning("CBPREG", { "Callback object ", cb.get_name(), " is already registered",
