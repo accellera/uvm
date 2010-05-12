@@ -527,10 +527,14 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
         uvm_report_warning("CBPREG", { "Callback object ", cb.get_name(), " is already registered with type ", tnm }, UVM_NONE);
       end
       else begin
+        `uvm_cb_trace_noobj(cb,$sformatf("Add (%s) typewide callback %0s for type %s",
+                         ordering.name(), cb.get_name(), m_base_inst.m_typename))
         m_t_inst.m_add_tw_cbs(cb,ordering);
       end
     end
     else begin
+      `uvm_cb_trace_noobj(cb,$sformatf("Add (%s) callback %0s to object %0s ",
+                      ordering.name(), cb.get_name(), obj.get_full_name()))
       q = m_base_inst.m_pool.get(obj);
       if(q.size() == 0)
         for(int i=0; i<m_t_inst.m_twcb.size(); ++i)  begin
@@ -569,6 +573,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
          name }, UVM_NONE);
        return;
     end
+    `uvm_cb_trace_noobj(cb,$sformatf("Add (%s) callback %0s by name to object(s) %0s ",
+                    ordering.name(), cb.get_name(), name))
     void'(uvm_top.find_all(name,cq,root));
     if(cq.size() == 0) begin
       uvm_report_warning("CBNOMTC", { "add_by_name failed to find any components matching the name ",
@@ -601,9 +607,13 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     bit found = 0;
     int pos;
     if(obj == null) begin
+      `uvm_cb_trace_noobj(cb,$sformatf("Delete typewide callback %0s for type %s",
+                       cb.get_name(), m_base_inst.m_typename))
       found = m_t_inst.m_delete_tw_cbs(cb);
     end
     else begin
+      `uvm_cb_trace_noobj(cb,$sformatf("Delete callback %0s from object %0s ",
+                      cb.get_name(), obj.get_full_name()))
       q = m_base_inst.m_pool.get(b_obj);
       pos = m_cb_find(q,cb);
       if(pos != -1) begin
@@ -632,6 +642,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
      uvm_component root);
     uvm_component cq[$];
     T t;
+    `uvm_cb_trace_noobj(cb,$sformatf("Delete callback %0s by name from object(s) %0s ",
+                    cb.get_name(), name))
     void'(uvm_top.find_all(name,cq,root));
     if(cq.size() == 0) begin
       uvm_report_warning("CBNOMTC", { "delete_by_name failed to find any components matching the name ",
@@ -666,8 +678,9 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
       if(obj == null) begin
         q = m_t_inst.m_twcb;
       end
-      else
+      else begin
         q = m_t_inst.m_get_twq(obj); //get the most derivative queue
+      end
     end 
     else begin
       q = m_base_inst.m_pool.get(obj);
@@ -868,6 +881,7 @@ endclass
 //------------------------------------------------------------------------------
 
 class uvm_callback extends uvm_object;
+  /*protected*/ static bit m_tracing = 1;
 
   static uvm_report_object reporter = new("cb_tracer");
 
@@ -886,8 +900,14 @@ class uvm_callback extends uvm_object;
   // Enable/disable callbacks (modeled like rand_mode and constraint_mode).
 
   function bit callback_mode(int on=-1);
-    `uvm_cb_trace_noobj(this,$sformatf("callback_mode(%0d) %s (%s)",
+    if(on == 0 || on == 1) begin
+      `uvm_cb_trace_noobj(this,$sformatf("write callback_mode(%0d) %s (%s)",
                          on, get_name(), get_type_name()))
+    end
+    else begin
+      `uvm_cb_trace_noobj(this,$sformatf("read callback_mode() = %0d %s (%s)",
+                         m_enabled, get_name(), get_type_name()))
+    end
     callback_mode = m_enabled;
     if(on==0) m_enabled=0;
     if(on==1) m_enabled=1;

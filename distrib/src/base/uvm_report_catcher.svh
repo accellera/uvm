@@ -422,7 +422,6 @@ virtual class uvm_report_catcher extends uvm_callback;
      uvm_action a;
      UVM_FILE f;
      uvm_report_handler rh;
-     
      rh    = this.m_client.get_report_handler();
      a    = rh.get_action(UVM_INFO,id);
      f     = rh.get_file_handle(UVM_INFO,id);
@@ -478,7 +477,6 @@ virtual class uvm_report_catcher extends uvm_callback;
   );
     uvm_report_cb_iter iter = new(client);
     uvm_report_catcher catcher;
-
     int thrown = 1;
     uvm_severity orig_severity;
     static bit in_catcher;
@@ -487,6 +485,7 @@ virtual class uvm_report_catcher extends uvm_callback;
         return 1;
     end
     in_catcher = 1;    
+    m_tracing = 0;  //turn off cb tracing so catcher stuff doesn't print
 
     m_server             = server;
     m_client             = client;
@@ -536,6 +535,7 @@ virtual class uvm_report_catcher extends uvm_callback;
     endcase
    
     in_catcher = 0;
+    m_tracing = 1;  //turn tracing stuff back on
 
     severity        = m_modified_severity;
     id              = m_modified_id;
