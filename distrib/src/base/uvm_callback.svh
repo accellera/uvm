@@ -916,12 +916,12 @@ class uvm_callback extends uvm_object;
 
   function bit callback_mode(int on=-1);
     if(on == 0 || on == 1) begin
-      `uvm_cb_trace_noobj(this,$sformatf("Set callback_mode to %s",
-            ((on==1) ? "ENABLED":"DISABLED")))
+      `uvm_cb_trace_noobj(this,$sformatf("Setting callback mode for %s to %s",
+            get_name(), ((on==1) ? "ENABLED":"DISABLED")))
     end
     else begin
-      `uvm_cb_trace_noobj(this,$sformatf("Check callback_mode : %s",
-            ((m_enabled==1) ? "ENABLED":"DISABLED")))
+      `uvm_cb_trace_noobj(this,$sformatf("Callback mode for %s is %s",
+            get_name(), ((m_enabled==1) ? "ENABLED":"DISABLED")))
     end
     callback_mode = m_enabled;
     if(on==0) m_enabled=0;

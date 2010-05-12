@@ -68,7 +68,7 @@ module test;
 
         case (1)
           uvm_is_match("*UVM_APPEND*", msg): trace_count("   - UVM_APPEND");
-          uvm_is_match("*callback_mode*", msg): trace_count("   - callback_mode");
+          uvm_is_match("*allback mode*", msg): trace_count("   - callback_mode");
           uvm_is_match("*Delete*", msg): trace_count("   - delete");
           //uvm_is_match("*METHOD_CALL*", msg): trace_count("   saw METHOD_CALL");
           uvm_is_match("*doit\(q\)*", msg): trace_count("   - User function doit(q)");
