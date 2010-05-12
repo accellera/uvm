@@ -118,8 +118,8 @@ module test;
     ip_comp comp;
     `uvm_component_utils(test)
 
-    // Expecting to see 10 callback messages in this test.
-    my_catcher catcher = new(10);
+    // Expecting to see 14 callback messages in this test.
+    my_catcher catcher = new(14);
 
     function new(string name,uvm_component parent);
       super.new(name,parent);

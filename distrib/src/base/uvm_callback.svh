@@ -731,7 +731,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     end
     for(itr = itr+1; itr<q.size(); ++itr) begin
       if($cast(cb, q.get(itr))) begin
-        if(cb.is_enabled()) begin
+        if(cb.callback_mode()) begin
           return cb;
         end
       end
