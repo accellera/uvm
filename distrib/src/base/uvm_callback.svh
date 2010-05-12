@@ -257,6 +257,8 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
 
     int max_cb_name=0, max_inst_name=0;
 
+    uvm_callback::m_tracing = 0; //don't allow tracing during display
+
     if(m_typename != "") tname = m_typename;
     else if(obj != null) tname = obj.get_type_name();
     else tname = "*";
@@ -339,6 +341,7 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
       $display("%s  %s on %s  %s", cbq[i], blanks.substr(0,max_cb_name-cbq[i].len()-1), inst_q[i], blanks.substr(0,max_inst_name - inst_q[i].len()-1), mode_q[i]);
     end
 
+    uvm_callback::m_tracing = 1; //allow tracing to be resumed
   endfunction
 
 endclass
@@ -913,12 +916,12 @@ class uvm_callback extends uvm_object;
 
   function bit callback_mode(int on=-1);
     if(on == 0 || on == 1) begin
-      `uvm_cb_trace_noobj(this,$sformatf("write callback_mode(%0d) %s (%s)",
-                         on, get_name(), get_type_name()))
+      `uvm_cb_trace_noobj(this,$sformatf("Set callback_mode to %s",
+            ((on==1) ? "ENABLED":"DISABLED")))
     end
     else begin
-      `uvm_cb_trace_noobj(this,$sformatf("read callback_mode() = %0d %s (%s)",
-                         m_enabled, get_name(), get_type_name()))
+      `uvm_cb_trace_noobj(this,$sformatf("Check callback_mode : %s",
+            ((m_enabled==1) ? "ENABLED":"DISABLED")))
     end
     callback_mode = m_enabled;
     if(on==0) m_enabled=0;
@@ -930,7 +933,7 @@ class uvm_callback extends uvm_object;
   // Returns 1 if the callback is enabled, 0 otherwise.
 
   function bit is_enabled();
-    return m_enabled;
+    return callback_mode();
   endfunction
 
   static string type_name = "uvm_callback";
