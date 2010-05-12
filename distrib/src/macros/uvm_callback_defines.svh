@@ -244,7 +244,7 @@
 
 `define uvm_cb_trace_noobj(CB,OPER) \
   begin \
-    if(uvm_callback::m_tracing) \
+    if(uvm_callbacks_base::m_tracing) \
       `uvm_info("UVMCB_TRC", $sformatf("%s : callback %s (%s@%0d)" ,  \
        OPER, CB.get_name(), CB.get_type_name(), CB.get_inst_id()), UVM_NONE) \
   end

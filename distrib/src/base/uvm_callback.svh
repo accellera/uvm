@@ -66,6 +66,7 @@ endclass
 // instance queue.
 
 class uvm_callbacks_base extends uvm_object;
+  /*protected*/ static bit m_tracing = 1;
   static uvm_callbacks_base m_b_inst;
   static uvm_pool#(uvm_object,uvm_queue#(uvm_callback)) m_pool = m_get_pool();
   static function uvm_pool#(uvm_object,uvm_queue#(uvm_callback)) m_get_pool();
@@ -257,7 +258,7 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
 
     int max_cb_name=0, max_inst_name=0;
 
-    uvm_callback::m_tracing = 0; //don't allow tracing during display
+    m_tracing = 0; //don't allow tracing during display
 
     if(m_typename != "") tname = m_typename;
     else if(obj != null) tname = obj.get_type_name();
@@ -341,7 +342,7 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
       $display("%s  %s on %s  %s", cbq[i], blanks.substr(0,max_cb_name-cbq[i].len()-1), inst_q[i], blanks.substr(0,max_inst_name - inst_q[i].len()-1), mode_q[i]);
     end
 
-    uvm_callback::m_tracing = 1; //allow tracing to be resumed
+    m_tracing = 1; //allow tracing to be resumed
   endfunction
 
 endclass
@@ -896,7 +897,6 @@ endclass
 //------------------------------------------------------------------------------
 
 class uvm_callback extends uvm_object;
-  /*protected*/ static bit m_tracing = 1;
 
   static uvm_report_object reporter = new("cb_tracer");
 

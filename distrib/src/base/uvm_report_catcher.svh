@@ -485,7 +485,7 @@ virtual class uvm_report_catcher extends uvm_callback;
         return 1;
     end
     in_catcher = 1;    
-    m_tracing = 0;  //turn off cb tracing so catcher stuff doesn't print
+    uvm_callbacks_base::m_tracing = 0;  //turn off cb tracing so catcher stuff doesn't print
 
     m_server             = server;
     m_client             = client;
@@ -535,7 +535,7 @@ virtual class uvm_report_catcher extends uvm_callback;
     endcase
    
     in_catcher = 0;
-    m_tracing = 1;  //turn tracing stuff back on
+    uvm_callbacks_base::m_tracing = 1;  //turn tracing stuff back on
 
     severity        = m_modified_severity;
     id              = m_modified_id;
