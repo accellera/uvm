@@ -1,3 +1,15 @@
+// Test: 01simple
+// Purpose: To test the basic usage of callbacks. 
+// API tested:
+//   `uvm_do_callbacks
+//   `uvm_register_cb
+//      uvm_callbacks#(T,CB)::add(comp,cb); //append
+//      uvm_callbacks#(T,CB)::add(comp,cb,UVM_PREPEND); //preappend
+//      uvm_callbacks#(T,CB)::delete(comp,cb);   
+//      uvm_callback::callback_mode(0); //disable
+//      uvm_callback::callback_mode(1); //enable
+//      uvm_callback::callback_mode();  //read
+
 module test;
   import uvm_pkg::*;
   `include "uvm_macros.svh"
@@ -16,8 +28,13 @@ module test;
     endfunction
     task run;
       int i;
-      $display("executing callbacks");
-      `uvm_do_callbacks(ip_comp,cb_base,doit(q))
+      // Executes the callbacks twice. cb2 is disabled the first
+      // time through but enabled for the second time.
+      repeat(2) begin
+        $display("executing callbacks");
+        `uvm_do_callbacks(ip_comp,cb_base,doit(q))
+        #10;
+      end
     endtask
   endclass
 
@@ -30,7 +47,7 @@ module test;
   endclass
 
   class test extends uvm_component;
-    mycb cb, rcb;
+    mycb cb, rcb, dis_cb;
     ip_comp comp;
     `uvm_component_utils(test)
     function new(string name,uvm_component parent);
@@ -42,10 +59,17 @@ module test;
       cb = new("cb0");
       uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
 
+      if(cb.callback_mode() != 1)
+        $display("## UVM_TEST FAILED, expected cb mode 1 **");
+
       cb = new("cb1");
       uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
-      cb.callback_mode(0);
+      void'(cb.callback_mode(0));
+      dis_cb = cb;
   
+      if(cb.callback_mode() != 0)
+        $display("## UVM_TEST FAILED, expected cb mode 0 **");
+
       cb = new("cb2");
       rcb = cb;
       uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
@@ -56,13 +80,14 @@ module test;
       uvm_callbacks#(ip_comp,cb_base)::delete(comp,rcb);
    
       cb = new("cb4");
-      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
+      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb, UVM_PREPEND);
   
       uvm_callbacks#(ip_comp,cb_base)::display();
 
     endfunction
 
     task run;
+      #5 void'(dis_cb.callback_mode(1));
       #100 uvm_top.stop_request();
     endtask
 
@@ -70,7 +95,8 @@ module test;
       int failed = 0;
       string exp[$];
       //cb2 was deleted and cb1 was disabled
-      exp.push_back("cb0");  exp.push_back("cb3"); exp.push_back("cb4"); 
+      exp.push_back("cb4"); exp.push_back("cb0");  exp.push_back("cb3"); 
+      exp.push_back("cb4"); exp.push_back("cb0");  exp.push_back("cb1"); exp.push_back("cb3"); 
       $write("CBS: ");
       foreach(comp.q[i]) $write("%s ",comp.q[i]);
       $write("\n");

@@ -18,10 +18,33 @@
 //----------------------------------------------------------------------
 
 
+// Test: 25params
+// Purpose: Test parameterized callback classes are properly executed
+//   by parameterized components.
+// API tested:
+//   `uvm_do_callbacks
+//   `uvm_register_cb
+//   `uvm_set_super_type
+//   uvm_callbacks#(T,CB)::add(comp,cb); //append
 //
-// Test that parameterized callback classes are properly executed
-// by parameterized components
+// Callback Class hierarchy
 //
+//     specific_cb            generic_cb
+//    ^           ^              ^
+//   /             \             |
+// my_specific_cb   |          my_generic_cb
+//             special_cb#(N) 
+//                 ^
+//                 |     
+//            my_special_cb#(N)
+//
+// Component Class Hierarchy (and callbacks they use)
+//
+//        generic_comp (generic_cb)
+//              ^
+//              |
+//        special_comp#(N)  (specific_cb)
+//                          (special_cb#(N))
 
 program top;
 

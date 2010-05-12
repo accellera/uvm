@@ -1,3 +1,12 @@
+// Test: 03by_name
+// Purpose: To test adding and removing callbacks by name 
+// API tested:
+//   `uvm_do_callbacks
+//   `uvm_register_cb
+//      uvm_callbacks#(T,CB)::add_by_name("name",cb); //append
+//      uvm_callbacks#(T,CB)::add_by_name("name",cb,null,UVM_PREPEND); //preappend
+//      uvm_callbacks#(T,CB)::delete_by_name("name",cb);   
+
 module top;
   import uvm_pkg::*;
   `include "uvm_macros.svh"
@@ -60,7 +69,7 @@ module top;
   endclass
 
   class test extends uvm_component;
-    mycb cb;
+    mycb cb, del_cb;
     mid m1;
 
     `uvm_component_utils(test)
@@ -77,9 +86,12 @@ module top;
       cb = new("*.ip1");
       cbtype::add_by_name("*.ip1", cb, this);
       cb = new("*.der1");
+      del_cb = cb;
       cbtype::add_by_name("*.der1", cb, this);
+      cb = new("*");
+      cbtype::add_by_name("*", cb, this, UVM_PREPEND);
 
-      cbtype::delete_by_name("*m1.de*",cb,this);
+      cbtype::delete_by_name("*m1.de*",del_cb,this);
 
       uvm_callbacks#(ip_comp,cb_base)::display();
     endfunction
@@ -101,16 +113,20 @@ module top;
       foreach(m1.ip2.q[i]) $write("%s ", m1.ip2.q[i]);
       $write("\n");
 
-      if(m1.ip1.q.size() != 2) failed = 1;
+      if(m1.ip1.q.size() != 3) failed = 1;
       else begin
-        if(m1.ip1.q[0] != "*1") failed = 1;
-        if(m1.ip1.q[1] != "*.ip1") failed = 1;
+        if(m1.ip1.q[0] != "*") failed = 1;
+        if(m1.ip1.q[1] != "*1") failed = 1;
+        if(m1.ip1.q[2] != "*.ip1") failed = 1;
       end
-      if(m1.der1.q.size() != 1) failed = 1;
+      if(m1.der1.q.size() != 2) failed = 1;
       else begin
-        if(m1.ip1.q[0] != "*1") failed = 1;
+        if(m1.ip1.q[0] != "*") failed = 1;
+        if(m1.ip1.q[1] != "*1") failed = 1;
       end
-      if(m1.ip2.q.size() != 0) failed = 1;
+      if(m1.ip2.q.size() != 1) failed = 1;
+      else
+        if(m1.ip1.q[0] != "*") failed = 1;
 
       if(failed)
         $write("** UVM TEST FAILED! **\n");
