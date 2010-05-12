@@ -32,24 +32,29 @@ typedef class uvm_report_server;
 // CLASS: uvm_report_catcher
 //
 // The uvm_report_catcher is used to catch messages issued by the uvm report
-// server. Catchers are <uvm_callbacks#(T,CB)> objects, so all factilities in the
-// <uvm_callback> and <uvm_callbacks#(T,CB)> classes are available for registering
-// catchers and controlling catcher state. Multiple report catchers can be 
+// server. Catchers are
+// uvm_callbacks#(<uvm_report_object>,uvm_report_catcher) objects,
+// so all factilities in the <uvm_callback> and <uvm_callbacks#(T,CB)>
+// classes are available for registering catchers and controlling catcher
+// state.
+// The uvm_callbacks#(<uvm_report_object>,uvm_report_catcher) class is
+// aliased to ~uvm_report_cb~ to make it easier to use.
+// Multiple report catchers can be 
 // registered with a report object. The catchers can be registered as default 
 // catchers which catch all reports on all <uvm_report_object> reporters,
 // or catchers can be attached to specific report objects (i.e. components). 
 //
-// User extensions of uvm_report_catcher must implement the <catch> method in 
+// User extensions of <uvm_report_catcher> must implement the <catch> method in 
 // which the action to be taken on catching the report is specified. The catch 
-// method can return CAUGHT, in which case further processing of the report is 
-// immediately stopped, or return THROW in which case the (possibly modified) report 
+// method can return ~CAUGHT~, in which case further processing of the report is 
+// immediately stopped, or return ~THROW~ in which case the (possibly modified) report 
 // is passed on to other registered catchers. The catchers are processed in the order 
 // in which they are registered.
 //
-// On catching a report the <catch> method can modify the severity, id, action,
+// On catching a report, the <catch> method can modify the severity, id, action,
 // verbosity or the report string itself before the report is finally issued by
 // the report server. The report can be immediately issued from within the catcher 
-// class by calling the issue method.
+// class by calling the <issue> method.
 //
 // The catcher maintains a count of all reports with FATAL,ERROR or WARNING severity
 // and a count of all reports with FATAL, ERROR or WARNING severity whose severity
@@ -62,7 +67,7 @@ typedef class uvm_report_server;
 //|   function new(string name="my_error_demoter");
 //|     super.new(name);
 //|   endfunction
-//|   //This example demotes the error "MY_ID" to an info message
+//|   //This example demotes "MY_ID" errors to an info message
 //|   function action_e catch();
 //|     if(get_severity() == UVM_ERROR && get_id() == "MY_ID")
 //|       set_severity(UVM_INFO);
@@ -75,13 +80,13 @@ typedef class uvm_report_server;
 //|  // Catchers are callbacks on report objects (components are report 
 //|  // objects, so catchers can be attached to components).
 //|
-//|  // To effect all reporters, use null for the object
+//|  // To affect all reporters, use null for the object
 //|  uvm_report_cb::add(null, demoter); 
 //|
-//|  // To effect some specific object use the specific reporter
+//|  // To affect some specific object use the specific reporter
 //|  uvm_report_cb::add(mytest.myenv.myagent.mydriver, demoter);
 //|
-//|  // To effect some set of components using the component name
+//|  // To affect some set of components using the component name
 //|  uvm_report_cb::add_by_name("*.*driver", demoter);
 //| end
 //
@@ -294,7 +299,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   endfunction
 
 
-  // Function: print_catchers()
+  // Function: print_catcher
   //
   // Prints information about all of the report catchers that are 
   // registered. For finer grained detail, the <uvm_callbacks::display>
@@ -432,12 +437,12 @@ virtual class uvm_report_catcher extends uvm_callback;
                                   m, verbosity, this.m_client);
   endfunction  
 
-  // Funciton: issue
+  // Function: issue
   // Immediately issues the message which is currently being processed. This
-  // is useful if the message is being <CAUGHT> but should still be emitted.
+  // is useful if the message is being ~CAUGHT~ but should still be emitted.
   //
   // Issuing a message will update the report_server stats, possibly multiple 
-  // times if the message is not <CAUGHT>.
+  // times if the message is not ~CAUGHT~.
 
   protected function void issue();
      string m;
