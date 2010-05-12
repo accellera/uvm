@@ -37,6 +37,20 @@ typedef uvm_callbacks #(uvm_objection,uvm_objection_cb) uvm_objection_cbs_t;
 // This class allows for external consumers to attach to the various
 // objection callbacks, <uvm_objection::raised>, <uvm_objection::dropped> and 
 // <uvm_objection::all_dropped>.
+//
+//| class my_objection_cb extends uvm_objection_cb;
+//|    virtual function void raised (uvm_object obj, uvm_object source_obj,
+//|      string description, int count);
+//|      if(obj == source_obj)
+//|        $display("Got raise: %s from object %s", description, obj.get_full_name());
+//|    endfunction
+//| endclass
+//|
+//| my_objection_cb cb = new;
+//|
+//| //add to every type of objection
+//| initial uvm_callbacks#(uvm_objection)::add(null,cb);
+
 
 class uvm_objection_cb extends uvm_callback;
   function new(string name);
@@ -808,7 +822,10 @@ class uvm_test_done_objection extends uvm_objection;
 
   // Function: force_stop
   //
-  // 
+  // Forces the propagation of the all_dropped() callback, even if there are still
+  // outstanding objections. The net effect of this action is to forcibly end
+  // the current phase.
+
   virtual task force_stop(uvm_object obj=null);
     string name;
     if (obj==null)
