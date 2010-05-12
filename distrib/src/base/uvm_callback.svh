@@ -592,8 +592,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   // issued. Note that the CB parameter is optional. For example, the 
   // following are equivalent:
   //
-  //| uvm_callbacks#(my_comp)::remove(comp_a, cb);
-  //| uvm_callbacks#(my_comp, my_callback)::remove(comp_a,cb);
+  //| uvm_callbacks#(my_comp)::delete(comp_a, cb);
+  //| uvm_callbacks#(my_comp, my_callback)::delete(comp_a,cb);
 
   static function void delete(T obj, uvm_callback cb);
     uvm_object b_obj = obj;
