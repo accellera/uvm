@@ -362,7 +362,7 @@ endclass
 // To enable compile-time type-safety, the class is parameterized on both the
 // user-defined callback interface implementation as well as the object type
 // associated with the callback. The object type-callback type pair are
-// associated together using the <`uvm_register_callback> macro to define
+// associated together using the <`uvm_register_cb> macro to define
 // a valid pairing; valid pairings are checked when a user attempts to add
 // a callback to an object.
 //
@@ -614,8 +614,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   // issued. Note that the CB parameter is optional. For example, the 
   // following are equivalent:
   //
-  //| uvm_callbacks#(my_comp)::remove(comp_a, cb);
-  //| uvm_callbacks#(my_comp, my_callback)::remove(comp_a,cb);
+  //| uvm_callbacks#(my_comp)::delete(comp_a, cb);
+  //| uvm_callbacks#(my_comp, my_callback)::delete(comp_a,cb);
 
   static function void delete(T obj, uvm_callback cb);
     uvm_object b_obj = obj;
@@ -685,7 +685,10 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   // it will be updated with a value that can be supplied to <get_next> to get the next
   // callback object.
   //
-  // If the queue is empty then null is returned.
+  // If the queue is empty then null is returned. 
+  //
+  // The iterator class <uvm_callback_iter> may be used as an alternative, simplified,
+  // iterator interface.
 
   static function CB get_first (ref int itr, input T obj);
     uvm_queue#(uvm_callback) q;
@@ -718,7 +721,12 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   // is searched. ~itr~ is the iterator; it will be updated with a value that can be 
   // supplied to <get_next> to get the next callback object.
   //
-  // If no more callbacks exist in the queue, then null is returned.
+  // If no more callbacks exist in the queue, then null is returned. <get_next> will
+  // continue to return null in this case until <get_first> has been used to reset
+  // the iterator.
+  //
+  // The iterator class <uvm_callback_iter> may be used as an alternative, simplified,
+  // iterator interface.
 
   static function CB get_next (ref int itr, input T obj);
     uvm_queue#(uvm_callback) q;
@@ -813,6 +821,9 @@ endclass
 //| for(mycb cb = iter.first(); cb != null; cb = iter.next())
 //|    cb.dosomething();
 //
+// The callback iteration macros, <`uvm_do_callbacks> and
+// <`uvm_do_callbacks_exit_on> provide a simple method for iterating
+// callbacks and executing the callback methods.
 //------------------------------------------------------------------------------
 
 class uvm_callback_iter#(type T = uvm_object, type CB = uvm_callback);
@@ -843,9 +854,9 @@ class uvm_callback_iter#(type T = uvm_object, type CB = uvm_callback);
 
    // Function: next
    //
-   // Returns the first valid (enabled) callback of the callback type (or
-   // a derivative) that is in the queue of the context object. If the
-   // queue is empty then null is returned.
+   // Returns the next valid (enabled) callback of the callback type (or
+   // a derivative) that is in the queue of the context object. If there
+   // are no more valid callbacks in the queue, then null is returned.
 
    function CB next();
       m_cb = uvm_callbacks#(T,CB)::get_next(m_i, m_obj);

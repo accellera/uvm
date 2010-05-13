@@ -37,7 +37,7 @@ typedef enum {
 // Heartbeats provide a way for environments to easily ensure that their
 // descendants are alive. A uvm_heartbeat is associated with a specific
 // objection object. A component that is being tracked by the heartbeat
-// object must raise (or drop) an the synchronizing objection during
+// object must raise (or drop) the synchronizing objection during
 // the heartbeat window.
 //
 // The uvm_heartbeat object has a list of participating objects. The heartbeat
@@ -138,9 +138,9 @@ class uvm_heartbeat extends uvm_object;
     m_cb.last_trigger[c]=0;
   endfunction
 
-  // Function: add
+  // Function: remove
   //
-  // Remove a single component to the set of components to be monitored.
+  // Remove a single component to the set of components being monitored.
   // Monitoring is not stopped, even if the last component has been
   // removed (an explicit stop is required).
 

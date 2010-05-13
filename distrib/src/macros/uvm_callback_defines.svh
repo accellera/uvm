@@ -59,7 +59,7 @@
 // MACRO: `uvm_set_super_type
 //
 // Defines the super type of T to be ST. This allows for derived class
-// objects to inherit typewide objects that are registered with the base
+// objects to inherit typewide callbacks that are registered with the base
 // class.
 //
 // The registration will typically occur in the component that executes the
@@ -102,7 +102,7 @@
 // object (i.e. ~this~ object). The macro takes three arguments:
 //
 // - CB is the class type of the callback objects to execute. The class
-//   type must have a function signature that matches the FNC argument.
+//   type must have a function signature that matches the METHOD argument.
 //
 // - T is the type associated with the callback. Typically, an instance
 //   of type T is passed as one the arguments in the ~METHOD~ call.
@@ -121,7 +121,7 @@
 //| task mycomp::run(); 
 //|    int curr_addr, curr_data;
 //|    ...
-//|    `uvm_do_callbacks(mycb, mycomp, my_function(this, curr_addr, curr_data)
+//|    `uvm_do_callbacks(mycb, mycomp, my_function(this, curr_addr, curr_data))
 //|    ...
 //| endtask
 //-----------------------------------------------------------------------------
@@ -137,11 +137,15 @@
 // Calls the given ~METHOD~ of all callbacks based on type ~CB~ registered with
 // the given object, ~OBJ~, which is or is based on type ~T~.
 //
-// This macro is identical to <uvm_do_callbacks (CB,T,METHOD)> macro,
+// This macro is identical to <`uvm_do_callbacks> macro,
 // but it has an additional ~OBJ~ argument to allow the specification of an
 // external object to associate the callback with. For example, if the
 // callbacks are being applied in a sequence, ~OBJ~ could be specified
 // as the associated sequencer or parent sequence.
+//
+//|    ...
+//|    `uvm_do_callbacks(mycb, mycomp, seqr, my_function(seqr, curr_addr, curr_data))
+//|    ...
 //-----------------------------------------------------------------------------
 
 `define uvm_do_obj_callbacks(T,CB,OBJ,METHOD_CALL) \
@@ -169,7 +173,7 @@
 // object (i.e. ~this~ object). The macro takes three arguments:
 //
 // - CB is the class type of the callback objects to execute. The class
-//   type must have a function signature that matches the FNC argument.
+//   type must have a function signature that matches the METHOD argument.
 //
 // - T is the type associated with the callback. Typically, an instance
 //   of type T is passed as one the arguments in the ~METHOD~ call.
@@ -210,7 +214,14 @@
 //
 // Calls the given ~METHOD~ of all callbacks of type ~CB~ registered with
 // the given object ~OBJ~, which must be or be based on type ~T~, and returns
-// upon the first callback that returns the bit value given by ~VAL~.
+// upon the first callback that returns the bit value given by ~VAL~. It is
+// exactly the same as the <`uvm_do_callbacks_exit_on> but has a specific
+// object instance (instead of the implicit this instance) as the third
+// argument.
+//
+//| ...
+//|  if (`uvm_do_callbacks_exit_on(mycb, mycomp, seqr, drop_trans(seqr,trans), 1))
+//| ...
 //-----------------------------------------------------------------------------
 
 `define uvm_do_obj_callbacks_exit_on(T,CB,OBJ,METHOD_CALL,VAL) \
