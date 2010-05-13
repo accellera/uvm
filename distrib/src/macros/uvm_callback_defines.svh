@@ -65,7 +65,7 @@
 // The registration will typically occur in the component that executes the
 // given type of callback. For instance:
 //
-//| virtual class mycb;
+//| virtual class mycb extend uvm_callback;
 //|   virtual function void doit();
 //| endclass
 //|
