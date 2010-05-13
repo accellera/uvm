@@ -318,6 +318,7 @@ class test extends uvm_test;
 
    virtual function void check();
       string p[$];
+      bit fail = 0;
 
       uvm_pkg::uvm_callbacks#(uvm_object)::display();
       uvm_callbacks#(a_comp)::display();
@@ -339,7 +340,9 @@ class test extends uvm_test;
       p.push_back("my_a_cb::a_f(a*)");
       p.push_back("my_z_cb::z_f(a1)");
       p.push_back("my_z_cb::z_f(a*)");
-      if (a1.q != p) begin
+      fail = 0;
+      foreach(p[i]) if(a1.q[i] != p[i]) fail = 1;
+      if (fail) begin
          `uvm_error("TEST", "a1 did not execute expected callback sequence");
          print_trace("observed:", a1.q);
          print_trace("expected:", p);
@@ -351,7 +354,9 @@ class test extends uvm_test;
       p.push_back("my_a_cb::base_f(a*)"); //----
       p.push_back("my_a_cb::a_f(a*)");
       p.push_back("my_z_cb::z_f(a*)");
-      if (a2.q != p) begin
+      fail = 0;
+      foreach(p[i]) if(a2.q[i] != p[i]) fail = 1;
+      if (fail) begin
          `uvm_error("TEST", "a2 did not execute expected callback sequence");
          print_trace("observed:", a2.q);
          print_trace("expected:", p);
@@ -369,7 +374,9 @@ class test extends uvm_test;
       p.push_back("my_z_cb::z_f(a*)");
       p.push_back("my_ax_cb::ax_f(ax1)");
       p.push_back("my_ax_cb::ax_f(ax*)");
-      if (ax1.q != p) begin
+      fail = 0;
+      foreach(p[i]) if(ax1.q[i] != p[i]) fail = 1;
+      if (fail) begin
          `uvm_error("TEST", "ax1 did not execute expected callback sequence");
          print_trace("observed:", ax1.q);
          print_trace("expected:", p);
@@ -384,7 +391,9 @@ class test extends uvm_test;
       p.push_back("my_ax_cb::a_f(ax*)");
       p.push_back("my_z_cb::z_f(a*)");
       p.push_back("my_ax_cb::ax_f(ax*)");
-      if (ax2.q != p) begin
+      fail = 0;
+      foreach(p[i]) if(ax2.q[i] != p[i]) fail = 1;
+      if (fail) begin
          `uvm_error("TEST", "ax2 did not execute expected callback sequence");
          print_trace("observed:", ax2.q);
          print_trace("expected:", p);
@@ -397,7 +406,9 @@ class test extends uvm_test;
       p.push_back("my_b_cb::base_f(b*)");
       p.push_back("my_b_cb::b_f(b1)");
       p.push_back("my_b_cb::b_f(b*)");
-      if (b1.q != p) begin
+      fail = 0;
+      foreach(p[i]) if(b1.q[i] != p[i]) fail = 1;
+      if (fail) begin
          `uvm_error("TEST", "b1 did not execute expected callback sequence");
          print_trace("observed:", b1.q);
          print_trace("expected:", p);
@@ -408,7 +419,9 @@ class test extends uvm_test;
       p.push_back("my_base_cb::base_f(*)");
       p.push_back("my_b_cb::base_f(b*)"); //----
       p.push_back("my_b_cb::b_f(b*)");
-      if (b2.q != p) begin
+      fail = 0;
+      foreach(p[i]) if(b2.q[i] != p[i]) fail = 1;
+      if (fail) begin
          `uvm_error("TEST", "b2 did not execute expected callback sequence");
          print_trace("observed:", b2.q);
          print_trace("expected:", p);

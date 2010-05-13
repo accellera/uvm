@@ -88,17 +88,22 @@ class test extends uvm_test;
 
    virtual function void check();
       int exp[$];
+      int fail;
 
       exp.push_back(1); exp.push_back(2); 
       exp.push_back(4); exp.push_back(5); 
-      if (a1.q != exp) begin
+      fail = 0;
+      foreach(exp[i]) if(a1.q[i] != exp[i]) fail = 1;
+      if (fail) begin
          `uvm_error("TEST", "Callback execution order for a1 was not 1, 2, 4, 5.");
          pass = 0;
       end
       `uvm_clear_queue(exp)
       exp.push_back(2); exp.push_back(3); 
       exp.push_back(4);
-      if (a2.q != exp) begin
+      fail = 0;
+      foreach(exp[i]) if(a2.q[i] != exp[i]) fail = 1;
+      if (fail) begin
          `uvm_error("TEST", "Callback execution order for a2 was not 2, 3, 4.");   
          pass = 0;
       end
