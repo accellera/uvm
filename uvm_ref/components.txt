@@ -1,13 +1,13 @@
 
 Group: Predefined Component Classes
 
-Components form the foundation of the OVM. They encapsulate behavior of
+Components form the foundation of the UVM. They encapsulate behavior of
 drivers, scoreboards, and other objects in a testbench.
-The OVM library provides a set of predefined component types, all derived
-directly or indirectly from <ovm_component>.
+The UVM library provides a set of predefined component types, all derived
+directly or indirectly from <uvm_component>.
 
 
 Predefined Components:
 
-(see ovm_ref_components.gif)
+(see uvm_ref_components.gif)
 

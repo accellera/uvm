@@ -1,8 +1,8 @@
 #!/bin/csh
 
 #-------------------------------------------------------------------------------
-# This script runs Naturals Docs to generate the OVM Reference Documentation
-# from comments embedded in the OVM source.
+# This script runs Naturals Docs to generate the UVM Reference Documentation
+# from comments embedded in the UVM source.
 #
 # Before running, you must define the ND environment variable to point to the
 # NaturalDocs source tree. 
@@ -11,7 +11,7 @@
 # > ./gen_nd
 #
 # Before running NaturalDocs, this script will remove any existing html output
-# directory, which is fixed at $OVM_HOME/docs/html. It then copies the OVM logo,
+# directory, which is fixed at $UVM_HOME/distrib/docs/html. It then copies the UVM logo,
 # banner, other gifs from the $ND source dir to the outdir. NaturalDocs will not
 # do this for us, as we've customized the page layout.
 #
@@ -24,7 +24,7 @@
 #        since we delete any previously existing output before running
 #
 # -i   - sets the input directories from which to gather documentation,
-#        $OVM_HOME/src and $OVM_HOME/docs/ovm_ref. The latter directory
+#        $UVM_HOME/distrib/src and $UVM_HOME/uvm_ref. The latter directory
 #        contains various overview text files.
 #
 # -img - sets the directories from which to find the images referenced in the
@@ -67,7 +67,6 @@ mkdir -p $outdir/images
 
 
 cp -r $nd_dir/images/b* $outdir/images
-cp -r $nd_dir/images/logo* $outdir/images
 cp    $nd_dir/logo.html $outdir
 
 # Run ND

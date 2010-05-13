@@ -36,17 +36,42 @@ module test;
   // Catch the messages that should be printed by the TRACE
   // option. We should flag an error if these never appear.
   class my_catcher extends uvm_report_catcher;
+    // Keep a count of how many messages we saw. User can specify
+    // how many messages should be seen during construction.
+    local int unsigned count = 0;
+    local int unsigned expected_count;
+
+    function new(int unsigned c);
+       super.new();
+       this.expected_count = c;
+    endfunction: new
+
+    virtual function void trace_count(string msg);
+       count++;
+       $display(msg);
+    endfunction: trace_count
+
+    virtual function bit count_match();
+      if (this.expected_count != count) begin
+         $display($psprintf("ERROR: Expected %1d callback trace messages, but saw %1d during the test.", expected_count, count));
+         return 0;
+      end
+
+      return 1;
+    endfunction:count_match
+
     virtual function action_e catch();
-      $display("just caught a message with ID: ", get_id());
+      //$display("just caught a message with ID: ", get_id());
       if (get_id() == "UVMCB_TRC") begin
         string msg = get_message();
-        $display("just saw a UVMCB_TRC message.");
+        $display("Just saw a UVMCB_TRC message.");
 
         case (1)
-          uvm_is_match("*callback*to object*", msg): $display("saw callback... to object");
-          uvm_is_match("*callback_mode*", msg): $display("saw callback_mode message");
-          uvm_is_match("*METHOD_CALL*", msg): $display("saw METHOD_CALL");
-          uvm_is_match("*doit\(q\)*", msg): $display("saw doit(q)");
+          uvm_is_match("*UVM_APPEND*", msg): trace_count("   - UVM_APPEND");
+          uvm_is_match("*allback mode*", msg): trace_count("   - callback_mode");
+          uvm_is_match("*Delete*", msg): trace_count("   - delete");
+          //uvm_is_match("*METHOD_CALL*", msg): trace_count("   saw METHOD_CALL");
+          uvm_is_match("*doit\(q\)*", msg): trace_count("   - User function doit(q)");
         endcase
       end
       return THROW;
@@ -68,7 +93,6 @@ module test;
     endfunction
     task run;
       int i;
-      //$display("executing callbacks");
       uvm_report_info(get_name(), "In ip_comp run(): Executing callbacks");
       `uvm_do_callbacks(ip_comp,cb_base,doit(q))
     endtask
@@ -94,40 +118,41 @@ module test;
     ip_comp comp;
     `uvm_component_utils(test)
 
-    my_catcher catcher = new();
+    // Expecting to see 14 callback messages in this test.
+    my_catcher catcher = new(14);
 
     function new(string name,uvm_component parent);
       super.new(name,parent);
       comp = new("comp",this);
 
       // First, register a catcher to see if TRACE messages appear.
-      $display("Adding a catcher.");
-      uvm_report_cb::add(null, catcher);
+      // Trace counter not incremented because catcher isn't registered yet! 
+      uvm_report_cb::add(null, catcher); 
     endfunction
 
     function void build();
       cb = new("cb0");
-      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
+      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb); // TRACE 1
 
       cb = new("cb1");
-      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
+      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb); // TRACE 2
 
       // Disable callback cb1
-      cb.callback_mode(0);
+      cb.callback_mode(0); // TRACE 3
   
       cb = new("cb2");
       rcb = cb;
-      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
+      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb); // TRACE 4
   
       cb = new("cb3");
-      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
+      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb); // TRACE 5
   
-      uvm_callbacks#(ip_comp,cb_base)::delete(comp,rcb);
+      uvm_callbacks#(ip_comp,cb_base)::delete(comp,rcb); // TRACE 6
    
       cb = new("cb4");
-      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
+      uvm_callbacks#(ip_comp,cb_base)::add(comp,cb); // TRACE 7
   
-      uvm_callbacks#(ip_comp,cb_base)::display();
+      uvm_callbacks#(ip_comp,cb_base)::display();  
 
     endfunction
 
@@ -146,6 +171,7 @@ module test;
       int failed = 0;
       string exp[$];
       //cb2 was deleted and cb1 was disabled
+      // TRACE 8, TRACE 9, TRACE 10 via calls to doit() in component 
       exp.push_back("cb0");  exp.push_back("cb3"); exp.push_back("cb4"); 
       $write("CBS: ");
       foreach(comp.q[i]) $write("%s ",comp.q[i]);
@@ -156,6 +182,12 @@ module test;
            $display("       got:      comp.q[%0d]", i, comp.q[i]);
            failed = 1;
         end
+
+      // Make sure the catcher saw the expected number of messages.
+      if (!catcher.count_match()) begin
+         failed = 1;
+      end
+
       if(failed)
         $write("** UVM TEST FAILED! **\n");
       else

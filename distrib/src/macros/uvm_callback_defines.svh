@@ -37,7 +37,7 @@
 // The registration will typically occur in the component that executes the
 // given type of callback. For instance:
 //
-//| virtual class mycb;
+//| virtual class mycb extends uvm_callback;
 //|   virtual function void doit();
 //| endclass
 //|
@@ -65,7 +65,7 @@
 // The registration will typically occur in the component that executes the
 // given type of callback. For instance:
 //
-//| virtual class mycb;
+//| virtual class mycb extend uvm_callback;
 //|   virtual function void doit();
 //| endclass
 //|
@@ -153,7 +153,7 @@
      uvm_callback_iter#(T,CB) iter = new(OBJ); \
      CB cb = iter.first(); \
      while(cb != null) begin \
-       `uvm_cb_trace(cb,OBJ,$sformatf(`"CB (%s) T (%s) METHOD_CALL`",cb.get_name(), OBJ.get_full_name())) \
+       `uvm_cb_trace_noobj(cb,$sformatf(`"Executing callback method METHOD_CALL for callback %s (CB) from %s (T)`",cb.get_name(), OBJ.get_full_name())) \
        cb.METHOD_CALL; \
        cb = iter.next(); \
      end \
@@ -230,10 +230,10 @@
      CB cb = iter.first(); \
      while(cb != null) begin \
        if (cb.METHOD_CALL == VAL) begin \
-         `uvm_cb_trace(cb,OBJ,$sformatf(`"CB (%s) T (%s) METHOD_CALL returned VAL`",cb.get_name(), OBJ.get_full_name())) \
+         `uvm_cb_trace_noobj(cb,$sformatf(`"Executed callback method METHOD_CALL for callback %s (CB) from %s (T) : returned value VAL (other callbacks will be ignored)`",cb.get_name(), OBJ.get_full_name())) \
          return VAL; \
        end \
-       `uvm_cb_trace(cb,OBJ,$sformatf(`"CB (%s) T (%s) METHOD_CALL did not return VAL`",cb.get_name(), OBJ.get_full_name())) \
+       `uvm_cb_trace_noobj(cb,$sformatf(`"Executed callback method METHOD_CALL for callback %s (CB) from %s (T) : did not return value VAL`",cb.get_name(), OBJ.get_full_name())) \
        cb = iter.next(); \
      end \
      return 1-VAL; \
@@ -255,7 +255,8 @@
 
 `define uvm_cb_trace_noobj(CB,OPER) \
   begin \
-    `uvm_info("UVMCB_TRC", $sformatf("%s: callback %s (%s@%0d)" ,  \
+    if(uvm_callbacks_base::m_tracing) \
+      `uvm_info("UVMCB_TRC", $sformatf("%s : callback %s (%s@%0d)" ,  \
        OPER, CB.get_name(), CB.get_type_name(), CB.get_inst_id()), UVM_NONE) \
   end
 `else

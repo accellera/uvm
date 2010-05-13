@@ -12,15 +12,10 @@ event datatype with such services as setting callbacks and data delivery.
 - <uvm_barrier> - A barrier is used to prevent a pre-configured number of
 processes from continuing until all have reached a certain point in simulation. 
 
-- <uvm_event_pool> and <uvm_barrier_pool> -
+- uvm_event_pool and uvm_barrier_pool -
 The event and barrier pool classes are used to store collections of events and
-barriers, all indexed by string name.  Each pool class contains a static,
-"global" pool instance for sharing across all processes.
+barriers, respectively, all indexed by string name.  Each pool class contains 
+a static, "global" pool instance for sharing across all processes.
 
-- <uvm_objection> - The class for syncronizing status information between
-components. The most typical usage is of the <uvm_test_done> objection
-for coordinating end of test status.
-
-- <uvm_heartbeat> - The heartbeat class provides a way for an encapsulating
-environment to monitor the liveness of its sub components and/or 
-sub component hierarchies.
+- <uvm_event_callback> - The event callback is used to create callback objects
+that may be attached to <uvm_event>s.

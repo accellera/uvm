@@ -19,7 +19,7 @@ body {
     color: #000000;
     margin: 0; padding: 0;
         /*min-width: 825px;*/ /* hack to force Netscape 6 pc to show horizontal scroll bar */
-            background-color: #6C8473;
+            background-color: #C7DAEB;
         /*
         background-image: url(../images/bg_main.gif); 
         background-repeat: repeat-x;
@@ -114,7 +114,7 @@ blockquote {
 
 #masthead {
         position: relative;
-        background-image: url(../images/bg_masthead2.gif);
+        background-image: url(../images/bg_masthead.jpg);
         background-color: #6C8473;
         background-repeat: no-repeat;
         height: 117px;
@@ -144,7 +144,6 @@ a:hover {
 #Menu {
         float: left;
         width: 200px;
-        background-image: url(../images/bg_column_top.gif);
         background-color: #D9EAD9;
         background-repeat: no-repeat;
         padding-top: 25px;

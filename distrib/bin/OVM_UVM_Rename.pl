@@ -59,6 +59,8 @@ sub replace_string
         my $outfile = ".tmpfile";
 	my $path = $ENV{'PWD'};
 
+        if (-l $filename) { return; }
+
 	if ((! ($filename =~ /$path/)) && ( !($filename =~ /^[\~|\/]/)))
 	{
 		$filename = $path."/".$filename;
@@ -70,8 +72,8 @@ sub replace_string
 		open (OUTFILE, ">$outfile") || die "Can't open file, $outfile";
 
 		my $fid = 
-		my $bfile = `basename $filename`; chomp $bfile;
-		my $dfile = `dirname $filename`; chomp $dfile;
+		my $bfile = `basename "$filename"`; chomp $bfile;
+		my $dfile = `dirname "$filename"`; chomp $dfile;
 		my $bmod = $bfile;
 		$bmod =~ s/ovm/uvm/g;
 		$bmod =~ s/OVM/UVM/g;
@@ -84,11 +86,13 @@ sub replace_string
 			$_ =~ s/TLM_/UVM_TLM_/g;
 			print OUTFILE "$_";
 		}
-		system("mv $outfile $filename");
+		system("mv $outfile \"$filename\"");
 		if ("$bfile" ne "$bmod")
 		{
-			system("mv $filename $dfile/$bmod");
+			system("mv \"$filename\" \"$dfile\"/\"$bmod\"");
 		}
+                close (INFILE);
+                close (OUTFILE);
 	}
 
 }
