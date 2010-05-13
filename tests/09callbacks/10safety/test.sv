@@ -17,6 +17,16 @@
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
 
+// Test: 10safety
+// Purpose: Tests that warnings are issued if a user attempts to
+//   add a callback to an object that does not support the specified
+//   callback type.
+// API tested:
+//   `uvm_register_cb
+//      uvm_callbacks#(T,CB)::add(comp,cb); //append
+//      uvm_callbacks#(T,CB)::add(null,cb);
+// Three illegal adds are done and three legal adds are done. The
+// illegal adds are caught by the message catcher.
 
 program top;
 

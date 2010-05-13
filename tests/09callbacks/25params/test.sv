@@ -18,10 +18,33 @@
 //----------------------------------------------------------------------
 
 
+// Test: 25params
+// Purpose: Test parameterized callback classes are properly executed
+//   by parameterized components.
+// API tested:
+//   `uvm_do_callbacks
+//   `uvm_register_cb
+//   `uvm_set_super_type
+//   uvm_callbacks#(T,CB)::add(comp,cb); //append
 //
-// Test that parameterized callback classes are properly executed
-// by parameterized components
+// Callback Class hierarchy
 //
+//     specific_cb            generic_cb
+//    ^           ^              ^
+//   /             \             |
+// my_specific_cb   |          my_generic_cb
+//             special_cb#(N) 
+//                 ^
+//                 |     
+//            my_special_cb#(N)
+//
+// Component Class Hierarchy (and callbacks they use)
+//
+//        generic_comp (generic_cb)
+//              ^
+//              |
+//        special_comp#(N)  (specific_cb)
+//                          (special_cb#(N))
 
 program top;
 
@@ -176,6 +199,7 @@ class test extends uvm_test;
 
    virtual function void check();
       string p[$];
+      bit fail = 0;
 
       uvm_pkg::uvm_callbacks#(uvm_object)::display();
       uvm_callbacks#(generic_comp)::display();
@@ -190,7 +214,9 @@ class test extends uvm_test;
       p.push_back("my_special_cb::specific_f(a1)");
       p.push_back("my_specific_cb::specific_f(*)");
       p.push_back("my_special_cb::special#(1)_f(a1)");
-      if (a1.q != p) begin
+      fail = 0;
+      foreach(p[i]) if(a1.q[i] != p[i]) fail = 1;
+      if (fail) begin
          `uvm_error("TEST", "a1 did not execute expected callback sequence");
          print_trace("observed:", a1.q);
          print_trace("expected:", p);
@@ -201,7 +227,9 @@ class test extends uvm_test;
       p.push_back("my_generic_cb::generic_f(*)");
       p.push_back("my_special_cb::specific_f(a2)");
       p.push_back("my_special_cb::special#(2)_f(a2)");
-      if (a2.q != p) begin
+      fail = 0;
+      foreach(p[i]) if(a2.q[i] != p[i]) fail = 1;
+      if (fail) begin
          `uvm_error("TEST", "a2 did not execute expected callback sequence");
          print_trace("observed:", a2.q);
          print_trace("expected:", p);

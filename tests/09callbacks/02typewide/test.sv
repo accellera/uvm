@@ -1,3 +1,13 @@
+// Test: 02typewide
+// Purpose: Basic tests for typewide callbacks
+// API tested:
+//   `uvm_do_callbacks
+//   `uvm_register_cb
+//      uvm_callbacks#(T,CB)::add(null,cb); //append
+//      uvm_callbacks#(T,CB)::add(null,cb,UVM_PREPEND); //preappend
+//      uvm_callbacks#(T,CB)::delete(null,cb);   
+//      uvm_callback::callback_mode(0); //disable
+
 module test;
   import uvm_pkg::*;
   `include "uvm_macros.svh"
@@ -66,7 +76,7 @@ module test;
       uvm_callbacks#(ip_comp,cb_base)::delete(null,rcb);
    
       cb = new("tw_cb4");
-      uvm_callbacks#(ip_comp,cb_base)::add(null,cb);
+      uvm_callbacks#(ip_comp,cb_base)::add(null,cb,UVM_PREPEND);
   
       uvm_callbacks#(ip_comp,cb_base)::display();
     endfunction
@@ -81,10 +91,10 @@ module test;
       //cb2 was deleted and cb1 was disabled
 
       exp.push_back("comp_cb0");  exp.push_back("tw_cb0"); 
-      exp.push_back("cb3");  exp.push_back("tw_cb4");
+      exp.push_back("cb3");  exp.push_front("tw_cb4");
 
       exp1.push_back("tw_cb0"); 
-      exp1.push_back("comp1_cb0");  exp1.push_back("tw_cb4");
+      exp1.push_back("comp1_cb0");  exp1.push_front("tw_cb4");
 
       $write("comp CBS: ");
       foreach(comp.q[i]) $write("%s ",comp.q[i]);

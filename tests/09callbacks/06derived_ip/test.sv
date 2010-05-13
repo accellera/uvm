@@ -1,3 +1,14 @@
+// Test: 06derived_ip
+// Purpose: Tests having a class hierarchy which uses callbacks
+//   at different levels of the hierarchy.
+// API tested:
+//   `uvm_do_callbacks
+//   `uvm_register_cb
+//   `uvm_set_super_type
+//      uvm_callbacks#(T,CB)::add(comp,cb); //append
+//      uvm_callbacks#(T,CB)::delete(comp,cb);   
+//      uvm_callback::callback_mode(0); //disable
+
 module test;
   import uvm_pkg::*;
   `include "uvm_macros.svh"

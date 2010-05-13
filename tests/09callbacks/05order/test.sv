@@ -1,22 +1,11 @@
 //---------------------------------------------------------------------- 
-//   Copyright 2010 Synopsys, Inc. 
-//   All Rights Reserved Worldwide 
-// 
-//   Licensed under the Apache License, Version 2.0 (the 
-//   "License"); you may not use this file except in 
-//   compliance with the License.  You may obtain a copy of 
-//   the License at 
-// 
-//       http://www.apache.org/licenses/LICENSE-2.0 
-// 
-//   Unless required by applicable law or agreed to in 
-//   writing, software distributed under the License is 
-//   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-//   CONDITIONS OF ANY KIND, either express or implied.  See 
-//   the License for the specific language governing 
-//   permissions and limitations under the License. 
-//----------------------------------------------------------------------
-
+// Test: 05order
+// Purpose: To test the order of execution of callbacks.
+// API tested:
+//   `uvm_do_callbacks
+//   `uvm_register_cb
+//      uvm_callbacks#(T,CB)::add(comp,cb); //append
+//      uvm_callbacks#(T,CB)::add(null,cb); //preappend
 
 program top;
 
@@ -99,17 +88,22 @@ class test extends uvm_test;
 
    virtual function void check();
       int exp[$];
+      int fail;
 
       exp.push_back(1); exp.push_back(2); 
       exp.push_back(4); exp.push_back(5); 
-      if (a1.q != exp) begin
+      fail = 0;
+      foreach(exp[i]) if(a1.q[i] != exp[i]) fail = 1;
+      if (fail) begin
          `uvm_error("TEST", "Callback execution order for a1 was not 1, 2, 4, 5.");
          pass = 0;
       end
       `uvm_clear_queue(exp)
       exp.push_back(2); exp.push_back(3); 
       exp.push_back(4);
-      if (a2.q != exp) begin
+      fail = 0;
+      foreach(exp[i]) if(a2.q[i] != exp[i]) fail = 1;
+      if (fail) begin
          `uvm_error("TEST", "Callback execution order for a2 was not 2, 3, 4.");   
          pass = 0;
       end
