@@ -128,7 +128,7 @@ module test;
   my_catcher ctchr = new;
 
   initial begin
-    uvm_report_catcher::add_report_default_catcher(ctchr);
+    uvm_report_cb::add(null,ctchr);
     set_global_timeout(1000);
     run_test("test");
   end

@@ -1,5 +1,6 @@
 //---------------------------------------------------------------------- 
 //   Copyright 2010 Synopsys, Inc. 
+//   Copyright 2010 Cadence Design Systems, Inc. 
 //   All Rights Reserved Worldwide 
 // 
 //   Licensed under the Apache License, Version 2.0 (the 
@@ -17,30 +18,6 @@
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
 
-//////////////distrib/src/base/uvm_object_globals.svh////////////////////////////
-//////// uvm_severity   
-////////
-///////typedef enum uvm_severity
-///////{
-///////  UVM_INFO,
-///////  UVM_WARNING,
-///////  UVM_ERROR,
-///////  UVM_FATAL
-/////////} uvm_severity_type;
-//////////////////////////
-
-
-///////uvm_misc.svh////////////
-/////////
-////// typedef enum {UVM_APPEND, UVM_PREPEND} uvm_apprepend;
-///////////////////////////////
-///////////////////////////////
-
-////`define uvm_info(ID, MSG, VERBOSITY)
-//// `define uvm_warning(ID,MSG)
-///// `define uvm_error(ID,MSG)
-///// `define uvm_fatal(ID,MSG)
-
 program top;
 
 import uvm_pkg::*;
@@ -48,14 +25,47 @@ import uvm_pkg::*;
 
 class my_catcher extends uvm_report_catcher;
    static int seen = 0;
+   uvm_report_object client;
+   int client_cnt[uvm_report_object];
+
    virtual function action_e catch();
-      $write("Caught a message...\n");
+      client = get_client();
+      $write("Caught a message from client \"%0s\"...\n",client.get_full_name());
       seen++;
+      if(!client_cnt.exists(client)) client_cnt[client]=0;
+      client_cnt[client]++;
       return CAUGHT;
    endfunction
 endclass
 
+class leaf extends uvm_component;
+   `uvm_component_utils(leaf)
+
+   function new(string name, uvm_component parent = null);
+      super.new(name, parent);
+   endfunction
+   task run;
+     repeat(4) #10 `uvm_info("from_leaf", "Message from leaf", UVM_NONE)
+   endtask
+endclass
+
+class mid extends uvm_component;
+   leaf leaf1, leaf2;
+
+   `uvm_component_utils(mid)
+
+   function new(string name, uvm_component parent = null);
+      super.new(name, parent);
+      leaf1 = new("leaf1", this);
+      leaf2 = new("leaf2", this);
+   endfunction
+   task run;
+     repeat(4) #10 `uvm_info("from_mid", "Message from mid", UVM_NONE)
+   endtask
+endclass
+
 class test extends uvm_test;
+   mid mid1;
 
    bit pass = 1;
 
@@ -63,36 +73,36 @@ class test extends uvm_test;
 
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
+      mid1 = new("mid1", this);
    endfunction
 
    virtual task run();
       my_catcher ctchr = new;
-      $write("UVM TEST EXPECT 2 UVM_ERROR\n");
-      `uvm_error("Test", "Error 1...");
+
+      $write("UVM TEST EXPECT 3 UVM_INFO\n");
+      #11;
+
       if (my_catcher::seen != 0) begin
          $write("ERROR: Message was caught with no catcher installed!\n");
          pass = 0;
       end
       begin
-          uvm_report_cb::add(null,ctchr);
-         `uvm_error("Test", "Error 2...");
-         if (my_catcher::seen != 1) begin
-            $write("ERROR: Message was NOT caught with default catcher installed!\n");
-            pass = 0;
-         end
-         `uvm_info("XYZ", "Medium INFO...", UVM_MEDIUM);
+          uvm_report_cb::add(mid1.leaf1,ctchr); //add to mid1.leaf1
+          uvm_report_cb::add(mid1,ctchr); //add to mid1
+         #10;
          if (my_catcher::seen != 2) begin
             $write("ERROR: Message was NOT caught with default catcher installed!\n");
             pass = 0;
          end
-         `uvm_fatal("Test", "FATAL...");
+         uvm_report_cb::delete(mid1,ctchr); //remove to mid1
+         #10
          if (my_catcher::seen != 3) begin
             $write("ERROR: Message was NOT caught with default catcher installed!\n");
             pass = 0;
          end
       end
       uvm_report_cb::delete(null,ctchr);
-      `uvm_error("Test", "Error 3...");
+      #10;
       if (my_catcher::seen != 3) begin
          $write("ERROR: Message was caught after all catcher removed!\n");
          pass = 0;

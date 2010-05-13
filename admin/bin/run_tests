@@ -383,12 +383,12 @@ sub check_test {
        $in_summary = 1;
        next;
      }
-     if ($in_summary && m/^UVM_ERROR :\s+(\d+)\s*$/) {
-       $n_errs = $1;
+     if ($in_summary && m/^(\# )?UVM_ERROR :\s+(\d+)\s*$/) {
+       $n_errs = $2;
        next;
      }
-     if ($in_summary && m/^UVM_FATAL :\s+(\d+)\s*$/) {
-       $n_fatals = $1;
+     if ($in_summary && m/^(\# )?UVM_FATAL :\s+(\d+)\s*$/) {
+       $n_fatals = $2;
        next;
      }
    }

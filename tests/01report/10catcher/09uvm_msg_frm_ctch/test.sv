@@ -41,10 +41,14 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 class my_catcher_info extends uvm_report_catcher;
+   function new(string name); super.new(name); endfunction   
    
    virtual function action_e catch();
+      if(get_name() != get_id()) return THROW;
+      if(get_severity() != UVM_INFO) return THROW;
       $write("Info Catcher Caught a message...\n");
      `uvm_info("INFO CATCHER", "From my_catcher_info catch()" ,UVM_MEDIUM);
      
@@ -53,8 +57,10 @@ class my_catcher_info extends uvm_report_catcher;
 endclass
 
   class my_catcher_warning extends uvm_report_catcher;
-   
+   function new(string name); super.new(name); endfunction   
    virtual function action_e catch();
+      if(get_name() != get_id()) return THROW;
+      if(get_severity() != UVM_WARNING) return THROW;
       $write("Warning Catcher Caught a message...\n");
   `uvm_warning("WARNING CATCHER","From my_catcher_warning catch()");
   
@@ -64,8 +70,11 @@ endclass
   endclass
 
   class my_catcher_error extends uvm_report_catcher;
+   function new(string name); super.new(name); endfunction   
    
    virtual function action_e catch();
+      if(get_name() != get_id()) return THROW;
+      if(get_severity() != UVM_ERROR) return THROW;
       $write("Error Catcher Caught a message...\n");
   `uvm_error( "ERROR CATCHER ","From my_catcher_error catch() ");
   
@@ -75,8 +84,11 @@ endclass
   endclass
 
   class my_catcher_fatal extends uvm_report_catcher;
+   function new(string name); super.new(name); endfunction   
    
    virtual function action_e catch();
+      if(get_name() != get_id()) return THROW;
+      if(get_severity() != UVM_FATAL) return THROW;
       $write("Fatal Catcher Caught a Fatal message...\n");
   `uvm_info("FATAL CATCHER", "From my_catcher_fatal catch()", UVM_INFO );
   
@@ -101,24 +113,23 @@ class test extends uvm_test;
       $write("UVM TEST - Same catcher type - different IDs\n");
   
         begin
-          my_catcher_info ctchr1 = new;
-          my_catcher_warning ctchr2 = new;
-          my_catcher_error ctchr3 = new;
-          my_catcher_fatal ctchr4 = new;
+          my_catcher_info ctchr1 = new("Catcher1");
+          my_catcher_warning ctchr2 = new("Catcher2");
+          my_catcher_error ctchr3 = new("Catcher3");
+          my_catcher_fatal ctchr4 = new("Catcher4");
           
 
-          //add_report_id_catcher(string id, uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
           $write("adding a catcher of type my_catcher_info with id of Catcher1\n");
-          uvm_report_catcher::add_report_id_catcher("Catcher1",ctchr1);
+          uvm_report_cb::add(null,ctchr1);
           
           $write("adding a catcher of type my_catcher_warning with id of Catcher2\n");
-          uvm_report_catcher::add_report_id_catcher("Catcher2",ctchr2);
+          uvm_report_cb::add(null,ctchr2);
 
           $write("adding a catcher of type my_catcher_error with id of Catcher3\n");
-          uvm_report_catcher::add_report_id_catcher("Catcher3",ctchr3);
+          uvm_report_cb::add(null,ctchr3);
           
           $write("adding a catcher of type my_catcher_fatal with id of Catcher4\n");
-          uvm_report_catcher::add_report_id_catcher("Catcher4",ctchr4);
+          uvm_report_cb::add(null,ctchr4);
           
           `uvm_info("Catcher1", "This Info message is for Catcher1", UVM_MEDIUM);
           `uvm_warning("Catcher2", "This Warning message is for Catcher2");
@@ -130,8 +141,6 @@ class test extends uvm_test;
         end // begin
   
 
-  uvm_report_catcher::remove_all_report_catchers();
-  
   $write("UVM TEST EXPECT 2 UVM_ERROR\n");
   
   uvm_top.stop_request();

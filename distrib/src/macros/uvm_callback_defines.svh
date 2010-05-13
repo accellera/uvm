@@ -46,7 +46,7 @@
 //|   ...
 //|   task run;
 //|     ...
-//|     `uvm_do_callbacks(mycb, my_comp, doit())
+//|     `uvm_do_callbacks(my_comp, mycb, doit())
 //|   endtask
 //| endclass
 //-----------------------------------------------------------------------------
@@ -74,7 +74,7 @@
 //|   ...
 //|   task run;
 //|     ...
-//|     `uvm_do_callbacks(mycb, my_comp, doit())
+//|     `uvm_do_callbacks(my_comp, mycb, doit())
 //|   endtask
 //| endclass
 //|
@@ -83,7 +83,7 @@
 //|   ...
 //|   task run;
 //|     ...
-//|     `uvm_do_callbacks(mycb, my_comp, doit())
+//|     `uvm_do_callbacks(my_comp, mycb, doit())
 //|   endtask
 //| endclass
 //-----------------------------------------------------------------------------
@@ -127,8 +127,8 @@
 //-----------------------------------------------------------------------------
 
 
-`define uvm_do_callbacks(CB,T,METHOD_CALL) \
-  `uvm_do_obj_callbacks(CB,T,this,METHOD_CALL)
+`define uvm_do_callbacks(T,CB,METHOD_CALL) \
+  `uvm_do_obj_callbacks(T,CB,this,METHOD_CALL)
 
 
 //-----------------------------------------------------------------------------
@@ -148,9 +148,9 @@
 //|    ...
 //-----------------------------------------------------------------------------
 
-`define uvm_do_obj_callbacks(CB,T,OBJ,METHOD_CALL) \
+`define uvm_do_obj_callbacks(T,CB,OBJ,METHOD_CALL) \
    begin \
-     uvm_callback_iter#(CB,T) iter = new(OBJ); \
+     uvm_callback_iter#(T,CB) iter = new(OBJ); \
      CB cb = iter.first(); \
      while(cb != null) begin \
        `uvm_cb_trace(cb,OBJ,$sformatf(`"CB (%s) T (%s) METHOD_CALL`",cb.get_name(), OBJ.get_full_name())) \
@@ -197,7 +197,7 @@
 //|    my_trans trans;
 //|    forever begin
 //|      get_port.get(trans);
-//|      if (`uvm_do_callbacks_exit_on(mycb, mycomp, drop_trans(this,trans), 1))
+//|      if (`uvm_do_callbacks_exit_on(mycomp, mycb, extobj, drop_trans(this,trans), 1)
 //|        uvm_report_info("DROPPED",{"trans dropped: %s",trans.convert2string()});
 //|      // execute transaction
 //|    end
@@ -205,8 +205,8 @@
 //-----------------------------------------------------------------------------
 
 
-`define uvm_do_callbacks_exit_on(CB,T,METHOD_CALL,VAL) \
-  `uvm_do_obj_callbacks_exit_on(CB,T,this,METHOD_CALL,VAL) \
+`define uvm_do_callbacks_exit_on(T,CB,METHOD_CALL,VAL) \
+  `uvm_do_obj_callbacks_exit_on(T,CB,this,METHOD_CALL,VAL) \
 
 
 //-----------------------------------------------------------------------------
@@ -224,9 +224,9 @@
 //| ...
 //-----------------------------------------------------------------------------
 
-`define uvm_do_obj_callbacks_exit_on(CB,T,OBJ,METHOD_CALL,VAL) \
+`define uvm_do_obj_callbacks_exit_on(T,CB,OBJ,METHOD_CALL,VAL) \
    begin \
-     uvm_callback_iter#(CB,T) iter = new(OBJ); \
+     uvm_callback_iter#(T,CB) iter = new(OBJ); \
      CB cb = iter.first(); \
      while(cb != null) begin \
        if (cb.METHOD_CALL == VAL) begin \

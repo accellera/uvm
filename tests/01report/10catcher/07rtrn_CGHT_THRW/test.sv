@@ -41,11 +41,14 @@
 program top;
 
 import uvm_pkg::*;
-
+`include "uvm_macros.svh"
 
 class catcher_return_caught extends uvm_report_catcher;
+  string id;
+  function new(string id); this.id = id; endfunction
   
   virtual function action_e catch();
+  if(get_id() != id) return THROW;
   $write("An instance of catcher_return_caught, Caught a message...\n");
   $write("===========================================\n");
   
@@ -55,8 +58,11 @@ endclass
 
   
 class catcher_return_caught_call_issue extends uvm_report_catcher;
+  string id;
+  function new(string id); this.id = id; endfunction
    
   virtual function action_e catch();
+  if(get_id() != id) return THROW;
   $write("An instance of catcher_return_caught_call_issue, Caught a message...calling issue()...\n");
   $write("===========================================\n");
   issue();
@@ -65,8 +71,11 @@ class catcher_return_caught_call_issue extends uvm_report_catcher;
 endclass
 
 class catcher_return_throw extends uvm_report_catcher;
+  string id;
+  function new(string id); this.id = id; endfunction
    
   virtual function action_e catch();
+  if(get_id() != id) return THROW;
   $write("An instance of catcher_return_throw, Caught a message...\n");
   $write("===========================================\n");
   return THROW;
@@ -74,8 +83,11 @@ class catcher_return_throw extends uvm_report_catcher;
 endclass
 
 class catcher_return_throw_call_issue extends uvm_report_catcher;
+  string id;
+  function new(string id); this.id = id; endfunction
   
   virtual function action_e catch();
+  if(get_id() != id) return THROW;
   $write("An instance of catcher_return_throw_call_issue, Caught a message...calling issue()...\n");
   $write("===========================================\n");
   issue();
@@ -84,8 +96,11 @@ class catcher_return_throw_call_issue extends uvm_report_catcher;
 endclass
 
   class catcher_return_unknown_action extends uvm_report_catcher;
+  string id;
+  function new(string id); this.id = id; endfunction
   
   virtual function action_e catch();
+  if(get_id() != id) return THROW;
   $write("An instance of catcher_return_unknown_action, Caught a message...\n");
   $write("===========================================\n");
   return UNKNOWN_ACTION;
@@ -110,28 +125,28 @@ class test extends uvm_test;
       $write("UVM TEST - Catchers which return CAUGHT/THROW and call issue() \n");
       
       begin
-          catcher_return_caught  ctchr1 = new;
-          catcher_return_caught_call_issue ctchr2 = new;
-          catcher_return_throw  ctchr3 = new;
-          catcher_return_throw_call_issue ctchr4 = new;
-          catcher_return_unknown_action ctchr5 = new;
+          catcher_return_caught  ctchr1 = new("Catcher1");
+          catcher_return_caught_call_issue ctchr2 = new("Catcher2");
+          catcher_return_throw  ctchr3 = new("Catcher3");
+          catcher_return_throw_call_issue ctchr4 = new("Catcher4");
+          catcher_return_unknown_action ctchr5 = new("Catcher5");
         
            $write("===========================================\n");
           //add_report_id_catcher(string id, uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
           $write("adding a catcher of type catcher_return_caught  with id of Catcher1\n");
-          uvm_report_catcher::add_report_id_catcher("Catcher1",ctchr1);
+          uvm_report_cb::add(null,ctchr1);
           
           $write("adding a catcher of type catcher_return_caught_call_issue with id of Catcher2\n");
-          uvm_report_catcher::add_report_id_catcher("Catcher2",ctchr2);
+          uvm_report_cb::add(null,ctchr2);
 
           $write("adding a catcher of type catcher_return_throw  with id of Catcher3\n");
-          uvm_report_catcher::add_report_id_catcher("Catcher3",ctchr3);
+          uvm_report_cb::add(null,ctchr3);
           
           $write("adding a catcher of type catcher_return_throw_call_issue with id of Catcher4\n");
-          uvm_report_catcher::add_report_id_catcher("Catcher4",ctchr4);
+          uvm_report_cb::add(null,ctchr4);
 
            $write("adding a catcher of type catcher_return_unknown_action with id of Catcher5\n");
-          uvm_report_catcher::add_report_id_catcher("Catcher5",ctchr5);
+          uvm_report_cb::add(null,ctchr5);
 
            $write("===========================================\n");
         
@@ -144,7 +159,6 @@ class test extends uvm_test;
             
         end // begin
 
-      uvm_report_catcher::remove_all_report_catchers();
       $write("UVM TEST EXPECT 1 UVM_ERROR\n");
       uvm_top.stop_request();
    endtask

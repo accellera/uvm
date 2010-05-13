@@ -55,7 +55,7 @@ module test;
       super.build();
       drv1 = new("drv1", this); drv2 = new("drv2", this); drv3 = new("drv3", this);
       drv1.i = 1; drv2.i = 2; drv3.i = 3;
-      uvm_report_catcher::add_report_default_catcher(ctchr);
+      uvm_report_cb::add(null,ctchr);
     endfunction
     function void start_of_simulation();
       this.print();

@@ -17,5 +17,5 @@ The event and barrier pool classes are used to store collections of events and
 barriers, respectively, all indexed by string name.  Each pool class contains 
 a static, "global" pool instance for sharing across all processes.
 
-- <uvm_event_callback> - The event callback is used to creage callback objects
+- <uvm_event_callback> - The event callback is used to create callback objects
 that may be attached to <uvm_event>s.

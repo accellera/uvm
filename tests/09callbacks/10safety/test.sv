@@ -21,6 +21,7 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 virtual class a_cb extends uvm_callback;
    function new(string name = "a_cb");
@@ -116,7 +117,7 @@ class test extends uvm_test;
       $write("Checking unsafe registrations...\n");
       begin
          cb_catch cth = new;
-         uvm_report_catcher::add_report_default_catcher(cth);
+         uvm_report_cb::add(null,cth);
       end
       cb_catch::seen = 0;
       uvm_callbacks#(b_comp, a_cb)::add(null, acb);

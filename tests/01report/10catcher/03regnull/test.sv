@@ -21,6 +21,7 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 class my_catcher extends uvm_report_catcher;
    static int seen = 0;
@@ -52,24 +53,10 @@ class test extends uvm_test;
     $write("UVM TEST - ERROR expected since registering a default catcher with NULL handle\n");
         
     //add_report_default_catcher(uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
-    uvm_report_catcher::add_report_default_catcher(ctchr);
+    uvm_report_cb::add(null,ctchr);
     
-    $write("UVM TEST - ERROR expected since registering a severity catcher with NULL handle\n");
-    //add_report_severity_catcher(uvm_severity severity, uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
-    uvm_report_catcher::add_report_severity_catcher(UVM_INFO, ctchr1);
-    
-    $write("UVM TEST - ERROR expected since registering an ID catcher with NULL handle\n");
-    //add_report_id_catcher(string id, uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
-    uvm_report_catcher::add_report_id_catcher("MyID", ctchr2);
-
-    $write("UVM TEST - ERROR expected since registering a severity/ID catcher with NULL handle\n");
-    //add_report_severity_id_catcher(uvm_severity severity, string id, uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
-    uvm_report_catcher::add_report_severity_id_catcher(UVM_WARNING,"MyOtherID" ,ctchr3); 
-
- 
       end
-      uvm_report_catcher::remove_all_report_catchers();
-      $write("UVM TEST EXPECT 4 UVM_ERROR\n");
+      $write("UVM TEST EXPECT 1 UVM_ERROR\n");
       uvm_top.stop_request();
    endtask
 

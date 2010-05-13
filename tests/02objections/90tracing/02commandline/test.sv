@@ -73,7 +73,7 @@ module top;
     function new(string name, uvm_component parent);
       super.new(name,parent);
       tc = new("tc", this);
-      uvm_report_catcher::add_report_default_catcher(ctchr);
+      uvm_report_cb::add(null,ctchr);
     endfunction
 
     function void report();
