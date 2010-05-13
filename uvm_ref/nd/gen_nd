@@ -67,7 +67,6 @@ mkdir -p $outdir/images
 
 
 cp -r $nd_dir/images/b* $outdir/images
-cp -r $nd_dir/images/logo* $outdir/images
 cp    $nd_dir/logo.html $outdir
 
 # Run ND
