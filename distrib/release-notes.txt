@@ -1,0 +1,95 @@
+Release Notes for UVM-1.0EA
+May 17, 2010
+
+** Overview
+
+  - This is the first early adopter release of the Universal Verification 
+    Methodology (UVM) from Accellera.  The UVM includes a SystemVerilog base 
+    class library, a Reference Guide, and a User Guide.
+
+  - The UVM is built on the same code base as OVM-2.1.1, with the following 
+    new feature enhancements which are described in greater detail in the  
+    "New Features" section below and any API changes described in the
+    "API Changes" section.
+	- All ovm_* symbols converted to uvm_*.
+	- Enhancements to the OVM callback facility, including a new message 
+	catching facility. These enhancements introduce some minor backward 
+        incompatibilities to the OVM callback facility.
+	- Enhancements to the OVM objection mechanism.  These enhancements 
+        introduce some minor backward incompatibilities to the OVM objection
+        mechanism.
+       	- These new feature enhancements have been fully tested but they are
+	  considered as "Early Adopter" in this first release of UVM.
+
+** New Features - added since OVM 2.1.1
+
+   - uvm_callbacks added support for typewide callbacks by using a null
+     object identifier.
+
+   - Added better runtime type checking for callbacks to ensure that 
+     callbacks are only registered with objects that can use them.
+
+     * added type-callback registration macro, `uvm_register_cb.
+     * added ability to specify inheritence hierarchy of objects using
+       callbacks via the `uvm_set_super_type macro.
+
+   - Added the ability to register callbacks to uvm_components by
+     name with the uvm_callbacks#(T,CB)::add_by_name() method.
+
+   - uvm_report_catcher callback mechanism for reports. Allows messages to
+     be processed and potentially changed. Catcher callbacks can be added
+     globally or to specific report objects using the uvm_callbacks add
+     methods.
+
+   - Added a uvm_heartbeat class which allows environments to set up
+     heartbeat criteria to monitor the liveness of the components in the
+     hierarchy.
+
+   - Added the ability to configure the global timeout using the configuration
+     mechanism. ovm_top.set_config("","timeout",<value>) will set the
+     timeout value for the task based phases.
+
+   - Added tracing to the objection mechanism. The tracing can be enabled
+     procedurally with uvm_objection::trace_mode() or can be set via the
+     command line with +UVM_OBJECTION_TRACE.
+
+   - Added raised, dropped, and all_dropped callbacks to the uvm_objection
+     class. This allows external callbacks to be attached to objections
+     (not just via the virtual methods in the component class).
+
+** API Changes
+
+   - All ovm identifiers changed to uvm.
+
+     * ovm_ replaced with uvm_
+     * OVM_ replaced with UVM_
+     * tlm_ replaced with uvm_tlm_
+     * TLM_ replaced with UVM_TLM_
+     * A conversion script is provided, <root>/bin/OVM_UVM_Rename.pl
+
+   - All deprecated OVM features were removed (refer to the file 
+     <ovmhome>/deprecated.txt for a complete list). This includes the
+     removal of the URM and AVM compatibility layers.
+
+   - Callback queues are no longer accessed via uvm_callbacks#(T,CB)::get_global_cbs.
+     Users are now expected to use the new callback iterator class,
+     uvm_callback_iter#(T,CB) (or the iteration macros) for iteration,
+     and use uvm_callbacks#(T,CB)::add() for adding callbacks.
+
+   - Added a string description argument to the add/drop_objection 
+     methods. This primarily effects the uvm_component raised, dropped
+     and all_dropped callback methods because their signatures must be
+     changed to match the new signature which includes the string argument.
+
+** Bug Fixes
+
+** Documentation Fixes
+
+   - Reference manual and User Guide modified with UVM name changes, 
+     callback facility enhancements, and Accellera organization changes.
+	
+The OVM-2.1.1 release notes can be reviewed for additional information on 
+previous releases of the core functionality of UVM - please reference the
+file "release-notes.txt" available in the OVM-2.1.1 release which can be
+downloaded at http://ovmworld.org/downloads.php.
+
