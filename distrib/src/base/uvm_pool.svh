@@ -81,8 +81,10 @@ class uvm_pool #(type KEY=int, T=uvm_void) extends uvm_object;
   // and returned.
 
   virtual function T get (KEY key);
-    if (!pool.exists(key))
-      pool[key] = new();
+    if (!pool.exists(key)) begin
+      T default_value;
+      return default_value;
+    end
     return pool[key];
   endfunction
   
@@ -211,6 +213,7 @@ class uvm_pool #(type KEY=int, T=uvm_void) extends uvm_object;
   endfunction
 
   virtual function void do_print (uvm_printer printer);
+    string v;
     int cnt=0;
     string item;
     KEY key;
@@ -219,7 +222,8 @@ class uvm_pool #(type KEY=int, T=uvm_void) extends uvm_object;
       do begin
         item.itoa(cnt);
         item = {"[-key",item,"--]"};
-        printer.print_object(item, pool[key],"[");
+        $swrite(v,pool[key]);
+        printer.print_generic(item,"",-1,v,"[");
       end
       while (pool.next(key));
     printer.print_array_footer();
