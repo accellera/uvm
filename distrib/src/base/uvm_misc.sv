@@ -431,8 +431,8 @@ function integer uvm_begin_transaction(string txtype,
                                  string desc="",
                                  time begin_time=0
                                  );
-
-  return 0;
+  static int h = 1;
+  return h++;
 endfunction
 
 

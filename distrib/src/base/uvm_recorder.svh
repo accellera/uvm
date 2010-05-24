@@ -151,7 +151,6 @@ class uvm_recorder;
     string str; 
 
     if(scope.in_hierarchy(value)) return;
-
     if(identifier) begin 
       $swrite(str, "%0d", value.get_inst_id());
       v = str.atoi(); 

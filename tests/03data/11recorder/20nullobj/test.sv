@@ -11,7 +11,7 @@ module top;
     `uvm_object_utils_end
   endclass
 
-  class data extends uvm_object;
+  class data extends uvm_sequence_item;
     rand header hdr;
     rand byte payload[];
     `uvm_object_utils_begin(data)
@@ -24,23 +24,19 @@ module top;
     `uvm_component_utils(test)
     function new(string name, uvm_component parent);
       super.new(name,parent);
+      recording_detail = UVM_LOW;
     endfunction
 
     task run;
-      data d1, d2;
+      data d1;
       d1 = new; d1.set_name("d1");
-      d1.hdr = new;
 
       void'(d1.randomize());
-      $cast(d2, d1.clone());
 
-      d2.hdr = null;
+      void'(begin_tr(d1));
+      end_tr(d1);
 
-      if(d1.compare(d2)) begin
-        uvm_report_error("FAILURE", "**** UVM TEST FAILED  (objects compared as equal) ****");
-        return;
-      end
-      uvm_report_info("SUCCESS", "**** UVM TEST PASSED ****", UVM_NONE);
+      uvm_report_info("SUCCESS", "**** UVM TEST PASSED ****", UVM_INFO);
       global_stop_request();
     endtask
   endclass
