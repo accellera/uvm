@@ -631,6 +631,7 @@
     end \
     `uvm_pack_unpack_sarray_enum(T,ARG,FLAG) \
     `M_UVM_FIELD_SET_SARRAY_ENUM(T, ARG, m_sc.bitstream, FLAG) \
+    m_sc.scope.up(null); \
   end
 
 
@@ -745,9 +746,11 @@
 
 `define uvm_field_array_enum(T,ARG,FLAG) \
   begin \
+    m_sc.scope.down(`"ARG`", null); \
     `uvm_field_qda_enum(T,ARG,FLAG) \
     `uvm_unpack_array_enum(T,ARG,FLAG) \
     `M_UVM_FIELD_SET_ARRAY_ENUM(T, ARG, m_sc.bitstream, FLAG) \
+    m_sc.scope.up(null); \
   end
 
 
@@ -856,9 +859,11 @@
 
 `define uvm_field_queue_enum(T,ARG,FLAG) \
   begin \
+    m_sc.scope.down(`"ARG`", null); \
     `uvm_field_qda_enum(T,ARG,FLAG) \
     `uvm_unpack_queue_enum(T,ARG,FLAG) \
     `M_UVM_FIELD_SET_QUEUE_ENUM(T, ARG, m_sc.bitstream, FLAG) \
+    m_sc.scope.up(null); \
   end
 
 
