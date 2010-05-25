@@ -151,13 +151,16 @@ class uvm_recorder;
     string str; 
 
     if(scope.in_hierarchy(value)) return;
+
     if(identifier) begin 
-      $swrite(str, "%0d", value.get_inst_id());
-      v = str.atoi(); 
+      if(value != null) begin
+        $swrite(str, "%0d", value.get_inst_id());
+        v = str.atoi(); 
+      end
       scope.set_arg(name);
       uvm_set_attribute_by_name(tr_handle, scope.get_arg(), v, "'s");
     end
-  
+ 
     if(policy != UVM_REFERENCE) begin
       if(value!=null) begin
         scope.down(name, value);

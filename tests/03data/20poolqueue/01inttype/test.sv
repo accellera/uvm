@@ -11,6 +11,16 @@ module test;
   uvm_pool#(int,uvm_pool#(int,int)) pqpi = new, pqpi2;
   uvm_pool#(int,uvm_pool#(logic[63:0],logic[63:0])) pqpl = new, pqpl2;
 
+  class test extends uvm_component;
+    `uvm_component_utils(test)
+    function new(string name, uvm_component parent);
+      super.new(name,parent);
+    endfunction
+    task run;
+      global_stop_request();
+    endtask
+  endclass
+
   initial begin
     for(int i=0; i<5; ++i) begin
       qi.push_back(i);
@@ -40,6 +50,8 @@ module test;
       if(qi.pop_front() != i) $display("**** UVM TEST FAILED ****");
       if(ql.pop_front() != i+5) $display("**** UVM TEST FAILED ****");
     end
-    $display("**** UVM TEST PASSED ****");  
+    uvm_report_info ("PASSED", "**** UVM TEST PASSED ****", UVM_NONE);  
+
+    run_test();
   end
 endmodule
