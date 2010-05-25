@@ -36,7 +36,7 @@
 sub run_the_test {
   local($testdir, $comptime, $runtime, $_) = @_;
 
-  system("cd $testdir; rm -f $comptime *.log *~ *.bak #*#");
+  system("cd $testdir; rm -f *.log *~ *.bak #*#");
 }
 
 
