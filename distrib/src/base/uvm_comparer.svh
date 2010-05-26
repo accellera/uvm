@@ -300,9 +300,9 @@ class uvm_comparer;
       return 0;  //miscompare
     end
 
-    scope.down(name, null);
+    scope.down(name);
     compare_object = lhs.compare(rhs, this);
-    scope.up(null);
+    scope.up();
 
   endfunction
   

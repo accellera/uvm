@@ -334,11 +334,11 @@ class uvm_event extends uvm_object;
     printer.print_field("on", on, $bits(on), UVM_BIN, ".", "bit");
     printer.print_time("trigger_time", trigger_time);
     printer.print_object("trigger_data", trigger_data);
-    printer.m_scope.down("callbacks", null);
+    printer.m_scope.down("callbacks");
     foreach(callbacks[e]) begin
       printer.print_object($psprintf("[%0d]",e), callbacks[e], "[");
     end
-    printer.m_scope.up(null);
+    printer.m_scope.up();
   endfunction
 
 

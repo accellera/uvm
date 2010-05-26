@@ -148,8 +148,8 @@
        else \
          return; \
      end \
-     if(uvm_auto_options_object.recorder != null) begin \
-       uvm_auto_options_object.recorder.scope = m_sc.scope; \
+     if(m_sc.recorder != null) begin \
+       m_sc.recorder.scope = m_sc.scope; \
      end \
      /* Type is verified by uvm_object::compare() */ \
      super.m_field_automation(tmp_data__, what__, str__); \
@@ -610,23 +610,23 @@
     if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
     m_sc.scope.down(`"ARG`",null); \
     if((what__ == UVM_PRINT) && !(UVM_NOPRINT&(FLAG))) \
-      `uvm_print_qda_enum(ARG, uvm_auto_options_object.printer, array, T) \
+      `uvm_print_qda_enum(ARG, m_sc.printer, array, T) \
     else if((what__ == UVM_COPY) && !(UVM_NOCOPY&(FLAG))) begin \
       $cast(local_data__, tmp_data__); \
       if(local_data__ != null) foreach(ARG[i]) ARG[i] = local_data__.ARG[i]; \
     end \
     else if((what__ == UVM_RECORD) && !(UVM_NORECORD&(FLAG))) \
-      `m_uvm_record_qda_enum(T,ARG, uvm_auto_options_object.recorder) \
+      `m_uvm_record_qda_enum(T,ARG, m_sc.recorder) \
     else if((what__ == UVM_COMPARE) && !(UVM_NOCOMPARE&(FLAG))) begin \
       foreach(ARG[i__]) \
         if(ARG[i__] !== local_data__.ARG[i__]) begin \
           lh__ = ARG[i__]; \
           rh__ = local_data__.ARG[i__]; \
-          uvm_auto_options_object.comparer.scope.down_element(i__, null);\
+          m_sc.comparer.scope.down_element(i__, null);\
           $swrite(m_sc.stringv, "lhs = %0s : rhs = %0s", \
             lh__.name(), rh__.name()); \
-          uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
-          uvm_auto_options_object.comparer.scope.up_element(null);\
+          m_sc.comparer.print_msg(m_sc.stringv); \
+          m_sc.comparer.scope.up_element(null);\
         end \
     end \
     `uvm_pack_unpack_sarray_enum(T,ARG,FLAG) \
@@ -1175,7 +1175,7 @@
     value = ARG; \
     radix__ = uvm_radix_enum'((FLAG)&(UVM_RADIX)); \
     if(recorder==null) \
-      recorder=uvm_auto_options_object.recorder; \
+      recorder=m_sc.recorder; \
     recorder.record_field(`"ARG`", ARG, radix__, $bits(ARG); \
   end 
 
@@ -1252,47 +1252,47 @@
 
 `define uvm_unpack_array_enum(T,ARG,FLAG) \
   if((what__ == UVM_UNPACK) && !(UVM_NOPACK&(FLAG))) begin \
-    if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-        (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
-      if(uvm_auto_options_object.packer.use_metadata) begin \
+    if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+        (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) begin \
+      if(m_sc.packer.use_metadata) begin \
         int s_; \
-        s_ = uvm_auto_options_object.packer.unpack_field_int(32); \
+        s_ = m_sc.packer.unpack_field_int(32); \
         ARG = new[s_]; \
       end \
       foreach(ARG[i]) \
-        ARG[i] = T'(uvm_auto_options_object.packer.unpack_field($bits(ARG[i]))); \
+        ARG[i] = T'(m_sc.packer.unpack_field($bits(ARG[i]))); \
     end \
   end
 
 
 `define uvm_unpack_queue_enum(T,ARG,FLAG) \
   if((what__ == UVM_UNPACK) && !(UVM_NOPACK&(FLAG))) begin \
-    if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-        (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
-      if(uvm_auto_options_object.packer.use_metadata) begin \
+    if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+        (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) begin \
+      if(m_sc.packer.use_metadata) begin \
         int s_; \
-        s_ = uvm_auto_options_object.packer.unpack_field_int(32); \
+        s_ = m_sc.packer.unpack_field_int(32); \
         while(ARG.size() > s_) void'(ARG.pop_front()); \
         while(ARG.size() < s_) ARG.push_back(T'(0)); \
       end \
       foreach(ARG[i]) \
-        ARG[i] = T'(uvm_auto_options_object.packer.unpack_field($bits(ARG[i]))); \
+        ARG[i] = T'(m_sc.packer.unpack_field($bits(ARG[i]))); \
     end \
   end \
 
 
 `define uvm_pack_unpack_sarray_enum(T,ARG,FLAG) \
   if((what__ == UVM_PACK) && !(UVM_NOPACK&(FLAG))) begin \
-    if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-        (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) \
+    if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+        (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) \
       foreach(ARG[i]) \
-        uvm_auto_options_object.packer.pack_field(ARG[i],$bits(ARG[i])); \
+        m_sc.packer.pack_field(ARG[i],$bits(ARG[i])); \
   end \
   else if((what__ == UVM_UNPACK) && !(UVM_NOPACK&(FLAG))) begin \
-    if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-        (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) \
+    if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+        (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) \
       foreach(ARG[i]) \
-        ARG[i] = T'(uvm_auto_options_object.packer.unpack_field($bits(ARG[i]))); \
+        ARG[i] = T'(m_sc.packer.unpack_field($bits(ARG[i]))); \
   end \
 
 
@@ -1302,9 +1302,9 @@
     if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
     m_sc.scope.down(`"ARG`",null); \
     if((what__ == UVM_PRINT) && !(UVM_NOPRINT&(FLAG))) \
-      `uvm_print_qda_enum(ARG, uvm_auto_options_object.printer, array, T) \
+      `uvm_print_qda_enum(ARG, m_sc.printer, array, T) \
     else if((what__ == UVM_RECORD) && !(UVM_NORECORD&(FLAG))) \
-      `m_uvm_record_qda_enum(T,ARG, uvm_auto_options_object.recorder) \
+      `m_uvm_record_qda_enum(T,ARG, m_sc.recorder) \
     else if((what__ == UVM_COMPARE) && !(UVM_NOCOMPARE&(FLAG))) begin \
       $cast(local_data__, tmp_data__); \
       if(ARG.size() != local_data__.ARG.size()) begin \
@@ -1312,17 +1312,17 @@
         m_sc.stringv = ""; \
         s1__ = ARG.size(); s2__ = local_data__.ARG.size(); \
         $swrite(m_sc.stringv, "lhs size = %0d : rhs size = %0d", s1__, s2__);\
-        uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
+        m_sc.comparer.print_msg(m_sc.stringv); \
       end \
       for(int i__=0; i__<ARG.size() && i__<local_data__.ARG.size(); ++i__) \
         if(ARG[i__] !== local_data__.ARG[i__]) begin \
           lh__ = ARG[i__]; \
           rh__ = local_data__.ARG[i__]; \
-          uvm_auto_options_object.comparer.scope.down_element(i__, null);\
+          m_sc.comparer.scope.down_element(i__, null);\
           $swrite(m_sc.stringv, "lhs = %0s : rhs = %0s", \
             lh__.name(), rh__.name()); \
-          uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
-          uvm_auto_options_object.comparer.scope.up_element(null);\
+          m_sc.comparer.print_msg(m_sc.stringv); \
+          m_sc.comparer.scope.up_element(null);\
         end \
     end \
     if((what__ == UVM_COPY) && !(UVM_NOCOPY&(FLAG))) begin \
@@ -1330,10 +1330,10 @@
       if(local_data__ != null) ARG = local_data__.ARG; \
     end \
     else if((what__ == UVM_PACK) && !(UVM_NOPACK&(FLAG))) begin \
-      if(uvm_auto_options_object.packer.use_metadata == 1) \
-        uvm_auto_options_object.packer.pack_field_int(ARG.size(), 32); \
+      if(m_sc.packer.use_metadata == 1) \
+        m_sc.packer.pack_field_int(ARG.size(), 32); \
       foreach(ARG[i]) \
-        uvm_auto_options_object.packer.pack_field(int'(ARG[i]), $bits(ARG[i])); \
+        m_sc.packer.pack_field(int'(ARG[i]), $bits(ARG[i])); \
     end \
     m_sc.scope.up(null); \
   end
@@ -1523,7 +1523,7 @@
 `define uvm_print_msg_enum(LHS,RHS) \
   begin \
     uvm_comparer comparer; \
-    comparer = uvm_auto_options_object.comparer; \
+    comparer = m_sc.comparer; \
     if(comparer==null) comparer = uvm_default_comparer; \
     comparer.result++; \
 /*    $swrite(comparer.miscompares,"%s%s: lhs = %s : rhs = %s\n",*/ \
@@ -1540,15 +1540,15 @@
   begin \
     int r__; \
     if((what__ == UVM_PRINT) && (((FLAG)&UVM_NOPRINT) == 0) && (uvm_radix_enum'((FLAG)&UVM_RADIX) == UVM_ENUM) && \
-        (uvm_auto_options_object.printer.knobs.print_fields == 1)) begin \
+        (m_sc.printer.knobs.print_fields == 1)) begin \
       $swrite(m_sc.stringv, "%0d", ARG); \
-      uvm_auto_options_object.printer.print_generic(`"ARG`", "enum", \
+      m_sc.printer.print_generic(`"ARG`", "enum", \
           $bits(ARG), m_sc.stringv); \
     end \
     else if((what__ == UVM_RECORD) && (((FLAG)&UVM_NORECORD) == 0) && (uvm_radix_enum'((FLAG)&UVM_RADIX) == UVM_ENUM)) \
     begin \
       $swrite(m_sc.stringv, "%0d", ARG); \
-      uvm_auto_options_object.recorder.record_string(`"ARG`",m_sc.stringv); \
+      m_sc.recorder.record_string(`"ARG`",m_sc.stringv); \
     end \
     else if(tmp_data__!=null) begin \
       if($cast(local_data__, tmp_data__)) begin \
@@ -1576,13 +1576,13 @@
   begin \
     T lh__=ARG, rh__; \
     if((what__ == UVM_PRINT) && (((FLAG)&UVM_NOPRINT) == 0) && \
-        (uvm_auto_options_object.printer.knobs.print_fields == 1)) begin \
-      uvm_auto_options_object.printer.print_generic(`"ARG`", `"T`", \
+        (m_sc.printer.knobs.print_fields == 1)) begin \
+      m_sc.printer.print_generic(`"ARG`", `"T`", \
           $bits(ARG), lh__.name()); \
     end \
     else if((what__ == UVM_RECORD) && (((FLAG)&UVM_NORECORD) == 0)) \
     begin \
-      uvm_auto_options_object.recorder.record_string(`"ARG`",lh__.name()); \
+      m_sc.recorder.record_string(`"ARG`",lh__.name()); \
     end \
     else if(tmp_data__!=null) begin \
       if($cast(local_data__, tmp_data__)) begin \
@@ -1593,7 +1593,7 @@
           UVM_COMPARE: \
             if((((FLAG)&UVM_NOCOMPARE) == 0) && (ARG != local_data__.ARG)) begin \
                rh__ = local_data__.ARG; \
-               uvm_auto_options_object.comparer.print_msg({"lhs = ", lh__.name(), " : rhs = ", rh__.name()}); \
+               m_sc.comparer.print_msg({"lhs = ", lh__.name(), " : rhs = ", rh__.name()}); \
             end \
         endcase \
       end \
@@ -1602,16 +1602,16 @@
       case(what__) \
         UVM_PACK: \
           if(((FLAG)&UVM_NOPACK) == 0) \
-            if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-                (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
-              uvm_auto_options_object.packer.pack_field_int(int'(ARG), $bits(ARG)); \
+            if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+                (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) begin \
+              m_sc.packer.pack_field_int(int'(ARG), $bits(ARG)); \
             end \
         UVM_UNPACK: \
           begin \
-          if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-              (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) \
+          if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+              (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) \
             if(((FLAG)&UVM_NOPACK) == 0) begin \
-              ARG = T'(uvm_auto_options_object.packer.unpack_field_int($bits(ARG))); \
+              ARG = T'(m_sc.packer.unpack_field_int($bits(ARG))); \
             end \
           end \
         UVM_SETINT: \
@@ -1632,12 +1632,12 @@
 `define M_UVM_FIELD_DATA_EVENT(ARG,FLAG) \
   begin \
     if(what__ == UVM_PRINT && ( (FLAG)&UVM_NOPRINT != 0) && \
-                          uvm_auto_options_object.printer.knobs.print_fields == 1) \
-       uvm_auto_options_object.printer.print_generic(`"ARG`", "event", -1, "-"); \
+                          m_sc.printer.knobs.print_fields == 1) \
+       m_sc.printer.print_generic(`"ARG`", "event", -1, "-"); \
     else if((what__ == UVM_COMPARE) && ( (FLAG)&UVM_NOCOMPARE != 0) && \
             local_data__ && ARG != local_data__.ARG) \
     begin \
-      uvm_auto_options_object.comparer.print_msg(""); \
+      m_sc.comparer.print_msg(""); \
     end \
     else if((what__ == UVM_COPY) && local_data__ && ( (FLAG)&UVM_NOCOPY != 0 ) ) \
     begin \
@@ -1826,11 +1826,11 @@
              m_sc.stringv = ""; \
              s1__ = ARG.size(); s2__ = local_data__.ARG.size(); \
              $swrite(m_sc.stringv, "lhs size = %0d : rhs size = %0d", s1__, s2__);\
-             uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
+             m_sc.comparer.print_msg(m_sc.stringv); \
            end \
            for(i__=0; i__<ARG.size() && i__<local_data__.ARG.size(); ++i__) begin \
              if(ARG[i__] !== local_data__.``ARG[i__]) begin \
-               uvm_auto_options_object.comparer.scope.down_element(i__, null);\
+               m_sc.comparer.scope.down_element(i__, null);\
                case(UVM_RADIX&(FLAG)) \
                  UVM_BIN: $swrite(m_sc.stringv, "lhs = 'b%0b : rhs = 'b%0b", \
                                 ARG[i__], local_data__.ARG[i__]); \
@@ -1849,8 +1849,8 @@
                  default: $swrite(m_sc.stringv, "lhs = %0d : rhs = %0d", \
                                 ARG[i__], local_data__.ARG[i__]); \
                endcase \
-               uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
-               uvm_auto_options_object.comparer.scope.up_element(null);\
+               m_sc.comparer.print_msg(m_sc.stringv); \
+               m_sc.comparer.scope.up_element(null);\
              end \
            end \
          end \
@@ -1867,16 +1867,16 @@
        UVM_PRINT: \
          begin \
            if(((FLAG)&UVM_NOPRINT) == 0 && \
-                          uvm_auto_options_object.printer.knobs.print_fields == 1) begin \
+                          m_sc.printer.knobs.print_fields == 1) begin \
              `uvm_print_array_int3(ARG, uvm_radix_enum'((FLAG)&(UVM_RADIX)), \
-                                   uvm_auto_options_object.printer) \
+                                   m_sc.printer) \
            end \
          end \
        UVM_RECORD: \
          begin \
            if(((FLAG)&UVM_NORECORD) == 0) begin \
              `m_uvm_record_array_int(ARG, uvm_radix_enum'((FLAG)&(UVM_RADIX)), \
-                                   uvm_auto_options_object.recorder) \
+                                   m_sc.recorder) \
            end \
          end \
      endcase \
@@ -1887,26 +1887,26 @@
       UVM_PACK: \
         if(((FLAG)&UVM_NOPACK) == 0) \
         begin \
-          if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-              (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
-            if(uvm_auto_options_object.packer.use_metadata == 1) \
-              uvm_auto_options_object.packer.pack_field_int(ARG.size(), 32); \
+          if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+              (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) begin \
+            if(m_sc.packer.use_metadata == 1) \
+              m_sc.packer.pack_field_int(ARG.size(), 32); \
             foreach(ARG[i]) \
-              uvm_auto_options_object.packer.pack_field(ARG[i], $bits(ARG[i])); \
+              m_sc.packer.pack_field(ARG[i], $bits(ARG[i])); \
           end \
         end \
       UVM_UNPACK: \
         if(((FLAG)&UVM_NOPACK) == 0) \
         begin \
-          if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-              (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
-            if(uvm_auto_options_object.packer.use_metadata) begin \
+          if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+              (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) begin \
+            if(m_sc.packer.use_metadata) begin \
               int s_; \
-              s_ = uvm_auto_options_object.packer.unpack_field_int(32); \
+              s_ = m_sc.packer.unpack_field_int(32); \
               ARG = new[s_]; \
             end \
             foreach(ARG[i]) \
-              ARG[i] = uvm_auto_options_object.packer.unpack_field($bits(ARG[i])); \
+              ARG[i] = m_sc.packer.unpack_field($bits(ARG[i])); \
           end \
         end \
   endcase
@@ -1916,27 +1916,27 @@
       UVM_PACK: \
         if(((FLAG)&UVM_NOPACK) == 0) \
         begin \
-          if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-              (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
-            if(uvm_auto_options_object.packer.use_metadata == 1) \
-              uvm_auto_options_object.packer.pack_field_int(ARG.size(), 32); \
+          if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+              (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) begin \
+            if(m_sc.packer.use_metadata == 1) \
+              m_sc.packer.pack_field_int(ARG.size(), 32); \
             foreach(ARG[i]) \
-              uvm_auto_options_object.packer.pack_field(ARG[i], $bits(ARG[i])); \
+              m_sc.packer.pack_field(ARG[i], $bits(ARG[i])); \
           end \
         end \
       UVM_UNPACK: \
         if(((FLAG)&UVM_NOPACK) == 0) \
         begin \
-          if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-              (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
-            if(uvm_auto_options_object.packer.use_metadata) begin \
+          if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+              (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) begin \
+            if(m_sc.packer.use_metadata) begin \
               int s_; \
-              s_ = uvm_auto_options_object.packer.unpack_field_int(32); \
+              s_ = m_sc.packer.unpack_field_int(32); \
               while(ARG.size() < s_) ARG.push_back(0); \
               while(ARG.size() > s_) void'(ARG.pop_front()); \
             end \
             foreach(ARG[i]) \
-              ARG[i] = uvm_auto_options_object.packer.unpack_field($bits(ARG[i])); \
+              ARG[i] = m_sc.packer.unpack_field($bits(ARG[i])); \
           end \
         end \
   endcase
@@ -1946,7 +1946,7 @@
     if((what__ & (FLAG)) || (what__ >= UVM_MACRO_EXTRAS)) begin \
       if(what__ == UVM_PRINT && ((FLAG)&UVM_NOPRINT) == 0) \
         `uvm_print_sarray_int3(ARG, uvm_radix_enum'((FLAG)&(UVM_RADIX)), \
-                                   uvm_auto_options_object.printer) \
+                                   m_sc.printer) \
       else if(tmp_data__!=null) begin \
         foreach(ARG[i__]) \
           if($cast(local_data__, tmp_data__)) begin \
@@ -1993,9 +1993,9 @@
          if ( !((FLAG)&UVM_NOCOMPARE) && (tmp_data__ != null)) begin \
            int i__; \
            uvm_recursion_policy_enum orig_policy; \
-           orig_policy = uvm_auto_options_object.comparer.policy; \
+           orig_policy = m_sc.comparer.policy; \
            if(((FLAG)&UVM_REFERENCE) != 0) begin \
-             uvm_auto_options_object.comparer.policy = UVM_REFERENCE; \
+             m_sc.comparer.policy = UVM_REFERENCE; \
            end \
            $cast(local_data__, tmp_data__); \
            if(ARG.size() != local_data__.``ARG.size()) begin \
@@ -2003,11 +2003,11 @@
              m_sc.stringv = ""; \
              s1__ = ARG.size(); s2__ = local_data__.ARG.size(); \
              $swrite(m_sc.stringv, "lhs size = %0d : rhs size = %0d", s1__, s2__);\
-             uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
+             m_sc.comparer.print_msg(m_sc.stringv); \
            end \
            for(i__=0; i__<ARG.size() && i__<local_data__.ARG.size(); ++i__) \
-             void'(uvm_auto_options_object.comparer.compare_object($psprintf(`"ARG[%0d]`",i__), ARG[i__], local_data__.ARG[i__])); \
-           uvm_auto_options_object.comparer.policy = orig_policy; \
+             void'(m_sc.comparer.compare_object($psprintf(`"ARG[%0d]`",i__), ARG[i__], local_data__.ARG[i__])); \
+           m_sc.comparer.policy = orig_policy; \
          end \
        UVM_COPY: \
          if(!((FLAG)&UVM_NOCOPY) && (tmp_data__ != null) ) \
@@ -2022,14 +2022,14 @@
          end \
        UVM_PRINT: \
            if((((FLAG)&UVM_NOPRINT) == 0) && \
-              uvm_auto_options_object.printer.knobs.print_fields == 1) \
+              m_sc.printer.knobs.print_fields == 1) \
            begin \
-             `uvm_print_array_object3(ARG, uvm_auto_options_object.printer,FLAG) \
+             `uvm_print_array_object3(ARG, m_sc.printer,FLAG) \
            end \
        UVM_RECORD: \
          begin \
            if((((FLAG)&UVM_NORECORD) == 0) && (((FLAG)&UVM_SHALLOW) == 0)) begin \
-             `m_uvm_record_array_object(ARG,uvm_auto_options_object.recorder) \
+             `m_uvm_record_array_object(ARG,m_sc.recorder) \
            end \
          end \
      endcase \
@@ -2041,29 +2041,29 @@
       UVM_PACK: \
         if(((FLAG)&UVM_NOPACK) == 0) \
         begin \
-          if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-              (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
-            if(uvm_auto_options_object.packer.use_metadata == 1) \
-              uvm_auto_options_object.packer.pack_field_int(ARG.size(), 32); \
+          if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+              (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) begin \
+            if(m_sc.packer.use_metadata == 1) \
+              m_sc.packer.pack_field_int(ARG.size(), 32); \
             foreach(ARG[i]) begin \
-              uvm_auto_options_object.packer.pack_object(ARG[i]); \
+              m_sc.packer.pack_object(ARG[i]); \
             end \
           end \
         end \
       UVM_UNPACK: \
         if(((FLAG)&UVM_NOPACK) == 0) \
         begin \
-          if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-              (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
-            if(uvm_auto_options_object.packer.use_metadata) begin \
+          if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+              (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) begin \
+            if(m_sc.packer.use_metadata) begin \
               int s_; \
-              s_ = uvm_auto_options_object.packer.unpack_field_int(32); \
+              s_ = m_sc.packer.unpack_field_int(32); \
               if(ARG.size() < s_) \
                 _global_reporter.uvm_report_error("OBJUPK", $psprintf(`"Array ARG cannot support the unpack operation, the unpack requires %0d elements, ARG has only %0d`", s_, ARG.size()), UVM_NONE); \
             end \
             foreach(ARG[i]) begin \
-              uvm_auto_options_object.packer.unpack_object(ARG[i]); \
-              if(uvm_auto_options_object.packer.use_metadata == 0 && ARG[i] == null) \
+              m_sc.packer.unpack_object(ARG[i]); \
+              if(m_sc.packer.use_metadata == 0 && ARG[i] == null) \
                 return; \
             end \
           end \
@@ -2075,36 +2075,36 @@
       UVM_PACK: \
         if(((FLAG)&UVM_NOPACK) == 0) \
         begin \
-          if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-              (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
-            if(uvm_auto_options_object.packer.use_metadata == 1) \
-              uvm_auto_options_object.packer.pack_field_int(ARG.size(), 32); \
+          if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+              (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) begin \
+            if(m_sc.packer.use_metadata == 1) \
+              m_sc.packer.pack_field_int(ARG.size(), 32); \
             foreach(ARG[i]) begin \
-              uvm_auto_options_object.packer.pack_object(ARG[i]); \
+              m_sc.packer.pack_object(ARG[i]); \
             end \
           end \
         end \
       UVM_UNPACK: \
         if(((FLAG)&UVM_NOPACK) == 0) \
         begin \
-          if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-              (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
-            if(uvm_auto_options_object.packer.use_metadata) begin \
+          if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+              (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) begin \
+            if(m_sc.packer.use_metadata) begin \
               int s_; \
-              s_ = uvm_auto_options_object.packer.unpack_field_int(32); \
+              s_ = m_sc.packer.unpack_field_int(32); \
               if(ARG.size() < s_) \
                 _global_reporter.uvm_report_error("OBJUPK", $psprintf(`"Queue ARG cannot support the unpack operation, the unpack requires %0d elements, ARG has only %0d`", s_, ARG.size()), UVM_NONE); \
             end \
             foreach(ARG[i]) begin \
-              uvm_auto_options_object.packer.unpack_object(ARG[i]); \
-              if(uvm_auto_options_object.packer.use_metadata == 0 && ARG[i] == null) \
+              m_sc.packer.unpack_object(ARG[i]); \
+              if(m_sc.packer.use_metadata == 0 && ARG[i] == null) \
                 return; \
             end \
 //          while(ARG.size() < s_) ARG.push_back(null); \
 //          while(ARG.size() > s_) void'(ARG.pop_front()); \
 //          foreach(ARG[i]) begin \
-//            if(!uvm_auto_options_object.packer.is_null()) ARG[i] = new; \
-//            uvm_auto_options_object.packer.unpack_object(ARG[i]); \
+//            if(!m_sc.packer.is_null()) ARG[i] = new; \
+//            m_sc.packer.unpack_object(ARG[i]); \
 //          end \
           end \
         end \
@@ -2115,7 +2115,7 @@
     if((what__ & (FLAG)) || (what__ >= UVM_MACRO_EXTRAS)) begin \
       uvm_object lhs__; \
       if(what__ == UVM_PRINT && ((FLAG)&UVM_NOPRINT) == 0) \
-        `uvm_print_sarray_object3(ARG, uvm_auto_options_object.printer, FLAG) \
+        `uvm_print_sarray_object3(ARG, m_sc.printer, FLAG) \
       else if((what__ == UVM_COPY) && ((FLAG)&UVM_NOCOPY)==0) begin \
         $cast(local_data__, tmp_data__); \
         foreach(ARG[i__]) begin \
@@ -2176,16 +2176,16 @@
              m_sc.stringv = ""; \
              s1__ = ARG.size(); s2__ = local_data__.ARG.size(); \
              $swrite(m_sc.stringv, "lhs size = %0d : rhs size = %0d", s1__, s2__);\
-             uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
+             m_sc.comparer.print_msg(m_sc.stringv); \
            end \
            for(i__=0; i__<ARG.size() && i__<local_data__.ARG.size(); ++i__) \
              if(ARG[i__] != local_data__.ARG[i__]) begin \
                string ls__, rs__; \
                ls__ = ARG[i__]; rs__ = local_data__.ARG[i__]; \
-               uvm_auto_options_object.comparer.scope.down_element(i__, null);\
+               m_sc.comparer.scope.down_element(i__, null);\
                $swrite(m_sc.stringv, "lhs = %0s : rhs = %0s", ls__, rs__); \
-               uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
-               uvm_auto_options_object.comparer.scope.up_element(null);\
+               m_sc.comparer.print_msg(m_sc.stringv); \
+               m_sc.comparer.scope.up_element(null);\
              end \
          end \
        UVM_COPY: \
@@ -2200,13 +2200,13 @@
        UVM_PRINT: \
          begin \
            if((FLAG)&UVM_NOPRINT != 0 && \
-                          uvm_auto_options_object.printer.knobs.print_fields == 1) \
-             `uvm_print_array_string2(ARG, uvm_auto_options_object.printer) \
+                          m_sc.printer.knobs.print_fields == 1) \
+             `uvm_print_array_string2(ARG, m_sc.printer) \
          end \
        UVM_RECORD: \
          begin \
            if(((FLAG)&UVM_NORECORD) == 0 && !m_sc.array_warning_done) begin \
-             `m_uvm_record_array_string(ARG, uvm_auto_options_object.recorder) \
+             `m_uvm_record_array_string(ARG, m_sc.recorder) \
            end \
          end \
      endcase \
@@ -2217,7 +2217,7 @@
   begin \
     if((what__ & (FLAG)) || (what__ >= UVM_MACRO_EXTRAS)) begin \
       if(what__ == UVM_PRINT && ((FLAG)&UVM_NOPRINT) == 0) \
-        `uvm_print_sarray_string2(ARG, uvm_auto_options_object.printer) \
+        `uvm_print_sarray_string2(ARG, m_sc.printer) \
       else if(tmp_data__!=null) begin \
         foreach(ARG[i__]) \
           if($cast(local_data__, tmp_data__)) begin \
@@ -2238,26 +2238,26 @@
       UVM_PACK: \
         if(((FLAG)&UVM_NOPACK) == 0) \
         begin \
-          if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-              (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
-            if(uvm_auto_options_object.packer.use_metadata == 1) \
-              uvm_auto_options_object.packer.pack_field_int(ARG.size(), 32); \
+          if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+              (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) begin \
+            if(m_sc.packer.use_metadata == 1) \
+              m_sc.packer.pack_field_int(ARG.size(), 32); \
             foreach(ARG[i]) \
-              uvm_auto_options_object.packer.pack_string(ARG[i]); \
+              m_sc.packer.pack_string(ARG[i]); \
           end \
         end \
       UVM_UNPACK: \
         if(((FLAG)&UVM_NOPACK) == 0) \
         begin \
-          if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-              (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
-            if(uvm_auto_options_object.packer.use_metadata) begin \
+          if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+              (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) begin \
+            if(m_sc.packer.use_metadata) begin \
               int s_; \
-              s_ = uvm_auto_options_object.packer.unpack_field_int(32); \
+              s_ = m_sc.packer.unpack_field_int(32); \
               ARG = new[s_]; \
             end \
             foreach(ARG[i]) begin \
-              ARG[i] = uvm_auto_options_object.packer.unpack_string(-1); \
+              ARG[i] = m_sc.packer.unpack_string(-1); \
             end \
           end \
         end \
@@ -2268,27 +2268,27 @@
       UVM_PACK: \
         if(((FLAG)&UVM_NOPACK) == 0) \
         begin \
-          if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-              (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
-            if(uvm_auto_options_object.packer.use_metadata == 1) \
-              uvm_auto_options_object.packer.pack_field_int(ARG.size(), 32); \
+          if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+              (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) begin \
+            if(m_sc.packer.use_metadata == 1) \
+              m_sc.packer.pack_field_int(ARG.size(), 32); \
             foreach(ARG[i]) \
-              uvm_auto_options_object.packer.pack_string(ARG[i]); \
+              m_sc.packer.pack_string(ARG[i]); \
           end \
         end \
       UVM_UNPACK: \
         if(((FLAG)&UVM_NOPACK) == 0) \
         begin \
-          if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
-              (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
-            if(uvm_auto_options_object.packer.use_metadata) begin \
+          if((((FLAG)&UVM_ABSTRACT) && m_sc.packer.abstract) || \
+              (!((FLAG)&UVM_ABSTRACT) && m_sc.packer.physical)) begin \
+            if(m_sc.packer.use_metadata) begin \
               int s_; \
-              s_ = uvm_auto_options_object.packer.unpack_field_int(32); \
+              s_ = m_sc.packer.unpack_field_int(32); \
               while(ARG.size() < s_) ARG.push_back(""); \
               while(ARG.size() > s_) void'(ARG.pop_front()); \
             end \
             foreach(ARG[i]) begin \
-              ARG[i] = uvm_auto_options_object.packer.unpack_string(-1); \
+              ARG[i] = m_sc.packer.unpack_string(-1); \
             end \
           end \
         end \
@@ -2300,9 +2300,9 @@
 `define UVM_COMPARE_FAILED(ARG) \
 begin \
   uvm_object::m_sc.scratch1 = `"Compare failed ARG`"; \
-   uvm_auto_options_object.comparer.result++; \
-   if(uvm_auto_options_object.comparer.result <=  \
-      uvm_auto_options_object.comparer.show_max) \
+   m_sc.comparer.result++; \
+   if(m_sc.comparer.result <=  \
+      m_sc.comparer.show_max) \
    begin \
      uvm_object::m_sc.scratch1 = `"Miscompare for field ARG`"; \
      _global_reporter.uvm_report_info("MISCMP", uvm_object::m_sc.scratch1, UVM_MEDIUM) \
@@ -2328,16 +2328,16 @@ end
                  s1__ = ARG.num(); s2__ = local_data__.ARG.num(); \
                  $swrite(m_sc.stringv, "lhs size = %0d : rhs size = %0d", \
                     s1__, s2__);\
-                 uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
+                 m_sc.comparer.print_msg(m_sc.stringv); \
               end \
               string_aa_key = ""; \
               while(ARG.next(string_aa_key)) begin \
-                uvm_auto_options_object.comparer.scope.set_arg({"[",string_aa_key,"]"}); \
+                m_sc.comparer.scope.set_arg({"[",string_aa_key,"]"}); \
                 void'(m_do_data({`"ARG[`", string_aa_key, "]"}, \
                     ARG[string_aa_key], \
                     local_data__.ARG[string_aa_key], what__, \
                     $bits(ARG[string_aa_key]), FLAG)); \
-                uvm_auto_options_object.comparer.scope.unset_arg(string_aa_key); \
+                m_sc.comparer.scope.unset_arg(string_aa_key); \
               end \
             end \
            end \
@@ -2354,7 +2354,7 @@ end
           end \
         UVM_PRINT: \
           `uvm_print_aa_``KEY``_``TYPE``3(ARG, uvm_radix_enum'((FLAG)&(UVM_RADIX)), \
-             uvm_auto_options_object.printer) \
+             m_sc.printer) \
       endcase \
     end \
   end
@@ -2385,20 +2385,20 @@ end
                  s1__ = ARG.num(); s2__ = local_data__.ARG.num(); \
                  $swrite(m_sc.stringv, "lhs size = %0d : rhs size = %0d", \
                     s1__, s2__);\
-                 uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
+                 m_sc.comparer.print_msg(m_sc.stringv); \
               end \
-              uvm_auto_options_object.comparer.scope.up(null); \
+              m_sc.comparer.scope.up(null); \
               if(ARG.first(aa_key)) \
                 do begin \
                   $swrite(string_aa_key, "%0d", aa_key); \
-                  uvm_auto_options_object.comparer.scope.set_arg({"[",string_aa_key,"]"}); \
+                  m_sc.comparer.scope.set_arg({"[",string_aa_key,"]"}); \
                   void'(m_do_data({`"ARG[`", string_aa_key, "]"}, \
                     ARG[aa_key], \
                     local_data__.ARG[aa_key], what__, \
                     $bits(ARG[aa_key]), FLAG)); \
-                  uvm_auto_options_object.comparer.scope.unset_arg(string_aa_key); \
+                  m_sc.comparer.scope.unset_arg(string_aa_key); \
                 end while(ARG.next(aa_key)); \
-              uvm_auto_options_object.comparer.scope.down(`"ARG`",null); \
+              m_sc.comparer.scope.down(`"ARG`",null); \
             end \
            end \
         UVM_COPY: \
@@ -2415,7 +2415,7 @@ end
           end \
         UVM_PRINT: \
           `uvm_print_aa_int_key4(KEY,ARG, uvm_radix_enum'((FLAG)&(UVM_RADIX)), \
-             uvm_auto_options_object.printer) \
+             m_sc.printer) \
       endcase \
     end \
   end
@@ -2440,16 +2440,16 @@ end
                  s1__ = ARG.num(); s2__ = local_data__.ARG.num(); \
                  $swrite(m_sc.stringv, "lhs size = %0d : rhs size = %0d", \
                     s1__, s2__);\
-                 uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
+                 m_sc.comparer.print_msg(m_sc.stringv); \
               end \
-              uvm_auto_options_object.comparer.scope.up(null); \
+              m_sc.comparer.scope.up(null); \
               if(ARG.first(aa_key)) \
                 do begin \
-                  void'(uvm_auto_options_object.comparer.compare_field_int({`"ARG[`",aa_key.name(),"]"}, \
+                  void'(m_sc.comparer.compare_field_int({`"ARG[`",aa_key.name(),"]"}, \
                     ARG[aa_key], local_data__.ARG[aa_key], $bits(ARG[aa_key]), \
                     uvm_radix_enum'((FLAG)&UVM_RADIX) )); \
                 end while(ARG.next(aa_key)); \
-              uvm_auto_options_object.comparer.scope.down(`"ARG`",null); \
+              m_sc.comparer.scope.down(`"ARG`",null); \
             end \
            end \
         UVM_COPY: \
@@ -2466,13 +2466,13 @@ end
           end \
         UVM_PRINT: \
           begin \
-            uvm_printer p__ = uvm_auto_options_object.printer; \
+            uvm_printer p__ = m_sc.printer; \
             p__.print_array_header (`"ARG`", ARG.num(),`"aa_``KEY`"); \
             if((p__.knobs.depth == -1) || (p__.m_scope.depth() < p__.knobs.depth+1)) \
             begin \
               if(ARG.first(aa_key)) \
                 do begin \
-                  uvm_auto_options_object.printer.print_field( \
+                  m_sc.printer.print_field( \
                     {"[",aa_key.name(),"]"}, ARG[aa_key], $bits(ARG[aa_key]), \
                     uvm_radix_enum'((FLAG)&UVM_RADIX), "[" ); \
                 end while(ARG.next(aa_key)); \
@@ -2502,7 +2502,7 @@ end
                  s1__ = ARG.num(); s2__ = local_data__.ARG.num(); \
                  $swrite(m_sc.stringv, "lhs size = %0d : rhs size = %0d", \
                           s1__, s2__);\
-                 uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
+                 m_sc.comparer.print_msg(m_sc.stringv); \
               end \
               string_aa_key = ""; \
               while(ARG.next(string_aa_key)) begin \
@@ -2510,10 +2510,10 @@ end
                 /* Since m_do_data_object is inout, need a uvm_object for */ \
                 /* assignment compatibility. We must cast back the return. */ \
                 tmp = ARG[string_aa_key]; \
-                uvm_auto_options_object.comparer.scope.down({"[",string_aa_key,"]"},tmp); \
+                m_sc.comparer.scope.down({"[",string_aa_key,"]"},tmp); \
                 void'(m_do_data_object({"[", string_aa_key, "]"}, tmp, \
                     local_data__.ARG[string_aa_key], what__, FLAG)); \
-                uvm_auto_options_object.comparer.scope.up(tmp,"["); \
+                m_sc.comparer.scope.up(tmp,"["); \
               end \
             end \
           end \
@@ -2537,7 +2537,7 @@ end
            end \
           end \
         UVM_PRINT: \
-          `uvm_print_aa_string_object3(ARG, uvm_auto_options_object.printer,FLAG) \
+          `uvm_print_aa_string_object3(ARG, m_sc.printer,FLAG) \
       endcase \
     end \
   end
@@ -2561,7 +2561,7 @@ end
                  s1__ = ARG.num(); s2__ = local_data__.ARG.num(); \
                  $swrite(m_sc.stringv, "lhs size = %0d : rhs size = %0d", \
                           s1__, s2__);\
-                 uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
+                 m_sc.comparer.print_msg(m_sc.stringv); \
               end \
               if(ARG.first(key__)) begin \
                 do begin \
@@ -2570,10 +2570,10 @@ end
                   /* assignment compatibility. We must cast back the return. */ \
                   tmp__ = ARG[key__]; \
                   $swrite(m_sc.stringv, "[%0d]", key__); \
-                  uvm_auto_options_object.comparer.scope.down_element(key__,tmp__); \
+                  m_sc.comparer.scope.down_element(key__,tmp__); \
                   void'(m_do_data_object(m_sc.stringv, tmp__, \
                       local_data__.ARG[key__], what__, FLAG)); \
-                  uvm_auto_options_object.comparer.scope.up_element(tmp__); \
+                  m_sc.comparer.scope.up_element(tmp__); \
                 end while(ARG.next(key__)); \
               end \
             end \
@@ -2602,7 +2602,7 @@ end
            end \
          end \
         UVM_PRINT: \
-          `uvm_print_aa_int_object3(ARG, uvm_auto_options_object.printer,FLAG) \
+          `uvm_print_aa_int_object3(ARG, m_sc.printer,FLAG) \
       endcase \
     end \
   end
@@ -2625,15 +2625,15 @@ end
                  s1__ = ARG.num(); s2__ = local_data__.ARG.num(); \
                  $swrite(m_sc.stringv, "lhs size = %0d : rhs size = %0d", \
                     s1__, s2__);\
-                 uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
+                 m_sc.comparer.print_msg(m_sc.stringv); \
               end \
               string_aa_key = ""; \
               while(ARG.next(string_aa_key)) begin \
-                uvm_auto_options_object.comparer.scope.set_arg({"[",string_aa_key,"]"}); \
+                m_sc.comparer.scope.set_arg({"[",string_aa_key,"]"}); \
                 void'(m_do_data_string({`"ARG[`", string_aa_key, "]"}, \
                     ARG[string_aa_key], \
                     local_data__.ARG[string_aa_key], what__, FLAG) ); \
-                uvm_auto_options_object.comparer.scope.unset_arg(string_aa_key); \
+                m_sc.comparer.scope.unset_arg(string_aa_key); \
               end \
             end \
            end \
@@ -2648,7 +2648,7 @@ end
             end \
           end \
         UVM_PRINT: \
-          `uvm_print_aa_string_string2(ARG, uvm_auto_options_object.printer) \
+          `uvm_print_aa_string_string2(ARG, m_sc.printer) \
       endcase \
     end \
   end

@@ -123,7 +123,7 @@ function void uvm_object::print(uvm_printer printer=null);
   else begin
     //do m_field_automation here so user doesn't need to call anything to get
     //automation.
-    uvm_auto_options_object.printer = printer;
+    m_sc.printer = printer;
     m_field_automation(null, UVM_PRINT, "");
     //call user override
     do_print(printer);
@@ -164,9 +164,6 @@ endfunction
 function void uvm_object::print_field_match(string fnc, string match);
   string scratch;
 
-  if(m_sc.save_last_field)
-    m_sc.last_field = m_sc.get_full_scope_arg();
-
   if(print_matches) begin
     int style;
     scratch = {
@@ -182,7 +179,8 @@ endfunction
 function void  uvm_object::set_int_local (string      field_name,
                                           uvm_bitstream_t value,
                                           bit         recurse=1);
-  if(m_sc.scope.in_hierarchy(this)) return;
+  if(m_sc.cycle_check.exists(this)) return;
+  m_sc.cycle_check[this] = 1;
 
   this.m_sc.status = 0;
   this.m_sc.bitstream = value;
@@ -192,6 +190,7 @@ function void  uvm_object::set_int_local (string      field_name,
   if(m_sc.warning && !this.m_sc.status) begin
     uvm_report_error("NOMTC", $psprintf("did not find a match for field %s", field_name),UVM_NONE);
   end
+  m_sc.cycle_check.delete(this);
 
 endfunction
 
@@ -204,7 +203,9 @@ function void  uvm_object::set_object_local (string     field_name,
                                              bit        clone=1,
                                              bit        recurse=1);
   uvm_object cc;
-  if(m_sc.scope.in_hierarchy(this)) return;
+  if(m_sc.cycle_check.exists(this)) return;
+  m_sc.cycle_check[this] = 1;
+
 
   if(clone && (value!=null)) begin 
     cc = value.clone();
@@ -214,7 +215,7 @@ function void  uvm_object::set_object_local (string     field_name,
 
   this.m_sc.status = 0;
   this.m_sc.object = value;
-  uvm_auto_options_object.clone = clone;
+  m_sc.clone = clone;
 
   m_field_automation(null, UVM_SETOBJ, field_name);
 
@@ -222,6 +223,7 @@ function void  uvm_object::set_object_local (string     field_name,
     uvm_report_error("NOMTC", $psprintf("did not find a match for field %s", field_name), UVM_NONE);
   end
 
+  m_sc.cycle_check.delete(this);
 endfunction
 
 
@@ -230,7 +232,9 @@ endfunction
 function void  uvm_object::set_string_local (string field_name,
                                              string value,
                                              bit    recurse=1);
-  if(m_sc.scope.in_hierarchy(this)) return;
+  if(m_sc.cycle_check.exists(this)) return;
+  m_sc.cycle_check[this] = 1;
+
   this.m_sc.status = 0;
   this.m_sc.stringv = value;
 
@@ -239,6 +243,7 @@ function void  uvm_object::set_string_local (string field_name,
   if(m_sc.warning && !this.m_sc.status) begin
     uvm_report_error("NOMTC", $psprintf("did not find a match for field %s (@%0d)", field_name, this.get_inst_id()), UVM_NONE);
   end
+  m_sc.cycle_check.delete(this);
 endfunction
 
 
@@ -485,15 +490,6 @@ function void uvm_object::do_copy (uvm_object rhs);
 endfunction
 
 
-// init_status
-// -----------
-
-function uvm_status_container uvm_object::init_status();
-  if(m_sc==null) m_sc=new;
-  return m_sc;
-endfunction
-
-
 // compare
 // -------
 
@@ -504,10 +500,10 @@ function bit  uvm_object::compare (uvm_object rhs,
   bit done;
   done = 0;
   if(comparer != null) 
-    uvm_auto_options_object.comparer = comparer;
+    m_sc.comparer = comparer;
   else 
-    uvm_auto_options_object.comparer = uvm_default_comparer;
-  comparer = uvm_auto_options_object.comparer;
+    m_sc.comparer = uvm_default_comparer;
+  comparer = m_sc.comparer;
 
   if(!m_sc.scope.depth()) begin
     comparer.compare_map.clear();
@@ -515,10 +511,10 @@ function bit  uvm_object::compare (uvm_object rhs,
     comparer.miscompares = "";
     comparer.scope = m_sc.scope;
     if(get_name() == "") begin
-      m_sc.scope.down("<object>", this);
+      m_sc.scope.down("<object>");
     end
     else
-      m_sc.scope.down(this.get_name(), this);
+      m_sc.scope.down(this.get_name());
   end
   if(!done && (rhs == null)) begin
     if(m_sc.scope.depth()) begin
@@ -528,7 +524,7 @@ function bit  uvm_object::compare (uvm_object rhs,
       comparer.print_msg_object(this, rhs);
       uvm_report_info("MISCMP",
            $psprintf("%0d Miscompare(s) for object %s@%0d vs. @%0d", 
-           comparer.result, get_name(), this.get_inst_id(), rhs.get_inst_id()), uvm_auto_options_object.comparer.verbosity);
+           comparer.result, get_name(), this.get_inst_id(), rhs.get_inst_id()), m_sc.comparer.verbosity);
       done = 1;
     end
   end
@@ -553,7 +549,7 @@ function bit  uvm_object::compare (uvm_object rhs,
   end
 
   if(m_sc.scope.depth() == 1)  begin
-    m_sc.scope.up(this);
+    m_sc.scope.up();
   end
 
   comparer.print_rollup(this, rhs);
@@ -609,20 +605,20 @@ endfunction
 function void uvm_object::m_pack (inout uvm_packer packer);
 
   if(packer!=null) 
-    uvm_auto_options_object.packer = packer;
+    m_sc.packer = packer;
   else  
-    uvm_auto_options_object.packer = uvm_default_packer;
-  packer = uvm_auto_options_object.packer;
+    m_sc.packer = uvm_default_packer;
+  packer = m_sc.packer;
 
   packer.reset();
-  packer.scope.down(get_name(), this);
+  packer.scope.down(get_name());
 
   m_field_automation(null, UVM_PACK, "");
   do_pack(packer);
 
   packer.set_packed_size();
 
-  packer.scope.up(this); 
+  packer.scope.up(); 
 
 endfunction
   
@@ -672,10 +668,10 @@ endfunction
   
 function void uvm_object::m_unpack_pre (inout uvm_packer packer);
   if(packer!=null)
-    uvm_auto_options_object.packer = packer;
+    m_sc.packer = packer;
   else
-    uvm_auto_options_object.packer = uvm_default_packer;
-  packer = uvm_auto_options_object.packer;
+    m_sc.packer = uvm_default_packer;
+  packer = m_sc.packer;
   packer.reset();
 endfunction
   
@@ -690,14 +686,14 @@ function void uvm_object::m_unpack_post (uvm_packer packer);
   provided_size = packer.get_packed_size();
 
   //Put this object into the hierarchy
-  packer.scope.down(get_name(), this);
+  packer.scope.down(get_name());
 
   m_field_automation(null, UVM_UNPACK, "");
 
   do_unpack(packer);
 
   //Scope back up before leaving
-  packer.scope.up(this);
+  packer.scope.up();
 
   if(packer.get_packed_size() != provided_size) begin
     uvm_report_warning("BDUNPK", $psprintf("Unpack operation unsuccessful: unpacked %0d bits from a total of %0d bits", packer.get_packed_size(), provided_size), UVM_NONE);
@@ -763,7 +759,7 @@ function void uvm_object::record (uvm_recorder recorder=null);
 
   if(!recorder.tr_handle) return;
 
-  uvm_auto_options_object.recorder = recorder;
+  m_sc.recorder = recorder;
   recorder.recording_depth++;
   m_field_automation(null, UVM_RECORD, "");
   do_record(recorder);
@@ -820,13 +816,19 @@ function void uvm_object::m_record_field_object (string arg,
                                                uvm_recorder recorder =null,
                                                int flag = UVM_DEFAULT);
   begin
-    if(recorder == null)
-      recorder=uvm_auto_options_object.recorder;
+    uvm_recursion_policy_enum p;
 
-    if((flag&UVM_NORECORD) != 0) return;
+    if(recorder == null)
+      recorder=m_sc.recorder;
+
+    p = recorder.policy;
+
+    if((flag&UVM_REFERENCE) != 0) return;
+      recorder.policy = UVM_REFERENCE;
 
     recorder.record_object(arg, value);
 
+    recorder.policy = p;
   end
 endfunction
 
@@ -872,21 +874,21 @@ function int uvm_object::m_do_data (string arg,
         if(((flag)&UVM_NOCOMPARE) == 0) begin
           bit r;
           if(bits <= 64)
-            r = uvm_auto_options_object.comparer.compare_field_int(arg, lhs, rhs, bits, uvm_radix_enum'(flag&UVM_RADIX));
+            r = m_sc.comparer.compare_field_int(arg, lhs, rhs, bits, uvm_radix_enum'(flag&UVM_RADIX));
           else
-            r = uvm_auto_options_object.comparer.compare_field(arg, lhs, rhs, bits, uvm_radix_enum'(flag&UVM_RADIX));
+            r = m_sc.comparer.compare_field(arg, lhs, rhs, bits, uvm_radix_enum'(flag&UVM_RADIX));
         end
         return 0;
       end
     UVM_PACK:
       begin
         if(((flag)&UVM_NOPACK) == 0) begin
-          if(((flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin
+          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
+             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
             if(bits<=64)
-              uvm_auto_options_object.packer.pack_field_int(lhs, bits);
+              m_sc.packer.pack_field_int(lhs, bits);
             else
-              uvm_auto_options_object.packer.pack_field(lhs, bits);
+              m_sc.packer.pack_field(lhs, bits);
           end
         end
         return 0;
@@ -894,12 +896,12 @@ function int uvm_object::m_do_data (string arg,
     UVM_UNPACK:
       begin
         if(((flag)&UVM_NOPACK) == 0) begin
-          if(((flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin
+          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
+             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
             if(bits<=64)
-              lhs=uvm_auto_options_object.packer.unpack_field_int(bits);
+              lhs=m_sc.packer.unpack_field_int(bits);
             else
-              lhs=uvm_auto_options_object.packer.unpack_field(bits);
+              lhs=m_sc.packer.unpack_field(bits);
           end
         end
         return 0;
@@ -911,7 +913,7 @@ function int uvm_object::m_do_data (string arg,
           uvm_printer printer; 
           uvm_radix_enum radix;
           radix = uvm_radix_enum'(flag&UVM_RADIX);
-          printer = uvm_auto_options_object.printer; 
+          printer = m_sc.printer; 
           printer.print_field(arg, lhs, bits, radix);
         end
       end
@@ -923,7 +925,7 @@ function int uvm_object::m_do_data (string arg,
           uvm_radix_enum radix;
 
           radix = uvm_radix_enum'(flag&UVM_RADIX);
-          uvm_auto_options_object.recorder.record_field(arg, lhs, bits, radix);
+          m_sc.recorder.record_field(arg, lhs, bits, radix);
         end 
       end
   endcase
@@ -963,16 +965,16 @@ function int uvm_object::m_do_data_real (string arg,
       begin
         if(((flag)&UVM_NOCOMPARE) == 0) begin
           bit r;
-          r = uvm_auto_options_object.comparer.compare_field_real(arg, lhs, rhs);
+          r = m_sc.comparer.compare_field_real(arg, lhs, rhs);
         end
         return 0;
       end
     UVM_PACK:
       begin
         if(((flag)&UVM_NOPACK) == 0) begin
-          if(((flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin
-            uvm_auto_options_object.packer.pack_field_int($realtobits(lhs), 64);
+          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
+             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
+            m_sc.packer.pack_field_int($realtobits(lhs), 64);
           end
         end
         return 0;
@@ -980,9 +982,9 @@ function int uvm_object::m_do_data_real (string arg,
     UVM_UNPACK:
       begin
         if(((flag)&UVM_NOPACK) == 0) begin
-          if(((flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin
-            lhs=$bitstoreal(uvm_auto_options_object.packer.unpack_field_int(64));
+          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
+             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
+            lhs=$bitstoreal(m_sc.packer.unpack_field_int(64));
           end
         end
         return 0;
@@ -992,7 +994,7 @@ function int uvm_object::m_do_data_real (string arg,
         if(((flag)&UVM_NOPRINT) == 0) 
         begin  
           uvm_printer printer; 
-          printer = uvm_auto_options_object.printer; 
+          printer = m_sc.printer; 
           printer.print_field_real(arg, lhs);
         end
       end
@@ -1000,7 +1002,7 @@ function int uvm_object::m_do_data_real (string arg,
       begin
         if(((flag)&UVM_NORECORD) == 0) 
         begin 
-          uvm_auto_options_object.recorder.record_field_real(arg, lhs);
+          m_sc.recorder.record_field_real(arg, lhs);
         end 
       end
   endcase
@@ -1084,20 +1086,20 @@ function int uvm_object::m_do_data_object (string arg,
         //if the object are the same then don't need to do a deep compare
         if(rhs == lhs) return 0;
 
-        refcmp = (flag & UVM_SHALLOW) && !(uvm_auto_options_object.comparer.policy == UVM_DEEP);
+        refcmp = (flag & UVM_SHALLOW) && !(m_sc.comparer.policy == UVM_DEEP);
 
         //do a deep compare here 
-        if(!refcmp && !(uvm_auto_options_object.comparer.policy == UVM_REFERENCE))
+        if(!refcmp && !(m_sc.comparer.policy == UVM_REFERENCE))
         begin
           if(((rhs == null) && (lhs != null)) || ((lhs==null) && (rhs!=null))) begin
-            uvm_auto_options_object.comparer.print_msg_object(lhs, rhs);
+            m_sc.comparer.print_msg_object(lhs, rhs);
             return 1;  //miscompare
           end
           if((rhs == null) && (lhs==null))
             return 0;
           else begin
             bit r;
-            r = lhs.compare(rhs, uvm_auto_options_object.comparer);
+            r = lhs.compare(rhs, m_sc.comparer);
             if(r == 0) begin
               return 1;
             end
@@ -1108,7 +1110,7 @@ function int uvm_object::m_do_data_object (string arg,
         end
         else begin //reference compare
           if(lhs != rhs) begin
-            uvm_auto_options_object.comparer.print_msg_object(lhs, rhs);
+            m_sc.comparer.print_msg_object(lhs, rhs);
             return 1;
           end
         end
@@ -1116,9 +1118,9 @@ function int uvm_object::m_do_data_object (string arg,
     UVM_PACK:
       begin
         if(((flag&UVM_NOPACK) == 0) && ((flag&UVM_REFERENCE)==0)) begin
-          if(((flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin
-            uvm_auto_options_object.packer.pack_object(lhs);
+          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
+             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
+            m_sc.packer.pack_object(lhs);
           end
         end
         return 0;
@@ -1126,9 +1128,9 @@ function int uvm_object::m_do_data_object (string arg,
     UVM_UNPACK:
       begin
         if(((flag&UVM_NOPACK) == 0) && ((flag&UVM_REFERENCE)==0)) begin
-          if(((flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin
-          uvm_auto_options_object.packer.unpack_object_ext(lhs);
+          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
+             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
+          m_sc.packer.unpack_object_ext(lhs);
           end
         end
         return 0;
@@ -1139,23 +1141,15 @@ function int uvm_object::m_do_data_object (string arg,
         begin  
           if(((flag)&UVM_REFERENCE) || (lhs == null)) begin
             int d;
-            d = uvm_auto_options_object.printer.knobs.depth;
-            uvm_auto_options_object.printer.knobs.depth = 0;
-            uvm_auto_options_object.printer.print_object(arg, lhs);
-            uvm_auto_options_object.printer.knobs.depth = d;
+            d = m_sc.printer.knobs.depth;
+            m_sc.printer.knobs.depth = 0;
+            m_sc.printer.print_object(arg, lhs);
+            m_sc.printer.knobs.depth = d;
           end
           else begin
             uvm_component obj;
             if(lhs != null) begin
-              if($cast(obj,lhs)) begin 
-                if(uvm_auto_options_object.printer.m_scope.current() == obj.get_parent() )
-                  uvm_auto_options_object.printer.print_object(arg, lhs);
-                else
-                  uvm_auto_options_object.printer.print_object_header(arg, lhs);
-              end
-              else begin
-                uvm_auto_options_object.printer.print_object(arg, lhs);
-              end
+              m_sc.printer.print_object(arg, lhs);
             end
           end
         end
@@ -1164,17 +1158,8 @@ function int uvm_object::m_do_data_object (string arg,
       begin
         if(((flag)&UVM_NORECORD) == 0) 
         begin 
-          m_sc.scope.up(lhs); //need to scope up since gets scoped down before
           if(lhs != null && lhs.get_name()!="") arg = lhs.get_name(); 
-          //If refernce is on then don't want to do cycle check since only
-          //recording the reference.
-          if( ((flag) & int'(UVM_REFERENCE)) != 0) 
-            m_record_field_object(arg, lhs, uvm_auto_options_object.recorder,flag);
-          else begin
-            if(!m_sc.scope.in_hierarchy(lhs)) 
-              m_record_field_object(arg, lhs, uvm_auto_options_object.recorder,flag);
-          end
-          m_sc.scope.down(arg,lhs); //need to scope back dwon
+          m_record_field_object(arg, lhs, m_sc.recorder,flag);
         end 
       end
   endcase
@@ -1216,7 +1201,7 @@ function int uvm_object::m_do_data_string(string arg,
         if(((flag)&UVM_NOCOMPARE) == 0) begin
           if(lhs != rhs) begin
             m_sc.stringv = { "lhs = \"", lhs, "\" : rhs = \"", rhs, "\""};
-            uvm_auto_options_object.comparer.print_msg(m_sc.stringv);
+            m_sc.comparer.print_msg(m_sc.stringv);
             return 1;
           end
         end
@@ -1225,9 +1210,9 @@ function int uvm_object::m_do_data_string(string arg,
     UVM_PACK:
       begin 
         if(((flag)&UVM_NOPACK) == 0) begin
-          if(((flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin
-          uvm_auto_options_object.packer.pack_string(lhs);
+          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
+             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
+          m_sc.packer.pack_string(lhs);
           end
         end
         return 0;
@@ -1235,9 +1220,9 @@ function int uvm_object::m_do_data_string(string arg,
     UVM_UNPACK:
       begin
         if(((flag)&UVM_NOPACK) == 0) begin
-          if(((flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin
-          lhs = uvm_auto_options_object.packer.unpack_string();
+          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
+             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
+          lhs = m_sc.packer.unpack_string();
           end
         end
         return 0;
@@ -1246,16 +1231,16 @@ function int uvm_object::m_do_data_string(string arg,
       begin
         if(((flag)&UVM_NOPRINT) == 0) 
         begin  
-          uvm_auto_options_object.printer.print_string(arg, lhs);
+          m_sc.printer.print_string(arg, lhs);
         end
       end
     UVM_RECORD:
       begin
         if(((flag)&UVM_NORECORD) == 0) 
         begin 
-          m_sc.scope.up(null); //need to scope up since gets scoped down before
-          uvm_auto_options_object.recorder.record_string(arg, lhs);
-          m_sc.scope.down(arg,null); //need to scope back dwon
+          m_sc.scope.up(); //need to scope up since gets scoped down before
+          m_sc.recorder.record_string(arg, lhs);
+          m_sc.scope.down(arg); //need to scope back dwon
         end 
       end
   endcase
@@ -1272,30 +1257,5 @@ endfunction
 
 function string uvm_status_container::get_full_scope_arg ();
   get_full_scope_arg = scope.get_arg();
-endfunction
-
-function uvm_scope_stack uvm_status_container::init_scope();
-  if(scope==null) scope=new;
-  return scope;
-endfunction
-
-//-----------------------------------------------------------------------------
-//
-// uvm_options_container
-//
-//-----------------------------------------------------------------------------
-
-uvm_options_container uvm_auto_options_object = uvm_options_container::init();
-
-function uvm_options_container::new();
-  comparer = uvm_default_comparer;
-  packer   = uvm_default_packer;
-  recorder = uvm_default_recorder;
-  printer  = uvm_default_printer;
-endfunction
-
-function uvm_options_container uvm_options_container::init();
-  if(uvm_auto_options_object==null) uvm_auto_options_object=new;
-  return uvm_auto_options_object;
 endfunction
 

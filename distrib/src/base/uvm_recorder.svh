@@ -150,8 +150,6 @@ class uvm_recorder;
      int v;
     string str; 
 
-    if(scope.in_hierarchy(value)) return;
-
     if(identifier) begin 
       $swrite(str, "%0d", value.get_inst_id());
       v = str.atoi(); 
@@ -161,9 +159,13 @@ class uvm_recorder;
   
     if(policy != UVM_REFERENCE) begin
       if(value!=null) begin
-        scope.down(name, value);
+        if(value.m_sc.cycle_check.exists(value)) return;
+        value.m_sc.cycle_check[value] = 1;
+
+        scope.down(name);
         value.record(this);
-        scope.up(value);
+        scope.up();
+        value.m_sc.cycle_check.delete(value);
       end
     end
 

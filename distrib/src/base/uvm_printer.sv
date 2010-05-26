@@ -315,7 +315,7 @@ function void uvm_printer::print_array_header (string name, int size,
   print_size (size);
   print_value_array("", size);
   print_newline();
-  m_scope.down(name, null);
+  m_scope.down(name);
   m_array_stack.push_back(1);
 endfunction
 
@@ -325,7 +325,7 @@ endfunction
 
 function void  uvm_printer::print_array_footer (int size=0);
   if(m_array_stack.size()) begin
-    m_scope.up(null);
+    m_scope.up();
     void'(m_array_stack.pop_front());
   end
 endfunction
@@ -436,10 +436,10 @@ function void uvm_printer::print_object (string name, uvm_object value,
 
   if(value != null) 
     if((knobs.depth == -1 || (knobs.depth > m_scope.depth())) &&
-       !m_scope.in_hierarchy(value)) 
+       !value.m_sc.cycle_check.exists(value))
     begin
-
-      m_scope.down(name, value);
+      value.m_sc.cycle_check[value] = 1;
+      m_scope.down(name);
 
       //Handle children of the named_object
       if($cast(named, value)) begin
@@ -459,9 +459,10 @@ function void uvm_printer::print_object (string name, uvm_object value,
       end
 
       if(name[0] == "[")
-        m_scope.up(value,"[");
+        m_scope.up("[");
       else
-        m_scope.up(value,".");
+        m_scope.up(".");
+      value.m_sc.cycle_check.delete(value);
     end
 
   print_footer();

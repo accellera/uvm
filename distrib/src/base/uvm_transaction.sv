@@ -168,7 +168,7 @@ function void uvm_transaction::do_record (uvm_recorder recorder);
                      $bits(accept_time), 0));
   if(initiator != null) 
     m_record_field_object("initiator", initiator, 
-                          uvm_auto_options_object.recorder, 0);
+                          m_sc.recorder, 0);
 endfunction
 
 // get_tr_handle
