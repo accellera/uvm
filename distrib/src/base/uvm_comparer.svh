@@ -393,10 +393,10 @@ class uvm_comparer;
     if(result <= show_max) begin
       uvm_report_info("MISCMP", 
         $psprintf("Miscompare for %0s: lhs = @%0d : rhs = @%0d", 
-        scope.get_arg(), lhs.get_inst_id(), rhs.get_inst_id()), verbosity);
+        scope.get_arg(), (lhs!=null ? lhs.get_inst_id() : 0), (rhs != null ? rhs.get_inst_id() : 0)), verbosity);
     end
     $swrite(miscompares, "%s%s: lhs = @%0d : rhs = @%0d",
-        miscompares, scope.get_arg(), lhs.get_inst_id(), rhs.get_inst_id());
+        miscompares, scope.get_arg(), (lhs != null ? lhs.get_inst_id() : 0), (rhs != null ? rhs.get_inst_id() : 0));
   endfunction
 
 

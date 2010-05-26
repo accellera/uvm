@@ -195,6 +195,7 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
       do begin
         if($cast(me,obj)) begin
           q = m_t_inst.m_pool.get(obj);
+          if(q==null) begin q=new; m_t_inst.m_pool.add(obj,q); end
           if(m_cb_find(q,cb) == -1) begin
             if(ordering == UVM_APPEND)
               q.push_back(cb);
@@ -228,6 +229,7 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
     if(m_t_inst.m_pool.first(obj)) begin
       do begin
         q = m_t_inst.m_pool.get(obj);
+        if(q==null) begin q=new; m_t_inst.m_pool.add(obj,q); end
         pos = m_cb_find(q,cb);
         if(pos != -1) begin
           q.delete(pos);
@@ -292,6 +294,7 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
         do begin
           if($cast(me,bobj)) begin
             q = m_t_inst.m_pool.get(bobj);
+            if(q==null) begin q=new; m_t_inst.m_pool.add(bobj,q); end
             for(int i=0; i<q.size(); ++i) begin
               cb = q.get(i);
               cbq.push_back(cb.get_name());
@@ -318,6 +321,7 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
       end
       if(m_t_inst.m_pool.exists(bobj)) begin
         q = m_t_inst.m_pool.get(bobj);
+        if(q==null) begin q=new; m_t_inst.m_pool.add(bobj,q); end
         for(int i=0; i<q.size(); ++i) begin
           cb = q.get(i);
           cbq.push_back(cb.get_name());
@@ -540,6 +544,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
       `uvm_cb_trace_noobj(cb,$sformatf("Add (%s) callback %0s to object %0s ",
                       ordering.name(), cb.get_name(), obj.get_full_name()))
       q = m_base_inst.m_pool.get(obj);
+      if(q==null) begin q=new; m_base_inst.m_pool.add(obj,q); end
       if(q.size() == 0) begin
         // Need to make sure that registered report catchers are added. This
         // way users don't need to set up uvm_report_object as a super type.
@@ -703,6 +708,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     end 
     else begin
       q = m_base_inst.m_pool.get(obj);
+      if(q==null) begin q=new; m_base_inst.m_pool.add(obj,q); end
     end
     for(itr = 0; itr<q.size(); ++itr) begin
       if($cast(cb, q.get(itr))) begin
@@ -740,6 +746,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     end 
     else begin
       q = m_base_inst.m_pool.get(obj);
+      if(q==null) begin q=new; m_base_inst.m_pool.add(obj,q); end
     end
     for(itr = itr+1; itr<q.size(); ++itr) begin
       if($cast(cb, q.get(itr))) begin
