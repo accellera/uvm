@@ -371,7 +371,7 @@ virtual class uvm_object extends uvm_void;
   //|    base_field=foo write=1 addr=00000123 data=00000456 child_field=bar
 
 
-  extern virtual function string convert2string;
+  extern virtual function string convert2string();
 
 
   // Group: Recording
