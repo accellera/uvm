@@ -206,7 +206,6 @@ function void  uvm_object::set_object_local (string     field_name,
   if(m_sc.cycle_check.exists(this)) return;
   m_sc.cycle_check[this] = 1;
 
-
   if(clone && (value!=null)) begin 
     cc = value.clone();
     if(cc != null) cc.set_name(field_name); 
@@ -510,9 +509,8 @@ function bit  uvm_object::compare (uvm_object rhs,
     comparer.result = 0;
     comparer.miscompares = "";
     comparer.scope = m_sc.scope;
-    if(get_name() == "") begin
+    if(get_name() == "")
       m_sc.scope.down("<object>");
-    end
     else
       m_sc.scope.down(this.get_name());
   end
@@ -523,8 +521,8 @@ function bit  uvm_object::compare (uvm_object rhs,
     else begin
       comparer.print_msg_object(this, rhs);
       uvm_report_info("MISCMP",
-           $psprintf("%0d Miscompare(s) for object %s@%0d vs. @%0d", 
-           comparer.result, get_name(), this.get_inst_id(), rhs.get_inst_id()), m_sc.comparer.verbosity);
+           $psprintf("%0d Miscompare(s) for object %s@%0d vs. %s@%0d", 
+           comparer.result, m_sc.scope.get_arg(), this.get_inst_id(), m_sc.scope.get_arg(), rhs.get_inst_id()), m_sc.comparer.verbosity);
       done = 1;
     end
   end
@@ -548,7 +546,7 @@ function bit  uvm_object::compare (uvm_object rhs,
     dc = do_compare(rhs, comparer);
   end
 
-  if(m_sc.scope.depth() == 1)  begin
+  if(m_sc.scope.depth()==1)  begin
     m_sc.scope.up();
   end
 

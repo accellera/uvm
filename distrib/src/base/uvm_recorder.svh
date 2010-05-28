@@ -163,7 +163,6 @@ class uvm_recorder;
       if(value!=null) begin
         if(value.m_sc.cycle_check.exists(value)) return;
         value.m_sc.cycle_check[value] = 1;
-
         scope.down(name);
         value.record(this);
         scope.up();

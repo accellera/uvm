@@ -435,8 +435,8 @@ function void uvm_printer::print_object (string name, uvm_object value,
   print_object_header(name, value, scope_separator);
 
   if(value != null) 
-    if((knobs.depth == -1 || (knobs.depth > m_scope.depth())) &&
-       !value.m_sc.cycle_check.exists(value))
+    if((knobs.depth == -1 || (knobs.depth > m_scope.depth()))
+       && !value.m_sc.cycle_check.exists(value))
     begin
       value.m_sc.cycle_check[value] = 1;
       m_scope.down(name);

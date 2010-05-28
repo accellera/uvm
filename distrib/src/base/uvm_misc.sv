@@ -158,7 +158,7 @@ function string uvm_scope_stack::get();
   string v;
   if(m_stack.size() == 0) return m_arg;
   get = m_stack[0];
-  for(int i=0; i<m_stack.size(); ++i) begin
+  for(int i=1; i<m_stack.size(); ++i) begin
     v = m_stack[i];
     if(v[0] == "[" || v[0] == "(" || v[0] == "{")
       get = {get,v};
@@ -245,6 +245,7 @@ endfunction
 // -------
 
 function void uvm_scope_stack::set_arg (string arg);
+  if(arg=="") return;
   m_arg = arg;
 endfunction
 
