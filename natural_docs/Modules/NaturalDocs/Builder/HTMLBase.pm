@@ -2160,7 +2160,7 @@ $INDEX_TYPE=$type;
             };
 
         print INDEXFILEHANDLE
-        '<tr>'
+        "\n" . '<tr>'
             . '<td class=IHeading' . ($firstHeading ? ' id=IFirstHeading' : '') . '>'
                 . '<a name="' . $indexAnchors[$i] . '"></a>'
                  . $indexHeadings[$i]
@@ -2366,7 +2366,7 @@ sub BuildIndexElement #(NaturalDocs::SymbolTable::IndexElement element, string c
             . '</td><td class=IEntry>';
 
         my $searchResultsHTML =
-        '<div class=SRResult id=' . $searchResultID . '><div class=IEntry>';
+        "\n" . '<div class=SRResult id=' . $searchResultID . '><div class=IEntry>';
 
             if ($symbolPrefix)
                 {  $searchResultsHTML .= '<span class=ISymbolPrefix>' . $symbolPrefix . '</span>';  };
@@ -2960,9 +2960,9 @@ sub StringToSearchResultID #(string string, bool dontIncrement = 0) => string
     my %translation = ( '~' => '_til', '!' => '_exc', '@' => '_att', '#' => '_num', '$' => '_dol', '%' => '_pct', '^' => '_car',
                                   '&' => '_amp', '*' => '_ast', '(' => '_lpa', ')' => '_rpa', '-' => '_min', '+' => '_plu', '=' => '_equ',
                                   '{' => '_lbc', '}' => '_rbc', '[' => '_lbk', ']' => '_rbk', ':' => '_col', ';' => '_sco', '"' => '_quo',
-                                  '\'' => '_apo', '<' => '_lan', '>' => '_ran', ',' => '_com', '.' => '_per', '?' => '_que', '/' => '_sla' );
+                                  '\'' => '_apo', '<' => '_lan', '>' => '_ran', ',' => '_com', '.' => '_per', '?' => '_que', '/' => '_sla', '`' => '_tik' );
 
-    $string =~ s/([\~\!\@\#\$\%\^\&\*\(\)\-\+\=\{\}\[\]\:\;\"\'\<\>\,\.\?\/])/$translation{$1}/ge;
+    $string =~ s/([\`\~\!\@\#\$\%\^\&\*\(\)\-\+\=\{\}\[\]\:\;\"\'\<\>\,\.\?\/])/$translation{$1}/ge;
     $string =~ s/[^a-z0-9_]/_zzz/gi;
 
     my $number = $searchResultIDs{lc($string)};

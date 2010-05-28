@@ -793,6 +793,7 @@ function SearchResults(name, mode)
             search = search.replace(/\./g, "_per");
             search = search.replace(/\?/g, "_que");
             search = search.replace(/\//g, "_sla");
+            search = search.replace(/\`/g, "_tik");
             search = search.replace(/[^a-z0-9\_]i/gi, "_zzz");
             };
 
