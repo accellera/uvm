@@ -102,11 +102,9 @@ class env extends uvm_component;
   
   virtual function void report();
     if(PASS == 1) begin
-      //OVM2UVM> `UVM_REPORT_INFO("PASS","Test PASSED");
       `uvm_info("PASS","Test PASSED", UVM_MEDIUM);
     end
     else begin
-      //OVM2UVM> `UVM_REPORT_ERROR("FAIL","Test FAILED");
       `uvm_info("FAIL","Test FAILED", UVM_MEDIUM);
     end
   endfunction // report

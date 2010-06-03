@@ -279,6 +279,7 @@ class env #(int DATA_SIZE=8, int ADDR_SIZE=16) extends base_env;
     // the avt_uvm_vmm_env wrapper for details.
    
    virtual task wait_for_end();
+     #0; //needed to avoid scheduling issue
      super.wait_for_end();
      #0; //needed to avoid scheduling issue
    endtask

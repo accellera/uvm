@@ -1,19 +1,20 @@
 //------------------------------------------------------------------------------
-//    Copyright 2008 Mentor Graphics Corporation
-//    Copyright 2009 Synopsys, Inc.
-//    All Rights Reserved Worldwide
+// Copyright 2008 Mentor Graphics Corporation
+// Copyright 2010 Synopsys, Inc.
+//
+// All Rights Reserved Worldwide
 // 
-//    Licensed under the Apache License, Version 2.0 (the "License"); you may
-//    not use this file except in compliance with the License.  You may obtain
-//    a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License.  You may obtain
+// a copy of the License at
 // 
 //        http://www.apache.org/licenses/LICENSE-2.0
 // 
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
-//    License for the specific language governing permissions and limitations
-//    under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+// License for the specific language governing permissions and limitations
+// under the License.
 //------------------------------------------------------------------------------
 
 class avt_match_uvm_id;
@@ -208,7 +209,6 @@ class avt_channel2uvm_tlm #(type VMM_REQ     = int,
    virtual function void end_of_elaboration();
      if (this.req_chan == null)
      `ifdef UVM_ON_TOP
-       //OVM2UVM> `UVM_REPORT_FATAL("Connection Error",
        `uvm_fatal("Connection Error",
           "avt_channel2uvm_tlm requires a request vmm_channel");
       `else
@@ -217,7 +217,6 @@ class avt_channel2uvm_tlm #(type VMM_REQ     = int,
       `endif
      if (this.rsp_chan != null && this.rsp_is_req)
       `ifdef UVM_ON_TOP
-       //OVM2UVM> `UVM_REPORT_WARNING("Ignoring rsp_is_req bit",
        `uvm_warning("Ignoring rsp_is_req bit",
           "rsp_is_req bit is ignored when a response channel is in use");
        `else
@@ -393,7 +392,6 @@ class avt_channel2uvm_tlm #(type VMM_REQ     = int,
      else begin
        if (vmm_req.size() >= max_pending_req) begin
          `ifdef UVM_ON_TOP
-          //OVM2UVM> `UVM_REPORT_FATAL("Pending Transactions",
           `uvm_fatal("Pending Transactions",
                   $psprintf("Exceeded maximum number of %0d pending requests.",
                      max_pending_req));
@@ -567,7 +565,6 @@ class avt_channel2uvm_tlm #(type VMM_REQ     = int,
      req_chan.peek(req);
      if (vmm_req[$] == req) begin
        `ifdef UVM_ON_TOP
-       //OVM2UVM> `UVM_REPORT_ERROR("Trans In-Progress",
        `uvm_error("Trans In-Progress",
          "Get_next_item called twice without item_done or get in between");
        `else
@@ -613,7 +610,6 @@ class avt_channel2uvm_tlm #(type VMM_REQ     = int,
 
      if (o_rsp == null) begin
        `ifdef UVM_ON_TOP
-       //OVM2UVM> `UVM_REPORT_FATAL("SQRPUT", "Driver put a null response");
        `uvm_fatal("SQRPUT", "Driver put a null response");
        `else
        `vmm_fatal(this.req_chan.log, "SQRPUT Driver put a null response");
@@ -621,7 +617,6 @@ class avt_channel2uvm_tlm #(type VMM_REQ     = int,
      end
      else if (o_rsp.get_sequence_id() == -1) begin
        `ifdef UVM_ON_TOP
-       //OVM2UVM> `UVM_REPORT_FATAL("SQRPUT",
        `uvm_fatal("SQRPUT",
          "Response has invalid sequence_id");
        `else
@@ -641,7 +636,6 @@ class avt_channel2uvm_tlm #(type VMM_REQ     = int,
 
      if (v_req == null) begin
         `ifdef UVM_ON_TOP
-        //OVM2UVM> `UVM_REPORT_ERROR("Orphan Response",
         `uvm_error("Orphan Response",
                           "A response did not match a pending request");
         `else
@@ -694,7 +688,6 @@ class avt_channel2uvm_tlm #(type VMM_REQ     = int,
 
      if (v_req != vmm_req[$]) begin
      `ifdef UVM_ON_TOP
-       //OVM2UVM> `UVM_REPORT_FATAL("Item Not Started",
        `uvm_fatal("Item Not Started",
          "Item done called without a previous peek or get_next_item");
      `else

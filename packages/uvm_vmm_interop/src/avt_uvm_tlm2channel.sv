@@ -1,21 +1,21 @@
 //------------------------------------------------------------------------------
-//    Copyright 2008 Mentor Graphics Corporation
-//    Copyright 2009 Synopsys, Inc.
-//    All Rights Reserved Worldwide
+// Copyright 2008 Mentor Graphics Corporation
+// Copyright 2010 Synopsys, Inc.
+//
+// All Rights Reserved Worldwide
 // 
-//    Licensed under the Apache License, Version 2.0 (the "License"); you may
-//    not use this file except in compliance with the License.  You may obtain
-//    a copy of the License at
+// Licensed under the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License.  You may obtain
+// a copy of the License at
 // 
 //        http://www.apache.org/licenses/LICENSE-2.0
 // 
-//    Unless required by applicable law or agreed to in writing, software
-//    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-//    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
-//    License for the specific language governing permissions and limitations
-//    under the License.
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+// License for the specific language governing permissions and limitations
+// under the License.
 //------------------------------------------------------------------------------
-
 
 //------------------------------------------------------------------------------
 //
@@ -219,9 +219,8 @@ class avt_uvm_tlm2channel #(type UVM_REQ     = int,
 
    virtual function void end_of_elaboration();
      if (this.req_chan == null)
-       //OVM2UVM> `UVM_REPORT_FATAL("Connection Error",
        `uvm_fatal("Connection Error",
-          "vmm_uvm_tlm2channel adapter requires a request vmm_channel"); //OVM2UVM>
+          "vmm_uvm_tlm2channel adapter requires a request vmm_channel");
    endfunction
 
 

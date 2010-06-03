@@ -13,14 +13,14 @@ if [ "$1" = clean ] ; then
  \rm -rf *.log *.log.filtered simv* csrc* .vcs* *.vpd DVE* *.vdb vc_hdrs.h; exit
 fi
 
-
+# +define+NO_VMM_12
 VLOG_ARGS=" +warn=noUNK_COMP_ARG +warn=noSV-LCM-PPWI -R \
            +vmm_log_default=trace  -timescale=100ns/100ns \
            -V -sverilog +plusarg_save \
-           +define+VMM_OVM_INTEROP \
+           +define+VMM_UVM_INTEROP \
            +define+VMM_PARAM_CHANNEL \
            +define+VMM_LOG_FORMAT_FILE_LINE \
-           +incdir+$OVM_HOME/src \
+           +incdir+$UVM_HOME/src \
            $VMM_DIR \
            +incdir+$INTEROP_HOME/src \
            +incdir+../src \
@@ -28,13 +28,19 @@ VLOG_ARGS=" +warn=noUNK_COMP_ARG +warn=noSV-LCM-PPWI -R \
            +incdir+../src/hfpb_components"
 
 for EXAMPLE in *.sv; do 
-
+  if [ $EXAMPLE != "04_IP_integration.sv" ] ; then
   TOP_LEVEL=`echo example_$EXAMPLE | sed -e "s/.sv//"`
-  rm -rf simv* csrc* 
-  vcs +define+VMM_ON_TOP -cm_dir $EXAMPLE $VLOG_ARGS `pwd`/$EXAMPLE -l $TOP_LEVEL.vmm.log 
+     rm -rf simv* csrc* 
+     vcs -cm_dir $EXAMPLE $VLOG_ARGS `pwd`/$EXAMPLE -l $TOP_LEVEL.log 
 
-  rm -rf simv* csrc* 
-  vcs +define+OVM_ON_TOP -cm_dir $EXAMPLE $VLOG_ARGS `pwd`/$EXAMPLE -l $TOP_LEVEL.ovm.log 
+  ## FOR RUNNING THE 04_IP_INTEGRATION EXAMPLE ONLY
+  else
+     TOP_LEVEL=example_04_IP_integration
+     rm -rf simv* csrc* 
+     vcs +define+VMM_ON_TOP -cm_dir $EXAMPLE $VLOG_ARGS `pwd`/$EXAMPLE -l $TOP_LEVEL.vmm.log 
+
+     rm -rf simv* csrc* 
+     vcs +define+UVM_ON_TOP -cm_dir $EXAMPLE $VLOG_ARGS `pwd`/$EXAMPLE -l $TOP_LEVEL.uvm.log 
 
   if [ -n "$INTEROP_REGRESS" ] ; then
     perl ../regress/regress_passfail.pl $TOP_LEVEL.log 01_adapters ../results.log

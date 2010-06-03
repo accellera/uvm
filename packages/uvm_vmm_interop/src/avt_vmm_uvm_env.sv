@@ -1,23 +1,21 @@
 //------------------------------------------------------------------------------
-//    Copyright 2009 Mentor Graphics Corporation
-//    Copyright 2009 Synopsys, Inc.
-//    All Rights Reserved Worldwide
+// Copyright 2008 Mentor Graphics Corporation
+// Copyright 2010 Synopsys, Inc.
 //
-//    Licensed under the Apache License, Version 2.0 (the
-//    "License"); you may not use this file except in
-//    compliance with the License.  You may obtain a copy of
-//    the License at
-//
+// All Rights Reserved Worldwide
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may
+// not use this file except in compliance with the License.  You may obtain
+// a copy of the License at
+// 
 //        http://www.apache.org/licenses/LICENSE-2.0
-//
-//    Unless required by applicable law or agreed to in
-//    writing, software distributed under the License is
-//    distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-//    CONDITIONS OF ANY KIND, either express or implied.  See
-//    the License for the specific language governing
-//    permissions and limitations under the License.
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+// WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+// License for the specific language governing permissions and limitations
+// under the License.
 //------------------------------------------------------------------------------
-
 
 //------------------------------------------------------------------------------
 //
@@ -25,12 +23,12 @@
 //
 //------------------------------------------------------------------------------
 //
-// This class is used to ensure UVM components (i.e. all subtypes of
+// The <avt_vmm_uvm_env> class is used to ensure UVM components (i.e. all subtypes of
 // uvm_component), when instantiated in VMM environments and/or components, have
 // their phase methods called at the correct time relative to the execution of
 // the top-level VMM environment phase methods.
 //
-// With VMM_UVM_INTEROP defined, UVM phasing is controlled by the ~avt_vmm_uvm_env~
+// With VMM_UVM_INTEROP defined, UVM phasing is controlled by the <avt_vmm_uvm_env>
 // as follows:
 //
 //|             VMM                 UVM
@@ -117,11 +115,11 @@ bit _avt_uvm_server = avt_override_uvm_report_server();
 class avt_vmm_uvm_env extends `AVT_VMM_UVM_ENV_BASE;
 
    bit disable_uvm = 0;
-   protected int build_level;
+   protected int build_level=0;
 
    // Function: new
    // 
-   // Creates a new instance of an ~avt_vmm_uvm_env~.
+   // Creates a new instance of an <avt_vmm_uvm_env>.
 
    function new(string name = "Verif Env"
                 `VMM_ENV_BASE_NEW_EXTERN_ARGS);
@@ -143,9 +141,12 @@ class avt_vmm_uvm_env extends `AVT_VMM_UVM_ENV_BASE;
    virtual function void uvm_build();
      if (disable_uvm)
        return;
-     if (--build_level <= 0)
-       //OVM2UVM> uvm_top.run_global_func_phase(configure_ph,1);
-       uvm_top.run_global_func_phase(connect_ph,1);  //OVM2UVM> see ovm-2.0 deprecated.txt
+     if (--build_level <= 0) begin
+       uvm_top.run_global_func_phase(connect_ph,1);
+       `vmm_trace(this.log, "build() method complete");
+     end
+     else
+       `vmm_warning(this.log, $psprintf("build() not executed - lvl=%0d", build_level));
    endfunction
 
 
@@ -172,9 +173,9 @@ class avt_vmm_uvm_env extends `AVT_VMM_UVM_ENV_BASE;
       if (this.step < BUILD)
         this.build();
       if (!disable_uvm) begin
-        //OVM2UVM> if (!connect_ph.is_done()) begin
         if (!build_ph.is_done()) begin
-	         `vmm_fatal(this.log, {"The build() method did not call ",
+         //this.display_phases();
+         `vmm_fatal(this.log, {"The build() method did not call ",
                     "avt_vmm_uvm_env::uvm_build() before returning"});
         end
         uvm_top.run_global_phase(run_ph,1);
@@ -196,8 +197,7 @@ class avt_vmm_uvm_env extends `AVT_VMM_UVM_ENV_BASE;
       if (!disable_uvm) begin
         if (!run_ph.is_done()) begin
            repeat (2) #0;
-           //OVM2UVM> uvm_top.global_stop_request();
-           uvm_top.stop_request();  //OVM2UVM> ovm-2.0.2 release-notes.txt
+           uvm_top.stop_request();
            run_ph.wait_done();
         end
       end
@@ -219,7 +219,6 @@ class avt_vmm_uvm_env extends `AVT_VMM_UVM_ENV_BASE;
 
 endclass
 
-
 // MACRO: `uvm_build
 //
 // Overrides the avt_vmm_uvm_env's <uvm_build> method such that the
@@ -233,11 +232,6 @@ endclass
      if (disable_uvm) \
        return; \
      if (--build_level <= 0) \
-       /* OVM2UVM> uvm_top.run_global_func_phase(configure_ph,1); */ \
        uvm_top.run_global_func_phase(connect_ph,1); \
    endfunction
-
-
-
-
 

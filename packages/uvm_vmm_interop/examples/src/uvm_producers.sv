@@ -181,7 +181,6 @@ class uvm_blocking_transport_producer extends uvm_component;
     void'(get_config_int("num_trans",num_trans));
     void'(get_config_object("prototype",obj));
     if (!$cast(prototype,obj))
-      //OVM2UVM> `UVM_REPORT_ERROR("Bad Object",
       `uvm_error("Bad Object",
           "configured prototype not compatible");
   endfunction
@@ -266,7 +265,6 @@ class uvm_passive_producer #(type T=int) extends uvm_component ;
     void'(get_config_int("num_trans",num_trans));
     void'(get_config_object("prototype",obj));
     if (!$cast(prototype,obj))
-      //OVM2UVM> `UVM_REPORT_ERROR("Bad Object",
       `uvm_error("Bad Object",
           "configured prototype not compatible");
   endfunction

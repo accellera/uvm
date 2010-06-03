@@ -17,10 +17,10 @@ fi
 VLOG_ARGS=" +warn=noUNK_COMP_ARG +warn=noSV-LCM-PPWI -R \
            +vmm_log_default=trace  -timescale=100ns/100ns \
            -V -sverilog +plusarg_save \
-           +define+VMM_OVM_INTEROP \
+           +define+VMM_UVM_INTEROP \
            +define+VMM_PARAM_CHANNEL \
            +define+VMM_LOG_FORMAT_FILE_LINE \
-           +incdir+$OVM_HOME/src \
+           +incdir+$UVM_HOME/src \
            $VMM_DIR \
            +incdir+$INTEROP_HOME/src \
            +incdir+../src \
@@ -34,7 +34,7 @@ for EXAMPLE in *.sv; do
   vcs +define+VMM_ON_TOP -cm_dir $EXAMPLE $VLOG_ARGS `pwd`/$EXAMPLE -l $TOP_LEVEL.vmm.log 
 
   rm -rf simv* csrc* 
-  vcs +define+OVM_ON_TOP -cm_dir $EXAMPLE $VLOG_ARGS `pwd`/$EXAMPLE -l $TOP_LEVEL.ovm.log 
+  vcs +define+UVM_ON_TOP -cm_dir $EXAMPLE $VLOG_ARGS `pwd`/$EXAMPLE -l $TOP_LEVEL.uvm.log 
 
   if [ -n "$INTEROP_REGRESS" ] ; then
     perl ../regress/regress_passfail.pl $TOP_LEVEL.log 01_adapters ../results.log

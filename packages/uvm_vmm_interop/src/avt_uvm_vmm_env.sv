@@ -1,5 +1,7 @@
 //------------------------------------------------------------------------------
 // Copyright 2008 Mentor Graphics Corporation
+// Copyright 2010 Synopsys, Inc.
+//
 // All Rights Reserved Worldwide
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -86,7 +88,7 @@
 // instance basis via the ~uvm_factory~.
 //
 //------------------------------------------------------------------------------
-
+`ifdef UVM_ON_TOP 
 `uvm_phase_func_topdown_decl(vmm_gen_cfg)
 `uvm_phase_task_bottomup_decl(vmm_report)
 
@@ -379,3 +381,4 @@ class avt_uvm_vmm_env_named #(type ENV=vmm_env) extends avt_uvm_vmm_env_base;
 endclass
 
 
+`endif
