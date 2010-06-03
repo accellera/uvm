@@ -1,0 +1,110 @@
+irun: 09.20-s016: (c) Copyright 1995-2010 Cadence Design Systems, Inc.
+TOOL:	irun	09.20-s016: Started on Jun 01, 2010 at 06:52:27 PDT
+irun
+	-incdir ../../../../uvm_ea1.0_042710/src
+	-incdir ../../../vmm-1.1.1a-uvm/sv
+	-incdir ../../src
+	../../../vmm-1.1.1a-uvm/sv/std_lib/vmm_str_dpi.c
+	10_analysis_channel.sv
+	+incdir+../../examples/src
+	+incdir+../src/hfpb
+	+incdir+../src/hfpb_components
+	-l 10_analysis_channel.log
+	+vmm_log_default=trace
+
+   User defined plus("+") options:
+	+vmm_log_default=trace
+
+file: 10_analysis_channel.sv
+	package worklib.uvm_pkg:sv
+		errors: 0, warnings: 0
+	package worklib.vmm_std_lib:sv
+		errors: 0, warnings: 0
+	package worklib.avt_interop_pkg:sv
+		errors: 0, warnings: 0
+	module worklib.example_10_analysis_channel:sv
+		errors: 0, warnings: 0
+     vmm_fifo.tee_mode(1);
+                     |
+ncvlog: *W,FUNTSK (../../examples/src/apb_scoreboard.sv,51|21): function called as a task without void'().
+	Total errors/warnings found outside modules and primitives:
+		errors: 0, warnings: 1
+		Caching library 'worklib' ....... Done
+	Elaborating the design hierarchy:
+	Top level design units:
+		uvm_pkg
+		vmm_std_lib
+		avt_interop_pkg
+		$unit_0x52b6d484
+		example_10_analysis_channel
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+		worklib.avt_interop_pkg:sv <0x5ede0119>
+			streams: 3387, words: 11119229
+		worklib.example_10_analysis_channel:sv <0x53e8a95d>
+			streams:   3, words:  1395
+	Loading native compiled code:     .................... Done
+	Building instance specific data structures.
+	Design hierarchy summary:
+		                      Instances  Unique
+		Modules:                      1       1
+		Verilog packages:             3       3
+		Registers:                 5776    6603
+		Named events:                 2      26
+		Initial blocks:             154     133
+		Parallel blocks:             57      62
+		Compilation units:            1       1
+		SV Class declarations:      172     253
+		SV Class specializations:   216     216
+	Writing initial simulation snapshot: worklib.example_10_analysis_channel:sv
+Loading snapshot worklib.example_10_analysis_channel:sv .................... Done
+ncsim> source /home/phuynh/sw/IUS/tools/inca/files/ncsimrc
+ncsim> run
+SVSEED default: 1
+----------------------------------------------------------------
+UVM-1.0.EA
+(C) 2007-2010 Mentor Graphics Corporation
+(C) 2007-2010 Cadence Design Systems, Inc.
+(C) 2010 Synopsys, Inc.
+----------------------------------------------------------------
+UVM_INFO @ 0: reporter [RNTST] Running test ...
+UVM_INFO @ 0: vmm_channel #(T) [in_chan] tee branch turned ON
+UVM_INFO @ 0: APB Bus Cycle Atomic Generator output channel [v_prod] tee branch turned ON
+UVM_INFO @ 0: env [uvm2vmm] UVM publisher to VMM consumer
+UVM_INFO @ 0: env.o_prod [publishing] APB RD @ 0x755143ea = 0x3ef5957d
+UVM_INFO @ 0: vmm_consumer #(T) [v_cons] Started
+UVM_INFO @ 0: vmm_consumer #(T) [v_cons] Received transaction APB READ @ 0x755143ea = 0x3ef5957d
+UVM_INFO @ 10: env [vmm2uvm] VMM atomic_gen to UVM subscriber
+UVM_INFO @ 10: APB Bus Cycle Atomic Generator [v_prod] Started
+UVM_INFO @ 10: env.o_cons [received_uvm] APB RD @ 0x040a9908 = 0xcdaaa89b
+UVM_INFO @ 10: env.comp_v2o [match] APB RD @ 0x040a9908 = 0xcdaaa89b
+UVM_INFO @ 100: vmm_consumer #(T) [v_cons] 1 threads have now stopped or blocked
+UVM_INFO @ 100: env.comp_o2v [match] APB RD @ 0x755143ea = 0x3ef5957d
+UVM_INFO @ 200: env.comp_o2v [env.comp_o2v] Scoreboard had 1 matches and 0 mismatches.
+UVM_INFO @ 200: env.comp_v2o [env.comp_v2o] Scoreboard had 1 matches and 0 mismatches.
+UVM_INFO @ 200: env [PASS] Test PASSED
+
+--- UVM Report Summary ---
+
+** Report counts by severity
+UVM_INFO :   16
+UVM_WARNING :    0
+UVM_ERROR :    0
+UVM_FATAL :    0
+** Report counts by id
+[PASS]     1
+[RNTST]     1
+[env.comp_o2v]     1
+[env.comp_v2o]     1
+[in_chan]     1
+[match]     2
+[publishing]     1
+[received_uvm]     1
+[uvm2vmm]     1
+[v_cons]     3
+[v_prod]     2
+[vmm2uvm]     1
+Simulation complete via $finish(1) at time 200 NS + 7
+/home/phuynh/Data/Projects/UVM/uvm_ea1.0_042710/src/base/uvm_root.svh:466       $finish;
+ncsim> exit
+TOOL:	irun	09.20-s016: Exiting on Jun 01, 2010 at 06:52:34 PDT  (total: 00:00:07)

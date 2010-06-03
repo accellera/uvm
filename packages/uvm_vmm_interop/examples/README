@@ -1,0 +1,10 @@
+To run vcs with interop libs:
+
+modify setup_libs.sh for your paths to VMM-1.1.1 & OVM-2.0.1 & INTEROP 
+
+setup VCS0906-1 or later
+
+Execute:
+./run_vcs.sh |&tee all_examples.output; ./run_vcs.sh clean
+
+all_examples.ouput file will contain VCS command to be able to rerun any example from its local directory.

@@ -1,0 +1,71 @@
+## 
+## -------------------------------------------------------------
+##    Copyright 2008 Cadence Design Systems, Inc.
+##    All Rights Reserved Worldwide
+## 
+##    Licensed under the Apache License, Version 2.0 (the
+##    "License"); you may not use this file except in
+##    compliance with the License.  You may obtain a copy of
+##    the License at
+## 
+##        http://www.apache.org/licenses/LICENSE-2.0
+## 
+##    Unless required by applicable law or agreed to in
+##    writing, software distributed under the License is
+##    distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+##    CONDITIONS OF ANY KIND, either express or implied.  See
+##    the License for the specific language governing
+##    permissions and limitations under the License.
+## -------------------------------------------------------------
+## 
+
+INCLUDE_UVM?=1
+
+VMM_HOME ?= ../../../vmm-1.1.1a-uvm
+UVM_HOME ?= ../../../../uvm_ea1.0_042710
+INTEROP_HOME ?=../..
+
+UVM_EXAMPLE_ARGS = -incdir $(UVM_HOME)/src -incdir $(VMM_HOME)/sv -incdir $(INTEROP_HOME)/src $(VMM_HOME)/sv/std_lib/vmm_str_dpi.c
+
+
+
+SOURCES = $(shell find . | grep '/[0-9][0-9]*_.*\.sv' | sort)
+TARGETS = $(subst .sv,,$(SOURCES))
+
+# used for 04_IP_integration
+HFPB_INCLUDE = +incdir+../src/hfpb \
+               +incdir+../src/hfpb_components
+
+# used for 05
+APB_INCLUDE = +incdir+$(INTEROP_HOME)/examples/src
+
+# used for 03_vmm_on_top
+APB_ENV_HOME = $(VMM_HOME)/sv/examples/sb/apb_bus
+
+#run: $(TARGETS)
+run:
+
+#% : %.sv 
+#	irun $(UVM_EXAMPLE_ARGS) $@.sv \
+#	$(APB_INCLUDE) $(HFPB_INCLUDE) -l $@.log +vmm_log_default=trace +define+UVM_ON_TOP
+	irun $(UVM_EXAMPLE_ARGS) 02_uvm_on_top.sv \
+	$(APB_INCLUDE) $(HFPB_INCLUDE) -l 02_uvm_on_top.log +vmm_log_default=trace
+#
+	irun $(UVM_EXAMPLE_ARGS) 03_vmm_on_top.sv \
+	$(APB_INCLUDE) $(HFPB_INCLUDE) -l 03_vmm_on_top.log +vmm_log_default=trace
+#
+	irun $(UVM_EXAMPLE_ARGS) 05_mixed_hierarchy.sv \
+	$(APB_INCLUDE) $(HFPB_INCLUDE) -l 05_mixed_hierarchy.log +vmm_log_default=trace
+#
+	irun $(UVM_EXAMPLE_ARGS) 06_env_step_by_step.sv \
+	$(APB_INCLUDE) $(HFPB_INCLUDE) -l 06_env_step_by_step.log +vmm_log_default=trace
+
+#Run test 04*.sv with UVM_ON_TOP
+	irun $(UVM_EXAMPLE_ARGS) 04_IP_integration.sv \
+	$(APB_INCLUDE) $(HFPB_INCLUDE) -l 04_IP_integration-UVM_ON_TOP.log +vmm_log_default=trace +define+UVM_ON_TOP
+#Rerun test 04*.sv with VMM_ON_TOP
+	irun $(UVM_EXAMPLE_ARGS) 04_IP_integration.sv \
+	$(APB_INCLUDE) $(HFPB_INCLUDE) -l 04_IP_integration-VMM_ON_TOP.log +vmm_log_default=trace +define+VMM_ON_TOP
+
+clean:
+	rm -rf INCA_libs *.log

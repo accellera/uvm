@@ -1,0 +1,29 @@
+  -incdir ./src                 #interop lib
+  -incdir ../vmm-1.1.1a-uvm/sv
+#
+  +incdir+./examples/src
+  +incdir+./examples/src/hfpb
+  +incdir+./examples/src/hfpb_components
+  //---------------------
+
+//01_adapters tests
+examples/01_adapters/02_tlm2channel.sv
+examples/01_adapters/03_channel2tlm.sv
+examples/01_adapters/06_sequencer2channel.sv
+examples/01_adapters/07_channel2driver.sv
+examples/01_adapters/10_analysis_channel.sv
+examples/01_adapters/11_analysis2notify.sv
+examples/01_adapters/12_notify2analysis.sv
+examples/01_adapters/13_uvm_port2vmm_channel.sv
+examples/01_adapters/14_vmm_channel2uvm_port.sv
+examples/01_adapters/15_uvm_analysis2vmm_notify.sv
+examples/01_adapters/16_vmm_notify2uvm_analysis.sv
+examples/01_adapters/17_tlm2channel_passive_producer.sv
+examples/01_adapters/18_tlm2channel_blocking_transport.sv
+  
+//02_integration tests
+examples/02_integration/02_uvm_on_top.sv
+examples/02_integration/03_vmm_on_top.sv
+examples/02_integration/04_IP_integration.sv
+examples/02_integration/05_mixed_hierarchy.sv
+examples/02_integration/06_env_step_by_step.sv

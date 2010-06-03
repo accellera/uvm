@@ -1,0 +1,191 @@
+irun: 09.20-s016: (c) Copyright 1995-2010 Cadence Design Systems, Inc.
+TOOL:	irun	09.20-s016: Started on Jun 01, 2010 at 06:57:55 PDT
+irun
+	-incdir ../../../../uvm_ea1.0_042710/src
+	-incdir ../../../vmm-1.1.1a-uvm/sv
+	-incdir ../../src
+	../../../vmm-1.1.1a-uvm/sv/std_lib/vmm_str_dpi.c
+	03_vmm_on_top.sv
+	+incdir+../../examples/src
+	+incdir+../src/hfpb
+	+incdir+../src/hfpb_components
+	-l 03_vmm_on_top.log
+	+vmm_log_default=trace
+
+   User defined plus("+") options:
+	+vmm_log_default=trace
+
+file: 03_vmm_on_top.sv
+	package worklib.uvm_pkg:sv
+		errors: 0, warnings: 0
+	package worklib.vmm_std_lib:sv
+		errors: 0, warnings: 0
+	package worklib.avt_interop_pkg:sv
+		errors: 0, warnings: 0
+	program worklib.example_03_vmm_on_top:sv
+		errors: 0, warnings: 0
+		Caching library 'worklib' ....... Done
+	Elaborating the design hierarchy:
+	Top level design units:
+		uvm_pkg
+		vmm_std_lib
+		avt_interop_pkg
+		$unit_0x087d76d6
+		example_03_vmm_on_top
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+		worklib.avt_interop_pkg:sv <0x59d15eec>
+			streams: 1836, words: 5834327
+		worklib.example_03_vmm_on_top:sv <0x72e0603f>
+			streams:   3, words: 18298
+		worklib.vmm_std_lib:sv <0x307ad4fb>
+			streams: 745, words: 3091943
+	Loading native compiled code:     .................... Done
+	Building instance specific data structures.
+	Design hierarchy summary:
+		                      Instances  Unique
+		Programs:                     1       1
+		Verilog packages:             3       3
+		Registers:                 4544    6201
+		Named events:                 2      25
+		Initial blocks:             126     129
+		Parallel blocks:             43      52
+		Compilation units:            1       1
+		SV Class declarations:      138     230
+		SV Class specializations:   148     148
+	Writing initial simulation snapshot: worklib.example_03_vmm_on_top:sv
+Loading snapshot worklib.example_03_vmm_on_top:sv .................... Done
+ncsim> source /home/phuynh/sw/IUS/tools/inca/files/ncsimrc
+ncsim> run
+SVSEED default: 1
+----------------------------------------------------------------
+UVM-1.0.EA
+(C) 2007-2010 Mentor Graphics Corporation
+(C) 2007-2010 Cadence Design Systems, Inc.
+(C) 2010 Synopsys, Inc.
+----------------------------------------------------------------
+Normal[NOTE] on example_03_vmm_on_top(program) at                    0:
+    *** calling env.gen_cfg
+Trace[INTERNAL] on vmm_top() at                    0:
+    Generating test configuration...
+Normal[NOTE] on vmm_top() at                    0:
+    vmm_top gen_cfg
+Normal[NOTE] on example_03_vmm_on_top(program) at                  100:
+    *** calling env.build
+Normal[NOTE] on vmm_top() at                  100:
+    subtype build vmm_top begin
+Normal[NOTE] on vmm_top() at                  100:
+    vmm_top build begin
+Trace[INTERNAL] on vmm_top() at                  100:
+    Building verification environment...
+Normal[NOTE] on vmm_top() at                  100:
+    vmm_top build calling uvm_build()
+Normal[NOTE] on vmm_top() at                  100:
+    vmm_top build end
+Normal[NOTE] on vmm_top() at                  100:
+    subtype build vmm_top calling uvm_build()
+Normal[NOTE] on UVM(reporter) at                  100:
+    vmm_top.uvm_child($unit_0x087d76d6.uvm_comp_ext.build): build
+Normal[NOTE] on UVM(reporter) at                  100:
+    vmm_top.uvm_child2($unit_0x087d76d6.uvm_comp_ext.build): build
+Normal[NOTE] on vmm_top() at                  100:
+    subtype build vmm_top end
+Normal[NOTE] on example_03_vmm_on_top(program) at                  200:
+    *** calling env.reset_dut
+Normal[NOTE] on UVM(reporter) at                  200:
+    vmm_top.uvm_child($unit_0x087d76d6.uvm_comp_ext.connect): connect
+Normal[NOTE] on UVM(reporter) at                  200:
+    vmm_top.uvm_child2($unit_0x087d76d6.uvm_comp_ext.connect): connect
+Normal[NOTE] on UVM(reporter) at                  200:
+    vmm_top.uvm_child($unit_0x087d76d6.uvm_comp_ext.end_of_elaboration): end_of_elaboration
+Normal[NOTE] on UVM(reporter) at                  200:
+    vmm_top.uvm_child2($unit_0x087d76d6.uvm_comp_ext.end_of_elaboration): end_of_elaboration
+Normal[NOTE] on UVM(reporter) at                  200:
+    vmm_top.uvm_child($unit_0x087d76d6.uvm_comp_ext.start_of_simulation): start_of_simulation
+Normal[NOTE] on UVM(reporter) at                  200:
+    vmm_top.uvm_child2($unit_0x087d76d6.uvm_comp_ext.start_of_simulation): start_of_simulation
+Trace[INTERNAL] on vmm_top() at                  200:
+    Reseting DUT...
+Normal[NOTE] on vmm_top() at                  200:
+    vmm_top reset_dut begin
+Normal[NOTE] on UVM(reporter) at                  200:
+    vmm_top.uvm_child2($unit_0x087d76d6.uvm_comp_ext.run): run begin
+Normal[NOTE] on UVM(reporter) at                  200:
+    vmm_top.uvm_child($unit_0x087d76d6.uvm_comp_ext.run): run begin
+Normal[NOTE] on vmm_top() at                  210:
+    vmm_top reset_dut end
+Normal[NOTE] on example_03_vmm_on_top(program) at                  310:
+    *** calling env.cfg_dut
+Trace[INTERNAL] on vmm_top() at                  310:
+    Configuring...
+Normal[NOTE] on vmm_top() at                  310:
+    vmm_top cfg_dut begin
+Normal[NOTE] on vmm_top() at                  320:
+    vmm_top cfg_dut end
+Normal[NOTE] on example_03_vmm_on_top(program) at                  420:
+    *** calling env.start
+Trace[INTERNAL] on vmm_top() at                  420:
+    Starting verification environment...
+Trace[INTERNAL] on vmm_top() at                  420:
+    Saving RNG state information...
+Normal[NOTE] on vmm_top() at                  420:
+    vmm_top start begin
+Normal[NOTE] on vmm_top() at                  430:
+    vmm_top start end
+Normal[NOTE] on example_03_vmm_on_top(program) at                  530:
+    *** calling env.wait_for_end
+Trace[INTERNAL] on vmm_top() at                  530:
+    Waiting for end of test...
+Normal[NOTE] on vmm_top() at                  530:
+    vmm_top wait_for_end begin
+Normal[NOTE] on vmm_top() at                  540:
+    vmm_top wait_for_end end
+Normal[NOTE] on example_03_vmm_on_top(program) at                  640:
+    *** calling env.stop
+Trace[INTERNAL] on vmm_top() at                  640:
+    Stopping verification environment...
+Normal[NOTE] on UVM(reporter) at                  640:
+    vmm_top.uvm_child2($unit_0x087d76d6.uvm_comp_ext.stop): vmm_top.uvm_child2 stop  Stopping phase run
+Normal[NOTE] on UVM(reporter) at                  640:
+    vmm_top.uvm_child($unit_0x087d76d6.uvm_comp_ext.stop): vmm_top.uvm_child stop  Stopping phase run
+Normal[NOTE] on UVM(reporter) at                  641:
+    vmm_top.uvm_child2($unit_0x087d76d6.uvm_comp_ext.stop): vmm_top.uvm_child2 stop  Stopped phase run
+Normal[NOTE] on UVM(reporter) at                  641:
+    vmm_top.uvm_child($unit_0x087d76d6.uvm_comp_ext.stop): vmm_top.uvm_child stop  Stopped phase run
+Normal[NOTE] on vmm_top() at                  641:
+    vmm_top stop begin
+Normal[NOTE] on vmm_top() at                  651:
+    vmm_top stop end
+Normal[NOTE] on example_03_vmm_on_top(program) at                  751:
+    *** calling env.cleanup
+Trace[INTERNAL] on vmm_top() at                  751:
+    Cleaning up...
+Normal[NOTE] on vmm_top() at                  751:
+    vmm_top cleanup begin
+Normal[NOTE] on vmm_top() at                  761:
+    vmm_top cleanup end
+Normal[NOTE] on example_03_vmm_on_top(program) at                  861:
+    *** calling env.run
+Normal[NOTE] on UVM(reporter) at                  861:
+    vmm_top.uvm_child($unit_0x087d76d6.uvm_comp_ext.extract): extract
+Normal[NOTE] on UVM(reporter) at                  861:
+    vmm_top.uvm_child2($unit_0x087d76d6.uvm_comp_ext.extract): extract
+Normal[NOTE] on UVM(reporter) at                  861:
+    vmm_top.uvm_child($unit_0x087d76d6.uvm_comp_ext.check): check
+Normal[NOTE] on UVM(reporter) at                  861:
+    vmm_top.uvm_child2($unit_0x087d76d6.uvm_comp_ext.check): check
+Normal[NOTE] on UVM(reporter) at                  861:
+    vmm_top.uvm_child($unit_0x087d76d6.uvm_comp_ext.report): report
+Normal[NOTE] on UVM(reporter) at                  861:
+    vmm_top.uvm_child2($unit_0x087d76d6.uvm_comp_ext.report): report
+Normal[NOTE] on vmm_top() at                  861:
+    vmm_top report begin
+Normal[NOTE] on vmm_top() at                  866:
+    vmm_top report end
+Simulation PASSED on /./ (/./) at                  866 (0 warnings, 0 demoted errors & 0 demoted warnings)
+Normal[NOTE] on example_03_vmm_on_top(program) at                  966:
+    *** after full run
+Simulation complete via implicit call to $finish(1) at time 966 NS + 1
+./03_vmm_on_top.sv:78 program example_03_vmm_on_top;
+ncsim> exit
+TOOL:	irun	09.20-s016: Exiting on Jun 01, 2010 at 06:58:00 PDT  (total: 00:00:05)

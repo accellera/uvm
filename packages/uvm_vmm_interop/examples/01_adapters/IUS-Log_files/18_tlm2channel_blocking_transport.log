@@ -1,0 +1,149 @@
+irun: 09.20-s016: (c) Copyright 1995-2010 Cadence Design Systems, Inc.
+TOOL:	irun	09.20-s016: Started on Jun 01, 2010 at 06:53:20 PDT
+irun
+	-incdir ../../../../uvm_ea1.0_042710/src
+	-incdir ../../../vmm-1.1.1a-uvm/sv
+	-incdir ../../src
+	../../../vmm-1.1.1a-uvm/sv/std_lib/vmm_str_dpi.c
+	18_tlm2channel_blocking_transport.sv
+	+incdir+../../examples/src
+	+incdir+../src/hfpb
+	+incdir+../src/hfpb_components
+	-l 18_tlm2channel_blocking_transport.log
+	+vmm_log_default=trace
+
+   User defined plus("+") options:
+	+vmm_log_default=trace
+
+file: 18_tlm2channel_blocking_transport.sv
+	package worklib.uvm_pkg:sv
+		errors: 0, warnings: 0
+	package worklib.vmm_std_lib:sv
+		errors: 0, warnings: 0
+	package worklib.avt_interop_pkg:sv
+		errors: 0, warnings: 0
+	module worklib.example_18_uvm_tlm2channel_blocking_transport:sv
+		errors: 0, warnings: 0
+     vmm_fifo.tee_mode(1);
+                     |
+ncvlog: *W,FUNTSK (../../examples/src/apb_scoreboard.sv,51|21): function called as a task without void'().
+	Total errors/warnings found outside modules and primitives:
+		errors: 0, warnings: 1
+		Caching library 'worklib' ....... Done
+	Elaborating the design hierarchy:
+	Top level design units:
+		uvm_pkg
+		vmm_std_lib
+		avt_interop_pkg
+		$unit_0x5160edb2
+		example_18_uvm_tlm2channel_blocking_transport
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+		worklib.avt_interop_pkg:sv <0x61de1975>
+			streams: 3325, words: 10942459
+		worklib.example_18_uvm_tlm2channel_blocking_transport:sv <0x292b90ec>
+			streams:   2, words:   794
+	Loading native compiled code:     .................... Done
+	Building instance specific data structures.
+	Design hierarchy summary:
+		                      Instances  Unique
+		Modules:                      1       1
+		Verilog packages:             3       3
+		Registers:                 5680    6553
+		Named events:                 2      26
+		Initial blocks:             148     132
+		Parallel blocks:             58      62
+		Compilation units:            1       1
+		SV Class declarations:      168     250
+		SV Class specializations:   209     209
+	Writing initial simulation snapshot: worklib.example_18_uvm_tlm2channel_blocking_transport:sv
+Loading snapshot worklib.example_18_uvm_tlm2channel_blocking_transport:sv .................... Done
+ncsim> source /home/phuynh/sw/IUS/tools/inca/files/ncsimrc
+ncsim> run
+SVSEED default: 1
+----------------------------------------------------------------
+UVM-1.0.EA
+(C) 2007-2010 Mentor Graphics Corporation
+(C) 2007-2010 Cadence Design Systems, Inc.
+(C) 2010 Synopsys, Inc.
+----------------------------------------------------------------
+UVM_INFO @ 0: reporter [RNTST] Running test ...
+UVM_INFO @ 0: vmm_channel #(T) [rsp_chan] tee branch turned ON
+UVM_INFO @ 0: vmm_consumer #(T) [v_cons] Started
+UVM_INFO @ 10: env.o_prod [uvm_producer] Send #1 req transaction
+APB RD @ 0xa9936c53 = 0xa4945849
+UVM_INFO @ 10: vmm_consumer #(T) [v_cons] Starting transaction...
+   APB READ @ 0xa9936c53 = 0xa4945849
+UVM_INFO @ 10: env.o_prod [uvm_producer] Get #0 rsp transaction
+APB RD @ 0xa9936c53 = 0xa4945849
+UVM_INFO @ 20: env.o_prod [uvm_producer] Send #2 req transaction
+APB RD @ 0x04e8cb09 = 0xab326056
+UVM_INFO @ 20: vmm_consumer #(T) [v_cons] Starting transaction...
+   APB READ @ 0x04e8cb09 = 0xab326056
+UVM_INFO @ 20: env.o_prod [uvm_producer] Get #1 rsp transaction
+APB RD @ 0x04e8cb09 = 0xab326056
+UVM_INFO @ 30: vmm_consumer #(T) [v_cons] Receiving transaction...
+   APB READ @ 0xa9936c53 = 0xdeadbeef
+UVM_INFO @ 30: vmm_consumer #(T) [v_cons] Returning rsp transaction...
+   APB READ @ 0xa9936c53 = 0xdeadbeef
+UVM_INFO @ 30: env.o_prod [uvm_producer] Send #3 req transaction
+APB RD @ 0xfa5532f4 = 0xf431e6e8
+UVM_INFO @ 30: env.Comparator [match] APB RD @ 0xa9936c53 = 0xdeadbeef
+UVM_INFO @ 30: vmm_consumer #(T) [v_cons] Starting transaction...
+   APB READ @ 0xfa5532f4 = 0xf431e6e8
+UVM_INFO @ 30: env.o_prod [uvm_producer] Get #2 rsp transaction
+APB RD @ 0xfa5532f4 = 0xf431e6e8
+UVM_INFO @ 40: vmm_consumer #(T) [v_cons] Receiving transaction...
+   APB READ @ 0x04e8cb09 = 0xdeadbeef
+UVM_INFO @ 40: vmm_consumer #(T) [v_cons] Returning rsp transaction...
+   APB READ @ 0x04e8cb09 = 0xdeadbeef
+UVM_INFO @ 40: env.o_prod [uvm_producer] Send #4 req transaction
+APB RD @ 0xbce0ac79 = 0xb3501666
+UVM_INFO @ 40: env.Comparator [match] APB RD @ 0x04e8cb09 = 0xdeadbeef
+UVM_INFO @ 40: vmm_consumer #(T) [v_cons] Starting transaction...
+   APB READ @ 0xbce0ac79 = 0xb3501666
+UVM_INFO @ 40: env.o_prod [uvm_producer] Get #3 rsp transaction
+APB RD @ 0xbce0ac79 = 0xb3501666
+UVM_INFO @ 50: vmm_consumer #(T) [v_cons] Receiving transaction...
+   APB READ @ 0xfa5532f4 = 0xdeadbeef
+UVM_INFO @ 50: vmm_consumer #(T) [v_cons] Returning rsp transaction...
+   APB READ @ 0xfa5532f4 = 0xdeadbeef
+UVM_INFO @ 50: env.o_prod [uvm_producer] Send #5 req transaction
+APB RD @ 0x5874d7b0 = 0xd0877ca1
+UVM_INFO @ 50: env.Comparator [match] APB RD @ 0xfa5532f4 = 0xdeadbeef
+UVM_INFO @ 50: vmm_consumer #(T) [v_cons] Starting transaction...
+   APB READ @ 0x5874d7b0 = 0xd0877ca1
+UVM_INFO @ 50: env.o_prod [uvm_producer] Get #4 rsp transaction
+APB RD @ 0x5874d7b0 = 0xd0877ca1
+UVM_INFO @ 60: vmm_consumer #(T) [v_cons] Receiving transaction...
+   APB READ @ 0xbce0ac79 = 0xdeadbeef
+UVM_INFO @ 60: vmm_consumer #(T) [v_cons] Returning rsp transaction...
+   APB READ @ 0xbce0ac79 = 0xdeadbeef
+UVM_INFO @ 60: env.Comparator [match] APB RD @ 0xbce0ac79 = 0xdeadbeef
+UVM_INFO @ 70: vmm_consumer #(T) [v_cons] Receiving transaction...
+   APB READ @ 0x5874d7b0 = 0xdeadbeef
+UVM_INFO @ 70: vmm_consumer #(T) [v_cons] Returning rsp transaction...
+   APB READ @ 0x5874d7b0 = 0xdeadbeef
+UVM_INFO @ 70: env.Comparator [match] APB RD @ 0x5874d7b0 = 0xdeadbeef
+UVM_INFO @ 70: env.Comparator [env.Comparator] Scoreboard had 5 matches and 0 mismatches.
+UVM_INFO @ 70: env [TEST_RESULT] PASSED
+
+--- UVM Report Summary ---
+
+** Report counts by severity
+UVM_INFO :   35
+UVM_WARNING :    0
+UVM_ERROR :    0
+UVM_FATAL :    0
+** Report counts by id
+[RNTST]     1
+[TEST_RESULT]     1
+[env.Comparator]     1
+[match]     5
+[rsp_chan]     1
+[uvm_producer]    10
+[v_cons]    16
+Simulation complete via $finish(1) at time 70 NS + 7
+/home/phuynh/Data/Projects/UVM/uvm_ea1.0_042710/src/base/uvm_root.svh:466       $finish;
+ncsim> exit
+TOOL:	irun	09.20-s016: Exiting on Jun 01, 2010 at 06:53:27 PDT  (total: 00:00:07)

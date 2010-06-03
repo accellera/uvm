@@ -1,0 +1,148 @@
+irun: 09.20-s016: (c) Copyright 1995-2010 Cadence Design Systems, Inc.
+TOOL:	irun	09.20-s016: Started on Jun 01, 2010 at 06:51:59 PDT
+irun
+	-incdir ../../../../uvm_ea1.0_042710/src
+	-incdir ../../../vmm-1.1.1a-uvm/sv
+	-incdir ../../src
+	../../../vmm-1.1.1a-uvm/sv/std_lib/vmm_str_dpi.c
+	02_tlm2channel.sv
+	+incdir+../../examples/src
+	+incdir+../src/hfpb
+	+incdir+../src/hfpb_components
+	-l 02_tlm2channel.log
+	+vmm_log_default=trace
+
+   User defined plus("+") options:
+	+vmm_log_default=trace
+
+file: 02_tlm2channel.sv
+	package worklib.uvm_pkg:sv
+		errors: 0, warnings: 0
+	package worklib.vmm_std_lib:sv
+		errors: 0, warnings: 0
+	package worklib.avt_interop_pkg:sv
+		errors: 0, warnings: 0
+	module worklib.example_02_uvm_tlm2channel:sv
+		errors: 0, warnings: 0
+     vmm_fifo.tee_mode(1);
+                     |
+ncvlog: *W,FUNTSK (../../examples/src/apb_scoreboard.sv,51|21): function called as a task without void'().
+	Total errors/warnings found outside modules and primitives:
+		errors: 0, warnings: 1
+$CDSROOT = /home/phuynh/sw/IUS
+$TESTDIR = /home/phuynh/Data/Projects/UVM/SourceForge/uvm_vmm_interop_1_0/examples/01_adapters
+
+TOOL:	ncsc	09.20-s016
+ncsc cc parameters: 
+	$CDSROOT/tools/systemc/gcc/4.1/bin/gcc
+	-I$CDSROOT/tools/include
+	-I$CDSROOT/tools/inca/include-DNCSC
+	-c
+	-x c  -Wall 
+
+make[1]: Entering directory `/home/phuynh/Data/Projects/UVM/SourceForge/uvm_vmm_interop_1_0/examples/01_adapters'
+ncsc: compiling $TESTDIR/../../../vmm-1.1.1a-uvm/sv/std_lib/vmm_str_dpi.c
+
+make[1]: Leaving directory `/home/phuynh/Data/Projects/UVM/SourceForge/uvm_vmm_interop_1_0/examples/01_adapters'
+$TESTDIR/../../../vmm-1.1.1a-uvm/sv/std_lib/vmm_str_dpi.c: In function ‘vmm_regex_build’:
+Wide character in print at /home/phuynh/sw/IUS/tools/bin/ncsc_modules.pm line 650.
+$TESTDIR/../../../vmm-1.1.1a-uvm/sv/std_lib/vmm_str_dpi.c:130: warning: '0' flag used with ‘%s’ printf format
+Wide character in print at /home/phuynh/sw/IUS/tools/bin/ncsc_modules.pm line 650.
+$TESTDIR/../../../vmm-1.1.1a-uvm/sv/std_lib/vmm_str_dpi.c: In function ‘vmm_regex_compare’:
+Wide character in print at /home/phuynh/sw/IUS/tools/bin/ncsc_modules.pm line 650.
+$TESTDIR/../../../vmm-1.1.1a-uvm/sv/std_lib/vmm_str_dpi.c:158: warning: '0' flag used with ‘%s’ printf format
+Wide character in print at /home/phuynh/sw/IUS/tools/bin/ncsc_modules.pm line 650.
+$TESTDIR/../../../vmm-1.1.1a-uvm/sv/std_lib/vmm_str_dpi.c: In function ‘vmm_regex’:
+Wide character in print at /home/phuynh/sw/IUS/tools/bin/ncsc_modules.pm line 650.
+$TESTDIR/../../../vmm-1.1.1a-uvm/sv/std_lib/vmm_str_dpi.c:171: warning: unused variable ‘retval’
+Wide character in print at /home/phuynh/sw/IUS/tools/bin/ncsc_modules.pm line 650.
+
+make[1]: Entering directory `/home/phuynh/Data/Projects/UVM/SourceForge/uvm_vmm_interop_1_0/examples/01_adapters'
+building library run.so
+make[1]: Leaving directory `/home/phuynh/Data/Projects/UVM/SourceForge/uvm_vmm_interop_1_0/examples/01_adapters'
+
+		Caching library 'worklib' ....... Done
+	Elaborating the design hierarchy:
+	Top level design units:
+		uvm_pkg
+		vmm_std_lib
+		avt_interop_pkg
+		$unit_0x13541f05
+		example_02_uvm_tlm2channel
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+		worklib.avt_interop_pkg:sv <0x5ff4c7b7>
+			streams: 3363, words: 11026343
+		worklib.example_02_uvm_tlm2channel:sv <0x7e9fa589>
+			streams:   2, words:   794
+	Loading native compiled code:     .................... Done
+	Building instance specific data structures.
+	Design hierarchy summary:
+		                      Instances  Unique
+		Modules:                      1       1
+		Verilog packages:             3       3
+		Registers:                 5744    6543
+		Named events:                 2      26
+		Initial blocks:             153     132
+		Parallel blocks:             57      62
+		Compilation units:            1       1
+		SV Class declarations:      169     249
+		SV Class specializations:   212     212
+	Writing initial simulation snapshot: worklib.example_02_uvm_tlm2channel:sv
+Loading snapshot worklib.example_02_uvm_tlm2channel:sv .................... Done
+ncsim> source /home/phuynh/sw/IUS/tools/inca/files/ncsimrc
+ncsim> run
+SVSEED default: 1
+----------------------------------------------------------------
+UVM-1.0.EA
+(C) 2007-2010 Mentor Graphics Corporation
+(C) 2007-2010 Cadence Design Systems, Inc.
+(C) 2010 Synopsys, Inc.
+----------------------------------------------------------------
+UVM_INFO @ 0: reporter [RNTST] Running test ...
+UVM_INFO @ 0: env.o_prod [uvm_stimulus] rand state is svseed=1 ; 1535693287 ; 
+UVM_INFO @ 0: vmm_channel #(T) [in_chan] tee branch turned ON
+UVM_INFO @ 0: env.o_prod [stimulus generation] APB WR @ 0xdb8658b7 = 0xed8304db
+UVM_INFO @ 0: vmm_consumer #(T) [v_cons] Started
+UVM_INFO @ 0: vmm_consumer #(T) [v_cons] Received transaction APB WRITE @ 0xdb8658b7 = 0xed8304db
+UVM_INFO @ 100: vmm_consumer #(T) [v_cons] 1 threads have now stopped or blocked
+UVM_INFO @ 100: env.o_prod [stimulus generation] APB RD @ 0x50ed2da1 = 0xdd9afebb
+UVM_INFO @ 100: env.comparator [match] APB WR @ 0xdb8658b7 = 0xed8304db
+UVM_INFO @ 100: vmm_consumer #(T) [v_cons] Received transaction APB READ @ 0x50ed2da1 = 0xdd9afebb
+UVM_INFO @ 200: vmm_consumer #(T) [v_cons] 1 threads have now stopped or blocked
+UVM_INFO @ 200: env.o_prod [stimulus generation] APB WR @ 0xeaddf2d5 = 0xa8376850
+UVM_INFO @ 200: env.comparator [match] APB RD @ 0x50ed2da1 = 0xdd9afebb
+UVM_INFO @ 200: vmm_consumer #(T) [v_cons] Received transaction APB WRITE @ 0xeaddf2d5 = 0xa8376850
+UVM_INFO @ 300: vmm_consumer #(T) [v_cons] 1 threads have now stopped or blocked
+UVM_INFO @ 300: env.o_prod [stimulus generation] APB RD @ 0x21bdfb43 = 0xf1abe2e3
+UVM_INFO @ 300: env.comparator [match] APB WR @ 0xeaddf2d5 = 0xa8376850
+UVM_INFO @ 300: vmm_consumer #(T) [v_cons] Received transaction APB READ @ 0x21bdfb43 = 0xf1abe2e3
+UVM_INFO @ 400: vmm_consumer #(T) [v_cons] 1 threads have now stopped or blocked
+UVM_INFO @ 400: env.o_prod [stimulus generation] APB RD @ 0xb8a78271 = 0x9bc5f037
+UVM_INFO @ 400: env.comparator [match] APB RD @ 0x21bdfb43 = 0xf1abe2e3
+UVM_INFO @ 400: vmm_consumer #(T) [v_cons] Received transaction APB READ @ 0xb8a78271 = 0x9bc5f037
+UVM_INFO @ 500: vmm_consumer #(T) [v_cons] 1 threads have now stopped or blocked
+UVM_INFO @ 500: env.comparator [match] APB RD @ 0xb8a78271 = 0x9bc5f037
+UVM_INFO @ 500: env.comparator [env.comparator] Scoreboard had 5 matches and 0 mismatches.
+UVM_INFO @ 500: env [PASS] Test PASSED
+
+--- UVM Report Summary ---
+
+** Report counts by severity
+UVM_INFO :   26
+UVM_WARNING :    0
+UVM_ERROR :    0
+UVM_FATAL :    0
+** Report counts by id
+[PASS]     1
+[RNTST]     1
+[env.comparator]     1
+[in_chan]     1
+[match]     5
+[stimulus generation]     5
+[uvm_stimulus]     1
+[v_cons]    11
+Simulation complete via $finish(1) at time 500 NS + 7
+/home/phuynh/Data/Projects/UVM/uvm_ea1.0_042710/src/base/uvm_root.svh:466       $finish;
+ncsim> exit
+TOOL:	irun	09.20-s016: Exiting on Jun 01, 2010 at 06:52:08 PDT  (total: 00:00:09)

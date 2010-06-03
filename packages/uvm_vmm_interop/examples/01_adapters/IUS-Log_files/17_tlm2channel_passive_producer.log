@@ -1,0 +1,129 @@
+irun: 09.20-s016: (c) Copyright 1995-2010 Cadence Design Systems, Inc.
+TOOL:	irun	09.20-s016: Started on Jun 01, 2010 at 06:53:14 PDT
+irun
+	-incdir ../../../../uvm_ea1.0_042710/src
+	-incdir ../../../vmm-1.1.1a-uvm/sv
+	-incdir ../../src
+	../../../vmm-1.1.1a-uvm/sv/std_lib/vmm_str_dpi.c
+	17_tlm2channel_passive_producer.sv
+	+incdir+../../examples/src
+	+incdir+../src/hfpb
+	+incdir+../src/hfpb_components
+	-l 17_tlm2channel_passive_producer.log
+	+vmm_log_default=trace
+
+   User defined plus("+") options:
+	+vmm_log_default=trace
+
+file: 17_tlm2channel_passive_producer.sv
+	package worklib.uvm_pkg:sv
+		errors: 0, warnings: 0
+	package worklib.vmm_std_lib:sv
+		errors: 0, warnings: 0
+	package worklib.avt_interop_pkg:sv
+		errors: 0, warnings: 0
+	module worklib.example_17_uvm_tlm2channel_passive_producer:sv
+		errors: 0, warnings: 0
+     vmm_fifo.tee_mode(1);
+                     |
+ncvlog: *W,FUNTSK (../../examples/src/apb_scoreboard.sv,51|21): function called as a task without void'().
+	Total errors/warnings found outside modules and primitives:
+		errors: 0, warnings: 1
+		Caching library 'worklib' ....... Done
+	Elaborating the design hierarchy:
+	Top level design units:
+		uvm_pkg
+		vmm_std_lib
+		avt_interop_pkg
+		$unit_0x49d8d76b
+		example_17_uvm_tlm2channel_passive_producer
+	Building instance overlay tables: .................... Done
+	Generating native compiled code:
+		worklib.avt_interop_pkg:sv <0x04747ec6>
+			streams: 3365, words: 11018404
+		worklib.example_17_uvm_tlm2channel_passive_producer:sv <0x65bdec00>
+			streams:   2, words:   794
+	Loading native compiled code:     .................... Done
+	Building instance specific data structures.
+	Design hierarchy summary:
+		                      Instances  Unique
+		Modules:                      1       1
+		Verilog packages:             3       3
+		Registers:                 5739    6554
+		Named events:                 2      26
+		Initial blocks:             150     132
+		Parallel blocks:             57      62
+		Compilation units:            1       1
+		SV Class declarations:      170     250
+		SV Class specializations:   213     213
+	Writing initial simulation snapshot: worklib.example_17_uvm_tlm2channel_passive_producer:sv
+Loading snapshot worklib.example_17_uvm_tlm2channel_passive_producer:sv .................... Done
+ncsim> source /home/phuynh/sw/IUS/tools/inca/files/ncsimrc
+ncsim> run
+SVSEED default: 1
+----------------------------------------------------------------
+UVM-1.0.EA
+(C) 2007-2010 Mentor Graphics Corporation
+(C) 2007-2010 Cadence Design Systems, Inc.
+(C) 2010 Synopsys, Inc.
+----------------------------------------------------------------
+UVM_INFO @ 0: reporter [RNTST] Running test ...
+UVM_INFO @ 0: vmm_channel #(T) [out_chan] tee branch turned ON
+UVM_INFO @ 0: vmm_consumer #(T) [v_cons] Started
+UVM_INFO @ 0: vmm_consumer #(T) [v_cons] 1 threads have now stopped or blocked
+UVM_INFO @ 100: vmm_consumer #(T) [v_cons] 
+$unit_0x49d8d76b.vmm_notifier_consumer.wait_to_notify About to notify with status
+APB READ @ 0xa8d5ea51 = 0xdf9142bf
+UVM_INFO @ 100: vmm_consumer #(T) [v_cons] Starting transaction...
+   APB READ @ 0xa8d5ea51 = 0xdeadbeef
+UVM_INFO @ 100: vmm_consumer #(T) [v_cons] 1 threads have now stopped or blocked
+UVM_INFO @ 100: env.Comparator [match] APB RD @ 0xa8d5ea51 = 0xdeadbeef
+UVM_INFO @ 200: vmm_consumer #(T) [v_cons] 
+$unit_0x49d8d76b.vmm_notifier_consumer.wait_to_notify About to notify with status
+APB WRITE @ 0xc9b0fe93 = 0xaea2b05d
+UVM_INFO @ 200: vmm_consumer #(T) [v_cons] Starting transaction...
+   APB WRITE @ 0xc9b0fe93 = 0xaea2b05d
+UVM_INFO @ 200: vmm_consumer #(T) [v_cons] 1 threads have now stopped or blocked
+UVM_INFO @ 200: env.Comparator [match] APB WR @ 0xc9b0fe93 = 0xaea2b05d
+UVM_INFO @ 300: vmm_consumer #(T) [v_cons] 
+$unit_0x49d8d76b.vmm_notifier_consumer.wait_to_notify About to notify with status
+APB WRITE @ 0x40769b80 = 0xe5424eca
+UVM_INFO @ 300: vmm_consumer #(T) [v_cons] Starting transaction...
+   APB WRITE @ 0x40769b80 = 0xe5424eca
+UVM_INFO @ 300: vmm_consumer #(T) [v_cons] 1 threads have now stopped or blocked
+UVM_INFO @ 300: env.Comparator [match] APB WR @ 0x40769b80 = 0xe5424eca
+UVM_INFO @ 400: vmm_consumer #(T) [v_cons] 
+$unit_0x49d8d76b.vmm_notifier_consumer.wait_to_notify About to notify with status
+APB READ @ 0x074a4b0e = 0x9d5f2e3a
+UVM_INFO @ 400: vmm_consumer #(T) [v_cons] Starting transaction...
+   APB READ @ 0x074a4b0e = 0xdeadbeef
+UVM_INFO @ 400: vmm_consumer #(T) [v_cons] 1 threads have now stopped or blocked
+UVM_INFO @ 400: env.Comparator [match] APB RD @ 0x074a4b0e = 0xdeadbeef
+UVM_INFO @ 500: vmm_consumer #(T) [v_cons] 
+$unit_0x49d8d76b.vmm_notifier_consumer.wait_to_notify About to notify with status
+APB READ @ 0xb32dd066 = 0x7ff4cfff
+UVM_INFO @ 500: vmm_consumer #(T) [v_cons] Starting transaction...
+   APB READ @ 0xb32dd066 = 0xdeadbeef
+UVM_INFO @ 500: vmm_consumer #(T) [v_cons] 1 threads have now stopped or blocked
+UVM_INFO @ 500: env.Comparator [match] APB RD @ 0xb32dd066 = 0xdeadbeef
+UVM_INFO @ 500: env.Comparator [env.Comparator] Scoreboard had 5 matches and 0 mismatches.
+UVM_INFO @ 500: env [TEST_RESULT] PASSED
+
+--- UVM Report Summary ---
+
+** Report counts by severity
+UVM_INFO :   26
+UVM_WARNING :    0
+UVM_ERROR :    0
+UVM_FATAL :    0
+** Report counts by id
+[RNTST]     1
+[TEST_RESULT]     1
+[env.Comparator]     1
+[match]     5
+[out_chan]     1
+[v_cons]    17
+Simulation complete via $finish(1) at time 500 NS + 7
+/home/phuynh/Data/Projects/UVM/uvm_ea1.0_042710/src/base/uvm_root.svh:466       $finish;
+ncsim> exit
+TOOL:	irun	09.20-s016: Exiting on Jun 01, 2010 at 06:53:20 PDT  (total: 00:00:06)

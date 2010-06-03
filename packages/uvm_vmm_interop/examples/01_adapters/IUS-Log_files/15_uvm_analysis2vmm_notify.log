@@ -1,0 +1,104 @@
+irun: 09.20-s016: (c) Copyright 1995-2010 Cadence Design Systems, Inc.
+TOOL:	irun	09.20-s016: Started on Jun 01, 2010 at 06:53:00 PDT
+irun
+	-incdir ../../../../uvm_ea1.0_042710/src
+	-incdir ../../../vmm-1.1.1a-uvm/sv
+	-incdir ../../src
+	../../../vmm-1.1.1a-uvm/sv/std_lib/vmm_str_dpi.c
+	15_uvm_analysis2vmm_notify.sv
+	+incdir+../../examples/src
+	+incdir+../src/hfpb
+	+incdir+../src/hfpb_components
+	-l 15_uvm_analysis2vmm_notify.log
+	+vmm_log_default=trace
+
+   User defined plus("+") options:
+	+vmm_log_default=trace
+
+file: 15_uvm_analysis2vmm_notify.sv
+	package worklib.uvm_pkg:sv
+		errors: 0, warnings: 0
+	package worklib.vmm_std_lib:sv
+		errors: 0, warnings: 0
+	package worklib.avt_interop_pkg:sv
+		errors: 0, warnings: 0
+	module worklib.example_15_uvm_analysis2vmm_notify:sv
+		errors: 0, warnings: 0
+		Caching library 'worklib' ....... Done
+	Elaborating the design hierarchy:
+	Top level design units:
+		uvm_pkg
+		vmm_std_lib
+		avt_interop_pkg
+		$unit_0x02092874
+		example_15_uvm_analysis2vmm_notify
+                     max_pending_req));
+                                     |
+ncelab: *W,EXFARG (/home/phuynh/Data/Projects/UVM/SourceForge/uvm_vmm_interop_1_0/src/avt_channel2uvm_tlm.sv,403|37): Extra Argument with given format specifier.
+	Building instance overlay tables: ................
+                     max_pending_req));
+                                     |
+ncelab: *W,EXFARG (/home/phuynh/Data/Projects/UVM/SourceForge/uvm_vmm_interop_1_0/src/avt_channel2uvm_tlm.sv,403|37): Extra Argument with given format specifier.
+.... Done
+	Generating native compiled code:
+		worklib.avt_interop_pkg:sv <0x5b9c12fb>
+			streams: 3214, words: 10688253
+		worklib.example_15_uvm_analysis2vmm_notify:sv <0x0e8f1cff>
+			streams:   2, words:  1186
+	Loading native compiled code:     .................... Done
+                     max_pending_req));
+                                     |
+ncelab: *W,EXFARG (/home/phuynh/Data/Projects/UVM/SourceForge/uvm_vmm_interop_1_0/src/avt_channel2uvm_tlm.sv,403|37): Extra Argument with given format specifier.
+	Building instance specific data structures.
+	Design hierarchy summary:
+		                      Instances  Unique
+		Modules:                      1       1
+		Verilog packages:             3       3
+		Registers:                 5534    6515
+		Named events:                 2      26
+		Initial blocks:             144     131
+		Parallel blocks:             55      60
+		Compilation units:            1       1
+		SV Class declarations:      166     248
+		SV Class specializations:   201     201
+	Writing initial simulation snapshot: worklib.example_15_uvm_analysis2vmm_notify:sv
+Loading snapshot worklib.example_15_uvm_analysis2vmm_notify:sv .................... Done
+ncsim> source /home/phuynh/sw/IUS/tools/inca/files/ncsimrc
+ncsim> run
+SVSEED default: 1
+----------------------------------------------------------------
+UVM-1.0.EA
+(C) 2007-2010 Mentor Graphics Corporation
+(C) 2007-2010 Cadence Design Systems, Inc.
+(C) 2010 Synopsys, Inc.
+----------------------------------------------------------------
+Trace[INTERNAL] on Verif Env() at                    0:
+    Generating test configuration...
+Trace[INTERNAL] on Verif Env() at                    0:
+    Building verification environment...
+Trace[INTERNAL] on Verif Env() at                   10:
+    Reseting DUT...
+Trace[INTERNAL] on Verif Env() at                   10:
+    Configuring...
+Trace[INTERNAL] on Verif Env() at                   10:
+    Starting verification environment...
+Trace[INTERNAL] on Verif Env() at                   10:
+    Saving RNG state information...
+Trace[INTERNAL] on Verif Env() at                   10:
+    Waiting for end of test...
+Trace[INTERNAL] on vmm_watcher(observer) at                   10:
+    Started
+Normal[NOTE] on UVM(reporter) at                   10:
+    sender(publishing): APB WR @ 0x1aa7f935 = 0x313ba962
+Normal[NOTE] on vmm_watcher(observer) at                   10:
+    Received transaction APB WRITE @ 0x1aa7f935 = 0x313ba962
+Trace[INTERNAL] on Verif Env() at                  110:
+    Stopping verification environment...
+Trace[INTERNAL] on vmm_watcher(observer) at                  110:
+    Stop requested
+Trace[INTERNAL] on Verif Env() at                  110:
+    Cleaning up...
+Simulation PASSED on /./ (/./) at                  110 (0 warnings, 0 demoted errors & 0 demoted warnings)
+ncsim: *W,RNQUIE: Simulation is complete.
+ncsim> exit
+TOOL:	irun	09.20-s016: Exiting on Jun 01, 2010 at 06:53:07 PDT  (total: 00:00:07)
