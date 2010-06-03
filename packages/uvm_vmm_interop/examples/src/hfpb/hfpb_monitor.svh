@@ -18,7 +18,6 @@
 //----------------------------------------------------------------------
 
 class hfpb_monitor #(int DATA_SIZE=8, int ADDR_SIZE=16)
-  //OVM2UVM> extends uvm_threaded_component;
   extends uvm_component;
   
   uvm_analysis_port #(hfpb_transaction #(DATA_SIZE, ADDR_SIZE))

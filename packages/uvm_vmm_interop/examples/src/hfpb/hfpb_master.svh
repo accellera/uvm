@@ -21,8 +21,7 @@
 // hfpb_master
 //----------------------------------------------------------------------
 class hfpb_master #(int DATA_SIZE=8, ADDR_SIZE=16)
-  //OVM2UVM> extends uvm_threaded_component;
-  extends uvm_component;  //OVM2UVM>
+  extends uvm_component;  
 
   typedef bit [ADDR_SIZE-1:0] addr_t;
 

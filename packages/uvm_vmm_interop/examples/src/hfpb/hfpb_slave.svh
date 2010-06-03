@@ -18,7 +18,6 @@
 //----------------------------------------------------------------------
 
 class hfpb_slave #(int DATA_SIZE=8, int ADDR_SIZE=16)
-  //OVM2UVM> extends uvm_threaded_component;
   extends uvm_component;
   
 
