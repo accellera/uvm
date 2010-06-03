@@ -13,10 +13,11 @@ if [ "$1" = clean ] ; then
  \rm -rf *.log *.log.filtered simv* csrc* .vcs* *.vpd DVE* *.vdb vc_hdrs.h; exit
 fi
 
-# +define+NO_VMM_12
+
 VLOG_ARGS=" +warn=noUNK_COMP_ARG +warn=noSV-LCM-PPWI -R \
            +vmm_log_default=trace  -timescale=100ns/100ns \
            -V -sverilog +plusarg_save \
+           +define+VMM_12 \
            +define+VMM_UVM_INTEROP \
            +define+VMM_PARAM_CHANNEL \
            +define+VMM_LOG_FORMAT_FILE_LINE \

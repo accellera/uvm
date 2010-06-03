@@ -32,6 +32,10 @@
 `ifndef UVM_VMM_PKG_SV
 `define UVM_VMM_PKG_SV
 
+`ifndef VMM_12
+ `define NO_VMM_12
+`endif
+
 `ifndef UVM_PKG_SV
 `include "uvm_pkg.sv" // DO NOT INLINE
 
