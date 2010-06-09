@@ -598,7 +598,7 @@
           ARG = m_sc.packer.unpack_string(); \
         end \
       UVM_RECORD: \
-        `m_uvm_record_string(ARG, `"ARG`", FLAG) \
+        `m_uvm_record_string(ARG, ARG, FLAG) \
       UVM_PRINT: \
         begin \
           m_sc.printer.print_string(`"ARG`", ARG); \
@@ -717,19 +717,19 @@
         end \
       UVM_PACK: \
         begin \
-          if($bits(ARG) <= 64) m_sc.packer.pack_field_int(ARG, $bits(ARG)); \
-          else m_sc.packer.pack_field(ARG, $bits(ARG)); \
+          m_sc.packer.pack_field_int($realtobits(ARG), 64); \
         end \
       UVM_UNPACK: \
         begin \
-          if($bits(ARG) <= 64) ARG =  m_sc.packer.unpack_field_int($bits(ARG)); \
-          else ARG = m_sc.packer.unpack_field($bits(ARG)); \
+          ARG = $bitstoreal(m_sc.packer.unpack_field_int(64)); \
         end \
       UVM_RECORD: \
-        `m_uvm_record_int(ARG,FLAG) \
+        if(!(FLAG&UVM_NORECORD)) begin \
+          m_sc.recorder.record_field_real(`"ARG`", ARG); \
+        end \
       UVM_PRINT: \
         begin \
-          m_sc.printer.print_field(`"ARG`", ARG, $bits(ARG), uvm_radix_enum'(FLAG&UVM_RADIX)); \
+          m_sc.printer.print_field_real(`"ARG`", ARG); \
         end \
       UVM_SETINT: \
         begin \
@@ -741,7 +741,7 @@
             end \
             else begin \
               print_field_match("set_int()", str__); \
-              ARG = uvm_object::m_sc.bitstream; \
+              ARG = $bitstoreal(uvm_object::m_sc.bitstream); \
               m_sc.status = 1; \
             end \
           end \
@@ -2909,7 +2909,7 @@
           begin \
             uvm_printer p__ = m_sc.printer; \
             p__.print_array_header (`"ARG`", ARG.num(),`"aa_``KEY`"); \
-            if((p__.knobs.depth == -1) || (m_sc.m_scope.depth() < p__.knobs.depth+1)) \
+            if((p__.knobs.depth == -1) || (m_sc.printer.m_scope.depth() < p__.knobs.depth+1)) \
             begin \
               if(ARG.first(aa_key)) \
                 do begin \
