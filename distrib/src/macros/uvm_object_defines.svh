@@ -446,7 +446,7 @@
       UVM_SETINT: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -534,7 +534,7 @@
       UVM_SETOBJ: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG &UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -606,7 +606,7 @@
       UVM_SETSTR: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -671,7 +671,7 @@
       UVM_SETINT: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -734,7 +734,7 @@
       UVM_SETINT: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -878,7 +878,7 @@
       UVM_SETINT: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -891,7 +891,7 @@
           else if(!(FLAG&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
-              if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+              if(uvm_is_match(str__, m_sc.scope.get())) begin \
                 print_field_match("set_int()", str__); \
                 ARG[i] =  uvm_object::m_sc.bitstream; \
                 m_sc.status = 1; \
@@ -987,7 +987,7 @@
             foreach(ARG[i]) begin \
               $swrite(s,`"ARG[%0d]`",i); \
               m_sc.scope.set_arg(s); \
-              if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+              if(uvm_is_match(str__, m_sc.scope.get())) begin \
                 print_field_match("set_object()", str__); \
                 if($cast(ARG[i],uvm_object::m_sc.object)) \
                   uvm_object::m_sc.status = 1; \
@@ -1080,7 +1080,7 @@
       UVM_SETSTR: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -1093,7 +1093,7 @@
           else if(!(FLAG&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
-              if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+              if(uvm_is_match(str__, m_sc.scope.get())) begin \
                 print_field_match("set_int()", str__); \
                 ARG[i] =  uvm_object::m_sc.stringv; \
                 m_sc.status = 1; \
@@ -1174,7 +1174,7 @@
       UVM_SETINT: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -1187,7 +1187,7 @@
           else if(!(FLAG&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
-              if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+              if(uvm_is_match(str__, m_sc.scope.get())) begin \
                 print_field_match("set_int()", str__); \
                 ARG[i] =  T'(uvm_object::m_sc.bitstream); \
                 m_sc.status = 1; \
@@ -1286,7 +1286,7 @@
       UVM_SETINT: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -1302,7 +1302,7 @@
           else if(!(FLAG&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
-              if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+              if(uvm_is_match(str__, m_sc.scope.get())) begin \
                 print_field_match("set_int()", str__); \
                 ARG[i] =  uvm_object::m_sc.bitstream; \
                 m_sc.status = 1; \
@@ -1398,7 +1398,7 @@
       UVM_SETINT: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -1419,7 +1419,7 @@
             foreach(ARG[i]) begin \
               $swrite(s,`"ARG[%0d]`",i); \
               m_sc.scope.set_arg(s); \
-              if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+              if(uvm_is_match(str__, m_sc.scope.get())) begin \
                 print_field_match("set_object()", str__); \
                 if($cast(ARG[i],uvm_object::m_sc.object)) \
                   uvm_object::m_sc.status = 1; \
@@ -1517,7 +1517,7 @@
       UVM_SETINT: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -1536,7 +1536,7 @@
           if(!(FLAG&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
-              if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+              if(uvm_is_match(str__, m_sc.scope.get())) begin \
                 print_field_match("set_int()", str__); \
                 ARG[i] =  uvm_object::m_sc.stringv; \
                 m_sc.status = 1; \
@@ -1627,7 +1627,7 @@
       UVM_SETINT: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -1643,7 +1643,7 @@
           else if(!(FLAG&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
-              if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+              if(uvm_is_match(str__, m_sc.scope.get())) begin \
                 print_field_match("set_int()", str__); \
                 ARG[i] =  T'(uvm_object::m_sc.bitstream); \
                 m_sc.status = 1; \
@@ -1742,7 +1742,7 @@
       UVM_SETINT: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -1760,7 +1760,7 @@
           else if(!(FLAG&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
-              if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+              if(uvm_is_match(str__, m_sc.scope.get())) begin \
                 print_field_match("set_int()", str__); \
                 ARG[i] =  uvm_object::m_sc.bitstream; \
                 m_sc.status = 1; \
@@ -1858,7 +1858,7 @@
       UVM_SETINT: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -1881,7 +1881,7 @@
             foreach(ARG[i]) begin \
               $swrite(s,`"ARG[%0d]`",i); \
               m_sc.scope.set_arg(s); \
-              if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+              if(uvm_is_match(str__, m_sc.scope.get())) begin \
                 print_field_match("set_object()", str__); \
                 if($cast(ARG[i],uvm_object::m_sc.object)) \
                   uvm_object::m_sc.status = 1; \
@@ -1981,7 +1981,7 @@
       UVM_SETINT: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -2002,7 +2002,7 @@
           if(!(FLAG&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
-              if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+              if(uvm_is_match(str__, m_sc.scope.get())) begin \
                 print_field_match("set_int()", str__); \
                 ARG[i] =  uvm_object::m_sc.stringv; \
                 m_sc.status = 1; \
@@ -2095,7 +2095,7 @@
       UVM_SETINT: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+          if(uvm_is_match(str__, m_sc.scope.get())) begin \
             if(FLAG&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
@@ -2114,7 +2114,7 @@
           else if(!(FLAG&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
-              if(uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+              if(uvm_is_match(str__, m_sc.scope.get())) begin \
                 print_field_match("set_int()", str__); \
                 ARG[i] =  T'(uvm_object::m_sc.bitstream); \
                 m_sc.status = 1; \
@@ -3106,18 +3106,18 @@
         if(wildcard_index__) begin \
           if(ARRAY.first(index__)) \
           do begin \
-            if(uvm_is_match(str__, {m_sc.scope.get_arg(),$psprintf("[%0d]", index__)}) ||  \
-               uvm_is_match(str__, {m_sc.scope.get_arg(),$psprintf("[%0s]", index__)})) begin \
+            if(uvm_is_match(str__, {m_sc.scope.get(),$psprintf("[%0d]", index__)}) ||  \
+               uvm_is_match(str__, {m_sc.scope.get(),$psprintf("[%0s]", index__)})) begin \
               ARRAY[index__] = RHS; \
               m_sc.status = 1; \
             end \
           end while(ARRAY.next(index__));\
         end \
-        else if(uvm_is_match(str__, {m_sc.scope.get_arg(),$psprintf("[%0d]", index__)})) begin \
+        else if(uvm_is_match(str__, {m_sc.scope.get(),$psprintf("[%0d]", index__)})) begin \
           ARRAY[index__] = RHS; \
           m_sc.status = 1; \
         end \
-        else if(uvm_is_match(str__, {m_sc.scope.get_arg(),$psprintf("[%0s]", index__)})) begin \
+        else if(uvm_is_match(str__, {m_sc.scope.get(),$psprintf("[%0s]", index__)})) begin \
           ARRAY[index__] = RHS; \
           m_sc.status = 1; \
         end \
@@ -3136,20 +3136,20 @@
         if(wildcard_index__) begin \
           if(ARRAY.first(index__)) \
           do begin \
-            if(uvm_is_match(str__, {m_sc.scope.get_arg(),$psprintf("[%0d]", index__)}) || \
-               uvm_is_match(str__, {m_sc.scope.get_arg(),$psprintf("[%0s]", index__)})) begin \
+            if(uvm_is_match(str__, {m_sc.scope.get(),$psprintf("[%0d]", index__)}) || \
+               uvm_is_match(str__, {m_sc.scope.get(),$psprintf("[%0s]", index__)})) begin \
               if (m_sc.object != null) \
                 $cast(ARRAY[index__], m_sc.object); \
               m_sc.status = 1; \
             end \
           end while(ARRAY.next(index__));\
         end \
-        else if(uvm_is_match(str__, {m_sc.scope.get_arg(),$psprintf("[%0d]", index__)})) begin \
+        else if(uvm_is_match(str__, {m_sc.scope.get(),$psprintf("[%0d]", index__)})) begin \
           if (m_sc.object != null) \
             $cast(ARRAY[index__], m_sc.object); \
           m_sc.status = 1; \
         end \
-        else if(uvm_is_match(str__, {m_sc.scope.get_arg(),$psprintf("[%0s]", index__)})) begin \
+        else if(uvm_is_match(str__, {m_sc.scope.get(),$psprintf("[%0s]", index__)})) begin \
           if (m_sc.object != null) \
             $cast(ARRAY[index__], m_sc.object); \
           m_sc.status = 1; \
@@ -3170,14 +3170,14 @@
         if(wildcard_index__) begin \
           if(ARRAY.first(index__)) \
           do begin \
-            $swrite(idx__, m_sc.scope.get_arg(), "[", index__, "]"); \
+            $swrite(idx__, m_sc.scope.get(), "[", index__, "]"); \
             if(uvm_is_match(str__, idx__)) begin \
               ARRAY[index__] = RHS; \
               m_sc.status = 1; \
             end \
           end while(ARRAY.next(index__));\
         end \
-        else if(uvm_is_match(str__, {m_sc.scope.get_arg(),$psprintf("[%0d]", index__)})) begin \
+        else if(uvm_is_match(str__, {m_sc.scope.get(),$psprintf("[%0d]", index__)})) begin \
           ARRAY[index__] = RHS; \
           m_sc.status = 1; \
         end  \
@@ -3198,14 +3198,14 @@
         if(wildcard_index__) begin \
           if(ARRAY.first(index__)) \
           do begin \
-            $swrite(idx__, m_sc.scope.get_arg(), "[", index__, "]"); \
+            $swrite(idx__, m_sc.scope.get(), "[", index__, "]"); \
             if(uvm_is_match(str__, idx__)) begin \
               ARRAY[index__] = RHS; \
               m_sc.status = 1; \
             end \
           end while(ARRAY.next(index__));\
         end \
-        else if(uvm_is_match(str__, {m_sc.scope.get_arg(),$psprintf("[%0d]", index__)})) begin \
+        else if(uvm_is_match(str__, {m_sc.scope.get(),$psprintf("[%0d]", index__)})) begin \
           ARRAY[index__] = RHS; \
           m_sc.status = 1; \
         end  \
@@ -3224,31 +3224,31 @@
       if(uvm_is_array(str__) ) begin\
         if(wildcard_index__) begin \
           for(int index__=0; index__<ARRAY.size(); ++index__) begin \
-            if(uvm_is_match(str__, {m_sc.scope.get_arg(),$psprintf("[%0d]", index__)})) begin \
+            if(uvm_is_match(str__, {m_sc.scope.get(),$psprintf("[%0d]", index__)})) begin \
               ARRAY[index__] = RHS; \
               m_sc.status = 1; \
             end \
           end \
         end \
-        else if(uvm_is_match(str__, {m_sc.scope.get_arg(),$psprintf("[%0d]", index__)})) begin \
+        else if(uvm_is_match(str__, {m_sc.scope.get(),$psprintf("[%0d]", index__)})) begin \
           ARRAY[index__] = RHS; \
           m_sc.status = 1; \
         end \
-        else if(what__==UVM_SET && uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+        else if(what__==UVM_SET && uvm_is_match(str__, m_sc.scope.get())) begin \
           int size__; \
           size__ = m_sc.bitstream; \
           ARRAY = new[size__](ARRAY); \
           m_sc.status = 1; \
         end \
       end \
-      else if(what__==UVM_SET && uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+      else if(what__==UVM_SET && uvm_is_match(str__, m_sc.scope.get())) begin \
         int size__; \
         size__ = m_sc.bitstream; \
         ARRAY = new[size__](ARRAY); \
         m_sc.status = 1; \
       end \
     end \
-    else if(what__==UVM_SET && uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+    else if(what__==UVM_SET && uvm_is_match(str__, m_sc.scope.get())) begin \
      int size__; \
      size__ = m_sc.bitstream; \
      ARRAY = new[size__](ARRAY); \
@@ -3266,31 +3266,31 @@
       if(uvm_is_array(str__) ) begin\
         if(wildcard_index__) begin \
           for(int index__=0; index__<ARRAY.size(); ++index__) begin \
-            if(uvm_is_match(str__, {m_sc.scope.get_arg(),$psprintf("[%0d]", index__)})) begin \
+            if(uvm_is_match(str__, {m_sc.scope.get(),$psprintf("[%0d]", index__)})) begin \
               ARRAY[index__] = T'(RHS); \
               m_sc.status = 1; \
             end \
           end \
         end \
-        else if(uvm_is_match(str__, {m_sc.scope.get_arg(),$psprintf("[%0d]", index__)})) begin \
+        else if(uvm_is_match(str__, {m_sc.scope.get(),$psprintf("[%0d]", index__)})) begin \
           ARRAY[index__] = T'(RHS); \
           m_sc.status = 1; \
         end \
-        else if(what__==UVM_SET && uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+        else if(what__==UVM_SET && uvm_is_match(str__, m_sc.scope.get())) begin \
           int size__; \
           size__ = m_sc.bitstream; \
           ARRAY = new[size__](ARRAY); \
           m_sc.status = 1; \
         end \
       end \
-      else if(what__==UVM_SET && uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+      else if(what__==UVM_SET && uvm_is_match(str__, m_sc.scope.get())) begin \
         int size__; \
         size__ = m_sc.bitstream; \
         ARRAY = new[size__](ARRAY); \
         m_sc.status = 1; \
       end \
     end \
-    else if(what__==UVM_SET && uvm_is_match(str__, m_sc.scope.get_arg())) begin \
+    else if(what__==UVM_SET && uvm_is_match(str__, m_sc.scope.get())) begin \
      int size__; \
      size__ = m_sc.bitstream; \
      ARRAY = new[size__](ARRAY); \

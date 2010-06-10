@@ -310,7 +310,7 @@ function void uvm_printer::print_array_header (string name, int size,
 
   if(name != "")
     m_scope.set_arg(name);
-  print_id (m_scope.get_arg(), scope_separator);
+  print_id (m_scope.get(), scope_separator);
   print_type_name (arraytype);
   print_size (size);
   print_value_array("", size);
@@ -360,7 +360,7 @@ function void uvm_printer::print_field (string name,
   if(name != "")
     m_scope.set_arg(name);
 
-  print_id (m_scope.get_arg(), scope_separator);
+  print_id (m_scope.get(), scope_separator);
   if(type_name != "") begin
     print_type_name(type_name);
   end
@@ -399,7 +399,7 @@ function void uvm_printer::print_object_header ( string name,
 
   if(name != "")
     m_scope.set_arg(name);
-  print_id (m_scope.get_arg(), scope_separator);
+  print_id (m_scope.get(), scope_separator);
 
   if(value != null) 
     print_type_name(value.get_type_name());
@@ -487,7 +487,7 @@ function void uvm_printer::print_string (string name, string value,
   if(name != "")
     m_scope.set_arg(name);
 
-  print_id (m_scope.get_arg(), scope_separator);
+  print_id (m_scope.get(), scope_separator);
   print_type_name ("string");
   print_size (value.len());
   //print_value_string ( {"\"", value, "\""} );
@@ -525,7 +525,7 @@ function void uvm_printer::print_generic (string name, string type_name,
   if(name == "...")
     print_id (name, scope_separator);
   else
-    print_id (m_scope.get_arg(), scope_separator);
+    print_id (m_scope.get(), scope_separator);
   print_type_name (type_name);
   print_size (size);
   print_value_string ( value );
@@ -955,7 +955,7 @@ function void uvm_tree_printer::print_string (string name, string value,
   if(name != "")
     m_scope.set_arg(name);
 
-  print_id (m_scope.get_arg(), scope_separator);
+  print_id (m_scope.get(), scope_separator);
   print_type_name ("string");
   //print_value_string ( {"\"", value, "\""} );
   print_value_string ( value );
@@ -976,7 +976,7 @@ function void uvm_tree_printer::print_object_header ( string name,
 
   if(name != "" && name != "<unnamed>")
     m_scope.set_arg(name);
-  print_id (m_scope.get_arg(), scope_separator);
+  print_id (m_scope.get(), scope_separator);
 
   if(value!=null)
     print_type_name(value.get_type_name(), 1);

@@ -117,12 +117,12 @@ class uvm_recorder;
       radix = default_radix;
 
     case(radix)
-      UVM_BIN:     uvm_set_attribute_by_name(tr_handle, scope.get_arg(), value, "'b",size);
-      UVM_OCT:     uvm_set_attribute_by_name(tr_handle, scope.get_arg(), value, "'o",size);
-      UVM_DEC:     uvm_set_attribute_by_name(tr_handle, scope.get_arg(), value, "'s",size);
-      UVM_TIME:    uvm_set_attribute_by_name(tr_handle, scope.get_arg(), value, "'u",size);
-      UVM_STRING:  uvm_set_attribute_by_name(tr_handle, scope.get_arg(), value, "'a",size);
-      default: uvm_set_attribute_by_name(tr_handle, scope.get_arg(), value, "'x",size);
+      UVM_BIN:     uvm_set_attribute_by_name(tr_handle, scope.get(), value, "'b",size);
+      UVM_OCT:     uvm_set_attribute_by_name(tr_handle, scope.get(), value, "'o",size);
+      UVM_DEC:     uvm_set_attribute_by_name(tr_handle, scope.get(), value, "'s",size);
+      UVM_TIME:    uvm_set_attribute_by_name(tr_handle, scope.get(), value, "'u",size);
+      UVM_STRING:  uvm_set_attribute_by_name(tr_handle, scope.get(), value, "'a",size);
+      default: uvm_set_attribute_by_name(tr_handle, scope.get(), value, "'x",size);
     endcase
   endfunction
 
@@ -135,7 +135,7 @@ class uvm_recorder;
                                            real value);
     if(tr_handle==0) return;
     scope.set_arg(name);
-    uvm_set_attribute_by_name(tr_handle, scope.get_arg(), value, "'r");
+    uvm_set_attribute_by_name(tr_handle, scope.get(), value, "'r");
   endfunction
 
 
@@ -156,7 +156,7 @@ class uvm_recorder;
         v = str.atoi(); 
       end
       scope.set_arg(name);
-      uvm_set_attribute_by_name(tr_handle, scope.get_arg(), v, "'s");
+      uvm_set_attribute_by_name(tr_handle, scope.get(), v, "'s");
     end
  
     if(policy != UVM_REFERENCE) begin
@@ -179,7 +179,7 @@ class uvm_recorder;
   
   virtual function void record_string (string name, string value);
     scope.set_arg(name);
-    uvm_set_attribute_by_name(tr_handle, scope.get_arg(), uvm_string_to_bits(value), "'a");
+    uvm_set_attribute_by_name(tr_handle, scope.get(), uvm_string_to_bits(value), "'a");
   endfunction
 
 

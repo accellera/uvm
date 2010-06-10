@@ -273,7 +273,7 @@ function int uvm_object::m_do_set (string match,
   if (what < UVM_START_FUNCS || what > UVM_END_FUNCS)
      return 0;
 
-  matched = uvm_is_match(match, m_sc.scope.get_arg());
+  matched = uvm_is_match(match, m_sc.scope.get());
 
   case (what)
     UVM_SETINT:
@@ -330,7 +330,7 @@ function int uvm_object::m_do_set_string(string match,
   if (what < UVM_START_FUNCS || what > UVM_END_FUNCS)
      return 0;
 
-  matched = uvm_is_match(match, m_sc.scope.get_arg());
+  matched = uvm_is_match(match, m_sc.scope.get());
 
   case (what)
     UVM_SETSTR:
@@ -393,7 +393,7 @@ function int uvm_object::m_do_set_object (string match,
   if (what < UVM_START_FUNCS || what > UVM_END_FUNCS)
      return 0;
 
-  matched = uvm_is_match(match, m_sc.scope.get_arg());
+  matched = uvm_is_match(match, m_sc.scope.get());
 
   case (what)
     UVM_SETOBJ:
@@ -522,7 +522,7 @@ function bit  uvm_object::compare (uvm_object rhs,
       comparer.print_msg_object(this, rhs);
       uvm_report_info("MISCMP",
            $psprintf("%0d Miscompare(s) for object %s@%0d vs. %s@%0d", 
-           comparer.result, m_sc.scope.get_arg(), this.get_inst_id(), m_sc.scope.get_arg(), rhs.get_inst_id()), m_sc.comparer.verbosity);
+           comparer.result, m_sc.scope.get(), this.get_inst_id(), m_sc.scope.get_arg(), rhs.get_inst_id()), m_sc.comparer.verbosity);
       done = 1;
     end
   end
@@ -1254,6 +1254,6 @@ endfunction
 //-----------------------------------------------------------------------------
 
 function string uvm_status_container::get_full_scope_arg ();
-  get_full_scope_arg = scope.get_arg();
+  get_full_scope_arg = scope.get();
 endfunction
 
