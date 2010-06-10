@@ -2467,17 +2467,17 @@
       else if(sz__ < 10) begin \
         foreach(ARG[i]) begin \
            m_sc.scope.set_arg_element(`"ARG`",i); \
-           m_sc.recorder.record_field("", ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+           m_sc.recorder.record_field(m_sc.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
         end \
       end \
       else begin \
         for(int i=0; i<5; ++i) begin \
            m_sc.scope.set_arg_element(`"ARG`", i); \
-           m_sc.recorder.record_field("", ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+           m_sc.recorder.record_field(m_sc.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
         end \
         for(int i=sz__-5; i<sz__; ++i) begin \
            m_sc.scope.set_arg_element(`"ARG`", i); \
-           m_sc.recorder.record_field("", ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+           m_sc.recorder.record_field(m_sc.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
         end \
       end \
     end \
@@ -2497,17 +2497,17 @@
       else if(sz__ < 10) begin \
         foreach(ARG[i]) begin \
            m_sc.scope.set_arg_element(`"ARG`",i); \
-           m_sc.recorder.record_string("", ARG[i].name()); \
+           m_sc.recorder.record_string(m_sc.scope.get(), ARG[i].name()); \
         end \
       end \
       else begin \
         for(int i=0; i<5; ++i) begin \
            m_sc.scope.set_arg_element(`"ARG`", i); \
-           m_sc.recorder.record_string("", ARG[i].name()); \
+           m_sc.recorder.record_string(m_sc.scope.get(), ARG[i].name()); \
         end \
         for(int i=sz__-5; i<sz__; ++i) begin \
            m_sc.scope.set_arg_element(`"ARG`", i); \
-           m_sc.recorder.record_string("", ARG[i].name()); \
+           m_sc.recorder.record_string(m_sc.scope.get(), ARG[i].name()); \
         end \
       end \
     end \
@@ -2551,17 +2551,17 @@
       else if(sz__ < 10) begin \
         foreach(ARG[i]) begin \
            m_sc.scope.set_arg_element(`"ARG`",i); \
-           m_sc.recorder.record_string("", ARG[i]); \
+           m_sc.recorder.record_string(m_sc.scope.get(), ARG[i]); \
         end \
       end \
       else begin \
         for(int i=0; i<5; ++i) begin \
            m_sc.scope.set_arg_element(`"ARG`", i); \
-           m_sc.recorder.record_string("", ARG[i]); \
+           m_sc.recorder.record_string(m_sc.scope.get(), ARG[i]); \
         end \
         for(int i=sz__-5; i<sz__; ++i) begin \
            m_sc.scope.set_arg_element(`"ARG`", i); \
-           m_sc.recorder.record_string("", ARG[i]); \
+           m_sc.recorder.record_string(m_sc.scope.get(), ARG[i]); \
         end \
       end \
     end \
