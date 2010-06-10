@@ -517,15 +517,15 @@
         end \
       UVM_SETINT: \
         begin \
-          if(ARG != null && (FLAG&UVM_READONLY)!=0) begin \
+          if((ARG != null) && ((FLAG&UVM_READONLY)==0) && ((FLAG&UVM_REFERENCE)==0)) begin \
             m_sc.scope.down(`"ARG`"); \
             ARG.m_field_automation(null, UVM_SETINT, str__); \
-            m_sc.scope.up(`"ARG`"); \
+            m_sc.scope.up(); \
           end \
         end \
       UVM_SETSTR: \
         begin \
-          if(ARG != null && (FLAG&UVM_READONLY)!=0) begin \
+          if((ARG != null) && ((FLAG&UVM_READONLY)==0) && ((FLAG&UVM_REFERENCE)==0)) begin \
             m_sc.scope.down(`"ARG`"); \
             ARG.m_field_automation(null, UVM_SETSTR, str__); \
             m_sc.scope.up(); \
