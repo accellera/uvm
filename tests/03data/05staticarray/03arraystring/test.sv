@@ -108,8 +108,8 @@ module test;
 
       uvm_default_packer.use_metadata = 1;
       void'(cp.pack_bytes(bytes));
-      if(bytes.size() != 88)
-        uvm_report_info("FAILED", "*** UVM TEST FAILED compare passed, packed incorrectly ***", UVM_NONE);
+      if(bytes.size() != 80)
+        uvm_report_info("FAILED", "*** UVM TEST FAILED packed incorrectly ***", UVM_NONE);
 
       void'(obj.unpack_bytes(bytes));
       if(!cp.compare(obj))

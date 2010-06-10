@@ -150,7 +150,7 @@ cfg_field_set_clone.print();
 
       uvm_default_packer.use_metadata = 1;
       void'(cp.pack_bytes(bytes));
-      if(bytes.size() != 73)
+      if(bytes.size() != 69)
         uvm_report_info("FAILED", "*** UVM TEST FAILED packed incorrectly ***", UVM_NONE);
 
       void'(obj.unpack_bytes(bytes));
