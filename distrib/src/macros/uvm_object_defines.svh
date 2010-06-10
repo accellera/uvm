@@ -964,7 +964,7 @@
       UVM_PACK: \
         begin \
           foreach(ARG[i])  \
-            void'(m_sc.packer.unpack_object(ARG[i])); \
+            void'(m_sc.packer.pack_object(ARG[i])); \
         end \
       UVM_UNPACK: \
         begin \
@@ -1376,7 +1376,7 @@
         begin \
           if(m_sc.packer.use_metadata) m_sc.packer.pack_field_int(ARG.size(), 32); \
           foreach(ARG[i])  \
-            void'(m_sc.packer.unpack_object(ARG[i])); \
+            void'(m_sc.packer.pack_object(ARG[i])); \
         end \
       UVM_UNPACK: \
         begin \
@@ -1722,7 +1722,7 @@
           int sz = ARG.size(); \
           if(m_sc.packer.use_metadata) sz = m_sc.packer.unpack_field_int(32); \
           if(sz != ARG.size()) begin \
-            while(sz<ARG.size()) ARG.push_back(0); \
+            while(ARG.size()<sz) ARG.push_back(0); \
             while(ARG.size()>sz) void'(ARG.pop_front()); \
           end \
           foreach(ARG[i]) \
@@ -1751,7 +1751,7 @@
               int sz =  uvm_object::m_sc.bitstream; \
               print_field_match("set_int()", str__); \
               if(ARG.size() !=  sz) begin \
-                while(sz<ARG.size()) ARG.push_back(0); \
+                while(ARG.size()<sz) ARG.push_back(0); \
                 while(ARG.size()>sz) void'(ARG.pop_front()); \
               end \
               m_sc.status = 1; \
@@ -1833,14 +1833,14 @@
         begin \
           if(m_sc.packer.use_metadata) m_sc.packer.pack_field_int(ARG.size(), 32); \
           foreach(ARG[i])  \
-            void'(m_sc.packer.unpack_object(ARG[i])); \
+            void'(m_sc.packer.pack_object(ARG[i])); \
         end \
       UVM_UNPACK: \
         begin \
           int sz = ARG.size(); \
           if(m_sc.packer.use_metadata) sz = m_sc.packer.unpack_field_int(32); \
           if(sz != ARG.size()) begin \
-            while(sz<ARG.size()) ARG.push_back(null); \
+            while(ARG.size()<sz) ARG.push_back(null); \
             while(ARG.size()>sz) void'(ARG.pop_front()); \
           end \
           foreach(ARG[i]) \
@@ -1867,7 +1867,7 @@
               int sz =  uvm_object::m_sc.bitstream; \
               print_field_match("set_int()", str__); \
               if(ARG.size() !=  sz) begin \
-                while(sz<ARG.size()) ARG.push_back(null); \
+                while(ARG.size()<sz) ARG.push_back(null); \
                 while(ARG.size()>sz) void'(ARG.pop_front()); \
               end \
               m_sc.status = 1; \
@@ -1963,7 +1963,7 @@
           int sz = ARG.size(); \
           if(m_sc.packer.use_metadata) sz = m_sc.packer.unpack_field_int(32); \
           if(sz != ARG.size()) begin \
-            while(sz<ARG.size()) ARG.push_back(""); \
+            while(ARG.size()<sz) ARG.push_back(""); \
             while(ARG.size()>sz) void'(ARG.pop_front()); \
           end \
           foreach(ARG[i]) \
@@ -1990,7 +1990,7 @@
               int sz =  uvm_object::m_sc.bitstream; \
               print_field_match("set_int()", str__); \
               if(ARG.size() !=  sz) begin \
-                while(sz<ARG.size()) ARG.push_back(""); \
+                while(ARG.size()<sz) ARG.push_back(""); \
                 while(ARG.size()>sz) void'(ARG.pop_front()); \
               end \
               m_sc.status = 1; \
@@ -2077,7 +2077,7 @@
           if(m_sc.packer.use_metadata) sz = m_sc.packer.unpack_field_int(32); \
           if(sz != ARG.size()) begin \
             T tmp__; /* for default value of enum type */ \
-            while(sz<ARG.size()) ARG.push_back(tmp__); \
+            while(ARG.size()<sz) ARG.push_back(tmp__); \
             while(ARG.size()>sz) void'(ARG.pop_front()); \
           end \
           foreach(ARG[i]) \
@@ -2105,7 +2105,7 @@
               print_field_match("set_int()", str__); \
               if(ARG.size() !=  sz) begin \
                 T tmp__; /* for default value of enum type */ \
-                while(sz<ARG.size()) ARG.push_back(tmp__); \
+                while(ARG.size()<sz) ARG.push_back(tmp__); \
                 while(ARG.size()>sz) void'(ARG.pop_front()); \
               end \
               m_sc.status = 1; \
