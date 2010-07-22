@@ -40,8 +40,6 @@
   `include "methodology/sequences/uvm_sequence.svh"
   `include "methodology/sequences/uvm_sequence_builtin.svh"
 
-  `include "methodology/uvm_meth_defines.svh"
-
   `include "methodology/uvm_monitor.svh"
   `include "methodology/uvm_driver.svh"
   `include "methodology/uvm_push_driver.svh"
