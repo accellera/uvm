@@ -811,9 +811,7 @@ virtual class uvm_object extends uvm_void;
 
   extern protected virtual function uvm_report_object m_get_report_object();
 
-  extern static function uvm_status_container init_status();
-
-  static protected uvm_status_container m_sc = init_status();
+  static /*protected*/ uvm_status_container m_sc = new;
 
   static function uvm_status_container m_get_status(); return m_sc; endfunction
 
@@ -835,25 +833,40 @@ endclass
 //------------------------------------------------------------------------------
 
 class uvm_status_container;
-  //Since there is a cost to saving the field string, only do so if needed.
-  static bit          save_last_field = 0;
-  static string       last_field     = "";
+  //The clone setting is used by the set/get config to know if cloning is on.
+  bit             clone = 1;
 
-  static bit          warning    = 0;
-  static bit          status     = 0;
-  static uvm_bitstream_t  bitstream  = 0;
-  static int          intv       = 0;
-  static int          element    = 0;
-  static string       stringv    = "";
-  static string       scratch1   = "";
-  static string       scratch2   = "";
-  static string       key        = "";
-  static uvm_object   object     = null;
-  static bit          array_warning_done = 0;
-  static uvm_scope_stack scope       = init_scope();  //For get-set operations
+  //Information variables used by the macro functions for storage.
+  bit          warning    = 0;
+  bit          status     = 0;
+  uvm_bitstream_t  bitstream  = 0;
+  int          intv       = 0;
+  int          element    = 0;
+  string       stringv    = "";
+  string       scratch1   = "";
+  string       scratch2   = "";
+  string       key        = "";
+  uvm_object   object     = null;
+  bit          array_warning_done = 0;
 
-  extern static function string get_full_scope_arg ();
-  extern static function uvm_scope_stack init_scope();
+  // The scope stack is used for messages that are emitted by policy classes.
+  uvm_scope_stack scope  = new;
+
+  extern function string get_full_scope_arg ();
+
+  //Used for checking cycles. When a data function is entered, if the depth is
+  //non-zero, then then the existeance of the object in the map means that a
+  //cycle has occured and the function should immediately exit. When the
+  //function exits, it should reset the cycle map so that there is no memory
+  //leak.
+  bit             cycle_check[uvm_object];
+
+  //These are the policy objects currently in use. The policy object gets set
+  //when a function starts up. The macros use this.
+  uvm_comparer    comparer;
+  uvm_packer      packer;
+  uvm_recorder    recorder;
+  uvm_printer     printer;
 endclass
 
 //------------------------------------------------------------------------------
@@ -881,24 +894,6 @@ class uvm_copy_map;
   function void delete(uvm_object v);
     m_map.delete(v);
   endfunction 
-endclass
-
-
-//------------------------------------------------------------------------------
-//
-// CLASS- uvm_options_container
-//
-// Internal class.
-//------------------------------------------------------------------------------
-
-class uvm_options_container;
-  uvm_comparer    comparer;
-  uvm_packer      packer;
-  uvm_recorder    recorder;
-  uvm_printer     printer;
-  bit             clone = 1;
-  extern function new();
-  extern static function uvm_options_container init();
 endclass
 
 

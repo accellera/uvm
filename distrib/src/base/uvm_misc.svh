@@ -53,26 +53,20 @@ typedef class uvm_object;
 //----------------------------------------------------------------------------
 
 class uvm_scope_stack;
-  local string   m_scope="";
-  local string   m_scope_arg="";
-  local int      m_depth=0;
-  local bit      m_object_map[uvm_void];
-  local uvm_void m_stack[$];
+  local string m_arg = "";
+  local string m_stack[$];
 
-  extern function void   set          (string s, uvm_object obj);
-  extern function void   down         (string s, uvm_object obj);
-  extern function void   down_element (int element, uvm_object obj);
-  extern function void   up           (uvm_object obj, byte separator=".");
-  extern function void   up_element   (uvm_object obj);
+  extern function void   set          (string s);
+  extern function void   down         (string s);
+  extern function void   down_element (int element);
+  extern function void   up_element   ();
+  extern function void   up           (byte separator=".");
   extern function void   set_arg      (string arg);
   extern function void   unset_arg    (string arg);
   extern function void   set_arg_element  (string arg, int ele);
   extern function int    depth        ();
   extern function string get          ();
   extern function string get_arg      ();
-  extern function uvm_object current    ();
-
-  extern function bit    in_hierarchy  (uvm_object obj);
 endclass
 
 `endif // UVM_MISC_SVH

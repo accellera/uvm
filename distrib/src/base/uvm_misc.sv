@@ -155,7 +155,19 @@ endfunction
 // -----
 
 function string uvm_scope_stack::get();
-  return m_scope;
+  string v;
+  if(m_stack.size() == 0) return m_arg;
+  get = m_stack[0];
+  for(int i=1; i<m_stack.size(); ++i) begin
+    v = m_stack[i];
+    if(v[0] == "[" || v[0] == "(" || v[0] == "{")
+      get = {get,v};
+    else
+      get = {get,".",v};
+  end
+  if(m_arg != "") begin
+    get = {get, ".", m_arg};
+  end
 endfunction
 
 
@@ -163,118 +175,69 @@ endfunction
 // ---------
 
 function string uvm_scope_stack::get_arg();
-  return m_scope_arg;
+  return m_arg;
 endfunction
 
 
 // set_scope
 // ---------
 
-function void uvm_scope_stack::set (string s, uvm_object obj);
-  uvm_void v; v=obj;
-  m_scope_arg = s;
-  m_scope = s;
-
-  // When no arg delete() is supported for queues, can just call m_stack.delete().
-  while(m_stack.size()) void'(m_stack.pop_front());
+function void uvm_scope_stack::set (string s);
+  `uvm_clear_queue(m_stack);
   
-  m_stack.push_back(v);
-  if(v!=null) begin
-   m_object_map[v] = 1;
-  end
+  m_stack.push_back(s);
+  m_arg = "";
 endfunction
 
 
 // down
 // ----
 
-function void uvm_scope_stack::down (string s, uvm_object obj);
-  uvm_void v; v=obj;
-  if(m_scope == "")
-    m_scope = s;
-  else if(s.len()) begin
-    if(s[0] == "[")
-      m_scope = {m_scope,s};
-    else
-      m_scope = {m_scope,".",s};
-  end
-  m_scope_arg=m_scope;
-  if(v!=null) begin
-    m_object_map[v] = 1;
-  end
-  m_stack.push_back(v);
+function void uvm_scope_stack::down (string s);
+  m_stack.push_back(s);
+  m_arg = "";
 endfunction
 
 
 // down_element
 // ------------
 
-function void uvm_scope_stack::down_element (int element, uvm_object obj);
-  string tmp_value_str;
-  uvm_void v; v=obj;
-  tmp_value_str.itoa(element);
-
-  m_scope = {m_scope, "[", tmp_value_str, "]"};
-  m_scope_arg=m_scope;
-  m_stack.push_back(v);
-  if(v!=null)
-    m_object_map[v] = 1;
+function void uvm_scope_stack::down_element (int element);
+  m_stack.push_back($sformatf("[%0d]",element));
+  m_arg = "";
 endfunction
 
-// current
-// -------
+// up_element
+// ------------
 
-function uvm_object uvm_scope_stack::current ();
-  uvm_void v;
-  if(m_stack.size()) begin
-    v = m_stack[m_stack.size()-1];
-    $cast(current, v);
-  end
-  else
-    return null;
+function void uvm_scope_stack::up_element ();
+  string s;
+  if(!m_stack.size()) return;
+  s = m_stack.pop_back();
+  if(s[0] != "[") m_stack.push_back(s);
 endfunction
 
 // up
 // --
 
-function void uvm_scope_stack::up (uvm_object obj, byte separator =".");
-  string tmp_value_str;
-  int last_dot;
-  if(!m_scope.len()) begin
-    // When no arg delete() is supported for associative arrays, can just call 
-    // m_object_map.delete().
-    foreach(m_object_map[i]) m_object_map.delete(i);
-    // When no arg delete() is supported for queues, can just call m_stack.delete().
-    while(m_stack.size()) void'(m_stack.pop_front());
-    return;
+function void uvm_scope_stack::up (byte separator =".");
+  bit found=0;
+  string s;
+  while(m_stack.size() && !found ) begin
+    s = m_stack.pop_back();
+    if(separator == ".") begin
+      case (s[0])
+        "[": found = 0;
+        "(": found = 0;
+        "{": found = 0;
+        default: found = 1;
+      endcase
+    end
+    else begin
+      if(s[0] == separator) found = 1;
+    end
   end
-  //Find the last scope separator
-  for(last_dot = m_scope.len()-1; last_dot != 0; --last_dot)
-    if(m_scope[last_dot] == separator) break;
-
-  if(!last_dot)
-    m_scope = "";
-
-  tmp_value_str = "";
-  for(int i=0; i<last_dot; ++i) begin
-    tmp_value_str = {tmp_value_str, " "};
-    tmp_value_str[i] = m_scope[i];
-  end
-  m_scope = tmp_value_str;
-  void'(m_stack.pop_back());
-  if(m_stack.size() == 0)
-    m_scope = "";
-
-  m_scope_arg = m_scope;
-  m_object_map.delete(obj);
-endfunction
-
-
-// up_element
-// ----------
-
-function void uvm_scope_stack::up_element (uvm_object obj);
-  up(obj, "[");
+  m_arg = "";
 endfunction
 
 
@@ -282,12 +245,8 @@ endfunction
 // -------
 
 function void uvm_scope_stack::set_arg (string arg);
-  if(m_scope == "")
-    m_scope_arg = arg;
-  else if(arg[0] == "[")
-    m_scope_arg = {m_scope, arg};
-  else 
-    m_scope_arg = {m_scope, ".", arg};
+  if(arg=="") return;
+  m_arg = arg;
 endfunction
 
 
@@ -297,45 +256,14 @@ endfunction
 function void uvm_scope_stack::set_arg_element (string arg, int ele);
   string tmp_value_str;
   tmp_value_str.itoa(ele);
-  if(m_scope == "")
-    m_scope_arg = {arg, "[", tmp_value_str, "]"};
-  else
-    m_scope_arg = {m_scope, ".", arg, "[", tmp_value_str, "]"};
+  m_arg = {arg, "[", tmp_value_str, "]"};
 endfunction
 
 function void uvm_scope_stack::unset_arg (string arg);
-  int s, sa;
-
-  if((arg.len() == 0) || (m_scope_arg.len() == 0))
-    return;
-
-  s=m_scope_arg.len() - 1;
-  sa=arg.len() - 1;
-
-  if(m_scope_arg[s] == "]" && arg[sa] != "]") 
-    s--;
-  if(s<sa) return;
-  while(sa>=0 && s >= 0) begin
-    if(m_scope_arg[s] != arg[sa]) return;
-    s--; sa--;
-  end
-  if(s>=0 && m_scope_arg[s] == ".") 
-    s--;
-  else if(s > 0 && m_scope_arg[s] == "[" && m_scope_arg[m_scope_arg.len()-1]=="]")
-    s--;
-  m_scope_arg = m_scope_arg.substr(0,s);
+  if(arg == m_arg)
+    m_arg = "";
 endfunction
 
-// in_hierarchy
-// ------------
-
-function bit uvm_scope_stack::in_hierarchy (uvm_object obj);
-  uvm_void v; v = obj;
-  if (!m_object_map.exists(v)) return 0;
-  return m_object_map[v];
-endfunction
-
-// uvm_leaf_scope
 // --------------
 function string uvm_leaf_scope (string full_name, byte scope_separator = ".");
   byte bracket_match;
