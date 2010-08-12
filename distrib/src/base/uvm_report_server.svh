@@ -385,9 +385,7 @@ class uvm_report_global_server;
 
   static uvm_report_server global_report_server = null;
 
-  function new();
-    if (global_report_server == null)
-      global_report_server = new;
+  local function new();
   endfunction
 
 
@@ -395,7 +393,9 @@ class uvm_report_global_server;
   //
   // Returns a handle to the central report server.
 
-  function uvm_report_server get_server();
+  static function uvm_report_server get_server();
+    if (global_report_server == null)
+      global_report_server = new;
     return global_report_server;
   endfunction
 
@@ -405,10 +405,12 @@ class uvm_report_global_server;
   //
 
   function void set_server(uvm_report_server server);
-    server.set_max_quit_count(global_report_server.get_max_quit_count());
-    server.set_quit_count(global_report_server.get_quit_count());
-    global_report_server.copy_severity_counts(server);
-    global_report_server.copy_id_counts(server);
+    if (global_report_server == null) begin
+       server.set_max_quit_count(global_report_server.get_max_quit_count());
+       server.set_quit_count(global_report_server.get_quit_count());
+       global_report_server.copy_severity_counts(server);
+       global_report_server.copy_id_counts(server);
+    end
     global_report_server = server;
   endfunction
 
