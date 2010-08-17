@@ -142,7 +142,7 @@ class my_uvm_env extends uvm_component;
   endfunction // void
 endclass
 
-program 08_uvm_on_top_timeline;
+program example_08_uvm_on_top_timeline;
    
    initial run_test("my_uvm_env");   
 

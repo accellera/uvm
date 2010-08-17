@@ -35,10 +35,11 @@
 // component.
 //------------------------------------------------------------------------------
 
-`ifndef NO_VMM_12
-program 09_vmm_on_top_timeline;
-   bit reset =0;
 
+`ifndef NO_VMM_12
+   
+program example_09_vmm_on_top_timeline;
+    bit reset =0;
 
 class uvm_as_child extends uvm_component;
   int v=0; int s=0;
@@ -144,8 +145,8 @@ class uvm_as_child extends uvm_component;
      endfunction
      
      task reset_ph();
-	09_vmm_on_top_timeline.reset <= 1;
-	#100 09_vmm_on_top_timeline.reset <= 0;
+	example_09_vmm_on_top_timeline.reset <= 1;
+	#100 example_09_vmm_on_top_timeline.reset <= 0;
 	`vmm_note(log, `vmm_sformatf("TESTCODE: VMM Resetting start"));
      endtask
      
@@ -177,5 +178,6 @@ endclass // MyTest
       vmm_simulation::run_tests();
    end
    
-endprogram // 09_vmm_on_top_timeline
+endprogram 
 `endif
+ 

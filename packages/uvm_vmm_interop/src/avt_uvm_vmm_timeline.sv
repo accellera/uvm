@@ -1,5 +1,4 @@
 //------------------------------------------------------------------------------
-// Copyright 2008 Mentor Graphics Corporation
 // Copyright 2010 Synopsys, Inc.
 //
 // All Rights Reserved Worldwide
@@ -213,7 +212,7 @@ class avt_uvm_vmm_timeline extends uvm_component;
   // timeline from manually calling into the UVM's phasing mechanism.
   
   virtual function void build();
-   fork timeline.run_phase("configure"); join_none
+    timeline.run_function_phase("configure"); 
   endfunction
   
   // Function: connect
@@ -222,7 +221,7 @@ class avt_uvm_vmm_timeline extends uvm_component;
   // timeline from manually calling into the UVM's phasing mechanism.
   
   virtual function void connect();
-  fork timeline.run_phase("connect"); join_none
+   timeline.run_function_phase("connect"); 
   endfunction // void
    
   // Function: start_of_simulation
@@ -231,7 +230,7 @@ class avt_uvm_vmm_timeline extends uvm_component;
   // timeline from manually calling into the UVM's phasing mechanism.
   
   virtual function void start_of_simulation();
-  fork timeline.run_phase("start_of_sim"); join_none
+   timeline.run_function_phase("start_of_sim");
   endfunction // void
   
   
