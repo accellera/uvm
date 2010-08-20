@@ -357,7 +357,7 @@ usage model:
 4. inspect the MARKERS 
 
 
-usage: SV_OVM_UVM_Rename.pl options* args*
+usage: ovm2uvm.pl options* args*
 
-example: SV_OVM_UVM_Rename.pl --top_dir /xyz/abc/src
+example: ovm2uvm.pl --top_dir /xyz/abc/src
 
