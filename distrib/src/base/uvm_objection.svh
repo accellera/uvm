@@ -603,13 +603,6 @@ class uvm_objection extends uvm_report_object;
   endfunction
 
 
-  // Function: display_objections
-  // 
-  // Displays objection information about the given ~object~. If ~object~ is
-  // not specified or ~null~, the implicit top-level component, <uvm_top>, is
-  // chosen. The ~show_header~ argument allows control of whether a header is
-  // output.
-
   protected function string m_display_objections(uvm_object obj=null, bit show_header=1);
 
     static string blank="                                                                                   ";
@@ -689,7 +682,15 @@ class uvm_objection extends uvm_report_object;
   function string convert2string();
     return m_display_objections(top,1);
   endfunction
-    
+  
+  
+  // Function: display_objections
+  // 
+  // Displays objection information about the given ~object~. If ~object~ is
+  // not specified or ~null~, the implicit top-level component, <uvm_top>, is
+  // chosen. The ~show_header~ argument allows control of whether a header is
+  // output.
+
   function void display_objections(uvm_object obj=null, bit show_header=1);
     $display(m_display_objections(obj,show_header));
   endfunction
