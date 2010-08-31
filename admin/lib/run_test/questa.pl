@@ -30,7 +30,7 @@
 
 sub questa_support($$$) {
     my ($series,$letter,$beta) = @_;
-    return(1) if ((($series eq "6.6") && ($letter ge "a")) ||
+    return(1) if ((($series eq "6.6")) ||
                   (($series eq "6.5") && ($letter ge "e")) ||
                   (($series eq "6.4") && ($letter ge "f")));
     die "Questa version \"$series$letter$beta\" does not fully support UVM.\n".
@@ -86,7 +86,7 @@ sub run_the_test($$$) {
 
     # compile commands
     my $vlib = ("vlib work");
-    my $vlog = ("vlog $compile_opts -timescale 1ns/1ns $uvm_opts test.sv");
+    my $vlog = ("vlog $uvm_opts $compile_opts -timescale 1ns/1ns  test.sv");
     &questa_run("cd ./$testdir && ($vlib && $vlog && touch qa) $redirect ".&comptime_log_fname()." 2>&1");
 
     # only run if the compile succeeded in reaching QA
@@ -104,7 +104,8 @@ sub run_the_test($$$) {
             close(COMPILE_LOG);
             $toplevels =~ s/\s\s+/ /g; # remove excess whitespace
         }
-        my $vsim = ("vsim $run_opts +UVM_TESTNAME=test -c $toplevels -do 'run -all;quit -f'");
+        my $clib = "-sv_lib $uvm_home/src/uvm_regex/uvm_regex";
+        my $vsim = ("vsim $run_opts $clib +UVM_TESTNAME=test -c $toplevels -do 'run -all;quit -f'");
         &questa_run("cd ./$testdir && $vsim $redirect ".&runtime_log_fname()." 2>&1");
     }
     return(0);

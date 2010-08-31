@@ -819,9 +819,11 @@ virtual class uvm_object extends uvm_void;
 
   // The following members are used for verifying the integrity of the 
   // optional uvm_field macros.
-  static protected int m_field_array[string];
-  extern protected function void m_do_field_check(string field);
+  typedef enum {UVM_NONE_T, UVM_INT_T, UVM_STR_T, UVM_OBJ_T} uvm_apply_t;
+  static protected uvm_apply_t m_field_array[string];
+  extern protected function void m_do_field_check(string field, uvm_apply_t t_t = UVM_NONE_T);
   extern static protected function void m_delete_field_array();
+  extern protected function void m_print_field_array();
 
 endclass
 

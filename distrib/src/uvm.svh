@@ -22,6 +22,7 @@
 `ifndef UVM_SVH
 `define UVM_SVH
   `include "uvm_macros.svh"
+  `include "uvm_regex/uvm_regex.svh"
   `include "base/base.svh"
   `include "uvm_tlm/uvm_tlm.svh"
   `include "methodology/methodology.svh"

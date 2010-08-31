@@ -63,12 +63,17 @@
   // The phase declarations. uvm_component does the actual phasing.
   `include "base/uvm_phases.sv"
 
+  // Resources/configuration facility
+  `include "base/uvm_spell_chkr.svh"
+  `include "base/uvm_resource.svh"
+  `include "base/uvm_resource_proxy.svh"
+  `include "base/uvm_resource_specializations.svh"
+
   // uvm_component has a co-dependency with the factory. 
   `include "base/uvm_factory.sv"
   `include "base/uvm_registry.svh"
 
   `include "base/uvm_component.sv"
-  `include "base/uvm_config.sv"
 
   // Objection interface
   `include "base/uvm_objection.svh"

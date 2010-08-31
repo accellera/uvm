@@ -25,7 +25,7 @@
 
 typedef class uvm_objection;
 
-`include "base/uvm_config.svh"
+//`include "base/uvm_config.svh"
 
 //------------------------------------------------------------------------------
 //
@@ -565,7 +565,7 @@ virtual class uvm_component extends uvm_report_object;
   // Used for caching config settings
   static bit m_config_set = 1;
 
-  // Function: set_config_int
+  extern local function string massage_scope(string scope);
 
   extern virtual function void set_config_int (string inst_name,  
                                                string field_name,
@@ -767,11 +767,38 @@ virtual class uvm_component extends uvm_report_object;
   //
   // If ~recurse~ is set, then configuration information for all ~comp~'s
   // children and below are printed as well.
+  //
+  // This function has been deprecated.  Use print_config instead.
 
   extern function void print_config_settings (string field="", 
                                               uvm_component comp=null, 
                                               bit recurse=0);
 
+  // Function: print_config
+  //
+  // Print_config_settings prints all configuration information for this
+  // component, as set by previous calls to set_config_* and exports to
+  // the resources pool.  The settings are printing in the order of
+  // their precedence.
+  //
+  // If ~recurse~ is set, then configuration information for all
+  // children and below are printed as well.
+  //
+  // if ~audit~ is set then the audit trail for each resource is printed
+  // along with the resource name and value
+
+  extern function void print_config(bit recurse = 0, bit audit = 0);
+
+  // Function: print_config_with_audit
+  //
+  // Operates the same as print_config except that the audit bit is
+  // forced to 1.  This interface makes user code a bit more readable as
+  // it avoids multiple arbitrary bit settings in the argument list.
+  //
+  // If ~recurse~ is set, then configuration information for all
+  // children and below are printed as well.
+
+  extern function void print_config_with_audit(bit recurse = 0);
 
   // Variable: print_config_matches
   //
@@ -1302,11 +1329,6 @@ virtual class uvm_component extends uvm_report_object;
   extern       function void set_int_local (string field_name, 
                                uvm_bitstream_t value,
                                bit recurse=1);
-  extern local function void m_component_path (ref uvm_component path[$]);
-  extern local function void m_get_config_matches
-                             (ref uvm_config_setting cfg_matches[$], 
-                              input uvm_config_setting::uvm_config_type cfgtype, 
-                              string field_name);
 
   /*protected*/ uvm_component m_parent;
   protected uvm_component m_children[string];
@@ -1323,8 +1345,6 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual function void flush ();
 
   uvm_phase m_curr_phase=null;
-
-  protected uvm_config_setting m_configuration_table[$];
 
   protected bit m_build_done=0;
 
@@ -1360,6 +1380,103 @@ virtual class uvm_component extends uvm_report_object;
   extern         function void   do_print(uvm_printer printer);
 
 endclass : uvm_component
+
+//----------------------------------------------------------------------
+// uvm_config_int
+//----------------------------------------------------------------------
+class uvm_config_int extends uvm_resource#(uvm_bitstream_t);
+
+  typedef uvm_config_int this_type;
+
+  function new(string name="", string scope="");
+    super.new(name, scope);
+  endfunction
+
+  function void do_print(uvm_printer printer);
+    $display("%s = %0d [%s]", get_name(), read(), get_scope());
+  endfunction
+
+  static function this_type import_by_name(string name, string scope, bit rpterr = 1);
+    this_type t;
+    if(!$cast(t, super.import_by_name(name, scope, rpterr)))
+      `uvm_fatal("BADCAST", "broken cast in uvm_config_int");
+    return t;
+  endfunction
+
+  static function this_type import_by_type(uvm_resource_base type_handle,
+                                    string scope = "");
+    this_type t;
+    if(!$cast(t, super.import_by_type(type_handle, scope)))
+      `uvm_fatal("BADCAST", "broken cast in uvm_config_int");
+    return t;
+  endfunction
+
+endclass
+
+//----------------------------------------------------------------------
+// uvm_config_str
+//----------------------------------------------------------------------
+class uvm_config_str extends uvm_resource#(string);
+
+  typedef uvm_config_str this_type;
+
+  function new(string name="", string scope="");
+    super.new(name, scope);
+  endfunction
+
+  function void do_print(uvm_printer printer);
+    $display("%s = %0s [%s]", get_name(), read(), get_scope());
+  endfunction
+
+  static function this_type import_by_name(string name, string scope, bit rpterr = 1);
+    this_type t;
+    if(!$cast(t, super.import_by_name(name, scope, rpterr)))
+      `uvm_fatal("BADCAST", "broken cast in uvm_config_str");
+    return t;
+  endfunction
+
+  static function this_type import_by_type(uvm_resource_base type_handle,
+                                    string scope = "");
+    this_type t;
+    if(!$cast(t, super.import_by_type(type_handle, scope)))
+      `uvm_fatal("BADCAST", "broken cast in uvm_config_str");
+    return t;
+  endfunction
+endclass
+
+//----------------------------------------------------------------------
+// uvm_config_obj
+//----------------------------------------------------------------------
+class uvm_config_obj extends uvm_resource#(uvm_object);
+
+  typedef uvm_config_obj this_type;
+  bit clone;
+
+  function new(string name="", string scope = "");
+    super.new(name, scope);
+  endfunction
+
+  function void do_print(uvm_printer printer);
+    uvm_object obj = read();
+    $display("%s = <obj> [%s]", get_name(), get_scope());
+    obj.print();
+  endfunction
+
+  static function this_type import_by_name(string name, string scope, bit rpterr = 1);
+    this_type t;
+    if(!$cast(t, super.import_by_name(name, scope, rpterr)))
+      `uvm_fatal("BADCAST", "broken cast in uvm_config_obj");
+    return t;
+  endfunction
+
+  static function this_type import_by_type(uvm_resource_base type_handle,
+                                    string scope = "");
+    this_type t;
+    if(!$cast(t, super.import_by_type(type_handle, scope)))
+      `uvm_fatal("BADCAST", "broken cast in uvm_config_obj");
+    return t;
+  endfunction
+endclass
 
 `endif // UVM_COMPONENT_SVH
 

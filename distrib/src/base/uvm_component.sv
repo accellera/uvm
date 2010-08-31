@@ -664,6 +664,7 @@ endfunction
 
 function void uvm_component::build();
   m_build_done = 1;
+  m_field_automation (null, UVM_CHECK_FIELDS, "");
   apply_config_settings(print_config_matches);
 endfunction
 
@@ -1016,46 +1017,70 @@ endfunction
 //------------------------------------------------------------------------------
 
 
+function string uvm_component::massage_scope(string scope);
+
+  if(get_full_name() == "") begin
+    if(scope == "")
+      return "*";
+    return {"^", scope, "$"};
+  end
+
+  if(scope == "uvm_test_top")
+    return { get_full_name(), ".*" };
+  if(scope[0] != ".")
+    return {"^", get_full_name(), ".", scope, "$"};
+   return {"^", get_full_name(), scope, "$"};
+
+endfunction
+
+//
 // set_config_int
-// --------------
+//
+function void uvm_component::set_config_int(string inst_name,
+                                           string field_name,
+                                           uvm_bitstream_t value);
 
-function void  uvm_component::set_config_int    (string      inst_name,
-                                                 string      field_name,
-                                                 uvm_bitstream_t value);
-  uvm_int_config_setting cfg;
-  cfg = new(inst_name, field_name, value, this);
-  m_config_set = 1;
-  m_configuration_table.push_front(cfg);
+  uvm_phase curr_phase = uvm_top.get_current_phase();
+
+  uvm_config_int c = new(field_name, massage_scope(inst_name));
+  c.write(value, this);
+  if(curr_phase != null && curr_phase.get_name() == "build")
+    c.export_resource();
+  else
+    c.export_resource_override();
 endfunction
 
-
+//
 // set_config_string
-// -----------------
+//
+function void uvm_component::set_config_string(string inst_name,
+                                               string field_name,
+                                               string value);
 
-function void uvm_component::set_config_string  (string      inst_name,  
-                                                 string      field_name,
-                                                 string      value);
-  uvm_string_config_setting cfg;
-  cfg = new(inst_name, field_name, value, this);
-  m_config_set = 1;
-  m_configuration_table.push_front(cfg);
+  uvm_phase curr_phase = uvm_top.get_current_phase();
+
+  uvm_config_str c = new(field_name, massage_scope(inst_name));
+  c.write(value, this);
+  if(curr_phase != null && curr_phase.get_name() == "build")
+    c.export_resource();
+  else
+    c.export_resource_override();
 endfunction
 
-
+//
 // set_config_object
-// -----------------
+//
+function void uvm_component::set_config_object(string inst_name,
+                                               string field_name,
+                                               uvm_object value,
+                                               bit clone = 1);
+  uvm_phase curr_phase = uvm_top.get_current_phase();
+  uvm_object tmp;
 
-function void uvm_component::set_config_object  (string      inst_name,
-                                                 string      field_name,
-                                                 uvm_object  value,
-                                                 bit         clone=1);
-  uvm_object_config_setting cfg;
+  uvm_config_obj c = new(field_name, massage_scope(inst_name));
+
   if(clone && (value != null)) begin
-    uvm_object tmp;
     tmp = value.clone();
-
-    // If create not implemented, or clone is attempted on objects that
-    // do not t allow cloning (e.g. components) clone will return null.
     if(tmp == null) begin
       uvm_component comp;
       if ($cast(comp,value)) begin
@@ -1073,282 +1098,198 @@ function void uvm_component::set_config_object  (string      inst_name,
       value = tmp;
   end
 
-  cfg = new(inst_name, field_name, value, this, clone);
-  m_config_set = 1;
-  m_configuration_table.push_front(cfg);
+  c.clone = clone;
+  c.write(value, this);
+  if(curr_phase != null && curr_phase.get_name() == "build")
+    c.export_resource();
+  else
+    c.export_resource_override();
 
 endfunction
 
+//
+// get_config_int
+//
+function bit uvm_component::get_config_int (string field_name,
+                                            inout uvm_bitstream_t value);
+  uvm_config_int c;
 
-// m_component_path
-// ----------------
+  // Retrieve the resource from the resource pool. The final argument of
+  // 0 indicates that we are turning off spell checking and verbose
+  // warnings.
+  c = uvm_config_int::import_by_name(field_name, get_full_name(), 0);
+  if(c == null)
+    return 0;
 
-function void uvm_component::m_component_path(ref uvm_component path[$]);
-  uvm_component comp;
-  comp = this;
-  `uvm_clear_queue(path)
-  while(comp != null) begin
-    path.push_front(comp);
-    comp = comp.get_parent();
-  end
-endfunction
-
-
-// m_get_config_matches
-// --------------------
-
-function void uvm_component::m_get_config_matches(
-      ref uvm_config_setting cfg_matches[$], 
-      input uvm_config_setting::uvm_config_type cfgtype, string field_name);
-  uvm_component comp;
-  static uvm_component stack[$];
-  static uvm_config_setting comp_matches[$];
-
-  comp = this;
-
-  `uvm_clear_queue(cfg_matches)
-
-
-  //Get the path up to the root. Since configs are done in groups for a comp,
-  //cache the set of config matches from the last check to reduce searching.
-  if((stack.size() == 0) || (stack[stack.size()-1] != this) || (m_config_set == 1)) begin
-    m_config_set = 0;
-    m_component_path(stack);
-    `uvm_clear_queue(comp_matches);
-    foreach(stack[i]) begin
-      for(int j=0; j<stack[i].m_configuration_table.size(); ++j) begin
-         if(stack[i].m_configuration_table[j].component_match(this)) 
-           comp_matches.push_back(stack[i].m_configuration_table[j]);
-      end
-    end
-  end
-
-  foreach(comp_matches[i]) begin
-    if(comp_matches[i].field_match(field_name) &&
-         ((comp_matches[i].get_value_type() == cfgtype) ||
-          (cfgtype == uvm_config_setting::UVM_UNDEFINED_TYPE))) 
-    begin
-       cfg_matches.push_back(comp_matches[i]);
-    end
-  end
+  value = c.read(this);
+  return 1;
 
 endfunction
 
+//
+// get_config_string
+//
+function bit uvm_component::get_config_string(string field_name,
+                                              inout string value);
+
+  string msg;
+  uvm_config_str c;
+
+  // Retrieve the resource from the resource pool. The final argument of
+  // 0 indicates that we are turning off spell checking and verbose
+  // warnings.
+  c = uvm_config_str::import_by_name(field_name, get_full_name(), 0);
+  if(c == null)
+    return 0;
+
+  value = c.read(this);
+  return 1;
+
+endfunction
+
+//
+// get_config_object
+//
+function bit uvm_component::get_config_object (string field_name,
+                                               inout uvm_object value,
+                                               input bit clone=1);
+  uvm_config_obj c;
+  uvm_object tmp = null;
+
+  // Retrieve the resource from the resource pool. The final argument of
+  // 0 indicates that we are turning off spell checking and verbose
+  // warnings.
+  c = uvm_config_obj::import_by_name(field_name, get_full_name(), 0);
+  if(c == null)
+    return 0;
+
+  value = c.read(this);
+  if(clone && value != null)
+    tmp = value.clone();
+
+  value = tmp;
+  return 1;
+
+endfunction
 
 // check_config_usage
 // ------------------
 
 function void uvm_component::check_config_usage ( bit recurse=1 );
-  uvm_config_setting cfg;
-  bit found;
-  string fstr, applied_str, cfg_type;
+  uvm_resource_pool rp = uvm_resource_pool::get();
+  uvm_resource_base rq[$];
 
-  found=0; 
+  rq = rp.find_zeros();
 
-  if(recurse)
-    foreach(m_children[i])  begin
-      m_children[i].check_config_usage(recurse);
-    end
+  if(rq.size() == 0)
+    return;
 
-  if(m_configuration_table.size() == 0) return;
-
-  if(this == uvm_top)
-    fstr = "from the GLOBAL scope";
-  else
-    fstr = {"from component ", get_full_name(), "(", 
-             get_type_name(), ")"};
-
-  foreach(m_configuration_table[i]) begin
-    cfg = m_configuration_table[i];
-    if(cfg.m_used_list.size() == 0 &&
-       cfg.m_override_list.size() == 0 )
-    begin
-      if(cfg.get_value_type() == uvm_config_setting::UVM_INT_TYPE)
-        cfg_type = "int";
-      else if(cfg.get_value_type() == uvm_config_setting::UVM_STRING_TYPE)
-        cfg_type = "string";
-      else
-        cfg_type = "object";
-      uvm_report_warning("CFGNTS", {"No get_config_",cfg_type,
-         "() call ever matched the following set_config_", cfg_type, "() call ", fstr,
-         ": ", cfg.convert2string()}, UVM_NONE);
-    end 
-  end
-
-  //Do not do the lookup work if the CFGOVR action is off
-  if(uvm_report_enabled(UVM_LOW, UVM_INFO, "CFGOVR"))
-  foreach(m_configuration_table[i]) begin
-    cfg = m_configuration_table[i];
-    if(cfg.m_override_list.size() != 0)
-    begin
-      uvm_report_info("CFGOVR", {"The configuration setting ", cfg.convert2string(), " ", fstr, " was overridden by config setting ", cfg.m_override_list[0].convert2string(), " from component ", cfg.m_override_list[0].m_from.get_full_name(), "(",  cfg.m_override_list[0].m_from.get_type_name(), ")"}, UVM_NONE);
-    end
-  end
-
-  //Do not do the lookup work if the CFGSET action is off
-  if(uvm_report_enabled(UVM_LOW, UVM_INFO, "CFGSET"))
-  foreach(m_configuration_table[i]) begin
-    string cfgstr;
-    cfg = m_configuration_table[i];
-    if(cfg.m_used_list.size() != 0)
-      begin
-        cfgstr = cfg.convert2string();
-        applied_str = "";
-        for(int j=0; j<cfg.m_used_list.size(); ++j) begin
-          uvm_report_info("CFGSET", {"The configuration setting ", cfgstr, " ", fstr, " was applied to component: ", cfg.m_used_list[j].get_full_name(), " (",  cfg.m_used_list[j].get_type_name(), ")"}, UVM_NONE);
-        end
-      end 
-  end
-
+  $display("\n ::: The following resources have at least one write and no reads :::");
+  rp.print_resources(rq, 1);
 endfunction
-
-
-// get_config_int
-// --------------
-
-function bit uvm_component::get_config_int (string field_name,
-                                            inout uvm_bitstream_t value);
-  static uvm_config_setting cfg_matches[$];
-  uvm_int_config_setting cfg;
-  uvm_component c;
-  //Scan the config tables of each component in the path
-  m_get_config_matches(cfg_matches, uvm_config_setting::UVM_INT_TYPE, field_name);
-
-  //The first match is the override
-  if(cfg_matches.size()) begin
-    $cast(cfg, cfg_matches[0]);
-    if(print_config_matches)
-      cfg_matches[0].print_match(this, cfg_matches[0].get_from_component(), field_name);
-    cfg_matches[0].set_used(this);
-    for(int i=1; i<cfg_matches.size(); ++i) begin
-      cfg_matches[i].set_override(cfg_matches[0]);
-    end
-    value = cfg.m_value;
-    return 1;
-  end
-
-  return 0;
-endfunction
-  
-
-// get_config_string
-// -----------------
-
-function bit uvm_component::get_config_string (string field_name,
-                                               inout string value);
-  static uvm_config_setting cfg_matches[$];
-  uvm_string_config_setting cfg;
-  uvm_component c;
-
-  //Scan the config tables of each component in the path
-  m_get_config_matches(cfg_matches, uvm_config_setting::UVM_STRING_TYPE, field_name);
-
-  //The first match is the override
-  if(cfg_matches.size()) begin
-    $cast(cfg, cfg_matches[0]);
-    if(print_config_matches)
-      cfg_matches[0].print_match(this, cfg_matches[0].get_from_component(), field_name);
-    cfg_matches[0].set_used(this);
-    for(int i=1; i<cfg_matches.size(); ++i)
-      cfg_matches[i].set_override(cfg_matches[0]);
-    value = cfg.m_value;
-    return 1;
-  end
-
-  return 0;
-endfunction
-
-  
-// get_config_object
-// -----------------
-
-function bit uvm_component::get_config_object (string field_name,
-                                               inout uvm_object value,  
-                                               input bit clone=1);
-  static uvm_config_setting cfg_matches[$];
-  uvm_object_config_setting cfg;
-  uvm_component c;
-
-  //Scan the config tables of each component in the path
-  m_get_config_matches(cfg_matches, uvm_config_setting::UVM_OBJECT_TYPE, field_name);
-
-  //The first match is the override
-  if(cfg_matches.size()) begin
-    $cast(cfg, cfg_matches[0]);
-    if(print_config_matches)
-      cfg_matches[0].print_match(this, cfg_matches[0].get_from_component(), field_name);
-    cfg_matches[0].set_used(this);
-    for(int i=1; i<cfg_matches.size(); ++i)
-      cfg_matches[i].set_override(cfg_matches[0]);
-    if((clone && cfg.m_clone) && (cfg.m_value != null))
-      value = cfg.m_value.clone();
-    else
-      value = cfg.m_value;
-    return 1;
-  end
-
-  return 0;
-endfunction
- 
 
 // apply_config_settings
 // ---------------------
 
 function void uvm_component::apply_config_settings (bit verbose=0);
-  static uvm_component stack[$];
-  static uvm_config_setting overrides[string];
-  uvm_config_setting cfg;
-  uvm_int_config_setting cfg_int;
-  uvm_string_config_setting cfg_str;
-  uvm_object_config_setting cfg_obj;
-  uvm_component comp;
-  string match_str;
-  string matched="";
-  bit has_match=0;
-  if(stack.size() == 0 || stack[stack.size()-1] != this) begin
-    m_component_path(stack);
-  end
-  //apply any override that matches this component. Go bottom up and then back
-  //to front so the last override in the global scope has precedence to the
-  //first override in the parent scope.
-  if (verbose) begin
-    match_str = {"Auto-configuration matches for component ",
-       this.get_full_name()," (",get_type_name(),"). Last entry for a given field takes precedence.\n\n",
-       "   Config set from  Instance Path     Field name   Type    Value\n",
-       "   ------------------------------------------------------------------------------\n"};
-  end
-  for(int i=stack.size()-1; i>=0; --i) begin
-    comp = stack[i];
-    if(comp == null) comp = uvm_top;
-    if(comp!=null) begin
-      for(int j=comp.m_configuration_table.size()-1; j>=0; --j) begin
-        cfg = comp.m_configuration_table[j];
-        if(cfg.component_match(this)) begin
-          if(verbose)
-            matched = cfg.matches_string(this,comp);
-          if($cast(cfg_int, cfg))
-             set_int_local(cfg_int.m_field, cfg_int.m_value);
-          else if($cast(cfg_str, cfg))
-            set_string_local(cfg_str.m_field, cfg_str.m_value);
-          else if($cast(cfg_obj, cfg)) begin
-            set_object_local(cfg_obj.m_field, cfg_obj.m_value, cfg_obj.m_clone);
-            if(verbose)
-              matched = {matched, " clone=",(cfg_obj.m_clone==1)?"1":"0"};
-          end
-          if(verbose)
-            match_str = {match_str, "  ", matched,"\n"};
-          has_match = 1;
-          if(m_sc.status)
-            cfg.m_used_list.push_back(this);
-        end
-      end
+
+  uvm_resource_pool rp = uvm_resource_pool::get();
+  uvm_resource_base rq [$];
+  uvm_resource_base r;
+  string msg;
+  string name;
+  string search_name;
+  int unsigned i;
+  int unsigned j;
+
+  if(verbose)
+    $display("applying configuration settings for %s", get_full_name());
+
+  rq = rp.retrieve_resources(get_full_name());
+  foreach (rq[i]) begin
+    r = rq[i];
+    name = r.get_name();
+
+    // does name have brackets [] in it?
+    for(j = 0; j < name.len(); j++) begin
+      if(name[j] == "[")
+        break;
     end
+    // If it does have brackets then we'll use the name
+    // up to the brackets to search m_field_array
+    if(j < name.len())
+      search_name = name.substr(0, j-1);
+    else
+      search_name = name;
+
+    if(!m_field_array.exists(search_name))
+      continue;
+
+    if(verbose)
+      $display("applying %s [%s] in %s", name, m_field_array[search_name],
+                                         get_full_name());
+
+    case (m_field_array[search_name])
+
+      UVM_INT_T:
+        begin
+          uvm_config_int ci;
+          uvm_resource#(int) ri;
+          uvm_resource#(int unsigned) riu;
+          uvm_resource#(uvm_bitstream_t) rbs;
+
+          if($cast(ci, r))
+            set_int_local(name, ci.read(this));
+          else
+            if($cast(ri, r))
+              set_int_local(name, ri.read(this));
+            else
+              if($cast(riu, r))
+                set_int_local(name, riu.read(this));
+              else
+                if($cast(rbs, r))
+                  set_int_local(name, rbs.read(this));
+                else begin
+                  $sformat(msg, "You told me %s was an int, but it apparently is not.  Auto-config not completed.  To make sure auto-config works correctly use uvm_config_int as the type of your integer resources.", name);
+                  `uvm_error("BADTYPE", msg);
+                end
+        end
+
+      UVM_STR_T:
+        begin
+          uvm_config_str cs;
+          uvm_resource#(string) rs;
+
+          if($cast(cs, r))
+            set_string_local(name, cs.read(this));
+          else
+            if($cast(rs, r))
+              set_string_local(name, rs.read(this));
+            else begin
+              $sformat(msg, "You told me %s was a string, but it apparently is not.  Auto-config not completed. To make sure auto-config works correctly use uvm_config_string or uvm_resource#(string) as the type of your string resources.", name);
+               `uvm_error("BADTYPE", msg);
+            end
+        
+        end
+
+      UVM_OBJ_T:
+        begin
+          uvm_config_obj co;
+          uvm_resource#(uvm_object) ro;
+
+          if($cast(co, r))
+            set_object_local(name, co.read(this), co.clone);
+          else
+            if($cast(ro,r))
+              set_object_local(name, ro.read(this), 0);
+            else begin
+              $sformat(msg, "You told me %s was a uvm_object, but it apparently is not.  Auto-config not completed. To make sure auto-config works correctly use uvm_config_obj or uvm_resource#(uvm_object) as the type of your object resources.", name);
+               `uvm_error("BADTYPE", msg);
+            end
+        end
+    endcase
   end
-
-  if (verbose && has_match)
-    if(uvm_report_enabled(UVM_MEDIUM, UVM_INFO, "auto-configuration"))
-      uvm_report_info("auto-configuration", {match_str,"\n"}, UVM_MEDIUM);
-
+  
 endfunction
 
 
@@ -1358,52 +1299,35 @@ endfunction
 function void uvm_component::print_config_settings (string field="",
                                                     uvm_component comp=null,
                                                     bit recurse=0);
-  static int depth;
-  static uvm_component stack[$];
-  uvm_component cc;
-  string all_matches;
-  string v,r;
-  all_matches = "";
+  static bit have_been_warned = 0;
+  if(!have_been_warned) begin
+    uvm_report_warning("deprecated", "uvm_component::print_config_settings has been deprecated.  Use print_config() instead");
+    have_been_warned = 1;
+  end
 
-  if(comp==null)
-    comp = this;
+  print_config(1, recurse);
+endfunction
 
-  comp.m_component_path(stack);
-  while(stack.size() && (stack[stack.size()-1] != comp))
-    void'(stack.pop_back());
+function void uvm_component::print_config_with_audit(bit recurse = 0);
+  print_config(recurse, 1);
+endfunction
 
-  cc = comp;
+function void uvm_component::print_config(bit recurse = 0, audit = 0);
 
-  $swrite(v, "%s", cc.get_full_name());
-  while(v.len()<17) v = {v," "};
-  foreach(stack[s]) begin
-    comp = stack[s];
-    for(int i=0; i<comp.m_configuration_table.size(); ++i) begin
-      r = comp.m_configuration_table[i].matches_string(cc, comp);
-      if(r != "")
-        all_matches = {all_matches, v, r, "\n"};
+  uvm_resource_pool rp = uvm_resource_pool::get();
+
+  $display();
+  $display("resources that are visible in %s", get_full_name());
+  rp.print_resources(rp.retrieve_resources(get_full_name()), audit);
+
+  if(recurse) begin
+    uvm_component c;
+    foreach(m_children[name]) begin
+      c = m_children[name];
+      c.print_config(recurse, audit);
     end
   end
 
-  // Note- should use uvm_printer for formatting
-  if(((all_matches != "") || (recurse == 1)) && depth == 0) begin
-    $display("Configuration settings for component %s (recurse = %0d)",
-             cc.get_full_name(), recurse);
-    $display("Set to            Set from         Component match   Field name   Type    Value");
-    $display("-------------------------------------------------------------------------------");
-  end
-  if(all_matches == "")
-    $display("%s NONE", v);
-  else
-    $write("%s", all_matches);
-
-  if(recurse) begin
-    depth++;
-    if(cc.m_children.first(v))
-      do this.print_config_settings(field, cc.m_children[v], recurse);
-      while(cc.m_children.next(v));
-    depth--;
-  end
 endfunction
 
 
