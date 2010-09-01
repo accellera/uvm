@@ -567,9 +567,6 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   typedef uvm_resource#(T) this_type;
   static this_type my_type = get_type();
 
-  // database that contains all the resources
-  static uvm_resource_pool rp = uvm_resource_pool::get();
-
   rand protected T val;
 
   function new(string name="", scope="");
@@ -590,6 +587,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // export_resource
   //--------------------------------------------------------------------
   function void export_resource ();
+    uvm_resource_pool rp = uvm_resource_pool::get();
     rp.export_resource(this);
   endfunction
   
@@ -597,6 +595,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // export_resource
   //--------------------------------------------------------------------
   function void export_resource_override();
+    uvm_resource_pool rp = uvm_resource_pool::get();
     rp.export_resource(this, 1);
   endfunction
 
@@ -605,6 +604,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   //--------------------------------------------------------------------
   static function this_type import_by_name(string name, string scope, bit rpterr = 1);
 
+    uvm_resource_pool rp = uvm_resource_pool::get();
     uvm_resource_base rsrc_base;
     this_type rsrc;
     string msg;
@@ -629,6 +629,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   static function this_type import_by_type(uvm_resource_base type_handle,
                                     string scope = "");
 
+    uvm_resource_pool rp = uvm_resource_pool::get();
     uvm_resource_base rsrc_base;
     this_type rsrc;
     string msg;
