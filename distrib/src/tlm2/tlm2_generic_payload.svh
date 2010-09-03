@@ -44,9 +44,63 @@ typedef enum
 } tlm_response_status_e;
 
 //----------------------------------------------------------------------
+// TLM extensions
+//----------------------------------------------------------------------
+virtual class tlm_extension_base extends uvm_object;
+
+  function new(string name = "");
+    super.new(name);
+  endfunction
+
+  pure virtual function tlm_extension_base get_type_handle();
+
+  function void do_copy(uvm_object rhs);
+    super.do_copy(rhs);
+  endfunction
+
+  function uvm_object create (string name="");
+    tlm_extension_base t = new(name);
+    return t;
+  endfunction
+
+endclass
+
+class tlm_extension #(type T=int) extends tlm_extension_base;
+
+  typedef tlm_extension#(T) this_type;
+
+  static this_type my_type = get_type();
+
+  function new(string name="");
+    super.new(name);
+  endfunction
+
+  static function this_type get_type();
+    if(my_type == null)
+      my_type = new();
+    return my_type;
+  endfunction
+
+  function tlm_extension_base get_type_handle();
+    return get_type();
+  endfunction
+
+  function void do_copy(uvm_object rhs);
+    super.do_copy(rhs);
+  endfunction
+
+  function uvm_object create (string name="");
+    this_type t = new(name);
+    return t;
+  endfunction
+
+endclass
+
+
+//----------------------------------------------------------------------
 // tlm2_generic_payload
 //----------------------------------------------------------------------
-virtual class tlm2_generic_payload extends uvm_sequence_item;
+class tlm2_generic_payload extends uvm_sequence_item;
 
     local tlm2_addr_t            m_address;
     local tlm_command_e          m_command;
@@ -90,34 +144,6 @@ virtual class tlm2_generic_payload extends uvm_sequence_item;
 
     return msg;
 
-  endfunction
-
-  function void do_copy(uvm_object rhs);
-
-    tlm2_generic_payload t;
-
-    super.do_copy(rhs);
-
-    if(rhs == null)
-      return;
-    if(!$cast(t, rhs))
-      return;
-
-    m_address            = t.m_address;
-    m_command            = t.m_command;
-    m_length             = t.m_length;
-    m_response_status    = t.m_response_status;
-    m_dmi                = t.m_dmi;
-    m_byte_enable_length = t.m_byte_enable_length;
-    m_streaming_width    = t.m_streaming_width;
-    m_data               = t.m_data;
-    m_byte_enable        = t.m_byte_enable;
-  endfunction
-
-  function uvm_object clone();
-    tlm2_generic_payload t = new();
-    t.copy(this);
-    return t;
   endfunction
 
   // return an abbreviated response string
@@ -225,10 +251,63 @@ virtual class tlm2_generic_payload extends uvm_sequence_item;
 
 // tlm_response_status get_response_status() const;
 // void set_response_status( const tlm_response_status );
-// std::string get_response_string();
 // bool is_response_ok();
 // bool is_response_error();
 
+  //--------------------------------------------------------------------
+  // extensions mechanism
+  //--------------------------------------------------------------------
+
+  local tlm_extension_base m_extensions [tlm_extension_base];
+
+  // Function: set_extension
+  //
+  // Add an instance-specific extension.
+  // The specified extension is bound to the generic payload by ts type
+  // handle.
+   
+  function tlm_extension_base set_extension(tlm_extension_base ext);
+    tlm_extension_base ext_handle = ext.get_type_handle();
+    tlm_extension_base old_ext = m_extensions[ext_handle];
+    m_extensions[ext_handle] = ext;
+    return old_ext;
+  endfunction
+
+  // Function: get_num_extensions
+  //
+  // Return the current number of instance specific extensions.
+   
+  function int get_num_extensions();
+    return m_extensions.num();
+  endfunction: get_num_extensions
+   
+  // Function: get_extension
+  //
+  // Return the instance specific extension bound under the specified key.
+  // If no extension is bound under that key, ~null~ is returned.
+   
+  function tlm_extension_base get_extension(tlm_extension_base ext_handle);
+    if(!m_extensions.exists(ext_handle))
+      return null;
+    return m_extensions[ext_handle];
+  endfunction
+   
+  // Function: clear_extension
+  //
+  // Remove the instance-specific extension bound under the specified key.
+   
+  function void clear_extension(tlm_extension_base ext_handle);
+    if(!m_extensions.exists(ext_handle))
+      return;
+    m_extensions.delete(ext_handle);
+  endfunction: clear_extension
+
+  // Function: clear_extensions
+  //
+  // Remove all instance-specific extensions
+   
+  function void clear_extensions();
+    m_extensions.delete();
+  endfunction
     
 endclass
-
