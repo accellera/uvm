@@ -46,11 +46,30 @@ typedef enum
 //----------------------------------------------------------------------
 // TLM extensions
 //----------------------------------------------------------------------
+
+// class: tlm_extension_base
+//
+// The class tlm_extension_base is the non-parameerized base class for
+// all generic payload extensions.  It includes the utility do_copy()
+// and create().  The pure virtual function get_type_handle() allows you
+// to get a unique handles that represents the derived type.  This is
+// implemented in derived classes.
 virtual class tlm_extension_base extends uvm_object;
+
+  // function: new
+  //
+  // creates a new extension object.  Since this class is virtual this
+  // function is always called from the constructor of the derived class
+  // and not directly.
 
   function new(string name = "");
     super.new(name);
   endfunction
+
+  // function: get_type_handle
+  //
+  // An interface to polymorphically retrieve a handle that uniquely
+  // identifies the type of the sub-class
 
   pure virtual function tlm_extension_base get_type_handle();
 
@@ -64,6 +83,20 @@ virtual class tlm_extension_base extends uvm_object;
   endfunction
 
 endclass
+
+// class: tlm_extension#(T)
+//
+
+// TLM extension class. The class is parameterized with arbitrary type
+// which represents the type of the extension. An instance of the
+// generic payload can contain one extension object of each type; it
+// cannot contain two instances of the same extension type.  An
+// extension object can identify its type vial the static variable
+// my_type.  The function get_type() provides an interface to retrieve
+// the type handle.
+//
+// You can derive a new class from this class to contain any arbitry
+// data or code required for an extension.
 
 class tlm_extension #(type T=int) extends tlm_extension_base;
 
@@ -96,9 +129,14 @@ class tlm_extension #(type T=int) extends tlm_extension_base;
 
 endclass
 
-
 //----------------------------------------------------------------------
-// tlm2_generic_payload
+// class: tlm2_generic_payload
+//
+// This class provides a transaction architecture commonly used in
+// memory-mapped bus-based systems.  It's intended to be a general
+// purpose transaction class that lends itself to many applications. The
+// class is derived from uvm_sequence_item which enables it to be
+// generated in sequences and transported to drivers through sequencers.
 //----------------------------------------------------------------------
 class tlm2_generic_payload extends uvm_sequence_item;
 
@@ -106,11 +144,16 @@ class tlm2_generic_payload extends uvm_sequence_item;
     local tlm_command_e          m_command;
     local byte                   m_data[];
     local int unsigned           m_length;
-    tlm_response_status_e  m_response_status;
+    local tlm_response_status_e  m_response_status;
     local bit                    m_dmi;
     local byte                   m_byte_enable[];
     local int unsigned           m_byte_enable_length;
     local int unsigned           m_streaming_width;
+
+  // function: new
+  //
+  // Create a new instance of the generic payload.  Initialize all the
+  // members to their default values.
 
   function new(string name="");
     super.new(name);
@@ -122,6 +165,11 @@ class tlm2_generic_payload extends uvm_sequence_item;
     m_byte_enable_length = 0;
     m_streaming_width = 0;
   endfunction
+
+  // function: convert2string
+  //
+  // Convert the contents of the class to a string suitable for
+  // printing.
 
   function string convert2string();
 
@@ -146,17 +194,20 @@ class tlm2_generic_payload extends uvm_sequence_item;
 
   endfunction
 
+  // function: get_response_string
+  //
   // return an abbreviated response string
+
   function string get_response_string();
 
     case(m_response_status)
-      TLM_OK_RESPONSE:                return "OK";
-      TLM_INCOMPLETE_RESPONSE:        return "INCOMPLETE";
-      TLM_GENERIC_ERROR_RESPONSE:     return "GENERIC_ERROR";
-      TLM_ADDRESS_ERROR_RESPONSE:     return "ADDRESS_ERROR";
-      TLM_COMMAND_ERROR_RESPONSE:     return "COMMAND_ERROR";
-      TLM_BURST_ERROR_RESPONSE:       return "BURST_ERROR";
-      TLM_BYTE_ENABLE_ERROR_RESPONSE: return "BYTE_ENABLE_ERROR";
+      TLM_OK_RESPONSE                : return "OK";
+      TLM_INCOMPLETE_RESPONSE        : return "INCOMPLETE";
+      TLM_GENERIC_ERROR_RESPONSE     : return "GENERIC_ERROR";
+      TLM_ADDRESS_ERROR_RESPONSE     : return "ADDRESS_ERROR";
+      TLM_COMMAND_ERROR_RESPONSE     : return "COMMAND_ERROR";
+      TLM_BURST_ERROR_RESPONSE       : return "BURST_ERROR";
+      TLM_BYTE_ENABLE_ERROR_RESPONSE : return "BYTE_ENABLE_ERROR";
     endcase
 
     // we should never get here
@@ -164,24 +215,42 @@ class tlm2_generic_payload extends uvm_sequence_item;
 
   endfunction
 
+  //--------------------------------------------------------------------
   // accessors
+  //--------------------------------------------------------------------
 
-  // command
+  // function: get_command
+  // return the command type.
+
   virtual function tlm_command_e get_command();
     return m_command;
   endfunction
+
+  // function: set_command
+  // set the command
 
   virtual function void set_command(tlm_command_e command);
     m_command = command;
   endfunction
 
+  // function: is_read
+  // return a one if the command typs is TLM_READ_COMMAND, a zero
+  // otherwise.
+
   virtual function bit is_read();
     return (m_command == TLM_READ_COMMAND);
   endfunction
 
+  // function: set_read
+  // set the command to TLM_READ_COMMAND
+
   virtual function void set_read();
     set_command(TLM_READ_COMMAND);
   endfunction
+
+  // function: is_write
+  // return a one if the command type is TLM_WRITE_COMMAND, a zero
+  // otherwise.
 
   virtual function bit is_write();
     return (m_command == TLM_WRITE_COMMAND);
@@ -249,8 +318,14 @@ class tlm2_generic_payload extends uvm_sequence_item;
     return m_dmi;
   endfunction
 
-// tlm_response_status get_response_status() const;
-// void set_response_status( const tlm_response_status );
+  virtual function tlm_response_status_e get_response_status();
+    return m_response_status;
+  endfunction
+
+  virtual function set_response_status(tlm_response_status_e status);
+    m_response_status = status;
+  endfunction
+
 // bool is_response_ok();
 // bool is_response_error();
 
