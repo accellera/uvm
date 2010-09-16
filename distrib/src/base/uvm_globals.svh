@@ -246,7 +246,9 @@ endfunction
 //----------------------------------------------------------------------------
 
 function bit uvm_is_match (string expr, string str);
-  return (uvm_re_match(uvm_glob_to_re(expr), str) == 0);
+  string s;
+  s = uvm_glob_to_re(expr);
+  return (uvm_re_match(s, str) == 0);
 endfunction
 
 `ifndef UVM_LINE_WIDTH

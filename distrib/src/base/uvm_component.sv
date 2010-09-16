@@ -1177,7 +1177,7 @@ endfunction
 
 function void uvm_component::check_config_usage ( bit recurse=1 );
   uvm_resource_pool rp = uvm_resource_pool::get();
-  uvm_resource_base rq[$];
+  uvm_queue#(uvm_resource_base) rq;
 
   rq = rp.find_zeros();
 
@@ -1194,7 +1194,7 @@ endfunction
 function void uvm_component::apply_config_settings (bit verbose=0);
 
   uvm_resource_pool rp = uvm_resource_pool::get();
-  uvm_resource_base rq [$];
+  uvm_queue#(uvm_resource_base) rq;
   uvm_resource_base r;
   string msg;
   string name;
@@ -1206,8 +1206,8 @@ function void uvm_component::apply_config_settings (bit verbose=0);
     $display("applying configuration settings for %s", get_full_name());
 
   rq = rp.retrieve_resources(get_full_name());
-  foreach (rq[i]) begin
-    r = rq[i];
+  for(int i=0; i<rq.size(); ++i) begin
+    r = rq.get(i);
     name = r.get_name();
 
     // does name have brackets [] in it?

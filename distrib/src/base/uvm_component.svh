@@ -1398,7 +1398,8 @@ class uvm_config_int extends uvm_resource#(uvm_bitstream_t);
 
   static function this_type import_by_name(string name, string scope, bit rpterr = 1);
     this_type t;
-    if(!$cast(t, super.import_by_name(name, scope, rpterr)))
+    uvm_resource_base b = uvm_resource#(uvm_bitstream_t)::import_by_name(name, scope, rpterr);
+    if(!$cast(t, b))
       `uvm_fatal("BADCAST", "broken cast in uvm_config_int");
     return t;
   endfunction
@@ -1406,7 +1407,8 @@ class uvm_config_int extends uvm_resource#(uvm_bitstream_t);
   static function this_type import_by_type(uvm_resource_base type_handle,
                                     string scope = "");
     this_type t;
-    if(!$cast(t, super.import_by_type(type_handle, scope)))
+    uvm_resource_base b = uvm_resource#(uvm_bitstream_t)::import_by_type(type_handle, scope);
+    if(!$cast(t, b))
       `uvm_fatal("BADCAST", "broken cast in uvm_config_int");
     return t;
   endfunction
@@ -1430,7 +1432,8 @@ class uvm_config_str extends uvm_resource#(string);
 
   static function this_type import_by_name(string name, string scope, bit rpterr = 1);
     this_type t;
-    if(!$cast(t, super.import_by_name(name, scope, rpterr)))
+    uvm_resource_base b = uvm_resource#(string)::import_by_name(name, scope, rpterr);
+    if(!$cast(t, b))
       `uvm_fatal("BADCAST", "broken cast in uvm_config_str");
     return t;
   endfunction
@@ -1438,7 +1441,8 @@ class uvm_config_str extends uvm_resource#(string);
   static function this_type import_by_type(uvm_resource_base type_handle,
                                     string scope = "");
     this_type t;
-    if(!$cast(t, super.import_by_type(type_handle, scope)))
+    uvm_resource_base b = uvm_resource#(string)::import_by_type(type_handle, scope);
+    if(!$cast(t, b))
       `uvm_fatal("BADCAST", "broken cast in uvm_config_str");
     return t;
   endfunction
@@ -1464,7 +1468,8 @@ class uvm_config_obj extends uvm_resource#(uvm_object);
 
   static function this_type import_by_name(string name, string scope, bit rpterr = 1);
     this_type t;
-    if(!$cast(t, super.import_by_name(name, scope, rpterr)))
+    uvm_resource_base b = uvm_resource#(uvm_object)::import_by_name(name, scope, rpterr);
+    if(!$cast(t, b))
       `uvm_fatal("BADCAST", "broken cast in uvm_config_obj");
     return t;
   endfunction
@@ -1472,7 +1477,8 @@ class uvm_config_obj extends uvm_resource#(uvm_object);
   static function this_type import_by_type(uvm_resource_base type_handle,
                                     string scope = "");
     this_type t;
-    if(!$cast(t, super.import_by_type(type_handle, scope)))
+    uvm_resource_base b = uvm_resource#(uvm_object)::import_by_type(type_handle, scope);
+    if(!$cast(t, b))
       `uvm_fatal("BADCAST", "broken cast in uvm_config_obj");
     return t;
   endfunction

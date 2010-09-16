@@ -25,7 +25,8 @@ class uvm_resource_proxy #(type T=int);
   typedef uvm_resource #(T) rsrc_t;
 
   // all the functions are static, no need to instantiate this class
-  protected function new();
+//  protected function new();
+  function new();
   endfunction
 
   static function rsrc_t import_by_type(string scope);
@@ -60,7 +61,7 @@ class uvm_resource_proxy #(type T=int);
     rsrc.write(val, accessor);
     rsrc.export_resource();
 
-  endfunction;
+  endfunction
 
   // function: export_and_write_anonymous
   //
@@ -74,7 +75,7 @@ class uvm_resource_proxy #(type T=int);
     rsrc.write(val, accessor);
     rsrc.export_resource();
 
-  endfunction;
+  endfunction
 
 
   // function read_by_name

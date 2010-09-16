@@ -51,7 +51,7 @@ class child_component extends uvm_component;
   endfunction
 
   function void report();
-    uvm_resource_base rq [$];
+    uvm_queue#(uvm_resource_base) rq;
     $display("resources visible in %s", get_full_name());
     rq = uvm_resources.retrieve_resources(get_full_name());
     uvm_resources.print_resources(rq);
@@ -89,7 +89,7 @@ class parent_component extends uvm_component;
   endfunction
 
   function void report();
-    uvm_resource_base rq [$];
+    uvm_queue#(uvm_resource_base) rq;
     $display("resources visible in %s", get_full_name());
     rq = uvm_resources.retrieve_resources(get_full_name());
     uvm_resources.print_resources(rq);
@@ -146,7 +146,7 @@ class test extends uvm_component;
   endtask
 
   function void report();
-    uvm_resource_base rq [$];
+    uvm_queue#(uvm_resource_base) rq;
 
     // retrieve_resources() locates all the resources that are visible
     // in the current scope -- i.e. the scope identified by get_full_name(),
