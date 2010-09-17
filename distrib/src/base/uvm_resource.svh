@@ -521,6 +521,10 @@ class uvm_resource_pool;
 
     int unsigned i;
     uvm_resource_base r;
+    static uvm_line_printer ptr=new;
+
+    ptr.knobs.separator=""; ptr.knobs.full_name=0; ptr.knobs.identifier=0;
+    ptr.knobs.type_name=0;  ptr.knobs.reference=0;
 
     if(rq == null && rq.size() == 0) begin
       $display("<none>");
@@ -529,7 +533,7 @@ class uvm_resource_pool;
 
     for(int i=0; i<rq.size(); ++i) begin
       r = rq.get(i);
-      r.print();
+      r.print(ptr);
       if(audit == 1)
         r.print_accessors();
     end

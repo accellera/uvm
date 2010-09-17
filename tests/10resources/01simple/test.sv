@@ -121,13 +121,13 @@ class test extends uvm_component;
     // create and export a resource that is available only in the "mom"
     // sub-hierarchy.  We use a glob to represent the set of scopes over
     // which this resource is visible
-    uvm_resource_proxy#(int)::export_and_write("size", "test.mom.*", 16, this);
+    uvm_resource_proxy#(int)::export_and_write("size", "*.mom.*", 16, this);
 
     // create and export a resource that is available only in the "dad"
     // sub-hierarchy.  Here we use a regex to represent the set of
     // scopes over which this resource is visible.  Note the % as the
     // lead character
-    uvm_resource_proxy#(int)::export_and_write("size", "%test\\.dad\\..*", 32, this);
+    uvm_resource_proxy#(int)::export_and_write("size", "%.*\\.dad\\..*", 32, this);
     
     // create and export a resource that is available only in leaves
     // named child1.
