@@ -27,38 +27,6 @@ typedef class uvm_report_object;
 typedef class uvm_report_server;
 typedef class uvm_report_global_server;
 
-`ifdef UVM_USE_AAOFAA_WA
-    class uvm_hash #(type T=int, I1=int, I2=int);
-      local T d[string];
-      function void set(I1 i1, I2 i2, T t);
-        string s;
-        $swrite(s,i1,":",i2);
-        d[s] = t;
-      endfunction
-      function T get(I1 i1,I2 i2);
-        string s;
-        $swrite(s,i1,":",i2);
-        return d[s];
-      endfunction
-      function int exists(I1 i1, I2 i2);
-        string s;
-        if(d.num() == 0) return 0;
-        $swrite(s,i1,":",i2);
-        return d.exists(s);
-      endfunction
-      function int first(string index);
-        return d.first(index);
-      endfunction
-      function int next(string index);
-        return d.next(index);
-      endfunction
-      function T fetch(string index);
-        return d[index];
-      endfunction
-    endclass : uvm_hash
-`endif
-   
-
 //------------------------------------------------------------------------------
 //
 // CLASS: uvm_report_handler
@@ -80,6 +48,9 @@ typedef class uvm_report_global_server;
 //
 //------------------------------------------------------------------------------
 
+typedef uvm_pool#(string, uvm_action) id_actions_array;
+typedef uvm_pool#(string, UVM_FILE) id_file_array;
+
 class uvm_report_handler;
 
   uvm_report_global_server m_glob;
@@ -90,26 +61,14 @@ class uvm_report_handler;
 
   uvm_action severity_actions[uvm_severity];
 
-  `ifndef UVM_USE_AAOFAA_WA
-  id_actions_array id_actions;
+  id_actions_array id_actions=new;
   id_actions_array severity_id_actions[uvm_severity];
 
   // file handles : default, severity, action, (severity,id)
   UVM_FILE default_file_handle;
   UVM_FILE severity_file_handles[uvm_severity];
-  id_file_array id_file_handles;
+  id_file_array id_file_handles=new;
   id_file_array severity_id_file_handles[uvm_severity];
-  `endif
-
-  `ifdef UVM_USE_AAOFAA_WA
-  uvm_action id_actions[string];
-  uvm_hash #(uvm_action,uvm_severity,string) severity_id_actions = new;
-
-  UVM_FILE default_file_handle;
-  UVM_FILE severity_file_handles[uvm_severity];
-  UVM_FILE id_file_handles[string];
-  uvm_hash #(UVM_FILE,uvm_severity,string) severity_id_file_handles = new;
-  `endif
 
 
   // Function: new
@@ -226,22 +185,17 @@ class uvm_report_handler;
 
   local function UVM_FILE get_severity_id_file(uvm_severity severity, string id);
 
-   `ifndef UVM_USE_AAOFAA_WA
     id_file_array array;
 
     if(severity_id_file_handles.exists(severity)) begin
       array = severity_id_file_handles[severity];      
       if(array.exists(id))
-        return array[id];
+        return array.get(id);
     end
-   `else
-    if (severity_id_file_handles.exists(severity,id))
-      return severity_id_file_handles.get(severity,id);
-   `endif
 
 
     if(id_file_handles.exists(id))
-      return id_file_handles[id];
+      return id_file_handles.get(id);
 
     if(severity_file_handles.exists(severity))
       return severity_file_handles[severity];
@@ -280,21 +234,16 @@ class uvm_report_handler;
 
   function uvm_action get_action(uvm_severity severity, string id);
 
-   `ifndef UVM_USE_AAOFAA_WA
     id_actions_array array;
 
     if(severity_id_actions.exists(severity)) begin
       array = severity_id_actions[severity];
       if(array.exists(id))
-        return array[id];
+        return array.get(id);
     end
-   `else
-    if (severity_id_actions.exists(severity,id))
-      return severity_id_actions.get(severity,id);
-   `endif
 
     if(id_actions.exists(id))
-      return id_actions[id];
+      return id_actions.get(id);
 
     return severity_actions[severity];
 
@@ -318,7 +267,7 @@ class uvm_report_handler;
       return file;
   
     if (id_file_handles.exists(id)) begin
-      file = id_file_handles[id];
+      file = id_file_handles.get(id);
       if (file != 0)
         return file;
     end
@@ -409,17 +358,15 @@ class uvm_report_handler;
   endfunction
 
   function void set_id_action(input string id, input uvm_action action);
-    id_actions[id] = action;
+    id_actions.add(id, action);
   endfunction
 
   function void set_severity_id_action(uvm_severity severity,
                                        string id,
                                        uvm_action action);
-    `ifndef UVM_USE_AAOFAA_WA
-    severity_id_actions[severity][id] = action;
-    `else
-    severity_id_actions.set(severity,id,action);
-    `endif
+    if(!severity_id_actions.exists(severity))
+      severity_id_actions[severity] = new;
+    severity_id_actions[severity].add(id,action);
   endfunction
   
 
@@ -439,17 +386,14 @@ class uvm_report_handler;
   endfunction
 
   function void set_id_file (string id, UVM_FILE file);
-    id_file_handles[id] = file;
+    id_file_handles.add(id, file);
   endfunction
 
   function void set_severity_id_file(uvm_severity severity,
                                      string id, UVM_FILE file);
-  
-    `ifndef UVM_USE_AAOFAA_WA
-    severity_id_file_handles[severity][id] = file;
-    `else
-    severity_id_file_handles.set(severity,id,file);
-    `endif
+    if(!severity_id_file_handles.exists(severity))
+      severity_id_file_handles[severity] = new;
+    severity_id_file_handles[severity].add(id, file);
   endfunction
 
   
@@ -466,12 +410,8 @@ class uvm_report_handler;
     UVM_FILE file;
     uvm_report_server srvr;
  
-   `ifndef UVM_USE_AAOFAA_WA
-     id_actions_array id_a_ary;
-     id_file_array id_f_ary;
-   `else
-     UVM_FILE id_f_ary[string];
-   `endif
+    id_actions_array id_a_ary;
+    id_file_array id_f_ary;
 
     srvr = m_glob.get_server();
 
@@ -501,38 +441,26 @@ class uvm_report_handler;
     srvr.f_display(0, "");
     srvr.f_display(0, "*** actions by id");
 
-    foreach( id_actions[idx] ) begin
-      $sformat(s, "[%s] --> %s", idx, format_action(id_actions[idx]));
+    if(id_actions.first(idx))
+    do begin
+      $sformat(s, "[%s] --> %s", idx, format_action(id_actions.get(idx)));
       srvr.f_display(0, s);
-    end
+    end while(id_actions.next(idx));
 
     // actions by id
 
     srvr.f_display(0, "");
     srvr.f_display(0, "*** actions by id and severity");
 
-    `ifndef UVM_USE_AAOFAA_WA
     foreach( severity_id_actions[severity] ) begin
-      // ADAM: is id_a_ary __copied__?
       id_a_ary = severity_id_actions[severity];
-      foreach( id_a_ary[idx] ) begin
+      if(id_a_ary.first(idx))
+      do begin
         $sformat(s, "%s:%s --> %s",
-           uvm_severity_type'(severity), idx, format_action(id_a_ary[idx]));
+           uvm_severity_type'(severity), idx, format_action(id_a_ary.get(idx)));
         srvr.f_display(0, s);        
-      end
+      end while(id_a_ary.next(idx));
     end
-    `else
-    begin
-      string idx;
-      if ( severity_id_actions.first( idx ) )
-        do begin
-            $sformat(s, "%s --> %s", idx,
-              format_action(severity_id_actions.fetch(idx)));
-            srvr.f_display(0, s);        
-        end
-        while ( severity_id_actions.next( idx ) );
-    end
-    `endif
 
     // Files
 
@@ -556,35 +484,24 @@ class uvm_report_handler;
     srvr.f_display(0, "");
     srvr.f_display(0, "*** files by id");
 
-    foreach ( id_file_handles[idx] ) begin
-      file = id_file_handles[idx];
+    if(id_file_handles.first(idx))
+    do begin
+      file = id_file_handles.get(idx);
       $sformat(s, "id %s --> %d", idx, file);
       srvr.f_display(0, s);
-    end
+    end while (id_file_handles.next(idx));
 
     srvr.f_display(0, "");
     srvr.f_display(0, "*** files by id and severity");
 
-    `ifndef UVM_USE_AAOFAA_WA
     foreach( severity_id_file_handles[severity] ) begin
       id_f_ary = severity_id_file_handles[severity];
-      foreach ( id_f_ary[idx] ) begin
-        $sformat(s, "%s:%s --> %d", uvm_severity_type'(severity), idx, id_f_ary[idx]);
+      if(id_f_ary.first(idx))
+      do begin
+        $sformat(s, "%s:%s --> %d", uvm_severity_type'(severity), idx, id_f_ary.get(idx));
         srvr.f_display(0, s);
-      end
+      end while(id_f_ary.next(idx));
     end
-    `else
-    begin
-      string idx;
-      if ( severity_id_file_handles.first( idx ) )
-        do begin
-            $sformat(s, "%s --> %s", idx,
-              format_action(severity_id_file_handles.fetch(idx)));
-            srvr.f_display(0, s);        
-        end
-        while ( severity_id_file_handles.next( idx ) );
-    end
-    `endif
 
     srvr.dump_server_state();
     
