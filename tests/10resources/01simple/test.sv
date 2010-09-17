@@ -51,7 +51,7 @@ class child_component extends uvm_component;
   endfunction
 
   function void report();
-    uvm_resource_base rq [$];
+    uvm_queue#(uvm_resource_base) rq;
     $display("resources visible in %s", get_full_name());
     rq = uvm_resources.retrieve_resources(get_full_name());
     uvm_resources.print_resources(rq);
@@ -89,7 +89,7 @@ class parent_component extends uvm_component;
   endfunction
 
   function void report();
-    uvm_resource_base rq [$];
+    uvm_queue#(uvm_resource_base) rq;
     $display("resources visible in %s", get_full_name());
     rq = uvm_resources.retrieve_resources(get_full_name());
     uvm_resources.print_resources(rq);
@@ -121,13 +121,13 @@ class test extends uvm_component;
     // create and export a resource that is available only in the "mom"
     // sub-hierarchy.  We use a glob to represent the set of scopes over
     // which this resource is visible
-    uvm_resource_proxy#(int)::export_and_write("size", "test.mom.*", 16, this);
+    uvm_resource_proxy#(int)::export_and_write("size", "*.mom.*", 16, this);
 
     // create and export a resource that is available only in the "dad"
     // sub-hierarchy.  Here we use a regex to represent the set of
     // scopes over which this resource is visible.  Note the % as the
     // lead character
-    uvm_resource_proxy#(int)::export_and_write("size", "%test\\.dad\\..*", 32, this);
+    uvm_resource_proxy#(int)::export_and_write("size", "%.*\\.dad\\..*", 32, this);
     
     // create and export a resource that is available only in leaves
     // named child1.
@@ -146,7 +146,7 @@ class test extends uvm_component;
   endtask
 
   function void report();
-    uvm_resource_base rq [$];
+    uvm_queue#(uvm_resource_base) rq;
 
     // retrieve_resources() locates all the resources that are visible
     // in the current scope -- i.e. the scope identified by get_full_name(),

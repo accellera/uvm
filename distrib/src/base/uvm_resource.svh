@@ -109,7 +109,7 @@ virtual class uvm_resource_base extends uvm_object;
     return "?";
   endfunction
 
-  function void do_print (uvm_printer printer=null);
+  function void do_print (uvm_printer printer);
     $display("  %s = %s [%s]", get_name(), convert2string(), get_scope());
   endfunction
 
@@ -119,12 +119,13 @@ virtual class uvm_resource_base extends uvm_object;
     uvm_component comp;
     access_t access_record;
 
-    if(access.size() == 0)
+    if(access.num() == 0)
       return;
 
     $display("  --------");
 
-    foreach (access[obj]) begin
+    foreach (access[i]) begin
+      obj = i;
 
       if($cast(comp, obj))
         $write("  %s", comp.get_full_name());
@@ -218,13 +219,12 @@ endclass
 // Instances of import_t are stored in the history list as a record of
 // each import.  Failed imports are indicated with rsrc set to null.
 //
-typedef struct
-{
+class import_t;
   string name;
   string scope;
   uvm_resource_base rsrc;
   time t;
-} import_t;
+endclass
 
 //----------------------------------------------------------------------
 // uvm_resource_pool
@@ -233,14 +233,15 @@ class uvm_resource_pool;
 
   static local uvm_resource_pool rp = get();
 
-  typedef uvm_resource_base rsrc_q_t [$];
+  typedef uvm_queue#(uvm_resource_base) rsrc_q_t;
 
   rsrc_q_t rtab [string];
   rsrc_q_t ttab [uvm_resource_base];
 
   import_t import_record [$];  // history of imports
 
-  protected function new();
+//  protected function new();
+  function new();
   endfunction
 
   static function uvm_resource_pool get();
@@ -283,7 +284,9 @@ class uvm_resource_pool;
     // anonymous resources and are not entered into the name map
     name = rsrc.get_name();
     if(name != "") begin
-      rq = (rtab.exists(name)) ? rtab[name] : {};
+      if(rtab.exists(name)) rq = rtab[name];
+      else rq = new;
+
       if(override)
         rq.push_front(rsrc);
       else
@@ -293,11 +296,13 @@ class uvm_resource_pool;
 
     // insert into the type list
     type_handle = rsrc.get_type_handle();
-    rq = (ttab.exists(type_handle)) ? ttab[type_handle] : {};
-      if(override)
-        rq.push_front(rsrc);
-      else
-        rq.push_back(rsrc);
+    if(ttab.exists(type_handle)) rq = ttab[type_handle];
+    else rq = new;
+
+    if(override)
+      rq.push_front(rsrc);
+    else
+      rq.push_back(rsrc);
     ttab[type_handle] = rq;
 
   endfunction
@@ -313,7 +318,7 @@ class uvm_resource_pool;
   //--------------------------------------------------------------------
   function void push_import_record(string name, string scope,
                                   uvm_resource_base rsrc);
-    import_t impt;
+    import_t impt = new;
 
     impt.name  = name;
     impt.scope = scope;
@@ -356,7 +361,7 @@ class uvm_resource_pool;
   function uvm_resource_base import_by_name(string name, string scope = "", bit rpterr = 1);
 
     rsrc_q_t rq;
-    rsrc_q_t matchq;
+    rsrc_q_t matchq=new;
     uvm_resource_base rsrc;
     uvm_resource_base r;
     int unsigned i;
@@ -375,10 +380,10 @@ class uvm_resource_pool;
 
     // we search through the queue for the first resource that matches the scope
     rsrc = null;
-    matchq = {};
+    `uvm_clear_queue(matchq);
     rq = rtab[name];
-    foreach (rq [i]) begin
-      r = rq[i];
+    for(int i=0; i<rq.size(); ++i) begin 
+      r = rq.get(i);
       if(r.match_scope(scope)) begin
         matchq.push_back(r);
       end
@@ -393,13 +398,13 @@ class uvm_resource_pool;
       $sformat(msg, "There are multiple resources with name %s that are visible in scope %s.  The first one is the one that was used. The matching resources are:",
                name, scope);
       `uvm_warning("DUPRSRC", msg);
-      foreach(matchq[i]) begin
-        r = matchq[i];
+      for(int i=0; i<matchq.size(); ++i) begin 
+        r = matchq.get(i);
         $display("    %s in scope %s", r.get_name(), r.get_scope());
       end
     end
 
-    rsrc = matchq[0];
+    rsrc = matchq.get(0);
     push_import_record(name, scope, rsrc);
     return rsrc;
     
@@ -427,8 +432,8 @@ class uvm_resource_pool;
 
     rsrc = null;
     rq = ttab[type_handle];
-    foreach (rq [i]) begin
-      r = rq[i];
+    for(int i=0; i<rq.size(); ++i) begin 
+      r = rq.get(i);
       if(r.match_scope(scope)) begin
         rsrc = r;
         break;
@@ -455,13 +460,14 @@ class uvm_resource_pool;
     uvm_resource_base r;
     int unsigned i;
     int unsigned err;
-    rsrc_q_t result_q;
+    rsrc_q_t result_q = new;
 
     foreach (rtab[name]) begin
       rq = rtab[name];
-      foreach (rq [i]) begin
-        r = rq[i];
+      for(int i=0; i<rq.size(); ++i) begin
+        r = rq.get(i);
         if(r.match_scope(scope)) begin
+          if(result_q == null) result_q = new;
           result_q.push_back(r);
         end
       end
@@ -479,7 +485,7 @@ class uvm_resource_pool;
   function rsrc_q_t find_zeros();
 
     rsrc_q_t rq;
-    rsrc_q_t q;
+    rsrc_q_t q = new;
     int unsigned i;
     uvm_resource_base r;
     access_t a;
@@ -488,8 +494,8 @@ class uvm_resource_pool;
 
     foreach (rtab[name]) begin
       rq = rtab[name];
-      foreach (rq [i]) begin
-        r = rq[i];
+      for(int i=0; i<rq.size(); ++i) begin
+        r = rq.get(i);
         reads = 0;
         writes = 0;
         foreach(r.access[obj]) begin
@@ -515,15 +521,19 @@ class uvm_resource_pool;
 
     int unsigned i;
     uvm_resource_base r;
+    static uvm_line_printer ptr=new;
 
-    if(rq.size() == 0) begin
+    ptr.knobs.separator=""; ptr.knobs.full_name=0; ptr.knobs.identifier=0;
+    ptr.knobs.type_name=0;  ptr.knobs.reference=0;
+
+    if(rq == null && rq.size() == 0) begin
       $display("<none>");
       return;
     end
 
-    foreach (rq[i]) begin
-      r = rq[i];
-      r.print();
+    for(int i=0; i<rq.size(); ++i) begin
+      r = rq.get(i);
+      r.print(ptr);
       if(audit == 1)
         r.print_accessors();
     end
@@ -567,7 +577,8 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   typedef uvm_resource#(T) this_type;
   static this_type my_type = get_type();
 
-  rand protected T val;
+  // Can't be rand since things like rand strings are not legal.
+  protected T val;
 
   function new(string name="", scope="");
     super.new(name, scope);
