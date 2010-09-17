@@ -303,6 +303,12 @@ class uvm_report_object extends uvm_object;
     m_rh.set_id_action(id, action);
   endfunction
 
+  // Function: set_report_id_verbosity
+  //
+  function void set_report_id_verbosity (string id, int verbosity);
+    m_rh.set_id_verbosity(id, verbosity);
+  endfunction
+
   // Function: set_report_severity_id_action
   //
   // These methods associate the specified action or actions with reports of the
@@ -317,6 +323,23 @@ class uvm_report_object extends uvm_object;
   function void set_report_severity_id_action (uvm_severity severity,
                                                string id, uvm_action action);
     m_rh.set_severity_id_action(severity, id, action);
+  endfunction
+
+
+  // Function: set_report_severity_id_verbosity
+  //
+  // These methods associate the specified verbosity with reports of the
+  // given ~severity~, ~id~, or ~severity-id~ pair. An verbosity associated with a
+  // particular ~severity-id~ pair takes precedence over an verbosity associated with
+  // ~id~, which take precedence over an an verbosity associated with a ~severity~.
+  //
+  // The ~verbosity~ argument can be any integer, but is most commonaly a
+  // predefined <uvm_verbosity> value, <UVM_NONE>, <UVM_LOW>, <UVM_MEDIUM>,
+  // <UVM_HIGH>, <UVM_FULL>.
+
+  function void set_report_severity_id_verbosity (uvm_severity severity,
+                                               string id, int verbosity);
+    m_rh.set_severity_id_verbosity(severity, id, verbosity);
   endfunction
 
 
@@ -370,6 +393,18 @@ class uvm_report_object extends uvm_object;
   endfunction
 
 
+  // Function: get_report_verbosity
+  //
+  // Gets the verbosity level for a specific ~severity~, ~id~ pair. This 
+  // verbosity has precedance over the default verbosity obtained from
+  // <get_report_verbosity_level>.
+
+  function int get_report_id_verbosity(uvm_severity severity, string id, 
+       int default_verbosity=UVM_MEDIUM);
+    return m_rh.get_id_verbosity(severity, id, default_verbosity);
+  endfunction
+
+
   // Function: get_report_action
   //
   // Gets the action associated with reports having the given ~severity~
@@ -392,7 +427,7 @@ class uvm_report_object extends uvm_object;
 
   // Function: uvm_report_enabled
   //
-  // Returns 1 if the configured verbosity for this object is greater than 
+  // Returns 1 if the configured verbosity for this severity/id is greater than 
   // ~verbosity~ and the action associated with the given ~severity~ and ~id~
   // is not UVM_NO_ACTION, else returns 0.
   // 
@@ -401,7 +436,7 @@ class uvm_report_object extends uvm_object;
 
   function int uvm_report_enabled(int verbosity, 
                           uvm_severity severity=UVM_INFO, string id="");
-    if (get_report_verbosity_level() < verbosity ||
+    if (get_report_verbosity_level() < get_report_id_verbosity(severity, id, verbosity) ||
         get_report_action(severity,id) == uvm_action'(UVM_NO_ACTION)) 
       return 0;
     else 

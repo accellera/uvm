@@ -1027,10 +1027,32 @@ virtual class uvm_component extends uvm_report_object;
   // report will be sent to its associated FILE descriptor.
   //----------------------------------------------------------------------------
 
+  // Function: set_report_id_verbosity_hier
+
+  extern function void set_report_id_verbosity_hier (string id,
+                                                  int verbosity);
+
+  // Function: set_report_severity_id_verbosity_hier
+  //
+  // These methods recursively associate the specified verbosity with reports of
+  // the given ~severity~, ~id~, or ~severity-id~ pair. An verbosity associated
+  // with a particular severity-id pair takes precedence over an verbosity
+  // associated with id, which takes precedence over an an verbosity associated
+  // with a severity.
+  //
+  // For a list of severities and their default verbosities, refer to
+  // <uvm_report_handler>.
+
+  extern function void set_report_severity_id_verbosity_hier(uvm_severity severity,
+                                                          string id,
+                                                          int verbosity);
+
+
   // Function: set_report_severity_action_hier
 
   extern function void set_report_severity_action_hier (uvm_severity severity,
                                                         uvm_action action);
+
 
   // Function: set_report_id_action_hier
 

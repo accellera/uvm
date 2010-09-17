@@ -50,6 +50,7 @@ typedef class uvm_report_global_server;
 
 typedef uvm_pool#(string, uvm_action) id_actions_array;
 typedef uvm_pool#(string, UVM_FILE) id_file_array;
+typedef uvm_pool#(string, int) id_verbosities_array;
 
 class uvm_report_handler;
 
@@ -63,6 +64,10 @@ class uvm_report_handler;
 
   id_actions_array id_actions=new;
   id_actions_array severity_id_actions[uvm_severity];
+
+  // id verbosity settings : default and severity
+  id_verbosities_array id_verbosities=new;
+  id_verbosities_array severity_id_verbosities[uvm_severity];
 
   // file handles : default, severity, action, (severity,id)
   UVM_FILE default_file_handle;
@@ -223,6 +228,37 @@ class uvm_report_handler;
   endfunction
 
 
+  // Function: get_id_verbosity
+  //
+  // Returns the verbosity associated with the given ~severity~ and ~id~.
+  // 
+  // First, if there is a verbosity associated with the ~(severity,id)~ pair,
+  // return that.  Else, if there is an verbosity associated with the ~id~, return
+  // that.  Else, return the input verbosity.
+
+  function int get_id_verbosity(uvm_severity severity, string id, 
+       int default_verbosity=UVM_MEDIUM);
+
+    id_verbosities_array array;
+    if(severity_id_verbosities.exists(severity)) begin
+      array = severity_id_verbosities[severity];
+      if(array.exists(id)) begin
+        return array.get(id);
+      end
+    end
+
+    if(id_verbosities.exists(id)) begin
+      return id_verbosities.get(id);
+    end
+
+    if(severity == UVM_INFO) begin
+      return default_verbosity;
+    end
+    return UVM_NONE;
+
+  endfunction
+
+
   // Function: get_action
   //
   // Returns the action associated with the given ~severity~ and ~id~.
@@ -300,7 +336,7 @@ class uvm_report_handler;
  
     uvm_report_server srvr;
     srvr = m_glob.get_server();
-    srvr.report(severity,name,id,message,verbosity_level,filename,line,client);
+    srvr.report(severity,name,id,message,get_id_verbosity(severity, id, verbosity_level),filename,line,client);
     
   endfunction
 
@@ -349,6 +385,8 @@ class uvm_report_handler;
   // Function- set_severity_action
   // Function- set_id_action
   // Function- set_severity_id_action
+  // Function- set_id_verbosity
+  // Function- set_severity_id_verbosity
   //
   // Internal methods called by uvm_report_object.
 
@@ -369,6 +407,17 @@ class uvm_report_handler;
     severity_id_actions[severity].add(id,action);
   endfunction
   
+  function void set_id_verbosity(input string id, input int verbosity);
+    id_verbosities.add(id, verbosity);
+  endfunction
+
+  function void set_severity_id_verbosity(uvm_severity severity,
+                                       string id,
+                                       int verbosity);
+    if(!severity_id_verbosities.exists(severity))
+      severity_id_verbosities[severity] = new;
+    severity_id_verbosities[severity].add(id,verbosity);
+  endfunction
 
   // Function- set_default_file
   // Function- set_severity_file
@@ -411,6 +460,7 @@ class uvm_report_handler;
     uvm_report_server srvr;
  
     id_actions_array id_a_ary;
+    id_verbosities_array id_v_ary;
     id_file_array id_f_ary;
 
     srvr = m_glob.get_server();
@@ -420,8 +470,39 @@ class uvm_report_handler;
     srvr.f_display(0, "report handler state dump");
     srvr.f_display(0, "");
 
+    // verbosities
+
+    srvr.f_display(0, "");   
+    srvr.f_display(0, "+-----------------+");
+    srvr.f_display(0, "|   Verbosities   |");
+    srvr.f_display(0, "+-----------------+");
+    srvr.f_display(0, "");   
+
     $sformat(s, "max verbosity level = %d", m_max_verbosity_level);
     srvr.f_display(0, s);
+
+    srvr.f_display(0, "*** verbosities by id");
+
+    if(id_verbosities.first(idx))
+    do begin
+      $sformat(s, "[%s] --> %s", idx, uvm_verbosity'(id_verbosities.get(idx)));
+      srvr.f_display(0, s);
+    end while(id_verbosities.next(idx));
+
+    // verbosities by id
+
+    srvr.f_display(0, "");
+    srvr.f_display(0, "*** verbosities by id and severity");
+
+    foreach( severity_id_verbosities[severity] ) begin
+      id_v_ary = severity_id_verbosities[severity];
+      if(id_v_ary.first(idx))
+      do begin
+        $sformat(s, "%s:%s --> %s",
+           uvm_severity_type'(severity), idx, uvm_verbosity'(id_v_ary.get(idx)));
+        srvr.f_display(0, s);        
+      end while(id_v_ary.next(idx));
+    end
 
     // actions
 
