@@ -322,7 +322,7 @@ class tlm2_generic_payload extends uvm_sequence_item;
     return m_response_status;
   endfunction
 
-  virtual function set_response_status(tlm_response_status_e status);
+  virtual function void set_response_status(tlm_response_status_e status);
     m_response_status = status;
   endfunction
 
