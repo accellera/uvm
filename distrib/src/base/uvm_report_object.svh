@@ -386,22 +386,12 @@ class uvm_report_object extends uvm_object;
   // Function: get_report_verbosity_level
   //
   // Gets the verbosity level in effect for this object. Reports issued
-  // with verbosity greater than this will be filtered out.
+  // with verbosity greater than this will be filtered out. The severity
+  // and tag arguments check if the verbosity level has been modified for
+  // specific severity/tag combinations.
 
-  function int get_report_verbosity_level();
-    return m_rh.get_verbosity_level();
-  endfunction
-
-
-  // Function: get_report_verbosity
-  //
-  // Gets the verbosity level for a specific ~severity~, ~id~ pair. This 
-  // verbosity has precedance over the default verbosity obtained from
-  // <get_report_verbosity_level>.
-
-  function int get_report_id_verbosity(uvm_severity severity, string id, 
-       int default_verbosity=UVM_MEDIUM);
-    return m_rh.get_id_verbosity(severity, id, default_verbosity);
+  function int get_report_verbosity_level(uvm_severity severity=UVM_INFO, string id="");
+    return m_rh.get_verbosity_level(severity, id);
   endfunction
 
 
@@ -436,7 +426,7 @@ class uvm_report_object extends uvm_object;
 
   function int uvm_report_enabled(int verbosity, 
                           uvm_severity severity=UVM_INFO, string id="");
-    if (get_report_verbosity_level() < get_report_id_verbosity(severity, id, verbosity) ||
+    if (get_report_verbosity_level(severity, id) < verbosity ||
         get_report_action(severity,id) == uvm_action'(UVM_NO_ACTION)) 
       return 0;
     else 

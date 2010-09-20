@@ -54,7 +54,7 @@
     
     // filter based on verbosity level
  
-    if(severity == uvm_severity'(UVM_INFO) && verbosity_level > rh.m_max_verbosity_level) begin
+    if(!client.uvm_report_enabled(verbosity_level, severity, id)) begin
        return;
     end
 

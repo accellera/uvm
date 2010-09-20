@@ -221,23 +221,13 @@ class uvm_report_handler;
 
   // Function: get_verbosity_level
   //
-  // Returns the configured maximum verbosity level.
-
-  function int get_verbosity_level();
-    return m_max_verbosity_level;
-  endfunction
-
-
-  // Function: get_id_verbosity
-  //
   // Returns the verbosity associated with the given ~severity~ and ~id~.
   // 
   // First, if there is a verbosity associated with the ~(severity,id)~ pair,
   // return that.  Else, if there is an verbosity associated with the ~id~, return
-  // that.  Else, return the input verbosity.
+  // that.  Else, return the max verbosity setting.
 
-  function int get_id_verbosity(uvm_severity severity, string id, 
-       int default_verbosity=UVM_MEDIUM);
+  function int get_verbosity_level(uvm_severity severity=UVM_INFO, string id="" );
 
     id_verbosities_array array;
     if(severity_id_verbosities.exists(severity)) begin
@@ -251,10 +241,7 @@ class uvm_report_handler;
       return id_verbosities.get(id);
     end
 
-    if(severity == UVM_INFO) begin
-      return default_verbosity;
-    end
-    return UVM_NONE;
+    return m_max_verbosity_level;
 
   endfunction
 
@@ -336,7 +323,7 @@ class uvm_report_handler;
  
     uvm_report_server srvr;
     srvr = m_glob.get_server();
-    srvr.report(severity,name,id,message,get_id_verbosity(severity, id, verbosity_level),filename,line,client);
+    srvr.report(severity,name,id,message,verbosity_level,filename,line,client);
     
   endfunction
 
