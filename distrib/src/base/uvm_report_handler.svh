@@ -25,7 +25,6 @@
 
 typedef class uvm_report_object;
 typedef class uvm_report_server;
-typedef class uvm_report_global_server;
 
 `ifdef UVM_USE_AAOFAA_WA
     class uvm_hash #(type T=int, I1=int, I2=int);
@@ -82,8 +81,6 @@ typedef class uvm_report_global_server;
 
 class uvm_report_handler;
 
-  uvm_report_global_server m_glob;
-
   int m_max_verbosity_level;
 
   // internal variables
@@ -126,7 +123,7 @@ class uvm_report_handler;
   // Internal method called by <uvm_report_object::get_report_server>.
 
   function uvm_report_server get_server();
-    return uvm_report_global_server::get_server();
+    return uvm_report_server::get_server();
   endfunction
 
 
@@ -136,7 +133,7 @@ class uvm_report_handler;
 
   function void set_max_quit_count(int max_count);
     uvm_report_server srvr;
-    srvr = uvm_report_global_server::get_server();
+    srvr = uvm_report_server::get_server();
     srvr.set_max_quit_count(max_count);
   endfunction
 
@@ -147,7 +144,7 @@ class uvm_report_handler;
 
   function void summarize(UVM_FILE file = 0);
     uvm_report_server srvr;
-    srvr = uvm_report_global_server::get_server();
+    srvr = uvm_report_server::get_server();
     srvr.summarize(file);
   endfunction
 
@@ -160,7 +157,7 @@ class uvm_report_handler;
 
     uvm_report_server srvr;
 
-    srvr = m_glob.get_server();
+    srvr = uvm_report_server::get_server();
     srvr.f_display(file,
       "----------------------------------------------------------------");
     srvr.f_display(file, uvm_revision_string());
@@ -349,7 +346,7 @@ class uvm_report_handler;
       );
  
     uvm_report_server srvr;
-    srvr = m_glob.get_server();
+    srvr = uvm_report_server::get_server();
     srvr.report(severity,name,id,message,verbosity_level,filename,line,client);
     
   endfunction
@@ -472,7 +469,7 @@ class uvm_report_handler;
      UVM_FILE id_f_ary[string];
    `endif
 
-    srvr = m_glob.get_server();
+    srvr = uvm_report_server::get_server();
 
     srvr.f_display(0,
       "----------------------------------------------------------------------");
