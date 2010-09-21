@@ -19,19 +19,55 @@
 
 //----------------------------------------------------------------------
 // class: uvm_resource_proxy
+//
+// The uvm_resource_proxy#(T) class provides a convenience interface for
+// the resources facility.  In many cases basic operations such as
+// creating and exporting a resource or importing a resource could take
+// multiple lines of code using the interfaces in uvm_resource_base or
+// uvm_resource#(T).  The convenience layer in uvm_resource_proxy#(T)
+// reduce many of those operations to a single line of code.
+//
+// All of the functions in uvm_resource_proxy#(T) are static, so they
+// must be called using the :: operator.  For example:
+//
+//|  uvm_resource_proxy#(int)::export_and_write("A", "*", 17, this);
+//
+// The parameter value "int" identifies the resource type as
+// uvm_resource#(int).  Thus, the type of the object in the resource
+// container is int. This maintains the type-safety characteristics of
+// resource operations.
 //----------------------------------------------------------------------
 class uvm_resource_proxy #(type T=int);
 
   typedef uvm_resource #(T) rsrc_t;
 
-  // all the functions are static, no need to instantiate this class
-//  protected function new();
-  function new();
-  endfunction
+  // All of the functions in this class are static, so there is no need
+  // to instantiate this class ever.  To make sure that the constructor
+  // is never called it's good practice to make it local or at leat
+  // protected. However, IUS doesn't support protected constructors so
+  // we'll just the default constructor instead.  If support for
+  // protected constructors ever becomes available then this comment can
+  // be deleted and the protected constructor uncommented.
+
+  //  protected function new();
+  //  endfunction
+
+
+  // function: import_by_type
+  //
+  // Import a resource by type.  The type is specified in the proxy
+  // class parameter so the only argument to this funciton is the
+  // current scope.
 
   static function rsrc_t import_by_type(string scope);
     return rsrc_t::import_by_type(rsrc_t::get_type(), scope);
   endfunction
+
+  // function: import_by_name
+
+  // Imports a resource by name.  The first argument is the name of the
+  // resource to be imported and the second argument is the current
+  // scope.
 
   static function rsrc_t import_by_name(string name, string scope);
     return rsrc_t::import_by_name(name, scope);
