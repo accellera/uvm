@@ -111,11 +111,11 @@
     incr_id_count(id);
 
     if(action & UVM_DISPLAY)
-      $display(composed_message);
+      $display("%s",composed_message);
 
     if(action & UVM_LOG)
       if(file != 0 || !(action & UVM_DISPLAY)) // don't display twice
-        $fdisplay(file, composed_message);
+        $fdisplay(file, "%s",composed_message);
 
     if(action & UVM_EXIT) client.die();
 
