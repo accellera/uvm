@@ -148,12 +148,13 @@ class uvm_report_object extends uvm_object;
   //
   //   verbosity - the verbosity of the message, indicating its relative
   //               importance. If this number is less than or equal to the
-  //               effective verbosity level (see <set_report_verbosity_level>),
+  //               effective verbosity level, see <set_report_verbosity_level>,
   //               then the report is issued, subject to the configured action
   //               and file descriptor settings.  Verbosity is ignored for 
-  //               warnings, errors, and fatals to ensure users do not 
-  //               inadvertently filter them out. It remains in the methods
-  //               for backward compatibility.
+  //               warnings, errors, and fatals. However, if a warning, error
+  //               or fatal is demoted to an info message using the
+  //               <uvm_report_catcher>, then the verbosity is taken into
+  //               account.
   //
   //   filename/line - (Optional) The location from which the report was issued.
   //               Use the predefined macros, `__FILE__ and `__LINE__.

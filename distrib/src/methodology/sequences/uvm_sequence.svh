@@ -171,12 +171,9 @@ protected bit      response_queue_error_report_disabled = 0;
       m_sequencer.end_tr(this);
     end
         
-    // Clean up any sequencer queues after exiting; if we
-    // were forcibly stoped, this step has already taken place
-    if (m_sequence_state != STOPPED) begin
-      if (m_sequencer != null)
-        m_sequencer.sequence_exiting(this);
-    end
+    // Clean up any sequencer queues after exiting.
+    if (m_sequencer != null)
+      m_sequencer.sequence_exiting(this);
 
     #0; // allow stopped and finish waiters to resume
 

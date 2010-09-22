@@ -72,6 +72,37 @@ class uvm_report_server extends uvm_object;
   endfunction
 
 
+  static protected uvm_report_server m_global_report_server = get_server();
+
+  // Function: set_server
+  //
+  // Sets the global report server to use for reporting. The report
+  // server is responsible for formatting messages.
+
+  static function void set_server(uvm_report_server server);
+    if(m_global_report_server != null) begin
+      server.set_max_quit_count(m_global_report_server.get_max_quit_count());
+      server.set_quit_count(m_global_report_server.get_quit_count());
+      m_global_report_server.copy_severity_counts(server);
+      m_global_report_server.copy_id_counts(server);
+    end
+
+    m_global_report_server = server;
+  endfunction
+
+
+  // Function: get_server
+  //
+  // Gets the global report server. The method will always return 
+  // a valid handle to a report server.
+
+  static function uvm_report_server get_server();
+    if (m_global_report_server == null)
+      m_global_report_server = new;
+    return m_global_report_server;
+  endfunction
+
+
   // Function: set_max_quit_count
 
   function void set_max_quit_count(int count);
@@ -383,11 +414,8 @@ endclass
 //----------------------------------------------------------------------
 class uvm_report_global_server;
 
-  static uvm_report_server global_report_server = null;
-
   function new();
-    if (global_report_server == null)
-      global_report_server = new;
+    void'(get_server());
   endfunction
 
 
@@ -396,20 +424,16 @@ class uvm_report_global_server;
   // Returns a handle to the central report server.
 
   function uvm_report_server get_server();
-    return global_report_server;
+    return uvm_report_server::get_server();
   endfunction
 
 
-  // Function- set_server
+  // Function- set_server (deprecated)
   //
   //
 
   function void set_server(uvm_report_server server);
-    server.set_max_quit_count(global_report_server.get_max_quit_count());
-    server.set_quit_count(global_report_server.get_quit_count());
-    global_report_server.copy_severity_counts(server);
-    global_report_server.copy_id_counts(server);
-    global_report_server = server;
+    uvm_report_server::set_server(server);
   endfunction
 
 endclass

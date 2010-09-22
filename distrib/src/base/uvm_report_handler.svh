@@ -25,7 +25,6 @@
 
 typedef class uvm_report_object;
 typedef class uvm_report_server;
-typedef class uvm_report_global_server;
 
 //------------------------------------------------------------------------------
 //
@@ -54,8 +53,6 @@ typedef uvm_pool#(string, int) id_verbosities_array;
 
 class uvm_report_handler;
 
-  uvm_report_global_server m_glob;
-
   int m_max_verbosity_level;
 
   // internal variables
@@ -81,7 +78,6 @@ class uvm_report_handler;
   // Creates and initializes a new uvm_report_handler object.
 
   function new();
-    m_glob = new();
     initialize;
   endfunction
 
@@ -91,7 +87,7 @@ class uvm_report_handler;
   // Internal method called by <uvm_report_object::get_report_server>.
 
   function uvm_report_server get_server();
-    return m_glob.get_server();
+    return uvm_report_server::get_server();
   endfunction
 
 
@@ -101,7 +97,7 @@ class uvm_report_handler;
 
   function void set_max_quit_count(int max_count);
     uvm_report_server srvr;
-    srvr = m_glob.get_server();
+    srvr = uvm_report_server::get_server();
     srvr.set_max_quit_count(max_count);
   endfunction
 
@@ -112,7 +108,7 @@ class uvm_report_handler;
 
   function void summarize(UVM_FILE file = 0);
     uvm_report_server srvr;
-    srvr = m_glob.get_server();
+    srvr = uvm_report_server::get_server();
     srvr.summarize(file);
   endfunction
 
@@ -125,7 +121,7 @@ class uvm_report_handler;
 
     uvm_report_server srvr;
 
-    srvr = m_glob.get_server();
+    srvr = uvm_report_server::get_server();
     srvr.f_display(file,
       "----------------------------------------------------------------");
     srvr.f_display(file, uvm_revision_string());
@@ -322,7 +318,7 @@ class uvm_report_handler;
       );
  
     uvm_report_server srvr;
-    srvr = m_glob.get_server();
+    srvr = uvm_report_server::get_server();
     srvr.report(severity,name,id,message,verbosity_level,filename,line,client);
     
   endfunction
@@ -450,7 +446,7 @@ class uvm_report_handler;
     id_verbosities_array id_v_ary;
     id_file_array id_f_ary;
 
-    srvr = m_glob.get_server();
+    srvr = uvm_report_server::get_server();
 
     srvr.f_display(0,
       "----------------------------------------------------------------------");
@@ -578,23 +574,6 @@ class uvm_report_handler;
   endfunction
 
 endclass : uvm_report_handler
-
-
-//------------------------------------------------------------------------------
-
-class uvm_default_report_server;
-
-  uvm_report_global_server glob;
-
-  function new();
-    glob = new;
-  endfunction
-
-  function uvm_report_server get_server();
-    return glob.get_server();
-  endfunction
-  
-endclass
 
 `endif // UVM_REPORT_HANDLER_SVH
 
