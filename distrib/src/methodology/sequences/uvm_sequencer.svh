@@ -205,7 +205,7 @@ class uvm_sequencer #(type REQ = uvm_sequence_item,
     get_next_item_called = 0;
     
     if (m_req_fifo.try_get(t) == 0) begin
-      uvm_report_fatal(get_full_name(), "Item done reports empty request fifo", UVM_NONE);
+      uvm_report_fatal(get_full_name(), "Item_done() called with no outstanding requests.  Each call to item_dome() must be paired with a previous call to get_next_item().", UVM_NONE);
     end else begin
       m_wait_for_item_sequence_id = t.get_sequence_id();
       m_wait_for_item_transaction_id = t.get_transaction_id();
