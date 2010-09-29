@@ -18,7 +18,7 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// priority event queue
+// payload event queue
 //
 // A data structure containing time/transaction pairs.  The data
 // structure is organized as an associative array of queues of
@@ -62,9 +62,9 @@ virtual class tlm2_peq_base extends uvm_object;
 endclass
 
 //----------------------------------------------------------------------
-// tlm2_peq
+// tlm2_peq_with_get
 //----------------------------------------------------------------------
-class tlm2_peq #(type T=int) extends tlm2_peq_base;
+class tlm2_peq_with_get #(type T=int) extends tlm2_peq_base;
 
   typedef T queue [$];
   local queue m_scheduled_events[time];

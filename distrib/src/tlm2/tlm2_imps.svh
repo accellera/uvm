@@ -26,19 +26,19 @@
 
 // IMP binding macros
 
-`define TLM2_NB_TRANSPORT_FW_IMP(imp, T, P, t, p, delay)                  \
-  function tlm_sync_e nb_transport_fw(ref T t, ref P p, ref time delay);  \
-    return imp.nb_transport_fw(t, p, delay);                              \
+`define TLM2_NB_TRANSPORT_FW_IMP(imp, T, P, t, p, delay)              \
+  function tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);  \
+    return imp.nb_transport_fw(t, p, delay);                          \
   endfunction
 
-`define TLM2_NB_TRANSPORT_BW_IMP(imp, T, P, t, p, delay)                  \
-  function tlm_sync_e nb_transport_bw(ref T t, ref P p, ref time delay);  \
-    return imp.nb_transport_bw(t, p, delay);                              \
+`define TLM2_NB_TRANSPORT_BW_IMP(imp, T, P, t, p, delay)              \
+  function tlm_sync_e nb_transport_bw(T t, ref P p, ref time delay);  \
+    return imp.nb_transport_bw(t, p, delay);                          \
   endfunction
 
-`define TLM2_B_TRANSPORT_IMP(imp, T, t, delay)                            \
-  task b_transport(ref T t, ref time delay);                              \
-    imp.b_transport(t, delay);                                            \
+`define TLM2_B_TRANSPORT_IMP(imp, T, t, delay)                        \
+  task b_transport(T t, ref time delay);                              \
+    imp.b_transport(t, delay);                                        \
   endtask
 
 //======================================================================

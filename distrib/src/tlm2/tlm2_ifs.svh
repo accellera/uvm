@@ -44,17 +44,17 @@ typedef enum
 class tlm2_if #(type T=tlm2_generic_payload,
                 type P=tlm_phase_e);
 
-  virtual function tlm_sync_e nb_transport_fw(ref T t, ref P p, ref time delay);
+  virtual function tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);
     uvm_report_error("nb_transport_fw", `TLM_FUNCTION_ERROR, UVM_NONE);
     return TLM_ACCEPTED;
   endfunction
 
-  virtual function tlm_sync_e nb_transport_bw(ref T t, ref P p, ref time delay);
+  virtual function tlm_sync_e nb_transport_bw(T t, ref P p, ref time delay);
     uvm_report_error("nb_transport_bw", `TLM_FUNCTION_ERROR, UVM_NONE);
     return TLM_ACCEPTED;
   endfunction
 
-  virtual task b_transport(ref T t, ref time delay);
+  virtual task b_transport(T t, ref time delay);
     uvm_report_error("b_transport", `TLM_TASK_ERROR, UVM_NONE);
   endtask
 

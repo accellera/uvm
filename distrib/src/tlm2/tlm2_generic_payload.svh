@@ -84,6 +84,7 @@ virtual class tlm_extension_base extends uvm_object;
 
 endclass
 
+//----------------------------------------------------------------------
 // class: tlm_extension#(T)
 //
 
@@ -97,6 +98,7 @@ endclass
 //
 // You can derive a new class from this class to contain any arbitry
 // data or code required for an extension.
+//----------------------------------------------------------------------
 
 class tlm_extension #(type T=int) extends tlm_extension_base;
 
@@ -140,15 +142,15 @@ endclass
 //----------------------------------------------------------------------
 class tlm2_generic_payload extends uvm_sequence_item;
 
-    local tlm2_addr_t            m_address;
-    local tlm_command_e          m_command;
-    local byte                   m_data[];
-    local int unsigned           m_length;
-    local tlm_response_status_e  m_response_status;
-    local bit                    m_dmi;
-    local byte                   m_byte_enable[];
-    local int unsigned           m_byte_enable_length;
-    local int unsigned           m_streaming_width;
+    protected rand tlm2_addr_t            m_address;
+    protected rand tlm_command_e          m_command;
+    protected rand byte                   m_data[];
+    protected rand int unsigned           m_length;
+    protected rand tlm_response_status_e  m_response_status;
+    protected rand bit                    m_dmi;
+    protected rand byte                   m_byte_enable[];
+    protected rand int unsigned           m_byte_enable_length;
+    protected rand int unsigned           m_streaming_width;
 
   // function: new
   //
@@ -191,27 +193,6 @@ class tlm2_generic_payload extends uvm_sequence_item;
       msg = { msg, " <-- ", get_response_string() };
 
     return msg;
-
-  endfunction
-
-  // function: get_response_string
-  //
-  // return an abbreviated response string
-
-  function string get_response_string();
-
-    case(m_response_status)
-      TLM_OK_RESPONSE                : return "OK";
-      TLM_INCOMPLETE_RESPONSE        : return "INCOMPLETE";
-      TLM_GENERIC_ERROR_RESPONSE     : return "GENERIC_ERROR";
-      TLM_ADDRESS_ERROR_RESPONSE     : return "ADDRESS_ERROR";
-      TLM_COMMAND_ERROR_RESPONSE     : return "COMMAND_ERROR";
-      TLM_BURST_ERROR_RESPONSE       : return "BURST_ERROR";
-      TLM_BYTE_ENABLE_ERROR_RESPONSE : return "BYTE_ENABLE_ERROR";
-    endcase
-
-    // we should never get here
-    return "UNKNOWN_RESPONSE";
 
   endfunction
 
@@ -326,14 +307,40 @@ class tlm2_generic_payload extends uvm_sequence_item;
     m_response_status = status;
   endfunction
 
-// bool is_response_ok();
-// bool is_response_error();
+  virtual function bit is_response_ok();
+    return (m_response_status > 0);
+  endfunction
+
+  virtual function bit is_response_error();
+    return !is_response_ok();
+  endfunction
+
+  // function: get_response_string
+  //
+  // return an abbreviated response string
+
+  virtual function string get_response_string();
+
+    case(m_response_status)
+      TLM_OK_RESPONSE                : return "OK";
+      TLM_INCOMPLETE_RESPONSE        : return "INCOMPLETE";
+      TLM_GENERIC_ERROR_RESPONSE     : return "GENERIC_ERROR";
+      TLM_ADDRESS_ERROR_RESPONSE     : return "ADDRESS_ERROR";
+      TLM_COMMAND_ERROR_RESPONSE     : return "COMMAND_ERROR";
+      TLM_BURST_ERROR_RESPONSE       : return "BURST_ERROR";
+      TLM_BYTE_ENABLE_ERROR_RESPONSE : return "BYTE_ENABLE_ERROR";
+    endcase
+
+    // we should never get here
+    return "UNKNOWN_RESPONSE";
+
+  endfunction
 
   //--------------------------------------------------------------------
   // extensions mechanism
   //--------------------------------------------------------------------
 
-  local tlm_extension_base m_extensions [tlm_extension_base];
+  protected tlm_extension_base m_extensions [tlm_extension_base];
 
   // Function: set_extension
   //
