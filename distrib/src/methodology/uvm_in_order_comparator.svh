@@ -158,14 +158,14 @@ class uvm_in_order_comparator
         $sformat(s, "%s differs from %s", convert::convert2string(a),
                                           convert::convert2string(b));
 
-        uvm_report_warning("Comparator Mismatch", s);
+        `uvm_warning("Comparator Mismatch", s)
 
         m_mismatches++;
 
       end
       else begin
         s = convert::convert2string(b);
-        uvm_report_info("Comparator Match", s);
+        `uvm_info("Comparator Match", s, UVM_NONE)
         m_matches++;
       end
 

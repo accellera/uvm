@@ -381,7 +381,7 @@ function void uvm_root::check_verbosity();
                           verbosity = UVM_MEDIUM;
                           $sformat(msg, "illegal verbosity value, using default of %0d",
                                    UVM_MEDIUM);
-                         uvm_report_warning("verbosity", msg, UVM_NONE);
+                         `uvm_warning("verbosity", msg)
                       end
                 end
     endcase
@@ -430,8 +430,8 @@ task uvm_root::run_test(string test_name="");
   // if test now defined, create it using common factory
   if (test_name != "") begin
     if(m_children.exists("uvm_test_top")) begin
-      uvm_report_fatal("TTINST",
-          "An uvm_test_top already exists via a previous call to run_test", UVM_NONE);
+      `uvm_fatal("TTINST",
+          "An uvm_test_top already exists via a previous call to run_test")
       #0; // forces shutdown because $finish is forked
     end
     $cast(uvm_test_top, factory.create_component_by_name(test_name,
@@ -439,21 +439,21 @@ task uvm_root::run_test(string test_name="");
 
     if (uvm_test_top == null) begin
       msg = testname_plusarg ? "command line +UVM_TESTNAME=": "call to run_test(";
-      uvm_report_fatal("INVTST",
-          {"Requested test from ",msg, test_name, ") not found." }, UVM_NONE);
+      `uvm_fatal("INVTST",
+          {"Requested test from ",msg, test_name, ") not found." })
     end
   end
 
   if (m_children.num() == 0) begin
-    uvm_report_fatal("NOCOMP",
+    `uvm_fatal("NOCOMP",
           {"No components instantiated. You must instantiate",
            " at least one component before calling run_test. To run",
            " a test, use +UVM_TESTNAME or supply the test name in",
-           " the argument to run_test(). Exiting simulation."}, UVM_NONE);
+           " the argument to run_test(). Exiting simulation."})
     return;
   end
 
-  uvm_report_info("RNTST", {"Running test ",test_name, "..."}, UVM_LOW);
+  `uvm_info("RNTST", {"Running test ",test_name, "..."}, UVM_LOW)
 
   fork 
     // isolated from calling process
@@ -534,7 +534,7 @@ function void uvm_root::run_global_func_phase(uvm_phase phase=null, bit upto=0);
 
   if (phase != null) begin
     if (!m_phase_q.exists(phase)) begin
-      uvm_report_fatal("PHNTFD", {"Phase %0s not registered.",phase.get_name()}, UVM_NONE); 
+      `uvm_fatal("PHNTFD", {"Phase %0s not registered.",phase.get_name()}) 
       return;
     end
     if (upto) begin
@@ -548,7 +548,7 @@ function void uvm_root::run_global_func_phase(uvm_phase phase=null, bit upto=0);
     end
     // make sure we've something to do
     if (phase.is_done()) begin
-      uvm_report_warning("PHDONE", {"Phase ", phase.get_name()," already executed."}, UVM_NONE);
+      `uvm_warning("PHDONE", {"Phase ", phase.get_name()," already executed."})
       return;
     end
 
@@ -566,10 +566,10 @@ function void uvm_root::run_global_func_phase(uvm_phase phase=null, bit upto=0);
       m_curr_phase = m_phase_q[m_curr_phase];
 
     if (m_curr_phase.is_task()) begin
-        uvm_report_fatal("TASKPH",
+        `uvm_fatal("TASKPH",
           {"Phase ", m_curr_phase.get_name(),
           " is a time-consuming method. Cannot be run using",
-          " uvm_root::run_global_phase_func()"}, UVM_NONE);
+          " uvm_root::run_global_phase_func()"})
         return;
     end
 
@@ -577,13 +577,13 @@ function void uvm_root::run_global_func_phase(uvm_phase phase=null, bit upto=0);
     m_curr_phase.m_set_in_progress();
     // #0; can't call this in a func
 
-    uvm_report_info("STARTPH",
-      $psprintf("STARTING PHASE %0s",m_curr_phase.get_name()),int'(UVM_FULL)+1);
+    `uvm_info("STARTPH",
+      $psprintf("STARTING PHASE %0s",m_curr_phase.get_name()),int'(UVM_FULL)+1)
 
       m_do_phase(this,m_curr_phase);
 
-    uvm_report_info("ENDPH",
-      $psprintf("ENDING PHASE %0s",m_curr_phase.get_name()),int'(UVM_FULL)+1);
+    `uvm_info("ENDPH",
+      $psprintf("ENDING PHASE %0s",m_curr_phase.get_name()),int'(UVM_FULL)+1)
 
     // Trigger phase's done event.
     m_curr_phase.m_set_done();
@@ -594,7 +594,7 @@ function void uvm_root::run_global_func_phase(uvm_phase phase=null, bit upto=0);
       uvm_report_server srvr;
       srvr = get_report_server();
       if(srvr.get_severity_count(UVM_ERROR) > 0) begin
-        uvm_report_fatal("uvm", "elaboration errors", UVM_NONE);
+        `uvm_fatal("uvm", "elaboration errors")
         //#0; // $finish is called in a forked process in uvm_report_object::die.
             // this forces that process to start, preventing us from continuing
         return;
@@ -634,7 +634,7 @@ task uvm_root::run_global_phase(uvm_phase phase=null, bit upto=0);
 
   if (phase != null) begin
     if (!m_phase_q.exists(phase)) begin
-      uvm_report_fatal("PHNTFD", {"Phase ", phase.get_name()," not registered."}, UVM_NONE);
+      `uvm_fatal("PHNTFD", {"Phase ", phase.get_name()," not registered."})
       return;
     end
     // if only running up to the given phase, run through previous phase 
@@ -649,7 +649,7 @@ task uvm_root::run_global_phase(uvm_phase phase=null, bit upto=0);
     end
     // make sure we've something to do
     if (phase.is_done()) begin
-      uvm_report_warning("PHDONE", {"Phase ", phase.get_name()," already executed."}, UVM_NONE);
+      `uvm_warning("PHDONE", {"Phase ", phase.get_name()," already executed."})
       return;
     end
       
@@ -676,8 +676,8 @@ task uvm_root::run_global_phase(uvm_phase phase=null, bit upto=0);
     m_curr_phase.m_set_in_progress();
     #0;
 
-    uvm_report_info("STARTPH",
-      $psprintf("STARTING PHASE %0s",m_curr_phase.get_name()),int'(UVM_FULL)+1);
+    `uvm_info("STARTPH",
+      $psprintf("STARTING PHASE %0s",m_curr_phase.get_name()),int'(UVM_FULL)+1)
 
     // TASK-based phase
     if (m_curr_phase.is_task()) begin
@@ -711,8 +711,8 @@ task uvm_root::run_global_phase(uvm_phase phase=null, bit upto=0);
                 wait fork;
               end
               begin
-                #timeout uvm_report_error("TIMOUT",
-                      $psprintf("Watchdog timeout of '%0t' expired.", timeout), UVM_NONE);
+                #timeout `uvm_error("TIMOUT",
+                      $psprintf("Watchdog timeout of '%0t' expired.", timeout))
               end
             join_any
             disable fork;
@@ -733,8 +733,8 @@ task uvm_root::run_global_phase(uvm_phase phase=null, bit upto=0);
             wait fork;
           end
           begin
-            #timeout uvm_report_error("TIMOUT",
-                $psprintf("Watchdog timeout of '%0t' expired.", timeout), UVM_NONE);
+            #timeout `uvm_error("TIMOUT",
+                $psprintf("Watchdog timeout of '%0t' expired.", timeout))
           end
         join_any
         disable task_based_phase;
@@ -742,8 +742,8 @@ task uvm_root::run_global_phase(uvm_phase phase=null, bit upto=0);
       `endif // UVM_USE_ALT_PHASING
 
       if(uvm_test_done.get_objection_total(uvm_root::get()) != 0) begin
-        uvm_test_done.uvm_report_warning("OBJOUT", $psprintf("%0d objection(s) are still outstanding", uvm_test_done.get_objection_total(uvm_root::get())));
-        uvm_report_info("SHOW_OBJECTIONS",uvm_test_done.convert2string());
+        `uvm_warning_context("OBJOUT", $psprintf("%0d objection(s) are still outstanding", uvm_test_done.get_objection_total(uvm_root::get())), uvm_test_done)
+        `uvm_info("SHOW_OBJECTIONS",uvm_test_done.convert2string(), UVM_NONE)
       end
 
     end // if (is_task)
@@ -753,8 +753,8 @@ task uvm_root::run_global_phase(uvm_phase phase=null, bit upto=0);
       m_do_phase(this,m_curr_phase);
     end
 
-    uvm_report_info("ENDPH",
-      $psprintf("ENDING PHASE %0s",m_curr_phase.get_name()),int'(UVM_FULL)+1);
+    `uvm_info("ENDPH",
+      $psprintf("ENDING PHASE %0s",m_curr_phase.get_name()),int'(UVM_FULL)+1)
 
     // Trigger phase's done event.
     // The #0 allows any waiting processes to resume before we continue.
@@ -766,7 +766,7 @@ task uvm_root::run_global_phase(uvm_phase phase=null, bit upto=0);
       uvm_report_server srvr;
       srvr = get_report_server();
       if(srvr.get_severity_count(UVM_ERROR) > 0) begin
-        uvm_report_fatal("uvm", "elaboration errors", UVM_NONE);
+        `uvm_fatal("uvm", "elaboration errors")
         #0; // $finish is called in a forked process in uvm_report_object::die.
             // this forces that process to start, preventing us from continuing
       end
@@ -833,9 +833,9 @@ function void uvm_root::m_do_phase (uvm_component comp, uvm_phase phase);
       end
     end
 
-    uvm_report_info("COMPPH", $psprintf("*** comp %0s (%0s) curr_phase is %0s",
+    `uvm_info("COMPPH", $psprintf("*** comp %0s (%0s) curr_phase is %0s",
       comp.get_full_name(),comp.get_type_name(),
-      curr_phase.get_name()),int'(UVM_FULL)+1);
+      curr_phase.get_name()),int'(UVM_FULL)+1)
 
     if (curr_phase.is_task()) begin
       // We fork here to ensure that do_task_phase, a user-overridable task,
@@ -923,10 +923,10 @@ task uvm_root::m_stop_request(time timeout=0);
 
   // stop request valid for running task-based phases only
   if (m_curr_phase == null || !m_curr_phase.is_task()) begin
-    uvm_report_warning("STPNA",
+    `uvm_warning("STPNA",
       $psprintf("Stop-request has no effect outside non-time-consuming phases%s%s",
                 "current phase is ",m_curr_phase==null?
-                "none (not started":m_curr_phase.get_name()), UVM_NONE);
+                "none (not started":m_curr_phase.get_name()))
     return;
   end
   m_in_stop_request=1;
@@ -948,9 +948,9 @@ task uvm_root::m_stop_request(time timeout=0);
         m_executing_stop_processes = 0;
       end
       begin
-        #timeout uvm_report_warning("STPTO",
+        #timeout `uvm_warning("STPTO",
          $psprintf("Stop-request timeout of %0t expired. Stopping phase '%0s'",
-                           timeout, m_curr_phase.get_name()), UVM_NONE);
+                           timeout, m_curr_phase.get_name()))
       end
     join_any
     disable fork;
@@ -969,9 +969,9 @@ task uvm_root::m_stop_request(time timeout=0);
       m_executing_stop_processes = 0;
     end
     begin
-      #timeout uvm_report_warning("STPTO",
+      #timeout `uvm_warning("STPTO",
        $psprintf("Stop-request timeout of %0t expired. Stopping phase '%0s'",
-                         timeout, m_curr_phase.get_name()), UVM_NONE);
+                         timeout, m_curr_phase.get_name()))
     end
   join_any
   disable stop_tasks;
@@ -1022,7 +1022,7 @@ function void uvm_root::raised (uvm_objection objection, uvm_object source_obj,
   if(objection != test_done_objection()) return;
   if (m_executing_stop_processes) begin
     string desc = description == "" ? "" : {" (\"", description, "\") "};
-    uvm_report_warning("ILLRAISE", {"An uvm_test_done objection ", desc, "was raised during the execution of component stop processes for the stop_request. The objection is ignored by the stop process."}, UVM_NONE);
+    `uvm_warning("ILLRAISE", {"An uvm_test_done objection ", desc, "was raised during the execution of component stop processes for the stop_request. The objection is ignored by the stop process."})
   end
   else
     m_objections_outstanding = 1;
@@ -1058,19 +1058,19 @@ function void uvm_root::insert_phase(uvm_phase new_phase,
   exist_phase = m_get_phase_master(exist_phase);
 
   if (build_ph.is_done()) begin
-    uvm_report_fatal("PHINST", "Phase insertion after build phase prohibited.", UVM_NONE);
+    `uvm_fatal("PHINST", "Phase insertion after build phase prohibited.")
     return;
   end
 
   if (exist_phase != null && exist_phase.is_done() ||
       exist_phase == null && m_curr_phase != null) begin 
-    uvm_report_fatal("PHINST", {"Can not insert a phase at a point that has ",
-      "already executed. Current phase is '", m_curr_phase.get_name(),"'."}, UVM_NONE);
+    `uvm_fatal("PHINST", {"Can not insert a phase at a point that has ",
+      "already executed. Current phase is '", m_curr_phase.get_name(),"'."})
     return;
   end
 
   if (new_phase == null) begin
-    uvm_report_fatal("PHNULL", "Phase argument is null.", UVM_NONE);
+    `uvm_fatal("PHNULL", "Phase argument is null.")
     return;
   end
 
@@ -1078,8 +1078,8 @@ function void uvm_root::insert_phase(uvm_phase new_phase,
     //could be an aliased phase. The phase may not exist in the queue, but if
     //the name matches one in the queue then it is a possible alias
     if(get_phase_by_name(exist_phase.get_name()) == null) begin
-      uvm_report_fatal("PHNTFD", {"Phase '",exist_phase.get_name(),
-                      "' is not registered."}, UVM_NONE);
+      `uvm_fatal("PHNTFD", {"Phase '",exist_phase.get_name(),
+                      "' is not registered."})
       return;
     end
   end
@@ -1095,8 +1095,8 @@ function void uvm_root::insert_phase(uvm_phase new_phase,
   if (m_phase_q.exists(new_phase)) begin
     if ((exist_phase == null && m_first_phase != new_phase) ||
         (exist_phase != null && m_phase_q[exist_phase] != new_phase)) begin
-      uvm_report_error("PHDUPL", {"Phase '", new_phase.get_name(),
-        "' is already registered in a different order."}, UVM_NONE);
+      `uvm_error("PHDUPL", {"Phase '", new_phase.get_name(),
+        "' is already registered in a different order."})
     end
     return;
   end
@@ -1167,14 +1167,14 @@ function uvm_component uvm_root::find (string comp_match);
   find_all(comp_match,comp_list);
 
   if (comp_list.size() > 1)
-    uvm_report_warning("MMATCH",
+    `uvm_warning("MMATCH",
     $psprintf("Found %0d components matching '%s'. Returning first match, %0s.",
-              comp_list.size(),comp_match,comp_list[0].get_full_name()), UVM_NONE);
+              comp_list.size(),comp_match,comp_list[0].get_full_name()))
 
   if (comp_list.size() == 0) begin
-    uvm_report_warning("CMPNFD",
+    `uvm_warning("CMPNFD",
       {"Component matching '",comp_match,
-       "' was not found in the list of uvm_components"}, UVM_NONE);
+       "' was not found in the list of uvm_components"})
     return null;
   end
 
@@ -1189,10 +1189,10 @@ function void uvm_root::print_topology(uvm_printer printer=null);
 
   string s;
 
-  uvm_report_info("UVMTOP", "UVM testbench topology:", UVM_LOW);
+  `uvm_info("UVMTOP", "UVM testbench topology:", UVM_LOW)
 
   if (m_children.num()==0) begin
-    uvm_report_warning("EMTCOMP", "print_topology - No UVM components to print.", UVM_NONE);
+    `uvm_warning("EMTCOMP", "print_topology - No UVM components to print.")
     return;
   end
 

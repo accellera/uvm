@@ -161,15 +161,14 @@ class uvm_heartbeat extends uvm_object;
 
   function void start (uvm_event e=null);
     if(m_event == null && e == null) begin
-      m_cntxt.uvm_report_warning("NOEVNT", { "start() was called for: ",
-        get_name(), " with a null trigger and no currently set trigger" },
-        UVM_NONE);
+      `uvm_warning_context("NOEVNT", { "start() was called for: ",
+          get_name(), " with a null trigger and no currently set trigger" }, m_cntxt)
       return;
     end
     if((m_event != null) && (e != m_event) && m_started) begin
-      m_cntxt.uvm_report_error("ILHBVNT", { "start() was called for: ",
-        get_name(), " with trigger ", e.get_name(), " which is different ",
-        "from the original trigger ", m_event.get_name() }, UVM_NONE);
+      `uvm_error_context("ILHBVNT", { "start() was called for: ",
+          get_name(), " with trigger ", e.get_name(), " which is different ",
+          "from the original trigger ", m_event.get_name() }, m_cntxt)
       return;
     end  
     m_event = e;
@@ -227,9 +226,9 @@ class uvm_heartbeat extends uvm_object;
                   foreach(m_cb.cnt[idx]) begin
                     obj = idx;
                     if(!m_cb.cnt[obj]) begin
-                      m_cntxt.uvm_report_fatal("HBFAIL", $sformatf("Did not recieve an update of %s for component %s since last event trigger at time %0t : last update time was %0t",
-                        m_objection.get_name(), obj.get_full_name(), 
-                        last_trigger, m_cb.last_trigger[obj]), UVM_NONE);
+                      `uvm_fatal_context("HBFAIL", $sformatf("Did not recieve an update of %s for component %s since last event trigger at time %0t : last update time was %0t",
+                          m_objection.get_name(), obj.get_full_name(), 
+                          last_trigger, m_cb.last_trigger[obj]), m_cntxt)
                     end
                   end
                 end 
@@ -241,8 +240,8 @@ class uvm_heartbeat extends uvm_object;
                       obj = idx;
                       s={s,"\n  ",obj.get_full_name()};
                     end
-                    m_cntxt.uvm_report_fatal("HBFAIL", $sformatf("Did not recieve an update of %s on any component since last event trigger at time %0t. The list of registered components is:%s",
-                      m_objection.get_name(), last_trigger, s), UVM_NONE); 
+                    `uvm_fatal_context("HBFAIL", $sformatf("Did not recieve an update of %s on any component since last event trigger at time %0t. The list of registered components is:%s",
+                      m_objection.get_name(), last_trigger, s), m_cntxt)
                   end
                 end 
               UVM_ONE_ACTIVE:              
@@ -254,8 +253,8 @@ class uvm_heartbeat extends uvm_object;
                       if(m_cb.cnt[obj]) $swrite(s,"%s\n  %s (updated: %0t)",
                          s, obj.get_full_name(), m_cb.last_trigger[obj]);
                     end
-                    m_cntxt.uvm_report_fatal("HBFAIL", $sformatf("Recieved update of %s from more than one component since last event trigger at time %0t. The list of triggered components is:%s",
-                      m_objection.get_name(), last_trigger, s), UVM_NONE); 
+                    `uvm_fatal_context("HBFAIL", $sformatf("Recieved update of %s from more than one component since last event trigger at time %0t. The list of triggered components is:%s",
+                        m_objection.get_name(), last_trigger, s), m_cntxt);
                   end
                   if(m_cb.cnt.num() && !m_cb.objects_triggered()) begin
                     string s;
@@ -263,8 +262,8 @@ class uvm_heartbeat extends uvm_object;
                       obj = idx;
                       s={s,"\n  ",obj.get_full_name()};
                     end
-                    m_cntxt.uvm_report_fatal("HBFAIL", $sformatf("Did not recieve an update of %s on any component since last event trigger at time %0t. The list of registered components is:%s",
-                      m_objection.get_name(), last_trigger, s), UVM_NONE); 
+                    `uvm_fatal_context("HBFAIL", $sformatf("Did not recieve an update of %s on any component since last event trigger at time %0t. The list of registered components is:%s",
+                      m_objection.get_name(), last_trigger, s), m_cntxt)
                   end
                 end 
             endcase

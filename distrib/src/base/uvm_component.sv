@@ -51,9 +51,9 @@ function uvm_component::new (string name, uvm_component parent);
       end_of_elaboration_ph.is_done() ) begin
     uvm_phase curr_phase;
     curr_phase = uvm_top.get_current_phase();
-    uvm_report_fatal("ILLCRT", {"It is illegal to create a component once",
+    `uvm_fatal("ILLCRT", {"It is illegal to create a component once",
               " phasing reaches end_of_elaboration. The current phase is ", 
-              curr_phase.get_name()}, UVM_NONE);
+              curr_phase.get_name()})
   end
 
   if (name == "") begin
@@ -62,28 +62,28 @@ function uvm_component::new (string name, uvm_component parent);
   end
 
   if(parent == this) begin
-    uvm_report_fatal("THISPARENT", "cannot set the parent of a component to itself", UVM_NONE);
+    `uvm_fatal("THISPARENT", "cannot set the parent of a component to itself")
   end
 
   if (parent == null)
     parent = uvm_top;
 
   if(uvm_report_enabled(UVM_MEDIUM+1, UVM_INFO, "NEWCOMP"))
-    uvm_report_info("NEWCOMP",$psprintf("this=%0s, parent=%0s, name=%s",
-                    this.get_full_name(),parent.get_full_name(),name),UVM_MEDIUM+1);
+    `uvm_info("NEWCOMP",$psprintf("this=%0s, parent=%0s, name=%s",
+                    this.get_full_name(),parent.get_full_name(),name),UVM_MEDIUM+1)
 
   if (parent.has_child(name) && this != parent.get_child(name)) begin
     if (parent == uvm_top) begin
       error_str = {"Name '",name,"' is not unique to other top-level ",
       "instances. If parent is a module, build a unique name by combining the ",
       "the module name and component name: $psprintf(\"\%m.\%s\",\"",name,"\")."};
-      uvm_report_fatal("CLDEXT",error_str, UVM_NONE);
+      `uvm_fatal("CLDEXT",error_str)
     end
     else
-      uvm_report_fatal("CLDEXT",
+      `uvm_fatal("CLDEXT",
         $psprintf("Cannot set '%s' as a child of '%s', %s",
                   name, parent.get_full_name(),
-                  "which already has a child by that name."), UVM_NONE);
+                  "which already has a child by that name."))
     return;
   end
 
@@ -124,18 +124,18 @@ function bit uvm_component::m_add_child(uvm_component child);
 
   if (m_children.exists(child.get_name()) &&
       m_children[child.get_name()] != child) begin
-      uvm_report_warning("BDCLD",
+      `uvm_warning("BDCLD",
         $psprintf("A child with the name '%0s' (type=%0s) already exists.",
-           child.get_name(), m_children[child.get_name()].get_type_name()), UVM_NONE);
+           child.get_name(), m_children[child.get_name()].get_type_name()))
       return 0;
   end
 
   if (m_children_by_handle.exists(child)) begin
-      uvm_report_warning("BDCHLD",
+      `uvm_warning("BDCHLD",
         $psprintf("A child with the name '%0s' %0s %0s'",
                   child.get_name(),
                   "already exists in parent under name '",
-                  m_children_by_handle[child].get_name()), UVM_NONE);
+                  m_children_by_handle[child].get_name()))
       return 0;
     end
 
@@ -174,8 +174,8 @@ endfunction
 function uvm_component uvm_component::get_child(string name);
   if (m_children.exists(name))
     return m_children[name];
-  uvm_report_warning("NOCHILD",{"Component with name '",name,
-       "' is not a child of component '",get_full_name(),"'"}, UVM_NONE); 
+  `uvm_warning("NOCHILD",{"Component with name '",name,
+       "' is not a child of component '",get_full_name(),"'"})
   return null;
 endfunction
 
@@ -265,8 +265,8 @@ function uvm_component uvm_component::lookup( string name );
   end
   
   if (!comp.has_child(leaf)) begin
-    uvm_report_warning("Lookup Error", 
-       $psprintf("Cannot find child %0s",leaf), UVM_NONE);
+    `uvm_warning("Lookup Error", 
+       $psprintf("Cannot find child %0s",leaf))
     return null;
   end
 
@@ -335,8 +335,8 @@ endfunction
 // ------
 
 function uvm_object  uvm_component::create (string name =""); 
-  uvm_report_error("ILLCRT",
-    "create cannot be called on a uvm_component. Use create_component instead.", UVM_NONE);
+  `uvm_error("ILLCRT",
+    "create cannot be called on a uvm_component. Use create_component instead.")
   return null;
 endfunction
 
@@ -345,7 +345,7 @@ endfunction
 // ------
 
 function uvm_object  uvm_component::clone ();
-  uvm_report_error("ILLCLN","clone cannot be called on a uvm_component. ", UVM_NONE);
+  `uvm_error("ILLCLN","clone cannot be called on a uvm_component. ")
   return null;
 endfunction
 
@@ -611,7 +611,7 @@ task uvm_component::suspend();
     if(m_phase_process != null)
       m_phase_process.suspend;
   `else
-    uvm_report_error("UNIMP", "suspend not implemented", UVM_NONE);
+    `uvm_error("UNIMP", "suspend not implemented")
   `endif
 endtask
 
@@ -624,7 +624,7 @@ task uvm_component::resume();
     if(m_phase_process!=null) 
       m_phase_process.resume;
   `else
-     uvm_report_error("UNIMP", "resume not implemented", UVM_NONE);
+     `uvm_error("UNIMP", "resume not implemented")
   `endif
 endtask
 
@@ -633,8 +633,8 @@ endtask
 // -------
 
 task uvm_component::restart();
-  uvm_report_warning("UNIMP",
-      $psprintf("%0s: restart not implemented",this.get_name()), UVM_NONE);
+  `uvm_warning("UNIMP",
+      $psprintf("%0s: restart not implemented",this.get_name()))
 endtask
 
 
@@ -653,7 +653,7 @@ function string uvm_component::status();
 
     return ps.name();
   `else
-     uvm_report_error("UNIMP", "status not implemented", UVM_NONE);
+     `uvm_error("UNIMP", "status not implemented")
   `endif
 
 endfunction
@@ -1059,14 +1059,14 @@ function void uvm_component::set_config_object  (string      inst_name,
     if(tmp == null) begin
       uvm_component comp;
       if ($cast(comp,value)) begin
-        uvm_report_error("INVCLNC", {"Clone failed during set_config_object ",
-          "with an object that is an uvm_component. Components cannot be cloned."}, UVM_NONE);
+        `uvm_error("INVCLNC", {"Clone failed during set_config_object ",
+          "with an object that is an uvm_component. Components cannot be cloned."})
         return;
       end
       else begin
-        uvm_report_warning("INVCLN", {"Clone failed during set_config_object, ",
+        `uvm_warning("INVCLN", {"Clone failed during set_config_object, ",
           "the original reference will be used for configuration. Check that ",
-          "the create method for the object type is defined properly."}, UVM_NONE);
+          "the create method for the object type is defined properly."})
       end
     end
     else
@@ -1169,9 +1169,9 @@ function void uvm_component::check_config_usage ( bit recurse=1 );
         cfg_type = "string";
       else
         cfg_type = "object";
-      uvm_report_warning("CFGNTS", {"No get_config_",cfg_type,
+      `uvm_warning("CFGNTS", {"No get_config_",cfg_type,
          "() call ever matched the following set_config_", cfg_type, "() call ", fstr,
-         ": ", cfg.convert2string()}, UVM_NONE);
+         ": ", cfg.convert2string()})
     end 
   end
 
@@ -1181,7 +1181,7 @@ function void uvm_component::check_config_usage ( bit recurse=1 );
     cfg = m_configuration_table[i];
     if(cfg.m_override_list.size() != 0)
     begin
-      uvm_report_info("CFGOVR", {"The configuration setting ", cfg.convert2string(), " ", fstr, " was overridden by config setting ", cfg.m_override_list[0].convert2string(), " from component ", cfg.m_override_list[0].m_from.get_full_name(), "(",  cfg.m_override_list[0].m_from.get_type_name(), ")"}, UVM_NONE);
+      `uvm_info("CFGOVR", {"The configuration setting ", cfg.convert2string(), " ", fstr, " was overridden by config setting ", cfg.m_override_list[0].convert2string(), " from component ", cfg.m_override_list[0].m_from.get_full_name(), "(",  cfg.m_override_list[0].m_from.get_type_name(), ")"}, UVM_NONE)
     end
   end
 
@@ -1195,7 +1195,7 @@ function void uvm_component::check_config_usage ( bit recurse=1 );
         cfgstr = cfg.convert2string();
         applied_str = "";
         for(int j=0; j<cfg.m_used_list.size(); ++j) begin
-          uvm_report_info("CFGSET", {"The configuration setting ", cfgstr, " ", fstr, " was applied to component: ", cfg.m_used_list[j].get_full_name(), " (",  cfg.m_used_list[j].get_type_name(), ")"}, UVM_NONE);
+          `uvm_info("CFGSET", {"The configuration setting ", cfgstr, " ", fstr, " was applied to component: ", cfg.m_used_list[j].get_full_name(), " (",  cfg.m_used_list[j].get_type_name(), ")"}, UVM_NONE)
         end
       end 
   end
@@ -1347,7 +1347,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
 
   if (verbose && has_match)
     if(uvm_report_enabled(UVM_MEDIUM, UVM_INFO, "auto-configuration"))
-      uvm_report_info("auto-configuration", {match_str,"\n"}, UVM_MEDIUM);
+      `uvm_info("auto-configuration", {match_str,"\n"}, UVM_MEDIUM)
 
 endfunction
 
