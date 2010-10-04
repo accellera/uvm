@@ -23,6 +23,7 @@
 `ifndef UVM_OBJECTION_SVH
 `define UVM_OBJECTION_SVH
 
+typedef class uvm_objection_context_object;
 typedef class uvm_objection;
 typedef class uvm_sequence_base;
 typedef class uvm_objection_cb;
@@ -435,17 +436,10 @@ class uvm_objection extends uvm_report_object;
 
   endfunction
 
-  // Have a pool of context objects to use
-  class m_context_object;
-    uvm_object obj;
-    uvm_object source_obj;
-    string description;
-    int count;
-  endclass
-  m_context_object m_context_pool[$];
+  uvm_objection_context_object m_context_pool[$];
 
   // List of scheduled objects
-  m_context_object m_scheduled_list[$];
+  uvm_objection_context_object m_scheduled_list[$];
   event m_activate_scheduled_forks;
 
   function void m_schedule_forked_drop (uvm_object obj, uvm_object source_obj, 
@@ -453,7 +447,7 @@ class uvm_objection extends uvm_report_object;
     if(in_top_thread)
       m_forked_drop(obj, source_obj, description, count, in_top_thread);
     else begin
-      m_context_object ctxt;
+      uvm_objection_context_object ctxt;
       if(m_context_pool.size()) ctxt = m_context_pool.pop_front();
       else ctxt = new;
       ctxt.obj = obj;
@@ -465,7 +459,7 @@ class uvm_objection extends uvm_report_object;
   endfunction
 
   task m_execute_scheduled_forks;
-    m_context_object ctxt;
+    uvm_objection_context_object ctxt;
     while(1) begin
       wait(m_scheduled_list.size() != 0);
       ctxt = m_scheduled_list.pop_front();
@@ -923,6 +917,14 @@ typedef class uvm_root;
 function uvm_test_done_objection uvm_root::test_done_objection();
   return uvm_test_done_objection::get();
 endfunction
+
+// Have a pool of context objects to use
+class uvm_objection_context_object;
+  uvm_object obj;
+  uvm_object source_obj;
+  string description;
+  int count;
+endclass
 
 `endif
 
