@@ -83,7 +83,7 @@ class tlm2_nb_passthrough_initiator_socket #(type T=tlm2_generic_payload,
     end
 
     c = get_comp();
-    c.uvm_report_error(get_type_name(), "type mismatch in connect -- connection cannot be completed");
+    `uvm_error_context(get_type_name(), "type mismatch in connect -- connection cannot be completed", c)
 
   endfunction
 
@@ -122,7 +122,7 @@ class tlm2_nb_passthrough_target_socket #(type T=tlm2_generic_payload,
     end
 
     c = get_comp();
-    c.uvm_report_error(get_type_name(), "type mismatch in connect -- connection cannot be completed");
+    `uvm_error_context(get_type_name(), "type mismatch in connect -- connection cannot be completed", c)
 
   endfunction
 
@@ -156,7 +156,7 @@ class tlm2_b_passthrough_initiator_socket #(type T=tlm2_generic_payload)
       return;
 
     c = get_comp();
-    c.uvm_report_error(get_type_name(), "type mismatch in connect -- connection cannot be completed");
+    `uvm_error_context(get_type_name(), "type mismatch in connect -- connection cannot be completed", c)
 
   endfunction
 
@@ -188,7 +188,7 @@ class tlm2_b_passthrough_target_socket #(type T=tlm2_generic_payload)
       return;
 
     c = get_comp();
-    c.uvm_report_error(get_type_name(), "type mismatch in connect -- connection cannot be completed");
+    `uvm_error_context(get_type_name(), "type mismatch in connect -- connection cannot be completed", c)
   endfunction
 
 endclass
@@ -224,7 +224,7 @@ class tlm2_b_target_socket #(type T=tlm2_generic_payload,
     super.connect(provider);
 
     c = get_comp();
-    c.uvm_report_error(get_type_name(), "You cannot call connect() on a target termination socket");
+    `uvm_error_context(get_type_name(), "You cannot call connect() on a target termination socket", c)
   endfunction
 
   `TLM2_B_TRANSPORT_IMP(m_imp, T, t, delay)
@@ -260,7 +260,7 @@ class tlm2_b_initiator_socket #(type T=tlm2_generic_payload)
       return;
 
     c = get_comp();
-    c.uvm_report_error(get_type_name(), "type mismatch in connect -- connection cannot be completed");
+    `uvm_error_context(get_type_name(), "type mismatch in connect -- connection cannot be completed", c)
 
   endfunction
 
@@ -291,7 +291,7 @@ class tlm2_nb_target_socket #(type T=tlm2_generic_payload,
     super.connect(provider);
 
     c = get_comp();
-    c.uvm_report_error(get_type_name(), "You cannot call connect() on a target termination socket");
+    `uvm_error_context(get_type_name(), "You cannot call connect() on a target termination socket", c)
   endfunction
 
   `TLM2_NB_TRANSPORT_FW_IMP(m_imp, T, P, t, p, delay)
@@ -340,9 +340,8 @@ class tlm2_nb_initiator_socket #(type T=tlm2_generic_payload,
     end
     
     c = get_comp();
-    c.uvm_report_error(get_type_name(), "type mismatch in connect -- connection cannot be completed");
+    `uvm_error_context(get_type_name(), "type mismatch in connect -- connection cannot be completed", c)
 
   endfunction
 
 endclass
-

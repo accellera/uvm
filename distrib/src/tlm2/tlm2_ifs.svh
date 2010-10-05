@@ -45,17 +45,17 @@ class tlm2_if #(type T=tlm2_generic_payload,
                 type P=tlm_phase_e);
 
   virtual function tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);
-    uvm_report_error("nb_transport_fw", `TLM_FUNCTION_ERROR, UVM_NONE);
+    `uvm_error("nb_transport_fw", `TLM_FUNCTION_ERROR)
     return TLM_ACCEPTED;
   endfunction
 
   virtual function tlm_sync_e nb_transport_bw(T t, ref P p, ref time delay);
-    uvm_report_error("nb_transport_bw", `TLM_FUNCTION_ERROR, UVM_NONE);
+    `uvm_error("nb_transport_bw", `TLM_FUNCTION_ERROR)
     return TLM_ACCEPTED;
   endfunction
 
   virtual task b_transport(T t, ref time delay);
-    uvm_report_error("b_transport", `TLM_TASK_ERROR, UVM_NONE);
+    `uvm_error("b_transport", `TLM_TASK_ERROR)
   endtask
 
 endclass
