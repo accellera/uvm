@@ -253,61 +253,11 @@ endfunction
 //
 //----------------------------------------------------------------------------
 
-`ifdef UVM_DPI
-import "DPI" function bit uvm_is_match (string expr, string str);
-`else
 function bit uvm_is_match (string expr, string str);
-
-  int e, es, s, ss;
-  string tmp;
-  e  = 0; s  = 0;
-  es = 0; ss = 0;
-
-  if(expr.len() == 0)
-    return 1;
-
-  // The ^ used to be used to remove the implicit wildcard, but now we don't
-  // use implicit wildcard so this character is just stripped.
-  if(expr[0] == "^")
-    expr = expr.substr(1, expr.len()-1);
-
-  //This loop is only needed when the first character of the expr may not
-  //be a *. 
-  while (s != str.len() && expr.getc(e) != "*") begin
-    if ((expr.getc(e) != str.getc(s)) && (expr.getc(e) != "?"))
-      return 0;
-    e++; s++;
-  end
-
-  while (s != str.len()) begin
-    if (expr.getc(e) == "*") begin
-      e++;
-      if (e == expr.len()) begin
-        return 1;
-      end
-      es = e;
-      ss = s+1;
-    end
-    else if (expr.getc(e) == str.getc(s) || expr.getc(e) == "?") begin
-      e++;
-      s++;
-    end
-    else begin
-      e = es;
-      s = ss++;
-    end
-  end
-  while (expr.getc(e) == "*")
-    e++;
-  if(e == expr.len()) begin
-    return 1;
-  end
-  else begin
-    return 0;
-  end
+  string s;
+  s = uvm_glob_to_re(expr);
+  return (uvm_re_match(s, str) == 0);
 endfunction
-`endif
-
 
 `ifndef UVM_LINE_WIDTH
   `define UVM_LINE_WIDTH 120

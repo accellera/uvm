@@ -627,4 +627,4 @@ virtual class uvm_report_catcher extends uvm_callback;
 
 endclass
 
-`endif // UVM_REPORT_SERVER_SVH
+`endif // UVM_REPORT_CATCHER_SVH

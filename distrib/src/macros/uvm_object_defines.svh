@@ -155,10 +155,7 @@
      super.m_field_automation(tmp_data__, what__, str__); \
      if(tmp_data__ != null) \
        /* Allow objects in same hierarchy to be copied/compared */ \
-       if(!$cast(local_data__, tmp_data__)) return; \
-     if(what__ == UVM_CHECK_FIELDS) begin \
-       super.m_delete_field_array(); \
-     end
+       if(!$cast(local_data__, tmp_data__)) return;
 
 `define uvm_field_utils_end \
      end \
@@ -420,7 +417,7 @@
 
 `define uvm_field_int(ARG,FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_INT_T); \
   m_sc.scope.set_arg(`"ARG`"); \
   `M_UVM_FIELD_DATA(ARG,FLAG) \
   `M_UVM_FIELD_SET(ARG,FLAG) \
@@ -439,7 +436,7 @@
 
 `define uvm_field_object(ARG,FLAG) \
   if((ARG==null) || !m_sc.scope.in_hierarchy(ARG)) begin \
-    if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+    if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_OBJ_T); \
     m_sc.scope.down(`"ARG`", ARG); \
     `M_UVM_FIELD_DATA_OBJECT(ARG,FLAG) \
     `M_UVM_FIELD_SET_OBJECT(ARG,FLAG) \
@@ -458,7 +455,7 @@
 
 `define uvm_field_string(ARG,FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_STR_T); \
   m_sc.scope.down(`"ARG`",null); \
   `M_UVM_FIELD_DATA_STRING(ARG,FLAG) \
   `M_UVM_FIELD_SET_STRING(ARG,FLAG) \
@@ -544,7 +541,7 @@
 
 `define uvm_field_sarray_int(ARG,FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_INT_T); \
   m_sc.scope.down(`"ARG`",null); \
   `M_UVM_FIELD_DATA_SARRAY(ARG,FLAG) \
   `M_UVM_FIELD_SET_SARRAY_TYPE(INT,ARG,m_sc.bitstream,FLAG) \
@@ -565,7 +562,7 @@
 
 `define uvm_field_sarray_object(ARG,FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_OBJ_T); \
   m_sc.scope.down(`"ARG`",null); \
   `M_UVM_FIELD_DATA_SARRAY_OBJECT(ARG,FLAG) \
   `M_UVM_FIELD_SET_SARRAY_OBJECT(ARG,FLAG) \
@@ -585,7 +582,7 @@
 
 `define uvm_field_sarray_string(ARG,FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_STR_T); \
   m_sc.scope.down(`"ARG`", null); \
   `M_UVM_FIELD_DATA_SARRAY_STRING(ARG,FLAG) \
   `M_UVM_FIELD_SET_SARRAY_TYPE(STR, ARG, m_sc.stringv, FLAG) \
@@ -607,7 +604,7 @@
 `define uvm_field_sarray_enum(T,ARG,FLAG) \
   begin \
     T lh__, rh__; \
-    if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+    if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_INT_T); \
     m_sc.scope.down(`"ARG`",null); \
     if((what__ == UVM_PRINT) && !(UVM_NOPRINT&(FLAG))) \
       `uvm_print_qda_enum(ARG, uvm_auto_options_object.printer, array, T) \
@@ -656,7 +653,7 @@
 
 `define uvm_field_array_int(ARG,FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_INT_T); \
   m_sc.scope.down(`"ARG`",null); \
   if(what__==UVM_COPY && !((FLAG)&UVM_NOCOPY)) begin \
     if(local_data__!=null) begin \
@@ -686,7 +683,7 @@
 
 `define uvm_field_array_object(ARG,FLAG) \
   begin \
-    if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+    if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_OBJ_T); \
     m_sc.scope.down(`"ARG`", null); \
     if(what__==UVM_COPY && !((FLAG)&UVM_NOCOPY)) begin \
       if(local_data__!=null) begin \
@@ -716,7 +713,7 @@
 
 `define uvm_field_array_string(ARG,FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_STR_T); \
   m_sc.scope.down(`"ARG`", null); \
   if(what__==UVM_COPY && !((FLAG)&UVM_NOCOPY)) begin \
     if(local_data__!=null) begin \
@@ -773,7 +770,7 @@
 
 `define uvm_field_queue_int(ARG,FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_INT_T); \
   m_sc.scope.down(`"ARG`", null); \
   if(what__==UVM_COPY && !((FLAG)&UVM_NOCOPY)) begin \
     if(local_data__!=null) begin \
@@ -802,7 +799,7 @@
 
 `define uvm_field_queue_object(ARG,FLAG) \
   begin \
-    if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+    if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_OBJ_T); \
     m_sc.scope.down(`"ARG`", null); \
     if(what__==UVM_COPY && !((FLAG)&UVM_NOCOPY)) begin \
       if(local_data__!=null) begin \
@@ -830,7 +827,7 @@
 
 `define uvm_field_queue_string(ARG,FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_STR_T); \
   m_sc.scope.down(`"ARG`", null); \
   if(what__==UVM_COPY && !((FLAG)&UVM_NOCOPY)) begin \
     if(local_data__!=null) begin \
@@ -888,7 +885,7 @@
 
 `define uvm_field_aa_int_string(ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_INT_T); \
   m_sc.scope.down(`"ARG`", null); \
   `M_UVM_FIELD_DATA_AA_int_string(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_TYPE(string, INT, ARG, m_sc.bitstream, FLAG)  \
@@ -909,7 +906,7 @@
 
 `define uvm_field_aa_object_string(ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_OBJ_T); \
   m_sc.scope.down(`"ARG`", null); \
   `M_UVM_FIELD_DATA_AA_object_string(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_OBJECT_TYPE(string, ARG, FLAG)  \
@@ -930,7 +927,7 @@
 
 `define uvm_field_aa_string_string(ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_STR_T); \
   m_sc.scope.down(`"ARG`", null); \
   `M_UVM_FIELD_DATA_AA_string_string(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_TYPE(string, STR, ARG, m_sc.stringv, FLAG)  \
@@ -959,7 +956,7 @@
 
 `define uvm_field_aa_object_int(ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_OBJ_T); \
   m_sc.scope.down(`"ARG`", null); \
   `M_UVM_FIELD_DATA_AA_object_int(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_OBJECT_TYPE(int, ARG, FLAG)  \
@@ -1130,7 +1127,7 @@
 
 `define uvm_field_aa_int_key(KEY, ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_INT_T); \
   m_sc.scope.down(`"ARG`", null); \
   `M_UVM_FIELD_DATA_AA_int_key(KEY,ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_INT_TYPE(KEY, INT, ARG, m_sc.bitstream, FLAG)  \
@@ -1151,7 +1148,7 @@
 
 `define uvm_field_aa_int_enumkey(KEY, ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_INT_T); \
   m_sc.scope.down(`"ARG`", null); \
   `M_UVM_FIELD_DATA_AA_enum_key(KEY,ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_INT_ENUMTYPE(KEY, INT, ARG, m_sc.bitstream, FLAG)  \
@@ -1304,7 +1301,7 @@
 `define uvm_field_qda_enum(T,ARG,FLAG) \
   begin \
     T lh__, rh__; \
-    if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`"); \
+    if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_INT_T); \
     m_sc.scope.down(`"ARG`",null); \
     if((what__ == UVM_PRINT) && !(UVM_NOPRINT&(FLAG))) \
       `uvm_print_qda_enum(ARG, uvm_auto_options_object.printer, array, T) \

@@ -1,8 +1,5 @@
-//
 //----------------------------------------------------------------------
-//   Copyright 2007-2010 Mentor Graphics Corporation
-//   Copyright 2007-2010 Cadence Design Systems, Inc. 
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2007-2009 Mentor Graphics Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -19,11 +16,9 @@
 //   the License for the specific language governing
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
-`ifndef UVM_SVH
-`define UVM_SVH
-  `include "uvm_macros.svh"
-  `include "uvm_regex/uvm_regex.svh"
-  `include "base/base.svh"
-  `include "uvm_tlm/uvm_tlm.svh"
-  `include "methodology/methodology.svh"
-`endif // UVM_SVH
+
+
+
+import "DPI-C" function int uvm_re_match(string re, string str);
+import "DPI-C" function void uvm_dump_re_cache();
+import "DPI-C" function string uvm_glob_to_re(string glob);
