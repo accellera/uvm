@@ -1,4 +1,5 @@
 -mfcu
+-f ../common/oc_ethernet_rtl/rtl_file_list2.lst
 +acc=rmb
 +incdir+../../../src 
 timescale.v

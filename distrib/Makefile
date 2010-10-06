@@ -50,24 +50,25 @@ endif
 
 
 ifeq ($(TOOL),questa)
-CFLAGS += -DQUESTA -I$(MTI_HOME)/include -m32
+CFLAGS += -shared -DQUESTA -I$(MTI_HOME)/include -m32
 CC = $(MTI_HOME)/gcc-4.1.2-linux/bin/gcc
 endif
 
 ifeq ($(TOOL),nc)
-CFLAGS += -DNCSIM
+CFLAGS += -c -DNCSIM
 endif
 
 ifeq ($(TOOL),vcs)
-CFLAGS += -DVCS -I $(VCS_HOME)/include -m32
+CFLAGS += -c -DVCS -I $(VCS_HOME)/include -m32
 endif
 
 
 
 $(LIBDIR)/$(SONAME): $(LIBDIR) $(SRCS)
-	$(CC) -c $(CFLAGS) -o $(LIBDIR)/$(SONAME) $(SRCS)
+	$(CC) $(CFLAGS) -o $(LIBDIR)/$(SONAME) $(SRCS)
 	@rm -f $(UVM_HOME)/lib/$(SONAME)
-	ln -s $(OS)/$(SONAME) $(UVM_HOME)/lib/$(SONAME)
+	#ln -s $(OS)/$(SONAME) $(UVM_HOME)/lib/$(SONAME)
+	cp  $(OS)/$(SONAME) $(UVM_HOME)/lib/$(SONAME)
 
 
 $(LIBDIR):
