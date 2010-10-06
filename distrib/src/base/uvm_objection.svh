@@ -23,6 +23,7 @@
 `ifndef UVM_OBJECTION_SVH
 `define UVM_OBJECTION_SVH
 
+typedef class uvm_objection_context_object;
 typedef class uvm_objection;
 typedef class uvm_sequence_base;
 typedef class uvm_objection_cb;
@@ -203,13 +204,13 @@ class uvm_objection extends uvm_report_object;
   //   1 indicates the objection is being raised.
 
   function void m_propagate (uvm_object obj, uvm_object source_obj, 
-       string description, int count, bit raise);
+       string description, int count, bit raise, int in_top_thread);
     if (obj != null && obj != top) begin
       obj = m_get_parent(obj);
       if(raise)
         m_raise(obj, source_obj, description, count);
       else
-        m_drop(obj, source_obj, description, count);
+        m_drop(obj, source_obj, description, count, in_top_thread);
     end
   endfunction
 
@@ -313,7 +314,7 @@ class uvm_objection extends uvm_report_object;
     if (!m_hier_mode && obj != top)
       m_raise(top,source_obj,description,count);
     else if (obj != top)
-      m_propagate(obj, source_obj, description, count, 1);
+      m_propagate(obj, source_obj, description, count, 1, 0);
   
   endfunction
   
@@ -379,14 +380,14 @@ class uvm_objection extends uvm_report_object;
 
   function void drop_objection (uvm_object obj=null, string description="", 
        int count=1);
-    m_drop (obj, obj, description, count);
+    m_drop (obj, obj, description, count, 0);
   endfunction
 
 
   // Function- m_drop
 
   function void m_drop (uvm_object obj, uvm_object source_obj, 
-       string description="", int count=1);
+       string description="", int count=1, int in_top_thread=0);
 
     if (obj == null)
       obj = top;
@@ -409,7 +410,7 @@ class uvm_objection extends uvm_report_object;
       m_source_count[obj] -= count;
       source_obj = obj;
     end
-  
+ 
     if (m_trace_mode)
       m_report(obj,source_obj,description,count,"dropped");
     
@@ -420,12 +421,56 @@ class uvm_objection extends uvm_report_object;
     if (m_total_count[obj] != 0) begin
 
       if (!m_hier_mode && obj != top)
-        m_drop(top,source_obj,description, count);
+        m_drop(top,source_obj,description, count, in_top_thread);
       else if (obj != top)
-        this.m_propagate(obj, source_obj, description, count, 0);
+        this.m_propagate(obj, source_obj, description, count, 0, in_top_thread);
 
     end
     else begin
+        // need to make sure we are safe from the dropping thread terminating
+        // while the drain time is being honored. Can call immediatiately if
+        // we are in the top thread, otherwise we have to schedule it.
+//        m_schedule_forked_drop(obj, source_obj, description, count, in_top_thread);
+        m_schedule_forked_drop(obj, source_obj, description, count, in_top_thread);
+    end
+
+  endfunction
+
+  uvm_objection_context_object m_context_pool[$];
+
+  // List of scheduled objects
+  uvm_objection_context_object m_scheduled_list[$];
+  event m_activate_scheduled_forks;
+
+  function void m_schedule_forked_drop (uvm_object obj, uvm_object source_obj, 
+       string description="", int count=1, int in_top_thread=0);
+    if(in_top_thread)
+      m_forked_drop(obj, source_obj, description, count, in_top_thread);
+    else begin
+      uvm_objection_context_object ctxt;
+      if(m_context_pool.size()) ctxt = m_context_pool.pop_front();
+      else ctxt = new;
+      ctxt.obj = obj;
+      ctxt.source_obj = source_obj;
+      ctxt.description = description;
+      ctxt.count = count;
+      m_scheduled_list.push_back(ctxt); 
+    end
+  endfunction
+
+  task m_execute_scheduled_forks;
+    uvm_objection_context_object ctxt;
+    while(1) begin
+      wait(m_scheduled_list.size() != 0);
+      ctxt = m_scheduled_list.pop_front();
+      m_forked_drop(ctxt.obj, ctxt.source_obj, ctxt.description, ctxt.count, 1);
+      m_context_pool.push_back(ctxt);
+    end
+  endtask
+
+
+  function void m_forked_drop (uvm_object obj, uvm_object source_obj, 
+       string description="", int count=1, int in_top_thread=0);
 
         int diff_count;
         bit reraise;
@@ -433,7 +478,6 @@ class uvm_objection extends uvm_report_object;
         m_draining[obj] = 1;
 
         fork begin
-
          if (m_total_count[obj] == 0) begin
            fork begin //wrapper thread for disable fork
               fork
@@ -470,22 +514,19 @@ class uvm_objection extends uvm_report_object;
             if (!m_hier_mode && obj != top) begin
               if (reraise)
                 m_raise(top,source_obj,description,diff_count);
-              else
-                m_drop(top,source_obj,description, diff_count);
+              else begin
+                m_drop(top,source_obj,description, diff_count, in_top_thread);
+              end
             end
             else
               if (obj != top) begin
-                this.m_propagate(obj, source_obj, description, diff_count, reraise);
+                this.m_propagate(obj, source_obj, description, diff_count, reraise, in_top_thread);
               end
           end
 
         end
         join_none
-
-    end
-
   endfunction
-
 
   // Function: set_drain_time
   //
@@ -740,8 +781,15 @@ class uvm_test_done_objection extends uvm_objection;
   protected bit m_forced;
 
 //  local function new();
+process theprocess;
   function new(string name="uvm_test_done");
     super.new(name);
+
+    // Needed to allow threads dropping objections to be killed
+    fork begin
+theprocess = process::self();
+      m_execute_scheduled_forks;
+    end join_none
   endfunction
 
   // Function: qualify
@@ -870,6 +918,14 @@ typedef class uvm_root;
 function uvm_test_done_objection uvm_root::test_done_objection();
   return uvm_test_done_objection::get();
 endfunction
+
+// Have a pool of context objects to use
+class uvm_objection_context_object;
+  uvm_object obj;
+  uvm_object source_obj;
+  string description;
+  int count;
+endclass
 
 `endif
 
