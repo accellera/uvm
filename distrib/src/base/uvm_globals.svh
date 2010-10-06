@@ -111,7 +111,9 @@ endfunction
 
 function bit uvm_report_enabled (int verbosity,
                                  uvm_severity severity=UVM_INFO, string id="");
-  return uvm_top.uvm_report_enabled(verbosity,severity,id);
+  uvm_root top;
+  top = uvm_root::get();
+  return top.uvm_report_enabled(verbosity,severity,id);
 endfunction
 
 
@@ -122,7 +124,9 @@ function void uvm_report_info(string id,
                               int verbosity = UVM_MEDIUM,
 			      string filename = "",
 			      int line = 0);
-  uvm_top.uvm_report_info(id, message, verbosity, filename, line);
+  uvm_root top;
+  top = uvm_root::get();
+  top.uvm_report_info(id, message, verbosity, filename, line);
 endfunction
 
 
@@ -133,7 +137,9 @@ function void uvm_report_warning(string id,
                                  int verbosity = UVM_MEDIUM,
 				 string filename = "",
 				 int line = 0);
-  uvm_top.uvm_report_warning(id, message, verbosity, filename, line);
+  uvm_root top;
+  top = uvm_root::get();
+  top.uvm_report_warning(id, message, verbosity, filename, line);
 endfunction
 
 
@@ -144,7 +150,9 @@ function void uvm_report_error(string id,
                                int verbosity = UVM_LOW,
 			       string filename = "",
 			       int line = 0);
-  uvm_top.uvm_report_error(id, message, verbosity, filename, line);
+  uvm_root top;
+  top = uvm_root::get();
+  top.uvm_report_error(id, message, verbosity, filename, line);
 endfunction
 
 
@@ -164,7 +172,9 @@ function void uvm_report_fatal(string id,
                                int verbosity = UVM_NONE,
 			       string filename = "",
 			       int line = 0);
-  uvm_top.uvm_report_fatal(id, message, verbosity, filename, line);
+  uvm_root top;
+  top = uvm_root::get();
+  top.uvm_report_fatal(id, message, verbosity, filename, line);
 endfunction
 
   
