@@ -114,6 +114,10 @@ class uvm_objection extends uvm_report_object;
     if($test$plusargs("UVM_OBJECTION_TRACE")) begin
       m_trace_mode=1;
     end
+    // Needed to allow threads dropping objections to be killed
+    fork begin
+      m_execute_scheduled_forks;
+    end join_none
   endfunction
 
   // Function: trace_mode
@@ -422,15 +426,15 @@ class uvm_objection extends uvm_report_object;
 
       if (!m_hier_mode && obj != top)
         m_drop(top,source_obj,description, count, in_top_thread);
-      else if (obj != top)
+      else if (obj != top) begin
         this.m_propagate(obj, source_obj, description, count, 0, in_top_thread);
+      end
 
     end
     else begin
         // need to make sure we are safe from the dropping thread terminating
         // while the drain time is being honored. Can call immediatiately if
         // we are in the top thread, otherwise we have to schedule it.
-//        m_schedule_forked_drop(obj, source_obj, description, count, in_top_thread);
         m_schedule_forked_drop(obj, source_obj, description, count, in_top_thread);
     end
 
@@ -444,8 +448,10 @@ class uvm_objection extends uvm_report_object;
 
   function void m_schedule_forked_drop (uvm_object obj, uvm_object source_obj, 
        string description="", int count=1, int in_top_thread=0);
-    if(in_top_thread)
+    m_draining[obj] = 1;
+    if(in_top_thread) begin
       m_forked_drop(obj, source_obj, description, count, in_top_thread);
+    end
     else begin
       uvm_objection_context_object ctxt;
       if(m_context_pool.size()) ctxt = m_context_pool.pop_front();
@@ -474,8 +480,6 @@ class uvm_objection extends uvm_report_object;
 
         int diff_count;
         bit reraise;
-
-        m_draining[obj] = 1;
 
         fork begin
          if (m_total_count[obj] == 0) begin
@@ -515,12 +519,12 @@ class uvm_objection extends uvm_report_object;
               if (reraise)
                 m_raise(top,source_obj,description,diff_count);
               else begin
-                m_drop(top,source_obj,description, diff_count, in_top_thread);
+                m_drop(top,source_obj,description, diff_count, 1);
               end
             end
             else
               if (obj != top) begin
-                this.m_propagate(obj, source_obj, description, diff_count, reraise, in_top_thread);
+                this.m_propagate(obj, source_obj, description, diff_count, reraise, 1);
               end
           end
 
@@ -781,15 +785,9 @@ class uvm_test_done_objection extends uvm_objection;
   protected bit m_forced;
 
 //  local function new();
-process theprocess;
   function new(string name="uvm_test_done");
     super.new(name);
 
-    // Needed to allow threads dropping objections to be killed
-    fork begin
-theprocess = process::self();
-      m_execute_scheduled_forks;
-    end join_none
   endfunction
 
   // Function: qualify
