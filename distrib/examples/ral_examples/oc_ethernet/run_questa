@@ -1,0 +1,21 @@
+#!/bin/sh
+vlib work
+cd ../common/oc_ethernet_rtl; vlog -f rtl_file_list.lst +define+SINGLE_RAM_VARIABLE+RAM128x64  -work ../../oc_ethernet/work; cd ../../oc_ethernet
+vlog -f compile_questa.f
+VSIM_ARGS='eth_top tb_top tb -c -sv_lib ../../../lib/libuvm_questa '
+
+
+# These sequences each run an individual built-in
+vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_hw_reset_seq && \
+vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_bit_bash_seq && \
+vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_shared_access_seq && \
+vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_mem_walk_seq
+#vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_reg_access_seq +ROOT_HDL_PATH=tb_top.dut
+#vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_mem_access_seq
+
+# This sequence runs both the reg_access_seq and mem_access_seq
+#vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_access_seq
+
+# This sequence runs all the above built-in tests
+#vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_built_in_seq
+

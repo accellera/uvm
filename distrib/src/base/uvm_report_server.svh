@@ -395,7 +395,7 @@ class uvm_report_global_server;
   //
   // Returns a handle to the central report server.
 
-  function uvm_report_server get_server();
+  static function uvm_report_server get_server();
     return global_report_server;
   endfunction
 

@@ -34,5 +34,7 @@
 `include "uvm_tlm/uvm_tlm_fifos.svh"
 `include "uvm_tlm/uvm_tlm_req_rsp.svh"
 
+`include "uvm_tlm/uvm_tlm_gp.svh"
+
 `include "uvm_tlm/sqr_connections.svh"
 

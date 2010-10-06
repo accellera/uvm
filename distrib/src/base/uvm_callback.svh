@@ -515,6 +515,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   static function void add(T obj, uvm_callback cb, uvm_apprepend ordering=UVM_APPEND);
     uvm_queue#(uvm_callback) q;
     string nm,tnm; 
+    void'(m_get_tw_queue());
     if(cb==null) begin
        if(obj==null) nm = "(*)"; else nm = obj.get_full_name();
        if(m_base_inst.m_typename!="") tnm = m_base_inst.m_typename; else if(obj != null) tnm = obj.get_type_name(); else tnm = "uvm_object";

@@ -1,0 +1,19 @@
+block B {
+   bytes 1;
+   register R {
+      bytes 1;
+      field F {
+         access rw;
+         bits 8;
+      }
+   }
+   register CTL {
+      bytes 1;
+      field CTL {
+         access wo;
+         bits 2;
+         enum {NOP, INC, DEC, CLR}
+      }
+      attributes { NO_RAL_TESTS 1 }
+   }
+}

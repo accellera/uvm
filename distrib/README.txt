@@ -12,9 +12,32 @@ the licese is provided in this kit in the file LICENSE.txt
 Installing the kit
 ------------------
 
-Installation of UVM requires only unpacking the kit in a convenient
-location.  No additional installation procedures or scripts are
-necessary.
+Installation of UVM requires unpacking the kit in a convenient
+location and building the DPI object library for each combination of
+simulator and platform you are using.
+
+For each platform/OS:
+
+  - Log in to a machine of the suitable platform/OS
+  - Change your working directory to the 'distrib' directory where
+    you unpacked the kit
+
+       % cd .../distrib
+
+  - Invoke 'make' for every simulator you use
+
+       % make TOOL=mti
+       % make TOOL=nc
+       % make TOOL=vcs
+
+The shared library, named 'libuvm_<tool>.so' where "<tool>" is the name of
+the simulator specified using the TOOL makefile variable, is found in
+the ".../distrib/lib/<os>" directory, where "<os>" is the name of the
+platform as returned by the ".../distrib/bin/uvm_os_name" script.
+
+For convenience, a link to the last tool-specific shared library that
+was compiled is located in the ".../distrib/lib" directory.
+
 
 Using the UVM
 -------------
@@ -33,5 +56,9 @@ To use the include technique you include a single file:
 
 You will need to put the location of the UVM source as a include
 directory in your compilation command line.
+
+You will need to specify the location of the UVM DPI shared library
+to your simulator. This is a simulator-specific specification.
+Please refer to your simulator documentation.
 
 ------------------------------------------------------------------------

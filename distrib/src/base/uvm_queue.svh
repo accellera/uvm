@@ -40,7 +40,7 @@ class uvm_queue #(type T=int) extends uvm_object;
   typedef uvm_queue #(T) this_type;
 
   static local this_type m_global_queue;
-  protected rand T queue[$];
+  protected T queue[$];
 
   // Function: new
   //

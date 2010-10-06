@@ -38,6 +38,7 @@ class uvm_sequencer #(type REQ = uvm_sequence_item,
   bit     sequence_item_requested = 0;
   bit     get_next_item_called    = 0;
 
+  `uvm_component_param_utils(this_type)
 
   // Variable: seq_item_export
   //

@@ -1,0 +1,119 @@
+system xa0 {
+    bytes 1;
+    block xbus_rf (reg_file) @'h1000 {
+        bytes 1;
+        register addr_reg (addr_reg) @'h8 {
+            bytes 1;
+            field addr @'h0 {
+                bits 3;
+                access rw;
+                hard_reset 'h1;
+                soft_reset 'h0;
+            }
+        }
+        register config_reg @'h9 {
+            bytes 1;
+            field destination (dest) @'h0 {
+                bits 2;
+                access rw;
+                hard_reset 'h0;
+            }
+            field frame_kind (kind) @'h2 {
+                bits 2;
+                access rw;
+		enum { k0=0, k1=1, k2=2, k3=3 };
+                hard_reset 'h0;
+		constraint c1 { value inside {k1, k3}; }
+            }
+            field rsvd0 (rsvd) @'h4 {
+                bits 4;
+                access rw;
+                hard_reset 'hf;
+                soft_reset 'hf;
+            }
+        }
+        register user_acp_reg (user_reg) @'ha {
+            bytes 1;
+            field data_msb @'h4 {
+                bits 4;
+                access other;
+                hard_reset 'h0;
+                soft_reset 'h0;
+            }
+            field data_lsb @'h0 {
+                bits 4;
+                access other;
+                hard_reset 'h0;
+                soft_reset 'h0;
+            }
+        }
+        register swr_reg (shared_wr_reg) @'hb {
+            bytes 1;
+            field wdata_msb @'h4 {
+                bits 4;
+                access wo;
+            }
+            field wdata_lsb @'h0 {
+                bits 4;
+                access wo;
+            }
+        }
+        register srd_reg (shared_rd_reg) @'hb {
+            bytes 1;
+            field rdata_msb @'h4 {
+                bits 4;
+                access ro;
+                hard_reset 'ha;
+            }
+            field rdata_lsb @'h0 {
+                bits 4;
+                access ro;
+                hard_reset 'h5;
+            }
+        }
+        register data_reg @'hc {
+            bytes 1;
+            field value {
+                bits 8;
+                access other;
+            }
+        }
+        register xbus_indirect_reg[8] (id_reg_values[%d]) @none {
+            bytes 1;
+            field value {
+                bits 8;
+                access rw;
+            }
+        }
+        register rw_reg[4] (rw_regs[%d]) @'h10 {
+            bytes 1;
+            field value {
+                bits 8;
+                access rw;
+                hard_reset 'h5a;
+            }
+        }
+        register ro_reg[4] (ro_regs[%d]) @'h14 {
+            bytes 1;
+            field value {
+                bits 8;
+                access ro;
+                hard_reset 'ha5;
+            }
+        }
+        register wo_reg[4] (wo_regs[%d]) @'h18 {
+            bytes 1;
+            field value {
+                bits 8;
+                access wo;
+                hard_reset 'h55;
+            }
+        }
+
+	memory mem (mem) @'h100 {
+	   bits 8;
+	   size 256;
+  	}
+    }
+}
+

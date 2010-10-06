@@ -82,6 +82,10 @@ class xbus_transfer extends uvm_sequence_item;
     super.new(name);
   endfunction : new
 
+  virtual function string convert2string();
+    return sprint(uvm_default_line_printer);
+  endfunction
+
 endclass : xbus_transfer
 
 `endif // XBUS_TRANSFER_SV
