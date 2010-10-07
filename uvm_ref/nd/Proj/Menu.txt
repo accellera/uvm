@@ -170,6 +170,45 @@ Group: Globals  {
    File: Globals  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_globals.svh)
    }  # Group: Globals
 
+Group: Register Layer  {
+
+   File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/registers.txt)
+   File: Globals  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral.svh)
+
+   Group: Register Model  {
+
+      File: Blocks  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_block.svh)
+      File: Address Maps  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_map.svh)
+      File: Register Files  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_regfile.svh)
+      File: Registers  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_reg.svh)
+      File: Fields  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_field.svh)
+      File: Memories  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_mem.svh)
+      File: Virtual Fields  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_vfield.svh)
+      File: Virtual Registers  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_vreg.svh)
+      File: Memory Allocation Mgr  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_mam.svh)
+      }  # Group: Register Model
+
+   Group: Tests  {
+
+      File: Built-In Test Sequences  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_test_all.svh)
+      File: Hardware Reset Test Sequence  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_test_hw_reset.svh)
+      File: Bit Bashing Test Sequence  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_test_bit_bash.svh)
+      File: Register Access Test Sequence  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_test_reg_access.svh)
+      File: Shared Register Access test Sequence  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_test_shared_access.svh)
+      File: Memory Access Test Sequence  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_test_mem_access.svh)
+      File: Memory Walk  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_test_mem_walk.svh)
+      File: User-Defined Sequences  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_sequence.svh)
+      }  # Group: Tests
+
+   Group: DUT Integration  {
+
+      File: Register Model Adaptor  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_adapter.svh)
+      File: Backdoors  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_backdoor.svh)
+      File: HDL access  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_hdl.svh)
+      }  # Group: DUT Integration
+
+   }  # Group: Register Layer
+
 Group: Index  {
 
    Index: Everything

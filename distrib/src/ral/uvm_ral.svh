@@ -47,7 +47,19 @@ typedef class uvm_ral_sequence;
 typedef class uvm_ral_adapter;
 
 
-class uvm_ral extends uvm_component;
+//------------------------------------------------------------------------------
+// CLASS: uvm_ral
+//
+// Utility class for global symbolic values.
+// Each set of symbolic values is specified using enumerated types.
+// The symbolic values are accessed using a fully-qualified name,
+// such as ~uvm_ral::IS_OK~.
+//
+// A separate encapsulating class is used to minimize the length
+// of these identifiers and to make them easier to share across classes.
+//------------------------------------------------------------------------------
+
+class uvm_ral;
    typedef enum {
       IS_OK,
       ERROR,
@@ -103,15 +115,6 @@ class uvm_ral extends uvm_component;
       ALL_COVERAGE = 'h0007
    } coverage_model_e;
 
-   // Singleton root component for the RAL root sequencers
-   local function new(string name, uvm_component parent);
-      super.new(name, parent);
-   endfunction
-   static local uvm_ral m_root = null;
-   static function uvm_component get_root();
-      if (m_root == null) m_root = new("rals", uvm_top);
-      return m_root;
-   endfunction
 endclass: uvm_ral
 
 
@@ -140,48 +143,6 @@ typedef  logic [`UVM_RAL_ADDR_WIDTH-1:0]  uvm_ral_addr_logic_t ;
 typedef  logic [`UVM_RAL_DATA_WIDTH-1:0]  uvm_ral_data_logic_t ;
 
 typedef  bit [`UVM_RAL_BYTENABLE_WIDTH-1:0]  uvm_ral_byte_en_t ;
-
-
-//------------------------------------------------------------------------------
-// TYPE: uvm_ral_hdl_path_slice
-//
-// Slice of a HDL variable
-
-typedef struct {
-   string path;
-   int offset;
-   int size;
-} uvm_ral_hdl_path_slice;
-
-
-//------------------------------------------------------------------------------
-// TYPE: uvm_ral_hdl_path_slice
-//
-// Slice of a HDL variable
-
-typedef uvm_ral_hdl_path_slice uvm_ral_hdl_path_concat[];
-
-
-// concat2string
-
-function string uvm_ral_concat2string(uvm_ral_hdl_path_concat slices);
-   string image = "{";
-   
-   if (slices.size() == 1) return slices[0].path;
-
-   foreach (slices[i]) begin
-      uvm_ral_hdl_path_slice slice;
-      slice = slices[i];
-
-      image = { image, (i == 0) ? "" : ", ", slice.path };
-      if (slice.offset >= 0)
-         image = { image, "@", $psprintf("[%0d +: %0d]", slice.offset, slice.size) };
-   end
-
-   image = { image, "}" };
-
-   return image;
-endfunction
 
 
 //------------------------------------------------------------------------------
@@ -281,6 +242,7 @@ endclass
 
 `include "ral/uvm_hdl.svh"
 
+`include "ral/uvm_ral_adapter.svh"
 `include "ral/uvm_ral_sequence.svh"
 `include "ral/uvm_ral_field.svh"
 `include "ral/uvm_ral_vfield.svh"

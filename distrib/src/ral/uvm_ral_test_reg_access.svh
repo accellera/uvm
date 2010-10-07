@@ -18,7 +18,12 @@
 //    the License for the specific language governing
 //    permissions and limitations under the License.
 // -------------------------------------------------------------
-// 
+//
+
+//
+// TITLE: Register Access Test Sequence
+//
+
 typedef class uvm_ral_mem_access_seq;
 
 class uvm_ral_single_reg_access_seq extends uvm_ral_sequence;

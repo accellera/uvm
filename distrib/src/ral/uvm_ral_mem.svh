@@ -22,11 +22,9 @@
 
 
 //------------------------------------------------------------------------------
-//
 // CLASS: uvm_ral_mem_burst
-//
+// Descriptor for memory burst read/write operation. 
 //------------------------------------------------------------------------------
-
 class uvm_ral_mem_burst;
    rand int unsigned    n_beats;
    rand uvm_ral_addr_t  start_offset;
@@ -35,13 +33,10 @@ class uvm_ral_mem_burst;
 endclass
 
 
-
 //------------------------------------------------------------------------------
-//
 // CLASS: uvm_ral_mem_cbs
-//
+// Memory descriptors. 
 //------------------------------------------------------------------------------
-
 class uvm_ral_mem_cbs extends uvm_callback;
    string fname = "";
    int lineno = 0;
@@ -50,6 +45,14 @@ class uvm_ral_mem_cbs extends uvm_callback;
       super.new(name);
    endfunction
    
+
+   //------------------------------------------------------------------------------
+   // TASK: pre_write
+   // This callback method is invoked before a value is written to a memory location in the
+   // DUT. The written value, if modified, modifies the actual value that will be written.
+   // The address of the location within the memory, as well as the path and domain used to write
+   // to it can also be modified. 
+   //------------------------------------------------------------------------------
    virtual task pre_write(uvm_ral_mem         mem,
                           ref uvm_ral_addr_t  offset,
                           ref uvm_ral_data_t  wdat,
@@ -57,6 +60,14 @@ class uvm_ral_mem_cbs extends uvm_callback;
                           ref uvm_ral_map  map);
    endtask: pre_write
 
+
+   //------------------------------------------------------------------------------
+   // TASK: post_write
+   // This callback method is invoked after a value is successfully written to a memory location
+   // in the DUT. The wdat value is the value that was attempted to be written to the memory location,
+   // not necessarily the current value of that memory location. If a physical write access
+   // did not return uvm_rw::IS_OK, this method is not called. 
+   //------------------------------------------------------------------------------
    virtual task post_write(uvm_ral_mem            mem,
                            uvm_ral_addr_t         offset,
                            uvm_ral_data_t         wdat,
@@ -65,12 +76,27 @@ class uvm_ral_mem_cbs extends uvm_callback;
                            ref uvm_ral::status_e  status);
    endtask: post_write
 
+
+   //------------------------------------------------------------------------------
+   // TASK: pre_read
+   // This callback method is invoked before a value is read from a memory location in the DUT.
+   // The address of the location in the memory, as well as the path and domain used to read from
+   // it, can be modified. 
+   //------------------------------------------------------------------------------
    virtual task pre_read(uvm_ral_mem         mem,
                          ref uvm_ral_addr_t  offset,
                          ref uvm_ral::path_e path,
                          ref uvm_ral_map  map);
    endtask: pre_read
 
+
+   //------------------------------------------------------------------------------
+   // TASK: post_read
+   // This callback method is invoked after a value is successfully read from a memory location
+   // in the DUT. The rdat and status values are the values that are ultimately returned by
+   // the "uvm_ral_mem::read()" method and can be modified. If a physical read access did
+   // not return uvm_rw::IS_OK, this method is not called. 
+   //------------------------------------------------------------------------------
    virtual task post_read(input uvm_ral_mem        mem,
                           input uvm_ral_addr_t     offset,
                           ref   uvm_ral_data_t     rdat,
@@ -79,6 +105,13 @@ class uvm_ral_mem_cbs extends uvm_callback;
                           ref   uvm_ral::status_e  status);
    endtask: post_read
 
+
+   //------------------------------------------------------------------------------
+   // TASK: pre_burst
+   // This callback method is invoked before a burst operation is performed. The description
+   // of the burst area, any value to be written (if it is a burst-write operation), as well
+   // as the path and domain used to perform the operation, can be modified. 
+   //------------------------------------------------------------------------------
    virtual task pre_burst(uvm_ral_mem              mem,
                           uvm_tlm_gp::tlm_command  kind,
                           uvm_ral_mem_burst        burst,
@@ -87,6 +120,13 @@ class uvm_ral_mem_cbs extends uvm_callback;
                           ref uvm_ral_map       map);
    endtask: pre_burst
 
+
+   //------------------------------------------------------------------------------
+   // TASK: post_burst
+   // This callback method is invoked after a burst operation is performed. The values read
+   // (if it is a burst-read operation), as well as the status the operation, can be modified.
+   // 
+   //------------------------------------------------------------------------------
    virtual task post_burst(input uvm_ral_mem             mem,
                            input uvm_tlm_gp::tlm_command kind,
                            input uvm_ral_mem_burst       burst,
@@ -103,12 +143,16 @@ typedef uvm_callbacks#(uvm_ral_mem, uvm_ral_mem_cbs) uvm_ral_mem_cb;
 typedef uvm_callback_iter#(uvm_ral_mem, uvm_ral_mem_cbs) uvm_ral_mem_cb_iter;
 
 
-//------------------------------------------------------------------------------
-//
-// CLASS: uvm_ral_mem_frontdoor
-//
-//------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+// CLASS: uvm_ral_mem_frontdoor
+// Virtual base class for user-defined access to memories through a physical interface.
+// By default, the entire address space of a memory is mapped within the address space of
+// the block instantiating it. Different memory locations are accessed using different
+// addresses. If the memory is physically accessed using a non-linear, non-mapped mechanism,
+// this base class must be user-extended to provide the physical access to the memory.
+// See "User-Defined Register Access" on page 114 for an example. 
+//------------------------------------------------------------------------------
 virtual class uvm_ral_mem_frontdoor extends uvm_sequence #(uvm_sequence_item);
 
    uvm_ral_mem       mem;
@@ -138,6 +182,11 @@ endclass: uvm_ral_mem_frontdoor
 //
 //------------------------------------------------------------------------------
 
+
+//------------------------------------------------------------------------------
+// CLASS: uvm_ral_mem
+// Memory descriptors. 
+//------------------------------------------------------------------------------
 class uvm_ral_mem extends uvm_object;
 
    `uvm_register_cb(uvm_ral_mem, uvm_ral_mem_cbs)
@@ -189,6 +238,14 @@ class uvm_ral_mem extends uvm_object;
 
    /*local*/ extern function void Xlock_modelX();
 
+
+   //------------------------------------------------------------------------------
+   // TASK: init
+   // See "uvm_ral_mem::init()" for the method that uses these symbolic values. Each symbolic
+   // value is used to define a specific memory initialization pattern as follows: uvm_ral_mem::UNKNOWNS
+   // Initializes the memory with all unknowns ('bx). uvm_ral_mem::ZEROES Initializes
+   // the memory with all zeroes ('b0). uvm_ral_mem::ONES 
+   //------------------------------------------------------------------------------
    extern virtual task init(output bit             is_ok,
                             input  init_e          pattern,
                             input  uvm_ral_data_t  data);
@@ -202,11 +259,40 @@ class uvm_ral_mem extends uvm_object;
    // Group: Get
    //-----------
 
+
+   //------------------------------------------------------------------------------
+   // FUNCTION: get_access
+   // Returns the specification of the behavior of the memory when written and read. If the
+   // memory is shared in more than one domain, a domain name must be specified. If access restrictions
+   // are present when accessing a memory through the specified domain, the access mode returned
+   // takes the access restrictions into account. For example, a read-write memory accessed
+   // through a domain with read-only restrictions would return uvm_ral::RO. 
+   //------------------------------------------------------------------------------
    extern virtual function string          get_access(uvm_ral_map map = null);
 
+
+   //------------------------------------------------------------------------------
+   // FUNCTION: get_virtual_registers
+   // Fills the specified dynamic array with the descriptor for all of the virtual registers
+   // implemented in this memory. The order in which the registers are located in the array
+   // is not specified. 
+   //------------------------------------------------------------------------------
    extern virtual function void            get_virtual_registers(ref uvm_ral_vreg regs[$]);
+
+   //------------------------------------------------------------------------------
+   // FUNCTION: get_virtual_fields
+   // Fills the specified dynamic array with the descriptor for all of the virtual fields
+   // implemented in this memory. The order in which the fields are located in the array is
+   // not specified. 
+   //------------------------------------------------------------------------------
    extern virtual function void            get_virtual_fields(ref uvm_ral_vfield fields[$]);
 
+
+   //------------------------------------------------------------------------------
+   // FUNCTION: get_vreg_by_name
+   // Finds a virtual register with the specified name implemented in this memory and returns
+   // its descriptor. If no registers are found, returns null. 
+   //------------------------------------------------------------------------------
    extern virtual function uvm_ral_vreg    get_vreg_by_name(string name);
    extern virtual function uvm_ral_vfield  get_vfield_by_name(string name);
 
@@ -214,11 +300,41 @@ class uvm_ral_mem extends uvm_object;
                                                            uvm_ral_map map = null);
 
    extern virtual function uvm_ral_block   get_parent ();
+
+   //------------------------------------------------------------------------------
+   // FUNCTION: get_block
+   // Returns a reference to the descriptor of the block that includes the memory corresponding
+   // to the descriptor instance. 
+   //------------------------------------------------------------------------------
    extern virtual function uvm_ral_block   get_block  ();
+
+   //------------------------------------------------------------------------------
+   // FUNCTION: get_rights
+   // Returns the access rights of a memory. Returns uvm_ral::RW, uvm_ral::RO, or uvm_ral::WO.
+   // The access rights of a memory is always uvm_ral::RW, unless it is a shared memory with
+   // access restrictions in a particular domain. If the memory is shared in more than one
+   // domain, a domain name must be specified. If the memory is not shared in the specified
+   // domain, an error message is issued and uvm_ral::RW is returned. 
+   //------------------------------------------------------------------------------
    extern virtual function string          get_rights (uvm_ral_map map = null);
+
+   //------------------------------------------------------------------------------
+   // FUNCTION: get_size
+   // Returns the number of unique memory locations in this memory. 
+   //------------------------------------------------------------------------------
    extern virtual function longint unsigned get_size();
 
+
+   //------------------------------------------------------------------------------
+   // FUNCTION: get_n_bytes
+   // 
+   //------------------------------------------------------------------------------
    extern         function int unsigned    get_n_bytes();
+
+   //------------------------------------------------------------------------------
+   // FUNCTION: get_n_bits
+   // Returns the width, in number of bits, of each memory location in the memory. 
+   //------------------------------------------------------------------------------
    extern virtual function int unsigned    get_n_bits();
 
    //------------
@@ -245,8 +361,24 @@ class uvm_ral_mem extends uvm_object;
    // Group: Attributes & Constraints
    //--------------------------------
 
+
+   //------------------------------------------------------------------------------
+   // FUNCTION: set_attribute
+   // Set the specified attribute to the specified value for this memory. If the value is specified
+   // as "", the specified attribute is deleted. A warning is issued if an existing attribute
+   // is modified. Attribute names are case sensitive. 
+   //------------------------------------------------------------------------------
    extern virtual function void set_attribute(string name,
                                               string value);
+
+   //------------------------------------------------------------------------------
+   // FUNCTION: get_attribute
+   // Get the value of the specified attribute for this memory. If the attribute does not exists,
+   // "" is returned. If the "inherited" argument is specifed as TRUE, the value of the attribute
+   // is inherited from the nearest enclosing block or system if it is not specified for this
+   // memory. If it is specified as FALSE, the value "" is returned if it does not exists in the
+   // this memory. Attribute names are case sensitive. 
+   //------------------------------------------------------------------------------
    extern virtual function string get_attribute(string name,
                                                 bit inherited = 1);
    extern virtual function void get_attributes(ref string names[string],
@@ -264,6 +396,14 @@ class uvm_ral_mem extends uvm_object;
    // Group: HDL Access
    //------------------
  
+
+   //------------------------------------------------------------------------------
+   // TASK: write
+   // Writes the specified value at the specified memory location in the design using the
+   // specified access path. If the memory is shared by more than one physical interface,
+   // a domain must be specified if a physical access is used (front-door access). The optional
+   // value of the arguments: 
+   //------------------------------------------------------------------------------
    extern virtual task write(output uvm_ral::status_e  status,
                              input  uvm_ral_addr_t     mem_addr,
                              input  uvm_ral_data_t     value,
@@ -275,6 +415,14 @@ class uvm_ral_mem extends uvm_object;
                              input  string             fname = "",
                              input  int                lineno = 0);
 
+
+   //------------------------------------------------------------------------------
+   // TASK: read
+   // Reads the current value of the memory location from the design using the specified access
+   // path. If the memory is shared by more than one physical interface, a domain must be specified
+   // if a physical access is used (front-door access). The optional value of the arguments:
+   // 
+   //------------------------------------------------------------------------------
    extern virtual task read(output uvm_ral::status_e   status,
                             input  uvm_ral_addr_t      mem_addr,
                             output uvm_ral_data_t      value,
@@ -286,6 +434,14 @@ class uvm_ral_mem extends uvm_object;
                             input  string              fname = "",
                             input  int                 lineno = 0);
 
+
+   //------------------------------------------------------------------------------
+   // TASK: burst_write
+   // Burst-write the specified values in the memory locations specified by burst descriptor.
+   // If the memory is shared by more than one physical interface, a domain must be specified
+   // if a physical access is used (front-door access). The optional value of the arguments:
+   // 
+   //------------------------------------------------------------------------------
    extern virtual task burst_write(output uvm_ral::status_e  status,
                                    input  uvm_ral_mem_burst  burst,
                                    input  uvm_ral_data_t     value[],
@@ -297,6 +453,14 @@ class uvm_ral_mem extends uvm_object;
                                    input  string             fname = "",
                                    input  int                lineno = 0);
 
+
+   //------------------------------------------------------------------------------
+   // TASK: burst_read
+   // Burst-read the current values of the memory locations specified by the burst descriptor.
+   // If the memory is shared by more than one physical interface, a domain must be specified
+   // if a physical access is used (front-door access). The optional value of the arguments:
+   // 
+   //------------------------------------------------------------------------------
    extern virtual task burst_read(output uvm_ral::status_e   status,
                                   input  uvm_ral_mem_burst   burst,
                                   output uvm_ral_data_t      value[],
@@ -308,6 +472,14 @@ class uvm_ral_mem extends uvm_object;
                                   input  string              fname = "",
                                   input  int                 lineno = 0);
 
+
+   //------------------------------------------------------------------------------
+   // TASK: poke
+   // Deposit the specified value at the specified memory location in the design using a back-door
+   // access. Depending on the design model implementation, it may be possible to modify
+   // the content of a read-only memory. The optional value of the arguments: data_id scenario_id
+   // stream_id 
+   //------------------------------------------------------------------------------
    extern virtual task poke(output uvm_ral::status_e  status,
                             input  uvm_ral_addr_t     mem_addr,
                             input  uvm_ral_data_t     value,
@@ -317,6 +489,14 @@ class uvm_ral_mem extends uvm_object;
                             input  string             fname = "",
                             input  int                lineno = 0);
 
+
+   //------------------------------------------------------------------------------
+   // TASK: peek
+   // Reads the current value of the memory location from the design using a back-door access.
+   // The optional value of the arguments: data_id scenario_id stream_id ...are passed
+   // to the back-door access method. This allows the physical and back-door read access
+   // to be traced back to the higher-level transaction that caused the access to occur. 
+   //------------------------------------------------------------------------------
    extern virtual task peek(output uvm_ral::status_e  status,
                             input  uvm_ral_addr_t     mem_addr,
                             output uvm_ral_data_t     value,
@@ -326,7 +506,22 @@ class uvm_ral_mem extends uvm_object;
                             input  string             fname = "",
                             input  int                lineno = 0);
 
+
+   //------------------------------------------------------------------------------
+   // TASK: readmemh
+   // Not yet implemented. Initializes the content of all memory locations using the values
+   // in the specified file. The values are updated using the default access path. See "uvm_ral_mem::writememh()"
+   // for details. The format of the file is the same as the one used by the $readmemh task. 
+   //------------------------------------------------------------------------------
    extern virtual task readmemh(string filename);
+
+   //------------------------------------------------------------------------------
+   // TASK: writememh
+   // Not yet implemented. Dumps the content of all memory locations to the specified file.
+   // The file can then be used as an input for the "uvm_ral_mem::readmemh()" method. The
+   // values are obtained using the default access path. The format of the file is the same
+   // as the one used by the $readmemh task. 
+   //------------------------------------------------------------------------------
    extern virtual task writememh(string filename);
 
 
@@ -334,11 +529,26 @@ class uvm_ral_mem extends uvm_object;
    // Group: Frontdoor
    //-----------------
 
+
+   //------------------------------------------------------------------------------
+   // FUNCTION: set_frontdoor
+   // By default, memories are mapped linearly into the address space of the block that instantiates
+   // them. If memories are accessed using a different mechanism, a user-defined access
+   // mechanism must be defined and associated with the corresponding memory abstraction
+   // class. See "User-Defined Memory Access" on page 116 for an example. 
+   //------------------------------------------------------------------------------
    extern function void set_frontdoor(uvm_ral_mem_frontdoor ftdr,
                                       uvm_ral_map        map = null,
                                       string                fname = "",
                                       int                   lineno = 0);
    
+
+   //------------------------------------------------------------------------------
+   // FUNCTION: get_frontdoor
+   // Returns the current user-defined mechanism for this memory for the specified domain.
+   // If null, no user-defined mechanism has been defined. A user-defined mechanism is defined
+   // by using the "uvm_ral_mem::set_frontdoor()" method. 
+   //------------------------------------------------------------------------------
    extern function uvm_ral_mem_frontdoor get_frontdoor(uvm_ral_map map = null);
 
 
@@ -349,10 +559,30 @@ class uvm_ral_mem extends uvm_object;
    local uvm_ral_mem_backdoor backdoor;
    local uvm_object_string_pool #(uvm_queue #(uvm_ral_hdl_path_concat)) hdl_paths_pool;
 
+
+   //------------------------------------------------------------------------------
+   // FUNCTION: set_backdoor
+   // Memories implemented using SystemVerilog unpacked arrays can be accessed using a
+   // hierarchical path. This direct back-door access is automatically generated if the
+   // necessary hdl_path properties are specified in the RALF description. However, memories
+   // can be modeled using other methods, such as using DesignWare models. These memory models
+   // come with their own back-door mechanism. This method is used to associate a back-door
+   // access mechanism with a memory descriptor to enable back-door access. A class extension
+   // implementing the back-door mechanism for DesignWare memory models has already been
+   // defined and is included in RAL. 
+   //------------------------------------------------------------------------------
    extern function void set_backdoor (uvm_ral_mem_backdoor bkdr,
                                       string               fname = "",
                                       int                  lineno = 0);
 
+
+   //------------------------------------------------------------------------------
+   // FUNCTION: get_backdoor
+   // Returns the current back-door mechanism for this memory. If null, no back-door mechanism
+   // has been defined. A back-door mechanism can be automatically defined by using the hdl_path
+   // properties in the RALF definition or user-defined using the "uvm_ral_mem::set_backdoor()"
+   // method. 
+   //------------------------------------------------------------------------------
    extern function uvm_ral_mem_backdoor get_backdoor();
 
    extern function void clear_hdl_path    (string kind = "RTL");

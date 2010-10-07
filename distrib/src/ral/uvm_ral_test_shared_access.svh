@@ -20,6 +20,9 @@
 // -------------------------------------------------------------
 // 
 
+//
+// TITLE: Shared Register Access test Sequence
+//
 
 class uvm_ral_shared_reg_access_seq extends uvm_ral_sequence;
 

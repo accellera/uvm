@@ -26,7 +26,7 @@
 
 
 /* 
- * TITLE: UVM HDL access C code.
+ * UVM HDL access C code.
  *
  * This code is not strictly associated with the
  * UVM register library. It is used by the UVM register
@@ -35,8 +35,6 @@
  */
 
 /*
- * FUNCTION: uvm_hdl_max_width()
- *
  * This C code checks to see if there is PLI handle
  * with a value set to define the maximum bit width.
  *
@@ -61,8 +59,6 @@ static int uvm_hdl_max_width()
 }
 
 /*
- * FUNCTION: uvm_hdl_set_vlog
- *
  * Given a path, look the path name up using the PLI,
  * and set it to 'value'.
  */
@@ -125,8 +121,6 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 
 
 /*
- * FUNCTION: uvm_hdl_get_vlog
- *
  * Given a path, look the path name up using the PLI
  * and return its 'value'.
  */
@@ -184,8 +178,6 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 
 
 /*
- * FUNCTION: uvm_hdl_check_path
- *
  * Given a path, look the path name up using the PLI,
  * but don't set or get. Just check.
  *
@@ -203,8 +195,6 @@ int uvm_hdl_check_path(char *path)
 
 
 /*
- * FUNCTION: uvm_hdl_read
- *
  * Given a path, look the path name up using the PLI
  * or the FLI, and return its 'value'.
  */
@@ -214,8 +204,6 @@ int uvm_hdl_read(char *path, p_vpi_vecval value)
 }
 
 /*
- * FUNCTION: uvm_hdl_deposit
- *
  * Given a path, look the path name up using the PLI
  * or the FLI, and set it to 'value'.
  */
@@ -226,8 +214,6 @@ int uvm_hdl_deposit(char *path, p_vpi_vecval value)
 
 
 /*
- * FUNCTION: uvm_hdl_force
- *
  * Given a path, look the path name up using the PLI
  * or the FLI, and set it to 'value'.
  */
@@ -238,8 +224,6 @@ int uvm_hdl_force(char *path, p_vpi_vecval value)
 
 
 /*
- * FUNCTION: uvm_hdl_release
- *
  * Given a path, look the path name up using the PLI
  * or the FLI, and release it.
  */
