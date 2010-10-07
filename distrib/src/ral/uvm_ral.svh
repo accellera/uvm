@@ -112,16 +112,6 @@ class uvm_ral extends uvm_component;
       if (m_root == null) m_root = new("rals", uvm_top);
       return m_root;
    endfunction
-
-   local static bit banner = display_banner();
-   local static function bit display_banner();
-      $display("----------------------------------------------------------------");
-      $display("UVM RAL");
-      $display("(C) 2006-2010 Synopsys, Inc.");
-      $display("(C) 2010 Mentor Graphics, Inc.");
-      return 1;
-   endfunction
-
 endclass: uvm_ral
 
 
