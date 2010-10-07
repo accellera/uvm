@@ -278,6 +278,7 @@ class uvm_objection extends uvm_report_object;
 
   function void raise_objection (uvm_object obj=null, string description="",
        int count=1);
+    if(obj == null) obj = uvm_root::get();
     m_raise (obj, obj, description, count);
   endfunction
 
@@ -384,6 +385,7 @@ class uvm_objection extends uvm_report_object;
 
   function void drop_objection (uvm_object obj=null, string description="", 
        int count=1);
+    if(obj == null) obj = uvm_root::get();
     m_drop (obj, obj, description, count, 0);
   endfunction
 
@@ -594,6 +596,17 @@ class uvm_objection extends uvm_report_object;
 
 
   // Group: Objection Status
+
+  // Function: get_objectors
+  //
+  // Returns the current list of objecting objects (objects that
+  // raised an objection but have not dropped it).
+
+  function void get_objectors(ref uvm_object list[$]);
+    `uvm_clear_queue(list)
+    foreach (m_source_count[obj]) list.push_back(obj); 
+  endfunction
+
 
   // Function: get_objection_count
   //
