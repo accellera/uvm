@@ -28,10 +28,7 @@ LIBDIR	= $(UVM_HOME)/lib/$(OS)
 SONAME	= libuvm_$(TOOL).so
 
 CC	= gcc
-CFLAGS	+= -fPIC
-
-LD	= ld
-LDFLAGS	+= -shared
+CFLAGS	+= -shared -fPIC
 
 
 SRCS	= $(SRCDIR)/uvm_hdl.c
@@ -50,16 +47,16 @@ endif
 
 
 ifeq ($(TOOL),questa)
-CFLAGS += -shared -DQUESTA -I$(MTI_HOME)/include -m32
+CFLAGS += -DQUESTA -I$(MTI_HOME)/include -m32
 CC = $(MTI_HOME)/gcc-4.1.2-linux/bin/gcc
 endif
 
 ifeq ($(TOOL),nc)
-CFLAGS += -c -DNCSIM
+CFLAGS += -DNCSIM
 endif
 
 ifeq ($(TOOL),vcs)
-CFLAGS += -c -DVCS -I $(VCS_HOME)/include -m32
+CFLAGS += -DVCS -I $(VCS_HOME)/include -m32
 endif
 
 
@@ -67,8 +64,7 @@ endif
 $(LIBDIR)/$(SONAME): $(LIBDIR) $(SRCS)
 	$(CC) $(CFLAGS) -o $(LIBDIR)/$(SONAME) $(SRCS)
 	@rm -f $(UVM_HOME)/lib/$(SONAME)
-	#ln -s $(OS)/$(SONAME) $(UVM_HOME)/lib/$(SONAME)
-	cp  $(OS)/$(SONAME) $(UVM_HOME)/lib/$(SONAME)
+	ln -s $(OS)/$(SONAME) $(UVM_HOME)/lib/$(SONAME)
 
 
 $(LIBDIR):

@@ -289,6 +289,8 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
 endclass
 
 
+`include "ral/uvm_hdl.svh"
+
 `include "ral/uvm_ral_sequence.svh"
 `include "ral/uvm_ral_field.svh"
 `include "ral/uvm_ral_vfield.svh"
@@ -308,8 +310,5 @@ endclass
 `include "ral/uvm_ral_test_reg_access.svh"
 `include "ral/uvm_ral_test_shared_access.svh"
 `include "ral/uvm_ral_test_all.svh"
-
-`include "ral/uvm_backdoor_dpi.svh"
-
 
 `endif // UVM_RAL__SV

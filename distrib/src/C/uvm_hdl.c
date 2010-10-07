@@ -26,7 +26,7 @@
 
 
 /* 
- * TITLE: UVM Register Backdoor C code.
+ * TITLE: UVM HDL access C code.
  *
  * This code is not strictly associated with the
  * UVM register library. It is used by the UVM register
@@ -35,7 +35,7 @@
  */
 
 /*
- * FUNCTION: uvm_get_hdl_max_width()
+ * FUNCTION: uvm_hdl_max_width()
  *
  * This C code checks to see if there is PLI handle
  * with a value set to define the maximum bit width.
@@ -47,7 +47,7 @@
  * its return value is cached in the caller.
  *
  */
-static int uvm_get_hdl_max_width()
+static int uvm_hdl_max_width()
 {
   vpiHandle ms;
   s_vpi_value value_s = { vpiIntVal };
@@ -61,12 +61,12 @@ static int uvm_get_hdl_max_width()
 }
 
 /*
- * FUNCTION: uvm_set_verilog
+ * FUNCTION: uvm_hdl_set_vlog
  *
  * Given a path, look the path name up using the PLI,
  * and set it to 'value'.
  */
-int uvm_set_verilog(char *path, p_vpi_vecval value, PLI_INT32 flag)
+static int uvm_hdl_set_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 {
   static int maxsize = -1;
   int i, size, chunks;
@@ -85,7 +85,7 @@ int uvm_set_verilog(char *path, p_vpi_vecval value, PLI_INT32 flag)
   else
   {
     if(maxsize == -1) 
-        maxsize = uvm_get_hdl_max_width();
+        maxsize = uvm_hdl_max_width();
 
 #ifdef NCSIM
     // Code for NC
@@ -125,12 +125,12 @@ int uvm_set_verilog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 
 
 /*
- * FUNCTION: uvm_get_verilog
+ * FUNCTION: uvm_hdl_get_vlog
  *
  * Given a path, look the path name up using the PLI
  * and return its 'value'.
  */
-int uvm_get_verilog(char *path, p_vpi_vecval value, PLI_INT32 flag)
+static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 {
   static int maxsize = -1;
   int i, size, chunks;
@@ -149,7 +149,7 @@ int uvm_get_verilog(char *path, p_vpi_vecval value, PLI_INT32 flag)
   else
   {
     if(maxsize == -1) 
-        maxsize = uvm_get_hdl_max_width();
+        maxsize = uvm_hdl_max_width();
 
     size = vpi_get(vpiSize, r);
     if(size > maxsize)
@@ -210,7 +210,7 @@ int uvm_hdl_check_path(char *path)
  */
 int uvm_hdl_read(char *path, p_vpi_vecval value)
 {
-    return uvm_get_verilog(path, value, vpiNoDelay);
+    return uvm_hdl_get_vlog(path, value, vpiNoDelay);
 }
 
 /*
@@ -221,7 +221,7 @@ int uvm_hdl_read(char *path, p_vpi_vecval value)
  */
 int uvm_hdl_deposit(char *path, p_vpi_vecval value)
 {
-    return uvm_set_verilog(path, value, vpiNoDelay);
+    return uvm_hdl_set_vlog(path, value, vpiNoDelay);
 }
 
 
@@ -233,7 +233,7 @@ int uvm_hdl_deposit(char *path, p_vpi_vecval value)
  */
 int uvm_hdl_force(char *path, p_vpi_vecval value)
 {
-    return uvm_set_verilog(path, value, vpiForceFlag);
+    return uvm_hdl_set_vlog(path, value, vpiForceFlag);
 }
 
 
@@ -241,10 +241,10 @@ int uvm_hdl_force(char *path, p_vpi_vecval value)
  * FUNCTION: uvm_hdl_release
  *
  * Given a path, look the path name up using the PLI
- * or the FLI, and set it to 'value'.
+ * or the FLI, and release it.
  */
-int uvm_hdl_release(char *path, p_vpi_vecval value)
+int uvm_hdl_release(char *path)
 {
-    return uvm_set_verilog(path, value, vpiReleaseFlag);
+    return uvm_hdl_set_vlog(path, NULL, vpiReleaseFlag);
 }
 
