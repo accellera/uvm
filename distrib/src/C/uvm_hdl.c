@@ -66,7 +66,7 @@ static int uvm_hdl_max_width()
  * Given a path, look the path name up using the PLI,
  * and set it to 'value'.
  */
-static int uvm_hdl_set_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
+static int uvm_hdl_set_vlog(char *path, p_vpi_vecval *value, PLI_INT32 flag)
 {
   static int maxsize = -1;
   int i, size, chunks;
@@ -87,14 +87,37 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
     if(maxsize == -1) 
         maxsize = uvm_hdl_max_width();
 
-#ifdef NCSIM
-    // Code for NC
+// Code for Questa & VCS
+// ---------------------
+#ifndef NCSIM
+    if (flag == vpiReleaseFlag) {
+      //size = vpi_get(vpiSize, r);
+      //value_p = (p_vpi_vecval)(malloc(((size-1)/32+1)*8*sizeof(s_vpi_vecval)));
+      //value = &value_p;
+    }
+    value_s.format = vpiVectorVal;
+    value_s.value.vector = *value;
+    vpi_put_value(r, &value_s, &time_s, flag);  
+    //if (value_p != NULL)
+    //  free(value_p);
+    if (value == NULL) {
+      *value = value_s.value.vector;
+    }
+  }
+  vpi_release_handle(r);
+  return 1;
+}
+
+// Code for NC
+// ---------------------
+#else
     size = vpi_get(vpiSize, r);
     if(size > maxsize)
     {
       vpi_printf("ERROR UVM : hdl path '%s' is %0d bits,\n", path, size);
       vpi_printf(" but the maximum size is %0d, redefine using a compile\n", maxsize);
       vpi_printf(" flag. i.e. %s\n", "vlog ... +define+UVM_HDL_MAX_WIDTH=<value>\n");
+      vpi_release_handle(r);
       return 0;
     }
     chunks = (size-1)/32 + 1;
@@ -113,15 +136,11 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
     }
     vpi_put_value(r, &value_s, &time_s, flag);  
     free (value_p);
-#else
-    // Code for Questa & VCS
-    value_s.format = vpiVectorVal;
-    value_s.value.vector = value;
-    vpi_put_value(r, &value_s, &time_s, flag);  
-#endif
   }
+  vpi_release_handle(r);
   return 1;
 }
+#endif
 
 
 /*
@@ -158,6 +177,7 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
       vpi_printf(" but the maximum size is %0d, redefine using a compile\n",maxsize);
       vpi_printf(" flag. i.e. %s\n", "vlog ... +define+UVM_HDL_MAX_WIDTH=<value>\n");
       //tf_dofinish();
+      vpi_release_handle(r);
       return 0;
     }
     chunks = (size-1)/32 + 1;
@@ -179,6 +199,7 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 #endif
     }
   }
+  vpi_release_handle(r);
   return 1;
 }
 
@@ -199,6 +220,7 @@ int uvm_hdl_check_path(char *path)
       return 0;
   else 
     return 1;
+  vpi_release_handle(r);
 }
 
 
@@ -221,7 +243,7 @@ int uvm_hdl_read(char *path, p_vpi_vecval value)
  */
 int uvm_hdl_deposit(char *path, p_vpi_vecval value)
 {
-    return uvm_hdl_set_vlog(path, value, vpiNoDelay);
+    return uvm_hdl_set_vlog(path, &value, vpiNoDelay);
 }
 
 
@@ -233,9 +255,20 @@ int uvm_hdl_deposit(char *path, p_vpi_vecval value)
  */
 int uvm_hdl_force(char *path, p_vpi_vecval value)
 {
-    return uvm_hdl_set_vlog(path, value, vpiForceFlag);
+    return uvm_hdl_set_vlog(path, &value, vpiForceFlag);
 }
 
+
+/*
+ * FUNCTION: uvm_hdl_release_and_read
+ *
+ * Given a path, look the path name up using the PLI
+ * or the FLI, and release it.
+ */
+int uvm_hdl_release_and_read(char *path, p_vpi_vecval value)
+{
+    return uvm_hdl_set_vlog(path, &value, vpiReleaseFlag);
+}
 
 /*
  * FUNCTION: uvm_hdl_release
@@ -245,6 +278,7 @@ int uvm_hdl_force(char *path, p_vpi_vecval value)
  */
 int uvm_hdl_release(char *path)
 {
-    return uvm_hdl_set_vlog(path, NULL, vpiReleaseFlag);
+  s_vpi_vecval value;
+  return uvm_hdl_set_vlog(path, &value, vpiReleaseFlag);
 }
 
