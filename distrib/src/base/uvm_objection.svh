@@ -411,9 +411,11 @@ class uvm_objection extends uvm_report_object;
     end
 
     m_total_count[obj] -= count;
+    if(m_total_count[obj] == 0) m_total_count.delete(obj);
 
     if (source_obj==obj) begin
       m_source_count[obj] -= count;
+      if(m_source_count[obj] == 0) m_source_count.delete(obj);
       source_obj = obj;
     end
  
@@ -424,7 +426,7 @@ class uvm_objection extends uvm_report_object;
     `uvm_do_callbacks(uvm_objection,uvm_objection_cb,dropped(obj,source_obj,description,count))
   
     // if count != 0, no reason to fork
-    if (m_total_count[obj] != 0) begin
+    if (m_total_count.exists(obj) && m_total_count[obj] != 0) begin
 
       if (!m_hier_mode && obj != top)
         m_drop(top,source_obj,description, count, in_top_thread);
@@ -484,7 +486,7 @@ class uvm_objection extends uvm_report_object;
         bit reraise;
 
         fork begin
-         if (m_total_count[obj] == 0) begin
+         if (m_total_count.exists(obj) || m_total_count[obj] == 0) begin
            fork begin //wrapper thread for disable fork
               fork
                 begin
@@ -500,7 +502,7 @@ class uvm_objection extends uvm_report_object;
                   // wait for all_dropped cbs to complete
                   wait fork;
                 end
-                wait (m_total_count[obj] != 0);
+                wait (m_total_count.exists(obj) && m_total_count[obj] != 0);
               join_any
               disable fork;
            end join
