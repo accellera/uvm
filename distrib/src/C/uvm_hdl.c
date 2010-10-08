@@ -100,7 +100,9 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval *value, PLI_INT32 flag)
       *value = value_s.value.vector;
     }
   }
+#ifndef VCS
   vpi_release_handle(r);
+#endif
   return 1;
 }
 
@@ -113,7 +115,9 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval *value, PLI_INT32 flag)
       vpi_printf("ERROR UVM : hdl path '%s' is %0d bits,\n", path, size);
       vpi_printf(" but the maximum size is %0d, redefine using a compile\n", maxsize);
       vpi_printf(" flag. i.e. %s\n", "vlog ... +define+UVM_HDL_MAX_WIDTH=<value>\n");
+#ifndef VCS
       vpi_release_handle(r);
+#endif
       return 0;
     }
     chunks = (size-1)/32 + 1;
@@ -133,7 +137,9 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval *value, PLI_INT32 flag)
     vpi_put_value(r, &value_s, &time_s, flag);  
     free (value_p);
   }
+#ifndef VCS
   vpi_release_handle(r);
+#endif
   return 1;
 }
 #endif
@@ -171,7 +177,9 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
       vpi_printf(" but the maximum size is %0d, redefine using a compile\n",maxsize);
       vpi_printf(" flag. i.e. %s\n", "vlog ... +define+UVM_HDL_MAX_WIDTH=<value>\n");
       //tf_dofinish();
+#ifndef VCS
       vpi_release_handle(r);
+#endif
       return 0;
     }
     chunks = (size-1)/32 + 1;
@@ -193,7 +201,9 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 #endif
     }
   }
+#ifndef VCS
   vpi_release_handle(r);
+#endif
   return 1;
 }
 
@@ -212,7 +222,9 @@ int uvm_hdl_check_path(char *path)
       return 0;
   else 
     return 1;
+#ifndef VCS
   vpi_release_handle(r);
+#endif
 }
 
 
@@ -261,5 +273,6 @@ int uvm_hdl_release_and_read(char *path, p_vpi_vecval value)
 int uvm_hdl_release(char *path)
 {
   s_vpi_vecval value;
-  return uvm_hdl_set_vlog(path, &value, vpiReleaseFlag);
+  p_vpi_vecval valuep = &value;
+  return uvm_hdl_set_vlog(path, &valuep, vpiReleaseFlag);
 }

@@ -236,7 +236,6 @@ virtual class uvm_ral_regfile extends uvm_object;
    extern function string get_default_hdl_path ();
 
 
-
    extern virtual function void          do_print (uvm_printer printer);
    extern virtual function string        convert2string();
    extern virtual function uvm_object    clone      ();
