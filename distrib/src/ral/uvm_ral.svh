@@ -47,36 +47,69 @@ typedef class uvm_ral_sequence;
 typedef class uvm_ral_adapter;
 
 
-//------------------------------------------------------------------------------
-// CLASS: uvm_ral
-//
-// Utility class for global symbolic values.
-// Each set of symbolic values is specified using enumerated types.
-// The symbolic values are accessed using a fully-qualified name,
-// such as ~uvm_ral::IS_OK~.
-//
-// A separate encapsulating class is used to minimize the length
-// of these identifiers and to make them easier to share across classes.
-//------------------------------------------------------------------------------
-
 class uvm_ral;
+
+//------------------------------------------------------------------------------
+//
+// Enum: uvm_ral::status_e
+//
+// Return status for register operations
+//
+// IS_OK      - Operation completed successfully
+// ERROR      - Operation completed with error
+// HAS_X      - Operation completed successfully bit had unknown bits.
+//
    typedef enum {
       IS_OK,
       ERROR,
       HAS_X
    } status_e;
 
+
+//------------------------------------------------------------------------------
+//
+// Enum: uvm_ral::path_e
+//
+// Path used for register operation
+//
+// BFM        - Use the front door
+// BACKDOOR   - Use the back door
+// DEFAULT    - Operation specified by the context
+//
    typedef enum {
       BFM,
       BACKDOOR,
       DEFAULT
    } path_e;
 
+
+//------------------------------------------------------------------------------
+//
+// Enum: uvm_ral::check_e
+//
+// Read-only or read-and-check
+//
+// NO_CHECK   - Read only
+// CHECK      - Read and check
+//   
    typedef enum {
       NO_CHECK,
       CHECK
    } check_e;
 
+
+//------------------------------------------------------------------------------
+//
+// Enum: uvm_ral::endianness_e
+//
+// Specifies byte ordering
+//
+// NO_ENDIAN      - Byte ordering not applicable
+// LITTLE_ENDIAN  - Least-significant bytes first in consecutive addresses
+// BIG_ENDIAN     - Most-significant bytes first in consecutive addresses
+// LITTLE_FIFO    - Least-significant bytes first at the same address
+// BIG_FIFO       - Most-significant bytes first at the same address
+//   
    typedef enum {
       NO_ENDIAN,
       LITTLE_ENDIAN,
@@ -85,28 +118,84 @@ class uvm_ral;
       BIG_FIFO
    } endianness_e;
 
+
+//------------------------------------------------------------------------------
+//
+// Enum: uvm_ral::reset_e
+//
+// DUT reset type
+//
+// HARD      - Hard reset
+// SOFT      - Software reset
+//
    typedef enum {
       HARD,
       SOFT
    } reset_e;
 
+
+//------------------------------------------------------------------------------
+//
+// Enum: uvm_ral::elem_kind_e
+//
+// Type of element being read or written
+//
+// REG      - Register
+// FIELD    - Field
+// MEM      - Memory location
+//
    typedef enum {
       REG,
       FIELD,
       MEM
    } elem_kind_e;
 
+
+//------------------------------------------------------------------------------
+//
+// Enum: uvm_ral::access_e
+//
+// Type of operation begin performed
+//
+// READ     - Read operation
+// WRITE    - Write operation
+//
    typedef enum {
       READ,
       WRITE
    } access_e;
 
+
+//------------------------------------------------------------------------------
+//
+// Enum: uvm_ral::predict_e
+//
+// How the mirror is to be updated
+//
+// PREDICT_DIRECT  - Predicted value is as-is
+// PREDICT_READ    - Predict based on the specified value having been read
+// PREDICT_WRITE   - Predict based on the specified value having been written
+//
    typedef enum {
       PREDICT_DIRECT,
       PREDICT_READ,
       PREDICT_WRITE
    } predict_e;
 
+
+//------------------------------------------------------------------------------
+//
+// Enum: uvm_ral::coverage_model_e
+//
+// Coverage models available or desired.
+// Multiple models may be specified by adding individual model identifiers.
+//
+// NO_COVERAGE   - None
+// REG_BITS      - Individual register bits
+// ADDR_MAP      - Individual register and memory addresses
+// FIELD_VALS    - Field values
+// ALL_COVERAGE  - All of the above
+//
    typedef enum {
       NO_COVERAGE  = 'h0000,
       REG_BITS     = 'h0001,
@@ -118,6 +207,14 @@ class uvm_ral;
 endclass: uvm_ral
 
 
+//------------------------------------------------------------------------------
+//
+// Macro: `UVM_RAL_ADDR_WIDTH
+//
+// Maximum address width in bits
+//
+// Default value is 64.
+//
 `ifndef UVM_RAL_ADDR_WIDTH
   `ifdef UVM_RAL_ADDR_WIDTH
     `define UVM_RAL_ADDR_WIDTH `UVM_RAL_ADDR_WIDTH
@@ -125,6 +222,16 @@ endclass: uvm_ral
     `define UVM_RAL_ADDR_WIDTH 64
   `endif
 `endif
+
+
+//------------------------------------------------------------------------------
+//
+// Macro: `UVM_RAL_DATA_WIDTH
+//
+// Maximum data width in bits
+//
+// Default value is 64.
+//
 `ifndef UVM_RAL_DATA_WIDTH
   `ifdef UVM_RAL_DATA_WIDTH
     `define UVM_RAL_DATA_WIDTH `UVM_RAL_DATA_WIDTH
@@ -133,15 +240,52 @@ endclass: uvm_ral
   `endif
 `endif
 
+//------------------------------------------------------------------------------
+//
+// Macro: `UVM_RAL_BYTENABLE_WIDTH
+//
+// Maximum number of byte enable bits
+//
+// Default value is one per byte in `UVM_RAL_DATA_WIDTH
+//
 `ifndef UVM_RAL_BYTENABLE_WIDTH 
   `define UVM_RAL_BYTENABLE_WIDTH ((`UVM_RAL_DATA_WIDTH-1)/8+1) 
 `endif
 
+
+//------------------------------------------------------------------------------
+//
+// Type: uvm_ral_addr_t
+//
+// Address value
+//
+// Type: uvm_ral_addr_logic_t
+//
+// 4-state address value
+//
 typedef  bit [`UVM_RAL_ADDR_WIDTH-1:0]  uvm_ral_addr_t ;
-typedef  bit [`UVM_RAL_DATA_WIDTH-1:0]  uvm_ral_data_t ;
 typedef  logic [`UVM_RAL_ADDR_WIDTH-1:0]  uvm_ral_addr_logic_t ;
+
+
+//------------------------------------------------------------------------------
+//
+// Type: uvm_ral_data_t
+//
+// Data value
+//
+// Type: uvm_ral_data_logic_t
+//
+// 4-state data value
+//
+typedef  bit [`UVM_RAL_DATA_WIDTH-1:0]  uvm_ral_data_t ;
 typedef  logic [`UVM_RAL_DATA_WIDTH-1:0]  uvm_ral_data_logic_t ;
 
+//------------------------------------------------------------------------------
+//
+// Type: uvm_ral_byte_en_t
+//
+// Byte enable vector
+//
 typedef  bit [`UVM_RAL_BYTENABLE_WIDTH-1:0]  uvm_ral_byte_en_t ;
 
 
