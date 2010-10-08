@@ -788,7 +788,10 @@ function void uvm_ral_reg::set_backdoor(uvm_ral_reg_backdoor bkdr,
                                         int                  lineno = 0);
    bkdr.fname = fname;
    bkdr.lineno = lineno;
-   if (this.backdoor != null) this.backdoor.kill_update_thread();
+   if (this.backdoor != null &&
+       this.backdoor.has_update_threads()) begin
+      `uvm_warning("RAL", "Previous register backdoor still has update threads running. Backdoors with active mirroring should only be set before simulation starts.");
+   end
    this.backdoor = bkdr;
 endfunction: set_backdoor
 
@@ -1679,7 +1682,7 @@ task uvm_ral_reg::XwriteX(output uvm_ral::status_e status,
             end
          end
          if (backdoor != null)
-           this.backdoor.write(status, final_val, parent, extension);
+           this.backdoor.write(this, status, final_val, parent, extension);
          else
            backdoor_write(status, final_val, "", parent, extension, fname, lineno);
          this.Xpredict_writeX(final_val, path, null);
@@ -1965,7 +1968,7 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
          uvm_ral_data_t  final_val;
 
          if (this.backdoor != null)
-           this.backdoor.read(status, value, parent, extension);
+           this.backdoor.read(this, status, value, parent, extension);
          else
            backdoor_read(status, value, "", parent, extension, fname, lineno);
 
@@ -1987,7 +1990,7 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
 
             if (final_val != value) begin
               if (this.backdoor != null)
-                 this.backdoor.read(status, final_val, parent, extension);
+                 this.backdoor.read(this, status, final_val, parent, extension);
               else
                  backdoor_read(status, final_val, "", parent, extension, fname, lineno);
             end
@@ -2278,7 +2281,7 @@ task uvm_ral_reg::poke(output uvm_ral::status_e status,
    end
 
    if (backdoor == null)
-     this.backdoor.write(status, value, parent, extension);
+     this.backdoor.write(this, status, value, parent, extension);
    else
      this.backdoor_write(status, value, kind, parent, extension, fname, lineno);
 
@@ -2314,7 +2317,7 @@ task uvm_ral_reg::peek(output uvm_ral::status_e status,
    end
 
    if (backdoor == null)
-     this.backdoor.read(status, value, parent, extension);
+     this.backdoor.read(this, status, value, parent, extension);
    else
      this.backdoor_read(status, value, kind, parent, extension, fname, lineno);
 

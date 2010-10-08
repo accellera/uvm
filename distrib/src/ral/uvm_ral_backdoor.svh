@@ -358,10 +358,9 @@ endclass
 class uvm_ral_reg_backdoor extends uvm_object;
    string fname = "";
    int lineno = 0;
-   uvm_ral_reg rg;
    local uvm_ral_reg_backdoor_cbs backdoor_cbs[$];
 
-   local process update_thread;
+   local process m_update_thread[uvm_ral_reg];
 
    `uvm_object_utils(uvm_ral_reg_backdoor)
 
@@ -374,9 +373,8 @@ class uvm_ral_reg_backdoor extends uvm_object;
    // Create an instance of the user-defined backdoor class
    // for the specified register
    //--------------------------------------------------------------------------
-   function new(input uvm_ral_reg rg=null);
-      super.new(rg.get_full_name());
-      this.rg = rg;
+   function new(string name = "");
+      super.new(name);
    endfunction: new
 
 
@@ -388,9 +386,10 @@ class uvm_ral_reg_backdoor extends uvm_object;
    // This method ~must~ be called as the first statement in
    // a user extension of the <read()> method.
    //--------------------------------------------------------------------------
-   protected task do_pre_read(input uvm_sequence_base parent,
+   protected task do_pre_read(input uvm_ral_reg       rg,
+                              input uvm_sequence_base parent,
                               input uvm_object        extension);
-      pre_read(parent, extension);
+      pre_read(rg, parent, extension);
       `uvm_do_obj_callbacks(uvm_ral_reg_backdoor,
                             uvm_ral_reg_backdoor_cbs,
                             this, pre_read(rg, parent, extension))
@@ -405,7 +404,8 @@ class uvm_ral_reg_backdoor extends uvm_object;
    // This method ~must~ be called as the last statement in
    // a user extension of the <read()> method.
    //--------------------------------------------------------------------------
-   protected task do_post_read(inout uvm_ral::status_e status,
+   protected task do_post_read(input uvm_ral_reg       rg,
+                               inout uvm_ral::status_e status,
                                inout uvm_ral_data_t    data,
                                input uvm_sequence_base parent,
                                input uvm_object        extension);
@@ -420,7 +420,7 @@ class uvm_ral_reg_backdoor extends uvm_object;
                             uvm_ral_reg_backdoor_cbs,
                             this,
                             post_read(rg, status, data, parent, extension))
-      post_read(status, data, parent, extension);
+      post_read(rg, status, data, parent, extension);
    endtask
 
 
@@ -432,10 +432,11 @@ class uvm_ral_reg_backdoor extends uvm_object;
    // This method ~must~ be called as the first statement in
    // a user extension of the <write()> method.
    //--------------------------------------------------------------------------
-   protected task do_pre_write(inout uvm_ral_data_t    data,
+   protected task do_pre_write(input uvm_ral_reg       rg,
+                               inout uvm_ral_data_t    data,
                                input uvm_sequence_base parent,
                                input uvm_object        extension);
-      pre_write(data, parent, extension);
+      pre_write(rg, data, parent, extension);
       `uvm_do_obj_callbacks(uvm_ral_reg_backdoor,
                             uvm_ral_reg_backdoor_cbs,
                             this,
@@ -458,7 +459,8 @@ class uvm_ral_reg_backdoor extends uvm_object;
    // This method ~must~ be called as the last statement in
    // a user extension of the <write()> method.
    //--------------------------------------------------------------------------
-   protected task do_post_write(inout uvm_ral::status_e status,
+   protected task do_post_write(input uvm_ral_reg       rg,
+                                inout uvm_ral::status_e status,
                                 input uvm_ral_data_t    data,
                                 input uvm_sequence_base parent,
                                 input uvm_object        extension);
@@ -466,7 +468,7 @@ class uvm_ral_reg_backdoor extends uvm_object;
                             uvm_ral_reg_backdoor_cbs,
                             this,
                             post_write(rg, status, data, parent, extension))
-      post_write(status, data, parent, extension);
+      post_write(rg, status, data, parent, extension);
    endtask
 
 
@@ -476,16 +478,16 @@ class uvm_ral_reg_backdoor extends uvm_object;
    // User-defined backdoor write operation.
    //
    // Call <do_pre_write()>.
-   // Deposit the specified value in the register corresponding
-   // to the instance of this class.
+   // Deposit the specified value in the specified register HDL implementation
    // Call <do_post_write()>
    // Returns an indication of the success of the operation.
    //
    //--------------------------------------------------------------------------
-   extern virtual task write(output uvm_ral::status_e status,
+   extern virtual task write(input  uvm_ral_reg       rg,
+                             output uvm_ral::status_e status,
                              input  uvm_ral_data_t    data,
-                             input uvm_sequence_base  parent,
-                             input uvm_object extension);
+                             input  uvm_sequence_base parent,
+                             input  uvm_object        extension);
 
 
    //--------------------------------------------------------------------------
@@ -496,15 +498,15 @@ class uvm_ral_reg_backdoor extends uvm_object;
    // Overload this method only if the backdoor requires the use of task.
    //
    // Call <do_pre_read()>.
-   // Peek the current value in the register corresponding
-   // to the instance of this class.
+   // Peek the current value of the specified register HDL implementation
    // Call <do_post_read()>
    // Returns the current value and an indication of the success of
    // the operation.
    //
    // By default, calls <read_func()>.
    //--------------------------------------------------------------------------
-   extern virtual task read(output uvm_ral::status_e  status,
+   extern virtual task read(input  uvm_ral_reg        rg,
+                            output uvm_ral::status_e  status,
                             output uvm_ral_data_t     data,
                             input  uvm_sequence_base  parent,
                             input  uvm_object         extension);
@@ -514,12 +516,12 @@ class uvm_ral_reg_backdoor extends uvm_object;
    //
    // User-defined backdoor read operation.
    //
-   // Peek the current value in the register corresponding
-   // to the instance of this class.
+   // Peek the current value in the register HDL implementation
    // Returns the current value and an indication of the success of
    // the operation.
    //--------------------------------------------------------------------------
    extern virtual function uvm_ral::status_e read_func(
+                            input  uvm_ral_reg        rg,
                             output uvm_ral::status_e  status,
                             output uvm_ral_data_t     data,
                             input  uvm_sequence_base  parent,
@@ -532,9 +534,10 @@ class uvm_ral_reg_backdoor extends uvm_object;
    // Indicates if wait_for_change() method is implemented
    //
    // Implement to return TRUE if and only if
-   // <wait_for_change()> is implemented.
+   // <wait_for_change()> is implemented to watch for changes
+   // in the HDL implementation of the specified field
    //--------------------------------------------------------------------------
-   extern virtual function bit is_auto_updated(string fieldname);
+   extern virtual function bit is_auto_updated(uvm_ral_field field);
 
 
    //--------------------------------------------------------------------------
@@ -546,11 +549,12 @@ class uvm_ral_reg_backdoor extends uvm_object;
    // corresponding to this instance of the backdoor class will be updated
    // via a backdoor read operation.
    //--------------------------------------------------------------------------
-   extern virtual task wait_for_change();
+   extern virtual local task wait_for_change(uvm_ral_reg rg);
 
   
    /*local*/ extern function void start_update_thread(uvm_ral_reg rg);
-   /*local*/ extern function void kill_update_thread();
+   /*local*/ extern function void kill_update_thread(uvm_ral_reg rg);
+   /*local*/ extern function bit has_update_threads();
 
 
    //--------------------------------------------------------------------------
@@ -561,8 +565,9 @@ class uvm_ral_reg_backdoor extends uvm_object;
    // The registered callback methods are invoked after the invocation
    // of this method.
    //--------------------------------------------------------------------------
-   virtual task pre_read(uvm_sequence_base parent,
-                         input uvm_object extension);
+   virtual task pre_read(input uvm_ral_reg       rg,
+                         input uvm_sequence_base parent,
+                         input uvm_object        extension);
    endtask
 
 
@@ -574,10 +579,11 @@ class uvm_ral_reg_backdoor extends uvm_object;
    // The registered callback methods are invoked before the invocation
    // of this method.
    //--------------------------------------------------------------------------
-   virtual task post_read(inout uvm_ral::status_e status,
+   virtual task post_read(input uvm_ral_reg       rg,
+                          inout uvm_ral::status_e status,
                           inout uvm_ral_data_t    data,
                           input uvm_sequence_base parent,
-                          input uvm_object extension);
+                          input uvm_object        extension);
    endtask
 
 
@@ -592,9 +598,10 @@ class uvm_ral_reg_backdoor extends uvm_object;
    // The written value, if modified, modifies the actual value that
    // will be written.
    //--------------------------------------------------------------------------
-   virtual task pre_write(inout uvm_ral_data_t    data,
+   virtual task pre_write(input uvm_ral_reg       rg,
+                          inout uvm_ral_data_t    data,
                           input uvm_sequence_base parent,
-                          input uvm_object extension);
+                          input uvm_object        extension);
    endtask
 
 
@@ -606,10 +613,11 @@ class uvm_ral_reg_backdoor extends uvm_object;
    // The registered callback methods are invoked before the invocation
    // of this method.
    //--------------------------------------------------------------------------
-   virtual task post_write(inout uvm_ral::status_e status,
+   virtual task post_write(input uvm_ral_reg       rg,
+                           inout uvm_ral::status_e status,
                            input uvm_ral_data_t    data,
                            input uvm_sequence_base parent,
-                           input uvm_object extension);
+                           input uvm_object        extension);
    endtask
 endclass: uvm_ral_reg_backdoor
 
@@ -642,10 +650,9 @@ class uvm_ral_mem_backdoor extends uvm_object;
    // Create an instance of the user-defined backdoor class
    // for the specified register
    //--------------------------------------------------------------------------
-   function new(input uvm_ral_mem mem=null);
-      super.new(mem.get_full_name());
-      this.mem = mem;
-   endfunction
+   function new(string name = "");
+      super.new(name);
+   endfunction: new
 
 
    //--------------------------------------------------------------------------
@@ -656,10 +663,11 @@ class uvm_ral_mem_backdoor extends uvm_object;
    // This method ~must~ be called as the first statement in
    // a user extension of the <read()> method.
    //--------------------------------------------------------------------------
-   protected task do_pre_read(inout uvm_ral_addr_t    offset,
+   protected task do_pre_read(input uvm_ral_mem       mem,
+                              inout uvm_ral_addr_t    offset,
                               input uvm_sequence_base parent,
                               input uvm_object        extension);
-      pre_read(offset, parent, extension);
+      pre_read(mem, offset, parent, extension);
       `uvm_do_obj_callbacks(uvm_ral_mem_backdoor,
                             uvm_ral_mem_backdoor_cbs,
                             this, pre_read(mem, offset, parent, extension))
@@ -674,7 +682,8 @@ class uvm_ral_mem_backdoor extends uvm_object;
    // This method ~must~ be called as the last statement in
    // a user extension of the <read()> method.
    //--------------------------------------------------------------------------
-   protected task do_post_read(inout uvm_ral::status_e status,
+   protected task do_post_read(input uvm_ral_mem       mem,
+                               inout uvm_ral::status_e status,
                                input uvm_ral_addr_t    offset,
                                inout uvm_ral_data_t    data,
                                input uvm_sequence_base parent,
@@ -690,7 +699,7 @@ class uvm_ral_mem_backdoor extends uvm_object;
                             uvm_ral_mem_backdoor_cbs,
                             this,
                             post_read(mem, status, offset, data, parent, extension))
-      post_read(status, offset, data, parent, extension);
+      post_read(mem, status, offset, data, parent, extension);
    endtask
 
 
@@ -702,11 +711,12 @@ class uvm_ral_mem_backdoor extends uvm_object;
    // This method ~must~ be called as the first statement in
    // a user extension of the <write()> method.
    //--------------------------------------------------------------------------
-   protected task do_pre_write(inout uvm_ral_addr_t    offset,
+   protected task do_pre_write(input uvm_ral_mem       mem,
+                               inout uvm_ral_addr_t    offset,
                                inout uvm_ral_data_t    data,
                                input uvm_sequence_base parent,
                                input uvm_object         extension);
-      pre_write(offset, data, parent, extension);
+      pre_write(mem, offset, data, parent, extension);
       `uvm_do_obj_callbacks(uvm_ral_mem_backdoor,
                             uvm_ral_mem_backdoor_cbs,
                             this,
@@ -729,7 +739,8 @@ class uvm_ral_mem_backdoor extends uvm_object;
    // This method ~must~ be called as the last statement in
    // a user extension of the <write()> method.
    //--------------------------------------------------------------------------
-   protected task do_post_write(inout uvm_ral::status_e status,
+   protected task do_post_write(input uvm_ral_mem       mem,
+                                inout uvm_ral::status_e status,
                                 input uvm_ral_addr_t    offset,
                                 input uvm_ral_data_t    data,
                                 input uvm_sequence_base parent,
@@ -738,7 +749,7 @@ class uvm_ral_mem_backdoor extends uvm_object;
                             uvm_ral_mem_backdoor_cbs,
                             this,
                             post_write(mem, status, offset, data, parent, extension))
-      post_write(status, offset, data, parent, extension);
+      post_write(mem, status, offset, data, parent, extension);
    endtask
 
 
@@ -748,17 +759,17 @@ class uvm_ral_mem_backdoor extends uvm_object;
    // User-defined backdoor write operation.
    //
    // Call <do_pre_write()>.
-   // Deposit the specified value in the memory location corresponding
-   // to the instance of this class.
+   // Deposit the specified value in the memory location HDL implementation
    // Call <do_post_write()>
    // Returns an indication of the success of the operation.
    //
    //--------------------------------------------------------------------------
-   extern virtual task write(output uvm_ral::status_e              status,
-                             input  uvm_ral_addr_t  offset,
-                             input  uvm_ral_data_t  data,
-                             input  uvm_sequence_base parent,
-                             input uvm_object extension);
+   extern virtual task write(input  uvm_ral_mem        mem,
+                             output uvm_ral::status_e  status,
+                             input  uvm_ral_addr_t     offset,
+                             input  uvm_ral_data_t     data,
+                             input  uvm_sequence_base  parent,
+                             input uvm_object          extension);
 
 
    //--------------------------------------------------------------------------
@@ -769,15 +780,15 @@ class uvm_ral_mem_backdoor extends uvm_object;
    // Overload this method only if the backdoor requires the use of task.
    //
    // Call <do_pre_read()>.
-   // Peek the current value in the memory corresponding
-   // to the instance of this class.
+   // Peek the current value in the memory location HDL implementation
    // Call <do_post_read()>
    // Returns the current value and an indication of the success of
    // the operation.
    //
    // By default, calls <read_func()>.
    //--------------------------------------------------------------------------
-   extern virtual task read(output uvm_ral::status_e  status,
+   extern virtual task read(input  uvm_ral_mem        mem,
+                            output uvm_ral::status_e  status,
                             input  uvm_ral_addr_t     offset,
                             output uvm_ral_data_t     data,
                             input  uvm_sequence_base  parent,
@@ -788,12 +799,12 @@ class uvm_ral_mem_backdoor extends uvm_object;
    //
    // User-defined backdoor read operation.
    //
-   // Peek the current value in the memory corresponding
-   // to the instance of this class.
+   // Peek the current value in the memory location HDL implementation
    // Returns the current value and an indication of the success of
    // the operation.
    //--------------------------------------------------------------------------
    extern virtual function uvm_ral::status_e read_func(
+                                       input  uvm_ral_mem        mem,
                                        output uvm_ral::status_e  status,
                                        input  uvm_ral_addr_t     offset,
                                        output uvm_ral_data_t     data,
@@ -809,7 +820,8 @@ class uvm_ral_mem_backdoor extends uvm_object;
    // The registered callback methods are invoked after the invocation
    // of this method.
    //--------------------------------------------------------------------------
-   virtual task pre_read(inout uvm_ral_addr_t    offset,
+   virtual task pre_read(input uvm_ral_mem       mem,
+                         inout uvm_ral_addr_t    offset,
                          input uvm_sequence_base parent,
                          input uvm_object        extension);
    endtask
@@ -823,7 +835,8 @@ class uvm_ral_mem_backdoor extends uvm_object;
    // The registered callback methods are invoked before the invocation
    // of this method.
    //--------------------------------------------------------------------------
-   virtual task post_read(inout uvm_ral::status_e status,
+   virtual task post_read(input uvm_ral_mem       mem,
+                          inout uvm_ral::status_e status,
                           inout uvm_ral_addr_t    offset,
                           inout uvm_ral_data_t    data,
                           input uvm_sequence_base parent,
@@ -842,7 +855,8 @@ class uvm_ral_mem_backdoor extends uvm_object;
    // The written value, if modified, modifies the actual value that
    // will be written.
    //--------------------------------------------------------------------------
-   virtual task pre_write(inout uvm_ral_addr_t    offset,
+   virtual task pre_write(input uvm_ral_mem       mem,
+                          inout uvm_ral_addr_t    offset,
                           inout uvm_ral_data_t    data,
                           input uvm_sequence_base parent,
                           input uvm_object        extension);
@@ -857,7 +871,8 @@ class uvm_ral_mem_backdoor extends uvm_object;
    // The registered callback methods are invoked before the invocation
    // of this method.
    //--------------------------------------------------------------------------
-   virtual task post_write(inout uvm_ral::status_e status,
+   virtual task post_write(input uvm_ral_mem       mem,
+                           inout uvm_ral::status_e status,
                            inout uvm_ral_addr_t    offset,
                            input uvm_ral_data_t    data,
                            input uvm_sequence_base parent,
@@ -870,85 +885,93 @@ endclass: uvm_ral_mem_backdoor
 // IMPLEMENTATION
 //------------------------------------------------------------------------------
 
-function bit uvm_ral_reg_backdoor::is_auto_updated(string fieldname);
-   `uvm_fatal("RAL", "uvm_ral_reg_backdoor::is_auto_updated() method has not been overloaded");
-  return 0;
+function bit uvm_ral_reg_backdoor::is_auto_updated(uvm_ral_field field);
+   return 0;
 endfunction
 
-task uvm_ral_reg_backdoor::wait_for_change();
+task uvm_ral_reg_backdoor::wait_for_change(uvm_ral_reg rg);
    `uvm_fatal("RAL", "uvm_ral_reg_backdoor::wait_for_change() method has not been overloaded");
 endtask
 
 function void uvm_ral_reg_backdoor::start_update_thread(uvm_ral_reg rg);
-   if (this.update_thread != null) begin
-      this.kill_update_thread();
+   if (this.m_update_thread.exists(rg)) begin
+      this.kill_update_thread(rg);
    end
 
    fork
       begin
          uvm_ral_field fields[$];
 
-         this.update_thread = process::self();
+         this.m_update_thread[rg] = process::self();
          rg.get_fields(fields);
          forever begin
             uvm_ral::status_e status;
             uvm_ral_data_t  val;
-            this.read(status, val, null, null);
+            this.read(rg, status, val, null, null);
             if (status != uvm_ral::IS_OK) begin
                `uvm_error("RAL", $psprintf("Backdoor read of register '%s' failed.",
                           rg.get_name()));
             end
             foreach (fields[i]) begin
-               if (this.is_auto_updated(fields[i].get_name())) begin
+               if (this.is_auto_updated(fields[i])) begin
                   uvm_ral_data_t  fld_val
                      = val >> fields[i].get_lsb_pos_in_register();
                   fld_val = fld_val & ((1 << fields[i].get_n_bits())-1);
                   void'(fields[i].predict(fld_val));
                end
             end
-            this.wait_for_change();
+            this.wait_for_change(rg);
          end
       end
    join_none
 endfunction
 
-function void uvm_ral_reg_backdoor::kill_update_thread();
-   if (this.update_thread != null) begin
-      this.update_thread.kill();
+function void uvm_ral_reg_backdoor::kill_update_thread(uvm_ral_reg rg);
+   if (this.m_update_thread.exists(rg)) begin
+      this.m_update_thread[rg].kill();
+      this.m_update_thread.delete(rg);
    end
 endfunction
 
-task uvm_ral_reg_backdoor::write(output uvm_ral::status_e status,
+function bit uvm_ral_reg_backdoor::has_update_threads();
+   return this.m_update_thread.num() > 0;
+endfunction
+
+task uvm_ral_reg_backdoor::write(input  uvm_ral_reg       rg,
+                                 output uvm_ral::status_e status,
                                  input  uvm_ral_data_t    data,
                                  input  uvm_sequence_base parent,
-                                 input uvm_object         extension);
+                                 input  uvm_object        extension);
 
    `uvm_fatal("RAL", "uvm_ral_reg_backdoor::write() method has not been overloaded");
 
 endtask: write
 
 
-task uvm_ral_reg_backdoor::read(output uvm_ral::status_e status,
+task uvm_ral_reg_backdoor::read(input  uvm_ral_reg       rg,
+                                output uvm_ral::status_e status,
                                 output uvm_ral_data_t    data,
                                 input  uvm_sequence_base parent,
                                 input  uvm_object        extension);
-   do_pre_read(parent, extension);
-   status = read_func(status, data,parent,extension);
-   do_post_read(status, data, parent, extension);
+   do_pre_read(rg, parent, extension);
+   status = read_func(rg, status, data,parent,extension);
+   do_post_read(rg, status, data, parent, extension);
 endtask: read
 
 
 function uvm_ral::status_e uvm_ral_reg_backdoor::read_func(
+                            input  uvm_ral_reg       rg,
                             output uvm_ral::status_e status,
                             output uvm_ral_data_t    data,
-                            input uvm_sequence_base  parent,
-                            input uvm_object         extension);
+                            input  uvm_sequence_base parent,
+                            input  uvm_object        extension);
    `uvm_fatal("RAL", "uvm_ral_reg_backdoor::read_func() method has not been overloaded");
    return uvm_ral::ERROR;
 endfunction
 
 
-task uvm_ral_mem_backdoor::write(output uvm_ral::status_e status,
+task uvm_ral_mem_backdoor::write(input  uvm_ral_mem       mem,
+                                 output uvm_ral::status_e status,
                                  input  uvm_ral_addr_t    offset,
                                  input  uvm_ral_data_t    data,
                                  input  uvm_sequence_base parent,
@@ -959,18 +982,20 @@ task uvm_ral_mem_backdoor::write(output uvm_ral::status_e status,
 endtask: write
 
 
-task uvm_ral_mem_backdoor::read(output uvm_ral::status_e status,
+task uvm_ral_mem_backdoor::read(input  uvm_ral_mem       mem,
+                                output uvm_ral::status_e status,
                                 input  uvm_ral_addr_t    offset,
                                 output uvm_ral_data_t    data,
                                 input  uvm_sequence_base parent,
                                 input  uvm_object        extension);
-   do_pre_read(offset, parent, extension);
-   status = read_func(status, offset, data, parent,extension);
-   do_post_read(status, offset, data, parent, extension);
+   do_pre_read(mem, offset, parent, extension);
+   status = read_func(mem, status, offset, data, parent,extension);
+   do_post_read(mem, status, offset, data, parent, extension);
 endtask: read
 
 
 function uvm_ral::status_e uvm_ral_mem_backdoor::read_func(
+                                       input  uvm_ral_mem       mem,
                                        output uvm_ral::status_e status,
                                        input  uvm_ral_addr_t    offset,
                                        output uvm_ral_data_t    data,

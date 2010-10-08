@@ -29,7 +29,20 @@ class uvm_ral_map_info;
 endclass
 
 
-
+// -------------------------------------------------------------
+//
+// Class: uvm_ral_map
+//
+// Address map abstraction class
+//
+// This class represents an address map.
+// An address map is a collection of registers and memories
+// accessible via a specific physical interface.
+// Address maps can be composed into higher-level address maps.
+//
+// Address maps are created using the <uvm_ral_block::create_map()>
+// method.
+//
 class uvm_ral_map extends uvm_object;
 
    `uvm_object_utils(uvm_ral_map)

@@ -2055,7 +2055,7 @@ task uvm_ral_mem::poke(output uvm_ral::status_e status,
    end
 
    if (backdoor != null)
-     this.backdoor.write(status, mem_addr, value, parent, extension);
+     this.backdoor.write(this, status, mem_addr, value, parent, extension);
    else
      this.backdoor_write(status, mem_addr, value, kind, parent, extension, fname, lineno);
 
@@ -2085,7 +2085,7 @@ task uvm_ral_mem::peek(output uvm_ral::status_e status,
    end
 
    if (backdoor != null)
-     this.backdoor.read(status, mem_addr, value, parent, extension);
+     this.backdoor.read(this, status, mem_addr, value, parent, extension);
    else
      this.backdoor_read(status, mem_addr, value, kind, parent, extension, fname, lineno);
 

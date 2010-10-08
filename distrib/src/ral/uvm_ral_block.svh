@@ -1448,8 +1448,10 @@ function void uvm_ral_block::set_backdoor(uvm_ral_reg_backdoor bkdr,
                                           int                  lineno = 0);
    bkdr.fname = fname;
    bkdr.lineno = lineno;
-   if (this.backdoor != null)
-     this.backdoor.kill_update_thread();
+   if (this.backdoor != null &&
+       this.backdoor.has_update_threads()) begin
+      `uvm_warning("RAL", "Previous register backdoor still has update threads running. Backdoors with active mirroring should only be set before simulation starts.");
+   end
    this.backdoor = bkdr;
 endfunction: set_backdoor
 
