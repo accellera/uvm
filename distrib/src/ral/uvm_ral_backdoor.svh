@@ -108,11 +108,11 @@ endfunction
 
 
 //------------------------------------------------------------------------------
-// CLASS: uvm_ral_reg_backdoor_callbacks
+// CLASS: uvm_ral_reg_backdoor_cbs
 //
 // Façade class for register backdoor access callback methods. 
 //------------------------------------------------------------------------------
-virtual class uvm_ral_reg_backdoor_callbacks extends uvm_callback;
+virtual class uvm_ral_reg_backdoor_cbs extends uvm_callback;
 
     string fname = "";
     int lineno = 0;
@@ -226,11 +226,11 @@ endclass
 
 
 //------------------------------------------------------------------------------
-// CLASS: uvm_ral_mem_backdoor_callbacks
+// CLASS: uvm_ral_mem_backdoor_cbs
 //
 // Façade class for memory backdoor access callback methods. 
 //------------------------------------------------------------------------------
-virtual class uvm_ral_mem_backdoor_callbacks extends uvm_callback;
+virtual class uvm_ral_mem_backdoor_cbs extends uvm_callback;
 
     string fname = "";
     int lineno = 0;
@@ -359,7 +359,7 @@ class uvm_ral_reg_backdoor extends uvm_object;
    string fname = "";
    int lineno = 0;
    uvm_ral_reg rg;
-   local uvm_ral_reg_backdoor_callbacks backdoor_callbacks[$];
+   local uvm_ral_reg_backdoor_cbs backdoor_cbs[$];
 
    local process update_thread;
 
@@ -392,7 +392,7 @@ class uvm_ral_reg_backdoor extends uvm_object;
                               input uvm_object        extension);
       pre_read(parent, extension);
       `uvm_do_obj_callbacks(uvm_ral_reg_backdoor,
-                            uvm_ral_reg_backdoor_callbacks,
+                            uvm_ral_reg_backdoor_cbs,
                             this, pre_read(rg, parent, extension))
    endtask
 
@@ -411,13 +411,13 @@ class uvm_ral_reg_backdoor extends uvm_object;
                                input uvm_object        extension);
       begin
          uvm_callback_iter#(uvm_ral_reg_backdoor,
-                            uvm_ral_reg_backdoor_callbacks) iter = new(this);
-         for(uvm_ral_reg_backdoor_callbacks cb = iter.last();
+                            uvm_ral_reg_backdoor_cbs) iter = new(this);
+         for(uvm_ral_reg_backdoor_cbs cb = iter.last();
              cb != null;
              cb = iter.prev()) data = cb.decode(data);
       end
       `uvm_do_obj_callbacks(uvm_ral_reg_backdoor,
-                            uvm_ral_reg_backdoor_callbacks,
+                            uvm_ral_reg_backdoor_cbs,
                             this,
                             post_read(rg, status, data, parent, extension))
       post_read(status, data, parent, extension);
@@ -437,13 +437,13 @@ class uvm_ral_reg_backdoor extends uvm_object;
                                input uvm_object        extension);
       pre_write(data, parent, extension);
       `uvm_do_obj_callbacks(uvm_ral_reg_backdoor,
-                            uvm_ral_reg_backdoor_callbacks,
+                            uvm_ral_reg_backdoor_cbs,
                             this,
                             pre_write(rg, data, parent, extension))
       begin
          uvm_callback_iter#(uvm_ral_reg_backdoor,
-                            uvm_ral_reg_backdoor_callbacks) iter = new(this);
-         for(uvm_ral_reg_backdoor_callbacks cb = iter.first();
+                            uvm_ral_reg_backdoor_cbs) iter = new(this);
+         for(uvm_ral_reg_backdoor_cbs cb = iter.first();
              cb != null;
              cb = iter.next()) data = cb.encode(data);
       end
@@ -463,7 +463,7 @@ class uvm_ral_reg_backdoor extends uvm_object;
                                 input uvm_sequence_base parent,
                                 input uvm_object        extension);
       `uvm_do_obj_callbacks(uvm_ral_reg_backdoor,
-                            uvm_ral_reg_backdoor_callbacks,
+                            uvm_ral_reg_backdoor_cbs,
                             this,
                             post_write(rg, status, data, parent, extension))
       post_write(status, data, parent, extension);
@@ -629,7 +629,7 @@ class uvm_ral_mem_backdoor extends uvm_object;
    string fname = "";
    int lineno = 0;
    uvm_ral_mem mem;
-   local uvm_ral_mem_backdoor_callbacks backdoor_callbacks[$];
+   local uvm_ral_mem_backdoor_cbs backdoor_cbs[$];
 
    `uvm_object_utils(uvm_ral_mem_backdoor)
 
@@ -661,7 +661,7 @@ class uvm_ral_mem_backdoor extends uvm_object;
                               input uvm_object        extension);
       pre_read(offset, parent, extension);
       `uvm_do_obj_callbacks(uvm_ral_mem_backdoor,
-                            uvm_ral_mem_backdoor_callbacks,
+                            uvm_ral_mem_backdoor_cbs,
                             this, pre_read(mem, offset, parent, extension))
    endtask
 
@@ -681,13 +681,13 @@ class uvm_ral_mem_backdoor extends uvm_object;
                                input uvm_object        extension);
       begin
          uvm_callback_iter#(uvm_ral_mem_backdoor,
-                            uvm_ral_mem_backdoor_callbacks) iter = new(this);
-         for(uvm_ral_mem_backdoor_callbacks cb = iter.last();
+                            uvm_ral_mem_backdoor_cbs) iter = new(this);
+         for(uvm_ral_mem_backdoor_cbs cb = iter.last();
              cb != null;
              cb = iter.prev()) data = cb.decode(data);
       end
       `uvm_do_obj_callbacks(uvm_ral_mem_backdoor,
-                            uvm_ral_mem_backdoor_callbacks,
+                            uvm_ral_mem_backdoor_cbs,
                             this,
                             post_read(mem, status, offset, data, parent, extension))
       post_read(status, offset, data, parent, extension);
@@ -708,13 +708,13 @@ class uvm_ral_mem_backdoor extends uvm_object;
                                input uvm_object         extension);
       pre_write(offset, data, parent, extension);
       `uvm_do_obj_callbacks(uvm_ral_mem_backdoor,
-                            uvm_ral_mem_backdoor_callbacks,
+                            uvm_ral_mem_backdoor_cbs,
                             this,
                             pre_write(mem, offset, data, parent, extension))
       begin
          uvm_callback_iter#(uvm_ral_mem_backdoor,
-                            uvm_ral_mem_backdoor_callbacks) iter = new(this);
-         for(uvm_ral_mem_backdoor_callbacks cb = iter.first();
+                            uvm_ral_mem_backdoor_cbs) iter = new(this);
+         for(uvm_ral_mem_backdoor_cbs cb = iter.first();
              cb != null;
              cb = iter.next()) data = cb.encode(data);
       end
@@ -735,7 +735,7 @@ class uvm_ral_mem_backdoor extends uvm_object;
                                 input uvm_sequence_base parent,
                                 input uvm_object        extension);
       `uvm_do_obj_callbacks(uvm_ral_mem_backdoor,
-                            uvm_ral_mem_backdoor_callbacks,
+                            uvm_ral_mem_backdoor_cbs,
                             this,
                             post_write(mem, status, offset, data, parent, extension))
       post_write(status, offset, data, parent, extension);

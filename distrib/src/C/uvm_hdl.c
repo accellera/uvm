@@ -246,8 +246,6 @@ int uvm_hdl_force(char *path, p_vpi_vecval value)
 
 
 /*
- * FUNCTION: uvm_hdl_release_and_read
- *
  * Given a path, look the path name up using the PLI
  * or the FLI, and release it.
  */
@@ -257,8 +255,6 @@ int uvm_hdl_release_and_read(char *path, p_vpi_vecval value)
 }
 
 /*
- * FUNCTION: uvm_hdl_release
- *
  * Given a path, look the path name up using the PLI
  * or the FLI, and release it.
  */
