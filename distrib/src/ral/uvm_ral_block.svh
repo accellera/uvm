@@ -24,7 +24,7 @@
 
 //------------------------------------------------------------------------------
 // CLASS: uvm_ral_block
-// Block descriptor class derived from "uvm_ral_block". 
+// Block abstraction base class
 //------------------------------------------------------------------------------
 virtual class uvm_ral_block extends uvm_object;
 
@@ -497,8 +497,7 @@ function void uvm_ral_block::configure(uvm_ral_block parent=null, string hdl_pat
   this.parent = parent; 
   if (parent != null)
     this.parent.add_block(this);
-  if (hdl_path != "")
-    add_hdl_path(hdl_path);
+  add_hdl_path(hdl_path);
 endfunction
 
 
