@@ -198,9 +198,9 @@ class uvm_ral_map extends uvm_object;
    /*local*/ extern virtual function void   Xverify_map_configX();
 
 
-   //----------------------------------------------------------
-   // Group: Get
-   //
+   //---------------------
+   // Group: Introspection
+   //---------------------
 
    //
    // Function: get_name
@@ -266,6 +266,7 @@ class uvm_ral_map extends uvm_object;
    // in the sub-maps.
    //
    extern virtual function void  get_fields            (ref uvm_ral_field fields[$],  input bit hier=1);
+
    //
    // Function get_memories
    // Get the memories
@@ -275,6 +276,7 @@ class uvm_ral_map extends uvm_object;
    // in the sub-maps.
    //
    extern virtual function void  get_memories          (ref uvm_ral_mem mems[$],      input bit hier=1);
+
    //
    // Function: get_virtual_registers
    // Get the virtual registers
@@ -284,6 +286,7 @@ class uvm_ral_map extends uvm_object;
    // in the sub-maps.
    //
    extern virtual function void  get_virtual_registers (ref uvm_ral_vreg regs[$],     input bit hier=1);
+
    //
    // Function: get_virtual_fields
    // Get the virtual fields
@@ -322,10 +325,6 @@ class uvm_ral_map extends uvm_object;
    function void set_auto_predict(bit on=1); m_auto_predict = on; endfunction
    function bit  get_auto_predict(); return m_auto_predict; endfunction
    
-   //---------------------
-   // Group: Get-by-Offset
-   //---------------------
-
    //
    // Function: get_reg_by_offset
    // Get register mapped at offset

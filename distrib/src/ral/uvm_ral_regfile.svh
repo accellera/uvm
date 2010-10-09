@@ -22,10 +22,10 @@
 
 
 //
-// CLASS: uvm_ral_block
+// CLASS: uvm_ral_regfile
 // Register file abstraction base class
 //
-// A register file is a collection of register files and memories
+// A register file is a collection of register files and registers
 // used to create regular repeated structures.
 //
 // Register files are usually instantiated as arrays.
@@ -105,7 +105,7 @@ virtual class uvm_ral_regfile extends uvm_object;
    // FUNCTION: get_attributes
    // Get all attribute values.
    //
-   // Get the value for all attribute for this register file.
+   // Get the name of all attribute for this register file.
    // If ~inherited~ is specifed as TRUE, the value for all attributes
    // inherited from all register file and block ancestors are included.
    // 
@@ -116,9 +116,9 @@ virtual class uvm_ral_regfile extends uvm_object;
    /*local*/ extern function void Xadd_constraintsX(string name);
 
 
-   //-----------
-   // Group: Get
-   //-----------
+   //---------------------
+   // Group: Introspection
+   //---------------------
 
    //
    // Function: get_name
@@ -138,7 +138,7 @@ virtual class uvm_ral_regfile extends uvm_object;
 
    //
    // FUNCTION: get_parent
-   // Get the parent parent
+   // Get the parent block
    //
    extern virtual function uvm_ral_block get_parent ();
    extern virtual function uvm_ral_block get_block  ();
@@ -185,6 +185,9 @@ virtual class uvm_ral_regfile extends uvm_object;
    // uses the default design abstraction specified for the nearest
    // enclosing register file or block
    //
+   // If no design asbtraction is specified, the default design abstraction
+   // for this register file is used.
+   //
    extern function bit  has_hdl_path      (string kind = "");
 
    //
@@ -197,6 +200,9 @@ virtual class uvm_ral_regfile extends uvm_object;
    // register file or block.
    // Returns only the component of the HDL paths that corresponds to
    // the register file, not a full hierarchical path
+   //
+   // If no design asbtraction is specified, the default design abstraction
+   // for this register file is used.
    //
    extern function void get_hdl_path      (ref string paths[$], input string kind = "");
 
@@ -212,6 +218,10 @@ virtual class uvm_ral_regfile extends uvm_object;
    // if only one path was defined for the register file instance, if any of the
    // parent components have more than one path defined for the same design
    // abstraction
+   //
+   // If no design asbtraction is specified, the default design abstraction
+   // for each ancestor register file or block is used to get each
+   // incremental path.
    //
    extern function void get_full_hdl_path (ref string paths[$], input string kind = "");
 
@@ -530,11 +540,6 @@ function void uvm_ral_regfile::set_default_hdl_path(string kind);
            "Must specify a valid HDL abstraction (kind)"})
       return;
     end
-  end
-
-  if (!has_hdl_path(kind)) begin
-    `uvm_error("RAL",{"Register file does not have hdl path defined for abstraction '",kind,"'"})
-    return;
   end
 
   default_hdl_path = kind;
