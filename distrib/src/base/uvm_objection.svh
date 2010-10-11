@@ -115,9 +115,7 @@ class uvm_objection extends uvm_report_object;
       m_trace_mode=1;
     end
     // Needed to allow threads dropping objections to be killed
-    fork begin
-      m_execute_scheduled_forks;
-    end join_none
+    top.m_create_objection_watcher(this);
   endfunction
 
   // Function: trace_mode
@@ -448,7 +446,6 @@ class uvm_objection extends uvm_report_object;
 
   // List of scheduled objects
   uvm_objection_context_object m_scheduled_list[$];
-  event m_activate_scheduled_forks;
 
   function void m_schedule_forked_drop (uvm_object obj, uvm_object source_obj, 
        string description="", int count=1, int in_top_thread=0);
