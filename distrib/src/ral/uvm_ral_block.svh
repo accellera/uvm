@@ -430,7 +430,7 @@ virtual class uvm_ral_block extends uvm_object;
    // Check if block has coverage model(s)
    //
    // Returns TRUE if the block abstraction class contains a coverage model
-   // for all of the model specified.
+   // for all of the models specified.
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_ral::coverage_model_e>.
    //
@@ -454,7 +454,7 @@ virtual class uvm_ral_block extends uvm_object;
    // This method can only control the measurement of functional
    // coverage models that are present in the various abstraction classes,
    // then enabled during construction.
-   // See the <uvm_ral_block::has_cover()> method to identify
+   // See the <uvm_ral_block::can_cover()> method to identify
    // the available functional coverage models.
    //
    extern virtual function int set_cover(int is_on);
@@ -655,7 +655,7 @@ virtual class uvm_ral_block extends uvm_object;
    // in a lower-level block or in the register itself.
    //
    // If ~inherit~ is TRUE, returns the backdoor of the parent block
-   // If none have been specified for this block.
+   // if none have been specified for this block.
    //
    extern function uvm_ral_reg_backdoor get_backdoor(bit inherit = 1);
 
@@ -697,11 +697,8 @@ virtual class uvm_ral_block extends uvm_object;
    //
    // Returns TRUE if the block instance has a HDL path defined for the
    // specified design abstraction. If no design abstraction is specified,
-   // uses the default design abstraction specified for the nearest
-   // enclosing block
-   //
-   // If no design asbtraction is specified, the default design abstraction
-   // for this block is used.
+   // uses the default design abstraction specified for this block or
+   // the nearest block ancestor with a specified default design abstraction.
    //
    extern function bit  has_hdl_path      (string kind = "");
 
@@ -710,9 +707,7 @@ virtual class uvm_ral_block extends uvm_object;
    // Get the incremental HDL path(s)
    //
    // Returns the HDL path(s) defined for the specified design abstraction
-   // in the block instance. If no design abstraction is specified, uses
-   // the default design abstraction specified for the nearest enclosing
-   // block.
+   // in the block instance.
    // Returns only the component of the HDL paths that corresponds to
    // the block, not a full hierarchical path
    //
@@ -726,9 +721,7 @@ virtual class uvm_ral_block extends uvm_object;
    // Get the full hierarchical HDL path(s)
    //
    // Returns the full hierarchical HDL path(s) defined for the specified
-   // design abstraction in the block instance. If no design abstraction
-   // is specified, uses the default design abstraction specified for the
-   // nearest enclosing block.
+   // design abstraction in the block instance.
    // There may be more than one path returned even
    // if only one path was defined for the block instance, if any of the
    // parent components have more than one path defined for the same design

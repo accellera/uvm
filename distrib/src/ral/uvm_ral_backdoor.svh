@@ -20,6 +20,14 @@
 // -------------------------------------------------------------
 //
 
+//
+// Title: User-Defined Backdoor Access
+//
+// The following declarations and classes
+// are used to specify HDL paths and
+// user-defined backdoor access to registers and memories.
+//
+
 
 //------------------------------------------------------------------------------
 // TYPE: uvm_ral_hdl_path_slice
@@ -108,246 +116,7 @@ endfunction
 
 
 //------------------------------------------------------------------------------
-// CLASS: uvm_ral_reg_backdoor_cbs
-//
-// Façade class for register backdoor access callback methods. 
-//------------------------------------------------------------------------------
-virtual class uvm_ral_reg_backdoor_cbs extends uvm_callback;
-
-    string fname = "";
-    int lineno = 0;
-
-
-   //--------------------------------------------------------------------------
-   // TASK: pre_read
-   //
-   // Called before user-defined backdoor register read.
-   //
-   // The registered callback methods are invoked after the invocation
-   // of the <uvm_ral_reg_backdoor::pre_read()> method.
-   //--------------------------------------------------------------------------
-    virtual task pre_read(input uvm_ral_reg rg,
-                          input uvm_sequence_base parent,
-                          input uvm_object extension);
-    endtask
-
-
-   //--------------------------------------------------------------------------
-   // TASK: post_read
-   //
-   // Called after user-defined backdoor register read.
-   //
-   // The registered callback methods are invoked before the invocation
-   // of the <uvm_ral_reg_backdoor::post_read()> method.
-   //--------------------------------------------------------------------------
-    virtual task post_read(input uvm_ral_reg       rg,
-                           inout uvm_ral::status_e status,
-                           inout uvm_ral_data_t    data,
-                           input uvm_sequence_base parent,
-                           input uvm_object extension);
-    endtask
-
-
-   //--------------------------------------------------------------------------
-   // TASK: pre_write
-   //
-   // Called before user-defined backdoor register write.
-   //
-   // The registered callback methods are invoked after the invocation
-   // of the <uvm_ral_reg_backdoor::pre_write()> method.
-   //
-   // The written value, if modified, modifies the actual value that
-   // will be written.
-   //--------------------------------------------------------------------------
-    virtual task pre_write(input uvm_ral_reg       rg,
-                           inout uvm_ral_data_t    data,
-                           input uvm_sequence_base parent,
-                           input uvm_object extension);
-    endtask
-
-
-   //--------------------------------------------------------------------------
-   // TASK: post_write
-   //
-   // Called after user-defined backdoor register write.
-   //
-   // The registered callback methods are invoked before the invocation
-   // of the <uvm_ral_reg_backdoor::post_write()> method.
-   //--------------------------------------------------------------------------
-    virtual task post_write(input uvm_ral_reg        rg,
-                            inout uvm_ral::status_e status,
-                            input uvm_ral_data_t    data,
-                            input uvm_sequence_base parent,
-                            input uvm_object extension);
-    endtask
-
-
-   //--------------------------------------------------------------------------
-   // FUNCTION: encode
-   //
-   // Data encoder
-   //
-   // The registered callback methods are invoked in order of registration
-   // after all the ~pre_write~ methods have been called.
-   // The encoded data is passed through each invocation in sequence.
-   // This allows the ~pre_write~ methods to deal with clear-text data.
-   //
-   // By default, the data is not modified.
-   //--------------------------------------------------------------------------
-    virtual function uvm_ral_data_t  encode(uvm_ral_data_t data);
-      return data;
-    endfunction
-
-
-   //--------------------------------------------------------------------------
-   // FUNCTION: decode
-   //
-   // Data decode
-   //
-   // The registered callback methods are invoked in ~reverse order~
-   // of registration before all the ~post_read~ methods are called.
-   // The decoded data is passed through each invocation in sequence.
-   // This allows the ~post_read~ methods to deal with clear-text data.
-   //
-   // The reversal of the invocation order is to allow the decoding
-   // of the data to be performed in the opposite order of the encoding
-   // with both operations specified in the same callback extension.
-   // 
-   // By default, the data is not modified.
-   //--------------------------------------------------------------------------
-    virtual function uvm_ral_data_t  decode(uvm_ral_data_t data);
-      return data;
-    endfunction
-
-
-endclass
-
-
-
-
-//------------------------------------------------------------------------------
-// CLASS: uvm_ral_mem_backdoor_cbs
-//
-// Façade class for memory backdoor access callback methods. 
-//------------------------------------------------------------------------------
-virtual class uvm_ral_mem_backdoor_cbs extends uvm_callback;
-
-    string fname = "";
-    int lineno = 0;
-    
-
-   //--------------------------------------------------------------------------
-   // TASK: pre_read
-   //
-   // Called before user-defined backdoor memory read.
-   //
-   // The registered callback methods are invoked after the invocation
-   // of the <uvm_ral_mem_backdoor::pre_read()> method.
-   //--------------------------------------------------------------------------
-    virtual task pre_read(input uvm_ral_mem       mem,
-                          inout uvm_ral_addr_t    offset,
-                          input uvm_sequence_base parent,
-                          input uvm_object extension);
-    endtask
-
-
-   //--------------------------------------------------------------------------
-   // TASK: post_read
-   //
-   // Called after user-defined backdoor memory read.
-   //
-   // The registered callback methods are invoked before the invocation
-   // of the <uvm_ral_mem_backdoor::post_read()> method.
-   //--------------------------------------------------------------------------
-    virtual task post_read(input uvm_ral_mem       mem,
-                           inout uvm_ral::status_e status,
-                           inout uvm_ral_addr_t    offset,
-                           inout uvm_ral_data_t    data,
-                           input uvm_sequence_base parent,
-                           input uvm_object extension);
-    endtask
-
-
-   //--------------------------------------------------------------------------
-   // TASK: pre_write
-   //
-   // Called before user-defined backdoor memory write.
-   //
-   // The registered callback methods are invoked after the invocation
-   // of the <uvm_ral_mem_backdoor::pre_write()> method.
-   //
-   // The written value, if modified, modifies the actual value that
-   // will be written.
-   //--------------------------------------------------------------------------
-    virtual task pre_write(input uvm_ral_mem       mem,
-                           inout uvm_ral_addr_t    offset,
-                           inout uvm_ral_data_t    data,
-                           input uvm_sequence_base parent,
-                           input uvm_object extension);
-    endtask
-
-
-   //--------------------------------------------------------------------------
-   // TASK: post_write
-   // 
-   // Called after user-defined backdoor memory write.
-   //
-   // The registered callback methods are invoked before the invocation
-   // of the <uvm_ral_mem_backdoor::post_write()> method.
-   //--------------------------------------------------------------------------
-    virtual task post_write(input uvm_ral_mem       mem,
-                            inout uvm_ral::status_e status,
-                            inout uvm_ral_addr_t    offset,
-                            input uvm_ral_data_t    data,
-                            input uvm_sequence_base parent,
-                            input uvm_object extension);
-    endtask
-
-
-   //--------------------------------------------------------------------------
-   // FUNCTION: encode
-   //
-   // Data encoder
-   //
-   // The registered callback methods are invoked in order of registration
-   // after all the ~pre_write~ methods have been called.
-   // The encoded data is passed through each invocation in sequence.
-   // This allows the ~pre_write~ methods to deal with clear-text data.
-   //
-   // By default, the data is not modified.
-   //--------------------------------------------------------------------------
-    virtual function uvm_ral_data_t  encode(uvm_ral_data_t  data);
-      return data;
-    endfunction
-
-
-   //--------------------------------------------------------------------------
-   // FUNCTION: decode
-   //
-   // Data decode
-   //
-   // The registered callback methods are invoked in ~reverse order~
-   // of registration before all the ~post_read~ methods are called.
-   // The decoded data is passed through each invocation in sequence.
-   // This allows the ~post_read~ methods to deal with clear-text data.
-   //
-   // The reversal of the invocation order is to allow the decoding
-   // of the data to be performed in the opposite order of the encoding
-   // with both operations specified in the same callback extension.
-   // 
-   // By default, the data is not modified.
-   //--------------------------------------------------------------------------
-    virtual function uvm_ral_data_t  decode(uvm_ral_data_t  data);
-      return data;
-    endfunction
-
-endclass
-
-
-
-//------------------------------------------------------------------------------
 // CLASS: uvm_ral_reg_backdoor
-//
 // Base class for user-defined back-door register access.
 //
 // This class can be extended by users to provide
@@ -355,6 +124,7 @@ endclass
 // that are not implemented in pure SystemVerilog
 // or that are not accessible using the default DPI backdoor mechanism.
 //------------------------------------------------------------------------------
+typedef class uvm_ral_reg_backdoor_cbs;
 class uvm_ral_reg_backdoor extends uvm_object;
    string fname = "";
    int lineno = 0;
@@ -363,6 +133,7 @@ class uvm_ral_reg_backdoor extends uvm_object;
    local process m_update_thread[uvm_ral_reg];
 
    `uvm_object_utils(uvm_ral_reg_backdoor)
+   `uvm_register_cb(uvm_ral_reg_backdoor, uvm_ral_reg_backdoor_cbs)
 
 
    //--------------------------------------------------------------------------
@@ -377,7 +148,7 @@ class uvm_ral_reg_backdoor extends uvm_object;
       super.new(name);
    endfunction: new
 
-
+   
    //--------------------------------------------------------------------------
    // TASK: do_pre_read
    //
@@ -633,6 +404,7 @@ endclass: uvm_ral_reg_backdoor
 // that are not implemented in pure SystemVerilog
 // or that are not accessible using the default DPI backdoor mechanism.
 //------------------------------------------------------------------------------
+typedef class uvm_ral_mem_backdoor_cbs;
 class uvm_ral_mem_backdoor extends uvm_object;
    string fname = "";
    int lineno = 0;
@@ -640,6 +412,7 @@ class uvm_ral_mem_backdoor extends uvm_object;
    local uvm_ral_mem_backdoor_cbs backdoor_cbs[$];
 
    `uvm_object_utils(uvm_ral_mem_backdoor)
+   `uvm_register_cb(uvm_ral_mem_backdoor, uvm_ral_mem_backdoor_cbs)
 
 
    //--------------------------------------------------------------------------
@@ -879,6 +652,284 @@ class uvm_ral_mem_backdoor extends uvm_object;
                            input uvm_object        extension);
    endtask
 endclass: uvm_ral_mem_backdoor
+
+
+//------------------------------------------------------------------------------
+// CLASS: uvm_ral_reg_backdoor_cbs
+//
+// Façade class for register backdoor access callback methods. 
+//------------------------------------------------------------------------------
+virtual class uvm_ral_reg_backdoor_cbs extends uvm_callback;
+
+    string fname = "";
+    int lineno = 0;
+
+
+   //--------------------------------------------------------------------------
+   // TASK: pre_read
+   //
+   // Called before user-defined backdoor register read.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of the <uvm_ral_reg_backdoor::pre_read()> method.
+   //--------------------------------------------------------------------------
+    virtual task pre_read(input uvm_ral_reg rg,
+                          input uvm_sequence_base parent,
+                          input uvm_object extension);
+    endtask
+
+
+   //--------------------------------------------------------------------------
+   // TASK: post_read
+   //
+   // Called after user-defined backdoor register read.
+   //
+   // The registered callback methods are invoked before the invocation
+   // of the <uvm_ral_reg_backdoor::post_read()> method.
+   //--------------------------------------------------------------------------
+    virtual task post_read(input uvm_ral_reg       rg,
+                           inout uvm_ral::status_e status,
+                           inout uvm_ral_data_t    data,
+                           input uvm_sequence_base parent,
+                           input uvm_object extension);
+    endtask
+
+
+   //--------------------------------------------------------------------------
+   // TASK: pre_write
+   //
+   // Called before user-defined backdoor register write.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of the <uvm_ral_reg_backdoor::pre_write()> method.
+   //
+   // The written value, if modified, modifies the actual value that
+   // will be written.
+   //--------------------------------------------------------------------------
+    virtual task pre_write(input uvm_ral_reg       rg,
+                           inout uvm_ral_data_t    data,
+                           input uvm_sequence_base parent,
+                           input uvm_object extension);
+    endtask
+
+
+   //--------------------------------------------------------------------------
+   // TASK: post_write
+   //
+   // Called after user-defined backdoor register write.
+   //
+   // The registered callback methods are invoked before the invocation
+   // of the <uvm_ral_reg_backdoor::post_write()> method.
+   //--------------------------------------------------------------------------
+    virtual task post_write(input uvm_ral_reg        rg,
+                            inout uvm_ral::status_e status,
+                            input uvm_ral_data_t    data,
+                            input uvm_sequence_base parent,
+                            input uvm_object extension);
+    endtask
+
+
+   //--------------------------------------------------------------------------
+   // FUNCTION: encode
+   //
+   // Data encoder
+   //
+   // The registered callback methods are invoked in order of registration
+   // after all the ~pre_write~ methods have been called.
+   // The encoded data is passed through each invocation in sequence.
+   // This allows the ~pre_write~ methods to deal with clear-text data.
+   //
+   // By default, the data is not modified.
+   //--------------------------------------------------------------------------
+    virtual function uvm_ral_data_t  encode(uvm_ral_data_t data);
+      return data;
+    endfunction
+
+
+   //--------------------------------------------------------------------------
+   // FUNCTION: decode
+   //
+   // Data decode
+   //
+   // The registered callback methods are invoked in ~reverse order~
+   // of registration before all the ~post_read~ methods are called.
+   // The decoded data is passed through each invocation in sequence.
+   // This allows the ~post_read~ methods to deal with clear-text data.
+   //
+   // The reversal of the invocation order is to allow the decoding
+   // of the data to be performed in the opposite order of the encoding
+   // with both operations specified in the same callback extension.
+   // 
+   // By default, the data is not modified.
+   //--------------------------------------------------------------------------
+    virtual function uvm_ral_data_t  decode(uvm_ral_data_t data);
+      return data;
+    endfunction
+
+
+endclass
+
+
+//
+// Type: uvm_ral_reg_bd_cb
+// Convenience callback type declaration
+//
+// Use this declaration to register register backdoor callbacks rather than
+// the more verbose parameterized class
+//
+//
+// Type: uvm_ral_reg_bd_cb_iter
+// Convenience callback iterator type declaration
+//
+// Use this declaration to iterate over registered register backdoor callbacks
+// rather than the more verbose parameterized class
+//
+
+typedef class uvm_ral_reg_backdoor;
+typedef uvm_callbacks#(uvm_ral_reg_backdoor, uvm_ral_reg_backdoor_cbs) uvm_ral_reg_bd_cb;
+
+typedef uvm_callback_iter#(uvm_ral_reg_backdoor, uvm_ral_reg_backdoor_cbs) uvm_ral_reg_bd_cb_iter;
+
+
+
+//------------------------------------------------------------------------------
+// CLASS: uvm_ral_mem_backdoor_cbs
+//
+// Façade class for memory backdoor access callback methods. 
+//------------------------------------------------------------------------------
+virtual class uvm_ral_mem_backdoor_cbs extends uvm_callback;
+
+    string fname = "";
+    int lineno = 0;
+    
+
+   //--------------------------------------------------------------------------
+   // TASK: pre_read
+   //
+   // Called before user-defined backdoor memory read.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of the <uvm_ral_mem_backdoor::pre_read()> method.
+   //--------------------------------------------------------------------------
+    virtual task pre_read(input uvm_ral_mem       mem,
+                          inout uvm_ral_addr_t    offset,
+                          input uvm_sequence_base parent,
+                          input uvm_object extension);
+    endtask
+
+
+   //--------------------------------------------------------------------------
+   // TASK: post_read
+   //
+   // Called after user-defined backdoor memory read.
+   //
+   // The registered callback methods are invoked before the invocation
+   // of the <uvm_ral_mem_backdoor::post_read()> method.
+   //--------------------------------------------------------------------------
+    virtual task post_read(input uvm_ral_mem       mem,
+                           inout uvm_ral::status_e status,
+                           inout uvm_ral_addr_t    offset,
+                           inout uvm_ral_data_t    data,
+                           input uvm_sequence_base parent,
+                           input uvm_object extension);
+    endtask
+
+
+   //--------------------------------------------------------------------------
+   // TASK: pre_write
+   //
+   // Called before user-defined backdoor memory write.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of the <uvm_ral_mem_backdoor::pre_write()> method.
+   //
+   // The written value, if modified, modifies the actual value that
+   // will be written.
+   //--------------------------------------------------------------------------
+    virtual task pre_write(input uvm_ral_mem       mem,
+                           inout uvm_ral_addr_t    offset,
+                           inout uvm_ral_data_t    data,
+                           input uvm_sequence_base parent,
+                           input uvm_object extension);
+    endtask
+
+
+   //--------------------------------------------------------------------------
+   // TASK: post_write
+   // 
+   // Called after user-defined backdoor memory write.
+   //
+   // The registered callback methods are invoked before the invocation
+   // of the <uvm_ral_mem_backdoor::post_write()> method.
+   //--------------------------------------------------------------------------
+    virtual task post_write(input uvm_ral_mem       mem,
+                            inout uvm_ral::status_e status,
+                            inout uvm_ral_addr_t    offset,
+                            input uvm_ral_data_t    data,
+                            input uvm_sequence_base parent,
+                            input uvm_object extension);
+    endtask
+
+
+   //--------------------------------------------------------------------------
+   // FUNCTION: encode
+   //
+   // Data encoder
+   //
+   // The registered callback methods are invoked in order of registration
+   // after all the ~pre_write~ methods have been called.
+   // The encoded data is passed through each invocation in sequence.
+   // This allows the ~pre_write~ methods to deal with clear-text data.
+   //
+   // By default, the data is not modified.
+   //--------------------------------------------------------------------------
+    virtual function uvm_ral_data_t  encode(uvm_ral_data_t  data);
+      return data;
+    endfunction
+
+
+   //--------------------------------------------------------------------------
+   // FUNCTION: decode
+   //
+   // Data decode
+   //
+   // The registered callback methods are invoked in ~reverse order~
+   // of registration before all the ~post_read~ methods are called.
+   // The decoded data is passed through each invocation in sequence.
+   // This allows the ~post_read~ methods to deal with clear-text data.
+   //
+   // The reversal of the invocation order is to allow the decoding
+   // of the data to be performed in the opposite order of the encoding
+   // with both operations specified in the same callback extension.
+   // 
+   // By default, the data is not modified.
+   //--------------------------------------------------------------------------
+    virtual function uvm_ral_data_t  decode(uvm_ral_data_t  data);
+      return data;
+    endfunction
+
+endclass
+
+
+//
+// Type: uvm_ral_mem_bd_cb
+// Convenience callback type declaration
+//
+// Use this declaration to register memory backdoor callbacks rather than
+// the more verbose parameterized class
+//
+
+//
+// Type: uvm_ral_mem_bd_cb_iter
+// Convenience callback iterator type declaration
+//
+// Use this declaration to iterate over registered memory backdoor callbacks
+// rather than the more verbose parameterized class
+//
+typedef class uvm_ral_mem_backdoor;
+typedef uvm_callbacks#(uvm_ral_mem_backdoor, uvm_ral_mem_backdoor_cbs) uvm_ral_mem_bd_cb;
+
+typedef uvm_callback_iter#(uvm_ral_mem_backdoor, uvm_ral_mem_backdoor_cbs) uvm_ral_mem_bd_cb_iter;
 
 
 //------------------------------------------------------------------------------
