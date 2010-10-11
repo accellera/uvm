@@ -20,109 +20,30 @@
 // -------------------------------------------------------------
 //
 
-
-typedef class uvm_ral_field;
-
-
-//------------------------------------------------------------------------------
-// CLASS: uvm_ral_field_cbs
-// Field descriptors. 
-//------------------------------------------------------------------------------
-class uvm_ral_field_cbs extends uvm_callback;
-   string fname;
-   int    lineno;
-
-   function new(string name = "uvm_ral_field_cbs");
-      super.new(name);
-   endfunction
-   
-
-   //------------------------------------------------------------------------------
-   // TASK: pre_write
-   // This callback method is invoked before a value is written to a field in the DUT. The written
-   // value, if modified, modifies the actual value that will be written. The path and domain
-   // used to write to the field can also be modified. This callback method is only invoked
-   // when the "uvm_ral_field::write()" or the "uvm_ral_reg::write()" method is used
-   // to write to the field inside the DUT. This callback method is not invoked when only the
-   // mirrored value is written to using the "uvm_ral_field::set()" method. Because writing
-   // a field causes the register to be written, and therefore all of the other fields it contains
-   // to also be written, all registered "uvm_ral_field_cbs::pre_write()" 
-   //------------------------------------------------------------------------------
-   virtual task pre_write (uvm_ral_field       field,
-                           ref uvm_ral_data_t  wdat,
-                           ref uvm_ral::path_e path,
-                           ref uvm_ral_map     map);
-   endtask
+//
+// Title: uvm_ral_field
+// Field abstraction base class
+//
+// A field is an atomic value in the DUT and
+// are wholly contained in a register.
+// All bits in a field have the same access policy.
+//
 
 
-   //------------------------------------------------------------------------------
-   // TASK: post_write
-   // This callback method is invoked after a value is written to a field in the DUT. The wdat
-   // value is the final mirrored value in the register as reported by the "uvm_ral_field::get()"
-   // method. This callback method is only invoked when the "uvm_ral_field::write()" or
-   // the "uvm_ral_reg::write()" method is used to write to the field inside the DUT. This
-   // callback method is not invoked when only the mirrored value is written to using the "uvm_ral_field::set()"
-   // method. Because writing a field causes the register to be written and, therefore, all
-   // of the other fields it contains to also be written, all registered "uvm_ral_field_cbs::post_write()"
-   // 
-   //------------------------------------------------------------------------------
-   virtual task post_write(uvm_ral_field       field,
-                           uvm_ral_data_t      wdat,
-                           uvm_ral::path_e     path,
-                           uvm_ral_map         map,
-                           ref uvm_ral::status_e status);
-   endtask
+typedef class uvm_ral_field_cbs;
 
 
-   //------------------------------------------------------------------------------
-   // TASK: pre_read
-   // This callback method is invoked before a value is read from a field in the DUT. The path
-   // and domain used to read from the field can be modified. This callback method is only invoked
-   // when the "uvm_ral_field::read()" or the "uvm_ral_reg::read()" method is used to
-   // read from the field inside the DUT. This callback method is not invoked when only the
-   // mirrored value is read using the "uvm_ral_field::get()" method. Because reading
-   // a field causes the register to be read and, therefore, all of the other fields it contains
-   // to also be read, all registered "uvm_ral_field_cbs::pre_read()" methods with the
-   // fields contained in the register will also be invoked. At this point, all registered
-   // "uvm_ral_reg_callbacks::pre_read()" methods with the register containing the
-   // field will also be invoked. 
-   //------------------------------------------------------------------------------
-   virtual task pre_read  (uvm_ral_field       field,
-                           ref uvm_ral::path_e path,
-                           ref uvm_ral_map     map);
-   endtask
-
-
-   //------------------------------------------------------------------------------
-   // TASK: post_read
-   // This callback method is invoked after a value is read from a field in the DUT. The rdat
-   // and status values are the values that are ultimately returned by the "uvm_ral_field::read()"
-   // method and can be modified. This callback method is only invoked when the "uvm_ral_field::read()"
-   // or the "uvm_ral_reg::read()" method is used to read from the field inside the DUT. This
-   // callback method is not invoked when only the mirrored value is read from using the "uvm_ral_field::get()"
-   // method. Because reading a field causes the register to be read and, therefore, all of
-   // the other fields it contains to also be read, all registered "uvm_ral_field_cbs::post_read()"
-   // 
-   //------------------------------------------------------------------------------
-   virtual task post_read (uvm_ral_field       field,
-                           ref uvm_ral_data_t  rdat,
-                           uvm_ral::path_e     path,
-                           uvm_ral_map         map,
-                           ref uvm_ral::status_e status);
-   endtask
-
-endclass: uvm_ral_field_cbs
-
-
-typedef uvm_callbacks#(uvm_ral_field, uvm_ral_field_cbs) uvm_ral_field_cb;
-typedef uvm_callback_iter#(uvm_ral_field, uvm_ral_field_cbs) uvm_ral_field_cb_iter;
-
-
-
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------
 // CLASS: uvm_ral_field
-// Field descriptors. 
-//------------------------------------------------------------------------------
+// Field abstraction base class
+//
+// A field represents a set of bots that behave consistently
+// as a single entity.
+//
+// A field is contained within a single register, but may
+// have different access policies depending on the adddress map
+// use the access the register (thus the field).
+//-----------------------------------------------------------------
 class uvm_ral_field extends uvm_object;
 
    local string access;
@@ -156,8 +77,41 @@ class uvm_ral_field extends uvm_object;
    // Group: Initialization
    //----------------------
 
+   //------------------------------------------------------------------------
+   // FUNCTION: new
+   // Create a field new instance
+   //
+   // This method should not be used directly.
+   // The uvm_ral_field::type_id::create() method shoudl be used instead.
+   //------------------------------------------------------------------------
    extern function new(string name = "uvm_ral_field");
 
+   //
+   // Function: configure
+   // Instance-specific configuration
+   //
+   // Specify the ~parent~ register of this field, its
+   // ~size~ in bits, the position of its least-significant bit
+   // within the register relative to the least-significant bit
+   // of the register, its ~access~ policy, ~reset~ value, ~soft reset~ value,
+   // whether the field value may be randomized and
+   // whether the field is the only one to occupy a byte lane in the register.
+   //
+   // The pre-defined access policies are:
+   //
+   // "RO"    - Read-only, never changes
+   // "RU"    - Read-only, but may be changed by the DUT
+   // "RW"    - Read-write, but not changed but the DUT
+   // "RC"    - Clear-on-read, write has no effect
+   // "W1C"   - Write-1-to-clear, writing zero has no effects
+   // "A0"    - Write-1-to-set, writing zero has no effect
+   // "A1"    - Write-0-to-clear, writing one has no effect
+   // "WO"    - Write-only, reading has no effect
+   // "W1"    - Write-once, subsequent writes have no effects
+   // "DC"    - Don't care, RW but "check" never fails
+   //
+   // If the field has no soft reset value, a 'bx value must be specified.
+   //
    extern function void configure(uvm_ral_reg                     parent,
                                   int unsigned                    size,
                                   int unsigned                    lsb_pos,
@@ -168,52 +122,84 @@ class uvm_ral_field extends uvm_object;
                                   bit                             individually_accessible = 0); 
 
 
-   //-----------
-   // Group: Get
-   //-----------
+   //---------------------
+   // Group: Introspection
+   //---------------------
 
-   extern virtual function uvm_ral_reg  get_parent();
+   //
+   // Function: get_name
+   // Get the simple name
+   //
+   // Return the simple object name of this field
+   //
 
-   //------------------------------------------------------------------------------
-   // FUNCTION: get_register
-   // Returns a reference to the descriptor of the register that includes the field corresponding
-   // to the descriptor instance. 
-   //------------------------------------------------------------------------------
-   extern virtual function uvm_ral_reg  get_register();
-   extern virtual function string       get_full_name();
+   //
+   // Function: get_full_name
+   // Get the hierarchical name
+   //
+   // Return the hierarchal name of this field
+   // The base of the hierarchical name is the root block.
+   //
+   extern virtual function string        get_full_name();
 
-   //------------------------------------------------------------------------------
+   //
+   // FUNCTION: get_parent
+   // Get the parent register
+   //
+   extern virtual function uvm_ral_reg get_parent ();
+   extern virtual function uvm_ral_reg get_register  ();
+
+   //
    // FUNCTION: get_lsb_pos_in_register
-   // Returns the index of the least significant bit of the field in the register that instantiates
-   // it. An offset of 0 indicates a field that is aligned with the least-significant bit of
-   // the register. 
-   //------------------------------------------------------------------------------
+   // Return the position of the field
+   ///
+   // Returns the index of the least significant bit of the field
+   // in the register that instantiates it.
+   // An offset of 0 indicates a field that is aligned with the
+   // least-significant bit of the register. 
+   //
    extern virtual function int unsigned get_lsb_pos_in_register();
 
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_n_bits
    // Returns the width, in number of bits, of the field. 
-   //------------------------------------------------------------------------------
+   //
    extern virtual function int unsigned get_n_bits();
 
 
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: set_access
-   // Set the access mode of the field to the specified mode and return the previous access
-   // mode. WARNING! Using this method will modify the behavior of the RAL model from the behavior
-   // specified in the original specification. 
-   //------------------------------------------------------------------------------
+   // Modify the access policy of the field
+   //
+   // Set the access policy of the field to the specified one and
+   // return the previous access policy.
+   //
    extern virtual function string       set_access(string mode);
 
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_access
-   // Returns the specification of the behavior of the field when written and read through
-   // the optionally specified domain. If the register containing the field is shared across
-   // multiple domains, a domain must be specified. The access mode of a field in a specific
-   // domain may be restricted. For example, a RW field may only be writable through one of
-   // the domains and read-only through all of the other domains. 
-   //------------------------------------------------------------------------------
+   // Get the access policy of the field
+   //
+   // Returns the current access policy of the field
+   // when written and read through the specified address ~map~.
+   // If the register containing the field is mapped in multiple
+   // address map, an address map must be specified.
+   // The access policy of a field from a specific
+   // address map may be restricted by the register's access policy in that
+   // address map.
+   // For example, a RW field may only be writable through one of
+   // the address maps and read-only through all of the other maps.
+   //
    extern virtual function string       get_access(uvm_ral_map map = null);
+
+   //
+   // FUNCTION: get_access
+   // Check if access policy is a built-in one.
+   //
+   // Returns TRUE if the current access policy of the field,
+   // when written and read through the specified address ~map~,
+   // is a built-in access policy.
+   //
    extern virtual function bit          is_known_access(uvm_ral_map map = null);
 
 
@@ -222,74 +208,143 @@ class uvm_ral_field extends uvm_object;
    //--------------
 
 
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: set
-   // Sets the mirror value of the field to the specified value. Does not actually set the value
-   // of the field in the design, only the value mirrored in its corresponding descriptor
-   // in the RAL model. Use the "uvm_ral_reg::update()" method to update the actual register
-   // with the mirrored value or the "uvm_ral_field::write()" method to set the actual field
-   // and its mirrored value. The final value in the mirror is a function of the field access
-   // mode and the set value, just like a normal physical write operation to the corresponding
-   // bits in the hardware. As such, this method (when eventually followed by a call to "uvm_ral_reg::update()")
-   // is a zero-time functional replacement for the "uvm_ral_field::write()" method.
-   // For example, the mirrored value of a read-only field is not modified by this method,
-   // and the mirrored value of a write-once field can only be set if the field has not yet been
-   // written to using a physical (for example, front-door) write operation. 
-   //------------------------------------------------------------------------------
+   // Set the desired value for this field
+   //
+   // Sets the desired value of the field to the specified value.
+   // Does not actually set the value of the field in the design,
+   // only the desired value in the abstrcation class.
+   // Use the <uvm_ral_reg::update()> method to update the actual register
+   // with the desired value or the <uvm_ral_field::write()> method
+   // to actually write the field and update its mirrored value.
+   //
+   // The final desired value in the mirror is a function of the field access
+   // mode and the set value, just like a normal physical write operation
+   // to the corresponding bits in the hardware.
+   // As such, this method (when eventually followed by a call to
+   // <uvm_ral_reg::update()>)
+   // is a zero-time functional replacement for the <uvm_ral_field::write()>
+   // method.
+   // For example, the mirrored value of a read-only field is not modified
+   // by this method and the mirrored value of a write-once field can only
+   // be set if the field has not yet been
+   // written to using a physical (for example, front-door) write operation.
+   //
+   // Use the <uvm_ral_field::predict()> to modify the mirrored value of
+   // the field.
+   //
    extern virtual function void set(uvm_ral_data_t  value,
                                     string          fname = "",
                                     int             lineno = 0);
 
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get
-   // Returns the mirror value of the field. Does not actually read the value of the field in
-   // the design, only the value mirrored in its corresponding descriptor in the RAL model.
-   // The mirrored value of a write-only field is the value that was set or written and assumed
-   // to be stored in the bits implementing the field. Even though a physical read operation
-   // of a write-only field returns zeroes, this method returns the assumed content of the
-   // field. Use the "uvm_ral_field::read()" method to read the actual field and update
-   // its mirrored value. 
-   //------------------------------------------------------------------------------
+   // Return the desired value of the field
+   //
+   // Does not actually read the value
+   // of the field in the design, only the desired value
+   // in the abstraction class. Unless set to a different value
+   // using the <uvm_ral_field::set()>, the desired value
+   // and the mirrored value are identical.
+   //
+   // Use the <uvm_ral_field::read()> or <uvm_ral_field::peek()>
+   // method to get the actual field value. 
+   //
+   // If the field is write-only, the desired/mirrored
+   // value is the value last written and assumed
+   // to reside in the bits implementing it.
+   // Although a physical read operation would something different,
+   // the returned value is the actual content.
+   //
    extern virtual function uvm_ral_data_t get(string fname = "",
                                               int    lineno = 0);
 
 
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: reset
-   // Sets the mirror value of the field to the specified reset value. Does not actually reset
-   // the value of the field in the design, only the value mirrored in the descriptor in the
-   // RAL model. The value of a write-once (uvm_ral::W1) field can be subsequently modified
-   // each time a hard reset is applied. 
-   //------------------------------------------------------------------------------
+   // Reset the desired/mirrored value for this field.
+   //
+   // Sets the desired and mirror value of the field
+   // to the reset value specified by ~kind~ as a <uvm_ral::reset_e> value.
+   // Does not actually reset the value of the field in the design,
+   // only the value mirrored in the field abstraction class.
+   //
+   // Write-once fields can be modified after
+   // a hard reset operation.
+   //
    extern virtual function void reset(uvm_ral::reset_e kind = uvm_ral::HARD);
 
+   //
+   // FUNCTION: get_reset
+   // Get a specified reset value for this field
+   //
+   // Return the reset value for this field
+   // specified by ~kind~ as a <uvm_ral::reset_e> value.
+   //
    extern virtual function uvm_ral_data_logic_t 
                        get_reset(uvm_ral::reset_e kind = uvm_ral::HARD);
 
+   //
+   // FUNCTION: get_reset
+   // Modify the reset value for this field
+   //
+   // Modify the reset value for this field corresponding
+   // to the cause specified by ~kind~ as a <uvm_ral::reset_e> value.
+   //
    extern virtual function uvm_ral_data_logic_t
                        set_reset(uvm_ral_data_logic_t value,
                                  uvm_ral::reset_e     kind = uvm_ral::HARD);
 
 
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: needs_update
-   // If the mirror value has been modified in the RAL model without actually updating the
-   // actual register, the mirror and state of the registers are outdated. This method returns
-   // TRUE if the state of the field needs to be updated to match the mirrored values (or vice-versa).
-   // The mirror value or actual content of the field are not modified. See "uvm_ral_reg::update()"
-   // or "uvm_ral_reg::mirror()". 
-   //------------------------------------------------------------------------------
+   // Check if the abstract model contains different desired and mirrored values.
+   //
+   // If a desired field value has been modified in the abstraction class
+   // without actually updating the field in the DUT,
+   // the state of the DUT (more specifically what the abstraction class
+   // ~thinks~ the state of the DUT is) is outdated.
+   // This method returns TRUE
+   // if the state of the field in the DUT needs to be updated 
+   // to match the desired value.
+   // The mirror values or actual content of DUT field are not modified.
+   // Use the <uvm_ral_reg::update()> to actually update the DUT field.
+   //
    extern virtual function bit needs_update();
 
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: write
-   // Writes the specified field value in the design using the specified access path. If a
-   // back-door access path is used, the effect of writing the field through a physical access
-   // is mimicked. For example, a read-only field will not be written. If the field is located
-   // in a register shared by more than one physical interface, a domain must be specified
-   // if a physical access is used (front-door access). 
-   //------------------------------------------------------------------------------
+   // Write the specified value in this field
+   //
+   // Write ~value~ in the DUT field that corresponds to this
+   // abstraction class instance using the specified access
+   // ~path~. 
+   // If the register containing this field is mapped in more
+   //  than one address map, 
+   // an address ~map~ must be
+   // specified if a physical access is used (front-door access).
+   // If a back-door access path is used, the effect of writing
+   // the field through a physical access is mimicked. For
+   // example, read-only bits in the field will not be written.
+   //
+   // The mirrored value will be updated using the <uvm_ral_field:predict()>
+   // method.
+   //
+   // If a front-door access is used, and
+   // if the field is the only field in a byte lane and
+   // if the physical interface corresponding to the address map used
+   // to access the field support byte-enabling,
+   // then only the field is written.
+   // Otherwise, the entire register containing the field is written,
+   // and the mirrored values of the other fields in the same register
+   // are used in a best-effort not to modify their value.
+   //
+   // If a backdoor access is used, a peek-modify-poke process is used.
+   // in a best-effort not to modify the value of the other fields in the
+   // register.
+   //
    extern virtual task write (output uvm_ral::status_e  status,
                               input  uvm_ral_data_t     value,
                               input  uvm_ral::path_e    path = uvm_ral::DEFAULT,
@@ -301,14 +356,35 @@ class uvm_ral_field extends uvm_object;
                               input  int                lineno = 0);
 
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: read
-   // Reads the current value of the field from the design using the specified access path.
-   // If a back-door access path is used, the effect of reading the field through a physical
-   // access is mimicked. For example, a write-only field will return zeroes. If the field
-   // is located in a register shared by more than one physical interface, a domain must be
-   // specified if a physical access is used (front-door access). 
-   //------------------------------------------------------------------------------
+   // Read the current value from this field
+   //
+   // Read and return ~value~ from the DUT field that corresponds to this
+   // abstraction class instance using the specified access
+   // ~path~. 
+   // If the register containing this field is mapped in more
+   // than one address map, an address ~map~ must be
+   // specified if a physical access is used (front-door access).
+   // If a back-door access path is used, the effect of reading
+   // the field through a physical access is mimicked. For
+   // example, clear-on-read bits in the filed will be set to zero.
+   //
+   // The mirrored value will be updated using the <uvm_ral_reg:predict()>
+   // method.
+   //
+   // If a front-door access is used, and
+   // if the field is the only field in a byte lane and
+   // if the physical interface corresponding to the address map used
+   // to access the field support byte-enabling,
+   // then only the field is read.
+   // Otherwise, the entire register containing the field is read,
+   // and the mirrored values of the other fields in the same register
+   // are updated.
+   //
+   // If a backdoor access is used, the entire containing register is peeked
+   // and the mirrored value of the other fields in the register is updated.
+   //
    extern virtual task read  (output uvm_ral::status_e  status,
                               output uvm_ral_data_t     value,
                               input  uvm_ral::path_e    path = uvm_ral::DEFAULT,
@@ -320,14 +396,19 @@ class uvm_ral_field extends uvm_object;
                               input  int                lineno = 0);
                
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: poke
-   // Deposit the specified field value in the design using a back-door access. The value
-   // of the field is updated, regardless of the access mode. The optional value of the arguments:
-   // data_id scenario_id stream_id ...are passed to the back-door access method. This
-   // allows the physical and back-door write accesses to be traced back to the higher-level
-   // transaction that caused the access to occur. 
-   //------------------------------------------------------------------------------
+   // Deposit the specified value in this field
+   //
+   // Deposit the value in the DUT field corresponding to this
+   // abstraction class instance, as-is, using a back-door access.
+   // A peek-modify-poke process is used
+   // in a best-effort not to modify the value of the other fields in the
+   // register.
+   //
+   // The mirrored value will be updated using the <uvm_ral_reg:predict()>
+   // method.
+   //
    extern virtual task poke  (output uvm_ral::status_e  status,
                               input  uvm_ral_data_t     value,
                               input  string             kind = "",
@@ -337,16 +418,21 @@ class uvm_ral_field extends uvm_object;
                               input  int                lineno = 0);
 
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: peek
-   // Peek the current value of the field from the design using a back-door access. The value
-   // of the field in the design is not modified, regardless of the access mode. The optional
-   // value of the data_id, scenario_id and stream_id arguments are passed to the back-door
-   // access method. This allows the physical and back-door read accesses to be traced back
-   // to the higher-level transaction which caused the access to occur. The mirrored value
-   // of the field, and all other fields located in the same register, is updated with the value
-   // peeked from the design. 
-   //------------------------------------------------------------------------------
+   // Read the current value from this field
+   //
+   // Sample the value in the DUT field corresponding to this
+   // absraction class instance using a back-door access.
+   // The field value is sampled, not modified.
+   //
+   // Uses the HDL path for the design abstraction specified by ~kind~.
+   //
+   // The entire containing register is peeked
+   // and the mirrored value of the other fields in the register
+   // are updated using the <uvm_ral_reg:predict()> method.
+   //
+   //
    extern virtual task peek  (output uvm_ral::status_e  status,
                               output uvm_ral_data_t     value,
                               input  string             kind = "",
@@ -356,18 +442,29 @@ class uvm_ral_field extends uvm_object;
                               input  int                lineno = 0);
                
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: mirror
-   // Updates the content of the field mirror value for all the fields in the same register
-   // to match the current values in the design. The mirroring can be performed using the physical
-   // interfaces (frontdoor) or "uvm_ral_field::peek()" (backdoor). If the check argument
-   // is specified as uvm_ral::VERB, an error message is issued if the current mirrored value
-   // of the entire register does not match the actual value in the design. The content of a
-   // write-only field is mirrored and optionally checked only if a uvm_ral::BACKDOOR access
-   // path is used to read the register containing the field. If the field is located in a register
-   // shared by more than one physical interface, a domain must be specified if a physical
-   // access is used (front-door access). 
-   //------------------------------------------------------------------------------
+   // Read the field and update/check its mirror value
+   //
+   // Read the field and optionally compared the readback value
+   // with the current mirrored value if ~check~ is <uvm_ral::VERB>.
+   // The mirrored value will be updated using the <uvm_ral_field:predict()>
+   // method based on the readback value.
+   //
+   // The mirroring can be performed using the physical interfaces (frontdoor)
+   // or <uvm_ral_field::peek()> (backdoor).
+   //
+   // If ~check~ is specified as uvm_ral::VERB,
+   // an error message is issued if the current mirrored value
+   // does not match the readback value, unless the field has the "DC"
+   // (don't care) policy.
+   //
+   // If the containing register is mapped in multiple address maps and physical
+   // access is used (front-door access), an address ~map~ must be specified.
+   // For write-only fields, their content is mirrored and optionally
+   // checked only if a uvm_ral::BACKDOOR
+   // access path is used to read the field. 
+   //
    extern virtual task mirror(output uvm_ral::status_e status,
                               input  uvm_ral::check_e  check = uvm_ral::NO_CHECK,
                               input  uvm_ral::path_e   path = uvm_ral::DEFAULT,
@@ -379,20 +476,31 @@ class uvm_ral_field extends uvm_object;
                               input  int               lineno = 0);
 
 
-   //------------------------------------------------------------------------------
+   //-----------------------------------------------------------------
    // FUNCTION: predict
-   // Force the mirror value of the field to the specified value. Does not actually force the
-   // value of the field in the design, only the value mirrored in its corresponding descriptor
-   // in the RAL model. Use the "uvm_ral_reg::update()" method to update the actual register
-   // with the mirrored value or the "uvm_ral_field::write()" method to set the actual field
-   // and its mirrored value. The final value in the mirror is the specified value, regardless
-   // of the access mode. For example, the mirrored value of a read-only field is modified
-   // by this method, and the mirrored value of a read-update field can be updated to any value
-   // predicted to correspond to the value in the corresponding physical bits in the design.
-   // By default, predict does not allow any update of the mirror, when RAL is busy executing
-   // a transaction on this field. However, if need be, that can be overridden, by setting
-   // the force_predict argument to 1. 
-   //------------------------------------------------------------------------------
+   // Update the mirrored value for this field
+   //
+   // Predict the mirror value of the field
+   // based on the specified observed ~value~ on a specified adress ~map~,
+   // or based on a calculated value.
+   //
+   // If ~kind~ is specified as <uvm_ral::PREDICT_READ>, the value
+   // was observed in a read transaction on the specified address ~map~ or
+   // backdoor (if ~path~ is <uvm_ral::BACKDOOR>).
+   // If ~kind~ is specified as <uvm_ral::PREDICT_WRITE>, the value
+   // was observed in a write transaction on the specified address ~map~ or
+   // backdoor (if ~path~ is <uvm_ral::BACKDOOR>).
+   // If ~kind~ is specified as <uvm_ral::PREDICT_DIRECT>, the value
+   // was computed and is updated as-is, without reguard to any access policy.
+   // For example, the mirrored value of a read-only field is modified
+   // by this method if ~kind~ is specified as <uvm_ral::PREDICT_DIRECT>.
+   //
+   // This method does not allow any explicit update of the mirror,
+   // when the register containing this field is busy executing
+   // a transaction because the results are unpredictable and
+   // indicative of a race condition in the testbench.
+   //
+   // Returns TRUE if the prediction was succesful.
    extern virtual function bit predict (uvm_ral_data_t  value,
                                         uvm_ral::predict_e kind = uvm_ral::PREDICT_DIRECT,
                                         uvm_ral::path_e path = uvm_ral::BFM,
@@ -423,16 +531,126 @@ class uvm_ral_field extends uvm_object;
    // Group: Attributes
    //------------------
 
-   extern virtual function void         set_attribute(string name,
-                                                      string value);
-   extern virtual function string       get_attribute(string name,
-                                                      bit inherited = 1);
-   extern virtual function void         get_attributes(ref string names[string],
-                                                       input bit inherited = 1);
+   //
+   // FUNCTION: set_attribute
+   // Set an attribute.
+   //
+   // Set the specified attribute to the specified value for this field.
+   // If the value is specified as "", the specified attribute is deleted.
+   // A warning is issued if an existing attribute is modified.
+   // 
+   // Attribute names are case sensitive. 
+   //
+   extern virtual function void set_attribute(string name,
+                                              string value);
 
-   //--------------------
-   // Group: Standard Ops
-   //--------------------
+   //
+   // FUNCTION: get_attribute
+   // Get an attribute value.
+   //
+   // Get the value of the specified attribute for this field.
+   // If the attribute does not exists, "" is returned.
+   // If ~inherited~ is specifed as TRUE, the value of the attribute
+   // is inherited from its parent register
+   // if it is not specified for this field.
+   // If ~inherited~ is specified as FALSE, the value "" is returned
+   // if it does not exists in the this field.
+   // 
+   // Attribute names are case sensitive.
+   // 
+   extern virtual function string get_attribute(string name,
+                                                bit inherited = 1);
+
+   //
+   // FUNCTION: get_attributes
+   // Get all attribute values.
+   //
+   // Get the name of all attribute for this field.
+   // If ~inherited~ is specifed as TRUE, the value for all attributes
+   // inherited from the parent register are included.
+   // 
+   extern virtual function void get_attributes(ref string names[string],
+                                               input bit inherited = 1);
+
+   //-----------------
+   // Group: Callbacks
+   //-----------------
+
+   `uvm_register_cb(uvm_ral_field, uvm_ral_field_cbs)
+
+   //--------------------------------------------------------------------------
+   // TASK: pre_write
+   // Called before field write.
+   //
+   // If the specified data value, access ~path~ or address ~map~ are modified,
+   // the updated data value, access path or address map will be used
+   // to perform the register operation.
+   //
+   // The field callback methods are invoked after the callback methods
+   // on the containing register.
+   // The registered callback methods are invoked after the invocation
+   // of this method.
+   //--------------------------------------------------------------------------
+   virtual task pre_write  (ref uvm_ral_data_t  wdat,
+                            ref uvm_ral::path_e path,
+                            ref uvm_ral_map     map);
+   endtask
+
+   //--------------------------------------------------------------------------
+   // TASK: post_write
+   // Called after field write
+   //
+   // If the specified ~status~ is modified,
+   // the updated status will be
+   // returned by the register operation.
+   //
+   // The field callback methods are invoked after the callback methods
+   // on the containing register.
+   // The registered callback methods are invoked before the invocation
+   // of this method.
+   //--------------------------------------------------------------------------
+   virtual task post_write (uvm_ral_data_t        wdat,
+                            uvm_ral::path_e       path,
+                            uvm_ral_map           map,
+                            ref uvm_ral::status_e status);
+   endtask
+
+   //--------------------------------------------------------------------------
+   // TASK: pre_read
+   // Called before field read.
+   //
+   // If the specified access ~path~ or address ~map~ are modified,
+   // the updated access path or address map will be used to perform
+   // the register operation.
+   //
+   // The field callback methods are invoked after the callback methods
+   // on the containing register.
+   // The registered callback methods are invoked after the invocation
+   // of this method.
+   //--------------------------------------------------------------------------
+   virtual task pre_read   (ref uvm_ral::path_e path,
+                            ref uvm_ral_map     map);
+   endtask
+
+   //--------------------------------------------------------------------------
+   // TASK: post_read
+   // Called after field read.
+   //
+   // If the specified readback data or~status~ is modified,
+   // the updated readback data or status will be
+   // returned by the register operation.
+   //
+   // The field callback methods are invoked after the callback methods
+   // on the containing register.
+   // The registered callback methods are invoked before the invocation
+   // of this method.
+   //--------------------------------------------------------------------------
+   virtual task post_read  (ref uvm_ral_data_t    rdat,
+                            uvm_ral::path_e       path,
+                            uvm_ral_map           map,
+                            ref uvm_ral::status_e status);
+   endtask
+
 
    extern virtual function void do_print (uvm_printer printer);
    extern virtual function string convert2string;
@@ -443,40 +661,122 @@ class uvm_ral_field extends uvm_object;
    extern virtual function void do_pack (uvm_packer packer);
    extern virtual function void do_unpack (uvm_packer packer);
 
-
-   //-----------------
-   // Group: Callbacks
-   //-----------------
-
-   `uvm_register_cb(uvm_ral_field, uvm_ral_field_cbs)
-
-   virtual task pre_write  (ref uvm_ral_data_t  wdat,
-                            ref uvm_ral::path_e path,
-                            ref uvm_ral_map     map);
-   endtask
-
-   virtual task post_write (uvm_ral_data_t        wdat,
-                            uvm_ral::path_e       path,
-                            uvm_ral_map           map,
-                            ref uvm_ral::status_e status);
-   endtask
-
-   virtual task pre_read   (ref uvm_ral::path_e path,
-                            ref uvm_ral_map     map);
-   endtask
-
-   virtual task post_read  (ref uvm_ral_data_t    rdat,
-                            uvm_ral::path_e       path,
-                            uvm_ral_map           map,
-                            ref uvm_ral::status_e status);
-   endtask
-
 endclass: uvm_ral_field
 
 
-//------------------------------------------------------------------------------
+//
+// CLASS: uvm_ral_field_cbs
+// Pre/post read/write callback facade class
+//
+class uvm_ral_field_cbs extends uvm_callback;
+   string fname;
+   int    lineno;
+
+   function new(string name = "uvm_ral_field_cbs");
+      super.new(name);
+   endfunction
+   
+
+   //
+   // Task: pre_write
+   // Callback called before a write operation.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of the register pre-write callbacks and
+   // of the <uvm_ral_field::pre_write()> method.
+   //
+   // The written value ~wdat, access ~path~ and address ~map~,
+   // if modified, modifies the actual value, access path or address map
+   // used in the register operation.
+   //
+   virtual task pre_write (uvm_ral_field       field,
+                           ref uvm_ral_data_t  wdat,
+                           ref uvm_ral::path_e path,
+                           ref uvm_ral_map     map);
+   endtask
+
+
+   //
+   // TASK: post_write
+   // Called after a write operation
+   //
+   // The registered callback methods are invoked after the invocation
+   // of the register post-write callbacks and
+   // before the invocation of the <uvm_ral_field::post_write()> method.
+   //
+   // The ~status~ of the operation,
+   // if modified, modifies the actual returned status.
+   //
+   virtual task post_write(uvm_ral_field       field,
+                           uvm_ral_data_t      wdat,
+                           uvm_ral::path_e     path,
+                           uvm_ral_map         map,
+                           ref uvm_ral::status_e status);
+   endtask
+
+
+   //
+   // TASK: pre_read
+   // Called before a field read.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of the register pre-read callbacks and
+   // after the invocation of the <uvm_ral_field::pre_read()> method.
+   //
+   // The access ~path~ and address ~map~,
+   // if modified, modifies the actual access path or address map
+   // used in the register operation.
+   //
+   virtual task pre_read  (uvm_ral_reg         rg,
+                           ref uvm_ral::path_e path,
+                           ref uvm_ral_map     map);
+   endtask
+
+
+   //
+   // TASK: post_read
+   // Called after a field read.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of the register post-read callbacks and
+   // before the invocation of the <uvm_ral_field::post_read()> method.
+   //
+   // The readback value ~rdat and the ~status~ of the operation,
+   // if modified, modifies the actual returned readback value and status.
+   //
+   virtual task post_read (uvm_ral_field       field,
+                           ref uvm_ral_data_t  rdat,
+                           uvm_ral::path_e     path,
+                           uvm_ral_map         map,
+                           ref uvm_ral::status_e status);
+   endtask
+
+endclass: uvm_ral_field_cbs
+
+
+//
+// Type: uvm_ral_field_cb
+// Convenience callback type declaration
+//
+// Use this declaration to register field callbacks rather than
+// the more verbose parameterized class
+//
+typedef uvm_callbacks#(uvm_ral_field, uvm_ral_field_cbs) uvm_ral_field_cb;
+
+//
+// Type: uvm_ral_reg_cb_iter
+// Convenience callback iterator type declaration
+//
+// Use this declaration to iterate over registered field callbacks
+// rather than the more verbose parameterized class
+//
+typedef uvm_callback_iter#(uvm_ral_field, uvm_ral_field_cbs) uvm_ral_field_cb_iter;
+
+
+
+//
 // IMPLEMENTATION
-//------------------------------------------------------------------------------
+//
 
 // new
 

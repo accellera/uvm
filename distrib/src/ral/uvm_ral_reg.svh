@@ -129,14 +129,14 @@ virtual class uvm_ral_reg extends uvm_object;
    // Function: get_name
    // Get the simple name
    //
-   // Return the simple object name of this register file.
+   // Return the simple object name of this register.
    //
 
    //
    // Function: get_full_name
    // Get the hierarchical name
    //
-   // Return the hierarchal name of this register file.
+   // Return the hierarchal name of this register.
    // The base of the hierarchical name is the root block.
    //
    extern virtual function string        get_full_name();
@@ -152,7 +152,7 @@ virtual class uvm_ral_reg extends uvm_object;
    // FUNCTION: get_regfile
    // Get the parent register file
    //
-   // Returns ~null~ if this register file is instantiated in a block.
+   // Returns ~null~ if this register is instantiated in a block.
    //
    extern virtual function uvm_ral_regfile  get_regfile     ();
 
@@ -312,7 +312,7 @@ virtual class uvm_ral_reg extends uvm_object;
    // Get the value of the specified attribute for this register.
    // If the attribute does not exists, "" is returned.
    // If ~inherited~ is specifed as TRUE, the value of the attribute
-   // is inherited from the nearest register ancestor
+   // is inherited from the nearest block ancestor
    // for which the attribute
    // is set if it is not specified for this register.
    // If ~inherited~ is specified as FALSE, the value "" is returned
@@ -329,154 +329,13 @@ virtual class uvm_ral_reg extends uvm_object;
    //
    // Get the name of all attribute for this register.
    // If ~inherited~ is specifed as TRUE, the value for all attributes
-   // inherited from all register ancestors are included.
+   // inherited from all block ancestors are included.
    // 
    extern virtual function void get_attributes(ref string names[string],
                                                    input bit inherited = 1);
 
    extern virtual function void   get_constraints (ref string names[]);
    /*local*/ extern function void Xadd_constraintsX(string name);
-
-
-   //----------------
-   // Group: Coverage
-   //----------------
-
-   //
-   // Function: can_cover
-   // Check if register has coverage model(s)
-   //
-   // Returns TRUE if the register abstraction class contains a coverage model
-   // for all of the models specified.
-   // Models are specified by adding the symbolic value of individual
-   // coverage model as defined in <uvm_ral::coverage_model_e>.
-   //
-   extern virtual function bit can_cover(int models);
-
-   //
-   // FUNCTION: set_cover
-   // Turns on coverage measurement.
-   //
-   // Turns the collection of functional coverage measurements on or off
-   // for this register.
-   // The functional coverage measurement is turned on for every
-   // coverage model specified using <uvm_ral::coverage_model_e> symbolic
-   // identifers.
-   // Multiple functional coverage models can be specified by adding
-   // the functional coverage model identifiers.
-   // All other functional coverage models are turned off.
-   // Returns the sum of all functional
-   // coverage models whose measurements were previously on.
-   //
-   // This method can only control the measurement of functional
-   // coverage models that are present in the register abstraction classes,
-   // then enabled during construction.
-   // See the <uvm_ral_reg::can_cover()> method to identify
-   // the available functional coverage models.
-   //
-   extern virtual function int set_cover(int is_on);
-
-   //
-   // FUNCTION: is_cover_on
-   // Check if coverage measurement is on.
-   //
-   // Returns TRUE if measurement for all of the specified functional
-   // coverage models are currently on.
-   // Multiple functional coverage models can be specified by adding the
-   // functional coverage model identifiers.
-   //
-   // See <uvm_ral_reg::set_cover()> for more details. 
-   //
-   extern virtual function bit is_cover_on(int is_on);
-
-
-   //
-   // Function: sample
-   // Functional coverage measurement method
-   //
-   // This method is invoked by the register abstraction class
-   // whenever it is read or written with the specified ~data~
-   // via the specified address ~map~.
-   //
-   // Empty by default, this method may be extended by the
-   // abstraction class generator to perform the required sampling
-   // in any provided functional coverage model.
-   //
-   virtual local function void sample(uvm_ral_data_t  data,
-                                      bit             is_read,
-                                      uvm_ral_map     map);
-   endfunction
-
-
-   //-----------------
-   // Group: Callbacks
-   //-----------------
-   `uvm_register_cb(uvm_ral_reg, uvm_ral_reg_cbs)
-   
-   //--------------------------------------------------------------------------
-   // TASK: pre_write
-   // Called before user-defined register write.
-   //
-   // If the specified data value, access ~path~ or address ~map~ are modified,
-   // the updated data value, access path or address map will be used
-   // to perform the register operation.
-   //
-   // The registered callback methods are invoked after the invocation
-   // of this method.
-   //--------------------------------------------------------------------------
-   virtual task pre_write(ref uvm_ral_data_t  wdat,
-                          ref uvm_ral::path_e path,
-                          ref uvm_ral_map     map);
-   endtask
-
-   //--------------------------------------------------------------------------
-   // TASK: post_write
-   // Called after user-defined register write.
-   //
-   // If the specified ~status~ is modified,
-   // the updated status will be
-   // returned by the register operation.
-   //
-   // The registered callback methods are invoked before the invocation
-   // of this method.
-   //--------------------------------------------------------------------------
-   virtual task post_write(uvm_ral_data_t        wdat,
-                           uvm_ral::path_e       path,
-                           uvm_ral_map           map,
-                           ref uvm_ral::status_e status);
-   endtask
-
-   //--------------------------------------------------------------------------
-   // TASK: pre_read
-   // Called before user-defined register read.
-   //
-   // If the specified access ~path~ or address ~map~ are modified,
-   // the updated access path or address map will be used to perform
-   // the register operation.
-   //
-   // The registered callback methods are invoked after the invocation
-   // of this method.
-   //--------------------------------------------------------------------------
-   virtual task pre_read(ref uvm_ral::path_e path,
-                         ref uvm_ral_map     map);
-   endtask
-
-   //--------------------------------------------------------------------------
-   // TASK: post_read
-   // Called after user-defined register read.
-   //
-   // If the specified readback data or~status~ is modified,
-   // the updated readback data or status will be
-   // returned by the register operation.
-   //
-   // The registered callback methods are invoked before the invocation
-   // of this method.
-   //--------------------------------------------------------------------------
-   virtual task post_read(ref uvm_ral_data_t    rdat,
-                          input uvm_ral::path_e path,
-                          input uvm_ral_map     map,
-                          ref uvm_ral::status_e status);
-   endtask
 
 
    //--------------
@@ -486,28 +345,14 @@ virtual class uvm_ral_reg extends uvm_object;
 
    //-----------------------------------------------------------------
    // FUNCTION: predict
-   // Update the mirrored vaue for this register
+   // Update the mirrored value for this register
    //
    // Predict the mirror value of the fields in the register
    // based on the specified observed ~value~ on a specified adress ~map~,
    // or based on a calculated value.
+   // See <uvm_ral_field::predict()> for more details.
    //
-   // If ~kind~ is specified as <uvm_ral::PREDICT_READ>, the value
-   // was observed in a read transaction on the specified address ~map~ or
-   // backdoor (if ~path~ is <uvm_ral::BACKDOOR>).
-   // If ~kind~ is specified as <uvm_ral::PREDICT_WRITE>, the value
-   // was observed in a write transaction on the specified address ~map~ or
-   // backdoor (if ~path~ is <uvm_ral::BACKDOOR>).
-   // If ~kind~ is specified as <uvm_ral::PREDICT_DIRECT>, the value
-   // was computed and is updated as-is, without reguard to any access policy.
-   // For example, the mirrored value of a read-only field is modified
-   // by this method if ~kind~ is specified as <uvm_ral::PREDICT_DIRECT>.
-   //
-   // This method does not allow any explicit update of the mirror,
-   // when RAL is busy executing a transaction on this register,
-   // because the results are unpredicatble and indicative of a race condition.
-   //
-   // Returns TRUE if the rpediction was succesful for each field in the
+   // Returns TRUE if the prediction was succesful for each field in the
    // register.
    //
    extern virtual function bit predict (uvm_ral_data_t  value,
@@ -566,7 +411,7 @@ virtual class uvm_ral_reg extends uvm_object;
    // using the <uvm_ral_reg::set()>, the desired value
    // and the mirrored value are identical.
    //
-   // Use the <uvm_ral_reg::read()>
+   // Use the <uvm_ral_reg::read()> or <uvm_ral_reg::peek()>
    // method to get the actual register value. 
    //
    // If the register contains write-only fields, the desired/mirrored
@@ -605,16 +450,9 @@ virtual class uvm_ral_reg extends uvm_object;
 
    //-----------------------------------------------------------------
    // FUNCTION: needs_update
-   // Check if the abstract model contains different desired and mirrored values.
+   // Check if any of the field need updating
    //
-   // If a desired register value has been modified in the abstraction class
-   // without actually updating the register in the DUT,
-   // the state of the DUT (more specifically what the abstraction class
-   // ~thinks~ the state of the DUT is) is outdated.
-   // This method returns TRUE
-   // if the state of the register in the DUT needs to be updated 
-   // to match the desired value.
-   // The mirror values or actual content of DUT register are not modified.
+   // See <uvm_ral_field::needs_update()> for details.
    // Use the <uvm_ral_reg::update()> to actually update the DUT register.
    //
    extern virtual function bit needs_update(); 
@@ -686,7 +524,7 @@ virtual class uvm_ral_reg extends uvm_object;
    // specified if a physical access is used (front-door access).
    // If a back-door access path is used, the effect of reading
    // the register through a physical access is mimicked. For
-   // example, clear-on-read bits in the registers will not be set to zero.
+   // example, clear-on-read bits in the registers will be set to zero.
    //
    // The mirrored value will be updated using the <uvm_ral_reg:predict()>
    // method.
@@ -708,8 +546,6 @@ virtual class uvm_ral_reg extends uvm_object;
    //
    // Deposit the value in the DUT register corresponding to this
    // abstraction class instance, as-is, using a back-door access.
-   // See <uvm_ral_field::poke()> for a description of the effect
-   // on field values.
    //
    // Uses the HDL path for the design abstraction specified by ~kind~.
    //
@@ -765,7 +601,7 @@ virtual class uvm_ral_reg extends uvm_object;
    // (don't care) policy.
    //
    // If the register is mapped in multiple address maps and physical
-   // access is used (front-door access), a~map~ must be specified.
+   // access is used (front-door access), an address ~map~ must be specified.
    // If the register contains
    // write-only fields, their content is mirrored and optionally
    // checked only if a uvm_ral::BACKDOOR
@@ -1004,6 +840,155 @@ virtual class uvm_ral_reg extends uvm_object;
    virtual task  backdoor_watch(); endtask
 
 
+   //----------------
+   // Group: Coverage
+   //----------------
+
+   //
+   // Function: can_cover
+   // Check if register has coverage model(s)
+   //
+   // Returns TRUE if the register abstraction class contains a coverage model
+   // for all of the models specified.
+   // Models are specified by adding the symbolic value of individual
+   // coverage model as defined in <uvm_ral::coverage_model_e>.
+   //
+   extern virtual function bit can_cover(int models);
+
+   //
+   // FUNCTION: set_cover
+   // Turns on coverage measurement.
+   //
+   // Turns the collection of functional coverage measurements on or off
+   // for this register.
+   // The functional coverage measurement is turned on for every
+   // coverage model specified using <uvm_ral::coverage_model_e> symbolic
+   // identifers.
+   // Multiple functional coverage models can be specified by adding
+   // the functional coverage model identifiers.
+   // All other functional coverage models are turned off.
+   // Returns the sum of all functional
+   // coverage models whose measurements were previously on.
+   //
+   // This method can only control the measurement of functional
+   // coverage models that are present in the register abstraction classes,
+   // then enabled during construction.
+   // See the <uvm_ral_reg::can_cover()> method to identify
+   // the available functional coverage models.
+   //
+   extern virtual function int set_cover(int is_on);
+
+   //
+   // FUNCTION: is_cover_on
+   // Check if coverage measurement is on.
+   //
+   // Returns TRUE if measurement for all of the specified functional
+   // coverage models are currently on.
+   // Multiple functional coverage models can be specified by adding the
+   // functional coverage model identifiers.
+   //
+   // See <uvm_ral_reg::set_cover()> for more details. 
+   //
+   extern virtual function bit is_cover_on(int is_on);
+
+
+   //
+   // Function: sample
+   // Functional coverage measurement method
+   //
+   // This method is invoked by the register abstraction class
+   // whenever it is read or written with the specified ~data~
+   // via the specified address ~map~.
+   //
+   // Empty by default, this method may be extended by the
+   // abstraction class generator to perform the required sampling
+   // in any provided functional coverage model.
+   //
+   virtual local function void sample(uvm_ral_data_t  data,
+                                      bit             is_read,
+                                      uvm_ral_map     map);
+   endfunction
+
+
+   //-----------------
+   // Group: Callbacks
+   //-----------------
+   `uvm_register_cb(uvm_ral_reg, uvm_ral_reg_cbs)
+   
+   //--------------------------------------------------------------------------
+   // TASK: pre_write
+   // Called before register write.
+   //
+   // If the specified data value, access ~path~ or address ~map~ are modified,
+   // the updated data value, access path or address map will be used
+   // to perform the register operation.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of this method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   //--------------------------------------------------------------------------
+   virtual task pre_write(ref uvm_ral_data_t  wdat,
+                          ref uvm_ral::path_e path,
+                          ref uvm_ral_map     map);
+   endtask
+
+   //--------------------------------------------------------------------------
+   // TASK: post_write
+   // Called after register write.
+   //
+   // If the specified ~status~ is modified,
+   // the updated status will be
+   // returned by the register operation.
+   //
+   // The registered callback methods are invoked before the invocation
+   // of this method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   //--------------------------------------------------------------------------
+   virtual task post_write(uvm_ral_data_t        wdat,
+                           uvm_ral::path_e       path,
+                           uvm_ral_map           map,
+                           ref uvm_ral::status_e status);
+   endtask
+
+   //--------------------------------------------------------------------------
+   // TASK: pre_read
+   // Called before register read.
+   //
+   // If the specified access ~path~ or address ~map~ are modified,
+   // the updated access path or address map will be used to perform
+   // the register operation.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of this method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   //--------------------------------------------------------------------------
+   virtual task pre_read(ref uvm_ral::path_e path,
+                         ref uvm_ral_map     map);
+   endtask
+
+   //--------------------------------------------------------------------------
+   // TASK: post_read
+   // Called after register read.
+   //
+   // If the specified readback data or~status~ is modified,
+   // the updated readback data or status will be
+   // returned by the register operation.
+   //
+   // The registered callback methods are invoked before the invocation
+   // of this method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   //--------------------------------------------------------------------------
+   virtual task post_read(ref uvm_ral_data_t    rdat,
+                          input uvm_ral::path_e path,
+                          input uvm_ral_map     map,
+                          ref uvm_ral::status_e status);
+   endtask
+
+
    extern virtual function void            do_print (uvm_printer printer);
    extern virtual function string          convert2string();
    extern virtual function uvm_object      clone      ();
@@ -1036,6 +1021,8 @@ virtual class uvm_ral_reg_cbs extends uvm_callback;
    //
    // The registered callback methods are invoked after the invocation
    // of the <uvm_ral_reg::pre_write()> method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
    //
    // The written value ~wdat, access ~path~ and address ~map~,
    // if modified, modifies the actual value, access path or address map
@@ -1049,10 +1036,12 @@ virtual class uvm_ral_reg_cbs extends uvm_callback;
 
    //
    // TASK: post_write
-   // Called after user-defined register write.
+   // Called after register write.
    //
    // The registered callback methods are invoked before the invocation
    // of the <uvm_ral_reg::post_write()> method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
    //
    // The ~status~ of the operation,
    // if modified, modifies the actual returned status.
@@ -1066,10 +1055,12 @@ virtual class uvm_ral_reg_cbs extends uvm_callback;
 
    //
    // TASK: pre_read
-   // Called before user-defined register read.
+   // Called before register read.
    //
    // The registered callback methods are invoked after the invocation
    // of the <uvm_ral_reg::pre_read()> method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
    //
    // The access ~path~ and address ~map~,
    // if modified, modifies the actual access path or address map
@@ -1082,10 +1073,12 @@ virtual class uvm_ral_reg_cbs extends uvm_callback;
 
    //
    // TASK: post_read
-   // Called after user-defined backdoor register read.
+   // Called after register read.
    //
    // The registered callback methods are invoked before the invocation
    // of the <uvm_ral_reg::post_read()> method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
    //
    // The readback value ~rdat and the ~status~ of the operation,
    // if modified, modifies the actual returned readback value and status.
