@@ -727,7 +727,7 @@ class uvm_ral_field_cbs extends uvm_callback;
    // if modified, modifies the actual access path or address map
    // used in the register operation.
    //
-   virtual task pre_read  (uvm_ral_reg         rg,
+   virtual task pre_read  (uvm_ral_field       field,
                            ref uvm_ral::path_e path,
                            ref uvm_ral_map     map);
    endtask
