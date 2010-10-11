@@ -221,7 +221,7 @@ class uvm_sequencer_base extends uvm_component;
     
     $sformat(s, "  -- arb i/id/type: ");
     foreach (arb_sequence_q[i]) begin
-      $sformat(s, "%s %0d/%0d/%s ", s, i, arb_sequence_q[i].sequence_id, arb_sequence_q[i].request);
+      $sformat(s, "%s %0d/%0d/%s ", s, i, arb_sequence_q[i].sequence_id, arb_sequence_q[i].request.name());
     end // UNMATCHED !!
     $sformat(s, "%s\n -- lock_list i/id: ", s);
     foreach (lock_list[i]) begin
