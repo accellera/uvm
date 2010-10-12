@@ -1,382 +1,32 @@
 `ifndef RAL_XA0
 `define RAL_XA0
 
-`define STR(arg) `"arg`"
-
 class ral_reg_xa0_xbus_rf_addr_reg_bkdr extends uvm_ral_reg_backdoor;
 
-	function new(uvm_ral_reg __ral_reg);
-		super.new(__ral_reg);
+        function new(string name = "ral_reg_xa0_xbus_rf_addr_reg_bkdr");
+		super.new(name);
 	endfunction
 
-	virtual task read(output uvm_ral::status_e status,
-	                  output bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                  input uvm_sequence_base parent = null,
-	                  input uvm_tlm_extension extension = null);
-		super.pre_read(parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_read({`STR(`XA0_TOP_PATH),".reg_file.addr_reg"},data));
-                `else
+	virtual task read(input  uvm_ral_reg       rg,
+                          output uvm_ral::status_e status,
+	                  output uvm_ral_data_t    data,
+	                  input  uvm_sequence_base parent,
+	                  input  uvm_tlm_extension extension);
+		do_pre_read(rg, parent, extension);
 		data = `XA0_TOP_PATH.reg_file.addr_reg;
-                `endif
 		status = uvm_ral::IS_OK;
-		super.post_read(status, data, parent, extension);
+		do_post_read(rg, status, data, parent, extension);
 	endtask
 
-	virtual task write(output uvm_ral::status_e status,
-	                   input bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                   input uvm_sequence_base parent = null,
-	                   input uvm_tlm_extension extension = null);
-		super.pre_write(data, parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_deposit({`STR(`XA0_TOP_PATH),".reg_file.addr_reg"},data));
-                `else
+	virtual task write(input  uvm_ral_reg       rg,
+                           output uvm_ral::status_e status,
+	                   input  uvm_ral_data_t    data,
+	                   input  uvm_sequence_base parent,
+	                   input  uvm_tlm_extension extension);
+		do_pre_write(rg, data, parent, extension);
 		`XA0_TOP_PATH.reg_file.addr_reg = data;
-                `endif
 		status = uvm_ral::IS_OK;
-		super.post_write(status, data, parent, extension);
-	endtask
-endclass
-
-
-class ral_reg_xa0_xbus_rf_config_reg_bkdr extends uvm_ral_reg_backdoor;
-
-	function new(uvm_ral_reg __ral_reg);
-		super.new(__ral_reg);
-	endfunction
-
-	virtual task read(output uvm_ral::status_e status,
-	                  output bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                  input uvm_sequence_base parent = null,
-	                  input uvm_tlm_extension extension = null);
-		super.pre_read(parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                begin
-                  bit [`UVM_RAL_DATA_WIDTH-1:0] tmp;
-                  void'(uvm_hdl_read({`STR(`XA0_TOP_PATH),".reg_file.dest"},tmp)); data[1:0] = tmp; 
-                  void'(uvm_hdl_read({`STR(`XA0_TOP_PATH),".reg_file.kind"},tmp)); data[3:2] = tmp;
-                  void'(uvm_hdl_read({`STR(`XA0_TOP_PATH),".reg_file.rsvd"},tmp)); data[7:4] = tmp;
-                end
-                `else
-		begin
-			data = `UVM_RAL_DATA_WIDTH'h0;
-			data[1:0] = `XA0_TOP_PATH.reg_file.dest;
-			data[3:2] = `XA0_TOP_PATH.reg_file.kind;
-			data[7:4] = `XA0_TOP_PATH.reg_file.rsvd;
-		end
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_read(status, data, parent, extension);
-	endtask
-
-	virtual task write(output uvm_ral::status_e status,
-	                   input bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                   input uvm_sequence_base parent = null,
-	                   input uvm_tlm_extension extension = null);
-		super.pre_write(data, parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                begin
-                  void'(uvm_hdl_deposit({`STR(`XA0_TOP_PATH),".reg_file.dest"},data[1:0]));
-                  void'(uvm_hdl_deposit({`STR(`XA0_TOP_PATH),".reg_file.kind"},data[3:2]));
-                  void'(uvm_hdl_deposit({`STR(`XA0_TOP_PATH),".reg_file.rsvd"},data[7:4]));
-                end
-                `else
-		begin
-			`XA0_TOP_PATH.reg_file.dest = data[1:0];
-			`XA0_TOP_PATH.reg_file.kind = data[3:2];
-			`XA0_TOP_PATH.reg_file.rsvd = data[7:4];
-		end
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_write(status, data, parent, extension);
-	endtask
-endclass
-
-
-class ral_reg_xa0_xbus_rf_user_acp_reg_bkdr extends uvm_ral_reg_backdoor;
-
-	function new(uvm_ral_reg __ral_reg);
-		super.new(__ral_reg);
-	endfunction
-
-	virtual task read(output uvm_ral::status_e status,
-	                  output bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                  input uvm_sequence_base parent = null,
-	                  input uvm_tlm_extension extension = null);
-		super.pre_read(parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_read({`STR(`XA0_TOP_PATH),".reg_file.user_reg"},data));
-                `else
-		data = `XA0_TOP_PATH.reg_file.user_reg;
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_read(status, data, parent, extension);
-	endtask
-
-	virtual task write(output uvm_ral::status_e status,
-	                   input bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                   input uvm_sequence_base parent = null,
-	                   input uvm_tlm_extension extension = null);
-		super.pre_write(data, parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_deposit({`STR(`XA0_TOP_PATH),".reg_file.user_reg"},data));
-                `else
-		`XA0_TOP_PATH.reg_file.user_reg = data;
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_write(status, data, parent, extension);
-	endtask
-endclass
-
-
-class ral_reg_xa0_xbus_rf_swr_reg_bkdr extends uvm_ral_reg_backdoor;
-
-	function new(uvm_ral_reg __ral_reg);
-		super.new(__ral_reg);
-	endfunction
-
-	virtual task read(output uvm_ral::status_e status,
-	                  output bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                  input uvm_sequence_base parent = null,
-	                  input uvm_tlm_extension extension = null);
-		super.pre_read(parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_read({`STR(`XA0_TOP_PATH),".reg_file.shared_wr_reg"},data));
-                `else
-		data = `XA0_TOP_PATH.reg_file.shared_wr_reg;
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_read(status, data, parent, extension);
-	endtask
-
-	virtual task write(output uvm_ral::status_e status,
-	                   input bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                   input uvm_sequence_base parent = null,
-	                   input uvm_tlm_extension extension = null);
-		super.pre_write(data, parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_deposit({`STR(`XA0_TOP_PATH),".reg_file.shared_wr_reg"},data));
-                `else
-		`XA0_TOP_PATH.reg_file.shared_wr_reg = data;
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_write(status, data, parent, extension);
-	endtask
-endclass
-
-
-class ral_reg_xa0_xbus_rf_srd_reg_bkdr extends uvm_ral_reg_backdoor;
-
-	function new(uvm_ral_reg __ral_reg);
-		super.new(__ral_reg);
-	endfunction
-
-	virtual task read(output uvm_ral::status_e status,
-	                  output bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                  input uvm_sequence_base parent = null,
-	                  input uvm_tlm_extension extension = null);
-		super.pre_read(parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_read({`STR(`XA0_TOP_PATH),".reg_file.shared_rd_reg"},data));
-                `else
-		data = `XA0_TOP_PATH.reg_file.shared_rd_reg;
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_read(status, data, parent, extension);
-	endtask
-
-	virtual task write(output uvm_ral::status_e status,
-	                   input bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                   input uvm_sequence_base parent = null,
-	                   input uvm_tlm_extension extension = null);
-		status = uvm_ral::ERROR;
-	endtask
-endclass
-
-
-class ral_reg_xa0_xbus_rf_xbus_indirect_reg_bkdr extends uvm_ral_reg_backdoor;
-	int xbus_indirect_reg;
-
-	function new(uvm_ral_reg __ral_reg, int xbus_indirect_reg);
-		super.new(__ral_reg);
-		this.xbus_indirect_reg = xbus_indirect_reg;
-	endfunction
-
-	virtual task read(output uvm_ral::status_e status,
-	                  output bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                  input uvm_sequence_base parent = null,
-	                  input uvm_tlm_extension extension = null);
-		super.pre_read(parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_read({`STR(`XA0_TOP_PATH),".reg_file.id_reg_values[",$sformatf("%0d",xbus_indirect_reg),"]"},data));
-                `else
-		data = `XA0_TOP_PATH.reg_file.id_reg_values[xbus_indirect_reg];
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_read(status, data, parent, extension);
-	endtask
-
-	virtual task write(output uvm_ral::status_e status,
-	                   input bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                   input uvm_sequence_base parent = null,
-	                   input uvm_tlm_extension extension = null);
-		super.pre_write(data, parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_deposit({`STR(`XA0_TOP_PATH),".reg_file.id_reg_values[",$sformatf("%0d",xbus_indirect_reg),"]"},data));
-                `else
-		`XA0_TOP_PATH.reg_file.id_reg_values[xbus_indirect_reg] = data;
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_write(status, data, parent, extension);
-	endtask
-endclass
-
-
-class ral_reg_xa0_xbus_rf_rw_reg_bkdr extends uvm_ral_reg_backdoor;
-	int rw_reg;
-        string path;
-
-	function new(uvm_ral_reg __ral_reg, int rw_reg);
-		super.new(__ral_reg);
-		this.rw_reg = rw_reg;
-                path = {`STR(`XA0_TOP_PATH),".reg_file.rw_regs[",$sformatf("%0d",rw_reg),"]"};
-	endfunction
-
-	virtual task read(output uvm_ral::status_e status,
-	                  output bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                  input uvm_sequence_base parent = null,
-	                  input uvm_tlm_extension extension = null);
-		super.pre_read(parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_read(path,data));
-                `else
-		data = `XA0_TOP_PATH.reg_file.rw_regs[rw_reg];
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_read(status, data, parent, extension);
-	endtask
-
-	virtual task write(output uvm_ral::status_e status,
-	                   input bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                   input uvm_sequence_base parent = null,
-	                   input uvm_tlm_extension extension = null);
-		super.pre_write(data, parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_deposit(path,data));
-                `else
-		`XA0_TOP_PATH.reg_file.rw_regs[rw_reg] = data;
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_write(status, data, parent, extension);
-	endtask
-endclass
-
-
-class ral_reg_xa0_xbus_rf_ro_reg_bkdr extends uvm_ral_reg_backdoor;
-	int ro_reg;
-
-	function new(uvm_ral_reg __ral_reg, int ro_reg);
-		super.new(__ral_reg);
-		this.ro_reg = ro_reg;
-	endfunction
-
-	virtual task read(output uvm_ral::status_e status,
-	                  output bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                  input uvm_sequence_base parent = null,
-	                  input uvm_tlm_extension extension = null);
-		super.pre_read(parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_read({`STR(`XA0_TOP_PATH),".reg_file.ro_regs[",$sformatf("%0d",ro_reg),"]"},data));
-                `else
-		data = `XA0_TOP_PATH.reg_file.ro_regs[ro_reg];
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_read(status, data, parent, extension);
-	endtask
-
-	virtual task write(output uvm_ral::status_e status,
-	                   input bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                   input uvm_sequence_base parent = null,
-	                   input uvm_tlm_extension extension = null);
-		status = uvm_ral::ERROR;
-	endtask
-endclass
-
-
-class ral_reg_xa0_xbus_rf_wo_reg_bkdr extends uvm_ral_reg_backdoor;
-	int wo_reg;
-        string path;
-
-	function new(uvm_ral_reg __ral_reg, int wo_reg);
-		super.new(__ral_reg);
-		this.wo_reg = wo_reg;
-                path = {`STR(`XA0_TOP_PATH),".reg_file.wo_regs[",$sformatf("%0d",wo_reg),"]"};
-	endfunction
-
-	virtual task read(output uvm_ral::status_e status,
-	                  output bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                  input uvm_sequence_base parent = null,
-	                  input uvm_tlm_extension extension = null);
-		super.pre_read(parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_read(path,data));
-                `else
-		data = `XA0_TOP_PATH.reg_file.wo_regs[wo_reg];
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_read(status, data, parent, extension);
-	endtask
-
-	virtual task write(output uvm_ral::status_e status,
-	                   input bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                   input uvm_sequence_base parent = null,
-	                   input uvm_tlm_extension extension = null);
-		super.pre_write(data, parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_deposit(path,data));
-                `else
-		`XA0_TOP_PATH.reg_file.wo_regs[wo_reg] = data;
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_write(status, data, parent, extension);
-	endtask
-endclass
-
-
-class ral_mem_xa0_xbus_rf_mem_bkdr extends uvm_ral_mem_backdoor;
-
-	function new(uvm_ral_mem __ral_mem);
-		super.new(__ral_mem);
-	endfunction
-
-	virtual task read(output uvm_ral::status_e status,
-	                  input bit [`UVM_RAL_ADDR_WIDTH-1:0] offset,
-	                  output bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                  input uvm_sequence_base parent = null,
-	                  input uvm_tlm_extension extension = null);
-		super.pre_read(offset, parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_read({`STR(`XA0_TOP_PATH),".reg_file.mem[",$sformatf("%0d",offset),"]"},data));
-                `else
-		data = `XA0_TOP_PATH.reg_file.mem[offset];
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_read(status, offset, data, parent, extension);
-	endtask
-
-	virtual task write(output uvm_ral::status_e status,
-	                   input bit [`UVM_RAL_ADDR_WIDTH-1:0] offset,
-	                   input bit [`UVM_RAL_DATA_WIDTH-1:0] data,
-	                   input uvm_sequence_base parent = null,
-	                   input uvm_tlm_extension extension = null);
-		super.pre_write(offset, data, parent, extension);
-                `ifndef UVM_NO_BACKDOOR_DPI
-                void'(uvm_hdl_deposit({`STR(`XA0_TOP_PATH),".reg_file.mem[",$sformatf("%0d",offset),"]"},data));
-                `else
-		`XA0_TOP_PATH.reg_file.mem[offset] = data;
-                `endif
-		status = uvm_ral::IS_OK;
-		super.post_write(status, offset, data, parent, extension);
+		do_post_write(rg, status, data, parent, extension);
 	endtask
 endclass
 
@@ -700,15 +350,18 @@ class ral_block_xa0_xbus_rf extends uvm_ral_block;
                 addr_reg.build();
                 addr_reg.configure(this, null, "addr_reg");
               config_reg.build();
-              config_reg.configure(this, null, "config_reg");
+              config_reg.configure(this, null);
+              config_reg.add_hdl_path('{ '{"rsvd", 4, 4},
+                                         '{"kind", 2, 2},
+                                         '{"dest", 0, 2} });
             user_acp_reg.build();
-            user_acp_reg.configure(this, null, "user_acp_reg");
+            user_acp_reg.configure(this, null, "user_reg");
                  swr_reg.build();
-                 swr_reg.configure(this, null, "swr_reg");
+                 swr_reg.configure(this, null, "shared_wr_reg");
                  srd_reg.build();
-                 srd_reg.configure(this, null, "srd_reg");
+                 srd_reg.configure(this, null, "shared_rd_reg");
                 data_reg.build();
-                data_reg.configure(this, null, "data_reg");
+                data_reg.configure(this, null);
 
 
                 // define address map
@@ -755,6 +408,7 @@ class ral_block_xa0_xbus_rf extends uvm_ral_block;
 			string name = $sformatf("xbus_indirect_reg[%0d]",i);
 			xbus_indirect_reg[i] = ral_reg_xa0_xbus_rf_xbus_indirect_reg::type_id::create(name);
 	     	        xbus_indirect_reg[i].build();
+			name = $sformatf("id_reg_values[%0d]",i);
                         xbus_indirect_reg[i].configure(this, null, name);
                         default_map.add_reg(xbus_indirect_reg[i],-1, "RW",1);
 			xbus_indirect_reg_value[i] = xbus_indirect_reg[i].value;
@@ -763,6 +417,7 @@ class ral_block_xa0_xbus_rf extends uvm_ral_block;
 			string name = $sformatf("rw_reg[%0d]",i);
 			rw_reg[i] = ral_reg_xa0_xbus_rf_rw_reg::type_id::create(name);
 			rw_reg[i].build();
+			name = $sformatf("rw_regs[%0d]",i);
 			rw_reg[i].configure(this, null, name);
                         default_map.add_reg(rw_reg[i], 'h10 + i, "RW");
 			rw_reg_value[i] = rw_reg[i].value;
@@ -771,6 +426,7 @@ class ral_block_xa0_xbus_rf extends uvm_ral_block;
 			string name = $sformatf("ro_reg[%0d]",i);
 			ro_reg[i] = ral_reg_xa0_xbus_rf_ro_reg::type_id::create(name);
 			ro_reg[i].build();
+			name = $sformatf("ro_regs[%0d]",i);
 			ro_reg[i].configure(this, null, name);
                         default_map.add_reg(ro_reg[i], 'h14 + i, "RW");
 			ro_reg_value[i] = ro_reg[i].value;
@@ -779,6 +435,7 @@ class ral_block_xa0_xbus_rf extends uvm_ral_block;
 			string name = $sformatf("wo_reg[%0d]",i);
 			wo_reg[i] = ral_reg_xa0_xbus_rf_wo_reg::type_id::create(name);
 			wo_reg[i].build();
+			name = $sformatf("wo_regs[%0d]",i);
 			wo_reg[i].configure(this, null, name);
                         default_map.add_reg(wo_reg[i], 'h18 + i, "RW");
 			wo_reg_value[i] = wo_reg[i].value;
@@ -809,55 +466,18 @@ class ral_sys_xa0 extends uvm_ral_block;
 
 		xbus_rf = ral_block_xa0_xbus_rf::type_id::create("xbus_rf");
 		xbus_rf.build();
-		xbus_rf.configure(this, "regfile");
+		xbus_rf.configure(this, "reg_file");
 
                 default_map = create_map("default_map", 'h0, 1, uvm_ral::LITTLE_ENDIAN);
 		default_map.add_submap(xbus_rf.default_map, 'h1000);
 
 		//
-		// Setting up backdoor access...
+		// Setting up user-defined backdoor access...
 		//
 		begin
-			ral_reg_xa0_xbus_rf_addr_reg_bkdr bkdr = new(xbus_rf.addr_reg);
+			ral_reg_xa0_xbus_rf_addr_reg_bkdr bkdr = new(xbus_rf.addr_reg.get_full_name());
 			xbus_rf.addr_reg.set_backdoor(bkdr);
 		end
-		begin
-			ral_reg_xa0_xbus_rf_config_reg_bkdr bkdr = new(xbus_rf.config_reg);
-			xbus_rf.config_reg.set_backdoor(bkdr);
-		end
-		begin
-			ral_reg_xa0_xbus_rf_user_acp_reg_bkdr bkdr = new(xbus_rf.user_acp_reg);
-			xbus_rf.user_acp_reg.set_backdoor(bkdr);
-		end
-		begin
-			ral_reg_xa0_xbus_rf_swr_reg_bkdr bkdr = new(xbus_rf.swr_reg);
-			xbus_rf.swr_reg.set_backdoor(bkdr);
-		end
-		begin
-			ral_reg_xa0_xbus_rf_srd_reg_bkdr bkdr = new(xbus_rf.srd_reg);
-			xbus_rf.srd_reg.set_backdoor(bkdr);
-		end
-		foreach (xbus_rf.xbus_indirect_reg[i0]) begin
-			ral_reg_xa0_xbus_rf_xbus_indirect_reg_bkdr bkdr = new(xbus_rf.xbus_indirect_reg[i0], i0);
-			xbus_rf.xbus_indirect_reg[i0].set_backdoor(bkdr);
-		end
-		foreach (xbus_rf.rw_reg[i0]) begin
-			ral_reg_xa0_xbus_rf_rw_reg_bkdr bkdr = new(xbus_rf.rw_reg[i0], i0);
-			xbus_rf.rw_reg[i0].set_backdoor(bkdr);
-		end
-		foreach (xbus_rf.ro_reg[i0]) begin
-			ral_reg_xa0_xbus_rf_ro_reg_bkdr bkdr = new(xbus_rf.ro_reg[i0], i0);
-			xbus_rf.ro_reg[i0].set_backdoor(bkdr);
-		end
-		foreach (xbus_rf.wo_reg[i0]) begin
-			ral_reg_xa0_xbus_rf_wo_reg_bkdr bkdr = new(xbus_rf.wo_reg[i0], i0);
-			xbus_rf.wo_reg[i0].set_backdoor(bkdr);
-		end
-		begin
-			ral_mem_xa0_xbus_rf_mem_bkdr bkdr = new(xbus_rf.mem);
-			xbus_rf.mem.set_backdoor(bkdr);
-		end
-
 
 		Xlock_modelX();
 	endfunction : build

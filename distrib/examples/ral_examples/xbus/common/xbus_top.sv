@@ -48,7 +48,7 @@ module xbus_ral_tb_top;
 
   initial begin
     vif_container xbus_vif = new;
-    env = new("env", null);   
+    env = new("env", null);
     xbus_vif.vif = xi0;
     set_config_object("*","xbus_vif",xbus_vif,0);
     run_test();

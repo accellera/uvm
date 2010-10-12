@@ -21,6 +21,8 @@
 `ifndef XBUS_RAL_TB_SV
 `define XBUS_RAL_TB_SV
 
+`define DEF2STR(arg) `"arg`"
+
 class vif_container extends uvm_object;
    `uvm_object_utils(vif_container);
    virtual interface xbus_if vif;
@@ -78,6 +80,8 @@ class xbus_ral_env extends xbus_env;
     rdb = xbus_ral_model::type_id::create("xa0", this);
     ral_seqr = uvm_sequencer #(uvm_rw_access)::type_id::create("ral_seqr",this);
     rdb.build();
+    // Should be done using resources
+    rdb.set_hdl_path_root(`DEF2STR(`XA0_TOP_PATH));
     rdb.default_map.set_auto_predict(0);
     xbus2ral.map = rdb.default_map;
     ral_seqr.set_report_id_action("SQRWFG",UVM_NO_ACTION);

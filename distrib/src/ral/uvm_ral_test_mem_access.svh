@@ -46,7 +46,8 @@ class uvm_ral_single_mem_access_seq extends uvm_sequence #(uvm_sequence_item);
       end
 
       // Can only deal with memories with backdoor access
-      if (mem.get_backdoor() == null) begin
+      if (mem.get_backdoor() == null &&
+          !mem.has_hdl_path()) begin
          `uvm_error("RAL", $psprintf("Memory \"%s\" does not have a backdoor mechanism available",
                                      mem.get_full_name()));
          return;
@@ -171,7 +172,8 @@ class uvm_ral_mem_access_seq extends uvm_ral_sequence;
 	          mems[i].get_attribute("NO_MEM_ACCESS_TEST") != "") continue;
 
               // Can only deal with memories with backdoor access
-              if (mems[i].get_backdoor() == null) begin
+              if (mems[i].get_backdoor() == null &&
+                  !mems[i].has_hdl_path()) begin
                  `uvm_warning("RAL", $psprintf("Memory \"%s\" does not have a backdoor mechanism available",
                                                mems[i].get_full_name()));
                  continue;

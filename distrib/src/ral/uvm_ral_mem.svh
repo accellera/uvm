@@ -2721,9 +2721,9 @@ function void uvm_ral_mem::add_hdl_path(uvm_ral_hdl_path_concat path,
 
   uvm_queue #(uvm_ral_hdl_path_concat) paths;
 
-  //paths = hdl_paths_pool.get(kind);
+  paths = hdl_paths_pool.get(kind);
 
-  //paths.push_back(path);
+  paths.push_back(path);
 
 endfunction
 
@@ -2734,9 +2734,7 @@ function bit  uvm_ral_mem::has_hdl_path(string kind = "");
   if (kind == "")
     kind = parent.get_default_hdl_path();
   
-  // TODO: fix
-  return 0;
-  //return this.hdl_paths_pool.exists(kind);
+  return hdl_paths_pool.exists(kind);
 endfunction
 
 
