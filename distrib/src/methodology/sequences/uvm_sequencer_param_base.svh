@@ -134,18 +134,18 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
     REQ param_t;
 
     if (sequence_ptr == null) begin
-      uvm_report_fatal("SNDREQ", "Send request sequence_ptr is null", UVM_NONE);
+      `uvm_fatal("SNDREQ", "Send request sequence_ptr is null")
     end
 
     if (sequence_ptr.m_wait_for_grant_semaphore < 1) begin
-      uvm_report_fatal("SNDREQ", "Send request called without wait_for_grant", UVM_NONE);
+      `uvm_fatal("SNDREQ", "Send request called without wait_for_grant")
     end
     sequence_ptr.m_wait_for_grant_semaphore--;
     
     if ($cast(param_t, t)) begin
       if (rerandomize == 1) begin
         if (!param_t.randomize()) begin
-          uvm_report_warning("SQRSNDREQ", "Failed to rerandomize sequence item in send_request");
+          `uvm_warning("SQRSNDREQ", "Failed to rerandomize sequence item in send_request")
         end
       end
       if (param_t.get_transaction_id() == -1) begin
@@ -153,15 +153,15 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
       end
       m_last_req_push_front(param_t);
     end else begin
-      uvm_report_fatal(get_name(),$psprintf("send_request failed to cast sequence item"), UVM_NONE);
+      `uvm_fatal(get_name(),$psprintf("send_request failed to cast sequence item"))
 //      $display("\nparam_t: %p\n\nt: %p\n\n", param_t, t);
     end
 
     param_t.set_sequence_id(sequence_ptr.m_get_sqr_sequence_id(m_sequencer_id, 1));
     t.set_sequencer(this);
     if (m_req_fifo.try_put(param_t) != 1) begin
-      uvm_report_fatal(get_full_name(), 
-                       $psprintf("Sequencer send_request not able to put to fifo, depth; %0d", m_req_fifo.size()), UVM_NONE);
+      `uvm_fatal(get_full_name(), 
+                       $psprintf("Sequencer send_request not able to put to fifo, depth; %0d", m_req_fifo.size()))
     end
 
     m_num_reqs_sent++;
@@ -199,7 +199,7 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
     uvm_sequence_base sequence_ptr;
     
     if (t == null) begin
-      uvm_report_fatal("SQRPUT", "Driver put a null response", UVM_NONE);
+      `uvm_fatal("SQRPUT", "Driver put a null response")
     end
 
     m_last_rsp_push_front(t);
@@ -208,7 +208,7 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
     // Check that set_id_info was called
     if (t.get_sequence_id() == -1) begin
 `ifndef CDNS_NO_SQR_CHK_SEQ_ID
-      uvm_report_fatal("SQRPUT", "Driver put a response with null sequence_id", UVM_NONE);
+      `uvm_fatal("SQRPUT", "Driver put a response with null sequence_id")
 `endif
       return;
     end
@@ -225,9 +225,9 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
       sequence_ptr.put_response(t);
     end
     else begin
-      uvm_report_info("Sequencer", 
+      `uvm_info("Sequencer", 
                       $psprintf("Dropping response for sequence %0d, sequence not found.  Probable cause: sequence exited or has been killed", 
-                                t.get_sequence_id()));
+                                t.get_sequence_id()), UVM_NONE)
     end
   endfunction // void
   
@@ -240,7 +240,7 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
     RSP response;
 
     if (!$cast(response, t)) begin
-      uvm_report_fatal("ANALWRT", "Failure to cast analysis port write item", UVM_NONE);
+      `uvm_fatal("ANALWRT", "Failure to cast analysis port write item")
     end
     put_response(response);
   endfunction
@@ -256,9 +256,8 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
 
     if(sequences.size() == 2 && sequences[0] == "uvm_random_sequence" &&
        sequences[1] == "uvm_exhaustive_sequence") begin
-      uvm_report_warning("NOUSERSEQ",
-                         "No user sequence available.  Not starting the default sequence.",
-                         UVM_NONE);
+      `uvm_warning("NOUSERSEQ",
+                         "No user sequence available.  Not starting the default sequence.")
       return;
     end
     
@@ -267,20 +266,20 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
       if (!$cast(m_seq, factory.create_object_by_name(default_sequence, 
                                                    get_full_name(), default_sequence))) 
         begin
-          uvm_report_fatal("FCTSEQ", 
+          `uvm_fatal("FCTSEQ", 
                            $psprintf("Default sequence set to invalid value : %0s.", 
-                                     default_sequence), UVM_NONE);
+                                     default_sequence))
         end
 
       if (m_seq == null) begin
-        uvm_report_fatal("STRDEFSEQ", "Null m_sequencer reference", UVM_NONE);
+        `uvm_fatal("STRDEFSEQ", "Null m_sequencer reference")
       end
       m_seq.print_sequence_info = 1;
       m_seq.set_parent_sequence(null);
       m_seq.set_sequencer(this);
       m_seq.reseed();
       if (!m_seq.randomize()) begin
-        uvm_report_warning("STRDEFSEQ", "Failed to randomize sequence");
+        `uvm_warning("STRDEFSEQ", "Failed to randomize sequence")
       end
       if(count != 0)
         m_seq.start(this);
@@ -324,8 +323,8 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
 
   function void set_num_last_reqs(int unsigned max);
     if(max > 1024) begin
-      uvm_report_warning("HSTOB", 
-        $psprintf("Invalid last size; 1024 is the maximum and will be used"));
+      `uvm_warning("HSTOB", 
+        $psprintf("Invalid last size; 1024 is the maximum and will be used"))
       max = 1024;
     end
 
@@ -357,9 +356,9 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
 
   function REQ last_req(int unsigned n = 0);
     if(n > m_num_last_reqs) begin
-      uvm_report_warning("HSTOB",
+      `uvm_warning("HSTOB",
         $psprintf("Invalid last access (%0d), the max history is %0d", n,
-        m_num_last_reqs));
+        m_num_last_reqs))
       return null;
     end
     if(n == m_last_req_buffer.size())
@@ -392,8 +391,8 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
 
   function void set_num_last_rsps(int unsigned max);
     if(max > 1024) begin
-      uvm_report_warning("HSTOB", 
-        $psprintf("Invalid last size; 1024 is the maximum and will be used"));
+      `uvm_warning("HSTOB", 
+        $psprintf("Invalid last size; 1024 is the maximum and will be used"))
       max = 1024;
     end
 
@@ -425,9 +424,9 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
 
   function RSP last_rsp(int unsigned n = 0);
     if(n > m_num_last_rsps) begin
-      uvm_report_warning("HSTOB",
+      `uvm_warning("HSTOB",
         $psprintf("Invalid last access (%0d), the max history is %0d", n,
-        m_num_last_rsps));
+        m_num_last_rsps))
       return null;
     end
     if(n == m_last_rsp_buffer.size())

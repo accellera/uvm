@@ -168,83 +168,83 @@ virtual class uvm_tlm_fifo_base #(type T=int) extends uvm_component;
   endfunction
 
   virtual function void flush();
-    uvm_report_error("flush", `UVM_TLM_FIFO_FUNCTION_ERROR, UVM_NONE);
+    `uvm_error("flush", `UVM_TLM_FIFO_FUNCTION_ERROR)
   endfunction
   
   virtual function int size();
-    uvm_report_error("size", `UVM_TLM_FIFO_FUNCTION_ERROR, UVM_NONE);
+    `uvm_error("size", `UVM_TLM_FIFO_FUNCTION_ERROR)
     return 0;
   endfunction
 
   virtual task put(T t);
-    uvm_report_error("put", `UVM_TLM_FIFO_TASK_ERROR, UVM_NONE);
+    `uvm_error("put", `UVM_TLM_FIFO_TASK_ERROR)
   endtask
 
   virtual task get(output T t);
-    uvm_report_error("get", `UVM_TLM_FIFO_TASK_ERROR, UVM_NONE);
+    `uvm_error("get", `UVM_TLM_FIFO_TASK_ERROR)
   endtask
 
   virtual task peek(output T t);
-    uvm_report_error("peek", `UVM_TLM_FIFO_TASK_ERROR, UVM_NONE);
+    `uvm_error("peek", `UVM_TLM_FIFO_TASK_ERROR)
   endtask
   
   virtual function bit try_put(T t);
-    uvm_report_error("try_put", `UVM_TLM_FIFO_FUNCTION_ERROR, UVM_NONE);
+    `uvm_error("try_put", `UVM_TLM_FIFO_FUNCTION_ERROR)
     return 0;
   endfunction
 
   virtual function bit try_get(output T t);
-    uvm_report_error("try_get", `UVM_TLM_FIFO_FUNCTION_ERROR, UVM_NONE);
+    `uvm_error("try_get", `UVM_TLM_FIFO_FUNCTION_ERROR)
     return 0;
   endfunction
 
   virtual function bit try_peek(output T t);
-    uvm_report_error("try_peek", `UVM_TLM_FIFO_FUNCTION_ERROR, UVM_NONE);
+    `uvm_error("try_peek", `UVM_TLM_FIFO_FUNCTION_ERROR)
     return 0;
   endfunction
   
   virtual function bit can_put();
-    uvm_report_error("can_put", `UVM_TLM_FIFO_FUNCTION_ERROR, UVM_NONE);
+    `uvm_error("can_put", `UVM_TLM_FIFO_FUNCTION_ERROR)
     return 0;
   endfunction
 
   virtual function bit can_get();
-    uvm_report_error("can_get", `UVM_TLM_FIFO_FUNCTION_ERROR, UVM_NONE);
+    `uvm_error("can_get", `UVM_TLM_FIFO_FUNCTION_ERROR)
     return 0;
   endfunction
 
   virtual function bit can_peek();
-    uvm_report_error("can_peek", `UVM_TLM_FIFO_FUNCTION_ERROR, UVM_NONE);
+    `uvm_error("can_peek", `UVM_TLM_FIFO_FUNCTION_ERROR)
     return 0;
   endfunction
 
   virtual function uvm_tlm_event ok_to_put();
-    uvm_report_error("ok_to_put", `UVM_TLM_FIFO_FUNCTION_ERROR, UVM_NONE);
+    `uvm_error("ok_to_put", `UVM_TLM_FIFO_FUNCTION_ERROR)
     return null;
   endfunction
 
   virtual function uvm_tlm_event ok_to_get();
-    uvm_report_error("ok_to_get", `UVM_TLM_FIFO_FUNCTION_ERROR, UVM_NONE);
+    `uvm_error("ok_to_get", `UVM_TLM_FIFO_FUNCTION_ERROR)
     return null;
   endfunction
 
   virtual function uvm_tlm_event ok_to_peek();
-    uvm_report_error("ok_to_peek", `UVM_TLM_FIFO_FUNCTION_ERROR, UVM_NONE);
+    `uvm_error("ok_to_peek", `UVM_TLM_FIFO_FUNCTION_ERROR)
     return null;
   endfunction
 
   virtual function bit is_empty();
-    uvm_report_error("is_empty", `UVM_TLM_FIFO_FUNCTION_ERROR, UVM_NONE);
+    `uvm_error("is_empty", `UVM_TLM_FIFO_FUNCTION_ERROR)
     return 0;
   endfunction
 
   virtual function bit is_full();
-    uvm_report_error("is_full", `UVM_TLM_FIFO_FUNCTION_ERROR);
+    `uvm_error("is_full", `UVM_TLM_FIFO_FUNCTION_ERROR);
     return 0;
   endfunction
 
   virtual function int used();
-    uvm_report_error("used", `UVM_TLM_FIFO_FUNCTION_ERROR, UVM_NONE);
+    `uvm_error("used", `UVM_TLM_FIFO_FUNCTION_ERROR)
     return 0;
   endfunction
 
