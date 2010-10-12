@@ -35,9 +35,9 @@ typedef class uvm_ral_field_cbs;
 
 //-----------------------------------------------------------------
 // CLASS: uvm_ral_field
-// Field abstraction base class
+// Field abstraction class
 //
-// A field represents a set of bots that behave consistently
+// A field represents a set of bits that behave consistently
 // as a single entity.
 //
 // A field is contained within a single register, but may
@@ -79,7 +79,7 @@ class uvm_ral_field extends uvm_object;
 
    //------------------------------------------------------------------------
    // FUNCTION: new
-   // Create a field new instance
+   // Create a new field instance
    //
    // This method should not be used directly.
    // The uvm_ral_field::type_id::create() method shoudl be used instead.
@@ -764,7 +764,7 @@ endclass: uvm_ral_field_cbs
 typedef uvm_callbacks#(uvm_ral_field, uvm_ral_field_cbs) uvm_ral_field_cb;
 
 //
-// Type: uvm_ral_reg_cb_iter
+// Type: uvm_ral_field_cb_iter
 // Convenience callback iterator type declaration
 //
 // Use this declaration to iterate over registered field callbacks

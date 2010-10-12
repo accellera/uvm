@@ -21,148 +21,30 @@
 //
 
 
-typedef class uvm_ral_vfield;
+//
+// Title: uvm_ral_vfield
+// Virtual field abstraction class
+//
+// A virtual field is set of contiguous bits in one or more memory locations.
+// The semantics and layout of virtual fields comes from
+// an agreement between the software and the hardware,
+// not any physical structures in the DUT.
+//
 
-//------------------------------------------------------------------------------
-// CLASS: uvm_ral_vfield_cbs
-// Field descriptors. 
-//------------------------------------------------------------------------------
-class uvm_ral_vfield_cbs extends uvm_callback;
-   string fname = "";
-   int    lineno = 0;
+typedef class uvm_ral_vfield_cbs;
 
-   function new(string name = "uvm_ral_vfield_cbs");
-      super.new(name);
-   endfunction
-   
-
-   //------------------------------------------------------------------------------
-   // TASK: pre_write
-   // This callback method is invoked before a value is written to a field in the DUT. The written
-   // value, if modified, changes the actual value that will be written. The path and domain
-   // used to write to the field can also be modified. This callback method is only invoked
-   // when the "uvm_ral_vfield::write()" or "uvm_ral_vreg::write()" method is used to
-   // write to the field inside the DUT. This callback method is not invoked when the memory
-   // location is directly written to using the "uvm_ral_mem::write()" method. Because
-   // writing a field causes the memory location to be written, and, therefore all of the other
-   // fields it contains to also be written, all registered "uvm_ral_vfield_cbs::pre_write()"
-   // methods with the fields contained in the same memory location will also be invoked.
-   // Because the memory implementing the virtual field is accessed through its own abstraction
-   // class, all of its registered "uvm_ral_mem_cbs::pre_write()" methods will also be
-   // invoked as a side effect. 
-   //------------------------------------------------------------------------------
-   virtual task pre_write(uvm_ral_vfield       field,
-                          longint unsigned     idx,
-                          ref uvm_ral_data_t   wdat,
-                          ref uvm_ral::path_e  path,
-                          ref uvm_ral_map   map);
-   endtask: pre_write
-
-
-   //------------------------------------------------------------------------------
-   // TASK: post_write
-   // This callback method is invoked after a value is written to a virtual field in the DUT.
-   // This callback method is only invoked when the "uvm_ral_vfield::write()" or "uvm_ral_vreg::write()"
-   // method is used to write to the field inside the DUT. This callback method is not invoked
-   // when the memory location is directly written to using the "uvm_ral_mem::write()"
-   // method. Because writing a field causes the memory location to be written, and, therefore
-   // all of the other fields it contains to also be written, all registered "uvm_ral_vfield_cbs::post_write()"
-   // methods with the fields contained in the same memory location will also be invoked.
-   // Because the memory implementing the virtual field is accessed through its own abstraction
-   // class, all of its registered "uvm_ral_mem_cbs::post_write()" methods will also
-   // be invoked as a side effect. 
-   //------------------------------------------------------------------------------
-   virtual task post_write(uvm_ral_vfield        field,
-                           longint unsigned      idx,
-                           uvm_ral_data_t        wdat,
-                           uvm_ral::path_e       path,
-                           uvm_ral_map        map,
-                           ref uvm_ral::status_e status);
-   endtask: post_write
-
-
-   //------------------------------------------------------------------------------
-   // TASK: pre_read
-   // This callback method is invoked before a value is read from a field in the DUT. The path
-   // and domain used to read from the field can be modified. This callback method is only invoked
-   // when the "uvm_ral_vfield::read()" method is used to read the field inside the DUT.
-   // This callback method is not invoked when the memory location containing the field is
-   // read directly using the "uvm_ral_mem::read()" method. Because reading a field causes
-   // the memory location to be read, and, therefore all of the other fields it contains to
-   // also be read, all registered "uvm_ral_vfield_cbs::pre_read()" methods with the
-   // fields contained in the same memory location will also be invoked. Because the memory
-   // implementing the virtual field is accessed through its own abstraction class, all
-   // of its registered "uvm_ral_mem_cbs::pre_read()" methods will also be invoked as
-   // a side effect. 
-   //------------------------------------------------------------------------------
-   virtual task pre_read(uvm_ral_vfield        field,
-                         longint unsigned      idx,
-                         ref uvm_ral::path_e   path,
-                         ref uvm_ral_map    map);
-   endtask: pre_read
-
-
-   //------------------------------------------------------------------------------
-   // TASK: post_read
-   // This callback method is invoked after a value is read from a virtual field in the DUT.
-   // The rdat and status values are the values that are ultimately returned by the "uvm_ral_vfield::read()"
-   // method and they can be modified. This callback method is only invoked when the "uvm_ral_vfield::read()"
-   // method is used to read the field inside the DUT. This callback method is not invoked when
-   // the memory location containing the field is read directly using the "uvm_ral_mem::read()"
-   // method. Because reading a field causes the memory location to be read, and, therefore
-   // all of the other fields it contains to also be read, all registered "uvm_ral_vfield_cbs::post_read()"
-   // methods with the fields contained in the same memory location will also be invoked.
-   // Because the memory implementing the virtual field is accessed through its own abstraction
-   // class, all of its registered "uvm_ral_mem_cbs::post_read()" methods will also be
-   // invoked as a side effect. 
-   //------------------------------------------------------------------------------
-   virtual task post_read(uvm_ral_vfield         field,
-                          longint unsigned       idx,
-                          ref uvm_ral_data_t     rdat,
-                          uvm_ral::path_e        path,
-                          uvm_ral_map         map,
-                          ref uvm_ral::status_e  status);
-   endtask: post_read
-endclass: uvm_ral_vfield_cbs
-typedef uvm_callbacks#(uvm_ral_vfield, uvm_ral_vfield_cbs) uvm_ral_vfield_cb;
-typedef uvm_callback_iter#(uvm_ral_vfield, uvm_ral_vfield_cbs) uvm_ral_vfield_cb_iter;
-
-
-
-
-//------------------------------------------------------------------------------
+//
 // CLASS: uvm_ral_vfield
-// Field descriptors. 
-//------------------------------------------------------------------------------
+// Virtual field abstraction class
+//
+// A virtual field represents a set of adjacent bits that are
+// logically implemented in consecutive memory locations.
+//
 class uvm_ral_vfield extends uvm_object;
 
+   `uvm_object_utils(uvm_ral_vfield)
    `uvm_register_cb(uvm_ral_vfield, uvm_ral_vfield_cbs)
    
-   virtual task pre_write(longint unsigned     idx,
-                          ref uvm_ral_data_t   wdat,
-                          ref uvm_ral::path_e  path,
-                          ref uvm_ral_map   map);
-   endtask: pre_write
-
-   virtual task post_write(longint unsigned       idx,
-                           uvm_ral_data_t         wdat,
-                           uvm_ral::path_e        path,
-                           uvm_ral_map         map,
-                           ref uvm_ral::status_e  status);
-   endtask: post_write
-
-   virtual task pre_read(longint unsigned      idx,
-                         ref uvm_ral::path_e   path,
-                         ref uvm_ral_map    map);
-   endtask: pre_read
-
-   virtual task post_read(longint unsigned       idx,
-                          ref uvm_ral_data_t     rdat,
-                          uvm_ral::path_e        path,
-                          uvm_ral_map         map,
-                          ref uvm_ral::status_e  status);
-   endtask: post_read
-
    local uvm_ral_vreg parent;
    local int unsigned lsb;
    local int unsigned size;
@@ -171,115 +53,176 @@ class uvm_ral_vfield extends uvm_object;
    local bit read_in_progress;
    local bit write_in_progress;
 
-   extern /*local*/ function new(string  name);
 
-   extern /*local*/ function void configure(uvm_ral_vreg parent,
-                                            int unsigned size,
-                                            int unsigned lsb_pos);
+   //
+   // Group: initialization
+   //
 
-   extern virtual function string get_full_name();
+   //
+   // Function: new
+   // Create a new virtual field instance
+   //
+   // This method should not be used directly.
+   // The uvm_ral_vfield::type_id::create() method shoudl be used instead.
+   //
+   extern function new(string name = "uvm_ral_vfield");
+
+   //
+   // Function: configure
+   // Instance-specific configuration
+   //
+   // Specify the ~parent~ virtual register of this virtual field, its
+   // ~size~ in bits, and the position of its least-significant bit
+   // within the virtual register relative to the least-significant bit
+   // of the virtual register.
+   //
+   extern function void configure(uvm_ral_vreg parent,
+                                  int unsigned size,
+                                  int unsigned lsb_pos);
+
+
+   //
+   // Group: Introspection
+   //
+
+   //
+   // Function: get_name
+   // Get the simple name
+   //
+   // Return the simple object name of this virtual field
+   //
+
+   //
+   // Function: get_full_name
+   // Get the hierarchical name
+   //
+   // Return the hierarchal name of this virtual field
+   // The base of the hierarchical name is the root block.
+   //
+   extern virtual function string        get_full_name();
+
+   //
+   // FUNCTION: get_parent
+   // Get the parent virtual register
+   //
    extern virtual function uvm_ral_vreg get_parent();
-
-   //------------------------------------------------------------------------------
-   // FUNCTION: get_register
-   // Returns a reference to the descriptor of the virtual register that includes the field
-   // corresponding to the descriptor instance. 
-   //------------------------------------------------------------------------------
    extern virtual function uvm_ral_vreg get_register();
 
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_lsb_pos_in_register
-   // Returns the index of the least significant bit of the field in the virtual register that
-   // instantiates it. An offset of 0 indicates a field that is aligned with the least-significant
-   // bit of the virtual register. 
-   //------------------------------------------------------------------------------
+   // Return the position of the virtual field
+   ///
+   // Returns the index of the least significant bit of the virtual field
+   // in the virtual register that instantiates it.
+   // An offset of 0 indicates a field that is aligned with the
+   // least-significant bit of the register. 
+   //
    extern virtual function int unsigned get_lsb_pos_in_register();
 
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_n_bits
-   // Returns the width, in number of bits, of the field. 
-   //------------------------------------------------------------------------------
+   // Returns the width, in bits, of the virtual field. 
+   //
    extern virtual function int unsigned get_n_bits();
 
-
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_access
-   // Returns the specification of the behavior of the field when written and read through
-   // the optionally-specified domain. If the register containing the field is shared across
-   // multiple domains, a domain must be specified. The access mode of a field in a specific
-   // domain may be restricted by the domain access rights of the memory implementing the
-   // field. For example, a RW field may only be writable through one of the domains and read-only
-   // through all of the other domains. 
-   //------------------------------------------------------------------------------
+   // Returns the access policy of the virtual field register
+   // when written and read via an address map.
+   //
+   // If the memory implementing the virtual field
+   // is mapped in more than one address map,
+   // an address ~map~ must be specified.
+   // If access restrictions are present when accessing a memory
+   // through the specified address map, the access mode returned
+   // takes the access restrictions into account.
+   // For example, a read-write memory accessed
+   // through an address map with read-only restrictions would return "RO". 
+   //
    extern virtual function string get_access(uvm_ral_map map = null);
 
 
-   //------------------------------------------------------------------------------
-   // FUNCTION: display
-   // Displays the image created by the "uvm_ral_field::psdisplay()" method on the standard
-   // output. 
-   //------------------------------------------------------------------------------
-   extern virtual function void display(string prefix = "");
+   //
+   // Group: HDL Access
+   //
 
-   //------------------------------------------------------------------------------
-   // FUNCTION: psdisplay
-   // Creates a human-readable description of the field and its current mirrored value.
-   // Each line of the description is prefixed with the specified prefix. 
-   //------------------------------------------------------------------------------
-   extern virtual function string psdisplay(string prefix = "");
-
-
-   //------------------------------------------------------------------------------
+   //
    // TASK: write
-   // Writes the specified field value in the virtual register specified by the index into
-   // the associated memory using the specified access path. If a back-door access path is
-   // used, the effect of writing the field through a physical access is mimicked. For example,
-   // a read-only field will not be written. If the virtual field is located in a memory shared
-   // by more than one physical interface, a domain must be specified if a physical access
-   // is used (front-door access). The optional value of the arguments: data_id scenario_id
-   // stream_id 
-   //------------------------------------------------------------------------------
+   // Write the specified value in a virtual field
+   //
+   // Write ~value~ in the DUT memory location(s) that implements
+   // the virtual field that corresponds to this
+   // abstraction class instance using the specified access
+   // ~path~. 
+   //
+   // If the memory implementing the virtual register array
+   // containing this virtual field
+   // is mapped in more than one address map, 
+   // an address ~map~ must be
+   // specified if a physical access is used (front-door access).
+   //
+   // The operation is eventually mapped into
+   // memory read-modify-write operations at the location
+   // where the virtual register
+   // specified by ~idx~ in the virtual register array is implemented.
+   // If a backdoor is available for the memory implemeting the
+   // virtual field, it will be used for the memory-read operation.
+   //
    extern virtual task write(input  longint unsigned   idx,
                              output uvm_ral::status_e  status,
                              input  uvm_ral_data_t     value,
                              input  uvm_ral::path_e    path = uvm_ral::DEFAULT,
-                             input  uvm_ral_map     map = null,
+                             input  uvm_ral_map        map = null,
                              input  uvm_sequence_base  parent = null,
                              input  uvm_object         extension = null,
                              input  string             fname = "",
                              input  int                lineno = 0);
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: read
-   // Reads the current value of the field in the virtual register specified by the index from
-   // the associated memory using the specified access path. If the field is located in a memory
-   // shared by more than one physical interface, a domain must be specified if a physical
-   // access is used (front-door access). The optional value of the arguments: data_id scenario_id
-   // stream_id ...are passed to the back-door access method or used to set the corresponding
-   // uvm_data class properties in the "uvm_rw_access" transaction descriptors that are
-   // necessary to 
-   //------------------------------------------------------------------------------
+   // Read the current value from a virtual field
+   //
+   // Read from the DUT memory location(s) that implements
+   // the virtual field that corresponds to this
+   // abstraction class instance using the specified access
+   // ~path~, and return the readback ~value~.
+   //
+   // If the memory implementing the virtual register array
+   // containing this virtual field
+   // is mapped in more than one address map, 
+   // an address ~map~ must be
+   // specified if a physical access is used (front-door access).
+   //
+   // The operation is eventually mapped into
+   // memory read operations at the location(s)
+   // where the virtual register
+   // specified by ~idx~ in the virtual register array is implemented.
+   //
    extern virtual task read(input  longint unsigned    idx,
                             output uvm_ral::status_e   status,
                             output uvm_ral_data_t      value,
                             input  uvm_ral::path_e     path = uvm_ral::DEFAULT,
-                            input  uvm_ral_map      map = null,
+                            input  uvm_ral_map         map = null,
                             input  uvm_sequence_base   parent = null,
                             input  uvm_object          extension = null,
                             input  string              fname = "",
                             input  int                 lineno = 0);
                
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: poke
-   // Deposit the specified field value in the associated memory using a back-door access.
-   // The value of the field is updated, regardless of the access mode. The optional value
-   // of the arguments: data_id scenario_id stream_id ...are passed to the back-door access
-   // method. This allows the physical and back-door write accesses to be traced back to the
-   // higher-level transaction that caused the access to occur. If the memory location where
-   // this field is physically located contains other fields, the current value of the other
-   // fields are peeked first then poked back in. 
-   //------------------------------------------------------------------------------
+   // Deposit the specified value in a virtual field
+   //
+   // Deposit ~value~ in the DUT memory location(s) that implements
+   // the virtual field that corresponds to this
+   // abstraction class instance using the specified access
+   // ~path~. 
+   //
+   // The operation is eventually mapped into
+   // memory peek-modify-poke operations at the location
+   // where the virtual register
+   // specified by ~idx~ in the virtual register array is implemented.
+   //
    extern virtual task poke(input  longint unsigned    idx,
                             output uvm_ral::status_e   status,
                             input  uvm_ral_data_t      value,
@@ -288,14 +231,26 @@ class uvm_ral_vfield extends uvm_object;
                             input  string              fname = "",
                             input  int                 lineno = 0);
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: peek
-   // Peek the current value of the virtual field from the associated memory using a back-door
-   // access. The value of the field in the design is not modified, regardless of the access
-   // mode. The optional value of the arguments: data_id scenario_id stream_id ...are passed
-   // to the back-door access method. This allows the physical and back-door read accesses
-   // to be traced back to the higher-level transaction that caused the access to occur. 
-   //------------------------------------------------------------------------------
+   // Sample the current value from a virtual field
+   //
+   // Sample from the DUT memory location(s) that implements
+   // the virtual field that corresponds to this
+   // abstraction class instance using the specified access
+   // ~path~, and return the readback ~value~.
+   //
+   // If the memory implementing the virtual register array
+   // containing this virtual field
+   // is mapped in more than one address map, 
+   // an address ~map~ must be
+   // specified if a physical access is used (front-door access).
+   //
+   // The operation is eventually mapped into
+   // memory peek operations at the location(s)
+   // where the virtual register
+   // specified by ~idx~ in the virtual register array is implemented.
+   //
    extern virtual task peek(input  longint unsigned    idx,
                             output uvm_ral::status_e   status,
                             output uvm_ral_data_t      value,
@@ -303,7 +258,98 @@ class uvm_ral_vfield extends uvm_object;
                             input  uvm_object          extension = null,
                             input  string              fname = "",
                             input  int                 lineno = 0);
-               
+
+   //
+   // Group: Callbacks
+   //
+
+
+   //
+   // TASK: pre_write
+   // Called before virtual field write.
+   //
+   // If the specified data value, access ~path~ or address ~map~ are modified,
+   // the updated data value, access path or address map will be used
+   // to perform the virtual register operation.
+   //
+   // The virtual field callback methods are invoked before the callback methods
+   // on the containing virtual register.
+   // The registered callback methods are invoked after the invocation
+   // of this method.
+   // The pre-write virtual register and field callbacks are executed
+   // before the corresponding pre-write memory callbacks
+   //
+   virtual task pre_write(longint unsigned     idx,
+                          ref uvm_ral_data_t   wdat,
+                          ref uvm_ral::path_e  path,
+                          ref uvm_ral_map   map);
+   endtask: pre_write
+
+   //
+   // TASK: post_write
+   // Called after virtual field write
+   //
+   // If the specified ~status~ is modified,
+   // the updated status will be
+   // returned by the virtual register operation.
+   //
+   // The virtual field callback methods are invoked after the callback methods
+   // on the containing virtual register.
+   // The registered callback methods are invoked before the invocation
+   // of this method.
+   // The post-write virtual register and field callbacks are executed
+   // after the corresponding post-write memory callbacks
+   //
+   virtual task post_write(longint unsigned       idx,
+                           uvm_ral_data_t         wdat,
+                           uvm_ral::path_e        path,
+                           uvm_ral_map         map,
+                           ref uvm_ral::status_e  status);
+   endtask: post_write
+
+   //
+   // TASK: pre_read
+   // Called before virtual field read.
+   //
+   // If the specified access ~path~ or address ~map~ are modified,
+   // the updated access path or address map will be used to perform
+   // the virtual register operation.
+   //
+   // The virtual field callback methods are invoked after the callback methods
+   // on the containing virtual register.
+   // The registered callback methods are invoked after the invocation
+   // of this method.
+   // The pre-read virtual register and field callbacks are executed
+   // before the corresponding pre-read memory callbacks
+   //
+   virtual task pre_read(longint unsigned      idx,
+                         ref uvm_ral::path_e   path,
+                         ref uvm_ral_map    map);
+   endtask: pre_read
+
+   //
+   // TASK: post_read
+   // Called after virtual field read.
+   //
+   // If the specified readback data or~status~ is modified,
+   // the updated readback data or status will be
+   // returned by the virtual register operation.
+   //
+   // The virtual field callback methods are invoked after the callback methods
+   // on the containing virtual register.
+   // The registered callback methods are invoked before the invocation
+   // of this method.
+   // The post-read virtual register and field callbacks are executed
+   // after the corresponding post-read memory callbacks
+   //
+   virtual task post_read(longint unsigned       idx,
+                          ref uvm_ral_data_t     rdat,
+                          uvm_ral::path_e        path,
+                          uvm_ral_map         map,
+                          ref uvm_ral::status_e  status);
+   endtask: post_read
+
+
    extern virtual function void do_print (uvm_printer printer);
    extern virtual function string convert2string;
    extern virtual function uvm_object clone();
@@ -314,6 +360,120 @@ class uvm_ral_vfield extends uvm_object;
    extern virtual function void do_unpack (uvm_packer packer);
 
 endclass: uvm_ral_vfield
+
+
+//
+// CLASS: uvm_ral_vfield_cbs
+// Pre/post read/write callback facade class
+//
+class uvm_ral_vfield_cbs extends uvm_callback;
+   string fname = "";
+   int    lineno = 0;
+
+   function new(string name = "uvm_ral_vfield_cbs");
+      super.new(name);
+   endfunction
+   
+
+   //
+   // Task: pre_write
+   // Callback called before a write operation.
+   //
+   // The registered callback methods are invoked before the invocation
+   // of the virtual register pre-write callbacks and
+   // after the invocation of the <uvm_ral_vfield::pre_write()> method.
+   //
+   // The written value ~wdat, access ~path~ and address ~map~,
+   // if modified, modifies the actual value, access path or address map
+   // used in the register operation.
+   //
+   virtual task pre_write(uvm_ral_vfield       field,
+                          longint unsigned     idx,
+                          ref uvm_ral_data_t   wdat,
+                          ref uvm_ral::path_e  path,
+                          ref uvm_ral_map   map);
+   endtask: pre_write
+
+
+   //
+   // TASK: post_write
+   // Called after a write operation
+   //
+   // The registered callback methods are invoked after the invocation
+   // of the virtual register post-write callbacks and
+   // before the invocation of the <uvm_ral_vfield::post_write()> method.
+   //
+   // The ~status~ of the operation,
+   // if modified, modifies the actual returned status.
+   //
+   virtual task post_write(uvm_ral_vfield        field,
+                           longint unsigned      idx,
+                           uvm_ral_data_t        wdat,
+                           uvm_ral::path_e       path,
+                           uvm_ral_map        map,
+                           ref uvm_ral::status_e status);
+   endtask: post_write
+
+
+   //
+   // TASK: pre_read
+   // Called before a virtual field read.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of the virtual register pre-read callbacks and
+   // after the invocation of the <uvm_ral_vfield::pre_read()> method.
+   //
+   // The access ~path~ and address ~map~,
+   // if modified, modifies the actual access path or address map
+   // used in the register operation.
+   //
+   virtual task pre_read(uvm_ral_vfield        field,
+                         longint unsigned      idx,
+                         ref uvm_ral::path_e   path,
+                         ref uvm_ral_map    map);
+   endtask: pre_read
+
+
+   //
+   // TASK: post_read
+   // Called after a virtual field read.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of the virtual register post-read callbacks and
+   // before the invocation of the <uvm_ral_vfield::post_read()> method.
+   //
+   // The readback value ~rdat and the ~status~ of the operation,
+   // if modified, modifies the actual returned readback value and status.
+   //
+   virtual task post_read(uvm_ral_vfield         field,
+                          longint unsigned       idx,
+                          ref uvm_ral_data_t     rdat,
+                          uvm_ral::path_e        path,
+                          uvm_ral_map         map,
+                          ref uvm_ral::status_e  status);
+   endtask: post_read
+endclass: uvm_ral_vfield_cbs
+
+
+//
+// Type: uvm_ral_vfield_cb
+// Convenience callback type declaration
+//
+// Use this declaration to register virtual field callbacks rather than
+// the more verbose parameterized class
+//
+typedef uvm_callbacks#(uvm_ral_vfield, uvm_ral_vfield_cbs) uvm_ral_vfield_cb;
+
+//
+// Type: uvm_ral_vfield_cb_iter
+// Convenience callback iterator type declaration
+//
+// Use this declaration to iterate over registered virtual field callbacks
+// rather than the more verbose parameterized class
+//
+typedef uvm_callback_iter#(uvm_ral_vfield, uvm_ral_vfield_cbs) uvm_ral_vfield_cb_iter;
+
+
 
 
 function uvm_ral_vfield::new(string name);
@@ -378,33 +538,6 @@ function string uvm_ral_vfield::get_access(uvm_ral_map map = null);
 
    return this.parent.get_access(map);
 endfunction: get_access
-
-
-function void uvm_ral_vfield::display(string prefix = "");
-   $write("%s\n", this.psdisplay(prefix));
-endfunction: display
-
-
-function string uvm_ral_vfield::psdisplay(string prefix = "");
-   string res_str = "";
-   string t_str = "";
-   bit with_debug_info = 1'b0;
-   $sformat(psdisplay, {"%s%s[%0d-%0d]"}, prefix,
-            this.get_name(),
-            this.get_lsb_pos_in_register() + this.get_n_bits() - 1,
-            this.get_lsb_pos_in_register());
-   if (read_in_progress == 1'b1) begin
-      if (fname != "" && lineno != 0)
-         $sformat(res_str, "%s:%0d ",fname, lineno);
-      psdisplay = {psdisplay, "\n", res_str, "currently executing read method"}; 
-   end
-   if ( write_in_progress == 1'b1) begin
-      if (fname != "" && lineno != 0)
-         $sformat(res_str, "%s:%0d ",fname, lineno);
-      psdisplay = {psdisplay, "\n", res_str, "currently executing write method"}; 
-   end
-
-endfunction: psdisplay
 
 
 task uvm_ral_vfield::write(input  longint unsigned    idx,
@@ -815,11 +948,28 @@ endtask: peek
 
 function void uvm_ral_vfield::do_print (uvm_printer printer);
   super.do_print(printer);
-  printer.print_generic("initiator", parent.get_type_name(), -1, psdisplay());
+  printer.print_generic("initiator", parent.get_type_name(), -1, convert2string());
 endfunction
 
 function string uvm_ral_vfield::convert2string();
-  return psdisplay();
+   string res_str = "";
+   string t_str = "";
+   bit with_debug_info = 1'b0;
+   $sformat(convert2string, {"%s[%0d-%0d]"},
+            this.get_name(),
+            this.get_lsb_pos_in_register() + this.get_n_bits() - 1,
+            this.get_lsb_pos_in_register());
+   if (read_in_progress == 1'b1) begin
+      if (fname != "" && lineno != 0)
+         $sformat(res_str, "%s:%0d ",fname, lineno);
+      convert2string = {convert2string, "\n", res_str, "currently executing read method"}; 
+   end
+   if ( write_in_progress == 1'b1) begin
+      if (fname != "" && lineno != 0)
+         $sformat(res_str, "%s:%0d ",fname, lineno);
+      convert2string = {convert2string, "\n", res_str, "currently executing write method"}; 
+   end
+
 endfunction
 
 //TODO - add fatal messages

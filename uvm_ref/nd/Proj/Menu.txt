@@ -183,8 +183,8 @@ Group: Register Layer  {
       File: Registers  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_reg.svh)
       File: Fields  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_field.svh)
       File: Memories  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_mem.svh)
-      File: Virtual Fields  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_vfield.svh)
       File: Virtual Registers  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_vreg.svh)
+      File: Virtual Fields  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_vfield.svh)
       File: Memory Allocation Mgr  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_mam.svh)
       }  # Group: Register Model
 
