@@ -59,6 +59,7 @@ class uvm_ral;
 // ERROR      - Operation completed with error
 // HAS_X      - Operation completed successfully bit had unknown bits.
 //
+
    typedef enum {
       IS_OK,
       ERROR,
@@ -164,6 +165,21 @@ class uvm_ral;
       READ,
       WRITE
    } access_e;
+
+
+//------------------------------------------------------------------------------
+//
+// Enum: uvm_ral::hier_e
+//
+// Whether to provide the requested information from a hierarchical context.
+//
+// NO_HIER - Provide info from the local context
+// HIER    - Provide info based on the hierarchical context
+
+   typedef enum {
+      NO_HIER,
+      HIER
+   } hier_e;
 
 
 //------------------------------------------------------------------------------

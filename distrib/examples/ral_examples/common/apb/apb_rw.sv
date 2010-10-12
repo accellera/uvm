@@ -99,6 +99,7 @@ class ral2apb_adapter extends uvm_ral_adapter;
     rw_access.kind = apb.kind ? uvm_ral::READ : uvm_ral::WRITE;
     rw_access.addr = apb.addr;
     rw_access.data = apb.data;
+    rw_access.status = uvm_ral::IS_OK;
   endfunction
 
 endclass

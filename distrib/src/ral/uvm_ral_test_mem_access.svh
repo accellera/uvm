@@ -20,12 +20,11 @@
 // -------------------------------------------------------------
 // 
 
-
 //
 // TITLE: Memory Access Test Sequence
 //
 
-class uvm_ral_single_mem_access_seq extends uvm_sequence #(uvm_sequence_item);
+class uvm_ral_single_mem_access_seq extends uvm_ral_sequence #(uvm_sequence #(uvm_sequence_item));
 
    uvm_ral_mem mem;
 

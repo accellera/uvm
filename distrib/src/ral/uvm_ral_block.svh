@@ -191,20 +191,19 @@ virtual class uvm_ral_block extends uvm_object;
    // Get the sub-blocks
    //
    // Get the blocks instantiated in this blocks.
-   // If ~hier~ is TRUE, recursively includes the sub-blocks
-   // in the sub-blocks.
+   // If ~hier~ is TRUE, recursively includes any sub-blocks.
    //
-   extern virtual function void get_blocks           (ref uvm_ral_block  blks[$],   input bit hier=1);
+   extern virtual function void get_blocks           (ref uvm_ral_block  blks[$],   input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    //
    // Function: get_maps
    // Get the address maps
    //
    // Get the address maps instantiated in this block.
-   // If ~hier~ is TRUE, recursively includes the address maps,
-   // in the sub-blocks.
+   // If ~hier~ is TRUE, recursively includes the address maps
+   // in any sub-blocks.
    //
-   extern virtual function void get_maps             (ref uvm_ral_map    maps[$],   input bit hier=1);
+   extern virtual function void get_maps             (ref uvm_ral_map    maps[$],   input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    //
    // Function: get_registers
@@ -218,7 +217,7 @@ virtual class uvm_ral_block extends uvm_object;
    // address maps. To get the registers in a specific address map,
    // use the <uvm_ral_map::get_registers()> method.
    //
-   extern virtual function void get_registers        (ref uvm_ral_reg    regs[$],   input bit hier=1);
+   extern virtual function void get_registers        (ref uvm_ral_reg    regs[$],   input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    //
    // Function: get_fields
@@ -228,7 +227,7 @@ virtual class uvm_ral_block extends uvm_object;
    // If ~hier~ is TRUE, recursively includes the fields of the registers
    // in the sub-blocks.
    //
-   extern virtual function void get_fields           (ref uvm_ral_field  fields[$], input bit hier=1);
+   extern virtual function void get_fields           (ref uvm_ral_field  fields[$], input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    //
    // Function get_memories
@@ -242,7 +241,7 @@ virtual class uvm_ral_block extends uvm_object;
    // address maps. To get the memories in a specific address map,
    // use the <uvm_ral_map::get_memories()> method.
    //
-   extern virtual function void get_memories         (ref uvm_ral_mem    mems[$],   input bit hier=1);
+   extern virtual function void get_memories         (ref uvm_ral_mem    mems[$],   input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    //
    // Function: get_virtual_registers
@@ -252,7 +251,7 @@ virtual class uvm_ral_block extends uvm_object;
    // If ~hier~ is TRUE, recursively includes the virtual registers
    // in the sub-blocks.
    //
-   extern virtual function void get_virtual_registers(ref uvm_ral_vreg   regs[$],   input bit hier=1);
+   extern virtual function void get_virtual_registers(ref uvm_ral_vreg   regs[$],   input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    //
    // Function: get_virtual_fields
@@ -263,9 +262,7 @@ virtual class uvm_ral_block extends uvm_object;
    // If ~hier~ is TRUE, recursively includes the virtual fields
    // in the virtual registers in the sub-blocks.
    //
-   extern virtual function void get_virtual_fields   (ref uvm_ral_vfield fields[$], input bit hier=1);
-
-
+   extern virtual function void get_virtual_fields   (ref uvm_ral_vfield fields[$], input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    //
    // FUNCTION: get_block_by_name
@@ -958,12 +955,12 @@ endfunction: get_full_name
 // get_fields
 
 function void uvm_ral_block::get_fields(ref uvm_ral_field fields[$],
-                                        input bit hier=1);
+                                        input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    foreach (this.regs[rg])
      rg.get_fields(fields);
    
-   if (hier)
+   if (hier == uvm_ral::HIER)
      foreach (this.blks[blk])
        blk.get_fields(fields);
 
@@ -973,12 +970,12 @@ endfunction: get_fields
 // get_virtual_fields
 
 function void uvm_ral_block::get_virtual_fields(ref uvm_ral_vfield fields[$],
-                                                input bit hier=1);
+                                                input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    foreach (this.vregs[vreg])
      vreg.get_fields(fields);
    
-   if (hier)
+   if (hier == uvm_ral::HIER)
      foreach (this.blks[blk])
        blk.get_virtual_fields(fields);
 
@@ -988,12 +985,12 @@ endfunction: get_virtual_fields
 // get_registers
 
 function void uvm_ral_block::get_registers(ref uvm_ral_reg regs[$],
-                                           input bit hier=1);
+                                           input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    foreach (this.regs[rg])
      regs.push_back(rg);
 
-   if (hier)
+   if (hier == uvm_ral::HIER)
      foreach (this.blks[blk])
        blk.get_registers(regs);
 
@@ -1003,12 +1000,12 @@ endfunction: get_registers
 // get_virtual_registers
 
 function void uvm_ral_block::get_virtual_registers(ref uvm_ral_vreg regs[$],
-                                                   input bit hier=1);
+                                                   input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    foreach (this.vregs[rg])
      regs.push_back(rg);
 
-   if (hier)
+   if (hier == uvm_ral::HIER)
      foreach (this.blks[blk])
        blk.get_virtual_registers(regs);
 
@@ -1018,12 +1015,12 @@ endfunction: get_virtual_registers
 // get_memories
 
 function void uvm_ral_block::get_memories(ref uvm_ral_mem mems[$],
-                                          input bit hier=1);
+                                          input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    foreach (this.mems[mem])
      mems.push_back(mem);
 
-   if (hier)
+   if (hier == uvm_ral::HIER)
      foreach (this.blks[blk])
        blk.get_memories(mems);
 
@@ -1033,11 +1030,11 @@ endfunction: get_memories
 // get_blocks
 
 function void uvm_ral_block::get_blocks(ref uvm_ral_block blks[$],
-                                        input bit hier=1);
+                                        input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    foreach (this.blks[blk]) begin
      blks.push_back(blk);
-     if (hier)
+     if (hier == uvm_ral::HIER)
        blk.get_blocks(blks);
    end
 
@@ -1058,12 +1055,12 @@ endfunction: get_root_blocks
 // get_maps
 
 function void uvm_ral_block::get_maps(ref uvm_ral_map maps[$],
-                                      input bit hier=1);
+                                      input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    foreach (this.maps[map])
      maps.push_back(map);
 
-   if (hier)
+   if (hier == uvm_ral::HIER)
      foreach (this.blks[blk])
        blk.get_maps(maps);
 
@@ -1686,7 +1683,7 @@ endfunction: add_map
 function uvm_ral_map uvm_ral_block::get_map_by_name(string name);
    uvm_ral_map maps[$];
 
-   this.get_maps(maps,1);
+   this.get_maps(maps,uvm_ral::HIER);
 
    foreach (maps[i])
      if (maps[i].get_name() == name)

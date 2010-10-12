@@ -18,6 +18,7 @@
 //----------------------------------------------------------------------
 
 `include "seq_lib.sv"
+`include "xbus_example_master_seq_lib.sv"
 
 class cmd_line_seq_test extends uvm_test;
 
@@ -27,54 +28,130 @@ class cmd_line_seq_test extends uvm_test;
       super.new(name, parent);
    endfunction: new
 
+   typedef uvm_queue #(string) q_of_strings;
+   bit virtual_seq_mode; 
    
    virtual task run();
      string seq_cmd;
-     string seqs[$];
+     q_of_strings seqs[$]; 
+     q_of_strings qos = new;
      uvm_report_server svr;
      xbus_ral_env env;
 
      $cast(env, uvm_top.lookup("env"));
 
+     uvm_default_printer = uvm_default_line_printer;
+
      svr = _global_reporter.get_report_server();
      svr.set_max_quit_count(10);
 
-     uvm_top.print();
+     uvm_top.print(uvm_default_table_printer);
+
+     if ($test$plusargs("VIRTUAL_SEQ")) begin
+       virtual_seq_mode = 1;
+     end
 
      if ($value$plusargs("UVM_SEQUENCE=%s",seq_cmd)) begin
 
        // Extract list of sequences
        int start_i = 0;
+       string last = "";
        foreach (seq_cmd[i]) begin
-         if (seq_cmd[i] == ",") begin
-           if (i > 0 && seq_cmd[i-1] != ",")
-             seqs.push_back(seq_cmd.substr(start_i,i-(i<seq_cmd.len()-1)));
+         if (seq_cmd[i] == "," || seq_cmd[i] == "=") begin
+           if (i > 0 && seq_cmd[i] == "," && seq_cmd[i-1] != "," && seq_cmd[i-1] != "=") begin
+             if (last == "=") begin
+               qos.push_back(seq_cmd.substr(start_i,i-(i<seq_cmd.len()-1)));
+               if (qos.size())
+                 seqs.push_back(qos);
+               qos = new;
+             end
+             if (last == "" || last == ",") begin
+               if (qos.size())
+                 seqs.push_back(qos);
+               qos = new;
+               qos.push_back(seq_cmd.substr(start_i,i-(i<seq_cmd.len()-1)));
+             end
+             last = ",";
+           end
+           if (i > 0 && seq_cmd[i] == "=" && seq_cmd[i-1] != "," && seq_cmd[i-1] != "=") begin
+             if (last == "" || last == ",") begin
+               if (qos.size())
+                 seqs.push_back(qos);
+               qos = new;
+             end
+             qos.push_back(seq_cmd.substr(start_i,i-(i<seq_cmd.len()-1)));
+             last = "=";
+           end
            start_i = i+1;
          end
        end
-       if (start_i <= seq_cmd.len()-1)
-         seqs.push_back(seq_cmd.substr(start_i,seq_cmd.len()-1));
+       if (start_i <= seq_cmd.len()-1) begin
+         if (last == "=") begin
+           qos.push_back(seq_cmd.substr(start_i,seq_cmd.len()-1));
+           seqs.push_back(qos);
+         end
+         else begin
+           if (qos.size())
+             seqs.push_back(qos);
+           qos = new;
+           qos.push_back(seq_cmd.substr(start_i,seq_cmd.len()-1));
+           seqs.push_back(qos);
+         end
+       end
 
        // No sequences found
        if (!seqs.size()) begin
          `uvm_fatal("BAD_CMD_LINE",
                    {"Command line +UVM_SEQUENCE value must be one or more sequences ",
-                   "separated by commas with no spaces. Given value '",seq_cmd,
+                   "separated by commas or equals with no spaces. Given value '",seq_cmd,
                    "' could not be parsed"})
        end
 
        // Execute sequences sequentially. Sequences must not depend on initial state.
-       foreach (seqs[i]) begin
-         uvm_ral_sequence seq;
-         seq = uvm_utils #(uvm_ral_sequence)::create_type_by_name(seqs[i],"tb");
-         if (seq == null) begin
-            `uvm_fatal("SEQ_NOT_FOUND",
-                       {"Command line +UVM_SEQUENCE specified a sequence '",seqs[i],
-                        "' that was not registered with the factory"});
+       begin
+         string msg;
+         foreach (seqs[i]) begin
+           string i_str;
+           i_str.itoa(i+1);
+           msg = {msg, "Group ",i_str,":\n  ",seqs[i].convert2string(),"\n"};
          end
-         `uvm_info("CMD_LINE_SEQ_TEST",{"\n\nStarting sequence '",seqs[i],"' ..."},UVM_LOW)
-         seq.ral = env.rdb;
-         seq.start(null);
+         `uvm_info("SEQ_SCHED",{"Executing sequences as follows ",
+            "(sequences within a group execute concurrently):\n",msg},UVM_LOW)
+       end
+
+       foreach (seqs[i]) begin
+         uvm_sequencer_base sequencer;
+         q_of_strings qos = seqs[i];
+         for (int j=0; j<qos.size();j++) begin
+           uvm_ral_sequence ral_seq;
+           uvm_sequence_base seq;
+           seq = uvm_utils #(uvm_sequence_base)::create_type_by_name(qos.get(j),"tb");
+           if (seq == null) begin
+              `uvm_fatal("SEQ_NOT_FOUND",
+                         {"Command line +UVM_SEQUENCE specified a sequence '",qos.get(j),
+                          "' that was not registered with the factory"});
+           end
+           `uvm_info("CMD_LINE_SEQ_TEST",{"\n\nStarting sequence '",qos.get(j),"' ..."},UVM_LOW)
+           void'(seq.randomize());
+           if ($cast(ral_seq,seq))
+             ral_seq.ral = env.rdb;
+
+           if (virtual_seq_mode)
+             sequencer = null;
+           else
+             sequencer = env.masters[0].sequencer;
+
+           if (qos.size() == 1) begin
+             seq.start(sequencer);
+           end
+           else begin
+             fork
+               seq.start(sequencer);
+             join_none
+           end
+         end
+         if (qos.size() != 1)
+           wait fork;
        end
        global_stop_request();
      end

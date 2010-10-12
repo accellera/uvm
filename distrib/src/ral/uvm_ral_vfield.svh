@@ -476,7 +476,7 @@ typedef uvm_callback_iter#(uvm_ral_vfield, uvm_ral_vfield_cbs) uvm_ral_vfield_cb
 
 
 
-function uvm_ral_vfield::new(string name);
+function uvm_ral_vfield::new(string name="uvm_ral_vfield");
    super.new(name);
 endfunction: new
 

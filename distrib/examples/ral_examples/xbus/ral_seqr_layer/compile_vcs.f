@@ -2,6 +2,7 @@
 +incdir+../../../../src 
 ../../../../src/uvm_pkg.sv 
 +incdir+../../../xbus/sv
++incdir+../../../xbus/examples
 ../../../xbus/sv/xbus.svh
 +incdir+../common
 +incdir+../common/reg_defn
