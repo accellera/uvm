@@ -263,9 +263,6 @@ virtual class uvm_ral_block extends uvm_object;
    // in the virtual registers in the sub-blocks.
    //
    extern virtual function void get_virtual_fields   (ref uvm_ral_vfield fields[$], input uvm_ral::hier_e hier=uvm_ral::HIER);
->>>>>>> a3e2ff3946089cfba15a789cb07608393221ed86
-
-
 
    //
    // FUNCTION: get_block_by_name
