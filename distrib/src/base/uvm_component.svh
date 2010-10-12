@@ -713,8 +713,8 @@ virtual class uvm_component extends uvm_report_object;
   // To get all configuration information prior to the run phase, do something 
   // like this in your top object:
   //|  function void start_of_simulation();
-  //|    set_report_id_action_hier(CFGOVR, UVM_DISPLAY);
-  //|    set_report_id_action_hier(CFGSET, UVM_DISPLAY);
+  //|    set_report_id_action_hier("CFGOVR", UVM_DISPLAY);
+  //|    set_report_id_action_hier("CFGSET", UVM_DISPLAY);
   //|    check_config_usage();
   //|  endfunction
 
