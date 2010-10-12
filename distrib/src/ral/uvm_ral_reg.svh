@@ -20,87 +20,29 @@
 // -------------------------------------------------------------
 //
 
-
-//------------------------------------------------------------------------------
 //
-// CLASS: uvm_ral_reg_cbs
+// Title: uvm_ral_reg
+// Register abstraction base class
 //
-//------------------------------------------------------------------------------
-
-
-virtual class uvm_ral_reg_cbs extends uvm_callback;
-
-   string fname = "";
-   int lineno = 0;
-
-   function new(string name = "uvm_ral_reg_cbs");
-      super.new(name);
-   endfunction
-   
-   virtual task pre_write (uvm_ral_reg         rg,
-                           ref uvm_ral_data_t  wdat,
-                           ref uvm_ral::path_e path,
-                           ref uvm_ral_map     map);
-   endtask
-
-   virtual task post_write(uvm_ral_reg        rg,
-                           uvm_ral_data_t     wdat,
-                           uvm_ral::path_e    path,
-                           uvm_ral_map        map,
-                           ref uvm_ral::status_e status);
-   endtask
-
-   virtual task pre_read  (uvm_ral_reg         rg,
-                           ref uvm_ral::path_e path,
-                           ref uvm_ral_map     map);
-   endtask
-
-   virtual task post_read (uvm_ral_reg           rg,
-                           ref uvm_ral_data_t    rdat,
-                           input uvm_ral::path_e path,
-                           input uvm_ral_map     map,
-                           ref uvm_ral::status_e status);
-   endtask
-
-endclass: uvm_ral_reg_cbs
-
-
-typedef uvm_callbacks#(uvm_ral_reg, uvm_ral_reg_cbs) uvm_ral_reg_cb;
-typedef uvm_callback_iter#(uvm_ral_reg, uvm_ral_reg_cbs) uvm_ral_reg_cb_iter;
-
-
-//------------------------------------------------------------------------------
+// A register is a collection of fields, located in a block or register file.
+// It is the unit that is accessible and programmable via an address map.
 //
-// CLASS: uvm_ral_reg_frontdoor
+// A register may be accessible via more than one address map.
 //
-//------------------------------------------------------------------------------
 
-virtual class uvm_ral_reg_frontdoor extends uvm_sequence #(uvm_sequence_item);
+typedef class uvm_ral_reg_cbs;
+typedef class uvm_ral_reg_frontdoor;
 
-   uvm_ral_reg       rg;
-   bit               is_write;
-   uvm_ral::status_e status = uvm_ral::IS_OK;
-   uvm_ral_data_t    data;
-   int               prior = -1;
-   uvm_object        extension;
-   string            fname = "";
-   int               lineno = 0;
-
-   uvm_sequencer_base sequencer;
-
-   function new(string name="");
-      super.new(name);
-   endfunction
-
-endclass: uvm_ral_reg_frontdoor
-
-
-//------------------------------------------------------------------------------
-//
+//-----------------------------------------------------------------
 // CLASS: uvm_ral_reg
+// Register abstraction base class
 //
-//------------------------------------------------------------------------------
-
+// A register represents a set of fields that are accessible
+// as a single entity.
+//
+// A register may be mapped to one or more address maps,
+// each with different access rights and policy.
+//-----------------------------------------------------------------
 virtual class uvm_ral_reg extends uvm_object;
 
    local bit               locked;
@@ -134,105 +76,285 @@ virtual class uvm_ral_reg extends uvm_object;
    // Group: Initialization
    //----------------------
 
+   //
+   // FUNCTION: new
+   // Create a new instance and type-specific configuration
+   //
+   // Creates an instance of a register abstraction class with the specified
+   // name.
+   //
+   // ~n_bits~ specifies the total number of bits in the register.
+   // Not all bits need to be implemented.
+   // This value is usually a multiple of 8.
+   //
+   // ~has_cover~ specifies which functional coverage models are present in
+   // the extension of the register abstraction class.
+   // Multiple functional coverage models may be specified by adding their
+   // symbolic names, as defined by the <uvm_ral::coverage_model_e> type.
+   //
    extern function                  new        (string name="",
                                                 int unsigned n_bits,
                                                 int has_cover);
+
+   //
+   // Function: configure
+   // Instance-specific configuration
+   //
+   // Specify the parent block of this register.
+   // May also set a parent register file for this register,
+   //
+   // If the register is implemented in a single HDL variable,
+   // it's name is specified as the ~hdl_path~.
+   // Otherwise, if the register is implemented as a concatenation
+   // of variables (usually one per field), then the HDL path
+   // must be specified using the <add_hdl_path()> method.
+   //
    extern virtual function void     configure  (uvm_ral_block blk_parent,
                                                 uvm_ral_regfile rf_parent,
                                                 string hdl_path = "");
- 
-   extern virtual function void     set_parent (uvm_ral_block blk_parent,
-                                                uvm_ral_regfile rf_parent);
-   extern virtual function void     add_field  (uvm_ral_field field);
-   extern virtual function void     add_map    (uvm_ral_map map);
+
+   /*local*/ extern virtual function void set_parent (uvm_ral_block blk_parent,
+                                                      uvm_ral_regfile rf_parent);
+   /*local*/ extern virtual function void add_field  (uvm_ral_field field);
+   /*local*/ extern virtual function void add_map    (uvm_ral_map map);
 
    /*local*/ extern function void   Xlock_modelX();
 
 
    //-----------
-   // Group: Get
+   // Group: Introspection
    //-----------
 
+   //
+   // Function: get_name
+   // Get the simple name
+   //
+   // Return the simple object name of this register.
+   //
+
+   //
+   // Function: get_full_name
+   // Get the hierarchical name
+   //
+   // Return the hierarchal name of this register.
+   // The base of the hierarchical name is the root block.
+   //
+   extern virtual function string        get_full_name();
+
+   //
+   // FUNCTION: get_parent
+   // Get the parent block
+   //
+   extern virtual function uvm_ral_block get_parent ();
+   extern virtual function uvm_ral_block get_block  ();
+
+   //
+   // FUNCTION: get_regfile
+   // Get the parent register file
+   //
+   // Returns ~null~ if this register is instantiated in a block.
+   //
+   extern virtual function uvm_ral_regfile  get_regfile     ();
+
+
+   //
+   // Function: get_n_maps
+   // Returns the number of address maps this register is mapped in
+   //
    extern virtual function int             get_n_maps      ();
+
+   //
+   // Function: is_in_map
+   // Return TRUE if this register is in the specified address ~map~
+   //
    extern function         bit             is_in_map       (uvm_ral_map map);
+
+   //
+   // Function: get_maps
+   // Returns all of the address ~maps~ where this register is mapped
+   //
    extern virtual function void            get_maps        (ref uvm_ral_map maps[$]);
-   extern function uvm_ral_map             get_local_map   (uvm_ral_map map,
-                                                            string caller = "");
-   extern function uvm_ral_map             get_default_map (string caller = "");
 
-   extern virtual function uvm_ral_block   get_block       ();
+
+   /*local*/ extern function uvm_ral_map get_local_map   (uvm_ral_map map,
+                                                          string caller = "");
+   /*local*/ extern function uvm_ral_map get_default_map (string caller = "");
+
+
+   //
+   // FUNCTION: get_rights
+   // Returns the access rights of this register.
+   //
+   // Returns "RW", "RO" or "WO".
+   // The access rights of a register is always "RW",
+   // unless it is a shared register
+   // with access restriction in a particular address map.
+   //
+   // If no address map is specified and the register is mapped in only one
+   // address map, that address map is used. If the register is mapped
+   // in more than one address map, the default address map of the
+   // parent block is used.
+   //
+   // If an address map is specified and
+   // the register is not mapped in the specified
+   // address map, an error message is issued
+   // and "RW" is returned. 
+   //
    extern virtual function string          get_rights      (uvm_ral_map map = null);
-   extern virtual function uvm_ral_addr_t  get_offset      (uvm_ral_map map = null);
-   extern virtual function uvm_ral_addr_t  get_address     (uvm_ral_map map = null);
-   extern virtual function int             get_addresses   (uvm_ral_map map = null,
-                                                            ref uvm_ral_addr_t addr[]);
 
+   //-----------------------------------------------------------------
+   // FUNCTION: get_n_bytes
+   // Returns the width, in bytes, of this register. 
+   //-----------------------------------------------------------------
    extern virtual function int unsigned    get_n_bytes     ();
+
+   //-----------------------------------------------------------------
+   // FUNCTION: get_fields
+   // Return the fields in this register
+   //
+   // Fills the specified array with the abstraction class
+   // for all of the fields contained in this register.
+   // Fields are ordered from least-significant position to most-significant
+   // position within the register. 
+   //-----------------------------------------------------------------
    extern virtual function void            get_fields      (ref uvm_ral_field fields[$]);
+
+   //-----------------------------------------------------------------
+   // FUNCTION: get_field_by_name
+   // Return the named field in this register
+   //
+   // Finds a field with the specified name in this register
+   // and returns its abstraction class.
+   // If no fields are found, returns null. 
+   //-----------------------------------------------------------------
    extern virtual function uvm_ral_field   get_field_by_name(string name);
 
 
-   //--------------------------------
-   // Group: Attributes & Constraints
-   //--------------------------------
+   //
+   // FUNCTION: get_offset
+   // Returns the offset of this register
+   //
+   // Returns the offset of this register in an address ~map~.
+   //
+   // If no address map is specified and the register is mapped in only one
+   // address map, that address map is used. If the register is mapped
+   // in more than one address map, the default address map of the
+   // parent block is used.
+   //
+   // If an address map is specified and
+   // the register is not mapped in the specified
+   // address map, an error message is issued.
+   //
+   extern virtual function uvm_ral_addr_t  get_offset      (uvm_ral_map map = null);
 
-   extern virtual function void   set_attribute   (string name, string value);
-   extern virtual function string get_attribute   (string name, bit inherited = 1);
-   extern virtual function void   get_attributes  (ref string names[string],
-                                                   input bit inherited = 1);
+   //
+   // FUNCTION: get_address
+   // Returns the base external physical address of this register
+   //
+   // Returns the base external physical address of this register
+   // if accessed through the specified address ~map~.
+   //
+   // If no address map is specified and the register is mapped in only one
+   // address map, that address map is used. If the register is mapped
+   // in more than one address map, the default address map of the
+   // parent block is used.
+   //
+   // If an address map is specified and
+   // the register is not mapped in the specified
+   // address map, an error message is issued.
+   //
+   extern virtual function uvm_ral_addr_t  get_address     (uvm_ral_map map = null);
+
+   //
+   // FUNCTION: get_addresses
+   // Identifies the external physical address(es) of this register
+   //
+   // Computes all of the external physical addresses that must be accessed
+   // to completely read or write this register. The addressed are specified in
+   // little endian order.
+   // Returns the number of bytes transfered on each access.
+   //
+   // If no address map is specified and the register is mapped in only one
+   // address map, that address map is used. If the register is mapped
+   // in more than one address map, the default address map of the
+   // parent block is used.
+   //
+   // If an address map is specified and
+   // the register is not mapped in the specified
+   // address map, an error message is issued.
+   //
+   extern virtual function int             get_addresses   (uvm_ral_map map = null,
+                                                            ref uvm_ral_addr_t addr[]);
+
+
+   //------------------
+   // Group: Attributes
+   //------------------
+
+
+   //
+   // FUNCTION: set_attribute
+   // Set an attribute.
+   //
+   // Set the specified attribute to the specified value for this register.
+   // If the value is specified as "", the specified attribute is deleted.
+   // A warning is issued if an existing attribute is modified.
+   // 
+   // Attribute names are case sensitive. 
+   //
+   extern virtual function void set_attribute(string name,
+                                              string value);
+
+   //
+   // FUNCTION: get_attribute
+   // Get an attribute value.
+   //
+   // Get the value of the specified attribute for this register.
+   // If the attribute does not exists, "" is returned.
+   // If ~inherited~ is specifed as TRUE, the value of the attribute
+   // is inherited from the nearest block ancestor
+   // for which the attribute
+   // is set if it is not specified for this register.
+   // If ~inherited~ is specified as FALSE, the value "" is returned
+   // if it does not exists in the this register.
+   // 
+   // Attribute names are case sensitive.
+   // 
+   extern virtual function string get_attribute(string name,
+                                                bit inherited = 1);
+
+   //
+   // FUNCTION: get_attributes
+   // Get all attribute values.
+   //
+   // Get the name of all attribute for this register.
+   // If ~inherited~ is specifed as TRUE, the value for all attributes
+   // inherited from all block ancestors are included.
+   // 
+   extern virtual function void get_attributes(ref string names[string],
+                                               input bit inherited = 1);
+
    extern virtual function void   get_constraints (ref string names[]);
-
    /*local*/ extern function void Xadd_constraintsX(string name);
-
-
-   //----------------
-   // Group: Coverage
-   //----------------
-
-   extern virtual function bit can_cover(int models);
-   extern virtual function int set_cover(int is_on);
-   extern virtual function bit is_cover_on(int is_on);
-
-   extern virtual local function void sample(uvm_ral_data_t  data,
-                                             bit             is_read,
-                                             uvm_ral_map     map);
-
-   local virtual function void map_coverage(uvm_ral_map map,
-                                            bit         rights);
-   endfunction
-   
-
-   //-----------------
-   // Group: Callbacks
-   //-----------------
-   `uvm_register_cb(uvm_ral_reg, uvm_ral_reg_cbs)
-   
-   virtual task pre_write(ref uvm_ral_data_t  wdat,
-                          ref uvm_ral::path_e path,
-                          ref uvm_ral_map     map);
-   endtask
-
-   virtual task post_write(uvm_ral_data_t        wdat,
-                           uvm_ral::path_e       path,
-                           uvm_ral_map           map,
-                           ref uvm_ral::status_e status);
-   endtask
-
-   virtual task pre_read(ref uvm_ral::path_e path,
-                         ref uvm_ral_map     map);
-   endtask
-
-   virtual task post_read(ref uvm_ral_data_t    rdat,
-                          input uvm_ral::path_e path,
-                          input uvm_ral_map     map,
-                          ref uvm_ral::status_e status);
-   endtask
 
 
    //--------------
    // Group: Access
    //--------------
 
+
+   //-----------------------------------------------------------------
+   // FUNCTION: predict
+   // Update the mirrored value for this register
+   //
+   // Predict the mirror value of the fields in the register
+   // based on the specified observed ~value~ on a specified adress ~map~,
+   // or based on a calculated value.
+   // See <uvm_ral_field::predict()> for more details.
+   //
+   // Returns TRUE if the prediction was succesful for each field in the
+   // register.
+   //
    extern virtual function bit predict (uvm_ral_data_t  value,
                                         uvm_ral::predict_e kind = uvm_ral::PREDICT_DIRECT,
                                         uvm_ral::path_e path = uvm_ral::BFM,
@@ -248,42 +370,165 @@ virtual class uvm_ral_reg extends uvm_object;
                                                       uvm_ral::path_e path,
                                                       uvm_ral_map     map);
 
+
+   //
+   // FUNCTION: set
+   // Set the desired value for this register
+   //
+   // Sets the desired value of the fields in the register
+   // to the specified value. Does not actually
+   // set the value of the register in the design,
+   // only the desired value in its corresponding
+   // abstraction class in the RAL model.
+   // Use the <uvm_ral_reg::update()> method to update the
+   // actual register with the mirrored value or
+   // the <uvm_ral_reg::write()> method to set
+   // the actual register and its mirrored value.
+   //
+   // Unless this methos is used, the desired value is equal to
+   // the mirrored value/
+   //
+   // Refer <uvm_ral_field::set()> for more details on the effect
+   // of setting mirror values on fields with different
+   // access policies.
+   //
+   // To modify the mirrored field values to a specific value,
+   // and thus use the mirrored as a scoreboard for the register values
+   // in the DUT, use the <uvm_ral_reg::predict()> method. 
+   //
    extern virtual function void set (uvm_ral_data_t  value,
                                      string          fname = "",
                                      int             lineno = 0);
 
+
+   //
+   // FUNCTION: get
+   // Return the desired value of the fields in the register.
+   //
+   // Does not actually read the value
+   // of the register in the design, only the desired value
+   // in the abstraction class. Unless set to a different value
+   // using the <uvm_ral_reg::set()>, the desired value
+   // and the mirrored value are identical.
+   //
+   // Use the <uvm_ral_reg::read()> or <uvm_ral_reg::peek()>
+   // method to get the actual register value. 
+   //
+   // If the register contains write-only fields, the desired/mirrored
+   // value for those fields are the value last written and assumed
+   // to reside in the bits implementing these fields.
+   // Although a physical read operation would something different
+   // for these fields,
+   // the returned value is the actual content.
+   //
    extern virtual function uvm_ral_data_t  get(string  fname = "",
                                                int     lineno = 0);
+
+   //
+   // FUNCTION: reset
+   // Reset the desired/mirrored value for this register.
+   //
+   // Sets the desired and mirror value of the fields in this register
+   // to the reset value specified by ~kind~ as a <uvm_ral::reset_e> value.
+   // Does not actually reset the value of the register in the design,
+   // only the value mirrored in the register abstraction class.
+   //
+   // Write-once fields in the register can be modified after
+   // a hard reset operation. 
+   //
    extern virtual function void reset(uvm_ral::reset_e kind = uvm_ral::HARD);
 
+   //
+   // FUNCTION: get_reset
+   // Get a specified reset value for this register
+   //
+   // Return the reset value for this register
+   // specified by ~kind~ as a <uvm_ral::reset_e> value.
+   //
    extern virtual function uvm_ral_data_logic_t
                              get_reset(uvm_ral::reset_e kind = uvm_ral::HARD);
+
+   //-----------------------------------------------------------------
+   // FUNCTION: needs_update
+   // Check if any of the field need updating
+   //
+   // See <uvm_ral_field::needs_update()> for details.
+   // Use the <uvm_ral_reg::update()> to actually update the DUT register.
+   //
    extern virtual function bit needs_update(); 
 
 
-   //------------------
-   // Group: HDL Access
-   //------------------
- 
+   //
+   // TASK: update
+   // Updates the content of the register in the design to match the
+   // desired value
+   //
+   // This method performs the reverse
+   // operation of <uvm_ral_reg::mirror()>.
+   // Write this register if the DUT register is out-of-date with the
+   // desired/mirrored value in the abstraction class, as determined by
+   // the <uvm_ral_reg::needs_update()> method.
+   //
+   // The update can be performed using the using the physical interfaces
+   // (frontdoor) or <uvm_ral_reg::poke()> (backdoor) access.
+   // If the register is mapped in multiple address maps and physical access
+   // is used (front-door), an address ~map~ must be specified.
+   //
    extern virtual task update(output uvm_ral::status_e status,
                               input  uvm_ral::path_e   path = uvm_ral::DEFAULT,
-                              input  uvm_ral_map    map = null,
+                              input  uvm_ral_map       map = null,
                               input  uvm_sequence_base parent = null,
                               input  int               prior = -1,
                               input  uvm_object        extension = null,
                               input  string            fname = "",
                               input  int               lineno = 0);
 
+
+   //
+   // TASK: write
+   // Write the specified value in this register
+   //
+   // Write ~value~ in the DUT register that corresponds to this
+   // abstraction class instance using the specified access
+   // ~path~. 
+   // If the register is mapped in more than one address map, 
+   // an address ~map~ must be
+   // specified if a physical access is used (front-door access).
+   // If a back-door access path is used, the effect of writing
+   // the register through a physical access is mimicked. For
+   // example, read-only bits in the registers will not be written.
+   //
+   // The mirrored value will be updated using the <uvm_ral_reg:predict()>
+   // method.
+   //
    extern virtual task write(output uvm_ral::status_e status,
                              input  uvm_ral_data_t    value,
                              input  uvm_ral::path_e   path = uvm_ral::DEFAULT,
-                             input  uvm_ral_map    map = null,
+                             input  uvm_ral_map       map = null,
                              input  uvm_sequence_base parent = null,
                              input  int               prior = -1,
                              input  uvm_object        extension = null,
                              input  string            fname = "",
                              input  int               lineno = 0);
 
+
+   //
+   // TASK: read
+   // Read the current value from this register
+   //
+   // Read and return ~value~ from the DUT register that corresponds to this
+   // abstraction class instance using the specified access
+   // ~path~. 
+   // If the register is mapped in more than one address map, 
+   // an address ~map~ must be
+   // specified if a physical access is used (front-door access).
+   // If a back-door access path is used, the effect of reading
+   // the register through a physical access is mimicked. For
+   // example, clear-on-read bits in the registers will be set to zero.
+   //
+   // The mirrored value will be updated using the <uvm_ral_reg:predict()>
+   // method.
+   //
    extern virtual task read(output uvm_ral::status_e status,
                             output uvm_ral_data_t    value,
                             input  uvm_ral::path_e   path = uvm_ral::DEFAULT,
@@ -294,6 +539,19 @@ virtual class uvm_ral_reg extends uvm_object;
                             input  string            fname = "",
                             input  int               lineno = 0);
 
+
+   //
+   // TASK: poke
+   // Deposit the specified value in this register
+   //
+   // Deposit the value in the DUT register corresponding to this
+   // abstraction class instance, as-is, using a back-door access.
+   //
+   // Uses the HDL path for the design abstraction specified by ~kind~.
+   //
+   // The mirrored value will be updated using the <uvm_ral_reg:predict()>
+   // method.
+   //
    extern virtual task poke(output uvm_ral::status_e status,
                             input  uvm_ral_data_t    value,
                             input  string            kind = "",
@@ -302,6 +560,20 @@ virtual class uvm_ral_reg extends uvm_object;
                             input  string            fname = "",
                             input  int               lineno = 0);
 
+
+   //
+   // TASK: peek
+   // Read the current value from this register
+   //
+   // Sample the value in the DUT register corresponding to this
+   // absraction class instance using a back-door access.
+   // The register value is sampled, not modified.
+   //
+   // Uses the HDL path for the design abstraction specified by ~kind~.
+   //
+   // The mirrored value will be updated using the <uvm_ral_reg:predict()>
+   // method.
+   //
    extern virtual task peek(output uvm_ral::status_e status,
                             output uvm_ral_data_t    value,
                             input  string            kind = "",
@@ -310,10 +582,35 @@ virtual class uvm_ral_reg extends uvm_object;
                             input  string            fname = "",
                             input  int               lineno = 0);
 
+
+   //
+   // TASK: mirror
+   // Read the register and update/check its mirror value
+   //
+   // Read the register and optionally compared the readback value
+   // with the current mirrored value if ~check~ is <uvm_ral::VERB>.
+   // The mirrored value will be updated using the <uvm_ral_reg:predict()>
+   // method based on the readback value.
+   //
+   // The mirroring can be performed using the physical interfaces (frontdoor)
+   // or <uvm_ral_reg::peek()> (backdoor).
+   //
+   // If ~check~ is specified as uvm_ral::VERB,
+   // an error message is issued if the current mirrored value
+   // does not match the readback value, unless a field has the "DC"
+   // (don't care) policy.
+   //
+   // If the register is mapped in multiple address maps and physical
+   // access is used (front-door access), an address ~map~ must be specified.
+   // If the register contains
+   // write-only fields, their content is mirrored and optionally
+   // checked only if a uvm_ral::BACKDOOR
+   // access path is used to read the register. 
+   //
    extern virtual task mirror(output uvm_ral::status_e status,
                               input uvm_ral::check_e   check  = uvm_ral::NO_CHECK,
                               input uvm_ral::path_e    path = uvm_ral::DEFAULT,
-                              input uvm_ral_map     map = null,
+                              input uvm_ral_map        map = null,
                               input uvm_sequence_base  parent = null,
                               input int                prior = -1,
                               input  uvm_object        extension = null,
@@ -347,10 +644,37 @@ virtual class uvm_ral_reg extends uvm_object;
    // Group: Frontdoor
    //-----------------
 
+
+   //
+   // FUNCTION: set_frontdoor
+   // Set a user-defined frontdoor for this register
+   //
+   // By default, registers are mapped linearly into the address space
+   // of the address maps that instantiate them.
+   // If registers are accessed using a different mechanism,
+   // a user-defined access
+   // mechanism must be defined and associated with
+   // the corresponding register abstraction class
+   //
+   // If the register is mapped in multiple address maps, an address ~map~
+   // must be specified.
+   //
    extern function void set_frontdoor(uvm_ral_reg_frontdoor ftdr,
-                                      uvm_ral_map        map = null,
+                                      uvm_ral_map           map = null,
                                       string                fname = "",
                                       int                   lineno = 0);
+
+   //
+   // FUNCTION: get_frontdoor
+   // Returns the user-defined frontdoor for this register
+   //
+   // If null, no user-defined frontdoor has been defined.
+   // A user-defined frontdoor is defined
+   // by using the "uvm_ral_reg::set_frontdoor()" method. 
+   //
+   // If the register is mapped in multiple address maps, an address ~map~
+   // must be specified.
+   //
    extern function uvm_ral_reg_frontdoor get_frontdoor(uvm_ral_map map = null);
 
 
@@ -361,21 +685,109 @@ virtual class uvm_ral_reg extends uvm_object;
    local uvm_object_string_pool #(uvm_queue #(uvm_ral_hdl_path_concat)) hdl_paths_pool;
    local uvm_ral_reg_backdoor  backdoor;
 
+
+   //
+   // FUNCTION: set_backdoor
+   // Set a user-defined backdoor for this register
+   //
+   // By default, registers are accessed via the built-in string-based
+   // DPI routines if an HDL path has been specified (see <uvm_hdl>).
+   // If this default mechanism is not suitable (e.g. because
+   // the register is not implemented in pure SystemVerilog)
+   // a user-defined access
+   // mechanism must be defined and associated with
+   // the corresponding register abstraction class
+   //
+   // A user-defined backdoor is required if active update of the
+   // mirror of this register abstraction class, based on observed
+   // changes of the corresponding DUT register, is used.
+   //
    extern function void set_backdoor(uvm_ral_reg_backdoor bkdr,
                                      string               fname = "",
                                      int                  lineno = 0);
-
+   //
+   // FUNCTION: get_backdoor
+   // Returns the user-defined backdoor for this register
+   //
+   // If null, no user-defined backdoor has been defined.
+   // A user-defined backdoor is defined
+   // by using the "uvm_ral_reg::set_backdoor()" method. 
+   //
+   // If ~inherit~ is TRUE, returns the backdoor of the parent block
+   // if none have been specified for this register.
+   //
    extern function uvm_ral_reg_backdoor get_backdoor(bit inherit = 1);
 
+   //
+   // Function:  clear_hdl_path
+   // Delete HDL paths
+   //
+   // Remove any previously specified HDL path to the register instance
+   // for the specified design abstraction.
+   //
    extern function void clear_hdl_path    (string kind = "RTL");
+
+   //
+   // Function:  add_hdl_path
+   // Add an HDL path
+   //
+   // Add the specified HDL path to the register instance for the specified
+   // design abstraction. This method may be called more than once for the
+   // same design abstraction if the register is physically duplicated
+   // in the design abstraction
+   //
    extern function void add_hdl_path      (uvm_ral_hdl_path_concat path,
                                            string kind = "RTL");
+   //
+   // Function:   has_hdl_path
+   // Check if a HDL path is specified
+   //
+   // Returns TRUE if the register instance has a HDL path defined for the
+   // specified design abstraction. If no design abstraction is specified,
+   // uses the default design abstraction specified for the parent block.
+   //
    extern function bit  has_hdl_path      (string kind = "");
+
+   //
+   // Function:  get_hdl_path
+   // Get the incremental HDL path(s)
+   //
+   // Returns the HDL path(s) defined for the specified design abstraction
+   // in the register instance.
+   // Returns only the component of the HDL paths that corresponds to
+   // the register, not a full hierarchical path
+   //
+   // If no design asbtraction is specified, the default design abstraction
+   // for the parent block is used.
+   //
    extern function void get_hdl_path      (ref uvm_ral_hdl_path_concat paths[$],
                                            input string kind = "");
+
+   //
+   // Function:  get_full_hdl_path
+   // Get the full hierarchical HDL path(s)
+   //
+   // Returns the full hierarchical HDL path(s) defined for the specified
+   // design abstraction in the register instance.
+   // There may be more than one path returned even
+   // if only one path was defined for the register instance, if any of the
+   // parent components have more than one path defined for the same design
+   // abstraction
+   //
+   // If no design asbtraction is specified, the default design abstraction
+   // for each ancestor block is used to get each incremental path.
+   //
    extern function void get_full_hdl_path (ref uvm_ral_hdl_path_concat paths[$],
                                            input string kind = "");
 
+   //
+   // Function: backdoor_read
+   // User-define backdoor read access
+   //
+   // Override the default string-based DPI backdoor access read
+   // for this register type.
+   // By default calls <uvm_ral_reg::backdoor_read_func()>.
+   //
    extern virtual task backdoor_read(output uvm_ral::status_e status,
                               output uvm_ral_data_t    data,
                               input string             kind,
@@ -384,6 +796,13 @@ virtual class uvm_ral_reg extends uvm_object;
                               input string             fname = "",
                               input int                lineno = 0);
 
+   //
+   // Function: backdoor_write
+   // User-defined backdoor read access
+   //
+   // Override the default string-based DPI backdoor access write
+   // for this register type.
+   //
    extern virtual task backdoor_write(output uvm_ral::status_e status,
                                input uvm_ral_data_t     data,
                                input string             kind,
@@ -392,6 +811,13 @@ virtual class uvm_ral_reg extends uvm_object;
                                input string             fname = "",
                                input int                lineno = 0);
 
+   //
+   // Function: backdoor_read_func
+   // User-defined backdoor read access
+   //
+   // Override the default string-based DPI backdoor access read
+   // for this register type.
+   //
    extern virtual function uvm_ral::status_e backdoor_read_func(
                                output uvm_ral_data_t    data,
                                input string             kind,
@@ -400,16 +826,169 @@ virtual class uvm_ral_reg extends uvm_object;
                                input string             fname = "",
                                input int                lineno = 0);
 
+   //
+   // Function: backdoor_watch
+   // User-defined DUT register change monitor
+   //
+   // Watch the DUT register corresponding to this abstraction class
+   // instance for any change in value and return when a value-change occurs.
+   // This may be implemented a string-based DPI access if the simulation
+   // tool provide a value-change callback facility. Such a facility does
+   // not exists in the standard SystemVerilog DPI and thus no
+   // default implementation for this method can be provided.
+   //
    virtual task  backdoor_watch(); endtask
 
 
-   //--------------------
-   // Group: Standard Ops
-   //--------------------
+   //----------------
+   // Group: Coverage
+   //----------------
 
-   extern virtual function string          get_full_name();
-   extern virtual function uvm_ral_block   get_parent ();
-   extern virtual function uvm_ral_regfile get_regfile ();
+   //
+   // Function: can_cover
+   // Check if register has coverage model(s)
+   //
+   // Returns TRUE if the register abstraction class contains a coverage model
+   // for all of the models specified.
+   // Models are specified by adding the symbolic value of individual
+   // coverage model as defined in <uvm_ral::coverage_model_e>.
+   //
+   extern virtual function bit can_cover(int models);
+
+   //
+   // FUNCTION: set_cover
+   // Turns on coverage measurement.
+   //
+   // Turns the collection of functional coverage measurements on or off
+   // for this register.
+   // The functional coverage measurement is turned on for every
+   // coverage model specified using <uvm_ral::coverage_model_e> symbolic
+   // identifers.
+   // Multiple functional coverage models can be specified by adding
+   // the functional coverage model identifiers.
+   // All other functional coverage models are turned off.
+   // Returns the sum of all functional
+   // coverage models whose measurements were previously on.
+   //
+   // This method can only control the measurement of functional
+   // coverage models that are present in the register abstraction classes,
+   // then enabled during construction.
+   // See the <uvm_ral_reg::can_cover()> method to identify
+   // the available functional coverage models.
+   //
+   extern virtual function int set_cover(int is_on);
+
+   //
+   // FUNCTION: is_cover_on
+   // Check if coverage measurement is on.
+   //
+   // Returns TRUE if measurement for all of the specified functional
+   // coverage models are currently on.
+   // Multiple functional coverage models can be specified by adding the
+   // functional coverage model identifiers.
+   //
+   // See <uvm_ral_reg::set_cover()> for more details. 
+   //
+   extern virtual function bit is_cover_on(int is_on);
+
+
+   //
+   // Function: sample
+   // Functional coverage measurement method
+   //
+   // This method is invoked by the register abstraction class
+   // whenever it is read or written with the specified ~data~
+   // via the specified address ~map~.
+   //
+   // Empty by default, this method may be extended by the
+   // abstraction class generator to perform the required sampling
+   // in any provided functional coverage model.
+   //
+   virtual local function void sample(uvm_ral_data_t  data,
+                                      bit             is_read,
+                                      uvm_ral_map     map);
+   endfunction
+
+
+   //-----------------
+   // Group: Callbacks
+   //-----------------
+   `uvm_register_cb(uvm_ral_reg, uvm_ral_reg_cbs)
+   
+   //--------------------------------------------------------------------------
+   // TASK: pre_write
+   // Called before register write.
+   //
+   // If the specified data value, access ~path~ or address ~map~ are modified,
+   // the updated data value, access path or address map will be used
+   // to perform the register operation.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of this method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   //--------------------------------------------------------------------------
+   virtual task pre_write(ref uvm_ral_data_t  wdat,
+                          ref uvm_ral::path_e path,
+                          ref uvm_ral_map     map);
+   endtask
+
+   //--------------------------------------------------------------------------
+   // TASK: post_write
+   // Called after register write.
+   //
+   // If the specified ~status~ is modified,
+   // the updated status will be
+   // returned by the register operation.
+   //
+   // The registered callback methods are invoked before the invocation
+   // of this method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   //--------------------------------------------------------------------------
+   virtual task post_write(uvm_ral_data_t        wdat,
+                           uvm_ral::path_e       path,
+                           uvm_ral_map           map,
+                           ref uvm_ral::status_e status);
+   endtask
+
+   //--------------------------------------------------------------------------
+   // TASK: pre_read
+   // Called before register read.
+   //
+   // If the specified access ~path~ or address ~map~ are modified,
+   // the updated access path or address map will be used to perform
+   // the register operation.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of this method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   //--------------------------------------------------------------------------
+   virtual task pre_read(ref uvm_ral::path_e path,
+                         ref uvm_ral_map     map);
+   endtask
+
+   //--------------------------------------------------------------------------
+   // TASK: post_read
+   // Called after register read.
+   //
+   // If the specified readback data or ~status~ is modified,
+   // the updated readback data or status will be
+   // returned by the register operation.
+   //
+   // The registered callback methods are invoked before the invocation
+   // of this method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   //--------------------------------------------------------------------------
+   virtual task post_read(ref uvm_ral_data_t    rdat,
+                          input uvm_ral::path_e path,
+                          input uvm_ral_map     map,
+                          ref uvm_ral::status_e status);
+   endtask
+
+
    extern virtual function void            do_print (uvm_printer printer);
    extern virtual function string          convert2string();
    extern virtual function uvm_object      clone      ();
@@ -422,9 +1001,178 @@ virtual class uvm_ral_reg extends uvm_object;
 endclass: uvm_ral_reg
 
 
-//------------------------------------------------------------------------------
+//
+// CLASS: uvm_ral_reg_cbs
+// Pre/post read/write callback facade class
+//
+
+virtual class uvm_ral_reg_cbs extends uvm_callback;
+
+   string fname = "";
+   int lineno = 0;
+
+   function new(string name = "uvm_ral_reg_cbs");
+      super.new(name);
+   endfunction
+
+   //
+   // Task: pre_write
+   // Callback called before a write operation.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of the <uvm_ral_reg::pre_write()> method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   //
+   // The written value ~wdat~, access ~path~ and address ~map~,
+   // if modified, modifies the actual value, access path or address map
+   // used in the register operation.
+   //
+   virtual task pre_write (uvm_ral_reg         rg,
+                           ref uvm_ral_data_t  wdat,
+                           ref uvm_ral::path_e path,
+                           ref uvm_ral_map     map);
+   endtask
+
+   //
+   // TASK: post_write
+   // Called after register write.
+   //
+   // The registered callback methods are invoked before the invocation
+   // of the <uvm_ral_reg::post_write()> method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   //
+   // The ~status~ of the operation,
+   // if modified, modifies the actual returned status.
+   //
+   virtual task post_write(uvm_ral_reg        rg,
+                           uvm_ral_data_t     wdat,
+                           uvm_ral::path_e    path,
+                           uvm_ral_map        map,
+                           ref uvm_ral::status_e status);
+   endtask
+
+   //
+   // TASK: pre_read
+   // Called before register read.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of the <uvm_ral_reg::pre_read()> method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   //
+   // The access ~path~ and address ~map~,
+   // if modified, modifies the actual access path or address map
+   // used in the register operation.
+   //
+   virtual task pre_read  (uvm_ral_reg         rg,
+                           ref uvm_ral::path_e path,
+                           ref uvm_ral_map     map);
+   endtask
+
+   //
+   // TASK: post_read
+   // Called after register read.
+   //
+   // The registered callback methods are invoked before the invocation
+   // of the <uvm_ral_reg::post_read()> method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   //
+   // The readback value ~rdat~ and the ~status~ of the operation,
+   // if modified, modifies the actual returned readback value and status.
+   //
+   virtual task post_read (uvm_ral_reg           rg,
+                           ref uvm_ral_data_t    rdat,
+                           input uvm_ral::path_e path,
+                           input uvm_ral_map     map,
+                           ref uvm_ral::status_e status);
+   endtask
+
+endclass: uvm_ral_reg_cbs
+
+
+//
+// Type: uvm_ral_reg_cb
+// Convenience callback type declaration
+//
+// Use this declaration to register register callbacks rather than
+// the more verbose parameterized class
+//
+typedef uvm_callbacks#(uvm_ral_reg, uvm_ral_reg_cbs) uvm_ral_reg_cb;
+
+
+//
+// Type: uvm_ral_reg_cb_iter
+// Convenience callback iterator type declaration
+//
+// Use this declaration to iterate over registered register callbacks
+// rather than the more verbose parameterized class
+//
+typedef uvm_callback_iter#(uvm_ral_reg, uvm_ral_reg_cbs) uvm_ral_reg_cb_iter;
+
+
+//-----------------------------------------------------------------
+//
+// CLASS: uvm_ral_reg_frontdoor
+// User-defined frontdoor access sequence
+//
+// Base class for user-defined access to registers through
+// a physical interface.
+// By default, different registers are mapped to different addresses
+// in the address space of the block instantiating them and are accessed
+// via those physical addresses.
+// If registers are physically accessed
+// using a non-linear and/or non-mapped mechanism, this sequence must be
+// user-extended to provide the physical access to these registers.
+// 
+//-----------------------------------------------------------------
+virtual class uvm_ral_reg_frontdoor extends uvm_sequence #(uvm_sequence_item);
+
+   // Variable: rg
+   // The register being read or written
+   uvm_ral_reg       rg;
+
+   // variable: is_write
+   // TRUE if operation is WRITE. FALSE is READ.
+   bit               is_write;
+
+   // Variable: status
+   // Status of the completed operation
+   uvm_ral::status_e status = uvm_ral::IS_OK;
+
+   // Variable: data
+   // Data to be written or read back.
+   uvm_ral_data_t    data;
+
+   // Variable: prior
+   // Priority of the sequence item
+   int               prior = -1;
+
+   // variable: extension
+   // Side-band information
+   uvm_object        extension;
+
+   string            fname = "";
+   int               lineno = 0;
+
+   // Variable: sequencer
+   // Sequencer executing the operation
+   uvm_sequencer_base sequencer;
+
+   // Function: new
+   // Constructor
+   function new(string name="");
+      super.new(name);
+   endfunction
+
+endclass: uvm_ral_reg_frontdoor
+
+
+//-----------------------------------------------------------------
 // IMPLEMENTATION
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------
 
 // new
 
@@ -574,7 +1322,10 @@ function void uvm_ral_reg::set_backdoor(uvm_ral_reg_backdoor bkdr,
                                         int                  lineno = 0);
    bkdr.fname = fname;
    bkdr.lineno = lineno;
-   if (this.backdoor != null) this.backdoor.kill_update_thread();
+   if (this.backdoor != null &&
+       this.backdoor.has_update_threads()) begin
+      `uvm_warning("RAL", "Previous register backdoor still has update threads running. Backdoors with active mirroring should only be set before simulation starts.");
+   end
    this.backdoor = bkdr;
 endfunction: set_backdoor
 
@@ -1157,16 +1908,6 @@ function bit uvm_ral_reg::is_cover_on(int is_on);
 endfunction: is_cover_on
 
 
-// sample
-
-function void uvm_ral_reg::sample(uvm_ral_data_t  data,
-                                  bit             is_read,
-                                  uvm_ral_map  map);
-   // Nothing to do in this base class
-endfunction
-
-
-
 
 //---------
 // ACCESS
@@ -1461,7 +2202,7 @@ task uvm_ral_reg::XwriteX(output uvm_ral::status_e status,
             end
          end
          if (backdoor != null)
-           this.backdoor.write(status, final_val, parent, extension);
+           this.backdoor.write(this, status, final_val, parent, extension);
          else
            backdoor_write(status, final_val, "", parent, extension, fname, lineno);
          this.Xpredict_writeX(final_val, path, null);
@@ -1591,13 +2332,13 @@ task uvm_ral_reg::XwriteX(output uvm_ral::status_e status,
    endcase
 
    // POST-WRITE CBS - REG
-   this.post_write(value, path, map, status);
    for (uvm_ral_reg_cbs cb = cbs.first(); cb != null;
         cb = cbs.next()) begin
       cb.fname = this.fname;
       cb.lineno = this.lineno;
       cb.post_write(this, value, path, map, status);
    end
+   this.post_write(value, path, map, status);
 
    // POST-WRITE CBS - FIELDS
    begin
@@ -1617,13 +2358,13 @@ task uvm_ral_reg::XwriteX(output uvm_ral::status_e status,
          msk = ((1<<f.get_n_bits())-1) << lsb;
          tmp = (predicted_value & msk) >> lsb;
 
-         f.post_write(tmp, path, map, status);
          for (uvm_ral_field_cbs cb = cbs.first(); cb != null;
               cb = cbs.next()) begin
             cb.fname = this.fname;
             cb.lineno = this.lineno;
             cb.post_write(f, tmp, path, map, status);
          end
+         f.post_write(tmp, path, map, status);
       end
    end
 
@@ -1742,7 +2483,7 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
          uvm_ral_data_t  final_val;
 
          if (this.backdoor != null)
-           this.backdoor.read(status, value, parent);
+           this.backdoor.read(this, status, value, parent, extension);
          else
            backdoor_read(status, value, "", parent, extension, fname, lineno);
 
@@ -1764,7 +2505,7 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
 
             if (final_val != value) begin
               if (this.backdoor != null)
-                 this.backdoor.read(status, final_val, parent, extension);
+                 this.backdoor.read(this, status, final_val, parent, extension);
               else
                  backdoor_read(status, final_val, "", parent, extension, fname, lineno);
             end
@@ -1894,13 +2635,13 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
 
 
    // POST-READ CBS - REG
-   this.post_read(value, path, map, status);
    for (uvm_ral_reg_cbs cb = cbs.first(); cb != null;
         cb = cbs.next()) begin
       cb.fname = this.fname;
       cb.lineno = this.lineno;
       cb.post_read(this, value, path, map, status);
    end
+   this.post_read(value, path, map, status);
 
    // POST-READ CBS - FIELDS
    begin
@@ -1918,13 +2659,13 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
          tmp = (value & msk) >> lsb;
 
 
-         f.post_read(tmp, path, map, status);
          for (uvm_ral_field_cbs cb = cbs.first(); cb != null;
               cb = cbs.next()) begin
             cb.fname = this.fname;
             cb.lineno = this.lineno;
             cb.post_read(f, tmp, path, map, status);
          end
+         f.post_read(tmp, path, map, status);
 
          value = (value & ~msk) | (tmp << lsb);
       end
@@ -2053,7 +2794,7 @@ task uvm_ral_reg::poke(output uvm_ral::status_e status,
    end
 
    if (backdoor == null)
-     this.backdoor.write(status, value, parent, extension);
+     this.backdoor.write(this, status, value, parent, extension);
    else
      this.backdoor_write(status, value, kind, parent, extension, fname, lineno);
 
@@ -2089,7 +2830,7 @@ task uvm_ral_reg::peek(output uvm_ral::status_e status,
    end
 
    if (backdoor == null)
-     this.backdoor.read(status, value, parent, extension);
+     this.backdoor.read(this, status, value, parent, extension);
    else
      this.backdoor_read(status, value, kind, parent, extension, fname, lineno);
 

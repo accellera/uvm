@@ -21,13 +21,17 @@
 //
 
 
-//------------------------------------------------------------------------------
-//
+
+//------------------------------------------------------------------------
 // CLASS: uvm_ral_block
+// Block abstraction base class
 //
-//------------------------------------------------------------------------------
-
-
+// A block represents a design hierarchy. It can contain registers,
+// register files, memories and sub-blocks.
+//
+// A block has one or more address maps, each corresponding to a physical
+// interface on the block.
+//------------------------------------------------------------------------
 virtual class uvm_ral_block extends uvm_object;
 
    local uvm_ral_block  parent;
@@ -40,7 +44,6 @@ virtual class uvm_ral_block extends uvm_object;
    local bit            maps[uvm_ral_map];
 
    uvm_ral::path_e      default_path = uvm_ral::DEFAULT;
-   uvm_ral_map          default_map;
    local string         default_hdl_path = "RTL";
    local uvm_ral_reg_backdoor backdoor;
    local uvm_object_string_pool #(uvm_queue #(string)) hdl_paths_pool;
@@ -62,11 +65,82 @@ virtual class uvm_ral_block extends uvm_object;
    // Group: Initialization
    //----------------------
 
+
+   //------------------------------------------------------------------------
+   // FUNCTION: new
+   // Create a new instance and type-specific configuration
+   //
+   // Creates an instance of a block abstraction class with the specified
+   // name.
+   //
+   // ~has_cover~ specifies which functional coverage models are present in
+   // the extension of the block abstraction class.
+   // Multiple functional coverage models may be specified by adding their
+   // symbolic names, as defined by the <uvm_ral::coverage_model_e> type.
+   //------------------------------------------------------------------------
    extern function new(string name="", int has_cover=uvm_ral::NO_COVERAGE);
 
+   //
+   // Function: configure
+   // Instance-specific configuration
+   //
+   // Specify the parent block of this block.
+   // A block without parent is a root block.
+   //
+   // If the block file corresponds to a hierarchical RTL structure,
+   // it's contribution to the HDL path is specified as the ~hdl_path~.
+   // Otherwise, the block does not correspond to a hierarchical RTL
+   // structure (e.g. it is physically flattened) and does not contribute
+   // to the hierarchical HDL path of any contained registers or memories.
+   //
    extern virtual function void configure(uvm_ral_block parent=null, string hdl_path="");
 
+   //
+   // Function: create_map
+   // Create an address map in this block
+   //
+   // Create an address map with the specified ~name~.
+   // The base address is usually 0.
+   // ~n_bytes~ specifies the number of bytes in the datapath that accesses
+   // this address map.
+   // ~endian~ specifies the endianness, should a register or sub-map with
+   // a greater number of bytes be accessed.
+   //|
+   //| APB = create_map("APB", 0, 1, uvm_ral::LITTLE_ENDIAN);
+   //|
+   extern virtual function uvm_ral_map create_map(string name,
+                                                  uvm_ral_addr_t base_addr,
+                                                  int unsigned n_bytes,
+                                                  uvm_ral::endianness_e endian);
+
+   //
+   // Function: set_default_map
+   // Defines the default address map
+   //
+   // Set the specified address map as the <default_map> for this
+   // block. The address map must be a map of this address block.
+   //
+   extern function void                set_default_map (uvm_ral_map map);
+
+   //
+   // Variable: default_map
+   // Default address map
+   //
+   // Default address map for this block, to be used when no
+   // address map is specified for a register operation and that
+   // register is accessible from more than one address map.
+   //
+   // It is also the implciit address map for a block with a single,
+   // unamed address map because it has only one physical interface.
+   //
+   uvm_ral_map          default_map;
+   extern function uvm_ral_map         get_default_map ();
+
+
+   extern virtual function void set_parent(uvm_ral_block parent);
+
    /*local*/ extern function void add_block (uvm_ral_block blk);
+   /*local*/ extern function void add_map   (uvm_ral_map map);
    /*local*/ extern function void add_reg   (uvm_ral_reg  rg);
    /*local*/ extern function void add_vreg  (uvm_ral_vreg vreg);
    /*local*/ extern function void add_mem   (uvm_ral_mem  mem);
@@ -75,66 +149,274 @@ virtual class uvm_ral_block extends uvm_object;
    /*local*/ extern function bit Xis_lockedX();
 
 
-  //-----------------
-  // Group: Hierarchy
-  //-----------------
+   //---------------------
+   // Group: Introspection
+   //---------------------
 
 
-   extern virtual function void set_parent(uvm_ral_block parent);
+   //
+   // Function: get_name
+   // Get the simple name
+   //
+   // Return the simple object name of this block.
+   //
+
+   //
+   // Function: get_full_name
+   // Get the hierarchical name
+   //
+   // Return the hierarchal name of this block.
+   // The base of the hierarchical name is the root block.
+   //
+   extern virtual function string        get_full_name();
+
+   //
+   // FUNCTION: get_parent
+   // Get the parent block
+   //
+   // If this a top-level block, returns ~null~. 
+   //
    extern virtual function uvm_ral_block get_parent();
 
-   extern virtual function string get_full_name();
-
+   //
+   // FUNCTION: get_root_blocks
+   // Get the all root blocks
+   //
+   // Returns an array of all root blocks in the simulation.
+   //
    extern static  function void get_root_blocks(ref uvm_ral_block blks[$]);
+      
+   //
+   // Function: get_blocks
+   // Get the sub-blocks
+   //
+   // Get the blocks instantiated in this blocks.
+   // If ~hier~ is TRUE, recursively includes any sub-blocks.
+   //
    extern virtual function void get_blocks           (ref uvm_ral_block  blks[$],   input uvm_ral::hier_e hier=uvm_ral::HIER);
-   extern virtual function void get_registers        (ref uvm_ral_reg    regs[$],   input uvm_ral::hier_e hier=uvm_ral::HIER);
-   extern virtual function void get_memories         (ref uvm_ral_mem    mems[$],   input uvm_ral::hier_e hier=uvm_ral::HIER);
-   extern virtual function void get_fields           (ref uvm_ral_field  fields[$], input uvm_ral::hier_e hier=uvm_ral::HIER);
-   extern virtual function void get_virtual_registers(ref uvm_ral_vreg   regs[$],   input uvm_ral::hier_e hier=uvm_ral::HIER);
-   extern virtual function void get_virtual_fields   (ref uvm_ral_vfield fields[$], input uvm_ral::hier_e hier=uvm_ral::HIER);
+
+   //
+   // Function: get_maps
+   // Get the address maps
+   //
+   // Get the address maps instantiated in this block.
+   // If ~hier~ is TRUE, recursively includes the address maps
+   // in any sub-blocks.
+   //
    extern virtual function void get_maps             (ref uvm_ral_map    maps[$],   input uvm_ral::hier_e hier=uvm_ral::HIER);
 
+   //
+   // Function: get_registers
+   // Get the registers
+   //
+   // Get the registers instantiated in this block.
+   // If ~hier~ is TRUE, recursively includes the registers
+   // in the sub-blocks.
+   //
+   // Note that registers may be located in different and/or multiple
+   // address maps. To get the registers in a specific address map,
+   // use the <uvm_ral_map::get_registers()> method.
+   //
+   extern virtual function void get_registers        (ref uvm_ral_reg    regs[$],   input uvm_ral::hier_e hier=uvm_ral::HIER);
 
-  //-------------------
-  // Group: Get By Name
-  //-------------------
+   //
+   // Function: get_fields
+   // Get the fields
+   //
+   // Get the fields in the registers instantiated in this block.
+   // If ~hier~ is TRUE, recursively includes the fields of the registers
+   // in the sub-blocks.
+   //
+   extern virtual function void get_fields           (ref uvm_ral_field  fields[$], input uvm_ral::hier_e hier=uvm_ral::HIER);
 
+   //
+   // Function get_memories
+   // Get the memories
+   //
+   // Get the memories instantiated in this block.
+   // If ~hier~ is TRUE, recursively includes the memories
+   // in the sub-blocks.
+   //
+   // Note that memories may be located in different and/or multiple
+   // address maps. To get the memories in a specific address map,
+   // use the <uvm_ral_map::get_memories()> method.
+   //
+   extern virtual function void get_memories         (ref uvm_ral_mem    mems[$],   input uvm_ral::hier_e hier=uvm_ral::HIER);
+
+   //
+   // Function: get_virtual_registers
+   // Get the virtual registers
+   //
+   // Get the virtual registers instantiated in this block.
+   // If ~hier~ is TRUE, recursively includes the virtual registers
+   // in the sub-blocks.
+   //
+   extern virtual function void get_virtual_registers(ref uvm_ral_vreg   regs[$],   input uvm_ral::hier_e hier=uvm_ral::HIER);
+
+   //
+   // Function: get_virtual_fields
+   // Get the virtual fields
+   //
+   // Get the virtual fields from the virtual registers instantiated
+   // in this block.
+   // If ~hier~ is TRUE, recursively includes the virtual fields
+   // in the virtual registers in the sub-blocks.
+   //
+   extern virtual function void get_virtual_fields   (ref uvm_ral_vfield fields[$], input uvm_ral::hier_e hier=uvm_ral::HIER);
+>>>>>>> a3e2ff3946089cfba15a789cb07608393221ed86
+
+
+
+   //
+   // FUNCTION: get_block_by_name
+   // Finds a sub-block with the specified simple name.
+   //
+   // The name is the simple name of the block, not a hierarchical name.
+   // relative to this block.
+   // If no block with that name is found in this block, the sub-blocks
+   // are searched for a block of that name and the first one to be found
+   // is returned.
+   //
+   // If no blocks are found, returns ~null~.
+   //
    extern virtual function uvm_ral_block  get_block_by_name  (string name);  
-   extern virtual function uvm_ral_reg    get_reg_by_name    (string name);
-   extern virtual function uvm_ral_vreg   get_vreg_by_name   (string name);
-   extern virtual function uvm_ral_mem    get_mem_by_name    (string name);
-   extern virtual function uvm_ral_field  get_field_by_name  (string name);
-   extern virtual function uvm_ral_vfield get_vfield_by_name (string name);
+
+   //
+   // FUNCTION: get_map_by_name
+   // Finds an address map with the specified simple name.
+   //
+   // The name is the simple name of the address map, not a hierarchical name.
+   // relative to this block.
+   // If no map with that name is found in this block, the sub-blocks
+   // are searched for a map of that name and the first one to be found
+   // is returned.
+   //
+   // If no address maps are found, returns ~null~.
+   //
    extern virtual function uvm_ral_map    get_map_by_name    (string name);
 
+   //
+   // FUNCTION: get_reg_by_name
+   // Finds a register with the specified simple name.
+   //
+   // The name is the simple name of the register, not a hierarchical name.
+   // relative to this block.
+   // If no register with that name is found in this block, the sub-blocks
+   // are searched for a register of that name and the first one to be found
+   // is returned.
+   //
+   // If no registers are found, returns ~null~.
+   //
+   extern virtual function uvm_ral_reg    get_reg_by_name    (string name);
 
-  //-------------------
-  // Group: Address Map
-  //-------------------
+   //
+   // FUNCTION: get_field_by_name
+   // Finds a field with the specified simple name.
+   //
+   // The name is the simple name of the field, not a hierarchical name.
+   // relative to this block.
+   // If no field with that name is found in this block, the sub-blocks
+   // are searched for a field of that name and the first one to be found
+   // is returned.
+   //
+   // If no fields are found, returns ~null~.
+   //
+   extern virtual function uvm_ral_field  get_field_by_name  (string name);
 
-   extern virtual function uvm_ral_map create_map      (string name,
-                                                        uvm_ral_addr_t base_addr,
-                                                        int unsigned n_bytes,
-                                                        uvm_ral::endianness_e endian);
-   extern virtual function void        add_map         (uvm_ral_map map);
-   extern function void                set_default_map (uvm_ral_map map);
-   extern function uvm_ral_map         get_default_map ();
+   //
+   // FUNCTION: get_mem_by_name
+   // Finds a memory with the specified simple name.
+   //
+   // The name is the simple name of the memory, not a hierarchical name.
+   // relative to this block.
+   // If no memory with that name is found in this block, the sub-blocks
+   // are searched for a memory of that name and the first one to be found
+   // is returned.
+   //
+   // If no memories are found, returns ~null~.
+   //
+   extern virtual function uvm_ral_mem    get_mem_by_name    (string name);
+
+   //
+   // FUNCTION: get_vreg_by_name
+   // Finds a virtual register with the specified simple name.
+   //
+   // The name is the simple name of the virtual register,
+   // not a hierarchical name.
+   // relative to this block.
+   // If no virtual register with that name is found in this block,
+   // the sub-blocks are searched for a virtual register of that name
+   // and the first one to be found is returned.
+   //
+   // If no virtual registers are found, returns ~null~.
+   //
+   extern virtual function uvm_ral_vreg   get_vreg_by_name   (string name);
+
+   //
+   // FUNCTION: get_vfield_by_name
+   // Finds a virtual field with the specified simple name.
+   //
+   // The name is the simple name of the virtual field,
+   // not a hierarchical name.
+   // relative to this block.
+   // If no virtual field with that name is found in this block,
+   // the sub-blocks are searched for a virtual field of that name
+   // and the first one to be found is returned.
+   //
+   // If no virtual fields are found, returns ~null~.
+   //
+   extern virtual function uvm_ral_vfield get_vfield_by_name (string name);
 
 
-   //--------------------------------
-   // Group: Attributes & Constraints
-   //--------------------------------
+   //------------------
+   // Group: Attributes
+   //------------------
 
-   extern virtual function void get_constraints(ref string names[$]);
 
+   //
+   // FUNCTION: set_attribute
+   // Set an attribute.
+   //
+   // Set the specified attribute to the specified value for this block.
+   // If the value is specified as "", the specified attribute is deleted.
+   // A warning is issued if an existing attribute is modified.
+   // 
+   // Attribute names are case sensitive. 
+   //
    extern virtual function void set_attribute(string name,
                                               string value);
+
+   //
+   // FUNCTION: get_attribute
+   // Get an attribute value.
+   //
+   // Get the value of the specified attribute for this block.
+   // If the attribute does not exists, "" is returned.
+   // If ~inherited~ is specifed as TRUE, the value of the attribute
+   // is inherited from the nearest block ancestor
+   // for which the attribute
+   // is set if it is not specified for this block.
+   // If ~inherited~ is specified as FALSE, the value "" is returned
+   // if it does not exists in the this block.
+   // 
+   // Attribute names are case sensitive.
+   // 
    extern virtual function string get_attribute(string name,
                                                 bit inherited = 1);
+
+   //
+   // FUNCTION: get_attributes
+   // Get all attribute values.
+   //
+   // Get the name of all attribute for this block.
+   // If ~inherited~ is specifed as TRUE, the value for all attributes
+   // inherited from all block ancestors are included.
+   // 
    extern virtual function void get_attributes(ref string names[string],
                                                    input bit inherited = 1);
 
    
+   extern virtual function void get_constraints(ref string names[$]);
    /*local*/ extern function void Xadd_constraintsX(string name);
 
 
@@ -142,8 +424,52 @@ virtual class uvm_ral_block extends uvm_object;
    // Group: Coverage
    //----------------
 
+
+   //
+   // Function: can_cover
+   // Check if block has coverage model(s)
+   //
+   // Returns TRUE if the block abstraction class contains a coverage model
+   // for all of the models specified.
+   // Models are specified by adding the symbolic value of individual
+   // coverage model as defined in <uvm_ral::coverage_model_e>.
+   //
    extern virtual function bit can_cover(int models);
+
+   //
+   // FUNCTION: set_cover
+   // Turns on coverage measurement.
+   //
+   // Turns the collection of functional coverage measurements on or off
+   // for this block and all blocks, registers, fields and memories within it.
+   // The functional coverage measurement is turned on for every
+   // coverage model specified using <uvm_ral::coverage_model_e> symbolic
+   // identifers.
+   // Multiple functional coverage models can be specified by adding
+   // the functional coverage model identifiers.
+   // All other functional coverage models are turned off.
+   // Returns the sum of all functional
+   // coverage models whose measurements were previously on.
+   //
+   // This method can only control the measurement of functional
+   // coverage models that are present in the various abstraction classes,
+   // then enabled during construction.
+   // See the <uvm_ral_block::can_cover()> method to identify
+   // the available functional coverage models.
+   //
    extern virtual function int set_cover(int is_on);
+
+   //
+   // FUNCTION: is_cover_on
+   // Check if coverage measurement is on.
+   //
+   // Returns TRUE if measurement for all of the specified functional
+   // coverage models are currently on.
+   // Multiple functional coverage models can be specified by adding the
+   // functional coverage model identifiers.
+   //
+   // See <uvm_ral_block::set_cover()> for more details. 
+   //
    extern virtual function bit is_cover_on(int is_on = uvm_ral::ALL_COVERAGE);
 
    /*local*/ extern virtual function void XsampleX(uvm_ral_addr_t  addr,
@@ -156,12 +482,56 @@ virtual class uvm_ral_block extends uvm_object;
    // Group: Access
    //--------------
 
+   //
+   // Function: get_default_path
+   // Default access path
+   //
+   // Returns the default access path for this block.
+   //
    extern virtual function uvm_ral::path_e get_default_path();
 
+
+   //
+   // FUNCTION: reset
+   // Reset the mirror for this block.
+   //
+   // Sets the mirror value of all registers in the block and sub-blocks
+   // to the specified hard or soft reset value.
+   // Does not actually set the value of the registers in the design,
+   // only the values mirrored in their corresponding mirror.
+   //
    extern virtual function void reset(uvm_ral::reset_e kind = uvm_ral::HARD); 
 
+
+   //
+   // FUNCTION: needs_update
+   // Check if DUT registers need to be written
+   //
+   // If a mirror value has been modified in the abstraction model
+   // without actually updating the actual register
+   // (either through randomization or via the <uvm_ral_reg::set()> method,
+   // the mirror and state of the registers are outdated.
+   // The corresponding registers in the DUT need to be updated.
+   //
+   // This method returns TRUE if the state of at lest one register in
+   // the block or sub-blocks needs to be updated to match the mirrored
+   // values.
+   // The mirror values, or actual content of registers, are not modified.
+   // For additional information, see <uvm_ral_block::update()> method.
+   //
    extern virtual function bit needs_update();
 
+
+   //
+   // TASK: update
+   // Batch update of register.
+   //
+   // Using the minimum number of write operations, updates the registers
+   // in the design to match the mirrored values in this block and sub-blocks.
+   // The update can be performed using the physical
+   // interfaces (front-door access) or back-door accesses.
+   // This method performs the reverse operation of <uvm_ral_block::mirror()>. 
+   //
    extern virtual task update(output uvm_ral::status_e  status,
                               input  uvm_ral::path_e    path = uvm_ral::DEFAULT,
                               input  uvm_sequence_base  parent = null,
@@ -170,6 +540,20 @@ virtual class uvm_ral_block extends uvm_object;
                               input  string             fname = "",
                               input  int                lineno = 0);
 
+
+   //
+   // TASK: mirror
+   // Update the mirrored values
+   //
+   // Read all of the registers in this block and sub-blcoks and update their
+   // mirror values to match their corresponding values in the design.
+   // The mirroring can be performed using the physical interfaces
+   // (front-door access) or back-door accesses.
+   // If the ~check~ argument is specified as ~uvm_ral::VERB~,
+   // an error message is issued if the current mirrored value
+   // does not match the actual value in the design.
+   // This method performs the reverse operation of <uvm_ral_block::update()>.
+   // 
    extern virtual task mirror(output uvm_ral::status_e  status,
                               input  uvm_ral::check_e   check = uvm_ral::NO_CHECK,
                               input  uvm_ral::path_e    path  = uvm_ral::DEFAULT,
@@ -178,7 +562,13 @@ virtual class uvm_ral_block extends uvm_object;
                               input  uvm_object         extension = null,
                               input  string             fname = "",
                               input  int                lineno = 0);
-   
+
+   //
+   // Task: write_reg_by_name
+   // Write the named register
+   //
+   // Equivalent to <get_reg_by_name()> followed by <uvm_ral_reg::write()>
+   //
    extern virtual task write_reg_by_name(
                               output uvm_ral::status_e   status,
                               input  string              name,
@@ -191,6 +581,12 @@ virtual class uvm_ral_block extends uvm_object;
                               input  string              fname = "",
                               input  int                 lineno = 0);
 
+   //
+   // Task: read_reg_by_name
+   // Read the named register
+   //
+   // Equivalent to <get_reg_by_name()> followed by <uvm_ral_reg::read()>
+   //
    extern virtual task read_reg_by_name(
                               output uvm_ral::status_e  status,
                               input  string             name,
@@ -203,6 +599,12 @@ virtual class uvm_ral_block extends uvm_object;
                               input  string             fname = "",
                               input  int                lineno = 0);
 
+   //
+   // Task: write_mem_by_name
+   // Write the named memory
+   //
+   // Equivalent to <get_mem_by_name()> followed by <uvm_ral_mem::write()>
+   //
    extern virtual task write_mem_by_name(
                               output uvm_ral::status_e  status,
                               input  string             name,
@@ -216,6 +618,12 @@ virtual class uvm_ral_block extends uvm_object;
                               input  string             fname = "",
                               input  int                lineno = 0);
 
+   //
+   // Task: read_mem_by_name
+   // Read the named memory
+   //
+   // Equivalent to <get_mem_by_name()> followed by <uvm_ral_mem::read()>
+   //
    extern virtual task read_mem_by_name(
                               output uvm_ral::status_e  status,
                               input  string             name,
@@ -229,36 +637,144 @@ virtual class uvm_ral_block extends uvm_object;
                               input  string             fname = "",
                               input  int                lineno = 0);
 
+
    extern virtual task readmemh(string filename);
    extern virtual task writememh(string filename);
 
-   extern virtual function void ral_power_down(bit retain = 0);
-   extern virtual function void ral_power_up(string power_maps = "");
 
    //----------------
    // Group: Backdoor
    //----------------
 
+   //
+   // Function: get_backdoor
+   // Get the user-defined backdoor for all registers in this block
+   //
+   // Return the user-defined backdoor for all register in this
+   // block and all sub-blocks -- unless overriden by a backdoor set
+   // in a lower-level block or in the register itself.
+   //
+   // If ~inherit~ is TRUE, returns the backdoor of the parent block
+   // if none have been specified for this block.
+   //
    extern function uvm_ral_reg_backdoor get_backdoor(bit inherit = 1);
 
+   //
+   // Function: set_backdoor
+   // Set the user-defined backdoor for all registers in this block
+   //
+   // Defines the backdoor mechanism for all registers instantiated
+   // in this block and sub-blocks, unless overriden by a definition
+   // in a lower-level block or register.
+   //
    extern function void set_backdoor        (uvm_ral_reg_backdoor bkdr,
                                              string fname = "",
                                              int lineno = 0);
 
-   extern function void clear_hdl_path      (string kind = "RTL");
-   extern function void add_hdl_path        (string path, string kind = "RTL");
-   extern function bit  has_hdl_path        (string kind = "");
-   extern function void get_hdl_path        (ref string paths[$], input string kind = "");
-   extern function void get_full_hdl_path   (ref string paths[$], input string kind = "");
+   //
+   // Function:  clear_hdl_path
+   // Delete HDL paths
+   //
+   // Remove any previously specified HDL path to the block instance
+   // for the specified design abstraction.
+   //
+   extern function void clear_hdl_path    (string kind = "RTL");
 
-   extern function bit    set_default_hdl_path (string kind);
+   //
+   // Function:  add_hdl_path
+   // Add an HDL path
+   //
+   // Add the specified HDL path to the block instance for the specified
+   // design abstraction. This method may be called more than once for the
+   // same design abstraction if the block is physically duplicated
+   // in the design abstraction
+   //
+   extern function void add_hdl_path      (string path, string kind = "RTL");
+
+   //
+   // Function:   has_hdl_path
+   // Check if a HDL path is specified
+   //
+   // Returns TRUE if the block instance has a HDL path defined for the
+   // specified design abstraction. If no design abstraction is specified,
+   // uses the default design abstraction specified for this block or
+   // the nearest block ancestor with a specified default design abstraction.
+   //
+   extern function bit  has_hdl_path      (string kind = "");
+
+   //
+   // Function:  get_hdl_path
+   // Get the incremental HDL path(s)
+   //
+   // Returns the HDL path(s) defined for the specified design abstraction
+   // in the block instance.
+   // Returns only the component of the HDL paths that corresponds to
+   // the block, not a full hierarchical path
+   //
+   // If no design asbtraction is specified, the default design abstraction
+   // for this block is used.
+   //
+   extern function void get_hdl_path      (ref string paths[$], input string kind = "");
+
+   //
+   // Function:  get_full_hdl_path
+   // Get the full hierarchical HDL path(s)
+   //
+   // Returns the full hierarchical HDL path(s) defined for the specified
+   // design abstraction in the block instance.
+   // There may be more than one path returned even
+   // if only one path was defined for the block instance, if any of the
+   // parent components have more than one path defined for the same design
+   // abstraction
+   //
+   // If no design asbtraction is specified, the default design abstraction
+   // for each ancestor block is used to get each incremental path.
+   //
+   extern function void get_full_hdl_path (ref string paths[$], input string kind = "");
+
+   //
+   // Function:    set_default_hdl_path
+   // Set the default design abstraction
+   //
+   // Set the default design abstraction for this block instance.
+   //
+   extern function void   set_default_hdl_path (string kind);
+
+   //
+   // Function:  get_default_hdl_path
+   // Get the default design abstraction
+   //
+   // Returns the default design abstraction for this block instance.
+   // If a default design abstraction has not been explicitly set for this
+   // block instance, returns the default design absraction for the
+   // nearest block ancestor.
+   // Returns "" if no default design abstraction has been specified.
+   //
    extern function string get_default_hdl_path ();
-   extern function void   set_hdl_path_root    (string path, string kind = "RTL");
-   extern function bit    is_hdl_path_root     (string kind = "");
 
-   //-----------------
-   // Group: Basic Ops
-   //-----------------
+   //
+   // Function: set_hdl_path_root
+   // Specify a root HDL path
+   //
+   // Set the specified path as the absolute HDL path to the block instance
+   // for the specified design abstraction.
+   // This absolute root path is preppended to all hierarchical paths
+   // under this block. The HDL path of any ancestor block is ignored.
+   // This method overrides any incremental path for the
+   // same design abstraction specified using <add_hdl_path>.
+   //
+   extern function void   set_hdl_path_root    (string path, string kind = "RTL");
+
+   //
+   // Function: is_hdl_path_root
+   // Check if this block has an absolute path
+   //
+   // Returns TRUE if an absolute HDL path to the block instance
+   // for the specified design abstraction has been defined.
+   // If no design asbtraction is specified, the default design abstraction
+   // for this block is used.
+   //
+   extern function bit    is_hdl_path_root     (string kind = "");
 
    extern virtual function void   do_print      (uvm_printer printer);
    extern virtual function void   do_copy       (uvm_object rhs);
@@ -273,7 +789,7 @@ virtual class uvm_ral_block extends uvm_object;
 
 endclass: uvm_ral_block
 
-//------------------------------------------------------------------------------
+//------------------------------------------------------------------------
 
 
 //---------------
@@ -297,8 +813,7 @@ function void uvm_ral_block::configure(uvm_ral_block parent=null, string hdl_pat
   this.parent = parent; 
   if (parent != null)
     this.parent.add_block(this);
-  if (hdl_path != "")
-    add_hdl_path(hdl_path);
+  add_hdl_path(hdl_path);
 endfunction
 
 
@@ -802,19 +1317,6 @@ function bit uvm_ral_block::is_cover_on(int is_on = uvm_ral::ALL_COVERAGE);
 endfunction: is_cover_on
 
 
-// ral_power_done
-
-function void uvm_ral_block::ral_power_down(bit retain = 0);
-endfunction: ral_power_down
-
-
-// ral_power_up
-
-function void uvm_ral_block::ral_power_up(string power_maps = "");
-endfunction: ral_power_up
-
-
-
 //-------------------------
 // Attributes & Constraints
 //-------------------------
@@ -1137,7 +1639,6 @@ endtask: writememh
 
 function uvm_ral_map uvm_ral_block::create_map(string name, uvm_ral_addr_t base_addr, int unsigned n_bytes, uvm_ral::endianness_e endian);
 
-   //example: APB = create_map("APB", 1, uvm_ral::LITTLE_ENDIAN);
    uvm_ral_map  map;
 
    if (this.locked) begin
@@ -1248,8 +1749,10 @@ function void uvm_ral_block::set_backdoor(uvm_ral_reg_backdoor bkdr,
                                           int                  lineno = 0);
    bkdr.fname = fname;
    bkdr.lineno = lineno;
-   if (this.backdoor != null)
-     this.backdoor.kill_update_thread();
+   if (this.backdoor != null &&
+       this.backdoor.has_update_threads()) begin
+      `uvm_warning("RAL", "Previous register backdoor still has update threads running. Backdoors with active mirroring should only be set before simulation starts.");
+   end
    this.backdoor = bkdr;
 endfunction: set_backdoor
 
@@ -1396,25 +1899,17 @@ endfunction
 
 // set_default_hdl_path
 
-function bit uvm_ral_block::set_default_hdl_path(string kind);
+function void uvm_ral_block::set_default_hdl_path(string kind);
 
   if (kind == "") begin
     if (parent == null) begin
       `uvm_error("RAL",{"Block has no parent. ",
            "Must specify a valid HDL abstraction (kind)"})
-      return 0;
     end
     kind = parent.get_default_hdl_path();
   end
 
-  if (!has_hdl_path(kind)) begin
-    `uvm_error("RAL",{"Block does not have hdl path defined for abstraction '",kind,"'"})
-    return 0;
-  end
-
   default_hdl_path = kind;
-  return 1;
-
 endfunction
 
 

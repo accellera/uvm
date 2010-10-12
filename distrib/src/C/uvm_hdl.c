@@ -26,7 +26,7 @@
 
 
 /* 
- * TITLE: UVM HDL access C code.
+ * UVM HDL access C code.
  *
  * This code is not strictly associated with the
  * UVM register library. It is used by the UVM register
@@ -35,8 +35,6 @@
  */
 
 /*
- * FUNCTION: uvm_hdl_max_width()
- *
  * This C code checks to see if there is PLI handle
  * with a value set to define the maximum bit width.
  *
@@ -61,8 +59,6 @@ static int uvm_hdl_max_width()
 }
 
 /*
- * FUNCTION: uvm_hdl_set_vlog
- *
  * Given a path, look the path name up using the PLI,
  * and set it to 'value'.
  */
@@ -104,7 +100,9 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval *value, PLI_INT32 flag)
       *value = value_s.value.vector;
     }
   }
+#ifndef VCS
   vpi_release_handle(r);
+#endif
   return 1;
 }
 
@@ -117,7 +115,9 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval *value, PLI_INT32 flag)
       vpi_printf("ERROR UVM : hdl path '%s' is %0d bits,\n", path, size);
       vpi_printf(" but the maximum size is %0d, redefine using a compile\n", maxsize);
       vpi_printf(" flag. i.e. %s\n", "vlog ... +define+UVM_HDL_MAX_WIDTH=<value>\n");
+#ifndef VCS
       vpi_release_handle(r);
+#endif
       return 0;
     }
     chunks = (size-1)/32 + 1;
@@ -137,15 +137,15 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval *value, PLI_INT32 flag)
     vpi_put_value(r, &value_s, &time_s, flag);  
     free (value_p);
   }
+#ifndef VCS
   vpi_release_handle(r);
+#endif
   return 1;
 }
 #endif
 
 
 /*
- * FUNCTION: uvm_hdl_get_vlog
- *
  * Given a path, look the path name up using the PLI
  * and return its 'value'.
  */
@@ -177,7 +177,9 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
       vpi_printf(" but the maximum size is %0d, redefine using a compile\n",maxsize);
       vpi_printf(" flag. i.e. %s\n", "vlog ... +define+UVM_HDL_MAX_WIDTH=<value>\n");
       //tf_dofinish();
+#ifndef VCS
       vpi_release_handle(r);
+#endif
       return 0;
     }
     chunks = (size-1)/32 + 1;
@@ -199,14 +201,14 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 #endif
     }
   }
+#ifndef VCS
   vpi_release_handle(r);
+#endif
   return 1;
 }
 
 
 /*
- * FUNCTION: uvm_hdl_check_path
- *
  * Given a path, look the path name up using the PLI,
  * but don't set or get. Just check.
  *
@@ -220,13 +222,13 @@ int uvm_hdl_check_path(char *path)
       return 0;
   else 
     return 1;
+#ifndef VCS
   vpi_release_handle(r);
+#endif
 }
 
 
 /*
- * FUNCTION: uvm_hdl_read
- *
  * Given a path, look the path name up using the PLI
  * or the FLI, and return its 'value'.
  */
@@ -236,8 +238,6 @@ int uvm_hdl_read(char *path, p_vpi_vecval value)
 }
 
 /*
- * FUNCTION: uvm_hdl_deposit
- *
  * Given a path, look the path name up using the PLI
  * or the FLI, and set it to 'value'.
  */
@@ -248,8 +248,6 @@ int uvm_hdl_deposit(char *path, p_vpi_vecval value)
 
 
 /*
- * FUNCTION: uvm_hdl_force
- *
  * Given a path, look the path name up using the PLI
  * or the FLI, and set it to 'value'.
  */
@@ -260,8 +258,6 @@ int uvm_hdl_force(char *path, p_vpi_vecval value)
 
 
 /*
- * FUNCTION: uvm_hdl_release_and_read
- *
  * Given a path, look the path name up using the PLI
  * or the FLI, and release it.
  */
@@ -271,14 +267,12 @@ int uvm_hdl_release_and_read(char *path, p_vpi_vecval value)
 }
 
 /*
- * FUNCTION: uvm_hdl_release
- *
  * Given a path, look the path name up using the PLI
  * or the FLI, and release it.
  */
 int uvm_hdl_release(char *path)
 {
   s_vpi_vecval value;
-  return uvm_hdl_set_vlog(path, &value, vpiReleaseFlag);
+  p_vpi_vecval valuep = &value;
+  return uvm_hdl_set_vlog(path, &valuep, vpiReleaseFlag);
 }
-

@@ -20,6 +20,10 @@
 // -------------------------------------------------------------
 // 
 
+//
+// TITLE: Bit Bashing Test Sequence
+//
+
 
 class uvm_ral_reg_bit_bash_seq extends uvm_ral_sequence;
 

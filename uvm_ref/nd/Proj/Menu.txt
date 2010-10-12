@@ -45,13 +45,18 @@ Timestamp: Updated month day, year
 
 File: Intro  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/intro.txt)
 
+Group: Globals  {
+
+   File: Types, Enums, Policies  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_object_globals.svh)
+   File: Globals  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_globals.svh)
+   }  # Group: Globals
+
 Group: Base  {
 
    File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/base.txt)
    File: uvm_void  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_misc.svh)
    File: uvm_object  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_object.svh)
    File: uvm_transaction  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_transaction.svh)
-   File: uvm_component  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_component.svh)
    File: uvm_root  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_root.svh)
    File: uvm_phase  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_phases.sv)
    File: uvm_port_base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_port_base.svh)
@@ -87,7 +92,6 @@ Group: Containers  {
 
    File: uvm_pool  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_pool.svh)
    File: uvm_queue  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_queue.svh)
-   File: uvm_callback  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_callback.svh)
    }  # Group: Containers
 
 Group: Policies  {
@@ -116,6 +120,8 @@ Group: TLM  {
 Group: Components  {
 
    File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/components.txt)
+   File: uvm_component  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_component.svh)
+   File: uvm_callback  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_callback.svh)
    File: uvm_test  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/methodology/uvm_test.svh)
    File: uvm_env  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/methodology/uvm_env.svh)
    File: uvm_agent  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/methodology/uvm_agent.svh)
@@ -164,11 +170,44 @@ Group: Macros  {
    File: TLM Implementation Port Declaration Macros  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/macros/uvm_tlm_defines.svh)
    }  # Group: Macros
 
-Group: Globals  {
+Group: Register Layer  {
 
-   File: Types, Enums, Policies  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_object_globals.svh)
-   File: Globals  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_globals.svh)
-   }  # Group: Globals
+   File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/registers.txt)
+   File: Globals  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral.svh)
+
+   Group: Register Model  {
+
+      File: Blocks  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_block.svh)
+      File: Address Maps  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_map.svh)
+      File: Register Files  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_regfile.svh)
+      File: Registers  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_reg.svh)
+      File: Fields  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_field.svh)
+      File: Memories  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_mem.svh)
+      File: Virtual Fields  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_vfield.svh)
+      File: Virtual Registers  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_vreg.svh)
+      File: Memory Allocation Mgr  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_mam.svh)
+      }  # Group: Register Model
+
+   Group: Tests  {
+
+      File: Built-In Test Sequences  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_test_all.svh)
+      File: Hardware Reset Test Sequence  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_test_hw_reset.svh)
+      File: Bit Bashing Test Sequence  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_test_bit_bash.svh)
+      File: Register Access Test Sequence  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_test_reg_access.svh)
+      File: Shared Register Access test Sequence  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_test_shared_access.svh)
+      File: Memory Access Test Sequence  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_test_mem_access.svh)
+      File: Memory Walk  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_test_mem_walk.svh)
+      File: User-Defined Sequences  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_sequence.svh)
+      }  # Group: Tests
+
+   Group: DUT Integration  {
+
+      File: Register Model Adaptor  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_adapter.svh)
+      File: Backdoors  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_ral_backdoor.svh)
+      File: HDL access  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/ral/uvm_hdl.svh)
+      }  # Group: DUT Integration
+
+   }  # Group: Register Layer
 
 Group: Index  {
 

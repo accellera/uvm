@@ -29,7 +29,20 @@ class uvm_ral_map_info;
 endclass
 
 
-
+// -------------------------------------------------------------
+//
+// Class: uvm_ral_map
+//
+// Address map abstraction class
+//
+// This class represents an address map.
+// An address map is a collection of registers and memories
+// accessible via a specific physical interface.
+// Address maps can be composed into higher-level address maps.
+//
+// Address maps are created using the <uvm_ral_block::create_map()>
+// method.
+//
 class uvm_ral_map extends uvm_object;
 
    `uvm_object_utils(uvm_ral_map)
@@ -79,34 +92,90 @@ class uvm_ral_map extends uvm_object;
    // Group: Initialization
    //----------------------
 
-   extern function new(string name = "");
+   /*local*/ extern function new(string name = "");
+   /*local*/ extern function void configure(uvm_ral_block          parent,
+                                            uvm_ral_addr_t         base_addr,
+                                            int unsigned           n_bytes,
+                                            uvm_ral::endianness_e  endian);
 
-   extern function void configure(uvm_ral_block          parent,
-                                  uvm_ral_addr_t         base_addr,
-                                  int unsigned           n_bytes,
-                                  uvm_ral::endianness_e  endian);
-
-
+   //
+   // Function: add_reg
+   //
+   // Add a register
+   //
+   // Add the specified register instance to this address map.
+   // The register is located at the specified base address and has the
+   // specified access rights ("RW", "RO" or "WO").
+   // The number of consecutive physical addresses occupied by the register
+   // depends on the width of the register and the number of bytes in the
+   // physical interface corresponding to this address map.
+   //
+   // If ~unmapped~ is TRUE, the register does not occupy any
+   // physical addresses and the base address is ignored.
+   // Unmapped registers require a user-defined ~frontdoor~ to be specified.
+   //
+   // A register may be added to multiple address maps
+   // if it is accessible from multiple physical interfaces.
+   // A register may only be added to an address map whose parent block
+   // is the same as the register's parent block.
+   //
    extern virtual function void   add_reg       (uvm_ral_reg   rg,
                                                  uvm_ral_addr_t offset,
                                                  string rights = "RW",
                                                  bit unmapped=0,
                                                  uvm_ral_reg_frontdoor frontdoor=null);
 
+   //
+   // Function: add_mem
+   //
+   // Add a memory
+   //
+   // Add the specified memory instance to this address map.
+   // The memory is located at the specified base address and has the
+   // specified access rights ("RW", "RO" or "WO").
+   // The number of consecutive physical addresses occupied by the memory
+   // depends on the width and size of the memory and the number of bytes in the
+   // physical interface corresponding to this address map.
+   //
+   // If ~unmapped~ is TRUE, the memory does not occupy any
+   // physical addresses and the base address is ignored.
+   // Unmapped memorys require a user-defined ~frontdoor~ to be specified.
+   //
+   // A memory may be added to multiple address maps
+   // if it is accessible from multiple physical interfaces.
+   // A memory may only be added to an address map whose parent block
+   // is the same as the memory's parent block.
+   //
    extern virtual function void   add_mem       (uvm_ral_mem   mem,
                                                  uvm_ral_addr_t offset,
                                                  string rights = "RW",
                                                  bit unmapped=0,
                                                  uvm_ral_mem_frontdoor frontdoor=null);
 
-   extern virtual function void   add_parent_map(uvm_ral_map  parent_map,
-                                                 uvm_ral_addr_t offset);
-
+   //
+   // Function: add_submap
+   //
+   // Add an address map
+   //
+   // Add the specified address map instance to this address map.
+   // The address map is located at the specified base address.
+   // The number of consecutive physical addresses occupied by the submap
+   // depends on the number of bytes in the physical interface
+   // that corresponds to the submap,
+   // the number of addresses used in the submap and
+   // the number of bytes in the
+   // physical interface corresponding to this address map.
+   //
+   // An address map may be added to multiple address maps
+   // if it is accessible from multiple physical interfaces.
+   // An address map may only be added to an address map
+   // in the grand-parent block of the address submap.
+   //
    extern virtual function void   add_submap    (uvm_ral_map    child_map,
                                                  uvm_ral_addr_t offset);
 
    extern virtual function void   set_sequencer (uvm_sequencer_base sequencer,
-                                                 uvm_ral_adapter adapter);
+                                                 uvm_ral_adapter    adapter);
 
    extern virtual function void           set_submap_offset (uvm_ral_map submap,
                                                              uvm_ral_addr_t offset);
@@ -114,22 +183,51 @@ class uvm_ral_map extends uvm_object;
 
    extern virtual function void   set_base_addr (uvm_ral_addr_t  offset);
 
-   extern function bit Xcheck_child_overlapX(uvm_ral_map  child_map,
-                                             int unsigned offset,
-                                             int unsigned size);
+   /*local*/ extern virtual function void   add_parent_map(uvm_ral_map  parent_map,
+                                                           uvm_ral_addr_t offset);
 
-   extern function bit Xcheck_rangeX        (int unsigned str_addr,
-                                             int unsigned end_addr,
-                                             string kind,
-                                             int unsigned new_str_addr,
-                                             int unsigned new_end_addr,
-                                             string new_name);
+   /*local*/ extern function bit Xcheck_child_overlapX(uvm_ral_map  child_map,
+                                                       int unsigned offset,
+                                                       int unsigned size);
 
-   extern virtual function void   Xverify_map_configX();
+   /*local*/ extern function bit Xcheck_rangeX        (int unsigned str_addr,
+                                                       int unsigned end_addr,
+                                                       string kind,
+                                                       int unsigned new_str_addr,
+                                                       int unsigned new_end_addr,
+                                                       string new_name);
+
+   /*local*/ extern virtual function void   Xverify_map_configX();
 
 
-   // Group: Get
+   //---------------------
+   // Group: Introspection
+   //---------------------
 
+   //
+   // Function: get_name
+   // Get the simple name
+   //
+   // Return the simple object name of this address map.
+   //
+
+   //
+   // Function: get_full_name
+   // Get the hierarchical name
+   //
+   // Return the hierarchal name of this address map.
+   // The base of the hierarchical name is the root block.
+   //
+   extern virtual function string      get_full_name();
+
+   //
+   // Function: get_root_map
+   // Get the externally-visible address map
+   //
+   // Get the top-most address map where this address map is instantiated.
+   // It corresponds to the externally-visible address map that can
+   // be accessed by the verification environment.
+   //
    extern virtual function uvm_ral_map           get_root_map();
    extern virtual function uvm_ral_block         get_parent    ();
    extern virtual function uvm_ral_map           get_parent_map();
@@ -140,17 +238,92 @@ class uvm_ral_map extends uvm_object;
    extern virtual function uvm_sequencer_base    get_sequencer (uvm_ral::hier_e hier=uvm_ral::HIER);
    extern virtual function uvm_ral_adapter       get_adapter   (uvm_ral::hier_e hier=uvm_ral::HIER);
 
+
+   //
+   // Function: get_submaps
+   // Get the address sub-maps
+   //
+   // Get the address maps instantiated in this address map.
+   // If ~hier~ is TRUE, recursively includes the address maps,
+   // in the sub-maps.
+   //
    extern virtual function void  get_submaps           (ref uvm_ral_map maps[$],      input uvm_ral::hier_e hier=uvm_ral::HIER);
+
+   //
+   // Function: get_registers
+   // Get the registers
+   //
+   // Get the registers instantiated in this address map.
+   // If ~hier~ is TRUE, recursively includes the registers
+   // in the sub-maps.
+   //
    extern virtual function void  get_registers         (ref uvm_ral_reg regs[$],      input uvm_ral::hier_e hier=uvm_ral::HIER);
+
+   //
+   // Function: get_fields
+   // Get the fields
+   //
+   // Get the fields in the registers instantiated in this address map.
+   // If ~hier~ is TRUE, recursively includes the fields of the registers
+   // in the sub-maps.
+   //
    extern virtual function void  get_fields            (ref uvm_ral_field fields[$],  input uvm_ral::hier_e hier=uvm_ral::HIER);
+
+   //
+   // Function get_memories
+   // Get the memories
+   //
+   // Get the memories instantiated in this address map.
+   // If ~hier~ is TRUE, recursively includes the memories
+   // in the sub-maps.
+   //
    extern virtual function void  get_memories          (ref uvm_ral_mem mems[$],      input uvm_ral::hier_e hier=uvm_ral::HIER);
+
+   //
+   // Function: get_virtual_registers
+   // Get the virtual registers
+   //
+   // Get the virtual registers instantiated in this address map.
+   // If ~hier~ is TRUE, recursively includes the virtual registers
+   // in the sub-maps.
+   //
    extern virtual function void  get_virtual_registers (ref uvm_ral_vreg regs[$],     input uvm_ral::hier_e hier=uvm_ral::HIER);
+
+   //
+   // Function: get_virtual_fields
+   // Get the virtual fields
+   //
+   // Get the virtual fields from the virtual registers instantiated
+   // in this address map.
+   // If ~hier~ is TRUE, recursively includes the virtual fields
+   // in the virtual registers in the sub-maps.
+   //
    extern virtual function void  get_virtual_fields    (ref uvm_ral_vfield fields[$], input uvm_ral::hier_e hier=uvm_ral::HIER);
+
 
    extern virtual function uvm_ral_map_info get_reg_map_info(uvm_ral_reg rg,  bit error=1);
    extern virtual function uvm_ral_map_info get_mem_map_info(uvm_ral_mem mem, bit error=1);
 
+
    extern virtual function int unsigned          get_size      ();
+
+   //
+   // Function: get_physical_addresses
+   // Translate a local address into external addresses
+   //
+   // Identify the sequence of addresses that must be accessed physically
+   // to access the specified number of bytes at the specified address
+   // within this address map.
+   // Returns the number of bytes of valid data in each access.
+   //
+   // Returns in ~addr~ a list of address in little endian order,
+   // with the granularity of the top-level address map.
+   //
+   // A register is specified using a base address with ~mem_offset~ as 0.
+   // A location within a memory is specified using the base address
+   // of the memory and the index of the location within that memory.
+   //
+
    extern virtual function int get_physical_addresses(uvm_ral_addr_t        base_addr,
                                                       uvm_ral_addr_t        mem_offset,
                                                       int unsigned          n_bytes,
@@ -159,27 +332,71 @@ class uvm_ral_map extends uvm_object;
    function void set_auto_predict(bit on=1); m_auto_predict = on; endfunction
    function bit  get_auto_predict(); return m_auto_predict; endfunction
    
-   //---------------------
-   // Group: Get-by-Offset
-   //---------------------
-
+   //
+   // Function: get_reg_by_offset
+   // Get register mapped at offset
+   //
+   // Identify the register located at the specified offset within
+   // this address map.
+   // Returns ~null~ if no such register is found.
+   //
    extern virtual function uvm_ral_reg    get_reg_by_offset(uvm_ral_addr_t offset);
+
+   //
+   // Function: get_mem_by_offset
+   // Get memory mapped at offset
+   //
+   // Identify the memory located at the specified offset within
+   // this address map. The offset may refer to any memory location
+   // in that memory.
+   // Returns ~null~ if no such memory is found.
+   //
    extern virtual function uvm_ral_mem    get_mem_by_offset(uvm_ral_addr_t offset);
 
    //------------------
    // Group: Attributes
    //------------------
 
+   //
+   // FUNCTION: set_attribute
+   // Set an attribute.
+   //
+   // Set the specified attribute to the specified value for this address map.
+   // If the value is specified as "", the specified attribute is deleted.
+   // A warning is issued if an existing attribute is modified.
+   // 
+   // Attribute names are case sensitive. 
+   //
    extern virtual function void        set_attribute(string name, string value);
+
+   //
+   // FUNCTION: get_attribute
+   // Get an attribute value.
+   //
+   // Get the value of the specified attribute for this address map.
+   // If the attribute does not exists, "" is returned.
+   // If ~inherited~ is specifed as TRUE, the value of the attribute
+   // is inherited from the nearest block ancestor for which the attribute
+   // is set if it is not specified for this address map.
+   // If ~inherited~ is specified as FALSE, the value "" is returned
+   // if it does not exists in the this address map.
+   // 
+   // Attribute names are case sensitive.
+   // 
    extern virtual function string      get_attribute(string name, bit inherited = 1);
+
+
+   //
+   // FUNCTION: get_attributes
+   // Get all attribute values.
+   //
+   // Get the value for all attribute for this address map.
+   // If ~inherited~ is specifed as TRUE, the value for all attributes
+   // inherited from all block ancestors are included.
+   // 
    extern virtual function void        get_attributes(ref string names[string],
                                                       input bit inherited=1);
 
-   //--------------------
-   // Group: Standard Ops
-   //--------------------
-
-   extern virtual function string      get_full_name();
    extern virtual function string      convert2string();
    extern virtual function uvm_object  clone();
    extern virtual function void        do_print (uvm_printer printer);
@@ -728,17 +945,6 @@ endfunction
 
 // get_physical_addresses
 
-// Identify the sequence of addresses that must be accessed physically
-// to access the specified number of bytes at the specified address
-// within the specified block or system. Returns the number of bytes
-// of valid data in each access.
-//
-// Returns a list of address in little endian order, with the granularity
-// of the top-level system
-//
-// A register is specified as a base address with mem_indx == 0.
-// A location within a memory is specified as an index from a base address.
-//
 function int uvm_ral_map::get_physical_addresses(uvm_ral_addr_t     base_addr,
                                                  uvm_ral_addr_t     mem_offset,
                                                  int unsigned       n_bytes,

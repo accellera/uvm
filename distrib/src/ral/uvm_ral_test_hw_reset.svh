@@ -20,6 +20,9 @@
 // -------------------------------------------------------------
 // 
 
+//
+// TITLE: Hardware Reset Test Sequence
+//
 
 class uvm_ral_hw_reset_seq extends uvm_ral_sequence;
 

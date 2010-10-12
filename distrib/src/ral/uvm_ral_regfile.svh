@@ -21,12 +21,15 @@
 //
 
 
-//------------------------------------------------------------------------------
 //
 // CLASS: uvm_ral_regfile
+// Register file abstraction base class
 //
-//------------------------------------------------------------------------------
-
+// A register file is a collection of register files and registers
+// used to create regular repeated structures.
+//
+// Register files are usually instantiated as arrays.
+//
 virtual class uvm_ral_regfile extends uvm_object;
 
    local uvm_ral_block     parent;
@@ -43,6 +46,24 @@ virtual class uvm_ral_regfile extends uvm_object;
 
    extern function                  new        (string name="");
 
+   //
+   // Function: configure
+   // Configure a register file instance
+   //
+   // Specify the parent block and register file of the register file
+   // instance.
+   // If the register file is instantiated in a block,
+   // ~rf_parent~ is specified as ~null~.
+   // If the register file is instantiated in a register file,
+   // ~blk_parent~ must be the block parent of that register file and
+   // ~rf_parent~ is specified as that register file.
+   //
+   // If the register file corresponds to a hierarchical RTL structure,
+   // it's contribution to the HDL path is specified as the ~hdl_path~.
+   // Otherwise, the register file does not correspond to a hierarchical RTL
+   // structure (e.g. it is physically flattened) and does not contribute
+   // to the hierarchical HDL path of any contained registers.
+   //
    extern virtual function void     configure  (uvm_ral_block blk_parent,
                                                 uvm_ral_regfile rf_parent,
                                                 string hdl_path = "");
@@ -51,19 +72,83 @@ virtual class uvm_ral_regfile extends uvm_object;
    // Group: Attributes & Constraints
    //--------------------------------
 
+   //
+   // FUNCTION: set_attribute
+   // Set an attribute.
+   //
+   // Set the specified attribute to the specified value for this register file.
+   // If the value is specified as "", the specified attribute is deleted.
+   // A warning is issued if an existing attribute is modified.
+   // 
+   // Attribute names are case sensitive. 
+   //
    extern virtual function void   set_attribute   (string name, string value);
+
+   //
+   // FUNCTION: get_attribute
+   // Get an attribute value.
+   //
+   // Get the value of the specified attribute for this register file.
+   // If the attribute does not exists, "" is returned.
+   // If ~inherited~ is specifed as TRUE, the value of the attribute
+   // is inherited from the nearest register file or block ancestor
+   // for which the attribute
+   // is set if it is not specified for this register file.
+   // If ~inherited~ is specified as FALSE, the value "" is returned
+   // if it does not exists in the this register file.
+   // 
+   // Attribute names are case sensitive.
+   // 
    extern virtual function string get_attribute   (string name, bit inherited = 1);
+
+   //
+   // FUNCTION: get_attributes
+   // Get all attribute values.
+   //
+   // Get the name of all attribute for this register file.
+   // If ~inherited~ is specifed as TRUE, the value for all attributes
+   // inherited from all register file and block ancestors are included.
+   // 
    extern virtual function void   get_attributes  (ref string names[string],
                                                    input bit inherited = 1);
+
    extern virtual function void   get_constraints (ref string names[]);
    /*local*/ extern function void Xadd_constraintsX(string name);
 
 
-   //-----------
-   // Group: Get
-   //-----------
+   //---------------------
+   // Group: Introspection
+   //---------------------
 
-   extern virtual function uvm_ral_block    get_block       ();
+   //
+   // Function: get_name
+   // Get the simple name
+   //
+   // Return the simple object name of this register file.
+   //
+
+   //
+   // Function: get_full_name
+   // Get the hierarchical name
+   //
+   // Return the hierarchal name of this register file.
+   // The base of the hierarchical name is the root block.
+   //
+   extern virtual function string        get_full_name();
+
+   //
+   // FUNCTION: get_parent
+   // Get the parent block
+   //
+   extern virtual function uvm_ral_block get_parent ();
+   extern virtual function uvm_ral_block get_block  ();
+
+   //
+   // FUNCTION: get_regfile
+   // Get the parent register file
+   //
+   // Returns ~null~ if this register file is instantiated in a block.
+   //
    extern virtual function uvm_ral_regfile  get_regfile     ();
 
 
@@ -71,22 +156,96 @@ virtual class uvm_ral_regfile extends uvm_object;
    // Group: Backdoor
    //----------------
 
+   //
+   // Function:  clear_hdl_path
+   // Delete HDL paths
+   //
+   // Remove any previously specified HDL path to the register file instance
+   // for the specified design abstraction.
+   //
    extern function void clear_hdl_path    (string kind = "RTL");
+
+   //
+   // Function:  add_hdl_path
+   // Add an HDL path
+   //
+   // Add the specified HDL path to the register file instance for the specified
+   // design abstraction. This method may be called more than once for the
+   // same design abstraction if the register file is physically duplicated
+   // in the design abstraction
+   //
    extern function void add_hdl_path      (string path, string kind = "RTL");
+
+   //
+   // Function:   has_hdl_path
+   // Check if a HDL path is specified
+   //
+   // Returns TRUE if the register file instance has a HDL path defined for the
+   // specified design abstraction. If no design abstraction is specified,
+   // uses the default design abstraction specified for the nearest
+   // enclosing register file or block
+   //
+   // If no design asbtraction is specified, the default design abstraction
+   // for this register file is used.
+   //
    extern function bit  has_hdl_path      (string kind = "");
+
+   //
+   // Function:  get_hdl_path
+   // Get the incremental HDL path(s)
+   //
+   // Returns the HDL path(s) defined for the specified design abstraction
+   // in the register file instance. If no design abstraction is specified, uses
+   // the default design abstraction specified for the nearest enclosing
+   // register file or block.
+   // Returns only the component of the HDL paths that corresponds to
+   // the register file, not a full hierarchical path
+   //
+   // If no design asbtraction is specified, the default design abstraction
+   // for this register file is used.
+   //
    extern function void get_hdl_path      (ref string paths[$], input string kind = "");
+
+   //
+   // Function:  get_full_hdl_path
+   // Get the full hierarchical HDL path(s)
+   //
+   // Returns the full hierarchical HDL path(s) defined for the specified
+   // design abstraction in the register file instance. If no design abstraction
+   // is specified, uses the default design abstraction specified for the
+   // nearest enclosing register file or block.
+   // There may be more than one path returned even
+   // if only one path was defined for the register file instance, if any of the
+   // parent components have more than one path defined for the same design
+   // abstraction
+   //
+   // If no design asbtraction is specified, the default design abstraction
+   // for each ancestor register file or block is used to get each
+   // incremental path.
+   //
    extern function void get_full_hdl_path (ref string paths[$], input string kind = "");
 
+   //
+   // Function:    set_default_hdl_path
+   // Set the default design abstraction
+   //
+   // Set the default design abstraction for this register file instance.
+   //
    extern function void   set_default_hdl_path (string kind);
+
+   //
+   // Function:  get_default_hdl_path
+   // Get the default design abstraction
+   //
+   // Returns the default design abstraction for this register file instance.
+   // If a default design abstraction has not been explicitly set for this
+   // register file instance, returns the default design absraction for the
+   // nearest register file or block ancestor.
+   // Returns "" if no default design abstraction has been specified.
+   //
    extern function string get_default_hdl_path ();
 
 
-   //--------------------
-   // Group: Standard Ops
-   //--------------------
-
-   extern virtual function string        get_full_name();
-   extern virtual function uvm_ral_block get_parent ();
    extern virtual function void          do_print (uvm_printer printer);
    extern virtual function string        convert2string();
    extern virtual function uvm_object    clone      ();
@@ -116,8 +275,7 @@ endfunction: new
 function void uvm_ral_regfile::configure(uvm_ral_block blk_parent, uvm_ral_regfile rf_parent, string hdl_path = "");
    this.parent = parent;
    this.m_rf = rf_parent;
-   if (hdl_path != "")
-     this.add_hdl_path(hdl_path);
+   this.add_hdl_path(hdl_path);
 endfunction: configure
 
 
@@ -382,11 +540,6 @@ function void uvm_ral_regfile::set_default_hdl_path(string kind);
            "Must specify a valid HDL abstraction (kind)"})
       return;
     end
-  end
-
-  if (!has_hdl_path(kind)) begin
-    `uvm_error("RAL",{"Register file does not have hdl path defined for abstraction '",kind,"'"})
-    return;
   end
 
   default_hdl_path = kind;

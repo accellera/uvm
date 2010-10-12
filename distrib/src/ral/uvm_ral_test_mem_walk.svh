@@ -21,6 +21,10 @@
 // 
 
 
+//
+// TITLE: Memory Walk test Sequence
+//
+
 //------------------------------------------------------------------------------
 // CLASS: uvm_ral_single_mem_walk_seq
 //

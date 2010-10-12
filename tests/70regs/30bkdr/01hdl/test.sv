@@ -40,6 +40,7 @@ typedef enum { READ, DEPOSIT, FORCE, RELEASE } op_e;
 
 task  op(op_e oper, string hdl, bit [7:0] wr_val=0, bit [7:0] exp_val, int lineno, time force_time=0);
 
+
   bit [7:0] rd_val;
 
   if (oper == DEPOSIT) begin
@@ -94,6 +95,7 @@ begin
    
    #50; // get between updates to q
 
+   
    op(READ,   "dut.q",            , 'h0F, `__LINE__);
    op(READ,   "dut.w",            , 'h0F, `__LINE__);
    op(READ,   "dut.q[1]",         , 'h01, `__LINE__);
@@ -103,19 +105,16 @@ begin
    op(DEPOSIT, "dut.q[6]",    'h01, 'h01, `__LINE__);
    op(READ,    "dut.q",           , 'h6C, `__LINE__);
 
-   op(READ,    "dut.w",           , 'h0F, `__LINE__); // w is scheduled, but not yet updated
    #0;
    op(READ,    "dut.w",           , 'h6C, `__LINE__); // w is now q
 
-   op(DEPOSIT, "dut.w",       'h3C, 'h3C, `__LINE__); // w retains until q drives new value
-   #0;
-   op(READ,    "dut.w",           , 'h3C, `__LINE__); //
+   op(DEPOSIT, "dut.w",       'h3C, 'h6C, `__LINE__); // Can't deposit on a wire
 
-   op(DEPOSIT, "dut.q",       'hA5, 'hA5, `__LINE__); // deposit on 'dut.q' again...
+   op(DEPOSIT, "dut.q",       'hA5, 'hA5, `__LINE__); // deposit on 'dut.q'
 
-   op(READ,    "dut.w",           , 'h3C, `__LINE__); // w is now ~scheduled~ to be A5
    #0;
    op(READ,    "dut.w",           , 'hA5, `__LINE__); // w is now q
+
 
    #100; // d propagates to q,w
 
