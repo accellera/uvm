@@ -436,6 +436,12 @@ virtual class uvm_ral_reg extends uvm_object;
    // Write-once fields in the register can be modified after
    // a hard reset operation. 
    //
+   // Also resets the semaphore that prevents concurrent access
+   // to the register.
+   // This semaphore must be explicitly reset if a thread accessing
+   // this register array was killed in before the access
+   // was completed
+   //
    extern virtual function void reset(uvm_ral::reset_e kind = uvm_ral::HARD);
 
    //

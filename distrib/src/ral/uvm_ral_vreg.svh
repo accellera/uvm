@@ -21,148 +21,39 @@
 //
 
 
+//
+// Title: uvm_ral_vreg
+// Virtual register abstraction base class
+//
+// A virtual register is a collection of fields,
+// overlaid on top of a memory, usually in an array.
+// The semantics and layout of virtual registers comes from
+// an agreement between the software and the hardware,
+// not any physical structures in the DUT.
+//
+
 typedef class uvm_mam_region;
 typedef class uvm_mam;
 
+typedef class uvm_ral_vreg_cbs;
 
 
-//------------------------------------------------------------------------------
-// CLASS: uvm_ral_vreg_cbs
-// Base class for virtual register descriptors. 
-//------------------------------------------------------------------------------
-class uvm_ral_vreg_cbs extends uvm_callback;
-   string fname = "";
-   int    lineno = 0;
-
-   function new(string name = "uvm_ral_reg_cbs");
-      super.new(name);
-   endfunction
-   
-
-   //------------------------------------------------------------------------------
-   // TASK: pre_write
-   // This callback method is invoked before a value is written to a virtual register in the
-   // DUT. The written value, if modified, changes the actual value that is written. The path
-   // and domain used to write to the register can also be modified. This callback method is
-   // only invoked when the "uvm_ral_vreg::write()" method is used to write to the register
-   // inside the DUT. This callback method is not invoked when the memory location implementing
-   // a virtual register, is written to using the "uvm_ral_mem::write()" method. Because
-   // writing a register causes all of the fields it contains to be written, all registered
-   // "uvm_ral_vfield_cbs::pre_write()" methods with the fields contained in the register
-   // will also be invoked before all registered register callback methods. Because the
-   // memory implementing the virtual field is accessed through its own abstraction class,
-   // all of its registered "uvm_ral_mem_cbs::pre_write()" methods will also be invoked
-   // as a side effect. 
-   //------------------------------------------------------------------------------
-   virtual task pre_write(uvm_ral_vreg         rg,
-                          longint unsigned     idx,
-                          ref uvm_ral_data_t   wdat,
-                          ref uvm_ral::path_e  path,
-                          ref uvm_ral_map   map);
-   endtask: pre_write
-
-
-   //------------------------------------------------------------------------------
-   // TASK: post_write
-   // This callback method is invoked after a value is successfully written to a register
-   // in the DUT. If a physical write access did not return uvm_rw::IS_OK, this method is not
-   // called. This callback method is only invoked when the "uvm_ral_vreg::write()" method
-   // is used to write to the register inside the DUT. This callback method is not invoked when
-   // the memory location implementing a virtual register, is written to using the "uvm_ral_mem::write()"
-   // method. Because writing a register causes all of the fields it contains to be written,
-   // all registered "uvm_ral_vfield_cbs::post_write()" methods with the fields contained
-   // in the register will also be invoked before all registered register callback methods.
-   // Because the memory implementing the virtual field is accessed through its own abstraction
-   // class, all of its registered "uvm_ral_mem_cbs::post_write()" methods will also
-   // be invoked as a side effect. 
-   //------------------------------------------------------------------------------
-   virtual task post_write(uvm_ral_vreg           rg,
-                           longint unsigned       idx,
-                           uvm_ral_data_t         wdat,
-                           uvm_ral::path_e        path,
-                           uvm_ral_map         map,
-                           ref uvm_ral::status_e  status);
-   endtask: post_write
-
-
-   //------------------------------------------------------------------------------
-   // TASK: pre_read
-   // This callback method is invoked before a value is read from a register in the DUT. The
-   // path and domain used to read the register can be modified. This callback method is only
-   // invoked when the "uvm_ral_vreg::read()" method is used to read to the register inside
-   // the DUT. This callback method is not invoked when the memory location implementing
-   // a virtual register, is read to using the "uvm_ral_mem::read()" method. Because reading
-   // a register causes all of the fields it contains to be written, all registered "uvm_ral_vfield_cbs::pre_read()"
-   // methods with the fields contained in the register will also be invoked before all registered
-   // register callback methods. Because the memory implementing the virtual field is accessed
-   // through its own abstraction class, all of its registered "uvm_ral_mem_cbs::pre_read()"
-   // methods will also be invoked as a side effect. 
-   //------------------------------------------------------------------------------
-   virtual task pre_read(uvm_ral_vreg         rg,
-                         longint unsigned     idx,
-                         ref uvm_ral::path_e  path,
-                         ref uvm_ral_map   map);
-   endtask: pre_read
-
-
-   //------------------------------------------------------------------------------
-   // TASK: post_read
-   // This callback method is invoked after a value is successfully read from a register in
-   // the DUT. The rdat and status values are the values that will be ultimately returned by
-   // the "uvm_ral_vreg::read()" method and can be modified. If a physical read access did
-   // not return uvm_rw::IS_OK, this method is not called. This callback method is only invoked
-   // when the "uvm_ral_vreg::read()" method is used to read to the register inside the DUT.
-   // This callback method is not invoked when the memory location implementing a virtual
-   // register, is read to using the "uvm_ral_mem::read()" method. Because reading a register
-   // causes all of the fields it contains to be written, all registered "uvm_ral_vfield_cbs::post_read()"
-   // methods with the fields contained in the register will also be invoked before all registered
-   // register callback methods. Because the memory 
-   //------------------------------------------------------------------------------
-   virtual task post_read(uvm_ral_vreg           rg,
-                          longint unsigned       idx,
-                          ref uvm_ral_data_t     rdat,
-                          input uvm_ral::path_e  path,
-                          input uvm_ral_map   map,
-                          ref uvm_ral::status_e  status);
-   endtask: post_read
-endclass: uvm_ral_vreg_cbs
-typedef uvm_callbacks#(uvm_ral_vreg, uvm_ral_vreg_cbs) uvm_ral_vreg_cb;
-typedef uvm_callback_iter#(uvm_ral_vreg, uvm_ral_vreg_cbs) uvm_ral_vreg_cb_iter;
-
-
-
-//------------------------------------------------------------------------------
+//
 // CLASS: uvm_ral_vreg
-// Base class for virtual register descriptors. 
-//------------------------------------------------------------------------------
+// Virtual register abstraction base class
+//
+// A virtual register represents a set of fields that are
+// logically implemented in consecutive memory locations.
+//
+// All virtual register accesses eventually turn into memory accesses.
+//
+// A virtual register array may be implemented on top of
+// any memory abstraction class and possibly dynamically
+// resized and/or relocated.
+//
 class uvm_ral_vreg extends uvm_object;
 
    `uvm_register_cb(uvm_ral_vreg, uvm_ral_vreg_cbs)
-
-   virtual task pre_write(longint unsigned     idx,
-                          ref uvm_ral_data_t   wdat,
-                          ref uvm_ral::path_e  path,
-                          ref uvm_ral_map   map);
-   endtask: pre_write
-
-   virtual task post_write(longint unsigned       idx,
-                           uvm_ral_data_t         wdat,
-                           uvm_ral::path_e        path,
-                           uvm_ral_map         map,
-                           ref uvm_ral::status_e  status);
-   endtask: post_write
-
-   virtual task pre_read(longint unsigned     idx,
-                         ref uvm_ral::path_e  path,
-                         ref uvm_ral_map   map);
-   endtask: pre_read
-
-   virtual task post_read(longint unsigned       idx,
-                          ref uvm_ral_data_t     rdat,
-                          input uvm_ral::path_e  path,
-                          input uvm_ral_map   map,
-                          ref uvm_ral::status_e  status);
-   endtask: post_read
 
    local bit locked;
    local uvm_ral_block parent;
@@ -185,192 +76,337 @@ class uvm_ral_vreg extends uvm_object;
    local bit read_in_progress;
    local bit write_in_progress;
 
-   extern /*local*/ function new(string name);
+   //
+   // Group: Initialization
+   //
 
-   extern /*local*/ function void configure(uvm_ral_block     parent,
-                                            int unsigned      n_bits,
-                                            uvm_ral_addr_t    offset = 0,
-                                            uvm_ral_mem       mem    = null,
-                                            longint unsigned  size   = 0,
-                                            int unsigned      incr   = 0);
+   //
+   // FUNCTION: new
+   // Create a new instance and type-specific configuration
+   //
+   // Creates an instance of a virtual register abstraction class
+   // with the specified name.
+   //
+   // ~n_bits~ specifies the total number of bits in a virtual register.
+   // Not all bits need to be mapped to a virtual field.
+   // This value is usually a multiple of 8.
+   //
+   extern function new(string       name,
+                       int unsigned n_bits);
+                       
+
+   //
+   // Function: configure
+   // Instance-specific configuration
+   //
+   // Specify the ~parent~ block of this virtual register array.
+   // If one of the other parameters are specified, the virtual register
+   // is assumed to be dynamic and can be later (re-)implemented using
+   // the <uvm_ral_vreg::implement()> method.
+   //
+   // If ~mem~ is specified, then the virtual register array is assumed
+   // to be statically implemented in the memory corresponding to the specified
+   // memory abstraction class and ~size~, ~offset~ and ~incr~
+   // must also be specified.
+   // Static virtual register arrays cannot be re-implemented.
+   //
+   extern function void configure(uvm_ral_block     parent,
+                                  uvm_ral_mem       mem    = null,
+                                  longint unsigned  size   = 0,
+                                  uvm_ral_addr_t    offset = 0,
+                                  int unsigned      incr   = 0);
+
+   //
+   // FUNCTION: implement
+   // Dynamically implement, resize or relocate a virtual register array
+   //
+   // Implement an array of virtual registers of the specified
+   // ~size~, in the specified memory and ~offset~.
+   // If an offset increment is specified, each
+   // virtual register is implemented at the specified offset increment
+   // from the previous one.
+   // If an offset increment of 0 is specified,
+   // virtual registers are packed as closely as possible
+   // in the memory.
+   //
+   // If no memory is specified, the virtual register array is
+   // in the same memory, at the same base offset using the same
+   // offset increment as originally implemented.
+   // Only the number of virtual registers in the virtual register array
+   // is modified.
+   //
+   // The initial value of the newly-implemented or
+   // relocated set of virtual registers is whatever values
+   // are currently stored in the memory now implementing them.
+   //
+   // Returns TRUE if the memory
+   // can implement the number of virtual registers
+   // at the specified base offset and offset increment.
+   // Returns FALSE otherwise.
+   //
+   // The memory region used to implement a virtual register array
+   // is reserved in the memory allocation manager associated with
+   // the memory to prevent it from being allocated for another purpose.
+   //
+   extern virtual function bit implement(longint unsigned  n,
+                                         uvm_ral_mem       mem    = null,
+                                         uvm_ral_addr_t    offset = 0,
+                                         int unsigned      incr   = 0);
+
+   //
+   // FUNCTION: allocate
+   // Randomly implement, resize or relocate a virtual register array
+   //
+   // Implement a virtual register array of the specified
+   // size in a randomly allocated region of the appropriate size
+   // in the address space managed by the specified memory allocation manager.
+   //
+   // The initial value of the newly-implemented
+   // or relocated set of virtual registers is whatever values are
+   // currently stored in the
+   // memory region now implementing them.
+   //
+   // Returns a reference to a <uvm_mam_region> memory region descriptor
+   // if the memory allocation manager was able to allocate a region
+   // that can implement the virtual register array.
+   // Returns ~null~ otherwise.
+   //
+   // A region implementing a virtual register array
+   // must not be released using the <uvm_mam::release_region()> method.
+   // It must be released using the <uvm_ral_vreg::release_region()> method.
+   // 
+   extern virtual function uvm_mam_region allocate(longint unsigned n,
+                                                   uvm_mam          mam);
+
+   //
+   // FUNCTION: get_region
+   // Get the region where the virtual register array is implemented
+   //
+   // Returns a reference to the <uvm_mam_region> memory region descriptor
+   // that implements the virtual register array.
+   //
+   // Returns ~null~ if the virtual registers array
+   // is not currently implemented.
+   // A region implementing a virtual register array
+   // must not be released using the <uvm_mam::release_region()> method.
+   // It must be released using the <uvm_ral_vreg::release_region()> method.
+   // 
+   extern virtual function uvm_mam_region get_region();
+
+   //
+   // FUNCTION: release_region
+   // Dynamically un-implement a virtual register array
+   //
+   // Release the memory region used to implement a virtual register array
+   // and return it to the pool of available memory 
+   // that can be allocated by the memory's default allocation manager.
+   // The virtual register array is subsequently considered as unimplemented
+   // and can no longer be accessed.
+   //
+   // Statically-implemented virtual registers cannot be released.
+   //
+   extern virtual function void release_region();
 
 
+   /*local*/ extern virtual function void set_parent(uvm_ral_block parent);
    /*local*/ extern function void Xlock_modelX();
    
    /*local*/ extern function void add_field(uvm_ral_vfield field);
    /*local*/ extern task XatomicX(bit on);
-   
-   extern function void reset(uvm_ral::reset_e kind = uvm_ral::HARD);
 
-   extern virtual function string get_full_name();
+   //
+   // Group: Introspection
+   //
+
+   //
+   // Function: get_name
+   // Get the simple name
+   //
+   // Return the simple object name of this register.
+   //
+
+   //
+   // Function: get_full_name
+   // Get the hierarchical name
+   //
+   // Return the hierarchal name of this register.
+   // The base of the hierarchical name is the root block.
+   //
+   extern virtual function string        get_full_name();
+
+   //
+   // FUNCTION: get_parent
+   // Get the parent block
+   //
    extern virtual function uvm_ral_block get_parent();
-   extern virtual function void set_parent(uvm_ral_block parent);
-
-   //------------------------------------------------------------------------------
-   // FUNCTION: get_block
-   // Returns a reference to the descriptor of the block that includes the register corresponding
-   // to the descriptor instance. 
-   //------------------------------------------------------------------------------
    extern virtual function uvm_ral_block get_block();
 
 
-   //------------------------------------------------------------------------------
-   // FUNCTION: implement
-   // Dynamically implement, resize or relocate a set of virtual registers of the specified
-   // size, in the specified memory and offset. If an offset increment is specified, each
-   // virtual register is implemented at the specified offset from the previous one. If an
-   // offset increment of 0 is specified, virtual registers are packed as closely as possible
-   // in the memory. If no memory is specified, the virtual register set is in the same memory,
-   // at the same offset using the same offset increment as originally implemented. The initial
-   // value of the newly-implemented or relocated set of virtual registers is whatever values
-   // are currently stored in the memory now implementing them. Returns TRUE if the memory
-   // can implement the number of virtual registers at the specified offset and increment.
-   // Returns FALSE if the memory cannot implement the specified virtual register set. The
-   // memory region used to implement a set of virtual registers is reserved to prevent it
-   // from being allocated for another purpose by the memory's default memory allocation
-   // manager. 
-   //------------------------------------------------------------------------------
-   extern virtual function bit implement(longint unsigned              n,
-                                         uvm_ral_mem                   mem    = null,
-                                         uvm_ral_addr_t  offset = 0,
-                                         int unsigned                  incr   = 0);
-
-   //------------------------------------------------------------------------------
-   // FUNCTION: allocate
-   // Dynamically implement, resize or relocate a set of virtual registers of the specified
-   // size to a randomly allocated region of the appropriate size in the address space managed
-   // by the specified memory allocation manager. The initial value of the newly-implemented
-   // or relocated set of virtual registers is whatever values are currently stored in the
-   // memory region now implementing them. Returns a reference to a memory region descriptor
-   // if the memory allocation manager was able to allocate a region that can implement the
-   // number of virtual registers. Returns null if the memory allocation manager cannot
-   // allocate a suitable region. Statically-implemented virtual registers cannot be
-   // implemented, resized nor relocated. 
-   //------------------------------------------------------------------------------
-   extern virtual function uvm_mam_region allocate(longint unsigned n,
-                                                   uvm_mam          mam);
-
-   //------------------------------------------------------------------------------
-   // FUNCTION: get_region
-   // Returns a reference to a memory region descriptor that implements the set of virtual
-   // registers. Returns null if the virtual registers are not currently implemented. A
-   // region implementing a set of virtual registers must not be released using the uvm_mam::release_region()
-   // method. It must be released using the "uvm_ral_vreg::release_region()" method.
-   // 
-   //------------------------------------------------------------------------------
-   extern virtual function uvm_mam_region get_region();
-
-   //------------------------------------------------------------------------------
-   // FUNCTION: release_region
-   // Release the memory region used to implement the set of virtual registers and return
-   // it to the pool of available memory that can be allocated by the memory's default allocation
-   // manager. The virtual registers are subsequently considered as unimplemented and
-   // can no longer be accessed. Statically-implemented virtual registers cannot be released.
-   // 
-   //------------------------------------------------------------------------------
-   extern virtual function void release_region();
-
-
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_memory
-   // Returns a reference to the memory abstraction class for the memory that implements
-   // the set of virtual registers corresponding to the descriptor instance. 
-   //------------------------------------------------------------------------------
+   // Get the memory where the virtual regoster array is implemented
+   //
    extern virtual function uvm_ral_mem get_memory();
-   extern virtual function int get_n_maps();
-   extern virtual function void get_maps(ref uvm_ral_map maps[$]);
-   extern virtual function bit is_in_map(uvm_ral_map map);
 
-   //------------------------------------------------------------------------------
-   // FUNCTION: get_access
-   // Returns the specification of the behavior of the memory used to implement the set of
-   // virtual register when written and read. If the memory is shared across more than one
-   // domain, a domain name must be specified. If access restrictions are present when accessing
-   // a memory through the specified domain, the access mode returned takes the access restrictions
-   // into account. For example, a read-write memory accessed through a domain with read-only
-   // restrictions would return uvm_ral::RO. 
-   //------------------------------------------------------------------------------
-   extern virtual function string get_access(uvm_ral_map map = null);
+   //
+   // Function: get_n_maps
+   // Returns the number of address maps this virtual register array is mapped in
+   //
+   extern virtual function int             get_n_maps      ();
 
-   //------------------------------------------------------------------------------
+   //
+   // Function: is_in_map
+   // Return TRUE if this virtual register array is in the specified address ~map~
+   //
+   extern function         bit             is_in_map       (uvm_ral_map map);
+
+   //
+   // Function: get_maps
+   // Returns all of the address ~maps~ where this virtual register array is mapped
+   //
+   extern virtual function void            get_maps        (ref uvm_ral_map maps[$]);
+
+   //
    // FUNCTION: get_rights
-   // Returns the access rights of the memory implementing this set of virtual registers.
-   // Returns uvm_ral::RW, uvm_ral::RO or uvm_ral::WO. See "uvm_ral_mem::get_rights()"
-   // for more details. If the memory implementing this set of virtual registers is shared
-   // in more than one domain, a domain name must be specified. If the memory is not shared in
-   // the specified domain, an error message is issued and uvm_ral::RW is returned. 
-   //------------------------------------------------------------------------------
+   // Returns the access rights of this virtual reigster array
+   //
+   // Returns "RW", "RO" or "WO".
+   // The access rights of a virtual register array is always "RW",
+   // unless it is implemented in a shared memory
+   // with access restriction in a particular address map.
+   //
+   // If no address map is specified and the memory is mapped in only one
+   // address map, that address map is used. If the memory is mapped
+   // in more than one address map, the default address map of the
+   // parent block is used.
+   //
+   // If an address map is specified and
+   // the memory is not mapped in the specified
+   // address map, an error message is issued
+   // and "RW" is returned. 
+   //
    extern virtual function string get_rights(uvm_ral_map map = null);
 
-   //------------------------------------------------------------------------------
-   // FUNCTION: get_offset_in_memory
-   // Returns the offset of the virtual register in the overall address space of the memory
-   // that implements it. If the virtual register occupies more than one memory location,
-   // the lowest offset value is returned. 
-   //------------------------------------------------------------------------------
-   extern virtual function uvm_ral_addr_t  get_offset_in_memory(longint unsigned idx);
+   //
+   // FUNCTION: get_access
+   // Returns the access policy of the virtual register array
+   // when written and read via an address map.
+   //
+   // If the memory implementing the virtual register array
+   // is mapped in more than one address map,
+   // an address ~map~ must be specified.
+   // If access restrictions are present when accessing a memory
+   // through the specified address map, the access mode returned
+   // takes the access restrictions into account.
+   // For example, a read-write memory accessed
+   // through an address map with read-only restrictions would return "RO". 
+   //
+   extern virtual function string get_access(uvm_ral_map map = null);
 
-   extern virtual function uvm_ral_addr_t  get_external_address(longint unsigned idx,
-                                                                uvm_ral_map map = null);
-
-
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_size
-   // Returns the number of virtual registers in the virtual register array. 
-   //------------------------------------------------------------------------------
+   // Returns the size of the virtual register array. 
+   //
    extern virtual function int unsigned get_size();
 
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_n_bytes
-   // Returns the width, in number of bytes, of the virtual register. The width of a virtual
-   // register is always a multiple of the width of the memory locations used to implement
-   // it. For example, a virtual register containing two 1-byte fields implemented in a memory
-   // with 4-bytes memory locations is 4-byte wide. 
-   //------------------------------------------------------------------------------
+   // Returns the width, in bytes, of a virtual register.
+   //
+   // The width of a virtual register is always a multiple of the width
+   // of the memory locations used to implement it.
+   // For example, a virtual register containing two 1-byte fields
+   // implemented in a memory with 4-bytes memory locations is 4-byte wide. 
+   //
    extern virtual function int unsigned get_n_bytes();
 
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_n_memlocs
-   // Returns the number of memory locations used by a single virtual register. 
-   //------------------------------------------------------------------------------
+   // Returns the number of memory locations used
+   // by a single virtual register. 
+   //
    extern virtual function int unsigned get_n_memlocs();
 
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_incr
-   // Returns the number of memory locations between two individual virtual registers in
-   // the same array. 
-   //------------------------------------------------------------------------------
+   // Returns the number of memory locations
+   // between two individual virtual registers in the same array. 
+   //
    extern virtual function int unsigned get_incr();
 
-
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_fields
-   // Fills the specified dynamic array with the descriptor for all of the virtual fields
-   // contained in the virtual register. Fields are ordered from least-significant position
-   // to most-significant position within the register. 
-   //------------------------------------------------------------------------------
+   // Return the virtual fields in this virtual register
+   //
+   // Fills the specified array with the abstraction class
+   // for all of the virtual fields contained in this virtual register.
+   // Fields are ordered from least-significant position to most-significant
+   // position within the register. 
+   //
    extern virtual function void get_fields(ref uvm_ral_vfield fields[$]);
 
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_field_by_name
-   // Finds a virtual field with the specified name in the register and returns its descriptor.
-   // If no fields are found, returns null. 
-   //------------------------------------------------------------------------------
+   // Return the named virtual field in this virtual register
+   //
+   // Finds a virtual field with the specified name in this virtual register
+   // and returns its abstraction class.
+   // If no fields are found, returns null.
+   //
    extern virtual function uvm_ral_vfield get_field_by_name(string name);
 
+   //
+   // FUNCTION: get_offset_in_memory
+   // Returns the offset of a virtual register
+   //
+   // Returns the base offset of the specified virtual register,
+   // in the overall address space of the memory
+   // that implements the virtual register array.
+   //
+   extern virtual function uvm_ral_addr_t  get_offset_in_memory(longint unsigned idx);
 
-   //------------------------------------------------------------------------------
+   //
+   // FUNCTION: get_address
+   // Returns the base external physical address of a virtual register
+   //
+   // Returns the base external physical address of the specified
+   // virtual reigster if accessed through the specified address ~map~.
+   //
+   // If no address map is specified and the memory implementing
+   // the virtual register array is mapped in only one
+   // address map, that address map is used. If the memory is mapped
+   // in more than one address map, the default address map of the
+   // parent block is used.
+   //
+   // If an address map is specified and
+   // the memory is not mapped in the specified
+   // address map, an error message is issued.
+   //
+   extern virtual function uvm_ral_addr_t  get_address(longint unsigned idx,
+                                                       uvm_ral_map map = null);
+
+   //
+   // Group: HDL Access
+   //
+
+   //
    // TASK: write
-   // Writes the specified value in the specified virtual register in the design using the
-   // specified access path. If the memory implementing the virtual register is shared by
-   // more than one physical interface, a domain must be specified if a physical access is
-   // used (front-door access). The optional value of the arguments: data_id scenario_id
-   // stream_id ...are passed to the back-door access method or used to set the corresponding
-   // uvm_data class properties in the "uvm_rw_access" transaction descriptors that are
-   // necessary to execute this write operation. This allows the physical and back-door
-   // write accesses to be traced back to the higher-level transaction that caused the access
-   // to occur. 
-   //------------------------------------------------------------------------------
+   // Write the specified value in a virtual register
+   //
+   // Write ~value~ in the DUT memory location(s) that implements
+   // the virtual register array that corresponds to this
+   // abstraction class instance using the specified access
+   // ~path~. 
+   //
+   // If the memory implementing the virtual register array
+   // is mapped in more than one address map, 
+   // an address ~map~ must be
+   // specified if a physical access is used (front-door access).
+   //
+   // The operation is eventually mapped into set of
+   // memory-write operations at the location where the virtual register
+   // specified by ~idx~ in the virtual register array is implemented.
+   //
    extern virtual task write(input  longint unsigned   idx,
                              output uvm_ral::status_e  status,
                              input  uvm_ral_data_t     value,
@@ -381,18 +417,24 @@ class uvm_ral_vreg extends uvm_object;
                              input  string             fname = "",
                              input  int                lineno = 0);
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: read
-   // Reads the current value of the specified virtual register from the design using the
-   // specified access path. If the memory implementing the virtual register is shared by
-   // more than one physical interface, a domain must be specified if a physical access is
-   // used (front-door access). The optional value of the arguments: data_id scenario_id
-   // stream_id ...are passed to the back-door access method or used to set the corresponding
-   // uvm_data class properties in the "uvm_rw_access" transaction descriptors that are
-   // necessary to execute this read operation. This allows the physical and back-door read
-   // accesses to be traced back to the higher-level transaction that caused the access to
-   // occur. 
-   //------------------------------------------------------------------------------
+   // Read the current value from a virtual register
+   //
+   // Read from the DUT memory location(s) that implements
+   // the virtual register array that corresponds to this
+   // abstraction class instance using the specified access
+   // ~path~ and return the readback ~value~.
+   //
+   // If the memory implementing the virtual register array
+   // is mapped in more than one address map, 
+   // an address ~map~ must be
+   // specified if a physical access is used (front-door access).
+   //
+   // The operation is eventually mapped into set of
+   // memory-read operations at the location where the virtual register
+   // specified by ~idx~ in the virtual register array is implemented.
+   //
    extern virtual task read(input  longint unsigned    idx,
                             output uvm_ral::status_e   status,
                             output uvm_ral_data_t      value,
@@ -403,15 +445,18 @@ class uvm_ral_vreg extends uvm_object;
                             input  string              fname = "",
                             input  int                 lineno = 0);
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: poke
-   // Deposit the specified value in the specified virtual register in the design, as-is,
-   // using a back-door access. The memory implementing the virtual register must provide
-   // a back-door access. The optional value of the arguments: data_id scenario_id stream_id
-   // ...are passed to the back-door access method. This allows the physical and back-door
-   // write accesses to be traced back to the higher-level transaction that caused the access
-   // to occur. 
-   //------------------------------------------------------------------------------
+   // Deposit the specified value in a virtual register
+   //
+   // Deposit ~value~ in the DUT memory location(s) that implements
+   // the virtual register array that corresponds to this
+   // abstraction class instance using the memory backdoor access.
+   //
+   // The operation is eventually mapped into set of
+   // memory-poke operations at the location where the virtual register
+   // specified by ~idx~ in the virtual register array is implemented.
+   //
    extern virtual task poke(input  longint unsigned    idx,
                             output uvm_ral::status_e   status,
                             input  uvm_ral_data_t      value,
@@ -420,14 +465,19 @@ class uvm_ral_vreg extends uvm_object;
                             input  string              fname = "",
                             input  int                 lineno = 0);
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: peek
-   // Reads the current value of the specified virtual register from the design using a back-door
-   // access. The memory implementing the virtual register must provide a back-door access.
-   // The optional value of the arguments: data_id scenario_id stream_id ...are passed
-   // to the back-door access method. This allows the physical and back-door read accesses
-   // to be traced back to the higher-level transaction that caused the access to occur. 
-   //------------------------------------------------------------------------------
+   // Sample the current value in a virtual register
+   //
+   // Sample the DUT memory location(s) that implements
+   // the virtual register array that corresponds to this
+   // abstraction class instance using the memory backdoor access,
+   // and return the sampled ~value~.
+   //
+   // The operation is eventually mapped into set of
+   // memory-peek operations at the location where the virtual register
+   // specified by ~idx~ in the virtual register array is implemented.
+   //
    extern virtual task peek(input  longint unsigned    idx,
                             output uvm_ral::status_e   status,
                             output uvm_ral_data_t      value,
@@ -436,6 +486,108 @@ class uvm_ral_vreg extends uvm_object;
                             input  string              fname = "",
                             input  int                 lineno = 0);
   
+   //
+   // Function: reset
+   // Reset the access semaphore
+   //
+   // Reset the semaphore that prevents concurrent access
+   // to the virtual register.
+   // This semaphore must be explicitly reset if a thread accessing
+   // this virtual register array was killed in before the access
+   // was completed
+   //
+   extern function void reset(uvm_ral::reset_e kind = uvm_ral::HARD);
+
+
+   //
+   // Group: Callbacks
+   //
+
+   //
+   // TASK: pre_write
+   // Called before virtual register write.
+   //
+   // If the specified data value, access ~path~ or address ~map~ are modified,
+   // the updated data value, access path or address map will be used
+   // to perform the virtual register operation.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of this method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   // The pre-write virtual register and field callbacks are executed
+   // before the corresponding pre-write memory callbacks
+   //
+   virtual task pre_write(longint unsigned     idx,
+                          ref uvm_ral_data_t   wdat,
+                          ref uvm_ral::path_e  path,
+                          ref uvm_ral_map      map);
+   endtask: pre_write
+
+   //
+   // TASK: post_write
+   // Called after virtual register write.
+   //
+   // If the specified ~status~ is modified,
+   // the updated status will be
+   // returned by the virtual register operation.
+   //
+   // The registered callback methods are invoked before the invocation
+   // of this method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   // The post-write virtual register and field callbacks are executed
+   // after the corresponding post-write memory callbacks
+   //
+   virtual task post_write(longint unsigned       idx,
+                           uvm_ral_data_t         wdat,
+                           uvm_ral::path_e        path,
+                           uvm_ral_map            map,
+                           ref uvm_ral::status_e  status);
+   endtask: post_write
+
+   //
+   // TASK: pre_read
+   // Called before virtual register read.
+   //
+   // If the specified access ~path~ or address ~map~ are modified,
+   // the updated access path or address map will be used to perform
+   // the register operation.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of this method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   // The pre-read virtual register and field callbacks are executed
+   // before the corresponding pre-read memory callbacks
+   //
+   virtual task pre_read(longint unsigned     idx,
+                         ref uvm_ral::path_e  path,
+                         ref uvm_ral_map      map);
+   endtask: pre_read
+
+   //
+   // TASK: post_read
+   // Called after virtual register read.
+   //
+   // If the specified readback data or ~status~ is modified,
+   // the updated readback data or status will be
+   // returned by the register operation.
+   //
+   // The registered callback methods are invoked before the invocation
+   // of this method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   // The post-read virtual register and field callbacks are executed
+   // after the corresponding post-read memory callbacks
+   //
+   virtual task post_read(longint unsigned       idx,
+                          ref uvm_ral_data_t     rdat,
+                          input uvm_ral::path_e  path,
+                          input uvm_ral_map      map,
+                          ref uvm_ral::status_e  status);
+   endtask: post_read
+
    extern virtual function void do_print (uvm_printer printer);
    extern virtual function string convert2string;
    extern virtual function uvm_object clone();
@@ -448,18 +600,133 @@ class uvm_ral_vreg extends uvm_object;
 endclass: uvm_ral_vreg
 
 
-function uvm_ral_vreg::new(string name);
-   super.new(name);
-   this.locked    = 0;
-endfunction: new
+//
+// CLASS: uvm_ral_vreg_cbs
+// Pre/post read/write callback facade class
+//
+class uvm_ral_vreg_cbs extends uvm_callback;
+   string fname = "";
+   int    lineno = 0;
 
-function void uvm_ral_vreg::configure(uvm_ral_block      parent,
-                                      int unsigned       n_bits,
-                                      uvm_ral_addr_t     offset = 0,
-                                      uvm_ral_mem        mem = null,
-                                      longint unsigned   size = 0,
-                                      int unsigned       incr = 0);
-   this.parent = parent;
+   function new(string name = "uvm_ral_reg_cbs");
+      super.new(name);
+   endfunction
+   
+
+   //
+   // Task: pre_write
+   // Callback called before a write operation.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of the <uvm_ral_vreg::pre_write()> method.
+   // All virtual register callbacks are executed before the corresponding
+   // field field callbacks
+   // The pre-write virtual register and field callbacks are executed
+   // before the corresponding pre-write memory callbacks
+   //
+   // The written value ~wdat~, access ~path~ and address ~map~,
+   // if modified, modifies the actual value, access path or address map
+   // used in the virtual register operation.
+   //
+   virtual task pre_write(uvm_ral_vreg         rg,
+                          longint unsigned     idx,
+                          ref uvm_ral_data_t   wdat,
+                          ref uvm_ral::path_e  path,
+                          ref uvm_ral_map   map);
+   endtask: pre_write
+
+
+   //
+   // TASK: post_write
+   // Called after register write.
+   //
+   // The registered callback methods are invoked before the invocation
+   // of the <uvm_ral_reg::post_write()> method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   // The post-write virtual register and field callbacks are executed
+   // after the corresponding post-write memory callbacks
+   //
+   // The ~status~ of the operation,
+   // if modified, modifies the actual returned status.
+   //
+   virtual task post_write(uvm_ral_vreg           rg,
+                           longint unsigned       idx,
+                           uvm_ral_data_t         wdat,
+                           uvm_ral::path_e        path,
+                           uvm_ral_map         map,
+                           ref uvm_ral::status_e  status);
+   endtask: post_write
+
+
+   //
+   // TASK: pre_read
+   // Called before register read.
+   //
+   // The registered callback methods are invoked after the invocation
+   // of the <uvm_ral_reg::pre_read()> method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   // The pre-read virtual register and field callbacks are executed
+   // before the corresponding pre-read memory callbacks
+   //
+   // The access ~path~ and address ~map~,
+   // if modified, modifies the actual access path or address map
+   // used in the register operation.
+   //
+   virtual task pre_read(uvm_ral_vreg         rg,
+                         longint unsigned     idx,
+                         ref uvm_ral::path_e  path,
+                         ref uvm_ral_map   map);
+   endtask: pre_read
+
+
+   //
+   // TASK: post_read
+   // Called after register read.
+   //
+   // The registered callback methods are invoked before the invocation
+   // of the <uvm_ral_reg::post_read()> method.
+   // All register callbacks are executed before the corresponding
+   // field callbacks
+   // The post-read virtual register and field callbacks are executed
+   // after the corresponding post-read memory callbacks
+   //
+   // The readback value ~rdat~ and the ~status~ of the operation,
+   // if modified, modifies the actual returned readback value and status.
+   //
+   virtual task post_read(uvm_ral_vreg           rg,
+                          longint unsigned       idx,
+                          ref uvm_ral_data_t     rdat,
+                          input uvm_ral::path_e  path,
+                          input uvm_ral_map   map,
+                          ref uvm_ral::status_e  status);
+   endtask: post_read
+endclass: uvm_ral_vreg_cbs
+
+
+//
+// Type: uvm_ral_vreg_cb
+// Convenience callback type declaration
+//
+// Use this declaration to register virtual register callbacks rather than
+// the more verbose parameterized class
+//
+typedef uvm_callbacks#(uvm_ral_vreg, uvm_ral_vreg_cbs) uvm_ral_vreg_cb;
+
+//
+// Type: uvm_ral_vreg_cb_iter
+// Convenience callback iterator type declaration
+//
+// Use this declaration to iterate over registered virtual register callbacks
+// rather than the more verbose parameterized class
+//
+typedef uvm_callback_iter#(uvm_ral_vreg, uvm_ral_vreg_cbs) uvm_ral_vreg_cb_iter;
+
+
+function uvm_ral_vreg::new(string       name,
+                           int unsigned n_bits);
+   super.new(name);
 
    if (n_bits == 0) begin
       `uvm_error("RAL", $psprintf("Virtual register \"%s\" cannot have 0 bits", this.get_full_name()));
@@ -470,6 +737,17 @@ function void uvm_ral_vreg::configure(uvm_ral_block      parent,
       n_bits = `UVM_RAL_DATA_WIDTH;
    end
    this.n_bits = n_bits;
+
+   this.locked    = 0;
+endfunction: new
+
+function void uvm_ral_vreg::configure(uvm_ral_block      parent,
+                                      uvm_ral_mem        mem = null,
+                                      longint unsigned   size = 0,
+                                      uvm_ral_addr_t     offset = 0,
+                                      int unsigned       incr = 0);
+   this.parent = parent;
+
    this.n_used_bits = 0;
 
    if (mem != null) begin
@@ -788,15 +1066,15 @@ function uvm_ral_addr_t  uvm_ral_vreg::get_offset_in_memory(longint unsigned idx
 endfunction
 
 
-function uvm_ral_addr_t  uvm_ral_vreg::get_external_address(longint unsigned idx,
-                                                            uvm_ral_map map = null);
+function uvm_ral_addr_t  uvm_ral_vreg::get_address(longint unsigned idx,
+                                                   uvm_ral_map map = null);
    if (this.mem == null) begin
       `uvm_error("RAL", $psprintf("Cannot get address of of unimplemented virtual register \"%s\".", this.get_full_name()));
       return 0;
    end
 
    return this.mem.get_address(this.get_offset_in_memory(idx), map);
-endfunction: get_external_address
+endfunction: get_address
 
 
 function int unsigned uvm_ral_vreg::get_size();
@@ -1226,10 +1504,10 @@ function string uvm_ral_vreg::convert2string();
       $sformat(convert2string, "%s[%0d] in %0s['h%0h+'h%0h]\n", convert2string,
              this.size, this.mem.get_full_name(), this.offset, this.incr); 
       foreach (maps[i]) begin
-        uvm_ral_addr_t  addr0 = this.get_external_address(0, maps[i]);
+        uvm_ral_addr_t  addr0 = this.get_address(0, maps[i]);
 
         $sformat(convert2string, "  Address in map '%s' -- @'h%0h+%0h",
-        maps[i].get_full_name(), addr0, this.get_external_address(1, maps[i]) - addr0);
+        maps[i].get_full_name(), addr0, this.get_address(1, maps[i]) - addr0);
       end
    end
    foreach(this.fields[i]) begin
