@@ -272,7 +272,7 @@ class uvm_ral_vfield extends uvm_object;
    // the updated data value, access path or address map will be used
    // to perform the virtual register operation.
    //
-   // The virtual field callback methods are invoked after the callback methods
+   // The virtual field callback methods are invoked before the callback methods
    // on the containing virtual register.
    // The registered callback methods are invoked after the invocation
    // of this method.
@@ -379,9 +379,9 @@ class uvm_ral_vfield_cbs extends uvm_callback;
    // Task: pre_write
    // Callback called before a write operation.
    //
-   // The registered callback methods are invoked after the invocation
+   // The registered callback methods are invoked before the invocation
    // of the virtual register pre-write callbacks and
-   // of the <uvm_ral_vfield::pre_write()> method.
+   // after the invocation of the <uvm_ral_vfield::pre_write()> method.
    //
    // The written value ~wdat, access ~path~ and address ~map~,
    // if modified, modifies the actual value, access path or address map

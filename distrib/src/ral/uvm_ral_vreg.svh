@@ -513,7 +513,7 @@ class uvm_ral_vreg extends uvm_object;
    //
    // The registered callback methods are invoked after the invocation
    // of this method.
-   // All register callbacks are executed before the corresponding
+   // All register callbacks are executed after the corresponding
    // field callbacks
    // The pre-write virtual register and field callbacks are executed
    // before the corresponding pre-write memory callbacks
@@ -556,7 +556,7 @@ class uvm_ral_vreg extends uvm_object;
    //
    // The registered callback methods are invoked after the invocation
    // of this method.
-   // All register callbacks are executed before the corresponding
+   // All register callbacks are executed after the corresponding
    // field callbacks
    // The pre-read virtual register and field callbacks are executed
    // before the corresponding pre-read memory callbacks
@@ -619,8 +619,8 @@ class uvm_ral_vreg_cbs extends uvm_callback;
    //
    // The registered callback methods are invoked after the invocation
    // of the <uvm_ral_vreg::pre_write()> method.
-   // All virtual register callbacks are executed before the corresponding
-   // field field callbacks
+   // All virtual register callbacks are executed after the corresponding
+   // virtual field callbacks
    // The pre-write virtual register and field callbacks are executed
    // before the corresponding pre-write memory callbacks
    //
@@ -643,7 +643,7 @@ class uvm_ral_vreg_cbs extends uvm_callback;
    // The registered callback methods are invoked before the invocation
    // of the <uvm_ral_reg::post_write()> method.
    // All register callbacks are executed before the corresponding
-   // field callbacks
+   // virtual field callbacks
    // The post-write virtual register and field callbacks are executed
    // after the corresponding post-write memory callbacks
    //
@@ -665,8 +665,8 @@ class uvm_ral_vreg_cbs extends uvm_callback;
    //
    // The registered callback methods are invoked after the invocation
    // of the <uvm_ral_reg::pre_read()> method.
-   // All register callbacks are executed before the corresponding
-   // field callbacks
+   // All register callbacks are executed after the corresponding
+   // virtual field callbacks
    // The pre-read virtual register and field callbacks are executed
    // before the corresponding pre-read memory callbacks
    //
@@ -688,7 +688,7 @@ class uvm_ral_vreg_cbs extends uvm_callback;
    // The registered callback methods are invoked before the invocation
    // of the <uvm_ral_reg::post_read()> method.
    // All register callbacks are executed before the corresponding
-   // field callbacks
+   // virtual field callbacks
    // The post-read virtual register and field callbacks are executed
    // after the corresponding post-read memory callbacks
    //
@@ -1256,13 +1256,13 @@ task uvm_ral_vreg::write(input  longint unsigned   idx,
       lsb += this.mem.get_n_bytes() * 8;
    end
 
-   this.post_write(idx, value, path, map, status);
    for (uvm_ral_vreg_cbs cb = cbs.first(); cb != null;
         cb = cbs.next()) begin
       cb.fname = this.fname;
       cb.lineno = this.lineno;
       cb.post_write(this, idx, value, path, map, status);
    end
+   this.post_write(idx, value, path, map, status);
    foreach (fields[i]) begin
       uvm_ral_vfield_cb_iter cbs = new(fields[i]);
       uvm_ral_vfield f = fields[i];
@@ -1271,13 +1271,13 @@ task uvm_ral_vreg::write(input  longint unsigned   idx,
       msk = ((1<<f.get_n_bits())-1) << lsb;
       tmp = (value & msk) >> lsb;
 
-      f.post_write(idx, tmp, path, map, status);
       for (uvm_ral_vfield_cbs cb = cbs.first(); cb != null;
            cb = cbs.next()) begin
          cb.fname = this.fname;
          cb.lineno = this.lineno;
          cb.post_write(f, idx, tmp, path, map, status);
       end
+      f.post_write(idx, tmp, path, map, status);
 
       value = (value & ~msk) | (tmp << lsb);
    end
@@ -1357,13 +1357,13 @@ task uvm_ral_vreg::read(input  longint unsigned   idx,
       lsb += this.mem.get_n_bytes() * 8;
    end
 
-   this.post_read(idx, value, path, map, status);
    for (uvm_ral_vreg_cbs cb = cbs.first(); cb != null;
         cb = cbs.next()) begin
       cb.fname = this.fname;
       cb.lineno = this.lineno;
       cb.post_read(this, idx, value, path, map, status);
    end
+   this.post_read(idx, value, path, map, status);
    foreach (fields[i]) begin
       uvm_ral_vfield_cb_iter cbs = new(fields[i]);
       uvm_ral_vfield f = fields[i];
@@ -1373,13 +1373,13 @@ task uvm_ral_vreg::read(input  longint unsigned   idx,
       msk = ((1<<f.get_n_bits())-1) << lsb;
       tmp = (value & msk) >> lsb;
 
-      f.post_read(idx, tmp, path, map, status);
       for (uvm_ral_vfield_cbs cb = cbs.first(); cb != null;
            cb = cbs.next()) begin
          cb.fname = this.fname;
          cb.lineno = this.lineno;
          cb.post_read(f, idx, tmp, path, map, status);
       end
+      f.post_read(idx, tmp, path, map, status);
 
       value = (value & ~msk) | (tmp << lsb);
    end
