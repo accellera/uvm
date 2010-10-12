@@ -28,7 +28,9 @@ class vif_container extends uvm_object;
    virtual interface xbus_if vif;
 endclass
 
- 
+import uvm_pkg::*;
+`include "xbus.svh"
+`include "ral_xa0.sv"
 `include "ral2xbus_adapter.sv"
 `include "xbus_indirect_reg_ftdr_seq.sv"
 `include "xbus_user_acp_reg.sv"
@@ -77,7 +79,13 @@ class xbus_ral_env extends xbus_env;
     rdb = xbus_ral_model::type_id::create("xa0", this);
     rdb.build();
     // Should be done using resources
-    rdb.set_hdl_path_root(`DEF2STR(`XA0_TOP_PATH));
+    begin
+    string top_path;
+    top_path = `DEF2STR(`XA0_TOP_PATH);
+    if (top_path[0] == "$")
+       top_path = top_path.substr(6,top_path.len()-1);
+    rdb.set_hdl_path_root(top_path);
+    end
   endfunction : build
 
   // Connect register sequencer to xbus master

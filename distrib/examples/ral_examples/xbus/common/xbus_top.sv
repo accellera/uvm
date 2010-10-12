@@ -25,9 +25,12 @@
 
 `include "dut.sv"
 `include "xbus_if.sv"
-`include "xbus_ral_env.sv"
 
 module xbus_ral_tb_top;
+
+  import uvm_pkg::*;
+
+  `include "xbus_test.sv"
 
   xbus_ral_env env;
 

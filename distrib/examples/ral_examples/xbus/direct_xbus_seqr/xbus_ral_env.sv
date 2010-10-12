@@ -29,6 +29,9 @@ class vif_container extends uvm_object;
 endclass
 
  
+import uvm_pkg::*;
+`include "xbus.svh"
+`include "ral_xa0.sv"
 `include "ral2xbus_adapter.sv"
 `include "xbus_indirect_reg_ftdr_seq.sv"
 `include "xbus_user_acp_reg.sv"

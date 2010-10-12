@@ -17,8 +17,9 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`include "seq_lib.sv"
+`include "xbus_ral_env.sv"
 `include "xbus_example_master_seq_lib.sv"
+`include "seq_lib.sv"
 
 class cmd_line_seq_test extends uvm_test;
 
