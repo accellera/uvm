@@ -467,7 +467,7 @@ class uvm_sequencer_base extends uvm_component;
         end
         sum_priority_val += get_seq_item_priority(arb_sequence_q[avail_sequences[i]]);
       end
-      uvm_report_fatal("Sequencer", "UVM Internal error in weighted arbitration code", UVM_NONE);
+      `uvm_fatal("Sequencer", "UVM Internal error in weighted arbitration code")
     end // if (arbitration == SEQ_ARB_WEIGHTED)
     
     ///////////////////////////////////
@@ -512,13 +512,13 @@ class uvm_sequencer_base extends uvm_component;
       // use an available sequence will cause highly unpredictable results.
       highest_sequences = avail_sequences.find with (item == i);
       if (highest_sequences.size() == 0) begin
-        uvm_report_fatal("Sequencer", $psprintf("Error in User arbitration, sequence %0d not available\n%s",
-                                                i, display_queues()), UVM_NONE);
+        `uvm_fatal("Sequencer", $psprintf("Error in User arbitration, sequence %0d not available\n%s",
+                    i, display_queues()))
       end
       return(i);
     end
       
-    uvm_report_fatal("Sequencer", "Internal error: Failed to choose sequence", UVM_NONE);
+    `uvm_fatal("Sequencer", "Internal error: Failed to choose sequence")
 
   endfunction // int
 
@@ -600,17 +600,17 @@ class uvm_sequencer_base extends uvm_component;
     // If the priority was set on the item, then that is used
     if (seq_q_entry.item_priority != -1) begin
       if (seq_q_entry.item_priority <= 0) begin
-        uvm_report_fatal("SEQITEMPRI", $psprintf("Sequence item from %s has illegal priority: %0d",
+        `uvm_fatal("SEQITEMPRI", $psprintf("Sequence item from %s has illegal priority: %0d",
                                                  seq_q_entry.sequence_ptr.get_full_name(),
-                                                 seq_q_entry.item_priority), UVM_NONE);
+                                                 seq_q_entry.item_priority))
       end
       return (seq_q_entry.item_priority);
     end
     // Otherwise, use the priority of the calling sequence
     if (seq_q_entry.sequence_ptr.get_priority() < 0) begin
-      uvm_report_fatal("SEQDEFPRI", $psprintf("Sequence %s has illegal priority: %0d",
+      `uvm_fatal("SEQDEFPRI", $psprintf("Sequence %s has illegal priority: %0d",
                                                seq_q_entry.sequence_ptr.get_full_name(),
-                                               seq_q_entry.sequence_ptr.get_priority()), UVM_NONE);
+                                               seq_q_entry.sequence_ptr.get_priority()))
     end
     return (seq_q_entry.sequence_ptr.get_priority());
   endfunction
@@ -657,11 +657,11 @@ class uvm_sequencer_base extends uvm_component;
     uvm_sequence_base sequence_ptr;
 
     if (child == null) begin
-      uvm_report_fatal("uvm_sequencer", "is_child passed null child", UVM_NONE);
+      `uvm_fatal("uvm_sequencer", "is_child passed null child")
     end
 
     if (parent == null) begin
-      uvm_report_fatal("uvm_sequencer", "is_child passed null parent", UVM_NONE);
+      `uvm_fatal("uvm_sequencer", "is_child passed null parent")
     end
 
     sequence_ptr = child.get_parent_sequence();
@@ -693,7 +693,7 @@ class uvm_sequencer_base extends uvm_component;
     int my_seq_id;
 
     if (sequence_ptr == null) begin
-      uvm_report_fatal("uvm_sequencer", "wait_for_grant passed null sequence_ptr", UVM_NONE);
+      `uvm_fatal("uvm_sequencer", "wait_for_grant passed null sequence_ptr")
     end
 
     // Determine the number of drivers connected to this sequencer
@@ -704,7 +704,7 @@ class uvm_sequencer_base extends uvm_component;
 `ifndef CDNS_NO_SQR_CON_CHK
     // If there are no drivers, then it is not possible to wait for grant
     if(m_seq_item_port_connect_size == 0) begin
-      uvm_report_fatal("SQRWFG", "Wait_for_grant called on sequencer with no driver connected", UVM_NONE);
+      `uvm_fatal("SQRWFG", "Wait_for_grant called on sequencer with no driver connected")
     end
 `endif
     
@@ -787,7 +787,7 @@ class uvm_sequencer_base extends uvm_component;
   function bit is_blocked(uvm_sequence_base sequence_ptr);
 
     if (sequence_ptr == null)
-      uvm_report_fatal("uvm_sequence_controller", "is_blocked passed null sequence_ptr", UVM_NONE);
+      `uvm_fatal("uvm_sequence_controller", "is_blocked passed null sequence_ptr")
 
       foreach (lock_list[i]) begin
         if ((lock_list[i].get_inst_id() != 
@@ -813,7 +813,7 @@ class uvm_sequencer_base extends uvm_component;
     int my_seq_id;
     
     if (sequence_ptr == null)
-      uvm_report_fatal("uvm_sequence_controller", "has_lock passed null sequence_ptr", UVM_NONE);
+      `uvm_fatal("uvm_sequence_controller", "has_lock passed null sequence_ptr")
     my_seq_id = register_sequence(sequence_ptr);
       foreach (lock_list[i]) begin
         if (lock_list[i].get_inst_id() == sequence_ptr.get_inst_id()) begin
@@ -834,7 +834,7 @@ class uvm_sequencer_base extends uvm_component;
     seq_req_class new_req;
     
     if (sequence_ptr == null)
-      uvm_report_fatal("uvm_sequence_controller", "lock_req passed null sequence_ptr", UVM_NONE);
+      `uvm_fatal("uvm_sequence_controller", "lock_req passed null sequence_ptr")
 
     my_seq_id = register_sequence(sequence_ptr);
     new_req = new();
@@ -871,7 +871,7 @@ class uvm_sequencer_base extends uvm_component;
     int my_seq_id;
     
     if (sequence_ptr == null) begin
-      uvm_report_fatal("uvm_sequencer", "unlock_req passed null sequence_ptr", UVM_NONE);
+      `uvm_fatal("uvm_sequencer", "unlock_req passed null sequence_ptr")
     end
     my_seq_id = register_sequence(sequence_ptr);
 
@@ -882,10 +882,9 @@ class uvm_sequencer_base extends uvm_component;
         return;
       end
     end
-    uvm_report_warning("SQRUNL", 
+    `uvm_warning("SQRUNL", 
 		       $psprintf("Sequence %s called ungrab / unlock, but didn't have lock",
-				 sequence_ptr.get_full_name()),
-		       UVM_NONE);
+				 sequence_ptr.get_full_name()))
   endfunction // void
 
 
@@ -1180,9 +1179,9 @@ class uvm_sequencer_base extends uvm_component;
     if (sequence_ids.exists(type_name))
       return sequence_ids[type_name];
 
-    uvm_report_warning("SEQNF", 
+    `uvm_warning("SEQNF", 
       $psprintf("Sequence type_name '%0s' not registered with this sequencer.",
-      type_name), UVM_NONE);
+                type_name))
     return -1;
   endfunction
 
@@ -1199,9 +1198,9 @@ function uvm_sequence_base get_sequence(int req_kind);
   string m_seq_type;
 
   if (req_kind < 0 || req_kind >= sequences.size()) begin
-    uvm_report_error("SEQRNG", 
+    `uvm_error("SEQRNG", 
       $psprintf("Kind arg '%0d' out of range. Need 0-%0d", 
-      req_kind, sequences.size()-1));
+      req_kind, sequences.size()-1))
   end
 
   m_seq_type = sequences[req_kind];
@@ -1209,9 +1208,9 @@ function uvm_sequence_base get_sequence(int req_kind);
                                           get_full_name(),
                                           m_seq_type))) 
   begin
-      uvm_report_fatal("FCTSEQ", 
+      `uvm_fatal("FCTSEQ", 
         $psprintf("Factory can not produce a sequence of type %0s.",
-        m_seq_type), UVM_NONE);
+        m_seq_type))
   end
 
   m_seq.print_sequence_info = 1;

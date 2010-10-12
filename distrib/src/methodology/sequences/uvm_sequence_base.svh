@@ -175,7 +175,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // This method should not be called directly by the user.
 
   virtual task body();
-    uvm_report_warning("uvm_sequence_base", "Body definition undefined");
+    `uvm_warning("uvm_sequence_base", "Body definition undefined")
     return;
   endtask  
 
@@ -233,8 +233,8 @@ class uvm_sequence_base extends uvm_sequence_item;
     if(m_sequencer != null)
       return m_sequencer.get_seq_kind(type_name);
     else 
-      uvm_report_warning("NULLSQ", $psprintf("%0s sequencer is null.",
-                                           get_type_name()), UVM_NONE);
+      `uvm_warning("NULLSQ", $psprintf("%0s sequencer is null.",
+                                           get_type_name()))
   endfunction
 
 
@@ -248,15 +248,15 @@ class uvm_sequence_base extends uvm_sequence_item;
     string m_seq_type;
     uvm_factory factory = uvm_factory::get();
     if (req_kind < 0 || req_kind >= m_sequencer.sequences.size()) begin
-      uvm_report_error("SEQRNG", 
+      `uvm_error("SEQRNG", 
         $psprintf("Kind arg '%0d' out of range. Need 0-%0d",
-        req_kind, m_sequencer.sequences.size()-1), UVM_NONE);
+        req_kind, m_sequencer.sequences.size()-1))
     end
     m_seq_type = m_sequencer.sequences[req_kind];
     if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
-      uvm_report_fatal("FCTSEQ", 
+      `uvm_fatal("FCTSEQ", 
         $psprintf("Factory can not produce a sequence of type %0s.",
-        m_seq_type), UVM_NONE);
+        m_seq_type))
     end
     m_seq.set_use_sequence_info(1);
     return m_seq;
@@ -270,8 +270,8 @@ class uvm_sequence_base extends uvm_sequence_item;
   function uvm_sequence_base get_sequence_by_name(string seq_name);
     uvm_sequence_base m_seq;
     if (!$cast(m_seq, factory.create_object_by_name(seq_name, get_full_name(), seq_name))) begin
-      uvm_report_fatal("FCTSEQ", 
-        $psprintf("Factory can not produce a sequence of type %0s.", seq_name), UVM_NONE);
+      `uvm_fatal("FCTSEQ", 
+        $psprintf("Factory can not produce a sequence of type %0s.", seq_name))
     end
     m_seq.set_use_sequence_info(1);
     return m_seq;
@@ -289,8 +289,8 @@ class uvm_sequence_base extends uvm_sequence_item;
     uvm_factory factory = uvm_factory::get();
     m_seq_type = m_sequencer.sequences[req_kind];
     if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
-      uvm_report_fatal("FCTSEQ", 
-        $psprintf("Factory can not produce a sequence of type %0s.", m_seq_type), UVM_NONE);
+      `uvm_fatal("FCTSEQ", 
+        $psprintf("Factory can not produce a sequence of type %0s.", m_seq_type))
     end
     m_seq.set_use_sequence_info(1);
     m_seq.set_parent_sequence(this);
@@ -300,7 +300,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     
     start_item(m_seq);
     if(!m_seq.randomize()) begin
-      uvm_report_warning("RNDFLD", "Randomization failed in do_sequence_kind()");
+      `uvm_warning("RNDFLD", "Randomization failed in do_sequence_kind()")
     end
     finish_item(m_seq);
   endtask
@@ -358,8 +358,8 @@ class uvm_sequence_base extends uvm_sequence_item;
     event e;
     wait_rel_default = 1;
     if (is_rel_default != wait_rel_default)
-      uvm_report_fatal("RELMSM", 
-        "is_relevant() was implemented without defining wait_for_relevant()", UVM_NONE);
+      `uvm_fatal("RELMSM", 
+        "is_relevant() was implemented without defining wait_for_relevant()")
     @e;  // this is intended to never return
   endtask
  
@@ -431,7 +431,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   task lock(uvm_sequencer_base sequencer = null);
     if (sequencer == null) begin
       if (m_sequencer == null) begin
-        uvm_report_fatal("ISRELVNT", "Null m_sequencer reference", UVM_NONE);
+        `uvm_fatal("ISRELVNT", "Null m_sequencer reference")
       end
       m_sequencer.lock(this);
     end
@@ -455,7 +455,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   task grab(uvm_sequencer_base sequencer = null);
     if (sequencer == null) begin
       if (m_sequencer == null) begin
-        uvm_report_fatal("GRAB", "Null m_sequencer reference", UVM_NONE);
+        `uvm_fatal("GRAB", "Null m_sequencer reference")
       end
       m_sequencer.grab(this);
     end
@@ -474,7 +474,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   function void  unlock(uvm_sequencer_base sequencer = null);
     if (sequencer == null) begin
       if (m_sequencer == null) begin
-        uvm_report_fatal("UNLOCK", "Null m_sequencer reference", UVM_NONE);
+        `uvm_fatal("UNLOCK", "Null m_sequencer reference")
       end
       m_sequencer.unlock(this);
     end else begin
@@ -513,7 +513,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     
     if (this.get_sequencer() == null) begin
       if (!$cast(this_seq, sequence_ptr)) begin
-        uvm_report_fatal("SEQMSTART", "Failure to cast sequence item", UVM_NONE);
+        `uvm_fatal("SEQMSTART", "Failure to cast sequence item")
       end
       set_use_sequence_info(1);
       set_parent_sequence(this_seq);
@@ -533,7 +533,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     uvm_sequence_base seq_base_ptr;
 
     if (!$cast(seq_base_ptr, sequence_ptr)) begin
-        uvm_report_fatal("SEQMFINISH", "Failure to cast sequence item", UVM_NONE);
+        `uvm_fatal("SEQMFINISH", "Failure to cast sequence item")
       end
     if (set_priority == -1) 
       begin
@@ -568,7 +568,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   virtual task wait_for_grant(int item_priority = -1, bit lock_request = 0);
     if (m_sequencer == null) begin
-      uvm_report_fatal("WAITGRANT", "Null m_sequencer reference", UVM_NONE);
+      `uvm_fatal("WAITGRANT", "Null m_sequencer reference")
     end
     m_sequencer.wait_for_grant(this, item_priority, lock_request);
   endtask
@@ -583,7 +583,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   virtual function void send_request(uvm_sequence_item request, bit rerandomize = 0);
     if (m_sequencer == null) begin
-        uvm_report_fatal("SENDREQ", "Null m_sequencer reference", UVM_NONE);
+        `uvm_fatal("SENDREQ", "Null m_sequencer reference")
       end
     m_sequencer.send_request(this, request, rerandomize);
   endfunction
@@ -604,7 +604,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   virtual task wait_for_item_done(int transaction_id = -1);
     if (m_sequencer == null) begin
-        uvm_report_fatal("WAITITEMDONE", "Null m_sequencer reference", UVM_NONE);
+        `uvm_fatal("WAITITEMDONE", "Null m_sequencer reference")
       end
     m_sequencer.wait_for_item_done(this, transaction_id);
   endtask
