@@ -35,7 +35,7 @@ class uvm_ral_item extends uvm_sequence_item;
   uvm_object                element;       // handle to reg, field, mem, etc.
 
   rand uvm_ral::access_e    kind;        // READ, WRITE, MIRROR(READ), UPDATE(WRITE)
-  rand uvm_ral_data_logic_t value;       // data out (write), data in (read)
+  rand uvm_ral_data_t       value;       // data out (write), data in (read)
   rand uvm_ral_addr_t       offset;      // for mems
 
   uvm_ral::status_e         status;      // access outcome 
@@ -92,10 +92,8 @@ class uvm_rw_access extends uvm_ral_item;
 
   `uvm_object_utils(uvm_rw_access)
 
-   rand uvm_ral::access_e kind;
-
    rand  uvm_ral_addr_t       addr;                        // bus address
-   rand  uvm_ral_data_t       data;                     // bus data
+   rand  uvm_ral_data_logic_t data;                     // bus data
    rand  int                  n_bits = `UVM_RAL_DATA_WIDTH; // bit width
 
    rand  uvm_ral_byte_en_t    byte_en = '1;            // if bus supports it

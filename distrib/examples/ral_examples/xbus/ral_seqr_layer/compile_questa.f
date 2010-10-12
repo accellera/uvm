@@ -12,5 +12,5 @@
 ../../../xbus/sv/xbus.svh
 ../common/reg_defn/ral_xa0.sv
 ../common/xbus_top.sv
-xbus_test.sv
+../common/xbus_test.sv
 +define+XA0_TOP_PATH=xbus_ral_tb_top.dut

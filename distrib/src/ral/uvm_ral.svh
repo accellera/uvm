@@ -47,7 +47,7 @@ typedef class uvm_ral_sequence;
 typedef class uvm_ral_adapter;
 
 
-class uvm_ral extends uvm_component;
+class uvm_ral;
    typedef enum {
       IS_OK,
       ERROR,
@@ -85,6 +85,11 @@ class uvm_ral extends uvm_component;
    } elem_kind_e;
 
    typedef enum {
+      NO_HIER,
+      HIER
+   } hier_e;
+
+   typedef enum {
       READ,
       WRITE
    } access_e;
@@ -103,15 +108,6 @@ class uvm_ral extends uvm_component;
       ALL_COVERAGE = 'h0007
    } coverage_model_e;
 
-   // Singleton root component for the RAL root sequencers
-   local function new(string name, uvm_component parent);
-      super.new(name, parent);
-   endfunction
-   static local uvm_ral m_root = null;
-   static function uvm_component get_root();
-      if (m_root == null) m_root = new("rals", uvm_top);
-      return m_root;
-   endfunction
 endclass: uvm_ral
 
 

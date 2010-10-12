@@ -4,6 +4,7 @@
 -suppress 2218,2181
 +incdir+../../../../src 
 +incdir+../../../xbus/sv
++incdir+../../../xbus/examples
 +incdir+../common
 +incdir+../common/reg_defn
 +incdir+../common/sequences

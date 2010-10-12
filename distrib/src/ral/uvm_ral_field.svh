@@ -763,8 +763,7 @@ task uvm_ral_field::write(output uvm_ral::status_e  status,
    uvm_ral_field fields[$];
    int fld_pos = 0;
    bit indv_acc = 0;
-   //uvm_ral_addr_t  addr[];
-   int w = 0, j = 0,bus_width, n_bits,n_access,n_access_extra,n_bytes_acc,temp_be;
+   int j = 0,bus_width, n_bits,n_access,n_access_extra,n_bytes_acc,temp_be;
    
    uvm_ral_block  blk = this.parent.get_block();
 			
@@ -832,7 +831,7 @@ task uvm_ral_field::write(output uvm_ral::status_e  status,
 `else	
 
    system_map = local_map.get_root_map();
-   bus_width = system_map.get_n_bytes();  //// get the width of the physical interface data bus in bytes
+   bus_width = local_map.get_n_bytes();  //// get the width of the physical interface data bus in bytes
 			
    //
    // Check if this field is the sole occupant of the
@@ -914,11 +913,6 @@ task uvm_ral_field::write(output uvm_ral::status_e  status,
 	    if(n_access%8 != 0) n_access = n_access + (8 - (n_access%8)); 
             n_bytes_acc = n_access/8;
             
-            w = system_map.get_n_bytes();
-	    //w = local_map.get_physical_addresses(map_info.offset + (this.lsb/(bus_width*8)),
-            //                                     0,
-            //                                     n_bytes_acc,
-            //                                     addr);
             j = 0;
 	    n_bits = this.size;
             foreach(map_info.addr[i]) begin
@@ -946,8 +940,9 @@ task uvm_ral_field::write(output uvm_ral::status_e  status,
                rw_access.element_kind = uvm_ral::REG;
                rw_access.kind = uvm_ral::WRITE;
                rw_access.addr = map_info.addr[i];
+               rw_access.value = value;
                rw_access.data = data;
-               rw_access.n_bits = (n_bits > w*8) ? w*8 : n_bits;
+               rw_access.n_bits = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
                rw_access.byte_en = '1;
                rw_access.extension = extension;
 
@@ -972,8 +967,8 @@ task uvm_ral_field::write(output uvm_ral::status_e  status,
                                                     data, map_info.addr[i], map.get_full_name(), status.name()), UVM_HIGH);
 
                if (status != uvm_ral::IS_OK && status != uvm_ral::HAS_X) return;
-               j += w;
-               n_bits -= w * 8;
+               j += bus_width;
+               n_bits -= bus_width * 8;
             end
             /*if (this.cover_on) begin
              this.sample(value, 0, di);
@@ -1036,8 +1031,7 @@ task uvm_ral_field::read(output uvm_ral::status_e  status,
    uvm_ral_map_info map_info;
    bit [`UVM_RAL_BYTENABLE_WIDTH-1:0] byte_en = '0;
    bit b_en[$];
-   //uvm_ral_addr_t  addr[];
-   int w = 0, j = 0,bus_width, n_bits,n_access,n_access_extra,n_bytes_acc,temp_be;
+   int j = 0,bus_width, n_bits,n_access,n_access_extra,n_bytes_acc,temp_be;
    uvm_ral_field fields[$];
    int fld_pos = 0;
    int rh_shift = 0;
@@ -1068,7 +1062,7 @@ task uvm_ral_field::read(output uvm_ral::status_e  status,
 			value = (reg_value >> this.lsb) & ((1<<this.size))-1;
 `else
    system_map = local_map.get_root_map();
-   bus_width = system_map.get_n_bytes();  //// get the width of the physical interface data bus in bytes
+   bus_width = local_map.get_n_bytes();  //// get the width of the physical interface data bus in bytes
    
    /* START to check if this field is the sole occupant of the complete bus_data(width) */
    this.parent.get_fields(fields);
@@ -1151,11 +1145,6 @@ task uvm_ral_field::read(output uvm_ral::status_e  status,
             if(n_access%8 != 0) n_access = n_access + (8 - (n_access%8)); 
             n_bytes_acc = n_access/8;
 
-            w = system_map.get_n_bytes();
-   	    //w = local_map.get_physical_addresses(map_info.offset + (this.lsb/(bus_width*8)),
-            //                                     0,
-            //                                     n_bytes_acc,
-            //                                     addr);
             n_bits = this.size;
 
             foreach(map_info.addr[i]) begin
@@ -1177,8 +1166,9 @@ task uvm_ral_field::read(output uvm_ral::status_e  status,
                 rw_access.element_kind = uvm_ral::REG;
                 rw_access.kind = uvm_ral::READ;
                 rw_access.addr = map_info.addr[i];
+                rw_access.value = value;
                 rw_access.data = data;
-                rw_access.n_bits = (n_bits > w*8) ? w*8 : n_bits;
+                rw_access.n_bits = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
                 rw_access.byte_en = '1;
                 rw_access.extension = extension;
                             
@@ -1196,18 +1186,23 @@ task uvm_ral_field::read(output uvm_ral::status_e  status,
                 else begin
                   adapter.bus2ral(bus_req,rw_access);
                 end
+                data = rw_access.data & ((1<<bus_width*8)-1);
+                if (rw_access.status == uvm_ral::IS_OK && (^data) === 1'bx)
+                  rw_access.status = uvm_ral::HAS_X;
                 status = rw_access.status;
-                data = rw_access.data;
-                parent.post_do(rw_access);
+
 
                 `uvm_info(get_type_name(), $psprintf("Read 'h%0h at 'h%0h via map \"%s\": %s...",
                                                     data, map_info.addr[i], map.get_full_name(), status.name()), UVM_HIGH);
 
 
                if (status != uvm_ral::IS_OK && status != uvm_ral::HAS_X) return;
-   	       reg_value |= (data & ((1 << (w*8)) - 1)) << (j*8);
-               j += w;
-               n_bits -= w * 8;
+
+   	       reg_value |= data & j*8;
+               rw_access.value = reg_value;
+               parent.post_do(rw_access);
+               j += bus_width;
+               n_bits -= bus_width * 8;
             end
             this.parent.Xis_busyX = 0;
 	    /*if (this.cover_on) begin

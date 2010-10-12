@@ -45,6 +45,8 @@ class uvm_ral_map extends uvm_object;
 
    local uvm_ral_block           m_parent;
 
+   local int unsigned            m_system_n_bytes;
+
    local uvm_ral_map             m_parent_map;
    local uvm_ral_addr_t          m_parent_maps[uvm_ral_map];   // value=offset of this map at parent level
    local uvm_ral_addr_t          m_submaps[uvm_ral_map];       // value=offset of submap at this level
@@ -129,26 +131,26 @@ class uvm_ral_map extends uvm_object;
    // Group: Get
 
    extern virtual function uvm_ral_map           get_root_map();
-   extern virtual function int unsigned          get_size      (bit hier=0);
-   extern virtual function uvm_ral_block         get_parent    (bit hier=0);
-   extern virtual function uvm_ral_map           get_parent_map(bit hier=0);
+   extern virtual function uvm_ral_block         get_parent    ();
+   extern virtual function uvm_ral_map           get_parent_map();
 
-   extern virtual function uvm_ral_addr_t        get_base_addr (bit hier=1);
-   extern virtual function int unsigned          get_n_bytes   (bit hier=1);
-   extern virtual function uvm_ral::endianness_e get_endian    (bit hier=1);
-   extern virtual function uvm_sequencer_base    get_sequencer (bit hier=1);
-   extern virtual function uvm_ral_adapter       get_adapter   (bit hier=1);
+   extern virtual function uvm_ral_addr_t        get_base_addr (uvm_ral::hier_e hier=uvm_ral::HIER);
+   extern virtual function int unsigned          get_n_bytes   (uvm_ral::hier_e hier=uvm_ral::HIER);
+   extern virtual function uvm_ral::endianness_e get_endian    (uvm_ral::hier_e hier=uvm_ral::HIER);
+   extern virtual function uvm_sequencer_base    get_sequencer (uvm_ral::hier_e hier=uvm_ral::HIER);
+   extern virtual function uvm_ral_adapter       get_adapter   (uvm_ral::hier_e hier=uvm_ral::HIER);
 
-   extern virtual function void  get_submaps           (ref uvm_ral_map maps[$],      input bit hier=1);
-   extern virtual function void  get_registers         (ref uvm_ral_reg regs[$],      input bit hier=1);
-   extern virtual function void  get_fields            (ref uvm_ral_field fields[$],  input bit hier=1);
-   extern virtual function void  get_memories          (ref uvm_ral_mem mems[$],      input bit hier=1);
-   extern virtual function void  get_virtual_registers (ref uvm_ral_vreg regs[$],     input bit hier=1);
-   extern virtual function void  get_virtual_fields    (ref uvm_ral_vfield fields[$], input bit hier=1);
+   extern virtual function void  get_submaps           (ref uvm_ral_map maps[$],      input uvm_ral::hier_e hier=uvm_ral::HIER);
+   extern virtual function void  get_registers         (ref uvm_ral_reg regs[$],      input uvm_ral::hier_e hier=uvm_ral::HIER);
+   extern virtual function void  get_fields            (ref uvm_ral_field fields[$],  input uvm_ral::hier_e hier=uvm_ral::HIER);
+   extern virtual function void  get_memories          (ref uvm_ral_mem mems[$],      input uvm_ral::hier_e hier=uvm_ral::HIER);
+   extern virtual function void  get_virtual_registers (ref uvm_ral_vreg regs[$],     input uvm_ral::hier_e hier=uvm_ral::HIER);
+   extern virtual function void  get_virtual_fields    (ref uvm_ral_vfield fields[$], input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    extern virtual function uvm_ral_map_info get_reg_map_info(uvm_ral_reg rg,  bit error=1);
    extern virtual function uvm_ral_map_info get_mem_map_info(uvm_ral_mem mem, bit error=1);
 
+   extern virtual function int unsigned          get_size      ();
    extern virtual function int get_physical_addresses(uvm_ral_addr_t        base_addr,
                                                       uvm_ral_addr_t        mem_offset,
                                                       int unsigned          n_bytes,
@@ -163,9 +165,6 @@ class uvm_ral_map extends uvm_object;
 
    extern virtual function uvm_ral_reg    get_reg_by_offset(uvm_ral_addr_t offset);
    extern virtual function uvm_ral_mem    get_mem_by_offset(uvm_ral_addr_t offset);
-
-   //extern function uvm_ral_reg Xget_reg_by_offsetX(uvm_ral_addr_t  offset,
-   //                                                uvm_ral_map map = null);
 
    //------------------
    // Group: Attributes
@@ -278,7 +277,7 @@ endfunction: add_mem
 function void uvm_ral_map::add_submap (uvm_ral_map child_map,
                                        uvm_ral_addr_t offset);
    // was uvm_ral_block::register_child
-   uvm_ral_map parent_map = child_map.get_parent_map(0);
+   uvm_ral_map parent_map = child_map.get_parent_map();
 
    if (child_map == null) begin
       `uvm_error("RAL", {"Attempting to add NULL map to map '",get_full_name(),"'"})
@@ -306,11 +305,11 @@ function void uvm_ral_map::add_submap (uvm_ral_map child_map,
    end
 
    begin : n_bytes_match_check
-      if (m_n_bytes > child_map.get_n_bytes()) begin
+      if (m_n_bytes > child_map.get_n_bytes(uvm_ral::NO_HIER)) begin
          `uvm_warning("RAL",
              $sformatf("Adding %0d-byte submap '%s' to %0d-byte parent map '%s'",
                        m_n_bytes, child_map.get_full_name(),
-                       child_map.get_n_bytes(), get_full_name()));
+                       child_map.get_n_bytes(uvm_ral::NO_HIER), get_full_name()));
       end
    end
 
@@ -373,19 +372,15 @@ endfunction
 
 // get_parent
 
-function uvm_ral_block uvm_ral_map::get_parent(bit hier=0);
-  if (!hier || m_parent_map == null)
-    return m_parent;
-  return m_parent_map.get_parent(hier);
+function uvm_ral_block uvm_ral_map::get_parent();
+  return m_parent;
 endfunction
 
 
 // get_parent_map
 
-function uvm_ral_map uvm_ral_map::get_parent_map(bit hier=0);
-  if (!hier || m_parent_map == null)
-    return m_parent_map;
-  return m_parent_map.get_parent_map(hier);
+function uvm_ral_map uvm_ral_map::get_parent_map();
+  return m_parent_map;
 endfunction
 
 
@@ -398,26 +393,28 @@ endfunction: get_root_map
 
 // get_base_addr
 
-function uvm_ral_addr_t  uvm_ral_map::get_base_addr(bit hier=1);
-  if (!hier || m_parent_map == null)
-    return m_n_bytes;
-  return m_parent_map.get_base_addr(hier);
+function uvm_ral_addr_t  uvm_ral_map::get_base_addr(uvm_ral::hier_e hier=uvm_ral::HIER);
+  uvm_ral_map child = this;
+  if (hier == uvm_ral::NO_HIER || m_parent_map == null)
+    return m_base_addr;
+  get_base_addr = m_parent_map.get_submap_offset(this);
+  get_base_addr += m_parent_map.get_base_addr(uvm_ral::HIER);
 endfunction
 
 
 // get_n_bytes
 
-function int unsigned uvm_ral_map::get_n_bytes(bit hier=1);
-  if (!hier || m_parent_map == null)
+function int unsigned uvm_ral_map::get_n_bytes(uvm_ral::hier_e hier=uvm_ral::HIER);
+  if (hier == uvm_ral::NO_HIER)
     return m_n_bytes;
-  return m_parent_map.get_n_bytes(hier);
+  return m_system_n_bytes;
 endfunction
 
 
 // get_endian
 
-function uvm_ral::endianness_e uvm_ral_map::get_endian(bit hier=1);
-  if (!hier || m_parent_map == null)
+function uvm_ral::endianness_e uvm_ral_map::get_endian(uvm_ral::hier_e hier=uvm_ral::HIER);
+  if (hier == uvm_ral::NO_HIER || m_parent_map == null)
     return m_endian;
   return m_parent_map.get_endian(hier);
 endfunction
@@ -425,8 +422,8 @@ endfunction
 
 // get_sequencer
 
-function uvm_sequencer_base uvm_ral_map::get_sequencer(bit hier=1);
-  if (!hier || m_parent_map == null)
+function uvm_sequencer_base uvm_ral_map::get_sequencer(uvm_ral::hier_e hier=uvm_ral::HIER);
+  if (hier == uvm_ral::NO_HIER || m_parent_map == null)
     return m_sequencer;
   return m_parent_map.get_sequencer(hier);
 endfunction
@@ -434,8 +431,8 @@ endfunction
 
 // get_adapter
 
-function uvm_ral_adapter uvm_ral_map::get_adapter(bit hier=1);
-  if (!hier || m_parent_map == null)
+function uvm_ral_adapter uvm_ral_map::get_adapter(uvm_ral::hier_e hier=uvm_ral::HIER);
+  if (hier == uvm_ral::NO_HIER || m_parent_map == null)
     return m_adapter;
   return m_parent_map.get_adapter(hier);
 endfunction
@@ -443,12 +440,12 @@ endfunction
 
 // get_submaps
 
-function void uvm_ral_map::get_submaps(ref uvm_ral_map maps[$], input bit hier=1);
+function void uvm_ral_map::get_submaps(ref uvm_ral_map maps[$], input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    foreach (m_submaps[submap])
      maps.push_back(submap);
 
-   if (hier)
+   if (hier == uvm_ral::HIER)
      foreach (this.m_submaps[submap])
        submap.get_submaps(maps);
 
@@ -457,12 +454,12 @@ endfunction
 
 // get_registers
 
-function void uvm_ral_map::get_registers(ref uvm_ral_reg regs[$], input bit hier=1);
+function void uvm_ral_map::get_registers(ref uvm_ral_reg regs[$], input uvm_ral::hier_e hier=uvm_ral::HIER);
 
   foreach (this.m_regs_info[rg])
     regs.push_back(rg);
 
-  if (hier)
+  if (hier == uvm_ral::HIER)
     foreach (this.m_submaps[submap])
       submap.get_registers(regs);
 
@@ -471,12 +468,12 @@ endfunction
 
 // get_fields
 
-function void uvm_ral_map::get_fields(ref uvm_ral_field fields[$], input bit hier=1);
+function void uvm_ral_map::get_fields(ref uvm_ral_field fields[$], input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    foreach (this.m_regs_info[rg])
      rg.get_fields(fields);
    
-   if (hier)
+   if (hier == uvm_ral::HIER)
      foreach (this.m_submaps[submap])
        submap.get_fields(fields);
 
@@ -485,12 +482,12 @@ endfunction
 
 // get_memories
 
-function void uvm_ral_map::get_memories(ref uvm_ral_mem mems[$], input bit hier=1);
+function void uvm_ral_map::get_memories(ref uvm_ral_mem mems[$], input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    foreach (this.m_mems_info[mem])
      mems.push_back(mem);
     
-   if (hier)
+   if (hier == uvm_ral::HIER)
      foreach (this.m_submaps[submap])
        submap.get_memories(mems);
 
@@ -499,7 +496,7 @@ endfunction
 
 // get_virtual_registers
 
-function void uvm_ral_map::get_virtual_registers(ref uvm_ral_vreg regs[$], input bit hier=1);
+function void uvm_ral_map::get_virtual_registers(ref uvm_ral_vreg regs[$], input uvm_ral::hier_e hier=uvm_ral::HIER);
 
   uvm_ral_mem mems[$];
   get_memories(mems,hier);
@@ -513,7 +510,7 @@ endfunction
 
 // get_virtual_fields
 
-function void uvm_ral_map::get_virtual_fields(ref uvm_ral_vfield fields[$], input bit hier=1);
+function void uvm_ral_map::get_virtual_fields(ref uvm_ral_vfield fields[$], input uvm_ral::hier_e hier=uvm_ral::HIER);
 
    uvm_ral_vreg regs[$];
    get_virtual_registers(regs,hier);
@@ -571,7 +568,10 @@ endfunction
 
 function void uvm_ral_map::set_base_addr(uvm_ral_addr_t offset);
    if (m_parent_map != null) begin
-      void'(m_parent_map.Xcheck_child_overlapX(this, offset, get_size()));
+      uvm_ral_map top_map = get_root_map();
+      m_parent_map.set_submap_offset(this, offset);
+      top_map.Xinit_address_mapX();
+      return;
    end
    m_base_addr = offset;
 endfunction
@@ -579,15 +579,10 @@ endfunction
 
 // get_size
 
-function int unsigned uvm_ral_map::get_size(bit hier=0);
+function int unsigned uvm_ral_map::get_size();
 
   int unsigned max_addr = 0;
   int unsigned addr;
-
-  if (hier) begin
-    uvm_ral_map root_map = get_root_map();
-    return root_map.get_size(0);
-  end
 
   // get max offset from registers
   foreach (m_regs_info[rg]) begin
@@ -605,7 +600,7 @@ function int unsigned uvm_ral_map::get_size(bit hier=0);
 
   // get max offset from submaps
   foreach (m_submaps[submap]) begin
-    addr = m_submaps[submap] + submap.get_size(hier);
+    addr = m_submaps[submap] + submap.get_size();
     if (addr > max_addr)
       max_addr = addr;
   end
@@ -644,7 +639,7 @@ function bit uvm_ral_map::Xcheck_child_overlapX(uvm_ral_map  child_map,
                                                 int unsigned offset,
                                                 int unsigned size);
 
-  int unsigned multiplier = ((child_map.get_n_bytes()-1)/m_n_bytes)+1;
+  int unsigned multiplier = ((child_map.get_n_bytes(uvm_ral::NO_HIER)-1)/m_n_bytes)+1;
   int unsigned new_submap_size     = size;
   int unsigned new_submap_str_addr = offset;
   int unsigned new_submap_end_addr = offset + (new_submap_size * multiplier) - 1;
@@ -671,7 +666,7 @@ function bit uvm_ral_map::Xcheck_child_overlapX(uvm_ral_map  child_map,
 
       int unsigned submap_start_addr = m_submaps[submap];
       int unsigned submap_end_addr   = m_submaps[submap] + (submap.get_size() *
-                                     (((submap.get_n_bytes()-1)/m_n_bytes)+1))-1;
+                                     (((submap.get_n_bytes(uvm_ral::NO_HIER)-1)/m_n_bytes)+1))-1;
       Xcheck_child_overlapX &=
         Xcheck_rangeX(submap_start_addr, submap_end_addr, "submap",
                       new_submap_str_addr, new_submap_end_addr, child_map.get_full_name());
@@ -748,7 +743,7 @@ function int uvm_ral_map::get_physical_addresses(uvm_ral_addr_t     base_addr,
                                                  uvm_ral_addr_t     mem_offset,
                                                  int unsigned       n_bytes,
                                                  ref uvm_ral_addr_t addr[]);
-   int bus_width = get_n_bytes(0);
+   int bus_width = get_n_bytes(uvm_ral::NO_HIER);
    uvm_ral_map  up_map;
    uvm_ral_addr_t  local_addr[];
 
@@ -772,7 +767,7 @@ function int uvm_ral_map::get_physical_addresses(uvm_ral_addr_t     base_addr,
       
       base_addr = base_addr + mem_offset * n;
 
-      case (get_endian(0))
+      case (get_endian(uvm_ral::NO_HIER))
          uvm_ral::LITTLE_ENDIAN: begin
             foreach (local_addr[i]) begin
                local_addr[i] = base_addr + i;
@@ -803,7 +798,7 @@ function int uvm_ral_map::get_physical_addresses(uvm_ral_addr_t     base_addr,
       endcase
    end
 
-  up_map = get_parent_map(0);
+  up_map = get_parent_map();
 
    // Then translate these addresses in the parent's space
    if (up_map == null) begin
@@ -815,10 +810,10 @@ function int uvm_ral_map::get_physical_addresses(uvm_ral_addr_t     base_addr,
       int w, k;
 
       // Scale the consecutive local address in the system's granularity
-      if (bus_width < up_map.get_n_bytes(0))
+      if (bus_width < up_map.get_n_bytes(uvm_ral::NO_HIER))
         k = 1;
       else
-        k = ((bus_width-1) / up_map.get_n_bytes(0)) + 1;
+        k = ((bus_width-1) / up_map.get_n_bytes(uvm_ral::NO_HIER)) + 1;
 
       base_addr = up_map.get_submap_offset(this);
       foreach (local_addr[i]) begin
@@ -895,6 +890,8 @@ endfunction
 
 function void uvm_ral_map::Xinit_address_mapX();
 
+   int unsigned bus_width;
+
    uvm_ral_map top_map = get_root_map();
 
    foreach (m_submaps[map])
@@ -903,7 +900,6 @@ function void uvm_ral_map::Xinit_address_mapX();
    foreach (m_regs_info[rg]) begin
      if (!m_regs_info[rg].unmapped) begin
        uvm_ral_addr_t addrs[];
-       int unsigned bus_width;
        bus_width = get_physical_addresses(m_regs_info[rg].offset,0,rg.get_n_bytes(),addrs);
        foreach (addrs[i]) begin
          uvm_ral_addr_t addr = addrs[i];
@@ -930,7 +926,6 @@ function void uvm_ral_map::Xinit_address_mapX();
    foreach (m_mems_info[mem]) begin
      if (!m_mems_info[mem].unmapped) begin
        uvm_ral_addr_t addrs[];
-       int unsigned bus_width;
        bus_width = get_physical_addresses(m_mems_info[mem].offset,0,mem.get_n_bytes(),addrs);
        foreach (addrs[i]) begin
          uvm_ral_addr_t addr = addrs[i];
@@ -955,6 +950,7 @@ function void uvm_ral_map::Xinit_address_mapX();
        end
      end
    end
+   m_system_n_bytes = bus_width;
 endfunction
 
 
@@ -1044,23 +1040,23 @@ function string uvm_ral_map::convert2string();
    string prefix = "";
 
    $sformat(convert2string, "%sMap %s", prefix, this.get_full_name());
-   endian = this.get_endian();
+   endian = this.get_endian(uvm_ral::NO_HIER);
    $sformat(convert2string, "%s -- %0d bytes (%s)", convert2string,
-            this.get_n_bytes(), endian.name());
+            this.get_n_bytes(uvm_ral::NO_HIER), endian.name());
    this.get_registers(regs);
    foreach (regs[j]) begin
       $sformat(convert2string, "%s\n%s", convert2string,
                regs[j].convert2string());//{prefix, "   "}, this));
    end
-   this.get_virtual_registers(vregs);
-   foreach (vregs[j]) begin
-      $sformat(convert2string, "%s\n%s", convert2string,
-               vregs[j].convert2string());//{prefix, "   "}, this));
-   end
    this.get_memories(mems);
    foreach (mems[j]) begin
       $sformat(convert2string, "%s\n%s", convert2string,
                mems[j].convert2string());//{prefix, "   "}, this));
+   end
+   this.get_virtual_registers(vregs);
+   foreach (vregs[j]) begin
+      $sformat(convert2string, "%s\n%s", convert2string,
+               vregs[j].convert2string());//{prefix, "   "}, this));
    end
 endfunction
 

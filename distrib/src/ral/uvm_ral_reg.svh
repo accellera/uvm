@@ -950,12 +950,8 @@ function int uvm_ral_reg::get_addresses(uvm_ral_map map=null, ref uvm_ral_addr_t
  
    addr = map_info.addr;
    system_map = map.get_root_map();
-   return system_map.get_n_bytes();
+   return map.get_n_bytes();
 
-   //return map.get_physical_addresses(map_info.offset,
-   //                                  0,
-   //                                  this.get_n_bytes(),
-   //                                  addr);
 endfunction
 
 
@@ -1499,7 +1495,6 @@ task uvm_ral_reg::XwriteX(output uvm_ral::status_e status,
             uvm_ral_adapter    adapter = system_map.get_adapter();
             uvm_sequencer_base sequencer = system_map.get_sequencer();
 
-            //uvm_ral_addr_t  addr[];
             int w, j;
             int n_bits;
 
@@ -1514,12 +1509,7 @@ task uvm_ral_reg::XwriteX(output uvm_ral::status_e status,
             end
 
             
-            w = system_map.get_n_bytes();
-            //w = local_map.get_physical_addresses(map_info.offset,
-            //                                     0,
-            //                                     this.get_n_bytes(),
-            //                                     addr);
-
+            w = local_map.get_n_bytes();
             j = 0;
             n_bits = this.get_n_bytes() * 8;
 
@@ -1544,6 +1534,7 @@ task uvm_ral_reg::XwriteX(output uvm_ral::status_e status,
                rw_access.element_kind = uvm_ral::REG;
                rw_access.kind = uvm_ral::WRITE;
                rw_access.addr = map_info.addr[i];
+               rw_access.value = value;
                rw_access.data = data;
                rw_access.n_bits = (n_bits > w*8) ? w*8 : n_bits;
                rw_access.byte_en = '1;
@@ -1812,7 +1803,6 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
             uvm_ral_adapter    adapter = system_map.get_adapter();
             uvm_sequencer_base sequencer = system_map.get_sequencer();
 
-            //uvm_ral_addr_t  addr[];
             int w, j;
             int n_bits;
          
@@ -1826,25 +1816,20 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
                return;
             end
 
-            w = system_map.get_n_bytes();
-            //w = local_map.get_physical_addresses(map_info.offset,
-            //                                     0,
-            //                                     this.get_n_bytes(),
-            //                                     addr);
-
+            w = local_map.get_n_bytes();
             j = 0;
             n_bits = this.get_n_bytes() * 8;
             value = 0;
 
 
             foreach (map_info.addr[i]) begin
-               uvm_ral_data_t  data;
                uvm_sequence_item bus_req = new("bus_rd");
                uvm_rw_access rw_access;
+               uvm_ral_data_logic_t data;
                
                `uvm_info(get_type_name(),
-                  $psprintf("Reading 'h%0h at 'h%0h via map \"%s\"...",
-                            data, map_info.addr[i], map.get_full_name()), UVM_HIGH);
+                  $psprintf("Reading 'address 'h%0h via map \"%s\"...",
+                            map_info.addr[i], map.get_full_name()), UVM_HIGH);
                         
                 rw_access = uvm_rw_access::type_id::create("rw_access",,
                              {sequencer.get_full_name(),".",parent.get_full_name()});
@@ -1852,7 +1837,7 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
                 rw_access.element_kind = uvm_ral::REG;
                 rw_access.kind = uvm_ral::READ;
                 rw_access.addr = map_info.addr[i];
-                rw_access.data = data;
+                rw_access.data = 'h0;
                 rw_access.n_bits = (n_bits > w*8) ? w*8 : n_bits;
                 rw_access.byte_en = '1;
                 rw_access.extension = extension;
@@ -1872,9 +1857,10 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
                 else begin
                   adapter.bus2ral(bus_req,rw_access);
                 end
+                data = rw_access.data & ((1<<w*8)-1);
+                if (rw_access.status == uvm_ral::IS_OK && (^data) === 1'bx)
+                  rw_access.status = uvm_ral::HAS_X;
                 status = rw_access.status;
-                data = rw_access.data;
-                parent.post_do(rw_access);
 
                 `uvm_info(get_type_name(),
                    $psprintf("Read 'h%0h at 'h%0h via map \"%s\": %s...", data,
@@ -1884,7 +1870,10 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
                    this.Xis_busyX = 0;
                    return;
                 end
-                value |= (data & ((1 << (w*8)) - 1)) << (j*8);
+
+                value |= data << j*8;
+                rw_access.value = value;
+                parent.post_do(rw_access);
                 j += w;
                 n_bits -= w * 8;
              end
@@ -2232,8 +2221,8 @@ function string uvm_ral_reg::convert2string();
      int unsigned offset;
      while (parent_map != null) begin
        uvm_ral_map this_map = parent_map;
-       parent_map = this_map.get_parent_map(0);
-       offset = parent_map == null ? this_map.get_base_addr(0) : parent_map.get_submap_offset(this_map);
+       parent_map = this_map.get_parent_map();
+       offset = parent_map == null ? this_map.get_base_addr(uvm_ral::NO_HIER) : parent_map.get_submap_offset(this_map);
        prefix = {prefix, "  "};
        $sformat(convert2string, "%sMapped in '%s' -- %s bytes, %s, offset 'h%0h\n", prefix,
             this_map.get_full_name(), this_map.get_n_bytes(), this_map.get_endian(), offset);
