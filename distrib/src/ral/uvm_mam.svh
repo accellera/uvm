@@ -20,26 +20,243 @@
 // -------------------------------------------------------------
 //
 
+//
+// Title: Memory Allocation Manager
+//
+// Manage the exclusive allocation of consecutive memory locations
+// called ~regions~.
+// The regions can subsequently be accessed like little memories of
+// their own, without knowing in which memory or offset they are
+// actually located.
+//
+// The memory allocation manage should used by any
+// application-level process
+// that requires reserved space in the memory,
+// such as DMA buffers.
+// A region will remain reserved until it is explicitly released. 
+//
 
 `ifndef UVM_MAM__SV
 `define UVM_MAM__SV
 
 
 typedef class uvm_mam_cfg;
-typedef class uvm_mam;
+typedef class uvm_mam_region;
+typedef class uvm_mam_policy;
 
 typedef class uvm_ral_mem;
 typedef class uvm_ral_mem_burst;
 
 
-//------------------------------------------------------------------------------
+//
+// CLASS: uvm_mam
+// Memory allocation manager
+//
+// Memory allocation management utility class similar to C's malloc()
+// and free().
+// A single instance of this class is used to manage a single,
+// contiguous address space.
+//
+class uvm_mam;
+
+   //
+   // Group: Initialization
+   //
+
+   // Type: alloc_mode_e
+   // Memory allocation mode
+   //
+   // Specifies how to allocate a memory region
+   //
+   // GREEDY   - Consume new, previously unallocated memory
+   // THRIFTY  - Reused previously released memory as much as possible (not yet implemented)
+   //
+   typedef enum {GREEDY, THRIFTY} alloc_mode_e;
+
+   // Type: locality_e
+   // Location of memory regions
+   //
+   // Specifies where to locate new memory regions
+   //
+   // BROAD    - Locate new regions randomly throughout the address space
+   // NEARBY   - Locate new regions adjacent to existing regions
+   
+   typedef enum {BROAD, NEARBY}   locality_e;
+
+   local uvm_mam_cfg cfg;
+
+   // Variable: default_alloc
+   // Region allocation policy
+   //
+   // This object is repeatedly randomized when allocating new regions.
+   uvm_mam_policy default_alloc;
+   local uvm_ral_mem memory;
+
+   local uvm_mam_region in_use[$];
+   local int for_each_idx = -1;
+   local string fname = "";
+   local int lineno = 0;
+
+   //
+   // FUNCTION: new
+   // Create a new manager instance
+   //
+   // Create an instance of a memory allocation manager
+   // with the specified name and configuration.
+   // This instance manages all memory region allocation within
+   // the address range specified in the configuration descriptor.
+   //
+   // If a reference to a memory abstraction class is provided, the memory
+   // locations within the regions can be accessed through the region
+   // descriptor, using the <uvm_mam_region::read()> and
+   // <uvm_mam_region::write()> methods.
+   //
+   extern function new(string      name,
+                       uvm_mam_cfg cfg,
+                       uvm_ral_mem mem=null);
+
+
+   //
+   // FUNCTION: reconfigure
+   // Reconfigure the manager
+   //
+   // Modify the maximum and minimum addresses of the address space managed by
+   // the allocation manager, allocation mode, or locality.
+   // The number of bytes per memory location cannot be modified
+   // once an allocation manager has been constructed.
+   // All currently allocated regions must fall within the new address space.
+   //
+   // Returns the previous configuration.
+   //
+   // if no new configuration is specified, simply returns the current
+   // configuration.
+   //
+   extern function uvm_mam_cfg reconfigure(uvm_mam_cfg cfg = null);
+
+
+   //
+   // Group: Memory Management
+   //
+
+   //
+   // FUNCTION: reserve_region
+   // Reserve a specific memory region
+   //
+   // Reserve a memory region of the specified number of bytes
+   // starting at the specified offset.
+   // A descriptor of the reserved region is returned.
+   // If the specified region cannot be reserved, null is returned.
+   //
+   // It may not be possible to reserve a region because
+   // it overlaps with an already-allocated region or
+   // it lies outside the address range managed
+   // by the memory manager.
+   //
+   // Regions can be reserved to create "holes" in the managed address space.
+   //
+   extern function uvm_mam_region reserve_region(bit [63:0]   start_offset,
+                                                 int unsigned n_bytes,
+                                                 string       fname = "",
+                                                 int          lineno = 0);
+
+   //
+   // FUNCTION: request_region
+   // Request and reserve a memory region
+   //
+   // Request and reserve a memory region of the specified number
+   // of bytes starting at a random location.
+   // If an policy is specified, it is randomized to determine
+   // the start offset of the region.
+   // If no policy is specified, the policy found in
+   // the "uvm_mam::default_alloc" class property is randomized.
+   //
+   // A descriptor of the allocated region is returned.
+   // If no region can be allocated, ~null~ is returned.
+   //
+   // It may not be possible to allocate a region because
+   // there is no area in the memory with enough consecutive locations
+   // to meet the size requirements or
+   // because there is another contradiction when randomizing
+   // the policy.
+   //
+   // If the memory allocation is configured to <uvm_mam::THRIFTY> or
+   // <uvm_mam::NEARBY>
+   // (see the <uvm_mam_cfg::alloc_mode_e> and <uvm_mam_cfg::locality_e>),
+   // a suitable region is first sought procedurally.
+   //
+   extern function uvm_mam_region request_region(int unsigned      n_bytes,
+                                                 uvm_mam_policy alloc = null,
+                                                 string            fname = "",
+                                                 int               lineno = 0);
+
+   //
+   // FUNCTION: release_region
+   // Release the specified region
+   //
+   // Release a previously allocated memory region.
+   // An error is issued if the
+   // specified region has not been previously allocated or
+   // is no longer allocated. 
+   //
+   extern function void release_region(uvm_mam_region region);
+
+   //
+   // FUNCTION: release_all_regions
+   // Forcibly release all allocated memory regions. 
+   //
+   extern function void release_all_regions();
+
+
+   //
+   // Group: Introspection
+   //
+
+   //
+   // FUNCTION: convert2string
+   // Image of the state of the manager
+   //
+   // Create a human-readable description of the state of
+   // the memory manager and the currently allocated regions.
+   // 
+   extern function string convert2string();
+
+   //
+   // FUNCTION: for_each
+   // Iterate over all currently allocated regions
+   //
+   // If reset is ~TRUE~, reset the iterator
+   // and return the first allocated region.
+   // Returns ~null~ when there are no additional allocated
+   // regions to iterate on. 
+   //
+   extern function uvm_mam_region for_each(bit reset = 0);
+
+   //
+   // FUNCTION: get_memory
+   // Get the managed memory implementation
+   //
+   // Return the reference to the memory abstraction class
+   // for the memory implementing
+   // the locations managed by this instance of the allocation manager.
+   // Returns ~null~ if no
+   // memory abstraction class was specified at construction time. 
+   //
+   extern function uvm_ral_mem get_memory();
+
+endclass: uvm_mam
+
+
+
+//
 // CLASS: uvm_mam_region
-// This class is used by the memory allocation manager to describe allocated memory regions.
-// Instances of this class should not be created directly, therefore, this appendix does
-// not document the constructor. Instances of this class should be created only from within
-// the memory manager, in the "uvm_mam::reserve_region()" and "uvm_mam::request_region()"
+// Allocated memory region descriptor
+//
+// Each instance of this class describes an allocated memory region.
+// Instances of this class are created only by
+// the memory manager, and returned by the
+// <uvm_mam::reserve_region()> and <uvm_mam::request_region()>
 // methods. 
-//------------------------------------------------------------------------------
+//
 class uvm_mam_region;
    /*local*/ bit [63:0] Xstart_offsetX;  // Can't be local since function
    /*local*/ bit [63:0] Xend_offsetX;    // calls not supported in constraints
@@ -58,59 +275,80 @@ class uvm_mam_region;
                                  int unsigned n_bytes,
                                  uvm_mam      parent);
 
+   // Function: get_start_offset
+   // Get the start offset of the region
+   //
+   // Return the address offset, within the memory,
+   // where this memory region starts.
    extern function bit [63:0] get_start_offset();
+
+   // Function: get_end_offset
+   // Get the end offset of the region
+   //
+   // Return the address offset, within the memory,
+   // where this memory region ends.
    extern function bit [63:0] get_end_offset();
 
-
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_len
-   // Return the number of consecutive memory locations (not necessarily bytes) in the allocated
-   // region. 
-   //------------------------------------------------------------------------------
+   // Size of the memory region
+   //
+   // Return the number of consecutive memory locations
+   // (not necessarily bytes) in the allocated region. 
+   //
    extern function int unsigned get_len();
 
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_n_bytes
-   // Return the number of consecutive bytes in the allocated region. If the managed memory
-   // contains more than one byte per address, the number of bytes in an allocated region may
+   // Number of bytes in the region
+   //
+   // Return the number of consecutive bytes in the allocated region.
+   // If the managed memory contains more than one byte per address,
+   // the number of bytes in an allocated region may
    // be greater than the number of requested or reserved bytes. 
-   //------------------------------------------------------------------------------
+   //
    extern function int unsigned get_n_bytes();
 
-
-   //------------------------------------------------------------------------------
-   // FUNCTION: psdisplay
-   // Create a human-readable description of the allocated region. Each line of the description
-   // is prefixed with the specified prefix. 
-   //------------------------------------------------------------------------------
-   extern function string psdisplay(string prefix = "");
-
+   //
+   // function: release_region
+   // Release this region
+   //
    extern function void release_region();
 
-
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_memory
-   // Return the reference to the RAL memory abstraction class for the memory implementing
-   // this allocated memory region. Returns null if no memory abstraction class was specified
+   // Get the memory where the region resides
+   //
+   // Return a reference to the memory abstraction class
+   // for the memory implementing this allocated memory region.
+   // Returns ~null~ if no memory abstraction class was specified
    // for the allocation manager that allocated this region. 
-   //------------------------------------------------------------------------------
+   //
    extern function uvm_ral_mem get_memory();
 
-   //------------------------------------------------------------------------------
+   //
    // FUNCTION: get_virtual_registers
-   // Return the reference to the RAL virtual register abstraction class for the set of virtual
-   // registers implemented in the allocated region. Returns null if the memory region is
+   // Get the virtual register array in this region
+   //
+   // Return a reference to the virtual register array abstraction class
+   // implemented in this region.
+   // Returns ~null~ if the memory region is
    // not known to implement virtual registers. 
-   //------------------------------------------------------------------------------
+   //
    extern function uvm_ral_vreg get_virtual_registers();
 
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: write
-   // Writes the specified value at the specified region location in the design using the
-   // specified access path. If the memory is shared by more than one physical interface,
-   // a domain must be specified if a physical access is used (front-door access). 
-   //------------------------------------------------------------------------------
+   // Write to a memory location in the region.
+   //
+   // Write to the memory location that corresponds to the
+   // specified ~offset~ within this region.
+   // Requires that the memory abstraction class be associated with
+   // the memory allocation manager that allocated this region.
+   //
+   // See <uvm_ral_mem::write()> for more details.
+   //
    extern task write(output uvm_ral::status_e  status,
                      input  uvm_ral_addr_t     offset,
                      input  uvm_ral_data_t     value,
@@ -123,12 +361,17 @@ class uvm_mam_region;
                      input  int                lineno = 0);
 
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: read
-   // Reads the current value of the memory region location from the design using the specified
-   // access path. If the memory is shared by more than one physical interface, a domain must
-   // be specified if a physical access is used (front-door access). 
-   //------------------------------------------------------------------------------
+   // Read from a memory location in the region.
+   //
+   // Read from the memory location that corresponds to the
+   // specified ~offset~ within this region.
+   // Requires that the memory abstraction class be associated with
+   // the memory allocation manager that allocated this region.
+   //
+   // See <uvm_ral_mem::read()> for more details.
+   //
    extern task read(output uvm_ral::status_e  status,
                     input  uvm_ral_addr_t     offset,
                     output uvm_ral_data_t     value,
@@ -141,12 +384,17 @@ class uvm_mam_region;
                     input  int                lineno = 0);
 
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: burst_write
-   // Burst-write the specified values in the region locations specified by burst descriptor.
-   // If the memory is shared by more than one physical interface, a domain must be specified
-   // if a physical access is used (front-door access). 
-   //------------------------------------------------------------------------------
+   // Write to a set of memory location in the region.
+   //
+   // Write to the memory locations that corresponds to the
+   // specified ~burst~ within this region.
+   // Requires that the memory abstraction class be associated with
+   // the memory allocation manager that allocated this region.
+   //
+   // See <uvm_ral_mem::burst_write()> for more details.
+   //
    extern task burst_write(output uvm_ral::status_e  status,
                            input  uvm_ral_mem_burst  burst,
                            input  uvm_ral_data_t     value[],
@@ -159,12 +407,17 @@ class uvm_mam_region;
                            input  int                lineno = 0);
 
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: burst_read
-   // Burst-read the current values of the region locations specified by the burst descriptor.
-   // If the memory is shared by more than one physical interface, a domain must be specified
-   // if a physical access is used (front-door access). 
-   //------------------------------------------------------------------------------
+   // Read from a set of memory location in the region.
+   //
+   // Read from the memory locations that corresponds to the
+   // specified ~burst~ within this region.
+   // Requires that the memory abstraction class be associated with
+   // the memory allocation manager that allocated this region.
+   //
+   // See <uvm_ral_mem::burst_read()> for more details.
+   //
    extern task burst_read(output uvm_ral::status_e  status,
                           input  uvm_ral_mem_burst  burst,
                           output uvm_ral_data_t     value[],
@@ -177,12 +430,18 @@ class uvm_mam_region;
                           input  int                lineno = 0);
 
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: poke
-   // Deposit the specified value at the specified region location in the design using a back-door
-   // access. Depending on the design model implementation, it may be possible to modify
-   // the content of a read-only memory. 
-   //------------------------------------------------------------------------------
+   // Deposit in a memory location in the region.
+   //
+   // Deposit the specified value in the memory location
+   // that corresponds to the
+   // specified ~offset~ within this region.
+   // Requires that the memory abstraction class be associated with
+   // the memory allocation manager that allocated this region.
+   //
+   // See <uvm_ral_mem::poke()> for more details.
+   //
    extern task poke(output uvm_ral::status_e  status,
                     input  uvm_ral_addr_t     offset,
                     input  uvm_ral_data_t     value,
@@ -192,13 +451,17 @@ class uvm_mam_region;
                     input  int                lineno = 0);
 
 
-   //------------------------------------------------------------------------------
+   //
    // TASK: peek
-   // Reads the current value of the region location from the design using a back-door access.
-   // The optional value of the arguments: data_id scenario_id stream_id ...are passed
-   // to the back-door access method. This allows the physical and back-door read access
-   // to be traced back to the higher-level transaction that caused the access to occur. 
-   //------------------------------------------------------------------------------
+   // Sample a memory location in the region.
+   //
+   // Sample the memory location that corresponds to the
+   // specified ~offset~ within this region.
+   // Requires that the memory abstraction class be associated with
+   // the memory allocation manager that allocated this region.
+   //
+   // See <uvm_ral_mem::sample()> for more details.
+   //
    extern task peek(output uvm_ral::status_e  status,
                     input  uvm_ral_addr_t     offset,
                     output uvm_ral_data_t     value,
@@ -206,33 +469,51 @@ class uvm_mam_region;
                     input  uvm_object         extension = null,
                     input  string             fname = "",
                     input  int                lineno = 0);
+
+
+   extern function string convert2string();
 endclass
 
 
 
-//------------------------------------------------------------------------------
-// CLASS: uvm_mam_allocator
-// An instance of this class is randomized to determine the starting offset of a randomly
-// allocated memory region. This class can be extended to provide additional constraints
-// on the starting offset, such as word alignment or location of the region within a memory
-// page. 
-//------------------------------------------------------------------------------
-class uvm_mam_allocator;
+//
+// CLASS: uvm_mam_policy
+//
+// An instance of this class is randomized to determine
+// the starting offset of a randomly allocated memory region.
+// This class can be extended to provide additional constraints
+// on the starting offset, such as word alignment or
+// location of the region within a memory page.
+// If a procedural region allocation policy is required,
+// it can be implemented in the pre/post_randomize() method.
+//
+class uvm_mam_policy;
+   // variable: len
+   // Number of addresses required
    int unsigned len;
 
+   // variable: start_offset
+   // The starting offset of the region
    rand bit [63:0] start_offset;
 
+   // variable: min_offset
+   // Minimum address offset in the managed address space
    bit [63:0] min_offset;
+
+   // variable: max_offset
+   // Maximum address offset in the managed address space
    bit [63:0] max_offset;
 
+   // variable: in_use
+   // Regions already allocated in the managed address space
    uvm_mam_region in_use[$];
 
-   constraint vmam_mam_allocator_valid {
+   constraint uvm_mam_policy_valid {
       start_offset >= min_offset;
       start_offset <= max_offset - len + 1;
    }
 
-   constraint vmam_mam_allocator_no_overlap {
+   constraint uvm_mam_policy_no_overlap {
       foreach (in_use[i]) {
          !(start_offset <= in_use[i].Xend_offsetX &&
            start_offset + len - 1 >= in_use[i].Xstart_offsetX);
@@ -243,141 +524,30 @@ endclass
 
 
 
-//------------------------------------------------------------------------------
-// CLASS: uvm_mam
-// This class is a memory allocation management utility class similar to C's malloc()
-// and free(). A single instance of this class is used to manage a single, contiguous address
-// space. This memory allocation management class is used by any application-level process
-// that requires reserved space in the memory. The section of memory (called a region)
-// will remain reserved until it is explicitly released. 
-//------------------------------------------------------------------------------
-class uvm_mam;
-
-   typedef enum {GREEDY, THRIFTY} alloc_mode_e;
-   typedef enum {BROAD, NEARBY}   locality_e;
-
-   local uvm_mam_cfg cfg;
-
-   uvm_mam_allocator default_alloc;
-   local uvm_ral_mem memory;
-
-   local uvm_mam_region in_use[$];
-   local int for_each_idx = -1;
-   local string fname = "";
-   local int lineno = 0;
-
-
-   //------------------------------------------------------------------------------
-   // FUNCTION: new
-   // Create an instance of a memory allocation manager with the specified name. This instance
-   // manages all memory region allocation within the address range specified in the configuration
-   // descriptor. If a reference to a RAL memory abstraction class is provided, the memory
-   // locations within the regions can be accessed through the region descriptor, using
-   // the Xref and Xref methods. The specified name is used as the instance name of the message
-   // interface found in the "uvm_mam::log" class property. 
-   //------------------------------------------------------------------------------
-   extern function new(string      name,
-                       uvm_mam_cfg cfg,
-                       uvm_ral_mem mem=null);
-
-
-   //------------------------------------------------------------------------------
-   // FUNCTION: reconfigure
-   // Optionally modify the maximum and minimum addresses of the address space managed by
-   // the allocation manager, allocation mode, or locality. The number of bytes per memory
-   // location cannot be modified once an allocation manager has been constructed. Returns
-   // the previous configuration. All currently allocated regions must fall within the
-   // new address space. 
-   //------------------------------------------------------------------------------
-   extern function uvm_mam_cfg reconfigure(uvm_mam_cfg cfg = null);
-
-
-   //------------------------------------------------------------------------------
-   // FUNCTION: reserve_region
-   // Reserve a memory buffer of the specified number of bytes starting at the specified offset
-   // in the memory. A descriptor of the reserved region is returned. If the specified region
-   // cannot be reserved, null is returned. It may not be possible to reserve a region because
-   // it overlaps with an already-allocated region or it lies outside the address range managed
-   // by the memory manager. 
-   //------------------------------------------------------------------------------
-   extern function uvm_mam_region reserve_region(bit [63:0]   start_offset,
-                                                 int unsigned n_bytes,
-                                                 string       fname = "",
-                                                 int          lineno = 0);
-
-   //------------------------------------------------------------------------------
-   // FUNCTION: request_region
-   // Request and reserve a memory buffer of the specified number of bytes starting at a random
-   // location in the memory. If an allocator is specified, it is randomized to determine
-   // the start offset of the region. If no allocator is specified, the allocator found in
-   // the "uvm_mam::default_alloc" class property is randomized. A descriptor of the allocated
-   // region is returned. If no region can be allocated, null is returned. It may not be possible
-   // to allocate a region because there is no area in the memory with enough consecutive locations
-   // to meet the size requirements or because there is another contradiction when randomizing
-   // the allocator. If the memory allocation is configured to uvm_mam::THRIFTY or uvm_mam::NEARBY
-   // (see the "uvm_mam_cfg::mode" and "uvm_mam_cfg::locality" class properties, respectively),
-   // a suitable region is first sought procedurally. If no suitable region is 
-   //------------------------------------------------------------------------------
-   extern function uvm_mam_region request_region(int unsigned      n_bytes,
-                                                 uvm_mam_allocator alloc = null,
-                                                 string            fname = "",
-                                                 int               lineno = 0);
-
-   //------------------------------------------------------------------------------
-   // FUNCTION: release_region
-   // Release the specified previously allocated memory region. An error is issued if the
-   // specified region has not been previously allocated or is no longer allocated. 
-   //------------------------------------------------------------------------------
-   extern function void release_region(uvm_mam_region region);
-
-   //------------------------------------------------------------------------------
-   // FUNCTION: release_all_regions
-   // Release all allocated memory regions. 
-   //------------------------------------------------------------------------------
-   extern function void release_all_regions();
-
-
-
-   //------------------------------------------------------------------------------
-   // FUNCTION: psdisplay
-   // Create a human-readable description of the state of the memory manager and the currently
-   // allocated regions. Each line of the description is prefixed with the specified prefix.
-   // 
-   //------------------------------------------------------------------------------
-   extern function string psdisplay(string prefix = "");
-
-   //------------------------------------------------------------------------------
-   // FUNCTION: for_each
-   // Iterate over all currently allocated regions. If reset is non-zero, reset the iterator
-   // and return the first allocated region. Returns null when there are no additional allocated
-   // regions to iterate on. 
-   //------------------------------------------------------------------------------
-   extern function uvm_mam_region for_each(bit reset = 0);
-
-   //------------------------------------------------------------------------------
-   // FUNCTION: get_memory
-   // Return the reference to the RAL memory abstraction class for the memory implementing
-   // the locations managed by this instance of the allocation manager. Returns null if no
-   // memory abstraction class was specified at construction time. 
-   //------------------------------------------------------------------------------
-   extern function uvm_ral_mem get_memory();
-
-endclass: uvm_mam
-
-
-
-//------------------------------------------------------------------------------
+//
 // CLASS: uvm_mam_cfg
-// This class is used to specify the memory managed by an instance of a "uvm_mam" memory
+// Specifies the memory managed by an instance of a <uvm_mam> memory
 // allocation manager class. 
-//------------------------------------------------------------------------------
+//
 class uvm_mam_cfg;
+   // variable: n_bytes
+   // Number of bytes in each memory location
    rand int unsigned n_bytes;
 
+   // variable: start_offset
+   // Lowest address of managed space
    rand bit [63:0] start_offset;
+
+   // variable: end_offset
+   // Last address of managed space
    rand bit [63:0] end_offset;
 
+   // variable: mode
+   // Region allocation mode
    rand uvm_mam::alloc_mode_e mode;
+
+   // variable: locality
+   // Region location mode
    rand uvm_mam::locality_e   locality;
 
    constraint uvm_mam_cfg_valid {
@@ -427,10 +597,10 @@ function int unsigned uvm_mam_region::get_n_bytes();
 endfunction: get_n_bytes
 
 
-function string uvm_mam_region::psdisplay(string prefix = "");
-   $sformat(psdisplay, "%s['h%h:'h%h]", prefix,
+function string uvm_mam_region::convert2string();
+   $sformat(convert2string, "['h%h:'h%h]",
             this.Xstart_offsetX, this.Xend_offsetX);
-endfunction: psdisplay
+endfunction: convert2string
 
 
 function void uvm_mam_region::release_region();
@@ -524,7 +694,7 @@ function uvm_mam_region uvm_mam::reserve_region(bit [63:0]   start_offset,
          // Overlap!
          `uvm_error("RAL", $psprintf("Cannot reserve ['h%h:'h%h] because it overlaps with %s",
                                         start_offset, end_offset,
-                                        this.in_use[i].psdisplay()));
+                                        this.in_use[i].convert2string()));
          return null;
       end
 
@@ -544,7 +714,7 @@ endfunction: reserve_region
 
 
 function uvm_mam_region uvm_mam::request_region(int unsigned      n_bytes,
-                                                uvm_mam_allocator alloc = null,
+                                                uvm_mam_policy alloc = null,
                                                 string            fname = "",
                                                 int               lineno = 0);
    this.fname = fname;
@@ -557,7 +727,7 @@ function uvm_mam_region uvm_mam::request_region(int unsigned      n_bytes,
    alloc.in_use     = this.in_use;
 
    if (!alloc.randomize()) begin
-      `uvm_error("RAL", "Unable to randomize allocator");
+      `uvm_error("RAL", "Unable to randomize policy");
       return null;
    end
 
@@ -575,7 +745,8 @@ function void uvm_mam::release_region(uvm_mam_region region);
          return;
       end
    end
-   `uvm_error("RAL", region.psdisplay("Attempting to release unallocated region "));
+   `uvm_error("RAL", {"Attempting to release unallocated region\n",
+                      region.convert2string()});
 endfunction: release_region
 
 
@@ -592,13 +763,13 @@ function void uvm_mam::release_all_regions();
 endfunction: release_all_regions
 
 
-function string uvm_mam::psdisplay(string prefix = "");
-   $sformat(psdisplay, "%sAllocated memory regions:\n", prefix);
+function string uvm_mam::convert2string();
+   convert2string = "Allocated memory regions:\n";
    foreach (this.in_use[i]) begin
-      $sformat(psdisplay, "%s%s   %s\n", psdisplay, prefix,
-               this.in_use[i].psdisplay());
+      $sformat(convert2string, "%s   %s\n", convert2string,
+               this.in_use[i].convert2string());
    end
-endfunction: psdisplay
+endfunction: convert2string
 
 
 function uvm_mam_region uvm_mam::for_each(bit reset = 0);
