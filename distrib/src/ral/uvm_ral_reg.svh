@@ -76,7 +76,7 @@ virtual class uvm_ral_reg extends uvm_object;
    // Group: Initialization
    //----------------------
 
-   //------------------------------------------------------------------------
+   //
    // FUNCTION: new
    // Create a new instance and type-specific configuration
    //
@@ -88,10 +88,10 @@ virtual class uvm_ral_reg extends uvm_object;
    // This value is usually a multiple of 8.
    //
    // ~has_cover~ specifies which functional coverage models are present in
-   // the extension of the block abstraction class.
+   // the extension of the register abstraction class.
    // Multiple functional coverage models may be specified by adding their
    // symbolic names, as defined by the <uvm_ral::coverage_model_e> type.
-   //------------------------------------------------------------------------
+   //
    extern function                  new        (string name="",
                                                 int unsigned n_bits,
                                                 int has_cover);
@@ -202,6 +202,34 @@ virtual class uvm_ral_reg extends uvm_object;
    //
    extern virtual function string          get_rights      (uvm_ral_map map = null);
 
+   //-----------------------------------------------------------------
+   // FUNCTION: get_n_bytes
+   // Returns the width, in bytes, of this register. 
+   //-----------------------------------------------------------------
+   extern virtual function int unsigned    get_n_bytes     ();
+
+   //-----------------------------------------------------------------
+   // FUNCTION: get_fields
+   // Return the fields in this register
+   //
+   // Fills the specified array with the abstraction class
+   // for all of the fields contained in this register.
+   // Fields are ordered from least-significant position to most-significant
+   // position within the register. 
+   //-----------------------------------------------------------------
+   extern virtual function void            get_fields      (ref uvm_ral_field fields[$]);
+
+   //-----------------------------------------------------------------
+   // FUNCTION: get_field_by_name
+   // Return the named field in this register
+   //
+   // Finds a field with the specified name in this register
+   // and returns its abstraction class.
+   // If no fields are found, returns null. 
+   //-----------------------------------------------------------------
+   extern virtual function uvm_ral_field   get_field_by_name(string name);
+
+
    //
    // FUNCTION: get_offset
    // Returns the offset of this register
@@ -259,34 +287,6 @@ virtual class uvm_ral_reg extends uvm_object;
                                                             ref uvm_ral_addr_t addr[]);
 
 
-   //-----------------------------------------------------------------
-   // FUNCTION: get_n_bytes
-   // Returns the width, in bytes, of this register. 
-   //-----------------------------------------------------------------
-   extern virtual function int unsigned    get_n_bytes     ();
-
-   //-----------------------------------------------------------------
-   // FUNCTION: get_fields
-   // Return the fields in this register
-   //
-   // Fills the specified array with the abstraction class
-   // for all of the fields contained in this register.
-   // Fields are ordered from least-significant position to most-significant
-   // position within the register. 
-   //-----------------------------------------------------------------
-   extern virtual function void            get_fields      (ref uvm_ral_field fields[$]);
-
-   //-----------------------------------------------------------------
-   // FUNCTION: get_field_by_name
-   // Return the named field in this register
-   //
-   // Finds a field with the specified name in this register
-   // and returns its abstraction class.
-   // If no fields are found, returns null. 
-   //-----------------------------------------------------------------
-   extern virtual function uvm_ral_field   get_field_by_name(string name);
-
-
    //------------------
    // Group: Attributes
    //------------------
@@ -332,7 +332,7 @@ virtual class uvm_ral_reg extends uvm_object;
    // inherited from all block ancestors are included.
    // 
    extern virtual function void get_attributes(ref string names[string],
-                                                   input bit inherited = 1);
+                                               input bit inherited = 1);
 
    extern virtual function void   get_constraints (ref string names[]);
    /*local*/ extern function void Xadd_constraintsX(string name);
@@ -690,7 +690,7 @@ virtual class uvm_ral_reg extends uvm_object;
    // FUNCTION: set_backdoor
    // Set a user-defined backdoor for this register
    //
-   // By default, registers accessed via the built-in string-based
+   // By default, registers are accessed via the built-in string-based
    // DPI routines if an HDL path has been specified (see <uvm_hdl>).
    // If this default mechanism is not suitable (e.g. because
    // the register is not implemented in pure SystemVerilog)
@@ -973,7 +973,7 @@ virtual class uvm_ral_reg extends uvm_object;
    // TASK: post_read
    // Called after register read.
    //
-   // If the specified readback data or~status~ is modified,
+   // If the specified readback data or ~status~ is modified,
    // the updated readback data or status will be
    // returned by the register operation.
    //
@@ -1024,7 +1024,7 @@ virtual class uvm_ral_reg_cbs extends uvm_callback;
    // All register callbacks are executed before the corresponding
    // field callbacks
    //
-   // The written value ~wdat, access ~path~ and address ~map~,
+   // The written value ~wdat~, access ~path~ and address ~map~,
    // if modified, modifies the actual value, access path or address map
    // used in the register operation.
    //
@@ -1080,7 +1080,7 @@ virtual class uvm_ral_reg_cbs extends uvm_callback;
    // All register callbacks are executed before the corresponding
    // field callbacks
    //
-   // The readback value ~rdat and the ~status~ of the operation,
+   // The readback value ~rdat~ and the ~status~ of the operation,
    // if modified, modifies the actual returned readback value and status.
    //
    virtual task post_read (uvm_ral_reg           rg,
