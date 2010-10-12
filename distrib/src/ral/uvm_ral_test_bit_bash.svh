@@ -21,12 +21,27 @@
 // 
 
 //
-// TITLE: Bit Bashing Test Sequence
+// TITLE: Bit Bashing Test Sequences
 //
 
+//
+// class: uvm_ral_reg_bit_bash_seq
+//
+// Verify the implementation of a register
+// by attempting to write 1's and 0's to every bit in it,
+// via every address map in which the register is mapped,
+// making sure that the resulting value matches the mirrored value.
+//
+// Registers that contain fields with unknown access policies
+// cannot be tested.
+//
+// The DUT should be idle and not modify any register durign this test.
+//
 
 class uvm_ral_reg_bit_bash_seq extends uvm_ral_sequence;
 
+   // Variable: rg
+   // The register to be tested
    uvm_ral_reg rg;
 
    `uvm_object_utils(uvm_ral_reg_bit_bash_seq)
@@ -195,6 +210,16 @@ class uvm_ral_reg_bit_bash_seq extends uvm_ral_sequence;
 endclass: uvm_ral_reg_bit_bash_seq
 
 
+//
+// class: uvm_ral_bit_bash_seq
+//
+// Verify the implementation of all registers in a block
+// by executing the <uvm_ral_reg_bit_bash_seq> sequence on it.
+//
+// Blocks and registers with the NO_RAL_TESTS or
+// the NO_BIT_BASH_TEST attribute are not verified.
+//
+
 class uvm_ral_bit_bash_seq extends uvm_ral_sequence;
 
    `uvm_object_utils(uvm_ral_bit_bash_seq)
@@ -203,6 +228,9 @@ class uvm_ral_bit_bash_seq extends uvm_ral_sequence;
      super.new(name);
    endfunction
 
+   // variable: ral
+   // The block to be tested
+   
    virtual task body();
 
       if (ral == null) begin
@@ -237,8 +265,18 @@ class uvm_ral_bit_bash_seq extends uvm_ral_sequence;
    endtask: body
 
 
-   // Any additional steps required to reset the block
-   // and make it accessibl
+   //
+   // task: reset_blk
+   // Reset the DUT that corresponds to the specified block abstraction class.
+   //
+   // Currently empty.
+   // Will rollback the environment's phase to the ~reset~
+   // phase once the new phasing is available.
+   //
+   // In the meantime, the DUT should be reset before executing this
+   // test sequence or this method should be implemented
+   // in an extension to reset the DUT.
+   //
    virtual task reset_blk(uvm_ral_block blk);
    endtask
 

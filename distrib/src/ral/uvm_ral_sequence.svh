@@ -21,7 +21,7 @@
 //
  
                                                               
-//------------------------------------------------------------------------------
+//
 //
 // CLASS: uvm_ral_sequence
 //
@@ -29,17 +29,26 @@
 // via the uvm_sequence base class or even from outside a sequence. If used,
 // the RAL sequence class (will) provides convenient features for the sequence
 // writer wanting to access DUT registers via the RAL abstract model.
-//------------------------------------------------------------------------------
+//
 
 class uvm_ral_sequence #(type BASE=uvm_sequence #(uvm_ral_item)) extends BASE;
 
   `uvm_object_param_utils(uvm_ral_sequence #(BASE))
 
-  uvm_ral_block ral;       // define when this seq is a user seq
-  uvm_ral_adapter adapter; // define when this seq is a translation seq
+   // variable: ral
+   // Block abstraction this sequence executes on.
+   // Define only when this sequence is a user-defined test sequence.
+  uvm_ral_block ral;
 
-  // define when this seq is a translation seq and we want to "pull" from
-  // an upstream RAL sequencer.
+  // Variable: adapter
+  // Adatper this translation sequence executes on.
+  // Define when this sequence is a translation sequence
+  uvm_ral_adapter adapter;
+
+  // Variable: ral_seqr
+  // Layered translation sequencer.
+  // Define when this sequence is a translation sequence
+  // and we want to "pull" from an upstream sequencer.
   uvm_sequencer #(uvm_rw_access) ral_seqr;
 
   function new (string name="uvm_ral_sequence_inst");

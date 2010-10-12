@@ -23,7 +23,28 @@
 //
 // TITLE: Built-In Test Sequences
 //
+// This sequence is able to execute a user-defined selection of the
+// pre-defined register and memory test sequences
+//
 
+//
+// Type: uvm_ral_tests_e
+// Select which pre-defined test sequence to execute.
+//
+// Multiple test sequences may be selected by adding their
+// respective symbolic values.
+//
+// RAL_HW_RESET      - <uvm_ral_hw_reset_seq>
+// RAL_BIT_BASH      - <uvm_ral_bit_bash_seq>
+// RAL_REG_ACCESS    - <uvm_ral_reg_access_seq>
+// RAL_MEM_ACCESS    - <uvm_ral_mem_access_seq>
+// RAL_SHARED_ACCESS - <uvm_ral_shared_access_seq>
+// RAL_MEM_WALK      - <uvm_ral_mem_walk_seq>
+// ALL_RAL_TESTS     - All of the above
+//
+// Test sequences, when selected, are executed in the
+// order in which they are specified above.
+//
 typedef enum bit [63:0] {
   RAL_HW_RESET      = 64'h0000_0000_0000_0001,
   RAL_BIT_BASH      = 64'h0000_0000_0000_0002,
@@ -35,6 +56,11 @@ typedef enum bit [63:0] {
 } uvm_ral_tests_e;
 
 
+//
+// Class: uvm_ral_built_in_seq
+// Sequence that executes a user-defined selection
+// of pre-defined register and memory test sequences.
+//
 class uvm_ral_built_in_seq extends uvm_ral_sequence;
 
    `uvm_object_utils(uvm_ral_built_in_seq)
@@ -43,6 +69,11 @@ class uvm_ral_built_in_seq extends uvm_ral_sequence;
      super.new(name);
    endfunction
 
+   // variable: ral
+   // The block on which to execute test sequences
+   
+   // Variable: tests
+   // The pre-defined test sequences to be executed.
    uvm_ral_tests_e tests = ALL_RAL_TESTS;
 
    virtual task body();

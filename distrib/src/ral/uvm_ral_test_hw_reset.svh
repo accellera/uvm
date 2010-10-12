@@ -21,7 +21,22 @@
 // 
 
 //
-// TITLE: Hardware Reset Test Sequence
+// class: uvm_ral_hw_reset_seq
+// Test the hard reset values of registers
+//
+// The test sequence performs the following steps
+//
+// 1. resets the DUT and the
+// block abstraction class associated with this sequence.
+//
+// 2. reads all of the registers in the block,
+// via all of the available address maps,
+// comparing the value read with the expected reset value.
+//
+// Blocks and registers with the NO_RAL_TESTS or
+// the NO_HW_RESET_TEST attribute are not verified.
+//
+// This is usually the first test executed on any DUT.
 //
 
 class uvm_ral_hw_reset_seq extends uvm_ral_sequence;
@@ -32,6 +47,8 @@ class uvm_ral_hw_reset_seq extends uvm_ral_sequence;
      super.new(name);
    endfunction
 
+   // Variable: ral
+   // The block abstraction class of the DUT
 
    virtual task body();
 
@@ -87,8 +104,18 @@ class uvm_ral_hw_reset_seq extends uvm_ral_sequence;
    endtask: body
 
 
-   // Any additional steps required to reset the block
-   // and make it accessible
+   //
+   // task: reset_blk
+   // Reset the DUT that corresponds to the specified block abstraction class.
+   //
+   // Currently empty.
+   // Will rollback the environment's phase to the ~reset~
+   // phase once the new phasing is available.
+   //
+   // In the meantime, the DUT should be reset before executing this
+   // test sequence or this method should be implemented
+   // in an extension to reset the DUT.
+   //
    virtual task reset_blk(uvm_ral_block blk);
    endtask
 

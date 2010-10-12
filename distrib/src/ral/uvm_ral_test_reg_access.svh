@@ -26,8 +26,26 @@
 
 typedef class uvm_ral_mem_access_seq;
 
+//
+// class: uvm_ral_single_reg_access_seq
+//
+// Verify the accessibility of a register
+// by writing through its default address map
+// then reading it via the backdoor, then reversing the process,
+// making sure that the resulting value matches the mirrored value.
+//
+// Registers without an available backdoor or
+// that contain read-only fields only,
+// or fields with unknown access policies
+// cannot be tested.
+//
+// The DUT should be idle and not modify any register during this test.
+//
+
 class uvm_ral_single_reg_access_seq extends uvm_ral_sequence;
 
+   // Variable: rg
+   // The register to be tested
    uvm_ral_reg rg;
 
    `uvm_object_utils(uvm_ral_single_reg_access_seq)
@@ -119,6 +137,17 @@ class uvm_ral_single_reg_access_seq extends uvm_ral_sequence;
 endclass: uvm_ral_single_reg_access_seq
 
 
+//
+// class: uvm_ral_reg_access_seq
+//
+// Verify the accessibility of all registers in a block
+// by executing the <uvm_ral_single_reg_access_seq> sequence on
+// every register within it.
+//
+// Blocks and registers with the NO_RAL_TESTS or
+// the NO_REG_ACCESS_TEST attribute are not verified.
+//
+
 class uvm_ral_reg_access_seq extends uvm_ral_sequence;
 
    `uvm_object_utils(uvm_ral_reg_access_seq)
@@ -127,7 +156,9 @@ class uvm_ral_reg_access_seq extends uvm_ral_sequence;
      super.new(name);
    endfunction
 
-
+   // variable: ral
+   // The block to be tested
+   
    virtual task body();
 
       if (ral == null) begin
@@ -169,14 +200,36 @@ class uvm_ral_reg_access_seq extends uvm_ral_sequence;
    endtask: body
 
 
-   // Any additional steps required to reset the block
-   // and make it accessibl
+   //
+   // task: reset_blk
+   // Reset the DUT that corresponds to the specified block abstraction class.
+   //
+   // Currently empty.
+   // Will rollback the environment's phase to the ~reset~
+   // phase once the new phasing is available.
+   //
+   // In the meantime, the DUT should be reset before executing this
+   // test sequence or this method should be implemented
+   // in an extension to reset the DUT.
+   //
    virtual task reset_blk(uvm_ral_block blk);
    endtask
 
 endclass: uvm_ral_reg_access_seq
 
 
+
+//
+// class: uvm_ral_access_seq
+//
+// Verify the accessibility of all registers and memories in a block
+// by executing the <uvm_ral_reg_access_seq> and
+// <uvm_ral_mem_access_seq> sequence respectively on every register
+// and memory within it.
+//
+// Blocks and registers with the NO_RAL_TESTS or
+// the NO_REG_ACCESS_TEST attribute are not verified.
+//
 
 class uvm_ral_access_seq extends uvm_ral_sequence;
 

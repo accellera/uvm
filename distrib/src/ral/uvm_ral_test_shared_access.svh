@@ -21,11 +21,28 @@
 // 
 
 //
-// TITLE: Shared Register Access test Sequence
+// TITLE: Shared Register and Memory Access test Sequences
+//
+
+//
+// class: uvm_ral_shared_reg_access_seq
+//
+// Verify the accessibility of a shared register
+// by writing through each address map
+// then reading it via every other address maps
+// in which the register is readable and the backdoor,
+// making sure that the resulting value matches the mirrored value.
+//
+// Registers that contain fields with unknown access policies
+// cannot be tested.
+//
+// The DUT should be idle and not modify any register during this test.
 //
 
 class uvm_ral_shared_reg_access_seq extends uvm_ral_sequence;
 
+   // Variable: rg
+   // The register to be tested
    uvm_ral_reg rg;
 
    `uvm_object_utils(uvm_ral_shared_reg_access_seq)
@@ -140,8 +157,22 @@ class uvm_ral_shared_reg_access_seq extends uvm_ral_sequence;
 endclass: uvm_ral_shared_reg_access_seq
 
 
+//
+// class: uvm_ral_shared_mem_access_seq
+//
+// Verify the accessibility of a shared memory
+// by writing through each address map
+// then reading it via every other address maps
+// in which the memory is readable and the backdoor,
+// making sure that the resulting value matches the written value.
+//
+// The DUT should be idle and not modify the memory during this test.
+//
+
 class uvm_ral_shared_mem_access_seq extends uvm_ral_sequence;
 
+   // variable: mem
+   // The memory to be tested
    uvm_ral_mem mem;
 
    `uvm_object_utils(uvm_ral_shared_mem_access_seq)
@@ -253,6 +284,19 @@ endclass: uvm_ral_shared_mem_access_seq
 
 
 
+//
+// class: uvm_ral_shared_access_seq
+//
+// Verify the accessibility of all shared registers
+// and memories in a block
+// by executing the <uvm_ral_shared_reg_access_seq>
+// and <uvm_ral_shared_mem_access_seq>
+// sequence respectively on every register and memory within it.
+//
+// Blocks, registers and memories with the NO_RAL_TESTS or
+// the NO_SHARED_ACCESS_TEST attribute are not verified.
+//
+
 class uvm_ral_shared_access_seq extends uvm_ral_sequence;
 
    `uvm_object_utils(uvm_ral_shared_access_seq)
@@ -260,6 +304,9 @@ class uvm_ral_shared_access_seq extends uvm_ral_sequence;
    function new(string name="ral_shared_access_seq");
      super.new(name);
    endfunction
+
+   // variable: ral
+   // The block to be tested
 
    virtual task body();
 
@@ -297,7 +344,7 @@ class uvm_ral_shared_access_seq extends uvm_ral_sequence;
          foreach (mems[i]) begin
             // Registers with some attributes are not to be tested
             if (mems[i].get_attribute("NO_RAL_TESTS") == "" &&
-	        mems[i].get_attribute("NO_MEM_ACCESS_TEST") == "") begin
+	        mems[i].get_attribute("NO_SHARED_ACCESS_TEST") == "") begin
               uvm_ral_shared_mem_access_seq mem_seq;
               mem_seq = uvm_ral_shared_mem_access_seq::type_id::create("shared_mem_access_seq");
               mem_seq.mem = mems[i];
@@ -309,8 +356,18 @@ class uvm_ral_shared_access_seq extends uvm_ral_sequence;
    endtask: body
 
 
-   // Any additional steps required to reset the block
-   // and make it accessibl
+   //
+   // task: reset_blk
+   // Reset the DUT that corresponds to the specified block abstraction class.
+   //
+   // Currently empty.
+   // Will rollback the environment's phase to the ~reset~
+   // phase once the new phasing is available.
+   //
+   // In the meantime, the DUT should be reset before executing this
+   // test sequence or this method should be implemented
+   // in an extension to reset the DUT.
+   //
    virtual task reset_blk(uvm_ral_block blk);
    endtask
 
