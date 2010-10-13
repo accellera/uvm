@@ -125,12 +125,20 @@ endfunction
 // or that are not accessible using the default DPI backdoor mechanism.
 //------------------------------------------------------------------------------
 typedef class uvm_ral_reg_backdoor_cbs;
+
+class process_container_c;
+	process p;
+	function new(process p_);
+		p=p_;
+	endfunction
+endclass
+
 class uvm_ral_reg_backdoor extends uvm_object;
    string fname = "";
    int lineno = 0;
    local uvm_ral_reg_backdoor_cbs backdoor_cbs[$];
 
-   local process m_update_thread[uvm_ral_reg];
+   local process_container_c m_update_thread[uvm_ral_reg];
 
    `uvm_object_utils(uvm_ral_reg_backdoor)
    `uvm_register_cb(uvm_ral_reg_backdoor, uvm_ral_reg_backdoor_cbs)
@@ -952,8 +960,8 @@ function void uvm_ral_reg_backdoor::start_update_thread(uvm_ral_reg rg);
    fork
       begin
          uvm_ral_field fields[$];
-
-         this.m_update_thread[rg] = process::self();
+         
+         this.m_update_thread[rg] = new(process::self());
          rg.get_fields(fields);
          forever begin
             uvm_ral::status_e status;
@@ -979,7 +987,7 @@ endfunction
 
 function void uvm_ral_reg_backdoor::kill_update_thread(uvm_ral_reg rg);
    if (this.m_update_thread.exists(rg)) begin
-      this.m_update_thread[rg].kill();
+      this.m_update_thread[rg].p.kill();
       this.m_update_thread.delete(rg);
    end
 endfunction

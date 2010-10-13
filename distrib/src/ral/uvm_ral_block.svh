@@ -1331,19 +1331,19 @@ function int uvm_ral_block::set_cover(int is_on);
    foreach (regs[rg_])
    begin
    		uvm_ral_reg rg = rg_;
-     rg.set_cover(can_cvr);
+     void'(rg.set_cover(can_cvr));
    end
    
    foreach (mems[mem_])
    begin
    	 uvm_ral_mem mem = mem_;
-     mem.set_cover(can_cvr);
+     void'(mem.set_cover(can_cvr));
    end
    
    foreach (blks[blk_])
    begin
    	 uvm_ral_block blk = blk_;
-     blk.set_cover(can_cvr);
+     void'(blk.set_cover(can_cvr));
    end
 
 endfunction: set_cover
@@ -1585,9 +1585,11 @@ task uvm_ral_block::mirror(output uvm_ral::status_e  status,
       end
    end
 
-   foreach (blks[blk])
+   foreach (blks[blk_])
+   begin
+   	uvm_ral_block blk = blk_;
      blk.update(status,path,parent,prior,extension,fname,lineno);
-
+   end
 endtask: mirror
 
 
@@ -1800,7 +1802,8 @@ endfunction
 // Xinit_address_mapsX
 
 function void uvm_ral_block::Xinit_address_mapsX();
-   foreach (this.maps[map]) begin
+   foreach (maps[map_]) begin
+   		uvm_ral_map map = map_;
       map.Xinit_address_mapX();
    end
       //map.Xverify_map_configX();
