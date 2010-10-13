@@ -24,9 +24,6 @@
 `ifndef UVM_SEQUENCE_BUILTIN_SVH
 `define UVM_SEQUENCE_BUILTIN_SVH
 
-`include "methodology/uvm_meth_defines.svh"
-
-
 //------------------------------------------------------------------------------
 //
 // CLASS: uvm_random_sequence
