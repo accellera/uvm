@@ -18,7 +18,7 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// tlm2 interfaces
+// tlm interfaces
 //----------------------------------------------------------------------
 
 typedef enum
@@ -41,8 +41,8 @@ typedef enum
 `define TLM_TASK_ERROR "TLM-2 interface task not implemented"
 `define TLM_FUNCTION_ERROR "TLM-2 interface function not implemented"
 
-class tlm2_if #(type T=tlm2_generic_payload,
-                type P=tlm_phase_e);
+class tlm_if #(type T=tlm_generic_payload,
+               type P=tlm_phase_e);
 
   virtual function tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);
     `uvm_error("nb_transport_fw", `TLM_FUNCTION_ERROR)

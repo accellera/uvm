@@ -23,7 +23,7 @@
 class master extends uvm_component;
 
   typedef master this_t;
-  tlm2_nb_initiator_socket #(trans, tlm_phase_e, this_t) initiator_socket;
+  tlm_nb_initiator_socket #(trans, tlm_phase_e, this_t) initiator_socket;
 
   local tlm_phase_e state;
   local time delay_time;
@@ -159,7 +159,7 @@ class master extends uvm_component;
   //--------------------------------------------------------------------
   function trans generate_transaction();
 
-    tlm2_addr_t addr;
+    tlm_addr_t addr;
     int unsigned length;
     byte data[];
 

@@ -17,6 +17,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`define TLM2_NB_FW_MASK  (1<<0)
-`define TLM2_NB_BW_MASK  (1<<1)
-`define TLM2_B_MASK      (1<<2)
+`define TLM_NB_FW_MASK  (1<<0)
+`define TLM_NB_BW_MASK  (1<<1)
+`define TLM_B_MASK      (1<<2)

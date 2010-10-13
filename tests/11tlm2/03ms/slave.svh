@@ -23,7 +23,7 @@
 class slave extends uvm_component;
 
   typedef slave this_t;
-  tlm2_nb_target_socket #(trans, tlm_phase_e, this_t) target_socket;
+  tlm_nb_target_socket #(trans, tlm_phase_e, this_t) target_socket;
 
   local tlm_phase_e state;
   local time delay_time;

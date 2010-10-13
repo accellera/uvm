@@ -23,7 +23,7 @@ import uvm_pkg::*;
 //----------------------------------------------------------------------
 // trans
 //----------------------------------------------------------------------
-class trans extends tlm2_generic_payload;
+class trans extends tlm_generic_payload;
 
   function string convert2string();
     return super.convert2string();
@@ -36,7 +36,7 @@ endclass
 //----------------------------------------------------------------------
 class producer extends uvm_component;
 
-  tlm2_b_initiator_socket #(trans) initiator_socket;
+  tlm_b_initiator_socket #(trans) initiator_socket;
 
   local bit done;
 
@@ -77,7 +77,7 @@ class producer extends uvm_component;
   //--------------------------------------------------------------------
   function trans generate_transaction();
 
-    tlm2_addr_t addr;
+    tlm_addr_t addr;
     byte data[];
     int length;
 
@@ -104,7 +104,7 @@ endclass
 //----------------------------------------------------------------------
 class consumer extends uvm_component;
 
-  tlm2_b_target_socket #(trans, consumer) target_socket;
+  tlm_b_target_socket #(trans, consumer) target_socket;
 
   int unsigned transaction_count;
 

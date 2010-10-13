@@ -21,9 +21,9 @@
 // Generic Payload
 //----------------------------------------------------------------------
 
-`define ADDR_SIZE 64
-const int unsigned addr_size = `ADDR_SIZE;
-typedef bit[`ADDR_SIZE-1:0] tlm2_addr_t;
+`define TLM_ADDR_SIZE 64
+const int unsigned addr_size = `TLM_ADDR_SIZE;
+typedef bit[`TLM_ADDR_SIZE-1:0] tlm_addr_t;
 
 typedef enum
 {
@@ -132,7 +132,7 @@ class tlm_extension #(type T=int) extends tlm_extension_base;
 endclass
 
 //----------------------------------------------------------------------
-// class: tlm2_generic_payload
+// class: tlm_generic_payload
 //
 // This class provides a transaction architecture commonly used in
 // memory-mapped bus-based systems.  It's intended to be a general
@@ -140,9 +140,9 @@ endclass
 // class is derived from uvm_sequence_item which enables it to be
 // generated in sequences and transported to drivers through sequencers.
 //----------------------------------------------------------------------
-class tlm2_generic_payload extends uvm_sequence_item;
+class tlm_generic_payload extends uvm_sequence_item;
 
-    protected rand tlm2_addr_t            m_address;
+    protected rand tlm_addr_t             m_address;
     protected rand tlm_command_e          m_command;
     protected rand byte                   m_data[];
     protected rand int unsigned           m_length;
@@ -242,11 +242,11 @@ class tlm2_generic_payload extends uvm_sequence_item;
   endfunction
   
   // address
-  virtual function void set_address(tlm2_addr_t addr);
+  virtual function void set_address(tlm_addr_t addr);
     m_address = addr;
   endfunction
 
-  virtual function tlm2_addr_t get_address();
+  virtual function tlm_addr_t get_address();
     return m_address;
   endfunction
 

@@ -58,7 +58,7 @@ import uvm_pkg::*;
 //----------------------------------------------------------------------
 // trans
 //----------------------------------------------------------------------
-class trans extends tlm2_generic_payload;
+class trans extends tlm_generic_payload;
 
   function string convert2string();
     return super.convert2string();
@@ -79,14 +79,14 @@ endclass
 // transactions prefixed with "<--" are moving from the target back to
 // the initiator (i.e. traversing the backward path).
 //----------------------------------------------------------------------
-class connector #(type T=tlm2_generic_payload,
+class connector #(type T=tlm_generic_payload,
                   type P=tlm_phase_e)
   extends uvm_component;
 
   typedef connector #(T,P) this_type;
 
-  tlm2_nb_initiator_socket #(T,P,this_type) initiator_socket;
-  tlm2_nb_target_socket #(T,P,this_type) target_socket;
+  tlm_nb_initiator_socket #(T,P,this_type) initiator_socket;
+  tlm_nb_target_socket #(T,P,this_type) target_socket;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -118,13 +118,13 @@ endclass
 //
 // demonstrates hierarchical connectivity using passthrough sockets
 //----------------------------------------------------------------------
-class shell #(type T=tlm2_generic_payload,
+class shell #(type T=tlm_generic_payload,
               type P=tlm_phase_e)
   extends uvm_component;
 
   connector #(T,P) c;
-  tlm2_nb_passthrough_initiator_socket #(T,P) initiator_socket;
-  tlm2_nb_passthrough_target_socket #(T,P) target_socket;
+  tlm_nb_passthrough_initiator_socket #(T,P) initiator_socket;
+  tlm_nb_passthrough_target_socket #(T,P) target_socket;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);

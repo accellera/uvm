@@ -18,7 +18,7 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// tlm2 imps -- interface implementations
+// tlm imps -- interface implementations
 //
 // Binds the interface with the object that contains the interface
 // implementation.
@@ -26,17 +26,17 @@
 
 // IMP binding macros
 
-`define TLM2_NB_TRANSPORT_FW_IMP(imp, T, P, t, p, delay)              \
+`define TLM_NB_TRANSPORT_FW_IMP(imp, T, P, t, p, delay)              \
   function tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);  \
     return imp.nb_transport_fw(t, p, delay);                          \
   endfunction
 
-`define TLM2_NB_TRANSPORT_BW_IMP(imp, T, P, t, p, delay)              \
+`define TLM_NB_TRANSPORT_BW_IMP(imp, T, P, t, p, delay)              \
   function tlm_sync_e nb_transport_bw(T t, ref P p, ref time delay);  \
     return imp.nb_transport_bw(t, p, delay);                          \
   endfunction
 
-`define TLM2_B_TRANSPORT_IMP(imp, T, t, delay)                        \
+`define TLM_B_TRANSPORT_IMP(imp, T, t, delay)                        \
   task b_transport(T t, ref time delay);                              \
     imp.b_transport(t, delay);                                        \
   endtask
@@ -49,25 +49,25 @@
 //
 //======================================================================
 
-class tlm_nb_transport_fw_imp #(type T=tlm2_generic_payload,
-                      type P=tlm_phase_e,
-                      type IMP=int)
-  extends uvm_port_base #(tlm2_if #(T,P));
-  `UVM_IMP_COMMON(`TLM2_NB_FW_MASK, "tlm_nb_transport_fw_imp", IMP)
-  `TLM2_NB_TRANSPORT_FW_IMP(m_imp, T, P, t, p, delay)
+class tlm_nb_transport_fw_imp #(type T=tlm_generic_payload,
+                                type P=tlm_phase_e,
+                                type IMP=int)
+  extends uvm_port_base #(tlm_if #(T,P));
+  `UVM_IMP_COMMON(`TLM_NB_FW_MASK, "tlm_nb_transport_fw_imp", IMP)
+  `TLM_NB_TRANSPORT_FW_IMP(m_imp, T, P, t, p, delay)
 endclass
 
-class tlm_nb_transport_bw_imp #(type T=tlm2_generic_payload,
-                      type P=tlm_phase_e,
-                      type IMP=int)
-  extends uvm_port_base #(tlm2_if #(T,P));
-  `UVM_IMP_COMMON(`TLM2_NB_BW_MASK, "tlm_nb_transport_bw_imp", IMP)
-  `TLM2_NB_TRANSPORT_BW_IMP(m_imp, T, P, t, p, delay)
+class tlm_nb_transport_bw_imp #(type T=tlm_generic_payload,
+                                type P=tlm_phase_e,
+                                type IMP=int)
+  extends uvm_port_base #(tlm_if #(T,P));
+  `UVM_IMP_COMMON(`TLM_NB_BW_MASK, "tlm_nb_transport_bw_imp", IMP)
+  `TLM_NB_TRANSPORT_BW_IMP(m_imp, T, P, t, p, delay)
 endclass
 
-class tlm_b_transport_imp #(type T=tlm2_generic_payload,
+class tlm_b_transport_imp #(type T=tlm_generic_payload,
                             type IMP=int)
-  extends uvm_port_base #(tlm2_if #(T));
-  `UVM_IMP_COMMON(`TLM2_B_MASK, "tlm_b_transport_imp", IMP)
-  `TLM2_B_TRANSPORT_IMP(m_imp, T, t, delay)
+  extends uvm_port_base #(tlm_if #(T));
+  `UVM_IMP_COMMON(`TLM_B_MASK, "tlm_b_transport_imp", IMP)
+  `TLM_B_TRANSPORT_IMP(m_imp, T, t, delay)
 endclass

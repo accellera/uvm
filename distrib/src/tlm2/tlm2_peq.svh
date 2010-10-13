@@ -51,9 +51,9 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// tlm2_peq_base
+// tlm_peq_base
 //----------------------------------------------------------------------
-virtual class tlm2_peq_base extends uvm_object;
+virtual class tlm_peq_base extends uvm_object;
 
   function new(string name);
     super.new(name);
@@ -62,9 +62,9 @@ virtual class tlm2_peq_base extends uvm_object;
 endclass
 
 //----------------------------------------------------------------------
-// tlm2_peq_with_get
+// tlm_peq_with_get
 //----------------------------------------------------------------------
-class tlm2_peq_with_get #(type T=int) extends tlm2_peq_base;
+class tlm_peq_with_get #(type T=int) extends tlm_peq_base;
 
   typedef T queue [$];
   local queue m_scheduled_events[time];

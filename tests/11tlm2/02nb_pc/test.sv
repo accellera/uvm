@@ -24,7 +24,7 @@ import uvm_pkg::*;
 //----------------------------------------------------------------------
 class producer extends uvm_component;
 
-  tlm2_nb_initiator_socket #(tlm2_generic_payload, tlm_phase_e, producer) initiator_socket;
+  tlm_nb_initiator_socket #(tlm_generic_payload, tlm_phase_e, producer) initiator_socket;
 
   bit done;
 
@@ -38,7 +38,7 @@ class producer extends uvm_component;
     initiator_socket = new("initator_socket", this, this);
   endfunction
 
-  function tlm_sync_e nb_transport_bw(ref tlm2_generic_payload t,
+  function tlm_sync_e nb_transport_bw(ref tlm_generic_payload t,
                                       ref tlm_phase_e p,
                                       ref time delay);
     uvm_report_warning("producer", "nb_transport_bw is not implemented");
@@ -50,7 +50,7 @@ class producer extends uvm_component;
     time delay;
     tlm_phase_e phase;
     tlm_sync_e sync;
-    tlm2_generic_payload t;
+    tlm_generic_payload t;
 
     delay = 1;
 
@@ -73,13 +73,13 @@ class producer extends uvm_component;
   //
   // generat a new, randomized transaction
   //--------------------------------------------------------------------
-  function tlm2_generic_payload generate_transaction();
+  function tlm_generic_payload generate_transaction();
 
-    tlm2_addr_t addr;
+    tlm_addr_t addr;
     int unsigned length;
     byte data[];
 
-    tlm2_generic_payload t = new();
+    tlm_generic_payload t = new();
     addr = $urandom() & 'hff;
     length = 4;
     data = new[length];
@@ -104,7 +104,7 @@ endclass
 //----------------------------------------------------------------------
 class consumer extends uvm_component;
 
-  tlm2_nb_target_socket #(tlm2_generic_payload, tlm_phase_e, consumer) target_socket;
+  tlm_nb_target_socket #(tlm_generic_payload, tlm_phase_e, consumer) target_socket;
 
   int unsigned transaction_count;
 
@@ -116,7 +116,7 @@ class consumer extends uvm_component;
     target_socket = new("target_socket", this, this);
   endfunction
 
-  function tlm_sync_e nb_transport_fw(ref tlm2_generic_payload t,
+  function tlm_sync_e nb_transport_fw(ref tlm_generic_payload t,
                                       ref tlm_phase_e p,
                                       ref time delay);
     uvm_report_info("consumer", t.convert2string());

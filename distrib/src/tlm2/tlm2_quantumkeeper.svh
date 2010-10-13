@@ -18,19 +18,19 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// tlm2_global_quantum
+// tlm_global_quantum
 //
 // A singleton that holds the global quantum
 //----------------------------------------------------------------------
-class tlm2_global_quantum;
+class tlm_global_quantum;
 
-  static tlm2_global_quantum m_instance;
+  static tlm_global_quantum m_instance;
   protected time m_global_quantum;
 
   local function new();
   endfunction
 
-  static function tlm2_global_quantum inst();
+  static function tlm_global_quantum inst();
     if(m_instance == null)
       m_instance = new();
     return m_instance;
@@ -57,11 +57,11 @@ class tlm2_global_quantum;
 endclass
 
 //----------------------------------------------------------------------
-// tlm2_quantumkeeper
+// tlm_quantumkeeper
 //
 // A class that holds the local quantum
 //----------------------------------------------------------------------
-class tlm2_quantumkeeper;
+class tlm_quantumkeeper;
 
   protected time m_next_sync_point;
   protected time m_local_time;
@@ -103,7 +103,7 @@ class tlm2_quantumkeeper;
   endfunction
 
   protected virtual function time compute_local_quantum();
-    tlm2_global_quantum qntm = tlm2_global_quantum::inst();
+    tlm_global_quantum qntm = tlm_global_quantum::inst();
     return qntm.compute_local_quantum();
   endfunction
 

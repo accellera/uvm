@@ -18,27 +18,27 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// tlm2 exports
+// tlm exports
 //
-// class definitions of export classes that connect tlm2 interfaces
+// class definitions of export classes that connect tlm interfaces
 //----------------------------------------------------------------------
 
-class tlm_nb_transport_fw_export #(type T=tlm2_generic_payload,
+class tlm_nb_transport_fw_export #(type T=tlm_generic_payload,
                                    type P=tlm_phase_e)
-  extends uvm_port_base #(tlm2_if #(T,P));
-  `UVM_EXPORT_COMMON(`TLM2_NB_FW_MASK, "tlm_nb_transport_fw_export")
-  `TLM2_NB_TRANSPORT_FW_IMP(this.m_if, T, P, t, p, delay)
+  extends uvm_port_base #(tlm_if #(T,P));
+  `UVM_EXPORT_COMMON(`TLM_NB_FW_MASK, "tlm_nb_transport_fw_export")
+  `TLM_NB_TRANSPORT_FW_IMP(this.m_if, T, P, t, p, delay)
 endclass
 
-class tlm_nb_transport_bw_export #(type T=tlm2_generic_payload,
+class tlm_nb_transport_bw_export #(type T=tlm_generic_payload,
                                    type P=tlm_phase_e)
-  extends uvm_port_base #(tlm2_if #(T,P));
-  `UVM_EXPORT_COMMON(`TLM2_NB_BW_MASK, "tlm_nb_transport_bw_export")
-  `TLM2_NB_TRANSPORT_BW_IMP(this.m_if, T, P, t, p, delay)
+  extends uvm_port_base #(tlm_if #(T,P));
+  `UVM_EXPORT_COMMON(`TLM_NB_BW_MASK, "tlm_nb_transport_bw_export")
+  `TLM_NB_TRANSPORT_BW_IMP(this.m_if, T, P, t, p, delay)
 endclass
 
-class tlm_b_transport_export #(type T=tlm2_generic_payload)
-  extends uvm_port_base #(tlm2_if #(T));
-  `UVM_EXPORT_COMMON(`TLM2_B_MASK, "tlm_b_transport_export")
-  `TLM2_B_TRANSPORT_IMP(this.m_if, T, t, delay)
+class tlm_b_transport_export #(type T=tlm_generic_payload)
+  extends uvm_port_base #(tlm_if #(T));
+  `UVM_EXPORT_COMMON(`TLM_B_MASK, "tlm_b_transport_export")
+  `TLM_B_TRANSPORT_IMP(this.m_if, T, t, delay)
 endclass
