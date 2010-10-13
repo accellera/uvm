@@ -131,8 +131,11 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval *value, PLI_INT32 flag)
     for(i=0;i<chunks; ++i)
     {
       // Reverse a/b on NC.
-      value_p[i].aval = value[i].bval;
-      value_p[i].bval = value[i].aval;
+      // FIXME 
+#warning("FIXME VPI not functional");
+
+      //      value_p[i].aval = value[i].bval;
+      //      value_p[i].bval = value[i].aval;
     }
     vpi_put_value(r, &value_s, &time_s, flag);  
     free (value_p);

@@ -95,7 +95,7 @@ typedef uvm_ral_hdl_path_slice uvm_ral_hdl_path_concat[];
 
 // concat2string
 
-function string uvm_ral_concat2string(uvm_ral_hdl_path_concat slices);
+function automatic string uvm_ral_concat2string(uvm_ral_hdl_path_concat slices);
    string image = "{";
    
    if (slices.size() == 1) return slices[0].path;
@@ -657,7 +657,7 @@ endclass: uvm_ral_mem_backdoor
 //------------------------------------------------------------------------------
 // CLASS: uvm_ral_reg_backdoor_cbs
 //
-// Façade class for register backdoor access callback methods. 
+// Facade class for register backdoor access callback methods. 
 //------------------------------------------------------------------------------
 virtual class uvm_ral_reg_backdoor_cbs extends uvm_callback;
 
@@ -795,7 +795,7 @@ typedef uvm_callback_iter#(uvm_ral_reg_backdoor, uvm_ral_reg_backdoor_cbs) uvm_r
 //------------------------------------------------------------------------------
 // CLASS: uvm_ral_mem_backdoor_cbs
 //
-// Façade class for memory backdoor access callback methods. 
+// Facade class for memory backdoor access callback methods. 
 //------------------------------------------------------------------------------
 virtual class uvm_ral_mem_backdoor_cbs extends uvm_callback;
 

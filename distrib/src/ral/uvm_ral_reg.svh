@@ -722,7 +722,7 @@ virtual class uvm_ral_reg extends uvm_object;
    // If ~inherit~ is TRUE, returns the backdoor of the parent block
    // if none have been specified for this register.
    //
-   extern function uvm_ral_reg_backdoor get_backdoor(bit inherit = 1);
+   extern function uvm_ral_reg_backdoor get_backdoor(bit inherit_ = 1);
 
    //
    // Function:  clear_hdl_path
@@ -1338,8 +1338,8 @@ endfunction: set_backdoor
 
 // get_backdoor
 
-function uvm_ral_reg_backdoor uvm_ral_reg::get_backdoor(bit inherit = 1);
-   if (backdoor == null && inherit) begin
+function uvm_ral_reg_backdoor uvm_ral_reg::get_backdoor(bit inherit_ = 1);
+   if (backdoor == null && inherit_) begin
      uvm_ral_block blk = get_parent();
      while (blk != null) begin
        uvm_ral_reg_backdoor bkdr = blk.get_backdoor();

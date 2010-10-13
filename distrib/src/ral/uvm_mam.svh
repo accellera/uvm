@@ -758,7 +758,11 @@ function void uvm_mam::release_all_regions();
 `else
    // Works in VCS2008.03 or later
    // IEEE 1800-2005 compliant
+`ifdef INCA
+   this.in_use.delete();
+`else
    this.in_use = '{};
+`endif
 `endif
 endfunction: release_all_regions
 

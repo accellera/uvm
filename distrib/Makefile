@@ -39,7 +39,7 @@ all install:
 	@echo "\$$(TOOL) variable not set."
 	@echo "Use one of:"
 	@echo "   make TOOL=questa"
-	@echo "   make TOOL=nc"
+	@echo "   make TOOL=ius"
 	@echo "   make TOOL=vcs"
 else
 all install: $(LIBDIR)/$(SONAME)
@@ -51,8 +51,8 @@ CFLAGS += -DQUESTA -I$(MTI_HOME)/include -m32
 CC = $(MTI_HOME)/gcc-4.1.2-linux/bin/gcc
 endif
 
-ifeq ($(TOOL),nc)
-CFLAGS += -DNCSIM
+ifeq ($(TOOL),ius)
+CFLAGS += -DNCSIM -I`ncroot`/tools/include
 endif
 
 ifeq ($(TOOL),vcs)
@@ -60,12 +60,17 @@ CFLAGS += -DVCS -I $(VCS_HOME)/include -m32
 endif
 
 
-
+#
+# this has to $UVMHOME/lib/$arch$/libuvm_$tool.so
+# (otherwise we could not have multiple $arch$ supported in a single UVM install
+#
+# the lib/*.so should be removed
+#
 $(LIBDIR)/$(SONAME): $(LIBDIR) $(SRCS)
+	mkdir -p $(LIBDIR)
 	$(CC) $(CFLAGS) -o $(LIBDIR)/$(SONAME) $(SRCS)
 	@rm -f $(UVM_HOME)/lib/$(SONAME)
-	ln -s $(OS)/$(SONAME) $(UVM_HOME)/lib/$(SONAME)
-
+	(cd lib && ln -sf $(OS)/$(SONAME))
 
 $(LIBDIR):
 	mkdir -p $(LIBDIR)
@@ -73,7 +78,6 @@ $(LIBDIR):
 
 clean:
 	rm -rf $(LIBDIR)/libuvm_*.so
-	rm -rf $(UVM_HOME)/lib/libuvm_*.so
 
 distclean realclean allclean squeakyclean: clean
 	rm -rf $(LIBDIR)

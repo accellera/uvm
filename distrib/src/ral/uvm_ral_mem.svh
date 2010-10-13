@@ -1526,7 +1526,7 @@ endfunction: get_vreg_by_name
 
 // get_vreg_by_offset
 
-function uvm_ral_vreg uvm_ral_mem::get_vreg_by_offset(bit [63:0] offset,
+function uvm_ral_vreg uvm_ral_mem::get_vreg_by_offset(uvm_ral_addr_t offset,
                                                       uvm_ral_map map = null);
    `uvm_error("RAL", "uvm_ral_mem::get_vreg_by_offset() not yet implemented")
    return null;
