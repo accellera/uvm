@@ -1550,7 +1550,8 @@ endfunction
 function bit uvm_ral_reg::is_in_map(uvm_ral_map map);
    if (maps.exists(map))
      return 1;
-   foreach (maps[local_map]) begin
+   foreach (maps[l]) begin
+   	uvm_ral_map local_map = l;
      uvm_ral_map parent_map = local_map.get_parent_map();
      while (parent_map != null) begin
        if (parent_map == map)
@@ -1570,7 +1571,8 @@ function uvm_ral_map uvm_ral_reg::get_local_map(uvm_ral_map map, string caller="
      return get_default_map();
    if (maps.exists(map))
      return map; 
-   foreach (maps[local_map]) begin
+   foreach (maps[l]) begin
+   	 uvm_ral_map local_map=l;
      uvm_ral_map parent_map = local_map.get_parent_map();
      while (parent_map != null) begin
        if (parent_map == map)
@@ -1606,7 +1608,8 @@ function uvm_ral_map uvm_ral_reg::get_default_map(string caller="");
    end
 
    // try to choose one based on default_map in parent blocks.
-   foreach (maps[map]) begin
+   foreach (maps[l]) begin
+   	 uvm_ral_map map = l;
      uvm_ral_block blk = map.get_parent();
      uvm_ral_map default_map = blk.get_default_map();
      if (default_map != null) begin
