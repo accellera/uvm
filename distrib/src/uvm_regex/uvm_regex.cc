@@ -26,7 +26,7 @@
 
 using namespace std;
 
-const char uvm_re_lead_char = '%';
+const char uvm_re_bracket_char = '/';
 
 //----------------------------------------------------------------------
 // uvm_re_cache
@@ -134,20 +134,37 @@ class uvm_re_cache
     string *temp_re;
     const char *p;
     char * re;
+    int len;
 
     // safety check.  Glob should never be null since this is called
     // from DPI.
     if(glob == NULL)
       return NULL;
 
-    // Is glob a regex or a glob?  If it has the prefix character
-    // regex, otherwise it's a glob
+    // start with a little error checking. Check for the pathological
+    // cases:
+    //
+    //  1.  The glob string is empty (it has zero characters)
+    //  2.  The glob string has a single character that is the
+    //      uvm_re_bracket_char  (i.e. "/")
+    //
+    // If either of those cases appear then return an empty string
+    len = strlen(glob);
+    if(len == 0 || (len == 1 && *glob == uvm_re_bracket_char))
+    {
+      re = (char*)malloc(1);
+      *re = '\0';
+      return re;  // return an empty string
+    }
 
-    if(*glob == uvm_re_lead_char)
+    // Is glob a regex or a glob?  If it is bracketed with the
+    // uvm_re_bracket_char character them it is a regex, otherwise it's
+    // a glob.
+    if(glob[0] == uvm_re_bracket_char && glob[len-1] == uvm_re_bracket_char)
     {
       // the glob is really a regular expression.  Strip off the 
       // leading character that identifies it as such.
-      temp_re = new string(glob + 1);
+      temp_re = new string(glob + 1, len - 2);
     }
     else
     {

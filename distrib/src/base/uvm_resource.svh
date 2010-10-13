@@ -232,6 +232,10 @@ virtual class uvm_resource_base extends uvm_object;
   // before it is stored.
   function void set_scope(string s);
     scope = uvm_glob_to_re(s);
+    if(scope == "") begin
+      `uvm_warning("set_scope", "Empty scope string, reverting to \"*\"");
+      scope = "\.*";
+    end
   endfunction
 
   // funciton get_scope
