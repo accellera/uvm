@@ -29,6 +29,8 @@ use Fcntl;
 use File::Temp qw/tempfile tempdir/;
 use File::Path;
 use File::Copy;
+use Data::Dumper;
+use File::stat;
 
 
 my @all_files=();
@@ -37,14 +39,26 @@ local $opt_marker="-*-";
 local $opt_help;
 local $opt_backup;
 local $opt_write;
+local $opt_all_text_files;
 
-my $VCSID='-*- $Id$ -*-';
+# regexp to match sv files (can be overriden using --sv_ext)
+local $opt_sv_ext="\.(s?vh?|inc)\$";
+
+# regexp of mime types for files considered for a change with the --all option
+local $text_file_mime_regexp="(text\/|application\/x-shellscript)";
+
+# ignore pattern
+local $file_ignore_pattern="(/(.hg|.git|INCA_libs)\/|[#~]\$|\.(zip|gz|bz2|orig|diff|patch)\$)";
+
+my $VCSID='-*- $Id: ovm2uvm.pl,v d60c9fc172de 2010/10/13 14:58:52 uwes $ -*-';
 my @Options=(
           ["help","this help screen"],
 	  ["top_dir=s","the top directory name containing the files to translate"],
 	  ["backup","if specified make a backup of all files handled by the script"],
 	  ["write","really write the changed files back to disk (by default it runs in dry mode)"],
-	  ["marker=s", "use the marker supplied instead of the default marker [$opt_marker]"]
+	  ["marker=s", "use the marker supplied instead of the default marker [$opt_marker]"],
+	  ["sv_ext=s","a regexp matching all sv files default:[$opt_sv_ext]"],
+	  ["all_text_files","apply the simple \"o2u\" transformation to all files where the MIME-type of matches [$text_file_mime_regexp]"]
 	  );	  
  
 
@@ -61,7 +75,7 @@ $DUMMY='-' x 80;
 NoteMessage("$DUMMY");
 NoteMessage("$VCSID");
 
-NoteMessage("traversing $opt_top_dir to find files");
+NoteMessage("traversing directory [$opt_top_dir] to find files");
 
 search_all_relevant_files($opt_top_dir);
 
@@ -69,9 +83,17 @@ search_all_relevant_files($opt_top_dir);
 #
 #
 foreach my $file (@all_files) {
-    print "working on [$file]\n";
-
-    $content{$file}=ReadFileAsText($file);
+    if($file =~ /${opt_sv_ext}/) {
+	print "handling sv [$file]\n";
+	$content{$file}=ReadFileAsText($file);
+	$content{$file}=replace_trivial($content{$file},$file);
+    } elsif (defined($opt_all_text_files) && matches_mime_type($file)) { 
+	print "handling generic [$file]\n";
+	$content{$file}=ReadFileAsText($file);
+	$content{$file}=simple_fix($content{$file});
+    } else {
+	print "skipping $file ...\n";
+    }
 }
 
 foreach $f (keys %content) { 
@@ -80,6 +102,18 @@ foreach $f (keys %content) {
 
 write_back_files(%content);
 
+# determines if the file is one of requested mime types
+sub matches_mime_type {
+    my($file) = @_;
+    my($mime)=qx{file -i $file};
+    if($mime =~ /:\s+${text_file_mime_regexp}/) {
+	return 1;
+    } else {
+	return 0;
+    }
+}
+
+# writes back the contents of the files
 sub write_back_files {
     my(%content)=@_;
 
@@ -94,7 +128,7 @@ sub write_back_files {
 
 	mkpath($directories, 0);
     
-	open(OUT,">$nfile");
+	open(OUT,">$nfile") || die("error opening $nfile fullfile:$f for write [$!]");
 	print OUT $content{$f};
 	close(OUT);
     }
@@ -127,6 +161,7 @@ sub write_back_files {
 		$target=$opt_top_dir . $mod_nfile;
 	    }
 	    
+	    warn("target file $target is not writeable and in the way") if !(-w $target);
 	    #NoteMessage("moving [$source] to [$target]");
 	    move($source,$target);
 	}
@@ -134,8 +169,8 @@ sub write_back_files {
 }
 
 sub search_all_relevant_files {
-	my ($dir) = shift;
-	finddepth(\&pattern, $dir);
+	my ($dir) = @_;
+	finddepth({ wanted => \&pattern, no_chdir => 1 }, $dir);
 }
 
 
@@ -262,13 +297,21 @@ sub simple_fix {
 }
 
 sub pattern {
-	my $filename= "$File::Find::name";
+	my($filename)= $File::Find::name;
+	my($st) =stat($filename) || die "error: $filename: $!";
 
-	return unless !(-d $filename);
-	return unless $filename =~ /\.s?vh?$/;
+#	print "[$filename][$st]";
+# print Dumper($filename);
+#	print Dumper($st),"\n";
+	
+# NOTE directories are not handled (a directory ovm_bla has to be renamed manually)
+	return 0 if (-d $filename);
+	warn("file $filename is a link and may lead to strange results") if -l $filename;
+	return 0 if $filename =~ /${file_ignore_pattern}/;
+#	return unless $filename =~ /\.s?vh?$/;
 
 #	replace_string($filename);
-	push @all_files,$File::Find::name;
+	push @all_files,$filename;
 }
 
 sub PrintUsage {
@@ -339,12 +382,12 @@ sub Message {
 
 __DATA__
 
-this scripts walks through all files under the --top_dir hierarchy and makes modifications 
+This scripts walks through all files under the --top_dir hierarchy and makes modifications 
 so that the OVM code fragments are changed to their UVM counterparts. As it is based on perl/regexps rather 
 then a full parsing some of the replacements might be inaccurate or it might not find all occurences required 
 to change. however it is expected that ~90%+ of the changes required in a conversion are completed by the script.
 
-usage model:
+standard usage model sv files only:
 
 1. run the script with the --top_dir option
 
@@ -360,4 +403,13 @@ usage model:
 usage: ovm2uvm.pl options* args*
 
 example: ovm2uvm.pl --top_dir /xyz/abc/src
+
+
+all_text_files use model:
+
+If the all_text_files use model is enabled using the --all_text_files switch all files recognized 
+as text files are additionally considered for replacements. The simple o-to-u replacements will be performed 
+in all files (textual + sv) while the SV/OVM specific changes will be only applied to files identified as SV.
+
+example: example: ovm2uvm.pl --top_dir /xyz/abc/src --all
 
