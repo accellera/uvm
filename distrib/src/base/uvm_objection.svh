@@ -115,9 +115,7 @@ class uvm_objection extends uvm_report_object;
       m_trace_mode=1;
     end
     // Needed to allow threads dropping objections to be killed
-    fork begin
-      m_execute_scheduled_forks;
-    end join_none
+    top.m_create_objection_watcher(this);
   endfunction
 
   // Function: trace_mode
@@ -149,7 +147,7 @@ class uvm_objection extends uvm_report_object;
 
       uvm_report_info("OBJTN_TRC", 
         $sformatf("Object %0s %0s %0d objection(s), count=%0d  total=%0d%s",
-           obj.get_full_name()==""?"uvm_top":obj.get_full_name(), action, count, _count, _total,desc), UVM_NONE);
+           obj.get_full_name()==""?"uvm_top":obj.get_full_name(), action, count, _count, _total,desc), UVM_NONE, `uvm_file, `uvm_line);
     else begin
       int cpath = 0, last_dot=0;
       string sname = source_obj.get_full_name(), nm = obj.get_full_name();
@@ -163,10 +161,10 @@ class uvm_objection extends uvm_report_object;
       end 
 
       if(last_dot) sname = sname.substr(last_dot+1, sname.len());
-      uvm_report_info("OBJTN_TRC",
+      `uvm_info("OBJTN_TRC",
         $sformatf("Object %0s %0s %0d objection(s) from its total (%s from source object %s), count=%0d  total=%0d%s",
            obj.get_full_name()==""?"uvm_top":obj.get_full_name(), action=="raised"?"added":"subtracted",
-            count, action, sname, _count, _total, desc), UVM_NONE);
+            count, action, sname, _count, _total, desc), UVM_NONE)
     end
   endfunction
 
@@ -278,6 +276,7 @@ class uvm_objection extends uvm_report_object;
 
   function void raise_objection (uvm_object obj=null, string description="",
        int count=1);
+    if(obj == null) obj = uvm_root::get();
     m_raise (obj, obj, description, count);
   endfunction
 
@@ -384,6 +383,7 @@ class uvm_objection extends uvm_report_object;
 
   function void drop_objection (uvm_object obj=null, string description="", 
        int count=1);
+    if(obj == null) obj = uvm_root::get();
     m_drop (obj, obj, description, count, 0);
   endfunction
 
@@ -397,21 +397,23 @@ class uvm_objection extends uvm_report_object;
       obj = top;
 
     if (!m_total_count.exists(obj) || (count > m_total_count[obj])) begin
-      uvm_report_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
-        "\" attempted to drop objection count below zero."});
+      `uvm_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
+        "\" attempted to drop objection count below zero."})
       return;
     end
     if ((obj == source_obj) && 
         (!m_source_count.exists(obj) || (count > m_source_count[obj]))) begin
-      uvm_report_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
-        "\" attempted to drop objection count below zero."});
+      `uvm_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
+        "\" attempted to drop objection count below zero."})
       return;
     end
 
     m_total_count[obj] -= count;
+    if(m_total_count[obj] == 0) m_total_count.delete(obj);
 
     if (source_obj==obj) begin
       m_source_count[obj] -= count;
+      if(m_source_count[obj] == 0) m_source_count.delete(obj);
       source_obj = obj;
     end
  
@@ -422,7 +424,7 @@ class uvm_objection extends uvm_report_object;
     `uvm_do_callbacks(uvm_objection,uvm_objection_cb,dropped(obj,source_obj,description,count))
   
     // if count != 0, no reason to fork
-    if (m_total_count[obj] != 0) begin
+    if (m_total_count.exists(obj) && m_total_count[obj] != 0) begin
 
       if (!m_hier_mode && obj != top)
         m_drop(top,source_obj,description, count, in_top_thread);
@@ -444,7 +446,6 @@ class uvm_objection extends uvm_report_object;
 
   // List of scheduled objects
   uvm_objection_context_object m_scheduled_list[$];
-  event m_activate_scheduled_forks;
 
   function void m_schedule_forked_drop (uvm_object obj, uvm_object source_obj, 
        string description="", int count=1, int in_top_thread=0);
@@ -482,7 +483,7 @@ class uvm_objection extends uvm_report_object;
         bit reraise;
 
         fork begin
-         if (m_total_count[obj] == 0) begin
+         if (m_total_count.exists(obj) || m_total_count[obj] == 0) begin
            fork begin //wrapper thread for disable fork
               fork
                 begin
@@ -498,7 +499,7 @@ class uvm_objection extends uvm_report_object;
                   // wait for all_dropped cbs to complete
                   wait fork;
                 end
-                wait (m_total_count[obj] != 0);
+                wait (m_total_count.exists(obj) && m_total_count[obj] != 0);
               join_any
               disable fork;
            end join
@@ -594,6 +595,17 @@ class uvm_objection extends uvm_report_object;
 
 
   // Group: Objection Status
+
+  // Function: get_objectors
+  //
+  // Returns the current list of objecting objects (objects that
+  // raised an objection but have not dropped it).
+
+  function void get_objectors(ref uvm_object list[$]);
+    `uvm_clear_queue(list)
+    foreach (m_source_count[obj]) list.push_back(obj); 
+  endfunction
+
 
   // Function: get_objection_count
   //
@@ -801,10 +813,10 @@ class uvm_test_done_objection extends uvm_objection;
     string nm = is_raise ? "raise_objection" : "drop_objection";
     string desc = description == "" ? "" : {" (\"", description, "\")"};
     if(! ($cast(c,obj) || $cast(s,obj))) begin
-      uvm_report_error("TEST_DONE_NOHIER", {"A non-hierarchical object, '",
+      `uvm_error("TEST_DONE_NOHIER", {"A non-hierarchical object, '",
         obj.get_full_name(), "' (", obj.get_type_name(),") was used in a call ",
         "to uvm_test_done.", nm,"(). For this objection, a sequence ",
-        "or component is required.", desc });
+        "or component is required.", desc })
     end
   endfunction
 
@@ -830,7 +842,7 @@ class uvm_test_done_objection extends uvm_objection;
       end
       else
         msg = {msg, "Previous call to global_stop_request() will now be honored."};
-      uvm_report_info("TEST_DONE", msg, UVM_LOW);
+      `uvm_info("TEST_DONE", msg, UVM_LOW);
     end
   endtask
 
@@ -881,8 +893,8 @@ class uvm_test_done_objection extends uvm_objection;
     if (name == "")
       name = "uvm_top";
     m_forced = 1;
-    uvm_report_warning("FORCE_STOP",{"Object '",name,"' called force_stop. ",
-       "Ending run phase"});
+    `uvm_warning("FORCE_STOP",{"Object '",name,"' called force_stop. ",
+       "Ending run phase"})
     all_dropped(uvm_top, obj, "", 0);
     m_forced = 0;
   endtask

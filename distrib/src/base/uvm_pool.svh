@@ -91,13 +91,10 @@ class uvm_pool #(type KEY=int, T=uvm_void) extends uvm_object;
 
   // Function: add
   //
-  // Adds the given (~key~, ~item~) pair to the pool.
+  // Adds the given (~key~, ~item~) pair to the pool. If an item already
+  // exists at the given ~key~ it is overwritten with the new ~item~.
 
   virtual function void add (KEY key, T item);
-//    if (pool.exists(key)) begin
-//      uvm_report_warning("POOLEXST",
-//        $psprintf("add: value for given key already exists. Replacing with new value."));
-//    end
     pool[key] = item;
   endfunction
   
@@ -117,8 +114,8 @@ class uvm_pool #(type KEY=int, T=uvm_void) extends uvm_object;
 
   virtual function void delete (KEY key);
     if (!exists(key)) begin
-      uvm_report_warning("POOLDEL",
-        $psprintf("delete: pool key doesn't exist. Ignoring delete request"));
+      `uvm_warning("POOLDEL",
+        $psprintf("delete: pool key doesn't exist. Ignoring delete request"))
       return;
     end
     pool.delete(key);
@@ -303,8 +300,8 @@ class uvm_object_string_pool #(type T=uvm_object) extends uvm_pool #(string,T);
 
   virtual function void delete (string key);
     if (!exists(key)) begin
-      uvm_report_warning("POOLDEL",
-        $psprintf("delete: key '%s' doesn't exist", key));
+      `uvm_warning("POOLDEL",
+        $psprintf("delete: key '%s' doesn't exist", key))
       return;
     end
     pool.delete(key);

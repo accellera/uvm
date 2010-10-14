@@ -3,6 +3,9 @@ import uvm_pkg::*;
 `include "uvm_macros.svh"
 
 package P;
+
+import uvm_pkg::*;
+
 class  packet extends uvm_object;
    `uvm_object_utils_begin(packet)
    `uvm_object_utils_end

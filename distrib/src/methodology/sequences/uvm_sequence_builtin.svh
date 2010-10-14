@@ -3,6 +3,7 @@
 //   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010 Paradigm-works, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -22,9 +23,6 @@
 
 `ifndef UVM_SEQUENCE_BUILTIN_SVH
 `define UVM_SEQUENCE_BUILTIN_SVH
-
-`include "methodology/uvm_meth_defines.svh"
-
 
 //------------------------------------------------------------------------------
 //
@@ -82,7 +80,7 @@ task body();
   if (m_sequencer.count == -1) begin
     if (!randomize(l_count) with { l_count > 0 && l_count <
       m_sequencer.max_random_count; })
-      uvm_report_fatal("RANDSEQ", "Randomization for l_count failed in random sequence body", UVM_NONE);
+      `uvm_fatal("RANDSEQ", "Randomization for l_count failed in random sequence body")
     m_sequencer.count = l_count;
   end
   else
@@ -92,7 +90,7 @@ task body();
   repeat (l_count) begin
     if (!randomize(l_kind) with { l_kind > l_exhaustive_seq_kind && 
       l_kind < max_kind; })
-      uvm_report_fatal("RANDSEQ", "Randomization for l_kind failed in random sequence body", UVM_NONE);
+      `uvm_fatal("RANDSEQ", "Randomization for l_kind failed in random sequence body")
     do_sequence_kind(l_kind);
   end
   m_sequencer.m_random_count++;
@@ -191,7 +189,7 @@ task body();
   repeat (l_count) begin
     if (!randomize(l_kind) with { l_kind > l_exhaustive_seq_kind; 
       l_kind < max_kind; }) // l_kind is randc
-      uvm_report_fatal("RANDSEQ", "Randomization for l_kind failed in exhaustive sequence body", UVM_NONE);
+      `uvm_fatal("RANDSEQ", "Randomization for l_kind failed in exhaustive sequence body")
 
     //$display ("Chosen l_kind: %0d", l_kind);
     do_sequence_kind(l_kind);
@@ -265,6 +263,9 @@ class uvm_simple_sequence extends uvm_sequence #(uvm_sequence_item);
   // ---
   function new (string name="uvm_simple_sequence");
     super.new(name);
+    // Initialized to avoid potential warnings if this class instance 
+    // is randomized without calling its body()
+    item = new;
   endfunction
 
   // body

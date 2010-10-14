@@ -72,9 +72,9 @@ class uvm_push_driver #(type REQ=uvm_sequence_item,
 
   function void check_port_connections();
     if (req_export.size() != 1)
-    uvm_report_fatal("Connection Error",
+    `uvm_fatal("Connection Error",
                      $psprintf("Must connect to seq_item_port(%0d)",
-                               req_export.size()), UVM_NONE);
+                               req_export.size()))
   endfunction
   
   virtual function void end_of_elaboration();
@@ -82,7 +82,7 @@ class uvm_push_driver #(type REQ=uvm_sequence_item,
   endfunction
   
   virtual task put(REQ item);
-    uvm_report_fatal("UVM_PUSH_DRIVER", "Put task for push driver is not implemented", UVM_NONE);
+    `uvm_fatal("UVM_PUSH_DRIVER", "Put task for push driver is not implemented")
   endtask
 
   const static string type_name = "uvm_push_driver #(REQ,RSP)";

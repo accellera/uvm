@@ -116,7 +116,7 @@ class uvm_sequencer #(type REQ = uvm_sequence_item,
     // Empty the request fifo
     while (m_req_fifo.try_get(t)) begin
       if (reported == 0) begin
-        uvm_report_info(get_full_name(), "Sequences stopped.  Removing request from sequencer fifo");
+        `uvm_info(get_full_name(), "Sequences stopped.  Removing request from sequencer fifo", UVM_NONE)
         reported  = 1;
       end
 //      void'(m_req_fifo.try_get(t));
@@ -163,7 +163,7 @@ class uvm_sequencer #(type REQ = uvm_sequence_item,
     // should not be called again until item_done() has been called.
 
     if (get_next_item_called == 1) begin
-      uvm_report_error(get_full_name(), "Get_next_item called twice without item_done or get in between", UVM_NONE);
+      `uvm_error(get_full_name(), "Get_next_item called twice without item_done or get in between")
     end
     
     if (sequence_item_requested == 0) begin
@@ -205,7 +205,7 @@ class uvm_sequencer #(type REQ = uvm_sequence_item,
     get_next_item_called = 0;
     
     if (m_req_fifo.try_get(t) == 0) begin
-      uvm_report_fatal(get_full_name(), "Item done reports empty request fifo", UVM_NONE);
+      `uvm_fatal(get_full_name(), "Item_done() called with no outstanding requests.  Each call to item_done() must be paired with a previous call to get_next_item().")
     end else begin
       m_wait_for_item_sequence_id = t.get_sequence_id();
       m_wait_for_item_transaction_id = t.get_transaction_id();

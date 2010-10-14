@@ -408,7 +408,14 @@ sub check_test {
      }
      return 1;
    }
-   # Should NEVER have any UVM_FATAL messages
+
+   # FATAL may be the expected outcome
+   if ($pass > 0 && $n_fatals > 0) {
+     print "pass (UVM_FATALs)\n";
+     return 0;
+   }
+
+   # ... Otherwise, there should NEVER have any UVM_FATAL messages
    if ($n_fatals > 0) {
      print "**FAIL** (UVM_FATALs)\n";
      return 1;
