@@ -58,8 +58,8 @@ class env #(int unsigned ADDR_SIZE=16, int unsigned DATA_SIZE=8)
     mem_if_rsrc_t::read_by_type("vif.mem_if1", mif1);
     mem_if_rsrc_t::read_by_type("vif.mem_if2", mif2);
 
-    mem_if_rsrc_t::export_and_write("mif1", "*.mem_agent1.*", mif1, this);
-    mem_if_rsrc_t::export_and_write("mif2", "*.mem_agent2.*", mif2, this);
+    mem_if_rsrc_t::write_and_publish("mif1", "*.mem_agent1.*", mif1, this);
+    mem_if_rsrc_t::write_and_publish("mif2", "*.mem_agent2.*", mif2, this);
 
     // instantiate the agents
     agnt1 = new("mem_agent1", this);
@@ -88,12 +88,12 @@ class test extends uvm_component;
     mem_agent_config mem_cfg  = new();
     mem_cfg.initial_sequence = mem_seq_rand#(8,8)::get_type();
 
-    // create the configuration resource and export it into the resoures
+    // create the configuration resource and publish it into the resoures
     // database
-    uvm_resource_proxy#(mem_agent_config)::export_and_write("mem_cfg", "*.mem_agent*",
+    uvm_resource_proxy#(mem_agent_config)::write_and_publish("mem_cfg", "*.mem_agent*",
                                                        mem_cfg, this);
     // establish the loop count for the main sequence
-    uvm_resource_proxy#(int unsigned)::export_and_write("loop_count", "mem_seq",
+    uvm_resource_proxy#(int unsigned)::write_and_publish("loop_count", "mem_seq",
                                                          1000, this);
     
     e = new("env", this);
@@ -133,15 +133,15 @@ module top;
 
   initial begin
 
-    // export the virtuals interfaces into the resouce pool under the
+    // publish the virtuals interfaces into the resouce pool under the
     // pseudo-space "vif".  We put them in that space because we don't
     // know what the testbench hierarchy will look like and we need to
     // put them somewhere.  The top-level environment can retrieve them
     // and put them into the propoer part of the component space, if
     // necessary.
 
-    mem_if_rsrc_t::export_and_write("mif1", "vif.mem_if1", mif1);
-    mem_if_rsrc_t::export_and_write("mif2", "vif.mem_if2", mif2);
+    mem_if_rsrc_t::write_and_publish("mif1", "vif.mem_if1", mif1);
+    mem_if_rsrc_t::write_and_publish("mif2", "vif.mem_if2", mif2);
 
     run_test();
   end

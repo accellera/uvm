@@ -1045,9 +1045,9 @@ function void uvm_component::set_config_int(string inst_name,
   uvm_config_int c = new(field_name, massage_scope(inst_name));
   c.write(value, this);
   if(curr_phase != null && curr_phase.get_name() == "build")
-    c.export_resource();
+    c.publish();
   else
-    c.export_resource_override();
+    c.publish_override();
 endfunction
 
 //
@@ -1062,9 +1062,9 @@ function void uvm_component::set_config_string(string inst_name,
   uvm_config_str c = new(field_name, massage_scope(inst_name));
   c.write(value, this);
   if(curr_phase != null && curr_phase.get_name() == "build")
-    c.export_resource();
+    c.publish();
   else
-    c.export_resource_override();
+    c.publish_override();
 endfunction
 
 //
@@ -1101,9 +1101,9 @@ function void uvm_component::set_config_object(string inst_name,
   c.clone = clone;
   c.write(value, this);
   if(curr_phase != null && curr_phase.get_name() == "build")
-    c.export_resource();
+    c.publish();
   else
-    c.export_resource_override();
+    c.publish_override();
 
 endfunction
 
@@ -1117,7 +1117,7 @@ function bit uvm_component::get_config_int (string field_name,
   // Retrieve the resource from the resource pool. The final argument of
   // 0 indicates that we are turning off spell checking and verbose
   // warnings.
-  c = uvm_config_int::import_by_name(field_name, get_full_name(), 0);
+  c = uvm_config_int::acquire_by_name(field_name, get_full_name(), 0);
   if(c == null)
     return 0;
 
@@ -1138,7 +1138,7 @@ function bit uvm_component::get_config_string(string field_name,
   // Retrieve the resource from the resource pool. The final argument of
   // 0 indicates that we are turning off spell checking and verbose
   // warnings.
-  c = uvm_config_str::import_by_name(field_name, get_full_name(), 0);
+  c = uvm_config_str::acquire_by_name(field_name, get_full_name(), 0);
   if(c == null)
     return 0;
 
@@ -1159,15 +1159,16 @@ function bit uvm_component::get_config_object (string field_name,
   // Retrieve the resource from the resource pool. The final argument of
   // 0 indicates that we are turning off spell checking and verbose
   // warnings.
-  c = uvm_config_obj::import_by_name(field_name, get_full_name(), 0);
+  c = uvm_config_obj::acquire_by_name(field_name, get_full_name(), 0);
   if(c == null)
     return 0;
 
   value = c.read(this);
-  if(clone && value != null)
+  if(clone && value != null) begin
     tmp = value.clone();
+    value = tmp;
+  end
 
-  value = tmp;
   return 1;
 
 endfunction

@@ -353,13 +353,13 @@ virtual class uvm_resource_base extends uvm_object;
 endclass
 
 //----------------------------------------------------------------------
-// class: import_t
+// class: acquire_t
 //
-// Instances of import_t are stored in the history list as a record of
-// each import.  Failed imports are indicated with rsrc set to null.
-// This is part of the audit trail facility for resources.
+// Instances of acquire_t are stored in the history list as a record of
+// each acquire.  Failed acquisitions are indicated with rsrc set to
+// null.  This is part of the audit trail facility for resources.
 //----------------------------------------------------------------------
-class import_t;
+class acquire_t;
   string name;
   string scope;
   uvm_resource_base rsrc;
@@ -404,20 +404,21 @@ endclass
 // our resource A.  Similarly, the type map can contain in its queue
 // other resources whose type is T and whose name may or may not be A.
 //
-// Resources are added to the pool by exporting them; they are retrieved
-// from the pool by importing them.  The terms import and export are
-// relative to the object performing the operation.  An object creates a
-// new resource and exports it to the pool, making it available for
-// other objects outside of itsef; an object imports a resource when it
-// wants to access a resource not currently available in its scope.
+// Resources are added to the pool by publishing them; they are
+// retrieved from the pool by acquireing them.  The terms acquire and
+// publish are relative to the object performing the operation.  An
+// object creates a new resource and publishes it to the pool thereby
+// making it available for other objects outside of itsef; an object
+// acquires a resource when it wants to access a resource not currently
+// available in its scope.
 //
 // The scope is stored in the resource itself (not in the pool) so
-// whether you import by name or by type the resource's visibility is
+// whether you acquire by name or by type the resource's visibility is
 // the same.
 //
-// As an auditting capability, the pool contains an import history.  A
-// record of each import, whether by type or by name, is stored in the
-// queue import_record.  Both successful and failed imports are
+// As an auditting capability, the pool contains an acquire history.  A
+// record of each acquire, whether by type or by name, is stored in the
+// queue acquire_record.  Both successful and failed acquisitions are
 // recorded. At the end of simulator, or any time for that matter, you
 // can dump history list.  This will tell users which resources were
 // successfully located and which were not.  Users can then tell if
@@ -435,7 +436,7 @@ class uvm_resource_pool;
   rsrc_q_t rtab [string];
   rsrc_q_t ttab [uvm_resource_base];
 
-  import_t import_record [$];  // history of imports
+  acquire_t acquire_record [$];  // history of acquisitions
 
   // To make a proper singleton the constructor should be protected.
   // However, IUS doesn't support protected constructors so we'll just
@@ -466,18 +467,18 @@ class uvm_resource_pool;
     return uvm_spell_chkr#(rsrc_q_t)::check(rtab, s);
   endfunction
 
-  // function: export_resource
+  // function: publish
   //
   // Add a new resource to the resource pool.  The resource is inserted
   // into both the name map and type map so it can be located by
   // either.
   //
-  // The notion of exporting a resource is relative to the object doing
-  // the exporting.  That is, an object creates a resources and
-  // ~exports~ it into the resource pool.  Later, other objects that
-  // want to access the resource must ~import~ it from the pool
+  // The notion of publishing a resource is relative to the object doing
+  // the publishing.  That is, an object creates a resources and
+  // ~publishes~ it into the resource pool.  Later, other objects that
+  // want to access the resource must ~acquire~ it from the pool
 
-  function void export_resource (uvm_resource_base rsrc, bit override = 0);
+  function void publish (uvm_resource_base rsrc, bit override = 0);
 
     rsrc_q_t rq;
     string name;
@@ -514,55 +515,55 @@ class uvm_resource_pool;
 
   endfunction
 
-  function void export_resource_override(uvm_resource_base rsrc);
-    export_resource(rsrc, 1);
+  function void publish_override(uvm_resource_base rsrc);
+    publish(rsrc, 1);
   endfunction
 
-  // function: push_import_record
+  // function: push_acquire_record
   //
-  // Insert a new record into the import history list.
+  // Insert a new record into the acquire history list.
 
-  function void push_import_record(string name, string scope,
+  function void push_acquire_record(string name, string scope,
                                   uvm_resource_base rsrc);
-    import_t impt = new;
+    acquire_t impt = new;
 
     impt.name  = name;
     impt.scope = scope;
     impt.rsrc  = rsrc;
     impt.t     = $time;
 
-    import_record.push_back(impt);
+    acquire_record.push_back(impt);
   endfunction
 
-  // function: dump_import_records
+  // function: dump_acquire_records
   //
-  // Format and print the import history list.
+  // Format and print the acquire history list.
 
-  function void dump_import_records();
+  function void dump_acquire_records();
 
-    import_t record;
+    acquire_t record;
     bit success;
 
-    $display("--- resource import records ---");
-    foreach (import_record[i]) begin
-      record = import_record[i];
+    $display("--- resource acquire records ---");
+    foreach (acquire_record[i]) begin
+      record = acquire_record[i];
       success = (record.rsrc != null);
-      $display("import: name=%s  scope=%s  %s @ %0t",
+      $display("acquire: name=%s  scope=%s  %s @ %0t",
                record.name, record.scope,
                ((success)?"success":"fail"),
                record.t);
     end
   endfunction
 
-  // function: import_by_name
+  // function: acquire_by_name
   //
-  // Lookup a resource by name and scope.  Whether the import succeeds
-  // or fails, save a record of the import attempt.  The rpterr flag
+  // Lookup a resource by name and scope.  Whether the acquire succeeds
+  // or fails, save a record of the acquire attempt.  The rpterr flag
   // indicates whether we should report errors or not.  Essentially, it
   // severes as a verbose flag.  If set then the spell checker will be
   // invoked and warnings about multiple resources will be produced.
 
-  function uvm_resource_base import_by_name(string name, string scope = "", bit rpterr = 1);
+  function uvm_resource_base acquire_by_name(string name, string scope = "", bit rpterr = 1);
 
     rsrc_q_t rq;
     rsrc_q_t matchq=new;
@@ -578,7 +579,7 @@ class uvm_resource_pool;
     // Does an entry in the name map exist with the specified name?
     // If not, then we're done
     if((rpterr && !spell_check(name)) || (!rpterr && !rtab.exists(name))) begin
-      push_import_record(name, scope, null);
+      push_acquire_record(name, scope, null);
       return null;
     end
 
@@ -594,7 +595,7 @@ class uvm_resource_pool;
     end
 
     if(matchq.size() == 0) begin
-      push_import_record(name, scope, null);
+      push_acquire_record(name, scope, null);
       return null;
     end
 
@@ -609,18 +610,18 @@ class uvm_resource_pool;
     end
 
     rsrc = matchq.get(0);
-    push_import_record(name, scope, rsrc);
+    push_acquire_record(name, scope, rsrc);
     return rsrc;
     
   endfunction
 
-  // function: import_by_type
+  // function: acquire_by_type
   //
   // Lookup a resource by type handle and scope.  Insert a record into
-  // the import history list whether or not the import succeeded or
+  // the acquire history list whether or not the acquire succeeded or
   // failed.
 
-  function uvm_resource_base import_by_type(uvm_resource_base type_handle,
+  function uvm_resource_base acquire_by_type(uvm_resource_base type_handle,
                                          string scope = "");
 
     rsrc_q_t rq;
@@ -629,7 +630,7 @@ class uvm_resource_pool;
     int unsigned i;
 
     if(type_handle == null || !ttab.exists(type_handle)) begin
-      push_import_record("<type>", scope, null);
+      push_acquire_record("<type>", scope, null);
       return null;
     end
 
@@ -643,7 +644,7 @@ class uvm_resource_pool;
       end
     end
 
-    push_import_record("<type>", scope, rsrc);
+    push_acquire_record("<type>", scope, rsrc);
     return rsrc;
     
   endfunction
@@ -823,39 +824,39 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   endfunction
 
   //--------------------------------------------------------------------
-  // group: Import/Export Interface
+  // group: Publish/Get Interface
   //
-  // uvm_resource#(T) provides an interface for importing and exporting
-  // a resource.  Specifically, a resource can export itself.  It
-  // doesn't make sense for a resource to import itself, since you can't
-  // call a funtion on a handle you don't have.  However, a static
-  // import interface is provided as a convenience.  This obviates for
-  // the user to get a handle to the global resource pool as this is
-  // done for him here.
+  // uvm_resource#(T) provides an interface for acquiring and publishing
+  // a resource.  Specifically, a resource can publish itself.  It
+  // doesn't make sense for a resource to acquire itself, since you
+  // can't call a funtion on a handle you don't have.  However, a static
+  // acquire interface is provided as a convenience.  This obviates the
+  // need for the user to get a handle to the global resource pool as
+  // this is done for him here.
   //--------------------------------------------------------------------
 
-  // function: export_resource
+  // function: publish
   //
-  // Simply export this resource into the global resource pool
+  // Simply publish this resource into the global resource pool
 
-  function void export_resource();
+  function void publish();
     uvm_resource_pool rp = uvm_resource_pool::get();
-    rp.export_resource(this);
+    rp.publish(this);
   endfunction
   
-  // function: export_resource_override
+  // function: publish_override
   //
   // Export a resource into the global resource pool as an override.
   // This means it gets put at the head of the list and is searched
   // before other existing resources that occupy the same position in
   // the name map or the type map.
 
-  function void export_resource_override();
+  function void publish_override();
     uvm_resource_pool rp = uvm_resource_pool::get();
-    rp.export_resource(this, 1);
+    rp.publish(this, 1);
   endfunction
 
-  // function: import_by_name
+  // function: acquire_by_name
   //
   // looks up a resource by name in the name map. The first resource
   // with the specified name that is visible in the specified scope is
@@ -864,14 +865,14 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // to one then a failure message is issued, including suggested
   // spelling alternatives gathered by the spell checker.
 
-  static function this_type import_by_name(string name, string scope, bit rpterr = 1);
+  static function this_type acquire_by_name(string name, string scope, bit rpterr = 1);
 
     uvm_resource_pool rp = uvm_resource_pool::get();
     uvm_resource_base rsrc_base;
     this_type rsrc;
     string msg;
 
-    rsrc_base = rp.import_by_name(name, scope, rpterr);
+    rsrc_base = rp.acquire_by_name(name, scope, rpterr);
     if(rsrc_base == null)
       return null;
 
@@ -885,14 +886,14 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     
   endfunction
 
-  // function: import_by_type
+  // function: acquire_by_type
 
   // looks up a resource by type in the type map. The first resource
   // with the specified type that is visible in the specified scope is
   // returned, if one exists. Null is returned if a resource matching
   // the specifications was not located.
 
-  static function this_type import_by_type(uvm_resource_base type_handle,
+  static function this_type acquire_by_type(uvm_resource_base type_handle,
                                     string scope = "");
 
     uvm_resource_pool rp = uvm_resource_pool::get();
@@ -903,7 +904,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     if(type_handle == null)
       return null;
 
-    rsrc_base = rp.import_by_type(type_handle, scope);
+    rsrc_base = rp.acquire_by_type(type_handle, scope);
     if(rsrc_base == null)
       return null;
 
