@@ -70,6 +70,7 @@ class uvm_ral_single_mem_access_seq extends uvm_ral_sequence #(uvm_sequence #(uv
 
       n_bits = mem.get_n_bits();
       
+      $display("\n\n***** n_bits =%0d",n_bits);
       // Memories may be accessible from multiple physical interfaces (maps)
       mem.get_maps(maps);
 

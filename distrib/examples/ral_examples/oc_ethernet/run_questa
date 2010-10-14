@@ -1,20 +1,41 @@
 #!/bin/sh
-vlib work
-vlog -f compile_questa.f
+
+if [ $1 = clean ]
+then
+  rm -rf work vsim.wlf transcript
+  exit
+fi
+
+if [ $1 ]
+then
+  SEQ=$1
+else
+echo ""
+echo " Usage: run_questa <name_of_sequence>"
+echo ""
+echo "    Example:"
+echo ""
+echo "    run_questa uvm_ral_built_in_seq"
+echo ""
+echo " Available sequences:"
+echo ""
+echo " Built-In RAL:"
+echo ""
+echo "    uvm_ral_built_in_seq (run all)"
+echo "       uvm_ral_hw_reset_seq"
+echo "       uvm_ral_bit_bash_seq"
+echo "       uvm_ral_mem_walk_seq"
+echo "       uvm_ral_access_seq)"
+echo "          uvm_ral_reg_access_seq"
+echo "          uvm_ral_mem_access_seq"
+echo ""
+exit
+fi
+
 VSIM_ARGS='tb_top tb -c -sv_lib ../../../lib/libuvm_questa +ROOT_HDL_PATH=tb_top.dut'
 
 
-# These sequences each run an individual built-in
-#vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_hw_reset_seq
-#vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_bit_bash_seq
-#vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_shared_access_seq
-#vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_mem_walk_seq
-#vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_reg_access_seq
-#vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_mem_access_seq
-
-# This sequence runs both the reg_access_seq and mem_access_seq
-#vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_access_seq
-
-# This sequence runs all the above built-in tests
-vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=uvm_ral_built_in_seq
+vlib work
+vlog -f compile_questa.f
+vsim $VSIM_ARGS -do "run -all;q" +UVM_SEQUENCE=$SEQ
 

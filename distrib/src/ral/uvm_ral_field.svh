@@ -1358,6 +1358,8 @@ task uvm_ral_field::write(output uvm_ral::status_e  status,
       if(this.individually_accessible) begin
          uvm_ral_adapter    adapter;
          uvm_sequencer_base sequencer;
+         bit is_passthru;
+         uvm_ral_passthru_adapter passthru_adapter;
 
          if (local_map == null)
            return;
@@ -1366,6 +1368,8 @@ task uvm_ral_field::write(output uvm_ral::status_e  status,
 
          adapter = system_map.get_adapter();
          sequencer = system_map.get_sequencer();
+         if ($cast(passthru_adapter,adapter))
+            is_passthru = 1;
 
    	 if(adapter.supports_byte_enable || (indv_acc)) begin
 
@@ -1427,15 +1431,21 @@ task uvm_ral_field::write(output uvm_ral::status_e  status,
                rw_access.element = this;
                rw_access.element_kind = uvm_ral::REG;
                rw_access.kind = uvm_ral::WRITE;
-               rw_access.addr = map_info.addr[i];
                rw_access.value = value;
+               rw_access.path = path;
+               rw_access.map = local_map;
+               rw_access.extension = extension;
+               rw_access.fname = fname;
+               rw_access.lineno = lineno;
+
+               rw_access.addr = map_info.addr[i];
                rw_access.data = data;
                rw_access.n_bits = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
                rw_access.byte_en = '1;
-               rw_access.extension = extension;
 
                bus_req.m_start_item(sequencer,parent,prior);
-               parent.mid_do(rw_access);
+               if (!is_passthru)
+                 parent.mid_do(rw_access);
                bus_req = adapter.ral2bus(rw_access);
                bus_req.m_finish_item(sequencer,parent);
                bus_req.end_event.wait_on();
@@ -1449,7 +1459,8 @@ task uvm_ral_field::write(output uvm_ral::status_e  status,
                  adapter.bus2ral(bus_req,rw_access);
                end
                status = rw_access.status;
-               parent.post_do(rw_access);
+               if (!is_passthru)
+                 parent.post_do(rw_access);
 
                `uvm_info(get_type_name(), $psprintf("Wrote 'h%0h at 'h%0h via map \"%s\": %s...",
                                                     data, map_info.addr[i], map.get_full_name(), status.name()), UVM_HIGH);
@@ -1593,6 +1604,8 @@ task uvm_ral_field::read(output uvm_ral::status_e  status,
 
          uvm_ral_adapter    adapter;
          uvm_sequencer_base sequencer;
+         bit is_passthru;
+         uvm_ral_passthru_adapter passthru_adapter;
 
          if (local_map == null)
            return;
@@ -1601,6 +1614,8 @@ task uvm_ral_field::read(output uvm_ral::status_e  status,
 
          adapter = system_map.get_adapter();
          sequencer = system_map.get_sequencer();
+         if ($cast(passthru_adapter,adapter))
+            is_passthru = 1;
 
    	 if(adapter.supports_byte_enable || (indv_acc)) begin
             uvm_ral_field_cb_iter cbs = new(this);
@@ -1653,15 +1668,22 @@ task uvm_ral_field::read(output uvm_ral::status_e  status,
                 rw_access.element = this;
                 rw_access.element_kind = uvm_ral::REG;
                 rw_access.kind = uvm_ral::READ;
-                rw_access.addr = map_info.addr[i];
                 rw_access.value = value;
+                rw_access.path = path;
+                rw_access.map = local_map;
+                rw_access.extension = extension;
+                rw_access.fname = fname;
+                rw_access.lineno = lineno;
+
+
+                rw_access.addr = map_info.addr[i];
                 rw_access.data = data;
                 rw_access.n_bits = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
                 rw_access.byte_en = '1;
-                rw_access.extension = extension;
                             
                 bus_req.m_start_item(sequencer,parent,prior);
-                parent.mid_do(rw_access);
+                if (!is_passthru)
+                  parent.mid_do(rw_access);
                 bus_req = adapter.ral2bus(rw_access);
                 bus_req.m_finish_item(sequencer,parent);
                 bus_req.end_event.wait_on();
@@ -1688,7 +1710,8 @@ task uvm_ral_field::read(output uvm_ral::status_e  status,
 
    	       reg_value |= data & j*8;
                rw_access.value = reg_value;
-               parent.post_do(rw_access);
+               if (!is_passthru)
+                 parent.post_do(rw_access);
                j += bus_width;
                n_bits -= bus_width * 8;
             end

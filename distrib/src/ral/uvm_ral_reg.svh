@@ -2239,11 +2239,15 @@ task uvm_ral_reg::XwriteX(output uvm_ral::status_e status,
 
          // ...VIA BUILT-IN FRONTDOOR
          else begin : built_in_frontdoor
+            bit is_passthru;
+            uvm_ral_passthru_adapter passthru_adapter;
             uvm_ral_adapter    adapter = system_map.get_adapter();
             uvm_sequencer_base sequencer = system_map.get_sequencer();
-
             int w, j;
             int n_bits;
+
+            if ($cast(passthru_adapter,adapter))
+              is_passthru = 1;
 
             if (parent == null)
               `uvm_fatal("RAL","Built-in frontdoor write requires non-null parent argument")
@@ -2280,16 +2284,22 @@ task uvm_ral_reg::XwriteX(output uvm_ral::status_e status,
                rw_access.element = this;
                rw_access.element_kind = uvm_ral::REG;
                rw_access.kind = uvm_ral::WRITE;
-               rw_access.addr = map_info.addr[i];
                rw_access.value = value;
+               rw_access.path = path;
+               rw_access.map = local_map;
+               rw_access.extension = extension;
+               rw_access.fname = fname;
+               rw_access.lineno = lineno;
+
+               rw_access.addr = map_info.addr[i];
                rw_access.data = data;
                rw_access.n_bits = (n_bits > w*8) ? w*8 : n_bits;
                rw_access.byte_en = '1;
-               rw_access.extension = extension;
 
                bus_req.m_start_item(sequencer,parent,prior);
 
-               parent.mid_do(rw_access);
+               if (!is_passthru)
+                 parent.mid_do(rw_access);
                bus_req = adapter.ral2bus(rw_access);
 
                bus_req.set_sequencer(sequencer);
@@ -2299,6 +2309,7 @@ task uvm_ral_reg::XwriteX(output uvm_ral::status_e status,
                if (adapter.provides_responses) begin
                  uvm_sequence_item bus_rsp;
                  uvm_ral::access_e op;
+                 // TODO: need to test for right trans type, if not put back in q
                  parent.get_base_response(bus_rsp);
                  adapter.bus2ral(bus_rsp,rw_access);
                end
@@ -2308,7 +2319,8 @@ task uvm_ral_reg::XwriteX(output uvm_ral::status_e status,
 
                status = rw_access.status;
 
-               parent.post_do(rw_access);
+               if (!is_passthru)
+                 parent.post_do(rw_access);
 
                `uvm_info(get_type_name(),
                   $psprintf("Wrote 'h%0h at 'h%0h via map \"%s\": %s...",
@@ -2547,12 +2559,16 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
 
          // ...VIA BUILT-IN FRONTDOOR
          else begin : built_in_frontdoor
+            bit is_passthru;
+            uvm_ral_passthru_adapter passthru_adapter;
             uvm_ral_adapter    adapter = system_map.get_adapter();
             uvm_sequencer_base sequencer = system_map.get_sequencer();
-
             int w, j;
             int n_bits;
          
+            if ($cast(passthru_adapter,adapter))
+              is_passthru = 1;
+
             if (parent == null)
               `uvm_fatal("RAL","Built-in frontdoor read requires non-null parent argument")
 
@@ -2583,14 +2599,21 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
                 rw_access.element = this;
                 rw_access.element_kind = uvm_ral::REG;
                 rw_access.kind = uvm_ral::READ;
+                rw_access.value = value;
+                rw_access.path = path;
+                rw_access.map = local_map;
+                rw_access.extension = extension;
+                rw_access.fname = fname;
+                rw_access.lineno = lineno;
+
                 rw_access.addr = map_info.addr[i];
                 rw_access.data = 'h0;
                 rw_access.n_bits = (n_bits > w*8) ? w*8 : n_bits;
                 rw_access.byte_en = '1;
-                rw_access.extension = extension;
                             
                 bus_req.m_start_item(sequencer,parent,prior);
-                parent.mid_do(rw_access);
+                if (!is_passthru)
+                 parent.mid_do(rw_access);
                 bus_req = adapter.ral2bus(rw_access);
                 bus_req.set_sequencer(sequencer);
                 bus_req.m_finish_item(sequencer,parent);
@@ -2598,6 +2621,7 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
                 if (adapter.provides_responses) begin
                   uvm_sequence_item bus_rsp;
                   uvm_ral::access_e op;
+                  // TODO: need to test for right trans type, if not put back in q
                   parent.get_base_response(bus_rsp);
                   adapter.bus2ral(bus_rsp,rw_access);
                 end
@@ -2620,7 +2644,8 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
 
                 value |= data << j*8;
                 rw_access.value = value;
-                parent.post_do(rw_access);
+                if (!is_passthru)
+                  parent.post_do(rw_access);
                 j += w;
                 n_bits -= w * 8;
              end

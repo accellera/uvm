@@ -4,7 +4,7 @@
 +incdir+../../../src 
 timescale.v
 ../../../src/uvm_pkg.sv 
-+define+SINGLE_RAM_VARIABLE
++define+SINGLE_RAM_VARIABLE+RAM128x64
 +incdir+../common/wishbone
 +incdir+../common/oc_ethernet_rtl
 -suppress 2218,2181

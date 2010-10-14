@@ -98,7 +98,7 @@ class xbus_ral_env extends xbus_env;
 
     rdb.default_map.set_sequencer(ral_seqr,ral2ral);
 
-    slaves[0].monitor.item_collected_port.connect(xbus2ral.xbus_in);
+    slaves[0].monitor.item_collected_port.connect(xbus2ral.bus_in);
     xbus2ral.adapter = ral2xbus;
 
     assign_vi(vif_obj.vif);         // xbus agent should use get_config, not this

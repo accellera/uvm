@@ -41,14 +41,6 @@ class user_acp_reg_seq extends uvm_ral_sequence;
 
     acp = ral.xbus_rf.user_acp_reg;
 
-    /*
-    begin
-    xbus_user_acp_reg_cb cb = new;
-    uvm_callbacks#(ral_reg_xa0_xbus_rf_user_acp_reg, uvm_ral_reg_cbs)::add(ral.xbus_rf.user_acp_reg, cb);
-    end
-    */
-
-
     `ifdef UVM_OBJECTIONS_SVH
       // Raising one uvm_test_done objection
       uvm_test_done.raise_objection(this);
@@ -77,5 +69,33 @@ class user_acp_reg_seq extends uvm_ral_sequence;
       uvm_test_done.drop_objection(this);
     `endif
   endtask
+
+  virtual task pre_do(bit is_item);
+    `uvm_info("PRE_DO",$sformatf("%m called"),UVM_MEDIUM);
+  endtask
+
+  virtual function void mid_do(uvm_sequence_item this_item);
+    `uvm_info("MID_DO",$sformatf("%m called with transaction type %s",this_item.get_type_name()),UVM_MEDIUM);
+  endfunction
+
+  virtual function void post_do(uvm_sequence_item this_item);
+    `uvm_info("POST_DO",$sformatf("%m called with transaction type %s",this_item.get_type_name()),UVM_MEDIUM);
+  endfunction
+
+
+  bit toggle = 0;
+
+  virtual function bit is_relevant();
+    `uvm_info("IS_RELEVANT",$sformatf("%m called"),UVM_MEDIUM);
+    is_relevant = toggle;
+    if (toggle) toggle = 0;
+  endfunction
+
+  virtual task wait_for_relevant();
+    toggle = 1;
+    `uvm_info("WAIT_FOR_RELEVANT",$sformatf("%m called"),UVM_MEDIUM);
+    #1;
+  endtask
+
 
 endclass : user_acp_reg_seq

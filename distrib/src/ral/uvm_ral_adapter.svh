@@ -23,32 +23,134 @@
 //
 // TITLE: Register Model Adaptor for Bus Agent
 //
+// This file defines the following classes:
+//
+// <uvm_ral_item> : abstract register transaction type
+//
+// <uvm_rw_access> : physical register transaction type
+//
+// <uvm_ral_adapter> : converts between a register transaction type and a bus transaction type
+//
+// <uvm_ral_passthru_adapter> : a converter whose input is passed to its output
+//
+// <uvm_ral_predictor> : updates the RAL mirror based on observed bus transactions
+//
+//
+
+//------------------------------------------------------------------------------
+// CLASS: uvm_ral_item
+//
+// Defines an abstract register transaction item. No bus-specific information
+// is present, although a handle a <uvm_ral_map> is provided in case the user
+// wishes to implement a custom address translation algorithm.
+//------------------------------------------------------------------------------
 
 class uvm_ral_item extends uvm_sequence_item;
 
   `uvm_object_utils(uvm_ral_item)
 
-  uvm_ral::elem_kind_e      element_kind;  // REG, MEM, or FIELD 
-  uvm_object                element;       // handle to reg, field, mem, etc.
+  // Variable: element_kind
+  //
+  // Kind of element being accessed: REG, MEM, or FIELD. See <uvm_ral::elem_kind_e>.
+  //
+  uvm_ral::elem_kind_e element_kind;
 
-  rand uvm_ral::access_e    kind;        // READ, WRITE, MIRROR(READ), UPDATE(WRITE)
-  rand uvm_ral_data_logic_t value;       // data out (write), data in (read)
-  rand uvm_ral_addr_t       offset;      // for mems
 
-  uvm_ral::status_e         status;      // access outcome 
+  // Variable: element
+  //
+  // A handle to the RAL model element associated with this transaction.
+  // Use <element_kind> to determine the type to cast  to: <uvm_ral_reg>,
+  // <uvm_ral_mem>, or <uvm_ral_field>.
+  //
+  uvm_object element;
 
-  uvm_ral_map               map;      // the map map being used
-  uvm_ral::path_e           path;        // the path (BACKDOOR, BFM)
 
+  // Variable: kind
+  //
+  // Kind of access: READ or WRITE.
+  //
+  rand uvm_ral::access_e kind;
+
+
+  // Variable: value
+  //
+  // The value to write to, or after completion, the value read from the DUT.
+  //
+  rand uvm_ral_data_logic_t value;
+
+
+  // Variable: offset
+  //
+  // The offset address, if a memory access. Undefined if not a memory access.
+  //
+  rand uvm_ral_addr_t offset;
+
+
+  // Variable: status
+  //
+  // The result of the transaction: IS_OK, HAS_X, or ERROR.
+  // See <uvm_ral::status_e>.
+  //
+  uvm_ral::status_e status;
+
+
+  // Variable: map
+  //
+  // The local map used to obtain addresses. Users may customize 
+  // address-translation using this map.
+  //
+  uvm_ral_map map;
+
+
+  // Variable: path
+  //
+  // The path being used: BFM or BACKDOOR. Currently, uvm_ral_item transactions
+  // are used only during frontdoor (BFM) accesses.
+  //
+  uvm_ral::path_e path;
+
+
+  // Variable: extension
+  //
+  // Handle to optional user data, as conveyed in the call to write, read,
+  // mirror, or update call. Must derive from uvm_object. 
+  //
   rand uvm_object           extension;
 
+
+  // Variable: fname
+  //
+  // The file name from where this transaction originated, if provided
+  // at the call site.
+  //
+  string                     fname = ""; // file and line from which access originated
+
+
+  // Variable: lineno
+  //
+  // The file name from where this transaction originated, if provided 
+  // at the call site.
+  //
+  int                        lineno = 0;
+
+
+  // Function: new
+  //
+  // Create a new instance of this type, giving it the optional ~name~.
+  //
   function new(string name="");
     super.new(name);
   endfunction
 
+
+  // Function: convert2string
+  //
+  // Returns a string showing the contents of this transaction.
+  //
   virtual function string convert2string();
     string s;
-    s = {"kind=",kind.name()," ele_kind=",element_kind.name()," ele_name=",element.get_full_name() };
+    s = {"kind=",kind.name()," ele_kind=",element_kind.name(),
+         " ele_name=",element.get_full_name() };
     s = {s, $sformatf(" value=%0h",value)};
     if (element_kind == uvm_ral::MEM)
       s = {s, $sformatf(" offset=%0h",offset)};
@@ -57,6 +159,12 @@ class uvm_ral_item extends uvm_sequence_item;
     return s;
   endfunction
 
+
+  // Function: copy
+  //
+  // Copy the ~rhs~ object into this object. The ~rhs~ object must
+  // derive from <uvm_ral_item>.
+  //
   virtual function void copy(uvm_object rhs);
     uvm_ral_item rhs_;
     assert(rhs != null);
@@ -81,24 +189,44 @@ endclass
 
 
 //------------------------------------------------------------------------------
+//
 // CLASS: uvm_rw_access
-// Descriptor for generic bus transactions.
+//
+// Defines a generic bus transaction for register and memory accesses. Extending
+// from <uvm_ral_item>, this class adds bus-specific information such as
+// address, byte_en, and execution priority. If the bus is narrower than the
+// register or memory location being accessed, there will be multiple bus
+// operations (<uvm_rw_access> transactions) for every abstract <uvm_ral_item>
+// transaction. In this case, ~data~ represents the portion 
+// of <uvm_ral_item::value> to be transferred during this bus cycle. 
+// If the bus is wide enough to perform the register or memory operation in
+// a single cycle, ~data~ will be the same as ~value~.
 //------------------------------------------------------------------------------
+
 class uvm_rw_access extends uvm_ral_item;
 
-  `uvm_object_utils(uvm_rw_access)
+   `uvm_object_utils(uvm_rw_access)
 
-   rand uvm_ral::access_e kind;
+   // Variable: addr
+   //
+   // The bus address.
+   //
+   rand uvm_ral_addr_t addr;
 
-   rand  uvm_ral_addr_t       addr;                        // bus address
-   rand  uvm_ral_data_t       data;                     // bus data
-   rand  int                  n_bits = `UVM_RAL_DATA_WIDTH; // bit width
 
-   rand  uvm_ral_byte_en_t    byte_en = '1;            // if bus supports it
+   // Variable: data
+   //
+   // The data to write
+   //
+   rand uvm_ral_data_t data;
 
-   string                     fname = ""; // file and line from which access originated
-   int                        lineno = 0;
-   int                        prior = -1;
+   
+   // Variable: n_bits
+   //
+   // The number of bits of <uvm_ral_item::value> being transferred by
+   // this transaction.
+
+   rand int n_bits = `UVM_RAL_DATA_WIDTH;
 
    constraint valid_uvm_rw_access {
       n_bits > 0;
@@ -106,14 +234,36 @@ class uvm_rw_access extends uvm_ral_item;
    }
 
 
-   //------------------------------------------------------------------------------
-   // FUNCTION: new
-   // Creates a new instance of a transaction descriptor. 
-   //------------------------------------------------------------------------------
+   // Variable: byte_en
+   //
+   // Enables for the byte lanes on the bus. Meaningful only when the
+   // bus supports byte enables and the operation originates from a field
+   // write/read.
+   //
+   rand uvm_ral_byte_en_t byte_en = '1;            // if bus supports it
+
+
+   // Variable: prior
+   //
+   // The priority of this transfer, as defined by
+   // <uvm_sequence_base::start_item>.
+   //
+   int prior = -1;
+
+
+   // Function: new
+   //
+   // Create a new instance of this type, giving it the optional ~name~.
+   //
    function new(string name="");
      super.new(name);
    endfunction
 
+
+   // Function: convert2string
+   //
+   // Returns a string showing the contents of this transaction.
+   //
    virtual function string convert2string();
      string s;
      s = super.convert2string();
@@ -122,6 +272,12 @@ class uvm_rw_access extends uvm_ral_item;
      return s;
    endfunction
 
+
+   // Function: copy
+   //
+   // Copy the ~rhs~ object into this object. The ~rhs~ object must
+   // derive from <uvm_rw_access>.
+   //
    virtual function void copy(uvm_object rhs);
      uvm_rw_access rhs_;
      assert(rhs != null);
@@ -142,22 +298,27 @@ class uvm_rw_access extends uvm_ral_item;
 endclass: uvm_rw_access
 
 
-
 typedef class uvm_ral_block;
+
 
 //------------------------------------------------------------------------------
 //
 // CLASS: uvm_ral_adapter
 //
+// This class defines an interface for converting between <uvm_rw_access>
+// and a specific bus transaction. 
 //------------------------------------------------------------------------------
 
 virtual class uvm_ral_adapter extends uvm_object;
 
-  //`uvm_object_utils(uvm_ral_adapter)
+  // Function: new
+  //
+  // Create a new instance of this type, giving it the optional ~name~.
 
   function new(string name="");
     super.new(name);
   endfunction
+
 
   // Variable: supports_byte_enable
   //
@@ -166,32 +327,35 @@ virtual class uvm_ral_adapter extends uvm_object;
   
   bit supports_byte_enable;
 
+
   // Variable: provides_responses
   //
   // Set this bit in extensions of this class if the bus driver provides
-  // separate response items. If set, the <bus2ral> method must be
-  // implemented.
+  // separate response items.
 
   bit provides_responses; 
 
 
   // Function: ral2bus
   //
-  // Extensions of this class ~must~ implement this method to adapter a
-  // ~ral_item~ to the <sequence_item> that defines the bus transaction.
-  // The method should allocate a new bus item, assign its members from
-  // the corresponding members in the ral item, then return it. The bus
-  // item gets returned in a <uvm_sequence_item> base handle.
+  // Extensions of this class ~must~ implement this method to convert a
+  // <uvm_ral_item> to the <uvm_sequence_item> subtype that defines the bus
+  // transaction.
+  //
+  // The method must allocate a new bus item, assign its members from
+  // the corresponding members from the given ~rw_access~ item, then
+  // return it. The bus item gets returned in a <uvm_sequence_item> base handle.
 
   pure virtual function uvm_sequence_item ral2bus(uvm_rw_access rw_access);
 
 
-  // Function: ral2bus
+  // Function: bus2ral
   //
   // Extensions of this class ~must~ implement this method to copy members
   // of the given ~bus_item~ to corresponding members of the provided
-  // ~ral_item~. The ~bus_item~ is passed via a <uvm_sequence_item> base
-  // handle, so it must be $cast to actual bus item type.
+  // ~rw_access~ instance. Unlike <ral2bus>, the resulting transaction
+  // is not allocated from scratch. This is to accommodate applications
+  // where the bus response must be returned in the original request.
 
   pure virtual function void bus2ral(uvm_sequence_item bus_item, uvm_rw_access rw_access);
 
@@ -204,44 +368,82 @@ endclass
 // The following example illustrates how to implement a RAL-BUS adapter class
 // for the APB bus protocol.
 //
-//|class ral_apb_adapter extends uvm_ral_adapter;
-//|  `uvm_object_utils(ral_apb_adapter)
+//|class ral2apb_adapter extends uvm_ral_adapter;
+//|  `uvm_object_utils(ral2apb_adapter)
 //|
-//|  virtual function uvm_sequence_item ral2bus(uvm_rw_access ral_access);
+//|  function new(string name="ral2apb_adapter");
+//|    super.new(name);
+//|    
+//|  endfunction
+//|
+//|  virtual function uvm_sequence_item ral2bus(uvm_rw_access rw_access);
 //|    apb_item apb = apb_item::type_id::create("apb_item");
-//|    apb.op   = (ral_access.kind == uvm_ral::READ) ? apb::READ : apb::WRITE;
-//|    apb.addr = ral_access.addr;
-//|    apb.data = ral_access.data;
+//|    apb.op   = (rw_access.kind == uvm_ral::READ) ? apb::READ : apb::WRITE;
+//|    apb.addr = rw_access.addr;
+//|    apb.data = rw_access.data;
+//|    return apb;
 //|  endfunction
 //|
 //|  virtual function void bus2ral(uvm_sequencer_item bus_item,
-//|                                uvm_ral_access ral_access);
+//|                                uvm_rw_access rw_access);
 //|    apb_item apb;
 //|    if (!$cast(apb,bus_item)) begin
-//|      `uvm_fatal("CONVERT_APB2RAL","Provided bus_item is not of type apb_item")
+//|      `uvm_fatal("CONVERT_APB2RAL","Bus item is not of type apb_item")
 //|    end
-//|    ral_access.kind  = apb.op == apb::READ ? uvm_ral::READ : uvm_ral::WRITE;
-//|    ral_access.addr = apb.addr;
-//|    ral_access.data = apb.data;
+//|    rw_access.kind  = apb.op==apb::READ ? uvm_ral::READ : uvm_ral::WRITE;
+//|    rw_access.addr = apb.addr;
+//|    rw_access.data = apb.data;
+//|    rw_access.status = uvm_ral::IS_OK;
 //|  endfunction
 //|
 //|endclass
+
 
 
 //------------------------------------------------------------------------------
 //
 // CLASS: uvm_ral_passthru_adapter
 //
+// Defines an extension of <uvm_ral_adapter> that does no conversion.
+//
+// This adapter is used when running in a layering model that has RAL sequences
+// running on a separate, generic "upstream" sequencer connected to a
+// "downstream" bus sequencer. In this case, the RAL map associated with
+// the downstream bus must be configured to start RAL items on the generic
+// upstream RAL sequencer and performing no conversion.
+//
+//| virtual function void build();
+//|   ral_seqr = uvm_sequencer #(uvm_rw_access)::type_id::create("ral_seqr",this);
+//|   ...
+//| endfunction
+//|
+//| virtual function void connect();
+//|   uvm_ral_passthru_adapter ral2ral;
+//|   ral2ral = uvm_ral_passthru_adapter::type_id::create("ral2ral");
+//|   my_ral_model.default_map.set_sequencer(generic_ral_seqr,ral2ral);
+//|   ...
+//| endfunction
+// 
 //------------------------------------------------------------------------------
 
 class uvm_ral_passthru_adapter extends uvm_ral_adapter;
 
   `uvm_object_utils(uvm_ral_passthru_adapter)
 
+  // Function: ral2bus
+  //
+  // Returns the ~rw_access~ input argument.
+
   virtual function uvm_sequence_item ral2bus(uvm_rw_access rw_access);
     return rw_access;
   endfunction
 
+
+  // Function: bus2ral
+  //
+  // Copies the contents of the ~bus_item~, which must be of type <uvm_rw_access>,
+  // into the provided ~rw_access~ transaction.
+  //
   virtual function void bus2ral(uvm_sequence_item bus_item, uvm_rw_access rw_access);
     uvm_rw_access from;
     assert(bus_item!=null);
@@ -260,29 +462,78 @@ endclass
 //
 // CLASS: uvm_ral_predictor
 //
+// This class converts observed bus transactions of type <BUSTYPE> to generic
+// registers transactions, determines the register being accessed based on the
+// bus address, then updates the register's mirror value with the observed bus
+// data, subject to the register's access mode. See <uvm_ral_reg::predict> for details.
+//
 //------------------------------------------------------------------------------
 
-// move to base library
 class uvm_ral_predictor #(type BUSTYPE=int) extends uvm_component;
-
-  uvm_analysis_imp #(BUSTYPE, uvm_ral_predictor #(BUSTYPE)) xbus_in;
-  uvm_analysis_port #(uvm_rw_access) ral_ap;
-
-  uvm_ral_map map;
-  uvm_ral_adapter adapter;
 
   `uvm_component_param_utils(uvm_ral_predictor#(BUSTYPE))
 
+
+  // Variable: bus_in
+  //
+  // Observed bus transactions of type ~BUSTYPE~ are received from this
+  // port and processed.
+  // For each incoming transaction, the predictor will attempt to get the
+  // register or memory handle corresponding to the observed bus address. 
+  // If there is a match, the predictor calls the register or memory's
+  // predict method, passing in the observed bus data. The register or
+  // memory mirror will be updated with this data, subject to its configured
+  // access behavior--RW, RO, WO, etc. The predictor will also convert the
+  // bus transaction to a generic <uvm_rw_access> transaction and send it
+  // out its ~ral_ap~ analysis port.
+  //
+  // Note- the predictor currently does not handle multiple bus transactions
+  // per logical RAL transaction, which occurs when the bus width is smaller
+  // than the register size.
+  //
+  uvm_analysis_imp #(BUSTYPE, uvm_ral_predictor #(BUSTYPE)) bus_in;
+
+
+  // Variable: ral_ap
+  //
+  // Analysis output port that publishes <uvm_rw_access> transactions
+  // converted from bus transactions received on ~bus_in~.
+  uvm_analysis_port #(uvm_rw_access) ral_ap;
+
+
+  // Variable: map
+  //
+  // The map used to convert a bus address to the corresponding register
+  // or memory handle. Must be configured before the run phase.
+  // 
+  uvm_ral_map map;
+
+
+  // Variable: adapter
+  //
+  // The adapter used to convert a bus address to an instance of
+  // <uvm_rw_access>. Must be configured before the run phase.
+  //
+  uvm_ral_adapter adapter;
+
+
+  // Function: new
+  //
+  // Create a new instance of this type, giving it the optional ~name~
+  // and ~parent~.
+  //
   function new (string name, uvm_component parent);
     super.new(name, parent);
-    xbus_in = new("xbus_in", this);
+    bus_in = new("bus_in", this);
     ral_ap = new("ral_ap", this);
   endfunction
 
-  function void set_adapter(uvm_ral_adapter adapter);
-    this.adapter = adapter;
-  endfunction
 
+  // Function- write
+  //
+  // not a user-level method. Do not call directly. See documentation
+  // for the ~bus_in~ member.
+  //
   virtual function void write(BUSTYPE tr);
     uvm_rw_access rw_access = new;
     uvm_ral_reg rg;
@@ -301,7 +552,8 @@ class uvm_ral_predictor #(type BUSTYPE=int) extends uvm_component;
         ral_ap.write(rw_access);
       return;
     end
-    /*
+    /* Memories can be large, so do not predict. Users can use 
+       backdoor peek/poke to update the memory mirror.
     else begin
       uvm_ral_mem mem;
       mem = map.get_mem_by_offset(tr.addr);

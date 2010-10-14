@@ -1806,13 +1806,16 @@ task uvm_ral_mem::write(output uvm_ral::status_e status,
 
          // ...VIA BUILT-IN FRONTDOOR
          else begin
-            uvm_ral_adapter    adapter = map.get_adapter();
-            uvm_sequencer_base sequencer = map.get_sequencer();
-
+            bit is_passthru;
+            uvm_ral_passthru_adapter passthru_adapter;
+            uvm_ral_adapter    adapter = system_map.get_adapter();
+            uvm_sequencer_base sequencer = system_map.get_sequencer();
             uvm_ral_addr_t  addr[];
             int w, j;
             int n_bits;
          
+            if ($cast(passthru_adapter,adapter))
+              is_passthru = 1;
             if (map_info.unmapped) begin
                `uvm_error("RAL", {"Memory '",get_full_name(),"' unmapped in map '",
                           map.get_full_name(),"' and does not have a user-defined frontdoor"})
@@ -1841,15 +1844,21 @@ task uvm_ral_mem::write(output uvm_ral::status_e status,
                rw_access.element = this;
                rw_access.element_kind = uvm_ral::REG;
                rw_access.kind = uvm_ral::WRITE;
-               rw_access.addr = addr[i];
                rw_access.value = value;
+               rw_access.path = path;
+               rw_access.map = local_map;
+               rw_access.extension = extension;
+               rw_access.fname = fname;
+               rw_access.lineno = lineno;
+
+               rw_access.addr = addr[i];
                rw_access.data = data;
                rw_access.n_bits = (n_bits > w*8) ? w*8 : n_bits;
                rw_access.byte_en = '1;
-               rw_access.extension = extension;
 
                bus_req.m_start_item(sequencer,parent,prior);
-               parent.mid_do(rw_access);
+               if (!is_passthru)
+                 parent.mid_do(rw_access);
                bus_req = adapter.ral2bus(rw_access);
                bus_req.m_finish_item(sequencer,parent);
                bus_req.end_event.wait_on();
@@ -1863,7 +1872,8 @@ task uvm_ral_mem::write(output uvm_ral::status_e status,
                  adapter.bus2ral(bus_req,rw_access);
                end
                status = rw_access.status;
-               parent.post_do(rw_access);
+               if (!is_passthru)
+                 parent.post_do(rw_access);
 
                `uvm_info(get_type_name(), $psprintf("Wrote 'h%0h at 'h%0h via map \"%s\": %s...",
                                                     data, addr[i], map.get_full_name(), status.name()), UVM_HIGH);
@@ -2000,13 +2010,17 @@ task uvm_ral_mem::read(output uvm_ral::status_e  status,
 
          // ...VIA BUILT-IN FRONTDOOR
          else begin
-            uvm_ral_adapter    adapter = map.get_adapter();
-            uvm_sequencer_base sequencer = map.get_sequencer();
-
+            bit is_passthru;
+            uvm_ral_passthru_adapter passthru_adapter;
+            uvm_ral_adapter    adapter = system_map.get_adapter();
+            uvm_sequencer_base sequencer = system_map.get_sequencer();
             uvm_ral_addr_t  addr[];
             int w, j;
             int n_bits;
          
+            if ($cast(passthru_adapter,adapter))
+              is_passthru = 1;
+
             if (map_info.unmapped) begin
                `uvm_error("RAL", {"Memory '",get_full_name(),"' unmapped in map '",
                           map.get_full_name(),"' and does not have a user-defined frontdoor"})
@@ -2033,14 +2047,21 @@ task uvm_ral_mem::read(output uvm_ral::status_e  status,
                 rw_access.element = this;
                 rw_access.element_kind = uvm_ral::REG;
                 rw_access.kind = uvm_ral::READ;
+                rw_access.value = value;
+                rw_access.path = path;
+                rw_access.map = local_map;
+                rw_access.extension = extension;
+                rw_access.fname = fname;
+                rw_access.lineno = lineno;
+
                 rw_access.addr = addr[i];
                 rw_access.data = 'h0;
                 rw_access.n_bits = (n_bits > w*8) ? w*8 : n_bits;
                 rw_access.byte_en = '1;
-                rw_access.extension = extension;
                             
                 bus_req.m_start_item(sequencer,parent,prior);
-                parent.mid_do(rw_access);
+                if (!is_passthru)
+                  parent.mid_do(rw_access);
                 bus_req = adapter.ral2bus(rw_access);
                 bus_req.m_finish_item(sequencer,parent);
                 bus_req.end_event.wait_on();
@@ -2065,7 +2086,8 @@ task uvm_ral_mem::read(output uvm_ral::status_e  status,
 
                 value |= data << j*8;
                 rw_access.value = value;
-                parent.post_do(rw_access);
+                if (!is_passthru)
+                  parent.post_do(rw_access);
                 j += w;
                 n_bits -= w * 8;
             end
