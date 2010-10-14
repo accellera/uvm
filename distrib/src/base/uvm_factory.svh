@@ -700,7 +700,7 @@ class uvm_factory_override;
                 uvm_object_wrapper orig_type=null,
                 uvm_object_wrapper ovrd_type);
     if (ovrd_type == null) begin
-      uvm_report_fatal ("NULLWR", "Attempting to register a null override object with the factory", UVM_NONE);
+      `uvm_fatal ("NULLWR", "Attempting to register a null override object with the factory")
     end
     this.full_inst_path= full_inst_path;
     this.orig_type_name = orig_type == null ? orig_type_name : orig_type.get_type_name();

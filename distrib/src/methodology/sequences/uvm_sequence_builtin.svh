@@ -82,7 +82,7 @@ task body();
   if (m_sequencer.count == -1) begin
     if (!randomize(l_count) with { l_count > 0 && l_count <
       m_sequencer.max_random_count; })
-      uvm_report_fatal("RANDSEQ", "Randomization for l_count failed in random sequence body", UVM_NONE);
+      `uvm_fatal("RANDSEQ", "Randomization for l_count failed in random sequence body")
     m_sequencer.count = l_count;
   end
   else
@@ -92,7 +92,7 @@ task body();
   repeat (l_count) begin
     if (!randomize(l_kind) with { l_kind > l_exhaustive_seq_kind && 
       l_kind < max_kind; })
-      uvm_report_fatal("RANDSEQ", "Randomization for l_kind failed in random sequence body", UVM_NONE);
+      `uvm_fatal("RANDSEQ", "Randomization for l_kind failed in random sequence body")
     do_sequence_kind(l_kind);
   end
   m_sequencer.m_random_count++;
@@ -191,7 +191,7 @@ task body();
   repeat (l_count) begin
     if (!randomize(l_kind) with { l_kind > l_exhaustive_seq_kind; 
       l_kind < max_kind; }) // l_kind is randc
-      uvm_report_fatal("RANDSEQ", "Randomization for l_kind failed in exhaustive sequence body", UVM_NONE);
+      `uvm_fatal("RANDSEQ", "Randomization for l_kind failed in exhaustive sequence body")
 
     //$display ("Chosen l_kind: %0d", l_kind);
     do_sequence_kind(l_kind);

@@ -36,7 +36,7 @@
 `define BLOCKING_PUT_IMP(imp, TYPE, arg) \
   task put (TYPE arg); \
     if (m_imp_list.size()) == 0) begin \
-      uvm_report_error("Port Not Bound","Blocking put to unbound port will wait forever.", UVM_NONE);
+      `uvm_error("Port Not Bound","Blocking put to unbound port will wait forever.")
       @imp;
     end
     if (bcast_mode) begin \

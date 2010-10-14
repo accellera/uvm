@@ -81,7 +81,7 @@ class uvm_port_component #(type PORT=uvm_object) extends uvm_port_component_base
   function new (string name, uvm_component parent, PORT port);
     super.new(name,parent);
     if (port == null)
-      uvm_report_fatal("Bad usage", "Null handle to port", UVM_NONE);
+      `uvm_fatal("Bad usage", "Null handle to port")
     m_port = port;
   endfunction
 
@@ -394,40 +394,40 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
     if (end_of_elaboration_ph.is_done() ||
         end_of_elaboration_ph.is_in_progress()) begin
       //m_comp.uvm_report_warning(s_connection_warning_id, 
-      m_comp.uvm_report_warning("Late Connection", 
+      `uvm_warning_context("Late Connection", 
         {"Attempt to connect ",this.get_full_name()," (of type ",this.get_type_name(),
-         ") at or after end_of_elaboration phase.  Ignoring."});
+         ") at or after end_of_elaboration phase.  Ignoring."}, m_comp)
       return;
     end
 
     if (provider == null) begin
-      m_comp.uvm_report_error(s_connection_error_id,
-                       "Cannot connect to null port handle", UVM_NONE);
+      `uvm_error_context(s_connection_error_id,
+                       "Cannot connect to null port handle", m_comp);
       return;
     end
 
     if ((provider.m_if_mask & m_if_mask) != m_if_mask) begin
-      m_comp.uvm_report_error(s_connection_error_id, 
+      `uvm_error_context(s_connection_error_id, 
         {provider.get_full_name(),
          " (of type ",provider.get_type_name(),
          ") does not provide the complete interface required of this port (type ",
-         get_type_name(),")"}, UVM_NONE);
+         get_type_name(),")"}, m_comp)
       return;
     end
 
     // IMP.connect(anything) is illegal
     if (is_imp()) begin
-      m_comp.uvm_report_error(s_connection_error_id,
+      `uvm_error_context(s_connection_error_id,
         $psprintf(
-"Cannot call an imp port's connect method. An imp is connected only to the component passed in its constructor. (You attempted to bind this imp to %s)", provider.get_full_name()), UVM_NONE);
+"Cannot call an imp port's connect method. An imp is connected only to the component passed in its constructor. (You attempted to bind this imp to %s)", provider.get_full_name()), m_comp)
       return;
     end
   
     // EXPORT.connect(PORT) are illegal
     if (is_export() && provider.is_port()) begin
-      m_comp.uvm_report_error(s_connection_error_id,
+      `uvm_error_context(s_connection_error_id,
         $psprintf(
-"Cannot connect exports to ports Try calling port.connect(export) instead. (You attempted to bind this export to %s).", provider.get_full_name()), UVM_NONE);
+"Cannot connect exports to ports Try calling port.connect(export) instead. (You attempted to bind this export to %s).", provider.get_full_name()), m_comp)
       return;
     end
   
@@ -495,7 +495,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
           sz++;
         end
       end
-      m_comp.uvm_report_info("debug_connected_to", save);
+      `uvm_info_context("debug_connected_to", save, UVM_NONE, m_comp)
     end
   endfunction
   
@@ -540,7 +540,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
                get_full_name()," (",get_type_name(),")\n",save,"\n"};
       if (m_provided_to.num() == 0)
         save = {save,indent,"This port has not been bound\n"};
-      m_comp.uvm_report_info("debug_provided_to", save);
+      `uvm_info_context("debug_provided_to", save, UVM_NONE, m_comp)
     end
   
   endfunction
@@ -610,7 +610,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
            ") is not up one level of hierarchy from this port. ",
            "A port-to-port connection takes the form ",
            "child_component.child_port.connect(parent_port)"};
-      m_comp.uvm_report_warning(s_connection_warning_id, s, UVM_NONE);
+      `uvm_warning_context(s_connection_warning_id, s, m_comp)
       return 0;
     end    
       
@@ -624,7 +624,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
            ") is not at the same level of hierarchy as this port. ",
            "A port-to-export connection takes the form ",
            "component1.port.connect(component2.export)"};
-      m_comp.uvm_report_warning(s_connection_warning_id, s, UVM_NONE);
+      `uvm_warning_context(s_connection_warning_id, s, m_comp)
       return 0;
     end
   
@@ -638,7 +638,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
            ") is not down one level of hierarchy from this export. ",
            "An export-to-export or export-to-imp connection takes the form ",
            "parent_export.connect(child_component.child_export)"};
-      m_comp.uvm_report_warning(s_connection_warning_id, s, UVM_NONE);
+      `uvm_warning_context(s_connection_warning_id, s, m_comp)
       return 0;
     end
 
@@ -693,15 +693,15 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
     m_resolved = 1;
   
     if (size() < min_size() ) begin
-      m_comp.uvm_report_error(s_connection_error_id, 
+      `uvm_error_context(s_connection_error_id, 
         $psprintf("connection count of %0d does not meet required minimum of %0d",
-        size(), min_size()), UVM_NONE);
+        size(), min_size()), m_comp)
     end
   
     if (max_size() != UVM_UNBOUNDED_CONNECTIONS && size() > max_size() ) begin
-      m_comp.uvm_report_error(s_connection_error_id, 
+      `uvm_error_context(s_connection_error_id, 
         $psprintf("connection count of %0d exceeds maximum of %0d",
-        size(), max_size()), UVM_NONE);
+        size(), max_size()), m_comp)
     end
 
     if (size())
@@ -720,13 +720,13 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   function uvm_port_base #(IF) get_if(int index=0);
     string s;
     if (size()==0) begin
-      m_comp.uvm_report_warning("get_if",
-        "Port size is zero; cannot get interface at any index", UVM_NONE);
+      `uvm_warning_context("get_if",
+        "Port size is zero; cannot get interface at any index", m_comp);
       return null;
     end
     if (index < 0 || index >= size()) begin
       $sformat(s, "Index %0d out of range [0,%0d]", index, size()-1);
-      m_comp.uvm_report_warning(s_connection_error_id, s, UVM_NONE);
+      `uvm_warning_context(s_connection_error_id, s, m_comp);
       return null;
     end
     foreach (m_imp_list[nm]) begin
