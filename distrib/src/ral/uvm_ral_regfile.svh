@@ -373,7 +373,8 @@ endfunction: Xadd_constraintsX
 // get_constraints
 
 function void uvm_ral_regfile::get_constraints(ref string names[]);
-   names = new [this.constr.size()] (this.constr);
+   names = new [this.constr.size()];
+   names = this.constr;
 endfunction: get_constraints
 
 

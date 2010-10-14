@@ -92,6 +92,19 @@ typedef struct {
 
 typedef uvm_ral_hdl_path_slice uvm_ral_hdl_path_concat[];
 
+class uvm_ral_hdl_path_concat_qo;
+    class da_container;
+    	uvm_ral_hdl_path_concat data;
+    endclass
+    
+    da_container q[$];
+    
+	function void push_back(ref uvm_ral_hdl_path_concat arg);
+	endfunction
+	function uvm_ral_hdl_path_concat get(int index);
+	endfunction
+endclass
+
 
 // concat2string
 

@@ -871,7 +871,7 @@ endfunction
 function string uvm_ral_field::get_access(uvm_ral_map map = null);
    get_access = this.access;
 
-   if (parent.get_n_maps() == 1 || map == uvm_ral_map::backdoor)
+   if (parent.get_n_maps() == 1 || map == uvm_ral_map::backdoor())
      return get_access;
 
    // Is the register restricted in this map?

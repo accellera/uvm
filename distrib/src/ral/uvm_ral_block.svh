@@ -1007,7 +1007,9 @@ endfunction: get_virtual_fields
 function void uvm_ral_block::get_registers(ref uvm_ral_reg regs[$],
                                            input uvm_ral::hier_e hier=uvm_ral::HIER);
 
-   foreach (regs[rg])
+// FIXME strange modification of the iterator base (might lead to strange results)
+// FIXME regs is of type queue-of-uvm_ral_reg, the index is (int) but cant push (int) into queue-of-class
+   foreach (this.regs[rg])
      regs.push_back(rg);
 
    if (hier == uvm_ral::HIER)
@@ -1041,7 +1043,7 @@ endfunction: get_virtual_registers
 function void uvm_ral_block::get_memories(ref uvm_ral_mem mems[$],
                                           input uvm_ral::hier_e hier=uvm_ral::HIER);
 
-   foreach (mems[mem_])
+   foreach (this.mems[mem_])
    begin
    		uvm_ral_mem mem = mem_;
      mems.push_back(mem);
@@ -1062,7 +1064,8 @@ endfunction: get_memories
 function void uvm_ral_block::get_blocks(ref uvm_ral_block blks[$],
                                         input uvm_ral::hier_e hier=uvm_ral::HIER);
 
-   foreach (blks[blk]) begin
+   foreach (this.blks[blk_]) begin
+   	 uvm_ral_block blk = blk_;
      blks.push_back(blk);
      if (hier == uvm_ral::HIER)
        blk.get_blocks(blks);
@@ -1087,7 +1090,7 @@ endfunction: get_root_blocks
 function void uvm_ral_block::get_maps(ref uvm_ral_map maps[$],
                                       input uvm_ral::hier_e hier=uvm_ral::HIER);
 
-   foreach (maps[map])
+   foreach (this.maps[map])
      maps.push_back(map);
 
    if (hier == uvm_ral::HIER)

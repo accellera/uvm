@@ -115,7 +115,7 @@ class uvm_ral_single_reg_access_seq extends uvm_ral_sequence;
          end
          #1;
          
-         rg.mirror(status, uvm_ral::CHECK, uvm_ral::BACKDOOR, uvm_ral_map::backdoor, this);
+         rg.mirror(status, uvm_ral::CHECK, uvm_ral::BACKDOOR, uvm_ral_map::backdoor(), this);
          if (status != uvm_ral::IS_OK) begin
             `uvm_error("RAL", $psprintf("Status was %s when reading reset value of register \"%s\" through backdoor.",
                                         status.name(), rg.get_full_name()));
