@@ -133,7 +133,7 @@ class component #(type CONFIG = int) extends uvm_component;
     end
     uvm_report_info("build", $psprintf("ii = %0d", ii));
 
-    // here we acquire a resource by name   
+    // here we import a resource by name   
     if(!uvm_resource_proxy#(bit [7:0])::read_by_name("data", get_full_name(), data, this)) begin
       `uvm_error("TESTERROR", "cannot locate 'data' in the resource pool");
       test_error = 1;
@@ -204,20 +204,20 @@ class env extends uvm_component;
     s1 = new("s1", this);
     s2 = new("s2", this);
 
-    // Create, randomize, and publish two configuration object, cA, and
+    // Create, randomize, and export two configuration object, cA, and
     // cB.  These are stored in the database anonymously.  Since they
     // have no names they can only be looked up by type
 
     cA = new();
     assert(cA.randomize());
-    uvm_resource_proxy#(config_A)::write_and_publish_anonymous("*", cA, this);
+    uvm_resource_proxy#(config_A)::export_and_write_anonymous("*", cA, this);
 
 
     cB = new();
     assert(cB.randomize());
-    uvm_resource_proxy#(config_B)::write_and_publish_anonymous("*", cB, this);
+    uvm_resource_proxy#(config_B)::export_and_write_anonymous("*", cB, this);
 
-    r_data = uvm_resource_proxy#(bit [7:0])::publish("data", "*");
+    r_data = uvm_resource_proxy#(bit [7:0])::export_resource("data", "*");
     r_data.write(43, this);
     r_data.set_read_only();
 
@@ -253,7 +253,7 @@ class test extends uvm_component;
     // We print the configuration datbase just for reference.  The
     // result does not affect whether or not the test passes.
     uvm_resources.dump();
-    uvm_resources.dump_acquire_records();
+    uvm_resources.dump_import_records();
 
     if(test_error)
       $display("** UVM TEST FAIL **");
@@ -272,8 +272,8 @@ module top;
 
   initial begin
 
-    // publish the bus interface as a resource
-    uvm_resource_proxy#(virtual bus_if)::write_and_publish("bus_if", ".*", bus);
+    // export the bus interface as a resource
+    uvm_resource_proxy#(virtual bus_if)::export_and_write("bus_if", ".*", bus);
     
     run_test();
 
