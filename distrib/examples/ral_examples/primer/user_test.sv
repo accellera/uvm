@@ -56,7 +56,7 @@ endclass : user_test_seq
 
 class ral_user_test extends uvm_test;
 
-   `uvm_component_utils(ral_user_test);
+   `uvm_component_utils(ral_user_test)
 
    tb_env env;
 

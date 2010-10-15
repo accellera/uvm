@@ -688,7 +688,7 @@ virtual class uvm_ral_reg extends uvm_object;
    // Group: Backdoor
    //----------------
 
-   local uvm_object_string_pool #(uvm_queue #(uvm_ral_hdl_path_concat)) hdl_paths_pool;
+   local uvm_object_string_pool #(uvm_queue #(path_wrapper)) hdl_paths_pool;
    local uvm_ral_reg_backdoor  backdoor;
 
 
@@ -1004,6 +1004,11 @@ virtual class uvm_ral_reg extends uvm_object;
    extern virtual function void            do_pack    (uvm_packer packer);
    extern virtual function void            do_unpack  (uvm_packer packer);
 
+  // CCMPR00836527
+  function automatic string ternary_op(bit tf, string a, string b);
+	return tf ? a : b;
+  endfunction  
+  
 endclass: uvm_ral_reg
 
 
@@ -1211,7 +1216,12 @@ function void uvm_ral_reg::configure(uvm_ral_block blk_parent, uvm_ral_regfile r
    this.m_rf = rf_parent;
    if (hdl_path != "")
    begin
-   	 uvm_ral_hdl_path_slice e[1]='{'{hdl_path, -1, -1}};
+   	// NOTE add_hdl_path('{'{hdl_path,-1,-1}})
+   	 uvm_ral_hdl_path_slice e[1];
+   	 e[0].path=hdl_path;
+   	 e[0].size=-1;
+   	 e[0].offset=-1;
+   	 
      this.add_hdl_path(e);
    end
 endfunction: configure
@@ -1384,7 +1394,7 @@ endfunction
 
 function void uvm_ral_reg::add_hdl_path(uvm_ral_hdl_path_concat path, string kind = "RTL");
 
-  uvm_queue #(uvm_ral_hdl_path_concat) paths;
+  uvm_queue #(path_wrapper) paths;
 
   paths = hdl_paths_pool.get(kind);
 
@@ -1412,7 +1422,7 @@ endfunction
 function void uvm_ral_reg::get_hdl_path(ref uvm_ral_hdl_path_concat_qo paths,
                                         input string kind = "");
 
-  uvm_queue #(uvm_ral_hdl_path_concat) hdl_paths;
+  uvm_queue #(path_wrapper) hdl_paths;
 
   if (kind == "") begin
      if (m_rf != null)
@@ -1454,7 +1464,7 @@ function void uvm_ral_reg::get_full_hdl_path(ref uvm_ral_hdl_path_concat_qo path
    end
 
    begin
-      uvm_queue #(uvm_ral_hdl_path_concat) hdl_paths = hdl_paths_pool.get(kind);
+      uvm_queue #(path_wrapper) hdl_paths = hdl_paths_pool.get(kind);
       string parent_paths[$];
 
       if (m_rf != null)
@@ -2382,14 +2392,14 @@ task uvm_ral_reg::XwriteX(output uvm_ral::status_e status,
       end
    end
 
-   `uvm_info("RAL", $psprintf("Wrote register \"%s\" via %s: 'h%0h",
-              this.get_full_name(),
-              (path == uvm_ral::BFM) ? $psprintf("map %s",map.get_full_name()) : 
-              (backdoor != null ? "user backdoor" : "DPI backdoor"),
-              value),UVM_MEDIUM );
-   
-endtask: XwriteX
 
+		`uvm_info("RAL", $psprintf("Wrote register \"%s\" via %s: 'h%0h",
+              this.get_full_name(),
+              ternary_op(path == uvm_ral::BFM,{"map ",map.get_full_name()},ternary_op(backdoor != null,"user backdoor","DPI backdoor")),
+              value),UVM_MEDIUM );
+
+	
+endtask: XwriteX
 
 // read
 
@@ -2688,9 +2698,8 @@ task uvm_ral_reg::XreadX(output uvm_ral::status_e status,
    `uvm_info("RAL",
       $psprintf("Read register \"%s\" via %s: 'h%0h",
                 this.get_full_name(),
-                (path == uvm_ral::BFM) ? $psprintf("map %s",map.get_full_name()) : 
-                  (backdoor != null ? "user backdoor" : "DPI backdoor"),
-                value),UVM_MEDIUM);
+                ternary_op(path == uvm_ral::BFM,{"map ",map.get_full_name()},ternary_op(backdoor != null,"user backdoor","DPI backdoor")),
+                value),UVM_MEDIUM)
 
 endtask: XreadX
 
@@ -2708,7 +2717,7 @@ task  uvm_ral_reg::backdoor_write(output uvm_ral::status_e status,
   bit ok=1;
   get_full_hdl_path(paths,kind);
   foreach (paths.q[i]) begin
-     uvm_ral_hdl_path_concat hdl_slices = paths[i].data;
+     uvm_ral_hdl_path_concat hdl_slices = paths.q[i].data;
      foreach (hdl_slices[j]) begin
         if (hdl_slices[j].offset < 0) begin
            ok &= uvm_hdl_deposit(hdl_slices[j].path,data);
@@ -2753,7 +2762,7 @@ function uvm_ral::status_e uvm_ral_reg::backdoor_read_func(
   bit ok=1;
   get_full_hdl_path(paths,kind);
   foreach (paths.q[i]) begin
-     uvm_ral_hdl_path_concat hdl_slices = paths[i].data;
+     uvm_ral_hdl_path_concat hdl_slices = paths.q[i].data;
      val = 0;
      foreach (hdl_slices[j]) begin
         if (hdl_slices[j].offset < 0) begin

@@ -282,7 +282,6 @@ endclass: uvm_ral
 typedef  bit [`UVM_RAL_ADDR_WIDTH-1:0]  uvm_ral_addr_t ;
 typedef  logic [`UVM_RAL_ADDR_WIDTH-1:0]  uvm_ral_addr_logic_t ;
 
-
 //------------------------------------------------------------------------------
 //
 // Type: uvm_ral_data_t

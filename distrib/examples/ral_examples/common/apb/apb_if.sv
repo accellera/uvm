@@ -24,7 +24,10 @@
 `ifndef APB_IF__SV
 `define APB_IF__SV
 
-interface apb_if(input bit pclk, ref bit rst);
+timeunit 1ns;
+timeprecision 1ns;
+
+interface apb_if(input bit pclk, /* ref */  bit rst); // FIXME ref is correct check
    wire [31:0] paddr;
    wire        psel;
    wire        penable;
@@ -46,9 +49,9 @@ interface apb_if(input bit pclk, ref bit rst);
       input  paddr, psel, penable, pwrite, pwdata;
       output prdata;
 
-      sequence at_posedge;
+      sequence at_posedge_; // FIXME todo review 
          1;
-      endsequence : at_posedge
+      endsequence : at_posedge_
    endclocking: sck
 
    clocking pck @(posedge pclk);

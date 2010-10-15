@@ -598,7 +598,7 @@ class uvm_ral_mem extends uvm_object;
    //----------------
 
    local uvm_ral_mem_backdoor backdoor;
-   local uvm_object_string_pool #(uvm_queue #(uvm_ral_hdl_path_concat)) hdl_paths_pool;
+   local uvm_object_string_pool #(uvm_queue #(path_wrapper)) hdl_paths_pool;
 
 
    //
@@ -1230,7 +1230,11 @@ function void uvm_ral_mem::configure(uvm_ral_block  parent,
 
    if (hdl_path != "")
    begin
-   	uvm_ral_hdl_path_slice e[1]=	'{'{hdl_path, -1, -1}};
+   	uvm_ral_hdl_path_slice e_;
+   	e_.hdl_path=hdl_path;
+   	e_.parent=-1;
+   	e_.size=-1;
+   	uvm_ral_hdl_path_slice e[1]='{e_};
      add_hdl_path(e);
    end
 endfunction: configure
@@ -2729,7 +2733,7 @@ endfunction
 function void uvm_ral_mem::add_hdl_path(uvm_ral_hdl_path_concat path,
                                         string kind = "RTL");
 
-  uvm_queue #(uvm_ral_hdl_path_concat) paths;
+  uvm_queue #(path_wrapper) paths;
 
   paths = hdl_paths_pool.get(kind);
 
@@ -2753,7 +2757,7 @@ endfunction
 function void uvm_ral_mem::get_hdl_path(uvm_ral_hdl_path_concat_qo paths,
                                         input string kind = "");
 
-  uvm_queue #(uvm_ral_hdl_path_concat) hdl_paths;
+  uvm_queue #(path_wrapper) hdl_paths;
 
   if (kind == "")
      kind = parent.get_default_hdl_path();
@@ -2787,7 +2791,7 @@ function void uvm_ral_mem::get_full_hdl_path(uvm_ral_hdl_path_concat_qo paths,
    end
 
    begin
-      uvm_queue #(uvm_ral_hdl_path_concat) hdl_paths = hdl_paths_pool.get(kind);
+      uvm_queue #(path_wrapper) hdl_paths = hdl_paths_pool.get(kind);
       string parent_paths[$];
 
       parent.get_full_hdl_path(parent_paths,kind);

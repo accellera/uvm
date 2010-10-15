@@ -1,6 +1,8 @@
 -uvm
 -uvmhome ../../..
+-uvmnoautocompile
 -incdir ../common/apb
-tb_top.sv
-test.sv
+../../../src/uvm_pkg.sv
+./tb_top.sv
+./test.sv
 -sv_lib ../../../lib/libuvm_ius.so
