@@ -56,7 +56,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // item from the sequencer fifo.
 
   virtual task get_next_item(output T1 t);
-    `uvm_error("get_next_item", `SEQ_ITEM_TASK_ERROR)
+    uvm_report_error("get_next_item", `SEQ_ITEM_TASK_ERROR, UVM_NONE);
   endtask
  
 
@@ -80,7 +80,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // item from the sequencer fifo.
 
   virtual task try_next_item(output T1 t);
-    `uvm_error("try_next_item", `SEQ_ITEM_TASK_ERROR)
+    uvm_report_error("try_next_item", `SEQ_ITEM_TASK_ERROR, UVM_NONE);
   endtask
 
 
@@ -102,7 +102,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // will cause the sequencer to arbitrate for a new item.
 
   virtual function void item_done(input T2 t = null);
-    `uvm_error("item_done", `SEQ_ITEM_FUNCTION_ERROR)
+    uvm_report_error("item_done", `SEQ_ITEM_FUNCTION_ERROR, UVM_NONE);
   endfunction
 
   
@@ -115,7 +115,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // application-specific implementation.
 
   virtual task wait_for_sequences();
-    `uvm_error("wait_for_sequences", `SEQ_ITEM_TASK_ERROR)
+    uvm_report_error("wait_for_sequences", `SEQ_ITEM_TASK_ERROR, UVM_NONE);
   endtask
 
 
@@ -125,7 +125,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // Implementations should return 1 if an item is available, 0 otherwise. 
 
   virtual function bit has_do_available();
-    `uvm_error("has_do_available", `SEQ_ITEM_FUNCTION_ERROR)
+    uvm_report_error("has_do_available", `SEQ_ITEM_FUNCTION_ERROR, UVM_NONE);
     return 0;
   endfunction
 
@@ -155,7 +155,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // put, or rsp_port.write.
 
   virtual task get(output T1 t);
-    `uvm_error("get", `SEQ_ITEM_TASK_ERROR)
+    uvm_report_error("get", `SEQ_ITEM_TASK_ERROR, UVM_NONE);
   endtask
 
   // Task: peek
@@ -179,7 +179,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // the fifo until either get or item_done is called.
 
   virtual task peek(output T1 t);
-    `uvm_error("peek", `SEQ_ITEM_TASK_ERROR)
+    uvm_report_error("peek", `SEQ_ITEM_TASK_ERROR, UVM_NONE);
   endtask
 
 
@@ -195,7 +195,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // response_queue or it will be sent to the sequence response handler.
 
   virtual task put(input T2 t);
-    `uvm_error("put", `SEQ_ITEM_TASK_ERROR)
+    uvm_report_error("put", `SEQ_ITEM_TASK_ERROR, UVM_NONE);
   endtask
 
 
@@ -204,7 +204,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // Internal method.
 
   virtual function void put_response(input T2 t);
-    `uvm_error("put_response", `SEQ_ITEM_FUNCTION_ERROR)
+    uvm_report_error("put_response", `SEQ_ITEM_FUNCTION_ERROR, UVM_NONE);
   endfunction
 
 endclass

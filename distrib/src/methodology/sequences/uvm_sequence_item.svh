@@ -136,7 +136,7 @@ bit        print_sequence_info = 0;
 
   function void set_id_info(uvm_sequence_item item);
     if (item == null) begin
-      `uvm_fatal(get_full_name(), "set_id_info called with null parameter")
+      uvm_report_fatal(get_full_name(), "set_id_info called with null parameter", UVM_NONE);
     end
     this.set_transaction_id(item.get_transaction_id());
     this.set_sequence_id(item.get_sequence_id());
@@ -237,7 +237,7 @@ bit        print_sequence_info = 0;
 
   virtual task start_item(uvm_sequence_item item, int set_priority = -1);
     if(item == null)
-      `uvm_fatal_context("NULLITM", {"attempting to start a null item from item/sequence '", get_full_name(), "'"}, m_sequencer)
+      m_sequencer.uvm_report_fatal("NULLITM", {"attempting to start a null item from item/sequence '", get_full_name(), "'"}, UVM_NONE);
     item.m_start_item(m_sequencer, this, set_priority);
   endtask  
 
@@ -265,11 +265,11 @@ bit        print_sequence_info = 0;
     
     target_seqr = this.get_sequencer();
     if (!$cast(this_seq, sequence_ptr))
-      `uvm_fatal ("CASTFL", "start_item failed to cast sequence_ptr to sequence type")
+      uvm_report_fatal ("CASTFL", "start_item failed to cast sequence_ptr to sequence type", UVM_NONE);
     
     if (target_seqr == null) begin
       if (sequencer_ptr == null) begin
-        `uvm_fatal("STRITM", "sequence_item has null sequencer")
+        uvm_report_fatal("STRITM", "sequence_item has null sequencer", UVM_NONE);
       end else begin
         target_seqr  = sequencer_ptr;
         set_use_sequence_info(1);
@@ -295,7 +295,7 @@ bit        print_sequence_info = 0;
 
     target_seqr = this.get_sequencer();
     if (!$cast(this_seq, sequence_ptr))
-       `uvm_fatal ("CASTFL", "finish_item failed to cast sequence_ptr to sequence type")
+       uvm_report_fatal ("CASTFL", "finish_item failed to cast sequence_ptr to sequence type", UVM_NONE);
     sequence_ptr.mid_do(this);
     target_seqr.send_request(this_seq, this);
     target_seqr.wait_for_item_done(this_seq, -1);

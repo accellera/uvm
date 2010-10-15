@@ -343,7 +343,7 @@ class uvm_comparer;
     result++;
     if(result <= show_max) begin
        msg = {"Miscompare for ", scope.get_arg(), ": ", msg};
-       `uvm_info("MISCMP", msg, UVM_LOW)
+       uvm_report_info("MISCMP", msg, UVM_LOW);
     end
     miscompares = { miscompares, scope.get_arg(), ": ", msg, "\n" };
   endfunction
@@ -368,16 +368,16 @@ class uvm_comparer;
 
         case (sev)
           UVM_WARNING: begin 
-                     `uvm_warning("MISCMP", $psprintf("%s%s@%0d vs. %s@%0d", msg,
-                        lhs.get_name(), lhs.get_inst_id(), rhs.get_name(), rhs.get_inst_id()))
+                     uvm_report_warning("MISCMP", $psprintf("%s%s@%0d vs. %s@%0d", msg,
+                        lhs.get_name(), lhs.get_inst_id(), rhs.get_name(), rhs.get_inst_id()), UVM_NONE);
                    end
           UVM_ERROR: begin 
-                     `uvm_error("MISCMP", $psprintf("%s%s@%0d vs. %s@%0d", msg,
-                        lhs.get_name(), lhs.get_inst_id(), rhs.get_name(), rhs.get_inst_id()))
+                     uvm_report_error("MISCMP", $psprintf("%s%s@%0d vs. %s@%0d", msg,
+                        lhs.get_name(), lhs.get_inst_id(), rhs.get_name(), rhs.get_inst_id()), UVM_NONE);
                    end
           default: begin 
-                     `uvm_info("MISCMP", $psprintf("%s%s@%0d vs. %s@%0d", msg,
-                        lhs.get_name(), lhs.get_inst_id(), rhs.get_name(), rhs.get_inst_id()), UVM_LOW)
+                     uvm_report_info("MISCMP", $psprintf("%s%s@%0d vs. %s@%0d", msg,
+                        lhs.get_name(), lhs.get_inst_id(), rhs.get_name(), rhs.get_inst_id()), UVM_LOW);
                    end
         endcase
       end
@@ -391,7 +391,7 @@ class uvm_comparer;
   function void print_msg_object(uvm_object lhs, uvm_object rhs);
     result++;
     if(result <= show_max) begin
-      `uvm_info("MISCMP", 
+      uvm_report_info("MISCMP", 
         $psprintf("Miscompare for %0s: lhs = @%0d : rhs = @%0d", 
         scope.get_arg(), (lhs!=null ? lhs.get_inst_id() : 0), (rhs != null ? rhs.get_inst_id() : 0)), verbosity);
     end

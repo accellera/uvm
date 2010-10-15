@@ -32,7 +32,7 @@ class uvm_sequencer_analysis_fifo #(type RSP = uvm_sequence_item) extends uvm_tl
 
   function void write(input RSP t);
     if (sequencer_ptr == null)
-      `uvm_fatal ("SEQRNULL", "The sequencer pointer is null when attempting a write")
+      uvm_report_fatal ("SEQRNULL", "The sequencer pointer is null when attempting a write", UVM_NONE);
     sequencer_ptr.analysis_write(t);
   endfunction // void
 endclass

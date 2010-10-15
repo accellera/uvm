@@ -265,7 +265,7 @@ class uvm_event extends uvm_object;
   virtual function void add_callback (uvm_event_callback cb, bit append=1);
     for (int i=0;i<callbacks.size();i++) begin
       if (cb == callbacks[i]) begin
-        `uvm_warning("CBRGED","add_callback: Callback already registered. Ignoring.")
+        uvm_report_warning("CBRGED","add_callback: Callback already registered. Ignoring.", UVM_NONE);
         return;
       end
     end
@@ -287,7 +287,7 @@ class uvm_event extends uvm_object;
         return;
       end
     end
-    `uvm_warning("CBNTFD", "delete_callback: Callback not found. Ignoring delete request.")
+    uvm_report_warning("CBNTFD", "delete_callback: Callback not found. Ignoring delete request.", UVM_NONE);
   endfunction
 
 

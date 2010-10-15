@@ -169,8 +169,8 @@ class uvm_tlm_fifo #(type T=int) extends uvm_tlm_fifo_base #(T);
     while( r ) r = try_get( t ) ;
     
     if( m.num() > 0 && m_pending_blocked_gets != 0 ) begin
-      `uvm_error("flush failed" ,
-                 "there are blocked gets preventing the flush")
+      uvm_report_error("flush failed" ,
+		       "there are blocked gets preventing the flush", UVM_NONE);
     end
   
   endfunction
