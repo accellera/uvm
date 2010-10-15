@@ -65,7 +65,7 @@ class apb_master extends uvm_driver#(apb_rw);
 `endif
 
 `ifdef INCA
-       if(this.sigs.mck) // FIXME this is wrong and has to be reviewed
+          // FIXME      if (!this.sigs.mck.at_posedge.triggered) // this is wrong and has to be reviewed
 `endif
 `ifdef QUESTA	
 	   if (!this.sigs.mck.triggered)
@@ -95,7 +95,7 @@ class apb_master extends uvm_driver#(apb_rw);
 `ifdef VCS
 	@ (this.sigs.mck);
 `else
-      @(posedge sigs.mck);
+      @(sigs.mck);
       `endif
       this.sigs.rst <= 0;
    endtask: reset

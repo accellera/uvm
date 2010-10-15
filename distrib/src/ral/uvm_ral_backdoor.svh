@@ -90,32 +90,25 @@ typedef struct {
 //|
 //
 
-typedef uvm_ral_hdl_path_slice uvm_ral_hdl_path_concat[];
+typedef uvm_ral_hdl_path_slice uvm_ral_hdl_path_concat_a[];
 
-class path_wrapper;
-	uvm_ral_hdl_path_concat data;
+class uvm_ral_hdl_path_concat;
+	uvm_ral_hdl_path_slice data[];
+	
+	function new(ref uvm_ral_hdl_path_concat_a t);
+		data=t;
+	endfunction	
 endclass
-
-class uvm_ral_hdl_path_concat_qo;   
-    path_wrapper q[$];
-    
-	function void push_back(ref uvm_ral_hdl_path_concat arg);
-	endfunction
-	function uvm_ral_hdl_path_concat get(int index);
-	endfunction
-endclass
-
 
 // concat2string
 
 function automatic string uvm_ral_concat2string(uvm_ral_hdl_path_concat slices);
    string image = "{";
    
-   if (slices.size() == 1) return slices[0].path;
+   if (slices.data.size() == 1) return slices.data[0].path;
 
-   foreach (slices[i]) begin
-      uvm_ral_hdl_path_slice slice;
-      slice = slices[i];
+   foreach (slices.data[i]) begin
+      uvm_ral_hdl_path_slice slice = slices.data[i];
 
       image = { image, (i == 0) ? "" : ", ", slice.path };
       if (slice.offset >= 0)

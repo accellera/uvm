@@ -598,7 +598,7 @@ class uvm_ral_mem extends uvm_object;
    //----------------
 
    local uvm_ral_mem_backdoor backdoor;
-   local uvm_object_string_pool #(uvm_queue #(path_wrapper)) hdl_paths_pool;
+   local uvm_object_string_pool #(uvm_queue #(uvm_ral_hdl_path_concat)) hdl_paths_pool;
 
 
    //
@@ -673,7 +673,7 @@ class uvm_ral_mem extends uvm_object;
    // If no design asbtraction is specified, the default design abstraction
    // for the parent block is used.
    //
-   extern function void get_hdl_path      (uvm_ral_hdl_path_concat_qo paths,
+   extern function void get_hdl_path      (uvm_ral_hdl_path_concat paths[$],
                                            input string kind = "");
 
    //
@@ -690,7 +690,7 @@ class uvm_ral_mem extends uvm_object;
    // If no design asbtraction is specified, the default design abstraction
    // for each ancestor block is used to get each incremental path.
    //
-   extern function void get_full_hdl_path (uvm_ral_hdl_path_concat_qo paths,
+   extern function void get_full_hdl_path (uvm_ral_hdl_path_concat paths[$],
                                            input string kind = "");
 
    //
@@ -1230,12 +1230,15 @@ function void uvm_ral_mem::configure(uvm_ral_block  parent,
 
    if (hdl_path != "")
    begin
-   	uvm_ral_hdl_path_slice e_;
-   	e_.hdl_path=hdl_path;
-   	e_.parent=-1;
-   	e_.size=-1;
-   	uvm_ral_hdl_path_slice e[1]='{e_};
-     add_hdl_path(e);
+   	uvm_ral_hdl_path_slice e_[]=new[1];
+ 
+   	e_[0].path=hdl_path;
+   	e_[0].offset=-1;
+   	e_[0].size=-1;
+   	begin
+   		  	uvm_ral_hdl_path_concat t_ = new(e_);
+   		  	add_hdl_path(t_);
+   	end
    end
 endfunction: configure
 
@@ -1414,7 +1417,7 @@ function string uvm_ral_mem::get_access(uvm_ral_map map = null);
 
          "RO": begin
             `uvm_error("RAL",
-                       $psprintf("RO memory %s restricted to WO in map \"%s\"",
+                       $psprintf("RO memory %s restricted to %s in map \"%s\"",
                                  this.get_full_name(), get_access, map.get_full_name()))
          end
 
@@ -2612,7 +2615,7 @@ function uvm_ral::status_e  uvm_ral_mem::backdoor_read_func(
                     input uvm_object        extension,
                     input string            fname="",
                     input int               lineno=0);
-  uvm_ral_hdl_path_concat_qo paths;
+  uvm_ral_hdl_path_concat paths[$];
   uvm_ral_data_t val;
   string idx;
   bit ok=1;
@@ -2621,19 +2624,19 @@ function uvm_ral::status_e  uvm_ral_mem::backdoor_read_func(
 
   get_full_hdl_path(paths,kind);
 
-  foreach (paths.q[i]) begin
-     uvm_ral_hdl_path_concat hdl_slices = paths.q[i].data;
+  foreach (paths[i]) begin
+     uvm_ral_hdl_path_concat hdl_slices = paths[i];
      val = 0;
-     foreach (hdl_slices[j]) begin
-        if (hdl_slices[j].offset < 0) begin
-           ok &= uvm_hdl_read({hdl_slices[j].path, "[", idx, "]"},val);
+     foreach (hdl_slices.data[j]) begin
+        if (hdl_slices.data[j].offset < 0) begin
+           ok &= uvm_hdl_read({hdl_slices.data[j].path, "[", idx, "]"},val);
            continue;
         end
         begin
            uvm_ral_data_t slice;
-           int k = hdl_slices[j].offset;
-           ok &= uvm_hdl_read({hdl_slices[j].path,"[", idx, "]"}, slice);
-           repeat (hdl_slices[j].size) begin
+           int k = hdl_slices.data[j].offset;
+           ok &= uvm_hdl_read({hdl_slices.data[j].path,"[", idx, "]"}, slice);
+           repeat (hdl_slices.data[j].size) begin
               val[k++] = slice[0];
               slice >>= 1;
            end
@@ -2643,10 +2646,10 @@ function uvm_ral::status_e  uvm_ral_mem::backdoor_read_func(
      if (i == 0) data = val;
 
      if (val != data) begin
-        `uvm_error("RAL", $psprintf("Backdoor read of register with multiple HDL copies: values are not the same: %0h at path '%s', and %0h at path '%s'. Returning first value.",
+        `uvm_error("RAL", $psprintf("Backdoor read of register %s with multiple HDL copies: values are not the same: %0h at path '%s', and %0h at path '%s'. Returning first value.",
                                     this.get_full_name(),
-                                    data, uvm_ral_concat2string(paths.q[0]),
-                                    val, uvm_ral_concat2string(paths.q[i]))); 
+                                    data, uvm_ral_concat2string(paths[0]),
+                                    val, uvm_ral_concat2string(paths[i]))); 
         return uvm_ral::ERROR;
       end
   end
@@ -2679,7 +2682,7 @@ task uvm_ral_mem::backdoor_write(output uvm_ral::status_e status,
                                  input uvm_object         extension,
                                  input string             fname="",
                                  input int                lineno=0);
-  uvm_ral_hdl_path_concat_qo paths;
+  uvm_ral_hdl_path_concat paths[$];
   string idx;
   bit ok=1;
 
@@ -2687,18 +2690,18 @@ task uvm_ral_mem::backdoor_write(output uvm_ral::status_e status,
    
   get_full_hdl_path(paths,kind);
    
-  foreach (paths.q[i]) begin
-     uvm_ral_hdl_path_concat hdl_slices = paths.q[i].data;
-     foreach (hdl_slices[j]) begin
-        if (hdl_slices[j].offset < 0) begin
-           ok &= uvm_hdl_deposit({hdl_slices[j].path,"[", idx, "]"},data);
+  foreach (paths[i]) begin
+     uvm_ral_hdl_path_concat hdl_slices = paths[i];
+     foreach (hdl_slices.data[j]) begin
+        if (hdl_slices.data[j].offset < 0) begin
+           ok &= uvm_hdl_deposit({hdl_slices.data[j].path,"[", idx, "]"},data);
            continue;
         end
         begin
            uvm_ral_data_t slice;
-           slice = data >> hdl_slices[j].offset;
-           slice &= (1 << hdl_slices[j].size)-1;
-           ok &= uvm_hdl_deposit({hdl_slices[j].path, "[", idx, "]"}, slice);
+           slice = data >> hdl_slices.data[j].offset;
+           slice &= (1 << hdl_slices.data[j].size)-1;
+           ok &= uvm_hdl_deposit({hdl_slices.data[j].path, "[", idx, "]"}, slice);
         end
      end
   end
@@ -2733,7 +2736,7 @@ endfunction
 function void uvm_ral_mem::add_hdl_path(uvm_ral_hdl_path_concat path,
                                         string kind = "RTL");
 
-  uvm_queue #(path_wrapper) paths;
+  uvm_queue #(uvm_ral_hdl_path_concat) paths;
 
   paths = hdl_paths_pool.get(kind);
 
@@ -2754,10 +2757,10 @@ endfunction
 
 // get_hdl_path
 
-function void uvm_ral_mem::get_hdl_path(uvm_ral_hdl_path_concat_qo paths,
+function void uvm_ral_mem::get_hdl_path(uvm_ral_hdl_path_concat paths[$],
                                         input string kind = "");
 
-  uvm_queue #(path_wrapper) hdl_paths;
+  uvm_queue #(uvm_ral_hdl_path_concat) hdl_paths;
 
   if (kind == "")
      kind = parent.get_default_hdl_path();
@@ -2779,7 +2782,7 @@ endfunction
 
 // get_full_hdl_path
 
-function void uvm_ral_mem::get_full_hdl_path(uvm_ral_hdl_path_concat_qo paths,
+function void uvm_ral_mem::get_full_hdl_path(uvm_ral_hdl_path_concat paths[$],
                                              input string kind = "");
 
    if (kind == "")
@@ -2791,7 +2794,7 @@ function void uvm_ral_mem::get_full_hdl_path(uvm_ral_hdl_path_concat_qo paths,
    end
 
    begin
-      uvm_queue #(path_wrapper) hdl_paths = hdl_paths_pool.get(kind);
+      uvm_queue #(uvm_ral_hdl_path_concat) hdl_paths = hdl_paths_pool.get(kind);
       string parent_paths[$];
 
       parent.get_full_hdl_path(parent_paths,kind);
@@ -2800,11 +2803,11 @@ function void uvm_ral_mem::get_full_hdl_path(uvm_ral_hdl_path_concat_qo paths,
          uvm_ral_hdl_path_concat hdl_slices = hdl_paths.get(i);
 
          foreach (parent_paths[j])  begin
-            foreach (hdl_slices[k]) begin
-               if (hdl_slices[k].path == "")
-                  hdl_slices[k].path = parent_paths[j];
+            foreach (hdl_slices.data[k]) begin
+               if (hdl_slices.data[k].path == "")
+                  hdl_slices.data[k].path = parent_paths[j];
                else
-                  hdl_slices[k].path = { parent_paths[j], ".", hdl_slices[k].path };
+                  hdl_slices.data[k].path = { parent_paths[j], ".", hdl_slices.data[k].path };
             end
          end
          paths.push_back(hdl_slices);

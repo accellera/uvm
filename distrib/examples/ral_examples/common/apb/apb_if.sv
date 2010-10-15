@@ -27,7 +27,8 @@
 timeunit 1ns;
 timeprecision 1ns;
 
-interface apb_if(input bit pclk, /* ref */  bit rst); // FIXME ref is correct check
+interface apb_if(input bit pclk);
+   bit        rst=0;
    wire [31:0] paddr;
    wire        psel;
    wire        penable;

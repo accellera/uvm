@@ -25,8 +25,7 @@
 
 module tb_top;
    bit clk = 0;
-   bit rst = 0;
-   apb_if apb0(clk,rst);
+   apb_if apb0(clk);
    slave dut(apb0);
    always #10 clk = ~clk;
 endmodule: tb_top
