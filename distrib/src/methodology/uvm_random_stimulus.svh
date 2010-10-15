@@ -70,7 +70,7 @@ class uvm_random_stimulus #(type T=uvm_transaction) extends uvm_component;
 
     blocking_put_port=new("blocking_put_port", this);
     
-    `uvm_info("uvm_stimulus", {"rand state is ", get_randstate()}, UVM_NONE)
+    uvm_report_info("uvm_stimulus", {"rand state is ", get_randstate()});
 
   endfunction
 
@@ -103,10 +103,10 @@ class uvm_random_stimulus #(type T=uvm_transaction) extends uvm_component;
     for (int i=0; (max_count == 0 || i < max_count) && !m_stop; i++) begin
 
        if (! t.randomize() )
-          `uvm_warning ("RANDFL", "Randomization failed in generate_stimulus")
+          uvm_report_warning ("RANDFL", "Randomization failed in generate_stimulus");
       
        $cast(temp, t.clone());
-       `uvm_info("stimulus generation", temp.convert2string(), UVM_NONE)
+       uvm_report_info("stimulus generation", temp.convert2string()); 
        blocking_put_port.put(temp);
     end
   endtask

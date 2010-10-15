@@ -164,7 +164,7 @@ class uvm_analysis_port # (type T = int)
     for (int i = 0; i < this.size(); i++) begin
       tif = this.get_if (i);
       if ( tif == null )
-        `uvm_fatal ("NTCONN", {"No uvm_tlm interface is connected to ", get_full_name(), " for executing write()"})
+        uvm_report_fatal ("NTCONN", {"No uvm_tlm interface is connected to ", get_full_name(), " for executing write()"}, UVM_NONE);
       tif.write (t);
     end 
   endfunction

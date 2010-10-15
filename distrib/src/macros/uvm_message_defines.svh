@@ -151,12 +151,12 @@
        uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
    end
 
-// MACRO: uvm_info_context
+// MACRO: `uvm_info_context
 //
-// Operates the same as uvm_info with the exception that it takes an
-// additional argument that represents the message context.  This is for
-// use in places where the reporting context is not in an object derived
-// from uvm_report_object such as a component.
+
+// Operates identically to `uvm_info.  The only difference is that the
+// context in which the message is printed is explicitly supplied as a
+// macro argument.
 
 `define uvm_info_context(ID, MSG, VERBOSITY, CNTXT) \
    begin \
@@ -164,12 +164,11 @@
        CNTXT.uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line); \
    end
 
-// MACRO: uvm_warning_context
+// MACRO: `uvm_warning_context
 //
-// Operates the same as uvm_warning with the exception that it takes an
-// additional argument that represents the message context.  This is for
-// use in places where the reporting context is not in an object derived
-// from uvm_report_object such as a component.
+// Operates identically to `uvm_warning.  The only difference is that the
+// context in which the message is printed is explicitly supplied as a
+// macro argument.
 
 `define uvm_warning_context(ID, MSG, CNTXT) \
    begin \
@@ -177,12 +176,11 @@
        CNTXT.uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
    end
 
-// MACRO: uvm_error_context
+// MACRO: `uvm_error_context
 //
-// Operates the same as uvm_error with the exception that it takes an
-// additional argument that represents the message context.  This is for
-// use in places where the reporting context is not in an object derived
-// from uvm_report_object such as a component.
+// Operates identically to `uvm_error.  The only difference is that the
+// context in which the message is printed is explicitly supplied as a
+// macro argument.
 
 `define uvm_error_context(ID, MSG, CNTXT) \
    begin \
@@ -190,12 +188,11 @@
        CNTXT.uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
    end
 
-// MACRO: uvm_fatal_context
+// MACRO: `uvm_fatal_context
 //
-// Operates the same as uvm_fatal with the exception that it takes an
-// additional argument that represents the message context.  This is for
-// use in places where the reporting context is not in an object derived
-// from uvm_report_object such as a component.
+// Operates identically to `uvm_fatal.  The only difference is that the
+// context in which the message is printed is explicitly supplied as a
+// macro argument.
 
 `define uvm_fatal_context(ID, MSG, CNTXT) \
    begin \

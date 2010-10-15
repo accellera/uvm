@@ -57,7 +57,7 @@ virtual class uvm_tlm_if_base #(type T1=int, type T2=int);
   // it cannot immediately accept delivery of the transaction.
 
   virtual task put( input T1 t );
-    `uvm_error("put", `TASK_ERROR)
+    uvm_report_error("put", `TASK_ERROR, UVM_NONE);
   endtask
 
   // Group: Blocking get
@@ -74,7 +74,7 @@ virtual class uvm_tlm_if_base #(type T1=int, type T2=int);
   // Subsequent calls to get must return a different transaction instance.
 
   virtual task get( output T2 t );
-    `uvm_error("get", `TASK_ERROR)
+    uvm_report_error("get", `TASK_ERROR, UVM_NONE);
   endtask
 
 
@@ -92,7 +92,7 @@ virtual class uvm_tlm_if_base #(type T1=int, type T2=int);
   // return the same transaction.
 
   virtual task peek( output T2 t );
-    `uvm_error("peek", `TASK_ERROR)
+    uvm_report_error("peek", `TASK_ERROR, UVM_NONE);
   endtask
 
 
@@ -106,7 +106,7 @@ virtual class uvm_tlm_if_base #(type T1=int, type T2=int);
   // so and returns 1, otherwise it returns 0.
 
   virtual function bit try_put( input T1 t );
-    `uvm_error("try_put", `FUNCTION_ERROR)
+    uvm_report_error("try_put", `FUNCTION_ERROR, UVM_NONE);
     return 0;
   endfunction
 
@@ -116,7 +116,7 @@ virtual class uvm_tlm_if_base #(type T1=int, type T2=int);
   // Returns 1 if the component is ready to accept the transaction; 0 otherwise.
 
   virtual function bit can_put();
-    `uvm_error("can_put", `FUNCTION_ERROR)
+    uvm_report_error("can_put", `FUNCTION_ERROR, UVM_NONE);
     return 0;
   endfunction
 
@@ -132,7 +132,7 @@ virtual class uvm_tlm_if_base #(type T1=int, type T2=int);
   // and 0 is returned.
 
   virtual function bit try_get( output T2 t );
-    `uvm_error("try_get", `FUNCTION_ERROR)
+    uvm_report_error("try_get", `FUNCTION_ERROR, UVM_NONE);
     return 0;
   endfunction
 
@@ -143,7 +143,7 @@ virtual class uvm_tlm_if_base #(type T1=int, type T2=int);
   // 0 otherwise.
 
   virtual function bit can_get();
-    `uvm_error("can_get", `FUNCTION_ERROR)
+    uvm_report_error("can_get", `FUNCTION_ERROR, UVM_NONE);
     return 0;
   endfunction
 
@@ -160,7 +160,7 @@ virtual class uvm_tlm_if_base #(type T1=int, type T2=int);
   // returned.
 
   virtual function bit try_peek( output T2 t );
-    `uvm_error("try_peek", `FUNCTION_ERROR)
+    uvm_report_error("try_peek", `FUNCTION_ERROR, UVM_NONE);
     return 0;
   endfunction
 
@@ -170,7 +170,7 @@ virtual class uvm_tlm_if_base #(type T1=int, type T2=int);
   // Returns 1 if a new transaction is available; 0 otherwise.
 
   virtual function bit can_peek();
-    `uvm_error("can_ppeek", `FUNCTION_ERROR)
+    uvm_report_error("can_ppeek", `FUNCTION_ERROR, UVM_NONE);
     return 0;
   endfunction
 
@@ -183,7 +183,7 @@ virtual class uvm_tlm_if_base #(type T1=int, type T2=int);
   // argument. The calling thread may block until the operation is complete.
 
   virtual task transport( input T1 req , output T2 rsp );
-    `uvm_error("transport", `TASK_ERROR)
+    uvm_report_error("transport", `TASK_ERROR, UVM_NONE);
   endtask
 
 
@@ -198,7 +198,7 @@ virtual class uvm_tlm_if_base #(type T1=int, type T2=int);
   // a 0 must be returned; otherwise 1.
 
   virtual function bit nb_transport(input T1 req, output T2 rsp);
-    `uvm_error("nb_transport", `FUNCTION_ERROR)
+    uvm_report_error("nb_transport", `FUNCTION_ERROR, UVM_NONE);
     return 0;
   endfunction
 
@@ -211,7 +211,7 @@ virtual class uvm_tlm_if_base #(type T1=int, type T2=int);
   // The operation must complete without blocking. 
 
   virtual function void write( input T1 t );
-    `uvm_error("write", `FUNCTION_ERROR)
+    uvm_report_error("write", `FUNCTION_ERROR, UVM_NONE);
   endfunction
 
 endclass
