@@ -1664,7 +1664,7 @@
     else if(!$cast(lhs__,ARG)) begin \
       uvm_object::m_sc.scratch1 = \
         `"Cast failed for ARG to uvm_object type (uvm_field_object not implemented)`";  \
-     `uvm_warning_context("CSTFLD",uvm_object::m_sc.scratch1,  _global_reporter) \
+      `uvm_warning_context("CSTFLD", uvm_object::m_sc.scratch1, _global_reporter) \
     end \
     if(tmp_data__ != null) begin \
       if($cast(local_data__, tmp_data__)) begin \
