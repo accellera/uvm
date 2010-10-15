@@ -142,15 +142,15 @@ endclass
 //----------------------------------------------------------------------
 class tlm_generic_payload extends uvm_sequence_item;
 
-    protected rand tlm_addr_t             m_address;
-    protected rand tlm_command_e          m_command;
-    protected rand byte                   m_data[];
-    protected rand int unsigned           m_length;
-    protected rand tlm_response_status_e  m_response_status;
-    protected rand bit                    m_dmi;
-    protected rand byte                   m_byte_enable[];
-    protected rand int unsigned           m_byte_enable_length;
-    protected rand int unsigned           m_streaming_width;
+   rand tlm_addr_t             m_address;
+   rand tlm_command_e          m_command;
+   rand byte                   m_data[];
+   rand int unsigned           m_length;
+   rand tlm_response_status_e  m_response_status;
+   rand bit                    m_dmi;
+   rand byte                   m_byte_enable[];
+   rand int unsigned           m_byte_enable_length;
+   rand int unsigned           m_streaming_width;
 
   // function: new
   //
