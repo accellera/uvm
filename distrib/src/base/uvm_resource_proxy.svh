@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
+//   Copyright 2010 Mentor Graphics Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -22,7 +22,7 @@
 //
 // The uvm_resource_proxy#(T) class provides a convenience interface for
 // the resources facility.  In many cases basic operations such as
-// creating and publishing a resource or acquiring a resource could take
+// creating and setting a resource or getting a resource could take
 // multiple lines of code using the interfaces in uvm_resource_base or
 // uvm_resource#(T).  The convenience layer in uvm_resource_proxy#(T)
 // reduce many of those operations to a single line of code.
@@ -30,7 +30,7 @@
 // All of the functions in uvm_resource_proxy#(T) are static, so they
 // must be called using the :: operator.  For example:
 //
-//|  uvm_resource_proxy#(int)::write_and_publish("A", "*", 17, this);
+//|  uvm_resource_proxy#(int)::write_and_set("A", "*", 17, this);
 //
 // The parameter value "int" identifies the resource type as
 // uvm_resource#(int).  Thus, the type of the object in the resource
@@ -52,63 +52,63 @@ class uvm_resource_proxy #(type T=int);
   //  protected function new();
   //  endfunction
 
-  // function: acquire_by_type
+  // function: get_by_type
   //
   // Import a resource by type.  The type is specified in the proxy
   // class parameter so the only argument to this funciton is the
   // current scope.
 
-  static function rsrc_t acquire_by_type(string scope);
-    return rsrc_t::acquire_by_type(rsrc_t::get_type(), scope);
+  static function rsrc_t get_by_type(string scope);
+    return rsrc_t::get_by_type(rsrc_t::get_type(), scope);
   endfunction
 
-  // function: acquire_by_name
+  // function: get_by_name
 
   // Imports a resource by name.  The first argument is the name of the
-  // resource to be acquired and the second argument is the current
+  // resource to be getd and the second argument is the current
   // scope.
 
-  static function rsrc_t acquire_by_name(string name, string scope);
-    return rsrc_t::acquire_by_name(name, scope);
+  static function rsrc_t get_by_name(string name, string scope);
+    return rsrc_t::get_by_name(name, scope);
   endfunction
 
-  // function: publish 
+  // function: set 
   //
   // add a new item into the resources database.  The item will not be
   // written to so it will have its default value
-  static function rsrc_t publish(string name, string scope);
+  static function rsrc_t set(string name, string scope);
 
     rsrc_t r;
     
     r = new(name, scope);
-    uvm_resources.publish(r);
+    uvm_resources.set(r);
     return r;
   endfunction
 
-  // function: write_and_publish
+  // function: write_and_set
   //
-  // Create a new resource, write a value to it, and publish it into the
+  // Create a new resource, write a value to it, and set it into the
   // database.
-  static function void write_and_publish(input string name, input string scope,
+  static function void write_and_set(input string name, input string scope,
                                         T val, input uvm_object accessor = null);
 
     rsrc_t rsrc = new(name, scope);
     rsrc.write(val, accessor);
-    rsrc.publish();
+    rsrc.set();
 
   endfunction
 
-  // function: write_and_publish_anonymous
+  // function: write_and_set_anonymous
   //
-  // Create a new resource, write a value to it, and publish it into the
+  // Create a new resource, write a value to it, and set it into the
   // database.  The resource has no name and therefore will not be
   // entered into the name map
-  static function void write_and_publish_anonymous(input string scope,
+  static function void write_and_set_anonymous(input string scope,
                                                   T val, input uvm_object accessor = null);
 
     rsrc_t rsrc = new("", scope);
     rsrc.write(val, accessor);
-    rsrc.publish();
+    rsrc.set();
 
   endfunction
 
@@ -121,7 +121,7 @@ class uvm_resource_proxy #(type T=int);
   static function bit read_by_name(input string name, input string scope,
                                    ref T val, input uvm_object accessor = null);
 
-    rsrc_t rsrc = acquire_by_name(name, scope);
+    rsrc_t rsrc = get_by_name(name, scope);
 
     if(rsrc == null)
       return 0;
@@ -139,7 +139,7 @@ class uvm_resource_proxy #(type T=int);
   static function bit read_by_type(input string scope,
                                    ref T val, input uvm_object accessor = null);
     
-    rsrc_t rsrc = acquire_by_type(scope);
+    rsrc_t rsrc = get_by_type(scope);
 
     if(rsrc == null)
       return 0;
@@ -157,7 +157,7 @@ class uvm_resource_proxy #(type T=int);
   static function bit write_by_name(input string name, input string scope,
                                      T val, input uvm_object accessor = null);
 
-    rsrc_t rsrc = acquire_by_name(name, scope);
+    rsrc_t rsrc = get_by_name(name, scope);
 
     if(rsrc == null)
       return 0;
@@ -175,7 +175,7 @@ class uvm_resource_proxy #(type T=int);
   static function bit write_by_type(input string scope,
                                     input T val, input uvm_object accessor = null);
 
-    rsrc_t rsrc = acquire_by_type(scope);
+    rsrc_t rsrc = get_by_type(scope);
 
     // resrouce was not found in the database, so let's add one
     if(rsrc == null)

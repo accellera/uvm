@@ -1,5 +1,5 @@
 //------------------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
+//   Copyright 2010 Mentor Graphics Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -121,21 +121,21 @@ class test extends uvm_component;
     // create and export a resource that is available only in the "mom"
     // sub-hierarchy.  We use a glob to represent the set of scopes over
     // which this resource is visible
-    uvm_resource_proxy#(int)::write_and_publish("size", "*.mom.*", 16, this);
+    uvm_resource_proxy#(int)::write_and_set("size", "*.mom.*", 16, this);
 
     // create and export a resource that is available only in the "dad"
     // sub-hierarchy.  Here we use a regex to represent the set of
     // scopes over which this resource is visible.  Note the % as the
     // lead character
-    uvm_resource_proxy#(int)::write_and_publish("size", "/.*\\.dad\\..*/", 32, this);
+    uvm_resource_proxy#(int)::write_and_set("size", "/.*\\.dad\\..*/", 32, this);
     
     // create and export a resource that is available only in leaves
     // named child1.
-    uvm_resource_proxy#(bit)::write_and_publish("flag", "*.child1", 1, this);
+    uvm_resource_proxy#(bit)::write_and_set("flag", "*.child1", 1, this);
 
     // create and export a resource that is available anywhere in the
     // sub-herarchy rooted at this this component.
-    uvm_resource_proxy#(mode_t)::write_and_publish("mode", "*", MODE_CONFIGURE, this);
+    uvm_resource_proxy#(mode_t)::write_and_set("mode", "*", MODE_CONFIGURE, this);
   endfunction
 
   task run();

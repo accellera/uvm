@@ -1418,18 +1418,18 @@ class uvm_config_int extends uvm_resource#(uvm_bitstream_t);
     $display("%s = %0d [%s]", get_name(), read(), get_scope());
   endfunction
 
-  static function this_type acquire_by_name(string name, string scope, bit rpterr = 1);
+  static function this_type get_by_name(string name, string scope, bit rpterr = 1);
     this_type t;
-    uvm_resource_base b = uvm_resource#(uvm_bitstream_t)::acquire_by_name(name, scope, rpterr);
+    uvm_resource_base b = uvm_resource#(uvm_bitstream_t)::get_by_name(name, scope, rpterr);
     if(!$cast(t, b))
       `uvm_fatal("BADCAST", "broken cast in uvm_config_int");
     return t;
   endfunction
 
-  static function this_type acquire_by_type(uvm_resource_base type_handle,
+  static function this_type get_by_type(uvm_resource_base type_handle,
                                     string scope = "");
     this_type t;
-    uvm_resource_base b = uvm_resource#(uvm_bitstream_t)::acquire_by_type(type_handle, scope);
+    uvm_resource_base b = uvm_resource#(uvm_bitstream_t)::get_by_type(type_handle, scope);
     if(!$cast(t, b))
       `uvm_fatal("BADCAST", "broken cast in uvm_config_int");
     return t;
@@ -1452,18 +1452,18 @@ class uvm_config_str extends uvm_resource#(string);
     $display("%s = %0s [%s]", get_name(), read(), get_scope());
   endfunction
 
-  static function this_type acquire_by_name(string name, string scope, bit rpterr = 1);
+  static function this_type get_by_name(string name, string scope, bit rpterr = 1);
     this_type t;
-    uvm_resource_base b = uvm_resource#(string)::acquire_by_name(name, scope, rpterr);
+    uvm_resource_base b = uvm_resource#(string)::get_by_name(name, scope, rpterr);
     if(!$cast(t, b))
       `uvm_fatal("BADCAST", "broken cast in uvm_config_str");
     return t;
   endfunction
 
-  static function this_type acquire_by_type(uvm_resource_base type_handle,
+  static function this_type get_by_type(uvm_resource_base type_handle,
                                     string scope = "");
     this_type t;
-    uvm_resource_base b = uvm_resource#(string)::acquire_by_type(type_handle, scope);
+    uvm_resource_base b = uvm_resource#(string)::get_by_type(type_handle, scope);
     if(!$cast(t, b))
       `uvm_fatal("BADCAST", "broken cast in uvm_config_str");
     return t;
@@ -1488,18 +1488,18 @@ class uvm_config_obj extends uvm_resource#(uvm_object);
     obj.print();
   endfunction
 
-  static function this_type acquire_by_name(string name, string scope, bit rpterr = 1);
+  static function this_type get_by_name(string name, string scope, bit rpterr = 1);
     this_type t;
-    uvm_resource_base b = uvm_resource#(uvm_object)::acquire_by_name(name, scope, rpterr);
+    uvm_resource_base b = uvm_resource#(uvm_object)::get_by_name(name, scope, rpterr);
     if(!$cast(t, b))
       `uvm_fatal("BADCAST", "broken cast in uvm_config_obj");
     return t;
   endfunction
 
-  static function this_type acquire_by_type(uvm_resource_base type_handle,
+  static function this_type get_by_type(uvm_resource_base type_handle,
                                     string scope = "");
     this_type t;
-    uvm_resource_base b = uvm_resource#(uvm_object)::acquire_by_type(type_handle, scope);
+    uvm_resource_base b = uvm_resource#(uvm_object)::get_by_type(type_handle, scope);
     if(!$cast(t, b))
       `uvm_fatal("BADCAST", "broken cast in uvm_config_obj");
     return t;

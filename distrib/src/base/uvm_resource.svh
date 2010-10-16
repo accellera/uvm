@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
+//   Copyright 2010 Mentor Graphics Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -64,17 +64,19 @@ virtual class uvm_resource_base extends uvm_object;
   //
   // The task lock() and the functions try_lock() and unlock() form a
   // locking interface for resources.  These can be used for thread-safe
-  // reads and writes.  The put/get interface in uvm_resource#(T) (a
-  // family of resource subclasses) obey the lock when reading and
-  // writing.  See documentation in uvm_resource #(T) form more
-  // information on put/get.  The lock interface is a wrapper around a
-  // local semaphore.
+  // reads and writes.  The interface methods write_with_lock and
+  // read_with_lock and their nonblocking counterparts in
+  // uvm_resource#(T) (a family of resource subclasses) obey the lock
+  // when reading and writing.  See documentation in uvm_resource #(T)
+  // for more information on put/get.  The lock interface is a wrapper
+  // around a local semaphore.
   //--------------------------------------------------------------------
 
   // task: lock
   //
   // Retrieves a lock for this resource.  The task blocks until the lock
   // is obtained.
+
   task lock();
     sm.get();
   endtask
@@ -84,6 +86,7 @@ virtual class uvm_resource_base extends uvm_object;
   // Retrives the lock for this resource.  The function is nonblocking,
   // so it will return immediately.  If it was successfull in retrieving
   // the lock then a one is returned, otherwise a zero is returned.
+
   function bit try_lock();
     return sm.try_get();
   endfunction
@@ -353,13 +356,13 @@ virtual class uvm_resource_base extends uvm_object;
 endclass
 
 //----------------------------------------------------------------------
-// class: acquire_t
+// class: get_t
 //
-// Instances of acquire_t are stored in the history list as a record of
-// each acquire.  Failed acquisitions are indicated with rsrc set to
-// null.  This is part of the audit trail facility for resources.
+// Instances of get_t are stored in the history list as a record of each
+// get.  Failed gets are indicated with rsrc set to null.  This is part
+// of the audit trail facility for resources.
 //----------------------------------------------------------------------
-class acquire_t;
+class get_t;
   string name;
   string scope;
   uvm_resource_base rsrc;
@@ -404,26 +407,25 @@ endclass
 // our resource A.  Similarly, the type map can contain in its queue
 // other resources whose type is T and whose name may or may not be A.
 //
-// Resources are added to the pool by publishing them; they are
-// retrieved from the pool by acquireing them.  The terms acquire and
-// publish are relative to the object performing the operation.  An
-// object creates a new resource and publishes it to the pool thereby
-// making it available for other objects outside of itsef; an object
-// acquires a resource when it wants to access a resource not currently
-// available in its scope.
+// Resources are added to the pool by calling set(); they are retrieved
+// from the pool by calling get().  When an object creates a new
+// resource and calls set() the resource is made available to be
+// retrieved by other objects outside of itsef; an object gets a
+// resource when it wants to access a resource not currently available
+// in its scope.
 //
 // The scope is stored in the resource itself (not in the pool) so
-// whether you acquire by name or by type the resource's visibility is
+// whether you get by name or by type the resource's visibility is
 // the same.
 //
-// As an auditting capability, the pool contains an acquire history.  A
-// record of each acquire, whether by type or by name, is stored in the
-// queue acquire_record.  Both successful and failed acquisitions are
-// recorded. At the end of simulator, or any time for that matter, you
-// can dump history list.  This will tell users which resources were
-// successfully located and which were not.  Users can then tell if
-// their expectations are met or if there is some error in name, type,
-// or scope that caused a resource to not be located or incorrrectly
+// As an auditting capability, the pool contains a history of gets.  A
+// record of each get, whether by type or by name, is stored in the
+// queue get_record.  Both successful and failed gets are recorded. At
+// the end of simulator, or any time for that matter, you can dump
+// history list.  This will tell users which resources were successfully
+// located and which were not.  Users can then tell if their
+// expectations are met or if there is some error in name, type, or
+// scope that caused a resource to not be located or incorrrectly
 // located (i.e. the wrong one is located).
 //
 //----------------------------------------------------------------------
@@ -436,7 +438,7 @@ class uvm_resource_pool;
   rsrc_q_t rtab [string];
   rsrc_q_t ttab [uvm_resource_base];
 
-  acquire_t acquire_record [$];  // history of acquisitions
+  get_t get_record [$];  // history of gets
 
   // To make a proper singleton the constructor should be protected.
   // However, IUS doesn't support protected constructors so we'll just
@@ -467,18 +469,17 @@ class uvm_resource_pool;
     return uvm_spell_chkr#(rsrc_q_t)::check(rtab, s);
   endfunction
 
-  // function: publish
+  // function: set
   //
   // Add a new resource to the resource pool.  The resource is inserted
   // into both the name map and type map so it can be located by
   // either.
   //
-  // The notion of publishing a resource is relative to the object doing
-  // the publishing.  That is, an object creates a resources and
-  // ~publishes~ it into the resource pool.  Later, other objects that
-  // want to access the resource must ~acquire~ it from the pool
+  // An object creates a resources and ~sets~ it into the resource pool.
+  // Later, other objects that want to access the resource must ~get~ it
+  // from the pool
 
-  function void publish (uvm_resource_base rsrc, bit override = 0);
+  function void set (uvm_resource_base rsrc, bit override = 0);
 
     rsrc_q_t rq;
     string name;
@@ -515,55 +516,55 @@ class uvm_resource_pool;
 
   endfunction
 
-  function void publish_override(uvm_resource_base rsrc);
-    publish(rsrc, 1);
+  function void set_override(uvm_resource_base rsrc);
+    set(rsrc, 1);
   endfunction
 
-  // function: push_acquire_record
+  // function: push_get_record
   //
-  // Insert a new record into the acquire history list.
+  // Insert a new record into the get history list.
 
-  function void push_acquire_record(string name, string scope,
+  function void push_get_record(string name, string scope,
                                   uvm_resource_base rsrc);
-    acquire_t impt = new;
+    get_t impt = new;
 
     impt.name  = name;
     impt.scope = scope;
     impt.rsrc  = rsrc;
     impt.t     = $time;
 
-    acquire_record.push_back(impt);
+    get_record.push_back(impt);
   endfunction
 
-  // function: dump_acquire_records
+  // function: dump_get_records
   //
-  // Format and print the acquire history list.
+  // Format and print the get history list.
 
-  function void dump_acquire_records();
+  function void dump_get_records();
 
-    acquire_t record;
+    get_t record;
     bit success;
 
-    $display("--- resource acquire records ---");
-    foreach (acquire_record[i]) begin
-      record = acquire_record[i];
+    $display("--- resource get records ---");
+    foreach (get_record[i]) begin
+      record = get_record[i];
       success = (record.rsrc != null);
-      $display("acquire: name=%s  scope=%s  %s @ %0t",
+      $display("get: name=%s  scope=%s  %s @ %0t",
                record.name, record.scope,
                ((success)?"success":"fail"),
                record.t);
     end
   endfunction
 
-  // function: acquire_by_name
+  // function: get_by_name
   //
-  // Lookup a resource by name and scope.  Whether the acquire succeeds
-  // or fails, save a record of the acquire attempt.  The rpterr flag
+  // Lookup a resource by name and scope.  Whether the get succeeds
+  // or fails, save a record of the get attempt.  The rpterr flag
   // indicates whether we should report errors or not.  Essentially, it
   // severes as a verbose flag.  If set then the spell checker will be
   // invoked and warnings about multiple resources will be produced.
 
-  function uvm_resource_base acquire_by_name(string name, string scope = "", bit rpterr = 1);
+  function uvm_resource_base get_by_name(string name, string scope = "", bit rpterr = 1);
 
     rsrc_q_t rq;
     rsrc_q_t matchq=new;
@@ -579,7 +580,7 @@ class uvm_resource_pool;
     // Does an entry in the name map exist with the specified name?
     // If not, then we're done
     if((rpterr && !spell_check(name)) || (!rpterr && !rtab.exists(name))) begin
-      push_acquire_record(name, scope, null);
+      push_get_record(name, scope, null);
       return null;
     end
 
@@ -595,7 +596,7 @@ class uvm_resource_pool;
     end
 
     if(matchq.size() == 0) begin
-      push_acquire_record(name, scope, null);
+      push_get_record(name, scope, null);
       return null;
     end
 
@@ -610,18 +611,18 @@ class uvm_resource_pool;
     end
 
     rsrc = matchq.get(0);
-    push_acquire_record(name, scope, rsrc);
+    push_get_record(name, scope, rsrc);
     return rsrc;
     
   endfunction
 
-  // function: acquire_by_type
+  // function: get_by_type
   //
   // Lookup a resource by type handle and scope.  Insert a record into
-  // the acquire history list whether or not the acquire succeeded or
+  // the get history list whether or not the get succeeded or
   // failed.
 
-  function uvm_resource_base acquire_by_type(uvm_resource_base type_handle,
+  function uvm_resource_base get_by_type(uvm_resource_base type_handle,
                                          string scope = "");
 
     rsrc_q_t rq;
@@ -630,7 +631,7 @@ class uvm_resource_pool;
     int unsigned i;
 
     if(type_handle == null || !ttab.exists(type_handle)) begin
-      push_acquire_record("<type>", scope, null);
+      push_get_record("<type>", scope, null);
       return null;
     end
 
@@ -644,7 +645,7 @@ class uvm_resource_pool;
       end
     end
 
-    push_acquire_record("<type>", scope, rsrc);
+    push_get_record("<type>", scope, rsrc);
     return rsrc;
     
   endfunction
@@ -773,8 +774,9 @@ endclass
 // class: uvm_resource #(T)
 //
 // Parameterized resource.  Provides essential access methods read and
-// write.  Also provides locking access methods including put, try_put,
-// get, and try_get.
+// write.  Also provides locking access methods including
+// write_with_lock try_write_with_lock read_with_lock, and
+// try_read_with_lock.
 //
 // Read and write tracks resource access by updating access records.
 //----------------------------------------------------------------------
@@ -824,39 +826,39 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   endfunction
 
   //--------------------------------------------------------------------
-  // group: Publish/Get Interface
+  // group: Set/Get Interface
   //
-  // uvm_resource#(T) provides an interface for acquiring and publishing
-  // a resource.  Specifically, a resource can publish itself.  It
-  // doesn't make sense for a resource to acquire itself, since you
-  // can't call a funtion on a handle you don't have.  However, a static
-  // acquire interface is provided as a convenience.  This obviates the
-  // need for the user to get a handle to the global resource pool as
-  // this is done for him here.
+  // uvm_resource#(T) provides an interface for setting and getting a
+  // resource.  Specifically, a resource can insert itself into the
+  // resource pool.  It doesn't make sense for a resource to get itself,
+  // since you can't call a funtion on a handle you don't have.
+  // However, a static get interface is provided as a convenience.  This
+  // obviates the need for the user to get a handle to the global
+  // resource pool as this is done for him here.
   //--------------------------------------------------------------------
 
-  // function: publish
+  // function: set
   //
-  // Simply publish this resource into the global resource pool
+  // Simply set this resource into the global resource pool
 
-  function void publish();
+  function void set();
     uvm_resource_pool rp = uvm_resource_pool::get();
-    rp.publish(this);
+    rp.set(this);
   endfunction
   
-  // function: publish_override
+  // function: set_override
   //
   // Export a resource into the global resource pool as an override.
   // This means it gets put at the head of the list and is searched
   // before other existing resources that occupy the same position in
   // the name map or the type map.
 
-  function void publish_override();
+  function void set_override();
     uvm_resource_pool rp = uvm_resource_pool::get();
-    rp.publish(this, 1);
+    rp.set(this, 1);
   endfunction
 
-  // function: acquire_by_name
+  // function: get_by_name
   //
   // looks up a resource by name in the name map. The first resource
   // with the specified name that is visible in the specified scope is
@@ -865,14 +867,14 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // to one then a failure message is issued, including suggested
   // spelling alternatives gathered by the spell checker.
 
-  static function this_type acquire_by_name(string name, string scope, bit rpterr = 1);
+  static function this_type get_by_name(string name, string scope, bit rpterr = 1);
 
     uvm_resource_pool rp = uvm_resource_pool::get();
     uvm_resource_base rsrc_base;
     this_type rsrc;
     string msg;
 
-    rsrc_base = rp.acquire_by_name(name, scope, rpterr);
+    rsrc_base = rp.get_by_name(name, scope, rpterr);
     if(rsrc_base == null)
       return null;
 
@@ -886,14 +888,14 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     
   endfunction
 
-  // function: acquire_by_type
+  // function: get_by_type
 
   // looks up a resource by type in the type map. The first resource
   // with the specified type that is visible in the specified scope is
   // returned, if one exists. Null is returned if a resource matching
   // the specifications was not located.
 
-  static function this_type acquire_by_type(uvm_resource_base type_handle,
+  static function this_type get_by_type(uvm_resource_base type_handle,
                                     string scope = "");
 
     uvm_resource_pool rp = uvm_resource_pool::get();
@@ -904,7 +906,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     if(type_handle == null)
       return null;
 
-    rsrc_base = rp.acquire_by_type(type_handle, scope);
+    rsrc_base = rp.get_by_type(type_handle, scope);
     if(rsrc_base == null)
       return null;
 
@@ -999,30 +1001,31 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   //
   // This interface is optional, you can choose to lock a resource or
   // not. These methods are wrappers around the read/write interface.
-  // The difference between the read/write interface and the locking
+  // The difference the between read/write interface and the locking
   // interface is the use of a semaphore to guarantee exclusive access.
   // Curiously, these interface methods look a lot like TLM interface
   // methods.  Hmmm.....
   //--------------------------------------------------------------------
 
-  // task: get
+  // task: read_with_lock
   //
   // Locking version of read().  Like read(), this returns the contents
   // of the resource container.  In addtion it obeys the lock.
 
-  task get (output T t, input uvm_object accessor = null);
+  task read_with_lock (output T t, input uvm_object accessor = null);
     lock();
     t = read(accessor);
     unlock();
   endtask
 
-  // function: try_get
+  // function: try_read_with_lock
   //
-  // Nonblocking form of get().  If the lock is availble it grabs the
-  // lock and returns one.  If the lock is not available then it returns
-  // a 0.  In either case the return is immediate with no blocking.
+  // Nonblocking form of read_with_lock().  If the lock is availble it
+  // grabs the lock and returns one.  If the lock is not available then
+  // it returns a 0.  In either case the return is immediate with no
+  // blocking.
 
-  function bit try_get(output T t, input uvm_object accessor = null);
+  function bit try_read_with_lock(output T t, input uvm_object accessor = null);
     if(!try_lock())
       return 0;
     t = read(accessor);
@@ -1030,27 +1033,29 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     return 1;
   endfunction
 
-  // task: put
+  // task: write_with_lock
   //
-  // Locking form of write().  Like write(), put() sets the contents of
-  // the resource container.  In addition it locks the resource before
-  // doing the write and unlocks it when the write is complete.  If the
-  // lock is currently not available put() will block until it is.
+  // Locking form of write().  Like write(), write_with_lock() sets the
+  // contents of the resource container.  In addition it locks the
+  // resource before doing the write and unlocks it when the write is
+  // complete.  If the lock is currently not available write_with_lock()
+  // will block until it is.
 
-  task put (input T t, uvm_object accessor = null);
+  task write_with_lock (input T t, uvm_object accessor = null);
     lock();
     write(t, accessor);
     unlock();
   endtask
 
-  // function: try_put
+  // function: try_write_with_lock
   //
-  // Nonblocking form of put(). If the lock is available then the
-  // write() occurs immediately and a one is returned.  If the lock is
-  // not available then the write does not occur and a zero is returned.
-  // IN either case try_put() returns immediately with no blocking.
+  // Nonblocking form of write_with_lock(). If the lock is available
+  // then the write() occurs immediately and a one is returned.  If the
+  // lock is not available then the write does not occur and a zero is
+  // returned.  IN either case try_write_with_lock() returns immediately
+  // with no blocking.
 
-  function bit try_put(input T t, uvm_object accessor = null);
+  function bit try_write_with_lock(input T t, uvm_object accessor = null);
     if(!try_lock())
       return 0;
     write(t, accessor);
