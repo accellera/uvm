@@ -200,10 +200,8 @@ virtual class uvm_reg_mem_block extends uvm_object;
    // Get the address maps
    //
    // Get the address maps instantiated in this block.
-   // If ~hier~ is TRUE, recursively includes the address maps
-   // in any sub-blocks.
    //
-   extern virtual function void get_maps             (ref uvm_reg_mem_map    maps[$],   input uvm_hier_e hier=UVM_HIER);
+   extern virtual function void get_maps             (ref uvm_reg_mem_map    maps[$]);
 
    //
    // Function: get_registers
@@ -1054,15 +1052,10 @@ endfunction: get_root_blocks
 
 // get_maps
 
-function void uvm_reg_mem_block::get_maps(ref uvm_reg_mem_map maps[$],
-                                      input uvm_hier_e hier=UVM_HIER);
+function void uvm_reg_mem_block::get_maps(ref uvm_reg_mem_map maps[$]);
 
    foreach (this.maps[map])
      maps.push_back(map);
-
-   if (hier == UVM_HIER)
-     foreach (this.blks[blk])
-       blk.get_maps(maps);
 
 endfunction
 
@@ -1683,11 +1676,21 @@ endfunction: add_map
 function uvm_reg_mem_map uvm_reg_mem_block::get_map_by_name(string name);
    uvm_reg_mem_map maps[$];
 
-   this.get_maps(maps,UVM_HIER);
+   this.get_maps(maps);
 
    foreach (maps[i])
      if (maps[i].get_name() == name)
        return maps[i];
+
+   foreach (maps[i]) begin
+      uvm_reg_mem_map submaps[$];
+      maps[i].get_submaps(submaps, UVM_HIER);
+
+      foreach (submaps[j])
+         if (submaps[j].get_name() == name)
+            return submaps[j];
+   end
+      
 
    `uvm_warning("RegMem", {"Map with name '",name,"' does not exist in block"})
    return null;
