@@ -40,15 +40,28 @@
 //------------------------------------------------------------------------------
 
 virtual class uvm_agent extends uvm_component;
+  uvm_active_passive_enum is_active = UVM_ACTIVE;
 
   // Function: new
   //
   // Creates and initializes an instance of this class using the normal
   // constructor arguments for <uvm_component>: ~name~ is the name of the
   // instance, and ~parent~ is the handle to the hierarchical parent, if any.
+  //
+  // The int configuration parameter is_active is used to identify whether this
+  // agent should be acting in active or passive mode. This parameter can
+  // be set by doing:
+  //
+  //| set_config_int("<path_to_agent>", "is_active", UVM_ACTIVE);
 
   function new (string name, uvm_component parent);
     super.new(name, parent);
+  endfunction
+
+  function void build();
+    int active;
+    super.build();
+    if(get_config_int("is_active", active)) is_active = uvm_active_passive_enum'(active);
   endfunction
 
   const static string type_name = "uvm_agent";
@@ -57,6 +70,17 @@ virtual class uvm_agent extends uvm_component;
     return type_name;
   endfunction
 
+  // Function: get_is_active
+  //
+  // Returns UVM_ACTIVE is the agent is acting as an active agent and 
+  // UVM_PASSIVE if it is acting as a passive agent. The default implementation
+  // is to just return the is_active flag, but the component developer may
+  // override this behavior if a more complex algorithm is needed to determine
+  // the active/passive nature of the agent.
+
+  virtual function uvm_active_passive_enum get_is_active();
+    return is_active;
+  endfunction
 endclass
 
 `endif // UVM_AGENT_SVH

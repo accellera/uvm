@@ -36,9 +36,9 @@
       super.call_func(parent); \
       if($cast(m_parent,parent)) begin \
         if(has_executed(parent)) begin \
-          parent.uvm_report_warning("PHSEXEC", { "The phase ", get_name(), \
+          `uvm_warning_context("PHSEXEC", { "The phase ", get_name(), \
             " has already executed. Either the phase was not reset, or there", \
-            " there is an invalid phase alias for this phase."}); \
+            " there is an invalid phase alias for this phase."}, parent) \
           return; \
         end \
         set_executed(parent); \
@@ -59,9 +59,9 @@
       super.call_task(parent); \
       if($cast(m_parent,parent)) begin \
         if(has_executed(parent)) begin \
-          parent.uvm_report_warning("PHSEXEC", { "The phase ", get_name(), \
+          `uvm_warning_context("PHSEXEC", { "The phase ", get_name(), \
             " has already executed. Either the phase was not reset, or there", \
-            " there is an invalid phase alias for this phase."}); \
+            " there is an invalid phase alias for this phase."}, parent) \
           return; \
         end \
         set_executed(parent); \

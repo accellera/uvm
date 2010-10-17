@@ -58,9 +58,6 @@
   `ifndef INCA_UVM_USE_FILE_LINE
     `undef  UVM_USE_FILE_LINE
   `endif
-  `ifndef INCA_UVM_USE_AAOFAA
-    `define UVM_USE_AAOFAA_WA
-  `endif
 `endif
 
 `include "macros/uvm_version_defines.svh"

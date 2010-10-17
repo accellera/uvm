@@ -91,13 +91,10 @@ class uvm_pool #(type KEY=int, T=uvm_void) extends uvm_object;
 
   // Function: add
   //
-  // Adds the given (~key~, ~item~) pair to the pool.
+  // Adds the given (~key~, ~item~) pair to the pool. If an item already
+  // exists at the given ~key~ it is overwritten with the new ~item~.
 
   virtual function void add (KEY key, T item);
-    if (pool.exists(key)) begin
-      uvm_report_warning("POOLEXST",
-        $psprintf("add: value for given key already exists. Replacing with new value."));
-    end
     pool[key] = item;
   endfunction
   
