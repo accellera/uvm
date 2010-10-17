@@ -1,1 +1,0 @@
-./simv +UVM_TESTNAME=ral_user_test +UVM_VERBOSITY=UVM_LOW

@@ -1,8 +1,6 @@
-//
 //----------------------------------------------------------------------
-//   Copyright 2007-2010 Mentor Graphics Corporation
-//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
+//    Copyright 2010 Mentor Graphics Corp.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -19,11 +17,32 @@
 //   the License for the specific language governing
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
-`ifndef UVM_SVH
-`define UVM_SVH
-  `include "uvm_macros.svh"
-  `include "base/base.svh"
-  `include "uvm_tlm/uvm_tlm.svh"
-  `include "methodology/methodology.svh"
-  `include "reg_mem/uvm_reg_mem.svh"
-`endif // UVM_SVH
+
+
+class blk_test extends uvm_test;
+
+   `uvm_component_utils(blk_test)
+
+   blk_env env;
+
+   function new(string name = "blk_test", uvm_component parent = null);
+      super.new(name, parent);
+   endfunction
+
+   function void build();
+     env = blk_env::type_id::create("blk_env",this);
+   endfunction
+
+   task run();
+      blk_AXW_test_seq seq = blk_AXW_test_seq::type_id::create("blk_AXW_test_seq",this);
+      seq.regmem = env.regmem;
+
+      seq.start(null);
+      seq.wait_for_sequence_state(FINISHED);
+
+      global_stop_request();
+   endtask
+   
+endclass
+
+

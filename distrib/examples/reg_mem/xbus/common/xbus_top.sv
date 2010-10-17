@@ -1,7 +1,5 @@
-//
 //----------------------------------------------------------------------
-//   Copyright 2007-2010 Mentor Graphics Corporation
-//   Copyright 2007-2010 Cadence Design Systems, Inc. 
+//   Copyright 2007-2009 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -19,11 +17,46 @@
 //   the License for the specific language governing
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
-`ifndef UVM_SVH
-`define UVM_SVH
-  `include "uvm_macros.svh"
-  `include "base/base.svh"
-  `include "uvm_tlm/uvm_tlm.svh"
-  `include "methodology/methodology.svh"
-  `include "reg_mem/uvm_reg_mem.svh"
-`endif // UVM_SVH
+
+
+`define XBUS_ADDR_WIDTH 16
+
+`include "uvm_macros.svh"
+
+`include "dut.sv"
+`include "xbus_if.sv"
+
+module xbus_reg_tb_top;
+
+  import uvm_pkg::*;
+
+  `include "xbus_test.sv"
+
+  xbus_reg_env env;
+
+  xbus_if xi0();
+  
+  dut_dummy dut(
+    xi0.sig_clock,
+    xi0.sig_reset,
+    xi0
+  );
+
+  initial begin
+    xi0.sig_clock <= 1'b0;
+    xi0.sig_reset <= 1'b1;
+    repeat (5) @(posedge xi0.sig_clock);
+    xi0.sig_reset = 1'b0;
+  end
+
+  initial begin
+    vif_container xbus_vif = new;
+    env = new("env", null);
+    xbus_vif.vif = xi0;
+    set_config_object("*","xbus_vif",xbus_vif,0);
+    run_test();
+  end
+   
+  always #5 xi0.sig_clock = ~xi0.sig_clock;
+
+endmodule

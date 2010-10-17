@@ -1,3 +1,0 @@
-#! /bin/csh -fb
-#./simv +UVM_TESTNAME=uvm_ral_hw_reset_test
-./simv +UVM_TESTNAME=sys_R_test
