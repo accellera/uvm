@@ -55,7 +55,7 @@ class reg_block_B extends uvm_reg_mem_block;
       WSH.add_reg(X, 'h0,  "RW");
       WSH.add_reg(W, 'h10, "RW");
 
-      this.Xlock_modelX();
+      this.lock_model();
    endfunction : build
    
    `uvm_object_utils(reg_block_B)

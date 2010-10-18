@@ -193,7 +193,7 @@ class reg_block_slave extends uvm_reg_mem_block;
       CHIP_ID     = ID.CHIP_ID;
       PRODUCT_ID  = ID.PRODUCT_ID;
 
-      Xlock_modelX();
+      lock_model();
    endfunction
    
    `uvm_object_utils(reg_block_slave)

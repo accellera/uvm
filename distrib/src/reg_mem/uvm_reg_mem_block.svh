@@ -145,8 +145,27 @@ virtual class uvm_reg_mem_block extends uvm_object;
    /*local*/ extern function void add_vreg  (uvm_vreg vreg);
    /*local*/ extern function void add_mem   (uvm_mem  mem);
 
-   /*local*/ extern virtual function void Xlock_modelX();
-   /*local*/ extern function bit Xis_lockedX();
+   //
+   // Function: lock_model
+   // Lock a model and build the address map.
+   //
+   // Recursively lock an entire register model
+   // and build the address maps to enable the
+   // <uvm_reg_mem_block::get_reg_by_offset()> and
+   // <uvm_reg_mem_block::get_mem_by_offset()> methods.
+   //
+   // Once locked, no further structural changes,
+   // such as adding registers or memories,
+   // can be made.
+   //
+   // It is not possible to unlock a model.
+   //
+   extern virtual function void lock_model();
+
+   // Function: is_locked
+   // Return TRUE if the model is locked.
+   //
+   extern function bit is_locked();
 
 
    //---------------------
@@ -816,7 +835,7 @@ endfunction
 // add_block
 
 function void uvm_reg_mem_block::add_block (uvm_reg_mem_block blk);
-   if (this.Xis_lockedX()) begin
+   if (this.is_locked()) begin
       `uvm_error("RegMem", "Cannot add subblock to locked block model");
       return;
    end
@@ -833,7 +852,7 @@ endfunction
 // add_reg
 
 function void uvm_reg_mem_block::add_reg(uvm_reg rg);
-   if (this.Xis_lockedX()) begin
+   if (this.is_locked()) begin
       `uvm_error("RegMem", "Cannot add register to locked block model");
       return;
    end
@@ -851,7 +870,7 @@ endfunction: add_reg
 // add_vreg
 
 function void uvm_reg_mem_block::add_vreg(uvm_vreg vreg);
-   if (this.Xis_lockedX()) begin
+   if (this.is_locked()) begin
       `uvm_error("RegMem", "Cannot add virtual register to locked block model");
       return;
    end
@@ -868,7 +887,7 @@ endfunction: add_vreg
 // add_mem
 
 function void uvm_reg_mem_block::add_mem(uvm_mem mem);
-   if (this.Xis_lockedX()) begin
+   if (this.is_locked()) begin
       `uvm_error("RegMem", "Cannot add memory to locked block model");
       return;
    end
@@ -890,18 +909,18 @@ function void uvm_reg_mem_block::set_parent(uvm_reg_mem_block parent);
 endfunction
 
 
-// Xis_lockedX
+// is_locked
 
-function bit uvm_reg_mem_block::Xis_lockedX();
-   Xis_lockedX = this.locked;
-endfunction: Xis_lockedX
+function bit uvm_reg_mem_block::is_locked();
+   return this.locked;
+endfunction: is_locked
 
 
-// Xlock_modelX
+// lock_model
 
-function void uvm_reg_mem_block::Xlock_modelX();
+function void uvm_reg_mem_block::lock_model();
 
-   if (Xis_lockedX())
+   if (is_locked())
      return;
 
    locked = 1;
@@ -913,7 +932,7 @@ function void uvm_reg_mem_block::Xlock_modelX();
      mem.Xlock_modelX();
 
    foreach (blks[blk])
-     blk.Xlock_modelX();
+     blk.lock_model();
 
    //`ifndef UVM_REG_FAST_SRCH
    if (this.parent == null)
@@ -924,7 +943,7 @@ function void uvm_reg_mem_block::Xlock_modelX();
    //   foreach (maps[map])
    //     map.Xcheck_overlapX();
 
-endfunction: Xlock_modelX
+endfunction: lock_model
 
 
 

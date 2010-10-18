@@ -789,7 +789,7 @@ class reg_block_oc_ethernet extends uvm_reg_mem_block;
       this.BD.configure(this, "wishbone.bd_ram.mem");
       this.default_map.add_mem(this.BD, `UVM_REG_MEM_ADDR_WIDTH'h100, "RW", 0);
       this.BD.build();
-      this.Xlock_modelX();
+      this.lock_model();
    endfunction : build
 
    `uvm_object_utils(reg_block_oc_ethernet)

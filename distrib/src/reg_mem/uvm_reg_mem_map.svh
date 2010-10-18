@@ -337,6 +337,9 @@ class uvm_reg_mem_map extends uvm_object;
    // this address map.
    // Returns ~null~ if no such register is found.
    //
+   // The model must be locked using <uvm_reg_mem_block::lock_model()>
+   // to enable this functionality.
+   //
    extern virtual function uvm_reg    get_reg_by_offset(uvm_reg_mem_addr_t offset);
 
    //
@@ -347,6 +350,9 @@ class uvm_reg_mem_map extends uvm_object;
    // this address map. The offset may refer to any memory location
    // in that memory.
    // Returns ~null~ if no such memory is found.
+   //
+   // The model must be locked using <uvm_reg_mem_block::lock_model()>
+   // to enable this functionality.
    //
    extern virtual function uvm_mem    get_mem_by_offset(uvm_reg_mem_addr_t offset);
 
@@ -1074,8 +1080,14 @@ endfunction
 // get_reg_by_offset
 
 function uvm_reg uvm_reg_mem_map::get_reg_by_offset(uvm_reg_mem_addr_t offset);
+   if (!m_parent.is_locked()) begin
+      `uvm_error("RegMem", $psprintf("Cannot get register by offset: Block %s is not locked.", m_parent.get_full_name()));
+      return null;
+   end
+
    if (m_regs_by_offset.exists(offset))
      return m_regs_by_offset[offset];
+
    return null;
 endfunction
 
@@ -1083,8 +1095,14 @@ endfunction
 // get_mem_by_offset
 
 function uvm_mem uvm_reg_mem_map::get_mem_by_offset(uvm_reg_mem_addr_t offset);
+   if (!m_parent.is_locked()) begin
+      `uvm_error("RegMem", $psprintf("Cannot memory register by offset: Block %s is not locked.", m_parent.get_full_name()));
+      return null;
+   end
+
    if (m_mems_by_offset.exists(offset))
      return m_mems_by_offset[offset];
+
    return null;
 endfunction
 
