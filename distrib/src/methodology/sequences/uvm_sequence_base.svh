@@ -27,6 +27,108 @@
 // The uvm_sequence_base class provides the interfaces needed to create streams
 // of sequence items and/or other sequences.
 //
+// A sequence is executed by calling its <start> method, either directly
+// or indirectly via <start_item>/<finish_item> or invocation of any of
+// the `ovm_do_* macros.
+// 
+// Executing sequences via <start>:
+// 
+// A sequence's <start> method has a ~parent_sequence~ argument that controls
+// whether <pre_do>, <mid_do>, and <post_do> are called *in the parent*
+// sequence. It also has a ~call_pre_post~ argument that controls whether its
+// <pre_body> and <post_body> methods are called.
+// 
+// When <start> is called directly, you can provide the appropriate arguments
+// according to your application.
+//
+// The sequence execution flow looks like
+// 
+// User code
+//
+//| sub_seq.randomize(...); // optional
+//| sub_seq.start(seqr, parent_seq, priority, *call_pre_post*)
+//|
+//
+// The following methods are called, in order
+//
+//|
+//|   sub_seq.pre_body           (task)  if call_pre_post==1
+//|     parent_seq.pre_do(0)     (task)  if parent_sequence!=null
+//|     parent_seq.mid_do(this)  (func)  if parent_sequence!=null
+//|   sub_seq.body               (task)  YOUR STIMULUS CODE
+//|     parent_seq.post_do(this) (func)  if parent_sequence!=null
+//|   sub_seq.post_body          (task)  if call_pre_post==1
+// 
+//
+// Executing sub-sequences via <start_item>/<finish_item> or `ovm_do macros:
+//
+// A sequence can also be indirectly started as a child in the <body> of a
+// parent sequence. The child sequence's <start> method is called indirectly
+// via calls to its <start_item>/<finish_item> methods or by invoking
+// any of the `ovm_do macros. Child sequences can also be started by
+// the predefined sequences, <uvm_random_sequence> and
+// <uvm_exhaustive_sequence>. In all these cases, <start> is called with
+// ~call_pre_post~ set to 0, preventing the started sequence's <pre_body> and
+// <post_body> methods from being called. During execution of the
+// child sequence, the parent's <pre_do>, <mid_do>, and <post_do> methods
+// are called.
+//
+// The sub-sequence execution flow looks like
+// 
+// User code
+//
+//| parent_seq.start_item(sub_seq, priority);
+//| sub_seq.randomize(...);
+//| parent_seq.finish_item(sub_seq);
+//|
+//| or
+//|
+//| `ovm_do_with_prior(seq_seq, { constraints }, priority)
+//|
+//
+// The following methods are called, in order
+//
+//|
+//|   parent_seq.pre_do(0)        (task)
+//|   parent_req.mid_do(sub_seq)  (func)
+//|     sub_seq.body              (task)
+//|   parent_seq.post_do(sub_seq) (func)
+// 
+// Remember, it is the *parent* sequence's pre|mid|post_do that are called, not
+// the sequence being executed. 
+//
+// 
+// Executing sequence items via <start_item>/<finish_item> or `ovm_do macros:
+// 
+// Items are started in the <body> of a parent sequence via calls to
+// <start_item>/<finish_item> or invocations of any of the `ovm_do
+// macros. The <pre_do>, <mid_do>, and <post_do> methods of the parent
+// sequence will be called as the item is executed.
+//
+// The sequence-item execution flow looks like
+// 
+// User code
+//
+//| parent_seq.start_item(item, priority);
+//| sub_seq.randomize(...);
+//| parent_seq.finish_item(item);
+//|
+//| or
+//|
+//| `ovm_do_with_prior(item, constraints, priority)
+//|
+//
+// The following methods are called, in order
+//
+//|
+//|   sequencer.wait_for_grant(prior) (task) \ start_item  \
+//|   parent_seq.pre_do(1)            (task) /              \
+//|                                                      `uvm_do* macros
+//|   parent_seq.mid_do(item)         (func) \              /
+//|   sequencer.send_request(item)    (func)  \finish_item /
+//|   sequencer.wait_for_item_done()  (task)  /
+//|   parent_seq.post_do(item)        (func) /
+// 
 //------------------------------------------------------------------------------
 
 class uvm_sequence_base extends uvm_sequence_item;
@@ -41,6 +143,11 @@ class uvm_sequence_base extends uvm_sequence_item;
   // sequencers, each sequence_id is managed seperately
   protected int m_sqr_seq_ids[int];
 
+  protected uvm_sequence_item response_queue[$];
+  protected int               response_queue_depth = 8;
+  protected bit               response_queue_error_report_disabled = 0;
+
+
   `ifdef UVM_USE_FPC
   protected process  m_sequence_process;
   `else
@@ -50,18 +157,6 @@ class uvm_sequence_base extends uvm_sequence_item;
   local bit                       m_use_response_handler = 0;
 
   static string type_name = "uvm_sequenc_base";
-
-  // Variable: seq_kind
-  //
-  // Used as an identifier in constraints for a specific sequence type.
-
-  rand int unsigned seq_kind;
-
-  // For user random selection. This excludes the exhaustive and
-  // random sequences.
-  constraint pick_sequence { 
-       (num_sequences() <= 2) || (seq_kind >= 2);
-       (seq_kind <  num_sequences()) || (seq_kind == 0); }
 
   // bits to detect if is_relevant()/wait_for_relevant() are implemented
   local bit is_rel_default;
@@ -78,6 +173,17 @@ class uvm_sequence_base extends uvm_sequence_item;
     super.new(name);
     m_sequence_state = CREATED;
     m_wait_for_grant_semaphore = 0;
+  endfunction
+
+
+  // Function: is_item
+  //
+  // Returns 1 on items and 0 on sequences. As this object is a sequence,
+  // ~is_item~ will return 0.
+  // This function may be called on any sequence_item or sequence object.
+
+  virtual function bit is_item();
+    return(0);
   endfunction
 
 
@@ -104,24 +210,30 @@ class uvm_sequence_base extends uvm_sequence_item;
   endtask
 
 
-  virtual function void clear_response_queue();
-  endfunction
+
+  //--------------------------
+  // Group: Sequence Execution
+  //--------------------------
+
 
   // Task: start
   //
-  // The start task is called to begin execution of a sequence.
+  // Executes this sequence, returning when the sequence has completed.
   //
   // The ~sequencer~ argument specifies the sequencer on which to run this
   // sequence. The sequencer must be compatible with the sequence.
   //
-  // If ~parent_sequence~ is null, then the sequence is a parent, otherwise it is
-  // a child of the specified parent.
+  // If ~parent_sequence~ is null, then this sequence is a root parent,
+  // otherwise it is a child of ~parent_sequence~. The ~parent_sequence~'s
+  // pre_do, mid_do, and post_do methods will be called during the execution
+  // of this sequence.
   //
-  // By default, the priority of a sequence is 100. A different priority may be
+  // By default, the ~priority~ of a sequence is 100. A different priority may be
   // specified by ~this_priority~. Higher numbers indicate higher priority.
   //
-  // If ~call_pre_post~ is set to 1, then the pre_body and post_body tasks will be
-  // called before and after the sequence body is called.
+  // If ~call_pre_post~ is set to 1 (default), then the <pre_body> and
+  // <post_body> tasks will be called before and after the sequence
+  // <body> is called.
 
   virtual task start (uvm_sequencer_base sequencer,
                       uvm_sequence_base parent_sequence = null,
@@ -233,13 +345,15 @@ class uvm_sequence_base extends uvm_sequence_item;
 
     #0; // allow stopped and finish waiters to resume
 
-  endtask // start
+  endtask
 
 
   // Task: pre_body
   //
-  // This task is a user-definable callback task that is called before the
-  // execution of the body, unless the sequence is started with call_pre_post=0.
+  // This task is a user-definable callback that is called before the
+  // execution of <body> ~only~ when the sequence is started with <start>.
+  // If <start> is called with ~call_pre_post~ set to 0, ~pre_body~ is not
+  // called.
   // This method should not be called directly by the user.
 
   virtual task pre_body();  
@@ -247,51 +361,21 @@ class uvm_sequence_base extends uvm_sequence_item;
   endtask
 
 
-  // Task: post_body
-  //
-  // This task is a user-definable callback task that is called after the
-  // execution of the body, unless the sequence is started with call_pre_post=0.
-  // This method should not be called directly by the user.
-
-  virtual task post_body();
-    return;
-  endtask
-    
-
   // Task: pre_do
   //
-  // This task is a user-definable callback task that is called after the
+  // This task is a user-definable callback task that is called ~on the
+  // parent sequence~, if any.the
   // sequence has issued a wait_for_grant() call and after the sequencer has
-  // selected this sequence, and before the item is randomized.  This method 
-  // should not be called directly by the user.
+  // selected this sequence, and before the item is randomized.
   //
   // Although pre_do is a task, consuming simulation cycles may result in
   // unexpected behavior on the driver.
+  //
+  // This method should not be called directly by the user.
 
   virtual task pre_do(bit is_item);
     return;
   endtask
-
-
-  // Task: body
-  //
-  // This is the user-defined task where the main sequence code resides.
-  // This method should not be called directly by the user.
-
-  virtual task body();
-    uvm_report_warning("uvm_sequence_base", "Body definition undefined");
-    return;
-  endtask  
-
-
-  // Function: is_item
-  //
-  // This function may be called on any sequence_item or sequence object.
-  // It will return 1 on items and 0 on sequences.
-
-  virtual function bit is_item();
-    return(0);
-  endfunction
 
 
   // Function: mid_do
@@ -305,6 +389,17 @@ class uvm_sequence_base extends uvm_sequence_item;
   endfunction
   
   
+  // Task: body
+  //
+  // This is the user-defined task where the main sequence code resides.
+  // This method should not be called directly by the user.
+
+  virtual task body();
+    uvm_report_warning("uvm_sequence_base", "Body definition undefined");
+    return;
+  endtask  
+
+
   // Function: post_do
   //
   // This function is a user-definable callback function that is called after
@@ -317,109 +412,26 @@ class uvm_sequence_base extends uvm_sequence_item;
   endfunction
 
 
-  // Function: num_sequences
-  // 
-  // Returns the number of sequences in the sequencer's sequence library.
-
-  function int num_sequences();
-    if (m_sequencer == null) return (0);
-    return (m_sequencer.num_sequences());
-  endfunction
 
 
-  // Function: get_seq_kind
+  // Task: post_body
   //
-  // This function returns an int representing the sequence kind that has
-  // been registerd with the sequencer.  The seq_kind int may be used with
-  // the get_sequence or do_sequence_kind methods.
+  // This task is a user-definable callback task that is called after the
+  // execution of <body> ~only~ when the sequence is started with <start>.
+  // If <start> is called with ~call_pre_post~ set to 0, ~post_body~ is not
+  // called.
+  // This task is a user-definable callback task that is called after the
+  // execution of the body, unless the sequence is started with call_pre_post=0.
+  // This method should not be called directly by the user.
 
-  function int get_seq_kind(string type_name);
-    if(m_sequencer != null)
-      return m_sequencer.get_seq_kind(type_name);
-    else 
-      uvm_report_warning("NULLSQ", $psprintf("%0s sequencer is null.",
-                                           get_type_name()), UVM_NONE);
-  endfunction
-
-
-  // Function: get_sequence
-  //
-  // This function returns a reference to a sequence specified by req_kind,
-  // which can be obtained using the get_seq_kind method.
-
-  function uvm_sequence_base get_sequence(int unsigned req_kind);
-    uvm_sequence_base m_seq;
-    string m_seq_type;
-    uvm_factory factory = uvm_factory::get();
-    if (req_kind < 0 || req_kind >= m_sequencer.sequences.size()) begin
-      uvm_report_error("SEQRNG", 
-        $psprintf("Kind arg '%0d' out of range. Need 0-%0d",
-        req_kind, m_sequencer.sequences.size()-1), UVM_NONE);
-    end
-    m_seq_type = m_sequencer.sequences[req_kind];
-    if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
-      uvm_report_fatal("FCTSEQ", 
-        $psprintf("Factory can not produce a sequence of type %0s.",
-        m_seq_type), UVM_NONE);
-    end
-    m_seq.set_use_sequence_info(1);
-    return m_seq;
-  endfunction
-
-
-  // Function: get_sequence_by_name
-  //
-  // Internal method.
-
-  function uvm_sequence_base get_sequence_by_name(string seq_name);
-    uvm_sequence_base m_seq;
-    if (!$cast(m_seq, factory.create_object_by_name(seq_name, get_full_name(), seq_name))) begin
-      uvm_report_fatal("FCTSEQ", 
-        $psprintf("Factory can not produce a sequence of type %0s.", seq_name), UVM_NONE);
-    end
-    m_seq.set_use_sequence_info(1);
-    return m_seq;
-  endfunction
-
-
-  // Task: do_sequence_kind
-  //
-  // This task will start a sequence of kind specified by req_kind, which can
-  // be obtained using the get_seq_kind method.
-
-  task do_sequence_kind(int unsigned req_kind);
-    string m_seq_type;
-    uvm_sequence_base m_seq;
-    uvm_factory factory = uvm_factory::get();
-    m_seq_type = m_sequencer.sequences[req_kind];
-    if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
-      uvm_report_fatal("FCTSEQ", 
-        $psprintf("Factory can not produce a sequence of type %0s.", m_seq_type), UVM_NONE);
-    end
-    m_seq.set_use_sequence_info(1);
-    m_seq.set_parent_sequence(this);
-    m_seq.set_sequencer(m_sequencer);
-    m_seq.set_depth(get_depth() + 1);
-    m_seq.reseed();
+  virtual task post_body();
+    return;
+  endtask
     
-    start_item(m_seq);
-    if(!m_seq.randomize()) begin
-      uvm_report_warning("RNDFLD", "Randomization failed in do_sequence_kind()");
-    end
-    finish_item(m_seq);
-  endtask
 
-
-  // Task- create_and_start_sequence_by_name
-  //
-  // Internal method.
-
-  task create_and_start_sequence_by_name(string seq_name);
-    uvm_sequence_base m_seq;
-    m_seq = get_sequence_by_name(seq_name);
-    m_seq.start(m_sequencer, this, this.get_priority(), 0);
-  endtask
-
+  //------------------------
+  // Group: Sequence Control
+  //------------------------
 
   // Function: set_priority
   //
@@ -443,30 +455,6 @@ class uvm_sequence_base extends uvm_sequence_item;
     return (m_priority);
   endfunction
 
-
-  // Task: wait_for_relevant
-  //
-  // This method is called by the sequencer when all available sequences are
-  // not relevant.  When wait_for_relevant returns the sequencer attempt to
-  // re-arbitrate. 
-  //
-  // Returning from this call does not guarantee a sequence is relevant,
-  // although that would be the ideal. The method provide some delay to
-  // prevent an infinite loop.
-  //
-  // If a sequence defines is_relevant so that it is not always relevant (by
-  // default, a sequence is always relevant), then the sequence must also supply
-  // a wait_for_relevant method.  
-
-  virtual task wait_for_relevant();
-    event e;
-    wait_rel_default = 1;
-    if (is_rel_default != wait_rel_default)
-      uvm_report_fatal("RELMSM", 
-        "is_relevant() was implemented without defining wait_for_relevant()", UVM_NONE);
-    @e;  // this is intended to never return
-  endtask
- 
 
   // Function: is_relevant
   //
@@ -493,6 +481,30 @@ class uvm_sequence_base extends uvm_sequence_item;
     return 1;
   endfunction
 
+
+  // Task: wait_for_relevant
+  //
+  // This method is called by the sequencer when all available sequences are
+  // not relevant.  When wait_for_relevant returns the sequencer attempt to
+  // re-arbitrate. 
+  //
+  // Returning from this call does not guarantee a sequence is relevant,
+  // although that would be the ideal. The method provide some delay to
+  // prevent an infinite loop.
+  //
+  // If a sequence defines is_relevant so that it is not always relevant (by
+  // default, a sequence is always relevant), then the sequence must also supply
+  // a wait_for_relevant method.  
+
+  virtual task wait_for_relevant();
+    event e;
+    wait_rel_default = 1;
+    if (is_rel_default != wait_rel_default)
+      uvm_report_fatal("RELMSM", 
+        "is_relevant() was implemented without defining wait_for_relevant()", UVM_NONE);
+    @e;  // this is intended to never return
+  endtask
+ 
 
   // Function: is_blocked
   //
@@ -595,24 +607,31 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   function void  ungrab(uvm_sequencer_base sequencer = null);
     unlock(sequencer);
-  endfunction // void
+  endfunction
 
 
-  // Function- get_base_response
+  //---------------------------------------
+  // Group: Fine-grained Sequence Execution
+  //---------------------------------------
+
+  // Function: create_item
   //
-  // 
+  // Create_item will create and initialize a sequence_item or sequence
+  // using the factory.  The sequence_item or sequence will be initialized
+  // to communicate with the specified sequencer.
 
-  virtual task get_base_response(output uvm_sequence_item response, input int transaction_id = -1);
-  endtask
+  protected function uvm_sequence_item create_item(uvm_object_wrapper type_var, 
+                                                   uvm_sequencer_base l_sequencer, string name);
 
+    uvm_factory f_ = uvm_factory::get();
+    $cast(create_item,  f_.create_object_by_type( type_var, this.get_full_name(), name ));
 
+    create_item.set_use_sequence_info(1);
+    create_item.set_parent_sequence(this);
+    create_item.set_sequencer(l_sequencer);
+    create_item.set_depth(get_depth() + 1);
+    create_item.reseed();
 
-  // Function- put_response
-  //
-  // Internal method.
-
-  virtual function void put_response (uvm_sequence_item response_item);
-    return;
   endfunction
 
 
@@ -626,18 +645,11 @@ class uvm_sequence_base extends uvm_sequence_item;
   //
   //| virtual task start_item(uvm_sequence_item item, int set_priority = -1);
 
-  // Function: finish_item
-  //
-  // finish_item, together with start_item together will initiate operation of 
-  // either a sequence_item or sequence object.  Finish_item must be called
-  // after start_item with no delays or delta-cycles.  Randomization, or other
-  // functions may be called between the start_item and finish_item calls.
-  //
-  //|virtual task finish_item(uvm_sequence_item item, int set_priority = -1);
-  
   // Function- m_start_item
   //
   // Internal method.
+  //   seq.start_item(item,prior) calls
+  //   item.m_start_item(get_sequencer(), seq, prior);
 
   virtual task m_start_item(uvm_sequencer_base sequencer_ptr, uvm_sequence_item sequence_ptr,
                             int set_priority);
@@ -655,33 +667,38 @@ class uvm_sequence_base extends uvm_sequence_item;
     return;
   endtask  
 
+
+  // Function: finish_item
+  //
+  // finish_item, together with start_item together will initiate operation of 
+  // either a sequence_item or sequence object.  Finish_item must be called
+  // after start_item with no delays or delta-cycles.  Randomization, or other
+  // functions may be called between the start_item and finish_item calls.
+  //
+  //|virtual task finish_item(uvm_sequence_item item, int set_priority = -1);
+  
   // Function- m_finish_item
   //
   // Internal method.
+  //   seq.finish_item(item,prior) calls
+  //   item.m_finish_item(get_sequencer(), seq, prior);
 
   virtual task m_finish_item(uvm_sequencer_base sequencer_ptr, 
                              uvm_sequence_item sequence_ptr, 
                              int set_priority = -1);
     uvm_sequence_base seq_base_ptr;
+    int prior;
 
-    if (!$cast(seq_base_ptr, sequence_ptr)) begin
+    if (!$cast(seq_base_ptr, sequence_ptr))
         uvm_report_fatal("SEQMFINISH", "Failure to cast sequence item", UVM_NONE);
-      end
-    if (set_priority == -1) 
-      begin
-        if (get_priority() < 0) 
-          begin
-            start(sequencer_ptr, seq_base_ptr, 100, 0);
-          end
-        else 
-          begin
-            start(sequencer_ptr, seq_base_ptr, get_priority(), 0);
-          end 
-      end
-    else 
-      begin
-        start(sequencer_ptr, seq_base_ptr, set_priority, 0);
-      end
+
+    // determine priority
+    prior = (set_priority   >= 0 ? set_priority :
+            (get_priority() >= 0 ? get_priority() :
+             100));
+
+    start(sequencer_ptr, seq_base_ptr, prior, 0);
+    
   endtask  
 
 
@@ -742,25 +759,6 @@ class uvm_sequence_base extends uvm_sequence_item;
   endtask
 
 
-  // Function: set_sequencer
-  //
-  // Sets the default sequencer for the sequence to run on.  It will take
-  // effect immediately, so it should not be called while the sequence is
-  // actively communicating with the sequencer.
-
-  virtual function void set_sequencer(uvm_sequencer_base sequencer);
-    m_sequencer = sequencer;
-  endfunction
-
-
-  // Function: get_sequencer
-  //
-  // Returns a reference to the current default sequencer of the sequence.
-
-  virtual function uvm_sequencer_base get_sequencer();
-    return(m_sequencer);
-  endfunction
-
   function void m_kill();
 `ifdef UVM_USE_FPC
     if (m_sequence_process != null) begin
@@ -806,6 +804,8 @@ class uvm_sequence_base extends uvm_sequence_item;
   endfunction
 
 
+  // Group: Response API
+
   // Function: use_response_handler
   //
   // When called with enable set to 1, responses will be sent to the response
@@ -841,25 +841,224 @@ class uvm_sequence_base extends uvm_sequence_item;
   endfunction
 
 
-  // Function: create_item
+  // Function: set_response_queue_error_report_disabled
   //
-  // Create_item will create and initialize a sequence_item or sequence
-  // using the factory.  The sequence_item or sequence will be initialized
-  // to communicate with the specified sequencer.
+  // By default, if the response_queue overflows, an error is reported. The
+  // response_queue will overflow if more responses are sent to this sequence
+  // from the driver than get_response calls are made. Setting value to 0
+  // disables these errors, while setting it to 1 enables them.
 
-  protected function uvm_sequence_item create_item(uvm_object_wrapper type_var, 
-                                                   uvm_sequencer_base l_sequencer, string name);
-
-  uvm_factory f_ = uvm_factory::get();
-  $cast(create_item,  f_.create_object_by_type( type_var, this.get_full_name(), name ));
-
-  create_item.set_use_sequence_info(1);
-  create_item.set_parent_sequence(this);
-  create_item.set_sequencer(l_sequencer);
-  create_item.set_depth(get_depth() + 1);
-  create_item.reseed();
-
+  function void set_response_queue_error_report_disabled(bit value);
+    response_queue_error_report_disabled = value;
   endfunction
+
+  
+  // Function: get_response_queue_error_report_disabled
+  //
+  // When this bit is 0 (default value), error reports are generated when
+  // the response queue overflows. When this bit is 1, no such error
+  // reports are generated.
+
+  function bit get_response_queue_error_report_disabled();
+    return(response_queue_error_report_disabled);
+  endfunction
+
+
+  // Function: set_response_queue_depth
+  //
+  // The default maximum depth of the response queue is 8. These method is used
+  // to examine or change the maximum depth of the response queue.
+  //
+  // Setting the response_queue_depth to -1 indicates an arbitrarily deep
+  // response queue.  No checking is done.
+
+  function void set_response_queue_depth(int value);
+    response_queue_depth = value;
+  endfunction  
+
+
+  // Function: get_response_queue_depth
+  //
+  // Returns the current depth setting for the response queue.
+
+  function int get_response_queue_depth();
+    return(response_queue_depth);
+  endfunction  
+
+
+  // Function: clear_response_queue
+  //
+  // Empties the response queue for this sequence.
+
+  virtual function void clear_response_queue();
+    `uvm_clear_queue(response_queue);
+  endfunction
+
+
+  // Function- put_response
+  //
+  // Internal method.
+
+  virtual function void put_response (uvm_sequence_item response_item);
+    return;
+  endfunction
+
+
+  // Function- get_base_response
+
+  virtual task get_base_response(output uvm_sequence_item response, input int transaction_id = -1);
+
+    int queue_size, i;
+
+    if (response_queue.size() == 0)
+      wait (response_queue.size() != 0);
+
+    if (transaction_id == -1) begin
+      response = response_queue.pop_front();
+      return;
+    end
+
+    forever begin
+      queue_size = response_queue.size();
+      for (i = 0; i < queue_size; i++) begin
+        if (response_queue[i].get_transaction_id() == transaction_id) 
+          begin
+            $cast(response,response_queue[i]);
+            response_queue.delete(i);
+            return;
+          end
+      end
+      wait (response_queue.size() != queue_size);
+    end
+  endtask
+
+
+
+  //------------------------
+  // Group: Sequence Library
+  //------------------------
+
+
+  // Variable: seq_kind
+  //
+  // Used as an identifier in constraints for a specific sequence type.
+
+  rand int unsigned seq_kind;
+
+  // For user random selection. This excludes the exhaustive and
+  // random sequences.
+  constraint pick_sequence { 
+       (num_sequences() <= 2) || (seq_kind >= 2);
+       (seq_kind <  num_sequences()) || (seq_kind == 0); }
+
+
+  // Function: num_sequences
+  // 
+  // Returns the number of sequences in the sequencer's sequence library.
+
+  function int num_sequences();
+    if (m_sequencer == null) return (0);
+    return (m_sequencer.num_sequences());
+  endfunction
+
+
+
+  // Function: get_seq_kind
+  //
+  // This function returns an int representing the sequence kind that has
+  // been registerd with the sequencer.  The seq_kind int may be used with
+  // the get_sequence or do_sequence_kind methods.
+
+  function int get_seq_kind(string type_name);
+    if(m_sequencer != null)
+      return m_sequencer.get_seq_kind(type_name);
+    else 
+      uvm_report_warning("NULLSQ", $psprintf("%0s sequencer is null.",
+                                           get_type_name()), UVM_NONE);
+  endfunction
+
+
+  // Function: get_sequence
+  //
+  // This function returns a reference to a sequence specified by req_kind,
+  // which can be obtained using the get_seq_kind method.
+
+  function uvm_sequence_base get_sequence(int unsigned req_kind);
+    uvm_sequence_base m_seq;
+    string m_seq_type;
+    uvm_factory factory = uvm_factory::get();
+    if (req_kind < 0 || req_kind >= m_sequencer.sequences.size()) begin
+      uvm_report_error("SEQRNG", 
+        $psprintf("Kind arg '%0d' out of range. Need 0-%0d",
+        req_kind, m_sequencer.sequences.size()-1), UVM_NONE);
+    end
+    m_seq_type = m_sequencer.sequences[req_kind];
+    if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
+      uvm_report_fatal("FCTSEQ", 
+        $psprintf("Factory can not produce a sequence of type %0s.",
+        m_seq_type), UVM_NONE);
+    end
+    m_seq.set_use_sequence_info(1);
+    return m_seq;
+  endfunction
+
+
+  // Function: get_sequence_by_name
+  //
+  // Internal method.
+
+  function uvm_sequence_base get_sequence_by_name(string seq_name);
+    uvm_sequence_base m_seq;
+    if (!$cast(m_seq, factory.create_object_by_name(seq_name, get_full_name(), seq_name))) begin
+      uvm_report_fatal("FCTSEQ", 
+        $psprintf("Factory can not produce a sequence of type %0s.", seq_name), UVM_NONE);
+    end
+    m_seq.set_use_sequence_info(1);
+    return m_seq;
+  endfunction
+
+
+  // Task: do_sequence_kind
+  //
+  // This task will start a sequence of kind specified by req_kind, which can
+  // be obtained using the get_seq_kind method.
+
+  task do_sequence_kind(int unsigned req_kind);
+    string m_seq_type;
+    uvm_sequence_base m_seq;
+    uvm_factory factory = uvm_factory::get();
+    m_seq_type = m_sequencer.sequences[req_kind];
+    if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
+      uvm_report_fatal("FCTSEQ", 
+        $psprintf("Factory can not produce a sequence of type %0s.", m_seq_type), UVM_NONE);
+    end
+    m_seq.set_use_sequence_info(1);
+    m_seq.set_parent_sequence(this);
+    m_seq.set_sequencer(m_sequencer);
+    m_seq.set_depth(get_depth() + 1);
+    m_seq.reseed();
+    
+    start_item(m_seq);
+    if(!m_seq.randomize()) begin
+      uvm_report_warning("RNDFLD", "Randomization failed in do_sequence_kind()");
+    end
+    finish_item(m_seq);
+  endtask
+
+
+  // Task- create_and_start_sequence_by_name
+  //
+  // Internal method.
+
+  task create_and_start_sequence_by_name(string seq_name);
+    uvm_sequence_base m_seq;
+    m_seq = get_sequence_by_name(seq_name);
+    m_seq.start(m_sequencer, this, this.get_priority(), 0);
+  endtask
+
+
+
+  // Misc Internal methods.
 
 
   // Function- m_get_sqr_sequence_id

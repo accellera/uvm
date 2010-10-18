@@ -144,21 +144,24 @@ bit        print_sequence_info = 0;
 
 
   // Function: set_sequencer
+  //
+  // Sets the default sequencer for the sequence to sequencer.  It will take
+  // effect immediately, so it should not be called while the sequence is
+  // actively communicating with the sequencer.
 
-  function void set_sequencer(uvm_sequencer_base sequencer);
+  virtual function void set_sequencer(uvm_sequencer_base sequencer);
     m_sequencer = sequencer;
     m_set_p_sequencer();
-  endfunction // void
+  endfunction
 
 
   // Function: get_sequencer
   //
-  // These routines set and get the reference to the sequencer to which this
-  // sequence_item communicates.
+  // Returns a reference to the default sequencer used by this sequence.
 
   function uvm_sequencer_base get_sequencer();
-    return (m_sequencer);
-  endfunction // uvm_sequencer_base
+    return m_sequencer;
+  endfunction
 
 
   // Function: set_parent_sequence

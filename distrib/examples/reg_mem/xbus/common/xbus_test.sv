@@ -108,7 +108,7 @@ class cmd_line_seq_test extends uvm_test;
                    "' could not be parsed"})
        end
 
-       // Execute sequences sequentially. Sequences must not depend on initial state.
+       // Execute sequences. Sequences must not depend on initial state.
        begin
          string msg;
          foreach (seqs[i]) begin
@@ -123,9 +123,11 @@ class cmd_line_seq_test extends uvm_test;
        foreach (seqs[i]) begin
          uvm_sequencer_base sequencer;
          q_of_strings qos = seqs[i];
+       $display("\n\n******* HERE i=%0d\n\n", i);
          for (int j=0; j<qos.size();j++) begin
            uvm_reg_sequence reg_seq;
            uvm_sequence_base seq;
+       $display("\n\n******* HERE j=%0d\n\n", i);
            seq = uvm_utils #(uvm_sequence_base)::create_type_by_name(qos.get(j),"tb");
            if (seq == null) begin
               `uvm_fatal("SEQ_NOT_FOUND",
