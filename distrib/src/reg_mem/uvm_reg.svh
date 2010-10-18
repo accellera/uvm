@@ -429,12 +429,8 @@ virtual class uvm_reg extends uvm_object;
    // Reset the desired/mirrored value for this register.
    //
    // Sets the desired and mirror value of the fields in this register
-   // to the reset value specified by ~kind~ as a <uvm_reset_e> value.
-   // Does not actually reset the value of the register in the design,
-   // only the value mirrored in the register abstraction class.
-   //
-   // Write-once fields in the register can be modified after
-   // a hard reset operation. 
+   // to the reset value for the specified reset ~kind~.
+   // See <uvm_reg_field.reset()> for more details.
    //
    // Also resets the semaphore that prevents concurrent access
    // to the register.
@@ -442,17 +438,17 @@ virtual class uvm_reg extends uvm_object;
    // this register array was killed in before the access
    // was completed
    //
-   extern virtual function void reset(uvm_reset_e kind = UVM_HARD);
+   extern virtual function void reset(string kind = "HARD");
 
    //
    // FUNCTION: get_reset
-   // Get a specified reset value for this register
+   // Get the specified reset value for this register
    //
    // Return the reset value for this register
-   // specified by ~kind~ as a <uvm_reset_e> value.
+   // for the specified reset ~kind~.
    //
-   extern virtual function uvm_reg_mem_data_logic_t
-                             get_reset(uvm_reset_e kind = UVM_HARD);
+   extern virtual function uvm_reg_mem_data_t
+                             get_reset(string kind = "HARD");
 
    //-----------------------------------------------------------------
    // FUNCTION: needs_update
@@ -1978,7 +1974,7 @@ function uvm_reg_mem_data_t  uvm_reg::get(string  fname = "",
 endfunction: get
 
 
-function void uvm_reg::reset(uvm_reset_e kind = UVM_HARD);
+function void uvm_reg::reset(string kind = "HARD");
    foreach (this.fields[i]) begin
       this.fields[i].reset(kind);
    end
@@ -1989,7 +1985,7 @@ function void uvm_reg::reset(uvm_reset_e kind = UVM_HARD);
 endfunction: reset
 
 
-function uvm_reg_mem_data_logic_t uvm_reg::get_reset(uvm_reset_e kind = UVM_HARD);
+function uvm_reg_mem_data_t uvm_reg::get_reset(string kind = "HARD");
    // Concatenate the value of the individual fields
    // to form the register value
    int j, w;

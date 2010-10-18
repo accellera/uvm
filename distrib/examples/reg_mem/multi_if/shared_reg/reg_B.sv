@@ -12,7 +12,7 @@ class reg_reg_R extends uvm_reg;
    
    virtual function void build();
       this.F = uvm_reg_field::type_id::create("F");
-      this.F.configure(this, 8, 0, "RW", 8'h0, `UVM_REG_MEM_DATA_WIDTH'hx, 0, 1);
+      this.F.configure(this, 8, 0, "RW", 8'h0, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_reg_R)

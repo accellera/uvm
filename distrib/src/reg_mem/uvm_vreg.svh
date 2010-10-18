@@ -496,7 +496,7 @@ class uvm_vreg extends uvm_object;
    // this virtual register array was killed in before the access
    // was completed
    //
-   extern function void reset(uvm_reset_e kind = UVM_HARD);
+   extern function void reset(string kind = "HARD");
 
 
    //
@@ -841,7 +841,7 @@ task uvm_vreg::XatomicX(bit on);
 endtask: XatomicX
 
 
-function void uvm_vreg::reset(uvm_reset_e kind = UVM_HARD);
+function void uvm_vreg::reset(string kind = "HARD");
    // Put back a key in the semaphore if it is checked out
    // in case a thread was killed during an operation
    void'(this.atomic.try_get(1));

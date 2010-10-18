@@ -53,8 +53,7 @@ class uvm_reg_field extends uvm_object;
    local uvm_reg_mem_data_t  mirrored; // What we think is in the HW
    local uvm_reg_mem_data_t  desired;  // Mirrored after set()
    rand  uvm_reg_mem_data_t  value;    // Mirrored after randomize()
-   local uvm_reg_mem_data_t  reset_value;
-   local logic [`UVM_REG_MEM_DATA_WIDTH-1:0] soft_reset_value;
+   local uvm_reg_mem_data_t  m_reset[string];
    local bit written;
    local bit read_in_progress;
    local bit write_in_progress;
@@ -93,7 +92,7 @@ class uvm_reg_field extends uvm_object;
    // Specify the ~parent~ register of this field, its
    // ~size~ in bits, the position of its least-significant bit
    // within the register relative to the least-significant bit
-   // of the register, its ~access~ policy, ~reset~ value, ~soft reset~ value,
+   // of the register, its ~access~ policy, "HARD" ~reset~ value, 
    // whether the field value may be randomized and
    // whether the field is the only one to occupy a byte lane in the register.
    //
@@ -112,14 +111,13 @@ class uvm_reg_field extends uvm_object;
    //
    // If the field has no soft reset value, a 'bx value must be specified.
    //
-   extern function void configure(uvm_reg                     parent,
-                                  int unsigned                    size,
-                                  int unsigned                    lsb_pos,
-                                  string                          access,
-                                  uvm_reg_mem_data_t                  reset,
-                                  logic [`UVM_REG_MEM_DATA_WIDTH-1:0] soft_reset,
-                                  bit                             is_rand = 0,
-                                  bit                             individually_accessible = 0); 
+   extern function void configure(uvm_reg            parent,
+                                  int unsigned       size,
+                                  int unsigned       lsb_pos,
+                                  string             access,
+                                  uvm_reg_mem_data_t reset,
+                                  bit                is_rand = 0,
+                                  bit                individually_accessible = 0); 
 
 
    //---------------------
@@ -266,35 +264,51 @@ class uvm_reg_field extends uvm_object;
    // Reset the desired/mirrored value for this field.
    //
    // Sets the desired and mirror value of the field
-   // to the reset value specified by ~kind~ as a <uvm_reset_e> value.
+   // to the reset event specified by ~kind~.
+   // If the field does not have a reset value specified for the
+   // specified reset ~kind~ (see <uvm_reg_field::set_reset()>),
+   // the field is unchanged.
+   //
    // Does not actually reset the value of the field in the design,
    // only the value mirrored in the field abstraction class.
    //
    // Write-once fields can be modified after
-   // a hard reset operation.
+   // a "HARD" reset operation.
    //
-   extern virtual function void reset(uvm_reset_e kind = UVM_HARD);
+   extern virtual function void reset(string kind = "HARD");
 
    //
    // FUNCTION: get_reset
-   // Get a specified reset value for this field
+   // Get the specified reset value for this field
    //
    // Return the reset value for this field
-   // specified by ~kind~ as a <uvm_reset_e> value.
+   // for the specified reset ~kind~.
+   // Returns the current field value is no reset value has been
+   // specified for the specified reset event.
    //
-   extern virtual function uvm_reg_mem_data_logic_t 
-                       get_reset(uvm_reset_e kind = UVM_HARD);
+   extern virtual function uvm_reg_mem_data_t 
+                       get_reset(string kind = "HARD");
 
    //
-   // FUNCTION: get_reset
-   // Modify the reset value for this field
+   // FUNCTION: has_reset
+   // Check if the field has a reset value specified
    //
-   // Modify the reset value for this field corresponding
-   // to the cause specified by ~kind~ as a <uvm_reset_e> value.
+   // Return TRUE if this field has a reset value specified
+   // for the specified reset ~kind~.
    //
-   extern virtual function uvm_reg_mem_data_logic_t
-                       set_reset(uvm_reg_mem_data_logic_t value,
-                                 uvm_reset_e     kind = UVM_HARD);
+   extern virtual function bit has_reset(string kind = "HARD");
+
+
+   //
+   // FUNCTION: set_reset
+   // Specify or modify the reset value for this field
+   //
+   // Specify or modify the reset value for this field corresponding
+   // to the cause specified by ~kind~.
+   //
+   extern virtual function void
+                       set_reset(uvm_reg_mem_data_t value,
+                                 string             kind = "HARD");
 
 
    //
@@ -787,14 +801,13 @@ endfunction: new
 
 // configure
 
-function void uvm_reg_field::configure(uvm_reg                     parent,
-                                       int unsigned                    size,
-                                       int unsigned                    lsb_pos,
-                                       string                          access,
-                                       uvm_reg_mem_data_t                  reset,
-                                       logic [`UVM_REG_MEM_DATA_WIDTH-1:0] soft_reset,
-                                       bit                             is_rand = 0,
-                                       bit                             individually_accessible = 0); 
+function void uvm_reg_field::configure(uvm_reg            parent,
+                                       int unsigned       size,
+                                       int unsigned       lsb_pos,
+                                       string             access,
+                                       uvm_reg_mem_data_t reset,
+                                       bit                is_rand = 0,
+                                       bit                individually_accessible = 0); 
    this.parent = parent;
    if (size == 0) begin
       `uvm_error("RegMem", $psprintf("Field \"%s\" cannot have 0 bits", this.get_full_name()));
@@ -808,8 +821,7 @@ function void uvm_reg_field::configure(uvm_reg                     parent,
 
    this.size                    = size;
    this.access                  = access.toupper();
-   this.reset_value             = reset;
-   this.soft_reset_value        = soft_reset;
+   this.set_reset(reset);
    this.lsb                     = lsb_pos;
    this.individually_accessible = individually_accessible;
    this.cover_on                = UVM_NO_COVERAGE;
@@ -1175,50 +1187,43 @@ endfunction: get
 
 // reset
 
-function void uvm_reg_field::reset(uvm_reset_e kind = UVM_HARD);
-   case (kind)
-     UVM_HARD: begin
-        this.mirrored = reset_value;
-        this.desired  = reset_value;
-        this.written  = 0;
-     end
-     UVM_SOFT: begin
-        if (soft_reset_value !== 'x) begin
-           this.mirrored = soft_reset_value;
-           this.desired  = soft_reset_value;
-        end
-     end
-   endcase
-   this.value = this.desired;
+function void uvm_reg_field::reset(string kind = "HARD");
+   if (!m_reset.exists(kind)) return;
+   
+   this.mirrored = m_reset[kind];
+   this.desired  = this.mirrored;
+   this.value    = this.mirrored;
+
+   if (kind == "HARD") this.written  = 0;
 endfunction: reset
+
+
+// has_reset
+
+function bit uvm_reg_field::has_reset(string kind = "HARD");
+
+   return m_reset.exists(kind);
+
+endfunction: has_reset
 
 
 // get_reset
 
-function logic [`UVM_REG_MEM_DATA_WIDTH-1:0]
-   uvm_reg_field::get_reset(uvm_reset_e kind = UVM_HARD);
+function uvm_reg_mem_data_t
+   uvm_reg_field::get_reset(string kind = "HARD");
 
-   if (kind == UVM_SOFT) return this.soft_reset_value;
+   if (!m_reset.exists(kind)) return this.desired;
 
-   return this.reset_value;
+   return m_reset[kind];
+
 endfunction: get_reset
 
 
 // set_reset
 
-function logic [`UVM_REG_MEM_DATA_WIDTH-1:0]
-   uvm_reg_field::set_reset(logic [`UVM_REG_MEM_DATA_WIDTH-1:0] value,
-                            uvm_reset_e kind = UVM_HARD);
-   case (kind)
-     UVM_HARD: begin
-        set_reset = this.reset_value;
-        this.reset_value = value;
-     end
-     UVM_SOFT: begin
-        set_reset = this.soft_reset_value;
-        this.soft_reset_value = value;
-     end
-   endcase
+function void uvm_reg_field::set_reset(uvm_reg_mem_data_t value,
+                                       string             kind = "HARD");
+   m_reset[kind] = value;
 endfunction: set_reset
 
 

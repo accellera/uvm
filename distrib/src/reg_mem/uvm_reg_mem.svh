@@ -120,21 +120,6 @@ typedef class uvm_reg_adapter;
 
 //------------------------------------------------------------------------------
 //
-// Enum: uvm_reset_e
-//
-// DUT reset type
-//
-// UVM_HARD      - Hard reset
-// UVM_SOFT      - Software reset
-//
-   typedef enum {
-      UVM_HARD,
-      UVM_SOFT
-   } uvm_reset_e;
-
-
-//------------------------------------------------------------------------------
-//
 // Enum: uvm_elem_kind_e
 //
 // Type of element being read or written

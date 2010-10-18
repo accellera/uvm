@@ -18,9 +18,9 @@ class reg_reg_slave_ID extends uvm_reg;
           this.CHIP_ID = uvm_reg_field::type_id::create("CHIP_ID");
        this.PRODUCT_ID = uvm_reg_field::type_id::create("PRODUCT_ID");
 
-      this.REVISION_ID.configure(this, 8,  0, "RO",   8'h03, 'hx, 0, 1);
-          this.CHIP_ID.configure(this, 8,  8, "RO",   8'h5A, 'hx, 0, 1);
-       this.PRODUCT_ID.configure(this, 10, 16,"RO", 10'h176, 'hx, 0, 1);
+      this.REVISION_ID.configure(this, 8,  0, "RO",   8'h03, 0, 1);
+          this.CHIP_ID.configure(this, 8,  8, "RO",   8'h5A, 0, 1);
+       this.PRODUCT_ID.configure(this, 10, 16,"RO", 10'h176, 0, 1);
    endfunction
    
    `uvm_object_utils(reg_reg_slave_ID)
@@ -38,7 +38,7 @@ class reg_reg_slave_INDEX extends uvm_reg;
 
    virtual function void build();
       this.value = uvm_reg_field::type_id::create("value");
-      this.value.configure(this, 8, 0, "RW", 32'h0, `UVM_REG_MEM_DATA_WIDTH'hx, 0, 1);
+      this.value.configure(this, 8, 0, "RW", 32'h0, 0, 1);
    endfunction
 
    `uvm_object_utils(reg_reg_slave_INDEX)
@@ -56,7 +56,7 @@ class reg_reg_slave_DATA extends uvm_reg;
 
    virtual function void build();
       this.value = uvm_reg_field::type_id::create("value");
-      this.value.configure(this, 32, 0, "RU", 32'h0, `UVM_REG_MEM_DATA_WIDTH'hx, 0, 1);
+      this.value.configure(this, 32, 0, "RU", 32'h0, 0, 1);
    endfunction
 
    `uvm_object_utils(reg_reg_slave_DATA)
@@ -74,7 +74,7 @@ class reg_reg_slave_COUNTERS extends uvm_reg;
 
    virtual function void build();
       this.value = uvm_reg_field::type_id::create("value");
-      this.value.configure(this, 32, 0, "RU", 32'h0, `UVM_REG_MEM_DATA_WIDTH'hx, 0, 1);
+      this.value.configure(this, 32, 0, "RU", 32'h0, 0, 1);
    endfunction
    
    `uvm_object_utils(reg_reg_slave_COUNTERS)
@@ -92,7 +92,7 @@ class reg_reg_slave_TABLES extends uvm_reg;
 
    virtual function void build();
       this.value = uvm_reg_field::type_id::create("value");
-      this.value.configure(this, 32, 0, "RW", 32'h0, `UVM_REG_MEM_DATA_WIDTH'hx, 0, 1);
+      this.value.configure(this, 32, 0, "RW", 32'h0, 0, 1);
    endfunction
 
    `uvm_object_utils(reg_reg_slave_TABLES)

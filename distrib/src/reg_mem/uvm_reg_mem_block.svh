@@ -491,11 +491,12 @@ virtual class uvm_reg_mem_block extends uvm_object;
    // Reset the mirror for this block.
    //
    // Sets the mirror value of all registers in the block and sub-blocks
-   // to the specified hard or soft reset value.
+   // to the reset value corresponding to the specified reset event.
+   // See <uvm_reg_field.reset()> for more details.
    // Does not actually set the value of the registers in the design,
    // only the values mirrored in their corresponding mirror.
    //
-   extern virtual function void reset(uvm_reset_e kind = UVM_HARD); 
+   extern virtual function void reset(string kind = "HARD");
 
 
    //
@@ -1411,7 +1412,7 @@ endfunction
 
 // reset
 
-function void uvm_reg_mem_block::reset(uvm_reset_e kind = UVM_HARD);
+function void uvm_reg_mem_block::reset(string kind = "HARD");
 
    foreach (regs[rg])
      rg.reset(kind);
