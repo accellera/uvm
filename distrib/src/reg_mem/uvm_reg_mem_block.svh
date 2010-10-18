@@ -1004,9 +1004,6 @@ endfunction: get_virtual_fields
 
 function void uvm_reg_mem_block::get_registers(ref uvm_reg regs[$],
                                            input uvm_hier_e hier=UVM_HIER);
-
-// FIXME strange modification of the iterator base (might lead to strange results)
-// FIXME regs is of type queue-of-uvm_reg, the index is (int) but cant push (int) into queue-of-class
    foreach (this.regs[rg])
      regs.push_back(rg);
 
