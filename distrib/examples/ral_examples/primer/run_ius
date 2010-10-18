@@ -1,2 +1,3 @@
 #!/bin/sh
-irun -f compile_ius.f +UVM_TESTNAME=ral_user_test +UVM_VERBOSITY=UVM_LOW $*
+arch=`../../../bin/uvm_os_name`
+irun -sv_lib ../../../lib/${arch}/libuvm_ius.so -f compile_ius.f +UVM_TESTNAME=ral_user_test +UVM_VERBOSITY=UVM_LOW $*
