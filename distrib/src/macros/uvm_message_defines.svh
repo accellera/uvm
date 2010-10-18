@@ -151,5 +151,53 @@
        uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
    end
 
+// MACRO: `uvm_info_context
+//
+
+// Operates identically to `uvm_info.  The only difference is that the
+// context in which the message is printed is explicitly supplied as a
+// macro argument.
+
+`define uvm_info_context(ID, MSG, VERBOSITY, CNTXT) \
+   begin \
+     if (uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) \
+       CNTXT.uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line); \
+   end
+
+// MACRO: `uvm_warning_context
+//
+// Operates identically to `uvm_warning.  The only difference is that the
+// context in which the message is printed is explicitly supplied as a
+// macro argument.
+
+`define uvm_warning_context(ID, MSG, CNTXT) \
+   begin \
+     if (uvm_report_enabled(UVM_NONE,UVM_WARNING,ID)) \
+       CNTXT.uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
+   end
+
+// MACRO: `uvm_error_context
+//
+// Operates identically to `uvm_error.  The only difference is that the
+// context in which the message is printed is explicitly supplied as a
+// macro argument.
+
+`define uvm_error_context(ID, MSG, CNTXT) \
+   begin \
+     if (uvm_report_enabled(UVM_NONE,UVM_ERROR,ID)) \
+       CNTXT.uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
+   end
+
+// MACRO: `uvm_fatal_context
+//
+// Operates identically to `uvm_fatal.  The only difference is that the
+// context in which the message is printed is explicitly supplied as a
+// macro argument.
+
+`define uvm_fatal_context(ID, MSG, CNTXT) \
+   begin \
+     if (uvm_report_enabled(UVM_NONE,UVM_FATAL,ID)) \
+       CNTXT.uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
+   end
 
 `endif //UVM_MESSAGE_DEFINES_SVH

@@ -729,10 +729,14 @@ virtual class uvm_object extends uvm_void;
   //|       if (value != null) begin
   //|         obj_type tmp;
   //|         // if provided value is not correct type, produce error
-  //|         if (!$cast(tmp, value) 
+  //|         if (!$cast(tmp, value) )
   //|           /* error */
-  //|         else
-  //|           myobj = clone ? tmp.clone() : tmp;
+  //|         else begin
+  //|           if(clone) 
+  //|             $cast(myobj, tmp.clone());
+  //|           else
+  //|             myobj = tmp;
+  //|         end
   //|       end
   //|       else
   //|         myobj = null; // value is null, so simply assign null to myobj

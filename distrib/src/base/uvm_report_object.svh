@@ -148,12 +148,13 @@ class uvm_report_object extends uvm_object;
   //
   //   verbosity - the verbosity of the message, indicating its relative
   //               importance. If this number is less than or equal to the
-  //               effective verbosity level (see <set_report_verbosity_level>),
+  //               effective verbosity level, see <set_report_verbosity_level>,
   //               then the report is issued, subject to the configured action
   //               and file descriptor settings.  Verbosity is ignored for 
-  //               warnings, errors, and fatals to ensure users do not 
-  //               inadvertently filter them out. It remains in the methods
-  //               for backward compatibility.
+  //               warnings, errors, and fatals. However, if a warning, error
+  //               or fatal is demoted to an info message using the
+  //               <uvm_report_catcher>, then the verbosity is taken into
+  //               account.
   //
   //   filename/line - (Optional) The location from which the report was issued.
   //               Use the predefined macros, `__FILE__ and `__LINE__.
@@ -303,6 +304,12 @@ class uvm_report_object extends uvm_object;
     m_rh.set_id_action(id, action);
   endfunction
 
+  // Function: set_report_id_verbosity
+  //
+  function void set_report_id_verbosity (string id, int verbosity);
+    m_rh.set_id_verbosity(id, verbosity);
+  endfunction
+
   // Function: set_report_severity_id_action
   //
   // These methods associate the specified action or actions with reports of the
@@ -317,6 +324,23 @@ class uvm_report_object extends uvm_object;
   function void set_report_severity_id_action (uvm_severity severity,
                                                string id, uvm_action action);
     m_rh.set_severity_id_action(severity, id, action);
+  endfunction
+
+
+  // Function: set_report_severity_id_verbosity
+  //
+  // These methods associate the specified verbosity with reports of the
+  // given ~severity~, ~id~, or ~severity-id~ pair. An verbosity associated with a
+  // particular ~severity-id~ pair takes precedence over an verbosity associated with
+  // ~id~, which take precedence over an an verbosity associated with a ~severity~.
+  //
+  // The ~verbosity~ argument can be any integer, but is most commonaly a
+  // predefined <uvm_verbosity> value, <UVM_NONE>, <UVM_LOW>, <UVM_MEDIUM>,
+  // <UVM_HIGH>, <UVM_FULL>.
+
+  function void set_report_severity_id_verbosity (uvm_severity severity,
+                                               string id, int verbosity);
+    m_rh.set_severity_id_verbosity(severity, id, verbosity);
   endfunction
 
 
@@ -363,10 +387,12 @@ class uvm_report_object extends uvm_object;
   // Function: get_report_verbosity_level
   //
   // Gets the verbosity level in effect for this object. Reports issued
-  // with verbosity greater than this will be filtered out.
+  // with verbosity greater than this will be filtered out. The severity
+  // and tag arguments check if the verbosity level has been modified for
+  // specific severity/tag combinations.
 
-  function int get_report_verbosity_level();
-    return m_rh.get_verbosity_level();
+  function int get_report_verbosity_level(uvm_severity severity=UVM_INFO, string id="");
+    return m_rh.get_verbosity_level(severity, id);
   endfunction
 
 
@@ -392,7 +418,7 @@ class uvm_report_object extends uvm_object;
 
   // Function: uvm_report_enabled
   //
-  // Returns 1 if the configured verbosity for this object is greater than 
+  // Returns 1 if the configured verbosity for this severity/id is greater than 
   // ~verbosity~ and the action associated with the given ~severity~ and ~id~
   // is not UVM_NO_ACTION, else returns 0.
   // 
@@ -401,7 +427,7 @@ class uvm_report_object extends uvm_object;
 
   function int uvm_report_enabled(int verbosity, 
                           uvm_severity severity=UVM_INFO, string id="");
-    if (get_report_verbosity_level() < verbosity ||
+    if (get_report_verbosity_level(severity, id) < verbosity ||
         get_report_action(severity,id) == uvm_action'(UVM_NO_ACTION)) 
       return 0;
     else 

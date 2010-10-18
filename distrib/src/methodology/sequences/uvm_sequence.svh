@@ -50,6 +50,126 @@ virtual class uvm_sequence #(type REQ = uvm_sequence_item,
     super.new(name);
   endfunction
 
+  // Task: start
+  //
+  // The start task is called to begin execution of a sequence.
+  //
+  // The ~sequencer~ argument specifies the sequencer on which to run this
+  // sequence. The sequencer must be compatible with the sequence.
+  //
+  // If ~parent_sequence~ is null, then the sequence is a parent, otherwise it is
+  // a child of the specified parent.
+  //
+  // By default, the ~priority~ of a sequence is 100. A different priority may be
+  // specified by this_priority. Higher numbers indicate higher priority.
+  //
+  // If ~call_pre_post~ is set to 1, then the pre_body and post_body tasks will be
+  // called before and after the sequence body is called.
+
+  virtual task start (uvm_sequencer_base sequencer,
+              uvm_sequence_base parent_sequence = null,
+              integer this_priority = 100,
+              bit call_pre_post = 1);
+
+    if ((this_priority < 1) |  (^this_priority === 1'bx)) begin
+      uvm_report_fatal("SEQPRI", $psprintf("Sequence %s start has illegal priority: %0d",
+                                           get_full_name(),
+                                           this_priority), UVM_NONE);
+      end
+
+    // Check that the response queue is empty from earlier runs
+    `uvm_clear_queue(response_queue);
+
+    super.start(sequencer, parent_sequence, this_priority, call_pre_post);
+    m_set_p_sequencer();
+
+    if (m_sequencer != null) begin
+        if (m_parent_sequence == null) begin
+          m_tr_handle = m_sequencer.begin_tr(this, get_name());
+        end else begin
+          m_tr_handle = m_sequencer.begin_child_tr(this, m_parent_sequence.m_tr_handle, 
+                                                   get_root_sequence_name());
+        end
+    end
+
+    // Ensure that the sequence_id is intialized in case this sequence has been stopped previously
+    set_sequence_id(-1);
+    // Remove all sqr_seq_ids
+    m_sqr_seq_ids.delete();
+
+    // Register the sequence with the sequencer if defined.
+    if (m_sequencer != null) begin
+      void'(m_sequencer.register_sequence(this));
+    end
+    
+    `ifndef UVM_USE_FPC
+    fork begin //wrap the fork/join_any to only effect this block
+    `endif
+
+    fork
+      begin
+        `ifdef UVM_USE_FPC
+        m_sequence_process = process::self();
+        `endif
+
+        if (call_pre_post == 1) begin
+          m_sequence_state = PRE_BODY;
+          #0;
+          pre_body();
+        end
+
+        if (parent_sequence != null) begin
+          parent_sequence.pre_do(0);    // task
+          parent_sequence.mid_do(this); // function
+        end
+
+        m_sequence_state = BODY;
+        #0;
+        body();
+
+        m_sequence_state = ENDED;
+        #0;
+
+        if (parent_sequence != null) begin
+          parent_sequence.post_do(this);
+        end
+
+        if (call_pre_post == 1) begin
+          m_sequence_state = POST_BODY;
+          #0;
+          post_body();
+        end
+
+        m_sequence_state = FINISHED;
+        #0;
+
+      end
+    `ifdef UVM_USE_FPC
+    join
+    `else
+      begin
+        m_sequence_started = 1;
+        @(m_kill_event or m_sequence_state==FINISHED);
+      end
+    join_any
+    if(m_sequence_state!=FINISHED) begin
+       disable fork;
+    end
+    
+    end join // wrapper process
+    `endif
+
+    if (m_sequencer != null) begin      
+      m_sequencer.end_tr(this);
+    end
+        
+    // Clean up any sequencer queues after exiting.
+    if (m_sequencer != null)
+      m_sequencer.sequence_exiting(this);
+
+    #0; // allow stopped and finish waiters to resume
+
+  endtask // start
 
   // Function: send_request
   //

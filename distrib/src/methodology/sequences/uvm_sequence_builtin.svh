@@ -3,6 +3,7 @@
 //   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010 Paradigm-works, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -22,9 +23,6 @@
 
 `ifndef UVM_SEQUENCE_BUILTIN_SVH
 `define UVM_SEQUENCE_BUILTIN_SVH
-
-`include "methodology/uvm_meth_defines.svh"
-
 
 //------------------------------------------------------------------------------
 //
@@ -265,6 +263,9 @@ class uvm_simple_sequence extends uvm_sequence #(uvm_sequence_item);
   // ---
   function new (string name="uvm_simple_sequence");
     super.new(name);
+    // Initialized to avoid potential warnings if this class instance 
+    // is randomized without calling its body()
+    item = new;
   endfunction
 
   // body

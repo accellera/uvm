@@ -25,5 +25,5 @@
   `include "base/base.svh"
   `include "uvm_tlm/uvm_tlm.svh"
   `include "methodology/methodology.svh"
-  `include "ral/uvm_ral.svh"
+  `include "reg_mem/uvm_reg_mem.svh"
 `endif // UVM_SVH

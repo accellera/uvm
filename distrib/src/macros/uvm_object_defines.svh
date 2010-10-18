@@ -1416,7 +1416,7 @@
      if (contxt == "" && parent != null) \
        contxt = parent.get_full_name(); \
      if(!$cast(create,f.create_object_by_type(get(),contxt,name))) \
-        uvm_top.uvm_report_fatal("FACTFL", {"Factory did not return an object of type, ",type_name}, UVM_NONE); \
+        `uvm_fatal_context("FACTFL", {"Factory did not return an object of type, ",type_name}, uvm_top) \
    endfunction
 
 
@@ -1436,7 +1436,7 @@
      if (contxt == "" && parent != null) \
        contxt = parent.get_full_name(); \
      if(!$cast(create,f.create_component_by_type(get(),contxt,name,parent))) \
-        uvm_top.uvm_report_fatal("FACTFL", {"Factory did not return a component of type, ",type_name}, UVM_NONE); \
+        `uvm_report_fatal("FACTFL", {"Factory did not return a component of type, ",type_name}, uvm_top.) \
    endfunction
 
 
@@ -1664,7 +1664,7 @@
     else if(!$cast(lhs__,ARG)) begin \
       uvm_object::m_sc.scratch1 = \
         `"Cast failed for ARG to uvm_object type (uvm_field_object not implemented)`";  \
-      _global_reporter.uvm_report_warning("CSTFLD",uvm_object::m_sc.scratch1, UVM_NONE); \
+      `uvm_warning_context("CSTFLD", uvm_object::m_sc.scratch1, _global_reporter) \
     end \
     if(tmp_data__ != null) begin \
       if($cast(local_data__, tmp_data__)) begin \
@@ -1672,7 +1672,7 @@
       end \
       else if(tmp_data__!=null) begin \
         uvm_object::m_sc.scratch1 = `"Type check failed for ARG for copy/compare`"; \
-        _global_reporter.uvm_report_error("TCKFLD", uvm_object::m_sc.scratch1, UVM_NONE); \
+        `uvm_error_context("TCKFLD", uvm_object::m_sc.scratch1, _global_reporter) \
       end \
     end \
     else begin \
@@ -1712,7 +1712,7 @@
       if((lhs__ == null)&&(local_data__.ARG != null)) begin \
         if(!$cast(ARG,local_data__.ARG)) begin \
           uvm_object::m_sc.scratch1 = `"Copy cast failed for ARG`"; \
-          _global_reporter.uvm_report_error("CSTFLD",uvm_object::m_sc.scratch1, UVM_NONE); \
+          `uvm_error_context("CSTFLD",uvm_object::m_sc.scratch1, _global_reporter) \
         end \
       end \
       else if(lhs__==null) \
@@ -1791,7 +1791,7 @@
            m_sc.array_warning_done = 1; \
            uvm_object::m_sc.scratch1 = \
              `"Recording not supported for array enumerations: ARG`"; \
-           _global_reporter.uvm_report_warning("RCDNTS", uvm_object::m_sc.scratch1, UVM_NONE); \
+           `uvm_warning_context("RCDNTS", uvm_object::m_sc.scratch1, _global_reporter) \
         end \
       end \
       else begin \
@@ -2064,7 +2064,7 @@
               int s_; \
               s_ = uvm_auto_options_object.packer.unpack_field_int(32); \
               if(ARG.size() < s_) \
-                _global_reporter.uvm_report_error("OBJUPK", $psprintf(`"Array ARG cannot support the unpack operation, the unpack requires %0d elements, ARG has only %0d`", s_, ARG.size()), UVM_NONE); \
+                `uvm_error_context("OBJUPK", $psprintf(`"Array ARG cannot support the unpack operation, the unpack requires %0d elements, ARG has only %0d`", s_, ARG.size()), _global_reporter) \
             end \
             foreach(ARG[i]) begin \
               uvm_auto_options_object.packer.unpack_object(ARG[i]); \
@@ -2098,7 +2098,7 @@
               int s_; \
               s_ = uvm_auto_options_object.packer.unpack_field_int(32); \
               if(ARG.size() < s_) \
-                _global_reporter.uvm_report_error("OBJUPK", $psprintf(`"Queue ARG cannot support the unpack operation, the unpack requires %0d elements, ARG has only %0d`", s_, ARG.size()), UVM_NONE); \
+                `uvm_error_context("OBJUPK", $psprintf(`"Queue ARG cannot support the unpack operation, the unpack requires %0d elements, ARG has only %0d`", s_, ARG.size()), _global_reporter) \
             end \
             foreach(ARG[i]) begin \
               uvm_auto_options_object.packer.unpack_object(ARG[i]); \
@@ -2310,7 +2310,7 @@ begin \
       uvm_auto_options_object.comparer.show_max) \
    begin \
      uvm_object::m_sc.scratch1 = `"Miscompare for field ARG`"; \
-     _global_reporter.uvm_report_info("MISCMP", uvm_object::m_sc.scratch1, UVM_MEDIUM) \
+     `uvm_info_context("MISCMP", uvm_object::m_sc.scratch1, UVM_MEDIUM, _global_reporter) \
    end \
 end
 
@@ -2690,7 +2690,7 @@ end
     end \
     if((this_d__ == null) || !$cast(ARG, this_d__)) begin \
       uvm_object::m_sc.scratch1 = `"Cast failed for ARG during copy`"; \
-      _global_reporter.uvm_report_error("CSTFLD", uvm_object::m_sc.scratch1, UVM_NONE); \
+      `uvm_error_context("CSTFLD", uvm_object::m_sc.scratch1, _global_reporter) \
     end \
   end    
 

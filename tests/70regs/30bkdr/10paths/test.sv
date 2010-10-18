@@ -23,10 +23,10 @@ program top;
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 
-class r1_typ extends uvm_ral_reg;
+class r1_typ extends uvm_reg;
 
    function new(string name = "r1_typ");
-      super.new(name,32,uvm_ral::NO_COVERAGE);
+      super.new(name,32,UVM_NO_COVERAGE);
    endfunction
 
    virtual function void build();
@@ -37,12 +37,12 @@ class r1_typ extends uvm_ral_reg;
 endclass
 
 
-class b1_typ extends uvm_ral_block;
+class b1_typ extends uvm_reg_mem_block;
 
    rand r1_typ r1; 
 
    function new(string name = "b1_typ");
-      super.new(name,uvm_ral::NO_COVERAGE);
+      super.new(name,UVM_NO_COVERAGE);
    endfunction
 
    virtual function void build();
@@ -57,12 +57,12 @@ class b1_typ extends uvm_ral_block;
 endclass
 
 
-class top_blk extends uvm_ral_block;
+class top_blk extends uvm_reg_mem_block;
 
    rand b1_typ b1; 
 
    function new(string name = "top_blk");
-      super.new(name,uvm_ral::NO_COVERAGE);
+      super.new(name,UVM_NO_COVERAGE);
    endfunction
 
    virtual function void build();
@@ -92,17 +92,17 @@ endfunction
 
 
 function void check_paths(string name,
-                          uvm_ral_hdl_path_concat paths[$],
-                          uvm_ral_hdl_path_concat exp[]);
+                          uvm_hdl_path_concat paths[$],
+                          uvm_hdl_path_concat exp[]);
    $write("Path(s) to %s:\n", name);
    foreach (paths[i]) begin
-      uvm_ral_hdl_path_concat slices;
-      uvm_ral_hdl_path_concat exp_sl;
+      uvm_hdl_path_concat slices;
+      uvm_hdl_path_concat exp_sl;
 
       slices = paths[i];
       exp_sl = exp[i];
 
-      $write("   %s\n", uvm_ral_concat2string(slices));
+      $write("   %s\n", uvm_hdl_concat2string(slices));
       foreach (slices[j]) begin
          if (slices[i].path != exp_sl[j].path) begin
             `uvm_error("PATHS", $psprintf(" Path does not match \"%s\".", exp_sl[j].path));
@@ -115,20 +115,20 @@ endfunction
 
 initial
 begin
-   uvm_ral_hdl_path_concat paths[$];
-   uvm_ral_hdl_path_slice  slice;
+   uvm_hdl_path_concat paths[$];
+   uvm_hdl_path_slice  slice;
    string roots[$];
    
-   top_blk ral = new("ral");
+   top_blk regmem = new("regmem");
    
-   ral.build();
-   ral.set_hdl_path_root("$root.dut");
+   regmem.build();
+   regmem.set_hdl_path_root("$root.dut");
 
-   ral.b1.get_full_hdl_path(roots);
-   check_roots("ral.b1", roots, '{"$root.dut.b1"});
+   regmem.b1.get_full_hdl_path(roots);
+   check_roots("regmem.b1", roots, '{"$root.dut.b1"});
 
-   ral.b1.r1.get_full_hdl_path(paths);
-   check_paths("ral.b1.r1", paths,'{ '{ '{"$root.dut.b1.r1", -1, -1} } });
+   regmem.b1.r1.get_full_hdl_path(paths);
+   check_paths("regmem.b1.r1", paths,'{ '{ '{"$root.dut.b1.r1", -1, -1} } });
 
    begin
       uvm_report_server svr;
@@ -137,7 +137,7 @@ begin
       svr.summarize();
 
       if (svr.get_severity_count(UVM_FATAL) +
-          svr.get_severity_count(UVM_ERROR) == 0)
+          svr.get_severity_count(UVM_NOT_OK) == 0)
          $write("** UVM TEST PASSED **\n");
       else
          $write("!! UVM TEST FAILED !!\n");

@@ -1,1 +1,0 @@
-./simv +UVM_SEQUENCE=uvm_ral_hw_reset_seq

@@ -25,39 +25,6 @@
 
 typedef class uvm_report_object;
 typedef class uvm_report_server;
-typedef class uvm_report_global_server;
-
-`ifdef UVM_USE_AAOFAA_WA
-    class uvm_hash #(type T=int, I1=int, I2=int);
-      local T d[string];
-      function void set(I1 i1, I2 i2, T t);
-        string s;
-        $swrite(s,i1,":",i2);
-        d[s] = t;
-      endfunction
-      function T get(I1 i1,I2 i2);
-        string s;
-        $swrite(s,i1,":",i2);
-        return d[s];
-      endfunction
-      function int exists(I1 i1, I2 i2);
-        string s;
-        if(d.num() == 0) return 0;
-        $swrite(s,i1,":",i2);
-        return d.exists(s);
-      endfunction
-      function int first(string index);
-        return d.first(index);
-      endfunction
-      function int next(string index);
-        return d.next(index);
-      endfunction
-      function T fetch(string index);
-        return d[index];
-      endfunction
-    endclass : uvm_hash
-`endif
-   
 
 //------------------------------------------------------------------------------
 //
@@ -80,9 +47,11 @@ typedef class uvm_report_global_server;
 //
 //------------------------------------------------------------------------------
 
-class uvm_report_handler;
+typedef uvm_pool#(string, uvm_action) id_actions_array;
+typedef uvm_pool#(string, UVM_FILE) id_file_array;
+typedef uvm_pool#(string, int) id_verbosities_array;
 
-  uvm_report_global_server m_glob;
+class uvm_report_handler;
 
   int m_max_verbosity_level;
 
@@ -90,26 +59,18 @@ class uvm_report_handler;
 
   uvm_action severity_actions[uvm_severity];
 
-  `ifndef UVM_USE_AAOFAA_WA
-  id_actions_array id_actions;
+  id_actions_array id_actions=new;
   id_actions_array severity_id_actions[uvm_severity];
+
+  // id verbosity settings : default and severity
+  id_verbosities_array id_verbosities=new;
+  id_verbosities_array severity_id_verbosities[uvm_severity];
 
   // file handles : default, severity, action, (severity,id)
   UVM_FILE default_file_handle;
   UVM_FILE severity_file_handles[uvm_severity];
-  id_file_array id_file_handles;
+  id_file_array id_file_handles=new;
   id_file_array severity_id_file_handles[uvm_severity];
-  `endif
-
-  `ifdef UVM_USE_AAOFAA_WA
-  uvm_action id_actions[string];
-  uvm_hash #(uvm_action,uvm_severity,string) severity_id_actions = new;
-
-  UVM_FILE default_file_handle;
-  UVM_FILE severity_file_handles[uvm_severity];
-  UVM_FILE id_file_handles[string];
-  uvm_hash #(UVM_FILE,uvm_severity,string) severity_id_file_handles = new;
-  `endif
 
 
   // Function: new
@@ -117,7 +78,6 @@ class uvm_report_handler;
   // Creates and initializes a new uvm_report_handler object.
 
   function new();
-    m_glob = new();
     initialize;
   endfunction
 
@@ -127,7 +87,7 @@ class uvm_report_handler;
   // Internal method called by <uvm_report_object::get_report_server>.
 
   function uvm_report_server get_server();
-    return m_glob.get_server();
+    return uvm_report_server::get_server();
   endfunction
 
 
@@ -137,7 +97,7 @@ class uvm_report_handler;
 
   function void set_max_quit_count(int max_count);
     uvm_report_server srvr;
-    srvr = m_glob.get_server();
+    srvr = uvm_report_server::get_server();
     srvr.set_max_quit_count(max_count);
   endfunction
 
@@ -148,7 +108,7 @@ class uvm_report_handler;
 
   function void summarize(UVM_FILE file = 0);
     uvm_report_server srvr;
-    srvr = m_glob.get_server();
+    srvr = uvm_report_server::get_server();
     srvr.summarize(file);
   endfunction
 
@@ -161,7 +121,7 @@ class uvm_report_handler;
 
     uvm_report_server srvr;
 
-    srvr = m_glob.get_server();
+    srvr = uvm_report_server::get_server();
     srvr.f_display(file,
       "----------------------------------------------------------------");
     srvr.f_display(file, uvm_revision_string());
@@ -226,22 +186,17 @@ class uvm_report_handler;
 
   local function UVM_FILE get_severity_id_file(uvm_severity severity, string id);
 
-   `ifndef UVM_USE_AAOFAA_WA
     id_file_array array;
 
     if(severity_id_file_handles.exists(severity)) begin
       array = severity_id_file_handles[severity];      
       if(array.exists(id))
-        return array[id];
+        return array.get(id);
     end
-   `else
-    if (severity_id_file_handles.exists(severity,id))
-      return severity_id_file_handles.get(severity,id);
-   `endif
 
 
     if(id_file_handles.exists(id))
-      return id_file_handles[id];
+      return id_file_handles.get(id);
 
     if(severity_file_handles.exists(severity))
       return severity_file_handles[severity];
@@ -262,10 +217,28 @@ class uvm_report_handler;
 
   // Function: get_verbosity_level
   //
-  // Returns the configured maximum verbosity level.
+  // Returns the verbosity associated with the given ~severity~ and ~id~.
+  // 
+  // First, if there is a verbosity associated with the ~(severity,id)~ pair,
+  // return that.  Else, if there is an verbosity associated with the ~id~, return
+  // that.  Else, return the max verbosity setting.
 
-  function int get_verbosity_level();
+  function int get_verbosity_level(uvm_severity severity=UVM_INFO, string id="" );
+
+    id_verbosities_array array;
+    if(severity_id_verbosities.exists(severity)) begin
+      array = severity_id_verbosities[severity];
+      if(array.exists(id)) begin
+        return array.get(id);
+      end
+    end
+
+    if(id_verbosities.exists(id)) begin
+      return id_verbosities.get(id);
+    end
+
     return m_max_verbosity_level;
+
   endfunction
 
 
@@ -280,21 +253,16 @@ class uvm_report_handler;
 
   function uvm_action get_action(uvm_severity severity, string id);
 
-   `ifndef UVM_USE_AAOFAA_WA
     id_actions_array array;
 
     if(severity_id_actions.exists(severity)) begin
       array = severity_id_actions[severity];
       if(array.exists(id))
-        return array[id];
+        return array.get(id);
     end
-   `else
-    if (severity_id_actions.exists(severity,id))
-      return severity_id_actions.get(severity,id);
-   `endif
 
     if(id_actions.exists(id))
-      return id_actions[id];
+      return id_actions.get(id);
 
     return severity_actions[severity];
 
@@ -318,7 +286,7 @@ class uvm_report_handler;
       return file;
   
     if (id_file_handles.exists(id)) begin
-      file = id_file_handles[id];
+      file = id_file_handles.get(id);
       if (file != 0)
         return file;
     end
@@ -350,7 +318,7 @@ class uvm_report_handler;
       );
  
     uvm_report_server srvr;
-    srvr = m_glob.get_server();
+    srvr = uvm_report_server::get_server();
     srvr.report(severity,name,id,message,verbosity_level,filename,line,client);
     
   endfunction
@@ -400,6 +368,8 @@ class uvm_report_handler;
   // Function- set_severity_action
   // Function- set_id_action
   // Function- set_severity_id_action
+  // Function- set_id_verbosity
+  // Function- set_severity_id_verbosity
   //
   // Internal methods called by uvm_report_object.
 
@@ -409,19 +379,28 @@ class uvm_report_handler;
   endfunction
 
   function void set_id_action(input string id, input uvm_action action);
-    id_actions[id] = action;
+    id_actions.add(id, action);
   endfunction
 
   function void set_severity_id_action(uvm_severity severity,
                                        string id,
                                        uvm_action action);
-    `ifndef UVM_USE_AAOFAA_WA
-    severity_id_actions[severity][id] = action;
-    `else
-    severity_id_actions.set(severity,id,action);
-    `endif
+    if(!severity_id_actions.exists(severity))
+      severity_id_actions[severity] = new;
+    severity_id_actions[severity].add(id,action);
   endfunction
   
+  function void set_id_verbosity(input string id, input int verbosity);
+    id_verbosities.add(id, verbosity);
+  endfunction
+
+  function void set_severity_id_verbosity(uvm_severity severity,
+                                       string id,
+                                       int verbosity);
+    if(!severity_id_verbosities.exists(severity))
+      severity_id_verbosities[severity] = new;
+    severity_id_verbosities[severity].add(id,verbosity);
+  endfunction
 
   // Function- set_default_file
   // Function- set_severity_file
@@ -439,17 +418,14 @@ class uvm_report_handler;
   endfunction
 
   function void set_id_file (string id, UVM_FILE file);
-    id_file_handles[id] = file;
+    id_file_handles.add(id, file);
   endfunction
 
   function void set_severity_id_file(uvm_severity severity,
                                      string id, UVM_FILE file);
-  
-    `ifndef UVM_USE_AAOFAA_WA
-    severity_id_file_handles[severity][id] = file;
-    `else
-    severity_id_file_handles.set(severity,id,file);
-    `endif
+    if(!severity_id_file_handles.exists(severity))
+      severity_id_file_handles[severity] = new;
+    severity_id_file_handles[severity].add(id, file);
   endfunction
 
   
@@ -466,22 +442,50 @@ class uvm_report_handler;
     UVM_FILE file;
     uvm_report_server srvr;
  
-   `ifndef UVM_USE_AAOFAA_WA
-     id_actions_array id_a_ary;
-     id_file_array id_f_ary;
-   `else
-     UVM_FILE id_f_ary[string];
-   `endif
+    id_actions_array id_a_ary;
+    id_verbosities_array id_v_ary;
+    id_file_array id_f_ary;
 
-    srvr = m_glob.get_server();
+    srvr = uvm_report_server::get_server();
 
     srvr.f_display(0,
       "----------------------------------------------------------------------");
     srvr.f_display(0, "report handler state dump");
     srvr.f_display(0, "");
 
+    // verbosities
+
+    srvr.f_display(0, "");   
+    srvr.f_display(0, "+-----------------+");
+    srvr.f_display(0, "|   Verbosities   |");
+    srvr.f_display(0, "+-----------------+");
+    srvr.f_display(0, "");   
+
     $sformat(s, "max verbosity level = %d", m_max_verbosity_level);
     srvr.f_display(0, s);
+
+    srvr.f_display(0, "*** verbosities by id");
+
+    if(id_verbosities.first(idx))
+    do begin
+      $sformat(s, "[%s] --> %s", idx, uvm_verbosity'(id_verbosities.get(idx)));
+      srvr.f_display(0, s);
+    end while(id_verbosities.next(idx));
+
+    // verbosities by id
+
+    srvr.f_display(0, "");
+    srvr.f_display(0, "*** verbosities by id and severity");
+
+    foreach( severity_id_verbosities[severity] ) begin
+      id_v_ary = severity_id_verbosities[severity];
+      if(id_v_ary.first(idx))
+      do begin
+        $sformat(s, "%s:%s --> %s",
+           uvm_severity_type'(severity), idx, uvm_verbosity'(id_v_ary.get(idx)));
+        srvr.f_display(0, s);        
+      end while(id_v_ary.next(idx));
+    end
 
     // actions
 
@@ -501,38 +505,26 @@ class uvm_report_handler;
     srvr.f_display(0, "");
     srvr.f_display(0, "*** actions by id");
 
-    foreach( id_actions[idx] ) begin
-      $sformat(s, "[%s] --> %s", idx, format_action(id_actions[idx]));
+    if(id_actions.first(idx))
+    do begin
+      $sformat(s, "[%s] --> %s", idx, format_action(id_actions.get(idx)));
       srvr.f_display(0, s);
-    end
+    end while(id_actions.next(idx));
 
     // actions by id
 
     srvr.f_display(0, "");
     srvr.f_display(0, "*** actions by id and severity");
 
-    `ifndef UVM_USE_AAOFAA_WA
     foreach( severity_id_actions[severity] ) begin
-      // ADAM: is id_a_ary __copied__?
       id_a_ary = severity_id_actions[severity];
-      foreach( id_a_ary[idx] ) begin
+      if(id_a_ary.first(idx))
+      do begin
         $sformat(s, "%s:%s --> %s",
-           uvm_severity_type'(severity), idx, format_action(id_a_ary[idx]));
+           uvm_severity_type'(severity), idx, format_action(id_a_ary.get(idx)));
         srvr.f_display(0, s);        
-      end
+      end while(id_a_ary.next(idx));
     end
-    `else
-    begin
-      string idx;
-      if ( severity_id_actions.first( idx ) )
-        do begin
-            $sformat(s, "%s --> %s", idx,
-              format_action(severity_id_actions.fetch(idx)));
-            srvr.f_display(0, s);        
-        end
-        while ( severity_id_actions.next( idx ) );
-    end
-    `endif
 
     // Files
 
@@ -556,35 +548,24 @@ class uvm_report_handler;
     srvr.f_display(0, "");
     srvr.f_display(0, "*** files by id");
 
-    foreach ( id_file_handles[idx] ) begin
-      file = id_file_handles[idx];
+    if(id_file_handles.first(idx))
+    do begin
+      file = id_file_handles.get(idx);
       $sformat(s, "id %s --> %d", idx, file);
       srvr.f_display(0, s);
-    end
+    end while (id_file_handles.next(idx));
 
     srvr.f_display(0, "");
     srvr.f_display(0, "*** files by id and severity");
 
-    `ifndef UVM_USE_AAOFAA_WA
     foreach( severity_id_file_handles[severity] ) begin
       id_f_ary = severity_id_file_handles[severity];
-      foreach ( id_f_ary[idx] ) begin
-        $sformat(s, "%s:%s --> %d", uvm_severity_type'(severity), idx, id_f_ary[idx]);
+      if(id_f_ary.first(idx))
+      do begin
+        $sformat(s, "%s:%s --> %d", uvm_severity_type'(severity), idx, id_f_ary.get(idx));
         srvr.f_display(0, s);
-      end
+      end while(id_f_ary.next(idx));
     end
-    `else
-    begin
-      string idx;
-      if ( severity_id_file_handles.first( idx ) )
-        do begin
-            $sformat(s, "%s --> %s", idx,
-              format_action(severity_id_file_handles.fetch(idx)));
-            srvr.f_display(0, s);        
-        end
-        while ( severity_id_file_handles.next( idx ) );
-    end
-    `endif
 
     srvr.dump_server_state();
     
@@ -593,23 +574,6 @@ class uvm_report_handler;
   endfunction
 
 endclass : uvm_report_handler
-
-
-//------------------------------------------------------------------------------
-
-class uvm_default_report_server;
-
-  uvm_report_global_server glob;
-
-  function new();
-    glob = new;
-  endfunction
-
-  function uvm_report_server get_server();
-    return glob.get_server();
-  endfunction
-  
-endclass
 
 `endif // UVM_REPORT_HANDLER_SVH
 

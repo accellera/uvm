@@ -26,7 +26,7 @@ For each platform/OS:
 
   - Invoke 'make' for every simulator you use
 
-       % make TOOL=mti
+       % make TOOL=questa
        % make TOOL=nc
        % make TOOL=vcs
 
