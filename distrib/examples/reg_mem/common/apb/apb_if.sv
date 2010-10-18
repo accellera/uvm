@@ -24,8 +24,7 @@
 `ifndef APB_IF__SV
 `define APB_IF__SV
 
-timeunit 1ns;
-timeprecision 1ns;
+`timescale 1ns/1ns
 
 interface apb_if(input bit pclk);
    bit        rst=0;
