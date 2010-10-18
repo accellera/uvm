@@ -77,10 +77,7 @@ virtual class tlm_extension_base extends uvm_object;
     super.do_copy(rhs);
   endfunction
 
-  function uvm_object create (string name="");
-    tlm_extension_base t = new(name);
-    return t;
-  endfunction
+  pure virtual function uvm_object create (string name="");
 
 endclass
 
