@@ -27,11 +27,11 @@
   // along with some auxillary functions that UVM needs but are not really
   // part of UVM.
   `include "base/uvm_version.svh"
+  `include "base/uvm_object_globals.svh"
   `include "base/uvm_misc.sv"
 
   // The base object element. Contains data methods (copy/compare etc) and
   // factory creation methods (create). Also includes control classes.
-  `include "base/uvm_object_globals.svh"
   `include "base/uvm_object.sv"
 
   `include "base/uvm_pool.svh"
