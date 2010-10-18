@@ -658,14 +658,14 @@ function void uvm_reg_mem_map::get_submaps(ref uvm_reg_mem_map maps[$], input uv
 
    foreach (m_submaps[submap_])
    begin
-   	  uvm_ral_map submap=submap_;
+   	  uvm_reg_mem_map submap=submap_;
       maps.push_back(submap);
    end
    
    if (hier == UVM_HIER)
      foreach (m_submaps[submap_])
      begin
-       uvm_ral_map submap = submap_;
+       uvm_reg_mem_map submap = submap_;
        submap.get_submaps(maps);
      end
 endfunction
@@ -681,7 +681,7 @@ function void uvm_reg_mem_map::get_registers(ref uvm_reg regs[$], input uvm_hier
   if (hier == UVM_HIER)
     foreach (m_submaps[submap_])
     begin
-      uvm_ral_map submap = submap_;
+      uvm_reg_mem_map submap = submap_;
       submap.get_registers(regs);
     end
 endfunction
@@ -693,14 +693,14 @@ function void uvm_reg_mem_map::get_fields(ref uvm_reg_field fields[$], input uvm
 
    foreach (m_regs_info[rg_])
    begin
-   	 uvm_ral_reg rg = rg_;
+   	 uvm_reg rg = rg_;
      rg.get_fields(fields);
    end
    
    if (hier == UVM_HIER)
      foreach (this.m_submaps[submap_])
      begin
-     	uvm_ral_map submap = submap_;
+     	uvm_reg_mem_map submap = submap_;
        submap.get_fields(fields);
      end
 endfunction
@@ -716,7 +716,7 @@ function void uvm_reg_mem_map::get_memories(ref uvm_mem mems[$], input uvm_hier_
    if (hier == UVM_HIER)
      foreach (m_submaps[submap_])
      begin
-       uvm_ral_map submap = submap_;
+       uvm_reg_mem_map submap = submap_;
        submap.get_memories(mems);
      end
      
@@ -815,7 +815,7 @@ function int unsigned uvm_reg_mem_map::get_size();
 
   // get max offset from registers
   foreach (m_regs_info[rg_]) begin
-  	uvm_ral_reg rg = rg_;
+  	uvm_reg rg = rg_;
     addr = m_regs_info[rg].offset + ((rg.get_n_bytes()-1)/m_n_bytes);
     if (addr > max_addr);
       max_addr = addr;
@@ -823,7 +823,7 @@ function int unsigned uvm_reg_mem_map::get_size();
 
   // get max offset from memories
   foreach (m_mems_info[mem_]) begin
-  	uvm_ral_mem mem = mem_;
+  	uvm_mem mem = mem_;
     addr = m_mems_info[mem].offset + (mem.get_size() * (((mem.get_n_bytes()-1)/m_n_bytes)+1)) -1;
     if (addr > max_addr) 
       max_addr = addr;
@@ -831,7 +831,7 @@ function int unsigned uvm_reg_mem_map::get_size();
 
   // get max offset from submaps
   foreach (m_submaps[submap_]) begin
-  	uvm_ral_map submap = submap_;
+  	uvm_reg_mem_map submap = submap_;
     addr = m_submaps[submap] + submap.get_size();
     if (addr > max_addr)
       max_addr = addr;
@@ -885,7 +885,7 @@ function bit uvm_reg_mem_map::Xcheck_child_overlapX(uvm_reg_mem_map  child_map,
   end
 
   foreach(m_mems_info[mem_]) begin
-  	uvm_ral_mem mem = mem_;
+  	uvm_mem mem = mem_;
     Xcheck_child_overlapX &=
       Xcheck_rangeX(m_mems_info[mem].offset,
                     m_mems_info[mem].offset + mem.get_size() - 1, "memory",
@@ -893,7 +893,7 @@ function bit uvm_reg_mem_map::Xcheck_child_overlapX(uvm_reg_mem_map  child_map,
   end
 
   foreach(m_submaps[submap_]) begin
-    uvm_ral_map submap = submap_;
+    uvm_reg_mem_map submap = submap_;
     if (submap != child_map) begin
 
 
@@ -1118,12 +1118,12 @@ function void uvm_reg_mem_map::Xinit_address_mapX();
 
    foreach (m_submaps[l])
    begin
-   	 uvm_ral_map map=l;
+   	 uvm_reg_mem_map map=l;
      map.Xinit_address_mapX();
    end
 
    foreach (m_regs_info[rg_]) begin
-   	 uvm_ral_reg rg = rg_;
+   	 uvm_reg rg = rg_;
      if (!m_regs_info[rg].unmapped) begin
        uvm_reg_mem_addr_t addrs[];
        bus_width = get_physical_addresses(m_regs_info[rg].offset,0,rg.get_n_bytes(),addrs);
@@ -1150,7 +1150,7 @@ function void uvm_reg_mem_map::Xinit_address_mapX();
    end
 
    foreach (m_mems_info[mem_]) begin
-   	 uvm_ral_mem mem = mem_;
+   	 uvm_mem mem = mem_;
      if (!m_mems_info[mem].unmapped) begin
        uvm_reg_mem_addr_t addrs[];
        bus_width = get_physical_addresses(m_mems_info[mem].offset,0,mem.get_n_bytes(),addrs);

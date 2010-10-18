@@ -722,7 +722,7 @@ virtual class uvm_reg extends uvm_object;
    // If ~inherit~ is TRUE, returns the backdoor of the parent block
    // if none have been specified for this register.
    //
-   extern function uvm_reg_backdoor get_backdoor(bit inherit = 1);
+   extern function uvm_reg_backdoor get_backdoor(bit inherit_ = 1);
 
    //
    // Function:  clear_hdl_path
@@ -1217,14 +1217,14 @@ function void uvm_reg::configure(uvm_reg_mem_block blk_parent, uvm_reg_file rf_p
    this.m_rf = rf_parent;
    if (hdl_path != "")
    begin
-   	// NOTE add_hdl_path('{'{hdl_path,-1,-1}})
-   	 uvm_ral_hdl_path_slice e[]=new[1];
+   	// NOTE was add_hdl_path('{'{hdl_path,-1,-1}})
+   	 uvm_hdl_path_slice e[]=new[1];
    	 e[0].path=hdl_path;
    	 e[0].size=-1;
    	 e[0].offset=-1;
    	 
    	 begin
-   	 	uvm_ral_hdl_path_concat t_ = new(e);
+   	 	uvm_hdl_path_concat t_ = new(e);
    	 	this.add_hdl_path(t_);
    	 end
    end
@@ -1443,7 +1443,7 @@ function void uvm_reg::get_hdl_path(ref uvm_hdl_path_concat paths[$],
   hdl_paths = hdl_paths_pool.get(kind);
 
   for (int i=0; i<hdl_paths.size();i++) begin
-  	uvm_ral_hdl_path_concat v = hdl_paths.get(i);
+  	uvm_hdl_path_concat v = hdl_paths.get(i);
      paths.push_back(v);
   end
 
@@ -2411,7 +2411,7 @@ task uvm_reg::XwriteX(output uvm_status_e status,
    end
 
 
-		`uvm_info("RAL", $psprintf("Wrote register \"%s\" via %s: 'h%0h",
+		`uvm_info("RegMem", $psprintf("Wrote register \"%s\" via %s: 'h%0h",
               this.get_full_name(),
               ternary_op(path == UVM_BFM,{"map ",map.get_full_name()},ternary_op(backdoor != null,"user backdoor","DPI backdoor")),
               value),UVM_MEDIUM );

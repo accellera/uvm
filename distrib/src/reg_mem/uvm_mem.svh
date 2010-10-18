@@ -1230,13 +1230,13 @@ function void uvm_mem::configure(uvm_reg_mem_block  parent,
 
    if (hdl_path != "")
    begin
-   	uvm_ral_hdl_path_slice e_[]=new[1];
+   	uvm_hdl_path_slice e_[]=new[1];
  
    	e_[0].path=hdl_path;
    	e_[0].offset=-1;
    	e_[0].size=-1;
    	begin
-   		  	uvm_ral_hdl_path_concat t_ = new(e_);
+   		  	uvm_hdl_path_concat t_ = new(e_);
    		  	add_hdl_path(t_);
    	end
    end
@@ -1540,7 +1540,7 @@ endfunction: get_vreg_by_name
 
 // get_vreg_by_offset
 
-function uvm_vreg uvm_mem::get_vreg_by_offset(uvm_ral_addr_t offset,
+function uvm_vreg uvm_mem::get_vreg_by_offset(uvm_reg_mem_addr_t offset,
                                                       uvm_reg_mem_map map = null);
    `uvm_error("RegMem", "uvm_mem::get_vreg_by_offset() not yet implemented")
    return null;
@@ -2797,7 +2797,7 @@ function void uvm_mem::get_hdl_path(ref uvm_hdl_path_concat paths[$],
   hdl_paths = hdl_paths_pool.get(kind);
 
   for (int i=0; i<hdl_paths.size();i++) begin
-  	 uvm_ral_hdl_path_concat t = hdl_paths.get(i);
+  	 uvm_hdl_path_concat t = hdl_paths.get(i);
      paths.push_back(t);
   end
 

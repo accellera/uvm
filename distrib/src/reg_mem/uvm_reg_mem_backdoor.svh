@@ -90,15 +90,7 @@ typedef struct {
 //|
 //
 
-typedef uvm_ral_hdl_path_slice uvm_hdl_path_concat_a[];
-
-class uvm_ral_hdl_path_concat;
-	uvm_ral_hdl_path_slice data[];
-	
-	function new(ref uvm_ral_hdl_path_concat_a t);
-		data=t;
-	endfunction	
-endclass
+typedef uvm_hdl_path_slice uvm_hdl_path_concat_a[];
 
 class uvm_hdl_path_concat;
 	uvm_hdl_path_slice data[];
