@@ -1,0 +1,37 @@
+#!/bin/sh
+uvm_home="../../../"
+lib=`$uvm_home/bin/uvm_dpi_name`
+
+if [ $1 = clean ]
+then
+  rm -rf INCA_libs
+  exit
+fi
+
+if [ $1 ]
+then
+  SEQ=$1
+else
+echo ""
+echo " Usage: $0 <name_of_sequence>"
+echo ""
+echo "    Example:"
+echo ""
+echo "    $0 uvm_reg_mem_built_in_seq"
+echo ""
+echo " Available sequences:"
+echo ""
+echo " Built-In Tests:"
+echo ""
+echo "    uvm_reg_hw_reset_seq"
+echo "    uvm_reg_access_seq"
+echo "    uvm_mem_access_seq"
+echo "    uvm_reg_bit_bash_seq"
+echo "    uvm_mem_walk_seq"
+echo "    uvm_reg_access_seq     runs both uvm_reg_access_seq and uvm_mem_access_seq"
+echo "    uvm_reg_mem_built_in_seq   runs all the built-in tests"
+echo ""
+exit
+fi
+
+irun -sv_lib $lib -f compile_ius.f +UVM_TESTNAME=reg_user_test +UVM_SEQUENCE=$SEQ

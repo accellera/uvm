@@ -51,8 +51,8 @@ CFLAGS += -DQUESTA -I$(MTI_HOME)/include -m32
 CC = $(MTI_HOME)/gcc-4.1.2-linux/bin/gcc
 endif
 
-ifeq ($(TOOL),nc)
-CFLAGS += -DNCSIM  -I`ncroot`/tools/include
+ifeq ($(TOOL),ius)
+CFLAGS += -DNCSIM  -I`ncroot`/tools/include -m32
 endif
 
 ifeq ($(TOOL),vcs)
@@ -61,10 +61,10 @@ endif
 
 
 
-$(LIBDIR)/$(SONAME): $(LIBDIR) $(SRCS)
+$(LIBDIR)/$(SONAME): $(LIBDIR) $(SRCS) Makefile
 	$(CC) $(CFLAGS) -o $(LIBDIR)/$(SONAME) $(SRCS)
-	@rm -f $(UVM_HOME)/lib/$(SONAME)
-	ln -s $(OS)/$(SONAME) $(UVM_HOME)/lib/$(SONAME)
+#	@rm -f $(UVM_HOME)/lib/$(SONAME)
+#	ln -s $(OS)/$(SONAME) $(UVM_HOME)/lib/$(SONAME)
 
 
 $(LIBDIR):

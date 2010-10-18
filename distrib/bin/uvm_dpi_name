@@ -1,0 +1,16 @@
+#!/bin/sh
+
+arch=`dirname $0`/uvm_os_name
+arch=`$arch`
+
+if [ "x" != "x${MTI_HOME}" ]; then
+	tool="mti"
+elif [ "" != `which ncroot` ]; then
+	tool="ius"
+elif [ "x" != "x${VCS_HOME}" ]; then
+	tool="vcs"
+else	
+	tool="unknown"
+fi
+
+echo `dirname $0`/../lib/$arch/libuvm_$tool.so
