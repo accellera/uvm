@@ -57,8 +57,10 @@ sub ius_too_old {
 #
 sub run_the_test {
   local($testdir, $ius_comp_opts, $ius_sim_opts, $_) = @_;
-
-  $ius = "irun -timescale 1ns/1ns +incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv test.sv -l irun.log $ius_comp_opts $ius_sim_opts +UVM_TESTNAME=test";
+  local($uvm_dpi_lib) = qx($uvm_home/bin/uvm_dpi_name);
+  
+#  print "***#$uvm_dpi_lib#$uvm_home#**\n";
+  $ius = "irun -uvm -uvmhome $uvm_home -uvmnoautocompile $uvm_home/src/uvm_pkg.sv test.sv -sv_lib `$uvm_home/bin/uvm_dpi_name` -l irun.log $ius_comp_opts $ius_sim_opts +UVM_TESTNAME=test";
   $ius .= " -nostdout" unless $opt_v;
 
   print "$ius\n" if $opt_v;
