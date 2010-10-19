@@ -17,15 +17,15 @@
 ##   permissions and limitations under the License.
 ##----------------------------------------------------------------------
 
-TOOL	?= error
+TOOL	= $(shell $(UVM_HOME)/bin/uvm_dpi_name -tool)
 
 UVM_HOME = .
 
 OS	= $(shell $(UVM_HOME)/bin/uvm_os_name)
 
 SRCDIR	= $(UVM_HOME)/src/C
-LIBDIR	= $(UVM_HOME)/lib/$(OS)
-SONAME	= libuvm_$(TOOL).so
+SONAME	= $(shell $(UVM_HOME)/bin/uvm_dpi_name)
+LIBDIR	= $(shell dirname $(SONAME))
 
 CC	= gcc
 CFLAGS	+= -shared -fPIC
@@ -42,7 +42,7 @@ all install:
 	@echo "   make TOOL=ius"
 	@echo "   make TOOL=vcs"
 else
-all install: $(LIBDIR)/$(SONAME)
+all install: $(SONAME)
 endif
 
 
@@ -61,19 +61,14 @@ endif
 
 
 
-$(LIBDIR)/$(SONAME): $(LIBDIR) $(SRCS) Makefile
-	$(CC) $(CFLAGS) -o $(LIBDIR)/$(SONAME) $(SRCS)
-#	@rm -f $(UVM_HOME)/lib/$(SONAME)
-#	ln -s $(OS)/$(SONAME) $(UVM_HOME)/lib/$(SONAME)
-
+$(SONAME): $(LIBDIR) $(SRCS) Makefile
+	$(CC) $(CFLAGS) -o $(SONAME) $(SRCS)
 
 $(LIBDIR):
 	mkdir -p $(LIBDIR)
 
-
 clean:
-	rm -rf $(LIBDIR)/libuvm_*.so
-	rm -rf $(UVM_HOME)/lib/libuvm_*.so
+	rm -rf $(SONAME)
 
 distclean realclean allclean squeakyclean: clean
 	rm -rf $(LIBDIR)
