@@ -27,7 +27,14 @@ module slave(apb_if apb);
 reg [31:0] pr_data;
 assign apb.prdata = (apb.psel && apb.penable && !apb.pwrite) ? pr_data : 'z;
 
-reg [7:0] INDEX;
+typedef struct {
+   reg [63:0] SRC;
+   reg [63:0] DST;
+} socket_t;
+
+reg [ 7:0] INDEX;
+socket_t   SESSION[256];
+reg [63:0] DST[256];
 reg [31:0] TABLES[256];
 reg [31:0] DMA[1024];
 
@@ -51,6 +58,10 @@ always @ (posedge apb.pclk)
               16'h0024: begin
                  TABLES[INDEX] <= apb.pwdata;
               end
+              16'h1XX0: SESSION[apb.paddr[11:2]].SRC[63:32] <= apb.pwdata;
+              16'h1XX4: SESSION[apb.paddr[11:2]].SRC[32: 0] <= apb.pwdata;
+              16'h1XX8: SESSION[apb.paddr[11:2]].DST[63:32] <= apb.pwdata;
+              16'h1XXC: SESSION[apb.paddr[11:2]].DST[32: 0] <= apb.pwdata;
               16'h2XXX: DMA[apb.paddr[11:2]] <= apb.pwdata;
             endcase
          end
@@ -59,6 +70,10 @@ always @ (posedge apb.pclk)
               16'h0000: pr_data <= {4'h0, 10'h176, 8'h5A, 8'h03};
               16'h0020: pr_data <= {24'h0000, INDEX};
               16'h0024: pr_data <= TABLES[INDEX];
+              16'h1XX0: pr_data <= SESSION[apb.paddr[11:2]].SRC[63:32];
+              16'h1XX4: pr_data <= SESSION[apb.paddr[11:2]].SRC[32: 0];
+              16'h1XX8: pr_data <= SESSION[apb.paddr[11:2]].DST[63:32];
+              16'h1XXC: pr_data <= SESSION[apb.paddr[11:2]].DST[32: 0];
               16'h2XXX: pr_data <= DMA[apb.paddr[11:2]];
             endcase
          end

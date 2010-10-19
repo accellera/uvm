@@ -20,13 +20,6 @@
 // -------------------------------------------------------------
 // 
 
-import uvm_pkg::*;
-import apb_pkg::*;
-
-`include "reg_model.sv"
-`include "tb_env.sv"
-
-
 class user_test_seq extends uvm_reg_sequence;
 
    reg_block_slave regmem;
@@ -56,25 +49,19 @@ endclass : user_test_seq
 
 class reg_user_test extends uvm_test;
 
-   `uvm_component_utils(reg_user_test);
-
    tb_env env;
+
+   `uvm_component_utils(reg_user_test);
 
    function new(string name, uvm_component parent);
       super.new(name, parent);
-   endfunction
-
-   function void build();
-      apb_config apb_cfg = new;
-      apb_cfg.vif = $root.tb_top.apb0;
-      env = tb_env::type_id::create("env",this);
-      set_config_object("env.apb.*","config",apb_cfg,0);
    endfunction
 
    virtual task run();
       apb_reset_seq reset_seq;
       user_test_seq seq;
 
+      $cast(env, uvm_top.find("env"));
       reset_seq = apb_reset_seq::type_id::create("apb_reset_seq",this);
       reset_seq.start(env.apb.sqr);
 

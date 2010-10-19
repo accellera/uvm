@@ -64,20 +64,55 @@ class reg_reg_slave_DATA extends uvm_reg;
 endclass
 
 
-class reg_reg_slave_COUNTERS extends uvm_reg;
+class reg_reg_slave_SOCKET extends uvm_reg;
 
-   rand uvm_reg_field value;
+   rand uvm_reg_field IP;
+   rand uvm_reg_field PORT;
    
-   function new(string name = "slave_COUNTERS");
-      super.new(name,32,UVM_NO_COVERAGE);
+   function new(string name = "slave_ADDR");
+      super.new(name,64,UVM_NO_COVERAGE);
    endfunction: new
 
    virtual function void build();
-      this.value = uvm_reg_field::type_id::create("value");
-      this.value.configure(this, 32, 0, "RU", 32'h0, 0, 1);
+      this.IP   = uvm_reg_field::type_id::create("value");
+      this.PORT = uvm_reg_field::type_id::create("value");
+      
+        this.IP.configure(this, 48,  0, "RW", 48'h0, 0, 1);
+      this.PORT.configure(this, 16, 48, "RW", 16'h0, 0, 1);
    endfunction
    
-   `uvm_object_utils(reg_reg_slave_COUNTERS)
+   `uvm_object_utils(reg_reg_slave_SOCKET)
+   
+endclass
+
+
+class reg_reg_slave_SESSION extends uvm_reg_file;
+
+   rand reg_reg_slave_SOCKET SRC;
+   rand reg_reg_slave_SOCKET DST;
+   
+   function new(string name = "slave_SESSION");
+      super.new(name);
+   endfunction: new
+
+   virtual function void build();
+      this.SRC = reg_reg_slave_SOCKET::type_id::create("SRC");
+      this.DST = reg_reg_slave_SOCKET::type_id::create("DST");
+
+      this.SRC.build();
+      this.DST.build();
+   endfunction
+
+   virtual function map(uvm_reg_mem_map    mp,
+                        uvm_reg_mem_addr_t offset);
+      this.SRC.configure(get_block(), this, "SRC");
+      this.DST.configure(get_block(), this, "DST");
+
+      mp.add_reg(SRC, offset+'h00);
+      mp.add_reg(DST, offset+'h08);
+   endfunction
+   
+   `uvm_object_utils(reg_reg_slave_SESSION)
    
 endclass
 
@@ -114,7 +149,7 @@ endclass
 class indexed_reg extends uvm_reg_frontdoor;
 
    uvm_reg INDEX;
-   int         addr;
+   int     addr;
    uvm_reg DATA;
 
    function new(string name = "indexed_reg");
@@ -136,7 +171,11 @@ class reg_block_slave extends uvm_reg_mem_block;
    rand reg_reg_slave_ID       ID;
    rand reg_reg_slave_INDEX    INDEX;
    rand reg_reg_slave_DATA     DATA;
+
+   rand reg_reg_slave_SESSION  SESSION[256];
+   
    rand reg_reg_slave_TABLES   TABLES[256];
+   
    rand reg_mem_slave_DMA_RAM  DMA_RAM;
 
    uvm_reg_field REVISION_ID;
@@ -153,8 +192,10 @@ class reg_block_slave extends uvm_reg_mem_block;
       ID        = reg_reg_slave_ID::type_id::create("ID");
       INDEX     = reg_reg_slave_INDEX::type_id::create("INDEX");
       DATA      = reg_reg_slave_DATA::type_id::create("DATA");
+      foreach (SESSION[i])
+         SESSION[i] = reg_reg_slave_SESSION::type_id::create($sformatf("SESSION[%0d]",i));
       foreach (TABLES[i])
-      TABLES[i] = reg_reg_slave_TABLES::type_id::create($sformatf("TABLES[%0d]",i));
+         TABLES[i] = reg_reg_slave_TABLES::type_id::create($sformatf("TABLES[%0d]",i));
       DMA_RAM   = reg_mem_slave_DMA_RAM::type_id::create("DMA_RAM");
 
       // configure
@@ -164,6 +205,10 @@ class reg_block_slave extends uvm_reg_mem_block;
       INDEX.configure(this,null,"INDEX");
       DATA.build();
       DATA.configure(this,null,"DATA");
+      foreach (SESSION[i]) begin
+         SESSION[i].build();
+         SESSION[i].configure(this,null,$sformatf("SESSION[%0d]",i));
+      end
       foreach (TABLES[i]) begin
          TABLES[i].build();
          TABLES[i].configure(this,null,$sformatf("TABLES[%0d]",i));
@@ -175,6 +220,8 @@ class reg_block_slave extends uvm_reg_mem_block;
       default_map.add_reg(ID,    'h0,  "RW");
       default_map.add_reg(INDEX, 'h20, "RW");
       default_map.add_reg(DATA,  'h24, "RW");
+      foreach (SESSION[i])
+         SESSION[i].map(default_map, 'h1000 + 16 * i);
       foreach (TABLES[i])
         default_map.add_reg(TABLES[i], 0, "RW", 1);
       default_map.add_mem(DMA_RAM, 'h2000, "RW");

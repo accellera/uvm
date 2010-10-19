@@ -44,6 +44,14 @@ virtual class uvm_reg_file extends uvm_object;
    // Group: Initialization
    //----------------------
 
+   //
+   // Function: new
+   //
+   // Create a new instance
+   //
+   // Creates an instance of a register file abstraction class
+   // with the specified name.
+   //
    extern function                  new        (string name="");
 
    //
@@ -273,7 +281,7 @@ endfunction: new
 // configure
 
 function void uvm_reg_file::configure(uvm_reg_mem_block blk_parent, uvm_reg_file rf_parent, string hdl_path = "");
-   this.parent = parent;
+   this.parent = blk_parent;
    this.m_rf = rf_parent;
    this.add_hdl_path(hdl_path);
 endfunction: configure
