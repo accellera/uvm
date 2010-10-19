@@ -50,8 +50,8 @@
 
 typedef struct {
    string path;
-   int offset;
-   int size;
+   int unsigned offset;
+   int unsigned size;
 } uvm_hdl_path_slice;
 
 
@@ -95,9 +95,23 @@ typedef uvm_hdl_path_slice uvm_hdl_path_concat_a[];
 class uvm_hdl_path_concat;
 	uvm_hdl_path_slice data[];
 	
-	function new(ref uvm_hdl_path_concat_a t);
+	function set(ref uvm_hdl_path_concat_a t);
 		data=t;
 	endfunction	
+	
+	function void push_back_path(string path,int unsigned offset, int unsigned size);
+		uvm_hdl_path_slice t;
+		t.offset=offset;
+		t.path=path;
+		t.size=size;
+       
+		push_back(t);
+	endfunction
+	
+	function void push_back(uvm_hdl_path_slice t_);		        
+		data=new[data.size()+1](data);
+		data[data.size()-1]=t_;
+	endfunction
 endclass
 
 

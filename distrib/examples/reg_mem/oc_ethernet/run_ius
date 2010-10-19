@@ -2,7 +2,7 @@
 uvm_home="../../../"
 lib=`$uvm_home/bin/uvm_dpi_name`
 
-if [ $1 = clean ]
+if [ "$1" = "clean" ]
 then
   rm -rf INCA_libs
   exit
@@ -34,4 +34,4 @@ echo ""
 exit
 fi
 
-irun -sv_lib $lib -f compile_ius.f +UVM_TESTNAME=reg_user_test +UVM_SEQUENCE=$SEQ
+irun -sv_lib $lib -f compile_ius.f +UVM_SEQUENCE=$SEQ

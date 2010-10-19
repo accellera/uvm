@@ -1236,7 +1236,8 @@ function void uvm_mem::configure(uvm_reg_mem_block  parent,
    	e_[0].offset=-1;
    	e_[0].size=-1;
    	begin
-   		  	uvm_hdl_path_concat t_ = new(e_);
+   		  	uvm_hdl_path_concat t_ = new();
+   		  	void'(t_.set(e_));
    		  	add_hdl_path(t_);
    	end
    end

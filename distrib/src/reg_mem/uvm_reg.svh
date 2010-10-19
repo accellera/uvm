@@ -744,6 +744,14 @@ virtual class uvm_reg extends uvm_object;
    //
    extern function void add_hdl_path      (uvm_hdl_path_concat path,
                                            string kind = "RTL");
+                                           
+                                           
+   // Function: add_hdl_path_array 
+   // similar to add_hdl_path takes an uvm_hdl_path_slice[] instead of the wrapped container uvm_hdl_path_concat
+   //                                       
+   extern function void add_hdl_path_array (uvm_hdl_path_concat_a path,
+                                           string kind = "RTL");
+                                                                                  
    //
    // Function:   has_hdl_path
    // Check if a HDL path is specified
@@ -1224,7 +1232,8 @@ function void uvm_reg::configure(uvm_reg_mem_block blk_parent, uvm_reg_file rf_p
    	 e[0].offset=-1;
    	 
    	 begin
-   	 	uvm_hdl_path_concat t_ = new(e);
+   	 	uvm_hdl_path_concat t_ = new();
+   	 	void'(t_.set(e));
    	 	this.add_hdl_path(t_);
    	 end
    end
@@ -1406,7 +1415,13 @@ function void uvm_reg::add_hdl_path(uvm_hdl_path_concat path, string kind = "RTL
 
 endfunction
 
-
+function void uvm_reg::add_hdl_path_array (uvm_hdl_path_concat_a path, string kind = "RTL");
+    uvm_hdl_path_concat t_ = new();
+    void'(t_.set(path));
+    add_hdl_path(t_,kind);                                                                                 
+endfunction                                           
+                                           
+                                          
 // has_hdl_path
 
 function bit  uvm_reg::has_hdl_path(string kind = "");
