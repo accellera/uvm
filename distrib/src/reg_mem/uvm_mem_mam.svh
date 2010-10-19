@@ -751,19 +751,7 @@ endfunction: release_region
 
 
 function void uvm_mam::release_all_regions();
-`ifdef VCS2006_06
-   // Work-around for NYI feature in VCS2006.06
-   // but IEEE 1800-2009 compliant
-   this.in_use.delete();
-`else
-   // Works in VCS2008.03 or later
-   // IEEE 1800-2005 compliant
-`ifdef INCA
-   this.in_use.delete();
-`else
-   this.in_use = '{};
-`endif
-`endif
+  `uvm_clear_queue(in_use)
 endfunction: release_all_regions
 
 
