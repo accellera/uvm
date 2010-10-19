@@ -120,6 +120,10 @@ class uvm_reg_mem_map extends uvm_object;
                                                  bit unmapped=0,
                                                  uvm_reg_frontdoor frontdoor=null);
 
+   extern virtual function void   m_set_reg_offset(uvm_reg   rg,
+                                                   uvm_reg_mem_addr_t offset);
+
+
    //
    // Function: add_mem
    //
@@ -241,7 +245,20 @@ class uvm_reg_mem_map extends uvm_object;
    // be accessed by the verification environment.
    //
    extern virtual function uvm_reg_mem_map           get_root_map();
+
+   // Function: get_parent
+   // Get the parent block
+   //
+   // Return the block that is the parent of this address map.
+   //
    extern virtual function uvm_reg_mem_block         get_parent    ();
+
+   // Function: get_parent_map
+   // Get the higher-level address map
+   //
+   // Return the address map in which this address map is mapped.
+   // returns ~null~ if this is a top-level address map.
+   //
    extern virtual function uvm_reg_mem_map           get_parent_map();
 
    extern virtual function uvm_reg_mem_addr_t        get_base_addr (uvm_hier_e hier=UVM_HIER);
@@ -467,6 +484,11 @@ function void uvm_reg_mem_map::add_reg(uvm_reg rg,
       return;
    end
 
+   if (rg.get_parent() != get_parent()) begin
+      `uvm_error("RegMem", $psprintf("Register %s may not be added to address map %s: they are not in the same block", rg.get_full_name(), get_full_name()));
+      return;
+   end
+   
    rg.add_map(this);
 
    begin
@@ -476,6 +498,56 @@ function void uvm_reg_mem_map::add_reg(uvm_reg rg,
    info.unmapped = unmapped;
    info.frontdoor = frontdoor;
    m_regs_info[rg] = info;
+   end
+endfunction
+
+
+function void uvm_reg_mem_map::m_set_reg_offset(uvm_reg rg, 
+                                                uvm_reg_mem_addr_t offset);
+
+   if (!this.m_regs_info.exists(rg)) begin
+     `uvm_error("RegMem", $psprintf("Cannot modify offset of register %s in address map %s: register not mapped in that address map", rg.get_full_name(), get_full_name()));
+      return;
+   end
+
+   begin
+      uvm_reg_mem_map_info info = m_regs_info[rg];
+      uvm_reg_mem_block    blk = get_parent();
+
+      if (blk.is_locked() && !info.unmapped) begin
+         uvm_reg_mem_addr_t addrs[];
+         uvm_reg_mem_map    top_map = get_root_map();
+
+         void'(get_physical_addresses(info.offset,0,rg.get_n_bytes(),addrs));
+         foreach (addrs[i]) begin
+            uvm_reg_mem_addr_t addr = addrs[i];
+            if (top_map.m_regs_by_offset.exists(addr))
+               top_map.m_regs_by_offset.delete(addr);
+         end
+
+         void'(get_physical_addresses(offset,0,rg.get_n_bytes(),addrs));
+         foreach (addrs[i]) begin
+            uvm_reg_mem_addr_t addr = addrs[i];
+            if (top_map.m_regs_by_offset.exists(addr)) begin
+               string a;
+               a = $sformatf("%0h",addr);
+               `uvm_warning("RegMem", {"In map '",get_full_name(),"' register '",
+                                       rg.get_full_name(), "' maps to same address as register '",
+                                       top_map.m_regs_by_offset[addr].get_full_name(),"': 'h",a})
+            end
+            if (top_map.m_mems_by_offset.exists(addr)) begin
+               string a;
+               a = $sformatf("%0h",addr);
+               `uvm_warning("RegMem", {"In map '",get_full_name(),"' register '",
+                                       rg.get_full_name(), "' maps to same address as memory '",
+                                       top_map.m_mems_by_offset[addr].get_full_name(),"': 'h",a})
+            end
+            top_map.m_regs_by_offset[ addr ] = rg;
+            m_regs_info[rg].addr = addrs;
+         end
+      end
+
+      info.offset   = offset;
    end
 endfunction
 
@@ -493,6 +565,11 @@ function void uvm_reg_mem_map::add_mem(uvm_mem mem,
       return;
    end
 
+   if (mem.get_parent() != get_parent()) begin
+      `uvm_error("RegMem", $psprintf("Memory %s may not be added to address map %s: they are not in the same block", mem.get_full_name(), get_full_name()));
+      return;
+   end
+   
    mem.add_map(this);
 
    begin
@@ -512,12 +589,14 @@ endfunction: add_mem
 function void uvm_reg_mem_map::add_submap (uvm_reg_mem_map child_map,
                                        uvm_reg_mem_addr_t offset);
    // was uvm_reg_mem_block::register_child
-   uvm_reg_mem_map parent_map = child_map.get_parent_map();
+                 uvm_reg_mem_map parent_map;
 
    if (child_map == null) begin
       `uvm_error("RegMem", {"Attempting to add NULL map to map '",get_full_name(),"'"})
       return;
    end
+
+   parent_map = child_map.get_parent_map();
 
    // Can not have more than one parent (currently)
    if (parent_map != null) begin
@@ -537,6 +616,11 @@ function void uvm_reg_mem_map::add_submap (uvm_reg_mem_map child_map,
                    "' because it does not have a parent block"})
         return;
      end
+     if (get_parent() != blk) begin
+      `uvm_error("RegMem", $psprintf("Address map %s may not be added to address map %s: they are not in the same block", child_map.get_full_name(), get_full_name()));
+      return;
+   end
+   
    end
 
    begin : n_bytes_match_check

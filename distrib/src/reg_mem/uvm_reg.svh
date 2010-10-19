@@ -113,6 +113,21 @@ virtual class uvm_reg extends uvm_object;
                                                 uvm_reg_file rf_parent,
                                                 string hdl_path = "");
 
+   //
+   // Function: set_offset
+   // Modify the offset of the register
+   //
+   // The offset of a register within an address map is set using the
+   // <uvm_reg_mem_map::add_reg()> method.
+   // This method is used to modify that offset dynamically.
+   //
+   // It is important to remember that modifying the offset of a register
+   // will make the register model diverge from the specification
+   // that was used to create it.
+   //
+   extern virtual function void set_offset (uvm_reg_mem_map    map,
+                                            uvm_reg_mem_addr_t offset);
+
    /*local*/ extern virtual function void set_parent (uvm_reg_mem_block blk_parent,
                                                       uvm_reg_file rf_parent);
    /*local*/ extern virtual function void add_field  (uvm_reg_field field);
@@ -1470,6 +1485,17 @@ function void uvm_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
    end
 endfunction
 
+
+// set_offset
+
+function void uvm_reg::set_offset (uvm_reg_mem_map    map,
+                                   uvm_reg_mem_addr_t offset);
+  if (!maps.exists(map)) begin
+     `uvm_error("RegMem", $psprintf("Cannot modify offset of register %s in address map %s: register not mapped in that address map", get_full_name(), map.get_full_name()));
+     return;
+  end
+   map.m_set_reg_offset(this, offset);
+endfunction
 
 // set_parent
 

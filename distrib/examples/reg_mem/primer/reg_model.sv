@@ -112,6 +112,12 @@ class reg_reg_slave_SESSION extends uvm_reg_file;
       mp.add_reg(DST, offset+'h08);
    endfunction
    
+   virtual function set_offset(uvm_reg_mem_map    mp,
+                               uvm_reg_mem_addr_t offset);
+      SRC.set_offset(mp, offset+'h00);
+      DST.set_offset(mp, offset+'h08);
+   endfunction
+   
    `uvm_object_utils(reg_reg_slave_SESSION)
    
 endclass

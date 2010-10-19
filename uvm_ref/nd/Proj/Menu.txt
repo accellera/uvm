@@ -199,7 +199,7 @@ Group: Register Layer  {
    Group: Test Sequences  {
 
       File: Built-In Test Sequences  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_mem_test_all.svh)
-      File: Reset Test Sequence (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_test_hw_reset.svh)
+      File: Reset Test Sequence  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_test_hw_reset.svh)
       File: Bit Bashing Test Sequences  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_test_bit_bash.svh)
       File: Register Access Test Sequence  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_test_access.svh)
       File: Shared Register and Memory Access test Sequences  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_mem_test_shared_access.svh)
