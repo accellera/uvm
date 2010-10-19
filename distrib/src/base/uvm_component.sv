@@ -1041,17 +1041,22 @@ endfunction
 
 function string uvm_component::massage_scope(string scope);
 
-  if(get_full_name() == "") begin
-    if(scope == "")
-      return "*";
-    return {"^", scope, "$"};
-  end
+  // uvm_top
+  if(scope == "")
+    return "^$";
 
+  if(scope == "*")
+    return {"^", get_full_name(), ".*$"};
+
+  // absolute path to the top-level test
   if(scope == "uvm_test_top")
-    return { get_full_name(), ".*" };
-  if(scope[0] != ".")
-    return {"^", get_full_name(), ".", scope, "$"};
-   return {"^", get_full_name(), scope, "$"};
+    return "^uvm_test_top$";
+
+  // absolute path to uvm_root
+  if(scope[0] == ".")
+    return {"^", get_full_name(), scope, "$"};
+
+  return {"^", get_full_name(), ".", scope, "$"};
 
 endfunction
 
@@ -1065,6 +1070,10 @@ function void uvm_component::set_config_int(string inst_name,
   uvm_phase curr_phase = uvm_top.get_current_phase();
 
   uvm_config_int c = new(field_name, massage_scope(inst_name));
+
+  $display("full name = %s", get_full_name());
+  $display("scope \"%s\" -> \"%s\"", inst_name, massage_scope(inst_name));
+
   c.write(value, this);
   if(curr_phase != null && curr_phase.get_name() == "build")
     c.set();
@@ -1202,7 +1211,7 @@ function void uvm_component::check_config_usage ( bit recurse=1 );
   uvm_resource_pool rp = uvm_resource_pool::get();
   uvm_queue#(uvm_resource_base) rq;
 
-  rq = rp.find_zeros();
+  rq = rp.find_unused_resources();
 
   if(rq.size() == 0)
     return;

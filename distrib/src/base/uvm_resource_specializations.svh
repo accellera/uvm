@@ -17,12 +17,59 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+
+// macro: UVM_RESOURCE_GET_FCNS
+
+// When specicializing resources the get_by_name and get_by_type
+// functions must be redefined.  The reason is that the version of these
+// functions in the base class (uvm_resource#(T)) returns an object of
+// type uvm_resource#(T).  In the specializations we must return an
+// object of the type of the specialization.  So, we call the base_class
+// implementation of these functions and then downcast to the subtype.
+//
+// This macro is invokved once in each where a resource specialization
+// is a class defined as:
+//
+//|  class <resource_specialization> extends uvm_resource#(T)
+//
+// where <resource_specialization> is the name of the derived class.
+// The argument to this macro is T, the type of the uvm_resource#(T)
+// specialization.  The class in which the macro is defined must supply
+// a typedef of the specialized class of the form:
+//
+//|  typedef <resource_specialization> this_subtype;
+//
+// where <resource_specialization> is the same as above.  The macro
+// generates the get_by_name() and get_by_type() functions for the
+// specialized resource (i.e. resource subtype).
+
+`define UVM_RESOURCE_GET_FCNS(base_type)                                               \
+  static function this_subtype get_by_name(string name, string scope, bit rpterr = 1); \
+    this_subtype t;                                                                    \
+    uvm_resource_base b = uvm_resource#(base_type)::get_by_name(name, scope, rpterr);  \
+    if(!$cast(t, b))                                                                   \
+      `uvm_fatal("BADCAST", "cannot cast resource to resource subtype");               \
+    return t;                                                                          \
+  endfunction                                                                          \
+                                                                                       \
+  static function this_subtype get_by_type(uvm_resource_base type_handle,              \
+                                    string scope = "");                                \
+    this_subtype t;                                                                    \
+    uvm_resource_base b = uvm_resource#(base_type)::get_by_type(type_handle, scope);   \
+    if(!$cast(t, b))                                                                   \
+      `uvm_fatal("BADCAST", "cannot cast resource to resource subtype");               \
+    return t;                                                                          \
+  endfunction
+
+
 //----------------------------------------------------------------------
 // uvm_int_rsrc
 //
-// specialization of uvm_resource #() for int
+// specialization of uvm_resource #(T) for T = int
 //----------------------------------------------------------------------
 class uvm_int_rsrc extends uvm_resource #(int);
+
+  typedef uvm_int_rsrc this_subtype;
 
   function new(string name, string s = "*");
     super.new(name, s);
@@ -34,14 +81,18 @@ class uvm_int_rsrc extends uvm_resource #(int);
     return s;
   endfunction
 
+  `UVM_RESOURCE_GET_FCNS(int)
+
 endclass
 
 //----------------------------------------------------------------------
 // uvm_string_rsrc
 //
-// specialization of uvm_resource #() for string
+// specialization of uvm_resource #(T) for T = string
 //----------------------------------------------------------------------
 class uvm_string_rsrc extends uvm_resource #(string);
+
+  typedef uvm_string_rsrc this_subtype;
 
   function new(string name, string s = "*");
     super.new(name, s);
@@ -51,27 +102,35 @@ class uvm_string_rsrc extends uvm_resource #(string);
     return read();
   endfunction
 
+  `UVM_RESOURCE_GET_FCNS(string)
+
 endclass
 
 //----------------------------------------------------------------------
 // uvm_obj_rsrc
 //
-// specialization of uvm_resource #() for uvm_object
+// specialization of uvm_resource #(T) for T = uvm_object
 //----------------------------------------------------------------------
 class uvm_obj_rsrc extends uvm_resource #(uvm_object);
+
+  typedef uvm_obj_rsrc this_subtype;
 
   function new(string name, string s = "*");
     super.new(name, s);
   endfunction
+
+  `UVM_RESOURCE_GET_FCNS(uvm_object)
 
 endclass
 
 //----------------------------------------------------------------------
 // uvm_bit_rsrc
 //
-// specialization of uvm_resource #() for vector of bits
+// specialization of uvm_resource #(T) for T = vector of bits
 //----------------------------------------------------------------------
 class uvm_bit_rsrc #(int unsigned N=1) extends uvm_resource #(bit[N-1:0]);
+
+  typedef uvm_bit_rsrc#(N) this_subtype;
 
   function new(string name, string s = "*");
     super.new(name, s);
@@ -83,14 +142,18 @@ class uvm_bit_rsrc #(int unsigned N=1) extends uvm_resource #(bit[N-1:0]);
     return s;
   endfunction
 
+  `UVM_RESOURCE_GET_FCNS(bit[N-1:0])
+
 endclass
 
 //----------------------------------------------------------------------
 // uvm_byte_rsrc
 //
-// specialization of uvm_resource #() for vector of bytes
+// specialization of uvm_resource #T() for T = vector of bytes
 //----------------------------------------------------------------------
 class uvm_byte_rsrc #(int unsigned N=1) extends uvm_resource #(bit[7:0][N-1:0]);
+
+  typedef uvm_byte_rsrc#(N) this_subtype;
 
   function new(string name, string s = "*");
     super.new(name, s);
@@ -101,6 +164,8 @@ class uvm_byte_rsrc #(int unsigned N=1) extends uvm_resource #(bit[7:0][N-1:0]);
     $sformat(s, "%0x", read());
     return s;
   endfunction
+
+  `UVM_RESOURCE_GET_FCNS(bit[7:0][N-1:0])
 
 endclass
 

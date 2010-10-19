@@ -565,7 +565,7 @@ virtual class uvm_component extends uvm_report_object;
   // Used for caching config settings
   static bit m_config_set = 1;
 
-  extern local function string massage_scope(string scope);
+  extern protected function string massage_scope(string scope);
 
   extern virtual function void set_config_int (string inst_name,  
                                                string field_name,
@@ -1404,11 +1404,17 @@ virtual class uvm_component extends uvm_report_object;
 endclass : uvm_component
 
 //----------------------------------------------------------------------
-// uvm_config_int
+// class: uvm_config_int
+//
+// Specialization of uvm_resource#(T) for T = uvm_bitstream_t.  This is
+// for use by the set_config/get_config backward compatibility layer.
+// The "int" in set_config_int is really a uvm_bitstream_t.  The
+// set_config_int() and get_config_int() functions manage resources of
+// type uvm_config_int "under the hood."
 //----------------------------------------------------------------------
 class uvm_config_int extends uvm_resource#(uvm_bitstream_t);
 
-  typedef uvm_config_int this_type;
+  typedef uvm_config_int this_subtype;
 
   function new(string name="", string scope="");
     super.new(name, scope);
@@ -1418,31 +1424,21 @@ class uvm_config_int extends uvm_resource#(uvm_bitstream_t);
     $display("%s = %0d [%s]", get_name(), read(), get_scope());
   endfunction
 
-  static function this_type get_by_name(string name, string scope, bit rpterr = 1);
-    this_type t;
-    uvm_resource_base b = uvm_resource#(uvm_bitstream_t)::get_by_name(name, scope, rpterr);
-    if(!$cast(t, b))
-      `uvm_fatal("BADCAST", "broken cast in uvm_config_int");
-    return t;
-  endfunction
-
-  static function this_type get_by_type(uvm_resource_base type_handle,
-                                    string scope = "");
-    this_type t;
-    uvm_resource_base b = uvm_resource#(uvm_bitstream_t)::get_by_type(type_handle, scope);
-    if(!$cast(t, b))
-      `uvm_fatal("BADCAST", "broken cast in uvm_config_int");
-    return t;
-  endfunction
+  `UVM_RESOURCE_GET_FCNS(uvm_bitstream_t)
 
 endclass
 
 //----------------------------------------------------------------------
-// uvm_config_str
+// class: uvm_config_str
+//
+// Specialization of uvm_resource#(T) for T = string.  This is for use
+// by the set_config/get_config backward compatibility layer.  The
+// set_config_string() and get_config_string() functions manage
+// resources of type uvm_config_int "under the hood."
 //----------------------------------------------------------------------
 class uvm_config_str extends uvm_resource#(string);
 
-  typedef uvm_config_str this_type;
+  typedef uvm_config_str this_subtype;
 
   function new(string name="", string scope="");
     super.new(name, scope);
@@ -1452,30 +1448,21 @@ class uvm_config_str extends uvm_resource#(string);
     $display("%s = %0s [%s]", get_name(), read(), get_scope());
   endfunction
 
-  static function this_type get_by_name(string name, string scope, bit rpterr = 1);
-    this_type t;
-    uvm_resource_base b = uvm_resource#(string)::get_by_name(name, scope, rpterr);
-    if(!$cast(t, b))
-      `uvm_fatal("BADCAST", "broken cast in uvm_config_str");
-    return t;
-  endfunction
+    `UVM_RESOURCE_GET_FCNS(string)
 
-  static function this_type get_by_type(uvm_resource_base type_handle,
-                                    string scope = "");
-    this_type t;
-    uvm_resource_base b = uvm_resource#(string)::get_by_type(type_handle, scope);
-    if(!$cast(t, b))
-      `uvm_fatal("BADCAST", "broken cast in uvm_config_str");
-    return t;
-  endfunction
 endclass
 
 //----------------------------------------------------------------------
-// uvm_config_obj
+// class: uvm_config_obj
+//
+// Specialization of uvm_resource#(T) for T = uvm_object.  This is for
+// use by the set_config/get_config backward compatibility layer.  The
+// set_config_object() and get_config_object() functions manage
+// resources of type uvm_config_int "under the hood."
 //----------------------------------------------------------------------
 class uvm_config_obj extends uvm_resource#(uvm_object);
 
-  typedef uvm_config_obj this_type;
+  typedef uvm_config_obj this_subtype;
   bit clone;
 
   function new(string name="", string scope = "");
@@ -1488,22 +1475,8 @@ class uvm_config_obj extends uvm_resource#(uvm_object);
     obj.print();
   endfunction
 
-  static function this_type get_by_name(string name, string scope, bit rpterr = 1);
-    this_type t;
-    uvm_resource_base b = uvm_resource#(uvm_object)::get_by_name(name, scope, rpterr);
-    if(!$cast(t, b))
-      `uvm_fatal("BADCAST", "broken cast in uvm_config_obj");
-    return t;
-  endfunction
+  `UVM_RESOURCE_GET_FCNS(uvm_object)
 
-  static function this_type get_by_type(uvm_resource_base type_handle,
-                                    string scope = "");
-    this_type t;
-    uvm_resource_base b = uvm_resource#(uvm_object)::get_by_type(type_handle, scope);
-    if(!$cast(t, b))
-      `uvm_fatal("BADCAST", "broken cast in uvm_config_obj");
-    return t;
-  endfunction
 endclass
 
 `endif // UVM_COMPONENT_SVH

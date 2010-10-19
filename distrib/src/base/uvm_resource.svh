@@ -17,17 +17,39 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+typedef class uvm_resource_base; // forward reference
+
 //----------------------------------------------------------------------
-// access record for resources.  A set of these is stored for each
-// resource by accessing object.  It's updated for each read/write.
+// class: uvm_resource_types
+//
+// Class that provides typedefs used throughout the resources facility.
+// This class has no members or methods, only typedefs.  It's used in
+// lieu of package-scope types.  When needed, other classes can use
+// these types by prefixing their usage with uvm_resource_types::.  E.g.
+//
+//|  uvm_resource_t::rsrc_q_t queue;
 //----------------------------------------------------------------------
-typedef struct
-{
-  time read_time;
-  time write_time;
-  int unsigned read_count;
-  int unsigned write_count;
-} access_t;
+class uvm_resource_types;
+
+  // types uses for setting overrides
+  typedef bit[1:0] override_t;
+  typedef enum override_t { TYPE_OVERRIDE = 2'b01, NAME_OVERRIDE = 2'b10 } override_e;
+
+   // general purpose queue of resourcex
+  typedef uvm_queue#(uvm_resource_base) rsrc_q_t;
+
+  // access record for resources.  A set of these is stored for each
+  // resource by accessing object.  It's updated for each read/write.
+  typedef struct
+  {
+    time read_time;
+    time write_time;
+    int unsigned read_count;
+    int unsigned write_count;
+  } access_t;
+
+endclass
+
 
 //----------------------------------------------------------------------
 // class: uvm_resource_base
@@ -43,7 +65,7 @@ virtual class uvm_resource_base extends uvm_object;
   protected bit modified;
   protected bit read_only;
 
-  access_t access[uvm_object];
+  uvm_resource_types::access_t access[uvm_object];
 
   function new(string name, string s = "*");
     super.new(name);
@@ -235,10 +257,6 @@ virtual class uvm_resource_base extends uvm_object;
   // before it is stored.
   function void set_scope(string s);
     scope = uvm_glob_to_re(s);
-    if(scope == "") begin
-      `uvm_warning("set_scope", "Empty scope string, reverting to \"*\"");
-      scope = "\.*";
-    end
   endfunction
 
   // funciton get_scope
@@ -316,7 +334,7 @@ virtual class uvm_resource_base extends uvm_object;
 
     uvm_object obj;
     uvm_component comp;
-    access_t access_record;
+    uvm_resource_types::access_t access_record;
 
     if(access.num() == 0)
       return;
@@ -346,7 +364,7 @@ virtual class uvm_resource_base extends uvm_object;
   // function: init_access_record
   //
   // Initalize a new access record
-  function void init_access_record (inout access_t access_record);
+  function void init_access_record (inout uvm_resource_types::access_t access_record);
     access_record.read_time = 0;
     access_record.write_time = 0;
     access_record.read_count = 0;
@@ -433,10 +451,8 @@ class uvm_resource_pool;
 
   static local uvm_resource_pool rp = get();
 
-  typedef uvm_queue#(uvm_resource_base) rsrc_q_t;
-
-  rsrc_q_t rtab [string];
-  rsrc_q_t ttab [uvm_resource_base];
+  uvm_resource_types::rsrc_q_t rtab [string];
+  uvm_resource_types::rsrc_q_t ttab [uvm_resource_base];
 
   get_t get_record [$];  // history of gets
 
@@ -466,7 +482,7 @@ class uvm_resource_pool;
   // map.
 
   function bit spell_check(string s);
-    return uvm_spell_chkr#(rsrc_q_t)::check(rtab, s);
+    return uvm_spell_chkr#(uvm_resource_types::rsrc_q_t)::check(rtab, s);
   endfunction
 
   // function: set
@@ -478,10 +494,18 @@ class uvm_resource_pool;
   // An object creates a resources and ~sets~ it into the resource pool.
   // Later, other objects that want to access the resource must ~get~ it
   // from the pool
+  //
+  // Overrides can be specified using this interface.  Either a name
+  // overrider, a type override or both can be specified.  If an
+  // override is specified then the resource is entered at the front of
+  // the queue instead of at the back.  It is not recommended that users
+  // specify the override paramterer directly, rather thay use the
+  // set_override(), set_name_override(), or set_type_override()
+  // functions.
 
-  function void set (uvm_resource_base rsrc, bit override = 0);
+  function void set (uvm_resource_base rsrc, uvm_resource_types::override_t override = 2'b00);
 
-    rsrc_q_t rq;
+    uvm_resource_types::rsrc_q_t rq;
     string name;
     uvm_resource_base type_handle;
 
@@ -493,11 +517,18 @@ class uvm_resource_pool;
     // anonymous resources and are not entered into the name map
     name = rsrc.get_name();
     if(name != "") begin
-      if(rtab.exists(name)) rq = rtab[name];
-      else rq = new;
+      if(rtab.exists(name))
+        rq = rtab[name];
+      else
+        rq = new;
 
-      if(override)
+      // Insert the resource into the queue associated with its name.
+      // If we are doing a name override then insert it in the front of
+      // the queue, otherwise insert it in the back.
+      if(override & uvm_resource_types::NAME_OVERRIDE) begin
+        $display ("name override");
         rq.push_front(rsrc);
+      end
       else
         rq.push_back(rsrc);
       rtab[name] = rq;
@@ -505,10 +536,15 @@ class uvm_resource_pool;
 
     // insert into the type map
     type_handle = rsrc.get_type_handle();
-    if(ttab.exists(type_handle)) rq = ttab[type_handle];
-    else rq = new;
+    if(ttab.exists(type_handle))
+      rq = ttab[type_handle];
+    else
+      rq = new;
 
-    if(override)
+    // insert the resource into the queue associated with its type.  If
+    // we are doing a type override then insert it in the front of the
+    // queue, otherwise insert it in the back of the queue.
+    if(override & uvm_resource_types::TYPE_OVERRIDE)
       rq.push_front(rsrc);
     else
       rq.push_back(rsrc);
@@ -516,8 +552,31 @@ class uvm_resource_pool;
 
   endfunction
 
+  // function: set_override
+  //
+  // The resource provided as an argument will be entered into the pool
+  // and will override both by name and type.
+
   function void set_override(uvm_resource_base rsrc);
-    set(rsrc, 1);
+    set(rsrc, (uvm_resource_types::NAME_OVERRIDE | uvm_resource_types::TYPE_OVERRIDE));
+  endfunction
+
+  // function: set_name_override
+  //
+  // The resource provided as an argument will entered into the pool
+  // using noraml precedence in the type map and will override the name.
+
+  function void set_name_override(uvm_resource_base rsrc);
+    set(rsrc, uvm_resource_types::NAME_OVERRIDE);
+  endfunction
+
+  // function: set_type_override
+  //
+  // The resource provided as an argument will entered into the pool
+  // using noraml precedence in the name map and will override the type.
+
+  function void set_type_override(uvm_resource_base rsrc);
+    set(rsrc, uvm_resource_types::TYPE_OVERRIDE);
   endfunction
 
   // function: push_get_record
@@ -566,8 +625,8 @@ class uvm_resource_pool;
 
   function uvm_resource_base get_by_name(string name, string scope = "", bit rpterr = 1);
 
-    rsrc_q_t rq;
-    rsrc_q_t matchq=new;
+    uvm_resource_types::rsrc_q_t rq;
+    uvm_resource_types::rsrc_q_t matchq=new;
     uvm_resource_base rsrc;
     uvm_resource_base r;
     int unsigned i;
@@ -625,7 +684,7 @@ class uvm_resource_pool;
   function uvm_resource_base get_by_type(uvm_resource_base type_handle,
                                          string scope = "");
 
-    rsrc_q_t rq;
+    uvm_resource_types::rsrc_q_t rq;
     uvm_resource_base rsrc;
     uvm_resource_base r;
     int unsigned i;
@@ -658,13 +717,13 @@ class uvm_resource_pool;
   // quite expensive, as it has to traverse all of the resources in the
   // database.
 
-  function rsrc_q_t retrieve_resources(string scope);
+  function uvm_resource_types::rsrc_q_t retrieve_resources(string scope);
 
-    rsrc_q_t rq;
+    uvm_resource_types::rsrc_q_t rq;
     uvm_resource_base r;
     int unsigned i;
     int unsigned err;
-    rsrc_q_t result_q = new;
+    uvm_resource_types::rsrc_q_t result_q = new;
 
     foreach (rtab[name]) begin
       rq = rtab[name];
@@ -681,17 +740,17 @@ class uvm_resource_pool;
     
   endfunction
 
-  // function: find_zeros
+  // function: find_unused_resources
   //
   // Locate all the resources that have at least one write and no reads
 
-  function rsrc_q_t find_zeros();
+  function uvm_resource_types::rsrc_q_t find_unused_resources();
 
-    rsrc_q_t rq;
-    rsrc_q_t q = new;
+    uvm_resource_types::rsrc_q_t rq;
+    uvm_resource_types::rsrc_q_t q = new;
     int unsigned i;
     uvm_resource_base r;
-    access_t a;
+    uvm_resource_types::access_t a;
     int reads;
     int writes;
 
@@ -723,7 +782,7 @@ class uvm_resource_pool;
   // audit trail is printed for each resource along with the name,
   // value, and scope regular expression.
 
-  function void print_resources(rsrc_q_t rq, bit audit = 0);
+  function void print_resources(uvm_resource_types::rsrc_q_t rq, bit audit = 0);
 
     int unsigned i;
     uvm_resource_base r;
@@ -754,7 +813,7 @@ class uvm_resource_pool;
 
   function void dump();
 
-    rsrc_q_t rq;
+    uvm_resource_types::rsrc_q_t rq;
     string name;
 
     $display("\n=== resource pool ===");
@@ -855,7 +914,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
 
   function void set_override();
     uvm_resource_pool rp = uvm_resource_pool::get();
-    rp.set(this, 1);
+    rp.set(this, (uvm_resource_types::NAME_OVERRIDE | uvm_resource_types::TYPE_OVERRIDE));
   endfunction
 
   // function: get_by_name
@@ -944,7 +1003,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     // the access record with information about this access
 
     if(accessor != null) begin
-      access_t access_record;
+      uvm_resource_types::access_t access_record;
       if(access.exists(accessor))
         access_record = access[accessor];
       else
@@ -981,7 +1040,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     // the access record with information about this access
 
     if(accessor != null) begin
-      access_t access_record;
+      uvm_resource_types::access_t access_record;
       if(access.exists(accessor))
         access_record = access[accessor];
       else
