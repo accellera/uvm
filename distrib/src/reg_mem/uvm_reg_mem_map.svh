@@ -83,8 +83,6 @@ class uvm_reg_mem_map extends uvm_object;
    endfunction
 
 
-   // TODO: add 'reset' method, which resets only elements in that map
-
    //----------------------
    // Group: Initialization
    //----------------------
@@ -179,6 +177,23 @@ class uvm_reg_mem_map extends uvm_object;
    extern virtual function uvm_reg_mem_addr_t get_submap_offset (uvm_reg_mem_map submap);
 
    extern virtual function void   set_base_addr (uvm_reg_mem_addr_t  offset);
+
+   //
+   // FUNCTION: reset
+   // Reset the mirror for all registers in this address map.
+   //
+   // Sets the mirror value of all registers in this address map
+   // and all of its submaps
+   // to the reset value corresponding to the specified reset event.
+   // See <uvm_reg_field::reset()> for more details.
+   // Does not actually set the value of the registers in the design,
+   // only the values mirrored in their corresponding mirror.
+   //
+   // Note that, unlike the other reset() method, the default
+   // reset event for this method is "SOFT".
+   //
+   extern virtual function void reset(string kind = "SOFT");
+
 
    /*local*/ extern virtual function void   add_parent_map(uvm_reg_mem_map  parent_map,
                                                            uvm_reg_mem_addr_t offset);
@@ -538,6 +553,19 @@ function void uvm_reg_mem_map::add_submap (uvm_reg_mem_map child_map,
    set_submap_offset(child_map, offset);
 
 endfunction: add_submap
+
+
+// reset
+
+function void uvm_reg_mem_map::reset(string kind = "SOFT");
+   uvm_reg regs[$];
+
+   get_registers(regs);
+
+   foreach (regs[i]) begin
+      regs[i].reset(kind);
+   end
+endfunction
 
 
 // add_parent_map

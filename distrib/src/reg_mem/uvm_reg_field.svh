@@ -266,8 +266,7 @@ class uvm_reg_field extends uvm_object;
    // Sets the desired and mirror value of the field
    // to the reset event specified by ~kind~.
    // If the field does not have a reset value specified for the
-   // specified reset ~kind~ (see <uvm_reg_field::set_reset()>),
-   // the field is unchanged.
+   // specified reset ~kind~ the field is unchanged.
    //
    // Does not actually reset the value of the field in the design,
    // only the value mirrored in the field abstraction class.

@@ -511,7 +511,7 @@ virtual class uvm_reg_mem_block extends uvm_object;
    //
    // Sets the mirror value of all registers in the block and sub-blocks
    // to the reset value corresponding to the specified reset event.
-   // See <uvm_reg_field.reset()> for more details.
+   // See <uvm_reg_field::reset()> for more details.
    // Does not actually set the value of the registers in the design,
    // only the values mirrored in their corresponding mirror.
    //
