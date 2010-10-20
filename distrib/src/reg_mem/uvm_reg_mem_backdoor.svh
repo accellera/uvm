@@ -95,7 +95,7 @@ typedef uvm_hdl_path_slice uvm_hdl_path_concat_a[];
 class uvm_hdl_path_concat;
 	uvm_hdl_path_slice data[];
 	
-	function set(ref uvm_hdl_path_concat_a t);
+	function void set(ref uvm_hdl_path_concat_a t);
 		data=t;
 	endfunction	
 	

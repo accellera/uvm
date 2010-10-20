@@ -1230,6 +1230,7 @@ function void uvm_mem::configure(uvm_reg_mem_block  parent,
 
    if (hdl_path != "")
    begin
+   	// NOTE was add_hdl_path('{'{hdl_path,-1,-1}})  	    
    	uvm_hdl_path_slice e_[]=new[1];
  
    	e_[0].path=hdl_path;
