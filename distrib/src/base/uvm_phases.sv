@@ -100,10 +100,15 @@
                   UVM_PHASE_BOTTOMUP
                   } uvm_phase_type_t;
 
-   string phase_type_string[uvm_phase_type_t] =
-               '{ UVM_PHASE_TASK:     "forked task",
-                  UVM_PHASE_TOPDOWN:  "top-down func",
-                  UVM_PHASE_BOTTOMUP: "bottom-up func" };
+   string phase_type_string[uvm_phase_type_t];
+
+   function bit m_initialize_phase_type_string;
+     phase_type_string[UVM_PHASE_TASK]    = "forked task";
+     phase_type_string[UVM_PHASE_TOPDOWN] = "top-down func";
+     phase_type_string[UVM_PHASE_BOTTOMUP]= "bottom-up func";
+     return 1;
+   endfunction
+   bit m_phase_type_string_initialized = m_initialize_phase_type_string();
 
 // phase threading mode
 // --------------------
@@ -130,10 +135,16 @@
                   UVM_PHASE_PERSISTENT
                   } uvm_thread_mode_t;
 
-   string thread_mode_string[uvm_thread_mode_t] =
-               '{ UVM_PHASE_PROACTIVE:  "proactive",
-                  UVM_PHASE_REACTIVE:   "reactive",
-                  UVM_PHASE_PERSISTENT: "persistent" };
+   string thread_mode_string[uvm_thread_mode_t];
+
+   function bit m_initialize_thread_mode_string;
+     thread_mode_string[UVM_PHASE_PROACTIVE]  = "proactive";
+     thread_mode_string[UVM_PHASE_REACTIVE]   = "reactive";
+     thread_mode_string[UVM_PHASE_PERSISTENT] = "persistent";
+     return 1;
+   endfunction
+   bit m_thread_mode_string_initialized = m_initialize_thread_mode_string();
+
 
 // schedule phase state
 // --------------------
@@ -162,11 +173,16 @@
                   UVM_PHASE_DONE
                   } uvm_phase_state_t;
 
-   string phase_state_string[uvm_phase_state_t] =
-               '{ UVM_PHASE_DORMANT:   "dormant",
-                  UVM_PHASE_SCHEDULED: "scheduled",
-                  UVM_PHASE_EXECUTING: "executing",
-                  UVM_PHASE_DONE:      "done" };
+   string phase_state_string[uvm_phase_state_t];
+
+   function bit m_initialize_phase_state_string;
+     phase_state_string[UVM_PHASE_DORMANT]   = "dormant";
+     phase_state_string[UVM_PHASE_SCHEDULED] = "scheduled";
+     phase_state_string[UVM_PHASE_EXECUTING] = "executing";
+     phase_state_string[UVM_PHASE_DONE]      = "done";
+     return 1;
+   endfunction
+   bit m_phase_state_string_initialized = m_initialize_phase_state_string();
 
 // phase state transition for callbacks
 // ------------------------------------
@@ -388,6 +404,14 @@ endclass
 
 
 
+// Internal class to wrap a process id
+
+class uvm_process;
+  process m_process_id;  
+  function new(process pid);
+    m_process_id = pid;
+  endfunction
+endclass
 
 //----------------------------------------------------------------------
 // Class: uvm_phase_thread
@@ -403,9 +427,8 @@ endclass
 // TBD benchmark the assoc arrays - given that this class holds both
 // TBD comp and sched handles, it is possible to use a simpler darray
 
-class uvm_phase_thread;
+class uvm_phase_thread extends uvm_process;
 
-  process m_process_id;            // process ID of this phase/component thread
   uvm_phase_schedule m_phase;      // the phase this thread was spawned from
   uvm_component m_comp;            // the component this thread is running on
   uvm_thread_mode_t m_thread_mode; // threading semantics in force for this pid
@@ -416,7 +439,8 @@ class uvm_phase_thread;
   // thread semantics from the component.
 
   function new(uvm_phase_schedule phase, uvm_component comp);
-    m_process_id = process::self();
+    // process ID of this phase/component thread
+    super.new(process::self());
     m_phase = phase;
     m_comp = comp;
     if (m_comp.m_phase_threads.exists(m_phase)) begin // sanity check
@@ -454,7 +478,8 @@ class uvm_phase_thread;
   endfunction
 
   function int is_current_process();
-    return (m_process_id == process::self());
+    process pid = process::self();
+    return (m_process_id == pid);
   endfunction
 
 endclass
@@ -778,6 +803,8 @@ endfunction
 // - called from outside by uvm_root::phase_runner()
 // - calls uvm_phase_imp::traverse using our phase handle
 task uvm_phase_schedule::execute();
+    uvm_root top = uvm_root::get();
+
     if(m_state == UVM_PHASE_SCHEDULED)
       return;
     if (m_phase == null) begin
@@ -829,7 +856,7 @@ task uvm_phase_schedule::execute();
       end
       begin
         m_phase_proc = process::self();
-        m_phase.traverse(uvm_top,this);
+        m_phase.traverse(top,this);
         wait fork;
       end
     join_any
@@ -869,9 +896,9 @@ task uvm_phase_schedule::execute();
     // if there are no successors then we are all done.  Otherwise, run
     // all the successor phases.
     // GSA TBD insert new global_stop_request support
-    if(uvm_top.active_list_size() == 0 && m_successors.size() == 0) begin
+    if(top.active_list_size() == 0 && m_successors.size() == 0) begin
       $display("TBD about to call all_done as nothing to do");
-      uvm_top.all_done(); //TBD linkage? global_all_done()
+      top.all_done(); //TBD linkage? global_all_done()
     end 
     else begin
       // execute all the successors

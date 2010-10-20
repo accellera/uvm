@@ -164,7 +164,7 @@ class uvm_root extends uvm_component;
 
   /*NEW*/ // phasing - // GSA TBD cleanup
   /*NEW*/ local mailbox #(uvm_phase_schedule) phase_hopper;
-  /*NEW*/ process active_list [uvm_phase_schedule];
+  /*NEW*/ uvm_process active_list [uvm_phase_schedule];
   /*NEW*/ local bit phases_all_done;
   /*NEW*/ extern local task phase_runner(); // main phase machine
   /*NEW*/ extern function void initiate_phase(uvm_phase_schedule phase);
@@ -529,11 +529,11 @@ endtask
 /*NEW*/ task uvm_root::phase_runner(); // GSA TBD cleanup
 /*NEW*/   forever begin
 /*NEW*/     uvm_phase_schedule phase;
-/*NEW*/     process proc;
+/*NEW*/     uvm_process proc;
 /*NEW*/     phase_hopper.get(phase);
 /*NEW*/     fork
 /*NEW*/       begin
-/*NEW*/         proc = process::self();
+/*NEW*/         proc = new(process::self());
 /*NEW*/         phase.execute();
 /*NEW*/       end
 /*NEW*/     join_none

@@ -280,14 +280,14 @@ endfunction
 function void uvm_graph::bfs();
   uvm_graph q[$];
   this.m_level = 0;
-  q = { this };
+  q.push_back(this);
   bfs_imp(q);
 endfunction
 
 function void uvm_graph::bfs_imp(ref uvm_graph q[$]);
   int level = 0;
   int prev_level = 0;
-  uvm_graph level_q [$] = {};
+  uvm_graph level_q [$];
   clr_marks();
   while(q.size() > 0) begin
     uvm_graph n = q.pop_front();
