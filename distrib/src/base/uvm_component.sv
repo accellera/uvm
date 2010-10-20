@@ -47,14 +47,14 @@ function uvm_component::new (string name, uvm_component parent);
   end
 
   // Check that we're not in or past end_of_elaboration
-  if (end_of_elaboration_ph.is_in_progress() ||
-      end_of_elaboration_ph.is_done() ) begin
-    uvm_phase curr_phase;
-    curr_phase = uvm_top.get_current_phase();
-    uvm_report_fatal("ILLCRT", {"It is illegal to create a component once",
-              " phasing reaches end_of_elaboration. The current phase is ", 
-              curr_phase.get_name()}, UVM_NONE);
-  end
+  //TBD if (end_of_elaboration_ph.is_in_progress() ||
+  //TBD     end_of_elaboration_ph.is_done() ) begin
+  //TBD   uvm_phase curr_phase;
+  //TBD   curr_phase = uvm_top.get_current_phase();
+  //TBD   uvm_report_fatal("ILLCRT", {"It is illegal to create a component once",
+  //TBD             " phasing reaches end_of_elaboration. The current phase is ", 
+  //TBD             curr_phase.get_name()}, UVM_NONE);
+  //TBD end
 
   if (name == "") begin
     name.itoa(m_inst_count);
@@ -536,45 +536,76 @@ endfunction
 //------------------------------------------------------------------------------
 
 
-// do_func_phase
-// -------------
+  /*NEW*/ //--------------------------------------------------------------------
+  /*NEW*/ // phase_started() and phase_ended() are callbacks called at the
+  /*NEW*/ // beginning and end of each phase, respectively.  Since they are
+  /*NEW*/ // called for all phases the phase is passed in as an argument so the
+  /*NEW*/ // callback can decide what to do for any particular phase.
+  /*NEW*/ //--------------------------------------------------------------------
 
-function void uvm_component::do_func_phase (uvm_phase phase);
-  // If in build_ph, don't build if already done
-  m_curr_phase = phase;
-  if (!(phase == build_ph && m_build_done))
-    phase.call_func(this);
-endfunction
+  /*NEW*/ function void uvm_component::phase_started(uvm_phase_schedule phase);
+  /*NEW*/ endfunction
 
+  /*NEW*/ function void uvm_component::phase_ended(uvm_phase_schedule phase);
+  /*NEW*/ endfunction
 
-// do_task_phase
-// -------------
+  /*NEW*/ //--------------------------------------------------------------------
+  /*NEW*/ // some phase-related convenience functions
+  /*NEW*/ //--------------------------------------------------------------------
 
-task uvm_component::do_task_phase (uvm_phase phase);
+  /*NEW*/ function uvm_phase_schedule uvm_component::get_current_phase();
+  /*NEW*/   foreach (m_phase_threads[phase]) begin
+  /*NEW*/     if (m_phase_threads[phase].is_current_process()) begin
+  /*NEW*/       return phase;
+  /*NEW*/       break;
+  /*NEW*/     end
+  /*NEW*/   end
+  /*NEW*/   uvm_report_fatal("LOSTTHREAD","unable to determine current phase from child thread");
+  /*NEW*/ endfunction
 
-  m_curr_phase = phase;
-  `ifdef UVM_USE_FPC  
-        m_phase_process = process::self();
-        phase.call_task(this);
-        @m_kill_request;
-  `else
-  // don't use fine grained process control
-   fork begin // isolate inner fork so can safely kill via disable fork
-     fork : task_phase
-       // process 1 - call task; if returns, keep alive until kill request
-       begin
-         phase.call_task(this);
-         @m_kill_request;
-       end
-       // process 2 - any kill request will preempt process 1
-       @m_kill_request;
-     join_any
-     disable fork;
-   end
-   join
-  `endif
+  /*NEW*/ function void uvm_component::set_default_thread_mode(uvm_thread_mode_t thread_mode);
+  /*NEW*/   m_phase_thread_mode = thread_mode;
+  /*NEW*/ endfunction
 
-endtask
+  /*NEW*/ function void uvm_component::set_thread_mode(uvm_thread_mode_t thread_mode);
+  /*NEW*/   foreach (m_phase_threads[phase]) begin
+  /*NEW*/     if (m_phase_threads[phase].is_current_process()) begin
+  /*NEW*/       m_phase_threads[phase].set_thread_mode(thread_mode);
+  /*NEW*/       return;
+  /*NEW*/     end
+  /*NEW*/   end
+  /*NEW*/   //TBD fatal
+  /*NEW*/ endfunction
+
+  /*NEW*/ function void uvm_component::jump(uvm_phase_imp phase);
+  /*NEW*/   uvm_phase_schedule current_phase;
+  /*NEW*/   current_phase = get_current_phase();
+  /*NEW*/   current_phase.jump(phase);
+  /*NEW*/ endfunction
+
+  /*NEW*/ function void uvm_component::jump_all_domains(uvm_phase_imp phase);
+  /*NEW*/   uvm_phase_schedule current_phase;
+  /*NEW*/   current_phase = get_current_phase();
+  /*NEW*/   current_phase.jump_all(phase);
+  /*NEW*/ endfunction
+
+  /*NEW*/ function void uvm_component::agree_to_terminate_phase();
+  /*NEW*/   uvm_phase_schedule current_phase;
+  /*NEW*/   current_phase = get_current_phase();
+  /*NEW*/   current_phase.agree_to_terminate_phase();
+  /*NEW*/ endfunction
+
+  /*NEW*/ function void uvm_component::disagree_to_terminate_phase();
+  /*NEW*/   uvm_phase_schedule current_phase;
+  /*NEW*/   current_phase = get_current_phase();
+  /*NEW*/   current_phase.disagree_to_terminate_phase();
+  /*NEW*/ endfunction
+
+  /*NEW*/ function void uvm_component::terminate_phase();
+  /*NEW*/   uvm_phase_schedule current_phase;
+  /*NEW*/   current_phase = get_current_phase();
+  /*NEW*/   current_phase.terminate_phase();
+  /*NEW*/ endfunction
 
 
 // do_kill_all
@@ -722,6 +753,25 @@ endfunction
 function void uvm_component::report();
   return;
 endfunction
+
+
+/*NEW*/ // finalize
+/*NEW*/ // --------
+/*NEW*/ 
+/*NEW*/ function void uvm_component::finalize(); return; endfunction
+/*NEW*/ 
+/*NEW*/ task uvm_component::pre_reset();      return; endtask
+/*NEW*/ task uvm_component::reset();          return; endtask
+/*NEW*/ task uvm_component::post_reset();     return; endtask
+/*NEW*/ task uvm_component::pre_configure();  return; endtask
+/*NEW*/ task uvm_component::configure();      return; endtask
+/*NEW*/ task uvm_component::post_configure(); return; endtask
+/*NEW*/ task uvm_component::pre_main();       return; endtask
+/*NEW*/ task uvm_component::main();           return; endtask
+/*NEW*/ task uvm_component::post_main();      return; endtask
+/*NEW*/ task uvm_component::pre_shutdown();   return; endtask
+/*NEW*/ task uvm_component::shutdown();       return; endtask
+/*NEW*/ task uvm_component::post_shutdown();  return; endtask
 
 
 // stop

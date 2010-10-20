@@ -52,7 +52,6 @@ endtask
 uvm_test_done_objection uvm_test_done = uvm_test_done_objection::get();
 
 
-
 // Method: global_stop_request 
 //
 // Convenience function for uvm_top.stop_request(). See uvm_root for more
@@ -87,6 +86,17 @@ function void set_global_stop_timeout(time timeout);
   top = uvm_root::get();
   top.stop_timeout = timeout;
 endfunction
+
+
+/*NEW*/ // Function: initiate_phase
+/*NEW*/ // Convenience function for uvm_top.initiate_phase
+/*NEW*/ // See uvm_root for more information
+/*NEW*/ 
+/*NEW*/ function void initiate_phase(uvm_phase_schedule phase);
+/*NEW*/   uvm_root top;
+/*NEW*/   top = uvm_root::get();
+/*NEW*/   top.initiate_phase(phase);
+/*NEW*/ endfunction
 
 
 //----------------------------------------------------------------------------

@@ -60,7 +60,7 @@ virtual class uvm_port_component_base extends uvm_component;
     return;
   endfunction
 
-  virtual task do_task_phase (uvm_phase phase);
+  virtual task do_task_phase (uvm_phase_imp phase);
   endtask
 endclass
 
@@ -391,14 +391,15 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
 
   virtual function void connect (this_type provider);
 
-    if (end_of_elaboration_ph.is_done() ||
-        end_of_elaboration_ph.is_in_progress()) begin
-      //m_comp.uvm_report_warning(s_connection_warning_id, 
-      m_comp.uvm_report_warning("Late Connection", 
-        {"Attempt to connect ",this.get_full_name()," (of type ",this.get_type_name(),
-         ") at or after end_of_elaboration phase.  Ignoring."});
-      return;
-    end
+    m_comp.uvm_report_warning("PHASING-TBD","uvm_port_base refers to end_of_elaboration_ph");
+    //TBD if (end_of_elaboration_ph.is_done() ||
+    //TBD     end_of_elaboration_ph.is_in_progress()) begin
+    //TBD   //m_comp.uvm_report_warning(s_connection_warning_id, 
+    //TBD   m_comp.uvm_report_warning("Late Connection", 
+    //TBD     {"Attempt to connect ",this.get_full_name()," (of type ",this.get_type_name(),
+    //TBD      ") at or after end_of_elaboration phase.  Ignoring."});
+    //TBD   return;
+    //TBD end
 
     if (provider == null) begin
       m_comp.uvm_report_error(s_connection_error_id,
@@ -479,12 +480,13 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
         save = {"This port's fanout network:\n\n  ",
                get_full_name()," (",get_type_name(),")\n",save,"\n"};
       if (m_imp_list.num() == 0) begin
-        if (end_of_elaboration_ph.is_done() ||
-            end_of_elaboration_ph.is_in_progress())
-          save = {save,"  Connected implementations: none\n"};
-        else
-        save = {save,
-                "  Connected implementations: not resolved until end-of-elab\n"};
+        m_comp.uvm_report_warning("PHASING-TBD","uvm_port_base refers to end_of_elaboration_ph");
+        //TBD if (end_of_elaboration_ph.is_done() ||
+        //TBD     end_of_elaboration_ph.is_in_progress())
+        //TBD   save = {save,"  Connected implementations: none\n"};
+        //TBD else
+        //TBD save = {save,
+        //TBD         "  Connected implementations: not resolved until end-of-elab\n"};
       end
       else begin
         save = {save,"  Resolved implementation list:\n"};
