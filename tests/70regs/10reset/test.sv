@@ -49,7 +49,7 @@ endclass
 
 initial
 begin
-   uvm_reg_mem_data_t data;
+   uvm_reg_data_t data;
    reg_ID rg = new;
 
    rg.build();

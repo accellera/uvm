@@ -52,14 +52,14 @@ class reg32 extends uvm_reg;
 endclass
 
 
-class dut extends uvm_reg_mem_block;
+class dut extends uvm_reg_block;
 
    rand reg32 r0;
    rand reg8  r1;
    rand reg32 r2;
 
-   uvm_reg_mem_map bus8;
-   uvm_reg_mem_map bus32;
+   uvm_reg_map bus8;
+   uvm_reg_map bus32;
 
    function new(string name = "dut");
       super.new(name,UVM_NO_COVERAGE);
@@ -118,7 +118,7 @@ begin
    $write("Checking if get_by_offset(0 reports if model is not locked...\n");
    catcher::seen = 0;
    rg = blk.bus8.get_reg_by_offset(0);
-   if (catcher::seen != 1) `uvm_error("Test", "uvm_reg_mem_map::get_reg_by_offset() did not report that model was not locked");
+   if (catcher::seen != 1) `uvm_error("Test", "uvm_reg_map::get_reg_by_offset() did not report that model was not locked");
    if (rg != null) `uvm_error("test", "A register was found without being locked");
    catcher::seen = 0;
    
