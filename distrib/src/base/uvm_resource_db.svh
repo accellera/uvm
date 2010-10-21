@@ -18,26 +18,26 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// class: uvm_resource_proxy
+// class: uvm_resource_db
 //
-// The uvm_resource_proxy#(T) class provides a convenience interface for
+// The uvm_resource_db#(T) class provides a convenience interface for
 // the resources facility.  In many cases basic operations such as
 // creating and setting a resource or getting a resource could take
 // multiple lines of code using the interfaces in uvm_resource_base or
-// uvm_resource#(T).  The convenience layer in uvm_resource_proxy#(T)
+// uvm_resource#(T).  The convenience layer in uvm_resource_db#(T)
 // reduce many of those operations to a single line of code.
 //
-// All of the functions in uvm_resource_proxy#(T) are static, so they
+// All of the functions in uvm_resource_db#(T) are static, so they
 // must be called using the :: operator.  For example:
 //
-//|  uvm_resource_proxy#(int)::write_and_set("A", "*", 17, this);
+//|  uvm_resource_db#(int)::write_and_set("A", "*", 17, this);
 //
 // The parameter value "int" identifies the resource type as
 // uvm_resource#(int).  Thus, the type of the object in the resource
 // container is int. This maintains the type-safety characteristics of
 // resource operations.
 //----------------------------------------------------------------------
-class uvm_resource_proxy #(type T=int);
+class uvm_resource_db #(type T=int);
 
   typedef uvm_resource #(T) rsrc_t;
 
@@ -54,7 +54,7 @@ class uvm_resource_proxy #(type T=int);
 
   // function: get_by_type
   //
-  // Import a resource by type.  The type is specified in the proxy
+  // Import a resource by type.  The type is specified in the db
   // class parameter so the only argument to this funciton is the
   // current scope.
 

@@ -105,7 +105,7 @@ class component #(type CONFIG = int) extends uvm_component;
     ii = 91; // default value for ii;
 
     // retrieve a config object by type from the resource database
-    if(!uvm_resource_proxy#(CONFIG)::read_by_type(get_full_name(), cfg, this)) begin
+    if(!uvm_resource_db#(CONFIG)::read_by_type(get_full_name(), cfg, this)) begin
       `uvm_error("TESTERROR", "no config object available");
       test_error = 1;
     end
@@ -115,7 +115,7 @@ class component #(type CONFIG = int) extends uvm_component;
 
     // retrieve a virtual interface from the resource database by type
     // instead of by name.
-    if(!uvm_resource_proxy#(virtual bus_if)::read_by_type(get_full_name(), bus, this)) begin
+    if(!uvm_resource_db#(virtual bus_if)::read_by_type(get_full_name(), bus, this)) begin
       `uvm_error("TESTERROR", "no bus interface available");
       test_error = 1;
     end
@@ -125,7 +125,7 @@ class component #(type CONFIG = int) extends uvm_component;
     // this read will result in a failure because we have not added a
     // resource whose type is int into the resource database.  The
     // variable ii retains its default value
-    if(!uvm_resource_proxy#(int)::read_by_type(get_full_name(), ii, this))
+    if(!uvm_resource_db#(int)::read_by_type(get_full_name(), ii, this))
       uvm_report_info("build", "no ii");
     else begin
       `uvm_error("TESTERROR", "non-existant int mysteriously located in resource pool");
@@ -134,7 +134,7 @@ class component #(type CONFIG = int) extends uvm_component;
     uvm_report_info("build", $psprintf("ii = %0d", ii));
 
     // here we get a resource by name   
-    if(!uvm_resource_proxy#(bit [7:0])::read_by_name("data", get_full_name(), data, this)) begin
+    if(!uvm_resource_db#(bit [7:0])::read_by_name("data", get_full_name(), data, this)) begin
       `uvm_error("TESTERROR", "cannot locate 'data' in the resource pool");
       test_error = 1;
     end
@@ -210,14 +210,14 @@ class env extends uvm_component;
 
     cA = new();
     assert(cA.randomize());
-    uvm_resource_proxy#(config_A)::write_and_set_anonymous("*", cA, this);
+    uvm_resource_db#(config_A)::write_and_set_anonymous("*", cA, this);
 
 
     cB = new();
     assert(cB.randomize());
-    uvm_resource_proxy#(config_B)::write_and_set_anonymous("*", cB, this);
+    uvm_resource_db#(config_B)::write_and_set_anonymous("*", cB, this);
 
-    r_data = uvm_resource_proxy#(bit [7:0])::set("data", "*");
+    r_data = uvm_resource_db#(bit [7:0])::set("data", "*");
     r_data.write(43, this);
     r_data.set_read_only();
 
@@ -273,7 +273,7 @@ module top;
   initial begin
 
     // set the bus interface as a resource
-    uvm_resource_proxy#(virtual bus_if)::write_and_set("bus_if", ".*", bus);
+    uvm_resource_db#(virtual bus_if)::write_and_set("bus_if", ".*", bus);
     
     run_test();
 

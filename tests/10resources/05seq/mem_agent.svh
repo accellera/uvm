@@ -64,7 +64,7 @@ class mem_driver #(int unsigned ADDR_SIZE=16, int unsigned DATA_SIZE=8)
 
   function void build();
     // retrieve virtual interface from the resources database
-    if(!uvm_resource_proxy#(if_t)::read_by_type(get_full_name(), m_if, this))
+    if(!uvm_resource_db#(if_t)::read_by_type(get_full_name(), m_if, this))
       uvm_report_error("build", "no bus interface available");
   endfunction
 
@@ -142,7 +142,7 @@ class mem_monitor #(int unsigned ADDR_SIZE=16, int unsigned DATA_SIZE=8)
   function void build();
     ap = new("ap", this);
     // retrieve virtual interface from the resources database
-    if(!uvm_resource_proxy#(if_t)::read_by_type(get_full_name(), m_if, this))
+    if(!uvm_resource_db#(if_t)::read_by_type(get_full_name(), m_if, this))
       uvm_report_error("build", "no bus interface available");
   endfunction
 
@@ -220,7 +220,7 @@ class mem_agent #(type CONFIG=int,
   function void build();
 
     // retrieve the config object
-    if(!uvm_resource_proxy#(CONFIG)::read_by_type(get_full_name(), cfg, this)) begin
+    if(!uvm_resource_db#(CONFIG)::read_by_type(get_full_name(), cfg, this)) begin
       `uvm_warning("build", "no config object available, creating a default one");
       cfg = new(); // create default configuration object
     end

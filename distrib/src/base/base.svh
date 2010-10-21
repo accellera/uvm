@@ -66,7 +66,7 @@
   // Resources/configuration facility
   `include "base/uvm_spell_chkr.svh"
   `include "base/uvm_resource.svh"
-  `include "base/uvm_resource_proxy.svh"
+  `include "base/uvm_resource_db.svh"
   `include "base/uvm_resource_specializations.svh"
 
   // uvm_component has a co-dependency with the factory. 

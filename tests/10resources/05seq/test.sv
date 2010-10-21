@@ -30,7 +30,7 @@ class env #(int unsigned ADDR_SIZE=16, int unsigned DATA_SIZE=8)
    extends uvm_component;
 
   typedef env #(ADDR_SIZE, DATA_SIZE) this_type;
-  typedef uvm_resource_proxy#(virtual mem_if #(ADDR_SIZE, DATA_SIZE)) mem_if_rsrc_t;
+  typedef uvm_resource_db#(virtual mem_if #(ADDR_SIZE, DATA_SIZE)) mem_if_rsrc_t;
   typedef virtual mem_if #(ADDR_SIZE, DATA_SIZE) vif_t;
 
   `uvm_component_param_utils(this_type);
@@ -90,10 +90,10 @@ class test extends uvm_component;
 
     // create the configuration resource and set it into the resoures
     // database
-    uvm_resource_proxy#(mem_agent_config)::write_and_set("mem_cfg", "*.mem_agent*",
+    uvm_resource_db#(mem_agent_config)::write_and_set("mem_cfg", "*.mem_agent*",
                                                        mem_cfg, this);
     // establish the loop count for the main sequence
-    uvm_resource_proxy#(int unsigned)::write_and_set("loop_count", "mem_seq",
+    uvm_resource_db#(int unsigned)::write_and_set("loop_count", "mem_seq",
                                                          1000, this);
     
     e = new("env", this);
@@ -122,7 +122,7 @@ module top;
   parameter int unsigned ADDR_SIZE = 8;
   parameter int unsigned DATA_SIZE = 8;
 
-  typedef uvm_resource_proxy#(virtual mem_if #(ADDR_SIZE, DATA_SIZE)) mem_if_rsrc_t;
+  typedef uvm_resource_db#(virtual mem_if #(ADDR_SIZE, DATA_SIZE)) mem_if_rsrc_t;
 
   clkgen ck(clk);
   mem_if #(ADDR_SIZE, DATA_SIZE) mif1(clk);

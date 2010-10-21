@@ -1,4 +1,4 @@
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //   Copyright 2010 Mentor Graphics Corporation
 //   All Rights Reserved Worldwide
 //
@@ -15,7 +15,7 @@
 //   CONDITIONS OF ANY KIND, either express or implied.  See
 //   the License for the specific language governing
 //   permissions and limitations under the License.
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 
 import uvm_pkg::*;
 `include "uvm_macros.svh"
@@ -40,11 +40,11 @@ class child_component extends uvm_component;
 
     super.build();
 
-    if(!uvm_resource_proxy#(int)::read_by_name("size", get_full_name(), size))
+    if(!uvm_resource_db#(int)::read_by_name("size", get_full_name(), size))
       `uvm_warning("RSRCNF", $psprintf("resource size in scope %s not found", get_full_name()));
     $display("%s: size = %0d", get_full_name(), size);
 
-    if(!uvm_resource_proxy#(bit)::read_by_name("flag", get_full_name(), flag))
+    if(!uvm_resource_db#(bit)::read_by_name("flag", get_full_name(), flag))
       `uvm_warning("RSRCNF", $psprintf("resource flag in scope %s not found", get_full_name()));
     $display("%s: flag = %0d", get_full_name(), flag);
 
@@ -79,10 +79,10 @@ class parent_component extends uvm_component;
     child2 = new("child2", this);
 
     // Intentionally mispell "mode" to see if the spell checker works
-    if(!uvm_resource_proxy#(mode_t)::read_by_name("mde", get_full_name(), mode))
+    if(!uvm_resource_db#(mode_t)::read_by_name("mde", get_full_name(), mode))
       `uvm_warning("RSRCNF", "resource not found");
     // try a different intentional misspelling
-    if(!uvm_resource_proxy#(mode_t)::read_by_name("odf", get_full_name(), mode))
+    if(!uvm_resource_db#(mode_t)::read_by_name("odf", get_full_name(), mode))
       `uvm_warning("RSRCNF", "resource not found");
     $display("%s: mode = %0d", get_full_name(), mode);
 
@@ -121,27 +121,27 @@ class test extends uvm_component;
     // create and export a resource that is available only in the "mom"
     // sub-hierarchy.  We use a glob to represent the set of scopes over
     // which this resource is visible
-    uvm_resource_proxy#(int)::write_and_set("size", "*.mom.*", 16, this);
+    uvm_resource_db#(int)::write_and_set("size", "*.mom.*", 16, this);
 
     // create and export a resource that is available only in the "dad"
     // sub-hierarchy.  Here we use a regex to represent the set of
     // scopes over which this resource is visible.  Note the % as the
     // lead character
-    uvm_resource_proxy#(int)::write_and_set("size", "/.*\\.dad\\..*/", 32, this);
+    uvm_resource_db#(int)::write_and_set("size", "/.*\\.dad\\..*/", 32, this);
     
     // create and export a resource that is available only in leaves
     // named child1.
-    uvm_resource_proxy#(bit)::write_and_set("flag", "*.child1", 1, this);
+    uvm_resource_db#(bit)::write_and_set("flag", "*.child1", 1, this);
 
     // create and export a resource that is available anywhere in the
     // sub-herarchy rooted at this this component.
-    uvm_resource_proxy#(mode_t)::write_and_set("mode", "*", MODE_CONFIGURE, this);
+    uvm_resource_db#(mode_t)::write_and_set("mode", "*", MODE_CONFIGURE, this);
   endfunction
 
   task run();
     uvm_resources.dump();
     $display("--- zeros ---");
-    uvm_resources.print_resources(uvm_resources.find_zeros);
+    uvm_resources.print_resources(uvm_resources.find_unused_resources);
     global_stop_request();
   endtask
 
