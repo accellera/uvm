@@ -80,12 +80,12 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence;
          foreach (fields[j]) begin
             foreach (maps[k]) begin
                if (fields[j].get_access(maps[k]) == "RO") begin
-                  `uvm_warning("RegMem", $psprintf("Register \"%s\" has RO bits",
+                  `uvm_warning("RegMem", $psprintf("Register \"%s\" has RO fields",
                                                 rg.get_full_name()));
                   return;
                end
                if (!fields[j].is_known_access(maps[k])) begin
-                  `uvm_warning("RegMem", $psprintf("Register \"%s\" has unknown\"%s\" bits",
+                  `uvm_warning("RegMem", $psprintf("Register \"%s\" has fields with unknown access type \"%s\"",
                                                 rg.get_full_name(),
                                                 fields[j].get_access(maps[k])));
                   return;

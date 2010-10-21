@@ -267,7 +267,7 @@ typedef class uvm_reg_adapter;
 
 
 //------------------------------------------------------------------------------
-//
+// FIXME uvm_reg_mem_data_t is of type bit so 2val not 4val
 // Type: uvm_reg_mem_addr_t
 //
 // Address value
@@ -280,7 +280,7 @@ typedef  bit [`UVM_REG_MEM_ADDR_WIDTH-1:0]  uvm_reg_mem_addr_t ;
 typedef  logic [`UVM_REG_MEM_ADDR_WIDTH-1:0]  uvm_reg_mem_addr_logic_t ;
 
 //------------------------------------------------------------------------------
-//
+// FIXME uvm_reg_mem_data_t is of type bit so 2val not 4val
 // Type: uvm_reg_mem_data_t
 //
 // Data value

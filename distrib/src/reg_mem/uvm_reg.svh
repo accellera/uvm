@@ -2767,6 +2767,8 @@ task  uvm_reg::backdoor_write(output uvm_status_e status,
   foreach (paths[i]) begin
      uvm_hdl_path_concat hdl_slices = paths[i];
      foreach (hdl_slices.data[j]) begin
+        `uvm_info("RegMem", $psprintf("backdoor_write to %s ",hdl_slices.data[j].path),UVM_DEBUG);
+     	
         if (hdl_slices.data[j].offset < 0) begin
            ok &= uvm_hdl_deposit(hdl_slices.data[j].path,data);
            continue;
@@ -2813,6 +2815,8 @@ function uvm_status_e uvm_reg::backdoor_read_func(
      uvm_hdl_path_concat hdl_slices = paths[i];
      val = 0;
      foreach (hdl_slices.data[j]) begin
+        `uvm_info("RegMem", $psprintf("backdoor_read from %s ",hdl_slices.data[j].path),UVM_DEBUG);
+     	
         if (hdl_slices.data[j].offset < 0) begin
            ok &= uvm_hdl_read(hdl_slices.data[j].path,val);
            continue;
@@ -2820,14 +2824,17 @@ function uvm_status_e uvm_reg::backdoor_read_func(
         begin
            uvm_reg_mem_data_t slice;
            int k = hdl_slices.data[j].offset;
+           
            ok &= uvm_hdl_read(hdl_slices.data[j].path, slice);
+//          `uvm_info("RegMem", $psprintf("raw1 dpi result is 0x%0x size=%0d",slice,hdl_slices.data[j].size),UVM_DEBUG);
+      
            repeat (hdl_slices.data[j].size) begin
               val[k++] = slice[0];
               slice >>= 1;
            end
         end
      end
-
+ 
      if (i == 0) data = val;
 
      if (val != data) begin
@@ -2837,6 +2844,8 @@ function uvm_status_e uvm_reg::backdoor_read_func(
                                     val, uvm_hdl_concat2string(paths[i]))); 
         return UVM_NOT_OK;
       end
+      `uvm_info("RegMem", $psprintf("returned backdoor value 0x%0x",data),UVM_DEBUG);
+      
   end
 
   return (ok) ? UVM_IS_OK : UVM_NOT_OK;

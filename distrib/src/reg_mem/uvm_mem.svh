@@ -2826,17 +2826,24 @@ function void uvm_mem::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
       parent.get_full_hdl_path(parent_paths,kind);
 
       for (int i=0; i<hdl_paths.size();i++) begin
+         // NOTE this is for an array a by-value copy but for a ref its a ptr to the object
          uvm_hdl_path_concat hdl_slices = hdl_paths.get(i);
+         uvm_hdl_path_slice hdl_slices_a[] = hdl_slices.data;
 
          foreach (parent_paths[j])  begin
-            foreach (hdl_slices.data[k]) begin
-               if (hdl_slices.data[k].path == "")
-                  hdl_slices.data[k].path = parent_paths[j];
+            foreach (hdl_slices_a[k]) begin
+               if (hdl_slices_a[k].path == "")
+                  hdl_slices_a[k].path = parent_paths[j];
                else
-                  hdl_slices.data[k].path = { parent_paths[j], ".", hdl_slices.data[k].path };
+                  hdl_slices_a[k].path = { parent_paths[j], ".", hdl_slices_a[k].path };
             end
          end
-         paths.push_back(hdl_slices);
+
+         begin
+                uvm_hdl_path_concat t_ = new();
+                t_.set(hdl_slices_a);
+                paths.push_back(t_);
+         end        
       end
    end
 endfunction

@@ -50,8 +50,8 @@
 
 typedef struct {
    string path;
-   int unsigned offset;
-   int unsigned size;
+   int offset;
+   int size;
 } uvm_hdl_path_slice;
 
 

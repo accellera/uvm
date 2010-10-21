@@ -16,7 +16,13 @@ tb_env.sv
 // 
 // to enable it use one of the following strategies 
 // 1. -linedebug (enables full access to ALL values)
-// 2. -access +rwc (enables full access to ALL values)
+// 2. -access +rw (enables full access to ALL values)
 // 3a. use "-genafile <accessfile>" for a simulation the generate a specific access file
 // 3b. use "-afile <accessfile>" to enable only access to the recorded objects 
--access +rwc
+-access +rw
+
+
+// the VPI part for the backdoor
+../../../../distrib/src/C/uvm_hdl.c
+-DNCSIM
+
