@@ -103,23 +103,18 @@ begin
    op(DEPOSIT, "dut.q",       'h3C, 'h3C, `__LINE__);
    op(DEPOSIT, "dut.q[4]",    'h00, 'h00, `__LINE__);
    op(DEPOSIT, "dut.q[6]",    'h01, 'h01, `__LINE__);
-   op(READ,    "dut.q",           , 'h6C, `__LINE__);
-
-`ifndef VCS
-   op(READ,    "dut.w",           , 'h0F, `__LINE__); // w is scheduled, but not yet updated
+`ifndef MODEL_TECH
+   op(DEPOSIT, "dut.q[6:4]",  'h02, 'h02, `__LINE__);
+   op(READ,    "dut.q",           , 'h2C, `__LINE__);
+   op(DEPOSIT, "dut.q[7:4]",  'h06, 'h06, `__LINE__);
+`endif
+   
    #0;
    op(READ,    "dut.w",           , 'h6C, `__LINE__); // w is now q
    op(DEPOSIT, "dut.w",       'h3C, 'h3C, `__LINE__); // w retains until q drives new value
    #0;
    op(READ,    "dut.w",           , 'h3C, `__LINE__); //
    op(DEPOSIT, "dut.q",       'hA5, 'hA5, `__LINE__); // deposit on 'dut.q'
-   op(READ,    "dut.w",           , 'h3C, `__LINE__); // w is now ~scheduled~ to be A5
-`else // VCS behavior
-   #0;
-   op(READ,    "dut.w",           , 'h6C, `__LINE__); // w is now q
-   op(DEPOSIT, "dut.w",       'h3C, 'h6C, `__LINE__); // Can't deposit on a wire
-   op(DEPOSIT, "dut.q",       'hA5, 'hA5, `__LINE__); // deposit on 'dut.q'
-`endif
 
    #0;
    op(READ,    "dut.w",           , 'hA5, `__LINE__); // w is now q
