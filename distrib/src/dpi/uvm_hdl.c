@@ -61,10 +61,8 @@ static int uvm_hdl_max_width()
 static int uvm_hdl_set_vlog(char *path, p_vpi_vecval *value, PLI_INT32 flag)
 {
   static int maxsize = -1;
-  int i, size, chunks;
   vpiHandle r;
   s_vpi_value value_s;
-  p_vpi_vecval value_p;
   s_vpi_time  time_s = { vpiSimTime, 0, 0 };
 
   r = vpi_handle_by_name(path, 0);
@@ -81,7 +79,6 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval *value, PLI_INT32 flag)
 
 // Code for Questa & VCS
 // ---------------------
-#ifndef NCSIM
     if (flag == vpiReleaseFlag) {
       //size = vpi_get(vpiSize, r);
       //value_p = (p_vpi_vecval)(malloc(((size-1)/32+1)*8*sizeof(s_vpi_vecval)));
@@ -101,44 +98,6 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval *value, PLI_INT32 flag)
 #endif
   return 1;
 }
-
-// Code for NC
-// ---------------------
-#else
-    size = vpi_get(vpiSize, r);
-    if(size > maxsize)
-    {
-      vpi_printf("ERROR UVM : hdl path '%s' is %0d bits,\n", path, size);
-      vpi_printf(" but the maximum size is %0d, redefine using a compile\n", maxsize);
-      vpi_printf(" flag. i.e. %s\n", "vlog ... +define+UVM_HDL_MAX_WIDTH=<value>\n");
-#ifndef VCS
-      vpi_release_handle(r);
-#endif
-      return 0;
-    }
-    chunks = (size-1)/32 + 1;
-    // Probably should be:
-    //   value_p = (p_vpi_vecval)(calloc(1, chunks*8*sizeof(s_vpi_vecval)));
-    value_p = (p_vpi_vecval)(malloc(chunks*8*sizeof(s_vpi_vecval)));
-    value_s.format = vpiVectorVal;
-    value_s.value.vector = value_p;
-    /* Copy a/b, reversing on NC. */
-    /*dpi and vpi are reversed*/
-    for(i=0;i<chunks; ++i)
-    {
-      // Reverse a/b on NC.
-      value_p[i].aval = value[i].bval;
-      value_p[i].bval = value[i].aval;
-    }
-    vpi_put_value(r, &value_s, &time_s, flag);  
-    free (value_p);
-  }
-#ifndef VCS
-  vpi_release_handle(r);
-#endif
-  return 1;
-}
-#endif
 
 
 /*
@@ -185,16 +144,9 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
     /*dpi and vpi are reversed*/
     for(i=0;i<chunks; ++i)
     {
-#ifdef NCSIM
-      // Code for NC.
-      // Reverse a/b on NC.
-      value[i].aval = value_s.value.vector[i].bval;
-      value[i].bval = value_s.value.vector[i].aval;
-#else
       // Code for Questa & VCS
       value[i].aval = value_s.value.vector[i].aval;
       value[i].bval = value_s.value.vector[i].bval;
-#endif
     }
   }
 #ifndef VCS
