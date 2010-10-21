@@ -53,6 +53,8 @@ require "getopts.pl"
 &Getopts("cC:df:F:hR:Su:v");
 &usage if $opt_h || $#ARGV < 0;
 
+$tool = shift(@ARGV);
+
 if (!$opt_u) {
   # Find "distrib" directory
   $opt_u = "distrib";
@@ -72,15 +74,16 @@ if (! -e "$opt_u/src/uvm_pkg.sv") {
 $uvm_home = $opt_u;
 
 $libdir = $0;
-$libdir =~ s#bin/run_tests#lib/run_test#;
+$libdir =~ s#bin/run_tests#../tools#;
+$libdir =~ s#/[^/]+/../tools#/tools#;
+$libdir .= "/$tool";
 if (! -e $libdir) {
    print STDERR "Tool-specific library \"$libdir\" does not exists.\n";
    exit(1);
 }
 push(@INC, $libdir);
 
-$tool = shift(@ARGV);
-require "$tool.pl";
+require "run_test.pl";
 
 #
 # Always keep a list of failed tests

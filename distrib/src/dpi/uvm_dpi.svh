@@ -1,7 +1,4 @@
-//
 //----------------------------------------------------------------------
-//   Copyright 2007-2010 Mentor Graphics Corporation
-//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -19,11 +16,22 @@
 //   the License for the specific language governing
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
-`ifndef UVM_SVH
-`define UVM_SVH
-  `include "uvm_macros.svh"
-  `include "dpi/uvm_dpi.svh"
-  `include "base/base.svh"
-  `include "uvm_tlm/uvm_tlm.svh"
-  `include "methodology/methodology.svh"
-`endif // UVM_SVH
+
+`ifndef UVM_DPI_SVH
+`define UVM_DPI_SVH
+
+//
+// Top-level file for DPI subroutines used by UVM.
+//
+// Tool-specific distribution overlays may be required.
+//
+// To use UVM without any tool-specific overlay, use +defin+UVM_NO_DPI
+//
+
+`ifdef UVM_NO_DPI
+ `define UVM_HDL_NO_DPI
+`endif
+
+`include "dpi/uvm_hdl.svh"
+
+`endif // UVM_DPI_SVH
