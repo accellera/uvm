@@ -62,7 +62,7 @@ class user_acp_reg_seq extends uvm_reg_sequence;
     else
       uvm_report_error(get_type_name(), 
         $psprintf("%s 'user_acp_reg' returned incorrect value. Exp='h%0x, returned=%0x", 
-                  get_sequence_path(), 5, data, UVM_NONE));
+                  get_sequence_path(), 5, data), UVM_NONE);
 
     `ifdef UVM_OBJECTIONS_SVH
       // Dropping the objection
