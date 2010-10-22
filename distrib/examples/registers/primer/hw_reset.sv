@@ -24,7 +24,7 @@ class hw_reset_test extends uvm_test;
 
    tb_env env;
 
-   `uvm_component_utils(hw_reset_test);
+   `uvm_component_utils(hw_reset_test)
 
    function new(string name, uvm_component parent);
       super.new(name, parent);

@@ -133,7 +133,7 @@ virtual class uvm_reg extends uvm_object;
    /*local*/ extern virtual function void add_field  (uvm_reg_field field);
    /*local*/ extern virtual function void add_map    (uvm_reg_map map);
 
-   /*local*/ extern function void   Xlock_modelX();
+   /*local*/ extern function void   lock_model;
 
 
    //-----------
@@ -1309,7 +1309,7 @@ endfunction: add_field
 
 // Xlock_modelX
 
-function void uvm_reg::Xlock_modelX();
+function void uvm_reg::lock_model();
    if (this.locked)
      return;
    this.locked = 1;
@@ -1618,8 +1618,8 @@ function bit uvm_reg::is_in_map(uvm_reg_map map);
    if (maps.exists(map))
      return 1;
    foreach (maps[l]) begin
-   	uvm_reg_mem_map local_map = l;
-   	uvm_reg_mem_map parent_map = local_map.get_parent_map();
+   	uvm_reg_map local_map = l;
+   	uvm_reg_map parent_map = local_map.get_parent_map();
 
      while (parent_map != null) begin
        if (parent_map == map)
@@ -1640,8 +1640,8 @@ function uvm_reg_map uvm_reg::get_local_map(uvm_reg_map map, string caller="");
    if (maps.exists(map))
      return map; 
    foreach (maps[l]) begin
- 	uvm_reg_mem_map local_map=l;
-	uvm_reg_mem_map parent_map = local_map.get_parent_map();
+ 	uvm_reg_map local_map=l;
+	uvm_reg_map parent_map = local_map.get_parent_map();
 
      while (parent_map != null) begin
        if (parent_map == map)
@@ -1678,9 +1678,9 @@ function uvm_reg_map uvm_reg::get_default_map(string caller="");
 
    // try to choose one based on default_map in parent blocks.
    foreach (maps[l]) begin
-	 uvm_reg_mem_map map = l;
-	 uvm_reg_mem_block blk = map.get_parent();
-         uvm_reg_mem_map default_map = blk.get_default_map();
+	 uvm_reg_map map = l;
+	 uvm_reg_block blk = map.get_parent();
+         uvm_reg_map default_map = blk.get_default_map();
      if (default_map != null) begin
        uvm_reg_map local_map = get_local_map(default_map);
        if (local_map != null)
@@ -2200,7 +2200,7 @@ task uvm_reg::XwriteX(output uvm_status_e status,
          path = UVM_BFM;
       end
       else
-        map = uvm_reg_mem_map::backdoor();
+        map = uvm_reg_map::backdoor();
    end
 
    if (path != UVM_BACKDOOR) begin
@@ -2520,7 +2520,7 @@ task uvm_reg::XreadX(output uvm_status_e status,
          path = UVM_BFM;
       end
       else
-        map = uvm_reg_mem_map::backdoor();
+        map = uvm_reg_map::backdoor();
    end
 
    if (path != UVM_BACKDOOR) begin
@@ -2980,7 +2980,7 @@ task uvm_reg::mirror(output uvm_status_e  status,
    this.XatomicX(1);
 
    if (path == UVM_BACKDOOR && (this.backdoor != null || has_hdl_path()))
-      map = uvm_reg_mem_map::backdoor();
+      map = uvm_reg_map::backdoor();
    else
      map = get_local_map(map, "read()");
 

@@ -51,7 +51,7 @@ class reg_user_test extends uvm_test;
 
    tb_env env;
 
-   `uvm_component_utils(reg_user_test);
+   `uvm_component_utils(reg_user_test)
 
    function new(string name, uvm_component parent);
       super.new(name, parent);

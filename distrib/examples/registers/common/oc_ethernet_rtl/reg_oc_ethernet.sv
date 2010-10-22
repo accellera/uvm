@@ -590,7 +590,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
 `endif
 
          
-        this.default_map.add_reg(this.MODER, `UVM_REG_MEM_ADDR_WIDTH'h0, "RW", 0);
+        this.default_map.add_reg(this.MODER, `UVM_REG_ADDR_WIDTH'h0, "RW", 0);
         this.MODER.build();
         this.RECSMALL = this.MODER.RECSMALL;
         this.PAD = this.MODER.PAD;
@@ -637,7 +637,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.INT_SOURCE, `UVM_REG_MEM_ADDR_WIDTH'h1, "RW", 0);
+        this.default_map.add_reg(this.INT_SOURCE, `UVM_REG_ADDR_WIDTH'h1, "RW", 0);
         this.INT_SOURCE.build();
         this.RXC = this.INT_SOURCE.RXC;
         this.TXC = this.INT_SOURCE.TXC;
@@ -660,7 +660,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.INT_MASK, `UVM_REG_MEM_ADDR_WIDTH'h2, "RW", 0);
+        this.default_map.add_reg(this.INT_MASK, `UVM_REG_ADDR_WIDTH'h2, "RW", 0);
         this.INT_MASK.build();
         this.RXC_M = this.INT_MASK.RXC_M;
         this.TXC_M = this.INT_MASK.TXC_M;
@@ -683,7 +683,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.IPGT, `UVM_REG_MEM_ADDR_WIDTH'h3, "RW", 0);
+        this.default_map.add_reg(this.IPGT, `UVM_REG_ADDR_WIDTH'h3, "RW", 0);
         this.IPGT.build();
         this.IPGR1 = reg_reg_IPGR1::type_id::create("IPGR1",,get_full_name());
         this.IPGR1.configure(this, null, "");
@@ -699,7 +699,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.IPGR1, `UVM_REG_MEM_ADDR_WIDTH'h4, "RW", 0);
+        this.default_map.add_reg(this.IPGR1, `UVM_REG_ADDR_WIDTH'h4, "RW", 0);
         this.IPGR1.build();
         this.IPGR2 = reg_reg_IPGR2::type_id::create("IPGR2",,get_full_name());
         this.IPGR2.configure(this, null, "");
@@ -715,7 +715,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.IPGR2, `UVM_REG_MEM_ADDR_WIDTH'h5, "RW", 0);
+        this.default_map.add_reg(this.IPGR2, `UVM_REG_ADDR_WIDTH'h5, "RW", 0);
         this.IPGR2.build();
         this.PACKETLEN = reg_reg_PACKETLEN::type_id::create("PACKETLEN",,get_full_name());
         this.PACKETLEN.configure(this, null, "");
@@ -737,13 +737,13 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.PACKETLEN, `UVM_REG_MEM_ADDR_WIDTH'h6, "RW", 0);
+        this.default_map.add_reg(this.PACKETLEN, `UVM_REG_ADDR_WIDTH'h6, "RW", 0);
         this.PACKETLEN.build();
         this.MINFL = this.PACKETLEN.MINFL;
         this.MAXFL = this.PACKETLEN.MAXFL;
         this.COLLCONF = reg_reg_COLLCONF::type_id::create("COLLCONF",,get_full_name());
         this.COLLCONF.configure(this, null, "");
-        this.default_map.add_reg(this.COLLCONF, `UVM_REG_MEM_ADDR_WIDTH'h7, "RW", 0);
+        this.default_map.add_reg(this.COLLCONF, `UVM_REG_ADDR_WIDTH'h7, "RW", 0);
         this.COLLCONF.build();
         this.MAXRET = this.COLLCONF.MAXRET;
         this.COLLVALID = this.COLLCONF.COLLVALID;
@@ -761,7 +761,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.TX_BD_NUM, `UVM_REG_MEM_ADDR_WIDTH'h8, "RW", 0);
+        this.default_map.add_reg(this.TX_BD_NUM, `UVM_REG_ADDR_WIDTH'h8, "RW", 0);
         this.TX_BD_NUM.build();
         this.CTRLMODER = reg_reg_CTRLMODER::type_id::create("CTRLMODER",,get_full_name());
         this.CTRLMODER.configure(this, null, "");
@@ -777,7 +777,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.CTRLMODER, `UVM_REG_MEM_ADDR_WIDTH'h9, "RW", 0);
+        this.default_map.add_reg(this.CTRLMODER, `UVM_REG_ADDR_WIDTH'h9, "RW", 0);
         this.CTRLMODER.build();
         this.TXFLOW = this.CTRLMODER.TXFLOW;
         this.RXFLOW = this.CTRLMODER.RXFLOW;
@@ -798,7 +798,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
  
-        this.default_map.add_reg(this.MIIMODER, `UVM_REG_MEM_ADDR_WIDTH'hA, "RW", 0);
+        this.default_map.add_reg(this.MIIMODER, `UVM_REG_ADDR_WIDTH'hA, "RW", 0);
         this.MIIMODER.build();
         this.MIINOPRE = this.MIIMODER.MIINOPRE;
         this.CLKDIV = this.MIIMODER.CLKDIV;
@@ -820,14 +820,14 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.MIICOMMAND, `UVM_REG_MEM_ADDR_WIDTH'hB, "RW", 0);
+        this.default_map.add_reg(this.MIICOMMAND, `UVM_REG_ADDR_WIDTH'hB, "RW", 0);
         this.MIICOMMAND.build();
         this.WCTRLDATA = this.MIICOMMAND.WCTRLDATA;
         this.RSTAT = this.MIICOMMAND.RSTAT;
         this.SCANSTAT = this.MIICOMMAND.SCANSTAT;
         this.MIIADDRESS = reg_reg_MIIADDRESS::type_id::create("MIIADDRESS",,get_full_name());
         this.MIIADDRESS.configure(this, null, "");
-        this.default_map.add_reg(this.MIIADDRESS, `UVM_REG_MEM_ADDR_WIDTH'hC, "RW", 0);
+        this.default_map.add_reg(this.MIIADDRESS, `UVM_REG_ADDR_WIDTH'hC, "RW", 0);
         this.MIIADDRESS.build();
         this.RGAD = this.MIIADDRESS.RGAD;
         this.FIAD = this.MIIADDRESS.FIAD;
@@ -847,7 +847,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.MIITX_DATA, `UVM_REG_MEM_ADDR_WIDTH'hD, "RW", 0);
+        this.default_map.add_reg(this.MIITX_DATA, `UVM_REG_ADDR_WIDTH'hD, "RW", 0);
         this.MIITX_DATA.build();
         this.CTRLDATA = this.MIITX_DATA.CTRLDATA;
         this.MIIRX_DATA = reg_reg_MIIRX_DATA::type_id::create("MIIRX_DATA",,get_full_name());
@@ -864,7 +864,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.MIIRX_DATA, `UVM_REG_MEM_ADDR_WIDTH'hE, "RW", 0);
+        this.default_map.add_reg(this.MIIRX_DATA, `UVM_REG_ADDR_WIDTH'hE, "RW", 0);
         this.MIIRX_DATA.build();
         this.PRSD = this.MIIRX_DATA.PRSD;
         this.MIISTATUS = reg_reg_MIISTATUS::type_id::create("MIISTATUS",,get_full_name());
@@ -885,7 +885,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.MIISTATUS, `UVM_REG_MEM_ADDR_WIDTH'hF, "RW", 0);
+        this.default_map.add_reg(this.MIISTATUS, `UVM_REG_ADDR_WIDTH'hF, "RW", 0);
         this.MIISTATUS.build();
         this.NVALID = this.MIISTATUS.NVALID;
         this.BUSY_N = this.MIISTATUS.BUSY_N;
@@ -914,7 +914,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.MAC_ADDR, `UVM_REG_MEM_ADDR_WIDTH'h10, "RW", 0);
+        this.default_map.add_reg(this.MAC_ADDR, `UVM_REG_ADDR_WIDTH'h10, "RW", 0);
         this.MAC_ADDR.build();
         this.HASH0 = reg_reg_HASH0::type_id::create("HASH0",,get_full_name());
         this.HASH0.configure(this, null, "");
@@ -936,7 +936,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.HASH0, `UVM_REG_MEM_ADDR_WIDTH'h12, "RW", 0);
+        this.default_map.add_reg(this.HASH0, `UVM_REG_ADDR_WIDTH'h12, "RW", 0);
         this.HASH0.build();
         this.HASH1 = reg_reg_HASH1::type_id::create("HASH1",,get_full_name());
         this.HASH1.configure(this, null, "");
@@ -958,7 +958,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.HASH1, `UVM_REG_MEM_ADDR_WIDTH'h13, "RW", 0);
+        this.default_map.add_reg(this.HASH1, `UVM_REG_ADDR_WIDTH'h13, "RW", 0);
         this.HASH1.build();
         this.TXCTRL = reg_reg_TXCTRL::type_id::create("TXCTRL",,get_full_name());
         this.TXCTRL.configure(this, null, "");
@@ -978,15 +978,15 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             });
 `endif
 
-        this.default_map.add_reg(this.TXCTRL, `UVM_REG_MEM_ADDR_WIDTH'h14, "RW", 0);
+        this.default_map.add_reg(this.TXCTRL, `UVM_REG_ADDR_WIDTH'h14, "RW", 0);
         this.TXCTRL.build();
         this.TXPAUSEREQ = this.TXCTRL.TXPAUSEREQ;
         this.TXPAUSETV = this.TXCTRL.TXPAUSETV;
         this.BD = reg_mem_BD::type_id::create("BD",,get_full_name());
         this.BD.configure(this, "wishbone.bd_ram.mem");
-        this.default_map.add_mem(this.BD, `UVM_REG_MEM_ADDR_WIDTH'h100, "RW", 0);
+        this.default_map.add_mem(this.BD, `UVM_REG_ADDR_WIDTH'h100, "RW", 0);
         this.BD.build();
-        this.Xlock_modelX();
+        this.lock_model();
     endfunction : build
 
     `uvm_object_utils(reg_block_oc_ethernet)

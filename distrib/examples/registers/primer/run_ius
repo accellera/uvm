@@ -1,3 +1,2 @@
 #!/bin/sh
-arch=`../../../bin/uvm_os_name`
 irun -f compile_ius.f +UVM_TESTNAME=reg_user_test +UVM_VERBOSITY=UVM_LOW $*

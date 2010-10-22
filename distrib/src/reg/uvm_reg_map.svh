@@ -785,16 +785,14 @@ endfunction
 
 function void uvm_reg_map::get_submaps(ref uvm_reg_map maps[$], input uvm_hier_e hier=UVM_HIER);
 
-   foreach (m_submaps[submap_])
-   begin
-   	  uvm_reg_mem_map submap=submap_;
+   foreach (m_submaps[submap])
       maps.push_back(submap);
-   end
+
    
    if (hier == UVM_HIER)
      foreach (m_submaps[submap_])
      begin
-       uvm_reg_mem_map submap = submap_;
+     	uvm_reg_map submap=submap_;
        submap.get_submaps(maps);
      end
 endfunction
@@ -810,9 +808,10 @@ function void uvm_reg_map::get_registers(ref uvm_reg regs[$], input uvm_hier_e h
   if (hier == UVM_HIER)
     foreach (m_submaps[submap_])
     begin
-      uvm_reg_mem_map submap = submap_;
+    	uvm_reg_map submap=submap_;
       submap.get_registers(regs);
     end
+    
 endfunction
 
 
@@ -829,9 +828,10 @@ function void uvm_reg_map::get_fields(ref uvm_reg_field fields[$], input uvm_hie
    if (hier == UVM_HIER)
      foreach (this.m_submaps[submap_])
      begin
-     	uvm_reg_mem_map submap = submap_;
-       submap.get_fields(fields);
+     	uvm_reg_map submap=submap_;
+     	submap.get_fields(fields);
      end
+     
 endfunction
 
 
@@ -845,8 +845,8 @@ function void uvm_reg_map::get_memories(ref uvm_mem mems[$], input uvm_hier_e hi
    if (hier == UVM_HIER)
      foreach (m_submaps[submap_])
      begin
-       uvm_reg_mem_map submap = submap_;
-       submap.get_memories(mems);
+     	uvm_reg_map submap=submap_;
+     	submap.get_memories(mems);
      end
      
 endfunction
@@ -861,7 +861,6 @@ function void uvm_reg_map::get_virtual_registers(ref uvm_vreg regs[$], input uvm
 
   foreach (mems[i])
     mems[i].get_virtual_registers(regs);
-
 
 endfunction
 
@@ -960,8 +959,8 @@ function int unsigned uvm_reg_map::get_size();
 
   // get max offset from submaps
   foreach (m_submaps[submap_]) begin
-  	uvm_reg_mem_map submap = submap_;
-    addr = m_submaps[submap] + submap.get_size();
+  	uvm_reg_map submap=submap_;
+  	addr = m_submaps[submap] + submap.get_size();
     if (addr > max_addr)
       max_addr = addr;
   end
@@ -1022,8 +1021,8 @@ function bit uvm_reg_map::Xcheck_child_overlapX(uvm_reg_map  child_map,
   end
 
   foreach(m_submaps[submap_]) begin
-    uvm_reg_mem_map submap = submap_;
-    if (submap != child_map) begin
+  	uvm_reg_map submap=submap_;
+    if(submap != child_map) begin
 
 
       int unsigned submap_start_addr = m_submaps[submap];
@@ -1259,7 +1258,7 @@ function void uvm_reg_map::Xinit_address_mapX();
 
    foreach (m_submaps[l])
    begin
-   	 uvm_reg_mem_map map=l;
+   	 uvm_reg_map map=l;
      map.Xinit_address_mapX();
    end
 
