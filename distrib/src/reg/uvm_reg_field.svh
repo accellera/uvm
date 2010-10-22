@@ -21,12 +21,15 @@
 //
 
 //
-// Title: uvm_reg_field
-// Field abstraction base class
+// Title: Register Field Abstraction Base Classes
 //
 // A field is an atomic value in the DUT and
 // are wholly contained in a register.
 // All bits in a field have the same access policy.
+//
+// <uvm_reg_field> : base for abstract register fields
+//
+// <uvm_reg_field_cbs> : base for user-defined pre/post read/write callbacks
 //
 
 

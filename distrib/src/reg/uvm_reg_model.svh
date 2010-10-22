@@ -388,7 +388,7 @@ endclass
 `include "reg/uvm_reg_sequence.svh"
 `include "reg/uvm_reg_field.svh"
 `include "reg/uvm_vreg_field.svh"
-`include "reg/uvm_reg_mem_backdoor.svh"
+`include "reg/uvm_reg_backdoor.svh"
 `include "reg/uvm_reg.svh"
 `include "reg/uvm_reg_file.svh"
 `include "reg/uvm_mem_mam.svh"
@@ -397,12 +397,12 @@ endclass
 `include "reg/uvm_reg_map.svh"
 `include "reg/uvm_reg_block.svh"
 
-`include "reg/uvm_reg_test_hw_reset.svh"
-`include "reg/uvm_reg_test_bit_bash.svh"
-`include "reg/uvm_mem_test_walk.svh"
-`include "reg/uvm_mem_test_access.svh"
-`include "reg/uvm_reg_test_access.svh"
-`include "reg/uvm_reg_mem_test_shared_access.svh"
-`include "reg/uvm_reg_mem_test_all.svh"
+`include "reg/sequences/uvm_reg_hw_reset_seq.svh"
+`include "reg/sequences/uvm_reg_bit_bash_seq.svh"
+`include "reg/sequences/uvm_mem_walk_seq.svh"
+`include "reg/sequences/uvm_mem_access_seq.svh"
+`include "reg/sequences/uvm_reg_access_seq.svh"
+`include "reg/sequences/uvm_reg_mem_shared_access_seq.svh"
+`include "reg/sequences/uvm_reg_mem_built_in_seq.svh"
 
 `endif // UVM_REG_MODEL__SV

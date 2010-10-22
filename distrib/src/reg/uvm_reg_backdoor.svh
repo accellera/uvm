@@ -27,7 +27,22 @@
 // are used to specify HDL paths and
 // user-defined backdoor access to registers and memories.
 //
-
+// The following types are defined herein:
+//
+// <uvm_hdl_path_slice> : slice of an HDL path
+//
+// <uvm_hdl_path_concat> : array of HDL path slices
+//
+// The following classes are defined herein:
+//
+// <uvm_reg_backdoor> : base for user-defined backdoor register access
+//
+// <uvm_mem_backdoor> : base for user-defined backdoor memory access
+//
+// <uvm_reg_backdoor_cbs> : base for user-defined register backdoor access callbacks
+//
+// <uvm_mem_backdoor_cbs> : base for user-defined memory backdoor access callbacks
+//
 
 //------------------------------------------------------------------------------
 // TYPE: uvm_hdl_path_slice

@@ -1,5 +1,6 @@
 //---------------------------------------------------------------------- 
 //   Copyright 2010 Synopsys, Inc. 
+//   Copyright 2010 Mentor Graphics Corp.
 //   All Rights Reserved Worldwide 
 // 
 //   Licensed under the Apache License, Version 2.0 (the 
@@ -106,7 +107,6 @@ begin
    op(READ,    "dut.q",           , 'h6C, `__LINE__);
 
 `ifndef VCS
-   op(READ,    "dut.w",           , 'h0F, `__LINE__); // w is scheduled, but not yet updated
    #0;
    op(READ,    "dut.w",           , 'h6C, `__LINE__); // w is now q
    op(DEPOSIT, "dut.w",       'h3C, 'h3C, `__LINE__); // w retains until q drives new value
@@ -122,7 +122,7 @@ begin
 `endif
 
    #0;
-   op(READ,    "dut.w",           , 'hA5, `__LINE__); // w is now q
+   op(READ,    "dut.w",           , 'hA5, `__LINE__); // w is now q // B5
 
 
    #100; // d propagates to q,w
