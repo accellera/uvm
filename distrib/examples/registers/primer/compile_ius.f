@@ -6,5 +6,5 @@
 ./tb_top.sv
 ./test.sv
 
-../../../../distrib/src/C/uvm_hdl.c
+../../../src/C/uvm_hdl.c
 -DNCSIM

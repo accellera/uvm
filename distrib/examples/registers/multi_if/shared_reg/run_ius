@@ -1,2 +1,2 @@
 #!/bin/sh
-irun -sv_lib ../../../lib/${arch}/libuvm_ius.so -f compile_ius.f +UVM_TESTNAME=blk_test $*
+irun -f compile_ius.f +UVM_TESTNAME=blk_test $*
