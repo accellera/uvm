@@ -10,7 +10,7 @@ timescale.v
 -F ../common/oc_ethernet_rtl/rtl_file_list.lst
 tb_top.sv
 tb_env.sv
-//-linedebug -gui
+-linedebug -gui
 
 // NOTE using the backdoor API requires R(ead) and potentially W(rite) access to the hdl signals used
 // 

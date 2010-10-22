@@ -70,7 +70,8 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_se
 
       n_bits = mem.get_n_bits();
       
-      $display("\n\n***** n_bits =%0d",n_bits);
+      `uvm_info("RegMem",$psprintf("***** n_bits =%0d",n_bits),UVM_DEBUG)
+      
       // Memories may be accessible from multiple physical interfaces (maps)
       mem.get_maps(maps);
 
@@ -79,7 +80,7 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_se
          uvm_status_e status;
          uvm_reg_mem_data_t  val, exp, v;
          
-         `uvm_info("RegMem", $psprintf("Accessing memory %s in map \"%s\"...\n",
+         `uvm_info("RegMem", $psprintf("Accessing memory %s in map \"%s\"...",
                                     mem.get_full_name(), maps[j].get_full_name()), UVM_LOW);
          
          mode = mem.get_access(maps[j]);

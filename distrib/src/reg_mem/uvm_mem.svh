@@ -1238,7 +1238,7 @@ function void uvm_mem::configure(uvm_reg_mem_block  parent,
    	e_[0].size=-1;
    	begin
    		  	uvm_hdl_path_concat t_ = new();
-   		  	void'(t_.set(e_));
+   		  	t_.set(e_);
    		  	add_hdl_path(t_);
    	end
    end
@@ -1921,7 +1921,7 @@ task uvm_mem::write(output uvm_status_e status,
       cb.post_write(this, offset, value, path, map, status);
    end
 
-   `uvm_info("RegMem", $psprintf("Wrote memory \"%s\"[%0d] via %s: with 'h%h",
+   `uvm_info("RegMem", $psprintf("Wrote memory \"%s\[%0d]\" via %s: with 'h%h",
                               this.get_full_name(), offset,
                               (path == UVM_BFM) ? "frontdoor" : "backdoor",
                               value),UVM_MEDIUM )
@@ -2525,7 +2525,7 @@ task uvm_mem::poke(output uvm_status_e status,
    else
      this.backdoor_write(status, offset, value, kind, parent, extension, fname, lineno);
 
-   `uvm_info("RegMem", $psprintf("Poked memory \"%s\"[%0d] with: 'h%h",
+   `uvm_info("RegMem", $psprintf("Poked memory \"%s[%0d]\" with: 'h%h",
                               this.get_full_name(), offset, value),UVM_MEDIUM);
    this.fname = "";
    this.lineno = 0;
@@ -2555,7 +2555,7 @@ task uvm_mem::peek(output uvm_status_e status,
    else
      this.backdoor_read(status, offset, value, kind, parent, extension, fname, lineno);
 
-   `uvm_info("RegMem", $psprintf("Peeked memory \"%s\"[%0d]: 'h%h",
+   `uvm_info("RegMem", $psprintf("Peeked memory \"%s[%0d]\": 'h%h",
                               this.get_full_name(), offset, value),UVM_MEDIUM);
    this.fname = "";
    this.lineno = 0;
@@ -2654,6 +2654,8 @@ function uvm_status_e  uvm_mem::backdoor_read_func(
      uvm_hdl_path_concat hdl_slices = paths[i];
      val = 0;
      foreach (hdl_slices.data[j]) begin
+        `uvm_info("RegMem", $psprintf("backdoor_read from %s ",hdl_slices.data[j].path),UVM_DEBUG);
+ 
         if (hdl_slices.data[j].offset < 0) begin
            ok &= uvm_hdl_read({hdl_slices.data[j].path, "[", idx, "]"},val);
            continue;
@@ -2719,6 +2721,8 @@ task uvm_mem::backdoor_write(output uvm_status_e status,
   foreach (paths[i]) begin
      uvm_hdl_path_concat hdl_slices = paths[i];
      foreach (hdl_slices.data[j]) begin
+        `uvm_info("RegMem", $psprintf("backdoor_write to %s ",hdl_slices.data[j].path),UVM_DEBUG);
+ 
         if (hdl_slices.data[j].offset < 0) begin
            ok &= uvm_hdl_deposit({hdl_slices.data[j].path,"[", idx, "]"},data);
            continue;

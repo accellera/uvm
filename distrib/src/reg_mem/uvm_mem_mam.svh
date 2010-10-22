@@ -534,6 +534,7 @@ class uvm_mam_cfg;
    // Number of bytes in each memory location
    rand int unsigned n_bytes;
 
+// FIXME start_offset and end_offset should be "longint unsigned" to match the memory addr types
    // variable: start_offset
    // Lowest address of managed space
    rand bit [63:0] start_offset;
