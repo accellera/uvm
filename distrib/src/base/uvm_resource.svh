@@ -64,11 +64,11 @@ class uvm_resource_options;
 
   static local bit auditting = 1;
 
-  static function turn_on_auditting();
+  static function void turn_on_auditting();
     auditting = 1;
   endfunction
 
-  static function turn_off_auditting();
+  static function void turn_off_auditting();
     auditting = 0;
   endfunction
 

@@ -39,10 +39,16 @@ class env extends uvm_component;
     
     //           -- input --     -- expected return value --
     test_massage("",             {"^$"});
-    test_massage("*",            {"^", get_full_name(), ".*$"});
-    test_massage("a.b.c",        {"^", get_full_name(), ".a.b.c$"});
-    test_massage("uvm_test_top", "^uvm_test_top$");
-    test_massage(".q.r",         {"^", get_full_name(), ".q.r$"});
+    test_massage("*",            {get_full_name(), ".*"});
+    test_massage("a.b.c",        {get_full_name(), ".a.b.c"});
+    test_massage("uvm_test_top", "uvm_test_top");
+    test_massage(".q.r",         {get_full_name(), ".q.r"});
+
+    test_match("^a$", "a", 1);
+    test_match("^a$", "aaaa", 0);
+    test_match("^m$", "m_begin", 0);
+    test_match("^m$", "at_end_m", 0);
+    test_match("^m$", "m", 1);
 
   endtask
 
@@ -58,6 +64,19 @@ class env extends uvm_component;
     test_error |= err;    
   endfunction
 
+  function void test_match(string re, string str, bit expected_match);
+    int err = uvm_re_match(re, str);
+
+    // expected_match == 0 means we don't expect the string to match
+    // the regular expression.  expected_match == 1 means we do expect
+    // the string to match the regular expression
+    if(!expected_match)
+      err = !err;
+
+    $display("[%s] scope \"%s\" %s \"%s\"", (err?"ERR":"OK"), re,
+             (expected_match?"matches":"does not match"), str);
+    test_error |= (err != 0);
+  endfunction
 endclass
 
 class test extends uvm_component;

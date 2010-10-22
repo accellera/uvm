@@ -273,7 +273,7 @@ module top;
   initial begin
 
     // set the bus interface as a resource
-    uvm_resource_db#(virtual bus_if)::write_and_set("bus_if", ".*", bus);
+    uvm_resource_db#(virtual bus_if)::write_and_set("bus_if", "*", bus);
     
     run_test();
 

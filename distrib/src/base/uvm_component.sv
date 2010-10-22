@@ -1046,17 +1046,17 @@ function string uvm_component::massage_scope(string scope);
     return "^$";
 
   if(scope == "*")
-    return {"^", get_full_name(), ".*$"};
+    return {get_full_name(), ".*"};
 
   // absolute path to the top-level test
   if(scope == "uvm_test_top")
-    return "^uvm_test_top$";
+    return "uvm_test_top";
 
   // absolute path to uvm_root
   if(scope[0] == ".")
-    return {"^", get_full_name(), scope, "$"};
+    return {get_full_name(), scope};
 
-  return {"^", get_full_name(), ".", scope, "$"};
+  return {get_full_name(), ".", scope};
 
 endfunction
 
