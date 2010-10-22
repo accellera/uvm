@@ -53,6 +53,8 @@ require "getopts.pl"
 &Getopts("cC:df:F:hR:Su:v");
 &usage if $opt_h || $#ARGV < 0;
 
+$tool = shift(@ARGV);
+
 if (!$opt_u) {
   # Find "distrib" directory
   $opt_u = "distrib";
@@ -72,15 +74,16 @@ if (! -e "$opt_u/src/uvm_pkg.sv") {
 $uvm_home = $opt_u;
 
 $libdir = $0;
-$libdir =~ s#bin/run_tests#lib/run_test#;
+$libdir =~ s#bin/run_tests#../tools#;
+$libdir =~ s#/[^/]+/../tools#/tools#;
+$libdir .= "/$tool";
 if (! -e $libdir) {
    print STDERR "Tool-specific library \"$libdir\" does not exists.\n";
    exit(1);
 }
 push(@INC, $libdir);
 
-$tool = shift(@ARGV);
-require "$tool.pl";
+require "run_test.pl";
 
 #
 # Always keep a list of failed tests
@@ -122,7 +125,7 @@ sub get_testdirs {
   local($dir, $_, @subs, @dirs) = @_;
 
     @dirs = ();
-    if (-e "$dir/test.sv") {
+    if (-e "$dir/test.sv" || -e "$dir/test.pl") {
       push(@dirs, $dir);
     }
 
@@ -196,7 +199,25 @@ sub run_one_test {
 
    local($sv) = ("$testdir/test.sv");
    if (! -e $sv) {
-     print "**FAIL** ($sv does not exist)\n";
+     # Maybe it is a script instead of an SV file?
+     local($pl) = ("$testdir/test.pl");
+     if (-e $pl) {
+       $post_test = 0;
+       $failed = do "$testdir/test.pl";
+       if (!defined($failed) || $@) {
+         print "**FAIL** (Invalid test.pl)\n";
+         return 1;
+       }
+       if ($failed ne "0") {
+	 $post_test = "test.pl" unless $post_test;
+	 print "**FAIL** ($post_test)\n";
+       } else {
+	 $post_test = "from test.pl" unless $post_test;
+	 print "pass ($post_test)\n";
+       }	
+       return $failed;
+     }
+     print "**FAIL** (Neither $sv nor $pl exist)\n";
      return 1;
    }
 

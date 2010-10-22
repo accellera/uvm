@@ -382,8 +382,6 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
 endclass
 
 
-`include "reg/uvm_hdl.svh"
-
 `include "reg/uvm_reg_adapter.svh"
 `include "reg/uvm_reg_sequence.svh"
 `include "reg/uvm_reg_field.svh"
