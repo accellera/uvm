@@ -88,6 +88,9 @@ class test extends uvm_component;
     mem_agent_config mem_cfg  = new();
     mem_cfg.initial_sequence = mem_seq_rand#(8,8)::get_type();
 
+    // turn off resource auditting
+    uvm_resource_options::turn_off_auditting();
+
     // create the configuration resource and set it into the resoures
     // database
     uvm_resource_db#(mem_agent_config)::write_and_set("mem_cfg", "*.mem_agent*",
@@ -105,11 +108,17 @@ class test extends uvm_component;
   endtask
 
   function void report();
+    uvm_resource_pool rp = uvm_resource_pool::get();
     uvm_report_server rs = get_report_server();
     if(rs.get_severity_count(UVM_ERROR) > 0)
       $display("** UVM TEST FAIL **");
     else
       $display("** UVM TEST PASSED **");
+
+    // The '1' argument to dump() instructs the function to also dump
+    // the audit trail.  However, since we turned auditting off above we
+    // should not see an audit trail appear.
+    rp.dump(1);
   endfunction
 
 endclass

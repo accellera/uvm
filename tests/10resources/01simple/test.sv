@@ -140,7 +140,7 @@ class test extends uvm_component;
 
   task run();
     uvm_resources.dump();
-    $display("--- zeros ---");
+    $display("--- unused resources ---");
     uvm_resources.print_resources(uvm_resources.find_unused_resources);
     global_stop_request();
   endtask

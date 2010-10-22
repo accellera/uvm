@@ -50,6 +50,34 @@ class uvm_resource_types;
 
 endclass
 
+//----------------------------------------------------------------------
+// class: uvm_resource_options
+//
+// This class provides a namespace for managing options for the
+// resources facility.  The only thing allowed in this class is static
+// local data members and static functions for manipulating and
+// retrieving the value of the data members.  The static local data
+// members represent options and settings that control the behavior of
+// the resources facility.
+//----------------------------------------------------------------------
+class uvm_resource_options;
+
+  static local bit auditting = 1;
+
+  static function turn_on_auditting();
+    auditting = 1;
+  endfunction
+
+  static function turn_off_auditting();
+    auditting = 0;
+  endfunction
+
+  static function bit is_auditting();
+    return auditting;
+  endfunction
+
+endclass
+
 
 //----------------------------------------------------------------------
 // class: uvm_resource_base
@@ -65,7 +93,14 @@ virtual class uvm_resource_base extends uvm_object;
   protected bit modified;
   protected bit read_only;
 
-  uvm_resource_types::access_t access[uvm_object];
+   uvm_resource_types::access_t access[string];
+
+
+  // function: new
+  //
+  // constructor for uvm_resource_base.  The constructor takes two
+  // arguments, the name of the resource and a resgular expression which
+  // represents the set of scopes over which this resource is visible.
 
   function new(string name, string s = "*");
     super.new(name);
@@ -79,6 +114,7 @@ virtual class uvm_resource_base extends uvm_object;
   //
   // Pure virtual function that returns the type handle of the resource
   // container.
+
   pure virtual function uvm_resource_base get_type_handle();
 
   //--------------------------------------------------------------------
@@ -332,7 +368,7 @@ virtual class uvm_resource_base extends uvm_object;
   // Dump the access records for this resource
   virtual function void print_accessors();
 
-    uvm_object obj;
+    string str;
     uvm_component comp;
     uvm_resource_types::access_t access_record;
 
@@ -342,14 +378,9 @@ virtual class uvm_resource_base extends uvm_object;
     $display("  --------");
 
     foreach (access[i]) begin
-      obj = i;
-
-      if($cast(comp, obj))
-        $write("  %s", comp.get_full_name());
-      else
-        $write("  %s", obj.get_name());
-
-      access_record = access[obj];
+      str = i;
+      $write("  %s", str);
+      access_record = access[str];
       $display(" reads: %0d @ %0t  writes: %0d @ %0t",
                access_record.read_count,
                access_record.read_time,
@@ -585,7 +616,14 @@ class uvm_resource_pool;
 
   function void push_get_record(string name, string scope,
                                   uvm_resource_base rsrc);
-    get_t impt = new;
+    get_t impt;
+
+    // if auditting is turned off then there is no reason
+    // to save a get record
+    if(!uvm_resource_options::is_auditting())
+      return;
+
+    impt = new();
 
     impt.name  = name;
     impt.scope = scope;
@@ -760,8 +798,8 @@ class uvm_resource_pool;
         r = rq.get(i);
         reads = 0;
         writes = 0;
-        foreach(r.access[obj]) begin
-          a = r.access[obj];
+        foreach(r.access[str]) begin
+          a = r.access[str];
           reads += a.read_count;
           writes += a.write_count;
         end
@@ -786,10 +824,13 @@ class uvm_resource_pool;
 
     int unsigned i;
     uvm_resource_base r;
-    static uvm_line_printer ptr=new;
+    static uvm_line_printer printer = new();
 
-    ptr.knobs.separator=""; ptr.knobs.full_name=0; ptr.knobs.identifier=0;
-    ptr.knobs.type_name=0;  ptr.knobs.reference=0;
+    printer.knobs.separator="";
+    printer.knobs.full_name=0;
+    printer.knobs.identifier=0;
+    printer.knobs.type_name=0;
+    printer.knobs.reference=0;
 
     if(rq == null && rq.size() == 0) begin
       $display("<none>");
@@ -798,7 +839,7 @@ class uvm_resource_pool;
 
     for(int i=0; i<rq.size(); ++i) begin
       r = rq.get(i);
-      r.print(ptr);
+      r.print(printer);
       if(audit == 1)
         r.print_accessors();
     end
@@ -811,7 +852,7 @@ class uvm_resource_pool;
   // each resource is printed.  The utility function print_resources()
   // is used to initiate the printing.
 
-  function void dump();
+  function void dump(bit audit = 0);
 
     uvm_resource_types::rsrc_q_t rq;
     string name;
@@ -820,7 +861,7 @@ class uvm_resource_pool;
 
     foreach (rtab[name]) begin
       rq = rtab[name];
-      print_resources(rq);
+      print_resources(rq, audit);
     end
 
     $display("=== end of resource pool ===");
@@ -998,19 +1039,25 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
 
   function T read(uvm_object accessor = null);
 
+    string str;
+
     // If an accessor object is supplied then get the accessor record.
     // Otherwise create a new access record.  In either case populate
-    // the access record with information about this access
+    // the access record with information about this access.  Check
+    // first to make sure that auditting is turned on.
 
-    if(accessor != null) begin
-      uvm_resource_types::access_t access_record;
-      if(access.exists(accessor))
-        access_record = access[accessor];
-      else
-        init_access_record(access_record);
-      access_record.read_count++;
-      access_record.read_time = $time;
-      access[accessor] = access_record;
+    if(uvm_resource_options::is_auditting()) begin
+      if(accessor != null) begin
+        uvm_resource_types::access_t access_record;
+        str = accessor.get_full_name();
+        if(access.exists(str))
+          access_record = access[str];
+        else
+          init_access_record(access_record);
+        access_record.read_count++;
+        access_record.read_time = $time;
+        access[str] = access_record;
+      end
     end
 
     // get the value
@@ -1037,17 +1084,21 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
 
     // If an accessor object is supplied then get the accessor record.
     // Otherwise create a new access record.  In either case populate
-    // the access record with information about this access
+    // the access record with information about this access.  Check
+    // first that auditting is turned on
 
-    if(accessor != null) begin
-      uvm_resource_types::access_t access_record;
-      if(access.exists(accessor))
-        access_record = access[accessor];
-      else
-        init_access_record(access_record);
-      access_record.write_count++;
-      access_record.write_time = $time;
-      access[accessor] = access_record;
+    if(uvm_resource_options::is_auditting()) begin
+      if(accessor != null) begin
+        uvm_resource_types::access_t access_record;
+        string str;
+        if(access.exists(str))
+          access_record = access[str];
+        else
+          init_access_record(access_record);
+        access_record.write_count++;
+        access_record.write_time = $time;
+        access[str] = access_record;
+      end
     end
 
     // set the value and set the dirty bit
