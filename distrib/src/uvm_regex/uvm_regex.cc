@@ -137,7 +137,7 @@ class uvm_re_cache
     int len;
 
     // safety check.  Glob should never be null since this is called
-    // from DPI.
+    // from DPI.  But we'll check anyway.
     if(glob == NULL)
       return NULL;
 
@@ -215,6 +215,20 @@ class uvm_re_cache
         }
       }
     }
+
+    // Let's check to see if the regular expression is bounded by ^ at
+    // the beginning and $ at the end.  If not, add those characters in
+    // the appropriate position.
+
+    // ^ goes at the beginning...
+    if((*temp_re)[0] != '^')
+      *temp_re = '^' + *temp_re;
+
+    // ... $ goes at the end
+    if((*temp_re)[temp_re->size()-1] != '$')
+       *temp_re += '$';
+
+    cout << "massaged regex -> " << *temp_re << endl;
 
     // temp_re is a C++ string type.  However, we need to return a C
     // style char*. Here we conver the regex string to a char*.
