@@ -1,0 +1,63 @@
+#!/bin/sh
+
+if [ $1 = clean ]
+then
+  # fill in VCS-related cleanup
+  exit
+fi
+
+if [ $1 ]
+then
+  option=$1
+else
+  option=user_acp_reg_seq
+echo ""
+echo " Usage: run_vcs <list_of_sequences>"
+echo ""
+echo " Sequences must be separated by commas or equals and contain no whitespace."
+echo " Sequences separated by = will be executed in parallel."
+echo " Sequences separated by , will be executed sequentially."
+echo ""
+echo " To see pre_do, mid_do, post_do, is_relevant, and wait_for_relevant calls"
+echo " during execution, run the 'user_acp_reg_seq' sequence."
+echo ""
+echo "    Example:"
+echo ""
+echo "    run_vcs a=b,c=d=e,f,g"
+echo ""
+echo "    Run a and b in parallel, followed by c, d, and e in parallel,"
+echo "    folloed by f by itself, then finally g by itself."
+echo ""
+echo " Available sequences:"
+echo ""
+echo " Built-In RegModel:"
+echo ""
+echo "    uvm_reg_hw_reset_seq"
+echo "    uvm_reg_access_seq"
+echo "    uvm_mem_access_seq"
+echo "    uvm_reg_bit_bash_seq"
+echo "    uvm_mem_walk_seq"
+echo "    uvm_reg_mem_access_seq     runs both uvm_reg_access_seq and uvm_mem_access_seq"
+echo "    uvm_reg_mem_built_in_seq   runs all the built-in tests"
+echo ""
+echo " User-defined RegModel:"
+echo ""
+echo "    mem_init_from_file_seq"
+echo "    mem_rand_init_seq"
+echo "    user_acp_reg_seq"
+echo "    virtual_seq"
+echo ""
+echo " User-defined XBUS:"
+echo ""
+echo "    incr_read_byte_seq"
+echo "    incr_write_byte_seq"
+echo "    incr_read_write_read_seq"
+echo "    r8_w8_r4_w4_seq"
+echo "    read_modify_write_seq"
+echo "    loop_read_modify_write_seq"
+echo ""
+echo "RUNNING user_acp_reg_seq"
+#exit
+fi
+
+./simv +UVM_SEQUENCE=$option +UVM_TESTNAME=cmd_line_seq_test

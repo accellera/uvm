@@ -86,7 +86,7 @@ sub run_the_test($$$) {
 
     # compile commands
     my $vlib = ("vlib work");
-    my $vlog = ("vlog -suppress 2218 $compile_opts -timescale 1ns/1ns $uvm_opts test.sv");
+    my $vlog = ("vlog -suppress 2218,2181 -mfcu $compile_opts -timescale 1ns/1ns $uvm_opts test.sv");
     &questa_run("cd ./$testdir && ($vlib && $vlog && touch qa) $redirect ".&comptime_log_fname()." 2>&1");
 
     # only run if the compile succeeded in reaching QA
@@ -104,7 +104,7 @@ sub run_the_test($$$) {
             close(COMPILE_LOG);
             $toplevels =~ s/\s\s+/ /g; # remove excess whitespace
         }
-        my $vsim = ("vsim $run_opts +UVM_TESTNAME=test -c $toplevels -do 'run -all;quit -f'");
+        my $vsim = ("vsim $run_opts +UVM_TESTNAME=test -c $toplevels -do 'run -all;quit -f' -sv_lib $uvm_home/lib/libuvm_questa");
         &questa_run("cd ./$testdir && $vsim $redirect ".&runtime_log_fname()." 2>&1");
     }
     return(0);

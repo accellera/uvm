@@ -37,7 +37,7 @@ class r1_typ extends uvm_reg;
 endclass
 
 
-class b1_typ extends uvm_reg_mem_block;
+class b1_typ extends uvm_reg_block;
 
    rand r1_typ r1; 
 
@@ -57,7 +57,7 @@ class b1_typ extends uvm_reg_mem_block;
 endclass
 
 
-class top_blk extends uvm_reg_mem_block;
+class top_blk extends uvm_reg_block;
 
    rand b1_typ b1; 
 
@@ -119,16 +119,16 @@ begin
    uvm_hdl_path_slice  slice;
    string roots[$];
    
-   top_blk regmem = new("regmem");
+   top_blk model = new("model");
    
-   regmem.build();
-   regmem.set_hdl_path_root("$root.dut");
+   model.build();
+   model.set_hdl_path_root("$root.dut");
 
-   regmem.b1.get_full_hdl_path(roots);
-   check_roots("regmem.b1", roots, '{"$root.dut.b1"});
+   model.b1.get_full_hdl_path(roots);
+   check_roots("model.b1", roots, '{"$root.dut.b1"});
 
-   regmem.b1.r1.get_full_hdl_path(paths);
-   check_paths("regmem.b1.r1", paths,'{ '{ '{"$root.dut.b1.r1", -1, -1} } });
+   model.b1.r1.get_full_hdl_path(paths);
+   check_paths("model.b1.r1", paths,'{ '{ '{"$root.dut.b1.r1", -1, -1} } });
 
    begin
       uvm_report_server svr;

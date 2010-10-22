@@ -177,6 +177,8 @@ Group: Register Layer  {
 
    Group: Register Model  {
 
+      File: Blocks  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_mem_block.svh)
+      File: Address Maps  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_mem_map.svh)
       File: Register Files  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_file.svh)
       File: Registers  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg.svh)
       File: Fields  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_field.svh)
@@ -184,8 +186,6 @@ Group: Register Layer  {
       File: Virtual Registers  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_vreg.svh)
       File: Virtual Fields  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_vreg_field.svh)
       File: Memory Allocation Mgr  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_mem_mam.svh)
-      File: uvm_reg_mem_block  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_mem_block.svh)
-      File: uvm_reg_mem_map  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_mem_map.svh)
       }  # Group: Register Model
 
    Group: DUT Integration  {
@@ -199,7 +199,7 @@ Group: Register Layer  {
    Group: Test Sequences  {
 
       File: Built-In Test Sequences  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_mem_test_all.svh)
-      File: uvm_ral_hw_reset_seq  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_test_hw_reset.svh)
+      File: Reset Test Sequence  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_test_hw_reset.svh)
       File: Bit Bashing Test Sequences  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_test_bit_bash.svh)
       File: Register Access Test Sequence  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_test_access.svh)
       File: Shared Register and Memory Access test Sequences  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg_mem/uvm_reg_mem_test_shared_access.svh)
