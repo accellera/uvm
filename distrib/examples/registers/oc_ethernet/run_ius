@@ -33,4 +33,4 @@ echo ""
 exit
 fi
 
-irun -f compile_ius.f +UVM_SEQUENCE=$SEQ +UVM_VERBOSITY=UVM_DEBUG
+irun -f compile_ius.f +UVM_SEQUENCE=$SEQ +UVM_VERBOSITY=UVM_NONE

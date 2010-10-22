@@ -200,7 +200,7 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
     {
       value[i].aval = value_s.value.vector[i].aval;
       value[i].bval = value_s.value.vector[i].bval;
-      vpi_printf("NCSIM FIXME read : path=%s fsize=%0d aval=%0x bval=%0x\n",path,size,value[i].aval,value[i].bval);
+//      vpi_printf("NCSIM FIXME read : path=%s fsize=%0d aval=%0x bval=%0x\n",path,size,value[i].aval,value[i].bval);
     }
   }
   // FIXME check release

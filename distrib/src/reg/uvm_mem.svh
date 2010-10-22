@@ -650,7 +650,17 @@ class uvm_mem extends uvm_object;
    // in the design abstraction
    //
    extern function void add_hdl_path      (uvm_hdl_path_concat path,
+                                           string kind = "RTL");   
+                                           
+   // Function: add_hdl_path_array 
+   // similar to add_hdl_path takes an uvm_hdl_path_slice[] instead of the wrapped container uvm_hdl_path_concat
+   //                                       
+   extern function void add_hdl_path_array (uvm_hdl_path_concat_a path,
                                            string kind = "RTL");
+                                           
+                                           
+                                           
+                                           
    //
    // Function:   has_hdl_path
    // Check if a HDL path is specified
@@ -1236,11 +1246,8 @@ function void uvm_mem::configure(uvm_reg_block  parent,
    	e_[0].path=hdl_path;
    	e_[0].offset=-1;
    	e_[0].size=-1;
-   	begin
-   		  	uvm_hdl_path_concat t_ = new();
-   		  	t_.set(e_);
-   		  	add_hdl_path(t_);
-   	end
+   	
+   	add_hdl_path_array(e_);
    end
 endfunction: configure
 
@@ -2654,7 +2661,7 @@ function uvm_status_e  uvm_mem::backdoor_read_func(
      uvm_hdl_path_concat hdl_slices = paths[i];
      val = 0;
      foreach (hdl_slices.data[j]) begin
-        `uvm_info("RegMem", $psprintf("backdoor_read from %s ",hdl_slices.data[j].path),UVM_DEBUG);
+        `uvm_info("RegModel", $psprintf("backdoor_read from %s ",hdl_slices.data[j].path),UVM_DEBUG);
  
         if (hdl_slices.data[j].offset < 0) begin
            ok &= uvm_hdl_read({hdl_slices.data[j].path, "[", idx, "]"},val);
@@ -2721,7 +2728,7 @@ task uvm_mem::backdoor_write(output uvm_status_e status,
   foreach (paths[i]) begin
      uvm_hdl_path_concat hdl_slices = paths[i];
      foreach (hdl_slices.data[j]) begin
-        `uvm_info("RegMem", $psprintf("backdoor_write to %s ",hdl_slices.data[j].path),UVM_DEBUG);
+        `uvm_info("RegModel", $psprintf("backdoor_write to %s ",hdl_slices.data[j].path),UVM_DEBUG);
  
         if (hdl_slices.data[j].offset < 0) begin
            ok &= uvm_hdl_deposit({hdl_slices.data[j].path,"[", idx, "]"},data);
@@ -2760,7 +2767,12 @@ function void uvm_mem::clear_hdl_path(string kind = "RTL");
   hdl_paths_pool.delete(kind);
 endfunction
 
-
+function void uvm_mem::add_hdl_path_array (uvm_hdl_path_concat_a path, string kind = "RTL");
+    uvm_hdl_path_concat t_ = new();
+    void'(t_.set(path));
+    add_hdl_path(t_,kind);                                                                                 
+endfunction                                           
+            
 // add_hdl_path
 
 function void uvm_mem::add_hdl_path(uvm_hdl_path_concat path,
