@@ -1,5 +1,6 @@
 //----------------------------------------------------------------------
 //   Copyright 2010 Mentor Graphics Corporation
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -18,7 +19,7 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// payload event queue
+// Title: payload event queue
 //
 // A data structure containing time/transaction pairs.  The data
 // structure is organized as an associative array of queues of
@@ -26,24 +27,25 @@
 // scheduled at a particular time.  The key for the associative array is
 // time.
 //
-//   time   queue
-//  +-----+-----+
-//  |     |     |
-//  +-----+-----+   +---+---+---+---+
-//  |  17 |   --+-->|   |   |   |   |
-//  +-----+-----+   +---+---+---+---+
-//  |     |     |
-//  +-----+-----+   +---+---+
-//  |  22 |   --+-->|   |   |
-//  +-----+-----+   +---+---+
-//  |     |     |
-//  +-----+-----+
-//  |     |     |
-//  +-----+-----+
-//  |     |     |
-//  +-----+-----+
-//  |     |     |
-//  +-----+-----+
+//  > time   queue
+//  >+-----+-----+
+//  >|     |     |
+//  >+-----+-----+   +---+---+---+---+
+//  >|  17 |   --+-->|   |   |   |   |
+//  >+-----+-----+   +---+---+---+---+
+//  >|     |     |
+//  >+-----+-----+   +---+---+
+//  >|  22 |   --+-->|   |   |
+//  >+-----+-----+   +---+---+
+//  >|     |     |
+//  >+-----+-----+
+//  >|     |     |
+//  >+-----+-----+
+//  >|     |     |
+//  >+-----+-----+
+//  >|     |     |
+//  >+-----+-----+
+//  
 //
 //  This illustration shows a priority event queue (peq) with some
 //  transactions at time 17 and some at time 22.
@@ -51,7 +53,8 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// tlm_peq_base
+// Class:  tlm_peq_base
+//
 //----------------------------------------------------------------------
 virtual class tlm_peq_base extends uvm_object;
 
@@ -62,7 +65,8 @@ virtual class tlm_peq_base extends uvm_object;
 endclass
 
 //----------------------------------------------------------------------
-// tlm_peq_with_get
+// Class:  tlm_peq_with_get
+//
 //----------------------------------------------------------------------
 class tlm_peq_with_get #(type T=int) extends tlm_peq_base;
 
@@ -76,7 +80,7 @@ class tlm_peq_with_get #(type T=int) extends tlm_peq_base;
   endfunction
 
   //--------------------------------------------------------------------
-  // notify
+  // Function:  notify
   //
   // Put a new transaction into the queue and notify the time for which
   // the transaction is scheduled.
@@ -109,7 +113,7 @@ class tlm_peq_with_get #(type T=int) extends tlm_peq_base;
   endfunction
 
   //--------------------------------------------------------------------
-  // get_next_event
+  // Function: get_next_event
   //--------------------------------------------------------------------
   function T get_next_event();
 
@@ -152,14 +156,14 @@ class tlm_peq_with_get #(type T=int) extends tlm_peq_base;
   endfunction
 
   //--------------------------------------------------------------------
-  // get_event
+  // Function: get_event
   //--------------------------------------------------------------------
   function event get_event();
     return m_event;
   endfunction
   
   //--------------------------------------------------------------------
-  // cancel_all
+  // Function: cancel_all
   //--------------------------------------------------------------------
   function void cancel_all();
 

@@ -1,5 +1,6 @@
 //----------------------------------------------------------------------
 //   Copyright 2010 Mentor Graphics Corporation
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -18,36 +19,120 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// tlm imps -- interface implementations
+// Title: tlm imps, interface implementations
 //
 // Binds the interface with the object that contains the interface
 // implementation.
+// In addition to the transaction type and the phase type, the imps 
+// are parameterized with the type of the object that will provide the
+//  implementation. Most often this will be the type of the component 
+// where the imp resides. The constructor of the imp takes as an argument 
+// an object of type IMP and installs it as the implementation object. 
+// Most often the imp constructor argument is ‘this’.
 //----------------------------------------------------------------------
 
-// IMP binding macros
+// Group:  IMP binding macros
+//----------------------------------------------------------------------
 
+// Macro: `TLM_NB_TRANSPORT_FW_IMP
+//
+// The macro wraps Forward path call function <nb_transport_fw>
+// The first call to this method for a transaction marks the initial timing point.
+// Every call to this method may mark a timing point in the execution of the 
+// transaction. The timing annotation argument allows the timing points
+// to be offset from the simulation times at which the forward path is used.
+// The final timing point of a transaction may be marked by a call
+// to <nb_transport_bw> within <`TLM_NB_TRANSPORT_BW_IMP> or a return from this 
+// or subsequent call to <nb_transport_fw>.
+//
+// See Xref for more details on the semantics and rules of the nonblocking
+// transport interface.
+   
 `define TLM_NB_TRANSPORT_FW_IMP(imp, T, P, t, p, delay)              \
   function tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);  \
     return imp.nb_transport_fw(t, p, delay);                          \
   endfunction
+
+// Macro: `TLM_NB_TRANSPORT_BW_IMP
+//
+//
+// Implementation of the backward path.
+// The macro wraps function called <nb_transport_bw>.
+// This function MUST be implemented in the INITIATOR component class.
+//
+// Every call to this method may mark a timing point, including the final
+// timing point, in the execution of the transaction.
+// The timing annotation argument allows the timing point
+// to be offset from the simulation times at which the backward path is used.
+// The final timing point of a transaction may be marked by a call
+// to <nb_transport_fw> within <`TLM_NB_TRANSPORT_FW_IMP> or a return from 
+// this or subsequent call to <nb_transport_bw>.
+//
+// See Xref for more details on the semantics and rules of the nonblocking
+// transport interface.
+//
+// Example:
+//
+//| class master extends uvm_component;
+//     tlm_nb_initiator_socket #(trans, tlm_phase_e, this_t) initiator_socket;
+//|
+//|    function void build();
+//        initiator_socket = new("initiator_socket", this, this);
+//|    endfunction
+//|
+//|    function tlm_sync_e nb_transport_bw(ref trans t,
+//|                                   ref tlm_phase_e p,
+//|                                   ref time delay);
+//|        delay_time = delay;
+//|        transaction = t;
+//|        state = p;
+//|        return TLM_ACCEPTED;
+//|    endfunction
+//|
+//|    ...
+//| endclass
 
 `define TLM_NB_TRANSPORT_BW_IMP(imp, T, P, t, p, delay)              \
   function tlm_sync_e nb_transport_bw(T t, ref P p, ref time delay);  \
     return imp.nb_transport_bw(t, p, delay);                          \
   endfunction
 
+// Macro: `TLM_B_TRANSPORT_IMP
+//
+// The macro wraps the function <b_transport>
+// Execute a blocking transaction. Once this method returns,
+// the transaction is assumed to have been executed. Whether
+// that execution is succesful or not must be indicated by the
+// transaction itself.
+//
+// The callee may modify or update the transaction object, subject
+// to any constraints imposed by the transaction class. The
+// initiator may re-use a transaction object from one call to
+// the next and across calls to b_transport(). 
+//
+// The call to b_transport shall mark the first timing point of the
+// transaction. The return from <b_transport> shall mark the final
+// timing point of the transaction. The timing annotation argument
+// allows the timing points to be offset from the simulation times
+// at which the task call and return are executed.
+
 `define TLM_B_TRANSPORT_IMP(imp, T, t, delay)                        \
   task b_transport(T t, ref time delay);                              \
     imp.b_transport(t, delay);                                        \
   endtask
 
-//======================================================================
+//----------------------------------------------------------------------
+// Group: IMP binding classes
+//----------------------------------------------------------------------
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// Class: tlm_nb_transport_fw_imp
 //
-// imp classes.  These are used like exports excpet an addtional class
-// parameter specifices the type of the implementation object.  When the
+// used like exports except an addtional class  parameter specifices 
+// the type of the implementation object.  When the
 // imp is instantiated the implementation object is bound.
-//
-//======================================================================
+//----------------------------------------------------------------------
 
 class tlm_nb_transport_fw_imp #(type T=tlm_generic_payload,
                                 type P=tlm_phase_e,
@@ -57,6 +142,14 @@ class tlm_nb_transport_fw_imp #(type T=tlm_generic_payload,
   `TLM_NB_TRANSPORT_FW_IMP(m_imp, T, P, t, p, delay)
 endclass
 
+//----------------------------------------------------------------------
+// Class: tlm_nb_transport_bw_imp
+//
+// used like exports except an addtional class  parameter specifices 
+// the type of the implementation object.  When the
+// imp is instantiated the implementation object is bound.
+//----------------------------------------------------------------------
+
 class tlm_nb_transport_bw_imp #(type T=tlm_generic_payload,
                                 type P=tlm_phase_e,
                                 type IMP=int)
@@ -64,6 +157,14 @@ class tlm_nb_transport_bw_imp #(type T=tlm_generic_payload,
   `UVM_IMP_COMMON(`TLM_NB_BW_MASK, "tlm_nb_transport_bw_imp", IMP)
   `TLM_NB_TRANSPORT_BW_IMP(m_imp, T, P, t, p, delay)
 endclass
+
+//----------------------------------------------------------------------
+// Class: tlm_b_transport_imp
+//
+// used like exports except an addtional class  parameter specifices 
+// the type of the implementation object.  When the
+// imp is instantiated the implementation object is bound.
+//----------------------------------------------------------------------
 
 class tlm_b_transport_imp #(type T=tlm_generic_payload,
                             type IMP=int)

@@ -1,5 +1,6 @@
 //----------------------------------------------------------------------
 //   Copyright 2010 Mentor Graphics Corporation
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -18,34 +19,56 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// Sockets
+// title: Sockets
 //
 // Each *_socket class is derived from a corresponding *_socket_base
 // class.  The base class contains the "meat" of the class, the derived
 // classes (in this file) contain the connection semantics.
 //
+// Sockets come in several flavors: Each socket is either an initiator or a 
+// target, a passthrough or a terminator. Further, any particular socket 
+// implements either the blocking interfaces or the nonblocking interfaces. 
+// Terminator sockets are used on initiators and targets as well as 
+// interconnect components as shown in the figure above. Passthrough
+//  sockets are used to enable connections to cross hierarchical boundaries.
+//
 // There are eight socket types: the cross of blocking and nonblocking,
 // passthrough and termination, target and initiator
 //
-//    tlm_nb_passthrough_initiator_socket
-//    tlm_nb_passthrough_target_socket
-//    tlm_b_passthrough_initiator_socket
-//    tlm_b_passthrough_target_socket
-//    tlm_b_target_socket
-//    tlm_b_initiator_socket
-//    tlm_nb_target_socket
-//    tlm_nb_initiator_socket
+//----------------------------------------------------------------------
+
+// Topic:                       Passthrough Sockets                     
+//    -  <tlm_nb_passthrough_initiator_socket>
 //
+//    -  <tlm_nb_passthrough_target_socket>
+//
+//    -  <tlm_b_passthrough_initiator_socket>
+//
+//    -  <tlm_b_passthrough_target_socket>
+//
+
+// Topic:                      Termination Sockets	  
+//    -  <tlm_b_target_socket>
+//
+//    -  <tlm_b_initiator_socket>
+//
+//    -  <tlm_nb_target_socket>
+//
+//    -  <tlm_nb_initiator_socket>           
+//
+
+
+//----------------------------------------------------------------------
+// Section:                       Passthrough Sockets                     
+//    IS-A and HAS-A are types of object relationships. 
+// IS-A refers to the inheritance relationship and
+//  HAS-A refers to the ownership relationship. 
+// For example if you say D is a B that means that D is derived from base B. 
+// If you say object A HAS-A B that means that B is a member of A.
 //----------------------------------------------------------------------
 
-//======================================================================
-//=                                                                    =
-//=                       Passthrough Sockets                          =
-//=                                                                    =
-//======================================================================
-
 //----------------------------------------------------------------------
-// tlm_nb_passthrough_initiator_socket
+// Class: tlm_nb_passthrough_initiator_socket
 //
 // IS-A forward port; HAS-A backward export
 //----------------------------------------------------------------------
@@ -57,6 +80,9 @@ class tlm_nb_passthrough_initiator_socket #(type T=tlm_generic_payload,
     super.new(name, parent);
   endfunction
 
+   // Function : connect
+   //
+   // Connect socket types
   function void connect(this_type provider);
 
     tlm_nb_passthrough_initiator_socket_base #(T,P) initiator_pt_socket;
@@ -90,7 +116,7 @@ class tlm_nb_passthrough_initiator_socket #(type T=tlm_generic_payload,
 endclass
 
 //----------------------------------------------------------------------
-// tlm_nb_passthrough_target_socket
+// Class: tlm_nb_passthrough_target_socket
 //
 // IS-A forward export; HAS-A backward port
 //----------------------------------------------------------------------
@@ -102,6 +128,9 @@ class tlm_nb_passthrough_target_socket #(type T=tlm_generic_payload,
     super.new(name, parent);
   endfunction
 
+   // Function : connect
+   //
+   // Connect socket types
   function void connect(this_type provider);
 
     tlm_nb_passthrough_target_socket_base #(T,P) target_pt_socket;
@@ -129,7 +158,7 @@ class tlm_nb_passthrough_target_socket #(type T=tlm_generic_payload,
 endclass
 
 //----------------------------------------------------------------------
-// tlm_b_passthrough_initiator_socket
+// Class: tlm_b_passthrough_initiator_socket
 //
 // IS-A forward port;
 //----------------------------------------------------------------------
@@ -140,6 +169,9 @@ class tlm_b_passthrough_initiator_socket #(type T=tlm_generic_payload)
     super.new(name, parent);
   endfunction
 
+   // Function : connect
+   //
+   // Connect socket types
   function void connect(this_type provider);
 
     tlm_b_passthrough_initiator_socket_base #(T) initiator_pt_socket;
@@ -163,7 +195,7 @@ class tlm_b_passthrough_initiator_socket #(type T=tlm_generic_payload)
 endclass
 
 //----------------------------------------------------------------------
-// tlm_b_passthrough_target_socket
+// Class: tlm_b_passthrough_target_socket
 //
 // IS-A forward export;
 //----------------------------------------------------------------------
@@ -172,8 +204,11 @@ class tlm_b_passthrough_target_socket #(type T=tlm_generic_payload)
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
-  endfunction
-
+  endfunction 
+   
+   // Function : connect
+   //
+   // Connect socket types
   function void connect(this_type provider);
 
     tlm_b_passthrough_target_socket_base #(T) target_pt_socket;
@@ -194,14 +229,19 @@ class tlm_b_passthrough_target_socket #(type T=tlm_generic_payload)
 endclass
 
 
-//======================================================================
-//=                                                                    =
-//=                       Termination Sockets                          =
-//=                                                                    =
-//======================================================================
 
 //----------------------------------------------------------------------
-// tlm_b_target_socket
+// Section:                      Termination Sockets
+//
+// IS-A and HAS-A are types of object relationships. 
+// IS-A refers to the inheritance relationship and
+//  HAS-A refers to the ownership relationship. 
+// For example if you say D is a B that means that D is derived from base B. 
+// If you say object A HAS-A B that means that B is a member of A.
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// Class: tlm_b_target_socket
 //
 // IS-A forward imp; has no backward path except via the payload
 // contents.
@@ -217,6 +257,9 @@ class tlm_b_target_socket #(type T=tlm_generic_payload,
     m_imp = imp;
   endfunction
 
+   // Function: Connect
+   //
+   // Connect socket types
   function void connect(this_type provider);
 
     uvm_component c;
@@ -232,7 +275,7 @@ class tlm_b_target_socket #(type T=tlm_generic_payload,
 endclass
 
 //----------------------------------------------------------------------
-// tlm_b_initiator_socket
+// class: tlm_b_initiator_socket
 //
 // IS-A forward port; has no backward path except via the payload
 // contents
@@ -242,8 +285,11 @@ class tlm_b_initiator_socket #(type T=tlm_generic_payload)
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
-  endfunction
-
+  endfunction 
+   
+   // Function: Connect
+   //
+   // Connect socket types
   function void connect(this_type provider);
 
     tlm_b_passthrough_initiator_socket_base #(T) initiator_pt_socket;
@@ -267,7 +313,7 @@ class tlm_b_initiator_socket #(type T=tlm_generic_payload)
 endclass
 
 //----------------------------------------------------------------------
-// tlm_nb_target_socket
+// Class: tlm_nb_target_socket
 //
 // IS-A forward imp; HAS-A backward port
 //----------------------------------------------------------------------
@@ -299,7 +345,7 @@ class tlm_nb_target_socket #(type T=tlm_generic_payload,
 endclass
 
 //----------------------------------------------------------------------
-// tlm_nb_initiator_socket
+// Class: tlm_nb_initiator_socket
 //
 // IS-A forward port; HAS-A backward imp
 //----------------------------------------------------------------------
@@ -315,7 +361,10 @@ class tlm_nb_initiator_socket #(type T=tlm_generic_payload,
     bw_imp = new("bw_imp", imp);
   endfunction
 
-  function void connect(this_type provider);
+   // Function: Connect
+   //
+   // Connect socket types
+   function void connect(this_type provider);
 
     tlm_nb_passthrough_initiator_socket_base #(T,P) initiator_pt_socket;
     tlm_nb_passthrough_target_socket_base #(T,P) target_pt_socket;

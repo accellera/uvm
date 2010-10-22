@@ -1,5 +1,6 @@
 //----------------------------------------------------------------------
 //   Copyright 2010 Mentor Graphics Corporation
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -18,28 +19,40 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// Socket Base Classes
+// Title: Socket Base Classes
 //
 // A collection of base classes, one for each socket type.  The reason
 // for having a base class for each socket is that all the socket (base)
 // types must be known before connect is defined.  Socket connection
 // semantics are provided in the derived classes, which are user
 // visible.
+//
+// Topic: Passthrough Scokets
+//
+// <tlm_nb_passthrough_initiator_socket_base> :  IS-A forward port; HAS-A backward export
+// <tlm_nb_passthrough_target_socket_base>    :  IS-A forward export; HAS-A backward port
+// <tlm_b_passthrough_initiator_socket_base>  :  IS-A forward port;
+// <tlm_b_passthrough_target_socket_base>     :  IS-A forward export;
+//
+// Topic: Termination Sockets
+//
+// <tlm_b_target_socket_base>      : IS-A forward imp with no backward path
+// <tlm_b_initiator_socket_base>   : IS-A forward port; has no backward path
+// <tlm_nb_target_socket_base>     :  IS-A forward imp; HAS-A backward port
+// <tlm_nb_initiator_socket_base>  : IS-A forward port; HAS-A backward imp
+//
 //----------------------------------------------------------------------
 
-
-//======================================================================
-//=                                                                    =
-//=                       Passthrough Sockets                          =
-//=                                                                    =
-//======================================================================
-//
-// Passthrough initiators are ports and contain exports -- i.e. IS-A
-// port and HAS-A export.  Passthrough targets are the opposite, they
+//---------------------------------------------------------------------
+// Section: Passthrough Sockets                                          
+//                                                                    
+// Passthrough initiators are ports and contain exports 
+// for instance IS-A port and HAS-A export.  
+// Passthrough targets are the opposite, they
 // are exports and contain ports.
 
 //----------------------------------------------------------------------
-// tlm_nb_passthrough_initiator_socket_base
+// Class: tlm_nb_passthrough_initiator_socket_base
 //
 // IS-A forward port; HAS-A backward export
 //----------------------------------------------------------------------
@@ -64,7 +77,7 @@ class tlm_nb_passthrough_initiator_socket_base #(type T=tlm_generic_payload,
 endclass
 
 //----------------------------------------------------------------------
-// tlm_nb_passthrough_target_socket_base
+// Class: tlm_nb_passthrough_target_socket_base
 //
 // IS-A forward export; HAS-A backward port
 //----------------------------------------------------------------------
@@ -89,7 +102,7 @@ class tlm_nb_passthrough_target_socket_base #(type T=tlm_generic_payload,
 endclass
 
 //----------------------------------------------------------------------
-// tlm_b_passthrough_initiator_socket_base
+// Class: tlm_b_passthrough_initiator_socket_base
 //
 // IS-A forward port;
 //----------------------------------------------------------------------
@@ -101,8 +114,9 @@ class tlm_b_passthrough_initiator_socket_base #(type T=tlm_generic_payload)
 
 endclass
 
+
 //----------------------------------------------------------------------
-// tlm_b_passthrough_target_socket_base
+// Class: tlm_b_passthrough_target_socket_base
 //
 // IS-A forward export;
 //----------------------------------------------------------------------
@@ -114,12 +128,11 @@ class tlm_b_passthrough_target_socket_base #(type T=tlm_generic_payload)
 
  endclass
 
-
-//======================================================================
-//=                                                                    =
-//=                       Termination Sockets                          =
-//=                                                                    =
-//======================================================================
+//----------------------------------------------------------------------
+//                                                                    
+// Section: Termination Sockets                                         
+//                                                                   
+//----------------------------------------------------------------------
 //
 // A termination socket must be the terminus of every TLM path.  A
 // transaction originates with an initator socket and ultimately ends up
@@ -127,7 +140,7 @@ class tlm_b_passthrough_target_socket_base #(type T=tlm_generic_payload)
 // between initiator and target.
 
 //----------------------------------------------------------------------
-// tlm_b_target_socket_base
+// Class: tlm_b_target_socket_base
 //
 // IS-A forward imp; has no backward path except via the payload
 // contents.
@@ -145,7 +158,7 @@ class tlm_b_target_socket_base #(type T=tlm_generic_payload)
 endclass
 
 //----------------------------------------------------------------------
-// tlm_b_initiator_socket_base
+// Class: tlm_b_initiator_socket_base
 //
 // IS-A forward port; has no backward path except via the payload
 // contents
@@ -159,7 +172,7 @@ class tlm_b_initiator_socket_base #(type T=tlm_generic_payload)
 endclass
 
 //----------------------------------------------------------------------
-// tlm_nb_target_socket_base
+// Class: tlm_nb_target_socket_base
 //
 // IS-A forward imp; HAS-A backward port
 //----------------------------------------------------------------------
@@ -181,7 +194,7 @@ class tlm_nb_target_socket_base #(type T=tlm_generic_payload,
 endclass
 
 //----------------------------------------------------------------------
-// tlm_nb_initiator_socket_base
+// Class: tlm_nb_initiator_socket_base
 //
 // IS-A forward port; HAS-A backward imp
 //----------------------------------------------------------------------
