@@ -2045,8 +2045,8 @@ endfunction: get_reset
 
 
 function void uvm_reg::Xpredict_readX(uvm_reg_data_t  value,
-                                   uvm_path_e path,
-                                   uvm_reg_map  map);
+                                      uvm_path_e      path,
+                                      uvm_reg_map     map);
    // Fields are stored in LSB to MSB order
    foreach (this.fields[i]) begin
       this.fields[i].Xpredict_readX(value >> this.fields[i].get_lsb_pos_in_register(),
@@ -2547,16 +2547,28 @@ task uvm_reg::XreadX(output uvm_status_e status,
 
          final_val = value;
 
-         // Need to clear RC fields and mask WO fields
+         // Need to clear RC fields, set RS fields and mask WO fields
          if (status == UVM_IS_OK || status == UVM_HAS_X) begin
             uvm_reg_data_t  wo_mask = 0;
 
             foreach (this.fields[i]) begin
                string acc = this.fields[i].get_access(uvm_reg_map::backdoor);
-               if (acc == "RC") begin
+               if (acc == "RC" ||
+                   acc == "WRC" ||
+                   acc == "W1SRC" ||
+                   acc == "W0SRC") begin
                   final_val &= ~(((1<<this.fields[i].get_n_bits())-1) << this.fields[i].get_lsb_pos_in_register());
                end
-               else if (acc == "WO") begin
+               else if (acc == "RS" ||
+                        acc == "WRS" ||
+                        acc == "W1CRS" ||
+                        acc == "W0CRS") begin
+                  final_val |= (((1<<this.fields[i].get_n_bits())-1) << this.fields[i].get_lsb_pos_in_register());
+               end
+               else if (acc == "WO" ||
+                        acc == "WOC" ||
+                        acc == "WOS" ||
+                        acc == "WO1") begin
                   wo_mask |= ((1<<this.fields[i].get_n_bits())-1) << this.fields[i].get_lsb_pos_in_register();
                end
             end
@@ -2949,9 +2961,14 @@ task uvm_reg::mirror(output uvm_status_e  status,
    // Remember what we think the value is before it gets updated
    if (check == UVM_CHECK) begin
       exp = this.get();
-      // Any WO field will readback as 0's
+      // Assuume that WO* field will readback as 0's
       foreach(this.fields[i]) begin
-         if (this.fields[i].get_access(map) == "WO") begin
+         string mode;
+         mode = this.fields[i].get_access(map);
+         if (mode == "WO" ||
+             mode == "WOC" ||
+             mode == "WOS" ||
+             mode == "WO1") begin
             exp &= ~(((1 << this.fields[i].get_n_bits())-1)
                      << this.fields[i].get_lsb_pos_in_register());
          end
@@ -2976,8 +2993,11 @@ task uvm_reg::mirror(output uvm_status_e  status,
             dc |= ((1 << this.fields[i].get_n_bits())-1)
                   << this.fields[i].get_lsb_pos_in_register();
          end
-         else if (acc == "WO") begin
-            // WO fields will always read-back as 0
+         else if (acc == "WO" ||
+                  acc == "WOC" ||
+                  acc == "WOS" ||
+                  acc == "WO1") begin
+            // Assume WO fields will always read-back as 0
             exp &= ~(((1 << this.fields[i].get_n_bits())-1)
                      << this.fields[i].get_lsb_pos_in_register());
          end
