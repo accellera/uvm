@@ -1,7 +1,4 @@
-//
 //----------------------------------------------------------------------
-//   Copyright 2007-2010 Mentor Graphics Corporation
-//   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -20,9 +17,12 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UVM_METH_DEFINES_SVH
-`define UVM_METH_DEFINES_SVH
+//
+// Top-level file that includes all of the C files required
+// by UVM
+//
+// The C code may be compiled by compiling this top file only,
+// or by compiling individual files then linking them together.
+//
 
-typedef enum bit { UVM_PASSIVE=0, UVM_ACTIVE=1 } uvm_active_passive_enum;
-
-`endif // UVM_METH_DEFINES_SVH
+#include "uvm_hdl.c"

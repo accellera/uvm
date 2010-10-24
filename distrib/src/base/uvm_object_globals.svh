@@ -102,6 +102,12 @@ typedef enum {
   UVM_REFERENCE      = 'h1000
  } uvm_recursion_policy_enum;
 
+// Enum: uvm_active_passive_enum
+//
+// Convenience value to define whether a component, usually an agent,
+// is in "active" mode or "passive" mode.
+
+typedef enum bit { UVM_PASSIVE=0, UVM_ACTIVE=1 } uvm_active_passive_enum;
 
 
 // Parameters
@@ -236,10 +242,8 @@ typedef enum {
   UVM_DEBUG  = 500
 } uvm_verbosity;
 
-typedef int UVM_FILE;
-typedef uvm_action id_actions_array[string];
-typedef UVM_FILE id_file_array[string];
 
+typedef int UVM_FILE;
 uvm_action s_default_action_array[string]; // default is already NO_ACTION
 UVM_FILE s_default_file_array[string]; // default is already 0
 

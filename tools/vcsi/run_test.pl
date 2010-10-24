@@ -19,11 +19,11 @@
 ##----------------------------------------------------------------------
 
 #
-# VCS-Specific test running script
+# VCSi-Specific test running script
 #
 
 #
-# Make sure the version of VSC can run these tests
+# Make sure the version of VCSi can run these tests
 #
 $vcs_bin = "vcsi";
 
@@ -32,6 +32,13 @@ $vcs_bin = "vcsi";
 # body of run_tests.
 $tool = "vcs";
 
-require "vcs.pl";
+$libdir =~ s|/tools/vcsi/|/tools/vcs/|;
+if (! -e $libdir) {
+   print STDERR "Tool-specific library \"$libdir\" does not exists.\n";
+   exit(1);
+}
+unshift(@INC, $libdir);
+
+require "run_test.pl";
 
 1;
