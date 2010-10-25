@@ -33,7 +33,7 @@ endclass
 //
 // Class: uvm_reg_map
 //
-// Address map abstraction class
+// :Address map abstraction class
 //
 // This class represents an address map.
 // An address map is a collection of registers and memories
@@ -120,8 +120,11 @@ class uvm_reg_map extends uvm_object;
                                                  bit unmapped=0,
                                                  uvm_reg_frontdoor frontdoor=null);
 
+   // Function- m_set_reg_offset
+   // Called by uvm_reg::set_offset, for dynamic adjustment of reg's offset
    extern virtual function void   m_set_reg_offset(uvm_reg   rg,
-                                                   uvm_reg_addr_t offset);
+                                                   uvm_reg_addr_t offset,
+                                                   bit unmapped);
 
 
    //
@@ -173,12 +176,30 @@ class uvm_reg_map extends uvm_object;
    extern virtual function void   add_submap    (uvm_reg_map    child_map,
                                                  uvm_reg_addr_t offset);
 
+   // Function: set_sequencer
+   //
+   // Set the sequencer and adapter associated with this map. This method
+   // ~must~ be called before starting any sequences based on uvm_reg_sequence.
+
    extern virtual function void   set_sequencer (uvm_sequencer_base sequencer,
                                                  uvm_reg_adapter    adapter);
 
-   extern virtual function void           set_submap_offset (uvm_reg_map submap,
-                                                             uvm_reg_addr_t offset);
+   // Function: set_submap_offset
+   //
+   // Set the offset of the given ~submap~ to ~offset~.
+
+   extern virtual function void   set_submap_offset (uvm_reg_map submap,
+                                                    uvm_reg_addr_t offset);
+
+   // Function: get_submap_offset
+   //
+   // Return the offset of the given ~submap~.
+
    extern virtual function uvm_reg_addr_t get_submap_offset (uvm_reg_map submap);
+
+   // Function: set_base_addr
+   //
+   // Set the base address of this map.
 
    extern virtual function void   set_base_addr (uvm_reg_addr_t  offset);
 
@@ -201,17 +222,6 @@ class uvm_reg_map extends uvm_object;
 
    /*local*/ extern virtual function void   add_parent_map(uvm_reg_map  parent_map,
                                                            uvm_reg_addr_t offset);
-
-   /*local*/ extern function bit Xcheck_child_overlapX(uvm_reg_map  child_map,
-                                                       int unsigned offset,
-                                                       int unsigned size);
-
-   /*local*/ extern function bit Xcheck_rangeX        (int unsigned str_addr,
-                                                       int unsigned end_addr,
-                                                       string kind,
-                                                       int unsigned new_str_addr,
-                                                       int unsigned new_end_addr,
-                                                       string new_name);
 
    /*local*/ extern virtual function void   Xverify_map_configX();
 
@@ -507,7 +517,8 @@ endfunction
 // m_set_reg_offset
 
 function void uvm_reg_map::m_set_reg_offset(uvm_reg rg, 
-                                            uvm_reg_addr_t offset);
+                                            uvm_reg_addr_t offset,
+                                            bit unmapped);
 
    if (!this.m_regs_info.exists(rg)) begin
       `uvm_error("RegModel",
@@ -518,42 +529,58 @@ function void uvm_reg_map::m_set_reg_offset(uvm_reg rg,
    end
 
    begin
-      uvm_reg_map_info info = m_regs_info[rg];
-      uvm_reg_block blk = get_parent();
-      uvm_reg_map top_map = get_root_map();
-      uvm_reg_addr_t addrs[];
+      uvm_reg_map_info info    = m_regs_info[rg];
+      uvm_reg_block    blk     = get_parent();
+      uvm_reg_map      top_map = get_root_map();
+      uvm_reg_addr_t   addrs[];
 
-      if (blk.is_locked() && !info.unmapped) begin
-         foreach (info.addr[i]) begin
-            uvm_reg_addr_t addr = addrs[i]; // IUS limitation requires temporary
-            top_map.m_regs_by_offset.delete(addr);
+      // if block is not locked, Xinit_address_mapX will resolve map when block is locked
+      if (blk.is_locked()) begin
+
+         // remove any existing cached addresses
+         if (!info.unmapped) begin
+           foreach (info.addr[i])
+              top_map.m_regs_by_offset.delete(info.addr[i]);
+         end
+
+         // if we are remapping...
+         if (!unmapped) begin
+            // get new addresses
+            void'(get_physical_addresses(offset,0,rg.get_n_bytes(),addrs));
+
+            // make sure they do not conflict with others
+            foreach (addrs[i]) begin
+               uvm_reg_addr_t addr = addrs[i];
+               if (top_map.m_regs_by_offset.exists(addr)) begin
+                  string a;
+                  a = $sformatf("%0h",addr);
+                  `uvm_warning("RegModel", {"In map '",get_full_name(),"' register '",
+                                          rg.get_full_name(), "' maps to same address as register '",
+                                          top_map.m_regs_by_offset[addr].get_full_name(),"': 'h",a})
+               end
+               if (top_map.m_mems_by_offset.exists(addr)) begin
+                  string a;
+                     a = $sformatf("%0h",addr);
+                  `uvm_warning("RegModel", {"In map '",get_full_name(),"' register '",
+                                          rg.get_full_name(), "' maps to same address as memory '",
+                                          top_map.m_mems_by_offset[addr].get_full_name(),"': 'h",a})
+               end
+               top_map.m_regs_by_offset[ addr ] = rg;
+            end
+            // cache it
+            info.addr = addrs;
          end
       end
 
-      void'(get_physical_addresses(offset,0,rg.get_n_bytes(),addrs));
-
-      foreach (addrs[i]) begin
-         uvm_reg_addr_t addr = addrs[i];
-         if (top_map.m_regs_by_offset.exists(addr)) begin
-            string a;
-            a = $sformatf("%0h",addr);
-            `uvm_warning("RegModel", {"In map '",get_full_name(),"' register '",
-                                    rg.get_full_name(), "' maps to same address as register '",
-                                    top_map.m_regs_by_offset[addr].get_full_name(),"': 'h",a})
-         end
-         if (top_map.m_mems_by_offset.exists(addr)) begin
-            string a;
-            a = $sformatf("%0h",addr);
-            `uvm_warning("RegModel", {"In map '",get_full_name(),"' register '",
-                                    rg.get_full_name(), "' maps to same address as memory '",
-                                    top_map.m_mems_by_offset[addr].get_full_name(),"': 'h",a})
-         end
-         top_map.m_regs_by_offset[ addr ] = rg;
+      if (unmapped) begin
+        info.offset   = -1;
+        info.unmapped = 1;
       end
-
-      info.addr = addrs;
-      info.offset   = offset;
-      info.unmapped =  0;
+      else begin
+        info.offset   = offset;
+        info.unmapped = 0;
+      end
+      
    end
 endfunction
 
@@ -596,8 +623,7 @@ endfunction: add_mem
 
 function void uvm_reg_map::add_submap (uvm_reg_map child_map,
                                        uvm_reg_addr_t offset);
-   // was uvm_reg_block::register_child
-                 uvm_reg_map parent_map;
+   uvm_reg_map parent_map;
 
    if (child_map == null) begin
       `uvm_error("RegModel", {"Attempting to add NULL map to map '",get_full_name(),"'"})
@@ -928,9 +954,9 @@ function void uvm_reg_map::set_base_addr(uvm_reg_addr_t offset);
       uvm_reg_map top_map = get_root_map();
       m_parent_map.set_submap_offset(this, offset);
       top_map.Xinit_address_mapX();
-      return;
    end
-   m_base_addr = offset;
+   else
+     m_base_addr = offset;
 endfunction
 
 
@@ -970,102 +996,12 @@ function int unsigned uvm_reg_map::get_size();
 endfunction
 
 
-// Xcheck_rangeX
-
-function bit uvm_reg_map::Xcheck_rangeX(int unsigned str_addr,
-                                        int unsigned end_addr,
-                                        string kind,
-                                        int unsigned new_str_addr,
-                                        int unsigned new_end_addr,
-                                        string new_name);
-
-    if (new_str_addr >= str_addr && new_end_addr <= end_addr ||
-        new_str_addr <= str_addr && new_end_addr >= str_addr ||
-        new_str_addr <= end_addr && new_end_addr >= end_addr) begin
-
-      `uvm_warning("RegModel",
-      $sformatf("In parent map '%s', new submap '%s' with offset range 'h%0h:%0h overlaps with existing %s with offset range 'h%0h:%0h",
-        get_full_name(), new_name, new_str_addr, new_end_addr, kind, str_addr, end_addr))
-      return 0;
-    end
-
-    return 1;
-endfunction
-
-
-// Xcheck_child_overlapX
-
-function bit uvm_reg_map::Xcheck_child_overlapX(uvm_reg_map  child_map,
-                                                int unsigned offset,
-                                                int unsigned size);
-
-  int unsigned multiplier = ((child_map.get_n_bytes(UVM_NO_HIER)-1)/m_n_bytes)+1;
-  int unsigned new_submap_size     = size;
-  int unsigned new_submap_str_addr = offset;
-  int unsigned new_submap_end_addr = offset + (new_submap_size * multiplier) - 1;
-
-  Xcheck_child_overlapX = 1;
-
-  foreach(m_regs_info[rg]) begin
-    Xcheck_child_overlapX &=
-      Xcheck_rangeX(m_regs_info[rg].offset, m_regs_info[rg].offset,"register",
-                    new_submap_str_addr, new_submap_end_addr, child_map.get_full_name());
-  end
-
-  foreach(m_mems_info[mem_]) begin
-  	uvm_mem mem = mem_;
-    Xcheck_child_overlapX &=
-      Xcheck_rangeX(m_mems_info[mem].offset,
-                    m_mems_info[mem].offset + mem.get_size() - 1, "memory",
-                    new_submap_str_addr, new_submap_end_addr, child_map.get_full_name());
-  end
-
-  foreach(m_submaps[submap_]) begin
-  	uvm_reg_map submap=submap_;
-    if(submap != child_map) begin
-
-
-      int unsigned submap_start_addr = m_submaps[submap];
-      int unsigned submap_end_addr   = m_submaps[submap] + (submap.get_size() *
-                                     (((submap.get_n_bytes(UVM_NO_HIER)-1)/m_n_bytes)+1))-1;
-      Xcheck_child_overlapX &=
-        Xcheck_rangeX(submap_start_addr, submap_end_addr, "submap",
-                      new_submap_str_addr, new_submap_end_addr, child_map.get_full_name());
-    end
-  end
-
-  if (Xcheck_child_overlapX == 0)
-    return 0;
-
-  //if there is a parent map, then this map is a submap of that parent, 
-  //and if the submap size has increased, we need to check that it has not overlapped
-  //into any of its siblings in the parent.
-
-  if (m_parent_map != null) begin
-
-    int unsigned new_size = get_size();
-
-    if (new_submap_str_addr >= new_size)
-      new_size += (new_size - new_submap_str_addr) + size;
-
-    Xcheck_child_overlapX &= m_parent_map.Xcheck_child_overlapX(this, 
-                               m_parent_map.get_submap_offset(this), new_size);
-
-  end
-
-endfunction
-
-
-// Xverify_map_configX
 
 function void uvm_reg_map::Xverify_map_configX();
    // Make sure there is a generic payload sequence for each map
    // in the model and vice-versa if this is a root sequencer
    bit error;
    uvm_reg_map root_map = get_root_map();
-
-   if (this.get_parent_map() != null)
-     return;
 
    if (root_map.get_adapter() == null) begin
       `uvm_error("RegModel", {"Map '",root_map.get_full_name(),
@@ -1198,10 +1134,9 @@ endfunction: get_physical_addresses
 
 function void uvm_reg_map::set_submap_offset(uvm_reg_map submap, uvm_reg_addr_t offset);
   assert(submap != null);
-  if (!Xcheck_child_overlapX(submap,offset,submap.get_size())) begin
-    // msg?
-  end
   m_submaps[submap] = offset;
+  if (m_parent.is_locked())
+    Xinit_address_mapX();
 endfunction
 
 

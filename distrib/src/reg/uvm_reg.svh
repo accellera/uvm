@@ -21,13 +21,15 @@
 //
 
 //
-// Title: uvm_reg
-// Register abstraction base class
+// Title: Register Abstraction Base Classes
 //
-// A register is a collection of fields, located in a block or register file.
-// It is the unit that is accessible and programmable via an address map.
+// The following classes are defined herein:
 //
-// A register may be accessible via more than one address map.
+// <uvm_reg> : base for abstract registers
+//
+// <uvm_reg_cbs> : base for user-defined pre/post read/write callbacks
+//
+// <uvm_reg_frontdoor> : user-defined frontdoor access sequence
 //
 
 typedef class uvm_reg_cbs;
@@ -47,7 +49,7 @@ virtual class uvm_reg extends uvm_object;
 
    local bit               locked;
    local uvm_reg_block     parent;
-   local uvm_reg_file   m_rf;
+   local uvm_reg_file   m_regfile_parent;
    /*local*/ int unsigned  n_bits;
    local int unsigned      n_used_bits;
 
@@ -77,7 +79,7 @@ virtual class uvm_reg extends uvm_object;
    //----------------------
 
    //
-   // FUNCTION: new
+   // Function: new
    // Create a new instance and type-specific configuration
    //
    // Creates an instance of a register abstraction class with the specified
@@ -92,9 +94,9 @@ virtual class uvm_reg extends uvm_object;
    // Multiple functional coverage models may be specified by adding their
    // symbolic names, as defined by the <uvm_coverage_model_e> type.
    //
-   extern function                  new        (string name="",
-                                                int unsigned n_bits,
-                                                int has_cover);
+   extern function new (string name="",
+                        int unsigned n_bits,
+                        int has_cover);
 
    //
    // Function: configure
@@ -109,9 +111,9 @@ virtual class uvm_reg extends uvm_object;
    // of variables (usually one per field), then the HDL path
    // must be specified using the <add_hdl_path()> method.
    //
-   extern virtual function void     configure  (uvm_reg_block blk_parent,
-                                                uvm_reg_file rf_parent,
-                                                string hdl_path = "");
+   extern virtual function void configure (uvm_reg_block blk_parent,
+                                           uvm_reg_file regfile_parent = null,
+                                           string hdl_path = "");
 
    //
    // Function: set_offset
@@ -126,10 +128,11 @@ virtual class uvm_reg extends uvm_object;
    // that was used to create it.
    //
    extern virtual function void set_offset (uvm_reg_map    map,
-                                            uvm_reg_addr_t offset);
+                                            uvm_reg_addr_t offset,
+                                            bit            unmapped = 0);
 
    /*local*/ extern virtual function void set_parent (uvm_reg_block blk_parent,
-                                                      uvm_reg_file rf_parent);
+                                                      uvm_reg_file regfile_parent);
    /*local*/ extern virtual function void add_field  (uvm_reg_field field);
    /*local*/ extern virtual function void add_map    (uvm_reg_map map);
 
@@ -157,38 +160,38 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function string        get_full_name();
 
    //
-   // FUNCTION: get_parent
+   // Function: get_parent
    // Get the parent block
    //
    extern virtual function uvm_reg_block get_parent ();
    extern virtual function uvm_reg_block get_block  ();
 
    //
-   // FUNCTION: get_regfile
+   // Function: get_regfile
    // Get the parent register file
    //
    // Returns ~null~ if this register is instantiated in a block.
    //
-   extern virtual function uvm_reg_file  get_regfile     ();
+   extern virtual function uvm_reg_file get_regfile ();
 
 
    //
    // Function: get_n_maps
    // Returns the number of address maps this register is mapped in
    //
-   extern virtual function int             get_n_maps      ();
+   extern virtual function int get_n_maps ();
 
    //
    // Function: is_in_map
-   // Return TRUE if this register is in the specified address ~map~
+   // Returns 1 if this register is in the specified address ~map~
    //
-   extern function         bit             is_in_map       (uvm_reg_map map);
+   extern function bit is_in_map (uvm_reg_map map);
 
    //
    // Function: get_maps
    // Returns all of the address ~maps~ where this register is mapped
    //
-   extern virtual function void            get_maps        (ref uvm_reg_map maps[$]);
+   extern virtual function void get_maps (ref uvm_reg_map maps[$]);
 
 
    /*local*/ extern function uvm_reg_map get_local_map   (uvm_reg_map map,
@@ -197,7 +200,7 @@ virtual class uvm_reg extends uvm_object;
 
 
    //
-   // FUNCTION: get_rights
+   // Function: get_rights
    // Returns the access rights of this register.
    //
    // Returns "RW", "RO" or "WO".
@@ -217,14 +220,14 @@ virtual class uvm_reg extends uvm_object;
    //
    extern virtual function string          get_rights      (uvm_reg_map map = null);
 
-   //-----------------------------------------------------------------
-   // FUNCTION: get_n_bytes
+
+   // Function: get_n_bytes
    // Returns the width, in bytes, of this register. 
-   //-----------------------------------------------------------------
+   //
    extern virtual function int unsigned    get_n_bytes     ();
 
    //-----------------------------------------------------------------
-   // FUNCTION: get_fields
+   // Function: get_fields
    // Return the fields in this register
    //
    // Fills the specified array with the abstraction class
@@ -235,7 +238,7 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function void            get_fields      (ref uvm_reg_field fields[$]);
 
    //-----------------------------------------------------------------
-   // FUNCTION: get_field_by_name
+   // Function: get_field_by_name
    // Return the named field in this register
    //
    // Finds a field with the specified name in this register
@@ -246,7 +249,7 @@ virtual class uvm_reg extends uvm_object;
 
 
    //
-   // FUNCTION: get_offset
+   // Function: get_offset
    // Returns the offset of this register
    //
    // Returns the offset of this register in an address ~map~.
@@ -263,7 +266,7 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function uvm_reg_addr_t  get_offset      (uvm_reg_map map = null);
 
    //
-   // FUNCTION: get_address
+   // Function: get_address
    // Returns the base external physical address of this register
    //
    // Returns the base external physical address of this register
@@ -281,7 +284,7 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function uvm_reg_addr_t  get_address     (uvm_reg_map map = null);
 
    //
-   // FUNCTION: get_addresses
+   // Function: get_addresses
    // Identifies the external physical address(es) of this register
    //
    // Computes all of the external physical addresses that must be accessed
@@ -308,7 +311,7 @@ virtual class uvm_reg extends uvm_object;
 
 
    //
-   // FUNCTION: set_attribute
+   // Function: set_attribute
    // Set an attribute.
    //
    // Set the specified attribute to the specified value for this register.
@@ -321,7 +324,7 @@ virtual class uvm_reg extends uvm_object;
                                               string value);
 
    //
-   // FUNCTION: get_attribute
+   // Function: get_attribute
    // Get an attribute value.
    //
    // Get the value of the specified attribute for this register.
@@ -339,7 +342,7 @@ virtual class uvm_reg extends uvm_object;
                                                 bit inherited = 1);
 
    //
-   // FUNCTION: get_attributes
+   // Function: get_attributes
    // Get all attribute values.
    //
    // Get the name of all attribute for this register.
@@ -359,7 +362,7 @@ virtual class uvm_reg extends uvm_object;
 
 
    //-----------------------------------------------------------------
-   // FUNCTION: predict
+   // Function: predict
    // Update the mirrored value for this register
    //
    // Predict the mirror value of the fields in the register
@@ -387,7 +390,7 @@ virtual class uvm_reg extends uvm_object;
 
 
    //
-   // FUNCTION: set
+   // Function: set
    // Set the desired value for this register
    //
    // Sets the desired value of the fields in the register
@@ -417,7 +420,7 @@ virtual class uvm_reg extends uvm_object;
 
 
    //
-   // FUNCTION: get
+   // Function: get
    // Return the desired value of the fields in the register.
    //
    // Does not actually read the value
@@ -440,7 +443,7 @@ virtual class uvm_reg extends uvm_object;
                                                int     lineno = 0);
 
    //
-   // FUNCTION: reset
+   // Function: reset
    // Reset the desired/mirrored value for this register.
    //
    // Sets the desired and mirror value of the fields in this register
@@ -456,7 +459,7 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function void reset(string kind = "HARD");
 
    //
-   // FUNCTION: get_reset
+   // Function: get_reset
    // Get the specified reset value for this register
    //
    // Return the reset value for this register
@@ -466,7 +469,7 @@ virtual class uvm_reg extends uvm_object;
                              get_reset(string kind = "HARD");
 
    //-----------------------------------------------------------------
-   // FUNCTION: needs_update
+   // Function: needs_update
    // Check if any of the field need updating
    //
    // See <uvm_reg_field::needs_update()> for details.
@@ -663,7 +666,7 @@ virtual class uvm_reg extends uvm_object;
 
 
    //
-   // FUNCTION: set_frontdoor
+   // Function: set_frontdoor
    // Set a user-defined frontdoor for this register
    //
    // By default, registers are mapped linearly into the address space
@@ -682,7 +685,7 @@ virtual class uvm_reg extends uvm_object;
                                       int                   lineno = 0);
 
    //
-   // FUNCTION: get_frontdoor
+   // Function: get_frontdoor
    // Returns the user-defined frontdoor for this register
    //
    // If null, no user-defined frontdoor has been defined.
@@ -704,7 +707,7 @@ virtual class uvm_reg extends uvm_object;
 
 
    //
-   // FUNCTION: set_backdoor
+   // Function: set_backdoor
    // Set a user-defined backdoor for this register
    //
    // By default, registers are accessed via the built-in string-based
@@ -723,7 +726,7 @@ virtual class uvm_reg extends uvm_object;
                                      string               fname = "",
                                      int                  lineno = 0);
    //
-   // FUNCTION: get_backdoor
+   // Function: get_backdoor
    // Returns the user-defined backdoor for this register
    //
    // If null, no user-defined backdoor has been defined.
@@ -881,7 +884,7 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function bit can_cover(int models);
 
    //
-   // FUNCTION: set_cover
+   // Function: set_cover
    // Turns on coverage measurement.
    //
    // Turns the collection of functional coverage measurements on or off
@@ -904,7 +907,7 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function int set_cover(int is_on);
 
    //
-   // FUNCTION: is_cover_on
+   // Function: is_cover_on
    // Check if coverage measurement is on.
    //
    // Returns TRUE if measurement for all of the specified functional
@@ -1230,10 +1233,10 @@ endfunction: new
 
 // configure
 
-function void uvm_reg::configure(uvm_reg_block blk_parent, uvm_reg_file rf_parent, string hdl_path = "");
+function void uvm_reg::configure(uvm_reg_block blk_parent, uvm_reg_file regfile_parent=null, string hdl_path = "");
    this.parent = blk_parent;
    this.parent.add_reg(this);
-   this.m_rf = rf_parent;
+   this.m_regfile_parent = regfile_parent;
    if (hdl_path != "")
    begin
    	// NOTE was add_hdl_path('{'{hdl_path,-1,-1}})
@@ -1395,8 +1398,8 @@ function void uvm_reg::clear_hdl_path(string kind = "RTL");
   end
 
   if (kind == "") begin
-     if (m_rf != null)
-        kind = m_rf.get_default_hdl_path();
+     if (m_regfile_parent != null)
+        kind = m_regfile_parent.get_default_hdl_path();
      else
         kind = parent.get_default_hdl_path();
   end
@@ -1432,8 +1435,8 @@ endfunction
 
 function bit  uvm_reg::has_hdl_path(string kind = "");
   if (kind == "") begin
-     if (m_rf != null)
-        kind = m_rf.get_default_hdl_path();
+     if (m_regfile_parent != null)
+        kind = m_regfile_parent.get_default_hdl_path();
      else
         kind = parent.get_default_hdl_path();
   end
@@ -1450,8 +1453,8 @@ function void uvm_reg::get_hdl_path(ref uvm_hdl_path_concat paths[$],
   uvm_queue #(uvm_hdl_path_concat) hdl_paths;
 
   if (kind == "") begin
-     if (m_rf != null)
-        kind = m_rf.get_default_hdl_path();
+     if (m_regfile_parent != null)
+        kind = m_regfile_parent.get_default_hdl_path();
      else
         kind = parent.get_default_hdl_path();
   end
@@ -1476,8 +1479,8 @@ function void uvm_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
                                              input string kind = "");
 
    if (kind == "") begin
-      if (m_rf != null)
-         kind = m_rf.get_default_hdl_path();
+      if (m_regfile_parent != null)
+         kind = m_regfile_parent.get_default_hdl_path();
       else
          kind = parent.get_default_hdl_path();
    end
@@ -1491,8 +1494,8 @@ function void uvm_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
       uvm_queue #(uvm_hdl_path_concat) hdl_paths = hdl_paths_pool.get(kind);
       string parent_paths[$];
 
-      if (m_rf != null)
-         m_rf.get_full_hdl_path(parent_paths,kind);
+      if (m_regfile_parent != null)
+         m_regfile_parent.get_full_hdl_path(parent_paths,kind);
       else
          parent.get_full_hdl_path(parent_paths,kind);
 
@@ -1523,10 +1526,17 @@ endfunction
 // set_offset
 
 function void uvm_reg::set_offset (uvm_reg_map    map,
-                                   uvm_reg_addr_t offset);
+                                   uvm_reg_addr_t offset,
+                                   bit unmapped = 0);
 
    uvm_reg_map_info map_info;
    uvm_reg_map orig_map = map;
+
+   if (maps.num() > 1 && map == null) begin
+      `uvm_error("RegModel",{"set_offset requires a non-null map when register '",
+                 get_full_name(),"' belongs to more than one map."})
+      return;
+   end
 
    map = get_local_map(map,"set_offset()");
 
@@ -1535,21 +1545,19 @@ function void uvm_reg::set_offset (uvm_reg_map    map,
    
    map_info = map.get_reg_map_info(this);
    
-   map_info.offset = offset;
-   map_info.unmapped = 0;
-  
-   map.m_set_reg_offset(this, offset);
+   map.m_set_reg_offset(this, offset, unmapped);
 endfunction
+
 
 // set_parent
 
 function void uvm_reg::set_parent(uvm_reg_block blk_parent,
-                                      uvm_reg_file rf_parent);
+                                      uvm_reg_file regfile_parent);
   if (this.parent != null) begin
      // ToDo: remove register from previous parent
   end
   this.parent = blk_parent;
-  this.m_rf = rf_parent;
+  this.m_regfile_parent = regfile_parent;
 endfunction
 
 
@@ -1563,7 +1571,7 @@ endfunction
 // get_regfile
 
 function uvm_reg_file uvm_reg::get_regfile();
-   return m_rf;
+   return m_regfile_parent;
 endfunction
 
 
@@ -1575,8 +1583,8 @@ function string uvm_reg::get_full_name();
    get_full_name = this.get_name();
 
    // Do not include top-level name in full name
-   if (m_rf != null)
-      return {m_rf.get_full_name(), ".", get_full_name};
+   if (m_regfile_parent != null)
+      return {m_regfile_parent.get_full_name(), ".", get_full_name};
 
    // Do not include top-level name in full name
    blk = this.get_block();
@@ -1860,9 +1868,9 @@ endfunction: set_attribute
 // get_attribute
 
 function string uvm_reg::get_attribute(string name,
-                                           bit inherited = 1);
+                                        bit inherited = 1);
    if (inherited) begin
-      if (m_rf != null)
+      if (m_regfile_parent != null)
          get_attribute = parent.get_attribute(name);
       else if (parent != null)
          get_attribute = parent.get_attribute(name);
@@ -1881,7 +1889,7 @@ function void uvm_reg::get_attributes(ref string names[string],
                                           input bit inherited = 1);
    // attributes at higher levels supercede those at lower levels
    if (inherited) begin
-      if (m_rf != null)
+      if (m_regfile_parent != null)
          this.parent.get_attributes(names,1);
       else if (parent != null)
          this.parent.get_attributes(names,1);
@@ -2077,8 +2085,8 @@ endfunction: get_reset
 
 
 function void uvm_reg::Xpredict_readX(uvm_reg_data_t  value,
-                                   uvm_path_e path,
-                                   uvm_reg_map  map);
+                                      uvm_path_e      path,
+                                      uvm_reg_map     map);
    // Fields are stored in LSB to MSB order
    foreach (this.fields[i]) begin
       this.fields[i].Xpredict_readX(value >> this.fields[i].get_lsb_pos_in_register(),
@@ -2579,16 +2587,28 @@ task uvm_reg::XreadX(output uvm_status_e status,
 
          final_val = value;
 
-         // Need to clear RC fields and mask WO fields
+         // Need to clear RC fields, set RS fields and mask WO fields
          if (status == UVM_IS_OK || status == UVM_HAS_X) begin
             uvm_reg_data_t  wo_mask = 0;
 
             foreach (this.fields[i]) begin
                string acc = this.fields[i].get_access(uvm_reg_map::backdoor());
-               if (acc == "RC") begin
+               if (acc == "RC" ||
+                   acc == "WRC" ||
+                   acc == "W1SRC" ||
+                   acc == "W0SRC") begin
                   final_val &= ~(((1<<this.fields[i].get_n_bits())-1) << this.fields[i].get_lsb_pos_in_register());
                end
-               else if (acc == "WO") begin
+               else if (acc == "RS" ||
+                        acc == "WRS" ||
+                        acc == "W1CRS" ||
+                        acc == "W0CRS") begin
+                  final_val |= (((1<<this.fields[i].get_n_bits())-1) << this.fields[i].get_lsb_pos_in_register());
+               end
+               else if (acc == "WO" ||
+                        acc == "WOC" ||
+                        acc == "WOS" ||
+                        acc == "WO1") begin
                   wo_mask |= ((1<<this.fields[i].get_n_bits())-1) << this.fields[i].get_lsb_pos_in_register();
                end
             end
@@ -2989,9 +3009,14 @@ task uvm_reg::mirror(output uvm_status_e  status,
    // Remember what we think the value is before it gets updated
    if (check == UVM_CHECK) begin
       exp = this.get();
-      // Any WO field will readback as 0's
+      // Assuume that WO* field will readback as 0's
       foreach(this.fields[i]) begin
-         if (this.fields[i].get_access(map) == "WO") begin
+         string mode;
+         mode = this.fields[i].get_access(map);
+         if (mode == "WO" ||
+             mode == "WOC" ||
+             mode == "WOS" ||
+             mode == "WO1") begin
             exp &= ~(((1 << this.fields[i].get_n_bits())-1)
                      << this.fields[i].get_lsb_pos_in_register());
          end
@@ -3016,8 +3041,11 @@ task uvm_reg::mirror(output uvm_status_e  status,
             dc |= ((1 << this.fields[i].get_n_bits())-1)
                   << this.fields[i].get_lsb_pos_in_register();
          end
-         else if (acc == "WO") begin
-            // WO fields will always read-back as 0
+         else if (acc == "WO" ||
+                  acc == "WOC" ||
+                  acc == "WOS" ||
+                  acc == "WO1") begin
+            // Assume WO fields will always read-back as 0
             exp &= ~(((1 << this.fields[i].get_n_bits())-1)
                      << this.fields[i].get_lsb_pos_in_register());
          end

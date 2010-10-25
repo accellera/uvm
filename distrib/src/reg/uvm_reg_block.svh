@@ -943,14 +943,8 @@ function void uvm_reg_block::lock_model();
      	blk.lock_model();
    end
    
-   //`ifndef UVM_REG_FAST_SRCH
    if (this.parent == null)
       Xinit_address_mapsX();
-   //`endif
-
-   //if (this.parent == null)
-   //   foreach (maps[map])
-   //     map.Xcheck_overlapX();
 
 endfunction: lock_model
 

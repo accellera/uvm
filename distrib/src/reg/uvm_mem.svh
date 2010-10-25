@@ -21,7 +21,26 @@
 //
 
 //
-// Title: uvm_mem
+// Title: Memory Abstraction Base Classes
+//
+// The following classes are defined herein:
+//
+// <uvm_mem> : base for abstract memories
+//
+// <uvm_mem_burst> : descriptor for memory burst read/write operation
+//
+// <uvm_mem_cbs> : base for user-defined pre/post read/write callbacks
+//
+// <uvm_mem_frontdoor> : base for user-defined frontdoor access sequences
+//
+
+
+typedef class uvm_mem_burst;
+typedef class uvm_mem_cbs;
+typedef class uvm_mem_frontdoor;
+
+//
+// CLASS: uvm_mem
 // Memory abstraction base class
 //
 // A memory is a collection of contiguous locations.
@@ -34,14 +53,6 @@
 // backdoor access be used instead.
 //
 
-typedef class uvm_mem_burst;
-typedef class uvm_mem_cbs;
-typedef class uvm_mem_frontdoor;
-
-//
-// CLASS: uvm_mem
-// Memory descriptors. 
-//
 class uvm_mem extends uvm_object;
 
    `uvm_register_cb(uvm_mem, uvm_mem_cbs)

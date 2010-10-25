@@ -21,9 +21,9 @@
 //
  
 //
-// TITLE: Register Model Adaptor for Bus Agent
+// TITLE: Register Classes for Adapting to Bus Agents
 //
-// This file defines the following classes:
+// The following classes are defined herein:
 //
 // <uvm_reg_item> : abstract register transaction type
 //

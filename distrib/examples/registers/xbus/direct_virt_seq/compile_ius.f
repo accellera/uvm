@@ -16,5 +16,6 @@
 // the VPI part for the backdoor
 ../../../../../distrib/src/C/uvm_hdl.c
 -DNCSIM
+-access rw
 
 

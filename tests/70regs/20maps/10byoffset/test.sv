@@ -32,7 +32,7 @@ class reg8 extends uvm_reg;
 
    virtual function void build();
       this.f8 = new("f8");
-      this.f8.configure(this, 8,  0, "RW", 'h0, 0, 1);
+      this.f8.configure(this, 8,  0, "RW", 0, 'h0, 0, 1);
    endfunction
 endclass
 
@@ -47,7 +47,7 @@ class reg32 extends uvm_reg;
 
    virtual function void build();
       this.f32 = new("f32");
-      this.f32.configure(this, 32,  0, "RW", 'h0, 0, 1);
+      this.f32.configure(this, 32,  0, "RW", 0, 'h0, 0, 1);
    endfunction
 endclass
 

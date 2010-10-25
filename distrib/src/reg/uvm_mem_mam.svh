@@ -29,12 +29,23 @@
 // their own, without knowing in which memory or offset they are
 // actually located.
 //
-// The memory allocation manage should used by any
+// The memory allocation manager should be used by any
 // application-level process
 // that requires reserved space in the memory,
 // such as DMA buffers.
+//
 // A region will remain reserved until it is explicitly released. 
 //
+// The following classes are defined herein:
+//
+// <uvm_mam> : base for abstract register fields
+//
+// <uvm_mam_region> : allocated memory region descriptor
+//
+// <uvm_mam_policy> : determines the starting offset of a randomly allocated memory region
+//
+// <uvm_mam_cfg> : specifies the configuration of a memory allocation manager
+
 
 `ifndef UVM_MAM__SV
 `define UVM_MAM__SV

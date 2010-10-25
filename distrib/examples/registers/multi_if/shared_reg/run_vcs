@@ -1,3 +1,0 @@
-#! /bin/csh -fb
-#./simv +UVM_SEQUENCE=uvm_reg_hw_reset_seq
-./simv +UVM_TESTNAME=blk_test
