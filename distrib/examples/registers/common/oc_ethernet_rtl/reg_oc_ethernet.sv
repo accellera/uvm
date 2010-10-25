@@ -572,17 +572,17 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MODER = reg_reg_MODER::type_id::create("MODER",,get_full_name());
         this.MODER.configure(this, null, "");
 
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.MODER_2.DataOut", 16, 1);
             t_.push_back_path("ethreg1.MODER_1.DataOut", 8, 8);
             t_.push_back_path("ethreg1.MODER_0.DataOut", 0, 8);
          	
-            this.MODER.add_hdl_path(t_);
+            this.MODER.add_hdl_path_object(t_);
         end
 `else
-        this.MODER.add_hdl_path_array('{
+        this.MODER.add_hdl_path('{
                 '{"ethreg1.MODER_2.DataOut", 16, 1},
                 '{"ethreg1.MODER_1.DataOut", 8, 8},
                 '{"ethreg1.MODER_0.DataOut", 0, 8}
@@ -611,7 +611,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.RXEN = this.MODER.RXEN;
         this.INT_SOURCE = reg_reg_oc_ethernet_INT_SOURCE::type_id::create("INT_SOURCE",,get_full_name());
         this.INT_SOURCE.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.irq_rxc", 6, 1);
@@ -622,11 +622,11 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             t_.push_back_path("ethreg1.irq_txe", 1, 1);
             t_.push_back_path("ethreg1.irq_txb", 0, 1);
             
-            this.INT_SOURCE.add_hdl_path(t_);
+            this.INT_SOURCE.add_hdl_path_object(t_);
         end
 `else
          	
-        this.INT_SOURCE.add_hdl_path_array('{
+        this.INT_SOURCE.add_hdl_path('{
                 '{"ethreg1.irq_rxc", 6, 1},
                 '{"ethreg1.irq_txc", 5, 1},
                 '{"ethreg1.irq_busy", 4, 1},
@@ -648,14 +648,14 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.TXB = this.INT_SOURCE.TXB;
         this.INT_MASK = reg_reg_oc_ethernet_INT_MASK::type_id::create("INT_MASK",,get_full_name());
         this.INT_MASK.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.INT_MASK_0.DataOut", -1, -1);
-            this.INT_MASK.add_hdl_path(t_);
+            this.INT_MASK.add_hdl_path_object(t_);
         end
 `else
-        this.INT_MASK.add_hdl_path_array('{
+        this.INT_MASK.add_hdl_path('{
                 '{"ethreg1.INT_MASK_0.DataOut", -1, -1}
             });
 `endif
@@ -671,14 +671,14 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.TXB_M = this.INT_MASK.TXB_M;
         this.IPGT = reg_reg_IPGT::type_id::create("IPGT",,get_full_name());
         this.IPGT.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.IPGT_0.DataOut", -1, -1);
-            this.IPGT.add_hdl_path(t_);
+            this.IPGT.add_hdl_path_object(t_);
         end
 `else
-        this.IPGT.add_hdl_path_array('{
+        this.IPGT.add_hdl_path('{
                 '{"ethreg1.IPGT_0.DataOut", -1, -1}
             });
 `endif
@@ -687,14 +687,14 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.IPGT.build();
         this.IPGR1 = reg_reg_IPGR1::type_id::create("IPGR1",,get_full_name());
         this.IPGR1.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.IPGR1_0.DataOut", -1, -1);
-            this.IPGR1.add_hdl_path(t_);
+            this.IPGR1.add_hdl_path_object(t_);
         end
 `else
-        this.IPGR1.add_hdl_path_array('{
+        this.IPGR1.add_hdl_path('{
                 '{"ethreg1.IPGR1_0.DataOut", -1, -1}
             });
 `endif
@@ -703,14 +703,14 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.IPGR1.build();
         this.IPGR2 = reg_reg_IPGR2::type_id::create("IPGR2",,get_full_name());
         this.IPGR2.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.IPGR2_0.DataOut", -1, -1);
-            this.IPGR2.add_hdl_path(t_);
+            this.IPGR2.add_hdl_path_object(t_);
         end
 `else
-        this.IPGR2.add_hdl_path_array('{
+        this.IPGR2.add_hdl_path('{
                 '{"ethreg1.IPGR2_0.DataOut", -1, -1}
             });
 `endif
@@ -719,17 +719,17 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.IPGR2.build();
         this.PACKETLEN = reg_reg_PACKETLEN::type_id::create("PACKETLEN",,get_full_name());
         this.PACKETLEN.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.PACKETLEN_3.DataOut", 24, 8);
             t_.push_back_path("ethreg1.PACKETLEN_2.DataOut", 16, 8);
             t_.push_back_path("ethreg1.PACKETLEN_1.DataOut", 8, 8);
             t_.push_back_path("ethreg1.PACKETLEN_0.DataOut", 0, 8);
-            this.PACKETLEN.add_hdl_path(t_);
+            this.PACKETLEN.add_hdl_path_object(t_);
         end
 `else
-        this.PACKETLEN.add_hdl_path_array('{
+        this.PACKETLEN.add_hdl_path('{
                 '{"ethreg1.PACKETLEN_3.DataOut", 24, 8},
                 '{"ethreg1.PACKETLEN_2.DataOut", 16, 8},
                 '{"ethreg1.PACKETLEN_1.DataOut", 8, 8},
@@ -749,14 +749,14 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.COLLVALID = this.COLLCONF.COLLVALID;
         this.TX_BD_NUM = reg_reg_TX_BD_NUM::type_id::create("TX_BD_NUM",,get_full_name());
         this.TX_BD_NUM.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.TX_BD_NUM_0.DataOut", -1, -1);
-            this.TX_BD_NUM.add_hdl_path(t_);
+            this.TX_BD_NUM.add_hdl_path_object(t_);
         end
 `else
-        this.TX_BD_NUM.add_hdl_path_array('{
+        this.TX_BD_NUM.add_hdl_path('{
                 '{"ethreg1.TX_BD_NUM_0.DataOut", -1, -1}
             });
 `endif
@@ -765,14 +765,14 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.TX_BD_NUM.build();
         this.CTRLMODER = reg_reg_CTRLMODER::type_id::create("CTRLMODER",,get_full_name());
         this.CTRLMODER.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.CTRLMODER_0.DataOut", -1, -1);
-            this.CTRLMODER.add_hdl_path(t_);
+            this.CTRLMODER.add_hdl_path_object(t_);
         end
 `else
-        this.CTRLMODER.add_hdl_path_array('{
+        this.CTRLMODER.add_hdl_path('{
                 '{"ethreg1.CTRLMODER_0.DataOut", -1, -1}
             });
 `endif
@@ -784,15 +784,15 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.PASSALL = this.CTRLMODER.PASSALL;
         this.MIIMODER = reg_reg_MIIMODER::type_id::create("MIIMODER",,get_full_name());
         this.MIIMODER.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.MIIMODER_1.DataOut", 8, 1);
             t_.push_back_path("ethreg1.MIIMODER_0.DataOut", 0, 8);
-            this.MIIMODER.add_hdl_path(t_);
+            this.MIIMODER.add_hdl_path_object(t_);
         end
 `else
-        this.MIIMODER.add_hdl_path_array('{
+        this.MIIMODER.add_hdl_path('{
                 '{"ethreg1.MIIMODER_1.DataOut", 8, 1},
                 '{"ethreg1.MIIMODER_0.DataOut", 0, 8}
             });
@@ -804,16 +804,16 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.CLKDIV = this.MIIMODER.CLKDIV;
         this.MIICOMMAND = reg_reg_MIICOMMAND::type_id::create("MIICOMMAND",,get_full_name());
         this.MIICOMMAND.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.MIICOMMAND2.DataOut", 2, 1);
             t_.push_back_path("ethreg1.MIICOMMAND1.DataOut", 1, 1);
             t_.push_back_path("ethreg1.MIICOMMAND0.DataOut", 0, 1);
-            this.MIICOMMAND.add_hdl_path(t_);
+            this.MIICOMMAND.add_hdl_path_object(t_);
         end
 `else
-        this.MIICOMMAND.add_hdl_path_array('{
+        this.MIICOMMAND.add_hdl_path('{
                 '{"ethreg1.MIICOMMAND2.DataOut", 2, 1},
                 '{"ethreg1.MIICOMMAND1.DataOut", 1, 1},
                 '{"ethreg1.MIICOMMAND0.DataOut", 0, 1}
@@ -833,15 +833,15 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.FIAD = this.MIIADDRESS.FIAD;
         this.MIITX_DATA = reg_reg_MIITX_DATA::type_id::create("MIITX_DATA",,get_full_name());
         this.MIITX_DATA.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.MIITX_DATA_1.DataOut", 8, 8);
             t_.push_back_path("ethreg1.MIITX_DATA_0.DataOut", 0, 8);
-            this.MIITX_DATA.add_hdl_path(t_);
+            this.MIITX_DATA.add_hdl_path_object(t_);
         end
 `else
-        this.MIITX_DATA.add_hdl_path_array('{
+        this.MIITX_DATA.add_hdl_path('{
                 '{"ethreg1.MIITX_DATA_1.DataOut", 8, 8},
                 '{"ethreg1.MIITX_DATA_0.DataOut", 0, 8}
             });
@@ -852,14 +852,14 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.CTRLDATA = this.MIITX_DATA.CTRLDATA;
         this.MIIRX_DATA = reg_reg_MIIRX_DATA::type_id::create("MIIRX_DATA",,get_full_name());
         this.MIIRX_DATA.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.MIIRX_DATA.DataOut", -1, -1);
-            this.MIIRX_DATA.add_hdl_path(t_);
+            this.MIIRX_DATA.add_hdl_path_object(t_);
         end
 `else
-        this.MIIRX_DATA.add_hdl_path_array('{
+        this.MIIRX_DATA.add_hdl_path('{
                 '{"ethreg1.MIIRX_DATA.DataOut", -1, -1}
             });
 `endif
@@ -869,16 +869,16 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.PRSD = this.MIIRX_DATA.PRSD;
         this.MIISTATUS = reg_reg_MIISTATUS::type_id::create("MIISTATUS",,get_full_name());
         this.MIISTATUS.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.NValid_stat", 2, 1);
             t_.push_back_path("ethreg1.Busy_stat", 1, 1);
             t_.push_back_path("ethreg1.LinkFail", 0, 1);
-            this.MIISTATUS.add_hdl_path(t_);
+            this.MIISTATUS.add_hdl_path_object(t_);
         end
 `else
-        this.MIISTATUS.add_hdl_path_array('{
+        this.MIISTATUS.add_hdl_path('{
                 '{"ethreg1.NValid_stat", 2, 1},
                 '{"ethreg1.Busy_stat", 1, 1},
                 '{"ethreg1.LinkFail", 0, 1}
@@ -892,7 +892,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.LINKFAIL = this.MIISTATUS.LINKFAIL;
         this.MAC_ADDR = reg_reg_MAC_ADDR::type_id::create("MAC_ADDR",,get_full_name());
         this.MAC_ADDR.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.MAC_ADDR1_1.DataOut", 40, 8);
@@ -901,10 +901,10 @@ class reg_block_oc_ethernet extends uvm_reg_block;
             t_.push_back_path("ethreg1.MAC_ADDR0_2.DataOut", 16, 8);
             t_.push_back_path("ethreg1.MAC_ADDR0_1.DataOut", 8, 8);
             t_.push_back_path("ethreg1.MAC_ADDR0_0.DataOut", 0, 8);
-            this.MAC_ADDR.add_hdl_path(t_);
+            this.MAC_ADDR.add_hdl_path_object(t_);
         end
 `else
-        this.MAC_ADDR.add_hdl_path_array('{
+        this.MAC_ADDR.add_hdl_path('{
                 '{"ethreg1.MAC_ADDR1_1.DataOut", 40, 8},
                 '{"ethreg1.MAC_ADDR1_0.DataOut", 32, 8},
                 '{"ethreg1.MAC_ADDR0_3.DataOut", 24, 8},
@@ -918,17 +918,17 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MAC_ADDR.build();
         this.HASH0 = reg_reg_HASH0::type_id::create("HASH0",,get_full_name());
         this.HASH0.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.RXHASH0_3.DataOut", 24, 8);
             t_.push_back_path("ethreg1.RXHASH0_2.DataOut", 16, 8);
             t_.push_back_path("ethreg1.RXHASH0_1.DataOut", 8, 8);
             t_.push_back_path("ethreg1.RXHASH0_0.DataOut", 0, 8);
-            this.HASH0.add_hdl_path(t_);
+            this.HASH0.add_hdl_path_object(t_);
         end
 `else
-        this.HASH0.add_hdl_path_array('{
+        this.HASH0.add_hdl_path('{
                 '{"ethreg1.RXHASH0_3.DataOut", 24, 8},
                 '{"ethreg1.RXHASH0_2.DataOut", 16, 8},
                 '{"ethreg1.RXHASH0_1.DataOut", 8, 8},
@@ -940,17 +940,17 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.HASH0.build();
         this.HASH1 = reg_reg_HASH1::type_id::create("HASH1",,get_full_name());
         this.HASH1.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.RXHASH1_3.DataOut", 24, 8);
             t_.push_back_path("ethreg1.RXHASH1_2.DataOut", 16, 8);
             t_.push_back_path("ethreg1.RXHASH1_1.DataOut", 8, 8);
             t_.push_back_path("ethreg1.RXHASH1_0.DataOut", 0, 8);
-            this.HASH1.add_hdl_path(t_);
+            this.HASH1.add_hdl_path_object(t_);
         end
 `else
-        this.HASH1.add_hdl_path_array('{
+        this.HASH1.add_hdl_path('{
                 '{"ethreg1.RXHASH1_3.DataOut", 24, 8},
                 '{"ethreg1.RXHASH1_2.DataOut", 16, 8},
                 '{"ethreg1.RXHASH1_1.DataOut", 8, 8},
@@ -962,16 +962,16 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.HASH1.build();
         this.TXCTRL = reg_reg_TXCTRL::type_id::create("TXCTRL",,get_full_name());
         this.TXCTRL.configure(this, null, "");
-`ifdef INCA
+`ifdef USE_PATH_OBJECT
         begin
             uvm_hdl_path_concat t_ = new();
             t_.push_back_path("ethreg1.TXCTRL_2.DataOut", 16, 1);
             t_.push_back_path("ethreg1.TXCTRL_1.DataOut", 8, 8);
             t_.push_back_path("ethreg1.TXCTRL_0.DataOut", 0, 8);
-            this.TXCTRL.add_hdl_path(t_);
+            this.TXCTRL.add_hdl_path_object(t_);
         end
 `else
-        this.TXCTRL.add_hdl_path_array('{
+        this.TXCTRL.add_hdl_path('{
                 '{"ethreg1.TXCTRL_2.DataOut", 16, 1},
                 '{"ethreg1.TXCTRL_1.DataOut", 8, 8},
                 '{"ethreg1.TXCTRL_0.DataOut", 0, 8}

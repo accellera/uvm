@@ -753,14 +753,14 @@ virtual class uvm_reg extends uvm_object;
    // same design abstraction if the register is physically duplicated
    // in the design abstraction
    //
-   extern function void add_hdl_path      (uvm_hdl_path_concat path,
+   extern function void add_hdl_path      (uvm_hdl_path_slice path[],
                                            string kind = "RTL");
                                            
                                            
    // Function: add_hdl_path_array 
    // similar to add_hdl_path takes an uvm_hdl_path_slice[] instead of the wrapped container uvm_hdl_path_concat
    //                                       
-   extern function void add_hdl_path_array (uvm_hdl_path_concat_a path,
+   extern function void add_hdl_path_object (uvm_hdl_path_concat path,
                                            string kind = "RTL");
                                                                                   
    //
@@ -1242,7 +1242,7 @@ function void uvm_reg::configure(uvm_reg_block blk_parent, uvm_reg_file rf_paren
    	 e[0].size=-1;
    	 e[0].offset=-1;
    	 
-   	 this.add_hdl_path_array(e);
+   	 this.add_hdl_path(e);
    end
 endfunction: configure
 
@@ -1412,20 +1412,19 @@ endfunction
 
 // add_hdl_path
 
-function void uvm_reg::add_hdl_path(uvm_hdl_path_concat path, string kind = "RTL");
+function void uvm_reg::add_hdl_path(uvm_hdl_path_slice path[], string kind = "RTL");
+    uvm_hdl_path_concat t_ = new();
+    t_.set(path);
+    add_hdl_path_object(t_,kind);  
+endfunction
 
+function void uvm_reg::add_hdl_path_object (uvm_hdl_path_concat path, string kind = "RTL");
   uvm_queue #(uvm_hdl_path_concat) paths;
 
   paths = hdl_paths_pool.get(kind);
 
   paths.push_back(path);
-
-endfunction
-
-function void uvm_reg::add_hdl_path_array (uvm_hdl_path_concat_a path, string kind = "RTL");
-    uvm_hdl_path_concat t_ = new();
-    void'(t_.set(path));
-    add_hdl_path(t_,kind);                                                                                 
+                                                                                  
 endfunction                                           
                                            
                                           

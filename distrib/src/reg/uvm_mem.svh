@@ -649,13 +649,13 @@ class uvm_mem extends uvm_object;
    // same design abstraction if the memory is physically duplicated
    // in the design abstraction
    //
-   extern function void add_hdl_path      (uvm_hdl_path_concat path,
+   extern function void add_hdl_path      (uvm_hdl_path_slice path[],
                                            string kind = "RTL");   
                                            
    // Function: add_hdl_path_array 
    // similar to add_hdl_path takes an uvm_hdl_path_slice[] instead of the wrapped container uvm_hdl_path_concat
    //                                       
-   extern function void add_hdl_path_array (uvm_hdl_path_concat_a path,
+   extern function void add_hdl_path_object (uvm_hdl_path_concat path,
                                            string kind = "RTL");
                                            
                                            
@@ -1247,7 +1247,7 @@ function void uvm_mem::configure(uvm_reg_block  parent,
    	e_[0].offset=-1;
    	e_[0].size=-1;
    	
-   	add_hdl_path_array(e_);
+   	add_hdl_path(e_);
    end
 endfunction: configure
 
@@ -2767,15 +2767,15 @@ function void uvm_mem::clear_hdl_path(string kind = "RTL");
   hdl_paths_pool.delete(kind);
 endfunction
 
-function void uvm_mem::add_hdl_path_array (uvm_hdl_path_concat_a path, string kind = "RTL");
+function void uvm_mem::add_hdl_path (uvm_hdl_path_slice path[], string kind = "RTL");
     uvm_hdl_path_concat t_ = new();
-    void'(t_.set(path));
-    add_hdl_path(t_,kind);                                                                                 
+    t_.set(path);
+    add_hdl_path_object(t_,kind);                                                                                 
 endfunction                                           
             
 // add_hdl_path
 
-function void uvm_mem::add_hdl_path(uvm_hdl_path_concat path,
+function void uvm_mem::add_hdl_path_object(uvm_hdl_path_concat path,
                                         string kind = "RTL");
 
   uvm_queue #(uvm_hdl_path_concat) paths;
