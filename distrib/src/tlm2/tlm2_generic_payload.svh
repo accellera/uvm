@@ -159,7 +159,8 @@ virtual class tlm_extension_base extends uvm_object;
   // function: create
   //
    
-  pure virtual function uvm_object create (string name="");
+  virtual function uvm_object create (string name="");
+  endfunction
 
 endclass
 
