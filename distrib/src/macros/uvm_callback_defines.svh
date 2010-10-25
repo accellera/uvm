@@ -197,11 +197,16 @@
 //|    my_trans trans;
 //|    forever begin
 //|      get_port.get(trans);
-//|      if (`uvm_do_callbacks_exit_on(mycomp, mycb, extobj, drop_trans(this,trans), 1)
+//|      if(do_callbacks(trans) == 0)
 //|        uvm_report_info("DROPPED",{"trans dropped: %s",trans.convert2string()});
-//|      // execute transaction
+//|      else
+//|        // execute transaction
 //|    end
 //| endtask
+//| function bit do_callbacks(my_trans);
+//|   // Returns 0 if drop happens and 1 otherwise
+//|   `uvm_do_callbacks_exit_on(mycomp, mycb, extobj, drop_trans(this,trans), 1)
+//| endfunction
 //-----------------------------------------------------------------------------
 
 
@@ -220,7 +225,8 @@
 // argument.
 //
 //| ...
-//|  if (`uvm_do_callbacks_exit_on(mycb, mycomp, seqr, drop_trans(seqr,trans), 1))
+//|  // Exit with 0 if a callback returns a 1
+//|  `uvm_do_callbacks_exit_on(mycomp, mycb, seqr, drop_trans(seqr,trans), 1)
 //| ...
 //-----------------------------------------------------------------------------
 

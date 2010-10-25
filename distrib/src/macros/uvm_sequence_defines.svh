@@ -62,8 +62,8 @@
   virtual function void m_set_p_sequencer();\
     super.m_set_p_sequencer(); \
     if( !$cast(p_sequencer, m_sequencer)) \
-        uvm_report_fatal("DCLPSQ", \
-        $psprintf("%m %s Error casting p_sequencer, please verify that this sequence/sequence item is intended to execute on this type of sequencer", get_full_name()), UVM_NONE); \
+        `uvm_fatal("DCLPSQ", \
+        $psprintf("%m %s Error casting p_sequencer, please verify that this sequence/sequence item is intended to execute on this type of sequencer", get_full_name())) \
   endfunction  
 
 
@@ -276,7 +276,7 @@
   `uvm_create(UVM_SEQUENCE_ITEM) \
   start_item(UVM_SEQUENCE_ITEM); \
   if(!UVM_SEQUENCE_ITEM.randomize()) begin \
-    uvm_report_warning("RNDFLD", "Randomization failed in uvm_do action"); \
+    `uvm_warning("RNDFLD", "Randomization failed in uvm_do action") \
   end \
   finish_item(UVM_SEQUENCE_ITEM); \
   end
@@ -292,7 +292,7 @@
   `uvm_create(UVM_SEQUENCE_ITEM) \
   start_item(UVM_SEQUENCE_ITEM, PRIORITY); \
   if (!UVM_SEQUENCE_ITEM.randomize()) begin \
-    uvm_report_warning("RNDFLD", "Randomization failed in uvm_do action"); \
+    `uvm_warning("RNDFLD", "Randomization failed in uvm_do action") \
   end \
   finish_item(UVM_SEQUENCE_ITEM, PRIORITY); \
   end
@@ -309,7 +309,7 @@
   `uvm_create(UVM_SEQUENCE_ITEM) \
   start_item(UVM_SEQUENCE_ITEM);\
   if(!UVM_SEQUENCE_ITEM.randomize() with CONSTRAINTS ) begin \
-    uvm_report_warning("RNDFLD", "Randomization failed in uvm_do_with action"); \
+    `uvm_warning("RNDFLD", "Randomization failed in uvm_do_with action") \
   end\
   finish_item(UVM_SEQUENCE_ITEM);\
   end
@@ -326,7 +326,7 @@
   `uvm_create(UVM_SEQUENCE_ITEM) \
   start_item(UVM_SEQUENCE_ITEM, PRIORITY);\
   if(!UVM_SEQUENCE_ITEM.randomize() with CONSTRAINTS ) begin \
-    uvm_report_warning("RNDFLD", "Randomization failed in uvm_do_with action"); \
+    `uvm_warning("RNDFLD", "Randomization failed in uvm_do_with action") \
   end\
   finish_item(UVM_SEQUENCE_ITEM, PRIORITY);\
   end
@@ -367,7 +367,7 @@
   begin \
   start_item(UVM_SEQUENCE_ITEM); \
   if (!UVM_SEQUENCE_ITEM.randomize()) begin \
-    uvm_report_warning("RNDFLD", "Randomization failed in uvm_rand_send action"); \
+    `uvm_warning("RNDFLD", "Randomization failed in uvm_rand_send action") \
   end \
   finish_item(UVM_SEQUENCE_ITEM);\
   end\
@@ -382,7 +382,7 @@
   begin \
   start_item(UVM_SEQUENCE_ITEM, PRIORITY); \
   if (!UVM_SEQUENCE_ITEM.randomize()) begin \
-    uvm_report_warning("RNDFLD", "Randomization failed in uvm_rand_send action"); \
+    `uvm_warning("RNDFLD", "Randomization failed in uvm_rand_send action") \
   end \
   finish_item(UVM_SEQUENCE_ITEM, PRIORITY);\
   end\
@@ -398,7 +398,7 @@
   begin \
   start_item(UVM_SEQUENCE_ITEM); \
   if (!UVM_SEQUENCE_ITEM.randomize() with CONSTRAINTS ) begin \
-    uvm_report_warning("RNDFLD", "Randomization failed in uvm_rand_send_with action"); \
+    `uvm_warning("RNDFLD", "Randomization failed in uvm_rand_send_with action") \
   end \
   finish_item(UVM_SEQUENCE_ITEM);\
   end\
@@ -414,7 +414,7 @@
   begin \
   start_item(UVM_SEQUENCE_ITEM, PRIORITY); \
   if (!UVM_SEQUENCE_ITEM.randomize() with CONSTRAINTS ) begin \
-    uvm_report_warning("RNDFLD", "Randomization failed in uvm_rand_send_with action"); \
+    `uvm_warning("RNDFLD", "Randomization failed in uvm_rand_send_with action") \
   end \
   finish_item(UVM_SEQUENCE_ITEM, PRIORITY);\
   end\
@@ -452,7 +452,7 @@
   `uvm_create_on(UVM_SEQUENCE_ITEM, SEQUENCER_REF) \
   start_item(UVM_SEQUENCE_ITEM); \
   if (!UVM_SEQUENCE_ITEM.randomize()) begin \
-    uvm_report_warning("RNDFLD", "Randomization failed in uvm_do action"); \
+    `uvm_warning("RNDFLD", "Randomization failed in uvm_do action") \
   end \
   finish_item(UVM_SEQUENCE_ITEM); \
   end
@@ -469,7 +469,7 @@
   `uvm_create_on(UVM_SEQUENCE_ITEM, SEQUENCER_REF) \
   start_item(UVM_SEQUENCE_ITEM, PRIORITY); \
   if (!UVM_SEQUENCE_ITEM.randomize()) begin \
-    uvm_report_warning("RNDFLD", "Randomization failed in uvm_do action"); \
+    `uvm_warning("RNDFLD", "Randomization failed in uvm_do action") \
   end \
   finish_item(UVM_SEQUENCE_ITEM, PRIORITY); \
   end
@@ -487,7 +487,7 @@
   `uvm_create_on(UVM_SEQUENCE_ITEM, SEQUENCER_REF) \
   start_item(UVM_SEQUENCE_ITEM);\
   if (!UVM_SEQUENCE_ITEM.randomize() with CONSTRAINTS ) begin \
-    uvm_report_warning("RNDFLD", "Randomization failed in uvm_do_with action"); \
+    `uvm_warning("RNDFLD", "Randomization failed in uvm_do_with action") \
   end\
   finish_item(UVM_SEQUENCE_ITEM);\
   end
@@ -504,7 +504,7 @@
   `uvm_create_on(UVM_SEQUENCE_ITEM, SEQUENCER_REF) \
   start_item(UVM_SEQUENCE_ITEM, PRIORITY);\
   if (!UVM_SEQUENCE_ITEM.randomize() with CONSTRAINTS ) begin \
-    uvm_report_warning("RNDFLD", "Randomization failed in uvm_do_with action"); \
+    `uvm_warning("RNDFLD", "Randomization failed in uvm_do_with action") \
   end\
   finish_item(UVM_SEQUENCE_ITEM, PRIORITY);\
   end

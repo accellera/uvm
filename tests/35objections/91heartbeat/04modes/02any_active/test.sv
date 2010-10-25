@@ -2,10 +2,44 @@ module test;
   import uvm_pkg::*;
   `include "uvm_macros.svh"
 
-  string message = {"Did not recieve an update of myobj on any component since last event trigger at time 600. The list of registered components is:\n",
-    "  uvm_test_top.env.agent\n",
-    "  uvm_test_top.env.agent.mc1\n",
-    "  uvm_test_top.env.agent.mc2"};
+  string message = "Did not recieve an update of myobj on any component since last event trigger at time 600. The list of registered components is:";
+
+  function automatic bit check_message(string msg);
+    int lpos = 0;
+    int spos = 0;
+    bit got0, got1, got2;
+    string agent;
+
+    while(lpos<msg.len() && msg[lpos] != "\n") lpos++;
+    if(msg.substr(spos,lpos-1) != message) begin
+      $display("*** Bad start of message: %s", msg.substr(spos,lpos-1));
+      return 0;
+    end
+
+    repeat (3) begin
+      lpos++; spos = lpos; 
+      while(lpos<msg.len() && msg[lpos] != "\n") lpos++;
+      case(msg.substr(spos,lpos-1))
+        "  uvm_test_top.env.agent": begin got0=1; end
+        "  uvm_test_top.env.agent.mc1": begin got1=1; end
+        "  uvm_test_top.env.agent.mc2": begin got2=1; end
+        default: begin
+          $display("*** BAD AGENT: %s", msg.substr(spos,lpos-1));
+          return 0;
+        end
+      endcase
+    end
+    if(!got0) $display("*** DIDN'T GET uvm_test_top.env.agent");
+    if(!got1) $display("*** DIDN'T GET uvm_test_top.env.agent.mc1");
+    if(!got2) $display("*** DIDN'T GET uvm_test_top.env.agent.mc2");
+    lpos++;
+    if(lpos<msg.len()) begin
+      $display("*** Extra message text: %s", msg.substr(lpos, msg.len()-1));
+      return 0;
+    end 
+    return 1;
+  endfunction
+
 
   class my_catcher extends uvm_report_catcher;
      int id_cnt;
@@ -103,9 +137,7 @@ module test;
         $display("** UVM TEST FAILED **");
         return;
       end
-      if((mc.msg != message)) begin
-        $display("Expected: \"%s\"",message);
-        $display("Got: \"%s\"",mc.msg);
+      if(!check_message(mc.msg)) begin
         $display("** UVM TEST FAILED **");
         return;
       end

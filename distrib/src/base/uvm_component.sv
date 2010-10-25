@@ -443,11 +443,33 @@ endfunction
 //
 //------------------------------------------------------------------------------
 
-// set_report_severity_action_hier
-// -------------------------------
+// set_report_id_verbosity_hier
+// -------------------------
 
-function void uvm_component::set_report_severity_action_hier( uvm_severity severity,
-                                                              uvm_action action);
+function void uvm_component::set_report_id_verbosity_hier( string id, int verbosity);
+  set_report_id_verbosity(id, verbosity);
+  foreach( m_children[c] )
+    m_children[c].set_report_id_verbosity_hier(id, verbosity);
+endfunction
+
+
+// set_report_severity_id_verbosity_hier
+// ----------------------------------
+
+function void uvm_component::set_report_severity_id_verbosity_hier( uvm_severity severity,
+                                                                 string id,
+                                                                 int verbosity);
+  set_report_severity_id_verbosity(severity, id, verbosity);
+  foreach( m_children[c] )
+    m_children[c].set_report_severity_id_verbosity_hier(severity, id, verbosity);
+endfunction
+
+
+// set_report_severity_action_hier
+// -------------------------
+
+function void uvm_component::set_report_severity_action_hier( uvm_severity severity, 
+                                                           uvm_action action);
   set_report_severity_action(severity, action);
   foreach( m_children[c] )
     m_children[c].set_report_severity_action_hier(severity, action);

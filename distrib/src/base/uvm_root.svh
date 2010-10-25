@@ -235,6 +235,12 @@ class uvm_root extends uvm_component;
   extern function uvm_test_done_objection test_done_objection();
   extern function void print_topology  (uvm_printer printer=null);
 
+  // Need to create objection watcher processes from uvm_root because
+  // simulators may not allow processes to be created by static initializers,
+  // so the process cannot go in the objection class.
+  local uvm_objection m_objection_watcher_list[$];
+  extern function void m_objection_scheduler();
+  extern function void m_create_objection_watcher(uvm_objection objection);
 endclass
 
 
@@ -335,6 +341,7 @@ function uvm_root::new();
   insert_phase(extract_ph,            run_ph);
   insert_phase(check_ph,              extract_ph);
   insert_phase(report_ph,             check_ph);
+
 endfunction
 
 
@@ -422,6 +429,12 @@ task uvm_root::run_test(string test_name="");
   uvm_component uvm_test_top;
 
   testname_plusarg = 0;
+
+  // Set up the process that watches objections to handle the all_dropped
+  // situation to be safe from killing threads. Needs to be done in run_test
+  // since it needs to be in an initial block to fork a process.
+  m_objection_scheduler();
+
 
   // plusarg overrides argument
   if ($value$plusargs("UVM_TESTNAME=%s", test_name))
@@ -1214,5 +1227,25 @@ function void uvm_root::print_topology(uvm_printer printer=null);
 
 endfunction
 
+
+function void uvm_root::m_create_objection_watcher(uvm_objection objection);
+  m_objection_watcher_list.push_back(objection);
+endfunction
+
+
+function void uvm_root::m_objection_scheduler();
+  fork begin
+    while(1) begin
+      wait(m_objection_watcher_list.size() != 0);
+      foreach(m_objection_watcher_list[i]) begin
+        automatic uvm_objection obj = m_objection_watcher_list[i];
+        fork begin
+          obj.m_execute_scheduled_forks();
+        end join_none
+      end
+      `uvm_clear_queue(m_objection_watcher_list);
+    end
+  end join_none
+endfunction
 
 `endif //UVM_ROOT_SVH

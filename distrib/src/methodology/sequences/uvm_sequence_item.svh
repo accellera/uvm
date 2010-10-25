@@ -384,6 +384,70 @@ bit        print_sequence_info = 0;
     end
   endfunction
 
+  // Group: Reporting Interface
+  //
+  // Sequence items and sequences will use the sequencer which they are
+  // associated with for reporting messages. If no sequencer has been set
+  // for the item/sequence using <set_sequencer> (or <start_item>), then the global 
+  // reporter will be used.
+
+  // Function: uvm_report_info
+
+  virtual function void uvm_report_info( string id,
+                                         string message,
+                                         int verbosity = UVM_MEDIUM,
+                                         string filename = "",
+                                         int line = 0);
+    if(m_sequencer != null)
+      m_sequencer.uvm_report_info(id,message,verbosity,filename,line);
+    else
+      uvm_top.uvm_report_info(id,message,verbosity,filename,line);
+  endfunction
+
+  // Function: uvm_report_warning
+
+  virtual function void uvm_report_warning( string id,
+                                            string message,
+                                            int verbosity = UVM_MEDIUM,
+                                            string filename = "",
+                                            int line = 0);
+    if(m_sequencer != null)
+      m_sequencer.uvm_report_warning(id,message,verbosity,filename,line);
+    else
+      uvm_top.uvm_report_warning(id,message,verbosity,filename,line);
+  endfunction
+
+  // Function: uvm_report_error
+
+  virtual function void uvm_report_error( string id,
+                                          string message,
+                                          int verbosity = UVM_LOW,
+                                          string filename = "",
+                                          int line = 0);
+    if(m_sequencer != null)
+      m_sequencer.uvm_report_error(id,message,verbosity,filename,line);
+    else
+      uvm_top.uvm_report_error(id,message,verbosity,filename,line);
+  endfunction
+
+  // Function: uvm_report_fatal
+  //
+  // These are the primary reporting methods in the UVM. uvm_sequence_item
+  // derived types delegate these functions to their associated sequencer
+  // if they have one, or to the global reporter. See <uvm_report_object::Reporting>
+  // for details on the messaging functions.
+
+  virtual function void uvm_report_fatal( string id,
+                                          string message,
+                                          int verbosity = UVM_NONE,
+                                          string filename = "",
+                                          int line = 0);
+    if(m_sequencer != null)
+      m_sequencer.uvm_report_error(id,message,verbosity,filename,line);
+    else
+      uvm_top.uvm_report_error(id,message,verbosity,filename,line);
+  endfunction
+
 
   // Function- do_print
   //

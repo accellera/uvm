@@ -193,11 +193,36 @@ the cause of failure or success.
 
 The script will find the name of the run-time log file in the $log
 variable and the name of the testcase in the $testdir variable. The
-script run in the same context (i.e. variables & workign directory) as
+script runs in the same context (i.e. variables & working directory) as
 the run_tests script.
 
 
-3.4 How do I pass additional command-line arguments?
+3.4 How do I write a test that runs a script?
+
+The preferred implementation for a test is in pure SV code in a file
+named "test.sv". Sometimes, that is not possible and a script must be
+run instead.
+
+If the file "test.pl" is found in the testcase directory INSTEAD of
+the file "test.sv", it is executed instead of the normal testcase
+execution process.
+
+The testcase is executed by do'ing the script. The correctness of
+the testcase is determined by the value of the last expression
+executed in that file. If it is "0", then the test is assumed to have
+passed. Otherwise, the test is assumed to have failed.
+
+The script may set the variable $post_test to a short description of
+the cause of failure or success.
+
+The script will find the name of the tool to use in the $tool
+variable, the name of the run-time log file in the $log variable and
+the name of the testcase in the $testdir variable. The script runs in
+the same context (i.e. variables & working directory) as the run_tests
+script.
+
+
+3.5 How do I pass additional command-line arguments?
 
 If this is a transient need (e.g. for debugging, use the -C or -R
 command-line option of the run_tests script to pass compile-time and
