@@ -1,3 +1,0 @@
-#! /bin/sh
-arch=`../../../bin/uvm_os_name`
-irun -sv_lib ../../../lib/${arch}/libuvm_ius.so -f compile_ius.blk.f +UVM_TESTNAME=blk_R_test

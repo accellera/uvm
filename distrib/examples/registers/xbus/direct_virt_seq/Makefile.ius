@@ -1,0 +1,66 @@
+## 
+## -------------------------------------------------------------
+##    Copyright 2010 Cadence
+##    All Rights Reserved Worldwide
+## 
+##    Licensed under the Apache License, Version 2.0 (the
+##    "License"); you may not use this file except in
+##    compliance with the License.  You may obtain a copy of
+##    the License at
+## 
+##        http://www.apache.org/licenses/LICENSE-2.0
+## 
+##    Unless required by applicable law or agreed to in
+##    writing, software distributed under the License is
+##    distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+##    CONDITIONS OF ANY KIND, either express or implied.  See
+##    the License for the specific language governing
+##    permissions and limitations under the License.
+## -------------------------------------------------------------
+## 
+
+UVM_HOME	= ../../../..
+
+include ../../../Makefile.ius
+
+
+all: run
+
+IRUN= $(IUS) +incdir+../common \
+		+incdir+../common/reg_defn \
+		+incdir+../common/sequences \
+		+incdir+../../../xbus/sv \
+		+incdir+../../../xbus/examples \
+		+define+XA0_TOP_PATH=xbus_reg_tb_top.dut \
+		../common/xbus_top.sv
+
+help:
+	@echo " Available run-time targets:"
+	@echo
+	@echo " Built-In Tests:"
+	@echo
+	@echo "    uvm_reg_hw_reset_seq"
+	@echo "    uvm_reg_access_seq"
+	@echo "    uvm_mem_access_seq"
+	@echo "    uvm_reg_bit_bash_seq"
+	@echo "    uvm_mem_walk_seq"
+	@echo "    uvm_reg_access_seq     (e.g. uvm_reg_access_seq+uvm_mem_access_seq)"
+	@echo "    uvm_reg_mem_built_in_seq   (e.g. all the built-in tests)"
+	@echo
+	@echo " User-defined:"
+	@echo
+	@echo "    mem_init_from_file_seq"
+	@echo "    mem_rand_init_seq"
+	@echo "    user_acp_reg_seq"
+	@echo "    virtual_seq"
+	@echo
+
+run: uvm_reg_mem_built_in_seq \
+	mem_init_from_file_seq \
+	mem_rand_init_seq \
+	user_acp_reg_seq \
+	virtual_seq
+
+%_seq:
+	$(IRUN) +UVM_SEQUENCE=$@ +UVM_TESTNAME=cmd_line_seq_test
+	$(CHECK)

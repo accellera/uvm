@@ -1,2 +1,0 @@
-#!/bin/sh
-irun -f compile_ius.f +UVM_TESTNAME=blk_test $*
