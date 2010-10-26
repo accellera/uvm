@@ -1,35 +1,4 @@
-Section: TLM2 Interfaces, Ports, Exports and Transport Interfaces
-
-TLM, transaction-level modeling, is a modeling style for building highly 
-abstract models of components and systems. It relies on transactions, objects
- that contain arbitrary, protocol-specific data to abstractly represent 
-lower-level activity. In practice TLM refers to a family of abstraction levels 
-beginning with cycle-accurate modeling, the most abstract, and extending 
-upwards in abstraction as far as they eye can see. Cycle accurate, 
-approximately timed, loosely timed, untimed, and token level are amongst 
-the transaction-level abstractions commonly in use today.
-
-The acronym TLM also refers to a system of code elements used to create
- transaction-level models. TLM-1 and TLM-2 are two TLM modeling systems
- which have been developed as industry standards for building 
-transaction-level models. Both were built in SystemC and standardized
- within the TLM Working Group of the Open SystemC Initiative (OSCI). 
-TLM-1 achieved standardization in 2005 and TLM-2 became a standard in 2009.
-TLM-1 and TLM-2 share a common heritage and many of the same people who 
-developed TLM-1 also worked on TLM-2. Otherwise, they are quite different 
-things. TLM-1 is a message passing system. Interfaces are either untimed 
-or rely on the target for timing. None of the interfaces provide for
- explicit timing annotations. TLM-2, while still enabling transfer of 
-data and synchronization between independent processes, is mainly designed
- for high performance modeling of memory-mapped bus-based systems.
-
-Sockets:
-
-TLM 2.0 uses sockets to communicate between transaction
-level elements. A similar set of methods is in UVM, which helps
-lowering the learning curve for SystemC engineers. 
-You can connect Sockects in UVM objects to fulfill necessary
-communication completion models.
+Section: TLM2 Interfaces, Ports, Exports and Transport Interfaces Subset
 
 Sockets group together all the necessary core interfaces for
 transportation and binding, allowing more generic usage models
@@ -48,7 +17,7 @@ are called targets. Initiators have initiator sockets and targets have target
  initiator sockets to other initiator sockets and you cannot connect target 
 sockets to target sockets.
 
-TLM-2.0 provides the following two transport interfaces:
+The UVM TLM2 subset provides the following two transport interfaces:
 
  Blocking (b_transport) - completes the entire transaction
 within a single method call

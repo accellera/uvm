@@ -26,5 +26,3 @@
   `include "tlm2/tlm2_exports.svh"
   `include "tlm2/tlm2_sockets_base.svh"
   `include "tlm2/tlm2_sockets.svh"
-  `include "tlm2/tlm2_quantumkeeper.svh"
-  `include "tlm2/tlm2_peq.svh"

@@ -23,7 +23,7 @@
 //
 // class definitions of port classes that connect tlm interfaces
 //
-// blocking transport backward port : <tlm_b_transport_port>
+// blocking transport port : <tlm_b_transport_port>
 //
 // non-blocking transport forward port : <tlm_nb_transport_fw_port>
 //
