@@ -34,7 +34,7 @@
 // Group:  IMP binding macros
 //----------------------------------------------------------------------
 
-// Macro: `TLM_NB_TRANSPORT_FW_IMP
+// Macro: `UVM_TLM_NB_TRANSPORT_FW_IMP
 //
 // The macro wraps Forward path call function <nb_transport_fw>
 // The first call to this method for a transaction marks the initial timing point.
@@ -42,18 +42,18 @@
 // transaction. The timing annotation argument allows the timing points
 // to be offset from the simulation times at which the forward path is used.
 // The final timing point of a transaction may be marked by a call
-// to <nb_transport_bw> within <`TLM_NB_TRANSPORT_BW_IMP> or a return from this 
+// to <nb_transport_bw> within <`UVM_TLM_NB_TRANSPORT_BW_IMP> or a return from this 
 // or subsequent call to <nb_transport_fw>.
 //
 // See Xref for more details on the semantics and rules of the nonblocking
 // transport interface.
    
-`define TLM_NB_TRANSPORT_FW_IMP(imp, T, P, t, p, delay)              \
-  function tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);  \
+`define UVM_TLM_NB_TRANSPORT_FW_IMP(imp, T, P, t, p, delay)              \
+  function uvm_tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);  \
     return imp.nb_transport_fw(t, p, delay);                          \
   endfunction
 
-// Macro: `TLM_NB_TRANSPORT_BW_IMP
+// Macro: `UVM_TLM_NB_TRANSPORT_BW_IMP
 //
 //
 // Implementation of the backward path.
@@ -65,7 +65,7 @@
 // The timing annotation argument allows the timing point
 // to be offset from the simulation times at which the backward path is used.
 // The final timing point of a transaction may be marked by a call
-// to <nb_transport_fw> within <`TLM_NB_TRANSPORT_FW_IMP> or a return from 
+// to <nb_transport_fw> within <`UVM_TLM_NB_TRANSPORT_FW_IMP> or a return from 
 // this or subsequent call to <nb_transport_bw>.
 //
 // See Xref for more details on the semantics and rules of the nonblocking
@@ -74,30 +74,30 @@
 // Example:
 //
 //| class master extends uvm_component;
-//     tlm_nb_initiator_socket #(trans, tlm_phase_e, this_t) initiator_socket;
+//     uvm_tlm_nb_initiator_socket #(trans, uvm_tlm_phase_e, this_t) initiator_socket;
 //|
 //|    function void build();
 //        initiator_socket = new("initiator_socket", this, this);
 //|    endfunction
 //|
-//|    function tlm_sync_e nb_transport_bw(ref trans t,
-//|                                   ref tlm_phase_e p,
+//|    function uvm_tlm_sync_e nb_transport_bw(ref trans t,
+//|                                   ref uvm_tlm_phase_e p,
 //|                                   ref time delay);
 //|        delay_time = delay;
 //|        transaction = t;
 //|        state = p;
-//|        return TLM_ACCEPTED;
+//|        return UVM_TLM_ACCEPTED;
 //|    endfunction
 //|
 //|    ...
 //| endclass
 
-`define TLM_NB_TRANSPORT_BW_IMP(imp, T, P, t, p, delay)              \
-  function tlm_sync_e nb_transport_bw(T t, ref P p, ref time delay);  \
+`define UVM_TLM_NB_TRANSPORT_BW_IMP(imp, T, P, t, p, delay)              \
+  function uvm_tlm_sync_e nb_transport_bw(T t, ref P p, ref time delay);  \
     return imp.nb_transport_bw(t, p, delay);                          \
   endfunction
 
-// Macro: `TLM_B_TRANSPORT_IMP
+// Macro: `UVM_TLM_B_TRANSPORT_IMP
 //
 // The macro wraps the function <b_transport>
 // Execute a blocking transaction. Once this method returns,
@@ -116,7 +116,7 @@
 // allows the timing points to be offset from the simulation times
 // at which the task call and return are executed.
 
-`define TLM_B_TRANSPORT_IMP(imp, T, t, delay)                        \
+`define UVM_TLM_B_TRANSPORT_IMP(imp, T, t, delay)                        \
   task b_transport(T t, ref time delay);                              \
     imp.b_transport(t, delay);                                        \
   endtask
@@ -127,48 +127,48 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// Class: tlm_nb_transport_fw_imp
+// Class: uvm_tlm_nb_transport_fw_imp
 //
 // used like exports except an addtional class  parameter specifices 
 // the type of the implementation object.  When the
 // imp is instantiated the implementation object is bound.
 //----------------------------------------------------------------------
 
-class tlm_nb_transport_fw_imp #(type T=tlm_generic_payload,
-                                type P=tlm_phase_e,
+class uvm_tlm_nb_transport_fw_imp #(type T=uvm_tlm_generic_payload,
+                                type P=uvm_tlm_phase_e,
                                 type IMP=int)
-  extends uvm_port_base #(tlm_if #(T,P));
-  `UVM_IMP_COMMON(`TLM_NB_FW_MASK, "tlm_nb_transport_fw_imp", IMP)
-  `TLM_NB_TRANSPORT_FW_IMP(m_imp, T, P, t, p, delay)
+  extends uvm_port_base #(uvm_tlm_if #(T,P));
+  `UVM_IMP_COMMON(`UVM_TLM_NB_FW_MASK, "uvm_tlm_nb_transport_fw_imp", IMP)
+  `UVM_TLM_NB_TRANSPORT_FW_IMP(m_imp, T, P, t, p, delay)
 endclass
 
 //----------------------------------------------------------------------
-// Class: tlm_nb_transport_bw_imp
+// Class: uvm_tlm_nb_transport_bw_imp
 //
 // used like exports except an addtional class  parameter specifices 
 // the type of the implementation object.  When the
 // imp is instantiated the implementation object is bound.
 //----------------------------------------------------------------------
 
-class tlm_nb_transport_bw_imp #(type T=tlm_generic_payload,
-                                type P=tlm_phase_e,
+class uvm_tlm_nb_transport_bw_imp #(type T=uvm_tlm_generic_payload,
+                                type P=uvm_tlm_phase_e,
                                 type IMP=int)
-  extends uvm_port_base #(tlm_if #(T,P));
-  `UVM_IMP_COMMON(`TLM_NB_BW_MASK, "tlm_nb_transport_bw_imp", IMP)
-  `TLM_NB_TRANSPORT_BW_IMP(m_imp, T, P, t, p, delay)
+  extends uvm_port_base #(uvm_tlm_if #(T,P));
+  `UVM_IMP_COMMON(`UVM_TLM_NB_BW_MASK, "uvm_tlm_nb_transport_bw_imp", IMP)
+  `UVM_TLM_NB_TRANSPORT_BW_IMP(m_imp, T, P, t, p, delay)
 endclass
 
 //----------------------------------------------------------------------
-// Class: tlm_b_transport_imp
+// Class: uvm_tlm_b_transport_imp
 //
 // used like exports except an addtional class  parameter specifices 
 // the type of the implementation object.  When the
 // imp is instantiated the implementation object is bound.
 //----------------------------------------------------------------------
 
-class tlm_b_transport_imp #(type T=tlm_generic_payload,
+class uvm_tlm_b_transport_imp #(type T=uvm_tlm_generic_payload,
                             type IMP=int)
-  extends uvm_port_base #(tlm_if #(T));
-  `UVM_IMP_COMMON(`TLM_B_MASK, "tlm_b_transport_imp", IMP)
-  `TLM_B_TRANSPORT_IMP(m_imp, T, t, delay)
+  extends uvm_port_base #(uvm_tlm_if #(T));
+  `UVM_IMP_COMMON(`UVM_TLM_B_MASK, "uvm_tlm_b_transport_imp", IMP)
+  `UVM_TLM_B_TRANSPORT_IMP(m_imp, T, t, delay)
 endclass

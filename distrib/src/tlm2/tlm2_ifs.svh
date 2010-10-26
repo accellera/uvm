@@ -25,7 +25,7 @@
 // Group: Globals
 // Global macro's & enums
 
-// Enum: tlm_phase_e 
+// Enum: uvm_tlm_phase_e 
 //
 // Nonblocking transport synchronization state values between
 // an initiator and a target.
@@ -43,9 +43,9 @@ typedef enum
     END_REQ,
     BEGIN_RESP,
     END_RESP
-  } tlm_phase_e;
+  } uvm_tlm_phase_e;
 
-// Enum: tlm_sync_e
+// Enum: uvm_tlm_sync_e
 //
 // Pre-defined phase state values for the nonblocking transport
 // Base Protocol between an initiator and a target.
@@ -56,26 +56,26 @@ typedef enum
 
 typedef enum 
   {
-    TLM_ACCEPTED,
-    TLM_UPDATED,
-    TLM_COMPLETED
-  } tlm_sync_e;
+    UVM_TLM_ACCEPTED,
+    UVM_TLM_UPDATED,
+    UVM_TLM_COMPLETED
+  } uvm_tlm_sync_e;
 
-// MACRO: `TLM_TASK_ERROR
+// MACRO: `UVM_TLM_TASK_ERROR
 //
 // Defines Not-Yet-Implemented TLM tasks
-`define TLM_TASK_ERROR "TLM-2 interface task not implemented"
+`define UVM_TLM_TASK_ERROR "TLM-2 interface task not implemented"
 
-// MACRO: `TLM_FUNCTION_ERROR
+// MACRO: `UVM_TLM_FUNCTION_ERROR
 //
 // Defines Not-Yet-Implemented TLM functions
-`define TLM_FUNCTION_ERROR "TLM-2 interface function not implemented"
+`define UVM_TLM_FUNCTION_ERROR "TLM-2 interface function not implemented"
 
 // Group:  TLM IF Class
 // Base class type to define the transport functions.
 
 //
-// Class: tlm_if
+// Class: uvm_tlm_if
 //
 // Base class type to define the transport functions.
 //
@@ -86,8 +86,8 @@ typedef enum
 //  - <b_transport>
 //
 
-class tlm_if #(type T=tlm_generic_payload,
-               type P=tlm_phase_e);
+class uvm_tlm_if #(type T=uvm_tlm_generic_payload,
+               type P=uvm_tlm_phase_e);
    //----------------------------------------------------------------------
    // Group: tlm transport methods
    //
@@ -111,9 +111,9 @@ class tlm_if #(type T=tlm_generic_payload,
    // See Xref for more details on the semantics and rules of the nonblocking
    // transport interface.
    
-  virtual function tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);
-    `uvm_error("nb_transport_fw", `TLM_FUNCTION_ERROR)
-    return TLM_ACCEPTED;
+  virtual function uvm_tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);
+    `uvm_error("nb_transport_fw", `UVM_TLM_FUNCTION_ERROR)
+    return UVM_TLM_ACCEPTED;
   endfunction
 
    // Function: nb_transport_bw
@@ -135,27 +135,27 @@ class tlm_if #(type T=tlm_generic_payload,
    // Example:
    //
    //| class master extends uvm_component;
-   //     tlm_nb_initiator_socket #(trans, tlm_phase_e, this_t) initiator_socket;
+   //     uvm_tlm_nb_initiator_socket #(trans, uvm_tlm_phase_e, this_t) initiator_socket;
    //|    ...
    //|    function void build();
    //        initiator_socket = new("initiator_socket", this, this);
    //|    endfunction
    //|
-   //|    function tlm_sync_e nb_transport_bw(ref trans t,
-   //|                                   ref tlm_phase_e p,
+   //|    function uvm_tlm_sync_e nb_transport_bw(ref trans t,
+   //|                                   ref uvm_tlm_phase_e p,
    //|                                   ref time delay);
    //|        delay_time = delay;
    //|        transaction = t;
    //|        state = p;
-   //|        return TLM_ACCEPTED;
+   //|        return UVM_TLM_ACCEPTED;
    //|    endfunction
    //|
    //|    ...
    //| endclass
    
-  virtual function tlm_sync_e nb_transport_bw(T t, ref P p, ref time delay);
-    `uvm_error("nb_transport_bw", `TLM_FUNCTION_ERROR)
-    return TLM_ACCEPTED;
+  virtual function uvm_tlm_sync_e nb_transport_bw(T t, ref P p, ref time delay);
+    `uvm_error("nb_transport_bw", `UVM_TLM_FUNCTION_ERROR)
+    return UVM_TLM_ACCEPTED;
   endfunction
 
    // Function: b_transport
@@ -177,7 +177,7 @@ class tlm_if #(type T=tlm_generic_payload,
    // at which the task call and return are executed.
    
   virtual task b_transport(T t, ref time delay);
-    `uvm_error("b_transport", `TLM_TASK_ERROR)
+    `uvm_error("b_transport", `UVM_TLM_TASK_ERROR)
   endtask
 
 endclass

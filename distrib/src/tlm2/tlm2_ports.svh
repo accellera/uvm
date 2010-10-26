@@ -23,28 +23,28 @@
 //
 // class definitions of port classes that connect tlm interfaces
 //
-// blocking transport port : <tlm_b_transport_port>
+// blocking transport port : <uvm_tlm_b_transport_port>
 //
-// non-blocking transport forward port : <tlm_nb_transport_fw_port>
+// non-blocking transport forward port : <uvm_tlm_nb_transport_fw_port>
 //
-// non-blocking transport backward port : <tlm_nb_transport_bw_port>
+// non-blocking transport backward port : <uvm_tlm_nb_transport_bw_port>
 //
 //----------------------------------------------------------------------
 
-// class: tlm_b_transport_port
+// class: uvm_tlm_b_transport_port
 //
 // Class providing the blocking transport port,
 // The port can be bound to one export.
 // There is no backward path for the blocking transport.
 
-class tlm_b_transport_port #(type T=tlm_generic_payload)
-  extends uvm_port_base #(tlm_if #(T));
-  `UVM_PORT_COMMON(`TLM_B_MASK, "tlm_b_transport_port")
-  `TLM_B_TRANSPORT_IMP(this.m_if, T, t, delay)
+class uvm_tlm_b_transport_port #(type T=uvm_tlm_generic_payload)
+  extends uvm_port_base #(uvm_tlm_if #(T));
+  `UVM_PORT_COMMON(`UVM_TLM_B_MASK, "uvm_tlm_b_transport_port")
+  `UVM_TLM_B_TRANSPORT_IMP(this.m_if, T, t, delay)
 endclass
 
 
-// class: tlm_nb_transport_fw_port
+// class: uvm_tlm_nb_transport_fw_port
 //
 // Class providing the non-blocking backward transport port.
 // Transactions received from the producer, on the forward path, are
@@ -53,14 +53,14 @@ endclass
 // The port can be bound to one export.
 //
   
-class tlm_nb_transport_fw_port #(type T=tlm_generic_payload,
-                                 type P=tlm_phase_e)
-  extends uvm_port_base #(tlm_if #(T,P));
-  `UVM_PORT_COMMON(`TLM_NB_FW_MASK, "tlm_nb_transport_fw_port")
-  `TLM_NB_TRANSPORT_FW_IMP(this.m_if, T, P, t, p, delay)
+class uvm_tlm_nb_transport_fw_port #(type T=uvm_tlm_generic_payload,
+                                 type P=uvm_tlm_phase_e)
+  extends uvm_port_base #(uvm_tlm_if #(T,P));
+  `UVM_PORT_COMMON(`UVM_TLM_NB_FW_MASK, "uvm_tlm_nb_transport_fw_port")
+  `UVM_TLM_NB_TRANSPORT_FW_IMP(this.m_if, T, P, t, p, delay)
 endclass
 
-// class: tlm_nb_transport_bw_port
+// class: uvm_tlm_nb_transport_bw_port
 //
 // Class providing the non-blocking backward transport port.
 // Transactions received from the producer, on the forward path, are
@@ -69,10 +69,10 @@ endclass
 // The port can be bound to one export.
 //
   
-class tlm_nb_transport_bw_port #(type T=tlm_generic_payload,
-                                 type P=tlm_phase_e)
-  extends uvm_port_base #(tlm_if #(T,P));
-  `UVM_PORT_COMMON(`TLM_NB_BW_MASK, "tlm_nb_transport_bw_port")
-  `TLM_NB_TRANSPORT_BW_IMP(this.m_if, T, P, t, p, delay)
+class uvm_tlm_nb_transport_bw_port #(type T=uvm_tlm_generic_payload,
+                                 type P=uvm_tlm_phase_e)
+  extends uvm_port_base #(uvm_tlm_if #(T,P));
+  `UVM_PORT_COMMON(`UVM_TLM_NB_BW_MASK, "uvm_tlm_nb_transport_bw_port")
+  `UVM_TLM_NB_TRANSPORT_BW_IMP(this.m_if, T, P, t, p, delay)
 endclass
 

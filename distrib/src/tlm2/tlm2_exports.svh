@@ -24,17 +24,17 @@
 // class definitions of export classes that connect tlm interfaces
 //----------------------------------------------------------------------
 
-// class: tlm_nb_transport_fw_export
+// class: uvm_tlm_nb_transport_fw_export
 //
 // Non-blocking forward transport export class 
-class tlm_nb_transport_fw_export #(type T=tlm_generic_payload,
-                                   type P=tlm_phase_e)
-  extends uvm_port_base #(tlm_if #(T,P));
-  `UVM_EXPORT_COMMON(`TLM_NB_FW_MASK, "tlm_nb_transport_fw_export")
-  `TLM_NB_TRANSPORT_FW_IMP(this.m_if, T, P, t, p, delay)
+class uvm_tlm_nb_transport_fw_export #(type T=uvm_tlm_generic_payload,
+                                   type P=uvm_tlm_phase_e)
+  extends uvm_port_base #(uvm_tlm_if #(T,P));
+  `UVM_EXPORT_COMMON(`UVM_TLM_NB_FW_MASK, "uvm_tlm_nb_transport_fw_export")
+  `UVM_TLM_NB_TRANSPORT_FW_IMP(this.m_if, T, P, t, p, delay)
 endclass
 
-// class: tlm_nb_transport_bw_export
+// class: uvm_tlm_nb_transport_bw_export
 //
 // Non-blocking backward transport export class 
 // This class should be instantiated in the initiator transactor 
@@ -42,20 +42,20 @@ endclass
 // The transactions sent from this transactor on the forward path 
 // can be received by the transactor on the backward path through 
 // this backward export.
-class tlm_nb_transport_bw_export #(type T=tlm_generic_payload,
-                                   type P=tlm_phase_e)
-  extends uvm_port_base #(tlm_if #(T,P));
-  `UVM_EXPORT_COMMON(`TLM_NB_BW_MASK, "tlm_nb_transport_bw_export")
-  `TLM_NB_TRANSPORT_BW_IMP(this.m_if, T, P, t, p, delay)
+class uvm_tlm_nb_transport_bw_export #(type T=uvm_tlm_generic_payload,
+                                   type P=uvm_tlm_phase_e)
+  extends uvm_port_base #(uvm_tlm_if #(T,P));
+  `UVM_EXPORT_COMMON(`UVM_TLM_NB_BW_MASK, "uvm_tlm_nb_transport_bw_export")
+  `UVM_TLM_NB_TRANSPORT_BW_IMP(this.m_if, T, P, t, p, delay)
     endclass
 
-// class: tlm_b_transport_export
+// class: uvm_tlm_b_transport_export
 //
 // Blocking transport export class.
 // Any class instantiating this blocking transport export must 
 // provide an implementation of the <b_transport> task.
-class tlm_b_transport_export #(type T=tlm_generic_payload)
-  extends uvm_port_base #(tlm_if #(T));
-  `UVM_EXPORT_COMMON(`TLM_B_MASK, "tlm_b_transport_export")
-  `TLM_B_TRANSPORT_IMP(this.m_if, T, t, delay)
+class uvm_tlm_b_transport_export #(type T=uvm_tlm_generic_payload)
+  extends uvm_port_base #(uvm_tlm_if #(T));
+  `UVM_EXPORT_COMMON(`UVM_TLM_B_MASK, "uvm_tlm_b_transport_export")
+  `UVM_TLM_B_TRANSPORT_IMP(this.m_if, T, t, delay)
 endclass

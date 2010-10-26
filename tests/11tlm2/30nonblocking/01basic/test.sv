@@ -16,50 +16,48 @@
 //   the License for the specific language governing
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
-
 import uvm_pkg::*;
 `include "uvm_macros.svh"
-
-//----------------------------------------------------------------------
-// trans
-//----------------------------------------------------------------------
-class trans extends tlm_generic_payload;
-
-  function string convert2string();
-    return super.convert2string();
-  endfunction
-
-endclass
 
 //----------------------------------------------------------------------
 // producer
 //----------------------------------------------------------------------
 class producer extends uvm_component;
 
-  tlm_b_initiator_socket #(trans) initiator_socket;
+  uvm_tlm_nb_initiator_socket #(uvm_tlm_generic_payload, uvm_tlm_phase_e, producer) initiator_socket;
 
-  local bit done;
+  bit done;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
-    done = 0;
     enable_stop_interrupt = 1;
+    done = 0;
   endfunction
 
   function void build();
-    initiator_socket = new("initator_socket", this);
+    initiator_socket = new("initator_socket", this, this);
+  endfunction
+
+  function uvm_tlm_sync_e nb_transport_bw(ref uvm_tlm_generic_payload t,
+                                      ref uvm_tlm_phase_e p,
+                                      ref time delay);
+    uvm_report_warning("producer", "nb_transport_bw is not implemented");
   endfunction
 
   task run();
 
     int unsigned i;
     time delay;
-    trans t;
+    uvm_tlm_phase_e phase;
+    uvm_tlm_sync_e sync;
+    uvm_tlm_generic_payload t;
+
+    delay = 1;
 
     for(i = 0; i < 10; i++) begin
       t = generate_transaction();
       uvm_report_info("producer", t.convert2string());
-      initiator_socket.b_transport(t, delay);
+      sync = initiator_socket.nb_transport_fw(t, phase, delay);
     end
 
     done = 1;
@@ -75,24 +73,26 @@ class producer extends uvm_component;
   //
   // generat a new, randomized transaction
   //--------------------------------------------------------------------
-  function trans generate_transaction();
+  function uvm_tlm_generic_payload generate_transaction();
 
-    tlm_addr_t addr;
+    uvm_tlm_addr_t addr;
+    int unsigned length;
     byte data[];
-    int length;
 
-    trans t = new();
+    uvm_tlm_generic_payload t = new();
     addr = $urandom() & 'hff;
     length = 4;
     data = new[length];
 
     t.set_data_length(length);
     t.set_address(addr);
+
     for(int unsigned i = 0; i < length; i++) begin
       data[i] = $urandom();
     end
+    
     t.set_data_ptr(data);
-    t.set_command(TLM_WRITE_COMMAND);
+    t.set_command(UVM_TLM_WRITE_COMMAND);
 
     return t;
   endfunction
@@ -104,24 +104,25 @@ endclass
 //----------------------------------------------------------------------
 class consumer extends uvm_component;
 
-  tlm_b_target_socket #(trans, consumer) target_socket;
+  uvm_tlm_nb_target_socket #(uvm_tlm_generic_payload, uvm_tlm_phase_e, consumer) target_socket;
 
   int unsigned transaction_count;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
-    transaction_count = 0;
   endfunction
 
   function void build();
     target_socket = new("target_socket", this, this);
   endfunction
 
-  task b_transport(ref trans t, ref time delay);
-    #5;
+  function uvm_tlm_sync_e nb_transport_fw(ref uvm_tlm_generic_payload t,
+                                      ref uvm_tlm_phase_e p,
+                                      ref time delay);
     uvm_report_info("consumer", t.convert2string());
     transaction_count++;
-  endtask
+    return UVM_TLM_ACCEPTED;
+  endfunction
 
   function void report();
     if(transaction_count == 10)

@@ -45,33 +45,33 @@
 //
 // The termination sockets are
 //
-//    -  <tlm_b_target_socket>
+//    -  <uvm_tlm_b_target_socket>
 //
-//    -  <tlm_b_initiator_socket>
+//    -  <uvm_tlm_b_initiator_socket>
 //
-//    -  <tlm_nb_target_socket>
+//    -  <uvm_tlm_nb_target_socket>
 //
-//    -  <tlm_nb_initiator_socket>           
+//    -  <uvm_tlm_nb_initiator_socket>           
 //
 // The passthrough sockets are
 //
-//    -  <tlm_b_passthrough_initiator_socket>
+//    -  <uvm_tlm_b_passthrough_initiator_socket>
 //
-//    -  <tlm_b_passthrough_target_socket>
+//    -  <uvm_tlm_b_passthrough_target_socket>
 //
-//    -  <tlm_nb_passthrough_initiator_socket>
+//    -  <uvm_tlm_nb_passthrough_initiator_socket>
 //
-//    -  <tlm_nb_passthrough_target_socket>
+//    -  <uvm_tlm_nb_passthrough_target_socket>
 //
 
 //----------------------------------------------------------------------
-// class: tlm_b_initiator_socket
+// class: uvm_tlm_b_initiator_socket
 //
 // IS-A forward port; has no backward path except via the payload
 // contents
 //----------------------------------------------------------------------
-class tlm_b_initiator_socket #(type T=tlm_generic_payload)
-  extends tlm_b_initiator_socket_base #(T);
+class uvm_tlm_b_initiator_socket #(type T=uvm_tlm_generic_payload)
+  extends uvm_tlm_b_initiator_socket_base #(T);
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -79,12 +79,12 @@ class tlm_b_initiator_socket #(type T=tlm_generic_payload)
    
    // Function: Connect
    //
-   // Connect this socket to a <tlm_b_target_socket>
+   // Connect this socket to a <uvm_tlm_b_target_socket>
   function void connect(this_type provider);
 
-    tlm_b_passthrough_initiator_socket_base #(T) initiator_pt_socket;
-    tlm_b_passthrough_target_socket_base #(T) target_pt_socket;
-    tlm_b_target_socket_base #(T) target_socket;
+    uvm_tlm_b_passthrough_initiator_socket_base #(T) initiator_pt_socket;
+    uvm_tlm_b_passthrough_target_socket_base #(T) target_pt_socket;
+    uvm_tlm_b_target_socket_base #(T) target_socket;
 
     uvm_component c;
 
@@ -103,14 +103,14 @@ class tlm_b_initiator_socket #(type T=tlm_generic_payload)
 endclass
 
 //----------------------------------------------------------------------
-// Class: tlm_b_target_socket
+// Class: uvm_tlm_b_target_socket
 //
 // IS-A forward imp; has no backward path except via the payload
 // contents.
 //----------------------------------------------------------------------
-class tlm_b_target_socket #(type T=tlm_generic_payload,
+class uvm_tlm_b_target_socket #(type T=uvm_tlm_generic_payload,
                              type IMP=int)
-  extends tlm_b_target_socket_base #(T);
+  extends uvm_tlm_b_target_socket_base #(T);
 
   local IMP m_imp;
 
@@ -121,7 +121,7 @@ class tlm_b_target_socket #(type T=tlm_generic_payload,
 
    // Function: Connect
    //
-   // Connect this socket to a <tlm_b_initiator_socket>
+   // Connect this socket to a <uvm_tlm_b_initiator_socket>
   function void connect(this_type provider);
 
     uvm_component c;
@@ -132,21 +132,21 @@ class tlm_b_target_socket #(type T=tlm_generic_payload,
     `uvm_error_context(get_type_name(), "You cannot call connect() on a target termination socket", c)
   endfunction
 
-  `TLM_B_TRANSPORT_IMP(m_imp, T, t, delay)
+  `UVM_TLM_B_TRANSPORT_IMP(m_imp, T, t, delay)
 
 endclass
 
 //----------------------------------------------------------------------
-// Class: tlm_nb_initiator_socket
+// Class: uvm_tlm_nb_initiator_socket
 //
 // IS-A forward port; HAS-A backward imp
 //----------------------------------------------------------------------
-class tlm_nb_initiator_socket #(type T=tlm_generic_payload,
-                                 type P=tlm_phase_e,
+class uvm_tlm_nb_initiator_socket #(type T=uvm_tlm_generic_payload,
+                                 type P=uvm_tlm_phase_e,
                                  type IMP=int)
-  extends tlm_nb_initiator_socket_base #(T,P);
+  extends uvm_tlm_nb_initiator_socket_base #(T,P);
 
-  tlm_nb_transport_bw_imp #(T,P,IMP) bw_imp;
+  uvm_tlm_nb_transport_bw_imp #(T,P,IMP) bw_imp;
 
   function new(string name, uvm_component parent, IMP imp);
     super.new (name, parent);
@@ -155,12 +155,12 @@ class tlm_nb_initiator_socket #(type T=tlm_generic_payload,
 
    // Function: Connect
    //
-   // Connect this socket to a <tlm_nb_target_socket>
+   // Connect this socket to a <uvm_tlm_nb_target_socket>
    function void connect(this_type provider);
 
-    tlm_nb_passthrough_initiator_socket_base #(T,P) initiator_pt_socket;
-    tlm_nb_passthrough_target_socket_base #(T,P) target_pt_socket;
-    tlm_nb_target_socket_base #(T,P) target_socket;
+    uvm_tlm_nb_passthrough_initiator_socket_base #(T,P) initiator_pt_socket;
+    uvm_tlm_nb_passthrough_target_socket_base #(T,P) target_pt_socket;
+    uvm_tlm_nb_target_socket_base #(T,P) target_socket;
 
     uvm_component c;
 
@@ -189,14 +189,14 @@ endclass
 
 
 //----------------------------------------------------------------------
-// Class: tlm_nb_target_socket
+// Class: uvm_tlm_nb_target_socket
 //
 // IS-A forward imp; HAS-A backward port
 //----------------------------------------------------------------------
-class tlm_nb_target_socket #(type T=tlm_generic_payload,
-                              type P=tlm_phase_e,
+class uvm_tlm_nb_target_socket #(type T=uvm_tlm_generic_payload,
+                              type P=uvm_tlm_phase_e,
                               type IMP=int)
-  extends tlm_nb_target_socket_base #(T,P);
+  extends uvm_tlm_nb_target_socket_base #(T,P);
 
   local IMP m_imp;
 
@@ -208,7 +208,7 @@ class tlm_nb_target_socket #(type T=tlm_generic_payload,
 
    // Function: connect
    //
-   // Connect this socket to a <tlm_nb_initiator_socket>
+   // Connect this socket to a <uvm_tlm_nb_initiator_socket>
   function void connect(this_type provider);
 
     uvm_component c;
@@ -219,17 +219,17 @@ class tlm_nb_target_socket #(type T=tlm_generic_payload,
     `uvm_error_context(get_type_name(), "You cannot call connect() on a target termination socket", c)
   endfunction
 
-  `TLM_NB_TRANSPORT_FW_IMP(m_imp, T, P, t, p, delay)
+  `UVM_TLM_NB_TRANSPORT_FW_IMP(m_imp, T, P, t, p, delay)
 
 endclass
 
 //----------------------------------------------------------------------
-// Class: tlm_b_passthrough_initiator_socket
+// Class: uvm_tlm_b_passthrough_initiator_socket
 //
 // IS-A forward port;
 //----------------------------------------------------------------------
-class tlm_b_passthrough_initiator_socket #(type T=tlm_generic_payload)
-  extends tlm_b_passthrough_initiator_socket_base #(T);
+class uvm_tlm_b_passthrough_initiator_socket #(type T=uvm_tlm_generic_payload)
+  extends uvm_tlm_b_passthrough_initiator_socket_base #(T);
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -237,12 +237,12 @@ class tlm_b_passthrough_initiator_socket #(type T=tlm_generic_payload)
 
    // Function : connect
    //
-   // Connect this socket to a <tlm_b_target_socket>
+   // Connect this socket to a <uvm_tlm_b_target_socket>
   function void connect(this_type provider);
 
-    tlm_b_passthrough_initiator_socket_base #(T) initiator_pt_socket;
-    tlm_b_passthrough_target_socket_base #(T) target_pt_socket;
-    tlm_b_target_socket_base #(T) target_socket;
+    uvm_tlm_b_passthrough_initiator_socket_base #(T) initiator_pt_socket;
+    uvm_tlm_b_passthrough_target_socket_base #(T) target_pt_socket;
+    uvm_tlm_b_target_socket_base #(T) target_socket;
 
     uvm_component c;
 
@@ -261,12 +261,12 @@ class tlm_b_passthrough_initiator_socket #(type T=tlm_generic_payload)
 endclass
 
 //----------------------------------------------------------------------
-// Class: tlm_b_passthrough_target_socket
+// Class: uvm_tlm_b_passthrough_target_socket
 //
 // IS-A forward export;
 //----------------------------------------------------------------------
-class tlm_b_passthrough_target_socket #(type T=tlm_generic_payload)
-  extends tlm_b_passthrough_target_socket_base #(T);
+class uvm_tlm_b_passthrough_target_socket #(type T=uvm_tlm_generic_payload)
+  extends uvm_tlm_b_passthrough_target_socket_base #(T);
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -274,11 +274,11 @@ class tlm_b_passthrough_target_socket #(type T=tlm_generic_payload)
    
    // Function : connect
    //
-   // Connect this socket to a <tlm_b_initiator_socket>
+   // Connect this socket to a <uvm_tlm_b_initiator_socket>
   function void connect(this_type provider);
 
-    tlm_b_passthrough_target_socket_base #(T) target_pt_socket;
-    tlm_b_target_socket_base #(T) target_socket;
+    uvm_tlm_b_passthrough_target_socket_base #(T) target_pt_socket;
+    uvm_tlm_b_target_socket_base #(T) target_socket;
 
     uvm_component c;
 
@@ -297,13 +297,13 @@ endclass
 
 
 //----------------------------------------------------------------------
-// Class: tlm_nb_passthrough_initiator_socket
+// Class: uvm_tlm_nb_passthrough_initiator_socket
 //
 // IS-A forward port; HAS-A backward export
 //----------------------------------------------------------------------
-class tlm_nb_passthrough_initiator_socket #(type T=tlm_generic_payload,
-                                             type P=tlm_phase_e)
-  extends tlm_nb_passthrough_initiator_socket_base #(T,P);
+class uvm_tlm_nb_passthrough_initiator_socket #(type T=uvm_tlm_generic_payload,
+                                             type P=uvm_tlm_phase_e)
+  extends uvm_tlm_nb_passthrough_initiator_socket_base #(T,P);
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -311,12 +311,12 @@ class tlm_nb_passthrough_initiator_socket #(type T=tlm_generic_payload,
 
    // Function : connect
    //
-   // Connect this socket to a <tlm_nb_target_socket>
+   // Connect this socket to a <uvm_tlm_nb_target_socket>
   function void connect(this_type provider);
 
-    tlm_nb_passthrough_initiator_socket_base #(T,P) initiator_pt_socket;
-    tlm_nb_passthrough_target_socket_base #(T,P) target_pt_socket;
-    tlm_nb_target_socket_base #(T,P) target_socket;
+    uvm_tlm_nb_passthrough_initiator_socket_base #(T,P) initiator_pt_socket;
+    uvm_tlm_nb_passthrough_target_socket_base #(T,P) target_pt_socket;
+    uvm_tlm_nb_target_socket_base #(T,P) target_socket;
 
     uvm_component c;
 
@@ -345,13 +345,13 @@ class tlm_nb_passthrough_initiator_socket #(type T=tlm_generic_payload,
 endclass
 
 //----------------------------------------------------------------------
-// Class: tlm_nb_passthrough_target_socket
+// Class: uvm_tlm_nb_passthrough_target_socket
 //
 // IS-A forward export; HAS-A backward port
 //----------------------------------------------------------------------
-class tlm_nb_passthrough_target_socket #(type T=tlm_generic_payload,
-                                          type P=tlm_phase_e)
-  extends tlm_nb_passthrough_target_socket_base #(T,P);
+class uvm_tlm_nb_passthrough_target_socket #(type T=uvm_tlm_generic_payload,
+                                          type P=uvm_tlm_phase_e)
+  extends uvm_tlm_nb_passthrough_target_socket_base #(T,P);
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -359,11 +359,11 @@ class tlm_nb_passthrough_target_socket #(type T=tlm_generic_payload,
 
    // Function: connect
    //
-   // Connect this socket to a <tlm_nb_initiator_socket>
+   // Connect this socket to a <uvm_tlm_nb_initiator_socket>
   function void connect(this_type provider);
 
-    tlm_nb_passthrough_target_socket_base #(T,P) target_pt_socket;
-    tlm_nb_target_socket_base #(T,P) target_socket;
+    uvm_tlm_nb_passthrough_target_socket_base #(T,P) target_pt_socket;
+    uvm_tlm_nb_target_socket_base #(T,P) target_socket;
 
     uvm_component c;
 

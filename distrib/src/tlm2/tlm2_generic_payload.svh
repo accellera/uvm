@@ -26,19 +26,21 @@
 // Topic: Globals
 // Defines, Constants, enums.
 //
-// <`TLM_ADDR_SIZE>        : Define generic tlm_addr_size width of TLM GP
+// <`UVM_TLM_ADDR_SIZE>        : Define generic uvm_tlm_addr_size width of TLM GP
 //
-// <tlm_addr_size>         : Constant to hold default TLM GP Address size
+// <uvm_tlm_addr_size>         : Constant to hold default TLM GP Address size
 //
-// <tlm_command_e>         : Command atribute type definition
+// <uvm_tlm_command_e>         : Command atribute type definition
 
 // Topic: Generic Payload
-// TLM_GP definition
+// UVM_TLM_GP definition
 //
-// <tlm_generic_payload>   : base object, called the generic payload, for 
+// <uvm_tlm_generic_payload>   : base object, called the generic payload, for 
 // moving data between components. In SystemC this is the primary 
 // transaction vehicle. In SystemVerilog this is the default transaction 
 // type, but it is not the only type that can be used.
+//
+// <uvm_tlm_gp>                : A shorter name for <uvm_tlm_generic_payload>
 //
 
 // Topic: TLM extensions
@@ -47,88 +49,95 @@
 // stored in an associative array indexed by the type handle of the extension 
 // container
 //
-// <tlm_response_status_e> : Respone status attribute type definition
+// <uvm_tlm_response_status_e> : Respone status attribute type definition
 //
-// <tlm_extension_base>    : non-parameerized base class
+// <uvm_tlm_extension_base>    : non-parameerized base class
 //
-// <tlm_extension>         : parameterized with arbitrary type
+// <uvm_tlm_extension>         : parameterized with arbitrary type
 //
 
 // Section: Globals
 
 //------------------------------------------------------------------------------
-// MACRO: `TLM_ADDR_SIZE
+// MACRO: `UVM_TLM_ADDR_SIZE
 // 
-// Define generic tlm_addr_size width of TLM GP
+// Define generic uvm_tlm_addr_size width of TLM GP
 
-`define TLM_ADDR_SIZE 64
+`define UVM_TLM_ADDR_SIZE 64
 
-// const: tlm_addr_size
+// const: uvm_tlm_addr_size
 //
 // Constant to hold default TLM GP Address size.
 //
 
-const int unsigned tlm_addr_size = `TLM_ADDR_SIZE;
+const int unsigned uvm_tlm_addr_size = `UVM_TLM_ADDR_SIZE;
 
-typedef bit[`TLM_ADDR_SIZE-1:0] tlm_addr_t;
+typedef bit[`UVM_TLM_ADDR_SIZE-1:0] uvm_tlm_addr_t;
 
-// Enum: tlm_command_e
+// Enum: uvm_tlm_command_e
 //
 // Command atribute type definition
 //
-// TLM_READ_COMMAND      - Bus read operation
+// UVM_TLM_READ_COMMAND      - Bus read operation
 //
-// TLM_WRITE_COMMAND     - Bus write operation
+// UVM_TLM_WRITE_COMMAND     - Bus write operation
 //
-// TLM_IGNORE_COMMAND    - No bus operation.
+// UVM_TLM_IGNORE_COMMAND    - No bus operation.
 
 typedef enum
 {
-    TLM_READ_COMMAND,
-    TLM_WRITE_COMMAND,
-    TLM_IGNORE_COMMAND
-} tlm_command_e;
+    UVM_TLM_READ_COMMAND,
+    UVM_TLM_WRITE_COMMAND,
+    UVM_TLM_IGNORE_COMMAND
+} uvm_tlm_command_e;
 
-// Enum: tlm_response_status_e
+// Enum: uvm_tlm_response_status_e
 //
 // Respone status attribute type definition
 //
-// TLM_OK_RESPONSE                - Bus operation completed succesfully
+// UVM_TLM_OK_RESPONSE                - Bus operation completed succesfully
 //
-// TLM_INCOMPLETE_RESPONSE        - Transaction was not delivered to target
+// UVM_TLM_INCOMPLETE_RESPONSE        - Transaction was not delivered to target
 //
-// TLM_GENERIC_ERROR_RESPONSE     - Bus operation had an error
+// UVM_TLM_GENERIC_ERROR_RESPONSE     - Bus operation had an error
 //
-// TLM_ADDRESS_ERROR_RESPONSE     - Invalid address specified
+// UVM_TLM_ADDRESS_ERROR_RESPONSE     - Invalid address specified
 //
-// TLM_COMMAND_ERROR_RESPONSE     - Invalid command specified
+// UVM_TLM_COMMAND_ERROR_RESPONSE     - Invalid command specified
 //
-// TLM_BURST_ERROR_RESPONSE       - Invalid burst specified
+// UVM_TLM_BURST_ERROR_RESPONSE       - Invalid burst specified
 //
-// TLM_BYTE_ENABLE_ERROR_RESPONSE - Invalid byte enabling specified
+// UVM_TLM_BYTE_ENABLE_ERROR_RESPONSE - Invalid byte enabling specified
 //
 
 typedef enum
 {
-    TLM_OK_RESPONSE = 1,
-    TLM_INCOMPLETE_RESPONSE = 0,
-    TLM_GENERIC_ERROR_RESPONSE = -1,
-    TLM_ADDRESS_ERROR_RESPONSE = -2,
-    TLM_COMMAND_ERROR_RESPONSE = -3,
-    TLM_BURST_ERROR_RESPONSE = -4,
-    TLM_BYTE_ENABLE_ERROR_RESPONSE = -5
-} tlm_response_status_e;
+    UVM_TLM_OK_RESPONSE = 1,
+    UVM_TLM_INCOMPLETE_RESPONSE = 0,
+    UVM_TLM_GENERIC_ERROR_RESPONSE = -1,
+    UVM_TLM_ADDRESS_ERROR_RESPONSE = -2,
+    UVM_TLM_COMMAND_ERROR_RESPONSE = -3,
+    UVM_TLM_BURST_ERROR_RESPONSE = -4,
+    UVM_TLM_BYTE_ENABLE_ERROR_RESPONSE = -5
+} uvm_tlm_response_status_e;
 
 
-typedef class tlm_extension_base;
+typedef class uvm_tlm_extension_base;
 
 
 //----------------------------------------------------------------------
-// Section: Generic Payload
+// class: uvm_tlm_gp
+//
+// This typedef provides a short, more convenient name for the
+// <uvm_tlm_generic_payload> type.
 //----------------------------------------------------------------------
 
+typedef class uvm_tlm_generic_payload;
+typedef uvm_tlm_generic_payload uvm_tlm_gp;
+
+
 //----------------------------------------------------------------------
-// Class: tlm_generic_payload
+// Class: uvm_tlm_generic_payload
 //
 // This class provides a transaction architecture commonly used in
 // memory-mapped bus-based systems.  It's intended to be a general
@@ -137,7 +146,7 @@ typedef class tlm_extension_base;
 // generated in sequences and transported to drivers through sequencers.
 //----------------------------------------------------------------------
 
-class tlm_generic_payload extends uvm_sequence_item;
+class uvm_tlm_generic_payload extends uvm_sequence_item;
    
    // Variable: m_address
    //
@@ -156,9 +165,9 @@ class tlm_generic_payload extends uvm_sequence_item;
    // If the target is unable to execute the transaction with
    // the given address attribute (because the address is out-of-range,
    // for example) it shall generate a standard error response. The
-   // recommended response status is ~TLM_ADDRESS_ERROR_RESPONSE~.
+   // recommended response status is ~UVM_TLM_ADDRESS_ERROR_RESPONSE~.
 
-   rand tlm_addr_t             m_address;
+   rand uvm_tlm_addr_t             m_address;
  
    // Variable: m_command
    //
@@ -169,10 +178,10 @@ class tlm_generic_payload extends uvm_sequence_item;
    //
    // If the target is unable to execute a read or write command, it
    // shall generate a standard error response. The
-   // recommended response status is TLM_COMMAND_ERROR_RESPONSE.
+   // recommended response status is UVM_TLM_COMMAND_ERROR_RESPONSE.
    //
    // On receipt of a generic payload transaction with the command
-   // attribute equal to TLM_IGNORE_COMMAND, the target shall not execute
+   // attribute equal to UVM_TLM_IGNORE_COMMAND, the target shall not execute
    // a write command or a read command not modify any data.
    // The target may, however, use the value of any attribute in
    // the generic payload, including any extensions.
@@ -180,7 +189,7 @@ class tlm_generic_payload extends uvm_sequence_item;
    // The command attribute shall be set by the initiator, and shall
    // not be overwritten by any interconnect
 
-   rand tlm_command_e          m_command;
+   rand uvm_tlm_command_e          m_command;
    
    // Variable: m_data
    //
@@ -192,7 +201,7 @@ class tlm_generic_payload extends uvm_sequence_item;
    // to or from the data array, respectively, honoring the semantics of
    // the remaining attributes of the generic payload.
    //
-   // For a write command or TLM_IGNORE_COMMAND, the contents of the
+   // For a write command or UVM_TLM_IGNORE_COMMAND, the contents of the
    // data array shall be set by the initiator, and shall not be
    // overwritten by any interconnect component or target. For a read
    // command, the contents of the data array shall be overwritten by the
@@ -211,20 +220,20 @@ class tlm_generic_payload extends uvm_sequence_item;
    // The variable should be used only when constraining.
    //
    // The response status attribute shall be set to
-   // TLM_INCOMPLETE_RESPONSE by the initiator, and may
+   // UVM_TLM_INCOMPLETE_RESPONSE by the initiator, and may
    // be overwritten by the target. The response status attribute
    // should not be overwritten by any interconnect
-   // component, because the default value TLM_INCOMPLETE_RESPONSE
+   // component, because the default value UVM_TLM_INCOMPLETE_RESPONSE
    // indicates that the transaction was not delivered to the target.
    //
-   // The target may set the response status attribute to TLM_OK_RESPONSE
+   // The target may set the response status attribute to UVM_TLM_OK_RESPONSE
    // to indicate that it was able to execute the command
    // successfully, or to one of the five error responses
    // to indicate an error. The target should choose the appropriate
    // error response depending on the cause of the error.
    // If a target detects an error but is unable to select a specific
    // error response, it may set the response status to
-   // TLM_GENERIC_ERROR_RESPONSE.
+   // UVM_TLM_GENERIC_ERROR_RESPONSE.
    //
    // The target shall be responsible for setting the response status
    // attribute at the appropriate point in the
@@ -232,23 +241,27 @@ class tlm_generic_payload extends uvm_sequence_item;
    // transport interface, this means before returning
    // control from b_transport. In the case of the non-blocking
    // transport interface and the base protocol, this
-   // means before sending the BEGIN_RESP phase or returning a value of TLM_COMPLETED.
+   // means before sending the BEGIN_RESP phase or returning a value of UVM_TLM_COMPLETED.
    //
    // It is recommended that the initiator should always check the
    // response status attribute on receiving a
    // transition to the BEGIN_RESP phase or after the completion of
    // the transaction. An initiator may choose
    // to ignore the response status if it is known in advance that the
-   // value will be TLM_OK_RESPONSE,
+   // value will be UVM_TLM_OK_RESPONSE,
    // perhaps because it is known in advance that the initiator is
    // only connected to targets that always return
-   // TLM_OK_RESPONSE, but in general this will not be the case. In
+   // UVM_TLM_OK_RESPONSE, but in general this will not be the case. In
    // other words, the initiator ignores the
    // response status at its own risk.
 
-   rand tlm_response_status_e  m_response_status;
+   rand uvm_tlm_response_status_e  m_response_status;
 
-   // un doc'ed variable used for dmi functions    
+   // Variable: m_dmi
+   //
+   // DMI mode is not yet supported in the UVM TLM2 subset.
+   // This variable is provided for completeness and interoperability
+   // with SystemC.
    rand bit                    m_dmi;
    
    // Variable: m_byte_enable
@@ -281,7 +294,7 @@ class tlm_generic_payload extends uvm_sequence_item;
    // If the byte enable pointer is non-null, the target shall either
    // implement the semantics of the byte enable as defined below or
    // shall generate a standard error response. The recommended response
-   // status is TLM_BYTE_ENABLE_ERROR_RESPONSE.
+   // status is UVM_TLM_BYTE_ENABLE_ERROR_RESPONSE.
    //
    // In the case of a write command, any interconnect component or
    // target should ignore the values of any disabled bytes in the
@@ -294,45 +307,71 @@ class tlm_generic_payload extends uvm_sequence_item;
    // undoc'ed variable that shuld always be m_byte_enable.size()
    rand int unsigned           m_byte_enable_length;
 
-   // Variable: m_byte_enable
-   //
-   // Indicates valid <m_data> array elements.
-   // Should be set and read using the <set_byte_enable> or <get_byte_enable> methods
+   // Variable: m_streaming_width
+   //    
+   // Number of bytes transferred on each beat.
+   // Should be set and read using the <set_streaming_width> or
+   // <get_streaming_width> methods
    // The variable should be used only when constraining.
    //
-   // The elements in the byte enable array shall be interpreted as
-   // follows. A value of 0 shall indicate that that
-   // corresponding byte is disabled, and a value of 1 shall
-   // indicate that the corresponding byte is enabled.
+   // Streaming affects the way a component should interpret the data
+   // array. A stream consists of a sequence of data transfers occurring
+   // on successive notional beats, each beat having the same start
+   // address as given by the generic payload address attribute. The
+   // streaming width attribute shall determine the width of the stream,
+   // that is, the number of bytes transferred on each beat. In other
+   // words, streaming affects the local address associated with each
+   // byte in the data array. In all other respects, the organisation of
+   // the data array is unaffected by streaming.
    //
-   // Byte enables may be used to create burst transfers where the
-   // address increment between each beat is
-   // greater than the number of significant bytes transferred on each
-   // beat, or to place words in selected byte
-   // lanes of a bus. At a more abstract level, byte enables may be
-   // used to create "lacy bursts" where the data array of the generic
-   // payload has an arbitrary pattern of holes punched in it.
+   // The bytes within the data array have a corresponding sequence of
+   // local addresses within the component accessing the generic payload
+   // transaction. The lowest address is given by the value of the
+   // address attribute. The highest address is given by the formula
+   // address_attribute + streaming_width - 1. The address to or from
+   // which each byte is being copied in the target shall be set to the
+   // value of the address attribute at the start of each beat.
    //
-   // The byte enable mask may be defined by a small pattern applied
-   // repeatedly or by a large pattern covering the whole data array.
-   // The byte enable array may be empty, in which case byte enables
-   // shall not be used for the current transaction.
+   // With respect to the interpretation of the data array, a single
+   // transaction with a streaming width shall be functionally equivalent
+   // to a sequence of transactions each having the same address as the
+   // original transaction, each having a data length attribute equal to
+   // the streaming width of the original, and each with a data array
+   // that is a different subset of the original data array on each
+   // beat. This subset effectively steps down the original data array
+   // maintaining the sequence of bytes.
    //
-   // The byte enable array shall be set by the initiator and shall
-   // not be overwritten by any interconnect component or target.
+   // A streaming width of 0 indicates that a streaming transfer
+   // is not required. it is equivalent to a streaming width 
+   // value greater than or equal to the size of the <m_data> array.
    //
-   // If the byte enable pointer is non-null, the target shall either
-   // implement the semantics of the byte enable as defined below or
-   // shall generate a standard error response. The recommended response
-   // status is TLM_BYTE_ENABLE_ERROR_RESPONSE.
+   // Streaming may be used in conjunction with byte enables, in which
+   // case the streaming width would typically be equal to the byte
+   // enable length. It would also make sense to have the streaming width
+   // a multiple of the byte enable length. Having the byte enable length
+   // a multiple of the streaming width would imply that different bytes
+   // were enabled on each beat.
    //
-   // In the case of a write command, any interconnect component or
-   // target should ignore the values of any disabled bytes in the
-   // <m_data> array. In the case of a read command, any interconnect
-   // component or target should not modify the values of disabled
-   // bytes in the <m_data> array.
-   
+   // If the target is unable to execute the transaction with the
+   // given streaming width, it shall generate a standard error
+   // response. The recommended response status is
+   // TLM_BURST_ERROR_RESPONSE.
+               
    rand int unsigned           m_streaming_width;
+
+
+   local uvm_tlm_extension_base m_extensions [uvm_tlm_extension_base];
+
+   `uvm_object_utils_begin(uvm_tlm_generic_payload)
+      `uvm_field_int(m_address, UVM_ALL_ON);
+      `uvm_field_enum(uvm_tlm_command_e, m_command, UVM_ALL_ON);
+      `uvm_field_array_int(m_data, UVM_ALL_ON);
+      `uvm_field_int(m_length, UVM_ALL_ON);
+      `uvm_field_enum(uvm_tlm_response_status_e, m_response_status, UVM_ALL_ON);
+      `uvm_field_array_int(m_byte_enable, UVM_ALL_ON);
+      `uvm_field_int(m_streaming_width, UVM_ALL_ON);
+   `uvm_object_utils_end
+   
 
   // function: new
   //
@@ -342,13 +381,32 @@ class tlm_generic_payload extends uvm_sequence_item;
   function new(string name="");
     super.new(name);
     m_address = 0;
-    m_command = TLM_IGNORE_COMMAND;
+    m_command = UVM_TLM_IGNORE_COMMAND;
     m_length = 0;
-    m_response_status = TLM_INCOMPLETE_RESPONSE;
+    m_response_status = UVM_TLM_INCOMPLETE_RESPONSE;
     m_dmi = 0;
     m_byte_enable_length = 0;
     m_streaming_width = 0;
   endfunction
+
+
+   function void do_print(uvm_printer printer);
+      foreach (m_extensions[ext]) begin
+         printer.print_object(ext.get_type_handle_name(), m_extensions[ext]);
+      end
+   endfunction
+
+
+   function void do_copy(uvm_object rhs);
+      uvm_tlm_generic_payload gp;
+      super.do_copy(rhs);
+      $cast(gp, rhs);
+      m_extensions.delete();
+      foreach (gp.m_extensions[ext]) begin
+         $cast(m_extensions[ext], gp.m_extensions[ext].clone());
+      end
+   endfunction
+   
 
   // function: convert2string
   //
@@ -360,7 +418,7 @@ class tlm_generic_payload extends uvm_sequence_item;
     string msg;
     string addr_fmt;
     string s;
-    int unsigned addr_chars = (tlm_addr_size >> 2) + ((tlm_addr_size & 'hf) > 0);
+    int unsigned addr_chars = (uvm_tlm_addr_size >> 2) + ((uvm_tlm_addr_size & 'hf) > 0);
 
     $sformat(addr_fmt, "%%%0dx", addr_chars);
     $sformat(s, addr_fmt, m_address);
@@ -371,7 +429,7 @@ class tlm_generic_payload extends uvm_sequence_item;
       msg = { msg , s };
     end
 
-    if(m_response_status != TLM_INCOMPLETE_RESPONSE)
+    if(m_response_status != UVM_TLM_INCOMPLETE_RESPONSE)
       msg = { msg, " <-- ", get_response_string() };
 
     return msg;
@@ -379,13 +437,14 @@ class tlm_generic_payload extends uvm_sequence_item;
   endfunction
 
   //--------------------------------------------------------------------
-  // Topic: accessors
+  // Group: accessors
+  //
   // The accessor functions let you set and get each of the members of the 
   // generic payload. All of the accessor methods are virtual. This implies 
   // a slightly different use model for the generic payload than 
   // in SsytemC. The way the generic payload is defined in SystemC does 
   // not encourage you to create new transaction types derived from 
-  // tlm_generic_payload. Instead, you would use the extensions mechanism. 
+  // uvm_tlm_generic_payload. Instead, you would use the extensions mechanism. 
   // Thus in SystemC none of the accessors are virtual.
   //--------------------------------------------------------------------
 
@@ -393,7 +452,7 @@ class tlm_generic_payload extends uvm_sequence_item;
    //
    // Get the value of the <m_command> variable
 
-  virtual function tlm_command_e get_command();
+  virtual function uvm_tlm_command_e get_command();
     return m_command;
   endfunction
 
@@ -401,50 +460,50 @@ class tlm_generic_payload extends uvm_sequence_item;
    //
    // Set the value of the <m_command> variable
    
-  virtual function void set_command(tlm_command_e command);
+  virtual function void set_command(uvm_tlm_command_e command);
     m_command = command;
   endfunction
 
    // Function: is_read
    //
    // Returns true if the current value of the <m_command> variable
-   // is ~TLM_READ_COMMAND~.
+   // is ~UVM_TLM_READ_COMMAND~.
    
   virtual function bit is_read();
-    return (m_command == TLM_READ_COMMAND);
+    return (m_command == UVM_TLM_READ_COMMAND);
   endfunction
  
    // Function: set_read
    //
    // Set the current value of the <m_command> variable
-   // to ~TLM_READ_COMMAND~.
+   // to ~UVM_TLM_READ_COMMAND~.
    
   virtual function void set_read();
-    set_command(TLM_READ_COMMAND);
+    set_command(UVM_TLM_READ_COMMAND);
   endfunction
 
    // Function: is_write
    //
    // Returns true if the current value of the <m_command> variable
-   // is ~TLM_WRITE_COMMAND~.
+   // is ~UVM_TLM_WRITE_COMMAND~.
  
   virtual function bit is_write();
-    return (m_command == TLM_WRITE_COMMAND);
+    return (m_command == UVM_TLM_WRITE_COMMAND);
   endfunction
  
    // Function: set_write
    //
    // Set the current value of the <m_command> variable
-   // to ~TLM_WRITE_COMMAND~.
+   // to ~UVM_TLM_WRITE_COMMAND~.
 
   virtual function void set_write();
-    set_command(TLM_WRITE_COMMAND);
+    set_command(UVM_TLM_WRITE_COMMAND);
   endfunction
   
    // Function: set_address
    //
    // Set the value of the <m_address> variable
-  virtual function void set_address(tlm_addr_t addr);
+  virtual function void set_address(uvm_tlm_addr_t addr);
     m_address = addr;
   endfunction
 
@@ -452,7 +511,7 @@ class tlm_generic_payload extends uvm_sequence_item;
    //
    // Get the value of the <m_address> variable
  
-  virtual function tlm_addr_t get_address();
+  virtual function uvm_tlm_addr_t get_address();
     return m_address;
   endfunction
 
@@ -556,7 +615,7 @@ class tlm_generic_payload extends uvm_sequence_item;
    //
    // Return the current value of the <m_response_status> variable
    
-  virtual function tlm_response_status_e get_response_status();
+  virtual function uvm_tlm_response_status_e get_response_status();
     return m_response_status;
   endfunction
 
@@ -564,14 +623,14 @@ class tlm_generic_payload extends uvm_sequence_item;
    //
    // Set the current value of the <m_response_status> variable
 
-  virtual function void set_response_status(tlm_response_status_e status);
+  virtual function void set_response_status(uvm_tlm_response_status_e status);
     m_response_status = status;
   endfunction
 
    // Function: is_response_ok
    //
    // Return TRUE if the current value of the <m_response_status> variable
-   // is ~TLM_OK_RESPONSE~
+   // is ~UVM_TLM_OK_RESPONSE~
 
   virtual function bit is_response_ok();
     return (m_response_status > 0);
@@ -580,7 +639,7 @@ class tlm_generic_payload extends uvm_sequence_item;
    // Function: is_response_error
    //
    // Return TRUE if the current value of the <m_response_status> variable
-   // is not ~TLM_OK_RESPONSE~
+   // is not ~UVM_TLM_OK_RESPONSE~
 
   virtual function bit is_response_error();
     return !is_response_ok();
@@ -594,13 +653,13 @@ class tlm_generic_payload extends uvm_sequence_item;
   virtual function string get_response_string();
 
     case(m_response_status)
-      TLM_OK_RESPONSE                : return "OK";
-      TLM_INCOMPLETE_RESPONSE        : return "INCOMPLETE";
-      TLM_GENERIC_ERROR_RESPONSE     : return "GENERIC_ERROR";
-      TLM_ADDRESS_ERROR_RESPONSE     : return "ADDRESS_ERROR";
-      TLM_COMMAND_ERROR_RESPONSE     : return "COMMAND_ERROR";
-      TLM_BURST_ERROR_RESPONSE       : return "BURST_ERROR";
-      TLM_BYTE_ENABLE_ERROR_RESPONSE : return "BYTE_ENABLE_ERROR";
+      UVM_TLM_OK_RESPONSE                : return "OK";
+      UVM_TLM_INCOMPLETE_RESPONSE        : return "INCOMPLETE";
+      UVM_TLM_GENERIC_ERROR_RESPONSE     : return "GENERIC_ERROR";
+      UVM_TLM_ADDRESS_ERROR_RESPONSE     : return "ADDRESS_ERROR";
+      UVM_TLM_COMMAND_ERROR_RESPONSE     : return "COMMAND_ERROR";
+      UVM_TLM_BURST_ERROR_RESPONSE       : return "BURST_ERROR";
+      UVM_TLM_BYTE_ENABLE_ERROR_RESPONSE : return "BYTE_ENABLE_ERROR";
     endcase
 
     // we should never get here
@@ -609,11 +668,9 @@ class tlm_generic_payload extends uvm_sequence_item;
   endfunction
 
   //--------------------------------------------------------------------
-  // Topic: Extensions Mechanism
+  // Group: Extensions Mechanism
   //
   //--------------------------------------------------------------------
-
-  protected tlm_extension_base m_extensions [tlm_extension_base];
 
   // Function: set_extension
   //
@@ -621,11 +678,10 @@ class tlm_generic_payload extends uvm_sequence_item;
   // The specified extension is bound to the generic payload by ts type
   // handle.
    
-  function tlm_extension_base set_extension(tlm_extension_base ext);
-    tlm_extension_base ext_handle = ext.get_type_handle();
-    tlm_extension_base old_ext = m_extensions[ext_handle];
+  function uvm_tlm_extension_base set_extension(uvm_tlm_extension_base ext);
+    uvm_tlm_extension_base ext_handle = ext.get_type_handle();
+    set_extension = m_extensions[ext_handle];
     m_extensions[ext_handle] = ext;
-    return old_ext;
   endfunction
 
   // Function: get_num_extensions
@@ -641,7 +697,7 @@ class tlm_generic_payload extends uvm_sequence_item;
   // Return the instance specific extension bound under the specified key.
   // If no extension is bound under that key, ~null~ is returned.
    
-  function tlm_extension_base get_extension(tlm_extension_base ext_handle);
+  function uvm_tlm_extension_base get_extension(uvm_tlm_extension_base ext_handle);
     if(!m_extensions.exists(ext_handle))
       return null;
     return m_extensions[ext_handle];
@@ -651,7 +707,7 @@ class tlm_generic_payload extends uvm_sequence_item;
   //
   // Remove the instance-specific extension bound under the specified key.
    
-  function void clear_extension(tlm_extension_base ext_handle);
+  function void clear_extension(uvm_tlm_extension_base ext_handle);
     if(!m_extensions.exists(ext_handle))
       return;
     m_extensions.delete(ext_handle);
@@ -673,18 +729,18 @@ endclass
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// Class: tlm_extension_base
+// Class: uvm_tlm_extension_base
 //
-// The class tlm_extension_base is the non-parameterized base class for
+// The class uvm_tlm_extension_base is the non-parameterized base class for
 // all generic payload extensions.  It includes the utility do_copy()
 // and create().  The pure virtual function get_type_handle() allows you
 // to get a unique handles that represents the derived type.  This is
 // implemented in derived classes.
 //
 // This class is never used directly by users.
-// The <tlm_extension> class is used instead.
+// The <uvm_tlm_extension> class is used instead.
 //
-virtual class tlm_extension_base extends uvm_object;
+virtual class uvm_tlm_extension_base extends uvm_object;
 
   // function: new
   //
@@ -697,7 +753,14 @@ virtual class tlm_extension_base extends uvm_object;
   // An interface to polymorphically retrieve a handle that uniquely
   // identifies the type of the sub-class
 
-  pure virtual function tlm_extension_base get_type_handle();
+  pure virtual function uvm_tlm_extension_base get_type_handle();
+
+  // function: get_type_handle_name
+  //
+  // An interface to polymorphically retrieve the name that uniquely
+  // identifies the type of the sub-class
+
+  pure virtual function string get_type_handle_name();
 
   virtual function void do_copy(uvm_object rhs);
     super.do_copy(rhs);
@@ -712,42 +775,67 @@ virtual class tlm_extension_base extends uvm_object;
 endclass
 
 //----------------------------------------------------------------------
-// Class: tlm_extension
+// Class: uvm_tlm_extension
 //
 // TLM extension class. The class is parameterized with arbitrary type
 // which represents the type of the extension. An instance of the
 // generic payload can contain one extension object of each type; it
-// cannot contain two instances of the same extension type.  An
-// extension object can identify its type vial the static variable
-// my_type.  The function get_type() provides an interface to retrieve
-// the type handle.
+// cannot contain two instances of the same extension type.
 //
-// You can derive a new class from this class to contain any arbitry
-// data or code required for an extension.
-//----------------------------------------------------------------------
+// The extension type can be identified using the <get_tlm_gp_ext_type()>
+// method.
+//
+// To implement a generic payload extension, simply derive a new class
+// from this class and specify the name of the derived class as the
+// extension parameter.
+//
+//|
+//| class my_ID extends uvm_tlm_extension#(my_ID);
+//|   int ID;
+//|
+//|   `uvm_object_utils_begin(my_ID)
+//       `uvm_field_int(ID, UVM_ALL_ON)
+//|   `uvm_object_utils_end
+//|
+//|   function new(string name = "my_ID");
+//|      super.new(name);
+//|   endfunction
+//| endclass
+//|
 
-class tlm_extension #(type T=int) extends tlm_extension_base;
+class uvm_tlm_extension #(type T=int) extends uvm_tlm_extension_base;
 
-  typedef tlm_extension#(T) this_type;
+  typedef uvm_tlm_extension#(T) this_type;
 
-  static this_type my_type = get_type();
+  local static this_type m_my_tlm_ext_type = get_tlm_gp_ext_type();
 
-   // function: new
-   //
+  // function: new
+  //
   // creates a new extension object.
 
   function new(string name="");
     super.new(name);
   endfunction
 
-  static function this_type get_type();
-    if(my_type == null)
-      my_type = new();
-    return my_type;
+   // function: get_tlm_gp_ext_type
+   //
+   // Return the type of this TLM extension.
+   // This method is used to identify the type of the extension to retrieve
+   // from a <uvm_tlm_generic_payload> instance,
+   // using the <uvm_tlm_generic_payload::get_extension()> method.
+   //
+  static function this_type get_tlm_gp_ext_type();
+    if (m_my_tlm_ext_type == null)
+      m_my_tlm_ext_type = new();
+    return m_my_tlm_ext_type;
   endfunction
 
-  virtual function tlm_extension_base get_type_handle();
-    return get_type();
+  virtual function uvm_tlm_extension_base get_type_handle();
+     return get_tlm_gp_ext_type();
+  endfunction
+
+  virtual function string get_type_handle_name();
+     return $typename(T);
   endfunction
 
   virtual function void do_copy(uvm_object rhs);
@@ -755,8 +843,6 @@ class tlm_extension #(type T=int) extends tlm_extension_base;
   endfunction
 
   virtual function uvm_object create (string name="");
-    this_type t = new(name);
-    return t;
   endfunction
 
 endclass

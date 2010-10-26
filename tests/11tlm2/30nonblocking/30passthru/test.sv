@@ -58,7 +58,7 @@ import uvm_pkg::*;
 //----------------------------------------------------------------------
 // trans
 //----------------------------------------------------------------------
-class trans extends tlm_generic_payload;
+class trans extends uvm_tlm_generic_payload;
 
   function string convert2string();
     return super.convert2string();
@@ -79,14 +79,14 @@ endclass
 // transactions prefixed with "<--" are moving from the target back to
 // the initiator (i.e. traversing the backward path).
 //----------------------------------------------------------------------
-class connector #(type T=tlm_generic_payload,
-                  type P=tlm_phase_e)
+class connector #(type T=uvm_tlm_generic_payload,
+                  type P=uvm_tlm_phase_e)
   extends uvm_component;
 
   typedef connector #(T,P) this_type;
 
-  tlm_nb_initiator_socket #(T,P,this_type) initiator_socket;
-  tlm_nb_target_socket #(T,P,this_type) target_socket;
+  uvm_tlm_nb_initiator_socket #(T,P,this_type) initiator_socket;
+  uvm_tlm_nb_target_socket #(T,P,this_type) target_socket;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -97,14 +97,14 @@ class connector #(type T=tlm_generic_payload,
     target_socket = new("target_socket", this, this);
   endfunction
 
-  function tlm_sync_e nb_transport_fw(ref T t, ref P p, ref time delay);
+  function uvm_tlm_sync_e nb_transport_fw(ref T t, ref P p, ref time delay);
     string msg;
     $sformat(msg, "--> %s", t.convert2string());
     `uvm_info("connector", msg, UVM_NONE);
     return initiator_socket.nb_transport_fw(t, p, delay);
   endfunction
 
-  function tlm_sync_e nb_transport_bw(ref T t, ref P p, ref time delay);
+  function uvm_tlm_sync_e nb_transport_bw(ref T t, ref P p, ref time delay);
     string msg;
     $sformat(msg, "<-- %s", t.convert2string());
     `uvm_info("connector", msg, UVM_NONE);
@@ -118,13 +118,13 @@ endclass
 //
 // demonstrates hierarchical connectivity using passthrough sockets
 //----------------------------------------------------------------------
-class shell #(type T=tlm_generic_payload,
-              type P=tlm_phase_e)
+class shell #(type T=uvm_tlm_generic_payload,
+              type P=uvm_tlm_phase_e)
   extends uvm_component;
 
   connector #(T,P) c;
-  tlm_nb_passthrough_initiator_socket #(T,P) initiator_socket;
-  tlm_nb_passthrough_target_socket #(T,P) target_socket;
+  uvm_tlm_nb_passthrough_initiator_socket #(T,P) initiator_socket;
+  uvm_tlm_nb_passthrough_target_socket #(T,P) target_socket;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -153,7 +153,7 @@ class env extends uvm_component;
 
   local master m;
   local slave s;
-  local shell #(trans, tlm_phase_e) c;
+  local shell #(trans, uvm_tlm_phase_e) c;
 
   local uvm_barrier barrier;
 
