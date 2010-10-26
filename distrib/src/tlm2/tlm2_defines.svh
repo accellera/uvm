@@ -18,6 +18,18 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+//----------------------------------------------------------------------
+// Title: Interface Masks
+//
+// Each of the following macros is a mask that identifies which
+// interfaces a particular port requires or export provides.  The
+// interfaces are identified by bit position and can be or'ed together
+// for combination ports/exports.  The mask is used to do run-time
+// interface type checking of port/export connections. See
+// uvm_port_base::m_if_mask for details on the mechanics of how the mask
+// is used.
+//----------------------------------------------------------------------
+
 // MACRO: `TLM_NB_FW_MASK
 //
 // Define Non blocking Forward mask onehot assignment = 'b001

@@ -26,9 +26,9 @@
 // Topic: Globals
 // Defines, Constants, enums.
 //
-// <`TLM_ADDR_SIZE>        : Define generic addr_size width of TLM GP
+// <`TLM_ADDR_SIZE>        : Define generic tlm_addr_size width of TLM GP
 //
-// <addr_size>             : Constant to hold default TLM GP Address size
+// <tlm_addr_size>         : Constant to hold default TLM GP Address size
 //
 // <tlm_command_e>         : Command atribute type definition
 
@@ -59,16 +59,16 @@
 //------------------------------------------------------------------------------
 // MACRO: `TLM_ADDR_SIZE
 // 
-// Define generic addr_size width of TLM GP
+// Define generic tlm_addr_size width of TLM GP
 
 `define TLM_ADDR_SIZE 64
 
-// const: addr_size
+// const: tlm_addr_size
 //
 // Constant to hold default TLM GP Address size.
 //
 
-const int unsigned addr_size = `TLM_ADDR_SIZE;
+const int unsigned tlm_addr_size = `TLM_ADDR_SIZE;
 
 typedef bit[`TLM_ADDR_SIZE-1:0] tlm_addr_t;
 
@@ -447,7 +447,7 @@ class tlm_generic_payload extends uvm_sequence_item;
     string msg;
     string addr_fmt;
     string s;
-    int unsigned addr_chars = (addr_size >> 2) + ((addr_size & 'hf) > 0);
+    int unsigned addr_chars = (tlm_addr_size >> 2) + ((tlm_addr_size & 'hf) > 0);
 
     $sformat(addr_fmt, "%%%0dx", addr_chars);
     $sformat(s, addr_fmt, m_address);
