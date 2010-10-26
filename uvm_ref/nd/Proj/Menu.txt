@@ -113,7 +113,6 @@ Group: TLM  {
       File: Exports  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_exports.svh)
       File: Interfaces  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_ifs.svh)
       File: Macros  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_defines.svh)
-      File: PEQ  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_peq.svh)
       File: Socket Base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_sockets_base.svh)
       }  # Group: TLM2
 
