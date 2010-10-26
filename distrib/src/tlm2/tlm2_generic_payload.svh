@@ -32,6 +32,15 @@
 //
 // <tlm_command_e>         : Command atribute type definition
 
+// Topic: Generic Payload
+// TLM_GP definition
+//
+// <tlm_generic_payload>   : base object, called the generic payload, for 
+// moving data between components. In SystemC this is the primary 
+// transaction vehicle. In SystemVerilog this is the default transaction 
+// type, but it is not the only type that can be used.
+//
+
 // Topic: TLM extensions
 // An extension is an arbitrary object stored in an extension container. 
 // The set of extensions for any particular generic payload object are 
@@ -43,15 +52,6 @@
 // <tlm_extension_base>    : non-parameerized base class
 //
 // <tlm_extension>         : parameterized with arbitrary type
-//
-
-// Topic: Generic Payload
-// TLM_GP definition
-//
-// <tlm_generic_payload>   : base object, called the generic payload, for 
-// moving data between components. In SystemC this is the primary 
-// transaction vehicle. In SystemVerilog this is the default transaction 
-// type, but it is not the only type that can be used.
 //
 
 // Section: Globals
@@ -120,95 +120,8 @@ typedef enum
 } tlm_response_status_e;
 
 
-//----------------------------------------------------------------------
-// Section: TLM extensions
-//----------------------------------------------------------------------
+typedef class tlm_extension_base;
 
-//----------------------------------------------------------------------
-// Class: tlm_extension_base
-//
-// The class tlm_extension_base is the non-parameterized base class for
-// all generic payload extensions.  It includes the utility do_copy()
-// and create().  The pure virtual function get_type_handle() allows you
-// to get a unique handles that represents the derived type.  This is
-// implemented in derived classes.
-
-virtual class tlm_extension_base extends uvm_object;
-
-  // function: new
-  //
-  // creates a new extension object.  Since this class is virtual this
-  // function is always called from the constructor of the derived class
-  // and not directly.
-
-  function new(string name = "");
-    super.new(name);
-  endfunction
-
-  // function: get_type_handle
-  //
-  // An interface to polymorphically retrieve a handle that uniquely
-  // identifies the type of the sub-class
-
-  pure virtual function tlm_extension_base get_type_handle();
-
-  function void do_copy(uvm_object rhs);
-    super.do_copy(rhs);
-  endfunction
-
-  // function: create
-  //
-   
-  virtual function uvm_object create (string name="");
-  endfunction
-
-endclass
-
-//----------------------------------------------------------------------
-// Class: tlm_extension
-//
-// TLM extension class. The class is parameterized with arbitrary type
-// which represents the type of the extension. An instance of the
-// generic payload can contain one extension object of each type; it
-// cannot contain two instances of the same extension type.  An
-// extension object can identify its type vial the static variable
-// my_type.  The function get_type() provides an interface to retrieve
-// the type handle.
-//
-// You can derive a new class from this class to contain any arbitry
-// data or code required for an extension.
-//----------------------------------------------------------------------
-
-class tlm_extension #(type T=int) extends tlm_extension_base;
-
-  typedef tlm_extension#(T) this_type;
-
-  static this_type my_type = get_type();
-
-  function new(string name="");
-    super.new(name);
-  endfunction
-
-  static function this_type get_type();
-    if(my_type == null)
-      my_type = new();
-    return my_type;
-  endfunction
-
-  function tlm_extension_base get_type_handle();
-    return get_type();
-  endfunction
-
-  function void do_copy(uvm_object rhs);
-    super.do_copy(rhs);
-  endfunction
-
-  function uvm_object create (string name="");
-    this_type t = new(name);
-    return t;
-  endfunction
-
-endclass
 
 //----------------------------------------------------------------------
 // Section: Generic Payload
@@ -753,3 +666,98 @@ class tlm_generic_payload extends uvm_sequence_item;
   endfunction
     
 endclass
+
+
+//----------------------------------------------------------------------
+// Section: TLM extensions
+//----------------------------------------------------------------------
+
+//----------------------------------------------------------------------
+// Class: tlm_extension_base
+//
+// The class tlm_extension_base is the non-parameterized base class for
+// all generic payload extensions.  It includes the utility do_copy()
+// and create().  The pure virtual function get_type_handle() allows you
+// to get a unique handles that represents the derived type.  This is
+// implemented in derived classes.
+//
+// This class is never used directly by users.
+// The <tlm_extension> class is used instead.
+//
+virtual class tlm_extension_base extends uvm_object;
+
+  // function: new
+  //
+  function new(string name = "");
+    super.new(name);
+  endfunction
+
+  // function: get_type_handle
+  //
+  // An interface to polymorphically retrieve a handle that uniquely
+  // identifies the type of the sub-class
+
+  pure virtual function tlm_extension_base get_type_handle();
+
+  virtual function void do_copy(uvm_object rhs);
+    super.do_copy(rhs);
+  endfunction
+
+  // function: create
+  //
+   
+  virtual function uvm_object create (string name="");
+  endfunction
+
+endclass
+
+//----------------------------------------------------------------------
+// Class: tlm_extension
+//
+// TLM extension class. The class is parameterized with arbitrary type
+// which represents the type of the extension. An instance of the
+// generic payload can contain one extension object of each type; it
+// cannot contain two instances of the same extension type.  An
+// extension object can identify its type vial the static variable
+// my_type.  The function get_type() provides an interface to retrieve
+// the type handle.
+//
+// You can derive a new class from this class to contain any arbitry
+// data or code required for an extension.
+//----------------------------------------------------------------------
+
+class tlm_extension #(type T=int) extends tlm_extension_base;
+
+  typedef tlm_extension#(T) this_type;
+
+  static this_type my_type = get_type();
+
+   // function: new
+   //
+  // creates a new extension object.
+
+  function new(string name="");
+    super.new(name);
+  endfunction
+
+  static function this_type get_type();
+    if(my_type == null)
+      my_type = new();
+    return my_type;
+  endfunction
+
+  virtual function tlm_extension_base get_type_handle();
+    return get_type();
+  endfunction
+
+  virtual function void do_copy(uvm_object rhs);
+    super.do_copy(rhs);
+  endfunction
+
+  virtual function uvm_object create (string name="");
+    this_type t = new(name);
+    return t;
+  endfunction
+
+endclass
+
