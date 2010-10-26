@@ -408,6 +408,22 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    endfunction
    
 
+   function bit do_compare(uvm_object rhs, uvm_comparer comparer);
+      uvm_tlm_generic_payload gp;
+      do_compare = super.do_compare(rhs, comparer);
+      $cast(gp, rhs);
+      foreach (m_extensions[ext]) begin
+         if (!gp.m_extensions.exists(ext)) 
+            do_compare &= comparer.compare_object(ext.get_type_handle_name(), m_extensions[ext], null);
+         else do_compare &= comparer.compare_object(ext.get_type_handle_name(), m_extensions[ext], gp.m_extensions[ext]);
+      end
+      foreach (gp.m_extensions[ext]) begin
+         if (!m_extensions.exists(ext)) 
+            do_compare &= comparer.compare_object(ext.get_type_handle_name(), null, gp.m_extensions[ext]);
+      end
+   endfunction
+   
+
   // function: convert2string
   //
   // Convert the contents of the class to a string suitable for
