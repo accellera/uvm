@@ -63,6 +63,10 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence;
          return;
       end
 
+      // Registers with some attributes are not to be tested
+      if (rg.get_attribute("NO_REG_TESTS") != "" ||
+	  rg.get_attribute("NO_BIT_BASH_TEST") != "") return;
+      
       n_bits = rg.get_n_bytes() * 8;
          
       // Let's see what kind of bits we have...
@@ -217,6 +221,11 @@ endclass: uvm_reg_single_bit_bash_seq
 
 class uvm_reg_bit_bash_seq extends uvm_reg_sequence;
 
+   // variable: reg_seq
+   // The sequence used to test one register
+   //
+   protected uvm_reg_single_bit_bash_seq reg_seq;
+   
    `uvm_object_utils(uvm_reg_bit_bash_seq)
 
    function new(string name="uvm_reg_bit_bash_seq");
@@ -227,7 +236,8 @@ class uvm_reg_bit_bash_seq extends uvm_reg_sequence;
    // The block to be tested
    
    virtual task body();
-
+      uvm_reg_block blks[$];
+      
       if (model == null) begin
          `uvm_error("RegModel", "Not block or system specified to run sequence on");
          return;
@@ -235,29 +245,38 @@ class uvm_reg_bit_bash_seq extends uvm_reg_sequence;
 
       uvm_report_info("STARTING_SEQ",{"\n\nStarting ",get_name()," sequence...\n"},UVM_LOW);
 
-      if (model.get_attribute("NO_REG_TESTS") == "") begin
-        if (model.get_attribute("NO_BIT_BASH_TEST") == "") begin
-           uvm_reg regs[$];
-           uvm_reg_single_bit_bash_seq sub_seq;
+      reg_seq = uvm_reg_single_bit_bash_seq::type_id::create("reg_single_bit_bash_seq");
 
-           sub_seq = uvm_reg_single_bit_bash_seq::type_id::create("reg_bit_bash_seq");
-           this.reset_blk(model);
-           model.reset();
+      this.reset_blk(model);
+      model.reset();
 
-           // Iterate over all registers, checking accesses
-           model.get_registers(regs);
-           foreach (regs[i]) begin
-              // Registers with some attributes are not to be tested
-              if (regs[i].get_attribute("NO_REG_TESTS") != "" ||
-	          regs[i].get_attribute("NO_BIT_BASH_TEST") != "") continue;
-
-              sub_seq.rg = regs[i];
-              sub_seq.start(null,this);
-           end
-        end
+      do_block(model);
+      model.get_blocks(blks);
+      foreach (blks[i]) begin
+         do_block(blks[i]);
       end
+   endtask
 
-   endtask: body
+
+   // task: do_block
+   // Test all of the registers in a block
+   protected virtual task do_block(uvm_reg_block blk);
+      uvm_reg regs[$];
+
+      if (blk.get_attribute("NO_REG_TESTS") != "") return;
+      if (blk.get_attribute("NO_BIT_BASH_TEST") != "") return;
+
+      // Iterate over all registers, checking accesses
+      model.get_registers(regs, UVM_NO_HIER);
+      foreach (regs[i]) begin
+         // Registers with some attributes are not to be tested
+         if (regs[i].get_attribute("NO_REG_TESTS") != "" ||
+	     regs[i].get_attribute("NO_BIT_BASH_TEST") != "") continue;
+         
+         reg_seq.rg = regs[i];
+         reg_seq.start(null,this);
+      end
+   endtask: do_block
 
 
    //

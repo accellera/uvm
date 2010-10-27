@@ -231,7 +231,9 @@ virtual class uvm_reg_file extends uvm_object;
    // for each ancestor register file or block is used to get each
    // incremental path.
    //
-   extern function void get_full_hdl_path (ref string paths[$], input string kind = "");
+   extern function void get_full_hdl_path (ref string paths[$],
+                                           input string kind = "",
+                                           input string separator = ".");
 
    //
    // Function:    set_default_hdl_path
@@ -479,7 +481,9 @@ endfunction
 
 // get_full_hdl_path
 
-function void uvm_reg_file::get_full_hdl_path(ref string paths[$], input string kind = "");
+function void uvm_reg_file::get_full_hdl_path(ref string paths[$],
+                                              input string kind = "",
+                                              input string separator = ".");
    if (kind == "")
       kind = get_default_hdl_path();
 
@@ -495,9 +499,9 @@ function void uvm_reg_file::get_full_hdl_path(ref string paths[$], input string 
       string parent_paths[$];
 
       if (m_rf != null)
-         m_rf.get_full_hdl_path(parent_paths,kind);
+         m_rf.get_full_hdl_path(parent_paths, kind, separator);
       else if (parent != null)
-         parent.get_full_hdl_path(parent_paths,kind);
+         parent.get_full_hdl_path(parent_paths, kind, separator);
 
       for (int i=0; i<hdl_paths.size();i++) begin
          string hdl_path = hdl_paths.get(i);
@@ -513,7 +517,7 @@ function void uvm_reg_file::get_full_hdl_path(ref string paths[$], input string 
             if (hdl_path == "")
                paths.push_back(parent_paths[j]);
             else
-               paths.push_back({ parent_paths[j], ".", hdl_path });
+               paths.push_back({ parent_paths[j], separator, hdl_path });
          end
       end
    end

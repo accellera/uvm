@@ -798,7 +798,8 @@ virtual class uvm_reg extends uvm_object;
    // for each ancestor block is used to get each incremental path.
    //
    extern function void get_full_hdl_path (ref uvm_hdl_path_concat paths[$],
-                                           input string kind = "");
+                                           input string kind = "",
+                                           input string separator = ".");
 
    //
    // Function: backdoor_read
@@ -1449,7 +1450,8 @@ endfunction
 // get_full_hdl_path
 
 function void uvm_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
-                                             input string kind = "");
+                                         input string kind = "",
+                                         input string separator = ".");
 
    if (kind == "") begin
       if (m_regfile_parent != null)
@@ -1468,9 +1470,9 @@ function void uvm_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
       string parent_paths[$];
 
       if (m_regfile_parent != null)
-         m_regfile_parent.get_full_hdl_path(parent_paths,kind);
+         m_regfile_parent.get_full_hdl_path(parent_paths, kind, separator);
       else
-         parent.get_full_hdl_path(parent_paths,kind);
+         parent.get_full_hdl_path(parent_paths, kind, separator);
 
       for (int i=0; i<hdl_paths.size();i++) begin
          uvm_hdl_path_concat hdl_slices = hdl_paths.get(i);
@@ -1480,7 +1482,7 @@ function void uvm_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
                if (hdl_slices[k].path == "")
                   hdl_slices[k].path = parent_paths[j];
                else
-                  hdl_slices[k].path = { parent_paths[j], ".", hdl_slices[k].path };
+                  hdl_slices[k].path = { parent_paths[j], separator, hdl_slices[k].path };
             end
          end
          paths.push_back(hdl_slices);

@@ -74,7 +74,7 @@ class uvm_reg_mem_built_in_seq extends uvm_reg_sequence;
    
    // Variable: tests
    // The pre-defined test sequences to be executed.
-   uvm_reg_mem_tests_e tests = UVM_DO_ALL_REG_MEM_TESTS;
+   bit [63:0] tests = UVM_DO_ALL_REG_MEM_TESTS;
 
    virtual task body();
 

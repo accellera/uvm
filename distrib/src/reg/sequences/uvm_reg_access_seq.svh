@@ -62,6 +62,10 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence;
          return;
       end
 
+      // Registers with some attributes are not to be tested
+      if (rg.get_attribute("NO_REG_TESTS") != "") return;
+      if (rg.get_attribute("NO_REG_ACCESS_TEST") != "") return;
+
       // Can only deal with registers with backdoor access
       if (rg.get_backdoor() == null && !rg.has_hdl_path()) begin
          `uvm_error("RegModel", $psprintf("Register \"%s\" does not have a backdoor mechanism available",
@@ -150,6 +154,11 @@ endclass: uvm_reg_single_access_seq
 
 class uvm_reg_access_seq extends uvm_reg_sequence;
 
+   // variable: reg_seq
+   // The sequence used to test one register
+   //
+   protected uvm_reg_single_access_seq reg_seq;
+   
    `uvm_object_utils(uvm_reg_access_seq)
 
    function new(string name="uvm_reg_access_seq");
@@ -160,6 +169,7 @@ class uvm_reg_access_seq extends uvm_reg_sequence;
    // The block to be tested
    
    virtual task body();
+      uvm_reg_block blks[$];
 
       if (model == null) begin
          `uvm_error("RegModel", "Not block or system specified to run sequence on");
@@ -168,36 +178,46 @@ class uvm_reg_access_seq extends uvm_reg_sequence;
 
       uvm_report_info("STARTING_SEQ",{"\n\nStarting ",get_name()," sequence...\n"},UVM_LOW);
       
-      if (model.get_attribute("NO_REG_TESTS") == "") begin
-        if (model.get_attribute("NO_REG_ACCESS_TEST") == "") begin
-           uvm_reg regs[$];
-           uvm_reg_single_access_seq sub_seq;
+      reg_seq = uvm_reg_single_access_seq::type_id::create("single_reg_access_seq");
 
-           sub_seq = uvm_reg_single_access_seq::type_id::create("single_reg_access_seq");
-           this.reset_blk(model);
-           model.reset();
+      this.reset_blk(model);
+      model.reset();
 
-           // Iterate over all registers, checking accesses
-           model.get_registers(regs);
-           foreach (regs[i]) begin
-              // Registers with some attributes are not to be tested
-              if (regs[i].get_attribute("NO_REG_TESTS") != "" ||
-	          regs[i].get_attribute("NO_REG_ACCESS_TEST") != "") continue;
+      do_block(model);
+      model.get_blocks(blks);
+      foreach (blks[i]) begin
+         do_block(blks[i]);
+      end
+   endtask: body
 
-              // Can only deal with registers with backdoor access
-              if (regs[i].get_backdoor() == null && !regs[i].has_hdl_path()) begin
-                 `uvm_warning("RegModel", $psprintf("Register \"%s\" does not have a backdoor mechanism available",
+
+   // task: do_block
+   // Test all of the registers in a block
+   protected virtual task do_block(uvm_reg_block blk);
+      uvm_reg regs[$];
+      
+      if (blk.get_attribute("NO_REG_TESTS") != "") return;
+      if (blk.get_attribute("NO_REG_ACCESS_TEST") != "") return;
+
+      // Iterate over all registers, checking accesses
+      model.get_registers(regs, UVM_NO_HIER);
+      foreach (regs[i]) begin
+         // Registers with some attributes are not to be tested
+         if (regs[i].get_attribute("NO_REG_TESTS") != "" ||
+	     regs[i].get_attribute("NO_REG_ACCESS_TEST") != "") continue;
+         
+         // Can only deal with registers with backdoor access
+         if (regs[i].get_backdoor() == null && !regs[i].has_hdl_path()) begin
+            `uvm_warning("RegModel", $psprintf("Register \"%s\" does not have a backdoor mechanism available",
                                                regs[i].get_full_name()));
-                 continue;
-              end
-
-              sub_seq.rg = regs[i];
-              sub_seq.start(null,this);
-           end
-        end
+            continue;
+         end
+         
+         reg_seq.rg = regs[i];
+         reg_seq.start(null,this);
       end
 
-   endtask: body
+   endtask: do_block
 
 
    //
@@ -275,5 +295,3 @@ class uvm_reg_mem_access_seq extends uvm_reg_sequence;
 
 
 endclass: uvm_reg_mem_access_seq
-
-
