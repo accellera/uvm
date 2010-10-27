@@ -928,13 +928,13 @@ function void uvm_reg_block::lock_model();
    foreach (regs[rg_])
    begin
    	 uvm_reg rg = rg_;	
-     rg.lock_model();
+     rg.Xlock_modelX();
    end
    
    foreach (mems[mem_])
    begin
    	 uvm_mem mem = mem_;
-     mem.lock_model();
+     mem.Xlock_modelX();
    end
    
    foreach (blks[blk_])

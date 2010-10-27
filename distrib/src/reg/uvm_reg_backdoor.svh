@@ -163,18 +163,24 @@ endfunction
 typedef class uvm_reg_backdoor_cbs;
 class uvm_reg_backdoor extends uvm_object;
 
+`ifdef USE_PROCESS_CONTAINER
 class process_container_c;
 	process p;
 	function new(process p_);
 		p=p_;
 	endfunction
 endclass
+`endif
 
    string fname = "";
    int lineno = 0;
    local uvm_reg_backdoor_cbs backdoor_cbs[$];
 
+`ifdef USE_PROCESS_CONTAINER
    local process_container_c m_update_thread[uvm_reg];
+`else
+   local process m_update_thread[uvm_reg];
+`endif 
 
    `uvm_object_utils(uvm_reg_backdoor)
    `uvm_register_cb(uvm_reg_backdoor, uvm_reg_backdoor_cbs)
@@ -996,8 +1002,13 @@ function void uvm_reg_backdoor::start_update_thread(uvm_reg rg);
    fork
       begin
          uvm_reg_field fields[$];
-         
+
+`ifdef USE_PROCESS_CONTAINER         
          this.m_update_thread[rg] = new(process::self());
+`else
+		this.m_update_thread[rg] = process::self();
+`endif
+      
          rg.get_fields(fields);
          forever begin
             uvm_status_e status;
@@ -1023,7 +1034,13 @@ endfunction
 
 function void uvm_reg_backdoor::kill_update_thread(uvm_reg rg);
    if (this.m_update_thread.exists(rg)) begin
+
+`ifdef USE_PROCESS_CONTAINER
       this.m_update_thread[rg].p.kill();
+`else 
+ 	this.m_update_thread[rg].kill();
+`endif
+
       this.m_update_thread.delete(rg);
    end
 endfunction

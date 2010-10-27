@@ -58,7 +58,8 @@
   `ifndef INCA_UVM_USE_FILE_LINE
     `undef  UVM_USE_FILE_LINE
   `endif
-  
+  // wrap process into class container
+  `define USE_PROCESS_CONTAINER
 `endif
 
 `include "macros/uvm_version_defines.svh"

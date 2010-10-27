@@ -130,7 +130,7 @@ class uvm_mem extends uvm_object;
 
    /*local*/ extern virtual function void set_parent(uvm_reg_block parent);
    /*local*/ extern function void add_map(uvm_reg_map map);
-   /*local*/ extern function void lock_model();
+   /*local*/ extern function void Xlock_modelX();
 
    //
    // variable: mam
@@ -1273,9 +1273,9 @@ endfunction
 
 // Xlock_modelX
 
-function void uvm_mem::lock_model();
+function void uvm_mem::Xlock_modelX();
    this.locked = 1;
-endfunction: lock_model
+endfunction: Xlock_modelX
 
 
 // get_full_name

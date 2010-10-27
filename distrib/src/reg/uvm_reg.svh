@@ -136,7 +136,7 @@ virtual class uvm_reg extends uvm_object;
    /*local*/ extern virtual function void add_field  (uvm_reg_field field);
    /*local*/ extern virtual function void add_map    (uvm_reg_map map);
 
-   /*local*/ extern function void   lock_model;
+   /*local*/ extern function void   Xlock_modelX;
 
 
    //-----------
@@ -1312,7 +1312,7 @@ endfunction: add_field
 
 // Xlock_modelX
 
-function void uvm_reg::lock_model();
+function void uvm_reg::Xlock_modelX();
    if (this.locked)
      return;
    this.locked = 1;
