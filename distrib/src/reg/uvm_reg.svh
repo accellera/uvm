@@ -733,10 +733,10 @@ virtual class uvm_reg extends uvm_object;
    // A user-defined backdoor is defined
    // by using the "uvm_reg::set_backdoor()" method. 
    //
-   // If ~inherit~ is TRUE, returns the backdoor of the parent block
+   // If ~inherited~ is TRUE, returns the backdoor of the parent block
    // if none have been specified for this register.
    //
-   extern function uvm_reg_backdoor get_backdoor(bit inherit_ = 1);
+   extern function uvm_reg_backdoor get_backdoor(bit inherited = 1);
 
    //
    // Function:  clear_hdl_path
@@ -1374,8 +1374,8 @@ endfunction: set_backdoor
 
 // get_backdoor
 
-function uvm_reg_backdoor uvm_reg::get_backdoor(bit inherit_ = 1);
-   if (backdoor == null && inherit_) begin
+function uvm_reg_backdoor uvm_reg::get_backdoor(bit inherited = 1);
+   if (backdoor == null && inherited) begin
      uvm_reg_block blk = get_parent();
      while (blk != null) begin
        uvm_reg_backdoor bkdr = blk.get_backdoor();
@@ -2466,12 +2466,20 @@ task uvm_reg::XwriteX(output uvm_status_e status,
       end
    end
 
+	begin
+		string origin;
+		
+		if (path == UVM_BFM) 
+			origin = {"map ",map.get_full_name()};
+		else if (backdoor != null)
+			origin = "user backdoor"; 		// NOTE would it make sense to backdoor.get_full_name()
+		else
+			origin = "DPI backdoor";		// REVIEW why is a dpi-backdoor not a user backdoor (should be unified)
 
-		`uvm_info("RegModel", $psprintf("Wrote register \"%s\" via %s: 'h%0h",
-              this.get_full_name(),
-              ternary_op(path == UVM_BFM,{"map ",map.get_full_name()},ternary_op(backdoor != null,"user backdoor","DPI backdoor")),
+			`uvm_info("RegModel", $psprintf("Wrote register \"%s\" via %s: 'h%0h",
+              this.get_full_name(),origin,
               value),UVM_MEDIUM );
-
+ 	end
 	
 endtask: XwriteX
 
@@ -2794,11 +2802,23 @@ task uvm_reg::XreadX(output uvm_status_e status,
       end
    end
 
-   `uvm_info("RegModel",
-      $psprintf("Read register \"%s\" via %s: 'h%0h",
+	begin
+		string origin;
+		
+		if (path == UVM_BFM) 
+			origin = {"map ",map.get_full_name()};
+		else if (backdoor != null)
+			origin = "user backdoor"; 		// NOTE would it make sense to backdoor.get_full_name()
+		else
+			origin = "DPI backdoor";		// REVIEW why is a dpi-backdoor not a user backdoor (should be unified)
+			
+			`uvm_info("RegModel",
+			$psprintf("Read register \"%s\" via %s: 'h%0h",
                 this.get_full_name(),
-                ternary_op(path == UVM_BFM,{"map ",map.get_full_name()},ternary_op(backdoor != null,"user backdoor","DPI backdoor")),
+                origin,
                 value),UVM_MEDIUM)
+	end
+
 
 endtask: XreadX
 

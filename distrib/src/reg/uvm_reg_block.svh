@@ -669,10 +669,10 @@ virtual class uvm_reg_block extends uvm_object;
    // block and all sub-blocks -- unless overriden by a backdoor set
    // in a lower-level block or in the register itself.
    //
-   // If ~inherit~ is TRUE, returns the backdoor of the parent block
+   // If ~inherited~ is TRUE, returns the backdoor of the parent block
    // if none have been specified for this block.
    //
-   extern function uvm_reg_backdoor get_backdoor(bit inherit_ = 1);
+   extern function uvm_reg_backdoor get_backdoor(bit inherited = 1);
 
    //
    // Function: set_backdoor
@@ -1849,8 +1849,8 @@ endfunction: set_backdoor
 
 // get_backdoor
 
-function uvm_reg_backdoor uvm_reg_block::get_backdoor(bit inherit_ = 1);
-   if (backdoor == null && inherit_) begin
+function uvm_reg_backdoor uvm_reg_block::get_backdoor(bit inherited = 1);
+   if (backdoor == null && inherited) begin
      uvm_reg_block blk = get_parent();
      while (blk != null) begin
        uvm_reg_backdoor bkdr = blk.get_backdoor();
