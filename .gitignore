@@ -1,4 +1,19 @@
+
+
+# ius results are not for the vc
+irun.log
+INCA_libs
+*.[oa]
 *~
+*.patch
+*.orig
+*.tar.gz
+*.diff
+
+# created by flow
+*.fails
+
+# vcs results are not for the vc
 csrc
 simv*
 vc_hdrs.h
