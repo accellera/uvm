@@ -274,6 +274,7 @@ class uvm_reg_field extends uvm_object;
    // FUNCTION: is_volatile
    // Indicates if the field value is volatile
    //
+   // UVM uses the IEEE 1685-2009 IP-XACT definition of "volatility".
    // If TRUE, the value of the register is not predictable because it
    // may change between consecutive accesses.
    // This typically indicates a field whose value is updated by the DUT.
