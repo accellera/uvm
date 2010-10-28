@@ -3,6 +3,7 @@ if 0;
 # -*- mode: cperl -*-
 #----------------------------------------------------------------------
 #   Copyright 2007-2010 Cadence Design Systems, Inc.
+#   Copyright 2010 Synopsys Inc.
 #   All Rights Reserved Worldwide
 #
 #   Licensed under the Apache License, Version 2.0 (the
@@ -48,9 +49,9 @@ local $opt_sv_ext="\.(s?vh?|inc)\$";
 local $text_file_mime_regexp="(text\/|application\/x-shellscript)";
 
 # ignore pattern
-local $file_ignore_pattern="(/(.hg|.git|INCA_libs)\/|[#~]\$|\.(zip|gz|bz2|orig|diff|patch)\$)";
+local $file_ignore_pattern="(/(.hg|.git|INCA_libs|.daidir|.vdb|simv|csrc|DVEfiles)\/|[#~]\$|\.(zip|gz|bz2|orig|diff|patch)\$)";
 
-my $VCSID='-*- $Id: ovm2uvm.pl,v d60c9fc172de 2010/10/13 14:58:52 uwes $ -*-';
+my $VerID='-*- $Id: ovm2uvm.pl,v d60c9fc172de 2010/10/13 14:58:52 accellera $ -*-';
 my @Options=(
           ["help","this help screen"],
 	  ["top_dir=s","the top directory name containing the files to translate"],
@@ -73,7 +74,7 @@ $opt_top_dir =~ s/\/$//;
 
 $DUMMY='-' x 80;
 NoteMessage("$DUMMY");
-NoteMessage("$VCSID");
+NoteMessage("$VerID");
 
 NoteMessage("traversing directory [$opt_top_dir] to find files");
 
