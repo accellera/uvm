@@ -68,6 +68,18 @@ begin
    rg.reset();
    data = rg.get();
    if (data !== 'h1765A30) `uvm_error("Test", $psprintf("Hard reset value is 'h%h instead of 'h1765A30", data));
+
+   
+   rg.REVISION_ID.set(8'hFC);
+       rg.CHIP_ID.set(8'hA5);
+    rg.PRODUCT_ID.set(10'h289);
+   data = rg.get();
+   if (data !== 'h289A5FC) `uvm_error("Test", "Field values were not set");
+
+   void'(rg.PRODUCT_ID.has_reset("HARD", 1));
+   rg.reset();
+   data = rg.get();
+   if (data !== 'h2895A30) `uvm_error("Test", $psprintf("Hard reset value is 'h%h instead of 'h2895A30", data));
    
    begin
       uvm_report_server svr;

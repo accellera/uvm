@@ -377,8 +377,10 @@ class uvm_reg_field extends uvm_object;
    //
    // Return TRUE if this field has a reset value specified
    // for the specified reset ~kind~.
+   // If ~delete~ is TRUE, removes the reset value, if any.
    //
-   extern virtual function bit has_reset(string kind = "HARD");
+   extern virtual function bit has_reset(string kind = "HARD",
+                                         bit    delete = 0);
 
 
    //
@@ -390,7 +392,7 @@ class uvm_reg_field extends uvm_object;
    //
    extern virtual function void
                        set_reset(uvm_reg_data_t value,
-                                 string             kind = "HARD");
+                                 string         kind = "HARD");
 
 
    //
@@ -1395,10 +1397,14 @@ endfunction: reset
 
 // has_reset
 
-function bit uvm_reg_field::has_reset(string kind = "HARD");
+function bit uvm_reg_field::has_reset(string kind = "HARD",
+                                      bit    delete = 0);
 
-   return m_reset.exists(kind);
+   if (!m_reset.exists(kind)) return 0;
 
+   if (delete) m_reset.delete(kind);
+
+   return 1;
 endfunction: has_reset
 
 
