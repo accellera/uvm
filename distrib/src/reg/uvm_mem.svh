@@ -663,15 +663,14 @@ class uvm_mem extends uvm_object;
    extern function void add_hdl_path      (uvm_hdl_path_slice path[],
                                            string kind = "RTL");   
                                            
-   // Function: add_hdl_path_array 
-   // similar to add_hdl_path takes an uvm_hdl_path_slice[] instead of the wrapped container uvm_hdl_path_concat
-   //                                       
-   extern function void add_hdl_path_object (uvm_hdl_path_concat path,
-                                           string kind = "RTL");
-                                           
-                                           
-                                           
-                                           
+// Function: add_hdl_slice
+//
+// Add the specified HDL path as a slice of the register instance for the specified
+// design abstraction. If ~first~ is TRUE, starts the specification of a duplicate
+// HDL implementation of the register.
+//
+	extern function void add_hdl_slice(string name, int offset, int size, string kind = "RTL", bit first = 0);
+                                              
    //
    // Function:   has_hdl_path
    // Check if a HDL path is specified
@@ -2778,25 +2777,34 @@ function void uvm_mem::clear_hdl_path(string kind = "RTL");
   hdl_paths_pool.delete(kind);
 endfunction
 
-function void uvm_mem::add_hdl_path (uvm_hdl_path_slice path[], string kind = "RTL");
+function void uvm_mem::add_hdl_path(uvm_hdl_path_slice path[], string kind = "RTL");
     uvm_hdl_path_concat t_ = new();
+    uvm_queue #(uvm_hdl_path_concat) paths=hdl_paths_pool.get(kind);
+    
     t_.set(path);
-    add_hdl_path_object(t_,kind);                                                                                 
-endfunction                                           
-            
-// add_hdl_path
-
-function void uvm_mem::add_hdl_path_object(uvm_hdl_path_concat path,
-                                        string kind = "RTL");
-
-  uvm_queue #(uvm_hdl_path_concat) paths;
-
-  paths = hdl_paths_pool.get(kind);
-
-  paths.push_back(path);
-
+    paths.push_back(t_);  
 endfunction
+                                         
+     
+// add_hdl_slice
 
+function void uvm_mem::add_hdl_slice(string name, int offset, int size, string kind = "RTL", bit first = 0);
+    uvm_hdl_path_concat t_ ;
+    uvm_queue #(uvm_hdl_path_concat) paths=hdl_paths_pool.get(kind);
+    
+    if(first)
+    begin
+    	t_ = new();
+    	paths.push_back(t_);
+    end
+    else
+    begin
+    	assert(paths.size() != 0) else `uvm_error("RegModel","first path slice needs to be marked with first=1")
+     	t_=paths.get(paths.size()-1);
+    end
+     	
+    t_.push_back_path(name,offset,size);	                                           
+endfunction
 
 // has_hdl_path
 

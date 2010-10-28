@@ -356,19 +356,16 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
         config_reg.build();
         config_reg.configure(this, null);
                      
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("rsvd", 4, 4);
-            t_.push_back_path("kind", 2, 2);
-            t_.push_back_path("dest", 0, 2);
-              	  
-            config_reg.add_hdl_path_object(t_);
-        end
+
+        config_reg.add_hdl_slice("rsvd", 4, 4,,1);
+        config_reg.add_hdl_slice("kind", 2, 2);
+        config_reg.add_hdl_slice("dest", 0, 2);
+
         /* same as
               config_reg.add_hdl_path('{ '{"rsvd", 4, 4},
                                          '{"kind", 2, 2},
                                          '{"dest", 0, 2} });
-                */ 
+         */ 
 
         user_acp_reg.build();
         user_acp_reg.configure(this, null, "user_reg");

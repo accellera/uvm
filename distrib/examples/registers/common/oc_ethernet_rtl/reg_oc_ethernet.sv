@@ -28,39 +28,39 @@ class reg_reg_MODER extends uvm_reg;
 
     virtual function void build();
         this.RECSMALL = uvm_reg_field::type_id::create("RECSMALL",,get_full_name());
-      this.RECSMALL.configure(this, 1, 16, "RW", 0, 1'h0, 0, 1);
+        this.RECSMALL.configure(this, 1, 16, "RW", 0, 1'h0, 0, 1);
         this.PAD = uvm_reg_field::type_id::create("PAD",,get_full_name());
-      this.PAD.configure(this, 1, 15, "RW", 0, 1, 0, 0);
+        this.PAD.configure(this, 1, 15, "RW", 0, 1, 0, 0);
         this.HUGEN = uvm_reg_field::type_id::create("HUGEN",,get_full_name());
-      this.HUGEN.configure(this, 1, 14, "RW", 0, 1'h0, 0, 0);
+        this.HUGEN.configure(this, 1, 14, "RW", 0, 1'h0, 0, 0);
         this.CRCEN = uvm_reg_field::type_id::create("CRCEN",,get_full_name());
-      this.CRCEN.configure(this, 1, 13, "RW", 0, 1, 0, 0);
+        this.CRCEN.configure(this, 1, 13, "RW", 0, 1, 0, 0);
         this.DLYCRCEN = uvm_reg_field::type_id::create("DLYCRCEN",,get_full_name());
-      this.DLYCRCEN.configure(this, 1, 12, "RW", 0, 1'h0, 0, 0);
+        this.DLYCRCEN.configure(this, 1, 12, "RW", 0, 1'h0, 0, 0);
         this.undocumented = uvm_reg_field::type_id::create("undocumented",,get_full_name());
-      this.undocumented.configure(this, 1, 11, "DC", 0, 1'h0, 0, 0);
+        this.undocumented.configure(this, 1, 11, "DC", 0, 1'h0, 0, 0);
         this.FULLD = uvm_reg_field::type_id::create("FULLD",,get_full_name());
-      this.FULLD.configure(this, 1, 10, "RW", 0, 1'h0, 0, 0);
+        this.FULLD.configure(this, 1, 10, "RW", 0, 1'h0, 0, 0);
         this.EXDFREN = uvm_reg_field::type_id::create("EXDFREN",,get_full_name());
-      this.EXDFREN.configure(this, 1, 9, "RW", 0, 1'h0, 0, 0);
+        this.EXDFREN.configure(this, 1, 9, "RW", 0, 1'h0, 0, 0);
         this.NOBCKOF = uvm_reg_field::type_id::create("NOBCKOF",,get_full_name());
-      this.NOBCKOF.configure(this, 1, 8, "RW", 0, 1'h0, 0, 0);
+        this.NOBCKOF.configure(this, 1, 8, "RW", 0, 1'h0, 0, 0);
         this.LOOPBCK = uvm_reg_field::type_id::create("LOOPBCK",,get_full_name());
-      this.LOOPBCK.configure(this, 1, 7, "RW", 0, 1'h0, 0, 0);
+        this.LOOPBCK.configure(this, 1, 7, "RW", 0, 1'h0, 0, 0);
         this.IFG = uvm_reg_field::type_id::create("IFG",,get_full_name());
-      this.IFG.configure(this, 1, 6, "RW", 0, 1'h0, 0, 0);
+        this.IFG.configure(this, 1, 6, "RW", 0, 1'h0, 0, 0);
         this.PRO = uvm_reg_field::type_id::create("PRO",,get_full_name());
-      this.PRO.configure(this, 1, 5, "RW", 0, 1'h0, 0, 0);
+        this.PRO.configure(this, 1, 5, "RW", 0, 1'h0, 0, 0);
         this.IAM = uvm_reg_field::type_id::create("IAM",,get_full_name());
-      this.IAM.configure(this, 1, 4, "RW", 0, 1'h0, 0, 0);
+        this.IAM.configure(this, 1, 4, "RW", 0, 1'h0, 0, 0);
         this.BRO = uvm_reg_field::type_id::create("BRO",,get_full_name());
-      this.BRO.configure(this, 1, 3, "RW", 0, 1'h0, 0, 0);
+        this.BRO.configure(this, 1, 3, "RW", 0, 1'h0, 0, 0);
         this.NOPRE = uvm_reg_field::type_id::create("NOPRE",,get_full_name());
-      this.NOPRE.configure(this, 1, 2, "RW", 0, 1'h0, 0, 0);
+        this.NOPRE.configure(this, 1, 2, "RW", 0, 1'h0, 0, 0);
         this.TXEN = uvm_reg_field::type_id::create("TXEN",,get_full_name());
-      this.TXEN.configure(this, 1, 1, "RW", 0, 1'h0, 0, 0);
+        this.TXEN.configure(this, 1, 1, "RW", 0, 1'h0, 0, 0);
         this.RXEN = uvm_reg_field::type_id::create("RXEN",,get_full_name());
-      this.RXEN.configure(this, 1, 0, "RW", 0, 1'h0, 0, 0);
+        this.RXEN.configure(this, 1, 0, "RW", 0, 1'h0, 0, 0);
     endfunction: build
 
     `uvm_object_utils(reg_reg_MODER)
@@ -83,19 +83,19 @@ class reg_reg_oc_ethernet_INT_SOURCE extends uvm_reg;
 
     virtual function void build();
         this.RXC = uvm_reg_field::type_id::create("RXC",,get_full_name());
-      this.RXC.configure(this, 1, 6, "W1C", 1, 1'h0, 0, 0);
+        this.RXC.configure(this, 1, 6, "W1C", 1, 1'h0, 0, 0);
         this.TXC = uvm_reg_field::type_id::create("TXC",,get_full_name());
-      this.TXC.configure(this, 1, 5, "W1C", 1, 1'h0, 0, 0);
+        this.TXC.configure(this, 1, 5, "W1C", 1, 1'h0, 0, 0);
         this.BUSY = uvm_reg_field::type_id::create("BUSY",,get_full_name());
-      this.BUSY.configure(this, 1, 4, "W1C", 1, 1'h0, 0, 0);
+        this.BUSY.configure(this, 1, 4, "W1C", 1, 1'h0, 0, 0);
         this.RXE = uvm_reg_field::type_id::create("RXE",,get_full_name());
-      this.RXE.configure(this, 1, 3, "W1C", 1, 1'h0, 0, 0);
+        this.RXE.configure(this, 1, 3, "W1C", 1, 1'h0, 0, 0);
         this.RXB = uvm_reg_field::type_id::create("RXB",,get_full_name());
-      this.RXB.configure(this, 1, 2, "W1C", 1, 1'h0, 0, 0);
+        this.RXB.configure(this, 1, 2, "W1C", 1, 1'h0, 0, 0);
         this.TXE = uvm_reg_field::type_id::create("TXE",,get_full_name());
-      this.TXE.configure(this, 1, 1, "W1C", 1, 1'h0, 0, 0);
+        this.TXE.configure(this, 1, 1, "W1C", 1, 1'h0, 0, 0);
         this.TXB = uvm_reg_field::type_id::create("TXB",,get_full_name());
-      this.TXB.configure(this, 1, 0, "W1C", 1, 1'h0, 0, 0);
+        this.TXB.configure(this, 1, 0, "W1C", 1, 1'h0, 0, 0);
     endfunction: build
 
     `uvm_object_utils(reg_reg_oc_ethernet_INT_SOURCE)
@@ -118,19 +118,19 @@ class reg_reg_oc_ethernet_INT_MASK extends uvm_reg;
 
     virtual function void build();
         this.RXC_M = uvm_reg_field::type_id::create("RXC_M",,get_full_name());
-      this.RXC_M.configure(this, 1, 6, "RW", 0, 1'h0, 0, 0);
+        this.RXC_M.configure(this, 1, 6, "RW", 0, 1'h0, 0, 0);
         this.TXC_M = uvm_reg_field::type_id::create("TXC_M",,get_full_name());
-      this.TXC_M.configure(this, 1, 5, "RW", 0, 1'h0, 0, 0);
+        this.TXC_M.configure(this, 1, 5, "RW", 0, 1'h0, 0, 0);
         this.BUSY_M = uvm_reg_field::type_id::create("BUSY_M",,get_full_name());
-      this.BUSY_M.configure(this, 1, 4, "RW", 0, 1'h0, 0, 0);
+        this.BUSY_M.configure(this, 1, 4, "RW", 0, 1'h0, 0, 0);
         this.RXE_M = uvm_reg_field::type_id::create("RXE_M",,get_full_name());
-      this.RXE_M.configure(this, 1, 3, "RW", 0, 1'h0, 0, 0);
+        this.RXE_M.configure(this, 1, 3, "RW", 0, 1'h0, 0, 0);
         this.RXB_M = uvm_reg_field::type_id::create("RXB_M",,get_full_name());
-      this.RXB_M.configure(this, 1, 2, "RW", 0, 1'h0, 0, 0);
+        this.RXB_M.configure(this, 1, 2, "RW", 0, 1'h0, 0, 0);
         this.TXE_M = uvm_reg_field::type_id::create("TXE_M",,get_full_name());
-      this.TXE_M.configure(this, 1, 1, "RW", 0, 1'h0, 0, 0);
+        this.TXE_M.configure(this, 1, 1, "RW", 0, 1'h0, 0, 0);
         this.TXB_M = uvm_reg_field::type_id::create("TXB_M",,get_full_name());
-      this.TXB_M.configure(this, 1, 0, "RW", 0, 1'h0, 0, 0);
+        this.TXB_M.configure(this, 1, 0, "RW", 0, 1'h0, 0, 0);
     endfunction: build
 
     `uvm_object_utils(reg_reg_oc_ethernet_INT_MASK)
@@ -147,7 +147,7 @@ class reg_reg_IPGT extends uvm_reg;
 
     virtual function void build();
         this.IPGT = uvm_reg_field::type_id::create("IPGT",,get_full_name());
-      this.IPGT.configure(this, 7, 0, "RW", 0, 7'h12, 0, 1);
+        this.IPGT.configure(this, 7, 0, "RW", 0, 7'h12, 0, 1);
     endfunction: build
 
     `uvm_object_utils(reg_reg_IPGT)
@@ -164,7 +164,7 @@ class reg_reg_IPGR1 extends uvm_reg;
 
     virtual function void build();
         this.IPGR1 = uvm_reg_field::type_id::create("IPGR1",,get_full_name());
-      this.IPGR1.configure(this, 7, 0, "RW", 0, 7'h0C, 0, 1);
+        this.IPGR1.configure(this, 7, 0, "RW", 0, 7'h0C, 0, 1);
     endfunction: build
 
     `uvm_object_utils(reg_reg_IPGR1)
@@ -181,7 +181,7 @@ class reg_reg_IPGR2 extends uvm_reg;
 
     virtual function void build();
         this.IPGR2 = uvm_reg_field::type_id::create("IPGR2",,get_full_name());
-      this.IPGR2.configure(this, 7, 0, "RW", 0, 7'h12, 0, 1);
+        this.IPGR2.configure(this, 7, 0, "RW", 0, 7'h12, 0, 1);
     endfunction: build
 
     `uvm_object_utils(reg_reg_IPGR2)
@@ -208,9 +208,9 @@ class reg_reg_PACKETLEN extends uvm_reg;
 
     virtual function void build();
         this.MINFL = uvm_reg_field::type_id::create("MINFL",,get_full_name());
-      this.MINFL.configure(this, 16, 16, "RW", 0, 16'h0040, 1, 1);
+        this.MINFL.configure(this, 16, 16, "RW", 0, 16'h0040, 1, 1);
         this.MAXFL = uvm_reg_field::type_id::create("MAXFL",,get_full_name());
-      this.MAXFL.configure(this, 16, 0, "RW", 0, 16'h0600, 1, 1);
+        this.MAXFL.configure(this, 16, 0, "RW", 0, 16'h0600, 1, 1);
     endfunction: build
 
     `uvm_object_utils(reg_reg_PACKETLEN)
@@ -228,9 +228,9 @@ class reg_reg_COLLCONF extends uvm_reg;
 
     virtual function void build();
         this.MAXRET = uvm_reg_field::type_id::create("MAXRET",,get_full_name());
-      this.MAXRET.configure(this, 4, 16, "RW", 0, 4'hF, 0, 1);
+        this.MAXRET.configure(this, 4, 16, "RW", 0, 4'hF, 0, 1);
         this.COLLVALID = uvm_reg_field::type_id::create("COLLVALID",,get_full_name());
-      this.COLLVALID.configure(this, 6, 0, "RW", 0, 6'h3F, 0, 1);
+        this.COLLVALID.configure(this, 6, 0, "RW", 0, 6'h3F, 0, 1);
     endfunction: build
 
     `uvm_object_utils(reg_reg_COLLCONF)
@@ -252,8 +252,8 @@ class reg_reg_TX_BD_NUM extends uvm_reg;
 
     virtual function void build();
         this.TX_BD_NUM = uvm_reg_field::type_id::create("TX_BD_NUM",,get_full_name());
-      this.TX_BD_NUM.configure(this, 8, 0, "RW", 0, 8'h40, 1, 1);
-      this.set_attribute("NO_REG_TESTS", "1");
+        this.TX_BD_NUM.configure(this, 8, 0, "RW", 0, 8'h40, 1, 1);
+        this.set_attribute("NO_REG_TESTS", "1");
     endfunction: build
 
     `uvm_object_utils(reg_reg_TX_BD_NUM)
@@ -272,11 +272,11 @@ class reg_reg_CTRLMODER extends uvm_reg;
 
     virtual function void build();
         this.TXFLOW = uvm_reg_field::type_id::create("TXFLOW",,get_full_name());
-      this.TXFLOW.configure(this, 1, 2, "RW", 0, 1'h0, 0, 0);
+        this.TXFLOW.configure(this, 1, 2, "RW", 0, 1'h0, 0, 0);
         this.RXFLOW = uvm_reg_field::type_id::create("RXFLOW",,get_full_name());
-      this.RXFLOW.configure(this, 1, 1, "RW", 0, 1'h0, 0, 0);
+        this.RXFLOW.configure(this, 1, 1, "RW", 0, 1'h0, 0, 0);
         this.PASSALL = uvm_reg_field::type_id::create("PASSALL",,get_full_name());
-      this.PASSALL.configure(this, 1, 0, "RW", 0, 1'h0, 0, 0);
+        this.PASSALL.configure(this, 1, 0, "RW", 0, 1'h0, 0, 0);
     endfunction: build
 
     `uvm_object_utils(reg_reg_CTRLMODER)
@@ -294,9 +294,9 @@ class reg_reg_MIIMODER extends uvm_reg;
 
     virtual function void build();
         this.MIINOPRE = uvm_reg_field::type_id::create("MIINOPRE",,get_full_name());
-      this.MIINOPRE.configure(this, 1, 8, "RW", 0, 1'h0, 0, 1);
+        this.MIINOPRE.configure(this, 1, 8, "RW", 0, 1'h0, 0, 1);
         this.CLKDIV = uvm_reg_field::type_id::create("CLKDIV",,get_full_name());
-      this.CLKDIV.configure(this, 8, 0, "RW", 0, 8'h64, 0, 1);
+        this.CLKDIV.configure(this, 8, 0, "RW", 0, 8'h64, 0, 1);
     endfunction: build
 
     `uvm_object_utils(reg_reg_MIIMODER)
@@ -315,11 +315,11 @@ class reg_reg_MIICOMMAND extends uvm_reg;
 
     virtual function void build();
         this.WCTRLDATA = uvm_reg_field::type_id::create("WCTRLDATA",,get_full_name());
-      this.WCTRLDATA.configure(this, 1, 2, "DC", 1, 1'h0, 0, 0);
+        this.WCTRLDATA.configure(this, 1, 2, "DC", 1, 1'h0, 0, 0);
         this.RSTAT = uvm_reg_field::type_id::create("RSTAT",,get_full_name());
-      this.RSTAT.configure(this, 1, 1, "DC", 1, 1'h0, 0, 0);
+        this.RSTAT.configure(this, 1, 1, "DC", 1, 1'h0, 0, 0);
         this.SCANSTAT = uvm_reg_field::type_id::create("SCANSTAT",,get_full_name());
-      this.SCANSTAT.configure(this, 1, 0, "DC", 1, 1'h0, 0, 0);
+        this.SCANSTAT.configure(this, 1, 0, "DC", 1, 1'h0, 0, 0);
     endfunction: build
 
     `uvm_object_utils(reg_reg_MIICOMMAND)
@@ -337,9 +337,9 @@ class reg_reg_MIIADDRESS extends uvm_reg;
 
     virtual function void build();
         this.RGAD = uvm_reg_field::type_id::create("RGAD",,get_full_name());
-      this.RGAD.configure(this, 5, 8, "RW", 0, 5'h0, 0, 1);
+        this.RGAD.configure(this, 5, 8, "RW", 0, 5'h0, 0, 1);
         this.FIAD = uvm_reg_field::type_id::create("FIAD",,get_full_name());
-      this.FIAD.configure(this, 5, 0, "RW", 0, 5'h0, 0, 1);
+        this.FIAD.configure(this, 5, 0, "RW", 0, 5'h0, 0, 1);
     endfunction: build
 
     `uvm_object_utils(reg_reg_MIIADDRESS)
@@ -356,7 +356,7 @@ class reg_reg_MIITX_DATA extends uvm_reg;
 
     virtual function void build();
         this.CTRLDATA = uvm_reg_field::type_id::create("CTRLDATA",,get_full_name());
-      this.CTRLDATA.configure(this, 16, 0, "RW", 0, 16'h0, 0, 1);
+        this.CTRLDATA.configure(this, 16, 0, "RW", 0, 16'h0, 0, 1);
     endfunction: build
 
     `uvm_object_utils(reg_reg_MIITX_DATA)
@@ -373,7 +373,7 @@ class reg_reg_MIIRX_DATA extends uvm_reg;
 
     virtual function void build();
         this.PRSD = uvm_reg_field::type_id::create("PRSD",,get_full_name());
-      this.PRSD.configure(this, 16, 0, "RO", 1, 16'h0, 0, 1);
+        this.PRSD.configure(this, 16, 0, "RO", 1, 16'h0, 0, 1);
     endfunction: build
 
     `uvm_object_utils(reg_reg_MIIRX_DATA)
@@ -392,11 +392,11 @@ class reg_reg_MIISTATUS extends uvm_reg;
 
     virtual function void build();
         this.NVALID = uvm_reg_field::type_id::create("NVALID",,get_full_name());
-      this.NVALID.configure(this, 1, 2, "RO", 1, 1'h0, 0, 0);
+        this.NVALID.configure(this, 1, 2, "RO", 1, 1'h0, 0, 0);
         this.BUSY_N = uvm_reg_field::type_id::create("BUSY_N",,get_full_name());
-      this.BUSY_N.configure(this, 1, 1, "RO", 1, 1'h0, 0, 0);
+        this.BUSY_N.configure(this, 1, 1, "RO", 1, 1'h0, 0, 0);
         this.LINKFAIL = uvm_reg_field::type_id::create("LINKFAIL",,get_full_name());
-      this.LINKFAIL.configure(this, 1, 0, "RO", 1, 1'h0, 0, 0);
+        this.LINKFAIL.configure(this, 1, 0, "RO", 1, 1'h0, 0, 0);
     endfunction: build
 
     `uvm_object_utils(reg_reg_MIISTATUS)
@@ -413,7 +413,7 @@ class reg_reg_MAC_ADDR extends uvm_reg;
 
     virtual function void build();
         this.MAC_ADDR = uvm_reg_field::type_id::create("MAC_ADDR",,get_full_name());
-      this.MAC_ADDR.configure(this, 48, 0, "RW", 0, 48'h0, 0, 1);
+        this.MAC_ADDR.configure(this, 48, 0, "RW", 0, 48'h0, 0, 1);
     endfunction: build
 
     `uvm_object_utils(reg_reg_MAC_ADDR)
@@ -430,7 +430,7 @@ class reg_reg_HASH0 extends uvm_reg;
 
     virtual function void build();
         this.HASH0 = uvm_reg_field::type_id::create("HASH0",,get_full_name());
-      this.HASH0.configure(this, 32, 0, "RW", 0, 32'h0, 0, 1);
+        this.HASH0.configure(this, 32, 0, "RW", 0, 32'h0, 0, 1);
     endfunction: build
 
     `uvm_object_utils(reg_reg_HASH0)
@@ -447,7 +447,7 @@ class reg_reg_HASH1 extends uvm_reg;
 
     virtual function void build();
         this.HASH1 = uvm_reg_field::type_id::create("HASH1",,get_full_name());
-      this.HASH1.configure(this, 32, 0, "RW", 0, 32'h0, 0, 1);
+        this.HASH1.configure(this, 32, 0, "RW", 0, 32'h0, 0, 1);
     endfunction: build
 
     `uvm_object_utils(reg_reg_HASH1)
@@ -465,9 +465,9 @@ class reg_reg_TXCTRL extends uvm_reg;
 
     virtual function void build();
         this.TXPAUSEREQ = uvm_reg_field::type_id::create("TXPAUSEREQ",,get_full_name());
-      this.TXPAUSEREQ.configure(this, 1, 16, "RW", 0, 1'h0, 0, 1);
+        this.TXPAUSEREQ.configure(this, 1, 16, "RW", 0, 1'h0, 0, 1);
         this.TXPAUSETV = uvm_reg_field::type_id::create("TXPAUSETV",,get_full_name());
-      this.TXPAUSETV.configure(this, 16, 0, "RW", 0, 16'h0, 0, 1);
+        this.TXPAUSETV.configure(this, 16, 0, "RW", 0, 16'h0, 0, 1);
     endfunction: build
 
     `uvm_object_utils(reg_reg_TXCTRL)
@@ -477,7 +477,7 @@ endclass : reg_reg_TXCTRL
 
 class reg_mem_BD extends uvm_mem;
     function new(string name = "BD");
-      super.new(name, `UVM_REG_ADDR_WIDTH'h80, 64, "RW", UVM_NO_COVERAGE);
+        super.new(name, `UVM_REG_ADDR_WIDTH'h80, 64, "RW", UVM_NO_COVERAGE);
     endfunction: new
 
     virtual function void build();
@@ -574,14 +574,9 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MODER.configure(this, null, "");
 
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.MODER_2.DataOut", 16, 1);
-            t_.push_back_path("ethreg1.MODER_1.DataOut", 8, 8);
-            t_.push_back_path("ethreg1.MODER_0.DataOut", 0, 8);
-         	
-            this.MODER.add_hdl_path_object(t_);
-        end
+        this.MODER.add_hdl_slice("ethreg1.MODER_2.DataOut", 16, 1,,1);
+        this.MODER.add_hdl_slice("ethreg1.MODER_1.DataOut", 8, 8);
+        this.MODER.add_hdl_slice("ethreg1.MODER_0.DataOut", 0, 8);
 `else
         this.MODER.add_hdl_path('{
                 '{"ethreg1.MODER_2.DataOut", 16, 1},
@@ -613,18 +608,13 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.INT_SOURCE = reg_reg_oc_ethernet_INT_SOURCE::type_id::create("INT_SOURCE",,get_full_name());
         this.INT_SOURCE.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.irq_rxc", 6, 1);
-            t_.push_back_path("ethreg1.irq_txc", 5, 1);
-            t_.push_back_path("ethreg1.irq_busy", 4, 1);
-            t_.push_back_path("ethreg1.irq_rxe", 3, 1);
-            t_.push_back_path("ethreg1.irq_rxb", 2, 1);
-            t_.push_back_path("ethreg1.irq_txe", 1, 1);
-            t_.push_back_path("ethreg1.irq_txb", 0, 1);
-            
-            this.INT_SOURCE.add_hdl_path_object(t_);
-        end
+        this.INT_SOURCE.add_hdl_slice("ethreg1.irq_rxc", 6, 1,,1);
+        this.INT_SOURCE.add_hdl_slice("ethreg1.irq_txc", 5, 1);
+        this.INT_SOURCE.add_hdl_slice("ethreg1.irq_busy", 4, 1);
+        this.INT_SOURCE.add_hdl_slice("ethreg1.irq_rxe", 3, 1);
+        this.INT_SOURCE.add_hdl_slice("ethreg1.irq_rxb", 2, 1);
+        this.INT_SOURCE.add_hdl_slice("ethreg1.irq_txe", 1, 1);
+        this.INT_SOURCE.add_hdl_slice("ethreg1.irq_txb", 0, 1);
 `else
          	
         this.INT_SOURCE.add_hdl_path('{
@@ -650,11 +640,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.INT_MASK = reg_reg_oc_ethernet_INT_MASK::type_id::create("INT_MASK",,get_full_name());
         this.INT_MASK.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.INT_MASK_0.DataOut", -1, -1);
-            this.INT_MASK.add_hdl_path_object(t_);
-        end
+        this.INT_MASK.add_hdl_slice("ethreg1.INT_MASK_0.DataOut", -1, -1,,1);
 `else
         this.INT_MASK.add_hdl_path('{
                 '{"ethreg1.INT_MASK_0.DataOut", -1, -1}
@@ -673,11 +659,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.IPGT = reg_reg_IPGT::type_id::create("IPGT",,get_full_name());
         this.IPGT.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.IPGT_0.DataOut", -1, -1);
-            this.IPGT.add_hdl_path_object(t_);
-        end
+        this.IPGT.add_hdl_slice("ethreg1.IPGT_0.DataOut", -1, -1,,1);
 `else
         this.IPGT.add_hdl_path('{
                 '{"ethreg1.IPGT_0.DataOut", -1, -1}
@@ -689,11 +671,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.IPGR1 = reg_reg_IPGR1::type_id::create("IPGR1",,get_full_name());
         this.IPGR1.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.IPGR1_0.DataOut", -1, -1);
-            this.IPGR1.add_hdl_path_object(t_);
-        end
+        this.IPGR1.add_hdl_slice("ethreg1.IPGR1_0.DataOut", -1, -1,,1);
 `else
         this.IPGR1.add_hdl_path('{
                 '{"ethreg1.IPGR1_0.DataOut", -1, -1}
@@ -705,11 +683,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.IPGR2 = reg_reg_IPGR2::type_id::create("IPGR2",,get_full_name());
         this.IPGR2.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.IPGR2_0.DataOut", -1, -1);
-            this.IPGR2.add_hdl_path_object(t_);
-        end
+        this.IPGR2.add_hdl_slice("ethreg1.IPGR2_0.DataOut", -1, -1,,1);
 `else
         this.IPGR2.add_hdl_path('{
                 '{"ethreg1.IPGR2_0.DataOut", -1, -1}
@@ -721,14 +695,10 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.PACKETLEN = reg_reg_PACKETLEN::type_id::create("PACKETLEN",,get_full_name());
         this.PACKETLEN.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.PACKETLEN_3.DataOut", 24, 8);
-            t_.push_back_path("ethreg1.PACKETLEN_2.DataOut", 16, 8);
-            t_.push_back_path("ethreg1.PACKETLEN_1.DataOut", 8, 8);
-            t_.push_back_path("ethreg1.PACKETLEN_0.DataOut", 0, 8);
-            this.PACKETLEN.add_hdl_path_object(t_);
-        end
+        this.PACKETLEN.add_hdl_slice("ethreg1.PACKETLEN_3.DataOut", 24, 8,,1);
+        this.PACKETLEN.add_hdl_slice("ethreg1.PACKETLEN_2.DataOut", 16, 8);
+        this.PACKETLEN.add_hdl_slice("ethreg1.PACKETLEN_1.DataOut", 8, 8);
+        this.PACKETLEN.add_hdl_slice("ethreg1.PACKETLEN_0.DataOut", 0, 8);
 `else
         this.PACKETLEN.add_hdl_path('{
                 '{"ethreg1.PACKETLEN_3.DataOut", 24, 8},
@@ -751,11 +721,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.TX_BD_NUM = reg_reg_TX_BD_NUM::type_id::create("TX_BD_NUM",,get_full_name());
         this.TX_BD_NUM.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.TX_BD_NUM_0.DataOut", -1, -1);
-            this.TX_BD_NUM.add_hdl_path_object(t_);
-        end
+        this.TX_BD_NUM.add_hdl_slice("ethreg1.TX_BD_NUM_0.DataOut", -1, -1,,1);
 `else
         this.TX_BD_NUM.add_hdl_path('{
                 '{"ethreg1.TX_BD_NUM_0.DataOut", -1, -1}
@@ -767,11 +733,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.CTRLMODER = reg_reg_CTRLMODER::type_id::create("CTRLMODER",,get_full_name());
         this.CTRLMODER.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.CTRLMODER_0.DataOut", -1, -1);
-            this.CTRLMODER.add_hdl_path_object(t_);
-        end
+        this.CTRLMODER.add_hdl_slice("ethreg1.CTRLMODER_0.DataOut", -1, -1,,1);
 `else
         this.CTRLMODER.add_hdl_path('{
                 '{"ethreg1.CTRLMODER_0.DataOut", -1, -1}
@@ -786,12 +748,8 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MIIMODER = reg_reg_MIIMODER::type_id::create("MIIMODER",,get_full_name());
         this.MIIMODER.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.MIIMODER_1.DataOut", 8, 1);
-            t_.push_back_path("ethreg1.MIIMODER_0.DataOut", 0, 8);
-            this.MIIMODER.add_hdl_path_object(t_);
-        end
+        this.MIIMODER.add_hdl_slice("ethreg1.MIIMODER_1.DataOut", 8, 1,,1);
+        this.MIIMODER.add_hdl_slice("ethreg1.MIIMODER_0.DataOut", 0, 8);
 `else
         this.MIIMODER.add_hdl_path('{
                 '{"ethreg1.MIIMODER_1.DataOut", 8, 1},
@@ -806,13 +764,9 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MIICOMMAND = reg_reg_MIICOMMAND::type_id::create("MIICOMMAND",,get_full_name());
         this.MIICOMMAND.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.MIICOMMAND2.DataOut", 2, 1);
-            t_.push_back_path("ethreg1.MIICOMMAND1.DataOut", 1, 1);
-            t_.push_back_path("ethreg1.MIICOMMAND0.DataOut", 0, 1);
-            this.MIICOMMAND.add_hdl_path_object(t_);
-        end
+        this.MIICOMMAND.add_hdl_slice("ethreg1.MIICOMMAND2.DataOut", 2, 1,,1);
+        this.MIICOMMAND.add_hdl_slice("ethreg1.MIICOMMAND1.DataOut", 1, 1);
+        this.MIICOMMAND.add_hdl_slice("ethreg1.MIICOMMAND0.DataOut", 0, 1);
 `else
         this.MIICOMMAND.add_hdl_path('{
                 '{"ethreg1.MIICOMMAND2.DataOut", 2, 1},
@@ -835,12 +789,8 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MIITX_DATA = reg_reg_MIITX_DATA::type_id::create("MIITX_DATA",,get_full_name());
         this.MIITX_DATA.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.MIITX_DATA_1.DataOut", 8, 8);
-            t_.push_back_path("ethreg1.MIITX_DATA_0.DataOut", 0, 8);
-            this.MIITX_DATA.add_hdl_path_object(t_);
-        end
+        this.MIITX_DATA.add_hdl_slice("ethreg1.MIITX_DATA_1.DataOut", 8, 8,,1);
+        this.MIITX_DATA.add_hdl_slice("ethreg1.MIITX_DATA_0.DataOut", 0, 8);
 `else
         this.MIITX_DATA.add_hdl_path('{
                 '{"ethreg1.MIITX_DATA_1.DataOut", 8, 8},
@@ -854,11 +804,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MIIRX_DATA = reg_reg_MIIRX_DATA::type_id::create("MIIRX_DATA",,get_full_name());
         this.MIIRX_DATA.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.MIIRX_DATA.DataOut", -1, -1);
-            this.MIIRX_DATA.add_hdl_path_object(t_);
-        end
+        this.MIIRX_DATA.add_hdl_slice("ethreg1.MIIRX_DATA.DataOut", -1, -1,,1);
 `else
         this.MIIRX_DATA.add_hdl_path('{
                 '{"ethreg1.MIIRX_DATA.DataOut", -1, -1}
@@ -871,13 +817,9 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MIISTATUS = reg_reg_MIISTATUS::type_id::create("MIISTATUS",,get_full_name());
         this.MIISTATUS.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.NValid_stat", 2, 1);
-            t_.push_back_path("ethreg1.Busy_stat", 1, 1);
-            t_.push_back_path("ethreg1.LinkFail", 0, 1);
-            this.MIISTATUS.add_hdl_path_object(t_);
-        end
+        this.MIISTATUS.add_hdl_slice("ethreg1.NValid_stat", 2, 1,,1);
+        this.MIISTATUS.add_hdl_slice("ethreg1.Busy_stat", 1, 1);
+        this.MIISTATUS.add_hdl_slice("ethreg1.LinkFail", 0, 1);
 `else
         this.MIISTATUS.add_hdl_path('{
                 '{"ethreg1.NValid_stat", 2, 1},
@@ -894,16 +836,12 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MAC_ADDR = reg_reg_MAC_ADDR::type_id::create("MAC_ADDR",,get_full_name());
         this.MAC_ADDR.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.MAC_ADDR1_1.DataOut", 40, 8);
-            t_.push_back_path("ethreg1.MAC_ADDR1_0.DataOut", 32, 8);
-            t_.push_back_path("ethreg1.MAC_ADDR0_3.DataOut", 24, 8);
-            t_.push_back_path("ethreg1.MAC_ADDR0_2.DataOut", 16, 8);
-            t_.push_back_path("ethreg1.MAC_ADDR0_1.DataOut", 8, 8);
-            t_.push_back_path("ethreg1.MAC_ADDR0_0.DataOut", 0, 8);
-            this.MAC_ADDR.add_hdl_path_object(t_);
-        end
+        this.MAC_ADDR.add_hdl_slice("ethreg1.MAC_ADDR1_1.DataOut", 40, 8,,1);
+        this.MAC_ADDR.add_hdl_slice("ethreg1.MAC_ADDR1_0.DataOut", 32, 8);
+        this.MAC_ADDR.add_hdl_slice("ethreg1.MAC_ADDR0_3.DataOut", 24, 8);
+        this.MAC_ADDR.add_hdl_slice("ethreg1.MAC_ADDR0_2.DataOut", 16, 8);
+        this.MAC_ADDR.add_hdl_slice("ethreg1.MAC_ADDR0_1.DataOut", 8, 8);
+        this.MAC_ADDR.add_hdl_slice("ethreg1.MAC_ADDR0_0.DataOut", 0, 8);
 `else
         this.MAC_ADDR.add_hdl_path('{
                 '{"ethreg1.MAC_ADDR1_1.DataOut", 40, 8},
@@ -920,14 +858,10 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.HASH0 = reg_reg_HASH0::type_id::create("HASH0",,get_full_name());
         this.HASH0.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.RXHASH0_3.DataOut", 24, 8);
-            t_.push_back_path("ethreg1.RXHASH0_2.DataOut", 16, 8);
-            t_.push_back_path("ethreg1.RXHASH0_1.DataOut", 8, 8);
-            t_.push_back_path("ethreg1.RXHASH0_0.DataOut", 0, 8);
-            this.HASH0.add_hdl_path_object(t_);
-        end
+        this.HASH0.add_hdl_slice("ethreg1.RXHASH0_3.DataOut", 24, 8,,1);
+        this.HASH0.add_hdl_slice("ethreg1.RXHASH0_2.DataOut", 16, 8);
+        this.HASH0.add_hdl_slice("ethreg1.RXHASH0_1.DataOut", 8, 8);
+        this.HASH0.add_hdl_slice("ethreg1.RXHASH0_0.DataOut", 0, 8);
 `else
         this.HASH0.add_hdl_path('{
                 '{"ethreg1.RXHASH0_3.DataOut", 24, 8},
@@ -942,14 +876,10 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.HASH1 = reg_reg_HASH1::type_id::create("HASH1",,get_full_name());
         this.HASH1.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.RXHASH1_3.DataOut", 24, 8);
-            t_.push_back_path("ethreg1.RXHASH1_2.DataOut", 16, 8);
-            t_.push_back_path("ethreg1.RXHASH1_1.DataOut", 8, 8);
-            t_.push_back_path("ethreg1.RXHASH1_0.DataOut", 0, 8);
-            this.HASH1.add_hdl_path_object(t_);
-        end
+        this.HASH1.add_hdl_slice("ethreg1.RXHASH1_3.DataOut", 24, 8,,1);
+        this.HASH1.add_hdl_slice("ethreg1.RXHASH1_2.DataOut", 16, 8);
+        this.HASH1.add_hdl_slice("ethreg1.RXHASH1_1.DataOut", 8, 8);
+        this.HASH1.add_hdl_slice("ethreg1.RXHASH1_0.DataOut", 0, 8);
 `else
         this.HASH1.add_hdl_path('{
                 '{"ethreg1.RXHASH1_3.DataOut", 24, 8},
@@ -964,13 +894,9 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.TXCTRL = reg_reg_TXCTRL::type_id::create("TXCTRL",,get_full_name());
         this.TXCTRL.configure(this, null, "");
 `ifdef USE_PATH_OBJECT
-        begin
-            uvm_hdl_path_concat t_ = new();
-            t_.push_back_path("ethreg1.TXCTRL_2.DataOut", 16, 1);
-            t_.push_back_path("ethreg1.TXCTRL_1.DataOut", 8, 8);
-            t_.push_back_path("ethreg1.TXCTRL_0.DataOut", 0, 8);
-            this.TXCTRL.add_hdl_path_object(t_);
-        end
+        this.TXCTRL.add_hdl_slice("ethreg1.TXCTRL_2.DataOut", 16, 1,,1);
+        this.TXCTRL.add_hdl_slice("ethreg1.TXCTRL_1.DataOut", 8, 8);
+        this.TXCTRL.add_hdl_slice("ethreg1.TXCTRL_0.DataOut", 0, 8);
 `else
         this.TXCTRL.add_hdl_path('{
                 '{"ethreg1.TXCTRL_2.DataOut", 16, 1},
