@@ -49,6 +49,7 @@ typedef class uvm_reg_field_cbs;
 //-----------------------------------------------------------------
 class uvm_reg_field extends uvm_object;
 
+   local static int m_max_size = 0;
    local static bit m_policy_names[string];
    local string access;
    local bit m_volatile;
@@ -159,6 +160,12 @@ class uvm_reg_field extends uvm_object;
    //
    extern virtual function int unsigned get_n_bits();
 
+   //
+   // FUNCTION: get_max_size
+   // Returns the width, in number of bits, of the largest field. 
+   //
+   extern static function int unsigned get_max_size();
+
 
    //
    // FUNCTION: set_access
@@ -255,8 +262,6 @@ class uvm_reg_field extends uvm_object;
 
    //
    // FUNCTION: set_volatility
-   // Modify the volatility descriptor of the field
-   //
    // Modify the volatility of the field to the specified one.
    //
    // It is important to remember that modifying the volatility of a field
@@ -269,12 +274,12 @@ class uvm_reg_field extends uvm_object;
    // FUNCTION: is_volatile
    // Indicates if the field value is volatile
    //
-   // If TRUE, the value of the register may change between consecutive
-   // read accesses.
+   // If TRUE, the value of the register is not predictable because it
+   // may change between consecutive accesses.
    // This typically indicates a field whose value is updated by the DUT.
    // The nature or cause of the change is not specified.
    // If FALSE, the value of the register is not modified between
-   // consecutive read accesses.
+   // consecutive accesses.
    //
    extern virtual function bit   is_volatile();
 
@@ -891,16 +896,12 @@ function void uvm_reg_field::configure(uvm_reg        parent,
       `uvm_error("RegModel", $psprintf("Field \"%s\" cannot have 0 bits", this.get_full_name()));
       size = 1;
    end
-   if (size > `UVM_REG_DATA_WIDTH) begin
-      `uvm_error("RegModel", $psprintf("Field \"%s\" cannot have more than %0d bits",
-                                  this.get_full_name(), `UVM_REG_DATA_WIDTH))
-      size = `UVM_REG_DATA_WIDTH;
-   end
-
+   if (size > m_max_size) m_max_size = size;
+   
    this.size                    = size;
    this.access                  = access.toupper();
    if (!m_policy_names.exists(this.access)) begin
-      `uvm_error("RegMem", $psprintf("Access policy \"%s\" for field \"%s\" is not defined", this.access, get_full_name()));
+      `uvm_error("RegModel", $psprintf("Access policy \"%s\" for field \"%s\" is not defined", this.access, get_full_name()));
       this.access = "RW";
    end
    this.m_volatile              = volatile;
@@ -948,6 +949,13 @@ endfunction: get_lsb_pos_in_register
 function int unsigned uvm_reg_field::get_n_bits();
    return this.size;
 endfunction: get_n_bits
+
+
+// get_max_size
+
+function int unsigned uvm_reg_field::get_max_size();
+   return m_max_size;
+endfunction: get_max_size
 
 
 // is_known_access
@@ -1029,7 +1037,7 @@ function string uvm_reg_field::set_access(string mode);
    set_access = this.access;
    this.access = mode.toupper();
    if (!m_policy_names.exists(this.access)) begin
-      `uvm_error("RegMem", $psprintf("Access policy \"%s\" is not a defined field access policy", this.access));
+      `uvm_error("RegModel", $psprintf("Access policy \"%s\" is not a defined field access policy", this.access));
       this.access = set_access;
    end
 endfunction: set_access
@@ -1526,7 +1534,7 @@ task uvm_reg_field::write(output uvm_status_e  status,
 `ifdef UVM_REG_NO_INDIVIDUAL_FIELD_ACCESS
 
    if (bad_side_effect) begin
-      `uvm_warning("RegMem", $psprintf("Writing field \"%s\" will cause unintended side effects in adjoining Write-to-Clear or Write-to-Set fields in the same register", this.get_full_name()));
+      `uvm_warning("RegModel", $psprintf("Writing field \"%s\" will cause unintended side effects in adjoining Write-to-Clear or Write-to-Set fields in the same register", this.get_full_name()));
    end
    this.parent.XwriteX(status, tmp, path, map, parent, prior);
 
@@ -1710,14 +1718,14 @@ task uvm_reg_field::write(output uvm_status_e  status,
                `uvm_warning("RegModel", $psprintf("Field \"%s\" is not individually accessible. Writing complete register instead.", this.get_name()));
    	    end		
             if (bad_side_effect) begin
-               `uvm_warning("RegMem", $psprintf("Writing field \"%s\" will cause unintended side effects in adjoining Write-to-Clear or Write-to-Set fields in the same register", this.get_full_name()));
+               `uvm_warning("RegModel", $psprintf("Writing field \"%s\" will cause unintended side effects in adjoining Write-to-Clear or Write-to-Set fields in the same register", this.get_full_name()));
             end
             this.parent.XwriteX(status, tmp, path, map, parent, prior);
    	 end	
       end else begin
          `uvm_warning("RegModel", $psprintf("Individual field access not available for field \"%s\". Writing complete register instead.", this.get_name()));
          if (bad_side_effect) begin
-            `uvm_warning("RegMem", $psprintf("Writing field \"%s\" will cause unintended side effects in adjoining Write-to-Clear or Write-to-Set fields in the same register", this.get_full_name()));
+            `uvm_warning("RegModel", $psprintf("Writing field \"%s\" will cause unintended side effects in adjoining Write-to-Clear or Write-to-Set fields in the same register", this.get_full_name()));
          end
          this.parent.XwriteX(status, tmp, path, map, parent, prior);
       end	
@@ -1727,7 +1735,7 @@ task uvm_reg_field::write(output uvm_status_e  status,
    if(path == UVM_BACKDOOR) begin
       `uvm_warning("RegModel", $psprintf("Individual field access not available with BACKDOOR access for field \"%s\". Writing complete register instead.", this.get_name()));
       if (bad_side_effect) begin
-         `uvm_warning("RegMem", $psprintf("Writing field \"%s\" will cause unintended side effects in adjoining Write-to-Clear or Write-to-Set fields in the same register", this.get_full_name()));
+         `uvm_warning("RegModel", $psprintf("Writing field \"%s\" will cause unintended side effects in adjoining Write-to-Clear or Write-to-Set fields in the same register", this.get_full_name()));
       end
       this.parent.XwriteX(status, tmp, path, map, parent, prior);
    end
@@ -2005,7 +2013,7 @@ task uvm_reg_field::read(output uvm_status_e  status,
              mode == "W1CRS" ||
              mode == "W0SRC" ||
              mode == "W0CRS") begin
-            `uvm_warning("RegMem", $psprintf("Reading field \"%s\" will cause unintended side effects in adjoining Read-to-Clear or Read-to-Set fields in the same register", this.get_full_name()));
+            `uvm_warning("RegModel", $psprintf("Reading field \"%s\" will cause unintended side effects in adjoining Read-to-Clear or Read-to-Set fields in the same register", this.get_full_name()));
          end
       end
    end

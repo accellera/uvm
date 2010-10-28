@@ -65,6 +65,18 @@ virtual class uvm_reg_block extends uvm_object;
    // Group: Initialization
    //----------------------
 
+   // Function: check_data_width
+   // Check that the specified data width (in bits) is less than
+   // or equal to the value of `UVM_REG_DATA_WIDTH
+   //
+   // This method is designed to be called by a static initializer
+   //
+   //| class my_blk extends uvm_reg_block;
+   //|   local static bit m_data_width = check_data_width(356);
+   //|   ...
+   //| endclass
+   extern protected static function bit check_data_width(int unsigned width);
+
 
    //------------------------------------------------------------------------
    // FUNCTION: new
@@ -813,6 +825,17 @@ endclass: uvm_reg_block
 // Initialization
 //---------------
 
+// check_data_width
+
+function bit uvm_reg_block::check_data_width(int unsigned width);
+   if (width <= $bits(uvm_reg_data_t)) return 1;
+
+   `uvm_fatal("RegModel", $psprintf("Register model requires that UVM_REG_DATA_WIDTH be defined as %0d or greater. Currently defined as %0d", width, `UVM_REG_DATA_WIDTH))
+
+   return 0;
+endfunction
+
+
 // new
 
 function uvm_reg_block::new(string name="", int has_cover=UVM_NO_COVERAGE);
@@ -936,8 +959,21 @@ function void uvm_reg_block::lock_model();
    foreach (blks[blk])
      blk.lock_model();
 
-   if (this.parent == null)
+   if (this.parent == null) begin
+      int max_size = uvm_reg::get_max_size();
+
+      if (uvm_reg_field::get_max_size() > max_size)
+         max_size = uvm_reg_field::get_max_size();
+
+      if (uvm_mem::get_max_size() > max_size)
+         max_size = uvm_mem::get_max_size();
+
+      if (max_size > `UVM_REG_DATA_WIDTH) begin
+         `uvm_fatal("RegModel", $psprintf("Register model requires that UVM_REG_DATA_WIDTH be defined as %0d or greater. Currently defined as %0d", max_size, `UVM_REG_DATA_WIDTH))
+      end
+
       Xinit_address_mapsX();
+   end
 
 endfunction: lock_model
 

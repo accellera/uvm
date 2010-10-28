@@ -70,6 +70,7 @@ class uvm_mem extends uvm_object;
    local uvm_reg_block   parent;
    /*local*/ bit maps[uvm_reg_map];
 
+   local static int unsigned  m_max_size = 0;
    /*local*/ int unsigned  n_bits;
    local string        constraint_block_names[];
 
@@ -251,6 +252,12 @@ class uvm_mem extends uvm_object;
    // Returns the width, in number of bits, of each memory location
    //
    extern virtual function int unsigned    get_n_bits();
+
+   //
+   // FUNCTION: get_max_size
+   // Returns the maximum width, in number of bits, of all memories
+   //
+   extern static function int unsigned    get_max_size();
 
    //
    // FUNCTION: get_virtual_registers
@@ -1191,12 +1198,8 @@ function uvm_mem::new (string           name,
       `uvm_error("RegModel", {"Memory '",get_full_name(),"' cannot have 0 bits"})
       n_bits = 1;
    end
-   if (n_bits > `UVM_REG_DATA_WIDTH) begin
-      `uvm_error("RegModel",
-          $psprintf("Memory \"%s\" cannot have more than %0d bits (%0d)",
-                   this.get_full_name(), `UVM_REG_DATA_WIDTH, n_bits))
-      n_bits = `UVM_REG_DATA_WIDTH;
-   end
+   if (n_bits > m_max_size) m_max_size = n_bits;
+
    this.size      = size;
    this.n_bits    = n_bits;
    this.backdoor  = null;
@@ -1600,6 +1603,13 @@ endfunction: get_size
 function int unsigned uvm_mem::get_n_bits();
    get_n_bits = this.n_bits;
 endfunction: get_n_bits
+
+
+// get_max_size
+
+function int unsigned uvm_mem::get_max_size();
+   return m_max_size;
+endfunction: get_max_size
 
 
 // get_n_bytes

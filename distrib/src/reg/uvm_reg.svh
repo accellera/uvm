@@ -50,6 +50,7 @@ virtual class uvm_reg extends uvm_object;
    local bit               locked;
    local uvm_reg_block     parent;
    local uvm_reg_file   m_regfile_parent;
+   local static int unsigned m_max_size = 0;
    /*local*/ int unsigned  n_bits;
    local int unsigned      n_used_bits;
 
@@ -225,6 +226,12 @@ virtual class uvm_reg extends uvm_object;
    // Returns the width, in bytes, of this register. 
    //
    extern virtual function int unsigned    get_n_bytes     ();
+
+   // Function: get_max_size
+   // Returns the maximum width, in bits, of all register. 
+   //
+   extern static function int unsigned    get_max_size    ();
+
 
    //-----------------------------------------------------------------
    // Function: get_fields
@@ -1203,10 +1210,8 @@ function uvm_reg::new(string name="", int unsigned n_bits, int has_cover);
       `uvm_error("RegModel", $psprintf("Register \"%s\" cannot have 0 bits", this.get_name()));
       n_bits = 1;
    end
-   if (n_bits > `UVM_REG_DATA_WIDTH) begin
-      `uvm_error("RegModel", $psprintf("Register \"%s\" cannot have more than %0d bits (%0d)", this.get_name(), `UVM_REG_DATA_WIDTH, n_bits));
-      n_bits = `UVM_REG_DATA_WIDTH;
-   end
+   if (n_bits > m_max_size) m_max_size = n_bits;
+
    this.n_bits = n_bits;
    this.n_used_bits = 0;
    this.has_cover = has_cover;
@@ -1768,6 +1773,13 @@ endfunction
 function int unsigned uvm_reg::get_n_bytes();
    get_n_bytes = ((this.n_bits-1) / 8) + 1;
 endfunction: get_n_bytes
+
+
+// get_max_size
+
+function int unsigned uvm_reg::get_max_size();
+   return m_max_size;
+endfunction: get_max_size
 
 
 // get_fields
