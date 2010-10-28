@@ -255,7 +255,7 @@ sub replace_trivial{
     $t =~ s/M_UVM_FIELD_DATA.*/$&   \/\/ $opt_marker NOTE OVM_FIELD_DATA is a private macro to the ovm library and deprecated, in legacy code it might be replaced with M_UVM_FIELD_DATA\n/g;  
 
     # FIX map raise|drop objection argument mix
-    $t =~ s/\.(drop|raise)_objection\((.*),(.*)\)\s*;/.$1\_objection($2,,$3);/;
+    $t =~ s/\.(drop|raise)_objection\(([^,;]+),([^,;]+)\)\s*;/.$1\_objection($2,,$3);/;
 
     # FIX ovm_factory::print_all_overrides() -> factory.print()
     $t =~ s/ovm_factory::print_all_overrides\(\)/factory.print()/g;
