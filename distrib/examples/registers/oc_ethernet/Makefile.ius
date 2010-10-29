@@ -25,7 +25,7 @@ include ../../Makefile.ius
 
 all: uvm_reg_mem_built_in_seq
 
-IRUN=$(IUS) -define SINGLE_RAM_VARIABLE -define RAM128x64 -define USE_PATH_OBJECT \
+IRUN=$(IUS) -define SINGLE_RAM_VARIABLE -define RAM128x64 -define USE_SLICE_API \
 	-incdir ../common/wishbone -incdir ../common/oc_ethernet_rtl \
 	-F ../common/oc_ethernet_rtl/rtl_file_list.lst \
 	tb_top.sv tb_env.sv
