@@ -39,7 +39,8 @@ ovm_urm_report_server::set_global_verbosity(OVM_DEBUG-1);
 ovm_urm_report_server::set_global_debug_style(style);
 
 
-something.ovm_enable_print_topology = 1;
+	something.ovm_enable_print_topology = 1;
+	ovm_enable_print_topology = 1;	
 
 class bla extends ovm_reporter;
 endclass
@@ -47,7 +48,15 @@ endclass
 class phu extends configure_ph;
 endclass
 
-foo.raise_objection(this);
+// swap a and b for uvm
+foo.raise_objection(devthis,a,b); 
+ // should be devthis,,54
+foo.raise_objection(devthis,54);
+// no change
+foo.raise_objection(this); 
+// this,,4
+foo.raise_objection(this,4);
+ // this,,4 
 foo.raise_objection(this,4);
 
 class bla extends ovm_sequence_item;

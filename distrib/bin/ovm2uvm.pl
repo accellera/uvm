@@ -97,10 +97,6 @@ foreach my $file (@all_files) {
     }
 }
 
-foreach $f (keys %content) { 
-    $content{$f}=replace_trivial($content{$f},$f);
-}
-
 write_back_files(%content);
 
 # determines if the file is one of requested mime types
@@ -162,7 +158,7 @@ sub write_back_files {
 		$target=$opt_top_dir . $mod_nfile;
 	    }
 	    
-	    warn("target file $target is not writeable and in the way") if !(-w $target);
+	    warn("target file $target is not writeable and in the way") if (-e $target && !(-w $target));
 	    #NoteMessage("moving [$source] to [$target]");
 	    move($source,$target);
 	}
@@ -189,9 +185,6 @@ sub replace_trivial{
 
     # FIX instancehandle.global_stop_request() -> (global) global_stop_request()
     $t =~ s/(\S+\.)global_stop_request/global_stop_request/g;
-
-    # FIX ovm_print_topology() -> uvm_top.print()
-    $t =~ s/ovm_print_topology/uvm_top.print/g;
    
     # FIX take remove arg2,arg3 from constructor ovm_sequence::new(,arg2,arg3)
     while($t=~ /extends\s+ovm_sequence\s*;.*?endclass/s) {
@@ -236,7 +229,10 @@ sub replace_trivial{
 
     # FIX+MARKER .ovm_enable_print_topology -> .enable_print_topology
     $t =~ s/\S+\.[ou]vm_enable_print_topology(.*)/uvm_top.enable_print_topology$1 \/\/ $opt_marker NOTE mapped from $& \n/g;
-    $t =~ s/[ou]vm_enable_print_topology(.*)/uvm_top.enable_print_topology$1 \/\/ $opt_marker NOTE mapped from $& \n/g;
+    $t =~ s/(?<!\.)[ou]vm_enable_print_topology(.*)/uvm_top.enable_print_topology$1 \/\/ $opt_marker NOTE mapped from $& \n/g;
+
+    # FIX ovm_print_topology() -> uvm_top.print()
+    $t =~ s/ovm_print_topology/uvm_top.print/g;
 
     # MARKER configure_ph -> end_of_elaboration
     $t =~ s/configure_ph.*/$& \/\/ $opt_marker FIXME potential usage of configure_ph, this should be mapped to end_of_elaboration_ph\n/g;
@@ -255,7 +251,11 @@ sub replace_trivial{
     $t =~ s/M_UVM_FIELD_DATA.*/$&   \/\/ $opt_marker NOTE OVM_FIELD_DATA is a private macro to the ovm library and deprecated, in legacy code it might be replaced with M_UVM_FIELD_DATA\n/g;  
 
     # FIX map raise|drop objection argument mix
-    $t =~ s/\.(drop|raise)_objection\(([^,;]+),([^,;]+)\)\s*;/.$1\_objection($2,,$3);/;
+    # first swap with 3 args
+    $t =~ s/\.(drop|raise)_objection\(([^,;]+),([^,;]+),([^,;]+)\)\s*;/.$1\_objection($2,$4,$3);/g;    
+
+    # then swap those with two args
+    $t =~ s/\.(drop|raise)_objection\(([^,;]+),([^,;]+)\)\s*;/.$1\_objection($2,,$3);/g;
 
     # FIX ovm_factory::print_all_overrides() -> factory.print()
     $t =~ s/ovm_factory::print_all_overrides\(\)/factory.print()/g;
