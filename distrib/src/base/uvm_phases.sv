@@ -201,7 +201,7 @@ virtual class uvm_phase;
 
   function void set_insertion_phase(uvm_phase phase);
     if(m_insertion_phase != null) begin
-      `uvm_warning("INSPHS", "Cannot set the insertion phase for a phase that has already been set")
+      uvm_report_warning("INSPHS", "Cannot set the insertion phase for a phase that has already been set");
       return;
     end
     m_insertion_phase = phase;
@@ -235,23 +235,23 @@ virtual class uvm_phase;
     //their own phase controller in which case, aliasing different names is probably
     //not desireable.
     if(alias_nm != get_name()) begin
-      `uvm_warning("PHSALS", {
+      uvm_report_warning("PHSALS", {
         "Phases ", get_name(), " and ", alias_nm, 
-        " are being aliased, but have different phase names"})
+        " are being aliased, but have different phase names"});
     end
 
     //verify that the aliased phase has the same semantics as the
     //master phase.
     if(m_is_task != the_alias.is_task()) begin
-      `uvm_fatal("PHSALS", {
+      uvm_report_fatal("PHSALS", {
         "Phases ", get_name(), " and ", alias_nm, 
-        " are being aliased, but one is a function phase and one is a task phase"})
+        " are being aliased, but one is a function phase and one is a task phase"}, UVM_NONE);
       return;
     end
     if(m_is_top_down != the_alias.is_top_down()) begin
-      `uvm_fatal("PHSALS", {
+      uvm_report_fatal("PHSALS", {
         "Phases ", get_name(), " and ", alias_nm, 
-        " are being aliased, but one is top-down and the other is bottom-up"})
+        " are being aliased, but one is top-down and the other is bottom-up"}, UVM_NONE);
       return;
     end
     if(exist_ph != null)
@@ -263,10 +263,10 @@ virtual class uvm_phase;
     else
        insrt_nm = "the topmost phase";
     if(insrt_nm != alias_insrt_nm) begin
-      `uvm_fatal("PHSALS", {
+      uvm_report_fatal("PHSALS", {
         "Phases ", get_name(), " and ", alias_nm, 
         " are being aliased, they have different insertion phase, \"",
-        insrt_nm, "\" versus \"", alias_insrt_nm, "\""}) 
+        insrt_nm, "\" versus \"", alias_insrt_nm, "\""}, UVM_NONE); 
       return;
     end
 

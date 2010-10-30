@@ -55,7 +55,7 @@ endfunction
 // --------
 
 function uvm_object_wrapper uvm_object::get_type();
-  `uvm_error("NOTYPID", "get_type not implemented in derived class.")
+  uvm_report_error("NOTYPID", "get_type not implemented in derived class.", UVM_NONE);
   return null;
 endfunction
 
@@ -172,7 +172,7 @@ function void uvm_object::print_field_match(string fnc, string match);
     scratch = {
       fnc, ": Matched string ", match, " to field ", m_sc.get_full_scope_arg()
     };
-    `uvm_info("STRMTC", scratch, UVM_LOW)
+    uvm_report_info("STRMTC", scratch, UVM_LOW);
   end
 endfunction
 
@@ -190,7 +190,7 @@ function void  uvm_object::set_int_local (string      field_name,
   m_field_automation(null, UVM_SETINT, field_name);
 
   if(m_sc.warning && !this.m_sc.status) begin
-    `uvm_error("NOMTC", $psprintf("did not find a match for field %s", field_name))
+    uvm_report_error("NOMTC", $psprintf("did not find a match for field %s", field_name),UVM_NONE);
   end
 
 endfunction
@@ -219,7 +219,7 @@ function void  uvm_object::set_object_local (string     field_name,
   m_field_automation(null, UVM_SETOBJ, field_name);
 
   if(m_sc.warning && !this.m_sc.status) begin
-    `uvm_error("NOMTC", $psprintf("did not find a match for field %s", field_name))
+    uvm_report_error("NOMTC", $psprintf("did not find a match for field %s", field_name), UVM_NONE);
   end
 
 endfunction
@@ -237,7 +237,7 @@ function void  uvm_object::set_string_local (string field_name,
   m_field_automation(null, UVM_SETSTR, field_name);
 
   if(m_sc.warning && !this.m_sc.status) begin
-    `uvm_error("NOMTC", $psprintf("did not find a match for field %s (@%0d)", field_name, this.get_inst_id()))
+    uvm_report_error("NOMTC", $psprintf("did not find a match for field %s (@%0d)", field_name, this.get_inst_id()), UVM_NONE);
   end
 endfunction
 
@@ -276,8 +276,8 @@ function int uvm_object::m_do_set (string match,
       begin
         if(matched) begin
           if(flag &UVM_READONLY) begin
-            `uvm_warning("RDONLY", $psprintf("Readonly argument match %s is ignored", 
-               m_sc.get_full_scope_arg()))
+            uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored", 
+               m_sc.get_full_scope_arg()), UVM_NONE);
             return 0;
           end
           print_field_match("set_int()", match);
@@ -289,9 +289,9 @@ function int uvm_object::m_do_set (string match,
     default:
       begin
         if(matched) begin
-          `uvm_warning("MTCTYP", $psprintf("matched integral field %s, %s", 
+          uvm_report_warning("MTCTYP", $psprintf("matched integral field %s, %s", 
           m_sc.get_full_scope_arg(),
-          "but expected a non-integral type"))
+          "but expected a non-integral type"), UVM_NONE);
         end
       end
   endcase
@@ -333,8 +333,8 @@ function int uvm_object::m_do_set_string(string match,
       begin
         if(matched) begin
           if(flag &UVM_READONLY) begin
-            `uvm_warning("RDONLY", $psprintf("Readonly argument match %s is ignored", 
-               m_sc.get_full_scope_arg()))
+            uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored", 
+               m_sc.get_full_scope_arg()), UVM_NONE);
             return 0;
           end
           print_field_match("set_string()", match);
@@ -346,9 +346,9 @@ function int uvm_object::m_do_set_string(string match,
     default:
       begin
         if(matched) begin
-          `uvm_warning("MTCTYP", $psprintf("matched string field %s, %s", 
+          uvm_report_warning("MTCTYP", $psprintf("matched string field %s, %s", 
           m_sc.get_full_scope_arg(),
-          "but expected a non-string type"))
+          "but expected a non-string type"), UVM_NONE);
         end
       end
   endcase
@@ -396,8 +396,8 @@ function int uvm_object::m_do_set_object (string match,
       begin
         if(matched) begin
           if(flag &UVM_READONLY) begin
-            `uvm_warning("RDONLY", $psprintf("Readonly argument match %s is ignored", 
-               m_sc.get_full_scope_arg()))
+            uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored", 
+               m_sc.get_full_scope_arg()), UVM_NONE);
             return 0;
           end
           print_field_match("set_object()", match);
@@ -418,9 +418,9 @@ function int uvm_object::m_do_set_object (string match,
   endcase
 
   if(matched) begin
-    `uvm_warning("MTCTYP", $psprintf("matched object field %s, %s", 
+    uvm_report_warning("MTCTYP", $psprintf("matched object field %s, %s", 
           m_sc.get_full_scope_arg(),
-          "but expected a non-object type"))
+          "but expected a non-object type"), UVM_NONE);
   end
   if(lhsobj==null) return 0;
   lhsobj.m_field_automation(null, what, match);
@@ -438,7 +438,7 @@ function uvm_object uvm_object::clone();
   if(tmp == null) begin
 //    uvm_report_warning("CRFLD", $psprintf("The create method failed for %s,  object will be copied using shallow copy", get_name()));
 //    tmp = new this;
-    `uvm_warning("CRFLD", $psprintf("The create method failed for %s,  object cannot be cloned", get_name()))
+    uvm_report_warning("CRFLD", $psprintf("The create method failed for %s,  object cannot be cloned", get_name()), UVM_NONE);
   end
   else begin
     tmp.copy(this);
@@ -460,7 +460,7 @@ function void uvm_object::copy (uvm_object rhs);
   end
 
   if(rhs==null) begin
-    `uvm_warning("NULLCP", "A null object was supplied to copy; copy is ignored")
+    uvm_report_warning("NULLCP", "A null object was supplied to copy; copy is ignored", UVM_NONE);
     return;
   end
 
@@ -526,9 +526,9 @@ function bit  uvm_object::compare (uvm_object rhs,
     end
     else begin
       comparer.print_msg_object(this, rhs);
-      `uvm_info("MISCMP",
+      uvm_report_info("MISCMP",
            $psprintf("%0d Miscompare(s) for object %s@%0d vs. @%0d", 
-           comparer.result, get_name(), this.get_inst_id(), rhs.get_inst_id()), uvm_auto_options_object.comparer.verbosity)
+           comparer.result, get_name(), this.get_inst_id(), rhs.get_inst_id()), uvm_auto_options_object.comparer.verbosity);
       done = 1;
     end
   end
@@ -585,11 +585,10 @@ endfunction
 // Checks to see if a new field is a duplicate of one already in this object
 // ------------
 
-function void uvm_object::m_do_field_check(string field, uvm_apply_t t_t = UVM_NONE_T);
-  if(m_field_array.exists(field)) begin
-    `uvm_error("MLTFLD", $psprintf("Field %s is defined multiple times in type %s",
-       field, get_type_name()))
-    return;
+function void uvm_object::m_do_field_check(string field);
+  if(m_field_array.exists(field) && (m_field_array[field] == 1)) begin
+    uvm_report_error("MLTFLD", $psprintf("Field %s is defined multiple times in type %s",
+       field, get_type_name()), UVM_NONE);
   end
   m_field_array[field] = t_t;
 endfunction
@@ -723,7 +722,7 @@ function void uvm_object::m_unpack_post (uvm_packer packer);
   packer.scope.up(this);
 
   if(packer.get_packed_size() != provided_size) begin
-    `uvm_warning("BDUNPK", $psprintf("Unpack operation unsuccessful: unpacked %0d bits from a total of %0d bits", packer.get_packed_size(), provided_size))
+    uvm_report_warning("BDUNPK", $psprintf("Unpack operation unsuccessful: unpacked %0d bits from a total of %0d bits", packer.get_packed_size(), provided_size), UVM_NONE);
   end
 
 endfunction
@@ -876,8 +875,8 @@ function int uvm_object::m_do_data (string arg,
   if (what > UVM_END_DATA_EXTRA)
      return 0;
   if(bits > UVM_STREAMBITS) begin
-    `uvm_error("FLDTNC",$psprintf("%s is %0d bits; maximum field size is %0d, truncating",
-                 arg, bits, UVM_STREAMBITS))
+    uvm_report_error("FLDTNC",$psprintf("%s is %0d bits; maximum field size is %0d, truncating",
+                 arg, bits, UVM_STREAMBITS), UVM_NONE);
   end
   case (what)
     UVM_COPY:

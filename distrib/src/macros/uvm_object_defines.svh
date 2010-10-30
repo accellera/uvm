@@ -1433,7 +1433,7 @@
      if (contxt == "" && parent != null) \
        contxt = parent.get_full_name(); \
      if(!$cast(create,f.create_component_by_type(get(),contxt,name,parent))) \
-        `uvm_fatal_context("FACTFL", {"Factory did not return a component of type, ",type_name}, uvm_top) \
+        `uvm_report_fatal("FACTFL", {"Factory did not return a component of type, ",type_name}, uvm_top.) \
    endfunction
 
 

@@ -80,9 +80,9 @@ protected bit      response_queue_error_report_disabled = 0;
               bit call_pre_post = 1);
 
     if ((this_priority < 1) |  (^this_priority === 1'bx)) begin
-      `uvm_fatal("SEQPRI", $psprintf("Sequence %s start has illegal priority: %0d",
+      uvm_report_fatal("SEQPRI", $psprintf("Sequence %s start has illegal priority: %0d",
                                            get_full_name(),
-                                           this_priority))
+                                           this_priority), UVM_NONE);
       end
 
     // Check that the response queue is empty from earlier runs
@@ -191,10 +191,10 @@ protected bit      response_queue_error_report_disabled = 0;
     REQ m_request;
     
     if (m_sequencer == null) begin
-      `uvm_fatal("SSENDREQ", "Null m_sequencer reference")
+      uvm_report_fatal("SSENDREQ", "Null m_sequencer reference", UVM_NONE);
     end
     if (!$cast(m_request, request)) begin
-      `uvm_fatal("SSENDREQ", "Failure to cast uvm_sequence_item to request")
+      uvm_report_fatal("SSENDREQ", "Failure to cast uvm_sequence_item to request", UVM_NONE);
     end
     m_sequencer.send_request(this, m_request, rerandomize);
   endfunction // void
@@ -213,7 +213,7 @@ protected bit      response_queue_error_report_disabled = 0;
 
   function REQ get_current_item();
     if (!$cast(param_sequencer, m_sequencer))
-      `uvm_fatal("SGTCURR", "Failure to cast m_sequencer to the parameterized sequencer")
+      uvm_report_fatal("SGTCURR", "Failure to cast m_sequencer to the parameterized sequencer", UVM_NONE);
     return (param_sequencer.get_current_item());
   endfunction // REQ
 
@@ -328,7 +328,7 @@ protected bit      response_queue_error_report_disabled = 0;
     RSP response;
 
     if (!$cast(response, response_item)) begin
-      `uvm_fatal("PUTRSP", "Failure to cast response in put_response")
+      uvm_report_fatal("PUTRSP", "Failure to cast response in put_response", UVM_NONE);
     end
     if ((response_queue_depth == -1) ||
         (response_queue.size() < response_queue_depth)) begin
@@ -336,7 +336,7 @@ protected bit      response_queue_error_report_disabled = 0;
       return;
     end
     if (response_queue_error_report_disabled == 0) begin
-      `uvm_error(get_full_name(), "Response queue overflow, response was dropped")
+      uvm_report_error(get_full_name(), "Response queue overflow, response was dropped", UVM_NONE);
     end
   endfunction // put_response
 

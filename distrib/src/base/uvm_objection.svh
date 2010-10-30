@@ -147,7 +147,7 @@ class uvm_objection extends uvm_report_object;
 
       uvm_report_info("OBJTN_TRC", 
         $sformatf("Object %0s %0s %0d objection(s), count=%0d  total=%0d%s",
-           obj.get_full_name()==""?"uvm_top":obj.get_full_name(), action, count, _count, _total,desc), UVM_NONE, `uvm_file, `uvm_line);
+           obj.get_full_name()==""?"uvm_top":obj.get_full_name(), action, count, _count, _total,desc), UVM_NONE);
     else begin
       int cpath = 0, last_dot=0;
       string sname = source_obj.get_full_name(), nm = obj.get_full_name();
@@ -161,10 +161,10 @@ class uvm_objection extends uvm_report_object;
       end 
 
       if(last_dot) sname = sname.substr(last_dot+1, sname.len());
-      `uvm_info("OBJTN_TRC",
+      uvm_report_info("OBJTN_TRC",
         $sformatf("Object %0s %0s %0d objection(s) from its total (%s from source object %s), count=%0d  total=%0d%s",
            obj.get_full_name()==""?"uvm_top":obj.get_full_name(), action=="raised"?"added":"subtracted",
-            count, action, sname, _count, _total, desc), UVM_NONE)
+            count, action, sname, _count, _total, desc), UVM_NONE);
     end
   endfunction
 
@@ -397,14 +397,14 @@ class uvm_objection extends uvm_report_object;
       obj = top;
 
     if (!m_total_count.exists(obj) || (count > m_total_count[obj])) begin
-      `uvm_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
-        "\" attempted to drop objection count below zero."})
+      uvm_report_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
+        "\" attempted to drop objection count below zero."});
       return;
     end
     if ((obj == source_obj) && 
         (!m_source_count.exists(obj) || (count > m_source_count[obj]))) begin
-      `uvm_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
-        "\" attempted to drop objection count below zero."})
+      uvm_report_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
+        "\" attempted to drop objection count below zero."});
       return;
     end
 
@@ -813,10 +813,10 @@ class uvm_test_done_objection extends uvm_objection;
     string nm = is_raise ? "raise_objection" : "drop_objection";
     string desc = description == "" ? "" : {" (\"", description, "\")"};
     if(! ($cast(c,obj) || $cast(s,obj))) begin
-      `uvm_error("TEST_DONE_NOHIER", {"A non-hierarchical object, '",
+      uvm_report_error("TEST_DONE_NOHIER", {"A non-hierarchical object, '",
         obj.get_full_name(), "' (", obj.get_type_name(),") was used in a call ",
         "to uvm_test_done.", nm,"(). For this objection, a sequence ",
-        "or component is required.", desc })
+        "or component is required.", desc });
     end
   endfunction
 
@@ -842,7 +842,7 @@ class uvm_test_done_objection extends uvm_objection;
       end
       else
         msg = {msg, "Previous call to global_stop_request() will now be honored."};
-      `uvm_info("TEST_DONE", msg, UVM_LOW);
+      uvm_report_info("TEST_DONE", msg, UVM_LOW);
     end
   endtask
 
@@ -893,8 +893,8 @@ class uvm_test_done_objection extends uvm_objection;
     if (name == "")
       name = "uvm_top";
     m_forced = 1;
-    `uvm_warning("FORCE_STOP",{"Object '",name,"' called force_stop. ",
-       "Ending run phase"})
+    uvm_report_warning("FORCE_STOP",{"Object '",name,"' called force_stop. ",
+       "Ending run phase"});
     all_dropped(uvm_top, obj, "", 0);
     m_forced = 0;
   endtask

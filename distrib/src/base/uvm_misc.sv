@@ -61,7 +61,7 @@ function string uvm_instance_scope();
   while(pos && (c != ".") && (c != ":")) 
     c = uvm_instance_scope[--pos];
   if(pos == 0)
-    `uvm_error("SCPSTR", $psprintf("Illegal name %s in scope string",uvm_instance_scope))
+    uvm_report_error("SCPSTR", $psprintf("Illegal name %s in scope string",uvm_instance_scope));
   uvm_instance_scope = uvm_instance_scope.substr(0,pos);
 endfunction
 

@@ -26,12 +26,12 @@
 # Make sure the version of IUS can run these tests
 #
 $ius = `irun -version`;
-if ($ius !~ /TOOL:.*(\d+\.\d+)/) {
+if ($ius !~ /TOOL:[^\d]+(\d+\.\d+)/) {
   print STDERR "Unable to run IUS: $ius";
   exit(1);
 }
 $ius_version = $1;
-if ($ius_version !~ m/(\d?\d)\.(\d\d?)$/) {
+if ($ius_version !~ m/(\d+)\.(\d+)$/) {
    print stderr "Unknown IUS version number \"$ius_version\".\n";
    exit(1);
 }
@@ -58,7 +58,7 @@ sub ius_too_old {
 sub run_the_test {
   local($testdir, $ius_comp_opts, $ius_sim_opts, $_) = @_;
 
-  $ius = "irun -timescale 1ns/1ns +incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv $uvm_home/src/uvm_regex/uvm_regex.cc -l irun.log $ius_comp_opts $ius_sim_opts test.sv +UVM_TESTNAME=test";
+  $ius = "irun -timescale 1ns/1ns $uvm_home/src/dpi/uvm_dpi.c +incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv test.sv -l irun.log $ius_comp_opts $ius_sim_opts +UVM_TESTNAME=test";
   $ius .= " -nostdout" unless $opt_v;
 
   print "$ius\n" if $opt_v;

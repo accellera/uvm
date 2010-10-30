@@ -518,21 +518,21 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     if(cb==null) begin
        if(obj==null) nm = "(*)"; else nm = obj.get_full_name();
        if(m_base_inst.m_typename!="") tnm = m_base_inst.m_typename; else if(obj != null) tnm = obj.get_type_name(); else tnm = "uvm_object";
-       `uvm_error("CBUNREG", { "Null callback object cannot be registered with object ",
-         nm, " (", tnm, ")" })
+       uvm_report_error("CBUNREG", { "Null callback object cannot be registered with object ",
+         nm, " (", tnm, ")" }, UVM_NONE);
        return;
     end
     if(!m_base_inst.check_registration(obj,cb)) begin
        if(obj==null) nm = "(*)"; else nm = obj.get_full_name();
        if(m_base_inst.m_typename!="") tnm = m_base_inst.m_typename; else if(obj != null) tnm = obj.get_type_name(); else tnm = "uvm_object";
-       `uvm_warning("CBUNREG", { "Callback ", cb.get_name(), " cannot be registered with object ",
+       uvm_report_warning("CBUNREG", { "Callback ", cb.get_name(), " cannot be registered with object ",
          nm, " because callback type ", cb.get_type_name(),
-         " is not registered with object type ", tnm })
+         " is not registered with object type ", tnm }, UVM_NONE);
     end
     if(obj == null) begin
       if(m_cb_find(m_t_inst.m_twcb,cb) != -1) begin
         if(m_base_inst.m_typename!="") tnm = m_base_inst.m_typename; else if(obj != null) tnm = obj.get_type_name(); else tnm = "uvm_object";
-        `uvm_warning("CBPREG", { "Callback object ", cb.get_name(), " is already registered with type ", tnm })
+        uvm_report_warning("CBPREG", { "Callback object ", cb.get_name(), " is already registered with type ", tnm }, UVM_NONE);
       end
       else begin
         `uvm_cb_trace_noobj(cb,$sformatf("Add (%s) typewide callback %0s for type %s",
@@ -563,8 +563,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
       end
       //check if already exists in the queue
       if(m_cb_find(q,cb) != -1) begin
-        `uvm_warning("CBPREG", { "Callback object ", cb.get_name(), " is already registered",
-          " with object ", obj.get_full_name() })
+        uvm_report_warning("CBPREG", { "Callback object ", cb.get_name(), " is already registered",
+          " with object ", obj.get_full_name() }, UVM_NONE);
       end
       else begin
         if(ordering == UVM_APPEND) begin
@@ -590,16 +590,16 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     uvm_component cq[$];
     T t;
     if(cb==null) begin
-       `uvm_error("CBUNREG", { "Null callback object cannot be registered with object(s) ",
-         name })
+       uvm_report_error("CBUNREG", { "Null callback object cannot be registered with object(s) ",
+         name }, UVM_NONE);
        return;
     end
     `uvm_cb_trace_noobj(cb,$sformatf("Add (%s) callback %0s by name to object(s) %0s ",
                     ordering.name(), cb.get_name(), name))
     void'(uvm_top.find_all(name,cq,root));
     if(cq.size() == 0) begin
-      `uvm_warning("CBNOMTC", { "add_by_name failed to find any components matching the name ",
-        name, ", callback ", cb.get_name(), " will not be registered." })
+      uvm_report_warning("CBNOMTC", { "add_by_name failed to find any components matching the name ",
+        name, ", callback ", cb.get_name(), " will not be registered." }, UVM_NONE);
     end
     foreach(cq[i]) begin
       if($cast(t,cq[i])) begin 
@@ -645,8 +645,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     if(!found) begin
       string nm;
       if(obj==null) nm = "(*)"; else nm = obj.get_full_name();
-      `uvm_warning("CBUNREG", { "Callback ", cb.get_name(), " cannot be removed from object ",
-        nm, " because it is not currently registered to that object." })
+      uvm_report_warning("CBUNREG", { "Callback ", cb.get_name(), " cannot be removed from object ",
+        nm, " because it is not currently registered to that object." }, UVM_NONE);
     end
   endfunction
 
@@ -667,8 +667,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
                     cb.get_name(), name))
     void'(uvm_top.find_all(name,cq,root));
     if(cq.size() == 0) begin
-      `uvm_warning("CBNOMTC", { "delete_by_name failed to find any components matching the name ",
-        name, ", callback ", cb.get_name(), " will not be unregistered." })
+      uvm_report_warning("CBNOMTC", { "delete_by_name failed to find any components matching the name ",
+        name, ", callback ", cb.get_name(), " will not be unregistered." }, UVM_NONE);
     end
     foreach(cq[i]) begin
       if($cast(t,cq[i])) begin 
@@ -801,9 +801,9 @@ class uvm_derived_callbacks#(type T=uvm_object, type ST=uvm_object, type CB=uvm_
 
     if(u_inst.m_super_type != null) begin
       if(u_inst.m_super_type == m_s_typeid) return 1;
-      `uvm_warning("CBTPREG", { "Type ", tname, " is already registered to super type ", 
+      uvm_report_warning("CBTPREG", { "Type ", tname, " is already registered to super type ", 
         this_super_type::m_t_inst.m_typename, ". Ignoring attempt to register to super type ",
-        sname})
+        sname}, UVM_NONE); 
       return 1;
     end
     if(this_super_type::m_t_inst.m_typename == "")

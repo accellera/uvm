@@ -59,17 +59,17 @@ function void uvm_factory::register (uvm_object_wrapper obj);
   end
   else begin
     if (m_type_names.exists(obj.get_type_name()))
-      `uvm_warning("TPRGED", {"Type name '",obj.get_type_name(),
+      uvm_report_warning("TPRGED", {"Type name '",obj.get_type_name(),
         "' already registered with factory. No string-based lookup ",
-        "support for multiple types with the same type name."})
+        "support for multiple types with the same type name."}, UVM_NONE);
     else 
       m_type_names[obj.get_type_name()] = obj;
   end
 
   if (m_types.exists(obj)) begin
     if (obj.get_type_name() != "" && obj.get_type_name() != "<unknown>")
-      `uvm_warning("TPRGED", {"Object type '",obj.get_type_name(),
-                         "' already registered with factory. "})
+      uvm_report_warning("TPRGED", {"Object type '",obj.get_type_name(),
+                         "' already registered with factory. "}, UVM_NONE);
   end
   else begin
     m_types[obj] = 1;
@@ -105,12 +105,12 @@ function void uvm_factory::set_type_override_by_type (uvm_object_wrapper origina
   // check that old and new are not the same
   if (original_type == override_type) begin
     if (original_type.get_type_name() == "" || original_type.get_type_name() == "<unknown>")
-      `uvm_warning("TYPDUP", {"Original and override type ",
-                                    "arguments are identical"})
+      uvm_report_warning("TYPDUP", {"Original and override type ",
+                                    "arguments are identical"}, UVM_NONE);
     else
-      `uvm_warning("TYPDUP", {"Original and override type ",
+      uvm_report_warning("TYPDUP", {"Original and override type ",
                                     "arguments are identical: ",
-                                    original_type.get_type_name()})
+                                    original_type.get_type_name()}, UVM_NONE);
     return;
   end
 
@@ -134,12 +134,12 @@ function void uvm_factory::set_type_override_by_type (uvm_object_wrapper origina
              m_type_overrides[index].ovrd_type_name,"'"};
       if (!replace) begin
         msg = {msg, ".  Set 'replace' argument to replace the existing entry."};
-        `uvm_info("TPREGD", msg, UVM_MEDIUM)
+        uvm_report_info("TPREGD", msg, UVM_MEDIUM);
         return;
       end
       msg = {msg, ".  Replacing with override to produce type '",
                   override_type.get_type_name(),"'."};
-      `uvm_info("TPREGR", msg, UVM_MEDIUM)
+      uvm_report_info("TPREGR", msg, UVM_MEDIUM);
       replaced = 1;
       m_type_overrides[index].orig_type = original_type; 
       m_type_overrides[index].orig_type_name = original_type.get_type_name(); 
@@ -181,30 +181,30 @@ function void uvm_factory::set_type_override_by_name (string original_type_name,
 
   // check that type is registered with the factory
   if (override_type == null) begin
-      `uvm_error("TYPNTF", {"Cannot register override for original type '",
+      uvm_report_error("TYPNTF", {"Cannot register override for original type '",
       original_type_name,"' because the override type '",
-      override_type_name, "' is not registered with the factory."})
+      override_type_name, "' is not registered with the factory."}, UVM_NONE);
     return;
   end
 
   // check that old and new are not the same
   if (original_type_name == override_type_name) begin
-      `uvm_warning("TYPDUP", {"Requested and actual type name ",
-      " arguments are identical: ",original_type_name,". Ignoring this override."})
+      uvm_report_warning("TYPDUP", {"Requested and actual type name ",
+      " arguments are identical: ",original_type_name,". Ignoring this override."}, UVM_NONE);
     return;
   end
 
   foreach (m_type_overrides[index]) begin
     if (m_type_overrides[index].orig_type_name == original_type_name) begin
       if (!replace) begin
-        `uvm_info("TPREGD", {"Original type '",original_type_name,
+        uvm_report_info("TPREGD", {"Original type '",original_type_name,
           "' already registered to produce '",m_type_overrides[index].ovrd_type_name,
-          "'.  Set 'replace' argument to replace the existing entry."}, UVM_MEDIUM)
+          "'.  Set 'replace' argument to replace the existing entry."}, UVM_MEDIUM);
         return;
       end
-      `uvm_info("TPREGR", {"Original object type '",original_type_name,
+      uvm_report_info("TPREGR", {"Original object type '",original_type_name,
         "' already registered to produce '",m_type_overrides[index].ovrd_type_name,
-        "'.  Replacing with override to produce type '",override_type_name,"'."}, UVM_MEDIUM)
+        "'.  Replacing with override to produce type '",override_type_name,"'."}, UVM_MEDIUM);
       replaced = 1;
       m_type_overrides[index].ovrd_type = override_type; 
       m_type_overrides[index].ovrd_type_name = override_type_name; 
@@ -248,10 +248,10 @@ function bit uvm_factory::check_inst_override_exists (uvm_object_wrapper origina
         override.orig_type == original_type &&
         override.ovrd_type == override_type &&
         override.orig_type_name == original_type.get_type_name()) begin
-    `uvm_info("DUPOVRD",{"Instance override for '",
+    uvm_report_info("DUPOVRD",{"Instance override for '",
        original_type.get_type_name(),"' already exists: override type '",
        override_type.get_type_name(),"' with full_inst_path '",
-       full_inst_path,"'"},UVM_HIGH)
+       full_inst_path,"'"},UVM_HIGH);
       return 1;
     end
   end
@@ -310,9 +310,9 @@ function void uvm_factory::set_inst_override_by_name (string original_type_name,
 
   // check that type is registered with the factory
   if (override_type == null) begin
-    `uvm_error("TYPNTF", {"Cannot register instance override with type name '",
+    uvm_report_error("TYPNTF", {"Cannot register instance override with type name '",
     original_type_name,"' and instance path '",full_inst_path,"' because the type it's supposed ",
-    "to produce, '",override_type_name,"', is not registered with the factory."})
+    "to produce, '",override_type_name,"', is not registered with the factory."}, UVM_NONE);
     return;
   end
 
@@ -380,8 +380,8 @@ function uvm_object uvm_factory::create_object_by_name (string requested_type_na
   // if no override exists, try to use requested_type_name directly
   if (wrapper==null) begin
     if(!m_type_names.exists(requested_type_name)) begin
-      `uvm_warning("BDTYP",{"Cannot create an object of type '",
-      requested_type_name,"' because it is not registered with the factory."})
+      uvm_report_warning("BDTYP",{"Cannot create an object of type '",
+      requested_type_name,"' because it is not registered with the factory."}, UVM_NONE);
       return null;
     end
     wrapper = m_type_names[requested_type_name];
@@ -441,8 +441,8 @@ function uvm_component uvm_factory::create_component_by_name (string requested_t
   // if no override exists, try to use requested_type_name directly
   if (wrapper == null) begin
     if(!m_type_names.exists(requested_type_name)) begin 
-      `uvm_warning("BDTYP",{"Cannot create a component of type '",
-      requested_type_name,"' because it is not registered with the factory."})
+      uvm_report_warning("BDTYP",{"Cannot create a component of type '",
+      requested_type_name,"' because it is not registered with the factory."}, UVM_NONE);
       return null;
     end
     wrapper = m_type_names[requested_type_name];
@@ -487,8 +487,8 @@ function uvm_object_wrapper uvm_factory::find_by_name(string type_name);
   if (m_type_names.exists(type_name))
     return m_type_names[type_name];
 
-  `uvm_warning("UnknownTypeName", {"find_by_name: Type name '",type_name,
-      "' not registered with the factory."})
+  uvm_report_warning("UnknownTypeName", {"find_by_name: Type name '",type_name,
+      "' not registered with the factory."}, UVM_NONE);
   
 endfunction
 
@@ -509,9 +509,9 @@ function uvm_object_wrapper uvm_factory::find_override_by_name (string requested
 /***
   if(rtype == null) begin
     if(requested_type_name != "") begin
-      `uvm_warning("TYPNTF", {"Requested type name ",
+      uvm_report_warning("TYPNTF", {"Requested type name ",
          requested_type_name, " is not registered with the factory. The instance override to ",
-         full_inst_path, " is ignored"})
+         full_inst_path, " is ignored"}, UVM_NONE);
     end
     m_lookup_strs[requested_type_name] = 1;
     return null;
@@ -596,7 +596,7 @@ function uvm_object_wrapper uvm_factory::find_override_by_type(uvm_object_wrappe
   foreach (m_override_info[index]) begin
     if ( //index != m_override_info.size()-1 &&
        m_override_info[index].orig_type == requested_type) begin
-      `uvm_error("OVRDLOOP", "Recursive loop detected while finding override.")
+      uvm_report_error("OVRDLOOP", "Recursive loop detected while finding override.", UVM_NONE);
       if (!m_debug_pass)
         debug_create_by_type (requested_type, full_inst_path);
 
@@ -837,8 +837,8 @@ function void  uvm_factory::m_debug_create (string requested_type_name,
   if (requested_type == null) begin
     if (!m_type_names.exists(requested_type_name) &&
       !m_lookup_strs.exists(requested_type_name)) begin
-      `uvm_warning("Factory Warning", {"The factory does not recognize '",
-        requested_type_name,"' as a registered type."})
+      uvm_report_warning("Factory Warning", {"The factory does not recognize '",
+        requested_type_name,"' as a registered type."}, UVM_NONE);
       return;
     end
     m_debug_pass = 1;
