@@ -28,6 +28,7 @@ typedef class uvm_resource_base; // forward reference
 // these types by prefixing their usage with uvm_resource_types::.  E.g.
 //
 //|  uvm_resource_t::rsrc_q_t queue;
+//
 //----------------------------------------------------------------------
 class uvm_resource_types;
 
@@ -37,6 +38,9 @@ class uvm_resource_types;
 
    // general purpose queue of resourcex
   typedef uvm_queue#(uvm_resource_base) rsrc_q_t;
+
+  // enum for setting resource search priority
+  typedef enum { PRI_HIGH, PRI_LOW } priority_e;
 
   // access record for resources.  A set of these is stored for each
   // resource by accessing object.  It's updated for each read/write.
@@ -93,7 +97,8 @@ virtual class uvm_resource_base extends uvm_object;
   protected bit modified;
   protected bit read_only;
 
-   uvm_resource_types::access_t access[string];
+  int unsigned precedence;
+  uvm_resource_types::access_t access[string];
 
 
   // function: new
@@ -305,12 +310,28 @@ virtual class uvm_resource_base extends uvm_object;
 
   // function: match_scope
   //
-  // pUsing the regular expression facility, determine if this resource
+  // Using the regular expression facility, determine if this resource
   // is visible in a scope.  Return one if it is, zero otherwise.
   function bit match_scope(string s);
     int err = uvm_re_match(scope, s);
     return (err == 0);
   endfunction
+
+  //--------------------------------------------------------------------
+  // group: Priority
+  //
+  // Functions for manipulating the search priority of resources.  The
+  // function definitions here are pure virtual and are implemented in
+  // derived classes.  The definitons serve as a priority management
+  // interface.
+  //--------------------------------------------------------------------
+
+  // function: set priority
+  //
+  // Change the search priority of the resource based on the value of
+  // the priority enum argument.
+
+  pure virtual function void set_priority (uvm_resource_types::priority_e pri);
 
   //--------------------------------------------------------------------
   // group: Utility Functions
@@ -516,6 +537,10 @@ class uvm_resource_pool;
     return uvm_spell_chkr#(uvm_resource_types::rsrc_q_t)::check(rtab, s);
   endfunction
 
+  //--------------------------------------------------------------------
+  // group: Set
+  //--------------------------------------------------------------------
+
   // function: set
   //
   // Add a new resource to the resource pool.  The resource is inserted
@@ -534,7 +559,8 @@ class uvm_resource_pool;
   // set_override(), set_name_override(), or set_type_override()
   // functions.
 
-  function void set (uvm_resource_base rsrc, uvm_resource_types::override_t override = 2'b00);
+  function void set (uvm_resource_base rsrc,
+                     uvm_resource_types::override_t override = 2'b00);
 
     uvm_resource_types::rsrc_q_t rq;
     string name;
@@ -653,6 +679,97 @@ class uvm_resource_pool;
     end
   endfunction
 
+  //--------------------------------------------------------------------
+  // group: Lookup
+  //
+  // This group of functions is for finding resources in the resource database.  
+  //
+  // ~lookup_name()~ and ~lookup type()~ locate the set of resources that
+  // matches the name or type (respectively) and is visible in the
+  // current scoe.  These functions return a queue of resources.
+  //
+  // ~get_highest_precedence()~ traverese a queue of resources and
+  // returns the one with the highest precedence -- i.e. the one whose
+  // precedence member has the highest value.
+  //
+  // ~get_by_name()~ and ~get_by_type()~ use lookup_name and lookup_type
+  // (respectively) and get_highest_precedence to find the resource with
+  // the highest priority that matches the other search criteria.
+  //
+  //--------------------------------------------------------------------
+
+  // function: lookup_name
+
+  // Lookup resources by name.  Returns a queue of resources that match
+  // the name and scope.  If no resources match the queue is returned
+  // empty.
+
+  function uvm_resource_types::rsrc_q_t lookup_name(string name,
+                                                    string scope = "",
+                                                    bit rpterr = 1);
+    uvm_resource_types::rsrc_q_t rq;
+    uvm_resource_types::rsrc_q_t q = new();
+    uvm_resource_base rsrc;
+    uvm_resource_base r;
+
+    `uvm_clear_queue(q);
+
+    // resources with empty names are anonymous and do not exist in the name map
+    if(name == "")
+      return q;
+
+    // Does an entry in the name map exist with the specified name?
+    // If not, then we're done
+    if((rpterr && !spell_check(name)) || (!rpterr && !rtab.exists(name))) begin
+      return q;
+    end
+
+    rsrc = null;
+    rq = rtab[name];
+    for(int i=0; i<rq.size(); ++i) begin 
+      r = rq.get(i);
+      if(r.match_scope(scope))
+        q.push_back(r);
+    end
+
+    return q;
+
+  endfunction
+
+  // function: get_highest_precedence
+  //
+  // Traverse a queue of resources and return the one with the highest
+  // precedence.  In the case where there exists more than one resource
+  // with the highest precedence value, the first one that has that
+  // precedence will be the one that is returned.
+
+  function uvm_resource_base get_highest_precedence(ref uvm_resource_types::rsrc_q_t q);
+
+    uvm_resource_base rsrc;
+    uvm_resource_base r;
+    int unsigned i;
+    int unsigned prec;
+
+    if(q.size() == 0)
+      return null;
+
+    // get the first resrouce from the queue
+    rsrc = q.get(0);
+    prec = rsrc.precedence;
+
+    // start searching from the second resource
+    for(int i = 1; i < q.size(); ++i) begin
+      r = q.get(i);
+      if(r.precedence > prec) begin
+        rsrc = r;
+        prec = r.precedence;
+      end
+    end
+
+    return rsrc;
+
+  endfunction
+
   // function: get_by_name
   //
   // Lookup a resource by name and scope.  Whether the get succeeds
@@ -663,54 +780,51 @@ class uvm_resource_pool;
 
   function uvm_resource_base get_by_name(string name, string scope = "", bit rpterr = 1);
 
-    uvm_resource_types::rsrc_q_t rq;
-    uvm_resource_types::rsrc_q_t matchq=new;
+    uvm_resource_types::rsrc_q_t q;
     uvm_resource_base rsrc;
-    uvm_resource_base r;
-    int unsigned i;
-    string msg;
 
-    // resources with empty names are anonymous and do not exist in the name map
-    if(name == "")
-      return null;
+    q = lookup_name(name, scope, rpterr);
 
-    // Does an entry in the name map exist with the specified name?
-    // If not, then we're done
-    if((rpterr && !spell_check(name)) || (!rpterr && !rtab.exists(name))) begin
+    if(q.size() == 0) begin
       push_get_record(name, scope, null);
       return null;
     end
 
-    // we search through the queue for the first resource that matches the scope
-    rsrc = null;
-    `uvm_clear_queue(matchq);
-    rq = rtab[name];
-    for(int i=0; i<rq.size(); ++i) begin 
-      r = rq.get(i);
-      if(r.match_scope(scope)) begin
-        matchq.push_back(r);
-      end
-    end
-
-    if(matchq.size() == 0) begin
-      push_get_record(name, scope, null);
-      return null;
-    end
-
-    if(rpterr && matchq.size() > 1) begin
-      $sformat(msg, "There are multiple resources with name %s that are visible in scope %s.  The first one is the one that was used. The matching resources are:",
-               name, scope);
-      `uvm_warning("DUPRSRC", msg);
-      for(int i=0; i<matchq.size(); ++i) begin 
-        r = matchq.get(i);
-        $display("    %s in scope %s", r.get_name(), r.get_scope());
-      end
-    end
-
-    rsrc = matchq.get(0);
+    rsrc = get_highest_precedence(q);
     push_get_record(name, scope, rsrc);
     return rsrc;
     
+  endfunction
+
+  // function: lookup_type
+  //
+  // Lookup resources by type. Return a queue of resources that match
+  // the type handle and scope.  If no resources match then the returned
+  // queue is empty.
+
+  function uvm_resource_types::rsrc_q_t lookup_type(uvm_resource_base type_handle,
+                                                    string scope = "");
+
+    uvm_resource_types::rsrc_q_t q = new();
+    uvm_resource_types::rsrc_q_t rq;
+    uvm_resource_base r;
+    int unsigned i;
+
+    `uvm_clear_queue(q);
+
+    if(type_handle == null || !ttab.exists(type_handle)) begin
+      return q;
+    end
+
+    rq = ttab[type_handle];
+    for(int i = 0; i < rq.size(); ++i) begin 
+      r = rq.get(i);
+      if(r.match_scope(scope))
+        q.push_back(r);
+    end
+
+    return q;
+
   endfunction
 
   // function: get_by_type
@@ -722,29 +836,160 @@ class uvm_resource_pool;
   function uvm_resource_base get_by_type(uvm_resource_base type_handle,
                                          string scope = "");
 
-    uvm_resource_types::rsrc_q_t rq;
+    uvm_resource_types::rsrc_q_t q;
     uvm_resource_base rsrc;
-    uvm_resource_base r;
-    int unsigned i;
 
-    if(type_handle == null || !ttab.exists(type_handle)) begin
+    q = lookup_type(type_handle, scope);
+
+    if(q.size() == 0) begin
       push_get_record("<type>", scope, null);
       return null;
     end
 
-    rsrc = null;
-    rq = ttab[type_handle];
-    for(int i=0; i<rq.size(); ++i) begin 
-      r = rq.get(i);
-      if(r.match_scope(scope)) begin
-        rsrc = r;
-        break;
-      end
-    end
-
+    rsrc = q.get(0);
     push_get_record("<type>", scope, rsrc);
     return rsrc;
     
+  endfunction
+
+  //--------------------------------------------------------------------
+  // group: Set Priority
+  //
+  // Functions for altering the search priority of resources.  Resources
+  // are stored in queues in the type and name maps.  When retrieving
+  // resoures, either by type or by name, the resource queue is search
+  // from front to back.  The first one that matches the search criteria
+  // is the one that is returned.  The set_priority functions let you
+  // change the order in which resources are searched.  For any
+  // particular resource, you can set its priority to HIGH, in which
+  // case the resource is moved to the front of the queue, or to LOW in
+  // which case the resource is moved to the back of the queue.
+  //--------------------------------------------------------------------
+
+  // function- set_priority_queue
+  //
+  // This function handles the mechanics of moving a resource to either
+  // the front or back of the queue.
+
+  local function void set_priority_queue(uvm_resource_base rsrc,
+                                         ref uvm_resource_types::rsrc_q_t q,
+                                         uvm_resource_types::priority_e pri);
+
+    uvm_resource_base r;
+    int unsigned i;
+
+    string msg;
+    string name = rsrc.get_name();
+
+    for(i = 0; i < q.size(); i++) begin
+      r = q.get(i);
+      if(r == rsrc) break;
+    end
+
+    if(r != rsrc) begin
+      $sformat(msg, "Handle for resource named %s is not in the name name; cannot change its priority", name);
+      uvm_report_error("NORSRC", msg);
+      return;
+    end
+
+    q.delete(i);
+
+    case(pri)
+      uvm_resource_types::PRI_HIGH: q.push_front(rsrc);
+      uvm_resource_types::PRI_LOW:  q.push_back(rsrc);
+    endcase
+
+  endfunction
+
+  // function: set_priority_type
+  //
+  // Change the priority of the resource based on the value of the
+  // priority enum argument.  This function changes the priority only in
+  // the type map, leavint the name map untouched.
+
+  function void set_priority_type(uvm_resource_base rsrc,
+                                  uvm_resource_types::priority_e pri);
+
+    uvm_resource_base type_handle;
+    string msg;
+    uvm_resource_types::rsrc_q_t q;
+
+    if(rsrc == null) begin
+      uvm_report_warning("NULLRASRC", "attempting to change the serach priority of a null resource");
+      return;
+    end
+
+    type_handle = rsrc.get_type_handle();
+    if(!ttab.exists(type_handle)) begin
+      $sformat(msg, "Type handle for resrouce named %s not found in type map; cannot change its search priority", rsrc.get_name());
+      uvm_report_error("RNFTYPE", msg);
+      return;
+    end
+
+    q = ttab[type_handle];
+    set_priority_queue(rsrc, q, pri);
+  endfunction
+
+  // function: set_priority_name
+  //
+  // Change the priority of the resource based on the value of the
+  // priority enum argument.  This function changes the priority only in
+  // the name map, leavint the type map untouched.
+
+  function void set_priority_name(uvm_resource_base rsrc,
+                                  uvm_resource_types::priority_e pri);
+
+    string name;
+    string msg;
+    uvm_resource_types::rsrc_q_t q;
+
+    if(rsrc == null) begin
+      uvm_report_warning("NULLRASRC", "attempting to change the serach priority of a null resource");
+      return;
+    end
+
+    name = rsrc.get_name();
+    if(!rtab.exists(name)) begin
+      $sformat(msg, "Resrouce named %s not found in name map; cannot change its search priority", name);
+      uvm_report_error("RNFNAME", msg);
+      return;
+    end
+
+    q = rtab[name];
+    set_priority_queue(rsrc, q, pri);
+
+  endfunction
+
+  // function: set_priority
+  //
+  // Change the search priority of the resource based on the value of
+  // the priority enum argument.  This function changes the priority in
+  // both the name and type maps.
+
+  function void set_priority (uvm_resource_base rsrc,
+                              uvm_resource_types::priority_e pri);
+    set_priority_type(rsrc, pri);
+    set_priority_name(rsrc, pri);
+  endfunction
+
+  // function: lookup_regex
+  function uvm_resource_types::rsrc_q_t lookup_regex(string re, scope);
+
+    uvm_resource_types::rsrc_q_t rq;
+    uvm_resource_types::rsrc_q_t result_q = new();
+    int unsigned i;
+    uvm_resource_base r;
+
+    foreach (rtab[name]) begin
+      rq = rtab[name];
+      for(int i = 0; i < rq.size(); ++i) begin
+        r = rq.get(i);
+        if(uvm_re_match(scope, r.get_name()) == 0)
+          if(r.match_scope(scope))
+            result_q.push_back(r);
+      end
+    end
+
   endfunction
 
   // function: retrieve_resources
@@ -761,16 +1006,14 @@ class uvm_resource_pool;
     uvm_resource_base r;
     int unsigned i;
     int unsigned err;
-    uvm_resource_types::rsrc_q_t result_q = new;
+    uvm_resource_types::rsrc_q_t result_q = new();
 
     foreach (rtab[name]) begin
       rq = rtab[name];
-      for(int i=0; i<rq.size(); ++i) begin
+      for(int i = 0; i < rq.size(); ++i) begin
         r = rq.get(i);
-        if(r.match_scope(scope)) begin
-          if(result_q == null) result_q = new;
+        if(r.match_scope(scope))
           result_q.push_back(r);
-        end
       end
     end
 
@@ -811,6 +1054,7 @@ class uvm_resource_pool;
     return q;
 
   endfunction
+
 
   // function: print_resources
   //
@@ -1104,6 +1348,25 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     // set the value and set the dirty bit
     val = t;
     modified = 1;
+  endfunction
+
+  //--------------------------------------------------------------------
+  // group: Priority
+  //
+  // Functions for manipulating the search priority of resources.  These
+  // implementations of the interface defined in the base class delegate
+  // to the resource pool.  You could call the resource pool directly,
+  // but that would be less convenient.
+  //--------------------------------------------------------------------
+
+  // function: set priority
+  //
+  // Change the search priority of the resource based on the value of
+  // the priority enum argument.
+
+  function void set_priority (uvm_resource_types::priority_e pri);
+    uvm_resource_pool rp = uvm_resource_pool::get();
+    rp.set_priority(this, pri);
   endfunction
 
   //--------------------------------------------------------------------

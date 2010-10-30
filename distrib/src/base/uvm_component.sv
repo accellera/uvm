@@ -1071,9 +1071,6 @@ function void uvm_component::set_config_int(string inst_name,
 
   uvm_config_int c = new(field_name, massage_scope(inst_name));
 
-  $display("full name = %s", get_full_name());
-  $display("scope \"%s\" -> \"%s\"", inst_name, massage_scope(inst_name));
-
   c.write(value, this);
   if(curr_phase != null && curr_phase.get_name() == "build")
     c.set();
