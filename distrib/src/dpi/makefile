@@ -1,5 +1,5 @@
-src = uvm_regex.cc
-lib = uvm_regex
+src = uvmdpi.cc
+lib = uvm_dpi
 
 all:
 	g++ -m32 \

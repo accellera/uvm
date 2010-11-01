@@ -97,9 +97,24 @@ virtual class uvm_resource_base extends uvm_object;
   protected bit modified;
   protected bit read_only;
 
-  int unsigned precedence;
   uvm_resource_types::access_t access[string];
 
+  // variable: precedence
+  //
+  // This variable is used to associate a precedence that a resource
+  // has with respect to other resources which match the same scope
+  // and name. Resources are set to the <default_precedence> initially,
+  // and may be set to a higher or lower precedence as desired.
+
+  int unsigned precedence;
+
+  // variable: default_precedence
+  //
+  // The default precedence for an resource that has been created.
+  // When two resources have the same precedence, the first resource
+  // found has precedence.
+  
+  static int unsigned default_precedence=1000;
 
   // function: new
   //
@@ -113,6 +128,7 @@ virtual class uvm_resource_base extends uvm_object;
     sm = new(1);
     modified = 0;
     read_only = 0;
+    precedence = default_precedence;
   endfunction
 
   // function: get_type_handle
@@ -583,7 +599,6 @@ class uvm_resource_pool;
       // If we are doing a name override then insert it in the front of
       // the queue, otherwise insert it in the back.
       if(override & uvm_resource_types::NAME_OVERRIDE) begin
-        $display ("name override");
         rq.push_front(rsrc);
       end
       else

@@ -228,8 +228,6 @@ class uvm_re_cache
     if((*temp_re)[temp_re->size()-1] != '$')
        *temp_re += '$';
 
-    cout << "massaged regex -> " << *temp_re << endl;
-
     // temp_re is a C++ string type.  However, we need to return a C
     // style char*. Here we conver the regex string to a char*.
     re = (char*)malloc(temp_re->length() + 1);

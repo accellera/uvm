@@ -22,11 +22,7 @@
 `ifndef UVM_SVH
 `define UVM_SVH
   `include "uvm_macros.svh"
-<<<<<<< HEAD
-  `include "uvm_regex/uvm_regex.svh"
-=======
   `include "dpi/uvm_dpi.svh"
->>>>>>> 9e4d43e3b5c496eb49bf61bf893b4cb5cbc905de
   `include "base/base.svh"
   `include "uvm_tlm/uvm_tlm.svh"
   `include "methodology/methodology.svh"
