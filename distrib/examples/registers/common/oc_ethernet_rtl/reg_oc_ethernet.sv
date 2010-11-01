@@ -190,30 +190,28 @@ endclass : reg_reg_IPGR2
 
 
 class reg_reg_PACKETLEN extends uvm_reg;
-    rand uvm_reg_field MINFL;
-    rand uvm_reg_field MAXFL;
+   rand uvm_reg_field MINFL;
+   rand uvm_reg_field MAXFL;
 
-    constraint MINFL_spec {
-        MINFL.value == 'h40;
-    }
-    constraint MAXFL_spec {
-        MAXFL.value == 'h600;
-    }
+   constraint MINFL_spec {
+      MINFL.value == 'h40;
+   }
+   constraint MAXFL_spec {
+      MAXFL.value == 'h600;
+   }
 
-    function new(string name = "PACKETLEN");
-        super.new(name, 32, UVM_NO_COVERAGE);
-        Xadd_constraintsX("MINFL_spec");
-        Xadd_constraintsX("MAXFL_spec");
-    endfunction: new
+   function new(string name = "PACKETLEN");
+      super.new(name, 32, UVM_NO_COVERAGE);
+   endfunction: new
 
-    virtual function void build();
-        this.MINFL = uvm_reg_field::type_id::create("MINFL",,get_full_name());
-        this.MINFL.configure(this, 16, 16, "RW", 0, 16'h0040, 1, 1);
-        this.MAXFL = uvm_reg_field::type_id::create("MAXFL",,get_full_name());
-        this.MAXFL.configure(this, 16, 0, "RW", 0, 16'h0600, 1, 1);
-    endfunction: build
+   virtual function void build();
+      this.MINFL = uvm_reg_field::type_id::create("MINFL",,get_full_name());
+      this.MINFL.configure(this, 16, 16, "RW", 0, 16'h0040, 1, 1);
+      this.MAXFL = uvm_reg_field::type_id::create("MAXFL",,get_full_name());
+      this.MAXFL.configure(this, 16, 0, "RW", 0, 16'h0600, 1, 1);
+   endfunction: build
 
-    `uvm_object_utils(reg_reg_PACKETLEN)
+   `uvm_object_utils(reg_reg_PACKETLEN)
 
 endclass : reg_reg_PACKETLEN
 
@@ -245,10 +243,9 @@ class reg_reg_TX_BD_NUM extends uvm_reg;
         TX_BD_NUM.value <= 'h80;
     }
 
-    function new(string name = "TX_BD_NUM");
-        super.new(name, 8, UVM_NO_COVERAGE);
-        Xadd_constraintsX("TX_BD_NUM_hardware");
-    endfunction: new
+   function new(string name = "TX_BD_NUM");
+      super.new(name, 8, UVM_NO_COVERAGE);
+   endfunction: new
 
     virtual function void build();
         this.TX_BD_NUM = uvm_reg_field::type_id::create("TX_BD_NUM",,get_full_name());

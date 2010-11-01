@@ -60,6 +60,11 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_se
          return;
       end
 
+      // Memories with some attributes are not to be tested
+      if (mem.get_attribute("NO_REG_TESTS") != "" ||
+          mem.get_attribute("NO_MEM_TESTS") != "" ||
+	  mem.get_attribute("NO_MEM_ACCESS_TEST") != "") return;
+
       // Can only deal with memories with backdoor access
       if (mem.get_backdoor() == null &&
           !mem.has_hdl_path()) begin
@@ -71,7 +76,7 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_se
       n_bits = mem.get_n_bits();
       
       `uvm_info("RegMem",$psprintf("***** n_bits =%0d",n_bits),UVM_DEBUG)
-      
+
       // Memories may be accessible from multiple physical interfaces (maps)
       mem.get_maps(maps);
 
@@ -170,9 +175,14 @@ endclass: uvm_mem_single_access_seq
 
 class uvm_mem_access_seq extends uvm_reg_sequence;
 
+   // variable: mem_seq
+   // The sequence used to test one memory
+   //
+   protected uvm_mem_single_access_seq mem_seq;
+
    `uvm_object_utils(uvm_mem_access_seq)
 
-   function new(string name="uvm__mem_access_seq");
+   function new(string name="uvm_mem_access_seq");
      super.new(name);
    endfunction
 
@@ -180,6 +190,7 @@ class uvm_mem_access_seq extends uvm_reg_sequence;
    // The block to be tested
    
    virtual task body();
+      uvm_reg_block blks[$];
 
       if (model == null) begin
          `uvm_error("RegModel", "Not block or system specified to run sequence on");
@@ -188,35 +199,48 @@ class uvm_mem_access_seq extends uvm_reg_sequence;
 
       uvm_report_info("STARTING_SEQ",{"\n\nStarting ",get_name()," sequence...\n"},UVM_LOW);
       
-      if (model.get_attribute("NO_REG_TESTS") == "") begin
-        if (model.get_attribute("NO_MEM_ACCESS_TEST") == "") begin
-           uvm_mem mems[$];
-           uvm_mem_single_access_seq mem_seq = new("single_mem_access_seq");
-           this.reset_blk(model);
-           model.reset();
+      mem_seq = uvm_mem_single_access_seq::type_id::create("single_mem_access_seq");
 
-           // Iterate over all memories, checking accesses
-           model.get_memories(mems);
-           foreach (mems[i]) begin
-              // Registers with some attributes are not to be tested
-              if (mems[i].get_attribute("NO_REG_TESTS") != "" ||
-	          mems[i].get_attribute("NO_MEM_ACCESS_TEST") != "") continue;
+      this.reset_blk(model);
+      model.reset();
 
-              // Can only deal with memories with backdoor access
-              if (mems[i].get_backdoor() == null &&
-                  !mems[i].has_hdl_path()) begin
-                 `uvm_warning("RegModel", $psprintf("Memory \"%s\" does not have a backdoor mechanism available",
-                                               mems[i].get_full_name()));
-                 continue;
-              end
-
-              mem_seq.mem = mems[i];
-              mem_seq.start(null, this);
-           end
-        end
+      do_block(model);
+      model.get_blocks(blks);
+      foreach (blks[i]) begin
+         do_block(blks[i]);
       end
-
    endtask: body
+
+
+   // task: do_block
+   // Test all of the memories in a block
+   protected virtual task do_block(uvm_reg_block blk);
+      uvm_mem mems[$];
+      
+      if (blk.get_attribute("NO_REG_TESTS") == "") return;
+      if (blk.get_attribute("NO_MEM_TESTS") == "") return;
+      if (blk.get_attribute("NO_MEM_ACCESS_TEST") == "") return;
+      
+      // Iterate over all memories, checking accesses
+      model.get_memories(mems, UVM_NO_HIER);
+      foreach (mems[i]) begin
+         // Registers with some attributes are not to be tested
+         if (mems[i].get_attribute("NO_REG_TESTS") != "" ||
+             mems[i].get_attribute("NO_MEM_TESTS") != "" ||
+	     mems[i].get_attribute("NO_MEM_ACCESS_TEST") != "") continue;
+         
+         // Can only deal with memories with backdoor access
+         if (mems[i].get_backdoor() == null &&
+             !mems[i].has_hdl_path()) begin
+            `uvm_warning("RegModel", $psprintf("Memory \"%s\" does not have a backdoor mechanism available",
+                                               mems[i].get_full_name()));
+            continue;
+         end
+         
+         mem_seq.mem = mems[i];
+         mem_seq.start(null, this);
+      end
+   endtask: do_block
 
 
    //

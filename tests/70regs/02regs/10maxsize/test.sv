@@ -29,7 +29,7 @@ class reg_ID extends uvm_reg;
    uvm_reg_field PRODUCT_ID;
 
    function new(string name = "reg_ID");
-      super.new(name,32,UVM_NO_COVERAGE);
+      super.new(name,65,UVM_NO_COVERAGE);
    endfunction
 
    virtual function void build();
@@ -39,7 +39,7 @@ class reg_ID extends uvm_reg;
 
       this.REVISION_ID.configure(this, 8,  0, "RW", 0,   8'h03, 0, 1);
           this.CHIP_ID.configure(this, 8,  8, "RW", 0,   8'h5A, 0, 1);
-       this.PRODUCT_ID.configure(this, 10, 16,"RW", 0, 10'h176, 0, 1);
+       this.PRODUCT_ID.configure(this, 49, 16,"RW", 0, 10'h176, 0, 1);
 
       this.REVISION_ID.set_reset(8'h30);
           this.CHIP_ID.set_reset(8'h3C, "SOFT");
@@ -47,39 +47,63 @@ class reg_ID extends uvm_reg;
 endclass
 
 
+class blk extends uvm_reg_block;
+   reg_ID ID;
+
+   function new(string name = "blk");
+      super.new(name);
+   endfunction
+
+   virtual function void build();
+      ID = new("ID");
+      ID.configure(this, null, "");
+      ID.build();
+
+      lock_model();
+   endfunction
+endclass
+
+
+class my_catcher extends uvm_report_catcher;
+   static int seen = 0;
+   virtual function action_e catch();
+      string txt = get_message();
+
+      if (get_severity() == UVM_ERROR &&
+          get_id() == "RegModel") begin
+         txt = txt.substr(0, 19);
+         $write(">>%s<<\n", txt);
+         if (txt == "Fields use more bits") begin
+            set_severity(UVM_WARNING);
+            set_action(UVM_DISPLAY);
+         end
+         return THROW;
+      end
+      
+      if (get_severity() == UVM_FATAL &&
+          get_id() == "RegModel") begin
+         txt = txt.substr(29,46);
+         $write(">>%s<<\n", txt);
+         if (txt == "UVM_REG_DATA_WIDTH") begin
+            seen++;
+            set_severity(UVM_WARNING);
+            set_action(UVM_DISPLAY);
+            return THROW;
+         end
+      end
+      return THROW;
+   endfunction
+endclass
+
+
 initial
 begin
-   uvm_reg_data_t data;
-   reg_ID rg = new;
+   blk b = new;
 
-   rg.build();
-   
-   rg.REVISION_ID.set(8'hFC);
-       rg.CHIP_ID.set(8'hA5);
-    rg.PRODUCT_ID.set(10'h289);
+   my_catcher c = new;
+   uvm_report_cb::add(null, c);
 
-   data = rg.get();
-   if (data !== 'h289A5FC) `uvm_error("Test", "Field values were not set");
-
-   rg.reset("SOFT");
-   data = rg.get();
-   if (data !== 'h2893CFC) `uvm_error("Test", $psprintf("Soft reset value is 'h%h instead of 'h2893CFC", data));
-   
-   rg.reset();
-   data = rg.get();
-   if (data !== 'h1765A30) `uvm_error("Test", $psprintf("Hard reset value is 'h%h instead of 'h1765A30", data));
-
-   
-   rg.REVISION_ID.set(8'hFC);
-       rg.CHIP_ID.set(8'hA5);
-    rg.PRODUCT_ID.set(10'h289);
-   data = rg.get();
-   if (data !== 'h289A5FC) `uvm_error("Test", "Field values were not set");
-
-   void'(rg.PRODUCT_ID.has_reset("HARD", 1));
-   rg.reset();
-   data = rg.get();
-   if (data !== 'h2895A30) `uvm_error("Test", $psprintf("Hard reset value is 'h%h instead of 'h2895A30", data));
+   b.build();
    
    begin
       uvm_report_server svr;

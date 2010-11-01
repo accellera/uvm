@@ -65,6 +65,18 @@ virtual class uvm_reg_block extends uvm_object;
    // Group: Initialization
    //----------------------
 
+   // Function: check_data_width
+   // Check that the specified data width (in bits) is less than
+   // or equal to the value of `UVM_REG_DATA_WIDTH
+   //
+   // This method is designed to be called by a static initializer
+   //
+   //| class my_blk extends uvm_reg_block;
+   //|   local static bit m_data_width = check_data_width(356);
+   //|   ...
+   //| endclass
+   extern protected static function bit check_data_width(int unsigned width);
+
 
    //------------------------------------------------------------------------
    // FUNCTION: new
@@ -430,10 +442,6 @@ virtual class uvm_reg_block extends uvm_object;
                                                    input bit inherited = 1);
 
    
-   extern virtual function void get_constraints(ref string names[$]);
-   /*local*/ extern function void Xadd_constraintsX(string name);
-
-
    //----------------
    // Group: Coverage
    //----------------
@@ -745,7 +753,9 @@ virtual class uvm_reg_block extends uvm_object;
    // If no design asbtraction is specified, the default design abstraction
    // for each ancestor block is used to get each incremental path.
    //
-   extern function void get_full_hdl_path (ref string paths[$], input string kind = "");
+   extern function void get_full_hdl_path (ref string paths[$],
+                                           input string kind = "",
+                                           string separator = ".");
 
    //
    // Function:    set_default_hdl_path
@@ -810,6 +820,17 @@ endclass: uvm_reg_block
 //---------------
 // Initialization
 //---------------
+
+// check_data_width
+
+function bit uvm_reg_block::check_data_width(int unsigned width);
+   if (width <= $bits(uvm_reg_data_t)) return 1;
+
+   `uvm_fatal("RegModel", $psprintf("Register model requires that UVM_REG_DATA_WIDTH be defined as %0d or greater. Currently defined as %0d", width, `UVM_REG_DATA_WIDTH))
+
+   return 0;
+endfunction
+
 
 // new
 
@@ -927,24 +948,37 @@ function void uvm_reg_block::lock_model();
 
    foreach (regs[rg_])
    begin
-   	 uvm_reg rg = rg_;	
-     rg.Xlock_modelX();
+      uvm_reg rg = rg_;	
+      rg.Xlock_modelX();
    end
    
    foreach (mems[mem_])
    begin
-   	 uvm_mem mem = mem_;
-     mem.Xlock_modelX();
+      uvm_mem mem = mem_;
+      mem.Xlock_modelX();
    end
    
    foreach (blks[blk_])
    begin
-   	 	uvm_reg_block blk=blk_;
-     	blk.lock_model();
+      uvm_reg_block blk=blk_;
+      blk.lock_model();
    end
    
-   if (this.parent == null)
+   if (this.parent == null) begin
+      int max_size = uvm_reg::get_max_size();
+
+      if (uvm_reg_field::get_max_size() > max_size)
+         max_size = uvm_reg_field::get_max_size();
+
+      if (uvm_mem::get_max_size() > max_size)
+         max_size = uvm_mem::get_max_size();
+
+      if (max_size > `UVM_REG_DATA_WIDTH) begin
+         `uvm_fatal("RegModel", $psprintf("Register model requires that UVM_REG_DATA_WIDTH be defined as %0d or greater. Currently defined as %0d", max_size, `UVM_REG_DATA_WIDTH))
+      end
+
       Xinit_address_mapsX();
+   end
 
 endfunction: lock_model
 
@@ -1380,9 +1414,9 @@ function bit uvm_reg_block::is_cover_on(int is_on = UVM_ALL_COVERAGE);
 endfunction: is_cover_on
 
 
-//-------------------------
-// Attributes & Constraints
-//-------------------------
+//-----------
+// Attributes
+//-----------
 
 // set_attribute
 
@@ -1444,37 +1478,6 @@ function void uvm_reg_block::get_attributes(ref string names[string],
        names[nm] = attributes[nm];
 
 endfunction: get_attributes
-
-
-// Xadd_constraintsX
-
-function void uvm_reg_block::Xadd_constraintsX(string name);
-
-   if (this.locked) begin
-      `uvm_error("RegModel", "Cannot add constraints to locked model");
-      return;
-   end
-
-   // Check if the constraint block already exists
-   foreach (this.constr[i]) begin
-      if (this.constr[i] == name) begin
-         `uvm_warning("RegModel", $psprintf("Constraint \"%s\" already added",
-                                          name));
-         return;
-      end
-   end
-
-   constr.push_back(name);
-
-endfunction: Xadd_constraintsX
-
-
-// get_constraints
-
-function void uvm_reg_block::get_constraints(ref string names[$]);
-  names = constr;
-endfunction
-
 
 
 //----------------
@@ -1932,7 +1935,9 @@ endfunction
 
 // get_full_hdl_path
 
-function void uvm_reg_block::get_full_hdl_path(ref string paths[$], input string kind = "");
+function void uvm_reg_block::get_full_hdl_path(ref string paths[$],
+                                               input string kind = "",
+                                               string separator = ".");
 
    if (kind == "")
       kind = get_default_hdl_path();
@@ -1954,7 +1959,7 @@ function void uvm_reg_block::get_full_hdl_path(ref string paths[$], input string
       string parent_paths[$];
 
       if (parent != null)
-         parent.get_full_hdl_path(parent_paths,kind);
+         parent.get_full_hdl_path(parent_paths, kind, separator);
 
       for (int i=0; i<hdl_paths.size();i++) begin
          string hdl_path = hdl_paths.get(i);
@@ -1970,7 +1975,7 @@ function void uvm_reg_block::get_full_hdl_path(ref string paths[$], input string
             if (hdl_path == "")
                paths.push_back(parent_paths[j]);
             else
-               paths.push_back({ parent_paths[j], ".", hdl_path });
+               paths.push_back({ parent_paths[j], separator, hdl_path });
          end
       end
    end

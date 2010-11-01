@@ -50,13 +50,13 @@ virtual class uvm_reg extends uvm_object;
    local bit               locked;
    local uvm_reg_block     parent;
    local uvm_reg_file   m_regfile_parent;
+   local static int unsigned m_max_size = 0;
    /*local*/ int unsigned  n_bits;
    local int unsigned      n_used_bits;
 
    /*local*/ bit           maps[uvm_reg_map];
 
    local uvm_reg_field     fields[$];   // Fields in LSB to MSB order
-   local string            constr[$];
    local event             value_change;
 
    local string            attributes[string];
@@ -226,6 +226,12 @@ virtual class uvm_reg extends uvm_object;
    //
    extern virtual function int unsigned    get_n_bytes     ();
 
+   // Function: get_max_size
+   // Returns the maximum width, in bits, of all register. 
+   //
+   extern static function int unsigned    get_max_size    ();
+
+
    //-----------------------------------------------------------------
    // Function: get_fields
    // Return the fields in this register
@@ -352,9 +358,6 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function void get_attributes(ref string names[string],
                                                input bit inherited = 1);
 
-   extern virtual function void   get_constraints (ref string names[]);
-   /*local*/ extern function void Xadd_constraintsX(string name);
-
 
    //--------------
    // Group: Access
@@ -467,6 +470,28 @@ virtual class uvm_reg extends uvm_object;
    //
    extern virtual function uvm_reg_data_t
                              get_reset(string kind = "HARD");
+
+   //
+   // FUNCTION: has_reset
+   // Check if any field in the register has a reset value specified
+   // for the specified reset ~kind~.
+   // If ~delete~ is TRUE, removes the reset value, if any.
+   //
+   extern virtual function bit has_reset(string kind = "HARD",
+                                         bit    delete = 0);
+
+
+   //
+   // FUNCTION: set_reset
+   // Specify or modify the reset value for this register
+   //
+   // Specify or modify the reset value for all the fields in the register
+   // corresponding to the cause specified by ~kind~.
+   //
+   extern virtual function void
+                       set_reset(uvm_reg_data_t value,
+                                 string         kind = "HARD");
+
 
    //-----------------------------------------------------------------
    // Function: needs_update
@@ -808,7 +833,8 @@ virtual class uvm_reg extends uvm_object;
    // for each ancestor block is used to get each incremental path.
    //
    extern function void get_full_hdl_path (ref uvm_hdl_path_concat paths[$],
-                                           input string kind = "");
+                                           input string kind = "",
+                                           input string separator = ".");
 
    //
    // Function: backdoor_read
@@ -1218,10 +1244,8 @@ function uvm_reg::new(string name="", int unsigned n_bits, int has_cover);
       `uvm_error("RegModel", $psprintf("Register \"%s\" cannot have 0 bits", this.get_name()));
       n_bits = 1;
    end
-   if (n_bits > `UVM_REG_DATA_WIDTH) begin
-      `uvm_error("RegModel", $psprintf("Register \"%s\" cannot have more than %0d bits (%0d)", this.get_name(), `UVM_REG_DATA_WIDTH, n_bits));
-      n_bits = `UVM_REG_DATA_WIDTH;
-   end
+   if (n_bits > m_max_size) m_max_size = n_bits;
+
    this.n_bits = n_bits;
    this.n_used_bits = 0;
    this.has_cover = has_cover;
@@ -1492,7 +1516,8 @@ endfunction
 // get_full_hdl_path
 
 function void uvm_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
-                                             input string kind = "");
+                                         input string kind = "",
+                                         input string separator = ".");
 
    if (kind == "") begin
       if (m_regfile_parent != null)
@@ -1511,9 +1536,9 @@ function void uvm_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
       string parent_paths[$];
 
       if (m_regfile_parent != null)
-         m_regfile_parent.get_full_hdl_path(parent_paths,kind);
+         m_regfile_parent.get_full_hdl_path(parent_paths, kind, separator);
       else
-         parent.get_full_hdl_path(parent_paths,kind);
+         parent.get_full_hdl_path(parent_paths, kind, separator);
 
       for (int i=0; i<hdl_paths.size();i++) begin
       	 // NOTE this is for an array a by-value copy but for a ref its a ptr to the object
@@ -1525,8 +1550,7 @@ function void uvm_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
                if (hdl_slices_a[k].path == "")
                   hdl_slices_a[k].path = parent_paths[j];
                else
-                  hdl_slices_a[k].path = { parent_paths[j], ".", hdl_slices_a[k].path };
-                  
+                  hdl_slices_a[k].path = { parent_paths[j], separator, hdl_slices_a[k].path };
             end
          end
          begin
@@ -1823,6 +1847,13 @@ function int unsigned uvm_reg::get_n_bytes();
 endfunction: get_n_bytes
 
 
+// get_max_size
+
+function int unsigned uvm_reg::get_max_size();
+   return m_max_size;
+endfunction: get_max_size
+
+
 // get_fields
 
 function void uvm_reg::get_fields(ref uvm_reg_field fields[$]);
@@ -1916,38 +1947,6 @@ function void uvm_reg::get_attributes(ref string names[string],
        names[nm] = attributes[nm];
 
 endfunction: get_attributes
-
-
-// Xadd_constraintsX
-
-function void uvm_reg::Xadd_constraintsX(string name);
-
-   if (this.locked) begin
-      `uvm_error("RegModel", "Cannot add constraints to locked register model");
-      return;
-   end
-
-   // Check if the constraint block already exists
-   foreach (this.constr[i]) begin
-      if (this.constr[i] == name) begin
-         `uvm_warning("RegModel", $psprintf("Constraint \"%s\" already added",
-                                          name));
-         return;
-      end
-   end
-
-   constr.push_back(name);
-
-endfunction: Xadd_constraintsX
-
-
-// get_constraints
-
-function void uvm_reg::get_constraints(ref string names[]);
-   names = new [this.constr.size()];
-   names=this.constr;
-endfunction: get_constraints
-
 
 
 //---------
@@ -2098,6 +2097,28 @@ function uvm_reg_data_t uvm_reg::get_reset(string kind = "HARD");
       get_reset |= this.fields[i].get_reset(kind) << j;
    end
 endfunction: get_reset
+
+
+// has_reset
+
+function bit uvm_reg::has_reset(string kind = "HARD",
+                                bit    delete = 0);
+
+   has_reset = 0;
+   foreach (fields[i]) begin
+      has_reset |= fields[i].has_reset(kind, delete);
+      if (!delete && has_reset) return 1;
+   end
+endfunction: has_reset
+
+
+function void uvm_reg::set_reset(uvm_reg_data_t value,
+                                 string         kind = "HARD");
+   foreach (fields[i]) begin
+      fields[i].set_reset(value >> fields[i].get_lsb_pos_in_register(),
+                          kind);
+   end
+endfunction: set_reset
 
 
 function void uvm_reg::Xpredict_readX(uvm_reg_data_t  value,

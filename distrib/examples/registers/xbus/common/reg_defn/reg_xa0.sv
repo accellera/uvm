@@ -77,7 +77,6 @@ class reg_reg_xa0_xbus_rf_config_reg extends uvm_reg;
 
     function new(string name = "xa0_xbus_rf_config_reg");
         super.new(name,8,UVM_NO_COVERAGE);
-        Xadd_constraintsX("frame_kind_c1");
     endfunction: new
 
     virtual function void build();
