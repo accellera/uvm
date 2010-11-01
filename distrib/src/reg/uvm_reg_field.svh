@@ -1425,7 +1425,7 @@ endfunction: get_reset
 
 function void uvm_reg_field::set_reset(uvm_reg_data_t value,
                                        string             kind = "HARD");
-   m_reset[kind] = value;
+   m_reset[kind] = value & ((1<<size) - 1);
 endfunction: set_reset
 
 

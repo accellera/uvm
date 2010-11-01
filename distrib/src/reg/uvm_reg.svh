@@ -475,6 +475,28 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function uvm_reg_data_t
                              get_reset(string kind = "HARD");
 
+   //
+   // FUNCTION: has_reset
+   // Check if any field in the register has a reset value specified
+   // for the specified reset ~kind~.
+   // If ~delete~ is TRUE, removes the reset value, if any.
+   //
+   extern virtual function bit has_reset(string kind = "HARD",
+                                         bit    delete = 0);
+
+
+   //
+   // FUNCTION: set_reset
+   // Specify or modify the reset value for this register
+   //
+   // Specify or modify the reset value for all the fields in the register
+   // corresponding to the cause specified by ~kind~.
+   //
+   extern virtual function void
+                       set_reset(uvm_reg_data_t value,
+                                 string         kind = "HARD");
+
+
    //-----------------------------------------------------------------
    // Function: needs_update
    // Check if any of the field need updating
@@ -2056,6 +2078,28 @@ function uvm_reg_data_t uvm_reg::get_reset(string kind = "HARD");
       get_reset |= this.fields[i].get_reset(kind) << j;
    end
 endfunction: get_reset
+
+
+// has_reset
+
+function bit uvm_reg::has_reset(string kind = "HARD",
+                                bit    delete = 0);
+
+   has_reset = 0;
+   foreach (fields[i]) begin
+      has_reset |= fields[i].has_reset(kind, delete);
+      if (!delete && has_reset) return 1;
+   end
+endfunction: has_reset
+
+
+function void uvm_reg::set_reset(uvm_reg_data_t value,
+                                 string         kind = "HARD");
+   foreach (fields[i]) begin
+      fields[i].set_reset(value >> fields[i].get_lsb_pos_in_register(),
+                          kind);
+   end
+endfunction: set_reset
 
 
 function void uvm_reg::Xpredict_readX(uvm_reg_data_t  value,
