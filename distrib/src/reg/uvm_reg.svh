@@ -57,7 +57,6 @@ virtual class uvm_reg extends uvm_object;
    /*local*/ bit           maps[uvm_reg_map];
 
    local uvm_reg_field     fields[$];   // Fields in LSB to MSB order
-   local string            constr[$];
    local event             value_change;
 
    local string            attributes[string];
@@ -358,9 +357,6 @@ virtual class uvm_reg extends uvm_object;
    // 
    extern virtual function void get_attributes(ref string names[string],
                                                input bit inherited = 1);
-
-   extern virtual function void   get_constraints (ref string names[]);
-   /*local*/ extern function void Xadd_constraintsX(string name);
 
 
    //--------------
@@ -1897,37 +1893,6 @@ function void uvm_reg::get_attributes(ref string names[string],
        names[nm] = attributes[nm];
 
 endfunction: get_attributes
-
-
-// Xadd_constraintsX
-
-function void uvm_reg::Xadd_constraintsX(string name);
-
-   if (this.locked) begin
-      `uvm_error("RegModel", "Cannot add constraints to locked register model");
-      return;
-   end
-
-   // Check if the constraint block already exists
-   foreach (this.constr[i]) begin
-      if (this.constr[i] == name) begin
-         `uvm_warning("RegModel", $psprintf("Constraint \"%s\" already added",
-                                          name));
-         return;
-      end
-   end
-
-   constr.push_back(name);
-
-endfunction: Xadd_constraintsX
-
-
-// get_constraints
-
-function void uvm_reg::get_constraints(ref string names[]);
-   names = new [this.constr.size()] (this.constr);
-endfunction: get_constraints
-
 
 
 //---------

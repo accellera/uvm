@@ -37,7 +37,6 @@ virtual class uvm_reg_file extends uvm_object;
    local string            default_hdl_path = "RTL";
    local uvm_object_string_pool #(uvm_queue #(string)) hdl_paths_pool;
    local string            attributes[string];
-   local string            constr[$];
 
 
    //----------------------
@@ -76,9 +75,9 @@ virtual class uvm_reg_file extends uvm_object;
                                                 uvm_reg_file rf_parent,
                                                 string hdl_path = "");
  
-   //--------------------------------
-   // Group: Attributes & Constraints
-   //--------------------------------
+   //------------------
+   // Group: Attributes
+   //------------------
 
    //
    // FUNCTION: set_attribute
@@ -119,9 +118,6 @@ virtual class uvm_reg_file extends uvm_object;
    // 
    extern virtual function void   get_attributes  (ref string names[string],
                                                    input bit inherited = 1);
-
-   extern virtual function void   get_constraints (ref string names[]);
-   /*local*/ extern function void Xadd_constraintsX(string name);
 
 
    //---------------------
@@ -360,32 +356,6 @@ function void uvm_reg_file::get_attributes(ref string names[string],
        names[nm] = attributes[nm];
 
 endfunction: get_attributes
-
-
-// Xadd_constraintsX
-
-function void uvm_reg_file::Xadd_constraintsX(string name);
-
-   // Check if the constraint block already exists
-   foreach (this.constr[i]) begin
-      if (this.constr[i] == name) begin
-         `uvm_warning("RegModel", $psprintf("Constraint \"%s\" already added",
-                                          name));
-         return;
-      end
-   end
-
-   constr.push_back(name);
-
-endfunction: Xadd_constraintsX
-
-
-// get_constraints
-
-function void uvm_reg_file::get_constraints(ref string names[]);
-   names = new [this.constr.size()] (this.constr);
-endfunction: get_constraints
-
 
 
 // get_block

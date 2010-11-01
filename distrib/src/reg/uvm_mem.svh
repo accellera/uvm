@@ -72,7 +72,6 @@ class uvm_mem extends uvm_object;
 
    local static int unsigned  m_max_size = 0;
    /*local*/ int unsigned  n_bits;
-   local string        constraint_block_names[];
 
    local string attributes[string];
 

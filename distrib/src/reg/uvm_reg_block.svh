@@ -442,10 +442,6 @@ virtual class uvm_reg_block extends uvm_object;
                                                    input bit inherited = 1);
 
    
-   extern virtual function void get_constraints(ref string names[$]);
-   /*local*/ extern function void Xadd_constraintsX(string name);
-
-
    //----------------
    // Group: Coverage
    //----------------
@@ -1359,9 +1355,9 @@ function bit uvm_reg_block::is_cover_on(int is_on = UVM_ALL_COVERAGE);
 endfunction: is_cover_on
 
 
-//-------------------------
-// Attributes & Constraints
-//-------------------------
+//-----------
+// Attributes
+//-----------
 
 // set_attribute
 
@@ -1423,37 +1419,6 @@ function void uvm_reg_block::get_attributes(ref string names[string],
        names[nm] = attributes[nm];
 
 endfunction: get_attributes
-
-
-// Xadd_constraintsX
-
-function void uvm_reg_block::Xadd_constraintsX(string name);
-
-   if (this.locked) begin
-      `uvm_error("RegModel", "Cannot add constraints to locked model");
-      return;
-   end
-
-   // Check if the constraint block already exists
-   foreach (this.constr[i]) begin
-      if (this.constr[i] == name) begin
-         `uvm_warning("RegModel", $psprintf("Constraint \"%s\" already added",
-                                          name));
-         return;
-      end
-   end
-
-   constr.push_back(name);
-
-endfunction: Xadd_constraintsX
-
-
-// get_constraints
-
-function void uvm_reg_block::get_constraints(ref string names[$]);
-  names = constr;
-endfunction
-
 
 
 //----------------
