@@ -68,8 +68,8 @@ class uvm_resource_db #(type T=int);
   // resource to be getd and the second argument is the current
   // scope.
 
-  static function rsrc_t get_by_name(string name, string scope);
-    return rsrc_t::get_by_name(name, scope);
+  static function rsrc_t get_by_name(string name, string scope, bit rpterr=1);
+    return rsrc_t::get_by_name(name, scope, rpterr);
   endfunction
 
   // function: set 

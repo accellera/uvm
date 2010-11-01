@@ -164,6 +164,14 @@ virtual class uvm_component extends uvm_report_object;
   extern function uvm_component lookup (string name);
 
 
+  // Function: get_depth
+  //
+  // Returns the component's depth from the root level. uvm_top has a
+  // depth of 0. The test and any other top level components have a depth
+  // of 1, and so on.
+
+  extern function int unsigned get_depth();
+
 
   //----------------------------------------------------------------------------
   // Group: Phasing Interface
@@ -565,7 +573,7 @@ virtual class uvm_component extends uvm_report_object;
   // Used for caching config settings
   static bit m_config_set = 1;
 
-  extern protected function string massage_scope(string scope);
+  extern function string massage_scope(string scope);
 
   extern virtual function void set_config_int (string inst_name,  
                                                string field_name,
@@ -1403,81 +1411,6 @@ virtual class uvm_component extends uvm_report_object;
 
 endclass : uvm_component
 
-//----------------------------------------------------------------------
-// class: uvm_config_int
-//
-// Specialization of uvm_resource#(T) for T = uvm_bitstream_t.  This is
-// for use by the set_config/get_config backward compatibility layer.
-// The "int" in set_config_int is really a uvm_bitstream_t.  The
-// set_config_int() and get_config_int() functions manage resources of
-// type uvm_config_int "under the hood."
-//----------------------------------------------------------------------
-class uvm_config_int extends uvm_resource#(uvm_bitstream_t);
-
-  typedef uvm_config_int this_subtype;
-
-  function new(string name="", string scope="");
-    super.new(name, scope);
-  endfunction
-
-  function void do_print(uvm_printer printer);
-    $display("%s = %0d [%s]", get_name(), read(), get_scope());
-  endfunction
-
-  `UVM_RESOURCE_GET_FCNS(uvm_bitstream_t)
-
-endclass
-
-//----------------------------------------------------------------------
-// class: uvm_config_str
-//
-// Specialization of uvm_resource#(T) for T = string.  This is for use
-// by the set_config/get_config backward compatibility layer.  The
-// set_config_string() and get_config_string() functions manage
-// resources of type uvm_config_int "under the hood."
-//----------------------------------------------------------------------
-class uvm_config_str extends uvm_resource#(string);
-
-  typedef uvm_config_str this_subtype;
-
-  function new(string name="", string scope="");
-    super.new(name, scope);
-  endfunction
-
-  function void do_print(uvm_printer printer);
-    $display("%s = %0s [%s]", get_name(), read(), get_scope());
-  endfunction
-
-    `UVM_RESOURCE_GET_FCNS(string)
-
-endclass
-
-//----------------------------------------------------------------------
-// class: uvm_config_obj
-//
-// Specialization of uvm_resource#(T) for T = uvm_object.  This is for
-// use by the set_config/get_config backward compatibility layer.  The
-// set_config_object() and get_config_object() functions manage
-// resources of type uvm_config_int "under the hood."
-//----------------------------------------------------------------------
-class uvm_config_obj extends uvm_resource#(uvm_object);
-
-  typedef uvm_config_obj this_subtype;
-  bit clone;
-
-  function new(string name="", string scope = "");
-    super.new(name, scope);
-  endfunction
-
-  function void do_print(uvm_printer printer);
-    uvm_object obj = read();
-    $display("%s = <obj> [%s]", get_name(), get_scope());
-    obj.print();
-  endfunction
-
-  `UVM_RESOURCE_GET_FCNS(uvm_object)
-
-endclass
 
 `endif // UVM_COMPONENT_SVH
 

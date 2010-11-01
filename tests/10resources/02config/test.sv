@@ -43,8 +43,10 @@ class leaf extends uvm_component;
     // set A to a pseudo-default value.  If get_config_int fails then A
     // will have the value of 39
     A = 39;
-    if(!get_config_int("A", A))
+    if(!get_config_int("A", A)) begin
+      `uvm_error("TESTERROR", "Did not get setting for A");
       test_error = 1;
+    end
     $display("%s: A = %0d", get_full_name(), A);
   endfunction
 
