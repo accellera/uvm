@@ -368,7 +368,7 @@ virtual class uvm_resource_base extends uvm_object;
   // The accessor can by anything as long as it is derived from
   // uvm_object.  The accessor object can be a component or a sequence
   // or whatever object from which a read or write was invoked.
-  // Typically the âthisâ handle is used as the
+  // Typically the â??thisâ?? handle is used as the
   // accessor.  For example:
   //
   //|    uvm_resource#(int) rint;

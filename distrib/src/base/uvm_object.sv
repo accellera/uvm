@@ -585,7 +585,8 @@ endfunction
 // Checks to see if a new field is a duplicate of one already in this object
 // ------------
 
-function void uvm_object::m_do_field_check(string field);
+function void uvm_object::m_do_field_check(string field,
+                                           uvm_apply_t t_t = UVM_NONE_T);
   if(m_field_array.exists(field) && (m_field_array[field] == 1)) begin
     uvm_report_error("MLTFLD", $psprintf("Field %s is defined multiple times in type %s",
        field, get_type_name()), UVM_NONE);

@@ -17,11 +17,62 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
+`include "ctypes.sv"
+`include "mem_agent.sv"
+`include "mem_sequences.sv"
+`include "mem.sv"
+
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 
 import mem_agent::*;
 import mem_sequences::*;
+
+
+package top_pkg;
+   import uvm_pkg::*;
+
+   typedef virtual mem_if #(8, 8) vif_t;
+   typedef uvm_resource_db#(virtual mem_if #(8, 8)) mem_if_rsrc_t;
+endpackage
+
+import top_pkg::*;
+
+
+//----------------------------------------------------------------------
+// top
+//----------------------------------------------------------------------
+module top;
+
+  import top_pkg::*;
+
+   parameter int ADDR_SIZE = 8;
+   parameter int DATA_SIZE = 8;
+ 
+  clkgen ck(clk);
+  mem_if #(ADDR_SIZE, DATA_SIZE) mif1(clk);
+  mem_if #(ADDR_SIZE, DATA_SIZE) mif2(clk);
+
+  memory #(ADDR_SIZE, DATA_SIZE) mem1(mif1);
+  memory #(ADDR_SIZE, DATA_SIZE) mem2(mif2);
+
+  initial begin
+
+    // set the virtuals interfaces into the resouce pool under the
+    // pseudo-space "vif".  We put them in that space because we don't
+    // know what the testbench hierarchy will look like and we need to
+    // put them somewhere.  The top-level environment can retrieve them
+    // and put them into the propoer part of the component space, if
+    // necessary.
+
+    mem_if_rsrc_t::write_and_set("mif1", "vif.mem_if1", mif1);
+    mem_if_rsrc_t::write_and_set("mif2", "vif.mem_if2", mif2);
+
+    run_test();
+  end
+
+endmodule
+
 
 //----------------------------------------------------------------------
 // env
@@ -29,15 +80,17 @@ import mem_sequences::*;
 class env #(int unsigned ADDR_SIZE=16, int unsigned DATA_SIZE=8)
    extends uvm_component;
 
+
   typedef env #(ADDR_SIZE, DATA_SIZE) this_type;
-  typedef uvm_resource_db#(virtual mem_if #(ADDR_SIZE, DATA_SIZE)) mem_if_rsrc_t;
-  typedef virtual mem_if #(ADDR_SIZE, DATA_SIZE) vif_t;
 
   `uvm_component_param_utils(this_type);
 
   mem_agent #(mem_agent_config, ADDR_SIZE, DATA_SIZE) agnt1;
   mem_agent #(mem_agent_config, ADDR_SIZE, DATA_SIZE) agnt2;
 
+
+
+   
   function new(string name, uvm_component parent);
     super.new(name, parent);
   endfunction
@@ -55,8 +108,12 @@ class env #(int unsigned ADDR_SIZE=16, int unsigned DATA_SIZE=8)
     // looking for them.  The agents can just assume that the virtual
     // interfaces have been made visible in their own name space.
 
-    mem_if_rsrc_t::read_by_type("vif.mem_if1", mif1);
-    mem_if_rsrc_t::read_by_type("vif.mem_if2", mif2);
+    if (!mem_if_rsrc_t::read_by_type("vif.mem_if1", mif1)) begin
+       `uvm_error("Test", "read_by_type() failed");
+    end
+    if (!mem_if_rsrc_t::read_by_type("vif.mem_if2", mif2)) begin
+       `uvm_error("Test", "read_by_type() failed");
+    end
 
     mem_if_rsrc_t::write_and_set("mif1", "*.mem_agent1.*", mif1, this);
     mem_if_rsrc_t::write_and_set("mif2", "*.mem_agent2.*", mif2, this);
@@ -91,6 +148,7 @@ class test extends uvm_component;
     // turn off resource auditting
     uvm_resource_options::turn_off_auditting();
 
+     
     // create the configuration resource and set it into the resoures
     // database
     uvm_resource_db#(mem_agent_config)::write_and_set("mem_cfg", "*.mem_agent*",
@@ -123,36 +181,3 @@ class test extends uvm_component;
 
 endclass
 
-//----------------------------------------------------------------------
-// top
-//----------------------------------------------------------------------
-module top;
-
-  parameter int unsigned ADDR_SIZE = 8;
-  parameter int unsigned DATA_SIZE = 8;
-
-  typedef uvm_resource_db#(virtual mem_if #(ADDR_SIZE, DATA_SIZE)) mem_if_rsrc_t;
-
-  clkgen ck(clk);
-  mem_if #(ADDR_SIZE, DATA_SIZE) mif1(clk);
-  mem_if #(ADDR_SIZE, DATA_SIZE) mif2(clk);
-
-  memory #(ADDR_SIZE, DATA_SIZE) mem1(mif1);
-  memory #(ADDR_SIZE, DATA_SIZE) mem2(mif2);
-
-  initial begin
-
-    // set the virtuals interfaces into the resouce pool under the
-    // pseudo-space "vif".  We put them in that space because we don't
-    // know what the testbench hierarchy will look like and we need to
-    // put them somewhere.  The top-level environment can retrieve them
-    // and put them into the propoer part of the component space, if
-    // necessary.
-
-    mem_if_rsrc_t::write_and_set("mif1", "vif.mem_if1", mif1);
-    mem_if_rsrc_t::write_and_set("mif2", "vif.mem_if2", mif2);
-
-    run_test();
-  end
-
-endmodule
