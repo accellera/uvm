@@ -8,8 +8,8 @@ module test;
     `uvm_component_utils(test)
 
     task run;
-      set_config_int("a*","a*",10);
-      uvm_top.get_config_int("achoo", achoo);
+      uvm_top.set_config_int("*","a*",10);
+      get_config_int("achoo", achoo);
       $display("achoo: %0d", achoo);
       if(achoo != 10) $display("*** UVM TEST FAILED ***");
       else $display("*** UVM TEST PASSED ***");

@@ -58,7 +58,10 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
 //TBD: add file/line
   static function bit get(uvm_component cntxt, string inst_name,
       string field_name, ref T value);
-    uvm_resource#(T) r;
+    int unsigned p=0;
+    uvm_resource#(T) r, rt;
+    uvm_resource_pool rp = uvm_resource_pool::get();
+    uvm_resource_types::rsrc_q_t rq;
 
     if(cntxt == null) 
       cntxt = uvm_root::get();
@@ -66,8 +69,20 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
       inst_name = cntxt.get_full_name();
     else if(cntxt.get_full_name() != "") 
       inst_name = {cntxt.get_full_name(), ".", inst_name};
+ 
+    rq = rp.lookup_regex(field_name, inst_name);
+    if(!rq.size())
+      return 0;
 
-    r = get_by_name(field_name, inst_name, 0);
+    for(int i=0; i<rq.size(); ++i) begin
+      if($cast(rt,rq.get(i))) begin
+        if((r==null) || (rt.precedence > p)) begin
+          r = rt;
+          p = r.precedence;
+        end 
+      end
+    end
+
     if(r == null)
       return 0;
 

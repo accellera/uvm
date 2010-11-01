@@ -316,7 +316,7 @@ virtual class uvm_resource_base extends uvm_object;
     scope = uvm_glob_to_re(s);
   endfunction
 
-  // funciton get_scope
+  // funciton: get_scope
   //
   // Retrieve the regular expression string that identifies the set of
   // scopes over which this resource is visible.
@@ -988,23 +988,30 @@ class uvm_resource_pool;
   endfunction
 
   // function: lookup_regex
-  function uvm_resource_types::rsrc_q_t lookup_regex(string re, scope);
+  //
+  // This utility function answers the question, for a given name and
+  // scope, what are all of the resources with a matching name (where the
+  // resource name may be a regular expression) and a matching scope
+  // (where the resouce scope may be a regular expression). ~name~ and
+  // ~scope~ are explicit values.
+
+  function uvm_resource_types::rsrc_q_t lookup_regex(string name, scope);
 
     uvm_resource_types::rsrc_q_t rq;
     uvm_resource_types::rsrc_q_t result_q = new();
     int unsigned i;
     uvm_resource_base r;
 
-    foreach (rtab[name]) begin
-      rq = rtab[name];
+    foreach (rtab[re]) begin
+      rq = rtab[re];
       for(int i = 0; i < rq.size(); ++i) begin
         r = rq.get(i);
-        if(uvm_re_match(scope, r.get_name()) == 0)
+        if(uvm_re_match(uvm_glob_to_re(re),name) == 0)
           if(r.match_scope(scope))
             result_q.push_back(r);
       end
     end
-
+    return result_q;
   endfunction
 
   // function: retrieve_resources
