@@ -202,8 +202,6 @@ class reg_reg_PACKETLEN extends uvm_reg;
 
    function new(string name = "PACKETLEN");
       super.new(name, 32, UVM_NO_COVERAGE);
-      Xadd_constraintsX("MINFL_spec");
-      Xadd_constraintsX("MAXFL_spec");
    endfunction: new
 
    virtual function void build();
@@ -247,7 +245,6 @@ class reg_reg_TX_BD_NUM extends uvm_reg;
 
    function new(string name = "TX_BD_NUM");
       super.new(name, 8, UVM_NO_COVERAGE);
-      Xadd_constraintsX("TX_BD_NUM_hardware");
    endfunction: new
 
    virtual function void build();
