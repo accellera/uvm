@@ -217,9 +217,10 @@ class uvm_mem_access_seq extends uvm_reg_sequence;
    protected virtual task do_block(uvm_reg_block blk);
       uvm_mem mems[$];
       
-      if (blk.get_attribute("NO_REG_TESTS") == "") return;
-      if (blk.get_attribute("NO_MEM_TESTS") == "") return;
-      if (blk.get_attribute("NO_MEM_ACCESS_TEST") == "") return;
+      if (blk.get_attribute("NO_REG_TESTS") != "" ||
+          blk.get_attribute("NO_MEM_TESTS") != "" ||
+          blk.get_attribute("NO_MEM_ACCESS_TEST") != "")
+        return;
       
       // Iterate over all memories, checking accesses
       blk.get_memories(mems, UVM_NO_HIER);
@@ -227,7 +228,8 @@ class uvm_mem_access_seq extends uvm_reg_sequence;
          // Registers with some attributes are not to be tested
          if (mems[i].get_attribute("NO_REG_TESTS") != "" ||
              mems[i].get_attribute("NO_MEM_TESTS") != "" ||
-	     mems[i].get_attribute("NO_MEM_ACCESS_TEST") != "") continue;
+	     mems[i].get_attribute("NO_MEM_ACCESS_TEST") != "")
+           continue;
          
          // Can only deal with memories with backdoor access
          if (mems[i].get_backdoor() == null &&
