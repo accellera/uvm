@@ -34,7 +34,7 @@
 // contents to suit your enhanced functionality or derived component type/methods.
 
 `define uvm_builtin_task_phase(PHASE) \
-        class uvm_``PHASE``_phase extends uvm_task_phase(`"PHASE`","uvm"); \
+        class uvm_``PHASE``_phase extends uvm_task_phase(`"PHASE`"); \
           task exec_task(uvm_component comp, uvm_phase_schedule phase); \
             comp.``PHASE(); \
           endtask \
@@ -42,7 +42,7 @@
         uvm_``PHASE``_phase uvm_``PHASE``_ph = new();
 
 `define uvm_builtin_topdown_phase(PHASE) \
-        class uvm_``PHASE``_phase extends uvm_topdown_phase(`"PHASE`","uvm"); \
+        class uvm_``PHASE``_phase extends uvm_topdown_phase(`"PHASE`"); \
           function void exec_func(uvm_component comp, uvm_phase_schedule phase); \
             comp.``PHASE(); \
           endfunction \
@@ -50,7 +50,7 @@
         uvm_``PHASE``_phase uvm_``PHASE``_ph = new();
 
 `define uvm_builtin_bottomup_phase(PHASE) \
-        class uvm_``PHASE``_phase extends uvm_bottomup_phase(`"PHASE`","uvm"); \
+        class uvm_``PHASE``_phase extends uvm_bottomup_phase(`"PHASE`"); \
           function void exec_func(uvm_component comp, uvm_phase_schedule phase); \
             comp.``PHASE(); \
           endfunction \

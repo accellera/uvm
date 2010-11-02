@@ -88,15 +88,76 @@ function void set_global_stop_timeout(time timeout);
 endfunction
 
 
-/*NEW*/ // Function: initiate_phase
-/*NEW*/ // Convenience function for uvm_top.initiate_phase
-/*NEW*/ // See uvm_root for more information
-/*NEW*/ 
-/*NEW*/ function void initiate_phase(uvm_phase_schedule phase);
-/*NEW*/   uvm_root top;
-/*NEW*/   top = uvm_root::get();
-/*NEW*/   top.initiate_phase(phase);
-/*NEW*/ endfunction
+//------------------------------------------------------------------------------
+//
+// Group: Phasing
+//
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// Class: uvm_*_phase
+//------------------------------------------------------------------------------
+// (predefined phases)
+//
+// There are macros (see macros/uvm_phase_defines.svh) to help repetitive declarations
+// These both declare and instantiate the phase default imp class. If you are doing
+// one manually for your own custom phase, use the following template:
+//
+// 1. extend the appropriate base class for your phase type
+//        class uvm_PHASE_phase extends uvm_task_phase("PHASE");
+//        class uvm_PHASE_phase extends uvm_topdown_phase("PHASE");
+//        class uvm_PHASE_phase extends uvm_bottomup_phase("PHASE");
+//
+// 2. implement your exec_task or exec_func method:
+//          task void exec_task(uvm_component comp, uvm_phase_schedule schedule);
+//          function void exec_func(uvm_component comp, uvm_phase_schedule schedule);
+//
+// 3. the default ones simply call the related method on the component:
+//            comp.PHASE();
+//
+// 4. after declaring your phase singleton class, instantiate one for global use:
+//        uvm_``PHASE``_phase uvm_``PHASE``_ph = new();
+//
+// Note that the macros and template above are specific to UVM builtin phases.
+// User custom phases should instantiate the singleton class in their own package
+// with a prefix other than uvm_.
+
+`uvm_builtin_topdown_phase(build)
+`uvm_builtin_bottomup_phase(connect)
+`uvm_builtin_bottomup_phase(end_of_elaboration)
+`uvm_builtin_bottomup_phase(start_of_simulation)
+
+`uvm_builtin_task_phase(run)
+
+`uvm_builtin_task_phase(pre_reset)
+`uvm_builtin_task_phase(reset)
+`uvm_builtin_task_phase(post_reset)
+`uvm_builtin_task_phase(pre_configure)
+`uvm_builtin_task_phase(configure)
+`uvm_builtin_task_phase(post_configure)
+`uvm_builtin_task_phase(pre_main)
+`uvm_builtin_task_phase(main)
+`uvm_builtin_task_phase(post_main)
+`uvm_builtin_task_phase(pre_shutdown)
+`uvm_builtin_task_phase(shutdown)
+`uvm_builtin_task_phase(post_shutdown)
+
+`uvm_builtin_bottomup_phase(extract)
+`uvm_builtin_bottomup_phase(check)
+`uvm_builtin_bottomup_phase(report)
+`uvm_builtin_topdown_phase(finalize)
+
+
+
+// Function: phase_initiate
+// Internal use only: convenience function for uvm_top.phase_initiate
+// See uvm_root for more information
+
+function void phase_initiate(uvm_phase_schedule phase);
+  uvm_root top;
+  top = uvm_root::get();
+  top.phase_initiate(phase);
+endfunction
 
 
 //----------------------------------------------------------------------------
