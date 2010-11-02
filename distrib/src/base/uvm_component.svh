@@ -1458,10 +1458,7 @@ virtual class uvm_component extends uvm_report_object;
               string stream_name="main", string label="",
               string desc="", time begin_time=0);
 
-  `ifdef UVM_USE_FPC
   protected process m_phase_process;
-  `endif
-  protected event m_kill_request;
 
   string m_name;
 

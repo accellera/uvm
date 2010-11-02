@@ -991,7 +991,11 @@ task uvm_phase_schedule::execute();
     // if there are no successors then we are all done.  Otherwise, run
     // all the successor phases.
     // GSA TBD insert new global_stop_request support
-    if(top.phase_process_count() == 0 && m_successors.size() == 0) begin
+//JLR: phase processess are not being removed from the table. Even forcing
+//there removal does not elimenate all phases. Is the check for process
+//count really needed?
+//    if(top.phase_process_count() == 0 && m_successors.size() == 0) begin
+    if(m_successors.size() == 0) begin
       $display("TBD about to call top.phase_all_done as nothing to do");
       top.phase_all_done(); //TBD linkage? top singleton inst? global_all_done()
     end 

@@ -21,6 +21,7 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 class test extends uvm_test;
 
@@ -55,6 +56,7 @@ class test extends uvm_test;
 
    function new(string name = "my_comp", uvm_component parent = null);
       super.new(name, parent);
+      set_phase_domain("uvm");
    endfunction
 
    function void build();
@@ -74,11 +76,11 @@ class test extends uvm_test;
    endfunction
    
    task run();
-      check_phase_t("end_of_elaboration", "run");
+      check_phase_t("start_of_simulation", "run");
    endtask
    
    task pre_reset();
-      check_phase_t("end_of_elaboration", "pre_reset");
+      check_phase_t("start_of_simulation", "pre_reset");
       // Make sure the last phase is not "run"
       #10;
       last_phase = "pre_reset";
@@ -148,12 +150,15 @@ endclass
 
 initial
 begin
-   test t = new("t");
+// Test gets created by +UVM_TESTNAME, not needed here.
+//   test t = new("t");
+   test t;
+   uvm_top.finish_on_completion = 0;
 
    `uvm_info("Test", "Phasing one component through default phases...", UVM_NONE);
    
    run_test();
-      
+   $cast(t,uvm_top.find("uvm_test_top"));   
    if (t.last_phase != "finalize") begin
       `uvm_error("Test", $psprintf("Last phase was \"%s\" instead of \"finalize\".",
                                    t.last_phase));

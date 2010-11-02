@@ -798,14 +798,10 @@ endfunction
 // ----
 
 function void uvm_component::kill();
-  `ifdef UVM_USE_FPC
     if (m_phase_process != null) begin
       m_phase_process.kill;
       m_phase_process = null;
     end
-  `else
-     ->m_kill_request;
-  `endif
 endfunction
 
 
@@ -813,7 +809,7 @@ endfunction
 // -------
 
 task uvm_component::suspend();
-  `ifdef UVM_USE_FPC
+  `ifdef UVM_USE_SUSPEND_RESUME
     if(m_phase_process != null)
       m_phase_process.suspend;
   `else
@@ -826,7 +822,7 @@ endtask
 // ------
 
 task uvm_component::resume();
-  `ifdef UVM_USE_FPC
+  `ifdef UVM_USE_SUSPEND_RESUME
     if(m_phase_process!=null) 
       m_phase_process.resume;
   `else
@@ -849,7 +845,7 @@ endtask
 
 function string uvm_component::status();
 
-  `ifdef UVM_USE_FPC
+  `ifdef UVM_USE_PROCESS_STATE
     process::state ps;
 
     if(m_phase_process == null)
@@ -859,7 +855,17 @@ function string uvm_component::status();
 
     return ps.name();
   `else
-     uvm_report_error("UNIMP", "status not implemented", UVM_NONE);
+    if(m_phase_process == null)
+      return "<unknown>";
+
+    case(m_phase_process.status())
+      0: return "FINISHED";
+      1: return "RUNNING";
+      2: return "WAITING";
+      3: return "SUSPENDED";
+      4: return "KILLED";
+      default: return "<unknown>";
+    endcase
   `endif
 
 endfunction

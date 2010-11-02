@@ -171,6 +171,7 @@ class uvm_root extends uvm_component;
   extern local task phase_runner(); // main phase machine
   extern function void phase_initiate(uvm_phase_schedule phase);
   extern function void phase_all_done(); // kill phase_runner() and end run_test
+//JLR: this function is never used. It is local and uvm_root never uses.!!!!
   extern local function void terminate(uvm_phase_schedule phase);
   extern local function void print_active_phases();
   extern function int unsigned phase_process_count(); // TBD local
@@ -547,8 +548,6 @@ task uvm_root::m_stop_request(time timeout=0);
   // can be used. We fork the single thread as well so that 'wait fork'
   // does not wait for threads previously started by the caller's thread.
 
-  `ifdef UVM_USE_FPC
-
   fork begin // guard process
     fork
       begin
@@ -569,28 +568,6 @@ task uvm_root::m_stop_request(time timeout=0);
     disable fork;
   end
   join
-
-  `else  // not using FPC
-
-  fork : stop_tasks
-    begin
-      //If objections are outstanding, wait for them to finish first
-      wait(m_objections_outstanding==0);
-      m_executing_stop_processes = 1;
-      m_do_stop_all(this);
-      wait fork;
-      m_executing_stop_processes = 0;
-    end
-    begin
-      #timeout uvm_report_warning("STPTO","TBD cannot resolve m_curr_phase.get_name() yet");
-      //TBD #timeout uvm_report_warning("STPTO",
-      //TBD  $psprintf("Stop-request timeout of %0t expired. Stopping phase '%0s'",
-      //TBD                    timeout, m_curr_phase.get_name()), UVM_NONE);
-    end
-  join_any
-  disable stop_tasks;
-
-  `endif // UVM_USE_FPC
 
   // all stop processes have completed, or a timeout has occured
   this.do_kill_all();
