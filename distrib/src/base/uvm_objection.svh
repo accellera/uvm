@@ -99,6 +99,18 @@ class uvm_objection extends uvm_report_object;
   `uvm_register_cb(uvm_objection, uvm_objection_cb)
   uvm_root top = uvm_root::get();
 
+  // Function: clear
+  //
+  // Clears the objection state. All counts are cleared. The draintime
+  // is not effected.
+
+  function void clear();
+    //Should there be a warning if there are outstanding objections?
+    m_source_count.delete();
+    m_total_count.delete();
+    m_draining.delete();
+  endfunction
+
   // Function: new
   //
   // Creates a new objection instance. Accesses the command line

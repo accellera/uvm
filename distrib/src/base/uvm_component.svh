@@ -548,10 +548,29 @@ virtual class uvm_component extends uvm_report_object;
 
   extern function void set_phase_imp(uvm_phase_imp phase, uvm_phase_imp imp, int hier=1);
 
-  // 
-  extern function void agree_to_terminate_phase(); //TBD john to add objection
-  extern function void disagree_to_terminate_phase(); // TBD john to add objection
-  extern function void terminate_phase(); // TBD john to add objection
+  // Function: raise_objection
+  //
+  // Raises an objection to the end of the current phase. The current phase
+  // ends when all objections to the phase have been dropped.
+
+  extern function void raise_objection();
+
+
+  // Function: drop_objection
+  //
+  // Drops an objection to the end of the current phase. The current phase
+  // ends when all objections to the phase have been dropped.
+
+  extern function void drop_objection(); 
+
+
+  // Function: terminate_phase
+  //
+  // Forces all objections to the current phase to be immediately dropped
+  // so that the phase can end.
+
+  extern function void terminate_phase();
+
   
   // Function: jump
   extern function void jump(uvm_phase_imp phase);

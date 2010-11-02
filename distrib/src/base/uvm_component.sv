@@ -765,16 +765,16 @@ function void uvm_component::jump_all_domains(uvm_phase_imp phase);
   current_phase.jump_all(phase);
 endfunction
 
-function void uvm_component::agree_to_terminate_phase();
-  uvm_phase_schedule current_phase;
-  current_phase = get_current_phase();
-  current_phase.agree_to_terminate_phase();
+function void uvm_component::raise_objection();
+  uvm_phase_schedule  current_phase = get_current_phase();
+  if(current_phase != null)
+    current_phase.phase_done.raise_objection(this);
 endfunction
 
-function void uvm_component::disagree_to_terminate_phase();
-  uvm_phase_schedule current_phase;
-  current_phase = get_current_phase();
-  current_phase.disagree_to_terminate_phase();
+function void uvm_component::drop_objection();
+  uvm_phase_schedule  current_phase = get_current_phase();
+  if(current_phase != null)
+    current_phase.phase_done.drop_objection(this);
 endfunction
 
 function void uvm_component::terminate_phase();

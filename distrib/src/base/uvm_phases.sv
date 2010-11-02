@@ -299,6 +299,7 @@ virtual class uvm_phase_imp extends uvm_object;
     end
   endfunction
 
+
   // Function: execute
   // Provides the required per-component execution flow, called from traverse()
   // Default is for func phase call, overridden in uvm_task_phase class
@@ -387,12 +388,12 @@ virtual class uvm_task_phase extends uvm_phase_imp;
       begin
         uvm_phase_thread thread = new(phase,comp); // store thread process ID
         comp.m_current_phase = phase;
-        phase.m_termination_agreement++;
+        phase.phase_done.raise_objection(comp);
         comp.phase_started(phase); //GSA TBD do this in separate traversal?
         exec_task(comp,phase);
         comp.phase_ended(phase); //GSA TBD do this in separate traversal?
-        if( phase.m_termination_agreement > 0)
-          phase.m_termination_agreement--;
+        if( phase.phase_done.get_objection_count(comp) > 0)
+          phase.phase_done.drop_objection(comp);
         thread.cleanup(); // kill thread process, depending on chosen semantic
       end
     join_none
@@ -511,7 +512,7 @@ class uvm_phase_schedule extends uvm_graph;
   
   local uvm_phase_state_t m_state;  // readiness/execution state of this node
   local int m_run_count;            // no of times this phase has executed
-  int unsigned m_termination_agreement; // phase-end pseudo-objection //TBD protected
+  uvm_objection phase_done;         // phase done objection
   uvm_phase_thread m_threads[uvm_component];      // all active process threads
 
 
@@ -699,8 +700,6 @@ class uvm_phase_schedule extends uvm_graph;
   extern task execute();
   extern function void jump_OLD(string name); // TBD refactoring in progress
 
-  extern function void agree_to_terminate_phase();
-  extern function void disagree_to_terminate_phase();
   extern function void terminate_phase();
   extern function void print_termination_state();
 
@@ -722,6 +721,7 @@ endclass
 
 function uvm_phase_schedule::new(string name, uvm_phase_schedule parent=null);
   super.new();
+  phase_done = new;
   if (parent == null) begin
     uvm_phase_schedule end_node;
     m_parent = this;
@@ -873,7 +873,7 @@ function void uvm_phase_schedule::clear(
                                    uvm_phase_state_t state = UVM_PHASE_DORMANT);
   m_state = state;
   m_phase_proc = null;
-  m_termination_agreement = 0;
+  phase_done.clear();
 endfunction
 
 // clear_successors() is for internal graph maintenance after a forward jump
@@ -929,7 +929,9 @@ task uvm_phase_schedule::execute();
   // run this phase
   m_state = UVM_PHASE_EXECUTING;
   m_run_count++;
-  m_termination_agreement = 0;
+  //JLR: don't want to clear here because an objector may object before
+  //the phase ever starts, so clearing is not the right thing to do.
+  //phase_done.clear();
   uvm_report_info("STARTPH",
                   $psprintf("STARTING PHASE %0s (in schedule %0s)",
                             this.get_name(),this.get_schedule_name()),int'(UVM_FULL)+1);
@@ -945,7 +947,7 @@ task uvm_phase_schedule::execute();
       bit order = 0;
       begin
         wait (order); // force this process to run last
-        wait (m_termination_agreement == 0);
+        wait (phase_done.get_objection_total(uvm_root::get()) == 0);
         kill();
       end
       begin
@@ -1089,32 +1091,16 @@ endfunction
 
 
 //--------------------------------------------------------------------
-// agree_to_terminate_phase
-//--------------------------------------------------------------------
-function void uvm_phase_schedule::agree_to_terminate_phase();
-  m_termination_agreement--;
-endfunction
-
-
-//--------------------------------------------------------------------
-// disagree_to_terminate_phase
-//--------------------------------------------------------------------
-function void uvm_phase_schedule::disagree_to_terminate_phase();
-  m_termination_agreement++;
-endfunction
-
-
-//--------------------------------------------------------------------
 // terminate_phase
 //--------------------------------------------------------------------
 function void uvm_phase_schedule::terminate_phase();
-  m_termination_agreement = 0;
+  phase_done.clear();
 endfunction
 
 
 function void uvm_phase_schedule::print_termination_state();
-  uvm_report_info("PHTERMS",$psprintf("phase %s termination state = %0d",
-                                get_name(), m_termination_agreement),UVM_DEBUG);
+  uvm_report_info("PHTERMS",$psprintf("phase %s outstanding objections = %0d",
+                                get_name(), phase_done.get_objection_total(uvm_top)),UVM_DEBUG);
 endfunction
 
 
