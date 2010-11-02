@@ -96,6 +96,7 @@ virtual class uvm_resource_base extends uvm_object;
   protected string scope;
   protected bit modified;
   protected bit read_only;
+  /*protected*/ bit m_is_regex_name=0;
 
   uvm_resource_types::access_t access[string];
 
@@ -129,6 +130,7 @@ virtual class uvm_resource_base extends uvm_object;
     modified = 0;
     read_only = 0;
     precedence = default_precedence;
+    if( uvm_has_wildcard(name) ) m_is_regex_name=1;
   endfunction
 
   // function: get_type_handle
@@ -516,7 +518,7 @@ endclass
 //
 //----------------------------------------------------------------------
 class uvm_resource_pool;
-
+  static bit m_has_wildcard_names = 0;
   static local uvm_resource_pool rp = get();
 
   uvm_resource_types::rsrc_q_t rtab [string];
@@ -622,6 +624,11 @@ class uvm_resource_pool;
       rq.push_back(rsrc);
     ttab[type_handle] = rq;
 
+    //optimization for name lookups. Since most environments never
+    //use wildcarded names, don't want to incurr a search penalty
+    //unless a wildcarded name has been used.
+    if(rsrc.m_is_regex_name)
+      m_has_wildcard_names = 1;
   endfunction
 
   // function: set_override
@@ -998,10 +1005,20 @@ class uvm_resource_pool;
   function uvm_resource_types::rsrc_q_t lookup_regex(string name, scope);
 
     uvm_resource_types::rsrc_q_t rq;
-    uvm_resource_types::rsrc_q_t result_q = new();
+    uvm_resource_types::rsrc_q_t result_q;
     int unsigned i;
     uvm_resource_base r;
 
+    //For the simple case where no wildcard names exist, then we can
+    //just return the queue associated with name.
+    if(!m_has_wildcard_names) begin
+      result_q = lookup_name(name, scope, 0);
+      if(result_q == null) 
+        result_q = new;
+      return result_q;
+    end
+
+    result_q = new();
     foreach (rtab[re]) begin
       rq = rtab[re];
       for(int i = 0; i < rq.size(); ++i) begin
