@@ -1054,11 +1054,6 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function void            do_pack    (uvm_packer packer);
    extern virtual function void            do_unpack  (uvm_packer packer);
 
-  // CCMPR00836527
-  function automatic string ternary_op(bit tf, string a, string b);
-	return tf ? a : b;
-  endfunction  
-  
 endclass: uvm_reg
 
 
