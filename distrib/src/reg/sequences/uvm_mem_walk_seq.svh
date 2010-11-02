@@ -217,7 +217,7 @@ class uvm_mem_walk_seq extends uvm_reg_sequence;
       if (blk.get_attribute("NO_MEM_ACCESS_TEST") == "") return;
       
       // Iterate over all memories, checking accesses
-      model.get_memories(mems, UVM_NO_HIER);
+      blk.get_memories(mems, UVM_NO_HIER);
       foreach (mems[i]) begin
          // Registers with some attributes are not to be tested
          if (mems[i].get_attribute("NO_REG_TESTS") != "" ||

@@ -200,7 +200,7 @@ class uvm_reg_access_seq extends uvm_reg_sequence;
       if (blk.get_attribute("NO_REG_ACCESS_TEST") != "") return;
 
       // Iterate over all registers, checking accesses
-      model.get_registers(regs, UVM_NO_HIER);
+      blk.get_registers(regs, UVM_NO_HIER);
       foreach (regs[i]) begin
          // Registers with some attributes are not to be tested
          if (regs[i].get_attribute("NO_REG_TESTS") != "" ||
