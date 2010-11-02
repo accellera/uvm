@@ -571,9 +571,9 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MODER.configure(this, null, "");
 
 `ifdef USE_SLICE_API
-        this.MODER.add_hdl_slice("ethreg1.MODER_2.DataOut", 16, 1,,1);
-        this.MODER.add_hdl_slice("ethreg1.MODER_1.DataOut", 8, 8);
-        this.MODER.add_hdl_slice("ethreg1.MODER_0.DataOut", 0, 8);
+        this.MODER.add_hdl_path_slice("ethreg1.MODER_2.DataOut", 16, 1,1);
+        this.MODER.add_hdl_path_slice("ethreg1.MODER_1.DataOut", 8, 8);
+        this.MODER.add_hdl_path_slice("ethreg1.MODER_0.DataOut", 0, 8);
 `else
         this.MODER.add_hdl_path('{
                 '{"ethreg1.MODER_2.DataOut", 16, 1},
@@ -605,13 +605,13 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.INT_SOURCE = reg_reg_oc_ethernet_INT_SOURCE::type_id::create("INT_SOURCE",,get_full_name());
         this.INT_SOURCE.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.INT_SOURCE.add_hdl_slice("ethreg1.irq_rxc", 6, 1,,1);
-        this.INT_SOURCE.add_hdl_slice("ethreg1.irq_txc", 5, 1);
-        this.INT_SOURCE.add_hdl_slice("ethreg1.irq_busy", 4, 1);
-        this.INT_SOURCE.add_hdl_slice("ethreg1.irq_rxe", 3, 1);
-        this.INT_SOURCE.add_hdl_slice("ethreg1.irq_rxb", 2, 1);
-        this.INT_SOURCE.add_hdl_slice("ethreg1.irq_txe", 1, 1);
-        this.INT_SOURCE.add_hdl_slice("ethreg1.irq_txb", 0, 1);
+        this.INT_SOURCE.add_hdl_path_slice("ethreg1.irq_rxc", 6, 1,1);
+        this.INT_SOURCE.add_hdl_path_slice("ethreg1.irq_txc", 5, 1);
+        this.INT_SOURCE.add_hdl_path_slice("ethreg1.irq_busy", 4, 1);
+        this.INT_SOURCE.add_hdl_path_slice("ethreg1.irq_rxe", 3, 1);
+        this.INT_SOURCE.add_hdl_path_slice("ethreg1.irq_rxb", 2, 1);
+        this.INT_SOURCE.add_hdl_path_slice("ethreg1.irq_txe", 1, 1);
+        this.INT_SOURCE.add_hdl_path_slice("ethreg1.irq_txb", 0, 1);
 `else
          	
         this.INT_SOURCE.add_hdl_path('{
@@ -637,7 +637,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.INT_MASK = reg_reg_oc_ethernet_INT_MASK::type_id::create("INT_MASK",,get_full_name());
         this.INT_MASK.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.INT_MASK.add_hdl_slice("ethreg1.INT_MASK_0.DataOut", -1, -1,,1);
+        this.INT_MASK.add_hdl_path_slice("ethreg1.INT_MASK_0.DataOut", -1, -1,1);
 `else
         this.INT_MASK.add_hdl_path('{
                 '{"ethreg1.INT_MASK_0.DataOut", -1, -1}
@@ -656,7 +656,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.IPGT = reg_reg_IPGT::type_id::create("IPGT",,get_full_name());
         this.IPGT.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.IPGT.add_hdl_slice("ethreg1.IPGT_0.DataOut", -1, -1,,1);
+        this.IPGT.add_hdl_path_slice("ethreg1.IPGT_0.DataOut", -1, -1,1);
 `else
         this.IPGT.add_hdl_path('{
                 '{"ethreg1.IPGT_0.DataOut", -1, -1}
@@ -668,7 +668,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.IPGR1 = reg_reg_IPGR1::type_id::create("IPGR1",,get_full_name());
         this.IPGR1.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.IPGR1.add_hdl_slice("ethreg1.IPGR1_0.DataOut", -1, -1,,1);
+        this.IPGR1.add_hdl_path_slice("ethreg1.IPGR1_0.DataOut", -1, -1,1);
 `else
         this.IPGR1.add_hdl_path('{
                 '{"ethreg1.IPGR1_0.DataOut", -1, -1}
@@ -680,7 +680,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.IPGR2 = reg_reg_IPGR2::type_id::create("IPGR2",,get_full_name());
         this.IPGR2.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.IPGR2.add_hdl_slice("ethreg1.IPGR2_0.DataOut", -1, -1,,1);
+        this.IPGR2.add_hdl_path_slice("ethreg1.IPGR2_0.DataOut", -1, -1,1);
 `else
         this.IPGR2.add_hdl_path('{
                 '{"ethreg1.IPGR2_0.DataOut", -1, -1}
@@ -692,10 +692,10 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.PACKETLEN = reg_reg_PACKETLEN::type_id::create("PACKETLEN",,get_full_name());
         this.PACKETLEN.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.PACKETLEN.add_hdl_slice("ethreg1.PACKETLEN_3.DataOut", 24, 8,,1);
-        this.PACKETLEN.add_hdl_slice("ethreg1.PACKETLEN_2.DataOut", 16, 8);
-        this.PACKETLEN.add_hdl_slice("ethreg1.PACKETLEN_1.DataOut", 8, 8);
-        this.PACKETLEN.add_hdl_slice("ethreg1.PACKETLEN_0.DataOut", 0, 8);
+        this.PACKETLEN.add_hdl_path_slice("ethreg1.PACKETLEN_3.DataOut", 24, 8,1);
+        this.PACKETLEN.add_hdl_path_slice("ethreg1.PACKETLEN_2.DataOut", 16, 8);
+        this.PACKETLEN.add_hdl_path_slice("ethreg1.PACKETLEN_1.DataOut", 8, 8);
+        this.PACKETLEN.add_hdl_path_slice("ethreg1.PACKETLEN_0.DataOut", 0, 8);
 `else
         this.PACKETLEN.add_hdl_path('{
                 '{"ethreg1.PACKETLEN_3.DataOut", 24, 8},
@@ -718,7 +718,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.TX_BD_NUM = reg_reg_TX_BD_NUM::type_id::create("TX_BD_NUM",,get_full_name());
         this.TX_BD_NUM.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.TX_BD_NUM.add_hdl_slice("ethreg1.TX_BD_NUM_0.DataOut", -1, -1,,1);
+        this.TX_BD_NUM.add_hdl_path_slice("ethreg1.TX_BD_NUM_0.DataOut", -1, -1,1);
 `else
         this.TX_BD_NUM.add_hdl_path('{
                 '{"ethreg1.TX_BD_NUM_0.DataOut", -1, -1}
@@ -730,7 +730,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.CTRLMODER = reg_reg_CTRLMODER::type_id::create("CTRLMODER",,get_full_name());
         this.CTRLMODER.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.CTRLMODER.add_hdl_slice("ethreg1.CTRLMODER_0.DataOut", -1, -1,,1);
+        this.CTRLMODER.add_hdl_path_slice("ethreg1.CTRLMODER_0.DataOut", -1, -1,1);
 `else
         this.CTRLMODER.add_hdl_path('{
                 '{"ethreg1.CTRLMODER_0.DataOut", -1, -1}
@@ -745,8 +745,8 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MIIMODER = reg_reg_MIIMODER::type_id::create("MIIMODER",,get_full_name());
         this.MIIMODER.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.MIIMODER.add_hdl_slice("ethreg1.MIIMODER_1.DataOut", 8, 1,,1);
-        this.MIIMODER.add_hdl_slice("ethreg1.MIIMODER_0.DataOut", 0, 8);
+        this.MIIMODER.add_hdl_path_slice("ethreg1.MIIMODER_1.DataOut", 8, 1,1);
+        this.MIIMODER.add_hdl_path_slice("ethreg1.MIIMODER_0.DataOut", 0, 8);
 `else
         this.MIIMODER.add_hdl_path('{
                 '{"ethreg1.MIIMODER_1.DataOut", 8, 1},
@@ -761,9 +761,9 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MIICOMMAND = reg_reg_MIICOMMAND::type_id::create("MIICOMMAND",,get_full_name());
         this.MIICOMMAND.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.MIICOMMAND.add_hdl_slice("ethreg1.MIICOMMAND2.DataOut", 2, 1,,1);
-        this.MIICOMMAND.add_hdl_slice("ethreg1.MIICOMMAND1.DataOut", 1, 1);
-        this.MIICOMMAND.add_hdl_slice("ethreg1.MIICOMMAND0.DataOut", 0, 1);
+        this.MIICOMMAND.add_hdl_path_slice("ethreg1.MIICOMMAND2.DataOut", 2, 1,1);
+        this.MIICOMMAND.add_hdl_path_slice("ethreg1.MIICOMMAND1.DataOut", 1, 1);
+        this.MIICOMMAND.add_hdl_path_slice("ethreg1.MIICOMMAND0.DataOut", 0, 1);
 `else
         this.MIICOMMAND.add_hdl_path('{
                 '{"ethreg1.MIICOMMAND2.DataOut", 2, 1},
@@ -786,8 +786,8 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MIITX_DATA = reg_reg_MIITX_DATA::type_id::create("MIITX_DATA",,get_full_name());
         this.MIITX_DATA.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.MIITX_DATA.add_hdl_slice("ethreg1.MIITX_DATA_1.DataOut", 8, 8,,1);
-        this.MIITX_DATA.add_hdl_slice("ethreg1.MIITX_DATA_0.DataOut", 0, 8);
+        this.MIITX_DATA.add_hdl_path_slice("ethreg1.MIITX_DATA_1.DataOut", 8, 8,1);
+        this.MIITX_DATA.add_hdl_path_slice("ethreg1.MIITX_DATA_0.DataOut", 0, 8);
 `else
         this.MIITX_DATA.add_hdl_path('{
                 '{"ethreg1.MIITX_DATA_1.DataOut", 8, 8},
@@ -801,7 +801,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MIIRX_DATA = reg_reg_MIIRX_DATA::type_id::create("MIIRX_DATA",,get_full_name());
         this.MIIRX_DATA.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.MIIRX_DATA.add_hdl_slice("ethreg1.MIIRX_DATA.DataOut", -1, -1,,1);
+        this.MIIRX_DATA.add_hdl_path_slice("ethreg1.MIIRX_DATA.DataOut", -1, -1,1);
 `else
         this.MIIRX_DATA.add_hdl_path('{
                 '{"ethreg1.MIIRX_DATA.DataOut", -1, -1}
@@ -814,9 +814,9 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MIISTATUS = reg_reg_MIISTATUS::type_id::create("MIISTATUS",,get_full_name());
         this.MIISTATUS.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.MIISTATUS.add_hdl_slice("ethreg1.NValid_stat", 2, 1,,1);
-        this.MIISTATUS.add_hdl_slice("ethreg1.Busy_stat", 1, 1);
-        this.MIISTATUS.add_hdl_slice("ethreg1.LinkFail", 0, 1);
+        this.MIISTATUS.add_hdl_path_slice("ethreg1.NValid_stat", 2, 1,1);
+        this.MIISTATUS.add_hdl_path_slice("ethreg1.Busy_stat", 1, 1);
+        this.MIISTATUS.add_hdl_path_slice("ethreg1.LinkFail", 0, 1);
 `else
         this.MIISTATUS.add_hdl_path('{
                 '{"ethreg1.NValid_stat", 2, 1},
@@ -833,12 +833,12 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.MAC_ADDR = reg_reg_MAC_ADDR::type_id::create("MAC_ADDR",,get_full_name());
         this.MAC_ADDR.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.MAC_ADDR.add_hdl_slice("ethreg1.MAC_ADDR1_1.DataOut", 40, 8,,1);
-        this.MAC_ADDR.add_hdl_slice("ethreg1.MAC_ADDR1_0.DataOut", 32, 8);
-        this.MAC_ADDR.add_hdl_slice("ethreg1.MAC_ADDR0_3.DataOut", 24, 8);
-        this.MAC_ADDR.add_hdl_slice("ethreg1.MAC_ADDR0_2.DataOut", 16, 8);
-        this.MAC_ADDR.add_hdl_slice("ethreg1.MAC_ADDR0_1.DataOut", 8, 8);
-        this.MAC_ADDR.add_hdl_slice("ethreg1.MAC_ADDR0_0.DataOut", 0, 8);
+        this.MAC_ADDR.add_hdl_path_slice("ethreg1.MAC_ADDR1_1.DataOut", 40, 8,1);
+        this.MAC_ADDR.add_hdl_path_slice("ethreg1.MAC_ADDR1_0.DataOut", 32, 8);
+        this.MAC_ADDR.add_hdl_path_slice("ethreg1.MAC_ADDR0_3.DataOut", 24, 8);
+        this.MAC_ADDR.add_hdl_path_slice("ethreg1.MAC_ADDR0_2.DataOut", 16, 8);
+        this.MAC_ADDR.add_hdl_path_slice("ethreg1.MAC_ADDR0_1.DataOut", 8, 8);
+        this.MAC_ADDR.add_hdl_path_slice("ethreg1.MAC_ADDR0_0.DataOut", 0, 8);
 `else
         this.MAC_ADDR.add_hdl_path('{
                 '{"ethreg1.MAC_ADDR1_1.DataOut", 40, 8},
@@ -855,10 +855,10 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.HASH0 = reg_reg_HASH0::type_id::create("HASH0",,get_full_name());
         this.HASH0.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.HASH0.add_hdl_slice("ethreg1.RXHASH0_3.DataOut", 24, 8,,1);
-        this.HASH0.add_hdl_slice("ethreg1.RXHASH0_2.DataOut", 16, 8);
-        this.HASH0.add_hdl_slice("ethreg1.RXHASH0_1.DataOut", 8, 8);
-        this.HASH0.add_hdl_slice("ethreg1.RXHASH0_0.DataOut", 0, 8);
+        this.HASH0.add_hdl_path_slice("ethreg1.RXHASH0_3.DataOut", 24, 8,1);
+        this.HASH0.add_hdl_path_slice("ethreg1.RXHASH0_2.DataOut", 16, 8);
+        this.HASH0.add_hdl_path_slice("ethreg1.RXHASH0_1.DataOut", 8, 8);
+        this.HASH0.add_hdl_path_slice("ethreg1.RXHASH0_0.DataOut", 0, 8);
 `else
         this.HASH0.add_hdl_path('{
                 '{"ethreg1.RXHASH0_3.DataOut", 24, 8},
@@ -873,10 +873,10 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.HASH1 = reg_reg_HASH1::type_id::create("HASH1",,get_full_name());
         this.HASH1.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.HASH1.add_hdl_slice("ethreg1.RXHASH1_3.DataOut", 24, 8,,1);
-        this.HASH1.add_hdl_slice("ethreg1.RXHASH1_2.DataOut", 16, 8);
-        this.HASH1.add_hdl_slice("ethreg1.RXHASH1_1.DataOut", 8, 8);
-        this.HASH1.add_hdl_slice("ethreg1.RXHASH1_0.DataOut", 0, 8);
+        this.HASH1.add_hdl_path_slice("ethreg1.RXHASH1_3.DataOut", 24, 8,1);
+        this.HASH1.add_hdl_path_slice("ethreg1.RXHASH1_2.DataOut", 16, 8);
+        this.HASH1.add_hdl_path_slice("ethreg1.RXHASH1_1.DataOut", 8, 8);
+        this.HASH1.add_hdl_path_slice("ethreg1.RXHASH1_0.DataOut", 0, 8);
 `else
         this.HASH1.add_hdl_path('{
                 '{"ethreg1.RXHASH1_3.DataOut", 24, 8},
@@ -891,9 +891,9 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.TXCTRL = reg_reg_TXCTRL::type_id::create("TXCTRL",,get_full_name());
         this.TXCTRL.configure(this, null, "");
 `ifdef USE_SLICE_API
-        this.TXCTRL.add_hdl_slice("ethreg1.TXCTRL_2.DataOut", 16, 1,,1);
-        this.TXCTRL.add_hdl_slice("ethreg1.TXCTRL_1.DataOut", 8, 8);
-        this.TXCTRL.add_hdl_slice("ethreg1.TXCTRL_0.DataOut", 0, 8);
+        this.TXCTRL.add_hdl_path_slice("ethreg1.TXCTRL_2.DataOut", 16, 1,1);
+        this.TXCTRL.add_hdl_path_slice("ethreg1.TXCTRL_1.DataOut", 8, 8);
+        this.TXCTRL.add_hdl_path_slice("ethreg1.TXCTRL_0.DataOut", 0, 8);
 `else
         this.TXCTRL.add_hdl_path('{
                 '{"ethreg1.TXCTRL_2.DataOut", 16, 1},
