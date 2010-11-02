@@ -148,15 +148,17 @@ endclass
 
 initial
 begin
-   test t = new("t");
-
    `uvm_info("Test", "Phasing one component through default phases...", UVM_NONE);
    
    run_test();
-      
-   if (t.last_phase != "finalize") begin
-      `uvm_error("Test", $psprintf("Last phase was \"%s\" instead of \"finalize\".",
-                                   t.last_phase));
+
+   begin
+      test t;
+      $cast(t, uvm_top.find("uvm_test_top"));
+      if (t.last_phase != "finalize") begin
+         `uvm_error("Test", $psprintf("Last phase was \"%s\" instead of \"finalize\".",
+                                      t.last_phase));
+      end
    end
    
    if (test::n_ph != 21) begin
