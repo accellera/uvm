@@ -162,20 +162,22 @@ class uvm_root extends uvm_component;
   extern local task m_stop_request (time timeout=0);
   extern local task m_do_stop_all  (uvm_component comp);
 
-  /*NEW*/ // phasing - // GSA TBD cleanup
-  /*NEW*/ local mailbox #(uvm_phase_schedule) phase_hopper;
-  /*NEW*/ uvm_process active_list [uvm_phase_schedule];
-  /*NEW*/ local bit phases_all_done;
-  /*NEW*/ extern local task phase_runner(); // main phase machine
-  /*NEW*/ extern function void initiate_phase(uvm_phase_schedule phase);
-  /*NEW*/ extern function void all_done(); // tell phase machine its time to die //TBD local?
-  /*NEW*/ extern local function void terminate(uvm_phase_schedule phase);
-  /*NEW*/ extern local function void print_active_phases();
-  /*NEW*/ extern function int unsigned active_list_size(); // TBD local
+  // phasing implementation
+
+  local mailbox #(uvm_phase_schedule) m_phase_hopper;
+  local uvm_process m_phase_processes[uvm_phase_schedule];
+  local bit m_phase_all_done;
+
+  extern local task phase_runner(); // main phase machine
+  extern function void phase_initiate(uvm_phase_schedule phase);
+  extern function void phase_all_done(); // kill phase_runner() and end run_test
+  extern local function void terminate(uvm_phase_schedule phase);
+  extern local function void print_active_phases();
+  extern function int unsigned phase_process_count(); // TBD local
    
   local  event      m_stop_request_e;
 
-
+  // singleton handle
   static local uvm_root m_inst;
 
   // For communicating all objections dropped.
@@ -218,69 +220,6 @@ class uvm_root_report_handler extends uvm_report_handler;
 
 endclass
 
-//------------------------------------------------------------------------------
-// 
-// Class - uvm_*_phase (predefined phases)
-//
-//------------------------------------------------------------------------------
-
-/*NEW*/ // There are macros (see macros/uvm_phase_defines.svh) to help repetitive declarations
-/*NEW*/ // These both declare and instantiate the phase default imp class. If you are doing
-/*NEW*/ // one manually for your own custom phase, use the following template:
-/*NEW*/ //
-/*NEW*/ // 1. extend the appropriate base class for your phase type
-/*NEW*/ //        class uvm_PHASE_phase extends uvm_task_phase("PHASE","uvm");
-/*NEW*/ //        class uvm_PHASE_phase extends uvm_topdown_phase("PHASE","uvm");
-/*NEW*/ //        class uvm_PHASE_phase extends uvm_bottomup_phase("PHASE","uvm");
-/*NEW*/ //
-/*NEW*/ // 2. implement your exec_task or exec_func method:
-/*NEW*/ //          task void exec_task(uvm_component comp, uvm_phase_schedule schedule);
-/*NEW*/ //          function void exec_func(uvm_component comp, uvm_phase_schedule schedule);
-/*NEW*/ //
-/*NEW*/ // 3. the default ones simply call the related method on the component:
-/*NEW*/ //            comp.PHASE();
-/*NEW*/ //
-/*NEW*/ // 4. after declaring your phase singleton class, instantiate one for global use:
-/*NEW*/ //        uvm_``PHASE``_phase uvm_``PHASE``_ph = new();
-/*NEW*/ //
-/*NEW*/ // Note that the macros and template above are specific to UVM builtin phases.
-/*NEW*/ // User custom phases should use a vendor string other than "uvm" and instantiate
-/*NEW*/ // the singleton class in their own package with a prefix other than uvm_.
-/*NEW*/ 
-/*NEW*/ `uvm_builtin_topdown_phase(build)
-/*NEW*/ `uvm_builtin_bottomup_phase(connect)
-/*NEW*/ `uvm_builtin_bottomup_phase(end_of_elaboration)
-/*NEW*/ `uvm_builtin_bottomup_phase(start_of_simulation)
-/*NEW*/ 
-/*NEW*/ `uvm_builtin_task_phase(run)
-/*NEW*/ 
-/*NEW*/ `uvm_builtin_task_phase(pre_reset)
-/*NEW*/ `uvm_builtin_task_phase(reset)
-/*NEW*/ `uvm_builtin_task_phase(post_reset)
-/*NEW*/ `uvm_builtin_task_phase(pre_configure)
-/*NEW*/ `uvm_builtin_task_phase(configure)
-/*NEW*/ `uvm_builtin_task_phase(post_configure)
-/*NEW*/ `uvm_builtin_task_phase(pre_main)
-/*NEW*/ `uvm_builtin_task_phase(main)
-/*NEW*/ `uvm_builtin_task_phase(post_main)
-/*NEW*/ `uvm_builtin_task_phase(pre_shutdown)
-/*NEW*/ `uvm_builtin_task_phase(shutdown)
-/*NEW*/ `uvm_builtin_task_phase(post_shutdown)
-/*NEW*/ 
-/*NEW*/ `uvm_builtin_bottomup_phase(extract)
-/*NEW*/ `uvm_builtin_bottomup_phase(check)
-/*NEW*/ `uvm_builtin_bottomup_phase(report)
-/*NEW*/ `uvm_builtin_topdown_phase(finalize)
-/*NEW*/ 
-/*NEW*/ 
-/*NEW*/ 
-/*NEW*/ //----------------------------------------------------------------------
-/*NEW*/ // global list of named domain schedules which link the above phases
-/*NEW*/ //----------------------------------------------------------------------
-/*NEW*/ 
-/*NEW*/ uvm_phase_schedule uvm_phase_domains[string];
-
-
 //-----------------------------------------------------------------------------
 //
 // IMPLEMENTATION
@@ -314,51 +253,9 @@ function uvm_root::new();
   report_header();
   print_enabled=0;
 
-  /*NEW*/ // construct phase schedules for the common domain and default uvm runtime domain
-  /*NEW*/
-  /*NEW*/ // the "common" domain is common to all uvm_component instances
-  /*NEW*/ // - it is a linear list of phases as follows:
-  /*NEW*/ uvm_phase_domains["common"] = new("common");
-  /*NEW*/ uvm_phase_domains["common"].add_phase(uvm_build_ph);
-  /*NEW*/ uvm_phase_domains["common"].add_phase(uvm_connect_ph);
-  /*NEW*/ uvm_phase_domains["common"].add_phase(uvm_end_of_elaboration_ph);
-  /*NEW*/ uvm_phase_domains["common"].add_phase(uvm_start_of_simulation_ph);
-  /*NEW*/ uvm_phase_domains["common"].add_phase(uvm_run_ph);
-  /*NEW*/ uvm_phase_domains["common"].add_phase(uvm_extract_ph);
-  /*NEW*/ uvm_phase_domains["common"].add_phase(uvm_check_ph);
-  /*NEW*/ uvm_phase_domains["common"].add_phase(uvm_report_ph);
-  /*NEW*/ uvm_phase_domains["common"].add_phase(uvm_finalize_ph);
-  /*NEW*/
-  /*NEW*/ // the "uvm" domain is the default instance of the uvm runtime task phases
-  /*NEW*/ // - components must subscribe to it (or to a copy of it) by calling set_domain()
-  /*NEW*/ // - it is a linear list of task phases as follows:
-  /*NEW*/ uvm_phase_domains["uvm"] = new("uvm");
-  /*NEW*/ uvm_phase_domains["uvm"].add_phase(uvm_pre_reset_ph);
-  /*NEW*/ uvm_phase_domains["uvm"].add_phase(uvm_reset_ph);
-  /*NEW*/ uvm_phase_domains["uvm"].add_phase(uvm_post_reset_ph);
-  /*NEW*/ uvm_phase_domains["uvm"].add_phase(uvm_pre_configure_ph);
-  /*NEW*/ uvm_phase_domains["uvm"].add_phase(uvm_configure_ph);
-  /*NEW*/ uvm_phase_domains["uvm"].add_phase(uvm_post_configure_ph);
-  /*NEW*/ uvm_phase_domains["uvm"].add_phase(uvm_pre_main_ph);
-  /*NEW*/ uvm_phase_domains["uvm"].add_phase(uvm_main_ph);
-  /*NEW*/ uvm_phase_domains["uvm"].add_phase(uvm_post_main_ph);
-  /*NEW*/ uvm_phase_domains["uvm"].add_phase(uvm_pre_shutdown_ph);
-  /*NEW*/ uvm_phase_domains["uvm"].add_phase(uvm_shutdown_ph);
-  /*NEW*/ uvm_phase_domains["uvm"].add_phase(uvm_post_shutdown_ph);
-  /*NEW*/
-  /*NEW*/ // the "uvm" domain is integrated hierarchically within the "common" domain
-  /*NEW*/ // - it appears in parallel to the common "run" phase
-  /*NEW*/ //uvm_phase_domains["common"].add_schedule(uvm_phase_domains["uvm"],"uvm",
-  /*NEW*/ // TBD once jumping code in       .with_phase(uvm_phase_domains["common"].find("run")));
-  /*NEW*/ begin :DEBUG_TBD_DELETE_ME
-  /*NEW*/   $display("");$display("Phase Schedule Debug (GSA TBD REMOVE)");
-  /*NEW*/   uvm_phase_domains["common"].bfs(); uvm_phase_domains["common"].print();
-  /*NEW*/   $display();
-  /*NEW*/ end
-  /*NEW*/
-  /*NEW*/ // initialize phasing machine
-  /*NEW*/ phase_hopper = new();
-  /*NEW*/ phases_all_done = 0;
+  // initialize phasing machinery
+  m_phase_hopper = new();
+  m_phase_all_done = 0;
 
 endfunction
 
@@ -446,7 +343,7 @@ task uvm_root::run_test(string test_name="");
   string msg;
   uvm_component uvm_test_top;
 
-  /*NEW*/ process phase_runner_proc; // store thread forked below for final cleanup
+  process phase_runner_proc; // store thread forked below for final cleanup
 
   testname_plusarg = 0;
 
@@ -482,30 +379,31 @@ task uvm_root::run_test(string test_name="");
 
   uvm_report_info("RNTST", {"Running test ",test_name, "..."}, UVM_LOW);
 
-  /*NEW*/ // phase runner, isolated from calling process
-  /*NEW*/ fork
-  /*NEW*/   begin
-  /*NEW*/     // spawn the phase runner task
-  /*NEW*/     phase_runner_proc = process::self();
-  /*NEW*/     phase_runner();
-  /*NEW*/   end
-  /*NEW*/ join_none
-  /*NEW*/
-  /*NEW*/ // initiate phasing by starting the first phase in the common domain
-  /*NEW*/ #0; // let the phase runner start
-  /*NEW*/ void'(phase_hopper.try_put(uvm_phase_domains["common"]));
-  /*NEW*/
-  /*NEW*/ // wait for all phasing to be completed
-  /*NEW*/ // - blocks until phases_all_done == 1
-  /*NEW*/ // - phases_all_done is set to 1 by the global_all_done() function
-  /*NEW*/ // - this is called at the end of the global_stop_request process or will
-  /*NEW*/ //   be called by a phase schedule when there are no more phases in the
-  /*NEW*/ //   active phase list and the current phase has no successors
-  /*NEW*/ wait (phases_all_done == 1);
-  /*NEW*/ uvm_report_info("PHDONE","** phasing all done **", UVM_DEBUG);
-  /*NEW*/
-  /*NEW*/ // clean up after ourselves
-  /*NEW*/ phase_runner_proc.kill();
+  // phase runner, isolated from calling process
+  fork
+    begin
+      // spawn the phase runner task
+      phase_runner_proc = process::self();
+      phase_runner();
+    end
+  join_none
+  
+  // initiate phasing by starting the first phase in the common domain
+  #0; // let the phase runner start
+  void'(m_phase_hopper.try_put(find_phase_schedule("uvm_pkg::common","common")));
+  
+  // wait for all phasing to be completed
+  // - blocks until m_phase_all_done == 1
+  // - m_phase_all_done is set to 1 by the phase_all_done() method
+  //   which can be called from global global_all_done() function
+  // - this is called at the end of the global_stop_request process or will
+  //   be called by a phase schedule when there are no more phases in the
+  //   active phase list and the current phase has no successors
+  wait (m_phase_all_done == 1);
+  uvm_report_info("PHDONE","** phasing all done **", UVM_DEBUG);
+  
+  // clean up after ourselves
+  phase_runner_proc.kill();
 
   report_summarize();
 
@@ -519,81 +417,83 @@ task uvm_root::run_test(string test_name="");
 endtask
 
 
-/*NEW*/ //--------------------------------------------------------------------
-/*NEW*/ // Task: phase_runner
-/*NEW*/ //
-/*NEW*/ // This task contains the top-level process that owns all the phase
-/*NEW*/ // processes.  By hosting the phase processes here we avoid problems
-/*NEW*/ // associated with phase processes related as parents/children
-/*NEW*/ //--------------------------------------------------------------------
-/*NEW*/ task uvm_root::phase_runner(); // GSA TBD cleanup
-/*NEW*/   forever begin
-/*NEW*/     uvm_phase_schedule phase;
-/*NEW*/     uvm_process proc;
-/*NEW*/     phase_hopper.get(phase);
-/*NEW*/     fork
-/*NEW*/       begin
-/*NEW*/         proc = new(process::self());
-/*NEW*/         phase.execute();
-/*NEW*/       end
-/*NEW*/     join_none
-/*NEW*/     active_list[phase] = proc;
-/*NEW*/     #0;  // let the process start running
-/*NEW*/   end
-/*NEW*/ endtask
-/*NEW*/ 
-/*NEW*/ //--------------------------------------------------------------------
-/*NEW*/ // initiate_phase
-/*NEW*/ //--------------------------------------------------------------------
-/*NEW*/ function void uvm_root::initiate_phase(uvm_phase_schedule phase);
-/*NEW*/   void'(phase_hopper.try_put(phase));
-/*NEW*/  endfunction
-/*NEW*/ 
-/*NEW*/ //--------------------------------------------------------------------
-/*NEW*/ // all_done
-/*NEW*/ // signal to the run_test process that it's time to end phasing
-/*NEW*/ //--------------------------------------------------------------------
-/*NEW*/ function void uvm_root::all_done(); // GSA TBD cleanup
-/*NEW*/   phases_all_done = 1;
-/*NEW*/ endfunction
+//--------------------------------------------------------------------
+// Task: phase_runner
+//
+// This task contains the top-level process that owns all the phase
+// processes.  By hosting the phase processes here we avoid problems
+// associated with phase processes related as parents/children
+//--------------------------------------------------------------------
+task uvm_root::phase_runner(); // GSA TBD cleanup
+  forever begin
+    uvm_phase_schedule phase;
+    uvm_process proc;
+    m_phase_hopper.get(phase);
+    fork
+      begin
+        proc = new(process::self());
+        phase.execute();
+      end
+    join_none
+    m_phase_processes[phase] = proc;
+    #0;  // let the process start running
+  end
+endtask
 
 
-/*NEW*/  //--------------------------------------------------------------------
-/*NEW*/  // terminate
-/*NEW*/  // terminate a phase buy removing it from the active list
-/*NEW*/  //--------------------------------------------------------------------
-/*NEW*/  function void uvm_root::terminate(uvm_phase_schedule phase); // GSA TBD cleanup
-/*NEW*/    if(!active_list.exists(phase)) begin
-/*NEW*/      uvm_report_fatal("PHBADTERM",$psprintf("terminate(%s) - phase is not in active list", phase.get_name()));
-/*NEW*/      return;
-/*NEW*/    end
-/*NEW*/    active_list.delete(phase);
-/*NEW*/  endfunction
+//--------------------------------------------------------------------
+// phase_initiate
+//--------------------------------------------------------------------
+function void uvm_root::phase_initiate(uvm_phase_schedule phase);
+  void'(m_phase_hopper.try_put(phase));
+ endfunction
 
 
-/*NEW*/  //--------------------------------------------------------------------
-/*NEW*/  // print_active_phases
-/*NEW*/  // print the phases in the active list
-/*NEW*/  //--------------------------------------------------------------------
-/*NEW*/  function void uvm_root::print_active_phases(); // GSA TBD cleanup
-/*NEW*/    string s;
-/*NEW*/    s = "active phases:";
-/*NEW*/    foreach (active_list[p]) begin
-/*NEW*/      uvm_phase_state_t state;
-/*NEW*/      state = p.get_state();
-/*NEW*/      s = $psprintf("%s %s[%s]", s, p.get_name(), phase_state_string[state]);
-/*NEW*/    end
-/*NEW*/    uvm_report_info("PHPRACT",s);
-/*NEW*/  endfunction
+//--------------------------------------------------------------------
+// phase_all_done
+// signal to the run_test process that it's time to end phasing
+//--------------------------------------------------------------------
+function void uvm_root::phase_all_done();
+  m_phase_all_done = 1;
+endfunction
 
 
-/*NEW*/  //--------------------------------------------------------------------
-/*NEW*/  // active_list_size
-/*NEW*/  // return the number of phases currently in the active list
-/*NEW*/  //--------------------------------------------------------------------
-/*NEW*/  function int unsigned uvm_root::active_list_size(); // GSA TBD cleanup
-/*NEW*/    return active_list.size();
-/*NEW*/  endfunction
+//--------------------------------------------------------------------
+// terminate
+// terminate a phase buy removing it from the active list
+//--------------------------------------------------------------------
+function void uvm_root::terminate(uvm_phase_schedule phase); // GSA TBD cleanup
+  if(!m_phase_processes.exists(phase)) begin
+    uvm_report_fatal("PHBADTERM",$psprintf("terminate(%s) - phase is not in active list", phase.get_name()));
+    return;
+  end
+  m_phase_processes.delete(phase);
+endfunction
+
+
+//--------------------------------------------------------------------
+// print_active_phases
+// print the phases in the active list
+//--------------------------------------------------------------------
+function void uvm_root::print_active_phases(); // GSA TBD cleanup
+  string s;
+  s = "active phases:";
+  foreach (m_phase_processes[p]) begin
+    uvm_phase_state_t state;
+    state = p.get_state();
+    s = $psprintf("%s %s[%s]", s, p.get_name(), phase_state_string[state]);
+  end
+  uvm_report_info("PHPRACT",s);
+endfunction
+
+
+//--------------------------------------------------------------------
+// phase_process_count
+// return the number of phase processes currently in the active list
+//--------------------------------------------------------------------
+function int unsigned uvm_root::phase_process_count(); // GSA TBD cleanup
+  return m_phase_processes.size();
+endfunction
 
 
 
