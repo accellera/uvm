@@ -31,7 +31,7 @@
 //
 // <uvm_hdl_path_slice> : slice of an HDL path
 //
-// <uvm_hdl_path_concat> : array of HDL path slices
+// <uvm_hdl_path_concat> : Concatenation of HDL path slices
 //
 // The following classes are defined herein:
 //
@@ -71,11 +71,11 @@ typedef struct {
 
 
 //------------------------------------------------------------------------------
-// TYPE: uvm_hdl_path_concat
+// CLASS: uvm_hdl_path_concat
 //
 // Concatenation of HDL variables
 //
-// Array of <uvm_hdl_path_slice> specifing a concatenation
+// An dArray of <uvm_hdl_path_slice> specifing a concatenation
 // of HDL variables that implement a register in the HDL.
 //
 // Slices must be specified in most-to-least significant order.
@@ -101,44 +101,59 @@ typedef struct {
 // The array should specify a single slice with its ~offset~ and ~size~
 // specified as -1. For example:
 //|
-//| r1.add_hdl_path('{ '{"r1", -1, -1} });
+//| concat.set('{ '{"r1", -1, -1} });
 //|
 //
 
-typedef uvm_hdl_path_slice uvm_hdl_path_concat_a[];
-
 class uvm_hdl_path_concat;
-	uvm_hdl_path_slice data[];
-	
-	function void set(uvm_hdl_path_concat_a t);
-		data=t;
-	endfunction	
-	
-	function void push_back_path(string path,int unsigned offset, int unsigned size);
-		uvm_hdl_path_slice t;
-		t.offset=offset;
-		t.path=path;
-		t.size=size;
-       
-		push_back(t);
-	endfunction
-	
-	function void push_back(uvm_hdl_path_slice t_);		        
-		data=new[data.size()+1](data);
-		data[data.size()-1]=t_;
-	endfunction
+
+   // Variable: slices
+   // Array of individual slices,
+   // stored in most-to-least significant order
+   uvm_hdl_path_slice slices[];
+
+   // Function: set
+   // Initialize the concatenation using an array literal
+   function void set(uvm_hdl_path_slice t[]);
+      slices = t;
+   endfunction	
+
+   // Function: add_slice
+   // Append the specified ~slice~ literal to the path concatenation
+   function void add_slice(uvm_hdl_path_slice slice);
+      slices = new [slices.size()+1] (slices);
+      slices[slices.size()-1] = slice;
+   endfunction
+
+   // Function: add_path
+   // Append the specified ~path~ to the path concatenation,
+   // for the specified number of bits at the specified ~offset~.
+   function void add_path(string path,
+                          int unsigned offset = -1,
+                          int unsigned size = -1);
+      uvm_hdl_path_slice t;
+      t.offset = offset;
+      t.path   = path;
+      t.size   = size;
+      
+      add_slice(t);
+   endfunction
+   
 endclass
 
 
 // concat2string
 
-function automatic string uvm_hdl_concat2string(uvm_hdl_path_concat slices);
+function automatic string uvm_hdl_concat2string(uvm_hdl_path_concat concat);
    string image = "{";
    
-   if (slices.data.size() == 1) return slices.data[0].path;
+   if (concat.slices.size() == 1 &&
+       concat.slices[0].offset == -1 &&
+       concat.slices[0].size == -1)
+      return concat.slices[0].path;
 
-   foreach (slices.data[i]) begin
-      uvm_hdl_path_slice slice=slices.data[i];
+   foreach (concat.slices[i]) begin
+      uvm_hdl_path_slice slice=concat.slices[i];
 
       image = { image, (i == 0) ? "" : ", ", slice.path };
       if (slice.offset >= 0)

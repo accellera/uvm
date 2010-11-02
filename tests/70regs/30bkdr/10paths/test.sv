@@ -78,8 +78,8 @@ program top;
 
 
     function void check_roots(string name,
-            string roots[$],
-            string exp[]);
+                              string roots[$],
+                              string exp[]);
         $write("Path(s) to %s:\n", name);
         foreach (roots[i]) begin
             $write("   %s\n", roots[i]);
@@ -92,20 +92,33 @@ program top;
 
 
     function void check_paths(string name,
-            uvm_hdl_path_concat paths[$],
-            uvm_hdl_path_concat exp[]);
+                              uvm_hdl_path_concat paths[$],
+                              uvm_hdl_path_concat exp[]);
         $write("Path(s) to %s:\n", name);
+       if (paths.size() != exp.size()) begin
+`uvm_error("Test", $psprintf("%0d paths found instead of the expected %0d.",
+                             paths.size(), exp.size()))
+          
+          foreach (paths[i]) begin
+             $write("   %s\n", uvm_hdl_concat2string(paths[i]));
+          end
+          $write("vs.\n");
+          foreach (exp[i]) begin
+             $write("   %s\n", uvm_hdl_concat2string(exp[i]));
+          end
+          return;
+       end
         foreach (paths[i]) begin
-            uvm_hdl_path_concat slices;
+            uvm_hdl_path_concat concat;
             uvm_hdl_path_concat exp_sl;
 
-            slices = paths[i];
+            concat = paths[i];
             exp_sl = exp[i];
 
-            $write("   %s\n", uvm_hdl_concat2string(slices));
-            foreach (slices.data[j]) begin
-                if (slices.data[i].path != exp_sl.data[j].path) begin
-                    `uvm_error("PATHS", $psprintf(" Path does not match \"%s\".", exp_sl.data[j].path));
+            $write("   %s\n", uvm_hdl_concat2string(concat));
+            foreach (concat.slices[j]) begin
+                if (concat.slices[j].path != exp_sl.slices[j].path) begin
+                    `uvm_error("PATHS", $psprintf(" Path does not match \"%s\".", exp_sl.slices[j].path));
                 end
             end
         end
@@ -137,36 +150,95 @@ program top;
         check_roots("model.b1", roots, '{"$root.dut.b1"});
 `endif 
 
-        model.b1.r1.get_full_hdl_path(paths);
+        // Repeatthe test twice to make sure the paths
+        // are not modified 
+        repeat (2) begin
+           paths.delete();
+           model.b1.r1.get_full_hdl_path(paths);
    
-        begin
-            uvm_hdl_path_concat t_;
-            uvm_hdl_path_concat ta_[1];
-            
-            t_=new();
-   	
+           begin
+              uvm_hdl_path_concat t_ = new;
 `ifdef INCA 
-            t_.push_back_path("$root.dut.b1.r1", -1, -1);
-            ta_[0]=t_;
-            check_paths("model.b1.r1", paths,ta_);
+              uvm_hdl_path_concat ta_[1];
+              
+              t_.add_path("$root.dut.b1.r1", -1, -1);
+              ta_[0]=t_;
+              check_paths("model.b1.r1", paths,ta_);
 `else
-            t_.set('{ '{"$root.dut.b1.r1", -1, -1} });
-            check_paths("model.b1.r1", paths,'{ t_ });
+              t_.set('{ '{"$root.dut.b1.r1", -1, -1} });
+              check_paths("model.b1.r1", paths,'{ t_ });
 `endif     	
+           end
         end
 
-        begin
-            uvm_report_server svr;
-            svr = _global_reporter.get_report_server();
+        model.b1.add_hdl_path("b1a");
+       
+        // Repeatthe test twice to make sure the paths
+        // are not modified 
+        repeat (2) begin
+           paths.delete();
+           model.b1.r1.get_full_hdl_path(paths);
+   
+           begin
+              uvm_hdl_path_concat t_;
+              uvm_hdl_path_concat exp[2];
 
-            svr.summarize();
-
-            if (svr.get_severity_count(UVM_FATAL) +
-                    svr.get_severity_count(UVM_NOT_OK) == 0)
-                $write("** UVM TEST PASSED **\n");
-            else
-                $write("!! UVM TEST FAILED !!\n");
+              t_ = new;
+              t_.add_path("$root.dut.b1.r1", -1, -1);
+              exp[0]=t_;
+              t_ = new;
+              t_.add_path("$root.dut.b1a.r1");
+              exp[1]=t_;
+              check_paths("model.b1.r1", paths, exp);
+           end
         end
+       
+        model.b1.r1.add_hdl_path_slice("r1a", 1, 1, .first(1));
+        model.b1.r1.add_hdl_path_slice("r1a", 0, 1);
+        model.b1.r1.add_hdl_path_slice("r1b", -1, -1, .first(1));
+       
+       paths.delete();
+       model.b1.r1.get_full_hdl_path(paths);
+   
+       begin
+          uvm_hdl_path_concat t_;
+          uvm_hdl_path_concat exp[6];
+          
+          t_ = new;
+          t_.add_path("$root.dut.b1.r1", -1, -1);
+          exp[0]=t_;
+          t_ = new;
+          t_.add_path("$root.dut.b1.r1a", 1, 1);
+          t_.add_path("$root.dut.b1.r1a", 0, 1);
+          exp[2]=t_;
+          t_ = new;
+          t_.add_path("$root.dut.b1.r1b", -1, -1);
+          exp[4]=t_;
+          t_ = new;
+          t_.add_path("$root.dut.b1a.r1", -1, -1);
+          exp[1]=t_;
+          t_ = new;
+          t_.add_path("$root.dut.b1a.r1a", 1, 1);
+          t_.add_path("$root.dut.b1a.r1a", 0, 1);
+          exp[3]=t_;
+          t_ = new;
+          t_.add_path("$root.dut.b1a.r1b", -1, -1);
+          exp[5]=t_;
+          check_paths("model.b1.r1", paths, exp);
+       end
+       
+       begin
+          uvm_report_server svr;
+          svr = _global_reporter.get_report_server();
+          
+          svr.summarize();
+          
+          if (svr.get_severity_count(UVM_FATAL) +
+              svr.get_severity_count(UVM_NOT_OK) == 0)
+             $write("** UVM TEST PASSED **\n");
+          else
+             $write("!! UVM TEST FAILED !!\n");
+       end
     end
 
 endprogram
