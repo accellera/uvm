@@ -941,15 +941,17 @@ task uvm_phase_schedule::execute();
   // kills whichever forked process is still remaining.
   if (m_phase != null) begin
     // skip sentinel node with no phase imp to do
-    fork
+    fork: ex_ph
+      bit order = 0;
       begin
-        #0; // force this process to run last
+        wait (order); // force this process to run last
         wait (m_termination_agreement == 0);
         kill();
       end
       begin
         m_phase_proc = process::self();
         m_phase.traverse(top,this);
+        order = 1;
         wait fork;
       end
     join_any

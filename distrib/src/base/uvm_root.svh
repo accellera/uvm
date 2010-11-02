@@ -161,7 +161,7 @@ class uvm_root extends uvm_component;
   extern local task m_stop_process ();
   extern local task m_stop_request (time timeout=0);
   extern local task m_do_stop_all  (uvm_component comp);
-
+     
   // phasing implementation
 
   local mailbox #(uvm_phase_schedule) m_phase_hopper;
