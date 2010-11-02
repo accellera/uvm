@@ -150,6 +150,7 @@ endclass
 
 initial
 begin
+   uvm_top.finish_on_completion = 0;
    `uvm_info("Test", "Phasing one component through default phases...", UVM_NONE);
    
    run_test();
