@@ -106,6 +106,11 @@ class uvm_reg_field extends uvm_object;
    // See <set_access> for a specification of the pre-defined
    // field access policies.
    //
+   // If the field access policy is a pre-defined policy and NOT one of
+   // "RW", "WRC", "WRS", "WO", "W1", "WO1" or "DC",
+   // the value of ~is_rand~ is ignored and the rand_mode() for the
+   // field instance is turned off since it cannot be written.
+   //
    extern function void configure(uvm_reg        parent,
                                   int unsigned   size,
                                   int unsigned   lsb_pos,
@@ -912,6 +917,16 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    this.lsb                     = lsb_pos;
    this.individually_accessible = individually_accessible;
    this.cover_on                = UVM_NO_COVERAGE;
+
+   // Ignore is_rand if the field is known not to be writeable
+   // i.e. not "RW", "WRC", "WRS", "WO", "W1", "WO1" or "DC",
+   case (access)
+    "RO", "RC", "RS", "WC", "WS",
+      "W1C", "W1S", "W1T", "W0C", "W0S", "W0T",
+      "W1SRC", "W1CRS", "W0SRC", "W0CRS", "WSRC", "WCRS",
+      "WOC", "WOS": is_rand = 0;
+   endcase
+
    if (!is_rand) this.value.rand_mode(0);
    this.parent.add_field(this);
 
