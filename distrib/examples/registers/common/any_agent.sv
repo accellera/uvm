@@ -134,7 +134,7 @@ class any_driver #(type REQ=int,RSP=REQ) extends uvm_component;
 
   task do_rsp(REQ req, output RSP rsp);
     rsp = new("rsp");
-    rsp.kind = req.kind;
+    rsp.read = req.read;
     rsp.addr = req.addr;
     rsp.data = req.data;
     rsp.set_id_info(req);
@@ -144,7 +144,7 @@ class any_driver #(type REQ=int,RSP=REQ) extends uvm_component;
   virtual task do_req(REQ req);
     uvm_reg_addr_t addr = req.addr - base_addr;
     this.pre_req(req);
-    if (req.kind == UVM_WRITE) begin
+    if (!req.read) begin
       mem[req.addr] = req.data;
     end
     else begin
@@ -167,14 +167,14 @@ class any_driver #(type REQ=int,RSP=REQ) extends uvm_component;
 
       seqr_port.peek(req); // aka 'get_next_item'
 
-      if (req.kind == UVM_WRITE)
+      if (!req.read)
         `uvm_info({"DRIVER-",req.get_type_name()},{"Received write request: ",req.convert2string()},UVM_HIGH)
 
       #10;
 
       do_req(req);
 
-      if (req.kind == UVM_READ)
+      if (req.read)
          `uvm_info({"DRIVER-",req.get_type_name()},{"Executed read request: ",req.convert2string()},UVM_HIGH)
 
       case (mode)

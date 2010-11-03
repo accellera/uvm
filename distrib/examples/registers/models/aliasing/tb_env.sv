@@ -21,35 +21,25 @@
 // 
 
 
-`include "any_agent.sv"
+`include "reg_agent.sv"
 
-typedef any_agent #(uvm_reg_bus_item) bus_agent;
-typedef any_driver #(uvm_reg_bus_item) bus_driver;
-class my_bus_driver extends bus_driver;
+class dut;
+   static bit [7:0] F1 = 0;
+   static bit [7:0] F2 = 0;
 
-   `uvm_component_utils(my_bus_driver)
-   
-   bit [7:0] F1 = 0;
-   bit [7:0] F2 = 0;
-   
-   function new(string name = "my_bus_driver", uvm_component parent=null);
-      super.new(name, parent);
-   endfunction: new
+   static task rw(uvm_reg_bus_item item);
 
-   virtual task do_req(uvm_reg_bus_item req);
-      this.pre_req(req);
-      case (req.addr)
+      case (item.addr)
        'h000: // Ra
-          if (req.kind == UVM_READ) req.data = {8'h00, F2, 8'h00, F1};
-          else if (req.byte_en[0]) F1 = req.data[7:0];
+          if (item.kind == UVM_READ) item.data = {8'h00, F2, 8'h00, F1};
+          else if (item.byte_en[0]) F1 = item.data[7:0];
        'h100: // Rb
-          if (req.kind == UVM_READ) req.data = {8'h00, F2, 8'h00, F1};
+          if (item.kind == UVM_READ) item.data = {8'h00, F2, 8'h00, F1};
           else begin
-             if (req.byte_en[0]) F1 = req.data[7:0];
-             if (req.byte_en[2]) F2 = req.data[23:16];
+             if (item.byte_en[0]) F1 = item.data[7:0];
+             if (item.byte_en[2]) F2 = item.data[23:16];
           end
       endcase
-      post_req(req);
    endtask
 endclass
 
@@ -59,7 +49,7 @@ class tb_env extends uvm_env;
    `uvm_component_utils(tb_env)
 
    block_B   regmodel;
-   bus_agent bus;
+   reg_agent#(dut) bus;
 
    function new(string name = "tb_env", uvm_component parent=null);
       super.new(name, parent);
@@ -70,10 +60,7 @@ class tb_env extends uvm_env;
       regmodel.build();
       regmodel.lock_model();
 
-      bus = bus_agent::type_id::create("bus", this);
-      set_inst_override_by_type("bus.drv",
-                                bus_driver::get_type(),
-                                my_bus_driver::get_type());
+      bus = reg_agent#(dut)::type_id::create("bus", this);
   endfunction: build
 
    virtual function void connect();
