@@ -42,7 +42,7 @@ typedef class uvm_mem_access_seq;
 // The DUT should be idle and not modify any register during this test.
 //
 
-class uvm_reg_single_access_seq extends uvm_reg_sequence;
+class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    // Variable: rg
    // The register to be tested
@@ -58,14 +58,14 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence;
       uvm_reg_map maps[$];
 
       if (rg == null) begin
-         `uvm_error("RegModel", "No register specified to run sequence on");
+         `uvm_error("RegModel", "No register specified to run sequence on")
          return;
       end
 
       // Can only deal with registers with backdoor access
       if (rg.get_backdoor() == null && !rg.has_hdl_path()) begin
-         `uvm_error("RegModel", $psprintf("Register \"%s\" does not have a backdoor mechanism available",
-                                       rg.get_full_name()));
+         `uvm_error("RegModel", {"Register '",rg.get_full_name(),
+         "' does not have a backdoor mechanism available"})
          return;
       end
 
@@ -80,14 +80,14 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence;
          foreach (fields[j]) begin
             foreach (maps[k]) begin
                if (fields[j].get_access(maps[k]) == "RO") begin
-                  `uvm_warning("RegModel", $psprintf("Register \"%s\" has RO bits",
-                                                rg.get_full_name()));
+                  `uvm_warning("RegModel", {"Register '",
+                               rg.get_full_name(),"' has RO fields"})
                   return;
                end
                if (!fields[j].is_known_access(maps[k])) begin
-                  `uvm_warning("RegModel", $psprintf("Register \"%s\" has unknown\"%s\" bits",
-                                                rg.get_full_name(),
-                                                fields[j].get_access(maps[k])));
+                  `uvm_warning("RegModel", {"Register '",rg.get_full_name(),
+                    "' has field with unknown access type '",
+                    fields[j].get_access(maps[k]),"'"})
                   return;
                end
             end
@@ -103,34 +103,40 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence;
          uvm_status_e status;
          uvm_reg_data_t  v, exp;
          
-         `uvm_info("RegModel", $psprintf("Verifying access of register %s in map \"%s\"...",
-                                    rg.get_full_name(), maps[j].get_full_name()), UVM_LOW);
+         `uvm_info("RegModel", {"Verifying access of register '",
+             rg.get_full_name(),"' in map '", maps[j].get_full_name(),
+             "' ..."}, UVM_LOW)
          
          v = rg.get();
          
          rg.write(status, ~v, UVM_BFM, maps[j], this);
          if (status != UVM_IS_OK) begin
-            `uvm_error("RegModel", $psprintf("Status was %s when writing \"%s\" through map \"%s\".",
-                                        status.name(), rg.get_full_name(), maps[j].get_full_name()));
+            `uvm_error("RegModel", {"Status was '",status.name(),
+                                 "' when writing '",rg.get_full_name(),
+                                 "' through map '",maps[j].get_full_name(),"'"})
          end
          #1;
          
-         rg.mirror(status, UVM_CHECK, UVM_BACKDOOR, uvm_reg_map::backdoor, this);
+         rg.mirror(status, UVM_CHECK, UVM_BACKDOOR, uvm_reg_map::backdoor(), this);
          if (status != UVM_IS_OK) begin
-            `uvm_error("RegModel", $psprintf("Status was %s when reading reset value of register \"%s\" through backdoor.",
-                                        status.name(), rg.get_full_name()));
+            `uvm_error("RegModel", {"Status was '",status.name(),
+                                 "' when reading reset value of register '",
+                                 rg.get_full_name(), "' through backdoor"})
          end
          
          rg.write(status, v, UVM_BACKDOOR, maps[j], this);
          if (status != UVM_IS_OK) begin
-            `uvm_error("RegModel", $psprintf("Status was %s when writing \"%s\" through backdoor.",
-                                        status.name(), rg.get_full_name()));
+            `uvm_error("RegModel", {"Status was '",status.name(),
+                                 "' when writing '",rg.get_full_name(),
+                                 "' through backdoor"})
          end
          
          rg.mirror(status, UVM_CHECK, UVM_BFM, maps[j], this);
          if (status != UVM_IS_OK) begin
-            `uvm_error("RegModel", $psprintf("Status was %s when reading reset value of register \"%s\" through map \"%s\".",
-                                        status.name(), rg.get_full_name(), maps[j].get_full_name()));
+            `uvm_error("RegModel", {"Status was '",status.name(),
+                                 "' when reading reset value of register '",
+                                 rg.get_full_name(), "' through map '",
+                                 maps[j].get_full_name(),"'"})
          end
       end
    endtask: body
@@ -148,7 +154,7 @@ endclass: uvm_reg_single_access_seq
 // the NO_REG_ACCESS_TEST attribute are not verified.
 //
 
-class uvm_reg_access_seq extends uvm_reg_sequence;
+class uvm_reg_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    `uvm_object_utils(uvm_reg_access_seq)
 
@@ -162,7 +168,7 @@ class uvm_reg_access_seq extends uvm_reg_sequence;
    virtual task body();
 
       if (model == null) begin
-         `uvm_error("RegModel", "Not block or system specified to run sequence on");
+         `uvm_error("RegModel", "Not block or system specified to run sequence on")
          return;
       end
 
@@ -186,8 +192,8 @@ class uvm_reg_access_seq extends uvm_reg_sequence;
 
               // Can only deal with registers with backdoor access
               if (regs[i].get_backdoor() == null && !regs[i].has_hdl_path()) begin
-                 `uvm_warning("RegModel", $psprintf("Register \"%s\" does not have a backdoor mechanism available",
-                                               regs[i].get_full_name()));
+                 `uvm_warning("RegModel", {"Register '",regs[i].get_full_name(),
+                      "' does not have a backdoor mechanism available"})
                  continue;
               end
 
@@ -231,7 +237,7 @@ endclass: uvm_reg_access_seq
 // the NO_REG_ACCESS_TEST attribute are not verified.
 //
 
-class uvm_reg_mem_access_seq extends uvm_reg_sequence;
+class uvm_reg_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    `uvm_object_utils(uvm_reg_mem_access_seq)
 
@@ -242,11 +248,12 @@ class uvm_reg_mem_access_seq extends uvm_reg_sequence;
    virtual task body();
 
       if (model == null) begin
-         `uvm_error("RegModel", "Not block or system specified to run sequence on");
+         `uvm_error("RegModel", "Register model handle is null")
          return;
       end
 
-      uvm_report_info("STARTING_SEQ",{"\n\nStarting ",get_name()," sequence...\n"},UVM_LOW);
+      uvm_report_info("STARTING_SEQ",
+            {"\n\nStarting ",get_name()," sequence...\n"},UVM_LOW);
       
       if (model.get_attribute("NO_REG_TESTS") == "") begin
         if (model.get_attribute("NO_REG_ACCESS_TEST") == "") begin

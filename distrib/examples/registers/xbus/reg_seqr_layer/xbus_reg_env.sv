@@ -62,9 +62,9 @@ endclass
 class xbus_reg_env extends xbus_env;
 
   // the register model
-  xbus_reg_model rdb;
+  xbus_reg_model model;
   uvm_reg_predictor #(xbus_transfer) xbus2reg;
-  uvm_sequencer #(uvm_reg_bus_item) reg_seqr;
+  uvm_sequencer #(uvm_reg_item) reg_seqr;
   reg2xbus_adapter reg2xbus;
 
   `uvm_component_utils(xbus_reg_env)
@@ -80,28 +80,27 @@ class xbus_reg_env extends xbus_env;
     num_masters = 1;
     num_slaves = 1;
     super.build();
-    rdb = xbus_reg_model::type_id::create("xa0", this);
-    reg_seqr = uvm_sequencer #(uvm_reg_bus_item)::type_id::create("reg_seqr",this);
-    rdb.build();
+    model = xbus_reg_model::type_id::create("xa0", this);
+    reg_seqr = uvm_sequencer #(uvm_reg_item)::type_id::create("reg_seqr",this);
+    model.build();
     // Should be done using resources
-    rdb.set_hdl_path_root(`DEF2STR(`XA0_TOP_PATH));
-    rdb.default_map.set_auto_predict(0);
-    xbus2reg.map = rdb.default_map;
+    model.set_hdl_path_root(`DEF2STR(`XA0_TOP_PATH));
+    model.default_map.set_auto_predict(0);
+    xbus2reg.map = model.default_map;
     reg_seqr.set_report_id_action("SQRWFG",UVM_NO_ACTION);
     reg2xbus = reg2xbus_adapter::type_id::create("reg2xbus");
   endfunction : build
 
   // Connect register sequencer to xbus master
   function void connect();
-    vif_container vif_obj         = uvm_utils #(vif_container,"xbus_vif")::get_config(this,1);
-    uvm_reg_passthru_adapter reg2reg  = uvm_reg_passthru_adapter::type_id::create("reg2reg");
+    vif_container vif_obj = uvm_utils #(vif_container,"xbus_vif")::get_config(this,1);
 
-    rdb.default_map.set_sequencer(reg_seqr,reg2reg);
+    model.default_map.set_sequencer(reg_seqr,uvm_reg_adapter::none());
 
     slaves[0].monitor.item_collected_port.connect(xbus2reg.bus_in);
     xbus2reg.adapter = reg2xbus;
 
-    assign_vi(vif_obj.vif);         // xbus agent should use get_config, not this
+    assign_vi(vif_obj.vif);      // xbus agent should use get_config or resources, not assign_vi
     masters[0].sequencer.count = 0; //prevent auto-start
 
   endfunction : connect
@@ -109,7 +108,7 @@ class xbus_reg_env extends xbus_env;
 
   function void end_of_elaboration();
     set_slave_address_map("slaves[0]", 0, 16'hffff);
-    bus_monitor.set_report_verbosity_level(UVM_HIGH);
+    //bus_monitor.set_report_verbosity_level(UVM_HIGH);
   endfunction : end_of_elaboration
 
   typedef uvm_reg_sequence #(uvm_sequence #(xbus_transfer)) reg2xbus_seq_t;

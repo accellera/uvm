@@ -943,7 +943,7 @@ function bit uvm_vreg::implement(longint unsigned n,
    this.size   = n;
    this.offset = offset;
    this.incr   = incr;
-   this.mem.XvregsX.push_back(this);
+   this.mem.m_vregs.push_back(this);
 
    return 1;
 endfunction: implement
@@ -1014,7 +1014,7 @@ function uvm_mam_region uvm_vreg::allocate(longint unsigned n,
    this.size   = n;
    this.incr   = incr;
 
-   this.mem.XvregsX.push_back(this);
+   this.mem.m_vregs.push_back(this);
 endfunction: allocate
 
 
@@ -1030,9 +1030,9 @@ function void uvm_vreg::release_region();
    end
 
    if (this.mem != null) begin
-      foreach (this.mem.XvregsX[i]) begin
-         if (this.mem.XvregsX[i] == this) begin
-            this.mem.XvregsX.delete(i);
+      foreach (this.mem.m_vregs[i]) begin
+         if (this.mem.m_vregs[i] == this) begin
+            this.mem.m_vregs.delete(i);
             break;
          end
       end

@@ -39,7 +39,7 @@
 // The DUT should be idle and not modify any register during this test.
 //
 
-class uvm_reg_shared_access_seq extends uvm_reg_sequence;
+class uvm_reg_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    // Variable: rg
    // The register to be tested
@@ -75,7 +75,7 @@ class uvm_reg_shared_access_seq extends uvm_reg_sequence;
       foreach (fields[k]) begin
          int lsb, w;
          
-         lsb = fields[k].get_lsb_pos_in_register();
+         lsb = fields[k].get_lsb_pos();
          w   = fields[k].get_n_bits();
          
          if (!fields[k].is_known_access(maps[0])) begin
@@ -94,7 +94,7 @@ class uvm_reg_shared_access_seq extends uvm_reg_sequence;
          foreach (fields[k]) begin
             int lsb, w;
             
-            lsb = fields[k].get_lsb_pos_in_register();
+            lsb = fields[k].get_lsb_pos();
             w   = fields[k].get_n_bits();
             
             if (fields[k].get_access(maps[j]) == "WO") begin
@@ -169,7 +169,7 @@ endclass: uvm_reg_shared_access_seq
 // The DUT should be idle and not modify the memory during this test.
 //
 
-class uvm_mem_shared_access_seq extends uvm_reg_sequence;
+class uvm_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    // variable: mem
    // The memory to be tested
@@ -297,7 +297,7 @@ endclass: uvm_mem_shared_access_seq
 // the NO_SHARED_ACCESS_TEST attribute are not verified.
 //
 
-class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence;
+class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    `uvm_object_utils(uvm_reg_mem_shared_access_seq)
 

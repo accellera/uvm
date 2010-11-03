@@ -132,30 +132,31 @@ class reg2wsh_adapter extends uvm_reg_adapter;
 
   `uvm_object_utils(reg2wsh_adapter)
 
-  virtual function uvm_sequence_item reg2bus(uvm_reg_bus_item rw_access);
-    wb_cycle cyc = wb_cycle::type_id::create("wb_cycle"/*,rw_access.sequencer*/);
-    cyc.m_kind = (rw_access.kind == UVM_READ) ? wb_cycle::READ : wb_cycle::WRITE;
-    cyc.m_addr = rw_access.addr << 2; // BYTE granularity in DWORD bus size
+  virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
+    wb_cycle cyc = wb_cycle::type_id::create("wb_cycle");
+    cyc.m_kind = (rw.kind == UVM_READ) ? wb_cycle::READ : wb_cycle::WRITE;
+    cyc.m_addr = rw.addr << 2; // BYTE granularity in DWORD bus size
     cyc.m_sel = 4'hf; // 32-bit bus
-    cyc.m_data = rw_access.data; 
+    cyc.m_data = rw.data; 
     cyc.m_lock = 0;
     return cyc;
   endfunction
 
-  virtual function void bus2reg(uvm_sequence_item bus_item, uvm_reg_bus_item rw_access);
+  virtual function void bus2reg(uvm_sequence_item bus_item,
+                                ref uvm_reg_bus_op rw);
     wb_cycle cyc;
     if (!$cast(cyc,bus_item)) begin
       `uvm_fatal("NOT_APB_TYPE","Provided bus_item is not of the correct type")
       return;
     end
-    rw_access.kind = cyc.m_kind ? UVM_READ : UVM_WRITE;
-    rw_access.addr = cyc.m_addr;
-    rw_access.data = cyc.m_data;
+    rw.kind = (cyc.m_kind == wb_cycle::READ) ? UVM_READ : UVM_WRITE;
+    rw.addr = cyc.m_addr;
+    rw.data = cyc.m_data;
     // Send the result back to the RegModel
     case (cyc.m_status)
-       wb_cycle::ACK: rw_access.status = UVM_IS_OK;
-       wb_cycle::RTY: rw_access.status = UVM_IS_OK;
-       default      : rw_access.status = UVM_NOT_OK;
+       wb_cycle::ACK: rw.status = UVM_IS_OK;
+       wb_cycle::RTY: rw.status = UVM_IS_OK;
+       default      : rw.status = UVM_NOT_OK;
     endcase
   endfunction
 

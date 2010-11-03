@@ -56,25 +56,27 @@ typedef class uvm_mam_region;
 typedef class uvm_mam_policy;
 
 typedef class uvm_mem;
-typedef class uvm_mem_burst;
 
 
-//
+//------------------------------------------------------------------------------
 // CLASS: uvm_mam
+//------------------------------------------------------------------------------
 // Memory allocation manager
 //
 // Memory allocation management utility class similar to C's malloc()
 // and free().
 // A single instance of this class is used to manage a single,
 // contiguous address space.
-//
+//------------------------------------------------------------------------------
+
 class uvm_mam;
 
-   //
+   //----------------------
    // Group: Initialization
-   //
+   //----------------------
 
    // Type: alloc_mode_e
+   //
    // Memory allocation mode
    //
    // Specifies how to allocate a memory region
@@ -84,7 +86,9 @@ class uvm_mam;
    //
    typedef enum {GREEDY, THRIFTY} alloc_mode_e;
 
+
    // Type: locality_e
+   //
    // Location of memory regions
    //
    // Specifies where to locate new memory regions
@@ -94,22 +98,26 @@ class uvm_mam;
    
    typedef enum {BROAD, NEARBY}   locality_e;
 
-   local uvm_mam_cfg cfg;
+
 
    // Variable: default_alloc
+   //
    // Region allocation policy
    //
    // This object is repeatedly randomized when allocating new regions.
    uvm_mam_policy default_alloc;
-   local uvm_mem memory;
 
+
+   local uvm_mem memory;
+   local uvm_mam_cfg cfg;
    local uvm_mam_region in_use[$];
    local int for_each_idx = -1;
    local string fname = "";
    local int lineno = 0;
 
+
+   // Function: new
    //
-   // FUNCTION: new
    // Create a new manager instance
    //
    // Create an instance of a memory allocation manager
@@ -122,13 +130,13 @@ class uvm_mam;
    // descriptor, using the <uvm_mam_region::read()> and
    // <uvm_mam_region::write()> methods.
    //
-   extern function new(string      name,
+   extern function new(string name,
                        uvm_mam_cfg cfg,
                        uvm_mem mem=null);
 
 
+   // Function: reconfigure
    //
-   // FUNCTION: reconfigure
    // Reconfigure the manager
    //
    // Modify the maximum and minimum addresses of the address space managed by
@@ -145,12 +153,12 @@ class uvm_mam;
    extern function uvm_mam_cfg reconfigure(uvm_mam_cfg cfg = null);
 
 
-   //
+   //-------------------------
    // Group: Memory Management
-   //
+   //-------------------------
 
+   // Function: reserve_region
    //
-   // FUNCTION: reserve_region
    // Reserve a specific memory region
    //
    // Reserve a memory region of the specified number of bytes
@@ -170,8 +178,9 @@ class uvm_mam;
                                                  string       fname = "",
                                                  int          lineno = 0);
 
+
+   // Function: request_region
    //
-   // FUNCTION: request_region
    // Request and reserve a memory region
    //
    // Request and reserve a memory region of the specified number
@@ -195,13 +204,14 @@ class uvm_mam;
    // (see the <uvm_mam_cfg::alloc_mode_e> and <uvm_mam_cfg::locality_e>),
    // a suitable region is first sought procedurally.
    //
-   extern function uvm_mam_region request_region(int unsigned      n_bytes,
+   extern function uvm_mam_region request_region(int unsigned   n_bytes,
                                                  uvm_mam_policy alloc = null,
-                                                 string            fname = "",
-                                                 int               lineno = 0);
+                                                 string         fname = "",
+                                                 int            lineno = 0);
 
+
+   // Function: release_region
    //
-   // FUNCTION: release_region
    // Release the specified region
    //
    // Release a previously allocated memory region.
@@ -211,19 +221,20 @@ class uvm_mam;
    //
    extern function void release_region(uvm_mam_region region);
 
+
+   // Function: release_all_regions
    //
-   // FUNCTION: release_all_regions
    // Forcibly release all allocated memory regions. 
    //
    extern function void release_all_regions();
 
 
-   //
+   //---------------------
    // Group: Introspection
-   //
+   //---------------------
 
+   // Function: convert2string
    //
-   // FUNCTION: convert2string
    // Image of the state of the manager
    //
    // Create a human-readable description of the state of
@@ -231,8 +242,9 @@ class uvm_mam;
    // 
    extern function string convert2string();
 
+
+   // Function: for_each
    //
-   // FUNCTION: for_each
    // Iterate over all currently allocated regions
    //
    // If reset is ~TRUE~, reset the iterator
@@ -242,8 +254,9 @@ class uvm_mam;
    //
    extern function uvm_mam_region for_each(bit reset = 0);
 
+
+   // Function: get_memory
    //
-   // FUNCTION: get_memory
    // Get the managed memory implementation
    //
    // Return the reference to the memory abstraction class
@@ -258,8 +271,9 @@ endclass: uvm_mam
 
 
 
-//
+//------------------------------------------------------------------------------
 // CLASS: uvm_mam_region
+//------------------------------------------------------------------------------
 // Allocated memory region descriptor
 //
 // Each instance of this class describes an allocated memory region.
@@ -267,8 +281,10 @@ endclass: uvm_mam
 // the memory manager, and returned by the
 // <uvm_mam::reserve_region()> and <uvm_mam::request_region()>
 // methods. 
-//
+//------------------------------------------------------------------------------
+
 class uvm_mam_region;
+
    /*local*/ bit [63:0] Xstart_offsetX;  // Can't be local since function
    /*local*/ bit [63:0] Xend_offsetX;    // calls not supported in constraints
 
@@ -287,21 +303,27 @@ class uvm_mam_region;
                                  uvm_mam      parent);
 
    // Function: get_start_offset
+   //
    // Get the start offset of the region
    //
    // Return the address offset, within the memory,
    // where this memory region starts.
+   //
    extern function bit [63:0] get_start_offset();
 
+
    // Function: get_end_offset
+   //
    // Get the end offset of the region
    //
    // Return the address offset, within the memory,
    // where this memory region ends.
+   //
    extern function bit [63:0] get_end_offset();
 
+
+   // Function: get_len
    //
-   // FUNCTION: get_len
    // Size of the memory region
    //
    // Return the number of consecutive memory locations
@@ -309,8 +331,9 @@ class uvm_mam_region;
    //
    extern function int unsigned get_len();
 
+
+   // Function: get_n_bytes
    //
-   // FUNCTION: get_n_bytes
    // Number of bytes in the region
    //
    // Return the number of consecutive bytes in the allocated region.
@@ -320,14 +343,16 @@ class uvm_mam_region;
    //
    extern function int unsigned get_n_bytes();
 
+
+   // Function: release_region
    //
-   // function: release_region
    // Release this region
    //
    extern function void release_region();
 
+
+   // Function: get_memory
    //
-   // FUNCTION: get_memory
    // Get the memory where the region resides
    //
    // Return a reference to the memory abstraction class
@@ -337,8 +362,9 @@ class uvm_mam_region;
    //
    extern function uvm_mem get_memory();
 
+
+   // Function: get_virtual_registers
    //
-   // FUNCTION: get_virtual_registers
    // Get the virtual register array in this region
    //
    // Return a reference to the virtual register array abstraction class
@@ -349,8 +375,8 @@ class uvm_mam_region;
    extern function uvm_vreg get_virtual_registers();
 
 
+   // Task: write
    //
-   // TASK: write
    // Write to a memory location in the region.
    //
    // Write to the memory location that corresponds to the
@@ -360,10 +386,10 @@ class uvm_mam_region;
    //
    // See <uvm_mem::write()> for more details.
    //
-   extern task write(output uvm_status_e  status,
+   extern task write(output uvm_status_e       status,
                      input  uvm_reg_addr_t     offset,
                      input  uvm_reg_data_t     value,
-                     input  uvm_path_e    path   = UVM_DEFAULT_PATH,
+                     input  uvm_path_e         path   = UVM_DEFAULT_PATH,
                      input  uvm_reg_map        map    = null,
                      input  uvm_sequence_base  parent = null,
                      input  int                prior = -1,
@@ -372,8 +398,8 @@ class uvm_mam_region;
                      input  int                lineno = 0);
 
 
+   // Task: read
    //
-   // TASK: read
    // Read from a memory location in the region.
    //
    // Read from the memory location that corresponds to the
@@ -383,10 +409,10 @@ class uvm_mam_region;
    //
    // See <uvm_mem::read()> for more details.
    //
-   extern task read(output uvm_status_e  status,
+   extern task read(output uvm_status_e       status,
                     input  uvm_reg_addr_t     offset,
                     output uvm_reg_data_t     value,
-                    input  uvm_path_e    path   = UVM_DEFAULT_PATH,
+                    input  uvm_path_e         path   = UVM_DEFAULT_PATH,
                     input  uvm_reg_map        map    = null,
                     input  uvm_sequence_base  parent = null,
                     input  int                prior = -1,
@@ -395,8 +421,8 @@ class uvm_mam_region;
                     input  int                lineno = 0);
 
 
+   // Task: burst_write
    //
-   // TASK: burst_write
    // Write to a set of memory location in the region.
    //
    // Write to the memory locations that corresponds to the
@@ -406,20 +432,20 @@ class uvm_mam_region;
    //
    // See <uvm_mem::burst_write()> for more details.
    //
-   extern task burst_write(output uvm_status_e  status,
-                           input  uvm_mem_burst  burst,
+   extern task burst_write(output uvm_status_e       status,
+                           input  uvm_reg_addr_t     offset,
                            input  uvm_reg_data_t     value[],
-                           input  uvm_path_e    path   = UVM_DEFAULT_PATH,
+                           input  uvm_path_e         path   = UVM_DEFAULT_PATH,
                            input  uvm_reg_map        map    = null,
                            input  uvm_sequence_base  parent = null,
-                           input  int                prior = -1,
+                           input  int                prior  = -1,
                            input  uvm_object         extension = null,
-                           input  string             fname = "",
+                           input  string             fname  = "",
                            input  int                lineno = 0);
 
 
+   // Task: burst_read
    //
-   // TASK: burst_read
    // Read from a set of memory location in the region.
    //
    // Read from the memory locations that corresponds to the
@@ -429,20 +455,20 @@ class uvm_mam_region;
    //
    // See <uvm_mem::burst_read()> for more details.
    //
-   extern task burst_read(output uvm_status_e  status,
-                          input  uvm_mem_burst  burst,
+   extern task burst_read(output uvm_status_e       status,
+                          input  uvm_reg_addr_t     offset,
                           output uvm_reg_data_t     value[],
-                          input  uvm_path_e    path   = UVM_DEFAULT_PATH,
+                          input  uvm_path_e         path   = UVM_DEFAULT_PATH,
                           input  uvm_reg_map        map    = null,
                           input  uvm_sequence_base  parent = null,
-                          input  int                prior = -1,
+                          input  int                prior  = -1,
                           input  uvm_object         extension = null,
-                          input  string             fname = "",
+                          input  string             fname  = "",
                           input  int                lineno = 0);
 
 
+   // Task: poke
    //
-   // TASK: poke
    // Deposit in a memory location in the region.
    //
    // Deposit the specified value in the memory location
@@ -453,7 +479,7 @@ class uvm_mam_region;
    //
    // See <uvm_mem::poke()> for more details.
    //
-   extern task poke(output uvm_status_e  status,
+   extern task poke(output uvm_status_e       status,
                     input  uvm_reg_addr_t     offset,
                     input  uvm_reg_data_t     value,
                     input  uvm_sequence_base  parent = null,
@@ -462,8 +488,8 @@ class uvm_mam_region;
                     input  int                lineno = 0);
 
 
+   // Task: peek
    //
-   // TASK: peek
    // Sample a memory location in the region.
    //
    // Sample the memory location that corresponds to the
@@ -473,7 +499,7 @@ class uvm_mam_region;
    //
    // See <uvm_mem::sample()> for more details.
    //
-   extern task peek(output uvm_status_e  status,
+   extern task peek(output uvm_status_e       status,
                     input  uvm_reg_addr_t     offset,
                     output uvm_reg_data_t     value,
                     input  uvm_sequence_base  parent = null,
@@ -483,12 +509,14 @@ class uvm_mam_region;
 
 
    extern function string convert2string();
+
 endclass
 
 
 
-//
-// CLASS: uvm_mam_policy
+//------------------------------------------------------------------------------
+// Class: uvm_mam_policy
+//------------------------------------------------------------------------------
 //
 // An instance of this class is randomized to determine
 // the starting offset of a randomly allocated memory region.
@@ -497,7 +525,8 @@ endclass
 // location of the region within a memory page.
 // If a procedural region allocation policy is required,
 // it can be implemented in the pre/post_randomize() method.
-//
+//------------------------------------------------------------------------------
+
 class uvm_mam_policy;
    // variable: len
    // Number of addresses required
@@ -570,9 +599,8 @@ endclass
 
 
 //------------------------------------------------------------------
-//
 //  Implementation
-//
+//------------------------------------------------------------------
 
 function uvm_mam_region::new(bit [63:0] start_offset,
                              bit [63:0] end_offset,
@@ -694,7 +722,8 @@ function uvm_mam_region uvm_mam::reserve_region(bit [63:0]   start_offset,
       return null;
    end
     
-    `uvm_info("RegModel",$psprintf("Attempting to reserve ['h%h:'h%h]...",start_offset, end_offset),UVM_MEDIUM)
+    `uvm_info("RegModel",$psprintf("Attempting to reserve ['h%h:'h%h]...",
+          start_offset, end_offset),UVM_MEDIUM)
 
 
 
@@ -725,7 +754,7 @@ endfunction: reserve_region
 
 
 function uvm_mam_region uvm_mam::request_region(int unsigned      n_bytes,
-                                                uvm_mam_policy alloc = null,
+                                                uvm_mam_policy    alloc = null,
                                                 string            fname = "",
                                                 int               lineno = 0);
    this.fname = fname;
@@ -801,10 +830,10 @@ function uvm_mem uvm_mam::get_memory();
 endfunction: get_memory
 
 
-task uvm_mam_region::write(output uvm_status_e  status,
+task uvm_mam_region::write(output uvm_status_e       status,
                            input  uvm_reg_addr_t     offset,
                            input  uvm_reg_data_t     value,
-                           input  uvm_path_e    path = UVM_DEFAULT_PATH,
+                           input  uvm_path_e         path = UVM_DEFAULT_PATH,
                            input  uvm_reg_map        map    = null,
                            input  uvm_sequence_base  parent = null,
                            input  int                prior = -1,
@@ -835,10 +864,10 @@ task uvm_mam_region::write(output uvm_status_e  status,
 endtask: write
 
 
-task uvm_mam_region::read(output uvm_status_e  status,
+task uvm_mam_region::read(output uvm_status_e       status,
                           input  uvm_reg_addr_t     offset,
                           output uvm_reg_data_t     value,
-                          input  uvm_path_e    path = UVM_DEFAULT_PATH,
+                          input  uvm_path_e         path = UVM_DEFAULT_PATH,
                           input  uvm_reg_map        map    = null,
                           input  uvm_sequence_base  parent = null,
                           input  int                prior = -1,
@@ -868,10 +897,10 @@ task uvm_mam_region::read(output uvm_status_e  status,
 endtask: read
 
 
-task uvm_mam_region::burst_write(output uvm_status_e  status,
-                                 input  uvm_mem_burst  burst,
+task uvm_mam_region::burst_write(output uvm_status_e       status,
+                                 input  uvm_reg_addr_t     offset,
                                  input  uvm_reg_data_t     value[],
-                                 input  uvm_path_e    path = UVM_DEFAULT_PATH,
+                                 input  uvm_path_e         path = UVM_DEFAULT_PATH,
                                  input  uvm_reg_map        map    = null,
                                  input  uvm_sequence_base  parent = null,
                                  input  int                prior = -1,
@@ -888,31 +917,24 @@ task uvm_mam_region::burst_write(output uvm_status_e  status,
       return;
    end
 
-   if (burst.start_offset > this.len ||
-       burst.max_offset   > this.len) begin
+   if (offset + value.size() > this.len) begin
       `uvm_error("RegModel",
-                 $psprintf("Attempting to burst-write to an offset outside of the allocated region ([%0d:%0d] > %0d)",
-                           burst.start_offset, burst.max_offset, this.len));
+                 $psprintf("Attempting to burst-write to an offset outside of the allocated region (burst to [%0d:%0d] > mem_size %0d)",
+                           offset,offset+value.size(),this.len))
       status = UVM_NOT_OK;
       return;
    end
 
-   begin
-      uvm_mem_burst b = new burst;
-      b.start_offset += this.get_start_offset();
-      b.max_offset   += this.get_start_offset();
+   mem.burst_write(status, offset + get_start_offset(), value,
+                   path, map, parent, prior, extension);
 
-      mem.burst_write(status, b, value,
-                      path, map,
-                      parent, prior, extension);
-   end
 endtask: burst_write
 
 
-task uvm_mam_region::burst_read(output uvm_status_e  status,
-                                input  uvm_mem_burst  burst,
+task uvm_mam_region::burst_read(output uvm_status_e       status,
+                                input  uvm_reg_addr_t     offset,
                                 output uvm_reg_data_t     value[],
-                                input  uvm_path_e    path = UVM_DEFAULT_PATH,
+                                input  uvm_path_e         path = UVM_DEFAULT_PATH,
                                 input  uvm_reg_map        map    = null,
                                 input  uvm_sequence_base  parent = null,
                                 input  int                prior = -1,
@@ -929,28 +951,21 @@ task uvm_mam_region::burst_read(output uvm_status_e  status,
       return;
    end
 
-   if (burst.start_offset > this.len ||
-       burst.max_offset   > this.len) begin
+   if (offset + value.size() > this.len) begin
       `uvm_error("RegModel",
-                 $psprintf("Attempting to burst-read from an offset outside of the allocated region ([%0d:%0d] > %0d)",
-                           burst.start_offset, burst.max_offset, this.len));
+                 $psprintf("Attempting to burst-read to an offset outside of the allocated region (burst to [%0d:%0d] > mem_size %0d)",
+                           offset,offset+value.size(),this.len))
       status = UVM_NOT_OK;
       return;
    end
 
-   begin
-      uvm_mem_burst b = new burst;
-      b.start_offset += this.get_start_offset();
-      b.max_offset   += this.get_start_offset();
+   mem.burst_read(status, offset + get_start_offset(), value,
+                  path, map, parent, prior, extension);
 
-      mem.burst_read(status, b, value,
-                     path, map,
-                     parent, prior, extension);
-   end
 endtask: burst_read
 
 
-task uvm_mam_region::poke(output uvm_status_e  status,
+task uvm_mam_region::poke(output uvm_status_e       status,
                           input  uvm_reg_addr_t     offset,
                           input  uvm_reg_data_t     value,
                           input  uvm_sequence_base  parent = null,
@@ -979,7 +994,7 @@ task uvm_mam_region::poke(output uvm_status_e  status,
 endtask: poke
 
 
-task uvm_mam_region::peek(output uvm_status_e  status,
+task uvm_mam_region::peek(output uvm_status_e       status,
                           input  uvm_reg_addr_t     offset,
                           output uvm_reg_data_t     value,
                           input  uvm_sequence_base  parent = null,

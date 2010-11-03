@@ -63,7 +63,7 @@ endclass
 class xbus_reg_env extends xbus_env;
 
   // the register model
-  xbus_reg_model rdb;
+  xbus_reg_model model;
 
   `uvm_component_utils(xbus_reg_env)
 
@@ -77,10 +77,10 @@ class xbus_reg_env extends xbus_env;
     num_masters = 1;
     num_slaves = 1;
     super.build();
-    rdb = xbus_reg_model::type_id::create("xa0", this);
-    rdb.build();
+    model = xbus_reg_model::type_id::create("xa0", this);
+    model.build();
     // Should be done using resources
-    rdb.set_hdl_path_root(`DEF2STR(`XA0_TOP_PATH));
+    model.set_hdl_path_root(`DEF2STR(`XA0_TOP_PATH));
   endfunction : build
 
   // Connect register sequencer to xbus master
@@ -88,9 +88,9 @@ class xbus_reg_env extends xbus_env;
     vif_container vif_obj = uvm_utils #(vif_container,"xbus_vif")::get_config(this,1);
     reg2xbus_adapter reg2xbus = reg2xbus_adapter::type_id::create("reg2xbus_adapter");
 
-    rdb.default_map.set_sequencer(masters[0].sequencer,reg2xbus);
+    model.default_map.set_sequencer(masters[0].sequencer,reg2xbus);
 
-    assign_vi(vif_obj.vif); // xbus should do get_config, not this
+    assign_vi(vif_obj.vif); //  xbus agent should use get_config or resources, not assign_vi
     bus_monitor.set_report_verbosity_level(UVM_LOW);
     masters[0].sequencer.count = 0; //prevents auto-start
 
@@ -100,7 +100,7 @@ class xbus_reg_env extends xbus_env;
   function void end_of_elaboration();
     // Set up slave address map for xbus env (basic default)
     set_slave_address_map("slaves[0]", 0, 16'hffff);
-    bus_monitor.set_report_verbosity_level(UVM_HIGH);
+    bus_monitor.set_report_verbosity_level(UVM_NONE);
     //set_report_verbosity_level_hier(UVM_HIGH);
   endfunction : end_of_elaboration
 

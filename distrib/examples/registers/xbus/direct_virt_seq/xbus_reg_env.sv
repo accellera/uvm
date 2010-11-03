@@ -62,7 +62,7 @@ endclass
 class xbus_reg_env extends xbus_env;
 
   // the register model
-  xbus_reg_model rdb;
+  xbus_reg_model model;
 
   `uvm_component_utils(xbus_reg_env)
 
@@ -76,15 +76,15 @@ class xbus_reg_env extends xbus_env;
     num_masters = 1;
     num_slaves = 1;
     super.build();
-    rdb = xbus_reg_model::type_id::create("xa0", this);
-    rdb.build();
+    model = xbus_reg_model::type_id::create("xa0", this);
+    model.build();
     // Should be done using resources
     begin
     string top_path;
     top_path = `DEF2STR(`XA0_TOP_PATH);
     if (top_path[0] == "$")
        top_path = top_path.substr(6,top_path.len()-1);
-    rdb.set_hdl_path_root(top_path);
+    model.set_hdl_path_root(top_path);
     end
   endfunction : build
 
@@ -92,7 +92,7 @@ class xbus_reg_env extends xbus_env;
   function void connect();
     reg2xbus_adapter reg2xbus = reg2xbus_adapter::type_id::create("reg2xbus_seq");
     masters[0].sequencer.count = 0; //prevents auto-start
-    rdb.default_map.set_sequencer(masters[0].sequencer,reg2xbus);
+    model.default_map.set_sequencer(masters[0].sequencer,reg2xbus);
 
     // Assign interface
     begin
@@ -102,7 +102,7 @@ class xbus_reg_env extends xbus_env;
         uvm_report_fatal("NO_VIF","No access to bus signals. Use set_config_object to set the bus_vif_container.");
         return;
       end
-      assign_vi(vif_obj.vif);
+      assign_vi(vif_obj.vif); //  xbus agent should use get_config or resources, not assign_vi
     end
 
     bus_monitor.set_report_verbosity_level(UVM_LOW);

@@ -54,7 +54,7 @@ typedef class uvm_reg_adapter;
 // Return status for register operations
 //
 // UVM_IS_OK      - Operation completed successfully
-// UVM_NOT_OK      - Operation completed with error
+// UVM_NOT_OK     - Operation completed with error
 // UVM_HAS_X      - Operation completed successfully bit had unknown bits.
 //
 
@@ -71,13 +71,16 @@ typedef class uvm_reg_adapter;
 //
 // Path used for register operation
 //
-// UVM_BFM        - Use the front door
-// UVM_BACKDOOR   - Use the back door
-// UVM_DEFAULT_PATH    - Operation specified by the context
+// UVM_BFM          - Use the front door
+// UVM_BACKDOOR     - Use the back door
+// UVM_PREDICT      - Operation derived from observations by a bus monitor via
+   //                 the <uvm_predictor> class.
+// UVM_DEFAULT_PATH - Operation specified by the context
 //
    typedef enum {
       UVM_BFM,
       UVM_BACKDOOR,
+      UVM_PREDICT,
       UVM_DEFAULT_PATH
    } uvm_path_e;
 
@@ -146,7 +149,9 @@ typedef class uvm_reg_adapter;
 //
    typedef enum {
       UVM_READ,
-      UVM_WRITE
+      UVM_WRITE,
+      UVM_BURST_READ,
+      UVM_BURST_WRITE
    } uvm_access_e;
 
 
@@ -382,18 +387,107 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
 endclass
 
 
+//------------------------------------------------------------------------------
+// TYPE: uvm_hdl_path_slice
+//------------------------------------------------------------------------------
+//
+// Slice of an HDL path
+//
+// Struct that specifies the HDL variable that corresponds to all
+// or a portion of a register.
+//
+// path    - Path to the HDL variable.
+// offset  - Offset of the LSB in the register that this variable implements
+// size    - Number of bits (toward the MSB) that this variable implements
+//
+// If the HDL variable implements all of the register, ~offset~ and ~size~
+// are specified as -1. For example:
+//|
+//| r1.add_hdl_path('{ '{"r1", -1, -1} });
+//|
+//
+
+typedef struct {
+   string path;
+   int offset;
+   int size;
+} uvm_hdl_path_slice;
+
+
+//------------------------------------------------------------------------------
+// TYPE: uvm_hdl_path_concat
+//------------------------------------------------------------------------------
+//
+// Concatenation of HDL variables
+//
+// Array of <uvm_hdl_path_slice> specifing a concatenation
+// of HDL variables that implement a register in the HDL.
+//
+// Slices must be specified in most-to-least significant order.
+// Slices must not overlap. Gaps may exists in the concatentation
+// if portions of the registers are not implemented.
+//
+// For example, the following register
+//|
+//|        1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0
+//| Bits:  5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+//|       +-+---+-------------+---+-------+
+//|       |A|xxx|      B      |xxx|   C   |
+//|       +-+---+-------------+---+-------+
+//|
+//
+// would be specified using the following literal value:
+//|
+//|    '{ '{"A_reg", 15, 1},
+//|       '{"B_reg",  6, 7},
+//|       '{'C_reg",  0, 4} }
+//
+// If the register is implementd using a single HDL variable,
+// The array should specify a single slice with its ~offset~ and ~size~
+// specified as -1. For example:
+//|
+//| r1.add_hdl_path('{ '{"r1", -1, -1} });
+//|
+//
+
+typedef uvm_hdl_path_slice uvm_hdl_path_concat[];
+
+
+// concat2string
+
+function automatic string uvm_hdl_concat2string(uvm_hdl_path_concat slices);
+   string image = "{";
+   
+   if (slices.size() == 1) return slices[0].path;
+
+   foreach (slices[i]) begin
+      uvm_hdl_path_slice slice;
+      slice = slices[i];
+
+      image = { image, (i == 0) ? "" : ", ", slice.path };
+      if (slice.offset >= 0)
+         image = { image, "@", $psprintf("[%0d +: %0d]", slice.offset, slice.size) };
+   end
+
+   image = { image, "}" };
+
+   return image;
+endfunction
+
+
 `include "reg/uvm_hdl.svh"
 
+`include "reg/uvm_reg_item.svh"
 `include "reg/uvm_reg_adapter.svh"
 `include "reg/uvm_reg_sequence.svh"
+`include "reg/uvm_reg_backdoor.svh"
 `include "reg/uvm_reg_field.svh"
 `include "reg/uvm_vreg_field.svh"
-`include "reg/uvm_reg_backdoor.svh"
 `include "reg/uvm_reg.svh"
 `include "reg/uvm_reg_file.svh"
 `include "reg/uvm_mem_mam.svh"
-`include "reg/uvm_mem.svh"
 `include "reg/uvm_vreg.svh"
+`include "reg/uvm_mem.svh"
 `include "reg/uvm_reg_map.svh"
 `include "reg/uvm_reg_block.svh"
 

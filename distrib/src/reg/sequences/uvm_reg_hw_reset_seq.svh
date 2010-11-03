@@ -39,7 +39,7 @@
 // This is usually the first test executed on any DUT.
 //
 
-class uvm_reg_hw_reset_seq extends uvm_reg_sequence;
+class uvm_reg_hw_reset_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    `uvm_object_utils(uvm_reg_hw_reset_seq)
 

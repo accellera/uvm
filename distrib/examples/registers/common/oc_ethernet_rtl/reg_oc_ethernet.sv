@@ -38,7 +38,7 @@ class reg_reg_MODER extends uvm_reg;
       this.DLYCRCEN = uvm_reg_field::type_id::create("DLYCRCEN",,get_full_name());
       this.DLYCRCEN.configure(this, 1, 12, "RW", 1'h0, 0, 0);
       this.undocumented = uvm_reg_field::type_id::create("undocumented",,get_full_name());
-      this.undocumented.configure(this, 1, 11, "OTHER", 1'h0, 0, 0);
+      this.undocumented.configure(this, 1, 11, "DC", 1'h0, 0, 0);
       this.FULLD = uvm_reg_field::type_id::create("FULLD",,get_full_name());
       this.FULLD.configure(this, 1, 10, "RW", 1'h0, 0, 0);
       this.EXDFREN = uvm_reg_field::type_id::create("EXDFREN",,get_full_name());
@@ -252,7 +252,8 @@ class reg_reg_TX_BD_NUM extends uvm_reg;
 
    virtual function void build();
       this.TX_BD_NUM = uvm_reg_field::type_id::create("TX_BD_NUM",,get_full_name());
-      this.TX_BD_NUM.configure(this, 8, 0, "OTHER", 8'h40, 1, 1);
+      this.TX_BD_NUM.configure(this, 8, 0, "RW", 8'h40, 1, 1);
+      this.set_attribute("NO_REG_TESTS", "1");
    endfunction: build
 
    `uvm_object_utils(reg_reg_TX_BD_NUM)
@@ -314,11 +315,11 @@ class reg_reg_MIICOMMAND extends uvm_reg;
 
    virtual function void build();
       this.WCTRLDATA = uvm_reg_field::type_id::create("WCTRLDATA",,get_full_name());
-      this.WCTRLDATA.configure(this, 1, 2, "OTHER", 1'h0, 0, 0);
+      this.WCTRLDATA.configure(this, 1, 2, "DC", 1'h0, 0, 0);
       this.RSTAT = uvm_reg_field::type_id::create("RSTAT",,get_full_name());
-      this.RSTAT.configure(this, 1, 1, "OTHER", 1'h0, 0, 0);
+      this.RSTAT.configure(this, 1, 1, "DC", 1'h0, 0, 0);
       this.SCANSTAT = uvm_reg_field::type_id::create("SCANSTAT",,get_full_name());
-      this.SCANSTAT.configure(this, 1, 0, "OTHER", 1'h0, 0, 0);
+      this.SCANSTAT.configure(this, 1, 0, "DC", 1'h0, 0, 0);
    endfunction: build
 
    `uvm_object_utils(reg_reg_MIICOMMAND)
@@ -372,7 +373,7 @@ class reg_reg_MIIRX_DATA extends uvm_reg;
 
    virtual function void build();
       this.PRSD = uvm_reg_field::type_id::create("PRSD",,get_full_name());
-      this.PRSD.configure(this, 16, 0, "RU", 16'h0, 0, 1);
+      this.PRSD.configure(this, 16, 0, "RO", 16'h0, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_reg_MIIRX_DATA)

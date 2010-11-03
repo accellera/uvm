@@ -65,23 +65,24 @@ class reg2apb_adapter extends uvm_reg_adapter;
 
   `uvm_object_utils(reg2apb_adapter)
 
-  virtual function uvm_sequence_item reg2bus(uvm_reg_bus_item rw_access);
+  virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
     apb_item apb = apb_item::type_id::create("apb_item");
-    apb.read = (rw_access.kind == UVM_READ) ? 1 : 0;
-    apb.addr = rw_access.addr;
-    apb.data = rw_access.data;
+    apb.read = (rw.kind == UVM_READ) ? 1 : 0;
+    apb.addr = rw.addr;
+    apb.data = rw.data;
     return apb;
   endfunction
 
-  virtual function void bus2reg(uvm_sequence_item bus_item, uvm_reg_bus_item rw_access);
+  virtual function void bus2reg(uvm_sequence_item bus_item, ref uvm_reg_bus_op rw);
     apb_item apb;
     if (!$cast(apb,bus_item)) begin
       `uvm_fatal("NOT_APB_TYPE","Provided bus_item is not of the correct type")
       return;
     end
-    rw_access.kind = apb.read ? UVM_READ : UVM_WRITE;
-    rw_access.addr = apb.addr;
-    rw_access.data = apb.data;
+    rw.status = UVM_IS_OK;
+    rw.kind = apb.read ? UVM_READ : UVM_WRITE;
+    rw.addr = apb.addr;
+    rw.data = apb.data;
   endfunction
 
 endclass
@@ -90,23 +91,24 @@ class reg2wsh_adapter extends uvm_reg_adapter;
 
   `uvm_object_utils(reg2wsh_adapter)
 
-  virtual function uvm_sequence_item reg2bus(uvm_reg_bus_item rw_access);
+  virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
     wsh_item wsh = wsh_item::type_id::create("wsh_item");
-    wsh.read = (rw_access.kind == UVM_READ) ? 1 : 0;
-    wsh.addr = rw_access.addr;
-    wsh.data = rw_access.data;
+    wsh.read = (rw.kind == UVM_READ) ? 1 : 0;
+    wsh.addr = rw.addr;
+    wsh.data = rw.data;
     return wsh;
   endfunction
 
-  virtual function void bus2reg(uvm_sequence_item bus_item, uvm_reg_bus_item rw_access);
+  virtual function void bus2reg(uvm_sequence_item bus_item, ref uvm_reg_bus_op rw);
     wsh_item wsh;
     if (!$cast(wsh,bus_item)) begin
       `uvm_fatal("NOT_APB_TYPE","Provided bus_item is not of the correct type")
       return;
     end
-    rw_access.kind = wsh.read ? UVM_READ : UVM_WRITE;
-    rw_access.addr = wsh.addr;
-    rw_access.data = wsh.data;
+    rw.status = UVM_IS_OK;
+    rw.kind = wsh.read ? UVM_READ : UVM_WRITE;
+    rw.addr = wsh.addr;
+    rw.data = wsh.data;
   endfunction
 
 endclass

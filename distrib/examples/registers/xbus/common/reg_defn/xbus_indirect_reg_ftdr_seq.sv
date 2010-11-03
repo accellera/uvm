@@ -36,15 +36,46 @@ class xbus_indirect_reg_ftdr_seq extends uvm_reg_frontdoor;
 
    virtual task body();
 
-      m_am.xbus_rf.addr_reg.write(status, m_idx, UVM_DEFAULT_PATH, null, this, prior, extension, fname, lineno);
+      uvm_reg_item rw;
+      
+      $cast(rw,rw_info.clone());
+      rw.element = m_am.xbus_rf.addr_reg;
+      rw.kind    = UVM_WRITE;
+      rw.value[0]= m_idx;
+
+      m_am.xbus_rf.addr_reg.do_write(rw);
+
+      if (rw.status == UVM_NOT_OK)
+        return;
+
+      $cast(rw,rw_info.clone());
+      rw.element = m_am.xbus_rf.data_reg;
+
+      if (rw_info.kind == UVM_WRITE)
+        m_am.xbus_rf.data_reg.do_write(rw);
+      else begin
+        m_am.xbus_rf.data_reg.do_read(rw);
+        rw_info.value[0] = rw.value[0];
+      end
+
+      rw_info.status = rw.status;
+      /*
+      m_am.xbus_rf.addr_reg.write(rw.status, m_idx, UVM_DEFAULT_PATH, null,
+                                  rw_info.parent, rw_info.prior, rw_info.extension,
+                                  rw_info.fname, rw_info.lineno);
 
       if (status != UVM_IS_OK)
          return;
 
       if (is_write)
-         m_am.xbus_rf.data_reg.write(status, data, UVM_DEFAULT_PATH, null, this, prior, extension, fname, lineno);
+         m_am.xbus_rf.data_reg.write(rw_info.status, rw_info.value, UVM_DEFAULT_PATH, null,
+                                     rw_info.parent, rw_info.prior, rw_info.extension,
+                                     rw_info.fname, rw_info.lineno);
       else
-         m_am.xbus_rf.data_reg.read(status, data, UVM_DEFAULT_PATH, null, this, prior, extension, fname, lineno);
+         m_am.xbus_rf.data_reg.read (rw_info.status, rw_info.value, UVM_DEFAULT_PATH, null,
+                                     rw_info.parent, rw_info.prior, rw_info.extension,
+                                     rw_info.fname, rw_info.lineno);
+         */
 
    endtask
 

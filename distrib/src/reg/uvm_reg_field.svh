@@ -20,20 +20,7 @@
 // -------------------------------------------------------------
 //
 
-//
-// Title: Register Field Abstraction Base Classes
-//
-// A field is an atomic value in the DUT and
-// are wholly contained in a register.
-// All bits in a field have the same access policy.
-//
-// <uvm_reg_field> : base for abstract register fields
-//
-// <uvm_reg_field_cbs> : base for user-defined pre/post read/write callbacks
-//
-
-
-typedef class uvm_reg_field_cbs;
+typedef class uvm_reg_cbs;
 
 
 //-----------------------------------------------------------------
@@ -49,27 +36,28 @@ typedef class uvm_reg_field_cbs;
 //-----------------------------------------------------------------
 class uvm_reg_field extends uvm_object;
 
-   local string access;
-   local uvm_reg parent;
-   local int unsigned lsb;
-   local int unsigned size;
-   local uvm_reg_data_t  mirrored; // What we think is in the HW
-   local uvm_reg_data_t  desired;  // Mirrored after set()
-   rand  uvm_reg_data_t  value;    // Mirrored after randomize()
+   rand  uvm_reg_data_t  value; // Mirrored after randomize()
+
+   local uvm_reg_data_t  m_mirrored; // What we think is in the HW
+   local uvm_reg_data_t  m_desired;  // Mirrored after set()
+   local string          m_access;
+   local uvm_reg         m_parent;
+   local int unsigned    m_lsb;
+   local int unsigned    m_size;
    local uvm_reg_data_t  m_reset[string];
-   local bit written;
-   local bit read_in_progress;
-   local bit write_in_progress;
-   local string fname = "";
-   local int lineno = 0;
-   local int cover_on;
-   local bit individually_accessible = 0;
-   local string attributes[string];
+   local bit             m_written;
+   local bit             m_read_in_progress;
+   local bit             m_write_in_progress;
+   local string          m_fname = "";
+   local int             m_lineno = 0;
+   local int             m_cover_on;
+   local bit             m_individually_accessible = 0;
+   local string          m_attributes[string];
 
 
    constraint uvm_reg_field_valid {
-      if (`UVM_REG_DATA_WIDTH > size) {
-         value < (`UVM_REG_DATA_WIDTH'h1 << size);
+      if (`UVM_REG_DATA_WIDTH > m_size) {
+         value < (`UVM_REG_DATA_WIDTH'h1 << m_size);
       }
    }
 
@@ -79,17 +67,18 @@ class uvm_reg_field extends uvm_object;
    // Group: Initialization
    //----------------------
 
-   //------------------------------------------------------------------------
-   // FUNCTION: new
+   // Function: new
+   //
    // Create a new field instance
    //
    // This method should not be used directly.
    // The uvm_reg_field::type_id::create() method shoudl be used instead.
-   //------------------------------------------------------------------------
+   //
    extern function new(string name = "uvm_reg_field");
 
-   //
+
    // Function: configure
+   //
    // Instance-specific configuration
    //
    // Specify the ~parent~ register of this field, its
@@ -127,58 +116,63 @@ class uvm_reg_field extends uvm_object;
    // Group: Introspection
    //---------------------
 
-   //
    // Function: get_name
+   //
    // Get the simple name
    //
    // Return the simple object name of this field
    //
 
-   //
+
    // Function: get_full_name
+   //
    // Get the hierarchical name
    //
    // Return the hierarchal name of this field
    // The base of the hierarchical name is the root block.
    //
-   extern virtual function string        get_full_name();
+   extern virtual function string get_full_name();
 
+
+   // Function: get_parent
    //
-   // FUNCTION: get_parent
    // Get the parent register
    //
-   extern virtual function uvm_reg get_parent ();
-   extern virtual function uvm_reg get_register  ();
+   extern virtual function uvm_reg get_parent();
+   extern virtual function uvm_reg get_register();
 
+
+   // Function: get_lsb_pos
    //
-   // FUNCTION: get_lsb_pos_in_register
    // Return the position of the field
-   ///
+   //
    // Returns the index of the least significant bit of the field
    // in the register that instantiates it.
    // An offset of 0 indicates a field that is aligned with the
    // least-significant bit of the register. 
    //
-   extern virtual function int unsigned get_lsb_pos_in_register();
+   extern virtual function int unsigned get_lsb_pos();
 
+
+   // Function: get_n_bits
    //
-   // FUNCTION: get_n_bits
    // Returns the width, in number of bits, of the field. 
    //
    extern virtual function int unsigned get_n_bits();
 
 
+   // Function: set_access
    //
-   // FUNCTION: set_access
    // Modify the access policy of the field
    //
    // Set the access policy of the field to the specified one and
    // return the previous access policy.
    //
-   extern virtual function string       set_access(string mode);
+   extern virtual function string set_access(string mode);
 
+
+   // Function: get_access
    //
-   // FUNCTION: get_access
    // Get the access policy of the field
    //
    // Returns the current access policy of the field
@@ -191,17 +185,18 @@ class uvm_reg_field extends uvm_object;
    // For example, a RW field may only be writable through one of
    // the address maps and read-only through all of the other maps.
    //
-   extern virtual function string       get_access(uvm_reg_map map = null);
+   extern virtual function string get_access(uvm_reg_map map = null);
 
+
+   // Function: get_access
    //
-   // FUNCTION: get_access
    // Check if access policy is a built-in one.
    //
    // Returns TRUE if the current access policy of the field,
    // when written and read through the specified address ~map~,
    // is a built-in access policy.
    //
-   extern virtual function bit          is_known_access(uvm_reg_map map = null);
+   extern virtual function bit is_known_access(uvm_reg_map map = null);
 
 
    //--------------
@@ -209,8 +204,8 @@ class uvm_reg_field extends uvm_object;
    //--------------
 
 
+   // Function: set
    //
-   // FUNCTION: set
    // Set the desired value for this field
    //
    // Sets the desired value of the field to the specified value.
@@ -239,8 +234,8 @@ class uvm_reg_field extends uvm_object;
                                     string          fname = "",
                                     int             lineno = 0);
 
+   // Function: get
    //
-   // FUNCTION: get
    // Return the desired value of the field
    //
    // Does not actually read the value
@@ -262,8 +257,8 @@ class uvm_reg_field extends uvm_object;
                                               int    lineno = 0);
 
 
+   // Function: reset
    //
-   // FUNCTION: reset
    // Reset the desired/mirrored value for this field.
    //
    // Sets the desired and mirror value of the field
@@ -279,8 +274,9 @@ class uvm_reg_field extends uvm_object;
    //
    extern virtual function void reset(string kind = "HARD");
 
+
+   // Function: get_reset
    //
-   // FUNCTION: get_reset
    // Get the specified reset value for this field
    //
    // Return the reset value for this field
@@ -288,11 +284,11 @@ class uvm_reg_field extends uvm_object;
    // Returns the current field value is no reset value has been
    // specified for the specified reset event.
    //
-   extern virtual function uvm_reg_data_t 
-                       get_reset(string kind = "HARD");
+   extern virtual function uvm_reg_data_t get_reset(string kind = "HARD");
 
+
+   // Function: has_reset
    //
-   // FUNCTION: has_reset
    // Check if the field has a reset value specified
    //
    // Return TRUE if this field has a reset value specified
@@ -301,20 +297,19 @@ class uvm_reg_field extends uvm_object;
    extern virtual function bit has_reset(string kind = "HARD");
 
 
+   // Function: set_reset
    //
-   // FUNCTION: set_reset
    // Specify or modify the reset value for this field
    //
    // Specify or modify the reset value for this field corresponding
    // to the cause specified by ~kind~.
    //
-   extern virtual function void
-                       set_reset(uvm_reg_data_t value,
-                                 string             kind = "HARD");
+   extern virtual function void set_reset(uvm_reg_data_t value,
+                                          string kind = "HARD");
 
 
+   // Function: needs_update
    //
-   // FUNCTION: needs_update
    // Check if the abstract model contains different desired and mirrored values.
    //
    // If a desired field value has been modified in the abstraction class
@@ -330,8 +325,8 @@ class uvm_reg_field extends uvm_object;
    extern virtual function bit needs_update();
 
 
+   // Task: write
    //
-   // TASK: write
    // Write the specified value in this field
    //
    // Write ~value~ in the DUT field that corresponds to this
@@ -361,9 +356,9 @@ class uvm_reg_field extends uvm_object;
    // in a best-effort not to modify the value of the other fields in the
    // register.
    //
-   extern virtual task write (output uvm_status_e  status,
+   extern virtual task write (output uvm_status_e       status,
                               input  uvm_reg_data_t     value,
-                              input  uvm_path_e    path = UVM_DEFAULT_PATH,
+                              input  uvm_path_e         path = UVM_DEFAULT_PATH,
                               input  uvm_reg_map        map = null,
                               input  uvm_sequence_base  parent = null,
                               input  int                prior = -1,
@@ -372,8 +367,8 @@ class uvm_reg_field extends uvm_object;
                               input  int                lineno = 0);
 
 
+   // Task: read
    //
-   // TASK: read
    // Read the current value from this field
    //
    // Read and return ~value~ from the DUT field that corresponds to this
@@ -401,9 +396,9 @@ class uvm_reg_field extends uvm_object;
    // If a backdoor access is used, the entire containing register is peeked
    // and the mirrored value of the other fields in the register is updated.
    //
-   extern virtual task read  (output uvm_status_e  status,
+   extern virtual task read  (output uvm_status_e       status,
                               output uvm_reg_data_t     value,
-                              input  uvm_path_e    path = UVM_DEFAULT_PATH,
+                              input  uvm_path_e         path = UVM_DEFAULT_PATH,
                               input  uvm_reg_map        map = null,
                               input  uvm_sequence_base  parent = null,
                               input  int                prior = -1,
@@ -412,8 +407,8 @@ class uvm_reg_field extends uvm_object;
                               input  int                lineno = 0);
                
 
+   // Task: poke
    //
-   // TASK: poke
    // Deposit the specified value in this field
    //
    // Deposit the value in the DUT field corresponding to this
@@ -425,7 +420,7 @@ class uvm_reg_field extends uvm_object;
    // The mirrored value will be updated using the <uvm_reg:predict()>
    // method.
    //
-   extern virtual task poke  (output uvm_status_e  status,
+   extern virtual task poke  (output uvm_status_e       status,
                               input  uvm_reg_data_t     value,
                               input  string             kind = "",
                               input  uvm_sequence_base  parent = null,
@@ -434,8 +429,8 @@ class uvm_reg_field extends uvm_object;
                               input  int                lineno = 0);
 
 
+   // Task: peek
    //
-   // TASK: peek
    // Read the current value from this field
    //
    // Sample the value in the DUT field corresponding to this
@@ -449,7 +444,7 @@ class uvm_reg_field extends uvm_object;
    // are updated using the <uvm_reg:predict()> method.
    //
    //
-   extern virtual task peek  (output uvm_status_e  status,
+   extern virtual task peek  (output uvm_status_e       status,
                               output uvm_reg_data_t     value,
                               input  string             kind = "",
                               input  uvm_sequence_base  parent = null,
@@ -458,8 +453,8 @@ class uvm_reg_field extends uvm_object;
                               input  int                lineno = 0);
                
 
+   // Task: mirror
    //
-   // TASK: mirror
    // Read the field and update/check its mirror value
    //
    // Read the field and optionally compared the readback value
@@ -492,8 +487,17 @@ class uvm_reg_field extends uvm_object;
                               input  int               lineno = 0);
 
 
-   //-----------------------------------------------------------------
-   // FUNCTION: predict
+   // Function: is_indv_accessible
+   //
+   // Check if this field can be written individually, i.e. without
+   // affecting other fields in the containing register.
+   //
+   extern function bit is_indv_accessible (uvm_path_e  path,
+                                           uvm_reg_map local_map);
+
+
+   // Function: predict
+   //
    // Update the mirrored value for this field
    //
    // Predict the mirror value of the field
@@ -507,37 +511,46 @@ class uvm_reg_field extends uvm_object;
    // was observed in a write transaction on the specified address ~map~ or
    // backdoor (if ~path~ is <UVM_BACKDOOR>).
    // If ~kind~ is specified as <UVM_PREDICT_DIRECT>, the value
-   // was computed and is updated as-is, without reguard to any access policy.
+   // was computed and is updated as-is, without regard to any access policy.
    // For example, the mirrored value of a read-only field is modified
    // by this method if ~kind~ is specified as <UVM_PREDICT_DIRECT>.
    //
-   // This method does not allow any explicit update of the mirror,
+   // This method does not allow any explicit update of the mirror
    // when the register containing this field is busy executing
    // a transaction because the results are unpredictable and
    // indicative of a race condition in the testbench.
    //
    // Returns TRUE if the prediction was succesful.
+   //
    extern virtual function bit predict (uvm_reg_data_t  value,
-                                        uvm_predict_e kind = UVM_PREDICT_DIRECT,
-                                        uvm_path_e path = UVM_BFM,
+                                        uvm_predict_e   kind = UVM_PREDICT_DIRECT,
+                                        uvm_path_e      path = UVM_BFM,
                                         uvm_reg_map     map = null,
                                         string          fname = "",
                                         int             lineno = 0);
 
-   /*local*/ extern virtual function uvm_reg_data_t XpredictX (uvm_reg_data_t  cur_val,
-        	                                               uvm_reg_data_t  wr_val,
-                                                               uvm_reg_map  map);
 
-   /*local*/ extern virtual function void Xpredict_readX (uvm_reg_data_t  value,
-                                                          uvm_path_e path,
-                                                          uvm_reg_map  map);
 
-   /*local*/ extern virtual function void Xpredict_writeX(uvm_reg_data_t  value,
-                                                          uvm_path_e path,
-                                                          uvm_reg_map  map);
+   /*local*/ extern virtual function uvm_reg_data_t XpredictX (uvm_reg_data_t cur_val,
+                                                               uvm_reg_data_t wr_val,
+                                                               uvm_reg_map    map);
 
-   /*local*/ extern virtual function uvm_reg_data_t XupdX();
+   /*local*/ extern virtual function void Xpredict_readX (uvm_reg_data_t value,
+                                                          uvm_path_e     path,
+                                                          uvm_reg_map    map);
+
+   /*local*/ extern virtual function void Xpredict_writeX(uvm_reg_data_t value,
+                                                          uvm_path_e     path,
+                                                          uvm_reg_map    map);
+
+   /*local*/ extern virtual function uvm_reg_data_t XupdateX();
   
+   /*local*/ extern function bit Xcheck_accessX (input uvm_reg_item rw,
+                                                 output uvm_reg_map_info map_info,
+                                                 input string caller);
+
+   extern virtual task do_write(uvm_reg_item rw);
+   extern virtual task do_read(uvm_reg_item rw);
 
    extern function void pre_randomize();
    extern function void post_randomize();
@@ -547,8 +560,8 @@ class uvm_reg_field extends uvm_object;
    // Group: Attributes
    //------------------
 
+   // Function: set_attribute
    //
-   // FUNCTION: set_attribute
    // Set an attribute.
    //
    // Set the specified attribute to the specified value for this field.
@@ -560,8 +573,9 @@ class uvm_reg_field extends uvm_object;
    extern virtual function void set_attribute(string name,
                                               string value);
 
+
+   // Function: get_attribute
    //
-   // FUNCTION: get_attribute
    // Get an attribute value.
    //
    // Get the value of the specified attribute for this field.
@@ -577,8 +591,9 @@ class uvm_reg_field extends uvm_object;
    extern virtual function string get_attribute(string name,
                                                 bit inherited = 1);
 
+ 
+   // Function: get_attributes
    //
-   // FUNCTION: get_attributes
    // Get all attribute values.
    //
    // Get the name of all attribute for this field.
@@ -592,10 +607,10 @@ class uvm_reg_field extends uvm_object;
    // Group: Callbacks
    //-----------------
 
-   `uvm_register_cb(uvm_reg_field, uvm_reg_field_cbs)
+   `uvm_register_cb(uvm_reg_field, uvm_reg_cbs)
 
-   //--------------------------------------------------------------------------
-   // TASK: pre_write
+
+   // Task: pre_write
    // Called before field write.
    //
    // If the specified data value, access ~path~ or address ~map~ are modified,
@@ -606,15 +621,13 @@ class uvm_reg_field extends uvm_object;
    // on the containing register.
    // The registered callback methods are invoked after the invocation
    // of this method.
-   //--------------------------------------------------------------------------
-   virtual task pre_write  (ref uvm_reg_data_t  wdat,
-                            ref uvm_path_e path,
-                            ref uvm_reg_map     map);
-   endtask
+   //
+   virtual task pre_write  (uvm_reg_item rw); endtask
 
-   //--------------------------------------------------------------------------
-   // TASK: post_write
-   // Called after field write
+
+   // Task: post_write
+   //
+   // Called after field write.
    //
    // If the specified ~status~ is modified,
    // the updated status will be
@@ -624,18 +637,15 @@ class uvm_reg_field extends uvm_object;
    // on the containing register.
    // The registered callback methods are invoked before the invocation
    // of this method.
-   //--------------------------------------------------------------------------
-   virtual task post_write (uvm_reg_data_t        wdat,
-                            uvm_path_e       path,
-                            uvm_reg_map           map,
-                            ref uvm_status_e status);
-   endtask
+   //
+   virtual task post_write (uvm_reg_item rw); endtask
 
-   //--------------------------------------------------------------------------
-   // TASK: pre_read
+
+   // Task: pre_read
+   //
    // Called before field read.
    //
-   // If the specified access ~path~ or address ~map~ are modified,
+   // If the access ~path~ or address ~map~ in the ~rw~ argument are modified,
    // the updated access path or address map will be used to perform
    // the register operation.
    //
@@ -643,29 +653,24 @@ class uvm_reg_field extends uvm_object;
    // on the containing register.
    // The registered callback methods are invoked after the invocation
    // of this method.
-   //--------------------------------------------------------------------------
-   virtual task pre_read   (ref uvm_path_e path,
-                            ref uvm_reg_map     map);
-   endtask
+   //
+   virtual task pre_read (uvm_reg_item rw); endtask
 
-   //--------------------------------------------------------------------------
-   // TASK: post_read
+
+   // Task: post_read
+   //
    // Called after field read.
    //
-   // If the specified readback data or~status~ is modified,
-   // the updated readback data or status will be
+   // If the specified readback data or~status~ in the ~rw~ argument is
+   // modified, the updated readback data or status will be
    // returned by the register operation.
    //
    // The field callback methods are invoked after the callback methods
    // on the containing register.
    // The registered callback methods are invoked before the invocation
    // of this method.
-   //--------------------------------------------------------------------------
-   virtual task post_read  (ref uvm_reg_data_t    rdat,
-                            uvm_path_e       path,
-                            uvm_reg_map           map,
-                            ref uvm_status_e status);
-   endtask
+   //
+   virtual task post_read  (uvm_reg_item rw); endtask
 
 
    extern virtual function void do_print (uvm_printer printer);
@@ -680,119 +685,9 @@ class uvm_reg_field extends uvm_object;
 endclass: uvm_reg_field
 
 
-//
-// CLASS: uvm_reg_field_cbs
-// Pre/post read/write callback facade class
-//
-class uvm_reg_field_cbs extends uvm_callback;
-   string fname;
-   int    lineno;
-
-   function new(string name = "uvm_reg_field_cbs");
-      super.new(name);
-   endfunction
-   
-
-   //
-   // Task: pre_write
-   // Callback called before a write operation.
-   //
-   // The registered callback methods are invoked after the invocation
-   // of the register pre-write callbacks and
-   // of the <uvm_reg_field::pre_write()> method.
-   //
-   // The written value ~wdat, access ~path~ and address ~map~,
-   // if modified, modifies the actual value, access path or address map
-   // used in the register operation.
-   //
-   virtual task pre_write (uvm_reg_field       field,
-                           ref uvm_reg_data_t  wdat,
-                           ref uvm_path_e path,
-                           ref uvm_reg_map     map);
-   endtask
-
-
-   //
-   // TASK: post_write
-   // Called after a write operation
-   //
-   // The registered callback methods are invoked after the invocation
-   // of the register post-write callbacks and
-   // before the invocation of the <uvm_reg_field::post_write()> method.
-   //
-   // The ~status~ of the operation,
-   // if modified, modifies the actual returned status.
-   //
-   virtual task post_write(uvm_reg_field       field,
-                           uvm_reg_data_t      wdat,
-                           uvm_path_e     path,
-                           uvm_reg_map         map,
-                           ref uvm_status_e status);
-   endtask
-
-
-   //
-   // TASK: pre_read
-   // Called before a field read.
-   //
-   // The registered callback methods are invoked after the invocation
-   // of the register pre-read callbacks and
-   // after the invocation of the <uvm_reg_field::pre_read()> method.
-   //
-   // The access ~path~ and address ~map~,
-   // if modified, modifies the actual access path or address map
-   // used in the register operation.
-   //
-   virtual task pre_read  (uvm_reg_field       field,
-                           ref uvm_path_e path,
-                           ref uvm_reg_map     map);
-   endtask
-
-
-   //
-   // TASK: post_read
-   // Called after a field read.
-   //
-   // The registered callback methods are invoked after the invocation
-   // of the register post-read callbacks and
-   // before the invocation of the <uvm_reg_field::post_read()> method.
-   //
-   // The readback value ~rdat and the ~status~ of the operation,
-   // if modified, modifies the actual returned readback value and status.
-   //
-   virtual task post_read (uvm_reg_field       field,
-                           ref uvm_reg_data_t  rdat,
-                           uvm_path_e     path,
-                           uvm_reg_map         map,
-                           ref uvm_status_e status);
-   endtask
-
-endclass: uvm_reg_field_cbs
-
-
-//
-// Type: uvm_reg_field_cb
-// Convenience callback type declaration
-//
-// Use this declaration to register field callbacks rather than
-// the more verbose parameterized class
-//
-typedef uvm_callbacks#(uvm_reg_field, uvm_reg_field_cbs) uvm_reg_field_cb;
-
-//
-// Type: uvm_reg_field_cb_iter
-// Convenience callback iterator type declaration
-//
-// Use this declaration to iterate over registered field callbacks
-// rather than the more verbose parameterized class
-//
-typedef uvm_callback_iter#(uvm_reg_field, uvm_reg_field_cbs) uvm_reg_field_cb_iter;
-
-
-
-//
+//------------------------------------------------------------------------------
 // IMPLEMENTATION
-//
+//------------------------------------------------------------------------------
 
 // new
 
@@ -803,76 +698,78 @@ endfunction: new
 
 // configure
 
-function void uvm_reg_field::configure(uvm_reg            parent,
-                                       int unsigned       size,
-                                       int unsigned       lsb_pos,
-                                       string             access,
+function void uvm_reg_field::configure(uvm_reg        parent,
+                                       int unsigned   size,
+                                       int unsigned   lsb_pos,
+                                       string         access,
                                        uvm_reg_data_t reset,
-                                       bit                is_rand = 0,
-                                       bit                individually_accessible = 0); 
-   this.parent = parent;
+                                       bit            is_rand = 0,
+                                       bit            individually_accessible = 0); 
+   m_parent = parent;
    if (size == 0) begin
-      `uvm_error("RegModel", $psprintf("Field \"%s\" cannot have 0 bits", this.get_full_name()));
+      `uvm_error("RegModel",
+         $psprintf("Field \"%s\" cannot have 0 bits", get_full_name()));
       size = 1;
    end
    if (size > `UVM_REG_DATA_WIDTH) begin
-      `uvm_error("RegModel", $psprintf("Field \"%s\" cannot have more than %0d bits",
-                                  this.get_full_name(), `UVM_REG_DATA_WIDTH))
+      `uvm_error("RegModel",
+         $psprintf("Field \"%s\" cannot have more than %0d bits",
+                   get_full_name(), `UVM_REG_DATA_WIDTH))
       size = `UVM_REG_DATA_WIDTH;
    end
 
-   this.size                    = size;
-   this.access                  = access.toupper();
-   this.set_reset(reset);
-   this.lsb                     = lsb_pos;
-   this.individually_accessible = individually_accessible;
-   this.cover_on                = UVM_NO_COVERAGE;
-   if (!is_rand) this.value.rand_mode(0);
-   this.parent.add_field(this);
-
-   this.written = 0;
+   m_size                    = size;
+   m_access                  = access.toupper();
+   m_lsb                     = lsb_pos;
+   m_individually_accessible = individually_accessible;
+   m_cover_on                = UVM_NO_COVERAGE;
+   set_reset(reset);
+   if (!is_rand)
+     value.rand_mode(0);
+   m_parent.add_field(this);
+   m_written = 0;
 endfunction: configure
 
 
 // get_parent
 
 function uvm_reg uvm_reg_field::get_parent();
-   return this.parent;
+   return m_parent;
 endfunction: get_parent
 
 
 // get_full_name
 
 function string uvm_reg_field::get_full_name();
-   return {this.parent.get_full_name(), ".", this.get_name()};
+   return {m_parent.get_full_name(), ".", get_name()};
 endfunction: get_full_name
 
 
 // get_register
 
 function uvm_reg uvm_reg_field::get_register();
-   return this.parent;
+   return m_parent;
 endfunction: get_register
 
 
-// get_lsb_pos_in_register
+// get_lsb_pos
 
-function int unsigned uvm_reg_field::get_lsb_pos_in_register();
-   return this.lsb;
-endfunction: get_lsb_pos_in_register
+function int unsigned uvm_reg_field::get_lsb_pos();
+   return m_lsb;
+endfunction: get_lsb_pos
 
 
 // get_n_bits
 
 function int unsigned uvm_reg_field::get_n_bits();
-   return this.size;
+   return m_size;
 endfunction: get_n_bits
 
 
 // is_known_access
 
 function bit uvm_reg_field::is_known_access(uvm_reg_map map = null);
-   string acc = this.get_access(map);
+   string acc = get_access(map);
    case (acc)
      "RO", "RW", "RU", "RC", "W1C", "A0", "A1", "WO", "W1", "DC": return 1;
    endcase
@@ -883,13 +780,13 @@ endfunction
 // get_access
 
 function string uvm_reg_field::get_access(uvm_reg_map map = null);
-   get_access = this.access;
+   get_access = m_access;
 
-   if (parent.get_n_maps() == 1 || map == uvm_reg_map::backdoor)
+   if (m_parent.get_n_maps() == 1 || map == uvm_reg_map::backdoor)
      return get_access;
 
    // Is the register restricted in this map?
-   case (this.parent.get_rights(map))
+   case (m_parent.get_rights(map))
      "RW":
        // No restrictions
        return get_access;
@@ -908,7 +805,7 @@ function string uvm_reg_field::get_access(uvm_reg_map map = null);
          "WO": begin
             `uvm_error("RegModel",
                        $psprintf("WO field \"%s\" restricted to RO in map \"%s\"",
-                                 this.get_name(), map.get_full_name()));
+                                 get_name(), map.get_full_name()));
          end
 
          // No change for the other modes (OTHER, USERx)
@@ -924,18 +821,17 @@ function string uvm_reg_field::get_access(uvm_reg_map map = null);
          "W1C",
          "A0",
          "A1": begin
-            `uvm_error("RegModel",
-                       $psprintf("%s field \"%s\" restricted to WO in map \"%s\"",
-                                 get_access, this.get_name(), map.get_full_name()));
+            `uvm_error("RegModel", {get_access," field '",get_full_name(),
+                       "' restricted to WO in map '",map.get_full_name(),"'"})
          end
 
          // No change for the other modes
        endcase
 
      default:
-       `uvm_error("RegModel",
-                  $psprintf("Shared register \"%s\" containing field \"%s\" is not shared in map \"%s\"",
-                            this.parent.get_name(), this.get_name(), map.get_full_name()))
+       `uvm_error("RegModel", {"Shared register '",m_parent.get_full_name(),
+                  "' containing field '",get_name(),"' is not shared in map '",
+                  map.get_full_name(),"'"})
    endcase
 endfunction: get_access
 
@@ -943,8 +839,8 @@ endfunction: get_access
 // set_access
 
 function string uvm_reg_field::set_access(string mode);
-   set_access = this.access;
-   this.access = mode.toupper();
+   set_access = m_access;
+   m_access = mode.toupper();
 endfunction: set_access
 
 
@@ -955,21 +851,21 @@ endfunction: set_access
 // set_attribute
 
 function void uvm_reg_field::set_attribute(string name,
-                                         string value);
+                                           string value);
    if (name == "") begin
       `uvm_error("RegModel", {"Cannot set anonymous attribute \"\" in field '",
                          get_full_name(),"'"})
       return;
    end
 
-   if (this.attributes.exists(name)) begin
+   if (m_attributes.exists(name)) begin
       if (value != "") begin
          `uvm_warning("RegModel", {"Redefining attribute '",name,"' in field '",
                          get_full_name(),"' to '",value,"'"})
-         this.attributes[name] = value;
+         m_attributes[name] = value;
       end
       else begin
-         this.attributes.delete(name);
+         m_attributes.delete(name);
       end
       return;
    end
@@ -980,7 +876,7 @@ function void uvm_reg_field::set_attribute(string name,
       return;
    end
 
-   this.attributes[name] = value;
+   m_attributes[name] = value;
 endfunction: set_attribute
 
 
@@ -988,11 +884,11 @@ endfunction: set_attribute
 
 function string uvm_reg_field::get_attribute(string name,
                                              bit inherited = 1);
-   if (inherited && parent != null)
-      get_attribute = parent.get_attribute(name);
+   if (inherited && m_parent != null)
+      get_attribute = m_parent.get_attribute(name);
 
-   if (get_attribute == "" && this.attributes.exists(name))
-      return this.attributes[name];
+   if (get_attribute == "" && m_attributes.exists(name))
+      return m_attributes[name];
 
    return "";
 endfunction: get_attribute
@@ -1001,14 +897,14 @@ endfunction: get_attribute
 // get_attributes
 
 function void uvm_reg_field::get_attributes(ref string names[string],
-                                          input bit inherited = 1);
+                                            input bit inherited = 1);
    // attributes at higher levels supercede those at lower levels
-   if (inherited && parent != null)
-     this.parent.get_attributes(names,1);
+   if (inherited && m_parent != null)
+     m_parent.get_attributes(names,1);
 
-   foreach (attributes[nm])
+   foreach (m_attributes[nm])
      if (!names.exists(nm))
-       names[nm] = attributes[nm];
+       names[nm] = m_attributes[nm];
 
 endfunction
 
@@ -1018,11 +914,11 @@ endfunction
 function uvm_reg_data_t uvm_reg_field::XpredictX (uvm_reg_data_t cur_val,
                                                   uvm_reg_data_t wr_val,
                                                   uvm_reg_map    map);
-   case (this.get_access(map))
+   case (get_access(map))
      "RW":    return wr_val;
      "RO":    return cur_val;
      "WO":    return wr_val;
-     "W1":    return (this.written) ? cur_val : wr_val;
+     "W1":    return (m_written) ? cur_val : wr_val;
      "RU":    return cur_val;
      "RC":    return cur_val;
      "W1C":   return cur_val & (~wr_val);
@@ -1039,14 +935,14 @@ endfunction: XpredictX
 
 // Xpredict_readX
 
-function void uvm_reg_field::Xpredict_readX (uvm_reg_data_t  value,
-                                             uvm_path_e path,
-                                             uvm_reg_map     map);
-   value &= ('b1 << this.size)-1;
+function void uvm_reg_field::Xpredict_readX (uvm_reg_data_t value,
+                                             uvm_path_e     path,
+                                             uvm_reg_map    map);
+   value &= ('b1 << m_size)-1;
 
    if (path == UVM_BFM) begin
 
-      string acc = this.get_access(map);
+      string acc = get_access(map);
 
       // If the value was obtained via a front-door access
       // then a RC field will have been cleared
@@ -1060,71 +956,67 @@ function void uvm_reg_field::Xpredict_readX (uvm_reg_data_t  value,
         return;
    end
 
-   this.mirrored = value;
-   this.desired = value;
+   m_mirrored = value;
+   m_desired = value;
    this.value   = value;
 endfunction: Xpredict_readX
 
 
 // Xpredict_writeX 
 
-function void uvm_reg_field::Xpredict_writeX (uvm_reg_data_t  value,
-                                              uvm_path_e path,
-                                              uvm_reg_map     map);
-   if (value >> this.size) begin
-      `uvm_warning("RegModel", $psprintf("Specified value (0x%h) greater than field \"%s\" size (%0d bits)",
-                                       value, this.get_name(), this.size));
-      value &= ('b1 << this.size)-1;
-   end
+function void uvm_reg_field::Xpredict_writeX (uvm_reg_data_t value,
+                                              uvm_path_e     path,
+                                              uvm_reg_map    map);
+   value &= ('b1 << m_size)-1;
 
-   if (path == UVM_BFM) begin
-      this.mirrored = this.XpredictX(this.mirrored, value, map);
-   end
-   else this.mirrored = value;
+   if (path == UVM_BFM)
+      m_mirrored = XpredictX(m_mirrored, value, map);
+   else
+      m_mirrored = value;
 
-   this.desired = this.mirrored;
-   this.value   = this.mirrored;
+   m_desired  = m_mirrored;
+   this.value = m_mirrored;
 
-   this.written = 1;
+   m_written = 1;
 endfunction: Xpredict_writeX
 
 
-// XupdX
+// XupdateX
 
-function uvm_reg_data_t  uvm_reg_field::XupdX();
+function uvm_reg_data_t  uvm_reg_field::XupdateX();
    // Figure out which value must be written to get the desired value
    // given what we think is the current value in the hardware
-   XupdX = 0;
+   XupdateX = 0;
 
-   case (this.access)
-      "RW":    XupdX = this.desired;
-      "RO":    XupdX = this.desired;
-      "WO":    XupdX = this.desired;
-      "W1":    XupdX = this.desired;
-      "RU":    XupdX = this.desired;
-      "RC":    XupdX = this.desired;
-      "W1C":   XupdX = ~this.desired;
-      "A0":    XupdX = this.desired;
-      "A1":    XupdX = this.desired;
-      default: XupdX = this.desired;
+   case (m_access)
+      "RW":    XupdateX = m_desired;
+      "RO":    XupdateX = m_desired;
+      "WO":    XupdateX = m_desired;
+      "W1":    XupdateX = m_desired;
+      "RU":    XupdateX = m_desired;
+      "RC":    XupdateX = m_desired;
+      "W1C":   XupdateX = ~m_desired;
+      "A0":    XupdateX = m_desired;
+      "A1":    XupdateX = m_desired;
+      default: XupdateX = m_desired;
    endcase
-endfunction: XupdX
+endfunction: XupdateX
 
 
 // predict
 
-function bit uvm_reg_field::predict(uvm_reg_data_t  value,
-                                    uvm_predict_e kind = UVM_PREDICT_DIRECT,
-                                    uvm_path_e path = UVM_BFM,
-                                    uvm_reg_map     map = null,
-                                    string          fname = "",
-                                    int             lineno = 0);
-   this.fname = fname;
-   this.lineno = lineno;
-   if (this.parent.Xis_busyX && kind == UVM_PREDICT_DIRECT) begin
-      `uvm_warning("RegModel", $psprintf("Trying to predict value of field \"%s\" while register \"%s\" is being accessed",
-                                       this.get_name(),
-                                       this.parent.get_full_name()));
+function bit uvm_reg_field::predict(uvm_reg_data_t value,
+                                    uvm_predict_e  kind = UVM_PREDICT_DIRECT,
+                                    uvm_path_e     path = UVM_BFM,
+                                    uvm_reg_map    map = null,
+                                    string         fname = "",
+                                    int            lineno = 0);
+   m_fname = fname;
+   m_lineno = lineno;
+   if (m_parent.m_is_busy && kind == UVM_PREDICT_DIRECT) begin
+      `uvm_warning("RegModel", {"Trying to predict value of field '",
+        get_name(),"' while register '",m_parent.get_full_name(),
+        "' is being accessed"})
       return 0;
    end
 
@@ -1139,9 +1031,9 @@ function bit uvm_reg_field::predict(uvm_reg_data_t  value,
    end
 
    // update the mirror with value as-is
-   value &= ('b1 << this.size)-1;
-   this.mirrored = value;
-   this.desired = value;
+   value &= ('b1 << m_size)-1;
+   m_mirrored = value;
+   m_desired = value;
    this.value   = value;
 
    return 1;
@@ -1153,27 +1045,28 @@ endfunction: predict
 function void uvm_reg_field::set(uvm_reg_data_t  value,
                                  string          fname = "",
                                  int             lineno = 0);
-   this.fname = fname;
-   this.lineno = lineno;
-   if (value >> this.size) begin
-      `uvm_warning("RegModel", $psprintf("Specified value (0x%h) greater than field \"%s\" size (%0d bits)",
-                                       value, this.get_name(), this.size));
-      value &= ('b1 << this.size)-1;
+   m_fname = fname;
+   m_lineno = lineno;
+   if (value >> m_size) begin
+      `uvm_warning("RegModel",
+         $psprintf("Specified value (0x%h) greater than field \"%s\" size (%0d bits)",
+             value, get_name(), m_size));
+      value &= ('b1 << m_size)-1;
    end
 
-   case (this.access)
-      "RW":    this.desired = value;
-      "RO":    this.desired = this.desired;
-      "WO":    this.desired = value;
-      "W1":    this.desired = (this.written) ? this.desired : value;
-      "RU":    this.desired = this.desired;
-      "RC":    this.desired = this.desired;
-      "W1C":   this.desired &= (~value);
-      "A0":    this.desired |= value;
-      "A1":    this.desired &= value;
-      default: this.desired = value;
+   case (m_access)
+      "RW":    m_desired = value;
+      "RO":    m_desired = m_desired;
+      "WO":    m_desired = value;
+      "W1":    m_desired = (m_written) ? m_desired : value;
+      "RU":    m_desired = m_desired;
+      "RC":    m_desired = m_desired;
+      "W1C":   m_desired &= (~value);
+      "A0":    m_desired |= value;
+      "A1":    m_desired &= value;
+      default: m_desired = value;
    endcase
-   this.value = this.desired;
+   this.value = m_desired;
 endfunction: set
 
  
@@ -1181,22 +1074,26 @@ endfunction: set
 
 function uvm_reg_data_t  uvm_reg_field::get(string  fname = "",
                                             int     lineno = 0);
-   this.fname = fname;
-   this.lineno = lineno;
-   get = this.desired;
+   m_fname = fname;
+   m_lineno = lineno;
+   get = m_desired;
 endfunction: get
 
 
 // reset
 
 function void uvm_reg_field::reset(string kind = "HARD");
-   if (!m_reset.exists(kind)) return;
-   
-   this.mirrored = m_reset[kind];
-   this.desired  = this.mirrored;
-   this.value    = this.mirrored;
 
-   if (kind == "HARD") this.written  = 0;
+   if (!m_reset.exists(kind))
+      return;
+   
+   m_mirrored = m_reset[kind];
+   m_desired  = m_mirrored;
+   value      = m_mirrored;
+
+   if (kind == "HARD")
+      m_written  = 0;
+
 endfunction: reset
 
 
@@ -1214,7 +1111,8 @@ endfunction: has_reset
 function uvm_reg_data_t
    uvm_reg_field::get_reset(string kind = "HARD");
 
-   if (!m_reset.exists(kind)) return this.desired;
+   if (!m_reset.exists(kind))
+      return m_desired;
 
    return m_reset[kind];
 
@@ -1224,7 +1122,7 @@ endfunction: get_reset
 // set_reset
 
 function void uvm_reg_field::set_reset(uvm_reg_data_t value,
-                                       string             kind = "HARD");
+                                       string         kind = "HARD");
    m_reset[kind] = value;
 endfunction: set_reset
 
@@ -1232,549 +1130,397 @@ endfunction: set_reset
 // needs_update
 
 function bit uvm_reg_field::needs_update();
-   needs_update = (this.mirrored != this.desired);
+   needs_update = (m_mirrored != m_desired);
 endfunction: needs_update
 
 
 typedef class uvm_reg_map_info;
 
+
+// Xcheck_accessX
+
+function bit uvm_reg_field::Xcheck_accessX(input uvm_reg_item rw,
+                                           output uvm_reg_map_info map_info,
+                                           input string caller);
+
+                        
+   if (rw.path == UVM_DEFAULT_PATH) begin
+     uvm_reg_block blk = m_parent.get_block();
+     rw.path = blk.get_default_path();
+   end
+
+   if (rw.path == UVM_BACKDOOR) begin
+      if (m_parent.get_backdoor() == null && !m_parent.has_hdl_path()) begin
+         `uvm_warning("RegModel",
+            {"No backdoor access available for field '",get_full_name(),
+            "' . Using frontdoor instead."})
+         rw.path = UVM_BFM;
+      end
+      else
+        rw.map = uvm_reg_map::backdoor();
+   end
+
+   if (rw.path != UVM_BACKDOOR) begin
+
+     rw.local_map = m_parent.get_local_map(rw.map,caller);
+
+     if (rw.local_map == null) begin
+        `uvm_error(get_type_name(), 
+           {"No transactor available to physically access memory from map '",
+            rw.map.get_full_name(),"'"})
+        rw.status = UVM_NOT_OK;
+        return 0;
+     end
+
+     map_info = rw.local_map.get_reg_map_info(m_parent);
+
+     if (map_info.frontdoor == null) begin
+
+        if (rw.parent == null)
+          `uvm_fatal("RegModel",
+               "Built-in frontdoor write requires non-null parent argument")
+
+        if (map_info.unmapped) begin
+           `uvm_error("RegModel", {"Field '",get_full_name(),
+                    "' in register that is unmapped in map '",
+                    rw.map.get_full_name(),
+                    "' and does not have a user-defined frontdoor"})
+           rw.status = UVM_NOT_OK;
+           return 0;
+        end
+     end
+
+     if (rw.map == null)
+       rw.map = rw.local_map;
+   end
+
+   return 1;
+endfunction
+
+
 // write
 
-task uvm_reg_field::write(output uvm_status_e  status,
+task uvm_reg_field::write(output uvm_status_e       status,
                           input  uvm_reg_data_t     value,
-                          input  uvm_path_e    path = UVM_DEFAULT_PATH,
+                          input  uvm_path_e         path = UVM_DEFAULT_PATH,
                           input  uvm_reg_map        map = null,
                           input  uvm_sequence_base  parent = null,
                           input  int                prior = -1,
                           input  uvm_object         extension = null,
                           input  string             fname = "",
                           input  int                lineno = 0);
-   uvm_reg_data_t  tmp,msk,temp_data;
-   uvm_reg_map local_map, system_map;
+
+   uvm_reg_item rw;
+   rw = uvm_reg_item::type_id::create("field_write_item",,get_full_name());
+   rw.element      = this;
+   rw.element_kind = UVM_FIELD;
+   rw.kind         = UVM_WRITE;
+   rw.value[0]     = value;
+   rw.path         = path;
+   rw.map          = map;
+   rw.parent       = parent;
+   rw.prior        = prior;
+   rw.extension    = extension;
+   rw.fname        = fname;
+   rw.lineno       = lineno;
+
+   do_write(rw);
+
+   status = rw.status;
+
+endtask
+
+
+// do_write
+
+task uvm_reg_field::do_write(uvm_reg_item rw);
+
+   uvm_reg_data_t   value_adjust;
+   uvm_reg_map      local_map;
    uvm_reg_map_info map_info;
+   uvm_reg_field    fields[$];
 
-   bit [`UVM_REG_BYTENABLE_WIDTH-1:0] byte_en = '0;
-   bit b_en[$];
-   uvm_reg_field fields[$];
-   int fld_pos = 0;
-   bit indv_acc = 0;
-   int j = 0,bus_width, n_bits,n_access,n_access_extra,n_bytes_acc,temp_be;
-   
-   uvm_reg_block  blk = this.parent.get_block();
-			
-   if (path == UVM_DEFAULT_PATH)
-     path = blk.get_default_path();
+   m_parent.XatomicX(1);
+   m_fname  = rw.fname;
+   m_lineno = rw.lineno;
+   m_write_in_progress = 1'b1;
 
-   local_map = this.parent.get_local_map(map,"read()");
-
-   if (local_map != null)
-      map_info = local_map.get_reg_map_info(this.parent);
-
-   if (path != UVM_BACKDOOR && !this.parent.maps.exists(local_map) ) begin
-     `uvm_error(get_type_name(), $psprintf("No transactor available to physically access map \"%s\".",
-        map.get_full_name()));
+   if (!Xcheck_accessX(rw,map_info,"write()"))
      return;
-   end
-                        
-   this.fname = fname;
-   this.lineno = lineno;
-   this.write_in_progress = 1'b1;
 
-   this.parent.XatomicX(1);
-
-   if (value >> this.size) begin
+   if (rw.value[0] >> m_size) begin
       `uvm_warning("RegModel", {"uvm_reg_field::write(): Value greater than field '",
                           get_full_name(),"'"})
-      value &= value & ((1<<this.size)-1);
+      rw.value[0] &= ((1<<m_size)-1);
    end
-			temp_data = value;
-   tmp = 0;
-   // What values are written for the other fields???
-   this.parent.get_fields(fields);
+
+   // Get values to write to the other fields in register
+   m_parent.get_fields(fields);
    foreach (fields[i]) begin
+
       if (fields[i] == this) begin
-         tmp |= value << this.lsb;
-	 fld_pos = i;
+         value_adjust |= rw.value[0] << m_lsb;
          continue;
       end
 
-      // It depends on what kind of bits they are made of...
-      case (fields[i].get_access(local_map))
-        // These...
-        "RC",
-        "W1C",
-        "A0":
-          // Use all 0's
-          tmp |= 0;
-
-        // These...
+      case (fields[i].get_access(rw.local_map))
+        "RC", "W1C", "A0":
+           value_adjust |= 0;
         "A1":
-          // Use all 1's
-          tmp |= ((1<<fields[i].get_n_bits())-1) << fields[i].get_lsb_pos_in_register();
-
+           value_adjust |= ((1<<fields[i].get_n_bits())-1) << fields[i].get_lsb_pos();
         default:
-          // Use their mirrored value
-          tmp |= fields[i].get() << fields[i].get_lsb_pos_in_register();
+           value_adjust |= fields[i].m_mirrored << fields[i].get_lsb_pos();
 
       endcase
    end
 
 `ifdef UVM_REG_NO_INDIVIDUAL_FIELD_ACCESS
+   rw.element_kind = UVM_REG;
+   rw.element = m_parent;
+   rw.value = value_adjust;
+   m_parent.do_write(rw)
+`else        
 
-   this.parent.XwriteX(status, tmp, path, map, parent, prior);
-
-`else	
-
-   system_map = local_map.get_root_map();
-   bus_width = local_map.get_n_bytes();  //// get the width of the physical interface data bus in bytes
-			
-   //
-   // Check if this field is the sole occupant of the
-   // complete bus_data(width)
-   //
-   if (fields.size() == 1) begin
-      indv_acc = 1;
+   if (!is_indv_accessible(rw.path,rw.local_map)) begin
+      rw.element_kind = UVM_REG;
+      rw.element = m_parent;
+      rw.value[0] = value_adjust;
+      m_parent.do_write(rw);
    end
    else begin
-      if (fld_pos == 0) begin
-         if (fields[fld_pos+1].lsb%(bus_width*8) == 0)  indv_acc = 1;
-         else if ((fields[fld_pos+1].lsb - fields[fld_pos].size) >= (fields[fld_pos+1].lsb%(bus_width*8))) indv_acc = 1;
-         else indv_acc = 0;
-      end 
-      else if(fld_pos == (fields.size()-1)) begin
-         if (fields[fld_pos].lsb%(bus_width*8) == 0)  indv_acc = 1;
-         else if ((fields[fld_pos].lsb - (fields[fld_pos-1].lsb+fields[fld_pos-1].size)) >= (fields[fld_pos].lsb%(bus_width*8))) indv_acc = 1;
-         else indv_acc = 0;
-      end 
-      else begin
-         if (fields[fld_pos].lsb%(bus_width*8) == 0) begin
-            if (fields[fld_pos+1].lsb%(bus_width*8) == 0) indv_acc = 1;
-            else if ((fields[fld_pos+1].lsb - (fields[fld_pos].lsb+fields[fld_pos].size)) >= (fields[fld_pos+1].lsb%(bus_width*8))) indv_acc = 1;
-            else indv_acc = 0;
-         end 
-         else begin
-            if(((fields[fld_pos+1].lsb - (fields[fld_pos].lsb+fields[fld_pos].size))>= (fields[fld_pos+1].lsb%(bus_width*8)))  &&
-               ((fields[fld_pos].lsb - (fields[fld_pos-1].lsb+fields[fld_pos-1].size))>=(fields[fld_pos].lsb%(bus_width*8))) ) indv_acc = 1;
-            else indv_acc = 0;				
-         end
-      end
-   end
-			
-   // BUILT-IN FRONTDOOR
-   if (path == UVM_BFM) begin
-      if(this.individually_accessible) begin
-         uvm_reg_adapter    adapter;
-         uvm_sequencer_base sequencer;
-         bit is_passthru;
-         uvm_reg_passthru_adapter passthru_adapter;
 
-         if (local_map == null)
-           return;
+     uvm_reg_map system_map = rw.local_map.get_root_map();
+     uvm_reg_field_cb_iter cbs = new(this);
 
-         system_map = local_map.get_root_map();
+     m_parent.m_is_busy = 1;
 
-         adapter = system_map.get_adapter();
-         sequencer = system_map.get_sequencer();
-         if ($cast(passthru_adapter,adapter))
-            is_passthru = 1;
-
-   	 if(adapter.supports_byte_enable || (indv_acc)) begin
-
-	    uvm_reg_field_cb_iter cbs = new(this);
-	    value = temp_data;
-
-            // PRE-WRITE CBS
-            this.pre_write(value, path, map);
-            for (uvm_reg_field_cbs cb = cbs.first(); cb != null;
-                 cb = cbs.next()) begin
-               cb.fname = this.fname;
-               cb.lineno = this.lineno;
-               cb.pre_write(this, value, path, map);
-            end
-	    this.parent.Xis_busyX = 1;
+     pre_write(rw);
+     for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
+        cb.pre_write(rw);
             
-	    n_access_extra = this.lsb%(bus_width*8);		
-	    n_access = n_access_extra + this.size;
-	    value = (value) << (n_access_extra);
-	    /* calculate byte_enables */
-	    temp_be = n_access_extra;
-            while(temp_be >= 8) begin
-	       b_en.push_back(0);
-               temp_be = temp_be - 8;
-	    end			
-	    temp_be = temp_be + this.size;
-     	    while(temp_be > 0) begin
-	       b_en.push_back(1);
-               temp_be = temp_be - 8;
-	    end
-	    /* calculate byte_enables */
-            
-	    if(n_access%8 != 0) n_access = n_access + (8 - (n_access%8)); 
-            n_bytes_acc = n_access/8;
-            
-            j = 0;
-	    n_bits = this.size;
-            foreach(map_info.addr[i]) begin
-               uvm_sequence_item bus_req = new("bus_wr");
-               uvm_reg_bus_item rw_access;
-	       uvm_reg_data_t  data;
-	       bit tt;
-	       data = value >> (j*8);
-	       
-	       for(int z=0;z<bus_width;z++) begin
-		  tt = b_en.pop_front();	
-		  byte_en[z] = tt;
-	       end	
-               
+     local_map.do_write(rw);
 
-               data = value >> (j*8);
+     if (system_map.get_auto_predict())
+        Xpredict_writeX(rw.value[0], rw.path, rw.map);
 
-               status = UVM_NOT_OK;
-                           
-               `uvm_info(get_type_name(), $psprintf("Writing 'h%0h at 'h%0h via map \"%s\"...",
-                                                    data, map_info.addr[i], map.get_full_name()), UVM_HIGH);
-                        
-               rw_access = uvm_reg_bus_item::type_id::create("rw_access",,{sequencer.get_full_name(),".",parent.get_full_name()});
-               rw_access.element = this;
-               rw_access.element_kind = UVM_REG;
-               rw_access.kind = UVM_WRITE;
-               rw_access.value = value;
-               rw_access.path = path;
-               rw_access.map = local_map;
-               rw_access.extension = extension;
-               rw_access.fname = fname;
-               rw_access.lineno = lineno;
+     post_write(rw);
+     for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
+        cb.post_write(rw);
 
-               rw_access.addr = map_info.addr[i];
-               rw_access.data = data;
-               rw_access.n_bits = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
-               rw_access.byte_en = '1;
-
-               bus_req.m_start_item(sequencer,parent,prior);
-               if (!is_passthru)
-                 parent.mid_do(rw_access);
-               bus_req = adapter.reg2bus(rw_access);
-               bus_req.m_finish_item(sequencer,parent);
-               bus_req.end_event.wait_on();
-               if (adapter.provides_responses) begin
-                 uvm_sequence_item bus_rsp;
-                 uvm_access_e op;
-                 parent.get_base_response(bus_rsp);
-                 adapter.bus2reg(bus_rsp,rw_access);
-               end
-               else begin
-                 adapter.bus2reg(bus_req,rw_access);
-               end
-               status = rw_access.status;
-               if (!is_passthru)
-                 parent.post_do(rw_access);
-
-               `uvm_info(get_type_name(), $psprintf("Wrote 'h%0h at 'h%0h via map \"%s\": %s...",
-                                                    data, map_info.addr[i], map.get_full_name(), status.name()), UVM_HIGH);
-
-               if (status != UVM_IS_OK && status != UVM_HAS_X) return;
-               j += bus_width;
-               n_bits -= bus_width * 8;
-            end
-            /*if (this.cover_on) begin
-             this.sample(value, 0, di);
-             this.parent.XsampleX(this.offset_in_block[di], di);
-         end*/
-            
-            this.parent.Xis_busyX = 0;
-	    value = (value >> (n_access_extra)) & ((1<<this.size))-1;
-
-            if (system_map.get_auto_predict() == UVM_PREDICT_DIRECT)
-	      this.Xpredict_writeX(value, path, map);
-            
-            // POST-WRITE CBS
-            this.post_write(value, path, map, status);
-            for (uvm_reg_field_cbs cb = cbs.first(); cb != null;
-                 cb = cbs.next()) begin
-               cb.fname = this.fname;
-               cb.lineno = this.lineno;
-               cb.post_write(this, value, path, map, status);
-            end
-   	 end else begin
-   	    if(!adapter.supports_byte_enable) begin
-               `uvm_warning("RegModel", $psprintf("Protocol does not support byte enabling to write field \"%s\". Writing complete register instead.", this.get_name()));
-   	    end		
-   	    if(!indv_acc) begin
-               `uvm_warning("RegModel", $psprintf("Field \"%s\" is not individually accessible. Writing complete register instead.", this.get_name()));
-   	    end		
-            this.parent.XwriteX(status, tmp, path, map, parent, prior);
-   	 end	
-      end else begin
-         `uvm_warning("RegModel", $psprintf("Individual field access not available for field \"%s\". Writing complete register instead.", this.get_name()));
-         this.parent.XwriteX(status, tmp, path, map, parent, prior);
-      end	
+     m_parent.m_is_busy = 0;
+      
    end
 
-   // Individual field access not available for BACKDOOR access		
-   if(path == UVM_BACKDOOR) begin
-      `uvm_warning("RegModel", $psprintf("Individual field access not available with BACKDOOR access for field \"%s\". Writing complete register instead.", this.get_name()));
-      this.parent.XwriteX(status, tmp, path, map, parent, prior);
-   end
 `endif
-   this.parent.XatomicX(0);
-   this.write_in_progress = 1'b0;
-endtask: write
+
+   m_fname = "";
+   m_lineno = 0;
+   m_write_in_progress = 1'b0;
+   m_parent.XatomicX(0);
+
+endtask: do_write
 
 
 // read
 
-task uvm_reg_field::read(output uvm_status_e  status,
+task uvm_reg_field::read(output uvm_status_e       status,
                          output uvm_reg_data_t     value,
-                         input  uvm_path_e    path = UVM_DEFAULT_PATH,
+                         input  uvm_path_e         path = UVM_DEFAULT_PATH,
                          input  uvm_reg_map        map = null,
                          input  uvm_sequence_base  parent = null,
                          input  int                prior = -1,
                          input  uvm_object         extension = null,
                          input  string             fname = "",
                          input  int                lineno = 0);
-   uvm_reg_data_t  reg_value;
-   uvm_reg_map local_map, system_map;
-   uvm_reg_map_info map_info;
-   bit [`UVM_REG_BYTENABLE_WIDTH-1:0] byte_en = '0;
-   bit b_en[$];
-   int j = 0,bus_width, n_bits,n_access,n_access_extra,n_bytes_acc,temp_be;
-   uvm_reg_field fields[$];
-   int fld_pos = 0;
-   int rh_shift = 0;
-   bit indv_acc = 0;
-   
-   uvm_reg_block  blk = this.parent.get_block();
-			
-   this.fname = fname;
-   this.lineno = lineno;
-   this.read_in_progress = 1'b1;
-
-   if (path == UVM_DEFAULT_PATH) path = blk.get_default_path();
-
-   local_map = this.parent.get_local_map(map,"read()");
-
-   if (local_map != null)
-      map_info = local_map.get_reg_map_info(this.parent);
-
-   if (path != UVM_BACKDOOR && !this.parent.maps.exists(local_map)) begin
-     `uvm_error(get_type_name(), $psprintf("No transactor available to physically access map \"%s\".",
-        map.get_full_name()));
-     return;
-   end
-                        
-
-`ifdef UVM_REG_NO_INDIVIDUAL_FIELD_ACCESS
-   this.parent.read(status, reg_value, path, map, parent, prior, extension, fname, lineno);
-			value = (reg_value >> this.lsb) & ((1<<this.size))-1;
-`else
-   system_map = local_map.get_root_map();
-   bus_width = local_map.get_n_bytes();  //// get the width of the physical interface data bus in bytes
-   
-   /* START to check if this field is the sole occupant of the complete bus_data(width) */
-   this.parent.get_fields(fields);
-   foreach (fields[i]) begin
-      if (fields[i] == this) begin
-	 fld_pos = i;
-      end
-			end			
-   if(fields.size() == 1)	begin
-      indv_acc = 1;
-   end else begin
-      if(fld_pos == 0) begin
-         if (fields[fld_pos+1].lsb%(bus_width*8) == 0)  indv_acc = 1;
-         else if ((fields[fld_pos+1].lsb - fields[fld_pos].size) >= (fields[fld_pos+1].lsb%(bus_width*8))) indv_acc = 1;
-         else indv_acc = 0;
-      end 
-      else if(fld_pos == (fields.size()-1)) begin
-         if (fields[fld_pos].lsb%(bus_width*8) == 0)  indv_acc = 1;
-         else if ((fields[fld_pos].lsb - (fields[fld_pos-1].lsb+fields[fld_pos-1].size)) >= (fields[fld_pos].lsb%(bus_width*8))) indv_acc = 1;
-         else indv_acc = 0;
-      end 
-      else begin
-         if (fields[fld_pos].lsb%(bus_width*8) == 0) begin
-            if (fields[fld_pos+1].lsb%(bus_width*8) == 0) indv_acc = 1;
-            else if ((fields[fld_pos+1].lsb - (fields[fld_pos].lsb+fields[fld_pos].size)) >= (fields[fld_pos+1].lsb%(bus_width*8))) indv_acc = 1;
-            else indv_acc = 0;
-         end 
-         else begin
-            if(((fields[fld_pos+1].lsb - (fields[fld_pos].lsb+fields[fld_pos].size))>= (fields[fld_pos+1].lsb%(bus_width*8)))  &&
-               ((fields[fld_pos].lsb - (fields[fld_pos-1].lsb+fields[fld_pos-1].size))>=(fields[fld_pos].lsb%(bus_width*8))) ) indv_acc = 1;
-            else indv_acc = 0;				
-         end
-      end
-   end
-   /* END to check if this field is the sole occupant of the complete bus_data(width) */
-
-   if (path == UVM_BFM) begin
-
-      if (this.individually_accessible) begin
-
-         uvm_reg_adapter    adapter;
-         uvm_sequencer_base sequencer;
-         bit is_passthru;
-         uvm_reg_passthru_adapter passthru_adapter;
-
-         if (local_map == null)
-           return;
-
-         system_map = local_map.get_root_map();
-
-         adapter = system_map.get_adapter();
-         sequencer = system_map.get_sequencer();
-         if ($cast(passthru_adapter,adapter))
-            is_passthru = 1;
-
-   	 if(adapter.supports_byte_enable || (indv_acc)) begin
-            uvm_reg_field_cb_iter cbs = new(this);
-            this.parent.XatomicX(1);
-            this.parent.Xis_busyX = 1;
-            this.pre_read(path, map);
-            for (uvm_reg_field_cbs cb = cbs.first(); cb != null;
-                 cb = cbs.next()) begin
-               cb.fname = this.fname;
-               cb.lineno = this.lineno;
-               cb.pre_read(this, path, map);
-            end
-	    
-	    n_access_extra = this.lsb%(bus_width*8);		
-	    n_access = n_access_extra + this.size;
-	    
-	    /* calculate byte_enables */
-	    temp_be = n_access_extra;
-            while(temp_be >= 8) begin
-	       b_en.push_back(0);
-               temp_be = temp_be - 8;
-	    end			
-	    temp_be = temp_be + this.size;
-     	    while(temp_be > 0) begin
-	       b_en.push_back(1);
-               temp_be = temp_be - 8;
-	    end
-	    /* calculate byte_enables */
-	    
-            if(n_access%8 != 0) n_access = n_access + (8 - (n_access%8)); 
-            n_bytes_acc = n_access/8;
-
-            n_bits = this.size;
-
-            foreach(map_info.addr[i]) begin
-               uvm_sequence_item bus_req = new("bus_rd");
-               uvm_reg_bus_item rw_access;
-	       uvm_reg_data_t  data;	
-	       bit tt;
-	       
- 	       for(int z=0;z<bus_width;z++) begin
-	  	  tt = b_en.pop_front();	
-		  byte_en[z] = tt;
-	       end	
-
-               `uvm_info(get_type_name(), $psprintf("Reading 'h%0h at 'h%0h via map \"%s\"...",
-                                                    data, map_info.addr[i], map.get_full_name()), UVM_HIGH);
-                        
-                rw_access = uvm_reg_bus_item::type_id::create("rw_access",,{sequencer.get_full_name(),".",parent.get_full_name()});
-                rw_access.element = this;
-                rw_access.element_kind = UVM_REG;
-                rw_access.kind = UVM_READ;
-                rw_access.value = value;
-                rw_access.path = path;
-                rw_access.map = local_map;
-                rw_access.extension = extension;
-                rw_access.fname = fname;
-                rw_access.lineno = lineno;
 
 
-                rw_access.addr = map_info.addr[i];
-                rw_access.data = data;
-                rw_access.n_bits = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
-                rw_access.byte_en = '1;
-                            
-                bus_req.m_start_item(sequencer,parent,prior);
-                if (!is_passthru)
-                  parent.mid_do(rw_access);
-                bus_req = adapter.reg2bus(rw_access);
-                bus_req.m_finish_item(sequencer,parent);
-                bus_req.end_event.wait_on();
-                if (adapter.provides_responses) begin
-                  uvm_sequence_item bus_rsp;
-                  uvm_access_e op;
-                  parent.get_base_response(bus_rsp);
-                  adapter.bus2reg(bus_rsp,rw_access);
-                end
-                else begin
-                  adapter.bus2reg(bus_req,rw_access);
-                end
-                data = rw_access.data & ((1<<bus_width*8)-1);
-                if (rw_access.status == UVM_IS_OK && (^data) === 1'bx)
-                  rw_access.status = UVM_HAS_X;
-                status = rw_access.status;
+   uvm_reg_item rw;
+   rw = uvm_reg_item::type_id::create("field_read_item",,get_full_name());
+   rw.element      = this;
+   rw.element_kind = UVM_FIELD;
+   rw.kind         = UVM_READ;
+   rw.value[0]     = -1;
+   rw.path         = path;
+   rw.map          = map;
+   rw.parent       = parent;
+   rw.prior        = prior;
+   rw.extension    = extension;
+   rw.fname        = fname;
+   rw.lineno       = lineno;
 
+   do_read(rw);
 
-                `uvm_info(get_type_name(), $psprintf("Read 'h%0h at 'h%0h via map \"%s\": %s...",
-                                                    data, map_info.addr[i], map.get_full_name(), status.name()), UVM_HIGH);
+   value = rw.value[0];
+   status = rw.status;
 
-
-               if (status != UVM_IS_OK && status != UVM_HAS_X) return;
-
-   	       reg_value |= data & j*8;
-               rw_access.value = reg_value;
-               if (!is_passthru)
-                 parent.post_do(rw_access);
-               j += bus_width;
-               n_bits -= bus_width * 8;
-            end
-            this.parent.Xis_busyX = 0;
-	    /*if (this.cover_on) begin
-             parent.sample(value, 1, map);
-             parent.parent.XsampleX(parent.offset_in_block[map], map);
-         end*/
-	    value = (reg_value >> (n_access_extra)) & ((1<<this.size))-1;
-
-            if (system_map.get_auto_predict() == UVM_PREDICT_DIRECT)
-	      this.Xpredict_readX(value, path, map);
-
-            this.post_read(value, path, map, status);
-            for (uvm_reg_field_cbs cb = cbs.first(); cb != null;
-                 cb = cbs.next()) begin
-               cb.fname = this.fname;
-               cb.lineno = this.lineno;
-               cb.post_read(this, value, path, map, status);
-            end
-
-            this.parent.XatomicX(0);
-	    this.fname = "";
-	    this.lineno = 0;
-	    
-   	 end else begin
-   	    if(!adapter.supports_byte_enable) begin
-               `uvm_warning("RegModel", $psprintf("Protocol doesnot support byte enabling ....\n Reading complete register instead."));
-   	    end		
-   	    if((this.size%8)!=0) begin
-               `uvm_warning("RegModel", $psprintf("Field \"%s\" is not byte aligned. Individual field access will not be available ...\nReading complete register instead.", this.get_name()));
-   	    end		
-            this.parent.read(status, reg_value, path, map, parent, prior, extension, fname, lineno);
-            value = (reg_value >> this.lsb) & ((1<<this.size))-1;
-   	 end	
-      end else begin
-         `uvm_warning("RegModel", $psprintf("Individual field access not available for field \"%s\". Reading complete register instead.", this.get_name()));
-         this.parent.read(status, reg_value, path, map, parent, prior, extension, fname, lineno);
-         value = (reg_value >> this.lsb) & ((1<<this.size))-1;
-      end	
-   end
-   /// Individual field access not available for BACKDOOR access		
-   if(path == UVM_BACKDOOR) begin
-      `uvm_warning("RegModel", $psprintf("Individual field access not available with BACKDOOR access for field \"%s\". Reading complete register instead.", this.get_name()));
-      this.parent.read(status, reg_value, path, map, parent, prior, extension, fname, lineno);
-      value = (reg_value >> this.lsb) & ((1<<this.size))-1;
-   end
-`endif
-   this.read_in_progress = 1'b0;
 
 endtask: read
+
+
+// do_read
+
+task uvm_reg_field::do_read(uvm_reg_item rw);
+
+   uvm_reg_map_info map_info;
+
+   m_parent.XatomicX(1);
+   m_fname  = rw.fname;
+   m_lineno = rw.lineno;
+   m_read_in_progress = 1'b1;
+  
+   if (!Xcheck_accessX(rw,map_info,"read()"))
+     return;
+
+`ifdef UVM_REG_NO_INDIVIDUAL_FIELD_ACCESS
+   rw.element_kind = UVM_REG;
+   rw.element = m_parent;
+   m_parent.do_read(rw);
+   rw.value = (rw.value >> m_lsb) & ((1<<m_size))-1;
+`else
+
+   if (!is_indv_accessible(rw.path,rw.local_map)) begin
+      rw.element_kind = UVM_REG;
+      rw.element = m_parent;
+      m_parent.do_read(rw);
+      rw.value[0] = (rw.value[0] >> m_lsb) & ((1<<m_size))-1;
+   end
+   else begin
+
+     uvm_reg_map system_map = rw.local_map.get_root_map();
+     uvm_reg_field_cb_iter cbs = new(this);
+
+     m_parent.m_is_busy = 1;
+
+     pre_read(rw);
+     for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next())
+        cb.pre_read(rw);
+            
+     rw.local_map.do_read(rw);
+
+     if (system_map.get_auto_predict())
+        Xpredict_readX(rw.value[0], rw.path, rw.map);
+
+     post_read(rw);
+     for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
+        cb.post_read(rw);
+
+     m_parent.m_is_busy = 0;
+      
+   end
+
+`endif
+
+   m_fname = "";
+   m_lineno = 0;
+   m_read_in_progress = 1'b0;
+   m_parent.XatomicX(0);
+
+endtask: do_read
                
+
+// is_indv_accessible
+
+function bit uvm_reg_field::is_indv_accessible(uvm_path_e  path,
+                                               uvm_reg_map local_map);
+   if (path == UVM_BACKDOOR) begin
+      `uvm_warning("RegModel",
+         {"Individual BACKDOOR field access not available for field '",
+         get_full_name(), "'. Reading complete register instead."})
+      return 0;
+   end
+
+   if (!m_individually_accessible) begin
+         `uvm_warning("RegModel",
+            {"Individual field access not available for field '",
+            get_full_name(), "'. Reading complete register instead."})
+      return 0;
+   end        
+
+   begin
+     uvm_reg_map system_map = local_map.get_root_map();
+     uvm_reg_adapter adapter = system_map.get_adapter();
+     if (adapter.supports_byte_enable)
+       return 1;
+   end
+
+   begin
+     int fld_idx = 0;
+     int bus_width = local_map.get_n_bytes();
+     uvm_reg_field fields[$];
+     bit sole_field = 0;
+
+     m_parent.get_fields(fields);
+
+     if (fields.size() == 1) begin
+        sole_field = 1;
+     end
+     else begin
+        int prev_lsb,this_lsb,next_lsb; 
+        int prev_sz,this_sz,next_sz; 
+        int bus_sz = bus_width*8;
+
+        foreach (fields[i]) begin
+           if (fields[i] == this) begin
+              fld_idx = i;
+              break;
+           end
+        end
+
+        this_lsb = fields[fld_idx].get_lsb_pos();
+        this_sz  = fields[fld_idx].get_n_bits();
+
+        if (fld_idx>0) begin
+          prev_lsb = fields[fld_idx-1].get_lsb_pos();
+          prev_sz  = fields[fld_idx-1].get_n_bits();
+        end
+
+        if (fld_idx < fields.size()-1) begin
+          next_lsb = fields[fld_idx+1].get_lsb_pos();
+          next_sz  = fields[fld_idx+1].get_n_bits();
+        end
+
+        // if first field in register
+        if (fld_idx == 0 &&
+           ((next_lsb % bus_sz) == 0 ||
+            (next_lsb - this_sz) > (next_lsb % bus_sz)))
+           return 1;
+
+        // if last field in register
+        else if (fld_idx == (fields.size()-1) &&
+            ((this_lsb % bus_sz) == 0 ||
+             (this_lsb - (prev_lsb + prev_sz)) >= (this_lsb % bus_sz)))
+           return 1;
+
+        // if somewhere in between
+        else begin
+           if ((this_lsb % bus_sz) == 0) begin
+              if ((next_lsb % bus_sz) == 0 ||
+                  (next_lsb - (this_lsb + this_sz)) >= (next_lsb % bus_sz))
+                 return 1;
+           end 
+           else begin
+              if ( (next_lsb - (this_lsb + this_sz)) >= (next_lsb % bus_sz) &&
+                  ((this_lsb - (prev_lsb + prev_sz)) >= (this_lsb % bus_sz)) )
+                 return 1;
+           end
+        end
+     end
+   end
+   
+   `uvm_warning("RegModel", 
+       {"Target bus does not support byte enabling, and the field '",
+       get_full_name(),"' is not the only field within the entire bus width. ",
+       "Individual field access will not be available. ",
+       "Reading complete register instead."})
+
+   return 0;
+
+endfunction
+
 
 // poke
 
-task uvm_reg_field::poke(output uvm_status_e status,
+task uvm_reg_field::poke(output uvm_status_e      status,
                          input  uvm_reg_data_t    value,
                          input  string            kind = "",
                          input  uvm_sequence_base parent = null,
@@ -1783,41 +1529,46 @@ task uvm_reg_field::poke(output uvm_status_e status,
                          input  int               lineno = 0);
    uvm_reg_data_t  tmp;
 
-   this.fname = fname;
-   this.lineno = lineno;
+   m_fname = fname;
+   m_lineno = lineno;
 
-   if (value >> this.size) begin
-      `uvm_warning("RegModel", $psprintf("uvm_reg_field::poke(): Value greater than field \"%s\" size", this.get_name()));
-      value &= value & ((1<<this.size)-1);
+   if (value >> m_size) begin
+      `uvm_warning("RegModel",
+         {"uvm_reg_field::poke(): Value exceeds size of field '",
+          get_name(),"'"})
+      value &= value & ((1<<m_size)-1);
    end
 
 
-   this.parent.XatomicX(1);
-   this.parent.Xis_locked_by_fieldX = 1'b1;
+   m_parent.XatomicX(1);
+   m_parent.m_is_locked_by_field = 1'b1;
 
    tmp = 0;
+
    // What is the current values of the other fields???
-   this.parent.peek(status, tmp, kind, parent, extension, fname, lineno);
-   if (status != UVM_IS_OK && status != UVM_HAS_X) begin
-      `uvm_error("RegModel", $psprintf("uvm_reg_field::poke(): Peeking register \"%s\" returned status %s", this.parent.get_full_name(), status.name()));
-      this.parent.XatomicX(0);
-      this.parent.Xis_locked_by_fieldX = 1'b0;
+   m_parent.peek(status, tmp, kind, parent, extension, fname, lineno);
+
+   if (status == UVM_NOT_OK) begin
+      `uvm_error("RegModel", {"uvm_reg_field::poke(): Peek of register '",
+         m_parent.get_full_name(),"' returned status ",status.name()})
+      m_parent.XatomicX(0);
+      m_parent.m_is_locked_by_field = 1'b0;
       return;
    end
 
    // Force the value for this field then poke the resulting value
-   tmp &= ~(((1<<this.size)-1) << this.lsb);
-   tmp |= value << this.lsb;
-   this.parent.poke(status, tmp, kind, parent, extension, fname, lineno);
+   tmp &= ~(((1<<m_size)-1) << m_lsb);
+   tmp |= value << m_lsb;
+   m_parent.poke(status, tmp, kind, parent, extension, fname, lineno);
 
-   this.parent.XatomicX(0);
-   this.parent.Xis_locked_by_fieldX = 1'b0;
+   m_parent.XatomicX(0);
+   m_parent.m_is_locked_by_field = 1'b0;
 endtask: poke
 
 
 // peek
 
-task uvm_reg_field::peek(output uvm_status_e status,
+task uvm_reg_field::peek(output uvm_status_e      status,
                          output uvm_reg_data_t    value,
                          input  string            kind = "",
                          input  uvm_sequence_base parent = null,
@@ -1826,29 +1577,29 @@ task uvm_reg_field::peek(output uvm_status_e status,
                          input  int               lineno = 0);
    uvm_reg_data_t  reg_value;
 
-   this.fname = fname;
-   this.lineno = lineno;
+   m_fname = fname;
+   m_lineno = lineno;
 
-   this.parent.peek(status, reg_value, kind, parent, extension, fname, lineno);
-   value = (reg_value >> lsb) & ((1<<size))-1;
+   m_parent.peek(status, reg_value, kind, parent, extension, fname, lineno);
+   value = (reg_value >> m_lsb) & ((1<<m_size))-1;
 
 endtask: peek
                
 
 // mirror
 
-task uvm_reg_field::mirror(output uvm_status_e status,
-                           input  uvm_check_e  check = UVM_NO_CHECK,
-                           input  uvm_path_e   path = UVM_DEFAULT_PATH,
+task uvm_reg_field::mirror(output uvm_status_e      status,
+                           input  uvm_check_e       check = UVM_NO_CHECK,
+                           input  uvm_path_e        path = UVM_DEFAULT_PATH,
                            input  uvm_reg_map       map = null,
                            input  uvm_sequence_base parent = null,
                            input  int               prior = -1,
                            input  uvm_object        extension = null,
                            input  string            fname = "",
                            input  int               lineno = 0);
-   this.fname = fname;
-   this.lineno = lineno;
-   this.parent.mirror(status, check, path, map, parent, prior, extension,
+   m_fname = fname;
+   m_lineno = lineno;
+   m_parent.mirror(status, check, path, map, parent, prior, extension,
                       fname, lineno);
 endtask: mirror
 
@@ -1859,14 +1610,14 @@ function void uvm_reg_field::pre_randomize();
    // Update the only publicly known property with the current
    // desired value so it can be used as a state variable should
    // the rand_mode of the field be turned off.
-   this.value = this.desired;
+   value = m_desired;
 endfunction: pre_randomize
 
 
 // post_randomize
 
 function void uvm_reg_field::post_randomize();
-   this.desired = this.value;
+   m_desired = value;
 endfunction: post_randomize
 
 
@@ -1874,7 +1625,7 @@ endfunction: post_randomize
 
 function void uvm_reg_field::do_print (uvm_printer printer);
   super.do_print(printer);
-  printer.print_generic("initiator", parent.get_type_name(), -1, convert2string());
+  printer.print_generic("initiator", m_parent.get_type_name(), -1, convert2string());
 endfunction
 
 
@@ -1887,31 +1638,32 @@ function string uvm_reg_field::convert2string();
    bit with_debug_info = 0;
    string prefix = "";
 
-   $sformat(fmt, "%0d'h%%%0dh", this.get_n_bits(),
-            (this.get_n_bits()-1)/4 + 1);
+   $sformat(fmt, "%0d'h%%%0dh", get_n_bits(),
+            (get_n_bits()-1)/4 + 1);
    $sformat(convert2string, {"%s%s[%0d-%0d] = ",fmt,"%s"}, prefix,
-            this.get_name(),
-            this.get_lsb_pos_in_register() + this.get_n_bits() - 1,
-            this.get_lsb_pos_in_register(), this.desired,
-            (this.desired != this.mirrored) ? $psprintf({" (Mirror: ",fmt,")"}, this.mirrored) : "");
+            get_name(),
+            get_lsb_pos() + get_n_bits() - 1,
+            get_lsb_pos(), m_desired,
+            (m_desired != m_mirrored) ? $psprintf({" (Mirror: ",fmt,")"},
+               m_mirrored) : "");
 
-   if (read_in_progress == 1'b1) begin
-      if (fname != "" && lineno != 0)
-         $sformat(res_str, " from %s:%0d",fname, lineno);
+   if (m_read_in_progress == 1'b1) begin
+      if (m_fname != "" && m_lineno != 0)
+         $sformat(res_str, " from %s:%0d",m_fname, m_lineno);
       convert2string = {convert2string, "\n", "currently being read", res_str}; 
    end
-   if (write_in_progress == 1'b1) begin
-      if (fname != "" && lineno != 0)
-         $sformat(res_str, " from %s:%0d",fname, lineno);
+   if (m_write_in_progress == 1'b1) begin
+      if (m_fname != "" && m_lineno != 0)
+         $sformat(res_str, " from %s:%0d",m_fname, m_lineno);
       convert2string = {convert2string, "\n", res_str, "currently being written"}; 
    end
-   if (this.attributes.num() > 0) begin
+   if (m_attributes.num() > 0) begin
       string name;
-      void'(this.attributes.first(name));
+      void'(m_attributes.first(name));
       convert2string = {convert2string, "\n", prefix, "Attributes:"};
       do begin
-         $sformat(convert2string, " %s=\"%s\"", name, this.attributes[name]);
-      end while (this.attributes.next(name));
+         $sformat(convert2string, " %s=\"%s\"", name, m_attributes[name]);
+      end while (m_attributes.next(name));
    end
 endfunction: convert2string
 
@@ -1927,7 +1679,7 @@ endfunction
 
 function void uvm_reg_field::do_copy(uvm_object rhs);
   `uvm_warning("RegModel","RegModel field copy not yet implemented")
-  // just a this.set(rhs.get()) ?
+  // just a set(rhs.get()) ?
 endfunction
 
 
@@ -1936,7 +1688,7 @@ endfunction
 function bit uvm_reg_field::do_compare (uvm_object  rhs,
                                         uvm_comparer comparer);
   `uvm_warning("RegModel","RegModel field compare not yet implemented")
-  // just a return (this.get() == rhs.get()) ?
+  // just a return (get() == rhs.get()) ?
   return 0;
 endfunction
 

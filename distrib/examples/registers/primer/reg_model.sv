@@ -155,8 +155,8 @@ endclass
 class indexed_reg extends uvm_reg_frontdoor;
 
    uvm_reg INDEX;
-   int     addr;
    uvm_reg DATA;
+   uvm_reg_data_t addr;
 
    function new(string name = "indexed_reg");
       super.new(name);
@@ -165,9 +165,11 @@ class indexed_reg extends uvm_reg_frontdoor;
    `uvm_object_utils(indexed_reg)
 
    virtual task body();
-      INDEX.write(status, addr, .parent(this));
-      if (is_write) DATA.write(status, data, .parent(this));
-      else DATA.read(status, data, .parent(this));
+      INDEX.write(rw_info.status, addr, .parent(this));
+      if (rw_info.kind == UVM_WRITE)
+         DATA.write(rw_info.status, rw_info.value[0], .parent(this));
+      else
+         DATA.read(rw_info.status, rw_info.value[0], .parent(this));
    endtask
 endclass
 

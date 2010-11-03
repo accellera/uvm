@@ -38,7 +38,7 @@
 // The DUT should be idle and not modify any register durign this test.
 //
 
-class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence;
+class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    // Variable: rg
    // The register to be tested
@@ -83,7 +83,7 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence;
          foreach (fields[k]) begin
             int lsb, w, o;
             
-            lsb = fields[k].get_lsb_pos_in_register();
+            lsb = fields[k].get_lsb_pos();
             w   = fields[k].get_n_bits();
             o   = ~fields[k].is_known_access(maps[j]);
             if (fields[k].get_access(maps[j]) == "DC") o = 1;
@@ -220,7 +220,7 @@ endclass: uvm_reg_single_bit_bash_seq
 // the NO_BIT_BASH_TEST attribute are not verified.
 //
 
-class uvm_reg_bit_bash_seq extends uvm_reg_sequence;
+class uvm_reg_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    `uvm_object_utils(uvm_reg_bit_bash_seq)
 

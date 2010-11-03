@@ -123,11 +123,9 @@ class cmd_line_seq_test extends uvm_test;
        foreach (seqs[i]) begin
          uvm_sequencer_base sequencer;
          q_of_strings qos = seqs[i];
-       $display("\n\n******* HERE i=%0d\n\n", i);
          for (int j=0; j<qos.size();j++) begin
            uvm_reg_sequence reg_seq;
            uvm_sequence_base seq;
-       $display("\n\n******* HERE j=%0d\n\n", i);
            seq = uvm_utils #(uvm_sequence_base)::create_type_by_name(qos.get(j),"tb");
            if (seq == null) begin
               `uvm_fatal("SEQ_NOT_FOUND",
@@ -137,7 +135,7 @@ class cmd_line_seq_test extends uvm_test;
            `uvm_info("CMD_LINE_SEQ_TEST",{"\n\nStarting sequence '",qos.get(j),"' ..."},UVM_LOW)
            void'(seq.randomize());
            if ($cast(reg_seq,seq))
-             reg_seq.model = env.rdb;
+             reg_seq.model = env.model;
 
            if (virtual_seq_mode)
              sequencer = null;
@@ -152,6 +150,7 @@ class cmd_line_seq_test extends uvm_test;
                seq.start(sequencer);
              join_none
            end
+           `uvm_info("CMD_LINE_SEQ_TEST",{"Finished sequence '",qos.get(j),"' ..."},UVM_LOW)
          end
          if (qos.size() != 1)
            wait fork;

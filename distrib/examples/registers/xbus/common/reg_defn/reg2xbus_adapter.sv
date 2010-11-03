@@ -30,29 +30,30 @@ class reg2xbus_adapter extends uvm_reg_adapter;
     supports_byte_enable = 0;
   endfunction
 
-  virtual function uvm_sequence_item reg2bus(uvm_reg_bus_item rw_access);
+  virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
     xbus_transfer xbus = xbus_transfer::type_id::create("xbus_transfer");
-    int n_bytes = ((rw_access.n_bits + 7) / 8 );
-    xbus.read_write = (rw_access.kind == UVM_READ) ? READ : WRITE;
-    xbus.addr = rw_access.addr;
+    int n_bytes = ((rw.n_bits + 7) / 8 );
+    xbus.read_write = (rw.kind == UVM_READ) ? READ : WRITE;
+    xbus.addr = rw.addr;
     xbus.data = new[n_bytes];
     foreach (xbus.data[i])
-      xbus.data[i] = rw_access.data >> i*8;
+      xbus.data[i] = rw.data >> i*8;
     xbus.size = n_bytes;
     return xbus;
   endfunction
 
-  virtual function void bus2reg(uvm_sequence_item bus_item, uvm_reg_bus_item rw_access);
+  virtual function void bus2reg(uvm_sequence_item bus_item,
+                                ref uvm_reg_bus_op rw);
     xbus_transfer xbus;
     if (!$cast(xbus,bus_item)) begin
       `uvm_fatal("NOT_XBUS_TYPE","Provided bus_item is not of the correct type")
       return;
     end
-    rw_access.kind = xbus.read_write == READ ? UVM_READ : UVM_WRITE;
-    rw_access.addr = xbus.addr;
-    if (xbus.read_write == READ)
-      foreach (xbus.data[i])
-        rw_access.data[i*8 +:8] = xbus.data[i];
+    rw.kind = xbus.read_write == READ ? UVM_READ : UVM_WRITE;
+    rw.addr = xbus.addr;
+    foreach (xbus.data[i])
+      rw.data[i*8 +:8] = xbus.data[i];
+    rw.status = UVM_IS_OK;
   endfunction
 
 endclass

@@ -43,7 +43,7 @@
 //|     read addr=k, expect data=~k
 //
 
-class uvm_mem_single_walk_seq extends uvm_reg_sequence;
+class uvm_mem_single_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    `uvm_object_utils(uvm_mem_single_walk_seq)
 
@@ -162,7 +162,7 @@ endclass: uvm_mem_single_walk_seq
 // the NO_MEM_WALK_TEST attribute are not verified.
 //
 
-class uvm_mem_walk_seq extends uvm_reg_sequence;
+class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    `uvm_object_utils(uvm_mem_walk_seq)
 

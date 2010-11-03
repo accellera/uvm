@@ -61,7 +61,7 @@ typedef enum bit [63:0] {
 // Sequence that executes a user-defined selection
 // of pre-defined register and memory test sequences.
 //
-class uvm_reg_mem_built_in_seq extends uvm_reg_sequence;
+class uvm_reg_mem_built_in_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    `uvm_object_utils(uvm_reg_mem_built_in_seq)
 
@@ -83,7 +83,7 @@ class uvm_reg_mem_built_in_seq extends uvm_reg_sequence;
          return;
       end
 
-      uvm_report_info("STARTING_SEQ",{"\n\nStarting ",get_name()," sequence...\n"},UVM_LOW);
+      uvm_report_info("START_SEQ",{"\n\nStarting ",get_name()," sequence...\n"},UVM_LOW);
       
       if (tests & UVM_DO_REG_HW_RESET &&
           model.get_attribute("NO_REG_TESTS") == "" &&
@@ -91,6 +91,7 @@ class uvm_reg_mem_built_in_seq extends uvm_reg_sequence;
         uvm_reg_hw_reset_seq seq = uvm_reg_hw_reset_seq::type_id::create("reg_hw_reset_seq");
         seq.model = model;
         seq.start(null,this);
+        `uvm_info("FINISH_SEQ",{"Finished ",seq.get_name()," sequence."},UVM_LOW)
       end
 
       if (tests & UVM_DO_REG_BIT_BASH &&
@@ -99,6 +100,7 @@ class uvm_reg_mem_built_in_seq extends uvm_reg_sequence;
         uvm_reg_bit_bash_seq seq = uvm_reg_bit_bash_seq::type_id::create("reg_bit_bash_seq");
         seq.model = model;
         seq.start(null,this);
+        `uvm_info("FINISH_SEQ",{"Finished ",seq.get_name()," sequence."},UVM_LOW)
       end
 
       if (tests & UVM_DO_REG_ACCESS &&
@@ -107,6 +109,7 @@ class uvm_reg_mem_built_in_seq extends uvm_reg_sequence;
         uvm_reg_access_seq seq = uvm_reg_access_seq::type_id::create("reg_access_seq");
         seq.model = model;
         seq.start(null,this);
+        `uvm_info("FINISH_SEQ",{"Finished ",seq.get_name()," sequence."},UVM_LOW)
       end
 
       if (tests & UVM_DO_MEM_ACCESS &&
@@ -115,6 +118,7 @@ class uvm_reg_mem_built_in_seq extends uvm_reg_sequence;
         uvm_mem_access_seq seq = uvm_mem_access_seq::type_id::create("mem_access_seq");
         seq.model = model;
         seq.start(null,this);
+        `uvm_info("FINISH_SEQ",{"Finished ",seq.get_name()," sequence."},UVM_LOW)
       end
 
       if (tests & UVM_DO_SHARED_ACCESS &&
@@ -123,6 +127,7 @@ class uvm_reg_mem_built_in_seq extends uvm_reg_sequence;
         uvm_reg_mem_shared_access_seq seq = uvm_reg_mem_shared_access_seq::type_id::create("shared_access_seq");
         seq.model = model;
         seq.start(null,this);
+        `uvm_info("FINISH_SEQ",{"Finished ",seq.get_name()," sequence."},UVM_LOW)
       end
 
       if (tests & UVM_DO_MEM_WALK &&
@@ -131,6 +136,7 @@ class uvm_reg_mem_built_in_seq extends uvm_reg_sequence;
         uvm_mem_walk_seq seq = uvm_mem_walk_seq::type_id::create("mem_walk_seq");
         seq.model = model;
         seq.start(null,this);
+        `uvm_info("FINISH_SEQ",{"Finished ",seq.get_name()," sequence."},UVM_LOW)
       end
 
    endtask: body

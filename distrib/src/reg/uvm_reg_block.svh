@@ -1238,7 +1238,7 @@ endfunction: get_vfield_by_name
 function int uvm_reg_block::set_cover(int is_on);
    int can_cvr;
 
-   if (is_on == UVM_NO_COVERAGE) begin
+   if (is_on == int'(UVM_NO_COVERAGE)) begin
       this.cover_on = is_on;
       return this.cover_on;
    end
