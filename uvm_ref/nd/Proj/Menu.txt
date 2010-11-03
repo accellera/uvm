@@ -186,6 +186,7 @@ Group: Register Layer  {
       File: Virtual Registers  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_vreg.svh)
       File: Virtual Fields  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_vreg_field.svh)
       File: Memory Allocation Mgr  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_mem_mam.svh)
+      File: uvm_reg_item  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_reg_item.svh)
       }  # Group: Register Model
 
    Group: DUT Integration  {

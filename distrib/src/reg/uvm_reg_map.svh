@@ -1600,7 +1600,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
                                 uvm_sequencer_base sequencer,
                                 uvm_reg_adapter adapter);
 
-  uvm_reg_addr_t     addrs[];
+  uvm_reg_addr_t     addrs[$];
   uvm_reg_map        system_map = get_root_map();
   int unsigned       bus_width  = get_n_bytes();
   uvm_reg_byte_en_t  byte_en    = -1;
@@ -1638,7 +1638,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
          temp_be -= 8;
       end
       for (int i=0; i<skip; i++)
-        addrs.delete(0);
+         addrs.pop_front();
     end
               
     foreach(addrs[i]) begin: foreach_addr
@@ -1717,7 +1717,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
                                uvm_sequencer_base sequencer,
                                uvm_reg_adapter adapter);
 
-  uvm_reg_addr_t addrs[];
+  uvm_reg_addr_t addrs[$];
   uvm_reg_map        system_map = get_root_map();
   int unsigned       bus_width  = get_n_bytes();
   uvm_reg_byte_en_t  byte_en    = -1;
@@ -1756,7 +1756,8 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
          temp_be -= 8;
       end
       for (int i=0; i<skip; i++)
-        addrs.delete(0);
+        addrs.pop_front(
+);
     end
     rw.value[val_idx] = 0;
               

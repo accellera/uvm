@@ -1190,34 +1190,34 @@ function uvm_reg_data_t  uvm_reg_field::XupdateX();
    // given what we think is the current value in the hardware
    XupdateX = 0;
 
-   case (this.access)
-      "RO":    XupdateX = this.desired;
-      "RW":    XupdateX = this.desired;
-      "RC":    XupdateX = this.desired;
-      "RS":    XupdateX = this.desired;
-      "WRC":   XupdateX = this.desired;
-      "WRS":   XupdateX = this.desired;
-      "WC":    XupdateX = this.desired;  // Warn if != 0
-      "WS":    XupdateX = this.desired;  // Warn if != 1
-      "WSRC":  XupdateX = this.desired;  // Warn if != 1
-      "WCRS":  XupdateX = this.desired;  // Warn if != 0
-      "W1C":   XupdateX = ~this.desired;
-      "W1S":   XupdateX = this.desired;
-      "W1T":   XupdateX = this.desired ^ this.mirrored;
-      "W0C":   XupdateX = this.desired;
-      "W0S":   XupdateX = ~this.desired;
-      "W0T":   XupdateX = ~(this.desired ^ this.mirrored);
-      "W1SRC": XupdateX = this.desired;
-      "W1CRS": XupdateX = ~this.desired;
-      "W0SRC": XupdateX = ~this.desired;
-      "W0CRS": XupdateX = this.desired;
-      "WO":    XupdateX = this.desired;
-      "WOC":   XupdateX = this.desired;  // Warn if != 0
-      "WOS":   XupdateX = this.desired;  // Warn if != 1
-      "W1":    XupdateX = this.desired;
-      "WO1":   XupdateX = this.desired;
-      "DC":    XupdateX = this.desired;
-      default: XupdateX = this.desired;
+   case (m_access)
+      "RO":    XupdateX = m_desired;
+      "RW":    XupdateX = m_desired;
+      "RC":    XupdateX = m_desired;
+      "RS":    XupdateX = m_desired;
+      "WRC":   XupdateX = m_desired;
+      "WRS":   XupdateX = m_desired;
+      "WC":    XupdateX = m_desired;  // Warn if != 0
+      "WS":    XupdateX = m_desired;  // Warn if != 1
+      "WSRC":  XupdateX = m_desired;  // Warn if != 1
+      "WCRS":  XupdateX = m_desired;  // Warn if != 0
+      "W1C":   XupdateX = ~m_desired;
+      "W1S":   XupdateX = m_desired;
+      "W1T":   XupdateX = m_desired ^ m_mirrored;
+      "W0C":   XupdateX = m_desired;
+      "W0S":   XupdateX = ~m_desired;
+      "W0T":   XupdateX = ~(m_desired ^ m_mirrored);
+      "W1SRC": XupdateX = m_desired;
+      "W1CRS": XupdateX = ~m_desired;
+      "W0SRC": XupdateX = ~m_desired;
+      "W0CRS": XupdateX = m_desired;
+      "WO":    XupdateX = m_desired;
+      "WOC":   XupdateX = m_desired;  // Warn if != 0
+      "WOS":   XupdateX = m_desired;  // Warn if != 1
+      "W1":    XupdateX = m_desired;
+      "WO1":   XupdateX = m_desired;
+      "DC":    XupdateX = m_desired;
+      default: XupdateX = m_desired;
    endcase
 endfunction: XupdateX
 
@@ -1478,7 +1478,6 @@ endtask
 task uvm_reg_field::do_write(uvm_reg_item rw);
 
    uvm_reg_data_t   value_adjust;
-   uvm_reg_map      local_map;
    uvm_reg_map_info map_info;
    uvm_reg_field    fields[$];
    bit bad_side_effect;
@@ -1556,7 +1555,7 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
      for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
         cb.pre_write(rw);
             
-     local_map.do_write(rw);
+     rw.local_map.do_write(rw);
 
      if (system_map.get_auto_predict())
         Xpredict_writeX(rw.value[0], rw.path, rw.map);

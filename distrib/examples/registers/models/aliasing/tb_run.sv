@@ -54,6 +54,7 @@ class tb_test extends uvm_test;
          seq.model = env.regmodel;
          seq.start(env.bus.sqr);
 
+         `uvm_info("Test", "Verifying aliasing...", UVM_NONE);
          env.regmodel.Ra.write(status, 32'hDEADBEEF, .parent(seq));
          env.regmodel.mirror(status, UVM_CHECK);
          env.regmodel.Rb.write(status, 32'h87654320, .parent(seq));

@@ -69,19 +69,16 @@ class reg_Rb extends uvm_reg;
 endclass : reg_Rb
 
 
-class write_also_to_F extends uvm_reg_field_cbs;
+class write_also_to_F extends uvm_reg_cbs;
    local uvm_reg_field m_toF;
 
    function new(uvm_reg_field toF);
       m_toF = toF;
    endfunction
    
-   virtual task post_write(    uvm_reg_field  field,
-                               uvm_reg_data_t wdat,
-                               uvm_path_e     path,
-                               uvm_reg_map    map,
-                           ref uvm_status_e   status);
-      m_toF.predict(wdat);
+   virtual task post_write(uvm_reg_item item);
+      if (item.map.get_auto_predict())
+         m_toF.predict(item.value[0]);
    endtask
    
 endclass

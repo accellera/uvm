@@ -27,17 +27,17 @@ class dut;
    static bit [7:0] F1 = 0;
    static bit [7:0] F2 = 0;
 
-   static task rw(uvm_reg_bus_item item);
+   static task rw(reg_rw rw);
 
-      case (item.addr)
+      case (rw.addr)
        'h000: // Ra
-          if (item.kind == UVM_READ) item.data = {8'h00, F2, 8'h00, F1};
-          else if (item.byte_en[0]) F1 = item.data[7:0];
+          if (rw.read) rw.data = {8'h00, F2, 8'h00, F1};
+          else if (rw.byte_en[0]) F1 = rw.data[7:0];
        'h100: // Rb
-          if (item.kind == UVM_READ) item.data = {8'h00, F2, 8'h00, F1};
+          if (rw.read) rw.data = {8'h00, F2, 8'h00, F1};
           else begin
-             if (item.byte_en[0]) F1 = item.data[7:0];
-             if (item.byte_en[2]) F2 = item.data[23:16];
+             if (rw.byte_en[0]) F1 = rw.data[7:0];
+             if (rw.byte_en[2]) F2 = rw.data[23:16];
           end
       endcase
    endtask
@@ -50,6 +50,7 @@ class tb_env extends uvm_env;
 
    block_B   regmodel;
    reg_agent#(dut) bus;
+   uvm_reg_predictor#(reg_rw) predict;
 
    function new(string name = "tb_env", uvm_component parent=null);
       super.new(name, parent);
@@ -61,12 +62,17 @@ class tb_env extends uvm_env;
       regmodel.lock_model();
 
       bus = reg_agent#(dut)::type_id::create("bus", this);
+      predict = uvm_reg_predictor#(reg_rw)::type_id::create("predict", this);
   endfunction: build
 
    virtual function void connect();
-      uvm_reg_passthru_adapter reg2reg  = uvm_reg_passthru_adapter::type_id::create("reg2reg");
-      reg2reg.supports_byte_enable = 1;
-      regmodel.default_map.set_sequencer(bus.sqr, reg2reg);
+      reg2rw_adapter reg2rw  = new("reg2rw");
+      regmodel.default_map.set_sequencer(bus.sqr, reg2rw);
+
+      predict.map = regmodel.default_map;
+      predict.adapter = reg2rw;
+      bus.mon.ap.connect(predict.bus_in);
+      regmodel.default_map.set_auto_predict(0);
    endfunction
 
 endclass

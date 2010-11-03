@@ -231,7 +231,7 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// STRUCT: uvm_reg_bus_op
+// TITLE: uvm_reg_bus_op
 //
 // Defines a generic bus transaction for register and memory accesses, having
 // ~kind~ (read or write), ~address~, ~data~, and ~byte enable~ information.
@@ -249,20 +249,20 @@ typedef struct {
   //
   // The bus-independent read/write information. See <uvm_reg_item>.
 
-  //rand uvm_reg_item info;
+  //uvm_reg_item info;
 
   // Variable: kind
   //
   // Kind of access: READ or WRITE.
   //
-  rand uvm_access_e kind;
+  uvm_access_e kind;
 
 
   // Variable: addr
   //
   // The bus address.
   //
-  rand uvm_reg_addr_t addr;
+  uvm_reg_addr_t addr;
 
 
   // Variable: data
@@ -271,7 +271,7 @@ typedef struct {
   // memory width, ~data~ represents only the portion of ~value~ that is
   // being transferred this bus cycle.
   //
-  rand uvm_reg_data_t data;
+  uvm_reg_data_t data;
 
    
   // Variable: n_bits
@@ -279,7 +279,7 @@ typedef struct {
   // The number of bits of <uvm_reg_item::value> being transferred by
   // this transaction.
 
-  rand int n_bits = `UVM_REG_DATA_WIDTH;
+  int n_bits;
 
   /*
   constraint valid_n_bits {
@@ -295,7 +295,7 @@ typedef struct {
   // bus supports byte enables and the operation originates from a field
   // write/read.
   //
-  rand uvm_reg_byte_en_t byte_en = -1;
+  uvm_reg_byte_en_t byte_en;
 
 
   // Variable: status
