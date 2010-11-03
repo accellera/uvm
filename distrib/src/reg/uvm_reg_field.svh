@@ -297,14 +297,14 @@ class uvm_reg_field extends uvm_object;
    // to actually write the field and update its mirrored value.
    //
    // The final desired value in the mirror is a function of the field access
-   // mode and the set value, just like a normal physical write operation
+   // policy and the set value, just like a normal physical write operation
    // to the corresponding bits in the hardware.
    // As such, this method (when eventually followed by a call to
    // <uvm_reg::update()>)
    // is a zero-time functional replacement for the <uvm_reg_field::write()>
    // method.
-   // For example, the mirrored value of a read-only field is not modified
-   // by this method and the mirrored value of a write-once field can only
+   // For example, the desired value of a read-only field is not modified
+   // by this method and the desired value of a write-once field can only
    // be set if the field has not yet been
    // written to using a physical (for example, front-door) write operation.
    //
@@ -1190,17 +1190,34 @@ function uvm_reg_data_t  uvm_reg_field::XupdateX();
    // given what we think is the current value in the hardware
    XupdateX = 0;
 
-   case (m_access)
-      "RW":    XupdateX = m_desired;
-      "RO":    XupdateX = m_desired;
-      "WO":    XupdateX = m_desired;
-      "W1":    XupdateX = m_desired;
-      "RU":    XupdateX = m_desired;
-      "RC":    XupdateX = m_desired;
-      "W1C":   XupdateX = ~m_desired;
-      "A0":    XupdateX = m_desired;
-      "A1":    XupdateX = m_desired;
-      default: XupdateX = m_desired;
+   case (this.access)
+      "RO":    XupdateX = this.desired;
+      "RW":    XupdateX = this.desired;
+      "RC":    XupdateX = this.desired;
+      "RS":    XupdateX = this.desired;
+      "WRC":   XupdateX = this.desired;
+      "WRS":   XupdateX = this.desired;
+      "WC":    XupdateX = this.desired;  // Warn if != 0
+      "WS":    XupdateX = this.desired;  // Warn if != 1
+      "WSRC":  XupdateX = this.desired;  // Warn if != 1
+      "WCRS":  XupdateX = this.desired;  // Warn if != 0
+      "W1C":   XupdateX = ~this.desired;
+      "W1S":   XupdateX = this.desired;
+      "W1T":   XupdateX = this.desired ^ this.mirrored;
+      "W0C":   XupdateX = this.desired;
+      "W0S":   XupdateX = ~this.desired;
+      "W0T":   XupdateX = ~(this.desired ^ this.mirrored);
+      "W1SRC": XupdateX = this.desired;
+      "W1CRS": XupdateX = ~this.desired;
+      "W0SRC": XupdateX = ~this.desired;
+      "W0CRS": XupdateX = this.desired;
+      "WO":    XupdateX = this.desired;
+      "WOC":   XupdateX = this.desired;  // Warn if != 0
+      "WOS":   XupdateX = this.desired;  // Warn if != 1
+      "W1":    XupdateX = this.desired;
+      "WO1":   XupdateX = this.desired;
+      "DC":    XupdateX = this.desired;
+      default: XupdateX = this.desired;
    endcase
 endfunction: XupdateX
 
@@ -1247,25 +1264,44 @@ endfunction: predict
 function void uvm_reg_field::set(uvm_reg_data_t  value,
                                  string          fname = "",
                                  int             lineno = 0);
+   uvm_reg_data_t mask = ('b1 << m_size)-1;
+
    m_fname = fname;
    m_lineno = lineno;
    if (value >> m_size) begin
       `uvm_warning("RegModel",
          $psprintf("Specified value (0x%h) greater than field \"%s\" size (%0d bits)",
              value, get_name(), m_size));
-      value &= ('b1 << m_size)-1;
+      value &= mask;
    end
 
    case (m_access)
-      "RW":    m_desired = value;
       "RO":    m_desired = m_desired;
-      "WO":    m_desired = value;
-      "W1":    m_desired = (m_written) ? m_desired : value;
-      "RU":    m_desired = m_desired;
+      "RW":    m_desired = value;
       "RC":    m_desired = m_desired;
-      "W1C":   m_desired &= (~value);
-      "A0":    m_desired |= value;
-      "A1":    m_desired &= value;
+      "RS":    m_desired = m_desired;
+      "WC":    m_desired = '0;
+      "WS":    m_desired = mask;
+      "WRC":   m_desired = value;
+      "WRS":   m_desired = value;
+      "WSRC":  m_desired = mask;
+      "WCRS":  m_desired = '0;
+      "W1C":   m_desired = m_desired & (~value);
+      "W1S":   m_desired = m_desired | value;
+      "W1T":   m_desired = m_desired ^ value;
+      "W0C":   m_desired = m_desired & value;
+      "W0S":   m_desired = m_desired | (~value & mask);
+      "W0T":   m_desired = m_desired ^ (~value & mask);
+      "W1SRC": m_desired = m_desired | value;
+      "W1CRS": m_desired = m_desired & (~value);
+      "W0SRC": m_desired = m_desired | (~value & mask);
+      "W0CRS": m_desired = m_desired & value;
+      "WO":    m_desired = value;
+      "WOC":   m_desired = '0;
+      "WOS":   m_desired = mask;
+      "W1":    m_desired = (m_written) ? m_desired : value;
+      "WO1":   m_desired = (m_written) ? m_desired : value;
+      "DC":    m_desired = value;
       default: m_desired = value;
    endcase
    this.value = m_desired;
