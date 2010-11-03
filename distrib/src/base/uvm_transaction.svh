@@ -302,6 +302,21 @@ virtual class uvm_transaction extends uvm_object;
   extern function integer get_transaction_id();
 
        
+  // Variable: events
+  //
+  // 
+  const uvm_event_pool events = new;
+
+  // Variable: begin_event
+  //
+  //
+  uvm_event begin_event;
+
+  // Variable: end_event
+  //
+  //
+  uvm_event end_event;
+
   //----------------------------------------------------------------------------
   //
   // Internal methods properties; do not use directly
@@ -328,8 +343,6 @@ virtual class uvm_transaction extends uvm_object;
   local integer       stream_handle;
   local integer       tr_handle;      
   local bit           record_enable = 0;
-
-  local uvm_event_pool m_event_pool = new;
 
 endclass
 

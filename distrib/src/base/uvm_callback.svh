@@ -515,6 +515,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   static function void add(T obj, uvm_callback cb, uvm_apprepend ordering=UVM_APPEND);
     uvm_queue#(uvm_callback) q;
     string nm,tnm; 
+    void'(m_get_tw_queue());
     if(cb==null) begin
        if(obj==null) nm = "(*)"; else nm = obj.get_full_name();
        if(m_base_inst.m_typename!="") tnm = m_base_inst.m_typename; else if(obj != null) tnm = obj.get_type_name(); else tnm = "uvm_object";
@@ -720,6 +721,43 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     return null;
   endfunction
 
+  // Function: get_last
+  //
+  // returns the last enabled callback of type CB which resides in the queue for ~obj~.
+  // If ~obj~ is null then the typewide queue for T is searched. ~itr~ is the iterator;
+  // it will be updated with a value that can be supplied to <get_prev> to get the previous
+  // callback object.
+  //
+  // If the queue is empty then null is returned. 
+  //
+  // The iterator class <uvm_callback_iter> may be used as an alternative, simplified,
+  // iterator interface.
+
+  static function CB get_last (ref int itr, input T obj);
+    uvm_queue#(uvm_callback) q;
+    CB cb;
+    if(!m_base_inst.m_pool.exists(obj)) begin //no instance specific
+      if(obj == null) begin
+        q = m_t_inst.m_twcb;
+      end
+      else begin
+        q = m_t_inst.m_get_twq(obj); //get the most derivative queue
+      end
+    end 
+    else begin
+      q = m_base_inst.m_pool.get(obj);
+      if(q==null) begin q=new; m_base_inst.m_pool.add(obj,q); end
+    end
+    for(itr = q.size()-1; itr>=0; --itr) begin
+      if($cast(cb, q.get(itr))) begin
+        if(cb.callback_mode()) begin
+          return cb;
+        end
+      end
+    end
+    return null;
+  endfunction
+
   // Function: get_next
   //
   // returns the next enabled callback of type CB which resides in the queue for ~obj~,
@@ -728,7 +766,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   // supplied to <get_next> to get the next callback object.
   //
   // If no more callbacks exist in the queue, then null is returned. <get_next> will
-  // continue to return null in this case until <get_first> has been used to reset
+  // continue to return null in this case until <get_first> or <get_last> has been used to reset
   // the iterator.
   //
   // The iterator class <uvm_callback_iter> may be used as an alternative, simplified,
@@ -749,6 +787,44 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
       if(q==null) begin q=new; m_base_inst.m_pool.add(obj,q); end
     end
     for(itr = itr+1; itr<q.size(); ++itr) begin
+      if($cast(cb, q.get(itr))) begin
+        if(cb.callback_mode()) begin
+          return cb;
+        end
+      end
+    end
+    return null;
+  endfunction
+
+  // Function: get_prev
+  //
+  // returns the previous enabled callback of type CB which resides in the queue for ~obj~,
+  // using ~itr~ as the starting point. If ~obj~ is null then the typewide queue for T 
+  // is searched. ~itr~ is the iterator; it will be updated with a value that can be 
+  // supplied to <get_prev> to get the previous callback object.
+  //
+  // If no more callbacks exist in the queue, then null is returned. <get_prev> will
+  // continue to return null in this case until <get_first> or <get_last> has been used to reset
+  // the iterator.
+  //
+  // The iterator class <uvm_callback_iter> may be used as an alternative, simplified,
+  // iterator interface.
+
+  static function CB get_prev (ref int itr, input T obj);
+    uvm_queue#(uvm_callback) q;
+    CB cb;
+    get_prev = null;
+    if(!m_base_inst.m_pool.exists(obj)) begin //no instance specific
+      if(obj == null) 
+        q = m_t_inst.m_twcb;
+      else 
+        q = m_t_inst.m_get_twq(obj); //get the most derivative queue
+    end 
+    else begin
+      q = m_base_inst.m_pool.get(obj);
+      if(q==null) begin q=new; m_base_inst.m_pool.add(obj,q); end
+    end
+    for(itr = itr-1; itr>= 0; --itr) begin
       if($cast(cb, q.get(itr))) begin
         if(cb.callback_mode()) begin
           return cb;
@@ -859,6 +935,17 @@ class uvm_callback_iter#(type T = uvm_object, type CB = uvm_callback);
       return m_cb;
    endfunction
 
+   // Function: last
+   //
+   // Returns the last valid (enabled) callback of the callback type (or
+   // a derivative) that is in the queue of the context object. If the
+   // queue is empty then null is returned.
+
+   function CB last();
+      m_cb = uvm_callbacks#(T,CB)::get_last(m_i, m_obj);
+      return m_cb;
+   endfunction
+
    // Function: next
    //
    // Returns the next valid (enabled) callback of the callback type (or
@@ -867,6 +954,17 @@ class uvm_callback_iter#(type T = uvm_object, type CB = uvm_callback);
 
    function CB next();
       m_cb = uvm_callbacks#(T,CB)::get_next(m_i, m_obj);
+      return m_cb;
+   endfunction
+
+   // Function: prev
+   //
+   // Returns the previous valid (enabled) callback of the callback type (or
+   // a derivative) that is in the queue of the context object. If there
+   // are no more valid callbacks in the queue, then null is returned.
+
+   function CB prev();
+      m_cb = uvm_callbacks#(T,CB)::get_prev(m_i, m_obj);
       return m_cb;
    endfunction
 
