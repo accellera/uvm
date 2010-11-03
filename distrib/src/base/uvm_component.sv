@@ -116,7 +116,7 @@ function uvm_component::new (string name, uvm_component parent);
       // build phase schedule 'uvm_pkg::common', used by all uvm_component instances
       // - it is a linear list of predefined phases (see uvm_globals.svh) as follows:
       common = new("uvm_pkg::common");
-      // note: could not do this in uvm_root::new() due to static initialization ordering
+      // note - could not do this in uvm_root::new() due to static initialization ordering
       common.add_phase(uvm_build_ph);
       common.add_phase(uvm_connect_ph);
       common.add_phase(uvm_end_of_elaboration_ph);
@@ -765,22 +765,22 @@ function void uvm_component::jump_all_domains(uvm_phase_imp phase);
   current_phase.jump_all(phase);
 endfunction
 
-function void uvm_component::raise_objection();
-  uvm_phase_schedule  current_phase = get_current_phase();
-  if(current_phase != null)
-    current_phase.phase_done.raise_objection(this);
+function void uvm_component::raise_objection(uvm_phase_schedule phase=null);
+  if(phase == null)
+    phase = get_current_phase();
+  phase.phase_done.raise_objection(this);
 endfunction
 
-function void uvm_component::drop_objection();
-  uvm_phase_schedule  current_phase = get_current_phase();
-  if(current_phase != null)
-    current_phase.phase_done.drop_objection(this);
+function void uvm_component::drop_objection(uvm_phase_schedule phase=null);
+  if(phase == null)
+    phase = get_current_phase();
+  phase.phase_done.drop_objection(this);
 endfunction
 
-function void uvm_component::terminate_phase();
-  uvm_phase_schedule current_phase;
-  current_phase = get_current_phase();
-  current_phase.terminate_phase();
+function void uvm_component::terminate_phase(uvm_phase_schedule phase=null);
+  if(phase == null)
+    phase = get_current_phase();
+  phase.terminate_phase();
 endfunction
 
 

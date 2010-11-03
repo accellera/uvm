@@ -551,25 +551,43 @@ virtual class uvm_component extends uvm_report_object;
   // Function: raise_objection
   //
   // Raises an objection to the end of the current phase. The current phase
-  // ends when all objections to the phase have been dropped.
+  // ends when all objections to the phase have been dropped. The ~phase~
+  // argument must be provided. If null, uvm will call <get_current_phase>
+  // but this is only successful if the function call is made in the
+  // main phase process (not from a child process). It is a good practice
+  // to get the phase process before forking any child process. For example:
+  //
+  //| task main;
+  //|   uvm_phase_schedule phase = get_current_phase();
+  //|   fork begin
+  //|     raise_objection(phase);
+  //|     ...
+  //|     drop_objection(phase);
+  //|   end join_none
+  //|   ...
+  //| endtask
 
-  extern function void raise_objection();
+  extern function void raise_objection(uvm_phase_schedule phase=null);
 
 
   // Function: drop_objection
   //
   // Drops an objection to the end of the current phase. The current phase
-  // ends when all objections to the phase have been dropped.
+  // ends when all objections to the phase have been dropped. The ~phase~
+  // argument must be provided. If null, uvm will call <get_current_phase>
+  // but this is only successful if the function call is made in the
+  // main phase process (not from a child process). It is a good practice
+  // to get the phase process before forking any child process. 
 
-  extern function void drop_objection(); 
+  extern function void drop_objection(uvm_phase_schedule phase=null); 
 
 
   // Function: terminate_phase
   //
-  // Forces all objections to the current phase to be immediately dropped
+  // Forces all objections to the ~phase~ to be immediately dropped
   // so that the phase can end.
 
-  extern function void terminate_phase();
+  extern function void terminate_phase(uvm_phase_schedule phase=null);
 
   
   // Function: jump

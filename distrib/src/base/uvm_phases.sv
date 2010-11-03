@@ -935,7 +935,7 @@ task uvm_phase_schedule::execute();
   uvm_report_info("STARTPH",
                   $psprintf("STARTING PHASE %0s (in schedule %0s)",
                             this.get_name(),this.get_schedule_name()),int'(UVM_FULL)+1);
-  
+ 
   // fork two processes, one that executes the phase callbacks and the
   // other that serves as a termination watchdog.  The fork is
   // terminated with a join_any, so the first process to complete will
