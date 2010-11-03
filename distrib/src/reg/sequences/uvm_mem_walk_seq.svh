@@ -77,6 +77,12 @@ class uvm_mem_single_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_
          `uvm_error("RegModel", "No memory specified to run sequence on");
          return;
       end
+
+      // Memories with some attributes are not to be tested
+      if (mem.get_attribute("NO_REG_TESTS") != "" ||
+          mem.get_attribute("NO_MEM_TESTS") != "" ||
+	  mem.get_attribute("NO_MEM_WALK_TEST") != "") return;
+
       n_bits = mem.get_n_bits();
 
       // Memories may be accessible from multiple physical interfaces (maps)
@@ -164,16 +170,33 @@ endclass: uvm_mem_single_walk_seq
 
 class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
+   // Variable: model
+   //
+   // The block to be tested. Declared in the base class.
+   //
+   //| uvm_reg_block model; 
+
+
+   // Variable: mem_seq
+   //
+   // The sequence used to test one memory
+   //
+   protected uvm_mem_single_walk_seq mem_seq;
+
    `uvm_object_utils(uvm_mem_walk_seq)
 
    function new(string name="uvm_mem_walk_seq");
      super.new(name);
    endfunction
 
-   // variable: model
-   // The block on which to execute test sequences
 
+   // Task: body
+   //
+   // Executes the mem walk sequence, one block at a time.
+   // Do not call directly. Use seq.start() instead.
+   //
    virtual task body();
+      uvm_reg_block blks[$];
 
       if (model == null) begin
          `uvm_error("RegModel", "Not block or system specified to run sequence on");
@@ -182,31 +205,47 @@ class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
       uvm_report_info("STARTING_SEQ",{"\n\nStarting ",get_name()," sequence...\n"},UVM_LOW);
 
-      if (model.get_attribute("NO_REG_TESTS") == "") begin
-        if (model.get_attribute("NO_MEM_WALK_TEST") == "") begin
-           uvm_mem mems[$];
-           uvm_mem_single_walk_seq mem_seq = new("single_mem_walk_seq");
-           this.reset_blk(model);
-           model.reset();
+      mem_seq = uvm_mem_single_walk_seq::type_id::create("single_mem_walk_seq");
 
-           // Iterate over all memories, checking accesses
-           model.get_memories(mems);
-           foreach (mems[i]) begin
-              // Registers with some attributes are not to be tested
-              if (mems[i].get_attribute("NO_REG_TESTS") != "" ||
-	          mems[i].get_attribute("NO_MEM_WALK_TEST") != "") continue;
+      this.reset_blk(model);
+      model.reset();
 
-              mem_seq.mem = mems[i];
-              mem_seq.start(null, this);
-           end
-        end
+      do_block(model);
+      model.get_blocks(blks);
+      foreach (blks[i]) begin
+         do_block(blks[i]);
       end
-
    endtask: body
 
 
+   // Task: do_block
    //
-   // task: reset_blk
+   // Test all of the memories in a given ~block~
+   //
+   protected virtual task do_block(uvm_reg_block blk);
+      uvm_mem mems[$];
+      
+      if (blk.get_attribute("NO_REG_TESTS") != "" ||
+          blk.get_attribute("NO_MEM_TESTS") != "" ||
+          blk.get_attribute("NO_MEM_ACCESS_TEST") != "")
+         return;
+      
+      // Iterate over all memories, checking accesses
+      blk.get_memories(mems, UVM_NO_HIER);
+      foreach (mems[i]) begin
+         // Registers with some attributes are not to be tested
+         if (mems[i].get_attribute("NO_REG_TESTS") != "" ||
+             mems[i].get_attribute("NO_MEM_TESTS") != "" ||
+	     mems[i].get_attribute("NO_MEM_WALK_TEST") != "") continue;
+         
+         mem_seq.mem = mems[i];
+         mem_seq.start(null, this);
+      end
+   endtask: do_block
+
+
+   // Task: reset_blk
+   //
    // Reset the DUT that corresponds to the specified block abstraction class.
    //
    // Currently empty.

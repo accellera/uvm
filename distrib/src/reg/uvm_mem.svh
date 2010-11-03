@@ -40,29 +40,30 @@ class uvm_mem extends uvm_object;
 
    typedef enum {UNKNOWNS, ZEROES, ONES, ADDRESS, VALUE, INCR, DECR} init_e;
 
-   local bit                  m_locked;
-   local bit                  m_read_in_progress;
-   local bit                  m_write_in_progress;
-   /*local*/ string           m_access;
-   /*local*/ longint unsigned m_size;
-   local uvm_reg_block        m_parent;
-   /*local*/ bit              m_maps[uvm_reg_map];
-   /*local*/ int unsigned     m_n_bits;
-   local uvm_reg_backdoor     m_backdoor;
-   local string               m_attributes[string];
-   local bit                  m_is_powered_down;
-   /*local*/ int              m_has_cover;
-   local int                  m_cover_on;
-   local string               m_fname = "";
-   local int                  m_lineno = 0;
-   /*local*/ uvm_vreg         m_vregs[$]; //Virtual registers
+   local bit               m_locked;
+   local bit               m_read_in_progress;
+   local bit               m_write_in_progress;
+   local string            m_access;
+   local longint unsigned  m_size;
+   local uvm_reg_block     m_parent;
+   local bit               m_maps[uvm_reg_map];
+   local int unsigned      m_n_bits;
+   local uvm_reg_backdoor  m_backdoor;
+   local string            m_attributes[string];
+   local bit               m_is_powered_down;
+   local int               m_has_cover;
+   local int               m_cover_on;
+   local string            m_fname = "";
+   local int               m_lineno = 0;
+   local bit               m_vregs[uvm_vreg];
    local uvm_object_string_pool
                #(uvm_queue #(uvm_hdl_path_concat)) m_hdl_paths_pool;
+
+   local static int unsigned  m_max_size = 0;
 
    //----------------------
    // Group: Initialization
    //----------------------
-
 
    // Function: new
    //
@@ -123,6 +124,8 @@ class uvm_mem extends uvm_object;
    /*local*/ extern virtual function void set_parent(uvm_reg_block parent);
    /*local*/ extern function void add_map(uvm_reg_map map);
    /*local*/ extern function void Xlock_modelX();
+   /*local*/ extern function void Xadd_vregX(uvm_vreg vreg);
+   /*local*/ extern function void Xdelete_vregX(uvm_vreg vreg);
 
 
    // variable: mam
@@ -251,6 +254,13 @@ class uvm_mem extends uvm_object;
    // Returns the width, in number of bits, of each memory location
    //
    extern function int unsigned get_n_bits();
+
+
+   // Function: get_max_size
+   //
+   // Returns the maximum width, in number of bits, of all memories
+   //
+   extern static function int unsigned    get_max_size();
 
 
    // Function: get_virtual_registers
@@ -716,7 +726,8 @@ class uvm_mem extends uvm_object;
    // for each ancestor block is used to get each incremental path.
    //
    extern function void get_full_hdl_path (ref uvm_hdl_path_concat paths[$],
-                                           input string kind = "");
+                                           input string kind = "",
+                                           input string separator = ".");
 
 
    // Function: backdoor_read
@@ -900,18 +911,16 @@ function uvm_mem::new (string           name,
       `uvm_error("RegModel", {"Memory '",get_full_name(),"' cannot have 0 bits"})
       n_bits = 1;
    end
-   if (n_bits > `UVM_REG_DATA_WIDTH) begin
-      `uvm_error("RegModel",
-          $psprintf("Memory \"%s\" cannot have more than %0d bits (%0d)",
-                   get_full_name(), `UVM_REG_DATA_WIDTH, n_bits))
-      n_bits = `UVM_REG_DATA_WIDTH;
-   end
    m_size      = size;
    m_n_bits    = n_bits;
    m_backdoor  = null;
    m_access    = access.toupper();
    m_has_cover = has_cover;
    m_hdl_paths_pool = new("hdl_paths");
+
+   if (n_bits > m_max_size)
+      m_max_size = n_bits;
+
 endfunction: new
 
 
@@ -1200,8 +1209,8 @@ endfunction: get_offset
 // get_virtual_registers
 
 function void uvm_mem::get_virtual_registers(ref uvm_vreg regs[$]);
-  foreach (m_vregs[i])
-     regs.push_back(m_vregs[i]);
+  foreach (m_vregs[vreg])
+     regs.push_back(vreg);
 endfunction
 
 
@@ -1209,8 +1218,8 @@ endfunction
 
 function void uvm_mem::get_virtual_fields(ref uvm_vreg_field fields[$]);
 
-  foreach (m_vregs[i])
-    m_vregs[i].get_fields(fields);
+  foreach (m_vregs[vreg])
+    vreg.get_fields(fields);
 
 endfunction: get_virtual_fields
 
@@ -1237,9 +1246,9 @@ endfunction: get_vfield_by_name
 
 function uvm_vreg uvm_mem::get_vreg_by_name(string name);
 
-  foreach (m_vregs[i])
-    if (m_vregs[i].get_name() == name)
-      return m_vregs[i];
+  foreach (m_vregs[vreg])
+    if (vreg.get_name() == name)
+      return vreg;
 
   `uvm_warning("RegModel", {"Unable to find virtual register '",name,
                        "' in memory '",get_full_name(),"'"})
@@ -1314,6 +1323,13 @@ endfunction: get_size
 function int unsigned uvm_mem::get_n_bits();
    return m_n_bits;
 endfunction: get_n_bits
+
+
+// get_max_size
+
+function int unsigned uvm_mem::get_max_size();
+   return m_max_size;
+endfunction: get_max_size
 
 
 // get_n_bytes
@@ -2198,7 +2214,8 @@ endfunction
 // get_full_hdl_path
 
 function void uvm_mem::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
-                                             input string kind = "");
+                                         input string kind = "",
+                                         input string separator = ".");
 
    if (kind == "")
       kind = m_parent.get_default_hdl_path();
@@ -2213,7 +2230,7 @@ function void uvm_mem::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
       uvm_queue #(uvm_hdl_path_concat) hdl_paths = m_hdl_paths_pool.get(kind);
       string parent_paths[$];
 
-      m_parent.get_full_hdl_path(parent_paths,kind);
+      m_parent.get_full_hdl_path(parent_paths, kind, separator);
 
       for (int i=0; i<hdl_paths.size();i++) begin
          uvm_hdl_path_concat hdl_slices = hdl_paths.get(i);
@@ -2223,7 +2240,7 @@ function void uvm_mem::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
                if (hdl_slices[k].path == "")
                   hdl_slices[k].path = parent_paths[j];
                else
-                  hdl_slices[k].path = {parent_paths[j], ".", hdl_slices[k].path};
+                  hdl_slices[k].path = {parent_paths[j], separator, hdl_slices[k].path};
             end
          end
          paths.push_back(hdl_slices);
@@ -2331,6 +2348,21 @@ endfunction
 
 function void uvm_mem::do_unpack (uvm_packer packer);
   `uvm_warning("RegModel","RegModel memories cannot be unpacked")
+endfunction
+
+
+// Xadd_vregX
+
+function void uvm_mem::Xadd_vregX(uvm_vreg vreg);
+  m_vregs[vreg] = 1;
+endfunction
+
+
+// Xdelete_vregX
+
+function void uvm_mem::Xdelete_vregX(uvm_vreg vreg);
+   if (m_vregs.exists(vreg))
+     m_vregs.delete(vreg);
 endfunction
 
 

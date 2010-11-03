@@ -12,31 +12,36 @@ the licese is provided in this kit in the file LICENSE.txt
 Installing the kit
 ------------------
 
-Installation of UVM requires unpacking the kit in a convenient
-location and building the DPI object library for each combination of
-simulator and platform you are using.
+Installation of UVM requires first unpacking the kit in a convenient
+location.
 
-For each platform/OS:
+    % mkdir path/to/convenient/location
+    % cd path/to/convenient/location
+    % gunzip -c path/to/UVM/distribution/tar.gz | tar xvf -
 
-  - Log in to a machine of the suitable platform/OS
-  - Change your working directory to the 'distrib' directory where
-    you unpacked the kit
+You should define the $UVM_HOME environment variable to that
+convenient location using an absolute path name. The following
+instructions assume that this variable is appropriately set.
 
-       % cd .../distrib
+   % setenv UVM_HOME /absolute/path/to/convenient/location
 
-  - Invoke 'make' for every simulator you use
+You must then obtain from your SystemVerilog tool vendor a tool-specific
+distribution overlay. That overlay may be specific to the machine
+architecture and/or operating system you are using. Make sure you provide
+the output of the '$UVM_HOME/bin/uvm_os_name' script as well as the version
+of the simulator you are using when requesting a UVM overlay from your vendor.
 
-       % make TOOL=questa
-       % make TOOL=nc
-       % make TOOL=vcs
+            % $UVM_HOME/bin/uvm_os_name
+   IUS:     % irun -version
+   Questa:  % vlog -version
+   VCS:     % vcs -ID
 
-The shared library, named 'libuvm_<tool>.so' where "<tool>" is the name of
-the simulator specified using the TOOL makefile variable, is found in
-the ".../distrib/lib/<os>" directory, where "<os>" is the name of the
-platform as returned by the ".../distrib/bin/uvm_os_name" script.
+Follow the installation instructions provided by your tool vendor for
+installing the overlay in your UVM installation.
 
-For convenience, a link to the last tool-specific shared library that
-was compiled is located in the ".../distrib/lib" directory.
+Note to EDA vendors: to support multiple tool-specific overlays in the
+same UVM distribution, please locate any tool-specific files in a
+tool-specific sub-directory.
 
 
 Using the UVM

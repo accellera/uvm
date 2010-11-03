@@ -475,7 +475,7 @@ function automatic string uvm_hdl_concat2string(uvm_hdl_path_concat slices);
 endfunction
 
 
-`include "reg/uvm_hdl.svh"
+`include "dpi/uvm_hdl.svh"
 
 `include "reg/uvm_reg_item.svh"
 `include "reg/uvm_reg_adapter.svh"

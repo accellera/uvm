@@ -47,8 +47,18 @@ class uvm_reg_hw_reset_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_ite
      super.new(name);
    endfunction
 
+
    // Variable: model
-   // The block abstraction class of the DUT
+   //
+   // The block to be tested. Declared in the base class.
+   //
+   //| uvm_reg_block model; 
+
+
+   // Variable: body
+   //
+   // Executes the Hardware Reset sequence.
+   // Do not call directly. Use seq.start() instead.
 
    virtual task body();
 

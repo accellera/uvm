@@ -37,7 +37,6 @@ virtual class uvm_reg_file extends uvm_object;
    local string            default_hdl_path = "RTL";
    local uvm_object_string_pool #(uvm_queue #(string)) hdl_paths_pool;
    local string            attributes[string];
-   local string            constr[$];
 
 
    //----------------------
@@ -76,9 +75,9 @@ virtual class uvm_reg_file extends uvm_object;
                                                 uvm_reg_file rf_parent,
                                                 string hdl_path = "");
  
-   //--------------------------------
-   // Group: Attributes & Constraints
-   //--------------------------------
+   //------------------
+   // Group: Attributes
+   //------------------
 
    //
    // FUNCTION: set_attribute
@@ -119,9 +118,6 @@ virtual class uvm_reg_file extends uvm_object;
    // 
    extern virtual function void   get_attributes  (ref string names[string],
                                                    input bit inherited = 1);
-
-   extern virtual function void   get_constraints (ref string names[]);
-   /*local*/ extern function void Xadd_constraintsX(string name);
 
 
    //---------------------
@@ -231,7 +227,9 @@ virtual class uvm_reg_file extends uvm_object;
    // for each ancestor register file or block is used to get each
    // incremental path.
    //
-   extern function void get_full_hdl_path (ref string paths[$], input string kind = "");
+   extern function void get_full_hdl_path (ref string paths[$],
+                                           input string kind = "",
+                                           input string separator = ".");
 
    //
    // Function:    set_default_hdl_path
@@ -360,32 +358,6 @@ function void uvm_reg_file::get_attributes(ref string names[string],
 endfunction: get_attributes
 
 
-// Xadd_constraintsX
-
-function void uvm_reg_file::Xadd_constraintsX(string name);
-
-   // Check if the constraint block already exists
-   foreach (this.constr[i]) begin
-      if (this.constr[i] == name) begin
-         `uvm_warning("RegModel", $psprintf("Constraint \"%s\" already added",
-                                          name));
-         return;
-      end
-   end
-
-   constr.push_back(name);
-
-endfunction: Xadd_constraintsX
-
-
-// get_constraints
-
-function void uvm_reg_file::get_constraints(ref string names[]);
-   names = new [this.constr.size()] (this.constr);
-endfunction: get_constraints
-
-
-
 // get_block
 
 function uvm_reg_block uvm_reg_file::get_block();
@@ -479,7 +451,9 @@ endfunction
 
 // get_full_hdl_path
 
-function void uvm_reg_file::get_full_hdl_path(ref string paths[$], input string kind = "");
+function void uvm_reg_file::get_full_hdl_path(ref string paths[$],
+                                              input string kind = "",
+                                              input string separator = ".");
    if (kind == "")
       kind = get_default_hdl_path();
 
@@ -495,9 +469,9 @@ function void uvm_reg_file::get_full_hdl_path(ref string paths[$], input string 
       string parent_paths[$];
 
       if (m_rf != null)
-         m_rf.get_full_hdl_path(parent_paths,kind);
+         m_rf.get_full_hdl_path(parent_paths, kind, separator);
       else if (parent != null)
-         parent.get_full_hdl_path(parent_paths,kind);
+         parent.get_full_hdl_path(parent_paths, kind, separator);
 
       for (int i=0; i<hdl_paths.size();i++) begin
          string hdl_path = hdl_paths.get(i);
@@ -513,7 +487,7 @@ function void uvm_reg_file::get_full_hdl_path(ref string paths[$], input string 
             if (hdl_path == "")
                paths.push_back(parent_paths[j]);
             else
-               paths.push_back({ parent_paths[j], ".", hdl_path });
+               paths.push_back({ parent_paths[j], separator, hdl_path });
          end
       end
    end

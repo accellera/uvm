@@ -12,7 +12,7 @@ class reg_reg_B_R extends uvm_reg;
 
    virtual function void build();
 		F = uvm_reg_field::type_id::create("F");
-		F.configure(this, 8, 0, "RW", 8'h0, 0, 1);
+		F.configure(this, 8, 0, "RW", 0, 8'h0, 0, 1);
 	endfunction: build
 
 	`uvm_object_utils(reg_reg_B_R)
@@ -39,7 +39,7 @@ class reg_reg_B_CTL extends uvm_reg;
 
    virtual function void build();
 		CTL = uvm_reg_field::type_id::create("CTL");
-		CTL.configure(this, 2, 0, "WO", 2'h0, 0, 1);
+		CTL.configure(this, 2, 0, "WO", 0, 2'h0, 0, 1);
 		set_attribute("NO_REG_TESTS", "1");
 	endfunction: build
 

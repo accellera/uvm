@@ -69,13 +69,25 @@ class uvm_reg_mem_built_in_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg
      super.new(name);
    endfunction
 
-   // variable: model
-   // The block on which to execute test sequences
-   
-   // Variable: tests
-   // The pre-defined test sequences to be executed.
-   uvm_reg_mem_tests_e tests = UVM_DO_ALL_REG_MEM_TESTS;
+   // Variable: model
+   //
+   // The block to be tested. Declared in the base class.
+   //
+   //| uvm_reg_block model; 
 
+
+   // Variable: tests
+   //
+   // The pre-defined test sequences to be executed.
+   //
+   bit [63:0] tests = UVM_DO_ALL_REG_MEM_TESTS;
+
+
+   // Task: body
+   //
+   // Executes any or all the built-in register and memory sequences.
+   // Do not call directly. Use seq.start() instead.
+   
    virtual task body();
 
       if (model == null) begin

@@ -28,39 +28,39 @@ class reg_reg_MODER extends uvm_reg;
 
    virtual function void build();
       this.RECSMALL = uvm_reg_field::type_id::create("RECSMALL",,get_full_name());
-      this.RECSMALL.configure(this, 1, 16, "RW", 1'h0, 0, 1);
+      this.RECSMALL.configure(this, 1, 16, "RW", 0, 1'h0, 0, 1);
       this.PAD = uvm_reg_field::type_id::create("PAD",,get_full_name());
-      this.PAD.configure(this, 1, 15, "RW", 1, 0, 0);
+      this.PAD.configure(this, 1, 15, "RW", 0, 1, 0, 0);
       this.HUGEN = uvm_reg_field::type_id::create("HUGEN",,get_full_name());
-      this.HUGEN.configure(this, 1, 14, "RW", 1'h0, 0, 0);
+      this.HUGEN.configure(this, 1, 14, "RW", 0, 1'h0, 0, 0);
       this.CRCEN = uvm_reg_field::type_id::create("CRCEN",,get_full_name());
-      this.CRCEN.configure(this, 1, 13, "RW", 1, 0, 0);
+      this.CRCEN.configure(this, 1, 13, "RW", 0, 1, 0, 0);
       this.DLYCRCEN = uvm_reg_field::type_id::create("DLYCRCEN",,get_full_name());
-      this.DLYCRCEN.configure(this, 1, 12, "RW", 1'h0, 0, 0);
+      this.DLYCRCEN.configure(this, 1, 12, "RW", 0, 1'h0, 0, 0);
       this.undocumented = uvm_reg_field::type_id::create("undocumented",,get_full_name());
-      this.undocumented.configure(this, 1, 11, "DC", 1'h0, 0, 0);
+      this.undocumented.configure(this, 1, 11, "DC", 0, 1'h0, 0, 0);
       this.FULLD = uvm_reg_field::type_id::create("FULLD",,get_full_name());
-      this.FULLD.configure(this, 1, 10, "RW", 1'h0, 0, 0);
+      this.FULLD.configure(this, 1, 10, "RW", 0, 1'h0, 0, 0);
       this.EXDFREN = uvm_reg_field::type_id::create("EXDFREN",,get_full_name());
-      this.EXDFREN.configure(this, 1, 9, "RW", 1'h0, 0, 0);
+      this.EXDFREN.configure(this, 1, 9, "RW", 0, 1'h0, 0, 0);
       this.NOBCKOF = uvm_reg_field::type_id::create("NOBCKOF",,get_full_name());
-      this.NOBCKOF.configure(this, 1, 8, "RW", 1'h0, 0, 0);
+      this.NOBCKOF.configure(this, 1, 8, "RW", 0, 1'h0, 0, 0);
       this.LOOPBCK = uvm_reg_field::type_id::create("LOOPBCK",,get_full_name());
-      this.LOOPBCK.configure(this, 1, 7, "RW", 1'h0, 0, 0);
+      this.LOOPBCK.configure(this, 1, 7, "RW", 0, 1'h0, 0, 0);
       this.IFG = uvm_reg_field::type_id::create("IFG",,get_full_name());
-      this.IFG.configure(this, 1, 6, "RW", 1'h0, 0, 0);
+      this.IFG.configure(this, 1, 6, "RW", 0, 1'h0, 0, 0);
       this.PRO = uvm_reg_field::type_id::create("PRO",,get_full_name());
-      this.PRO.configure(this, 1, 5, "RW", 1'h0, 0, 0);
+      this.PRO.configure(this, 1, 5, "RW", 0, 1'h0, 0, 0);
       this.IAM = uvm_reg_field::type_id::create("IAM",,get_full_name());
-      this.IAM.configure(this, 1, 4, "RW", 1'h0, 0, 0);
+      this.IAM.configure(this, 1, 4, "RW", 0, 1'h0, 0, 0);
       this.BRO = uvm_reg_field::type_id::create("BRO",,get_full_name());
-      this.BRO.configure(this, 1, 3, "RW", 1'h0, 0, 0);
+      this.BRO.configure(this, 1, 3, "RW", 0, 1'h0, 0, 0);
       this.NOPRE = uvm_reg_field::type_id::create("NOPRE",,get_full_name());
-      this.NOPRE.configure(this, 1, 2, "RW", 1'h0, 0, 0);
+      this.NOPRE.configure(this, 1, 2, "RW", 0, 1'h0, 0, 0);
       this.TXEN = uvm_reg_field::type_id::create("TXEN",,get_full_name());
-      this.TXEN.configure(this, 1, 1, "RW", 1'h0, 0, 0);
+      this.TXEN.configure(this, 1, 1, "RW", 0, 1'h0, 0, 0);
       this.RXEN = uvm_reg_field::type_id::create("RXEN",,get_full_name());
-      this.RXEN.configure(this, 1, 0, "RW", 1'h0, 0, 0);
+      this.RXEN.configure(this, 1, 0, "RW", 0, 1'h0, 0, 0);
    endfunction: build
 
    `uvm_object_utils(reg_reg_MODER)
@@ -83,19 +83,19 @@ class reg_reg_oc_ethernet_INT_SOURCE extends uvm_reg;
 
    virtual function void build();
       this.RXC = uvm_reg_field::type_id::create("RXC",,get_full_name());
-      this.RXC.configure(this, 1, 6, "W1C", 1'h0, 0, 0);
+      this.RXC.configure(this, 1, 6, "W1C", 1, 1'h0, 0, 0);
       this.TXC = uvm_reg_field::type_id::create("TXC",,get_full_name());
-      this.TXC.configure(this, 1, 5, "W1C", 1'h0, 0, 0);
+      this.TXC.configure(this, 1, 5, "W1C", 1, 1'h0, 0, 0);
       this.BUSY = uvm_reg_field::type_id::create("BUSY",,get_full_name());
-      this.BUSY.configure(this, 1, 4, "W1C", 1'h0, 0, 0);
+      this.BUSY.configure(this, 1, 4, "W1C", 1, 1'h0, 0, 0);
       this.RXE = uvm_reg_field::type_id::create("RXE",,get_full_name());
-      this.RXE.configure(this, 1, 3, "W1C", 1'h0, 0, 0);
+      this.RXE.configure(this, 1, 3, "W1C", 1, 1'h0, 0, 0);
       this.RXB = uvm_reg_field::type_id::create("RXB",,get_full_name());
-      this.RXB.configure(this, 1, 2, "W1C", 1'h0, 0, 0);
+      this.RXB.configure(this, 1, 2, "W1C", 1, 1'h0, 0, 0);
       this.TXE = uvm_reg_field::type_id::create("TXE",,get_full_name());
-      this.TXE.configure(this, 1, 1, "W1C", 1'h0, 0, 0);
+      this.TXE.configure(this, 1, 1, "W1C", 1, 1'h0, 0, 0);
       this.TXB = uvm_reg_field::type_id::create("TXB",,get_full_name());
-      this.TXB.configure(this, 1, 0, "W1C", 1'h0, 0, 0);
+      this.TXB.configure(this, 1, 0, "W1C", 1, 1'h0, 0, 0);
    endfunction: build
 
    `uvm_object_utils(reg_reg_oc_ethernet_INT_SOURCE)
@@ -118,19 +118,19 @@ class reg_reg_oc_ethernet_INT_MASK extends uvm_reg;
 
    virtual function void build();
       this.RXC_M = uvm_reg_field::type_id::create("RXC_M",,get_full_name());
-      this.RXC_M.configure(this, 1, 6, "RW", 1'h0, 0, 0);
+      this.RXC_M.configure(this, 1, 6, "RW", 0, 1'h0, 0, 0);
       this.TXC_M = uvm_reg_field::type_id::create("TXC_M",,get_full_name());
-      this.TXC_M.configure(this, 1, 5, "RW", 1'h0, 0, 0);
+      this.TXC_M.configure(this, 1, 5, "RW", 0, 1'h0, 0, 0);
       this.BUSY_M = uvm_reg_field::type_id::create("BUSY_M",,get_full_name());
-      this.BUSY_M.configure(this, 1, 4, "RW", 1'h0, 0, 0);
+      this.BUSY_M.configure(this, 1, 4, "RW", 0, 1'h0, 0, 0);
       this.RXE_M = uvm_reg_field::type_id::create("RXE_M",,get_full_name());
-      this.RXE_M.configure(this, 1, 3, "RW", 1'h0, 0, 0);
+      this.RXE_M.configure(this, 1, 3, "RW", 0, 1'h0, 0, 0);
       this.RXB_M = uvm_reg_field::type_id::create("RXB_M",,get_full_name());
-      this.RXB_M.configure(this, 1, 2, "RW", 1'h0, 0, 0);
+      this.RXB_M.configure(this, 1, 2, "RW", 0, 1'h0, 0, 0);
       this.TXE_M = uvm_reg_field::type_id::create("TXE_M",,get_full_name());
-      this.TXE_M.configure(this, 1, 1, "RW", 1'h0, 0, 0);
+      this.TXE_M.configure(this, 1, 1, "RW", 0, 1'h0, 0, 0);
       this.TXB_M = uvm_reg_field::type_id::create("TXB_M",,get_full_name());
-      this.TXB_M.configure(this, 1, 0, "RW", 1'h0, 0, 0);
+      this.TXB_M.configure(this, 1, 0, "RW", 0, 1'h0, 0, 0);
    endfunction: build
 
    `uvm_object_utils(reg_reg_oc_ethernet_INT_MASK)
@@ -147,7 +147,7 @@ class reg_reg_IPGT extends uvm_reg;
 
    virtual function void build();
       this.IPGT = uvm_reg_field::type_id::create("IPGT",,get_full_name());
-      this.IPGT.configure(this, 7, 0, "RW", 7'h12, 0, 1);
+      this.IPGT.configure(this, 7, 0, "RW", 0, 7'h12, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_reg_IPGT)
@@ -164,7 +164,7 @@ class reg_reg_IPGR1 extends uvm_reg;
 
    virtual function void build();
       this.IPGR1 = uvm_reg_field::type_id::create("IPGR1",,get_full_name());
-      this.IPGR1.configure(this, 7, 0, "RW", 7'h0C, 0, 1);
+      this.IPGR1.configure(this, 7, 0, "RW", 0, 7'h0C, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_reg_IPGR1)
@@ -181,7 +181,7 @@ class reg_reg_IPGR2 extends uvm_reg;
 
    virtual function void build();
       this.IPGR2 = uvm_reg_field::type_id::create("IPGR2",,get_full_name());
-      this.IPGR2.configure(this, 7, 0, "RW", 7'h12, 0, 1);
+      this.IPGR2.configure(this, 7, 0, "RW", 0, 7'h12, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_reg_IPGR2)
@@ -202,15 +202,13 @@ class reg_reg_PACKETLEN extends uvm_reg;
 
    function new(string name = "PACKETLEN");
       super.new(name, 32, UVM_NO_COVERAGE);
-      Xadd_constraintsX("MINFL_spec");
-      Xadd_constraintsX("MAXFL_spec");
    endfunction: new
 
    virtual function void build();
       this.MINFL = uvm_reg_field::type_id::create("MINFL",,get_full_name());
-      this.MINFL.configure(this, 16, 16, "RW", 16'h0040, 1, 1);
+      this.MINFL.configure(this, 16, 16, "RW", 0, 16'h0040, 1, 1);
       this.MAXFL = uvm_reg_field::type_id::create("MAXFL",,get_full_name());
-      this.MAXFL.configure(this, 16, 0, "RW", 16'h0600, 1, 1);
+      this.MAXFL.configure(this, 16, 0, "RW", 0, 16'h0600, 1, 1);
    endfunction: build
 
    `uvm_object_utils(reg_reg_PACKETLEN)
@@ -228,9 +226,9 @@ class reg_reg_COLLCONF extends uvm_reg;
 
    virtual function void build();
       this.MAXRET = uvm_reg_field::type_id::create("MAXRET",,get_full_name());
-      this.MAXRET.configure(this, 4, 16, "RW", 4'hF, 0, 1);
+      this.MAXRET.configure(this, 4, 16, "RW", 0, 4'hF, 0, 1);
       this.COLLVALID = uvm_reg_field::type_id::create("COLLVALID",,get_full_name());
-      this.COLLVALID.configure(this, 6, 0, "RW", 6'h3F, 0, 1);
+      this.COLLVALID.configure(this, 6, 0, "RW", 0, 6'h3F, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_reg_COLLCONF)
@@ -247,12 +245,11 @@ class reg_reg_TX_BD_NUM extends uvm_reg;
 
    function new(string name = "TX_BD_NUM");
       super.new(name, 8, UVM_NO_COVERAGE);
-      Xadd_constraintsX("TX_BD_NUM_hardware");
    endfunction: new
 
    virtual function void build();
       this.TX_BD_NUM = uvm_reg_field::type_id::create("TX_BD_NUM",,get_full_name());
-      this.TX_BD_NUM.configure(this, 8, 0, "RW", 8'h40, 1, 1);
+      this.TX_BD_NUM.configure(this, 8, 0, "RW", 0, 8'h40, 1, 1);
       this.set_attribute("NO_REG_TESTS", "1");
    endfunction: build
 
@@ -272,11 +269,11 @@ class reg_reg_CTRLMODER extends uvm_reg;
 
    virtual function void build();
       this.TXFLOW = uvm_reg_field::type_id::create("TXFLOW",,get_full_name());
-      this.TXFLOW.configure(this, 1, 2, "RW", 1'h0, 0, 0);
+      this.TXFLOW.configure(this, 1, 2, "RW", 0, 1'h0, 0, 0);
       this.RXFLOW = uvm_reg_field::type_id::create("RXFLOW",,get_full_name());
-      this.RXFLOW.configure(this, 1, 1, "RW", 1'h0, 0, 0);
+      this.RXFLOW.configure(this, 1, 1, "RW", 0, 1'h0, 0, 0);
       this.PASSALL = uvm_reg_field::type_id::create("PASSALL",,get_full_name());
-      this.PASSALL.configure(this, 1, 0, "RW", 1'h0, 0, 0);
+      this.PASSALL.configure(this, 1, 0, "RW", 0, 1'h0, 0, 0);
    endfunction: build
 
    `uvm_object_utils(reg_reg_CTRLMODER)
@@ -294,9 +291,9 @@ class reg_reg_MIIMODER extends uvm_reg;
 
    virtual function void build();
       this.MIINOPRE = uvm_reg_field::type_id::create("MIINOPRE",,get_full_name());
-      this.MIINOPRE.configure(this, 1, 8, "RW", 1'h0, 0, 1);
+      this.MIINOPRE.configure(this, 1, 8, "RW", 0, 1'h0, 0, 1);
       this.CLKDIV = uvm_reg_field::type_id::create("CLKDIV",,get_full_name());
-      this.CLKDIV.configure(this, 8, 0, "RW", 8'h64, 0, 1);
+      this.CLKDIV.configure(this, 8, 0, "RW", 0, 8'h64, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_reg_MIIMODER)
@@ -315,11 +312,11 @@ class reg_reg_MIICOMMAND extends uvm_reg;
 
    virtual function void build();
       this.WCTRLDATA = uvm_reg_field::type_id::create("WCTRLDATA",,get_full_name());
-      this.WCTRLDATA.configure(this, 1, 2, "DC", 1'h0, 0, 0);
+      this.WCTRLDATA.configure(this, 1, 2, "DC", 1, 1'h0, 0, 0);
       this.RSTAT = uvm_reg_field::type_id::create("RSTAT",,get_full_name());
-      this.RSTAT.configure(this, 1, 1, "DC", 1'h0, 0, 0);
+      this.RSTAT.configure(this, 1, 1, "DC", 1, 1'h0, 0, 0);
       this.SCANSTAT = uvm_reg_field::type_id::create("SCANSTAT",,get_full_name());
-      this.SCANSTAT.configure(this, 1, 0, "DC", 1'h0, 0, 0);
+      this.SCANSTAT.configure(this, 1, 0, "DC", 1, 1'h0, 0, 0);
    endfunction: build
 
    `uvm_object_utils(reg_reg_MIICOMMAND)
@@ -337,9 +334,9 @@ class reg_reg_MIIADDRESS extends uvm_reg;
 
    virtual function void build();
       this.RGAD = uvm_reg_field::type_id::create("RGAD",,get_full_name());
-      this.RGAD.configure(this, 5, 8, "RW", 5'h0, 0, 1);
+      this.RGAD.configure(this, 5, 8, "RW", 0, 5'h0, 0, 1);
       this.FIAD = uvm_reg_field::type_id::create("FIAD",,get_full_name());
-      this.FIAD.configure(this, 5, 0, "RW", 5'h0, 0, 1);
+      this.FIAD.configure(this, 5, 0, "RW", 0, 5'h0, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_reg_MIIADDRESS)
@@ -356,7 +353,7 @@ class reg_reg_MIITX_DATA extends uvm_reg;
 
    virtual function void build();
       this.CTRLDATA = uvm_reg_field::type_id::create("CTRLDATA",,get_full_name());
-      this.CTRLDATA.configure(this, 16, 0, "RW", 16'h0, 0, 1);
+      this.CTRLDATA.configure(this, 16, 0, "RW", 0, 16'h0, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_reg_MIITX_DATA)
@@ -373,7 +370,7 @@ class reg_reg_MIIRX_DATA extends uvm_reg;
 
    virtual function void build();
       this.PRSD = uvm_reg_field::type_id::create("PRSD",,get_full_name());
-      this.PRSD.configure(this, 16, 0, "RO", 16'h0, 0, 1);
+      this.PRSD.configure(this, 16, 0, "RO", 1, 16'h0, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_reg_MIIRX_DATA)
@@ -392,11 +389,11 @@ class reg_reg_MIISTATUS extends uvm_reg;
 
    virtual function void build();
       this.NVALID = uvm_reg_field::type_id::create("NVALID",,get_full_name());
-      this.NVALID.configure(this, 1, 2, "RO", 1'h0, 0, 0);
+      this.NVALID.configure(this, 1, 2, "RO", 1, 1'h0, 0, 0);
       this.BUSY_N = uvm_reg_field::type_id::create("BUSY_N",,get_full_name());
-      this.BUSY_N.configure(this, 1, 1, "RO", 1'h0, 0, 0);
+      this.BUSY_N.configure(this, 1, 1, "RO", 1, 1'h0, 0, 0);
       this.LINKFAIL = uvm_reg_field::type_id::create("LINKFAIL",,get_full_name());
-      this.LINKFAIL.configure(this, 1, 0, "RO", 1'h0, 0, 0);
+      this.LINKFAIL.configure(this, 1, 0, "RO", 1, 1'h0, 0, 0);
    endfunction: build
 
    `uvm_object_utils(reg_reg_MIISTATUS)
@@ -413,7 +410,7 @@ class reg_reg_MAC_ADDR extends uvm_reg;
 
    virtual function void build();
       this.MAC_ADDR = uvm_reg_field::type_id::create("MAC_ADDR",,get_full_name());
-      this.MAC_ADDR.configure(this, 48, 0, "RW", 48'h0, 0, 1);
+      this.MAC_ADDR.configure(this, 48, 0, "RW", 0, 48'h0, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_reg_MAC_ADDR)
@@ -430,7 +427,7 @@ class reg_reg_HASH0 extends uvm_reg;
 
    virtual function void build();
       this.HASH0 = uvm_reg_field::type_id::create("HASH0",,get_full_name());
-      this.HASH0.configure(this, 32, 0, "RW", 32'h0, 0, 1);
+      this.HASH0.configure(this, 32, 0, "RW", 0, 32'h0, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_reg_HASH0)
@@ -447,7 +444,7 @@ class reg_reg_HASH1 extends uvm_reg;
 
    virtual function void build();
       this.HASH1 = uvm_reg_field::type_id::create("HASH1",,get_full_name());
-      this.HASH1.configure(this, 32, 0, "RW", 32'h0, 0, 1);
+      this.HASH1.configure(this, 32, 0, "RW", 0, 32'h0, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_reg_HASH1)
@@ -465,9 +462,9 @@ class reg_reg_TXCTRL extends uvm_reg;
 
    virtual function void build();
       this.TXPAUSEREQ = uvm_reg_field::type_id::create("TXPAUSEREQ",,get_full_name());
-      this.TXPAUSEREQ.configure(this, 1, 16, "RW", 1'h0, 0, 1);
+      this.TXPAUSEREQ.configure(this, 1, 16, "RW", 0, 1'h0, 0, 1);
       this.TXPAUSETV = uvm_reg_field::type_id::create("TXPAUSETV",,get_full_name());
-      this.TXPAUSETV.configure(this, 16, 0, "RW", 16'h0, 0, 1);
+      this.TXPAUSETV.configure(this, 16, 0, "RW", 0, 16'h0, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_reg_TXCTRL)

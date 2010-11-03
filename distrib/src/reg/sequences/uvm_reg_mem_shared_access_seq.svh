@@ -63,6 +63,10 @@ class uvm_reg_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
          return;
       end
 
+      // Registers with some attributes are not to be tested
+      if (rg.get_attribute("NO_REG_TESTS") != "") return;
+      if (rg.get_attribute("NO_SHARED_ACCESS_TEST") != "") return;
+
       // Only look at shared registers
       if (rg.get_n_maps() < 2) return;
       rg.get_maps(maps);
@@ -190,6 +194,11 @@ class uvm_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
          return;
       end
 
+      // Memories with some attributes are not to be tested
+      if (mem.get_attribute("NO_REG_TESTS") != "") return;
+      if (mem.get_attribute("NO_MEM_TESTS") != "") return;
+      if (mem.get_attribute("NO_SHARED_ACCESS_TEST") != "") return;
+
       // Only look at shared memories
       if (mem.get_n_maps() < 2) return;
       mem.get_maps(maps);
@@ -299,16 +308,39 @@ endclass: uvm_mem_shared_access_seq
 
 class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
+   // Variable: model
+   //
+   // The block to be tested
+   //
+   //| uvm_reg_block model; 
+
+
+   // Variable: reg_seq
+   //
+   // The sequence used to test one register
+   //
+   protected uvm_reg_shared_access_seq reg_seq;
+   
+
+   // Variable: mem_seq
+   //
+   // The sequence used to test one memory
+   //
+   protected uvm_mem_shared_access_seq mem_seq;
+   
    `uvm_object_utils(uvm_reg_mem_shared_access_seq)
 
    function new(string name="uvm_reg_mem_shared_access_seq");
      super.new(name);
    endfunction
 
-   // variable: model
-   // The block to be tested
 
+   // Task: body
+   //
+   // Executes the Shared Register and Memory sequence
+   //
    virtual task body();
+      uvm_reg_block blks[$];
 
       if (model == null) begin
          `uvm_error("RegModel", "Not block or system specified to run sequence on");
@@ -317,43 +349,60 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uv
       
       uvm_report_info("STARTING_SEQ",{"\n\nStarting ",get_name()," sequence...\n"},UVM_LOW);
 
-      if (model.get_attribute("NO_REG_TESTS") == "" &&
-          model.get_attribute("NO_SHARED_ACCESS_TEST") == "") begin
+      reg_seq = uvm_reg_shared_access_seq::type_id::create("reg_shared_access_seq");
+      mem_seq = uvm_mem_shared_access_seq::type_id::create("reg_shared_access_seq");
 
-         uvm_reg regs[$];
-         uvm_mem mems[$];
+      this.reset_blk(model);
+      model.reset();
 
-         this.reset_blk(model);
-         model.reset();
+      do_block(model);
+      model.get_blocks(blks);
+      foreach (blks[i]) begin
+         do_block(blks[i]);
+      end
+   endtask: body
 
-         // Iterate over all registers, checking accesses
-         model.get_registers(regs);
-         foreach (regs[i]) begin
-            // Registers with some attributes are not to be tested
-            if (regs[i].get_attribute("NO_REG_TESTS") == "" &&
-	        regs[i].get_attribute("NO_SHARED_ACCESS_TEST") == "") begin
-              uvm_reg_shared_access_seq reg_seq;
-              reg_seq = uvm_reg_shared_access_seq::type_id::create("shared_reg_access_seq");
-              reg_seq.rg = regs[i];
-              reg_seq.start(this.get_sequencer(), this);
-            end
-         end
 
-         // Iterate over all memories, checking accesses
-         model.get_memories(mems);
-         foreach (mems[i]) begin
-            // Registers with some attributes are not to be tested
-            if (mems[i].get_attribute("NO_REG_TESTS") == "" &&
-	        mems[i].get_attribute("NO_SHARED_ACCESS_TEST") == "") begin
-              uvm_mem_shared_access_seq mem_seq;
-              mem_seq = uvm_mem_shared_access_seq::type_id::create("shared_mem_access_seq");
-              mem_seq.mem = mems[i];
-              mem_seq.start(this.get_sequencer(), this);
-            end
+   // Task: do_block
+   //
+   // Test all of the registers and memories in a block
+   //
+   protected virtual task do_block(uvm_reg_block blk);
+      uvm_reg regs[$];
+      uvm_mem mems[$];
+      
+      if (blk.get_attribute("NO_REG_TESTS") != "" ||
+          blk.get_attribute("NO_MEM_TESTS") != "" ||
+          blk.get_attribute("NO_REG_ACCESS_TEST") != "")
+        return;
+
+      this.reset_blk(model);
+      model.reset();
+
+      // Iterate over all registers, checking accesses
+      blk.get_registers(regs, UVM_NO_HIER);
+      foreach (regs[i]) begin
+         // Registers with some attributes are not to be tested
+         if (regs[i].get_attribute("NO_REG_TESTS") == "" &&
+	     regs[i].get_attribute("NO_SHARED_ACCESS_TEST") == "") begin
+            reg_seq.rg = regs[i];
+            reg_seq.start(this.get_sequencer(), this);
          end
       end
 
-   endtask: body
+      // Iterate over all memories, checking accesses
+      model.get_memories(mems, UVM_NO_HIER);
+      foreach (mems[i]) begin
+         // Registers with some attributes are not to be tested
+         if (mems[i].get_attribute("NO_REG_TESTS") == "" &&
+             mems[i].get_attribute("NO_MEM_TESTS") == "" &&
+	     mems[i].get_attribute("NO_SHARED_ACCESS_TEST") == "") begin
+            mem_seq.mem = mems[i];
+            mem_seq.start(this.get_sequencer(), this);
+         end
+      end
+
+   endtask: do_block
 
 
    //

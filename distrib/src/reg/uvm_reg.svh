@@ -48,35 +48,27 @@ virtual class uvm_reg extends uvm_object;
    local bit               m_locked;
    local uvm_reg_block     m_parent;
    local uvm_reg_file      m_regfile_parent;
-   /*local*/ int unsigned  m_n_bits;
+   local int unsigned      m_n_bits;
    local int unsigned      m_n_used_bits;
-
-   /*local*/ bit           m_maps[uvm_reg_map];
-
+   local bit               m_maps[uvm_reg_map];
    local uvm_reg_field     m_fields[$];   // Fields in LSB to MSB order
-   local string            m_constr[$];
-   local event             m_value_change;
-
    local string            m_attributes[string];
-
-   /*local*/ int           m_has_cover;
+   local int               m_has_cover;
    local int               m_cover_on;
-
    local semaphore         m_atomic;
    local process           m_process;
    local string            m_fname = "";
    local int               m_lineno = 0;
    local bit               m_read_in_progress = 0;
    local bit               m_write_in_progress = 0;
-
    /*local*/ bit           m_is_busy;
    /*local*/ bit           m_is_locked_by_field;
-
    local uvm_reg_backdoor  m_backdoor;
+
+   local static int unsigned m_max_size = 0;
 
    local uvm_object_string_pool
        #(uvm_queue #(uvm_hdl_path_concat)) m_hdl_paths_pool;
-
 
    //----------------------
    // Group: Initialization
@@ -242,7 +234,14 @@ virtual class uvm_reg extends uvm_object;
    // Returns the width, in bytes, of this register. Rounds up to
    // next whole byte if register is not a multiple of 8.
    //
-   extern virtual function int unsigned get_n_bytes ();
+   extern virtual function int unsigned get_n_bytes();
+
+
+   // Function: get_max_size
+   //
+   // Returns the maximum width, in bits, of all registers. 
+   //
+   extern static function int unsigned get_max_size();
 
 
    // Function: get_fields
@@ -377,10 +376,6 @@ virtual class uvm_reg extends uvm_object;
                                                input bit inherited = 1);
 
 
-   extern virtual function void   get_constraints (ref string names[]);
-   /*local*/ extern function void Xadd_constraintsX(string name);
-
-
    //--------------
    // Group: Access
    //--------------
@@ -439,6 +434,17 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function uvm_reg_data_t  get(string  fname = "",
                                                int     lineno = 0);
 
+
+   // Function: needs_update
+   //
+   // Returns 1 if any of the fields need updating
+   //
+   // See <uvm_reg_field::needs_update()> for details.
+   // Use the <uvm_reg::update()> to actually update the DUT register.
+   //
+   extern virtual function bit needs_update(); 
+
+
    // Function: reset
    //
    // Reset the desired/mirrored value for this register.
@@ -465,6 +471,28 @@ virtual class uvm_reg extends uvm_object;
    //
    extern virtual function uvm_reg_data_t
                              get_reset(string kind = "HARD");
+
+
+   // Function: has_reset
+   //
+   // Check if any field in the register has a reset value specified
+   // for the specified reset ~kind~.
+   // If ~delete~ is TRUE, removes the reset value, if any.
+   //
+   extern virtual function bit has_reset(string kind = "HARD",
+                                         bit    delete = 0);
+
+
+   // Function: set_reset
+   //
+   // Specify or modify the reset value for this register
+   //
+   // Specify or modify the reset value for all the fields in the register
+   // corresponding to the cause specified by ~kind~.
+   //
+   extern virtual function void
+                       set_reset(uvm_reg_data_t value,
+                                 string         kind = "HARD");
 
 
    // Task: write
@@ -566,15 +594,6 @@ virtual class uvm_reg extends uvm_object;
                             input  int               lineno = 0);
 
 
-   // Function: needs_update
-   // Check if any of the field need updating
-   //
-   // See <uvm_reg_field::needs_update()> for details.
-   // Use the <uvm_reg::update()> to actually update the DUT register.
-   //
-   extern virtual function bit needs_update(); 
-
-
    // Task: update
    //
    // Updates the content of the register in the design to match the
@@ -656,6 +675,18 @@ virtual class uvm_reg extends uvm_object;
                                         string         fname = "",
                                         int            lineno = 0);
 
+
+   // Function: is_busy
+   //
+   // Returns 1 if register is currently being read or written.
+   //
+   extern function bit is_busy();
+
+
+
+   /*local*/ extern function void Xset_busyX(bit busy);
+
+
    extern local virtual function void Xpredict_readX (uvm_reg_data_t value,
                                                       uvm_path_e     path,
                                                       uvm_reg_map    map);
@@ -675,22 +706,25 @@ virtual class uvm_reg extends uvm_object;
                                  input  string            fname = "",
                                  input  int               lineno = 0);
 
-   /*local*/ extern task XreadX(output uvm_status_e      status,
-                                output uvm_reg_data_t    value,
-                                input  uvm_path_e        path,
-                                input  uvm_reg_map       map,
-                                input  uvm_sequence_base parent = null,
-                                input  int               prior = -1,
-                                input  uvm_object        extension = null,
-                                input  string            fname = "",
-                                input  int               lineno = 0);
+   /*local*/ extern task XreadX (output uvm_status_e      status,
+                                 output uvm_reg_data_t    value,
+                                 input  uvm_path_e        path,
+                                 input  uvm_reg_map       map,
+                                 input  uvm_sequence_base parent = null,
+                                 input  int               prior = -1,
+                                 input  uvm_object        extension = null,
+                                 input  string            fname = "",
+                                 input  int               lineno = 0);
    
    /*local*/ extern task XatomicX(bit on);
 
-   /*local*/ extern protected function bit Xcheck_accessX
-                                             (input uvm_reg_item rw,
-                                              output uvm_reg_map_info map_info,
-                                              input string caller);
+   /*local*/ extern virtual function bit Xcheck_accessX
+                                (input uvm_reg_item rw,
+                                 output uvm_reg_map_info map_info,
+                                 input string caller);
+
+   /*local*/ extern function bit Xis_locked_by_fieldX();
+
 
    extern virtual task do_write(uvm_reg_item rw);
 
@@ -839,7 +873,8 @@ virtual class uvm_reg extends uvm_object;
    // for each ancestor block is used to get each incremental path.
    //
    extern function void get_full_hdl_path (ref uvm_hdl_path_concat paths[$],
-                                           input string kind = "");
+                                           input string kind = "",
+                                           input string separator = ".");
 
 
    // Function: backdoor_read
@@ -1054,24 +1089,26 @@ function uvm_reg::new(string name="", int unsigned n_bits, int has_cover);
       `uvm_error("RegModel", $psprintf("Register \"%s\" cannot have 0 bits", get_name()));
       n_bits = 1;
    end
-   if (n_bits > `UVM_REG_DATA_WIDTH) begin
-      `uvm_error("RegModel", $psprintf("Register \"%s\" cannot have more than %0d bits (%0d)", get_name(), `UVM_REG_DATA_WIDTH, n_bits));
-      n_bits = `UVM_REG_DATA_WIDTH;
-   end
-   m_n_bits = n_bits;
+   m_n_bits      = n_bits;
+   m_has_cover   = has_cover;
+   m_atomic      = new(1);
    m_n_used_bits = 0;
-   m_has_cover = has_cover;
-   m_locked = 0;
-   m_atomic = new(1);
-   m_is_busy = 0;
+   m_locked      = 0;
+   m_is_busy     = 0;
    m_is_locked_by_field = 1'b0;
    m_hdl_paths_pool = new("hdl_paths");
+
+   if (n_bits > m_max_size)
+      m_max_size = n_bits;
+
 endfunction: new
 
 
 // configure
 
-function void uvm_reg::configure(uvm_reg_block blk_parent, uvm_reg_file regfile_parent=null, string hdl_path = "");
+function void uvm_reg::configure (uvm_reg_block blk_parent,
+                                  uvm_reg_file regfile_parent=null,
+                                  string hdl_path = "");
    m_parent = blk_parent;
    m_parent.add_reg(this);
    m_regfile_parent = regfile_parent;
@@ -1306,7 +1343,8 @@ endfunction
 // get_full_hdl_path
 
 function void uvm_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
-                                             input string kind = "");
+                                         input string kind = "",
+                                         input string separator = ".");
 
    if (kind == "") begin
       if (m_regfile_parent != null)
@@ -1326,9 +1364,9 @@ function void uvm_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
       string parent_paths[$];
 
       if (m_regfile_parent != null)
-         m_regfile_parent.get_full_hdl_path(parent_paths,kind);
+         m_regfile_parent.get_full_hdl_path(parent_paths, kind, separator);
       else
-         m_parent.get_full_hdl_path(parent_paths,kind);
+         m_parent.get_full_hdl_path(parent_paths, kind, separator);
 
       for (int i=0; i<hdl_paths.size();i++) begin
          uvm_hdl_path_concat hdl_slices = hdl_paths.get(i);
@@ -1338,7 +1376,7 @@ function void uvm_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
                if (hdl_slices[k].path == "")
                   hdl_slices[k].path = parent_paths[j];
                else
-                  hdl_slices[k].path = { parent_paths[j], ".", hdl_slices[k].path };
+                  hdl_slices[k].path = {parent_paths[j], separator, hdl_slices[k].path};
             end
          end
          paths.push_back(hdl_slices);
@@ -1629,6 +1667,13 @@ function int unsigned uvm_reg::get_n_bytes();
 endfunction
 
 
+// get_max_size
+
+function int unsigned uvm_reg::get_max_size();
+   return m_max_size;
+endfunction: get_max_size
+
+
 // get_fields
 
 function void uvm_reg::get_fields(ref uvm_reg_field fields[$]);
@@ -1721,36 +1766,6 @@ function void uvm_reg::get_attributes(ref string names[string],
        names[nm] = m_attributes[nm];
 
 endfunction: get_attributes
-
-
-// Xadd_constraintsX
-
-function void uvm_reg::Xadd_constraintsX(string name);
-
-   if (m_locked) begin
-      `uvm_error("RegModel", "Cannot add constraints to locked register model");
-      return;
-   end
-
-   // Check if the constraint block already exists
-   foreach (m_constr[i]) begin
-      if (m_constr[i] == name) begin
-         `uvm_warning("RegModel", {"Constraint '",name,"' already added"})
-         return;
-      end
-   end
-
-   m_constr.push_back(name);
-
-endfunction: Xadd_constraintsX
-
-
-// get_constraints
-
-function void uvm_reg::get_constraints(ref string names[]);
-   names = new [m_constr.size()] (m_constr);
-endfunction: get_constraints
-
 
 
 //---------
@@ -1904,6 +1919,20 @@ function uvm_reg_data_t uvm_reg::get_reset(string kind = "HARD");
 endfunction: get_reset
 
 
+// Xpredict_writeX
+
+function void uvm_reg::Xpredict_writeX(uvm_reg_data_t value,
+                                       uvm_path_e     path,
+                                       uvm_reg_map    map);
+   // Fields are stored in LSB to MSB order
+   foreach (m_fields[i]) begin
+      m_fields[i].Xpredict_writeX(
+            (value >> m_fields[i].get_lsb_pos()) &
+            ((1 << m_fields[i].get_n_bits()) - 1), path, map);
+   end
+endfunction: Xpredict_writeX
+
+
 // Xpredict_readX
 
 function void uvm_reg::Xpredict_readX(uvm_reg_data_t value,
@@ -1917,18 +1946,28 @@ function void uvm_reg::Xpredict_readX(uvm_reg_data_t value,
 endfunction: Xpredict_readX
 
 
-// Xpredict_writeX
+// has_reset
 
-function void uvm_reg::Xpredict_writeX(uvm_reg_data_t value,
-                                       uvm_path_e     path,
-                                       uvm_reg_map    map);
-   // Fields are stored in LSB to MSB order
+function bit uvm_reg::has_reset(string kind = "HARD",
+                                bit    delete = 0);
+
+   has_reset = 0;
    foreach (m_fields[i]) begin
-      m_fields[i].Xpredict_writeX(
-            (value >> m_fields[i].get_lsb_pos()) &
-            ((1 << m_fields[i].get_n_bits()) - 1), path, map);
+      has_reset |= m_fields[i].has_reset(kind, delete);
+      if (!delete && has_reset)
+        return 1;
    end
-endfunction: Xpredict_writeX
+endfunction: has_reset
+
+
+// set_reset
+
+function void uvm_reg::set_reset(uvm_reg_data_t value,
+                                 string         kind = "HARD");
+   foreach (m_fields[i]) begin
+      m_fields[i].set_reset(value >> m_fields[i].get_lsb_pos(), kind);
+   end
+endfunction: set_reset
 
 
 //-----------
@@ -2307,19 +2346,34 @@ task uvm_reg::do_read(uvm_reg_item rw);
 
          value = rw.value[0];
 
-         // Need to clear RC fields and mask WO fields
+         // Need to clear RC fields, set RS fields and mask WO fields
          if (rw.status != UVM_NOT_OK) begin
 
             uvm_reg_data_t wo_mask = 0;
 
             foreach (m_fields[i]) begin
                string acc = m_fields[i].get_access(uvm_reg_map::backdoor);
-               if (acc == "RC")
-                  value &= ~(((1<<m_fields[i].get_n_bits())-1) <<
-                            m_fields[i].get_lsb_pos());
-               else if (acc == "WO")
-                  wo_mask |= ((1<<m_fields[i].get_n_bits())-1) <<
-                            m_fields[i].get_lsb_pos();
+               if (acc == "RC" ||
+                   acc == "WRC" ||
+                   acc == "W1SRC" ||
+                   acc == "W0SRC") begin
+                  value &= ~(((1<<m_fields[i].get_n_bits())-1)
+                                          << m_fields[i].get_lsb_pos());
+               end
+               else if (acc == "RS" ||
+                        acc == "WRS" ||
+                        acc == "W1CRS" ||
+                        acc == "W0CRS") begin
+                  value |= (((1<<m_fields[i].get_n_bits())-1)
+                                          << m_fields[i].get_lsb_pos());
+               end
+               else if (acc == "WO" ||
+                        acc == "WOC" ||
+                        acc == "WOS" ||
+                        acc == "WO1") begin
+                  wo_mask |= ((1<<m_fields[i].get_n_bits())-1)
+                                          << m_fields[i].get_lsb_pos();
+               end
             end
 
             if (value != rw.value[0]) begin
@@ -2464,6 +2518,27 @@ function bit uvm_reg::Xcheck_accessX (input uvm_reg_item rw,
    return 1;
 endfunction
 
+
+// is_busy
+
+function bit uvm_reg::is_busy();
+   return m_is_busy;
+endfunction
+    
+
+// Xset_busyX
+
+function void uvm_reg::Xset_busyX(bit busy);
+   m_is_busy = busy;
+endfunction
+    
+
+// Xis_loacked_by_fieldX
+
+function bit uvm_reg::Xis_locked_by_fieldX();
+  return m_is_locked_by_field;
+endfunction
+    
 
 // backdoor_write
 
@@ -2693,9 +2768,14 @@ task uvm_reg::mirror(output uvm_status_e       status,
    // Remember what we think the value is before it gets updated
    if (check == UVM_CHECK) begin
       exp = get();
-      // Any WO field will readback as 0's
+      // Assuume that WO* field will readback as 0's
       foreach(m_fields[i]) begin
-         if (m_fields[i].get_access(map) == "WO") begin
+         string mode;
+         mode = m_fields[i].get_access(map);
+         if (mode == "WO" ||
+             mode == "WOC" ||
+             mode == "WOS" ||
+             mode == "WO1") begin
             exp &= ~(((1 << m_fields[i].get_n_bits())-1)
                      << m_fields[i].get_lsb_pos());
          end
@@ -2720,8 +2800,11 @@ task uvm_reg::mirror(output uvm_status_e       status,
             dc |= ((1 << m_fields[i].get_n_bits())-1)
                   << m_fields[i].get_lsb_pos();
          end
-         else if (acc == "WO") begin
-            // WO fields will always read-back as 0
+         else if (acc == "WO" ||
+                  acc == "WOC" ||
+                  acc == "WOS" ||
+                  acc == "WO1") begin
+            // Assume WO fields will always read-back as 0
             exp &= ~(((1 << m_fields[i].get_n_bits())-1)
                      << m_fields[i].get_lsb_pos());
          end
@@ -2783,10 +2866,13 @@ function string uvm_reg::convert2string();
      while (parent_map != null) begin
        uvm_reg_map this_map = parent_map;
        parent_map = this_map.get_parent_map();
-       offset = parent_map == null ? this_map.get_base_addr(UVM_NO_HIER) : parent_map.get_submap_offset(this_map);
+       offset = parent_map == null ? this_map.get_base_addr(UVM_NO_HIER) :
+                                     parent_map.get_submap_offset(this_map);
        prefix = {prefix, "  "};
-       $sformat(convert2string, "%sMapped in '%s' -- %s bytes, %s, offset 'h%0h\n", prefix,
-            this_map.get_full_name(), this_map.get_n_bytes(), this_map.get_endian(), offset);
+       $sformat(convert2string, 
+          "%sMapped in '%s' -- %s bytes, %s, offset 'h%0h\n",
+          prefix, this_map.get_full_name(), this_map.get_n_bytes(),
+          this_map.get_endian(), offset);
      end
    end
    prefix = "  ";
@@ -2806,12 +2892,14 @@ function string uvm_reg::convert2string();
    if (m_read_in_progress == 1'b1) begin
       if (m_fname != "" && m_lineno != 0)
          $sformat(res_str, "%s:%0d ",m_fname, m_lineno);
-      convert2string = {convert2string, "\n", res_str, "currently executing read method"}; 
+      convert2string = {convert2string, "\n", res_str,
+                        "currently executing read method"}; 
    end
    if ( m_write_in_progress == 1'b1) begin
       if (m_fname != "" && m_lineno != 0)
          $sformat(res_str, "%s:%0d ",m_fname, m_lineno);
-      convert2string = {convert2string, "\n", res_str, "currently executing write method"}; 
+      convert2string = {convert2string, "\n", res_str,
+                        "currently executing write method"}; 
    end
 
 endfunction: convert2string

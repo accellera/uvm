@@ -44,6 +44,7 @@ class uvm_reg_field extends uvm_object;
    local uvm_reg         m_parent;
    local int unsigned    m_lsb;
    local int unsigned    m_size;
+   local bit             m_volatile;
    local uvm_reg_data_t  m_reset[string];
    local bit             m_written;
    local bit             m_read_in_progress;
@@ -54,6 +55,8 @@ class uvm_reg_field extends uvm_object;
    local bit             m_individually_accessible = 0;
    local string          m_attributes[string];
 
+   local static int m_max_size = 0;
+   local static bit m_policy_names[string];
 
    constraint uvm_reg_field_valid {
       if (`UVM_REG_DATA_WIDTH > m_size) {
@@ -84,32 +87,22 @@ class uvm_reg_field extends uvm_object;
    // Specify the ~parent~ register of this field, its
    // ~size~ in bits, the position of its least-significant bit
    // within the register relative to the least-significant bit
-   // of the register, its ~access~ policy, "HARD" ~reset~ value, 
+   // of the register, its ~access~ policy, volatility,
+   // "HARD" ~reset~ value, 
    // whether the field value may be randomized and
    // whether the field is the only one to occupy a byte lane in the register.
    //
-   // The pre-defined access policies are:
+   // See <set_access> for a specification of the pre-defined
+   // field access policies.
    //
-   // "RO"    - Read-only, never changes
-   // "RU"    - Read-only, but may be changed by the DUT
-   // "RW"    - Read-write, but not changed but the DUT
-   // "RC"    - Clear-on-read, write has no effect
-   // "W1C"   - Write-1-to-clear, writing zero has no effects
-   // "A0"    - Write-1-to-set, writing zero has no effect
-   // "A1"    - Write-0-to-clear, writing one has no effect
-   // "WO"    - Write-only, reading has no effect
-   // "W1"    - Write-once, subsequent writes have no effects
-   // "DC"    - Don't care, RW but "check" never fails
-   //
-   // If the field has no soft reset value, a 'bx value must be specified.
-   //
-   extern function void configure(uvm_reg            parent,
-                                  int unsigned       size,
-                                  int unsigned       lsb_pos,
-                                  string             access,
+   extern function void configure(uvm_reg        parent,
+                                  int unsigned   size,
+                                  int unsigned   lsb_pos,
+                                  string         access,
+                                  bit            volatile,
                                   uvm_reg_data_t reset,
-                                  bit                is_rand = 0,
-                                  bit                individually_accessible = 0); 
+                                  bit            is_rand,
+                                  bit            individually_accessible); 
 
 
    //---------------------
@@ -160,17 +153,81 @@ class uvm_reg_field extends uvm_object;
    //
    extern virtual function int unsigned get_n_bits();
 
+   //
+   // FUNCTION: get_max_size
+   // Returns the width, in number of bits, of the largest field. 
+   //
+   extern static function int unsigned get_max_size();
+
 
    // Function: set_access
    //
    // Modify the access policy of the field
    //
-   // Set the access policy of the field to the specified one and
+   // Modify the access policy of the field to the specified one and
    // return the previous access policy.
+   //
+   // The pre-defined access policies are as follows.
+   // The effect of a read operation are applied after the current
+   // value of the field is sampled.
+   // The read operation will return the current value,
+   // not the value affected by the read operation (if any).
+   //
+   // "RO"    - W: no effect, R: no effect
+   // "RW"    - W: as-is, R: no effect
+   // "RC"    - W: no effect, R: clears all bits
+   // "RS"    - W: no effect, R: sets all bits
+   // "WRC"   - W: as-is, R: clears all bits
+   // "WRS"   - W: as-is, R: sets all bits
+   // "WC"    - W: clears all bits, R: no effect
+   // "WS"    - W: sets all bits, R: no effect
+   // "WSRC"  - W: sets all bits, R: clears all bits
+   // "WCRS"  - W: clears all bits, R: sets all bits
+   // "W1C"   - W: 1/0 clears/no effect on matching bit, R: no effect
+   // "W1S"   - W: 1/0 sets/no effect on matching bit, R: no effect
+   // "W1T"   - W: 1/0 toggles/no effect on matching bit, R: no effect
+   // "W0C"   - W: 1/0 no effect on/clears matching bit, R: no effect
+   // "W0S"   - W: 1/0 no effect on/sets matching bit, R: no effect
+   // "W0T"   - W: 1/0 no effect on/toggles matching bit, R: no effect
+   // "W1SRC" - W: 1/0 sets/no effect on matching bit, R: clears all bits
+   // "W1CRS" - W: 1/0 clears/no effect on matching bit, R: sets all bits
+   // "W0SRC" - W: 1/0 no effect on/sets matching bit, R: clears all bits
+   // "W0CRS" - W: 1/0 no effect on/clears matching bit, R: sets all bits
+   // "WO"    - W: as-is, R: error
+   // "WOC"   - W: clears all bits, R: error
+   // "WOS"   - W: sets all bits, R: error
+   // "W1"    - W: first one after ~HARD~ reset is as-is, other W have no effects, R: no effect
+   // "WO1"   - W: first one after ~HARD~ reset is as-is, other W have no effects, R: error
+   // "DC"    - W: as-is, R: no effect but "check" never fails
+   //
+   // It is important to remember that modifying the access of a field
+   // will make the register model diverge from the specification
+   // that was used to create it.
    //
    extern virtual function string set_access(string mode);
 
 
+   // Function: define_access
+   //
+   // Define a new access policy value
+   //
+   // Because field access policies are specified using string values,
+   // there is no way for SystemVerilog to verify if a spceific access
+   // value is valid or not.
+   // To help catch typing errors, user-defined access values
+   // must be defined using this method to avoid beign reported as an
+   // invalid access policy.
+   //
+   // The name of field access policies are always converted to all uppercase.
+   //
+   // Returns TRUE if the new access policy was not previously
+   // defined.
+   // Returns FALSE otherwise but does not issue an error message.
+   //
+   extern static function bit define_access(string name);
+   local static bit m_predefined = m_predefine_policies();
+   extern local static function bit m_predefine_policies();
+ 
    // Function: get_access
    //
    // Get the access policy of the field
@@ -188,7 +245,7 @@ class uvm_reg_field extends uvm_object;
    extern virtual function string get_access(uvm_reg_map map = null);
 
 
-   // Function: get_access
+   // Function: is_known_access
    //
    // Check if access policy is a built-in one.
    //
@@ -197,6 +254,30 @@ class uvm_reg_field extends uvm_object;
    // is a built-in access policy.
    //
    extern virtual function bit is_known_access(uvm_reg_map map = null);
+
+   //
+   // Function: set_volatility
+   // Modify the volatility of the field to the specified one.
+   //
+   // It is important to remember that modifying the volatility of a field
+   // will make the register model diverge from the specification
+   // that was used to create it.
+   //
+   extern virtual function void set_volatility(bit volatile);
+
+   //
+   // Function: is_volatile
+   // Indicates if the field value is volatile
+   //
+   // UVM uses the IEEE 1685-2009 IP-XACT definition of "volatility".
+   // If TRUE, the value of the register is not predictable because it
+   // may change between consecutive accesses.
+   // This typically indicates a field whose value is updated by the DUT.
+   // The nature or cause of the change is not specified.
+   // If FALSE, the value of the register is not modified between
+   // consecutive accesses.
+   //
+   extern virtual function bit is_volatile();
 
 
    //--------------
@@ -293,8 +374,10 @@ class uvm_reg_field extends uvm_object;
    //
    // Return TRUE if this field has a reset value specified
    // for the specified reset ~kind~.
+   // If ~delete~ is TRUE, removes the reset value, if any.
    //
-   extern virtual function bit has_reset(string kind = "HARD");
+   extern virtual function bit has_reset(string kind = "HARD",
+                                         bit    delete = 0);
 
 
    // Function: set_reset
@@ -702,32 +785,40 @@ function void uvm_reg_field::configure(uvm_reg        parent,
                                        int unsigned   size,
                                        int unsigned   lsb_pos,
                                        string         access,
+                                       bit            volatile,
                                        uvm_reg_data_t reset,
-                                       bit            is_rand = 0,
-                                       bit            individually_accessible = 0); 
+                                       bit            is_rand,
+                                       bit            individually_accessible); 
    m_parent = parent;
    if (size == 0) begin
       `uvm_error("RegModel",
          $psprintf("Field \"%s\" cannot have 0 bits", get_full_name()));
       size = 1;
    end
-   if (size > `UVM_REG_DATA_WIDTH) begin
-      `uvm_error("RegModel",
-         $psprintf("Field \"%s\" cannot have more than %0d bits",
-                   get_full_name(), `UVM_REG_DATA_WIDTH))
-      size = `UVM_REG_DATA_WIDTH;
-   end
 
-   m_size                    = size;
-   m_access                  = access.toupper();
-   m_lsb                     = lsb_pos;
+   m_size      = size;
+   m_volatile  = volatile;
+   m_access    = access.toupper();
+   m_lsb       = lsb_pos;
+   m_cover_on  = UVM_NO_COVERAGE;
+   m_written   = 0;
    m_individually_accessible = individually_accessible;
-   m_cover_on                = UVM_NO_COVERAGE;
    set_reset(reset);
+
    if (!is_rand)
      value.rand_mode(0);
+
    m_parent.add_field(this);
-   m_written = 0;
+
+   if (!m_policy_names.exists(m_access)) begin
+      `uvm_error("RegModel", {"Access policy '",access,
+       "' for field '",get_full_name(),"' is not defined. Setting to RW"})
+      m_access = "RW";
+   end
+
+   if (size > m_max_size)
+      m_max_size = size;
+   
 endfunction: configure
 
 
@@ -766,12 +857,23 @@ function int unsigned uvm_reg_field::get_n_bits();
 endfunction: get_n_bits
 
 
+// get_max_size
+
+function int unsigned uvm_reg_field::get_max_size();
+   return m_max_size;
+endfunction: get_max_size
+
+
 // is_known_access
 
 function bit uvm_reg_field::is_known_access(uvm_reg_map map = null);
    string acc = get_access(map);
    case (acc)
-     "RO", "RW", "RU", "RC", "W1C", "A0", "A1", "WO", "W1", "DC": return 1;
+    "RO", "RW", "RC", "RS", "WC", "WS",
+      "W1C", "W1S", "W1T", "W0C", "W0S", "W0T",
+      "WRC", "WRS", "W1SRC", "W1CRS", "W0SRC", "W0CRS", "WSRC", "WCRS",
+      "WO", "WOC", "WOS", "W1", "WO1",
+      "DC": return 1;
    endcase
    return 0;
 endfunction
@@ -793,34 +895,31 @@ function string uvm_reg_field::get_access(uvm_reg_map map = null);
 
      "RO":
        case (get_access)
-         "RW",
-         "RO",
-         "W1",
-         "W1C": get_access = "RO";
-
-         "RU",
-         "A0",
-         "A1": get_access = "RU";
-
-         "WO": begin
+        "RW", "RO", "WC", "WS",
+          "W1C", "W1S", "W1T", "W0C", "W0S", "W0T",
+          "W1"
+        : get_access = "RO";
+        
+        "RC", "WRC", "W1SRC", "W0SRC", "WSRC"
+        : get_access = "RC";
+        
+        "RS", "WRS", "W1CRS", "W0CRS", "WCRS"
+        : get_access = "RS";
+        
+         "WO", "WOC", "WOS", "WO1": begin
             `uvm_error("RegModel",
-                       $psprintf("WO field \"%s\" restricted to RO in map \"%s\"",
-                                 get_name(), map.get_full_name()));
+                       $psprintf("%s field \"%s\" restricted to RO in map \"%s\"",
+                                 get_access(), get_name(), map.get_full_name()))
          end
 
-         // No change for the other modes (OTHER, USERx)
+         // No change for the other modes
        endcase
 
      "WO":
        case (get_access)
          "RW",
          "WO": get_access = "WO";
-
-         "RO",
-         "RU",
-         "W1C",
-         "A0",
-         "A1": begin
+         default: begin
             `uvm_error("RegModel", {get_access," field '",get_full_name(),
                        "' restricted to WO in map '",map.get_full_name(),"'"})
          end
@@ -841,7 +940,77 @@ endfunction: get_access
 function string uvm_reg_field::set_access(string mode);
    set_access = m_access;
    m_access = mode.toupper();
+   if (!m_policy_names.exists(m_access)) begin
+      `uvm_error("RegModel", {"Access policy '",m_access,
+                              "' is not a defined field access policy"})
+      m_access = set_access;
+   end
 endfunction: set_access
+
+
+// define_access
+
+function bit uvm_reg_field::define_access(string name);
+   if (!m_predefined) m_predefined = m_predefine_policies();
+
+   name = name.toupper();
+
+   if (m_policy_names.exists(name)) return 0;
+
+   m_policy_names[name] = 1;
+   return 1;
+endfunction
+
+
+// m_predefined_policies
+
+function bit uvm_reg_field::m_predefine_policies();
+   if (m_predefined) return 1;
+
+   m_predefined = 1;
+   
+   void'(define_access("RO"));
+   void'(define_access("RW"));
+   void'(define_access("RC"));
+   void'(define_access("RS"));
+   void'(define_access("WRC"));
+   void'(define_access("WRS"));
+   void'(define_access("WC"));
+   void'(define_access("WS"));
+   void'(define_access("WSRC"));
+   void'(define_access("WCRS"));
+   void'(define_access("W1C"));
+   void'(define_access("W1S"));
+   void'(define_access("W1T"));
+   void'(define_access("W0C"));
+   void'(define_access("W0S"));
+   void'(define_access("W0T"));
+   void'(define_access("W1SRC"));
+   void'(define_access("W1CRS"));
+   void'(define_access("W0SRC"));
+   void'(define_access("W0CRS"));
+   void'(define_access("WO"));
+   void'(define_access("WOC"));
+   void'(define_access("WOS"));
+   void'(define_access("W1"));
+   void'(define_access("WO1"));
+   void'(define_access("DC"));
+   return 1;
+endfunction
+
+
+// set_volatility
+
+function void uvm_reg_field::set_volatility(bit volatile);
+   m_volatile = volatile;
+endfunction
+
+
+// is_volatile
+
+function bit uvm_reg_field::is_volatile();
+   return m_volatile;
+endfunction
 
 
 //-----------
@@ -914,16 +1083,34 @@ endfunction
 function uvm_reg_data_t uvm_reg_field::XpredictX (uvm_reg_data_t cur_val,
                                                   uvm_reg_data_t wr_val,
                                                   uvm_reg_map    map);
+   uvm_reg_data_t mask = ('b1 << m_size)-1;
+   
    case (get_access(map))
-     "RW":    return wr_val;
      "RO":    return cur_val;
-     "WO":    return wr_val;
-     "W1":    return (m_written) ? cur_val : wr_val;
-     "RU":    return cur_val;
+     "RW":    return wr_val;
      "RC":    return cur_val;
+     "RS":    return cur_val;
+     "WC":    return '0;
+     "WS":    return mask;
+     "WRC":   return wr_val;
+     "WRS":   return wr_val;
+     "WSRC":  return mask;
+     "WCRS":  return '0;
      "W1C":   return cur_val & (~wr_val);
-     "A0":    return cur_val | wr_val;
-     "A1":    return cur_val & wr_val;
+     "W1S":   return cur_val | wr_val;
+     "W1T":   return cur_val ^ wr_val;
+     "W0C":   return cur_val & wr_val;
+     "W0S":   return cur_val | (~wr_val & mask);
+     "W0T":   return cur_val ^ (~wr_val & mask);
+     "W1SRC": return cur_val | wr_val;
+     "W1CRS": return cur_val & (~wr_val);
+     "W0SRC": return cur_val | (~wr_val & mask);
+     "W0CRS": return cur_val & wr_val;
+     "WO":    return wr_val;
+     "WOC":   return '0;
+     "WOS":   return mask;
+     "W1":    return (m_written) ? cur_val : wr_val;
+     "WO1":   return (m_written) ? cur_val : wr_val;
      "DC":    return wr_val;
      default: return wr_val;
    endcase
@@ -946,19 +1133,34 @@ function void uvm_reg_field::Xpredict_readX (uvm_reg_data_t value,
 
       // If the value was obtained via a front-door access
       // then a RC field will have been cleared
-      if (acc == "RC")
+      if (acc == "RC" ||
+          acc == "WRC" ||
+          acc == "W1SRC" ||
+          acc == "W0SRC")
         value = 0;
+
+      // If the value was obtained via a front-door access
+      // then a RS field will have been set
+      else if (acc == "RS" ||
+               acc == "WRS" ||
+               acc == "W1CRS" ||
+               acc == "W0CRS")
+        value = ('b1 << m_size)-1;
 
       // If the value of a WO field was obtained via a front-door access
       // it will always read back as 0 and the value of the field
       // cannot be inferred from it
-      else if (acc == "WO")
+      else if (acc == "WO" ||
+               acc == "WOC" ||
+               acc == "WOS" ||
+               acc == "WO1") begin
         return;
+      end
    end
 
-   m_mirrored = value;
-   m_desired = value;
-   this.value   = value;
+   m_mirrored  = value;
+   m_desired   = value;
+   this.value  = value;
 endfunction: Xpredict_readX
 
 
@@ -1013,7 +1215,7 @@ function bit uvm_reg_field::predict(uvm_reg_data_t value,
                                     int            lineno = 0);
    m_fname = fname;
    m_lineno = lineno;
-   if (m_parent.m_is_busy && kind == UVM_PREDICT_DIRECT) begin
+   if (m_parent.is_busy() && kind == UVM_PREDICT_DIRECT) begin
       `uvm_warning("RegModel", {"Trying to predict value of field '",
         get_name(),"' while register '",m_parent.get_full_name(),
         "' is being accessed"})
@@ -1099,10 +1301,14 @@ endfunction: reset
 
 // has_reset
 
-function bit uvm_reg_field::has_reset(string kind = "HARD");
+function bit uvm_reg_field::has_reset(string kind = "HARD",
+                                      bit    delete = 0);
 
-   return m_reset.exists(kind);
+   if (!m_reset.exists(kind)) return 0;
 
+   if (delete) m_reset.delete(kind);
+
+   return 1;
 endfunction: has_reset
 
 
@@ -1122,8 +1328,8 @@ endfunction: get_reset
 // set_reset
 
 function void uvm_reg_field::set_reset(uvm_reg_data_t value,
-                                       string         kind = "HARD");
-   m_reset[kind] = value;
+                                       string kind = "HARD");
+   m_reset[kind] = value & ((1<<m_size) - 1);
 endfunction: set_reset
 
 
@@ -1239,6 +1445,7 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
    uvm_reg_map      local_map;
    uvm_reg_map_info map_info;
    uvm_reg_field    fields[$];
+   bit bad_side_effect;
 
    m_parent.XatomicX(1);
    m_fname  = rw.fname;
@@ -1263,15 +1470,30 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
          continue;
       end
 
+      // It depends on what kind of bits they are made of...
       case (fields[i].get_access(rw.local_map))
-        "RC", "W1C", "A0":
-           value_adjust |= 0;
-        "A1":
-           value_adjust |= ((1<<fields[i].get_n_bits())-1) << fields[i].get_lsb_pos();
+        // These...
+        "RO", "RC", "RS", "W1C", "W1S", "W1T", "W1SRC", "W1CRC":
+          // Use all 0's
+          value_adjust |= 0;
+
+        // These...
+        "W0C", "W0S", "W0T", "W0SRC", "W0CRS":
+          // Use all 1's
+          value_adjust |= ((1<<fields[i].get_n_bits())-1) << fields[i].get_lsb_pos();
+
+        // These might have side effects! Bad!
+        "WC", "WS", "WCRS", "WSRC", "WOC", "WOS":
+           bad_side_effect = 1;
+
         default:
            value_adjust |= fields[i].m_mirrored << fields[i].get_lsb_pos();
 
       endcase
+   end
+
+   if (bad_side_effect) begin
+      `uvm_warning("RegModel", $psprintf("Writing field \"%s\" will cause unintended side effects in adjoining Write-to-Clear or Write-to-Set fields in the same register", this.get_full_name()));
    end
 
 `ifdef UVM_REG_NO_INDIVIDUAL_FIELD_ACCESS
@@ -1292,7 +1514,7 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
      uvm_reg_map system_map = rw.local_map.get_root_map();
      uvm_reg_field_cb_iter cbs = new(this);
 
-     m_parent.m_is_busy = 1;
+     m_parent.Xset_busyX(1);
 
      pre_write(rw);
      for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
@@ -1307,7 +1529,7 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
      for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
         cb.post_write(rw);
 
-     m_parent.m_is_busy = 0;
+     m_parent.Xset_busyX(0);
       
    end
 
@@ -1333,13 +1555,12 @@ task uvm_reg_field::read(output uvm_status_e       status,
                          input  string             fname = "",
                          input  int                lineno = 0);
 
-
    uvm_reg_item rw;
    rw = uvm_reg_item::type_id::create("field_read_item",,get_full_name());
    rw.element      = this;
    rw.element_kind = UVM_FIELD;
    rw.kind         = UVM_READ;
-   rw.value[0]     = -1;
+   rw.value[0]     = 0;
    rw.path         = path;
    rw.map          = map;
    rw.parent       = parent;
@@ -1353,7 +1574,6 @@ task uvm_reg_field::read(output uvm_status_e       status,
    value = rw.value[0];
    status = rw.status;
 
-
 endtask: read
 
 
@@ -1362,6 +1582,7 @@ endtask: read
 task uvm_reg_field::do_read(uvm_reg_item rw);
 
    uvm_reg_map_info map_info;
+   bit bad_side_effect;
 
    m_parent.XatomicX(1);
    m_fname  = rw.fname;
@@ -1376,11 +1597,13 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
    rw.element = m_parent;
    m_parent.do_read(rw);
    rw.value = (rw.value >> m_lsb) & ((1<<m_size))-1;
+   bad_side_effect = 1;
 `else
 
    if (!is_indv_accessible(rw.path,rw.local_map)) begin
       rw.element_kind = UVM_REG;
       rw.element = m_parent;
+      bad_side_effect = 1;
       m_parent.do_read(rw);
       rw.value[0] = (rw.value[0] >> m_lsb) & ((1<<m_size))-1;
    end
@@ -1389,7 +1612,7 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
      uvm_reg_map system_map = rw.local_map.get_root_map();
      uvm_reg_field_cb_iter cbs = new(this);
 
-     m_parent.m_is_busy = 1;
+     m_parent.Xset_busyX(1);
 
      pre_read(rw);
      for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next())
@@ -1404,7 +1627,7 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
      for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
         cb.post_read(rw);
 
-     m_parent.m_is_busy = 0;
+     m_parent.Xset_busyX(0);
       
    end
 
@@ -1414,6 +1637,31 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
    m_lineno = 0;
    m_read_in_progress = 1'b0;
    m_parent.XatomicX(0);
+
+   if (bad_side_effect) begin
+      uvm_reg_field fields[$];
+      m_parent.get_fields(fields);
+      foreach (fields[i]) begin
+         string mode;
+         if (fields[i] == this)
+            continue;
+         mode = fields[i].get_access();
+         if (mode == "RC" ||
+             mode == "RS" ||
+             mode == "WRC" ||
+             mode == "WRS" ||
+             mode == "WSRC" ||
+             mode == "WCRS" ||
+             mode == "W1SRC" ||
+             mode == "W1CRS" ||
+             mode == "W0SRC" ||
+             mode == "W0CRS") begin
+            `uvm_warning("RegModel", {"Reading field '",get_full_name(),
+                "' will cause unintended side effects in adjoining ",
+                "Read-to-Clear or Read-to-Set fields in the same register"})
+         end
+      end
+   end
 
 endtask: do_read
                
