@@ -25,7 +25,7 @@
 // creating and setting a resource or getting a resource could take
 // multiple lines of code using the interfaces in uvm_resource_base or
 // uvm_resource#(T).  The convenience layer in uvm_resource_db#(T)
-// reduce many of those operations to a single line of code.
+// reduces many of those operations to a single line of code.
 //
 // All of the functions in uvm_resource_db#(T) are static, so they
 // must be called using the :: operator.  For example:

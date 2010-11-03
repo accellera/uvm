@@ -18,7 +18,7 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// class: uvm_config_db
+// class: uvm_config_db#(T)
 //
 // The uvm_config_db#(T) class provides a convenience interface 
 // on top of the uvm_resource_db to simplify the basic interface
@@ -30,7 +30,7 @@
 //|  uvm_config_db#(int)::set(this, "*", "A");
 //
 // The parameter value "int" identifies the configuration type as
-// integral.  
+// an int property.  
 //
 // The <set> and <get> methods provide the same api and
 // semantics as the set/get_config_* functions in <uvm_component>.
@@ -44,7 +44,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   //
   // Get the value using component ~cntxt~ as the starting 
   // search point. ~inst_name~ is an explicit instance name relative
-  // to cntxt and may be an empty string if the cntxt is the
+  // to ~cntxt~ and may be an empty string if the ~cntxt~ is the
   // instance that the configuration object applies to. ~field_name~
   // is the specific field in the scope that is being searched for.
   //
@@ -92,14 +92,16 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
 
   // function: set 
   //
-  // Create a new config setting. The setting is made at ~cntxt~,
-  // with the full name of ~cntxt~ added to the ~inst_name~. 
+  // Create a new or update an existing configuration setting. 
+  // The setting is made at ~cntxt~, with the full name of ~cntxt~ 
+  // added to the ~inst_name~. If ~cntxt~ is null then ~inst_name~
+  // provides the complete scope information of the setting.
   // ~field_name~ is the target field. Both ~inst_name~ and ~field_name~
   // may be glob style or regular expression style expressions.
   //
-  // If a setting is made at build time, the cntxt hierarchy is
+  // If a setting is made at build time, the ~cntxt~ hierarchy is
   // used to determine the setting's precedence in the database.
-  // Settings from hierarchically higher levels have a higher
+  // Settings from hierarchically higher levels have higher
   // precedence. Settings from the same level of hierarchy have
   // a last setting wins semantic. A precedence setting of 
   // <uvm_resource_base::default_precedence>  is used for uvm_top, and 

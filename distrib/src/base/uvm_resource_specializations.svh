@@ -17,8 +17,7 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-
-// macro: UVM_RESOURCE_GET_FCNS
+// macro - UVM_RESOURCE_GET_FCNS
 
 // When specicializing resources the get_by_name and get_by_type
 // functions must be redefined.  The reason is that the version of these

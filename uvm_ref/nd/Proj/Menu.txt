@@ -43,8 +43,6 @@ Timestamp: Updated month day, year
 # --------------------------------------------------------------------------
 
 
-File: Intro  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/intro.txt)
-
 Group: Base  {
 
    File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/base.txt)
@@ -72,6 +70,13 @@ Group: Factory  {
    File: uvm_*_registry  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_registry.svh)
    File: uvm_factory  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_factory.svh)
    }  # Group: Factory
+
+Group: Configuration and Resources  {
+
+   File: uvm_resource  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_resource.svh)
+   File: uvm_resource_db  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_resource_db.svh)
+   File: uvm_config_db  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_config_db.svh)
+   }  # Group: Configuration and Resources
 
 Group: Synchronization  {
 
@@ -170,6 +175,9 @@ Group: Globals  {
    File: Globals  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_globals.svh)
    }  # Group: Globals
 
+File: .  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/dpi/uvm_hdl.svh)
+File: Intro  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/intro.txt)
+
 Group: Index  {
 
    Index: Everything
@@ -186,5 +194,5 @@ Group: Index  {
 
 
 ##### Do not change or remove these lines. #####
-Data: 1(D3333HGEutG3/t`RuEGq3lp\89A3aOP3ruNH9GmuH`G3N/E3f86tH8Y36H9)
-Data: 1(h3333HGEutG3/t`RuEGq3lp\89A3aOP3ruNH9GmuH`G3N/E3N/EVHGc)
+Data: 1(D3333RuEG3loHu6G3tG6t3aOP36p\fYusV9u\c8`3N/E3f86tH8Y36H9)
+Data: 1(h3333RuEG3loHu6G3tG6t3aOP36p\fYusV9u\c8`3N/E3N/EVHGc)

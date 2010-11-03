@@ -17,6 +17,27 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+// Group: Resources
+//
+// The classes defined here are the lowest layer of the resource
+// database system. These classes provide all of the low level 
+// infrastructure. The following classes are defined herein:
+//
+// <uvm_resource_types>   - scope type that holds all resource related
+// enums and typesdefs.
+//
+// <uvm_resource_options> - policy class for setting options, such
+// as auditing, which effect resources.
+//
+// <uvm_resource_base>    - the base (untyped) resource class living
+// in the resource database.
+//
+// <uvm_resource#(T)>     - type specific resource. Included the
+// read/write interface for typesafe access.
+//
+// <uvm_resource_pool>    - the resource database. This is a singleton
+// class object.
+
 typedef class uvm_resource_base; // forward reference
 
 //----------------------------------------------------------------------
@@ -444,7 +465,7 @@ virtual class uvm_resource_base extends uvm_object;
 endclass
 
 //----------------------------------------------------------------------
-// class: get_t
+// class - get_t
 //
 // Instances of get_t are stored in the history list as a record of each
 // get.  Failed gets are indicated with rsrc set to null.  This is part
@@ -1154,7 +1175,7 @@ class uvm_resource_pool;
 endclass
 
 //----------------------------------------------------------------------
-// class: uvm_resource #(T)
+// class: uvm_resource#(T)
 //
 // Parameterized resource.  Provides essential access methods read and
 // write.  Also provides locking access methods including
