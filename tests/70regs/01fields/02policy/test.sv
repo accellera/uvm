@@ -139,9 +139,11 @@ class dut extends uvm_reg_frontdoor;
    endfunction
 
    virtual task body();
-        //  RO
-      if (is_write) begin
+      uvm_reg_data_t data;
 
+      if (rw_info.kind == UVM_WRITE) begin
+         data = rw_info.value[0];
+         
          R[51:50] = data[51:50];             // DC
          R[49:48] = (written) ? R[49:48] : data[49:48]; // WO1
          R[47:46] = (written) ? R[47:46] : data[47:46]; // W1
@@ -202,6 +204,7 @@ class dut extends uvm_reg_frontdoor;
          data[ 3: 2] = R[ 3: 2];                   // RW
          data[ 1: 0] = R[ 1: 0];                   // RO
 
+         rw_info.value[0] = data;
       end
    endtask
 
