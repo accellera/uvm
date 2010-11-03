@@ -358,9 +358,10 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence;
       uvm_reg regs[$];
       uvm_mem mems[$];
       
-      if (blk.get_attribute("NO_REG_TESTS") != "") return;
-      if (blk.get_attribute("NO_MEM_TESTS") != "") return;
-      if (blk.get_attribute("NO_REG_ACCESS_TEST") != "") return;
+      if (blk.get_attribute("NO_REG_TESTS") != "" ||
+          blk.get_attribute("NO_MEM_TESTS") != "" ||
+          blk.get_attribute("NO_REG_ACCESS_TEST") != "") return;
+        return;
 
 
       this.reset_blk(model);
