@@ -2270,23 +2270,17 @@ task uvm_reg::do_write (uvm_reg_item rw);
    post_write(rw);
 
    // POST-WRITE CBS - FIELDS
-   begin
-      uvm_reg_data_t predicted_value;
-
-      predicted_value = get();
-
-      foreach (m_fields[i]) begin
-         uvm_reg_field_cb_iter cbs = new(m_fields[i]);
-         uvm_reg_field f = m_fields[i];
-
-         rw.element = f;
-         rw.element_kind = UVM_FIELD;
-         rw.value[0] = (predicted_value >> f.get_lsb_pos()) & ((1<<f.get_n_bits())-1);
-
-         for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
-            cb.post_write(rw);
-         f.post_write(rw);
-      end
+   foreach (m_fields[i]) begin
+      uvm_reg_field_cb_iter cbs = new(m_fields[i]);
+      uvm_reg_field f = m_fields[i];
+      
+      rw.element = f;
+      rw.element_kind = UVM_FIELD;
+      rw.value[0] = (value >> f.get_lsb_pos()) & ((1<<f.get_n_bits())-1);
+      
+      for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
+         cb.post_write(rw);
+      f.post_write(rw);
    end
    
    rw.value[0] = value;
@@ -2501,21 +2495,17 @@ task uvm_reg::do_read(uvm_reg_item rw);
    post_read(rw);
 
    // POST-READ CBS - FIELDS
-   begin
-      uvm_reg_data_t predicted_value;
+   foreach (m_fields[i]) begin
+      uvm_reg_field_cb_iter cbs = new(m_fields[i]);
+      uvm_reg_field f = m_fields[i];
 
-      foreach (m_fields[i]) begin
-         uvm_reg_field_cb_iter cbs = new(m_fields[i]);
-         uvm_reg_field f = m_fields[i];
+      rw.element = f;
+      rw.element_kind = UVM_FIELD;
+      rw.value[0] = (value >> f.get_lsb_pos()) & ((1<<f.get_n_bits())-1);
 
-         rw.element = f;
-         rw.element_kind = UVM_FIELD;
-         rw.value[0] = (predicted_value >> f.get_lsb_pos()) & ((1<<f.get_n_bits())-1);
-
-         for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
-            cb.post_read(rw);
-         f.post_read(rw);
-      end
+      for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
+         cb.post_read(rw);
+      f.post_read(rw);
    end
 
    rw.value[0] = value; // restore

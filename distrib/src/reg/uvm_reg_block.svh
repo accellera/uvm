@@ -43,7 +43,10 @@ virtual class uvm_reg_block extends uvm_object;
    local int unsigned   mems[uvm_mem];
    local bit            maps[uvm_reg_map];
 
+   // Variable: default_path
+   // Default access path for the registers and memories in this block.
    uvm_path_e      default_path = UVM_DEFAULT_PATH;
+
    local string         default_hdl_path = "RTL";
    local uvm_reg_backdoor backdoor;
    local uvm_object_string_pool #(uvm_queue #(string)) hdl_paths_pool;

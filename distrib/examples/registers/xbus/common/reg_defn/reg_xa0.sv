@@ -163,50 +163,21 @@ class reg_reg_xa0_xbus_rf_srd_reg extends uvm_reg;
 
 endclass : reg_reg_xa0_xbus_rf_srd_reg
 
-typedef class reg_reg_xa0_xbus_rf_xbus_indirect_reg;
-class reg_reg_xa0_xbus_rf_data_reg extends uvm_reg;
+class reg_reg_xa0_xbus_rf_data_reg extends uvm_reg_indirect;
 
    `uvm_register_cb(reg_reg_xa0_xbus_rf_data_reg, uvm_reg_cbs)
    `uvm_set_super_type(reg_reg_xa0_xbus_rf_data_reg, uvm_reg)
    
-   rand uvm_reg_field value;
-   local reg_reg_xa0_xbus_rf_addr_reg m_idx;
-   local reg_reg_xa0_xbus_rf_xbus_indirect_reg m_tbl[];
-
    function new(string name = "xa0_xbus_rf_data_reg");
       super.new(name,8,UVM_NO_COVERAGE);
    endfunction: new
 
    virtual function void build();
-      value = uvm_reg_field::type_id::create("value");
-      value.configure(this, 8, 0, "DC", 0, 8'h0, 0, 1);
+      super.build();
    endfunction: build
 
    `uvm_object_utils(reg_reg_xa0_xbus_rf_data_reg)
 
-   function void configure (reg_reg_xa0_xbus_rf_addr_reg addr_reg,
-                            reg_reg_xa0_xbus_rf_xbus_indirect_reg ind_regs[],
-                            uvm_reg_block blk_parent,
-                            uvm_reg_file regfile_parent = null,
-                            string hdl_path = "");
-      super.configure(blk_parent, regfile_parent, hdl_path);
-      m_idx = addr_reg;
-      m_tbl = ind_regs;
-   endfunction
-   
-   virtual function bit predict (uvm_reg_data_t value,
-                                 uvm_predict_e  kind = UVM_PREDICT_DIRECT,
-                                 uvm_path_e     path = UVM_BFM,
-                                 uvm_reg_map    map = null,
-                                 string         fname = "",
-                                 int            lineno = 0);
-      // Reads have no effect
-      if (kind == UVM_PREDICT_READ) return 1;
-
-      m_tbl[m_idx.get()].predict(value, kind, path, map, fname, lineno);
-      return 1;
-   endfunction
-   
 endclass : reg_reg_xa0_xbus_rf_data_reg
 
 
@@ -441,9 +412,6 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
       rdata_msb         = srd_reg.rdata_msb;
       srd_reg_rdata_lsb = srd_reg.rdata_lsb;
       rdata_lsb         = srd_reg.rdata_lsb;
-
-      data_reg_value = data_reg.value;
-
 
       foreach (rw_reg[i]) begin
          string name = $sformatf("rw_reg[%0d]",i);
