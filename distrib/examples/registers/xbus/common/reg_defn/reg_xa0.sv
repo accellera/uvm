@@ -163,13 +163,15 @@ class reg_reg_xa0_xbus_rf_srd_reg extends uvm_reg;
 
 endclass : reg_reg_xa0_xbus_rf_srd_reg
 
-
+typedef class reg_reg_xa0_xbus_rf_xbus_indirect_reg;
 class reg_reg_xa0_xbus_rf_data_reg extends uvm_reg;
 
    `uvm_register_cb(reg_reg_xa0_xbus_rf_data_reg, uvm_reg_cbs)
    `uvm_set_super_type(reg_reg_xa0_xbus_rf_data_reg, uvm_reg)
    
    rand uvm_reg_field value;
+   local reg_reg_xa0_xbus_rf_addr_reg m_idx;
+   local reg_reg_xa0_xbus_rf_xbus_indirect_reg m_tbl[];
 
    function new(string name = "xa0_xbus_rf_data_reg");
       super.new(name,8,UVM_NO_COVERAGE);
@@ -182,6 +184,29 @@ class reg_reg_xa0_xbus_rf_data_reg extends uvm_reg;
 
    `uvm_object_utils(reg_reg_xa0_xbus_rf_data_reg)
 
+   function void configure (reg_reg_xa0_xbus_rf_addr_reg addr_reg,
+                            reg_reg_xa0_xbus_rf_xbus_indirect_reg ind_regs[],
+                            uvm_reg_block blk_parent,
+                            uvm_reg_file regfile_parent = null,
+                            string hdl_path = "");
+      super.configure(blk_parent, regfile_parent, hdl_path);
+      m_idx = addr_reg;
+      m_tbl = ind_regs;
+   endfunction
+   
+   virtual function bit predict (uvm_reg_data_t value,
+                                 uvm_predict_e  kind = UVM_PREDICT_DIRECT,
+                                 uvm_path_e     path = UVM_BFM,
+                                 uvm_reg_map    map = null,
+                                 string         fname = "",
+                                 int            lineno = 0);
+      // Reads have no effect
+      if (kind == UVM_PREDICT_READ) return 1;
+
+      m_tbl[m_idx.get()].predict(value, kind, path, map, fname, lineno);
+      return 1;
+   endfunction
+   
 endclass : reg_reg_xa0_xbus_rf_data_reg
 
 
@@ -333,26 +358,20 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
 
    virtual function void build();
                 
-      // create
-      addr_reg     = reg_reg_xa0_xbus_rf_addr_reg::type_id::create("addr_reg");
-      config_reg   = reg_reg_xa0_xbus_rf_config_reg::type_id::create("config_reg");
-      user_acp_reg = reg_reg_xa0_xbus_rf_user_acp_reg::type_id::create("user_acp_reg");
-      swr_reg      = reg_reg_xa0_xbus_rf_swr_reg::type_id::create("swr_reg");
-      srd_reg      = reg_reg_xa0_xbus_rf_srd_reg::type_id::create("srd_reg");
-      data_reg     = reg_reg_xa0_xbus_rf_data_reg::type_id::create("data_reg");
+      default_map = create_map("default_map", 'h0, 1, UVM_LITTLE_ENDIAN);
 
-
-      // build - set parent and optional hdl_path
+      addr_reg = reg_reg_xa0_xbus_rf_addr_reg::type_id::create("addr_reg");
       addr_reg.build();
       addr_reg.configure(this, null, "addr_reg");
 
+      config_reg = reg_reg_xa0_xbus_rf_config_reg::type_id::create("config_reg");
       config_reg.build();
       config_reg.configure(this, null);
                      
 
-        config_reg.add_hdl_path_slice("rsvd", 4, 4);
-        config_reg.add_hdl_path_slice("kind", 2, 2);
-        config_reg.add_hdl_path_slice("dest", 0, 2);
+      config_reg.add_hdl_path_slice("rsvd", 4, 4);
+      config_reg.add_hdl_path_slice("kind", 2, 2);
+      config_reg.add_hdl_path_slice("dest", 0, 2);
 
         /* same as
       config_reg.add_hdl_path('{ '{"rsvd", 4, 4},
@@ -360,22 +379,36 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
                                  '{"dest", 0, 2} });
          */ 
 
+      user_acp_reg = reg_reg_xa0_xbus_rf_user_acp_reg::type_id::create("user_acp_reg");
       user_acp_reg.build();
       user_acp_reg.configure(this, null, "user_reg");
 
+      swr_reg = reg_reg_xa0_xbus_rf_swr_reg::type_id::create("swr_reg");
       swr_reg.build();
       swr_reg.configure(this, null, "shared_wr_reg");
 
+      srd_reg = reg_reg_xa0_xbus_rf_srd_reg::type_id::create("srd_reg");
       srd_reg.build();
       srd_reg.configure(this, null, "shared_rd_reg");
 
+      foreach (xbus_indirect_reg[i]) begin
+         string name = $sformatf("xbus_indirect_reg[%0d]",i);
+         xbus_indirect_reg[i] = reg_reg_xa0_xbus_rf_xbus_indirect_reg::type_id::create(name);
+         xbus_indirect_reg[i].build();
+         name = $sformatf("id_reg_values[%0d]",i);
+         xbus_indirect_reg[i].configure(this, null, name);
+         default_map.add_reg(xbus_indirect_reg[i],-1, "RW",1);
+         xbus_indirect_reg_value[i] = xbus_indirect_reg[i].value;
+      end
+
+      data_reg = reg_reg_xa0_xbus_rf_data_reg::type_id::create("data_reg");
       data_reg.build();
-      data_reg.configure(this, null);
+      data_reg.configure(addr_reg, xbus_indirect_reg, this, null);
 
 
       // define address map
-      default_map = create_map("default_map", 'h0, 1, UVM_LITTLE_ENDIAN);
-      default_map.add_reg(addr_reg,     'h8, "RW");
+
+      default_map.add_reg(addr_reg,      'h8, "RW");
       default_map.add_reg(config_reg,   'h9, "RW");
       default_map.add_reg(user_acp_reg, 'hA, "RW");
       default_map.add_reg(swr_reg,      'hB, "RW");
@@ -412,15 +445,6 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
       data_reg_value = data_reg.value;
 
 
-      foreach (xbus_indirect_reg[i]) begin
-         string name = $sformatf("xbus_indirect_reg[%0d]",i);
-         xbus_indirect_reg[i] = reg_reg_xa0_xbus_rf_xbus_indirect_reg::type_id::create(name);
-         xbus_indirect_reg[i].build();
-         name = $sformatf("id_reg_values[%0d]",i);
-         xbus_indirect_reg[i].configure(this, null, name);
-         default_map.add_reg(xbus_indirect_reg[i],-1, "RW",1);
-         xbus_indirect_reg_value[i] = xbus_indirect_reg[i].value;
-      end
       foreach (rw_reg[i]) begin
          string name = $sformatf("rw_reg[%0d]",i);
          rw_reg[i] = reg_reg_xa0_xbus_rf_rw_reg::type_id::create(name);

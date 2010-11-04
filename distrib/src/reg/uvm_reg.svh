@@ -109,9 +109,9 @@ virtual class uvm_reg extends uvm_object;
    // must be specified using the <add_hdl_path()> or
    // <add_hdl_path_slice> method.
    //
-   extern virtual function void configure (uvm_reg_block blk_parent,
-                                           uvm_reg_file regfile_parent = null,
-                                           string hdl_path = "");
+   extern function void configure (uvm_reg_block blk_parent,
+                                   uvm_reg_file regfile_parent = null,
+                                   string hdl_path = "");
 
 
    // Function: set_offset

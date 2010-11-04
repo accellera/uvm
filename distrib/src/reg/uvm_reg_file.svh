@@ -71,9 +71,9 @@ virtual class uvm_reg_file extends uvm_object;
    // structure (e.g. it is physically flattened) and does not contribute
    // to the hierarchical HDL path of any contained registers.
    //
-   extern virtual function void     configure  (uvm_reg_block blk_parent,
-                                                uvm_reg_file rf_parent,
-                                                string hdl_path = "");
+   extern function void     configure  (uvm_reg_block blk_parent,
+                                        uvm_reg_file rf_parent,
+                                        string hdl_path = "");
  
    //------------------
    // Group: Attributes

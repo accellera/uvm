@@ -102,8 +102,8 @@ class uvm_mem extends uvm_object;
    // must be specified using the <add_hdl_path()> or
    // <add_hdl_path_slice()> method.
    //
-   extern virtual function void configure (uvm_reg_block parent,
-                                           string        hdl_path = "");
+   extern function void configure (uvm_reg_block parent,
+                                   string        hdl_path = "");
 
    
    // Function: set_offset

@@ -105,7 +105,8 @@ virtual class uvm_reg_block extends uvm_object;
    // structure (e.g. it is physically flattened) and does not contribute
    // to the hierarchical HDL path of any contained registers or memories.
    //
-   extern virtual function void configure(uvm_reg_block parent=null, string hdl_path="");
+   extern function void configure(uvm_reg_block parent=null,
+                                  string hdl_path="");
 
    //
    // Function: create_map
