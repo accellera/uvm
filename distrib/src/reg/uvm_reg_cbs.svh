@@ -27,7 +27,7 @@ typedef class uvm_reg_backdoor;
 //------------------------------------------------------------------------------
 // Class: uvm_reg_cbs
 //
-// Façade class for register and memory backdoor access callback methods. 
+// Facade class for register and memory backdoor access callback methods. 
 //------------------------------------------------------------------------------
 
 virtual class uvm_reg_cbs extends uvm_callback;

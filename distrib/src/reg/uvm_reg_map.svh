@@ -1625,7 +1625,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
   int                n_access_extra, n_access;
 
   Xget_bus_infoX(rw, map_info, n_bits, lsb, skip);
-  addrs = map_info.addr;
+ // FIXME US  addrs = map_info.addr;
 
   // if a memory, adjust addresses based on offset
   if (rw.element_kind == UVM_MEM)
@@ -1650,8 +1650,9 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
          byte_en[idx++] = 1;
          temp_be -= 8;
       end
-      for (int i=0; i<skip; i++)
-        void'(addrs.pop_front());
+      // NOTE for (int i=0; i<skip; i++)
+      // NOTE  void'(addrs.pop_front());
+        addrs=addrs[skip:addrs.size()-1];
     end
               
     foreach(addrs[i]) begin: foreach_addr
@@ -1742,7 +1743,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
   int n_access_extra, n_access;
 
   Xget_bus_infoX(rw, map_info, n_bits, lsb, skip);
-  addrs = map_info.addr;
+ // FIXME US  addrs = map_info.addr;
   size = n_bits;
 
   // if a memory, adjust addresses based on offset
@@ -1768,6 +1769,8 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
          byte_en[idx++] = 1;
          temp_be -= 8;
       end
+      
+      // NOTE addrs=addrs[skip:addrs.size()-1];
       for (int i=0; i<skip; i++)
         void'(addrs.pop_front());
     end

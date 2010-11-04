@@ -205,7 +205,7 @@ endclass
 //------------------------------------------------------------------------------
 // Class: uvm_reg_frontdoor
 //
-// Façade class for register and memory frontdoor access.
+// Facade class for register and memory frontdoor access.
 //------------------------------------------------------------------------------
 //
 // User-defined frontdoor access sequence
@@ -333,10 +333,10 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
   virtual function void pre_predict(uvm_reg_item rw);
   endfunction
 
-  typedef struct {
+  class predict_s;
     bit addr[uvm_reg_addr_t];
     uvm_reg_item reg_item;
-  } predict_s;
+  endclass
 
   local predict_s m_pending[uvm_reg];
 
@@ -363,6 +363,7 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
  
        if (!m_pending.exists(rg)) begin
          uvm_reg_item item = new;
+         predict_info =new;
          item.element_kind = UVM_REG;
          item.element      = rg;
          item.path         = UVM_PREDICT;
@@ -424,8 +425,11 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
     if (m_pending.num() > 0) begin
       `uvm_error("PENDING REG ITEMS",{"There are ",$sformatf("%0d",m_pending.num()),
                  " incomplete register transactions still pending completion:"})
-       foreach (m_pending[rg])
-         $display("\n%s",rg.get_full_name());
+       foreach (m_pending[l])
+       begin
+       		uvm_reg rg=l;
+       		$display("\n%s",rg.get_full_name());
+       end
     end
   endfunction
 

@@ -117,6 +117,7 @@ if ($opt_f) {
       print STDERR "test directory \"$dir\" does not exist.\n";
       exit(1);
     }
+    $dir =~ s|/$||;
     push(@dirs, &get_testdirs($dir));
   }
 }

@@ -1236,9 +1236,11 @@ endfunction
 
 function void uvm_mem::get_virtual_fields(ref uvm_vreg_field fields[$]);
 
-  foreach (m_vregs[vreg])
+  foreach (m_vregs[l])
+  begin
+  	uvm_vreg vreg = l;
     vreg.get_fields(fields);
-
+  end
 endfunction: get_virtual_fields
 
 
@@ -1264,9 +1266,12 @@ endfunction: get_vfield_by_name
 
 function uvm_vreg uvm_mem::get_vreg_by_name(string name);
 
-  foreach (m_vregs[vreg])
+  foreach (m_vregs[l])
+  begin
+  	uvm_vreg vreg = l;
     if (vreg.get_name() == name)
       return vreg;
+  end
 
   `uvm_warning("RegModel", {"Unable to find virtual register '",name,
                        "' in memory '",get_full_name(),"'"})
