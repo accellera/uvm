@@ -114,6 +114,7 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
          v = rg.get();
          
          rg.write(status, ~v, UVM_BFM, maps[j], this);
+
          if (status != UVM_IS_OK) begin
             `uvm_error("RegModel", {"Status was '",status.name(),
                                  "' when writing '",rg.get_full_name(),

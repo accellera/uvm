@@ -51,4 +51,4 @@ VSIM_ARGS="-novopt -c -sv_lib ../../../../lib/Linux_x86_64/libuvm_questa xbus_re
 vlib work
 vlog -f compile_questa.f
 
-vsim $VSIM_ARGS -do "run -all; q" +UVM_SEQUENCE=$option +UVM_TESTNAME=cmd_line_seq_test +UVM_VERBOSITY=HIGH
+vsim $VSIM_ARGS -do "run -all; q" +UVM_SEQUENCE=$option +UVM_TESTNAME=cmd_line_seq_test

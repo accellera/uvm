@@ -391,7 +391,7 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uv
       end
 
       // Iterate over all memories, checking accesses
-      model.get_memories(mems, UVM_NO_HIER);
+      blk.get_memories(mems, UVM_NO_HIER);
       foreach (mems[i]) begin
          // Registers with some attributes are not to be tested
          if (mems[i].get_attribute("NO_REG_TESTS") == "" &&

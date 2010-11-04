@@ -34,8 +34,8 @@ import apb_pkg::*;
 
 initial
 begin
-   tb_env env = new("env");
-   apb_config apb_cfg = new;
+   static tb_env env = new("env");
+   static apb_config apb_cfg = new;
 
    apb_cfg.vif = $root.tb_top.apb0;
    set_config_object("env.apb.*","config",apb_cfg,0);

@@ -24,8 +24,7 @@
 
 module blk_top;
    bit clk = 0;
-   bit rst = 0;
-   apb_if apb0(clk,rst);
+   apb_if apb0(clk);
    blk_dut dut(apb0);
    always #10 clk = ~clk;
 endmodule: blk_top

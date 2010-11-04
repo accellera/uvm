@@ -24,7 +24,7 @@
 `define DEF2STR(arg) `"arg`"
 
 class vif_container extends uvm_object;
-   `uvm_object_utils(vif_container);
+   `uvm_object_utils(vif_container)
    virtual interface xbus_if vif;
 endclass
 
@@ -91,7 +91,6 @@ class xbus_reg_env extends xbus_env;
     model.default_map.set_sequencer(masters[0].sequencer,reg2xbus);
 
     assign_vi(vif_obj.vif); //  xbus agent should use get_config or resources, not assign_vi
-    bus_monitor.set_report_verbosity_level(UVM_LOW);
     masters[0].sequencer.count = 0; //prevents auto-start
 
   endfunction : connect

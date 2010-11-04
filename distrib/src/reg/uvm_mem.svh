@@ -99,7 +99,8 @@ class uvm_mem extends uvm_object;
    // it's name is specified as the ~hdl_path~.
    // Otherwise, if the memory is implemented as a concatenation
    // of variables (usually one per bank), then the HDL path
-   // must be specified using the <add_hdl_path()> method.
+   // must be specified using the <add_hdl_path()> or
+   // <add_hdl_path_slice()> method.
    //
    extern virtual function void configure (uvm_reg_block parent,
                                            string        hdl_path = "");
@@ -680,9 +681,23 @@ class uvm_mem extends uvm_object;
    // same design abstraction if the memory is physically duplicated
    // in the design abstraction
    //
-   extern function void add_hdl_path (uvm_hdl_path_concat path,
+   extern function void add_hdl_path (uvm_hdl_path_slice slices[],
                                       string kind = "RTL");
    
+
+   // Function: add_hdl_path_slice
+   //
+   // Add the specified HDL slice to the HDL path for the specified
+   // design abstraction.
+   // If ~first~ is TRUE, starts the specification of a duplicate
+   // HDL implementation of the memory.
+   //
+   extern function void add_hdl_path_slice(string name,
+                                           int offset,
+                                           int size,
+                                           bit first = 0,
+                                           string kind = "RTL");
+
 
    // Function:   has_hdl_path
    //
@@ -953,9 +968,7 @@ function void uvm_mem::configure(uvm_reg_block  parent,
 
    m_parent.add_mem(this);
 
-   if (hdl_path != "")
-     add_hdl_path('{'{hdl_path, -1, -1}});
-
+   if (hdl_path != "") add_hdl_path_slice(hdl_path, -1, -1);
 endfunction: configure
 
 
@@ -1044,8 +1057,10 @@ endfunction
 function bit uvm_mem::is_in_map(uvm_reg_map map);
    if (m_maps.exists(map))
      return 1;
-   foreach (m_maps[local_map]) begin
+   foreach (m_maps[l]) begin
+    uvm_reg_map local_map=l;
      uvm_reg_map parent_map = local_map.get_parent_map();
+
      while (parent_map != null) begin
        if (parent_map == map)
          return 1;
@@ -1063,8 +1078,10 @@ function uvm_reg_map uvm_mem::get_local_map(uvm_reg_map map, string caller="");
      return get_default_map();
    if (m_maps.exists(map))
      return map; 
-   foreach (m_maps[local_map]) begin
+   foreach (m_maps[l]) begin
+     uvm_reg_map local_map = l;
      uvm_reg_map parent_map = local_map.get_parent_map();
+
      while (parent_map != null) begin
        if (parent_map == map)
          return local_map;
@@ -1096,7 +1113,8 @@ function uvm_reg_map uvm_mem::get_default_map(string caller="");
    end
 
    // try to choose one based on default_map in parent blocks.
-   foreach (m_maps[map]) begin
+   foreach (m_maps[l]) begin
+     uvm_reg_map map = l;
      uvm_reg_block blk = map.get_parent();
      uvm_reg_map default_map = blk.get_default_map();
      if (default_map != null) begin
@@ -1913,6 +1931,7 @@ task uvm_mem::poke(output uvm_status_e      status,
                               get_full_name(), offset, value),UVM_MEDIUM);
    m_fname = "";
    m_lineno = 0;
+
 endtask: poke
 
 
@@ -1964,6 +1983,7 @@ task uvm_mem::peek(output uvm_status_e      status,
                          get_full_name(), offset, value),UVM_MEDIUM);
    m_fname = "";
    m_lineno = 0;
+
 endtask: peek
 
 
@@ -2064,18 +2084,20 @@ function uvm_status_e uvm_mem::backdoor_read_func(uvm_reg_item rw);
      string idx;
      idx.itoa(rw.offset + mem_idx);
      foreach (paths[i]) begin
-        uvm_hdl_path_concat hdl_slices = paths[i];
+     uvm_hdl_path_concat hdl_concat = paths[i];
         val = 0;
-        foreach (hdl_slices[j]) begin
-           if (hdl_slices[j].offset < 0) begin
-              ok &= uvm_hdl_read({hdl_slices[j].path, "[", idx, "]"},val);
+     foreach (hdl_concat.slices[j]) begin
+        `uvm_info("RegModel", $psprintf("backdoor_read from %s ",hdl_concat.slices[j].path),UVM_DEBUG);
+ 
+        if (hdl_concat.slices[j].offset < 0) begin
+           ok &= uvm_hdl_read({hdl_concat.slices[j].path, "[", idx, "]"},val);
               continue;
            end
            begin
               uvm_reg_data_t slice;
-              int k = hdl_slices[j].offset;
-              ok &= uvm_hdl_read({hdl_slices[j].path,"[", idx, "]"}, slice);
-              repeat (hdl_slices[j].size) begin
+           int k = hdl_concat.slices[j].offset;
+           ok &= uvm_hdl_read({hdl_concat.slices[j].path,"[", idx, "]"}, slice);
+           repeat (hdl_concat.slices[j].size) begin
                  val[k++] = slice[0];
                  slice >>= 1;
               end
@@ -2121,19 +2143,21 @@ task uvm_mem::backdoor_write(uvm_reg_item rw);
      string idx;
      idx.itoa(rw.offset + mem_idx);
      foreach (paths[i]) begin
-        uvm_hdl_path_concat hdl_slices = paths[i];
-        foreach (hdl_slices[j]) begin
-           if (hdl_slices[j].offset < 0) begin
-              ok &= uvm_hdl_deposit({hdl_slices[j].path,"[", idx, "]"},rw.value[mem_idx]);
-              continue;
-           end
-           begin
-              uvm_reg_data_t slice;
-              slice = rw.value[mem_idx] >> hdl_slices[j].offset;
-              slice &= (1 << hdl_slices[j].size)-1;
-              ok &= uvm_hdl_deposit({hdl_slices[j].path, "[", idx, "]"}, slice);
-           end
-        end
+       uvm_hdl_path_concat hdl_concat = paths[i];
+       foreach (hdl_concat.slices[j]) begin
+          `uvm_info("RegModel", $psprintf("backdoor_write to %s ",hdl_concat.slices[j].path),UVM_DEBUG);
+ 
+          if (hdl_concat.slices[j].offset < 0) begin
+             ok &= uvm_hdl_deposit({hdl_concat.slices[j].path,"[", idx, "]"},rw.value[mem_idx]);
+             continue;
+          end
+          begin
+            uvm_reg_data_t slice;
+            slice = rw.value[mem_idx] >> hdl_concat.slices[j].offset;
+            slice &= (1 << hdl_concat.slices[j].size)-1;
+            ok &= uvm_hdl_deposit({hdl_concat.slices[j].path, "[", idx, "]"}, slice);
+          end
+       end
      end
   end
   rw.status = (ok ? UVM_IS_OK : UVM_NOT_OK);
@@ -2164,15 +2188,33 @@ endfunction
 
 // add_hdl_path
 
-function void uvm_mem::add_hdl_path(uvm_hdl_path_concat path,
-                                        string kind = "RTL");
+function void uvm_mem::add_hdl_path(uvm_hdl_path_slice slices[], string kind = "RTL");
+    uvm_queue #(uvm_hdl_path_concat) paths = m_hdl_paths_pool.get(kind);
+    uvm_hdl_path_concat concat = new();
 
-  uvm_queue #(uvm_hdl_path_concat) paths;
+    concat.set(slices);
+    paths.push_back(concat);  
+endfunction
 
-  paths = m_hdl_paths_pool.get(kind);
 
-  paths.push_back(path);
+// add_hdl_path_slice
 
+function void uvm_mem::add_hdl_path_slice(string name,
+                                          int offset,
+                                          int size,
+                                          bit first = 0,
+                                          string kind = "RTL");
+    uvm_queue #(uvm_hdl_path_concat) paths=m_hdl_paths_pool.get(kind);
+    uvm_hdl_path_concat concat;
+
+    if (first || paths.size() == 0) begin
+       concat = new();
+       paths.push_back(concat);
+    end
+    else
+       concat = paths.get(paths.size()-1);
+     
+    concat.add_path(name, offset, size);
 endfunction
 
 
@@ -2205,7 +2247,8 @@ function void uvm_mem::get_hdl_path(ref uvm_hdl_path_concat paths[$],
   hdl_paths = m_hdl_paths_pool.get(kind);
 
   for (int i=0; i<hdl_paths.size();i++) begin
-     paths.push_back(hdl_paths.get(i));
+     uvm_hdl_path_concat t = hdl_paths.get(i);
+     paths.push_back(t);
   end
 
 endfunction
@@ -2233,17 +2276,21 @@ function void uvm_mem::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
       m_parent.get_full_hdl_path(parent_paths, kind, separator);
 
       for (int i=0; i<hdl_paths.size();i++) begin
-         uvm_hdl_path_concat hdl_slices = hdl_paths.get(i);
+         uvm_hdl_path_concat hdl_concat = hdl_paths.get(i);
 
          foreach (parent_paths[j])  begin
-            foreach (hdl_slices[k]) begin
-               if (hdl_slices[k].path == "")
-                  hdl_slices[k].path = parent_paths[j];
+            uvm_hdl_path_concat t = new;
+
+            foreach (hdl_concat.slices[k]) begin
+               if (hdl_concat.slices[k].path == "")
+                  t.add_path(parent_paths[j]);
                else
-                  hdl_slices[k].path = {parent_paths[j], separator, hdl_slices[k].path};
+                  t.add_path({ parent_paths[j], separator, hdl_concat.slices[k].path },
+                             hdl_concat.slices[k].offset,
+                             hdl_concat.slices[k].size);
             end
+            paths.push_back(t);
          end
-         paths.push_back(hdl_slices);
       end
    end
 endfunction

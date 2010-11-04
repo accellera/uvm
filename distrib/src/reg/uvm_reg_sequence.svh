@@ -20,6 +20,17 @@
 // -------------------------------------------------------------
 //
  
+  
+// TITLE: Classes for Adapting Between Register and Bus Operations
+//
+// The following classes are defined herein:
+//
+// <uvm_reg_sequence> : base for all register sequences
+//
+// <uvm_reg_frontdoor> : base class for user-defined front-door (BFM) access
+//
+// <uvm_reg_predictor> : updates the register model mirror based on observed bus transactions
+
                                                               
 //------------------------------------------------------------------------------
 //
@@ -191,6 +202,50 @@ class uvm_reg_sequence #(type BASE=uvm_sequence #(uvm_reg_item)) extends BASE;
 endclass
 
 
+//------------------------------------------------------------------------------
+// Class: uvm_reg_frontdoor
+//
+// Façade class for register and memory frontdoor access.
+//------------------------------------------------------------------------------
+//
+// User-defined frontdoor access sequence
+//
+// Base class for user-defined access to register and memory reads and writes
+// through a physical interface.
+//
+// By default, different registers and memories are mapped to different
+// addresses in the address space and are accessed via those exclusively
+// through physical addresses.
+//
+// The frontdoor allows access using a non-linear and/or non-mapped mechanism.
+// Users can extend this class to provide the physical access to these registers.
+//
+virtual class uvm_reg_frontdoor extends uvm_reg_sequence #(uvm_sequence #(uvm_sequence_item));
+
+   // Variable: rw_info
+   //
+   // Holds information about the register being read or written
+   //
+   uvm_reg_item rw_info;
+
+   // Variable: sequencer
+   //
+   // Sequencer executing the operation
+   //
+   uvm_sequencer_base sequencer;
+
+   // Function: new
+   //
+   // Constructor, new object givne optional ~name~.
+   //
+   function new(string name="");
+      super.new(name);
+   endfunction
+
+   string fname;
+   int lineno;
+
+endclass: uvm_reg_frontdoor
 
 
 //------------------------------------------------------------------------------

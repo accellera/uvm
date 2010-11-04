@@ -76,6 +76,8 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
 
       n_bits = mem.get_n_bits();
       
+      `uvm_info("RegMem",$psprintf("***** n_bits =%0d",n_bits),UVM_DEBUG)
+
       // Memories may be accessible from multiple physical interfaces (maps)
       mem.get_maps(maps);
 
@@ -240,7 +242,8 @@ class uvm_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item)
          // Registers with some attributes are not to be tested
          if (mems[i].get_attribute("NO_REG_TESTS") != "" ||
              mems[i].get_attribute("NO_MEM_TESTS") != "" ||
-	     mems[i].get_attribute("NO_MEM_ACCESS_TEST") != "") continue;
+	     mems[i].get_attribute("NO_MEM_ACCESS_TEST") != "")
+           continue;
          
          // Can only deal with memories with backdoor access
          if (mems[i].get_backdoor() == null &&

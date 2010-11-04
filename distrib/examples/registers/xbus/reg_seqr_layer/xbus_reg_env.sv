@@ -24,7 +24,7 @@
 `define DEF2STR(arg) `"arg`"
 
 class vif_container extends uvm_object;
-   `uvm_object_utils(vif_container);
+   `uvm_object_utils(vif_container)
    virtual interface xbus_if vif;
 endclass
 
@@ -63,9 +63,9 @@ class xbus_reg_env extends xbus_env;
 
   // the register model
   xbus_reg_model model;
-  uvm_reg_predictor #(xbus_transfer) xbus2reg;
+  uvm_reg_predictor #(xbus_transfer) predictor;
   uvm_sequencer #(uvm_reg_item) reg_seqr;
-  reg2xbus_adapter reg2xbus;
+  reg2xbus_adapter adapter;
 
   `uvm_component_utils(xbus_reg_env)
 
@@ -75,30 +75,32 @@ class xbus_reg_env extends xbus_env;
 
   // build
   virtual function void build();
-    xbus2reg = new("xbus2reg",this);
     set_config_int("slaves*", "is_active", UVM_PASSIVE);
     num_masters = 1;
     num_slaves = 1;
     super.build();
+
+    predictor = new("predictor",this);
     model = xbus_reg_model::type_id::create("xa0", this);
     reg_seqr = uvm_sequencer #(uvm_reg_item)::type_id::create("reg_seqr",this);
     model.build();
+
     // Should be done using resources
     model.set_hdl_path_root(`DEF2STR(`XA0_TOP_PATH));
     model.default_map.set_auto_predict(0);
-    xbus2reg.map = model.default_map;
+    predictor.map = model.default_map;
     reg_seqr.set_report_id_action("SQRWFG",UVM_NO_ACTION);
-    reg2xbus = reg2xbus_adapter::type_id::create("reg2xbus");
+    adapter = reg2xbus_adapter::type_id::create("adapter");
   endfunction : build
 
   // Connect register sequencer to xbus master
   function void connect();
     vif_container vif_obj = uvm_utils #(vif_container,"xbus_vif")::get_config(this,1);
 
-    model.default_map.set_sequencer(reg_seqr,uvm_reg_adapter::none());
+    model.default_map.set_sequencer(reg_seqr);
 
-    slaves[0].monitor.item_collected_port.connect(xbus2reg.bus_in);
-    xbus2reg.adapter = reg2xbus;
+    slaves[0].monitor.item_collected_port.connect(predictor.bus_in);
+    predictor.adapter = adapter;
 
     assign_vi(vif_obj.vif);      // xbus agent should use get_config or resources, not assign_vi
     masters[0].sequencer.count = 0; //prevent auto-start
@@ -116,7 +118,7 @@ class xbus_reg_env extends xbus_env;
     
     reg2xbus_seq_t reg2xbus_seq = reg2xbus_seq_t::type_id::create("reg2xbus_seq");
     reg2xbus_seq.reg_seqr = reg_seqr;
-    reg2xbus_seq.adapter = reg2xbus;
+    reg2xbus_seq.adapter = adapter;
     reg2xbus_seq.start(masters[0].sequencer);
   endtask
 

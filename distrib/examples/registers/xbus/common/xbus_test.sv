@@ -23,7 +23,7 @@
 
 class cmd_line_seq_test extends uvm_test;
 
-   `uvm_component_utils(cmd_line_seq_test);
+   `uvm_component_utils(cmd_line_seq_test)
 
    function new(string name = "cmd_line_seq_test", uvm_component parent = null);
       super.new(name, parent);
@@ -44,7 +44,7 @@ class cmd_line_seq_test extends uvm_test;
      uvm_default_printer = uvm_default_line_printer;
 
      svr = _global_reporter.get_report_server();
-     svr.set_max_quit_count(1000);
+     svr.set_max_quit_count(200);
 
      uvm_top.print(uvm_default_table_printer);
 

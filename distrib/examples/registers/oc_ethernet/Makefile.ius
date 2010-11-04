@@ -1,6 +1,6 @@
 ## 
 ## -------------------------------------------------------------
-##    Copyright 2010 Synopsys, Inc.
+##    Copyright 2010 Cadence
 ##    All Rights Reserved Worldwide
 ## 
 ##    Licensed under the Apache License, Version 2.0 (the
@@ -19,23 +19,16 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../../..
+UVM_HOME	= ../../..
 
-include ../../../Makefile.vcs
+include ../../Makefile.ius
 
+all: uvm_reg_mem_built_in_seq
 
-all: comp run
-
-comp: simv
-
-simv:
-	$(VCS) +incdir+../common \
-		+incdir+../common/reg_defn \
-		+incdir+../common/sequences \
-		+incdir+../../../xbus/sv \
-		+incdir+../../../xbus/examples \
-		+define+XA0_TOP_PATH=xbus_reg_tb_top.dut \
-		../common/xbus_top.sv
+IRUN=$(IUS) -define SINGLE_RAM_VARIABLE -define RAM128x64 -define USE_SLICE_API \
+	-incdir ../common/wishbone -incdir ../common/oc_ethernet_rtl \
+	-F ../common/oc_ethernet_rtl/rtl_file_list.lst \
+	tb_top.sv tb_env.sv
 
 help:
 	@echo " Available run-time targets:"
@@ -50,20 +43,8 @@ help:
 	@echo "    uvm_reg_access_seq     (e.g. uvm_reg_access_seq+uvm_mem_access_seq)"
 	@echo "    uvm_reg_mem_built_in_seq   (e.g. all the built-in tests)"
 	@echo
-	@echo " User-defined:"
-	@echo
-	@echo "    mem_init_from_file_seq"
-	@echo "    mem_rand_init_seq"
-	@echo "    user_acp_reg_seq"
-	@echo "    virtual_seq"
-	@echo
 
-run: uvm_reg_mem_built_in_seq \
-	mem_init_from_file_seq \
-	mem_rand_init_seq \
-	user_acp_reg_seq \
-	virtual_seq
-
-%_seq: comp
-	$(SIMV) +UVM_SEQUENCE=$@ +UVM_TESTNAME=cmd_line_seq_test
+uvm_%_seq:
+	$(IRUN) +UVM_SEQUENCE=$@
 	$(CHECK)
+

@@ -150,7 +150,9 @@ class blk_env extends uvm_env;
    endfunction: new
 
    virtual function void build();
+      begin // FIXME 839607
       any_driver#(apb_item)::type_id::set_type_override(my_apb_driver::get_type());
+      end
       apb =   apb_agent::type_id::create("apb_agent",this);
       wsh =   wsh_agent::type_id::create("wsh_agent",this);
       model = reg_block_B::type_id::create("reg_blk_B");

@@ -257,7 +257,7 @@ typedef class uvm_reg_adapter;
 
 
 //------------------------------------------------------------------------------
-//
+// FIXME uvm_reg_mem_data_t is of type bit so 2val not 4val
 // Type: uvm_reg_addr_t
 //
 // Address value
@@ -269,9 +269,8 @@ typedef class uvm_reg_adapter;
 typedef  bit [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_t ;
 typedef  logic [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_logic_t ;
 
-
 //------------------------------------------------------------------------------
-//
+// FIXME uvm_reg_mem_data_t is of type bit so 2val not 4val
 // Type: uvm_reg_data_t
 //
 // Data value
@@ -296,6 +295,8 @@ typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
 // CLASS: uvm_utils #(TYPE)
 //
 // This class contains useful template functions.
+//
+//------------------------------------------------------------------------------
 
 
 class uvm_utils #(type TYPE=int, string FIELD="config");
@@ -387,9 +388,9 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
 endclass
 
 
+
 //------------------------------------------------------------------------------
-// TYPE: uvm_hdl_path_slice
-//------------------------------------------------------------------------------
+// Type: uvm_hdl_path_slice
 //
 // Slice of an HDL path
 //
@@ -406,6 +407,7 @@ endclass
 //| r1.add_hdl_path('{ '{"r1", -1, -1} });
 //|
 //
+//------------------------------------------------------------------------------
 
 typedef struct {
    string path;
@@ -414,13 +416,13 @@ typedef struct {
 } uvm_hdl_path_slice;
 
 
+
 //------------------------------------------------------------------------------
-// TYPE: uvm_hdl_path_concat
-//------------------------------------------------------------------------------
+// Class: uvm_hdl_path_concat
 //
 // Concatenation of HDL variables
 //
-// Array of <uvm_hdl_path_slice> specifing a concatenation
+// An dArray of <uvm_hdl_path_slice> specifing a concatenation
 // of HDL variables that implement a register in the HDL.
 //
 // Slices must be specified in most-to-least significant order.
@@ -436,33 +438,63 @@ typedef struct {
 //|       +-+---+-------------+---+-------+
 //|
 //
-// would be specified using the following literal value:
-//|
-//|    '{ '{"A_reg", 15, 1},
-//|       '{"B_reg",  6, 7},
-//|       '{'C_reg",  0, 4} }
-//
 // If the register is implementd using a single HDL variable,
 // The array should specify a single slice with its ~offset~ and ~size~
 // specified as -1. For example:
-//|
-//| r1.add_hdl_path('{ '{"r1", -1, -1} });
-//|
 //
+//| concat.set('{ '{"r1", -1, -1} });
+//
+//------------------------------------------------------------------------------
 
-typedef uvm_hdl_path_slice uvm_hdl_path_concat[];
+class uvm_hdl_path_concat;
+
+   // Variable: slices
+   // Array of individual slices,
+   // stored in most-to-least significant order
+   uvm_hdl_path_slice slices[];
+
+   // Function: set
+   // Initialize the concatenation using an array literal
+   function void set(uvm_hdl_path_slice t[]);
+      slices = t;
+   endfunction
+
+   // Function: add_slice
+   // Append the specified ~slice~ literal to the path concatenation
+   function void add_slice(uvm_hdl_path_slice slice);
+      slices = new [slices.size()+1] (slices);
+      slices[slices.size()-1] = slice;
+   endfunction
+
+   // Function: add_path
+   // Append the specified ~path~ to the path concatenation,
+   // for the specified number of bits at the specified ~offset~.
+   function void add_path(string path,
+                          int unsigned offset = -1,
+                          int unsigned size = -1);
+      uvm_hdl_path_slice t;
+      t.offset = offset;
+      t.path   = path;
+      t.size   = size;
+      
+      add_slice(t);
+   endfunction
+   
+endclass
 
 
 // concat2string
 
-function automatic string uvm_hdl_concat2string(uvm_hdl_path_concat slices);
+function automatic string uvm_hdl_concat2string(uvm_hdl_path_concat concat);
    string image = "{";
    
-   if (slices.size() == 1) return slices[0].path;
+   if (concat.slices.size() == 1 &&
+       concat.slices[0].offset == -1 &&
+       concat.slices[0].size == -1)
+      return concat.slices[0].path;
 
-   foreach (slices[i]) begin
-      uvm_hdl_path_slice slice;
-      slice = slices[i];
+   foreach (concat.slices[i]) begin
+      uvm_hdl_path_slice slice=concat.slices[i];
 
       image = { image, (i == 0) ? "" : ", ", slice.path };
       if (slice.offset >= 0)
@@ -480,6 +512,7 @@ endfunction
 `include "reg/uvm_reg_item.svh"
 `include "reg/uvm_reg_adapter.svh"
 `include "reg/uvm_reg_sequence.svh"
+`include "reg/uvm_reg_cbs.svh"
 `include "reg/uvm_reg_backdoor.svh"
 `include "reg/uvm_reg_field.svh"
 `include "reg/uvm_vreg_field.svh"

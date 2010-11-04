@@ -185,7 +185,7 @@ class uvm_reg_map extends uvm_object;
    // ~must~ be called before starting any sequences based on uvm_reg_sequence.
 
    extern virtual function void set_sequencer (uvm_sequencer_base sequencer,
-                                               uvm_reg_adapter    adapter);
+                                               uvm_reg_adapter    adapter=null);
 
 
 
@@ -964,7 +964,7 @@ endfunction: add_parent_map
 // set_sequencer
 
 function void uvm_reg_map::set_sequencer(uvm_sequencer_base sequencer,
-                                         uvm_reg_adapter adapter);
+                                         uvm_reg_adapter adapter=null);
 
    if (sequencer == null) begin
       `uvm_error("REG_NULL_SQR", "Null reference specified for bus sequencer");
@@ -972,8 +972,9 @@ function void uvm_reg_map::set_sequencer(uvm_sequencer_base sequencer,
    end
 
    if (adapter == null) begin
-      `uvm_error("REG_NULL_CVT", "Null reference specified for adapter object");
-      return;
+      `uvm_info("REG_NO_ADAPT", {"Adapter not specified for map '",get_full_name(),
+        "'. Accesses via this map will send abstract 'uvm_reg_items' to sequencer '",
+        sequencer.get_full_name(),"'"},UVM_MEDIUM)
    end
 
    m_sequencer = sequencer;
@@ -1061,10 +1062,12 @@ function void uvm_reg_map::get_submaps(ref uvm_reg_map maps[$], input uvm_hier_e
    foreach (m_submaps[submap])
      maps.push_back(submap);
 
+   
    if (hier == UVM_HIER)
-     foreach (m_submaps[submap])
+     foreach (m_submaps[submap_]) begin
+       uvm_reg_map submap=submap_;
        submap.get_submaps(maps);
-
+     end
 endfunction
 
 
@@ -1076,8 +1079,10 @@ function void uvm_reg_map::get_registers(ref uvm_reg regs[$], input uvm_hier_e h
     regs.push_back(rg);
 
   if (hier == UVM_HIER)
-    foreach (m_submaps[submap])
+    foreach (m_submaps[submap_]) begin
+      uvm_reg_map submap=submap_;
       submap.get_registers(regs);
+    end
 
 endfunction
 
@@ -1086,12 +1091,16 @@ endfunction
 
 function void uvm_reg_map::get_fields(ref uvm_reg_field fields[$], input uvm_hier_e hier=UVM_HIER);
 
-   foreach (m_regs_info[rg])
+   foreach (m_regs_info[rg_]) begin
+     uvm_reg rg = rg_;
      rg.get_fields(fields);
+   end
    
    if (hier == UVM_HIER)
-     foreach (m_submaps[submap])
+     foreach (this.m_submaps[submap_]) begin
+       uvm_reg_map submap=submap_;
        submap.get_fields(fields);
+     end
 
 endfunction
 
@@ -1104,8 +1113,10 @@ function void uvm_reg_map::get_memories(ref uvm_mem mems[$], input uvm_hier_e hi
      mems.push_back(mem);
     
    if (hier == UVM_HIER)
-     foreach (m_submaps[submap])
+     foreach (m_submaps[submap_]) begin
+       uvm_reg_map submap=submap_;
        submap.get_memories(mems);
+     end
 
 endfunction
 
@@ -1119,7 +1130,6 @@ function void uvm_reg_map::get_virtual_registers(ref uvm_vreg regs[$], input uvm
 
   foreach (mems[i])
     mems[i].get_virtual_registers(regs);
-
 
 endfunction
 
@@ -1202,21 +1212,24 @@ function int unsigned uvm_reg_map::get_size();
   int unsigned addr;
 
   // get max offset from registers
-  foreach (m_regs_info[rg]) begin
+  foreach (m_regs_info[rg_]) begin
+    uvm_reg rg = rg_;
     addr = m_regs_info[rg].offset + ((rg.get_n_bytes()-1)/m_n_bytes);
     if (addr > max_addr);
       max_addr = addr;
   end
 
   // get max offset from memories
-  foreach (m_mems_info[mem]) begin
+  foreach (m_mems_info[mem_]) begin
+    uvm_mem mem = mem_;
     addr = m_mems_info[mem].offset + (mem.get_size() * (((mem.get_n_bytes()-1)/m_n_bytes)+1)) -1;
     if (addr > max_addr) 
       max_addr = addr;
   end
 
   // get max offset from submaps
-  foreach (m_submaps[submap]) begin
+  foreach (m_submaps[submap_]) begin
+    uvm_reg_map submap=submap_;
     addr = m_submaps[submap] + submap.get_size();
     if (addr > max_addr)
       max_addr = addr;
@@ -1227,7 +1240,6 @@ function int unsigned uvm_reg_map::get_size();
 endfunction
 
 
-// Xverify_map_configX
 
 function void uvm_reg_map::Xverify_map_configX();
    // Make sure there is a generic payload sequence for each map
@@ -1430,10 +1442,13 @@ function void uvm_reg_map::Xinit_address_mapX();
      top_map.m_mems_by_offset.delete();
    end
 
-   foreach (m_submaps[map])
+   foreach (m_submaps[l]) begin
+     uvm_reg_map map=l;
      map.Xinit_address_mapX();
+   end
 
-   foreach (m_regs_info[rg]) begin
+   foreach (m_regs_info[rg_]) begin
+     uvm_reg rg = rg_;
      if (!m_regs_info[rg].unmapped) begin
        uvm_reg_addr_t addrs[];
        bus_width = get_physical_addresses(m_regs_info[rg].offset,0,rg.get_n_bytes(),addrs);
@@ -1463,8 +1478,8 @@ function void uvm_reg_map::Xinit_address_mapX();
      end
    end
 
-   foreach (m_mems_info[mem]) begin
-
+   foreach (m_mems_info[mem_]) begin
+     uvm_mem mem = mem_;
      if (!m_mems_info[mem].unmapped) begin
 
        uvm_reg_addr_t addrs[],addrs_max[];
@@ -1557,9 +1572,8 @@ task uvm_reg_map::do_write(uvm_reg_item rw);
   uvm_reg_map system_map = get_root_map();
   uvm_reg_adapter adapter = system_map.get_adapter();
   uvm_sequencer_base sequencer = system_map.get_sequencer();
-  uvm_reg_null_adapter null_adapter;
 
-  if ($cast(null_adapter,adapter)) begin
+  if (adapter == null) begin
     rw.set_sequencer(sequencer);
     rw.m_start_item(sequencer,rw.parent,rw.prior);
     rw.m_finish_item(sequencer,rw.parent);
@@ -1579,9 +1593,8 @@ task uvm_reg_map::do_read(uvm_reg_item rw);
   uvm_reg_map system_map = get_root_map();
   uvm_reg_adapter adapter = system_map.get_adapter();
   uvm_sequencer_base sequencer = system_map.get_sequencer();
-  uvm_reg_null_adapter null_adapter;
 
-  if ($cast(null_adapter,adapter)) begin
+  if (adapter == null) begin
     rw.set_sequencer(sequencer);
     rw.m_start_item(sequencer,rw.parent,rw.prior);
     rw.m_finish_item(sequencer,rw.parent);
@@ -1638,7 +1651,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
          temp_be -= 8;
       end
       for (int i=0; i<skip; i++)
-         addrs.pop_front();
+        void'(addrs.pop_front());
     end
               
     foreach(addrs[i]) begin: foreach_addr
@@ -1756,8 +1769,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
          temp_be -= 8;
       end
       for (int i=0; i<skip; i++)
-        addrs.pop_front(
-);
+        void'(addrs.pop_front());
     end
     rw.value[val_idx] = 0;
               

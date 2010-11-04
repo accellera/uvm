@@ -95,6 +95,11 @@ class uvm_reg_field extends uvm_object;
    // See <set_access> for a specification of the pre-defined
    // field access policies.
    //
+   // If the field access policy is a pre-defined policy and NOT one of
+   // "RW", "WRC", "WRS", "WO", "W1", "WO1" or "DC",
+   // the value of ~is_rand~ is ignored and the rand_mode() for the
+   // field instance is turned off since it cannot be written.
+   //
    extern function void configure(uvm_reg        parent,
                                   int unsigned   size,
                                   int unsigned   lsb_pos,
@@ -805,9 +810,6 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    m_individually_accessible = individually_accessible;
    set_reset(reset);
 
-   if (!is_rand)
-     value.rand_mode(0);
-
    m_parent.add_field(this);
 
    if (!m_policy_names.exists(m_access)) begin
@@ -819,6 +821,18 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    if (size > m_max_size)
       m_max_size = size;
    
+   // Ignore is_rand if the field is known not to be writeable
+   // i.e. not "RW", "WRC", "WRS", "WO", "W1", "WO1" or "DC",
+   case (access)
+    "RO", "RC", "RS", "WC", "WS",
+      "W1C", "W1S", "W1T", "W0C", "W0S", "W0T",
+      "W1SRC", "W1CRS", "W0SRC", "W0CRS", "WSRC", "WCRS",
+      "WOC", "WOS": is_rand = 0;
+   endcase
+
+   if (!is_rand)
+     value.rand_mode(0);
+
 endfunction: configure
 
 
@@ -884,7 +898,7 @@ endfunction
 function string uvm_reg_field::get_access(uvm_reg_map map = null);
    get_access = m_access;
 
-   if (m_parent.get_n_maps() == 1 || map == uvm_reg_map::backdoor)
+   if (m_parent.get_n_maps() == 1 || map == uvm_reg_map::backdoor())
      return get_access;
 
    // Is the register restricted in this map?

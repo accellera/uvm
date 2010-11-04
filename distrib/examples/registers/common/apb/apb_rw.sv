@@ -35,7 +35,7 @@ class apb_rw extends uvm_sequence_item;
      `uvm_field_int(addr, UVM_ALL_ON | UVM_NOPACK);
      `uvm_field_int(data, UVM_ALL_ON | UVM_NOPACK);
      `uvm_field_enum(kind_e,kind, UVM_ALL_ON | UVM_NOPACK);
-   `uvm_object_utils_end;
+   `uvm_object_utils_end
    
    function new (string name = "apb_rw");
       super.new(name);

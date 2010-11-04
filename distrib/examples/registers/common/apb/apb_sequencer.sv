@@ -25,7 +25,7 @@
 
 class apb_sequencer extends uvm_sequencer #(apb_rw);
 
-   `uvm_component_utils(apb_sequencer);
+   `uvm_component_utils(apb_sequencer)
 
    function new(input string name, uvm_component parent=null);
       super.new(name, parent);

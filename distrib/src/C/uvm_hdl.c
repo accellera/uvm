@@ -19,10 +19,35 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+// FIXME vpi_printf should be eventually forwarded to SV and routed via UVM messaging
+
 #include "vpi_user.h"
 #include "veriuser.h"
 #include "svdpi.h"
 #include <malloc.h>
+
+#ifdef NCSIM
+#include "vhpi_user.h"
+#endif
+
+/*
+	utility function to determine if a variable is in VHDL or Verilog
+	this can be used later to switch between VPI(verilog) or VHPI(VHDL)
+
+*/
+#ifdef NCSIM
+static int is_verilog(char* path)
+{
+  vhpiHandleT r = vhpi_handle_by_name(path, 0);
+
+  if(r == 0)
+  {
+    return 1;
+  }
+
+  return (vhpi_get(vhpiLanguageP, r) == vhpiVerilog);
+}
+#endif
 
 
 /* 
@@ -51,8 +76,8 @@ static int uvm_hdl_max_width()
   s_vpi_value value_s = { vpiIntVal };
   ms = vpi_handle_by_name(
         "uvm_pkg::UVM_HDL_MAX_WIDTH", 0);
-  if(ms == 0) 
-    return 1024;  /* If nothing else is defined, 
+  if(ms == 0)
+    return 1024;  /* If nothing else is defined,
                      this is the DEFAULT */
   vpi_get_value(ms, &value_s);
   return value_s.value.integer;
@@ -65,10 +90,9 @@ static int uvm_hdl_max_width()
 static int uvm_hdl_set_vlog(char *path, p_vpi_vecval *value, PLI_INT32 flag)
 {
   static int maxsize = -1;
-  int i, size, chunks;
+  int size;
   vpiHandle r;
   s_vpi_value value_s;
-  p_vpi_vecval value_p;
   s_vpi_time  time_s = { vpiSimTime, 0, 0 };
 
   r = vpi_handle_by_name(path, 0);
@@ -80,12 +104,13 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval *value, PLI_INT32 flag)
   }
   else
   {
-    if(maxsize == -1) 
+    if(maxsize == -1)
         maxsize = uvm_hdl_max_width();
 
 // Code for Questa & VCS
 // ---------------------
 #ifndef NCSIM
+    // FIXME check release that part does nothing
     if (flag == vpiReleaseFlag) {
       //size = vpi_get(vpiSize, r);
       //value_p = (p_vpi_vecval)(malloc(((size-1)/32+1)*8*sizeof(s_vpi_vecval)));
@@ -93,13 +118,14 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval *value, PLI_INT32 flag)
     }
     value_s.format = vpiVectorVal;
     value_s.value.vector = *value;
-    vpi_put_value(r, &value_s, &time_s, flag);  
+    vpi_put_value(r, &value_s, &time_s, flag);
     //if (value_p != NULL)
     //  free(value_p);
     if (value == NULL) {
       *value = value_s.value.vector;
     }
   }
+  // FIXME check release (is this QUESTA only?)
 #ifndef VCS
   vpi_release_handle(r);
 #endif
@@ -115,35 +141,17 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval *value, PLI_INT32 flag)
       vpi_printf("ERROR UVM : hdl path '%s' is %0d bits,\n", path, size);
       vpi_printf(" but the maximum size is %0d, redefine using a compile\n", maxsize);
       vpi_printf(" flag. i.e. %s\n", "vlog ... +define+UVM_HDL_MAX_WIDTH=<value>\n");
-#ifndef VCS
-      vpi_release_handle(r);
-#endif
+
       return 0;
     }
-    chunks = (size-1)/32 + 1;
-    // Probably should be:
-    //   value_p = (p_vpi_vecval)(calloc(1, chunks*8*sizeof(s_vpi_vecval)));
-    value_p = (p_vpi_vecval)(malloc(chunks*8*sizeof(s_vpi_vecval)));
     value_s.format = vpiVectorVal;
-    value_s.value.vector = value_p;
-    /* Copy a/b, reversing on NC. */
-    /*dpi and vpi are reversed*/
-    for(i=0;i<chunks; ++i)
-    {
-      // Reverse a/b on NC.
-      value_p[i].aval = value[i].bval;
-      value_p[i].bval = value[i].aval;
-    }
-    vpi_put_value(r, &value_s, &time_s, flag);  
-    free (value_p);
+    value_s.value.vector = *value;
+    vpi_put_value(r, &value_s, &time_s, flag);
   }
-#ifndef VCS
-  vpi_release_handle(r);
-#endif
+
   return 1;
 }
 #endif
-
 
 /*
  * Given a path, look the path name up using the PLI
@@ -167,7 +175,7 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
   }
   else
   {
-    if(maxsize == -1) 
+    if(maxsize == -1)
         maxsize = uvm_hdl_max_width();
 
     size = vpi_get(vpiSize, r);
@@ -177,7 +185,8 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
       vpi_printf(" but the maximum size is %0d, redefine using a compile\n",maxsize);
       vpi_printf(" flag. i.e. %s\n", "vlog ... +define+UVM_HDL_MAX_WIDTH=<value>\n");
       //tf_dofinish();
-#ifndef VCS
+      // FIXME check release
+#ifdef VCS
       vpi_release_handle(r);
 #endif
       return 0;
@@ -189,21 +198,16 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
     /*dpi and vpi are reversed*/
     for(i=0;i<chunks; ++i)
     {
-#ifdef NCSIM
-      // Code for NC.
-      // Reverse a/b on NC.
-      value[i].aval = value_s.value.vector[i].bval;
-      value[i].bval = value_s.value.vector[i].aval;
-#else
-      // Code for Questa & VCS
       value[i].aval = value_s.value.vector[i].aval;
       value[i].bval = value_s.value.vector[i].bval;
-#endif
+//      vpi_printf("NCSIM FIXME read : path=%s fsize=%0d aval=%0x bval=%0x\n",path,size,value[i].aval,value[i].bval);
     }
   }
-#ifndef VCS
+  // FIXME check release
+#ifdef VCS
   vpi_release_handle(r);
 #endif
+
   return 1;
 }
 
@@ -220,7 +224,7 @@ int uvm_hdl_check_path(char *path)
   vpiHandle r = vpi_handle_by_name(path, 0);
   if(r == 0)
       return 0;
-  else 
+  else
     return 1;
 #ifndef VCS
   vpi_release_handle(r);
@@ -234,7 +238,7 @@ int uvm_hdl_check_path(char *path)
  */
 int uvm_hdl_read(char *path, p_vpi_vecval value)
 {
-    return uvm_hdl_get_vlog(path, value, vpiNoDelay);
+	return uvm_hdl_get_vlog(path, value, vpiNoDelay);
 }
 
 /*

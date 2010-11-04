@@ -24,7 +24,7 @@
 `define DEF2STR(arg) `"arg`"
 
 class vif_container extends uvm_object;
-   `uvm_object_utils(vif_container);
+   `uvm_object_utils(vif_container)
    virtual interface xbus_if vif;
 endclass
 

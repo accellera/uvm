@@ -25,8 +25,7 @@
 
 module sys_top;
    bit clk = 0;
-   bit rst = 0;
-   apb_if apb0(clk,rst);
+   apb_if apb0(clk);
    sys_dut #('h100) dut(apb0);
    always #10 clk = ~clk;
 endmodule: sys_top

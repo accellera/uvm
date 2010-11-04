@@ -27,21 +27,13 @@
 //
 // <uvm_reg_adapter> : converts between a register transaction type and a bus transaction type
 //
-// <uvm_reg_null_adapter> : a converter that does nothing
-//
 // <uvm_reg_tlm_adapter> : converts between register items and TLM generic payload items
 //
-// <uvm_reg_predictor> : updates the RegModel mirror based on observed bus transactions
-//
-
-
-typedef class uvm_reg_block;
-typedef class uvm_reg_null_adapter;
 
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_reg_adapter
+// Class: uvm_reg_adapter
 //
 // This class defines an interface for converting between <uvm_reg_bus_op>
 // and a specific bus transaction. 
@@ -99,20 +91,6 @@ virtual class uvm_reg_adapter extends uvm_object;
                                      ref uvm_reg_bus_op rw);
 
 
-  local static uvm_reg_null_adapter m_null; 
-
-  // Function: null
-  //
-  // Get a singleton instance of the <uvm_reg_null_adapter>. Use this
-  // integrating the register model in a layered sequencer approach.
-  //
-  static function uvm_reg_null_adapter none();
-    if (m_null == null)
-      m_null = uvm_reg_null_adapter::type_id::create("reg_null_adapter");
-    return m_null;
-  endfunction
-    
-
 endclass
 
 
@@ -151,58 +129,8 @@ endclass
 //|  endfunction
 //|
 //|endclass
-
-
-
+//
 //------------------------------------------------------------------------------
-//
-// CLASS: uvm_reg_null_adapter
-//
-// Defines an extension of <uvm_reg_adapter> that does no conversion.
-//
-// This adapter is used when running in a layering model that has RegModel sequences
-// running on a separate, generic "upstream" sequencer connected to a
-// "downstream" bus sequencer. In this case, the register model does not perform
-// the conversion to bus items, and so must be configured to use this null adapter.
-// To do this, call <uvm_reg_map::set_sequencer> with <uvm_reg_adaptern::none>.
-// For example:
-//
-//| virtual function void build();
-//|   reg_seqr = uvm_sequencer #(uvm_reg_item)::type_id::create("reg_seqr",this);
-//|   ...
-//| endfunction
-//|
-//| virtual function void connect();
-//|   my_reg_model.default_map.set_sequencer(reg_seqr,uvm_reg_adapter::none());
-//|   ...
-//| endfunction
-// 
-//------------------------------------------------------------------------------
-
-class uvm_reg_null_adapter extends uvm_reg_adapter;
-
-  `uvm_object_utils(uvm_reg_null_adapter)
-
-  // Function: reg2bus
-  //
-  // Returns null.
-
-  virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
-    return null;
-  endfunction
-
-
-  // Function: bus2reg
-  //
-  // Does nothing.
-  //
-  virtual function void bus2reg(uvm_sequence_item bus_item,
-                                ref uvm_reg_bus_op rw);
-    return;
-  endfunction
-
-
-endclass
 
 
 //------------------------------------------------------------------------------

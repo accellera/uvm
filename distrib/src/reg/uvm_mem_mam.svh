@@ -574,6 +574,7 @@ class uvm_mam_cfg;
    // Number of bytes in each memory location
    rand int unsigned n_bytes;
 
+// FIXME start_offset and end_offset should be "longint unsigned" to match the memory addr types
    // variable: start_offset
    // Lowest address of managed space
    rand bit [63:0] start_offset;
@@ -791,15 +792,7 @@ endfunction: release_region
 
 
 function void uvm_mam::release_all_regions();
-`ifdef VCS2006_06
-   // Work-around for NYI feature in VCS2006.06
-   // but IEEE 1800-2009 compliant
-   this.in_use.delete();
-`else
-   // Works in VCS2008.03 or later
-   // IEEE 1800-2005 compliant
-   this.in_use = '{};
-`endif
+  `uvm_clear_queue(in_use)
 endfunction: release_all_regions
 
 

@@ -53,6 +53,7 @@ class oc_ethernet_env extends uvm_env;
       model.build();
 
       model.set_hdl_path_root(hdl_root);
+//      regmem.print();
 
       set_config_int("host.seqr", "count", 0);
 

@@ -50,7 +50,7 @@ module xbus_reg_tb_top;
   end
 
   initial begin
-    vif_container xbus_vif = new;
+    static vif_container xbus_vif = new;
     env = new("env", null);
     xbus_vif.vif = xi0;
     set_config_object("*","xbus_vif",xbus_vif,0);

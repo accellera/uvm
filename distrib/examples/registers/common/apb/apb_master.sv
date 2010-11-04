@@ -62,7 +62,12 @@ class apb_master extends uvm_driver#(apb_rw);
          // TODO: QUESTA issue with hier ref to sequence via modport; need workaround?
 `ifdef VCS
          if (!this.sigs.mck.at_posedge.triggered)
-`else
+`endif
+
+`ifdef INCA
+          // FIXME      if (!this.sigs.mck.at_posedge.triggered) // this is wrong and has to be reviewed
+`endif
+`ifdef QUESTA	
 	   if (!this.sigs.mck.triggered)
 `endif
 	    @ (this.sigs.mck);
@@ -90,7 +95,7 @@ class apb_master extends uvm_driver#(apb_rw);
 `ifdef VCS
 	@ (this.sigs.mck);
 `else
-      @(posedge sigs.mck);
+      @(sigs.mck);
       `endif
       this.sigs.rst <= 0;
    endtask: reset
