@@ -19,6 +19,8 @@
 // -------------------------------------------------------------
 //
 
+typedef class uvm_reg_indirect_ftdr_seq;
+
 //-----------------------------------------------------------------
 // CLASS: uvm_reg_indirect
 // Indirect data access abstraction class
@@ -32,7 +34,6 @@
 // ~n_bits~ and coverage models.
 //-----------------------------------------------------------------
 
-typedef class uvm_reg_indirect_ftdr_seq;
 class uvm_reg_indirect extends uvm_reg;
 
    local uvm_reg m_idx;
