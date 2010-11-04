@@ -102,6 +102,7 @@ Group: Policies  {
 Group: TLM  {
 
    File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/tlm_ifs_and_ports.txt)
+   File: Analysis Ports  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_analysis_port.svh)
 
    Group: TLM2  {
 
@@ -119,12 +120,12 @@ Group: TLM  {
    Group: TLM1  {
 
       File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/tlm1.txt)
-      File: uvm_tlm_fifo_base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_tlm_fifo_base.svh)
-      File: uvm_tlm_fifo  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_tlm_fifos.svh)
+      File: TLM FIFOs  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_tlm_fifos.svh)
       File: uvm_tlm_req_rsp_channel  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_tlm_req_rsp.svh)
       File: uvm_*_export  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_exports.svh)
       File: uvm_*_imp ports  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_imps.svh)
       File: uvm_*_port  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_ports.svh)
+      File: uvm_tlm_fifo_base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_tlm_fifo_base.svh)
       }  # Group: TLM1
 
    Group: Sequencer Ports  {

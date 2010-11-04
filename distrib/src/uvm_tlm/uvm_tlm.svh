@@ -29,6 +29,7 @@
 `include "uvm_tlm/uvm_imps.svh"
 `include "uvm_tlm/uvm_ports.svh"
 `include "uvm_tlm/uvm_exports.svh"
+`include "uvm_tlm/uvm_analysis_port.svh"
 
 `include "uvm_tlm/uvm_tlm_fifo_base.svh"
 `include "uvm_tlm/uvm_tlm_fifos.svh"
