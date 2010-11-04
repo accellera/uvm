@@ -97,16 +97,12 @@ class uvm_reg_indirect extends uvm_reg;
                                  uvm_reg_map    map = null,
                                  string         fname = "",
                                  int            lineno = 0);
-      // Reads have no effect
-      if (kind == UVM_PREDICT_READ) return 1;
-
       if (m_idx.get() >= m_tbl.size()) begin
          `uvm_error(get_full_name(), $psprintf("Address register %s has a value (%0d) greater than the maximum indirect register array size (%0d)", m_idx.get_full_name(), m_idx.get(), m_tbl.size()));
          return 0;
       end
 
-      m_tbl[m_idx.get()].predict(value, kind, path, map, fname, lineno);
-      return 1;
+      return m_tbl[m_idx.get()].predict(value, kind, path, map, fname, lineno);
    endfunction
 
    //
