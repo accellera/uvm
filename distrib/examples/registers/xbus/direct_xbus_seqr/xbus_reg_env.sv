@@ -80,7 +80,7 @@ class xbus_reg_env extends xbus_env;
   // Connect register sequencer to xbus master
   function void connect();
     vif_container vif_obj = uvm_utils #(vif_container,"xbus_vif")::get_config(this,1);
-    reg2xbus_adapter reg2xbus = reg2xbus_adapter::type_id::create("reg2xbus_adapter");
+    reg2xbus_adapter reg2xbus = reg2xbus_adapter::type_id::create("reg2xbus_adapter",,get_full_name());
 
     model.default_map.set_sequencer(masters[0].sequencer,reg2xbus);
 
