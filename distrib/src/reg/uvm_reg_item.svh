@@ -20,6 +20,18 @@
 //--------------------------------------------------------------
 //
  
+//
+// TITLE: Generic Register Operation Descriptors
+//
+// The following classes and types are defined herein:
+//
+// <uvm_reg_item> : Defines an abstract register transaction
+//
+// <uvm_reg_bus_op> : Defines a physical register operation
+//                    on a specific bus with a specific address map
+//
+
+
 //------------------------------------------------------------------------------
 // CLASS: uvm_reg_item
 //
@@ -231,9 +243,9 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// TITLE: uvm_reg_bus_op
+// CLASS: uvm_reg_bus_op
 //
-// Defines a generic bus transaction for register and memory accesses, having
+// Struct that defines a generic bus transaction for register and memory accesses, having
 // ~kind~ (read or write), ~address~, ~data~, and ~byte enable~ information.
 // If the bus is narrower than the register or memory location being accessed,
 // there will be multiple of these bus operations for every abstract
