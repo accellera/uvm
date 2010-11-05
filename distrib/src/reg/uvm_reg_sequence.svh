@@ -351,6 +351,8 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
      uvm_reg_bus_op rw;
      assert(adapter != null);
 
+     // In case they forget to set byte_en
+     rw.byte_en = -1;
      adapter.bus2reg(tr,rw);
      rg = map.get_reg_by_offset(rw.addr);
 
@@ -394,7 +396,8 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
                   (reg_item.kind == UVM_WRITE) ? UVM_PREDICT_WRITE : UVM_PREDICT_READ;
               found = 1;
               pre_predict(reg_item);
-              void'(rg.predict(reg_item.value[0],predict_kind,UVM_BFM));
+              void'(rg.predict(reg_item.value[0],rw.byte_en,
+                               predict_kind,UVM_BFM));
               `uvm_info("REG_PREDICT", {"Observed ",reg_item.kind.name(),
                         " transaction to register ",rg.get_full_name(), ": value='h",
                          $sformatf("%0h",reg_item.value[0])},UVM_HIGH)

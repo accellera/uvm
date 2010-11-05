@@ -28,14 +28,25 @@
 // "Ra" and "Rb". When accessed as "Ra", field F2 is RO.
 //
 
+typedef class reg_Rb;
 
 class reg_Ra extends uvm_reg;
    rand uvm_reg_field F1;
    rand uvm_reg_field F2;
 
+   local reg_Rb m_Rb;
+
    function new(string name = "Ra");
       super.new(name, 32, UVM_NO_COVERAGE);
    endfunction: new
+   
+   function void configure(reg_Rb        Rb,
+                           uvm_reg_block blk_parent,
+                           uvm_reg_file  rf_parent,
+                           string        hdl_path = "");
+      super.configure(blk_parent, rf_parent, hdl_path);
+      m_Rb = Rb;
+   endfunction
    
    virtual function void build();
       F1 = uvm_reg_field::type_id::create("F1");
@@ -46,6 +57,18 @@ class reg_Ra extends uvm_reg;
 
    `uvm_object_utils(reg_Ra)
    
+   virtual function bit predict(uvm_reg_data_t    value,
+                                uvm_reg_byte_en_t be,
+                                uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                uvm_path_e        path = UVM_BFM,
+                                uvm_reg_map       map = null,
+                                string            fname = "",
+                                int               lineno = 0);
+      predict = super.predict(value, be, kind, path, map, fname, lineno);
+
+      predict &= m_Rb.F1.predict(value & 8'hFF, be[0],
+                                 kind, path, map, fname, lineno);
+   endfunction
 endclass : reg_Ra
 
 
@@ -53,9 +76,19 @@ class reg_Rb extends uvm_reg;
    rand uvm_reg_field F1;
    rand uvm_reg_field F2;
 
+   local reg_Ra m_Ra;
+
    function new(string name = "Rb");
       super.new(name, 32, UVM_NO_COVERAGE);
    endfunction: new
+
+   function void configure(reg_Ra        Ra,
+                           uvm_reg_block blk_parent,
+                           uvm_reg_file  rf_parent,
+                           string        hdl_path = "");
+      super.configure(blk_parent, rf_parent, hdl_path);
+      m_Ra = Ra;
+   endfunction
    
    virtual function void build();
       F1 = uvm_reg_field::type_id::create("F1");
@@ -66,6 +99,20 @@ class reg_Rb extends uvm_reg;
 
    `uvm_object_utils(reg_Rb)
    
+   virtual function bit predict(uvm_reg_data_t    value,
+                                uvm_reg_byte_en_t be,
+                                uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                uvm_path_e        path = UVM_BFM,
+                                uvm_reg_map       map = null,
+                                string            fname = "",
+                                int               lineno = 0);
+      predict = super.predict(value, be, kind, path, map, fname, lineno);
+
+      predict &= m_Ra.F1.predict(value & 8'hFF, be[0],
+                                 kind, path, map, fname, lineno);
+      predict &= m_Ra.F2.predict((value >> 16) & 8'hFF, be[2],
+                                 UVM_PREDICT_DIRECT, path, map, fname, lineno);
+   endfunction
 endclass : reg_Rb
 
 
@@ -99,11 +146,11 @@ class block_B extends uvm_reg_block;
 
       Ra = reg_Ra::type_id::create("Ra");
       Ra.build();
-      Ra.configure(this, null);
 
       Rb = reg_Rb::type_id::create("Rb");
       Rb.build();
-      Rb.configure(this, null);
+      Ra.configure(Rb, this, null);
+      Rb.configure(Ra, this, null);
 
       begin
          write_also_to_F F2F;

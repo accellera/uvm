@@ -669,12 +669,13 @@ virtual class uvm_reg extends uvm_object;
    // Returns TRUE if the prediction was succesful for each field in the
    // register.
    //
-   extern virtual function bit predict (uvm_reg_data_t value,
-                                        uvm_predict_e  kind = UVM_PREDICT_DIRECT,
-                                        uvm_path_e     path = UVM_BFM,
-                                        uvm_reg_map    map = null,
-                                        string         fname = "",
-                                        int            lineno = 0);
+   extern virtual function bit predict (uvm_reg_data_t    value,
+                                        uvm_reg_byte_en_t be = -1,
+                                        uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                        uvm_path_e        path = UVM_BFM,
+                                        uvm_reg_map       map = null,
+                                        string            fname = "",
+                                        int               lineno = 0);
 
 
    // Function: is_busy
@@ -1915,12 +1916,13 @@ endfunction: set
 
 // predict
 
-function bit uvm_reg::predict(uvm_reg_data_t  value,
-                              uvm_predict_e   kind = UVM_PREDICT_DIRECT,
-                              uvm_path_e      path = UVM_BFM,
-                              uvm_reg_map     map = null,
-                              string          fname = "",
-                              int             lineno = 0);
+function bit uvm_reg::predict(uvm_reg_data_t    value,
+                              uvm_reg_byte_en_t be = -1,
+                              uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                              uvm_path_e        path = UVM_BFM,
+                              uvm_reg_map       map = null,
+                              string            fname = "",
+                              int               lineno = 0);
    m_fname = fname;
    m_lineno = lineno;
 
@@ -1937,6 +1939,7 @@ function bit uvm_reg::predict(uvm_reg_data_t  value,
       predict &= m_fields[i].predict(
           (value >> m_fields[i].get_lsb_pos()) &
           ((1 << m_fields[i].get_n_bits()) - 1),
+          be >> (m_fields[i].get_lsb_pos()/8),
           kind,path,map,fname,lineno);
    end
 endfunction: predict

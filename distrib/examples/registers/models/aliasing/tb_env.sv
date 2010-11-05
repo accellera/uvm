@@ -28,7 +28,6 @@ class dut;
    static bit [7:0] F2 = 0;
 
    static task rw(reg_rw rw);
-
       case (rw.addr)
        'h000: // Ra
           if (rw.read) rw.data = {8'h00, F2, 8'h00, F1};
@@ -40,6 +39,7 @@ class dut;
              if (rw.byte_en[2]) F2 = rw.data[23:16];
           end
       endcase
+      // $write("%s\n", rw.convert2string());
    endtask
 endclass
 

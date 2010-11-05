@@ -91,18 +91,19 @@ class uvm_reg_indirect extends uvm_reg;
       end
    endfunction
    
-   virtual function bit predict (uvm_reg_data_t value,
-                                 uvm_predict_e  kind = UVM_PREDICT_DIRECT,
-                                 uvm_path_e     path = UVM_BFM,
-                                 uvm_reg_map    map = null,
-                                 string         fname = "",
-                                 int            lineno = 0);
+   virtual function bit predict (uvm_reg_data_t    value,
+                                 uvm_reg_byte_en_t be = -1,
+                                 uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                 uvm_path_e        path = UVM_BFM,
+                                 uvm_reg_map       map = null,
+                                 string            fname = "",
+                                 int               lineno = 0);
       if (m_idx.get() >= m_tbl.size()) begin
          `uvm_error(get_full_name(), $psprintf("Address register %s has a value (%0d) greater than the maximum indirect register array size (%0d)", m_idx.get_full_name(), m_idx.get(), m_tbl.size()));
          return 0;
       end
 
-      return m_tbl[m_idx.get()].predict(value, kind, path, map, fname, lineno);
+      return m_tbl[m_idx.get()].predict(value, be, kind, path, map, fname, lineno);
    endfunction
 
    //

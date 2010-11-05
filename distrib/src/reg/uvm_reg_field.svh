@@ -610,12 +610,13 @@ class uvm_reg_field extends uvm_object;
    //
    // Returns TRUE if the prediction was succesful.
    //
-   extern virtual function bit predict (uvm_reg_data_t  value,
-                                        uvm_predict_e   kind = UVM_PREDICT_DIRECT,
-                                        uvm_path_e      path = UVM_BFM,
-                                        uvm_reg_map     map = null,
-                                        string          fname = "",
-                                        int             lineno = 0);
+   extern virtual function bit predict (uvm_reg_data_t    value,
+                                        uvm_reg_byte_en_t be = -1,
+                                        uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                        uvm_path_e        path = UVM_BFM,
+                                        uvm_reg_map       map = null,
+                                        string            fname = "",
+                                        int               lineno = 0);
 
 
 
@@ -1238,12 +1239,16 @@ endfunction: XupdateX
 
 // predict
 
-function bit uvm_reg_field::predict(uvm_reg_data_t value,
-                                    uvm_predict_e  kind = UVM_PREDICT_DIRECT,
-                                    uvm_path_e     path = UVM_BFM,
-                                    uvm_reg_map    map = null,
-                                    string         fname = "",
-                                    int            lineno = 0);
+function bit uvm_reg_field::predict(uvm_reg_data_t    value,
+                                    uvm_reg_byte_en_t be = -1,
+                                    uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                    uvm_path_e        path = UVM_BFM,
+                                    uvm_reg_map       map = null,
+                                    string            fname = "",
+                                    int               lineno = 0);
+   // Assume that the entire field is enabled
+   if (!be[0]) return 1;
+   
    m_fname = fname;
    m_lineno = lineno;
    if (m_parent.is_busy() && kind == UVM_PREDICT_DIRECT) begin
@@ -1541,10 +1546,6 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
       endcase
    end
 
-   if (bad_side_effect) begin
-      `uvm_warning("RegModel", $psprintf("Writing field \"%s\" will cause unintended side effects in adjoining Write-to-Clear or Write-to-Set fields in the same register", this.get_full_name()));
-   end
-
 `ifdef UVM_REG_NO_INDIVIDUAL_FIELD_ACCESS
    rw.element_kind = UVM_REG;
    rw.element = m_parent;
@@ -1557,6 +1558,10 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
       rw.element = m_parent;
       rw.value[0] = value_adjust;
       m_parent.do_write(rw);
+
+      if (bad_side_effect) begin
+         `uvm_warning("RegModel", $psprintf("Writing field \"%s\" will cause unintended side effects in adjoining Write-to-Clear or Write-to-Set fields in the same register", this.get_full_name()));
+      end
    end
    else begin
 
@@ -1668,6 +1673,7 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
         cb.pre_read(rw);
             
      rw.local_map.do_read(rw);
+
 
      if (system_map.get_auto_predict())
         Xpredict_readX(rw.value[0], rw.path, rw.map);
