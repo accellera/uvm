@@ -296,7 +296,7 @@ class uvm_reg_map extends uvm_object;
    //
    // Get the base offset address for this map. If this map is the
    // root map, the base address is that set with the ~base_addr~ argument
-   // to <configure>. If this map is a submap of a higher-level map,
+   // to <uvm_reg_block::create_map()>. If this map is a submap of a higher-level map,
    // the base address is offset given this submap by the parent map.
    // See <set_submap_offset>.
    //

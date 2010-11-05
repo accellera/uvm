@@ -171,8 +171,8 @@ endclass: uvm_mem_single_access_seq
 // by executing the <uvm_mem_single_access_seq> sequence on
 // every memory within it.
 //
-// Blocks and memories with the NO_REG_TESTS or
-// the NO_MEM_ACCESS_TEST attribute are not verified.
+// Blocks and memories with the ~NO_REG_TESTS~ or
+// the ~NO_MEM_ACCESS_TEST~ attribute are not verified.
 //
 
 class uvm_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));

@@ -167,8 +167,8 @@ virtual class uvm_reg_block extends uvm_object;
    //
    // Recursively lock an entire register model
    // and build the address maps to enable the
-   // <uvm_reg_block::get_reg_by_offset()> and
-   // <uvm_reg_block::get_mem_by_offset()> methods.
+   // <uvm_reg_map::get_reg_by_offset()> and
+   // <uvm_reg_map::get_mem_by_offset()> methods.
    //
    // Once locked, no further structural changes,
    // such as adding registers or memories,

@@ -302,8 +302,8 @@ endclass: uvm_mem_shared_access_seq
 // and <uvm_mem_shared_access_seq>
 // sequence respectively on every register and memory within it.
 //
-// Blocks, registers and memories with the NO_REG_TESTS or
-// the NO_SHARED_ACCESS_TEST attribute are not verified.
+// Blocks, registers and memories with the ~NO_REG_TESTS~ or
+// the ~NO_SHARED_ACCESS_TEST~ attribute are not verified.
 //
 
 class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
@@ -373,7 +373,7 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uv
       
       if (blk.get_attribute("NO_REG_TESTS") != "" ||
           blk.get_attribute("NO_MEM_TESTS") != "" ||
-          blk.get_attribute("NO_REG_ACCESS_TEST") != "")
+          blk.get_attribute("NO_SHARED_ACCESS_TEST") != "")
         return;
 
       this.reset_blk(model);

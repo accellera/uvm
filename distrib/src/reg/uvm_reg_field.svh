@@ -75,7 +75,8 @@ class uvm_reg_field extends uvm_object;
    // Create a new field instance
    //
    // This method should not be used directly.
-   // The uvm_reg_field::type_id::create() method shoudl be used instead.
+   // The uvm_reg_field::type_id::create() factory method
+   // should be used instead.
    //
    extern function new(string name = "uvm_reg_field");
 
@@ -428,7 +429,7 @@ class uvm_reg_field extends uvm_object;
    // the field through a physical access is mimicked. For
    // example, read-only bits in the field will not be written.
    //
-   // The mirrored value will be updated using the <uvm_reg_field:predict()>
+   // The mirrored value will be updated using the <uvm_reg_field::predict()>
    // method.
    //
    // If a front-door access is used, and
@@ -469,7 +470,7 @@ class uvm_reg_field extends uvm_object;
    // the field through a physical access is mimicked. For
    // example, clear-on-read bits in the filed will be set to zero.
    //
-   // The mirrored value will be updated using the <uvm_reg:predict()>
+   // The mirrored value will be updated using the <uvm_reg_field::predict()>
    // method.
    //
    // If a front-door access is used, and
@@ -505,7 +506,7 @@ class uvm_reg_field extends uvm_object;
    // in a best-effort not to modify the value of the other fields in the
    // register.
    //
-   // The mirrored value will be updated using the <uvm_reg:predict()>
+   // The mirrored value will be updated using the <uvm_reg_field::predict()>
    // method.
    //
    extern virtual task poke  (output uvm_status_e       status,
@@ -529,7 +530,7 @@ class uvm_reg_field extends uvm_object;
    //
    // The entire containing register is peeked
    // and the mirrored value of the other fields in the register
-   // are updated using the <uvm_reg:predict()> method.
+   // are updated using the <uvm_reg_field::predict()> method.
    //
    //
    extern virtual task peek  (output uvm_status_e       status,
@@ -546,8 +547,8 @@ class uvm_reg_field extends uvm_object;
    // Read the field and update/check its mirror value
    //
    // Read the field and optionally compared the readback value
-   // with the current mirrored value if ~check~ is <UVM_VERB>.
-   // The mirrored value will be updated using the <uvm_reg_field:predict()>
+   // with the current mirrored value if ~check~ is <UVM_CHECK>.
+   // The mirrored value will be updated using the <uvm_reg_field::predict()>
    // method based on the readback value.
    //
    // The mirroring can be performed using the physical interfaces (frontdoor)

@@ -205,7 +205,7 @@ endclass
 //------------------------------------------------------------------------------
 // Class: uvm_reg_frontdoor
 //
-// Façade class for register and memory frontdoor access.
+// Facade class for register and memory frontdoor access.
 //------------------------------------------------------------------------------
 //
 // User-defined frontdoor access sequence
@@ -252,7 +252,7 @@ endclass: uvm_reg_frontdoor
 //
 // CLASS: uvm_reg_predictor
 //
-// This class converts observed bus transactions of type <BUSTYPE> to generic
+// This class converts observed bus transactions of type ~BUSTYPE~ to generic
 // registers transactions, determines the register being accessed based on the
 // bus address, then updates the register's mirror value with the observed bus
 // data, subject to the register's access mode. See <uvm_reg::predict> for details.
