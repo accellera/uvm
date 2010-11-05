@@ -47,7 +47,7 @@ class xbus_reg_model extends reg_sys_xa0;
   virtual function void build();
     xbus_user_acp_reg_cb cb = new;
     super.build();
-    uvm_callbacks#(reg_reg_xa0_xbus_rf_user_acp_reg, uvm_reg_cbs)::add(xbus_rf.user_acp_reg, cb);
+    uvm_callbacks#(xa0_xbus_rf_user_acp_reg, uvm_reg_cbs)::add(xbus_rf.user_acp_reg, cb);
   endfunction
 
 endclass
