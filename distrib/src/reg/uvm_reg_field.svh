@@ -1176,6 +1176,13 @@ function void uvm_reg_field::Xpredict_readX (uvm_reg_data_t value,
    m_mirrored  = value;
    m_desired   = value;
    this.value  = value;
+
+   begin
+      uvm_reg_field_cb_iter cbs = new(this);
+
+      for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next())
+         cb.post_predict(this, value, UVM_PREDICT_READ, path, map);
+   end
 endfunction: Xpredict_readX
 
 
@@ -1195,6 +1202,13 @@ function void uvm_reg_field::Xpredict_writeX (uvm_reg_data_t value,
    this.value = m_mirrored;
 
    m_written = 1;
+
+   begin
+      uvm_reg_field_cb_iter cbs = new(this);
+
+      for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next())
+         cb.post_predict(this, value, UVM_PREDICT_WRITE, path, map);
+   end
 endfunction: Xpredict_writeX
 
 

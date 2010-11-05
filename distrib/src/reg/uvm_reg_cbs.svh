@@ -197,6 +197,19 @@ virtual class uvm_reg_cbs extends uvm_callback;
    virtual task post_read(uvm_reg_item rw); endtask
 
 
+   // Task: post_predict
+   //
+   // Called by the <uvm_reg_field::predict()> method
+   // after a successful UVM_PREDICT_READ or UVM_PREDICT_WRITE prediction.
+   //
+   virtual function void post_predict(uvm_reg_field  fld,
+                                      uvm_reg_data_t value,
+                                      uvm_predict_e  kind,
+                                      uvm_path_e     path,
+                                      uvm_reg_map    map);
+   endfunction
+
+
    // Function: encode
    //
    // Data encoder
