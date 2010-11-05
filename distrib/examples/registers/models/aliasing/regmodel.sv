@@ -40,9 +40,9 @@ class reg_Ra extends uvm_reg;
    
    virtual function void build();
       F1 = uvm_reg_field::type_id::create("F1");
-      F1.configure(this, 8, 0, "RW", 0, 8'h0, 0, 1);
+      F1.configure(this, 8, 0, "RW", 0, 8'h0, 1, 0, 1);
       F2 = uvm_reg_field::type_id::create("F2");
-      F2.configure(this, 8, 16, "RO", 0, 8'h0, 0, 1);
+      F2.configure(this, 8, 16, "RO", 0, 8'h0, 1, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_Ra)
@@ -60,9 +60,9 @@ class reg_Rb extends uvm_reg;
 
    virtual function void build();
       F1 = uvm_reg_field::type_id::create("F1");
-      F1.configure(this, 8, 0, "RW", 0, 8'h0, 0, 1);
+      F1.configure(this, 8, 0, "RW", 0, 8'h0, 1, 0, 1);
       F2 = uvm_reg_field::type_id::create("F2");
-      F2.configure(this, 8, 16, "RW", 0, 8'h0, 0, 1);
+      F2.configure(this, 8, 16, "RW", 0, 8'h0, 1, 0, 1);
    endfunction: build
 
    `uvm_object_utils(reg_Rb)

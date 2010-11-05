@@ -37,9 +37,9 @@ class reg_ID extends uvm_reg;
           this.CHIP_ID = uvm_reg_field::type_id::create("CHIP_ID");
        this.PRODUCT_ID = uvm_reg_field::type_id::create("PRODUCT_ID");
 
-      this.REVISION_ID.configure(this, 8,  0, "RW", 0,   8'h03, 0, 1);
-          this.CHIP_ID.configure(this, 8,  8, "RW", 0,   8'h5A, 0, 1);
-       this.PRODUCT_ID.configure(this, 10, 16,"RW", 0, 10'h176, 0, 1);
+      this.REVISION_ID.configure(this, 8,  0, "RW", 0,   8'h03, 1, 0, 1);
+          this.CHIP_ID.configure(this, 8,  8, "RW", 0,   8'hFF, 0, 0, 1);
+       this.PRODUCT_ID.configure(this, 10, 16,"RW", 0, 10'h176, 1, 0, 1);
 
       this.REVISION_ID.set_reset(8'h30);
           this.CHIP_ID.set_reset(8'h3C, "SOFT");
@@ -67,7 +67,7 @@ begin
    
    rg.reset();
    data = rg.get();
-   if (data !== 'h1765A30) `uvm_error("Test", $psprintf("Hard reset value is 'h%h instead of 'h1765A30", data));
+   if (data !== 'h1763C30) `uvm_error("Test", $psprintf("Hard reset value is 'h%h instead of 'h1765A30", data));
 
    
    rg.REVISION_ID.set(8'hFC);
@@ -77,6 +77,7 @@ begin
    if (data !== 'h289A5FC) `uvm_error("Test", "Field values were not set");
 
    void'(rg.PRODUCT_ID.has_reset("HARD", 1));
+   rg.CHIP_ID.set_reset(8'h5A);
    rg.reset();
    data = rg.get();
    if (data !== 'h2895A30) `uvm_error("Test", $psprintf("Hard reset value is 'h%h instead of 'h2895A30", data));

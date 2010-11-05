@@ -15,7 +15,7 @@ class reg_R extends uvm_reg;
    
    virtual function void build();
       this._dummy = uvm_reg_field::type_id::create("value");
-      this._dummy.configure(this, 8, 0, "RW", 0, 8'h0, 1, 1);
+      this._dummy.configure(this, 8, 0, "RW", 0, 8'h0, 1, 1, 1);
    endfunction: build
 
    `uvm_object_utils(reg_R)

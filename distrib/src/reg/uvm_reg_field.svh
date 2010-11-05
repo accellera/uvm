@@ -90,6 +90,8 @@ class uvm_reg_field extends uvm_object;
    // within the register relative to the least-significant bit
    // of the register, its ~access~ policy, volatility,
    // "HARD" ~reset~ value, 
+   // whether the field value is actually reset
+   // (the ~reset~ value is ignored if ~FALSE~),
    // whether the field value may be randomized and
    // whether the field is the only one to occupy a byte lane in the register.
    //
@@ -107,6 +109,7 @@ class uvm_reg_field extends uvm_object;
                                   string         access,
                                   bit            volatile,
                                   uvm_reg_data_t reset,
+                                  bit            is_reset,
                                   bit            is_rand,
                                   bit            individually_accessible); 
 
@@ -794,6 +797,7 @@ function void uvm_reg_field::configure(uvm_reg        parent,
                                        string         access,
                                        bit            volatile,
                                        uvm_reg_data_t reset,
+                                       bit            is_reset,
                                        bit            is_rand,
                                        bit            individually_accessible); 
    m_parent = parent;
@@ -810,7 +814,7 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    m_cover_on  = UVM_NO_COVERAGE;
    m_written   = 0;
    m_individually_accessible = individually_accessible;
-   set_reset(reset);
+   if (is_reset) set_reset(reset);
 
    m_parent.add_field(this);
 
