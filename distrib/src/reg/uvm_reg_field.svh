@@ -1728,17 +1728,26 @@ function bit uvm_reg_field::is_indv_accessible(uvm_path_e  path,
    if (path == UVM_BACKDOOR) begin
       `uvm_warning("RegModel",
          {"Individual BACKDOOR field access not available for field '",
-         get_full_name(), "'. Reading complete register instead."})
+         get_full_name(), "'. Accessing complete register instead."})
       return 0;
    end
 
    if (!m_individually_accessible) begin
          `uvm_warning("RegModel",
             {"Individual field access not available for field '",
-            get_full_name(), "'. Reading complete register instead."})
+            get_full_name(), "'. Accessing complete register instead."})
       return 0;
-   end        
+   end
 
+   // Cannot access individual fields if the container register
+   // has a user-defined front-door
+   if (m_parent.get_frontdoor(local_map) != null) begin
+      `uvm_warning("RegModel",
+                   {"Individual field access not available for field '",
+                    get_name(), "' because register '", m_parent.get_full_name(), "' has a user-defined front-door. Accessing complete register instead."})
+      return 0;
+   end
+   
    begin
      uvm_reg_map system_map = local_map.get_root_map();
      uvm_reg_adapter adapter = system_map.get_adapter();
@@ -1814,7 +1823,7 @@ function bit uvm_reg_field::is_indv_accessible(uvm_path_e  path,
        {"Target bus does not support byte enabling, and the field '",
        get_full_name(),"' is not the only field within the entire bus width. ",
        "Individual field access will not be available. ",
-       "Reading complete register instead."})
+       "Accessing complete register instead."})
 
    return 0;
 
