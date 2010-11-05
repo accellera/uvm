@@ -60,6 +60,9 @@
   `endif
   // wrap process into class container
   `define USE_PROCESS_CONTAINER
+  `define DA_TO_QUEUE_ASSIGNMENT(Q,DA)  foreach (DA[idx]) Q.push_back(DA[idx]);
+`else
+  `define DA_TO_QUEUE_ASSIGNMENT(Q,DA) Q=DA;
 `endif
 
 `include "macros/uvm_version_defines.svh"

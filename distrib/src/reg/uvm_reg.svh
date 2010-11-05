@@ -327,6 +327,13 @@ virtual class uvm_reg extends uvm_object;
                                               ref uvm_reg_addr_t addr[]);
 
 
+
+   // Function: get_hdl_path_kinds
+   //
+   // Return a queue of hdl abstractions used for this uvm_reg
+   //
+   extern virtual function void get_hdl_path_kinds(ref string kinds[$]);
+   
    //------------------
    // Group: Attributes
    //------------------
@@ -1830,7 +1837,10 @@ function void uvm_reg::get_attributes(ref string names[string],
 
 endfunction: get_attributes
 
-
+function void uvm_reg::get_hdl_path_kinds(ref string kinds[$]);
+// TODO
+endfunction
+  
 //---------
 // COVERAGE
 //---------
@@ -2916,11 +2926,12 @@ endtask: mirror
 // XatomicX
 
 task uvm_reg::XatomicX(bit on);
+   process self=process::self();
    if (on) begin
-     if (process::self == m_process)
+     if (self == m_process)
        return;
      m_atomic.get(1);
-     m_process = process::self;
+     m_process = self; 
    end
    else begin
       // Maybe a key was put back in by a spurious call to reset()

@@ -507,6 +507,14 @@ function automatic string uvm_hdl_concat2string(uvm_hdl_path_concat concat);
 endfunction
 
 
+typedef struct packed {
+  uvm_reg_addr_t min;
+  uvm_reg_addr_t max;
+  int unsigned stride;
+  } uvm_reg_map_addr_range;
+
+
+
 `include "dpi/uvm_hdl.svh"
 
 `include "reg/uvm_reg_item.svh"
@@ -531,5 +539,6 @@ endfunction
 `include "reg/sequences/uvm_reg_access_seq.svh"
 `include "reg/sequences/uvm_reg_mem_shared_access_seq.svh"
 `include "reg/sequences/uvm_reg_mem_built_in_seq.svh"
+// FIXME `include "reg/sequences/uvm_reg_access_backdoor_check.svh"
 
 `endif // UVM_REG_MODEL__SV

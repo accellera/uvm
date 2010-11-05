@@ -225,7 +225,7 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
   static function T create (string name="", uvm_component parent=null,
                             string contxt="");
     uvm_object obj;
-    uvm_factory f = uvm_factory::get();
+    uvm_factory f;// FIXME = uvm_factory::get();
     if (contxt == "" && parent != null)
       contxt = parent.get_full_name();
     obj = f.create_object_by_type(get(),contxt,name);

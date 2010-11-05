@@ -19,13 +19,6 @@
 // -------------------------------------------------------------
 //
 
-typedef struct packed {
-  uvm_reg_addr_t min;
-  uvm_reg_addr_t max;
-  int unsigned stride;
-  } uvm_reg_map_addr_range;
-
-
 class uvm_reg_map_info;
    uvm_reg_addr_t         offset;
    string                 rights;
@@ -1625,7 +1618,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
   int                n_access_extra, n_access;
 
   Xget_bus_infoX(rw, map_info, n_bits, lsb, skip);
- // FIXME US  addrs = map_info.addr;
+  `DA_TO_QUEUE_ASSIGNMENT(addrs,map_info.addr)
 
   // if a memory, adjust addresses based on offset
   if (rw.element_kind == UVM_MEM)
@@ -1743,7 +1736,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
   int n_access_extra, n_access;
 
   Xget_bus_infoX(rw, map_info, n_bits, lsb, skip);
- // FIXME US  addrs = map_info.addr;
+  `DA_TO_QUEUE_ASSIGNMENT(addrs,map_info.addr)
   size = n_bits;
 
   // if a memory, adjust addresses based on offset

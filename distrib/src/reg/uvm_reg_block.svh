@@ -1575,22 +1575,22 @@ task uvm_reg_block::mirror(output uvm_status_e  status,
                            input  int                lineno = 0);
    status = UVM_IS_OK;
 
-   if (!needs_update()) begin
+   if (!needs_update()) begin 
      `uvm_info("RegModel", $sformatf("%s:%0d - RegModel block %s does not need updating",
-                    fname, lineno, this.get_name()), UVM_HIGH);
+                    fname, lineno, this.get_name()), UVM_HIGH)
 
    end
    
    `uvm_info("RegModel", $sformatf("%s:%0d - Updating model block %s with %s path",
-                    fname, lineno, this.get_name(), path.name ), UVM_HIGH);
+                    fname, lineno, this.get_name(), path.name ), UVM_HIGH)
 
-   foreach (regs[rg_]) begin
+   foreach (regs[rg_]) begin 
    	  uvm_reg rg = rg_;
-      if (rg.needs_update())  begin
+      if (rg.needs_update())  begin 
          rg.update(status, path, null, parent, prior, extension);
-         if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
+         if (status != UVM_IS_OK || status != UVM_HAS_X) begin :a4
            `uvm_error("RegModel", $sformatf("Register \"%s\" could not be updated",
-                                        rg.get_full_name()));
+                                        rg.get_full_name()))
            return;
          end
       end
@@ -1598,8 +1598,8 @@ task uvm_reg_block::mirror(output uvm_status_e  status,
 
    foreach (blks[blk_])
    begin
-   	uvm_reg_block blk = blk_;
-     blk.update(status,path,parent,prior,extension,fname,lineno);
+   		uvm_reg_block blk = blk_;
+   		blk.update(status,path,parent,prior,extension,fname,lineno);
    end
 endtask: mirror
 
