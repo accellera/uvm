@@ -76,9 +76,9 @@ class write_also_to_F extends uvm_reg_cbs;
       m_toF = toF;
    endfunction
    
-   virtual task post_write(uvm_reg_item item);
-      if (item.map.get_auto_predict())
-         m_toF.predict(item.value[0]);
+   virtual task post_write(uvm_reg_item rw);
+      if (rw.map.get_auto_predict())
+         void'(m_toF.predict(rw.value[0]));
    endtask
    
 endclass

@@ -124,7 +124,7 @@ class cmd_line_seq_test extends uvm_test;
          uvm_sequencer_base sequencer;
          q_of_strings qos = seqs[i];
          for (int j=0; j<qos.size();j++) begin
-           uvm_reg_sequence reg_seq;
+           uvm_reg_sequence #(uvm_sequence #(uvm_reg_item)) reg_seq;
            uvm_sequence_base seq;
            seq = uvm_utils #(uvm_sequence_base)::create_type_by_name(qos.get(j),"tb");
            if (seq == null) begin

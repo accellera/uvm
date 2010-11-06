@@ -43,7 +43,7 @@ class oc_ethernet_env extends uvm_env;
 
    virtual function void build();
 
-      string hdl_root = "$root.tb_top.dut";
+      string hdl_root = "tb_top.dut";
 
       void'($value$plusargs("ROOT_HDL_PATH=%s",hdl_root));
 
@@ -53,15 +53,9 @@ class oc_ethernet_env extends uvm_env;
       model.build();
 
       model.set_hdl_path_root(hdl_root);
-//      regmem.print();
 
       set_config_int("host.seqr", "count", 0);
 
-      /*`ifdef VCS
-      this.model.set_hdl_path_root("$root.tb_top.dut");
-      `else
-      this.model.set_hdl_path_root("tb_top.dut");
-      `endif*/
    endfunction: build
 
    virtual function void connect();

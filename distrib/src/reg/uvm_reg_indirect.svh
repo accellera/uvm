@@ -104,7 +104,7 @@ class uvm_reg_indirect extends uvm_reg;
          return 0;
       end
 
-      m_tbl[m_idx.get()].predict(value, kind, path, map, fname, lineno);
+      void'(m_tbl[m_idx.get()].predict(value, kind, path, map, fname, lineno));
       return 1;
    endfunction
 

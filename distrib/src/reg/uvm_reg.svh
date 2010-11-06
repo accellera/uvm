@@ -396,8 +396,8 @@ virtual class uvm_reg extends uvm_object;
    // the <uvm_reg::write()> method to set
    // the actual register and its mirrored value.
    //
-   // Unless this methos is used, the desired value is equal to
-   // the mirrored value/
+   // Unless this method is used, the desired value is equal to
+   // the mirrored value.
    //
    // Refer <uvm_reg_field::set()> for more details on the effect
    // of setting mirror values on fields with different
@@ -697,16 +697,6 @@ virtual class uvm_reg extends uvm_object;
                                                       uvm_reg_map    map);
 
 
-   /*local*/ extern task XwriteX(output uvm_status_e      status,
-                                 input  uvm_reg_data_t    value,
-                                 input  uvm_path_e        path,
-                                 input  uvm_reg_map       map,
-                                 input  uvm_sequence_base parent = null,
-                                 input  int               prior = -1,
-                                 input  uvm_object        extension = null,
-                                 input  string            fname = "",
-                                 input  int               lineno = 0);
-
    /*local*/ extern task XreadX (output uvm_status_e      status,
                                  output uvm_reg_data_t    value,
                                  input  uvm_path_e        path,
@@ -891,6 +881,13 @@ virtual class uvm_reg extends uvm_object;
    //
    extern function void get_hdl_path (ref uvm_hdl_path_concat paths[$],
                                       input string kind = "");
+
+
+   // Function:  get_hdl_path_kinds
+   //
+   // Get design abstractions for which HDL paths have been defined
+   //
+   extern function void get_hdl_path_kinds (ref string kinds[$]);
 
 
    // Function:  get_full_hdl_path
@@ -1362,6 +1359,19 @@ function bit  uvm_reg::has_hdl_path(string kind = "");
   end
 
   return m_hdl_paths_pool.exists(kind);
+endfunction
+
+
+// get_hdl_path_kinds
+
+function void uvm_reg::get_hdl_path_kinds (ref string kinds[$]);
+  string kind;
+  kinds.delete();
+  if (!m_hdl_paths_pool.first(kind))
+    return;
+  do
+    kinds.push_back(kind);
+  while (m_hdl_paths_pool.next(kind));
 endfunction
 
 
@@ -2072,9 +2082,7 @@ task uvm_reg::update(output uvm_status_e      status,
    foreach (m_fields[i])
       upd |= m_fields[i].XupdateX() << m_fields[i].get_lsb_pos();
 
-   XatomicX(1);
-   XwriteX(status, upd, path, map, parent, prior, extension, fname, lineno);
-   XatomicX(0);
+   write(status, upd, path, map, parent, prior, extension, fname, lineno);
 
 endtask: update
 
@@ -2092,27 +2100,11 @@ task uvm_reg::write(output uvm_status_e      status,
                     input  string            fname = "",
                     input  int               lineno = 0);
 
-   XatomicX(1);
-   XwriteX(status, value, path, map, parent, prior, extension, fname, lineno);
-   XatomicX(0);
-
-endtask
-
-
-// XwriteX
-
-task uvm_reg::XwriteX(output uvm_status_e      status,
-                      input  uvm_reg_data_t    value,
-                      input  uvm_path_e        path,
-                      input  uvm_reg_map       map,
-                      input  uvm_sequence_base parent = null,
-                      input  int               prior = -1,
-                      input  uvm_object        extension = null,
-                      input  string            fname = "",
-                      input  int               lineno = 0);
-
    // create an abstract transaction for this operation
    uvm_reg_item rw;
+
+   XatomicX(1);
+
    rw = uvm_reg_item::type_id::create("write_item",,get_full_name());
    rw.element      = this;
    rw.element_kind = UVM_REG;
@@ -2129,6 +2121,8 @@ task uvm_reg::XwriteX(output uvm_status_e      status,
    do_write(rw);
 
    status = rw.status;
+
+   XatomicX(0);
 
 endtask
 

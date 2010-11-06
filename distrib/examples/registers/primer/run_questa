@@ -1,4 +1,0 @@
-vlib work
-vlog -f compile_questa.f
-#vsim -c -do "SetVlogTrace 1; run -all; q" -sv_lib ../../../lib/libuvm_questa +UVM_TESTNAME=reg_user_test +UVM_VERBOSITY=UVM_LOW tb_top test
-vsim -c -do "run -all; q" -sv_lib ../../../lib/libuvm_questa +UVM_TESTNAME=reg_user_test +UVM_VERBOSITY=UVM_LOW tb_top test
