@@ -122,7 +122,7 @@ virtual class uvm_reg extends uvm_object;
    // <uvm_reg_map::add_reg()> method.
    // This method is used to modify that offset dynamically.
    //  
-   // Note: Modifying the offset of a register will make the register model
+   // Modifying the offset of a register will make the register model
    // diverge from the specification that was used to create it.
    //
    extern virtual function void set_offset (uvm_reg_map    map,
@@ -510,7 +510,7 @@ virtual class uvm_reg extends uvm_object;
    // the register through a physical access is mimicked. For
    // example, read-only bits in the registers will not be written.
    //
-   // The mirrored value will be updated using the <uvm_reg:predict()>
+   // The mirrored value will be updated using the <uvm_reg::predict()>
    // method.
    //
    extern virtual task write(output uvm_status_e      status,
@@ -538,7 +538,7 @@ virtual class uvm_reg extends uvm_object;
    // the register through a physical access is mimicked. For
    // example, clear-on-read bits in the registers will be set to zero.
    //
-   // The mirrored value will be updated using the <uvm_reg:predict()>
+   // The mirrored value will be updated using the <uvm_reg::predict()>
    // method.
    //
    extern virtual task read(output uvm_status_e      status,
@@ -561,7 +561,7 @@ virtual class uvm_reg extends uvm_object;
    //
    // Uses the HDL path for the design abstraction specified by ~kind~.
    //
-   // The mirrored value will be updated using the <uvm_reg:predict()>
+   // The mirrored value will be updated using the <uvm_reg::predict()>
    // method.
    //
    extern virtual task poke(output uvm_status_e      status,
@@ -583,7 +583,7 @@ virtual class uvm_reg extends uvm_object;
    //
    // Uses the HDL path for the design abstraction specified by ~kind~.
    //
-   // The mirrored value will be updated using the <uvm_reg:predict()>
+   // The mirrored value will be updated using the <uvm_reg::predict()>
    // method.
    //
    extern virtual task peek(output uvm_status_e      status,
@@ -626,8 +626,8 @@ virtual class uvm_reg extends uvm_object;
    // Read the register and update/check its mirror value
    //
    // Read the register and optionally compared the readback value
-   // with the current mirrored value if ~check~ is <UVM_VERB>.
-   // The mirrored value will be updated using the <uvm_reg:predict()>
+   // with the current mirrored value if ~check~ is <UVM_CHECK>.
+   // The mirrored value will be updated using the <uvm_reg::predict()>
    // method based on the readback value.
    //
    // The mirroring can be performed using the physical interfaces (frontdoor)
@@ -669,12 +669,13 @@ virtual class uvm_reg extends uvm_object;
    // Returns TRUE if the prediction was succesful for each field in the
    // register.
    //
-   extern virtual function bit predict (uvm_reg_data_t value,
-                                        uvm_predict_e  kind = UVM_PREDICT_DIRECT,
-                                        uvm_path_e     path = UVM_BFM,
-                                        uvm_reg_map    map = null,
-                                        string         fname = "",
-                                        int            lineno = 0);
+   extern virtual function bit predict (uvm_reg_data_t    value,
+                                        uvm_reg_byte_en_t be = -1,
+                                        uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                        uvm_path_e        path = UVM_BFM,
+                                        uvm_reg_map       map = null,
+                                        string            fname = "",
+                                        int               lineno = 0);
 
 
    // Function: is_busy
@@ -769,7 +770,9 @@ virtual class uvm_reg extends uvm_object;
    // Set a user-defined backdoor for this register
    //
    // By default, registers are accessed via the built-in string-based
-   // DPI routines if an HDL path has been specified (see <uvm_hdl>).
+   // DPI routines if an HDL path has been specified using the
+   // <uvm_reg::configure()> or <uvm_reg::add_hdl_path()> method.
+   //
    // If this default mechanism is not suitable (e.g. because
    // the register is not implemented in pure SystemVerilog)
    // a user-defined access
@@ -1248,11 +1251,6 @@ function uvm_reg_frontdoor uvm_reg::get_frontdoor(uvm_reg_map map = null);
    map_info = map.get_reg_map_info(this);
    return map_info.frontdoor;
 endfunction: get_frontdoor
-
-
-//----------------
-// Group: Backdoor
-//----------------
 
 
 // set_backdoor
@@ -1925,12 +1923,13 @@ endfunction: set
 
 // predict
 
-function bit uvm_reg::predict(uvm_reg_data_t  value,
-                              uvm_predict_e   kind = UVM_PREDICT_DIRECT,
-                              uvm_path_e      path = UVM_BFM,
-                              uvm_reg_map     map = null,
-                              string          fname = "",
-                              int             lineno = 0);
+function bit uvm_reg::predict(uvm_reg_data_t    value,
+                              uvm_reg_byte_en_t be = -1,
+                              uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                              uvm_path_e        path = UVM_BFM,
+                              uvm_reg_map       map = null,
+                              string            fname = "",
+                              int               lineno = 0);
    m_fname = fname;
    m_lineno = lineno;
 
@@ -1947,6 +1946,7 @@ function bit uvm_reg::predict(uvm_reg_data_t  value,
       predict &= m_fields[i].predict(
           (value >> m_fields[i].get_lsb_pos()) &
           ((1 << m_fields[i].get_n_bits()) - 1),
+          be >> (m_fields[i].get_lsb_pos()/8),
           kind,path,map,fname,lineno);
    end
 endfunction: predict

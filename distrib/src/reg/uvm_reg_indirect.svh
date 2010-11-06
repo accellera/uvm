@@ -19,8 +19,10 @@
 // -------------------------------------------------------------
 //
 
+typedef class uvm_reg_indirect_ftdr_seq;
+
 //-----------------------------------------------------------------
-// CLASS: uvm_reg_indirect
+// CLASS: uvm_reg_indirect_data
 // Indirect data access abstraction class
 //
 // Models the behavior of a register used to indirectly access
@@ -32,8 +34,7 @@
 // ~n_bits~ and coverage models.
 //-----------------------------------------------------------------
 
-typedef class uvm_reg_indirect_ftdr_seq;
-class uvm_reg_indirect extends uvm_reg;
+class uvm_reg_indirect_data extends uvm_reg;
 
    local uvm_reg m_idx;
    local uvm_reg m_tbl[];
@@ -90,40 +91,37 @@ class uvm_reg_indirect extends uvm_reg;
       end
    endfunction
    
-   virtual function bit predict (uvm_reg_data_t value,
-                                 uvm_predict_e  kind = UVM_PREDICT_DIRECT,
-                                 uvm_path_e     path = UVM_BFM,
-                                 uvm_reg_map    map = null,
-                                 string         fname = "",
-                                 int            lineno = 0);
-      // Reads have no effect
-      if (kind == UVM_PREDICT_READ) return 1;
-
+   virtual function bit predict (uvm_reg_data_t    value,
+                                 uvm_reg_byte_en_t be = -1,
+                                 uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                 uvm_path_e        path = UVM_BFM,
+                                 uvm_reg_map       map = null,
+                                 string            fname = "",
+                                 int               lineno = 0);
       if (m_idx.get() >= m_tbl.size()) begin
          `uvm_error(get_full_name(), $psprintf("Address register %s has a value (%0d) greater than the maximum indirect register array size (%0d)", m_idx.get_full_name(), m_idx.get(), m_tbl.size()));
          return 0;
       end
 
-      void'(m_tbl[m_idx.get()].predict(value, kind, path, map, fname, lineno));
-      return 1;
+      return m_tbl[m_idx.get()].predict(value, be, kind, path, map, fname, lineno);
    endfunction
 
    //
    // Just for good measure, to catch and short-circuit non-sensical uses
    //
    virtual function void add_field  (uvm_reg_field field);
-      `uvm_error(get_full_name(), "Cannot add field to an indirect register");
+      `uvm_error(get_full_name(), "Cannot add field to an indirect data access register");
    endfunction
 
    virtual function void set (uvm_reg_data_t  value,
                               string          fname = "",
                               int             lineno = 0);
-      `uvm_error(get_full_name(), "Cannot set() an indirect register");
+      `uvm_error(get_full_name(), "Cannot set() an indirect data access register");
    endfunction
    
    virtual function uvm_reg_data_t  get(string  fname = "",
                                         int     lineno = 0);
-      `uvm_error(get_full_name(), "Cannot get() an indirect register");
+      `uvm_error(get_full_name(), "Cannot get() an indirect data access register");
    endfunction
 
    virtual function bit needs_update();
@@ -146,7 +144,7 @@ class uvm_reg_indirect extends uvm_reg;
       end
       
       if (path == UVM_BACKDOOR) begin
-         `uvm_warning(get_full_name(), "Cannot backdoor-write an indirect register. Switching to frontdoor.");
+         `uvm_warning(get_full_name(), "Cannot backdoor-write an indirect data access register. Switching to frontdoor.");
          path = UVM_BFM;
       end
       
@@ -169,7 +167,7 @@ class uvm_reg_indirect extends uvm_reg;
       end
       
       if (path == UVM_BACKDOOR) begin
-         `uvm_warning(get_full_name(), "Cannot backdoor-read an indirect register. Switching to frontdoor.");
+         `uvm_warning(get_full_name(), "Cannot backdoor-read an indirect data access register. Switching to frontdoor.");
          path = UVM_BFM;
       end
       
@@ -183,7 +181,7 @@ class uvm_reg_indirect extends uvm_reg;
                      input  uvm_object        extension = null,
                      input  string            fname = "",
                      input  int               lineno = 0);
-      `uvm_error(get_full_name(), "Cannot poke() an indirect register");
+      `uvm_error(get_full_name(), "Cannot poke() an indirect data access register");
       status = UVM_NOT_OK;
    endtask
 
@@ -194,7 +192,7 @@ class uvm_reg_indirect extends uvm_reg;
                      input  uvm_object        extension = null,
                      input  string            fname = "",
                      input  int               lineno = 0);
-      `uvm_error(get_full_name(), "Cannot peek() an indirect register");
+      `uvm_error(get_full_name(), "Cannot peek() an indirect data access register");
       status = UVM_NOT_OK;
    endtask
 
@@ -221,7 +219,7 @@ class uvm_reg_indirect extends uvm_reg;
       status = UVM_IS_OK;
    endtask
    
-endclass : uvm_reg_indirect
+endclass : uvm_reg_indirect_data
 
 
 class uvm_reg_indirect_ftdr_seq extends uvm_reg_frontdoor;

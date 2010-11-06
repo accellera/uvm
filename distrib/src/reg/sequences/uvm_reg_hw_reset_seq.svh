@@ -33,8 +33,8 @@
 // via all of the available address maps,
 // comparing the value read with the expected reset value.
 //
-// Blocks and registers with the NO_REG_TESTS or
-// the NO_HW_RESET_TEST attribute are not verified.
+// Blocks and registers with the ~NO_REG_TESTS~ or
+// the ~NO_HW_RESET_TEST~ attribute are not verified.
 //
 // This is usually the first test executed on any DUT.
 //

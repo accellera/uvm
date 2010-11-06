@@ -296,7 +296,7 @@ class uvm_reg_map extends uvm_object;
    //
    // Get the base offset address for this map. If this map is the
    // root map, the base address is that set with the ~base_addr~ argument
-   // to <configure>. If this map is a submap of a higher-level map,
+   // to <uvm_reg_block::create_map()>. If this map is a submap of a higher-level map,
    // the base address is offset given this submap by the parent map.
    // See <set_submap_offset>.
    //
@@ -1634,6 +1634,8 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
 
   foreach (rw.value[val_idx]) begin: foreach_value
 
+     uvm_reg_data_t value = rw.value[val_idx];
+
     /* calculate byte_enables */
     if (rw.element_kind == UVM_FIELD) begin
       int temp_be;
@@ -1641,6 +1643,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
       n_access_extra = lsb%(bus_width*8);                
       n_access = n_access_extra + n_bits;
       temp_be = n_access_extra;
+      value = value << n_access_extra;
       while(temp_be >= 8) begin
          byte_en[idx++] = 0;
          temp_be -= 8;
@@ -1650,6 +1653,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
          byte_en[idx++] = 1;
          temp_be -= 8;
       end
+      byte_en &= (1<<idx)-1;
       for (int i=0; i<skip; i++)
         void'(addrs.pop_front());
     end
@@ -1660,7 +1664,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
       uvm_reg_bus_op rw_access;
       uvm_reg_data_t data;
 
-      data = (rw.value[val_idx] >> (curr_byte*8)) & ((1'b1 << (bus_width * 8))-1);
+      data = (value >> (curr_byte*8)) & ((1'b1 << (bus_width * 8))-1);
        
       `uvm_info(get_type_name(),
          $psprintf("Writing 'h%0h at 'h%0h via map \"%s\"...",
@@ -1768,6 +1772,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
          byte_en[idx++] = 1;
          temp_be -= 8;
       end
+      byte_en &= (1<<idx)-1;
       for (int i=0; i<skip; i++)
         void'(addrs.pop_front());
     end
@@ -1790,6 +1795,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       rw_access.kind = rw.kind;
       rw_access.addr = addrs[i];
       rw_access.data = 'h0;
+      rw_access.byte_en = byte_en;
       rw_access.n_bits = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
                           
       bus_req.m_start_item(sequencer,rw.parent,rw.prior);
@@ -1839,8 +1845,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
     end
 
     if (rw.element_kind == UVM_FIELD)
-       rw.value[val_idx] = (rw.value[val_idx] >> (n_access_extra)) & ((1<<size))-1;
-
+       rw.value[val_idx] = (rw.value[val_idx] >> (n_access_extra)) & ((1<<size)-1);
   end
 
 endtask: do_bus_read

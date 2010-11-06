@@ -139,7 +139,7 @@ class uvm_mem extends uvm_object;
    // specific sizes, such as DMA buffers,
    // or to locate virtual register array.
    //
-   uvm_mam mam;
+   uvm_mem_mam mam;
 
 
    //---------------------
@@ -619,7 +619,7 @@ class uvm_mem extends uvm_object;
    //
    // If null, no user-defined frontdoor has been defined.
    // A user-defined frontdoor is defined
-   // by using the "uvm_reg::set_frontdoor()" method. 
+   // by using the <uvm_mem::set_frontdoor()> method. 
    //
    // If the memory is mapped in multiple address maps, an address ~map~
    // must be specified.
@@ -636,7 +636,8 @@ class uvm_mem extends uvm_object;
    // Set a user-defined backdoor for this memory
    //
    // By default, memories are accessed via the built-in string-based
-   // DPI routines if an HDL path has been specified (see <uvm_hdl>).
+   // DPI routines if an HDL path has been specified using the
+   // <uvm_mem::configure()> or <uvm_mem::add_hdl_path()> method.
    // If this default mechanism is not suitable (e.g. because
    // the memory is not implemented in pure SystemVerilog)
    // a user-defined access
@@ -954,14 +955,14 @@ function void uvm_mem::configure(uvm_reg_block  parent,
    end
 
    begin
-      uvm_mam_cfg cfg = new;
+      uvm_mem_mam_cfg cfg = new;
 
       cfg.n_bytes      = ((m_n_bits-1) / 8) + 1;
       cfg.start_offset = 0;
       cfg.end_offset   = m_size-1;
 
-      cfg.mode     = uvm_mam::GREEDY;
-      cfg.locality = uvm_mam::BROAD;
+      cfg.mode     = uvm_mem_mam::GREEDY;
+      cfg.locality = uvm_mem_mam::BROAD;
 
       mam = new(get_full_name(), cfg, this);
    end

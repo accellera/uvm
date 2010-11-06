@@ -46,7 +46,7 @@ class xbus_reg_model extends reg_sys_xa0;
   virtual function void build();
     xbus_user_acp_reg_cb cb = new;
     super.build();
-    uvm_callbacks#(reg_reg_xa0_xbus_rf_user_acp_reg, uvm_reg_cbs)::add(xbus_rf.user_acp_reg, cb);
+    uvm_callbacks#(xa0_xbus_rf_user_acp_reg, uvm_reg_cbs)::add(xbus_rf.user_acp_reg, cb);
   endfunction
 
 endclass
@@ -84,7 +84,7 @@ class xbus_reg_env extends xbus_env;
 
   // Connect register sequencer to xbus master
   function void connect();
-    reg2xbus_adapter reg2xbus = reg2xbus_adapter::type_id::create("reg2xbus_seq");
+    reg2xbus_adapter reg2xbus = reg2xbus_adapter::type_id::create("reg2xbus_seq",,get_full_name());
     masters[0].sequencer.count = 0; //prevents auto-start
     model.default_map.set_sequencer(masters[0].sequencer,reg2xbus);
 

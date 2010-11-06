@@ -205,7 +205,7 @@ endclass
 //------------------------------------------------------------------------------
 // Class: uvm_reg_frontdoor
 //
-// Façade class for register and memory frontdoor access.
+// Facade class for register and memory frontdoor access.
 //------------------------------------------------------------------------------
 //
 // User-defined frontdoor access sequence
@@ -252,7 +252,7 @@ endclass: uvm_reg_frontdoor
 //
 // CLASS: uvm_reg_predictor
 //
-// This class converts observed bus transactions of type <BUSTYPE> to generic
+// This class converts observed bus transactions of type ~BUSTYPE~ to generic
 // registers transactions, determines the register being accessed based on the
 // bus address, then updates the register's mirror value with the observed bus
 // data, subject to the register's access mode. See <uvm_reg::predict> for details.
@@ -351,6 +351,8 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
      uvm_reg_bus_op rw;
      assert(adapter != null);
 
+     // In case they forget to set byte_en
+     rw.byte_en = -1;
      adapter.bus2reg(tr,rw);
      rg = map.get_reg_by_offset(rw.addr);
 
@@ -394,7 +396,8 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
                   (reg_item.kind == UVM_WRITE) ? UVM_PREDICT_WRITE : UVM_PREDICT_READ;
               found = 1;
               pre_predict(reg_item);
-              void'(rg.predict(reg_item.value[0],predict_kind,UVM_BFM));
+              void'(rg.predict(reg_item.value[0],rw.byte_en,
+                               predict_kind,UVM_BFM));
               `uvm_info("REG_PREDICT", {"Observed ",reg_item.kind.name(),
                         " transaction to register ",rg.get_full_name(), ": value='h",
                          $sformatf("%0h",reg_item.value[0])},UVM_HIGH)

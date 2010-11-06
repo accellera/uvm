@@ -26,9 +26,7 @@ include ../../../Makefile.vcs
 
 all: comp run
 
-comp: simv
-
-simv:
+comp:
 	$(VCS) +incdir+../common \
 		+incdir+../common/reg_defn \
 		+incdir+../common/sequences \
