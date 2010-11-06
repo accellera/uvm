@@ -318,7 +318,6 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
    uvm_reg_field srd_reg_rdata_lsb;
    uvm_reg_field rdata_lsb;
    rand uvm_reg_field data_reg_value;
-   rand uvm_reg_field xbus_indirect_reg_value[8];
    rand uvm_reg_field rw_reg_value[4];
    uvm_reg_field ro_reg_value[4];
    rand uvm_reg_field wo_reg_value[4];
@@ -332,13 +331,12 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
       default_map = create_map("default_map", 'h0, 1, UVM_LITTLE_ENDIAN);
 
       addr_reg = xa0_xbus_rf_addr_reg::type_id::create("addr_reg");
-      addr_reg.build();
       addr_reg.configure(this, null, "addr_reg");
+      addr_reg.build();
 
       config_reg = xa0_xbus_rf_config_reg::type_id::create("config_reg");
-      config_reg.build();
       config_reg.configure(this, null);
-                     
+      config_reg.build();
 
       config_reg.add_hdl_path_slice("rsvd", 4, 4);
       config_reg.add_hdl_path_slice("kind", 2, 2);
@@ -351,25 +349,24 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
          */ 
 
       user_acp_reg = xa0_xbus_rf_user_acp_reg::type_id::create("user_acp_reg");
-      user_acp_reg.build();
       user_acp_reg.configure(this, null, "user_reg");
+      user_acp_reg.build();
 
       swr_reg = xa0_xbus_rf_swr_reg::type_id::create("swr_reg");
-      swr_reg.build();
       swr_reg.configure(this, null, "shared_wr_reg");
+      swr_reg.build();
 
       srd_reg = xa0_xbus_rf_srd_reg::type_id::create("srd_reg");
-      srd_reg.build();
       srd_reg.configure(this, null, "shared_rd_reg");
+      srd_reg.build();
 
       foreach (xbus_indirect_reg[i]) begin
          string name = $sformatf("xbus_indirect_reg[%0d]",i);
          xbus_indirect_reg[i] = xa0_xbus_rf_xbus_indirect_reg::type_id::create(name);
-         xbus_indirect_reg[i].build();
          name = $sformatf("id_reg_values[%0d]",i);
+         xbus_indirect_reg[i].build();
          xbus_indirect_reg[i].configure(this, null, name);
          default_map.add_reg(xbus_indirect_reg[i],-1, "RW",1);
-         xbus_indirect_reg_value[i] = xbus_indirect_reg[i].value;
       end
 
       data_reg = xa0_xbus_rf_data_reg::type_id::create("data_reg");
@@ -416,34 +413,34 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
       foreach (rw_reg[i]) begin
          string name = $sformatf("rw_reg[%0d]",i);
          rw_reg[i] = xa0_xbus_rf_rw_reg::type_id::create(name);
-         rw_reg[i].build();
          name = $sformatf("rw_regs[%0d]",i);
          rw_reg[i].configure(this, null, name);
+         rw_reg[i].build();
          default_map.add_reg(rw_reg[i], 'h10 + i, "RW");
          rw_reg_value[i] = rw_reg[i].value;
       end
       foreach (ro_reg[i]) begin
          string name = $sformatf("ro_reg[%0d]",i);
          ro_reg[i] = xa0_xbus_rf_ro_reg::type_id::create(name);
-         ro_reg[i].build();
          name = $sformatf("ro_regs[%0d]",i);
          ro_reg[i].configure(this, null, name);
+         ro_reg[i].build();
          default_map.add_reg(ro_reg[i], 'h14 + i, "RW");
          ro_reg_value[i] = ro_reg[i].value;
       end
       foreach (wo_reg[i]) begin
          string name = $sformatf("wo_reg[%0d]",i);
          wo_reg[i] = xa0_xbus_rf_wo_reg::type_id::create(name);
-         wo_reg[i].build();
          name = $sformatf("wo_regs[%0d]",i);
+         wo_reg[i].build();
          wo_reg[i].configure(this, null, name);
          default_map.add_reg(wo_reg[i], 'h18 + i, "RW");
          wo_reg_value[i] = wo_reg[i].value;
       end
 
       mem = reg_mem_xa0_xbus_rf_mem::type_id::create("mem");
-      mem.build();
       mem.configure(this, "mem");
+      mem.build();
       default_map.add_mem(mem, 'h100, "RW");
 
       lock_model();
