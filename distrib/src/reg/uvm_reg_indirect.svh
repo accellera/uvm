@@ -79,6 +79,20 @@ class uvm_reg_indirect_data extends uvm_reg;
       // Not testable using pre-defined sequences
       set_attribute("NO_REG_TESTS", "1");
 
+      // Add a frontdoor to each indirectly-accessed register
+      // for every address map this register is in.
+      foreach (m_maps[map]) begin
+         add_frontdoors(map);
+      end
+   endfunction
+   
+   /*local*/ virtual function void add_map(uvm_reg_map map);
+      super.add_map(map);
+      add_frontdoors(map);
+   endfunction
+   
+   
+   local function void add_frontdoors(uvm_reg_map map);
       foreach (m_tbl[i]) begin
          uvm_reg_indirect_ftdr_seq fd;
          if (m_tbl[i] == null) begin
@@ -87,7 +101,7 @@ class uvm_reg_indirect_data extends uvm_reg;
             continue;
          end
          fd = new(m_idx, i, this);
-         m_tbl[i].set_frontdoor(fd);
+         m_tbl[i].set_frontdoor(fd, map);
       end
    endfunction
    

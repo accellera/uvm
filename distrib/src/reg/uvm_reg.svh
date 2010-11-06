@@ -50,8 +50,8 @@ virtual class uvm_reg extends uvm_object;
    local uvm_reg_file      m_regfile_parent;
    local int unsigned      m_n_bits;
    local int unsigned      m_n_used_bits;
-   local bit               m_maps[uvm_reg_map];
-   local uvm_reg_field     m_fields[$];   // Fields in LSB to MSB order
+   protected bit           m_maps[uvm_reg_map];
+   protected uvm_reg_field m_fields[$];   // Fields in LSB to MSB order
    local string            m_attributes[string];
    local int               m_has_cover;
    local int               m_cover_on;
@@ -1237,7 +1237,15 @@ function void uvm_reg::set_frontdoor(uvm_reg_frontdoor ftdr,
    if (map == null)
      return;
    map_info = map.get_reg_map_info(this);
-   map_info.frontdoor = ftdr;
+   if (map_info == null)
+      map.add_reg(this, -1, "RW", 1, ftdr);
+   else begin
+      if (!map_info.unmapped) begin
+         `uvm_warning(get_full_name(), $psprintf("Indirectly accessed register has been mapped in address map %s. Unmapping.", map.get_full_name()));
+         map_info.unmapped = 1;
+      end
+      map_info.frontdoor = ftdr;
+   end
 endfunction: set_frontdoor
 
 
