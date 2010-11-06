@@ -5,7 +5,7 @@ transportation and binding, allowing more generic usage models
 than just TLM core interfaces.
 
 A socket is like a port or export; in fact it is derived from the 
-same base class as ports and export, namely uvm_port_base. 
+same base class as ports and export, namely <uvm_port_base #(IF)>. 
 However, unlike a port or export a socket provides both a 
 forward and backward path. Thus you can enable asynchronous 
 (pipelined) bi-directional communication by connecting sockets 
@@ -23,13 +23,13 @@ The UVM TLM2 subset provides the following two transport interfaces:
 within a single method call
 
  Non-blocking (nb_transport) - describes the progress of a
-transaction using multiple nb_transport method calls going
+transaction using multiple nb_transport() method calls going
 back-and-forth between initiator and target
 
 In general,any component might modify a transaction object during
 its lifetime (subject to the rules of the protocol). Significant timing
 points during the lifetime of a transaction (for example: start-ofresponse-
-phase) are indicated by calling nb_transport in either
+phase) are indicated by calling nb_transport() in either
 forward or backward direction, the specific timing point being given
 by the phase argument.
 Protocol-specific rules for reading or writing the attributes of a
@@ -38,24 +38,25 @@ be used for flow control, and for that reason might have a different
 value at each hop taken by a transaction; the phase is not an
 attribute of the transaction object.
 
-A call to nb_transport always represents a phase transition.
-However, the return from nb_transport might or might not do so,
+A call to nb_transport() always represents a phase transition.
+However, the return from nb_transport() might or might not do so,
 the choice being indicated by the value returned from the function
-(TLM_ACCEPTED versus TLM_UPDATED).
+(<UVM_TLM_ACCEPTED> versus <UVM_TLM_UPDATED>).
 Generally, you indicate the completion of a transaction over a
 particular hop using the value of the phase argument. As a shortcut,
 a target might indicate the completion of the transaction by returning
-a special value of TLM_COMPLETED. However, this is an option,
+a special value of <UVM_TLM_COMPLETED>. However, this is an option,
 not a necessity.
 
 The transaction object itself does not contain any timing information
 by design. Or even events and status information concerning the
-API. You can pass the delays as arguments to b_transport /
-nb_transport and push the actual realization of any delay in the
+API. You can pass the delays as arguments to b_transport()/
+nb_transport() and push the actual realization of any delay in the
 simulator kernel downstream and defer (for simulation speed).
 
 Use Models:
-Since sockets are derived from uvm_port_base they are created and connected 
+Since sockets are derived from <uvm_port_base #(IF)>
+they are created and connected 
 in the same way as port, and exports. Create them in the build phase and connect 
 them in the connect phase by calling connect().
 Initiator and target termination sockets are on the ends of any connection. 
@@ -64,9 +65,9 @@ initator and target.
 Some socket types must be bound to imps  implementations of the transport 
 tasks and functions. Blocking terminator sockets must be bound to an 
 implementation of b_transport(), for example. Nonblocking initiator 
-sockets must be bound to an implementation of nb_transport_bw and 
+sockets must be bound to an implementation of nb_transport_bw() and 
 nonblocking target sockets must be bound to an implementation of 
-nb_transport_fw. Typically, the task or function is implemented in the 
+nb_transport_fw(). Typically, the task or function is implemented in the 
 component in which the socket is instantiated and the component type and 
 instance are provided to complete the binding.
 
@@ -87,7 +88,7 @@ Example:
 |    endtask
 | endclass
 | 
-The interface task b_transport is implemented in the consumer component. 
+The interface task b_transport() is implemented in the consumer component. 
 The consumer component type is used in the declaration of the target socket. 
 This informs the socket object the type of the object that contains the 
 interface task, in this case b_transport(). When the socket is instantiated 
@@ -104,11 +105,11 @@ implementations of any sort. Of course, they must ultimately be connected
 to sockets that do that the necessary implementations.
 
 In summary:
- Call to b_transport - start-of-life of transaction
- Return from b_transport - end-of-life of transaction
- Phase argument to nb_transport - timing point within lifetime
+ Call to b_transport() - start-of-life of transaction
+ Return from b_transport() - end-of-life of transaction
+ Phase argument to nb_transport() - timing point within lifetime
 of transaction
- Return value of nb_transport - whether return path is being
+ Return value of nb_transport() - whether return path is being
 used (also shortcut to final phase)
  Response status within transaction object - protocol-specific
 status, success/failure of transaction
@@ -122,10 +123,4 @@ transaction types and protocols for the sake of interoperability.
 However, TLM-2.0 strongly recommends either using the base
 protocol off-the-shelf or creating models of specific protocols on top
 of the base protocol.
-
-Group: Generic Payload
-
-Generic Payload transaction. This transaction represents a generic 
-bus read/write access. It is used as the default transaction in
-TLM2 blocking and nonblocking transport interfaces.
 

@@ -25,9 +25,7 @@
 // interfaces a particular port requires or export provides.  The
 // interfaces are identified by bit position and can be or'ed together
 // for combination ports/exports.  The mask is used to do run-time
-// interface type checking of port/export connections. See
-// uvm_port_base::m_if_mask for details on the mechanics of how the mask
-// is used.
+// interface type checking of port/export connections.
 //----------------------------------------------------------------------
 
 // MACRO: `UVM_TLM_NB_FW_MASK

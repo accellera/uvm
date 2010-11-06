@@ -49,7 +49,7 @@ and the ports and exports that facilitate their use.  Each TLM interface
 consists of one or more methods used to transport data, typically whole
 transactions (objects) at a time.  Component designs that use TLM ports and
 exports to communicate are inherently more reusable, interoperable, and modular.
-See <TLM Interfaces, Ports, and Exports> for details.
+See <TLM Interfaces> for details.
 
 Components - Components form the foundation of the UVM. They encapsulate
 behavior of drivers, scoreboards, and other objects in a testbench.
@@ -74,7 +74,7 @@ See ~Utility and Field Macros~ and <Sequence and Do Action Macros> for a
 complete list.
 
 Globals - This category defines a small list of types, variables, functions,
-and tasks defined in ~<uvm_pkg~ scope.  These items are accessible from
+and tasks defined in the ~uvm_pkg~ scope.  These items are accessible from
 any scope that imports the ~uvm_pkg~. See <Types and Enumerations> and
 <Globals> for details.
 

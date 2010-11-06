@@ -173,7 +173,7 @@ endclass
 // RSP - The type of response transaction to be communicated by the export
 //
 // Exports are connected to interface implementations directly via 
-// <uvm_*_imp #(REQ,RSP,IMP)> ports or indirectly via other
+// <uvm_*_imp #(REQ, RSP, IMP, REQ_IMP, RSP_IMP)> ports or indirectly via other
 // <uvm_*_export #(REQ,RSP)> exports.
 //
 //------------------------------------------------------------------------------

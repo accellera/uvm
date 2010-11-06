@@ -22,18 +22,26 @@
 // Title: TLM Extensions & Generic Payload
 //----------------------------------------------------------------------
 //
-
+//
+// The Generic Payload transaction represents a generic 
+// bus read/write access. It is used as the default transaction in
+// TLM2 blocking and nonblocking transport interfaces.
+//
 // Topic: Globals
 // Defines, Constants, enums.
 //
-// <`UVM_TLM_ADDR_SIZE>        : Define generic uvm_tlm_addr_size width of TLM GP
+// <`UVM_TLM_ADDR_SIZE>        : Define generic <uvm_tlm_addr_size> width of
+//                               the generic payload
 //
-// <uvm_tlm_addr_size>         : Constant to hold default TLM GP Address size
+// <uvm_tlm_addr_size>         : Constant to hold default generic payload
+//                               address size
 //
-// <uvm_tlm_command_e>         : Command atribute type definition
-
+// <uvm_tlm_command_e>         : Command attribute type definition
+//
+// <uvm_tlm_response_status_e> : Respone status attribute type definition
+//
 // Topic: Generic Payload
-// UVM_TLM_GP definition
+// Generic Payload definition
 //
 // <uvm_tlm_generic_payload>   : base object, called the generic payload, for 
 // moving data between components. In SystemC this is the primary 
@@ -42,16 +50,7 @@
 //
 // <uvm_tlm_gp>                : A shorter name for <uvm_tlm_generic_payload>
 //
-
-// Topic: TLM extensions
-// An extension is an arbitrary object stored in an extension container. 
-// The set of extensions for any particular generic payload object are 
-// stored in an associative array indexed by the type handle of the extension 
-// container
-//
-// <uvm_tlm_response_status_e> : Respone status attribute type definition
-//
-// <uvm_tlm_extension_base>    : non-parameerized base class
+// <uvm_tlm_extension_base>    : non-parameetrized base class
 //
 // <uvm_tlm_extension>         : parameterized with arbitrary type
 //
@@ -209,6 +208,19 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // component.
 
    rand byte                   m_data[];
+
+   // Variable: m_length
+   //
+   // The number of bytes to be copied to or from the <m_data> array,
+   // inclusive of any bytes disabled by the <m_byte_enable> attribute.
+   //
+   // The data length attribute shall be set by the initiator,
+   // and shall not be overwritten by any interconnect component or target.
+   //
+   // The data length attribute shall not be set to 0.
+   // In order to transfer zero bytes, the <m_command> attribute
+   // should be set to <UVM_TLM_IGNORE_COMMAND>.
+   
    rand int unsigned           m_length;
    
    // Variable: m_response_status
@@ -304,7 +316,12 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    
    rand byte                   m_byte_enable[];
 
-   // undoc'ed variable that shuld always be m_byte_enable.size()
+   // Variable: m_byte_enable_length
+   // The number of elements in the <m_byte_enable> array.
+   //
+   // It shall be set by the initiator, and shall not be overwritten
+   // by any interconnect component or target.
+   
    rand int unsigned           m_byte_enable_length;
 
    // Variable: m_streaming_width
@@ -539,11 +556,11 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
     p = m_data;
   endfunction
 
-   // Function: set_data_ptr
+   // Function: set_data
    //
    // Set the value of the <m_data> array  
 
-  virtual function void set_data_ptr(ref byte p []);
+  virtual function void set_data(ref byte p []);
     m_data = p;
   endfunction 
   

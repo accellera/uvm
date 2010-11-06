@@ -108,7 +108,8 @@ class uvm_tlm_if #(type T=uvm_tlm_generic_payload,
    // to <nb_transport_bw> or a return from this or subsequent call to
    // nb_transport_fw.
    //
-   // See Xref for more details on the semantics and rules of the nonblocking
+   // See <TLM2 Interfaces, Ports, Exports and Transport Interfaces Subset>
+   // for more details on the semantics and rules of the nonblocking
    // transport interface.
    
   virtual function uvm_tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);
@@ -129,7 +130,8 @@ class uvm_tlm_if #(type T=uvm_tlm_generic_payload,
    // to <nb_transport_fw> or a return from this or subsequent call to
    // nb_transport_bw.
    //
-   // See Xref for more details on the semantics and rules of the nonblocking
+   // See <TLM2 Interfaces, Ports, Exports and Transport Interfaces Subset>
+   // for more details on the semantics and rules of the nonblocking
    // transport interface.
    //
    // Example:

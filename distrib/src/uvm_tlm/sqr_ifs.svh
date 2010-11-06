@@ -46,12 +46,12 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   //     mode. If no sequence is available, wait for a requesting unlocked
   //     relevant sequence,  then re-arbitrate.
   // 2 - The chosen sequence will return from wait_for_grant
-  // 3 - The chosen sequence pre_do is called
+  // 3 - The chosen sequence <uvm_sequence_base::pre_do> is called
   // 4 - The chosen sequence item is randomized
-  // 5 - The chosen sequence post_do is called
+  // 5 - The chosen sequence <uvm_sequence_base::post_do> is called
   // 6 - Return with a reference to the item
   //
-  // Once get_next_item is called, item_done must be called to indicate the
+  // Once <get_next_item> is called, <item_done> must be called to indicate the
   // completion of the request to the sequencer.  This will remove the request
   // item from the sequencer fifo.
 
@@ -70,12 +70,12 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   //     highest priority sequence based on the current sequencer arbitration
   //     mode. If no sequence is available, return null.
   // 2 - The chosen sequence will return from wait_for_grant
-  // 3 - The chosen sequence pre_do is called
+  // 3 - The chosen sequence <uvm_sequence_base::pre_do> is called
   // 4 - The chosen sequence item is randomized
-  // 5 - The chosen sequence post_do is called
+  // 5 - The chosen sequence <uvm_sequence_base::post_do> is called
   // 6 - Return with a reference to the item
   //
-  // Once try_next_item is called, item_done must be called to indicate the
+  // Once <try_next_item> is called, <item_done> must be called to indicate the
   // completion of the request to the sequencer.  This will remove the request
   // item from the sequencer fifo.
 
@@ -87,18 +87,19 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // Function: item_done
   //
   // Indicates that the request is completed to the sequencer.  Any 
-  // wait_for_item_done calls made by a sequence for this item will return.
+  // <uvm_sequence_base::wait_for_item_done>
+  // calls made by a sequence for this item will return.
   //
   // The current item is removed from the sequencer fifo.
   //
   // If a response item is provided, then it will be sent back to the requesting
   // sequence. The response item must have it's sequence ID and transaction ID
-  // set correctly, using the set_id_info method:
+  // set correctly, using the <uvm_sequence_item::set_id_info> method:
   //
   //|  rsp.set_id_info(req);
   //
-  // Before item_done is called, any calls to peek will retrieve the current
-  // item that was obtained by get_next_item.  After item_done is called, peek
+  // Before <item_done> is called, any calls to peek will retrieve the current
+  // item that was obtained by <get_next_item>.  After <item_done> is called, peek
   // will cause the sequencer to arbitrate for a new item.
 
   virtual function void item_done(input T2 t = null);
@@ -109,9 +110,10 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // Task: wait_for_sequences
   //
   // Waits for a sequence to have a new item available. The default
-  // implementation in the sequencer delays pound_zero_count delta cycles.
-  // (This variable is defined in uvm_sequencer_base.) User-derived sequencers
-  // may override its wait_for_sequences implementation to perform some other
+  // implementation in the sequencer delays
+  //  <uvm_sequencer_base::pound_zero_count> delta cycles.
+  // User-derived sequencers
+  // may override its <wait_for_sequences> implementation to perform some other
   // application-specific implementation.
 
   virtual task wait_for_sequences();
@@ -143,16 +145,16 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   //     highest priority sequence based on the current sequencer arbitration
   //     mode. If no sequence is available, wait for a requesting unlocked
   //     relevant sequence, then re-arbitrate.
-  // 2 - The chosen sequence will return from wait_for_grant
-  // 3 - The chosen sequence <pre_do> is called
+  // 2 - The chosen sequence will return from <uvm_sequence_base::wait_for_grant>
+  // 3 - The chosen sequence <uvm_sequence_base::pre_do> is called
   // 4 - The chosen sequence item is randomized
-  // 5 - The chosen sequence post_do is called
-  // 6 - Indicate item_done to the sequencer
+  // 5 - The chosen sequence <uvm_sequence_base::post_do> is called
+  // 6 - Indicate <item_done> to the sequencer
   // 7 - Return with a reference to the item
   //
-  // When get is called, item_done may not be called.  A new item can be
+  // When get is called, <item_done> may not be called.  A new item can be
   // obtained by calling get again, or a response may be sent using either
-  // put, or rsp_port.write.
+  // <put>, or <uvm_driver::rsp_port>.write().
 
   virtual task get(output T1 t);
     uvm_report_error("get", `SEQ_ITEM_TASK_ERROR, UVM_NONE);
@@ -169,14 +171,14 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // If no sequence is available, wait for a requesting unlocked relevant
   // sequence, then re-arbitrate.
   //
-  // 2 - The chosen sequence will return from wait_for_grant
-  // 3 - The chosen sequence pre_do is called
+  // 2 - The chosen sequence will return from <uvm_sequence_base::wait_for_grant>
+  // 3 - The chosen sequence <uvm_sequence_base::pre_do> is called
   // 4 - The chosen sequence item is randomized
-  // 5 - The chosen sequence post_do is called
+  // 5 - The chosen sequence <uvm_sequence_base::post_do> is called
   //
   // Once a request item has been retrieved and is in the sequencer fifo,
   // subsequent calls to peek will return the same item.  The item will stay in
-  // the fifo until either get or item_done is called.
+  // the fifo until either get or <item_done> is called.
 
   virtual task peek(output T1 t);
     uvm_report_error("peek", `SEQ_ITEM_TASK_ERROR, UVM_NONE);
@@ -187,12 +189,14 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   //
   // Sends a response back to the sequence that issued the request. Before the
   // response is put, it must have it's sequence ID and transaction ID set to
-  // match the request.  This can be done using the set_id_info call:
+  // match the request.  This can be done using the
+  // <uvm_sequence_item::set_id_info> call:
   //
   //   rsp.set_id_info(req);
   //
-  // This task will not block. The response will be put into the sequence
-  // response_queue or it will be sent to the sequence response handler.
+  // This task will not block. The response will be put into the
+  // sequence response queue or it will be sent to the
+  // sequence response handler.
 
   virtual task put(input T2 t);
     uvm_report_error("put", `SEQ_ITEM_TASK_ERROR, UVM_NONE);

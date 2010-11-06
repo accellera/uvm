@@ -25,10 +25,10 @@
 // implementation.
 // In addition to the transaction type and the phase type, the imps 
 // are parameterized with the type of the object that will provide the
-//  implementation. Most often this will be the type of the component 
+// implementation. Most often this will be the type of the component 
 // where the imp resides. The constructor of the imp takes as an argument 
 // an object of type IMP and installs it as the implementation object. 
-// Most often the imp constructor argument is ‘this’.
+// Most often the imp constructor argument is "this".
 //----------------------------------------------------------------------
 
 // Group:  IMP binding macros
@@ -36,16 +36,18 @@
 
 // Macro: `UVM_TLM_NB_TRANSPORT_FW_IMP
 //
-// The macro wraps Forward path call function <nb_transport_fw>
+// The macro wraps the forward path call function nb_transport_fw()
+//
 // The first call to this method for a transaction marks the initial timing point.
 // Every call to this method may mark a timing point in the execution of the 
 // transaction. The timing annotation argument allows the timing points
 // to be offset from the simulation times at which the forward path is used.
 // The final timing point of a transaction may be marked by a call
-// to <nb_transport_bw> within <`UVM_TLM_NB_TRANSPORT_BW_IMP> or a return from this 
-// or subsequent call to <nb_transport_fw>.
+// to nb_transport_bw() within <`UVM_TLM_NB_TRANSPORT_BW_IMP> or a return from this 
+// or subsequent call to nb_transport_fw().
 //
-// See Xref for more details on the semantics and rules of the nonblocking
+// See <TLM2 Interfaces, Ports, Exports and Transport Interfaces Subset>
+// for more details on the semantics and rules of the nonblocking
 // transport interface.
    
 `define UVM_TLM_NB_TRANSPORT_FW_IMP(imp, T, P, t, p, delay)              \
@@ -57,7 +59,7 @@
 //
 //
 // Implementation of the backward path.
-// The macro wraps function called <nb_transport_bw>.
+// The macro wraps the function called nb_transport_bw().
 // This function MUST be implemented in the INITIATOR component class.
 //
 // Every call to this method may mark a timing point, including the final
@@ -65,10 +67,11 @@
 // The timing annotation argument allows the timing point
 // to be offset from the simulation times at which the backward path is used.
 // The final timing point of a transaction may be marked by a call
-// to <nb_transport_fw> within <`UVM_TLM_NB_TRANSPORT_FW_IMP> or a return from 
-// this or subsequent call to <nb_transport_bw>.
+// to nb_transport_fw() within <`UVM_TLM_NB_TRANSPORT_FW_IMP> or a return from 
+// this or subsequent call to nb_transport_bw().
 //
-// See Xref for more details on the semantics and rules of the nonblocking
+// See <TLM2 Interfaces, Ports, Exports and Transport Interfaces Subset>
+// for more details on the semantics and rules of the nonblocking
 // transport interface.
 //
 // Example:
@@ -99,7 +102,7 @@
 
 // Macro: `UVM_TLM_B_TRANSPORT_IMP
 //
-// The macro wraps the function <b_transport>
+// The macro wraps the function b_transport()
 // Execute a blocking transaction. Once this method returns,
 // the transaction is assumed to have been executed. Whether
 // that execution is succesful or not must be indicated by the
@@ -111,7 +114,7 @@
 // the next and across calls to b_transport(). 
 //
 // The call to b_transport shall mark the first timing point of the
-// transaction. The return from <b_transport> shall mark the final
+// transaction. The return from b_transport() shall mark the final
 // timing point of the transaction. The timing annotation argument
 // allows the timing points to be offset from the simulation times
 // at which the task call and return are executed.
@@ -172,3 +175,5 @@ class uvm_tlm_b_transport_imp #(type T=uvm_tlm_generic_payload,
   `UVM_IMP_COMMON(`UVM_TLM_B_MASK, "uvm_tlm_b_transport_imp", IMP)
   `UVM_TLM_B_TRANSPORT_IMP(m_imp, T, t, delay)
 endclass
+
+// Note: EOF.
