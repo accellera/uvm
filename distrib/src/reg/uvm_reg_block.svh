@@ -43,7 +43,10 @@ virtual class uvm_reg_block extends uvm_object;
    local int unsigned   mems[uvm_mem];
    local bit            maps[uvm_reg_map];
 
+   // Variable: default_path
+   // Default access path for the registers and memories in this block.
    uvm_path_e      default_path = UVM_DEFAULT_PATH;
+
    local string         default_hdl_path = "RTL";
    local uvm_reg_backdoor backdoor;
    local uvm_object_string_pool #(uvm_queue #(string)) hdl_paths_pool;
@@ -105,7 +108,8 @@ virtual class uvm_reg_block extends uvm_object;
    // structure (e.g. it is physically flattened) and does not contribute
    // to the hierarchical HDL path of any contained registers or memories.
    //
-   extern virtual function void configure(uvm_reg_block parent=null, string hdl_path="");
+   extern function void configure(uvm_reg_block parent=null,
+                                  string hdl_path="");
 
    //
    // Function: create_map
@@ -163,8 +167,8 @@ virtual class uvm_reg_block extends uvm_object;
    //
    // Recursively lock an entire register model
    // and build the address maps to enable the
-   // <uvm_reg_block::get_reg_by_offset()> and
-   // <uvm_reg_block::get_mem_by_offset()> methods.
+   // <uvm_reg_map::get_reg_by_offset()> and
+   // <uvm_reg_map::get_mem_by_offset()> methods.
    //
    // Once locked, no further structural changes,
    // such as adding registers or memories,
@@ -1565,41 +1569,33 @@ endtask: update
 
 // mirror
 
-task uvm_reg_block::mirror(output uvm_status_e  status,
-                           input  uvm_check_e   check = UVM_NO_CHECK,
-                           input  uvm_path_e    path = UVM_DEFAULT_PATH,
+task uvm_reg_block::mirror(output uvm_status_e       status,
+                           input  uvm_check_e        check = UVM_NO_CHECK,
+                           input  uvm_path_e         path = UVM_DEFAULT_PATH,
                            input  uvm_sequence_base  parent = null,
                            input  int                prior = -1,
                            input  uvm_object         extension = null,
                            input  string             fname = "",
                            input  int                lineno = 0);
-   status = UVM_IS_OK;
-
-   if (!needs_update()) begin 
-     `uvm_info("RegModel", $sformatf("%s:%0d - RegModel block %s does not need updating",
-                    fname, lineno, this.get_name()), UVM_HIGH)
-
-   end
-   
-   `uvm_info("RegModel", $sformatf("%s:%0d - Updating model block %s with %s path",
-                    fname, lineno, this.get_name(), path.name ), UVM_HIGH)
+   uvm_status_e final_status = UVM_IS_OK;
 
    foreach (regs[rg_]) begin 
-   	  uvm_reg rg = rg_;
-      if (rg.needs_update())  begin 
-         rg.update(status, path, null, parent, prior, extension);
-         if (status != UVM_IS_OK || status != UVM_HAS_X) begin :a4
-           `uvm_error("RegModel", $sformatf("Register \"%s\" could not be updated",
-                                        rg.get_full_name()))
-           return;
-         end
+      uvm_reg rg = rg_;
+      rg.mirror(status, check, path, null,
+                parent, prior, extension, fname, lineno);
+      if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
+         final_status = status;
       end
    end
 
    foreach (blks[blk_])
    begin
-   		uvm_reg_block blk = blk_;
-   		blk.update(status,path,parent,prior,extension,fname,lineno);
+	uvm_reg_block blk = blk_;
+
+      blk.mirror(status, check, path, parent, prior, extension, fname, lineno);
+      if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
+         final_status = status;
+      end
    end
    
 endtask: mirror

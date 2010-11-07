@@ -50,8 +50,8 @@ virtual class uvm_reg extends uvm_object;
    local uvm_reg_file      m_regfile_parent;
    local int unsigned      m_n_bits;
    local int unsigned      m_n_used_bits;
-   local bit               m_maps[uvm_reg_map];
-   local uvm_reg_field     m_fields[$];   // Fields in LSB to MSB order
+   protected bit           m_maps[uvm_reg_map];
+   protected uvm_reg_field m_fields[$];   // Fields in LSB to MSB order
    local string            m_attributes[string];
    local int               m_has_cover;
    local int               m_cover_on;
@@ -109,9 +109,9 @@ virtual class uvm_reg extends uvm_object;
    // must be specified using the <add_hdl_path()> or
    // <add_hdl_path_slice> method.
    //
-   extern virtual function void configure (uvm_reg_block blk_parent,
-                                           uvm_reg_file regfile_parent = null,
-                                           string hdl_path = "");
+   extern function void configure (uvm_reg_block blk_parent,
+                                   uvm_reg_file regfile_parent = null,
+                                   string hdl_path = "");
 
 
    // Function: set_offset
@@ -122,7 +122,7 @@ virtual class uvm_reg extends uvm_object;
    // <uvm_reg_map::add_reg()> method.
    // This method is used to modify that offset dynamically.
    //  
-   // Note: Modifying the offset of a register will make the register model
+   // Modifying the offset of a register will make the register model
    // diverge from the specification that was used to create it.
    //
    extern virtual function void set_offset (uvm_reg_map    map,
@@ -403,8 +403,8 @@ virtual class uvm_reg extends uvm_object;
    // the <uvm_reg::write()> method to set
    // the actual register and its mirrored value.
    //
-   // Unless this methos is used, the desired value is equal to
-   // the mirrored value/
+   // Unless this method is used, the desired value is equal to
+   // the mirrored value.
    //
    // Refer <uvm_reg_field::set()> for more details on the effect
    // of setting mirror values on fields with different
@@ -517,7 +517,7 @@ virtual class uvm_reg extends uvm_object;
    // the register through a physical access is mimicked. For
    // example, read-only bits in the registers will not be written.
    //
-   // The mirrored value will be updated using the <uvm_reg:predict()>
+   // The mirrored value will be updated using the <uvm_reg::predict()>
    // method.
    //
    extern virtual task write(output uvm_status_e      status,
@@ -545,7 +545,7 @@ virtual class uvm_reg extends uvm_object;
    // the register through a physical access is mimicked. For
    // example, clear-on-read bits in the registers will be set to zero.
    //
-   // The mirrored value will be updated using the <uvm_reg:predict()>
+   // The mirrored value will be updated using the <uvm_reg::predict()>
    // method.
    //
    extern virtual task read(output uvm_status_e      status,
@@ -568,7 +568,7 @@ virtual class uvm_reg extends uvm_object;
    //
    // Uses the HDL path for the design abstraction specified by ~kind~.
    //
-   // The mirrored value will be updated using the <uvm_reg:predict()>
+   // The mirrored value will be updated using the <uvm_reg::predict()>
    // method.
    //
    extern virtual task poke(output uvm_status_e      status,
@@ -590,7 +590,7 @@ virtual class uvm_reg extends uvm_object;
    //
    // Uses the HDL path for the design abstraction specified by ~kind~.
    //
-   // The mirrored value will be updated using the <uvm_reg:predict()>
+   // The mirrored value will be updated using the <uvm_reg::predict()>
    // method.
    //
    extern virtual task peek(output uvm_status_e      status,
@@ -633,8 +633,8 @@ virtual class uvm_reg extends uvm_object;
    // Read the register and update/check its mirror value
    //
    // Read the register and optionally compared the readback value
-   // with the current mirrored value if ~check~ is <UVM_VERB>.
-   // The mirrored value will be updated using the <uvm_reg:predict()>
+   // with the current mirrored value if ~check~ is <UVM_CHECK>.
+   // The mirrored value will be updated using the <uvm_reg::predict()>
    // method based on the readback value.
    //
    // The mirroring can be performed using the physical interfaces (frontdoor)
@@ -676,12 +676,13 @@ virtual class uvm_reg extends uvm_object;
    // Returns TRUE if the prediction was succesful for each field in the
    // register.
    //
-   extern virtual function bit predict (uvm_reg_data_t value,
-                                        uvm_predict_e  kind = UVM_PREDICT_DIRECT,
-                                        uvm_path_e     path = UVM_BFM,
-                                        uvm_reg_map    map = null,
-                                        string         fname = "",
-                                        int            lineno = 0);
+   extern virtual function bit predict (uvm_reg_data_t    value,
+                                        uvm_reg_byte_en_t be = -1,
+                                        uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                        uvm_path_e        path = UVM_BFM,
+                                        uvm_reg_map       map = null,
+                                        string            fname = "",
+                                        int               lineno = 0);
 
 
    // Function: is_busy
@@ -703,16 +704,6 @@ virtual class uvm_reg extends uvm_object;
                                                       uvm_path_e     path,
                                                       uvm_reg_map    map);
 
-
-   /*local*/ extern task XwriteX(output uvm_status_e      status,
-                                 input  uvm_reg_data_t    value,
-                                 input  uvm_path_e        path,
-                                 input  uvm_reg_map       map,
-                                 input  uvm_sequence_base parent = null,
-                                 input  int               prior = -1,
-                                 input  uvm_object        extension = null,
-                                 input  string            fname = "",
-                                 input  int               lineno = 0);
 
    /*local*/ extern task XreadX (output uvm_status_e      status,
                                  output uvm_reg_data_t    value,
@@ -786,7 +777,9 @@ virtual class uvm_reg extends uvm_object;
    // Set a user-defined backdoor for this register
    //
    // By default, registers are accessed via the built-in string-based
-   // DPI routines if an HDL path has been specified (see <uvm_hdl>).
+   // DPI routines if an HDL path has been specified using the
+   // <uvm_reg::configure()> or <uvm_reg::add_hdl_path()> method.
+   //
    // If this default mechanism is not suitable (e.g. because
    // the register is not implemented in pure SystemVerilog)
    // a user-defined access
@@ -898,6 +891,13 @@ virtual class uvm_reg extends uvm_object;
    //
    extern function void get_hdl_path (ref uvm_hdl_path_concat paths[$],
                                       input string kind = "");
+
+
+   // Function:  get_hdl_path_kinds
+   //
+   // Get design abstractions for which HDL paths have been defined
+   //
+   extern function void get_hdl_path_kinds (ref string kinds[$]);
 
 
    // Function:  get_full_hdl_path
@@ -1247,7 +1247,15 @@ function void uvm_reg::set_frontdoor(uvm_reg_frontdoor ftdr,
    if (map == null)
      return;
    map_info = map.get_reg_map_info(this);
-   map_info.frontdoor = ftdr;
+   if (map_info == null)
+      map.add_reg(this, -1, "RW", 1, ftdr);
+   else begin
+      if (!map_info.unmapped) begin
+         `uvm_warning(get_full_name(), $psprintf("Indirectly accessed register has been mapped in address map %s. Unmapping.", map.get_full_name()));
+         map_info.unmapped = 1;
+      end
+      map_info.frontdoor = ftdr;
+   end
 endfunction: set_frontdoor
 
 
@@ -1261,11 +1269,6 @@ function uvm_reg_frontdoor uvm_reg::get_frontdoor(uvm_reg_map map = null);
    map_info = map.get_reg_map_info(this);
    return map_info.frontdoor;
 endfunction: get_frontdoor
-
-
-//----------------
-// Group: Backdoor
-//----------------
 
 
 // set_backdoor
@@ -1372,6 +1375,19 @@ function bit  uvm_reg::has_hdl_path(string kind = "");
   end
 
   return m_hdl_paths_pool.exists(kind);
+endfunction
+
+
+// get_hdl_path_kinds
+
+function void uvm_reg::get_hdl_path_kinds (ref string kinds[$]);
+  string kind;
+  kinds.delete();
+  if (!m_hdl_paths_pool.first(kind))
+    return;
+  do
+    kinds.push_back(kind);
+  while (m_hdl_paths_pool.next(kind));
 endfunction
 
 
@@ -1928,12 +1944,13 @@ endfunction: set
 
 // predict
 
-function bit uvm_reg::predict(uvm_reg_data_t  value,
-                              uvm_predict_e   kind = UVM_PREDICT_DIRECT,
-                              uvm_path_e      path = UVM_BFM,
-                              uvm_reg_map     map = null,
-                              string          fname = "",
-                              int             lineno = 0);
+function bit uvm_reg::predict(uvm_reg_data_t    value,
+                              uvm_reg_byte_en_t be = -1,
+                              uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                              uvm_path_e        path = UVM_BFM,
+                              uvm_reg_map       map = null,
+                              string            fname = "",
+                              int               lineno = 0);
    m_fname = fname;
    m_lineno = lineno;
 
@@ -1950,6 +1967,7 @@ function bit uvm_reg::predict(uvm_reg_data_t  value,
       predict &= m_fields[i].predict(
           (value >> m_fields[i].get_lsb_pos()) &
           ((1 << m_fields[i].get_n_bits()) - 1),
+          be >> (m_fields[i].get_lsb_pos()/8),
           kind,path,map,fname,lineno);
    end
 endfunction: predict
@@ -2085,9 +2103,7 @@ task uvm_reg::update(output uvm_status_e      status,
    foreach (m_fields[i])
       upd |= m_fields[i].XupdateX() << m_fields[i].get_lsb_pos();
 
-   XatomicX(1);
-   XwriteX(status, upd, path, map, parent, prior, extension, fname, lineno);
-   XatomicX(0);
+   write(status, upd, path, map, parent, prior, extension, fname, lineno);
 
 endtask: update
 
@@ -2105,27 +2121,11 @@ task uvm_reg::write(output uvm_status_e      status,
                     input  string            fname = "",
                     input  int               lineno = 0);
 
-   XatomicX(1);
-   XwriteX(status, value, path, map, parent, prior, extension, fname, lineno);
-   XatomicX(0);
-
-endtask
-
-
-// XwriteX
-
-task uvm_reg::XwriteX(output uvm_status_e      status,
-                      input  uvm_reg_data_t    value,
-                      input  uvm_path_e        path,
-                      input  uvm_reg_map       map,
-                      input  uvm_sequence_base parent = null,
-                      input  int               prior = -1,
-                      input  uvm_object        extension = null,
-                      input  string            fname = "",
-                      input  int               lineno = 0);
-
    // create an abstract transaction for this operation
    uvm_reg_item rw;
+
+   XatomicX(1);
+
    rw = uvm_reg_item::type_id::create("write_item",,get_full_name());
    rw.element      = this;
    rw.element_kind = UVM_REG;
@@ -2142,6 +2142,8 @@ task uvm_reg::XwriteX(output uvm_status_e      status,
    do_write(rw);
 
    status = rw.status;
+
+   XatomicX(0);
 
 endtask
 
@@ -2283,23 +2285,17 @@ task uvm_reg::do_write (uvm_reg_item rw);
    post_write(rw);
 
    // POST-WRITE CBS - FIELDS
-   begin
-      uvm_reg_data_t predicted_value;
-
-      predicted_value = get();
-
-      foreach (m_fields[i]) begin
-         uvm_reg_field_cb_iter cbs = new(m_fields[i]);
-         uvm_reg_field f = m_fields[i];
-
-         rw.element = f;
-         rw.element_kind = UVM_FIELD;
-         rw.value[0] = (predicted_value >> f.get_lsb_pos()) & ((1<<f.get_n_bits())-1);
-
-         for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
-            cb.post_write(rw);
-         f.post_write(rw);
-      end
+   foreach (m_fields[i]) begin
+      uvm_reg_field_cb_iter cbs = new(m_fields[i]);
+      uvm_reg_field f = m_fields[i];
+      
+      rw.element = f;
+      rw.element_kind = UVM_FIELD;
+      rw.value[0] = (value >> f.get_lsb_pos()) & ((1<<f.get_n_bits())-1);
+      
+      for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
+         cb.post_write(rw);
+      f.post_write(rw);
    end
    
    rw.value[0] = value;
@@ -2514,21 +2510,17 @@ task uvm_reg::do_read(uvm_reg_item rw);
    post_read(rw);
 
    // POST-READ CBS - FIELDS
-   begin
-      uvm_reg_data_t predicted_value;
+   foreach (m_fields[i]) begin
+      uvm_reg_field_cb_iter cbs = new(m_fields[i]);
+      uvm_reg_field f = m_fields[i];
 
-      foreach (m_fields[i]) begin
-         uvm_reg_field_cb_iter cbs = new(m_fields[i]);
-         uvm_reg_field f = m_fields[i];
+      rw.element = f;
+      rw.element_kind = UVM_FIELD;
+      rw.value[0] = (value >> f.get_lsb_pos()) & ((1<<f.get_n_bits())-1);
 
-         rw.element = f;
-         rw.element_kind = UVM_FIELD;
-         rw.value[0] = (predicted_value >> f.get_lsb_pos()) & ((1<<f.get_n_bits())-1);
-
-         for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
-            cb.post_read(rw);
-         f.post_read(rw);
-      end
+      for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
+         cb.post_read(rw);
+      f.post_read(rw);
    end
 
    rw.value[0] = value; // restore

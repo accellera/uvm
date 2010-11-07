@@ -75,7 +75,8 @@ class uvm_reg_field extends uvm_object;
    // Create a new field instance
    //
    // This method should not be used directly.
-   // The uvm_reg_field::type_id::create() method shoudl be used instead.
+   // The uvm_reg_field::type_id::create() factory method
+   // should be used instead.
    //
    extern function new(string name = "uvm_reg_field");
 
@@ -89,6 +90,8 @@ class uvm_reg_field extends uvm_object;
    // within the register relative to the least-significant bit
    // of the register, its ~access~ policy, volatility,
    // "HARD" ~reset~ value, 
+   // whether the field value is actually reset
+   // (the ~reset~ value is ignored if ~FALSE~),
    // whether the field value may be randomized and
    // whether the field is the only one to occupy a byte lane in the register.
    //
@@ -106,6 +109,7 @@ class uvm_reg_field extends uvm_object;
                                   string         access,
                                   bit            volatile,
                                   uvm_reg_data_t reset,
+                                  bit            is_reset,
                                   bit            is_rand,
                                   bit            individually_accessible); 
 
@@ -428,7 +432,7 @@ class uvm_reg_field extends uvm_object;
    // the field through a physical access is mimicked. For
    // example, read-only bits in the field will not be written.
    //
-   // The mirrored value will be updated using the <uvm_reg_field:predict()>
+   // The mirrored value will be updated using the <uvm_reg_field::predict()>
    // method.
    //
    // If a front-door access is used, and
@@ -469,7 +473,7 @@ class uvm_reg_field extends uvm_object;
    // the field through a physical access is mimicked. For
    // example, clear-on-read bits in the filed will be set to zero.
    //
-   // The mirrored value will be updated using the <uvm_reg:predict()>
+   // The mirrored value will be updated using the <uvm_reg_field::predict()>
    // method.
    //
    // If a front-door access is used, and
@@ -505,7 +509,7 @@ class uvm_reg_field extends uvm_object;
    // in a best-effort not to modify the value of the other fields in the
    // register.
    //
-   // The mirrored value will be updated using the <uvm_reg:predict()>
+   // The mirrored value will be updated using the <uvm_reg_field::predict()>
    // method.
    //
    extern virtual task poke  (output uvm_status_e       status,
@@ -529,7 +533,7 @@ class uvm_reg_field extends uvm_object;
    //
    // The entire containing register is peeked
    // and the mirrored value of the other fields in the register
-   // are updated using the <uvm_reg:predict()> method.
+   // are updated using the <uvm_reg_field::predict()> method.
    //
    //
    extern virtual task peek  (output uvm_status_e       status,
@@ -546,8 +550,8 @@ class uvm_reg_field extends uvm_object;
    // Read the field and update/check its mirror value
    //
    // Read the field and optionally compared the readback value
-   // with the current mirrored value if ~check~ is <UVM_VERB>.
-   // The mirrored value will be updated using the <uvm_reg_field:predict()>
+   // with the current mirrored value if ~check~ is <UVM_CHECK>.
+   // The mirrored value will be updated using the <uvm_reg_field::predict()>
    // method based on the readback value.
    //
    // The mirroring can be performed using the physical interfaces (frontdoor)
@@ -610,12 +614,13 @@ class uvm_reg_field extends uvm_object;
    //
    // Returns TRUE if the prediction was succesful.
    //
-   extern virtual function bit predict (uvm_reg_data_t  value,
-                                        uvm_predict_e   kind = UVM_PREDICT_DIRECT,
-                                        uvm_path_e      path = UVM_BFM,
-                                        uvm_reg_map     map = null,
-                                        string          fname = "",
-                                        int             lineno = 0);
+   extern virtual function bit predict (uvm_reg_data_t    value,
+                                        uvm_reg_byte_en_t be = -1,
+                                        uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                        uvm_path_e        path = UVM_BFM,
+                                        uvm_reg_map       map = null,
+                                        string            fname = "",
+                                        int               lineno = 0);
 
 
 
@@ -792,6 +797,7 @@ function void uvm_reg_field::configure(uvm_reg        parent,
                                        string         access,
                                        bit            volatile,
                                        uvm_reg_data_t reset,
+                                       bit            is_reset,
                                        bit            is_rand,
                                        bit            individually_accessible); 
    m_parent = parent;
@@ -808,7 +814,7 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    m_cover_on  = UVM_NO_COVERAGE;
    m_written   = 0;
    m_individually_accessible = individually_accessible;
-   set_reset(reset);
+   if (is_reset) set_reset(reset);
 
    m_parent.add_field(this);
 
@@ -1175,6 +1181,13 @@ function void uvm_reg_field::Xpredict_readX (uvm_reg_data_t value,
    m_mirrored  = value;
    m_desired   = value;
    this.value  = value;
+
+   begin
+      uvm_reg_field_cb_iter cbs = new(this);
+
+      for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next())
+         cb.post_predict(this, value, UVM_PREDICT_READ, path, map);
+   end
 endfunction: Xpredict_readX
 
 
@@ -1194,6 +1207,13 @@ function void uvm_reg_field::Xpredict_writeX (uvm_reg_data_t value,
    this.value = m_mirrored;
 
    m_written = 1;
+
+   begin
+      uvm_reg_field_cb_iter cbs = new(this);
+
+      for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next())
+         cb.post_predict(this, value, UVM_PREDICT_WRITE, path, map);
+   end
 endfunction: Xpredict_writeX
 
 
@@ -1238,12 +1258,16 @@ endfunction: XupdateX
 
 // predict
 
-function bit uvm_reg_field::predict(uvm_reg_data_t value,
-                                    uvm_predict_e  kind = UVM_PREDICT_DIRECT,
-                                    uvm_path_e     path = UVM_BFM,
-                                    uvm_reg_map    map = null,
-                                    string         fname = "",
-                                    int            lineno = 0);
+function bit uvm_reg_field::predict(uvm_reg_data_t    value,
+                                    uvm_reg_byte_en_t be = -1,
+                                    uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                    uvm_path_e        path = UVM_BFM,
+                                    uvm_reg_map       map = null,
+                                    string            fname = "",
+                                    int               lineno = 0);
+   // Assume that the entire field is enabled
+   if (!be[0]) return 1;
+   
    m_fname = fname;
    m_lineno = lineno;
    if (m_parent.is_busy() && kind == UVM_PREDICT_DIRECT) begin
@@ -1541,10 +1565,6 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
       endcase
    end
 
-   if (bad_side_effect) begin
-      `uvm_warning("RegModel", $psprintf("Writing field \"%s\" will cause unintended side effects in adjoining Write-to-Clear or Write-to-Set fields in the same register", this.get_full_name()));
-   end
-
 `ifdef UVM_REG_NO_INDIVIDUAL_FIELD_ACCESS
    rw.element_kind = UVM_REG;
    rw.element = m_parent;
@@ -1557,6 +1577,10 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
       rw.element = m_parent;
       rw.value[0] = value_adjust;
       m_parent.do_write(rw);
+
+      if (bad_side_effect) begin
+         `uvm_warning("RegModel", $psprintf("Writing field \"%s\" will cause unintended side effects in adjoining Write-to-Clear or Write-to-Set fields in the same register", this.get_full_name()));
+      end
    end
    else begin
 
@@ -1669,6 +1693,7 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
             
      rw.local_map.do_read(rw);
 
+
      if (system_map.get_auto_predict())
         Xpredict_readX(rw.value[0], rw.path, rw.map);
 
@@ -1722,17 +1747,26 @@ function bit uvm_reg_field::is_indv_accessible(uvm_path_e  path,
    if (path == UVM_BACKDOOR) begin
       `uvm_warning("RegModel",
          {"Individual BACKDOOR field access not available for field '",
-         get_full_name(), "'. Reading complete register instead."})
+         get_full_name(), "'. Accessing complete register instead."})
       return 0;
    end
 
    if (!m_individually_accessible) begin
          `uvm_warning("RegModel",
             {"Individual field access not available for field '",
-            get_full_name(), "'. Reading complete register instead."})
+            get_full_name(), "'. Accessing complete register instead."})
       return 0;
-   end        
+   end
 
+   // Cannot access individual fields if the container register
+   // has a user-defined front-door
+   if (m_parent.get_frontdoor(local_map) != null) begin
+      `uvm_warning("RegModel",
+                   {"Individual field access not available for field '",
+                    get_name(), "' because register '", m_parent.get_full_name(), "' has a user-defined front-door. Accessing complete register instead."})
+      return 0;
+   end
+   
    begin
      uvm_reg_map system_map = local_map.get_root_map();
      uvm_reg_adapter adapter = system_map.get_adapter();
@@ -1808,7 +1842,7 @@ function bit uvm_reg_field::is_indv_accessible(uvm_path_e  path,
        {"Target bus does not support byte enabling, and the field '",
        get_full_name(),"' is not the only field within the entire bus width. ",
        "Individual field access will not be available. ",
-       "Reading complete register instead."})
+       "Accessing complete register instead."})
 
    return 0;
 

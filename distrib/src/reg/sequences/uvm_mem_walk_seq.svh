@@ -165,8 +165,8 @@ endclass: uvm_mem_single_walk_seq
 // by executing the <uvm_mem_single_walk_seq> sequence on
 // every memory within it.
 //
-// Blocks and memories with the NO_REG_TESTS or
-// the NO_MEM_WALK_TEST attribute are not verified.
+// Blocks and memories with the ~NO_REG_TESTS~ or
+// the ~NO_MEM_WALK_TEST~ attribute are not verified.
 //
 
 class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));

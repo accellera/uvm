@@ -20,6 +20,19 @@
 // -------------------------------------------------------------
 //
 
+//
+// TITLE: Global Declarations for the Register Layer
+//
+// Globally available types and enumerals.
+//
+// In addition to the declarations outlined in the summary below,
+// the following classes are defined herein
+//
+// <uvm_hdl_path_concat>  : Concatenation of HDL paths
+//
+// <uvm_utils>            : Various type-specific utility functions
+//
+
 `ifndef UVM_REG_MODEL__SV
 `define UVM_REG_MODEL__SV
 
@@ -74,7 +87,7 @@ typedef class uvm_reg_adapter;
 // UVM_BFM          - Use the front door
 // UVM_BACKDOOR     - Use the back door
 // UVM_PREDICT      - Operation derived from observations by a bus monitor via
-   //                 the <uvm_predictor> class.
+//                    the <uvm_reg_redictor> class.
 // UVM_DEFAULT_PATH - Operation specified by the context
 //
    typedef enum {
@@ -249,7 +262,7 @@ typedef class uvm_reg_adapter;
 //
 // Maximum number of byte enable bits
 //
-// Default value is one per byte in `UVM_REG_DATA_WIDTH
+// Default value is one per byte in <`UVM_REG_DATA_WIDTH>
 //
 `ifndef UVM_REG_BYTENABLE_WIDTH 
   `define UVM_REG_BYTENABLE_WIDTH ((`UVM_REG_DATA_WIDTH-1)/8+1) 
@@ -257,136 +270,38 @@ typedef class uvm_reg_adapter;
 
 
 //------------------------------------------------------------------------------
-// FIXME uvm_reg_mem_data_t is of type bit so 2val not 4val
-// Type: uvm_reg_addr_t
-//
-// Address value
-//
-// Type: uvm_reg_addr_logic_t
-//
-// 4-state address value
-//
-typedef  bit [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_t ;
-typedef  logic [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_logic_t ;
-
-//------------------------------------------------------------------------------
-// FIXME uvm_reg_mem_data_t is of type bit so 2val not 4val
 // Type: uvm_reg_data_t
 //
-// Data value
-//
-// Type: uvm_reg_data_logic_t
-//
-// 4-state data value
+// 2-state data value with <`UVM_REG_DATA_WIDTH> bits
 //
 typedef  bit [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_t ;
+
+// Type: uvm_reg_data_logic_t
+//
+// 4-state data value with <`UVM_REG_DATA_WIDTH> bits
+//
 typedef  logic [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_logic_t ;
+
+//------------------------------------------------------------------------------
+// Type: uvm_reg_addr_t
+//
+// 2-state address value with <`UVM_REG_ADDR_WIDTH> bits
+//
+typedef  bit [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_t ;
+
+// Type: uvm_reg_addr_logic_t
+//
+// 4-state address value with <`UVM_REG_ADDR_WIDTH> bits
+//
+typedef  logic [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_logic_t ;
 
 //------------------------------------------------------------------------------
 //
 // Type: uvm_reg_byte_en_t
 //
-// Byte enable vector
+// 2-state byte_enable value with <`UVM_REG_BYTENABLE_WIDTH> bits
 //
 typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
-
-
-//------------------------------------------------------------------------------
-// CLASS: uvm_utils #(TYPE)
-//
-// This class contains useful template functions.
-//
-//------------------------------------------------------------------------------
-
-
-class uvm_utils #(type TYPE=int, string FIELD="config");
-
-  typedef TYPE types_t[$];
-
-  // Function: find_all
-  //
-  // Recursively finds all component instances of the parameter type ~TYPE~,
-  // starting with the component given by ~start~. Uses <uvm_root::find_all>.
-
-  static function types_t find_all(uvm_component start);
-    uvm_component list[$];
-    types_t types;
-    uvm_top.find_all("*",list,start);
-    foreach (list[i]) begin
-      TYPE typ;
-      if ($cast(typ,list[i]))
-        types.push_back(typ);
-    end
-    if (types.size() == 0) begin
-      `uvm_warning("find_type-no match",{"Instance of type '",TYPE::type_name,
-         " not found in component hierarchy beginning at ",start.get_full_name()})
-    end
-    return types;
-  endfunction
-
-  static function TYPE find(uvm_component start);
-    types_t types = find_all(start);
-    if (types.size() == 0)
-      return null;
-    if (types.size() > 1) begin
-      `uvm_warning("find_type-multi match",{"More than one instance of type '",TYPE::type_name,
-         " found in component hierarchy beginning at ",start.get_full_name()})
-      return null;
-    end
-    return types[0];
-  endfunction
-
-  static function TYPE create_type_by_name(string type_name, string contxt);
-    uvm_object obj;
-    TYPE  typ;
-    obj = factory.create_object_by_name(type_name,contxt,type_name);
-       if (!$cast(typ,obj))
-         uvm_report_error("WRONG_TYPE",{"The type_name given '",type_name,
-                "' with context '",contxt,"' did not produce the expected type."});
-    return typ;
-  endfunction
-
-
-  // Function: get_config
-  //
-  // This method gets the any_config associated with component c.
-  // We check for the two kinds of error which may occur with this kind of 
-  // operation.
-
-  static function TYPE get_config(uvm_component comp, bit is_fatal);
-    uvm_object obj;
-    TYPE cfg;
-
-    if (!comp.get_config_object(FIELD, obj, 0)) begin
-      if (is_fatal)
-        comp.uvm_report_fatal("NO_SET_CFG", {"no set_config to field '", FIELD,
-                           "' for component '",comp.get_full_name(),"'"},
-                           UVM_MEDIUM, `uvm_file , `uvm_line  );
-      else
-        comp.uvm_report_warning("NO_SET_CFG", {"no set_config to field '", FIELD,
-                           "' for component '",comp.get_full_name(),"'"},
-                           UVM_MEDIUM, `uvm_file , `uvm_line  );
-      return null;
-    end
-
-    if (!$cast(cfg, obj)) begin
-      if (is_fatal)
-        comp.uvm_report_fatal( "GET_CFG_TYPE_FAIL",
-                          {"set_config_object with field name ",FIELD,
-                          " is not of type '",TYPE::type_name,"'"},
-                          UVM_NONE , `uvm_file , `uvm_line );
-      else
-        comp.uvm_report_warning( "GET_CFG_TYPE_FAIL",
-                          {"set_config_object with field name ",FIELD,
-                          " is not of type '",TYPE::type_name,"'"},
-                          UVM_NONE , `uvm_file , `uvm_line );
-    end
-
-    return cfg;
-  endfunction
-
-endclass
-
 
 
 //------------------------------------------------------------------------------
@@ -483,6 +398,106 @@ class uvm_hdl_path_concat;
 endclass
 
 
+//------------------------------------------------------------------------------
+// CLASS: uvm_utils
+//
+// This class contains useful template functions.
+//
+//------------------------------------------------------------------------------
+
+
+class uvm_utils #(type TYPE=int, string FIELD="config");
+
+  typedef TYPE types_t[$];
+
+  // Function: find_all
+  //
+  // Recursively finds all component instances of the parameter type ~TYPE~,
+  // starting with the component given by ~start~. Uses <uvm_root::find_all>.
+
+  static function types_t find_all(uvm_component start);
+    uvm_component list[$];
+    types_t types;
+    uvm_top.find_all("*",list,start);
+    foreach (list[i]) begin
+      TYPE typ;
+      if ($cast(typ,list[i]))
+        types.push_back(typ);
+    end
+    if (types.size() == 0) begin
+      `uvm_warning("find_type-no match",{"Instance of type '",TYPE::type_name,
+         " not found in component hierarchy beginning at ",start.get_full_name()})
+    end
+    return types;
+  endfunction
+
+  static function TYPE find(uvm_component start);
+    types_t types = find_all(start);
+    if (types.size() == 0)
+      return null;
+    if (types.size() > 1) begin
+      `uvm_warning("find_type-multi match",{"More than one instance of type '",TYPE::type_name,
+         " found in component hierarchy beginning at ",start.get_full_name()})
+      return null;
+    end
+    return types[0];
+  endfunction
+
+  static function TYPE create_type_by_name(string type_name, string contxt);
+    uvm_object obj;
+    TYPE  typ;
+    obj = factory.create_object_by_name(type_name,contxt,type_name);
+       if (!$cast(typ,obj))
+         uvm_report_error("WRONG_TYPE",{"The type_name given '",type_name,
+                "' with context '",contxt,"' did not produce the expected type."});
+    return typ;
+  endfunction
+
+
+  // Function: get_config
+  //
+  // This method gets the object config of type ~TYPE~
+  // associated with component ~comp~.
+  // We check for the two kinds of error which may occur with this kind of 
+  // operation.
+
+  static function TYPE get_config(uvm_component comp, bit is_fatal);
+    uvm_object obj;
+    TYPE cfg;
+
+    if (!comp.get_config_object(FIELD, obj, 0)) begin
+      if (is_fatal)
+        comp.uvm_report_fatal("NO_SET_CFG", {"no set_config to field '", FIELD,
+                           "' for component '",comp.get_full_name(),"'"},
+                           UVM_MEDIUM, `uvm_file , `uvm_line  );
+      else
+        comp.uvm_report_warning("NO_SET_CFG", {"no set_config to field '", FIELD,
+                           "' for component '",comp.get_full_name(),"'"},
+                           UVM_MEDIUM, `uvm_file , `uvm_line  );
+      return null;
+    end
+
+    if (!$cast(cfg, obj)) begin
+      if (is_fatal)
+        comp.uvm_report_fatal( "GET_CFG_TYPE_FAIL",
+                          {"set_config_object with field name ",FIELD,
+                          " is not of type '",TYPE::type_name,"'"},
+                          UVM_NONE , `uvm_file , `uvm_line );
+      else
+        comp.uvm_report_warning( "GET_CFG_TYPE_FAIL",
+                          {"set_config_object with field name ",FIELD,
+                          " is not of type '",TYPE::type_name,"'"},
+                          UVM_NONE , `uvm_file , `uvm_line );
+    end
+
+    return cfg;
+  endfunction
+
+endclass
+
+
+
+
 // concat2string
 
 function automatic string uvm_hdl_concat2string(uvm_hdl_path_concat concat);
@@ -525,6 +540,7 @@ typedef struct packed {
 `include "reg/uvm_reg_field.svh"
 `include "reg/uvm_vreg_field.svh"
 `include "reg/uvm_reg.svh"
+`include "reg/uvm_reg_indirect.svh"
 `include "reg/uvm_reg_file.svh"
 `include "reg/uvm_mem_mam.svh"
 `include "reg/uvm_vreg.svh"

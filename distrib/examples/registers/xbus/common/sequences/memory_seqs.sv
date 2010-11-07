@@ -17,7 +17,7 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-class mem_init_from_file_seq extends uvm_reg_sequence;
+class mem_init_from_file_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    // Must set these two vars before starting sequence. This sequence
    // could be enhanced to use get_config_string/object.
@@ -77,7 +77,7 @@ class mem_init_from_file_seq extends uvm_reg_sequence;
 endclass
 
 
-class mem_rand_init_seq extends uvm_reg_sequence;
+class mem_rand_init_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    `uvm_object_utils(mem_rand_init_seq)
 

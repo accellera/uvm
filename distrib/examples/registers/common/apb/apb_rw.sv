@@ -82,6 +82,10 @@ class reg2apb_adapter extends uvm_reg_adapter;
 
   `uvm_object_utils(reg2apb_adapter)
 
+   function new(string name = "reg2apb_adapter");
+      super.new(name);
+   endfunction 
+
   virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
     apb_rw apb = apb_rw::type_id::create("apb_rw");
     apb.kind = (rw.kind == UVM_READ) ? apb_rw::READ : apb_rw::WRITE;

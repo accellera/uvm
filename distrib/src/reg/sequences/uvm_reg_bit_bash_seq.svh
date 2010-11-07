@@ -173,8 +173,8 @@ endclass: uvm_reg_single_bit_bash_seq
 // Verify the implementation of all registers in a block
 // by executing the <uvm_reg_single_bit_bash_seq> sequence on it.
 //
-// Blocks and registers with the NO_REG_TESTS or
-// the NO_BIT_BASH_TEST attribute are not verified.
+// Blocks and registers with the ~NO_REG_TESTS~ or
+// the ~NO_BIT_BASH_TEST~ attribute are not verified.
 //
 //------------------------------------------------------------------------------
 

@@ -63,7 +63,7 @@ class uvm_vreg_field extends uvm_object;
    // Create a new virtual field instance
    //
    // This method should not be used directly.
-   // The uvm_vreg_field::type_id::create() method shoudl be used instead.
+   // The uvm_vreg_field::type_id::create() method should be used instead.
    //
    extern function new(string name = "uvm_vreg_field");
 

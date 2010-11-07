@@ -27,7 +27,8 @@ typedef class uvm_reg_backdoor;
 //------------------------------------------------------------------------------
 // Class: uvm_reg_cbs
 //
-// Facade class for register and memory backdoor access callback methods. 
+// Facade class for field, register, memory and backdoor
+// access callback methods. 
 //------------------------------------------------------------------------------
 
 virtual class uvm_reg_cbs extends uvm_callback;
@@ -48,20 +49,19 @@ virtual class uvm_reg_cbs extends uvm_callback;
    // before the contained <uvm_reg_fields>. 
    //
    // Backdoor - <uvm_reg_backdoor::pre_write>,
-   //            <uvm_reg_cbs>::pre_write> cbs for backdoor
+   //            <uvm_reg_cbs::pre_write> cbs for backdoor.
    //
    // Register - <uvm_reg::pre_write>,
-   //            <uvm_reg_cbs>::pre_write> cbs for reg,
-   //            foreach field {
-   //              <uvm_reg_field::pre_write>,
+   //            <uvm_reg_cbs::pre_write> cbs for reg,
+   //            then foreach field:
+   //              <uvm_reg_field::pre_write>, 
    //              <uvm_reg_cbs::pre_write> cbs for field
-   //            }
    //
    // RegField - <uvm_reg_field::pre_write>,
    //            <uvm_reg_cbs::pre_write> cbs for field
    //
    // Memory   - <uvm_mem::pre_write>,
-   //            <uvm_reg_cbs>::pre_write> cbs for mem
+   //            <uvm_reg_cbs::pre_write> cbs for mem
    //
    // The ~rw~ argument holds information about the operation.
    //
@@ -91,20 +91,19 @@ virtual class uvm_reg_cbs extends uvm_callback;
    //
    // Summary of callback order:
    //
-   // Backdoor - <uvm_reg_cbs>::post_write> cbs for backdoor,
+   // Backdoor - <uvm_reg_cbs::post_write> cbs for backdoor,
    //            <uvm_reg_backdoor::post_write>
    //
-   // Register - <uvm_reg_cbs>::post_write> cbs for reg,
+   // Register - <uvm_reg_cbs::post_write> cbs for reg,
    //            <uvm_reg::post_write>,
-   //            foreach field {
+   //            then foreach field:
    //              <uvm_reg_cbs::post_write> cbs for field,
    //              <uvm_reg_field::post_read>
-   //            }
    //
    // RegField - <uvm_reg_cbs::post_write> cbs for field,
    //            <uvm_reg_field::post_write>
    //
-   // Memory   - <uvm_reg_cbs>::post_write> cbs for mem,
+   // Memory   - <uvm_reg_cbs::post_write> cbs for mem,
    //            <uvm_mem::post_write>
    //
    // The ~rw~ argument holds information about the operation.
@@ -130,20 +129,19 @@ virtual class uvm_reg_cbs extends uvm_callback;
    // the contained <uvm_reg_fields>. 
    //
    // Backdoor - <uvm_reg_backdoor::pre_read>,
-   //            <uvm_reg_cbs>::pre_read> cbs for backdoor
+   //            <uvm_reg_cbs::pre_read> cbs for backdoor
    //
    // Register - <uvm_reg::pre_read>,
-   //            <uvm_reg_cbs>::pre_read> cbs for reg,
-   //            foreach field {
+   //            <uvm_reg_cbs::pre_read> cbs for reg,
+   //            then foreach field:
    //              <uvm_reg_field::pre_read>,
    //              <uvm_reg_cbs::pre_read> cbs for field
-   //            }
    //
    // RegField - <uvm_reg_field::pre_read>,
    //            <uvm_reg_cbs::pre_read> cbs for field
    //
    // Memory   - <uvm_mem::pre_read>,
-   //            <uvm_reg_cbs>::pre_read> cbs for mem
+   //            <uvm_reg_cbs::pre_read> cbs for mem
    //
    // The ~rw~ argument holds information about the operation.
    //
@@ -171,20 +169,19 @@ virtual class uvm_reg_cbs extends uvm_callback;
    // is a <uvm_reg>, all ~post_read~ callback methods are invoked before the
    // contained <uvm_reg_fields>. 
    //
-   // Backdoor - <uvm_reg_cbs>::post_read> cbs for backdoor,
+   // Backdoor - <uvm_reg_cbs::post_read> cbs for backdoor,
    //            <uvm_reg_backdoor::post_read>
    //
-   // Register - <uvm_reg_cbs>::post_read> cbs for reg,
+   // Register - <uvm_reg_cbs::post_read> cbs for reg,
    //            <uvm_reg::post_read>,
-   //            foreach field {
+   //            then foreach field:
    //              <uvm_reg_cbs::post_read> cbs for field,
    //              <uvm_reg_field::post_read>
-   //            }
    //
    // RegField - <uvm_reg_cbs::post_read> cbs for field,
    //            <uvm_reg_field::post_read>
    //
-   // Memory   - <uvm_reg_cbs>::post_read> cbs for mem,
+   // Memory   - <uvm_reg_cbs::post_read> cbs for mem,
    //            <uvm_mem::post_read>
    //
    // The ~rw~ argument holds information about the operation.
@@ -198,6 +195,19 @@ virtual class uvm_reg_cbs extends uvm_callback;
    // See <uvm_reg_item> for details on ~rw~ information.
    //
    virtual task post_read(uvm_reg_item rw); endtask
+
+
+   // Task: post_predict
+   //
+   // Called by the <uvm_reg_field::predict()> method
+   // after a successful UVM_PREDICT_READ or UVM_PREDICT_WRITE prediction.
+   //
+   virtual function void post_predict(uvm_reg_field  fld,
+                                      uvm_reg_data_t value,
+                                      uvm_predict_e  kind,
+                                      uvm_path_e     path,
+                                      uvm_reg_map    map);
+   endfunction
 
 
    // Function: encode

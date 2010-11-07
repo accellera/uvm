@@ -155,8 +155,8 @@ endclass: uvm_reg_single_access_seq
 // by executing the <uvm_reg_single_access_seq> sequence on
 // every register within it.
 //
-// Blocks and registers with the NO_REG_TESTS or
-// the NO_REG_ACCESS_TEST attribute are not verified.
+// Blocks and registers with the ~NO_REG_TESTS~ or
+// the ~NO_REG_ACCESS_TEST~ attribute are not verified.
 //
 
 class uvm_reg_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));

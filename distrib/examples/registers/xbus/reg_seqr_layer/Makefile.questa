@@ -1,6 +1,6 @@
 ## 
 ## -------------------------------------------------------------
-##    Copyright 2010 Synopsys, Inc.
+##    Copyright 2010 Mentor Graphics Corp.
 ##    All Rights Reserved Worldwide
 ## 
 ##    Licensed under the Apache License, Version 2.0 (the
@@ -21,13 +21,14 @@
 
 UVM_HOME	= ../../../..
 
-include ../../../Makefile.vcs
+include ../../../Makefile.questa
 
+all: prepare comp run
 
-all: comp run
+comp: vlog
 
-comp:
-	$(VCS) +incdir+../common \
+vlog:
+	$(VLOG) +incdir+../common \
 		+incdir+../common/reg_defn \
 		+incdir+../common/sequences \
 		+incdir+../../../xbus/sv \
@@ -57,11 +58,11 @@ help:
 	@echo
 
 run: uvm_reg_mem_built_in_seq \
-	mem_init_from_file_seq \
-	mem_rand_init_seq \
-	user_acp_reg_seq \
-	virtual_seq
+     mem_init_from_file_seq \
+     mem_rand_init_seq \
+     user_acp_reg_seq \
+     virtual_seq
 
 %_seq: comp
-	$(SIMV) +UVM_SEQUENCE=$@ +UVM_TESTNAME=cmd_line_seq_test
+	$(VSIM) +UVM_SEQUENCE=$@ +UVM_TESTNAME=cmd_line_seq_test
 	$(CHECK)
