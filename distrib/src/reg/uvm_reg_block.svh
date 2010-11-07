@@ -1601,6 +1601,7 @@ task uvm_reg_block::mirror(output uvm_status_e  status,
    		uvm_reg_block blk = blk_;
    		blk.update(status,path,parent,prior,extension,fname,lineno);
    end
+   
 endtask: mirror
 
 

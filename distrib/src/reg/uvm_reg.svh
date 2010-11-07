@@ -2926,12 +2926,12 @@ endtask: mirror
 // XatomicX
 
 task uvm_reg::XatomicX(bit on);
-   process self=process::self();
    if (on) begin
-     if (self == m_process)
+   	process self_ ; //= process::self; // FIXME = process::self();
+     if (self_ == m_process)
        return;
      m_atomic.get(1);
-     m_process = self; 
+     m_process = self_; 
    end
    else begin
       // Maybe a key was put back in by a spurious call to reset()
