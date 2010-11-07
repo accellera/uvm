@@ -1115,6 +1115,9 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function void            do_pack    (uvm_packer packer);
    extern virtual function void            do_unpack  (uvm_packer packer);
 
+// FIXME WA
+local process m_reg_process;
+
 endclass: uvm_reg
 
 
@@ -2700,7 +2703,7 @@ function uvm_status_e uvm_reg::backdoor_read_func(uvm_reg_item rw);
         rw.value[0] = val;
 
      if (val != rw.value[0]) begin
-        `uvm_error("RegModel", $psprintf("Backdoor read of register with multiple HDL copies: values are not the same: %0h at path '%s', and %0h at path '%s'. Returning first value.",
+        `uvm_error("RegModel", $psprintf("Backdoor read of register %s with multiple HDL copies: values are not the same: %0h at path '%s', and %0h at path '%s'. Returning first value.",
                get_full_name(),
                rw.value[0], uvm_hdl_concat2string(paths[0]),
                val, uvm_hdl_concat2string(paths[i]))); 
@@ -2926,12 +2929,12 @@ endtask: mirror
 // XatomicX
 
 task uvm_reg::XatomicX(bit on);
-   if (on) begin
-   	process self_ ; //= process::self; // FIXME = process::self();
-     if (self_ == m_process)
+// FIXME   	m_reg_process=process::self();
+    if (on) begin
+    if (m_reg_process == m_process)
        return;
      m_atomic.get(1);
-     m_process = self_; 
+     m_process = m_reg_process; 
    end
    else begin
       // Maybe a key was put back in by a spurious call to reset()

@@ -2113,7 +2113,7 @@ function uvm_status_e uvm_mem::backdoor_read_func(uvm_reg_item rw);
            rw.value[mem_idx] = val;
 
         if (val != rw.value[mem_idx]) begin
-           `uvm_error("RegModel", $psprintf("Backdoor read of register with multiple HDL copies: values are not the same: %0h at path '%s', and %0h at path '%s'. Returning first value.",
+           `uvm_error("RegModel", $psprintf("Backdoor read of register %s with multiple HDL copies: values are not the same: %0h at path '%s', and %0h at path '%s'. Returning first value.",
                   get_full_name(), rw.value[mem_idx], uvm_hdl_concat2string(paths[0]),
                   val, uvm_hdl_concat2string(paths[i]))); 
            return UVM_NOT_OK;
