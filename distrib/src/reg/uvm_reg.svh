@@ -328,12 +328,6 @@ virtual class uvm_reg extends uvm_object;
 
 
 
-   // Function: get_hdl_path_kinds
-   //
-   // Return a queue of hdl abstractions used for this uvm_reg
-   //
-   extern virtual function void get_hdl_path_kinds(ref string kinds[$]);
-   
    //------------------
    // Group: Attributes
    //------------------
@@ -1115,9 +1109,6 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function void            do_pack    (uvm_packer packer);
    extern virtual function void            do_unpack  (uvm_packer packer);
 
-// FIXME WA
-local process m_reg_process;
-
 endclass: uvm_reg
 
 
@@ -1855,11 +1846,7 @@ function void uvm_reg::get_attributes(ref string names[string],
        names[nm] = m_attributes[nm];
 
 endfunction: get_attributes
-
-function void uvm_reg::get_hdl_path_kinds(ref string kinds[$]);
-// TODO
-endfunction
-  
+ 
 //---------
 // COVERAGE
 //---------
@@ -2921,7 +2908,13 @@ endtask: mirror
 // XatomicX
 
 task uvm_reg::XatomicX(bit on);
-// FIXME   	m_reg_process=process::self();
+`ifdef INCA
+	static process m_reg_process;
+  	// FIXME this is not working right now m_reg_process=process::self();
+  	assert(0) else $fatal(0,"FIXME");
+ `else
+ 	process m_reg_process=process::self();
+ `endif
     if (on) begin
     if (m_reg_process == m_process)
        return;
