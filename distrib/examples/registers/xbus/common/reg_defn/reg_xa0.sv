@@ -290,7 +290,7 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
    rand xa0_xbus_rf_swr_reg           swr_reg;
    rand xa0_xbus_rf_srd_reg           srd_reg;
    rand xa0_xbus_rf_data_reg          data_reg;
-   rand xa0_xbus_rf_xbus_indirect_reg xbus_indirect_reg[8];
+   rand uvm_reg xbus_indirect_reg[8];
    rand xa0_xbus_rf_rw_reg            rw_reg[4];
    rand xa0_xbus_rf_ro_reg            ro_reg[4];
    rand xa0_xbus_rf_wo_reg            wo_reg[4];
@@ -361,11 +361,13 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
       srd_reg.build();
 
       foreach (xbus_indirect_reg[i]) begin
+      	xa0_xbus_rf_xbus_indirect_reg r_;
          string name = $sformatf("xbus_indirect_reg[%0d]",i);
-         xbus_indirect_reg[i] = xa0_xbus_rf_xbus_indirect_reg::type_id::create(name);
+         r_ = xa0_xbus_rf_xbus_indirect_reg::type_id::create(name);
          name = $sformatf("id_reg_values[%0d]",i);
-         xbus_indirect_reg[i].build();
-         xbus_indirect_reg[i].configure(this, null, name);
+         r_.build();
+         r_.configure(this, null, name);
+         xbus_indirect_reg[i]=r_;
       end
 
       data_reg = xa0_xbus_rf_data_reg::type_id::create("data_reg");
