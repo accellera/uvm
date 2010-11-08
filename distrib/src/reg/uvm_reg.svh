@@ -2908,13 +2908,9 @@ endtask: mirror
 // XatomicX
 
 task uvm_reg::XatomicX(bit on);
-`ifdef INCA
-	static process m_reg_process;
-  	// FIXME this is not working right now m_reg_process=process::self();
-  	assert(0) else $fatal(0,"FIXME");
- `else
- 	process m_reg_process=process::self();
- `endif
+ 	process m_reg_process;
+ 	m_reg_process=process::self();
+
     if (on) begin
     if (m_reg_process == m_process)
        return;

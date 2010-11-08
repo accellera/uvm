@@ -555,6 +555,6 @@ typedef struct packed {
 `include "reg/sequences/uvm_reg_access_seq.svh"
 `include "reg/sequences/uvm_reg_mem_shared_access_seq.svh"
 `include "reg/sequences/uvm_reg_mem_built_in_seq.svh"
-// FIXME `include "reg/sequences/uvm_reg_access_backdoor_check.svh"
+// TODO `include "reg/sequences/uvm_reg_access_backdoor_check.svh"
 
 `endif // UVM_REG_MODEL__SV
