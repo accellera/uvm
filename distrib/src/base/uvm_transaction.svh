@@ -50,7 +50,7 @@ virtual class uvm_transaction extends uvm_object;
 
   // Function: accept_tr
   //
-  // Calling accept_tr indicates that the transaction has been accepted for
+  // Calling ~accept_tr~ indicates that the transaction has been accepted for
   // processing by a consumer component, such as an uvm_driver. With some
   // protocols, the transaction may not be started immediately after it is
   // accepted. For example, a bus driver may have to wait for a bus grant
@@ -59,13 +59,13 @@ virtual class uvm_transaction extends uvm_object;
   // This function performs the following actions:
   //
   // - The transaction's internal accept time is set to the current simulation
-  //   time, or to accept_time if provided and non-zero. The accept_time may be
+  //   time, or to accept_time if provided and non-zero. The ~accept_time~ may be
   //   any time, past or future.
   //
   // - The transaction's internal accept event is triggered. Any processes
   //   waiting on the this event will resume in the next delta cycle. 
   //
-  // - The do_accept_tr method is called to allow for any post-accept
+  // - The <do_accept_tr> method is called to allow for any post-accept
   //   action in derived classes.
 
   extern function void accept_tr (time accept_time=0);
@@ -73,8 +73,8 @@ virtual class uvm_transaction extends uvm_object;
   
   // Function: do_accept_tr
   //
-  // This user-definable callback is called by accept_tr just before the accept
-  // event is triggered. Implementations should call super.do_accept_tr to
+  // This user-definable callback is called by <accept_tr> just before the accept
+  // event is triggered. Implementations should call ~super.do_accept_tr~ to
   // ensure correct operation.
 
   extern virtual protected function void do_accept_tr ();
@@ -93,11 +93,11 @@ virtual class uvm_transaction extends uvm_object;
   //   any time, past or future, but should not be less than the accept time.
   //
   // - If recording is enabled, then a new database-transaction is started with
-  //   the same begin time as above. The record method inherited from uvm_object
+  //   the same begin time as above. The record method inherited from <uvm_object>
   //   is then called, which records the current property values to this new
   //   transaction.
   //
-  // - The do_begin_tr method is called to allow for any post-begin action in
+  // - The <do_begin_tr< method is called to allow for any post-begin action in
   //   derived classes.
   //
   // - The transaction's internal begin event is triggered. Any processes
@@ -118,7 +118,7 @@ virtual class uvm_transaction extends uvm_object;
   //
   // The parent handle is obtained by a previous call to begin_tr or
   // begin_child_tr. If the parent_handle is invalid (=0), then this function
-  // behaves the same as begin_tr. 
+  // behaves the same as <begin_tr>. 
   //
   // This function performs the following actions:
   //
@@ -127,7 +127,7 @@ virtual class uvm_transaction extends uvm_object;
   //   any time, past or future, but should not be less than the accept time.
   //
   // - If recording is enabled, then a new database-transaction is started with
-  //   the same begin time as above. The record method inherited from uvm_object
+  //   the same begin time as above. The record method inherited from <uvm_object>
   //   is then called, which records the current property values to this new
   //   transaction. Finally, the newly started transaction is linked to the
   //   parent transaction given by parent_handle.
@@ -147,9 +147,9 @@ virtual class uvm_transaction extends uvm_object;
 
   // Function: do_begin_tr
   //
-  // This user-definable callback is called by begin_tr and begin_child_tr just
+  // This user-definable callback is called by <begin_tr> and <begin_child_tr> just
   // before the begin event is triggered. Implementations should call
-  // super.do_begin_tr to ensure correct operation.
+  // ~super.do_begin_tr~ to ensure correct operation.
 
   extern virtual protected function void do_begin_tr ();
 
@@ -163,12 +163,12 @@ virtual class uvm_transaction extends uvm_object;
   // This function performs the following actions:
   //
   // - The transaction's internal end time is set to the current simulation
-  //   time, or to end_time if provided and non-zero. The end_time may be any
+  //   time, or to ~end_time~ if provided and non-zero. The ~end_time~ may be any
   //   time, past or future, but should not be less than the begin time.
   //
   // - If recording is enabled and a database-transaction is currently active,
   //   then the record method inherited from uvm_object is called, which records
-  //   the final property values. The transaction is then ended. If free_handle
+  //   the final property values. The transaction is then ended. If ~free_handle~
   //   is set, the transaction is released and can no longer be linked to (if
   //   supported by the implementation).
   //
@@ -183,8 +183,8 @@ virtual class uvm_transaction extends uvm_object;
 
   // Function: do_end_tr
   //
-  // This user-definable callback is called by end_tr just before the end event
-  // is triggered. Implementations should call super.do_end_tr to ensure correct
+  // This user-definable callback is called by <end_tr> just before the end event
+  // is triggered. Implementations should call ~super.do_end_tr~ to ensure correct
   // operation.
 
   extern virtual protected function void do_end_tr ();
@@ -193,7 +193,7 @@ virtual class uvm_transaction extends uvm_object;
   // Function: get_tr_handle
   //
   // Returns the handle associated with the transaction, as set by a previous
-  // call to begin_child_tr or begin_tr with transaction recording enabled.
+  // call to <begin_child_tr> or <begin_tr> with transaction recording enabled.
 
   extern function integer get_tr_handle ();
 
@@ -201,7 +201,7 @@ virtual class uvm_transaction extends uvm_object;
   // Function: disable_recording
   //
   // Turns off recording for the transaction stream. This method does not
-  // effect a component's recording streams.
+  // effect a <uvm_component>'s recording streams.
 
   extern function void disable_recording ();
 
@@ -237,7 +237,7 @@ virtual class uvm_transaction extends uvm_object;
   // Returns the event pool associated with this transaction. 
   //
   // By default, the event pool contains the events: begin, accept, and end.
-  // Events can also be added by derivative objects. See uvm_event_pool for
+  // Events can also be added by derivative objects. See <uvm_event_pool> for
   // more information.
 
   extern function uvm_event_pool get_event_pool ();
@@ -273,7 +273,7 @@ virtual class uvm_transaction extends uvm_object;
   // Function: get_end_time
   //
   // Returns the time at which this transaction was accepted, begun, or ended, 
-  // as by a previous call to accept_tr, begin_tr, begin_child_tr, or end_tr.
+  // as by a previous call to <accept_tr>, <begin_tr>, <begin_child_tr>, or <end_tr>.
 
   extern function time   get_end_time       ();
 
@@ -293,9 +293,10 @@ virtual class uvm_transaction extends uvm_object;
   // Function: get_transaction_id
   //
   // Returns this transaction's numeric identifier, which is -1 if not set
-  // explicitly by set_transaction_id.
+  // explicitly by ~set_transaction_id~.
   //
-  // When using sequences to generate stimulus, the transaction ID is used along
+  // When using a <uvm_sequence #(REQ,RSP)> to generate stimulus, the transaction 
+  // ID is used along
   // with the sequence ID to route responses in sequencers and to correlate
   // responses to requests.
 

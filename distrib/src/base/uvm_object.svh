@@ -214,7 +214,7 @@ virtual class uvm_object extends uvm_void;
   //|      return type_name;
   //|    endfunction
   //
-  // We define the <type_name> static variable to enable access to the type name
+  // We define the ~type_name~ static variable to enable access to the type name
   // without need of an object of the class, i.e., to enable access via the
   // scope operator, ~mytype::type_name~.
 
@@ -288,12 +288,13 @@ virtual class uvm_object extends uvm_void;
   //
   // The ~do_print~ method is the user-definable hook called by <print> and
   // <sprint> that allows users to customize what gets printed or sprinted 
-  // beyond the field information provided by the <`uvm_field_*> macros.
+  // beyond the field information provided by the `uvm_field_* macros
+  // (see <Utility and Field Macros for Components and Objects>).
   //
   // The ~printer~ argument is the policy object that governs the format and
   // content of the output. To ensure correct <print> and <sprint> operation,
   // and to ensure a consistent output format, the ~printer~ must be used
-  // by all <do_print> implementations. That is, instead of using $display or
+  // by all <do_print> implementations. That is, instead of using ~$display~ or
   // string concatenations directly, a ~do_print~ implementation must call
   // through the ~printer's~ API to add information to be printed or sprinted.
   //
@@ -329,8 +330,8 @@ virtual class uvm_object extends uvm_void;
   // consistent formatting offered by the <print>/<sprint>/<do_print>
   // API.
   //
-  // Note: Fields declared in <`uvm_field_*> macros, if used, will not
-  // automatically appear in calls to convert2string.
+  // Fields declared in <Utility Macros> macros (`uvm_field_*), if used, will
+  // not automatically appear in calls to convert2string.
   //
   // An example implementation of convert2string follows.
   // 
@@ -496,9 +497,9 @@ virtual class uvm_object extends uvm_void;
   //|      do_compare &= comparer.compare_field_int("f1", f1, rhs_.f1);
   //|    endfunction
   //
-  // A derived class implementation must call super.do_compare to ensure its
+  // A derived class implementation must call ~super.do_compare()~ to ensure its
   // base class' properties, if any, are included in the comparison. Also, the
-  // rhs argument is provided as a generic uvm_object. Thus, you must $cast it
+  // rhs argument is provided as a generic uvm_object. Thus, you must ~$cast~ it
   // to the type of this object before comparing. 
   //
   // The actual comparison should be implemented using the uvm_comparer object
@@ -584,8 +585,10 @@ virtual class uvm_object extends uvm_void;
   //  - For objects, pack 4 bits immediately before packing the object. For null
   //    objects, pack 4'b0000. For non-null objects, pack 4'b0001.
   //
-  // When the `uvm_*_field macros are used, the above meta information is
-  // included provided the <uvm_packer>'s <use_metadata> variable is set.
+  // When the `uvm_field_* macros are used,
+  // (see <Utility and Field Macros for Components and Objects>)
+  // the above meta information is included provided the <uvm_packer::use_metadata> 
+  // variable is set for the packer.
   //
   // Packing order does not need to match declaration order. However, unpacking
   // order must match packing order.

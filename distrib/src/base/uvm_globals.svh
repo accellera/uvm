@@ -31,7 +31,7 @@
 
 // Task: run_test
 //
-// Convenience function for uvm_top.run_test(). See uvm_root for more
+// Convenience function for uvm_top.run_test(). See <uvm_root> for more
 // information.
 
 task run_test (string test_name="");
@@ -55,8 +55,8 @@ uvm_test_done_objection uvm_test_done = uvm_test_done_objection::get();
 
 // Method: global_stop_request 
 //
-// Convenience function for uvm_top.stop_request(). See uvm_root for more
-// information.
+// Convenience function for uvm_top.stop_request(). See 
+// <uvm_root::stop_request> for more information.
 
 function void global_stop_request();
   uvm_root top;
@@ -67,8 +67,8 @@ endfunction
 
 // Method: set_global_timeout 
 //
-// Convenience function for uvm_top.phase_timeout = timeout. See uvm_root
-// for more information.
+// Convenience function for uvm_top.phase_timeout = timeout. See 
+// <uvm_root::phase_timeout> for more information.
 
 function void set_global_timeout(time timeout);
   uvm_root top;
@@ -80,7 +80,7 @@ endfunction
 // Function: set_global_stop_timeout
 //
 // Convenience function for uvm_top.stop_timeout = timeout.
-// See uvm_root for more information.
+// See <uvm_root::stop_timeout> for more information.
 
 function void set_global_stop_timeout(time timeout);
   uvm_root top;
@@ -97,7 +97,7 @@ endfunction
 
 // Function: uvm_report_enabled
 //
-// Returns 1 if the configured verbosity in <uvm_top> is greater than 
+// Returns 1 if the configured verbosity in ~uvm_top~ is greater than 
 // ~verbosity~ and the action associated with the given ~severity~ and ~id~
 // is not UVM_NO_ACTION, else returns 0.
 // 
