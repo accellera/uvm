@@ -208,7 +208,7 @@ sub run_one_test {
    }
 
    local($sv) = ("$testdir/test.sv");
-   if (! -e $sv) {
+   if (! -e $sv && !$opt_c) {
      # Maybe it is a script instead of an SV file?
      local($pl) = ("$testdir/test.pl");
      if (-e $pl) {
