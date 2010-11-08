@@ -2908,11 +2908,11 @@ endtask: mirror
 // XatomicX
 
 task uvm_reg::XatomicX(bit on);
- 	process m_reg_process;
- 	m_reg_process=process::self();
+   process m_reg_process;
+   m_reg_process=process::self();
 
-    if (on) begin
-    if (m_reg_process == m_process)
+   if (on) begin
+     if (m_reg_process == m_process)
        return;
      m_atomic.get(1);
      m_process = m_reg_process; 

@@ -430,8 +430,8 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
                  " incomplete register transactions still pending completion:"})
        foreach (m_pending[l])
        begin
-       		uvm_reg rg=l;
-       		$display("\n%s",rg.get_full_name());
+       	  uvm_reg rg=l;
+       	  $display("\n%s",rg.get_full_name());
        end
     end
   endfunction

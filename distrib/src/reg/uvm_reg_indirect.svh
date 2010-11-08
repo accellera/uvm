@@ -117,11 +117,11 @@ class uvm_reg_indirect_data extends uvm_reg;
          return 0;
       end
 
-	  //NOTE limit to 2**32 registers
-	  begin
-	  	int unsigned idx = m_idx.get();
-	  	return m_tbl[idx].predict(value, be, kind, path, map, fname, lineno);
-	  end
+      //NOTE limit to 2**32 registers
+      begin
+	 int unsigned idx = m_idx.get();
+	 return m_tbl[idx].predict(value, be, kind, path, map, fname, lineno);
+      end
    endfunction
 
    //
