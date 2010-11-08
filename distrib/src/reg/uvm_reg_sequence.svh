@@ -428,10 +428,9 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
     if (m_pending.num() > 0) begin
       `uvm_error("PENDING REG ITEMS",{"There are ",$sformatf("%0d",m_pending.num()),
                  " incomplete register transactions still pending completion:"})
-       foreach (m_pending[l])
-       begin
-       	  uvm_reg rg=l;
-       	  $display("\n%s",rg.get_full_name());
+       foreach (m_pending[l]) begin
+          uvm_reg rg=l;
+          $display("\n%s",rg.get_full_name());
        end
     end
   endfunction

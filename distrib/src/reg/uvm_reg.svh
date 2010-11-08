@@ -1350,7 +1350,7 @@ function void uvm_reg::add_hdl_path_slice(string name,
     end
     else
        concat = paths.get(paths.size()-1);
-     	
+
    concat.add_path(name, offset, size);
 endfunction
 
@@ -2623,7 +2623,7 @@ task  uvm_reg::backdoor_write(uvm_reg_item rw);
      foreach (hdl_concat.slices[j]) begin
         `uvm_info("RegMem", {"backdoor_write to ",
                   hdl_concat.slices[j].path},UVM_DEBUG)
-     	
+
         if (hdl_concat.slices[j].offset < 0) begin
            ok &= uvm_hdl_deposit(hdl_concat.slices[j].path,rw.value[0]);
            continue;
@@ -2660,7 +2660,7 @@ function uvm_status_e uvm_reg::backdoor_read_func(uvm_reg_item rw);
      foreach (hdl_concat.slices[j]) begin
         `uvm_info("RegMem", {"backdoor_read from %s ",
                hdl_concat.slices[j].path},UVM_DEBUG)
-     	
+
         if (hdl_concat.slices[j].offset < 0) begin
            ok &= uvm_hdl_read(hdl_concat.slices[j].path,val);
            continue;
