@@ -30,11 +30,12 @@
 
 sub questa_support($$$) {
     my ($series,$letter,$beta) = @_;
-    return(1) if ((($series eq "6.6") && ($letter ge "c")) ||
-                  (($series eq "6.5") && ($letter ge "f")) ||
-                  (($series eq "6.4") && ($letter ge "g")));
+    return(1) if ((($series eq "6.6") && ($letter ge "d"))); # ||
+                  #(($series eq "6.5") && ($letter ge "f")) ||
+                  #(($series eq "6.4") && ($letter ge "g")));
     die "Questa version \"$series$letter$beta\" does not fully support UVM.\n".
-      "- required version 6.4f, 6.5f, 6.6c or later\n";
+      #"- required version 6.4f, 6.5f, 6.6c or later\n";
+      "- required version 6.6d\n";
     exit(1);
 }
 
@@ -104,6 +105,7 @@ sub run_the_test($$$) {
             close(COMPILE_LOG);
             $toplevels =~ s/\s\s+/ /g; # remove excess whitespace
         }
+        system("make --quiet -f ../distrib/examples/Makefile.questa UVM_HOME=../distrib svlib") && die "DPI Library Compilation Problem" ;
         my $vsim = ("vsim $run_opts +UVM_TESTNAME=test -c $toplevels -do 'run -all;quit -f' -sv_lib $uvm_home/lib/libuvm_questa");
         &questa_run("cd ./$testdir && $vsim $redirect ".&runtime_log_fname()." 2>&1");
     }

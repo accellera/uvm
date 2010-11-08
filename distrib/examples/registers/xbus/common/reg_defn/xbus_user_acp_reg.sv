@@ -26,28 +26,23 @@ class xbus_user_acp_reg_cb extends uvm_reg_cbs;
 
    local uvm_reg_data_t m_data;
 
-   virtual task pre_write(uvm_reg         rg,
-                          ref uvm_reg_data_t  wdat,
-                          ref uvm_path_e path,
-                          ref uvm_reg_map     map);
-      uvm_reg_data_t data;
+   virtual task pre_write(uvm_reg_item rw);
+      uvm_reg rg;
+      assert($cast(rg,rw.element));
 
       // Predict the value that will be in the register
-      this.m_data = rg.get() + 1;
+      m_data = rg.get() + 1;
       
       // If a backdoor write is used, replace the value written
       // with the incremented value to emulate the front-door
-      if (path == UVM_BACKDOOR) begin
-         wdat = this.m_data;
-      end
+      if (rw.path == UVM_BACKDOOR)
+         rw.value[0] = m_data;
    endtask: pre_write
 
-   virtual task post_write(uvm_reg            rg,
-                           uvm_reg_data_t         wdat,
-                           uvm_path_e        path,
-                           uvm_reg_map            map,
-                           ref uvm_status_e  status);
-      void'(rg.predict(this.m_data));
+   virtual task post_write(uvm_reg_item rw);
+      uvm_reg rg;
+      assert($cast(rg,rw.element));
+      void'(rg.predict(m_data));
    endtask: post_write
 
 endclass

@@ -24,8 +24,8 @@
 // TITLE: Bit Bashing Test Sequences
 //
 
-//
-// class: uvm_reg_single_bit_bash_seq
+//------------------------------------------------------------------------------
+// Class: uvm_reg_single_bit_bash_seq
 //
 // Verify the implementation of a register
 // by attempting to write 1's and 0's to every bit in it,
@@ -37,8 +37,9 @@
 //
 // The DUT should be idle and not modify any register durign this test.
 //
+//------------------------------------------------------------------------------
 
-class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence;
+class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    // Variable: rg
    // The register to be tested
@@ -87,7 +88,7 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence;
             int lsb, w, dc;
 
             dc = 0;
-            lsb = fields[k].get_lsb_pos_in_register();
+            lsb = fields[k].get_lsb_pos();
             w   = fields[k].get_n_bits();
             // Ignore "DC" fields 
             // Ignore Write-only fields because
@@ -111,26 +112,6 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence;
 	 	`uvm_info("RegModel", $psprintf("Verifying bits in register %s in map \"%s\"...",
                                     rg.get_full_name(), maps[j].get_full_name()),UVM_LOW);
          
-         /*
-         // TODO: this test should not rely on nor check the reset values; that is role of the reset test sequence
-
-         // The mirror still contains initial value
-         reset_val = rg.get() & ~dc_mask;
-         
-         rg.read(status, val, UVM_BFM, maps[j], this);
-         if (status != UVM_IS_OK) begin
-            `uvm_error("RegModel", $psprintf("Status was %s when reading register \"%s\" through map \"%s\".",
-                                        status, rg.get_full_name(), maps[j].get_full_name()));
-         end
-         
-         if (val !== reset_val) begin
-            `uvm_error("RegModel", $psprintf("Initial value of register \"%s\" ('h%h) not %s ('h%h)",
-                                        rg.get_full_name(), val,
-                                        (j == 0) ? "reset value" : "as expected",
-                                        reset_val));
-         end
-         */
-         
          // Bash the kth bit
          for (int k = 0; k < n_bits; k++) begin
             // Cannot test unpredictable bit behavior
@@ -139,30 +120,6 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence;
             bash_kth_bit(rg, k, mode[k], maps[j], dc_mask);
          end
             
-            /*
-         // Write the complement of the reset value
-         // Except in unknown field accesses
-         val = reset_val;
-            
-         rg.write(status, val, UVM_BFM, maps[j], this);
-         if (status != UVM_IS_OK) begin
-            `uvm_error("RegModel", $psprintf("Status was %s when writing to register \"%s\" through map \"%s\".",
-                                        status, rg.get_full_name(), maps[j].get_full_name()));
-         end
-         
-         exp = rg.get() & ~dc_mask;
-         rg.read(status, v, UVM_BFM, maps[j], this);
-         if (status != UVM_IS_OK) begin
-            `uvm_error("RegModel", $psprintf("Status was %s when reading register \"%s\" through map \"%s\".",
-                                        status, rg.get_full_name(), maps[j].get_full_name()));
-         end
-
-         v &= ~dc_mask;
-         if (v !== exp) begin
-            `uvm_error("RegModel", $psprintf("Writing 'h%h to register \"%s\" with initial value 'h%h yielded 'h%h instead of 'h%h",
-                                        val, rg.get_full_name(), reset_val, v, exp));
-         end
-         */
       end
    endtask: body
 
@@ -209,19 +166,29 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence;
 endclass: uvm_reg_single_bit_bash_seq
 
 
+//------------------------------------------------------------------------------
+// Class: uvm_reg_bit_bash_seq
 //
-// class: uvm_reg_bit_bash_seq
 //
 // Verify the implementation of all registers in a block
 // by executing the <uvm_reg_single_bit_bash_seq> sequence on it.
 //
-// Blocks and registers with the NO_REG_TESTS or
-// the NO_BIT_BASH_TEST attribute are not verified.
+// Blocks and registers with the ~NO_REG_TESTS~ or
+// the ~NO_BIT_BASH_TEST~ attribute are not verified.
 //
+//------------------------------------------------------------------------------
 
-class uvm_reg_bit_bash_seq extends uvm_reg_sequence;
+class uvm_reg_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
-   // variable: reg_seq
+   // Variable: model
+   //
+   // The block to be tested. Declared in the base class.
+   //
+   //| uvm_reg_block model; 
+
+
+   // Variable: reg_seq
+   //
    // The sequence used to test one register
    //
    protected uvm_reg_single_bit_bash_seq reg_seq;
@@ -232,9 +199,12 @@ class uvm_reg_bit_bash_seq extends uvm_reg_sequence;
      super.new(name);
    endfunction
 
-   // variable: model
-   // The block to be tested
-   
+
+   // Task: body
+   //
+   // Executes the Register Bit Bash sequence.
+   // Do not call directly. Use seq.start() instead.
+   //
    virtual task body();
       uvm_reg_block blks[$];
       
@@ -258,8 +228,10 @@ class uvm_reg_bit_bash_seq extends uvm_reg_sequence;
    endtask
 
 
-   // task: do_block
-   // Test all of the registers in a block
+   // Task: do_block
+   //
+   // Test all of the registers in a a given ~block~
+   //
    protected virtual task do_block(uvm_reg_block blk);
       uvm_reg regs[$];
 
@@ -279,8 +251,8 @@ class uvm_reg_bit_bash_seq extends uvm_reg_sequence;
    endtask: do_block
 
 
+   // Task: reset_blk
    //
-   // task: reset_blk
    // Reset the DUT that corresponds to the specified block abstraction class.
    //
    // Currently empty.

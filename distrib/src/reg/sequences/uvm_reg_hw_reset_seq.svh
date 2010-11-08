@@ -33,13 +33,13 @@
 // via all of the available address maps,
 // comparing the value read with the expected reset value.
 //
-// Blocks and registers with the NO_REG_TESTS or
-// the NO_HW_RESET_TEST attribute are not verified.
+// Blocks and registers with the ~NO_REG_TESTS~ or
+// the ~NO_HW_RESET_TEST~ attribute are not verified.
 //
 // This is usually the first test executed on any DUT.
 //
 
-class uvm_reg_hw_reset_seq extends uvm_reg_sequence;
+class uvm_reg_hw_reset_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    `uvm_object_utils(uvm_reg_hw_reset_seq)
 
@@ -47,8 +47,18 @@ class uvm_reg_hw_reset_seq extends uvm_reg_sequence;
      super.new(name);
    endfunction
 
+
    // Variable: model
-   // The block abstraction class of the DUT
+   //
+   // The block to be tested. Declared in the base class.
+   //
+   //| uvm_reg_block model; 
+
+
+   // Variable: body
+   //
+   // Executes the Hardware Reset sequence.
+   // Do not call directly. Use seq.start() instead.
 
    virtual task body();
 

@@ -82,24 +82,29 @@ class reg2apb_adapter extends uvm_reg_adapter;
 
   `uvm_object_utils(reg2apb_adapter)
 
-  virtual function uvm_sequence_item reg2bus(uvm_reg_bus_item rw_access);
+   function new(string name = "reg2apb_adapter");
+      super.new(name);
+   endfunction 
+
+  virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
     apb_rw apb = apb_rw::type_id::create("apb_rw");
-    apb.kind = (rw_access.kind == UVM_READ) ? apb_rw::READ : apb_rw::WRITE;
-    apb.addr = rw_access.addr;
-    apb.data = rw_access.data;
+    apb.kind = (rw.kind == UVM_READ) ? apb_rw::READ : apb_rw::WRITE;
+    apb.addr = rw.addr;
+    apb.data = rw.data;
     return apb;
   endfunction
 
-  virtual function void bus2reg(uvm_sequence_item bus_item, uvm_reg_bus_item rw_access);
+  virtual function void bus2reg(uvm_sequence_item bus_item,
+                                ref uvm_reg_bus_op rw);
     apb_rw apb;
     if (!$cast(apb,bus_item)) begin
       `uvm_fatal("NOT_APB_TYPE","Provided bus_item is not of the correct type")
       return;
     end
-    rw_access.kind = apb.kind ? UVM_READ : UVM_WRITE;
-    rw_access.addr = apb.addr;
-    rw_access.data = apb.data;
-    rw_access.status = UVM_IS_OK;
+    rw.kind = apb.kind ? UVM_READ : UVM_WRITE;
+    rw.addr = apb.addr;
+    rw.data = apb.data;
+    rw.status = UVM_IS_OK;
   endfunction
 
 endclass

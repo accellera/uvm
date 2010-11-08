@@ -43,7 +43,7 @@
 //|     read addr=k, expect data=~k
 //
 
-class uvm_mem_single_walk_seq extends uvm_reg_sequence;
+class uvm_mem_single_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    `uvm_object_utils(uvm_mem_single_walk_seq)
 
@@ -165,13 +165,21 @@ endclass: uvm_mem_single_walk_seq
 // by executing the <uvm_mem_single_walk_seq> sequence on
 // every memory within it.
 //
-// Blocks and memories with the NO_REG_TESTS or
-// the NO_MEM_WALK_TEST attribute are not verified.
+// Blocks and memories with the ~NO_REG_TESTS~ or
+// the ~NO_MEM_WALK_TEST~ attribute are not verified.
 //
 
-class uvm_mem_walk_seq extends uvm_reg_sequence;
+class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
-   // variable: mem_seq
+   // Variable: model
+   //
+   // The block to be tested. Declared in the base class.
+   //
+   //| uvm_reg_block model; 
+
+
+   // Variable: mem_seq
+   //
    // The sequence used to test one memory
    //
    protected uvm_mem_single_walk_seq mem_seq;
@@ -182,9 +190,12 @@ class uvm_mem_walk_seq extends uvm_reg_sequence;
      super.new(name);
    endfunction
 
-   // variable: model
-   // The block on which to execute test sequences
 
+   // Task: body
+   //
+   // Executes the mem walk sequence, one block at a time.
+   // Do not call directly. Use seq.start() instead.
+   //
    virtual task body();
       uvm_reg_block blks[$];
 
@@ -208,15 +219,17 @@ class uvm_mem_walk_seq extends uvm_reg_sequence;
    endtask: body
 
 
-   // task: do_block
-   // Test all of the memories in a block
+   // Task: do_block
+   //
+   // Test all of the memories in a given ~block~
+   //
    protected virtual task do_block(uvm_reg_block blk);
       uvm_mem mems[$];
       
       if (blk.get_attribute("NO_REG_TESTS") != "" ||
           blk.get_attribute("NO_MEM_TESTS") != "" ||
           blk.get_attribute("NO_MEM_ACCESS_TEST") != "")
-        return;
+         return;
       
       // Iterate over all memories, checking accesses
       blk.get_memories(mems, UVM_NO_HIER);
@@ -233,8 +246,8 @@ class uvm_mem_walk_seq extends uvm_reg_sequence;
    endtask: do_block
 
 
+   // Task: reset_blk
    //
-   // task: reset_blk
    // Reset the DUT that corresponds to the specified block abstraction class.
    //
    // Currently empty.

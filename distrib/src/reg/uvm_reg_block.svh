@@ -43,7 +43,10 @@ virtual class uvm_reg_block extends uvm_object;
    local int unsigned   mems[uvm_mem];
    local bit            maps[uvm_reg_map];
 
+   // Variable: default_path
+   // Default access path for the registers and memories in this block.
    uvm_path_e      default_path = UVM_DEFAULT_PATH;
+
    local string         default_hdl_path = "RTL";
    local uvm_reg_backdoor backdoor;
    local uvm_object_string_pool #(uvm_queue #(string)) hdl_paths_pool;
@@ -105,7 +108,8 @@ virtual class uvm_reg_block extends uvm_object;
    // structure (e.g. it is physically flattened) and does not contribute
    // to the hierarchical HDL path of any contained registers or memories.
    //
-   extern virtual function void configure(uvm_reg_block parent=null, string hdl_path="");
+   extern function void configure(uvm_reg_block parent=null,
+                                  string hdl_path="");
 
    //
    // Function: create_map
@@ -163,8 +167,8 @@ virtual class uvm_reg_block extends uvm_object;
    //
    // Recursively lock an entire register model
    // and build the address maps to enable the
-   // <uvm_reg_block::get_reg_by_offset()> and
-   // <uvm_reg_block::get_mem_by_offset()> methods.
+   // <uvm_reg_map::get_reg_by_offset()> and
+   // <uvm_reg_map::get_mem_by_offset()> methods.
    //
    // Once locked, no further structural changes,
    // such as adding registers or memories,
@@ -492,7 +496,7 @@ virtual class uvm_reg_block extends uvm_object;
    //
    // See <uvm_reg_block::set_cover()> for more details. 
    //
-   extern virtual function bit is_cover_on(int is_on = UVM_ALL_COVERAGE);
+   extern virtual function bit is_cover_on(int is_on = UVM_CVR_ALL);
 
    /*local*/ extern virtual function void XsampleX(uvm_reg_addr_t  addr,
                                                    uvm_reg_map  map);
@@ -946,24 +950,21 @@ function void uvm_reg_block::lock_model();
 
    locked = 1;
 
-   foreach (regs[rg_])
-   begin
-      uvm_reg rg = rg_;	
+   foreach (regs[rg_]) begin
+      uvm_reg rg = rg_;
       rg.Xlock_modelX();
    end
-   
-   foreach (mems[mem_])
-   begin
+
+   foreach (mems[mem_]) begin
       uvm_mem mem = mem_;
       mem.Xlock_modelX();
    end
-   
-   foreach (blks[blk_])
-   begin
+
+   foreach (blks[blk_]) begin
       uvm_reg_block blk=blk_;
       blk.lock_model();
    end
-   
+
    if (this.parent == null) begin
       int max_size = uvm_reg::get_max_size();
 
@@ -1012,9 +1013,8 @@ endfunction: get_full_name
 function void uvm_reg_block::get_fields(ref uvm_reg_field fields[$],
                                         input uvm_hier_e hier=UVM_HIER);
 
-   foreach (regs[rg_])
-   begin
-   	 uvm_reg rg = rg_;
+   foreach (regs[rg_]) begin
+     uvm_reg rg = rg_;
      rg.get_fields(fields);
    end
    
@@ -1024,7 +1024,7 @@ function void uvm_reg_block::get_fields(ref uvm_reg_field fields[$],
        uvm_reg_block blk = blk_;
        blk.get_fields(fields);
      end
-     
+
 endfunction: get_fields
 
 
@@ -1033,16 +1033,14 @@ endfunction: get_fields
 function void uvm_reg_block::get_virtual_fields(ref uvm_vreg_field fields[$],
                                                 input uvm_hier_e hier=UVM_HIER);
 
-   foreach (vregs[vreg_])
-   begin
-   	 uvm_vreg vreg = vreg_;
+   foreach (vregs[vreg_]) begin
+     uvm_vreg vreg = vreg_;
      vreg.get_fields(fields);
    end
    
    if (hier == UVM_HIER)
-     foreach (blks[blk_])
-     begin
-     	uvm_reg_block blk = blk_;
+     foreach (blks[blk_]) begin
+       uvm_reg_block blk = blk_;
        blk.get_virtual_fields(fields);
      end
 endfunction: get_virtual_fields
@@ -1056,9 +1054,8 @@ function void uvm_reg_block::get_registers(ref uvm_reg regs[$],
      regs.push_back(rg);
 
    if (hier == UVM_HIER)
-     foreach (blks[blk_])
-     begin
-     	uvm_reg_block blk = blk_;
+     foreach (blks[blk_]) begin
+       uvm_reg_block blk = blk_;
        blk.get_registers(regs);
      end
 endfunction: get_registers
@@ -1073,9 +1070,8 @@ function void uvm_reg_block::get_virtual_registers(ref uvm_vreg regs[$],
      regs.push_back(rg);
 
    if (hier == UVM_HIER)
-     foreach (blks[blk_])
-     begin
-     	uvm_reg_block blk = blk_;
+     foreach (blks[blk_]) begin
+       uvm_reg_block blk = blk_;
        blk.get_virtual_registers(regs);
      end
 endfunction: get_virtual_registers
@@ -1086,19 +1082,17 @@ endfunction: get_virtual_registers
 function void uvm_reg_block::get_memories(ref uvm_mem mems[$],
                                           input uvm_hier_e hier=UVM_HIER);
 
-   foreach (this.mems[mem_])
-   begin
-   		uvm_mem mem = mem_;
+   foreach (this.mems[mem_]) begin
+     uvm_mem mem = mem_;
      mems.push_back(mem);
    end
-   
+
    if (hier == UVM_HIER)
-     foreach (blks[blk_])
-     begin
-     	uvm_reg_block blk = blk_;
+     foreach (blks[blk_]) begin
+       uvm_reg_block blk = blk_;
        blk.get_memories(mems);
      end
-     
+
 endfunction: get_memories
 
 
@@ -1108,7 +1102,7 @@ function void uvm_reg_block::get_blocks(ref uvm_reg_block blks[$],
                                         input uvm_hier_e hier=UVM_HIER);
 
    foreach (this.blks[blk_]) begin
-   	 uvm_reg_block blk = blk_;
+     uvm_reg_block blk = blk_;
      blks.push_back(blk);
      if (hier == UVM_HIER)
        blk.get_blocks(blks);
@@ -1157,9 +1151,9 @@ function uvm_reg_block uvm_reg_block::get_block_by_name(string name);
      return this;
 
    foreach (blks[blk_]) begin
-	uvm_reg_block blk = blk_;
-	uvm_reg_block tmp_blk;
-	
+     uvm_reg_block blk = blk_;
+     uvm_reg_block tmp_blk;
+
      if (blk.get_name() == name)
        return blk;
      tmp_blk = blk.get_block_by_name(name);
@@ -1178,15 +1172,14 @@ endfunction: get_block_by_name
 
 function uvm_reg uvm_reg_block::get_reg_by_name(string name);
 
-   foreach (regs[rg_])
-   begin
-   	 uvm_reg rg = rg_;
+   foreach (regs[rg_]) begin
+     uvm_reg rg = rg_;
      if (rg.get_name() == name)
        return rg;
    end
    foreach (blks[blk_]) begin
-	uvm_reg_block blk = blk_;
-        uvm_reg rg;
+     uvm_reg_block blk = blk_;
+     uvm_reg rg;
 
      rg = blk.get_reg_by_name(name);
      if (rg != null)
@@ -1204,16 +1197,15 @@ endfunction: get_reg_by_name
 
 function uvm_vreg uvm_reg_block::get_vreg_by_name(string name);
 
-   foreach (vregs[rg_])
-   begin
-   	uvm_vreg rg = rg_;
+   foreach (vregs[rg_]) begin
+     uvm_vreg rg = rg_;
      if (rg.get_name() == name)
        return rg;
    end
-   
+
    foreach (blks[blk_]) begin
-	 uvm_reg_block blk=blk_;
-	 uvm_vreg rg;
+     uvm_reg_block blk=blk_;
+     uvm_vreg rg;
 
      rg = blk.get_vreg_by_name(name);
      if (rg != null)
@@ -1231,16 +1223,15 @@ endfunction: get_vreg_by_name
 
 function uvm_mem uvm_reg_block::get_mem_by_name(string name);
 
-   foreach (mems[mem_])
-   begin
-   	uvm_mem mem = mem_;
+   foreach (mems[mem_]) begin
+     uvm_mem mem = mem_;
      if (mem.get_name() == name)
        return mem;
    end
-   
+
    foreach (blks[blk_]) begin
-	uvm_reg_block blk=blk_;
-	uvm_mem mem;	
+     uvm_reg_block blk=blk_;
+     uvm_mem mem;
      mem = blk.get_mem_by_name(name);
      if (mem != null)
        return mem;
@@ -1258,8 +1249,8 @@ endfunction: get_mem_by_name
 function uvm_reg_field uvm_reg_block::get_field_by_name(string name);
 
    foreach (regs[rg_]) begin
- 	uvm_reg rg = rg_;
-  	uvm_reg_field fields[$];
+      uvm_reg rg = rg_;
+      uvm_reg_field fields[$];
 
       rg.get_fields(fields);
       foreach (fields[i])
@@ -1268,8 +1259,8 @@ function uvm_reg_field uvm_reg_block::get_field_by_name(string name);
    end
 
    foreach (blks[blk_]) begin
-	uvm_reg_block blk = blk_;
-	uvm_reg_field field = blk.get_field_by_name(name);
+     uvm_reg_block blk = blk_;
+     uvm_reg_field field = blk.get_field_by_name(name);
 
      if (field != null)
        return field;
@@ -1288,8 +1279,8 @@ endfunction: get_field_by_name
 function uvm_vreg_field uvm_reg_block::get_vfield_by_name(string name);
 
    foreach (vregs[rg_]) begin
-	uvm_vreg rg =rg_;
-	uvm_vreg_field fields[$];
+      uvm_vreg rg =rg_;
+      uvm_vreg_field fields[$];
 
       rg.get_fields(fields);
       foreach (fields[i])
@@ -1298,8 +1289,8 @@ function uvm_vreg_field uvm_reg_block::get_vfield_by_name(string name);
    end
 
    foreach (blks[blk_]) begin
- 	uvm_reg_block blk = blk_;
- 	uvm_vreg_field field = blk.get_vfield_by_name(name);
+     uvm_reg_block blk = blk_;
+     uvm_vreg_field field = blk.get_vfield_by_name(name);
      if (field != null)
        return field;
    end
@@ -1322,7 +1313,7 @@ endfunction: get_vfield_by_name
 function int uvm_reg_block::set_cover(int is_on);
    int can_cvr;
 
-   if (is_on == UVM_NO_COVERAGE) begin
+   if (is_on == int'(UVM_NO_COVERAGE)) begin
       this.cover_on = is_on;
       return this.cover_on;
    end
@@ -1333,9 +1324,9 @@ function int uvm_reg_block::set_cover(int is_on);
       return this.cover_on;
    end
 
-   if (is_on & UVM_REG_BITS) begin
-      if (this.has_cover & UVM_REG_BITS) begin
-          this.cover_on |= UVM_REG_BITS;
+   if (is_on & UVM_CVR_REG_BITS) begin
+      if (this.has_cover & UVM_CVR_REG_BITS) begin
+          this.cover_on |= UVM_CVR_REG_BITS;
       end
       else begin
         `uvm_warning("RegModel", {this.get_full_name()," - Cannot turn ON Register Bit ",
@@ -1343,9 +1334,9 @@ function int uvm_reg_block::set_cover(int is_on);
       end
    end
 
-   if (is_on & UVM_FIELD_VALS) begin
-      if (this.has_cover & UVM_FIELD_VALS) begin
-          this.cover_on |= UVM_FIELD_VALS;
+   if (is_on & UVM_CVR_FIELD_VALS) begin
+      if (this.has_cover & UVM_CVR_FIELD_VALS) begin
+          this.cover_on |= UVM_CVR_FIELD_VALS;
       end
       else begin
         `uvm_warning("RegModel", {this.get_full_name()," - Cannot turn ON Field Value ",
@@ -1353,9 +1344,9 @@ function int uvm_reg_block::set_cover(int is_on);
       end
    end
 
-   if (is_on & UVM_ADDR_MAP) begin
-      if (this.has_cover & UVM_ADDR_MAP) begin
-          this.cover_on |= UVM_ADDR_MAP;
+   if (is_on & UVM_CVR_ADDR_MAP) begin
+      if (this.has_cover & UVM_CVR_ADDR_MAP) begin
+          this.cover_on |= UVM_CVR_ADDR_MAP;
       end 
       else begin
         `uvm_warning("RegModel", {this.get_full_name()," - Cannot turn ON Address Map ",
@@ -1370,21 +1361,18 @@ function int uvm_reg_block::set_cover(int is_on);
    if (can_cvr == 0)
      return set_cover;
 
-   foreach (regs[rg_])
-   begin
-   		uvm_reg rg = rg_;
+   foreach (regs[rg_]) begin
+     uvm_reg rg = rg_;
      void'(rg.set_cover(can_cvr));
    end
-   
-   foreach (mems[mem_])
-   begin
-   	 uvm_mem mem = mem_;
+
+   foreach (mems[mem_]) begin
+     uvm_mem mem = mem_;
      void'(mem.set_cover(can_cvr));
    end
-   
-   foreach (blks[blk_])
-   begin
-   	 uvm_reg_block blk = blk_;
+
+   foreach (blks[blk_]) begin
+     uvm_reg_block blk = blk_;
      void'(blk.set_cover(can_cvr));
    end
 
@@ -1408,7 +1396,7 @@ endfunction: can_cover
 
 // is_cover_on
 
-function bit uvm_reg_block::is_cover_on(int is_on = UVM_ALL_COVERAGE);
+function bit uvm_reg_block::is_cover_on(int is_on = UVM_CVR_ALL);
    if (this.can_cover(is_on) == 0) return 0;
    return ((this.cover_on & is_on) == is_on);
 endfunction: is_cover_on
@@ -1489,15 +1477,13 @@ endfunction: get_attributes
 
 function void uvm_reg_block::reset(string kind = "HARD");
 
-   foreach (regs[rg_])
-   begin
-   	 uvm_reg rg = rg_;
+   foreach (regs[rg_]) begin
+     uvm_reg rg = rg_;
      rg.reset(kind);
    end
-   
-   foreach (blks[blk_])
-   begin
-   	 uvm_reg_block blk = blk_;
+
+   foreach (blks[blk_]) begin
+     uvm_reg_block blk = blk_;
      blk.reset(kind);
    end
 endfunction
@@ -1508,15 +1494,13 @@ endfunction
 function bit uvm_reg_block::needs_update();
    needs_update = 0;
 
-   foreach (regs[rg_])
-   begin
-   	uvm_reg rg = rg_;
+   foreach (regs[rg_]) begin
+     uvm_reg rg = rg_;
      if (rg.needs_update())
        return 1;
    end
-   foreach (blks[blk_])
-   begin
-   	 uvm_reg_block blk =blk_;
+   foreach (blks[blk_]) begin
+     uvm_reg_block blk =blk_;
      if (blk.needs_update())
        return 1;
    end
@@ -1544,7 +1528,7 @@ task uvm_reg_block::update(output uvm_status_e  status,
                     fname, lineno, this.get_name(), path.name ), UVM_HIGH);
 
    foreach (regs[rg_]) begin
-   		uvm_reg rg = rg_;
+      uvm_reg rg = rg_;
       if (rg.needs_update()) begin
          rg.update(status, path, null, parent, prior, extension);
          if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
@@ -1555,9 +1539,8 @@ task uvm_reg_block::update(output uvm_status_e  status,
       end
    end
 
-   foreach (blks[blk_])
-   begin
-   	 uvm_reg_block blk = blk_;
+   foreach (blks[blk_]) begin
+     uvm_reg_block blk = blk_;
      blk.update(status,path,parent,prior,extension,fname,lineno);
    end
 endtask: update
@@ -1565,42 +1548,34 @@ endtask: update
 
 // mirror
 
-task uvm_reg_block::mirror(output uvm_status_e  status,
-                           input  uvm_check_e   check = UVM_NO_CHECK,
-                           input  uvm_path_e    path = UVM_DEFAULT_PATH,
+task uvm_reg_block::mirror(output uvm_status_e       status,
+                           input  uvm_check_e        check = UVM_NO_CHECK,
+                           input  uvm_path_e         path = UVM_DEFAULT_PATH,
                            input  uvm_sequence_base  parent = null,
                            input  int                prior = -1,
                            input  uvm_object         extension = null,
                            input  string             fname = "",
                            input  int                lineno = 0);
-   status = UVM_IS_OK;
+   uvm_status_e final_status = UVM_IS_OK;
 
-   if (!needs_update()) begin
-     `uvm_info("RegModel", $sformatf("%s:%0d - RegModel block %s does not need updating",
-                    fname, lineno, this.get_name()), UVM_HIGH);
-
-   end
-   
-   `uvm_info("RegModel", $sformatf("%s:%0d - Updating model block %s with %s path",
-                    fname, lineno, this.get_name(), path.name ), UVM_HIGH);
-
-   foreach (regs[rg_]) begin
-   	  uvm_reg rg = rg_;
-      if (rg.needs_update())  begin
-         rg.update(status, path, null, parent, prior, extension);
-         if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
-           `uvm_error("RegModel", $sformatf("Register \"%s\" could not be updated",
-                                        rg.get_full_name()));
-           return;
-         end
+   foreach (regs[rg_]) begin 
+      uvm_reg rg = rg_;
+      rg.mirror(status, check, path, null,
+                parent, prior, extension, fname, lineno);
+      if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
+         final_status = status;
       end
    end
 
-   foreach (blks[blk_])
-   begin
-   	uvm_reg_block blk = blk_;
-     blk.update(status,path,parent,prior,extension,fname,lineno);
+   foreach (blks[blk_]) begin
+      uvm_reg_block blk = blk_;
+
+      blk.mirror(status, check, path, parent, prior, extension, fname, lineno);
+      if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
+         final_status = status;
+      end
    end
+   
 endtask: mirror
 
 
@@ -1824,7 +1799,7 @@ endfunction
 
 function void uvm_reg_block::Xinit_address_mapsX();
    foreach (maps[map_]) begin
-   		uvm_reg_map map = map_;
+      uvm_reg_map map = map_;
       map.Xinit_address_mapX();
    end
       //map.Xverify_map_configX();

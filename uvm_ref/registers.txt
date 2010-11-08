@@ -23,5 +23,5 @@ Model generators are outside the scope of the UVM library.
 
 The class diagram of a register layer model is shown below.
 
-(see uvm_ref_ral_class_map.gif)
+(see uvm_ref_reg_class_map.gif)
 

@@ -44,7 +44,7 @@ class cmd_line_seq_test extends uvm_test;
      uvm_default_printer = uvm_default_line_printer;
 
      svr = _global_reporter.get_report_server();
-     svr.set_max_quit_count(10);
+     svr.set_max_quit_count(200);
 
      uvm_top.print(uvm_default_table_printer);
 
@@ -124,7 +124,7 @@ class cmd_line_seq_test extends uvm_test;
          uvm_sequencer_base sequencer;
          q_of_strings qos = seqs[i];
          for (int j=0; j<qos.size();j++) begin
-           uvm_reg_sequence reg_seq;
+           uvm_reg_sequence #(uvm_sequence #(uvm_reg_item)) reg_seq;
            uvm_sequence_base seq;
            seq = uvm_utils #(uvm_sequence_base)::create_type_by_name(qos.get(j),"tb");
            if (seq == null) begin
@@ -135,7 +135,7 @@ class cmd_line_seq_test extends uvm_test;
            `uvm_info("CMD_LINE_SEQ_TEST",{"\n\nStarting sequence '",qos.get(j),"' ..."},UVM_LOW)
            void'(seq.randomize());
            if ($cast(reg_seq,seq))
-             reg_seq.model = env.rdb;
+             reg_seq.model = env.model;
 
            if (virtual_seq_mode)
              sequencer = null;
@@ -150,6 +150,7 @@ class cmd_line_seq_test extends uvm_test;
                seq.start(sequencer);
              join_none
            end
+           `uvm_info("CMD_LINE_SEQ_TEST",{"Finished sequence '",qos.get(j),"' ..."},UVM_LOW)
          end
          if (qos.size() != 1)
            wait fork;

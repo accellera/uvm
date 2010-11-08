@@ -20,6 +20,19 @@
 // -------------------------------------------------------------
 //
 
+//
+// TITLE: Global Declarations for the Register Layer
+//
+// Globally available types and enumerals.
+//
+// In addition to the declarations outlined in the summary below,
+// the following classes are defined herein
+//
+// <uvm_hdl_path_concat>  : Concatenation of HDL paths
+//
+// <uvm_utils>            : Various type-specific utility functions
+//
+
 `ifndef UVM_REG_MODEL__SV
 `define UVM_REG_MODEL__SV
 
@@ -54,7 +67,7 @@ typedef class uvm_reg_adapter;
 // Return status for register operations
 //
 // UVM_IS_OK      - Operation completed successfully
-// UVM_NOT_OK      - Operation completed with error
+// UVM_NOT_OK     - Operation completed with error
 // UVM_HAS_X      - Operation completed successfully bit had unknown bits.
 //
 
@@ -71,13 +84,16 @@ typedef class uvm_reg_adapter;
 //
 // Path used for register operation
 //
-// UVM_BFM        - Use the front door
-// UVM_BACKDOOR   - Use the back door
-// UVM_DEFAULT_PATH    - Operation specified by the context
+// UVM_BFM          - Use the front door
+// UVM_BACKDOOR     - Use the back door
+// UVM_PREDICT      - Operation derived from observations by a bus monitor via
+//                    the <uvm_reg_redictor> class.
+// UVM_DEFAULT_PATH - Operation specified by the context
 //
    typedef enum {
       UVM_BFM,
       UVM_BACKDOOR,
+      UVM_PREDICT,
       UVM_DEFAULT_PATH
    } uvm_path_e;
 
@@ -146,7 +162,9 @@ typedef class uvm_reg_adapter;
 //
    typedef enum {
       UVM_READ,
-      UVM_WRITE
+      UVM_WRITE,
+      UVM_BURST_READ,
+      UVM_BURST_WRITE
    } uvm_access_e;
 
 
@@ -189,18 +207,18 @@ typedef class uvm_reg_adapter;
 // Coverage models available or desired.
 // Multiple models may be specified by adding individual model identifiers.
 //
-// UVM_NO_COVERAGE   - None
-// UVM_REG_BITS      - Individual register bits
-// UVM_ADDR_MAP      - Individual register and memory addresses
-// UVM_FIELD_VALS    - Field values
-// UVM_ALL_COVERAGE  - All of the above
+// UVM_NO_COVERAGE      - None
+// UVM_CVR_REG_BITS     - Individual register bits
+// UVM_CVR_ADDR_MAP     - Individual register and memory addresses
+// UVM_CVR_FIELD_VALS   - Field values
+// UVM_CVR_ALL          - All of the above
 //
    typedef enum {
-      UVM_NO_COVERAGE  = 'h0000,
-      UVM_REG_BITS     = 'h0001,
-      UVM_ADDR_MAP     = 'h0002,
-      UVM_FIELD_VALS   = 'h0004,
-      UVM_ALL_COVERAGE = 'h0007
+      UVM_NO_COVERAGE      = 'h0000,
+      UVM_CVR_REG_BITS     = 'h0001,
+      UVM_CVR_ADDR_MAP     = 'h0002,
+      UVM_CVR_FIELD_VALS   = 'h0004,
+      UVM_CVR_ALL          = 'h0007
    } uvm_coverage_model_e;
 
 
@@ -244,7 +262,7 @@ typedef class uvm_reg_adapter;
 //
 // Maximum number of byte enable bits
 //
-// Default value is one per byte in `UVM_REG_DATA_WIDTH
+// Default value is one per byte in <`UVM_REG_DATA_WIDTH>
 //
 `ifndef UVM_REG_BYTENABLE_WIDTH 
   `define UVM_REG_BYTENABLE_WIDTH ((`UVM_REG_DATA_WIDTH-1)/8+1) 
@@ -252,44 +270,140 @@ typedef class uvm_reg_adapter;
 
 
 //------------------------------------------------------------------------------
-// FIXME uvm_reg_mem_data_t is of type bit so 2val not 4val
-// Type: uvm_reg_addr_t
-//
-// Address value
-//
-// Type: uvm_reg_addr_logic_t
-//
-// 4-state address value
-//
-typedef  bit [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_t ;
-typedef  logic [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_logic_t ;
-
-//------------------------------------------------------------------------------
-// FIXME uvm_reg_mem_data_t is of type bit so 2val not 4val
 // Type: uvm_reg_data_t
 //
-// Data value
-//
-// Type: uvm_reg_data_logic_t
-//
-// 4-state data value
+// 2-state data value with <`UVM_REG_DATA_WIDTH> bits
 //
 typedef  bit [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_t ;
+
+// Type: uvm_reg_data_logic_t
+//
+// 4-state data value with <`UVM_REG_DATA_WIDTH> bits
+//
 typedef  logic [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_logic_t ;
+
+//------------------------------------------------------------------------------
+// Type: uvm_reg_addr_t
+//
+// 2-state address value with <`UVM_REG_ADDR_WIDTH> bits
+//
+typedef  bit [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_t ;
+
+// Type: uvm_reg_addr_logic_t
+//
+// 4-state address value with <`UVM_REG_ADDR_WIDTH> bits
+//
+typedef  logic [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_logic_t ;
 
 //------------------------------------------------------------------------------
 //
 // Type: uvm_reg_byte_en_t
 //
-// Byte enable vector
+// 2-state byte_enable value with <`UVM_REG_BYTENABLE_WIDTH> bits
 //
 typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
 
 
 //------------------------------------------------------------------------------
-// CLASS: uvm_utils #(TYPE)
+// Type: uvm_hdl_path_slice
+//
+// Slice of an HDL path
+//
+// Struct that specifies the HDL variable that corresponds to all
+// or a portion of a register.
+//
+// path    - Path to the HDL variable.
+// offset  - Offset of the LSB in the register that this variable implements
+// size    - Number of bits (toward the MSB) that this variable implements
+//
+// If the HDL variable implements all of the register, ~offset~ and ~size~
+// are specified as -1. For example:
+//|
+//| r1.add_hdl_path('{ '{"r1", -1, -1} });
+//|
+//
+//------------------------------------------------------------------------------
+
+typedef struct {
+   string path;
+   int offset;
+   int size;
+} uvm_hdl_path_slice;
+
+
+
+//------------------------------------------------------------------------------
+// Class: uvm_hdl_path_concat
+//
+// Concatenation of HDL variables
+//
+// An dArray of <uvm_hdl_path_slice> specifing a concatenation
+// of HDL variables that implement a register in the HDL.
+//
+// Slices must be specified in most-to-least significant order.
+// Slices must not overlap. Gaps may exists in the concatentation
+// if portions of the registers are not implemented.
+//
+// For example, the following register
+//|
+//|        1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0
+//| Bits:  5 4 3 2 1 0 9 8 7 6 5 4 3 2 1 0
+//|       +-+---+-------------+---+-------+
+//|       |A|xxx|      B      |xxx|   C   |
+//|       +-+---+-------------+---+-------+
+//|
+//
+// If the register is implementd using a single HDL variable,
+// The array should specify a single slice with its ~offset~ and ~size~
+// specified as -1. For example:
+//
+//| concat.set('{ '{"r1", -1, -1} });
+//
+//------------------------------------------------------------------------------
+
+class uvm_hdl_path_concat;
+
+   // Variable: slices
+   // Array of individual slices,
+   // stored in most-to-least significant order
+   uvm_hdl_path_slice slices[];
+
+   // Function: set
+   // Initialize the concatenation using an array literal
+   function void set(uvm_hdl_path_slice t[]);
+      slices = t;
+   endfunction
+
+   // Function: add_slice
+   // Append the specified ~slice~ literal to the path concatenation
+   function void add_slice(uvm_hdl_path_slice slice);
+      slices = new [slices.size()+1] (slices);
+      slices[slices.size()-1] = slice;
+   endfunction
+
+   // Function: add_path
+   // Append the specified ~path~ to the path concatenation,
+   // for the specified number of bits at the specified ~offset~.
+   function void add_path(string path,
+                          int unsigned offset = -1,
+                          int unsigned size = -1);
+      uvm_hdl_path_slice t;
+      t.offset = offset;
+      t.path   = path;
+      t.size   = size;
+      
+      add_slice(t);
+   endfunction
+   
+endclass
+
+
+//------------------------------------------------------------------------------
+// CLASS: uvm_utils
 //
 // This class contains useful template functions.
+//
+//------------------------------------------------------------------------------
 
 
 class uvm_utils #(type TYPE=int, string FIELD="config");
@@ -342,7 +456,8 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
 
   // Function: get_config
   //
-  // This method gets the any_config associated with component c.
+  // This method gets the object config of type ~TYPE~
+  // associated with component ~comp~.
   // We check for the two kinds of error which may occur with this kind of 
   // operation.
 
@@ -381,16 +496,55 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
 endclass
 
 
+
+
+// concat2string
+
+function automatic string uvm_hdl_concat2string(uvm_hdl_path_concat concat);
+   string image = "{";
+   
+   if (concat.slices.size() == 1 &&
+       concat.slices[0].offset == -1 &&
+       concat.slices[0].size == -1)
+      return concat.slices[0].path;
+
+   foreach (concat.slices[i]) begin
+      uvm_hdl_path_slice slice=concat.slices[i];
+
+      image = { image, (i == 0) ? "" : ", ", slice.path };
+      if (slice.offset >= 0)
+         image = { image, "@", $psprintf("[%0d +: %0d]", slice.offset, slice.size) };
+   end
+
+   image = { image, "}" };
+
+   return image;
+endfunction
+
+
+typedef struct packed {
+  uvm_reg_addr_t min;
+  uvm_reg_addr_t max;
+  int unsigned stride;
+  } uvm_reg_map_addr_range;
+
+
+
+`include "dpi/uvm_hdl.svh"
+
+`include "reg/uvm_reg_item.svh"
 `include "reg/uvm_reg_adapter.svh"
 `include "reg/uvm_reg_sequence.svh"
+`include "reg/uvm_reg_cbs.svh"
+`include "reg/uvm_reg_backdoor.svh"
 `include "reg/uvm_reg_field.svh"
 `include "reg/uvm_vreg_field.svh"
-`include "reg/uvm_reg_backdoor.svh"
 `include "reg/uvm_reg.svh"
+`include "reg/uvm_reg_indirect.svh"
 `include "reg/uvm_reg_file.svh"
 `include "reg/uvm_mem_mam.svh"
-`include "reg/uvm_mem.svh"
 `include "reg/uvm_vreg.svh"
+`include "reg/uvm_mem.svh"
 `include "reg/uvm_reg_map.svh"
 `include "reg/uvm_reg_block.svh"
 
@@ -401,5 +555,6 @@ endclass
 `include "reg/sequences/uvm_reg_access_seq.svh"
 `include "reg/sequences/uvm_reg_mem_shared_access_seq.svh"
 `include "reg/sequences/uvm_reg_mem_built_in_seq.svh"
+// TODO `include "reg/sequences/uvm_reg_access_backdoor_check.svh"
 
 `endif // UVM_REG_MODEL__SV

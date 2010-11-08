@@ -32,7 +32,7 @@ class reg_ID extends uvm_reg;
 
    virtual function void build();
        this.PRODUCT_ID = uvm_reg_field::type_id::create("PRODUCT_ID");
-       this.PRODUCT_ID.configure(this, 65, 16,"RW", 0, 10'h176, 0, 1);
+       this.PRODUCT_ID.configure(this, 65, 16,"RW", 0, 10'h176, 1, 0, 1);
    endfunction
 endclass
 

@@ -90,32 +90,32 @@ class a_reg extends uvm_reg;
       this.RW    = uvm_reg_field::type_id::create("RW");
       this.RO    = uvm_reg_field::type_id::create("RO");
 
-         this.DC.configure(this, 2, 50, "DC",    0, 2'b01, 0, 0);
-        this.WO1.configure(this, 2, 48, "WO1",   0, 2'b01, 0, 0);
-         this.W1.configure(this, 2, 46, "W1",    0, 2'b01, 0, 0);
-        this.WOS.configure(this, 2, 44, "WOS",   0, 2'b01, 0, 0);
-        this.WOC.configure(this, 2, 42, "WOC",   0, 2'b01, 0, 0);
-         this.WO.configure(this, 2, 40, "WO",    0, 2'b01, 0, 0);
-      this.W0CRS.configure(this, 2, 38, "W0CRS", 0, 2'b01, 0, 0);
-      this.W0SRC.configure(this, 2, 36, "W0SRC", 0, 2'b01, 0, 0);
-      this.W1CRS.configure(this, 2, 34, "W1CRS", 0, 2'b01, 0, 0);
-      this.W1SRC.configure(this, 2, 32, "W1SRC", 0, 2'b01, 0, 0);
-        this.W0T.configure(this, 2, 30, "W0T",   0, 2'b01, 0, 0);
-        this.W0S.configure(this, 2, 28, "W0S",   0, 2'b01, 0, 0);
-        this.W0C.configure(this, 2, 26, "W0C",   0, 2'b01, 0, 0);
-        this.W1T.configure(this, 2, 24, "W1T",   0, 2'b01, 0, 0);
-        this.W1S.configure(this, 2, 22, "W1S",   0, 2'b01, 0, 0);
-        this.W1C.configure(this, 2, 20, "W1C",   0, 2'b01, 0, 0);
-       this.WCRS.configure(this, 2, 18, "WCRS",  0, 2'b01, 0, 0);
-       this.WSRC.configure(this, 2, 16, "WSRC",  0, 2'b01, 0, 0);
-         this.WS.configure(this, 2, 14, "WS",    0, 2'b01, 0, 0);
-         this.WC.configure(this, 2, 12, "WC",    0, 2'b01, 0, 0);
-        this.WRS.configure(this, 2, 10, "WRS",   0, 2'b01, 0, 0);
-        this.WRC.configure(this, 2,  8, "WRC",   0, 2'b01, 0, 0);
-         this.RS.configure(this, 2,  6, "RS",    0, 2'b01, 0, 0);
-         this.RC.configure(this, 2,  4, "RC",    0, 2'b01, 0, 0);
-         this.RW.configure(this, 2,  2, "RW",    0, 2'b01, 0, 0);
-         this.RO.configure(this, 2,  0, "RO",    0, 2'b01, 0, 0);
+         this.DC.configure(this, 2, 50, "DC",    0, 2'b01, 1, 0, 0);
+        this.WO1.configure(this, 2, 48, "WO1",   0, 2'b01, 1, 0, 0);
+         this.W1.configure(this, 2, 46, "W1",    0, 2'b01, 1, 0, 0);
+        this.WOS.configure(this, 2, 44, "WOS",   0, 2'b01, 1, 0, 0);
+        this.WOC.configure(this, 2, 42, "WOC",   0, 2'b01, 1, 0, 0);
+         this.WO.configure(this, 2, 40, "WO",    0, 2'b01, 1, 0, 0);
+      this.W0CRS.configure(this, 2, 38, "W0CRS", 0, 2'b01, 1, 0, 0);
+      this.W0SRC.configure(this, 2, 36, "W0SRC", 0, 2'b01, 1, 0, 0);
+      this.W1CRS.configure(this, 2, 34, "W1CRS", 0, 2'b01, 1, 0, 0);
+      this.W1SRC.configure(this, 2, 32, "W1SRC", 0, 2'b01, 1, 0, 0);
+        this.W0T.configure(this, 2, 30, "W0T",   0, 2'b01, 1, 0, 0);
+        this.W0S.configure(this, 2, 28, "W0S",   0, 2'b01, 1, 0, 0);
+        this.W0C.configure(this, 2, 26, "W0C",   0, 2'b01, 1, 0, 0);
+        this.W1T.configure(this, 2, 24, "W1T",   0, 2'b01, 1, 0, 0);
+        this.W1S.configure(this, 2, 22, "W1S",   0, 2'b01, 1, 0, 0);
+        this.W1C.configure(this, 2, 20, "W1C",   0, 2'b01, 1, 0, 0);
+       this.WCRS.configure(this, 2, 18, "WCRS",  0, 2'b01, 1, 0, 0);
+       this.WSRC.configure(this, 2, 16, "WSRC",  0, 2'b01, 1, 0, 0);
+         this.WS.configure(this, 2, 14, "WS",    0, 2'b01, 1, 0, 0);
+         this.WC.configure(this, 2, 12, "WC",    0, 2'b01, 1, 0, 0);
+        this.WRS.configure(this, 2, 10, "WRS",   0, 2'b01, 1, 0, 0);
+        this.WRC.configure(this, 2,  8, "WRC",   0, 2'b01, 1, 0, 0);
+         this.RS.configure(this, 2,  6, "RS",    0, 2'b01, 1, 0, 0);
+         this.RC.configure(this, 2,  4, "RC",    0, 2'b01, 1, 0, 0);
+         this.RW.configure(this, 2,  2, "RW",    0, 2'b01, 1, 0, 0);
+         this.RO.configure(this, 2,  0, "RO",    0, 2'b01, 1, 0, 0);
    endfunction
 endclass
 
@@ -139,9 +139,11 @@ class dut extends uvm_reg_frontdoor;
    endfunction
 
    virtual task body();
-        //  RO
-      if (is_write) begin
+      uvm_reg_data_t data;
 
+      if (rw_info.kind == UVM_WRITE) begin
+         data = rw_info.value[0];
+         
          R[51:50] = data[51:50];             // DC
          R[49:48] = (written) ? R[49:48] : data[49:48]; // WO1
          R[47:46] = (written) ? R[47:46] : data[47:46]; // W1
@@ -202,6 +204,7 @@ class dut extends uvm_reg_frontdoor;
          data[ 3: 2] = R[ 3: 2];                   // RW
          data[ 1: 0] = R[ 1: 0];                   // RO
 
+         rw_info.value[0] = data;
       end
    endtask
 

@@ -20,6 +20,17 @@
 // -------------------------------------------------------------
 //
  
+  
+// TITLE: Classes for Adapting Between Register and Bus Operations
+//
+// The following classes are defined herein:
+//
+// <uvm_reg_sequence> : base for all register sequences
+//
+// <uvm_reg_frontdoor> : base class for user-defined front-door (BFM) access
+//
+// <uvm_reg_predictor> : updates the register model mirror based on observed bus transactions
+
                                                               
 //------------------------------------------------------------------------------
 //
@@ -45,7 +56,7 @@
 // Note- The convenience API not yet implemented.
 //------------------------------------------------------------------------------
 
-class uvm_reg_sequence #(type BASE=uvm_sequence #(uvm_reg_bus_item)) extends BASE;
+class uvm_reg_sequence #(type BASE=uvm_sequence #(uvm_reg_item)) extends BASE;
 
   `uvm_object_param_utils(uvm_reg_sequence #(BASE))
 
@@ -63,13 +74,13 @@ class uvm_reg_sequence #(type BASE=uvm_sequence #(uvm_reg_bus_item)) extends BAS
   // not need to be specified, i.e. the default specialization is adequate.
   // 
   // To maximize opportunities for reuse, user-defined RegModel sequences should
-  // "promote" the BASE parameter to its own class.
+  // "promote" the BASE parameter.
   //
   // | class my_reg_sequence #(type BASE=uvm_sequence #(uvm_reg_item))
   // |                               extends uvm_reg_sequence #(BASE);
   //
-  // This way, the RegModel sequence can be extended from ~any~ sequence, including
-  // user-defined base sequences, and can run on ~any~ sequencer.
+  // This way, the RegModel sequence can be extended from 
+  // user-defined base sequences.
 
 
   // Variable: model
@@ -91,14 +102,13 @@ class uvm_reg_sequence #(type BASE=uvm_sequence #(uvm_reg_bus_item)) extends BAS
 
   // Variable: reg_seqr
   //
-  // The upstream sequencer  between abstract register transactions
-  // and physical bus transactions, defined only when this sequence is a
-  // translation sequence.
   // Layered upstream "register" sequencer.
-  // Define when this sequence is a translation sequence
-  // and we want to "pull" from an upstream sequencer.
   //
-  uvm_sequencer #(uvm_reg_bus_item) reg_seqr;
+  // Specifies the upstream sequencer between abstract register transactions
+  // and physical bus transactions. Defined only when this sequence is a
+  // translation sequence, and we want to "pull" from an upstream sequencer.
+  //
+  uvm_sequencer #(uvm_reg_item) reg_seqr;
 
 
   // Function: new
@@ -136,16 +146,20 @@ class uvm_reg_sequence #(type BASE=uvm_sequence #(uvm_reg_bus_item)) extends BAS
        {"Starting RegModel translation sequence on sequencer ",
        m_sequencer.get_full_name(),"'"},UVM_LOW)
     forever begin
-      uvm_reg_bus_item rw_access;
-      reg_seqr.peek(rw_access);
-      do_rw_access(rw_access);
-      reg_seqr.get(rw_access);
+      uvm_reg_item reg_item;
+      reg_seqr.peek(reg_item);
+      do_reg_item(reg_item);
+      reg_seqr.get(reg_item);
       #0;
     end
   endtask
 
 
-  local uvm_sequence_base parent_seq;
+  typedef enum { LOCAL, UPSTREAM } seq_parent_e;
+
+  seq_parent_e parent_select = LOCAL;
+
+  uvm_sequence_base upstream_parent;
 
 
   // Function: do_rw_access
@@ -155,32 +169,23 @@ class uvm_reg_sequence #(type BASE=uvm_sequence #(uvm_reg_bus_item)) extends BAS
   // <adapter> to convert the register transaction into the type expected by
   // this sequencer.
   //
-  virtual task do_rw_access(uvm_reg_bus_item rw);
-    uvm_sequence_item bus_req;
+  virtual task do_reg_item(uvm_reg_item rw);
     assert(m_sequencer != null);
     assert(adapter != null);
-    `uvm_info("REG_XLATE_SEQ_START",{"Doing transaction: ",rw.convert2string()},UVM_HIGH)
+    `uvm_info("DO_RW_ACCESS",{"Doing transaction: ",rw.convert2string()},UVM_HIGH)
+
+    if (parent_select == LOCAL) begin
+      upstream_parent = rw.parent;
+      rw.parent = this;
+    end
+
+    if (rw.kind == UVM_WRITE)
+      rw.local_map.do_bus_write(rw, m_sequencer, adapter);
+    else
+      rw.local_map.do_bus_read(rw, m_sequencer, adapter);
     
-    parent_seq = rw.get_parent_sequence();
-    bus_req = adapter.reg2bus(rw);
-    bus_req.m_start_item(m_sequencer,this,rw.prior); 
-    if (parent_seq != null) begin
-      parent_seq.pre_do(1);
-      parent_seq.mid_do(rw);
-    end
-    bus_req.m_finish_item(m_sequencer,this);
-    bus_req.end_event.wait_on();
-    if (adapter.provides_responses) begin
-      uvm_sequence_item bus_rsp;
-      uvm_access_e op;
-      get_base_response(bus_rsp);
-      adapter.bus2reg(bus_rsp,rw);
-    end
-    else begin
-      adapter.bus2reg(bus_req,rw);
-    end
-    if (parent_seq != null)
-      parent_seq.post_do(rw);
+    if (parent_select == LOCAL)
+       rw.parent = upstream_parent;
   endtask
 
 
@@ -194,75 +199,245 @@ class uvm_reg_sequence #(type BASE=uvm_sequence #(uvm_reg_bus_item)) extends BAS
     put_base_response(response_item);
   endfunction
 
-
-/*
-  // Task: pre_do
-  //
-  // When running on a downstream sequencer as a translation sequence, all
-  // calls to ~pre_do~ by the downstream sequencer will be forwarded
-  // to the originating RegModel sequence running on the upstream sequencer.
-  // Users may override ~pre_do~ to customize or disable this behavior.
-  //
-  //
-  virtual task pre_do(bit is_item);
-    if (parent_seq != null)
-      parent_seq.pre_do(is_item);
-  endtask
-
-
-  // Function: mid_do
-  //
-  // When running on a downstream sequencer as a translation sequence, all
-  // calls to ~mid_do~ by the downstream sequencer will be forwarded
-  // to the originating RegModel sequence running on the upstream sequencer.
-  // Users may override ~mid_do~ to customize or disable this behavior.
-  //
-  //
-  virtual function void mid_do(uvm_sequence_item this_item);
-    if (parent_seq != null)
-      parent_seq.mid_do(this_item);
-  endfunction
-
-
-  // Function: post_do
-  //
-  // When running on a downstream sequencer as a translation sequence, all
-  // calls to ~post_do~ by the downstream sequencer will be forwarded
-  // to the originating RegModel sequence running on the upstream sequencer.
-  // Users may override ~post_do~ to customize or disable this behavior.
-  //
-  //
-  virtual function void post_do(uvm_sequence_item this_item);
-    if (parent_seq != null)
-      return parent_seq.post_do(this_item);
-  endfunction
-
-
-  // Function: is_relevant
-  //
-  // When running on a downstream sequencer as a translation sequence, all
-  // calls to ~is_relevant~ by the downstream sequencer will be forwarded
-  // to the originating RegModel sequence running on the upstream sequencer.
-  // Users may override ~is_relevant~ to customize or disable this behavior.
-  //
-  virtual function bit is_relevant();
-    if (parent_seq != null)
-      return parent_seq.is_relevant();
-  endfunction
-
-
-  // Function: wait_for_relevant
-  //
-  // When running on a downstream sequencer as a translation sequence, all
-  // calls to ~wait_for_relevant~ by the downstream sequencer are forwarded
-  // to the originating RegModel sequence running on the upstream sequencer.
-  // Users may override ~wait_for_relevant~ to customize or disable this
-  // behavior.
-  //
-  virtual task wait_for_relevant();
-    if (parent_seq != null)
-      parent_seq.wait_for_relevant();
-  endtask
-
-*/
 endclass
+
+
+//------------------------------------------------------------------------------
+// Class: uvm_reg_frontdoor
+//
+// Facade class for register and memory frontdoor access.
+//------------------------------------------------------------------------------
+//
+// User-defined frontdoor access sequence
+//
+// Base class for user-defined access to register and memory reads and writes
+// through a physical interface.
+//
+// By default, different registers and memories are mapped to different
+// addresses in the address space and are accessed via those exclusively
+// through physical addresses.
+//
+// The frontdoor allows access using a non-linear and/or non-mapped mechanism.
+// Users can extend this class to provide the physical access to these registers.
+//
+virtual class uvm_reg_frontdoor extends uvm_reg_sequence #(uvm_sequence #(uvm_sequence_item));
+
+   // Variable: rw_info
+   //
+   // Holds information about the register being read or written
+   //
+   uvm_reg_item rw_info;
+
+   // Variable: sequencer
+   //
+   // Sequencer executing the operation
+   //
+   uvm_sequencer_base sequencer;
+
+   // Function: new
+   //
+   // Constructor, new object givne optional ~name~.
+   //
+   function new(string name="");
+      super.new(name);
+   endfunction
+
+   string fname;
+   int lineno;
+
+endclass: uvm_reg_frontdoor
+
+
+class uvm_predict_s;
+    bit addr[uvm_reg_addr_t];
+    uvm_reg_item reg_item;
+  endclass
+
+
+//------------------------------------------------------------------------------
+//
+// CLASS: uvm_reg_predictor
+//
+// This class converts observed bus transactions of type ~BUSTYPE~ to generic
+// registers transactions, determines the register being accessed based on the
+// bus address, then updates the register's mirror value with the observed bus
+// data, subject to the register's access mode. See <uvm_reg::predict> for details.
+//
+// Memories can be large, so their accesses are not predicted. Users can
+// periodically use backdoor peek/poke to update the memory mirror.
+//
+//------------------------------------------------------------------------------
+
+class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
+
+  `uvm_component_param_utils(uvm_reg_predictor#(BUSTYPE))
+  //`uvm_register_cb(uvm_reg_predictor #(BUSTYPE), uvm_reg_cbs)
+
+  // Variable: bus_in
+  //
+  // Observed bus transactions of type ~BUSTYPE~ are received from this
+  // port and processed.
+  //
+  // For each incoming transaction, the predictor will attempt to get the
+  // register or memory handle corresponding to the observed bus address. 
+  //
+  // If there is a match, the predictor calls the register or memory's
+  // predict method, passing in the observed bus data. The register or
+  // memory mirror will be updated with this data, subject to its configured
+  // access behavior--RW, RO, WO, etc. The predictor will also convert the
+  // bus transaction to a generic <uvm_reg_item> and send it out the
+  // ~reg_ap~ analysis port.
+  //
+  // If the register is wider than the bus, the
+  // predictor will collect the multiple bus transactions needed to
+  // determine the value being read or written.
+  //
+  uvm_analysis_imp #(BUSTYPE, uvm_reg_predictor #(BUSTYPE)) bus_in;
+
+
+  // Variable: reg_ap
+  //
+  // Analysis output port that publishes <uvm_reg_item> transactions
+  // converted from bus transactions received on ~bus_in~.
+  uvm_analysis_port #(uvm_reg_item) reg_ap;
+
+
+  // Variable: map
+  //
+  // The map used to convert a bus address to the corresponding register
+  // or memory handle. Must be configured before the run phase.
+  // 
+  uvm_reg_map map;
+
+
+  // Variable: adapter
+  //
+  // The adapter used to convey the parameters of a bus operation in 
+  // terms of a canonical <uvm_reg_bus_op> datum.
+  // The ~adapter~ must be configured before the run phase.
+  //
+  uvm_reg_adapter adapter;
+
+
+  // Function: new
+  //
+  // Create a new instance of this type, giving it the optional ~name~
+  // and ~parent~.
+  //
+  function new (string name, uvm_component parent);
+    super.new(name, parent);
+    bus_in = new("bus_in", this);
+    reg_ap = new("reg_ap", this);
+  endfunction
+
+
+  // Function: pre_predict
+  //
+  // Override this method to change the value or re-direct the
+  // target register
+  //
+  virtual function void pre_predict(uvm_reg_item rw);
+  endfunction
+
+  local uvm_predict_s m_pending[uvm_reg];
+
+
+  // Function- write
+  //
+  // not a user-level method. Do not call directly. See documentation
+  // for the ~bus_in~ member.
+  //
+  virtual function void write(BUSTYPE tr);
+     uvm_reg rg;
+     uvm_reg_bus_op rw;
+     assert(adapter != null);
+
+     // In case they forget to set byte_en
+     rw.byte_en = -1;
+     adapter.bus2reg(tr,rw);
+     rg = map.get_reg_by_offset(rw.addr);
+
+     if (rg != null) begin
+       bit found;
+       uvm_reg_item reg_item;
+       uvm_reg_map local_map;
+       uvm_reg_map_info map_info;
+       uvm_predict_s predict_info;
+ 
+       if (!m_pending.exists(rg)) begin
+         uvm_reg_item item = new;
+         predict_info =new;
+         item.element_kind = UVM_REG;
+         item.element      = rg;
+         item.path         = UVM_PREDICT;
+         item.map          = map;
+         item.kind         = rw.kind;
+         predict_info.reg_item = item;
+         m_pending[rg] = predict_info;
+       end
+       predict_info = m_pending[rg];
+       reg_item = predict_info.reg_item;
+
+       if (predict_info.addr.exists(rw.addr)) begin
+          `uvm_error("REG_PREDICT_COLLISION",{"Collision detected for register '",
+                     rg.get_full_name(),"'"})
+          // TODO: what to do with subsequent collisions?
+          m_pending.delete(rg);
+       end
+
+       local_map = rg.get_local_map(map,"predictor::write()");
+       map_info = local_map.get_reg_map_info(rg);
+
+       foreach (map_info.addr[i]) begin
+         if (rw.addr == map_info.addr[i]) begin
+           reg_item.value[0] |= rw.data << (i * map.get_n_bytes()*8);
+           predict_info.addr[rw.addr] = 1;
+           if (predict_info.addr.num() == map_info.addr.size()) begin
+              // We've captured the entire abstract register transaction.
+              uvm_predict_e predict_kind = 
+                  (reg_item.kind == UVM_WRITE) ? UVM_PREDICT_WRITE : UVM_PREDICT_READ;
+              found = 1;
+              pre_predict(reg_item);
+              void'(rg.predict(reg_item.value[0],rw.byte_en,
+                               predict_kind,UVM_BFM));
+              `uvm_info("REG_PREDICT", {"Observed ",reg_item.kind.name(),
+                        " transaction to register ",rg.get_full_name(), ": value='h",
+                         $sformatf("%0h",reg_item.value[0])},UVM_HIGH)
+              reg_ap.write(reg_item);
+              m_pending.delete(rg);
+           end
+           break;
+         end
+       end
+       if (!found)
+         `uvm_error("REG_PREDICT_INTERNAL",{"Unexpected failed address lookup for register '",
+                  rg.get_full_name(),"'"})
+     end
+     else begin
+       `uvm_info("REG_PREDICT_NOT_FOR_ME",
+          {"Observed transaction does not target a register: ",
+            $sformatf("%p",tr)},UVM_FULL)
+     end
+  endfunction
+
+  
+  // Function: check
+  //
+  // Checks that no pending register transactions are still enqueued.
+
+  virtual function void check();
+    if (m_pending.num() > 0) begin
+      `uvm_error("PENDING REG ITEMS",{"There are ",$sformatf("%0d",m_pending.num()),
+                 " incomplete register transactions still pending completion:"})
+       foreach (m_pending[l]) begin
+          uvm_reg rg=l;
+          $display("\n%s",rg.get_full_name());
+       end
+    end
+  endfunction
+
+endclass
+
+
+
+

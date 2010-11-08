@@ -52,8 +52,8 @@ class reg_R_fd extends uvm_reg_frontdoor;
    bit [7:0] R = 0;
 
    virtual task body();
-      if (is_write) R = data;
-      else data = R;
+      if (rw_info.kind == UVM_WRITE) R = rw_info.value[0];
+      else rw_info.value[0] = R;
    endtask
 
    // Function: new

@@ -38,10 +38,12 @@
 // The DUT should be idle and not modify the memory during this test.
 //
 
-class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_sequence_item));
+class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
-   // variable: mem
+   // Variable: mem
+   //
    // The memory to be tested
+   //
    uvm_mem mem;
 
    `uvm_object_utils(uvm_mem_single_access_seq)
@@ -66,10 +68,9 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_se
 	  mem.get_attribute("NO_MEM_ACCESS_TEST") != "") return;
 
       // Can only deal with memories with backdoor access
-      if (mem.get_backdoor() == null &&
-          !mem.has_hdl_path()) begin
-         `uvm_error("RegModel", $psprintf("Memory \"%s\" does not have a backdoor mechanism available",
-                                     mem.get_full_name()));
+      if (mem.get_backdoor() == null && !mem.has_hdl_path()) begin
+         `uvm_error("RegModel", {"Memory '",mem.get_full_name(),
+             "' does not have a backdoor mechanism available"})
          return;
       end
 
@@ -85,9 +86,10 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_se
          uvm_status_e status;
          uvm_reg_data_t  val, exp, v;
          
-         `uvm_info("RegModel", $psprintf("Accessing memory %s in map \"%s\"...",
-                                    mem.get_full_name(), maps[j].get_full_name()), UVM_LOW);
-         
+         `uvm_info("RegModel", {"Verifying access of memory '",
+             mem.get_full_name(),"' in map '", maps[j].get_full_name(),
+             "' ..."}, UVM_LOW)
+
          mode = mem.get_access(maps[j]);
          
          // The access process is, for address k:
@@ -103,7 +105,7 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_se
                mem.peek(status, k, exp);
                if (status != UVM_IS_OK) begin
                   `uvm_error("RegModel", $psprintf("Status was %s when reading \"%s[%0d]\" through backdoor.",
-                                              status.name(), mem.get_full_name(), k));
+                                              status.name(), mem.get_full_name(), k))
                end
             end
             else exp = val;
@@ -111,7 +113,7 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_se
             mem.write(status, k, val, UVM_BFM, maps[j], this);
             if (status != UVM_IS_OK) begin
                `uvm_error("RegModel", $psprintf("Status was %s when writing \"%s[%0d]\" through map \"%s\".",
-                                           status.name(), mem.get_full_name(), k, maps[j].get_full_name()));
+                                           status.name(), mem.get_full_name(), k, maps[j].get_full_name()))
             end
             #1;
             
@@ -119,12 +121,12 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_se
             mem.peek(status, k, val);
             if (status != UVM_IS_OK) begin
                `uvm_error("RegModel", $psprintf("Status was %s when reading \"%s[%0d]\" through backdoor.",
-                                           status.name(), mem.get_full_name(), k));
+                                           status.name(), mem.get_full_name(), k))
             end
             else begin
                if (val !== exp) begin
                   `uvm_error("RegModel", $psprintf("Backdoor \"%s[%0d]\" read back as 'h%h instead of 'h%h.",
-                                              mem.get_full_name(), k, val, exp));
+                                              mem.get_full_name(), k, val, exp))
                end
             end
             
@@ -132,25 +134,25 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_se
             mem.poke(status, k, exp);
             if (status != UVM_IS_OK) begin
                `uvm_error("RegModel", $psprintf("Status was %s when writing \"%s[%0d-1]\" through backdoor.",
-                                           status.name(), mem.get_full_name(), k));
+                                           status.name(), mem.get_full_name(), k))
             end
             
             mem.read(status, k, val, UVM_BFM, maps[j], this);
             if (status != UVM_IS_OK) begin
                `uvm_error("RegModel", $psprintf("Status was %s when reading \"%s[%0d]\" through map \"%s\".",
-                                           status.name(), mem.get_full_name(), k, maps[j].get_full_name()));
+                                           status.name(), mem.get_full_name(), k, maps[j].get_full_name()))
             end
             else begin
                if (mode == "WO") begin
                   if (val !== '0) begin
                      `uvm_error("RegModel", $psprintf("Front door \"%s[%0d]\" read back as 'h%h instead of 'h%h.",
-                                                 mem.get_full_name(), k, val, 0));
+                                                 mem.get_full_name(), k, val, 0))
                   end
                end
                else begin
                   if (val !== exp) begin
                      `uvm_error("RegModel", $psprintf("Front door \"%s[%0d]\" read back as 'h%h instead of 'h%h.",
-                                                 mem.get_full_name(), k, val, exp));
+                                                 mem.get_full_name(), k, val, exp))
                   end
                end
             end
@@ -169,13 +171,21 @@ endclass: uvm_mem_single_access_seq
 // by executing the <uvm_mem_single_access_seq> sequence on
 // every memory within it.
 //
-// Blocks and memories with the NO_REG_TESTS or
-// the NO_MEM_ACCESS_TEST attribute are not verified.
+// Blocks and memories with the ~NO_REG_TESTS~ or
+// the ~NO_MEM_ACCESS_TEST~ attribute are not verified.
 //
 
-class uvm_mem_access_seq extends uvm_reg_sequence;
+class uvm_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
-   // variable: mem_seq
+   // Variable: model
+   //
+   // The block to be tested. Declared in the base class.
+   //
+   //| uvm_reg_block model; 
+
+
+   // Variable: mem_seq
+   //
    // The sequence used to test one memory
    //
    protected uvm_mem_single_access_seq mem_seq;
@@ -186,9 +196,11 @@ class uvm_mem_access_seq extends uvm_reg_sequence;
      super.new(name);
    endfunction
 
-   // variable: model
-   // The block to be tested
-   
+   // Task: body
+   //
+   // Execute the Memory Access sequence.
+   // Do not call directly. Use seq.start() instead.
+   //
    virtual task body();
       uvm_reg_block blks[$];
 
@@ -212,15 +224,17 @@ class uvm_mem_access_seq extends uvm_reg_sequence;
    endtask: body
 
 
-   // task: do_block
-   // Test all of the memories in a block
+   // Task: do_block
+   //
+   // Test all of the memories in a given ~block~
+   //
    protected virtual task do_block(uvm_reg_block blk);
       uvm_mem mems[$];
       
       if (blk.get_attribute("NO_REG_TESTS") != "" ||
           blk.get_attribute("NO_MEM_TESTS") != "" ||
           blk.get_attribute("NO_MEM_ACCESS_TEST") != "")
-        return;
+         return;
       
       // Iterate over all memories, checking accesses
       blk.get_memories(mems, UVM_NO_HIER);
@@ -245,8 +259,8 @@ class uvm_mem_access_seq extends uvm_reg_sequence;
    endtask: do_block
 
 
+   // Task: reset_blk
    //
-   // task: reset_blk
    // Reset the DUT that corresponds to the specified block abstraction class.
    //
    // Currently empty.

@@ -39,7 +39,7 @@
 // The DUT should be idle and not modify any register during this test.
 //
 
-class uvm_reg_shared_access_seq extends uvm_reg_sequence;
+class uvm_reg_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    // Variable: rg
    // The register to be tested
@@ -79,7 +79,7 @@ class uvm_reg_shared_access_seq extends uvm_reg_sequence;
       foreach (fields[k]) begin
          int lsb, w;
          
-         lsb = fields[k].get_lsb_pos_in_register();
+         lsb = fields[k].get_lsb_pos();
          w   = fields[k].get_n_bits();
          
          if (!fields[k].is_known_access(maps[0])) begin
@@ -98,7 +98,7 @@ class uvm_reg_shared_access_seq extends uvm_reg_sequence;
          foreach (fields[k]) begin
             int lsb, w;
             
-            lsb = fields[k].get_lsb_pos_in_register();
+            lsb = fields[k].get_lsb_pos();
             w   = fields[k].get_n_bits();
             
             if (fields[k].get_access(maps[j]) == "WO") begin
@@ -173,7 +173,7 @@ endclass: uvm_reg_shared_access_seq
 // The DUT should be idle and not modify the memory during this test.
 //
 
-class uvm_mem_shared_access_seq extends uvm_reg_sequence;
+class uvm_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    // variable: mem
    // The memory to be tested
@@ -302,19 +302,28 @@ endclass: uvm_mem_shared_access_seq
 // and <uvm_mem_shared_access_seq>
 // sequence respectively on every register and memory within it.
 //
-// Blocks, registers and memories with the NO_REG_TESTS or
-// the NO_SHARED_ACCESS_TEST attribute are not verified.
+// Blocks, registers and memories with the ~NO_REG_TESTS~ or
+// the ~NO_SHARED_ACCESS_TEST~ attribute are not verified.
 //
 
-class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence;
+class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
+
+   // Variable: model
+   //
+   // The block to be tested
+   //
+   //| uvm_reg_block model; 
 
 
-   // variable: reg_seq
+   // Variable: reg_seq
+   //
    // The sequence used to test one register
    //
    protected uvm_reg_shared_access_seq reg_seq;
    
-   // variable: mem_seq
+
+   // Variable: mem_seq
+   //
    // The sequence used to test one memory
    //
    protected uvm_mem_shared_access_seq mem_seq;
@@ -325,9 +334,11 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence;
      super.new(name);
    endfunction
 
-   // variable: model
-   // The block to be tested
 
+   // Task: body
+   //
+   // Executes the Shared Register and Memory sequence
+   //
    virtual task body();
       uvm_reg_block blks[$];
 
@@ -352,23 +363,24 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence;
    endtask: body
 
 
-   // task: do_block
+   // Task: do_block
+   //
    // Test all of the registers and memories in a block
+   //
    protected virtual task do_block(uvm_reg_block blk);
       uvm_reg regs[$];
       uvm_mem mems[$];
       
       if (blk.get_attribute("NO_REG_TESTS") != "" ||
           blk.get_attribute("NO_MEM_TESTS") != "" ||
-          blk.get_attribute("NO_REG_ACCESS_TEST") != "") return;
+          blk.get_attribute("NO_SHARED_ACCESS_TEST") != "")
         return;
-
 
       this.reset_blk(model);
       model.reset();
 
       // Iterate over all registers, checking accesses
-      model.get_registers(regs, UVM_NO_HIER);
+      blk.get_registers(regs, UVM_NO_HIER);
       foreach (regs[i]) begin
          // Registers with some attributes are not to be tested
          if (regs[i].get_attribute("NO_REG_TESTS") == "" &&

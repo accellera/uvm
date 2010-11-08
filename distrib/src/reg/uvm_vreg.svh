@@ -32,8 +32,8 @@
 // not any physical structures in the DUT.
 //
 
-typedef class uvm_mam_region;
-typedef class uvm_mam;
+typedef class uvm_mem_region;
+typedef class uvm_mem_mam;
 
 typedef class uvm_vreg_cbs;
 
@@ -68,7 +68,7 @@ class uvm_vreg extends uvm_object;
    local longint unsigned              size;    //number of vregs
    local bit                           is_static;
 
-   local uvm_mam_region   region;    // Not NULL if implemented via MAM
+   local uvm_mem_region   region;    // Not NULL if implemented via MAM
   
    local semaphore atomic;   // Field RMW operations must be atomic
    local string fname = "";
@@ -166,32 +166,32 @@ class uvm_vreg extends uvm_object;
    // currently stored in the
    // memory region now implementing them.
    //
-   // Returns a reference to a <uvm_mam_region> memory region descriptor
+   // Returns a reference to a <uvm_mem_region> memory region descriptor
    // if the memory allocation manager was able to allocate a region
    // that can implement the virtual register array.
    // Returns ~null~ otherwise.
    //
    // A region implementing a virtual register array
-   // must not be released using the <uvm_mam::release_region()> method.
+   // must not be released using the <uvm_mem_mam::release_region()> method.
    // It must be released using the <uvm_vreg::release_region()> method.
    // 
-   extern virtual function uvm_mam_region allocate(longint unsigned n,
-                                                   uvm_mam          mam);
+   extern virtual function uvm_mem_region allocate(longint unsigned n,
+                                                   uvm_mem_mam          mam);
 
    //
    // FUNCTION: get_region
    // Get the region where the virtual register array is implemented
    //
-   // Returns a reference to the <uvm_mam_region> memory region descriptor
+   // Returns a reference to the <uvm_mem_region> memory region descriptor
    // that implements the virtual register array.
    //
    // Returns ~null~ if the virtual registers array
    // is not currently implemented.
    // A region implementing a virtual register array
-   // must not be released using the <uvm_mam::release_region()> method.
+   // must not be released using the <uvm_mem_mam::release_region()> method.
    // It must be released using the <uvm_vreg::release_region()> method.
    // 
-   extern virtual function uvm_mam_region get_region();
+   extern virtual function uvm_mem_region get_region();
 
    //
    // FUNCTION: release_region
@@ -880,7 +880,7 @@ function bit uvm_vreg::implement(longint unsigned n,
                                      uvm_reg_addr_t   offset = 0,
                                      int unsigned     incr = 0);
 
-   uvm_mam_region mam_region;
+   uvm_mem_region region;
 
    if(n < 1)
    begin
@@ -922,9 +922,9 @@ function bit uvm_vreg::implement(longint unsigned n,
       return 0;
    end
 
-   mam_region = mem.mam.reserve_region(offset,n*incr*mem.get_n_bytes());
+   region = mem.mam.reserve_region(offset,n*incr*mem.get_n_bytes());
 
-   if (mam_region == null) begin
+   if (region == null) begin
       `uvm_error("RegModel", $psprintf("Could not allocate a memory region for virtual register \"%s\"", this.get_full_name()));
       return 0;
    end
@@ -938,19 +938,19 @@ function bit uvm_vreg::implement(longint unsigned n,
       this.release_region();
    end
 
-   this.region = mam_region;
+   this.region = region;
    this.mem    = mem;
    this.size   = n;
    this.offset = offset;
    this.incr   = incr;
-   this.mem.XvregsX.push_back(this);
+   this.mem.Xadd_vregX(this);
 
    return 1;
 endfunction: implement
 
 
-function uvm_mam_region uvm_vreg::allocate(longint unsigned n,
-                                               uvm_mam          mam);
+function uvm_mem_region uvm_vreg::allocate(longint unsigned n,
+                                               uvm_mem_mam          mam);
 
    uvm_mem mem;
 
@@ -961,7 +961,7 @@ function uvm_mam_region uvm_vreg::allocate(longint unsigned n,
    end
 
    if (mam == null) begin
-      `uvm_error("RegModel", $psprintf("Attempting to implement virtual register \"%s\" using a NULL uvm_mam reference", this.get_full_name()));
+      `uvm_error("RegModel", $psprintf("Attempting to implement virtual register \"%s\" using a NULL uvm_mem_mam reference", this.get_full_name()));
       return null;
    end
 
@@ -1014,11 +1014,11 @@ function uvm_mam_region uvm_vreg::allocate(longint unsigned n,
    this.size   = n;
    this.incr   = incr;
 
-   this.mem.XvregsX.push_back(this);
+   this.mem.Xadd_vregX(this);
 endfunction: allocate
 
 
-function uvm_mam_region uvm_vreg::get_region();
+function uvm_mem_region uvm_vreg::get_region();
    return this.region;
 endfunction: get_region
 
@@ -1029,14 +1029,9 @@ function void uvm_vreg::release_region();
       return;
    end
 
-   if (this.mem != null) begin
-      foreach (this.mem.XvregsX[i]) begin
-         if (this.mem.XvregsX[i] == this) begin
-            this.mem.XvregsX.delete(i);
-            break;
-         end
-      end
-   end 
+   if (this.mem != null)
+      this.mem.Xdelete_vregX(this);
+
    if (this.region != null) begin
       this.region.release_region();
    end
