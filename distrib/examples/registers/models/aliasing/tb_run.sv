@@ -76,10 +76,13 @@ endclass
 
 
 initial begin
-   static tb_env env = new("env");
-   static tb_test test = new("test");
-   
+   tb_env env;
+   tb_test test;
    uvm_report_server svr;
+   
+   env = new("env");
+   test = new("test");
+
    svr = _global_reporter.get_report_server();
    svr.set_max_quit_count(10);
    
