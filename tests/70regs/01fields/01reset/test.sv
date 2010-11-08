@@ -50,7 +50,8 @@ endclass
 initial
 begin
    uvm_reg_data_t data;
-   static reg_ID rg = new;
+   reg_ID rg;
+   rg = new;
 
    rg.build();
    

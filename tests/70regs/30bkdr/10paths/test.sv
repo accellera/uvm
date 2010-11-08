@@ -158,9 +158,9 @@ program top;
    
            begin
               uvm_hdl_path_concat t_;
+              uvm_hdl_path_concat ta_[1];
               t_ = new;
 `ifdef INCA 
-              uvm_hdl_path_concat ta_[1];
               
               t_.add_path("$root.dut.b1.r1", -1, -1);
               ta_[0]=t_;
