@@ -1239,7 +1239,7 @@ function void uvm_mem::get_virtual_fields(ref uvm_vreg_field fields[$]);
 
   foreach (m_vregs[l])
   begin
-  	uvm_vreg vreg = l;
+    uvm_vreg vreg = l;
     vreg.get_fields(fields);
   end
 endfunction: get_virtual_fields
@@ -1269,7 +1269,7 @@ function uvm_vreg uvm_mem::get_vreg_by_name(string name);
 
   foreach (m_vregs[l])
   begin
-  	uvm_vreg vreg = l;
+    uvm_vreg vreg = l;
     if (vreg.get_name() == name)
       return vreg;
   end

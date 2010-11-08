@@ -35,7 +35,7 @@ class xa0_xbus_rf_addr_reg extends uvm_reg;
    endfunction: new
 
    virtual function void build();
-      addr = uvm_reg_field::type_id::create("addr");
+      addr = uvm_reg_field::type_id::create("addr",,get_full_name());
       addr.configure(this, 3, 0, "RW", 0, 3'h1, 1, 0, 1);
       addr.set_reset('h0, "SOFT");
    endfunction: build
@@ -73,11 +73,11 @@ class xa0_xbus_rf_config_reg extends uvm_reg;
    endfunction: new
 
    virtual function void build();
-      destination = uvm_reg_field::type_id::create("destination");
+      destination = uvm_reg_field::type_id::create("destination",,get_full_name());
       destination.configure(this, 2, 0, "RW", 0, 2'h0, 1, 0, 0);
-      frame_kind = uvm_reg_field::type_id::create("frame_kind");
+      frame_kind = uvm_reg_field::type_id::create("frame_kind",,get_full_name());
       frame_kind.configure(this, 2, 2, "RW", 0, 2'h0, 1, 1, 0);
-      rsvd0 = uvm_reg_field::type_id::create("rsvd0");
+      rsvd0 = uvm_reg_field::type_id::create("rsvd0",,get_full_name());
       rsvd0.configure(this, 4, 4, "RW", 0, 4'hf, 1, 0, 0);
       rsvd0.set_reset('hf, "SOFT");
    endfunction: build
@@ -100,10 +100,10 @@ class xa0_xbus_rf_user_acp_reg extends uvm_reg;
    endfunction: new
 
    virtual function void build();
-      data_msb = uvm_reg_field::type_id::create("data_msb");
+      data_msb = uvm_reg_field::type_id::create("data_msb",,get_full_name());
       data_msb.configure(this, 4, 4, "DC", 0, 4'h0, 1, 0, 0);
       data_msb.set_reset('h0, "SOFT");
-      data_lsb = uvm_reg_field::type_id::create("data_lsb");
+      data_lsb = uvm_reg_field::type_id::create("data_lsb",,get_full_name());
       data_lsb.configure(this, 4, 0, "DC", 0, 4'h0, 1, 0, 0);
       data_lsb.set_reset('h0, "SOFT");
       set_attribute("NO_BIT_BASH_TEST", "1");
@@ -128,9 +128,9 @@ class xa0_xbus_rf_swr_reg extends uvm_reg;
    endfunction: new
 
    virtual function void build();
-      wdata_msb = uvm_reg_field::type_id::create("wdata_msb");
+      wdata_msb = uvm_reg_field::type_id::create("wdata_msb",,get_full_name());
       wdata_msb.configure(this, 4, 4, "WO", 0, 4'h0, 1, 0, 0);
-      wdata_lsb = uvm_reg_field::type_id::create("wdata_lsb");
+      wdata_lsb = uvm_reg_field::type_id::create("wdata_lsb",,get_full_name());
       wdata_lsb.configure(this, 4, 0, "WO", 0, 4'h0, 1, 0, 0);
       set_attribute("NO_REG_TESTS", "1");
    endfunction: build
@@ -153,9 +153,9 @@ class xa0_xbus_rf_srd_reg extends uvm_reg;
    endfunction: new
 
    virtual function void build();
-      rdata_msb = uvm_reg_field::type_id::create("rdata_msb");
+      rdata_msb = uvm_reg_field::type_id::create("rdata_msb",,get_full_name());
       rdata_msb.configure(this, 4, 4, "RO", 0, 4'ha, 1, 0, 0);
-      rdata_lsb = uvm_reg_field::type_id::create("rdata_lsb");
+      rdata_lsb = uvm_reg_field::type_id::create("rdata_lsb",,get_full_name());
       rdata_lsb.configure(this, 4, 0, "RO", 0, 4'h5, 1, 0, 0);
    endfunction: build
 
@@ -193,7 +193,7 @@ class xa0_xbus_rf_xbus_indirect_reg extends uvm_reg;
    endfunction: new
 
    virtual function void build();
-      value = uvm_reg_field::type_id::create("value");
+      value = uvm_reg_field::type_id::create("value",,get_full_name());
       value.configure(this, 8, 0, "RW", 0, 8'h0, 1, 0, 1);
    endfunction: build
 
@@ -214,7 +214,7 @@ class xa0_xbus_rf_rw_reg extends uvm_reg;
    endfunction: new
 
    virtual function void build();
-      value = uvm_reg_field::type_id::create("value");
+      value = uvm_reg_field::type_id::create("value",,get_full_name());
       value.configure(this, 8, 0, "RW", 0, 8'h5a, 1, 0, 1);
    endfunction: build
 
@@ -235,7 +235,7 @@ class xa0_xbus_rf_ro_reg extends uvm_reg;
    endfunction: new
 
    virtual function void build();
-      value = uvm_reg_field::type_id::create("value");
+      value = uvm_reg_field::type_id::create("value",,get_full_name());
       value.configure(this, 8, 0, "RO", 0, 8'ha5, 1, 0, 1);
    endfunction: build
 
@@ -256,7 +256,7 @@ class xa0_xbus_rf_wo_reg extends uvm_reg;
    endfunction: new
 
    virtual function void build();
-      value = uvm_reg_field::type_id::create("value");
+      value = uvm_reg_field::type_id::create("value",,get_full_name());
       value.configure(this, 8, 0, "WO", 0, 8'h55, 1, 0, 1);
    endfunction: build
 
@@ -290,7 +290,7 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
    rand xa0_xbus_rf_swr_reg           swr_reg;
    rand xa0_xbus_rf_srd_reg           srd_reg;
    rand xa0_xbus_rf_data_reg          data_reg;
-   rand uvm_reg xbus_indirect_reg[8];
+   rand uvm_reg                       xbus_indirect_reg[8];
    rand xa0_xbus_rf_rw_reg            rw_reg[4];
    rand xa0_xbus_rf_ro_reg            ro_reg[4];
    rand xa0_xbus_rf_wo_reg            wo_reg[4];
@@ -330,11 +330,11 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
                 
       default_map = create_map("default_map", 'h0, 1, UVM_LITTLE_ENDIAN);
 
-      addr_reg = xa0_xbus_rf_addr_reg::type_id::create("addr_reg");
+      addr_reg = xa0_xbus_rf_addr_reg::type_id::create("addr_reg",,get_full_name());
       addr_reg.configure(this, null, "addr_reg");
       addr_reg.build();
 
-      config_reg = xa0_xbus_rf_config_reg::type_id::create("config_reg");
+      config_reg = xa0_xbus_rf_config_reg::type_id::create("config_reg",,get_full_name());
       config_reg.configure(this, null);
       config_reg.build();
 
@@ -348,29 +348,29 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
                                  '{"dest", 0, 2} });
          */ 
 
-      user_acp_reg = xa0_xbus_rf_user_acp_reg::type_id::create("user_acp_reg");
+      user_acp_reg = xa0_xbus_rf_user_acp_reg::type_id::create("user_acp_reg",,get_full_name());
       user_acp_reg.configure(this, null, "user_reg");
       user_acp_reg.build();
 
-      swr_reg = xa0_xbus_rf_swr_reg::type_id::create("swr_reg");
+      swr_reg = xa0_xbus_rf_swr_reg::type_id::create("swr_reg",,get_full_name());
       swr_reg.configure(this, null, "shared_wr_reg");
       swr_reg.build();
 
-      srd_reg = xa0_xbus_rf_srd_reg::type_id::create("srd_reg");
+      srd_reg = xa0_xbus_rf_srd_reg::type_id::create("srd_reg",,get_full_name());
       srd_reg.configure(this, null, "shared_rd_reg");
       srd_reg.build();
 
       foreach (xbus_indirect_reg[i]) begin
-      	xa0_xbus_rf_xbus_indirect_reg r_;
+       	 xa0_xbus_rf_xbus_indirect_reg r_;
          string name = $sformatf("xbus_indirect_reg[%0d]",i);
-         r_ = xa0_xbus_rf_xbus_indirect_reg::type_id::create(name);
-         name = $sformatf("id_reg_values[%0d]",i);
-         r_.build();
-         r_.configure(this, null, name);
+         r_ = xa0_xbus_rf_xbus_indirect_reg::type_id::create(name,,get_full_name());
          xbus_indirect_reg[i]=r_;
+         name = $sformatf("id_reg_values[%0d]",i);
+         r_.configure(this, null, name);
+         r_.build();
       end
 
-      data_reg = xa0_xbus_rf_data_reg::type_id::create("data_reg");
+      data_reg = xa0_xbus_rf_data_reg::type_id::create("data_reg",,get_full_name());
       data_reg.build();
       data_reg.configure(addr_reg, xbus_indirect_reg, this, null);
 
@@ -413,7 +413,7 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
 
       foreach (rw_reg[i]) begin
          string name = $sformatf("rw_reg[%0d]",i);
-         rw_reg[i] = xa0_xbus_rf_rw_reg::type_id::create(name);
+         rw_reg[i] = xa0_xbus_rf_rw_reg::type_id::create(name,,get_full_name());
          name = $sformatf("rw_regs[%0d]",i);
          rw_reg[i].configure(this, null, name);
          rw_reg[i].build();
@@ -422,7 +422,7 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
       end
       foreach (ro_reg[i]) begin
          string name = $sformatf("ro_reg[%0d]",i);
-         ro_reg[i] = xa0_xbus_rf_ro_reg::type_id::create(name);
+         ro_reg[i] = xa0_xbus_rf_ro_reg::type_id::create(name,,get_full_name());
          name = $sformatf("ro_regs[%0d]",i);
          ro_reg[i].configure(this, null, name);
          ro_reg[i].build();
@@ -431,7 +431,7 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
       end
       foreach (wo_reg[i]) begin
          string name = $sformatf("wo_reg[%0d]",i);
-         wo_reg[i] = xa0_xbus_rf_wo_reg::type_id::create(name);
+         wo_reg[i] = xa0_xbus_rf_wo_reg::type_id::create(name,,get_full_name());
          name = $sformatf("wo_regs[%0d]",i);
          wo_reg[i].build();
          wo_reg[i].configure(this, null, name);
@@ -439,7 +439,7 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
          wo_reg_value[i] = wo_reg[i].value;
       end
 
-      mem = reg_mem_xa0_xbus_rf_mem::type_id::create("mem");
+      mem = reg_mem_xa0_xbus_rf_mem::type_id::create("mem",,get_full_name());
       mem.configure(this, "mem");
       mem.build();
       default_map.add_mem(mem, 'h100, "RW");
@@ -462,7 +462,7 @@ class reg_sys_xa0 extends uvm_reg_block;
 
    function void build();
 
-      xbus_rf = reg_block_xa0_xbus_rf::type_id::create("xbus_rf");
+      xbus_rf = reg_block_xa0_xbus_rf::type_id::create("xbus_rf",,get_full_name());
       xbus_rf.build();
       xbus_rf.configure(this, "reg_file");
 

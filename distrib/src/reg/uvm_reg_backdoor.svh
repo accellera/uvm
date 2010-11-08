@@ -22,7 +22,7 @@
 
 typedef class uvm_reg_cbs;
 
-`ifdef USE_PROCESS_CONTAINER
+`ifdef UVM_USE_PROCESS_CONTAINER
 class process_container_c;
    process p;
    function new(process p_);
@@ -229,11 +229,11 @@ class uvm_reg_backdoor extends uvm_object;
    string fname;
    int lineno;
 
-   `ifdef USE_PROCESS_CONTAINER
+`ifdef UVM_USE_PROCESS_CONTAINER
    local process_container_c m_update_thread[uvm_object];
-   `else
+`else
    local process m_update_thread[uvm_object];
-   `endif 
+`endif 
 
    `uvm_object_utils(uvm_reg_backdoor)
    `uvm_register_cb(uvm_reg_backdoor, uvm_reg_cbs)
@@ -275,11 +275,11 @@ function void uvm_reg_backdoor::start_update_thread(uvm_object element);
       begin
          uvm_reg_field fields[$];
 
-         `ifdef USE_PROCESS_CONTAINER         
+`ifdef UVM_USE_PROCESS_CONTAINER         
          this.m_update_thread[element] = new(process::self());
-         `else
+`else
          this.m_update_thread[element] = process::self();
-         `endif
+`endif
       
          rg.get_fields(fields);
          forever begin
@@ -313,7 +313,7 @@ endfunction
 function void uvm_reg_backdoor::kill_update_thread(uvm_object element);
    if (this.m_update_thread.exists(element)) begin
 
-`ifdef USE_PROCESS_CONTAINER
+`ifdef UVM_USE_PROCESS_CONTAINER
       this.m_update_thread[element].p.kill();
 `else 
       this.m_update_thread[element].kill();

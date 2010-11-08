@@ -950,22 +950,19 @@ function void uvm_reg_block::lock_model();
 
    locked = 1;
 
-   foreach (regs[rg_])
-   begin
-      uvm_reg rg = rg_;	
-     rg.Xlock_modelX();
+   foreach (regs[rg_]) begin
+      uvm_reg rg = rg_;
+      rg.Xlock_modelX();
    end
 
-   foreach (mems[mem_])
-   begin
+   foreach (mems[mem_]) begin
       uvm_mem mem = mem_;
-     mem.Xlock_modelX();
+      mem.Xlock_modelX();
    end
 
-   foreach (blks[blk_])
-   begin
+   foreach (blks[blk_]) begin
       uvm_reg_block blk=blk_;
-     blk.lock_model();
+      blk.lock_model();
    end
 
    if (this.parent == null) begin
@@ -1016,9 +1013,8 @@ endfunction: get_full_name
 function void uvm_reg_block::get_fields(ref uvm_reg_field fields[$],
                                         input uvm_hier_e hier=UVM_HIER);
 
-   foreach (regs[rg_])
-   begin
-   	 uvm_reg rg = rg_;
+   foreach (regs[rg_]) begin
+     uvm_reg rg = rg_;
      rg.get_fields(fields);
    end
    
@@ -1037,16 +1033,14 @@ endfunction: get_fields
 function void uvm_reg_block::get_virtual_fields(ref uvm_vreg_field fields[$],
                                                 input uvm_hier_e hier=UVM_HIER);
 
-   foreach (vregs[vreg_])
-   begin
-   	 uvm_vreg vreg = vreg_;
+   foreach (vregs[vreg_]) begin
+     uvm_vreg vreg = vreg_;
      vreg.get_fields(fields);
    end
    
    if (hier == UVM_HIER)
-     foreach (blks[blk_])
-     begin
-     	uvm_reg_block blk = blk_;
+     foreach (blks[blk_]) begin
+       uvm_reg_block blk = blk_;
        blk.get_virtual_fields(fields);
      end
 endfunction: get_virtual_fields
@@ -1060,9 +1054,8 @@ function void uvm_reg_block::get_registers(ref uvm_reg regs[$],
      regs.push_back(rg);
 
    if (hier == UVM_HIER)
-     foreach (blks[blk_])
-     begin
-     	uvm_reg_block blk = blk_;
+     foreach (blks[blk_]) begin
+       uvm_reg_block blk = blk_;
        blk.get_registers(regs);
      end
 endfunction: get_registers
@@ -1077,9 +1070,8 @@ function void uvm_reg_block::get_virtual_registers(ref uvm_vreg regs[$],
      regs.push_back(rg);
 
    if (hier == UVM_HIER)
-     foreach (blks[blk_])
-     begin
-     	uvm_reg_block blk = blk_;
+     foreach (blks[blk_]) begin
+       uvm_reg_block blk = blk_;
        blk.get_virtual_registers(regs);
      end
 endfunction: get_virtual_registers
@@ -1090,16 +1082,14 @@ endfunction: get_virtual_registers
 function void uvm_reg_block::get_memories(ref uvm_mem mems[$],
                                           input uvm_hier_e hier=UVM_HIER);
 
-   foreach (this.mems[mem_])
-   begin
-   		uvm_mem mem = mem_;
+   foreach (this.mems[mem_]) begin
+     uvm_mem mem = mem_;
      mems.push_back(mem);
    end
 
    if (hier == UVM_HIER)
-     foreach (blks[blk_])
-     begin
-     	uvm_reg_block blk = blk_;
+     foreach (blks[blk_]) begin
+       uvm_reg_block blk = blk_;
        blk.get_memories(mems);
      end
 
@@ -1112,7 +1102,7 @@ function void uvm_reg_block::get_blocks(ref uvm_reg_block blks[$],
                                         input uvm_hier_e hier=UVM_HIER);
 
    foreach (this.blks[blk_]) begin
-   	 uvm_reg_block blk = blk_;
+     uvm_reg_block blk = blk_;
      blks.push_back(blk);
      if (hier == UVM_HIER)
        blk.get_blocks(blks);
@@ -1161,9 +1151,9 @@ function uvm_reg_block uvm_reg_block::get_block_by_name(string name);
      return this;
 
    foreach (blks[blk_]) begin
-	uvm_reg_block blk = blk_;
+     uvm_reg_block blk = blk_;
      uvm_reg_block tmp_blk;
-	
+
      if (blk.get_name() == name)
        return blk;
      tmp_blk = blk.get_block_by_name(name);
@@ -1182,14 +1172,13 @@ endfunction: get_block_by_name
 
 function uvm_reg uvm_reg_block::get_reg_by_name(string name);
 
-   foreach (regs[rg_])
-   begin
-   	 uvm_reg rg = rg_;
+   foreach (regs[rg_]) begin
+     uvm_reg rg = rg_;
      if (rg.get_name() == name)
        return rg;
    end
    foreach (blks[blk_]) begin
-	uvm_reg_block blk = blk_;
+     uvm_reg_block blk = blk_;
      uvm_reg rg;
 
      rg = blk.get_reg_by_name(name);
@@ -1208,15 +1197,14 @@ endfunction: get_reg_by_name
 
 function uvm_vreg uvm_reg_block::get_vreg_by_name(string name);
 
-   foreach (vregs[rg_])
-   begin
-   	uvm_vreg rg = rg_;
+   foreach (vregs[rg_]) begin
+     uvm_vreg rg = rg_;
      if (rg.get_name() == name)
        return rg;
    end
 
    foreach (blks[blk_]) begin
-	 uvm_reg_block blk=blk_;
+     uvm_reg_block blk=blk_;
      uvm_vreg rg;
 
      rg = blk.get_vreg_by_name(name);
@@ -1235,15 +1223,14 @@ endfunction: get_vreg_by_name
 
 function uvm_mem uvm_reg_block::get_mem_by_name(string name);
 
-   foreach (mems[mem_])
-   begin
-   	uvm_mem mem = mem_;
+   foreach (mems[mem_]) begin
+     uvm_mem mem = mem_;
      if (mem.get_name() == name)
        return mem;
    end
 
    foreach (blks[blk_]) begin
-	uvm_reg_block blk=blk_;
+     uvm_reg_block blk=blk_;
      uvm_mem mem;
      mem = blk.get_mem_by_name(name);
      if (mem != null)
@@ -1262,7 +1249,7 @@ endfunction: get_mem_by_name
 function uvm_reg_field uvm_reg_block::get_field_by_name(string name);
 
    foreach (regs[rg_]) begin
- 	uvm_reg rg = rg_;
+      uvm_reg rg = rg_;
       uvm_reg_field fields[$];
 
       rg.get_fields(fields);
@@ -1272,8 +1259,8 @@ function uvm_reg_field uvm_reg_block::get_field_by_name(string name);
    end
 
    foreach (blks[blk_]) begin
-	uvm_reg_block blk = blk_;
-	uvm_reg_field field = blk.get_field_by_name(name);
+     uvm_reg_block blk = blk_;
+     uvm_reg_field field = blk.get_field_by_name(name);
 
      if (field != null)
        return field;
@@ -1292,7 +1279,7 @@ endfunction: get_field_by_name
 function uvm_vreg_field uvm_reg_block::get_vfield_by_name(string name);
 
    foreach (vregs[rg_]) begin
-	uvm_vreg rg =rg_;
+      uvm_vreg rg =rg_;
       uvm_vreg_field fields[$];
 
       rg.get_fields(fields);
@@ -1302,8 +1289,8 @@ function uvm_vreg_field uvm_reg_block::get_vfield_by_name(string name);
    end
 
    foreach (blks[blk_]) begin
- 	uvm_reg_block blk = blk_;
- 	uvm_vreg_field field = blk.get_vfield_by_name(name);
+     uvm_reg_block blk = blk_;
+     uvm_vreg_field field = blk.get_vfield_by_name(name);
      if (field != null)
        return field;
    end
@@ -1374,21 +1361,18 @@ function int uvm_reg_block::set_cover(int is_on);
    if (can_cvr == 0)
      return set_cover;
 
-   foreach (regs[rg_])
-   begin
-   		uvm_reg rg = rg_;
+   foreach (regs[rg_]) begin
+     uvm_reg rg = rg_;
      void'(rg.set_cover(can_cvr));
    end
 
-   foreach (mems[mem_])
-   begin
-   	 uvm_mem mem = mem_;
+   foreach (mems[mem_]) begin
+     uvm_mem mem = mem_;
      void'(mem.set_cover(can_cvr));
    end
 
-   foreach (blks[blk_])
-   begin
-   	 uvm_reg_block blk = blk_;
+   foreach (blks[blk_]) begin
+     uvm_reg_block blk = blk_;
      void'(blk.set_cover(can_cvr));
    end
 
@@ -1493,15 +1477,13 @@ endfunction: get_attributes
 
 function void uvm_reg_block::reset(string kind = "HARD");
 
-   foreach (regs[rg_])
-   begin
-   	 uvm_reg rg = rg_;
+   foreach (regs[rg_]) begin
+     uvm_reg rg = rg_;
      rg.reset(kind);
    end
 
-   foreach (blks[blk_])
-   begin
-   	 uvm_reg_block blk = blk_;
+   foreach (blks[blk_]) begin
+     uvm_reg_block blk = blk_;
      blk.reset(kind);
    end
 endfunction
@@ -1512,15 +1494,13 @@ endfunction
 function bit uvm_reg_block::needs_update();
    needs_update = 0;
 
-   foreach (regs[rg_])
-   begin
-   	uvm_reg rg = rg_;
+   foreach (regs[rg_]) begin
+     uvm_reg rg = rg_;
      if (rg.needs_update())
        return 1;
    end
-   foreach (blks[blk_])
-   begin
-   	 uvm_reg_block blk =blk_;
+   foreach (blks[blk_]) begin
+     uvm_reg_block blk =blk_;
      if (blk.needs_update())
        return 1;
    end
@@ -1548,7 +1528,7 @@ task uvm_reg_block::update(output uvm_status_e  status,
                     fname, lineno, this.get_name(), path.name ), UVM_HIGH);
 
    foreach (regs[rg_]) begin
-   		uvm_reg rg = rg_;
+      uvm_reg rg = rg_;
       if (rg.needs_update()) begin
          rg.update(status, path, null, parent, prior, extension);
          if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
@@ -1559,9 +1539,8 @@ task uvm_reg_block::update(output uvm_status_e  status,
       end
    end
 
-   foreach (blks[blk_])
-   begin
-   	 uvm_reg_block blk = blk_;
+   foreach (blks[blk_]) begin
+     uvm_reg_block blk = blk_;
      blk.update(status,path,parent,prior,extension,fname,lineno);
    end
 endtask: update
@@ -1588,9 +1567,8 @@ task uvm_reg_block::mirror(output uvm_status_e       status,
       end
    end
 
-   foreach (blks[blk_])
-   begin
-	uvm_reg_block blk = blk_;
+   foreach (blks[blk_]) begin
+      uvm_reg_block blk = blk_;
 
       blk.mirror(status, check, path, parent, prior, extension, fname, lineno);
       if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
@@ -1821,7 +1799,7 @@ endfunction
 
 function void uvm_reg_block::Xinit_address_mapsX();
    foreach (maps[map_]) begin
-   		uvm_reg_map map = map_;
+      uvm_reg_map map = map_;
       map.Xinit_address_mapX();
    end
       //map.Xverify_map_configX();
