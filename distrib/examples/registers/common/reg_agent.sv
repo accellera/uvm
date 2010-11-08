@@ -28,7 +28,7 @@ class reg_rw extends uvm_sequence_item;
      `uvm_field_int(addr, UVM_ALL_ON | UVM_NOPACK);
      `uvm_field_int(data, UVM_ALL_ON | UVM_NOPACK);
      `uvm_field_int(byte_en, UVM_ALL_ON | UVM_NOPACK);
-   `uvm_object_utils_end;
+   `uvm_object_utils_end
    
    function new (string name = "reg_rw");
       super.new(name);
@@ -45,7 +45,7 @@ endclass: reg_rw
 
 class reg_sequencer extends uvm_sequencer #(reg_rw);
 
-   `uvm_component_utils(reg_sequencer);
+   `uvm_component_utils(reg_sequencer)
 
    function new(input string name, uvm_component parent=null);
       super.new(name, parent);

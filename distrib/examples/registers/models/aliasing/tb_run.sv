@@ -76,8 +76,8 @@ endclass
 
 
 initial begin
-   tb_env env = new("env");
-   tb_test test = new("test");
+   static tb_env env = new("env");
+   static tb_test test = new("test");
    
    uvm_report_server svr;
    svr = _global_reporter.get_report_server();
