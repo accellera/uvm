@@ -1871,25 +1871,25 @@ function int uvm_reg::set_cover(int is_on);
       return m_cover_on;
    end
 
-   if (is_on & UVM_REG_BITS) begin
-      if (m_has_cover & UVM_REG_BITS) begin
-          m_cover_on |= UVM_REG_BITS;
+   if (is_on & UVM_CVR_REG_BITS) begin
+      if (m_has_cover & UVM_CVR_REG_BITS) begin
+          m_cover_on |= UVM_CVR_REG_BITS;
       end else begin
           `uvm_warning("RegModel", $psprintf("Register \"%s\" - Cannot turn ON Register Bit coverage becasue the corresponding coverage model was not generated.", get_full_name()));
       end
    end
 
-   if (is_on & UVM_FIELD_VALS) begin
-      if (m_has_cover & UVM_FIELD_VALS) begin
-          m_cover_on |= UVM_FIELD_VALS;
+   if (is_on & UVM_CVR_FIELD_VALS) begin
+      if (m_has_cover & UVM_CVR_FIELD_VALS) begin
+          m_cover_on |= UVM_CVR_FIELD_VALS;
       end else begin
           `uvm_warning("RegModel", $psprintf("Register \"%s\" - Cannot turn ON Field Value coverage becasue the corresponding coverage model was not generated.", get_full_name()));
       end
    end
 
-   if (is_on & UVM_ADDR_MAP) begin
-      if (m_has_cover & UVM_ADDR_MAP) begin
-          m_cover_on |= UVM_ADDR_MAP;
+   if (is_on & UVM_CVR_ADDR_MAP) begin
+      if (m_has_cover & UVM_CVR_ADDR_MAP) begin
+          m_cover_on |= UVM_CVR_ADDR_MAP;
       end else begin
           `uvm_warning("RegModel", $psprintf("Register \"%s\" - Cannot turn ON Address Map coverage becasue the corresponding coverage model was not generated.", get_full_name()));
       end

@@ -496,7 +496,7 @@ virtual class uvm_reg_block extends uvm_object;
    //
    // See <uvm_reg_block::set_cover()> for more details. 
    //
-   extern virtual function bit is_cover_on(int is_on = UVM_ALL_COVERAGE);
+   extern virtual function bit is_cover_on(int is_on = UVM_CVR_ALL);
 
    /*local*/ extern virtual function void XsampleX(uvm_reg_addr_t  addr,
                                                    uvm_reg_map  map);
@@ -1324,9 +1324,9 @@ function int uvm_reg_block::set_cover(int is_on);
       return this.cover_on;
    end
 
-   if (is_on & UVM_REG_BITS) begin
-      if (this.has_cover & UVM_REG_BITS) begin
-          this.cover_on |= UVM_REG_BITS;
+   if (is_on & UVM_CVR_REG_BITS) begin
+      if (this.has_cover & UVM_CVR_REG_BITS) begin
+          this.cover_on |= UVM_CVR_REG_BITS;
       end
       else begin
         `uvm_warning("RegModel", {this.get_full_name()," - Cannot turn ON Register Bit ",
@@ -1334,9 +1334,9 @@ function int uvm_reg_block::set_cover(int is_on);
       end
    end
 
-   if (is_on & UVM_FIELD_VALS) begin
-      if (this.has_cover & UVM_FIELD_VALS) begin
-          this.cover_on |= UVM_FIELD_VALS;
+   if (is_on & UVM_CVR_FIELD_VALS) begin
+      if (this.has_cover & UVM_CVR_FIELD_VALS) begin
+          this.cover_on |= UVM_CVR_FIELD_VALS;
       end
       else begin
         `uvm_warning("RegModel", {this.get_full_name()," - Cannot turn ON Field Value ",
@@ -1344,9 +1344,9 @@ function int uvm_reg_block::set_cover(int is_on);
       end
    end
 
-   if (is_on & UVM_ADDR_MAP) begin
-      if (this.has_cover & UVM_ADDR_MAP) begin
-          this.cover_on |= UVM_ADDR_MAP;
+   if (is_on & UVM_CVR_ADDR_MAP) begin
+      if (this.has_cover & UVM_CVR_ADDR_MAP) begin
+          this.cover_on |= UVM_CVR_ADDR_MAP;
       end 
       else begin
         `uvm_warning("RegModel", {this.get_full_name()," - Cannot turn ON Address Map ",
@@ -1396,7 +1396,7 @@ endfunction: can_cover
 
 // is_cover_on
 
-function bit uvm_reg_block::is_cover_on(int is_on = UVM_ALL_COVERAGE);
+function bit uvm_reg_block::is_cover_on(int is_on = UVM_CVR_ALL);
    if (this.can_cover(is_on) == 0) return 0;
    return ((this.cover_on & is_on) == is_on);
 endfunction: is_cover_on
