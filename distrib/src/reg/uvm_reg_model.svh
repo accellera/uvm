@@ -207,18 +207,18 @@ typedef class uvm_reg_adapter;
 // Coverage models available or desired.
 // Multiple models may be specified by adding individual model identifiers.
 //
-// UVM_NO_COVERAGE   - None
-// UVM_REG_BITS      - Individual register bits
-// UVM_ADDR_MAP      - Individual register and memory addresses
-// UVM_FIELD_VALS    - Field values
-// UVM_ALL_COVERAGE  - All of the above
+// UVM_NO_COVERAGE      - None
+// UVM_CVR_REG_BITS     - Individual register bits
+// UVM_CVR_ADDR_MAP     - Individual register and memory addresses
+// UVM_CVR_FIELD_VALS   - Field values
+// UVM_CVR_ALL          - All of the above
 //
    typedef enum {
-      UVM_NO_COVERAGE  = 'h0000,
-      UVM_REG_BITS     = 'h0001,
-      UVM_ADDR_MAP     = 'h0002,
-      UVM_FIELD_VALS   = 'h0004,
-      UVM_ALL_COVERAGE = 'h0007
+      UVM_NO_COVERAGE      = 'h0000,
+      UVM_CVR_REG_BITS     = 'h0001,
+      UVM_CVR_ADDR_MAP     = 'h0002,
+      UVM_CVR_FIELD_VALS   = 'h0004,
+      UVM_CVR_ALL          = 'h0007
    } uvm_coverage_model_e;
 
 
