@@ -23,8 +23,8 @@
 // The uvm_resource_db#(T) class provides a convenience interface for
 // the resources facility.  In many cases basic operations such as
 // creating and setting a resource or getting a resource could take
-// multiple lines of code using the interfaces in uvm_resource_base or
-// uvm_resource#(T).  The convenience layer in uvm_resource_db#(T)
+// multiple lines of code using the interfaces in <uvm_resource_base> or
+// <uvm_resource#(T)>.  The convenience layer in uvm_resource_db#(T)
 // reduces many of those operations to a single line of code.
 //
 // All of the functions in uvm_resource_db#(T) are static, so they
@@ -54,9 +54,9 @@ class uvm_resource_db #(type T=int);
 
   // function: get_by_type
   //
-  // Import a resource by type.  The type is specified in the db
-  // class parameter so the only argument to this funciton is the
-  // current scope.
+  // Get a resource by type.  The type is specified in the db
+  // class parameter so the only argument to this function is the
+  // ~scope~.
 
   static function rsrc_t get_by_type(string scope);
     return rsrc_t::get_by_type(rsrc_t::get_type(), scope);
@@ -64,9 +64,10 @@ class uvm_resource_db #(type T=int);
 
   // function: get_by_name
 
-  // Imports a resource by name.  The first argument is the name of the
-  // resource to be getd and the second argument is the current
-  // scope.
+  // Imports a resource by ~name~.  The first argument is the ~name~ of the
+  // resource to be retrieved and the second argument is the current
+  // ~scope~. The ~rpterr~ flag indicates whether or not to generate
+  // a warning if no matching resource is found.
 
   static function rsrc_t get_by_name(string name, string scope, bit rpterr=1);
     return rsrc_t::get_by_name(name, scope, rpterr);
@@ -75,7 +76,8 @@ class uvm_resource_db #(type T=int);
   // function: set 
   //
   // add a new item into the resources database.  The item will not be
-  // written to so it will have its default value
+  // written to so it will have its default value. The resource is
+  // created using ~name~ and ~scope~ as the lookup parameters.
   static function rsrc_t set(string name, string scope);
 
     rsrc_t r;
@@ -87,8 +89,9 @@ class uvm_resource_db #(type T=int);
 
   // function: write_and_set
   //
-  // Create a new resource, write a value to it, and set it into the
-  // database.
+  // Create a new resource, write a ~val~ to it, and set it into the
+  // database using ~name~ and ~scope~ as the lookup parameters. The
+  // ~accessor~ is used for auditting.
   static function void write_and_set(input string name, input string scope,
                                         T val, input uvm_object accessor = null);
 
@@ -100,9 +103,10 @@ class uvm_resource_db #(type T=int);
 
   // function: write_and_set_anonymous
   //
-  // Create a new resource, write a value to it, and set it into the
+  // Create a new resource, write a ~val~ to it, and set it into the
   // database.  The resource has no name and therefore will not be
-  // entered into the name map
+  // entered into the name map. But is does have a ~scope~ for lookup
+  // purposes. The ~accessor~ is used for auditting.
   static function void write_and_set_anonymous(input string scope,
                                                   T val, input uvm_object accessor = null);
 
@@ -115,9 +119,10 @@ class uvm_resource_db #(type T=int);
 
   // function read_by_name
   //
-  // locate a resource by name and read its value. The value is returned
-  // through the ref argument.  The return value is a bit that indicates
-  // whether or not the read was successful.
+  // locate a resource by ~name~ and ~scope~ and read its value. The value 
+  // is returned through the ref argument ~val~.  The return value is a bit 
+  // that indicates whether or not the read was successful. The ~accessor~
+  // is used for auditting.
   static function bit read_by_name(input string name, input string scope,
                                    ref T val, input uvm_object accessor = null);
 
@@ -134,8 +139,9 @@ class uvm_resource_db #(type T=int);
   // function read_by_type
   //
   // Read a value by type.  The value is returned through the ref
-  // argument.  The return value is a bit that indicates whether or not
-  // the read is successful.
+  // argument ~val~.  The ~scope~ is used for the lookup. The return
+  // value is a bit that indicates whether or not the read is successful.
+  // The ~accessor~ is used for auditting.
   static function bit read_by_type(input string scope,
                                    ref T val, input uvm_object accessor = null);
     
@@ -151,9 +157,16 @@ class uvm_resource_db #(type T=int);
 
   // function: write_by_name
   //
-  // write a value into the resources database.  First, look up the
-  // resource by name.  If it is not located then add a new resource to
-  // the database and then write its value.
+  // write a ~val~ into the resources database.  First, look up the
+  // resource by ~name~ and ~scope~.  If it is not located then add a new 
+  // resource to the database and then write its value.
+  //
+  // Because the ~scope~ is matched to a resource which may be a
+  // regular expression, and consequently may target other scopes beyond
+  // the ~scope~ argument. Care must be taken with this function. If
+  // a <get_by_name> match is found for ~name~ and ~scope~ then ~val~
+  // will be written to that matching resource and thus may impact
+  // other scopes which also match the resource.
   static function bit write_by_name(input string name, input string scope,
                                      T val, input uvm_object accessor = null);
 
@@ -169,9 +182,16 @@ class uvm_resource_db #(type T=int);
 
   // function: write_by_type
   //
-  // write a value into the resources database.  First, look up the
+  // write a ~val~ into the resources database.  First, look up the
   // resource by type.  If it is not located then add a new resource to
   // the database and then write its value.
+  //
+  // Because the ~scope~ is matched to a resource which may be a
+  // regular expression, and consequently may target other scopes beyond
+  // the ~scope~ argument. Care must be taken with this function. If
+  // a <get_by_name> match is found for ~name~ and ~scope~ then ~val~
+  // will be written to that matching resource and thus may impact
+  // other scopes which also match the resource.
   static function bit write_by_type(input string scope,
                                     input T val, input uvm_object accessor = null);
 

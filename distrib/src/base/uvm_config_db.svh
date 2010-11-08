@@ -21,7 +21,7 @@
 // class: uvm_config_db#(T)
 //
 // The uvm_config_db#(T) class provides a convenience interface 
-// on top of the uvm_resource_db to simplify the basic interface
+// on top of the <uvm_resource_db> to simplify the basic interface
 // that is used for reading and writing into the resource database.
 //
 // All of the functions in uvm_config_db#(T) are static, so they
@@ -42,9 +42,9 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
 
   // function: get
   //
-  // Get the value using component ~cntxt~ as the starting 
-  // search point. ~inst_name~ is an explicit instance name relative
-  // to ~cntxt~ and may be an empty string if the ~cntxt~ is the
+  // Get the value ~field_name~ in ~inst_name~, using component ~cntxt~ as 
+  // the starting search point. ~inst_name~ is an explicit instance name 
+  // relative to ~cntxt~ and may be an empty string if the ~cntxt~ is the
   // instance that the configuration object applies to. ~field_name~
   // is the specific field in the scope that is being searched for.
   //
@@ -92,7 +92,8 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
 
   // function: set 
   //
-  // Create a new or update an existing configuration setting. 
+  // Create a new or update an existing configuration setting for
+  // ~field_name~ in ~inst_name~ from ~cntxt~.
   // The setting is made at ~cntxt~, with the full name of ~cntxt~ 
   // added to the ~inst_name~. If ~cntxt~ is null then ~inst_name~
   // provides the complete scope information of the setting.
