@@ -157,7 +157,8 @@ program top;
            model.b1.r1.get_full_hdl_path(paths);
    
            begin
-              uvm_hdl_path_concat t_ = new;
+              uvm_hdl_path_concat t_;
+              t_ = new;
 `ifdef INCA 
               uvm_hdl_path_concat ta_[1];
               

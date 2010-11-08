@@ -248,6 +248,12 @@ virtual class uvm_reg_frontdoor extends uvm_reg_sequence #(uvm_sequence #(uvm_se
 endclass: uvm_reg_frontdoor
 
 
+class uvm_predict_s;
+    bit addr[uvm_reg_addr_t];
+    uvm_reg_item reg_item;
+  endclass
+
+
 //------------------------------------------------------------------------------
 //
 // CLASS: uvm_reg_predictor
@@ -333,12 +339,7 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
   virtual function void pre_predict(uvm_reg_item rw);
   endfunction
 
-  class predict_s;
-    bit addr[uvm_reg_addr_t];
-    uvm_reg_item reg_item;
-  endclass
-
-  local predict_s m_pending[uvm_reg];
+  local uvm_predict_s m_pending[uvm_reg];
 
 
   // Function- write
@@ -361,7 +362,7 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
        uvm_reg_item reg_item;
        uvm_reg_map local_map;
        uvm_reg_map_info map_info;
-       predict_s predict_info;
+       uvm_predict_s predict_info;
  
        if (!m_pending.exists(rg)) begin
          uvm_reg_item item = new;
@@ -428,10 +429,9 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
     if (m_pending.num() > 0) begin
       `uvm_error("PENDING REG ITEMS",{"There are ",$sformatf("%0d",m_pending.num()),
                  " incomplete register transactions still pending completion:"})
-       foreach (m_pending[l])
-       begin
-       		uvm_reg rg=l;
-       		$display("\n%s",rg.get_full_name());
+       foreach (m_pending[l]) begin
+          uvm_reg rg=l;
+          $display("\n%s",rg.get_full_name());
        end
     end
   endfunction

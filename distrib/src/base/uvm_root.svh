@@ -127,7 +127,7 @@ class uvm_root extends uvm_component;
 
   // Function: insert_phase
   //
-  // Inserts a new phase given by new_phase _after_ the existing phase given by
+  // Inserts a new phase given by new_phase ~after~ the existing phase given by
   // exist_phase. The uvm_top maintains a queue of phases executed in
   // consecutive order. If exist_phase is null, then new_phase is inserted at
   // the head of the queue, i.e., it becomes the first phase.
