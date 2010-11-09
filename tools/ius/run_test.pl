@@ -25,25 +25,44 @@
 #
 # Make sure the version of IUS can run these tests
 #
+@ius_min_version_required=(9,2,30);
 $ius = `irun -version`;
-if ($ius !~ /TOOL:[^\d]+(\d+\.\d+)/) {
+chomp $ius;
+if ($ius !~ /TOOL:\s+\S+\s+(\d+)\.(\d+)-([sdbep])(\d+)/) {
   print STDERR "Unable to run IUS: $ius";
   exit(1);
+} else {
+	@ius_version = ($1,$2,$4);
+	&ius_compare_version($3,\@ius_version, \@ius_min_version_required);
 }
-$ius_version = $1;
-if ($ius_version !~ m/(\d+)\.(\d+)$/) {
-   print stderr "Unknown IUS version number \"$ius_version\".\n";
-   exit(1);
-}
-if ($ius_version < 9.2) { &ius_too_old($ius_version); }
 
 sub ius_too_old {
-   local($v, $_) = @_;
+   local($v, @min) = @_;
    print STDERR "IUS $v cannot run the UVM library.\n";
-   print STDERR "Version 9.20-p001 or later is required.\n";
+   print STDERR "Version $min[0].$min[1]s$min[2] or later is required.\n";
    exit(1);
 }
 
+sub ius_compare_version {
+	my($stream,$cv,$rv)=@_;
+	my(@c,@r);
+	@c=@{$cv};
+	@r=@{$rv};
+	if($c[0] < $r[0]) {
+		&ius_too_old(@c,@r);
+	} elsif ($c[1] < $r[1]) {
+		&ius_too_old(@c,@r);
+	} elsif (($c[2] < $r[2]) && ($stream eq "s") ) {
+		&ius_too_old(@c,@r);
+	} elsif ($stream ne "s") {
+		print STDERR "running a nonstd build version [$ius] assuming its at least equiv. to IUS".ius_version_string(@r)."\n";
+	}
+}
+
+sub ius_version_string {
+	my(@v)=@_;
+	return "$v[0].$v[1]s$v[2]";
+}
 
 #
 # Run the test implemented by the file named "test.sv" located

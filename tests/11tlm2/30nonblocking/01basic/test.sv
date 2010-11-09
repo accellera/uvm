@@ -138,7 +138,7 @@ endclass
 //----------------------------------------------------------------------
 class env extends uvm_component;
 
-  `uvm_component_utils(env);
+  `uvm_component_utils(env)
 
   producer p;
   consumer c;

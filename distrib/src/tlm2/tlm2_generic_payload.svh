@@ -408,7 +408,8 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
 
 
    function void do_print(uvm_printer printer);
-      foreach (m_extensions[ext]) begin
+      foreach (m_extensions[ext_]) begin
+      	 uvm_tlm_extension_base ext = ext_;
          printer.print_object(ext.get_type_handle_name(), m_extensions[ext]);
       end
    endfunction
@@ -429,12 +430,14 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
       uvm_tlm_generic_payload gp;
       do_compare = super.do_compare(rhs, comparer);
       $cast(gp, rhs);
-      foreach (m_extensions[ext]) begin
+      foreach (m_extensions[ext_]) begin
+      	 uvm_tlm_extension_base ext = ext_;
          if (!gp.m_extensions.exists(ext)) 
             do_compare &= comparer.compare_object(ext.get_type_handle_name(), m_extensions[ext], null);
          else do_compare &= comparer.compare_object(ext.get_type_handle_name(), m_extensions[ext], gp.m_extensions[ext]);
       end
-      foreach (gp.m_extensions[ext]) begin
+      foreach (gp.m_extensions[ext_]) begin
+      	 uvm_tlm_extension_base ext = ext_;
          if (!m_extensions.exists(ext)) 
             do_compare &= comparer.compare_object(ext.get_type_handle_name(), null, gp.m_extensions[ext]);
       end
