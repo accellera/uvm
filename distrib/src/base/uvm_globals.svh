@@ -68,11 +68,19 @@ endfunction
 // Method: set_global_timeout 
 //
 // Convenience function for uvm_top.phase_timeout = timeout. See uvm_root
-// for more information.
+// for more information.  The overridable bit controls whether subsequent
+// settings will be honored.
 
-function void set_global_timeout(time timeout);
+
+function void set_global_timeout(time timeout, bit overridable = 1);
   uvm_root top;
+  static bit m_uvm_timeout_overridable = 1;
   top = uvm_root::get();
+  if (m_uvm_timeout_overridable == 0) begin
+    uvm_report_info("NOTIMOUTOVR", $psprintf("The global timeout setting of %0d is not overridable to %0d due to a previous setting.", top.phase_timeout, timeout), UVM_NONE);
+    return;
+  end
+  m_uvm_timeout_overridable = overridable;
   top.phase_timeout = timeout;
 endfunction
 
@@ -385,4 +393,29 @@ task uvm_wait_for_nba_region;
 
 endtask
 
+
+//----------------------------------------------------------------------------
+//
+// Function: uvm_split_string
+//
+// Returns a queue of strings, ~values~, that is the result of the ~str~ split
+// based on the ~sep~.  For example:
+//
+//| uvm_split_string("1,on,false", ",", splits);
+//
+// Results in the 'splits' queue containing the three elements: 1, on and 
+// false.
+//----------------------------------------------------------------------------
+
+function automatic void uvm_split_string (string str, byte sep, ref string values[$]);
+  int s = 0, e = 0;
+  values.delete();
+  while(e < str.len()) begin
+    for(s=e; e<str.len(); ++e)
+      if(str[e] == sep) break;
+    if(s != e)
+      values.push_back(str.substr(s,e-1));
+    e++;
+  end
+endfunction
 

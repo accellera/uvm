@@ -58,7 +58,7 @@ sub ius_too_old {
 sub run_the_test {
   local($testdir, $ius_comp_opts, $ius_sim_opts, $_) = @_;
 
-  $ius = "irun -timescale 1ns/1ns $uvm_home/src/dpi/uvm_dpi.c +incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv test.sv -l irun.log $ius_comp_opts $ius_sim_opts +UVM_TESTNAME=test";
+  $ius = "irun -timescale 1ns/1ns $uvm_home/src/dpi/uvm_dpi.c +incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv test.sv -l irun.log +UVM_TESTNAME=test $ius_comp_opts $ius_sim_opts";
   $ius .= " -nostdout" unless $opt_v;
 
   print "$ius\n" if $opt_v;

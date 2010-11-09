@@ -290,42 +290,11 @@ class uvm_report_object extends uvm_object;
     m_rh.set_verbosity_level(verbosity_level);
   endfunction
 
-
-  // Function: set_report_severity_action
-  //
-  function void set_report_severity_action (uvm_severity severity,
-                                            uvm_action action);
-    m_rh.set_severity_action(severity, action);
-  endfunction
-
-  // Function: set_report_id_action
-  //
-  function void set_report_id_action (string id, uvm_action action);
-    m_rh.set_id_action(id, action);
-  endfunction
-
   // Function: set_report_id_verbosity
   //
   function void set_report_id_verbosity (string id, int verbosity);
     m_rh.set_id_verbosity(id, verbosity);
   endfunction
-
-  // Function: set_report_severity_id_action
-  //
-  // These methods associate the specified action or actions with reports of the
-  // given ~severity~, ~id~, or ~severity-id~ pair. An action associated with a
-  // particular ~severity-id~ pair takes precedence over an action associated with
-  // ~id~, which take precedence over an an action associated with a ~severity~.
-  //
-  // The ~action~ argument can take the value <UVM_NO_ACTION>, or it can be a
-  // bitwise OR of any combination of <UVM_DISPLAY>, <UVM_LOG>, <UVM_COUNT>,
-  // <UVM_STOP>, <UVM_EXIT>, and <UVM_CALL_HOOK>.
-
-  function void set_report_severity_id_action (uvm_severity severity,
-                                               string id, uvm_action action);
-    m_rh.set_severity_id_action(severity, id, action);
-  endfunction
-
 
   // Function: set_report_severity_id_verbosity
   //
@@ -341,6 +310,55 @@ class uvm_report_object extends uvm_object;
   function void set_report_severity_id_verbosity (uvm_severity severity,
                                                string id, int verbosity);
     m_rh.set_severity_id_verbosity(severity, id, verbosity);
+  endfunction
+
+
+  // Function: set_report_severity_action
+  //
+  function void set_report_severity_action (uvm_severity severity,
+                                            uvm_action action);
+    m_rh.set_severity_action(severity, action);
+  endfunction
+
+  // Function: set_report_id_action
+  //
+  function void set_report_id_action (string id, uvm_action action);
+    m_rh.set_id_action(id, action);
+  endfunction
+
+  // Function: set_report_severity_id_action
+  //
+  // These methods associate the specified action or actions with reports of the
+  // given ~severity~, ~id~, or ~severity-id~ pair. An action associated with a
+  // particular ~severity-id~ pair takes precedence over an action associated with
+  // ~id~, which takes precedence over an an action associated with a ~severity~.
+  //
+  // The ~action~ argument can take the value <UVM_NO_ACTION>, or it can be a
+  // bitwise OR of any combination of <UVM_DISPLAY>, <UVM_LOG>, <UVM_COUNT>,
+  // <UVM_STOP>, <UVM_EXIT>, and <UVM_CALL_HOOK>.
+
+  function void set_report_severity_id_action (uvm_severity severity,
+                                               string id, uvm_action action);
+    m_rh.set_severity_id_action(severity, id, action);
+  endfunction
+
+  // Function: set_report_severity_override
+  //
+  function void set_report_severity_override(uvm_severity cur_severity,
+                                             uvm_severity new_severity);
+    m_rh.set_severity_override(cur_severity, new_severity);
+  endfunction
+
+  // Function: set_report_severity_id_override
+  //
+  // These methods provide the ability to upgrade or downgrade a message in
+  // terms of severity given ~severity~ and ~id~.  An upgrade or downgrade for
+  // a specific ~id~ takes precedence over an upgrade or downgrade associated 
+  // with a ~severity~.
+  function void set_report_severity_id_override(uvm_severity cur_severity,
+                                                string id, 
+                                                uvm_severity new_severity);
+    m_rh.set_severity_id_override(cur_severity, id, new_severity);
   endfunction
 
 

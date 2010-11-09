@@ -428,6 +428,17 @@ class uvm_report_handler;
     severity_id_file_handles[severity].add(id, file);
   endfunction
 
+  function void set_severity_override(uvm_severity cur_severity,
+                                      uvm_severity new_severity);
+    // Needs implementation
+  endfunction
+
+  function void set_severity_id_override(uvm_severity cur_severity,
+                                         string id,
+                                         uvm_severity new_severity);
+    // Needs implementation
+  endfunction
+
   
   // Function- dump_state
   //
