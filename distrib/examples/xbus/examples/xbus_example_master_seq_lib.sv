@@ -19,6 +19,8 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+`include "xbus_master_seq_lib.sv"
+
 //------------------------------------------------------------------------------
 //
 // SEQUENCE: incr_read_byte_seq
@@ -37,6 +39,7 @@ class incr_read_byte_seq extends xbus_base_sequence;
 
   rand int unsigned count;
     constraint count_ct { (count < 20); }
+    constraint count_min { (count > 5); }
   rand bit [15:0] start_address;
   rand int unsigned incr_transmit_del = 0;
     constraint transmit_del_ct { (incr_transmit_del <= 10); }

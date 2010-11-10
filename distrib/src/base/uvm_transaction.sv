@@ -31,6 +31,8 @@ function uvm_transaction::new (string name="",
   super.new(name);
   this.initiator = initiator;
   m_transaction_id = -1;
+  begin_event = events.get("begin");
+  end_event = events.get("end");
 
 endfunction // uvm_transaction
 
@@ -63,7 +65,7 @@ endfunction
 // --------------
 
 function uvm_event_pool uvm_transaction::get_event_pool();
-  return m_event_pool;
+  return events;
 endfunction
 
 
@@ -225,7 +227,7 @@ function void uvm_transaction::accept_tr (time accept_time = 0);
     this.accept_time = $time;
 
   do_accept_tr();
-  e = m_event_pool.get("accept");
+  e = events.get("accept");
 
   if(e!=null) 
     e.trigger();
@@ -253,8 +255,6 @@ endfunction
 function integer uvm_transaction::m_begin_tr (time begin_time=0, 
                                               integer parent_handle=0, 
                                               bit has_parent=0);
-  uvm_event e;
-
   if(begin_time != 0)
     this.begin_time = begin_time;
   else
@@ -287,12 +287,9 @@ function integer uvm_transaction::m_begin_tr (time begin_time=0,
   else 
     tr_handle = 0;
 
-  e = m_event_pool.get("begin");
-
   do_begin_tr(); //execute callback before event trigger
 
-  if(e!=null) 
-    e.trigger();
+  begin_event.trigger();
  
   return tr_handle;
 endfunction
@@ -302,7 +299,6 @@ endfunction
 // ------
 
 function void uvm_transaction::end_tr (time end_time=0, bit free_handle=1);
-  uvm_event e;
 
   if(end_time != 0)
     this.end_time = end_time;
@@ -324,10 +320,7 @@ function void uvm_transaction::end_tr (time end_time=0, bit free_handle=1);
     tr_handle = 0;
   end
 
-  e = m_event_pool.get("end");
-
-  if(e!=null) 
-    e.trigger();
+  end_event.trigger();
 endfunction
 
 

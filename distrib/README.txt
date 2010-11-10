@@ -62,4 +62,8 @@ To use the include technique you include a single file:
 You will need to put the location of the UVM source as a include
 directory in your compilation command line.
 
+You will need to specify the location of the UVM DPI shared library
+to your simulator. This is a simulator-specific specification.
+Please refer to your simulator documentation.
+
 ------------------------------------------------------------------------

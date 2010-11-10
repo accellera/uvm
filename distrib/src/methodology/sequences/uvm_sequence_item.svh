@@ -144,21 +144,24 @@ bit        print_sequence_info = 0;
 
 
   // Function: set_sequencer
+  //
+  // Sets the default sequencer for the sequence to sequencer.  It will take
+  // effect immediately, so it should not be called while the sequence is
+  // actively communicating with the sequencer.
 
-  function void set_sequencer(uvm_sequencer_base sequencer);
+  virtual function void set_sequencer(uvm_sequencer_base sequencer);
     m_sequencer = sequencer;
     m_set_p_sequencer();
-  endfunction // void
+  endfunction
 
 
   // Function: get_sequencer
   //
-  // These routines set and get the reference to the sequencer to which this
-  // sequence_item communicates.
+  // Returns a reference to the default sequencer used by this sequence.
 
   function uvm_sequencer_base get_sequencer();
-    return (m_sequencer);
-  endfunction // uvm_sequencer_base
+    return m_sequencer;
+  endfunction
 
 
   // Function: set_parent_sequence
@@ -242,18 +245,6 @@ bit        print_sequence_info = 0;
   endtask  
 
 
-  // Function: finish_item
-  //
-  // finish_item, together with start_item together will initiate operation of 
-  // either a sequence_item or sequence object.  Finish_item must be called
-  // after start_item with no delays or delta-cycles.  Randomization, or other
-  // functions may be called between the start_item and finish_item calls.
-  
-  virtual task finish_item(uvm_sequence_item item, int set_priority = -1);
-    item.m_finish_item(item.get_sequencer(), this, set_priority);
-  endtask // finish_item
-
-
   // Function- m_start_item
   //
   // Internal method.
@@ -285,15 +276,28 @@ bit        print_sequence_info = 0;
   endtask  
 
 
+  // Function: finish_item
+  //
+  // Finishes execution of a sequence_item or sequence. Finish_item must be called
+  // after <start_item> with no delays or delta-cycles.  Randomization, or other
+  // functions may be called between the <start_item> and finish_item calls.
+  
+  virtual task finish_item(uvm_sequence_item item, int set_priority = -1);
+    item.m_finish_item(item.get_sequencer(), this, set_priority);
+  endtask
+
+
   // Function- m_finish_item
   //
-  // Internal method.
+  // Internal method. This method is called when <finish_item> is called with a sequence_item argument.
   
   virtual task m_finish_item(uvm_sequencer_base sequencer_ptr, uvm_sequence_item sequence_ptr, int set_priority = -1);
     uvm_sequence_base this_seq;
     uvm_sequencer_base target_seqr;
 
     target_seqr = this.get_sequencer();
+    if (target_seqr == null)
+      target_seqr = sequencer_ptr;
     if (!$cast(this_seq, sequence_ptr))
        uvm_report_fatal ("CASTFL", "finish_item failed to cast sequence_ptr to sequence type", UVM_NONE);
     sequence_ptr.mid_do(this);
@@ -302,7 +306,7 @@ bit        print_sequence_info = 0;
     target_seqr.end_tr(this);
 
     sequence_ptr.post_do(this);
-  endtask // m_finish_item
+  endtask
 
 
   // Function- get_full_name
