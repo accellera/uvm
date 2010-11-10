@@ -928,13 +928,14 @@ class uvm_mem extends uvm_object;
    // This method is invoked by the memory abstraction class
    // whenever an address within one of its address map
    // is succesfully read or written.
-   // The address is an offset within the memory, not an absolute address.
+   // The specified offset is the offset within the memory,
+   // not an absolute address.
    //
    // Empty by default, this method may be extended by the
    // abstraction class generator to perform the required sampling
    // in any provided functional coverage model.
    //
-   protected virtual function void  sample(uvm_reg_addr_t addr,
+   protected virtual function void  sample(uvm_reg_addr_t offset,
                                            bit            is_read,
                                            uvm_reg_map    map);
    endfunction
