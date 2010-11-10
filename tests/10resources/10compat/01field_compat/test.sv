@@ -1,5 +1,6 @@
 module test;
   import uvm_pkg::*;
+  `include "uvm_macros.svh"
  
   int achoo;
  

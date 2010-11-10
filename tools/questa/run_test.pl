@@ -104,7 +104,7 @@ sub run_the_test($$$) {
             close(COMPILE_LOG);
             $toplevels =~ s/\s\s+/ /g; # remove excess whitespace
         }
-        my $clib = "-sv_lib $uvm_home/src/uvm_regex/uvm_regex";
+        my $clib = "-sv_lib $uvm_home/src/dpi/uvm_dpi";
         my $vsim = ("vsim $run_opts $clib +UVM_TESTNAME=test -c $toplevels -do 'run -all;quit -f'");
         &questa_run("cd ./$testdir && $vsim $redirect ".&runtime_log_fname()." 2>&1");
     }

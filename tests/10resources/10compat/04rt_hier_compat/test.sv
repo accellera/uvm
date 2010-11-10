@@ -1,5 +1,6 @@
 module test;
   import uvm_pkg::*;
+  `include "uvm_macros.svh"
 
   class myleaf extends uvm_component;
     int build_val=0;

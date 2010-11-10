@@ -399,6 +399,7 @@ virtual class uvm_resource_base extends uvm_object;
   // we don't know how to do this so we just return a "?".  Resource
   // specializations are expected to override this function to produce a
   // proper string representation of the resource value.
+
   function string convert2string();
     return "?";
   endfunction
@@ -406,6 +407,7 @@ virtual class uvm_resource_base extends uvm_object;
   // function: do_print
   //
   // Implementation of do_print which is called by print().
+
   function void do_print (uvm_printer printer);
     printer.print_generic( {get_name(), "[", get_scope(), "]"} , 
       "uvm_resource", -1, convert2string());
@@ -635,16 +637,16 @@ class uvm_resource_pool;
       if(rtab.exists(name))
         rq = rtab[name];
       else
-        rq = new;
+        rq = new();
 
       // Insert the resource into the queue associated with its name.
       // If we are doing a name override then insert it in the front of
       // the queue, otherwise insert it in the back.
-      if(override & uvm_resource_types::NAME_OVERRIDE) begin
+      if(override & uvm_resource_types::NAME_OVERRIDE)
         rq.push_front(rsrc);
-      end
       else
         rq.push_back(rsrc);
+
       rtab[name] = rq;
     end
 
@@ -653,7 +655,7 @@ class uvm_resource_pool;
     if(ttab.exists(type_handle))
       rq = ttab[type_handle];
     else
-      rq = new;
+      rq = new();
 
     // insert the resource into the queue associated with its type.  If
     // we are doing a type override then insert it in the front of the
@@ -816,7 +818,7 @@ class uvm_resource_pool;
     if(q.size() == 0)
       return null;
 
-    // get the first resrouce from the queue
+    // get the first resources in the queue
     rsrc = q.get(0);
     prec = rsrc.precedence;
 
@@ -1509,6 +1511,50 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     write(t, accessor);
     unlock();
     return 1;
+  endfunction
+
+  // function: get_highest_precedence
+  //
+  // In a queue of resources, locate the first one with the highest
+  // precedence whose type is T.  This function is static so that it can
+  // be called from anywhere.
+
+  static function this_type get_highest_precedence(ref uvm_resource_types::rsrc_q_t q);
+
+    this_type rsrc;
+    this_type r;
+    int unsigned i;
+    int unsigned prec;
+    int unsigned first;
+
+    if(q.size() == 0)
+      return null;
+
+    first = 0;
+    rsrc = null;
+    prec = 0;
+
+    // Locate first resources in the queue whose type is T
+    for(first = 0; first < q.size() && !$cast(rsrc, q.get(first)); first++);
+    prec = rsrc.precedence;
+
+    // no resource in the queue whose type is T
+    if(rsrc == null)
+      return null;
+
+    // start searching from the next resource after the first resource
+    // whose type is T
+    for(int i = first+1; i < q.size(); ++i) begin
+      if($cast(r, q.get(i))) begin
+        if(r.precedence > prec) begin
+          rsrc = r;
+          prec = r.precedence;
+        end
+      end
+    end
+
+    return rsrc;
+
   endfunction
 
 endclass

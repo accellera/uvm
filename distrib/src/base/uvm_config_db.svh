@@ -36,6 +36,7 @@
 // semantics as the set/get_config_* functions in <uvm_component>.
 //----------------------------------------------------------------------
 class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
+
   // Internal lookup of config settings so they can be reused
   // The context has a pool that is keyed by the inst/field name.
   static uvm_pool#(string,uvm_resource#(T)) m_rsc[uvm_component];
@@ -71,18 +72,8 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
       inst_name = {cntxt.get_full_name(), ".", inst_name};
  
     rq = rp.lookup_regex(field_name, inst_name);
-    if(!rq.size())
-      return 0;
-
-    for(int i=0; i<rq.size(); ++i) begin
-      if($cast(rt,rq.get(i))) begin
-        if((r==null) || (rt.precedence > p)) begin
-          r = rt;
-          p = r.precedence;
-        end 
-      end
-    end
-
+    r = uvm_resource#(T)::get_highest_precedence(rq);
+    
     if(r == null)
       return 0;
 
@@ -142,9 +133,10 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
    
     if(r == null) begin 
       uvm_pool#(string, uvm_resource#(T)) pool = new;
+      string key = {inst_name,field_name};
       m_rsc[cntxt] = pool;
       r = new(field_name, inst_name);
-      pool.add({inst_name,field_name}, r);
+      pool.add(key, r);
     end
     else begin
       exists = 1;

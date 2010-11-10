@@ -1,10 +1,10 @@
-src = uvmdpi.cc
+src = uvm_dpi.cc
 lib = uvm_dpi
 
 all:
 	g++ -m32 \
 	  -g \
-	  -I$(MTI_HOME)/include ${src} \
+	  -I$(MTI_HOME)/questasim/include ${src} \
 	  -shared -o ${lib}.so
 
 clean:
