@@ -92,6 +92,19 @@ typedef class uvm_reg_adapter;
 
 
 //------------------------------------------------------------------------------
+//
+// Macro: `UVM_REG_CVR_WIDTH
+//
+// Maximum number of bits in a <uvm_reg_cvr_t> coverage model set.
+//
+// Default value is 32.
+//
+`ifndef UVM_REG_CVR_WIDTH
+ `define UVM_REG_CVR_WIDTH 32
+`endif
+
+
+//------------------------------------------------------------------------------
 // Type: uvm_reg_data_t
 //
 // 2-state data value with <`UVM_REG_DATA_WIDTH> bits
@@ -267,19 +280,6 @@ typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
 
 
 //------------------------------------------------------------------------------
-//
-// Macro: `UVM_REG_CVR_WIDTH
-//
-// Maximum number of bits in a <uvm_reg_cvr_t> coverage model set.
-//
-// Default value is 32.
-//
-`ifndef UVM_REG_CVR_WIDTH
- `define UVM_REG_CVR_WIDTH 32
-`endif
-
-
-//------------------------------------------------------------------------------
 // Type: uvm_reg_cvr_t
 //
 // Coverage model value set with <`UVM_REG_CVR_WIDTH> bits.
@@ -287,10 +287,10 @@ typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
 // Symbolic values for individual coverage models are defined
 // by the <uvm_coverage_model_e> type.
 //
-// The following bits in the set are assigned as follows:
+// The following bits in the set are assigned as follows
 //
 // 0-7     - UVM pre-defined coverage models
-// 8-15    - Coverage models defiend by EDA vendors,
+// 8-15    - Coverage models defined by EDA vendors,
 //           implemented in a register model generator.
 // 16-23   - User-defined coverage models
 // 24..    - Reserved
@@ -308,7 +308,7 @@ typedef  bit [`UVM_REG_CVR_WIDTH-1:0]  uvm_reg_cvr_t ;
 // UVM_CVR_REG_BITS     - Individual register bits
 // UVM_CVR_ADDR_MAP     - Individual register and memory addresses
 // UVM_CVR_FIELD_VALS   - Field values
-// UVM_CVR_ALL          - All of the above
+// UVM_CVR_ALL          - All coverage models
 //
    typedef enum uvm_reg_cvr_t {
       UVM_NO_COVERAGE      = 'h0000,
