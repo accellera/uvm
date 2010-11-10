@@ -1061,6 +1061,23 @@ virtual class uvm_reg extends uvm_object;
                                           uvm_reg_map     map);
    endfunction
 
+   // Function: sample_values
+   //
+   // Functional coverage measurement method for field values
+   //
+   // This method is invoked by the user
+   // or by the <uvm_reg_block::sample_values()> method of the parent block
+   // to trigger the sampling
+   // of the current field values in the
+   // register-level functional coverage model.
+   //
+   // This method may be extended by the
+   // abstraction class generator to perform the required sampling
+   // in any provided field-value functional coverage model.
+   //
+   virtual function void sample_values();
+   endfunction
+
    /*local*/ function void XsampleX(uvm_reg_data_t  data,
                                     uvm_reg_data_t  byte_en,
                                     bit             is_read,
@@ -2116,7 +2133,6 @@ task uvm_reg::update(output uvm_status_e      status,
       upd |= m_fields[i].XupdateX() << m_fields[i].get_lsb_pos();
 
    write(status, upd, path, map, parent, prior, extension, fname, lineno);
-
 endtask: update
 
 

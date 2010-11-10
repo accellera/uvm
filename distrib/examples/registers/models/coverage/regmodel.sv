@@ -41,9 +41,8 @@ class reg_R extends uvm_reg;
    local uvm_reg_data_t m_data;
    local uvm_reg_data_t m_be;
    local bit            m_is_read;
-   local event          m_sample;
 
-   covergroup cg @(m_sample);
+   covergroup cg_bits;
       wF1_0: coverpoint {m_current[0],m_data[0]} iff (!m_is_read && m_be[0]);
       wF1_1: coverpoint {m_current[1],m_data[1]} iff (!m_is_read && m_be[0]);
       wF1_2: coverpoint {m_current[2],m_data[2]} iff (!m_is_read && m_be[0]);
@@ -54,11 +53,20 @@ class reg_R extends uvm_reg;
       wF2_3: coverpoint {m_current[7],m_data[7]} iff (!m_is_read && m_be[0]);
    endgroup
    
+   covergroup cg_vals;
+      F1: coverpoint F1.value[3:0];
+      F2: coverpoint F2.value[3:0];
+      F1F2: cross F1, F2;
+   endgroup
+   
    
    function new(string name = "reg_R");
-      super.new(name, 8, build_cover(UVM_CVR_REG_BITS));
+      super.new(name, 8, build_cover(UVM_CVR_REG_BITS +
+                                     UVM_CVR_FIELD_VALS));
       if (can_cover(UVM_CVR_REG_BITS))
-         cg = new();
+         cg_bits = new();
+      if (can_cover(UVM_CVR_FIELD_VALS))
+         cg_vals = new();
    endfunction: new
    
    virtual function void build();
@@ -80,19 +88,24 @@ class reg_R extends uvm_reg;
          m_data    = data;
          m_be      = byte_en;
          m_is_read = is_read;
-         ->m_sample;
+         cg_bits.sample();
       end
    endfunction
 
+   virtual function void sample_values();
+      super.sample_values();
+
+      if (is_cover_on(UVM_CVR_FIELD_VALS))
+         cg_vals.sample();
+   endfunction
 endclass : reg_R
 
 
 
 class mem_M extends uvm_mem;
    local uvm_reg_addr_t m_offset;
-   local event          m_sample;
 
-   covergroup cg @(m_sample);
+   covergroup cg_addr;
       MIN_MID_MAX: coverpoint m_offset
          {
             bins MIN = {0};
@@ -104,7 +117,7 @@ class mem_M extends uvm_mem;
    function new(string name = "mem_M");
       super.new(name, 1024, 8, "RW", build_cover(UVM_CVR_ADDR_MAP));
       if (can_cover(UVM_CVR_ADDR_MAP))
-         cg = new();
+         cg_addr = new();
    endfunction: new
    
    `uvm_object_utils(mem_M)
@@ -114,7 +127,7 @@ class mem_M extends uvm_mem;
                                 uvm_reg_map    map);
       if (is_cover_on(UVM_CVR_ADDR_MAP)) begin
          m_offset  = offset;
-         ->m_sample;
+         cg_addr.sample();
       end
    endfunction
 
@@ -129,9 +142,8 @@ class block_B extends uvm_reg_block;
    mem_M M;
 
    local uvm_reg_addr_t m_offset;
-   local event          m_sample;
 
-   covergroup cg @(m_sample);
+   covergroup cg_addr;
       Ra: coverpoint m_offset
          {
             bins hit = {'h0000};
@@ -147,10 +159,17 @@ class block_B extends uvm_reg_block;
          }
    endgroup
 
+   covergroup cg_vals;
+      Ra: coverpoint Ra.F1.value[3:0];
+      Rb: coverpoint Rb.F1.value[3:0];
+      RaRb: cross Ra, Rb;
+   endgroup
+   
+   
    function new(string name = "B");
       super.new(name, build_cover(UVM_CVR_ADDR_MAP));
       if (can_cover(UVM_CVR_ADDR_MAP))
-         cg = new();
+         cg_addr = new();
    endfunction: new
    
    virtual function void build();
@@ -181,7 +200,7 @@ class block_B extends uvm_reg_block;
                                 uvm_reg_map    map);
       if (is_cover_on(UVM_CVR_ADDR_MAP)) begin
          m_offset  = offset;
-         ->m_sample;
+         cg_addr.sample();
       end
    endfunction
 

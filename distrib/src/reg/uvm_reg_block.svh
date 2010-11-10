@@ -546,6 +546,26 @@ virtual class uvm_reg_block extends uvm_object;
                                            uvm_reg_map    map);
    endfunction
 
+   // Function: sample_values
+   //
+   // Functional coverage measurement method for field values
+   //
+   // This method is invoked by the user
+   // or by the <uvm_reg_block::sample_values()> method of the parent block
+   // to trigger the sampling
+   // of the current field values in the
+   // block-level functional coverage model.
+   // It recursively invokes the <uvm_reg_block::sample_values()>
+   // and <uvm_reg::sample_values()> methods
+   // in the blocks and registers in this block.
+   //
+   // This method may be extended by the
+   // abstraction class generator to perform the required sampling
+   // in any provided field-value functional coverage model.
+   // If this method is extended, it MUST call super.sample_values().
+   //
+   extern virtual function void sample_values();
+
    /*local*/ extern function void XsampleX(uvm_reg_addr_t addr,
                                            bit            is_read,
                                            uvm_reg_map    map);
@@ -1379,7 +1399,22 @@ function int uvm_reg_block::set_cover(int is_on);
 endfunction: set_cover
 
 
-// sample
+// sample_values
+
+function void uvm_reg_block::sample_values();
+   foreach (regs[rg_]) begin
+      uvm_reg rg = rg_;
+      rg.sample_values();
+   end
+
+   foreach (blks[blk_]) begin
+      uvm_reg_block blk = blk_;
+      blk.sample_values();
+   end
+endfunction
+
+
+// XsampleX
 
 function void uvm_reg_block::XsampleX(uvm_reg_addr_t addr,
                                       bit            is_read,
@@ -1549,7 +1584,7 @@ task uvm_reg_block::update(output uvm_status_e  status,
       uvm_reg rg = rg_;
       if (rg.needs_update()) begin
          rg.update(status, path, null, parent, prior, extension);
-         if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
+         if (status != UVM_IS_OK && status != UVM_HAS_X) begin;
            `uvm_error("RegModel", $sformatf("Register \"%s\" could not be updated",
                                         rg.get_full_name()));
            return;
@@ -1580,7 +1615,7 @@ task uvm_reg_block::mirror(output uvm_status_e       status,
       uvm_reg rg = rg_;
       rg.mirror(status, check, path, null,
                 parent, prior, extension, fname, lineno);
-      if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
+      if (status != UVM_IS_OK && status != UVM_HAS_X) begin;
          final_status = status;
       end
    end
@@ -1589,7 +1624,7 @@ task uvm_reg_block::mirror(output uvm_status_e       status,
       uvm_reg_block blk = blk_;
 
       blk.mirror(status, check, path, parent, prior, extension, fname, lineno);
-      if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
+      if (status != UVM_IS_OK && status != UVM_HAS_X) begin;
          final_status = status;
       end
    end

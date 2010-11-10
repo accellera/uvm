@@ -37,6 +37,10 @@ typedef class uvm_reg_cbs;
 //-----------------------------------------------------------------
 class uvm_reg_field extends uvm_object;
 
+   // Variable: value
+   // Mirrored field value.
+   // This value can be sampled in a functional coverage model
+   // or constrained when randomized.
    rand  uvm_reg_data_t  value; // Mirrored after randomize()
 
    local uvm_reg_data_t  m_mirrored; // What we think is in the HW
