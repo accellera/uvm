@@ -430,13 +430,16 @@ class uvm_report_handler;
 
   function void set_severity_override(uvm_severity cur_severity,
                                       uvm_severity new_severity);
-    // Needs implementation
+    // JLR: Needs implementation
+    //
   endfunction
 
   function void set_severity_id_override(uvm_severity cur_severity,
                                          string id,
                                          uvm_severity new_severity);
-    // Needs implementation
+    // JLR: Needs implementation
+    // has precedence
+    // silently override previous setting
   endfunction
 
   

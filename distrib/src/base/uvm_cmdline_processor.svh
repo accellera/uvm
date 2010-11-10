@@ -345,13 +345,6 @@ class uvm_cmdline_processor extends uvm_report_object;
     //| <sim command> +UVM_MAX_QUIT_COUNT=5,0
     //
 
-//HERE
-
-    // JR:  Due to a race condition between the set_max_quit_count() in the report server being set in
-    // the constructor and the report server being created via static initialization just like the
-    // command line processor is, this setting needs to be applied to the report server at the start of
-    // build phase of uvm_top (unless you can think of a 'safe' way to do this).  Some work needs to be
-    // done in the report server for the overridable flag.
 
     // Variable: +UVM_OBJECTION_TRACE
     //
