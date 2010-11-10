@@ -174,7 +174,7 @@ class master extends uvm_component;
     for(int unsigned i = 0; i < length; i++) begin
       data[i] = $urandom();
     end
-    t.set_data_ptr(data);
+    t.set_data(data);
     t.set_command(UVM_TLM_WRITE_COMMAND);
 
     return t;

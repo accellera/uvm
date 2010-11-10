@@ -150,7 +150,7 @@ endclass
 //----------------------------------------------------------------------
 class env extends uvm_component;
 
-  `uvm_component_utils(env);
+  `uvm_component_utils(env)
 
   local master m;
   local slave s;
