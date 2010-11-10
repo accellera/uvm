@@ -746,6 +746,11 @@ class uvm_mem extends uvm_object;
                                            input string kind = "",
                                            input string separator = ".");
 
+   // Function:  get_hdl_path_kinds
+   //
+   // Get design abstractions for which HDL paths have been defined
+   //
+   extern function void get_hdl_path_kinds (ref string kinds[$]);
 
    // Function: backdoor_read
    //
@@ -2327,6 +2332,18 @@ function void uvm_mem::get_hdl_path(ref uvm_hdl_path_concat paths[$],
 
 endfunction
 
+
+// get_hdl_path_kinds
+
+function void uvm_mem::get_hdl_path_kinds (ref string kinds[$]);
+  string kind;
+  kinds.delete();
+  if (!m_hdl_paths_pool.first(kind))
+    return;
+  do
+    kinds.push_back(kind);
+  while (m_hdl_paths_pool.next(kind));
+endfunction
 
 // get_full_hdl_path
 

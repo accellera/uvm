@@ -53,7 +53,7 @@ typedef logic [UVM_HDL_MAX_WIDTH-1:0] uvm_hdl_data_t;
 
   // Function: uvm_hdl_check_path
   //
-  // Checks that the given HDL ~path~ exists. Returns 0 if found, 1 otherwise.
+  // Checks that the given HDL ~path~ exists. Returns 0 if NOT found, 1 otherwise.
   //
   import "DPI-C" function int uvm_hdl_check_path(string path);
 
