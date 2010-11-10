@@ -359,7 +359,8 @@ class uvm_cmdline_processor extends uvm_report_object;
     // argument on the command line.
 
     // Variable: +uvm_set_inst_override, +uvm_set_type_override
-    // // ~+uvm_set_inst_override=<req_type>,<override_type>,<full_inst_path>~ and
+    //
+    // ~+uvm_set_inst_override=<req_type>,<override_type>,<full_inst_path>~ and
     // ~+uvm_set_type_override=<req_type>,<override_type>[,<replace>]~ work
     // like the name based overrides in the factory--factory.set_inst_override_by_name()
     //  and factory.set_type_override_by_name().
