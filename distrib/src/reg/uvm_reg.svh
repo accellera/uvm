@@ -973,7 +973,7 @@ virtual class uvm_reg extends uvm_object;
    // Returns the sum of all coverage models to be built in the
    // register model.
    //
-   extern virtual protected function int build_cover(int models);
+   extern virtual protected function uvm_reg_cvr_t build_cover(uvm_reg_cvr_t models);
 
 
    // Function: add_cover
@@ -988,7 +988,7 @@ virtual class uvm_reg extends uvm_object;
    // This method shall be called only in the constructor of
    // subsequently derived classes.
    //
-   extern virtual protected function void add_cover(int models);
+   extern virtual protected function void add_cover(uvm_reg_cvr_t models);
 
 
    // Function: can_cover
@@ -1000,7 +1000,7 @@ virtual class uvm_reg extends uvm_object;
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
    //
-   extern virtual function bit can_cover(int models);
+   extern virtual function bit can_cover(uvm_reg_cvr_t models);
 
 
    // Function: set_cover
@@ -1024,7 +1024,7 @@ virtual class uvm_reg extends uvm_object;
    // See the <uvm_reg::can_cover()> method to identify
    // the available functional coverage models.
    //
-   extern virtual function int set_cover(int is_on);
+   extern virtual function uvm_reg_cvr_t set_cover(uvm_reg_cvr_t is_on);
 
 
    // Function: is_cover_on
@@ -1038,7 +1038,7 @@ virtual class uvm_reg extends uvm_object;
    //
    // See <uvm_reg::set_cover()> for more details. 
    //
-   extern virtual function bit is_cover_on(int is_on);
+   extern virtual function bit is_cover_on(uvm_reg_cvr_t is_on);
 
 
    // Function: sample
@@ -1907,7 +1907,7 @@ endfunction: get_attributes
 // COVERAGE
 //---------
 
-function int uvm_reg::build_cover(int models);
+function uvm_reg_cvr_t uvm_reg::build_cover(uvm_reg_cvr_t models);
    // ToDO uses resources!
    return models;
 endfunction: build_cover
@@ -1915,22 +1915,22 @@ endfunction: build_cover
 
 // add_cover
 
-function void uvm_reg::add_cover(int models);
+function void uvm_reg::add_cover(uvm_reg_cvr_t models);
    m_has_cover |= models;
 endfunction: add_cover
 
 
 // can_cover
 
-function bit uvm_reg::can_cover(int models);
+function bit uvm_reg::can_cover(uvm_reg_cvr_t models);
    return ((m_has_cover & models) == models);
 endfunction: can_cover
 
 
 // set_cover
 
-function int uvm_reg::set_cover(int is_on);
-   if (is_on == int'(UVM_NO_COVERAGE)) begin
+function uvm_reg_cvr_t uvm_reg::set_cover(uvm_reg_cvr_t is_on);
+   if (is_on == uvm_reg_cvr_t'(UVM_NO_COVERAGE)) begin
       m_cover_on = is_on;
       return m_cover_on;
    end
@@ -1943,7 +1943,7 @@ endfunction: set_cover
 
 // is_cover_on
 
-function bit uvm_reg::is_cover_on(int is_on);
+function bit uvm_reg::is_cover_on(uvm_reg_cvr_t is_on);
    if (can_cover(is_on) == 0)
       return 0;
    return ((m_cover_on & is_on) == is_on);
