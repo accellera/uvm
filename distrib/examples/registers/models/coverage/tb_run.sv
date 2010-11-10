@@ -2,6 +2,7 @@
 // -------------------------------------------------------------
 //    Copyright 2004-2008 Synopsys, Inc.
 //    Copyright 2010 Mentor Graphics Corp.
+//    Copyright 2010 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
 // 
 //    Licensed under the Apache License, Version 2.0 (the
@@ -46,7 +47,7 @@ class tb_test extends uvm_test;
       end
 
       env.regmodel.reset();
-      env.regmodel.set_cover(UVM_CVR_ALL);
+      void'(env.regmodel.set_cover(UVM_CVR_ALL));
 
       begin
          uvm_reg_sequence seq;

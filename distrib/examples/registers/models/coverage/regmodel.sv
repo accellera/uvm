@@ -109,11 +109,11 @@ class mem_M extends uvm_mem;
    
    `uvm_object_utils(mem_M)
    
-   virtual function void sample(uvm_reg_addr_t offset,
+   virtual function void sample(uvm_reg_addr_t addr,
                                 bit            is_read,
                                 uvm_reg_map    map);
       if (is_cover_on(UVM_CVR_ADDR_MAP)) begin
-         m_offset  = offset;
+         m_offset  = addr;
          ->m_sample;
       end
    endfunction
@@ -176,11 +176,11 @@ class block_B extends uvm_reg_block;
    
    `uvm_object_utils(block_B)
    
-   virtual function void sample(uvm_reg_addr_t offset,
+   virtual function void sample(uvm_reg_addr_t addr,
                                 bit            is_read,
                                 uvm_reg_map    map);
       if (is_cover_on(UVM_CVR_ADDR_MAP)) begin
-         m_offset  = offset;
+         m_offset  = addr;
          ->m_sample;
       end
    endfunction
