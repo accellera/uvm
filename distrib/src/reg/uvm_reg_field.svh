@@ -1596,6 +1596,7 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
      rw.local_map.do_write(rw);
 
      if (system_map.get_auto_predict())
+        // ToDo: Call parent.XsampleX();
         Xpredict_writeX(rw.value[0], rw.path, rw.map);
 
      post_write(rw);
@@ -1695,6 +1696,7 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
 
 
      if (system_map.get_auto_predict())
+        // ToDo: Call parent.XsampleX();
         Xpredict_readX(rw.value[0], rw.path, rw.map);
 
      post_read(rw);

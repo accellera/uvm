@@ -46,6 +46,7 @@ class tb_test extends uvm_test;
       end
 
       env.regmodel.reset();
+      env.regmodel.set_cover(UVM_CVR_ALL);
 
       begin
          uvm_reg_sequence seq;
@@ -55,21 +56,11 @@ class tb_test extends uvm_test;
          seq.start(env.bus.sqr);
          seq.wait_for_sequence_state(FINISHED);
 
-         `uvm_info("Test", "Verifying aliasing...", UVM_NONE);
-         env.regmodel.Ra.write(status, 32'hDEADBEEF, .parent(seq));
-         env.regmodel.mirror(status, UVM_CHECK, .parent(seq));
-         env.regmodel.Rb.write(status, 32'h87654320, .parent(seq));
-         env.regmodel.mirror(status, UVM_CHECK, .parent(seq));
-         
-         env.regmodel.Ra.F1.write(status, 8'hA5, .parent(seq));
-         env.regmodel.mirror(status, UVM_CHECK, .parent(seq));
-         env.regmodel.Rb.F1.write(status, 8'hC3, .parent(seq));
-         env.regmodel.mirror(status, UVM_CHECK, .parent(seq));
-         
-         env.regmodel.Ra.F2.write(status, 8'hBD, .parent(seq));
-         env.regmodel.mirror(status, UVM_CHECK, .parent(seq));
-         env.regmodel.Rb.F2.write(status, 8'h2A, .parent(seq));
-         env.regmodel.mirror(status, UVM_CHECK, .parent(seq));
+         seq = uvm_mem_walk_seq::type_id::create("seq");
+         seq.model = env.regmodel;
+         seq.start(env.bus.sqr);
+         seq.wait_for_sequence_state(FINISHED);
+
       end
       global_stop_request();
    endtask

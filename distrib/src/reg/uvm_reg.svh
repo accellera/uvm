@@ -962,6 +962,34 @@ virtual class uvm_reg extends uvm_object;
    // Group: Coverage
    //----------------
 
+   // Function: build_cover
+   //
+   // Check if all of the specified coverage model must be built.
+   //
+   // Check if TBD 
+   // Models are specified by adding the symbolic value of individual
+   // coverage model as defined in <uvm_coverage_model_e>.
+   // Returns the sum of all coverage models to be built in the
+   // register model.
+   //
+   extern virtual protected function int build_cover(int models);
+
+
+   // Function: add_cover
+   //
+   // Specify that additional coverage models are available.
+   //
+   // Add the specified coverage model to the coverage models
+   // available in this class.
+   // Models are specified by adding the symbolic value of individual
+   // coverage model as defined in <uvm_coverage_model_e>.
+   //
+   // This method shall be called only in the constructor of
+   // subsequently derived classes.
+   //
+   extern virtual protected function void add_cover(int models);
+
+
    // Function: can_cover
    //
    // Check if register has coverage model(s)
@@ -1019,14 +1047,24 @@ virtual class uvm_reg extends uvm_object;
    // This method is invoked by the register abstraction class
    // whenever it is read or written with the specified ~data~
    // via the specified address ~map~.
+   // It is invoked after the read or write operation has completed
+   // but before the mirror has been updated.
    //
    // Empty by default, this method may be extended by the
    // abstraction class generator to perform the required sampling
    // in any provided functional coverage model.
    //
-   virtual local function void sample(uvm_reg_data_t  data,
-                                      bit             is_read,
-                                      uvm_reg_map     map);
+   protected virtual function void sample(uvm_reg_data_t  data,
+                                          uvm_reg_data_t  byte_en,
+                                          bit             is_read,
+                                          uvm_reg_map     map);
+   endfunction
+
+   /*local*/ function void XsampleX(uvm_reg_data_t  data,
+                                    uvm_reg_data_t  byte_en,
+                                    bit             is_read,
+                                    uvm_reg_map     map);
+      sample(data, byte_en, is_read, map);
    endfunction
 
 
@@ -1851,6 +1889,19 @@ endfunction: get_attributes
 // COVERAGE
 //---------
 
+function int uvm_reg::build_cover(int models);
+   // ToDO uses resources!
+   return models;
+endfunction: build_cover
+
+
+// add_cover
+
+function void uvm_reg::add_cover(int models);
+   m_has_cover |= models;
+endfunction: add_cover
+
+
 // can_cover
 
 function bit uvm_reg::can_cover(int models);
@@ -1866,36 +1917,9 @@ function int uvm_reg::set_cover(int is_on);
       return m_cover_on;
    end
 
-   if ((m_has_cover & is_on) == 0) begin
-      `uvm_warning("RegModel", $psprintf("Register \"%s\" - Cannot turn ON any coverage becasue the corresponding coverage model was not generated.", get_full_name()));
-      return m_cover_on;
-   end
+   m_cover_on = m_has_cover & is_on;
 
-   if (is_on & UVM_CVR_REG_BITS) begin
-      if (m_has_cover & UVM_CVR_REG_BITS) begin
-          m_cover_on |= UVM_CVR_REG_BITS;
-      end else begin
-          `uvm_warning("RegModel", $psprintf("Register \"%s\" - Cannot turn ON Register Bit coverage becasue the corresponding coverage model was not generated.", get_full_name()));
-      end
-   end
-
-   if (is_on & UVM_CVR_FIELD_VALS) begin
-      if (m_has_cover & UVM_CVR_FIELD_VALS) begin
-          m_cover_on |= UVM_CVR_FIELD_VALS;
-      end else begin
-          `uvm_warning("RegModel", $psprintf("Register \"%s\" - Cannot turn ON Field Value coverage becasue the corresponding coverage model was not generated.", get_full_name()));
-      end
-   end
-
-   if (is_on & UVM_CVR_ADDR_MAP) begin
-      if (m_has_cover & UVM_CVR_ADDR_MAP) begin
-          m_cover_on |= UVM_CVR_ADDR_MAP;
-      end else begin
-          `uvm_warning("RegModel", $psprintf("Register \"%s\" - Cannot turn ON Address Map coverage becasue the corresponding coverage model was not generated.", get_full_name()));
-      end
-   end
-
-   set_cover = m_cover_on;
+   return m_cover_on;
 endfunction: set_cover
 
 
@@ -2251,15 +2275,16 @@ task uvm_reg::do_write (uvm_reg_item rw);
 
          end
 
-         if (rw.status != UVM_NOT_OK && m_cover_on) begin
-            sample(value, 0, rw.map);
-            m_parent.XsampleX(map_info.offset, rw.map);
-         end
-
          m_is_busy = 0;
 
-         if (system_map.get_auto_predict())
+         if (system_map.get_auto_predict()) begin
+            if (rw.status != UVM_NOT_OK) begin
+               sample(value, -1, 0, rw.map);
+               m_parent.XsampleX(map_info.offset, 0, rw.map);
+            end
+
            Xpredict_writeX(rw.value[0], rw.path, rw.map);
+         end
       end
       
    endcase
@@ -2476,15 +2501,16 @@ task uvm_reg::do_read(uvm_reg_item rw);
             rw.local_map.do_read(rw);
          end
 
-         if (m_cover_on) begin
-            sample(rw.value[0], 1, rw.map);
-            m_parent.XsampleX(map_info.offset, rw.map);
-         end
-
          m_is_busy = 0;
 
-         if (system_map.get_auto_predict())
+         if (system_map.get_auto_predict()) begin
+            if (rw.status != UVM_NOT_OK) begin
+               sample(rw.value[0], -1, 1, rw.map);
+               m_parent.XsampleX(map_info.offset, 1, rw.map);
+            end
+
            Xpredict_readX(rw.value[0], rw.path, rw.map);
+         end
       end
       
    endcase

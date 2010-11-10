@@ -842,6 +842,34 @@ class uvm_mem extends uvm_object;
    // Group: Coverage
    //----------------
 
+   // Function: build_cover
+   //
+   // Check if all of the specified coverage model must be built.
+   //
+   // Check if TBD 
+   // Models are specified by adding the symbolic value of individual
+   // coverage model as defined in <uvm_coverage_model_e>.
+   // Returns the sum of all coverage models to be built in the
+   // memory model.
+   //
+   extern virtual protected function int build_cover(int models);
+
+
+   // Function: add_cover
+   //
+   // Specify that additional coverage models are available.
+   //
+   // Add the specified coverage model to the coverage models
+   // available in this class.
+   // Models are specified by adding the symbolic value of individual
+   // coverage model as defined in <uvm_coverage_model_e>.
+   //
+   // This method shall be called only in the constructor of
+   // subsequently derived classes.
+   //
+   extern virtual protected function void add_cover(int models);
+
+
    // Function: can_cover
    //
    // Check if memory has coverage model(s)
@@ -891,6 +919,30 @@ class uvm_mem extends uvm_object;
    //
    extern virtual function bit is_cover_on(int is_on);
 
+
+   // Function: sample
+   //
+   // Functional coverage measurement method
+   //
+   // This method is invoked by the memory abstraction class
+   // whenever an address within one of its address map
+   // is succesfully read or written.
+   // The address is an offset within the memory, not an absolute address.
+   //
+   // Empty by default, this method may be extended by the
+   // abstraction class generator to perform the required sampling
+   // in any provided functional coverage model.
+   //
+   protected virtual function void  sample(uvm_reg_addr_t addr,
+                                           bit            is_read,
+                                           uvm_reg_map    map);
+   endfunction
+
+   /*local*/ function void XsampleX(uvm_reg_addr_t addr,
+                                    bit            is_read,
+                                    uvm_reg_map    map);
+      sample(addr, is_read, map);
+   endfunction
 
    // Core ovm_object operations
 
@@ -1436,6 +1488,19 @@ endfunction: get_attributes
 //---------
 
 
+function int uvm_mem::build_cover(int models);
+   // ToDO uses resources!
+   return models;
+endfunction: build_cover
+
+
+// add_cover
+
+function void uvm_mem::add_cover(int models);
+   m_has_cover |= models;
+endfunction: add_cover
+
+
 // can_cover
 
 function bit uvm_mem::can_cover(int models);
@@ -1451,15 +1516,7 @@ function int uvm_mem::set_cover(int is_on);
       return m_cover_on;
    end
 
-   if (is_on & UVM_CVR_ADDR_MAP) begin
-      if (m_has_cover & UVM_CVR_ADDR_MAP) begin
-          m_cover_on |= UVM_CVR_ADDR_MAP;
-      end else begin
-          `uvm_warning("RegModel", $psprintf("\"%s\" - Cannot turn ON Address Map coverage becasue the corresponding coverage model was not generated.", get_full_name()));
-      end
-   end else begin
-      return m_cover_on;
-   end
+   m_cover_on = m_has_cover & is_on;
 
    return m_cover_on;
 endfunction: set_cover
@@ -1657,10 +1714,15 @@ task uvm_mem::do_write(uvm_reg_item rw);
          rw.local_map.do_write(rw);
       end
 
-      if (rw.status != UVM_NOT_OK && m_cover_on)
-         for (int idx = rw.offset; idx <= rw.offset + rw.value.size(); idx++)
+      if (rw.status != UVM_NOT_OK)
+         for (int idx = rw.offset;
+              idx <= rw.offset + rw.value.size();
+              idx++) begin
+            XsampleX(map_info.mem_range.stride * idx, 0, rw.map);
             m_parent.XsampleX(map_info.offset +
-                             (map_info.mem_range.stride * idx), rw.map);
+                             (map_info.mem_range.stride * idx),
+                              0, rw.map);
+         end
    end
       
    // BACKDOOR     
@@ -1751,10 +1813,15 @@ task uvm_mem::do_read(uvm_reg_item rw);
          rw.local_map.do_read(rw);
       end
 
-      if (rw.status != UVM_NOT_OK && m_cover_on)
-         for (int idx = rw.offset; idx <= rw.offset + rw.value.size(); idx++)
+      if (rw.status != UVM_NOT_OK)
+         for (int idx = rw.offset;
+              idx <= rw.offset + rw.value.size();
+              idx++) begin
+            XsampleX(map_info.mem_range.stride * idx, 1, rw.map);
             m_parent.XsampleX(map_info.offset +
-                             (map_info.mem_range.stride * idx), rw.map);
+                             (map_info.mem_range.stride * idx),
+                              1, rw.map);
+         end
    end
 
    // BACKDOOR
