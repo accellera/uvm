@@ -71,9 +71,9 @@ class reg_R extends uvm_reg;
    
    virtual function void build();
       F1 = uvm_reg_field::type_id::create("F1",,get_full_name());
-      F1.configure(this, 4, 0, "RW", 0, 8'h0, 1, 0, 1);
+      F1.configure(this, 4, 0, "RW", 0, 8'h0, 1, 1, 1);
       F2 = uvm_reg_field::type_id::create("F2",,get_full_name());
-      F2.configure(this, 4, 4, "RO", 0, 8'h0, 1, 0, 1);
+      F2.configure(this, 4, 4, "RO", 0, 8'h0, 1, 1, 1);
    endfunction: build
 
    `uvm_object_utils(reg_R)
