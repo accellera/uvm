@@ -91,7 +91,7 @@ class producer extends uvm_component;
       data[i] = $urandom();
     end
     
-    t.set_data_ptr(data);
+    t.set_data(data);
     t.set_command(UVM_TLM_WRITE_COMMAND);
 
     return t;
