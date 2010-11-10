@@ -167,9 +167,11 @@ class block_B extends uvm_reg_block;
    
    
    function new(string name = "B");
-      super.new(name, build_cover(UVM_CVR_ADDR_MAP));
+      super.new(name, build_cover(UVM_CVR_ADDR_MAP+UVM_CVR_FIELD_VALS));
       if (can_cover(UVM_CVR_ADDR_MAP))
          cg_addr = new();
+      if (can_cover(UVM_CVR_FIELD_VALS))
+         cg_vals = new();
    endfunction: new
    
    virtual function void build();
@@ -204,4 +206,10 @@ class block_B extends uvm_reg_block;
       end
    endfunction
 
+   virtual function void sample_values();
+      super.sample_values();
+
+      if (is_cover_on(UVM_CVR_FIELD_VALS))
+         cg_vals.sample();
+   endfunction
 endclass : block_B
