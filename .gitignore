@@ -3,3 +3,6 @@ csrc
 simv*
 vc_hdrs.h
 ucli.key
+irun.log
+*.err
+

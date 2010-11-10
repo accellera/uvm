@@ -28,7 +28,7 @@
 @ius_min_version_required=(9,2,30);
 $ius = `irun -version`;
 chomp $ius;
-if ($ius !~ /TOOL:\s+\S+\s+(\d+)\.(\d+)-([sdbep])(\d+)/) {
+if ($ius !~ /TOOL:\s+\S+\s+(\d+)\.(\d+)-([A-z])(\d+)/) {
   print STDERR "Unable to run IUS: $ius";
   exit(1);
 } else {
