@@ -1331,10 +1331,6 @@ function void uvm_reg::set_frontdoor(uvm_reg_frontdoor ftdr,
    if (map_info == null)
       map.add_reg(this, -1, "RW", 1, ftdr);
    else begin
-      if (!map_info.unmapped) begin
-         `uvm_warning(get_full_name(), $psprintf("Indirectly accessed register has been mapped in address map %s. Unmapping.", map.get_full_name()));
-         map_info.unmapped = 1;
-      end
       map_info.frontdoor = ftdr;
    end
 endfunction: set_frontdoor

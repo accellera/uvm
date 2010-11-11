@@ -102,7 +102,10 @@ class uvm_reg_indirect_data extends uvm_reg;
             continue;
          end
          fd = new(m_idx, i, this);
-         m_tbl[i].set_frontdoor(fd, map);
+         if (m_tbl[i].is_in_map(map))
+            m_tbl[i].set_frontdoor(fd, map);
+         else
+            map.add_reg(m_tbl[i], -1, "RW", 1, fd);
       end
    endfunction
    
