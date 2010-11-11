@@ -37,38 +37,66 @@ class tb_test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   
    virtual task run();
       tb_env env;
-      uvm_status_e status;
-      uvm_reg_data_t dat;
+      uvm_status_e   status;
+      uvm_reg_data_t data;
 
       if (!$cast(env, uvm_top.find("env")) || env == null) begin
          `uvm_fatal("test", "Cannot find tb_env");
       end
 
-      env.regmodel.R.reset();
-      env.regmodel.R.read(status, dat);
-      if (dat != 8'h00) `uvm_error("Test", $psprintf("R is not as expected after reset: 'h%0h instead of 'h00", dat));
-      env.regmodel.R.write(status, 8'hFF);
-      env.regmodel.R.read(status, dat);
-      if (dat != 8'hFF) `uvm_error("Test", $psprintf("R is not as expected after write: 'h%0h instead of 'hFF", dat));
-      void'(env.regmodel.randomize() with { R.value == 8'hA5; });
-      dat = env.regmodel.R.get();
-      if (dat != 8'hA5) `uvm_error("Test", $psprintf("R is not as expected after randomize: 'h%0h instead of 'hA5", dat));
-            
+      env.regmodel.reset();
+      void'(env.regmodel.set_cover(UVM_CVR_ALL));
+
+      begin
+         uvm_reg_sequence seq;
+
+         seq = uvm_reg_bit_bash_seq::type_id::create("seq");
+         seq.model = env.regmodel;
+         seq.start(env.bus.sqr);
+         seq.wait_for_sequence_state(FINISHED);
+
+         seq = uvm_mem_walk_seq::type_id::create("seq");
+         seq.model = env.regmodel;
+         seq.start(env.bus.sqr);
+         seq.wait_for_sequence_state(FINISHED);
+
+      end
+
+      `uvm_info("Test", "Generating and uploading 100 configurations...", UVM_LOW)
+      env.regmodel.Ra.F1.value.rand_mode(1);
+      env.regmodel.Ra.F2.value.rand_mode(1);
+      env.regmodel.Rb.F1.value.rand_mode(1);
+      env.regmodel.Rb.F2.value.rand_mode(1);
+      
+      repeat (100) begin
+         uvm_sequence_base seq = new;
+         uvm_status_e status;
+
+         void'(env.regmodel.randomize() with {
+                                              Ra.F2.value == Rb.F2.value;
+                                              });
+         env.regmodel.update(status, .parent(seq));
+         env.regmodel.sample_values();
+      end
+     
       global_stop_request();
    endtask
 endclass
 
 
 initial begin
-   static tb_env env = new("env");
-   static tb_test test = new("test");
-   
+   tb_env env;
+   tb_test test;
    uvm_report_server svr;
+   
+   env = new("env");
+   test = new("test");
+
    svr = _global_reporter.get_report_server();
    svr.set_max_quit_count(10);
+   
    run_test();
 end
 

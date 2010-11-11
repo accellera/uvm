@@ -2,6 +2,7 @@
 // -------------------------------------------------------------
 //    Copyright 2010 Synopsys, Inc.
 //    Copyright 2010 Mentor Graphics Corp.
+//    Copyright 2010 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
 //
 //    Licensed under the Apache License, Version 2.0 (the

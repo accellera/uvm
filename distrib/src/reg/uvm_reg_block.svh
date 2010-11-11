@@ -2,6 +2,7 @@
 // -------------------------------------------------------------
 //    Copyright 2004-2009 Synopsys, Inc.
 //    Copyright 2010 Mentor Graphics Corp.
+//    Copyright 2010 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
 //
 //    Licensed under the Apache License, Version 2.0 (the
@@ -451,6 +452,34 @@ virtual class uvm_reg_block extends uvm_object;
    //----------------
 
 
+   // Function: build_cover
+   //
+   // Check if all of the specified coverage model must be built.
+   //
+   // Check if TBD 
+   // Models are specified by adding the symbolic value of individual
+   // coverage model as defined in <uvm_coverage_model_e>.
+   // Returns the sum of all coverage models to be built in the
+   // block model.
+   //
+   extern virtual protected function uvm_reg_cvr_t build_cover(uvm_reg_cvr_t models);
+
+
+   // Function: add_cover
+   //
+   // Specify that additional coverage models are available.
+   //
+   // Add the specified coverage model to the coverage models
+   // available in this class.
+   // Models are specified by adding the symbolic value of individual
+   // coverage model as defined in <uvm_coverage_model_e>.
+   //
+   // This method shall be called only in the constructor of
+   // subsequently derived classes.
+   //
+   extern virtual protected function void add_cover(uvm_reg_cvr_t models);
+
+
    //
    // Function: can_cover
    // Check if block has coverage model(s)
@@ -460,7 +489,7 @@ virtual class uvm_reg_block extends uvm_object;
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
    //
-   extern virtual function bit can_cover(int models);
+   extern virtual function bit can_cover(uvm_reg_cvr_t models);
 
    //
    // FUNCTION: set_cover
@@ -483,7 +512,7 @@ virtual class uvm_reg_block extends uvm_object;
    // See the <uvm_reg_block::can_cover()> method to identify
    // the available functional coverage models.
    //
-   extern virtual function int set_cover(int is_on);
+   extern virtual function uvm_reg_cvr_t set_cover(uvm_reg_cvr_t is_on);
 
    //
    // FUNCTION: is_cover_on
@@ -496,12 +525,50 @@ virtual class uvm_reg_block extends uvm_object;
    //
    // See <uvm_reg_block::set_cover()> for more details. 
    //
-   extern virtual function bit is_cover_on(int is_on = UVM_CVR_ALL);
+   extern virtual function bit is_cover_on(uvm_reg_cvr_t is_on = UVM_CVR_ALL);
 
-   /*local*/ extern virtual function void XsampleX(uvm_reg_addr_t  addr,
-                                                   uvm_reg_map  map);
-   protected virtual function void     map_coverage    (uvm_reg_map map);
+   // Function: sample
+   //
+   // Functional coverage measurement method
+   //
+   // This method is invoked by the block abstraction class
+   // whenever an address within one of its address map
+   // is succesfully read or written.
+   // The specified offset is the offset within the block,
+   // not an absolute address.
+   //
+   // Empty by default, this method may be extended by the
+   // abstraction class generator to perform the required sampling
+   // in any provided functional coverage model.
+   //
+   protected virtual function void  sample(uvm_reg_addr_t offset,
+                                           bit            is_read,
+                                           uvm_reg_map    map);
    endfunction
+
+   // Function: sample_values
+   //
+   // Functional coverage measurement method for field values
+   //
+   // This method is invoked by the user
+   // or by the <uvm_reg_block::sample_values()> method of the parent block
+   // to trigger the sampling
+   // of the current field values in the
+   // block-level functional coverage model.
+   // It recursively invokes the <uvm_reg_block::sample_values()>
+   // and <uvm_reg::sample_values()> methods
+   // in the blocks and registers in this block.
+   //
+   // This method may be extended by the
+   // abstraction class generator to perform the required sampling
+   // in any provided field-value functional coverage model.
+   // If this method is extended, it MUST call super.sample_values().
+   //
+   extern virtual function void sample_values();
+
+   /*local*/ extern function void XsampleX(uvm_reg_addr_t addr,
+                                           bit            is_read,
+                                           uvm_reg_map    map);
 
 
    //--------------
@@ -1310,93 +1377,79 @@ endfunction: get_vfield_by_name
 
 // set_cover
 
-function int uvm_reg_block::set_cover(int is_on);
-   int can_cvr;
-
-   if (is_on == int'(UVM_NO_COVERAGE)) begin
-      this.cover_on = is_on;
-      return this.cover_on;
-   end
-
-   if ((this.has_cover & is_on) == 0) begin
-      `uvm_warning("RegModel", {this.get_full_name()," - Cannot turn ON any ",
-          "coverage becasue the corresponding coverage model was not generated."})
-      return this.cover_on;
-   end
-
-   if (is_on & UVM_CVR_REG_BITS) begin
-      if (this.has_cover & UVM_CVR_REG_BITS) begin
-          this.cover_on |= UVM_CVR_REG_BITS;
-      end
-      else begin
-        `uvm_warning("RegModel", {this.get_full_name()," - Cannot turn ON Register Bit ",
-            "coverage becasue the corresponding coverage model was not generated."})
-      end
-   end
-
-   if (is_on & UVM_CVR_FIELD_VALS) begin
-      if (this.has_cover & UVM_CVR_FIELD_VALS) begin
-          this.cover_on |= UVM_CVR_FIELD_VALS;
-      end
-      else begin
-        `uvm_warning("RegModel", {this.get_full_name()," - Cannot turn ON Field Value ",
-            "coverage becasue the corresponding coverage model was not generated."})
-      end
-   end
-
-   if (is_on & UVM_CVR_ADDR_MAP) begin
-      if (this.has_cover & UVM_CVR_ADDR_MAP) begin
-          this.cover_on |= UVM_CVR_ADDR_MAP;
-      end 
-      else begin
-        `uvm_warning("RegModel", {this.get_full_name()," - Cannot turn ON Address Map ",
-            "coverage becasue the corresponding coverage model was not generated."})
-      end
-   end
-
-   set_cover = this.cover_on;
-
-   can_cvr = is_on & set_cover; 
-
-   if (can_cvr == 0)
-     return set_cover;
+function uvm_reg_cvr_t uvm_reg_block::set_cover(uvm_reg_cvr_t is_on);
+   this.cover_on = this.has_cover & is_on;
 
    foreach (regs[rg_]) begin
      uvm_reg rg = rg_;
-     void'(rg.set_cover(can_cvr));
+     void'(rg.set_cover(is_on));
    end
 
    foreach (mems[mem_]) begin
      uvm_mem mem = mem_;
-     void'(mem.set_cover(can_cvr));
+     void'(mem.set_cover(is_on));
    end
 
    foreach (blks[blk_]) begin
      uvm_reg_block blk = blk_;
-     void'(blk.set_cover(can_cvr));
+     void'(blk.set_cover(is_on));
    end
 
+   return this.cover_on;
 endfunction: set_cover
 
 
-// sample
+// sample_values
+
+function void uvm_reg_block::sample_values();
+   foreach (regs[rg_]) begin
+      uvm_reg rg = rg_;
+      rg.sample_values();
+   end
+
+   foreach (blks[blk_]) begin
+      uvm_reg_block blk = blk_;
+      blk.sample_values();
+   end
+endfunction
+
+
+// XsampleX
 
 function void uvm_reg_block::XsampleX(uvm_reg_addr_t addr,
-                                    uvm_reg_map map);
-   // Nothing to do in this base class
+                                      bit            is_read,
+                                      uvm_reg_map    map);
+   sample(addr, is_read, map);
+   if (parent != null) begin
+      // ToDo: Call XsampleX in the parent block
+      //       with the offset and map within that block's context
+   end
 endfunction
+
+
+function uvm_reg_cvr_t uvm_reg_block::build_cover(uvm_reg_cvr_t models);
+   // ToDO uses resources!
+   return models;
+endfunction: build_cover
+
+
+// add_cover
+
+function void uvm_reg_block::add_cover(uvm_reg_cvr_t models);
+   this.has_cover |= models;
+endfunction: add_cover
 
 
 // can_cover
 
-function bit uvm_reg_block::can_cover(int models);
+function bit uvm_reg_block::can_cover(uvm_reg_cvr_t models);
    return ((this.has_cover & models) == models);
 endfunction: can_cover
 
 
 // is_cover_on
 
-function bit uvm_reg_block::is_cover_on(int is_on = UVM_CVR_ALL);
+function bit uvm_reg_block::is_cover_on(uvm_reg_cvr_t is_on = UVM_CVR_ALL);
    if (this.can_cover(is_on) == 0) return 0;
    return ((this.cover_on & is_on) == is_on);
 endfunction: is_cover_on
@@ -1531,7 +1584,7 @@ task uvm_reg_block::update(output uvm_status_e  status,
       uvm_reg rg = rg_;
       if (rg.needs_update()) begin
          rg.update(status, path, null, parent, prior, extension);
-         if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
+         if (status != UVM_IS_OK && status != UVM_HAS_X) begin;
            `uvm_error("RegModel", $sformatf("Register \"%s\" could not be updated",
                                         rg.get_full_name()));
            return;
@@ -1562,7 +1615,7 @@ task uvm_reg_block::mirror(output uvm_status_e       status,
       uvm_reg rg = rg_;
       rg.mirror(status, check, path, null,
                 parent, prior, extension, fname, lineno);
-      if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
+      if (status != UVM_IS_OK && status != UVM_HAS_X) begin;
          final_status = status;
       end
    end
@@ -1571,7 +1624,7 @@ task uvm_reg_block::mirror(output uvm_status_e       status,
       uvm_reg_block blk = blk_;
 
       blk.mirror(status, check, path, parent, prior, extension, fname, lineno);
-      if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
+      if (status != UVM_IS_OK && status != UVM_HAS_X) begin;
          final_status = status;
       end
    end
@@ -1709,7 +1762,6 @@ function uvm_reg_map uvm_reg_block::create_map(string name, uvm_reg_addr_t base_
    this.maps[map] = 1;
    if (maps.num() == 1)
      default_map = map;
-   this.map_coverage(map);
 
    return map;
 endfunction
@@ -1733,7 +1785,6 @@ function void uvm_reg_block::add_map(uvm_reg_map map);
    this.maps[map] = 1;
    if (maps.num() == 1)
      default_map = map;
-   this.map_coverage(map);
 
 endfunction: add_map
 

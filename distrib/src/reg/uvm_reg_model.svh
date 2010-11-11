@@ -2,6 +2,7 @@
 // -------------------------------------------------------------
 //    Copyright 2004-2009 Synopsys, Inc.
 //    Copyright 2010 Mentor Graphics Corp.
+//    Copyright 2010 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
 //
 //    Licensed under the Apache License, Version 2.0 (the
@@ -37,15 +38,6 @@
 `define UVM_REG_MODEL__SV
 
 
-`ifndef UVM_REG_ADDR_WIDTH
-`define UVM_REG_ADDR_WIDTH 64
-`endif
-
-`ifndef UVM_REG_DATA_WIDTH
-`define UVM_REG_DATA_WIDTH 64
-`endif
-
-
 typedef class uvm_reg_field;
 typedef class uvm_vreg_field;
 typedef class uvm_reg;
@@ -58,6 +50,93 @@ typedef class uvm_reg_map;
 typedef class uvm_reg_map_info;
 typedef class uvm_reg_sequence;
 typedef class uvm_reg_adapter;
+
+
+//------------------------------------------------------------------------------
+//
+// Macro: `UVM_REG_ADDR_WIDTH
+//
+// Maximum address width in bits
+//
+// Default value is 64. Used to define the <uvm_reg_addr_t> type.
+//
+`ifndef UVM_REG_ADDR_WIDTH
+ `define UVM_REG_ADDR_WIDTH 64
+`endif
+
+
+//------------------------------------------------------------------------------
+//
+// Macro: `UVM_REG_DATA_WIDTH
+//
+// Maximum data width in bits
+//
+// Default value is 64. Used to define the <uvm_reg_data_t> type.
+//
+`ifndef UVM_REG_DATA_WIDTH
+ `define UVM_REG_DATA_WIDTH 64
+`endif
+
+//------------------------------------------------------------------------------
+//
+// Macro: `UVM_REG_BYTENABLE_WIDTH
+//
+// Maximum number of byte enable bits
+//
+// Default value is one per byte in <`UVM_REG_DATA_WIDTH>.
+// Used to define the <uvm_reg_byte_en_t> type.
+//
+`ifndef UVM_REG_BYTENABLE_WIDTH 
+  `define UVM_REG_BYTENABLE_WIDTH ((`UVM_REG_DATA_WIDTH-1)/8+1) 
+`endif
+
+
+//------------------------------------------------------------------------------
+//
+// Macro: `UVM_REG_CVR_WIDTH
+//
+// Maximum number of bits in a <uvm_reg_cvr_t> coverage model set.
+//
+// Default value is 32.
+//
+`ifndef UVM_REG_CVR_WIDTH
+ `define UVM_REG_CVR_WIDTH 32
+`endif
+
+
+//------------------------------------------------------------------------------
+// Type: uvm_reg_data_t
+//
+// 2-state data value with <`UVM_REG_DATA_WIDTH> bits
+//
+typedef  bit [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_t ;
+
+// Type: uvm_reg_data_logic_t
+//
+// 4-state data value with <`UVM_REG_DATA_WIDTH> bits
+//
+typedef  logic [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_logic_t ;
+
+//------------------------------------------------------------------------------
+// Type: uvm_reg_addr_t
+//
+// 2-state address value with <`UVM_REG_ADDR_WIDTH> bits
+//
+typedef  bit [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_t ;
+
+// Type: uvm_reg_addr_logic_t
+//
+// 4-state address value with <`UVM_REG_ADDR_WIDTH> bits
+//
+typedef  logic [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_logic_t ;
+
+//------------------------------------------------------------------------------
+//
+// Type: uvm_reg_byte_en_t
+//
+// 2-state byte_enable value with <`UVM_REG_BYTENABLE_WIDTH> bits
+//
+typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
 
 
 //------------------------------------------------------------------------------
@@ -201,6 +280,24 @@ typedef class uvm_reg_adapter;
 
 
 //------------------------------------------------------------------------------
+// Type: uvm_reg_cvr_t
+//
+// Coverage model value set with <`UVM_REG_CVR_WIDTH> bits.
+//
+// Symbolic values for individual coverage models are defined
+// by the <uvm_coverage_model_e> type.
+//
+// The following bits in the set are assigned as follows
+//
+// 0-7     - UVM pre-defined coverage models
+// 8-15    - Coverage models defined by EDA vendors,
+//           implemented in a register model generator.
+// 16-23   - User-defined coverage models
+// 24..    - Reserved
+//
+typedef  bit [`UVM_REG_CVR_WIDTH-1:0]  uvm_reg_cvr_t ;
+
+//------------------------------------------------------------------------------
 //
 // Enum: uvm_coverage_model_e
 //
@@ -211,97 +308,16 @@ typedef class uvm_reg_adapter;
 // UVM_CVR_REG_BITS     - Individual register bits
 // UVM_CVR_ADDR_MAP     - Individual register and memory addresses
 // UVM_CVR_FIELD_VALS   - Field values
-// UVM_CVR_ALL          - All of the above
+// UVM_CVR_ALL          - All coverage models
 //
-   typedef enum {
+   typedef enum uvm_reg_cvr_t {
       UVM_NO_COVERAGE      = 'h0000,
       UVM_CVR_REG_BITS     = 'h0001,
       UVM_CVR_ADDR_MAP     = 'h0002,
       UVM_CVR_FIELD_VALS   = 'h0004,
-      UVM_CVR_ALL          = 'h0007
+      UVM_CVR_ALL          = -1
    } uvm_coverage_model_e;
 
-
-
-//------------------------------------------------------------------------------
-//
-// Macro: `UVM_REG_ADDR_WIDTH
-//
-// Maximum address width in bits
-//
-// Default value is 64.
-//
-`ifndef UVM_REG_ADDR_WIDTH
-  `ifdef UVM_REG_ADDR_WIDTH
-    `define UVM_REG_ADDR_WIDTH `UVM_REG_ADDR_WIDTH
-  `else
-    `define UVM_REG_ADDR_WIDTH 64
-  `endif
-`endif
-
-
-//------------------------------------------------------------------------------
-//
-// Macro: `UVM_REG_DATA_WIDTH
-//
-// Maximum data width in bits
-//
-// Default value is 64.
-//
-`ifndef UVM_REG_DATA_WIDTH
-  `ifdef UVM_REG_DATA_WIDTH
-    `define UVM_REG_DATA_WIDTH `UVM_REG_DATA_WIDTH
-  `else
-    `define UVM_REG_DATA_WIDTH 64
-  `endif
-`endif
-
-//------------------------------------------------------------------------------
-//
-// Macro: `UVM_REG_BYTENABLE_WIDTH
-//
-// Maximum number of byte enable bits
-//
-// Default value is one per byte in <`UVM_REG_DATA_WIDTH>
-//
-`ifndef UVM_REG_BYTENABLE_WIDTH 
-  `define UVM_REG_BYTENABLE_WIDTH ((`UVM_REG_DATA_WIDTH-1)/8+1) 
-`endif
-
-
-//------------------------------------------------------------------------------
-// Type: uvm_reg_data_t
-//
-// 2-state data value with <`UVM_REG_DATA_WIDTH> bits
-//
-typedef  bit [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_t ;
-
-// Type: uvm_reg_data_logic_t
-//
-// 4-state data value with <`UVM_REG_DATA_WIDTH> bits
-//
-typedef  logic [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_logic_t ;
-
-//------------------------------------------------------------------------------
-// Type: uvm_reg_addr_t
-//
-// 2-state address value with <`UVM_REG_ADDR_WIDTH> bits
-//
-typedef  bit [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_t ;
-
-// Type: uvm_reg_addr_logic_t
-//
-// 4-state address value with <`UVM_REG_ADDR_WIDTH> bits
-//
-typedef  logic [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_logic_t ;
-
-//------------------------------------------------------------------------------
-//
-// Type: uvm_reg_byte_en_t
-//
-// 2-state byte_enable value with <`UVM_REG_BYTENABLE_WIDTH> bits
-//
-typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
 
 
 //------------------------------------------------------------------------------
