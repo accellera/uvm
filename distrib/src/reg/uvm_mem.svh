@@ -858,7 +858,7 @@ class uvm_mem extends uvm_object;
    // Returns the sum of all coverage models to be built in the
    // memory model.
    //
-   extern virtual protected function int build_cover(int models);
+   extern virtual protected function uvm_reg_cvr_t build_cover(uvm_reg_cvr_t models);
 
 
    // Function: add_cover
@@ -873,7 +873,7 @@ class uvm_mem extends uvm_object;
    // This method shall be called only in the constructor of
    // subsequently derived classes.
    //
-   extern virtual protected function void add_cover(int models);
+   extern virtual protected function void add_cover(uvm_reg_cvr_t models);
 
 
    // Function: can_cover
@@ -885,7 +885,7 @@ class uvm_mem extends uvm_object;
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
    //
-   extern virtual function bit can_cover(int models);
+   extern virtual function bit can_cover(uvm_reg_cvr_t models);
 
 
    // Function: set_cover
@@ -909,7 +909,7 @@ class uvm_mem extends uvm_object;
    // See the <uvm_mem::can_cover()> method to identify
    // the available functional coverage models.
    //
-   extern virtual function int set_cover(int is_on);
+   extern virtual function uvm_reg_cvr_t set_cover(uvm_reg_cvr_t is_on);
 
 
    // Function: is_cover_on
@@ -923,7 +923,7 @@ class uvm_mem extends uvm_object;
    //
    // See <uvm_mem::set_cover()> for more details. 
    //
-   extern virtual function bit is_cover_on(int is_on);
+   extern virtual function bit is_cover_on(uvm_reg_cvr_t is_on);
 
 
    // Function: sample
@@ -933,13 +933,14 @@ class uvm_mem extends uvm_object;
    // This method is invoked by the memory abstraction class
    // whenever an address within one of its address map
    // is succesfully read or written.
-   // The address is an offset within the memory, not an absolute address.
+   // The specified offset is the offset within the memory,
+   // not an absolute address.
    //
    // Empty by default, this method may be extended by the
    // abstraction class generator to perform the required sampling
    // in any provided functional coverage model.
    //
-   protected virtual function void  sample(uvm_reg_addr_t addr,
+   protected virtual function void  sample(uvm_reg_addr_t offset,
                                            bit            is_read,
                                            uvm_reg_map    map);
    endfunction
@@ -1494,7 +1495,7 @@ endfunction: get_attributes
 //---------
 
 
-function int uvm_mem::build_cover(int models);
+function uvm_reg_cvr_t uvm_mem::build_cover(uvm_reg_cvr_t models);
    // ToDO uses resources!
    return models;
 endfunction: build_cover
@@ -1502,22 +1503,22 @@ endfunction: build_cover
 
 // add_cover
 
-function void uvm_mem::add_cover(int models);
+function void uvm_mem::add_cover(uvm_reg_cvr_t models);
    m_has_cover |= models;
 endfunction: add_cover
 
 
 // can_cover
 
-function bit uvm_mem::can_cover(int models);
+function bit uvm_mem::can_cover(uvm_reg_cvr_t models);
    return ((m_has_cover & models) == models);
 endfunction: can_cover
 
 
 // set_cover
 
-function int uvm_mem::set_cover(int is_on);
-   if (is_on == int'(UVM_NO_COVERAGE)) begin
+function uvm_reg_cvr_t uvm_mem::set_cover(uvm_reg_cvr_t is_on);
+   if (is_on == uvm_reg_cvr_t'(UVM_NO_COVERAGE)) begin
       m_cover_on = is_on;
       return m_cover_on;
    end
@@ -1530,7 +1531,7 @@ endfunction: set_cover
 
 // is_cover_on
 
-function bit uvm_mem::is_cover_on(int is_on);
+function bit uvm_mem::is_cover_on(uvm_reg_cvr_t is_on);
    if (can_cover(is_on) == 0) return 0;
    return ((m_cover_on & is_on) == is_on);
 endfunction: is_cover_on

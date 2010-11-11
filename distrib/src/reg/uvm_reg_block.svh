@@ -462,7 +462,7 @@ virtual class uvm_reg_block extends uvm_object;
    // Returns the sum of all coverage models to be built in the
    // block model.
    //
-   extern virtual protected function int build_cover(int models);
+   extern virtual protected function uvm_reg_cvr_t build_cover(uvm_reg_cvr_t models);
 
 
    // Function: add_cover
@@ -477,7 +477,7 @@ virtual class uvm_reg_block extends uvm_object;
    // This method shall be called only in the constructor of
    // subsequently derived classes.
    //
-   extern virtual protected function void add_cover(int models);
+   extern virtual protected function void add_cover(uvm_reg_cvr_t models);
 
 
    //
@@ -489,7 +489,7 @@ virtual class uvm_reg_block extends uvm_object;
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
    //
-   extern virtual function bit can_cover(int models);
+   extern virtual function bit can_cover(uvm_reg_cvr_t models);
 
    //
    // FUNCTION: set_cover
@@ -512,7 +512,7 @@ virtual class uvm_reg_block extends uvm_object;
    // See the <uvm_reg_block::can_cover()> method to identify
    // the available functional coverage models.
    //
-   extern virtual function int set_cover(int is_on);
+   extern virtual function uvm_reg_cvr_t set_cover(uvm_reg_cvr_t is_on);
 
    //
    // FUNCTION: is_cover_on
@@ -525,7 +525,7 @@ virtual class uvm_reg_block extends uvm_object;
    //
    // See <uvm_reg_block::set_cover()> for more details. 
    //
-   extern virtual function bit is_cover_on(int is_on = UVM_CVR_ALL);
+   extern virtual function bit is_cover_on(uvm_reg_cvr_t is_on = UVM_CVR_ALL);
 
    // Function: sample
    //
@@ -534,16 +534,37 @@ virtual class uvm_reg_block extends uvm_object;
    // This method is invoked by the block abstraction class
    // whenever an address within one of its address map
    // is succesfully read or written.
-   // The address is an offset within the block, not an absolute address.
+   // The specified offset is the offset within the block,
+   // not an absolute address.
    //
    // Empty by default, this method may be extended by the
    // abstraction class generator to perform the required sampling
    // in any provided functional coverage model.
    //
-   protected virtual function void  sample(uvm_reg_addr_t addr,
+   protected virtual function void  sample(uvm_reg_addr_t offset,
                                            bit            is_read,
                                            uvm_reg_map    map);
    endfunction
+
+   // Function: sample_values
+   //
+   // Functional coverage measurement method for field values
+   //
+   // This method is invoked by the user
+   // or by the <uvm_reg_block::sample_values()> method of the parent block
+   // to trigger the sampling
+   // of the current field values in the
+   // block-level functional coverage model.
+   // It recursively invokes the <uvm_reg_block::sample_values()>
+   // and <uvm_reg::sample_values()> methods
+   // in the blocks and registers in this block.
+   //
+   // This method may be extended by the
+   // abstraction class generator to perform the required sampling
+   // in any provided field-value functional coverage model.
+   // If this method is extended, it MUST call super.sample_values().
+   //
+   extern virtual function void sample_values();
 
    /*local*/ extern function void XsampleX(uvm_reg_addr_t addr,
                                            bit            is_read,
@@ -1356,7 +1377,7 @@ endfunction: get_vfield_by_name
 
 // set_cover
 
-function int uvm_reg_block::set_cover(int is_on);
+function uvm_reg_cvr_t uvm_reg_block::set_cover(uvm_reg_cvr_t is_on);
    this.cover_on = this.has_cover & is_on;
 
    foreach (regs[rg_]) begin
@@ -1378,7 +1399,22 @@ function int uvm_reg_block::set_cover(int is_on);
 endfunction: set_cover
 
 
-// sample
+// sample_values
+
+function void uvm_reg_block::sample_values();
+   foreach (regs[rg_]) begin
+      uvm_reg rg = rg_;
+      rg.sample_values();
+   end
+
+   foreach (blks[blk_]) begin
+      uvm_reg_block blk = blk_;
+      blk.sample_values();
+   end
+endfunction
+
+
+// XsampleX
 
 function void uvm_reg_block::XsampleX(uvm_reg_addr_t addr,
                                       bit            is_read,
@@ -1391,7 +1427,7 @@ function void uvm_reg_block::XsampleX(uvm_reg_addr_t addr,
 endfunction
 
 
-function int uvm_reg_block::build_cover(int models);
+function uvm_reg_cvr_t uvm_reg_block::build_cover(uvm_reg_cvr_t models);
    // ToDO uses resources!
    return models;
 endfunction: build_cover
@@ -1399,21 +1435,21 @@ endfunction: build_cover
 
 // add_cover
 
-function void uvm_reg_block::add_cover(int models);
+function void uvm_reg_block::add_cover(uvm_reg_cvr_t models);
    this.has_cover |= models;
 endfunction: add_cover
 
 
 // can_cover
 
-function bit uvm_reg_block::can_cover(int models);
+function bit uvm_reg_block::can_cover(uvm_reg_cvr_t models);
    return ((this.has_cover & models) == models);
 endfunction: can_cover
 
 
 // is_cover_on
 
-function bit uvm_reg_block::is_cover_on(int is_on = UVM_CVR_ALL);
+function bit uvm_reg_block::is_cover_on(uvm_reg_cvr_t is_on = UVM_CVR_ALL);
    if (this.can_cover(is_on) == 0) return 0;
    return ((this.cover_on & is_on) == is_on);
 endfunction: is_cover_on
@@ -1548,7 +1584,7 @@ task uvm_reg_block::update(output uvm_status_e  status,
       uvm_reg rg = rg_;
       if (rg.needs_update()) begin
          rg.update(status, path, null, parent, prior, extension);
-         if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
+         if (status != UVM_IS_OK && status != UVM_HAS_X) begin;
            `uvm_error("RegModel", $sformatf("Register \"%s\" could not be updated",
                                         rg.get_full_name()));
            return;
@@ -1579,7 +1615,7 @@ task uvm_reg_block::mirror(output uvm_status_e       status,
       uvm_reg rg = rg_;
       rg.mirror(status, check, path, null,
                 parent, prior, extension, fname, lineno);
-      if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
+      if (status != UVM_IS_OK && status != UVM_HAS_X) begin;
          final_status = status;
       end
    end
@@ -1588,7 +1624,7 @@ task uvm_reg_block::mirror(output uvm_status_e       status,
       uvm_reg_block blk = blk_;
 
       blk.mirror(status, check, path, parent, prior, extension, fname, lineno);
-      if (status != UVM_IS_OK || status != UVM_HAS_X) begin;
+      if (status != UVM_IS_OK && status != UVM_HAS_X) begin;
          final_status = status;
       end
    end

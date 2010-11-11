@@ -63,6 +63,24 @@ class tb_test extends uvm_test;
          seq.wait_for_sequence_state(FINISHED);
 
       end
+
+      `uvm_info("Test", "Generating and uploading 100 configurations...", UVM_LOW)
+      env.regmodel.Ra.F1.value.rand_mode(1);
+      env.regmodel.Ra.F2.value.rand_mode(1);
+      env.regmodel.Rb.F1.value.rand_mode(1);
+      env.regmodel.Rb.F2.value.rand_mode(1);
+      
+      repeat (100) begin
+         uvm_sequence_base seq = new;
+         uvm_status_e status;
+
+         void'(env.regmodel.randomize() with {
+                                              Ra.F2.value == Rb.F2.value;
+                                              });
+         env.regmodel.update(status, .parent(seq));
+         env.regmodel.sample_values();
+      end
+     
       global_stop_request();
    endtask
 endclass
