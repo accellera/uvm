@@ -38,7 +38,8 @@ class reg_reg_MODER extends uvm_reg;
         this.DLYCRCEN = uvm_reg_field::type_id::create("DLYCRCEN",,get_full_name());
         this.DLYCRCEN.configure(this, 1, 12, "RW", 0, 1'h0, 1, 0, 0);
         this.undocumented = uvm_reg_field::type_id::create("undocumented",,get_full_name());
-        this.undocumented.configure(this, 1, 11, "DC", 0, 1'h0, 1, 0, 0);
+        this.undocumented.configure(this, 1, 11, "RW", 0, 1'h0, 1, 0, 0);
+        this.undocmented.set_compare(UVM_NO_CHECK);
         this.FULLD = uvm_reg_field::type_id::create("FULLD",,get_full_name());
         this.FULLD.configure(this, 1, 10, "RW", 0, 1'h0, 1, 0, 0);
         this.EXDFREN = uvm_reg_field::type_id::create("EXDFREN",,get_full_name());
@@ -312,11 +313,14 @@ class reg_reg_MIICOMMAND extends uvm_reg;
 
     virtual function void build();
         this.WCTRLDATA = uvm_reg_field::type_id::create("WCTRLDATA",,get_full_name());
-        this.WCTRLDATA.configure(this, 1, 2, "DC", 1, 1'h0, 1, 0, 0);
+        this.WCTRLDATA.configure(this, 1, 2, "RW", 1, 1'h0, 1, 0, 0);
+        this.WCTRLDATA.set_compare(UVM_NO_CHECK);
         this.RSTAT = uvm_reg_field::type_id::create("RSTAT",,get_full_name());
-        this.RSTAT.configure(this, 1, 1, "DC", 1, 1'h0, 1, 0, 0);
+        this.RSTAT.configure(this, 1, 1, "RW", 1, 1'h0, 1, 0, 0);
+        this.RSTAT.set_compare(UVM_NO_CHECK);
         this.SCANSTAT = uvm_reg_field::type_id::create("SCANSTAT",,get_full_name());
-        this.SCANSTAT.configure(this, 1, 0, "DC", 1, 1'h0, 1, 0, 0);
+        this.SCANSTAT.configure(this, 1, 0, "RW", 1, 1'h0, 1, 0, 0);
+        this.SCANSTAT.set_compare(UVM_NO_CHECK);
     endfunction: build
 
     `uvm_object_utils(reg_reg_MIICOMMAND)

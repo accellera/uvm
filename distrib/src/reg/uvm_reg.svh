@@ -627,8 +627,9 @@ virtual class uvm_reg extends uvm_object;
    //
    // If ~check~ is specified as UVM_CHECK,
    // an error message is issued if the current mirrored value
-   // does not match the readback value, unless a field has the "DC"
-   // (don't care) policy.
+   // does not match the readback value. Any field whose check has been
+   // disabled with <uvm_reg_field::set_compare()> will not be considered
+   // in the comparison. 
    //
    // If the register is mapped in multiple address maps and physical
    // access is used (front-door access), an address ~map~ must be specified.
@@ -2954,7 +2955,7 @@ task uvm_reg::mirror(output uvm_status_e       status,
 
       foreach(m_fields[i]) begin
          string acc = m_fields[i].get_access(map);
-         if (acc == "DC") begin
+         if (m_fields[i].get_compare() == UVM_CHECK) begin
             dc |= ((1 << m_fields[i].get_n_bits())-1)
                   << m_fields[i].get_lsb_pos();
          end
