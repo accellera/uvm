@@ -47,7 +47,7 @@ class tb_test extends uvm_test;
       end
 
       env.regmodel.reset();
-      void'(env.regmodel.set_cover(UVM_CVR_ALL));
+      void'(env.regmodel.set_coverage(UVM_CVR_ALL));
 
       begin
          uvm_reg_sequence seq;
@@ -86,6 +86,8 @@ initial begin
    tb_env env;
    tb_test test;
    uvm_report_server svr;
+
+   uvm_reg::include_coverage("*", UVM_CVR_ALL);
    
    env = new("env");
    test = new("test");

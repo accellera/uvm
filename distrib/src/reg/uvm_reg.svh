@@ -86,14 +86,14 @@ virtual class uvm_reg extends uvm_object;
    // Not all bits need to be implemented.
    // This value is usually a multiple of 8.
    //
-   // ~has_cover~ specifies which functional coverage models are present in
+   // ~has_coverage~ specifies which functional coverage models are present in
    // the extension of the register abstraction class.
    // Multiple functional coverage models may be specified by adding their
    // symbolic names, as defined by the <uvm_coverage_model_e> type.
    //
    extern function new (string name="",
                         int unsigned n_bits,
-                        int has_cover);
+                        int has_coverage);
 
 
    // Function: configure
@@ -994,7 +994,7 @@ virtual class uvm_reg extends uvm_object;
    extern static function void include_coverage(string scope,
                                                 uvm_reg_cvr_t models);
 
-   // Function: build_cover
+   // Function: build_coverage
    //
    // Check if all of the specified coverage models must be built.
    //
@@ -1007,10 +1007,10 @@ virtual class uvm_reg extends uvm_object;
    // Returns the sum of all coverage models to be built in the
    // register model.
    //
-   extern virtual protected function uvm_reg_cvr_t build_cover(uvm_reg_cvr_t models);
+   extern virtual protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
 
 
-   // Function: add_cover
+   // Function: add_coverage
    //
    // Specify that additional coverage models are available.
    //
@@ -1022,10 +1022,10 @@ virtual class uvm_reg extends uvm_object;
    // This method shall be called only in the constructor of
    // subsequently derived classes.
    //
-   extern virtual protected function void add_cover(uvm_reg_cvr_t models);
+   extern virtual protected function void add_coverage(uvm_reg_cvr_t models);
 
 
-   // Function: can_cover
+   // Function: has_coverage
    //
    // Check if register has coverage model(s)
    //
@@ -1034,10 +1034,10 @@ virtual class uvm_reg extends uvm_object;
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
    //
-   extern virtual function bit can_cover(uvm_reg_cvr_t models);
+   extern virtual function bit has_coverage(uvm_reg_cvr_t models);
 
 
-   // Function: set_cover
+   // Function: set_coverage
    //
    // Turns on coverage measurement.
    //
@@ -1055,13 +1055,13 @@ virtual class uvm_reg extends uvm_object;
    // This method can only control the measurement of functional
    // coverage models that are present in the register abstraction classes,
    // then enabled during construction.
-   // See the <uvm_reg::can_cover()> method to identify
+   // See the <uvm_reg::has_coverage()> method to identify
    // the available functional coverage models.
    //
-   extern virtual function uvm_reg_cvr_t set_cover(uvm_reg_cvr_t is_on);
+   extern virtual function uvm_reg_cvr_t set_coverage(uvm_reg_cvr_t is_on);
 
 
-   // Function: is_cover_on
+   // Function: get_coverage
    //
    // Check if coverage measurement is on.
    //
@@ -1070,9 +1070,9 @@ virtual class uvm_reg extends uvm_object;
    // Multiple functional coverage models can be specified by adding the
    // functional coverage model identifiers.
    //
-   // See <uvm_reg::set_cover()> for more details. 
+   // See <uvm_reg::set_coverage()> for more details. 
    //
-   extern virtual function bit is_cover_on(uvm_reg_cvr_t is_on);
+   extern virtual function bit get_coverage(uvm_reg_cvr_t is_on);
 
 
    // Function: sample
@@ -1208,14 +1208,14 @@ endclass: uvm_reg
 
 // new
 
-function uvm_reg::new(string name="", int unsigned n_bits, int has_cover);
+function uvm_reg::new(string name="", int unsigned n_bits, int has_coverage);
    super.new(name);
    if (n_bits == 0) begin
       `uvm_error("RegModel", $psprintf("Register \"%s\" cannot have 0 bits", get_name()));
       n_bits = 1;
    end
    m_n_bits      = n_bits;
-   m_has_cover   = has_cover;
+   m_has_cover   = has_coverage;
    m_atomic      = new(1);
    m_n_used_bits = 0;
    m_locked      = 0;
@@ -1955,36 +1955,36 @@ function void uvm_reg::include_coverage(string scope,
 endfunction
 
 
-// build_cover
+// build_coverage
 
-function uvm_reg_cvr_t uvm_reg::build_cover(uvm_reg_cvr_t models);
+function uvm_reg_cvr_t uvm_reg::build_coverage(uvm_reg_cvr_t models);
 `ifdef UVM_RESOURCES
-   build_cover = UVM_NO_COVERAGE;
+   build_coverage = UVM_NO_COVERAGE;
    void'(uvm_reg_cvr_rsrc_db::read_by_name("include_coverage",
                                            {"uvm_reg::", get_full_name()},
-                                           build_cover, this);
+                                           build_coverage, this);
 `endif
    return models;
-endfunction: build_cover
+endfunction: build_coverage
 
 
-// add_cover
+// add_coverage
 
-function void uvm_reg::add_cover(uvm_reg_cvr_t models);
+function void uvm_reg::add_coverage(uvm_reg_cvr_t models);
    m_has_cover |= models;
-endfunction: add_cover
+endfunction: add_coverage
 
 
-// can_cover
+// has_coverage
 
-function bit uvm_reg::can_cover(uvm_reg_cvr_t models);
+function bit uvm_reg::has_coverage(uvm_reg_cvr_t models);
    return ((m_has_cover & models) == models);
-endfunction: can_cover
+endfunction: has_coverage
 
 
-// set_cover
+// set_coverage
 
-function uvm_reg_cvr_t uvm_reg::set_cover(uvm_reg_cvr_t is_on);
+function uvm_reg_cvr_t uvm_reg::set_coverage(uvm_reg_cvr_t is_on);
    if (is_on == uvm_reg_cvr_t'(UVM_NO_COVERAGE)) begin
       m_cover_on = is_on;
       return m_cover_on;
@@ -1993,16 +1993,16 @@ function uvm_reg_cvr_t uvm_reg::set_cover(uvm_reg_cvr_t is_on);
    m_cover_on = m_has_cover & is_on;
 
    return m_cover_on;
-endfunction: set_cover
+endfunction: set_coverage
 
 
-// is_cover_on
+// get_coverage
 
-function bit uvm_reg::is_cover_on(uvm_reg_cvr_t is_on);
-   if (can_cover(is_on) == 0)
+function bit uvm_reg::get_coverage(uvm_reg_cvr_t is_on);
+   if (has_coverage(is_on) == 0)
       return 0;
    return ((m_cover_on & is_on) == is_on);
-endfunction: is_cover_on
+endfunction: get_coverage
 
 
 

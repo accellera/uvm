@@ -61,11 +61,11 @@ class reg_R extends uvm_reg;
    
    
    function new(string name = "reg_R");
-      super.new(name, 8, build_cover(UVM_CVR_REG_BITS +
-                                     UVM_CVR_FIELD_VALS));
-      if (can_cover(UVM_CVR_REG_BITS))
+      super.new(name, 8, build_coverage(UVM_CVR_REG_BITS +
+                                        UVM_CVR_FIELD_VALS));
+      if (has_coverage(UVM_CVR_REG_BITS))
          cg_bits = new();
-      if (can_cover(UVM_CVR_FIELD_VALS))
+      if (has_coverage(UVM_CVR_FIELD_VALS))
          cg_vals = new();
    endfunction: new
    
@@ -83,7 +83,7 @@ class reg_R extends uvm_reg;
                                 uvm_reg_data_t byte_en,
                                 bit            is_read,
                                 uvm_reg_map    map);
-      if (is_cover_on(UVM_CVR_REG_BITS)) begin
+      if (get_coverage(UVM_CVR_REG_BITS)) begin
          m_current = get();
          m_data    = data;
          m_be      = byte_en;
@@ -95,7 +95,7 @@ class reg_R extends uvm_reg;
    virtual function void sample_values();
       super.sample_values();
 
-      if (is_cover_on(UVM_CVR_FIELD_VALS))
+      if (get_coverage(UVM_CVR_FIELD_VALS))
          cg_vals.sample();
    endfunction
 endclass : reg_R
@@ -115,8 +115,8 @@ class mem_M extends uvm_mem;
    endgroup
 
    function new(string name = "mem_M");
-      super.new(name, 1024, 8, "RW", build_cover(UVM_CVR_ADDR_MAP));
-      if (can_cover(UVM_CVR_ADDR_MAP))
+      super.new(name, 1024, 8, "RW", build_coverage(UVM_CVR_ADDR_MAP));
+      if (has_coverage(UVM_CVR_ADDR_MAP))
          cg_addr = new();
    endfunction: new
    
@@ -125,7 +125,7 @@ class mem_M extends uvm_mem;
    virtual function void sample(uvm_reg_addr_t offset,
                                 bit            is_read,
                                 uvm_reg_map    map);
-      if (is_cover_on(UVM_CVR_ADDR_MAP)) begin
+      if (get_coverage(UVM_CVR_ADDR_MAP)) begin
          m_offset  = offset;
          cg_addr.sample();
       end
@@ -167,10 +167,10 @@ class block_B extends uvm_reg_block;
    
    
    function new(string name = "B");
-      super.new(name, build_cover(UVM_CVR_ADDR_MAP+UVM_CVR_FIELD_VALS));
-      if (can_cover(UVM_CVR_ADDR_MAP))
+      super.new(name, build_coverage(UVM_CVR_ADDR_MAP+UVM_CVR_FIELD_VALS));
+      if (has_coverage(UVM_CVR_ADDR_MAP))
          cg_addr = new();
-      if (can_cover(UVM_CVR_FIELD_VALS))
+      if (has_coverage(UVM_CVR_FIELD_VALS))
          cg_vals = new();
    endfunction: new
    
@@ -200,7 +200,7 @@ class block_B extends uvm_reg_block;
    virtual function void sample(uvm_reg_addr_t offset,
                                 bit            is_read,
                                 uvm_reg_map    map);
-      if (is_cover_on(UVM_CVR_ADDR_MAP)) begin
+      if (get_coverage(UVM_CVR_ADDR_MAP)) begin
          m_offset  = offset;
          cg_addr.sample();
       end
@@ -209,7 +209,7 @@ class block_B extends uvm_reg_block;
    virtual function void sample_values();
       super.sample_values();
 
-      if (is_cover_on(UVM_CVR_FIELD_VALS))
+      if (get_coverage(UVM_CVR_FIELD_VALS))
          cg_vals.sample();
    endfunction
 endclass : block_B

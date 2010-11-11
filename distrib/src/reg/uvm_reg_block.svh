@@ -89,12 +89,12 @@ virtual class uvm_reg_block extends uvm_object;
    // Creates an instance of a block abstraction class with the specified
    // name.
    //
-   // ~has_cover~ specifies which functional coverage models are present in
+   // ~has_coverage~ specifies which functional coverage models are present in
    // the extension of the block abstraction class.
    // Multiple functional coverage models may be specified by adding their
    // symbolic names, as defined by the <uvm_coverage_model_e> type.
    //------------------------------------------------------------------------
-   extern function new(string name="", int has_cover=UVM_NO_COVERAGE);
+   extern function new(string name="", int has_coverage=UVM_NO_COVERAGE);
 
    //
    // Function: configure
@@ -452,7 +452,7 @@ virtual class uvm_reg_block extends uvm_object;
    //----------------
 
 
-   // Function: build_cover
+   // Function: build_coverage
    //
    // Check if all of the specified coverage model must be built.
    //
@@ -465,10 +465,10 @@ virtual class uvm_reg_block extends uvm_object;
    // Returns the sum of all coverage models to be built in the
    // block model.
    //
-   extern virtual protected function uvm_reg_cvr_t build_cover(uvm_reg_cvr_t models);
+   extern virtual protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
 
 
-   // Function: add_cover
+   // Function: add_coverage
    //
    // Specify that additional coverage models are available.
    //
@@ -480,11 +480,11 @@ virtual class uvm_reg_block extends uvm_object;
    // This method shall be called only in the constructor of
    // subsequently derived classes.
    //
-   extern virtual protected function void add_cover(uvm_reg_cvr_t models);
+   extern virtual protected function void add_coverage(uvm_reg_cvr_t models);
 
 
    //
-   // Function: can_cover
+   // Function: has_coverage
    // Check if block has coverage model(s)
    //
    // Returns TRUE if the block abstraction class contains a coverage model
@@ -492,10 +492,10 @@ virtual class uvm_reg_block extends uvm_object;
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
    //
-   extern virtual function bit can_cover(uvm_reg_cvr_t models);
+   extern virtual function bit has_coverage(uvm_reg_cvr_t models);
 
    //
-   // FUNCTION: set_cover
+   // FUNCTION: set_coverage
    // Turns on coverage measurement.
    //
    // Turns the collection of functional coverage measurements on or off
@@ -512,13 +512,13 @@ virtual class uvm_reg_block extends uvm_object;
    // This method can only control the measurement of functional
    // coverage models that are present in the various abstraction classes,
    // then enabled during construction.
-   // See the <uvm_reg_block::can_cover()> method to identify
+   // See the <uvm_reg_block::has_coverage()> method to identify
    // the available functional coverage models.
    //
-   extern virtual function uvm_reg_cvr_t set_cover(uvm_reg_cvr_t is_on);
+   extern virtual function uvm_reg_cvr_t set_coverage(uvm_reg_cvr_t is_on);
 
    //
-   // FUNCTION: is_cover_on
+   // FUNCTION: get_coverage
    // Check if coverage measurement is on.
    //
    // Returns TRUE if measurement for all of the specified functional
@@ -526,9 +526,9 @@ virtual class uvm_reg_block extends uvm_object;
    // Multiple functional coverage models can be specified by adding the
    // functional coverage model identifiers.
    //
-   // See <uvm_reg_block::set_cover()> for more details. 
+   // See <uvm_reg_block::set_coverage()> for more details. 
    //
-   extern virtual function bit is_cover_on(uvm_reg_cvr_t is_on = UVM_CVR_ALL);
+   extern virtual function bit get_coverage(uvm_reg_cvr_t is_on = UVM_CVR_ALL);
 
    // Function: sample
    //
@@ -908,10 +908,10 @@ endfunction
 
 // new
 
-function uvm_reg_block::new(string name="", int has_cover=UVM_NO_COVERAGE);
+function uvm_reg_block::new(string name="", int has_coverage=UVM_NO_COVERAGE);
    super.new(name);
    hdl_paths_pool = new("hdl_paths");
-   this.has_cover = has_cover;
+   this.has_cover = has_coverage;
    // Root block until registered with a parent
    m_roots[this] = 1;
 endfunction: new
@@ -1378,28 +1378,28 @@ endfunction: get_vfield_by_name
 // Coverage API
 //-------------
 
-// set_cover
+// set_coverage
 
-function uvm_reg_cvr_t uvm_reg_block::set_cover(uvm_reg_cvr_t is_on);
+function uvm_reg_cvr_t uvm_reg_block::set_coverage(uvm_reg_cvr_t is_on);
    this.cover_on = this.has_cover & is_on;
 
    foreach (regs[rg_]) begin
      uvm_reg rg = rg_;
-     void'(rg.set_cover(is_on));
+     void'(rg.set_coverage(is_on));
    end
 
    foreach (mems[mem_]) begin
      uvm_mem mem = mem_;
-     void'(mem.set_cover(is_on));
+     void'(mem.set_coverage(is_on));
    end
 
    foreach (blks[blk_]) begin
      uvm_reg_block blk = blk_;
-     void'(blk.set_cover(is_on));
+     void'(blk.set_coverage(is_on));
    end
 
    return this.cover_on;
-endfunction: set_cover
+endfunction: set_coverage
 
 
 // sample_values
@@ -1430,37 +1430,37 @@ function void uvm_reg_block::XsampleX(uvm_reg_addr_t addr,
 endfunction
 
 
-function uvm_reg_cvr_t uvm_reg_block::build_cover(uvm_reg_cvr_t models);
+function uvm_reg_cvr_t uvm_reg_block::build_coverage(uvm_reg_cvr_t models);
 `ifdef UVM_RESOURCES
-   build_cover = UVM_NO_COVERAGE;
+   build_coverage = UVM_NO_COVERAGE;
    void'(uvm_reg_cvr_rsrc_db::read_by_name("include_coverage",
                                            {"uvm_reg::", get_full_name()},
-                                           build_cover, this);
+                                           build_coverage, this);
 `endif
    return models;
-endfunction: build_cover
+endfunction: build_coverage
 
 
-// add_cover
+// add_coverage
 
-function void uvm_reg_block::add_cover(uvm_reg_cvr_t models);
+function void uvm_reg_block::add_coverage(uvm_reg_cvr_t models);
    this.has_cover |= models;
-endfunction: add_cover
+endfunction: add_coverage
 
 
-// can_cover
+// has_coverage
 
-function bit uvm_reg_block::can_cover(uvm_reg_cvr_t models);
+function bit uvm_reg_block::has_coverage(uvm_reg_cvr_t models);
    return ((this.has_cover & models) == models);
-endfunction: can_cover
+endfunction: has_coverage
 
 
-// is_cover_on
+// get_coverage
 
-function bit uvm_reg_block::is_cover_on(uvm_reg_cvr_t is_on = UVM_CVR_ALL);
-   if (this.can_cover(is_on) == 0) return 0;
+function bit uvm_reg_block::get_coverage(uvm_reg_cvr_t is_on = UVM_CVR_ALL);
+   if (this.has_coverage(is_on) == 0) return 0;
    return ((this.cover_on & is_on) == is_on);
-endfunction: is_cover_on
+endfunction: get_coverage
 
 
 //-----------
