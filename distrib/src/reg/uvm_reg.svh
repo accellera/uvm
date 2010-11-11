@@ -963,11 +963,45 @@ virtual class uvm_reg extends uvm_object;
    // Group: Coverage
    //----------------
 
+   // Function: include_coverage
+   //
+   // Specify which coverage model that must be included in
+   // various block, register or memory abstraction class instances.
+   //
+   // The coverage models are specified by or'ing or adding the
+   // <uvm_coverage_model_e> coverage model identifiers corresponding to the
+   // coverage model to be included.
+   //
+   // The scope specifies a hierarchical name or pattern identifying
+   // a block, memory or register abstraction class instances.
+   // Any block, memory or register whose full hierarchical name
+   // matches the specified scope will have the specified functional
+   // coverage models included in them.
+   //
+   // The scope can be specified as a POSIX regular expression
+   // or simple pattern. See <Xref> for more details.
+   //
+   // The specification of which coverage model to include in
+   // which abstraction class is stored in a resource in the
+   // <uvm_resource_db>#(<uvm_reg_cvr_t>) database,
+   // in the "uvm_reg::" scope namespace.
+   // The ordering normal resource look-up ordering rules
+   // apply when multiple specifications are provided.
+   // See <Xref> for more details.
+   //
+   //| uvm_reg::include_coverage("*", UVM_CVR_ALL);
+   //
+   extern static function void include_coverage(string scope,
+                                                uvm_reg_cvr_t models);
+
    // Function: build_cover
    //
-   // Check if all of the specified coverage model must be built.
+   // Check if all of the specified coverage models must be built.
    //
-   // Check if TBD 
+   // Check which of the specified coverage model must be built
+   // in this instance of the register abstraction class,
+   // as specified by calls to <uvm_reg::include_coverage()>.
+   //
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
    // Returns the sum of all coverage models to be built in the
@@ -1903,12 +1937,33 @@ function void uvm_reg::get_attributes(ref string names[string],
 
 endfunction: get_attributes
  
+
 //---------
 // COVERAGE
 //---------
 
+
+// include_coverage
+
+function void uvm_reg::include_coverage(string scope,
+                                        uvm_reg_cvr_t models);
+`ifdef UVM_RESOURCES
+   uvm_reg_cvr_rsrc_db::write_and_set("include_coverage",
+                                      {"uvm_reg::", scope},
+                                      models, this);
+`endif
+endfunction
+
+
+// build_cover
+
 function uvm_reg_cvr_t uvm_reg::build_cover(uvm_reg_cvr_t models);
-   // ToDO uses resources!
+`ifdef UVM_RESOURCES
+   build_cover = UVM_NO_COVERAGE;
+   void'(uvm_reg_cvr_rsrc_db::read_by_name("include_coverage",
+                                           {"uvm_reg::", get_full_name()},
+                                           build_cover, this);
+`endif
    return models;
 endfunction: build_cover
 

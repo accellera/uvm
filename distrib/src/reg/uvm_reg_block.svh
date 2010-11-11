@@ -456,7 +456,10 @@ virtual class uvm_reg_block extends uvm_object;
    //
    // Check if all of the specified coverage model must be built.
    //
-   // Check if TBD 
+   // Check which of the specified coverage model must be built
+   // in this instance of the block abstraction class,
+   // as specified by calls to <uvm_reg::include_coverage()>.
+   //
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
    // Returns the sum of all coverage models to be built in the
@@ -1428,7 +1431,12 @@ endfunction
 
 
 function uvm_reg_cvr_t uvm_reg_block::build_cover(uvm_reg_cvr_t models);
-   // ToDO uses resources!
+`ifdef UVM_RESOURCES
+   build_cover = UVM_NO_COVERAGE;
+   void'(uvm_reg_cvr_rsrc_db::read_by_name("include_coverage",
+                                           {"uvm_reg::", get_full_name()},
+                                           build_cover, this);
+`endif
    return models;
 endfunction: build_cover
 
