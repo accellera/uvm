@@ -172,8 +172,7 @@ class uvm_tlm_nb_transport_bw_imp #(type T=uvm_tlm_generic_payload,
                                 type P=uvm_tlm_phase_e,
                                 type IMP=int)
   extends uvm_port_base #(uvm_tlm_if #(T,P));
+   // Function: new
   `UVM_IMP_COMMON(`UVM_TLM_NB_BW_MASK, "uvm_tlm_nb_transport_bw_imp", IMP)
   `UVM_TLM_NB_TRANSPORT_BW_IMP(m_imp, T, P, t, p, delay)
 endclass
-
-// Note: EOF.
