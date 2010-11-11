@@ -130,6 +130,21 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
+// Class: uvm_tlm_b_transport_imp
+//
+// used like exports except an addtional class  parameter specifices 
+// the type of the implementation object.  When the
+// imp is instantiated the implementation object is bound.
+//----------------------------------------------------------------------
+
+class uvm_tlm_b_transport_imp #(type T=uvm_tlm_generic_payload,
+                            type IMP=int)
+  extends uvm_port_base #(uvm_tlm_if #(T));
+  `UVM_IMP_COMMON(`UVM_TLM_B_MASK, "uvm_tlm_b_transport_imp", IMP)
+  `UVM_TLM_B_TRANSPORT_IMP(m_imp, T, t, delay)
+endclass
+
+//----------------------------------------------------------------------
 // Class: uvm_tlm_nb_transport_fw_imp
 //
 // used like exports except an addtional class  parameter specifices 
@@ -159,21 +174,6 @@ class uvm_tlm_nb_transport_bw_imp #(type T=uvm_tlm_generic_payload,
   extends uvm_port_base #(uvm_tlm_if #(T,P));
   `UVM_IMP_COMMON(`UVM_TLM_NB_BW_MASK, "uvm_tlm_nb_transport_bw_imp", IMP)
   `UVM_TLM_NB_TRANSPORT_BW_IMP(m_imp, T, P, t, p, delay)
-endclass
-
-//----------------------------------------------------------------------
-// Class: uvm_tlm_b_transport_imp
-//
-// used like exports except an addtional class  parameter specifices 
-// the type of the implementation object.  When the
-// imp is instantiated the implementation object is bound.
-//----------------------------------------------------------------------
-
-class uvm_tlm_b_transport_imp #(type T=uvm_tlm_generic_payload,
-                            type IMP=int)
-  extends uvm_port_base #(uvm_tlm_if #(T));
-  `UVM_IMP_COMMON(`UVM_TLM_B_MASK, "uvm_tlm_b_transport_imp", IMP)
-  `UVM_TLM_B_TRANSPORT_IMP(m_imp, T, t, delay)
 endclass
 
 // Note: EOF.

@@ -154,7 +154,7 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   //
   // When get is called, <item_done> may not be called.  A new item can be
   // obtained by calling get again, or a response may be sent using either
-  // <put>, or <uvm_driver::rsp_port>.write().
+  // <put>, or uvm_driver::rsp_port.write().
 
   virtual task get(output T1 t);
     uvm_report_error("get", `SEQ_ITEM_TASK_ERROR, UVM_NONE);

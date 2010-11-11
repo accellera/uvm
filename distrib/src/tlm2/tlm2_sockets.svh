@@ -107,6 +107,12 @@ endclass
 //
 // IS-A forward imp; has no backward path except via the payload
 // contents.
+//
+// The component instantiating this socket must implement
+// a b_transport() method with the following signature
+//
+//|   task b_transport(T t, ref time delay);
+//
 //----------------------------------------------------------------------
 class uvm_tlm_b_target_socket #(type T=uvm_tlm_generic_payload,
                              type IMP=int)
@@ -140,6 +146,12 @@ endclass
 // Class: uvm_tlm_nb_initiator_socket
 //
 // IS-A forward port; HAS-A backward imp
+//
+// The component instantiating this socket must implement
+// a nb_transport_bw() method with the following signature
+//
+//|   function uvm_tlm_sync_e nb_transport_bw(T t, ref P p, ref time delay);
+//
 //----------------------------------------------------------------------
 class uvm_tlm_nb_initiator_socket #(type T=uvm_tlm_generic_payload,
                                  type P=uvm_tlm_phase_e,
@@ -192,6 +204,12 @@ endclass
 // Class: uvm_tlm_nb_target_socket
 //
 // IS-A forward imp; HAS-A backward port
+//
+// The component instantiating this socket must implement
+// a nb_transport_fw() method with the following signature
+//
+//|   function uvm_tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);
+//
 //----------------------------------------------------------------------
 class uvm_tlm_nb_target_socket #(type T=uvm_tlm_generic_payload,
                               type P=uvm_tlm_phase_e,
