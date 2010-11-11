@@ -114,7 +114,7 @@ class uvm_reg_field extends uvm_object;
                                   string         access,
                                   bit            volatile,
                                   uvm_reg_data_t reset,
-                                  bit            is_reset,
+                                  bit            has_reset,
                                   bit            is_rand,
                                   bit            individually_accessible); 
 
@@ -803,7 +803,7 @@ function void uvm_reg_field::configure(uvm_reg        parent,
                                        string         access,
                                        bit            volatile,
                                        uvm_reg_data_t reset,
-                                       bit            is_reset,
+                                       bit            has_reset,
                                        bit            is_rand,
                                        bit            individually_accessible); 
    m_parent = parent;
@@ -820,7 +820,8 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    m_cover_on  = UVM_NO_COVERAGE;
    m_written   = 0;
    m_individually_accessible = individually_accessible;
-   if (is_reset)
+
+   if (has_reset)
       set_reset(reset);
    else
       set_attribute("NO_HW_RESET_TEST","ON");
