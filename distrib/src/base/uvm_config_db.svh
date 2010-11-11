@@ -17,6 +17,17 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+//Internal class for config waiters
+class m_uvm_waiter;
+  string inst_name;
+  string field_name;
+  event trigger;
+  function new (string inst_name, string field_name);
+    this.inst_name = inst_name;
+    this.field_name = field_name;
+  endfunction
+endclass
+
 //----------------------------------------------------------------------
 // class: uvm_config_db#(T)
 //
@@ -40,6 +51,9 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   // Internal lookup of config settings so they can be reused
   // The context has a pool that is keyed by the inst/field name.
   static uvm_pool#(string,uvm_resource#(T)) m_rsc[uvm_component];
+
+  // Internal waiter list for wait_modified
+  static local uvm_queue#(m_uvm_waiter) m_waiters[string];
 
   // function: get
   //
@@ -78,6 +92,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
       return 0;
 
     value = r.read(cntxt);
+
     return 1;
   endfunction
 
@@ -156,8 +171,59 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
       r.set_override();
     end
 
+    //trigger any waiters
+    if(m_waiters.exists(field_name)) begin
+      m_uvm_waiter w;
+      for(int i=0; i<m_waiters[field_name].size(); ++i) begin
+        w = m_waiters[field_name].get(i);
+        if(uvm_re_match(inst_name,w.inst_name) == 0)
+           ->w.trigger;  
+      end
+    end
+
     p.set_randstate(rstate);
   endfunction
+
+  // Function: wait_modified
+  //
+  // Wait for a configuration setting to be set for ~field_name~
+  // in ~cntxt~ and ~inst_name~. The task blocks until a new configuration
+  // setting is applied that effects the specified field.
+
+  static task wait_modified(uvm_component cntxt, string inst_name,
+      string field_name);
+    process p = process::self();
+    string rstate = p.get_randstate();
+    m_uvm_waiter waiter;
+
+    if(cntxt == null) cntxt = uvm_root::get();
+    if(cntxt != uvm_root::get()) begin
+      if(inst_name != "")
+        inst_name = {cntxt.get_full_name(),".",inst_name};
+      else
+        inst_name = cntxt.get_full_name();
+    end
+
+    waiter = new(inst_name, field_name);
+
+    if(!m_waiters.exists(field_name))
+      m_waiters[field_name] = new;
+    m_waiters[field_name].push_back(waiter);
+
+    p.set_randstate(rstate);
+
+    // wait on the waiter to trigger
+    @waiter.trigger;
+  
+    // Remove the waiter from the waiter list 
+    for(int i=0; i<m_waiters[field_name].size(); ++i) begin
+      if(m_waiters[field_name].get(i) == waiter) begin
+        m_waiters[field_name].delete(i);
+        break;
+      end
+    end 
+  endtask
+
 
   static function uvm_resource#(T) m_get_resource_match(uvm_component cntxt, 
         string field_name, string inst_name);
