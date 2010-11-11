@@ -754,7 +754,7 @@ virtual class uvm_reg extends uvm_object;
    //
    // If null, no user-defined frontdoor has been defined.
    // A user-defined frontdoor is defined
-   // by using the "uvm_reg::set_frontdoor()" method. 
+   // by using the <uvm_reg::set_frontdoor()> method. 
    //
    // If the register is mapped in multiple address maps, an address ~map~
    // must be specified.
@@ -796,7 +796,7 @@ virtual class uvm_reg extends uvm_object;
    //
    // If null, no user-defined backdoor has been defined.
    // A user-defined backdoor is defined
-   // by using the "uvm_reg::set_backdoor()" method. 
+   // by using the <uvm_reg::set_backdoor()> method. 
    //
    // If ~inherited~ is TRUE, returns the backdoor of the parent block
    // if none have been specified for this register.
@@ -979,17 +979,15 @@ virtual class uvm_reg extends uvm_object;
    // coverage models included in them.
    //
    // The scope can be specified as a POSIX regular expression
-   // or simple pattern. See <Xref> for more details.
-   //
-   // The specification of which coverage model to include in
-   // which abstraction class is stored in a resource in the
-   // <uvm_resource_db>#(<uvm_reg_cvr_t>) database,
-   // in the "uvm_reg::" scope namespace.
-   // The ordering normal resource look-up ordering rules
-   // apply when multiple specifications are provided.
-   // See <Xref> for more details.
+   // or simple pattern.
+   // See <uvm_resource_base::Scope Interface> for more details.
    //
    //| uvm_reg::include_coverage("*", UVM_CVR_ALL);
+   //
+   // The specification of which coverage model to include in
+   // which abstraction class is stored in a <uvm_reg_cvr_t> resource in the
+   // <uvm_resource_db> resource database,
+   // in the "uvm_reg::" scope namespace.
    //
    extern static function void include_coverage(string scope,
                                                 uvm_reg_cvr_t models);

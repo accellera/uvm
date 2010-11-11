@@ -656,7 +656,7 @@ class uvm_mem extends uvm_object;
    //
    // If null, no user-defined backdoor has been defined.
    // A user-defined backdoor is defined
-   // by using the "uvm_reg::set_backdoor()" method. 
+   // by using the <uvm_reg::set_backdoor()> method. 
    //
    // If ~inherit~ is TRUE, returns the backdoor of the parent block
    // if none have been specified for this memory.
