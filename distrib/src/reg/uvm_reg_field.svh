@@ -814,7 +814,10 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    m_cover_on  = UVM_NO_COVERAGE;
    m_written   = 0;
    m_individually_accessible = individually_accessible;
-   if (is_reset) set_reset(reset);
+   if (is_reset)
+      set_reset(reset);
+   else
+      set_attribute("NO_HW_RESET_TEST",1);
 
    m_parent.add_field(this);
 

@@ -20,16 +20,6 @@
 // -------------------------------------------------------------
 //
 
-//
-// Title: Register Abstraction Base Classes
-//
-// The following classes are defined herein:
-//
-// <uvm_reg> : base for abstract registers
-//
-// <uvm_reg_frontdoor> : user-defined frontdoor access sequence
-//
-
 typedef class uvm_reg_cbs;
 typedef class uvm_reg_frontdoor;
 
@@ -2568,13 +2558,7 @@ function bit uvm_reg::Xcheck_accessX (input uvm_reg_item rw,
 
      map_info = rw.local_map.get_reg_map_info(this);
 
-     if (map_info.frontdoor == null) begin
-
-       if (rw.parent == null)
-         `uvm_fatal("RegModel",
-            "Built-in frontdoor write requires non-null parent argument")
-
-       if (map_info.unmapped) begin
+     if (map_info.frontdoor == null && map_info.unmapped) begin
           `uvm_error("RegModel", {"Register '",get_full_name(),
              "' unmapped in map '",
              (rw.map==null)? rw.local_map.get_full_name():rw.map.get_full_name(),

@@ -248,10 +248,11 @@ virtual class uvm_reg_frontdoor extends uvm_reg_sequence #(uvm_sequence #(uvm_se
 endclass: uvm_reg_frontdoor
 
 
+
 class uvm_predict_s;
-    bit addr[uvm_reg_addr_t];
-    uvm_reg_item reg_item;
-  endclass
+   bit addr[uvm_reg_addr_t];
+   uvm_reg_item reg_item;
+endclass
 
 
 //------------------------------------------------------------------------------

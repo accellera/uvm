@@ -1848,10 +1848,6 @@ function bit uvm_mem::Xcheck_accessX(input uvm_reg_item rw,
 
      if (map_info.frontdoor == null) begin
 
-        if (rw.parent == null)
-          `uvm_fatal("RegModel",
-              "Built-in frontdoor write requires non-null parent argument")
-
         if (map_info.unmapped) begin
            `uvm_error("RegModel", {"Memory '",get_full_name(),
                       "' unmapped in map '", rw.map.get_full_name(),
