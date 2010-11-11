@@ -39,7 +39,7 @@ class reg_reg_MODER extends uvm_reg;
         this.DLYCRCEN.configure(this, 1, 12, "RW", 0, 1'h0, 1, 0, 0);
         this.undocumented = uvm_reg_field::type_id::create("undocumented",,get_full_name());
         this.undocumented.configure(this, 1, 11, "RW", 0, 1'h0, 1, 0, 0);
-        this.undocmented.set_compare(UVM_NO_CHECK);
+        this.undocumented.set_compare(UVM_NO_CHECK);
         this.FULLD = uvm_reg_field::type_id::create("FULLD",,get_full_name());
         this.FULLD.configure(this, 1, 10, "RW", 0, 1'h0, 1, 0, 0);
         this.EXDFREN = uvm_reg_field::type_id::create("EXDFREN",,get_full_name());
