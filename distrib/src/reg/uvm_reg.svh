@@ -187,9 +187,9 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function void get_maps (ref uvm_reg_map maps[$]);
 
 
-   /*local*/ extern function uvm_reg_map get_local_map   (uvm_reg_map map,
-                                                          string caller = "");
-   /*local*/ extern function uvm_reg_map get_default_map (string caller = "");
+   /*local*/ extern virtual function uvm_reg_map get_local_map   (uvm_reg_map map,
+                                                                  string caller = "");
+   /*local*/ extern virtual function uvm_reg_map get_default_map (string caller = "");
 
 
    // Function: get_rights
@@ -625,7 +625,7 @@ virtual class uvm_reg extends uvm_object;
    // The mirroring can be performed using the physical interfaces (frontdoor)
    // or <uvm_reg::peek()> (backdoor).
    //
-   // If ~check~ is specified as UVM_VERB,
+   // If ~check~ is specified as UVM_CHECK,
    // an error message is issued if the current mirrored value
    // does not match the readback value, unless a field has the "DC"
    // (don't care) policy.
@@ -664,7 +664,7 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function bit predict (uvm_reg_data_t    value,
                                         uvm_reg_byte_en_t be = -1,
                                         uvm_predict_e     kind = UVM_PREDICT_DIRECT,
-                                        uvm_path_e        path = UVM_BFM,
+                                        uvm_path_e        path = UVM_FRONTDOOR,
                                         uvm_reg_map       map = null,
                                         string            fname = "",
                                         int               lineno = 0);
@@ -743,8 +743,8 @@ virtual class uvm_reg extends uvm_object;
    // Returns the user-defined frontdoor for this register
    //
    // If null, no user-defined frontdoor has been defined.
-   // A user-defined frontdoor is defined
-   // by using the "uvm_reg::set_frontdoor()" method. 
+   // A user-defined frontdoor is registered using
+   // the <set_frontdoor()> method. 
    //
    // If the register is mapped in multiple address maps, an address ~map~
    // must be specified.
@@ -1966,7 +1966,7 @@ endfunction: set
 function bit uvm_reg::predict(uvm_reg_data_t    value,
                               uvm_reg_byte_en_t be = -1,
                               uvm_predict_e     kind = UVM_PREDICT_DIRECT,
-                              uvm_path_e        path = UVM_BFM,
+                              uvm_path_e        path = UVM_FRONTDOOR,
                               uvm_reg_map       map = null,
                               string            fname = "",
                               int               lineno = 0);
@@ -2260,7 +2260,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
          Xpredict_writeX(rw.value[0], rw.path, null);
       end
 
-      UVM_BFM: begin
+      UVM_FRONTDOOR: begin
 
          uvm_reg_map system_map = rw.local_map.get_root_map();
 
@@ -2324,7 +2324,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
    // REPORT
    if (uvm_report_enabled(UVM_MEDIUM)) begin
      string path_s,value_s;
-     if (rw.path == UVM_BFM)
+     if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
                                                {"map ",rw.map.get_full_name()};
      else
@@ -2488,7 +2488,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
       end
 
 
-      UVM_BFM: begin
+      UVM_FRONTDOOR: begin
 
          uvm_reg_map system_map = rw.local_map.get_root_map();
 
@@ -2550,7 +2550,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
    // REPORT
    if (uvm_report_enabled(UVM_MEDIUM)) begin
      string path_s,value_s;
-     if (rw.path == UVM_BFM)
+     if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
                                                {"map ",rw.map.get_full_name()};
      else
@@ -2580,7 +2580,7 @@ function bit uvm_reg::Xcheck_accessX (input uvm_reg_item rw,
          `uvm_warning("RegModel",
             {"No backdoor access available for register '",get_full_name(),
             "' . Using frontdoor instead."})
-         rw.path = UVM_BFM;
+         rw.path = UVM_FRONTDOOR;
       end
       else
         rw.map = uvm_reg_map::backdoor();
@@ -2608,7 +2608,6 @@ function bit uvm_reg::Xcheck_accessX (input uvm_reg_item rw,
              "' and does not have a user-defined frontdoor"})
           rw.status = UVM_NOT_OK;
           return 0;
-       end
      end
 
      if (rw.map == null)

@@ -1701,7 +1701,7 @@ task uvm_mem::do_write(uvm_reg_item rw);
       cb.pre_write(rw);
 
    // FRONTDOOR
-   if (rw.path == UVM_BFM) begin
+   if (rw.path == UVM_FRONTDOOR) begin
 
       uvm_reg_map system_map = rw.local_map.get_root_map();
       
@@ -1749,7 +1749,7 @@ task uvm_mem::do_write(uvm_reg_item rw);
    // REPORT
    if (uvm_report_enabled(UVM_MEDIUM)) begin
      string path_s,value_s,pre_s,range_s;
-     if (rw.path == UVM_BFM)
+     if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
                                                {"map ",rw.map.get_full_name()};
      else
@@ -1800,7 +1800,7 @@ task uvm_mem::do_read(uvm_reg_item rw);
       cb.pre_read(rw);
 
    // FRONTDOOR
-   if (rw.path == UVM_BFM) begin
+   if (rw.path == UVM_FRONTDOOR) begin
       
       uvm_reg_map system_map = rw.local_map.get_root_map();
          
@@ -1843,7 +1843,7 @@ task uvm_mem::do_read(uvm_reg_item rw);
    // REPORT
    if (uvm_report_enabled(UVM_MEDIUM)) begin
      string path_s,value_s,pre_s,range_s;
-     if (rw.path == UVM_BFM)
+     if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
                                                {"map ",rw.map.get_full_name()};
      else
@@ -1895,7 +1895,7 @@ function bit uvm_mem::Xcheck_accessX(input uvm_reg_item rw,
          `uvm_warning("RegModel",
             {"No backdoor access available for memory '",get_full_name(),
             "' . Using frontdoor instead."})
-         rw.path = UVM_BFM;
+         rw.path = UVM_FRONTDOOR;
       end
       else
         rw.map = uvm_reg_map::backdoor();

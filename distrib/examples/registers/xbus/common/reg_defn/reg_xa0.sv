@@ -367,6 +367,7 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
          xbus_indirect_reg[i]=r_;
          name = $sformatf("id_reg_values[%0d]",i);
          r_.configure(this, null, name);
+         default_map.add_reg(r_, -1, "RW",0);
          r_.build();
       end
 

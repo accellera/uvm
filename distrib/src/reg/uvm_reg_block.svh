@@ -643,7 +643,7 @@ virtual class uvm_reg_block extends uvm_object;
    // mirror values to match their corresponding values in the design.
    // The mirroring can be performed using the physical interfaces
    // (front-door access) or back-door accesses.
-   // If the ~check~ argument is specified as ~UVM_VERB~,
+   // If the ~check~ argument is specified as <UVM_CHECK>,
    // an error message is issued if the current mirrored value
    // does not match the actual value in the design.
    // This method performs the reverse operation of <uvm_reg_block::update()>.
@@ -1841,7 +1841,7 @@ function uvm_path_e uvm_reg_block::get_default_path();
    if (this.parent != null)
       return this.parent.get_default_path();
 
-   return UVM_BFM;
+   return UVM_FRONTDOOR;
 
 endfunction
 
