@@ -87,7 +87,7 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
          foreach (fields[k]) begin
             int lsb, w, dc;
 
-            dc = 0;
+            dc = (fields[k].get_compare() == UVM_NO_CHECK);
             lsb = fields[k].get_lsb_pos();
             w   = fields[k].get_n_bits();
             // Ignore Write-only fields because

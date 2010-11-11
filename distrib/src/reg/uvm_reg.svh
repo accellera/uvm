@@ -2927,7 +2927,7 @@ task uvm_reg::mirror(output uvm_status_e       status,
    // Remember what we think the value is before it gets updated
    if (check == UVM_CHECK) begin
       exp = get();
-      // Assuume that WO* field will readback as 0's
+      // Assume that WO* field will readback as 0's
       foreach(m_fields[i]) begin
          string mode;
          mode = m_fields[i].get_access(map);
@@ -2955,7 +2955,7 @@ task uvm_reg::mirror(output uvm_status_e       status,
 
       foreach(m_fields[i]) begin
          string acc = m_fields[i].get_access(map);
-         if (m_fields[i].get_compare() == UVM_CHECK) begin
+         if (m_fields[i].get_compare() == UVM_NO_CHECK) begin
             dc |= ((1 << m_fields[i].get_n_bits())-1)
                   << m_fields[i].get_lsb_pos();
          end
