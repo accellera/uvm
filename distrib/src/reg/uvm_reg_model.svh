@@ -167,14 +167,14 @@ typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
 //
 // Path used for register operation
 //
-// UVM_BFM          - Use the front door
+// UVM_FRONTDOOR    - Use the front door
 // UVM_BACKDOOR     - Use the back door
 // UVM_PREDICT      - Operation derived from observations by a bus monitor via
 //                    the <uvm_reg_predictor> class.
 // UVM_DEFAULT_PATH - Operation specified by the context
 //
    typedef enum {
-      UVM_BFM,
+      UVM_FRONTDOOR,
       UVM_BACKDOOR,
       UVM_PREDICT,
       UVM_DEFAULT_PATH

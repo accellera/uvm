@@ -28,7 +28,7 @@
 //
 // <uvm_reg_sequence> : base for all register sequences
 //
-// <uvm_reg_frontdoor> : base class for user-defined front-door (BFM) access
+// <uvm_reg_frontdoor> : base class for user-defined front-door access
 //
 // <uvm_reg_predictor> : updates the register model mirror based on observed bus transactions
 
@@ -249,10 +249,11 @@ virtual class uvm_reg_frontdoor extends uvm_reg_sequence #(uvm_sequence #(uvm_se
 endclass: uvm_reg_frontdoor
 
 
+
 class uvm_predict_s;
-    bit addr[uvm_reg_addr_t];
-    uvm_reg_item reg_item;
-  endclass
+   bit addr[uvm_reg_addr_t];
+   uvm_reg_item reg_item;
+endclass
 
 
 //------------------------------------------------------------------------------
@@ -412,7 +413,7 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
               end
 
               void'(rg.predict(reg_item.value[0], rw.byte_en,
-                               predict_kind, UVM_BFM));
+                               predict_kind, UVM_FRONTDOOR));
               `uvm_info("REG_PREDICT", {"Observed ",reg_item.kind.name(),
                         " transaction to register ",rg.get_full_name(), ": value='h",
                          $sformatf("%0h",reg_item.value[0])},UVM_HIGH)

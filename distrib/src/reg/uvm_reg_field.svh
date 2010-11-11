@@ -556,13 +556,14 @@ class uvm_reg_field extends uvm_object;
    //
    // Read the field and optionally compared the readback value
    // with the current mirrored value if ~check~ is <UVM_CHECK>.
-   // The mirrored value will be updated using the <uvm_reg_field::predict()>
+   // The mirrored value will be updated using the <predict()>
    // method based on the readback value.
    //
-   // The mirroring can be performed using the physical interfaces (frontdoor)
-   // or <uvm_reg_field::peek()> (backdoor).
+   // The ~path~ argument specifies whether to mirror using 
+   // the  <UVM_FRONTDOOR> (<read>) or
+   // or <UVM_BACKDOOR> (<peek()>).
    //
-   // If ~check~ is specified as UVM_VERB,
+   // If ~check~ is specified as <UVM_CHECK>,
    // an error message is issued if the current mirrored value
    // does not match the readback value, unless the field has the "DC"
    // (don't care) policy.
@@ -573,9 +574,9 @@ class uvm_reg_field extends uvm_object;
    // checked only if a UVM_BACKDOOR
    // access path is used to read the field. 
    //
-   extern virtual task mirror(output uvm_status_e status,
-                              input  uvm_check_e  check = UVM_NO_CHECK,
-                              input  uvm_path_e   path = UVM_DEFAULT_PATH,
+   extern virtual task mirror(output uvm_status_e      status,
+                              input  uvm_check_e       check = UVM_NO_CHECK,
+                              input  uvm_path_e        path = UVM_DEFAULT_PATH,
                               input  uvm_reg_map       map = null,
                               input  uvm_sequence_base parent = null,
                               input  int               prior = -1,
@@ -622,7 +623,7 @@ class uvm_reg_field extends uvm_object;
    extern virtual function bit predict (uvm_reg_data_t    value,
                                         uvm_reg_byte_en_t be = -1,
                                         uvm_predict_e     kind = UVM_PREDICT_DIRECT,
-                                        uvm_path_e        path = UVM_BFM,
+                                        uvm_path_e        path = UVM_FRONTDOOR,
                                         uvm_reg_map       map = null,
                                         string            fname = "",
                                         int               lineno = 0);
@@ -819,7 +820,11 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    m_cover_on  = UVM_NO_COVERAGE;
    m_written   = 0;
    m_individually_accessible = individually_accessible;
-   if (has_reset) set_reset(reset);
+
+   if (has_reset)
+      set_reset(reset);
+   else
+      set_attribute("NO_HW_RESET_TEST","ON");
 
    m_parent.add_field(this);
 
@@ -1152,7 +1157,7 @@ function void uvm_reg_field::Xpredict_readX (uvm_reg_data_t value,
                                              uvm_reg_map    map);
    value &= ('b1 << m_size)-1;
 
-   if (path == UVM_BFM) begin
+   if (path == UVM_FRONTDOOR) begin
 
       string acc = get_access(map);
 
@@ -1203,7 +1208,7 @@ function void uvm_reg_field::Xpredict_writeX (uvm_reg_data_t value,
                                               uvm_reg_map    map);
    value &= ('b1 << m_size)-1;
 
-   if (path == UVM_BFM)
+   if (path == UVM_FRONTDOOR)
       m_mirrored = XpredictX(m_mirrored, value, map);
    else
       m_mirrored = value;
@@ -1266,7 +1271,7 @@ endfunction: XupdateX
 function bit uvm_reg_field::predict(uvm_reg_data_t    value,
                                     uvm_reg_byte_en_t be = -1,
                                     uvm_predict_e     kind = UVM_PREDICT_DIRECT,
-                                    uvm_path_e        path = UVM_BFM,
+                                    uvm_path_e        path = UVM_FRONTDOOR,
                                     uvm_reg_map       map = null,
                                     string            fname = "",
                                     int               lineno = 0);
@@ -1439,7 +1444,7 @@ function bit uvm_reg_field::Xcheck_accessX(input uvm_reg_item rw,
          `uvm_warning("RegModel",
             {"No backdoor access available for field '",get_full_name(),
             "' . Using frontdoor instead."})
-         rw.path = UVM_BFM;
+         rw.path = UVM_FRONTDOOR;
       end
       else
         rw.map = uvm_reg_map::backdoor();

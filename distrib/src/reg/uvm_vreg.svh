@@ -1279,7 +1279,7 @@ task uvm_vreg::write(input  longint unsigned   idx,
 
    `uvm_info("RegModel", $psprintf("Wrote virtual register \"%s\"[%0d] via %s with: 'h%h",
                               this.get_full_name(), idx,
-                              (path == UVM_BFM) ? "frontdoor" : "backdoor",
+                              (path == UVM_FRONTDOOR) ? "frontdoor" : "backdoor",
                               value),UVM_MEDIUM);
    
    this.write_in_progress = 1'b0;
@@ -1381,7 +1381,7 @@ task uvm_vreg::read(input  longint unsigned   idx,
 
    `uvm_info("RegModel", $psprintf("Read virtual register \"%s\"[%0d] via %s: 'h%h",
                               this.get_full_name(), idx,
-                              (path == UVM_BFM) ? "frontdoor" : "backdoor",
+                              (path == UVM_FRONTDOOR) ? "frontdoor" : "backdoor",
                               value),UVM_MEDIUM);
    
    this.read_in_progress = 1'b0;

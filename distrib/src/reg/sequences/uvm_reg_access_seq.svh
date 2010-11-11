@@ -114,7 +114,7 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
          
          v = rg.get();
          
-         rg.write(status, ~v, UVM_BFM, maps[j], this);
+         rg.write(status, ~v, UVM_FRONTDOOR, maps[j], this);
 
          if (status != UVM_IS_OK) begin
             `uvm_error("RegModel", {"Status was '",status.name(),
@@ -137,7 +137,7 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
                                  "' through backdoor"})
          end
          
-         rg.mirror(status, UVM_CHECK, UVM_BFM, maps[j], this);
+         rg.mirror(status, UVM_CHECK, UVM_FRONTDOOR, maps[j], this);
          if (status != UVM_IS_OK) begin
             `uvm_error("RegModel", {"Status was '",status.name(),
                                  "' when reading reset value of register '",
