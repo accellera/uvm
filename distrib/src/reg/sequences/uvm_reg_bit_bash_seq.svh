@@ -90,11 +90,10 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
             dc = 0;
             lsb = fields[k].get_lsb_pos();
             w   = fields[k].get_n_bits();
-            // Ignore "DC" fields 
             // Ignore Write-only fields because
             // you are not supposed to read them
             case (fields[k].get_access(maps[j]))
-             "DC", "WO", "WOC", "WOS", "WO1": dc = 1;
+             "WO", "WOC", "WOS", "WO1": dc = 1;
             endcase
             // Any unused bits on the right side of the LSB?
             while (next_lsb < lsb) mode[next_lsb++] = "RO";
