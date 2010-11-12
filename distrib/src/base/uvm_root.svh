@@ -193,6 +193,13 @@ class uvm_root extends uvm_component;
   extern function uvm_test_done_objection test_done_objection();
   extern function void print_topology  (uvm_printer printer=null);
 
+  // At end of elab phase we need to do tlm binding resolution.
+  function void phase_ended(uvm_phase_schedule phase);
+    uvm_phase_schedule domain = find_phase_schedule("uvm_pkg::common","*");
+    uvm_phase_schedule elab_ph = domain.find_schedule("end_of_elaboration");
+    if(phase == elab_ph)
+      do_resolve_bindings(); 
+  endfunction
 endclass
 
 
