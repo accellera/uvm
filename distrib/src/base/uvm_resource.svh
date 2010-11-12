@@ -17,26 +17,79 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+//----------------------------------------------------------------------
 // Title: Resources
 //
-// The classes defined here are the lowest layer of the resource
-// database system. These classes provide all of the low level 
-// infrastructure. The following classes are defined herein:
+
+// A resource is a parameterized container that holds arbitrary data.
+// Resources can be used to configure components, supply data to
+// sequences, or enable sharing of information across disparate parts of
+// a testbench.  They are stored using scoping information so their
+// visibility can be constrained to certain parts of the testbench.
+// Resource containers can hold any type of data, constrained only by
+// the data types available in SystemVerilog.  Resources can contain
+// scalar objects, class handles, queues, lists, or even virtual
+// interfaces.
 //
-// - <uvm_resource_types>   - scope type that holds all resource related
-// enums and typesdefs.
+// Resources are stored in a resource database so that each resource can
+// be retrieved by name or by type. The databse has both a name table
+// and a type table and each resource is entered into both. The database
+// is globally accessible.
 //
-// - <uvm_resource_options> - policy class for setting options, such
+// Each resource has a set of scopes over which it is visible.  The set
+// of scopes is represented as a regular expression.  When a resource is
+// looked up the scope of the entity doing the looking up is supplied to
+// the lookup function.  This is called the ~current scope~.  If the
+// current scope is in the set of scopes over which a resource is
+// visible then the resource can be retuned in the lookup.
+//
+// Resources can be looked up by name or by type. To support type lookup
+// each resource has a static type handle that uniquely identifies the
+// type of each specialized resource container.
+//
+// Mutliple resources that have the same name are stored in a queue.
+// Each resource is pushed into a queue with the first one at the front
+// of the queue and each subsequent one behind it.  The same happens for
+// multiple resources that have the same type.  The resource queues are
+// searched front to back, so those placed earlier in the queue have
+// precedence over those placed later.
+//
+// The precedence of resources with the same name or same type can be
+// altered.  One way is to set the ~precedence~ member of the resource
+// container to any arbitrary value.  The search algorithm will return
+// the resource with the highest precedence.  In the case where there
+// are multiple resources that match the search criteria and have the
+// same (highest) precedence, the earliest one located in the queue will
+// be one returned.  Another way to change the precedence is to use the
+// set_priority function to move a resource to either the front or back
+// of the queue.
+
+// The classes defined here form the low level layer of the resource
+// database.  The clases includ the resource container and the database
+// that holds the containers.  The following set of classes are defined
+// here:
+//
+// <uvm_resource_types>: A class without methods or members, only
+// typedefs and enums. These types and enums ware used throughout the
+// resources facility.  Putting the types in a class keeps them confined
+// to a specific name space.
+//
+// <uvm_resource_options>: policy class for setting options, such
 // as auditing, which effect resources.
 //
-// - <uvm_resource_base>    - the base (untyped) resource class living
-// in the resource database.
+// <uvm_resource_base>: the base (untyped) resource class living in the
+// resource database.  This class includes the interface for locking,
+// setting a resource as read-only, notification, scope management,
+// altering search priority, and managing auditing.
 //
-// - <uvm_resource#(T)>     - type specific resource. Included the
-// read/write interface for typesafe access.
+// <uvm_resource#(T)>: parameterized resource container.  This class
+// includes the interfaces for reading and writing each resource.
+// Because the class is parameterized, all the access functions are type
+// sace.
 //
-// - <uvm_resource_pool>    - the resource database. This is a singleton
+// <uvm_resource_pool>: the resource database. This is a singleton
 // class object.
+//----------------------------------------------------------------------
 
 typedef class uvm_resource_base; // forward reference
 
@@ -84,6 +137,18 @@ endclass
 // retrieving the value of the data members.  The static local data
 // members represent options and settings that control the behavior of
 // the resources facility.
+
+// Options include:
+//
+//  * auditting:  on/off
+//
+//    The default for auditting is on.  You may wish to turn it off to
+//    for performance reasons.  With auditting off memory is not
+//    consumed for storage of auditting information and time is not
+//    spent collecting and storing auditting information.  Of course,
+//    during the period when auditting is off no audit trail information
+//    is available
+//
 //----------------------------------------------------------------------
 class uvm_resource_options;
 
@@ -133,6 +198,9 @@ virtual class uvm_resource_base extends uvm_object;
   protected string scope;
   protected bit modified;
   protected bit read_only;
+
+  // note: IUS currently does not support the protected keyword.  When
+  // it does, comments delimiters can be removed.
   /*protected*/ bit m_is_regex_name=0;
 
   uvm_resource_types::access_t access[string];
@@ -152,7 +220,7 @@ virtual class uvm_resource_base extends uvm_object;
   // When two resources have the same precedence, the first resource
   // found has precedence.
   
-  static int unsigned default_precedence=1000;
+  static int unsigned default_precedence = 1000;
 
   // function: new
   //
@@ -167,7 +235,8 @@ virtual class uvm_resource_base extends uvm_object;
     modified = 0;
     read_only = 0;
     precedence = default_precedence;
-    if( uvm_has_wildcard(name) ) m_is_regex_name=1;
+    if(uvm_has_wildcard(name))
+      m_is_regex_name = 1;
   endfunction
 
   // function: get_type_handle
@@ -211,7 +280,8 @@ virtual class uvm_resource_base extends uvm_object;
 
   // function unlock
   //
-  // Releases the lock held by this semaphore.  
+  // Releases the lock held by this semaphore.
+
   function void unlock();
     sm.put();
   endfunction
@@ -224,6 +294,7 @@ virtual class uvm_resource_base extends uvm_object;
   //
   // Establishes this resource as a read-only resource.  An attempt
   // to <write> the resource will cause an error.
+
   function void set_read_only();
     read_only = 1;
   endfunction
@@ -236,6 +307,7 @@ virtual class uvm_resource_base extends uvm_object;
   // Once a resource is set to read_only no one should be able to change 
   // that.  If anyone can flip the read_only bit then the resource is not 
   // truly read_only.
+
   function void set_read_write();
     read_only = 0;
   endfunction
@@ -258,6 +330,7 @@ virtual class uvm_resource_base extends uvm_object;
   // <write> operation has been performed.  When a <write> is performed the
   // modified bit is set which releases the block.  Wait_modified() then
   // clears the modified bit so it can be called repeatedly.
+
   task wait_modified();
     wait (modified == 1);
     modified = 0;
@@ -409,8 +482,7 @@ virtual class uvm_resource_base extends uvm_object;
   // Implementation of do_print which is called by print().
 
   function void do_print (uvm_printer printer);
-    printer.print_generic( {get_name(), "[", get_scope(), "]"} , 
-      "uvm_resource", -1, convert2string());
+    $display("%s [%s] : %s", get_name(), get_scope(), convert2string());
   endfunction
 
   //--------------------------------------------------------------------
@@ -1038,7 +1110,7 @@ class uvm_resource_pool;
     set_priority_name(rsrc, pri);
   endfunction
 
-  // function: lookup_regex
+  // function: lookup_regex_names
   //
   // This utility function answers the question, for a given ~name~ and
   // ~scope~, what are all of the resources with a matching name (where the
@@ -1058,12 +1130,11 @@ class uvm_resource_pool;
     //just return the queue associated with name.
     if(!m_has_wildcard_names) begin
       result_q = lookup_name(scope, name, 0);
-      if(result_q == null) 
-        result_q = new;
       return result_q;
     end
 
     result_q = new();
+
     foreach (rtab[re]) begin
       rq = rtab[re];
       for(i = 0; i < rq.size(); i++) begin
