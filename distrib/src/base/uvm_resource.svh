@@ -20,7 +20,7 @@
 //----------------------------------------------------------------------
 // Title: Resources
 //
-
+//
 // A resource is a parameterized container that holds arbitrary data.
 // Resources can be used to configure components, supply data to
 // sequences, or enable sharing of information across disparate parts of
@@ -63,7 +63,7 @@
 // be one returned.  Another way to change the precedence is to use the
 // set_priority function to move a resource to either the front or back
 // of the queue.
-
+//
 // The classes defined here form the low level layer of the resource
 // database.  The clases includ the resource container and the database
 // that holds the containers.  The following set of classes are defined
@@ -199,7 +199,7 @@ virtual class uvm_resource_base extends uvm_object;
   protected bit modified;
   protected bit read_only;
 
-  // note: IUS currently does not support the protected keyword.  When
+  // IUS currently does not support the protected keyword.  When
   // it does, comments delimiters can be removed.
   /*protected*/ bit m_is_regex_name=0;
 
@@ -249,11 +249,11 @@ virtual class uvm_resource_base extends uvm_object;
   //--------------------------------------------------------------------
   // group: Locking Interface
   //
-  // The task lock() and the functions try_lock() and unlock() form a
+  // The task <lock> and the functions <try_lock> and <unlock> form a
   // locking interface for resources.  These can be used for thread-safe
   // reads and writes.  The interface methods write_with_lock and
   // read_with_lock and their nonblocking counterparts in
-  // <uvm_resource#(T) <(a family of resource subclasses) obey the lock
+  // <uvm_resource#(T)> (a family of resource subclasses) obey the lock
   // when reading and writing.  See documentation in <uvm_resource#(T)>
   // for more information on put/get.  The lock interface is a wrapper
   // around a local semaphore.
@@ -278,7 +278,7 @@ virtual class uvm_resource_base extends uvm_object;
     return sm.try_get();
   endfunction
 
-  // function unlock
+  // function: unlock
   //
   // Releases the lock held by this semaphore.
 
@@ -293,7 +293,7 @@ virtual class uvm_resource_base extends uvm_object;
   // function: set_read_only
   //
   // Establishes this resource as a read-only resource.  An attempt
-  // to <write> the resource will cause an error.
+  // to call <uvm_resource#(T)::write> on the resource will cause an error.
 
   function void set_read_only();
     read_only = 1;
@@ -327,9 +327,10 @@ virtual class uvm_resource_base extends uvm_object;
   // task: wait_modified
   //
   // This task blocks until the resource has been modified -- that is, a
-  // <write> operation has been performed.  When a <write> is performed the
-  // modified bit is set which releases the block.  Wait_modified() then
-  // clears the modified bit so it can be called repeatedly.
+  // <uvm_resource#(T)::write> operation has been performed.  When a 
+  // <uvm_resource#(T)::write> is performed the modified bit is set which 
+  // releases the block.  Wait_modified() then clears the modified bit so 
+  // it can be called repeatedly.
 
   task wait_modified();
     wait (modified == 1);
@@ -820,7 +821,7 @@ class uvm_resource_pool;
   //
   // This group of functions is for finding resources in the resource database.  
   //
-  // <lookup_name> and <lookup type> locate the set of resources that
+  // <lookup_name> and <lookup_type> locate the set of resources that
   // matches the name or type (respectively) and is visible in the
   // current scope.  These functions return a queue of resources.
   //
@@ -1504,7 +1505,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // not read-only and an ~accessor~ object has been supplied then also
   // update the accessor record.  Lastly, replace the object value in the
   // container with the value supplied as the  argument, ~t~, and 
-  // release any processes blocked on <wait_modified>.
+  // release any processes blocked on <uvm_resource_base::wait_modified>.
 
   function void write(T t, uvm_object accessor = null);
 
