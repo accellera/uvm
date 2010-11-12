@@ -1194,7 +1194,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
   if(verbose)
     $display("applying configuration settings for %s", get_full_name());
 
-  rq = rp.retrieve_resources(get_full_name());
+  rq = rp.lookup_scope(get_full_name());
   for(int i=0; i<rq.size(); ++i) begin
     r = rq.get(i);
     name = r.get_name();
@@ -1295,7 +1295,7 @@ function void uvm_component::print_config(bit recurse = 0, audit = 0);
 
   $display();
   $display("resources that are visible in %s", get_full_name());
-  rp.print_resources(rp.retrieve_resources(get_full_name()), audit);
+  rp.print_resources(rp.lookup_scope(get_full_name()), audit);
 
   if(recurse) begin
     uvm_component c;

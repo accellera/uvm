@@ -134,7 +134,7 @@ class component #(type CONFIG = int) extends uvm_component;
     uvm_report_info("build", $psprintf("ii = %0d", ii));
 
     // here we get a resource by name   
-    if(!uvm_resource_db#(bit [7:0])::read_by_name("data", get_full_name(), data, this)) begin
+    if(!uvm_resource_db#(bit [7:0])::read_by_name(get_full_name(), "data", data, this)) begin
       `uvm_error("TESTERROR", "cannot locate 'data' in the resource pool");
       test_error = 1;
     end

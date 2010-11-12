@@ -43,18 +43,18 @@
 // specialized resource (i.e. resource subtype).
 
 `define UVM_RESOURCE_GET_FCNS(base_type)                                               \
-  static function this_subtype get_by_name(string name, string scope, bit rpterr = 1); \
+  static function this_subtype get_by_name(string scope, string name, bit rpterr = 1); \
     this_subtype t;                                                                    \
-    uvm_resource_base b = uvm_resource#(base_type)::get_by_name(name, scope, rpterr);  \
+    uvm_resource_base b = uvm_resource#(base_type)::get_by_name(scope, name, rpterr);  \
     if(!$cast(t, b))                                                                   \
       `uvm_fatal("BADCAST", "cannot cast resource to resource subtype");               \
     return t;                                                                          \
   endfunction                                                                          \
                                                                                        \
-  static function this_subtype get_by_type(uvm_resource_base type_handle,              \
-                                    string scope = "");                                \
+  static function this_subtype get_by_type(string scope = "",                          \
+                                           uvm_resource_base type_handle);             \
     this_subtype t;                                                                    \
-    uvm_resource_base b = uvm_resource#(base_type)::get_by_type(type_handle, scope);   \
+    uvm_resource_base b = uvm_resource#(base_type)::get_by_type(scope, type_handle);   \
     if(!$cast(t, b))                                                                   \
       `uvm_fatal("BADCAST", "cannot cast resource to resource subtype");               \
     return t;                                                                          \

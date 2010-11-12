@@ -13,12 +13,12 @@ module test;
       super.build();
 //      get_config_int("value", build_val);
       $display("full name = %s", get_full_name());
-      uvm_resource_db#(int)::read_by_name("value", get_full_name(), build_val, this);
+      uvm_resource_db#(int)::read_by_name(get_full_name(), "value", build_val, this);
     endfunction
     task run;
 //      #2 get_config_int("value", run_val);
       #2;
-      uvm_resource_db#(int)::read_by_name("value", get_full_name(), run_val, this);
+      uvm_resource_db#(int)::read_by_name(get_full_name(), "value", run_val, this);
     endtask
   endclass
  

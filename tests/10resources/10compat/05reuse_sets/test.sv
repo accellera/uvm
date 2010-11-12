@@ -76,13 +76,14 @@ class test extends uvm_component;
       // Test a write to the resource_db goes to the head of the queue.
       rsrc.write(i*i, this);
       rp.set_priority_name(rsrc, uvm_resource_types::PRI_HIGH);
-      uvm_resource_db#(uvm_bitstream_t)::read_by_name("val",get_full_name(), val, this);
+      uvm_resource_db#(uvm_bitstream_t)::read_by_name(get_full_name(), "val",
+                                                      val, this);
       if(val != i*i) begin
         $display("Got wrong resource value: expected %0d, got %0d", i*i, val);
         failed=1;
       end
 
-      rq =  rp.lookup_name("val", get_full_name());
+      rq =  rp.lookup_name(get_full_name(), "val");
 
       // Verify that the config settings got reused.
       if(sets != rq.size()) begin

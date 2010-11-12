@@ -71,7 +71,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     else if(cntxt.get_full_name() != "") 
       inst_name = {cntxt.get_full_name(), ".", inst_name};
  
-    rq = rp.lookup_regex(field_name, inst_name);
+    rq = rp.lookup_regex_names(inst_name, field_name);
     r = uvm_resource#(T)::get_highest_precedence(rq);
     
     if(r == null)

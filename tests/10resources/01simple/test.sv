@@ -40,11 +40,11 @@ class child_component extends uvm_component;
 
     super.build();
 
-    if(!uvm_resource_db#(int)::read_by_name("size", get_full_name(), size))
+    if(!uvm_resource_db#(int)::read_by_name(get_full_name(), "size", size))
       `uvm_warning("RSRCNF", $psprintf("resource size in scope %s not found", get_full_name()));
     $display("%s: size = %0d", get_full_name(), size);
 
-    if(!uvm_resource_db#(bit)::read_by_name("flag", get_full_name(), flag))
+    if(!uvm_resource_db#(bit)::read_by_name(get_full_name(), "flag", flag))
       `uvm_warning("RSRCNF", $psprintf("resource flag in scope %s not found", get_full_name()));
     $display("%s: flag = %0d", get_full_name(), flag);
 
@@ -53,7 +53,7 @@ class child_component extends uvm_component;
   function void report();
     uvm_queue#(uvm_resource_base) rq;
     $display("resources visible in %s", get_full_name());
-    rq = uvm_resources.retrieve_resources(get_full_name());
+    rq = uvm_resources.lookup_scope(get_full_name());
     uvm_resources.print_resources(rq);
   endfunction
 
@@ -79,10 +79,10 @@ class parent_component extends uvm_component;
     child2 = new("child2", this);
 
     // Intentionally mispell "mode" to see if the spell checker works
-    if(!uvm_resource_db#(mode_t)::read_by_name("mde", get_full_name(), mode))
+    if(!uvm_resource_db#(mode_t)::read_by_name(get_full_name(), "mde", mode))
       `uvm_warning("RSRCNF", "resource not found");
     // try a different intentional misspelling
-    if(!uvm_resource_db#(mode_t)::read_by_name("odf", get_full_name(), mode))
+    if(!uvm_resource_db#(mode_t)::read_by_name(get_full_name(), "odf", mode))
       `uvm_warning("RSRCNF", "resource not found");
     $display("%s: mode = %0d", get_full_name(), mode);
 
@@ -91,7 +91,7 @@ class parent_component extends uvm_component;
   function void report();
     uvm_queue#(uvm_resource_base) rq;
     $display("resources visible in %s", get_full_name());
-    rq = uvm_resources.retrieve_resources(get_full_name());
+    rq = uvm_resources.lookup_scope(get_full_name());
     uvm_resources.print_resources(rq);
   endfunction
 
@@ -148,12 +148,12 @@ class test extends uvm_component;
   function void report();
     uvm_queue#(uvm_resource_base) rq;
 
-    // retrieve_resources() locates all the resources that are visible
+    // lookup_scope() locates all the resources that are visible
     // in the current scope -- i.e. the scope identified by get_full_name(),
     // and returns then in a queue.  The function print_resources is a 
     // convenience function that prints all the resources in the queue.
     $display("resources visible in %s", get_full_name());
-    rq = uvm_resources.retrieve_resources(get_full_name());
+    rq = uvm_resources.lookup_scope(get_full_name());
     uvm_resources.print_resources(rq);
 
     $display("** UVM TEST PASSED **");

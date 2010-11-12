@@ -59,7 +59,7 @@ class uvm_resource_db #(type T=int);
   // ~scope~.
 
   static function rsrc_t get_by_type(string scope);
-    return rsrc_t::get_by_type(rsrc_t::get_type(), scope);
+    return rsrc_t::get_by_type(scope, rsrc_t::get_type());
   endfunction
 
   // function: get_by_name
@@ -69,8 +69,11 @@ class uvm_resource_db #(type T=int);
   // ~scope~. The ~rpterr~ flag indicates whether or not to generate
   // a warning if no matching resource is found.
 
-  static function rsrc_t get_by_name(string name, string scope, bit rpterr=1);
-    return rsrc_t::get_by_name(name, scope, rpterr);
+  static function rsrc_t get_by_name(string scope,
+                                     string name,
+                                     bit rpterr=1);
+
+    return rsrc_t::get_by_name(scope, name, rpterr);
   endfunction
 
   // function: set 
@@ -123,10 +126,11 @@ class uvm_resource_db #(type T=int);
   // is returned through the ref argument ~val~.  The return value is a bit 
   // that indicates whether or not the read was successful. The ~accessor~
   // is used for auditting.
-  static function bit read_by_name(input string name, input string scope,
+  static function bit read_by_name(input string scope,
+                                   input string name,
                                    ref T val, input uvm_object accessor = null);
 
-    rsrc_t rsrc = get_by_name(name, scope);
+    rsrc_t rsrc = get_by_name(scope, name);
 
     if(rsrc == null)
       return 0;
@@ -143,7 +147,8 @@ class uvm_resource_db #(type T=int);
   // value is a bit that indicates whether or not the read is successful.
   // The ~accessor~ is used for auditting.
   static function bit read_by_type(input string scope,
-                                   ref T val, input uvm_object accessor = null);
+                                   ref T val,
+                                   input uvm_object accessor = null);
     
     rsrc_t rsrc = get_by_type(scope);
 
@@ -170,7 +175,7 @@ class uvm_resource_db #(type T=int);
   static function bit write_by_name(input string name, input string scope,
                                      T val, input uvm_object accessor = null);
 
-    rsrc_t rsrc = get_by_name(name, scope);
+    rsrc_t rsrc = get_by_name(scope, name);
 
     if(rsrc == null)
       return 0;

@@ -14,14 +14,14 @@ module test;
     task run;
       int_rsrc::write_and_set("value", "m", 55);
     
-      int_rsrc::read_by_name("value", "at_end_m", value);
+      int_rsrc::read_by_name("at_end_m", "value", value);
       if(value == 55) begin
         $display("*** UVM TEST FAILED : got at_end_m for m ***");
         failed = 1;
       end
 
       value = 0;
-      int_rsrc::read_by_name("value", "m_begin", value);
+      int_rsrc::read_by_name("m_begin", "value", value);
       if(value == 55) begin
         $display("*** UVM TEST FAILED : got m_begin for m ***");
         failed = 1;

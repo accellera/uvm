@@ -769,8 +769,8 @@ class uvm_resource_pool;
   // empty. If ~rpterr~ is set then a warning is issued if no matches
   // are found, and the spell checker is invoked on ~name~.
 
-  function uvm_resource_types::rsrc_q_t lookup_name(string name,
-                                                    string scope = "",
+  function uvm_resource_types::rsrc_q_t lookup_name(string scope = "",
+                                                    string name,
                                                     bit rpterr = 1);
     uvm_resource_types::rsrc_q_t rq;
     uvm_resource_types::rsrc_q_t q = new();
@@ -843,12 +843,14 @@ class uvm_resource_pool;
   // serves as a verbose flag.  If set then the spell checker will be
   // invoked and warnings about multiple resources will be produced.
 
-  function uvm_resource_base get_by_name(string name, string scope = "", bit rpterr = 1);
+  function uvm_resource_base get_by_name(string scope = "",
+                                         string name,
+                                         bit rpterr = 1);
 
     uvm_resource_types::rsrc_q_t q;
     uvm_resource_base rsrc;
 
-    q = lookup_name(name, scope, rpterr);
+    q = lookup_name(scope, name, rpterr);
 
     if(q.size() == 0) begin
       push_get_record(name, scope, null);
@@ -867,8 +869,8 @@ class uvm_resource_pool;
   // the ~type_handle~ and ~scope~.  If no resources match then the returned
   // queue is empty.
 
-  function uvm_resource_types::rsrc_q_t lookup_type(uvm_resource_base type_handle,
-                                                    string scope = "");
+  function uvm_resource_types::rsrc_q_t lookup_type(string scope = "",
+                                                    uvm_resource_base type_handle);
 
     uvm_resource_types::rsrc_q_t q = new();
     uvm_resource_types::rsrc_q_t rq;
@@ -897,13 +899,13 @@ class uvm_resource_pool;
   // Lookup a resource by ~type_handle~ and ~scope~.  Insert a record into
   // the get history list whether or not the get succeeded.
 
-  function uvm_resource_base get_by_type(uvm_resource_base type_handle,
-                                         string scope = "");
+  function uvm_resource_base get_by_type(string scope = "",
+                                         uvm_resource_base type_handle);
 
     uvm_resource_types::rsrc_q_t q;
     uvm_resource_base rsrc;
 
-    q = lookup_type(type_handle, scope);
+    q = lookup_type(scope, type_handle);
 
     if(q.size() == 0) begin
       push_get_record("<type>", scope, null);
@@ -1044,7 +1046,8 @@ class uvm_resource_pool;
   // (where the resoucre scope may be a regular expression). ~name~ and
   // ~scope~ are explicit values.
 
-  function uvm_resource_types::rsrc_q_t lookup_regex(string name, scope);
+  function uvm_resource_types::rsrc_q_t lookup_regex_names(string scope,
+                                                           string name);
 
     uvm_resource_types::rsrc_q_t rq;
     uvm_resource_types::rsrc_q_t result_q;
@@ -1054,7 +1057,7 @@ class uvm_resource_pool;
     //For the simple case where no wildcard names exist, then we can
     //just return the queue associated with name.
     if(!m_has_wildcard_names) begin
-      result_q = lookup_name(name, scope, 0);
+      result_q = lookup_name(scope, name, 0);
       if(result_q == null) 
         result_q = new;
       return result_q;
@@ -1063,7 +1066,7 @@ class uvm_resource_pool;
     result_q = new();
     foreach (rtab[re]) begin
       rq = rtab[re];
-      for(int i = 0; i < rq.size(); ++i) begin
+      for(i = 0; i < rq.size(); i++) begin
         r = rq.get(i);
         if(uvm_re_match(uvm_glob_to_re(re),name) == 0)
           if(r.match_scope(scope))
@@ -1073,25 +1076,26 @@ class uvm_resource_pool;
     return result_q;
   endfunction
 
-  // function: retrieve_resources
+  // function: lookup_regex
   //
-  // This is a utility function that answers the question: For a given
-  // ~scope~, what resources are visible to it?  Locate all the resources
-  // that are visible to a particular scope.  This operation could be
-  // quite expensive, as it has to traverse all of the resources in the
-  // database.
+  // Looks for all the resources whose name matches the regular
+  // expression argument and whose scope matches the current scope.
 
-  function uvm_resource_types::rsrc_q_t retrieve_resources(string scope);
+  function uvm_resource_types::rsrc_q_t lookup_regex(string re, scope);
 
     uvm_resource_types::rsrc_q_t rq;
-    uvm_resource_base r;
+    uvm_resource_types::rsrc_q_t result_q;
     int unsigned i;
-    int unsigned err;
-    uvm_resource_types::rsrc_q_t result_q = new();
+    uvm_resource_base r;
+
+    re = uvm_glob_to_re(re);
+    result_q = new();
 
     foreach (rtab[name]) begin
+      if(!uvm_re_match(re, name))
+        continue;
       rq = rtab[name];
-      for(int i = 0; i < rq.size(); ++i) begin
+      for(i = 0; i < rq.size(); i++) begin
         r = rq.get(i);
         if(r.match_scope(scope))
           result_q.push_back(r);
@@ -1099,6 +1103,36 @@ class uvm_resource_pool;
     end
 
     return result_q;
+
+  endfunction
+
+  // function: lookup_scope
+  //
+  // This is a utility function that answers the question: For a given
+  // ~scope~, what resources are visible to it?  Locate all the resources
+  // that are visible to a particular scope.  This operation could be
+  // quite expensive, as it has to traverse all of the resources in the
+  // database.
+
+  function uvm_resource_types::rsrc_q_t lookup_scope(string scope);
+
+    uvm_resource_types::rsrc_q_t rq;
+    uvm_resource_base r;
+    int unsigned i;
+
+    int unsigned err;
+    uvm_resource_types::rsrc_q_t q = new();
+
+    foreach (rtab[name]) begin
+      rq = rtab[name];
+      for(int i = 0; i < rq.size(); ++i) begin
+        r = rq.get(i);
+        if(r.match_scope(scope))
+          q.push_back(r);
+      end
+    end
+
+    return q;
     
   endfunction
 
@@ -1292,14 +1326,16 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // spelling alternatives, based on resource names that exist in the
   // database, gathered by the spell checker.
 
-  static function this_type get_by_name(string name, string scope, bit rpterr = 1);
+  static function this_type get_by_name(string scope,
+                                        string name,
+                                        bit rpterr = 1);
 
     uvm_resource_pool rp = uvm_resource_pool::get();
     uvm_resource_base rsrc_base;
     this_type rsrc;
     string msg;
 
-    rsrc_base = rp.get_by_name(name, scope, rpterr);
+    rsrc_base = rp.get_by_name(scope, name, rpterr);
     if(rsrc_base == null)
       return null;
 
@@ -1320,8 +1356,8 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // returned, if one exists. Null is returned if there is no resource matching
   // the specifications.
 
-  static function this_type get_by_type(uvm_resource_base type_handle,
-                                    string scope = "");
+  static function this_type get_by_type(string scope = "",
+                                        uvm_resource_base type_handle);
 
     uvm_resource_pool rp = uvm_resource_pool::get();
     uvm_resource_base rsrc_base;
@@ -1331,7 +1367,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     if(type_handle == null)
       return null;
 
-    rsrc_base = rp.get_by_type(type_handle, scope);
+    rsrc_base = rp.get_by_type(scope, type_handle);
     if(rsrc_base == null)
       return null;
 
