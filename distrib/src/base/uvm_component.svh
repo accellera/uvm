@@ -575,6 +575,8 @@ virtual class uvm_component extends uvm_report_object;
 
   extern function string massage_scope(string scope);
 
+  // Function: set_config_int
+
   extern virtual function void set_config_int (string inst_name,  
                                                string field_name,
                                                uvm_bitstream_t value);

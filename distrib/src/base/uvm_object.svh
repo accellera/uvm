@@ -288,8 +288,8 @@ virtual class uvm_object extends uvm_void;
   //
   // The ~do_print~ method is the user-definable hook called by <print> and
   // <sprint> that allows users to customize what gets printed or sprinted 
-  // beyond the field information provided by the `uvm_field_* macros
-  // (see <Utility and Field Macros for Components and Objects>).
+  // beyond the field information provided by the `uvm_field_* macros,
+  // <Utility and Field Macros for Components and Objects>.
   //
   // The ~printer~ argument is the policy object that governs the format and
   // content of the output. To ensure correct <print> and <sprint> operation,
@@ -585,8 +585,8 @@ virtual class uvm_object extends uvm_void;
   //  - For objects, pack 4 bits immediately before packing the object. For null
   //    objects, pack 4'b0000. For non-null objects, pack 4'b0001.
   //
-  // When the `uvm_field_* macros are used,
-  // (see <Utility and Field Macros for Components and Objects>)
+  // When the `uvm_field_* macros are used, 
+  // <Utility and Field Macros for Components and Objects>,
   // the above meta information is included provided the <uvm_packer::use_metadata> 
   // variable is set for the packer.
   //

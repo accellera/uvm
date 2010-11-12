@@ -97,7 +97,7 @@ virtual class uvm_transaction extends uvm_object;
   //   is then called, which records the current property values to this new
   //   transaction.
   //
-  // - The <do_begin_tr< method is called to allow for any post-begin action in
+  // - The <do_begin_tr> method is called to allow for any post-begin action in
   //   derived classes.
   //
   // - The transaction's internal begin event is triggered. Any processes
@@ -237,8 +237,8 @@ virtual class uvm_transaction extends uvm_object;
   // Returns the event pool associated with this transaction. 
   //
   // By default, the event pool contains the events: begin, accept, and end.
-  // Events can also be added by derivative objects. See <uvm_event_pool> for
-  // more information.
+  // Events can also be added by derivative objects. An event pool is a
+  // specialization of an <uvm_pool #(T)>, e.g. a ~uvm_pool#(uvm_event)~.
 
   extern function uvm_event_pool get_event_pool ();
 
