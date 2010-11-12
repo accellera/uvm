@@ -834,6 +834,19 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     return null;
   endfunction
 
+  // Group: Debug
+
+  // Function: display
+  //
+  // This function displays callback information for ~obj~. If ~obj~ is
+  // null, then it displays callback information for all objects
+  // of type ~T~, including typewide callbacks.
+
+  static function void display(T obj=null);
+    // For documentation purposes, need a function wrapper here.
+    super.display();
+  endfunction
+
 endclass
 
 // This type is not really expected to be used directly by the user, instead they are 

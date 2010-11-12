@@ -608,7 +608,7 @@ endclass
 //|  endmodule
 //
 // When the above example is run, the resulting topology (displayed via a call to
-// <uvm_top.print_topology> in env's <uvm_component::end_of_elaboration> method)
+// <uvm_root::print_topology> in env's <uvm_component::end_of_elaboration> method)
 // is similar to the following:
 //
 //| # UVM_INFO @ 0 [RNTST] Running test ...

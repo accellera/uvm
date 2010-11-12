@@ -202,6 +202,8 @@ typedef enum uvm_severity
 //                   When this value reaches max_quit_count, the simulation terminates
 //   UVM_EXIT      - Terminates the simulation immediately.
 //   UVM_CALL_HOOK - Callback the report hook methods 
+//   UVM_STOP      - Causes ~$stop~ to be executed, putting the simulation into
+//                   interactive mode.
 
 
 typedef int uvm_action;

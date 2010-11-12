@@ -289,7 +289,7 @@ class uvm_report_server extends uvm_object;
 
   // Function: summarize
   //
-  // See uvm_report_object::report_summarize method.
+  // See <uvm_report_object::report_summarize> method.
 
   virtual function void summarize(UVM_FILE file=0);
     string id;
