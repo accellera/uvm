@@ -417,16 +417,20 @@ virtual class uvm_task_phase extends uvm_phase_imp;
 
   protected virtual function void execute(uvm_component comp,
                                           uvm_phase_schedule phase);
+    uvm_root top=uvm_root::get();
+    //Raise here to make sure raise is done before we need to check
+    //the status.
+    phase.phase_done.raise_objection(comp);
     fork
       begin
         uvm_phase_thread thread = new(phase,comp); // store thread process ID
         comp.m_current_phase = phase;
-        phase.phase_done.raise_objection(comp);
         comp.phase_started(phase); //GSA TBD do this in separate traversal?
         exec_task(comp,phase);
         comp.phase_ended(phase); //GSA TBD do this in separate traversal?
         if( phase.phase_done.get_objection_count(comp) > 0)
           phase.phase_done.drop_objection(comp);
+        wait(phase.phase_done.get_objection_total(top) == 0);
         thread.cleanup(); // kill thread process, depending on chosen semantic
       end
     join_none

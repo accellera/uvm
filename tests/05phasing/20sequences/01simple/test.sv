@@ -27,18 +27,22 @@ import uvm_pkg::*;
 // different phases, configure and main.
 
 class myseq extends uvm_sequence;
+  static int start_cnt = 0, end_cnt = 0;
   `uvm_object_utils(myseq)
+  
   task body;
+    start_cnt++;
     `uvm_info("INBODY", "Starting myseq!!!", UVM_NONE)
     #10;
     `uvm_info("INBODY", "Ending myseq!!!", UVM_NONE)
+    end_cnt++;
   endtask
 endclass
 
 class myseqr extends uvm_sequencer;
   function new(string name, uvm_component parent);
     super.new(name,parent);
-    set_phase_domain("uvm");
+    set_phase_domain("uvm", .hier(0));
   endfunction
   `uvm_component_utils(myseqr)
 
@@ -66,6 +70,10 @@ class test extends uvm_test;
    endfunction
    
    function void report();
+     if(myseq::start_cnt != 2 && myseq::end_cnt != 2)
+       $display("*** UVM TEST FAILED ***");
+      else
+       $display("*** UVM TEST PASSED ***");
    endfunction
    
 endclass
