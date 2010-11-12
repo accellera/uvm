@@ -138,15 +138,15 @@
 // to keep track of, and (b) at phase end, to decide what to kill, and
 // (c) in jump() operations, to decide what to kill
 //
-//   PROACTIVE - An active component which dictates when the phase ends,
+//   UVM_PHASE_PROACTIVE - An active component which dictates when the phase ends,
 //               whenever its phase task returns. It's threads are managed
 //               by the phaser and are cleaned up when it returns
 //
-//   REACTIVE -  A passive component (e.g. monitor) which does not object to
+//   UVM_PHASE_REACTIVE -  A passive component (e.g. monitor) which does not object to
 //               phase end even though it is still looping. It's threads are
 //               managed by the phaser and are cleaned up when it returns
 //
-//   PERSISTENT - A phase whose main thread and/or forked child threads continue
+//   UVM_PHASE_PERSISTENT - A phase whose main thread and/or forked child threads continue
 //               to run after the phase has ended, they are not managed or
 //               killed by the phaser, except during a jump operation.
 
@@ -171,16 +171,16 @@
 // The set of possible states of a phase. This is an attribute of a schedule
 // node in the graph, not of a phase, to maintain independent per-domain state
 //
-//   DORMANT -  Nothing has happened with the phase in this domain.
+//   UVM_PHASE_DORMANT -  Nothing has happened with the phase in this domain.
 //
-//   SCHEDULED - At least one immediate predecessor has completed.
+//   UVM_PHASE_SCHEDULED - At least one immediate predecessor has completed.
 //              Scheduled phases block until all predecessor complete or
 //              until a jump is executed.
 //
-//   EXECUTING - An executing phase is one where the phase callbacks are
+//   UVM_PHASE_EXECUTING - An executing phase is one where the phase callbacks are
 //              being executed. It's process is tracked by the phaser.
 //
-//   DONE -     A phase is done after it terminated execution.  Becoming
+//   UVM_PHASE_DONE -     A phase is done after it terminated execution.  Becoming
 //              done may enable a waiting successor phase to execute.
 //
 //    The state transitions occur as follows:
@@ -716,16 +716,27 @@ class uvm_phase_schedule extends uvm_graph;
   // ahead of schedule relative to another synchronized domain, as a result of
   // a jump in either domain, will await the domain that is behind schedule.
   //
-  // Note: Jumping out of a schedule
-  //
-  // A jump out of the local schedule causes other schedules that have
+  // *Note*: A jump out of the local schedule causes other schedules that have
   // the jump node in their schedule to jump as well. In some cases, it is
   // desirable to jump to a local phase in the schedule but to have all
   // schedules that share that phase to jump as well. In that situation, the
   // jump_all static function should be used. This function causes all schedules
   // that share a phase to jump to that phase.
-  
+ 
+  // Function: jump
+  //
+  // Jump to a specified ~phase~. The jump happens within the current 
+  // phase schedule. If the jump-to ~phase~ is outside of the current schedule
+  // then the jump effects other schedules which share the phase.
+
   extern function void jump(uvm_phase_imp phase);
+
+
+  // Function: jump
+  //
+  // Make all schedules jump to a specified ~phase~. The jump happens to all
+  // phase schedules that contain the jump-to ~phase~, i.e. a global jump. 
+
   extern static function void jump_all(uvm_phase_imp phase);
 
   // internal - implementation
@@ -1181,26 +1192,25 @@ endfunction
 //------------------------------------------------------------------------------
 // Class: uvm_*_phase
 //------------------------------------------------------------------------------
-// (predefined phases)
 //
 // There are macros (see macros/uvm_phase_defines.svh) to help repetitive declarations
 // These both declare and instantiate the phase default imp class. If you are doing
 // one manually for your own custom phase, use the following template:
 //
-// 1. extend the appropriate base class for your phase type
-//        class uvm_PHASE_phase extends uvm_task_phase("PHASE");
-//        class uvm_PHASE_phase extends uvm_topdown_phase("PHASE");
-//        class uvm_PHASE_phase extends uvm_bottomup_phase("PHASE");
+// 1. extend the appropriate base class for your phase type:
+//|       class uvm_PHASE_phase extends uvm_task_phase("PHASE");
+//|       class uvm_PHASE_phase extends uvm_topdown_phase("PHASE");
+//|       class uvm_PHASE_phase extends uvm_bottomup_phase("PHASE");
 //
 // 2. implement your exec_task or exec_func method:
-//          task void exec_task(uvm_component comp, uvm_phase_schedule schedule);
-//          function void exec_func(uvm_component comp, uvm_phase_schedule schedule);
+//|       task void exec_task(uvm_component comp, uvm_phase_schedule schedule);
+//|       function void exec_func(uvm_component comp, uvm_phase_schedule schedule);
 //
 // 3. the default ones simply call the related method on the component:
-//            comp.PHASE();
+//|       comp.PHASE();
 //
 // 4. after declaring your phase singleton class, instantiate one for global use:
-//        uvm_``PHASE``_phase uvm_``PHASE``_ph = new();
+//|       uvm_``PHASE``_phase uvm_``PHASE``_ph = new();
 //
 // Note that the macros and template above are specific to UVM builtin phases.
 // User custom phases should instantiate the singleton class in their own package
