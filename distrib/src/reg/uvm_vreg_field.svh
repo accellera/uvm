@@ -331,7 +331,7 @@ class uvm_vreg_field extends uvm_object;
    // TASK: post_read
    // Called after virtual field read.
    //
-   // If the specified readback data or~status~ is modified,
+   // If the specified readback data ~rdat~ or ~status~ is modified,
    // the updated readback data or status will be
    // returned by the virtual register operation.
    //
@@ -383,7 +383,7 @@ class uvm_vreg_field_cbs extends uvm_callback;
    // of the virtual register pre-write callbacks and
    // after the invocation of the <uvm_vreg_field::pre_write()> method.
    //
-   // The written value ~wdat, access ~path~ and address ~map~,
+   // The written value ~wdat~, access ~path~ and address ~map~,
    // if modified, modifies the actual value, access path or address map
    // used in the register operation.
    //
@@ -442,7 +442,7 @@ class uvm_vreg_field_cbs extends uvm_callback;
    // of the virtual register post-read callbacks and
    // before the invocation of the <uvm_vreg_field::post_read()> method.
    //
-   // The readback value ~rdat and the ~status~ of the operation,
+   // The readback value ~rdat~ and the ~status~ of the operation,
    // if modified, modifies the actual returned readback value and status.
    //
    virtual task post_read(uvm_vreg_field         field,
@@ -668,7 +668,7 @@ task uvm_vreg_field::write(input  longint unsigned    idx,
 
    `uvm_info("RegModel", $psprintf("Wrote virtual field \"%s\"[%0d] via %s with: 'h%h",
                               this.get_full_name(), idx,
-                              (path == UVM_BFM) ? "frontdoor" : "backdoor",
+                              (path == UVM_FRONTDOOR) ? "frontdoor" : "backdoor",
                               value),UVM_MEDIUM); 
    
    write_in_progress = 1'b0;
@@ -766,7 +766,7 @@ task uvm_vreg_field::read(input longint unsigned     idx,
 
    `uvm_info("RegModel", $psprintf("Read virtual field \"%s\"[%0d] via %s: 'h%h",
                               this.get_full_name(), idx,
-                              (path == UVM_BFM) ? "frontdoor" : "backdoor",
+                              (path == UVM_FRONTDOOR) ? "frontdoor" : "backdoor",
                               value),UVM_MEDIUM);
 
 

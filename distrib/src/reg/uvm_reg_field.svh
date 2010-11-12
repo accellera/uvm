@@ -59,6 +59,7 @@ class uvm_reg_field extends uvm_object;
    local int             m_cover_on;
    local bit             m_individually_accessible = 0;
    local string          m_attributes[string];
+   local uvm_check_e     m_check;
 
    local static int m_max_size = 0;
    local static bit m_policy_names[string];
@@ -104,7 +105,7 @@ class uvm_reg_field extends uvm_object;
    // field access policies.
    //
    // If the field access policy is a pre-defined policy and NOT one of
-   // "RW", "WRC", "WRS", "WO", "W1", "WO1" or "DC",
+   // "RW", "WRC", "WRS", "WO", "W1", or "WO1",
    // the value of ~is_rand~ is ignored and the rand_mode() for the
    // field instance is turned off since it cannot be written.
    //
@@ -114,7 +115,7 @@ class uvm_reg_field extends uvm_object;
                                   string         access,
                                   bit            volatile,
                                   uvm_reg_data_t reset,
-                                  bit            is_reset,
+                                  bit            has_reset,
                                   bit            is_rand,
                                   bit            individually_accessible); 
 
@@ -212,7 +213,6 @@ class uvm_reg_field extends uvm_object;
    // "WOS"   - W: sets all bits, R: error
    // "W1"    - W: first one after ~HARD~ reset is as-is, other W have no effects, R: no effect
    // "WO1"   - W: first one after ~HARD~ reset is as-is, other W have no effects, R: error
-   // "DC"    - W: as-is, R: no effect but "check" never fails
    //
    // It is important to remember that modifying the access of a field
    // will make the register model diverge from the specification
@@ -556,16 +556,17 @@ class uvm_reg_field extends uvm_object;
    //
    // Read the field and optionally compared the readback value
    // with the current mirrored value if ~check~ is <UVM_CHECK>.
-   // The mirrored value will be updated using the <uvm_reg_field::predict()>
+   // The mirrored value will be updated using the <predict()>
    // method based on the readback value.
    //
-   // The mirroring can be performed using the physical interfaces (frontdoor)
-   // or <uvm_reg_field::peek()> (backdoor).
+   // The ~path~ argument specifies whether to mirror using 
+   // the  <UVM_FRONTDOOR> (<read>) or
+   // or <UVM_BACKDOOR> (<peek()>).
    //
-   // If ~check~ is specified as UVM_VERB,
+   // If ~check~ is specified as <UVM_CHECK>,
    // an error message is issued if the current mirrored value
-   // does not match the readback value, unless the field has the "DC"
-   // (don't care) policy.
+   // does not match the readback value, unless <set_compare> was used
+   // disable the check.
    //
    // If the containing register is mapped in multiple address maps and physical
    // access is used (front-door access), an address ~map~ must be specified.
@@ -573,9 +574,9 @@ class uvm_reg_field extends uvm_object;
    // checked only if a UVM_BACKDOOR
    // access path is used to read the field. 
    //
-   extern virtual task mirror(output uvm_status_e status,
-                              input  uvm_check_e  check = UVM_NO_CHECK,
-                              input  uvm_path_e   path = UVM_DEFAULT_PATH,
+   extern virtual task mirror(output uvm_status_e      status,
+                              input  uvm_check_e       check = UVM_NO_CHECK,
+                              input  uvm_path_e        path = UVM_DEFAULT_PATH,
                               input  uvm_reg_map       map = null,
                               input  uvm_sequence_base parent = null,
                               input  int               prior = -1,
@@ -584,6 +585,24 @@ class uvm_reg_field extends uvm_object;
                               input  int               lineno = 0);
 
 
+   // Function: set_compare
+   //
+   // Sets the compare policy during a mirror update. 
+   // The field value is checked against its mirror only when both the
+   // ~check~ argument in <uvm_reg_block::mirror>, <uvm_reg::mirror>,
+   // or <uvm_reg_field::mirror> and the compare policy for the
+   // field is <UVM_CHECK>.
+   //
+   extern function void set_compare(uvm_check_e check=UVM_CHECK);
+
+
+   // Function: get_compare
+   //
+   // Returns the compare policy for this field.
+   //
+   extern function uvm_check_e get_compare();
+
+   
    // Function: is_indv_accessible
    //
    // Check if this field can be written individually, i.e. without
@@ -622,7 +641,7 @@ class uvm_reg_field extends uvm_object;
    extern virtual function bit predict (uvm_reg_data_t    value,
                                         uvm_reg_byte_en_t be = -1,
                                         uvm_predict_e     kind = UVM_PREDICT_DIRECT,
-                                        uvm_path_e        path = UVM_BFM,
+                                        uvm_path_e        path = UVM_FRONTDOOR,
                                         uvm_reg_map       map = null,
                                         string            fname = "",
                                         int               lineno = 0);
@@ -802,7 +821,7 @@ function void uvm_reg_field::configure(uvm_reg        parent,
                                        string         access,
                                        bit            volatile,
                                        uvm_reg_data_t reset,
-                                       bit            is_reset,
+                                       bit            has_reset,
                                        bit            is_rand,
                                        bit            individually_accessible); 
    m_parent = parent;
@@ -819,7 +838,11 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    m_cover_on  = UVM_NO_COVERAGE;
    m_written   = 0;
    m_individually_accessible = individually_accessible;
-   if (is_reset) set_reset(reset);
+
+   if (has_reset)
+      set_reset(reset);
+   else
+      set_attribute("NO_HW_RESET_TEST","ON");
 
    m_parent.add_field(this);
 
@@ -833,7 +856,7 @@ function void uvm_reg_field::configure(uvm_reg        parent,
       m_max_size = size;
    
    // Ignore is_rand if the field is known not to be writeable
-   // i.e. not "RW", "WRC", "WRS", "WO", "W1", "WO1" or "DC",
+   // i.e. not "RW", "WRC", "WRS", "WO", "W1", "WO1"
    case (access)
     "RO", "RC", "RS", "WC", "WS",
       "W1C", "W1S", "W1T", "W0C", "W0S", "W0T",
@@ -897,8 +920,7 @@ function bit uvm_reg_field::is_known_access(uvm_reg_map map = null);
     "RO", "RW", "RC", "RS", "WC", "WS",
       "W1C", "W1S", "W1T", "W0C", "W0S", "W0T",
       "WRC", "WRS", "W1SRC", "W1CRS", "W0SRC", "W0CRS", "WSRC", "WCRS",
-      "WO", "WOC", "WOS", "W1", "WO1",
-      "DC": return 1;
+      "WO", "WOC", "WOS", "W1", "WO1" : return 1;
    endcase
    return 0;
 endfunction
@@ -1019,7 +1041,6 @@ function bit uvm_reg_field::m_predefine_policies();
    void'(define_access("WOS"));
    void'(define_access("W1"));
    void'(define_access("WO1"));
-   void'(define_access("DC"));
    return 1;
 endfunction
 
@@ -1136,7 +1157,6 @@ function uvm_reg_data_t uvm_reg_field::XpredictX (uvm_reg_data_t cur_val,
      "WOS":   return mask;
      "W1":    return (m_written) ? cur_val : wr_val;
      "WO1":   return (m_written) ? cur_val : wr_val;
-     "DC":    return wr_val;
      default: return wr_val;
    endcase
 
@@ -1152,7 +1172,7 @@ function void uvm_reg_field::Xpredict_readX (uvm_reg_data_t value,
                                              uvm_reg_map    map);
    value &= ('b1 << m_size)-1;
 
-   if (path == UVM_BFM) begin
+   if (path == UVM_FRONTDOOR) begin
 
       string acc = get_access(map);
 
@@ -1203,7 +1223,7 @@ function void uvm_reg_field::Xpredict_writeX (uvm_reg_data_t value,
                                               uvm_reg_map    map);
    value &= ('b1 << m_size)-1;
 
-   if (path == UVM_BFM)
+   if (path == UVM_FRONTDOOR)
       m_mirrored = XpredictX(m_mirrored, value, map);
    else
       m_mirrored = value;
@@ -1255,7 +1275,6 @@ function uvm_reg_data_t  uvm_reg_field::XupdateX();
       "WOS":   XupdateX = m_desired;  // Warn if != 1
       "W1":    XupdateX = m_desired;
       "WO1":   XupdateX = m_desired;
-      "DC":    XupdateX = m_desired;
       default: XupdateX = m_desired;
    endcase
 endfunction: XupdateX
@@ -1266,7 +1285,7 @@ endfunction: XupdateX
 function bit uvm_reg_field::predict(uvm_reg_data_t    value,
                                     uvm_reg_byte_en_t be = -1,
                                     uvm_predict_e     kind = UVM_PREDICT_DIRECT,
-                                    uvm_path_e        path = UVM_BFM,
+                                    uvm_path_e        path = UVM_FRONTDOOR,
                                     uvm_reg_map       map = null,
                                     string            fname = "",
                                     int               lineno = 0);
@@ -1344,7 +1363,6 @@ function void uvm_reg_field::set(uvm_reg_data_t  value,
       "WOS":   m_desired = mask;
       "W1":    m_desired = (m_written) ? m_desired : value;
       "WO1":   m_desired = (m_written) ? m_desired : value;
-      "DC":    m_desired = value;
       default: m_desired = value;
    endcase
    this.value = m_desired;
@@ -1439,7 +1457,7 @@ function bit uvm_reg_field::Xcheck_accessX(input uvm_reg_item rw,
          `uvm_warning("RegModel",
             {"No backdoor access available for field '",get_full_name(),
             "' . Using frontdoor instead."})
-         rw.path = UVM_BFM;
+         rw.path = UVM_FRONTDOOR;
       end
       else
         rw.map = uvm_reg_map::backdoor();
@@ -1941,6 +1959,19 @@ task uvm_reg_field::mirror(output uvm_status_e      status,
                       fname, lineno);
 endtask: mirror
 
+
+// set_compare
+
+function void uvm_reg_field::set_compare(uvm_check_e check=UVM_CHECK);
+  m_check = check;
+endfunction
+
+
+// get_compare
+
+function uvm_check_e uvm_reg_field::get_compare();
+  return m_check;
+endfunction
 
 // pre_randomize
 

@@ -47,7 +47,7 @@ class tb_test extends uvm_test;
       end
 
       env.regmodel.reset();
-      void'(env.regmodel.set_cover(UVM_CVR_ALL));
+      void'(env.regmodel.set_coverage(UVM_CVR_ALL));
 
       begin
          uvm_reg_sequence seq;
@@ -65,10 +65,6 @@ class tb_test extends uvm_test;
       end
 
       `uvm_info("Test", "Generating and uploading 100 configurations...", UVM_LOW)
-      env.regmodel.Ra.F1.value.rand_mode(1);
-      env.regmodel.Ra.F2.value.rand_mode(1);
-      env.regmodel.Rb.F1.value.rand_mode(1);
-      env.regmodel.Rb.F2.value.rand_mode(1);
       
       repeat (100) begin
          uvm_sequence_base seq = new;
@@ -90,6 +86,8 @@ initial begin
    tb_env env;
    tb_test test;
    uvm_report_server svr;
+
+   uvm_reg::include_coverage("*", UVM_CVR_ALL);
    
    env = new("env");
    test = new("test");

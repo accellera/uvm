@@ -102,14 +102,17 @@ class uvm_reg_indirect_data extends uvm_reg;
             continue;
          end
          fd = new(m_idx, i, this);
-         m_tbl[i].set_frontdoor(fd, map);
+         if (m_tbl[i].is_in_map(map))
+            m_tbl[i].set_frontdoor(fd, map);
+         else
+            map.add_reg(m_tbl[i], -1, "RW", 1, fd);
       end
    endfunction
    
    virtual function bit predict (uvm_reg_data_t    value,
                                  uvm_reg_byte_en_t be = -1,
                                  uvm_predict_e     kind = UVM_PREDICT_DIRECT,
-                                 uvm_path_e        path = UVM_BFM,
+                                 uvm_path_e        path = UVM_FRONTDOOR,
                                  uvm_reg_map       map = null,
                                  string            fname = "",
                                  int               lineno = 0);
@@ -123,6 +126,11 @@ class uvm_reg_indirect_data extends uvm_reg;
          int unsigned idx = m_idx.get();
          return m_tbl[idx].predict(value, be, kind, path, map, fname, lineno);
       end
+   endfunction
+
+
+   virtual function uvm_reg_map get_local_map(uvm_reg_map map, string caller="");
+      return  m_idx.get_local_map(map,caller);
    endfunction
 
    //
@@ -165,7 +173,7 @@ class uvm_reg_indirect_data extends uvm_reg;
       
       if (path == UVM_BACKDOOR) begin
          `uvm_warning(get_full_name(), "Cannot backdoor-write an indirect data access register. Switching to frontdoor.");
-         path = UVM_BFM;
+         path = UVM_FRONTDOOR;
       end
       
       write(status, value, path, map, parent, prior, extension, fname, lineno);
@@ -188,7 +196,7 @@ class uvm_reg_indirect_data extends uvm_reg;
       
       if (path == UVM_BACKDOOR) begin
          `uvm_warning(get_full_name(), "Cannot backdoor-read an indirect data access register. Switching to frontdoor.");
-         path = UVM_BFM;
+         path = UVM_FRONTDOOR;
       end
       
       read(status, value, path, map, parent, prior, extension, fname, lineno);

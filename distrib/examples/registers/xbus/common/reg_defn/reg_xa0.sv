@@ -101,10 +101,12 @@ class xa0_xbus_rf_user_acp_reg extends uvm_reg;
 
    virtual function void build();
       data_msb = uvm_reg_field::type_id::create("data_msb",,get_full_name());
-      data_msb.configure(this, 4, 4, "DC", 0, 4'h0, 1, 0, 0);
+      data_msb.configure(this, 4, 4, "RW", 0, 4'h0, 1, 0, 0);
+      data_msb.set_compare(UVM_NO_CHECK);
       data_msb.set_reset('h0, "SOFT");
       data_lsb = uvm_reg_field::type_id::create("data_lsb",,get_full_name());
-      data_lsb.configure(this, 4, 0, "DC", 0, 4'h0, 1, 0, 0);
+      data_lsb.configure(this, 4, 0, "RW", 0, 4'h0, 1, 0, 0);
+      data_lsb.set_compare(UVM_NO_CHECK);
       data_lsb.set_reset('h0, "SOFT");
       set_attribute("NO_BIT_BASH_TEST", "1");
       set_attribute("NO_REG_ACCESS_TEST", "1");
@@ -367,6 +369,7 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
          xbus_indirect_reg[i]=r_;
          name = $sformatf("id_reg_values[%0d]",i);
          r_.configure(this, null, name);
+         default_map.add_reg(r_, -1, "RW",0);
          r_.build();
       end
 

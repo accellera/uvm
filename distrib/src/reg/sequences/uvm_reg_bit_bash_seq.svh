@@ -87,14 +87,13 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
          foreach (fields[k]) begin
             int lsb, w, dc;
 
-            dc = 0;
+            dc = (fields[k].get_compare() == UVM_NO_CHECK);
             lsb = fields[k].get_lsb_pos();
             w   = fields[k].get_n_bits();
-            // Ignore "DC" fields 
             // Ignore Write-only fields because
             // you are not supposed to read them
             case (fields[k].get_access(maps[j]))
-             "DC", "WO", "WOC", "WOS", "WO1": dc = 1;
+             "WO", "WOC", "WOS", "WO1": dc = 1;
             endcase
             // Any unused bits on the right side of the LSB?
             while (next_lsb < lsb) mode[next_lsb++] = "RO";
@@ -142,14 +141,14 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
          val[k] = ~val[k];
          bit_val = val[k];
          
-         rg.write(status, val, UVM_BFM, map, this);
+         rg.write(status, val, UVM_FRONTDOOR, map, this);
          if (status != UVM_IS_OK) begin
             `uvm_error("RegModel", $psprintf("Status was %s when writing to register \"%s\" through map \"%s\".",
                                         status, rg.get_full_name(), map.get_full_name()));
          end
          
          exp = rg.get() & ~dc_mask;
-         rg.read(status, val, UVM_BFM, map, this);
+         rg.read(status, val, UVM_FRONTDOOR, map, this);
          if (status != UVM_IS_OK) begin
             `uvm_error("RegModel", $psprintf("Status was %s when reading register \"%s\" through map \"%s\".",
                                         status, rg.get_full_name(), map.get_full_name()));

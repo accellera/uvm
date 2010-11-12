@@ -24,7 +24,8 @@
 
 
 //------------------------------------------------------------------------
-// CLASS: uvm_reg_block
+// Class: uvm_reg_block
+//
 // Block abstraction base class
 //
 // A block represents a design hierarchy. It can contain registers,
@@ -32,6 +33,7 @@
 //
 // A block has one or more address maps, each corresponding to a physical
 // interface on the block.
+//
 //------------------------------------------------------------------------
 virtual class uvm_reg_block extends uvm_object;
 
@@ -69,35 +71,23 @@ virtual class uvm_reg_block extends uvm_object;
    // Group: Initialization
    //----------------------
 
-   // Function: check_data_width
-   // Check that the specified data width (in bits) is less than
-   // or equal to the value of `UVM_REG_DATA_WIDTH
+   // Function: new
    //
-   // This method is designed to be called by a static initializer
-   //
-   //| class my_blk extends uvm_reg_block;
-   //|   local static bit m_data_width = check_data_width(356);
-   //|   ...
-   //| endclass
-   extern protected static function bit check_data_width(int unsigned width);
-
-
-   //------------------------------------------------------------------------
-   // FUNCTION: new
    // Create a new instance and type-specific configuration
    //
    // Creates an instance of a block abstraction class with the specified
    // name.
    //
-   // ~has_cover~ specifies which functional coverage models are present in
+   // ~has_coverage~ specifies which functional coverage models are present in
    // the extension of the block abstraction class.
    // Multiple functional coverage models may be specified by adding their
    // symbolic names, as defined by the <uvm_coverage_model_e> type.
-   //------------------------------------------------------------------------
-   extern function new(string name="", int has_cover=UVM_NO_COVERAGE);
-
    //
+   extern function new(string name="", int has_coverage=UVM_NO_COVERAGE);
+
+
    // Function: configure
+   //
    // Instance-specific configuration
    //
    // Specify the parent block of this block.
@@ -112,8 +102,9 @@ virtual class uvm_reg_block extends uvm_object;
    extern function void configure(uvm_reg_block parent=null,
                                   string hdl_path="");
 
-   //
+
    // Function: create_map
+   //
    // Create an address map in this block
    //
    // Create an address map with the specified ~name~.
@@ -122,25 +113,43 @@ virtual class uvm_reg_block extends uvm_object;
    // this address map.
    // ~endian~ specifies the endianness, should a register or sub-map with
    // a greater number of bytes be accessed.
-   //|
+   //
    //| APB = create_map("APB", 0, 1, UVM_LITTLE_ENDIAN);
-   //|
+   //
    extern virtual function uvm_reg_map create_map(string name,
                                                   uvm_reg_addr_t base_addr,
                                                   int unsigned n_bytes,
                                                   uvm_endianness_e endian);
 
+
+   // Function: check_data_width
    //
+   // Check that the specified data width (in bits) is less than
+   // or equal to the value of `UVM_REG_DATA_WIDTH
+   //
+   // This method is designed to be called by a static initializer
+   //
+   //| class my_blk extends uvm_reg_block;
+   //|   local static bit m_data_width = check_data_width(356);
+   //|   ...
+   //| endclass
+   //
+   extern protected static function bit check_data_width(int unsigned width);
+
+
+
    // Function: set_default_map
+   //
    // Defines the default address map
    //
    // Set the specified address map as the <default_map> for this
    // block. The address map must be a map of this address block.
    //
-   extern function void                set_default_map (uvm_reg_map map);
+   extern function void set_default_map (uvm_reg_map map);
 
-   //
+
    // Variable: default_map
+   //
    // Default address map
    //
    // Default address map for this block, to be used when no
@@ -150,9 +159,9 @@ virtual class uvm_reg_block extends uvm_object;
    // It is also the implciit address map for a block with a single,
    // unamed address map because it has only one physical interface.
    //
-   uvm_reg_map          default_map;
-   extern function uvm_reg_map         get_default_map ();
+   uvm_reg_map default_map;
 
+   extern function uvm_reg_map get_default_map ();
 
    extern virtual function void set_parent(uvm_reg_block parent);
 
@@ -162,8 +171,9 @@ virtual class uvm_reg_block extends uvm_object;
    /*local*/ extern function void add_vreg  (uvm_vreg vreg);
    /*local*/ extern function void add_mem   (uvm_mem  mem);
 
-   //
+
    // Function: lock_model
+   //
    // Lock a model and build the address map.
    //
    // Recursively lock an entire register model
@@ -179,7 +189,9 @@ virtual class uvm_reg_block extends uvm_object;
    //
    extern virtual function void lock_model();
 
+
    // Function: is_locked
+   //
    // Return TRUE if the model is locked.
    //
    extern function bit is_locked();
@@ -190,57 +202,64 @@ virtual class uvm_reg_block extends uvm_object;
    //---------------------
 
 
-   //
    // Function: get_name
+   //
    // Get the simple name
    //
    // Return the simple object name of this block.
    //
 
-   //
+
    // Function: get_full_name
+   //
    // Get the hierarchical name
    //
    // Return the hierarchal name of this block.
    // The base of the hierarchical name is the root block.
    //
-   extern virtual function string        get_full_name();
+   extern virtual function string get_full_name();
 
+
+   // Function: get_parent
    //
-   // FUNCTION: get_parent
    // Get the parent block
    //
    // If this a top-level block, returns ~null~. 
    //
    extern virtual function uvm_reg_block get_parent();
 
+
+   // Function: get_root_blocks
    //
-   // FUNCTION: get_root_blocks
    // Get the all root blocks
    //
    // Returns an array of all root blocks in the simulation.
    //
    extern static  function void get_root_blocks(ref uvm_reg_block blks[$]);
       
-   //
+
    // Function: get_blocks
+   //
    // Get the sub-blocks
    //
    // Get the blocks instantiated in this blocks.
    // If ~hier~ is TRUE, recursively includes any sub-blocks.
    //
-   extern virtual function void get_blocks           (ref uvm_reg_block  blks[$],   input uvm_hier_e hier=UVM_HIER);
+   extern virtual function void get_blocks (ref uvm_reg_block  blks[$],
+                                            input uvm_hier_e hier=UVM_HIER);
 
-   //
+
    // Function: get_maps
+   //
    // Get the address maps
    //
    // Get the address maps instantiated in this block.
    //
-   extern virtual function void get_maps             (ref uvm_reg_map    maps[$]);
+   extern virtual function void get_maps (ref uvm_reg_map maps[$]);
 
-   //
+
    // Function: get_registers
+   //
    // Get the registers
    //
    // Get the registers instantiated in this block.
@@ -251,20 +270,24 @@ virtual class uvm_reg_block extends uvm_object;
    // address maps. To get the registers in a specific address map,
    // use the <uvm_reg_map::get_registers()> method.
    //
-   extern virtual function void get_registers        (ref uvm_reg    regs[$],   input uvm_hier_e hier=UVM_HIER);
+   extern virtual function void get_registers (ref uvm_reg regs[$],
+                                               input uvm_hier_e hier=UVM_HIER);
 
-   //
+
    // Function: get_fields
+   //
    // Get the fields
    //
    // Get the fields in the registers instantiated in this block.
    // If ~hier~ is TRUE, recursively includes the fields of the registers
    // in the sub-blocks.
    //
-   extern virtual function void get_fields           (ref uvm_reg_field  fields[$], input uvm_hier_e hier=UVM_HIER);
+   extern virtual function void get_fields (ref uvm_reg_field  fields[$],
+                                            input uvm_hier_e hier=UVM_HIER);
 
-   //
+
    // Function get_memories
+   //
    // Get the memories
    //
    // Get the memories instantiated in this block.
@@ -275,20 +298,24 @@ virtual class uvm_reg_block extends uvm_object;
    // address maps. To get the memories in a specific address map,
    // use the <uvm_reg_map::get_memories()> method.
    //
-   extern virtual function void get_memories         (ref uvm_mem    mems[$],   input uvm_hier_e hier=UVM_HIER);
+   extern virtual function void get_memories (ref uvm_mem mems[$],
+                                              input uvm_hier_e hier=UVM_HIER);
 
-   //
+
    // Function: get_virtual_registers
+   //
    // Get the virtual registers
    //
    // Get the virtual registers instantiated in this block.
    // If ~hier~ is TRUE, recursively includes the virtual registers
    // in the sub-blocks.
    //
-   extern virtual function void get_virtual_registers(ref uvm_vreg   regs[$],   input uvm_hier_e hier=UVM_HIER);
+   extern virtual function void get_virtual_registers(ref uvm_vreg regs[$],
+                                                input uvm_hier_e hier=UVM_HIER);
 
-   //
+
    // Function: get_virtual_fields
+   //
    // Get the virtual fields
    //
    // Get the virtual fields from the virtual registers instantiated
@@ -296,10 +323,12 @@ virtual class uvm_reg_block extends uvm_object;
    // If ~hier~ is TRUE, recursively includes the virtual fields
    // in the virtual registers in the sub-blocks.
    //
-   extern virtual function void get_virtual_fields   (ref uvm_vreg_field fields[$], input uvm_hier_e hier=UVM_HIER);
+   extern virtual function void get_virtual_fields (ref uvm_vreg_field fields[$],
+                                                 input uvm_hier_e hier=UVM_HIER);
 
+
+   // Function: get_block_by_name
    //
-   // FUNCTION: get_block_by_name
    // Finds a sub-block with the specified simple name.
    //
    // The name is the simple name of the block, not a hierarchical name.
@@ -310,10 +339,11 @@ virtual class uvm_reg_block extends uvm_object;
    //
    // If no blocks are found, returns ~null~.
    //
-   extern virtual function uvm_reg_block  get_block_by_name  (string name);  
+   extern virtual function uvm_reg_block get_block_by_name (string name);  
 
+
+   // Function: get_map_by_name
    //
-   // FUNCTION: get_map_by_name
    // Finds an address map with the specified simple name.
    //
    // The name is the simple name of the address map, not a hierarchical name.
@@ -324,10 +354,11 @@ virtual class uvm_reg_block extends uvm_object;
    //
    // If no address maps are found, returns ~null~.
    //
-   extern virtual function uvm_reg_map    get_map_by_name    (string name);
+   extern virtual function uvm_reg_map get_map_by_name (string name);
 
+
+   // Function: get_reg_by_name
    //
-   // FUNCTION: get_reg_by_name
    // Finds a register with the specified simple name.
    //
    // The name is the simple name of the register, not a hierarchical name.
@@ -338,10 +369,11 @@ virtual class uvm_reg_block extends uvm_object;
    //
    // If no registers are found, returns ~null~.
    //
-   extern virtual function uvm_reg    get_reg_by_name    (string name);
+   extern virtual function uvm_reg get_reg_by_name (string name);
 
+
+   // Function: get_field_by_name
    //
-   // FUNCTION: get_field_by_name
    // Finds a field with the specified simple name.
    //
    // The name is the simple name of the field, not a hierarchical name.
@@ -352,10 +384,11 @@ virtual class uvm_reg_block extends uvm_object;
    //
    // If no fields are found, returns ~null~.
    //
-   extern virtual function uvm_reg_field  get_field_by_name  (string name);
+   extern virtual function uvm_reg_field get_field_by_name (string name);
 
+
+   // Function: get_mem_by_name
    //
-   // FUNCTION: get_mem_by_name
    // Finds a memory with the specified simple name.
    //
    // The name is the simple name of the memory, not a hierarchical name.
@@ -366,10 +399,11 @@ virtual class uvm_reg_block extends uvm_object;
    //
    // If no memories are found, returns ~null~.
    //
-   extern virtual function uvm_mem    get_mem_by_name    (string name);
+   extern virtual function uvm_mem get_mem_by_name (string name);
 
+
+   // Function: get_vreg_by_name
    //
-   // FUNCTION: get_vreg_by_name
    // Finds a virtual register with the specified simple name.
    //
    // The name is the simple name of the virtual register,
@@ -381,10 +415,11 @@ virtual class uvm_reg_block extends uvm_object;
    //
    // If no virtual registers are found, returns ~null~.
    //
-   extern virtual function uvm_vreg   get_vreg_by_name   (string name);
+   extern virtual function uvm_vreg get_vreg_by_name (string name);
 
+
+   // Function: get_vfield_by_name
    //
-   // FUNCTION: get_vfield_by_name
    // Finds a virtual field with the specified simple name.
    //
    // The name is the simple name of the virtual field,
@@ -404,8 +439,8 @@ virtual class uvm_reg_block extends uvm_object;
    //------------------
 
 
+   // Function: set_attribute
    //
-   // FUNCTION: set_attribute
    // Set an attribute.
    //
    // Set the specified attribute to the specified value for this block.
@@ -417,8 +452,9 @@ virtual class uvm_reg_block extends uvm_object;
    extern virtual function void set_attribute(string name,
                                               string value);
 
+
+   // Function: get_attribute
    //
-   // FUNCTION: get_attribute
    // Get an attribute value.
    //
    // Get the value of the specified attribute for this block.
@@ -435,8 +471,9 @@ virtual class uvm_reg_block extends uvm_object;
    extern virtual function string get_attribute(string name,
                                                 bit inherited = 1);
 
+
+   // Function: get_attributes
    //
-   // FUNCTION: get_attributes
    // Get all attribute values.
    //
    // Get the name of all attribute for this block.
@@ -452,20 +489,23 @@ virtual class uvm_reg_block extends uvm_object;
    //----------------
 
 
-   // Function: build_cover
+   // Function: build_coverage
    //
    // Check if all of the specified coverage model must be built.
    //
-   // Check if TBD 
+   // Check which of the specified coverage model must be built
+   // in this instance of the block abstraction class,
+   // as specified by calls to <uvm_reg::include_coverage()>.
+   //
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
    // Returns the sum of all coverage models to be built in the
    // block model.
    //
-   extern virtual protected function uvm_reg_cvr_t build_cover(uvm_reg_cvr_t models);
+   extern virtual protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
 
 
-   // Function: add_cover
+   // Function: add_coverage
    //
    // Specify that additional coverage models are available.
    //
@@ -477,11 +517,11 @@ virtual class uvm_reg_block extends uvm_object;
    // This method shall be called only in the constructor of
    // subsequently derived classes.
    //
-   extern virtual protected function void add_cover(uvm_reg_cvr_t models);
+   extern virtual protected function void add_coverage(uvm_reg_cvr_t models);
 
 
+   // Function: has_coverage
    //
-   // Function: can_cover
    // Check if block has coverage model(s)
    //
    // Returns TRUE if the block abstraction class contains a coverage model
@@ -489,10 +529,11 @@ virtual class uvm_reg_block extends uvm_object;
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
    //
-   extern virtual function bit can_cover(uvm_reg_cvr_t models);
+   extern virtual function bit has_coverage(uvm_reg_cvr_t models);
 
+
+   // Function: set_coverage
    //
-   // FUNCTION: set_cover
    // Turns on coverage measurement.
    //
    // Turns the collection of functional coverage measurements on or off
@@ -509,13 +550,14 @@ virtual class uvm_reg_block extends uvm_object;
    // This method can only control the measurement of functional
    // coverage models that are present in the various abstraction classes,
    // then enabled during construction.
-   // See the <uvm_reg_block::can_cover()> method to identify
+   // See the <uvm_reg_block::has_coverage()> method to identify
    // the available functional coverage models.
    //
-   extern virtual function uvm_reg_cvr_t set_cover(uvm_reg_cvr_t is_on);
+   extern virtual function uvm_reg_cvr_t set_coverage(uvm_reg_cvr_t is_on);
 
+
+   // Function: get_coverage
    //
-   // FUNCTION: is_cover_on
    // Check if coverage measurement is on.
    //
    // Returns TRUE if measurement for all of the specified functional
@@ -523,9 +565,10 @@ virtual class uvm_reg_block extends uvm_object;
    // Multiple functional coverage models can be specified by adding the
    // functional coverage model identifiers.
    //
-   // See <uvm_reg_block::set_cover()> for more details. 
+   // See <uvm_reg_block::set_coverage()> for more details. 
    //
-   extern virtual function bit is_cover_on(uvm_reg_cvr_t is_on = UVM_CVR_ALL);
+   extern virtual function bit get_coverage(uvm_reg_cvr_t is_on = UVM_CVR_ALL);
+
 
    // Function: sample
    //
@@ -545,6 +588,7 @@ virtual class uvm_reg_block extends uvm_object;
                                            bit            is_read,
                                            uvm_reg_map    map);
    endfunction
+
 
    // Function: sample_values
    //
@@ -575,8 +619,8 @@ virtual class uvm_reg_block extends uvm_object;
    // Group: Access
    //--------------
 
-   //
    // Function: get_default_path
+   //
    // Default access path
    //
    // Returns the default access path for this block.
@@ -584,8 +628,8 @@ virtual class uvm_reg_block extends uvm_object;
    extern virtual function uvm_path_e get_default_path();
 
 
+   // Function: reset
    //
-   // FUNCTION: reset
    // Reset the mirror for this block.
    //
    // Sets the mirror value of all registers in the block and sub-blocks
@@ -597,8 +641,8 @@ virtual class uvm_reg_block extends uvm_object;
    extern virtual function void reset(string kind = "HARD");
 
 
+   // Function: needs_update
    //
-   // FUNCTION: needs_update
    // Check if DUT registers need to be written
    //
    // If a mirror value has been modified in the abstraction model
@@ -616,8 +660,8 @@ virtual class uvm_reg_block extends uvm_object;
    extern virtual function bit needs_update();
 
 
+   // Task: update
    //
-   // TASK: update
    // Batch update of register.
    //
    // Using the minimum number of write operations, updates the registers
@@ -626,8 +670,8 @@ virtual class uvm_reg_block extends uvm_object;
    // interfaces (front-door access) or back-door accesses.
    // This method performs the reverse operation of <uvm_reg_block::mirror()>. 
    //
-   extern virtual task update(output uvm_status_e  status,
-                              input  uvm_path_e    path = UVM_DEFAULT_PATH,
+   extern virtual task update(output uvm_status_e       status,
+                              input  uvm_path_e         path = UVM_DEFAULT_PATH,
                               input  uvm_sequence_base  parent = null,
                               input  int                prior = -1,
                               input  uvm_object         extension = null,
@@ -635,36 +679,37 @@ virtual class uvm_reg_block extends uvm_object;
                               input  int                lineno = 0);
 
 
+   // Task: mirror
    //
-   // TASK: mirror
    // Update the mirrored values
    //
-   // Read all of the registers in this block and sub-blcoks and update their
+   // Read all of the registers in this block and sub-blocks and update their
    // mirror values to match their corresponding values in the design.
    // The mirroring can be performed using the physical interfaces
    // (front-door access) or back-door accesses.
-   // If the ~check~ argument is specified as ~UVM_VERB~,
+   // If the ~check~ argument is specified as <UVM_CHECK>,
    // an error message is issued if the current mirrored value
    // does not match the actual value in the design.
    // This method performs the reverse operation of <uvm_reg_block::update()>.
    // 
-   extern virtual task mirror(output uvm_status_e  status,
-                              input  uvm_check_e   check = UVM_NO_CHECK,
-                              input  uvm_path_e    path  = UVM_DEFAULT_PATH,
+   extern virtual task mirror(output uvm_status_e       status,
+                              input  uvm_check_e        check = UVM_NO_CHECK,
+                              input  uvm_path_e         path  = UVM_DEFAULT_PATH,
                               input  uvm_sequence_base  parent = null,
                               input  int                prior = -1,
                               input  uvm_object         extension = null,
                               input  string             fname = "",
                               input  int                lineno = 0);
 
-   //
+
    // Task: write_reg_by_name
+   //
    // Write the named register
    //
    // Equivalent to <get_reg_by_name()> followed by <uvm_reg::write()>
    //
    extern virtual task write_reg_by_name(
-                              output uvm_status_e   status,
+                              output uvm_status_e        status,
                               input  string              name,
                               input  uvm_reg_data_t      data,
                               input  uvm_path_e     path = UVM_DEFAULT_PATH,
@@ -675,14 +720,15 @@ virtual class uvm_reg_block extends uvm_object;
                               input  string              fname = "",
                               input  int                 lineno = 0);
 
-   //
+
    // Task: read_reg_by_name
+   //
    // Read the named register
    //
    // Equivalent to <get_reg_by_name()> followed by <uvm_reg::read()>
    //
    extern virtual task read_reg_by_name(
-                              output uvm_status_e  status,
+                              output uvm_status_e       status,
                               input  string             name,
                               output uvm_reg_data_t     data,
                               input  uvm_path_e    path = UVM_DEFAULT_PATH,
@@ -693,14 +739,15 @@ virtual class uvm_reg_block extends uvm_object;
                               input  string             fname = "",
                               input  int                lineno = 0);
 
-   //
+
    // Task: write_mem_by_name
+   //
    // Write the named memory
    //
    // Equivalent to <get_mem_by_name()> followed by <uvm_mem::write()>
    //
    extern virtual task write_mem_by_name(
-                              output uvm_status_e  status,
+                              output uvm_status_e       status,
                               input  string             name,
                               input  uvm_reg_addr_t     offset,
                               input  uvm_reg_data_t     data,
@@ -712,14 +759,15 @@ virtual class uvm_reg_block extends uvm_object;
                               input  string             fname = "",
                               input  int                lineno = 0);
 
-   //
+
    // Task: read_mem_by_name
+   //
    // Read the named memory
    //
    // Equivalent to <get_mem_by_name()> followed by <uvm_mem::read()>
    //
    extern virtual task read_mem_by_name(
-                              output uvm_status_e  status,
+                              output uvm_status_e       status,
                               input  string             name,
                               input  uvm_reg_addr_t     offset,
                               output uvm_reg_data_t     data,
@@ -736,12 +784,13 @@ virtual class uvm_reg_block extends uvm_object;
    extern virtual task writememh(string filename);
 
 
+
    //----------------
    // Group: Backdoor
    //----------------
 
-   //
    // Function: get_backdoor
+   //
    // Get the user-defined backdoor for all registers in this block
    //
    // Return the user-defined backdoor for all register in this
@@ -753,29 +802,32 @@ virtual class uvm_reg_block extends uvm_object;
    //
    extern function uvm_reg_backdoor get_backdoor(bit inherited = 1);
 
-   //
+
    // Function: set_backdoor
+   //
    // Set the user-defined backdoor for all registers in this block
    //
    // Defines the backdoor mechanism for all registers instantiated
    // in this block and sub-blocks, unless overriden by a definition
    // in a lower-level block or register.
    //
-   extern function void set_backdoor        (uvm_reg_backdoor bkdr,
-                                             string fname = "",
-                                             int lineno = 0);
+   extern function void set_backdoor (uvm_reg_backdoor bkdr,
+                                      string fname = "",
+                                      int lineno = 0);
 
-   //
+
    // Function:  clear_hdl_path
+   //
    // Delete HDL paths
    //
    // Remove any previously specified HDL path to the block instance
    // for the specified design abstraction.
    //
-   extern function void clear_hdl_path    (string kind = "RTL");
+   extern function void clear_hdl_path (string kind = "RTL");
 
-   //
+
    // Function:  add_hdl_path
+   //
    // Add an HDL path
    //
    // Add the specified HDL path to the block instance for the specified
@@ -783,10 +835,11 @@ virtual class uvm_reg_block extends uvm_object;
    // same design abstraction if the block is physically duplicated
    // in the design abstraction
    //
-   extern function void add_hdl_path      (string path, string kind = "RTL");
+   extern function void add_hdl_path (string path, string kind = "RTL");
 
-   //
+
    // Function:   has_hdl_path
+   //
    // Check if a HDL path is specified
    //
    // Returns TRUE if the block instance has a HDL path defined for the
@@ -794,10 +847,11 @@ virtual class uvm_reg_block extends uvm_object;
    // uses the default design abstraction specified for this block or
    // the nearest block ancestor with a specified default design abstraction.
    //
-   extern function bit  has_hdl_path      (string kind = "");
+   extern function bit has_hdl_path (string kind = "");
 
-   //
+
    // Function:  get_hdl_path
+   //
    // Get the incremental HDL path(s)
    //
    // Returns the HDL path(s) defined for the specified design abstraction
@@ -808,10 +862,11 @@ virtual class uvm_reg_block extends uvm_object;
    // If no design asbtraction is specified, the default design abstraction
    // for this block is used.
    //
-   extern function void get_hdl_path      (ref string paths[$], input string kind = "");
+   extern function void get_hdl_path (ref string paths[$], input string kind = "");
 
-   //
+
    // Function:  get_full_hdl_path
+   //
    // Get the full hierarchical HDL path(s)
    //
    // Returns the full hierarchical HDL path(s) defined for the specified
@@ -828,16 +883,18 @@ virtual class uvm_reg_block extends uvm_object;
                                            input string kind = "",
                                            string separator = ".");
 
+
+   // Function: set_default_hdl_path
    //
-   // Function:    set_default_hdl_path
    // Set the default design abstraction
    //
    // Set the default design abstraction for this block instance.
    //
    extern function void   set_default_hdl_path (string kind);
 
-   //
+
    // Function:  get_default_hdl_path
+   //
    // Get the default design abstraction
    //
    // Returns the default design abstraction for this block instance.
@@ -848,8 +905,9 @@ virtual class uvm_reg_block extends uvm_object;
    //
    extern function string get_default_hdl_path ();
 
-   //
+
    // Function: set_hdl_path_root
+   //
    // Specify a root HDL path
    //
    // Set the specified path as the absolute HDL path to the block instance
@@ -859,10 +917,11 @@ virtual class uvm_reg_block extends uvm_object;
    // This method overrides any incremental path for the
    // same design abstraction specified using <add_hdl_path>.
    //
-   extern function void   set_hdl_path_root    (string path, string kind = "RTL");
+   extern function void set_hdl_path_root (string path, string kind = "RTL");
 
-   //
+
    // Function: is_hdl_path_root
+   //
    // Check if this block has an absolute path
    //
    // Returns TRUE if an absolute HDL path to the block instance
@@ -870,7 +929,8 @@ virtual class uvm_reg_block extends uvm_object;
    // If no design asbtraction is specified, the default design abstraction
    // for this block is used.
    //
-   extern function bit    is_hdl_path_root     (string kind = "");
+   extern function bit is_hdl_path_root (string kind = "");
+
 
    extern virtual function void   do_print      (uvm_printer printer);
    extern virtual function void   do_copy       (uvm_object rhs);
@@ -905,10 +965,10 @@ endfunction
 
 // new
 
-function uvm_reg_block::new(string name="", int has_cover=UVM_NO_COVERAGE);
+function uvm_reg_block::new(string name="", int has_coverage=UVM_NO_COVERAGE);
    super.new(name);
    hdl_paths_pool = new("hdl_paths");
-   this.has_cover = has_cover;
+   this.has_cover = has_coverage;
    // Root block until registered with a parent
    m_roots[this] = 1;
 endfunction: new
@@ -1375,28 +1435,28 @@ endfunction: get_vfield_by_name
 // Coverage API
 //-------------
 
-// set_cover
+// set_coverage
 
-function uvm_reg_cvr_t uvm_reg_block::set_cover(uvm_reg_cvr_t is_on);
+function uvm_reg_cvr_t uvm_reg_block::set_coverage(uvm_reg_cvr_t is_on);
    this.cover_on = this.has_cover & is_on;
 
    foreach (regs[rg_]) begin
      uvm_reg rg = rg_;
-     void'(rg.set_cover(is_on));
+     void'(rg.set_coverage(is_on));
    end
 
    foreach (mems[mem_]) begin
      uvm_mem mem = mem_;
-     void'(mem.set_cover(is_on));
+     void'(mem.set_coverage(is_on));
    end
 
    foreach (blks[blk_]) begin
      uvm_reg_block blk = blk_;
-     void'(blk.set_cover(is_on));
+     void'(blk.set_coverage(is_on));
    end
 
    return this.cover_on;
-endfunction: set_cover
+endfunction: set_coverage
 
 
 // sample_values
@@ -1427,32 +1487,37 @@ function void uvm_reg_block::XsampleX(uvm_reg_addr_t addr,
 endfunction
 
 
-function uvm_reg_cvr_t uvm_reg_block::build_cover(uvm_reg_cvr_t models);
-   // ToDO uses resources!
+function uvm_reg_cvr_t uvm_reg_block::build_coverage(uvm_reg_cvr_t models);
+`ifdef UVM_RESOURCES
+   build_coverage = UVM_NO_COVERAGE;
+   void'(uvm_reg_cvr_rsrc_db::read_by_name("include_coverage",
+                                           {"uvm_reg::", get_full_name()},
+                                           build_coverage, this);
+`endif
    return models;
-endfunction: build_cover
+endfunction: build_coverage
 
 
-// add_cover
+// add_coverage
 
-function void uvm_reg_block::add_cover(uvm_reg_cvr_t models);
+function void uvm_reg_block::add_coverage(uvm_reg_cvr_t models);
    this.has_cover |= models;
-endfunction: add_cover
+endfunction: add_coverage
 
 
-// can_cover
+// has_coverage
 
-function bit uvm_reg_block::can_cover(uvm_reg_cvr_t models);
+function bit uvm_reg_block::has_coverage(uvm_reg_cvr_t models);
    return ((this.has_cover & models) == models);
-endfunction: can_cover
+endfunction: has_coverage
 
 
-// is_cover_on
+// get_coverage
 
-function bit uvm_reg_block::is_cover_on(uvm_reg_cvr_t is_on = UVM_CVR_ALL);
-   if (this.can_cover(is_on) == 0) return 0;
+function bit uvm_reg_block::get_coverage(uvm_reg_cvr_t is_on = UVM_CVR_ALL);
+   if (this.has_coverage(is_on) == 0) return 0;
    return ((this.cover_on & is_on) == is_on);
-endfunction: is_cover_on
+endfunction: get_coverage
 
 
 //-----------
@@ -1841,7 +1906,7 @@ function uvm_path_e uvm_reg_block::get_default_path();
    if (this.parent != null)
       return this.parent.get_default_path();
 
-   return UVM_BFM;
+   return UVM_FRONTDOOR;
 
 endfunction
 

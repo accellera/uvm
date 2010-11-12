@@ -107,7 +107,7 @@ class uvm_mem_single_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_
          // - Read k and expect ~k if k == last address
          for (int k = 0; k < mem.get_size(); k++) begin
 
-            mem.write(status, k, ~k, UVM_BFM, maps[j], this);
+            mem.write(status, k, ~k, UVM_FRONTDOOR, maps[j], this);
 
             if (status != UVM_IS_OK) begin
                `uvm_error("RegModel", $psprintf("Status was %s when writing \"%s[%0d]\" through map \"%s\".",
@@ -115,7 +115,7 @@ class uvm_mem_single_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_
             end
             
             if (k > 0) begin
-               mem.read(status, k-1, val, UVM_BFM, maps[j], this);
+               mem.read(status, k-1, val, UVM_FRONTDOOR, maps[j], this);
                if (status != UVM_IS_OK) begin
                   `uvm_error("RegModel", $psprintf("Status was %s when reading \"%s[%0d]\" through map \"%s\".",
                                               status.name(), mem.get_full_name(), k, maps[j].get_full_name()));
@@ -129,7 +129,7 @@ class uvm_mem_single_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_
                   end
                end
                
-               mem.write(status, k-1, k-1, UVM_BFM, maps[j], this);
+               mem.write(status, k-1, k-1, UVM_FRONTDOOR, maps[j], this);
                if (status != UVM_IS_OK) begin
                   `uvm_error("RegModel", $psprintf("Status was %s when writing \"%s[%0d-1]\" through map \"%s\".",
                                               status.name(), mem.get_full_name(), k, maps[j].get_full_name()));
@@ -137,7 +137,7 @@ class uvm_mem_single_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_
             end
             
             if (k == mem.get_size() - 1) begin
-               mem.read(status, k, val, UVM_BFM, maps[j], this);
+               mem.read(status, k, val, UVM_FRONTDOOR, maps[j], this);
                if (status != UVM_IS_OK) begin
                   `uvm_error("RegModel", $psprintf("Status was %s when reading \"%s[%0d]\" through map \"%s\".",
                                               status.name(), mem.get_full_name(), k, maps[j].get_full_name()));

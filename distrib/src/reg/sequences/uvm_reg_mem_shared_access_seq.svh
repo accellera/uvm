@@ -126,7 +126,7 @@ class uvm_reg_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
          
          `uvm_info("RegModel", $psprintf("Writing 'h%h over 'h%h", v, prev),UVM_DEBUG);
          
-         rg.write(status, v, UVM_BFM, maps[j], this);
+         rg.write(status, v, UVM_FRONTDOOR, maps[j], this);
          if (status != UVM_IS_OK) begin
             `uvm_error("RegModel", $psprintf("Status was %s when writing register \"%s\" through map \"%s\".",
                                         status.name(), rg.get_full_name(), maps[j].get_full_name()));
@@ -141,7 +141,7 @@ class uvm_reg_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
             // Was it what we expected?
             exp = rg.get() & ~wo_mask[k];
             
-            rg.read(status, actual, UVM_BFM, maps[k], this);
+            rg.read(status, actual, UVM_FRONTDOOR, maps[k], this);
             if (status != UVM_IS_OK) begin
                `uvm_error("RegModel", $psprintf("Status was %s when reading register \"%s\" through map \"%s\".",
                                            status.name(), rg.get_full_name(), maps[k].get_full_name()));
@@ -242,7 +242,7 @@ class uvm_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
                end
             end
             else begin
-               mem.read(status, offset, prev, UVM_BFM, maps[read_from], this);
+               mem.read(status, offset, prev, UVM_FRONTDOOR, maps[read_from], this);
                if (status != UVM_IS_OK) begin
                   `uvm_error("RegModel", $psprintf("Status was %s when reading initial value of \"%s\"[%0d] through map \"%s\".",
                                               status.name(), mem.get_full_name(),
@@ -254,7 +254,7 @@ class uvm_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
             // Write a random value,
             v = {$random, $random};
             
-            mem.write(status, offset, v, UVM_BFM, maps[j], this);
+            mem.write(status, offset, v, UVM_FRONTDOOR, maps[j], this);
             if (status != UVM_IS_OK) begin
                `uvm_error("RegModel", $psprintf("Status was %s when writing \"%s\"[%0d] through map \"%s\".",
                                            status.name(), mem.get_full_name(), offset, maps[j].get_full_name()));
@@ -264,7 +264,7 @@ class uvm_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
             foreach (maps[k]) begin
                uvm_reg_data_t  actual, exp;
                
-               mem.read(status, offset, actual, UVM_BFM, maps[k], this);
+               mem.read(status, offset, actual, UVM_FRONTDOOR, maps[k], this);
                if (status != UVM_IS_OK) begin
                   `uvm_error("RegModel", $psprintf("Status was %s when reading %s[%0d] through map \"%s\".",
                                               status.name(), mem.get_full_name(), offset, maps[k].get_full_name()));

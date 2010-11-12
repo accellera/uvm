@@ -100,7 +100,7 @@ class uvm_reg_hw_reset_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_ite
                       $psprintf("Verifying reset value of register %s in map \"%s\"...",
                       regs[i].get_full_name(), maps[d].get_full_name()), UVM_LOW);
             
-            regs[i].mirror(status, UVM_CHECK, UVM_BFM, maps[d], this);
+            regs[i].mirror(status, UVM_CHECK, UVM_FRONTDOOR, maps[d], this);
 
             if (status != UVM_IS_OK) begin
                `uvm_error(get_type_name(),

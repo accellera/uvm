@@ -78,7 +78,7 @@ class uvm_mem extends uvm_object;
    // ~access~ specifies the access policy of this memory and may be
    // one of "RW for RAMs and "RO" for ROMs.
    //
-   // ~has_cover~ specifies which functional coverage models are present in
+   // ~has_coverage~ specifies which functional coverage models are present in
    // the extension of the register abstraction class.
    // Multiple functional coverage models may be specified by adding their
    // symbolic names, as defined by the <uvm_coverage_model_e> type.
@@ -87,7 +87,7 @@ class uvm_mem extends uvm_object;
                         longint unsigned size,
                         int unsigned     n_bits,
                         string           access = "RW",
-                        int              has_cover = UVM_NO_COVERAGE);
+                        int              has_coverage = UVM_NO_COVERAGE);
 
    
    // Function: configure
@@ -656,7 +656,7 @@ class uvm_mem extends uvm_object;
    //
    // If null, no user-defined backdoor has been defined.
    // A user-defined backdoor is defined
-   // by using the "uvm_reg::set_backdoor()" method. 
+   // by using the <uvm_reg::set_backdoor()> method. 
    //
    // If ~inherit~ is TRUE, returns the backdoor of the parent block
    // if none have been specified for this memory.
@@ -848,20 +848,23 @@ class uvm_mem extends uvm_object;
    // Group: Coverage
    //----------------
 
-   // Function: build_cover
+   // Function: build_coverage
    //
    // Check if all of the specified coverage model must be built.
    //
-   // Check if TBD 
+   // Check which of the specified coverage model must be built
+   // in this instance of the memory abstraction class,
+   // as specified by calls to <uvm_reg::include_coverage()>.
+   //
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
    // Returns the sum of all coverage models to be built in the
    // memory model.
    //
-   extern virtual protected function uvm_reg_cvr_t build_cover(uvm_reg_cvr_t models);
+   extern virtual protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
 
 
-   // Function: add_cover
+   // Function: add_coverage
    //
    // Specify that additional coverage models are available.
    //
@@ -873,10 +876,10 @@ class uvm_mem extends uvm_object;
    // This method shall be called only in the constructor of
    // subsequently derived classes.
    //
-   extern virtual protected function void add_cover(uvm_reg_cvr_t models);
+   extern virtual protected function void add_coverage(uvm_reg_cvr_t models);
 
 
-   // Function: can_cover
+   // Function: has_coverage
    //
    // Check if memory has coverage model(s)
    //
@@ -885,10 +888,10 @@ class uvm_mem extends uvm_object;
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
    //
-   extern virtual function bit can_cover(uvm_reg_cvr_t models);
+   extern virtual function bit has_coverage(uvm_reg_cvr_t models);
 
 
-   // Function: set_cover
+   // Function: set_coverage
    //
    // Turns on coverage measurement.
    //
@@ -906,13 +909,13 @@ class uvm_mem extends uvm_object;
    // This method can only control the measurement of functional
    // coverage models that are present in the memory abstraction classes,
    // then enabled during construction.
-   // See the <uvm_mem::can_cover()> method to identify
+   // See the <uvm_mem::has_coverage()> method to identify
    // the available functional coverage models.
    //
-   extern virtual function uvm_reg_cvr_t set_cover(uvm_reg_cvr_t is_on);
+   extern virtual function uvm_reg_cvr_t set_coverage(uvm_reg_cvr_t is_on);
 
 
-   // Function: is_cover_on
+   // Function: get_coverage
    //
    // Check if coverage measurement is on.
    //
@@ -921,9 +924,9 @@ class uvm_mem extends uvm_object;
    // Multiple functional coverage models can be specified by adding the
    // functional coverage model identifiers.
    //
-   // See <uvm_mem::set_cover()> for more details. 
+   // See <uvm_mem::set_coverage()> for more details. 
    //
-   extern virtual function bit is_cover_on(uvm_reg_cvr_t is_on);
+   extern virtual function bit get_coverage(uvm_reg_cvr_t is_on);
 
 
    // Function: sample
@@ -978,7 +981,7 @@ function uvm_mem::new (string           name,
                        longint unsigned size,
                        int unsigned     n_bits,
                        string           access = "RW",
-                       int              has_cover = UVM_NO_COVERAGE);
+                       int              has_coverage = UVM_NO_COVERAGE);
 
    super.new(name);
    m_locked = 0;
@@ -990,7 +993,7 @@ function uvm_mem::new (string           name,
    m_n_bits    = n_bits;
    m_backdoor  = null;
    m_access    = access.toupper();
-   m_has_cover = has_cover;
+   m_has_cover = has_coverage;
    m_hdl_paths_pool = new("hdl_paths");
 
    if (n_bits > m_max_size)
@@ -1495,29 +1498,34 @@ endfunction: get_attributes
 //---------
 
 
-function uvm_reg_cvr_t uvm_mem::build_cover(uvm_reg_cvr_t models);
-   // ToDO uses resources!
+function uvm_reg_cvr_t uvm_mem::build_coverage(uvm_reg_cvr_t models);
+`ifdef UVM_RESOURCES
+   build_coverage = UVM_NO_COVERAGE;
+   void'(uvm_reg_cvr_rsrc_db::read_by_name("include_coverage",
+                                           {"uvm_reg::", get_full_name()},
+                                           build_coverage, this);
+`endif
    return models;
-endfunction: build_cover
+endfunction: build_coverage
 
 
-// add_cover
+// add_coverage
 
-function void uvm_mem::add_cover(uvm_reg_cvr_t models);
+function void uvm_mem::add_coverage(uvm_reg_cvr_t models);
    m_has_cover |= models;
-endfunction: add_cover
+endfunction: add_coverage
 
 
-// can_cover
+// has_coverage
 
-function bit uvm_mem::can_cover(uvm_reg_cvr_t models);
+function bit uvm_mem::has_coverage(uvm_reg_cvr_t models);
    return ((m_has_cover & models) == models);
-endfunction: can_cover
+endfunction: has_coverage
 
 
-// set_cover
+// set_coverage
 
-function uvm_reg_cvr_t uvm_mem::set_cover(uvm_reg_cvr_t is_on);
+function uvm_reg_cvr_t uvm_mem::set_coverage(uvm_reg_cvr_t is_on);
    if (is_on == uvm_reg_cvr_t'(UVM_NO_COVERAGE)) begin
       m_cover_on = is_on;
       return m_cover_on;
@@ -1526,15 +1534,15 @@ function uvm_reg_cvr_t uvm_mem::set_cover(uvm_reg_cvr_t is_on);
    m_cover_on = m_has_cover & is_on;
 
    return m_cover_on;
-endfunction: set_cover
+endfunction: set_coverage
 
 
-// is_cover_on
+// get_coverage
 
-function bit uvm_mem::is_cover_on(uvm_reg_cvr_t is_on);
-   if (can_cover(is_on) == 0) return 0;
+function bit uvm_mem::get_coverage(uvm_reg_cvr_t is_on);
+   if (has_coverage(is_on) == 0) return 0;
    return ((m_cover_on & is_on) == is_on);
-endfunction: is_cover_on
+endfunction: get_coverage
 
 
 
@@ -1706,7 +1714,7 @@ task uvm_mem::do_write(uvm_reg_item rw);
       cb.pre_write(rw);
 
    // FRONTDOOR
-   if (rw.path == UVM_BFM) begin
+   if (rw.path == UVM_FRONTDOOR) begin
 
       uvm_reg_map system_map = rw.local_map.get_root_map();
       
@@ -1754,7 +1762,7 @@ task uvm_mem::do_write(uvm_reg_item rw);
    // REPORT
    if (uvm_report_enabled(UVM_MEDIUM)) begin
      string path_s,value_s,pre_s,range_s;
-     if (rw.path == UVM_BFM)
+     if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
                                                {"map ",rw.map.get_full_name()};
      else
@@ -1805,7 +1813,7 @@ task uvm_mem::do_read(uvm_reg_item rw);
       cb.pre_read(rw);
 
    // FRONTDOOR
-   if (rw.path == UVM_BFM) begin
+   if (rw.path == UVM_FRONTDOOR) begin
       
       uvm_reg_map system_map = rw.local_map.get_root_map();
          
@@ -1848,7 +1856,7 @@ task uvm_mem::do_read(uvm_reg_item rw);
    // REPORT
    if (uvm_report_enabled(UVM_MEDIUM)) begin
      string path_s,value_s,pre_s,range_s;
-     if (rw.path == UVM_BFM)
+     if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
                                                {"map ",rw.map.get_full_name()};
      else
@@ -1900,7 +1908,7 @@ function bit uvm_mem::Xcheck_accessX(input uvm_reg_item rw,
          `uvm_warning("RegModel",
             {"No backdoor access available for memory '",get_full_name(),
             "' . Using frontdoor instead."})
-         rw.path = UVM_BFM;
+         rw.path = UVM_FRONTDOOR;
       end
       else
         rw.map = uvm_reg_map::backdoor();
@@ -1921,10 +1929,6 @@ function bit uvm_mem::Xcheck_accessX(input uvm_reg_item rw,
      map_info = rw.local_map.get_mem_map_info(this);
 
      if (map_info.frontdoor == null) begin
-
-        if (rw.parent == null)
-          `uvm_fatal("RegModel",
-              "Built-in frontdoor write requires non-null parent argument")
 
         if (map_info.unmapped) begin
            `uvm_error("RegModel", {"Memory '",get_full_name(),

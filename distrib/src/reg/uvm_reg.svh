@@ -21,16 +21,6 @@
 // -------------------------------------------------------------
 //
 
-//
-// Title: Register Abstraction Base Classes
-//
-// The following classes are defined herein:
-//
-// <uvm_reg> : base for abstract registers
-//
-// <uvm_reg_frontdoor> : user-defined frontdoor access sequence
-//
-
 typedef class uvm_reg_cbs;
 typedef class uvm_reg_frontdoor;
 
@@ -86,14 +76,14 @@ virtual class uvm_reg extends uvm_object;
    // Not all bits need to be implemented.
    // This value is usually a multiple of 8.
    //
-   // ~has_cover~ specifies which functional coverage models are present in
+   // ~has_coverage~ specifies which functional coverage models are present in
    // the extension of the register abstraction class.
    // Multiple functional coverage models may be specified by adding their
    // symbolic names, as defined by the <uvm_coverage_model_e> type.
    //
    extern function new (string name="",
                         int unsigned n_bits,
-                        int has_cover);
+                        int has_coverage);
 
 
    // Function: configure
@@ -197,9 +187,9 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function void get_maps (ref uvm_reg_map maps[$]);
 
 
-   /*local*/ extern function uvm_reg_map get_local_map   (uvm_reg_map map,
-                                                          string caller = "");
-   /*local*/ extern function uvm_reg_map get_default_map (string caller = "");
+   /*local*/ extern virtual function uvm_reg_map get_local_map   (uvm_reg_map map,
+                                                                  string caller = "");
+   /*local*/ extern virtual function uvm_reg_map get_default_map (string caller = "");
 
 
    // Function: get_rights
@@ -635,10 +625,11 @@ virtual class uvm_reg extends uvm_object;
    // The mirroring can be performed using the physical interfaces (frontdoor)
    // or <uvm_reg::peek()> (backdoor).
    //
-   // If ~check~ is specified as UVM_VERB,
+   // If ~check~ is specified as UVM_CHECK,
    // an error message is issued if the current mirrored value
-   // does not match the readback value, unless a field has the "DC"
-   // (don't care) policy.
+   // does not match the readback value. Any field whose check has been
+   // disabled with <uvm_reg_field::set_compare()> will not be considered
+   // in the comparison. 
    //
    // If the register is mapped in multiple address maps and physical
    // access is used (front-door access), an address ~map~ must be specified.
@@ -674,7 +665,7 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function bit predict (uvm_reg_data_t    value,
                                         uvm_reg_byte_en_t be = -1,
                                         uvm_predict_e     kind = UVM_PREDICT_DIRECT,
-                                        uvm_path_e        path = UVM_BFM,
+                                        uvm_path_e        path = UVM_FRONTDOOR,
                                         uvm_reg_map       map = null,
                                         string            fname = "",
                                         int               lineno = 0);
@@ -754,7 +745,7 @@ virtual class uvm_reg extends uvm_object;
    //
    // If null, no user-defined frontdoor has been defined.
    // A user-defined frontdoor is defined
-   // by using the "uvm_reg::set_frontdoor()" method. 
+   // by using the <uvm_reg::set_frontdoor()> method. 
    //
    // If the register is mapped in multiple address maps, an address ~map~
    // must be specified.
@@ -796,7 +787,7 @@ virtual class uvm_reg extends uvm_object;
    //
    // If null, no user-defined backdoor has been defined.
    // A user-defined backdoor is defined
-   // by using the "uvm_reg::set_backdoor()" method. 
+   // by using the <uvm_reg::set_backdoor()> method. 
    //
    // If ~inherited~ is TRUE, returns the backdoor of the parent block
    // if none have been specified for this register.
@@ -963,20 +954,52 @@ virtual class uvm_reg extends uvm_object;
    // Group: Coverage
    //----------------
 
-   // Function: build_cover
+   // Function: include_coverage
    //
-   // Check if all of the specified coverage model must be built.
+   // Specify which coverage model that must be included in
+   // various block, register or memory abstraction class instances.
    //
-   // Check if TBD 
+   // The coverage models are specified by or'ing or adding the
+   // <uvm_coverage_model_e> coverage model identifiers corresponding to the
+   // coverage model to be included.
+   //
+   // The scope specifies a hierarchical name or pattern identifying
+   // a block, memory or register abstraction class instances.
+   // Any block, memory or register whose full hierarchical name
+   // matches the specified scope will have the specified functional
+   // coverage models included in them.
+   //
+   // The scope can be specified as a POSIX regular expression
+   // or simple pattern.
+   // See <uvm_resource_base::Scope Interface> for more details.
+   //
+   //| uvm_reg::include_coverage("*", UVM_CVR_ALL);
+   //
+   // The specification of which coverage model to include in
+   // which abstraction class is stored in a <uvm_reg_cvr_t> resource in the
+   // <uvm_resource_db> resource database,
+   // in the "uvm_reg::" scope namespace.
+   //
+   extern static function void include_coverage(string scope,
+                                                uvm_reg_cvr_t models);
+
+   // Function: build_coverage
+   //
+   // Check if all of the specified coverage models must be built.
+   //
+   // Check which of the specified coverage model must be built
+   // in this instance of the register abstraction class,
+   // as specified by calls to <uvm_reg::include_coverage()>.
+   //
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
    // Returns the sum of all coverage models to be built in the
    // register model.
    //
-   extern virtual protected function uvm_reg_cvr_t build_cover(uvm_reg_cvr_t models);
+   extern virtual protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
 
 
-   // Function: add_cover
+   // Function: add_coverage
    //
    // Specify that additional coverage models are available.
    //
@@ -988,10 +1011,10 @@ virtual class uvm_reg extends uvm_object;
    // This method shall be called only in the constructor of
    // subsequently derived classes.
    //
-   extern virtual protected function void add_cover(uvm_reg_cvr_t models);
+   extern virtual protected function void add_coverage(uvm_reg_cvr_t models);
 
 
-   // Function: can_cover
+   // Function: has_coverage
    //
    // Check if register has coverage model(s)
    //
@@ -1000,10 +1023,10 @@ virtual class uvm_reg extends uvm_object;
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
    //
-   extern virtual function bit can_cover(uvm_reg_cvr_t models);
+   extern virtual function bit has_coverage(uvm_reg_cvr_t models);
 
 
-   // Function: set_cover
+   // Function: set_coverage
    //
    // Turns on coverage measurement.
    //
@@ -1021,13 +1044,13 @@ virtual class uvm_reg extends uvm_object;
    // This method can only control the measurement of functional
    // coverage models that are present in the register abstraction classes,
    // then enabled during construction.
-   // See the <uvm_reg::can_cover()> method to identify
+   // See the <uvm_reg::has_coverage()> method to identify
    // the available functional coverage models.
    //
-   extern virtual function uvm_reg_cvr_t set_cover(uvm_reg_cvr_t is_on);
+   extern virtual function uvm_reg_cvr_t set_coverage(uvm_reg_cvr_t is_on);
 
 
-   // Function: is_cover_on
+   // Function: get_coverage
    //
    // Check if coverage measurement is on.
    //
@@ -1036,9 +1059,9 @@ virtual class uvm_reg extends uvm_object;
    // Multiple functional coverage models can be specified by adding the
    // functional coverage model identifiers.
    //
-   // See <uvm_reg::set_cover()> for more details. 
+   // See <uvm_reg::set_coverage()> for more details. 
    //
-   extern virtual function bit is_cover_on(uvm_reg_cvr_t is_on);
+   extern virtual function bit get_coverage(uvm_reg_cvr_t is_on);
 
 
    // Function: sample
@@ -1174,14 +1197,14 @@ endclass: uvm_reg
 
 // new
 
-function uvm_reg::new(string name="", int unsigned n_bits, int has_cover);
+function uvm_reg::new(string name="", int unsigned n_bits, int has_coverage);
    super.new(name);
    if (n_bits == 0) begin
       `uvm_error("RegModel", $psprintf("Register \"%s\" cannot have 0 bits", get_name()));
       n_bits = 1;
    end
    m_n_bits      = n_bits;
-   m_has_cover   = has_cover;
+   m_has_cover   = has_coverage;
    m_atomic      = new(1);
    m_n_used_bits = 0;
    m_locked      = 0;
@@ -1297,10 +1320,6 @@ function void uvm_reg::set_frontdoor(uvm_reg_frontdoor ftdr,
    if (map_info == null)
       map.add_reg(this, -1, "RW", 1, ftdr);
    else begin
-      if (!map_info.unmapped) begin
-         `uvm_warning(get_full_name(), $psprintf("Indirectly accessed register has been mapped in address map %s. Unmapping.", map.get_full_name()));
-         map_info.unmapped = 1;
-      end
       map_info.frontdoor = ftdr;
    end
 endfunction: set_frontdoor
@@ -1903,33 +1922,54 @@ function void uvm_reg::get_attributes(ref string names[string],
 
 endfunction: get_attributes
  
+
 //---------
 // COVERAGE
 //---------
 
-function uvm_reg_cvr_t uvm_reg::build_cover(uvm_reg_cvr_t models);
-   // ToDO uses resources!
+
+// include_coverage
+
+function void uvm_reg::include_coverage(string scope,
+                                        uvm_reg_cvr_t models);
+`ifdef UVM_RESOURCES
+   uvm_reg_cvr_rsrc_db::write_and_set("include_coverage",
+                                      {"uvm_reg::", scope},
+                                      models, this);
+`endif
+endfunction
+
+
+// build_coverage
+
+function uvm_reg_cvr_t uvm_reg::build_coverage(uvm_reg_cvr_t models);
+`ifdef UVM_RESOURCES
+   build_coverage = UVM_NO_COVERAGE;
+   void'(uvm_reg_cvr_rsrc_db::read_by_name("include_coverage",
+                                           {"uvm_reg::", get_full_name()},
+                                           build_coverage, this);
+`endif
    return models;
-endfunction: build_cover
+endfunction: build_coverage
 
 
-// add_cover
+// add_coverage
 
-function void uvm_reg::add_cover(uvm_reg_cvr_t models);
+function void uvm_reg::add_coverage(uvm_reg_cvr_t models);
    m_has_cover |= models;
-endfunction: add_cover
+endfunction: add_coverage
 
 
-// can_cover
+// has_coverage
 
-function bit uvm_reg::can_cover(uvm_reg_cvr_t models);
+function bit uvm_reg::has_coverage(uvm_reg_cvr_t models);
    return ((m_has_cover & models) == models);
-endfunction: can_cover
+endfunction: has_coverage
 
 
-// set_cover
+// set_coverage
 
-function uvm_reg_cvr_t uvm_reg::set_cover(uvm_reg_cvr_t is_on);
+function uvm_reg_cvr_t uvm_reg::set_coverage(uvm_reg_cvr_t is_on);
    if (is_on == uvm_reg_cvr_t'(UVM_NO_COVERAGE)) begin
       m_cover_on = is_on;
       return m_cover_on;
@@ -1938,16 +1978,16 @@ function uvm_reg_cvr_t uvm_reg::set_cover(uvm_reg_cvr_t is_on);
    m_cover_on = m_has_cover & is_on;
 
    return m_cover_on;
-endfunction: set_cover
+endfunction: set_coverage
 
 
-// is_cover_on
+// get_coverage
 
-function bit uvm_reg::is_cover_on(uvm_reg_cvr_t is_on);
-   if (can_cover(is_on) == 0)
+function bit uvm_reg::get_coverage(uvm_reg_cvr_t is_on);
+   if (has_coverage(is_on) == 0)
       return 0;
    return ((m_cover_on & is_on) == is_on);
-endfunction: is_cover_on
+endfunction: get_coverage
 
 
 
@@ -1976,7 +2016,7 @@ endfunction: set
 function bit uvm_reg::predict(uvm_reg_data_t    value,
                               uvm_reg_byte_en_t be = -1,
                               uvm_predict_e     kind = UVM_PREDICT_DIRECT,
-                              uvm_path_e        path = UVM_BFM,
+                              uvm_path_e        path = UVM_FRONTDOOR,
                               uvm_reg_map       map = null,
                               string            fname = "",
                               int               lineno = 0);
@@ -2270,7 +2310,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
          Xpredict_writeX(rw.value[0], rw.path, null);
       end
 
-      UVM_BFM: begin
+      UVM_FRONTDOOR: begin
 
          uvm_reg_map system_map = rw.local_map.get_root_map();
 
@@ -2334,7 +2374,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
    // REPORT
    if (uvm_report_enabled(UVM_MEDIUM)) begin
      string path_s,value_s;
-     if (rw.path == UVM_BFM)
+     if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
                                                {"map ",rw.map.get_full_name()};
      else
@@ -2498,7 +2538,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
       end
 
 
-      UVM_BFM: begin
+      UVM_FRONTDOOR: begin
 
          uvm_reg_map system_map = rw.local_map.get_root_map();
 
@@ -2560,7 +2600,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
    // REPORT
    if (uvm_report_enabled(UVM_MEDIUM)) begin
      string path_s,value_s;
-     if (rw.path == UVM_BFM)
+     if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
                                                {"map ",rw.map.get_full_name()};
      else
@@ -2590,7 +2630,7 @@ function bit uvm_reg::Xcheck_accessX (input uvm_reg_item rw,
          `uvm_warning("RegModel",
             {"No backdoor access available for register '",get_full_name(),
             "' . Using frontdoor instead."})
-         rw.path = UVM_BFM;
+         rw.path = UVM_FRONTDOOR;
       end
       else
         rw.map = uvm_reg_map::backdoor();
@@ -2611,20 +2651,13 @@ function bit uvm_reg::Xcheck_accessX (input uvm_reg_item rw,
 
      map_info = rw.local_map.get_reg_map_info(this);
 
-     if (map_info.frontdoor == null) begin
-
-       if (rw.parent == null)
-         `uvm_fatal("RegModel",
-            "Built-in frontdoor write requires non-null parent argument")
-
-       if (map_info.unmapped) begin
+     if (map_info.frontdoor == null && map_info.unmapped) begin
           `uvm_error("RegModel", {"Register '",get_full_name(),
              "' unmapped in map '",
              (rw.map==null)? rw.local_map.get_full_name():rw.map.get_full_name(),
              "' and does not have a user-defined frontdoor"})
           rw.status = UVM_NOT_OK;
           return 0;
-       end
      end
 
      if (rw.map == null)
@@ -2894,7 +2927,7 @@ task uvm_reg::mirror(output uvm_status_e       status,
    // Remember what we think the value is before it gets updated
    if (check == UVM_CHECK) begin
       exp = get();
-      // Assuume that WO* field will readback as 0's
+      // Assume that WO* field will readback as 0's
       foreach(m_fields[i]) begin
          string mode;
          mode = m_fields[i].get_access(map);
@@ -2922,7 +2955,7 @@ task uvm_reg::mirror(output uvm_status_e       status,
 
       foreach(m_fields[i]) begin
          string acc = m_fields[i].get_access(map);
-         if (acc == "DC") begin
+         if (m_fields[i].get_compare() == UVM_NO_CHECK) begin
             dc |= ((1 << m_fields[i].get_n_bits())-1)
                   << m_fields[i].get_lsb_pos();
          end
