@@ -1,7 +1,5 @@
-//
 //----------------------------------------------------------------------
-//   Copyright 2007-2010 Mentor Graphics Corporation
-//   Copyright 2007-2010 Cadence Design Systems, Inc. 
+//   Copyright 2010 Mentor Graphics Corporation
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -19,13 +17,12 @@
 //   the License for the specific language governing
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
-`ifndef UVM_SVH
-`define UVM_SVH
-  `include "uvm_macros.svh"
-  `include "dpi/uvm_dpi.svh"
-  `include "base/base.svh"
-  `include "uvm_tlm/uvm_tlm.svh"
-  `include "methodology/methodology.svh"
-  `include "tlm2/tlm2.svh"
-  `include "reg/uvm_reg_model.svh"
-`endif // UVM_SVH
+
+  `include "tlm2/tlm2_defines.svh"
+  `include "tlm2/tlm2_generic_payload.svh"
+  `include "tlm2/tlm2_ifs.svh"
+  `include "tlm2/tlm2_imps.svh"
+  `include "tlm2/tlm2_ports.svh"
+  `include "tlm2/tlm2_exports.svh"
+  `include "tlm2/tlm2_sockets_base.svh"
+  `include "tlm2/tlm2_sockets.svh"

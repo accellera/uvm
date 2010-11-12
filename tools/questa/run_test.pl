@@ -30,7 +30,7 @@
 
 sub questa_support($$$) {
     my ($series,$letter,$beta) = @_;
-    return(1) if ((($series eq "6.6") && ($letter ge "d"))); # ||
+    return(1) if ((($series eq "6.6") && ($letter ge "c"))); # ||
                   #(($series eq "6.5") && ($letter ge "f")) ||
                   #(($series eq "6.4") && ($letter ge "g")));
     die "Questa version \"$series$letter$beta\" does not fully support UVM.\n".

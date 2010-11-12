@@ -47,8 +47,6 @@
 //|  blocking_get_peek
 //|  nonblocking_get_peek
 //|  get_peek
-//|
-//|  analysis
 //
 // Type parameters
 //
@@ -143,33 +141,6 @@ class uvm_get_peek_port #(type T=int)
   `UVM_PORT_COMMON(`UVM_TLM_GET_PEEK_MASK,"uvm_get_peek_port")
   `GET_PEEK_IMP (this.m_if, T, t)
 endclass 
-
-class uvm_analysis_port # (type T = int)
-  extends uvm_port_base # (uvm_tlm_if_base #(T,T));
-
-  function new (string name, uvm_component parent);
-    super.new (name, parent, UVM_PORT, 0, UVM_UNBOUNDED_CONNECTIONS);
-    m_if_mask = `UVM_TLM_ANALYSIS_MASK;  
-  endfunction
-
-  virtual function string get_type_name();
-    return "uvm_analysis_port";
-  endfunction
-
-  // analysis port differs from other ports in that it broadcasts
-  // to all connected interfaces. Ports only send to the interface
-  // at the index specified in a call to set_if (0 by default).
-  function void write (input T t);
-    uvm_tlm_if_base # (T, T) tif;
-    for (int i = 0; i < this.size(); i++) begin
-      tif = this.get_if (i);
-      if ( tif == null )
-        uvm_report_fatal ("NTCONN", {"No uvm_tlm interface is connected to ", get_full_name(), " for executing write()"}, UVM_NONE);
-      tif.write (t);
-    end 
-  endfunction
-
-endclass
 
 
 //------------------------------------------------------------------------------

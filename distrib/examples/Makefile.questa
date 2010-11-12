@@ -27,7 +27,7 @@ TOOL    = $(shell $(UVM_HOME)/bin/uvm_dpi_name -tool)
 
 OS      = $(shell $(UVM_HOME)/bin/uvm_os_name)
 
-SRCDIR  = $(UVM_HOME)/src/C
+SRCDIR  = $(UVM_HOME)/src/dpi
 LIBDIR  = $(shell dirname $(SONAME))
 SONAME  = $(shell $(UVM_HOME)/bin/uvm_dpi_name)
 

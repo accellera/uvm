@@ -56,8 +56,6 @@
 //|  blocking_get_peek
 //|  nonblocking_get_peek
 //|  get_peek
-//|
-//|  analysis
 //
 // Type parameters
 //
@@ -154,15 +152,6 @@ class uvm_get_peek_imp #(type T=int, type IMP=int)
   `UVM_IMP_COMMON(`UVM_TLM_GET_PEEK_MASK,"uvm_get_peek_imp",IMP)
   `GET_PEEK_IMP (m_imp, T, t)
 endclass
-
-class uvm_analysis_imp #(type T=int, type IMP=int)
-  extends uvm_port_base #(uvm_tlm_if_base #(T,T));
-  `UVM_IMP_COMMON(`UVM_TLM_ANALYSIS_MASK,"uvm_analysis_imp",IMP)
-  function void write (input T t);
-    m_imp.write (t);
-  endfunction
-endclass
-
 
 //------------------------------------------------------------------------------
 //
