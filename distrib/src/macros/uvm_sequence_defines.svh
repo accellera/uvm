@@ -266,7 +266,7 @@
 // MACRO: `uvm_do
 //
 // This macro takes as an argument a uvm_sequence_item variable or object.  
-// uvm_sequence_item's are randomized _at the time_ the sequencer grants the
+// uvm_sequence_item's are randomized ~at the time~ the sequencer grants the
 // do request. This is called late-randomization or late-generation. 
 // In the case of a sequence a sub-sequence is spawned. In the case of an item,
 // the item is sent to the driver through the associated sequencer.

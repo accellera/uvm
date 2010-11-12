@@ -31,6 +31,8 @@
 `define UVM_USE_P_FORMAT
 `define UVM_USE_FILE_LINE
 `define UVM_USE_ALT_PHASING
+`define UVM_DA_TO_QUEUE(Q,DA) Q=DA;
+`undef  UVM_USE_PROCESS_CONTAINER
 
 //
 // Any vendor specific defines go here.
@@ -58,6 +60,9 @@
   `ifndef INCA_UVM_USE_FILE_LINE
     `undef  UVM_USE_FILE_LINE
   `endif
+  `define UVM_USE_PROCESS_CONTAINER
+  `undef  UVM_DA_TO_QUEUE
+  `define UVM_DA_TO_QUEUE(Q,DA)  foreach (DA[idx]) Q.push_back(DA[idx]);
 `endif
 
 `include "macros/uvm_version_defines.svh"
@@ -68,5 +73,6 @@
 `include "macros/uvm_tlm_defines.svh"
 `include "macros/uvm_sequence_defines.svh"
 `include "macros/uvm_callback_defines.svh"
+`include "macros/uvm_reg_defines.svh"
 
 `endif

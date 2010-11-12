@@ -611,7 +611,7 @@ virtual class uvm_object extends uvm_void;
   // Function: unpack_ints
   //
   // The unpack methods extract property values from an array of bits, bytes, or
-  // ints. The method of unpacking _must_ exactly correspond to the method of
+  // ints. The method of unpacking ~must~ exactly correspond to the method of
   // packing. This is assured if (a) the same ~packer~ policy is used to pack
   // and unpack, and (b) the order of unpacking is the same as the order of
   // packing used to create the input array.

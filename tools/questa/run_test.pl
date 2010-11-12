@@ -30,11 +30,12 @@
 
 sub questa_support($$$) {
     my ($series,$letter,$beta) = @_;
-    return(1) if ((($series eq "6.6")) ||
-                  (($series eq "6.5") && ($letter ge "e")) ||
-                  (($series eq "6.4") && ($letter ge "f")));
+    return(1) if ((($series eq "6.6") && ($letter ge "c"))); # ||
+                  #(($series eq "6.5") && ($letter ge "f")) ||
+                  #(($series eq "6.4") && ($letter ge "g")));
     die "Questa version \"$series$letter$beta\" does not fully support UVM.\n".
-      "- required version 6.4f, 6.5e, 6.6a or later\n";
+      #"- required version 6.4f, 6.5f, 6.6c or later\n";
+      "- required version 6.6d\n";
     exit(1);
 }
 
@@ -86,7 +87,7 @@ sub run_the_test($$$) {
 
     # compile commands
     my $vlib = ("vlib work");
-    my $vlog = ("vlog $uvm_opts $compile_opts -timescale 1ns/1ns  test.sv");
+    my $vlog = ("vlog -suppress 2218,2181 -mfcu $compile_opts -timescale 1ns/1ns $uvm_opts test.sv");
     &questa_run("cd ./$testdir && ($vlib && $vlog && touch qa) $redirect ".&comptime_log_fname()." 2>&1");
 
     # only run if the compile succeeded in reaching QA
@@ -106,6 +107,7 @@ sub run_the_test($$$) {
         }
         my $clib = "-sv_lib $uvm_home/src/dpi/uvm_dpi";
         my $vsim = ("vsim $run_opts $clib +UVM_TESTNAME=test -c $toplevels -do 'run -all;quit -f'");
+        system("cd ./$testdir/$uvm_home/src/dpi; make --quiet") && die "DPI Library Compilation Problem" ;
         &questa_run("cd ./$testdir && $vsim $redirect ".&runtime_log_fname()." 2>&1");
     }
     return(0);
