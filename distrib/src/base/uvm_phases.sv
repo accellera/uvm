@@ -24,7 +24,7 @@
 `define UVM_PHASES_SVH
 
 //-----------------------------------------------------------------------------
-// Title: UVM1.0 phase scheduling api                                          
+// Title: Phase Scheduling API                                          
 //-----------------------------------------------------------------------------
 //                                                                             
 // The API described here provides a general purpose testbench phasing         
