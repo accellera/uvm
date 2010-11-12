@@ -21,6 +21,8 @@
 #include <map>
 #include <string>
 
+#include <malloc.h>
+#include <string.h>
 #include <sys/types.h>
 #include <regex.h>
 
