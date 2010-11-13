@@ -243,9 +243,6 @@ Group: Register Layer  {
 
    }  # Group: Register Layer
 
-File: HDL  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/dpi/uvm_hdl.svh)
-File: Intro  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/intro.txt)
-
 Group: Index  {
 
    Index: Everything

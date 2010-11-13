@@ -22,7 +22,7 @@
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_pool #(T)
+// CLASS: uvm_pool #(KEY,T)
 //
 //------------------------------------------------------------------------------
 // Implements a class-based dynamic associative array. Allows sparse arrays to
@@ -234,10 +234,11 @@ endclass
 // CLASS: uvm_object_string_pool #(T)
 //
 //------------------------------------------------------------------------------
-// This provides a specialization of the generic <uvm_pool #(KEY,T) class for
+// This provides a specialization of the generic <uvm_pool #(KEY,T)> class for
 // an associative array of <uvm_object>-based objects indexed by string. 
-// Specializations of this class include the ~uvm_event_pool~ and
-// ~uvm_barrier_pool~ classes.
+// Specializations of this class include the ~uvm_event_pool~ (a
+// uvm_object_string_pool storing <uvm_event>s) and
+// ~uvm_barrier_pool~ (a uvm_obejct_string_pool storing <uvm_barrier>s).
 //------------------------------------------------------------------------------
 
 class uvm_object_string_pool #(type T=uvm_object) extends uvm_pool #(string,T);

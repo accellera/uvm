@@ -512,16 +512,16 @@ class uvm_printer_knobs;
 
   // Variable: header
   //
-  // Indicates whether the <print_header> function should be called when
-  // printing an object.
+  // Indicates whether the <uvm_printer::print_header> function should be called
+  // when printing an object.
 
   bit header = 1;
 
 
   // Variable: footer
   //
-  // Indicates whether the <print_footer> function should be called when
-  // printing an object. 
+  // Indicates whether the <uvm_printer::print_footer> function should be called 
+  // when printing an object. 
 
   bit footer = 1;
 
@@ -536,17 +536,17 @@ class uvm_printer_knobs;
 
   // Variable: full_name
   //
-  // Indicates whether <print_id> should print the full name of an identifier
-  // or just the leaf name. The line, table, and tree printers ignore this
-  // bit and always print only the leaf name.
+  // Indicates whether <uvm_printer::print_id> should print the full name of an
+  // identifier or just the leaf name. The line, table, and tree printers ignore 
+  // this bit and always print only the leaf name.
 
   bit full_name = 1;
 
 
   // Variable: identifier
   //
-  // Indicates whether <print_id> should print the identifier. This is useful
-  // in cases where you just want the values of an object, but no identifiers.
+  // Indicates whether <uvm_printer::print_id> should print the identifier. This is 
+  // useful in cases where you just want the values of an object, but no identifiers.
 
   bit identifier = 1;
 
@@ -695,7 +695,7 @@ endclass
 // CLASS: uvm_hier_printer_knobs
 //
 // The ~uvm_hier_printer_knobs~ is a simple container class that extends
-// <uvm_printer::uvm_printer_knobs> with settings for printing information
+// <uvm_printer_knobs> with settings for printing information
 // hierarchically.
 //------------------------------------------------------------------------------
 
@@ -727,7 +727,7 @@ endclass
 // CLASS: uvm_table_printer_knobs
 //
 // The ~uvm_table_printer_knobs~ is a simple container class that extends
-// <uvm_printer::uvm_hier_printer_knobs> with settings specific to printing
+// <uvm_hier_printer_knobs> with settings specific to printing
 // in table format.
 //------------------------------------------------------------------------------
 
@@ -768,7 +768,7 @@ endclass
 // CLASS: uvm_tree_printer_knobs
 //
 // The ~uvm_tree_printer_knobs~ is a simple container class that extends
-// <uvm_printer::uvm_hier_printer_knobs> with settings specific to printing
+// <uvm_hier_printer_knobs> with settings specific to printing
 // in tree format.
 //------------------------------------------------------------------------------
 

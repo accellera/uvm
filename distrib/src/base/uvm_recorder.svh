@@ -143,7 +143,7 @@ class uvm_recorder;
   //
   // Records an object field. ~name~ is the name of the recorded field. 
   //
-  // This method uses the recursion <policy> to determine whether or not to
+  // This method uses the <recursion_policy> to determine whether or not to
   // recurse into the object.
 
   virtual function void record_object (string name, uvm_object value);
@@ -194,8 +194,10 @@ class uvm_recorder;
 
   // Function: record_generic
   //
-  // Records the name-value pair, where value has been converted
-  // to a string, e.g. via $psprintf("%<format>",<some variable>);
+  // Records the ~name~-~value~ pair, where ~value~ has been converted
+  // to a string. For example:
+  //
+  //| recorder.record_generic("myvar",$sformatf("%0d",myvar));
   
   virtual function void record_generic (string name, string value);
     record_string(name, value);

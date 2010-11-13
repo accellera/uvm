@@ -173,6 +173,16 @@ class uvm_root extends uvm_component;
   virtual function string get_type_name(); return "uvm_root"; endfunction
 
 
+  // Function: print_topology
+  //
+  // Print the verification environment's component topology. The
+  // ~printer~ is a <uvm_printer> object that controls the format
+  // of the topology printout; a ~null~ printer prints with the
+  // default output.
+
+  extern function void print_topology  (uvm_printer printer=null);
+
+
   // Variable: phase_timeout
 
   time phase_timeout = 0;
@@ -237,7 +247,6 @@ class uvm_root extends uvm_component;
   extern virtual function void raised (uvm_objection objection, 
            uvm_object source_obj, string description, int count);
   extern function uvm_test_done_objection test_done_objection();
-  extern function void print_topology  (uvm_printer printer=null);
 
   // Need to create objection watcher processes from uvm_root because
   // simulators may not allow processes to be created by static initializers,
@@ -1030,7 +1039,7 @@ endtask
 // This objection is used to communicate all objections dropped at the
 // root level so that the uvm_top can start the shutdown.
 
-// Function: raised
+// Function - raised
 //
 //
 
@@ -1046,7 +1055,7 @@ function void uvm_root::raised (uvm_objection objection, uvm_object source_obj,
 endfunction
 
 
-// Task: all_dropped
+// Task - all_dropped
 //
 //
 
