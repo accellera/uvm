@@ -11,14 +11,11 @@ module test;
 
     function void build();
       super.build();
-//      get_config_int("value", build_val);
+      get_config_int("value", build_val);
       $display("full name = %s", get_full_name());
-      uvm_resource_db#(int)::read_by_name(get_full_name(), "value", build_val, this);
     endfunction
     task run;
-//      #2 get_config_int("value", run_val);
-      #2;
-      uvm_resource_db#(int)::read_by_name(get_full_name(), "value", run_val, this);
+      #2 get_config_int("value", run_val);
     endtask
   endclass
  
@@ -31,23 +28,19 @@ module test;
 
     function void build();
       super.build();
-      uvm_resource_db#(int)::write_and_set("value", { get_full_name(), ".mc"}, 22, this);
-      uvm_resource_db#(int)::write_by_name("value", { get_full_name(), ".mc"}, 33, this);
-//      set_config_int("mc", "value", 22);
-//      set_config_int("mc", "value", 33);
+      set_config_int("mc", "value", 22);
+      set_config_int("mc", "value", 33);
       mc = new("mc", this);
     endfunction
 
     task run;
       bit failed = 0;
-      uvm_resource_db#(int)::write_by_name("value", { get_full_name(), ".mc"}, 44, this);
-//      set_config_int("mc", "value", 44);
       #10;
       if(mc.build_val != 33) begin
         $display("*** UVM TEST FAILED, expected mc.build_val=33 but got %0d ***", mc.build_val);
         failed = 1;
       end
-      if(mc.run_val != 44) begin
+      if(mc.run_val != 33) begin
         $display("*** UVM TEST FAILED, expected mc.run_val=44 but got %0d ***", mc.run_val);
         failed = 1;
       end
