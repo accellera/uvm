@@ -154,9 +154,9 @@ class uvm_report_handler;
   // Function: run_hooks
   //
   // The run_hooks method is called if the <UVM_CALL_HOOK> action is set for a
-  // report. It first calls the client's <report_hook> method, followed by the
-  // appropriate severity-specific hook method. If either returns 0, then the
-  // report is not processed.
+  // report. It first calls the client's <uvm_report_object::report_hook> method, 
+  // followed by the appropriate severity-specific hook method. If either 
+  // returns 0, then the report is not processed.
 
   virtual function bit run_hooks(uvm_report_object client,
                                  uvm_severity severity,

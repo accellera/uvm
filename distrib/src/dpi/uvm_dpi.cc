@@ -18,12 +18,17 @@
 //----------------------------------------------------------------------
 
 //
-// Top-level file that includes all of the C files required
+// Top-level file that includes all of the C/C++ files required
 // by UVM
 //
 // The C code may be compiled by compiling this top file only,
 // or by compiling individual files then linking them together.
 //
 
-#include "uvm_hdl.c"
-#include "uvm_svcmd_dpi.c"
+#include "uvm_regex.cc"
+
+extern "C" {
+  #include "uvm_hdl.c"
+  #include "uvm_svcmd_dpi.c"
+}
+

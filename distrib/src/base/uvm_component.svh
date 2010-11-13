@@ -25,7 +25,7 @@
 
 typedef class uvm_objection;
 
-`include "base/uvm_config.svh"
+//`include "base/uvm_config.svh"
 
 //------------------------------------------------------------------------------
 //
@@ -163,6 +163,14 @@ virtual class uvm_component extends uvm_report_object;
 
   extern function uvm_component lookup (string name);
 
+
+  // Function: get_depth
+  //
+  // Returns the component's depth from the root level. uvm_top has a
+  // depth of 0. The test and any other top level components have a depth
+  // of 1, and so on.
+
+  extern function int unsigned get_depth();
 
 
   //----------------------------------------------------------------------------
@@ -565,6 +573,8 @@ virtual class uvm_component extends uvm_report_object;
   // Used for caching config settings
   static bit m_config_set = 1;
 
+  extern function string massage_scope(string scope);
+
   // Function: set_config_int
 
   extern virtual function void set_config_int (string inst_name,  
@@ -767,11 +777,38 @@ virtual class uvm_component extends uvm_report_object;
   //
   // If ~recurse~ is set, then configuration information for all ~comp~'s
   // children and below are printed as well.
+  //
+  // This function has been deprecated.  Use print_config instead.
 
   extern function void print_config_settings (string field="", 
                                               uvm_component comp=null, 
                                               bit recurse=0);
 
+  // Function: print_config
+  //
+  // Print_config_settings prints all configuration information for this
+  // component, as set by previous calls to set_config_* and exports to
+  // the resources pool.  The settings are printing in the order of
+  // their precedence.
+  //
+  // If ~recurse~ is set, then configuration information for all
+  // children and below are printed as well.
+  //
+  // if ~audit~ is set then the audit trail for each resource is printed
+  // along with the resource name and value
+
+  extern function void print_config(bit recurse = 0, bit audit = 0);
+
+  // Function: print_config_with_audit
+  //
+  // Operates the same as print_config except that the audit bit is
+  // forced to 1.  This interface makes user code a bit more readable as
+  // it avoids multiple arbitrary bit settings in the argument list.
+  //
+  // If ~recurse~ is set, then configuration information for all
+  // children and below are printed as well.
+
+  extern function void print_config_with_audit(bit recurse = 0);
 
   // Variable: print_config_matches
   //
@@ -1324,11 +1361,6 @@ virtual class uvm_component extends uvm_report_object;
   extern       function void set_int_local (string field_name, 
                                uvm_bitstream_t value,
                                bit recurse=1);
-  extern local function void m_component_path (ref uvm_component path[$]);
-  extern local function void m_get_config_matches
-                             (ref uvm_config_setting cfg_matches[$], 
-                              input uvm_config_setting::uvm_config_type cfgtype, 
-                              string field_name);
 
   /*protected*/ uvm_component m_parent;
   protected uvm_component m_children[string];
@@ -1345,8 +1377,6 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual function void flush ();
 
   uvm_phase m_curr_phase=null;
-
-  protected uvm_config_setting m_configuration_table[$];
 
   protected bit m_build_done=0;
 
@@ -1382,6 +1412,7 @@ virtual class uvm_component extends uvm_report_object;
   extern         function void   do_print(uvm_printer printer);
 
 endclass : uvm_component
+
 
 `endif // UVM_COMPONENT_SVH
 

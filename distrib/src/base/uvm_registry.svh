@@ -32,7 +32,7 @@
 // registration with the <uvm_factory>. Without it, registration would
 // require an instance of the component itself.
 //
-// See Usage section below for information on using uvm_component_registry.
+// See <Usage> section below for information on using uvm_component_registry.
 //
 //------------------------------------------------------------------------------
 
@@ -163,7 +163,7 @@ endclass
 // registration with the <uvm_factory>. Without it, registration would
 // require an instance of the object itself.
 //
-// See Usage section below for information on using uvm_component_registry.
+// See <Usage> section below for information on using uvm_component_registry.
 //
 //------------------------------------------------------------------------------
 

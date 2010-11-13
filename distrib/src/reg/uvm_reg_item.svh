@@ -116,9 +116,7 @@ class uvm_reg_item extends uvm_sequence_item;
 
   // Variable: path
   //
-  // The path being used: BFM or BACKDOOR. Currently,
-  // <uvm_reg_item> transactions
-  // are used only during frontdoor (BFM) accesses.
+  // The path being used: <UVM_FRONTDOOR> or <UVM_BACKDOOR>.
   //
   uvm_path_e path;
 

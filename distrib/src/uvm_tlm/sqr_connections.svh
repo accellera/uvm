@@ -80,9 +80,8 @@ endclass
 
 class uvm_seq_item_pull_imp #(type REQ=int, type RSP=REQ, type IMP=int)
   extends uvm_port_base #(uvm_sqr_if_base #(REQ, RSP));
+   // Function: new
   `UVM_IMP_COMMON(`SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_imp",IMP)
   `SEQ_ITEM_PULL_IMP(m_imp, REQ, RSP, t, t)
 
 endclass
-
-// Section: end

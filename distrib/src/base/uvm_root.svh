@@ -155,6 +155,10 @@ class uvm_root extends uvm_component;
                                  ref uvm_component comps[$],
                                  input uvm_component comp=null);
 
+  extern function void find_all_recurse(string comp_match,
+                                        ref uvm_component comps[$],
+                                        input uvm_component comp=null); 
+
   // Function: get_current_phase
   //
   // Returns the handle of the currently executing phase.
@@ -1483,18 +1487,24 @@ endfunction
 
 function void uvm_root::find_all(string comp_match, ref uvm_component comps[$],
                                  input uvm_component comp=null); 
-  string name;
 
   if (comp==null)
     comp = this;
+  find_all_recurse(comp_match, comps, comp);
+
+endfunction
+
+function void uvm_root::find_all_recurse(string comp_match, ref uvm_component comps[$],
+                                         input uvm_component comp=null); 
+  string name;
 
   if (comp.get_first_child(name))
     do begin
-      this.find_all(comp_match,comps,comp.get_child(name));
+      this.find_all_recurse(comp_match, comps, comp.get_child(name));
     end
     while (comp.get_next_child(name));
   if (uvm_is_match(comp_match, comp.get_full_name()) &&
-       comp.get_name() != "") /* uvm_top */
+      comp.get_name() != "") /* uvm_top */
     comps.push_back(comp);
 
 endfunction

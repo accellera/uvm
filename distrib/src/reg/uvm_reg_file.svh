@@ -2,6 +2,7 @@
 // -------------------------------------------------------------
 //    Copyright 2010 Synopsys, Inc.
 //    Copyright 2010 Mentor Graphics Corp.
+//    Copyright 2010 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
 //
 //    Licensed under the Apache License, Version 2.0 (the
@@ -60,10 +61,10 @@ virtual class uvm_reg_file extends uvm_object;
    // Specify the parent block and register file of the register file
    // instance.
    // If the register file is instantiated in a block,
-   // ~rf_parent~ is specified as ~null~.
+   // ~regfile_parent~ is specified as ~null~.
    // If the register file is instantiated in a register file,
    // ~blk_parent~ must be the block parent of that register file and
-   // ~rf_parent~ is specified as that register file.
+   // ~regfile_parent~ is specified as that register file.
    //
    // If the register file corresponds to a hierarchical RTL structure,
    // it's contribution to the HDL path is specified as the ~hdl_path~.
@@ -72,7 +73,7 @@ virtual class uvm_reg_file extends uvm_object;
    // to the hierarchical HDL path of any contained registers.
    //
    extern function void     configure  (uvm_reg_block blk_parent,
-                                        uvm_reg_file rf_parent,
+                                        uvm_reg_file regfile_parent,
                                         string hdl_path = "");
  
    //------------------
@@ -278,9 +279,9 @@ endfunction: new
 
 // configure
 
-function void uvm_reg_file::configure(uvm_reg_block blk_parent, uvm_reg_file rf_parent, string hdl_path = "");
+function void uvm_reg_file::configure(uvm_reg_block blk_parent, uvm_reg_file regfile_parent, string hdl_path = "");
    this.parent = blk_parent;
-   this.m_rf = rf_parent;
+   this.m_rf = regfile_parent;
    this.add_hdl_path(hdl_path);
 endfunction: configure
 

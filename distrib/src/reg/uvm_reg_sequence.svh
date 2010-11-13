@@ -2,6 +2,7 @@
 // -------------------------------------------------------------
 //    Copyright 2004-2009 Synopsys, Inc.
 //    Copyright 2010 Mentor Graphics Corp.
+//    Copyright 2010 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
 //
 //    Licensed under the Apache License, Version 2.0 (the
@@ -27,7 +28,7 @@
 //
 // <uvm_reg_sequence> : base for all register sequences
 //
-// <uvm_reg_frontdoor> : base class for user-defined front-door (BFM) access
+// <uvm_reg_frontdoor> : base class for user-defined front-door access
 //
 // <uvm_reg_predictor> : updates the register model mirror based on observed bus transactions
 
@@ -248,10 +249,11 @@ virtual class uvm_reg_frontdoor extends uvm_reg_sequence #(uvm_sequence #(uvm_se
 endclass: uvm_reg_frontdoor
 
 
+
 class uvm_predict_s;
-    bit addr[uvm_reg_addr_t];
-    uvm_reg_item reg_item;
-  endclass
+   bit addr[uvm_reg_addr_t];
+   uvm_reg_item reg_item;
+endclass
 
 
 //------------------------------------------------------------------------------
@@ -357,6 +359,8 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
      adapter.bus2reg(tr,rw);
      rg = map.get_reg_by_offset(rw.addr);
 
+     // ToDo: Add memory look-up and call uvm_mem::XsampleX()
+
      if (rg != null) begin
        bit found;
        uvm_reg_item reg_item;
@@ -398,8 +402,18 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
                   (reg_item.kind == UVM_WRITE) ? UVM_PREDICT_WRITE : UVM_PREDICT_READ;
               found = 1;
               pre_predict(reg_item);
-              void'(rg.predict(reg_item.value[0],rw.byte_en,
-                               predict_kind,UVM_BFM));
+
+              rg.XsampleX(reg_item.value[0], rw.byte_en,
+                          reg_item.kind == UVM_READ, local_map);
+              begin
+                 uvm_reg_block blk = rg.get_parent();
+                 blk.XsampleX(map_info.offset,
+                              reg_item.kind == UVM_READ,
+                              local_map);
+              end
+
+              void'(rg.predict(reg_item.value[0], rw.byte_en,
+                               predict_kind, UVM_FRONTDOOR));
               `uvm_info("REG_PREDICT", {"Observed ",reg_item.kind.name(),
                         " transaction to register ",rg.get_full_name(), ": value='h",
                          $sformatf("%0h",reg_item.value[0])},UVM_HIGH)

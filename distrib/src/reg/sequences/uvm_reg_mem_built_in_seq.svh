@@ -126,6 +126,7 @@ class uvm_reg_mem_built_in_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg
 
       if (tests & UVM_DO_MEM_ACCESS &&
           model.get_attribute("NO_REG_TESTS") == "" &&
+          model.get_attribute("NO_MEM_TESTS") == "" &&
           model.get_attribute("NO_MEM_ACCESS_TEST") == "") begin
         uvm_mem_access_seq seq = uvm_mem_access_seq::type_id::create("mem_access_seq");
         seq.model = model;
@@ -135,6 +136,7 @@ class uvm_reg_mem_built_in_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg
 
       if (tests & UVM_DO_SHARED_ACCESS &&
           model.get_attribute("NO_REG_TESTS") == "" &&
+          model.get_attribute("NO_MEM_TESTS") == "" &&
           model.get_attribute("NO_SHARED_ACCESS_TEST") == "") begin
         uvm_reg_mem_shared_access_seq seq = uvm_reg_mem_shared_access_seq::type_id::create("shared_access_seq");
         seq.model = model;
@@ -144,6 +146,7 @@ class uvm_reg_mem_built_in_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg
 
       if (tests & UVM_DO_MEM_WALK &&
           model.get_attribute("NO_REG_TESTS") == "" &&
+          model.get_attribute("NO_MEM_TESTS") == "" &&
           model.get_attribute("NO_MEM_WALK_TEST") == "") begin
         uvm_mem_walk_seq seq = uvm_mem_walk_seq::type_id::create("mem_walk_seq");
         seq.model = model;

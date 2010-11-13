@@ -64,6 +64,7 @@ class a_reg extends uvm_reg;
 
    virtual function void build();
       this.DC    = uvm_reg_field::type_id::create("DC");
+      this.DC.set_compare(UVM_NO_CHECK);
       this.WO1   = uvm_reg_field::type_id::create("WO1");
       this.W1    = uvm_reg_field::type_id::create("W1");
       this.WOS   = uvm_reg_field::type_id::create("WOS");
@@ -90,7 +91,7 @@ class a_reg extends uvm_reg;
       this.RW    = uvm_reg_field::type_id::create("RW");
       this.RO    = uvm_reg_field::type_id::create("RO");
 
-         this.DC.configure(this, 2, 50, "DC",    0, 2'b01, 1, 0, 0);
+         this.DC.configure(this, 2, 50, "RW",    0, 2'b01, 1, 0, 0);
         this.WO1.configure(this, 2, 48, "WO1",   0, 2'b01, 1, 0, 0);
          this.W1.configure(this, 2, 46, "W1",    0, 2'b01, 1, 0, 0);
         this.WOS.configure(this, 2, 44, "WOS",   0, 2'b01, 1, 0, 0);

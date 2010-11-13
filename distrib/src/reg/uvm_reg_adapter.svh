@@ -156,9 +156,9 @@ class uvm_reg_tlm_adapter extends uvm_reg_adapter;
      uvm_reg_addr_t addr=rw.addr;
 
      if (rw.kind == UVM_WRITE)
-        gp.set_command(uvm_tlm_gp::TLM_WRITE_COMMAND);
+        gp.set_command(UVM_TLM_WRITE_COMMAND);
      else
-        gp.set_command(uvm_tlm_gp::TLM_READ_COMMAND);
+        gp.set_command(UVM_TLM_READ_COMMAND);
 
      gp.set_address(addr);
 
@@ -196,7 +196,7 @@ class uvm_reg_tlm_adapter extends uvm_reg_adapter;
       return;
     end
 
-    if (gp.get_command() == uvm_tlm_gp::TLM_WRITE_COMMAND)
+    if (gp.get_command() == UVM_TLM_WRITE_COMMAND)
       rw.kind = UVM_WRITE;
     else
       rw.kind = UVM_READ;

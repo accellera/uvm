@@ -581,15 +581,38 @@ endfunction
 
 
 // check_fields
+//
+// Checks to see if a new field is a duplicate of one already in this object
 // ------------
 
-function void uvm_object::m_do_field_check(string field);
+function void uvm_object::m_do_field_check(string field,
+                                           uvm_apply_t t_t = UVM_NONE_T);
   if(m_field_array.exists(field) && (m_field_array[field] == 1)) begin
     uvm_report_error("MLTFLD", $psprintf("Field %s is defined multiple times in type %s",
        field, get_type_name()), UVM_NONE);
   end
-  m_field_array[field]++; 
+  m_field_array[field] = t_t;
 endfunction
+
+// m_print_field_array
+//
+// Prints all the fields and their types in the field array.  This
+// function is useful for debugging field automation facility and is
+// otherwise generally not used.
+// ------------
+
+function void uvm_object::m_print_field_array();
+  $display("field array for %s", get_full_name());
+  foreach (m_field_array[name]) begin
+    $display("  %s : %s", name, m_field_array[name].name());
+  end
+endfunction
+
+// m_delete_field_array
+//
+// Frees the memory used by the field array.  Useful for optimizing
+// memory intensive design
+// ------------
 
 function void uvm_object::m_delete_field_array();
   m_field_array.delete();

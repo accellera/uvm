@@ -110,7 +110,7 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
             end
             else exp = val;
             
-            mem.write(status, k, val, UVM_BFM, maps[j], this);
+            mem.write(status, k, val, UVM_FRONTDOOR, maps[j], this);
             if (status != UVM_IS_OK) begin
                `uvm_error("RegModel", $psprintf("Status was %s when writing \"%s[%0d]\" through map \"%s\".",
                                            status.name(), mem.get_full_name(), k, maps[j].get_full_name()))
@@ -137,7 +137,7 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
                                            status.name(), mem.get_full_name(), k))
             end
             
-            mem.read(status, k, val, UVM_BFM, maps[j], this);
+            mem.read(status, k, val, UVM_FRONTDOOR, maps[j], this);
             if (status != UVM_IS_OK) begin
                `uvm_error("RegModel", $psprintf("Status was %s when reading \"%s[%0d]\" through map \"%s\".",
                                            status.name(), mem.get_full_name(), k, maps[j].get_full_name()))

@@ -399,6 +399,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   // that users can override in subtypes. This type must be a derivative
   // of <uvm_callback>.
   
+  typedef uvm_typed_callbacks#(T) super_type;
   typedef uvm_callbacks#(T,CB) this_type;
   typedef uvm_callbacks#(T,uvm_callback) that_type;
 
@@ -832,6 +833,19 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
       end
     end
     return null;
+  endfunction
+
+  // Group: Debug
+
+  // Function: display
+  //
+  // This function displays callback information for ~obj~. If ~obj~ is
+  // null, then it displays callback information for all objects
+  // of type ~T~, including typewide callbacks.
+
+  static function void display(T obj=null);
+    // For documentation purposes, need a function wrapper here.
+    super_type::display(obj);
   endfunction
 
 endclass

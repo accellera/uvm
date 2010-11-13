@@ -2,6 +2,7 @@
 // -------------------------------------------------------------
 //    Copyright 2004-2008 Synopsys, Inc.
 //    Copyright 2010 Mentor Graphics Corp.
+//    Copyright 2010 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
 // 
 //    Licensed under the Apache License, Version 2.0 (the
@@ -53,6 +54,7 @@ class tb_test extends uvm_test;
          seq = uvm_reg_bit_bash_seq::type_id::create("seq");
          seq.model = env.regmodel;
          seq.start(env.bus.sqr);
+         seq.wait_for_sequence_state(FINISHED);
 
          `uvm_info("Test", "Verifying aliasing...", UVM_NONE);
          env.regmodel.Ra.write(status, 32'hDEADBEEF, .parent(seq));

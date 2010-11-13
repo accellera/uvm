@@ -217,7 +217,7 @@ class uvm_report_object extends uvm_object;
   // Function: report_hook
   // 
   // These hook methods can be defined in derived classes to perform additional
-  // actions when reports are issued. They are called only if the UVM_CALL_HOOK
+  // actions when reports are issued. They are called only if the <UVM_CALL_HOOK>
   // bit is specified in the action associated with the report. The default
   // implementations return 1, which allows the report to be processed. If an
   // override returns 0, then the report is not processed.

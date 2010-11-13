@@ -22,9 +22,20 @@
 
 typedef class uvm_tlm_event;
 
+//
+// TITLE: TLM FIFOs
+//
+// The following classes are defined herein
+//
+// <uvm_tlm_fifo>           : FIFO with put/get interfaces
+// 
+//
+// <uvm_tlm_analysis_fifo>  : FIFO that can be written to by an analysis port
+//
+
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_tlm_fifo #(T)
+// CLASS: uvm_tlm_fifo
 //
 // This class provides storage of transactions between two independently running
 // processes. Transactions are put into the FIFO via the ~put_export~. 
@@ -47,7 +58,7 @@ class uvm_tlm_fifo #(type T=int) extends uvm_tlm_fifo_base #(T);
   // Function: new
   //
   // The ~name~ and ~parent~ are the normal uvm_component constructor arguments. 
-  // The ~parent~ should be null if the uvm_tlm_fifo is going to be used in a
+  // The ~parent~ should be null if the <uvm_tlm_fifo> is going to be used in a
   // statically elaborated construct (e.g., a module). The ~size~ indicates the
   // maximum size of the FIFO; a value of zero indicates no upper bound.
 
@@ -180,18 +191,18 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_tlm_analysis_fifo #(T)
+// CLASS: uvm_tlm_analysis_fifo
 //
-// An analysis_fifo is a uvm_tlm_fifo with an unbounded size and a write interface.
-// It can be used any place an <uvm_subscriber #(T)> is used. Typical usage is
-// as a buffer between an analysis_port in a monitor and an analysis component
-// (e.g., a component derived from uvm_subscriber).
+// An analysis_fifo is a <uvm_tlm_fifo> with an unbounded size and a write interface.
+// It can be used any place a <uvm_analysis_imp> is used. Typical usage is
+// as a buffer between an <uvm_analysis_port> in an initiator component
+// and TLM1 target component.
 //
 //------------------------------------------------------------------------------
 
 class uvm_tlm_analysis_fifo #(type T = int) extends uvm_tlm_fifo #(T);
 
-  // Port: analysis_port #(T)
+  // Port: analysis_export #(T)
   //
   // The analysis_export provides the write method to all connected analysis
   // ports and parent exports:
