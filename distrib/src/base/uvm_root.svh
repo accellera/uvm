@@ -1159,12 +1159,9 @@ endfunction
 function void uvm_root::find_all(string comp_match, ref uvm_component comps[$],
                                  input uvm_component comp=null); 
 
-  string re = uvm_glob_to_re(comp_match);
-
   if (comp==null)
     comp = this;
-
-  find_all_recurse(re, comps, comp);
+  find_all_recurse(comp_match, comps, comp);
 
 endfunction
 
@@ -1177,7 +1174,6 @@ function void uvm_root::find_all_recurse(string comp_match, ref uvm_component co
       this.find_all_recurse(comp_match, comps, comp.get_child(name));
     end
     while (comp.get_next_child(name));
-
   if (uvm_is_match(comp_match, comp.get_full_name()) &&
       comp.get_name() != "") /* uvm_top */
     comps.push_back(comp);

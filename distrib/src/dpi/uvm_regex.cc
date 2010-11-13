@@ -101,9 +101,14 @@ class uvm_re_cache
   {
     regex_t *rexp;
     int err;
-    string *re_str;
+    string *re_str; 
+    int len = strlen(re);
 
-    re_str = new string(re);
+    // If the expression has the // around it, strip it
+    if(len>1 && (re[0] == uvm_re_bracket_char) && re[len-1] == uvm_re_bracket_char)
+      re_str = new string(re + 1, len - 2);
+    else
+      re_str = new string(re);
 
     // Lookup the regexp in the cache
     rexp = cache[*re_str];
@@ -164,9 +169,8 @@ class uvm_re_cache
     // a glob.
     if(glob[0] == uvm_re_bracket_char && glob[len-1] == uvm_re_bracket_char)
     {
-      // the glob is really a regular expression.  Strip off the 
-      // leading character that identifies it as such.
-      temp_re = new string(glob + 1, len - 2);
+      // the glob is really a regular expression.  Just return.
+      return const_cast<char *>(glob);
     }
     else
     {
@@ -229,6 +233,10 @@ class uvm_re_cache
     // ... $ goes at the end
     if((*temp_re)[temp_re->size()-1] != '$')
        *temp_re += '$';
+
+    //Bracket with // so that multiple calls to glob_to_re are benign
+    *temp_re = uvm_re_bracket_char + *temp_re;
+    *temp_re += uvm_re_bracket_char;
 
     // temp_re is a C++ string type.  However, we need to return a C
     // style char*. Here we conver the regex string to a char*.
