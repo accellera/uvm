@@ -60,13 +60,29 @@ virtual class uvm_port_component_base extends uvm_component;
     super.new(name,parent);
   endfunction
 
-  // Function: get_connected_to
+  // Function: get_provided_to
   //
+  // For a port or export type, this function fills ~list~ with all
+  // of the ports, exports and implementations that this port is
+  // connected to.
+
   pure virtual function void get_connected_to(ref uvm_port_list list);
 
   // Function: get_provided_to
   //
+  // For an implementation or export type, this function fills ~list~ with all
+  // of the ports, exports and implementations that this port is
+  // provides its implementation to.
+
   pure virtual function void get_provided_to(ref uvm_port_list list);
+
+  // Function: is_port
+  // Function: is_export
+  // Function: is_imp
+  //
+  // These function determine the type of port. The functions are
+  // mutually exclusive; one will return 1 and the other two will
+  // return 0.
 
   pure virtual function bit is_port();
   pure virtual function bit is_export();
@@ -87,12 +103,12 @@ endclass
 // CLASS: uvm_port_component #(PORT)
 //
 //------------------------------------------------------------------------------
-// See description of uvm_port_base for information about this class
+// See description of <uvm_port_component_base> for information about this class
 //------------------------------------------------------------------------------
 
 
 class uvm_port_component #(type PORT=uvm_object) extends uvm_port_component_base;
-   
+  
   PORT m_port;
 
   function new (string name, uvm_component parent, PORT port);
@@ -110,7 +126,11 @@ class uvm_port_component #(type PORT=uvm_object) extends uvm_port_component_base
   virtual function void resolve_bindings();
     m_port.resolve_bindings();
   endfunction
-    
+  
+  // Function: get_port
+  //
+  // Retrieve the actual port object that this proxy refers to.
+
   function PORT get_port();
     return m_port;
   endfunction
@@ -202,7 +222,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   //
   // The ~min_size~ and ~max_size~ specify the minimum and maximum number of
   // implementation (imp) ports that must be connected to this port base by the
-  // end of elaboration. Setting ~max_size~ to UVM_UNBOUNDED_CONNECTIONS sets no
+  // end of elaboration. Setting ~max_size~ to ~UVM_UNBOUNDED_CONNECTIONS~ sets no
   // maximum, i.e., an unlimited number of connections are allowed.
   //
   // By default, the parent/child relationship of any port being connected to
@@ -305,9 +325,9 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
 
   // Function: is_unbounded
   //
-  // Returns 1 if this port has no maximum on the number of implementation (imp)
+  // Returns 1 if this port has no maximum on the number of implementation
   // ports this port can connect to. A port is unbounded when the ~max_size~
-  // argument in the constructor is specified as UVM_UNBOUNDED_CONNECTIONS.
+  // argument in the constructor is specified as ~UVM_UNBOUNDED_CONNECTIONS~.
 
   function bit is_unbounded ();
     return (m_max_size ==  UVM_UNBOUNDED_CONNECTIONS);

@@ -549,9 +549,6 @@ typedef struct packed {
   } uvm_reg_map_addr_range;
 
 
-
-`include "dpi/uvm_hdl.svh"
-
 `include "reg/uvm_reg_item.svh"
 `include "reg/uvm_reg_adapter.svh"
 `include "reg/uvm_reg_sequence.svh"
