@@ -26,9 +26,10 @@
 // equivalence. For example, a testbench may compare a stream of transactions
 // from a DUT with expected results.
 //
-// The UVM library provides a base class called uvm_in_order_comparator and two
-// derived classes, which are uvm_in_order_built_in_comparator for comparing
-// streams of built-in types and uvm_in_order_class_comparator for comparing
+// The UVM library provides a base class called 
+// <uvm_in_order_comparator #(T,comp_type,convert,pair_type)> and two
+// derived classes, which are <uvm_in_order_built_in_comparator #(T)> for comparing
+// streams of built-in types and <uvm_in_order_class_comparator #(T)> for comparing
 // streams of class objects.
 //
 // The uvm_algorithmic_comparator also compares two streams of transactions;
@@ -41,24 +42,25 @@
 //
 // CLASS: uvm_algorithmic_comparator #(BEFORE,AFTER,TRANSFORMER)
 //
-// Compares two streams of data objects of different types, BEFORE and AFTER.
+// Compares two streams of data objects of different types, ~BEFORE~ and ~AFTER~.
 //
-// The algorithmic comparator is a wrapper around uvm_in_order_class_comparator.
+// The algorithmic comparator is a wrapper around <uvm_in_order_class_comparator #(T)>.
 // Like the in-order comparator, the algorithmic comparator compares two streams
-// of transactions, the BEFORE stream and the AFTER stream. It is often the case
+// of transactions, the ~BEFORE~ stream and the ~AFTER~ stream. It is often the case
 // when two streams of transactions need to be compared that the two streams are
-// in different forms. That is, the type of the BEFORE transaction stream is
-// different than the type of the AFTER transaction stream.
+// in different forms. That is, the type of the ~BEFORE~ transaction stream is
+// different than the type of the ~AFTER~ transaction stream.
 //
-// The uvm_algorithmic_comparator's TRANSFORMER type parameter specifies the
-// class responsible for converting transactions of type BEFORE into those of
-// type AFTER. This transformer class must provide a transform() method with the
+// The uvm_algorithmic_comparator's ~TRANSFORMER~ type parameter specifies the
+// class responsible for converting transactions of type ~BEFORE~ into those of
+// type ~AFTER~. This transformer class must provide a transform() method with the
 // following prototype:
 //
-//    function AFTER transform (BEFORE b);
+//|    function AFTER transform (BEFORE b);
 //
-// Matches and mistmatches are reported in terms of the AFTER transactions.
-// For more information, see the uvm_in_order_comparator #(...) class.
+// Matches and mistmatches are reported in terms of the ~AFTER~ transactions.
+// For more information, see the 
+// <uvm_in_order_comparator #(T,comp_type,convert,pair_type)> class.
 //
 //------------------------------------------------------------------------------
 

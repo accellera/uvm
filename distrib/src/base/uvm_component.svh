@@ -217,7 +217,7 @@ virtual class uvm_component extends uvm_report_object;
   //     stop - When a component's <enable_stop_interrupt> bit is set and
   //            <global_stop_request> is called, the component's <stop> task
   //            is called. Components can implement stop to allow completion
-  //            of in-progress transactions, <flush> queues, etc. Upon return
+  //            of in-progress transactions, flush queues, etc. Upon return
   //            from stop() by all enabled components, a <do_kill_all> is
   //            issued. If the <uvm_test_done_objection> is being used,
   //            this stopping procedure is deferred until all outstanding
@@ -962,13 +962,14 @@ virtual class uvm_component extends uvm_report_object;
   // ~override_type~. 
   //
   // The original and override types are lightweight proxies to the types they
-  // represent. They can be obtained by calling type::get_type(), if
-  // implemented, or by directly calling type::type_id::get(), where type is the
-  // user type and type_id is the name of the typedef to
+  // represent. They can be obtained by calling ~type::get_type()~, if
+  // implemented by ~type~, or by directly calling ~type::type_id::get()~, where 
+  // ~type~ is the user type and ~type_id~ is the name of the typedef to
   // <uvm_object_registry #(T,Tname)> or <uvm_component_registry #(T,Tname)>.
   //
   // If you are employing the `uvm_*_utils macros, the typedef and the get_type
-  // method will be implemented for you.
+  // method will be implemented for you. For details on the utils macros
+  // refer to <Utility and Field Macros for Components and Objects>.
   //
   // The following example shows `uvm_*_utils usage:
   //
@@ -1293,8 +1294,8 @@ virtual class uvm_component extends uvm_report_object;
   // Function: record_error_tr
   //
   // This function marks an error transaction by a component. Properties of the
-  // given uvm_object, ~info~, as implemented in its <do_record> method, are
-  // recorded to the transaction database.
+  // given uvm_object, ~info~, as implemented in its <uvm_object::do_record> method,
+  // are recorded to the transaction database.
   //
   // An ~error_time~ of 0 indicates to use the current simulation time. The
   // ~keep_active~ bit determines if the handle should remain active. If 0,
