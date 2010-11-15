@@ -101,7 +101,7 @@ typedef class uvm_resource_base; // forward reference
 // lieu of package-scope types.  When needed, other classes can use
 // these types by prefixing their usage with uvm_resource_types::.  E.g.
 //
-//|  uvm_resource_t::rsrc_q_t queue;
+//|  uvm_resource_types::rsrc_q_t queue;
 //
 //----------------------------------------------------------------------
 class uvm_resource_types;
@@ -991,6 +991,103 @@ class uvm_resource_pool;
     
   endfunction
 
+  // function: lookup_regex_names
+  //
+  // This utility function answers the question, for a given ~name~ and
+  // ~scope~, what are all of the resources with a matching name (where the
+  // resource name may be a regular expression) and a matching scope
+  // (where the resoucre scope may be a regular expression). ~name~ and
+  // ~scope~ are explicit values.
+
+  function uvm_resource_types::rsrc_q_t lookup_regex_names(string scope,
+                                                           string name);
+
+    uvm_resource_types::rsrc_q_t rq;
+    uvm_resource_types::rsrc_q_t result_q;
+    int unsigned i;
+    uvm_resource_base r;
+
+    //For the simple case where no wildcard names exist, then we can
+    //just return the queue associated with name.
+    if(!m_has_wildcard_names) begin
+      result_q = lookup_name(scope, name, 0);
+      return result_q;
+    end
+
+    result_q = new();
+
+    foreach (rtab[re]) begin
+      rq = rtab[re];
+      for(i = 0; i < rq.size(); i++) begin
+        r = rq.get(i);
+        if(uvm_re_match(uvm_glob_to_re(re),name) == 0)
+          if(r.match_scope(scope))
+            result_q.push_back(r);
+      end
+    end
+    return result_q;
+  endfunction
+
+  // function: lookup_regex
+  //
+  // Looks for all the resources whose name matches the regular
+  // expression argument and whose scope matches the current scope.
+
+  function uvm_resource_types::rsrc_q_t lookup_regex(string re, scope);
+
+    uvm_resource_types::rsrc_q_t rq;
+    uvm_resource_types::rsrc_q_t result_q;
+    int unsigned i;
+    uvm_resource_base r;
+
+    re = uvm_glob_to_re(re);
+    result_q = new();
+
+    foreach (rtab[name]) begin
+      if(!uvm_re_match(re, name))
+        continue;
+      rq = rtab[name];
+      for(i = 0; i < rq.size(); i++) begin
+        r = rq.get(i);
+        if(r.match_scope(scope))
+          result_q.push_back(r);
+      end
+    end
+
+    return result_q;
+
+  endfunction
+
+  // function: lookup_scope
+  //
+  // This is a utility function that answers the question: For a given
+  // ~scope~, what resources are visible to it?  Locate all the resources
+  // that are visible to a particular scope.  This operation could be
+  // quite expensive, as it has to traverse all of the resources in the
+  // database.
+
+  function uvm_resource_types::rsrc_q_t lookup_scope(string scope);
+
+    uvm_resource_types::rsrc_q_t rq;
+    uvm_resource_base r;
+    int unsigned i;
+
+    int unsigned err;
+    uvm_resource_types::rsrc_q_t q = new();
+
+    foreach (rtab[name]) begin
+      rq = rtab[name];
+      for(int i = 0; i < rq.size(); ++i) begin
+        r = rq.get(i);
+        if(r.match_scope(scope))
+          q.push_back(r);
+      end
+    end
+
+    return q;
+    
+  endfunction
+
   //--------------------------------------------------------------------
   // group: Set Priority
   //
@@ -1111,102 +1208,9 @@ class uvm_resource_pool;
     set_priority_name(rsrc, pri);
   endfunction
 
-  // function: lookup_regex_names
-  //
-  // This utility function answers the question, for a given ~name~ and
-  // ~scope~, what are all of the resources with a matching name (where the
-  // resource name may be a regular expression) and a matching scope
-  // (where the resoucre scope may be a regular expression). ~name~ and
-  // ~scope~ are explicit values.
-
-  function uvm_resource_types::rsrc_q_t lookup_regex_names(string scope,
-                                                           string name);
-
-    uvm_resource_types::rsrc_q_t rq;
-    uvm_resource_types::rsrc_q_t result_q;
-    int unsigned i;
-    uvm_resource_base r;
-
-    //For the simple case where no wildcard names exist, then we can
-    //just return the queue associated with name.
-    if(!m_has_wildcard_names) begin
-      result_q = lookup_name(scope, name, 0);
-      return result_q;
-    end
-
-    result_q = new();
-
-    foreach (rtab[re]) begin
-      rq = rtab[re];
-      for(i = 0; i < rq.size(); i++) begin
-        r = rq.get(i);
-        if(uvm_re_match(uvm_glob_to_re(re),name) == 0)
-          if(r.match_scope(scope))
-            result_q.push_back(r);
-      end
-    end
-    return result_q;
-  endfunction
-
-  // function: lookup_regex
-  //
-  // Looks for all the resources whose name matches the regular
-  // expression argument and whose scope matches the current scope.
-
-  function uvm_resource_types::rsrc_q_t lookup_regex(string re, scope);
-
-    uvm_resource_types::rsrc_q_t rq;
-    uvm_resource_types::rsrc_q_t result_q;
-    int unsigned i;
-    uvm_resource_base r;
-
-    re = uvm_glob_to_re(re);
-    result_q = new();
-
-    foreach (rtab[name]) begin
-      if(!uvm_re_match(re, name))
-        continue;
-      rq = rtab[name];
-      for(i = 0; i < rq.size(); i++) begin
-        r = rq.get(i);
-        if(r.match_scope(scope))
-          result_q.push_back(r);
-      end
-    end
-
-    return result_q;
-
-  endfunction
-
-  // function: lookup_scope
-  //
-  // This is a utility function that answers the question: For a given
-  // ~scope~, what resources are visible to it?  Locate all the resources
-  // that are visible to a particular scope.  This operation could be
-  // quite expensive, as it has to traverse all of the resources in the
-  // database.
-
-  function uvm_resource_types::rsrc_q_t lookup_scope(string scope);
-
-    uvm_resource_types::rsrc_q_t rq;
-    uvm_resource_base r;
-    int unsigned i;
-
-    int unsigned err;
-    uvm_resource_types::rsrc_q_t q = new();
-
-    foreach (rtab[name]) begin
-      rq = rtab[name];
-      for(int i = 0; i < rq.size(); ++i) begin
-        r = rq.get(i);
-        if(r.match_scope(scope))
-          q.push_back(r);
-      end
-    end
-
-    return q;
-    
-  endfunction
+  //--------------------------------------------------------------------
+  // group: Debug
+  //--------------------------------------------------------------------
 
   // function: find_unused_resources
   //

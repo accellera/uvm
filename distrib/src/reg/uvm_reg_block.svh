@@ -238,6 +238,36 @@ virtual class uvm_reg_block extends uvm_object;
    extern static  function void get_root_blocks(ref uvm_reg_block blks[$]);
       
 
+   // Function: find_blocks
+   //
+   // Find the blocks whose hierarchical names match the
+   // specified ~name~ glob.
+   // If a ~root~ block is specified, the name of the blocks are
+   // relative to that block, otherwise they are absolute.
+   //
+   // Returns the number of blocks found.
+   //
+   extern static function int find_blocks(input string        name,
+                                          ref   uvm_reg_block blks[$],
+                                          input uvm_reg_block root = null,
+                                          input uvm_object    accessor = null);
+      
+
+   // Function: find_block
+   //
+   // Find the first block whose hierarchical names match the
+   // specified ~name~ glob.
+   // If a ~root~ block is specified, the name of the blocks are
+   // relative to that block, otherwise they are absolute.
+   //
+   // Returns the first block found or ~null~ otherwise.
+   // A warning is issued if more than one block is found.
+   //
+   extern static function uvm_reg_block find_block(input string        name,
+                                                   input uvm_reg_block root = null,
+                                                   input uvm_object    accessor = null);
+      
+
    // Function: get_blocks
    //
    // Get the sub-blocks
@@ -981,6 +1011,9 @@ function void uvm_reg_block::configure(uvm_reg_block parent=null, string hdl_pat
   if (parent != null)
     this.parent.add_block(this);
   add_hdl_path(hdl_path);
+
+  uvm_resource_db#(uvm_reg_block)::write_and_set(get_full_name(),
+                                                 "uvm_reg::*", this);
 endfunction
 
 
@@ -1117,20 +1150,14 @@ endfunction: lock_model
 //--------------------------
 
 function string uvm_reg_block::get_full_name();
-   uvm_reg_block blk;
+   uvm_reg_block parent;
 
    get_full_name = this.get_name();
 
-   // Do not include top-level name in full name
-   blk = this.get_parent();
-
-   if (blk == null)
+   if (parent == null)
      return get_full_name;
 
-   if (blk.get_parent() == null)
-     return get_full_name;
-
-   get_full_name = {this.parent.get_full_name(), ".", get_full_name};
+   get_full_name = {parent.get_full_name(), ".", get_full_name};
 
 endfunction: get_full_name
 
@@ -1247,6 +1274,51 @@ function void uvm_reg_block::get_root_blocks(ref uvm_reg_block blks[$]);
    end
 
 endfunction: get_root_blocks
+
+
+// find_blocks
+
+function int uvm_reg_block::find_blocks(input string        name,
+                                        ref   uvm_reg_block blks[$],
+                                        input uvm_reg_block root = null,
+                                        input uvm_object    accessor = null);
+
+   uvm_resource_pool rpl = uvm_resource_pool::get();
+   uvm_resource_types::rsrc_q_t rs;
+
+   blks.delete();
+
+   if (root != null) name = {root.get_full_name(), ".", name};
+
+   rs = rpl.lookup_regex(name, "uvm_reg::");
+   for (int i = 0; i < rs.size(); i++) begin
+      uvm_resource#(uvm_reg_block) blk;
+      if (!$cast(blk, rs.get(i))) continue;
+      blks.push_back(blk.read(accessor));
+   end
+   
+   return blks.size();
+endfunction
+
+
+// find_blocks
+
+function uvm_reg_block uvm_reg_block::find_block(input string        name,
+                                                 input uvm_reg_block root = null,
+                                                 input uvm_object    accessor = null);
+
+   uvm_reg_block blks[$];
+   if (!find_blocks(name, blks, root, accessor))
+      return null;
+
+   if (blks.size() > 1) begin
+      `uvm_warning("MRTH1BLK",
+                   {"More than one block matched the name \"", name, "\"."})
+   end
+   
+
+   return blks[0];
+endfunction
 
 
 // get_maps
