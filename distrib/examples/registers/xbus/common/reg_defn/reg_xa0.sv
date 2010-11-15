@@ -445,8 +445,6 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
       mem.configure(this, "mem");
       mem.build();
       default_map.add_mem(mem, 'h100, "RW");
-
-      lock_model();
    endfunction : build
 
    `uvm_object_utils(reg_block_xa0_xbus_rf)
@@ -478,8 +476,6 @@ class reg_sys_xa0 extends uvm_reg_block;
          xa0_xbus_rf_addr_reg_bkdr bkdr = new(xbus_rf.addr_reg.get_full_name());
          xbus_rf.addr_reg.set_backdoor(bkdr);
       end
-
-      lock_model();
    endfunction : build
 
    `uvm_object_utils(reg_sys_xa0)

@@ -40,6 +40,7 @@ class blk_env extends uvm_env;
       apb = apb_agent::type_id::create("apb_agent",this);
       model = reg_block_B::type_id::create("reg_blk_B");
       model.build();
+      model.lock_model();
    endfunction: build
 
    virtual function void connect();

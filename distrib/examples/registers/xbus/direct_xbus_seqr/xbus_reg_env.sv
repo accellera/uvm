@@ -73,6 +73,7 @@ class xbus_reg_env extends xbus_env;
     super.build();
     model = xbus_reg_model::type_id::create("xa0", this);
     model.build();
+    model.lock_model();
     // Should be done using resources
     model.set_hdl_path_root(`DEF2STR(`XA0_TOP_PATH));
   endfunction : build

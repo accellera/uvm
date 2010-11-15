@@ -22,8 +22,6 @@ class reg_sys_S extends uvm_reg_block;
       B[i].configure(this);
       default_map.add_submap(this.B[i].default_map, 'h100 + i*'h100);
     end
-
-    lock_model();
   endfunction : build
 
 endclass : reg_sys_S

@@ -239,6 +239,7 @@ Group: Register Layer  {
       File: Shared Access  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/sequences/uvm_reg_mem_shared_access_seq.svh)
       File: Memory Access  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/sequences/uvm_mem_access_seq.svh)
       File: Memory Walk  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/sequences/uvm_mem_walk_seq.svh)
+      File: Register Backdoor Access Test Sequence  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/sequences/uvm_reg_access_backdoor_check.svh)
       }  # Group: Test Sequences
 
    }  # Group: Register Layer
@@ -259,5 +260,5 @@ Group: Index  {
 
 
 ##### Do not change or remove these lines. #####
-Data: 1(D3333RuEG3loHu6G3tG6t3aOP36p\fYusV9u\c8`3N/E3f86tH8Y36H9)
-Data: 1(h3333RuEG3loHu6G3tG6t3aOP36p\fYusV9u\c8`3N/E3N/EVHGc)
+Data: 1(D3333HGEutG3/t`RuEGq3lp\89A3aOP3ruNH9GmuH`G3N/E3f86tH8Y36H9)
+Data: 1(h3333HGEutG3/t`RuEGq3lp\89A3aOP3ruNH9GmuH`G3N/E3N/EVHGc)

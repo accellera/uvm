@@ -348,6 +348,13 @@ typedef uvm_callback_iter#(uvm_reg_field, uvm_reg_cbs) uvm_reg_field_cb_iter;
 // Remove this callback from the specified register and its contained fields.
 //
 class uvm_reg_no_write extends uvm_reg_cbs;
+
+   function new(string name = "uvm_reg_no_write");
+      super.new(name);
+   endfunction
+
+   `uvm_object_utils(uvm_reg_no_write)
+   
    virtual task pre_write(uvm_reg_item rw);
       string name = rw.element.get_full_name();
       
@@ -412,6 +419,13 @@ endclass
 // Remove this callback from the specified register and its contained fields.
 //
 class uvm_reg_no_read extends uvm_reg_cbs;
+
+   function new(string name = "uvm_reg_no_read");
+      super.new(name);
+   endfunction
+
+   `uvm_object_utils(uvm_reg_no_read)
+   
    virtual task pre_read(uvm_reg_item rw);
       string name = rw.element.get_full_name();
       

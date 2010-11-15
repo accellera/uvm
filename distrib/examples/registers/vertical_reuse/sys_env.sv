@@ -40,6 +40,7 @@ class sys_env extends uvm_env;
       apb = apb_agent::type_id::create("apb_agent",this);
       model = reg_sys_S::type_id::create("reg_sys_S");
       model.build();
+      model.lock_model();
    endfunction: build
 
    virtual function void connect();

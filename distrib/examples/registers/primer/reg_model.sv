@@ -247,8 +247,6 @@ class reg_block_slave extends uvm_reg_block;
       REVISION_ID = ID.REVISION_ID;
       CHIP_ID     = ID.CHIP_ID;
       PRODUCT_ID  = ID.PRODUCT_ID;
-
-      lock_model();
    endfunction
    
    `uvm_object_utils(reg_block_slave)
