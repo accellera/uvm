@@ -120,7 +120,7 @@ class uvm_resource_db #(type T=int);
   endfunction
 
 
-  // function read_by_name
+  // function: read_by_name
   //
   // locate a resource by ~name~ and ~scope~ and read its value. The value 
   // is returned through the ref argument ~val~.  The return value is a bit 
@@ -140,7 +140,7 @@ class uvm_resource_db #(type T=int);
   
   endfunction
 
-  // function read_by_type
+  // function: read_by_type
   //
   // Read a value by type.  The value is returned through the ref
   // argument ~val~.  The ~scope~ is used for the lookup. The return

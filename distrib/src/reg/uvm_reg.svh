@@ -984,7 +984,8 @@ virtual class uvm_reg extends uvm_object;
    // in the "uvm_reg::" scope namespace.
    //
    extern static function void include_coverage(string scope,
-                                                uvm_reg_cvr_t models);
+                                                uvm_reg_cvr_t models,
+                                                uvm_object accessor = null);
 
    // Function: build_coverage
    //
@@ -1976,24 +1977,21 @@ endfunction: get_attributes
 // include_coverage
 
 function void uvm_reg::include_coverage(string scope,
-                                        uvm_reg_cvr_t models);
-`ifdef UVM_RESOURCES
+                                        uvm_reg_cvr_t models,
+                                        uvm_object accessor = null);
    uvm_reg_cvr_rsrc_db::write_and_set("include_coverage",
                                       {"uvm_reg::", scope},
-                                      models, this);
-`endif
+                                      models, accessor);
 endfunction
 
 
 // build_coverage
 
 function uvm_reg_cvr_t uvm_reg::build_coverage(uvm_reg_cvr_t models);
-`ifdef UVM_RESOURCES
    build_coverage = UVM_NO_COVERAGE;
-   void'(uvm_reg_cvr_rsrc_db::read_by_name("include_coverage",
-                                           {"uvm_reg::", get_full_name()},
-                                           build_coverage, this);
-`endif
+   void'(uvm_reg_cvr_rsrc_db::read_by_name({"uvm_reg::", get_full_name()},
+                                           "include_coverage",
+                                           build_coverage, this));
    return models;
 endfunction: build_coverage
 

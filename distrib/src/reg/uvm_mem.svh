@@ -1503,12 +1503,10 @@ endfunction: get_attributes
 
 
 function uvm_reg_cvr_t uvm_mem::build_coverage(uvm_reg_cvr_t models);
-`ifdef UVM_RESOURCES
    build_coverage = UVM_NO_COVERAGE;
-   void'(uvm_reg_cvr_rsrc_db::read_by_name("include_coverage",
-                                           {"uvm_reg::", get_full_name()},
-                                           build_coverage, this);
-`endif
+   void'(uvm_reg_cvr_rsrc_db::read_by_name({"uvm_reg::", get_full_name()},
+                                           "include_coverage",
+                                           build_coverage, this));
    return models;
 endfunction: build_coverage
 

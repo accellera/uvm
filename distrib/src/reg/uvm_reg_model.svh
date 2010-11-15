@@ -50,9 +50,7 @@ typedef class uvm_reg_map;
 typedef class uvm_reg_map_info;
 typedef class uvm_reg_sequence;
 typedef class uvm_reg_adapter;
-`ifdef UVM_RESOURCES
-typedef uvm_resource_db#(uvm_reg_cvr_t) uvm_reg_cvr_rsrc_db;
-`endif
+
 
 
 
@@ -322,6 +320,9 @@ typedef  bit [`UVM_REG_CVR_WIDTH-1:0]  uvm_reg_cvr_t ;
       UVM_CVR_FIELD_VALS   = 'h0004,
       UVM_CVR_ALL          = -1
    } uvm_coverage_model_e;
+
+
+typedef uvm_resource_db#(uvm_reg_cvr_t) uvm_reg_cvr_rsrc_db;
 
 
 //------------------------------------------------------------------------------
