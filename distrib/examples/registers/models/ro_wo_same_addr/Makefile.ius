@@ -19,32 +19,12 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../..
+UVM_HOME	= ../../../..
 
-include ../../Makefile.ius
+include ../../../Makefile.ius
 
-all: uvm_reg_mem_built_in_seq uvm_reg_mem_access_backdoor_check_seq
 
-IRUN=$(IUS) -define SINGLE_RAM_VARIABLE -define RAM128x64 -define USE_SLICE_API \
-	-incdir ../common/wishbone -incdir ../common/oc_ethernet_rtl \
-	-F ../common/oc_ethernet_rtl/rtl_file_list.lst \
-	tb_top.sv tb_env.sv
-
-help:
-	@echo " Available run-time targets:"
-	@echo
-	@echo " Built-In Tests:"
-	@echo
-	@echo "    uvm_reg_hw_reset_seq"
-	@echo "    uvm_reg_access_seq"
-	@echo "    uvm_mem_access_seq"
-	@echo "    uvm_reg_bit_bash_seq"
-	@echo "    uvm_mem_walk_seq"
-	@echo "    uvm_reg_access_seq     (e.g. uvm_reg_access_seq+uvm_mem_access_seq)"
-	@echo "    uvm_reg_mem_built_in_seq   (e.g. all the built-in tests)"
-	@echo
-
-uvm_%_seq:
-	$(IRUN) +UVM_SEQUENCE=$@
+all: 
+	$(IUS)  +incdir+../../common tb_run.sv
 	$(CHECK)
 

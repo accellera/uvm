@@ -259,6 +259,9 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function uvm_reg_field get_field_by_name(string name);
 
 
+   /*local*/ extern function string Xget_fields_accessX(uvm_reg_map map);
+
+
    // Function: get_offset
    //
    // Returns the offset of this register
@@ -1122,6 +1125,8 @@ virtual class uvm_reg extends uvm_object;
    // If the specified data value, access ~path~ or address ~map~ are modified,
    // the updated data value, access path or address map will be used
    // to perform the register operation.
+   // If the ~status~ is modified to anything other than <UVM_IS_OK>,
+   // the operation is aborted.
    //
    // The registered callback methods are invoked after the invocation
    // of this method.
@@ -1154,6 +1159,8 @@ virtual class uvm_reg extends uvm_object;
    // If the specified access ~path~ or address ~map~ are modified,
    // the updated access path or address map will be used to perform
    // the register operation.
+   // If the ~status~ is modified to anything other than <UVM_IS_OK>,
+   // the operation is aborted.
    //
    // The registered callback methods are invoked after the invocation
    // of this method.
@@ -1849,6 +1856,44 @@ function uvm_reg_field uvm_reg::get_field_by_name(string name);
 endfunction
 
 
+// Xget_field_accessX
+//
+// Returns "WO" if all of the fields in the registers are write-only
+// Returns "RO" if all of the fields in the registers are read-only
+// Returns "RW" otherwise.
+
+function string uvm_reg::Xget_fields_accessX(uvm_reg_map map);
+   bit is_R = 0;
+   bit is_W = 0;
+   
+   foreach(m_fields[i]) begin
+      case (m_fields[i].get_access(map))
+       "RO",
+         "RC",
+         "RS":
+            is_R = 1;
+       
+       "WO",
+          "WOC",
+          "WOS",
+          "WO1":
+             is_W = 1;
+       
+       default:
+          return "RW";
+      endcase
+      
+      if (is_R && is_W) return "RW";
+   end
+
+   case ({is_R, is_W})
+    2'b01: return "WO";
+    2'b10: return "RO";
+   endcase
+   return "RW";
+endfunction
+
+      
 //-----------
 // ATTRIBUTES
 //-----------
@@ -2224,6 +2269,9 @@ task uvm_reg::do_write (uvm_reg_item rw);
    uvm_reg_map_info map_info;
    uvm_reg_addr_t   value;
 
+   if (!Xcheck_accessX(rw,map_info,"write()"))
+     return;
+
    XatomicX(1);
 
    m_fname  = rw.fname;
@@ -2233,8 +2281,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
    rw.value[0] &= ((1 << m_n_bits)-1);
    value = rw.value[0];
 
-   if (!Xcheck_accessX(rw,map_info,"write()"))
-     return;
+   rw.status = UVM_IS_OK;
 
    // PRE-WRITE CBS - FIELDS
    begin : pre_write_callbacks
@@ -2266,6 +2313,16 @@ task uvm_reg::do_write (uvm_reg_item rw);
    for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
       cb.pre_write(rw);
 
+   if (rw.status != UVM_IS_OK) begin
+     m_fname = "";
+     m_lineno = 0;
+     m_write_in_progress = 1'b0;
+
+     XatomicX(0);
+         
+     return;
+   end
+         
    // EXECUTE WRITE...
    case (rw.path)
       
@@ -2372,7 +2429,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
    rw.element_kind = UVM_REG;
 
    // REPORT
-   if (uvm_report_enabled(UVM_MEDIUM)) begin
+   if (uvm_report_enabled(UVM_HIGH)) begin
      string path_s,value_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -2383,7 +2440,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
      value_s = $sformatf("=%0h",rw.value[0]);
 
      `uvm_info("RegModel", {"Wrote register via ",path_s,": ",
-                            get_full_name(),value_s},UVM_MEDIUM)
+                            get_full_name(),value_s},UVM_HIGH)
    end
 
    m_fname = "";
@@ -2454,12 +2511,14 @@ task uvm_reg::do_read(uvm_reg_item rw);
    uvm_reg_map_info map_info;
    uvm_reg_addr_t   value;
    
+   if (!Xcheck_accessX(rw,map_info,"read()"))
+     return;
+
    m_fname   = rw.fname;
    m_lineno  = rw.lineno;
    m_read_in_progress = 1'b1;
 
-   if (!Xcheck_accessX(rw,map_info,"read()"))
-     return;
+   rw.status = UVM_IS_OK;
 
    // PRE-READ CBS - FIELDS
    foreach (m_fields[i]) begin
@@ -2480,7 +2539,14 @@ task uvm_reg::do_read(uvm_reg_item rw);
    for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
       cb.pre_read(rw);
 
+   if (rw.status != UVM_IS_OK) begin
+     m_fname   = "";
+     m_lineno  = 0;
+     m_read_in_progress = 1'b0;
 
+     return;
+   end
+         
    // EXECUTE READ...
    case (rw.path)
       
@@ -2598,7 +2664,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
    rw.element_kind = UVM_REG;
 
    // REPORT
-   if (uvm_report_enabled(UVM_MEDIUM)) begin
+   if (uvm_report_enabled(UVM_HIGH)) begin
      string path_s,value_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -2609,8 +2675,12 @@ task uvm_reg::do_read(uvm_reg_item rw);
      value_s = $sformatf("=%0h",rw.value[0]);
 
      `uvm_info("RegModel", {"Read  register via ",path_s,": ",
-                            get_full_name(),value_s},UVM_MEDIUM)
+                            get_full_name(),value_s},UVM_HIGH)
    end
+
+   m_fname   = "";
+   m_lineno  = 0;
+   m_read_in_progress = 1'b0;
 
 endtask: do_read
 
@@ -2822,7 +2892,7 @@ task uvm_reg::poke(output uvm_status_e      status,
    status = rw.status;
 
    `uvm_info("RegModel", $psprintf("Poked register \"%s\": 'h%h",
-                              get_full_name(), value),UVM_MEDIUM);
+                              get_full_name(), value),UVM_HIGH);
 
    Xpredict_writeX(value, UVM_BACKDOOR, null);
 
@@ -2882,7 +2952,7 @@ task uvm_reg::peek(output uvm_status_e      status,
    value = rw.value[0];
 
    `uvm_info("RegModel", $psprintf("Peeked register \"%s\": 'h%h",
-                          get_full_name(), value),UVM_MEDIUM);
+                          get_full_name(), value),UVM_HIGH);
 
    Xpredict_readX(value, UVM_BACKDOOR, null);
 

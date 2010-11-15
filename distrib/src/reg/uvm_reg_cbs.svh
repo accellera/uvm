@@ -75,6 +75,9 @@ virtual class uvm_reg_cbs extends uvm_callback;
    //   address ~map~ modifies the actual path or map used in the
    //   operation.
    //
+   // If the ~rw.status~ is modified to anything other than <UVM_IS_OK>,
+   // the operation is aborted.
+   //
    // See <uvm_reg_item> for details on ~rw~ information.
    //
    virtual task pre_write(uvm_reg_item rw); endtask
@@ -154,6 +157,9 @@ virtual class uvm_reg_cbs extends uvm_callback;
    // - For non-backdoor operations, modifying the access ~path~ or
    //   address ~map~ modifies the actual path or map used in the
    //   operation.
+   //
+   // If the ~rw.status~ is modified to anything other than <UVM_IS_OK>,
+   // the operation is aborted.
    //
    // See <uvm_reg_item> for details on ~rw~ information.
    //
@@ -330,3 +336,130 @@ typedef uvm_callbacks#(uvm_reg_field, uvm_reg_cbs) uvm_reg_field_cb;
 typedef uvm_callback_iter#(uvm_reg_field, uvm_reg_cbs) uvm_reg_field_cb_iter;
 
 
+
+// Class: uvm_reg_no_write
+// Pre-defined register callback method for read-only registers
+// that will issue an error if a read() operation is attempted.
+//
+// Function: add
+// Add this callback to the specified register and its contained fields.
+//
+// Function: remove
+// Remove this callback from the specified register and its contained fields.
+//
+class uvm_reg_no_write extends uvm_reg_cbs;
+   virtual task pre_write(uvm_reg_item rw);
+      string name = rw.element.get_full_name();
+      
+      if (rw.status != UVM_IS_OK) return;
+
+      if (rw.element_kind == UVM_FIELD) begin
+         uvm_reg_field fld;
+         uvm_reg rg;
+         $cast(fld, rw.element);
+         rg = fld.get_parent();
+         name = rg.get_full_name();
+      end
+      
+      `uvm_error("RegMem",
+                 {name, " is read-only. Cannot call write() method."});
+
+      rw.status = UVM_NOT_OK;
+   endtask
+
+   local static uvm_reg_no_write m_me = null;
+   local static function uvm_reg_no_write get();
+      if (m_me == null) m_me = new;
+      return m_me;
+   endfunction
+
+   static function void add(uvm_reg rg);
+      uvm_reg_field flds[$];
+      
+      uvm_reg_cb::add(rg, get());
+      rg.get_fields(flds);
+      foreach (flds[i]) begin
+         uvm_reg_field_cb::add(flds[i], get());
+      end
+   endfunction
+
+   static function void remove(uvm_reg rg);
+      uvm_reg_cb_iter cbs = new(rg);
+      uvm_reg_field flds[$];
+
+      cbs.first();
+      while (cbs.get_cb() != get()) begin
+         if (cbs.get_cb() == null) return;
+         cbs.next();
+      end
+      uvm_reg_cb::delete(rg, get());
+      rg.get_fields(flds);
+      foreach (flds[i]) begin
+         uvm_reg_field_cb::delete(flds[i], get());
+      end
+   endfunction
+endclass
+
+
+// Class: uvm_reg_no_read
+// Pre-defined register callback method for write-only registers
+// that will issue an error if a write() operation is attempted.
+//
+// Function: add
+// Add this callback to the specified register and its contained fields.
+//
+// Function: remove
+// Remove this callback from the specified register and its contained fields.
+//
+class uvm_reg_no_read extends uvm_reg_cbs;
+   virtual task pre_read(uvm_reg_item rw);
+      string name = rw.element.get_full_name();
+      
+      if (rw.status != UVM_IS_OK) return;
+
+      if (rw.element_kind == UVM_FIELD) begin
+         uvm_reg_field fld;
+         uvm_reg rg;
+         $cast(fld, rw.element);
+         rg = fld.get_parent();
+         name = rg.get_full_name();
+      end
+      
+      `uvm_error("RegMem",
+                 {name, " is write-only. Cannot call read() method."});
+
+      rw.status = UVM_NOT_OK;
+   endtask
+
+   local static uvm_reg_no_read m_me = null;
+   local static function uvm_reg_no_read get();
+      if (m_me == null) m_me = new;
+      return m_me;
+   endfunction
+
+   static function void add(uvm_reg rg);
+      uvm_reg_field flds[$];
+      
+      uvm_reg_cb::add(rg, get());
+      rg.get_fields(flds);
+      foreach (flds[i]) begin
+         uvm_reg_field_cb::add(flds[i], get());
+      end
+   endfunction
+
+   static function void remove(uvm_reg rg);
+      uvm_reg_cb_iter cbs = new(rg);
+      uvm_reg_field flds[$];
+
+      cbs.first();
+      while (cbs.get_cb() != get()) begin
+         if (cbs.get_cb() == null) return;
+         cbs.next();
+      end
+      uvm_reg_cb::delete(rg, get());
+      rg.get_fields(flds);
+      foreach (flds[i]) begin
+         uvm_reg_field_cb::delete(flds[i], get());
+      end
+   endfunction
+endclass
