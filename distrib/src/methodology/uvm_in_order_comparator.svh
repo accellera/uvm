@@ -48,13 +48,13 @@
 //
 // Built in types (such as ints, bits, logic, and structs) can be compared using
 // the default values for comp_type, convert, and pair_type. For convenience,
-// you can use the subtype, <uvm_in_order_builtin_comparator #(T)> for built-in
-// types.
+// you can use the subtype, <uvm_in_order_built_in_comparator #(T)> 
+// for built-in types.
 //
 // When T is a class, T must implement comp and convert2string, and you must
 // specify class-based policy classes for comp_type, convert, and pair_type.
 // In most cases, you can use the convenient subtype,
-// uvm_in_order_class_comparator #(T).
+// <uvm_in_order_class_comparator #(T)>.
 //
 // Comparisons are commutative, meaning it does not matter which data stream is
 // connected to which export, before_export or after_export.
@@ -183,7 +183,7 @@ class uvm_in_order_comparator
   // Function: flush
   //
   // This method sets m_matches and m_mismatches back to zero. The
-  // <uvm_tlm_fifo #(T)::flush> takes care of flushing the FIFOs.
+  // <uvm_tlm_fifo::flush> takes care of flushing the FIFOs.
 
   virtual function void flush();
     m_matches = 0;
@@ -195,7 +195,7 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: in_order_built_in_comparator #(T)
+// CLASS: uvm_in_order_built_in_comparator #(T)
 //
 // This class uses the uvm_built_in_* comparison, converter, and pair classes.
 // Use this class for built-in types (int, bit, string, etc.)
@@ -223,7 +223,7 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: in_order_class_comparator #(T)
+// CLASS: uvm_in_order_class_comparator #(T)
 //
 // This class uses the uvm_class_* comparison, converter, and pair classes.
 // Use this class for comparing user-defined objects of type T, which must
