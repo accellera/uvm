@@ -804,6 +804,7 @@ virtual class uvm_tlm_extension_base extends uvm_object;
   //
    
   virtual function uvm_object create (string name="");
+    return null;
   endfunction
 
 endclass
@@ -877,6 +878,7 @@ class uvm_tlm_extension #(type T=int) extends uvm_tlm_extension_base;
   endfunction
 
   virtual function uvm_object create (string name="");
+    return null;
   endfunction
 
 endclass
