@@ -616,7 +616,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   //  the given ~obj~ handle. The ~obj~ handle can be null, which allows 
   // de-registration of callbacks without an object context. 
   // The ~cb~ is the callback handle; it must be non-null, and if the callback
-  // has already been removed to the object instance then a warning is
+  // has already been removed from the object instance then a warning is
   // issued. Note that the CB parameter is optional. For example, the 
   // following are equivalent:
   //

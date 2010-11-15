@@ -796,6 +796,8 @@ class uvm_mem extends uvm_object;
    // If the ~offset~, ~value~, access ~path~,
    // or address ~map~ are modified, the updated offset, data value,
    // access path or address map will be used to perform the memory operation.
+   // If the ~status~ is modified to anything other than <UVM_IS_OK>,
+   // the operation is aborted.
    //
    // The registered callback methods are invoked after the invocation
    // of this method.
@@ -823,6 +825,8 @@ class uvm_mem extends uvm_object;
    // If the ~offset~, access ~path~ or address ~map~ are modified,
    // the updated offset, access path or address map will be used to perform
    // the memory operation.
+   // If the ~status~ is modified to anything other than <UVM_IS_OK>,
+   // the operation is aborted.
    //
    // The registered callback methods are invoked after the invocation
    // of this method.
@@ -1700,18 +1704,29 @@ task uvm_mem::do_write(uvm_reg_item rw);
    uvm_mem_cb_iter  cbs = new(this);
    uvm_reg_map_info map_info;
    
-   m_fname  = rw.fname;
-   m_lineno = rw.lineno;
-   m_write_in_progress = 1'b1;
-   rw.status = UVM_NOT_OK;
-   
    if (!Xcheck_accessX(rw, map_info, "burst_write()"))
      return;
 
+   m_fname  = rw.fname;
+   m_lineno = rw.lineno;
+   m_write_in_progress = 1'b1;
+
+   rw.status = UVM_IS_OK;
+   
    // PRE-WRITE CBS
    pre_write(rw);
    for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
       cb.pre_write(rw);
+
+   if (rw.status != UVM_IS_OK) begin
+      m_fname = "";
+      m_lineno = 0;
+      m_write_in_progress = 1'b0;
+
+      return;
+   end
+
+   rw.status = UVM_NOT_OK;
 
    // FRONTDOOR
    if (rw.path == UVM_FRONTDOOR) begin
@@ -1805,12 +1820,23 @@ task uvm_mem::do_read(uvm_reg_item rw);
    m_fname = rw.fname;
    m_lineno = rw.lineno;
    m_read_in_progress = 1'b1;
-   rw.status = UVM_NOT_OK;
+
+   rw.status = UVM_IS_OK;
    
    // PRE-READ CBS
    pre_read(rw);
    for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
       cb.pre_read(rw);
+
+   if (rw.status != UVM_IS_OK) begin
+      m_fname = "";
+      m_lineno = 0;
+      m_read_in_progress = 1'b0;
+
+      return;
+   end
+
+   rw.status = UVM_NOT_OK;
 
    // FRONTDOOR
    if (rw.path == UVM_FRONTDOOR) begin

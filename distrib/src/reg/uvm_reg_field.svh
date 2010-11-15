@@ -733,6 +733,8 @@ class uvm_reg_field extends uvm_object;
    // If the specified data value, access ~path~ or address ~map~ are modified,
    // the updated data value, access path or address map will be used
    // to perform the register operation.
+   // If the ~status~ is modified to anything other than <UVM_IS_OK>,
+   // the operation is aborted.
    //
    // The field callback methods are invoked after the callback methods
    // on the containing register.
@@ -765,6 +767,8 @@ class uvm_reg_field extends uvm_object;
    // If the access ~path~ or address ~map~ in the ~rw~ argument are modified,
    // the updated access path or address map will be used to perform
    // the register operation.
+   // If the ~status~ is modified to anything other than <UVM_IS_OK>,
+   // the operation is aborted.
    //
    // The field callback methods are invoked after the callback methods
    // on the containing register.
@@ -1612,9 +1616,21 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
 
      m_parent.Xset_busyX(1);
 
+     rw.status = UVM_IS_OK;
+      
      pre_write(rw);
      for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
         cb.pre_write(rw);
+
+     if (rw.status != UVM_IS_OK) begin
+        m_fname = "";
+        m_lineno = 0;
+        m_write_in_progress = 1'b0;
+        m_parent.Xset_busyX(0);
+        m_parent.XatomicX(0);
+        
+        return;
+     end
             
      rw.local_map.do_write(rw);
 
@@ -1711,9 +1727,21 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
 
      m_parent.Xset_busyX(1);
 
+     rw.status = UVM_IS_OK;
+      
      pre_read(rw);
      for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next())
         cb.pre_read(rw);
+
+     if (rw.status != UVM_IS_OK) begin
+        m_fname = "";
+        m_lineno = 0;
+        m_read_in_progress = 1'b0;
+        m_parent.Xset_busyX(0);
+        m_parent.XatomicX(0);
+
+        return;
+     end
             
      rw.local_map.do_read(rw);
 
