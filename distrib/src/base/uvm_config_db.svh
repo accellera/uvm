@@ -96,6 +96,13 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     return 1;
   endfunction
 
+// FIXME SHR: implement exists for ubus work. Need to be replaced with real code. the spellcheck is not being used here
+  static function bit exists(uvm_component cntxt, string inst_name,
+      string field_name, bit spellcheck = 1);
+          T dummy_value;
+          return get(cntxt,inst_name,field_name, dummy_value);
+  endfunction
+
   // function: set 
   //
   // Create a new or update an existing configuration setting for
