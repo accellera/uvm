@@ -67,7 +67,7 @@ class test extends uvm_component;
 
       // Do a set_config
       set_config_int("", "val", 25*i);
-      get_config_int("val", val);
+      void'(get_config_int("val", val));
       if(val != 25*i) begin
         $display("Got wrong config value: expected %0d, got %0d", 25*i, val);
         failed=1;

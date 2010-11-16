@@ -11,10 +11,10 @@ module test;
 
     function void build();
       super.build();
-      get_config_int("value", build_val);
+      void'(get_config_int("value", build_val));
     endfunction
     task run;
-      #5 get_config_int("value", run_val);
+      #5 void'(get_config_int("value", run_val));
     endtask
   endclass
  

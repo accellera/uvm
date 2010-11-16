@@ -59,7 +59,7 @@ class mycomp extends uvm_component;
       cfg_settings++;
 
       prev = field1;
-      get_config_int("field1",field1);
+      void'(get_config_int("field1",field1));
 
       if(!f1_init) begin
         f1_init = 1;
