@@ -71,15 +71,15 @@ class uvm_sequencer_base extends uvm_component;
   // the default sequence and run it. A manually set default sequence
   // will have precedence over one set with set_config_object.
 
-  protected uvm_object_wrapper m_default_sequences[uvm_phase_schedule];
+  protected uvm_object_wrapper m_default_sequences[uvm_phase_imp];
 
   virtual function void phase_started(uvm_phase_schedule phase);
     uvm_object_wrapper w;
     uvm_sequence_base seq;
     uvm_factory f = uvm_factory::get();
 
-    if(m_default_sequences.exists(phase))
-      w = m_default_sequences[phase];
+    if(m_default_sequences.exists(phase.m_phase))
+      w = m_default_sequences[phase.m_phase];
     else begin
 //JLR: need the new resource stuff
 //      void'(uvm_config_db#(uvm_object_wrapper)::get(this, "", {phase.get_name(),"_ph"}, w) );
@@ -120,14 +120,14 @@ class uvm_sequencer_base extends uvm_component;
 
   // Function: set_phase_seq
   //
-  // Set the phase sequence that will automatically start for the given ~phase~
-  // (see <uvm_component::find_phase_schedule>).
-  // The implemenation is a uvm_sequence factory wrapper. The sequence object, ~imp~,
+  // Set the phase sequence that will automatically start for the given
+  // <uvm_phase_schedule>. ~phase~ is a <uvm_phase_imp>
+  // and ~imp~ is a <uvm_sequence_base> factory wrapper. The sequence object, ~imp~,
   // will be created and randomized at the time the phase starts. If ~imp~ is
   // null then no default sequence will be executed.
   //
-  // Example of setting the phase sequence:
-  //|  seqr.set_phase_seq(uvm_phase_schedule("main","*"), myseq_type::type_id::get());
+  // Example of setting the phase sequence for the UVM main phase:
+  //|  seqr.set_phase_seq(uvm_main_ph, myseq_type::type_id::get());
   //
   // If no phase sequence has been set by using this function, then
   // <uvm_config_db#(T)::get> (with T=uvm_object_wrapper) is used to access the 
@@ -139,7 +139,7 @@ class uvm_sequencer_base extends uvm_component;
   //|       "main_ph", myseq_type::type_id::get());
   
 
-  function void set_phase_seq (uvm_phase_schedule phase, uvm_object_wrapper imp); 
+  function void set_phase_seq (uvm_phase_imp phase, uvm_object_wrapper imp); 
     m_default_sequences[phase] = imp;
   endfunction
 
