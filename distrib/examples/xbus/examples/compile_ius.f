@@ -1,6 +1,7 @@
 -uvm
 -uvmhome ../../..
 -uvmnoautocompile
+../../../src/dpi/uvm_dpi.cc
 
 ../../../src/uvm_pkg.sv
 xbus_tb_top.sv  

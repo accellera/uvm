@@ -592,8 +592,8 @@ function void uvm_object::m_do_field_check(string field,
     uvm_report_error("MLTFLD", $psprintf("Field %s is defined multiple times in type %s",
        field, get_type_name()), UVM_NONE);
   end
-  m_field_array[field] = t_t;
   `endif
+  m_field_array[field] = t_t;
 endfunction
 
 // m_print_field_array
