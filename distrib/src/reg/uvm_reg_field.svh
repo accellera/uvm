@@ -1550,10 +1550,11 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
    m_parent.XatomicX(1);
    m_fname  = rw.fname;
    m_lineno = rw.lineno;
-   m_write_in_progress = 1'b1;
 
    if (!Xcheck_accessX(rw,map_info,"write()"))
      return;
+
+   m_write_in_progress = 1'b1;
 
    if (rw.value[0] >> m_size) begin
       `uvm_warning("RegModel", {"uvm_reg_field::write(): Value greater than field '",
@@ -1623,8 +1624,6 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
         cb.pre_write(rw);
 
      if (rw.status != UVM_IS_OK) begin
-        m_fname = "";
-        m_lineno = 0;
         m_write_in_progress = 1'b0;
         m_parent.Xset_busyX(0);
         m_parent.XatomicX(0);
@@ -1648,8 +1647,6 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
 
 `endif
 
-   m_fname = "";
-   m_lineno = 0;
    m_write_in_progress = 1'b0;
    m_parent.XatomicX(0);
 
@@ -1734,8 +1731,6 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
         cb.pre_read(rw);
 
      if (rw.status != UVM_IS_OK) begin
-        m_fname = "";
-        m_lineno = 0;
         m_read_in_progress = 1'b0;
         m_parent.Xset_busyX(0);
         m_parent.XatomicX(0);
@@ -1760,8 +1755,6 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
 
 `endif
 
-   m_fname = "";
-   m_lineno = 0;
    m_read_in_progress = 1'b0;
    m_parent.XatomicX(0);
 

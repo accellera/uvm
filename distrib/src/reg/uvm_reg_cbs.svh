@@ -354,20 +354,20 @@ typedef uvm_callback_iter#(uvm_reg_field, uvm_reg_cbs) uvm_reg_field_cb_iter;
 //-----------------------------
 
 //------------------------------------------------------------------------------
-// Class: uvm_reg_no_write
+// Class: uvm_reg_read_only_cbs
 //
 // Pre-defined register callback method for read-only registers
 // that will issue an error if a write() operation is attempted.
 //
 //------------------------------------------------------------------------------
 
-class uvm_reg_no_write extends uvm_reg_cbs;
+class uvm_reg_read_only_cbs extends uvm_reg_cbs;
 
-   function new(string name = "uvm_reg_no_write");
+   function new(string name = "uvm_reg_read_only_cbs");
       super.new(name);
    endfunction
 
-   `uvm_object_utils(uvm_reg_no_write)
+   `uvm_object_utils(uvm_reg_read_only_cbs)
 
    
    // Function: pre_write
@@ -394,8 +394,8 @@ class uvm_reg_no_write extends uvm_reg_cbs;
       rw.status = UVM_NOT_OK;
    endtask
 
-   local static uvm_reg_no_write m_me = null;
-   local static function uvm_reg_no_write get();
+   local static uvm_reg_read_only_cbs m_me = null;
+   local static function uvm_reg_read_only_cbs get();
       if (m_me == null) m_me = new;
       return m_me;
    endfunction
@@ -440,20 +440,20 @@ endclass
 
 
 //------------------------------------------------------------------------------
-// Class: uvm_reg_no_read
+// Class: uvm_reg_write_only_cbs
 //
 // Pre-defined register callback method for write-only registers
 // that will issue an error if a read() operation is attempted.
 //
 //------------------------------------------------------------------------------
 
-class uvm_reg_no_read extends uvm_reg_cbs;
+class uvm_reg_write_only_cbs extends uvm_reg_cbs;
 
-   function new(string name = "uvm_reg_no_read");
+   function new(string name = "uvm_reg_write_only_cbs");
       super.new(name);
    endfunction
 
-   `uvm_object_utils(uvm_reg_no_read)
+   `uvm_object_utils(uvm_reg_write_only_cbs)
    
    // Function: pre_read
    //
@@ -479,8 +479,8 @@ class uvm_reg_no_read extends uvm_reg_cbs;
       rw.status = UVM_NOT_OK;
    endtask
 
-   local static uvm_reg_no_read m_me = null;
-   local static function uvm_reg_no_read get();
+   local static uvm_reg_write_only_cbs m_me = null;
+   local static function uvm_reg_write_only_cbs get();
       if (m_me == null) m_me = new;
       return m_me;
    endfunction

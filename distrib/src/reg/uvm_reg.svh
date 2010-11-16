@@ -2267,13 +2267,14 @@ task uvm_reg::do_write (uvm_reg_item rw);
    uvm_reg_map_info map_info;
    uvm_reg_addr_t   value;
 
+   m_fname  = rw.fname;
+   m_lineno = rw.lineno;
+
    if (!Xcheck_accessX(rw,map_info,"write()"))
      return;
 
    XatomicX(1);
 
-   m_fname  = rw.fname;
-   m_lineno = rw.lineno;
    m_write_in_progress = 1'b1;
 
    rw.value[0] &= ((1 << m_n_bits)-1);
@@ -2312,8 +2313,6 @@ task uvm_reg::do_write (uvm_reg_item rw);
       cb.pre_write(rw);
 
    if (rw.status != UVM_IS_OK) begin
-     m_fname = "";
-     m_lineno = 0;
      m_write_in_progress = 1'b0;
 
      XatomicX(0);
@@ -2338,8 +2337,6 @@ task uvm_reg::do_write (uvm_reg_item rw);
 
          if (rw.status == UVM_NOT_OK) begin
            m_write_in_progress = 1'b0;
-           m_fname = "";
-           m_lineno = 0;
            return;
          end
 
@@ -2441,8 +2438,6 @@ task uvm_reg::do_write (uvm_reg_item rw);
                             get_full_name(),value_s},UVM_HIGH)
    end
 
-   m_fname = "";
-   m_lineno = 0;
    m_write_in_progress = 1'b0;
 
    XatomicX(0);
@@ -2508,12 +2503,13 @@ task uvm_reg::do_read(uvm_reg_item rw);
    uvm_reg_cb_iter  cbs = new(this);
    uvm_reg_map_info map_info;
    uvm_reg_addr_t   value;
+
+   m_fname   = rw.fname;
+   m_lineno  = rw.lineno;
    
    if (!Xcheck_accessX(rw,map_info,"read()"))
      return;
 
-   m_fname   = rw.fname;
-   m_lineno  = rw.lineno;
    m_read_in_progress = 1'b1;
 
    rw.status = UVM_IS_OK;
@@ -2538,8 +2534,6 @@ task uvm_reg::do_read(uvm_reg_item rw);
       cb.pre_read(rw);
 
    if (rw.status != UVM_IS_OK) begin
-     m_fname   = "";
-     m_lineno  = 0;
      m_read_in_progress = 1'b0;
 
      return;
@@ -2676,8 +2670,6 @@ task uvm_reg::do_read(uvm_reg_item rw);
                             get_full_name(),value_s},UVM_HIGH)
    end
 
-   m_fname   = "";
-   m_lineno  = 0;
    m_read_in_progress = 1'b0;
 
 endtask: do_read
@@ -2896,9 +2888,6 @@ task uvm_reg::poke(output uvm_status_e      status,
 
    if (!m_is_locked_by_field)
      XatomicX(0);
-
-   m_fname = "";
-   m_lineno = 0;
 endtask: poke
 
 
@@ -2956,8 +2945,6 @@ task uvm_reg::peek(output uvm_status_e      status,
 
    if (!m_is_locked_by_field)
       XatomicX(0);
-   m_fname = "";
-   m_lineno = 0;
 endtask: peek
 
 
@@ -3043,8 +3030,6 @@ task uvm_reg::mirror(output uvm_status_e       status,
       end
    end
 
-   m_fname = "";
-   m_lineno = 0;
    XatomicX(0);
 endtask: mirror
 

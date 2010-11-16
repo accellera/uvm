@@ -691,12 +691,12 @@ function void uvm_reg_map::m_set_reg_offset(uvm_reg rg,
                  if (top_map.m_regs_by_offset[info.addr[i]] == rg) begin
                     top_map.m_regs_by_offset[info.addr[i]] = 
                       top_map.m_regs_by_offset_wo[info.addr[i]];
-                    uvm_reg_no_write::remove(rg);
-                    uvm_reg_no_read::remove(top_map.m_regs_by_offset[info.addr[i]]);
+                    uvm_reg_read_only_cbs::remove(rg);
+                    uvm_reg_write_only_cbs::remove(top_map.m_regs_by_offset[info.addr[i]]);
                  end
                  else begin
-                    uvm_reg_no_read::remove(rg);
-                    uvm_reg_no_write::remove(top_map.m_regs_by_offset[info.addr[i]]);
+                    uvm_reg_write_only_cbs::remove(rg);
+                    uvm_reg_read_only_cbs::remove(top_map.m_regs_by_offset[info.addr[i]]);
                  end
                  top_map.m_regs_by_offset_wo.delete(info.addr[i]);
               end
@@ -722,14 +722,14 @@ function void uvm_reg_map::m_set_reg_offset(uvm_reg rg,
                   // and this register is WO or RO, this is OK
                   if (rg_acc == "RO" && rg2_acc == "WO") begin
                      top_map.m_regs_by_offset[addr]    = rg;
-                     uvm_reg_no_write::add(rg);
+                     uvm_reg_read_only_cbs::add(rg);
                      top_map.m_regs_by_offset_wo[addr] = rg2;
-                     uvm_reg_no_read::add(rg2);
+                     uvm_reg_write_only_cbs::add(rg2);
                   end
                   else if (rg_acc == "WO" && rg2_acc == "RO") begin
                      top_map.m_regs_by_offset_wo[addr] = rg;
-                     uvm_reg_no_read::add(rg);
-                     uvm_reg_no_write::add(rg2);
+                     uvm_reg_write_only_cbs::add(rg);
+                     uvm_reg_read_only_cbs::add(rg2);
                   end
                   else begin
                      string a;
@@ -1508,14 +1508,14 @@ function void uvm_reg_map::Xinit_address_mapX();
             // and this register is WO or RO, this is OK
             if (rg_acc == "RO" && rg2_acc == "WO") begin
                top_map.m_regs_by_offset[addr]    = rg;
-               uvm_reg_no_write::add(rg);
+               uvm_reg_read_only_cbs::add(rg);
                top_map.m_regs_by_offset_wo[addr] = rg2;
-               uvm_reg_no_read::add(rg2);
+               uvm_reg_write_only_cbs::add(rg2);
             end
             else if (rg_acc == "WO" && rg2_acc == "RO") begin
                top_map.m_regs_by_offset_wo[addr] = rg;
-               uvm_reg_no_read::add(rg);
-               uvm_reg_no_write::add(rg2);
+               uvm_reg_write_only_cbs::add(rg);
+               uvm_reg_read_only_cbs::add(rg2);
             end
             else begin
                string a;

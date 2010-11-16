@@ -1702,11 +1702,12 @@ task uvm_mem::do_write(uvm_reg_item rw);
    uvm_mem_cb_iter  cbs = new(this);
    uvm_reg_map_info map_info;
    
+   m_fname  = rw.fname;
+   m_lineno = rw.lineno;
+
    if (!Xcheck_accessX(rw, map_info, "burst_write()"))
      return;
 
-   m_fname  = rw.fname;
-   m_lineno = rw.lineno;
    m_write_in_progress = 1'b1;
 
    rw.status = UVM_IS_OK;
@@ -1717,8 +1718,6 @@ task uvm_mem::do_write(uvm_reg_item rw);
       cb.pre_write(rw);
 
    if (rw.status != UVM_IS_OK) begin
-      m_fname = "";
-      m_lineno = 0;
       m_write_in_progress = 1'b0;
 
       return;
@@ -1798,8 +1797,6 @@ task uvm_mem::do_write(uvm_reg_item rw);
                             get_full_name(),range_s,value_s},UVM_MEDIUM)
    end
 
-   m_fname = "";
-   m_lineno = 0;
    m_write_in_progress = 1'b0;
 
 endtask: do_write
@@ -1812,11 +1809,12 @@ task uvm_mem::do_read(uvm_reg_item rw);
    uvm_mem_cb_iter cbs = new(this);
    uvm_reg_map_info map_info;
    
+   m_fname = rw.fname;
+   m_lineno = rw.lineno;
+
    if (!Xcheck_accessX(rw, map_info, "burst_read()"))
      return;
 
-   m_fname = rw.fname;
-   m_lineno = rw.lineno;
    m_read_in_progress = 1'b1;
 
    rw.status = UVM_IS_OK;
@@ -1827,8 +1825,6 @@ task uvm_mem::do_read(uvm_reg_item rw);
       cb.pre_read(rw);
 
    if (rw.status != UVM_IS_OK) begin
-      m_fname = "";
-      m_lineno = 0;
       m_read_in_progress = 1'b0;
 
       return;
@@ -1903,8 +1899,6 @@ task uvm_mem::do_read(uvm_reg_item rw);
                             get_full_name(),range_s,value_s},UVM_MEDIUM)
    end
 
-   m_fname = "";
-   m_lineno = 0;
    m_read_in_progress = 1'b0;
 
 endtask: do_read
@@ -2037,8 +2031,6 @@ task uvm_mem::poke(output uvm_status_e      status,
 
    `uvm_info("RegModel", $psprintf("Poked memory '%s[%0d]' with value 'h%h",
                               get_full_name(), offset, value),UVM_MEDIUM);
-   m_fname = "";
-   m_lineno = 0;
 
 endtask: poke
 
@@ -2089,9 +2081,6 @@ task uvm_mem::peek(output uvm_status_e      status,
 
    `uvm_info("RegModel", $psprintf("Peeked memory '%s[%0d]' has value 'h%h",
                          get_full_name(), offset, value),UVM_MEDIUM);
-   m_fname = "";
-   m_lineno = 0;
-
 endtask: peek
 
 
