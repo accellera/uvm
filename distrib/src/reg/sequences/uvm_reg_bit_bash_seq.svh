@@ -68,8 +68,9 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
       end
 
       // Registers with some attributes are not to be tested
-      if (rg.get_attribute("NO_REG_TESTS") != "" ||
-	  rg.get_attribute("NO_BIT_BASH_TEST") != "") return;
+      if (rg.has_attribute("NO_REG_TESTS") ||
+          rg.has_attribute("NO_BIT_BASH_TEST"))
+            return;
       
       n_bits = rg.get_n_bytes() * 8;
          
@@ -108,10 +109,10 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
             end
          end
          // Any unused bits on the left side of the MSB?
-         while (next_lsb < `UVM_REG_DATA_WIDTH) mode[next_lsb++] = "RO";
+         while (next_lsb < `UVM_REG_DATA_WIDTH)
+            mode[next_lsb++] = "RO";
          
-         if (uvm_report_enabled(UVM_NONE,UVM_INFO,"RegModel"))
-	 	`uvm_info("RegModel", $psprintf("Verifying bits in register %s in map \"%s\"...",
+         `uvm_info("RegModel", $psprintf("Verifying bits in register %s in map \"%s\"...",
                                     rg.get_full_name(), maps[j].get_full_name()),UVM_LOW);
          
          // Bash the kth bit
@@ -245,7 +246,7 @@ class uvm_reg_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_ite
       foreach (regs[i]) begin
          // Registers with some attributes are not to be tested
          if (regs[i].get_attribute("NO_REG_TESTS") != "" ||
-	     regs[i].get_attribute("NO_BIT_BASH_TEST") != "") continue;
+             regs[i].get_attribute("NO_BIT_BASH_TEST") != "") continue;
          
          reg_seq.rg = regs[i];
          reg_seq.start(null,this);

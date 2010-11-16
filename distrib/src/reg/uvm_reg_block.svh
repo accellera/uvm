@@ -482,6 +482,15 @@ virtual class uvm_reg_block extends uvm_object;
    extern virtual function void set_attribute(string name,
                                               string value);
 
+   
+   // Function: has_attribute
+   //
+   // Returns TRUE if attribute exists.
+   //
+   // See <get_attribute> for details on ~inherited~ argument.
+   //
+   extern virtual function bit has_attribute(string name, bit inherited = 1);
+   
 
    // Function: get_attribute
    //
@@ -1625,6 +1634,20 @@ function void uvm_reg_block::set_attribute(string name,
    this.attributes[name] = value;
 
 endfunction: set_attribute
+
+
+// has_attribute
+
+function bit uvm_reg_block::has_attribute(string name, bit inherited = 1);
+   if (attributes.exists(name))
+      return 1;
+
+   if (inherited && parent != null)
+      if (parent.get_attribute(name,1) != "")
+        return 1;
+
+   return 0;
+endfunction
 
 
 // get_attribute

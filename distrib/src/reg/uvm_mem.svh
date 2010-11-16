@@ -407,6 +407,15 @@ class uvm_mem extends uvm_object;
                                               string value);
 
 
+   // Function: has_attribute
+   //
+   // Returns TRUE if attribute exists.
+   //
+   // See <get_attribute> for details on ~inherited~ argument.
+   //
+   extern virtual function bit has_attribute(string name, bit inherited = 1);
+   
+   
    // Function: get_attribute
    //
    // Get an attribute value.
@@ -1465,6 +1474,20 @@ function void uvm_mem::set_attribute(string name,
 
    m_attributes[name] = value;
 endfunction: set_attribute
+
+
+// has_attribute
+
+function bit uvm_mem::has_attribute(string name, bit inherited = 1);
+   if (m_attributes.exists(name))
+      return 1;
+
+   if (inherited && m_parent != null)
+      if (m_parent.get_attribute(name,1) != "")
+        return 1;
+
+   return 0;
+endfunction
 
 
 // get_attribute
