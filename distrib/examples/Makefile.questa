@@ -41,7 +41,7 @@ SRCS    = $(SRCDIR)/uvm_dpi.cc
 # Include file for Questa Makefiles
 #
 
-UVM_VERBOSITY =	UVM_HIGH
+UVM_VERBOSITY =	UVM_MEDIUM
 
 
 # Note that +acc and +vpi have an adverse impact on performance

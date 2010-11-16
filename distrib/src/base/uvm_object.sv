@@ -587,11 +587,13 @@ endfunction
 
 function void uvm_object::m_do_field_check(string field,
                                            uvm_apply_t t_t = UVM_NONE_T);
+ `ifdef UVM_ENABLE_FIELD_CHECKS                                           
   if(m_field_array.exists(field) && (m_field_array[field] == 1)) begin
     uvm_report_error("MLTFLD", $psprintf("Field %s is defined multiple times in type %s",
        field, get_type_name()), UVM_NONE);
   end
   m_field_array[field] = t_t;
+  `endif
 endfunction
 
 // m_print_field_array

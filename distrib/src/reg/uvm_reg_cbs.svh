@@ -424,11 +424,11 @@ class uvm_reg_no_write extends uvm_reg_cbs;
       uvm_reg_cb_iter cbs = new(rg);
       uvm_reg_field flds[$];
 
-      cbs.first();
+      void'(cbs.first());
       while (cbs.get_cb() != get()) begin
          if (cbs.get_cb() == null)
             return;
-         cbs.next();
+         void'(cbs.next());
       end
       uvm_reg_cb::delete(rg, get());
       rg.get_fields(flds);
@@ -509,11 +509,11 @@ class uvm_reg_no_read extends uvm_reg_cbs;
       uvm_reg_cb_iter cbs = new(rg);
       uvm_reg_field flds[$];
 
-      cbs.first();
+      void'(cbs.first());
       while (cbs.get_cb() != get()) begin
          if (cbs.get_cb() == null)
             return;
-         cbs.next();
+         void'(cbs.next());
       end
       uvm_reg_cb::delete(rg, get());
       rg.get_fields(flds);
