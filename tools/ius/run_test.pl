@@ -79,7 +79,7 @@ sub run_the_test {
   local($uvm_dpi_lib) = qx($uvm_home/bin/uvm_dpi_name);
   
   # FIXME do we really need -timescale here
-  $ius = "irun -uvm -uvmhome $uvm_home -uvmnoautocompile $uvm_home/src/dpi/uvm_dpi.cc +incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv $ius_comp_opts $ius_sim_opts test.sv -l irun.log +UVM_TESTNAME=test";
+  $ius = "irun -uvmhome $uvm_home -uvmnoautocompile $uvm_home/src/dpi/uvm_dpi.cc +incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv $ius_comp_opts $ius_sim_opts test.sv -l irun.log +UVM_TESTNAME=test";
   $ius .= " -nostdout" unless $opt_v;
 
   print "$ius\n" if $opt_v;
