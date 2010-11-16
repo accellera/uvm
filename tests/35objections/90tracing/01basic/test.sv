@@ -67,7 +67,7 @@ module top;
       super.new(name,parent);
       tc = new("tc", this);
       uvm_report_cb::add(null,ctchr);
-      uvm_test_done.trace_mode(1);
+      void'(uvm_test_done.trace_mode(1));
     endfunction
 
     function void report();
