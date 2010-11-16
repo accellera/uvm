@@ -1648,6 +1648,9 @@ task uvm_reg_map::do_write(uvm_reg_item rw);
   uvm_reg_adapter adapter = system_map.get_adapter();
   uvm_sequencer_base sequencer = system_map.get_sequencer();
 
+  if (rw.parent == null)
+    rw.parent = new("default_parent_seq");
+
   if (adapter == null) begin
     rw.set_sequencer(sequencer);
     rw.parent.start_item(rw,rw.prior);
@@ -1668,6 +1671,9 @@ task uvm_reg_map::do_read(uvm_reg_item rw);
   uvm_reg_map system_map = get_root_map();
   uvm_reg_adapter adapter = system_map.get_adapter();
   uvm_sequencer_base sequencer = system_map.get_sequencer();
+
+  if (rw.parent == null)
+    rw.parent = new("default_parent_seq");
 
   if (adapter == null) begin
     rw.set_sequencer(sequencer);

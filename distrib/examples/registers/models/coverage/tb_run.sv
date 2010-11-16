@@ -67,13 +67,12 @@ class tb_test extends uvm_test;
       `uvm_info("Test", "Generating and uploading 100 configurations...", UVM_LOW)
       
       repeat (100) begin
-         uvm_sequence_base seq = new;
          uvm_status_e status;
 
          void'(env.regmodel.randomize() with {
                                               Ra.F2.value == Rb.F2.value;
                                               });
-         env.regmodel.update(status, .parent(seq));
+         env.regmodel.update(status);
          env.regmodel.sample_values();
       end
      
