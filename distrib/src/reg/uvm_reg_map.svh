@@ -1735,7 +1735,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
               
     foreach(addrs[i]) begin: foreach_addr
 
-      uvm_sequence_item bus_req = new("bus_wr");
+      uvm_sequence_item bus_req;
       uvm_reg_bus_op rw_access;
       uvm_reg_data_t data;
 
@@ -1756,13 +1756,12 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
       rw_access.n_bits  = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
       rw_access.byte_en = byte_en;
 
+      bus_req = adapter.reg2bus(rw_access);
       bus_req.set_sequencer(sequencer);
       rw.parent.start_item(bus_req,rw.prior);
 
       if (rw.parent != null && rw_access.addr == addrs[0])
         rw.parent.mid_do(rw);
-
-      bus_req = adapter.reg2bus(rw_access);
 
       rw.parent.finish_item(bus_req);
       bus_req.end_event.wait_on();
@@ -1855,7 +1854,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
               
     foreach (addrs[i]) begin
 
-      uvm_sequence_item bus_req = new("bus_rd");
+      uvm_sequence_item bus_req;
       uvm_reg_bus_op rw_access;
       uvm_reg_data_logic_t data;
        
@@ -1873,6 +1872,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       rw_access.byte_en = byte_en;
       rw_access.n_bits = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
                           
+      bus_req = adapter.reg2bus(rw_access);
       bus_req.set_sequencer(sequencer);
       rw.parent.start_item(bus_req,rw.prior);
 
@@ -1881,7 +1881,6 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
         rw.parent.mid_do(rw);
       end
 
-      bus_req = adapter.reg2bus(rw_access);
       rw.parent.finish_item(bus_req);
       bus_req.end_event.wait_on();
 
