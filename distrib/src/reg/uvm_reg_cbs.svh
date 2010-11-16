@@ -426,8 +426,12 @@ class uvm_reg_no_write extends uvm_reg_cbs;
 
       void'(cbs.first());
       while (cbs.get_cb() != get()) begin
+<<<<<<< HEAD
          if (cbs.get_cb() == null)
             return;
+=======
+         if (cbs.get_cb() == null) return;
+>>>>>>> d2dfc0c7b48ed1cfceeeb0dae0e8c6610d509630
          void'(cbs.next());
       end
       uvm_reg_cb::delete(rg, get());
@@ -511,8 +515,12 @@ class uvm_reg_no_read extends uvm_reg_cbs;
 
       void'(cbs.first());
       while (cbs.get_cb() != get()) begin
+<<<<<<< HEAD
          if (cbs.get_cb() == null)
             return;
+=======
+         if (cbs.get_cb() == null) return;
+>>>>>>> d2dfc0c7b48ed1cfceeeb0dae0e8c6610d509630
          void'(cbs.next());
       end
       uvm_reg_cb::delete(rg, get());

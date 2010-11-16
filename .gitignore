@@ -21,3 +21,14 @@ vc_hdrs.h
 ucli.key
 *.err
 
+# editor tmp / save files
+*.orig
+*.swp
+
+# questa results are not for the vc
+vsim.wlf
+questa.tops
+work
+*.vstf
+
+
