@@ -80,8 +80,8 @@ virtual class uvm_reg_file extends uvm_object;
    // Group: Attributes
    //------------------
 
+   // Function: set_attribute
    //
-   // FUNCTION: set_attribute
    // Set an attribute.
    //
    // Set the specified attribute to the specified value for this register file.
@@ -92,8 +92,18 @@ virtual class uvm_reg_file extends uvm_object;
    //
    extern virtual function void   set_attribute   (string name, string value);
 
+
+   // Function: has_attribute
    //
-   // FUNCTION: get_attribute
+   // Returns TRUE if attribute exists.
+   //
+   // See <get_attribute> for details on ~inherited~ argument.
+   //
+   extern virtual function bit has_attribute(string name, bit inherited = 1);
+   
+   
+   // Function: get_attribute
+   //
    // Get an attribute value.
    //
    // Get the value of the specified attribute for this register file.
@@ -109,8 +119,9 @@ virtual class uvm_reg_file extends uvm_object;
    // 
    extern virtual function string get_attribute   (string name, bit inherited = 1);
 
+
+   // Function: get_attributes
    //
-   // FUNCTION: get_attributes
    // Get all attribute values.
    //
    // Get the name of all attribute for this register file.
@@ -142,14 +153,14 @@ virtual class uvm_reg_file extends uvm_object;
    extern virtual function string        get_full_name();
 
    //
-   // FUNCTION: get_parent
+   // Function: get_parent
    // Get the parent block
    //
    extern virtual function uvm_reg_block get_parent ();
    extern virtual function uvm_reg_block get_block  ();
 
    //
-   // FUNCTION: get_regfile
+   // Function: get_regfile
    // Get the parent register file
    //
    // Returns ~null~ if this register file is instantiated in a block.
@@ -320,6 +331,20 @@ function void uvm_reg_file::set_attribute(string name,
 
    this.attributes[name] = value;
 endfunction: set_attribute
+
+
+// has_attribute
+
+function bit uvm_reg_file::has_attribute(string name, bit inherited = 1);
+   if (attributes.exists(name))
+      return 1;
+
+   if (inherited && parent != null)
+      if (parent.get_attribute(name,1) != "")
+        return 1;
+
+   return 0;
+endfunction
 
 
 // get_attribute
