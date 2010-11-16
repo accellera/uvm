@@ -82,10 +82,10 @@ module top;
       super.new(name,parent);
       tc = new("tc", this);
       uvm_report_cb::add(null,ctchr);
-      uvm_test_done.trace_mode(1);
-      tc.mc.lc.from_bottom.trace_mode(1);
+      void'(uvm_test_done.trace_mode(1));
+      void'(tc.mc.lc.from_bottom.trace_mode(1));
       //don't trace the middle objections
-      tc.from_top.trace_mode(1);
+      void'(tc.from_top.trace_mode(1));
     endfunction
 
     function void report();
