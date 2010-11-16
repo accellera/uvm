@@ -20,14 +20,17 @@
 // -------------------------------------------------------------
 // 
 
-//
-// TITLE: Bit Bashing Test Sequences
-//
+//------------------------------------------------------------------------------
+// Title: Bit Bashing Test Sequences
+//------------------------------------------------------------------------------
+// This section defines classes that test individual bits of the registers
+// defined in a register model.
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // Class: uvm_reg_single_bit_bash_seq
 //
-// Verify the implementation of a register
+// Verify the implementation of a single register
 // by attempting to write 1's and 0's to every bit in it,
 // via every address map in which the register is mapped,
 // making sure that the resulting value matches the mirrored value.

@@ -19,59 +19,43 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// Title: TLM Extensions & Generic Payload
+// Title: TLM Generic Payload & Extensions
 //----------------------------------------------------------------------
-//
-//
 // The Generic Payload transaction represents a generic 
 // bus read/write access. It is used as the default transaction in
 // TLM2 blocking and nonblocking transport interfaces.
+//----------------------------------------------------------------------
+
+
+//---------------
+// Group: Globals
+//---------------
 //
-// Topic: Globals
 // Defines, Constants, enums.
-//
-// <`UVM_TLM_ADDR_SIZE>        : Define generic <uvm_tlm_addr_size> width of
-//                               the generic payload
-//
-// <uvm_tlm_addr_size>         : Constant to hold default generic payload
-//                               address size
-//
-// <uvm_tlm_command_e>         : Command attribute type definition
-//
-// <uvm_tlm_response_status_e> : Respone status attribute type definition
-//
-// Topic: Generic Payload
-// Generic Payload definition
-//
-// <uvm_tlm_generic_payload>   : base object, called the generic payload, for 
-// moving data between components. In SystemC this is the primary 
-// transaction vehicle. In SystemVerilog this is the default transaction 
-// type, but it is not the only type that can be used.
-//
-// <uvm_tlm_gp>                : A shorter name for <uvm_tlm_generic_payload>
-//
-// <uvm_tlm_extension_base>    : non-parameetrized base class
-//
-// <uvm_tlm_extension>         : parameterized with arbitrary type
-//
 
-// Section: Globals
 
-//------------------------------------------------------------------------------
-// MACRO: `UVM_TLM_ADDR_SIZE
+// Macro: `UVM_TLM_ADDR_SIZE
 // 
-// Define generic uvm_tlm_addr_size width of TLM GP
+// Define generic uvm_tlm_addr_size width of TLM generic payload
 
 `define UVM_TLM_ADDR_SIZE 64
 
-// const: uvm_tlm_addr_size
+
+// Const: uvm_tlm_addr_size
 //
-// Constant to hold default TLM GP Address size.
+// Constant to hold default TLM GP Address size
 //
 
 const int unsigned uvm_tlm_addr_size = `UVM_TLM_ADDR_SIZE;
 
+
+// Typedef: uvm_tlm_addr_t
+//
+// Constant to hold default TLM generic payload address size
+//
+
 typedef bit[`UVM_TLM_ADDR_SIZE-1:0] uvm_tlm_addr_t;
+
 
 // Enum: uvm_tlm_command_e
 //
@@ -89,6 +73,7 @@ typedef enum
     UVM_TLM_WRITE_COMMAND,
     UVM_TLM_IGNORE_COMMAND
 } uvm_tlm_command_e;
+
 
 // Enum: uvm_tlm_response_status_e
 //
@@ -124,10 +109,14 @@ typedef enum
 typedef class uvm_tlm_extension_base;
 
 
+//-----------------------
+// Group: Generic Payload
+//-----------------------
+
 //----------------------------------------------------------------------
 // Class: uvm_tlm_generic_payload
 //
-// This class provides a transaction architecture commonly used in
+// This class provides a transaction definition commonly used in
 // memory-mapped bus-based systems.  It's intended to be a general
 // purpose transaction class that lends itself to many applications. The
 // class is derived from uvm_sequence_item which enables it to be
@@ -379,7 +368,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    `uvm_object_utils_end
    
 
-  // function: new
+  // Function: new
   //
   // Create a new instance of the generic payload.  Initialize all the
   // members to their default values.
@@ -433,7 +422,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    endfunction
    
 
-  // function: convert2string
+  // Function: convert2string
   //
   // Convert the contents of the class to a string suitable for
   // printing.
@@ -564,7 +553,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
     return m_length;
   endfunction
 
-  // function: set_data_length
+  // Function: set_data_length
   // Set the value of the <m_length>
    
    virtual function void set_data_length(int unsigned length);
@@ -749,7 +738,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
 endclass
 
 //----------------------------------------------------------------------
-// class: uvm_tlm_gp
+// Class: uvm_tlm_gp
 //
 // This typedef provides a short, more convenient name for the
 // <uvm_tlm_generic_payload> type.
@@ -776,20 +765,20 @@ typedef uvm_tlm_generic_payload uvm_tlm_gp;
 //
 virtual class uvm_tlm_extension_base extends uvm_object;
 
-  // function: new
+  // Function: new
   //
   function new(string name = "");
     super.new(name);
   endfunction
 
-  // function: get_type_handle
+  // Function: get_type_handle
   //
   // An interface to polymorphically retrieve a handle that uniquely
   // identifies the type of the sub-class
 
   pure virtual function uvm_tlm_extension_base get_type_handle();
 
-  // function: get_type_handle_name
+  // Function: get_type_handle_name
   //
   // An interface to polymorphically retrieve the name that uniquely
   // identifies the type of the sub-class
@@ -800,13 +789,14 @@ virtual class uvm_tlm_extension_base extends uvm_object;
     super.do_copy(rhs);
   endfunction
 
-  // function: create
+  // Function: create
   //
    
   virtual function uvm_object create (string name="");
   endfunction
 
 endclass
+
 
 //----------------------------------------------------------------------
 // Class: uvm_tlm_extension
@@ -839,19 +829,19 @@ endclass
 
 class uvm_tlm_extension #(type T=int) extends uvm_tlm_extension_base;
 
-  typedef uvm_tlm_extension#(T) this_type;
+   typedef uvm_tlm_extension#(T) this_type;
 
-  local static this_type m_my_tlm_ext_type = get_tlm_gp_ext_type();
+   local static this_type m_my_tlm_ext_type = get_tlm_gp_ext_type();
 
-  // function: new
-  //
-  // creates a new extension object.
+   // Function: new
+   //
+   // creates a new extension object.
 
-  function new(string name="");
-    super.new(name);
-  endfunction
+   function new(string name="");
+     super.new(name);
+   endfunction
 
-   // function: get_tlm_gp_ext_type
+   // Function: get_tlm_gp_ext_type
    //
    // Return the type of this TLM extension.
    // This method is used to identify the type of the extension to retrieve

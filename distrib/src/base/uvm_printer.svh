@@ -35,37 +35,18 @@ parameter UVM_STDOUT = 1;  // Writes to standard out and logfile
 //
 // CLASS: uvm_printer
 //
-// The uvm_printer class provides an interface for printing <uvm_objects> in
-// various formats. Subtypes of uvm_printer implement different print formats,
-// or policies.
+// The uvm_printer class provides the base interface for printing <uvm_objects>
+// in various formats. Subtypes of uvm_printer implement different print
+// formats, or "policies".
 //
 // A user-defined printer format can be created, or one of the following four
 // built-in printers can be used:
 //
 // (see uvm_ref_printer.gif)
 //
-// - <uvm_printer> - provides raw, essentially un-formatted output
-//
-// - <uvm_table_printer> - prints the object in a tabular form. 
-//
-// - <uvm_tree_printer> - prints the object in a tree form. 
-//
-// - <uvm_line_printer> - prints the information on a single line, but uses the
-//   same object separators as the tree printer.
-//
-// Printers have knobs that you use to control what and how information is printed.
-// These knobs are contained in separate knob classes:
-//
-// (see uvm_ref_printer_knobs.gif)
-//
-// - <uvm_printer_knobs> - common printer settings
-//
-// - <uvm_hier_printer_knobs> - settings for printing hierarchically
-//
-// - <uvm_table_printer_knobs> - settings specific to the table printer
-//
-// - <uvm_tree_printer_knobs> - settings specific to the tree printer
-//
+// Printers have knobs that you use to control what and how information is
+// printed. This section defines the knobs classes used by each built-in
+// printer policy.
 //
 // For convenience, global instances of each printer type are available for
 // direct reference in your testbenches.
@@ -75,9 +56,20 @@ parameter UVM_STDOUT = 1;  // Writes to standard out and logfile
 //  -  <uvm_default_table_printer>
 //  -  <uvm_default_printer> (set to default_table_printer by default)
 //
-// The <uvm_default_printer> is used by <uvm_object::print> and <uvm_object::sprint>
-// when the optional ~uvm_printer~ argument to these methods is not provided. 
+// The <uvm_default_printer> is used by <uvm_object::print> and
+// <uvm_object::sprint> when the optional ~uvm_printer~ argument to these
+// methods is not provided. 
 //
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
+//
+// CLASS: uvm_printer
+//
+// The uvm_printer class provides an interface for printing <uvm_objects> in
+// various formats. Subtypes of uvm_printer implement different print formats,
+// or policies.
 //------------------------------------------------------------------------------
 
 class uvm_printer;
@@ -339,7 +331,7 @@ endclass
 //
 // CLASS: uvm_table_printer
 //
-// The table printer prints output in a tabular format.
+// Prints output in a tabular format.
 //
 // The following shows sample output from the table printer.
 //
@@ -392,10 +384,9 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_tree_printer
+// Class: uvm_tree_printer
 //
-// By overriding various methods of the <uvm_printer> super class,
-// the tree printer prints output in a tree format.
+// Prints output in a hierarchical tree format.
 //
 // The following shows sample output from the tree printer.
 //
@@ -453,9 +444,10 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_line_printer
+// Class: uvm_line_printer
 //
-// The line printer prints output in a line format.
+// Prints output on a single line. Same as <uvm_tree_printer> but without line
+// feeds.
 //
 // The following shows sample output from the line printer.
 //
@@ -483,9 +475,9 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_printer_knobs
+// Class: uvm_printer_knobs
 //
-// The ~uvm_printer_knobs~ class defines the printer settings available to all
+// Defines the printer settings available to all
 // printer subtypes.  Printer subtypes may subtype this class to provide
 // additional knobs for their specific format. For example, the
 // <uvm_table_printer> uses the <uvm_table_printer_knobs>, which defines knobs
@@ -692,11 +684,10 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_hier_printer_knobs
+// Class: uvm_hier_printer_knobs
 //
-// The ~uvm_hier_printer_knobs~ is a simple container class that extends
-// <uvm_printer_knobs> with settings for printing information
-// hierarchically.
+// Extends <uvm_printer_knobs> with settings specific to printing
+// in hierarchical format.
 //------------------------------------------------------------------------------
 
 class uvm_hier_printer_knobs extends uvm_printer_knobs;
@@ -724,11 +715,10 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_table_printer_knobs
+// Class: uvm_table_printer_knobs
 //
-// The ~uvm_table_printer_knobs~ is a simple container class that extends
-// <uvm_hier_printer_knobs> with settings specific to printing
-// in table format.
+// Extends <uvm_hier_printer_knobs> with settings specific to
+// printing in table format.
 //------------------------------------------------------------------------------
 
 class uvm_table_printer_knobs extends uvm_hier_printer_knobs;
@@ -765,11 +755,10 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_tree_printer_knobs
+// Class: uvm_tree_printer_knobs
 //
-// The ~uvm_tree_printer_knobs~ is a simple container class that extends
-// <uvm_hier_printer_knobs> with settings specific to printing
-// in tree format.
+// Extends <uvm_hier_printer_knobs> with settings specific to
+// printing in tree format.
 //------------------------------------------------------------------------------
 
 class uvm_tree_printer_knobs extends uvm_hier_printer_knobs;

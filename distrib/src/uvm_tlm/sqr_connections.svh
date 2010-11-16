@@ -33,8 +33,16 @@
   task put(input RSP rsp_arg); imp.put(rsp_arg); endtask
 
 //-----------------------------------------------------------------------------
+// Title: Sequence Item Pull Ports
 //
-// CLASS: uvm_seq_item_pull_port #(REQ,RSP)
+// This section defines the port, export, and imp port classes for
+// communicating sequence items between <uvm_sequencer #(REQ,RSP)> and
+// <uvm_driver #(REQ,RSP)>.
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//
+// Class: uvm_seq_item_pull_port #(REQ,RSP)
 //
 // UVM provides a port, export, and imp connector for use in sequencer-driver
 // communication. All have standard port connector constructors, except that
@@ -55,7 +63,7 @@ endclass
 
 //-----------------------------------------------------------------------------
 //
-// CLASS: uvm_seq_item_pull_export #(REQ,RSP)
+// Class: uvm_seq_item_pull_export #(REQ,RSP)
 //
 // This export type is used in sequencer-driver communication. It has the
 // standard constructor for exports.
@@ -71,7 +79,7 @@ endclass
 
 //-----------------------------------------------------------------------------
 //
-// CLASS: uvm_seq_item_pull_imp #(REQ,RSP,IMP)
+// Class: uvm_seq_item_pull_imp #(REQ,RSP,IMP)
 //
 // This imp type is used in sequencer-driver communication. It has the
 // standard constructor for imp-type ports.

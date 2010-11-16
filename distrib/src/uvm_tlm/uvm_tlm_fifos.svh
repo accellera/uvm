@@ -22,20 +22,17 @@
 
 typedef class uvm_tlm_event;
 
+//------------------------------------------------------------------------------
 //
-// TITLE: TLM FIFOs
+// Title: TLM FIFO Classes
 //
-// The following classes are defined herein
+// This section defines TLM-based FIFO classes. 
 //
-// <uvm_tlm_fifo>           : FIFO with put/get interfaces
-// 
-//
-// <uvm_tlm_analysis_fifo>  : FIFO that can be written to by an analysis port
-//
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_tlm_fifo
+// Class: uvm_tlm_fifo
 //
 // This class provides storage of transactions between two independently running
 // processes. Transactions are put into the FIFO via the ~put_export~. 
@@ -191,7 +188,7 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_tlm_analysis_fifo
+// Class: uvm_tlm_analysis_fifo
 //
 // An analysis_fifo is a <uvm_tlm_fifo> with an unbounded size and a write interface.
 // It can be used any place a <uvm_analysis_imp> is used. Typical usage is

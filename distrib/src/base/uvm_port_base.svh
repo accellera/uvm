@@ -26,15 +26,8 @@ const string s_spaces = "                       ";
 typedef class uvm_port_component_base;
 typedef uvm_port_component_base uvm_port_list[string];
 
+
 // TITLE: Port Base Classes
-//
-// The following classes are defined herein
-//
-// <uvm_port_component_base>    : Base class for port components
-//
-// <uvm_port_component #(PORT)> : Port component class
-//
-// <uvm_port_base #(IF)>        : Port base class
 //
 
 

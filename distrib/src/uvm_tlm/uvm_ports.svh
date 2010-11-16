@@ -21,8 +21,15 @@
 //----------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
+// Title: TLM Port Classes
+//------------------------------------------------------------------------------
+// The following classes define the TLM port classes.
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
 //
-// CLASS: uvm_*_port #(T)
+// Class: uvm_*_port #(T)
 //
 // These unidirectional ports are instantiated by components that ~require~,
 // or ~use~, the associated interface to convey transactions. A port can
@@ -145,7 +152,7 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_*_port #(REQ,RSP)
+// Class: uvm_*_port #(REQ,RSP)
 //
 // These bidirectional ports are instantiated by components that ~require~,
 // or ~use~, the associated interface to convey transactions. A port can

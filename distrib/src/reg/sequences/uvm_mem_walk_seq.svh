@@ -21,12 +21,16 @@
 // 
 
 
+//------------------------------------------------------------------------------
+// Title: Memory Walking-Ones Test Sequences
 //
-// TITLE: Memory Walk test Sequence
-//
+// This section defines sequences for applying a "walking-ones"
+// algorithm on one or more memories.
+//------------------------------------------------------------------------------
 
-//
-// CLASS: uvm_mem_single_walk_seq
+
+//------------------------------------------------------------------------------
+// Class: uvm_mem_single_walk_seq
 //
 // Runs the walking-ones algorithm on the memory given by the <mem> property,
 // which must be assigned prior to starting this sequence.
@@ -42,6 +46,7 @@
 //|   if (k == last addr)
 //|     read addr=k, expect data=~k
 //
+//------------------------------------------------------------------------------
 
 class uvm_mem_single_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
@@ -158,16 +163,18 @@ class uvm_mem_single_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_
 endclass: uvm_mem_single_walk_seq
 
 
+
+//------------------------------------------------------------------------------
+// Class: uvm_mem_walk_seq
 //
-// CLASS: uvm_mem_walk_seq
-//
-// Verify the all memories in a block
+// Verifies the all memories in a block
 // by executing the <uvm_mem_single_walk_seq> sequence on
 // every memory within it.
 //
 // Blocks and memories with the ~NO_REG_TESTS~ or
 // the ~NO_MEM_WALK_TEST~ attribute are not verified.
 //
+//------------------------------------------------------------------------------
 
 class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 

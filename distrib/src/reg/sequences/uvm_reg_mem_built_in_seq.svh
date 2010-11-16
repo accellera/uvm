@@ -20,47 +20,14 @@
 // -------------------------------------------------------------
 // 
 
-//
-// TITLE: Built-In Test Sequences
-//
-// This sequence is able to execute a user-defined selection of the
-// pre-defined register and memory test sequences
-//
-
-//
-// Type: uvm_reg_mem_tests_e
-// Select which pre-defined test sequence to execute.
-//
-// Multiple test sequences may be selected by adding their
-// respective symbolic values.
-//
-// UVM_DO_REG_HW_RESET      - <uvm_reg_hw_reset_seq>
-// UVM_DO_REG_BIT_BASH      - <uvm_reg_bit_bash_seq>
-// UVM_DO_REG_ACCESS        - <uvm_reg_access_seq>
-// UVM_DO_MEM_ACCESS        - <uvm_mem_access_seq>
-// UVM_DO_SHARED_ACCESS     - <uvm_reg_mem_shared_access_seq>
-// UVM_DO_MEM_WALK          - <uvm_mem_walk_seq>
-// UVM_DO_ALL_REG_MEM_TESTS - All of the above
-//
-// Test sequences, when selected, are executed in the
-// order in which they are specified above.
-//
-typedef enum bit [63:0] {
-  UVM_DO_REG_HW_RESET      = 64'h0000_0000_0000_0001,
-  UVM_DO_REG_BIT_BASH      = 64'h0000_0000_0000_0002,
-  UVM_DO_REG_ACCESS        = 64'h0000_0000_0000_0004,
-  UVM_DO_MEM_ACCESS        = 64'h0000_0000_0000_0008,
-  UVM_DO_SHARED_ACCESS     = 64'h0000_0000_0000_0010,
-  UVM_DO_MEM_WALK          = 64'h0000_0000_0000_0020,
-  UVM_DO_ALL_REG_MEM_TESTS = 64'hffff_ffff_ffff_ffff 
-} uvm_reg_mem_tests_e;
-
-
-//
+//------------------------------------------------------------------------------
 // Class: uvm_reg_mem_built_in_seq
+//
 // Sequence that executes a user-defined selection
 // of pre-defined register and memory test sequences.
 //
+//------------------------------------------------------------------------------
+
 class uvm_reg_mem_built_in_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
    `uvm_object_utils(uvm_reg_mem_built_in_seq)

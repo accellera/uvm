@@ -20,6 +20,9 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
+// Title: Pool Classes
+// This section defines the <uvm_pool #(T)> class and derivative.
+
 //------------------------------------------------------------------------------
 //
 // CLASS: uvm_pool #(KEY,T)

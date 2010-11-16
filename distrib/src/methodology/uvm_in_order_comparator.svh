@@ -21,10 +21,16 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
+// Title: Comparators
+//
+// The following classes define comparators for objects and built-in types.
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //
 // CLASS: uvm_in_order_comparator #(T,comp_type,convert,pair_type)
 //
-// Compares two streams of data objects of type T, a parameter to this class.
+// Compares two streams of data objects of the type parameter, T.
 // These transactions may either be classes or built-in types. To be
 // successfully compared, the two streams of data must be in the same order.
 // Apart from that, there are no assumptions made about the relative timing of

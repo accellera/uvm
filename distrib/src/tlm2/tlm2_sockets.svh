@@ -19,11 +19,12 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// title: Sockets
+// Title: TLM Sockets
 //
-// Each *_socket class is derived from a corresponding *_socket_base
-// class.  The base class contains the "meat" of the class, the derived
-// classes (in this file) contain the connection semantics.
+// Each uvm_tlm_*_socket class is derived from a corresponding
+// uvm_tlm_*_socket_base class.  The base class contains most of the
+// implementation of the class, The derived classes (in this file)
+// contain the connection semantics.
 //
 // Sockets come in several flavors: Each socket is either an initiator or a 
 // target, a passthrough or a terminator. Further, any particular socket 
@@ -42,36 +43,18 @@
 //  HAS-A refers to the ownership relationship. 
 // For example if you say D is a B that means that D is derived from base B. 
 // If you say object A HAS-A B that means that B is a member of A.
-//
-// The termination sockets are
-//
-//    -  <uvm_tlm_b_target_socket>
-//
-//    -  <uvm_tlm_b_initiator_socket>
-//
-//    -  <uvm_tlm_nb_target_socket>
-//
-//    -  <uvm_tlm_nb_initiator_socket>           
-//
-// The passthrough sockets are
-//
-//    -  <uvm_tlm_b_passthrough_initiator_socket>
-//
-//    -  <uvm_tlm_b_passthrough_target_socket>
-//
-//    -  <uvm_tlm_nb_passthrough_initiator_socket>
-//
-//    -  <uvm_tlm_nb_passthrough_target_socket>
-//
+//----------------------------------------------------------------------
+
 
 //----------------------------------------------------------------------
-// class: uvm_tlm_b_initiator_socket
+// Class: uvm_tlm_b_initiator_socket
 //
 // IS-A forward port; has no backward path except via the payload
 // contents
 //----------------------------------------------------------------------
+
 class uvm_tlm_b_initiator_socket #(type T=uvm_tlm_generic_payload)
-  extends uvm_tlm_b_initiator_socket_base #(T);
+                           extends uvm_tlm_b_initiator_socket_base #(T);
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -79,7 +62,7 @@ class uvm_tlm_b_initiator_socket #(type T=uvm_tlm_generic_payload)
    
    // Function: Connect
    //
-   // Connect this socket to a <uvm_tlm_b_target_socket>
+   // Connect this socket to the specified <uvm_tlm_b_target_socket>
   function void connect(this_type provider);
 
     uvm_tlm_b_passthrough_initiator_socket_base #(T) initiator_pt_socket;
@@ -96,7 +79,8 @@ class uvm_tlm_b_initiator_socket #(type T=uvm_tlm_generic_payload)
       return;
 
     c = get_comp();
-    `uvm_error_context(get_type_name(), "type mismatch in connect -- connection cannot be completed", c)
+    `uvm_error_context(get_type_name(),
+       "type mismatch in connect -- connection cannot be completed", c)
 
   endfunction
 
@@ -114,6 +98,7 @@ endclass
 //|   task b_transport(T t, ref time delay);
 //
 //----------------------------------------------------------------------
+
 class uvm_tlm_b_target_socket #(type T=uvm_tlm_generic_payload,
                              type IMP=int)
   extends uvm_tlm_b_target_socket_base #(T);
@@ -127,7 +112,7 @@ class uvm_tlm_b_target_socket #(type T=uvm_tlm_generic_payload,
 
    // Function: Connect
    //
-   // Connect this socket to a <uvm_tlm_b_initiator_socket>
+   // Connect this socket to the specified <uvm_tlm_b_initiator_socket>
   function void connect(this_type provider);
 
     uvm_component c;
@@ -135,7 +120,8 @@ class uvm_tlm_b_target_socket #(type T=uvm_tlm_generic_payload,
     super.connect(provider);
 
     c = get_comp();
-    `uvm_error_context(get_type_name(), "You cannot call connect() on a target termination socket", c)
+    `uvm_error_context(get_type_name(),
+       "You cannot call connect() on a target termination socket", c)
   endfunction
 
   `UVM_TLM_B_TRANSPORT_IMP(m_imp, T, t, delay)
@@ -153,6 +139,7 @@ endclass
 //|   function uvm_tlm_sync_e nb_transport_bw(T t, ref P p, ref time delay);
 //
 //----------------------------------------------------------------------
+
 class uvm_tlm_nb_initiator_socket #(type T=uvm_tlm_generic_payload,
                                  type P=uvm_tlm_phase_e,
                                  type IMP=int)
@@ -167,7 +154,7 @@ class uvm_tlm_nb_initiator_socket #(type T=uvm_tlm_generic_payload,
 
    // Function: Connect
    //
-   // Connect this socket to a <uvm_tlm_nb_target_socket>
+   // Connect this socket to the specified <uvm_tlm_nb_target_socket>
    function void connect(this_type provider);
 
     uvm_tlm_nb_passthrough_initiator_socket_base #(T,P) initiator_pt_socket;
@@ -193,7 +180,8 @@ class uvm_tlm_nb_initiator_socket #(type T=uvm_tlm_generic_payload,
     end
     
     c = get_comp();
-    `uvm_error_context(get_type_name(), "type mismatch in connect -- connection cannot be completed", c)
+    `uvm_error_context(get_type_name(),
+        "type mismatch in connect -- connection cannot be completed", c)
 
   endfunction
 
@@ -211,6 +199,7 @@ endclass
 //|   function uvm_tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);
 //
 //----------------------------------------------------------------------
+
 class uvm_tlm_nb_target_socket #(type T=uvm_tlm_generic_payload,
                               type P=uvm_tlm_phase_e,
                               type IMP=int)
@@ -226,7 +215,7 @@ class uvm_tlm_nb_target_socket #(type T=uvm_tlm_generic_payload,
 
    // Function: connect
    //
-   // Connect this socket to a <uvm_tlm_nb_initiator_socket>
+   // Connect this socket to the specified <uvm_tlm_nb_initiator_socket>
   function void connect(this_type provider);
 
     uvm_component c;
@@ -234,18 +223,21 @@ class uvm_tlm_nb_target_socket #(type T=uvm_tlm_generic_payload,
     super.connect(provider);
 
     c = get_comp();
-    `uvm_error_context(get_type_name(), "You cannot call connect() on a target termination socket", c)
+    `uvm_error_context(get_type_name(),
+       "You cannot call connect() on a target termination socket", c)
   endfunction
 
   `UVM_TLM_NB_TRANSPORT_FW_IMP(m_imp, T, P, t, p, delay)
 
 endclass
 
+
 //----------------------------------------------------------------------
 // Class: uvm_tlm_b_passthrough_initiator_socket
 //
 // IS-A forward port;
 //----------------------------------------------------------------------
+
 class uvm_tlm_b_passthrough_initiator_socket #(type T=uvm_tlm_generic_payload)
   extends uvm_tlm_b_passthrough_initiator_socket_base #(T);
 
@@ -255,7 +247,7 @@ class uvm_tlm_b_passthrough_initiator_socket #(type T=uvm_tlm_generic_payload)
 
    // Function : connect
    //
-   // Connect this socket to a <uvm_tlm_b_target_socket>
+   // Connect this socket to the specified <uvm_tlm_b_target_socket>
   function void connect(this_type provider);
 
     uvm_tlm_b_passthrough_initiator_socket_base #(T) initiator_pt_socket;
@@ -292,7 +284,7 @@ class uvm_tlm_b_passthrough_target_socket #(type T=uvm_tlm_generic_payload)
    
    // Function : connect
    //
-   // Connect this socket to a <uvm_tlm_b_initiator_socket>
+   // Connect this socket to the specified <uvm_tlm_b_initiator_socket>
   function void connect(this_type provider);
 
     uvm_tlm_b_passthrough_target_socket_base #(T) target_pt_socket;
@@ -307,7 +299,8 @@ class uvm_tlm_b_passthrough_target_socket #(type T=uvm_tlm_generic_payload)
       return;
 
     c = get_comp();
-    `uvm_error_context(get_type_name(), "type mismatch in connect -- connection cannot be completed", c)
+    `uvm_error_context(get_type_name(),
+       "type mismatch in connect -- connection cannot be completed", c)
   endfunction
 
 endclass
@@ -319,6 +312,7 @@ endclass
 //
 // IS-A forward port; HAS-A backward export
 //----------------------------------------------------------------------
+
 class uvm_tlm_nb_passthrough_initiator_socket #(type T=uvm_tlm_generic_payload,
                                              type P=uvm_tlm_phase_e)
   extends uvm_tlm_nb_passthrough_initiator_socket_base #(T,P);
@@ -329,7 +323,7 @@ class uvm_tlm_nb_passthrough_initiator_socket #(type T=uvm_tlm_generic_payload,
 
    // Function : connect
    //
-   // Connect this socket to a <uvm_tlm_nb_target_socket>
+   // Connect this socket to the specified <uvm_tlm_nb_target_socket>
   function void connect(this_type provider);
 
     uvm_tlm_nb_passthrough_initiator_socket_base #(T,P) initiator_pt_socket;
@@ -356,7 +350,8 @@ class uvm_tlm_nb_passthrough_initiator_socket #(type T=uvm_tlm_generic_payload,
     end
 
     c = get_comp();
-    `uvm_error_context(get_type_name(), "type mismatch in connect -- connection cannot be completed", c)
+    `uvm_error_context(get_type_name(),
+       "type mismatch in connect -- connection cannot be completed", c)
 
   endfunction
 
@@ -367,6 +362,7 @@ endclass
 //
 // IS-A forward export; HAS-A backward port
 //----------------------------------------------------------------------
+
 class uvm_tlm_nb_passthrough_target_socket #(type T=uvm_tlm_generic_payload,
                                           type P=uvm_tlm_phase_e)
   extends uvm_tlm_nb_passthrough_target_socket_base #(T,P);
@@ -377,7 +373,7 @@ class uvm_tlm_nb_passthrough_target_socket #(type T=uvm_tlm_generic_payload,
 
    // Function: connect
    //
-   // Connect this socket to a <uvm_tlm_nb_initiator_socket>
+   // Connect this socket to the specified <uvm_tlm_nb_initiator_socket>
   function void connect(this_type provider);
 
     uvm_tlm_nb_passthrough_target_socket_base #(T,P) target_pt_socket;
@@ -398,7 +394,8 @@ class uvm_tlm_nb_passthrough_target_socket #(type T=uvm_tlm_generic_payload,
     end
 
     c = get_comp();
-    `uvm_error_context(get_type_name(), "type mismatch in connect -- connection cannot be completed", c)
+    `uvm_error_context(get_type_name(),
+       "type mismatch in connect -- connection cannot be completed", c)
 
   endfunction
 

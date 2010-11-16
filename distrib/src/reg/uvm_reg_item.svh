@@ -20,16 +20,14 @@
 //--------------------------------------------------------------
 //
  
+//------------------------------------------------------------------------------
+// Title: Generic Register Operation Descriptors
 //
-// TITLE: Generic Register Operation Descriptors
-//
-// The following classes and types are defined herein:
-//
-// <uvm_reg_item> : Defines an abstract register transaction
-//
-// <uvm_reg_bus_op> : Defines a physical register operation
-//                    on a specific bus with a specific address map
-//
+// This section defines the abtract register transaction item. It also defines
+// a descriptor for a physical bus operation that is used by <uvm_reg_adapter>
+// subtypes to convert from a protocol-specific address/data/rw operation to
+// a bus-independent, canonical r/w operation.
+//------------------------------------------------------------------------------
 
 
 //------------------------------------------------------------------------------

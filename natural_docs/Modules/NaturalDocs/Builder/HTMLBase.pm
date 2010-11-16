@@ -998,8 +998,23 @@ sub BuildContent #(sourceFile, parsedFile)
     '<div id=Content>';
     my $i = 0;
 
-    while ($i < scalar @$parsedFile)
-        {
+    my $scopes = 0;
+
+    while ($i < scalar @$parsedFile) {
+      my $scp = NaturalDocs::Topics->TypeInfo($parsedFile->[$i]->Type())->Scope();
+      if ($scp == ::SCOPE_START()) { #|| $scp == ::SCOPE_END()) {
+        $scopes++;
+      }
+      $i++;
+    }
+    if ($scopes > 1) {
+        print "\n$sourceFile: scopes=$scopes\n";
+    }
+
+    $i = 0;
+
+    while ($i < scalar @$parsedFile) {
+
         my $anchor = $self->SymbolToHTMLSymbol($parsedFile->[$i]->Symbol());
 
         my $scope = NaturalDocs::Topics->TypeInfo($parsedFile->[$i]->Type())->Scope();
@@ -1009,12 +1024,15 @@ sub BuildContent #(sourceFile, parsedFile)
 
         my $headerType;
 
-        if ($i == 0)
-            {  $headerType = 'h1';  }
-        elsif ($scope == ::SCOPE_START() || $scope == ::SCOPE_END())
-            {  $headerType = 'h2';  }
-        else
-            {  $headerType = 'h3';  };
+        if ($i == 0) {
+           $headerType = 'h1';
+        }
+        elsif ($scope == ::SCOPE_START() || $scope == ::SCOPE_END()) {
+           $headerType = 'h2';
+        }
+        else {
+           $headerType = 'h3';
+        }
 
         $modSourceFile = $self->MakeRelativeURL($self->OutputFileOf($sourceFile), $sourceFile, 1 );
 
@@ -1038,38 +1056,42 @@ sub BuildContent #(sourceFile, parsedFile)
         #$output .= '<a href="' . $sourceFile . '">Edit this file</a>'; 
 
         my $hierarchy;
-        if (NaturalDocs::Topics->TypeInfo( $parsedFile->[$i]->Type() )->ClassHierarchy())
-            {
+        if (NaturalDocs::Topics->TypeInfo( $parsedFile->[$i]->Type() )->ClassHierarchy()) {
             $hierarchy = $self->BuildClassHierarchy($sourceFile, $parsedFile->[$i]->Symbol());
-            };
+        };
 
-#ADAME - embed prototype in Summary instead
+        #ADAME - embed prototype in Summary instead
         my $prototype;
-        if (defined $parsedFile->[$i]->Prototype())
-            {
-#ADAME- skip proto of title and class types- they'll be in the summary
-            my $topic_type = NaturalDocs::Topics->NameOfType($parsedFile->[$i]->Type(), 0, 1);
+        my $topic_type = NaturalDocs::Topics->NameOfType($parsedFile->[$i]->Type(), 0, 1);
+        if (defined $parsedFile->[$i]->Prototype()) {
+
+            #ADAME- skip proto of title and class types- they'll be in the summary
             if  ($i == 0 || $topic_type eq "Class") {
-            $prototype .= $self->BuildPrototype($parsedFile->[$i]->Type(), $parsedFile->[$i]->Prototype(), $sourceFile,1);
+               $prototype .= $self->BuildPrototype($parsedFile->[$i]->Type(), $parsedFile->[$i]->Prototype(), $sourceFile,1);
             }
             else {
-            $output .= $self->BuildPrototype($parsedFile->[$i]->Type(), $parsedFile->[$i]->Prototype(), $sourceFile,0);
+               $output .= $self->BuildPrototype($parsedFile->[$i]->Type(), $parsedFile->[$i]->Prototype(), $sourceFile,0);
             }
-            };
+        }
 
         my $summary;
-        if ($i == 0 || $scope == ::SCOPE_START() || $scope == ::SCOPE_END())
-            {
-            $summary .= $self->BuildSummary($sourceFile, $parsedFile, $i, $hierarchy, $prototype);
-            };
+        if ($i == 0 || $scope == ::SCOPE_START() || $scope == ::SCOPE_END()) {
+           my $multiSummary = 0;
+           if ($i == 0 && $scopes > 1) {
+             $multiSummary = 1;
+           }
+           $summary .= $self->BuildSummary($sourceFile, $parsedFile, $i, $hierarchy, $prototype, $multiSummary);
+           #if ($multiSummary && $i == 0 && $topic_type ne ::TOPIC_GROUP()) {
+           #  $summary .= $self->BuildSummary($sourceFile, $parsedFile, $i, $hierarchy, $prototype, 0);
+           #}
+        }
 
         my $hasBody;
         if (defined $hierarchy || defined $summary ||
-            defined $parsedFile->[$i]->Prototype() || defined $parsedFile->[$i]->Body())
-            {
-            $output .= '<div class=CBody>';
-            $hasBody = 1;
-            };
+            defined $parsedFile->[$i]->Prototype() || defined $parsedFile->[$i]->Body()) {
+           $output .= '<div class=CBody>';
+           $hasBody = 1;
+        }
 
 #ADAME - embed hierarchy in Summary instead
         #$output .= $hierarchy;
@@ -1098,7 +1120,7 @@ sub BuildContent #(sourceFile, parsedFile)
         . "\n\n";
 
         $i++;
-        };
+    };
 
         my $lsep = $/;
         undef $/;
@@ -1147,41 +1169,29 @@ sub BuildContent #(sourceFile, parsedFile)
 #
 #       The summary in HTML.
 #
-sub BuildSummary #(sourceFile, parsedFile, index, hierarhcy, prototype)  #ADAME: added hierarchy + prototype
+sub BuildSummary #(sourceFile, parsedFile, index, hierarhcy, prototype)  #ADAME: added hierarchy + prototype + multiSummary
     {
-    my ($self, $sourceFile, $parsedFile, $index, $hierarchy, $prototype) = @_;
-    my $completeSummary;
+    my ($self, $sourceFile, $parsedFile, $index, $hierarchy, $prototype, $multiSummary) = @_;
 
+    #if ($multiSummary != 0) {
+    #  print "file=$sourceFile  index=$index  multiSummary=$multiSummary\n" ;
+    #}
 
     my $scope;
     $scope = NaturalDocs::Topics->TypeInfo($parsedFile->[$index]->Type())->Scope();
     #my $next_entry = NaturalDocs::Topics->TypeInfo($parsedFile->[$index+1]->Type())->Scope();
 
-    if (!defined $index || $index == 0)
-        {
-        $index = 0;
-        # ADAME - don't summarize more than one class at a time
-        #$completeSummary = 1;
-        }
+    if (!defined $index) {
+       $index = 0;
+    }
     else
         {
         # Skip the scope entry.
         #$index++;
         };
 
-    if ($index + 1 >= scalar @$parsedFile)
-        {  return undef;  };
-
-
-
-    # Return nothing if there's only one entry.
-## ADAME- qualify completeSummary with index
-    #if (!$completeSummary &&
-       # $index != 0 &&
-        #($scope == ::SCOPE_START() || $scope == ::SCOPE_END()) )
-        #($next_entry == ::SCOPE_START() || $next_entry == ::SCOPE_END()) )
-        #{  return undef;  };
-
+    #if ($index + 1 >= scalar @$parsedFile)
+    #    {  return undef;  };
 
     my $indent = 0;
     my $inGroup;
@@ -1192,7 +1202,7 @@ sub BuildSummary #(sourceFile, parsedFile, index, hierarhcy, prototype)  #ADAME:
     my $SummaryStart =
     "\n\n<!--START_ND_SUMMARY index=$index-->\n"
         . '<div class=Summary>'
-        . '<div class=STitle>Summary</div>'
+        . "<div class=STitle>" . ($multiSummary ? "Contents" : "Summary") . "</div>"
 
         # Not all browsers get table padding right, so we need a div to apply the border.
         . '<div class=SBorder>'
@@ -1201,7 +1211,7 @@ sub BuildSummary #(sourceFile, parsedFile, index, hierarhcy, prototype)  #ADAME:
     my $SummaryEnd = '</table>'
                    . '</div>' # Body
                    . '</div>' # Summary
-                   . "<!--END_ND_SUMMARY-->";
+                   . "<!--END_ND_SUMMARY-->\n";
 
             my $topic = $parsedFile->[$index];
             my $scope = NaturalDocs::Topics->TypeInfo($topic->Type())->Scope();
@@ -1210,32 +1220,33 @@ sub BuildSummary #(sourceFile, parsedFile, index, hierarhcy, prototype)  #ADAME:
 
     $output = $SummaryStart;
 
-        while ($index < scalar @$parsedFile)
-            {
+        while ($index < scalar @$parsedFile) {
 
-$output .= "\n  <!-- index=$index -->\n";
-## ADAME- qualify completeSummary with index
+            $output .= "\n  <!-- index=$index -->\n";
 
             # Remove modifiers as appropriate for the current entry.
 
-            if ($scope == ::SCOPE_START() || $scope == ::SCOPE_END())
+            if (!$multiSummary && ($scope == ::SCOPE_START() || $scope == ::SCOPE_END()))
                 {
                 $indent = 0;
                 $inGroup = 0;
                 $isMarked = 0;
                 $toggleMarked = 1;
                 }
-            elsif ($topic->Type() eq ::TOPIC_GROUP())
-                {
-                if ($inGroup)
-                    {  $indent--;  };
+            #elsif ($topic->Type() eq ::TOPIC_GROUP() || ($scope == ::SCOPE_START() || $scope == ::SCOPE_END())) {
+            elsif ($topic->Type() eq ::TOPIC_GROUP()) {
+                  if ($inGroup) {
+                    $indent--;
+                  }
 
                 $inGroup = 0;
+                #$inGroup = 1;
                 $isMarked = 0;
                 $toggleMarked = 1;
-                };
+            };
 
             my $desc = $parsedFile->[$index]->Summary();
+
             if (!defined $desc) {
               $toggleMarked = 0;
                #print "Symbol=".$parsedFile->[$index]->Symbol()."\n";
@@ -1247,11 +1258,21 @@ $output .= "\n  <!-- index=$index -->\n";
 
             if ($index == 0 || $topic_type eq "Class") {
               #$output = $SummaryStart;
-              $output .= "\n" .
-              '<tr class="S' . ($topic_type eq "Class" ? "Class" : "Main")
+
+              if ($multiSummary == 1) {
+                $output .= "\n" .
+                '<tr class="S' . ($topic_type eq "Class" ? "SMethod" : "Main")
                 . ($indent ? ' SIndent' . $indent : '')
                 . ($isMarked ? ' SMarked' : '') .'">'
-                . '<td colspan=2 class=SEntry>';
+                . '<td class=SEntry>';
+              }
+              else {
+                $output .= "\n" .
+                '<tr class="S' . ($topic_type eq "Class" ? "Class" : "Main")
+                  . ($indent ? ' SIndent' . $indent : '')
+                  . ($isMarked ? ' SMarked' : '') .'">'
+                  . '<td colspan=2 class=SEntry>';
+              }
             }
             else {
 
@@ -1284,13 +1305,11 @@ $output .= "\n  <!-- index=$index -->\n";
             . '</a>';
 
 # ADAME- class type and description span both columns
-            if ($index == 0 || $topic_type eq "Class") {
-            $output .=
-            "</td></tr>\n<tr class=SMain><td colspan=2 class=SWideDescription>";
+            if (!$multiSummary && ($index == 0 || ($topic_type eq "Class"))) {
+              $output .= "</td></tr>\n<tr class=SMain><td colspan=2 class=SWideDescription>";
             }
             else {
-            $output .=
-            "</td><td class=SDescription>";
+              $output .= "</td><td class=SDescription>";
             }
 
             if (defined $parsedFile->[$index]->Body())
@@ -1305,69 +1324,80 @@ $output .= "\n  <!-- index=$index -->\n";
             $output .=
             '</td></tr>';
 
+         # Only print class name/link and description in the multiSummary
+         if (!$multiSummary) {
 #ADAME- add hierarchy if defined
 #if ($index != 0 && $topic_type ne "Class") { print "*** topic_type =$topic_type=\n"; }
 #print "*** symbol=".$parsedFile->[$index]->Symbol()." topic_type =$topic_type=\n";
             if (($index == 0 || $topic_type eq "Class")) {
              if (defined $hierarchy) {
-              $output .=  "\n" .
-               '<tr class="SHierarchy SIndent1 ">' .
-
-                '<td colspan=2 class="SEntry SIndent1">Class Hierarchy</td><tr>' .
-               '<tr class="SPrototype SIndent1">' .
-                '<td colspan=2 class=SDescription>' . $hierarchy . '</td></tr>';
+              $output .=  "\n\n" .
+               "  <!-- HIERARCHY -->\n" .
+               "  <tr class=\"SHierarchy SIndent1 \"><td colspan=2 class=\"SEntry SIndent1\">Class Hierarchy</td></tr>\n" .
+               "  <tr class=\"SPrototype SIndent1\"><td colspan=2 class=SDescription>\n" . $hierarchy . "\n" . "  </td></tr>\n" .
+               "\n\n";
 
                #'<td class=SEntry>Inheritance Hierarchy</td>' .
                #'<td class=SDescription>' . $hierarchy . '</td></tr>';
              }
              if (defined $prototype) {
-              $output .=
-                "\n" .
-               '<tr class="SPrototype SIndent1">' .
-                "\n" .
-
-                '<td colspan=2 class="SEntry SIndent1">Class Declaration</td><tr>' .
-               '<tr class="SPrototype SIndent1">' .
-                '<td colspan=2 class=SDescription>' . $prototype . '</td></tr>';
+              $output .= "\n" .
+               "  <!-- PROTOTYPE -->\n" .
+               "  <tr class=\"SPrototype SIndent1\"><td colspan=2 class=\"SEntry SIndent1\">Class Declaration</td></tr>\n" .
+               "  <tr class=\"SPrototype SIndent1\"><td colspan=2 class=SDescription>" . $prototype . "</td></tr>\n";
 
                #'<td class="SEntry">Declaration</td>' .
                 "\n" .
-               '<td class="SDescription">' . $prototype . "\n" . '</td></tr>' .
+                "<td class=\"SDescription\">" . $prototype . "\n" . "</td></tr>" .
                 "\n" ;
               }
             }
 
+          }
             # Prepare the modifiers for the next entry.
 
-            if ($scope == ::SCOPE_START() || $scope == ::SCOPE_END())
-                {
+            if (!$multiSummary && ($scope == ::SCOPE_START() || $scope == ::SCOPE_END())) {
                 $indent = 1;
                 $inGroup = 0;
+            }
+            elsif ($topic->Type() eq ::TOPIC_GROUP()) {
+            #11/15 elsif ($topic->Type() eq ::TOPIC_GROUP() || ($scope == ::SCOPE_START() || $scope == ::SCOPE_END())) {
+                if (!$inGroup) {
+                   $indent++;
+                   $inGroup = 1;
                 }
-            elsif ($topic->Type() eq ::TOPIC_GROUP())
-                {
-                if (!$inGroup)
-                    {
-                    $indent++;
-                    $inGroup = 1;
-                    };
-                };
+            }
 
-#ADAME- don't toggle if current description is empty- it means we're in a method group
+            #ADAME- don't toggle if current description is empty- it means we're in a method group
             if ($toggleMarked) {
               $isMarked ^= 1;
             }
             $toggleMarked = 1;
             $index++;
-#ADAME - move check for scope down here
-if ($index < (scalar $parsedFile)) {
-            $topic = $parsedFile->[$index];
-            if (defined $topic) {
-            $scope = NaturalDocs::Topics->TypeInfo($topic->Type())->Scope();
-            if (!$completeSummary && ($scope == ::SCOPE_START() || $scope == ::SCOPE_END()) )
-                {  last;  };
+
+            #ADAME - move check for scope down here
+            if ($index < (scalar $parsedFile)) {
+              $topic = $parsedFile->[$index];
+              if (defined $topic) {
+                $scope = NaturalDocs::Topics->TypeInfo($topic->Type())->Scope();
+                # if doing multiSummary, do not recurse into class contents
+                if ($multiSummary && $topic_type eq "Class") {
+                  while (defined $topic && 
+                         $index < (scalar $parsedFile) &&
+                         !(($scope == ::SCOPE_START() || $scope == ::SCOPE_END()))) {
+                    $index++;
+                    $topic = $parsedFile->[$index];
+                    if (defined $topic) {
+                      $scope = NaturalDocs::Topics->TypeInfo($topic->Type())->Scope();
+                    }
+                  }
                 }
-                }
+                if (!$multiSummary && ($scope == ::SCOPE_START() || $scope == ::SCOPE_END()) ) {
+                   # if we're not doing multi-class summary, then stop iterating, i.e. generate summary for just one class
+                   last;
+                };
+              }
+            }
 
             };
 
@@ -1410,11 +1440,12 @@ sub BuildPrototype #(type, prototype, file, in_summary)
         {
         $output =
         # A blockquote to scroll it if it's too long.
-        '<blockquote>'
+        "\n" .
+        "    <blockquote>"
             # A surrounding table as a hack to make the div form-fit.
             . '<table border=0 cellspacing=0 cellpadding=0 class=Prototype><tr><td>'
                 . $self->ConvertAmpChars($prototypeObject->BeforeParameters())
-            . '</td></tr></table>'
+            . "\n  </td></tr></table>"
         . '</blockquote>';
         }
 
@@ -1491,13 +1522,13 @@ sub BuildPrototype #(type, prototype, file, in_summary)
         my $parameterColumns = 1 + $hasType + $hasTypePrefix + $hasNamePrefix +
                                                $hasDefaultValue + $hasDefaultValuePrefix + $useCondensed;
 
-        $output =
-        '<blockquote><table border=0 cellspacing=0 cellpadding=0 class=Prototype><tr><td>'
+        $output = "\n" .
+        "    <blockquote><table border=0 cellspacing=0 cellpadding=0 class=Prototype>\n"
 
             # Stupid hack to get it to work right in IE.
-            . '<table border=0 cellspacing=0 cellpadding=0><tr>'
+            . "      <tr><td><table border=0 cellspacing=0 cellpadding=0><tr>\n"
 
-            . '<td class=PBeforeParameters ' . ($useCondensed ? 'colspan=' . $parameterColumns : 'nowrap') . '>'
+            . '      <td class=PBeforeParameters ' . ($useCondensed ? 'colspan=' . $parameterColumns : 'nowrap') . '>'
                 . $self->ConvertAmpChars($beforeParams);
 
                 if ($beforeParams && $beforeParams !~ /[\(\[\{\<]$/)
@@ -1510,7 +1541,7 @@ sub BuildPrototype #(type, prototype, file, in_summary)
                 {
                 if ($useCondensed)
                     {
-                    $output .= '</tr><tr><td>&nbsp;&nbsp;&nbsp;</td>';
+                    $output .= '      </tr><tr><td>&nbsp;&nbsp;&nbsp;</td>';
                     }
                 elsif ($i > 0)
                     {
@@ -1524,41 +1555,29 @@ sub BuildPrototype #(type, prototype, file, in_summary)
                         {
                         my $htmlTypePrefix = $self->ConvertAmpChars($params->[$i]->TypePrefix());
                         $htmlTypePrefix =~ s/ $/&nbsp;/;
-
-                        $output .=
-                        '<td class=PTypePrefix nowrap>'
-                            . $htmlTypePrefix
-                        . '</td>';
+                        $output .= "      <td class=PTypePrefix nowrap>" . $htmlTypePrefix . "</td>\n";
                         };
 
                     if ($hasType)
                         {
-                        $output .=
-                        '<td class=PType nowrap>'
-                            . $self->ConvertAmpChars($params->[$i]->Type()) . '&nbsp;'
-                        . '</td>';
+                        $output .= '      <td class=PType nowrap>' . $self->ConvertAmpChars($params->[$i]->Type()) . '&nbsp;' . "</td>\n";
                         };
 
                     if ($hasNamePrefix)
                         {
-                        $output .=
-                        '<td class=PParameterPrefix nowrap>'
-                            . $self->ConvertAmpChars($params->[$i]->NamePrefix())
-                        . '</td>';
+                        $output .= '      <td class=PParameterPrefix nowrap>' . $self->ConvertAmpChars($params->[$i]->NamePrefix()) . "</td>\n";
                         };
 
                     $output .=
-                    '<td class=PParameter nowrap' . ($useCondensed && !$hasDefaultValue ? ' width=100%' : '') . '>'
-                        . $self->ConvertAmpChars($params->[$i]->Name())
-                    . '</td>';
+                    '      <td class=PParameter nowrap' . ($useCondensed && !$hasDefaultValue ? ' width=100%' : '') . '>' . $self->ConvertAmpChars($params->[$i]->Name()) . "</td>\n";
                     }
 
                 else # !$language->TypeBeforeParameter()
                     {
                     $output .=
-                    '<td class=PParameter nowrap>'
+                    "      <td class=PParameter nowrap>"
                         . $self->ConvertAmpChars( $params->[$i]->NamePrefix() . $params->[$i]->Name() )
-                    . '</td>';
+                    . "</td>\n";
 
                     if ($hasType || $hasTypePrefix)
                         {
@@ -1567,35 +1586,35 @@ sub BuildPrototype #(type, prototype, file, in_summary)
                             {  $typePrefix .= ' ';  };
 
                         $output .=
-                        '<td class=PType nowrap' . ($useCondensed && !$hasDefaultValue ? ' width=100%' : '') . '>'
+                        '      <td class=PType nowrap' . ($useCondensed && !$hasDefaultValue ? ' width=100%' : '') . '>'
                             . '&nbsp;' . $self->ConvertAmpChars( $typePrefix . $params->[$i]->Type() )
-                        . '</td>';
+                        . "</td>\n";
                         };
                     };
 
                 if ($hasDefaultValuePrefix)
                     {
                     $output .=
-                    '<td class=PDefaultValuePrefix>'
+                    "      <td class=PDefaultValuePrefix>"
 
                        . '&nbsp;' . $self->ConvertAmpChars( $params->[$i]->DefaultValuePrefix() ) . '&nbsp;'
-                    . '</td>';
+                    . "</td>\n";
                     };
 
                 if ($hasDefaultValue)
                     {
                     $output .=
-                    '<td class=PDefaultValue width=100%>'
+                    "      <td class=PDefaultValue width=100%>"
                         . ($hasDefaultValuePrefix ? '' : '&nbsp;') . $self->ConvertAmpChars( $params->[$i]->DefaultValue() )
-                    . '</td>';
+                    . "</td>\n";
                     };
                 };
 
             if ($useCondensed)
-                {  $output .= '</tr><tr>';  };
+                {  $output .= "    </tr>\n    <tr>\n";  };
 
             $output .=
-            '<td class=PAfterParameters ' . ($useCondensed ? 'colspan=' . $parameterColumns : 'nowrap') . '>'
+            '      <td class=PAfterParameters ' . ($useCondensed ? 'colspan=' . $parameterColumns : 'nowrap') . '>'
                  . $self->ConvertAmpChars($afterParams);
 
                 if ($afterParams && $afterParams !~ /^[\)\]\}\>]/)
@@ -1603,10 +1622,10 @@ sub BuildPrototype #(type, prototype, file, in_summary)
 
             $output .=
             '</td>'
-        . '</tr></table>'
+        . "</tr>\n      </table>"
 
         # Hack.
-        . '</td></tr></table></blockquote>';
+        . "</td></tr>\n    </table></blockquote>\n";
        };
 
     return $output;
@@ -1778,9 +1797,9 @@ sub BuildClassHierarchy #(file, symbol)
         {  return undef;  };
 
     my $output =
-    '<div class=ClassHierarchy>';
+    "      <div class=ClassHierarchy>\n";
 
-       $output .="\n<table border=0 cellspacing=0 cellpadding=0>";
+       $output .="        <table border=0 cellspacing=0 cellpadding=0>\n";
 
     my $has_parent = 0;
 
@@ -1804,20 +1823,15 @@ if (1) {
 }
         foreach my $parent (@parents)
             {
-            $output .= "\n<tr><td>".$self->BuildClassHierarchyEntry($file, $parent, 'CHParent', 1)."</td></tr>\n";
+            $output .= "          <tr><td>".$self->BuildClassHierarchyEntry($file, $parent, 'CHParent', 1)."</td></tr>\n";
             };
 
         #$output .= '</table><div class=CHIndent>';
         };
 
-    $output .=
-    #'<table border=0 cellspacing=0 cellpadding=0><tr><td>' .
-    '<tr><td>' .
-        $self->BuildClassHierarchyEntry($file, $symbol, 'CHCurrent', undef)
-    . '</td></tr>';
-
-    
-    $output .= "</table>\n";
+    $output .= #'<table border=0 cellspacing=0 cellpadding=0><tr><td>' .
+              '          <tr><td>' . $self->BuildClassHierarchyEntry($file, $symbol, 'CHCurrent', undef) . "</td></tr>\n";
+    $output .= "        </table>\n";
 
 #ADAME temporarily disable
 if (0) {
@@ -1850,7 +1864,7 @@ if (0) {
     #    {  $output .= '</div>';  };
 
     $output .=
-    '</div>';
+    '      </div>';
 
     return $output;
     };

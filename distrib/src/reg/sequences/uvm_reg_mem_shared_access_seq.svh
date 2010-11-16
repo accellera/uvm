@@ -20,12 +20,17 @@
 // -------------------------------------------------------------
 // 
 
-//
-// TITLE: Shared Register and Memory Access test Sequences
-//
+//------------------------------------------------------------------------------
+// Title: Shared Register and Memory Access Test Sequences
+//------------------------------------------------------------------------------
+// This section defines sequences for testing registers and memories that are
+// shared between two or more physical interfaces, i.e. are associated with
+// more than one <uvm_reg_map> instance.
+//------------------------------------------------------------------------------
 
-//
-// class: uvm_reg_shared_access_seq
+
+//------------------------------------------------------------------------------
+// Class: uvm_reg_shared_access_seq
 //
 // Verify the accessibility of a shared register
 // by writing through each address map
@@ -38,6 +43,7 @@
 //
 // The DUT should be idle and not modify any register during this test.
 //
+//------------------------------------------------------------------------------
 
 class uvm_reg_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
@@ -161,8 +167,9 @@ class uvm_reg_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
 endclass: uvm_reg_shared_access_seq
 
 
-//
-// class: uvm_mem_shared_access_seq
+//------------------------------------------------------------------------------
+// Class: uvm_mem_shared_access_seq
+//------------------------------------------------------------------------------
 //
 // Verify the accessibility of a shared memory
 // by writing through each address map
@@ -172,6 +179,7 @@ endclass: uvm_reg_shared_access_seq
 //
 // The DUT should be idle and not modify the memory during this test.
 //
+//------------------------------------------------------------------------------
 
 class uvm_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
@@ -293,8 +301,9 @@ endclass: uvm_mem_shared_access_seq
 
 
 
-//
-// class: uvm_reg_mem_shared_access_seq
+//------------------------------------------------------------------------------
+// Class: uvm_reg_mem_shared_access_seq
+//------------------------------------------------------------------------------
 //
 // Verify the accessibility of all shared registers
 // and memories in a block
@@ -305,6 +314,7 @@ endclass: uvm_mem_shared_access_seq
 // Blocks, registers and memories with the ~NO_REG_TESTS~ or
 // the ~NO_SHARED_ACCESS_TEST~ attribute are not verified.
 //
+//------------------------------------------------------------------------------
 
 class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 

@@ -21,14 +21,20 @@
 // -------------------------------------------------------------
 //
 
+//------------------------------------------------------------------------------
 //
-// TITLE: Register Access Test Sequence
+// Title: Register Access Test Sequences
 //
+// This section defines sequences that test DUT register access via the
+// available frontdoor and backdoor paths defined in the provided register
+// model.
+//------------------------------------------------------------------------------
 
 typedef class uvm_mem_access_seq;
 
+//------------------------------------------------------------------------------
 //
-// class: uvm_reg_single_access_seq
+// Class: uvm_reg_single_access_seq
 //
 // Verify the accessibility of a register
 // by writing through its default address map
@@ -42,6 +48,7 @@ typedef class uvm_mem_access_seq;
 //
 // The DUT should be idle and not modify any register during this test.
 //
+//------------------------------------------------------------------------------
 
 class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
@@ -149,8 +156,9 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
 endclass: uvm_reg_single_access_seq
 
 
+//------------------------------------------------------------------------------
 //
-// class: uvm_reg_access_seq
+// Class: uvm_reg_access_seq
 //
 // Verify the accessibility of all registers in a block
 // by executing the <uvm_reg_single_access_seq> sequence on
@@ -159,6 +167,7 @@ endclass: uvm_reg_single_access_seq
 // Blocks and registers with the ~NO_REG_TESTS~ or
 // the ~NO_REG_ACCESS_TEST~ attribute are not verified.
 //
+//------------------------------------------------------------------------------
 
 class uvm_reg_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
@@ -261,6 +270,7 @@ endclass: uvm_reg_access_seq
 
 
 
+//------------------------------------------------------------------------------
 //
 // Class: uvm_reg_mem_access_seq
 //
@@ -272,6 +282,7 @@ endclass: uvm_reg_access_seq
 // Blocks and registers with the NO_REG_TESTS or
 // the NO_REG_ACCESS_TEST attribute are not verified.
 //
+//------------------------------------------------------------------------------
 
 class uvm_reg_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 

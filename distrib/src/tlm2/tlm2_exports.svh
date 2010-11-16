@@ -19,14 +19,17 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// title: tlm exports
+// Title: TLM2 Export Classes
 //
-// class definitions of export classes that connect tlm interfaces
+// This section defines the export classes for connecting TLM2
+// interfaces.
 //----------------------------------------------------------------------
 
-// class: uvm_tlm_b_transport_export
+
+// Class: uvm_tlm_b_transport_export
 //
 // Blocking transport export class.
+
 class uvm_tlm_b_transport_export #(type T=uvm_tlm_generic_payload)
   extends uvm_port_base #(uvm_tlm_if #(T));
   `UVM_EXPORT_COMMON(`UVM_TLM_B_MASK, "uvm_tlm_b_transport_export")
@@ -34,9 +37,11 @@ class uvm_tlm_b_transport_export #(type T=uvm_tlm_generic_payload)
 endclass
 
 
-// class: uvm_tlm_nb_transport_fw_export
+
+// Class: uvm_tlm_nb_transport_fw_export
 //
 // Non-blocking forward transport export class 
+
 class uvm_tlm_nb_transport_fw_export #(type T=uvm_tlm_generic_payload,
                                    type P=uvm_tlm_phase_e)
   extends uvm_port_base #(uvm_tlm_if #(T,P));
@@ -44,9 +49,12 @@ class uvm_tlm_nb_transport_fw_export #(type T=uvm_tlm_generic_payload,
   `UVM_TLM_NB_TRANSPORT_FW_IMP(this.m_if, T, P, t, p, delay)
 endclass
 
-// class: uvm_tlm_nb_transport_bw_export
+
+
+// Class: uvm_tlm_nb_transport_bw_export
 //
 // Non-blocking backward transport export class 
+
 class uvm_tlm_nb_transport_bw_export #(type T=uvm_tlm_generic_payload,
                                    type P=uvm_tlm_phase_e)
   extends uvm_port_base #(uvm_tlm_if #(T,P));

@@ -24,22 +24,36 @@
 `ifndef UVM_CALLBACK_SVH
 `define UVM_CALLBACK_SVH
 
+//------------------------------------------------------------------------------
+// Title: Callbacks Classes
+//
+// This section defines the classes used for callback registration, management,
+// and user-defined callbacks.
+//------------------------------------------------------------------------------
+
 typedef class uvm_callback;
 //typedef class uvm_callbacks;
 typedef class uvm_callbacks_base;
 
+//------------------------------------------------------------------------------
 // Class - uvm_typeid_base
-// Class - uvm_typeid#(T)
+//------------------------------------------------------------------------------
 //
 // Simple typeid interface. Need this to set up the base-super mapping.
 // This is similar to the factory, but much simpler. The idea of this
 // interface is that each object type T has a typeid that can be
 // used for mapping type relationships. This is not a user visible class.
+
 class uvm_typeid_base;
   static string typename="";
   static uvm_callbacks_base typeid_map[uvm_typeid_base];
   static uvm_typeid_base type_map[uvm_callbacks_base];
 endclass
+
+//------------------------------------------------------------------------------
+// Class - uvm_typeid#(T)
+//------------------------------------------------------------------------------
+
 class uvm_typeid#(type T=uvm_object) extends uvm_typeid_base;
   static uvm_typeid#(T) m_b_inst = get();
   static function uvm_typeid#(T) get();
@@ -50,6 +64,7 @@ class uvm_typeid#(type T=uvm_object) extends uvm_typeid_base;
   endfunction
 endclass
 
+//------------------------------------------------------------------------------
 // Class - uvm_callbacks_base
 //
 // Base class singleton that holds generic queues for all instance
@@ -64,6 +79,7 @@ endclass
 // Note, all derivative uvm_callbacks#() class singletons access this
 // global m_pool object in order to get access to their specific
 // instance queue.
+//------------------------------------------------------------------------------
 
 class uvm_callbacks_base extends uvm_object;
   /*protected*/ static bit m_tracing = 1;
@@ -127,7 +143,9 @@ class uvm_callbacks_base extends uvm_object;
 
 endclass
 
+//------------------------------------------------------------------------------
 // Class - uvm_typed_callbacks#(T)
+//------------------------------------------------------------------------------
 //
 // Another internal class. This contains the queue of typewide
 // callbacks. It also contains some of the public interface methods,
@@ -381,6 +399,7 @@ endclass
 // registered callbacks, or to not call the base implementation, effectively
 // disabling that particalar hook. A demonstration of this methodology is
 // provided in an example included in the kit.
+//------------------------------------------------------------------------------
 
 class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     extends uvm_typed_callbacks#(T);
@@ -850,9 +869,13 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
 
 endclass
 
+//------------------------------------------------------------------------------
+// Class- uvm_derived_callbacks #(T,ST,CB)
+//------------------------------------------------------------------------------
 // This type is not really expected to be used directly by the user, instead they are 
 // expected to use the macro `uvm_set_super_type. The sole purpose of this type is to
 // allow for setting up of the derived_type/super_type mapping.
+//------------------------------------------------------------------------------
 
 class uvm_derived_callbacks#(type T=uvm_object, type ST=uvm_object, type CB=uvm_callback)
     extends uvm_callbacks#(T,CB);

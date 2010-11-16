@@ -19,15 +19,9 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// Title: tlm ports
+// Title: TLM2 ports
 //
-// class definitions of port classes that connect tlm interfaces
-//
-// blocking transport port : <uvm_tlm_b_transport_port>
-//
-// non-blocking transport forward port : <uvm_tlm_nb_transport_fw_port>
-//
-// non-blocking transport backward port : <uvm_tlm_nb_transport_bw_port>
+// The following defines TLM2 port classes.
 //
 //----------------------------------------------------------------------
 

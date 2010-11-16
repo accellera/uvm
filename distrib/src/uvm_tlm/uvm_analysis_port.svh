@@ -21,22 +21,20 @@
 //----------------------------------------------------------------------
 
 
-//
+//------------------------------------------------------------------------------
 // Title: Analysis Ports
+//------------------------------------------------------------------------------
 //
-// The following classes are defined herein
+// This section defines the port, export, and imp classes used for transaction
+// analysis.
 //
-// <uvm_analysis_port>   : Initiator side port
-//
-// <uvm_analysis_imp>    : Subscriber-side implementation
-//
-// <uvm_analysis_export> : Hierarchical export of a port or implementation.
-//
+//------------------------------------------------------------------------------
 
 
+//------------------------------------------------------------------------------
+// Class: uvm_analysis_port
 //
-// CLASS: uvm_analysis_port
-// Broadcast a value to all subscribers implementing a <uvm_analysis_imp>.
+// Broadcasts a value to all subscribers implementing a <uvm_analysis_imp>.
 // 
 //| class mon extends uvm_component;
 //|   uvm_analysis_port#(trans) ap;
@@ -53,7 +51,8 @@
 //|       ...
 //|   endfunction
 //| endclass
-// 
+//------------------------------------------------------------------------------
+
 class uvm_analysis_port # (type T = int)
   extends uvm_port_base # (uvm_tlm_if_base #(T,T));
 
@@ -81,9 +80,14 @@ class uvm_analysis_port # (type T = int)
 endclass
 
 
+
+//------------------------------------------------------------------------------
+// Class: uvm_analysis_imp
 //
-// CLASS: uvm_analysis_imp
-// Subscriber-side of a <uvm_analysis_port>.
+// Receives all transactions broadcasted by a <uvm_analysis_port>. It serves as
+// the termination point of an analysis port/export/imp connection. The component
+// attached to the ~imp~ class--called a ~subscriber~-- implements the analysis
+// interface.
 //
 // Will invoke the ~write(T)~ method in the parent component.
 // The implementation of the ~write(T)~ method must not modify
@@ -101,7 +105,8 @@ endclass
 //|       ...
 //|   endfunction
 //| endclass
-// 
+//------------------------------------------------------------------------------
+
 class uvm_analysis_imp #(type T=int, type IMP=int)
   extends uvm_port_base #(uvm_tlm_if_base #(T,T));
   `UVM_IMP_COMMON(`UVM_TLM_ANALYSIS_MASK,"uvm_analysis_imp",IMP)
@@ -111,10 +116,13 @@ class uvm_analysis_imp #(type T=int, type IMP=int)
 endclass
 
 
+
+//------------------------------------------------------------------------------
+// Class: uvm_analysis_export
 //
-// CLASS: uvm_analysis_export
-// Export a <uvm_analysis_port> or a <uvm_analysis_imp>.
-// 
+// Exports a lower-level <uvm_analysis_imp> to its parent.
+//------------------------------------------------------------------------------
+
 class uvm_analysis_export #(type T=int)
   extends uvm_port_base #(uvm_tlm_if_base #(T,T));
 
