@@ -21,14 +21,20 @@
 // -------------------------------------------------------------
 //
 
+//------------------------------------------------------------------------------
 //
-// TITLE: Register Access Test Sequence
+// Title: Register Access Test Sequences
 //
+// This section defines sequences that test DUT register access via the
+// available frontdoor and backdoor paths defined in the provided register
+// model.
+//------------------------------------------------------------------------------
 
 typedef class uvm_mem_access_seq;
 
+//------------------------------------------------------------------------------
 //
-// class: uvm_reg_single_access_seq
+// Class: uvm_reg_single_access_seq
 //
 // Verify the accessibility of a register
 // by writing through its default address map
@@ -42,6 +48,7 @@ typedef class uvm_mem_access_seq;
 //
 // The DUT should be idle and not modify any register during this test.
 //
+//------------------------------------------------------------------------------
 
 class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
@@ -64,8 +71,9 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
       end
 
       // Registers with some attributes are not to be tested
-      if (rg.get_attribute("NO_REG_TESTS") != "") return;
-      if (rg.get_attribute("NO_REG_ACCESS_TEST") != "") return;
+      if (rg.has_attribute("NO_REG_TESTS") || 
+          rg.has_attribute("NO_REG_ACCESS_TEST"))
+            return;
 
       // Can only deal with registers with backdoor access
       if (rg.get_backdoor() == null && !rg.has_hdl_path()) begin
@@ -149,8 +157,9 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
 endclass: uvm_reg_single_access_seq
 
 
+//------------------------------------------------------------------------------
 //
-// class: uvm_reg_access_seq
+// Class: uvm_reg_access_seq
 //
 // Verify the accessibility of all registers in a block
 // by executing the <uvm_reg_single_access_seq> sequence on
@@ -159,6 +168,7 @@ endclass: uvm_reg_single_access_seq
 // Blocks and registers with the ~NO_REG_TESTS~ or
 // the ~NO_REG_ACCESS_TEST~ attribute are not verified.
 //
+//------------------------------------------------------------------------------
 
 class uvm_reg_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
@@ -217,16 +227,17 @@ class uvm_reg_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item)
    protected virtual task do_block(uvm_reg_block blk);
       uvm_reg regs[$];
       
-      if (blk.get_attribute("NO_REG_TESTS") != "" ||
-          blk.get_attribute("NO_REG_ACCESS_TEST") != "")
+      if (blk.has_attribute("NO_REG_TESTS") ||
+          blk.has_attribute("NO_REG_ACCESS_TEST"))
          return;
 
       // Iterate over all registers, checking accesses
       blk.get_registers(regs, UVM_NO_HIER);
       foreach (regs[i]) begin
          // Registers with some attributes are not to be tested
-         if (regs[i].get_attribute("NO_REG_TESTS") != "" ||
-	     regs[i].get_attribute("NO_REG_ACCESS_TEST") != "") continue;
+         if (regs[i].has_attribute("NO_REG_TESTS") ||
+	     regs[i].has_attribute("NO_REG_ACCESS_TEST"))
+              continue;
          
          // Can only deal with registers with backdoor access
          if (regs[i].get_backdoor() == null && !regs[i].has_hdl_path()) begin
@@ -261,6 +272,7 @@ endclass: uvm_reg_access_seq
 
 
 
+//------------------------------------------------------------------------------
 //
 // Class: uvm_reg_mem_access_seq
 //
@@ -272,6 +284,7 @@ endclass: uvm_reg_access_seq
 // Blocks and registers with the NO_REG_TESTS or
 // the NO_REG_ACCESS_TEST attribute are not verified.
 //
+//------------------------------------------------------------------------------
 
 class uvm_reg_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 

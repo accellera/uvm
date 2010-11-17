@@ -20,10 +20,9 @@
 // -------------------------------------------------------------
 //
 
-
-//
+//------------------------------------------------------------------------------
 // Title: uvm_vreg
-// Virtual register abstraction base class
+//------------------------------------------------------------------------------
 //
 // A virtual register is a collection of fields,
 // overlaid on top of a memory, usually in an array.
@@ -31,6 +30,7 @@
 // an agreement between the software and the hardware,
 // not any physical structures in the DUT.
 //
+//------------------------------------------------------------------------------
 
 typedef class uvm_mem_region;
 typedef class uvm_mem_mam;
@@ -38,8 +38,9 @@ typedef class uvm_mem_mam;
 typedef class uvm_vreg_cbs;
 
 
+//------------------------------------------------------------------------------
+// Class: uvm_vreg
 //
-// CLASS: uvm_vreg
 // Virtual register abstraction base class
 //
 // A virtual register represents a set of fields that are
@@ -51,6 +52,8 @@ typedef class uvm_vreg_cbs;
 // any memory abstraction class and possibly dynamically
 // resized and/or relocated.
 //
+//------------------------------------------------------------------------------
+
 class uvm_vreg extends uvm_object;
 
    `uvm_register_cb(uvm_vreg, uvm_vreg_cbs)
@@ -600,11 +603,16 @@ class uvm_vreg extends uvm_object;
 endclass: uvm_vreg
 
 
+
+//------------------------------------------------------------------------------
+// Class: uvm_vreg_cbs
 //
-// CLASS: uvm_vreg_cbs
 // Pre/post read/write callback facade class
 //
+//------------------------------------------------------------------------------
+
 class uvm_vreg_cbs extends uvm_callback;
+
    string fname = "";
    int    lineno = 0;
 
@@ -723,6 +731,11 @@ typedef uvm_callbacks#(uvm_vreg, uvm_vreg_cbs) uvm_vreg_cb;
 //
 typedef uvm_callback_iter#(uvm_vreg, uvm_vreg_cbs) uvm_vreg_cb_iter;
 
+
+
+//------------------------------------------------------------------------------
+// IMPLEMENTATION
+//------------------------------------------------------------------------------
 
 function uvm_vreg::new(string       name,
                            int unsigned n_bits);

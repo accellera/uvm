@@ -26,6 +26,15 @@ typedef class uvm_mem;
 typedef class uvm_reg_backdoor;
 
 //------------------------------------------------------------------------------
+// Title: Register Callbacks
+//
+// This section defines the base class used for all register callback
+// extensions. It also includes pre-defined callback extensions for use on
+// read-only and write-only registers.
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
 // Class: uvm_reg_cbs
 //
 // Facade class for field, register, memory and backdoor
@@ -255,10 +264,14 @@ virtual class uvm_reg_cbs extends uvm_callback;
 endclass
 
 
+//------------------
+// Section: Typedefs
+//------------------
+
 
 // Type: uvm_reg_cb
 //
-// Convenience callback type declaration
+// Convenience callback type declaration for registers
 //
 // Use this declaration to register register callbacks rather than
 // the more verbose parameterized class
@@ -268,7 +281,7 @@ typedef uvm_callbacks#(uvm_reg, uvm_reg_cbs) uvm_reg_cb;
 
 // Type: uvm_reg_cb_iter
 //
-// Convenience callback iterator type declaration
+// Convenience callback iterator type declaration for registers
 //
 // Use this declaration to iterate over registered register callbacks
 // rather than the more verbose parameterized class
@@ -278,7 +291,7 @@ typedef uvm_callback_iter#(uvm_reg, uvm_reg_cbs) uvm_reg_cb_iter;
 
 // Type: uvm_reg_bd_cb
 //
-// Convenience callback type declaration
+// Convenience callback type declaration for backdoor
 //
 // Use this declaration to register register backdoor callbacks rather than
 // the more verbose parameterized class
@@ -287,7 +300,7 @@ typedef uvm_callbacks#(uvm_reg_backdoor, uvm_reg_cbs) uvm_reg_bd_cb;
 
 
 // Type: uvm_reg_bd_cb_iter
-// Convenience callback iterator type declaration
+// Convenience callback iterator type declaration for backdoor
 //
 // Use this declaration to iterate over registered register backdoor callbacks
 // rather than the more verbose parameterized class
@@ -298,7 +311,7 @@ typedef uvm_callback_iter#(uvm_reg_backdoor, uvm_reg_cbs) uvm_reg_bd_cb_iter;
 
 // Type: uvm_mem_cb
 //
-// Convenience callback type declaration
+// Convenience callback type declaration for memories
 //
 // Use this declaration to register memory callbacks rather than
 // the more verbose parameterized class
@@ -308,7 +321,7 @@ typedef uvm_callbacks#(uvm_mem, uvm_reg_cbs) uvm_mem_cb;
 
 // Type: uvm_mem_cb_iter
 //
-// Convenience callback iterator type declaration
+// Convenience callback iterator type declaration for memories
 //
 // Use this declaration to iterate over registered memory callbacks
 // rather than the more verbose parameterized class
@@ -318,7 +331,7 @@ typedef uvm_callback_iter#(uvm_mem, uvm_reg_cbs) uvm_mem_cb_iter;
 
 // Type: uvm_reg_field_cb
 //
-// Convenience callback type declaration
+// Convenience callback type declaration for fields
 //
 // Use this declaration to register field callbacks rather than
 // the more verbose parameterized class
@@ -328,7 +341,7 @@ typedef uvm_callbacks#(uvm_reg_field, uvm_reg_cbs) uvm_reg_field_cb;
 
 // Type: uvm_reg_field_cb_iter
 //
-// Convenience callback iterator type declaration
+// Convenience callback iterator type declaration for fields
 //
 // Use this declaration to iterate over registered field callbacks
 // rather than the more verbose parameterized class
@@ -336,22 +349,36 @@ typedef uvm_callbacks#(uvm_reg_field, uvm_reg_cbs) uvm_reg_field_cb;
 typedef uvm_callback_iter#(uvm_reg_field, uvm_reg_cbs) uvm_reg_field_cb_iter;
 
 
+//-----------------------------
+// Group: Predefined Extensions
+//-----------------------------
 
+//------------------------------------------------------------------------------
 // Class: uvm_reg_no_write
+//
 // Pre-defined register callback method for read-only registers
-// that will issue an error if a read() operation is attempted.
+// that will issue an error if a write() operation is attempted.
 //
-// Function: add
-// Add this callback to the specified register and its contained fields.
-//
-// Function: remove
-// Remove this callback from the specified register and its contained fields.
-//
+//------------------------------------------------------------------------------
+
 class uvm_reg_no_write extends uvm_reg_cbs;
+
+   function new(string name = "uvm_reg_no_write");
+      super.new(name);
+   endfunction
+
+   `uvm_object_utils(uvm_reg_no_write)
+
+   
+   // Function: pre_write
+   //
+   // Produces an error message and sets status to <UVM_NOT_OK>.
+   //
    virtual task pre_write(uvm_reg_item rw);
       string name = rw.element.get_full_name();
       
-      if (rw.status != UVM_IS_OK) return;
+      if (rw.status != UVM_IS_OK)
+         return;
 
       if (rw.element_kind == UVM_FIELD) begin
          uvm_reg_field fld;
@@ -373,6 +400,11 @@ class uvm_reg_no_write extends uvm_reg_cbs;
       return m_me;
    endfunction
 
+
+   // Function: add
+   //
+   // Add this callback to the specified register and its contained fields.
+   //
    static function void add(uvm_reg rg);
       uvm_reg_field flds[$];
       
@@ -383,13 +415,19 @@ class uvm_reg_no_write extends uvm_reg_cbs;
       end
    endfunction
 
+
+   // Function: remove
+   //
+   // Remove this callback from the specified register and its contained fields.
+   //
    static function void remove(uvm_reg rg);
       uvm_reg_cb_iter cbs = new(rg);
       uvm_reg_field flds[$];
 
       void'(cbs.first());
       while (cbs.get_cb() != get()) begin
-         if (cbs.get_cb() == null) return;
+         if (cbs.get_cb() == null)
+            return;
          void'(cbs.next());
       end
       uvm_reg_cb::delete(rg, get());
@@ -401,21 +439,31 @@ class uvm_reg_no_write extends uvm_reg_cbs;
 endclass
 
 
+//------------------------------------------------------------------------------
 // Class: uvm_reg_no_read
+//
 // Pre-defined register callback method for write-only registers
-// that will issue an error if a write() operation is attempted.
+// that will issue an error if a read() operation is attempted.
 //
-// Function: add
-// Add this callback to the specified register and its contained fields.
-//
-// Function: remove
-// Remove this callback from the specified register and its contained fields.
-//
+//------------------------------------------------------------------------------
+
 class uvm_reg_no_read extends uvm_reg_cbs;
+
+   function new(string name = "uvm_reg_no_read");
+      super.new(name);
+   endfunction
+
+   `uvm_object_utils(uvm_reg_no_read)
+   
+   // Function: pre_read
+   //
+   // Produces an error message and sets status to <UVM_NOT_OK>.
+   //
    virtual task pre_read(uvm_reg_item rw);
       string name = rw.element.get_full_name();
       
-      if (rw.status != UVM_IS_OK) return;
+      if (rw.status != UVM_IS_OK)
+         return;
 
       if (rw.element_kind == UVM_FIELD) begin
          uvm_reg_field fld;
@@ -437,6 +485,11 @@ class uvm_reg_no_read extends uvm_reg_cbs;
       return m_me;
    endfunction
 
+
+   // Function: add
+   //
+   // Add this callback to the specified register and its contained fields.
+   //
    static function void add(uvm_reg rg);
       uvm_reg_field flds[$];
       
@@ -447,13 +500,19 @@ class uvm_reg_no_read extends uvm_reg_cbs;
       end
    endfunction
 
+
+   // Function: remove
+   //
+   // Remove this callback from the specified register and its contained fields.
+   //
    static function void remove(uvm_reg rg);
       uvm_reg_cb_iter cbs = new(rg);
       uvm_reg_field flds[$];
 
       void'(cbs.first());
       while (cbs.get_cb() != get()) begin
-         if (cbs.get_cb() == null) return;
+         if (cbs.get_cb() == null)
+            return;
          void'(cbs.next());
       end
       uvm_reg_cb::delete(rg, get());

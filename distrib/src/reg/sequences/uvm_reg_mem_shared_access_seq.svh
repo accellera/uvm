@@ -20,12 +20,17 @@
 // -------------------------------------------------------------
 // 
 
-//
-// TITLE: Shared Register and Memory Access test Sequences
-//
+//------------------------------------------------------------------------------
+// Title: Shared Register and Memory Access Test Sequences
+//------------------------------------------------------------------------------
+// This section defines sequences for testing registers and memories that are
+// shared between two or more physical interfaces, i.e. are associated with
+// more than one <uvm_reg_map> instance.
+//------------------------------------------------------------------------------
 
-//
-// class: uvm_reg_shared_access_seq
+
+//------------------------------------------------------------------------------
+// Class: uvm_reg_shared_access_seq
 //
 // Verify the accessibility of a shared register
 // by writing through each address map
@@ -38,6 +43,7 @@
 //
 // The DUT should be idle and not modify any register during this test.
 //
+//------------------------------------------------------------------------------
 
 class uvm_reg_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
@@ -64,8 +70,9 @@ class uvm_reg_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
       end
 
       // Registers with some attributes are not to be tested
-      if (rg.get_attribute("NO_REG_TESTS") != "") return;
-      if (rg.get_attribute("NO_SHARED_ACCESS_TEST") != "") return;
+      if (rg.has_attribute("NO_REG_TESTS") ||
+          rg.has_attribute("NO_SHARED_ACCESS_TEST"))
+        return;
 
       // Only look at shared registers
       if (rg.get_n_maps() < 2) return;
@@ -161,8 +168,9 @@ class uvm_reg_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
 endclass: uvm_reg_shared_access_seq
 
 
-//
-// class: uvm_mem_shared_access_seq
+//------------------------------------------------------------------------------
+// Class: uvm_mem_shared_access_seq
+//------------------------------------------------------------------------------
 //
 // Verify the accessibility of a shared memory
 // by writing through each address map
@@ -172,6 +180,7 @@ endclass: uvm_reg_shared_access_seq
 //
 // The DUT should be idle and not modify the memory during this test.
 //
+//------------------------------------------------------------------------------
 
 class uvm_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
@@ -195,9 +204,10 @@ class uvm_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
       end
 
       // Memories with some attributes are not to be tested
-      if (mem.get_attribute("NO_REG_TESTS") != "") return;
-      if (mem.get_attribute("NO_MEM_TESTS") != "") return;
-      if (mem.get_attribute("NO_SHARED_ACCESS_TEST") != "") return;
+      if (mem.has_attribute("NO_REG_TESTS") ||
+          mem.has_attribute("NO_MEM_TESTS") ||
+          mem.has_attribute("NO_SHARED_ACCESS_TEST"))
+            return;
 
       // Only look at shared memories
       if (mem.get_n_maps() < 2) return;
@@ -293,8 +303,9 @@ endclass: uvm_mem_shared_access_seq
 
 
 
-//
-// class: uvm_reg_mem_shared_access_seq
+//------------------------------------------------------------------------------
+// Class: uvm_reg_mem_shared_access_seq
+//------------------------------------------------------------------------------
 //
 // Verify the accessibility of all shared registers
 // and memories in a block
@@ -305,6 +316,7 @@ endclass: uvm_mem_shared_access_seq
 // Blocks, registers and memories with the ~NO_REG_TESTS~ or
 // the ~NO_SHARED_ACCESS_TEST~ attribute are not verified.
 //
+//------------------------------------------------------------------------------
 
 class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
@@ -371,9 +383,9 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uv
       uvm_reg regs[$];
       uvm_mem mems[$];
       
-      if (blk.get_attribute("NO_REG_TESTS") != "" ||
-          blk.get_attribute("NO_MEM_TESTS") != "" ||
-          blk.get_attribute("NO_SHARED_ACCESS_TEST") != "")
+      if (blk.has_attribute("NO_REG_TESTS") ||
+          blk.has_attribute("NO_MEM_TESTS") ||
+          blk.has_attribute("NO_SHARED_ACCESS_TEST"))
         return;
 
       this.reset_blk(model);
@@ -383,23 +395,23 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uv
       blk.get_registers(regs, UVM_NO_HIER);
       foreach (regs[i]) begin
          // Registers with some attributes are not to be tested
-         if (regs[i].get_attribute("NO_REG_TESTS") == "" &&
-	     regs[i].get_attribute("NO_SHARED_ACCESS_TEST") == "") begin
-            reg_seq.rg = regs[i];
-            reg_seq.start(this.get_sequencer(), this);
-         end
+         if (regs[i].has_attribute("NO_REG_TESTS") ||
+	     regs[i].has_attribute("NO_SHARED_ACCESS_TEST"))
+           continue;
+         reg_seq.rg = regs[i];
+         reg_seq.start(this.get_sequencer(), this);
       end
 
       // Iterate over all memories, checking accesses
       blk.get_memories(mems, UVM_NO_HIER);
       foreach (mems[i]) begin
          // Registers with some attributes are not to be tested
-         if (mems[i].get_attribute("NO_REG_TESTS") == "" &&
-             mems[i].get_attribute("NO_MEM_TESTS") == "" &&
-	     mems[i].get_attribute("NO_SHARED_ACCESS_TEST") == "") begin
-            mem_seq.mem = mems[i];
-            mem_seq.start(this.get_sequencer(), this);
-         end
+         if (mems[i].has_attribute("NO_REG_TESTS") ||
+             mems[i].has_attribute("NO_MEM_TESTS") ||
+	     mems[i].has_attribute("NO_SHARED_ACCESS_TEST"))
+            continue;
+         mem_seq.mem = mems[i];
+         mem_seq.start(this.get_sequencer(), this);
       end
 
    endtask: do_block

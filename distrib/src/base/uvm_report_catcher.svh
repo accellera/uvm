@@ -302,8 +302,8 @@ virtual class uvm_report_catcher extends uvm_callback;
   // Function: print_catcher
   //
   // Prints information about all of the report catchers that are 
-  // registered. For finer grained detail, the <uvm_callbacks::display>
-  // method can be used by calling uvm_report_cb::display(<report_object>).
+  // registered. For finer grained detail, the <uvm_callbacks #(T,CB)::display>
+  // method can be used by calling uvm_report_cb::display(<uvm_report_object>).
 
   static function void print_catcher(UVM_FILE file=0);
     string msg;

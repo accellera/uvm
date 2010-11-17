@@ -1,12 +1,36 @@
 *~
 core.*
+*.[oa]
+*.patch
+*.orig
+*.tar.gz
+*.diff
+
+
+# ius results are not for the vc
+irun.log
+INCA_libs
+.simvision
+irun.key
+
+# created by flow
+*.fails
+
+# vcs results are not for the vc
 csrc
 simv*
 vc_hdrs.h
 ucli.key
 *.err
+
+# editor tmp / save files
 *.orig
-INCA_libs
-.simvision
-irun.key
+*.swp
+
+# questa results are not for the vc
+vsim.wlf
+questa.tops
+work
+*.vstf
+
 

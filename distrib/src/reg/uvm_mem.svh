@@ -407,6 +407,15 @@ class uvm_mem extends uvm_object;
                                               string value);
 
 
+   // Function: has_attribute
+   //
+   // Returns TRUE if attribute exists.
+   //
+   // See <get_attribute> for details on ~inherited~ argument.
+   //
+   extern virtual function bit has_attribute(string name, bit inherited = 1);
+   
+   
    // Function: get_attribute
    //
    // Get an attribute value.
@@ -1467,6 +1476,20 @@ function void uvm_mem::set_attribute(string name,
 endfunction: set_attribute
 
 
+// has_attribute
+
+function bit uvm_mem::has_attribute(string name, bit inherited = 1);
+   if (m_attributes.exists(name))
+      return 1;
+
+   if (inherited && m_parent != null)
+      if (m_parent.get_attribute(name,1) != "")
+        return 1;
+
+   return 0;
+endfunction
+
+
 // get_attribute
 
 function string uvm_mem::get_attribute(string name,
@@ -1503,12 +1526,10 @@ endfunction: get_attributes
 
 
 function uvm_reg_cvr_t uvm_mem::build_coverage(uvm_reg_cvr_t models);
-`ifdef UVM_RESOURCES
    build_coverage = UVM_NO_COVERAGE;
-   void'(uvm_reg_cvr_rsrc_db::read_by_name("include_coverage",
-                                           {"uvm_reg::", get_full_name()},
-                                           build_coverage, this);
-`endif
+   void'(uvm_reg_cvr_rsrc_db::read_by_name({"uvm_reg::", get_full_name()},
+                                           "include_coverage",
+                                           build_coverage, this));
    return models;
 endfunction: build_coverage
 

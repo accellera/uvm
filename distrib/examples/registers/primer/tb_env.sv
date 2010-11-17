@@ -36,7 +36,8 @@ class tb_env extends uvm_component;
       model = reg_block_slave::type_id::create("model",this);
       apb = apb_agent::type_id::create("apb", this);
       model.build();
-  endfunction
+      model.lock_model();
+   endfunction
 
    virtual function void connect();
       reg2apb_adapter reg2apb = new;

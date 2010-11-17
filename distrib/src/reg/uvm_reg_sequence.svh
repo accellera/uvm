@@ -22,15 +22,14 @@
 //
  
   
-// TITLE: Classes for Adapting Between Register and Bus Operations
+//------------------------------------------------------------------------------
+// TITLE: Register Sequence and Predictor Classes
+//------------------------------------------------------------------------------
 //
-// The following classes are defined herein:
-//
-// <uvm_reg_sequence> : base for all register sequences
-//
-// <uvm_reg_frontdoor> : base class for user-defined front-door access
-//
-// <uvm_reg_predictor> : updates the register model mirror based on observed bus transactions
+// This section defines the base classes used for register stimulus generation.
+// It also defines a predictor component, which is used to update the register
+// model's mirror values based on transactions observed on a physical bus. 
+//------------------------------------------------------------------------------
 
                                                               
 //------------------------------------------------------------------------------
@@ -259,6 +258,8 @@ endclass
 //------------------------------------------------------------------------------
 //
 // CLASS: uvm_reg_predictor
+//
+// Updates the register model mirror based on observed bus transactions
 //
 // This class converts observed bus transactions of type ~BUSTYPE~ to generic
 // registers transactions, determines the register being accessed based on the

@@ -76,8 +76,6 @@ class reg_block_B extends uvm_reg_block;
 
                 // assign field aliases
 		F = R.F;
-
-		lock_model();
 	endfunction : build
 
 	`uvm_object_utils(reg_block_B)

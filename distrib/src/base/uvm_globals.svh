@@ -31,7 +31,7 @@
 
 // Task: run_test
 //
-// Convenience function for uvm_top.run_test(). See uvm_root for more
+// Convenience function for uvm_top.run_test(). See <uvm_root> for more
 // information.
 
 task run_test (string test_name="");
@@ -55,8 +55,8 @@ uvm_test_done_objection uvm_test_done = uvm_test_done_objection::get();
 
 // Method: global_stop_request 
 //
-// Convenience function for uvm_top.stop_request(). See uvm_root for more
-// information.
+// Convenience function for uvm_top.stop_request(). See 
+// <uvm_root::stop_request> for more information.
 
 function void global_stop_request();
   uvm_root top;
@@ -67,8 +67,8 @@ endfunction
 
 // Method: set_global_timeout 
 //
-// Convenience function for uvm_top.phase_timeout = timeout. See uvm_root
-// for more information.
+// Convenience function for uvm_top.phase_timeout = timeout. See 
+// <uvm_root::phase_timeout> for more information.
 
 function void set_global_timeout(time timeout);
   uvm_root top;
@@ -80,7 +80,7 @@ endfunction
 // Function: set_global_stop_timeout
 //
 // Convenience function for uvm_top.stop_timeout = timeout.
-// See uvm_root for more information.
+// See <uvm_root::stop_timeout> for more information.
 
 function void set_global_stop_timeout(time timeout);
   uvm_root top;
@@ -97,7 +97,7 @@ endfunction
 
 // Function: uvm_report_enabled
 //
-// Returns 1 if the configured verbosity in <uvm_top> is greater than 
+// Returns 1 if the configured verbosity in ~uvm_top~ is greater than 
 // ~verbosity~ and the action associated with the given ~severity~ and ~id~
 // is not UVM_NO_ACTION, else returns 0.
 // 
@@ -255,61 +255,11 @@ endfunction
 //
 //----------------------------------------------------------------------------
 
-`ifdef UVM_DPI
-import "DPI" function bit uvm_is_match (string expr, string str);
-`else
 function bit uvm_is_match (string expr, string str);
-
-  int e, es, s, ss;
-  string tmp;
-  e  = 0; s  = 0;
-  es = 0; ss = 0;
-
-  if(expr.len() == 0)
-    return 1;
-
-  // The ^ used to be used to remove the implicit wildcard, but now we don't
-  // use implicit wildcard so this character is just stripped.
-  if(expr[0] == "^")
-    expr = expr.substr(1, expr.len()-1);
-
-  //This loop is only needed when the first character of the expr may not
-  //be a *. 
-  while (s != str.len() && expr.getc(e) != "*") begin
-    if ((expr.getc(e) != str.getc(s)) && (expr.getc(e) != "?"))
-      return 0;
-    e++; s++;
-  end
-
-  while (s != str.len()) begin
-    if (expr.getc(e) == "*") begin
-      e++;
-      if (e == expr.len()) begin
-        return 1;
-      end
-      es = e;
-      ss = s+1;
-    end
-    else if (expr.getc(e) == str.getc(s) || expr.getc(e) == "?") begin
-      e++;
-      s++;
-    end
-    else begin
-      e = es;
-      s = ss++;
-    end
-  end
-  while (expr.getc(e) == "*")
-    e++;
-  if(e == expr.len()) begin
-    return 1;
-  end
-  else begin
-    return 0;
-  end
+  string s;
+  s = uvm_glob_to_re(expr);
+  return (uvm_re_match(s, str) == 0);
 endfunction
-`endif
-
 
 `ifndef UVM_LINE_WIDTH
   `define UVM_LINE_WIDTH 120

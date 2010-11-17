@@ -1,5 +1,5 @@
-//----------------------------------------------------------------------
-//   Copyright 2010 Synopsys, Inc.
+//------------------------------------------------------------------------------
+//   Copyright 2010 Mentor Graphics Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -15,14 +15,14 @@
 //   CONDITIONS OF ANY KIND, either express or implied.  See
 //   the License for the specific language governing
 //   permissions and limitations under the License.
-//----------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//
-// Top-level file that includes all of the C files required
-// by UVM
-//
-// The C code may be compiled by compiling this top file only,
-// or by compiling individual files then linking them together.
-//
+package mem_sequences;
 
-#include "uvm_hdl.c"
+  import uvm_pkg::*;
+  import mem_agent::*;
+  `include "uvm_macros.svh"
+
+  `include "mem_sequences.svh"
+
+endpackage

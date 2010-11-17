@@ -25,6 +25,12 @@
 `define UVM_SEQUENCE_BUILTIN_SVH
 
 //------------------------------------------------------------------------------
+// Title: Predefined Sequences
+//
+// This section defines several sequences that ship with the UVM library.
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //
 // CLASS: uvm_random_sequence
 //
@@ -290,5 +296,4 @@ class uvm_simple_sequence extends uvm_sequence #(uvm_sequence_item);
 
 endclass
 
-// Section: end
 `endif // UVM_SEQUENCE_BUILTIN_SVH

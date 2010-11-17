@@ -24,6 +24,16 @@
 `define UVM_REGISTRY_SVH
 
 //------------------------------------------------------------------------------
+// Title: Factory Component and Object Wrappers
+//
+// This section defines the proxy component and object classes used by the
+// factory. To avoid the overhead of creating an instance of every component
+// and object that get registered, the factory holds lightweight wrappers,
+// or proxies. When a request for a new object is made, the factory calls upon
+// the proxy to create the object it represents. 
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //
 // CLASS: uvm_component_registry #(T,Tname)
 //
@@ -32,7 +42,7 @@
 // registration with the <uvm_factory>. Without it, registration would
 // require an instance of the component itself.
 //
-// See Usage section below for information on using uvm_component_registry.
+// See <Usage> section below for information on using uvm_component_registry.
 //
 //------------------------------------------------------------------------------
 
@@ -163,7 +173,7 @@ endclass
 // registration with the <uvm_factory>. Without it, registration would
 // require an instance of the object itself.
 //
-// See Usage section below for information on using uvm_component_registry.
+// See <Usage> section below for information on using uvm_component_registry.
 //
 //------------------------------------------------------------------------------
 

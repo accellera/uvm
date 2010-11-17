@@ -21,18 +21,13 @@
 // -------------------------------------------------------------
 //
 
-//
+//------------------------------------------------------------------------------
 // TITLE: Global Declarations for the Register Layer
+//------------------------------------------------------------------------------
 //
-// Globally available types and enumerals.
+// This section defines globally available types, enums, and utility classes.
 //
-// In addition to the declarations outlined in the summary below,
-// the following classes are defined herein
-//
-// <uvm_hdl_path_concat>  : Concatenation of HDL paths
-//
-// <uvm_utils>            : Various type-specific utility functions
-//
+//------------------------------------------------------------------------------
 
 `ifndef UVM_REG_MODEL__SV
 `define UVM_REG_MODEL__SV
@@ -50,14 +45,13 @@ typedef class uvm_reg_map;
 typedef class uvm_reg_map_info;
 typedef class uvm_reg_sequence;
 typedef class uvm_reg_adapter;
-`ifdef UVM_RESOURCES
-typedef uvm_resource_db#(uvm_reg_cvr_t) uvm_reg_cvr_rsrc_db;
-`endif
 
 
 
-//------------------------------------------------------------------------------
-//
+//--------------
+// Group: Macros
+//--------------
+
 // Macro: `UVM_REG_ADDR_WIDTH
 //
 // Maximum address width in bits
@@ -69,8 +63,6 @@ typedef uvm_resource_db#(uvm_reg_cvr_t) uvm_reg_cvr_rsrc_db;
 `endif
 
 
-//------------------------------------------------------------------------------
-//
 // Macro: `UVM_REG_DATA_WIDTH
 //
 // Maximum data width in bits
@@ -81,8 +73,7 @@ typedef uvm_resource_db#(uvm_reg_cvr_t) uvm_reg_cvr_rsrc_db;
  `define UVM_REG_DATA_WIDTH 64
 `endif
 
-//------------------------------------------------------------------------------
-//
+
 // Macro: `UVM_REG_BYTENABLE_WIDTH
 //
 // Maximum number of byte enable bits
@@ -95,8 +86,6 @@ typedef uvm_resource_db#(uvm_reg_cvr_t) uvm_reg_cvr_rsrc_db;
 `endif
 
 
-//------------------------------------------------------------------------------
-//
 // Macro: `UVM_REG_CVR_WIDTH
 //
 // Maximum number of bits in a <uvm_reg_cvr_t> coverage model set.
@@ -108,12 +97,16 @@ typedef uvm_resource_db#(uvm_reg_cvr_t) uvm_reg_cvr_rsrc_db;
 `endif
 
 
-//------------------------------------------------------------------------------
+//-------------
+// Group: Types
+//-------------
+
 // Type: uvm_reg_data_t
 //
 // 2-state data value with <`UVM_REG_DATA_WIDTH> bits
 //
 typedef  bit [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_t ;
+
 
 // Type: uvm_reg_data_logic_t
 //
@@ -121,12 +114,13 @@ typedef  bit [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_t ;
 //
 typedef  logic [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_logic_t ;
 
-//------------------------------------------------------------------------------
+
 // Type: uvm_reg_addr_t
 //
 // 2-state address value with <`UVM_REG_ADDR_WIDTH> bits
 //
 typedef  bit [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_t ;
+
 
 // Type: uvm_reg_addr_logic_t
 //
@@ -134,8 +128,7 @@ typedef  bit [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_t ;
 //
 typedef  logic [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_logic_t ;
 
-//------------------------------------------------------------------------------
-//
+
 // Type: uvm_reg_byte_en_t
 //
 // 2-state byte_enable value with <`UVM_REG_BYTENABLE_WIDTH> bits
@@ -143,8 +136,55 @@ typedef  logic [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_logic_t ;
 typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
 
 
-//------------------------------------------------------------------------------
+// Type: uvm_reg_cvr_t
 //
+// Coverage model value set with <`UVM_REG_CVR_WIDTH> bits.
+//
+// Symbolic values for individual coverage models are defined
+// by the <uvm_coverage_model_e> type.
+//
+// The following bits in the set are assigned as follows
+//
+// 0-7     - UVM pre-defined coverage models
+// 8-15    - Coverage models defined by EDA vendors,
+//           implemented in a register model generator.
+// 16-23   - User-defined coverage models
+// 24..    - Reserved
+//
+typedef  bit [`UVM_REG_CVR_WIDTH-1:0]  uvm_reg_cvr_t ;
+
+
+// Type: uvm_hdl_path_slice
+//
+// Slice of an HDL path
+//
+// Struct that specifies the HDL variable that corresponds to all
+// or a portion of a register.
+//
+// path    - Path to the HDL variable.
+// offset  - Offset of the LSB in the register that this variable implements
+// size    - Number of bits (toward the MSB) that this variable implements
+//
+// If the HDL variable implements all of the register, ~offset~ and ~size~
+// are specified as -1. For example:
+//|
+//| r1.add_hdl_path('{ '{"r1", -1, -1} });
+//|
+//
+typedef struct {
+   string path;
+   int offset;
+   int size;
+} uvm_hdl_path_slice;
+
+
+typedef uvm_resource_db#(uvm_reg_cvr_t) uvm_reg_cvr_rsrc_db;
+
+
+//--------------------
+// Group: Enumerations
+//--------------------
+
 // Enum: uvm_status_e
 //
 // Return status for register operations
@@ -161,8 +201,6 @@ typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
    } uvm_status_e;
 
 
-//------------------------------------------------------------------------------
-//
 // Enum: uvm_path_e
 //
 // Path used for register operation
@@ -181,8 +219,6 @@ typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
    } uvm_path_e;
 
 
-//------------------------------------------------------------------------------
-//
 // Enum: uvm_check_e
 //
 // Read-only or read-and-check
@@ -196,8 +232,6 @@ typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
    } uvm_check_e;
 
 
-//------------------------------------------------------------------------------
-//
 // Enum: uvm_endianness_e
 //
 // Specifies byte ordering
@@ -217,8 +251,6 @@ typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
    } uvm_endianness_e;
 
 
-//------------------------------------------------------------------------------
-//
 // Enum: uvm_elem_kind_e
 //
 // Type of element being read or written
@@ -234,8 +266,6 @@ typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
    } uvm_elem_kind_e;
 
 
-//------------------------------------------------------------------------------
-//
 // Enum: uvm_access_e
 //
 // Type of operation begin performed
@@ -251,8 +281,6 @@ typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
    } uvm_access_e;
 
 
-//------------------------------------------------------------------------------
-//
 // Enum: uvm_hier_e
 //
 // Whether to provide the requested information from a hierarchical context.
@@ -266,8 +294,6 @@ typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
    } uvm_hier_e;
 
 
-//------------------------------------------------------------------------------
-//
 // Enum: uvm_predict_e
 //
 // How the mirror is to be updated
@@ -283,31 +309,10 @@ typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
    } uvm_predict_e;
 
 
-//------------------------------------------------------------------------------
-// Type: uvm_reg_cvr_t
-//
-// Coverage model value set with <`UVM_REG_CVR_WIDTH> bits.
-//
-// Symbolic values for individual coverage models are defined
-// by the <uvm_coverage_model_e> type.
-//
-// The following bits in the set are assigned as follows
-//
-// 0-7     - UVM pre-defined coverage models
-// 8-15    - Coverage models defined by EDA vendors,
-//           implemented in a register model generator.
-// 16-23   - User-defined coverage models
-// 24..    - Reserved
-//
-typedef  bit [`UVM_REG_CVR_WIDTH-1:0]  uvm_reg_cvr_t ;
-
-
-//------------------------------------------------------------------------------
-//
 // Enum: uvm_coverage_model_e
 //
 // Coverage models available or desired.
-// Multiple models may be specified by adding individual model identifiers.
+// Multiple models may be specified by bitwise OR'ing individual model identifiers.
 //
 // UVM_NO_COVERAGE      - None
 // UVM_CVR_REG_BITS     - Individual register bits
@@ -324,33 +329,39 @@ typedef  bit [`UVM_REG_CVR_WIDTH-1:0]  uvm_reg_cvr_t ;
    } uvm_coverage_model_e;
 
 
-//------------------------------------------------------------------------------
-// Type: uvm_hdl_path_slice
+// Enum: uvm_reg_mem_tests_e
 //
-// Slice of an HDL path
+// Select which pre-defined test sequence to execute.
 //
-// Struct that specifies the HDL variable that corresponds to all
-// or a portion of a register.
+// Multiple test sequences may be selected by bitwise OR'ing their
+// respective symbolic values.
 //
-// path    - Path to the HDL variable.
-// offset  - Offset of the LSB in the register that this variable implements
-// size    - Number of bits (toward the MSB) that this variable implements
+// UVM_DO_REG_HW_RESET      - Run <uvm_reg_hw_reset_seq>
+// UVM_DO_REG_BIT_BASH      - Run <uvm_reg_bit_bash_seq>
+// UVM_DO_REG_ACCESS        - Run <uvm_reg_access_seq>
+// UVM_DO_MEM_ACCESS        - Run <uvm_mem_access_seq>
+// UVM_DO_SHARED_ACCESS     - Run <uvm_reg_mem_shared_access_seq>
+// UVM_DO_MEM_WALK          - Run <uvm_mem_walk_seq>
+// UVM_DO_ALL_REG_MEM_TESTS - Run all of the above
 //
-// If the HDL variable implements all of the register, ~offset~ and ~size~
-// are specified as -1. For example:
-//|
-//| r1.add_hdl_path('{ '{"r1", -1, -1} });
-//|
+// Test sequences, when selected, are executed in the
+// order in which they are specified above.
 //
-//------------------------------------------------------------------------------
+typedef enum bit [63:0] {
+  UVM_DO_REG_HW_RESET      = 64'h0000_0000_0000_0001,
+  UVM_DO_REG_BIT_BASH      = 64'h0000_0000_0000_0002,
+  UVM_DO_REG_ACCESS        = 64'h0000_0000_0000_0004,
+  UVM_DO_MEM_ACCESS        = 64'h0000_0000_0000_0008,
+  UVM_DO_SHARED_ACCESS     = 64'h0000_0000_0000_0010,
+  UVM_DO_MEM_WALK          = 64'h0000_0000_0000_0020,
+  UVM_DO_ALL_REG_MEM_TESTS = 64'hffff_ffff_ffff_ffff 
+} uvm_reg_mem_tests_e;
 
-typedef struct {
-   string path;
-   int offset;
-   int size;
-} uvm_hdl_path_slice;
 
 
+//-----------------------
+// Group: Utility Classes
+//-----------------------
 
 //------------------------------------------------------------------------------
 // Class: uvm_hdl_path_concat
@@ -548,9 +559,6 @@ typedef struct packed {
   int unsigned stride;
   } uvm_reg_map_addr_range;
 
-
-
-`include "dpi/uvm_hdl.svh"
 
 `include "reg/uvm_reg_item.svh"
 `include "reg/uvm_reg_adapter.svh"

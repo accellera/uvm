@@ -369,7 +369,6 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
          xbus_indirect_reg[i]=r_;
          name = $sformatf("id_reg_values[%0d]",i);
          r_.configure(this, null, name);
-         default_map.add_reg(r_, -1, "RW",0);
          r_.build();
       end
 
@@ -446,8 +445,6 @@ class reg_block_xa0_xbus_rf extends uvm_reg_block;
       mem.configure(this, "mem");
       mem.build();
       default_map.add_mem(mem, 'h100, "RW");
-
-      lock_model();
    endfunction : build
 
    `uvm_object_utils(reg_block_xa0_xbus_rf)
@@ -479,8 +476,6 @@ class reg_sys_xa0 extends uvm_reg_block;
          xa0_xbus_rf_addr_reg_bkdr bkdr = new(xbus_rf.addr_reg.get_full_name());
          xbus_rf.addr_reg.set_backdoor(bkdr);
       end
-
-      lock_model();
    endfunction : build
 
    `uvm_object_utils(reg_sys_xa0)

@@ -556,6 +556,15 @@ class uvm_reg_map extends uvm_object;
    extern virtual function void set_attribute(string name, string value);
 
 
+   // Function: has_attribute
+   //
+   // Returns TRUE if attribute exists.
+   //
+   // See <get_attribute> for details on ~inherited~ argument.
+   //
+   extern virtual function bit has_attribute(string name, bit inherited = 1);
+   
+   
    // Function: get_attribute
    //
    // Get an attribute value.
@@ -1641,8 +1650,8 @@ task uvm_reg_map::do_write(uvm_reg_item rw);
 
   if (adapter == null) begin
     rw.set_sequencer(sequencer);
-    rw.m_start_item(sequencer,rw.parent,rw.prior);
-    rw.m_finish_item(sequencer,rw.parent);
+    rw.parent.start_item(rw,rw.prior);
+    rw.parent.finish_item(rw);
     rw.end_event.wait_on();
   end
   else begin
@@ -1662,8 +1671,8 @@ task uvm_reg_map::do_read(uvm_reg_item rw);
 
   if (adapter == null) begin
     rw.set_sequencer(sequencer);
-    rw.m_start_item(sequencer,rw.parent,rw.prior);
-    rw.m_finish_item(sequencer,rw.parent);
+    rw.parent.start_item(rw,rw.prior);
+    rw.parent.finish_item(rw);
     rw.end_event.wait_on();
   end
   else begin
@@ -1726,7 +1735,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
               
     foreach(addrs[i]) begin: foreach_addr
 
-      uvm_sequence_item bus_req = new("bus_wr");
+      uvm_sequence_item bus_req;
       uvm_reg_bus_op rw_access;
       uvm_reg_data_t data;
 
@@ -1747,15 +1756,14 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
       rw_access.n_bits  = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
       rw_access.byte_en = byte_en;
 
-      bus_req.m_start_item(sequencer,rw.parent,rw.prior);
+      bus_req = adapter.reg2bus(rw_access);
+      bus_req.set_sequencer(sequencer);
+      rw.parent.start_item(bus_req,rw.prior);
 
       if (rw.parent != null && rw_access.addr == addrs[0])
         rw.parent.mid_do(rw);
 
-      bus_req = adapter.reg2bus(rw_access);
-
-      bus_req.set_sequencer(sequencer);
-      bus_req.m_finish_item(sequencer,rw.parent);
+      rw.parent.finish_item(bus_req);
       bus_req.end_event.wait_on();
 
       if (adapter.provides_responses) begin
@@ -1846,7 +1854,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
               
     foreach (addrs[i]) begin
 
-      uvm_sequence_item bus_req = new("bus_rd");
+      uvm_sequence_item bus_req;
       uvm_reg_bus_op rw_access;
       uvm_reg_data_logic_t data;
        
@@ -1864,16 +1872,16 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       rw_access.byte_en = byte_en;
       rw_access.n_bits = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
                           
-      bus_req.m_start_item(sequencer,rw.parent,rw.prior);
+      bus_req = adapter.reg2bus(rw_access);
+      bus_req.set_sequencer(sequencer);
+      rw.parent.start_item(bus_req,rw.prior);
 
       if (rw.parent != null && rw_access.addr == addrs[0]) begin
         rw.parent.pre_do(1);
         rw.parent.mid_do(rw);
       end
 
-      bus_req = adapter.reg2bus(rw_access);
-      bus_req.set_sequencer(sequencer);
-      bus_req.m_finish_item(sequencer,rw.parent);
+      rw.parent.finish_item(bus_req);
       bus_req.end_event.wait_on();
 
       if (adapter.provides_responses) begin
@@ -1953,6 +1961,20 @@ function void uvm_reg_map::set_attribute(string name, string value);
    m_attributes[name] = value;
 
 endfunction: set_attribute
+
+
+// has_attribute
+
+function bit uvm_reg_map::has_attribute(string name, bit inherited = 1);
+   if (m_attributes.exists(name))
+      return 1;
+
+   if (inherited && m_parent != null)
+      if (m_parent.get_attribute(name,1) != "")
+        return 1;
+
+   return 0;
+endfunction
 
 
 // get_attribute

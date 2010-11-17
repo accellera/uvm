@@ -27,21 +27,21 @@ TOOL    = $(shell $(UVM_HOME)/bin/uvm_dpi_name -tool)
 
 OS      = $(shell $(UVM_HOME)/bin/uvm_os_name)
 
-SRCDIR  = $(UVM_HOME)/src/C
+SRCDIR  = $(UVM_HOME)/src/dpi
 LIBDIR  = $(shell dirname $(SONAME))
 SONAME  = $(shell $(UVM_HOME)/bin/uvm_dpi_name)
 
-CC = $(MTI_HOME)/gcc-4.1.2-linux/bin/gcc
+CC = $(MTI_HOME)/gcc-4.1.2-linux/bin/g++
 CFLAGS += -shared -fPIC -DQUESTA -I$(MTI_HOME)/include -m32
 
-SRCS    = $(SRCDIR)/uvm_hdl.c
+SRCS    = $(SRCDIR)/uvm_dpi.cc
 
 
 #
 # Include file for Questa Makefiles
 #
 
-UVM_VERBOSITY =	UVM_HIGH
+UVM_VERBOSITY =	UVM_MEDIUM
 
 
 # Note that +acc and +vpi have an adverse impact on performance

@@ -52,6 +52,7 @@ class oc_ethernet_env extends uvm_env;
       host = wb_agent::type_id::create("host", this);
 
       model.build();
+      model.lock_model();
 
       model.set_hdl_path_root(hdl_root);
 

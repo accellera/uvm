@@ -29,44 +29,12 @@ typedef class uvm_sequence_base;
 typedef class uvm_objection_cb;
 typedef uvm_callbacks #(uvm_objection,uvm_objection_cb) uvm_objection_cbs_t;
 
-
 //------------------------------------------------------------------------------
-//
-// Class: uvm_objection_cb
-//
+// Title: Objection Mechanism
 //------------------------------------------------------------------------------
-// This class allows for external consumers to attach to the various
-// objection callbacks, <uvm_objection::raised>, <uvm_objection::dropped> and 
-// <uvm_objection::all_dropped>.
-//
-//| class my_objection_cb extends uvm_objection_cb;
-//|    virtual function void raised (uvm_object obj, uvm_object source_obj,
-//|      string description, int count);
-//|      if(obj == source_obj)
-//|        $display("Got raise: %s from object %s", description, obj.get_full_name());
-//|    endfunction
-//| endclass
-//|
-//| my_objection_cb cb = new;
-//|
-//| //add to every type of objection
-//| initial uvm_callbacks#(uvm_objection)::add(null,cb);
-
-
-class uvm_objection_cb extends uvm_callback;
-  function new(string name);
-    super.new(name);
-  endfunction
-  virtual function void raised (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
-  endfunction
-  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
-  endfunction
-  virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
-  endtask
-endclass
+// The following classes define the objection mechanism and end-of-test
+// functionality, which is based on <ovm_objection>.
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
@@ -744,7 +712,7 @@ class uvm_objection extends uvm_report_object;
   // Function: display_objections
   // 
   // Displays objection information about the given ~object~. If ~object~ is
-  // not specified or ~null~, the implicit top-level component, <uvm_top>, is
+  // not specified or ~null~, the implicit top-level component, <uvm_root>, is
   // chosen. The ~show_header~ argument allows control of whether a header is
   // output.
 
@@ -783,12 +751,51 @@ class uvm_objection extends uvm_report_object;
 endclass
 
 
+//------------------------------------------------------------------------------
+//
+// Class: uvm_objection_cb
+//
+//------------------------------------------------------------------------------
+// This class allows for external consumers to attach to the various
+// objection callbacks, <uvm_objection::raised>, <uvm_objection::dropped> and 
+// <uvm_objection::all_dropped>.
+//
+//| class my_objection_cb extends uvm_objection_cb;
+//|    virtual function void raised (uvm_object obj, uvm_object source_obj,
+//|      string description, int count);
+//|      if(obj == source_obj)
+//|        $display("Got raise: %s from object %s", description, obj.get_full_name());
+//|    endfunction
+//| endclass
+//|
+//| my_objection_cb cb = new;
+//|
+//| //add to every type of objection
+//| initial uvm_callbacks#(uvm_objection)::add(null,cb);
+//------------------------------------------------------------------------------
+
+
+class uvm_objection_cb extends uvm_callback;
+  function new(string name);
+    super.new(name);
+  endfunction
+  virtual function void raised (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+  endfunction
+  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+  endfunction
+  virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+  endtask
+endclass
+
 
 //------------------------------------------------------------------------------
 //
 // Class: uvm_test_done_objection
 //
-// Built-in end-of-test coordination
+// Provides built-in end-of-test coordination
 //------------------------------------------------------------------------------
 
 class uvm_test_done_objection extends uvm_objection;
@@ -824,7 +831,7 @@ class uvm_test_done_objection extends uvm_objection;
   // Task: all_dropped
   //
   // This callback is called when the given ~object's~ objection count reaches
-  // zero; if the ~object~ is the implicit top-level, <uvm_top> then it means
+  // zero; if the ~object~ is the implicit top-level, <uvm_root> then it means
   // there are no more objections raised for the ~uvm_test_done~ objection.
   // Thus, after calling <uvm_objection::all_dropped>, this method will call
   // <global_stop_request> to stop the current task-based phase (e.g. run).

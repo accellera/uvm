@@ -72,6 +72,7 @@ class xbus_reg_env extends xbus_env;
     super.build();
     model = xbus_reg_model::type_id::create("xa0", this);
     model.build();
+    model.lock_model();
     // Should be done using resources
     begin
     string top_path;

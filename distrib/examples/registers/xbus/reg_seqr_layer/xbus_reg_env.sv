@@ -78,6 +78,7 @@ class xbus_reg_env extends xbus_env;
     model = xbus_reg_model::type_id::create("xa0", this);
     reg_seqr = uvm_sequencer #(uvm_reg_item)::type_id::create("reg_seqr",this);
     model.build();
+    model.lock_model();
 
     // Should be done using resources
     model.set_hdl_path_root(`DEF2STR(`XA0_TOP_PATH));
