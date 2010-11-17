@@ -44,7 +44,6 @@ USAGE
 
 @dirs = ("trivial",
 	 "hello_world/uvm",
-	 "basic_examples/ep",
 	 "basic_examples/module",
 	 "basic_examples/pkg",
 	 "callbacks",
@@ -57,14 +56,11 @@ USAGE
 	 "phases/stop_request",
 	 "sequence/basic_read_write_sequence",
 	 "sequence/simple",
-	 "uvm_examples/mechanics/hierarchy",
-	 "uvm_examples/mechanics/interfaces",
-	 "uvm_examples/mechanics/producer_consumer",
-	 "uvm_examples/uvm_tlm/bidir",
-	 "uvm_examples/uvm_tlm/fifo",
-	 "uvm_tlm/hierarchy",
-	 "uvm_tlm/producer_consumer",
-	 "uvm_tlm/uvm_tlm_fifo",
+	 "interfaces",
+	 "tlm1/hierarchy",
+	 "tlm1/producer_consumer",
+	 "tlm1/bidir",
+	 "tlm1/fifo",
 	 "xbus/examples");
 
 $cmd = join(" ", @ARGV);

@@ -208,7 +208,7 @@ sub run_one_test {
    }
 
    local($sv) = ("$testdir/test.sv");
-   if (! -e $sv && !$opt_c) {
+   if (! -e $sv) {
      # Maybe it is a script instead of an SV file?
      local($pl) = ("$testdir/test.pl");
      if (-e $pl) {
@@ -230,7 +230,11 @@ sub run_one_test {
 	 print "**FAIL** ($post_test)\n";
        } else {
 	 $post_test = "from test.pl" unless $post_test;
-	 print "pass ($post_test)\n";
+	 if ($opt_c) {
+	   print "clean ($post_test)\n";
+	 } else {
+	   print "pass ($post_test)\n";
+	 }
        }	
        return $failed;
      }
@@ -367,7 +371,7 @@ sub check_test {
    }
 
    # If the file "post_test.pl" exists, run it to determine success
-   # or failure. Required when the testcse produces some external
+   # or failure. Required when the testcase produces some external
    # output whose presence and format is part of the test's success
    if (-e "$testdir/post_test.pl") {
       $post_test = 0;
@@ -532,4 +536,28 @@ sub check_runtime_error {
   close(SV);
 
   return 1;
+}
+
+
+
+#
+# Execute a Makefile-based example
+#
+sub make_example {
+  local($dir, $result, $_) = @_;
+
+  return 0 if ($tool eq "clean");
+
+  $result = 0;
+  if (!$opt_c) {
+    $cmd = "cd $dir && make -f Makefile.$tool";
+    $cmd .= " > /dev/null 2>&1" unless $opt_v;
+    $result = system($cmd);
+  }
+  if (!$opt_d || $opt_c) {
+    $cmd = "cd $dir && make -f Makefile.$tool clean";
+    $cmd .= " > /dev/null 2>&1" unless $opt_v;
+    system($cmd);
+  }
+  return $result;
 }

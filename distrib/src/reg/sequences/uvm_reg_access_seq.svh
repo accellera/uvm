@@ -71,8 +71,9 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
       end
 
       // Registers with some attributes are not to be tested
-      if (rg.get_attribute("NO_REG_TESTS") != "") return;
-      if (rg.get_attribute("NO_REG_ACCESS_TEST") != "") return;
+      if (rg.has_attribute("NO_REG_TESTS") || 
+          rg.has_attribute("NO_REG_ACCESS_TEST"))
+            return;
 
       // Can only deal with registers with backdoor access
       if (rg.get_backdoor() == null && !rg.has_hdl_path()) begin
@@ -226,16 +227,17 @@ class uvm_reg_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item)
    protected virtual task do_block(uvm_reg_block blk);
       uvm_reg regs[$];
       
-      if (blk.get_attribute("NO_REG_TESTS") != "" ||
-          blk.get_attribute("NO_REG_ACCESS_TEST") != "")
+      if (blk.has_attribute("NO_REG_TESTS") ||
+          blk.has_attribute("NO_REG_ACCESS_TEST"))
          return;
 
       // Iterate over all registers, checking accesses
       blk.get_registers(regs, UVM_NO_HIER);
       foreach (regs[i]) begin
          // Registers with some attributes are not to be tested
-         if (regs[i].get_attribute("NO_REG_TESTS") != "" ||
-	     regs[i].get_attribute("NO_REG_ACCESS_TEST") != "") continue;
+         if (regs[i].has_attribute("NO_REG_TESTS") ||
+	     regs[i].has_attribute("NO_REG_ACCESS_TEST"))
+              continue;
          
          // Can only deal with registers with backdoor access
          if (regs[i].get_backdoor() == null && !regs[i].has_hdl_path()) begin
