@@ -1,0 +1,1 @@
+  +UVM_VERBOSITY=HIGH +define+NUM_REGS=10
