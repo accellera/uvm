@@ -119,7 +119,7 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
          for (int k = 0; k < n_bits; k++) begin
             // Cannot test unpredictable bit behavior
             if (dc_mask[k]) continue;
-            
+
             bash_kth_bit(rg, k, mode[k], maps[j], dc_mask);
          end
             
@@ -136,7 +136,7 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
       uvm_reg_data_t  val, exp, v;
       bit bit_val;
 
-      `uvm_info("RegModel", $psprintf("...Bashing %s bit #%0d", mode, k),UVM_MEDIUM);
+      `uvm_info("RegModel", $psprintf("...Bashing %s bit #%0d", mode, k),UVM_HIGH);
       
       repeat (2) begin
          val = rg.get();
