@@ -90,7 +90,6 @@ class uvm_reg_mem_hdl_paths_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
 
     protected virtual function void do_block(uvm_reg_block blk,
                                              string        kind);
-        uvm_reg_block blks[$];
         uvm_reg       regs[$];
         uvm_mem       mems[$];
 
@@ -108,9 +107,13 @@ class uvm_reg_mem_hdl_paths_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
        foreach (mems[i]) 
           check_mem(mems[i], kind);
     
-       blk.get_blocks(blks);
-       foreach (blks[i]) begin
-          do_block(blks[i], kind);
+       begin
+          uvm_reg_block blks[$];
+          
+          blk.get_blocks(blks);
+          foreach (blks[i]) begin
+             do_block(blks[i], kind);
+          end
        end
     endfunction: do_block
     
