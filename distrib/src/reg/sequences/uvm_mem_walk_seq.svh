@@ -84,9 +84,9 @@ class uvm_mem_single_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_
       end
 
       // Memories with some attributes are not to be tested
-      if (mem.get_attribute("NO_REG_TESTS") != "" ||
-          mem.get_attribute("NO_MEM_TESTS") != "" ||
-	  mem.get_attribute("NO_MEM_WALK_TEST") != "")
+      if (mem.has_attribute("NO_REG_TESTS") ||
+          mem.has_attribute("NO_MEM_TESTS") ||
+	  mem.has_attribute("NO_MEM_WALK_TEST"))
          return;
 
       n_bits = mem.get_n_bits();
@@ -204,10 +204,9 @@ class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
    // Do not call directly. Use seq.start() instead.
    //
    virtual task body();
-      uvm_reg_block blks[$];
 
       if (model == null) begin
-         `uvm_error("RegModel", "Not block or system specified to run sequence on");
+         `uvm_error("RegModel", "No register model specified to run sequence on");
          return;
       end
 
@@ -219,10 +218,6 @@ class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
       model.reset();
 
       do_block(model);
-      model.get_blocks(blks);
-      foreach (blks[i]) begin
-         do_block(blks[i]);
-      end
    endtask: body
 
 
@@ -233,22 +228,31 @@ class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
    protected virtual task do_block(uvm_reg_block blk);
       uvm_mem mems[$];
       
-      if (blk.get_attribute("NO_REG_TESTS") != "" ||
-          blk.get_attribute("NO_MEM_TESTS") != "" ||
-          blk.get_attribute("NO_MEM_ACCESS_TEST") != "")
+      if (blk.has_attribute("NO_REG_TESTS") ||
+          blk.has_attribute("NO_MEM_TESTS") ||
+          blk.has_attribute("NO_MEM_ACCESS_TEST"))
          return;
       
       // Iterate over all memories, checking accesses
       blk.get_memories(mems, UVM_NO_HIER);
       foreach (mems[i]) begin
          // Memories with some attributes are not to be tested
-         if (mems[i].get_attribute("NO_REG_TESTS") != "" ||
-             mems[i].get_attribute("NO_MEM_TESTS") != "" ||
-	     mems[i].get_attribute("NO_MEM_WALK_TEST") != "")
+         if (mems[i].has_attribute("NO_REG_TESTS") ||
+             mems[i].has_attribute("NO_MEM_TESTS") ||
+	     mems[i].has_attribute("NO_MEM_WALK_TEST"))
            continue;
          
          mem_seq.mem = mems[i];
          mem_seq.start(null, this);
+      end
+
+      begin
+         uvm_reg_block blks[$];
+         
+         blk.get_blocks(blks);
+         foreach (blks[i]) begin
+            do_block(blks[i]);
+         end
       end
    endtask: do_block
 

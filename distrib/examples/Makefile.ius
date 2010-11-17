@@ -38,8 +38,8 @@ UVM_VERBOSITY =	UVM_LOW
 
 TEST = /usr/bin/test
 
-IUS =	irun -access rw -uvm -uvmhome $(UVM_HOME) \
-	-uvmnoautocompile $(UVM_HOME)/src/uvm_pkg.sv $(UVM_HOME)/src/dpi/uvm_dpi.c -define NCSIM \
+IUS =	irun -access rw -uvmhome $(UVM_HOME) \
+	-uvmnoautocompile $(UVM_HOME)/src/uvm_pkg.sv $(UVM_HOME)/src/dpi/uvm_dpi.cc -define NCSIM \
 	+UVM_VERBOSITY=$(UVM_VERBOSITY)
 
 CHECK = \

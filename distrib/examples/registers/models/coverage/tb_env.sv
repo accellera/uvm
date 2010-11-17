@@ -50,6 +50,7 @@ class dut;
              if (rw.byte_en[0]) M[rw.addr[9:0]] = rw.data[ 7:0];
           end
       endcase
+      #1;
       // $write("%s\n", rw.convert2string());
    endtask
 endclass

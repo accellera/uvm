@@ -341,6 +341,15 @@ virtual class uvm_reg extends uvm_object;
                                               string value);
 
 
+   // Function: has_attribute
+   //
+   // Returns TRUE if attribute exists.
+   //
+   // See <get_attribute> for details on ~inherited~ argument.
+   //
+   extern virtual function bit has_attribute(string name, bit inherited = 1);
+   
+
    // Function: get_attribute
    //
    // Get an attribute value.
@@ -1509,7 +1518,7 @@ function void uvm_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
    
    if (!has_hdl_path(kind)) begin
       `uvm_error("RegModel",
-         {"Register does not have hdl path defined for abstraction '",kind,"'"})
+         {"Register ",get_full_name()," does not have hdl path defined for abstraction '",kind,"'"})
       return;
    end
 
@@ -1930,6 +1939,20 @@ function void uvm_reg::set_attribute(string name,
 
    m_attributes[name] = value;
 endfunction: set_attribute
+
+
+// has_attribute
+
+function bit uvm_reg::has_attribute(string name, bit inherited = 1);
+   if (m_attributes.exists(name))
+      return 1;
+
+   if (inherited && m_parent != null)
+      if (m_parent.get_attribute(name,1) != "")
+        return 1;
+
+   return 0;
+endfunction
 
 
 // get_attribute
@@ -3027,6 +3050,18 @@ task uvm_reg::mirror(output uvm_status_e       status,
       if ((v|dc) !== (exp|dc)) begin
          `uvm_error("RegModel", $psprintf("Register \"%s\" value read from DUT (0x%h) does not match mirrored value (0x%h)",
                                      get_name(), v, (exp ^ ('x & dc))));
+                                     
+          foreach(m_fields[i]) begin
+             if(m_fields[i].get_compare() == UVM_CHECK) begin
+                 uvm_reg_data_t mask=((1 << m_fields[i].get_n_bits())-1);
+                 uvm_reg_data_t field = mask << m_fields[i].get_lsb_pos();
+                 uvm_reg_data_t diff = ((v ^ exp) >> m_fields[i].get_lsb_pos()) & mask;
+                 if(diff)
+                    `uvm_info("RegMem",$psprintf("field %s mismatch read=0x%0h mirrored=0x%0h slice [%0d:%0d]",m_fields[i].get_name(),
+                        (v >> m_fields[i].get_lsb_pos()) & mask, (exp >> m_fields[i].get_lsb_pos())&mask,
+                        m_fields[i].get_lsb_pos(),m_fields[i].get_lsb_pos()+m_fields[i].get_n_bits()),UVM_NONE)
+             end
+          end
       end
    end
 

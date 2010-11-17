@@ -166,8 +166,11 @@ print "-----------------------------------------------------------------\n";
 $txt = sprintf("Total of %d tests ", $#dirs+1);
 $dots = substr("............................................", 0, 46-length($txt));
 print $txt, $dots;
+$failures -= $skipped;
 if ($failures > 0) {
-  print " FAILED $failures tests\n";
+  printf " FAILED %d of %d tests\n", $failures, $#dirs+1;
+} elsif ($skipped > 0) {
+   printf " PASSED %d of %d tests.\n", $#dirs+1-$skipped, $#dirs+1;
 } else {
    print " PASSED all tests.\n";
 }
@@ -207,8 +210,14 @@ sub run_one_test {
      }
    }
 
+   if (!$opt_S && !$opt_c && -e "$testdir/$tool.skip") {
+     print "SKIP (Use -S to force execution)\n";
+     $skipped++;
+     return 1;
+   }
+
    local($sv) = ("$testdir/test.sv");
-   if (! -e $sv && !$opt_c) {
+   if (! -e $sv) {
      # Maybe it is a script instead of an SV file?
      local($pl) = ("$testdir/test.pl");
      if (-e $pl) {
@@ -230,16 +239,15 @@ sub run_one_test {
 	 print "**FAIL** ($post_test)\n";
        } else {
 	 $post_test = "from test.pl" unless $post_test;
-	 print "pass ($post_test)\n";
+	 if ($opt_c) {
+	   print "clean ($post_test)\n";
+	 } else {
+	   print "pass ($post_test)\n";
+	 }
        }	
        return $failed;
      }
      print "**FAIL** (Neither $sv nor $pl exist)\n";
-     return 1;
-   }
-
-   if (!$opt_S && !$opt_c && -e "$testdir/$tool.skip") {
-     print "SKIP (Use -S to force execution)\n";
      return 1;
    }
 
@@ -367,7 +375,7 @@ sub check_test {
    }
 
    # If the file "post_test.pl" exists, run it to determine success
-   # or failure. Required when the testcse produces some external
+   # or failure. Required when the testcase produces some external
    # output whose presence and format is part of the test's success
    if (-e "$testdir/post_test.pl") {
       $post_test = 0;
@@ -532,4 +540,28 @@ sub check_runtime_error {
   close(SV);
 
   return 1;
+}
+
+
+
+#
+# Execute a Makefile-based example
+#
+sub make_example {
+  local($dir, $result, $_) = @_;
+
+  return 0 if ($tool eq "clean");
+
+  $result = 0;
+  if (!$opt_c) {
+    $cmd = "cd $dir && make -f Makefile.$tool";
+    $cmd .= " > /dev/null 2>&1" unless $opt_v;
+    $result = system($cmd);
+  }
+  if (!$opt_d || $opt_c) {
+    $cmd = "cd $dir && make -f Makefile.$tool clean";
+    $cmd .= " > /dev/null 2>&1" unless $opt_v;
+    system($cmd);
+  }
+  return $result;
 }
