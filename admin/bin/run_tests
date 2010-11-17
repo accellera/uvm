@@ -168,7 +168,7 @@ $dots = substr("............................................", 0, 46-length($txt
 print $txt, $dots;
 $failures -= $skipped;
 if ($failures > 0) {
-  print " FAILED %d of %d tests\n", $failures, $#dirs+1;
+  printf " FAILED %d of %d tests\n", $failures, $#dirs+1;
 } elsif ($skipped > 0) {
    printf " PASSED %d of %d tests.\n", $#dirs+1-$skipped, $#dirs+1;
 } else {
