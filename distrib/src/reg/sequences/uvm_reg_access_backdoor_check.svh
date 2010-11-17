@@ -39,12 +39,17 @@
 //
 // The test is performed in zero time and does not require any reads/writes to/from the DUT
 //
-// TODO add filtering capabilities
-//
+
 class uvm_reg_mem_access_backdoor_check_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
-
-    `uvm_object_utils(uvm_reg_mem_access_backdoor_check_seq)
-
+    // Variable: kinds
+    // if set the check is only performed for the listed abstractions
+    // if unset the check is performed for "RTL"
+    string abstractions[$];
+    
+    `uvm_object_utils_begin(uvm_reg_mem_access_backdoor_check_seq)
+        `uvm_field_queue_string(abstractions, UVM_DEFAULT)
+    `uvm_object_utils_end
+    
     function new(string name="uvm_reg_mem_access_backdoor_check_seq");
         super.new(name);
     endfunction
@@ -74,60 +79,56 @@ class uvm_reg_mem_access_backdoor_check_seq extends uvm_reg_sequence #(uvm_seque
         uvm_reg regs[$];
         uvm_mem mems[$];
 
-        // Iterate over all registers, checking accesses
-        blk.get_registers(regs, UVM_NO_HIER);
-        foreach (regs[i]) 
-            if (regs[i].get_backdoor() || regs[i].has_hdl_path())
-            	check_reg(regs[i]);
+        // if kinds are unset use a reasonable default
+        if(abstractions.size()==0)
+            abstractions.push_back("RTL");
+ 
+        foreach(abstractions[kind]) begin
+            `uvm_info("RegModel",{"validating hdl pathes for abstraction ",abstractions[kind]},UVM_NONE) 
+            // Iterate over all registers, checking accesses
+            blk.get_registers(regs, UVM_NO_HIER);
+            foreach (regs[i]) 
+                if (regs[i].get_backdoor() || regs[i].has_hdl_path())
+                    check_reg(regs[i],abstractions[kind]);
         
-        blk.get_memories(mems, UVM_NO_HIER);
-        foreach (mems[i]) 
-            if (mems[i].get_backdoor() || mems[i].has_hdl_path())
-            	check_mem(mems[i]);
-
+            blk.get_memories(mems, UVM_NO_HIER);
+            foreach (mems[i]) 
+                if (mems[i].get_backdoor() || mems[i].has_hdl_path())
+                    check_mem(mems[i],abstractions[kind]);
+        end
     endfunction: do_block
     
-    protected virtual function void check_reg(uvm_reg r);
-    	uvm_reg_backdoor b = r.get_backdoor();
-    	uvm_hdl_path_concat paths[$];
-    	string hdl_abstractions[$];
-    	
-    	r.get_hdl_path_kinds(hdl_abstractions);
-    	foreach(hdl_abstractions[kind])
-    	begin
-    		r.get_full_hdl_path(paths, hdl_abstractions[kind]);
-    		foreach(paths[p]) begin
-                uvm_hdl_path_concat path=paths[p];
-                foreach (path.slices[j]) 
-                begin
-                        string p_ = path.slices[j].path;
-                        if(!uvm_hdl_check_path(p_))
-                            uvm_report_warning("RegModel",$psprintf("hdl path %s for register %s does not seem to be accessible",
+    protected virtual function void check_reg(uvm_reg r,string kind);
+        uvm_reg_backdoor b = r.get_backdoor();
+        uvm_hdl_path_concat paths[$];
+      
+        r.get_full_hdl_path(paths, kind);
+        foreach(paths[p]) begin
+            uvm_hdl_path_concat path=paths[p];
+            foreach (path.slices[j]) 
+            begin
+                string p_ = path.slices[j].path;
+                if(!uvm_hdl_check_path(p_))
+                    uvm_report_warning("RegModel",$psprintf("hdl path %s for register %s does not seem to be accessible",
                             p_,r.get_full_name()));
-                end
-    	   end
+            end
         end
     endfunction
  
-    protected virtual function void check_mem(uvm_mem r);
+    protected virtual function void check_mem(uvm_mem r,string kind);
         uvm_reg_backdoor b = r.get_backdoor();
         uvm_hdl_path_concat paths[$];
-        string hdl_abstractions[$];
         
-        r.get_hdl_path_kinds(hdl_abstractions);
-        foreach(hdl_abstractions[kind])
-        begin
-            r.get_full_hdl_path(paths, hdl_abstractions[kind]);
-            foreach(paths[p]) begin
-                uvm_hdl_path_concat path=paths[p];
-                foreach (path.slices[j]) 
-                begin
-                        string p_ = path.slices[j].path;
-                        if(!uvm_hdl_check_path(p_))
-                            uvm_report_warning("RegModel",$psprintf("hdl path %s for memory %s does not seem to be accessible",
+        r.get_full_hdl_path(paths, kind);
+        foreach(paths[p]) begin
+            uvm_hdl_path_concat path=paths[p];
+            foreach (path.slices[j]) 
+            begin
+                string p_ = path.slices[j].path;
+                if(!uvm_hdl_check_path(p_))
+                    uvm_report_warning("RegModel",$psprintf("hdl path %s for memory %s does not seem to be accessible",
                             p_,r.get_full_name()));
-                end
-           end
+            end
         end
-    endfunction   
+    endfunction 
 endclass: uvm_reg_mem_access_backdoor_check_seq
