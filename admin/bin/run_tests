@@ -166,8 +166,11 @@ print "-----------------------------------------------------------------\n";
 $txt = sprintf("Total of %d tests ", $#dirs+1);
 $dots = substr("............................................", 0, 46-length($txt));
 print $txt, $dots;
+$failures -= $skipped;
 if ($failures > 0) {
-  print " FAILED $failures tests\n";
+  printf " FAILED %d of %d tests\n", $failures, $#dirs+1;
+} elsif ($skipped > 0) {
+   printf " PASSED %d of %d tests.\n", $#dirs+1-$skipped, $#dirs+1;
 } else {
    print " PASSED all tests.\n";
 }
@@ -207,6 +210,12 @@ sub run_one_test {
      }
    }
 
+   if (!$opt_S && !$opt_c && -e "$testdir/$tool.skip") {
+     print "SKIP (Use -S to force execution)\n";
+     $skipped++;
+     return 1;
+   }
+
    local($sv) = ("$testdir/test.sv");
    if (! -e $sv) {
      # Maybe it is a script instead of an SV file?
@@ -239,11 +248,6 @@ sub run_one_test {
        return $failed;
      }
      print "**FAIL** (Neither $sv nor $pl exist)\n";
-     return 1;
-   }
-
-   if (!$opt_S && !$opt_c && -e "$testdir/$tool.skip") {
-     print "SKIP (Use -S to force execution)\n";
      return 1;
    }
 

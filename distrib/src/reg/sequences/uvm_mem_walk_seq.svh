@@ -204,10 +204,9 @@ class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
    // Do not call directly. Use seq.start() instead.
    //
    virtual task body();
-      uvm_reg_block blks[$];
 
       if (model == null) begin
-         `uvm_error("RegModel", "Not block or system specified to run sequence on");
+         `uvm_error("RegModel", "No register model specified to run sequence on");
          return;
       end
 
@@ -219,10 +218,6 @@ class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
       model.reset();
 
       do_block(model);
-      model.get_blocks(blks);
-      foreach (blks[i]) begin
-         do_block(blks[i]);
-      end
    endtask: body
 
 
@@ -249,6 +244,15 @@ class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
          
          mem_seq.mem = mems[i];
          mem_seq.start(null, this);
+      end
+
+      begin
+         uvm_reg_block blks[$];
+         
+         blk.get_blocks(blks);
+         foreach (blks[i]) begin
+            do_block(blks[i]);
+         end
       end
    endtask: do_block
 

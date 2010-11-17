@@ -215,10 +215,14 @@ endclass
 initial
 begin
    uvm_reg_data_t data;
-   a_blk blk = new("blk");
-   a_reg rg = new("rg");
-   dut   fd = new;
+   a_blk blk; 
+   a_reg rg;
+   dut   fd;
 
+    blk=new("blk");
+    rg=new("rg");
+    fd=new();
+    
    blk.default_map = blk.create_map("map", 0, 8, UVM_BIG_ENDIAN);
    rg.build();
    rg.configure(blk);
@@ -227,7 +231,8 @@ begin
    rg.reset();
    
    begin   
-      uvm_reg_single_bit_bash_seq seq = new();
+      uvm_reg_single_bit_bash_seq seq;
+      seq = new();
       seq.rg = rg;
       seq.start(null);
    end
