@@ -3063,6 +3063,17 @@ task uvm_reg::mirror(output uvm_status_e       status,
       if ((v|dc) !== (exp|dc)) begin
          `uvm_error("RegModel", $psprintf("Register \"%s\" value read from DUT (0x%h) does not match mirrored value (0x%h)",
                                      get_name(), v, (exp ^ ('x & dc))));
+                                     
+          foreach(m_fields[i]) begin
+             if(m_fields[i].get_compare() == UVM_CHECK) begin
+                 uvm_reg_data_t field = ((1 << m_fields[i].get_n_bits())-1) << m_fields[i].get_lsb_pos();
+                 uvm_reg_data_t diff = (v ^ exp) & ~field;
+                 if(diff)
+                    `uvm_info("RegMem",$psprintf("field %s mismatch read=0x%h mirrored=0x%h slice=[%d:%d]",m_fields[i].get_name(),
+                        (v & ~field) >> m_fields[i].get_lsb_pos(), (exp & ~field) >> m_fields[i].get_lsb_pos(),
+                        m_fields[i].get_lsb_pos(),m_fields[i].get_lsb_pos()+m_fields[i].get_n_bits()),UVM_NONE)
+             end
+          end
       end
    end
 
