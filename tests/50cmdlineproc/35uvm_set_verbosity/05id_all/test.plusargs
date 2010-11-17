@@ -1,0 +1,9 @@
++UVM_VERBOSITY=UVM_MEDIUM
++uvm_set_verbosity=uvm_test_top.mc0,_ALL_,UVM_FULL,connect
++uvm_set_verbosity=uvm_test_top.mc1,_ALL_,UVM_NONE,connect
++uvm_set_verbosity=uvm_test_top.*,_ALL_,UVM_HIGH,start_of_simulation
++uvm_set_verbosity=uvm_test_top.mc0,_ALL_,UVM_NONE,time,200
++uvm_set_verbosity=uvm_test_top.*,_ALL_,UVM_MEDIUM,time,800
++uvm_set_verbosity=uvm_test_top.mc1,_ALL_,UVM_NONE,extract
++uvm_set_verbosity=uvm_test_top.*,_ALL_,UVM_FULL,check
++uvm_set_verbosity=uvm_test_top.*,_ALL_,UVM_LOW,report
