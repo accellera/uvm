@@ -6,4 +6,7 @@ vc_hdrs.h
 ucli.key
 *.err
 *.orig
+INCA_libs
+.simvision
+irun.key
 
