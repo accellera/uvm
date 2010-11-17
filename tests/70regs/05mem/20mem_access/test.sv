@@ -236,7 +236,7 @@ module dut;
     bit [63:0] m;
     foreach(mem[i])
     begin
-      void'(randomize(m));
+      void'(std::randomize(m));
       mem[i]=m;
       $display("Mem[%0d] = %x", i, mem[i]);
     end
