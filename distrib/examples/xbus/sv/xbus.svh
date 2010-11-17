@@ -24,10 +24,6 @@
 `define XBUS_SVH
 
 import uvm_pkg::*;
-syntax_error_to_force_failure_instance_of_hang
-70regs/80examples/50xbus/10xbus_seqr ......... **FAIL** (test.pl)
-70regs/80examples/50xbus/12virt_seq .......... **FAIL** (test.pl)
-70regs/80examples/50xbus/20layered ........... **FAIL** (test.pl)
 
 `include "uvm_macros.svh"
 
