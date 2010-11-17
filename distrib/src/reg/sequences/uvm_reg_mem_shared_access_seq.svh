@@ -352,10 +352,9 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uv
    // Executes the Shared Register and Memory sequence
    //
    virtual task body();
-      uvm_reg_block blks[$];
 
       if (model == null) begin
-         `uvm_error("RegModel", "Not block or system specified to run sequence on");
+         `uvm_error("RegModel", "No register model specified to run sequence on");
          return;
       end
       
@@ -368,10 +367,6 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uv
       model.reset();
 
       do_block(model);
-      model.get_blocks(blks);
-      foreach (blks[i]) begin
-         do_block(blks[i]);
-      end
    endtask: body
 
 
@@ -414,6 +409,14 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uv
          mem_seq.start(this.get_sequencer(), this);
       end
 
+      begin
+         uvm_reg_block blks[$];
+         
+         blk.get_blocks(blks);
+         foreach (blks[i]) begin
+            do_block(blks[i]);
+         end
+      end
    endtask: do_block
 
 

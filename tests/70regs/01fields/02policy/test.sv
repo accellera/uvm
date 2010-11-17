@@ -231,7 +231,8 @@ begin
    rg.reset();
    
    begin   
-      uvm_reg_single_bit_bash_seq seq = new();
+      uvm_reg_single_bit_bash_seq seq;
+      seq = new();
       seq.rg = rg;
       seq.start(null);
    end
