@@ -17,13 +17,11 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-module dut_regs(
-  input wire clock,
-  input wire reset,
-  input wire [15:0] addr,
-  input wire read,
-  input wire [7:0] write_data,
-  output reg [7:0] read_data);
+module dut_regs(apb_if apb);
+
+  reg [31:0] pr_data;
+  assign apb.prdata = (apb.psel && apb.penable && !apb.pwrite) ? pr_data : 'z;
+
 
   parameter int NUM_OF_BLOCK_REGS=4;
   bit[3:0]  st;
@@ -60,7 +58,7 @@ module dut_regs(
   // Local variable that saves index to register block
   reg[1:0] regs_index;
 
-  always @(posedge clock or posedge reset) begin
+  always @(posedge apb.pclk or posedge apb.rst) begin
      if(reset) begin
        addr_reg <= 3'b1;
        dest <=2'h0;
@@ -82,12 +80,24 @@ module dut_regs(
        regs_index <= 0;
      end
      else begin
+      // Wait for a SETUP+READ or ENABLE+WRITE cycle
+      if (apb.psel == 1'b1 && apb.penable == apb.pwrite) begin
+         pr_data <= 32'h0;
+         if (apb.pwrite) begin
+            casex (apb.paddr)
+            endcase
+         end
+         else begin
+            casex (apb.paddr)
+            endcase
+         end
+      end
        case(st)
          0: begin //Begin out of Reset
            if((addr > 'h1007 && addr <'h100d) || (addr>='h1010 && addr<'h101c) ||
              (addr>='h1100 && addr<'h1200))
            begin
-             case(addr[11:0])
+             casex(apb.paddr)
                8'h8:
                  if(read)
                    read_data <= addr_reg;
