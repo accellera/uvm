@@ -33,15 +33,20 @@ class tb_env extends uvm_component;
    endfunction
 
    virtual function void build();
-      model = reg_block_slave::type_id::create("model",this);
-      apb = apb_agent::type_id::create("apb", this);
-      model.build();
-      model.lock_model();
+      if (model == null) begin
+         model = reg_block_slave::type_id::create("model",this);
+         model.build();
+         model.lock_model();
+         
+         apb = apb_agent::type_id::create("apb", this);
+      end
    endfunction
 
    virtual function void connect();
-      reg2apb_adapter reg2apb = new;
-      model.default_map.set_sequencer(apb.sqr,reg2apb);
+      if (apb != null) begin
+         reg2apb_adapter reg2apb = new;
+         model.default_map.set_sequencer(apb.sqr,reg2apb);
+      end
    endfunction
 
 endclass
