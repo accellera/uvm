@@ -47,4 +47,4 @@ CHECK = \
 		 \( `grep -c 'UVM_FATAL :    0' irun.log` -eq 1 \)
 
 clean:
-	rm -rf *~ core *.log
+	rm -rf *~ core csrc simv* vc_hdrs.h ucli.key *.log

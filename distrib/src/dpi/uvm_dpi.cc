@@ -29,5 +29,6 @@
 
 extern "C" {
   #include "uvm_hdl.c"
+  #include "uvm_svcmd_dpi.c"
 }
 

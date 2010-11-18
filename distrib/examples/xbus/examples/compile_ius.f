@@ -1,5 +1,7 @@
 -uvm
 -uvmhome ../../..
+../../../src/dpi/uvm_dpi.cc
+
 -uvmnoautocompile
 ../../../src/dpi/uvm_dpi.cc
 

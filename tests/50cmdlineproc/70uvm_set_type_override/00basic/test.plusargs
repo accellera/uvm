@@ -1,0 +1,1 @@
++uvm_set_type_override=base_type,derived_type

@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/csh -f
 
 #-------------------------------------------------------------------------------
 # This script runs Naturals Docs to generate the UVM Reference Documentation

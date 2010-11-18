@@ -1991,7 +1991,6 @@ function void uvm_reg::get_attributes(ref string names[string],
 
 endfunction: get_attributes
  
-
 //---------
 // COVERAGE
 //---------
