@@ -23,9 +23,12 @@ UVM_HOME	= ../../..
 
 include ../../Makefile.questa
 
-run:
-	$(VLOG) test.sv
-	${VSIM}
+all: run
 
-check:
+comp: vlib
+	$(VLOG) +incdir+. \
+		test.sv
+
+run: comp
+	$(VSIM)
 	$(CHECK)

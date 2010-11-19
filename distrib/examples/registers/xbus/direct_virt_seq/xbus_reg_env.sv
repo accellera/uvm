@@ -32,6 +32,7 @@ import uvm_pkg::*;
 `include "xbus.svh"
 `include "reg_xa0.sv"
 `include "reg2xbus_adapter.sv"
+`include "xbus_slave_seq_lib.sv"
 `include "xbus_user_acp_reg.sv"
 
 
@@ -81,6 +82,9 @@ class xbus_reg_env extends xbus_env;
        top_path = top_path.substr(6,top_path.len()-1);
     model.set_hdl_path_root(top_path);
     end
+    set_config_string("slaves*.sequencer", 
+      "default_sequence", "slave_memory_seq");
+
   endfunction : build
 
   // Connect register sequencer to xbus master

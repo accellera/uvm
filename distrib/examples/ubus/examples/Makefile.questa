@@ -1,6 +1,6 @@
 ## 
 ## -------------------------------------------------------------
-##    Copyright 2010 Mentor Graphics Corporation, Inc.
+##    Copyright 2010 Mentor Graphics Corp.
 ##    All Rights Reserved Worldwide
 ## 
 ##    Licensed under the Apache License, Version 2.0 (the
@@ -19,7 +19,8 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME = ../../..
+UVM_HOME	= ../../..
+USES_DPI = 1
 
 include ../../Makefile.questa
 
@@ -27,9 +28,9 @@ include ../../Makefile.questa
 all: run
 
 comp: vlib
-	$(VLOG) +incdir+. \
-		hierarchy.sv
+	$(VLOG) +incdir+../sv \
+		ubus_tb_top.sv
 
 run: comp
-	$(VSIM)
+	$(VSIM) +UVM_TESTNAME=test_read_modify_write
 	$(CHECK)

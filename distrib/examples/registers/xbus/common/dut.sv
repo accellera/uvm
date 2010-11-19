@@ -103,11 +103,13 @@ module dut_regs(
                    read_data <= user_reg;
                  else
                    st <= 3;
-               8'hb:
+               8'hb:begin
+                 $display("HERE read=%d shared reg = %0h",read,shared_rd_reg);
                  if(read)
                    read_data <= shared_rd_reg;
                  else
                    st <= 4;
+                   end
                8'hc:
                begin
                  if(read)
@@ -211,6 +213,8 @@ module dut_dummy(
   assign xio.sig_wait = 0;
   assign xio.sig_error = 0;
   assign xio.sig_data = read_write_n ? read_data : 8'hZZ;
+
+  initial $monitor("%m %t clk=%d addr=%h data=%b rw_n=%d",$time,xbus_clock,xio.sig_addr,xio.sig_data, read_write_n);
 
   dut_regs reg_file(
     .clock(xbus_clock),

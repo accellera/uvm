@@ -28,8 +28,10 @@ class test extends uvm_test;
        $display("testname_matches[%0d]: %0s", i, testname_matches[i]);
      end
      $display("Doing +UVM_TESTNAME= match size check");
-     if(testname_matches.size() != 4)
+     if(testname_matches.size() != 4) begin
+       $display("Only %0d UVM_TESTNAME plusargs found. Expected 4.",testname_matches.size());
        pass_the_test = pass_the_test & 0;
+     end
      else
        $display("  Correct number of +UVM_TESTNAME= values found");
    endfunction

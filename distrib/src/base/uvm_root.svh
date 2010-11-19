@@ -792,9 +792,10 @@ task uvm_root::run_test(string test_name="");
           "uvm_test_top", "uvm_test_top", null));
 
     if (uvm_test_top == null) begin
-      msg = testname_plusarg ? "command line +UVM_TESTNAME=": "call to run_test(";
+      msg = testname_plusarg ? {"command line +UVM_TESTNAME=",test_name} : 
+                               {"call to run_test(",test_name,")"};
       uvm_report_fatal("INVTST",
-          {"Requested test from ",msg, test_name, ") not found." }, UVM_NONE);
+          {"Requested test from ",msg, " not found." }, UVM_NONE);
     end
   end
 

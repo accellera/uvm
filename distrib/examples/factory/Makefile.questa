@@ -19,15 +19,21 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../
+UVM_HOME	= ../..
 
 include ../Makefile.questa
 
-SRC = packet_pkg.sv gen_pkg.sv env_pkg.sv test.sv
 
-run:
-	$(VLOG) $(SRC)
-	${VSIM}
+all: run
 
-check:
+comp: vlib
+	$(VLOG) +incdir+. \
+		packet_pkg.sv \
+		gen_pkg.sv \
+		env_pkg.sv \
+		test.sv 
+
+
+run: comp
+	$(VSIM)
 	$(CHECK)

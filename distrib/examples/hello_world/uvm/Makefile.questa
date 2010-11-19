@@ -1,6 +1,6 @@
 ## 
 ## -------------------------------------------------------------
-##    Copyright 2010 Mentor Graphics Corporation, Inc.
+##    Copyright 2010 Mentor Graphics Corp.
 ##    All Rights Reserved Worldwide
 ## 
 ##    Licensed under the Apache License, Version 2.0 (the
@@ -23,11 +23,12 @@ UVM_HOME	= ../../..
 
 include ../../Makefile.questa
 
-SRC = hello_world.sv
+all: run
 
-run:
-	$(VLOG) $(SRC)
-	${VSIM}
+comp: vlib
+	$(VLOG) +incdir+. \
+		hello_world.sv
 
-check:
+run: comp
+	$(VSIM)
 	$(CHECK)

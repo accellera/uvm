@@ -32,7 +32,7 @@ import uvm_pkg::*;
 
 bit pass = 1;
 class my_catcher extends uvm_report_catcher;
-   int sev[uvm_severity];
+   int sev[uvm_severity_type];
    uvm_severity_type s;
 
    virtual function action_e catch(); 

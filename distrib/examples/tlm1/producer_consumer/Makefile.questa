@@ -23,11 +23,13 @@ UVM_HOME	= ../../..
 
 include ../../Makefile.questa
 
-SRC = fifo.sv
+all: run
 
-run:
-	$(VLOG) $(SRC)
-	${VSIM}
+comp: vlib
+	$(VLOG) +incdir+. \
+		fifo.sv
 
-check:
+run: comp
+	$(VSIM)
+>>>>>>> 9175dddb070bc10f756d33802dfad4dfae47a297
 	$(CHECK)

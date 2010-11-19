@@ -1,6 +1,6 @@
 ## 
 ## -------------------------------------------------------------
-##    Copyright 2010 Mentor Graphics Corporation, Inc.
+##    Copyright 2010 Mentor Graphics Corp.
 ##    All Rights Reserved Worldwide
 ## 
 ##    Licensed under the Apache License, Version 2.0 (the
@@ -19,7 +19,7 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME = ../../..
+UVM_HOME	= ../../..
 
 include ../../Makefile.questa
 
@@ -28,7 +28,7 @@ all: run
 
 comp: vlib
 	$(VLOG) +incdir+. \
-		hierarchy.sv
+		test.sv
 
 run: comp
 	$(VSIM)
