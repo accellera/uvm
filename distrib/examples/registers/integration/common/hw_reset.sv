@@ -21,33 +21,34 @@
 // -------------------------------------------------------------
 // 
 
-class tb_env extends uvm_component;
+class hw_reset_test extends uvm_test;
 
-   `uvm_component_utils(tb_env)
+   tb_env env;
 
-   reg_block_slave model; 
-   apb_agent apb;
+   `uvm_component_utils(hw_reset_test)
 
-   function new(string name, uvm_component parent=null);
-      super.new(name,parent);
+   function new(string name, uvm_component parent);
+      super.new(name, parent);
    endfunction
 
-   virtual function void build();
-      if (model == null) begin
-         model = reg_block_slave::type_id::create("model",this);
-         model.build();
-         model.lock_model();
-      end
-         
-      apb = apb_agent::type_id::create("apb", this);
-   endfunction
+   virtual task run();
+      apb_reset_seq reset_seq;
+      uvm_reg_hw_reset_seq seq;
 
-   virtual function void connect();
-      if (model.get_parent() == null) begin
-         reg2apb_adapter reg2apb = new;
-         model.default_map.set_sequencer(apb.sqr,reg2apb);
-      end
-   endfunction
+      $cast(env, uvm_top.find("env"));
 
-endclass
+      reset_seq = apb_reset_seq::type_id::create("apb_reset_seq",this);
+      reset_seq.start(env.apb.sqr);
+
+      seq = uvm_reg_hw_reset_seq::type_id::create("uvm_reg_hw_reset_seq",this);
+      seq.model = env.regmodel;
+      seq.start(null);
+
+      global_stop_request();
+
+   endtask : run
+
+endclass : hw_reset_test
+
+
 
