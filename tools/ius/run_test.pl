@@ -18,6 +18,7 @@
 ##   permissions and limitations under the License. 
 ##----------------------------------------------------------------------
 use Cwd 'realpath';
+use Data::Dumper;
 
 #
 # IUS-Specific test running script
@@ -94,7 +95,7 @@ sub run_the_test {
 # Return the name of the compile-time logfile
 #
 sub comptime_log_fname {
-   return "irun.log";
+   return runtime_log_fname();
 }
 
 
@@ -116,21 +117,15 @@ sub runtime_log_fname {
 sub get_compiletime_errors {
   local($testdir) = @_;
 
-  local($log);
-  $log = "$testdir/irun.log";
+  local($log)= "$testdir/" . comptime_log_fname();
 
   open(LOG,$log) or die("couldnt open log [$log] [$!]");
 
-  local(@errs);
-
+  local(@errs)=();
+  
   while ($_ = <LOG>) {
-    if (m/^(ncvlog|ncelab): \*[EF],\w+ \(([^,]),(\d+)\):/) {
-	  $fname = $2; $line = $3;
-	  push(@errs, "$fname#$line");
-    }
-    if (m/^ERROR:/) {
-	  $fname = "filename"; $line = 2;
-	  push(@errs, "$fname#$line");
+    if (/^(ncvlog|ncelab): \*[EF],\w+ \(([^,]+),(\d+)\|(\d+)\):/,){ 
+	  push(@errs, "$2#$3");
     }
   }
 
@@ -152,25 +147,24 @@ sub get_compiletime_errors {
 #
 sub get_runtime_errors {
     local($testdir) = @_;
-    local($log) = &realpath("$testdir/irun.log");
+    local($log) = &realpath("$testdir/" . runtime_log_fname());
 
   open(LOG, $log) or die("couldnt open [$log] [$!]");
 
-  local(@errs);
+  local(@errs)=();
 
   while ($_ = <LOG>) {
-    if (m/^(ncsim): \*[FE],\w+ \(([^,]),(\d+)\):/) {
-	  $fname = $2; $line = $3;
-	  push(@errs, "$fname#$line");
+   if (/^(ncsim): \*[FE],\w+ \(([^,]+),(\d+)\|(\d+)\):/) {
+	  push(@errs, "$2#$3");
     }
+
     if (/^ERROR:/) {
-	  $fname = "filename"; $line = 2;
-	  push(@errs, "$fname#$line");
+	  push(@errs, "fname#2");
     }
   }
 
   close(LOG);
-
+  
   return @errs;
 }
 
