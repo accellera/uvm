@@ -70,8 +70,9 @@ class uvm_reg_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
       end
 
       // Registers with some attributes are not to be tested
-      if (rg.get_attribute("NO_REG_TESTS") != "") return;
-      if (rg.get_attribute("NO_SHARED_ACCESS_TEST") != "") return;
+      if (rg.has_attribute("NO_REG_TESTS") ||
+          rg.has_attribute("NO_SHARED_ACCESS_TEST"))
+        return;
 
       // Only look at shared registers
       if (rg.get_n_maps() < 2) return;
@@ -203,9 +204,10 @@ class uvm_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
       end
 
       // Memories with some attributes are not to be tested
-      if (mem.get_attribute("NO_REG_TESTS") != "") return;
-      if (mem.get_attribute("NO_MEM_TESTS") != "") return;
-      if (mem.get_attribute("NO_SHARED_ACCESS_TEST") != "") return;
+      if (mem.has_attribute("NO_REG_TESTS") ||
+          mem.has_attribute("NO_MEM_TESTS") ||
+          mem.has_attribute("NO_SHARED_ACCESS_TEST"))
+            return;
 
       // Only look at shared memories
       if (mem.get_n_maps() < 2) return;
@@ -350,10 +352,9 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uv
    // Executes the Shared Register and Memory sequence
    //
    virtual task body();
-      uvm_reg_block blks[$];
 
       if (model == null) begin
-         `uvm_error("RegModel", "Not block or system specified to run sequence on");
+         `uvm_error("RegModel", "No register model specified to run sequence on");
          return;
       end
       
@@ -366,10 +367,6 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uv
       model.reset();
 
       do_block(model);
-      model.get_blocks(blks);
-      foreach (blks[i]) begin
-         do_block(blks[i]);
-      end
    endtask: body
 
 
@@ -381,9 +378,9 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uv
       uvm_reg regs[$];
       uvm_mem mems[$];
       
-      if (blk.get_attribute("NO_REG_TESTS") != "" ||
-          blk.get_attribute("NO_MEM_TESTS") != "" ||
-          blk.get_attribute("NO_SHARED_ACCESS_TEST") != "")
+      if (blk.has_attribute("NO_REG_TESTS") ||
+          blk.has_attribute("NO_MEM_TESTS") ||
+          blk.has_attribute("NO_SHARED_ACCESS_TEST"))
         return;
 
       this.reset_blk(model);
@@ -393,25 +390,33 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uv
       blk.get_registers(regs, UVM_NO_HIER);
       foreach (regs[i]) begin
          // Registers with some attributes are not to be tested
-         if (regs[i].get_attribute("NO_REG_TESTS") == "" &&
-	     regs[i].get_attribute("NO_SHARED_ACCESS_TEST") == "") begin
-            reg_seq.rg = regs[i];
-            reg_seq.start(this.get_sequencer(), this);
-         end
+         if (regs[i].has_attribute("NO_REG_TESTS") ||
+	     regs[i].has_attribute("NO_SHARED_ACCESS_TEST"))
+           continue;
+         reg_seq.rg = regs[i];
+         reg_seq.start(this.get_sequencer(), this);
       end
 
       // Iterate over all memories, checking accesses
       blk.get_memories(mems, UVM_NO_HIER);
       foreach (mems[i]) begin
          // Registers with some attributes are not to be tested
-         if (mems[i].get_attribute("NO_REG_TESTS") == "" &&
-             mems[i].get_attribute("NO_MEM_TESTS") == "" &&
-	     mems[i].get_attribute("NO_SHARED_ACCESS_TEST") == "") begin
-            mem_seq.mem = mems[i];
-            mem_seq.start(this.get_sequencer(), this);
-         end
+         if (mems[i].has_attribute("NO_REG_TESTS") ||
+             mems[i].has_attribute("NO_MEM_TESTS") ||
+	     mems[i].has_attribute("NO_SHARED_ACCESS_TEST"))
+            continue;
+         mem_seq.mem = mems[i];
+         mem_seq.start(this.get_sequencer(), this);
       end
 
+      begin
+         uvm_reg_block blks[$];
+         
+         blk.get_blocks(blks);
+         foreach (blks[i]) begin
+            do_block(blks[i]);
+         end
+      end
    endtask: do_block
 
 

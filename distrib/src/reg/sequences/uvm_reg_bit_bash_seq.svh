@@ -68,8 +68,9 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
       end
 
       // Registers with some attributes are not to be tested
-      if (rg.get_attribute("NO_REG_TESTS") != "" ||
-	  rg.get_attribute("NO_BIT_BASH_TEST") != "") return;
+      if (rg.has_attribute("NO_REG_TESTS") ||
+          rg.has_attribute("NO_BIT_BASH_TEST"))
+            return;
       
       n_bits = rg.get_n_bytes() * 8;
          
@@ -108,17 +109,17 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
             end
          end
          // Any unused bits on the left side of the MSB?
-         while (next_lsb < `UVM_REG_DATA_WIDTH) mode[next_lsb++] = "RO";
+         while (next_lsb < `UVM_REG_DATA_WIDTH)
+            mode[next_lsb++] = "RO";
          
-         if (uvm_report_enabled(UVM_NONE,UVM_INFO,"RegModel"))
-	 	`uvm_info("RegModel", $psprintf("Verifying bits in register %s in map \"%s\"...",
+         `uvm_info("RegModel", $psprintf("Verifying bits in register %s in map \"%s\"...",
                                     rg.get_full_name(), maps[j].get_full_name()),UVM_LOW);
          
          // Bash the kth bit
          for (int k = 0; k < n_bits; k++) begin
             // Cannot test unpredictable bit behavior
             if (dc_mask[k]) continue;
-            
+
             bash_kth_bit(rg, k, mode[k], maps[j], dc_mask);
          end
             
@@ -135,7 +136,7 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
       uvm_reg_data_t  val, exp, v;
       bit bit_val;
 
-      `uvm_info("RegModel", $psprintf("...Bashing %s bit #%0d", mode, k),UVM_MEDIUM);
+      `uvm_info("RegModel", $psprintf("...Bashing %s bit #%0d", mode, k),UVM_HIGH);
       
       repeat (2) begin
          val = rg.get();
@@ -208,10 +209,9 @@ class uvm_reg_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_ite
    // Do not call directly. Use seq.start() instead.
    //
    virtual task body();
-      uvm_reg_block blks[$];
       
       if (model == null) begin
-         `uvm_error("RegModel", "Not block or system specified to run sequence on");
+         `uvm_error("RegModel", "No register model specified to run sequence on");
          return;
       end
 
@@ -223,10 +223,6 @@ class uvm_reg_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_ite
       model.reset();
 
       do_block(model);
-      model.get_blocks(blks);
-      foreach (blks[i]) begin
-         do_block(blks[i]);
-      end
    endtask
 
 
@@ -245,10 +241,19 @@ class uvm_reg_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_ite
       foreach (regs[i]) begin
          // Registers with some attributes are not to be tested
          if (regs[i].get_attribute("NO_REG_TESTS") != "" ||
-	     regs[i].get_attribute("NO_BIT_BASH_TEST") != "") continue;
+             regs[i].get_attribute("NO_BIT_BASH_TEST") != "") continue;
          
          reg_seq.rg = regs[i];
          reg_seq.start(null,this);
+      end
+
+      begin
+         uvm_reg_block blks[$];
+         
+         blk.get_blocks(blks);
+         foreach (blks[i]) begin
+            do_block(blks[i]);
+         end
       end
    endtask: do_block
 

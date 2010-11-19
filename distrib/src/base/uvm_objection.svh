@@ -55,6 +55,8 @@ typedef uvm_callbacks #(uvm_objection,uvm_objection_cb) uvm_objection_cbs_t;
 // objections from the command line using the option +UVM_OBJECTION_TRACE.
 //------------------------------------------------------------------------------
 
+typedef class uvm_cmdline_processor;
+
 class uvm_objection extends uvm_report_object;
   protected bit  m_trace_mode=0;
 
@@ -75,11 +77,14 @@ class uvm_objection extends uvm_report_object;
   // all objection objects.
 
   function new(string name="");
+    uvm_cmdline_processor clp;
+    string trace_args[$];
     super.new(name);
     set_report_verbosity_level(top.get_report_verbosity_level());
 
     // Get the command line trace mode setting
-    if($test$plusargs("UVM_OBJECTION_TRACE")) begin
+    clp = uvm_cmdline_processor::get_inst();
+    if(clp.get_arg_matches("+UVM_OBJECTION_TRACE", trace_args)) begin
       m_trace_mode=1;
     end
     // Needed to allow threads dropping objections to be killed

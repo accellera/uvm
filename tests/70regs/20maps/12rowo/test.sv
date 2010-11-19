@@ -148,6 +148,16 @@ class test extends uvm_test;
       end
       global_stop_request();
    endtask
+
+   virtual function void report();
+	uvm_report_server svr =  _global_reporter.get_report_server();
+   if (svr.get_severity_count(UVM_FATAL) +
+       svr.get_severity_count(UVM_ERROR) +
+       svr.get_severity_count(UVM_WARNING) == 0)
+      $write("** UVM TEST PASSED **\n");
+   else
+      $write("!! UVM TEST FAILED !!\n");
+   endfunction
 endclass
 
 
@@ -162,12 +172,6 @@ initial begin
    
    run_test();
 
-   if (svr.get_severity_count(UVM_FATAL) +
-       svr.get_severity_count(UVM_ERROR) +
-       svr.get_severity_count(UVM_WARNING) == 0)
-      $write("** UVM TEST PASSED **\n");
-   else
-      $write("!! UVM TEST FAILED !!\n");
 end
 
 endprogram

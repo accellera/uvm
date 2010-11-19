@@ -691,6 +691,15 @@ class uvm_reg_field extends uvm_object;
                                               string value);
 
 
+   // Function: has_attribute
+   //
+   // Returns TRUE if attribute exists.
+   //
+   // See <get_attribute> for details on ~inherited~ argument.
+   //
+   extern virtual function bit has_attribute(string name, bit inherited = 1);
+   
+ 
    // Function: get_attribute
    //
    // Get an attribute value.
@@ -841,6 +850,7 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    m_lsb       = lsb_pos;
    m_cover_on  = UVM_NO_COVERAGE;
    m_written   = 0;
+   m_check     = UVM_CHECK;
    m_individually_accessible = individually_accessible;
 
    if (has_reset)
@@ -1097,6 +1107,20 @@ function void uvm_reg_field::set_attribute(string name,
 
    m_attributes[name] = value;
 endfunction: set_attribute
+
+
+// has_attribute
+
+function bit uvm_reg_field::has_attribute(string name, bit inherited = 1);
+   if (m_attributes.exists(name))
+      return 1;
+
+   if (inherited && m_parent != null)
+      if (m_parent.get_attribute(name,1) != "")
+        return 1;
+
+   return 0;
+endfunction
 
 
 // get_attribute
@@ -1550,10 +1574,11 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
    m_parent.XatomicX(1);
    m_fname  = rw.fname;
    m_lineno = rw.lineno;
-   m_write_in_progress = 1'b1;
 
    if (!Xcheck_accessX(rw,map_info,"write()"))
      return;
+
+   m_write_in_progress = 1'b1;
 
    if (rw.value[0] >> m_size) begin
       `uvm_warning("RegModel", {"uvm_reg_field::write(): Value greater than field '",
@@ -1623,8 +1648,6 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
         cb.pre_write(rw);
 
      if (rw.status != UVM_IS_OK) begin
-        m_fname = "";
-        m_lineno = 0;
         m_write_in_progress = 1'b0;
         m_parent.Xset_busyX(0);
         m_parent.XatomicX(0);
@@ -1648,8 +1671,6 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
 
 `endif
 
-   m_fname = "";
-   m_lineno = 0;
    m_write_in_progress = 1'b0;
    m_parent.XatomicX(0);
 
@@ -1734,8 +1755,6 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
         cb.pre_read(rw);
 
      if (rw.status != UVM_IS_OK) begin
-        m_fname = "";
-        m_lineno = 0;
         m_read_in_progress = 1'b0;
         m_parent.Xset_busyX(0);
         m_parent.XatomicX(0);
@@ -1760,8 +1779,6 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
 
 `endif
 
-   m_fname = "";
-   m_lineno = 0;
    m_read_in_progress = 1'b0;
    m_parent.XatomicX(0);
 

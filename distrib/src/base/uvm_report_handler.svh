@@ -50,6 +50,7 @@ typedef class uvm_report_server;
 typedef uvm_pool#(string, uvm_action) id_actions_array;
 typedef uvm_pool#(string, UVM_FILE) id_file_array;
 typedef uvm_pool#(string, int) id_verbosities_array;
+typedef uvm_pool#(uvm_severity, uvm_severity) sev_override_array;
 
 class uvm_report_handler;
 
@@ -65,6 +66,11 @@ class uvm_report_handler;
   // id verbosity settings : default and severity
   id_verbosities_array id_verbosities=new;
   id_verbosities_array severity_id_verbosities[uvm_severity];
+
+  // severity overrides
+  sev_override_array sev_overrides = new;
+  sev_override_array sev_id_overrides [string];
+
 
   // file handles : default, severity, action, (severity,id)
   UVM_FILE default_file_handle;
@@ -316,9 +322,23 @@ class uvm_report_handler;
       int line,
       uvm_report_object client
       );
- 
+
     uvm_report_server srvr;
     srvr = uvm_report_server::get_server();
+
+    // Check for severity overrides and apply them before calling the server.
+    // An id specific override has precedence over a generic severity override.
+    if(sev_id_overrides.exists(id)) begin
+      if(sev_id_overrides[id].exists(severity)) begin
+        severity = sev_id_overrides[id].get(severity);
+      end
+    end
+    else begin
+      if(sev_overrides.exists(severity)) begin
+         severity = sev_overrides.get(severity);
+      end
+    end
+
     srvr.report(severity,name,id,message,verbosity_level,filename,line,client);
     
   endfunction
@@ -426,6 +446,23 @@ class uvm_report_handler;
     if(!severity_id_file_handles.exists(severity))
       severity_id_file_handles[severity] = new;
     severity_id_file_handles[severity].add(id, file);
+  endfunction
+
+  function void set_severity_override(uvm_severity cur_severity,
+                                      uvm_severity new_severity);
+    sev_overrides.add(cur_severity, new_severity);
+  endfunction
+
+  function void set_severity_id_override(uvm_severity cur_severity,
+                                         string id,
+                                         uvm_severity new_severity);
+    // has precedence over set_severity_override
+    // silently override previous setting
+    sev_override_array arr;
+    if(!sev_id_overrides.exists(id))
+      sev_id_overrides[id] = new;
+ 
+    sev_id_overrides[id].add(cur_severity, new_severity);
   endfunction
 
   

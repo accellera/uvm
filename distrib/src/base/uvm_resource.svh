@@ -1713,11 +1713,12 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
 
     // Locate first resources in the queue whose type is T
     for(first = 0; first < q.size() && !$cast(rsrc, q.get(first)); first++);
-    prec = rsrc.precedence;
 
     // no resource in the queue whose type is T
     if(rsrc == null)
       return null;
+
+    prec = rsrc.precedence;
 
     // start searching from the next resource after the first resource
     // whose type is T

@@ -33,6 +33,7 @@
 `endif
 
 `include "dpi/uvm_hdl.svh"
+`include "dpi/uvm_svcmd_dpi.svh"
 `include "dpi/uvm_regex.svh"
 
 `endif // UVM_DPI_SVH

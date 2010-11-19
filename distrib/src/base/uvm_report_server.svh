@@ -102,10 +102,16 @@ class uvm_report_server extends uvm_object;
     return m_global_report_server;
   endfunction
 
+  local bit m_max_quit_overridable = 1;
 
   // Function: set_max_quit_count
 
-  function void set_max_quit_count(int count);
+  function void set_max_quit_count(int count, bit overridable = 1);
+    if (m_max_quit_overridable == 0) begin
+      uvm_report_info("NOMAXQUITOVR", $psprintf("The max quit count setting of %0d is not overridable to %0d due to a previous setting.", max_quit_count, count), UVM_NONE);
+      return;
+    end
+    m_max_quit_overridable = overridable;
     max_quit_count = count < 0 ? 0 : count;
   endfunction
 
@@ -302,7 +308,7 @@ class uvm_report_server extends uvm_object;
 
     if(max_quit_count != 0) begin
       if ( quit_count >= max_quit_count ) f_display(file, "Quit count reached!");
-      $sformat(output_str, "Quit count : %d of %d",
+      $sformat(output_str, "Quit count : %5d of %5d",
                              quit_count, max_quit_count);
       f_display(file, output_str);
     end
