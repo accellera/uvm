@@ -1,0 +1,194 @@
+00basic/00hello .............................. pass.
+00basic/01compfail ........................... pass (with syntax error(s))
+00basic/02runfail ............................ pass (with runtime error(s))
+00basic/03error .............................. pass (with UVM_ERRORs)
+00basic/06plusargs ........................... pass.
+00basic/07toolargs ........................... pass.
+00basic/10post_test .......................... pass (from post_test.pl)
+00basic/20subgroup ........................... pass.
+00basic/20subgroup/10subsub .................. pass.
+00basic/20subgroup/10subsub/10subsubsub ...... pass.
+00basic/20subgroup/20subsub/10subsubsub ...... pass.
+01report/02server/01set_get .................. pass.
+01report/02server/02compat ................... pass.
+01report/10catcher/02simple .................. pass (with UVM_ERRORs)
+01report/10catcher/03regnull ................. pass (with UVM_ERRORs)
+01report/10catcher/04re_reg .................. pass.
+01report/10catcher/07rtrn_CGHT_THRW .......... pass (with UVM_ERRORs)
+01report/10catcher/08set_prop ................ pass (with UVM_ERRORs)
+01report/10catcher/09uvm_msg_frm_ctch ........ pass (with UVM_ERRORs)
+01report/10catcher/10uvm_rprt_frm_ctch ....... pass.
+01report/10catcher/20specific_client ......... pass.
+01report/20severity/01allovr ................. pass.
+01report/20severity/02idspec ................. pass.
+01report/90Mantis/3132_global_null ........... pass.
+01report/90Mantis/3153_seqmsg ................ pass.
+01report/90Mantis/3159_pct_pct_issue ......... pass.
+01report/90Mantis/3175_idverb ................ pass.
+03data/10comparer/20nullobj .................. pass.
+03data/11recorder/20nullobj .................. pass.
+03data/12setcfg/30enumarray .................. pass.
+03data/20poolqueue/01inttype ................. pass.
+03data/90Mantis/3228_pool_warn_exists ........ pass.
+05components/90Mantis/3167_agent_activepass* . pass.
+09callbacks/01simple ......................... pass.
+09callbacks/02typewide ....................... pass.
+09callbacks/03by_name ........................ pass.
+09callbacks/05order .......................... pass.
+09callbacks/06derived_ip ..................... pass.
+09callbacks/07trace .......................... pass.
+09callbacks/10safety ......................... pass.
+09callbacks/20inherit ........................ pass.
+09callbacks/25params ......................... pass.
+09callbacks/80examples ....................... pass (from test.pl)
+10resources/01simple ......................... pass.
+10resources/02config ......................... pass.
+10resources/03types .......................... pass.
+10resources/04field_automation ............... pass.
+10resources/05seq ............................ pass.
+10resources/06spell .......................... pass.
+10resources/07scope_massage .................. pass.
+10resources/10compat/01field_compat .......... pass.
+10resources/10compat/02src_order ............. pass.
+10resources/10compat/03rt_compat ............. pass.
+10resources/10compat/04rt_hier_compat ........ pass.
+10resources/10compat/05reuse_sets ............ pass.
+10resources/11waitmod ........................ pass.
+10resources/12multiname ...................... pass.
+10resources/80examples/01basic_module ........ pass (from test.pl)
+10resources/80examples/02basic_pkg ........... pass (from test.pl)
+10resources/80examples/03config_auto ......... pass (from test.pl)
+10resources/80examples/04config_manual ....... pass (from test.pl)
+10resources/80examples/10vif ................. pass (from test.pl)
+10resources/99Mantis_fixes/3256 .............. pass.
+10resources/99Mantis_fixes/3257 .............. pass.
+10resources/99Mantis_fixes/3261 .............. pass.
+11tlm/10tlm1/80examples/00hello .............. pass (from test.pl)
+11tlm/10tlm1/80examples/05hierarchy .......... pass (from test.pl)
+11tlm/10tlm1/80examples/06prod_cons .......... pass (from test.pl)
+11tlm/10tlm1/80examples/07bidir .............. pass (from test.pl)
+11tlm/10tlm1/80examples/08fifo ............... pass (from test.pl)
+11tlm/20tlm2/10gp/30ext ...................... pass.
+11tlm/20tlm2/20blocking/01basic .............. pass.
+11tlm/20tlm2/30nonblocking/01basic ........... pass.
+11tlm/20tlm2/30nonblocking/30passthru ........ pass.
+14ovm2uvm .................................... pass (from test.pl)
+15factory/80examples ......................... pass (from test.pl)
+20sequences/80examples/01simple .............. pass (from test.pl)
+20sequences/80examples/10basic_rw ............ pass (from test.pl)
+20sequences/99Mantis_fixes/3129_seq_kill ..... pass.
+20sequences/99Mantis_fixes/3170_item_done_f* . pass (UVM_FATALs)
+35objections/01timeout ....................... pass.
+35objections/02desc .......................... pass.
+35objections/03basic/01basic ................. pass.
+35objections/03basic/02simple ................ pass.
+35objections/03basic/03complex ............... pass.
+35objections/03basic/04module ................ pass.
+35objections/03basic/05user_objection ........ pass.
+35objections/03basic/06xbus .................. pass.
+35objections/03basic/07hier_gen .............. pass.
+35objections/04callback/01all_obj_dropped .... pass.
+35objections/04callback/02raised_dropped ..... pass.
+35objections/04callback/03hier ............... pass.
+35objections/05phases/01timeout .............. pass.
+35objections/05phases/02timeout .............. pass.
+35objections/05phases/03reraise/01cancel_de* . pass.
+35objections/05phases/03reraise/02multi_can* . pass.
+35objections/05phases/04force_stop ........... pass.
+35objections/05phases/05with_stop/01obj_sto* . pass.
+35objections/05phases/05with_stop/02obj_dur* . pass.
+35objections/05phases/05with_stop/03obj_sto* . pass.
+35objections/05phases/05with_stop/04user_st* . pass.
+35objections/05phases/05with_stop/05user_st* . pass.
+35objections/05phases/05with_stop/06user_st* . pass.
+35objections/05phases/10user_phase ........... pass.
+35objections/06late/01late_raiser ............ pass.
+35objections/06late/02too_late ............... pass.
+35objections/07negative/01diff_dropper ....... pass.
+35objections/07negative/02neg_drop ........... pass.
+35objections/80examples ...................... pass (from test.pl)
+35objections/90Mantis/3214_kill .............. pass.
+35objections/90Mantis/3224_nullptr ........... pass.
+35objections/90Mantis/3227_memleak ........... pass.
+35objections/90tracing/01basic ............... pass.
+35objections/90tracing/02commandline ......... pass.
+35objections/90tracing/03multi_objs .......... pass.
+35objections/91heartbeat/01basic ............. pass.
+35objections/91heartbeat/02addremove ......... pass.
+35objections/91heartbeat/03addlist ........... pass.
+35objections/91heartbeat/04modes/01all_acti* . pass.
+35objections/91heartbeat/04modes/02any_acti* . pass.
+35objections/91heartbeat/04modes/03one_acti* . pass.
+35objections/91heartbeat/05negative/01illeg* . pass.
+35objections/91heartbeat/05negative/02no_ev* . pass.
+40phasing/05user_phases ...................... pass.
+40phasing/80examples/01trivial ............... pass (from test.pl)
+40phasing/80examples/02basic ................. pass (from test.pl)
+40phasing/80examples/05run_test .............. pass (from test.pl)
+40phasing/80examples/08stop_request .......... pass (from test.pl)
+50cmdlineproc/05get_args/00basic ............. pass.
+50cmdlineproc/10get_plusargs/00basic ......... pass.
+50cmdlineproc/15get_arg_matches/00basic ...... pass.
+50cmdlineproc/20get_arg_values/00basic ....... pass.
+50cmdlineproc/25UVM_TESTNAME/05mutliple ...... pass.
+50cmdlineproc/30UVM_VERBOSITY/05multiple ..... pass.
+50cmdlineproc/30UVM_VERBOSITY/10nonstandard .. pass.
+50cmdlineproc/30UVM_VERBOSITY/15illegal ...... pass.
+50cmdlineproc/35uvm_set_verbosity/05id_all ... SKIP (Use -S to force execution)
+50cmdlineproc/35uvm_set_verbosity/10id_spc ... SKIP (Use -S to force execution)
+50cmdlineproc/35uvm_set_verbosity/15invalid* . pass.
+50cmdlineproc/35uvm_set_verbosity/20invalid* . pass.
+50cmdlineproc/40uvm_set_action/05spc_id_spc* . SKIP (Use -S to force execution)
+50cmdlineproc/40uvm_set_action/10all_id_spc* . SKIP (Use -S to force execution)
+50cmdlineproc/40uvm_set_action/15spc_id_all* . SKIP (Use -S to force execution)
+50cmdlineproc/40uvm_set_action/20all_id_all* . SKIP (Use -S to force execution)
+50cmdlineproc/45uvm_set_severity/05spc_id_s* . SKIP (Use -S to force execution)
+50cmdlineproc/45uvm_set_severity/10id_all_s* . SKIP (Use -S to force execution)
+50cmdlineproc/45uvm_set_severity/15spc_id_a* . SKIP (Use -S to force execution)
+50cmdlineproc/45uvm_set_severity/20id_all_s* . SKIP (Use -S to force execution)
+50cmdlineproc/50UVM_TIMEOUT/00basic .......... pass (with UVM_ERRORs)
+50cmdlineproc/50UVM_TIMEOUT/05multiple ....... pass (with UVM_ERRORs)
+50cmdlineproc/50UVM_TIMEOUT/10not_overridab* . pass (with UVM_ERRORs)
+50cmdlineproc/50UVM_TIMEOUT/15overridable .... pass (with UVM_ERRORs)
+50cmdlineproc/55UVM_MAX_QUIT_COUNT/00basic ... pass (with UVM_ERRORs)
+50cmdlineproc/55UVM_MAX_QUIT_COUNT/05multip* . pass (with UVM_ERRORs)
+50cmdlineproc/55UVM_MAX_QUIT_COUNT/10not_ov* . pass (with UVM_ERRORs)
+50cmdlineproc/55UVM_MAX_QUIT_COUNT/15overri* . pass (with UVM_ERRORs)
+50cmdlineproc/60UVM_OBJECTION_TRACE/05on ..... pass.
+50cmdlineproc/60UVM_OBJECTION_TRACE/10off .... pass.
+50cmdlineproc/65uvm_set_inst_override/00bas* . pass.
+50cmdlineproc/70uvm_set_type_override/00bas* . pass.
+50cmdlineproc/75uvm_set_config_int/00basic ... pass.
+50cmdlineproc/80uvm_set_config_string/00bas* . pass.
+50cmdlineproc/85UVM_DUMP_CMDLN_ARGS/00basic .. pass.
+70regs/01fields/01reset ...................... pass.
+70regs/01fields/02policy ..................... pass.
+70regs/01fields/10maxsize .................... pass.
+70regs/02regs/10maxsize ...................... pass.
+70regs/02regs/20compare_mismatch ............. pass (with UVM_ERRORs)
+70regs/05mem/10maxsize ....................... pass.
+70regs/05mem/20mem_access .................... pass.
+70regs/07blk/10sizeok ........................ pass.
+70regs/07blk/11badsize ....................... pass.
+70regs/20maps/10byoffset ..................... pass.
+70regs/20maps/12rowo ......................... pass.
+70regs/30bkdr/01hdl .......................... **FAIL** (Did not pass)
+70regs/30bkdr/10paths ........................ pass.
+70regs/30bkdr/20path_seq ..................... **FAIL** (UVM_ERRORs)
+70regs/80examples/01model/20shared_reg ....... pass (from test.pl)
+70regs/80examples/01model/30nofield .......... pass (from test.pl)
+70regs/80examples/01model/40aliasing ......... pass (from test.pl)
+70regs/80examples/01model/42rowo ............. pass (from test.pl)
+70regs/80examples/01model/50unimplemented .... pass (from test.pl)
+70regs/80examples/01model/80coverage ......... pass (from test.pl)
+70regs/80examples/05primer ................... pass (from test.pl)
+70regs/80examples/10oc_ethernet .............. pass (from test.pl)
+70regs/80examples/30vert_reuse ............... pass (from test.pl)
+70regs/80examples/50xbus/10xbus_seqr ......... SKIP (Use -S to force execution)
+70regs/80examples/50xbus/12virt_seq .......... SKIP (Use -S to force execution)
+70regs/80examples/50xbus/20layered ........... SKIP (Use -S to force execution)
+80examples/10xbus ............................ pass (from test.pl)
+99final/99final .............................. pass.
+-----------------------------------------------------------------
+Total of 191 tests ........................... FAILED 2 of 191 tests
+

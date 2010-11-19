@@ -1,6 +1,6 @@
 ## 
 ## -------------------------------------------------------------
-##    Copyright 2010 Synopsys, Inc.
+##    Copyright 2010 Mentor Graphics Corp.
 ##    All Rights Reserved Worldwide
 ## 
 ##    Licensed under the Apache License, Version 2.0 (the
@@ -20,15 +20,16 @@
 ## 
 
 UVM_HOME	= ../../../..
+USES_DPI = 1
 
 include ../../../Makefile.questa
 
 
-all: prepare comp run
+all: run
 
-comp:
+comp: prepare
 	$(VLOG) +incdir+../../common tb_run.sv
 
-run:
+run: comp
 	$(VSIM)
 	$(CHECK)

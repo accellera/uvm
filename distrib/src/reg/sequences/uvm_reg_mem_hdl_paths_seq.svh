@@ -127,8 +127,7 @@ class uvm_reg_mem_hdl_paths_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
 
         foreach(paths[p]) begin
             uvm_hdl_path_concat path=paths[p];
-            foreach (path.slices[j]) 
-            begin
+            foreach (path.slices[j]) begin
                 string p_ = path.slices[j].path;
                 if (!uvm_hdl_check_path(p_))
                     `uvm_error("RegModel",

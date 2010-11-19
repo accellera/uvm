@@ -3,6 +3,7 @@ if 0;
 
 ##---------------------------------------------------------------------- 
 ##   Copyright 2010 Synopsys, Inc. 
+##   Copyright 2010 Mentor Graphics Corp.
 ##   All Rights Reserved Worldwide 
 ## 
 ##   Licensed under the Apache License, Version 2.0 (the 
@@ -31,9 +32,10 @@ Usage: $0 {cmd}
 
    args     The command to execute in each example directory
 
-Example:
+Examples:
 
-   $0 vcs -f compile_vcs.f
+   $0 make -f Makefile.vcs
+   $0 make -f Makefile.questa
 
 USAGE
    exit(1);

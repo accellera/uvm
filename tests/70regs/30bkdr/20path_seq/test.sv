@@ -106,7 +106,7 @@ begin
    model = new("model");
    
    model.build();
-   model.set_hdl_path_root("$root.dut");
+   model.set_hdl_path_root("dut");
 
    begin
       uvm_reg_mem_hdl_paths_seq seq = new;

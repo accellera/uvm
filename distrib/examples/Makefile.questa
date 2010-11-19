@@ -36,6 +36,17 @@ CFLAGS += -shared -fPIC -DQUESTA -I$(MTI_HOME)/include -m32
 
 SRCS    = $(SRCDIR)/uvm_dpi.cc
 
+ifeq ($(USES_DPI),1)
+  SVLIB_VLOG_OPT = 
+  SVLIB_VSIM_OPT = -sv_lib $(LIBDIR)/libuvm_questa 
+  SVLIB_TARGET = svlib
+else
+  SVLIB_VLOG_OPT = +define+UVM_NO_DPI 
+  SVLIB_VSIM_OPT = 
+  SVLIB_TARGET =
+endif
+  
+
 
 #
 # Include file for Questa Makefiles
@@ -57,6 +68,7 @@ TEST = /usr/bin/test
 VLIB =  vlib work
 
 VLOG =	vlog -timescale "1ns/1ns" \
+        $(SVLIB_VLOG_OPT) \
 	-mfcu \
         -suppress 2181 \
 	+acc=rmb \
@@ -64,9 +76,10 @@ VLOG =	vlog -timescale "1ns/1ns" \
 	+incdir+$(UVM_HOME)/src \
         $(UVM_HOME)/src/uvm_pkg.sv
 
+
 VSIM = 	vsim \
         +UVM_VERBOSITY=$(UVM_VERBOSITY) \
-        -sv_lib $(LIBDIR)/libuvm_questa \
+        $(SVLIB_VSIM_OPT) \
         -c \
         -do "run -all; q" \
         -l questa.log \
@@ -87,11 +100,11 @@ $(LIBDIR):
 	mkdir -p $(LIBDIR)
 
 
-prepare: clean vlib svlib
+prepare: clean vlib $(SVLIB_TARGET)
 
 svlib : $(SONAME)
 
-vlib: 
+vlib: $(SVLIB_TARGET)
 	vlib work
 
 clean:
