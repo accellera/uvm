@@ -478,8 +478,8 @@ virtual class uvm_component extends uvm_report_object;
   
   extern virtual function void phase_started (uvm_phase_schedule phase);
 
-  // Function: phase_started
-  // Phase transition callback, invoked at beginning of each phase
+  // Function: phase_ended
+  // Phase transition callback, invoked at end of each phase
   //   phase - the current phase schedule node in the graph
   
   extern virtual function void phase_ended (uvm_phase_schedule phase);
