@@ -94,6 +94,8 @@ svlib : $(SONAME)
 vlib: 
 	vlib work
 
+all: prepare run check
+
 clean:
 	rm -rf *~ work vsim.wlf* *.log $(SONAME) questa.tops transcript *.vstf
 

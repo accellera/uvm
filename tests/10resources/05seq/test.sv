@@ -145,8 +145,8 @@ class test extends uvm_component;
     mem_agent_config mem_cfg  = new();
     mem_cfg.initial_sequence = mem_seq_rand#(8,8)::get_type();
 
-    // turn off resource auditting
-    uvm_resource_options::turn_off_auditting();
+    // turn off resource auditing
+    uvm_resource_options::turn_off_auditing();
 
      
     // create the configuration resource and set it into the resoures
@@ -174,7 +174,7 @@ class test extends uvm_component;
       $display("** UVM TEST PASSED **");
 
     // The '1' argument to dump() instructs the function to also dump
-    // the audit trail.  However, since we turned auditting off above we
+    // the audit trail.  However, since we turned auditing off above we
     // should not see an audit trail appear.
     rp.dump(1);
   endfunction
