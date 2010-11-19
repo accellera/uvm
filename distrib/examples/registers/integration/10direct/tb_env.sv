@@ -1,6 +1,6 @@
 // 
 // -------------------------------------------------------------
-//    Copyright 2004-2008 Synopsys, Inc.
+//    Copyright 2004-2010 Synopsys, Inc.
 //    Copyright 2010 Mentor Graphics Corp.
 //    Copyright 2010 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
@@ -21,31 +21,52 @@
 // -------------------------------------------------------------
 // 
 
+
+//
+// This example shows how to integrate a register model
+// directly onto a bus sequencer.
+//
+// By default, the mirror in the register model is updated implicitly.
+// For explicit monitoring, define the `EXPLICIT_MON macro
+//
 class tb_env extends uvm_component;
 
    `uvm_component_utils(tb_env)
 
-   reg_block_slave model; 
-   apb_agent apb;
+   dut_regmodel regmodel; 
+   apb_agent    apb;
+`ifdef EXPLICIT_MON
+   uvm_reg_predictor#(apb_rw) apb2reg_predictor;
+`endif
 
    function new(string name, uvm_component parent=null);
       super.new(name,parent);
    endfunction
 
    virtual function void build();
-      if (model == null) begin
-         model = reg_block_slave::type_id::create("model",this);
-         model.build();
-         model.lock_model();
-      end
+      if (regmodel == null) begin
+         regmodel = dut_regmodel::type_id::create("regmodel",,get_full_name());
+         regmodel.build();
+         regmodel.lock_model();
          
-      apb = apb_agent::type_id::create("apb", this);
+         apb = apb_agent::type_id::create("apb", this);
+`ifdef EXPLICIT_MON
+         apb2reg_predictor = new("apb2reg_predictor", this);
+`endif
+      end
    endfunction
 
    virtual function void connect();
-      if (model.get_parent() == null) begin
+      if (apb != null) begin
          reg2apb_adapter reg2apb = new;
-         model.default_map.set_sequencer(apb.sqr,reg2apb);
+         regmodel.default_map.set_sequencer(apb.sqr,reg2apb);
+
+`ifdef EXPLICIT_MON
+         apb2reg_predictor.map = regmodel.default_map;
+         apb2reg_predictor.adapter = reg2apb;
+         regmodel.default_map.set_auto_predict(0);
+         apb.mon.ap.connect(apb2reg_predictor.bus_in);
+`endif
       end
    endfunction
 

@@ -21,33 +21,12 @@
 // -------------------------------------------------------------
 // 
 
-class tb_env extends uvm_component;
+`include "apb.sv"
+`include "dut.sv"
 
-   `uvm_component_utils(tb_env)
-
-   reg_block_slave model; 
-   apb_agent apb;
-
-   function new(string name, uvm_component parent=null);
-      super.new(name,parent);
-   endfunction
-
-   virtual function void build();
-      if (model == null) begin
-         model = reg_block_slave::type_id::create("model",this);
-         model.build();
-         model.lock_model();
-      end
-         
-      apb = apb_agent::type_id::create("apb", this);
-   endfunction
-
-   virtual function void connect();
-      if (model.get_parent() == null) begin
-         reg2apb_adapter reg2apb = new;
-         model.default_map.set_sequencer(apb.sqr,reg2apb);
-      end
-   endfunction
-
-endclass
-
+module tb_top;
+   bit clk = 0;
+   apb_if apb0(clk);
+   slave dut(apb0);
+   always #10 clk = ~clk;
+endmodule: tb_top

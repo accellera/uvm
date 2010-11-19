@@ -1231,16 +1231,19 @@ function void uvm_reg_field::Xpredict_readX (uvm_reg_data_t value,
       end
    end
 
-   m_mirrored  = value;
-   m_desired   = value;
-   this.value  = value;
-
    begin
       uvm_reg_field_cb_iter cbs = new(this);
 
       for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next())
-         cb.post_predict(this, value, UVM_PREDICT_READ, path, map);
+         cb.post_predict(this, m_mirrored, value, UVM_PREDICT_READ, path, map);
    end
+
+   value &= ('b1 << m_size)-1;
+
+   m_mirrored  = value;
+   m_desired   = value;
+   this.value  = value;
+
 endfunction: Xpredict_readX
 
 
@@ -1249,15 +1252,16 @@ endfunction: Xpredict_readX
 function void uvm_reg_field::Xpredict_writeX (uvm_reg_data_t value,
                                               uvm_path_e     path,
                                               uvm_reg_map    map);
+   uvm_reg_data_t previous;
+   
    value &= ('b1 << m_size)-1;
+
+   previous = m_mirrored;
 
    if (path == UVM_FRONTDOOR)
       m_mirrored = XpredictX(m_mirrored, value, map);
    else
       m_mirrored = value;
-
-   m_desired  = m_mirrored;
-   this.value = m_mirrored;
 
    m_written = 1;
 
@@ -1265,8 +1269,14 @@ function void uvm_reg_field::Xpredict_writeX (uvm_reg_data_t value,
       uvm_reg_field_cb_iter cbs = new(this);
 
       for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next())
-         cb.post_predict(this, value, UVM_PREDICT_WRITE, path, map);
+         cb.post_predict(this, previous, m_mirrored, UVM_PREDICT_WRITE, path, map);
    end
+
+   m_mirrored &= ('b1 << m_size)-1;
+
+   m_desired  = m_mirrored;
+   this.value = m_mirrored;
+
 endfunction: Xpredict_writeX
 
 

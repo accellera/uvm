@@ -2,7 +2,6 @@
 // -------------------------------------------------------------
 //    Copyright 2004-2008 Synopsys, Inc.
 //    Copyright 2010 Mentor Graphics Corp.
-//    Copyright 2010 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
 // 
 //    Licensed under the Apache License, Version 2.0 (the
@@ -21,33 +20,16 @@
 // -------------------------------------------------------------
 // 
 
-class tb_env extends uvm_component;
 
-   `uvm_component_utils(tb_env)
+module dut();
 
-   reg_block_slave model; 
-   apb_agent apb;
+bit [15:0] acp;
 
-   function new(string name, uvm_component parent=null);
-      super.new(name,parent);
-   endfunction
+function void reset();
+   acp = 0;
+endfunction
 
-   virtual function void build();
-      if (model == null) begin
-         model = reg_block_slave::type_id::create("model",this);
-         model.build();
-         model.lock_model();
-      end
-         
-      apb = apb_agent::type_id::create("apb", this);
-   endfunction
 
-   virtual function void connect();
-      if (model.get_parent() == null) begin
-         reg2apb_adapter reg2apb = new;
-         model.default_map.set_sequencer(apb.sqr,reg2apb);
-      end
-   endfunction
+initial reset();
 
-endclass
-
+endmodule

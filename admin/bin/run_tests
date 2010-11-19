@@ -557,18 +557,18 @@ sub check_runtime_error {
 # Execute a Makefile-based example
 #
 sub make_example {
-  local($dir, $result, $_) = @_;
+  local($dir, $opts, $result, $_) = @_;
 
   return 0 if ($tool eq "clean");
 
   $result = 0;
   if (!$opt_c) {
-    $cmd = "cd $dir && make -f Makefile.$tool";
+    $cmd = "cd $dir && make -f Makefile.$tool $opts";
     $cmd .= " > /dev/null 2>&1" unless $opt_v;
     $result = system($cmd);
   }
   if (!$opt_d || $opt_c) {
-    $cmd = "cd $dir && make -f Makefile.$tool clean";
+    $cmd = "cd $dir && make -f Makefile.$tool $opts clean";
     $cmd .= " > /dev/null 2>&1" unless $opt_v;
     system($cmd);
   }
