@@ -254,7 +254,8 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   virtual task start_default_sequence();
     uvm_sequence_base m_seq ;
 
-    if(sequences.size() == 2 && sequences[0] == "uvm_random_sequence" &&
+    if(sequences.size() == 2 && 
+       sequences[0] == "uvm_random_sequence" &&
        sequences[1] == "uvm_exhaustive_sequence") begin
       uvm_report_warning("NOUSERSEQ",
                          "No user sequence available.  Not starting the default sequence.",
@@ -282,8 +283,7 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
       if (!m_seq.randomize()) begin
         uvm_report_warning("STRDEFSEQ", "Failed to randomize sequence");
       end
-      if(count != 0)
-        m_seq.start(this);
+      m_seq.start(this);
     end
   endtask
 
@@ -294,7 +294,8 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   // Do not call directly except by overrides in derived classes
 
   task run();
-    start_default_sequence();
+    if (default_sequence != "" && count != 0)
+      start_default_sequence();
   endtask // run
 
 

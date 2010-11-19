@@ -116,12 +116,13 @@ class uvm_sequencer_base extends uvm_component;
 
   // Variable: default_sequence
   //
-  // This property defines the sequence type (by name) that will be
-  // auto-started. The default sequence is initially set to uvm_random_sequence.
+  // Specifies a sequence type (by name) to start automatically upon entering
+  // <run> phase. By default, ~default_sequence~ is the empty string, i.e. no
+  // sequence is auto-started. 
   // It can be configured through the uvm_component's set_config_string method
   // using the field name "default_sequence".
 
-  protected string default_sequence = "uvm_random_sequence";               
+  protected string default_sequence = "";               
 
 
   // The sequeunce aray holds the type names of the sequence types registered
