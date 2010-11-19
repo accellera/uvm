@@ -20,6 +20,7 @@
 ## 
 
 UVM_HOME	= ../../../..
+USES_DPI = 1
 
 include ../../../Makefile.questa
 
