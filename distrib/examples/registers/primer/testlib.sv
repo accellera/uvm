@@ -1,6 +1,6 @@
 // 
 // -------------------------------------------------------------
-//    Copyright 2004-2008 Synopsys, Inc.
+//    Copyright 2004-2010 Synopsys, Inc.
 //    Copyright 2010 Mentor Graphics Corp.
 //    Copyright 2010 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
@@ -20,35 +20,5 @@
 //    permissions and limitations under the License.
 // -------------------------------------------------------------
 // 
-
-class hw_reset_test extends uvm_test;
-
-   tb_env env;
-
-   `uvm_component_utils(hw_reset_test)
-
-   function new(string name, uvm_component parent);
-      super.new(name, parent);
-   endfunction
-
-   virtual task run();
-      apb_reset_seq reset_seq;
-      uvm_reg_hw_reset_seq seq;
-
-      $cast(env, uvm_top.find("env"));
-
-      reset_seq = apb_reset_seq::type_id::create("apb_reset_seq",this);
-      reset_seq.start(env.apb.sqr);
-
-      seq = uvm_reg_hw_reset_seq::type_id::create("uvm_reg_hw_reset_seq",this);
-      seq.model = env.model;
-      seq.start(null);
-
-      global_stop_request();
-
-   endtask : run
-
-endclass : hw_reset_test
-
-
-
+`include "cmdline_test.sv"
+`include "user_test.sv"

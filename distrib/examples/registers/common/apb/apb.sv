@@ -27,7 +27,11 @@
 
 package apb_pkg; 
 
-  import uvm_pkg::*; 
+  import uvm_pkg::*;
+
+  typedef virtual apb_if apb_vif;
+
+  typedef class apb_agent;
 
  `include "apb_rw.sv"
  `include "apb_config.sv"

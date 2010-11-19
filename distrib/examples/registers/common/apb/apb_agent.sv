@@ -34,6 +34,8 @@ class apb_agent extends uvm_agent;
    apb_master    drv;
    apb_monitor   mon;
 
+   apb_vif       vif;
+
    `uvm_component_utils_begin(apb_agent)
       `uvm_field_object(sqr, UVM_ALL_ON)
       `uvm_field_object(drv, UVM_ALL_ON)
@@ -42,10 +44,17 @@ class apb_agent extends uvm_agent;
    
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
-      sqr = new("sqr", this);
-      drv = new("drv", this);
-      mon = new("mon", this);
-   endfunction: new
+   endfunction
+
+   virtual function void build();
+      sqr = apb_sequencer::type_id::create("sqr", this);
+      drv = apb_master::type_id::create("drv", this);
+      mon = apb_monitor::type_id::create("mon", this);
+      
+      if (!uvm_config_db#(apb_vif)::get(this, "", "vif", vif)) begin
+         `uvm_fatal("APB/AGT/NOVIF", "No virtual interface specified for this agent instance")
+      end
+   endfunction: build
 
    virtual function void connect();
       drv.seq_item_port.connect(sqr.seq_item_export);
