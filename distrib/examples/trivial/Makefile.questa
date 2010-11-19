@@ -19,34 +19,17 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME = ../../..
-USES_DPI = 1
+UVM_HOME	= ../..
 
-include ../../Makefile.questa
-
-
-all: prepare blk sys
+include ../Makefile.questa
 
 
-blk: comp_blk run_blk
+all: run
 
-blk_comp comp_blk:
-	$(VLOG) +incdir+../common/apb \
-		blk_run.sv
+comp: vlib
+	$(VLOG) +incdir+. \
+		component.sv
 
-blk_run run_blk:
-	$(VSIM) +UVM_TESTNAME=blk_R_test
+run: comp
+	$(VSIM)
 	$(CHECK)
-
-
-sys: comp_sys run_sys
-
-sys_comp comp_sys:
-	$(VLOG) +incdir+../common/apb \
-		sys_run.sv
-
-sys_run run_sys:
-	$(VSIM) +UVM_TESTNAME=sys_R_test
-	$(CHECK)
-
-

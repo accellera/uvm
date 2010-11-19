@@ -103,7 +103,7 @@ sub run_the_test($$$) {
             $toplevels =~ s/\s\s+/ /g; # remove excess whitespace
         }
         my $clib = "-sv_lib $uvm_home/src/dpi/uvm_dpi";
-        my $vsim = ("vsim $run_opts $clib +UVM_TESTNAME=test -c $toplevels -do 'run -all;quit -f'");
+        my $vsim = ("vsim +UVM_TESTNAME=test $run_opts $clib -c $toplevels -do 'run -all;quit -f'");
         system("cd ./$testdir/$uvm_home/src/dpi; make --quiet") && die "DPI Library Compilation Problem" ;
         &questa_run("cd ./$testdir && $vsim $redirect ".&runtime_log_fname()." 2>&1");
     }
