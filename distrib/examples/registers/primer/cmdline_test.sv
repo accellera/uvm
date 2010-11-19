@@ -36,7 +36,7 @@ class cmdline_test extends uvm_test;
       $cast(env, uvm_top.find("env"));
 
       begin
-         uvm_sequence_base rst_seq;
+         dut_reset_seq rst_seq;
          rst_seq = dut_reset_seq::type_id::create("rst_seq", this);
          rst_seq.start(null);
       end
