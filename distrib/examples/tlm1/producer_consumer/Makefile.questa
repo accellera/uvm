@@ -31,5 +31,4 @@ comp: vlib
 
 run: comp
 	$(VSIM)
->>>>>>> 9175dddb070bc10f756d33802dfad4dfae47a297
 	$(CHECK)
