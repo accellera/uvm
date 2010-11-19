@@ -218,11 +218,16 @@ virtual class uvm_reg_cbs extends uvm_callback;
    // Called by the <uvm_reg_field::predict()> method
    // after a successful UVM_PREDICT_READ or UVM_PREDICT_WRITE prediction.
    //
-   virtual function void post_predict(uvm_reg_field  fld,
-                                      uvm_reg_data_t value,
-                                      uvm_predict_e  kind,
-                                      uvm_path_e     path,
-                                      uvm_reg_map    map);
+   // ~previous~ is the previous value in the mirror and
+   // ~value~ is the latest predicted value. Any change to ~value~ will
+   // modify the predicted mirror value.
+   //
+   virtual function void post_predict(input uvm_reg_field  fld,
+                                      input uvm_reg_data_t previous,
+                                      inout uvm_reg_data_t value,
+                                      input uvm_predict_e  kind,
+                                      input uvm_path_e     path,
+                                      input uvm_reg_map    map);
    endfunction
 
 
