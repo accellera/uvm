@@ -56,6 +56,8 @@
 class uvm_tlm_b_initiator_socket #(type T=uvm_tlm_generic_payload)
                            extends uvm_tlm_b_initiator_socket_base #(T);
 
+  // Function: new
+  // Construct a new instance of this socket
   function new(string name, uvm_component parent);
     super.new(name, parent);
   endfunction 
@@ -105,6 +107,10 @@ class uvm_tlm_b_target_socket #(type T=uvm_tlm_generic_payload,
 
   local IMP m_imp;
 
+  // Function: new
+  // Construct a new instance of this socket
+  // ~imp~ is a reference to the class implementing the
+  // b_transport() method, usually the same as ~parent~.
   function new (string name, uvm_component parent, IMP imp);
     super.new (name, parent);
     m_imp = imp;
@@ -147,6 +153,10 @@ class uvm_tlm_nb_initiator_socket #(type T=uvm_tlm_generic_payload,
 
   uvm_tlm_nb_transport_bw_imp #(T,P,IMP) bw_imp;
 
+  // Function: new
+  // Construct a new instance of this socket
+  // ~imp~ is a reference to the class implementing the
+  // nb_transport_bw() method, usually the same as ~parent~.
   function new(string name, uvm_component parent, IMP imp);
     super.new (name, parent);
     bw_imp = new("bw_imp", imp);
@@ -207,6 +217,10 @@ class uvm_tlm_nb_target_socket #(type T=uvm_tlm_generic_payload,
 
   local IMP m_imp;
 
+  // Function: new
+  // Construct a new instance of this socket
+  // ~imp~ is a reference to the class implementing the
+  // nb_transport_fw() method, usually the same as ~parent~.
   function new (string name, uvm_component parent, IMP imp);
     super.new (name, parent);
     m_imp = imp;
