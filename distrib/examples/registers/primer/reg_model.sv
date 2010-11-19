@@ -1,8 +1,6 @@
 `ifndef REG_SLAVE
 `define REG_SLAVE
 
-import uvm_pkg::*;
-
 class reg_slave_ID extends uvm_reg;
 
    uvm_reg_field REVISION_ID;

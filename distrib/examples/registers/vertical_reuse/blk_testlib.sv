@@ -22,6 +22,7 @@
 
 import apb_pkg::*;
 
+typedef class dut_reset_seq;
 class blk_R_test extends uvm_test;
 
    `uvm_component_utils(blk_R_test)
@@ -33,22 +34,24 @@ class blk_R_test extends uvm_test;
    endfunction
 
    function void build();
-      apb_config apb_cfg = new;
-      apb_cfg.vif = $root.blk_top.apb0;
-      env = blk_env::type_id::create("blk_env",this);
-      set_config_object("blk_env.apb_agent.*","config",apb_cfg,0);
+      if (env == null)
+         $cast(env, uvm_top.find("env"));
    endfunction
 
    task run();
-      apb_reset_seq reset_seq;
+      uvm_sequence_base reset_seq;
       blk_R_test_seq seq;
 
-      reset_seq = apb_reset_seq::type_id::create("apb_reset_seq",this);
-      reset_seq.start(env.apb.sqr);
+      begin
+         dut_reset_seq rst_seq;
+         rst_seq = dut_reset_seq::type_id::create("rst_seq", this);
+         rst_seq.start(null);
+      end
+      env.model.reset();
 
       seq = blk_R_test_seq::type_id::create("blk_R_test_seq",this);
       seq.model = env.model;
-      seq.start(env.apb.sqr);
+      seq.start(null);
 
       global_stop_request();
    endtask

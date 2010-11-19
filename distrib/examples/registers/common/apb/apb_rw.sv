@@ -27,7 +27,7 @@
 
 class apb_rw extends uvm_sequence_item;
   
-   typedef enum {READ, WRITE, RESET} kind_e;
+   typedef enum {READ, WRITE} kind_e;
    rand bit   [31:0] addr;
    rand logic [31:0] data;
    rand kind_e kind;  
@@ -42,41 +42,11 @@ class apb_rw extends uvm_sequence_item;
       super.new(name);
    endfunction
 
-   constraint no_rand_reset { kind != RESET; }
-
    function string convert2string();
      return $sformatf("kind=%s addr=%0h data=%0h",kind,addr,data);
    endfunction
 
 endclass: apb_rw
-
-
-class apb_reset extends apb_rw;
-   `uvm_object_utils(apb_reset)
-   function new (string name = "apb_reset");
-      super.new(name);
-      kind = RESET;
-      data = 5;
-   endfunction
-endclass
-
-
-
-
-class apb_reset_seq extends uvm_sequence #(apb_reset);
-   `uvm_object_utils(apb_reset_seq)
-
-   function new(string name = "apb_reset_seq");
-      super.new(name);
-   endfunction: new
-
-   virtual task body();
-     req = apb_reset::type_id::create("apb_reset",,get_full_name());
-     start_item(req);
-     finish_item(req);
-   endtask
-
-endclass
 
 
 class reg2apb_adapter extends uvm_reg_adapter;

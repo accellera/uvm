@@ -32,18 +32,45 @@ import apb_pkg::*;
 `include "regmodel.sv"
 `include "tb_env.sv"
 
-`include "hw_reset.sv"
+class hw_reset_test extends uvm_test;
+
+   function new(string name = "hw_reset_test", uvm_component parent = null);
+      super.new(name, parent);
+   endfunction
+
+   `uvm_component_utils(hw_reset_test)
+   
+   virtual task run();
+      tb_top.rst = 1;
+      repeat (5) @(negedge tb_top.clk);
+      tb_top.rst = 0;
+
+      #100;
+
+      begin
+         uvm_reg_hw_reset_seq seq;
+         tb_env env;
+         
+         $cast(env, uvm_top.find("env"));
+
+         seq = uvm_reg_hw_reset_seq::type_id::create("uvm_reg_hw_reset_seq",,
+                                                     get_full_name());
+         seq.model = env.regmodel;
+         seq.start(null);
+      end
+      
+      global_stop_request();
+   endtask
+endclass
+
 
 initial
 begin
    static tb_env env = new("env");
-   static apb_config apb_cfg = new;
 
-   apb_cfg.vif = $root.tb_top.apb0;
-   set_config_object("env.apb.*","config",apb_cfg,0);
+   uvm_config_db#(apb_vif)::set(env, "apb", "vif", $root.tb_top.apb0);
 
    run_test();
 end
 
 endprogram
-

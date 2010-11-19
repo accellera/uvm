@@ -23,7 +23,8 @@
 
 `timescale 1ns/1ns
 
-module slave(apb_if apb);
+module slave(apb_if apb,
+             input bit rst);
 
 reg [31:0] pr_data;
 assign apb.prdata = (apb.psel && apb.penable && !apb.pwrite) ? pr_data : 'z;
@@ -34,7 +35,7 @@ reg [31:0] DMA[1024];
 
 always @ (posedge apb.pclk)
   begin
-   if (apb.rst) begin
+   if (rst) begin
       DATA <= 'h00;
       foreach (SOCKET[i]) begin
          SOCKET[i] <= 64'h0000_0000;
