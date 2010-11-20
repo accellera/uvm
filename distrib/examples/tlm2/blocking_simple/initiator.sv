@@ -42,22 +42,14 @@ class initiator extends uvm_component;
       rw.addr = 32'h0000_FF00;
       
       sock.b_transport(rw, delay);
-
-      if (delay > 0) begin
-         #delay;
-         delay = 0;
-      end
+      assert(delay == 0);
 
       // Ok to reuse the same RW instance
       rw.kind = apb_rw::WRITE;
       rw.data = ~rw.data;
 
       sock.b_transport(rw, delay);
-
-      if (delay > 0) begin
-         #delay;
-         delay = 0;
-      end
+      assert(delay == 0);
 
       global_stop_request();
    endtask
