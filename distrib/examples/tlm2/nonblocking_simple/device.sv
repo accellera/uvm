@@ -26,7 +26,7 @@ class device extends uvm_component;
 
    function new(string name = "device", uvm_component parent = null);
       super.new(name, parent);
-      sock = new("sock", this, this);
+      sock = new("sock", this);
    endfunction
 
    byte data[];

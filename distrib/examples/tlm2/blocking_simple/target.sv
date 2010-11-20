@@ -28,7 +28,7 @@ class target extends uvm_component;
    
    function new(string name = "target", uvm_component parent = null);
       super.new(name, parent);
-      sock = new("sock", this, this);
+      sock = new("sock", this);
 
       m_data = 32'hDEADBEEF;
    endfunction

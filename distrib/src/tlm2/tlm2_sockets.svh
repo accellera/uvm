@@ -110,10 +110,15 @@ class uvm_tlm_b_target_socket #(type T=uvm_tlm_generic_payload,
   // Function: new
   // Construct a new instance of this socket
   // ~imp~ is a reference to the class implementing the
-  // b_transport() method, usually the same as ~parent~.
-  function new (string name, uvm_component parent, IMP imp);
+  // b_transport() method.
+  // If not specified, it is assume to be the same as ~parent~.
+  function new (string name, uvm_component parent, IMP imp = null);
     super.new (name, parent);
-    m_imp = imp;
+    if (imp == null) $cast(m_imp, parent);
+    else m_imp = imp;
+    if (m_imp == null)
+       `uvm_error("UVM/TLM2/NOIMP", {"b_target socket ", name,
+                                     " has no implementation"});
   endfunction
 
    // Function: Connect
@@ -156,9 +161,14 @@ class uvm_tlm_nb_initiator_socket #(type T=uvm_tlm_generic_payload,
   // Function: new
   // Construct a new instance of this socket
   // ~imp~ is a reference to the class implementing the
-  // nb_transport_bw() method, usually the same as ~parent~.
-  function new(string name, uvm_component parent, IMP imp);
+  // nb_transport_bw() method.
+  // If not specified, it is assume to be the same as ~parent~.
+  function new(string name, uvm_component parent, IMP imp = null);
     super.new (name, parent);
+    if (imp == null) $cast(imp, parent);
+    if (imp == null)
+       `uvm_error("UVM/TLM2/NOIMP", {"nb_initiator socket ", name,
+                                     " has no implementation"});
     bw_imp = new("bw_imp", imp);
   endfunction
 
@@ -220,11 +230,16 @@ class uvm_tlm_nb_target_socket #(type T=uvm_tlm_generic_payload,
   // Function: new
   // Construct a new instance of this socket
   // ~imp~ is a reference to the class implementing the
-  // nb_transport_fw() method, usually the same as ~parent~.
-  function new (string name, uvm_component parent, IMP imp);
+  // nb_transport_fw() method.
+  // If not specified, it is assume to be the same as ~parent~.
+  function new (string name, uvm_component parent, IMP imp = null);
     super.new (name, parent);
-    m_imp = imp;
+    if (imp == null) $cast(m_imp, parent);
+    else m_imp = imp;
     bw_port = new("bw_port", get_comp());
+    if (m_imp == null)
+       `uvm_error("UVM/TLM2/NOIMP", {"nb_target socket ", name,
+                                     " has no implementation"});
   endfunction
 
    // Function: connect
