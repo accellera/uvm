@@ -34,7 +34,7 @@
 //
 // CLASS: uvm_random_sequence
 //
-// This sequence randomly selects and executes a sequence from the sequencer¿s
+// This sequence randomly selects and executes a sequence from the sequencer's
 // sequence library, excluding uvm_random_sequence itself, and
 // uvm_exhaustive_sequence. 
 //
