@@ -18,6 +18,12 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+`timescale 1ns / 1ps
+
+package init_pkg;
+
+import uvm_pkg::*;
+import apb_pkg::*;
 
 class initiator extends uvm_component;
 
@@ -41,15 +47,23 @@ class initiator extends uvm_component;
       rw.kind = apb_rw::READ;
       rw.addr = 32'h0000_FF00;
       
+      delay.reset();
       sock.b_transport(rw, delay);
+      $write("Init: delay = %0.3f ns\n", delay.get_realtime(1ns));
+      #(delay.get_realtime(1ns));
 
       // Ok to reuse the same RW instance
       rw.kind = apb_rw::WRITE;
       rw.data = ~rw.data;
 
+      delay.reset();
       sock.b_transport(rw, delay);
+      $write("Init: delay = %0.3f ns\n", delay.get_realtime(1ns));
+      #(delay.get_realtime(1ns));
 
       global_stop_request();
    endtask
 
 endclass
+
+endpackage

@@ -34,10 +34,10 @@ class device extends uvm_component;
    // Forward path
    function uvm_tlm_sync_e nb_transport_fw(usb_xfer xfer,
                                            ref usb_tlm_phase ph,
-                                           ref time delay);
+                                           input uvm_tlm_time delay);
 
       `uvm_info("USB/DEV/FWD", $sformatf("%s @%0d: %s",
-                                         ph.name(), delay,
+                                         ph.name(), delay.get_realtime(1ns),
                                          xfer.convert2string()), UVM_LOW)
 
       // This device?
@@ -59,8 +59,8 @@ class device extends uvm_component;
 
               // Could complete transfer early here
               fork: out_ack
-                 automatic usb_xfer xf = xfer;
-                 automatic time     dl = delay;
+                 automatic usb_xfer     xf = xfer;
+                 automatic uvm_tlm_time dl = delay;
                  begin
                     usb_tlm_phase ph = USB_TLM_HANDSHAKE;
                     #100;
@@ -85,8 +85,8 @@ class device extends uvm_component;
            USB_TLM_TOKEN: begin
               // Could return the data early here
               fork: in_data
-                 automatic usb_xfer xf = xfer;
-                 automatic time     dl = delay;
+                 automatic usb_xfer     xf = xfer;
+                 automatic uvm_tlm_time dl = delay;
                  begin
                     usb_tlm_phase ph = USB_TLM_DATA;
                     #150;

@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
 //   Copyright 2010 Mentor Graphics Corporation
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010 Synopsys, Inc
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -18,12 +18,24 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-  `include "tlm2/tlm2_defines.svh"
-  `include "tlm2/tlm2_time.svh"
-  `include "tlm2/tlm2_generic_payload.svh"
-  `include "tlm2/tlm2_ifs.svh"
-  `include "tlm2/tlm2_imps.svh"
-  `include "tlm2/tlm2_ports.svh"
-  `include "tlm2/tlm2_exports.svh"
-  `include "tlm2/tlm2_sockets_base.svh"
-  `include "tlm2/tlm2_sockets.svh"
+class tb_env extends uvm_component;
+
+   `uvm_component_utils(tb_env)
+
+   initiator master;
+   target    slave;
+
+   function new(string name = "tb_env", uvm_component parent = null);
+      super.new(name, parent);
+   endfunction
+
+   function void build();
+      master = initiator::type_id::create("master", this);
+      slave  = target::type_id::create("slave", this);
+   endfunction
+
+   function void connect();
+      master.sock.connect(slave.sock);
+   endfunction
+
+endclass

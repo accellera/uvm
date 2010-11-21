@@ -97,7 +97,7 @@ endclass
 // The component instantiating this socket must implement
 // a b_transport() method with the following signature
 //
-//|   task b_transport(T t, ref time delay);
+//|   task b_transport(T t, uvm_tlm_time delay);
 //
 //----------------------------------------------------------------------
 
@@ -147,7 +147,7 @@ endclass
 // The component instantiating this socket must implement
 // a nb_transport_bw() method with the following signature
 //
-//|   function uvm_tlm_sync_e nb_transport_bw(T t, ref P p, ref time delay);
+//|   function uvm_tlm_sync_e nb_transport_bw(T t, ref P p, input uvm_tlm_time delay);
 //
 //----------------------------------------------------------------------
 
@@ -216,7 +216,7 @@ endclass
 // The component instantiating this socket must implement
 // a nb_transport_fw() method with the following signature
 //
-//|   function uvm_tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);
+//|   function uvm_tlm_sync_e nb_transport_fw(T t, ref P p, input uvm_tlm_time delay);
 //
 //----------------------------------------------------------------------
 

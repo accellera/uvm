@@ -120,6 +120,7 @@ Group: TLM  {
       File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/tlm2.txt)
       File: Generic Payload  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_generic_payload.svh)
       File: Sockets  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_sockets.svh)
+      File: uvm_tlm_time  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_time.svh)
       File: Ports  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_ports.svh)
       File: Implementation  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_imps.svh)
       File: Exports  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_exports.svh)

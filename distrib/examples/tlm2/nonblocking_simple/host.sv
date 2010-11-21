@@ -31,16 +31,16 @@ class host extends uvm_component;
 
    usb_xfer       xfer;
    usb_tlm_phase  ph;
-   time           delay = 0;
+   uvm_tlm_time   delay = new;
    uvm_tlm_sync_e sync;
 
    // Backward path
    function uvm_tlm_sync_e nb_transport_bw(usb_xfer xfer,
                                            ref usb_tlm_phase ph,
-                                           ref time delay);
+                                           input uvm_tlm_time delay);
 
       `uvm_info("USB/HST/BWD", $sformatf("%s @%0d: %s",
-                                         ph.name(), delay,
+                                         ph.name(), delay.get_realtime(1ns),
                                          xfer.convert2string()), UVM_LOW)
                
       assert(xfer == this.xfer);

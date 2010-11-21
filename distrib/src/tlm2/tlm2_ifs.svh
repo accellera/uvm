@@ -112,7 +112,7 @@ class uvm_tlm_if #(type T=uvm_tlm_generic_payload,
    // for more details on the semantics and rules of the nonblocking
    // transport interface.
    
-  virtual function uvm_tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);
+  virtual function uvm_tlm_sync_e nb_transport_fw(T t, ref P p, input uvm_tlm_time delay);
     `uvm_error("nb_transport_fw", `UVM_TLM_FUNCTION_ERROR)
     return UVM_TLM_ACCEPTED;
   endfunction
@@ -145,8 +145,7 @@ class uvm_tlm_if #(type T=uvm_tlm_generic_payload,
    //|
    //|    function uvm_tlm_sync_e nb_transport_bw(ref trans t,
    //|                                   ref uvm_tlm_phase_e p,
-   //|                                   ref time delay);
-   //|        delay_time = delay;
+   //|                                   input uvm_tlm_time delay);
    //|        transaction = t;
    //|        state = p;
    //|        return UVM_TLM_ACCEPTED;
@@ -155,7 +154,7 @@ class uvm_tlm_if #(type T=uvm_tlm_generic_payload,
    //|    ...
    //| endclass
    
-  virtual function uvm_tlm_sync_e nb_transport_bw(T t, ref P p, ref time delay);
+  virtual function uvm_tlm_sync_e nb_transport_bw(T t, ref P p, input uvm_tlm_time delay);
     `uvm_error("nb_transport_bw", `UVM_TLM_FUNCTION_ERROR)
     return UVM_TLM_ACCEPTED;
   endfunction
@@ -178,7 +177,7 @@ class uvm_tlm_if #(type T=uvm_tlm_generic_payload,
    // allows the timing points to be offset from the simulation times
    // at which the task call and return are executed.
    
-  virtual task b_transport(T t, ref time delay);
+  virtual task b_transport(T t, uvm_tlm_time delay);
     `uvm_error("b_transport", `UVM_TLM_TASK_ERROR)
   endtask
 

@@ -18,6 +18,13 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+`timescale 1ps / 1ps
+
+package trgt_pkg;
+
+import uvm_pkg::*;
+import apb_pkg::*;
+
 class target extends uvm_component;
 
    local bit [31:0] m_data;
@@ -44,7 +51,8 @@ class target extends uvm_component;
 
       endcase
 
-      #5;
+      delay.incr(10ns, 1ns);
+      $write("Trgt: delay = %0.3f ps...\n", delay.get_realtime(1ns));
    endtask
 
    function void start_of_simulation();
@@ -56,3 +64,5 @@ class target extends uvm_component;
    endfunction
 
 endclass
+
+endpackage

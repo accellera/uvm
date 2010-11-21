@@ -27,7 +27,7 @@ class slave extends uvm_component;
   uvm_tlm_nb_target_socket #(trans, uvm_tlm_phase_e, this_t) target_socket;
 
   local uvm_tlm_phase_e state;
-  local time delay_time;
+  local uvm_tlm_time delay_time;
   local trans transaction;
 
   local process fsm_proc;
@@ -53,9 +53,9 @@ class slave extends uvm_component;
   // Implementation of nb_transport_fw.  Provides a forward path from
   // initiator to target
   //--------------------------------------------------------------------
-  function uvm_tlm_sync_e nb_transport_fw(ref trans t,
+  function uvm_tlm_sync_e nb_transport_fw(trans t,
                                       ref uvm_tlm_phase_e p,
-                                      ref time delay);
+                                      input uvm_tlm_time delay);
     delay_time = delay;
     transaction = t;
     state = p;
@@ -91,7 +91,7 @@ class slave extends uvm_component;
   task fsm();
 
     uvm_tlm_phase_e prev_state;
-    time delay;
+    uvm_tlm_time delay = new;
     uvm_tlm_sync_e sync;
     string msg;
 
@@ -106,7 +106,7 @@ class slave extends uvm_component;
 
         BEGIN_REQ:
           begin
-            #delay_time;
+            #(delay_time.get_realtime(1ns));
             $sformat(msg, "begin req: %s", transaction.convert2string());
             `uvm_info("slave", msg, UVM_NONE);
             state = END_REQ;
@@ -117,7 +117,7 @@ class slave extends uvm_component;
           begin
             `uvm_info("slave", "end req", UVM_NONE);
             #5; // time to complete request
-            delay = 0;
+            delay.reset();
             sync = target_socket.nb_transport_bw(transaction, state, delay);
             state = BEGIN_RESP;
             #0;
@@ -125,7 +125,7 @@ class slave extends uvm_component;
 
         BEGIN_RESP:
           begin
-            delay = 3;
+            delay.incr(3, 1ns);
             `uvm_info("slave", "begin rsp", UVM_NONE);
             transaction.set_response_status(UVM_TLM_OK_RESPONSE);
             sync = target_socket.nb_transport_bw(transaction, state, delay);
@@ -134,7 +134,7 @@ class slave extends uvm_component;
 
         END_RESP:
           begin
-            #delay_time;
+            #(delay_time.get_realtime(1ns));
             `uvm_info("slave", "end rsp", UVM_NONE);
             wait (state != END_RESP);
           end
