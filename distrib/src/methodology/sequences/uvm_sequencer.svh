@@ -43,7 +43,7 @@ class uvm_sequencer #(type REQ = uvm_sequence_item,
   // Variable: seq_item_export
   //
   // This export provides access to this sequencer's implementation of the
-  // sequencer interface, <sqr_if_base #(REQ,RSP)>, which defines the following
+  // sequencer interface, <uvm_sqr_if_base #(REQ,RSP)>, which defines the following
   // methods:
   //
   //|  virtual task          get_next_item      (output REQ request);
@@ -55,7 +55,7 @@ class uvm_sequencer #(type REQ = uvm_sequence_item,
   //|  virtual task          peek               (output REQ request);
   //|  virtual task          put                (input RSP response);
   //
-  // See <sqr_if_base #(REQ,RSP)> for information about this interface.
+  // See <uvm_sqr_if_base #(REQ,RSP)> for information about this interface.
 
   uvm_seq_item_pull_imp #(REQ, RSP, this_type) seq_item_export;
 
