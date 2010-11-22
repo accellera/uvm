@@ -52,9 +52,11 @@ class apb_monitor extends uvm_monitor;
          sigs = agent.vif;
       end
       else begin
-         if (!uvm_config_db#(apb_vif)::get(this, "", "vif", sigs)) begin
+         virtual apb_if tmp;
+         if (!uvm_config_db#(apb_vif)::get(this, "", "vif", tmp)) begin
             `uvm_fatal("APB/MON/NOVIF", "No virtual interface specified for this monitor instance")
          end
+         sigs = tmp;
       end
    endfunction
 
