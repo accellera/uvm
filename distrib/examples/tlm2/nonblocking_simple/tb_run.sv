@@ -1,5 +1,4 @@
 //----------------------------------------------------------------------
-//   Copyright 2010 Mentor Graphics Corporation
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -18,12 +17,20 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-  `include "tlm2/tlm2_defines.svh"
-  `include "tlm2/tlm2_time.svh"
-  `include "tlm2/tlm2_generic_payload.svh"
-  `include "tlm2/tlm2_ifs.svh"
-  `include "tlm2/tlm2_imps.svh"
-  `include "tlm2/tlm2_ports.svh"
-  `include "tlm2/tlm2_exports.svh"
-  `include "tlm2/tlm2_sockets_base.svh"
-  `include "tlm2/tlm2_sockets.svh"
+import uvm_pkg::*;
+
+`include "usb_xfer.sv"
+`include "host.sv"
+`include "device.sv"
+`include "tb_env.sv"
+
+program tb_run;
+
+initial
+begin
+   static tb_env env = new("env");
+
+   run_test();
+end
+
+endprogram

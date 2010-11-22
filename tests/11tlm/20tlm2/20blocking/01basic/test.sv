@@ -53,7 +53,7 @@ class producer extends uvm_component;
   task run();
 
     int unsigned i;
-    time delay;
+    uvm_tlm_time delay = new;
     trans t;
 
     for(i = 0; i < 10; i++) begin
@@ -117,7 +117,7 @@ class consumer extends uvm_component;
     target_socket = new("target_socket", this, this);
   endfunction
 
-  task b_transport(ref trans t, ref time delay);
+  task b_transport(trans t, uvm_tlm_time delay);
     #5;
     uvm_report_info("consumer", t.convert2string());
     transaction_count++;

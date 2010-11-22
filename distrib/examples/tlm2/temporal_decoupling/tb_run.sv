@@ -18,12 +18,25 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-  `include "tlm2/tlm2_defines.svh"
-  `include "tlm2/tlm2_time.svh"
-  `include "tlm2/tlm2_generic_payload.svh"
-  `include "tlm2/tlm2_ifs.svh"
-  `include "tlm2/tlm2_imps.svh"
-  `include "tlm2/tlm2_ports.svh"
-  `include "tlm2/tlm2_exports.svh"
-  `include "tlm2/tlm2_sockets_base.svh"
-  `include "tlm2/tlm2_sockets.svh"
+`include "apb_rw.sv"
+`include "initiator.sv"
+`include "target.sv"
+
+`timescale 1ns / 1ns
+
+program tb_run;
+
+import uvm_pkg::*;
+import init_pkg::*;
+import trgt_pkg::*;
+
+`include "tb_env.sv"
+
+initial
+begin
+   static tb_env env = new("env");
+
+   run_test();
+end
+
+endprogram

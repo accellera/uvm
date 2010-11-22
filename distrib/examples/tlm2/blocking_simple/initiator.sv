@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
 //   Copyright 2010 Mentor Graphics Corporation
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010 Synopsys, Inc
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -18,12 +18,38 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-  `include "tlm2/tlm2_defines.svh"
-  `include "tlm2/tlm2_time.svh"
-  `include "tlm2/tlm2_generic_payload.svh"
-  `include "tlm2/tlm2_ifs.svh"
-  `include "tlm2/tlm2_imps.svh"
-  `include "tlm2/tlm2_ports.svh"
-  `include "tlm2/tlm2_exports.svh"
-  `include "tlm2/tlm2_sockets_base.svh"
-  `include "tlm2/tlm2_sockets.svh"
+
+class initiator extends uvm_component;
+
+   uvm_tlm_b_initiator_socket#(apb_rw) sock;
+
+   `uvm_component_utils(initiator)
+
+   function new(string name = "initiator", uvm_component parent = null);
+      super.new(name, parent);
+      sock = new("sock", this);
+   endfunction
+
+   //
+   // Execute a simple read-modify-write
+   //
+   virtual task run();
+      apb_rw rw;
+      uvm_tlm_time delay = new;
+
+      rw = apb_rw::type_id::create("rw",,get_full_name());
+      rw.kind = apb_rw::READ;
+      rw.addr = 32'h0000_FF00;
+      
+      sock.b_transport(rw, delay);
+
+      // Ok to reuse the same RW instance
+      rw.kind = apb_rw::WRITE;
+      rw.data = ~rw.data;
+
+      sock.b_transport(rw, delay);
+
+      global_stop_request();
+   endtask
+
+endclass

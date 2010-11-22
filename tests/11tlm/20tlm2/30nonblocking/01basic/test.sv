@@ -38,21 +38,21 @@ class producer extends uvm_component;
     initiator_socket = new("initator_socket", this, this);
   endfunction
 
-  function uvm_tlm_sync_e nb_transport_bw(ref uvm_tlm_generic_payload t,
+  function uvm_tlm_sync_e nb_transport_bw(uvm_tlm_generic_payload t,
                                       ref uvm_tlm_phase_e p,
-                                      ref time delay);
+                                      input uvm_tlm_time delay);
     uvm_report_warning("producer", "nb_transport_bw is not implemented");
   endfunction
 
   task run();
 
     int unsigned i;
-    time delay;
+    uvm_tlm_time delay = new;
     uvm_tlm_phase_e phase;
     uvm_tlm_sync_e sync;
     uvm_tlm_generic_payload t;
 
-    delay = 1;
+    delay.incr(1, 1ns);
 
     for(i = 0; i < 10; i++) begin
       t = generate_transaction();
@@ -116,9 +116,9 @@ class consumer extends uvm_component;
     target_socket = new("target_socket", this, this);
   endfunction
 
-  function uvm_tlm_sync_e nb_transport_fw(ref uvm_tlm_generic_payload t,
+  function uvm_tlm_sync_e nb_transport_fw(uvm_tlm_generic_payload t,
                                       ref uvm_tlm_phase_e p,
-                                      ref time delay);
+                                      input uvm_tlm_time delay);
     uvm_report_info("consumer", t.convert2string());
     transaction_count++;
     return UVM_TLM_ACCEPTED;

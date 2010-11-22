@@ -70,9 +70,9 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   //| get_config_string(...) => uvm_config_db#(string)::get(cntxt,...)
   //| get_config_object(...) => uvm_config_db#(uvm_object)::get(cntxt,...)
 
-//TBD: add file/line
   static function bit get(uvm_component cntxt, string inst_name,
       string field_name, ref T value);
+//TBD: add file/line
     int unsigned p=0;
     uvm_resource#(T) r, rt;
     uvm_resource_pool rp = uvm_resource_pool::get();
