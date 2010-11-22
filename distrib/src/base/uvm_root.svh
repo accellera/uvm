@@ -659,8 +659,14 @@ function void uvm_root::check_verbosity();
   int plusarg;
   int verbosity = UVM_MEDIUM;
 
+  `ifndef UVM_CMDLINE_NO_DPI
   // Retrieve the verbosities provided on the command line.
   verb_count = clp.get_arg_values("+UVM_VERBOSITY=", verb_settings);
+  `else
+  verb_count = $value$plusargs("UVM_VERBOSITY=%s",verb_string);
+  if (verb_count)
+    verb_settings.push_back(verb_string);
+  `endif
 
   // If none provided, provide message about the default being used.
   //if (verb_count == 0)

@@ -52,6 +52,7 @@ virtual class uvm_reg extends uvm_object;
    local int               m_lineno = 0;
    local bit               m_read_in_progress = 0;
    local bit               m_write_in_progress = 0;
+   local bit               m_update_in_progress = 0;
    /*local*/ bit           m_is_busy;
    /*local*/ bit           m_is_locked_by_field;
    local uvm_reg_backdoor  m_backdoor;
@@ -2228,8 +2229,12 @@ task uvm_reg::update(output uvm_status_e      status,
 
    status = UVM_IS_OK;
 
-   if (!needs_update())
+   if (m_update_in_progress) begin
+     @(negedge m_update_in_progress);
      return;
+   end
+
+   m_update_in_progress = 1;
 
    // Concatenate the write-to-update values from each field
    // Fields are stored in LSB or MSB order
@@ -2238,6 +2243,9 @@ task uvm_reg::update(output uvm_status_e      status,
       upd |= m_fields[i].XupdateX() << m_fields[i].get_lsb_pos();
 
    write(status, upd, path, map, parent, prior, extension, fname, lineno);
+
+   m_update_in_progress = 0;
+
 endtask: update
 
 
