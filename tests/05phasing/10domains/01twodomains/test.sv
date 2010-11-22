@@ -113,7 +113,7 @@ module test;
       l1.maxdelay = 1500;
       l2 = new("l2", this);
       l1.set_phase_domain("domain1");
-      l1.set_phase_domain("domain2");
+      l2.set_phase_domain("domain2");
     endfunction
     function void report();
       phase_run[uvm_report_ph] = 1;
