@@ -29,7 +29,7 @@
 //
 // A sequence is executed by calling its <start> method, either directly
 // or indirectly via <start_item>/<finish_item> or invocation of any of
-// the `ovm_do_* macros.
+// the `uvm_do_* macros.
 // 
 // Executing sequences via <start>:
 // 
@@ -60,12 +60,12 @@
 //|   sub_seq.post_body          (task)  if call_pre_post==1
 // 
 //
-// Executing sub-sequences via <start_item>/<finish_item> or `ovm_do macros:
+// Executing sub-sequences via <start_item>/<finish_item> or `uvm_do macros:
 //
 // A sequence can also be indirectly started as a child in the <body> of a
 // parent sequence. The child sequence's <start> method is called indirectly
 // via calls to its <start_item>/<finish_item> methods or by invoking
-// any of the `ovm_do macros. Child sequences can also be started by
+// any of the `uvm_do macros. Child sequences can also be started by
 // the predefined sequences, <uvm_random_sequence> and
 // <uvm_exhaustive_sequence>. In all these cases, <start> is called with
 // ~call_pre_post~ set to 0, preventing the started sequence's <pre_body> and
@@ -83,7 +83,7 @@
 //|
 //| or
 //|
-//| `ovm_do_with_prior(seq_seq, { constraints }, priority)
+//| `uvm_do_with_prior(seq_seq, { constraints }, priority)
 //|
 //
 // The following methods are called, in order
@@ -98,10 +98,10 @@
 // the sequence being executed. 
 //
 // 
-// Executing sequence items via <start_item>/<finish_item> or `ovm_do macros:
+// Executing sequence items via <start_item>/<finish_item> or `uvm_do macros:
 // 
 // Items are started in the <body> of a parent sequence via calls to
-// <start_item>/<finish_item> or invocations of any of the `ovm_do
+// <start_item>/<finish_item> or invocations of any of the `uvm_do
 // macros. The <pre_do>, <mid_do>, and <post_do> methods of the parent
 // sequence will be called as the item is executed.
 //
@@ -115,7 +115,7 @@
 //|
 //| or
 //|
-//| `ovm_do_with_prior(item, constraints, priority)
+//| `uvm_do_with_prior(item, constraints, priority)
 //|
 //
 // The following methods are called, in order
@@ -526,7 +526,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   //
   // Note that even if this sequence has a lock, a child sequence may also have
   // a lock, in which case the sequence is still blocked from issuing
-  // operations on the sequencer>
+  // operations on the sequencer.
 
   function bit has_lock();
     return(m_sequencer.has_lock(this));

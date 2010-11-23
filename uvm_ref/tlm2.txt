@@ -82,7 +82,7 @@ Example:
 |    function void build();
 |      target_socket = new("target_socket", this, this);
 |    endfunction
-|    task b_transport(trans t, ref time delay);
+|    task b_transport(trans t, uvm_tlm_time delay);
 |      #5;
 |      uvm_report_info("consumer", t.convert2string());
 |    endtask

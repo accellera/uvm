@@ -33,11 +33,11 @@ comp:
 run: hw_reset reg_user
 
 hw_reset:
-	$(SIMV) +UVM_TESTNAME=hw_reset_test
+	$(SIMV) +UVM_TESTNAME=cmdline_test +UVM_REG_SEQ=uvm_reg_hw_reset_seq
 	$(CHECK)
 
 reg_user:
-	$(SIMV) +UVM_TESTNAME=reg_user_test
+	$(SIMV) +UVM_TESTNAME=cmdline_test +UVM_REG_SEQ=user_test_seq
 	$(CHECK)
 
 

@@ -35,10 +35,28 @@ import blk_pkg::*;
 `include "blk_testlib.sv"
 
 
-initial begin
-   uvm_report_server svr;
-   svr = _global_reporter.get_report_server();
-   svr.set_max_quit_count(10);
+class dut_reset_seq extends uvm_sequence;
+
+   function new(string name = "dut_reset_seq");
+      super.new(name);
+   endfunction
+
+   `uvm_object_utils(dut_reset_seq)
+   
+   virtual task body();
+      blk_top.rst = 1;
+      repeat (5) @(negedge blk_top.clk);
+      blk_top.rst = 0;
+   endtask
+endclass
+
+
+initial
+begin
+   static blk_env env = new("env");
+
+   uvm_config_db#(apb_vif)::set(env, "apb", "vif", $root.blk_top.apb0);
+
    run_test();
 end
 

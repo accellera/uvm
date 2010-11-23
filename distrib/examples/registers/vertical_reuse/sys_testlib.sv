@@ -22,33 +22,36 @@
 
 import apb_pkg::*;
 
+typedef class dut_reset_seq;
 class sys_R_test extends uvm_test;
 
-   `uvm_component_utils(sys_R_test)
-
    sys_env env;
+
+   `uvm_component_utils(sys_R_test)
 
    function new(string name="sys_R_test", uvm_component parent=null);
       super.new(name, parent);
    endfunction
 
    function void build();
-      apb_config apb_cfg = new;
-      apb_cfg.vif = $root.sys_top.apb0;
-      env = sys_env::type_id::create("sys_env",this);
-      set_config_object("sys_env.apb_agent.*","config",apb_cfg,0);
+      if (env == null)
+         $cast(env, uvm_top.find("env"));
    endfunction
 
    task run();
-      apb_reset_seq reset_seq;
+      uvm_sequence_base reset_seq;
       sys_R_test_seq seq;
 
-      reset_seq = apb_reset_seq::type_id::create("apb_reset_seq",this);
-      reset_seq.start(env.apb.sqr);
+      begin
+         dut_reset_seq rst_seq;
+         rst_seq = dut_reset_seq::type_id::create("rst_seq", this);
+         rst_seq.start(null);
+      end
+      env.model.reset();
 
       seq = sys_R_test_seq::type_id::create("sys_R_test_seq",this);
       seq.model = env.model;
-      seq.start(env.apb.sqr);
+      seq.start(null);
 
       global_stop_request();
    endtask

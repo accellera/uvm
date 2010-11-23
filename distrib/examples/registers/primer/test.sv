@@ -1,6 +1,6 @@
 // 
 // -------------------------------------------------------------
-//    Copyright 2004-2008 Synopsys, Inc.
+//    Copyright 2004-2010 Synopsys, Inc.
 //    Copyright 2010 Mentor Graphics Corp.
 //    Copyright 2010 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
@@ -29,19 +29,33 @@ import apb_pkg::*;
 
 `include "reg_model.sv"
 `include "tb_env.sv"
+`include "testlib.sv"
 
-`include "user_test.sv"
-`include "hw_reset.sv"
+
+class dut_reset_seq extends uvm_sequence;
+
+   function new(string name = "dut_reset_seq");
+      super.new(name);
+   endfunction
+
+   `uvm_object_utils(dut_reset_seq)
+   
+   virtual task body();
+      tb_top.rst = 1;
+      repeat (5) @(negedge tb_top.clk);
+      tb_top.rst = 0;
+   endtask
+endclass
+
 
 initial
 begin
    static tb_env env = new("env");
-   static apb_config apb_cfg = new;
 
-   apb_cfg.vif = $root.tb_top.apb0;
-   set_config_object("env.apb.*","config",apb_cfg,0);
+   uvm_config_db#(apb_vif)::set(env, "apb", "vif", $root.tb_top.apb0);
 
    run_test();
+
 end
 
 endprogram

@@ -23,8 +23,6 @@
 
 class user_test_seq extends uvm_reg_sequence;
 
-   reg_block_slave model;
-
    function new(string name="user_test_seq");
       super.new(name);
    endfunction : new
@@ -35,55 +33,30 @@ class user_test_seq extends uvm_reg_sequence;
    `uvm_object_utils(user_test_seq)
    
    virtual task body();
+      reg_block_slave model;
+
+      $cast(model, this.model);
+      
       // Randomize the content of 10 random indexed registers
       repeat (10) begin
          bit [7:0]         idx = $urandom;
          uvm_reg_data_t    data = $urandom;
          uvm_status_e status;
+
          model.TABLES[idx].write(status, data, .parent(this));
       end
-   endtask : body
-endclass : user_test_seq
-
-
-
-
-class reg_user_test extends uvm_test;
-
-   tb_env env;
-
-   `uvm_component_utils(reg_user_test)
-
-   function new(string name, uvm_component parent);
-      super.new(name, parent);
-   endfunction
-
-   virtual task run();
-      apb_reset_seq reset_seq;
-      user_test_seq seq;
-
-      $cast(env, uvm_top.find("env"));
-      reset_seq = apb_reset_seq::type_id::create("apb_reset_seq",this);
-      reset_seq.start(env.apb.sqr);
-
-      seq = user_test_seq::type_id::create("user_test_seq",this);
-      seq.model = env.model;
-      seq.start(null);
 
       // Find which indexed registers are non-zero
-      foreach (env.model.TABLES[i]) begin
+      foreach (model.TABLES[i]) begin
          uvm_reg_data_t    data;
          uvm_status_e status;
-
-         env.model.TABLES[i].read(status, data);
+         
+         model.TABLES[i].read(status, data);
          if (data != 0) $write("TABLES[%0d] is 0x%h...\n", i, data);
       end
-      
-      global_stop_request();
+   endtask : body
 
-   endtask : run
-
-endclass : reg_user_test
+endclass : user_test_seq
 
 
 

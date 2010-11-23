@@ -27,7 +27,7 @@ class master extends uvm_component;
   uvm_tlm_nb_initiator_socket #(trans, uvm_tlm_phase_e, this_t) initiator_socket;
 
   local uvm_tlm_phase_e state;
-  local time delay_time;
+  local uvm_tlm_time delay_time;
   local trans transaction;
 
   local process fsm_proc;
@@ -54,9 +54,9 @@ class master extends uvm_component;
   // Implementation of nb_transport_bw.  Provides backward path from
   // target back top initiator
   //--------------------------------------------------------------------
-  function uvm_tlm_sync_e nb_transport_bw(ref trans t,
+  function uvm_tlm_sync_e nb_transport_bw(trans t,
                                       ref uvm_tlm_phase_e p,
-                                      ref time delay);
+                                      input uvm_tlm_time delay);
 
     delay_time = delay;
     transaction = t;
@@ -96,7 +96,7 @@ class master extends uvm_component;
   task fsm();
 
     uvm_tlm_phase_e prev_state;
-    time delay;
+    uvm_tlm_time delay = new;
     uvm_tlm_sync_e sync;
     string msg;
 
@@ -113,7 +113,7 @@ class master extends uvm_component;
           // start a new transaction
           begin
             `uvm_info("master", "begin req", UVM_NONE);
-            delay = 0;
+            delay.reset();
             transaction = generate_transaction();
             sync = initiator_socket.nb_transport_fw(transaction, state, delay);
             // we are using the backward path, not the return path,
@@ -123,14 +123,14 @@ class master extends uvm_component;
 
         END_REQ:
           begin
-            #delay_time;
+            #(delay_time.get_realtime(1ns));
             `uvm_info("master", "end req", UVM_NONE);
             wait(state != END_REQ);
           end
 
         BEGIN_RESP:
           begin
-            #delay_time;
+            #(delay_time.get_realtime(1ns));
             $sformat(msg, "begin rsp: %s", transaction.convert2string());
             `uvm_info("master", msg, UVM_NONE);
             state = END_RESP;
@@ -141,7 +141,7 @@ class master extends uvm_component;
           begin
             `uvm_info("master", "end rsp", UVM_NONE);
             #7; // time to complete response
-            delay = 0;
+            delay.reset();
             sync = initiator_socket.nb_transport_fw(transaction, state, delay);
             state = BEGIN_REQ;
             #0;

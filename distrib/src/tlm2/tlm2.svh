@@ -19,6 +19,7 @@
 //----------------------------------------------------------------------
 
   `include "tlm2/tlm2_defines.svh"
+  `include "tlm2/tlm2_time.svh"
   `include "tlm2/tlm2_generic_payload.svh"
   `include "tlm2/tlm2_ifs.svh"
   `include "tlm2/tlm2_imps.svh"

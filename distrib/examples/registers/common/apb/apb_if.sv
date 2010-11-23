@@ -28,7 +28,6 @@
 `timescale 1ns/1ns
 
 interface apb_if(input bit pclk);
-   bit        rst=0;
    wire [31:0] paddr;
    wire        psel;
    wire        penable;
@@ -59,9 +58,9 @@ interface apb_if(input bit pclk);
       input paddr, psel, penable, pwrite, prdata, pwdata;
    endclocking: pck
 
-   modport master(clocking mck, input rst);
-   modport slave(clocking sck, input rst);
-   modport passive(clocking pck, input rst);
+   modport master(clocking mck);
+   modport slave(clocking sck);
+   modport passive(clocking pck);
 
 endinterface: apb_if
 

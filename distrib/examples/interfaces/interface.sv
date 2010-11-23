@@ -1,4 +1,3 @@
-
 //
 //----------------------------------------------------------------------
 //   Copyright 2007-2010 Mentor Graphics Corporation
@@ -81,9 +80,16 @@ endinterface
 
 import uvm_pkg::*;
 
+
+package top_pkg;
+   typedef virtual pin_if pin_vif;
+endpackage
+
+
 package user_pkg;
-import uvm_pkg::*;  
-//----------------------------------------------------------------------
+import uvm_pkg::*;
+import top_pkg::*;
+//---------------------------------------------------------------------
 // component driver
 //----------------------------------------------------------------------
 class driver extends uvm_component;
@@ -94,10 +100,15 @@ class driver extends uvm_component;
     super.new(name, parent);
   endfunction
 
+  function void connect();
+     assert(uvm_resource_db#(pin_vif)::read_by_name(get_full_name(),
+                                                    "pif", pif));
+  endfunction
+
   task run;
     forever begin
       @(posedge pif.clk);
-      uvm_report_info("driver", "posedge clk");
+      `uvm_info("driver", "posedge clk", UVM_NONE);
       //...
     end
   endtask
@@ -112,11 +123,9 @@ class env extends uvm_env;
   local virtual pin_if pif;
   driver d;
 
-  function new(string name, virtual pin_if _p);
-    super.new(name);
-    pif = _p;
+  function new(string name, uvm_component parent = null);
+    super.new(name, parent);
     d = new("driver", this);
-    d.pif = pif;
   endfunction
 
   task run();
@@ -134,7 +143,7 @@ import user_pkg::*;
 module dut(pin_if pif);
 
   always @(posedge pif.clk) begin
-    uvm_report_info("dut", "posedge clk");
+    `uvm_info("dut", "posedge clk", UVM_NONE);
     //...
   end
 endmodule
@@ -157,6 +166,9 @@ endmodule
 // module top
 //----------------------------------------------------------------------
 module top;
+
+  import top_pkg::*;
+
   bit clk;
   clkgen ck(clk);
   pin_if pif(clk);
@@ -165,7 +177,8 @@ module top;
   dut d(pif.slave_mp);
 
   initial begin
-    e = new("env", pif);
+    e = new("env");
+    uvm_resource_db#(pin_vif)::write_and_set("pif", "env.driver", pif);
     run_test();
     //$finish;
   end

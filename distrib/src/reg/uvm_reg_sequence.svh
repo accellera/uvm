@@ -395,13 +395,13 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
 
        foreach (map_info.addr[i]) begin
          if (rw.addr == map_info.addr[i]) begin
+            found = 1;
            reg_item.value[0] |= rw.data << (i * map.get_n_bytes()*8);
            predict_info.addr[rw.addr] = 1;
            if (predict_info.addr.num() == map_info.addr.size()) begin
               // We've captured the entire abstract register transaction.
               uvm_predict_e predict_kind = 
                   (reg_item.kind == UVM_WRITE) ? UVM_PREDICT_WRITE : UVM_PREDICT_READ;
-              found = 1;
               pre_predict(reg_item);
 
               rg.XsampleX(reg_item.value[0], rw.byte_en,

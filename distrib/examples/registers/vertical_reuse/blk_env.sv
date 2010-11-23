@@ -22,7 +22,6 @@
 
 
 import apb_pkg::*;
-import blk_reg_pkg::*;
 
 class blk_env extends uvm_env;
 
@@ -37,15 +36,21 @@ class blk_env extends uvm_env;
 
    virtual function void build();
       super.build();
-      apb = apb_agent::type_id::create("apb_agent",this);
-      model = reg_block_B::type_id::create("reg_blk_B");
-      model.build();
-      model.lock_model();
+
+      if (model == null) begin
+         model = reg_block_B::type_id::create("reg_blk_B");
+         model.build();
+         model.lock_model();
+
+         apb = apb_agent::type_id::create("apb",this);
+      end
    endfunction: build
 
    virtual function void connect();
-      reg2apb_adapter reg2apb = new;
-      model.default_map.set_sequencer(apb.sqr, reg2apb);
+      if (model.get_parent() == null) begin
+         reg2apb_adapter reg2apb = new;
+         model.default_map.set_sequencer(apb.sqr, reg2apb);
+      end
    endfunction
 
 endclass: blk_env

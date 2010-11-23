@@ -22,12 +22,14 @@
 
 
 import apb_pkg::*;
-import sys_reg_pkg::*;
 
 class sys_env extends uvm_env;
 
    `uvm_component_utils(sys_env)
 
+   blk_env blk0;
+   blk_env blk1;
+   
    reg_sys_S model;
    apb_agent apb;
 
@@ -37,15 +39,27 @@ class sys_env extends uvm_env;
 
    virtual function void build();
       super.build();
-      apb = apb_agent::type_id::create("apb_agent",this);
-      model = reg_sys_S::type_id::create("reg_sys_S");
-      model.build();
-      model.lock_model();
+
+      blk0 = blk_env::type_id::create("blk0", this);
+      blk1 = blk_env::type_id::create("blk1", this);
+
+      if (model == null) begin
+         model = reg_sys_S::type_id::create("reg_sys_S",,get_full_name());
+         model.build();
+         model.lock_model();
+      end
+
+      blk0.model = model.B[0];
+      blk1.model = model.B[1];
+      
+      apb = apb_agent::type_id::create("apb",this);
    endfunction: build
 
    virtual function void connect();
-      reg2apb_adapter reg2apb = new;
-      model.default_map.set_sequencer(apb.sqr,reg2apb);
+      if (model.get_parent() == null) begin
+         reg2apb_adapter reg2apb = new;
+         model.default_map.set_sequencer(apb.sqr,reg2apb);
+      end
    endfunction
 
 endclass: sys_env

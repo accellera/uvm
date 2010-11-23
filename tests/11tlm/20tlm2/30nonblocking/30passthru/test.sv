@@ -98,14 +98,14 @@ class connector #(type T=uvm_tlm_generic_payload,
     target_socket = new("target_socket", this, this);
   endfunction
 
-  function uvm_tlm_sync_e nb_transport_fw(ref T t, ref P p, ref time delay);
+  function uvm_tlm_sync_e nb_transport_fw(T t, ref P p, input uvm_tlm_time delay);
     string msg;
     $sformat(msg, "--> %s", t.convert2string());
     `uvm_info("connector", msg, UVM_NONE);
     return initiator_socket.nb_transport_fw(t, p, delay);
   endfunction
 
-  function uvm_tlm_sync_e nb_transport_bw(ref T t, ref P p, ref time delay);
+  function uvm_tlm_sync_e nb_transport_bw(T t, ref P p, input uvm_tlm_time delay);
     string msg;
     $sformat(msg, "<-- %s", t.convert2string());
     `uvm_info("connector", msg, UVM_NONE);
