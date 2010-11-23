@@ -1749,7 +1749,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
        
       `uvm_info(get_type_name(),
          $psprintf("Writing 'h%0h at 'h%0h via map \"%s\"...",
-              data, addrs[i], rw.map.get_full_name()), UVM_HIGH);
+              data, addrs[i], rw.map.get_full_name()), UVM_FULL);
 
       if (rw.element_kind == UVM_FIELD) begin
         for (int z=0;z<bus_width;z++)
@@ -1790,7 +1790,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
 
       `uvm_info(get_type_name(),
          $psprintf("Wrote 'h%0h at 'h%0h via map \"%s\": %s...",
-            data, addrs[i], rw.map.get_full_name(), rw.status.name()), UVM_HIGH)
+            data, addrs[i], rw.map.get_full_name(), rw.status.name()), UVM_FULL)
 
       if (rw.status == UVM_NOT_OK)
          break;
@@ -1866,7 +1866,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
        
       `uvm_info(get_type_name(),
          $psprintf("Reading address 'h%0h via map \"%s\"...",
-                   addrs[i], get_full_name()), UVM_HIGH);
+                   addrs[i], get_full_name()), UVM_FULL);
                 
       if (rw.element_kind == UVM_FIELD)
         for (int z=0;z<bus_width;z++)
@@ -1910,7 +1910,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
          
       `uvm_info(get_type_name(),
          $psprintf("Read 'h%0h at 'h%0h via map \"%s\": %s...", data,
-                   addrs[i], get_full_name(), rw.status.name()), UVM_HIGH);
+                   addrs[i], get_full_name(), rw.status.name()), UVM_FULL);
 
       if (rw.status == UVM_NOT_OK)
          break;

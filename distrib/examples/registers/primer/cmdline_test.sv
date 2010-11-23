@@ -48,7 +48,7 @@ class cmdline_test extends uvm_test;
          uvm_reg_sequence  seq;
          string            seq_name;
 
-         opts.get_arg_value("+UVM_REG_SEQ=", seq_name);
+         void'(opts.get_arg_value("+UVM_REG_SEQ=", seq_name));
          
          if (!$cast(seq, factory.create_object_by_name(seq_name,
                                                        get_full_name(),

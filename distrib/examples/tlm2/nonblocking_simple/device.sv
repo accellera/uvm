@@ -90,7 +90,10 @@ class device extends uvm_component;
                  begin
                     usb_tlm_phase ph = USB_TLM_DATA;
                     #150;
-                    xf.data = '{'hAB, 'hCD};
+		    begin
+			byte tdata[2]='{'hAB, 'hCD};
+                    	xf.data = tdata;
+		    end
                     void'(sock.nb_transport_bw(xf, ph, dl));
                  end
               join_none
