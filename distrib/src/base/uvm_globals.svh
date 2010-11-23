@@ -171,7 +171,7 @@ endfunction
 // used in module-based code to use the same reporting mechanism as class-based
 // components. See <uvm_report_object> for details on the reporting mechanism. 
 //
-// Note: Verbosity is ignored for warnings, errors, and fatals to ensure users
+// *Note:* Verbosity is ignored for warnings, errors, and fatals to ensure users
 // do not inadvertently filter them out. It remains in the methods for backward
 // compatibility.
 
