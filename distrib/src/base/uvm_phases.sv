@@ -732,7 +732,7 @@ class uvm_phase_schedule extends uvm_graph;
   extern function void jump(uvm_phase_imp phase);
 
 
-  // Function: jump
+  // Function: jump_all
   //
   // Make all schedules jump to a specified ~phase~. The jump happens to all
   // phase schedules that contain the jump-to ~phase~, i.e. a global jump. 
