@@ -188,7 +188,21 @@ class reg_block_slave extends uvm_reg_block;
          TABLES[i].configure(this,null,$sformatf("TABLES[%0d]",i));
          TABLES[i].build();
       end
+      // the SV LRM IEEE2009 is not clear if an array of class handles can be assigned to another array if the element types 
+      // are assignment compatible OR if the LRM states the element types have to be 'equal' (the LRM states equal types)
+      // IUS requires per LRM 'equivalent' element types and does not accept assignment compatible types
+`ifdef INCA
+      begin
+      	uvm_reg r[256];
+	foreach(TABLES[i])
+		r[i]=TABLES[i];
+
+	DATA.configure(INDEX, r, this, null);
+      end
+`else
       DATA.configure(INDEX, TABLES, this, null);
+`endif
+     
       DATA.build();
       
       DMA_RAM.configure(this,"");
