@@ -1009,7 +1009,7 @@ function uvm_reg_block::new(string name="", int has_coverage=UVM_NO_COVERAGE);
    hdl_paths_pool = new("hdl_paths");
    this.has_cover = has_coverage;
    // Root block until registered with a parent
-   m_roots[this] = 1;
+   m_roots[this] = 0;
 endfunction: new
 
 
@@ -1148,6 +1148,28 @@ function void uvm_reg_block::lock_model();
       end
 
       Xinit_address_mapsX();
+
+      // Check that root register models have unique names
+
+      // Has this name has been checked before?
+      if (m_roots[this] != 1) begin
+         int n = 0;
+
+         foreach (m_roots[_blk]) begin
+            uvm_reg_block blk = _blk;
+
+            if (blk.get_name() == get_name()) begin
+               m_roots[blk] = 1;
+               n++;
+            end
+         end
+
+         if (n > 1) begin
+            `uvm_error("UVM/REG/DUPLROOT",
+                       $sformatf("There are %0d root register models named \"%s\". This may create confusion when configuring register model components.",
+                                 n, get_name()))
+         end
+      end
    end
 
 endfunction: lock_model
