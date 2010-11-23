@@ -160,9 +160,9 @@ class master extends uvm_component;
   //--------------------------------------------------------------------
   function trans generate_transaction();
 
-    uvm_tlm_addr_t addr;
+    bit [63:0] addr;
     int unsigned length;
-    byte data[];
+    byte unsigned data[];
 
     trans t = new();
     addr = $urandom() & 'hff;

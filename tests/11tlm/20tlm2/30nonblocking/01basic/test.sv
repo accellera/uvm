@@ -75,9 +75,9 @@ class producer extends uvm_component;
   //--------------------------------------------------------------------
   function uvm_tlm_generic_payload generate_transaction();
 
-    uvm_tlm_addr_t addr;
+    bit [63:0] addr;
     int unsigned length;
-    byte data[];
+    byte unsigned data[];
 
     uvm_tlm_generic_payload t = new();
     addr = $urandom() & 'hff;

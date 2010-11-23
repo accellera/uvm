@@ -262,7 +262,6 @@ Group: Index  {
    Variable Index: Variables
    Constant Index: Constants
    Port Index: Ports
-   Typedef Index: Typedefs
    }  # Group: Index
 
 
