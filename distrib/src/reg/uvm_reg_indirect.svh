@@ -78,8 +78,8 @@ class uvm_reg_indirect_data extends uvm_reg;
       m_tbl = reg_a;
 
       // Not testable using pre-defined sequences
-      uvm_resource_db#(int)::write_and_set("NO_REG_TESTS",
-                                           {"REG::", get_full_name()}, 1);
+      uvm_resource_db#(int)::set({"REG::", get_full_name()},
+                                 "NO_REG_TESTS", 1);
 
       // Add a frontdoor to each indirectly-accessed register
       // for every address map this register is in.

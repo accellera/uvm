@@ -41,8 +41,8 @@
 // matches the full name of the memory,
 // the memory is not tested.
 //
-//| uvm_resource_db#(bit)::write_and_set({"REG::",regmodel.blk.mem0.get_full_name()},
-//|                                      "NO_MEM_TESTS", 1, this);
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.mem0.get_full_name()},
+//|                            "NO_MEM_TESTS", 1, this);
 //
 // The walking ones algorithm is performed for each map in which the memory
 // is defined.
@@ -189,8 +189,8 @@ endclass: uvm_mem_single_walk_seq
 // matches the full name of the block,
 // the block is not tested.
 //
-//| uvm_resource_db#(bit)::write_and_set({"REG::",regmodel.blk.get_full_name(),".*"},
-//|                                      "NO_MEM_TESTS", 1, this);
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.get_full_name(),".*"},
+//|                            "NO_MEM_TESTS", 1, this);
 //
 //------------------------------------------------------------------------------
 

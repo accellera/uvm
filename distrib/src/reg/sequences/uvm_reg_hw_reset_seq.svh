@@ -39,8 +39,8 @@
 // matches the full name of the block or register,
 // the block or register is not tested.
 //
-//| uvm_resource_db#(bit)::write_and_set({"REG::",regmodel.blk.get_full_name(),".*"},
-//|                                      "NO_REG_TESTS", 1, this);
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.get_full_name(),".*"},
+//|                            "NO_REG_TESTS", 1, this);
 //
 // This is usually the first test executed on any DUT.
 //

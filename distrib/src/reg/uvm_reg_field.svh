@@ -799,8 +799,8 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    if (has_reset)
       set_reset(reset);
    else
-      uvm_resource_db#(bit)::write_and_set("NO_REG_HW_RESET_TEST",
-                                           {"REG::", get_full_name()}, 1);
+      uvm_resource_db#(bit)::set({"REG::", get_full_name()},
+                                 "NO_REG_HW_RESET_TEST", 1);
 
    m_parent.add_field(this);
 

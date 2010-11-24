@@ -40,8 +40,8 @@ class reg_B_CTL extends uvm_reg;
    virtual function void build();
       CTL = uvm_reg_field::type_id::create("CTL");
       CTL.configure(this, 2, 0, "WO", 0, 2'h0, 1, 0, 1);
-      uvm_resource_db#(bit)::write_and_set("NO_REG_TESTS",
-                                           {"REG::",get_full_name()}, 1);
+      uvm_resource_db#(bit)::set({"REG::",get_full_name()},
+                                 "NO_REG_TESTS", 1);
    endfunction: build
 
    `uvm_object_utils(reg_B_CTL)

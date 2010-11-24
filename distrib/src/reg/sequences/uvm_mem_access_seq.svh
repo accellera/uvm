@@ -38,8 +38,8 @@
 // matches the full name of the memory,
 // the memory is not tested.
 //
-//| uvm_resource_db#(bit)::write_and_set({"REG::",regmodel.blk.mem0.get_full_name()},
-//|                                      "NO_MEM_TESTS", 1, this);
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.mem0.get_full_name()},
+//|                            "NO_MEM_TESTS", 1, this);
 //
 // Memories without an available backdoor
 // cannot be tested.
@@ -190,8 +190,8 @@ endclass: uvm_mem_single_access_seq
 // matches the full name of the block,
 // the block is not tested.
 //
-//| uvm_resource_db#(bit)::write_and_set({"REG::",regmodel.blk.get_full_name(),".*"},
-//|                                      "NO_MEM_TESTS", 1, this);
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.get_full_name(),".*"},
+//|                            "NO_MEM_TESTS", 1, this);
 //
 
 class uvm_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));

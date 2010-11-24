@@ -47,8 +47,8 @@ typedef class uvm_mem_access_seq;
 // matches the full name of the register,
 // the register is not tested.
 //
-//| uvm_resource_db#(bit)::write_and_set({"REG::",regmodel.blk.r0.get_full_name()},
-//|                                      "NO_REG_TESTS", 1, this);
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.r0.get_full_name()},
+//|                            "NO_REG_TESTS", 1, this);
 //
 // Registers without an available backdoor or
 // that contain read-only fields only,
@@ -182,8 +182,8 @@ endclass: uvm_reg_single_access_seq
 // matches the full name of the block,
 // the block is not tested.
 //
-//| uvm_resource_db#(bit)::write_and_set({"REG::",regmodel.blk.get_full_name(),".*"},
-//|                                      "NO_REG_TESTS", 1, this);
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.get_full_name(),".*"},
+//|                            "NO_REG_TESTS", 1, this);
 //
 //------------------------------------------------------------------------------
 
