@@ -23,8 +23,7 @@
 //----------------------------------------------------------------------
 class master extends uvm_component;
 
-  typedef master this_t;
-  uvm_tlm_nb_initiator_socket #(trans, uvm_tlm_phase_e, this_t) initiator_socket;
+  uvm_tlm_nb_initiator_socket #(master, trans) initiator_socket;
 
   local uvm_tlm_phase_e state;
   local uvm_tlm_time delay_time;
@@ -43,7 +42,7 @@ class master extends uvm_component;
   // build
   //--------------------------------------------------------------------
   function void build();
-    initiator_socket = new("initiator_socket", this, this);
+    initiator_socket = new("initiator_socket", this);
     barrier = uvm_pool#(string, uvm_barrier)::get_global("barrier");
     barrier.set_threshold(barrier.get_threshold() + 1);
   endfunction

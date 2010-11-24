@@ -86,8 +86,8 @@ class connector #(type T=uvm_tlm_generic_payload,
 
   typedef connector #(T,P) this_type;
 
-  uvm_tlm_nb_initiator_socket #(T,P,this_type) initiator_socket;
-  uvm_tlm_nb_target_socket #(T,P,this_type) target_socket;
+  uvm_tlm_nb_initiator_socket #(this_type,T,P) initiator_socket;
+  uvm_tlm_nb_target_socket #(this_type,T,P) target_socket;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);

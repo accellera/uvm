@@ -104,7 +104,7 @@ endclass
 //----------------------------------------------------------------------
 class consumer extends uvm_component;
 
-  uvm_tlm_b_target_socket #(trans, consumer) target_socket;
+  uvm_tlm_b_target_socket #(consumer, trans) target_socket;
 
   int unsigned transaction_count;
 

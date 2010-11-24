@@ -24,7 +24,7 @@ import uvm_pkg::*;
 //----------------------------------------------------------------------
 class producer extends uvm_component;
 
-  uvm_tlm_nb_initiator_socket #(uvm_tlm_generic_payload, uvm_tlm_phase_e, producer) initiator_socket;
+  uvm_tlm_nb_initiator_socket #(producer) initiator_socket;
 
   bit done;
 
@@ -35,7 +35,7 @@ class producer extends uvm_component;
   endfunction
 
   function void build();
-    initiator_socket = new("initator_socket", this, this);
+    initiator_socket = new("initator_socket", this);
   endfunction
 
   function uvm_tlm_sync_e nb_transport_bw(uvm_tlm_generic_payload t,
@@ -104,7 +104,7 @@ endclass
 //----------------------------------------------------------------------
 class consumer extends uvm_component;
 
-  uvm_tlm_nb_target_socket #(uvm_tlm_generic_payload, uvm_tlm_phase_e, consumer) target_socket;
+  uvm_tlm_nb_target_socket #(consumer) target_socket;
 
   int unsigned transaction_count;
 
@@ -113,7 +113,7 @@ class consumer extends uvm_component;
   endfunction
 
   function void build();
-    target_socket = new("target_socket", this, this);
+    target_socket = new("target_socket", this);
   endfunction
 
   function uvm_tlm_sync_e nb_transport_fw(uvm_tlm_generic_payload t,

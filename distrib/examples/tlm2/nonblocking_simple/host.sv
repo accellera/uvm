@@ -20,7 +20,7 @@
 
 class host extends uvm_component;
 
-   uvm_tlm_nb_initiator_socket#(usb_xfer, usb_tlm_phase, host) sock;
+   uvm_tlm_nb_initiator_socket#(host, usb_xfer, usb_tlm_phase) sock;
 
    `uvm_component_utils(host)
 

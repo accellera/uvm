@@ -20,7 +20,7 @@
 
 class device extends uvm_component;
 
-   uvm_tlm_nb_target_socket#(usb_xfer, usb_tlm_phase, device) sock;
+   uvm_tlm_nb_target_socket#(device, usb_xfer, usb_tlm_phase) sock;
 
    `uvm_component_utils(device)
 
