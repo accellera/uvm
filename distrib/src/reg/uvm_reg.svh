@@ -52,7 +52,7 @@ virtual class uvm_reg extends uvm_object;
    local int               m_lineno = 0;
    local bit               m_read_in_progress = 0;
    local bit               m_write_in_progress = 0;
-   local bit               m_update_in_progress = 0;
+   protected bit           m_update_in_progress = 0;
    /*local*/ bit           m_is_busy;
    /*local*/ bit           m_is_locked_by_field;
    local uvm_reg_backdoor  m_backdoor;
@@ -2952,7 +2952,7 @@ task uvm_reg::peek(output uvm_status_e      status,
    rw = uvm_reg_item::type_id::create("mem_peek_item",,get_full_name());
    rw.element      = this;
    rw.path         = UVM_BACKDOOR;
-   rw.element_kind = UVM_MEM;
+   rw.element_kind = UVM_REG;
    rw.kind         = UVM_READ;
    rw.bd_kind      = kind;
    rw.parent       = parent;

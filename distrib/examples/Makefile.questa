@@ -1,6 +1,6 @@
 ## 
 ## -------------------------------------------------------------
-##    Copyright 2010 Mentor Graphics Corp.
+##    Copyright 2010 Mentor Graphics Corporation
 ##    All Rights Reserved Worldwide
 ## 
 ##    Licensed under the Apache License, Version 2.0 (the
@@ -19,22 +19,70 @@
 ## -------------------------------------------------------------
 ## 
 
-x: all
 USES_DPI = 1
+
+#---------------------------------------------------------------
+# Define Variables
+#---------------------------------------------------------------
+
 UVM_HOME ?= ..
+UVM_VERBOSITY =	UVM_MEDIUM
 
-TOOL    = $(shell $(UVM_HOME)/bin/uvm_dpi_name -tool)
 
-OS      = $(shell $(UVM_HOME)/bin/uvm_os_name)
-
-SRCDIR  = $(UVM_HOME)/src/dpi
-LIBDIR  = $(shell dirname $(SONAME))
+LIBDIR  = $(UVM_HOME)/lib
 SONAME  = $(shell $(UVM_HOME)/bin/uvm_dpi_name)
+GCC     = $(MTI_HOME)/gcc-4.1.2-linux/bin/g++
+TEST    = /usr/bin/test
+BITS    = 32
 
-CC = $(MTI_HOME)/gcc-4.1.2-linux/bin/g++
-CFLAGS += -shared -fPIC -DQUESTA -I$(MTI_HOME)/include -m32
 
-SRCS    = $(SRCDIR)/uvm_dpi.cc
+GCCCMD =  $(GCC) \
+        -m$(BITS) \
+        -fPIC \
+        -g \
+        -I$(MTI_HOME)/include \
+        $(UVM_HOME)/src/dpi/uvm_dpi.cc \
+        -shared \
+        -o $(LIBDIR)/libuvm_questa.so
+
+GCC_WINCMD = \
+        $(WIN_GCC) -g \
+        -I$(MTI_HOME)/include \
+        $(UVM_HOME)/src/dpi/uvm_dpi.cc \
+        -shared \
+        -Bsymbolic \
+        -o $(LIBDIR)/libuvm_questa_win32.so
+
+VLIB =  vlib work
+
+VLOG =  vlog \
+        -timescale "1ns/1ns" \
+        $(SVLIB_VLOG_OPT) \
+        -mfcu \
+        -suppress 2181 \
+        +acc=rmb \
+        -writetoplevels questa.tops \
+        +incdir+$(UVM_HOME)/src \
+        $(UVM_HOME)/src/uvm_pkg.sv
+
+
+VSIM =  vsim \
+        +UVM_VERBOSITY=$(UVM_VERBOSITY) \
+        $(SVLIB_VSIM_OPT) \
+        -c \
+        -do "run -all; q" \
+        -l questa.log \
+        -f questa.tops
+
+CHECK = \
+	@$(TEST) \( `grep -c 'UVM_ERROR :    0' questa.log` -eq 1 \) -a \
+		 \( `grep -c 'UVM_FATAL :    0' questa.log` -eq 1 \)
+
+#---------------------------------------------------------------
+# If USES_DPI is set, enables compilation and loading of DPI
+# libraries. Enabling DPI adds +acc on command line, which
+# may adversely affect simulator performance.
+#---------------------------------------------------------------
 
 ifeq ($(USES_DPI),1)
   SVLIB_VLOG_OPT = 
@@ -47,68 +95,32 @@ else
 endif
   
 
-
+#---------------------------------------------------------------
+# Define Targets
 #
-# Include file for Questa Makefiles
-#
-
-UVM_VERBOSITY =	UVM_MEDIUM
+# vlog and vsim targets defined in individual examples
+#---------------------------------------------------------------
 
 
-# Note that +acc and +vpi have an adverse impact on performance
-# and should not be used unless necessary.
-#
-# They are used here because they are required by some examples
-# (backdoor register accesses).
-#
-
-
-TEST = /usr/bin/test
-
-VLIB =  vlib work
-
-VLOG =	vlog -timescale "1ns/1ns" \
-        $(SVLIB_VLOG_OPT) \
-	-mfcu \
-        -suppress 2181 \
-	+acc=rmb \
-        -writetoplevels questa.tops \
-	+incdir+$(UVM_HOME)/src \
-        $(UVM_HOME)/src/uvm_pkg.sv
-
-
-VSIM = 	vsim \
-        +UVM_VERBOSITY=$(UVM_VERBOSITY) \
-        $(SVLIB_VSIM_OPT) \
-        -c \
-        -do "run -all; q" \
-        -l questa.log \
-        -f questa.tops
-
-CHECK = \
-	@$(TEST) \( `grep -c 'UVM_ERROR :    0' questa.log` -eq 1 \) -a \
-		 \( `grep -c 'UVM_FATAL :    0' questa.log` -eq 1 \)
-
-
-
-$(SONAME): $(LIBDIR) $(SRCS) 
-	$(CC) $(CFLAGS) -o $(SONAME) $(SRCS)
-	-rm -f $(LIBDIR)/../libuvm_questa.so
-	ln -s $(SONAME) $(LIBDIR)/..
-
-$(LIBDIR):
-	mkdir -p $(LIBDIR)
-
+x: all
 
 prepare: clean vlib $(SVLIB_TARGET)
 
-svlib : $(SONAME)
+
+svlib:
+	mkdir -p $(LIBDIR)
+	$(GCCCMD)
+
+svlib_win:
+	mkdir -p $(LIBDIR)
+	$(WIN_GCCCMD)
+	$(MTI_HOME)/win32/mtipli.dll -lregex
+
 
 vlib: $(SVLIB_TARGET)
 	vlib work
 
 clean:
-	rm -rf *~ work vsim.wlf* *.log $(SONAME) questa.tops transcript *.vstf
+	rm -rf *~ work vsim.wlf* *.log $(LIBDIR)/libuvm_questa* questa.tops transcript *.vstf
 
-distclean realclean allclean squeakyclean: clean
-	rm -rf $(LIBDIR)
+
