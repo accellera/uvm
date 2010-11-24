@@ -50,7 +50,7 @@ class uvm_reg_indirect_data extends uvm_reg;
    function new(string name = "uvm_reg_indirect",
                 int unsigned n_bits,
                 int has_cover);
-      super.new(name,8,UVM_NO_COVERAGE);
+      super.new(name,n_bits,has_cover);
    endfunction: new
 
    virtual function void build();

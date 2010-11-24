@@ -71,7 +71,7 @@ class my_test extends tb_env;
       uvm_reg_data_t data;
       uvm_reg_data_t expected[];
       int max;
-      uvm_reg_fifo #(8,32) FIFO;
+      fifo_reg FIFO;
 
 
       `uvm_info("Test", "Resetting DUT and Register Model...", UVM_LOW)
@@ -83,7 +83,7 @@ class my_test extends tb_env;
       regmodel.reset();
 
       FIFO = regmodel.FIFO;
-      max = regmodel.FIFO.capacity();
+      max = FIFO.capacity();
 
       FIFO.set_compare(UVM_CHECK);
 
