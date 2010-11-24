@@ -57,9 +57,6 @@ virtual class uvm_reg_block extends uvm_object;
 
    local bit            locked;
 
-   local string         attributes[string];
-   local string         constr[$];
-
    local int            has_cover;
    local int            cover_on;
    local string         fname = "";
@@ -464,65 +461,6 @@ virtual class uvm_reg_block extends uvm_object;
    extern virtual function uvm_vreg_field get_vfield_by_name (string name);
 
 
-   //------------------
-   // Group: Attributes
-   //------------------
-
-
-   // Function: set_attribute
-   //
-   // Set an attribute.
-   //
-   // Set the specified attribute to the specified value for this block.
-   // If the value is specified as "", the specified attribute is deleted.
-   // A warning is issued if an existing attribute is modified.
-   // 
-   // Attribute names are case sensitive. 
-   //
-   extern virtual function void set_attribute(string name,
-                                              string value);
-
-   
-   // Function: has_attribute
-   //
-   // Returns TRUE if attribute exists.
-   //
-   // See <get_attribute> for details on ~inherited~ argument.
-   //
-   extern virtual function bit has_attribute(string name, bit inherited = 1);
-   
-
-   // Function: get_attribute
-   //
-   // Get an attribute value.
-   //
-   // Get the value of the specified attribute for this block.
-   // If the attribute does not exists, "" is returned.
-   // If ~inherited~ is specifed as TRUE, the value of the attribute
-   // is inherited from the nearest block ancestor
-   // for which the attribute
-   // is set if it is not specified for this block.
-   // If ~inherited~ is specified as FALSE, the value "" is returned
-   // if it does not exists in the this block.
-   // 
-   // Attribute names are case sensitive.
-   // 
-   extern virtual function string get_attribute(string name,
-                                                bit inherited = 1);
-
-
-   // Function: get_attributes
-   //
-   // Get all attribute values.
-   //
-   // Get the name of all attribute for this block.
-   // If ~inherited~ is specifed as TRUE, the value for all attributes
-   // inherited from all block ancestors are included.
-   // 
-   extern virtual function void get_attributes(ref string names[string],
-                                                   input bit inherited = 1);
-
-   
    //----------------
    // Group: Coverage
    //----------------
@@ -1181,14 +1119,10 @@ endfunction: lock_model
 //--------------------------
 
 function string uvm_reg_block::get_full_name();
-   uvm_reg_block parent;
-
-   get_full_name = this.get_name();
-
    if (parent == null)
-     return get_full_name;
+     return get_name();
 
-   get_full_name = {parent.get_full_name(), ".", get_full_name};
+   return {parent.get_full_name(), ".", get_name()};
 
 endfunction: get_full_name
 
@@ -1619,86 +1553,6 @@ function bit uvm_reg_block::get_coverage(uvm_reg_cvr_t is_on = UVM_CVR_ALL);
    if (this.has_coverage(is_on) == 0) return 0;
    return ((this.cover_on & is_on) == is_on);
 endfunction: get_coverage
-
-
-//-----------
-// Attributes
-//-----------
-
-// set_attribute
-
-function void uvm_reg_block::set_attribute(string name,
-                                           string value);
-   if (name == "") begin
-      `uvm_error("RegModel", {"Cannot set anonymous attribute \"\" in block '",
-                         get_full_name(),"'"})
-      return;
-   end
-
-   if (this.attributes.exists(name)) begin
-      if (value != "") begin
-         `uvm_warning("RegModel", {"Redefining attribute '",name,"' in block '",
-                         get_full_name(),"' to '",value,"'"})
-         this.attributes[name] = value;
-      end
-      else begin
-         this.attributes.delete(name);
-      end
-      return;
-   end
-
-   if (value == "") begin
-      `uvm_warning("RegModel", {"Attempting to delete non-existent attribute '",
-                          name, "' in block '", get_full_name(), "'"})
-      return;
-   end
-
-   this.attributes[name] = value;
-
-endfunction: set_attribute
-
-
-// has_attribute
-
-function bit uvm_reg_block::has_attribute(string name, bit inherited = 1);
-   if (attributes.exists(name))
-      return 1;
-
-   if (inherited && parent != null)
-      if (parent.get_attribute(name,1) != "")
-        return 1;
-
-   return 0;
-endfunction
-
-
-// get_attribute
-
-function string uvm_reg_block::get_attribute(string name, bit inherited = 1);
-
-   if (inherited && parent != null)
-      get_attribute = parent.get_attribute(name);
-
-   if (get_attribute == "" && this.attributes.exists(name))
-      return this.attributes[name];
-
-   return "";
-endfunction
-
-
-// get_attributes
-
-function void uvm_reg_block::get_attributes(ref string names[string],
-                                            input bit inherited = 1);
-   // attributes at higher levels supercede those at lower levels
-   if (inherited && parent != null)
-     parent.get_attributes(names,1);
-
-   foreach (attributes[nm])
-     if (!names.exists(nm))
-       names[nm] = attributes[nm];
-
-endfunction: get_attributes
 
 
 //----------------
