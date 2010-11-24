@@ -65,12 +65,12 @@
 // of the queue.
 //
 // The classes defined here form the low level layer of the resource
-// database.  The clases includ the resource container and the database
+// database.  The classes include the resource container and the database
 // that holds the containers.  The following set of classes are defined
 // here:
 //
 // <uvm_resource_types>: A class without methods or members, only
-// typedefs and enums. These types and enums ware used throughout the
+// typedefs and enums. These types and enums are used throughout the
 // resources facility.  Putting the types in a class keeps them confined
 // to a specific name space.
 //

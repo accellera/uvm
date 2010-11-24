@@ -236,7 +236,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   
   // Group: Change Message State
 
-  // Funciton: set_severity
+  // Function: set_severity
   //
   // Change the severity of the message to ~severity~. Any other
   // report catchers will see the modified value.

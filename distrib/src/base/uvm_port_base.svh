@@ -53,7 +53,7 @@ virtual class uvm_port_component_base extends uvm_component;
     super.new(name,parent);
   endfunction
 
-  // Function: get_provided_to
+  // Function: get_connected_to
   //
   // For a port or export type, this function fills ~list~ with all
   // of the ports, exports and implementations that this port is
@@ -70,15 +70,19 @@ virtual class uvm_port_component_base extends uvm_component;
   pure virtual function void get_provided_to(ref uvm_port_list list);
 
   // Function: is_port
+  //
+  pure virtual function bit is_port();
+
   // Function: is_export
+  //
+  pure virtual function bit is_export();
+
   // Function: is_imp
   //
   // These function determine the type of port. The functions are
   // mutually exclusive; one will return 1 and the other two will
   // return 0.
 
-  pure virtual function bit is_port();
-  pure virtual function bit is_export();
   pure virtual function bit is_imp();
 
   // Turn off auto config by not calling build()

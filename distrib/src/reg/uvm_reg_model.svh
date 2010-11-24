@@ -569,6 +569,7 @@ typedef struct packed {
 `include "reg/uvm_vreg_field.svh"
 `include "reg/uvm_reg.svh"
 `include "reg/uvm_reg_indirect.svh"
+`include "reg/uvm_reg_fifo.svh"
 `include "reg/uvm_reg_file.svh"
 `include "reg/uvm_mem_mam.svh"
 `include "reg/uvm_vreg.svh"
