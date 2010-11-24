@@ -70,8 +70,6 @@ class uvm_reg_map extends uvm_object;
    local uvm_reg_map_info   m_regs_info[uvm_reg];
    local uvm_reg_map_info   m_mems_info[uvm_mem];
 
-   local string             m_attributes[string];
-
    local uvm_reg            m_regs_by_offset[uvm_reg_addr_t];
                             // Use only in addition to above if a RO and a WO
                             // register share the same address.
@@ -538,61 +536,6 @@ class uvm_reg_map extends uvm_object;
                                         output int size,
                                         output int lsb,
                                         output int addr_skip);
-
-   //------------------
-   // Group: Attributes
-   //------------------
-
-   // Function: set_attribute
-   //
-   // Set an attribute.
-   //
-   // Set the specified attribute to the specified value for this address map.
-   // If the value is specified as "", the specified attribute is deleted.
-   // A warning is issued if an existing attribute is modified.
-   // 
-   // Attribute names are case sensitive. 
-   //
-   extern virtual function void set_attribute(string name, string value);
-
-
-   // Function: has_attribute
-   //
-   // Returns TRUE if attribute exists.
-   //
-   // See <get_attribute> for details on ~inherited~ argument.
-   //
-   extern virtual function bit has_attribute(string name, bit inherited = 1);
-   
-   
-   // Function: get_attribute
-   //
-   // Get an attribute value.
-   //
-   // Get the value of the specified attribute for this address map.
-   // If the attribute does not exists, "" is returned.
-   // If ~inherited~ is specifed as TRUE, the value of the attribute
-   // is inherited from the nearest block ancestor for which the attribute
-   // is set if it is not specified for this address map.
-   // If ~inherited~ is specified as FALSE, the value "" is returned
-   // if it does not exists in the this address map.
-   // 
-   // Attribute names are case sensitive.
-   // 
-   extern virtual function string get_attribute(string name, bit inherited = 1);
-
-
-   // Function: get_attributes
-   //
-   // Get all attribute values.
-   //
-   // Get the value for all attribute for this address map.
-   // If ~inherited~ is specifed as TRUE, the value for all attributes
-   // inherited from all block ancestors are included.
-   // 
-   extern virtual function void get_attributes(ref string names[string],
-                                               input bit inherited=1);
-
 
    extern virtual function string      convert2string();
    extern virtual function uvm_object  clone();
@@ -1929,85 +1872,6 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
   end
 
 endtask: do_bus_read
-
-
-
-//-----------
-// Attributes
-//-----------
-
-// set_attribute
-
-function void uvm_reg_map::set_attribute(string name, string value);
-
-   if (name == "") begin
-      `uvm_error("RegModel", {"Cannot set attribute with empty name for map ",
-         get_full_name(),"'."})
-      return;
-   end
-
-   if (m_attributes.exists(name)) begin
-      if (value != "") begin
-         `uvm_warning("RegModel", {"Redefining attribute '",
-            name,"' in map '",get_full_name(),"' to '",value,"'"})
-         m_attributes[name] = value;
-      end
-      else begin
-         m_attributes.delete(name);
-      end
-      return;
-   end
-
-   if (value == "") begin
-      `uvm_warning("RegModel", {"Attempting to delete non-existent attribute '",
-          name,"' in map '",get_full_name(),"'"})
-      return;
-   end
-
-   m_attributes[name] = value;
-
-endfunction: set_attribute
-
-
-// has_attribute
-
-function bit uvm_reg_map::has_attribute(string name, bit inherited = 1);
-   if (m_attributes.exists(name))
-      return 1;
-
-   if (inherited && m_parent != null)
-      if (m_parent.get_attribute(name,1) != "")
-        return 1;
-
-   return 0;
-endfunction
-
-
-// get_attribute
-
-function string uvm_reg_map::get_attribute(string name, bit inherited = 1);
-
-   if (inherited && m_parent_map != null)
-      get_attribute = m_parent_map.get_attribute(name);
-
-   if (get_attribute == "" && m_attributes.exists(name))
-      return m_attributes[name];
-
-   return "";
-endfunction: get_attribute
-
-
-// get_attributes
-
-function void uvm_reg_map::get_attributes(ref string names[string],
-                                          input bit inherited = 1);
-   if (inherited && m_parent_map != null)
-     m_parent_map.get_attributes(names,1);
-
-   foreach (m_attributes[nm])
-     if (!names.exists(nm))
-       names[nm] = m_attributes[nm];
-endfunction
 
 
 

@@ -32,6 +32,15 @@
 // then reading it via the backdoor, then reversing the process,
 // making sure that the resulting value matches the written value.
 //
+// If bit-type resource named
+// "NO_REG_TESTS", "NO_MEM_TESTS", or "NO_MEM_ACCESS_TEST"
+// in the "REG::" namespace
+// matches the full name of the memory,
+// the memory is not tested.
+//
+//| uvm_resource_db#(bit)::write_and_set({"REG::",regmodel.blk.mem0.get_full_name()},
+//|                                      "NO_MEM_TESTS", 1, this);
+//
 // Memories without an available backdoor
 // cannot be tested.
 //
@@ -63,9 +72,13 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
       end
 
       // Memories with some attributes are not to be tested
-      if (mem.has_attribute("NO_REG_TESTS") ||
-          mem.has_attribute("NO_MEM_TESTS") ||
-	  mem.has_attribute("NO_MEM_ACCESS_TEST")) return;
+      if (uvm_resource_db#(bit)::get_by_name({"REG::",mem.get_full_name()},
+                                             "NO_REG_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",mem.get_full_name()},
+                                             "NO_MEM_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",mem.get_full_name()},
+                                             "NO_MEM_ACCESS_TEST", 0) != null)
+         return;
 
       // Can only deal with memories with backdoor access
       if (mem.get_backdoor() == null && !mem.has_hdl_path()) begin
@@ -171,8 +184,14 @@ endclass: uvm_mem_single_access_seq
 // by executing the <uvm_mem_single_access_seq> sequence on
 // every memory within it.
 //
-// Blocks and memories with the ~NO_REG_TESTS~ or
-// the ~NO_MEM_ACCESS_TEST~ attribute are not verified.
+// If bit-type resource named
+// "NO_REG_TESTS", "NO_MEM_TESTS", or "NO_MEM_ACCESS_TEST"
+// in the "REG::" namespace
+// matches the full name of the block,
+// the block is not tested.
+//
+//| uvm_resource_db#(bit)::write_and_set({"REG::",regmodel.blk.get_full_name(),".*"},
+//|                                      "NO_MEM_TESTS", 1, this);
 //
 
 class uvm_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
@@ -226,18 +245,24 @@ class uvm_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item)
    protected virtual task do_block(uvm_reg_block blk);
       uvm_mem mems[$];
       
-      if (blk.has_attribute("NO_REG_TESTS") ||
-          blk.has_attribute("NO_MEM_TESTS") ||
-          blk.has_attribute("NO_MEM_ACCESS_TEST"))
+      if (uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_REG_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_MEM_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_MEM_ACCESS_TEST", 0) != null )
          return;
       
       // Iterate over all memories, checking accesses
       blk.get_memories(mems, UVM_NO_HIER);
       foreach (mems[i]) begin
          // Registers with some attributes are not to be tested
-         if (mems[i].has_attribute("NO_REG_TESTS") ||
-             mems[i].has_attribute("NO_MEM_TESTS") ||
-	     mems[i].has_attribute("NO_MEM_ACCESS_TEST"))
+         if (uvm_resource_db#(bit)::get_by_name({"REG::",mems[i].get_full_name()},
+                                                "NO_REG_TESTS", 0) != null ||
+             uvm_resource_db#(bit)::get_by_name({"REG::",mems[i].get_full_name()},
+                                                "NO_MEM_TESTS", 0) != null ||
+	     uvm_resource_db#(bit)::get_by_name({"REG::",mems[i].get_full_name()},
+                                                "NO_MEM_ACCESS_TEST", 0) != null )
            continue;
          
          // Can only deal with memories with backdoor access

@@ -77,8 +77,8 @@ class producer extends uvm_component;
   //--------------------------------------------------------------------
   function trans generate_transaction();
 
-    uvm_tlm_addr_t addr;
-    byte data[];
+    bit [63:0] addr;
+    byte unsigned data[];
     int length;
 
     trans t = new();

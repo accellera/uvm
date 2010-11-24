@@ -63,7 +63,7 @@ class uvm_resource_db #(type T=uvm_object);
   endfunction
 
   // function: get_by_name
-
+  //
   // Imports a resource by ~name~.  The first argument is the ~name~ of the
   // resource to be retrieved and the second argument is the current
   // ~scope~. The ~rpterr~ flag indicates whether or not to generate

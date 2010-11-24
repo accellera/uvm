@@ -50,7 +50,6 @@ class uvm_mem extends uvm_object;
    local bit               m_maps[uvm_reg_map];
    local int unsigned      m_n_bits;
    local uvm_reg_backdoor  m_backdoor;
-   local string            m_attributes[string];
    local bit               m_is_powered_down;
    local int               m_has_cover;
    local int               m_cover_on;
@@ -387,64 +386,6 @@ class uvm_mem extends uvm_object;
    extern virtual function int get_addresses(uvm_reg_addr_t     offset = 0,
                                              uvm_reg_map        map=null,
                                              ref uvm_reg_addr_t addr[]);
-
-
-   //------------------
-   // Group: Attributes
-   //------------------
-
-   // Function: set_attribute
-   //
-   // Set an attribute.
-   //
-   // Set the specified attribute to the specified value for this memory.
-   // If the value is specified as "", the specified attribute is deleted.
-   // A warning is issued if an existing attribute is modified.
-   // 
-   // Attribute names are case sensitive. 
-   //
-   extern virtual function void set_attribute(string name,
-                                              string value);
-
-
-   // Function: has_attribute
-   //
-   // Returns TRUE if attribute exists.
-   //
-   // See <get_attribute> for details on ~inherited~ argument.
-   //
-   extern virtual function bit has_attribute(string name, bit inherited = 1);
-   
-   
-   // Function: get_attribute
-   //
-   // Get an attribute value.
-   //
-   // Get the value of the specified attribute for this memory.
-   // If the attribute does not exists, "" is returned.
-   // If ~inherited~ is specifed as TRUE, the value of the attribute
-   // is inherited from the nearest block ancestor
-   // for which the attribute
-   // is set if it is not specified for this memory.
-   // If ~inherited~ is specified as FALSE, the value "" is returned
-   // if it does not exists in the this memory.
-   // 
-   // Attribute names are case sensitive.
-   // 
-   extern virtual function string get_attribute(string name,
-                                                bit inherited = 1);
-
-
-   // Function: get_attributes
-   //
-   // Get all attribute values.
-   //
-   // Get the name of all attribute for this memory.
-   // If ~inherited~ is specifed as TRUE, the value for all attributes
-   // inherited from all block ancestors are included.
-   // 
-   extern virtual function void get_attributes(ref string names[string],
-                                               input bit inherited = 1);
 
 
    //------------------
@@ -1088,20 +1029,10 @@ endfunction: Xlock_modelX
 // get_full_name
 
 function string uvm_mem::get_full_name();
-   uvm_reg_block blk;
-
-   get_full_name = get_name();
-
-   // Do not include top-level name in full name
-   blk = get_block();
-
-   if (blk == null)
-     return get_full_name;
-
-   if (blk.get_parent() == null)
-     return get_full_name;
-
-   get_full_name = {m_parent.get_full_name(), ".", get_full_name};
+   if (m_parent == null)
+      return get_name();
+   
+   return {m_parent.get_full_name(), ".", get_name()};
 
 endfunction: get_full_name
 
@@ -1437,86 +1368,6 @@ function int unsigned uvm_mem::get_n_bytes();
    return (m_n_bits - 1) / 8 + 1;
 endfunction: get_n_bytes
 
-
-
-
-//-----------
-// ATTRIBUTES
-//-----------
-
-// set_attribute
-
-function void uvm_mem::set_attribute(string name,
-                                     string value);
-   if (name == "") begin
-      `uvm_error("RegModel", {"Cannot set anonymous attribute \"\" in memory '",
-                         get_full_name(),"'"})
-      return;
-   end
-
-   if (m_attributes.exists(name)) begin
-      if (value != "") begin
-         `uvm_warning("RegModel", {"Redefining attribute '",name,"' in memory '",
-                         get_full_name(),"' to '",value,"'"})
-         m_attributes[name] = value;
-      end
-      else begin
-         m_attributes.delete(name);
-      end
-      return;
-   end
-
-   if (value == "") begin
-      `uvm_warning("RegModel", {"Attempting to delete non-existent attribute '",
-                          name, "' in memory '", get_full_name(), "'"})
-      return;
-   end
-
-   m_attributes[name] = value;
-endfunction: set_attribute
-
-
-// has_attribute
-
-function bit uvm_mem::has_attribute(string name, bit inherited = 1);
-   if (m_attributes.exists(name))
-      return 1;
-
-   if (inherited && m_parent != null)
-      if (m_parent.get_attribute(name,1) != "")
-        return 1;
-
-   return 0;
-endfunction
-
-
-// get_attribute
-
-function string uvm_mem::get_attribute(string name,
-                                       bit inherited = 1);
-   if (inherited && m_parent != null)
-      get_attribute = m_parent.get_attribute(name,1);
-
-   if (get_attribute == "" && m_attributes.exists(name))
-      return m_attributes[name];
-
-   return "";
-endfunction: get_attribute
-
-
-// get_attributes
-
-function void uvm_mem::get_attributes(ref string names[string],
-                                      input bit inherited = 1);
-   // attributes at higher levels supercede those at lower levels
-   if (inherited && m_parent != null)
-     m_parent.get_attributes(names,1);
-
-   foreach (m_attributes[nm])
-     if (!names.exists(nm))
-       names[nm] = m_attributes[nm];
-
-endfunction: get_attributes
 
 
 
