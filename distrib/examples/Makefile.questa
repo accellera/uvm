@@ -20,7 +20,7 @@
 ## 
 
 x: all
-
+USES_DPI = 1
 UVM_HOME ?= ..
 
 TOOL    = $(shell $(UVM_HOME)/bin/uvm_dpi_name -tool)

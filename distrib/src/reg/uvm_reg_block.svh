@@ -1021,8 +1021,8 @@ function void uvm_reg_block::configure(uvm_reg_block parent=null, string hdl_pat
     this.parent.add_block(this);
   add_hdl_path(hdl_path);
 
-  uvm_resource_db#(uvm_reg_block)::write_and_set(get_full_name(),
-                                                 "uvm_reg::*", this);
+  uvm_resource_db#(uvm_reg_block)::set(get_full_name(),
+                                       "uvm_reg::*", this);
 endfunction
 
 

@@ -2002,9 +2002,9 @@ endfunction: get_attributes
 function void uvm_reg::include_coverage(string scope,
                                         uvm_reg_cvr_t models,
                                         uvm_object accessor = null);
-   uvm_reg_cvr_rsrc_db::write_and_set("include_coverage",
-                                      {"uvm_reg::", scope},
-                                      models, accessor);
+   uvm_reg_cvr_rsrc_db::set("include_coverage",
+                            {"uvm_reg::", scope},
+                            models, accessor);
 endfunction
 
 
