@@ -299,7 +299,7 @@ class uvm_reg_fifo extends uvm_reg;
       if (m_set_cnt == 0) begin
         uvm_reg_map system_map = rw.map.get_root_map();
         if (rw.map.get_auto_predict())
-          fifo.push_back(value);
+          fifo.push_back(rw.value[0]);
       end
     endtask
 
@@ -332,7 +332,7 @@ class uvm_reg_fifo extends uvm_reg;
       uvm_reg_map system_map = rw.map.get_root_map();
       if (rw.map.get_auto_predict()) begin
         uvm_reg_data_t mirror_val = fifo.pop_front();
-        if (mirror_val != rw.value) begin
+        if (mirror_val != rw.value[0]) begin
           `uvm_warning("MIRROR_MISMATCH",
              $sformatf("DUT read value 'h%0h != mirror value 'h%0h",rw.value[0],mirror_val))
         end
