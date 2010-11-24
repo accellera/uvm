@@ -88,7 +88,10 @@ class host extends uvm_component;
          end
 
          ph = USB_TLM_DATA;
-         xfer.data = '{'hDE, 'hAD, 'hBE, 'hEF};
+	 begin
+		 byte tdata[4]='{'hDE, 'hAD, 'hBE, 'hEF};
+	         xfer.data = tdata;
+	 end
          sync = sock.nb_transport_fw(xfer, ph, delay);
          if (sync == UVM_TLM_COMPLETED) begin
             `uvm_info("USB/HST/OUT/EARLY", "Device completed OUT transfer early",

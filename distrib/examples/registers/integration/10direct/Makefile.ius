@@ -30,6 +30,6 @@ run: hw_reset
 
 hw_reset:
 	$(IUS)	-incdir ../common \
-		-incdir ../common/apb \
+		-incdir ../../common/apb \
 		../common/test.sv +UVM_TESTNAME=hw_reset_test
 	$(CHECK)

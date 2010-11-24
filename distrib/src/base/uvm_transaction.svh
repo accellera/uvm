@@ -305,17 +305,22 @@ virtual class uvm_transaction extends uvm_object;
        
   // Variable: events
   //
-  // 
+  // The event pool instance for this transaction.
+
   const uvm_event_pool events = new;
 
   // Variable: begin_event
   //
-  //
+  // The event that is triggered when transaction recording for this transaction
+  // begins.
+
   uvm_event begin_event;
 
   // Variable: end_event
   //
-  //
+  // The event that is triggered when transaction recording for this transaction
+  // ends.
+  
   uvm_event end_event;
 
   //----------------------------------------------------------------------------
