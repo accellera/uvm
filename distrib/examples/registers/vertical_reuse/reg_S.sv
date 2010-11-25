@@ -18,8 +18,8 @@ class reg_sys_S extends uvm_reg_block;
 
     foreach (B[i]) begin
       B[i] = reg_block_B::type_id::create($psprintf("B[%0d]", i));
-      B[i].build();
       B[i].configure(this);
+      B[i].build();
       default_map.add_submap(this.B[i].default_map, 'h100 + i*'h100);
     end
   endfunction : build

@@ -42,12 +42,12 @@ class reg_block_B extends uvm_reg_block;
       this.X = reg_reg_R::type_id::create("X");
       this.W = reg_reg_R::type_id::create("W");
 
-      this.A.build();
       this.A.configure(this, null);
-      this.X.build();
+      this.A.build();
       this.X.configure(this, null);
-      this.W.build();
+      this.X.build();
       this.W.configure(this, null);
+      this.W.build();
 
       APB.add_reg(A, 'h0,  "RW");
       APB.add_reg(X, 'h10, "RW");

@@ -44,8 +44,8 @@ class reg_block_B extends uvm_reg_block;
 
    virtual function void build();
         FIFO = fifo_reg::type_id::create("FIFO");
-        FIFO.build();
         FIFO.configure(this, null);
+        FIFO.build();
 
         default_map = create_map("default_map", 'h0, 4, UVM_LITTLE_ENDIAN);
         default_map.add_reg(FIFO, 'h0, "RW");
