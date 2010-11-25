@@ -298,7 +298,7 @@ class uvm_reg_fifo extends uvm_reg;
     task post_write(uvm_reg_item rw);
       if (m_set_cnt == 0) begin
         uvm_reg_map system_map = rw.map.get_root_map();
-        if (rw.map.get_auto_predict())
+        if (system_map.get_auto_predict())
           fifo.push_back(rw.value[0]);
       end
     endtask
