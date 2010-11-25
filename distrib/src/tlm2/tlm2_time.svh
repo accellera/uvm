@@ -24,6 +24,9 @@
 // form that can bridge initiators and targets located in different
 // timescales and time precisions.
 //
+// For a detailed explanation of the purpose for this class,
+// see <Why is this necessary>.
+//
 class uvm_tlm_time;
 
    static local real m_resolution = 1.0e-12; // ps by default
@@ -42,7 +45,7 @@ class uvm_tlm_time;
    // By default, the default resolution is 1.0e-12 (ps)
    //
    static function void set_time_resolution(real res);
-      // ToDo: Check that it is a power of 10
+      // Actually, it does not *really* need to be a power of 10.
       m_resolution = res;
    endfunction
 
@@ -76,10 +79,11 @@ class uvm_tlm_time;
    endfunction
    
 
-   // Scale a timescaled value to 'm_res' units
-   local function real to_m_res(real t, time ns);
+   // Scale a timescaled value to 'm_res' units,
+   // the the specified scale
+   local function real to_m_res(real t, time scaled, real secs);
       // ToDo: Check resolution
-      return t/real'(ns) * (1.0e-9/m_res);
+      return t/real'(scaled) * (secs/m_res);
    endfunction
    
    
@@ -87,52 +91,69 @@ class uvm_tlm_time;
    // Return the current canonical time value,
    // scaled for the caller's timescale
    //
-   // ~ns~ MUST be 1ns to specify the timescale of the
-   // caller's scope.
+   // ~scaled~ must be a time literal value that corresponds
+   // to the number of seconds specified in ~secs~ (1ns by default).
+   // It must be a time literal value that is greater or equal
+   // to the current timescale.
    //
    //| #(delay.get_realtime(1ns));
+   //| #(delay.get_realtime(1fs, 1.0e-15));
    //
-   function real get_realtime(time ns);
-      return m_time*real'(ns) * m_res/1.0e-9;
+   function real get_realtime(time scaled, real secs = 1.0e-9);
+      return m_time*real'(scaled) * m_res/secs;
    endfunction
    
 
    // Function: incr
    // Increment the time value by the specified number of scaled time unit
    //
-   // ~t~ is a time value expressed in the scale
+   // ~t~ is a time value expressed in the scale and precision
    // of the caller.
-   // ~ns~ MUST be 1ns to specify the timescale of the
-   // caller's scope.
+   // ~scaled~ must be a time literal value that corresponds
+   // to the number of seconds specified in ~secs~ (1ns by default).
+   // It must be a time literal value that is greater or equal
+   // to the current timescale.
    //
    //| delay.incr(1.5ns, 1ns);
+   //| delay.incr(1.5ns, 1ps, 1.0e-12);
    //
-   function void incr(real t, time ns);
+   function void incr(real t, time scaled, real secs = 1.0e-9);
       if (t < 0.0) begin
          `uvm_error("UVM/TLM/TIMENEG", {"Cannot increment uvm_tlm_time variable ", m_name, " by a negative value"});
          return;
       end
-      m_time += to_m_res(t, ns);
+      if (scaled == 0) begin
+         `uvm_fatal("UVM/TLM/BADSCALE",
+                    "uvm_tlm_time::incr() called with a scaled time literal that is smaller than the current timescale")
+      end
+
+      m_time += to_m_res(t, scaled, secs);
    endfunction
 
 
    // Function: decr
    // Decrement the time value by the specified number of scaled time unit
    //  
-   // ~t~ is a time value expressed in the scale
+   // ~t~ is a time value expressed in the scale and precision
    // of the caller.
-   // ~ns~ MUST be 1ns to specify the timescale of the
-   // caller's scope.
+   // ~scaled~ must be a time literal value that corresponds
+   // to the number of seconds specified in ~secs~ (1ns by default).
+   // It must be a time literal value that is greater or equal
+   // to the current timescale.
    //
    //| delay.decr(200ps, 1ns);
    //
-   function void decr(real t, time ns);
+   function void decr(real t, time scaled, real secs);
       if (t < 0.0) begin
          `uvm_error("UVM/TLM/TIMENEG", {"Cannot decrement uvm_tlm_time variable ", m_name, " by a negative value"});
          return;
       end
+      if (scaled == 0) begin
+         `uvm_fatal("UVM/TLM/BADSCALE",
+                    "uvm_tlm_time::decr() called with a scaled time literal that is smaller than the current timescale")
+      end
       
-      m_time -= to_m_res(t, ns);
+      m_time -= to_m_res(t, scaled, secs);
 
       if (m_time < 0.0) begin
          `uvm_error("UVM/TLM/TOODECR", {"Cannot decrement uvm_tlm_time variable ", m_name, " to a negative value"});
@@ -140,3 +161,141 @@ class uvm_tlm_time;
       end
    endfunction
 endclass
+
+
+// Group: Why is this necessary
+//
+// Integers are not sufficient, on their own,
+// to represent time without any ambiguity:
+// you need to know the scale of that integer value.
+// That scale is information conveyed outside of that integer.
+// In SystemVerilog, it is based on the timescale
+// that was active when the code was compiled.
+// SystemVerilog properly scales time literals, but not integer values.
+// That's because it does not know the difference between an integer
+// that carries an integer value and an integer that carries a time value.
+// The 'time' variables are simply 64-bit integers,
+// they are not scaled back and forth to the underlying precision.
+//
+//| `timescale 1ns/1ps
+//| 
+//| module m();
+//| 
+//| time t;
+//| 
+//| initial
+//| begin
+//|    #1.5;
+//|    $write("T=%f ns (1.5)\n", $realtime());
+//|    t = 1.5;
+//|    #t;
+//|    $write("T=%f ns (3.0)\n", $realtime());
+//|    #10ps;
+//|    $write("T=%f ns (3.010)\n", $realtime());
+//|    t = 10ps;
+//|    #t;
+//|    $write("T=%f ns (3.020)\n", $realtime());
+//| end
+//| endmodule
+//
+// yields
+//
+//| T=1.500000 ns (1.5)
+//| T=3.500000 ns (3.0)
+//| T=3.510000 ns (3.010)
+//| T=3.510000 ns (3.020)
+//
+// Within SystemVerilog, we have to worry about
+// - different time scale
+// - different time precision
+//
+// Because each endpoint in a socket
+// could be coded in different packages
+// and thus be executing under different timescale directives,
+// a simple integer cannot be used to exchange time information
+// across a socket.
+//
+// For example
+//
+//| `timescale 1ns/1ps 
+//| 
+//| package a_pkg; 
+//| 
+//| class a; 
+//|    function void f(inout time t); 
+//|       t += 10ns; 
+//|    endfunction
+//| endclass 
+//| 
+//| endpackage 
+//| 
+//| 
+//| `timescale 1ps/1ps 
+//| 
+//| program p; 
+//| 
+//| import a_pkg::*;
+//|
+//| time t = 0; 
+//| 
+//| initial
+//| begin 
+//|    a A = new; 
+//|    A.f(t); 
+//|    #t; 
+//|    $write("T=%0d ps (10,000)\n", $time());
+//| end
+//| endprogram
+//  
+// yeilds
+//  
+//| T=10 ps (10,000)
+//
+// Scaling is needed everytime you make a procedural call
+// to code that may interpret a time value in a different timescale.
+//
+// Using the uvm_tlm_time type
+//
+//| `timescale 1ns/1ps
+//| 
+//|    package a_pkg;
+//| 
+//| import uvm_pkg::*;
+//| 
+//| class a;
+//|    function void f(uvm_tlm_time t);
+//|       t.incr(10ns, 1ns);
+//|    endfunction
+//| endclass
+//| 
+//| endpackage
+//| 
+//| 
+//| `timescale 1ps/1ps
+//| 
+//| program p;
+//| 
+//| import uvm_pkg::*;
+//| import a_pkg::*;
+//| 
+//| uvm_tlm_time t = new;
+//| 
+//| initial
+//|    begin
+//|       a A = new;
+//|       A.f(t);
+//|       #(t.get_realtime(1ns));
+//|       $write("T=%0d ps (10,000)\n", $time());
+//| end
+//| endprogram
+//
+// yields
+//
+//| T=10000 ps (10,000)
+//
+// A similar procedure is required when crossing any simulator
+// or language boundary,
+// such as interfacing between SystemVerilog and SystemC.
+      
+ 
+ 
