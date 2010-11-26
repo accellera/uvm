@@ -129,7 +129,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
 
   static function void set(uvm_component cntxt, string inst_name,
       string field_name, T value);
-    uvm_phase curr_phase = uvm_top.get_current_phase();
+    uvm_phase_schedule curr_phase = uvm_top.get_current_phase();
     uvm_resource#(T) r;
     bit exists = 0;
     

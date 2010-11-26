@@ -211,7 +211,7 @@ class test extends uvm_component;
   endfunction
 
   task run();
-    global_stop_request();
+     global_stop_request();
   endtask
 
 endclass
