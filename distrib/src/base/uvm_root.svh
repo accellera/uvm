@@ -440,10 +440,10 @@ task uvm_root::phase_runner(); // GSA TBD cleanup
     fork
       begin
         proc = new(process::self());
+        m_phase_processes[phase] = proc;
         phase.execute();
       end
     join_none
-    m_phase_processes[phase] = proc;
     #0;  // let the process start running
   end
 endtask
