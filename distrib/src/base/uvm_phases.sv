@@ -776,7 +776,7 @@ endclass
 
 function uvm_phase_schedule::new(string name, uvm_phase_schedule parent=null);
   super.new();
-  phase_done = new;
+  phase_done = new(name);
   if (parent == null) begin
     uvm_phase_schedule end_node;
     m_parent = this;
