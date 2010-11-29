@@ -48,6 +48,9 @@ endclass
 //
 //------------------------------------------------------------------------------
 
+// Typedef for configuring default sequences.
+typedef uvm_config_db#(uvm_object_wrapper) uvm_config_seq;
+
 class uvm_sequencer_base extends uvm_component;
 
   protected seq_req_class       arb_sequence_q[$];
@@ -72,6 +75,9 @@ class uvm_sequencer_base extends uvm_component;
   // will have precedence over one set with set_config_object.
 
   protected uvm_object_wrapper m_default_sequences[uvm_phase_imp];
+  protected uvm_thread_mode_t  m_seq_thread_mode[uvm_phase_imp];
+  protected uvm_process        m_processes[uvm_phase_schedule];
+  protected uvm_sequence_base  m_phase_sequences[uvm_phase_schedule];
 
   virtual function void phase_started(uvm_phase_schedule phase);
     uvm_object_wrapper w;
@@ -81,8 +87,7 @@ class uvm_sequencer_base extends uvm_component;
     if(m_default_sequences.exists(phase.m_phase))
       w = m_default_sequences[phase.m_phase];
     else begin
-//JLR: need the new resource stuff
-//      void'(uvm_config_db#(uvm_object_wrapper)::get(this, "", {phase.get_name(),"_ph"}, w) );
+      void'(uvm_config_seq::get(this, "", {phase.get_name(),"_ph"}, w) );
     end
 
     if(w == null)
@@ -105,14 +110,48 @@ class uvm_sequencer_base extends uvm_component;
         `uvm_warning("STRDEFSEQ", $sformatf("Failed to randomize default sequence %s for phase %s", w.get_type_name(), phase.get_name()));
       end
       else begin
-        phase.phase_done.raise_objection(this, {"default phase from ", get_full_name()});
+        if(!m_seq_thread_mode.exists(phase.m_phase))
+          m_seq_thread_mode[phase.m_phase] = UVM_PHASE_MODE_DEFAULT;
+
+        if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_MODE_DEFAULT)
+          m_seq_thread_mode[phase.m_phase] = m_phase_thread_mode;
+
+        if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_PROACTIVE)
+          phase.phase_done.raise_objection(this, {"default phase from ", get_full_name()});
+
         //JLR: really needs to be managed by the phasing code, so need to schedule
         //the process to be run under this component's phase process based on
         //phasing semantics.
         fork begin
           seq.start(this);
-          phase.phase_done.drop_objection(this, {"default phase from ", get_full_name()});
+          m_phase_sequences[phase] = seq;
+          m_processes[phase] = new(process::self());
+          if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_PROACTIVE) begin
+            phase.phase_done.drop_objection(this, {"default phase from ", get_full_name()});
+          end
         end join_none
+      end
+    end
+  endfunction
+
+
+  // Cleanup default phases. If the phase is persistent then we don't clean up
+  // the sequences, otherwise we do.
+  virtual function void phase_ended(uvm_phase_schedule phase);
+    uvm_sequence_base seq_ptr;
+
+    if(m_processes.exists(phase)) begin
+      if((m_seq_thread_mode[phase.m_phase] != UVM_PHASE_PERSISTENT) &&
+         (m_processes[phase].is_active()) ) 
+      begin
+        m_processes[phase].m_process_id.kill();
+
+        // Remove the phase sequence
+        if(m_phase_sequences.exists(phase)) begin
+          seq_ptr = find_sequence(m_phase_sequences[phase].get_sequence_id());
+          if(seq_ptr != null)
+            kill_sequence(seq_ptr);
+        end
       end
     end
   endfunction
@@ -139,8 +178,10 @@ class uvm_sequencer_base extends uvm_component;
   //|       "main_ph", myseq_type::type_id::get());
   
 
-  function void set_phase_seq (uvm_phase_imp phase, uvm_object_wrapper imp); 
+  function void set_phase_seq (uvm_phase_imp phase, uvm_object_wrapper imp,
+      uvm_thread_mode_t thread_mode=UVM_PHASE_MODE_DEFAULT); 
     m_default_sequences[phase] = imp;
+    m_seq_thread_mode[phase] = thread_mode;
   endfunction
 
 

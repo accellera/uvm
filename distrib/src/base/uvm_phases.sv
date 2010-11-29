@@ -152,7 +152,8 @@
 
    typedef enum { UVM_PHASE_PROACTIVE,
                   UVM_PHASE_REACTIVE,
-                  UVM_PHASE_PERSISTENT
+                  UVM_PHASE_PERSISTENT,
+                  UVM_PHASE_MODE_DEFAULT
                   } uvm_thread_mode_t;
 
    string thread_mode_string[uvm_thread_mode_t];
@@ -161,6 +162,7 @@
      thread_mode_string[UVM_PHASE_PROACTIVE]  = "proactive";
      thread_mode_string[UVM_PHASE_REACTIVE]   = "reactive";
      thread_mode_string[UVM_PHASE_PERSISTENT] = "persistent";
+     thread_mode_string[UVM_PHASE_MODE_DEFAULT] = "default";
      return 1;
    endfunction
    bit m_thread_mode_string_initialized = m_initialize_thread_mode_string();
@@ -427,10 +429,10 @@ virtual class uvm_task_phase extends uvm_phase_imp;
         comp.m_current_phase = phase;
         comp.phase_started(phase); //GSA TBD do this in separate traversal?
         exec_task(comp,phase);
-        comp.phase_ended(phase); //GSA TBD do this in separate traversal?
         if( phase.phase_done.get_objection_count(comp) > 0)
           phase.phase_done.drop_objection(comp);
         phase.phase_done.wait_get_objection_total(top);	 
+        comp.phase_ended(phase); //GSA TBD do this in separate traversal?
         thread.cleanup(); // kill thread process, depending on chosen semantic
       end
     join_none
@@ -445,6 +447,16 @@ class uvm_process;
   process m_process_id;  
   function new(process pid);
     m_process_id = pid;
+  endfunction
+
+  function int is_active();
+    return (m_process_id.status() != process::FINISHED &&
+            m_process_id.status() != process::KILLED);
+  endfunction
+
+  function int is_current_process();
+    process pid = process::self();
+    return (m_process_id == pid);
   endfunction
 endclass
 
@@ -506,16 +518,6 @@ class uvm_phase_thread extends uvm_process;
       m_phase.m_threads.delete(m_comp);
       m_process_id.kill();
     end
-  endfunction
-
-  function int is_active();
-    return (m_process_id.status() != process::FINISHED &&
-            m_process_id.status != process::KILLED);
-  endfunction
-
-  function int is_current_process();
-    process pid = process::self();
-    return (m_process_id == pid);
   endfunction
 
 endclass

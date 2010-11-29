@@ -50,6 +50,7 @@ class myseqr extends uvm_sequencer;
     `uvm_info("MAIN","In main!!!", UVM_NONE)
     #100;
   endtask
+
 endclass
 
 
