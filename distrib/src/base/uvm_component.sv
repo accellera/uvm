@@ -668,6 +668,11 @@ endfunction
 function uvm_phase_schedule uvm_component::get_current_phase();
   foreach (m_phase_threads[phase])
     if (m_phase_threads[phase].is_current_process()) return phase;
+
+  if(m_current_phase != null)
+    return m_current_phase;
+
+$stacktrace;
   uvm_report_fatal("BADTHREAD", "unable to determine current phase for this process thread");
 endfunction
 
