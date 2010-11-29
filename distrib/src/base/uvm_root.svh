@@ -172,6 +172,7 @@ class uvm_root extends uvm_component;
   // PRIVATE members
 
   extern `_protected function new ();
+  extern function void build();
   extern local function void m_check_set_verbs();
   extern local function void m_do_timeout_settings();
   extern local function void m_do_factory_settings();
@@ -296,6 +297,52 @@ function uvm_root::new();
   m_phase_all_done = 0;
 
 endfunction
+
+
+// build
+// -----
+
+function void uvm_root::build();
+
+  super.build();
+
+  check_verbosity();
+
+  m_check_set_verbs();
+  m_do_timeout_settings();
+  m_do_factory_settings();
+  m_do_config_settings();
+  m_do_max_quit_settings();
+  m_do_dump_args();
+
+endfunction
+
+// m_check_set_verbs
+// -----------------
+
+function void uvm_root::m_check_set_verbs();
+  string set_verbosity_settings[$];
+  string split_vals[$];
+  uvm_verbosity tmp_verb;
+
+  // Retrieve them all into set_verbosity_settings
+  void'(clp.get_arg_values("+uvm_set_verbosity=", set_verbosity_settings));
+
+  for(int i = 0; i < set_verbosity_settings.size(); i++) begin
+    uvm_split_string(set_verbosity_settings[i], ",", split_vals);
+    if(split_vals.size() < 4 || split_vals.size() > 5) begin
+      uvm_report_warning("INVLCMDARGS", 
+        $psprintf("Invalid number of arguments found on the command line for setting '+uvm_set_verbosity=%s'.  Setting ignored.",
+        set_verbosity_settings[i]), UVM_NONE, "", "");
+    end
+    // Invalid verbosity
+    if(!clp.m_convert_verb(split_vals[2], tmp_verb)) begin
+      uvm_report_warning("INVLCMDVERB", 
+        $psprintf("Invalid verbosity found on the command line for setting '%s'.", 
+        set_verbosity_settings[i]), UVM_NONE, "", "");
+    end
+  end
+endfunction // void
 
 // m_do_timeout_settings
 // ---------------------

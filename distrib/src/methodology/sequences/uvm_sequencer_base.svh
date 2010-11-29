@@ -67,6 +67,83 @@ class uvm_sequencer_base extends uvm_component;
   protected int                 m_arb_size;       // used for waiting processes
   protected int                 m_wait_for_item_sequence_id, m_wait_for_item_transaction_id;
 
+  // Default sequence processing. At the start of any phase, look up
+  // the default sequence and run it. A manually set default sequence
+  // will have precedence over one set with set_config_object.
+
+  protected uvm_object_wrapper m_default_sequences[uvm_phase_imp];
+
+  virtual function void phase_started(uvm_phase_schedule phase);
+    uvm_object_wrapper w;
+    uvm_sequence_base seq;
+    uvm_factory f = uvm_factory::get();
+
+    if(m_default_sequences.exists(phase.m_phase))
+      w = m_default_sequences[phase.m_phase];
+    else begin
+//JLR: need the new resource stuff
+//      void'(uvm_config_db#(uvm_object_wrapper)::get(this, "", {phase.get_name(),"_ph"}, w) );
+    end
+
+    if(w == null)
+      return;
+
+    if(!$cast(seq , f.create_object_by_type(w, get_full_name(), w.get_type_name()))) begin
+      `uvm_warning("BDFCT", $sformatf("Default phase object for %s did not cast to a sequence type", {phase.get_name(),"_ph"}) )
+    end
+
+    if(seq == null) begin
+      `uvm_info("PHASESEQ", $sformatf("No default phase sequence for phase %s", phase.get_name()), UVM_FULL )
+    end
+    else begin
+      `uvm_info("PHASESEQ", $sformatf("Starting default phase sequence %s for phase %s", w.get_type_name(), phase.get_name()), UVM_FULL )
+      seq.print_sequence_info = 1;
+      seq.set_parent_sequence(null);
+      seq.set_sequencer(this);
+      seq.reseed();
+      if (!seq.randomize()) begin
+        `uvm_warning("STRDEFSEQ", $sformatf("Failed to randomize default sequence %s for phase %s", w.get_type_name(), phase.get_name()));
+      end
+      else begin
+        phase.phase_done.raise_objection(this, {"default phase from ", get_full_name()});
+        //JLR: really needs to be managed by the phasing code, so need to schedule
+        //the process to be run under this component's phase process based on
+        //phasing semantics.
+        fork begin
+          seq.start(this);
+          phase.phase_done.drop_objection(this, {"default phase from ", get_full_name()});
+        end join_none
+      end
+    end
+  endfunction
+
+
+  // Function: set_phase_seq
+  //
+  // Set the phase sequence that will automatically start for the given
+  // <uvm_phase_schedule>. ~phase~ is a <uvm_phase_imp>
+  // and ~imp~ is a <uvm_sequence_base> factory wrapper. The sequence object, ~imp~,
+  // will be created and randomized at the time the phase starts. If ~imp~ is
+  // null then no default sequence will be executed.
+  //
+  // Example of setting the phase sequence for the UVM main phase:
+  //|  seqr.set_phase_seq(uvm_main_ph, myseq_type::type_id::get());
+  //
+  // If no phase sequence has been set by using this function, then
+  // <uvm_config_db#(T)::get> (with T=uvm_object_wrapper) is used to access the 
+  // default sequence using the field name ~PHASE~_ph. For example, the following 
+  // configuration setting will set the default sequence for the ~main~ phase on 
+  // sequencer u1.u2.seqr:
+  //
+  //| uvm_config_db#(uvm_object_wrapper)::get(this, "u1.u2.seqr", 
+  //|       "main_ph", myseq_type::type_id::get());
+  
+
+  function void set_phase_seq (uvm_phase_imp phase, uvm_object_wrapper imp); 
+    m_default_sequences[phase] = imp;
+  endfunction
+
+
   // Variable: pound_zero_count
   //
   // Set this variable via set_config_int to set the number of delta cycles
