@@ -430,7 +430,7 @@ virtual class uvm_task_phase extends uvm_phase_imp;
         comp.phase_ended(phase); //GSA TBD do this in separate traversal?
         if( phase.phase_done.get_objection_count(comp) > 0)
           phase.phase_done.drop_objection(comp);
-	 phase.phase_done.wait_get_objection_total(top);	 
+        phase.phase_done.wait_get_objection_total(top);	 
         thread.cleanup(); // kill thread process, depending on chosen semantic
       end
     join_none
@@ -776,7 +776,7 @@ endclass
 
 function uvm_phase_schedule::new(string name, uvm_phase_schedule parent=null);
   super.new();
-  phase_done = new;
+  phase_done = new(name);
   if (parent == null) begin
     uvm_phase_schedule end_node;
     m_parent = this;

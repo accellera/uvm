@@ -223,6 +223,7 @@ class uvm_root extends uvm_component;
   local uvm_objection m_objection_watcher_list[$];
   extern function void m_objection_scheduler();
   extern function void m_create_objection_watcher(uvm_objection objection);
+
   // At end of elab phase we need to do tlm binding resolution.
   function void phase_ended(uvm_phase_schedule phase);
     uvm_phase_schedule domain = find_phase_schedule("uvm_pkg::common","*");
@@ -861,6 +862,7 @@ endfunction
 function int unsigned uvm_root::phase_process_count(); // GSA TBD cleanup
   return m_phase_processes.size();
 endfunction
+
 
 
 //------------------------------------------------------------------------------

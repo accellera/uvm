@@ -1535,8 +1535,6 @@ virtual class uvm_component extends uvm_report_object;
 
   //AK uvm_phase m_curr_phase=null;
 
-  protected bit m_build_done=0;
-
   extern local function void m_extract_name(string name ,
                                             output string leaf ,
                                             output string remainder );
