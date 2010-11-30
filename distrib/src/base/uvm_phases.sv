@@ -421,7 +421,6 @@ virtual class uvm_task_phase extends uvm_phase_imp;
 
   protected virtual function void execute(uvm_component comp,
                                           uvm_phase_schedule phase);
-    uvm_root top=uvm_root::get();
     //Raise here to make sure raise is done before we need to check
     //the status.
     phase.phase_done.raise_objection(comp);
@@ -433,7 +432,7 @@ virtual class uvm_task_phase extends uvm_phase_imp;
         exec_task(comp,phase);
         if( phase.phase_done.get_objection_count(comp) > 0)
           phase.phase_done.drop_objection(comp);
-        phase.phase_done.wait_get_objection_total(top);	 
+        phase.wait_no_objections();
         comp.phase_ended(phase); //GSA TBD do this in separate traversal?
         thread.cleanup(); // kill thread process, depending on chosen semantic
       end
@@ -771,6 +770,8 @@ class uvm_phase_schedule extends uvm_graph;
            (m_parent==null) ? "null" : m_parent.m_schedule_name, super.convert2string());
   endfunction
 
+  // Wait for the objection counters to go to zero at the root.
+  extern task wait_no_objections;
 endclass
 
 
@@ -796,6 +797,21 @@ function uvm_phase_schedule::new(string name, uvm_phase_schedule parent=null);
   end
 endfunction
 
+
+task uvm_phase_schedule::wait_no_objections();
+  uvm_root top=uvm_root::get();
+  if(get_name() == "run") begin
+    while(phase_done.get_objection_total(top) + 
+          uvm_test_done.get_objection_total(top) )
+    begin
+      phase_done.wait_get_objection_total(top);	 
+      uvm_test_done.wait_get_objection_total(top);	 
+    end
+  end
+  else begin
+    phase_done.wait_get_objection_total(top);	 
+  end
+endtask
 
 function void uvm_phase_schedule::add_phase(
                                     uvm_phase_imp phase,
@@ -1006,7 +1022,7 @@ task uvm_phase_schedule::execute();
       bit order = 0;
       begin
         wait (order); // force this process to run last
-        wait (phase_done.get_objection_total(uvm_root::get()) == 0);
+        wait_no_objections();
         kill();
       end
       begin

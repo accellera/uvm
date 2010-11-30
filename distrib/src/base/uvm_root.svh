@@ -749,6 +749,10 @@ task uvm_root::run_test(string test_name="");
 
   // phase runner, isolated from calling process
   fork
+    // Start the stop request process
+    begin
+      m_stop_process();
+    end
     begin
       // spawn the phase runner task
       phase_runner_proc = process::self();
@@ -901,7 +905,7 @@ task uvm_root::m_stop_request(time timeout=0);
     timeout = `UVM_DEFAULT_TIMEOUT - $time;
 
   // stop request valid for running task-based phases only
-  uvm_report_fatal("DEV","TBD in uvm_root::m_stop_request() needs coded");
+//  uvm_report_fatal("DEV","TBD in uvm_root::m_stop_request() needs coded");
   //TBD if (m_curr_phase == null || !m_curr_phase.is_task()) begin
   //TBD   uvm_report_warning("STPNA",
   //TBD     $psprintf("Stop-request has no effect outside non-time-consuming phases%s%s",
@@ -926,10 +930,9 @@ task uvm_root::m_stop_request(time timeout=0);
         m_executing_stop_processes = 0;
       end
       begin
-        #timeout uvm_report_warning("STPTO","TBD cannot resolve m_curr_phase.get_name() yet");
-        //TBD #timeout uvm_report_warning("STPTO",
-        //TBD  $psprintf("Stop-request timeout of %0t expired. Stopping phase '%0s'",
-        //TBD                    timeout, m_curr_phase.get_name()), UVM_NONE);
+        #timeout uvm_report_warning("STPTO",
+          $psprintf("Stop-request timeout of %0t expired. Jumping to extract phase.",
+                           timeout), UVM_NONE);
       end
     join_any
     disable fork;
@@ -937,7 +940,15 @@ task uvm_root::m_stop_request(time timeout=0);
   join
 
   // all stop processes have completed, or a timeout has occured
-  this.do_kill_all();
+  `uvm_info("STOPREQ", "Stop request has been processed, jumping to the extract phase", UVM_MEDIUM)
+  jump_all_domains(uvm_extract_ph);
+
+  //Temporary hack because jump_all_domains is not jumping out of the run phase
+  begin
+    uvm_phase_schedule r = find_phase_schedule("uvm_pkg::common","*");
+    r = r.find_schedule("run");
+    r.phase_done.clear();
+  end
 
   m_in_stop_request=0;
 endtask

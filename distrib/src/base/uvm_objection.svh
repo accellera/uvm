@@ -593,7 +593,7 @@ class uvm_objection extends uvm_report_object;
 
 
    task wait_get_objection_total(uvm_object obj=null);
-         wait(m_total_count[top] == 0);      
+         wait(m_total_count[obj] == 0);      
    endtask
    
 
