@@ -2910,9 +2910,9 @@ task uvm_reg::mirror(output uvm_status_e       status,
                  uvm_reg_data_t field = mask << m_fields[i].get_lsb_pos();
                  uvm_reg_data_t diff = ((v ^ exp) >> m_fields[i].get_lsb_pos()) & mask;
                  if(diff)
-                    `uvm_info("RegMem",$psprintf("field %s mismatch read=0x%0h mirrored=0x%0h slice [%0d:%0d]",m_fields[i].get_name(),
-                        (v >> m_fields[i].get_lsb_pos()) & mask, (exp >> m_fields[i].get_lsb_pos())&mask,
-                        m_fields[i].get_lsb_pos(),m_fields[i].get_lsb_pos()+m_fields[i].get_n_bits()),UVM_NONE)
+                    `uvm_info("RegMem",$psprintf("field %s mismatch read=%0d'h%0h mirrored=%0d'h%0h slice [%0d:%0d]",m_fields[i].get_name(),
+                        m_fields[i].get_n_bits(),(v >> m_fields[i].get_lsb_pos()) & mask, m_fields[i].get_n_bits(),(exp >> m_fields[i].get_lsb_pos())&mask,
+                        m_fields[i].get_lsb_pos()+m_fields[i].get_n_bits()-1,m_fields[i].get_lsb_pos()),UVM_NONE)
              end
           end
       end
