@@ -483,7 +483,7 @@ virtual class uvm_component extends uvm_report_object;
   // Function: phase_started
   // Phase transition callback, invoked at beginning of each phase
   //   phase - the current phase schedule node in the graph
-  
+
   extern virtual function void phase_started (uvm_phase_schedule phase);
 
   // Function: phase_ended
@@ -620,6 +620,7 @@ virtual class uvm_component extends uvm_report_object;
   uvm_phase_imp      m_phase_imps[uvm_phase_imp];         // functors to override ovm_root defaults
   uvm_thread_mode_t  m_phase_thread_mode;                 // default thread semantic for this comp
   uvm_phase_schedule m_current_phase;                     // the most recently executed phase
+  /*protected*/ bit  m_build_done=0;
 
 
   // Task: suspend

@@ -618,6 +618,7 @@ endfunction
 // build() has a default implementation, the others have an empty default
 
 function void uvm_component::build();
+  m_build_done = 1;
   apply_config_settings(print_config_matches);
 endfunction
 
@@ -669,11 +670,7 @@ function uvm_phase_schedule uvm_component::get_current_phase();
   foreach (m_phase_threads[phase])
     if (m_phase_threads[phase].is_current_process()) return phase;
 
-  if(m_current_phase != null)
-    return m_current_phase;
-
-$stacktrace;
-  uvm_report_fatal("BADTHREAD", "unable to determine current phase for this process thread");
+  return m_current_phase;
 endfunction
 
 

@@ -384,10 +384,12 @@ virtual class uvm_topdown_phase extends uvm_phase_imp;
   virtual function void traverse(uvm_component comp, uvm_phase_schedule phase);
     string name;
     if (comp.m_phase_domains.exists(phase.m_parent)) begin
-      if (comp.m_phase_imps.exists(this))
-        comp.m_phase_imps[this].execute(comp,phase);
-      else
-        this.execute(comp,phase);
+      if(phase.get_name() != "build" || comp.m_build_done == 0) begin
+        if (comp.m_phase_imps.exists(this))
+          comp.m_phase_imps[this].execute(comp,phase);
+        else
+          this.execute(comp,phase);
+      end
     end
     if(comp.get_first_child(name))
       do begin
