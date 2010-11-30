@@ -75,11 +75,14 @@ class uvm_objection extends uvm_report_object;
   // Clears the objection state. All counts are cleared. The draintime
   // is not effected.
 
+  protected bit m_cleared = 0; /* for checking obj count<0 */
+
   function void clear();
     //Should there be a warning if there are outstanding objections?
     m_source_count.delete();
     m_total_count.delete();
     m_draining.delete();
+    m_cleared = 1;
   endfunction
 
   // Function: new
@@ -262,6 +265,7 @@ class uvm_objection extends uvm_report_object;
   function void raise_objection (uvm_object obj=null, string description="",
        int count=1);
     if(obj == null) obj = uvm_root::get();
+    m_cleared = 0;
     m_raise (obj, obj, description, count);
   endfunction
 
@@ -382,12 +386,14 @@ class uvm_objection extends uvm_report_object;
       obj = top;
 
     if (!m_total_count.exists(obj) || (count > m_total_count[obj])) begin
+      if(m_cleared) return;
       uvm_report_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
         "\" attempted to drop objection count below zero."});
       return;
     end
     if ((obj == source_obj) && 
         (!m_source_count.exists(obj) || (count > m_source_count[obj]))) begin
+      if(m_cleared) return;
       uvm_report_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
         "\" attempted to drop objection count below zero."});
       return;
