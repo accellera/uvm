@@ -33,6 +33,7 @@
 `define UVM_USE_P_FORMAT
 `define UVM_USE_FILE_LINE
 `define UVM_USE_ALT_PHASING
+`define UVM_USE_TYPENAME
 `define UVM_DA_TO_QUEUE(Q,DA) Q=DA;
 `undef  UVM_USE_PROCESS_CONTAINER
 
@@ -61,6 +62,9 @@
   `endif
   `ifndef INCA_UVM_USE_P_FORMAT
     `undef  UVM_USE_P_FORMAT
+  `endif
+  `ifndef INCA_UVM_USE_TYPENAME
+    `undef UVM_USE_TYPENAME
   `endif
   `ifndef INCA_UVM_USE_FILE_LINE
     `undef  UVM_USE_FILE_LINE
