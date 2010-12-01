@@ -20,7 +20,8 @@ class test extends uvm_test;
 
    virtual function void report();
      uvm_report_server rs = uvm_report_server::get_server();
-     if(rs.get_id_count("OBJTN_TRC") == 6)
+     // Need to include the implicit objections
+     if(rs.get_id_count("OBJTN_TRC") == 14)
        $write("** UVM TEST PASSED **\n");
    endfunction
 endclass
