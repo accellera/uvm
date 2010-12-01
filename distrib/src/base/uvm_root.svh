@@ -1029,6 +1029,7 @@ task uvm_root::m_stop_request(time timeout=0, bit forced = 0);
     uvm_phase_schedule r = find_phase_schedule("uvm_pkg::common","*");
     r = r.find_schedule("run");
     r.phase_done.clear();
+    uvm_test_done.clear();
   end
 
   m_in_stop_request=0;
