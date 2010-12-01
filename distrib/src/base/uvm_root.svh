@@ -367,8 +367,6 @@ function void uvm_root::build();
 
   super.build();
 
-  check_verbosity();
-
   m_check_set_verbs();
   m_do_timeout_settings();
   m_do_factory_settings();
