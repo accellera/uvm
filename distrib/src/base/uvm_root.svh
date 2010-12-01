@@ -67,6 +67,7 @@ typedef class uvm_cmdline_processor;
 class uvm_root extends uvm_component;
 
   extern static function uvm_root get();
+  extern local  function void m_initialize_common_schedule();
 
   uvm_cmdline_processor clp;
 
@@ -184,7 +185,7 @@ class uvm_root extends uvm_component;
   extern local function void m_process_config(string cfg, bit is_int);
   extern function void check_verbosity();
   extern local task m_stop_process ();
-  extern local task m_stop_request (time timeout=0);
+  extern /*local*/ task m_stop_request (time timeout=0, bit forced = 0);
   extern local task m_do_stop_all  (uvm_component comp);
      
   // phasing implementation
@@ -192,6 +193,7 @@ class uvm_root extends uvm_component;
   local mailbox #(uvm_phase_schedule) m_phase_hopper;
   local uvm_process m_phase_processes[uvm_phase_schedule];
   local bit m_phase_all_done;
+  static bit m_has_rt_phases=0;
 
   extern local task phase_runner(); // main phase machine
   extern function void phase_initiate(uvm_phase_schedule phase);
@@ -269,11 +271,68 @@ endclass
 // ---
 
 function uvm_root uvm_root::get();
-  if (m_inst == null)
+  if (m_inst == null) begin
     m_inst = new();
+    //Need m_inst to be set so that recusion won't happen in ctor
+    m_inst.m_initialize_common_schedule();
+  end
   return m_inst;
 endfunction
 
+
+// m_initialize_common_schedule
+// ----------------------------
+
+// Create the common phase schedule. To be done immediately after
+// the m_inst object has been set for uvm_root so that it is
+// immediately available.
+
+// Common schedules
+uvm_phase_schedule build_ph = null;
+uvm_phase_schedule connect_ph = null;
+uvm_phase_schedule end_of_elaboration_ph = null;
+uvm_phase_schedule start_of_simulation_ph = null;
+uvm_phase_schedule run_ph = null;
+uvm_phase_schedule extract_ph = null;
+uvm_phase_schedule check_ph = null;
+uvm_phase_schedule report_ph = null;
+uvm_phase_schedule finalize_ph = null;
+
+function void uvm_root::m_initialize_common_schedule();
+  // initialize phase schedule to "common", or inherit it from parent component
+  // - domain can be overridden by set_phase_domain()
+  // - schedule can be augmented by set_phase_schedule()
+
+  static uvm_phase_schedule common = null;
+  if(common != null) return;
+
+  // build phase schedule 'uvm_pkg::common', used by all uvm_component instances
+  // - it is a linear list of predefined phases (see uvm_globals.svh) as follows:
+  common = new("uvm_pkg::common");
+  // note - could not do this in uvm_root::new() due to static initialization ordering
+  common.add_phase(uvm_build_ph);
+  common.add_phase(uvm_connect_ph);
+  common.add_phase(uvm_end_of_elaboration_ph);
+  common.add_phase(uvm_start_of_simulation_ph);
+  common.add_phase(uvm_run_ph);
+  common.add_phase(uvm_extract_ph);
+  common.add_phase(uvm_check_ph);
+  common.add_phase(uvm_report_ph);
+  common.add_phase(uvm_finalize_ph);
+
+  // for backward compatibility, make common schedules available
+  build_ph = common.find_schedule("build");
+  connect_ph = common.find_schedule("connect");
+  end_of_elaboration_ph = common.find_schedule("end_of_elaboration");
+  start_of_simulation_ph = common.find_schedule("start_of_simulation");
+  run_ph = common.find_schedule("run");
+  extract_ph = common.find_schedule("extract");
+  check_ph = common.find_schedule("check");
+  report_ph = common.find_schedule("report");
+  finalize_ph = common.find_schedule("finalize");
+
+  m_inst.add_phase_schedule(common, "common");
+endfunction 
 
 // new
 // ---
@@ -885,6 +944,18 @@ endfunction
 // --------------
 
 task uvm_root::m_stop_process();
+  // For backward compatibility, the run phase never releases its objection until
+  // the stop request comes in.
+  uvm_phase_schedule run_ph = find_phase_schedule("uvm_pkg::common","*");
+  uvm_phase_schedule uvm = find_phase_schedule("uvm_pkg::uvm", "*");
+
+  run_ph = run_ph.find_schedule("run");
+
+  // For semantic backward compatibilty, run phase should not end until
+  // stop request happens. But, we may not want this.
+  if(uvm==null)
+    run_ph.phase_done.raise_objection(this, "Root objection for run phase");
+
   @m_stop_request_e;
   m_stop_request(stop_timeout);
 endtask
@@ -899,9 +970,9 @@ endfunction
 // m_stop_request
 // --------------
 
-task uvm_root::m_stop_request(time timeout=0);
+task uvm_root::m_stop_request(time timeout=0, bit forced = 0);
 
-  if (timeout == 0)
+  if (timeout == 0 && !forced)
     timeout = `UVM_DEFAULT_TIMEOUT - $time;
 
   // stop request valid for running task-based phases only
@@ -919,6 +990,7 @@ task uvm_root::m_stop_request(time timeout=0);
   // can be used. We fork the single thread as well so that 'wait fork'
   // does not wait for threads previously started by the caller's thread.
 
+  if(forced == 0) // If forced don't wait for objectors 
   fork begin // guard process
     fork
       begin

@@ -423,7 +423,7 @@ virtual class uvm_task_phase extends uvm_phase_imp;
                                           uvm_phase_schedule phase);
     //Raise here to make sure raise is done before we need to check
     //the status.
-    phase.phase_done.raise_objection(comp);
+    phase.phase_done.raise_objection(comp, {"raise implicit ", phase.get_name(), " objection for ", comp.get_full_name()});
     fork
       begin
         uvm_phase_thread thread = new(phase,comp); // store thread process ID
@@ -431,7 +431,7 @@ virtual class uvm_task_phase extends uvm_phase_imp;
         comp.phase_started(phase); //GSA TBD do this in separate traversal?
         exec_task(comp,phase);
         if( phase.phase_done.get_objection_count(comp) > 0)
-          phase.phase_done.drop_objection(comp);
+          phase.phase_done.drop_objection(comp, {"drop implicit ", phase.get_name(), " objection for ", comp.get_full_name()});
         phase.wait_no_objections();
         comp.phase_ended(phase); //GSA TBD do this in separate traversal?
         thread.cleanup(); // kill thread process, depending on chosen semantic
@@ -771,7 +771,15 @@ class uvm_phase_schedule extends uvm_graph;
   endfunction
 
   // Wait for the objection counters to go to zero at the root.
-  extern task wait_no_objections;
+  extern task wait_no_objections(uvm_component waiter=null);
+
+  // Backward compatibility functions, do not use
+  task wait_start;
+    wait(m_state == UVM_PHASE_EXECUTING || m_state ==  UVM_PHASE_DONE);
+  endtask
+  task wait_done;
+    wait(m_state == UVM_PHASE_DONE);
+  endtask
 endclass
 
 
@@ -798,9 +806,37 @@ function uvm_phase_schedule::new(string name, uvm_phase_schedule parent=null);
 endfunction
 
 
-task uvm_phase_schedule::wait_no_objections();
+task uvm_phase_schedule::wait_no_objections(uvm_component waiter=null);
   uvm_root top=uvm_root::get();
-  if(get_name() == "run") begin
+  if(get_name() == "run" && waiter==top) begin
+    fork begin // wrapper fork to protect siblings
+    fork 
+      while(phase_done.get_objection_total(top) + 
+            uvm_test_done.get_objection_total(top) )
+      begin
+        phase_done.wait_get_objection_total(top);	 
+        uvm_test_done.wait_get_objection_total(top);	 
+      end
+
+      begin
+        void'(top.get_config_int("timeout", top.phase_timeout));
+        if(top.phase_timeout == 0) begin
+          event e;
+          // don't use a phase timeout if 0
+          @e;
+        end
+        begin
+          #(top.phase_timeout) 
+          `uvm_error("TIMOUT", $sformatf("Phase timeout of %t hit, ending test", top.phase_timeout))
+          top.m_stop_request(0,.forced(1));
+        end
+      end
+
+    join_any
+    disable fork;
+    end join
+  end
+  else if(get_name() == "run") begin
     while(phase_done.get_objection_total(top) + 
           uvm_test_done.get_objection_total(top) )
     begin
@@ -1022,7 +1058,7 @@ task uvm_phase_schedule::execute();
       bit order = 0;
       begin
         wait (order); // force this process to run last
-        wait_no_objections();
+        wait_no_objections(uvm_root::get());
         kill();
       end
       begin

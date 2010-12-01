@@ -106,34 +106,8 @@ function uvm_component::new (string name, uvm_component parent);
 
   event_pool = new("event_pool");
 
-  // initialize phase schedule to "common", or inherit it from parent component
-  // - domain can be overridden by set_phase_domain()
-  // - schedule can be augmented by set_phase_schedule()
-  if (parent == uvm_top || parent == null) begin
-    uvm_phase_schedule common;
-    common = uvm_top.find_phase_schedule("uvm_pkg::common","common");
-    if (common == null) begin
-      // build phase schedule 'uvm_pkg::common', used by all uvm_component instances
-      // - it is a linear list of predefined phases (see uvm_globals.svh) as follows:
-      common = new("uvm_pkg::common");
-      // note - could not do this in uvm_root::new() due to static initialization ordering
-      common.add_phase(uvm_build_ph);
-      common.add_phase(uvm_connect_ph);
-      common.add_phase(uvm_end_of_elaboration_ph);
-      common.add_phase(uvm_start_of_simulation_ph);
-      common.add_phase(uvm_run_ph);
-      common.add_phase(uvm_extract_ph);
-      common.add_phase(uvm_check_ph);
-      common.add_phase(uvm_report_ph);
-      common.add_phase(uvm_finalize_ph);
-      // schedule/domain pair is added to the master list with fixed domain name "common"
-      uvm_top.add_phase_schedule(common, "common");
-    end
-    add_phase_schedule(common, "common");
-  end else begin
-    foreach(parent.m_phase_domains[schedule])
-      m_phase_domains[schedule] = parent.m_phase_domains[schedule];
-  end
+  foreach(parent.m_phase_domains[schedule])
+    m_phase_domains[schedule] = parent.m_phase_domains[schedule];
   
   // Now that inst name is established, reseed (if use_uvm_seeding is set)
   reseed();
@@ -149,7 +123,6 @@ function uvm_component::new (string name, uvm_component parent);
   set_report_id_action("CFGOVR", UVM_NO_ACTION);
   set_report_id_action("CFGSET", UVM_NO_ACTION);
 
-//Not sure what uvm_top isn't taking the setting... these two lines should be removed.
   uvm_top.set_report_id_action("CFGOVR", UVM_NO_ACTION);
   uvm_top.set_report_id_action("CFGSET", UVM_NO_ACTION);
 endfunction
@@ -725,6 +698,7 @@ function void uvm_component::set_phase_schedule(string domain_name);
   // create it and add it to master schedule if it doesn't exist
   if (uvm == null) begin
     uvm = new(schedule_name);
+    uvm_root::m_has_rt_phases=1;
     // schedule consists of a linear list of predefined phases
     uvm.add_phase(uvm_pre_reset_ph);
     uvm.add_phase(uvm_reset_ph);
