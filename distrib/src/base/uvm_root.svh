@@ -174,6 +174,7 @@ class uvm_root extends uvm_component;
 
   extern `_protected function new ();
   extern function void build();
+  extern function void end_of_elaboration();
   extern local function void m_check_set_verbs();
   extern local function void m_do_timeout_settings();
   extern local function void m_do_factory_settings();
@@ -376,6 +377,26 @@ function void uvm_root::build();
   m_do_dump_args();
 
 endfunction
+
+
+// end_of_elaboration
+// ------------------
+
+function void uvm_root::end_of_elaboration();
+  // For backward compatibility, the run phase never releases its objection until
+  // the stop request comes in.
+  uvm_phase_schedule run_ph = find_phase_schedule("uvm_pkg::common","*");
+  uvm_phase_schedule uvm = find_phase_schedule("uvm_pkg::uvm", "*");
+
+  run_ph = run_ph.find_schedule("run");
+
+  // For semantic backward compatibilty, run phase should not end until
+  // stop request happens. But, we may not want this.
+  if(uvm==null) begin
+    run_ph.phase_done.raise_objection(this, "Root objection for run phase");
+  end
+endfunction
+
 
 // m_check_set_verbs
 // -----------------
@@ -944,18 +965,6 @@ endfunction
 // --------------
 
 task uvm_root::m_stop_process();
-  // For backward compatibility, the run phase never releases its objection until
-  // the stop request comes in.
-  uvm_phase_schedule run_ph = find_phase_schedule("uvm_pkg::common","*");
-  uvm_phase_schedule uvm = find_phase_schedule("uvm_pkg::uvm", "*");
-
-  run_ph = run_ph.find_schedule("run");
-
-  // For semantic backward compatibilty, run phase should not end until
-  // stop request happens. But, we may not want this.
-  if(uvm==null)
-    run_ph.phase_done.raise_objection(this, "Root objection for run phase");
-
   @m_stop_request_e;
   m_stop_request(stop_timeout);
 endtask
