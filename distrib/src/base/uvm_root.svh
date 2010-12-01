@@ -311,15 +311,15 @@ function void uvm_root::m_initialize_common_schedule();
   // - it is a linear list of predefined phases (see uvm_globals.svh) as follows:
   common = new("uvm_pkg::common");
   // note - could not do this in uvm_root::new() due to static initialization ordering
-  common.add_phase(uvm_build_ph);
-  common.add_phase(uvm_connect_ph);
-  common.add_phase(uvm_end_of_elaboration_ph);
-  common.add_phase(uvm_start_of_simulation_ph);
-  common.add_phase(uvm_run_ph);
-  common.add_phase(uvm_extract_ph);
-  common.add_phase(uvm_check_ph);
-  common.add_phase(uvm_report_ph);
-  common.add_phase(uvm_finalize_ph);
+  common.add_phase(uvm_build_phase::get());
+  common.add_phase(uvm_connect_phase::get());
+  common.add_phase(uvm_end_of_elaboration_phase::get());
+  common.add_phase(uvm_start_of_simulation_phase::get());
+  common.add_phase(uvm_run_phase::get());
+  common.add_phase(uvm_extract_phase::get());
+  common.add_phase(uvm_check_phase::get());
+  common.add_phase(uvm_report_phase::get());
+  common.add_phase(uvm_finalize_phase::get());
 
   // for backward compatibility, make common schedules available
   build_ph = common.find_schedule("build");
