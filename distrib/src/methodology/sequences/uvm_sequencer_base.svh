@@ -240,6 +240,7 @@ class uvm_sequencer_base extends uvm_component;
   // using the field name "default_sequence".
 
   protected string default_sequence = "uvm_random_sequence";               
+  protected bit    m_default_seq_set = 0;
 
 
   // The sequeunce aray holds the type names of the sequence types registered
@@ -269,7 +270,8 @@ class uvm_sequencer_base extends uvm_component;
     m_sequencer_id = g_sequencer_id++;
     m_lock_arb_size = -1;
     m_seq_item_port_connect_size = -1;
-    void'(get_config_string("default_sequence", default_sequence));
+    if(get_config_string("default_sequence", default_sequence))
+      m_default_seq_set = 1;
     void'(get_config_int("count", count));
     void'(get_config_int("max_random_count", max_random_count));
     void'(get_config_int("max_random_depth", max_random_depth));
