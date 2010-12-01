@@ -57,25 +57,33 @@ class reg2apb_adapter extends uvm_reg_adapter;
       super.new(name);
    endfunction 
 
-  virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
+ virtual function uvm_sequence_item reg2bus(uvm_tlm_generic_payload rw);
     apb_rw apb = apb_rw::type_id::create("apb_rw");
-    apb.kind = (rw.kind == UVM_READ) ? apb_rw::READ : apb_rw::WRITE;
-    apb.addr = rw.addr;
-    apb.data = rw.data;
+    apb.kind = (rw.m_command == UVM_TLM_READ_COMMAND) ? apb_rw::READ : apb_rw::WRITE;
+    apb.addr = rw.m_address;
+    apb.data = 0;
+    foreach(rw.m_data[i])
+      apb.data |= (rw.m_data[i] << (i*8));
     return apb;
   endfunction
 
   virtual function void bus2reg(uvm_sequence_item bus_item,
-                                ref uvm_reg_bus_op rw);
+                                uvm_tlm_generic_payload rw);
     apb_rw apb;
     if (!$cast(apb,bus_item)) begin
       `uvm_fatal("NOT_APB_TYPE","Provided bus_item is not of the correct type")
       return;
     end
-    rw.kind = apb.kind == apb_rw::READ ? UVM_READ : UVM_WRITE;
-    rw.addr = apb.addr;
-    rw.data = apb.data;
-    rw.status = UVM_IS_OK;
+    rw.m_command = apb.kind ? UVM_TLM_READ_COMMAND : UVM_TLM_WRITE_COMMAND;
+    rw.m_address = apb.addr;
+    rw.m_byte_enable = new [($size(apb.data)/8)];
+    rw.set_streaming_width (($size(apb.data)/8));
+    rw.m_data = new [4];
+    foreach (rw.m_data[i]) begin
+       rw.m_data[i] = 8'hff & (apb.data >> (8*i));
+       rw.m_byte_enable[i] = 1;
+    end
+    rw.m_response_status = UVM_TLM_OK_RESPONSE;
   endfunction
 
 endclass

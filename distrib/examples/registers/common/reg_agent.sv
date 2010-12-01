@@ -134,27 +134,35 @@ class reg2rw_adapter extends uvm_reg_adapter;
       supports_byte_enable = 1;
    endfunction
 
-   virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
+   virtual function uvm_sequence_item reg2bus(uvm_tlm_generic_payload rw);
       reg_rw bus = reg_rw::type_id::create("rw");
-      bus.read    = (rw.kind == UVM_READ);
-      bus.addr    = rw.addr;
-      bus.data    = rw.data;
-      bus.byte_en = rw.byte_en;
+      bus.read    = (rw.m_command == UVM_TLM_READ_COMMAND);
+      bus.addr    = rw.m_address;
+      bus.data    = 0;
+      foreach(rw.m_data[i])
+         bus.data = bus.data | ((8'hff &(rw.m_data[i] >> (i*8)) << (i*8)));
+      foreach(rw.m_byte_enable[i])
+         bus.byte_en[i] = rw.m_byte_enable[i];
       return bus;
    endfunction
 
    virtual function void bus2reg(uvm_sequence_item bus_item,
-                                 ref uvm_reg_bus_op rw);
+                                 uvm_tlm_generic_payload rw);
       reg_rw bus;
       if (!$cast(bus,bus_item)) begin
          `uvm_fatal("NOT_REG_TYPE","Provided bus_item is not of the correct type")
          return;
       end
-      rw.kind    = bus.read ? UVM_READ : UVM_WRITE;
-      rw.addr    = bus.addr;
-      rw.data    = bus.data;
-      rw.byte_en = bus.byte_en;
-      rw.status  = UVM_IS_OK;
-   endfunction
+      rw.m_command   = bus.read ? UVM_TLM_READ_COMMAND : UVM_TLM_WRITE_COMMAND;
+      rw.m_address   = bus.addr;
+      rw.m_byte_enable = new [4];
+      rw.set_streaming_width (4);
+      rw.m_data = new [4];
+      foreach (rw.m_data[i])
+         rw.m_data[i] = 8'hff & (bus.data >> (8*i));
+      foreach (bus.byte_en[i])
+         rw.m_byte_enable[i] = bus.byte_en[i];
+      rw.m_response_status = UVM_TLM_OK_RESPONSE;
+   endfunction 
 
 endclass

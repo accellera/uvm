@@ -139,24 +139,33 @@ module tbtest();
 
   class reg2ovc_adapter extends uvm_reg_adapter;
   
-    virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
+    virtual function uvm_sequence_item reg2bus(uvm_tlm_generic_payload rw);
       user_transaction txn = user_transaction::type_id::create("txn");
-      txn.r_wn = (rw.kind == UVM_READ) ? 1 : 0;
-      txn.addr = rw.addr;
-      txn.data = rw.data;
+      txn.r_wn = (rw.m_command == UVM_TLM_READ_COMMAND ) ? 1 : 0;
+      txn.addr = rw.m_address;
+      txn.data = 0;
+      foreach(rw.m_data[i]) begin 
+        txn.data |= (rw.m_data[i] << (i*8));
+      end 
       return txn;
     endfunction
   
-    virtual function void bus2reg(uvm_sequence_item bus_item, ref uvm_reg_bus_op rw);
+    virtual function void bus2reg(uvm_sequence_item bus_item, uvm_tlm_generic_payload rw);
       user_transaction txn;
       if (!$cast(txn,bus_item)) begin 
         `uvm_fatal("NOT_TXN_TYPE","Provided bus_item not correct type")
         return;
       end
-      rw.kind = txn.r_wn ? UVM_READ : UVM_WRITE;
-      rw.addr = txn.addr;
-      rw.data = txn.data;
-      rw.status = UVM_IS_OK;
+      rw.m_command = txn.r_wn ? UVM_TLM_READ_COMMAND : UVM_TLM_WRITE_COMMAND;
+      rw.m_address = txn.addr;
+      rw.m_byte_enable = new [4];
+      rw.set_streaming_width (4);
+      rw.m_data = new [4];
+      foreach (rw.m_data[i]) begin
+        rw.m_data[i] = 8'hff & (txn.data >> (8*i));
+        rw.m_byte_enable[i] = 1;
+      end
+      rw.m_response_status = UVM_TLM_OK_RESPONSE;
     endfunction
     `uvm_object_utils(reg2ovc_adapter)
   endclass

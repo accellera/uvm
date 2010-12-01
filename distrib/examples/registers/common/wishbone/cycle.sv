@@ -132,31 +132,39 @@ class reg2wsh_adapter extends uvm_reg_adapter;
 
   `uvm_object_utils(reg2wsh_adapter)
 
-  virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
+  virtual function uvm_sequence_item reg2bus(uvm_tlm_generic_payload rw);
     wb_cycle cyc = wb_cycle::type_id::create("wb_cycle");
-    cyc.m_kind = (rw.kind == UVM_READ) ? wb_cycle::READ : wb_cycle::WRITE;
-    cyc.m_addr = rw.addr << 2; // BYTE granularity in DWORD bus size
+    cyc.m_kind = (rw.m_command == UVM_TLM_READ_COMMAND) ? wb_cycle::READ : wb_cycle::WRITE;
+    cyc.m_addr = rw.m_address << 2; // BYTE granularity in DWORD bus size
     cyc.m_sel = 4'hf; // 32-bit bus
-    cyc.m_data = rw.data; 
+    cyc.m_data = 0; 
+    foreach(rw.m_data[i])
+      cyc.m_data |= (rw.m_data[i] << (i*8)); 
     cyc.m_lock = 0;
     return cyc;
   endfunction
 
   virtual function void bus2reg(uvm_sequence_item bus_item,
-                                ref uvm_reg_bus_op rw);
+                                uvm_tlm_generic_payload rw);
     wb_cycle cyc;
     if (!$cast(cyc,bus_item)) begin
       `uvm_fatal("NOT_APB_TYPE","Provided bus_item is not of the correct type")
       return;
     end
-    rw.kind = (cyc.m_kind == wb_cycle::READ) ? UVM_READ : UVM_WRITE;
-    rw.addr = cyc.m_addr;
-    rw.data = cyc.m_data;
+    rw.m_command = (cyc.m_kind == wb_cycle::READ) ? UVM_TLM_READ_COMMAND : UVM_TLM_WRITE_COMMAND;
+    rw.m_address = cyc.m_addr;
+    rw.m_byte_enable = new [($size(cyc.m_data)/8)];
+    rw.set_streaming_width (($size(cyc.m_data)/8));
+    rw.m_data = new [4];
+    foreach (rw.m_data[i]) begin
+      rw.m_data[i] = 8'hff & (cyc.m_data >> (8*i));
+      rw.m_byte_enable[i] = 1;
+    end
     // Send the result back to the RegModel
     case (cyc.m_status)
-       wb_cycle::ACK: rw.status = UVM_IS_OK;
-       wb_cycle::RTY: rw.status = UVM_IS_OK;
-       default      : rw.status = UVM_NOT_OK;
+       wb_cycle::ACK: rw.m_response_status = UVM_TLM_OK_RESPONSE;
+       wb_cycle::RTY: rw.m_response_status = UVM_TLM_OK_RESPONSE;
+       default      : rw.m_response_status = UVM_TLM_GENERIC_ERROR_RESPONSE;
     endcase
   endfunction
 

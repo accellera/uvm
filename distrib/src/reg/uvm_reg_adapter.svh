@@ -32,7 +32,7 @@
 //
 // Class: uvm_reg_adapter
 //
-// This class defines an interface for converting between <uvm_reg_bus_op>
+// This class defines an interface for converting between <uvm_tlm_generic_payload>
 // and a specific bus transaction. 
 //------------------------------------------------------------------------------
 
@@ -73,7 +73,7 @@ virtual class uvm_reg_adapter extends uvm_object;
   // the corresponding members from the given ~bus_rw~ item, then
   // return it. The bus item gets returned in a <uvm_sequence_item> base handle.
 
-  pure virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
+  pure virtual function uvm_sequence_item reg2bus(uvm_tlm_generic_payload rw);
 
 
   // Function: bus2reg
@@ -85,7 +85,7 @@ virtual class uvm_reg_adapter extends uvm_object;
   // where the bus response must be returned in the original request.
 
   pure virtual function void bus2reg(uvm_sequence_item bus_item,
-                                     ref uvm_reg_bus_op rw);
+                                     uvm_tlm_generic_payload rw);
 
 
 endclass
@@ -129,89 +129,4 @@ endclass
 //
 //------------------------------------------------------------------------------
 
-
-//------------------------------------------------------------------------------
-//
-// Class: uvm_reg_tlm_adapter
-//
-// For converting between <uvm_reg_bus_op> and <uvm_tlm_gp> items.
-//
-//------------------------------------------------------------------------------
-
-class uvm_reg_tlm_adapter extends uvm_reg_adapter;
-
-  `uvm_object_utils(uvm_reg_tlm_adapter)
-
-  // Function: reg2bus
-  //
-  // Converts a <uvm_reg_bus_op> struct to a <uvm_tlm_gp> item.
-
-  virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
-
-     uvm_tlm_gp gp = uvm_tlm_gp::type_id::create("tlm_gp",, this.get_full_name());
-     int nbytes = (rw.n_bits-1)/8+1;
-     uvm_reg_addr_t addr=rw.addr;
-
-     if (rw.kind == UVM_WRITE)
-        gp.set_command(UVM_TLM_WRITE_COMMAND);
-     else
-        gp.set_command(UVM_TLM_READ_COMMAND);
-
-     gp.set_address(addr);
-
-     gp.m_byte_enable = new [nbytes];
-
-     gp.set_streaming_width (nbytes);
-
-     gp.m_data = new [gp.get_streaming_width()];
-
-     for (int i = 0; i < nbytes; i++) begin
-        gp.m_data[i] = rw.data[i*8+:8];
-        gp.m_byte_enable[i] = (i > nbytes) ? 1'b0 : rw.byte_en[i];
-     end
-
-     return gp;
-
-  endfunction
-
-
-  // Function: bus2reg
-  //
-  // Converts a <uvm_tlm_gp> item to a <uvm_reg_bus_op>.
-  // into the provided ~rw~ transaction.
-  //
-  virtual function void bus2reg(uvm_sequence_item bus_item,
-                                ref uvm_reg_bus_op rw);
-
-    uvm_tlm_gp gp;
-    int nbytes;
-
-    assert(bus_item!=null);
-
-    if (!$cast(gp,bus_item)) begin
-      `uvm_error("WRONG_TYPE","Provided bus_item is not of type uvm_tlm_gp")
-      return;
-    end
-
-    if (gp.get_command() == UVM_TLM_WRITE_COMMAND)
-      rw.kind = UVM_WRITE;
-    else
-      rw.kind = UVM_READ;
-
-    rw.addr = gp.get_address();
-
-    rw.byte_en = 0;
-    foreach (gp.m_byte_enable[i])
-      rw.byte_en[i] = gp.m_byte_enable[i];
-
-    rw.data = 0;
-    foreach (gp.m_data[i])
-      rw.data[i*8+:8] = gp.m_data[i];
-
-    rw.status = (gp.is_response_ok()) ? UVM_IS_OK : UVM_NOT_OK;
-
-
-  endfunction
-
-endclass
 

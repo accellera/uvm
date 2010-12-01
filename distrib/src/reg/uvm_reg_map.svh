@@ -1690,8 +1690,9 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
     foreach(addrs[i]) begin: foreach_addr
 
       uvm_sequence_item bus_req;
-      uvm_reg_bus_op rw_access;
+      uvm_tlm_generic_payload rw_access = new();
       uvm_reg_data_t data;
+      int nbytes = (n_bits-1)/8+1;
 
       data = (value >> (curr_byte*8)) & ((1'b1 << (bus_width * 8))-1);
        
@@ -1699,22 +1700,29 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
          $psprintf("Writing 'h%0h at 'h%0h via map \"%s\"...",
               data, addrs[i], rw.map.get_full_name()), UVM_FULL);
 
+      rw_access.m_byte_enable = new [nbytes];
       if (rw.element_kind == UVM_FIELD) begin
         for (int z=0;z<bus_width;z++)
-          rw_access.byte_en[z] = byte_en[curr_byte+z];
+          rw_access.m_byte_enable[z] = byte_en[curr_byte+z];
+      end
+
+      if (rw.kind == UVM_WRITE)
+        rw_access.set_command(UVM_TLM_WRITE_COMMAND);
+      else
+        rw_access.set_command(UVM_TLM_READ_COMMAND); 
+      rw_access.set_address(addrs[i]);
+      rw_access.set_streaming_width (nbytes);
+      rw_access.m_data  = new [rw_access.get_streaming_width()];
+      for (int i = 0; i < nbytes; i++) begin
+        rw_access.m_data[i] = 8'hFF & ((rw.value[0]) >> (i*8));
+        rw_access.m_byte_enable[i] = (i > nbytes) ? 1'b0 : byte_en[i];
       end
                 
-      rw_access.kind    = rw.kind;
-      rw_access.addr    = addrs[i];
-      rw_access.data    = data;
-      rw_access.n_bits  = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
-      rw_access.byte_en = byte_en;
-
       bus_req = adapter.reg2bus(rw_access);
       bus_req.set_sequencer(sequencer);
       rw.parent.start_item(bus_req,rw.prior);
 
-      if (rw.parent != null && rw_access.addr == addrs[0])
+      if (rw.parent != null && rw_access.m_address == addrs[0])
         rw.parent.mid_do(rw);
 
       rw.parent.finish_item(bus_req);
@@ -1731,10 +1739,10 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
         adapter.bus2reg(bus_req,rw_access);
       end
 
-      if (rw.parent != null && rw_access.addr == addrs[addrs.size()-1])
+      if (rw.parent != null && rw_access.m_address == addrs[addrs.size()-1])
         rw.parent.post_do(rw);
 
-      rw.status = rw_access.status;
+      rw.status = (rw_access.is_response_ok()) ? UVM_IS_OK : UVM_NOT_OK;
 
       `uvm_info(get_type_name(),
          $psprintf("Wrote 'h%0h at 'h%0h via map \"%s\": %s...",
@@ -1809,28 +1817,32 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
     foreach (addrs[i]) begin
 
       uvm_sequence_item bus_req;
-      uvm_reg_bus_op rw_access;
+      uvm_tlm_generic_payload rw_access = new();
       uvm_reg_data_logic_t data;
-       
+      int nbytes = (n_bits-1)/8+1;       
+
       `uvm_info(get_type_name(),
          $psprintf("Reading address 'h%0h via map \"%s\"...",
                    addrs[i], get_full_name()), UVM_FULL);
                 
+      rw_access.m_byte_enable = new [nbytes];
       if (rw.element_kind == UVM_FIELD)
         for (int z=0;z<bus_width;z++)
-          rw_access.byte_en[z] = byte_en[curr_byte+z];
+          rw_access.m_byte_enable[z] = byte_en[curr_byte+z];
 
-      rw_access.kind = rw.kind;
-      rw_access.addr = addrs[i];
-      rw_access.data = 'h0;
-      rw_access.byte_en = byte_en;
-      rw_access.n_bits = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
+      if (rw.kind == UVM_WRITE)
+        rw_access.set_command(UVM_TLM_WRITE_COMMAND);
+      else
+        rw_access.set_command(UVM_TLM_READ_COMMAND); 
+      rw_access.set_address(addrs[i]);
+      rw_access.set_streaming_width (nbytes);
+      rw_access.m_data  = new [rw_access.get_streaming_width()];
                           
       bus_req = adapter.reg2bus(rw_access);
       bus_req.set_sequencer(sequencer);
       rw.parent.start_item(bus_req,rw.prior);
 
-      if (rw.parent != null && rw_access.addr == addrs[0]) begin
+      if (rw.parent != null && rw_access.m_address == addrs[0]) begin
         rw.parent.pre_do(1);
         rw.parent.mid_do(rw);
       end
@@ -1849,9 +1861,11 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
         adapter.bus2reg(bus_req,rw_access);
       end
 
-      data = rw_access.data & ((1<<bus_width*8)-1);
+      data = 0;
+      foreach (rw_access.m_data[i])
+        data |= (rw_access.m_data[i] << (i*8));
 
-      rw.status = rw_access.status;
+      rw.status = (rw_access.is_response_ok()) ? UVM_IS_OK : UVM_NOT_OK;
 
       if (rw.status == UVM_IS_OK && (^data) === 1'bx)
         rw.status = UVM_HAS_X;
@@ -1865,7 +1879,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
 
       rw.value[val_idx] |= data << curr_byte*8;
 
-      if (rw.parent != null && rw_access.addr == addrs[addrs.size()])
+      if (rw.parent != null && rw_access.m_address == addrs[addrs.size()])
         rw.parent.post_do(rw);
 
       curr_byte += bus_width;

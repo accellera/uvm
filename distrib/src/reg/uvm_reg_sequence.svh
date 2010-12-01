@@ -316,7 +316,7 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
   // Variable: adapter
   //
   // The adapter used to convey the parameters of a bus operation in 
-  // terms of a canonical <uvm_reg_bus_op> datum.
+  // terms of a canonical <uvm_tlm_generic_payload> datum.
   // The ~adapter~ must be configured before the run phase.
   //
   uvm_reg_adapter adapter;
@@ -352,13 +352,12 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
   //
   virtual function void write(BUSTYPE tr);
      uvm_reg rg;
-     uvm_reg_bus_op rw;
+     uvm_tlm_generic_payload rw = new();
      assert(adapter != null);
 
      // In case they forget to set byte_en
-     rw.byte_en = -1;
      adapter.bus2reg(tr,rw);
-     rg = map.get_reg_by_offset(rw.addr, (rw.kind == UVM_READ));
+     rg = map.get_reg_by_offset(rw.m_address, (rw.m_command == UVM_TLM_READ_COMMAND));
 
      // ToDo: Add memory look-up and call uvm_mem::XsampleX()
 
@@ -368,7 +367,8 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
        uvm_reg_map local_map;
        uvm_reg_map_info map_info;
        uvm_predict_s predict_info;
- 
+       uvm_reg_data_t byte_en; 
+
        if (!m_pending.exists(rg)) begin
          uvm_reg_item item = new;
          predict_info =new;
@@ -376,14 +376,17 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
          item.element      = rg;
          item.path         = UVM_PREDICT;
          item.map          = map;
-         item.kind         = rw.kind;
+         if (rw.m_command == UVM_TLM_READ_COMMAND)
+           item.kind         = UVM_READ;
+         else
+           item.kind         = UVM_WRITE;
          predict_info.reg_item = item;
          m_pending[rg] = predict_info;
        end
        predict_info = m_pending[rg];
        reg_item = predict_info.reg_item;
 
-       if (predict_info.addr.exists(rw.addr)) begin
+       if (predict_info.addr.exists(rw.m_address)) begin
           `uvm_error("REG_PREDICT_COLLISION",{"Collision detected for register '",
                      rg.get_full_name(),"'"})
           // TODO: what to do with subsequent collisions?
@@ -394,17 +397,19 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
        map_info = local_map.get_reg_map_info(rg);
 
        foreach (map_info.addr[i]) begin
-         if (rw.addr == map_info.addr[i]) begin
+         if (rw.m_address == map_info.addr[i]) begin
             found = 1;
-           reg_item.value[0] |= rw.data << (i * map.get_n_bytes()*8);
-           predict_info.addr[rw.addr] = 1;
+           foreach (rw.m_data[j])
+             reg_item.value[0] |= rw.m_data[j] << ((j + (i * map.get_n_bytes()))*8);
+           predict_info.addr[rw.m_address] = 1;
            if (predict_info.addr.num() == map_info.addr.size()) begin
               // We've captured the entire abstract register transaction.
               uvm_predict_e predict_kind = 
                   (reg_item.kind == UVM_WRITE) ? UVM_PREDICT_WRITE : UVM_PREDICT_READ;
               pre_predict(reg_item);
-
-              rg.XsampleX(reg_item.value[0], rw.byte_en,
+              foreach (rw.m_byte_enable[i])
+                 byte_en[i] = rw.m_byte_enable[i];
+              rg.XsampleX(reg_item.value[0], byte_en,
                           reg_item.kind == UVM_READ, local_map);
               begin
                  uvm_reg_block blk = rg.get_parent();
@@ -413,7 +418,7 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
                               local_map);
               end
 
-              void'(rg.predict(reg_item.value[0], rw.byte_en,
+              void'(rg.predict(reg_item.value[0], byte_en,
                                predict_kind, UVM_FRONTDOOR));
               `uvm_info("REG_PREDICT", {"Observed ",reg_item.kind.name(),
                         " transaction to register ",rg.get_full_name(), ": value='h",
