@@ -38,6 +38,15 @@
 // in which the register is readable and the backdoor,
 // making sure that the resulting value matches the mirrored value.
 //
+// If bit-type resource named
+// "NO_REG_TESTS" or "NO_REG_SHARED_ACCESS_TEST"
+// in the "REG::" namespace
+// matches the full name of the register,
+// the register is not tested.
+//
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.r0.get_full_name()},
+//|                            "NO_REG_TESTS", 1, this);
+//
 // Registers that contain fields with unknown access policies
 // cannot be tested.
 //
@@ -70,8 +79,10 @@ class uvm_reg_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
       end
 
       // Registers with some attributes are not to be tested
-      if (rg.has_attribute("NO_REG_TESTS") ||
-          rg.has_attribute("NO_SHARED_ACCESS_TEST"))
+      if (uvm_resource_db#(bit)::get_by_name({"REG::",rg.get_full_name()},
+                                             "NO_REG_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",rg.get_full_name()},
+                                             "NO_REG_SHARED_ACCESS_TEST", 0) != null )
         return;
 
       // Only look at shared registers
@@ -178,6 +189,16 @@ endclass: uvm_reg_shared_access_seq
 // in which the memory is readable and the backdoor,
 // making sure that the resulting value matches the written value.
 //
+// If bit-type resource named
+// "NO_REG_TESTS", "NO_MEM_TESTS",
+// "NO_REG_SHARED_ACCESS_TEST" or "NO_MEM_SHARED_ACCESS_TEST"
+// in the "REG::" namespace
+// matches the full name of the memory,
+// the memory is not tested.
+//
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.mem0.get_full_name()},
+//|                            "NO_MEM_TESTS", 1, this);
+//
 // The DUT should be idle and not modify the memory during this test.
 //
 //------------------------------------------------------------------------------
@@ -204,9 +225,14 @@ class uvm_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
       end
 
       // Memories with some attributes are not to be tested
-      if (mem.has_attribute("NO_REG_TESTS") ||
-          mem.has_attribute("NO_MEM_TESTS") ||
-          mem.has_attribute("NO_SHARED_ACCESS_TEST"))
+      if (uvm_resource_db#(bit)::get_by_name({"REG::",mem.get_full_name()},
+                                             "NO_REG_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",mem.get_full_name()},
+                                             "NO_MEM_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",mem.get_full_name()},
+                                             "NO_REG_SHARED_ACCESS_TEST", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",mem.get_full_name()},
+                                             "NO_MEM_SHARED_ACCESS_TEST", 0) != null )
             return;
 
       // Only look at shared memories
@@ -313,8 +339,15 @@ endclass: uvm_mem_shared_access_seq
 // and <uvm_mem_shared_access_seq>
 // sequence respectively on every register and memory within it.
 //
-// Blocks, registers and memories with the ~NO_REG_TESTS~ or
-// the ~NO_SHARED_ACCESS_TEST~ attribute are not verified.
+// If bit-type resource named
+// "NO_REG_TESTS", "NO_MEM_TESTS",
+// "NO_REG_SHARED_ACCESS_TEST" or "NO_MEM_SHARED_ACCESS_TEST"
+// in the "REG::" namespace
+// matches the full name of the block,
+// the block is not tested.
+//
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.get_full_name(),".*"},
+//|                            "NO_REG_TESTS", 1, this);
 //
 //------------------------------------------------------------------------------
 
@@ -378,9 +411,14 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uv
       uvm_reg regs[$];
       uvm_mem mems[$];
       
-      if (blk.has_attribute("NO_REG_TESTS") ||
-          blk.has_attribute("NO_MEM_TESTS") ||
-          blk.has_attribute("NO_SHARED_ACCESS_TEST"))
+      if (uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_REG_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_MEM_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_REG_SHARED_ACCESS_TEST", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_MEM_SHARED_ACCESS_TEST", 0) != null )
         return;
 
       this.reset_blk(model);
@@ -390,8 +428,10 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uv
       blk.get_registers(regs, UVM_NO_HIER);
       foreach (regs[i]) begin
          // Registers with some attributes are not to be tested
-         if (regs[i].has_attribute("NO_REG_TESTS") ||
-	     regs[i].has_attribute("NO_SHARED_ACCESS_TEST"))
+         if (uvm_resource_db#(bit)::get_by_name({"REG::",regs[i].get_full_name()},
+                                                "NO_REG_TESTS", 0) != null ||
+	     uvm_resource_db#(bit)::get_by_name({"REG::",regs[i].get_full_name()},
+                                                "NO_REG_SHARED_ACCESS_TEST", 0) != null )
            continue;
          reg_seq.rg = regs[i];
          reg_seq.start(this.get_sequencer(), this);
@@ -401,9 +441,14 @@ class uvm_reg_mem_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uv
       blk.get_memories(mems, UVM_NO_HIER);
       foreach (mems[i]) begin
          // Registers with some attributes are not to be tested
-         if (mems[i].has_attribute("NO_REG_TESTS") ||
-             mems[i].has_attribute("NO_MEM_TESTS") ||
-	     mems[i].has_attribute("NO_SHARED_ACCESS_TEST"))
+         if (uvm_resource_db#(bit)::get_by_name({"REG::",mems[i].get_full_name()},
+                                                "NO_REG_TESTS", 0) != null ||
+             uvm_resource_db#(bit)::get_by_name({"REG::",mems[i].get_full_name()},
+                                                "NO_MEM_TESTS", 0) != null ||
+             uvm_resource_db#(bit)::get_by_name({"REG::",mems[i].get_full_name()},
+                                                "NO_REG_SHARED_ACCESS_TEST", 0) != null ||
+	     uvm_resource_db#(bit)::get_by_name({"REG::",mems[i].get_full_name()},
+                                                "NO_MEM_SHARED_ACCESS_TEST", 0) != null )
             continue;
          mem_seq.mem = mems[i];
          mem_seq.start(this.get_sequencer(), this);

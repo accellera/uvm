@@ -23,8 +23,7 @@
 //----------------------------------------------------------------------
 class slave extends uvm_component;
 
-  typedef slave this_t;
-  uvm_tlm_nb_target_socket #(trans, uvm_tlm_phase_e, this_t) target_socket;
+  uvm_tlm_nb_target_socket #(slave, trans) target_socket;
 
   local uvm_tlm_phase_e state;
   local uvm_tlm_time delay_time;
@@ -42,7 +41,7 @@ class slave extends uvm_component;
   // build
   //--------------------------------------------------------------------
   function void build();
-    target_socket = new("target_socket", this, this);
+    target_socket = new("target_socket", this);
     barrier = uvm_pool#(string, uvm_barrier)::get_global("barrier");
     barrier.set_threshold(barrier.get_threshold() + 1);
   endfunction

@@ -35,6 +35,15 @@
 // via every address map in which the register is mapped,
 // making sure that the resulting value matches the mirrored value.
 //
+// If bit-type resource named
+// "NO_REG_TESTS" or "NO_REG_BIT_BASH_TEST"
+// in the "REG::" namespace
+// matches the full name of the register,
+// the register is not tested.
+//
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.r0.get_full_name()},
+//|                            "NO_REG_TESTS", 1, this);
+//
 // Registers that contain fields with unknown access policies
 // cannot be tested.
 //
@@ -68,8 +77,10 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
       end
 
       // Registers with some attributes are not to be tested
-      if (rg.has_attribute("NO_REG_TESTS") ||
-          rg.has_attribute("NO_BIT_BASH_TEST"))
+      if (uvm_resource_db#(bit)::get_by_name({"REG::",rg.get_full_name()},
+                                             "NO_REG_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",rg.get_full_name()},
+                                             "NO_REG_BIT_BASH_TEST", 0) != null )
             return;
       
       n_bits = rg.get_n_bytes() * 8;
@@ -176,8 +187,14 @@ endclass: uvm_reg_single_bit_bash_seq
 // Verify the implementation of all registers in a block
 // by executing the <uvm_reg_single_bit_bash_seq> sequence on it.
 //
-// Blocks and registers with the ~NO_REG_TESTS~ or
-// the ~NO_BIT_BASH_TEST~ attribute are not verified.
+// If bit-type resource named
+// "NO_REG_TESTS" or "NO_REG_BIT_BASH_TEST"
+// in the "REG::" namespace
+// matches the full name of the block,
+// the block is not tested.
+//
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.get_full_name(),".*"},
+//|                            "NO_REG_TESTS", 1, this);
 //
 //------------------------------------------------------------------------------
 
@@ -233,15 +250,21 @@ class uvm_reg_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_ite
    protected virtual task do_block(uvm_reg_block blk);
       uvm_reg regs[$];
 
-      if (blk.get_attribute("NO_REG_TESTS") != "") return;
-      if (blk.get_attribute("NO_BIT_BASH_TEST") != "") return;
+      if (uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_REG_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_REG_BIT_BASH_TEST", 0) != null )
+         return;
 
       // Iterate over all registers, checking accesses
       blk.get_registers(regs, UVM_NO_HIER);
       foreach (regs[i]) begin
          // Registers with some attributes are not to be tested
-         if (regs[i].get_attribute("NO_REG_TESTS") != "" ||
-             regs[i].get_attribute("NO_BIT_BASH_TEST") != "") continue;
+         if (uvm_resource_db#(bit)::get_by_name({"REG::",regs[i].get_full_name()},
+                                                "NO_REG_TESTS", 0) != null ||
+	     uvm_resource_db#(bit)::get_by_name({"REG::",regs[i].get_full_name()},
+                                                "NO_REG_BIT_BASH_TEST", 0) != null )
+            continue;
          
          reg_seq.rg = regs[i];
          reg_seq.start(null,this);

@@ -62,8 +62,10 @@ class user_acp_reg extends uvm_reg;
       value.configure(this, 16, 0, "RW", 0, 16'h0000, 1, 0, 0);
       value.set_compare(UVM_NO_CHECK);
 
-      set_attribute("NO_BIT_BASH_TEST", "1");
-      set_attribute("NO_REG_ACCESS_TEST", "1");
+      uvm_resource_db#(bit)::set({"REG::",get_full_name()},
+                                 "NO_REG_BIT_BASH_TEST", 1);
+      uvm_resource_db#(bit)::set({"REG::",get_full_name()},
+                                 "NO_REG_ACCESS_TEST", 1);
 
       begin
          user_acp_incr_on_write_cbs cb = new;
