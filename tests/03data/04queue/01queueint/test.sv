@@ -88,7 +88,7 @@ module test;
       obj.set_name("obj");
 
       if(cfg_field_set.size() != 3)
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field is not set ***", UVM_NONE);
+        uvm_report_info("FAILED", $sformatf("*** UVM TEST FAILED cfg_field_set size is %0d, not 3 ***",cfg_field_set.size()), UVM_NONE);
       else begin
         for(int i=0; i<3; ++i)
           if(cfg_field_set[i] != 'haa+i)

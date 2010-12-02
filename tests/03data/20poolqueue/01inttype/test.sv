@@ -1,3 +1,5 @@
+`include "uvm_macros.svh"
+
 module test;
   import uvm_pkg::*;
 

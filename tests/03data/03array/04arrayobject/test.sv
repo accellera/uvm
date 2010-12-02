@@ -108,7 +108,10 @@ module test;
       obj.set_name("obj");
 
       if(cfg_field_set_clone.object.size() != 1 || cfg_field_set_clone.object[0] == cfg_container.object[0]) begin
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_clone is set to ref ***", UVM_NONE);
+        if(cfg_field_set_clone.object.size() != 1)
+          uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_clone.object[] is empty ***", UVM_NONE);
+        else
+          uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_clone.object[0] was not cloned ***", UVM_NONE);
       end
       if((cfg_field_set_clone.value != 0) || (cfg_field_set_clone.object[0].color != BLUE) ||
          (cfg_field_set_clone.object[0].i != 55) || (cfg_field_set_clone.object[0].str != "from cfg")) begin
