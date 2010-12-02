@@ -403,8 +403,10 @@ class uvm_objection extends uvm_report_object;
     if(m_total_count[obj] == 0) m_total_count.delete(obj);
 
     if (source_obj==obj) begin
-      m_source_count[obj] -= count;
-      if(m_source_count[obj] == 0) m_source_count.delete(obj);
+      if(m_source_count.exists(obj)) begin
+        m_source_count[obj] -= count;
+        if(m_source_count[obj] == 0) m_source_count.delete(obj);
+      end
       source_obj = obj;
     end
  
@@ -498,7 +500,8 @@ class uvm_objection extends uvm_report_object;
 
           m_draining.delete(obj);
 
-          diff_count = m_total_count[obj] - count;
+          if(!m_total_count.exists(obj)) diff_count = -count;
+          else diff_count = m_total_count[obj] - count;
 
           // no propagation if the re-raise cancels the drop
           if (diff_count != 0) begin
@@ -599,7 +602,8 @@ class uvm_objection extends uvm_report_object;
 
 
    task wait_get_objection_total(uvm_object obj=null);
-         wait(m_total_count[obj] == 0);      
+     if(!m_total_count.exists(obj)) return;
+     wait(m_total_count[obj] == 0);      
    endtask
    
 
@@ -632,7 +636,10 @@ class uvm_objection extends uvm_report_object;
       return m_total_count[obj];
     else begin
       if ($cast(c,obj)) begin
-        get_objection_total = m_source_count[obj];
+        if (!m_source_count.exists(obj))
+          get_objection_total = 0;
+        else
+          get_objection_total = m_source_count[obj];
         if (c.get_first_child(ch))
         do
           get_objection_total += get_objection_total(c.get_child(ch));
