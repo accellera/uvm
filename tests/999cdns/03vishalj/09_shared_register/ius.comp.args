@@ -1,0 +1,1 @@
+rdb.sv +UVM_VERBOSITY=HIGH -access rw -clean
