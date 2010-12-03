@@ -279,7 +279,7 @@ class uvm_objection extends uvm_report_object;
       m_report(obj,source_obj,description,count,"raised");
 
     raised(obj, source_obj, description, count);
-    `uvm_do_callbacks(uvm_objection,uvm_objection_cb,raised(obj,source_obj,description,count))
+    `uvm_do_callbacks(uvm_objection,uvm_objection_cb,raised(this,obj,source_obj,description,count))
 
     // If this object is still draining from a previous drop, then
     // raise the count and return. Any propagation will be handled
@@ -394,7 +394,7 @@ class uvm_objection extends uvm_report_object;
       m_report(obj,source_obj,description,count,"dropped");
     
     dropped(obj, source_obj, description, count);
-    `uvm_do_callbacks(uvm_objection,uvm_objection_cb,dropped(obj,source_obj,description,count))
+    `uvm_do_callbacks(uvm_objection,uvm_objection_cb,dropped(this,obj,source_obj,description,count))
   
     // if count != 0, no reason to fork
     if (m_total_count.exists(obj) && m_total_count[obj] != 0) begin
@@ -467,7 +467,7 @@ class uvm_objection extends uvm_report_object;
                      m_report(obj,source_obj,description,count,"all_dropped");
     
                   all_dropped(obj,source_obj,description, count);
-                  `uvm_do_callbacks(uvm_objection,uvm_objection_cb,all_dropped(obj,source_obj,description,count))
+                  `uvm_do_callbacks(uvm_objection,uvm_objection_cb,all_dropped(this,obj,source_obj,description,count))
   
                   // wait for all_dropped cbs to complete
                   wait fork;
@@ -766,10 +766,11 @@ endclass
 // <uvm_objection::all_dropped>.
 //
 //| class my_objection_cb extends uvm_objection_cb;
-//|    virtual function void raised (uvm_object obj, uvm_object source_obj,
-//|      string description, int count);
+//|    virtual function void raised (uvm_objection objection, uvm_object obj, 
+//|      uvm_object source_obj, string description, int count);
 //|      if(obj == source_obj)
-//|        $display("Got raise: %s from object %s", description, obj.get_full_name());
+//|        $display("Got %s raise: %s from object %s", objection.get_name(),
+//|           description, obj.get_full_name());
 //|    endfunction
 //| endclass
 //|
@@ -784,14 +785,14 @@ class uvm_objection_cb extends uvm_callback;
   function new(string name);
     super.new(name);
   endfunction
-  virtual function void raised (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
+  virtual function void raised (uvm_objection objection, uvm_object obj, 
+      uvm_object source_obj, string description, int count);
   endfunction
-  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
+  virtual function void dropped (uvm_objection objection, uvm_object obj, 
+      uvm_object source_obj, string description, int count);
   endfunction
-  virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
+  virtual task all_dropped (uvm_objection objection, uvm_object obj, 
+      uvm_object source_obj, string description, int count);
   endtask
 endclass
 
