@@ -27,11 +27,11 @@
   // along with some auxillary functions that UVM needs but are not really
   // part of UVM.
   `include "base/uvm_version.svh"
+  `include "base/uvm_object_globals.svh"
   `include "base/uvm_misc.sv"
 
   // The base object element. Contains data methods (copy/compare etc) and
   // factory creation methods (create). Also includes control classes.
-  `include "base/uvm_object_globals.svh"
   `include "base/uvm_object.sv"
 
   `include "base/uvm_pool.svh"
@@ -63,18 +63,27 @@
   // The phase declarations. uvm_component does the actual phasing.
   `include "base/uvm_phases.sv"
 
+  // Resources/configuration facility
+  `include "base/uvm_spell_chkr.svh"
+  `include "base/uvm_resource.svh"
+  `include "base/uvm_resource_db.svh"
+  `include "base/uvm_config_db.svh"
+  `include "base/uvm_resource_specializations.svh"
+
   // uvm_component has a co-dependency with the factory. 
   `include "base/uvm_factory.sv"
   `include "base/uvm_registry.svh"
 
   `include "base/uvm_component.sv"
-  `include "base/uvm_config.sv"
 
   // Objection interface
   `include "base/uvm_objection.svh"
   `include "base/uvm_heartbeat.svh"
 
   `include "base/uvm_globals.svh"
+
+  // Command Line Processor
+  `include "base/uvm_cmdline_processor.svh"
 
   `include "base/uvm_extern_report_server.svh"
 

@@ -445,4 +445,15 @@ function bit uvm_is_array(string arg);
   if(arg[last] == "]") uvm_is_array = 1;
 endfunction
 
+function bit uvm_has_wildcard (string arg);
+  //if it is a regex then return true
+  if( (arg.len() > 1) && (arg[0] == "/") && (arg[arg.len()-1] == "/") )
+    return 1;
 
+  //check if it has globs
+  foreach(arg[i])
+    if( (arg[i] == "*") || (arg[i] == "+") || (arg[i] == "?") )
+      return 1;
+
+  return 0;
+endfunction

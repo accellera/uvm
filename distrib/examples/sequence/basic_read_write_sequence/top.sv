@@ -232,7 +232,6 @@ task run();
       #0;
     end
     wait fork;
-    report_summarize();
     global_stop_request();
 endtask
 

@@ -1,3 +1,0 @@
-vlib work
-vlog -f compile_questa_sv.f
-vsim +UVM_TESTNAME=test_read_modify_write -do vsim.do -c -suppress 3829 xbus_tb_top

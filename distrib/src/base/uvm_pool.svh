@@ -20,9 +20,12 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
+// Title: Pool Classes
+// This section defines the <uvm_pool #(T)> class and derivative.
+
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_pool #(T)
+// CLASS: uvm_pool #(KEY,T)
 //
 //------------------------------------------------------------------------------
 // Implements a class-based dynamic associative array. Allows sparse arrays to
@@ -91,13 +94,10 @@ class uvm_pool #(type KEY=int, T=uvm_void) extends uvm_object;
 
   // Function: add
   //
-  // Adds the given (~key~, ~item~) pair to the pool.
+  // Adds the given (~key~, ~item~) pair to the pool. If an item already
+  // exists at the given ~key~ it is overwritten with the new ~item~.
 
   virtual function void add (KEY key, T item);
-    if (pool.exists(key)) begin
-      uvm_report_warning("POOLEXST",
-        $psprintf("add: value for given key already exists. Replacing with new value."));
-    end
     pool[key] = item;
   endfunction
   
@@ -237,10 +237,11 @@ endclass
 // CLASS: uvm_object_string_pool #(T)
 //
 //------------------------------------------------------------------------------
-// This provides a specialization of the generic <uvm_pool #(KEY,T) class for
+// This provides a specialization of the generic <uvm_pool #(KEY,T)> class for
 // an associative array of <uvm_object>-based objects indexed by string. 
-// Specializations of this class include the ~uvm_event_pool~ and
-// ~uvm_barrier_pool~ classes.
+// Specializations of this class include the ~uvm_event_pool~ (a
+// uvm_object_string_pool storing <uvm_event>s) and
+// ~uvm_barrier_pool~ (a uvm_obejct_string_pool storing <uvm_barrier>s).
 //------------------------------------------------------------------------------
 
 class uvm_object_string_pool #(type T=uvm_object) extends uvm_pool #(string,T);

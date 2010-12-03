@@ -922,7 +922,7 @@ function void uvm_tree_printer::print_id (string id, byte scope_separator=".");
 
   indent(m_scope.depth(), knobs.indent_str);
   super.print_id(id, scope_separator);
-  if(id == "" || id == "...") return;
+  if(id == "" || id == "..." || !knobs.identifier) return;
   write_stream(": "); 
 
   knobs.full_name = fn;

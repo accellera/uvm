@@ -379,7 +379,7 @@ function void uvm_packer::unpack_object(uvm_object value);
     count+=4;
   end
 
-  // NOTE- policy is a _pack_ policy, not unpack policy;
+  // NOTE- policy is a ~pack~ policy, not unpack policy;
   //       and you can't pack an object by REFERENCE
   if (value != null)begin
     if (is_non_null > 0) begin

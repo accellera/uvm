@@ -25,7 +25,7 @@
 
 typedef class uvm_objection;
 
-`include "base/uvm_config.svh"
+//`include "base/uvm_config.svh"
 
 //------------------------------------------------------------------------------
 //
@@ -164,6 +164,14 @@ virtual class uvm_component extends uvm_report_object;
   extern function uvm_component lookup (string name);
 
 
+  // Function: get_depth
+  //
+  // Returns the component's depth from the root level. uvm_top has a
+  // depth of 0. The test and any other top level components have a depth
+  // of 1, and so on.
+
+  extern function int unsigned get_depth();
+
 
   //----------------------------------------------------------------------------
   // Group: Phasing Interface
@@ -209,7 +217,7 @@ virtual class uvm_component extends uvm_report_object;
   //     stop - When a component's <enable_stop_interrupt> bit is set and
   //            <global_stop_request> is called, the component's <stop> task
   //            is called. Components can implement stop to allow completion
-  //            of in-progress transactions, <flush> queues, etc. Upon return
+  //            of in-progress transactions, flush queues, etc. Upon return
   //            from stop() by all enabled components, a <do_kill_all> is
   //            issued. If the <uvm_test_done_objection> is being used,
   //            this stopping procedure is deferred until all outstanding
@@ -565,6 +573,8 @@ virtual class uvm_component extends uvm_report_object;
   // Used for caching config settings
   static bit m_config_set = 1;
 
+  extern function string massage_scope(string scope);
+
   // Function: set_config_int
 
   extern virtual function void set_config_int (string inst_name,  
@@ -713,8 +723,8 @@ virtual class uvm_component extends uvm_report_object;
   // To get all configuration information prior to the run phase, do something 
   // like this in your top object:
   //|  function void start_of_simulation();
-  //|    set_report_id_action_hier(CFGOVR, UVM_DISPLAY);
-  //|    set_report_id_action_hier(CFGSET, UVM_DISPLAY);
+  //|    set_report_id_action_hier("CFGOVR", UVM_DISPLAY);
+  //|    set_report_id_action_hier("CFGSET", UVM_DISPLAY);
   //|    check_config_usage();
   //|  endfunction
 
@@ -767,11 +777,38 @@ virtual class uvm_component extends uvm_report_object;
   //
   // If ~recurse~ is set, then configuration information for all ~comp~'s
   // children and below are printed as well.
+  //
+  // This function has been deprecated.  Use print_config instead.
 
   extern function void print_config_settings (string field="", 
                                               uvm_component comp=null, 
                                               bit recurse=0);
 
+  // Function: print_config
+  //
+  // Print_config_settings prints all configuration information for this
+  // component, as set by previous calls to set_config_* and exports to
+  // the resources pool.  The settings are printing in the order of
+  // their precedence.
+  //
+  // If ~recurse~ is set, then configuration information for all
+  // children and below are printed as well.
+  //
+  // if ~audit~ is set then the audit trail for each resource is printed
+  // along with the resource name and value
+
+  extern function void print_config(bit recurse = 0, bit audit = 0);
+
+  // Function: print_config_with_audit
+  //
+  // Operates the same as print_config except that the audit bit is
+  // forced to 1.  This interface makes user code a bit more readable as
+  // it avoids multiple arbitrary bit settings in the argument list.
+  //
+  // If ~recurse~ is set, then configuration information for all
+  // children and below are printed as well.
+
+  extern function void print_config_with_audit(bit recurse = 0);
 
   // Variable: print_config_matches
   //
@@ -925,13 +962,14 @@ virtual class uvm_component extends uvm_report_object;
   // ~override_type~. 
   //
   // The original and override types are lightweight proxies to the types they
-  // represent. They can be obtained by calling type::get_type(), if
-  // implemented, or by directly calling type::type_id::get(), where type is the
-  // user type and type_id is the name of the typedef to
+  // represent. They can be obtained by calling ~type::get_type()~, if
+  // implemented by ~type~, or by directly calling ~type::type_id::get()~, where 
+  // ~type~ is the user type and ~type_id~ is the name of the typedef to
   // <uvm_object_registry #(T,Tname)> or <uvm_component_registry #(T,Tname)>.
   //
   // If you are employing the `uvm_*_utils macros, the typedef and the get_type
-  // method will be implemented for you.
+  // method will be implemented for you. For details on the utils macros
+  // refer to <Utility and Field Macros for Components and Objects>.
   //
   // The following example shows `uvm_*_utils usage:
   //
@@ -1027,10 +1065,32 @@ virtual class uvm_component extends uvm_report_object;
   // report will be sent to its associated FILE descriptor.
   //----------------------------------------------------------------------------
 
+  // Function: set_report_id_verbosity_hier
+
+  extern function void set_report_id_verbosity_hier (string id,
+                                                  int verbosity);
+
+  // Function: set_report_severity_id_verbosity_hier
+  //
+  // These methods recursively associate the specified verbosity with reports of
+  // the given ~severity~, ~id~, or ~severity-id~ pair. An verbosity associated
+  // with a particular severity-id pair takes precedence over an verbosity
+  // associated with id, which takes precedence over an an verbosity associated
+  // with a severity.
+  //
+  // For a list of severities and their default verbosities, refer to
+  // <uvm_report_handler>.
+
+  extern function void set_report_severity_id_verbosity_hier(uvm_severity severity,
+                                                          string id,
+                                                          int verbosity);
+
+
   // Function: set_report_severity_action_hier
 
   extern function void set_report_severity_action_hier (uvm_severity severity,
                                                         uvm_action action);
+
 
   // Function: set_report_id_action_hier
 
@@ -1234,8 +1294,8 @@ virtual class uvm_component extends uvm_report_object;
   // Function: record_error_tr
   //
   // This function marks an error transaction by a component. Properties of the
-  // given uvm_object, ~info~, as implemented in its <do_record> method, are
-  // recorded to the transaction database.
+  // given uvm_object, ~info~, as implemented in its <uvm_object::do_record> method,
+  // are recorded to the transaction database.
   //
   // An ~error_time~ of 0 indicates to use the current simulation time. The
   // ~keep_active~ bit determines if the handle should remain active. If 0,
@@ -1302,11 +1362,6 @@ virtual class uvm_component extends uvm_report_object;
   extern       function void set_int_local (string field_name, 
                                uvm_bitstream_t value,
                                bit recurse=1);
-  extern local function void m_component_path (ref uvm_component path[$]);
-  extern local function void m_get_config_matches
-                             (ref uvm_config_setting cfg_matches[$], 
-                              input uvm_config_setting::uvm_config_type cfgtype, 
-                              string field_name);
 
   /*protected*/ uvm_component m_parent;
   protected uvm_component m_children[string];
@@ -1323,8 +1378,6 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual function void flush ();
 
   uvm_phase m_curr_phase=null;
-
-  protected uvm_config_setting m_configuration_table[$];
 
   protected bit m_build_done=0;
 
@@ -1360,6 +1413,7 @@ virtual class uvm_component extends uvm_report_object;
   extern         function void   do_print(uvm_printer printer);
 
 endclass : uvm_component
+
 
 `endif // UVM_COMPONENT_SVH
 

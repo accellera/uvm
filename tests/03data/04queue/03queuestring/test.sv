@@ -19,13 +19,13 @@
 
 //Field Macros:
 //This test verifies that the basic funcitonality in uvm_field_queue_string
-//macro works as expected.
+//macro works as expected. Auto config is seperated tested due to issues.
 //
 //The macros which are tested are:
 //  `uvm_field_queue_string
 
 //Pass/Fail criteria:
-//  The copy, compare, pack, unpack, print, record and set_config_int must
+//  The copy, compare, pack, unpack, print, record must
 //  produce the correct results.
 //
 
@@ -79,19 +79,6 @@ module test;
 
       obj.set_name("obj");
 
-      if(cfg_field_set.size() != 3)
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field is not set ***", UVM_NONE);
-      else begin
-        if(cfg_field_set[0] != "zero")
-          uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field[0] is not set ***", UVM_NONE);
-        if(cfg_field_set[1] != "one")
-          uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field[1] is not set ***", UVM_NONE);
-        if(cfg_field_set[2] != "two")
-          uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field[2] is not set ***", UVM_NONE);
-      end
-      if(cfg_field_notset.size() != 0)
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_notset is set ***", UVM_NONE);
- 
       for(int i=0; i<5; ++i) begin
         obj.str1.push_back($sformatf("hello_%0d",i));
         obj.str2.push_back($sformatf("howdy_%0d",i));
@@ -134,10 +121,6 @@ module test;
   endclass
 
   initial begin
-    set_config_int("*", "cfg_field_set", 3);
-    set_config_string("*", "cfg_field_set[0]", "zero");
-    set_config_string("*", "cfg_field_set[1]", "one");
-    set_config_string("*", "cfg_field_set[2]", "two");
     run_test();
   end
 

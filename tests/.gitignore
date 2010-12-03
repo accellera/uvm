@@ -1,0 +1,4 @@
+*.log
+*.fails
+transcript
+*.swp

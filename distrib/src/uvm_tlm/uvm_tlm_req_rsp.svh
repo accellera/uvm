@@ -20,6 +20,13 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+
+//------------------------------------------------------------------------------
+// Title: TLM Channel Classes
+//------------------------------------------------------------------------------
+// This section defines built-in TLM channel classes.
+//------------------------------------------------------------------------------
+
 //------------------------------------------------------------------------------
 //
 // CLASS: uvm_tlm_req_rsp_channel #(REQ,RSP)
@@ -111,7 +118,7 @@ class uvm_tlm_req_rsp_channel #(type REQ=int, type RSP=REQ) extends uvm_componen
 
   // Port: request_ap
   //
-  // Transactions passed via put or try_put (via any port connected to the
+  // Transactions passed via ~put~ or ~try_put~ (via any port connected to the
   // put_request_export) are sent out this port via its write method.
   //
   //|  function void write (T t);
@@ -123,7 +130,7 @@ class uvm_tlm_req_rsp_channel #(type REQ=int, type RSP=REQ) extends uvm_componen
 
   // Port: response_ap
   //
-  // Transactions passed via put or try_put (via any port connected to the
+  // Transactions passed via ~put~ or ~try_put~ (via any port connected to the
   // put_response_export) are sent out this port via its write method.
   //
   //|  function void write (T t);

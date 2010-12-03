@@ -25,7 +25,7 @@ package NaturalDocs::Topics;
 use base 'Exporter';
 our @EXPORT = ( 'TOPIC_GENERAL', 'TOPIC_GENERIC', 'TOPIC_GROUP', 'TOPIC_CLASS', 'TOPIC_FILE', 'TOPIC_FUNCTION',
                           'TOPIC_VARIABLE', 'TOPIC_PROPERTY', 'TOPIC_TYPE', 'TOPIC_ENUMERATION', 'TOPIC_CONSTANT',
-                          'TOPIC_INTERFACE', 'TOPIC_EVENT', 'TOPIC_DELEGATE', 'TOPIC_SECTION' );
+                          'TOPIC_INTERFACE', 'TOPIC_EVENT', 'TOPIC_DELEGATE', 'TOPIC_SECTION', 'TOPIC_GLOBGROUP' );
 
 
 
@@ -69,6 +69,7 @@ use constant TOPIC_CLASS => 'class';
 use constant TOPIC_INTERFACE => 'interface';
 use constant TOPIC_FILE => 'file';
 use constant TOPIC_SECTION => 'section';
+use constant TOPIC_GLOBGROUP => 'global_group';
 use constant TOPIC_FUNCTION => 'function';
 use constant TOPIC_VARIABLE => 'variable';
 use constant TOPIC_PROPERTY => 'property';

@@ -33,16 +33,11 @@ class uvm_factory_queue_class;
   uvm_factory_override queue[$];
 endclass
 
+//------------------------------------------------------------------------------
 // Title: UVM Factory
 //
-// This page covers the following classes.
-//
-// - <uvm_factory> - creates objects and components according to user-defined
-// type and instance-based overrides.
-//
-// - <uvm_object_wrapper> - a lightweight substitute (proxy) representing a
-// user-defined object or component.
-
+// This page covers the classes that define the UVM factory facility.
+//------------------------------------------------------------------------------
 
 
 //------------------------------------------------------------------------------
@@ -608,7 +603,7 @@ endclass
 //|  endmodule
 //
 // When the above example is run, the resulting topology (displayed via a call to
-// <uvm_top.print_topology> in env's <uvm_component::end_of_elaboration> method)
+// <uvm_root::print_topology> in env's <uvm_component::end_of_elaboration> method)
 // is similar to the following:
 //
 //| # UVM_INFO @ 0 [RNTST] Running test ...

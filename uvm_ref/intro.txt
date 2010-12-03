@@ -14,6 +14,11 @@ We divide the UVM classes and utilities into categories pertaining to their
 role or function. A more detailed overview of each category-- and the classes
 comprising them-- can be found in the menu at left.
 
+Globals - This category defines a small list of types, variables, functions,
+and tasks defined in the ~uvm_pkg~ scope.  These items are accessible from
+any scope that imports the ~uvm_pkg~. See <Types and Enumerations> and
+<Globals> for details.
+
 Base - This basic building blocks for all environments are components,
 which do the actual work, transactions, which convey information between
 components, and ports, which provide the interfaces used to convey
@@ -33,8 +38,12 @@ allows dynamically configurable component hierarchies and object substitutions
 without having to modify their code and without breaking encapsulation.
 See <Factory Classes> for details.
 
+Configuration and Resources - Need content.
+
 Sychronization - The UVM provides event and barrier synchronization classes
 for process synchronization. See <Synchronization Classes> for more information.
+
+Containers - Need content.
 
 Policies - Each of UVM's policy classes perform a specific task for
 <uvm_object>-based objects: printing, comparing, recording, packing, and unpacking.
@@ -49,7 +58,7 @@ and the ports and exports that facilitate their use.  Each TLM interface
 consists of one or more methods used to transport data, typically whole
 transactions (objects) at a time.  Component designs that use TLM ports and
 exports to communicate are inherently more reusable, interoperable, and modular.
-See <TLM Interfaces, Ports, and Exports> for details.
+See <TLM Interfaces> for details.
 
 Components - Components form the foundation of the UVM. They encapsulate
 behavior of drivers, scoreboards, and other objects in a testbench.
@@ -73,8 +82,13 @@ Macros - The UVM provides several macros to help increase user productivity.
 See ~Utility and Field Macros~ and <Sequence and Do Action Macros> for a
 complete list.
 
-Globals - This category defines a small list of types, variables, functions,
-and tasks defined in ~<uvm_pkg~ scope.  These items are accessible from
-any scope that imports the ~uvm_pkg~. See <Types and Enumerations> and
-<Globals> for details.
+Register Layer - The Register abstraction classes, when properly extended,
+abstract the read/write operations to registers and memories
+in a design-under-verification.
+See <Register Layer> for more information.
+
+Command Line Processor - The command line processor provides a general
+interface to the command line arguments that were provided for the given
+simulation.  The capabilities are detailed in the <uvm_cmdline_processor>
+section.
 

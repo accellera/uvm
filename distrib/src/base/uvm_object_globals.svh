@@ -30,12 +30,17 @@ bit uvm_start_uvm_declarations = 1;
 //
 //------------------------------------------------------------------------------
 
+//------------------------
+// Group: Field automation
+//------------------------
+
+// Macro: `UVM_MAX_STREAMBITS
+//
+// Defines the maximum bit vector size for integral types.
+
 `ifndef UVM_MAX_STREAMBITS
 `define UVM_MAX_STREAMBITS 4096
 `endif
-
-
-// Current problem with large vector inout decls.
 
 parameter UVM_STREAMBITS = `UVM_MAX_STREAMBITS; 
 
@@ -44,13 +49,15 @@ parameter UVM_STREAMBITS = `UVM_MAX_STREAMBITS;
 //
 // The bitstream type is used as a argument type for passing integral values
 // in such methods as set_int_local, get_int_local, get_config_int, report,
-// pack and unpack.
+// pack and unpack. 
 
 typedef logic signed [UVM_STREAMBITS-1:0] uvm_bitstream_t;
 
 
 
 // Enum: uvm_radix_enum
+//
+// Specifies the radix to print or record in.
 //
 // UVM_BIN       - Selects binary (%b) format
 // UVM_DEC       - Selects decimal (%d) format
@@ -89,7 +96,10 @@ function string uvm_radix_to_string(uvm_radix_enum radix);
   endcase
 endfunction
 
+
 // Enum: uvm_recursion_policy_enum
+//
+// Specifies the policy for copying objects.
 //
 // UVM_DEEP      - Objects are deep copied (object must implement copy method)
 // UVM_SHALLOW   - Objects are shallow copied using default SV copy.
@@ -103,8 +113,38 @@ typedef enum {
  } uvm_recursion_policy_enum;
 
 
+// Enum: uvm_active_passive_enum
+//
+// Convenience value to define whether a component, usually an agent,
+// is in "active" mode or "passive" mode.
 
-// Parameters
+typedef enum bit { UVM_PASSIVE=0, UVM_ACTIVE=1 } uvm_active_passive_enum;
+
+
+// Parameter: `uvm_field_* macro flags
+//
+// Defines what operations a given field should be involved in.
+// Bitwise OR all that apply.
+//
+// UVM_DEFAULT   - All field operations turned on
+// UVM_COPY      - Field will participate in <uvm_object::copy>
+// UVM_COMPARE   - Field will participate in <uvm_object::compare>
+// UVM_PRINT     - Field will participate in <uvm_object::print>
+// UVM_RECORD    - Field will participate in <uvm_object::record>
+// UVM_PACK      - Field will participate in <uvm_object::pack>
+//
+// UVM_NOCOPY    - Field will not participate in <uvm_object::copy>
+// UVM_NOCOMPARE - Field will not participate in <uvm_object::compare>
+// UVM_NOPRINT   - Field will not participate in <uvm_object::print>
+// UVM_NORECORD  - Field will not participate in <uvm_object::record>
+// UVM_NOPACK    - Field will not participate in <uvm_object::pack>
+//
+// UVM_DEEP      - Object field will be deep copied
+// UVM_SHALLOW   - Object field will be shallow copied
+// UVM_REFERENCE - Object field will copied by reference
+//
+// UVM_READONLY  - Object field will NOT be automatically configured.
+
 
 parameter UVM_MACRO_NUMFLAGS    = 17;
 //A=ABSTRACT Y=PHYSICAL
@@ -158,8 +198,9 @@ string uvm_aa_string_key;
 
 
 
+//-----------------
 // Group: Reporting
-
+//-----------------
 
 // Enum: uvm_severity
 //
@@ -196,6 +237,8 @@ typedef enum uvm_severity
 //                   When this value reaches max_quit_count, the simulation terminates
 //   UVM_EXIT      - Terminates the simulation immediately.
 //   UVM_CALL_HOOK - Callback the report hook methods 
+//   UVM_STOP      - Causes ~$stop~ to be executed, putting the simulation into
+//                   interactive mode.
 
 
 typedef int uvm_action;
@@ -236,17 +279,19 @@ typedef enum {
   UVM_DEBUG  = 500
 } uvm_verbosity;
 
-typedef int UVM_FILE;
-typedef uvm_action id_actions_array[string];
-typedef UVM_FILE id_file_array[string];
 
+typedef int UVM_FILE;
 uvm_action s_default_action_array[string]; // default is already NO_ACTION
 UVM_FILE s_default_file_array[string]; // default is already 0
 
 
+//-----------------
 // Group: Port Type
+//-----------------
 
 // Enum: uvm_port_type_e
+//
+// Specifies the type of port
 //
 // UVM_PORT           - The port requires the interface that is its type
 //                      parameter.
@@ -264,9 +309,13 @@ typedef enum {
 } uvm_port_type_e;
 
 
+//-----------------
 // Group: Sequences
+//-----------------
 
 // Enum: uvm_sequence_state_enum
+//
+// Defines current sequence state
 //
 // CREATED            - The sequence has been allocated.
 // PRE_BODY           - The sequence is started and the pre_body task is
@@ -291,15 +340,13 @@ typedef enum { CREATED   = 1,
 
 
 
-//------------------------------------------------------------------------------
-//
+//------------------------------
 // Group: Default Policy Classes
+//------------------------------
 //
-// Policy classes for <uvm_object> basic functions, <uvm_object::copy>,
-// <uvm_object::compare>, <uvm_object::pack>, <uvm_object::unpack>, and
-// <uvm_object::record>.
-//
-//------------------------------------------------------------------------------
+// Policy classes copying, comparing, packing, unpacking, and recording
+// <uvm_object>-based objects.
+
 
 typedef class uvm_printer;
 typedef class uvm_table_printer;
@@ -335,8 +382,8 @@ uvm_line_printer uvm_default_line_printer  = new();
 
 // Variable: uvm_default_printer
 //
-// The default printer is a global object that is used by <uvm_object::print>
-// or <uvm_object::sprint> when no specific printer is set. 
+// The default printer policy. Used when calls to <uvm_object::print>
+// or <uvm_object::sprint> do not specify a printer policy.
 //
 // The default printer may be set to any legal <uvm_printer> derived type,
 // including the global line, tree, and table printers described above.
@@ -346,9 +393,8 @@ uvm_printer uvm_default_printer = uvm_default_table_printer;
 
 // Variable: uvm_default_packer
 //
-// The default packer policy. If a specific packer instance is not supplied in
-// calls to <uvm_object::pack> and <uvm_object::unpack>, this instance is
-// selected.
+// The default packer policy. Used when calls to <uvm_object::pack>
+// and <uvm_object::unpack> do not specify a packer policy.
 
 uvm_packer uvm_default_packer = new();
 
@@ -356,16 +402,16 @@ uvm_packer uvm_default_packer = new();
 // Variable: uvm_default_comparer
 //
 //
-// The default compare policy. If a specific comparer instance is not supplied
-// in calls to <uvm_object::compare>, this instance is selected.
+// The default compare policy. Used when calls to <uvm_object::compare>
+// do not specify a comparer policy.
 
 uvm_comparer uvm_default_comparer = new(); // uvm_comparer::init();
 
 
 // Variable: uvm_default_recorder
 //
-// The default recording policy. If a specific recorder instance is not
-// supplied in calls to <uvm_object::record>.
+// The default recording policy. Used when calls to <uvm_object::record>
+// do not specify a recorder policy.
 
 uvm_recorder uvm_default_recorder = new();
 

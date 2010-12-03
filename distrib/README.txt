@@ -12,9 +12,37 @@ the licese is provided in this kit in the file LICENSE.txt
 Installing the kit
 ------------------
 
-Installation of UVM requires only unpacking the kit in a convenient
-location.  No additional installation procedures or scripts are
-necessary.
+Installation of UVM requires first unpacking the kit in a convenient
+location.
+
+    % mkdir path/to/convenient/location
+    % cd path/to/convenient/location
+    % gunzip -c path/to/UVM/distribution/tar.gz | tar xvf -
+
+You should define the $UVM_HOME environment variable to that
+convenient location using an absolute path name. The following
+instructions assume that this variable is appropriately set.
+
+   % setenv UVM_HOME /absolute/path/to/convenient/location
+
+You must then obtain from your SystemVerilog tool vendor a tool-specific
+distribution overlay. That overlay may be specific to the machine
+architecture and/or operating system you are using. Make sure you provide
+the output of the '$UVM_HOME/bin/uvm_os_name' script as well as the version
+of the simulator you are using when requesting a UVM overlay from your vendor.
+
+            % $UVM_HOME/bin/uvm_os_name
+   IUS:     % irun -version
+   Questa:  % vlog -version
+   VCS:     % vcs -ID
+
+Follow the installation instructions provided by your tool vendor for
+installing the overlay in your UVM installation.
+
+Note to EDA vendors: to support multiple tool-specific overlays in the
+same UVM distribution, please locate any tool-specific files in a
+tool-specific sub-directory.
+
 
 Using the UVM
 -------------
@@ -33,5 +61,9 @@ To use the include technique you include a single file:
 
 You will need to put the location of the UVM source as a include
 directory in your compilation command line.
+
+You will need to specify the location of the UVM DPI shared library
+to your simulator. This is a simulator-specific specification.
+Please refer to your simulator documentation.
 
 ------------------------------------------------------------------------
