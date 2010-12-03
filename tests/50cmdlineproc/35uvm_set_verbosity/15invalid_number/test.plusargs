@@ -1,0 +1,2 @@
++UVM_VERBOSITY=UVM_MEDIUM
++uvm_set_verbosity=uvm_test_top.mc0,_ALL_,UVM_FULL

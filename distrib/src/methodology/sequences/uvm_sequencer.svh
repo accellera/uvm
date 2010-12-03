@@ -38,11 +38,12 @@ class uvm_sequencer #(type REQ = uvm_sequence_item,
   bit     sequence_item_requested = 0;
   bit     get_next_item_called    = 0;
 
+  `uvm_component_param_utils(this_type)
 
   // Variable: seq_item_export
   //
   // This export provides access to this sequencer's implementation of the
-  // sequencer interface, <sqr_if_base #(REQ,RSP)>, which defines the following
+  // sequencer interface, <uvm_sqr_if_base #(REQ,RSP)>, which defines the following
   // methods:
   //
   //|  virtual task          get_next_item      (output REQ request);
@@ -54,7 +55,7 @@ class uvm_sequencer #(type REQ = uvm_sequence_item,
   //|  virtual task          peek               (output REQ request);
   //|  virtual task          put                (input RSP response);
   //
-  // See <sqr_if_base #(REQ,RSP)> for information about this interface.
+  // See <uvm_sqr_if_base #(REQ,RSP)> for information about this interface.
 
   uvm_seq_item_pull_imp #(REQ, RSP, this_type) seq_item_export;
 
@@ -205,7 +206,7 @@ class uvm_sequencer #(type REQ = uvm_sequence_item,
     get_next_item_called = 0;
     
     if (m_req_fifo.try_get(t) == 0) begin
-      uvm_report_fatal(get_full_name(), "Item done reports empty request fifo", UVM_NONE);
+      uvm_report_fatal(get_full_name(), "Item_done() called with no outstanding requests.  Each call to item_done() must be paired with a previous call to get_next_item().");
     end else begin
       m_wait_for_item_sequence_id = t.get_sequence_id();
       m_wait_for_item_transaction_id = t.get_transaction_id();

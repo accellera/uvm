@@ -19,7 +19,8 @@
 
 //Field Macros:
 //This test verifies that the basic funcitonality in uvm_field_array_string
-//macro works as expected.
+//macro works as expected. Due to issues with auto-configuration of
+//non-integral arrays, that testing is in a seperate test.
 //
 //The macros which are tested are:
 //  `uvm_field_array_string
@@ -44,13 +45,8 @@ module test;
   endclass
 
   class test extends uvm_test;
-    string cfg_field_set[];
-    string cfg_field_notset[];
-
     `uvm_new_func
     `uvm_component_utils_begin(test)
-      `uvm_field_array_string(cfg_field_set, UVM_DEFAULT)
-      `uvm_field_array_string(cfg_field_notset, UVM_DEFAULT)
     `uvm_component_utils_end
 
     myobject obj = new;
@@ -79,19 +75,6 @@ module test;
 
       obj.set_name("obj");
 
-      if(cfg_field_set.size() != 3)
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field is not set ***", UVM_NONE);
-      else begin
-        if(cfg_field_set[0] != "zero")
-          uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field[0] is not set ***", UVM_NONE);
-        if(cfg_field_set[1] != "one")
-          uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field[1] is not set ***", UVM_NONE);
-        if(cfg_field_set[2] != "two")
-          uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field[2] is not set ***", UVM_NONE);
-      end
-      if(cfg_field_notset.size() != 0)
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_notset is set ***", UVM_NONE);
- 
       obj.str1=new[5]; obj.str2 = new[5];
       foreach(obj.str1[i]) begin
         obj.str1[i] = $sformatf("hello_%0d",i);
@@ -135,10 +118,6 @@ module test;
   endclass
 
   initial begin
-    set_config_int("*", "cfg_field_set", 3);
-    set_config_string("*", "cfg_field_set[0]", "zero");
-    set_config_string("*", "cfg_field_set[1]", "one");
-    set_config_string("*", "cfg_field_set[2]", "two");
     run_test();
   end
 

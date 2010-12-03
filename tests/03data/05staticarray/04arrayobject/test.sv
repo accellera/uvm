@@ -19,13 +19,13 @@
 
 //Field Macros:
 //This test verifies that the basic funcitonality in uvm_field_sarray_object
-//macro works as expected.
+//macro works as expected. Auto-config testing is done in a seperate test.
 //
 //The macros which are tested are:
 //  `uvm_field_int
 
 //Pass/Fail criteria:
-//  The copy, compare, pack, unpack, print, record and set_config_int must
+//  The copy, compare, pack, unpack, print, record and must
 //  produce the correct results.
 //
 
@@ -62,20 +62,9 @@ module test;
     endfunction
   endclass
 
-  container cfg_container = new;
-
   class test extends uvm_test;
-    container cfg_field_set_clone = new;
-    container cfg_field_set_ref = new;
-    container cfg_field_notset;
-    container  cfg_field_set_sub = new;
-
     `uvm_new_func
     `uvm_component_utils_begin(test)
-      `uvm_field_object(cfg_field_set_clone, UVM_DEFAULT)
-      `uvm_field_object(cfg_field_set_ref, UVM_DEFAULT)
-      `uvm_field_object(cfg_field_notset, UVM_DEFAULT)
-      `uvm_field_object(cfg_field_set_sub, UVM_DEFAULT)
     `uvm_component_utils_end
 
     task run;
@@ -106,25 +95,6 @@ module test;
 
       obj.set_name("obj");
 
-      if(cfg_field_set_clone.object[0] == cfg_container.object[0]) begin
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_clone is set to ref ***", UVM_NONE);
-      end
-      if((cfg_field_set_clone.value != 0) || (cfg_field_set_clone.object[0].color != BLUE) ||
-         (cfg_field_set_clone.object[0].i != 55) || (cfg_field_set_clone.object[0].str != "from cfg")) begin
-cfg_field_set_clone.print();
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_clone is not set correctly ***", UVM_NONE);
-      end
-   
-      if(cfg_field_set_ref.object[0] != cfg_container.object[0])
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_ref is not set to ref ***", UVM_NONE);
-      if(cfg_field_notset != null)
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_notset is set ***", UVM_NONE);
-   
-      if((cfg_field_set_sub.value != 0) || (cfg_field_set_sub.object[0] == cfg_container.object[0]) ||
-         (cfg_field_set_sub.object[0].color != BLUE) || (cfg_field_set_sub.object[0].i != 55) || 
-         (cfg_field_set_sub.object[0].str != "from cfg"))
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_sub is not set correctly ***", UVM_NONE);
-   
       obj.value = 'haa;
       foreach(obj.object[i]) obj.object[i] = new;
       obj.object[0].color = ORANGE;
@@ -174,14 +144,6 @@ cfg_field_set_clone.print();
   endclass
 
   initial begin
-    cfg_container.value = 22;
-    cfg_container.object[0] = new;
-    cfg_container.object[0].color = BLUE; 
-    cfg_container.object[0].i = 55; 
-    cfg_container.object[0].str = "from cfg"; 
-    set_config_object("*", "cfg_field_set_clone.object[0]", cfg_container.object[0]);
-    set_config_object("*", "cfg_field_set_ref.object[0]", cfg_container.object[0], 0);
-    set_config_object("*", "cfg_field_set_sub.object[0]", cfg_container.object[0]);
     run_test();
   end
 

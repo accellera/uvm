@@ -273,6 +273,10 @@ module top;
       tr.data = 6-i;
       driver.in.put(tr);
     end
+    begin
+       uvm_report_server svr = uvm_report_server::get_server();
+       svr.summarize();
+    end
   end
 
 endmodule

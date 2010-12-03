@@ -24,22 +24,36 @@
 `ifndef UVM_CALLBACK_SVH
 `define UVM_CALLBACK_SVH
 
+//------------------------------------------------------------------------------
+// Title: Callbacks Classes
+//
+// This section defines the classes used for callback registration, management,
+// and user-defined callbacks.
+//------------------------------------------------------------------------------
+
 typedef class uvm_callback;
 //typedef class uvm_callbacks;
 typedef class uvm_callbacks_base;
 
+//------------------------------------------------------------------------------
 // Class - uvm_typeid_base
-// Class - uvm_typeid#(T)
+//------------------------------------------------------------------------------
 //
 // Simple typeid interface. Need this to set up the base-super mapping.
 // This is similar to the factory, but much simpler. The idea of this
 // interface is that each object type T has a typeid that can be
 // used for mapping type relationships. This is not a user visible class.
+
 class uvm_typeid_base;
   static string typename="";
   static uvm_callbacks_base typeid_map[uvm_typeid_base];
   static uvm_typeid_base type_map[uvm_callbacks_base];
 endclass
+
+//------------------------------------------------------------------------------
+// Class - uvm_typeid#(T)
+//------------------------------------------------------------------------------
+
 class uvm_typeid#(type T=uvm_object) extends uvm_typeid_base;
   static uvm_typeid#(T) m_b_inst = get();
   static function uvm_typeid#(T) get();
@@ -50,6 +64,7 @@ class uvm_typeid#(type T=uvm_object) extends uvm_typeid_base;
   endfunction
 endclass
 
+//------------------------------------------------------------------------------
 // Class - uvm_callbacks_base
 //
 // Base class singleton that holds generic queues for all instance
@@ -64,6 +79,7 @@ endclass
 // Note, all derivative uvm_callbacks#() class singletons access this
 // global m_pool object in order to get access to their specific
 // instance queue.
+//------------------------------------------------------------------------------
 
 class uvm_callbacks_base extends uvm_object;
   /*protected*/ static bit m_tracing = 1;
@@ -127,7 +143,9 @@ class uvm_callbacks_base extends uvm_object;
 
 endclass
 
+//------------------------------------------------------------------------------
 // Class - uvm_typed_callbacks#(T)
+//------------------------------------------------------------------------------
 //
 // Another internal class. This contains the queue of typewide
 // callbacks. It also contains some of the public interface methods,
@@ -381,6 +399,7 @@ endclass
 // registered callbacks, or to not call the base implementation, effectively
 // disabling that particalar hook. A demonstration of this methodology is
 // provided in an example included in the kit.
+//------------------------------------------------------------------------------
 
 class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     extends uvm_typed_callbacks#(T);
@@ -399,6 +418,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   // that users can override in subtypes. This type must be a derivative
   // of <uvm_callback>.
   
+  typedef uvm_typed_callbacks#(T) super_type;
   typedef uvm_callbacks#(T,CB) this_type;
   typedef uvm_callbacks#(T,uvm_callback) that_type;
 
@@ -515,6 +535,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   static function void add(T obj, uvm_callback cb, uvm_apprepend ordering=UVM_APPEND);
     uvm_queue#(uvm_callback) q;
     string nm,tnm; 
+    void'(m_get_tw_queue());
     if(cb==null) begin
        if(obj==null) nm = "(*)"; else nm = obj.get_full_name();
        if(m_base_inst.m_typename!="") tnm = m_base_inst.m_typename; else if(obj != null) tnm = obj.get_type_name(); else tnm = "uvm_object";
@@ -615,7 +636,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   //  the given ~obj~ handle. The ~obj~ handle can be null, which allows 
   // de-registration of callbacks without an object context. 
   // The ~cb~ is the callback handle; it must be non-null, and if the callback
-  // has already been removed to the object instance then a warning is
+  // has already been removed from the object instance then a warning is
   // issued. Note that the CB parameter is optional. For example, the 
   // following are equivalent:
   //
@@ -720,6 +741,43 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     return null;
   endfunction
 
+  // Function: get_last
+  //
+  // returns the last enabled callback of type CB which resides in the queue for ~obj~.
+  // If ~obj~ is null then the typewide queue for T is searched. ~itr~ is the iterator;
+  // it will be updated with a value that can be supplied to <get_prev> to get the previous
+  // callback object.
+  //
+  // If the queue is empty then null is returned. 
+  //
+  // The iterator class <uvm_callback_iter> may be used as an alternative, simplified,
+  // iterator interface.
+
+  static function CB get_last (ref int itr, input T obj);
+    uvm_queue#(uvm_callback) q;
+    CB cb;
+    if(!m_base_inst.m_pool.exists(obj)) begin //no instance specific
+      if(obj == null) begin
+        q = m_t_inst.m_twcb;
+      end
+      else begin
+        q = m_t_inst.m_get_twq(obj); //get the most derivative queue
+      end
+    end 
+    else begin
+      q = m_base_inst.m_pool.get(obj);
+      if(q==null) begin q=new; m_base_inst.m_pool.add(obj,q); end
+    end
+    for(itr = q.size()-1; itr>=0; --itr) begin
+      if($cast(cb, q.get(itr))) begin
+        if(cb.callback_mode()) begin
+          return cb;
+        end
+      end
+    end
+    return null;
+  endfunction
+
   // Function: get_next
   //
   // returns the next enabled callback of type CB which resides in the queue for ~obj~,
@@ -728,7 +786,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   // supplied to <get_next> to get the next callback object.
   //
   // If no more callbacks exist in the queue, then null is returned. <get_next> will
-  // continue to return null in this case until <get_first> has been used to reset
+  // continue to return null in this case until <get_first> or <get_last> has been used to reset
   // the iterator.
   //
   // The iterator class <uvm_callback_iter> may be used as an alternative, simplified,
@@ -758,11 +816,66 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     return null;
   endfunction
 
+  // Function: get_prev
+  //
+  // returns the previous enabled callback of type CB which resides in the queue for ~obj~,
+  // using ~itr~ as the starting point. If ~obj~ is null then the typewide queue for T 
+  // is searched. ~itr~ is the iterator; it will be updated with a value that can be 
+  // supplied to <get_prev> to get the previous callback object.
+  //
+  // If no more callbacks exist in the queue, then null is returned. <get_prev> will
+  // continue to return null in this case until <get_first> or <get_last> has been used to reset
+  // the iterator.
+  //
+  // The iterator class <uvm_callback_iter> may be used as an alternative, simplified,
+  // iterator interface.
+
+  static function CB get_prev (ref int itr, input T obj);
+    uvm_queue#(uvm_callback) q;
+    CB cb;
+    get_prev = null;
+    if(!m_base_inst.m_pool.exists(obj)) begin //no instance specific
+      if(obj == null) 
+        q = m_t_inst.m_twcb;
+      else 
+        q = m_t_inst.m_get_twq(obj); //get the most derivative queue
+    end 
+    else begin
+      q = m_base_inst.m_pool.get(obj);
+      if(q==null) begin q=new; m_base_inst.m_pool.add(obj,q); end
+    end
+    for(itr = itr-1; itr>= 0; --itr) begin
+      if($cast(cb, q.get(itr))) begin
+        if(cb.callback_mode()) begin
+          return cb;
+        end
+      end
+    end
+    return null;
+  endfunction
+
+  // Group: Debug
+
+  // Function: display
+  //
+  // This function displays callback information for ~obj~. If ~obj~ is
+  // null, then it displays callback information for all objects
+  // of type ~T~, including typewide callbacks.
+
+  static function void display(T obj=null);
+    // For documentation purposes, need a function wrapper here.
+    super_type::display(obj);
+  endfunction
+
 endclass
 
+//------------------------------------------------------------------------------
+// Class- uvm_derived_callbacks #(T,ST,CB)
+//------------------------------------------------------------------------------
 // This type is not really expected to be used directly by the user, instead they are 
 // expected to use the macro `uvm_set_super_type. The sole purpose of this type is to
 // allow for setting up of the derived_type/super_type mapping.
+//------------------------------------------------------------------------------
 
 class uvm_derived_callbacks#(type T=uvm_object, type ST=uvm_object, type CB=uvm_callback)
     extends uvm_callbacks#(T,CB);
@@ -859,6 +972,17 @@ class uvm_callback_iter#(type T = uvm_object, type CB = uvm_callback);
       return m_cb;
    endfunction
 
+   // Function: last
+   //
+   // Returns the last valid (enabled) callback of the callback type (or
+   // a derivative) that is in the queue of the context object. If the
+   // queue is empty then null is returned.
+
+   function CB last();
+      m_cb = uvm_callbacks#(T,CB)::get_last(m_i, m_obj);
+      return m_cb;
+   endfunction
+
    // Function: next
    //
    // Returns the next valid (enabled) callback of the callback type (or
@@ -867,6 +991,17 @@ class uvm_callback_iter#(type T = uvm_object, type CB = uvm_callback);
 
    function CB next();
       m_cb = uvm_callbacks#(T,CB)::get_next(m_i, m_obj);
+      return m_cb;
+   endfunction
+
+   // Function: prev
+   //
+   // Returns the previous valid (enabled) callback of the callback type (or
+   // a derivative) that is in the queue of the context object. If there
+   // are no more valid callbacks in the queue, then null is returned.
+
+   function CB prev();
+      m_cb = uvm_callbacks#(T,CB)::get_prev(m_i, m_obj);
       return m_cb;
    endfunction
 

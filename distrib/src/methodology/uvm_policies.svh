@@ -24,7 +24,7 @@
 `define UVM_POLICIES_SVH
 
 
-// Group: Policy Classes
+// Title: Policy Classes
 //
 // Policy classes are used to implement polymorphic operations that
 // differ between built-in types and class-based types. Generic

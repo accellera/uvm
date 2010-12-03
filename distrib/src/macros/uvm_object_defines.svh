@@ -143,13 +143,16 @@
      string string_aa_key; /* Used for associative array lookups */ \
      /* Check the fields if not already checked */ \
      if(what__ == UVM_CHECK_FIELDS) begin \
-       return; \
+       if(m_fields_checked) \
+         return; \
+       else \
+         m_fields_checked = 1; \
      end \
      /* Type is verified by uvm_object::compare() */ \
      super.m_field_automation(tmp_data__, what__, str__); \
      if(tmp_data__ != null) \
        /* Allow objects in same hierarchy to be copied/compared */ \
-       if(!$cast(local_data__, tmp_data__)) return; \
+       if(!$cast(local_data__, tmp_data__)) return;
 
 `define uvm_field_utils_end \
      end \
@@ -386,48 +389,6 @@
   `uvm_named_object_create_func(T) \
 
 
-// uvm_object_factory_create_func
-// ------------------------------
-
-`define uvm_object_factory_create_func(T) \
-   function uvm_object create_object (string name=""); \
-     T tmp; \
-     tmp = new(); \
-     if (name!="") \
-       tmp.set_name(name); \
-     return tmp; \
-   endfunction \
-   \
-   static function T create(string name="", uvm_component parent=null, string contxt=""); \
-     uvm_factory f; \
-     f = uvm_factory::get(); \
-     if (contxt == "" && parent != null) \
-       contxt = parent.get_full_name(); \
-     if(!$cast(create,f.create_object_by_type(get(),contxt,name))) \
-        uvm_top.uvm_report_fatal("FACTFL", {"Factory did not return an object of type, ",type_name}, UVM_NONE); \
-   endfunction
-
-
-// uvm_component_factory_create_func
-// ---------------------------------
-
-`define uvm_component_factory_create_func(T) \
-   function uvm_component create_component (string name, uvm_component parent); \
-     T tmp; \
-     tmp = new(.name(name), .parent(parent)); \
-     return tmp; \
-   endfunction \
-   \
-   static function T create(string name, uvm_component parent, string contxt=""); \
-     uvm_factory f; \
-     f = uvm_factory::get(); \
-     if (contxt == "" && parent != null) \
-       contxt = parent.get_full_name(); \
-     if(!$cast(create,f.create_component_by_type(get(),contxt,name,parent))) \
-        uvm_top.uvm_report_fatal("FACTFL", {"Factory did not return a component of type, ",type_name}, UVM_NONE); \
-   endfunction
-
-
 // uvm_get_type_name_func
 // ----------------------
 
@@ -593,6 +554,8 @@
 `define uvm_field_int(ARG,FLAG) \
   begin \
     case (what__) \
+      UVM_CHECK_FIELDS: \
+        m_do_field_check(`"ARG`", UVM_INT_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -627,17 +590,8 @@
       UVM_SETINT: \
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
-          if(uvm_is_match(str__, m_sc.scope.get())) begin \
-            if(FLAG&UVM_READONLY) begin \
-              uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
-                 m_sc.get_full_scope_arg()), UVM_NONE); \
-            end \
-            else begin \
-              print_field_match("set_int()", str__); \
-              ARG = uvm_object::m_sc.bitstream; \
-              m_sc.status = 1; \
-            end \
-          end \
+          void'(uvm_object::m_do_set (str__, `"ARG`", ARG, what__, FLAG)); \
+          m_sc.scope.unset_arg(`"ARG`"); \
       end \
     endcase \
   end
@@ -655,6 +609,8 @@
 `define uvm_field_object(ARG,FLAG) \
   begin \
     case (what__) \
+      UVM_CHECK_FIELDS: \
+        m_do_field_check(`"ARG`", UVM_OBJ_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -755,6 +711,8 @@
 `define uvm_field_string(ARG,FLAG) \
   begin \
     case (what__) \
+      UVM_CHECK_FIELDS: \
+        m_do_field_check(`"ARG`", UVM_STR_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -817,6 +775,8 @@
 `define uvm_field_enum(T,ARG,FLAG) \
   begin \
     case (what__) \
+      UVM_CHECK_FIELDS: \
+        m_do_field_check(`"ARG`", UVM_INT_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -881,6 +841,8 @@
 `define uvm_field_real(ARG,FLAG) \
   begin \
     case (what__) \
+      UVM_CHECK_FIELDS: \
+        m_do_field_check(`"ARG`", UVM_INT_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1004,6 +966,8 @@
 `define uvm_field_sarray_int(ARG,FLAG) \
   begin \
     case (what__) \
+      UVM_CHECK_FIELDS: \
+        m_do_field_check(`"ARG`", UVM_INT_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1098,6 +1062,8 @@
 `define uvm_field_sarray_object(ARG,FLAG) \
   begin \
     case (what__) \
+      UVM_CHECK_FIELDS: \
+        m_do_field_check(`"ARG`", UVM_OBJ_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1205,6 +1171,8 @@
 `define uvm_field_sarray_string(ARG,FLAG) \
   begin \
     case (what__) \
+      UVM_CHECK_FIELDS: \
+        m_do_field_check(`"ARG`", UVM_STR_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1300,6 +1268,8 @@
 `define uvm_field_sarray_enum(T,ARG,FLAG) \
   begin \
     case (what__) \
+      UVM_CHECK_FIELDS: \
+        m_do_field_check(`"ARG`", UVM_INT_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1429,6 +1399,8 @@
 `define M_UVM_FIELD_QDA_INT(TYPE,ARG,FLAG) \
   begin \
     case (what__) \
+      UVM_CHECK_FIELDS: \
+        m_do_field_check(`"ARG`", UVM_INT_T); \
       UVM_COPY: \
         begin \
           if (local_data__ == null) return; \
@@ -1541,6 +1513,8 @@
 `define M_UVM_FIELD_QDA_OBJECT(TYPE,ARG,FLAG) \
   begin \
     case (what__) \
+      UVM_CHECK_FIELDS: \
+        m_do_field_check(`"ARG`", UVM_OBJ_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1675,6 +1649,8 @@
 `define M_UVM_FIELD_QDA_STRING(TYPE,ARG,FLAG) \
   begin \
     case (what__) \
+      UVM_CHECK_FIELDS: \
+        m_do_field_check(`"ARG`", UVM_STR_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1788,6 +1764,8 @@
 `define M_FIELD_QDA_ENUM(TYPE,T,ARG,FLAG) \
   begin \
     case (what__) \
+      UVM_CHECK_FIELDS: \
+        m_do_field_check(`"ARG`", UVM_INT_T); \
       UVM_COPY: \
         begin \
           if(!(FLAG&UVM_NOCOPY)) ARG = local_data__.ARG; \
@@ -1903,8 +1881,6 @@
 `define uvm_field_queue_int(ARG,FLAG) \
   `M_UVM_FIELD_QDA_INT(QUEUE,ARG,FLAG)
 
-
-
 // MACRO: `uvm_field_queue_object
 //
 // Implements the data operations for a queue of <uvm_object>-based objects.
@@ -1917,7 +1893,6 @@
 
 `define uvm_field_queue_object(ARG,FLAG) \
   `M_UVM_FIELD_QDA_OBJECT(QUEUE,ARG,FLAG)
-
 
 
 // MACRO: `uvm_field_queue_string
@@ -1968,6 +1943,7 @@
 
 `define uvm_field_aa_int_string(ARG, FLAG) \
   begin \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_INT_T); \
   `M_UVM_FIELD_DATA_AA_int_string(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_TYPE(string, INT, ARG, m_sc.bitstream, FLAG)  \
   end
@@ -1986,6 +1962,7 @@
 
 `define uvm_field_aa_object_string(ARG, FLAG) \
   begin \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_OBJ_T); \
   `M_UVM_FIELD_DATA_AA_object_string(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_OBJECT_TYPE(string, ARG, FLAG)  \
   end
@@ -2004,6 +1981,7 @@
 
 `define uvm_field_aa_string_string(ARG, FLAG) \
   begin \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_STR_T); \
   `M_UVM_FIELD_DATA_AA_string_string(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_TYPE(string, STR, ARG, m_sc.stringv, FLAG)  \
   end
@@ -2030,6 +2008,7 @@
 
 `define uvm_field_aa_object_int(ARG, FLAG) \
   begin \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_OBJ_T); \
   `M_UVM_FIELD_DATA_AA_object_int(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_OBJECT_TYPE(int, ARG, FLAG)  \
   end
@@ -2198,6 +2177,7 @@
 
 `define uvm_field_aa_int_key(KEY, ARG, FLAG) \
   begin \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_INT_T); \
   `M_UVM_FIELD_DATA_AA_int_key(KEY,ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_INT_TYPE(KEY, INT, ARG, m_sc.bitstream, FLAG)  \
   end
@@ -2216,6 +2196,7 @@
 
 `define uvm_field_aa_int_enumkey(KEY, ARG, FLAG) \
   begin \
+  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_INT_T); \
   `M_UVM_FIELD_DATA_AA_enum_key(KEY,ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_INT_ENUMTYPE(KEY, INT, ARG, m_sc.bitstream, FLAG)  \
   end
@@ -2274,8 +2255,361 @@
   end
 
 
-// m_uvm_record_qda_int
+// m_uvm_record_any_object
+// ---------------------
+
+// Purpose: provide record functionality for a user specific class object. This
+// macro is available for user access. If used externally, a record_options
+// object must be availble and must have the name recorder.
+//
+// Postcondition: The reference value of ~ARG~ is recorded.
+
+`define m_uvm_record_any_object(ARG) \
+  //recorder.record_object(`"ARG`", ARG);  
+
+
+//-----------------------------------------------------------------------------
+//
+// INTERNAL MACROS - do not use directly
+//
+//-----------------------------------------------------------------------------
+
+
+// Purpose: Provide a way for a derived class to override the flag settings in
+// the base class.
+//
+
+`define uvm_set_flags(ARG,FLAG) \
+  begin \
+   if(what__ == UVM_FLAGS) begin \
+   end \
+  end
+
+
+`define uvm_unpack_array_enum(T,ARG,FLAG) \
+  if((what__ == UVM_UNPACK) && !(UVM_NOPACK&(FLAG))) begin \
+    if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
+        (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
+      if(uvm_auto_options_object.packer.use_metadata) begin \
+        int s_; \
+        s_ = uvm_auto_options_object.packer.unpack_field_int(32); \
+        ARG = new[s_]; \
+      end \
+      foreach(ARG[i]) \
+        ARG[i] = T'(uvm_auto_options_object.packer.unpack_field($bits(ARG[i]))); \
+    end \
+  end
+
+
+`define uvm_unpack_queue_enum(T,ARG,FLAG) \
+  if((what__ == UVM_UNPACK) && !(UVM_NOPACK&(FLAG))) begin \
+    if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
+        (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) begin \
+      if(uvm_auto_options_object.packer.use_metadata) begin \
+        int s_; \
+        s_ = uvm_auto_options_object.packer.unpack_field_int(32); \
+        while(ARG.size() > s_) void'(ARG.pop_front()); \
+        while(ARG.size() < s_) ARG.push_back(T'(0)); \
+      end \
+      foreach(ARG[i]) \
+        ARG[i] = T'(uvm_auto_options_object.packer.unpack_field($bits(ARG[i]))); \
+    end \
+  end \
+
+
+`define uvm_pack_unpack_sarray_enum(T,ARG,FLAG) \
+  if((what__ == UVM_PACK) && !(UVM_NOPACK&(FLAG))) begin \
+    if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
+        (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) \
+      foreach(ARG[i]) \
+        uvm_auto_options_object.packer.pack_field(ARG[i],$bits(ARG[i])); \
+  end \
+  else if((what__ == UVM_UNPACK) && !(UVM_NOPACK&(FLAG))) begin \
+    if((((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.abstract) || \
+        (!((FLAG)&UVM_ABSTRACT) && uvm_auto_options_object.packer.physical)) \
+      foreach(ARG[i]) \
+        ARG[i] = T'(uvm_auto_options_object.packer.unpack_field($bits(ARG[i]))); \
+  end \
+
+
+`define uvm_field_qda_enum(T,ARG,FLAG) \
+  begin \
+    T lh__, rh__; \
+    m_sc.scope.down(`"ARG`",null); \
+    if(what__ == UVM_CHECK_FIELDS) \
+      m_do_field_check(`"ARG`", UVM_INT_T); \
+    if((what__ == UVM_PRINT) && !(UVM_NOPRINT&(FLAG))) \
+      `uvm_print_qda_enum(ARG, uvm_auto_options_object.printer, array, T) \
+    else if((what__ == UVM_RECORD) && !(UVM_NORECORD&(FLAG))) \
+      `m_uvm_record_qda_enum(T,ARG, uvm_auto_options_object.recorder) \
+    else if((what__ == UVM_COMPARE) && !(UVM_NOCOMPARE&(FLAG))) begin \
+      $cast(local_data__, tmp_data__); \
+      if(ARG.size() != local_data__.ARG.size()) begin \
+        int s1__, s2__; \
+        m_sc.stringv = ""; \
+        s1__ = ARG.size(); s2__ = local_data__.ARG.size(); \
+        $swrite(m_sc.stringv, "lhs size = %0d : rhs size = %0d", s1__, s2__);\
+        uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
+      end \
+      for(int i__=0; i__<ARG.size() && i__<local_data__.ARG.size(); ++i__) \
+        if(ARG[i__] !== local_data__.ARG[i__]) begin \
+          lh__ = ARG[i__]; \
+          rh__ = local_data__.ARG[i__]; \
+          uvm_auto_options_object.comparer.scope.down_element(i__, null);\
+          $swrite(m_sc.stringv, "lhs = %0s : rhs = %0s", \
+            lh__.name(), rh__.name()); \
+          uvm_auto_options_object.comparer.print_msg(m_sc.stringv); \
+          uvm_auto_options_object.comparer.scope.up_element(null);\
+        end \
+    end \
+    if((what__ == UVM_COPY) && !(UVM_NOCOPY&(FLAG))) begin \
+      $cast(local_data__, tmp_data__); \
+      if(local_data__ != null) ARG = local_data__.ARG; \
+    end \
+    else if((what__ == UVM_PACK) && !(UVM_NOPACK&(FLAG))) begin \
+      if(uvm_auto_options_object.packer.use_metadata == 1) \
+        uvm_auto_options_object.packer.pack_field_int(ARG.size(), 32); \
+      foreach(ARG[i]) \
+        uvm_auto_options_object.packer.pack_field(int'(ARG[i]), $bits(ARG[i])); \
+    end \
+    m_sc.scope.up(null); \
+  end
+
+
+// uvm_new_func
+// ------------
+
+`define uvm_new_func \
+  function new (string name, uvm_component parent); \
+    super.new(name, parent); \
+  endfunction
+
+`define uvm_component_new_func \
+  `uvm_new_func
+
+`define uvm_new_func_data \
+  function new (string name=""); \
+    super.new(name); \
+  endfunction
+
+`define uvm_object_new_func \
+  `uvm_new_func_data
+
+`define uvm_named_object_new_func \
+  function new (string name, uvm_component parent); \
+    super.new(name, parent); \
+  endfunction
+
+
+// uvm_object_create_func
+// ----------------------
+
+// Zero argument create function, requires default constructor
+`define uvm_object_create_func(T) \
+   function uvm_object create (string name=""); \
+     T tmp; \
+     tmp = new(); \
+     if (name!="") \
+       tmp.set_name(name); \
+     return tmp; \
+   endfunction
+
+
+// uvm_named_object_create_func
+// ----------------------------
+
+`define uvm_named_object_create_func(T) \
+   function uvm_named_object create_named_object (string name, uvm_named_object parent); \
+     T tmp; \
+     tmp = new(.name(name), .parent(parent)); \
+     return tmp; \
+   endfunction
+
+
+`define uvm_named_object_factory_create_func(T) \
+  `uvm_named_object_create_func(T) \
+
+
+// uvm_object_factory_create_func
+// ------------------------------
+
+`define uvm_object_factory_create_func(T) \
+   function uvm_object create_object (string name=""); \
+     T tmp; \
+     tmp = new(); \
+     if (name!="") \
+       tmp.set_name(name); \
+     return tmp; \
+   endfunction \
+   \
+   static function T create(string name="", uvm_component parent=null, string contxt=""); \
+     uvm_factory f; \
+     f = uvm_factory::get(); \
+     if (contxt == "" && parent != null) \
+       contxt = parent.get_full_name(); \
+     if(!$cast(create,f.create_object_by_type(get(),contxt,name))) \
+        `uvm_fatal_context("FACTFL", {"Factory did not return an object of type, ",type_name}, uvm_top) \
+   endfunction
+
+
+// uvm_component_factory_create_func
+// ---------------------------------
+
+`define uvm_component_factory_create_func(T) \
+   function uvm_component create_component (string name, uvm_component parent); \
+     T tmp; \
+     tmp = new(.name(name), .parent(parent)); \
+     return tmp; \
+   endfunction \
+   \
+   static function T create(string name, uvm_component parent, string contxt=""); \
+     uvm_factory f; \
+     f = uvm_factory::get(); \
+     if (contxt == "" && parent != null) \
+       contxt = parent.get_full_name(); \
+     if(!$cast(create,f.create_component_by_type(get(),contxt,name,parent))) \
+        `uvm_report_fatal("FACTFL", {"Factory did not return a component of type, ",type_name}, uvm_top.) \
+   endfunction
+
+
+// uvm_get_type_name_func
+// ----------------------
+
+`define uvm_get_type_name_func(T) \
+   const static string type_name = `"T`"; \
+   virtual function string get_type_name (); \
+     return type_name; \
+   endfunction 
+
+
+// uvm_object_derived_wrapper_class
+// --------------------------------
+
+//Requires S to be a constant string
+`define uvm_object_registry(T,S) \
+   typedef uvm_object_registry#(T,S) type_id; \
+   static function type_id get_type(); \
+     return type_id::get(); \
+   endfunction \
+   virtual function uvm_object_wrapper get_object_type(); \
+     return type_id::get(); \
+   endfunction 
+//This is needed due to an issue in of passing down strings
+//created by args to lower level macros.
+`define uvm_object_registry_internal(T,S) \
+   typedef uvm_object_registry#(T,`"S`") type_id; \
+   static function type_id get_type(); \
+     return type_id::get(); \
+   endfunction \
+   virtual function uvm_object_wrapper get_object_type(); \
+     return type_id::get(); \
+   endfunction 
+
+
+// versions of the uvm_object_registry macros above which are to be used
+// with parameterized classes
+
+`define uvm_object_registry_param(T) \
+   typedef uvm_object_registry #(T) type_id; \
+   static function type_id get_type(); \
+     return type_id::get(); \
+   endfunction \
+   virtual function uvm_object_wrapper get_object_type(); \
+     return type_id::get(); \
+   endfunction 
+
+
+// uvm_component_derived_wrapper_class
+// ---------------------------------
+
+`define uvm_component_registry(T,S) \
+   typedef uvm_component_registry #(T,S) type_id; \
+   static function type_id get_type(); \
+     return type_id::get(); \
+   endfunction \
+   virtual function uvm_object_wrapper get_object_type(); \
+     return type_id::get(); \
+   endfunction 
+//This is needed due to an issue in of passing down strings
+//created by args to lower level macros.
+`define uvm_component_registry_internal(T,S) \
+   typedef uvm_component_registry #(T,`"S`") type_id; \
+   static function type_id get_type(); \
+     return type_id::get(); \
+   endfunction \
+   virtual function uvm_object_wrapper get_object_type(); \
+     return type_id::get(); \
+   endfunction
+
+// versions of the uvm_component_registry macros to be used with
+// parameterized classes
+
+`define uvm_component_registry_param(T) \
+   typedef uvm_component_registry #(T) type_id; \
+   static function type_id get_type(); \
+     return type_id::get(); \
+   endfunction \
+   virtual function uvm_object_wrapper get_object_type(); \
+     return type_id::get(); \
+   endfunction
+
+
+// uvm_print_msg_enum
+// ------------------
+
+`define uvm_print_msg_enum(LHS,RHS) \
+  begin \
+    uvm_comparer comparer; \
+    comparer = uvm_auto_options_object.comparer; \
+    if(comparer==null) comparer = uvm_default_comparer; \
+    comparer.result++; \
+/*    $swrite(comparer.miscompares,"%s%s: lhs = %s : rhs = %s\n",*/ \
+/*       comparer.miscompares, comparer.scope.get_arg(), LHS, RHS );*/ \
+    $swrite(comparer.miscompares,"%s%s: lhs = %0d : rhs = %0d\n", \
+       comparer.miscompares, comparer.scope.get_arg(), LHS, RHS ); \
+  end
+
+
+// m_uvm_record_array_int
 // --------------------
+
+`define m_uvm_record_array_int(ARG, RADIX, RECORDER) \
+  begin \
+    if(RECORDER.tr_handle != 0) begin\
+      if(RADIX == UVM_ENUM) begin \
+        if(!m_sc.array_warning_done) begin \
+           m_sc.array_warning_done = 1; \
+           uvm_object::m_sc.scratch1 = \
+             `"Recording not supported for array enumerations: ARG`"; \
+           `uvm_warning_context("RCDNTS", uvm_object::m_sc.scratch1, _global_reporter) \
+        end \
+      end \
+      else begin \
+        for(int i__=0; i__<ARG.size(); ++i__) \
+          RECORDER.record_field($psprintf(`"ARG[%0d]`",i__), ARG[i__], $bits(ARG[i__]), uvm_radix_enum'(RADIX)); \
+      end \
+    end \
+  end
+
+
+// m_uvm_record_array_object
+// --------------------
+
+`define m_uvm_record_array_object(ARG, RECORDER) \
+  begin \
+    if(RECORDER.tr_handle != 0) begin\
+      uvm_object obj__; \
+      for(int i__=0; i__<ARG.size(); ++i__) begin \
+        if($cast(obj__, ARG[i__]))\
+          if(obj__ != null) begin \
+            m_sc.scope.down_element(i__, null);\
+            obj__.m_field_automation(null, what__, str__); \
+            m_sc.scope.up_element(null);\
+          end \
+      end \
+    end \
+  end
+
 
 `define m_uvm_record_qda_int(ARG, FLAG, SZ) \
   begin \
@@ -2309,7 +2643,7 @@
 
 `define m_uvm_record_qda_enum(ARG, FLAG, SZ) \
   begin \
-    if(!(FLAG&UVM_NORECORD)) begin \
+    if(!(FLAG&UVM_NORECORD) && (m_sc.recorder.tr_handle != 0)) begin \
       int sz__ = SZ; \
       if(sz__ == 0) begin \
         m_sc.recorder.record_field("ARG.size()", 0, 32, UVM_DEC); \

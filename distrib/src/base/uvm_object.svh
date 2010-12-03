@@ -171,7 +171,7 @@ virtual class uvm_object extends uvm_void;
   // <uvm_object_wrapper>. This method, if implemented, can be used as convenient
   // means of supplying those arguments. This method is the same as the static
   // <get_type> method, but uses an already allocated object to determine
-  // the type-proxy to access (instead of using the static object.
+  // the type-proxy to access (instead of using the static object).
   //
   // The default implementation of this method does a factory lookup of the
   // proxy using the return value from <get_type_name>. If the type returned
@@ -214,7 +214,7 @@ virtual class uvm_object extends uvm_void;
   //|      return type_name;
   //|    endfunction
   //
-  // We define the <type_name> static variable to enable access to the type name
+  // We define the ~type_name~ static variable to enable access to the type name
   // without need of an object of the class, i.e., to enable access via the
   // scope operator, ~mytype::type_name~.
 
@@ -288,12 +288,13 @@ virtual class uvm_object extends uvm_void;
   //
   // The ~do_print~ method is the user-definable hook called by <print> and
   // <sprint> that allows users to customize what gets printed or sprinted 
-  // beyond the field information provided by the <`uvm_field_*> macros.
+  // beyond the field information provided by the `uvm_field_* macros,
+  // <Utility and Field Macros for Components and Objects>.
   //
   // The ~printer~ argument is the policy object that governs the format and
   // content of the output. To ensure correct <print> and <sprint> operation,
   // and to ensure a consistent output format, the ~printer~ must be used
-  // by all <do_print> implementations. That is, instead of using $display or
+  // by all <do_print> implementations. That is, instead of using ~$display~ or
   // string concatenations directly, a ~do_print~ implementation must call
   // through the ~printer's~ API to add information to be printed or sprinted.
   //
@@ -329,8 +330,8 @@ virtual class uvm_object extends uvm_void;
   // consistent formatting offered by the <print>/<sprint>/<do_print>
   // API.
   //
-  // Note: Fields declared in <`uvm_field_*> macros, if used, will not
-  // automatically appear in calls to convert2string.
+  // Fields declared in <Utility Macros> macros (`uvm_field_*), if used, will
+  // not automatically appear in calls to convert2string.
   //
   // An example implementation of convert2string follows.
   // 
@@ -496,9 +497,9 @@ virtual class uvm_object extends uvm_void;
   //|      do_compare &= comparer.compare_field_int("f1", f1, rhs_.f1);
   //|    endfunction
   //
-  // A derived class implementation must call super.do_compare to ensure its
+  // A derived class implementation must call ~super.do_compare()~ to ensure its
   // base class' properties, if any, are included in the comparison. Also, the
-  // rhs argument is provided as a generic uvm_object. Thus, you must $cast it
+  // rhs argument is provided as a generic uvm_object. Thus, you must ~$cast~ it
   // to the type of this object before comparing. 
   //
   // The actual comparison should be implemented using the uvm_comparer object
@@ -584,8 +585,10 @@ virtual class uvm_object extends uvm_void;
   //  - For objects, pack 4 bits immediately before packing the object. For null
   //    objects, pack 4'b0000. For non-null objects, pack 4'b0001.
   //
-  // When the `uvm_*_field macros are used, the above meta information is
-  // included provided the <uvm_packer>'s <use_metadata> variable is set.
+  // When the `uvm_field_* macros are used, 
+  // <Utility and Field Macros for Components and Objects>,
+  // the above meta information is included provided the <uvm_packer::use_metadata> 
+  // variable is set for the packer.
   //
   // Packing order does not need to match declaration order. However, unpacking
   // order must match packing order.
@@ -608,7 +611,7 @@ virtual class uvm_object extends uvm_void;
   // Function: unpack_ints
   //
   // The unpack methods extract property values from an array of bits, bytes, or
-  // ints. The method of unpacking _must_ exactly correspond to the method of
+  // ints. The method of unpacking ~must~ exactly correspond to the method of
   // packing. This is assured if (a) the same ~packer~ policy is used to pack
   // and unpack, and (b) the order of unpacking is the same as the order of
   // packing used to create the input array.
@@ -729,10 +732,14 @@ virtual class uvm_object extends uvm_void;
   //|       if (value != null) begin
   //|         obj_type tmp;
   //|         // if provided value is not correct type, produce error
-  //|         if (!$cast(tmp, value) 
+  //|         if (!$cast(tmp, value) )
   //|           /* error */
-  //|         else
-  //|           myobj = clone ? tmp.clone() : tmp;
+  //|         else begin
+  //|           if(clone) 
+  //|             $cast(myobj, tmp.clone());
+  //|           else
+  //|             myobj = tmp;
+  //|         end
   //|       end
   //|       else
   //|         myobj = null; // value is null, so simply assign null to myobj
@@ -817,9 +824,11 @@ virtual class uvm_object extends uvm_void;
 
   // The following members are used for verifying the integrity of the 
   // optional uvm_field macros.
-  static protected int m_field_array[string];
-  extern protected function void m_do_field_check(string field);
+  typedef enum {UVM_NONE_T, UVM_INT_T, UVM_STR_T, UVM_OBJ_T} uvm_apply_t;
+  static protected uvm_apply_t m_field_array[string];
+  extern protected function void m_do_field_check(string field, uvm_apply_t t_t = UVM_NONE_T);
   extern static protected function void m_delete_field_array();
+  extern protected function void m_print_field_array();
 
 endclass
 

@@ -196,7 +196,7 @@ class uvm_sequencer_base extends uvm_component;
       printer.print_array_header("sequences", sequences.size());
       for(int i=0; i<sequences.size(); ++i)
         printer.print_string($psprintf("[%0d]", i), sequences[i], "[");
-      printer.print_array_footer();
+      printer.print_array_footer(sequences.size());
       printer.print_field("max_random_depth", max_random_depth, 
         $bits(max_random_depth), UVM_DEC);
     end
@@ -221,7 +221,7 @@ class uvm_sequencer_base extends uvm_component;
     
     $sformat(s, "  -- arb i/id/type: ");
     foreach (arb_sequence_q[i]) begin
-      $sformat(s, "%s %0d/%0d/%s ", s, i, arb_sequence_q[i].sequence_id, arb_sequence_q[i].request);
+      $sformat(s, "%s %0d/%0d/%s ", s, i, arb_sequence_q[i].sequence_id, arb_sequence_q[i].request.name());
     end // UNMATCHED !!
     $sformat(s, "%s\n -- lock_list i/id: ", s);
     foreach (lock_list[i]) begin
@@ -701,12 +701,12 @@ class uvm_sequencer_base extends uvm_component;
       m_seq_item_port_connect_size = m_find_number_driver_connections();
     end
 
-`ifndef CDNS_NO_SQR_CON_CHK
     // If there are no drivers, then it is not possible to wait for grant
+    /*
     if(m_seq_item_port_connect_size == 0) begin
-      uvm_report_fatal("SQRWFG", "Wait_for_grant called on sequencer with no driver connected", UVM_NONE);
+      uvm_report_warning("SQRWFG", "Wait_for_grant called on sequencer with no driver connected", UVM_NONE);
     end
-`endif
+    */
     
     my_seq_id = register_sequence(sequence_ptr);
     

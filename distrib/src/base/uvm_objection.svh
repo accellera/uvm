@@ -23,49 +23,18 @@
 `ifndef UVM_OBJECTION_SVH
 `define UVM_OBJECTION_SVH
 
+typedef class uvm_objection_context_object;
 typedef class uvm_objection;
 typedef class uvm_sequence_base;
 typedef class uvm_objection_cb;
 typedef uvm_callbacks #(uvm_objection,uvm_objection_cb) uvm_objection_cbs_t;
 
-
 //------------------------------------------------------------------------------
-//
-// Class: uvm_objection_cb
-//
+// Title: Objection Mechanism
 //------------------------------------------------------------------------------
-// This class allows for external consumers to attach to the various
-// objection callbacks, <uvm_objection::raised>, <uvm_objection::dropped> and 
-// <uvm_objection::all_dropped>.
-//
-//| class my_objection_cb extends uvm_objection_cb;
-//|    virtual function void raised (uvm_object obj, uvm_object source_obj,
-//|      string description, int count);
-//|      if(obj == source_obj)
-//|        $display("Got raise: %s from object %s", description, obj.get_full_name());
-//|    endfunction
-//| endclass
-//|
-//| my_objection_cb cb = new;
-//|
-//| //add to every type of objection
-//| initial uvm_callbacks#(uvm_objection)::add(null,cb);
-
-
-class uvm_objection_cb extends uvm_callback;
-  function new(string name);
-    super.new(name);
-  endfunction
-  virtual function void raised (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
-  endfunction
-  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
-  endfunction
-  virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
-  endtask
-endclass
+// The following classes define the objection mechanism and end-of-test
+// functionality, which is based on <ovm_objection>.
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
@@ -85,6 +54,8 @@ endclass
 // instance with <uvm_objection::trace_mode>, or it can be set for all 
 // objections from the command line using the option +UVM_OBJECTION_TRACE.
 //------------------------------------------------------------------------------
+
+typedef class uvm_cmdline_processor;
 
 class uvm_objection extends uvm_report_object;
   protected bit  m_trace_mode=0;
@@ -106,13 +77,18 @@ class uvm_objection extends uvm_report_object;
   // all objection objects.
 
   function new(string name="");
+    uvm_cmdline_processor clp;
+    string trace_args[$];
     super.new(name);
     set_report_verbosity_level(top.get_report_verbosity_level());
 
     // Get the command line trace mode setting
-    if($test$plusargs("UVM_OBJECTION_TRACE")) begin
+    clp = uvm_cmdline_processor::get_inst();
+    if(clp.get_arg_matches("+UVM_OBJECTION_TRACE", trace_args)) begin
       m_trace_mode=1;
     end
+    // Needed to allow threads dropping objections to be killed
+    top.m_create_objection_watcher(this);
   endfunction
 
   // Function: trace_mode
@@ -203,13 +179,13 @@ class uvm_objection extends uvm_report_object;
   //   1 indicates the objection is being raised.
 
   function void m_propagate (uvm_object obj, uvm_object source_obj, 
-       string description, int count, bit raise);
+       string description, int count, bit raise, int in_top_thread);
     if (obj != null && obj != top) begin
       obj = m_get_parent(obj);
       if(raise)
         m_raise(obj, source_obj, description, count);
       else
-        m_drop(obj, source_obj, description, count);
+        m_drop(obj, source_obj, description, count, in_top_thread);
     end
   endfunction
 
@@ -273,6 +249,7 @@ class uvm_objection extends uvm_report_object;
 
   function void raise_objection (uvm_object obj=null, string description="",
        int count=1);
+    if(obj == null) obj = uvm_root::get();
     m_raise (obj, obj, description, count);
   endfunction
 
@@ -313,7 +290,7 @@ class uvm_objection extends uvm_report_object;
     if (!m_hier_mode && obj != top)
       m_raise(top,source_obj,description,count);
     else if (obj != top)
-      m_propagate(obj, source_obj, description, count, 1);
+      m_propagate(obj, source_obj, description, count, 1, 0);
   
   endfunction
   
@@ -379,14 +356,15 @@ class uvm_objection extends uvm_report_object;
 
   function void drop_objection (uvm_object obj=null, string description="", 
        int count=1);
-    m_drop (obj, obj, description, count);
+    if(obj == null) obj = uvm_root::get();
+    m_drop (obj, obj, description, count, 0);
   endfunction
 
 
   // Function- m_drop
 
   function void m_drop (uvm_object obj, uvm_object source_obj, 
-       string description="", int count=1);
+       string description="", int count=1, int in_top_thread=0);
 
     if (obj == null)
       obj = top;
@@ -404,12 +382,14 @@ class uvm_objection extends uvm_report_object;
     end
 
     m_total_count[obj] -= count;
+    if(m_total_count[obj] == 0) m_total_count.delete(obj);
 
     if (source_obj==obj) begin
       m_source_count[obj] -= count;
+      if(m_source_count[obj] == 0) m_source_count.delete(obj);
       source_obj = obj;
     end
-  
+ 
     if (m_trace_mode)
       m_report(obj,source_obj,description,count,"dropped");
     
@@ -417,24 +397,66 @@ class uvm_objection extends uvm_report_object;
     `uvm_do_callbacks(uvm_objection,uvm_objection_cb,dropped(obj,source_obj,description,count))
   
     // if count != 0, no reason to fork
-    if (m_total_count[obj] != 0) begin
+    if (m_total_count.exists(obj) && m_total_count[obj] != 0) begin
 
       if (!m_hier_mode && obj != top)
-        m_drop(top,source_obj,description, count);
-      else if (obj != top)
-        this.m_propagate(obj, source_obj, description, count, 0);
+        m_drop(top,source_obj,description, count, in_top_thread);
+      else if (obj != top) begin
+        this.m_propagate(obj, source_obj, description, count, 0, in_top_thread);
+      end
 
     end
     else begin
+        // need to make sure we are safe from the dropping thread terminating
+        // while the drain time is being honored. Can call immediatiately if
+        // we are in the top thread, otherwise we have to schedule it.
+        m_schedule_forked_drop(obj, source_obj, description, count, in_top_thread);
+    end
+
+  endfunction
+
+  uvm_objection_context_object m_context_pool[$];
+
+  // List of scheduled objects
+  uvm_objection_context_object m_scheduled_list[$];
+
+  function void m_schedule_forked_drop (uvm_object obj, uvm_object source_obj, 
+       string description="", int count=1, int in_top_thread=0);
+    m_draining[obj] = 1;
+    if(in_top_thread) begin
+      m_forked_drop(obj, source_obj, description, count, in_top_thread);
+    end
+    else begin
+      uvm_objection_context_object ctxt;
+      if(m_context_pool.size()) ctxt = m_context_pool.pop_front();
+      else ctxt = new;
+      ctxt.obj = obj;
+      ctxt.source_obj = source_obj;
+      ctxt.description = description;
+      ctxt.count = count;
+      m_scheduled_list.push_back(ctxt); 
+    end
+  endfunction
+
+  task m_execute_scheduled_forks;
+    uvm_objection_context_object ctxt;
+    while(1) begin
+      wait(m_scheduled_list.size() != 0);
+      ctxt = m_scheduled_list.pop_front();
+      m_forked_drop(ctxt.obj, ctxt.source_obj, ctxt.description, ctxt.count, 1);
+      m_context_pool.push_back(ctxt);
+    end
+  endtask
+
+
+  function void m_forked_drop (uvm_object obj, uvm_object source_obj, 
+       string description="", int count=1, int in_top_thread=0);
 
         int diff_count;
         bit reraise;
 
-        m_draining[obj] = 1;
-
         fork begin
-
-         if (m_total_count[obj] == 0) begin
+         if (m_total_count.exists(obj) || m_total_count[obj] == 0) begin
            fork begin //wrapper thread for disable fork
               fork
                 begin
@@ -450,7 +472,7 @@ class uvm_objection extends uvm_report_object;
                   // wait for all_dropped cbs to complete
                   wait fork;
                 end
-                wait (m_total_count[obj] != 0);
+                wait (m_total_count.exists(obj) && m_total_count[obj] != 0);
               join_any
               disable fork;
            end join
@@ -470,22 +492,19 @@ class uvm_objection extends uvm_report_object;
             if (!m_hier_mode && obj != top) begin
               if (reraise)
                 m_raise(top,source_obj,description,diff_count);
-              else
-                m_drop(top,source_obj,description, diff_count);
+              else begin
+                m_drop(top,source_obj,description, diff_count, 1);
+              end
             end
             else
               if (obj != top) begin
-                this.m_propagate(obj, source_obj, description, diff_count, reraise);
+                this.m_propagate(obj, source_obj, description, diff_count, reraise, 1);
               end
           end
 
         end
         join_none
-
-    end
-
   endfunction
-
 
   // Function: set_drain_time
   //
@@ -550,6 +569,17 @@ class uvm_objection extends uvm_report_object;
 
   // Group: Objection Status
 
+  // Function: get_objectors
+  //
+  // Returns the current list of objecting objects (objects that
+  // raised an objection but have not dropped it).
+
+  function void get_objectors(ref uvm_object list[$]);
+    `uvm_clear_queue(list)
+    foreach (m_source_count[obj]) list.push_back(obj); 
+  endfunction
+
+
   // Function: get_objection_count
   //
   // Returns the current number of objections raised by the given ~object~.
@@ -602,13 +632,6 @@ class uvm_objection extends uvm_report_object;
     return m_drain_time[obj];
   endfunction
 
-
-  // Function: display_objections
-  // 
-  // Displays objection information about the given ~object~. If ~object~ is
-  // not specified or ~null~, the implicit top-level component, <uvm_top>, is
-  // chosen. The ~show_header~ argument allows control of whether a header is
-  // output.
 
   protected function string m_display_objections(uvm_object obj=null, bit show_header=1);
 
@@ -689,7 +712,15 @@ class uvm_objection extends uvm_report_object;
   function string convert2string();
     return m_display_objections(top,1);
   endfunction
-    
+  
+  
+  // Function: display_objections
+  // 
+  // Displays objection information about the given ~object~. If ~object~ is
+  // not specified or ~null~, the implicit top-level component, <uvm_root>, is
+  // chosen. The ~show_header~ argument allows control of whether a header is
+  // output.
+
   function void display_objections(uvm_object obj=null, bit show_header=1);
     $display(m_display_objections(obj,show_header));
   endfunction
@@ -725,12 +756,51 @@ class uvm_objection extends uvm_report_object;
 endclass
 
 
+//------------------------------------------------------------------------------
+//
+// Class: uvm_objection_cb
+//
+//------------------------------------------------------------------------------
+// This class allows for external consumers to attach to the various
+// objection callbacks, <uvm_objection::raised>, <uvm_objection::dropped> and 
+// <uvm_objection::all_dropped>.
+//
+//| class my_objection_cb extends uvm_objection_cb;
+//|    virtual function void raised (uvm_object obj, uvm_object source_obj,
+//|      string description, int count);
+//|      if(obj == source_obj)
+//|        $display("Got raise: %s from object %s", description, obj.get_full_name());
+//|    endfunction
+//| endclass
+//|
+//| my_objection_cb cb = new;
+//|
+//| //add to every type of objection
+//| initial uvm_callbacks#(uvm_objection)::add(null,cb);
+//------------------------------------------------------------------------------
+
+
+class uvm_objection_cb extends uvm_callback;
+  function new(string name);
+    super.new(name);
+  endfunction
+  virtual function void raised (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+  endfunction
+  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+  endfunction
+  virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+  endtask
+endclass
+
 
 //------------------------------------------------------------------------------
 //
 // Class: uvm_test_done_objection
 //
-// Built-in end-of-test coordination
+// Provides built-in end-of-test coordination
 //------------------------------------------------------------------------------
 
 class uvm_test_done_objection extends uvm_objection;
@@ -741,6 +811,7 @@ class uvm_test_done_objection extends uvm_objection;
 //  local function new();
   function new(string name="uvm_test_done");
     super.new(name);
+
   endfunction
 
   // Function: qualify
@@ -765,7 +836,7 @@ class uvm_test_done_objection extends uvm_objection;
   // Task: all_dropped
   //
   // This callback is called when the given ~object's~ objection count reaches
-  // zero; if the ~object~ is the implicit top-level, <uvm_top> then it means
+  // zero; if the ~object~ is the implicit top-level, <uvm_root> then it means
   // there are no more objections raised for the ~uvm_test_done~ objection.
   // Thus, after calling <uvm_objection::all_dropped>, this method will call
   // <global_stop_request> to stop the current task-based phase (e.g. run).
@@ -869,6 +940,14 @@ typedef class uvm_root;
 function uvm_test_done_objection uvm_root::test_done_objection();
   return uvm_test_done_objection::get();
 endfunction
+
+// Have a pool of context objects to use
+class uvm_objection_context_object;
+  uvm_object obj;
+  uvm_object source_obj;
+  string description;
+  int count;
+endclass
 
 `endif
 

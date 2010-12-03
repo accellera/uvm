@@ -1,7 +1,8 @@
 `include "uvm_macros.svh"
 
-module test;
+module top;
   import uvm_pkg::*;
+  `include "uvm_macros.svh"
 
   uvm_queue#(int) qi = new, qi2;
   uvm_queue#(logic[63:0]) ql = new, ql2;

@@ -25,7 +25,7 @@
 //  `uvm_field_int
 
 //Pass/Fail criteria:
-//  The copy, compare, pack, unpack, print, record and set_config_int must
+//  The copy, compare, pack, unpack, print, record must
 //  produce the correct results.
 //
 
@@ -62,16 +62,12 @@ module test;
     container cfg_field_set_clone = null;
     container cfg_field_set_ref = null;
     container cfg_field_notset = null;
-    container  cfg_field_set_sub = new;
-    container  cfg_field_set_sub2 = new;
 
     `uvm_new_func
     `uvm_component_utils_begin(test)
       `uvm_field_object(cfg_field_set_clone, UVM_DEFAULT)
       `uvm_field_object(cfg_field_set_ref, UVM_DEFAULT)
       `uvm_field_object(cfg_field_notset, UVM_DEFAULT)
-      `uvm_field_object(cfg_field_set_sub, UVM_DEFAULT)
-      `uvm_field_object(cfg_field_set_sub2, UVM_DEFAULT)
     `uvm_component_utils_end
 
     task run;
@@ -104,19 +100,6 @@ module test;
       if(cfg_field_notset != null)
         uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_notset is set ***", UVM_NONE);
    
-      if((cfg_field_set_sub.value != 0) || (cfg_field_set_sub.object == cfg_container.object) ||
-         (cfg_field_set_sub.object.color != BLUE) || (cfg_field_set_sub.object.i != 55) || 
-         (cfg_field_set_sub.object.str != "from cfg"))
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_sub is not set correctly ***", UVM_NONE);
-   
-      if((cfg_field_set_sub2.value != 88) || (cfg_field_set_sub2.object == cfg_container.object) ||
-         (cfg_field_set_sub2.object.color != ORANGE) || (cfg_field_set_sub2.object.i != 15) || 
-         (cfg_field_set_sub2.object.str != "substr val"))
-      begin
-        cfg_field_set_sub2.print();
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_sub2 is not set correctly ***", UVM_NONE);
-      end
-
       obj.value = 'haa;
       obj.object.color = ORANGE;
       obj.object.i = 'h5555;
@@ -166,11 +149,6 @@ $display("BYTES: %0d", bytes.size());
     cfg_container.object.str = "from cfg"; 
     set_config_object("*", "cfg_field_set_clone", cfg_container);
     set_config_object("*", "cfg_field_set_ref", cfg_container, 0);
-    set_config_object("*", "cfg_field_set_sub.object", cfg_container.object);
-    set_config_int("*", "cfg_field_set_sub2.value", 88);
-    set_config_int("*", "cfg_field_set_sub2.object.color", ORANGE);
-    set_config_int("*", "cfg_field_set_sub2.object.i", 15);
-    set_config_string("*", "cfg_field_set_sub2.object.str", "substr val");
     run_test();
   end
 

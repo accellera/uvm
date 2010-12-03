@@ -1,0 +1,1 @@
++uvm_set_inst_override=base_type,derived_type,uvm_test_top.c0.b0
