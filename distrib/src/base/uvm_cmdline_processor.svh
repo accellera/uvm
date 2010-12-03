@@ -283,10 +283,6 @@ class uvm_cmdline_processor extends uvm_report_object;
     //| <sim command> +uvm_set_verbosity=uvm_test_top.env0.agent1.*,_ALL_,UVM_FULL,time,800
     //
 
-    // JR:  The implementation of this should be in a phase start callback that process settings for the
-    // given component.  If the ~id~ is _ALL_, ovm_report_object::set_report_verbosity_level() should be 
-    // called.  If the ~id~ is not _ALL_, ovm_report_object::set_report_id_verbosity() should be called.
-
     // Variable: +uvm_set_action
     //
     // ~+uvm_set_action=<comp>,<id>,<severity>,<action>~ provides the equivalent of
@@ -298,13 +294,6 @@ class uvm_cmdline_processor extends uvm_report_object;
     //| <sim command> +uvm_set_action=uvm_test_top.env0.*,_ALL_,UVM_ERROR,UVM_NO_ACTION
     //
 
-    // JR:  This takes place once at the start of build.  If both ~id~ and ~severity~ are both _ALL_,
-    // omv_report_object::set_report_severity_action should be called for each severity.  If ~id~ is _ALL_
-    // and a specific ~severity~ is given, ovm_report_object::set_report_severity_action should be called
-    // for the specific ~severity~.  If a specific ~id~ is given and ~severity~ is _ALL_,
-    // ovm_report_object::set_report_id_action should be called.  If a specific ~id~ and a specific
-    // ~severity~ is given, ovm_report_object::set_report_severity_id_action should be called.
-
     // Variable: +uvm_set_severity
     //
     // ~+uvm_set_severity=<comp>,<id>,<current severity>,<new severity>~ provides the
@@ -314,14 +303,6 @@ class uvm_cmdline_processor extends uvm_report_object;
     //
     //| <sim command> +uvm_set_severity=uvm_test_top.env0.*,BAD_CRC,UVM_ERROR,UVM_WARNING
     //
-
-    // JR:  This takes place once at the start of build.  If both ~id~ and ~severity~ are both _ALL_,
-    // omv_report_object::set_report_severity_override should be called for each severity.  If ~id~ is _ALL_
-    // and a specific ~severity~ is given, ovm_report_object::set_report_severity_override should be called
-    // for the specific ~severity~.  If a specific ~id~ is given and ~severity~ is _ALL_,
-    // ovm_report_object::set_report_severity_id_override should be called for each severity.  
-    // If a specific ~id~ and a specific ~severity~ is given, 
-    // ovm_report_object::set_report_severity_id_override should be called.
 
     // Variable: +UVM_TIMEOUT
     //

@@ -368,6 +368,7 @@ function void uvm_root::build();
 
   super.build();
 
+  m_set_cl_msg_args();
   check_verbosity();
 
   m_check_set_verbs();

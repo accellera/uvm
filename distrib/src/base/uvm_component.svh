@@ -1411,6 +1411,12 @@ virtual class uvm_component extends uvm_report_object;
   int unsigned recording_detail = UVM_NONE;
   extern         function void   do_print(uvm_printer printer);
 
+  // Internal methods for setting up command line messaging stuff
+  extern function void m_set_cl_msg_args;
+  extern function void m_set_cl_verb;
+  extern function void m_set_cl_action;
+  extern function void m_set_cl_sev;
+
 endclass : uvm_component
 
 
