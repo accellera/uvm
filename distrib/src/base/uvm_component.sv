@@ -45,7 +45,6 @@ function uvm_component::new (string name, uvm_component parent);
     set_name("");
     return;
   end
-  m_set_cl_msg_args();
 
   // Check that we're not in or past end_of_elaboration
   if (end_of_elaboration_ph.is_in_progress() ||
@@ -68,6 +67,13 @@ function uvm_component::new (string name, uvm_component parent);
 
   if (parent == null)
     parent = uvm_top;
+
+  set_report_verbosity_level(uvm_top.get_report_verbosity_level());
+
+  set_report_id_action("CFGOVR", UVM_NO_ACTION);
+  set_report_id_action("CFGSET", UVM_NO_ACTION);
+
+  m_set_cl_msg_args();
 
   if(uvm_report_enabled(UVM_MEDIUM+1, UVM_INFO, "NEWCOMP"))
     `uvm_info("NEWCOMP",$psprintf("this=%0s, parent=%0s, name=%s",
@@ -106,11 +112,6 @@ function uvm_component::new (string name, uvm_component parent);
 
   if (parent == uvm_top)
     uvm_top_levels.push_back(this);
-
-  set_report_verbosity_level(uvm_top.get_report_verbosity_level());
-
-  set_report_id_action("CFGOVR", UVM_NO_ACTION);
-  set_report_id_action("CFGSET", UVM_NO_ACTION);
 
 //Not sure what uvm_top isn't taking the setting... these two lines should be removed.
   uvm_top.set_report_id_action("CFGOVR", UVM_NO_ACTION);

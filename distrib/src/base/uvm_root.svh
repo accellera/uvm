@@ -359,6 +359,9 @@ function uvm_root::new();
   insert_phase(check_ph,              extract_ph);
   insert_phase(report_ph,             check_ph);
 
+  // This sets up the global verbosity. Other command line args may
+  // change individual component verbosity.
+  check_verbosity();
 endfunction
 
 // build
@@ -369,7 +372,6 @@ function void uvm_root::build();
   super.build();
 
   m_set_cl_msg_args();
-  check_verbosity();
 
   m_check_set_verbs();
   m_do_timeout_settings();
