@@ -658,7 +658,6 @@ function void uvm_component::phase_started(uvm_phase_schedule phase);
         fork begin
           m_verbosity_setting setting = m_verbosity_settings[i];
           #setting.offset;
-$display("%0t: DOING SETTING AT %s TO %0d", $time, get_full_name(), setting.verbosity);
           if(setting.id == "_ALL_") 
             set_report_verbosity_level(setting.verbosity);
           else 
