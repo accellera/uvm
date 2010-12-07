@@ -48,6 +48,9 @@ endclass
 //
 //------------------------------------------------------------------------------
 
+// Typedef for configuring default sequences.
+typedef uvm_config_db#(uvm_object_wrapper) uvm_config_seq;
+
 class uvm_sequencer_base extends uvm_component;
 
   protected seq_req_class       arb_sequence_q[$];
@@ -66,6 +69,121 @@ class uvm_sequencer_base extends uvm_component;
   protected int                 m_lock_arb_size;  // used for waiting processes
   protected int                 m_arb_size;       // used for waiting processes
   protected int                 m_wait_for_item_sequence_id, m_wait_for_item_transaction_id;
+
+  // Default sequence processing. At the start of any phase, look up
+  // the default sequence and run it. A manually set default sequence
+  // will have precedence over one set with set_config_object.
+
+  protected uvm_object_wrapper m_default_sequences[uvm_phase_imp];
+  protected uvm_thread_mode_t  m_seq_thread_mode[uvm_phase_imp];
+  protected uvm_process        m_processes[uvm_phase_schedule];
+  protected uvm_sequence_base  m_phase_sequences[uvm_phase_schedule];
+
+  virtual function void phase_started(uvm_phase_schedule phase);
+    uvm_object_wrapper w;
+    uvm_sequence_base seq;
+    uvm_factory f = uvm_factory::get();
+
+    if(m_default_sequences.exists(phase.m_phase))
+      w = m_default_sequences[phase.m_phase];
+    else begin
+      void'(uvm_config_seq::get(this, "", {phase.get_name(),"_ph"}, w) );
+    end
+
+    if(w == null)
+      return;
+
+    if(!$cast(seq , f.create_object_by_type(w, get_full_name(), w.get_type_name()))) begin
+      `uvm_warning("BDFCT", $sformatf("Default phase object for %s did not cast to a sequence type", {phase.get_name(),"_ph"}) )
+    end
+
+    if(seq == null) begin
+      `uvm_info("PHASESEQ", $sformatf("No default phase sequence for phase %s", phase.get_name()), UVM_FULL )
+    end
+    else begin
+      `uvm_info("PHASESEQ", $sformatf("Starting default phase sequence %s for phase %s", w.get_type_name(), phase.get_name()), UVM_FULL )
+      seq.print_sequence_info = 1;
+      seq.set_parent_sequence(null);
+      seq.set_sequencer(this);
+      seq.reseed();
+      if (!seq.randomize()) begin
+        `uvm_warning("STRDEFSEQ", $sformatf("Failed to randomize default sequence %s for phase %s", w.get_type_name(), phase.get_name()));
+      end
+      else begin
+        if(!m_seq_thread_mode.exists(phase.m_phase))
+          m_seq_thread_mode[phase.m_phase] = UVM_PHASE_MODE_DEFAULT;
+
+        if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_MODE_DEFAULT)
+          m_seq_thread_mode[phase.m_phase] = m_phase_thread_mode;
+
+        if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_PROACTIVE)
+          phase.phase_done.raise_objection(this, {"default phase from ", get_full_name()});
+
+        //JLR: really needs to be managed by the phasing code, so need to schedule
+        //the process to be run under this component's phase process based on
+        //phasing semantics.
+        fork begin
+          seq.start(this);
+          m_phase_sequences[phase] = seq;
+          m_processes[phase] = new(process::self());
+          if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_PROACTIVE) begin
+            phase.phase_done.drop_objection(this, {"default phase from ", get_full_name()});
+          end
+        end join_none
+      end
+    end
+  endfunction
+
+
+  // Cleanup default phases. If the phase is persistent then we don't clean up
+  // the sequences, otherwise we do.
+  virtual function void phase_ended(uvm_phase_schedule phase);
+    uvm_sequence_base seq_ptr;
+
+    if(m_processes.exists(phase)) begin
+      if((m_seq_thread_mode[phase.m_phase] != UVM_PHASE_PERSISTENT) &&
+         (m_processes[phase].is_active()) ) 
+      begin
+        m_processes[phase].m_process_id.kill();
+
+        // Remove the phase sequence
+        if(m_phase_sequences.exists(phase)) begin
+          seq_ptr = find_sequence(m_phase_sequences[phase].get_sequence_id());
+          if(seq_ptr != null)
+            kill_sequence(seq_ptr);
+        end
+      end
+    end
+  endfunction
+
+
+  // Function: set_phase_seq
+  //
+  // Set the phase sequence that will automatically start for the given
+  // <uvm_phase_schedule>. ~phase~ is a <uvm_phase_imp>
+  // and ~imp~ is a <uvm_sequence_base> factory wrapper. The sequence object, ~imp~,
+  // will be created and randomized at the time the phase starts. If ~imp~ is
+  // null then no default sequence will be executed.
+  //
+  // Example of setting the phase sequence for the UVM main phase:
+  //|  seqr.set_phase_seq(uvm_main_ph, myseq_type::type_id::get());
+  //
+  // If no phase sequence has been set by using this function, then
+  // <uvm_config_db#(T)::get> (with T=uvm_object_wrapper) is used to access the 
+  // default sequence using the field name ~PHASE~_ph. For example, the following 
+  // configuration setting will set the default sequence for the ~main~ phase on 
+  // sequencer u1.u2.seqr:
+  //
+  //| uvm_config_db#(uvm_object_wrapper)::get(this, "u1.u2.seqr", 
+  //|       "main_ph", myseq_type::type_id::get());
+  
+
+  function void set_phase_seq (uvm_phase_imp phase, uvm_object_wrapper imp,
+      uvm_thread_mode_t thread_mode=UVM_PHASE_MODE_DEFAULT); 
+    m_default_sequences[phase] = imp;
+    m_seq_thread_mode[phase] = thread_mode;
+  endfunction
+
 
   // Variable: pound_zero_count
   //
@@ -122,6 +240,7 @@ class uvm_sequencer_base extends uvm_component;
   // using the field name "default_sequence".
 
   protected string default_sequence = "uvm_random_sequence";               
+  protected bit    m_default_seq_set = 0;
 
 
   // The sequeunce aray holds the type names of the sequence types registered
@@ -151,7 +270,8 @@ class uvm_sequencer_base extends uvm_component;
     m_sequencer_id = g_sequencer_id++;
     m_lock_arb_size = -1;
     m_seq_item_port_connect_size = -1;
-    void'(get_config_string("default_sequence", default_sequence));
+    if(get_config_string("default_sequence", default_sequence))
+      m_default_seq_set = 1;
     void'(get_config_int("count", count));
     void'(get_config_int("max_random_count", max_random_count));
     void'(get_config_int("max_random_depth", max_random_depth));

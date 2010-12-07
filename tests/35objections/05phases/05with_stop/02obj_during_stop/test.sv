@@ -116,10 +116,6 @@ module test;
         $display("** UVM TEST FAILED got_illraise: %0d, exp: 1 **", got_illraise);
         return;
       end
-      if(got_objout != 1) begin
-        $display("** UVM TEST FAILED got_objout: %0d, exp: 1 **", got_objout);
-        return;
-      end
       $display("** UVM TEST PASSED **");
     endfunction
   endclass : test
