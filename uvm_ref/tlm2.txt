@@ -75,14 +75,14 @@ Consider for example a consumer component with a blocking target socket.
 
 Example:
 | class consumer extends uvm_component;
-|    tlm2_b_target_socket #(trans, consumer) target_socket;
+|    tlm2_b_target_socket #(consumer, trans) target_socket;
 |    function new(string name, uvm_component parent);
 |      super.new(name, parent);
 |    endfunction
 |    function void build();
 |      target_socket = new("target_socket", this, this);
 |    endfunction
-|    task b_transport(trans t, ref time delay);
+|    task b_transport(trans t, uvm_tlm_time delay);
 |      #5;
 |      uvm_report_info("consumer", t.convert2string());
 |    endtask

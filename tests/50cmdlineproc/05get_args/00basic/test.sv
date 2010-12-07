@@ -37,15 +37,24 @@ class test extends uvm_test;
        end
        "ncsim" : begin
          $display("Doing IUS checks");
-         if(raw_args.size() != 24) begin
-           $display("  In correct number of arguments %0d found (expected 24)", raw_args.size());
+         if(raw_args.size() != 22) begin
+           $display("  Incorrect number of arguments %0d found (expected 22)", raw_args.size());
+           pass_the_test = pass_the_test & 0;
+         end
+         else
+           $display("  Correct number of arguments found");
+       end
+       "ModelSim for Questa " : begin
+         $display("Doing Questa checks");
+         if(raw_args.size() != 16) begin
+           $display("  Incorrect number of arguments %0d found (expected 16)", raw_args.size());
            pass_the_test = pass_the_test & 0;
          end
          else
            $display("  Correct number of arguments found");
        end
        default : begin
-         // Need Questa checks here -- currently just fail.
+         $display("unknown tool: '%s'",tool);
          pass_the_test = pass_the_test & 0;
        end
      endcase

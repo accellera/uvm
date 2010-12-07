@@ -19,10 +19,13 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// Title: tlm imps, interface implementations
+// Title: TLM2 imps (interface implementations)
 //
-// Binds the interface with the object that contains the interface
-// implementation.
+// This section defines the implementation classes for connecting TLM2
+// interfaces.
+//
+// TLM imps bind a TLM interface with the object that contains the
+// interface implementation.
 // In addition to the transaction type and the phase type, the imps 
 // are parameterized with the type of the object that will provide the
 // implementation. Most often this will be the type of the component 
@@ -31,8 +34,9 @@
 // Most often the imp constructor argument is "this".
 //----------------------------------------------------------------------
 
-// Group:  IMP binding macros
-//----------------------------------------------------------------------
+//--------------------------
+// Group: IMP binding macros
+//--------------------------
 
 // Macro: `UVM_TLM_NB_TRANSPORT_FW_IMP
 //
@@ -51,9 +55,16 @@
 // transport interface.
    
 `define UVM_TLM_NB_TRANSPORT_FW_IMP(imp, T, P, t, p, delay)              \
-  function uvm_tlm_sync_e nb_transport_fw(T t, ref P p, ref time delay);  \
+  function uvm_tlm_sync_e nb_transport_fw(T t, ref P p, input uvm_tlm_time delay);  \
+    if (delay == null) begin \
+       `uvm_error("UVM/TLM/NULLDELAY", \
+                  {get_full_name(), \
+                   ".nb_transport_fw() called with 'null' delay"}) \
+       return UVM_TLM_COMPLETED; \
+    end \
     return imp.nb_transport_fw(t, p, delay);                          \
   endfunction
+
 
 // Macro: `UVM_TLM_NB_TRANSPORT_BW_IMP
 //
@@ -77,16 +88,16 @@
 // Example:
 //
 //| class master extends uvm_component;
-//     uvm_tlm_nb_initiator_socket #(trans, uvm_tlm_phase_e, this_t) initiator_socket;
+//|    uvm_tlm_nb_initiator_socket
+//|          #(trans, uvm_tlm_phase_e, this_t) initiator_socket;
 //|
 //|    function void build();
-//        initiator_socket = new("initiator_socket", this, this);
+//|       initiator_socket = new("initiator_socket", this, this);
 //|    endfunction
 //|
-//|    function uvm_tlm_sync_e nb_transport_bw(ref trans t,
+//|    function uvm_tlm_sync_e nb_transport_bw(trans t,
 //|                                   ref uvm_tlm_phase_e p,
-//|                                   ref time delay);
-//|        delay_time = delay;
+//|                                   input uvm_tlm_time delay);
 //|        transaction = t;
 //|        state = p;
 //|        return UVM_TLM_ACCEPTED;
@@ -95,10 +106,17 @@
 //|    ...
 //| endclass
 
-`define UVM_TLM_NB_TRANSPORT_BW_IMP(imp, T, P, t, p, delay)              \
-  function uvm_tlm_sync_e nb_transport_bw(T t, ref P p, ref time delay);  \
-    return imp.nb_transport_bw(t, p, delay);                          \
+`define UVM_TLM_NB_TRANSPORT_BW_IMP(imp, T, P, t, p, delay) \
+  function uvm_tlm_sync_e nb_transport_bw(T t, ref P p, input uvm_tlm_time delay);  \
+    if (delay == null) begin \
+       `uvm_error("UVM/TLM/NULLDELAY", \
+                  {get_full_name(), \
+                   ".nb_transport_bw() called with 'null' delay"}) \
+       return UVM_TLM_COMPLETED; \
+    end \
+    return imp.nb_transport_bw(t, p, delay); \
   endfunction
+
 
 // Macro: `UVM_TLM_B_TRANSPORT_IMP
 //
@@ -120,19 +138,26 @@
 // at which the task call and return are executed.
 
 `define UVM_TLM_B_TRANSPORT_IMP(imp, T, t, delay)                        \
-  task b_transport(T t, ref time delay);                              \
+  task b_transport(T t, uvm_tlm_time delay);                              \
+    if (delay == null) begin \
+       `uvm_error("UVM/TLM/NULLDELAY", \
+                  {get_full_name(), \
+                   ".b_transport() called with 'null' delay"}) \
+       return; \
+    end \
     imp.b_transport(t, delay);                                        \
   endtask
 
-//----------------------------------------------------------------------
+
+
+//---------------------------
 // Group: IMP binding classes
-//----------------------------------------------------------------------
-//----------------------------------------------------------------------
+//---------------------------
 
 //----------------------------------------------------------------------
 // Class: uvm_tlm_b_transport_imp
 //
-// used like exports except an addtional class  parameter specifices 
+// Used like exports, except an addtional class parameter specifices 
 // the type of the implementation object.  When the
 // imp is instantiated the implementation object is bound.
 //----------------------------------------------------------------------
@@ -147,7 +172,7 @@ endclass
 //----------------------------------------------------------------------
 // Class: uvm_tlm_nb_transport_fw_imp
 //
-// used like exports except an addtional class  parameter specifices 
+// Used like exports, except an addtional class parameter specifices 
 // the type of the implementation object.  When the
 // imp is instantiated the implementation object is bound.
 //----------------------------------------------------------------------
@@ -163,7 +188,7 @@ endclass
 //----------------------------------------------------------------------
 // Class: uvm_tlm_nb_transport_bw_imp
 //
-// used like exports except an addtional class  parameter specifices 
+// Used like exports, except an addtional class parameter specifices 
 // the type of the implementation object.  When the
 // imp is instantiated the implementation object is bound.
 //----------------------------------------------------------------------
@@ -172,7 +197,6 @@ class uvm_tlm_nb_transport_bw_imp #(type T=uvm_tlm_generic_payload,
                                 type P=uvm_tlm_phase_e,
                                 type IMP=int)
   extends uvm_port_base #(uvm_tlm_if #(T,P));
-   // Function: new
   `UVM_IMP_COMMON(`UVM_TLM_NB_BW_MASK, "uvm_tlm_nb_transport_bw_imp", IMP)
   `UVM_TLM_NB_TRANSPORT_BW_IMP(m_imp, T, P, t, p, delay)
 endclass

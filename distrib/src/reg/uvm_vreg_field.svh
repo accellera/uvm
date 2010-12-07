@@ -21,25 +21,31 @@
 //
 
 
+//------------------------------------------------------------------------------
+// Title: Virtual Register Field Classes
 //
-// Title: uvm_vreg_field
-// Virtual field abstraction class
+// This section defines the virtual field and callback classes.
 //
 // A virtual field is set of contiguous bits in one or more memory locations.
 // The semantics and layout of virtual fields comes from
 // an agreement between the software and the hardware,
-// not any physical structures in the DUT.
+// not any physical structures in the DUT. 
 //
+//------------------------------------------------------------------------------
 
 typedef class uvm_vreg_field_cbs;
 
+
+//------------------------------------------------------------------------------
+// Class: uvm_vreg_field
 //
-// CLASS: uvm_vreg_field
 // Virtual field abstraction class
 //
 // A virtual field represents a set of adjacent bits that are
 // logically implemented in consecutive memory locations.
 //
+//------------------------------------------------------------------------------
+
 class uvm_vreg_field extends uvm_object;
 
    `uvm_object_utils(uvm_vreg_field)
@@ -362,10 +368,13 @@ class uvm_vreg_field extends uvm_object;
 endclass: uvm_vreg_field
 
 
+//------------------------------------------------------------------------------
+// Class: uvm_vreg_field_cbs
 //
-// CLASS: uvm_vreg_field_cbs
 // Pre/post read/write callback facade class
 //
+//------------------------------------------------------------------------------
+
 class uvm_vreg_field_cbs extends uvm_callback;
    string fname = "";
    int    lineno = 0;

@@ -24,7 +24,14 @@
 `define UVM_PAIR_SVH
 
 //-----------------------------------------------------------------------------
-// CLASS: uvm_pair #(T1,T2)
+// Title: uvm_pair classes
+//-----------------------------------------------------------------------------
+// This section defines container classes for handling value pairs.
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+// Class: uvm_pair #(T1,T2)
 //
 // Container holding handles to two objects whose types are specified by the
 // type parameters, T1 and T2.

@@ -249,9 +249,10 @@ class reg_reg_TX_BD_NUM extends uvm_reg;
    endfunction: new
 
     virtual function void build();
-        this.TX_BD_NUM = uvm_reg_field::type_id::create("TX_BD_NUM",,get_full_name());
-        this.TX_BD_NUM.configure(this, 8, 0, "RW", 0, 8'h40, 1, 1, 1);
-        this.set_attribute("NO_REG_TESTS", "1");
+       this.TX_BD_NUM = uvm_reg_field::type_id::create("TX_BD_NUM",,get_full_name());
+       this.TX_BD_NUM.configure(this, 8, 0, "RW", 0, 8'h40, 1, 1, 1);
+       uvm_resource_db#(bit)::set({"REG::",get_full_name()},
+                                  "NO_REG_TESTS", 1);
     endfunction: build
 
     `uvm_object_utils(reg_reg_TX_BD_NUM)
@@ -914,7 +915,6 @@ class reg_block_oc_ethernet extends uvm_reg_block;
         this.BD.configure(this, "wishbone.bd_ram.mem");
         this.default_map.add_mem(this.BD, `UVM_REG_ADDR_WIDTH'h100, "RW", 0);
         this.BD.build();
-        this.lock_model();
     endfunction : build
 
     `uvm_object_utils(reg_block_oc_ethernet)

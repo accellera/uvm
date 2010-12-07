@@ -104,6 +104,8 @@ class uvm_cmdline_processor extends uvm_report_object;
   //|                                                                   //not barfoo.sv.
 
   function int get_arg_matches (string match, ref string args[$]);
+
+   `ifndef UVM_CMDLINE_NO_DPI
     chandle exp_h = null;
     int len = match.len();
     args.delete();
@@ -126,6 +128,7 @@ class uvm_cmdline_processor extends uvm_report_object;
 
     if(exp_h != null)
       dpi_regfree(exp_h);
+    `endif
 
     return args.size();
   endfunction

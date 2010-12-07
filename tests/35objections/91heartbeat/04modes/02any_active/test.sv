@@ -93,7 +93,7 @@ module test;
       agent = new("agent", this);
 
       hb = new("myhb", this, myobj);
-      hb.hb_mode(UVM_ANY_ACTIVE);
+      void'(hb.hb_mode(UVM_ANY_ACTIVE));
       hb.add(agent.mc1);
       hb.add(agent.mc2);
       hb.add(agent);

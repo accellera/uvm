@@ -171,7 +171,7 @@ virtual class uvm_object extends uvm_void;
   // <uvm_object_wrapper>. This method, if implemented, can be used as convenient
   // means of supplying those arguments. This method is the same as the static
   // <get_type> method, but uses an already allocated object to determine
-  // the type-proxy to access (instead of using the static object.
+  // the type-proxy to access (instead of using the static object).
   //
   // The default implementation of this method does a factory lookup of the
   // proxy using the return value from <get_type_name>. If the type returned

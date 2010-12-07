@@ -36,7 +36,7 @@ class apb_master extends uvm_driver#(apb_rw);
     `uvm_component_utils(apb_master)
   
    event trig;
-   virtual apb_if sigs;
+   apb_vif sigs;
    apb_config cfg;
 
    function new(string name,uvm_component parent = null);
@@ -44,8 +44,15 @@ class apb_master extends uvm_driver#(apb_rw);
    endfunction
    
    virtual function void build();
-     cfg = uvm_utils #(apb_config,"config")::get_config(this,1);
-     sigs = cfg.vif;
+      apb_agent agent;
+      if ($cast(agent, get_parent()) && agent != null) begin
+         sigs = agent.vif;
+      end
+      else begin
+         if (!uvm_config_db#(apb_vif)::get(this, "", "vif", sigs)) begin
+            `uvm_fatal("APB/DRV/NOVIF", "No virtual interface specified for this driver instance")
+         end
+      end
    endfunction
 
    virtual protected task run();
@@ -79,7 +86,6 @@ class apb_master extends uvm_driver#(apb_rw);
 	 case (tr.kind)
           apb_rw::READ:  this.read(tr.addr, tr.data);  
           apb_rw::WRITE: this.write(tr.addr, tr.data);
-          apb_rw::RESET: this.reset(tr.data);
          endcase
          
          this.trans_executed(tr);
@@ -89,17 +95,6 @@ class apb_master extends uvm_driver#(apb_rw);
 	 ->trig ;
       end
    endtask: run
-
-   task reset(int cycles);
-      this.sigs.rst <= 1;
-      repeat (cycles)
-`ifdef VCS
-	@ (this.sigs.mck);
-`else
-      @(sigs.mck);
-      `endif
-      this.sigs.rst <= 0;
-   endtask: reset
 
    virtual protected task read(input  bit   [31:0] addr,
                                output logic [31:0] data);

@@ -210,14 +210,14 @@ class env extends uvm_component;
 
     cA = new();
     assert(cA.randomize());
-    uvm_resource_db#(config_A)::write_and_set_anonymous("*", cA, this);
+    uvm_resource_db#(config_A)::set_anonymous("*", cA, this);
 
 
     cB = new();
     assert(cB.randomize());
-    uvm_resource_db#(config_B)::write_and_set_anonymous("*", cB, this);
+    uvm_resource_db#(config_B)::set_anonymous("*", cB, this);
 
-    r_data = uvm_resource_db#(bit [7:0])::set("data", "*");
+    r_data = uvm_resource_db#(bit [7:0])::set_default("*", "data");
     r_data.write(43, this);
     r_data.set_read_only();
 
@@ -273,7 +273,7 @@ module top;
   initial begin
 
     // set the bus interface as a resource
-    uvm_resource_db#(virtual bus_if)::write_and_set("bus_if", "*", bus);
+    uvm_resource_db#(virtual bus_if)::set("*", "bus_if", bus);
     
     run_test();
 

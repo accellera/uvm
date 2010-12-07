@@ -19,59 +19,20 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// Title: TLM Extensions & Generic Payload
+// Title: TLM Generic Payload & Extensions
 //----------------------------------------------------------------------
-//
-//
 // The Generic Payload transaction represents a generic 
 // bus read/write access. It is used as the default transaction in
 // TLM2 blocking and nonblocking transport interfaces.
+//----------------------------------------------------------------------
+
+
+//---------------
+// Group: Globals
+//---------------
 //
-// Topic: Globals
 // Defines, Constants, enums.
-//
-// <`UVM_TLM_ADDR_SIZE>        : Define generic <uvm_tlm_addr_size> width of
-//                               the generic payload
-//
-// <uvm_tlm_addr_size>         : Constant to hold default generic payload
-//                               address size
-//
-// <uvm_tlm_command_e>         : Command attribute type definition
-//
-// <uvm_tlm_response_status_e> : Respone status attribute type definition
-//
-// Topic: Generic Payload
-// Generic Payload definition
-//
-// <uvm_tlm_generic_payload>   : base object, called the generic payload, for 
-// moving data between components. In SystemC this is the primary 
-// transaction vehicle. In SystemVerilog this is the default transaction 
-// type, but it is not the only type that can be used.
-//
-// <uvm_tlm_gp>                : A shorter name for <uvm_tlm_generic_payload>
-//
-// <uvm_tlm_extension_base>    : non-parameetrized base class
-//
-// <uvm_tlm_extension>         : parameterized with arbitrary type
-//
 
-// Section: Globals
-
-//------------------------------------------------------------------------------
-// MACRO: `UVM_TLM_ADDR_SIZE
-// 
-// Define generic uvm_tlm_addr_size width of TLM GP
-
-`define UVM_TLM_ADDR_SIZE 64
-
-// const: uvm_tlm_addr_size
-//
-// Constant to hold default TLM GP Address size.
-//
-
-const int unsigned uvm_tlm_addr_size = `UVM_TLM_ADDR_SIZE;
-
-typedef bit[`UVM_TLM_ADDR_SIZE-1:0] uvm_tlm_addr_t;
 
 // Enum: uvm_tlm_command_e
 //
@@ -89,6 +50,7 @@ typedef enum
     UVM_TLM_WRITE_COMMAND,
     UVM_TLM_IGNORE_COMMAND
 } uvm_tlm_command_e;
+
 
 // Enum: uvm_tlm_response_status_e
 //
@@ -124,10 +86,14 @@ typedef enum
 typedef class uvm_tlm_extension_base;
 
 
+//-----------------------
+// Group: Generic Payload
+//-----------------------
+
 //----------------------------------------------------------------------
 // Class: uvm_tlm_generic_payload
 //
-// This class provides a transaction architecture commonly used in
+// This class provides a transaction definition commonly used in
 // memory-mapped bus-based systems.  It's intended to be a general
 // purpose transaction class that lends itself to many applications. The
 // class is derived from uvm_sequence_item which enables it to be
@@ -155,7 +121,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // for example) it shall generate a standard error response. The
    // recommended response status is ~UVM_TLM_ADDRESS_ERROR_RESPONSE~.
 
-   rand uvm_tlm_addr_t             m_address;
+   rand bit [63:0]             m_address;
  
    // Variable: m_command
    //
@@ -196,7 +162,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // target (honoring the semantics of the byte enable) but by no other
    // component.
 
-   rand byte                   m_data[];
+   rand byte unsigned             m_data[];
 
    // Variable: m_length
    //
@@ -303,7 +269,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // component or target should not modify the values of disabled
    // bytes in the <m_data> array.
    
-   rand byte                   m_byte_enable[];
+   rand byte unsigned          m_byte_enable[];
 
    // Variable: m_byte_enable_length
    // The number of elements in the <m_byte_enable> array.
@@ -379,7 +345,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    `uvm_object_utils_end
    
 
-  // function: new
+  // Function: new
   //
   // Create a new instance of the generic payload.  Initialize all the
   // members to their default values.
@@ -433,7 +399,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    endfunction
    
 
-  // function: convert2string
+  // Function: convert2string
   //
   // Convert the contents of the class to a string suitable for
   // printing.
@@ -443,11 +409,9 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
     string msg;
     string addr_fmt;
     string s;
-    int unsigned addr_chars = (uvm_tlm_addr_size >> 2) + ((uvm_tlm_addr_size & 'hf) > 0);
+     int unsigned addr_chars = 16;
 
-    $sformat(addr_fmt, "%%%0dx", addr_chars);
-    $sformat(s, addr_fmt, m_address);
-    $sformat(msg, "%s [%s] =", m_command.name(), s);
+    $sformat(msg, "%s [0x%16x] =", m_command.name(), m_address);
 
     for(int unsigned i = 0; i < m_data.size(); i++) begin
       $sformat(s, " %02x", m_data[i]);
@@ -528,7 +492,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // Function: set_address
    //
    // Set the value of the <m_address> variable
-  virtual function void set_address(uvm_tlm_addr_t addr);
+  virtual function void set_address(bit [63:0] addr);
     m_address = addr;
   endfunction
 
@@ -536,7 +500,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    //
    // Get the value of the <m_address> variable
  
-  virtual function uvm_tlm_addr_t get_address();
+  virtual function bit [63:0] get_address();
     return m_address;
   endfunction
 
@@ -544,7 +508,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    //
    // Return the value of the <m_data> array
  
-  virtual function void get_data (output byte p []);
+  virtual function void get_data (output byte unsigned p []);
     p = m_data;
   endfunction
 
@@ -552,7 +516,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    //
    // Set the value of the <m_data> array  
 
-  virtual function void set_data(ref byte p []);
+  virtual function void set_data(ref byte unsigned p []);
     m_data = p;
   endfunction 
   
@@ -564,7 +528,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
     return m_length;
   endfunction
 
-  // function: set_data_length
+  // Function: set_data_length
   // Set the value of the <m_length>
    
    virtual function void set_data_length(int unsigned length);
@@ -591,7 +555,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // Function: get_byte_enable
    //
    // Return the value of the <m_byte_enable> array
-  virtual function void get_byte_enable(output byte p[]);
+  virtual function void get_byte_enable(output byte unsigned p[]);
     p = m_byte_enable;
   endfunction
 
@@ -599,7 +563,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    //
    // Set the value of the <m_byte_enable> array
    
-  virtual function void set_byte_enable(ref byte p[]);
+  virtual function void set_byte_enable(ref byte unsigned p[]);
     m_byte_enable = p;
   endfunction
 
@@ -749,7 +713,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
 endclass
 
 //----------------------------------------------------------------------
-// class: uvm_tlm_gp
+// Class: uvm_tlm_gp
 //
 // This typedef provides a short, more convenient name for the
 // <uvm_tlm_generic_payload> type.
@@ -776,20 +740,20 @@ typedef uvm_tlm_generic_payload uvm_tlm_gp;
 //
 virtual class uvm_tlm_extension_base extends uvm_object;
 
-  // function: new
+  // Function: new
   //
   function new(string name = "");
     super.new(name);
   endfunction
 
-  // function: get_type_handle
+  // Function: get_type_handle
   //
   // An interface to polymorphically retrieve a handle that uniquely
   // identifies the type of the sub-class
 
   pure virtual function uvm_tlm_extension_base get_type_handle();
 
-  // function: get_type_handle_name
+  // Function: get_type_handle_name
   //
   // An interface to polymorphically retrieve the name that uniquely
   // identifies the type of the sub-class
@@ -800,13 +764,15 @@ virtual class uvm_tlm_extension_base extends uvm_object;
     super.do_copy(rhs);
   endfunction
 
-  // function: create
+  // Function: create
   //
    
   virtual function uvm_object create (string name="");
+    return null;
   endfunction
 
 endclass
+
 
 //----------------------------------------------------------------------
 // Class: uvm_tlm_extension
@@ -839,19 +805,19 @@ endclass
 
 class uvm_tlm_extension #(type T=int) extends uvm_tlm_extension_base;
 
-  typedef uvm_tlm_extension#(T) this_type;
+   typedef uvm_tlm_extension#(T) this_type;
 
-  local static this_type m_my_tlm_ext_type = get_tlm_gp_ext_type();
+   local static this_type m_my_tlm_ext_type = get_tlm_gp_ext_type();
 
-  // function: new
-  //
-  // creates a new extension object.
+   // Function: new
+   //
+   // creates a new extension object.
 
-  function new(string name="");
-    super.new(name);
-  endfunction
+   function new(string name="");
+     super.new(name);
+   endfunction
 
-   // function: get_tlm_gp_ext_type
+   // Function: get_tlm_gp_ext_type
    //
    // Return the type of this TLM extension.
    // This method is used to identify the type of the extension to retrieve
@@ -869,7 +835,11 @@ class uvm_tlm_extension #(type T=int) extends uvm_tlm_extension_base;
   endfunction
 
   virtual function string get_type_handle_name();
+`ifndef UVM_USE_TYPENAME
+     return "";
+`else
      return $typename(T);
+`endif
   endfunction
 
   virtual function void do_copy(uvm_object rhs);
@@ -877,6 +847,7 @@ class uvm_tlm_extension #(type T=int) extends uvm_tlm_extension_base;
   endfunction
 
   virtual function uvm_object create (string name="");
+    return null;
   endfunction
 
 endclass

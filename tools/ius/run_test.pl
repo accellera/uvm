@@ -17,6 +17,8 @@
 ##   the License for the specific language governing 
 ##   permissions and limitations under the License. 
 ##----------------------------------------------------------------------
+use Cwd 'realpath';
+use Data::Dumper;
 
 #
 # IUS-Specific test running script
@@ -78,8 +80,7 @@ sub run_the_test {
   local($testdir, $ius_comp_opts, $ius_sim_opts, $_) = @_;
   local($uvm_dpi_lib) = qx($uvm_home/bin/uvm_dpi_name);
   
-  # FIXME do we really need -timescale here
-  $ius = "irun -uvm -uvmhome $uvm_home -uvmnoautocompile $uvm_home/src/dpi/uvm_dpi.cc +incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv $ius_comp_opts $ius_sim_opts test.sv -l irun.log +UVM_TESTNAME=test";
+  $ius = "irun -uvmhome $uvm_home -uvmnoautocompile $uvm_home/src/dpi/uvm_dpi.cc -incdir $uvm_home/src $uvm_home/src/uvm_pkg.sv $ius_comp_opts test.sv +UVM_TESTNAME=test $ius_sim_opts";
   $ius .= " -nostdout" unless $opt_v;
 
   print "$ius\n" if $opt_v;
@@ -94,7 +95,7 @@ sub run_the_test {
 # Return the name of the compile-time logfile
 #
 sub comptime_log_fname {
-   return "irun.log";
+   return runtime_log_fname();
 }
 
 
@@ -114,22 +115,17 @@ sub runtime_log_fname {
 # e.g. ("test.sv#25" "test.sv#30")
 #
 sub get_compiletime_errors {
-  local($testdir, $_) = @_;
+  local($testdir) = @_;
 
-  local($log);
-  $log = "$testdir/irun.log";
-  if (!open(LOG, "<$log")) {
-    return ();
-  }
+  local($log)= "$testdir/" . comptime_log_fname();
 
-  local(@errs);
+  open(LOG,$log) or die("couldnt open log [$log] [$!]");
 
+  local(@errs)=();
+  
   while ($_ = <LOG>) {
-    if (m/^(ncvlog|ncelab): \*E,\w+ \(([^,]),(\d+)\):/) {
-	  $fname = $2; $line = $3;
-    }
-    if ($2) {
-      push(@errs, "$fname#$line");
+    if (/^(ncvlog|ncelab): \*[EF],\w+ \(([^,]+),(\d+)\|(\d+)\):/,){ 
+	  push(@errs, "$2#$3");
     }
   }
 
@@ -150,27 +146,25 @@ sub get_compiletime_errors {
 # simulator, not UVM run-time reports.
 #
 sub get_runtime_errors {
-  local($testdir, $_) = @_;
+    local($testdir) = @_;
+    local($log) = &realpath("$testdir/" . runtime_log_fname());
 
-  local($log);
-  $log = "$testdir/irun.log";
-  if (!open(LOG, "<$log")) {
-    return ();
-  }
+  open(LOG, $log) or die("couldnt open [$log] [$!]");
 
-  local(@errs);
+  local(@errs)=();
 
   while ($_ = <LOG>) {
-    if (m/^(ncsim): \*E,\w+ \(([^,]),(\d+)\):/) {
-	  $fname = $2; $line = $3;
+   if (/^(ncsim): \*[FE],\w+ \(([^,]+),(\d+)\|(\d+)\):/) {
+	  push(@errs, "$2#$3");
     }
-    if ($2) {
-      push(@errs, "$fname#$line");
+
+    if (/^ERROR:/) {
+	  push(@errs, "fname#2");
     }
   }
 
   close(LOG);
-
+  
   return @errs;
 }
 

@@ -70,9 +70,9 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   //| get_config_string(...) => uvm_config_db#(string)::get(cntxt,...)
   //| get_config_object(...) => uvm_config_db#(uvm_object)::get(cntxt,...)
 
-//TBD: add file/line
   static function bit get(uvm_component cntxt, string inst_name,
       string field_name, ref T value);
+//TBD: add file/line
     int unsigned p=0;
     uvm_resource#(T) r, rt;
     uvm_resource_pool rp = uvm_resource_pool::get();
@@ -129,7 +129,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
 
   static function void set(uvm_component cntxt, string inst_name,
       string field_name, T value);
-    uvm_phase curr_phase = uvm_top.get_current_phase();
+    uvm_phase_schedule curr_phase = uvm_top.get_current_phase();
     uvm_resource#(T) r;
     bit exists = 0;
     
@@ -183,6 +183,33 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
 
     p.set_randstate(rstate);
   endfunction
+
+
+  // function: exists
+  //
+  // Check if a value for ~field_name~ is available in ~inst_name~, using
+  // component ~cntxt~ as the starting search point. ~inst_name~ is an explicit
+  // instance name relative to ~cntxt~ and may be an empty string if the
+  // ~cntxt~ is the instance that the configuration object applies to.
+  // ~field_name~ is the specific field in the scope that is being searched for.
+  // The ~spell_chk~ arg can be set to 1 to turn spell checking on if it
+  // is expected that the field should exist in the database. The function
+  // returns 1 if a config parameter exists and 0 if it doesn't exist.
+  //
+
+  static function bit exists(uvm_component cntxt, string inst_name,
+      string field_name, bit spell_chk=0);
+
+    if(cntxt == null)
+      cntxt = uvm_root::get();
+    if(inst_name == "")
+      inst_name = cntxt.get_full_name();
+    else if(cntxt.get_full_name() != "")
+      inst_name = {cntxt.get_full_name(), ".", inst_name};
+
+    return (uvm_resource_db#(T)::get_by_name(inst_name,field_name,spell_chk) != null);
+  endfunction
+
 
   // Function: wait_modified
   //

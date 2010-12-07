@@ -21,15 +21,28 @@
 // 
 
 
+//------------------------------------------------------------------------------
+// Title: Memory Walking-Ones Test Sequences
 //
-// TITLE: Memory Walk test Sequence
-//
+// This section defines sequences for applying a "walking-ones"
+// algorithm on one or more memories.
+//------------------------------------------------------------------------------
 
-//
-// CLASS: uvm_mem_single_walk_seq
+
+//------------------------------------------------------------------------------
+// Class: uvm_mem_single_walk_seq
 //
 // Runs the walking-ones algorithm on the memory given by the <mem> property,
 // which must be assigned prior to starting this sequence.
+//
+// If bit-type resource named
+// "NO_REG_TESTS", "NO_MEM_TESTS", or "NO_MEM_WALK_TEST"
+// in the "REG::" namespace
+// matches the full name of the memory,
+// the memory is not tested.
+//
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.mem0.get_full_name()},
+//|                            "NO_MEM_TESTS", 1, this);
 //
 // The walking ones algorithm is performed for each map in which the memory
 // is defined.
@@ -42,6 +55,7 @@
 //|   if (k == last addr)
 //|     read addr=k, expect data=~k
 //
+//------------------------------------------------------------------------------
 
 class uvm_mem_single_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
@@ -79,9 +93,12 @@ class uvm_mem_single_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_
       end
 
       // Memories with some attributes are not to be tested
-      if (mem.get_attribute("NO_REG_TESTS") != "" ||
-          mem.get_attribute("NO_MEM_TESTS") != "" ||
-	  mem.get_attribute("NO_MEM_WALK_TEST") != "")
+      if (uvm_resource_db#(bit)::get_by_name({"REG::",mem.get_full_name()},
+                                             "NO_REG_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",mem.get_full_name()},
+                                             "NO_MEM_TESTS", 0) != null ||
+	  uvm_resource_db#(bit)::get_by_name({"REG::",mem.get_full_name()},
+                                             "NO_MEM_WALK_TEST", 0) != null )
          return;
 
       n_bits = mem.get_n_bits();
@@ -158,16 +175,24 @@ class uvm_mem_single_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_
 endclass: uvm_mem_single_walk_seq
 
 
+
+//------------------------------------------------------------------------------
+// Class: uvm_mem_walk_seq
 //
-// CLASS: uvm_mem_walk_seq
-//
-// Verify the all memories in a block
+// Verifies the all memories in a block
 // by executing the <uvm_mem_single_walk_seq> sequence on
 // every memory within it.
 //
-// Blocks and memories with the ~NO_REG_TESTS~ or
-// the ~NO_MEM_WALK_TEST~ attribute are not verified.
+// If bit-type resource named
+// "NO_REG_TESTS", "NO_MEM_TESTS", or "NO_MEM_WALK_TEST"
+// in the "REG::" namespace
+// matches the full name of the block,
+// the block is not tested.
 //
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.get_full_name(),".*"},
+//|                            "NO_MEM_TESTS", 1, this);
+//
+//------------------------------------------------------------------------------
 
 class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
 
@@ -197,10 +222,9 @@ class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
    // Do not call directly. Use seq.start() instead.
    //
    virtual task body();
-      uvm_reg_block blks[$];
 
       if (model == null) begin
-         `uvm_error("RegModel", "Not block or system specified to run sequence on");
+         `uvm_error("RegModel", "No register model specified to run sequence on");
          return;
       end
 
@@ -212,10 +236,6 @@ class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
       model.reset();
 
       do_block(model);
-      model.get_blocks(blks);
-      foreach (blks[i]) begin
-         do_block(blks[i]);
-      end
    endtask: body
 
 
@@ -226,22 +246,37 @@ class uvm_mem_walk_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
    protected virtual task do_block(uvm_reg_block blk);
       uvm_mem mems[$];
       
-      if (blk.get_attribute("NO_REG_TESTS") != "" ||
-          blk.get_attribute("NO_MEM_TESTS") != "" ||
-          blk.get_attribute("NO_MEM_ACCESS_TEST") != "")
+      if (uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_REG_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_MEM_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_MEM_ACCESS_TEST", 0) != null )
          return;
       
       // Iterate over all memories, checking accesses
       blk.get_memories(mems, UVM_NO_HIER);
       foreach (mems[i]) begin
          // Memories with some attributes are not to be tested
-         if (mems[i].get_attribute("NO_REG_TESTS") != "" ||
-             mems[i].get_attribute("NO_MEM_TESTS") != "" ||
-	     mems[i].get_attribute("NO_MEM_WALK_TEST") != "")
+         if (uvm_resource_db#(bit)::get_by_name({"REG::",mems[i].get_full_name()},
+                                                "NO_REG_TESTS", 0) != null ||
+             uvm_resource_db#(bit)::get_by_name({"REG::",mems[i].get_full_name()},
+                                                "NO_MEM_TESTS", 0) != null ||
+	     uvm_resource_db#(bit)::get_by_name({"REG::",mems[i].get_full_name()},
+                                                "NO_MEM_WALK_TEST", 0) != null )
            continue;
          
          mem_seq.mem = mems[i];
          mem_seq.start(null, this);
+      end
+
+      begin
+         uvm_reg_block blks[$];
+         
+         blk.get_blocks(blks);
+         foreach (blks[i]) begin
+            do_block(blks[i]);
+         end
       end
    endtask: do_block
 

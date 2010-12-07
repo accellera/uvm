@@ -30,7 +30,7 @@ See <Sequence Classes> for an overview on sequences and sequence items.
 Sequence Item Ports:
 
 As with all UVM components, the sequencers and drivers described above use
-<TLM Interfaces, Ports, and Exports> to communicate transactions.
+<TLM Interfaces> to communicate transactions.
 
 The <uvm_sequencer #(REQ,RSP)> and <uvm_driver #(REQ,RSP)> pair also uses a
 ~sequence item pull port~ to achieve the special execution semantic 

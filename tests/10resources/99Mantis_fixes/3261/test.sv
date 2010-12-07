@@ -12,7 +12,7 @@ module test;
     `uvm_component_utils(test)
 
     task run;
-      int_rsrc::write_and_set("value", "m", 55);
+      int_rsrc::set("m", "value", 55);
     
       int_rsrc::read_by_name("at_end_m", "value", value);
       if(value == 55) begin

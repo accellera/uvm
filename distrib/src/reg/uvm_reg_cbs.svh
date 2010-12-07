@@ -26,6 +26,15 @@ typedef class uvm_mem;
 typedef class uvm_reg_backdoor;
 
 //------------------------------------------------------------------------------
+// Title: Register Callbacks
+//
+// This section defines the base class used for all register callback
+// extensions. It also includes pre-defined callback extensions for use on
+// read-only and write-only registers.
+//------------------------------------------------------------------------------
+
+
+//------------------------------------------------------------------------------
 // Class: uvm_reg_cbs
 //
 // Facade class for field, register, memory and backdoor
@@ -74,6 +83,9 @@ virtual class uvm_reg_cbs extends uvm_callback;
    // - For non-backdoor operations, modifying the access ~path~ or
    //   address ~map~ modifies the actual path or map used in the
    //   operation.
+   //
+   // If the ~rw.status~ is modified to anything other than <UVM_IS_OK>,
+   // the operation is aborted.
    //
    // See <uvm_reg_item> for details on ~rw~ information.
    //
@@ -155,6 +167,9 @@ virtual class uvm_reg_cbs extends uvm_callback;
    //   address ~map~ modifies the actual path or map used in the
    //   operation.
    //
+   // If the ~rw.status~ is modified to anything other than <UVM_IS_OK>,
+   // the operation is aborted.
+   //
    // See <uvm_reg_item> for details on ~rw~ information.
    //
    virtual task pre_read(uvm_reg_item rw); endtask
@@ -203,11 +218,16 @@ virtual class uvm_reg_cbs extends uvm_callback;
    // Called by the <uvm_reg_field::predict()> method
    // after a successful UVM_PREDICT_READ or UVM_PREDICT_WRITE prediction.
    //
-   virtual function void post_predict(uvm_reg_field  fld,
-                                      uvm_reg_data_t value,
-                                      uvm_predict_e  kind,
-                                      uvm_path_e     path,
-                                      uvm_reg_map    map);
+   // ~previous~ is the previous value in the mirror and
+   // ~value~ is the latest predicted value. Any change to ~value~ will
+   // modify the predicted mirror value.
+   //
+   virtual function void post_predict(input uvm_reg_field  fld,
+                                      input uvm_reg_data_t previous,
+                                      inout uvm_reg_data_t value,
+                                      input uvm_predict_e  kind,
+                                      input uvm_path_e     path,
+                                      input uvm_reg_map    map);
    endfunction
 
 
@@ -249,10 +269,14 @@ virtual class uvm_reg_cbs extends uvm_callback;
 endclass
 
 
+//------------------
+// Section: Typedefs
+//------------------
+
 
 // Type: uvm_reg_cb
 //
-// Convenience callback type declaration
+// Convenience callback type declaration for registers
 //
 // Use this declaration to register register callbacks rather than
 // the more verbose parameterized class
@@ -262,7 +286,7 @@ typedef uvm_callbacks#(uvm_reg, uvm_reg_cbs) uvm_reg_cb;
 
 // Type: uvm_reg_cb_iter
 //
-// Convenience callback iterator type declaration
+// Convenience callback iterator type declaration for registers
 //
 // Use this declaration to iterate over registered register callbacks
 // rather than the more verbose parameterized class
@@ -272,7 +296,7 @@ typedef uvm_callback_iter#(uvm_reg, uvm_reg_cbs) uvm_reg_cb_iter;
 
 // Type: uvm_reg_bd_cb
 //
-// Convenience callback type declaration
+// Convenience callback type declaration for backdoor
 //
 // Use this declaration to register register backdoor callbacks rather than
 // the more verbose parameterized class
@@ -281,7 +305,7 @@ typedef uvm_callbacks#(uvm_reg_backdoor, uvm_reg_cbs) uvm_reg_bd_cb;
 
 
 // Type: uvm_reg_bd_cb_iter
-// Convenience callback iterator type declaration
+// Convenience callback iterator type declaration for backdoor
 //
 // Use this declaration to iterate over registered register backdoor callbacks
 // rather than the more verbose parameterized class
@@ -292,7 +316,7 @@ typedef uvm_callback_iter#(uvm_reg_backdoor, uvm_reg_cbs) uvm_reg_bd_cb_iter;
 
 // Type: uvm_mem_cb
 //
-// Convenience callback type declaration
+// Convenience callback type declaration for memories
 //
 // Use this declaration to register memory callbacks rather than
 // the more verbose parameterized class
@@ -302,7 +326,7 @@ typedef uvm_callbacks#(uvm_mem, uvm_reg_cbs) uvm_mem_cb;
 
 // Type: uvm_mem_cb_iter
 //
-// Convenience callback iterator type declaration
+// Convenience callback iterator type declaration for memories
 //
 // Use this declaration to iterate over registered memory callbacks
 // rather than the more verbose parameterized class
@@ -312,7 +336,7 @@ typedef uvm_callback_iter#(uvm_mem, uvm_reg_cbs) uvm_mem_cb_iter;
 
 // Type: uvm_reg_field_cb
 //
-// Convenience callback type declaration
+// Convenience callback type declaration for fields
 //
 // Use this declaration to register field callbacks rather than
 // the more verbose parameterized class
@@ -322,7 +346,7 @@ typedef uvm_callbacks#(uvm_reg_field, uvm_reg_cbs) uvm_reg_field_cb;
 
 // Type: uvm_reg_field_cb_iter
 //
-// Convenience callback iterator type declaration
+// Convenience callback iterator type declaration for fields
 //
 // Use this declaration to iterate over registered field callbacks
 // rather than the more verbose parameterized class
@@ -330,3 +354,176 @@ typedef uvm_callbacks#(uvm_reg_field, uvm_reg_cbs) uvm_reg_field_cb;
 typedef uvm_callback_iter#(uvm_reg_field, uvm_reg_cbs) uvm_reg_field_cb_iter;
 
 
+//-----------------------------
+// Group: Predefined Extensions
+//-----------------------------
+
+//------------------------------------------------------------------------------
+// Class: uvm_reg_read_only_cbs
+//
+// Pre-defined register callback method for read-only registers
+// that will issue an error if a write() operation is attempted.
+//
+//------------------------------------------------------------------------------
+
+class uvm_reg_read_only_cbs extends uvm_reg_cbs;
+
+   function new(string name = "uvm_reg_read_only_cbs");
+      super.new(name);
+   endfunction
+
+   `uvm_object_utils(uvm_reg_read_only_cbs)
+
+   
+   // Function: pre_write
+   //
+   // Produces an error message and sets status to <UVM_NOT_OK>.
+   //
+   virtual task pre_write(uvm_reg_item rw);
+      string name = rw.element.get_full_name();
+      
+      if (rw.status != UVM_IS_OK)
+         return;
+
+      if (rw.element_kind == UVM_FIELD) begin
+         uvm_reg_field fld;
+         uvm_reg rg;
+         $cast(fld, rw.element);
+         rg = fld.get_parent();
+         name = rg.get_full_name();
+      end
+      
+      `uvm_error("UVM/REG/READONLY",
+                 {name, " is read-only. Cannot call write() method."});
+
+      rw.status = UVM_NOT_OK;
+   endtask
+
+   local static uvm_reg_read_only_cbs m_me = null;
+   local static function uvm_reg_read_only_cbs get();
+      if (m_me == null) m_me = new;
+      return m_me;
+   endfunction
+
+
+   // Function: add
+   //
+   // Add this callback to the specified register and its contained fields.
+   //
+   static function void add(uvm_reg rg);
+      uvm_reg_field flds[$];
+      
+      uvm_reg_cb::add(rg, get());
+      rg.get_fields(flds);
+      foreach (flds[i]) begin
+         uvm_reg_field_cb::add(flds[i], get());
+      end
+   endfunction
+
+
+   // Function: remove
+   //
+   // Remove this callback from the specified register and its contained fields.
+   //
+   static function void remove(uvm_reg rg);
+      uvm_reg_cb_iter cbs = new(rg);
+      uvm_reg_field flds[$];
+
+      void'(cbs.first());
+      while (cbs.get_cb() != get()) begin
+         if (cbs.get_cb() == null)
+            return;
+         void'(cbs.next());
+      end
+      uvm_reg_cb::delete(rg, get());
+      rg.get_fields(flds);
+      foreach (flds[i]) begin
+         uvm_reg_field_cb::delete(flds[i], get());
+      end
+   endfunction
+endclass
+
+
+//------------------------------------------------------------------------------
+// Class: uvm_reg_write_only_cbs
+//
+// Pre-defined register callback method for write-only registers
+// that will issue an error if a read() operation is attempted.
+//
+//------------------------------------------------------------------------------
+
+class uvm_reg_write_only_cbs extends uvm_reg_cbs;
+
+   function new(string name = "uvm_reg_write_only_cbs");
+      super.new(name);
+   endfunction
+
+   `uvm_object_utils(uvm_reg_write_only_cbs)
+   
+   // Function: pre_read
+   //
+   // Produces an error message and sets status to <UVM_NOT_OK>.
+   //
+   virtual task pre_read(uvm_reg_item rw);
+      string name = rw.element.get_full_name();
+      
+      if (rw.status != UVM_IS_OK)
+         return;
+
+      if (rw.element_kind == UVM_FIELD) begin
+         uvm_reg_field fld;
+         uvm_reg rg;
+         $cast(fld, rw.element);
+         rg = fld.get_parent();
+         name = rg.get_full_name();
+      end
+      
+      `uvm_error("UVM/REG/WRTEONLY",
+                 {name, " is write-only. Cannot call read() method."});
+
+      rw.status = UVM_NOT_OK;
+   endtask
+
+   local static uvm_reg_write_only_cbs m_me = null;
+   local static function uvm_reg_write_only_cbs get();
+      if (m_me == null) m_me = new;
+      return m_me;
+   endfunction
+
+
+   // Function: add
+   //
+   // Add this callback to the specified register and its contained fields.
+   //
+   static function void add(uvm_reg rg);
+      uvm_reg_field flds[$];
+      
+      uvm_reg_cb::add(rg, get());
+      rg.get_fields(flds);
+      foreach (flds[i]) begin
+         uvm_reg_field_cb::add(flds[i], get());
+      end
+   endfunction
+
+
+   // Function: remove
+   //
+   // Remove this callback from the specified register and its contained fields.
+   //
+   static function void remove(uvm_reg rg);
+      uvm_reg_cb_iter cbs = new(rg);
+      uvm_reg_field flds[$];
+
+      void'(cbs.first());
+      while (cbs.get_cb() != get()) begin
+         if (cbs.get_cb() == null)
+            return;
+         void'(cbs.next());
+      end
+      uvm_reg_cb::delete(rg, get());
+      rg.get_fields(flds);
+      foreach (flds[i]) begin
+         uvm_reg_field_cb::delete(flds[i], get());
+      end
+   endfunction
+endclass

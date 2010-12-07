@@ -57,9 +57,6 @@ virtual class uvm_reg_block extends uvm_object;
 
    local bit            locked;
 
-   local string         attributes[string];
-   local string         constr[$];
-
    local int            has_cover;
    local int            cover_on;
    local string         fname = "";
@@ -236,6 +233,36 @@ virtual class uvm_reg_block extends uvm_object;
    // Returns an array of all root blocks in the simulation.
    //
    extern static  function void get_root_blocks(ref uvm_reg_block blks[$]);
+      
+
+   // Function: find_blocks
+   //
+   // Find the blocks whose hierarchical names match the
+   // specified ~name~ glob.
+   // If a ~root~ block is specified, the name of the blocks are
+   // relative to that block, otherwise they are absolute.
+   //
+   // Returns the number of blocks found.
+   //
+   extern static function int find_blocks(input string        name,
+                                          ref   uvm_reg_block blks[$],
+                                          input uvm_reg_block root = null,
+                                          input uvm_object    accessor = null);
+      
+
+   // Function: find_block
+   //
+   // Find the first block whose hierarchical names match the
+   // specified ~name~ glob.
+   // If a ~root~ block is specified, the name of the blocks are
+   // relative to that block, otherwise they are absolute.
+   //
+   // Returns the first block found or ~null~ otherwise.
+   // A warning is issued if more than one block is found.
+   //
+   extern static function uvm_reg_block find_block(input string        name,
+                                                   input uvm_reg_block root = null,
+                                                   input uvm_object    accessor = null);
       
 
    // Function: get_blocks
@@ -434,56 +461,6 @@ virtual class uvm_reg_block extends uvm_object;
    extern virtual function uvm_vreg_field get_vfield_by_name (string name);
 
 
-   //------------------
-   // Group: Attributes
-   //------------------
-
-
-   // Function: set_attribute
-   //
-   // Set an attribute.
-   //
-   // Set the specified attribute to the specified value for this block.
-   // If the value is specified as "", the specified attribute is deleted.
-   // A warning is issued if an existing attribute is modified.
-   // 
-   // Attribute names are case sensitive. 
-   //
-   extern virtual function void set_attribute(string name,
-                                              string value);
-
-
-   // Function: get_attribute
-   //
-   // Get an attribute value.
-   //
-   // Get the value of the specified attribute for this block.
-   // If the attribute does not exists, "" is returned.
-   // If ~inherited~ is specifed as TRUE, the value of the attribute
-   // is inherited from the nearest block ancestor
-   // for which the attribute
-   // is set if it is not specified for this block.
-   // If ~inherited~ is specified as FALSE, the value "" is returned
-   // if it does not exists in the this block.
-   // 
-   // Attribute names are case sensitive.
-   // 
-   extern virtual function string get_attribute(string name,
-                                                bit inherited = 1);
-
-
-   // Function: get_attributes
-   //
-   // Get all attribute values.
-   //
-   // Get the name of all attribute for this block.
-   // If ~inherited~ is specifed as TRUE, the value for all attributes
-   // inherited from all block ancestors are included.
-   // 
-   extern virtual function void get_attributes(ref string names[string],
-                                                   input bit inherited = 1);
-
-   
    //----------------
    // Group: Coverage
    //----------------
@@ -970,7 +947,7 @@ function uvm_reg_block::new(string name="", int has_coverage=UVM_NO_COVERAGE);
    hdl_paths_pool = new("hdl_paths");
    this.has_cover = has_coverage;
    // Root block until registered with a parent
-   m_roots[this] = 1;
+   m_roots[this] = 0;
 endfunction: new
 
 
@@ -981,6 +958,9 @@ function void uvm_reg_block::configure(uvm_reg_block parent=null, string hdl_pat
   if (parent != null)
     this.parent.add_block(this);
   add_hdl_path(hdl_path);
+
+  uvm_resource_db#(uvm_reg_block)::set(get_full_name(),
+                                       "uvm_reg::*", this);
 endfunction
 
 
@@ -1106,6 +1086,28 @@ function void uvm_reg_block::lock_model();
       end
 
       Xinit_address_mapsX();
+
+      // Check that root register models have unique names
+
+      // Has this name has been checked before?
+      if (m_roots[this] != 1) begin
+         int n = 0;
+
+         foreach (m_roots[_blk]) begin
+            uvm_reg_block blk = _blk;
+
+            if (blk.get_name() == get_name()) begin
+               m_roots[blk] = 1;
+               n++;
+            end
+         end
+
+         if (n > 1) begin
+            `uvm_error("UVM/REG/DUPLROOT",
+                       $sformatf("There are %0d root register models named \"%s\". This may create confusion when configuring register model components.",
+                                 n, get_name()))
+         end
+      end
    end
 
 endfunction: lock_model
@@ -1117,20 +1119,10 @@ endfunction: lock_model
 //--------------------------
 
 function string uvm_reg_block::get_full_name();
-   uvm_reg_block blk;
+   if (parent == null)
+     return get_name();
 
-   get_full_name = this.get_name();
-
-   // Do not include top-level name in full name
-   blk = this.get_parent();
-
-   if (blk == null)
-     return get_full_name;
-
-   if (blk.get_parent() == null)
-     return get_full_name;
-
-   get_full_name = {this.parent.get_full_name(), ".", get_full_name};
+   return {parent.get_full_name(), ".", get_name()};
 
 endfunction: get_full_name
 
@@ -1247,6 +1239,51 @@ function void uvm_reg_block::get_root_blocks(ref uvm_reg_block blks[$]);
    end
 
 endfunction: get_root_blocks
+
+
+// find_blocks
+
+function int uvm_reg_block::find_blocks(input string        name,
+                                        ref   uvm_reg_block blks[$],
+                                        input uvm_reg_block root = null,
+                                        input uvm_object    accessor = null);
+
+   uvm_resource_pool rpl = uvm_resource_pool::get();
+   uvm_resource_types::rsrc_q_t rs;
+
+   blks.delete();
+
+   if (root != null) name = {root.get_full_name(), ".", name};
+
+   rs = rpl.lookup_regex(name, "uvm_reg::");
+   for (int i = 0; i < rs.size(); i++) begin
+      uvm_resource#(uvm_reg_block) blk;
+      if (!$cast(blk, rs.get(i))) continue;
+      blks.push_back(blk.read(accessor));
+   end
+   
+   return blks.size();
+endfunction
+
+
+// find_blocks
+
+function uvm_reg_block uvm_reg_block::find_block(input string        name,
+                                                 input uvm_reg_block root = null,
+                                                 input uvm_object    accessor = null);
+
+   uvm_reg_block blks[$];
+   if (!find_blocks(name, blks, root, accessor))
+      return null;
+
+   if (blks.size() > 1) begin
+      `uvm_warning("MRTH1BLK",
+                   {"More than one block matched the name \"", name, "\"."})
+   end
+   
+
+   return blks[0];
+endfunction
 
 
 // get_maps
@@ -1488,12 +1525,10 @@ endfunction
 
 
 function uvm_reg_cvr_t uvm_reg_block::build_coverage(uvm_reg_cvr_t models);
-`ifdef UVM_RESOURCES
    build_coverage = UVM_NO_COVERAGE;
-   void'(uvm_reg_cvr_rsrc_db::read_by_name("include_coverage",
-                                           {"uvm_reg::", get_full_name()},
-                                           build_coverage, this);
-`endif
+   void'(uvm_reg_cvr_rsrc_db::read_by_name({"uvm_reg::", get_full_name()},
+                                           "include_coverage",
+                                           build_coverage, this));
    return models;
 endfunction: build_coverage
 
@@ -1518,72 +1553,6 @@ function bit uvm_reg_block::get_coverage(uvm_reg_cvr_t is_on = UVM_CVR_ALL);
    if (this.has_coverage(is_on) == 0) return 0;
    return ((this.cover_on & is_on) == is_on);
 endfunction: get_coverage
-
-
-//-----------
-// Attributes
-//-----------
-
-// set_attribute
-
-function void uvm_reg_block::set_attribute(string name,
-                                           string value);
-   if (name == "") begin
-      `uvm_error("RegModel", {"Cannot set anonymous attribute \"\" in block '",
-                         get_full_name(),"'"})
-      return;
-   end
-
-   if (this.attributes.exists(name)) begin
-      if (value != "") begin
-         `uvm_warning("RegModel", {"Redefining attribute '",name,"' in block '",
-                         get_full_name(),"' to '",value,"'"})
-         this.attributes[name] = value;
-      end
-      else begin
-         this.attributes.delete(name);
-      end
-      return;
-   end
-
-   if (value == "") begin
-      `uvm_warning("RegModel", {"Attempting to delete non-existent attribute '",
-                          name, "' in block '", get_full_name(), "'"})
-      return;
-   end
-
-   this.attributes[name] = value;
-
-endfunction: set_attribute
-
-
-// get_attribute
-
-function string uvm_reg_block::get_attribute(string name, bit inherited = 1);
-
-   if (inherited && parent != null)
-      get_attribute = parent.get_attribute(name);
-
-   if (get_attribute == "" && this.attributes.exists(name))
-      return this.attributes[name];
-
-   return "";
-endfunction
-
-
-// get_attributes
-
-function void uvm_reg_block::get_attributes(ref string names[string],
-                                            input bit inherited = 1);
-   // attributes at higher levels supercede those at lower levels
-   if (inherited && parent != null)
-     parent.get_attributes(names,1);
-
-   foreach (attributes[nm])
-     if (!names.exists(nm))
-       names[nm] = attributes[nm];
-
-endfunction: get_attributes
 
 
 //----------------

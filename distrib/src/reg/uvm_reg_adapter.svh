@@ -20,15 +20,12 @@
 // -------------------------------------------------------------
 //
  
+//------------------------------------------------------------------------------
+// Title: Classes for Adapting Between Register and Bus Operations
 //
-// TITLE: Classes for Adapting Between Register and Bus Operations
-//
-// The following classes are defined herein:
-//
-// <uvm_reg_adapter> : converts between a register transaction type and a bus transaction type
-//
-// <uvm_reg_tlm_adapter> : converts between register items and TLM generic payload items
-//
+// This section defines classes used to convert transaction streams between
+// generic register address/data reads and writes and physical bus accesses. 
+//------------------------------------------------------------------------------
 
 
 //------------------------------------------------------------------------------

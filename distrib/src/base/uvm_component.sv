@@ -26,11 +26,13 @@
 uvm_component uvm_top_levels[$];
 
 
+
 //------------------------------------------------------------------------------
 //
 // CLASS- uvm_component
 //
 //------------------------------------------------------------------------------
+
 
 // new
 // ---
@@ -47,13 +49,21 @@ function uvm_component::new (string name, uvm_component parent);
   end
 
   // Check that we're not in or past end_of_elaboration
-  if (end_of_elaboration_ph.is_in_progress() ||
-      end_of_elaboration_ph.is_done() ) begin
-    uvm_phase curr_phase;
-    curr_phase = uvm_top.get_current_phase();
-    `uvm_fatal("ILLCRT", {"It is illegal to create a component once",
-              " phasing reaches end_of_elaboration. The current phase is ", 
-              curr_phase.get_name()})
+  begin
+    uvm_phase_schedule common, end_of_elab;
+    common = uvm_top.find_phase_schedule("uvm_pkg::common","common");
+    if (common != null) begin
+      // only check if we have got phasing set up yet
+      end_of_elab = common.find_schedule("end_of_elaboration");
+      if (end_of_elab.get_state == UVM_PHASE_EXECUTING ||
+          end_of_elab.get_run_count > 0 ) begin
+        uvm_phase_schedule curr_phase;
+        curr_phase = uvm_top.get_current_phase();
+        uvm_report_fatal("ILLCRT", {"It is illegal to create a component once",
+                                    " phasing reaches end_of_elaboration. The current phase is ", 
+                                    curr_phase.get_phase_name()}, UVM_NONE);
+      end
+    end
   end
 
   if (name == "") begin
@@ -103,6 +113,8 @@ function uvm_component::new (string name, uvm_component parent);
 
   event_pool = new("event_pool");
 
+  foreach(parent.m_phase_domains[schedule])
+    m_phase_domains[schedule] = parent.m_phase_domains[schedule];
   
   // Now that inst name is established, reseed (if use_uvm_seeding is set)
   reseed();
@@ -113,7 +125,6 @@ function uvm_component::new (string name, uvm_component parent);
   if (parent == uvm_top)
     uvm_top_levels.push_back(this);
 
-//Not sure what uvm_top isn't taking the setting... these two lines should be removed.
   uvm_top.set_report_id_action("CFGOVR", UVM_NO_ACTION);
   uvm_top.set_report_id_action("CFGSET", UVM_NO_ACTION);
 endfunction
@@ -145,6 +156,7 @@ function bit uvm_component::m_add_child(uvm_component child);
   m_children_by_handle[child] = child;
   return 1;
 endfunction
+
 
 
 //------------------------------------------------------------------------------
@@ -228,7 +240,6 @@ function void uvm_component::set_name (string name);
   m_set_full_name();
 
 endfunction
-
 
 
 // m_set_full_name
@@ -338,11 +349,13 @@ function void uvm_component::do_flush();
 endfunction
   
 
+
 //------------------------------------------------------------------------------
 //
 // Factory Methods
 // 
 //------------------------------------------------------------------------------
+
 
 // create
 // ------
@@ -449,6 +462,8 @@ function void uvm_component::set_inst_override_by_type (string relative_inst_pat
   factory.set_inst_override_by_type(original_type, override_type, full_inst_path);
 
 endfunction
+
+
 
 //------------------------------------------------------------------------------
 //
@@ -564,6 +579,7 @@ function void uvm_component::set_report_verbosity_level_hier(int verbosity);
 endfunction  
 
 
+
 //------------------------------------------------------------------------------
 //
 // Phase interface 
@@ -571,45 +587,246 @@ endfunction
 //------------------------------------------------------------------------------
 
 
-// do_func_phase
-// -------------
+// phase methods
+//--------------
+// these are prototypes for the methods to be implemented in user components
+// build() has a default implementation, the others have an empty default
 
-function void uvm_component::do_func_phase (uvm_phase phase);
-  // If in build_ph, don't build if already done
-  m_curr_phase = phase;
-  if (!(phase == build_ph && m_build_done))
-    phase.call_func(this);
+function void uvm_component::build();
+  m_build_done = 1;
+  apply_config_settings(print_config_matches);
+endfunction
+
+// these phase methods are common to all components in UVM
+
+function void uvm_component::connect();             return; endfunction
+function void uvm_component::start_of_simulation(); return; endfunction
+function void uvm_component::end_of_elaboration();  return; endfunction
+task          uvm_component::run();                 return; endtask
+function void uvm_component::extract();             return; endfunction
+function void uvm_component::check();               return; endfunction
+function void uvm_component::report();              return; endfunction
+function void uvm_component::finalize();            return; endfunction
+
+// these runtime phase methods are only called if a set_domain() is done
+
+task          uvm_component::pre_reset();           return; endtask
+task          uvm_component::reset();               return; endtask
+task          uvm_component::post_reset();          return; endtask
+task          uvm_component::pre_configure();       return; endtask
+task          uvm_component::configure();           return; endtask
+task          uvm_component::post_configure();      return; endtask
+task          uvm_component::pre_main();            return; endtask
+task          uvm_component::main();                return; endtask
+task          uvm_component::post_main();           return; endtask
+task          uvm_component::pre_shutdown();        return; endtask
+task          uvm_component::shutdown();            return; endtask
+task          uvm_component::post_shutdown();       return; endtask
+
+
+// The verbosity settings may have a specific phase to start at. 
+// We will do this work in the phase_started callback. May need a
+// seperate internal callback so the user doesn't have to remember to call
+// the phase started callback.
+typedef struct {
+  string phase;
+  time   offset;
+  uvm_verbosity verbosity;
+  string id;
+} m_verbosity_setting;
+m_verbosity_setting m_verbosity_settings[$];
+
+// current phase convenience API
+//------------------------------
+
+
+// phase_started() and phase_ended() are extra callbacks called at the
+// beginning and end of each phase, respectively.  Since they are
+// called for all phases the phase is passed in as an argument so the
+// extender can decide what to do, if anything, for each phase.
+
+function void uvm_component::phase_started(uvm_phase_schedule phase);
+  foreach(m_verbosity_settings[i]) begin
+    if(phase.get_name() == m_verbosity_settings[i].phase) begin
+      if( m_verbosity_settings[i].offset == 0 ) begin
+          if(m_verbosity_settings[i].id == "_ALL_") 
+            set_report_verbosity_level(m_verbosity_settings[i].verbosity);
+          else 
+            set_report_id_verbosity(m_verbosity_settings[i].id, m_verbosity_settings[i].verbosity);
+      end
+      else begin
+        fork begin
+          m_verbosity_setting setting = m_verbosity_settings[i];
+          #setting.offset;
+$display("%0t: DOING SETTING AT %s TO %0d", $time, get_full_name(), setting.verbosity);
+          if(setting.id == "_ALL_") 
+            set_report_verbosity_level(setting.verbosity);
+          else 
+            set_report_id_verbosity(setting.id, setting.verbosity);
+        end join_none;
+      end
+      // Remove after use
+      m_verbosity_settings.delete(i);
+    end
+  end
 endfunction
 
 
-// do_task_phase
-// -------------
+function void uvm_component::phase_ended(uvm_phase_schedule phase);
+endfunction
 
-task uvm_component::do_task_phase (uvm_phase phase);
 
-  m_curr_phase = phase;
-  `ifdef UVM_USE_FPC  
-        m_phase_process = process::self();
-        phase.call_task(this);
-        @m_kill_request;
-  `else
-  // don't use fine grained process control
-   fork begin // isolate inner fork so can safely kill via disable fork
-     fork : task_phase
-       // process 1 - call task; if returns, keep alive until kill request
-       begin
-         phase.call_task(this);
-         @m_kill_request;
-       end
-       // process 2 - any kill request will preempt process 1
-       @m_kill_request;
-     join_any
-     disable fork;
-   end
-   join
-  `endif
+function uvm_phase_schedule uvm_component::get_current_phase();
+  foreach (m_phase_threads[phase])
+    if (m_phase_threads[phase].is_current_process()) return phase;
 
-endtask
+  return m_current_phase;
+endfunction
+
+
+function string uvm_component::find_phase_domain(string schedule_name="uvm_pkg::uvm");
+  foreach (m_phase_domains[schedule])
+    if (schedule.get_schedule_name() == schedule_name)
+      return m_phase_domains[schedule];
+  uvm_report_fatal("BADDOMAIN", {"component has no '", schedule_name, "' schedule domain"});
+endfunction
+
+
+function uvm_phase_schedule uvm_component::find_phase_schedule(string name, string domain);
+  foreach (m_phase_domains[schedule])
+    if (((name == "*") || (schedule.get_schedule_name() == name)) &&
+        ((domain == "*") || (m_phase_domains[schedule] == domain)))
+      return schedule;
+  return null;
+endfunction
+
+
+function void uvm_component::add_phase_schedule(uvm_phase_schedule schedule, string domain);
+  m_phase_domains[schedule] = domain;
+endfunction
+
+
+function void uvm_component::delete_phase_schedule(uvm_phase_schedule schedule);
+  m_phase_domains.delete(schedule);
+endfunction
+
+
+// phase / schedule / domain API
+//------------------------------
+// methods for VIP creators and integrators to use to set up schedule domains
+// - a schedule is a named, organized group of phases for a component base type
+// - a domain is a named instance of a schedule in the master phasing schedule
+
+
+// here we define the "uvm_pkg::uvm" schedule containing the UVM runtime phases
+// - and add a named instance of it to the root schedule [if not already there]
+// - and add the schedule handle to this component's domain membership list
+// [replacing any existing handles comp has to this schedule in other domains]
+
+// components using these phases must subscribe by calling set_domain(name)
+
+function void uvm_component::set_phase_schedule(string domain_name);
+  const string schedule_name = "uvm_pkg::uvm";
+  uvm_phase_schedule uvm;
+
+  // find this schedule/domain in the master schedule if it exists
+  uvm = uvm_top.find_phase_schedule(schedule_name, domain_name);
+
+  // create it and add it to master schedule if it doesn't exist
+  if (uvm == null) begin
+    uvm = new(schedule_name);
+    uvm_root::m_has_rt_phases=1;
+    // schedule consists of a linear list of predefined phases
+    uvm.add_phase(uvm_pre_reset_ph);
+    uvm.add_phase(uvm_reset_ph);
+    uvm.add_phase(uvm_post_reset_ph);
+    uvm.add_phase(uvm_pre_configure_ph);
+    uvm.add_phase(uvm_configure_ph);
+    uvm.add_phase(uvm_post_configure_ph);
+    uvm.add_phase(uvm_pre_main_ph);
+    uvm.add_phase(uvm_main_ph);
+    uvm.add_phase(uvm_post_main_ph);
+    uvm.add_phase(uvm_pre_shutdown_ph);
+    uvm.add_phase(uvm_shutdown_ph);
+    uvm.add_phase(uvm_post_shutdown_ph);
+    // schedule is integrated hierarchically in parallel with the "run" phase
+    // of the "uvm_pkg::common" schedule, for the specified domain
+    begin
+      uvm_phase_schedule common;
+      common = uvm_top.find_phase_schedule("uvm_pkg::common","common");
+      common.add_schedule(uvm, .with_phase(common.find_schedule("run")));
+    end
+    // schedule/domain pair is added to the master list
+    uvm_top.add_phase_schedule(uvm, domain_name);
+  end
+
+  // add schedule to this component's list, replacing any existing entry found
+  if (find_phase_schedule(schedule_name,"*"))
+    delete_phase_schedule(find_phase_schedule(schedule_name,"*"));
+  add_phase_schedule(uvm, domain_name);
+endfunction
+
+function void uvm_component::set_phase_domain(string domain_name, int hier=1);
+  set_phase_schedule(domain_name);
+  if (hier) foreach (m_children[c]) m_children[c].set_phase_domain(domain_name,hier);
+endfunction
+
+function void uvm_component::set_phase_imp(uvm_phase_imp phase, uvm_phase_imp imp, int hier=1);
+  m_phase_imps[phase] = imp;
+  if (hier) foreach (m_children[c]) m_children[c].set_phase_imp(phase,imp,hier);
+endfunction
+
+
+// phase process / thread semantics API
+//-------------------------------------
+
+function void uvm_component::set_default_thread_mode(uvm_thread_mode_t thread_mode);
+  m_phase_thread_mode = thread_mode;
+endfunction
+
+function void uvm_component::set_thread_mode(uvm_thread_mode_t thread_mode);
+  foreach (m_phase_threads[phase]) begin
+    if (m_phase_threads[phase].is_current_process()) begin
+      m_phase_threads[phase].set_thread_mode(thread_mode);
+      return;
+    end
+  end
+  //TBD fatal
+endfunction
+
+
+// phase runtime control API
+// -------------------------
+
+function void uvm_component::jump(uvm_phase_imp phase);
+  uvm_phase_schedule current_phase;
+  current_phase = get_current_phase();
+  current_phase.jump(phase);
+endfunction
+
+function void uvm_component::jump_all_domains(uvm_phase_imp phase);
+  uvm_phase_schedule current_phase;
+  current_phase = get_current_phase();
+  current_phase.jump_all(phase);
+endfunction
+
+function void uvm_component::raise_objection(uvm_phase_schedule phase=null);
+  if(phase == null)
+    phase = get_current_phase();
+  phase.phase_done.raise_objection(this);
+endfunction
+
+function void uvm_component::drop_objection(uvm_phase_schedule phase=null);
+  if(phase == null)
+    phase = get_current_phase();
+  phase.phase_done.drop_objection(this);
+endfunction
+
+function void uvm_component::terminate_phase(uvm_phase_schedule phase=null);
+  if(phase == null)
+    phase = get_current_phase();
+  phase.terminate_phase();
+endfunction
 
 
 // do_kill_all
@@ -622,19 +839,14 @@ function void uvm_component::do_kill_all();
 endfunction
 
 
-
 // kill
 // ----
 
 function void uvm_component::kill();
-  `ifdef UVM_USE_FPC
     if (m_phase_process != null) begin
       m_phase_process.kill;
       m_phase_process = null;
     end
-  `else
-     ->m_kill_request;
-  `endif
 endfunction
 
 
@@ -642,7 +854,7 @@ endfunction
 // -------
 
 task uvm_component::suspend();
-  `ifdef UVM_USE_FPC
+  `ifdef UVM_USE_SUSPEND_RESUME
     if(m_phase_process != null)
       m_phase_process.suspend;
   `else
@@ -655,7 +867,7 @@ endtask
 // ------
 
 task uvm_component::resume();
-  `ifdef UVM_USE_FPC
+  `ifdef UVM_USE_SUSPEND_RESUME
     if(m_phase_process!=null) 
       m_phase_process.resume;
   `else
@@ -678,7 +890,7 @@ endtask
 
 function string uvm_component::status();
 
-  `ifdef UVM_USE_FPC
+  `ifdef UVM_USE_PROCESS_STATE
     process::state ps;
 
     if(m_phase_process == null)
@@ -688,75 +900,19 @@ function string uvm_component::status();
 
     return ps.name();
   `else
-     `uvm_error("UNIMP", "status not implemented")
-  `endif
+    if(m_phase_process == null)
+      return "<unknown>";
 
-endfunction
-
-
-// build
-// -----
-
-function void uvm_component::build();
-  m_build_done = 1;
-  m_field_automation (null, UVM_CHECK_FIELDS, "");
-  apply_config_settings(print_config_matches);
-endfunction
-
-
-// connect
-// -------
-
-function void uvm_component::connect();
-  return;
-endfunction
-
-
-// start_of_simulation
-// -------------------
-
-function void uvm_component::start_of_simulation();
-  return;
-endfunction
-
-
-// end_of_elaboration
-// ------------------
-
-function void uvm_component::end_of_elaboration();
-  return;
-endfunction
-
-
-// run
-// ---
-
-task uvm_component::run();
-  return;
-endtask
-
-
-// extract
-// -------
-
-function void uvm_component::extract();
-  return;
-endfunction
-
-
-// check
-// -----
-
-function void uvm_component::check();
-  return;
-endfunction
-
-
-// report
-// ------
-
-function void uvm_component::report();
-  return;
+    case(m_phase_process.status())
+      0: return "FINISHED";
+      1: return "RUNNING";
+      2: return "WAITING";
+      3: return "SUSPENDED";
+      4: return "KILLED";
+      default: return "<unknown>";
+    endcase
+  `endif 
+   
 endfunction
 
 
@@ -1375,8 +1531,6 @@ function void uvm_component::m_set_cl_verb;
   static string values[$];
   static bit first = 1;
   string args[$];
-  string phase="";
-  time   offset= 0;
   uvm_verbosity verb;
   uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
 
@@ -1384,40 +1538,48 @@ function void uvm_component::m_set_cl_verb;
     void'(uvm_cmdline_proc.get_arg_values("+uvm_set_verbosity=",values));
 
   foreach(values[i]) begin
+    string phase="";
+    time   offset= 0;
     uvm_split_string(values[i], ",", args);
     // Warning is already issued in uvm_root, so just don't keep it
-    if(((first && args.size() != 4) && (args.size() != 5)) || 
-       (clp.m_convert_verb(args[2], verb) == 0) ) 
+    if(first && ( ((args.size() != 4) && (args.size() != 5)) || 
+                  (clp.m_convert_verb(args[2], verb) == 0))  )
     begin
       values.delete(i);
     end
     else if (uvm_is_match(args[0], get_full_name()) ) begin
-      if(args[3] != "time") phase = args[3];
+      phase = args[3];
       if(args.size() == 5) begin
         offset = args[4].atoi();
       end
-      if((phase == "" || phase == "build") && (offset == 0) ) begin
+      if((phase == "" || phase == "build" || phase == "time") && (offset == 0) ) begin
         if(args[1] == "_ALL_") 
           set_report_verbosity_level(verb);
         else
           set_report_id_verbosity(args[1], verb);
       end
       else begin
-/***
-        uvm_phase_schedule p = find_phase_schedule("*",phase);
-        if(p == null) begin
-          `uvm_error("CLPERR", $sformatf("Unable to find phase %s in component %s (%s) to apply command line setting +uvm_set_verbosity=%s", phase, get_full_name(), get_type_name(), values[i]))
-          break;
+        if(phase == "time") begin
+          fork begin
+            uvm_verbosity lverb = verb;
+            string lid = args[1];
+            time t = offset;
+ 
+            #t;
+            if(lid == "_ALL_") 
+              set_report_verbosity_level(lverb);
+            else 
+              set_report_id_verbosity(lid, lverb);
+          end join_none
         end
-        fork begin
-          wait ((phase.get_state() == UVM_PHASE_EXECUTING) || 
-                (phase.get_state() == UVM_PHASE_DONE));
-          if(args[1] == "_ALL_") 
-            set_report_verbosity_level(verb);
-          else
-            set_report_id_verbosity(args[1], verb);
-        end join_none
-***/
+        else begin
+          m_verbosity_setting setting;
+          setting.phase = phase;
+          setting.offset = offset;
+          setting.verbosity = verb;
+          setting.id = args[1];
+          m_verbosity_settings.push_back(setting);
+        end
       end
     end
   end

@@ -19,7 +19,7 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// Title: Socket Base Classes
+// Title: TLM Socket Base Classes
 //
 // A collection of base classes, one for each socket type.  The reason
 // for having a base class for each socket is that all the socket (base)
@@ -27,117 +27,16 @@
 // semantics are provided in the derived classes, which are user
 // visible.
 //
-// Topic: Passthrough Scokets
+// Termination Sockets - A termination socket must be the terminus
+// of every TLM path.  A transaction originates with an initator socket
+// and ultimately ends up in a target socket.  There may be zero or more
+// passthrough sockets between initiator and target.
 //
-// <uvm_tlm_nb_passthrough_initiator_socket_base> :  IS-A forward port; HAS-A backward export
-// <uvm_tlm_nb_passthrough_target_socket_base>    :  IS-A forward export; HAS-A backward port
-// <uvm_tlm_b_passthrough_initiator_socket_base>  :  IS-A forward port;
-// <uvm_tlm_b_passthrough_target_socket_base>     :  IS-A forward export;
-//
-// Topic: Termination Sockets
-//
-// <uvm_tlm_b_target_socket_base>      : IS-A forward imp with no backward path
-// <uvm_tlm_b_initiator_socket_base>   : IS-A forward port; has no backward path
-// <uvm_tlm_nb_target_socket_base>     :  IS-A forward imp; HAS-A backward port
-// <uvm_tlm_nb_initiator_socket_base>  : IS-A forward port; HAS-A backward imp
-//
+// Passthrough Sockets - Passthrough initiators are ports and contain
+// exports for instance IS-A port and HAS-A export. Passthrough targets
+// are the opposite, they are exports and contain ports.
 //----------------------------------------------------------------------
 
-//---------------------------------------------------------------------
-// Section: Passthrough Sockets                                          
-//                                                                    
-// Passthrough initiators are ports and contain exports 
-// for instance IS-A port and HAS-A export.  
-// Passthrough targets are the opposite, they
-// are exports and contain ports.
-
-//----------------------------------------------------------------------
-// Class: uvm_tlm_nb_passthrough_initiator_socket_base
-//
-// IS-A forward port; HAS-A backward export
-//----------------------------------------------------------------------
-class uvm_tlm_nb_passthrough_initiator_socket_base #(type T=uvm_tlm_generic_payload,
-                                                  type P=uvm_tlm_phase_e)
-  extends uvm_port_base #(uvm_tlm_if #(T,P));
-
-  uvm_tlm_nb_transport_bw_export #(T,P) bw_export;
-
-  function new (string name, uvm_component parent,
-                int min_size=1, int max_size=1);
-    super.new (name, parent, UVM_PORT, min_size, max_size);
-    m_if_mask = `UVM_TLM_NB_FW_MASK;
-    bw_export = new("bw_export", get_comp());
-  endfunction
-
-  `UVM_TLM_GET_TYPE_NAME("uvm_tlm_nb_passthrough_initiator_socket")
-
-  `UVM_TLM_NB_TRANSPORT_FW_IMP(this.m_if, T, P, t, p, delay)
-  `UVM_TLM_NB_TRANSPORT_BW_IMP(bw_export, T, P, t, p, delay)
-
-endclass
-
-//----------------------------------------------------------------------
-// Class: uvm_tlm_nb_passthrough_target_socket_base
-//
-// IS-A forward export; HAS-A backward port
-//----------------------------------------------------------------------
-class uvm_tlm_nb_passthrough_target_socket_base #(type T=uvm_tlm_generic_payload,
-                                               type P=uvm_tlm_phase_e)
-  extends uvm_port_base #(uvm_tlm_if #(T,P));
-
-  uvm_tlm_nb_transport_bw_port #(T,P) bw_port;
-
-  function new (string name, uvm_component parent,
-                int min_size=1, int max_size=1);
-    super.new (name, parent, UVM_EXPORT, min_size, max_size);
-    m_if_mask = `UVM_TLM_NB_FW_MASK;
-    bw_port = new("bw_port", get_comp());
-  endfunction
-
-  `UVM_TLM_GET_TYPE_NAME("uvm_tlm_nb_passthrough_target_socket")
-
-  `UVM_TLM_NB_TRANSPORT_FW_IMP(this.m_if, T, P, t, p, delay)
-  `UVM_TLM_NB_TRANSPORT_BW_IMP(bw_port, T, P, t, p, delay)
-
-endclass
-
-//----------------------------------------------------------------------
-// Class: uvm_tlm_b_passthrough_initiator_socket_base
-//
-// IS-A forward port;
-//----------------------------------------------------------------------
-class uvm_tlm_b_passthrough_initiator_socket_base #(type T=uvm_tlm_generic_payload)
-  extends uvm_port_base #(uvm_tlm_if #(T));
-
-  `UVM_PORT_COMMON(`UVM_TLM_B_MASK, "uvm_tlm_b_passthrough_initiator_socket")
-  `UVM_TLM_B_TRANSPORT_IMP(this.m_if, T, t, delay)
-
-endclass
-
-
-//----------------------------------------------------------------------
-// Class: uvm_tlm_b_passthrough_target_socket_base
-//
-// IS-A forward export;
-//----------------------------------------------------------------------
-class uvm_tlm_b_passthrough_target_socket_base #(type T=uvm_tlm_generic_payload)
-  extends uvm_port_base #(uvm_tlm_if #(T));
-
-  `UVM_EXPORT_COMMON(`UVM_TLM_B_MASK, "uvm_tlm_b_passthrough_target_socket")
-  `UVM_TLM_B_TRANSPORT_IMP(this.m_if, T, t, delay)
-
- endclass
-
-//----------------------------------------------------------------------
-//                                                                    
-// Section: Termination Sockets                                         
-//                                                                   
-//----------------------------------------------------------------------
-//
-// A termination socket must be the terminus of every TLM path.  A
-// transaction originates with an initator socket and ultimately ends up
-// in a target socket.  There may be zero or more passthrough sockets
-// between initiator and target.
 
 //----------------------------------------------------------------------
 // Class: uvm_tlm_b_target_socket_base
@@ -212,3 +111,84 @@ class uvm_tlm_nb_initiator_socket_base #(type T=uvm_tlm_generic_payload,
   `UVM_TLM_NB_TRANSPORT_FW_IMP(this.m_if, T, P, t, p, delay)
 
 endclass
+
+
+
+
+//----------------------------------------------------------------------
+// Class: uvm_tlm_nb_passthrough_initiator_socket_base
+//
+// IS-A forward port; HAS-A backward export
+//----------------------------------------------------------------------
+class uvm_tlm_nb_passthrough_initiator_socket_base #(type T=uvm_tlm_generic_payload,
+                                                  type P=uvm_tlm_phase_e)
+  extends uvm_port_base #(uvm_tlm_if #(T,P));
+
+  uvm_tlm_nb_transport_bw_export #(T,P) bw_export;
+
+  function new (string name, uvm_component parent,
+                int min_size=1, int max_size=1);
+    super.new (name, parent, UVM_PORT, min_size, max_size);
+    m_if_mask = `UVM_TLM_NB_FW_MASK;
+    bw_export = new("bw_export", get_comp());
+  endfunction
+
+  `UVM_TLM_GET_TYPE_NAME("uvm_tlm_nb_passthrough_initiator_socket")
+
+  `UVM_TLM_NB_TRANSPORT_FW_IMP(this.m_if, T, P, t, p, delay)
+  `UVM_TLM_NB_TRANSPORT_BW_IMP(bw_export, T, P, t, p, delay)
+
+endclass
+
+//----------------------------------------------------------------------
+// Class: uvm_tlm_nb_passthrough_target_socket_base
+//
+// IS-A forward export; HAS-A backward port
+//----------------------------------------------------------------------
+class uvm_tlm_nb_passthrough_target_socket_base #(type T=uvm_tlm_generic_payload,
+                                               type P=uvm_tlm_phase_e)
+  extends uvm_port_base #(uvm_tlm_if #(T,P));
+
+  uvm_tlm_nb_transport_bw_port #(T,P) bw_port;
+
+  function new (string name, uvm_component parent,
+                int min_size=1, int max_size=1);
+    super.new (name, parent, UVM_EXPORT, min_size, max_size);
+    m_if_mask = `UVM_TLM_NB_FW_MASK;
+    bw_port = new("bw_port", get_comp());
+  endfunction
+
+  `UVM_TLM_GET_TYPE_NAME("uvm_tlm_nb_passthrough_target_socket")
+
+  `UVM_TLM_NB_TRANSPORT_FW_IMP(this.m_if, T, P, t, p, delay)
+  `UVM_TLM_NB_TRANSPORT_BW_IMP(bw_port, T, P, t, p, delay)
+
+endclass
+
+//----------------------------------------------------------------------
+// Class: uvm_tlm_b_passthrough_initiator_socket_base
+//
+// IS-A forward port
+//----------------------------------------------------------------------
+class uvm_tlm_b_passthrough_initiator_socket_base #(type T=uvm_tlm_generic_payload)
+  extends uvm_port_base #(uvm_tlm_if #(T));
+
+  `UVM_PORT_COMMON(`UVM_TLM_B_MASK, "uvm_tlm_b_passthrough_initiator_socket")
+  `UVM_TLM_B_TRANSPORT_IMP(this.m_if, T, t, delay)
+
+endclass
+
+
+//----------------------------------------------------------------------
+// Class: uvm_tlm_b_passthrough_target_socket_base
+//
+// IS-A forward export
+//----------------------------------------------------------------------
+class uvm_tlm_b_passthrough_target_socket_base #(type T=uvm_tlm_generic_payload)
+  extends uvm_port_base #(uvm_tlm_if #(T));
+
+  `UVM_EXPORT_COMMON(`UVM_TLM_B_MASK, "uvm_tlm_b_passthrough_target_socket")
+  `UVM_TLM_B_TRANSPORT_IMP(this.m_if, T, t, delay)
+
+ endclass
+

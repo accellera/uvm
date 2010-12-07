@@ -43,7 +43,6 @@ virtual class uvm_reg extends uvm_object;
    local int unsigned      m_n_used_bits;
    protected bit           m_maps[uvm_reg_map];
    protected uvm_reg_field m_fields[$];   // Fields in LSB to MSB order
-   local string            m_attributes[string];
    local int               m_has_cover;
    local int               m_cover_on;
    local semaphore         m_atomic;
@@ -52,6 +51,7 @@ virtual class uvm_reg extends uvm_object;
    local int               m_lineno = 0;
    local bit               m_read_in_progress = 0;
    local bit               m_write_in_progress = 0;
+   protected bit           m_update_in_progress = 0;
    /*local*/ bit           m_is_busy;
    /*local*/ bit           m_is_locked_by_field;
    local uvm_reg_backdoor  m_backdoor;
@@ -259,6 +259,9 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function uvm_reg_field get_field_by_name(string name);
 
 
+   /*local*/ extern function string Xget_fields_accessX(uvm_reg_map map);
+
+
    // Function: get_offset
    //
    // Returns the offset of this register
@@ -317,56 +320,6 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function int get_addresses (uvm_reg_map map = null,
                                               ref uvm_reg_addr_t addr[]);
 
-
-
-   //------------------
-   // Group: Attributes
-   //------------------
-
-
-   // Function: set_attribute
-   //
-   // Set an attribute.
-   //
-   // Set the specified attribute to the specified value for this register.
-   // If the value is specified as "", the specified attribute is deleted.
-   // A warning is issued if an existing attribute is modified.
-   // 
-   // Attribute names are case sensitive. 
-   //
-   extern virtual function void set_attribute(string name,
-                                              string value);
-
-
-   // Function: get_attribute
-   //
-   // Get an attribute value.
-   //
-   // Get the value of the specified attribute for this register.
-   // If the attribute does not exists, "" is returned.
-   // If ~inherited~ is specifed as TRUE, the value of the attribute
-   // is inherited from the nearest block ancestor
-   // for which the attribute
-   // is set if it is not specified for this register.
-   // If ~inherited~ is specified as FALSE, the value "" is returned
-   // if it does not exists in the this register.
-   // 
-   // Attribute names are case sensitive.
-   // 
-   extern virtual function string get_attribute(string name,
-                                                bit inherited = 1);
-
-
-   // Function: get_attributes
-   //
-   // Get all attribute values.
-   //
-   // Get the name of all attribute for this register.
-   // If ~inherited~ is specifed as TRUE, the value for all attributes
-   // inherited from all block ancestors are included.
-   // 
-   extern virtual function void get_attributes(ref string names[string],
-                                               input bit inherited = 1);
 
 
    //--------------
@@ -981,7 +934,8 @@ virtual class uvm_reg extends uvm_object;
    // in the "uvm_reg::" scope namespace.
    //
    extern static function void include_coverage(string scope,
-                                                uvm_reg_cvr_t models);
+                                                uvm_reg_cvr_t models,
+                                                uvm_object accessor = null);
 
    // Function: build_coverage
    //
@@ -1122,6 +1076,8 @@ virtual class uvm_reg extends uvm_object;
    // If the specified data value, access ~path~ or address ~map~ are modified,
    // the updated data value, access path or address map will be used
    // to perform the register operation.
+   // If the ~status~ is modified to anything other than <UVM_IS_OK>,
+   // the operation is aborted.
    //
    // The registered callback methods are invoked after the invocation
    // of this method.
@@ -1154,6 +1110,8 @@ virtual class uvm_reg extends uvm_object;
    // If the specified access ~path~ or address ~map~ are modified,
    // the updated access path or address map will be used to perform
    // the register operation.
+   // If the ~status~ is modified to anything other than <UVM_IS_OK>,
+   // the operation is aborted.
    //
    // The registered callback methods are invoked after the invocation
    // of this method.
@@ -1501,7 +1459,7 @@ function void uvm_reg::get_full_hdl_path(ref uvm_hdl_path_concat paths[$],
    
    if (!has_hdl_path(kind)) begin
       `uvm_error("RegModel",
-         {"Register does not have hdl path defined for abstraction '",kind,"'"})
+         {"Register ",get_full_name()," does not have hdl path defined for abstraction '",kind,"'"})
       return;
    end
 
@@ -1587,21 +1545,14 @@ endfunction
 // get_full_name
 
 function string uvm_reg::get_full_name();
-   uvm_reg_block blk;
 
-   get_full_name = get_name();
-
-   // Do not include top-level name in full name
    if (m_regfile_parent != null)
-      return {m_regfile_parent.get_full_name(), ".", get_full_name};
+      return {m_regfile_parent.get_full_name(), ".", get_name()};
 
-   // Do not include top-level name in full name
-   blk = get_block();
-   if (blk == null)
-      return get_full_name;
-   if (blk.get_parent() == null)
-      return get_full_name;
-   get_full_name = {m_parent.get_full_name(), ".", get_full_name};
+   if (m_parent != null)
+      return {m_parent.get_full_name(), ".", get_name()};
+   
+   return get_name();
 endfunction: get_full_name
 
 
@@ -1849,79 +1800,44 @@ function uvm_reg_field uvm_reg::get_field_by_name(string name);
 endfunction
 
 
-//-----------
-// ATTRIBUTES
-//-----------
+// Xget_field_accessX
+//
+// Returns "WO" if all of the fields in the registers are write-only
+// Returns "RO" if all of the fields in the registers are read-only
+// Returns "RW" otherwise.
 
-// set_attribute
-
-function void uvm_reg::set_attribute(string name,
-                                     string value);
-   if (name == "") begin
-      `uvm_error("RegModel", {"Cannot set empty attribute '' in register '",
-                         get_full_name(),"'"})
-      return;
+function string uvm_reg::Xget_fields_accessX(uvm_reg_map map);
+   bit is_R = 0;
+   bit is_W = 0;
+   
+   foreach(m_fields[i]) begin
+      case (m_fields[i].get_access(map))
+       "RO",
+         "RC",
+         "RS":
+            is_R = 1;
+       
+       "WO",
+          "WOC",
+          "WOS",
+          "WO1":
+             is_W = 1;
+       
+       default:
+          return "RW";
+      endcase
+      
+      if (is_R && is_W) return "RW";
    end
 
-   if (m_attributes.exists(name)) begin
-      if (value != "") begin
-         `uvm_warning("RegModel",
-                      {"Redefining attribute '",name,"' in register '",
-                       get_full_name(),"' to '",value,"'"})
-         m_attributes[name] = value;
-      end
-      else begin
-         m_attributes.delete(name);
-      end
-      return;
-   end
+   case ({is_R, is_W})
+    2'b01: return "WO";
+    2'b10: return "RO";
+   endcase
+   return "RW";
+endfunction
 
-   if (value == "") begin
-      `uvm_warning("RegModel", {"Attempting to delete non-existent attribute '",
-                          name, "' in register '", get_full_name(), "'"})
-      return;
-   end
-
-   m_attributes[name] = value;
-endfunction: set_attribute
-
-
-// get_attribute
-
-function string uvm_reg::get_attribute(string name,
-                                       bit inherited = 1);
-   if (inherited) begin
-      if (m_regfile_parent != null)
-         get_attribute = m_parent.get_attribute(name);
-      else if (m_parent != null)
-         get_attribute = m_parent.get_attribute(name);
-   end
-
-   if (get_attribute == "" && m_attributes.exists(name))
-      return m_attributes[name];
-
-   return "";
-endfunction: get_attribute
-
-
-// get_attributes
-
-function void uvm_reg::get_attributes(ref string names[string],
-                                      input bit inherited = 1);
-   // attributes at higher levels supercede those at lower levels
-   if (inherited) begin
-      if (m_regfile_parent != null)
-         m_parent.get_attributes(names,1);
-      else if (m_parent != null)
-         m_parent.get_attributes(names,1);
-   end
-
-   foreach (m_attributes[nm])
-     if (!names.exists(nm))
-       names[nm] = m_attributes[nm];
-
-endfunction: get_attributes
- 
+      
 //---------
 // COVERAGE
 //---------
@@ -1930,24 +1846,21 @@ endfunction: get_attributes
 // include_coverage
 
 function void uvm_reg::include_coverage(string scope,
-                                        uvm_reg_cvr_t models);
-`ifdef UVM_RESOURCES
-   uvm_reg_cvr_rsrc_db::write_and_set("include_coverage",
-                                      {"uvm_reg::", scope},
-                                      models, this);
-`endif
+                                        uvm_reg_cvr_t models,
+                                        uvm_object accessor = null);
+   uvm_reg_cvr_rsrc_db::set("include_coverage",
+                            {"uvm_reg::", scope},
+                            models, accessor);
 endfunction
 
 
 // build_coverage
 
 function uvm_reg_cvr_t uvm_reg::build_coverage(uvm_reg_cvr_t models);
-`ifdef UVM_RESOURCES
    build_coverage = UVM_NO_COVERAGE;
-   void'(uvm_reg_cvr_rsrc_db::read_by_name("include_coverage",
-                                           {"uvm_reg::", get_full_name()},
-                                           build_coverage, this);
-`endif
+   void'(uvm_reg_cvr_rsrc_db::read_by_name({"uvm_reg::", get_full_name()},
+                                           "include_coverage",
+                                           build_coverage, this));
    return models;
 endfunction: build_coverage
 
@@ -2162,8 +2075,12 @@ task uvm_reg::update(output uvm_status_e      status,
 
    status = UVM_IS_OK;
 
-   if (!needs_update())
+   if (m_update_in_progress) begin
+     @(negedge m_update_in_progress);
      return;
+   end
+
+   m_update_in_progress = 1;
 
    // Concatenate the write-to-update values from each field
    // Fields are stored in LSB or MSB order
@@ -2172,6 +2089,9 @@ task uvm_reg::update(output uvm_status_e      status,
       upd |= m_fields[i].XupdateX() << m_fields[i].get_lsb_pos();
 
    write(status, upd, path, map, parent, prior, extension, fname, lineno);
+
+   m_update_in_progress = 0;
+
 endtask: update
 
 
@@ -2223,17 +2143,20 @@ task uvm_reg::do_write (uvm_reg_item rw);
    uvm_reg_map_info map_info;
    uvm_reg_addr_t   value;
 
-   XatomicX(1);
-
    m_fname  = rw.fname;
    m_lineno = rw.lineno;
+
+   if (!Xcheck_accessX(rw,map_info,"write()"))
+     return;
+
+   XatomicX(1);
+
    m_write_in_progress = 1'b1;
 
    rw.value[0] &= ((1 << m_n_bits)-1);
    value = rw.value[0];
 
-   if (!Xcheck_accessX(rw,map_info,"write()"))
-     return;
+   rw.status = UVM_IS_OK;
 
    // PRE-WRITE CBS - FIELDS
    begin : pre_write_callbacks
@@ -2265,6 +2188,14 @@ task uvm_reg::do_write (uvm_reg_item rw);
    for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
       cb.pre_write(rw);
 
+   if (rw.status != UVM_IS_OK) begin
+     m_write_in_progress = 1'b0;
+
+     XatomicX(0);
+         
+     return;
+   end
+         
    // EXECUTE WRITE...
    case (rw.path)
       
@@ -2282,8 +2213,6 @@ task uvm_reg::do_write (uvm_reg_item rw);
 
          if (rw.status == UVM_NOT_OK) begin
            m_write_in_progress = 1'b0;
-           m_fname = "";
-           m_lineno = 0;
            return;
          end
 
@@ -2371,7 +2300,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
    rw.element_kind = UVM_REG;
 
    // REPORT
-   if (uvm_report_enabled(UVM_MEDIUM)) begin
+   if (uvm_report_enabled(UVM_HIGH)) begin
      string path_s,value_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -2382,11 +2311,9 @@ task uvm_reg::do_write (uvm_reg_item rw);
      value_s = $sformatf("=%0h",rw.value[0]);
 
      `uvm_info("RegModel", {"Wrote register via ",path_s,": ",
-                            get_full_name(),value_s},UVM_MEDIUM)
+                            get_full_name(),value_s},UVM_HIGH)
    end
 
-   m_fname = "";
-   m_lineno = 0;
    m_write_in_progress = 1'b0;
 
    XatomicX(0);
@@ -2452,13 +2379,16 @@ task uvm_reg::do_read(uvm_reg_item rw);
    uvm_reg_cb_iter  cbs = new(this);
    uvm_reg_map_info map_info;
    uvm_reg_addr_t   value;
-   
+
    m_fname   = rw.fname;
    m_lineno  = rw.lineno;
-   m_read_in_progress = 1'b1;
-
+   
    if (!Xcheck_accessX(rw,map_info,"read()"))
      return;
+
+   m_read_in_progress = 1'b1;
+
+   rw.status = UVM_IS_OK;
 
    // PRE-READ CBS - FIELDS
    foreach (m_fields[i]) begin
@@ -2479,7 +2409,12 @@ task uvm_reg::do_read(uvm_reg_item rw);
    for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
       cb.pre_read(rw);
 
+   if (rw.status != UVM_IS_OK) begin
+     m_read_in_progress = 1'b0;
 
+     return;
+   end
+         
    // EXECUTE READ...
    case (rw.path)
       
@@ -2597,7 +2532,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
    rw.element_kind = UVM_REG;
 
    // REPORT
-   if (uvm_report_enabled(UVM_MEDIUM)) begin
+   if (uvm_report_enabled(UVM_HIGH)) begin
      string path_s,value_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -2608,8 +2543,10 @@ task uvm_reg::do_read(uvm_reg_item rw);
      value_s = $sformatf("=%0h",rw.value[0]);
 
      `uvm_info("RegModel", {"Read  register via ",path_s,": ",
-                            get_full_name(),value_s},UVM_MEDIUM)
+                            get_full_name(),value_s},UVM_HIGH)
    end
+
+   m_read_in_progress = 1'b0;
 
 endtask: do_read
 
@@ -2821,15 +2758,12 @@ task uvm_reg::poke(output uvm_status_e      status,
    status = rw.status;
 
    `uvm_info("RegModel", $psprintf("Poked register \"%s\": 'h%h",
-                              get_full_name(), value),UVM_MEDIUM);
+                              get_full_name(), value),UVM_HIGH);
 
    Xpredict_writeX(value, UVM_BACKDOOR, null);
 
    if (!m_is_locked_by_field)
      XatomicX(0);
-
-   m_fname = "";
-   m_lineno = 0;
 endtask: poke
 
 
@@ -2864,7 +2798,7 @@ task uvm_reg::peek(output uvm_status_e      status,
    rw = uvm_reg_item::type_id::create("mem_peek_item",,get_full_name());
    rw.element      = this;
    rw.path         = UVM_BACKDOOR;
-   rw.element_kind = UVM_MEM;
+   rw.element_kind = UVM_REG;
    rw.kind         = UVM_READ;
    rw.bd_kind      = kind;
    rw.parent       = parent;
@@ -2881,14 +2815,12 @@ task uvm_reg::peek(output uvm_status_e      status,
    value = rw.value[0];
 
    `uvm_info("RegModel", $psprintf("Peeked register \"%s\": 'h%h",
-                          get_full_name(), value),UVM_MEDIUM);
+                          get_full_name(), value),UVM_HIGH);
 
    Xpredict_readX(value, UVM_BACKDOOR, null);
 
    if (!m_is_locked_by_field)
       XatomicX(0);
-   m_fname = "";
-   m_lineno = 0;
 endtask: peek
 
 
@@ -2971,11 +2903,21 @@ task uvm_reg::mirror(output uvm_status_e       status,
       if ((v|dc) !== (exp|dc)) begin
          `uvm_error("RegModel", $psprintf("Register \"%s\" value read from DUT (0x%h) does not match mirrored value (0x%h)",
                                      get_name(), v, (exp ^ ('x & dc))));
+                                     
+          foreach(m_fields[i]) begin
+             if(m_fields[i].get_compare() == UVM_CHECK) begin
+                 uvm_reg_data_t mask=((1 << m_fields[i].get_n_bits())-1);
+                 uvm_reg_data_t field = mask << m_fields[i].get_lsb_pos();
+                 uvm_reg_data_t diff = ((v ^ exp) >> m_fields[i].get_lsb_pos()) & mask;
+                 if(diff)
+                    `uvm_info("RegMem",$psprintf("field %s mismatch read=%0d'h%0h mirrored=%0d'h%0h slice [%0d:%0d]",m_fields[i].get_name(),
+                        m_fields[i].get_n_bits(),(v >> m_fields[i].get_lsb_pos()) & mask, m_fields[i].get_n_bits(),(exp >> m_fields[i].get_lsb_pos())&mask,
+                        m_fields[i].get_lsb_pos()+m_fields[i].get_n_bits()-1,m_fields[i].get_lsb_pos()),UVM_NONE)
+             end
+          end
       end
    end
 
-   m_fname = "";
-   m_lineno = 0;
    XatomicX(0);
 endtask: mirror
 
@@ -3037,14 +2979,6 @@ function string uvm_reg::convert2string();
      end
    end
    prefix = "  ";
-   if (m_attributes.num() > 0) begin
-      string name;
-      void'(m_attributes.first(name));
-      convert2string = {convert2string, "\n", prefix, "Attributes:"};
-      do begin
-         $sformat(convert2string, " %s=\"%s\"", name, m_attributes[name]);
-      end while (m_attributes.next(name));
-   end
    foreach(m_fields[i]) begin
       $sformat(convert2string, "%s\n%s", convert2string,
                m_fields[i].convert2string());

@@ -50,7 +50,6 @@ class uvm_mem extends uvm_object;
    local bit               m_maps[uvm_reg_map];
    local int unsigned      m_n_bits;
    local uvm_reg_backdoor  m_backdoor;
-   local string            m_attributes[string];
    local bit               m_is_powered_down;
    local int               m_has_cover;
    local int               m_cover_on;
@@ -390,55 +389,6 @@ class uvm_mem extends uvm_object;
 
 
    //------------------
-   // Group: Attributes
-   //------------------
-
-   // Function: set_attribute
-   //
-   // Set an attribute.
-   //
-   // Set the specified attribute to the specified value for this memory.
-   // If the value is specified as "", the specified attribute is deleted.
-   // A warning is issued if an existing attribute is modified.
-   // 
-   // Attribute names are case sensitive. 
-   //
-   extern virtual function void set_attribute(string name,
-                                              string value);
-
-
-   // Function: get_attribute
-   //
-   // Get an attribute value.
-   //
-   // Get the value of the specified attribute for this memory.
-   // If the attribute does not exists, "" is returned.
-   // If ~inherited~ is specifed as TRUE, the value of the attribute
-   // is inherited from the nearest block ancestor
-   // for which the attribute
-   // is set if it is not specified for this memory.
-   // If ~inherited~ is specified as FALSE, the value "" is returned
-   // if it does not exists in the this memory.
-   // 
-   // Attribute names are case sensitive.
-   // 
-   extern virtual function string get_attribute(string name,
-                                                bit inherited = 1);
-
-
-   // Function: get_attributes
-   //
-   // Get all attribute values.
-   //
-   // Get the name of all attribute for this memory.
-   // If ~inherited~ is specifed as TRUE, the value for all attributes
-   // inherited from all block ancestors are included.
-   // 
-   extern virtual function void get_attributes(ref string names[string],
-                                               input bit inherited = 1);
-
-
-   //------------------
    // Group: HDL Access
    //------------------
 
@@ -746,6 +696,11 @@ class uvm_mem extends uvm_object;
                                            input string kind = "",
                                            input string separator = ".");
 
+   // Function:  get_hdl_path_kinds
+   //
+   // Get design abstractions for which HDL paths have been defined
+   //
+   extern function void get_hdl_path_kinds (ref string kinds[$]);
 
    // Function: backdoor_read
    //
@@ -791,6 +746,8 @@ class uvm_mem extends uvm_object;
    // If the ~offset~, ~value~, access ~path~,
    // or address ~map~ are modified, the updated offset, data value,
    // access path or address map will be used to perform the memory operation.
+   // If the ~status~ is modified to anything other than <UVM_IS_OK>,
+   // the operation is aborted.
    //
    // The registered callback methods are invoked after the invocation
    // of this method.
@@ -818,6 +775,8 @@ class uvm_mem extends uvm_object;
    // If the ~offset~, access ~path~ or address ~map~ are modified,
    // the updated offset, access path or address map will be used to perform
    // the memory operation.
+   // If the ~status~ is modified to anything other than <UVM_IS_OK>,
+   // the operation is aborted.
    //
    // The registered callback methods are invoked after the invocation
    // of this method.
@@ -1070,20 +1029,10 @@ endfunction: Xlock_modelX
 // get_full_name
 
 function string uvm_mem::get_full_name();
-   uvm_reg_block blk;
-
-   get_full_name = get_name();
-
-   // Do not include top-level name in full name
-   blk = get_block();
-
-   if (blk == null)
-     return get_full_name;
-
-   if (blk.get_parent() == null)
-     return get_full_name;
-
-   get_full_name = {m_parent.get_full_name(), ".", get_full_name};
+   if (m_parent == null)
+      return get_name();
+   
+   return {m_parent.get_full_name(), ".", get_name()};
 
 endfunction: get_full_name
 
@@ -1422,84 +1371,16 @@ endfunction: get_n_bytes
 
 
 
-//-----------
-// ATTRIBUTES
-//-----------
-
-// set_attribute
-
-function void uvm_mem::set_attribute(string name,
-                                     string value);
-   if (name == "") begin
-      `uvm_error("RegModel", {"Cannot set anonymous attribute \"\" in memory '",
-                         get_full_name(),"'"})
-      return;
-   end
-
-   if (m_attributes.exists(name)) begin
-      if (value != "") begin
-         `uvm_warning("RegModel", {"Redefining attribute '",name,"' in memory '",
-                         get_full_name(),"' to '",value,"'"})
-         m_attributes[name] = value;
-      end
-      else begin
-         m_attributes.delete(name);
-      end
-      return;
-   end
-
-   if (value == "") begin
-      `uvm_warning("RegModel", {"Attempting to delete non-existent attribute '",
-                          name, "' in memory '", get_full_name(), "'"})
-      return;
-   end
-
-   m_attributes[name] = value;
-endfunction: set_attribute
-
-
-// get_attribute
-
-function string uvm_mem::get_attribute(string name,
-                                       bit inherited = 1);
-   if (inherited && m_parent != null)
-      get_attribute = m_parent.get_attribute(name,1);
-
-   if (get_attribute == "" && m_attributes.exists(name))
-      return m_attributes[name];
-
-   return "";
-endfunction: get_attribute
-
-
-// get_attributes
-
-function void uvm_mem::get_attributes(ref string names[string],
-                                      input bit inherited = 1);
-   // attributes at higher levels supercede those at lower levels
-   if (inherited && m_parent != null)
-     m_parent.get_attributes(names,1);
-
-   foreach (m_attributes[nm])
-     if (!names.exists(nm))
-       names[nm] = m_attributes[nm];
-
-endfunction: get_attributes
-
-
-
 //---------
 // COVERAGE
 //---------
 
 
 function uvm_reg_cvr_t uvm_mem::build_coverage(uvm_reg_cvr_t models);
-`ifdef UVM_RESOURCES
    build_coverage = UVM_NO_COVERAGE;
-   void'(uvm_reg_cvr_rsrc_db::read_by_name("include_coverage",
-                                           {"uvm_reg::", get_full_name()},
-                                           build_coverage, this);
-`endif
+   void'(uvm_reg_cvr_rsrc_db::read_by_name({"uvm_reg::", get_full_name()},
+                                           "include_coverage",
+                                           build_coverage, this));
    return models;
 endfunction: build_coverage
 
@@ -1697,16 +1578,26 @@ task uvm_mem::do_write(uvm_reg_item rw);
    
    m_fname  = rw.fname;
    m_lineno = rw.lineno;
-   m_write_in_progress = 1'b1;
-   rw.status = UVM_NOT_OK;
-   
+
    if (!Xcheck_accessX(rw, map_info, "burst_write()"))
      return;
 
+   m_write_in_progress = 1'b1;
+
+   rw.status = UVM_IS_OK;
+   
    // PRE-WRITE CBS
    pre_write(rw);
    for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
       cb.pre_write(rw);
+
+   if (rw.status != UVM_IS_OK) begin
+      m_write_in_progress = 1'b0;
+
+      return;
+   end
+
+   rw.status = UVM_NOT_OK;
 
    // FRONTDOOR
    if (rw.path == UVM_FRONTDOOR) begin
@@ -1780,8 +1671,6 @@ task uvm_mem::do_write(uvm_reg_item rw);
                             get_full_name(),range_s,value_s},UVM_MEDIUM)
    end
 
-   m_fname = "";
-   m_lineno = 0;
    m_write_in_progress = 1'b0;
 
 endtask: do_write
@@ -1794,18 +1683,28 @@ task uvm_mem::do_read(uvm_reg_item rw);
    uvm_mem_cb_iter cbs = new(this);
    uvm_reg_map_info map_info;
    
+   m_fname = rw.fname;
+   m_lineno = rw.lineno;
+
    if (!Xcheck_accessX(rw, map_info, "burst_read()"))
      return;
 
-   m_fname = rw.fname;
-   m_lineno = rw.lineno;
    m_read_in_progress = 1'b1;
-   rw.status = UVM_NOT_OK;
+
+   rw.status = UVM_IS_OK;
    
    // PRE-READ CBS
    pre_read(rw);
    for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
       cb.pre_read(rw);
+
+   if (rw.status != UVM_IS_OK) begin
+      m_read_in_progress = 1'b0;
+
+      return;
+   end
+
+   rw.status = UVM_NOT_OK;
 
    // FRONTDOOR
    if (rw.path == UVM_FRONTDOOR) begin
@@ -1874,8 +1773,6 @@ task uvm_mem::do_read(uvm_reg_item rw);
                             get_full_name(),range_s,value_s},UVM_MEDIUM)
    end
 
-   m_fname = "";
-   m_lineno = 0;
    m_read_in_progress = 1'b0;
 
 endtask: do_read
@@ -2008,8 +1905,6 @@ task uvm_mem::poke(output uvm_status_e      status,
 
    `uvm_info("RegModel", $psprintf("Poked memory '%s[%0d]' with value 'h%h",
                               get_full_name(), offset, value),UVM_MEDIUM);
-   m_fname = "";
-   m_lineno = 0;
 
 endtask: poke
 
@@ -2060,9 +1955,6 @@ task uvm_mem::peek(output uvm_status_e      status,
 
    `uvm_info("RegModel", $psprintf("Peeked memory '%s[%0d]' has value 'h%h",
                          get_full_name(), offset, value),UVM_MEDIUM);
-   m_fname = "";
-   m_lineno = 0;
-
 endtask: peek
 
 
@@ -2332,6 +2224,18 @@ function void uvm_mem::get_hdl_path(ref uvm_hdl_path_concat paths[$],
 
 endfunction
 
+
+// get_hdl_path_kinds
+
+function void uvm_mem::get_hdl_path_kinds (ref string kinds[$]);
+  string kind;
+  kinds.delete();
+  if (!m_hdl_paths_pool.first(kind))
+    return;
+  do
+    kinds.push_back(kind);
+  while (m_hdl_paths_pool.next(kind));
+endfunction
 
 // get_full_hdl_path
 

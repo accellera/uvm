@@ -32,13 +32,17 @@ import uvm_pkg::*;
 
 bit pass = 1;
 class my_catcher extends uvm_report_catcher;
-   int sev[uvm_severity];
+   int sev[uvm_severity_type];
    uvm_severity_type s;
 
    virtual function action_e catch(); 
       s = uvm_severity_type'(get_severity());
-      sev[s] ++;
 
+      // Ignore messages from root component
+      if(get_client() == uvm_root::get())
+        return THROW;
+ 
+      sev[s] ++;
       $display("%0t: got severity %s for id %s", $time, s.name(), get_id());
       if($time <10) begin
         if(s != UVM_INFO) begin
@@ -59,6 +63,7 @@ class my_catcher extends uvm_report_catcher;
         end
       end
       else if($time <40) begin
+        // Ignore the stop request info
         if(s != UVM_FATAL) begin
           $display("*** UVM TEST FAILED expected UVM_FATAL but got %s", s.name());
           pass=0;

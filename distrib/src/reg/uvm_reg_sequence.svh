@@ -22,15 +22,14 @@
 //
  
   
-// TITLE: Classes for Adapting Between Register and Bus Operations
+//------------------------------------------------------------------------------
+// TITLE: Register Sequence and Predictor Classes
+//------------------------------------------------------------------------------
 //
-// The following classes are defined herein:
-//
-// <uvm_reg_sequence> : base for all register sequences
-//
-// <uvm_reg_frontdoor> : base class for user-defined front-door access
-//
-// <uvm_reg_predictor> : updates the register model mirror based on observed bus transactions
+// This section defines the base classes used for register stimulus generation.
+// It also defines a predictor component, which is used to update the register
+// model's mirror values based on transactions observed on a physical bus. 
+//------------------------------------------------------------------------------
 
                                                               
 //------------------------------------------------------------------------------
@@ -260,6 +259,8 @@ endclass
 //
 // CLASS: uvm_reg_predictor
 //
+// Updates the register model mirror based on observed bus transactions
+//
 // This class converts observed bus transactions of type ~BUSTYPE~ to generic
 // registers transactions, determines the register being accessed based on the
 // bus address, then updates the register's mirror value with the observed bus
@@ -357,7 +358,7 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
      // In case they forget to set byte_en
      rw.byte_en = -1;
      adapter.bus2reg(tr,rw);
-     rg = map.get_reg_by_offset(rw.addr);
+     rg = map.get_reg_by_offset(rw.addr, (rw.kind == UVM_READ));
 
      // ToDo: Add memory look-up and call uvm_mem::XsampleX()
 
@@ -394,13 +395,13 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
 
        foreach (map_info.addr[i]) begin
          if (rw.addr == map_info.addr[i]) begin
+            found = 1;
            reg_item.value[0] |= rw.data << (i * map.get_n_bytes()*8);
            predict_info.addr[rw.addr] = 1;
            if (predict_info.addr.num() == map_info.addr.size()) begin
               // We've captured the entire abstract register transaction.
               uvm_predict_e predict_kind = 
                   (reg_item.kind == UVM_WRITE) ? UVM_PREDICT_WRITE : UVM_PREDICT_READ;
-              found = 1;
               pre_predict(reg_item);
 
               rg.XsampleX(reg_item.value[0], rw.byte_en,

@@ -32,6 +32,7 @@ class my_component extends uvm_component;
 
   task run();
     `uvm_info("component", "hello out there!", UVM_MEDIUM)
+    global_stop_request();
   endtask
 
 endclass
@@ -45,6 +46,7 @@ module test;
    
    initial begin
       t = new("Top", null);
+      run_test();
    end
 endmodule // test
 

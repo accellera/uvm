@@ -29,44 +29,12 @@ typedef class uvm_sequence_base;
 typedef class uvm_objection_cb;
 typedef uvm_callbacks #(uvm_objection,uvm_objection_cb) uvm_objection_cbs_t;
 
-
 //------------------------------------------------------------------------------
-//
-// Class: uvm_objection_cb
-//
+// Title: Objection Mechanism
 //------------------------------------------------------------------------------
-// This class allows for external consumers to attach to the various
-// objection callbacks, <uvm_objection::raised>, <uvm_objection::dropped> and 
-// <uvm_objection::all_dropped>.
-//
-//| class my_objection_cb extends uvm_objection_cb;
-//|    virtual function void raised (uvm_object obj, uvm_object source_obj,
-//|      string description, int count);
-//|      if(obj == source_obj)
-//|        $display("Got raise: %s from object %s", description, obj.get_full_name());
-//|    endfunction
-//| endclass
-//|
-//| my_objection_cb cb = new;
-//|
-//| //add to every type of objection
-//| initial uvm_callbacks#(uvm_objection)::add(null,cb);
-
-
-class uvm_objection_cb extends uvm_callback;
-  function new(string name);
-    super.new(name);
-  endfunction
-  virtual function void raised (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
-  endfunction
-  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
-  endfunction
-  virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
-  endtask
-endclass
+// The following classes define the objection mechanism and end-of-test
+// functionality, which is based on <ovm_objection>.
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
@@ -101,6 +69,21 @@ class uvm_objection extends uvm_report_object;
 
   `uvm_register_cb(uvm_objection, uvm_objection_cb)
   uvm_root top = uvm_root::get();
+
+  // Function: clear
+  //
+  // Clears the objection state. All counts are cleared. The draintime
+  // is not effected.
+
+  protected bit m_cleared = 0; /* for checking obj count<0 */
+
+  function void clear();
+    //Should there be a warning if there are outstanding objections?
+    m_source_count.delete();
+    m_total_count.delete();
+    m_draining.delete();
+    m_cleared = 1;
+  endfunction
 
   // Function: new
   //
@@ -282,6 +265,7 @@ class uvm_objection extends uvm_report_object;
   function void raise_objection (uvm_object obj=null, string description="",
        int count=1);
     if(obj == null) obj = uvm_root::get();
+    m_cleared = 0;
     m_raise (obj, obj, description, count);
   endfunction
 
@@ -402,12 +386,14 @@ class uvm_objection extends uvm_report_object;
       obj = top;
 
     if (!m_total_count.exists(obj) || (count > m_total_count[obj])) begin
+      if(m_cleared) return;
       uvm_report_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
         "\" attempted to drop objection count below zero."});
       return;
     end
     if ((obj == source_obj) && 
         (!m_source_count.exists(obj) || (count > m_source_count[obj]))) begin
+      if(m_cleared) return;
       uvm_report_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
         "\" attempted to drop objection count below zero."});
       return;
@@ -417,8 +403,10 @@ class uvm_objection extends uvm_report_object;
     if(m_total_count[obj] == 0) m_total_count.delete(obj);
 
     if (source_obj==obj) begin
-      m_source_count[obj] -= count;
-      if(m_source_count[obj] == 0) m_source_count.delete(obj);
+      if(m_source_count.exists(obj)) begin
+        m_source_count[obj] -= count;
+        if(m_source_count[obj] == 0) m_source_count.delete(obj);
+      end
       source_obj = obj;
     end
  
@@ -512,7 +500,8 @@ class uvm_objection extends uvm_report_object;
 
           m_draining.delete(obj);
 
-          diff_count = m_total_count[obj] - count;
+          if(!m_total_count.exists(obj)) diff_count = -count;
+          else diff_count = m_total_count[obj] - count;
 
           // no propagation if the re-raise cancels the drop
           if (diff_count != 0) begin
@@ -612,6 +601,12 @@ class uvm_objection extends uvm_report_object;
   endfunction
 
 
+   task wait_get_objection_total(uvm_object obj=null);
+     if(!m_total_count.exists(obj)) return;
+     wait(m_total_count[obj] == 0);      
+   endtask
+   
+
   // Function: get_objection_count
   //
   // Returns the current number of objections raised by the given ~object~.
@@ -641,7 +636,10 @@ class uvm_objection extends uvm_report_object;
       return m_total_count[obj];
     else begin
       if ($cast(c,obj)) begin
-        get_objection_total = m_source_count[obj];
+        if (!m_source_count.exists(obj))
+          get_objection_total = 0;
+        else
+          get_objection_total = m_source_count[obj];
         if (c.get_first_child(ch))
         do
           get_objection_total += get_objection_total(c.get_child(ch));
@@ -749,7 +747,7 @@ class uvm_objection extends uvm_report_object;
   // Function: display_objections
   // 
   // Displays objection information about the given ~object~. If ~object~ is
-  // not specified or ~null~, the implicit top-level component, <uvm_top>, is
+  // not specified or ~null~, the implicit top-level component, <uvm_root>, is
   // chosen. The ~show_header~ argument allows control of whether a header is
   // output.
 
@@ -788,12 +786,51 @@ class uvm_objection extends uvm_report_object;
 endclass
 
 
+//------------------------------------------------------------------------------
+//
+// Class: uvm_objection_cb
+//
+//------------------------------------------------------------------------------
+// This class allows for external consumers to attach to the various
+// objection callbacks, <uvm_objection::raised>, <uvm_objection::dropped> and 
+// <uvm_objection::all_dropped>.
+//
+//| class my_objection_cb extends uvm_objection_cb;
+//|    virtual function void raised (uvm_object obj, uvm_object source_obj,
+//|      string description, int count);
+//|      if(obj == source_obj)
+//|        $display("Got raise: %s from object %s", description, obj.get_full_name());
+//|    endfunction
+//| endclass
+//|
+//| my_objection_cb cb = new;
+//|
+//| //add to every type of objection
+//| initial uvm_callbacks#(uvm_objection)::add(null,cb);
+//------------------------------------------------------------------------------
+
+
+class uvm_objection_cb extends uvm_callback;
+  function new(string name);
+    super.new(name);
+  endfunction
+  virtual function void raised (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+  endfunction
+  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+  endfunction
+  virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+  endtask
+endclass
+
 
 //------------------------------------------------------------------------------
 //
 // Class: uvm_test_done_objection
 //
-// Built-in end-of-test coordination
+// Provides built-in end-of-test coordination
 //------------------------------------------------------------------------------
 
 class uvm_test_done_objection extends uvm_objection;
@@ -829,7 +866,7 @@ class uvm_test_done_objection extends uvm_objection;
   // Task: all_dropped
   //
   // This callback is called when the given ~object's~ objection count reaches
-  // zero; if the ~object~ is the implicit top-level, <uvm_top> then it means
+  // zero; if the ~object~ is the implicit top-level, <uvm_root> then it means
   // there are no more objections raised for the ~uvm_test_done~ objection.
   // Thus, after calling <uvm_objection::all_dropped>, this method will call
   // <global_stop_request> to stop the current task-based phase (e.g. run).

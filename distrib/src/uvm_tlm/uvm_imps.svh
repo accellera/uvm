@@ -20,14 +20,12 @@
 //   permissions and limitations under the License.
 //-------------.----------------------------------------------------------------
 
-// Section: uvm_*_imp ports
+//------------------------------------------------------------------------------
+// Title: uvm_*_imp ports
 //
-// This page documents the following port classes
-//
-// - <uvm_*_imp #(T,IMP)> - unidirectional implementation ports
-//
-// - <uvm_*_imp #(REQ, RSP, IMP, REQ_IMP, RSP_IMP)> - bidirectional implementation ports
-//
+// The following defines the TLM implementation (imp) classes.
+//------------------------------------------------------------------------------
+
 
 //------------------------------------------------------------------------------
 //

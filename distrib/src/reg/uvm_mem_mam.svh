@@ -21,10 +21,11 @@
 // -------------------------------------------------------------
 //
 
+//------------------------------------------------------------------------------
 //
 // Title: Memory Allocation Manager
 //
-// Manage the exclusive allocation of consecutive memory locations
+// Manages the exclusive allocation of consecutive memory locations
 // called ~regions~.
 // The regions can subsequently be accessed like little memories of
 // their own, without knowing in which memory or offset they are
@@ -37,15 +38,7 @@
 //
 // A region will remain reserved until it is explicitly released. 
 //
-// The following classes are defined herein:
-//
-// <uvm_mem_mam> : base for abstract register fields
-//
-// <uvm_mem_region> : allocated memory region descriptor
-//
-// <uvm_mem_mam_policy> : determines the starting offset of a randomly allocated memory region
-//
-// <uvm_mem_mam_cfg> : specifies the configuration of a memory allocation manager
+//------------------------------------------------------------------------------
 
 
 `ifndef UVM_MEM_MAM__SV

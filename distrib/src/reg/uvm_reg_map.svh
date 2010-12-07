@@ -70,9 +70,10 @@ class uvm_reg_map extends uvm_object;
    local uvm_reg_map_info   m_regs_info[uvm_reg];
    local uvm_reg_map_info   m_mems_info[uvm_mem];
 
-   local string             m_attributes[string];
-
    local uvm_reg            m_regs_by_offset[uvm_reg_addr_t];
+                            // Use only in addition to above if a RO and a WO
+                            // register share the same address.
+   local uvm_reg            m_regs_by_offset_wo[uvm_reg_addr_t]; 
    local uvm_mem            m_mems_by_offset[uvm_reg_map_addr_range];
 
    extern /*local*/ function void Xinit_address_mapX();
@@ -440,13 +441,14 @@ class uvm_reg_map extends uvm_object;
    // Get register mapped at offset
    //
    // Identify the register located at the specified offset within
-   // this address map.
+   // this address map for the specified type of access.
    // Returns ~null~ if no such register is found.
    //
    // The model must be locked using <uvm_reg_block::lock_model()>
    // to enable this functionality.
    //
-   extern virtual function uvm_reg    get_reg_by_offset(uvm_reg_addr_t offset);
+   extern virtual function uvm_reg get_reg_by_offset(uvm_reg_addr_t offset,
+                                                     bit            read = 1);
 
    //
    // Function: get_mem_by_offset
@@ -534,52 +536,6 @@ class uvm_reg_map extends uvm_object;
                                         output int size,
                                         output int lsb,
                                         output int addr_skip);
-
-   //------------------
-   // Group: Attributes
-   //------------------
-
-   // Function: set_attribute
-   //
-   // Set an attribute.
-   //
-   // Set the specified attribute to the specified value for this address map.
-   // If the value is specified as "", the specified attribute is deleted.
-   // A warning is issued if an existing attribute is modified.
-   // 
-   // Attribute names are case sensitive. 
-   //
-   extern virtual function void set_attribute(string name, string value);
-
-
-   // Function: get_attribute
-   //
-   // Get an attribute value.
-   //
-   // Get the value of the specified attribute for this address map.
-   // If the attribute does not exists, "" is returned.
-   // If ~inherited~ is specifed as TRUE, the value of the attribute
-   // is inherited from the nearest block ancestor for which the attribute
-   // is set if it is not specified for this address map.
-   // If ~inherited~ is specified as FALSE, the value "" is returned
-   // if it does not exists in the this address map.
-   // 
-   // Attribute names are case sensitive.
-   // 
-   extern virtual function string get_attribute(string name, bit inherited = 1);
-
-
-   // Function: get_attributes
-   //
-   // Get all attribute values.
-   //
-   // Get the value for all attribute for this address map.
-   // If ~inherited~ is specifed as TRUE, the value for all attributes
-   // inherited from all block ancestors are included.
-   // 
-   extern virtual function void get_attributes(ref string names[string],
-                                               input bit inherited=1);
-
 
    extern virtual function string      convert2string();
    extern virtual function uvm_object  clone();
@@ -678,12 +634,31 @@ function void uvm_reg_map::m_set_reg_offset(uvm_reg rg,
 
          // remove any existing cached addresses
          if (!info.unmapped) begin
-           foreach (info.addr[i])
-              top_map.m_regs_by_offset.delete(info.addr[i]);
+           foreach (info.addr[i]) begin
+
+              if (!top_map.m_regs_by_offset_wo.exists(info.addr[i])) begin
+                 top_map.m_regs_by_offset.delete(info.addr[i]);
+              end
+              else begin
+                 if (top_map.m_regs_by_offset[info.addr[i]] == rg) begin
+                    top_map.m_regs_by_offset[info.addr[i]] = 
+                      top_map.m_regs_by_offset_wo[info.addr[i]];
+                    uvm_reg_read_only_cbs::remove(rg);
+                    uvm_reg_write_only_cbs::remove(top_map.m_regs_by_offset[info.addr[i]]);
+                 end
+                 else begin
+                    uvm_reg_write_only_cbs::remove(rg);
+                    uvm_reg_read_only_cbs::remove(top_map.m_regs_by_offset[info.addr[i]]);
+                 end
+                 top_map.m_regs_by_offset_wo.delete(info.addr[i]);
+              end
+           end
          end
 
          // if we are remapping...
          if (!unmapped) begin
+            string rg_acc = rg.Xget_fields_accessX(this);
+            
             // get new addresses
             void'(get_physical_addresses(offset,0,rg.get_n_bytes(),addrs));
 
@@ -691,12 +666,33 @@ function void uvm_reg_map::m_set_reg_offset(uvm_reg rg,
             foreach (addrs[i]) begin
                uvm_reg_addr_t addr = addrs[i];
                if (top_map.m_regs_by_offset.exists(addr)) begin
-                  string a;
-                  a = $sformatf("%0h",addr);
-                  `uvm_warning("RegModel", {"In map '",get_full_name(),"' register '",
-                                          rg.get_full_name(), "' maps to same address as register '",
-                                          top_map.m_regs_by_offset[addr].get_full_name(),"': 'h",a})
+
+                  uvm_reg rg2 = top_map.m_regs_by_offset[addr];
+                  string rg2_acc = rg2.Xget_fields_accessX(this);
+
+                  // If the register at the same address is RO or WO
+                  // and this register is WO or RO, this is OK
+                  if (rg_acc == "RO" && rg2_acc == "WO") begin
+                     top_map.m_regs_by_offset[addr]    = rg;
+                     uvm_reg_read_only_cbs::add(rg);
+                     top_map.m_regs_by_offset_wo[addr] = rg2;
+                     uvm_reg_write_only_cbs::add(rg2);
+                  end
+                  else if (rg_acc == "WO" && rg2_acc == "RO") begin
+                     top_map.m_regs_by_offset_wo[addr] = rg;
+                     uvm_reg_write_only_cbs::add(rg);
+                     uvm_reg_read_only_cbs::add(rg2);
+                  end
+                  else begin
+                     string a;
+                     a = $sformatf("%0h",addr);
+                     `uvm_warning("RegModel", {"In map '",get_full_name(),"' register '",
+                                               rg.get_full_name(), "' maps to same address as register '",
+                                               top_map.m_regs_by_offset[addr].get_full_name(),"': 'h",a})
+                  end
                end
+               else
+                  top_map.m_regs_by_offset[addr] = rg;
 
                foreach (top_map.m_mems_by_offset[range]) begin
                   if (addrs[i] >= range.min && addrs[i] <= range.max) begin
@@ -707,10 +703,8 @@ function void uvm_reg_map::m_set_reg_offset(uvm_reg rg,
                         top_map.m_mems_by_offset[range].get_full_name(),"': 'h",a})
                   end
                end
-
-               top_map.m_regs_by_offset[addr] = rg;
-               info.addr = addrs; // cache it
             end
+            info.addr = addrs; // cache it
          end
       end
 
@@ -1395,12 +1389,16 @@ endfunction
 
 // get_reg_by_offset
 
-function uvm_reg uvm_reg_map::get_reg_by_offset(uvm_reg_addr_t offset);
+function uvm_reg uvm_reg_map::get_reg_by_offset(uvm_reg_addr_t offset,
+                                                bit            read = 1);
    if (!m_parent.is_locked()) begin
       `uvm_error("RegModel", $psprintf("Cannot get register by offset: Block %s is not locked.", m_parent.get_full_name()));
       return null;
    end
 
+   if (!read && m_regs_by_offset_wo.exists(offset))
+     return m_regs_by_offset_wo[offset];
+   
    if (m_regs_by_offset.exists(offset))
      return m_regs_by_offset[offset];
 
@@ -1433,6 +1431,7 @@ function void uvm_reg_map::Xinit_address_mapX();
 
    if (this == top_map) begin
      top_map.m_regs_by_offset.delete();
+     top_map.m_regs_by_offset_wo.delete();
      top_map.m_mems_by_offset.delete();
    end
 
@@ -1444,17 +1443,43 @@ function void uvm_reg_map::Xinit_address_mapX();
    foreach (m_regs_info[rg_]) begin
      uvm_reg rg = rg_;
      if (!m_regs_info[rg].unmapped) begin
+        string rg_acc = rg.Xget_fields_accessX(this);
        uvm_reg_addr_t addrs[];
+        
        bus_width = get_physical_addresses(m_regs_info[rg].offset,0,rg.get_n_bytes(),addrs);
+        
        foreach (addrs[i]) begin
          uvm_reg_addr_t addr = addrs[i];
+
          if (top_map.m_regs_by_offset.exists(addr)) begin
-           string a;
-           a = $sformatf("%0h",addr);
-           `uvm_warning("RegModel", {"In map '",get_full_name(),"' register '",
-               rg.get_full_name(), "' maps to same address as register '",
-               top_map.m_regs_by_offset[addr].get_full_name(),"': 'h",a})
+
+            uvm_reg rg2 = top_map.m_regs_by_offset[addr];
+            string rg2_acc = rg2.Xget_fields_accessX(this);
+            
+            // If the register at the same address is RO or WO
+            // and this register is WO or RO, this is OK
+            if (rg_acc == "RO" && rg2_acc == "WO") begin
+               top_map.m_regs_by_offset[addr]    = rg;
+               uvm_reg_read_only_cbs::add(rg);
+               top_map.m_regs_by_offset_wo[addr] = rg2;
+               uvm_reg_write_only_cbs::add(rg2);
+            end
+            else if (rg_acc == "WO" && rg2_acc == "RO") begin
+               top_map.m_regs_by_offset_wo[addr] = rg;
+               uvm_reg_write_only_cbs::add(rg);
+               uvm_reg_read_only_cbs::add(rg2);
+            end
+            else begin
+               string a;
+               a = $sformatf("%0h",addr);
+               `uvm_warning("RegModel", {"In map '",get_full_name(),"' register '",
+                                         rg.get_full_name(), "' maps to same address as register '",
+                                         top_map.m_regs_by_offset[addr].get_full_name(),"': 'h",a})
+            end
          end
+         else
+            top_map.m_regs_by_offset[addr] = rg;
+          
          foreach (top_map.m_mems_by_offset[range]) begin
            if (addr >= range.min && addr <= range.max) begin
              string a,b;
@@ -1466,9 +1491,8 @@ function void uvm_reg_map::Xinit_address_mapX();
                  top_map.m_mems_by_offset[range].get_full_name(),"': ",b})
              end
          end
-         top_map.m_regs_by_offset[ addr ] = rg;
-         m_regs_info[rg].addr = addrs;
        end
+       m_regs_info[rg].addr = addrs;
      end
    end
 
@@ -1567,10 +1591,13 @@ task uvm_reg_map::do_write(uvm_reg_item rw);
   uvm_reg_adapter adapter = system_map.get_adapter();
   uvm_sequencer_base sequencer = system_map.get_sequencer();
 
+  if (rw.parent == null)
+    rw.parent = new("default_parent_seq");
+
   if (adapter == null) begin
     rw.set_sequencer(sequencer);
-    rw.m_start_item(sequencer,rw.parent,rw.prior);
-    rw.m_finish_item(sequencer,rw.parent);
+    rw.parent.start_item(rw,rw.prior);
+    rw.parent.finish_item(rw);
     rw.end_event.wait_on();
   end
   else begin
@@ -1588,10 +1615,13 @@ task uvm_reg_map::do_read(uvm_reg_item rw);
   uvm_reg_adapter adapter = system_map.get_adapter();
   uvm_sequencer_base sequencer = system_map.get_sequencer();
 
+  if (rw.parent == null)
+    rw.parent = new("default_parent_seq");
+
   if (adapter == null) begin
     rw.set_sequencer(sequencer);
-    rw.m_start_item(sequencer,rw.parent,rw.prior);
-    rw.m_finish_item(sequencer,rw.parent);
+    rw.parent.start_item(rw,rw.prior);
+    rw.parent.finish_item(rw);
     rw.end_event.wait_on();
   end
   else begin
@@ -1654,7 +1684,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
               
     foreach(addrs[i]) begin: foreach_addr
 
-      uvm_sequence_item bus_req = new("bus_wr");
+      uvm_sequence_item bus_req;
       uvm_reg_bus_op rw_access;
       uvm_reg_data_t data;
 
@@ -1662,7 +1692,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
        
       `uvm_info(get_type_name(),
          $psprintf("Writing 'h%0h at 'h%0h via map \"%s\"...",
-              data, addrs[i], rw.map.get_full_name()), UVM_HIGH);
+              data, addrs[i], rw.map.get_full_name()), UVM_FULL);
 
       if (rw.element_kind == UVM_FIELD) begin
         for (int z=0;z<bus_width;z++)
@@ -1675,15 +1705,14 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
       rw_access.n_bits  = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
       rw_access.byte_en = byte_en;
 
-      bus_req.m_start_item(sequencer,rw.parent,rw.prior);
+      bus_req = adapter.reg2bus(rw_access);
+      bus_req.set_sequencer(sequencer);
+      rw.parent.start_item(bus_req,rw.prior);
 
       if (rw.parent != null && rw_access.addr == addrs[0])
         rw.parent.mid_do(rw);
 
-      bus_req = adapter.reg2bus(rw_access);
-
-      bus_req.set_sequencer(sequencer);
-      bus_req.m_finish_item(sequencer,rw.parent);
+      rw.parent.finish_item(bus_req);
       bus_req.end_event.wait_on();
 
       if (adapter.provides_responses) begin
@@ -1704,7 +1733,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
 
       `uvm_info(get_type_name(),
          $psprintf("Wrote 'h%0h at 'h%0h via map \"%s\": %s...",
-            data, addrs[i], rw.map.get_full_name(), rw.status.name()), UVM_HIGH)
+            data, addrs[i], rw.map.get_full_name(), rw.status.name()), UVM_FULL)
 
       if (rw.status == UVM_NOT_OK)
          break;
@@ -1774,13 +1803,13 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
               
     foreach (addrs[i]) begin
 
-      uvm_sequence_item bus_req = new("bus_rd");
+      uvm_sequence_item bus_req;
       uvm_reg_bus_op rw_access;
       uvm_reg_data_logic_t data;
        
       `uvm_info(get_type_name(),
          $psprintf("Reading address 'h%0h via map \"%s\"...",
-                   addrs[i], get_full_name()), UVM_HIGH);
+                   addrs[i], get_full_name()), UVM_FULL);
                 
       if (rw.element_kind == UVM_FIELD)
         for (int z=0;z<bus_width;z++)
@@ -1792,16 +1821,16 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       rw_access.byte_en = byte_en;
       rw_access.n_bits = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
                           
-      bus_req.m_start_item(sequencer,rw.parent,rw.prior);
+      bus_req = adapter.reg2bus(rw_access);
+      bus_req.set_sequencer(sequencer);
+      rw.parent.start_item(bus_req,rw.prior);
 
       if (rw.parent != null && rw_access.addr == addrs[0]) begin
         rw.parent.pre_do(1);
         rw.parent.mid_do(rw);
       end
 
-      bus_req = adapter.reg2bus(rw_access);
-      bus_req.set_sequencer(sequencer);
-      bus_req.m_finish_item(sequencer,rw.parent);
+      rw.parent.finish_item(bus_req);
       bus_req.end_event.wait_on();
 
       if (adapter.provides_responses) begin
@@ -1824,7 +1853,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
          
       `uvm_info(get_type_name(),
          $psprintf("Read 'h%0h at 'h%0h via map \"%s\": %s...", data,
-                   addrs[i], get_full_name(), rw.status.name()), UVM_HIGH);
+                   addrs[i], get_full_name(), rw.status.name()), UVM_FULL);
 
       if (rw.status == UVM_NOT_OK)
          break;
@@ -1843,71 +1872,6 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
   end
 
 endtask: do_bus_read
-
-
-
-//-----------
-// Attributes
-//-----------
-
-// set_attribute
-
-function void uvm_reg_map::set_attribute(string name, string value);
-
-   if (name == "") begin
-      `uvm_error("RegModel", {"Cannot set attribute with empty name for map ",
-         get_full_name(),"'."})
-      return;
-   end
-
-   if (m_attributes.exists(name)) begin
-      if (value != "") begin
-         `uvm_warning("RegModel", {"Redefining attribute '",
-            name,"' in map '",get_full_name(),"' to '",value,"'"})
-         m_attributes[name] = value;
-      end
-      else begin
-         m_attributes.delete(name);
-      end
-      return;
-   end
-
-   if (value == "") begin
-      `uvm_warning("RegModel", {"Attempting to delete non-existent attribute '",
-          name,"' in map '",get_full_name(),"'"})
-      return;
-   end
-
-   m_attributes[name] = value;
-
-endfunction: set_attribute
-
-
-// get_attribute
-
-function string uvm_reg_map::get_attribute(string name, bit inherited = 1);
-
-   if (inherited && m_parent_map != null)
-      get_attribute = m_parent_map.get_attribute(name);
-
-   if (get_attribute == "" && m_attributes.exists(name))
-      return m_attributes[name];
-
-   return "";
-endfunction: get_attribute
-
-
-// get_attributes
-
-function void uvm_reg_map::get_attributes(ref string names[string],
-                                          input bit inherited = 1);
-   if (inherited && m_parent_map != null)
-     m_parent_map.get_attributes(names,1);
-
-   foreach (m_attributes[nm])
-     if (!names.exists(nm))
-       names[nm] = m_attributes[nm];
-endfunction
 
 
 

@@ -229,9 +229,9 @@ class uvm_packer;
   // Variable: use_metadata
   //
   // This flag indicates whether to encode metadata when packing dynamic data,
-  // or to decode metadata when unpacking.  Implementations of <do_pack> and
-  // <do_unpack> should regard this bit when performing their respective
-  // operation. When set, metadata should be encoded as follows:
+  // or to decode metadata when unpacking.  Implementations of <uvm_object::do_pack>
+  // and <uvm_object::do_unpack> should regard this bit when performing their
+  // respective operation. When set, metadata should be encoded as follows:
   //
   // - For strings, pack an additional null byte after the string is packed.
   //

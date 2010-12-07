@@ -39,14 +39,25 @@ class apb_monitor extends uvm_monitor;
    uvm_analysis_port#(apb_rw) ap;
    apb_config cfg;
 
+   `uvm_component_utils(apb_monitor)
+
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
       ap = new("ap", this);
    endfunction: new
 
    virtual function void build();
-     cfg = uvm_utils #(apb_config,"config")::get_config(this,1);
-     sigs = cfg.vif;
+      apb_agent agent;
+      if ($cast(agent, get_parent()) && agent != null) begin
+         sigs = agent.vif;
+      end
+      else begin
+         virtual apb_if tmp;
+         if (!uvm_config_db#(apb_vif)::get(this, "", "vif", tmp)) begin
+            `uvm_fatal("APB/MON/NOVIF", "No virtual interface specified for this monitor instance")
+         end
+         sigs = tmp;
+      end
    endfunction
 
    virtual protected task run();

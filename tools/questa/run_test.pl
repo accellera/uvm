@@ -30,23 +30,25 @@
 
 sub questa_support($$$) {
     my ($series,$letter,$beta) = @_;
-    return(1) if ((($series eq "6.6") && ($letter ge "c"))); # ||
-                  #(($series eq "6.5") && ($letter ge "f")) ||
-                  #(($series eq "6.4") && ($letter ge "g")));
+    return(1) if ( ($series eq "6.6" && $letter ge "d") || ($series eq "10.0") || ($series eq "10.1")); #||
+                  #(($series eq "6.5") && ($letter ge "e")) ||
+                  #(($series eq "6.4") && ($letter ge "f")));
     die "Questa version \"$series$letter$beta\" does not fully support UVM.\n".
-      #"- required version 6.4f, 6.5f, 6.6c or later\n";
-      "- required version 6.6d\n";
+      #"- required version 6.4f, 6.5e, 6.6a or later\n";
+      "- required version 6.6d or later\n";
     exit(1);
 }
 
 sub questa_checkversion() {
     my $vlog_version = `vlog -version`;
     chomp $vlog_version;
-    if ($vlog_version !~ m/^QuestaSim\s+vlog\s+(.+?)\s+Compiler/) {
+    if ($vlog_version !~ m/((\d+\.\d+)([a-z])?)/) {
+    #if ($vlog_version !~ m/^QuestaSim\s+vlog\s+(.+?)\s+Compiler/) {
         die "Unable to get Questa version from 'vlog -version': $vlog_version\n";
     }
     my $version = $1;
-    my ($series,$letter,$beta) = ($version =~ m/^(\d+\.\d+)([a-z])?\s*(beta\d?)?$/i);
+    my ($series,$letter,$beta) = ($version =~ m/^(\d+\.\d+)([a-z])?\s*([Bb]eta\s+([0-9])?\d?)?$/i);
+    #my ($series,$letter,$beta) = ($version =~ m/^(\d+\.\d+)([a-z])?\s*(Beta 1)?$/i);
     die "Unrecognised Questa version number: \"$version\"\n" unless (defined $series);
     &questa_support($series,$letter,$beta);
     print "# Questa version $version ($vlog_version)\n" if ($opt_v);
@@ -106,8 +108,9 @@ sub run_the_test($$$) {
             $toplevels =~ s/\s\s+/ /g; # remove excess whitespace
         }
         my $clib = "-sv_lib $uvm_home/src/dpi/uvm_dpi";
-        my $vsim = ("vsim $run_opts $clib +UVM_TESTNAME=test -c $toplevels -do 'run -all;quit -f'");
+        my $vsim = ("vsim +UVM_TESTNAME=test $run_opts $clib -c $toplevels -do 'run -all;quit -f'");
         system("cd ./$testdir/$uvm_home/src/dpi; make --quiet") && die "DPI Library Compilation Problem" ;
+
         &questa_run("cd ./$testdir && $vsim $redirect ".&runtime_log_fname()." 2>&1");
     }
     return(0);
