@@ -208,15 +208,16 @@ sub replace_trivial{
     $t =~ s/include\s+\"ovm_(?!macros).*?\.svh\".*/$& \/\/ $opt_marker FIXME include of ovm file other than ovm_macros.svh detected, you should move to an import based methodology/g;
 
     # FIX  `message(sev,(...)) -> uvm_info("FIXME","...",sev)
-    $t =~ s|\`message\(([^,]+),\s*\((.*)\)\s*\)|\`uvm_info("FIXME",\$psprintf($2),$1)|g;
-    $t =~ s|\`message\(([^,]+),\s*(.*)\)|\`uvm_info("FIXME",\$psprintf($2),$1)|g;
+    $t =~ s|(?s)\`message\(([^,]+),\s*\(\s*\$psprintf\((.*?)\)\s*\)\s*\)|\`uvm_info("FIXME",\$psprintf($2),$1)|g;
+    $t =~ s|(?s)\`message\(([^,]+),\s*\((.*?)\)\s*\)|\`uvm_info("FIXME",\$psprintf($2),$1)|g;
+    $t =~ s|(?s)\`message\(([^,]+),\s*(.*?)\)|\`uvm_info("FIXME",\$psprintf($2),$1)|g;
 
     # FIX ovm_factory::print() -> factory.print
     $t =~ s/ovm_factory::print\(\)/factory.print()/g;
 
     # FIX `dut_error(MSG) -> uvm_error
-    $t =~ s/\`dut_error\(\((.*)\)\)/\`uvm_error(\"DUT\",\$psprintf($1))/g;
-    $t =~ s/\`dut_error\((.*)\)/\`uvm_error(\"DUT\",$1)/g;
+    $t =~ s/(?s)\`dut_error\(\((.*?)\)\s*\)/\`uvm_error(\"DUT\",\$psprintf($1))/g;
+    $t =~ s/(?s)\`dut_error\((.*?)\)/\`uvm_error(\"DUT\",$1)/g;
 
     # FIX set_global_verbosity(..) -> set_report_...
     $t =~ s/ovm_urm_report_server::set_global_verbosity\((.*)\);/uvm_pkg::uvm_top.set_report_verbosity_level_hier($1)/g;
