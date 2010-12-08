@@ -50,9 +50,10 @@ class uvm_reg_map extends uvm_object;
    `uvm_object_utils(uvm_reg_map)
    
    // info that is valid only if top-level map
+   local uvm_reg_addr_t     m_base_addr;
    local int unsigned       m_n_bytes;
    local uvm_endianness_e   m_endian;
-   local uvm_reg_addr_t     m_base_addr;
+   local bit                m_byte_addressing;
    local uvm_object_wrapper m_sequence_wrapper;
    local uvm_reg_adapter    m_adapter;
    local uvm_sequencer_base m_sequencer;
@@ -96,7 +97,8 @@ class uvm_reg_map extends uvm_object;
    /*local*/ extern function void configure(uvm_reg_block     parent,
                                             uvm_reg_addr_t    base_addr,
                                             int unsigned      n_bytes,
-                                            uvm_endianness_e  endian);
+                                            uvm_endianness_e  endian,
+                                            bit byte_addressing=0);
 
    // Function: add_reg
    //
@@ -564,14 +566,16 @@ endfunction
 
 // configure
 
-function void uvm_reg_map::configure(uvm_reg_block          parent,
-                                     uvm_reg_addr_t         base_addr,
-                                     int unsigned           n_bytes,
-                                     uvm_endianness_e  endian);
+function void uvm_reg_map::configure(uvm_reg_block    parent,
+                                     uvm_reg_addr_t   base_addr,
+                                     int unsigned     n_bytes,
+                                     uvm_endianness_e endian,
+                                     bit              byte_addressing=0);
    m_parent     = parent;
    m_n_bytes    = n_bytes;
    m_endian     = endian;
    m_base_addr  = base_addr;
+   m_byte_addressing = byte_addressing;
 endfunction: configure
 
 
@@ -1264,6 +1268,7 @@ function int uvm_reg_map::get_physical_addresses(uvm_reg_addr_t     base_addr,
    int bus_width = get_n_bytes(UVM_NO_HIER);
    uvm_reg_map  up_map;
    uvm_reg_addr_t  local_addr[];
+   int multiplier = m_byte_addressing ? bus_width : 1;
 
    addr = new [0];
    
@@ -1276,25 +1281,25 @@ function int uvm_reg_map::get_physical_addresses(uvm_reg_addr_t     base_addr,
    // First, identify the addresses within the block/system
    if (n_bytes <= bus_width) begin
       local_addr = new [1];
-      local_addr[0] = base_addr + mem_offset;
+      local_addr[0] = base_addr + (mem_offset * multiplier);
    end else begin
       int n;
 
       n = ((n_bytes-1) / bus_width) + 1;
       local_addr = new [n];
       
-      base_addr = base_addr + mem_offset * n;
+      base_addr = base_addr + mem_offset * (n * multiplier);
 
       case (get_endian(UVM_NO_HIER))
          UVM_LITTLE_ENDIAN: begin
             foreach (local_addr[i]) begin
-               local_addr[i] = base_addr + i;
+               local_addr[i] = base_addr + (i * multiplier);
             end
          end
          UVM_BIG_ENDIAN: begin
             foreach (local_addr[i]) begin
                n--;
-               local_addr[i] = base_addr + n;
+               local_addr[i] = base_addr + (n * multiplier);
             end
          end
          UVM_LITTLE_FIFO: begin

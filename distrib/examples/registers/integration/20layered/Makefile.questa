@@ -1,8 +1,8 @@
-## 
+##
 ## -------------------------------------------------------------
-##    Copyright 2010 Mentor Graphics Corp.
+##    Copyright 2010 Mentor Graphics Corp. 
 ##    All Rights Reserved Worldwide
-## 
+##
 ##    Licensed under the Apache License, Version 2.0 (the
 ##    "License"); you may not use this file except in
 ##    compliance with the License.  You may obtain a copy of
@@ -25,15 +25,22 @@ USES_DPI = 1
 include ../../../Makefile.questa
 
 
-all: prepare comp run
+ifdef EXPLICIT_MON
+  OPT += +define+EXPLICIT_MON
+endif
 
-comp:
-	$(VLOG) +incdir+../common \
+
+all: run
+
+comp: prepare
+	$(VLOG) $(OPT) +incdir+../common \
 		+incdir+../../common/apb \
 		../common/test.sv
 
-run: hw_reset
+run: uvm_reg_mem_built_in_seq
 
-hw_reset:
-	$(VSIM) +UVM_TESTNAME=hw_reset_test
+
+uvm_%_seq: comp
+	$(VSIM) +UVM_SEQUENCE=$@
 	$(CHECK)
+

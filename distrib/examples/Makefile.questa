@@ -58,6 +58,7 @@ VLIB =  vlib work
 VLOG =  vlog \
         -timescale "1ns/1ns" \
         $(SVLIB_VLOG_OPT) \
+        $(VLOG_OPT) \
         -mfcu \
         -suppress 2181 \
         +acc=rmb \
@@ -69,6 +70,7 @@ VLOG =  vlog \
 VSIM =  vsim \
         +UVM_VERBOSITY=$(UVM_VERBOSITY) \
         $(SVLIB_VSIM_OPT) \
+        $(VSIM_OPT) \
         -c \
         -do "run -all; q" \
         -l questa.log \

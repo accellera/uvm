@@ -622,7 +622,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // is ~UVM_TLM_OK_RESPONSE~
 
   virtual function bit is_response_ok();
-    return (m_response_status > 0);
+    return (int'(m_response_status) > 0);
   endfunction
 
    // Function: is_response_error
