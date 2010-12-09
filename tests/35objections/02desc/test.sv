@@ -74,8 +74,8 @@ module top;
       foreach(dropped_counter[idx]) $display("Dropped: %s : %0d", idx, dropped_counter[idx]);
       foreach(all_dropped_counter[idx]) $display("All dropped: %s : %0d", idx, all_dropped_counter[idx]);
 
-      // Total of 12 unique strings
-      if(raised_counter.num()+dropped_counter.num()+all_dropped_counter.num() != 12)
+      // Total of 12 unique strings plus the implicit objections
+      if(raised_counter.num()+dropped_counter.num()+all_dropped_counter.num() != 21)
       begin
         $display("** UVM TEST FAILED **");
         return;

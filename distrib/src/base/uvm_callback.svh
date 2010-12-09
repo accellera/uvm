@@ -84,10 +84,19 @@ endclass
 class uvm_callbacks_base extends uvm_object;
   /*protected*/ static bit m_tracing = 1;
   static uvm_callbacks_base m_b_inst;
+
   static uvm_pool#(uvm_object,uvm_queue#(uvm_callback)) m_pool = m_get_pool();
   static function uvm_pool#(uvm_object,uvm_queue#(uvm_callback)) m_get_pool();
     if(m_pool == null) m_pool = new;
     return m_pool;
+  endfunction
+
+  static function uvm_callbacks_base initialize();
+    if(m_b_inst == null) begin
+      m_b_inst = new;
+      void'(m_get_pool());
+    end
+    return m_b_inst;
   endfunction
 
   //Type checking inteface
@@ -161,13 +170,22 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
 
   //The actual global object from the derivative class. Note that this is
   //just a reference to the object that is generated in the derived class.
-  static uvm_typed_callbacks#(T) m_t_inst;
+  static uvm_typed_callbacks#(T) m_t_inst = initialize();
 
   static function uvm_queue#(uvm_callback) m_get_tw_queue();
     if(m_t_inst.m_twcb == null) begin
       m_t_inst.m_twcb = new;
     end
     return m_t_inst.m_twcb;
+  endfunction
+
+  static function  uvm_typed_callbacks#(T) initialize();
+    if(m_t_inst == null) begin
+      void'(uvm_callbacks_base::initialize());
+      m_t_inst = new;
+      void'(m_get_tw_queue());
+    end
+    return m_t_inst;
   endfunction
 
   //Type checking interface
@@ -423,9 +441,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   typedef uvm_callbacks#(T,uvm_callback) that_type;
 
 
-   // Singleton instance is used for type checking
-  static this_type m_inst;
-  static bit b = initialize(); 
+  // Singleton instance is used for type checking
+  static this_type m_inst = initialize();
 
   // typeinfo
   static uvm_typeid_base m_typeid;
@@ -439,7 +456,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
 
   static function this_type get();
     if(m_inst == null) begin
-      create_m_inst();
+      return initialize();
     end
     return m_inst;
   endfunction
@@ -479,16 +496,20 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
 
   endfunction
 
-  static function bit initialize();
+  static function this_type initialize();
+    if(m_inst != null) return m_inst;
+    void'(uvm_typed_callbacks#(T)::initialize());
     create_m_inst();
     assert( m_inst != null );
-    return 1;
+    return m_inst;
   endfunction
 
   // Register valid callback type
   bit m_registered = 0;
   static function bit register_pair(string tname="", cbname="");
     this_type inst = get();
+
+    void'(initialize());
 
     m_typename = tname;
     uvm_typed_callbacks#(T)::m_typename = tname;
@@ -535,6 +556,9 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   static function void add(T obj, uvm_callback cb, uvm_apprepend ordering=UVM_APPEND);
     uvm_queue#(uvm_callback) q;
     string nm,tnm; 
+
+    void'(initialize());
+
     void'(m_get_tw_queue());
     if(cb==null) begin
        if(obj==null) nm = "(*)"; else nm = obj.get_full_name();
@@ -610,6 +634,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
      uvm_component root, uvm_apprepend ordering=UVM_APPEND);
     uvm_component cq[$];
     T t;
+    void'(initialize());
+
     if(cb==null) begin
        uvm_report_error("CBUNREG", { "Null callback object cannot be registered with object(s) ",
          name }, UVM_NONE);
@@ -648,6 +674,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     uvm_queue#(uvm_callback) q;
     bit found = 0;
     int pos;
+    void'(initialize());
+
     if(obj == null) begin
       `uvm_cb_trace_noobj(cb,$sformatf("Delete typewide callback %0s for type %s",
                        cb.get_name(), m_base_inst.m_typename))
@@ -684,6 +712,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
      uvm_component root);
     uvm_component cq[$];
     T t;
+    void'(initialize());
+
     `uvm_cb_trace_noobj(cb,$sformatf("Delete callback %0s by name from object(s) %0s ",
                     cb.get_name(), name))
     void'(uvm_top.find_all(name,cq,root));
@@ -719,6 +749,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   static function CB get_first (ref int itr, input T obj);
     uvm_queue#(uvm_callback) q;
     CB cb;
+    void'(initialize());
+
     if(!m_base_inst.m_pool.exists(obj)) begin //no instance specific
       if(obj == null) begin
         q = m_t_inst.m_twcb;
@@ -756,6 +788,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   static function CB get_last (ref int itr, input T obj);
     uvm_queue#(uvm_callback) q;
     CB cb;
+    void'(initialize());
+
     if(!m_base_inst.m_pool.exists(obj)) begin //no instance specific
       if(obj == null) begin
         q = m_t_inst.m_twcb;
@@ -795,6 +829,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   static function CB get_next (ref int itr, input T obj);
     uvm_queue#(uvm_callback) q;
     CB cb;
+    void'(initialize());
+
     get_next = null;
     if(!m_base_inst.m_pool.exists(obj)) begin //no instance specific
       if(obj == null) 
@@ -833,6 +869,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   static function CB get_prev (ref int itr, input T obj);
     uvm_queue#(uvm_callback) q;
     CB cb;
+    void'(initialize());
+
     get_prev = null;
     if(!m_base_inst.m_pool.exists(obj)) begin //no instance specific
       if(obj == null) 
@@ -864,6 +902,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
 
   static function void display(T obj=null);
     // For documentation purposes, need a function wrapper here.
+    void'(initialize());
+
     super_type::display(obj);
   endfunction
 

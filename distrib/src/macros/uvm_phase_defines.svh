@@ -1,3 +1,5 @@
+`ifndef UVM_PHASE_DEFINES_SVH
+`define UVM_PHASE_DEFINES_SVH
 //
 //----------------------------------------------------------------------
 //   Copyright 2007-2010 Mentor Graphics Corporation
@@ -20,59 +22,54 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`define uvm_phase_type_name_decl(NAME) \
-    virtual function string get_type_name (); \
-      return `"NAME``_phase #(PARENT)`"; \
-    endfunction
 
-`define uvm_phase_func_decl(NAME,TOP_DOWN) \
-  class NAME``_phase #(type PARENT=int) extends uvm_phase; \
-    function new(); \
-      super.new(`"NAME`",TOP_DOWN,0); \
-    endfunction \
-    `uvm_phase_type_name_decl(NAME) \
-    virtual function void call_func(uvm_component parent); \
-      PARENT m_parent; \
-      super.call_func(parent); \
-      if($cast(m_parent,parent)) begin \
-        if(has_executed(parent)) begin \
-          `uvm_warning_context("PHSEXEC", { "The phase ", get_name(), \
-            " has already executed. Either the phase was not reset, or there", \
-            " there is an invalid phase alias for this phase."}, parent) \
-          return; \
-        end \
-        set_executed(parent); \
-        m_parent.NAME(); \
-      end \
-    endfunction \
-  endclass
+// uvm_root.svh uses these macros to simplify creation of all the phases.
+// they are only to be used for UVM builtin phases, because they are simple
+// delegate imps that call the corresponding methods on uvm_component.
+// Also, they declare classes and singleton instances with the uvm_ prefix.
 
-  
-`define uvm_phase_task_decl(NAME,TOP_DOWN) \
-  class NAME``_phase #(type PARENT=int) extends uvm_phase; \
-    function new(); \
-      super.new(`"NAME`",TOP_DOWN,1); \
-    endfunction \
-    `uvm_phase_type_name_decl(NAME) \
-    virtual task call_task(uvm_component parent); \
-      PARENT m_parent; \
-      super.call_task(parent); \
-      if($cast(m_parent,parent)) begin \
-        if(has_executed(parent)) begin \
-          `uvm_warning_context("PHSEXEC", { "The phase ", get_name(), \
-            " has already executed. Either the phase was not reset, or there", \
-            " there is an invalid phase alias for this phase."}, parent) \
-          return; \
-        end \
-        set_executed(parent); \
-        m_parent.NAME(); \
-      end \
-    endtask \
-  endclass
+// If you require more complex phase functors for your custom phase, code your
+// own imp class extending uvm_task/topdown/bottomup_phase base classes, following
+// the pattern of the macros below, but customize the exec_task() or exec_func()
+// contents to suit your enhanced functionality or derived component type/methods.
 
+`define uvm_builtin_task_phase(PHASE) \
+        class uvm_``PHASE``_phase extends uvm_task_phase(`"PHASE`"); \
+          task exec_task(uvm_component comp, uvm_phase_schedule phase); \
+            comp.``PHASE(); \
+          endtask \
+          static uvm_``PHASE``_phase m_inst = get(); \
+          static function uvm_``PHASE``_phase get(); \
+            if(m_inst == null) m_inst = new; \
+            return m_inst; \
+          endfunction \
+        endclass \
+        uvm_``PHASE``_phase uvm_``PHASE``_ph = uvm_``PHASE``_phase::get();
 
-`define uvm_phase_func_topdown_decl(NAME)  `uvm_phase_func_decl(NAME,1)
-`define uvm_phase_func_bottomup_decl(NAME) `uvm_phase_func_decl(NAME,0)
-`define uvm_phase_task_topdown_decl(NAME)  `uvm_phase_task_decl(NAME,1)
-`define uvm_phase_task_bottomup_decl(NAME) `uvm_phase_task_decl(NAME,0)
-  
+`define uvm_builtin_topdown_phase(PHASE) \
+        class uvm_``PHASE``_phase extends uvm_topdown_phase(`"PHASE`"); \
+          function void exec_func(uvm_component comp, uvm_phase_schedule phase); \
+            comp.``PHASE(); \
+          endfunction \
+          static uvm_``PHASE``_phase m_inst = get(); \
+          static function uvm_``PHASE``_phase get(); \
+            if(m_inst == null) m_inst = new; \
+            return m_inst; \
+          endfunction \
+        endclass \
+        uvm_``PHASE``_phase uvm_``PHASE``_ph = uvm_``PHASE``_phase::get();
+
+`define uvm_builtin_bottomup_phase(PHASE) \
+        class uvm_``PHASE``_phase extends uvm_bottomup_phase(`"PHASE`"); \
+          function void exec_func(uvm_component comp, uvm_phase_schedule phase); \
+            comp.``PHASE(); \
+          endfunction \
+          static uvm_``PHASE``_phase m_inst = get(); \
+          static function uvm_``PHASE``_phase get(); \
+            if(m_inst == null) m_inst = new; \
+            return m_inst; \
+          endfunction \
+        endclass \
+        uvm_``PHASE``_phase uvm_``PHASE``_ph = uvm_``PHASE``_phase::get();
+
+`endif

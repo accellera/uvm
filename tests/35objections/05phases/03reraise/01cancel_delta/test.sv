@@ -33,15 +33,24 @@ module top;
       super.new(name,parent);
     endfunction
     virtual function void raised (uvm_objection objection, uvm_object source_obj, string description, int count);
+      //Ignore implicit run phase objection
+      if(objection == run_ph.phase_done) return;
+
       base_raises++;
       if(source_obj == this)
         uvm_report_info(get_full_name(), $sformatf("%0s raised: local total count is %0d", get_full_name(), objection.get_objection_total(this)), UVM_NONE);
     endfunction
     virtual function void dropped (uvm_objection objection, uvm_object source_obj, string description, int count);
+      //Ignore implicit run phase objection
+      if(objection == run_ph.phase_done) return;
+
       if(source_obj == this)
         uvm_report_info(get_full_name(), $sformatf("%0s dropped: local total count is %0d", get_full_name(), objection.get_objection_total(this)), UVM_NONE);
     endfunction
     virtual task all_dropped (uvm_objection objection, uvm_object source_obj, string description, int count);
+      //Ignore implicit run phase objection
+      if(objection == run_ph.phase_done) return;
+
       uvm_report_info("AllDropped", $sformatf("%0s all objections dropped from %0s : local total count is %0d", objection.get_name(), source_obj.get_full_name(), objection.get_objection_total(this)), UVM_NONE);
     endtask
   endclass
@@ -98,11 +107,17 @@ module top;
     endtask
 
     virtual function void raised (uvm_objection objection, uvm_object source_obj, string description, int count);
+      //Ignore implicit run phase objection
+      if(objection == run_ph.phase_done) return;
+
       super.raised(objection,source_obj, description, count);
       test_raises++;
       uvm_report_info({source_obj.get_full_name(), "-RAISED"}, "Got raise", UVM_NONE);
     endfunction
     virtual function void dropped (uvm_objection objection, uvm_object source_obj, string description, int count);
+      //Ignore implicit run phase objection
+      if(objection == run_ph.phase_done) return;
+
       super.dropped(objection,source_obj, description, count);
       uvm_report_info({source_obj.get_full_name(), "-DROPPED"}, "Got drop", UVM_NONE);
     endfunction
