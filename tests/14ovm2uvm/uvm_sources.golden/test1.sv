@@ -103,3 +103,19 @@ global_stop_request();
           trans.read_write.name(), trans.addr + i, data),UVM_LOW);
 
       `uvm_info("FIXME",$psprintf("Reporting scoreboard information...\n%s", this.sprint(),UVM_LOW));
+
+
+  task put (T p);
+    lock.get();
+    count++;
+//    void'(accept_tr(p));
+    accept_tr(p);
+    #10;
+    void'(begin_tr(p));
+    #30; 
+    end_tr(p); 
+    `uvm_info("consumer", $sformatf("Received %0s local_count=%0d",p.get_name(),count), UVM_MEDIUM)
+    if (uvm_report_enabled(UVM_HIGH))
+      p.print();
+    lock.put();
+  endtask 

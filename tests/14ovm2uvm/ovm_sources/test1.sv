@@ -102,3 +102,19 @@ my_component.global_stop_request();
 
       `message(OVM_LOW,
         ($psprintf("Reporting scoreboard information...\n%s", this.sprint())));
+
+
+  task put (T p);
+    lock.get();
+    count++;
+//    void'(accept_tr(p));
+    accept_tr(p);
+    #10;
+    void'(begin_tr(p));
+    #30; 
+    end_tr(p); 
+    `ovm_info("consumer", $sformatf("Received %0s local_count=%0d",p.get_name(),count), OVM_MEDIUM)
+    if (`ovm_msg_detail(OVM_HIGH))
+      p.print();
+    lock.put();
+  endtask 

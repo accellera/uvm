@@ -219,6 +219,9 @@ sub replace_trivial{
     $t =~ s/(?s)\`dut_error\(\((.*?)\)\s*\)/\`uvm_error(\"DUT\",\$psprintf($1))/g;
     $t =~ s/(?s)\`dut_error\((.*?)\)/\`uvm_error(\"DUT\",$1)/g;
 
+    # FIX ovm_msg_detail(XX) -> uvm_report_enabled(XXX)
+    $t =~ s/(?s)\`ovm_msg_detail\((.*?)\)/uvm_report_enabled($1)/g;
+
     # FIX set_global_verbosity(..) -> set_report_...
     $t =~ s/ovm_urm_report_server::set_global_verbosity\((.*)\);/uvm_pkg::uvm_top.set_report_verbosity_level_hier($1)/g;
 
