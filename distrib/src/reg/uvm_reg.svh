@@ -2690,6 +2690,8 @@ function uvm_status_e uvm_reg::backdoor_read_func(uvm_reg_item rw);
         end
      end
 
+     val &= (1 << m_n_bits)-1;
+
      if (i == 0)
         rw.value[0] = val;
 
@@ -2744,7 +2746,7 @@ task uvm_reg::poke(output uvm_status_e      status,
    rw.element_kind = UVM_REG;
    rw.kind         = UVM_WRITE;
    rw.bd_kind      = kind;
-   rw.value[0]     = value;
+   rw.value[0]     = value & ((1 << m_n_bits)-1);
    rw.parent       = parent;
    rw.extension    = extension;
    rw.fname        = fname;

@@ -58,7 +58,7 @@ class uvm_reg_mem_built_in_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg
    virtual task body();
 
       if (model == null) begin
-         `uvm_error("RegModel", "Not block or system specified to run sequence on");
+         `uvm_error("uvm_reg_mem_built_in_seq", "Not block or system specified to run sequence on");
          return;
       end
 
