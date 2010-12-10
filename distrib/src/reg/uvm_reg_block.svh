@@ -116,7 +116,8 @@ virtual class uvm_reg_block extends uvm_object;
    extern virtual function uvm_reg_map create_map(string name,
                                                   uvm_reg_addr_t base_addr,
                                                   int unsigned n_bytes,
-                                                  uvm_endianness_e endian);
+                                                  uvm_endianness_e endian,
+                                                  bit byte_addressing=0);
 
 
    // Function: check_data_width
@@ -1781,7 +1782,11 @@ endtask: writememh
 
 // create_map
 
-function uvm_reg_map uvm_reg_block::create_map(string name, uvm_reg_addr_t base_addr, int unsigned n_bytes, uvm_endianness_e endian);
+function uvm_reg_map uvm_reg_block::create_map(string name,
+                                               uvm_reg_addr_t base_addr,
+                                               int unsigned n_bytes,
+                                               uvm_endianness_e endian,
+                                               bit byte_addressing=0);
 
    uvm_reg_map  map;
 
@@ -1791,7 +1796,7 @@ function uvm_reg_map uvm_reg_block::create_map(string name, uvm_reg_addr_t base_
    end
 
    map = uvm_reg_map::type_id::create(name,,this.get_full_name());
-   map.configure(this,base_addr,n_bytes,endian);
+   map.configure(this,base_addr,n_bytes,endian,byte_addressing);
 
    this.maps[map] = 1;
    if (maps.num() == 1)

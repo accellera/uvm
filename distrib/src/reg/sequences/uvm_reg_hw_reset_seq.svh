@@ -72,7 +72,7 @@ class uvm_reg_hw_reset_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_ite
       uvm_reg_map maps[$];
 
       if (model == null) begin
-         `uvm_error("RegModel", "Not block or system specified to run sequence on");
+         `uvm_error("uvm_reg_hw_reset_seq", "Not block or system specified to run sequence on");
          return;
       end
       

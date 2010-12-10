@@ -193,9 +193,9 @@ class uvm_sequencer_base extends uvm_component;
   // to fill the action queue when the driver uses the non-blocking try_get
   // interface.
 
-            int unsigned        pound_zero_count = 6;
+  int unsigned pound_zero_count = 6;
 
-  protected int                 m_seq_item_port_connect_size;
+  //protected int m_seq_item_port_connect_size;
 
 
 
@@ -269,14 +269,13 @@ class uvm_sequencer_base extends uvm_component;
     super.new(name, parent);
     m_sequencer_id = g_sequencer_id++;
     m_lock_arb_size = -1;
-    m_seq_item_port_connect_size = -1;
     if(get_config_string("default_sequence", default_sequence))
       m_default_seq_set = 1;
     void'(get_config_int("count", count));
     void'(get_config_int("max_random_count", max_random_count));
     void'(get_config_int("max_random_depth", max_random_depth));
     void'(get_config_int("pound_zero_count", pound_zero_count));
-  endfunction // new
+  endfunction
 
 
 
@@ -287,7 +286,7 @@ class uvm_sequencer_base extends uvm_component;
     void'(get_config_int("max_random_count", max_random_count));
     void'(get_config_int("max_random_depth", max_random_depth));
     void'(get_config_int("pound_zero_count", pound_zero_count));
-  endfunction // build
+  endfunction
 
 
   // Task: start_default_sequence
@@ -329,7 +328,7 @@ class uvm_sequencer_base extends uvm_component;
 
   protected function void m_update_lists();
     m_lock_arb_size++;
-  endfunction // void
+  endfunction
 
 
   // Function- display_queues
@@ -342,13 +341,13 @@ class uvm_sequencer_base extends uvm_component;
     $sformat(s, "  -- arb i/id/type: ");
     foreach (arb_sequence_q[i]) begin
       $sformat(s, "%s %0d/%0d/%s ", s, i, arb_sequence_q[i].sequence_id, arb_sequence_q[i].request.name());
-    end // UNMATCHED !!
+    end
     $sformat(s, "%s\n -- lock_list i/id: ", s);
     foreach (lock_list[i]) begin
       $sformat(s, "%s %0d/%0d",s, i, lock_list[i].get_sequence_id());
-    end // UNMATCHED !!
+    end
     return(s);
-  endfunction // string
+  endfunction
 
 
   // Function- next_sequence_id
@@ -357,7 +356,7 @@ class uvm_sequencer_base extends uvm_component;
 
   local function int next_sequence_id();
     return(g_sequence_id++);
-  endfunction // int
+  endfunction
 
   ///////////////////////////////////////////////////
   //
@@ -458,7 +457,7 @@ class uvm_sequencer_base extends uvm_component;
   
   virtual function integer user_priority_arbitration(integer avail_sequences[$]);
     return (avail_sequences[0]);
-  endfunction // user_priority_arbitration
+  endfunction
 
 
   // Function- grant_queued_locks
@@ -500,7 +499,7 @@ class uvm_sequencer_base extends uvm_component;
         end
       end
     end // for (i = 0; i < arb_sequence_q.size(); i++)
-  endfunction // void
+  endfunction
 
     
         
@@ -540,7 +539,7 @@ class uvm_sequencer_base extends uvm_component;
               end
               else avail_sequences.push_back(i);
             end
-    end // for (i = 0; i < arb_sequence_q.size(); i++)
+    end
 
     // Return immediately if there are 0 or 1 available sequences
     if (arbitration == SEQ_ARB_FIFO) begin
@@ -640,11 +639,11 @@ class uvm_sequencer_base extends uvm_component;
       
     uvm_report_fatal("Sequencer", "Internal error: Failed to choose sequence", UVM_NONE);
 
-  endfunction // int
+  endfunction
 
   protected task m_wait_arb_not_equal();
     wait (m_arb_size != m_lock_arb_size);
-  endtask // m_wait_arb_not_equal
+  endtask
 
 
   // Task- wait_for_available_sequence
@@ -695,7 +694,7 @@ class uvm_sequencer_base extends uvm_component;
                     end
                   join_none
 		  
-		end // for (i = 0; i < is_relevant_entries.size(); i++)
+		end
 		wait (m_is_relevant_completed > 0);
 	      end // fork begin
 	      
@@ -709,7 +708,7 @@ class uvm_sequencer_base extends uvm_component;
         disable fork;
       end // fork
     join
-  endtask // wait_for_available_sequence
+  endtask
 
 
   // Function- get_seq_item_priority
@@ -756,7 +755,7 @@ class uvm_sequencer_base extends uvm_component;
         end
         wait (lock_arb_size != m_lock_arb_size);
       end
-  endtask // wait_for_arbitration_completed
+  endtask
 
 
   // Function- set_arbitration_completed
@@ -765,7 +764,7 @@ class uvm_sequencer_base extends uvm_component;
 
   function void set_arbitration_completed(int request_id);
     arb_completed[request_id] = 1;
-  endfunction // void
+  endfunction
 
 
   // Function: is_child
@@ -792,7 +791,7 @@ class uvm_sequencer_base extends uvm_component;
       sequence_ptr = sequence_ptr.get_parent_sequence();
     end
     return (0);
-  endfunction // bit
+  endfunction
 
 
   // Task: wait_for_grant
@@ -816,18 +815,6 @@ class uvm_sequencer_base extends uvm_component;
       uvm_report_fatal("uvm_sequencer", "wait_for_grant passed null sequence_ptr", UVM_NONE);
     end
 
-    // Determine the number of drivers connected to this sequencer
-    if(m_seq_item_port_connect_size < 0) begin
-      m_seq_item_port_connect_size = m_find_number_driver_connections();
-    end
-
-    // If there are no drivers, then it is not possible to wait for grant
-    /*
-    if(m_seq_item_port_connect_size == 0) begin
-      uvm_report_warning("SQRWFG", "Wait_for_grant called on sequencer with no driver connected", UVM_NONE);
-    end
-    */
-    
     my_seq_id = register_sequence(sequence_ptr);
     
     // If lock_request is asserted, then issue a lock.  Don't wait for the response, since
@@ -840,7 +827,7 @@ class uvm_sequencer_base extends uvm_component;
       req_s.sequence_ptr = sequence_ptr;
       req_s.request_id = req_s.g_request_id++;
       arb_sequence_q.push_back(req_s);
-    end // lock_request == 1
+    end
         
     // Push the request onto the queue
     req_s = new();
@@ -862,7 +849,7 @@ class uvm_sequencer_base extends uvm_component;
     // requests might be done in parallel, but it will catch basic errors
     req_s.sequence_ptr.m_wait_for_grant_semaphore++;
 
-  endtask // wait_for_grant
+  endtask
 
 
   // task: wait_for_item_done
@@ -891,7 +878,7 @@ class uvm_sequencer_base extends uvm_component;
       wait ((m_wait_for_item_sequence_id == sequence_id &&
              m_wait_for_item_transaction_id == transaction_id));
     end
-  endtask // wait_for_item_done
+  endtask
 
 
   // Function: is_blocked
@@ -917,7 +904,7 @@ class uvm_sequencer_base extends uvm_component;
         end
       end 
       return (0);
-  endfunction //
+  endfunction
 
 
   // Function: has_lock
@@ -1006,7 +993,7 @@ class uvm_sequencer_base extends uvm_component;
 		       $psprintf("Sequence %s called ungrab / unlock, but didn't have lock",
 				 sequence_ptr.get_full_name()),
 		       UVM_NONE);
-  endfunction // void
+  endfunction
 
 
   // Task: lock
@@ -1021,7 +1008,7 @@ class uvm_sequencer_base extends uvm_component;
 
   virtual task lock(uvm_sequence_base sequence_ptr);
     lock_req(sequence_ptr, 1);
-  endtask // lock
+  endtask
 
 
   // Task: grab
@@ -1036,7 +1023,7 @@ class uvm_sequencer_base extends uvm_component;
 
   virtual task grab(uvm_sequence_base sequence_ptr);
     lock_req(sequence_ptr, 0);
-  endtask // lock
+  endtask
 
 
   // Function: unlock
@@ -1045,7 +1032,7 @@ class uvm_sequencer_base extends uvm_component;
 
   virtual function void unlock(uvm_sequence_base sequence_ptr);
     unlock_req(sequence_ptr);
-  endfunction // lock
+  endfunction
 
 
   // Function: ungrab
@@ -1054,7 +1041,7 @@ class uvm_sequencer_base extends uvm_component;
 
   virtual function void  ungrab(uvm_sequence_base sequence_ptr);
     unlock_req(sequence_ptr);
-  endfunction // lock
+  endfunction
 
 
   // Function- remove_sequence_from_queues
@@ -1101,7 +1088,7 @@ class uvm_sequencer_base extends uvm_component;
     
     // Unregister the sequence_id, so that any returning data is dropped
     unregister_sequence(sequence_ptr.m_get_sqr_sequence_id(m_sequencer_id, 1));
-  endfunction // void
+  endfunction
 
 
   // Function: stop_sequences
@@ -1120,7 +1107,7 @@ class uvm_sequencer_base extends uvm_component;
         kill_sequence(seq_ptr);
         seq_ptr = find_sequence(-1);
       end
-  endfunction // void
+  endfunction
       
 
   // Function- sequence_exiting
@@ -1129,7 +1116,7 @@ class uvm_sequencer_base extends uvm_component;
   
   function void sequence_exiting(uvm_sequence_base sequence_ptr);
     remove_sequence_from_queues(sequence_ptr);
-  endfunction // void
+  endfunction
 
 
   // Function- kill_sequence 
@@ -1140,9 +1127,8 @@ class uvm_sequencer_base extends uvm_component;
     int i;
 
     remove_sequence_from_queues(sequence_ptr);
-    // kill the sequence
     sequence_ptr.m_kill();
-  endfunction // void
+  endfunction
 
 
   // Function: is_grabbed
@@ -1152,7 +1138,7 @@ class uvm_sequencer_base extends uvm_component;
 
   virtual function bit is_grabbed();
     return(lock_list.size() != 0);
-  endfunction // bit
+  endfunction
 
 
   // Function: current_grabber
@@ -1166,7 +1152,7 @@ class uvm_sequencer_base extends uvm_component;
       return (null);
     end
     return (lock_list[lock_list.size()-1]);
-  endfunction // uvm_sequence_base
+  endfunction
 
 
   // Function: has_do_available
@@ -1212,7 +1198,7 @@ class uvm_sequencer_base extends uvm_component;
 
   function SEQ_ARB_TYPE get_arbitration();
     return (arbitration);
-  endfunction // SEQ_ARB_TYPE
+  endfunction
 
 
   // Function- analysis_write
@@ -1242,7 +1228,7 @@ class uvm_sequencer_base extends uvm_component;
     for (int i = 0; i < pound_zero_count; i++) begin
       #0;
     end
-  endtask // wait_for_sequences
+  endtask
 
 
   // Function: add_sequence
@@ -1286,7 +1272,7 @@ class uvm_sequencer_base extends uvm_component;
       sequence_ids[sequencer_sequence_lib[j]] = sequences.size();
       this.sequences.push_back(sequencer_sequence_lib[j]);
     end
-  endfunction // void
+  endfunction
 
 
   // Function: get_seq_kind
@@ -1312,33 +1298,33 @@ class uvm_sequencer_base extends uvm_component;
   // Returns a reference to a sequence specified by the seq_kind int.
   // The seq_kind int may be obtained using the get_seq_kind() method.
 
-function uvm_sequence_base get_sequence(int req_kind);
+  function uvm_sequence_base get_sequence(int req_kind);
 
-  uvm_factory factory = uvm_factory::get();
-  uvm_sequence_base m_seq ;
-  string m_seq_type;
-
-  if (req_kind < 0 || req_kind >= sequences.size()) begin
-    uvm_report_error("SEQRNG", 
-      $psprintf("Kind arg '%0d' out of range. Need 0-%0d", 
-      req_kind, sequences.size()-1));
-  end
-
-  m_seq_type = sequences[req_kind];
-  if (!$cast(m_seq, factory.create_object_by_name(m_seq_type,
-                                          get_full_name(),
-                                          m_seq_type))) 
-  begin
-      uvm_report_fatal("FCTSEQ", 
-        $psprintf("Factory can not produce a sequence of type %0s.",
-        m_seq_type), UVM_NONE);
-  end
-
-  m_seq.print_sequence_info = 1;
-  m_seq.set_sequencer (this);
-  return m_seq;
+    uvm_factory factory = uvm_factory::get();
+    uvm_sequence_base m_seq ;
+    string m_seq_type;
   
-endfunction // uvm_sequence_base
+    if (req_kind < 0 || req_kind >= sequences.size()) begin
+      uvm_report_error("SEQRNG", 
+        $psprintf("Kind arg '%0d' out of range. Need 0-%0d", 
+        req_kind, sequences.size()-1));
+    end
+
+    m_seq_type = sequences[req_kind];
+    if (!$cast(m_seq, factory.create_object_by_name(m_seq_type,
+                                            get_full_name(),
+                                            m_seq_type))) 
+    begin
+        uvm_report_fatal("FCTSEQ", 
+          $psprintf("Factory can not produce a sequence of type %0s.",
+          m_seq_type), UVM_NONE);
+    end
+
+    m_seq.print_sequence_info = 1;
+    m_seq.set_sequencer (this);
+    return m_seq;
+  
+  endfunction
 
 
   // Function: num_sequences
@@ -1347,7 +1333,7 @@ endfunction // uvm_sequence_base
 
   function int num_sequences();
     return (sequences.size());
-  endfunction // num_sequences
+  endfunction
 
 
   // Function: send_request
@@ -1358,7 +1344,9 @@ endfunction // uvm_sequence_base
   //  
   // This function may only be called after a <wait_for_grant> call.
 
-  virtual function void send_request(uvm_sequence_base sequence_ptr, uvm_sequence_item t, bit rerandomize = 0);
+  virtual function void send_request(uvm_sequence_base sequence_ptr,
+                                     uvm_sequence_item t,
+                                     bit rerandomize = 0);
     return;
   endfunction
 

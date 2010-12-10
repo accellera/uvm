@@ -28,7 +28,7 @@ UVM_HOME	= ../../../..
 
 include ../../../Makefile.vcs
 
-ifdef EXPLICIT
+ifdef EXPLICIT_MON
 OPTS	+= +define+EXPLICIT_MON
 endif
 
@@ -40,8 +40,11 @@ comp:
 		+incdir+../../common/apb \
 		../common/test.sv
 
-run: hw_reset
 
-hw_reset:
-	$(SIMV) +UVM_TESTNAME=hw_reset_test
+run: uvm_reg_mem_built_in_seq
+
+
+uvm_%_seq: comp
+	$(SIMV) +UVM_SEQUENCE=$@
 	$(CHECK)
+

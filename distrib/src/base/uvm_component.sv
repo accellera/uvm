@@ -23,10 +23,6 @@
 `include "base/uvm_component.svh"
 `include "base/uvm_root.svh"
 
-uvm_component uvm_top_levels[$];
-
-
-
 //------------------------------------------------------------------------------
 //
 // CLASS- uvm_component
@@ -114,9 +110,6 @@ function uvm_component::new (string name, uvm_component parent);
 
   // Do local configuration settings
   void'(get_config_int("recording_detail", recording_detail));
-
-  if (parent == uvm_top)
-    uvm_top_levels.push_back(this);
 
   set_report_verbosity_level(uvm_top.get_report_verbosity_level());
 

@@ -7,6 +7,14 @@ module testm();
   import my_pkg::*;
   import uvc_pkg::*;
 
+  class my_catcher extends uvm_report_catcher;
+     static int seen = 0;
+     virtual function action_e catch();
+        set_severity(UVM_INFO);
+        return THROW;
+     endfunction
+  endclass
+
   // User register sequence
   class test_seq extends uvm_reg_sequence;
      // The register model on which the sequence work 
@@ -16,6 +24,9 @@ module testm();
      virtual task body();
        uvm_status_e status;
        int data;
+
+       my_catcher catcher = new;
+       uvm_report_cb::add(null,catcher);
 
        `uvm_info("TEST_SEQ", "<><><><><><><><><><><><><><><><><><><><><><><>", UVM_LOW)
        `uvm_info("TEST_SEQ", "  Starting Test Sequence", UVM_LOW)
