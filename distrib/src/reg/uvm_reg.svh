@@ -1861,7 +1861,7 @@ function uvm_reg_cvr_t uvm_reg::build_coverage(uvm_reg_cvr_t models);
    void'(uvm_reg_cvr_rsrc_db::read_by_name({"uvm_reg::", get_full_name()},
                                            "include_coverage",
                                            build_coverage, this));
-   return models;
+   return build_coverage & models;
 endfunction: build_coverage
 
 

@@ -106,7 +106,7 @@ class dut_regmodel extends uvm_reg_block;
          SOCKET[i].configure(this,null,$sformatf("SOCKET[%0d]",i));
          SOCKET[i].build();
       end
-      RAM.configure(this,"");
+      RAM.configure(this,"DMA");
 
       // define default map
       default_map = create_map("default_map", 'h0, 4, UVM_LITTLE_ENDIAN);

@@ -330,8 +330,8 @@ class uvm_event extends uvm_object;
 
 
   virtual function void do_print (uvm_printer printer);
-    printer.print_field("num_waiters", num_waiters, $bits(num_waiters), UVM_DEC, ".", "int");
-    printer.print_field("on", on, $bits(on), UVM_BIN, ".", "bit");
+    printer.print_int("num_waiters", num_waiters, $bits(num_waiters), UVM_DEC, ".", "int");
+    printer.print_int("on", on, $bits(on), UVM_BIN, ".", "bit");
     printer.print_time("trigger_time", trigger_time);
     printer.print_object("trigger_data", trigger_data);
     printer.m_scope.down("callbacks");

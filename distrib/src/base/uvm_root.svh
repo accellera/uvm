@@ -1567,18 +1567,12 @@ function void uvm_root::print_topology(uvm_printer printer=null);
   if (printer==null)
     printer = uvm_default_printer;
 
-  if (printer.knobs.sprint)
-    s = printer.m_string;
-
   foreach (m_children[c]) begin
     if(m_children[c].print_enabled) begin
       printer.print_object("", m_children[c]);  
-      if(printer.knobs.sprint)
-        s = {s, printer.m_string};
     end
   end
-
-  printer.m_string = s;
+  $display(printer.emit());
 
 endfunction
 

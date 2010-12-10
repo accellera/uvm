@@ -497,12 +497,14 @@ endfunction
 function void uvm_transaction::do_record (uvm_recorder recorder);
   string s;
   super.do_record(recorder);
-  if(accept_time != -1)
-    void'(m_do_data ("accept_time", accept_time, 0, UVM_RECORD, 
-                     $bits(accept_time), 0));
-  if(initiator != null) 
-    m_record_field_object("initiator", initiator, 
-                          m_sc.recorder, 0);
+  if(accept_time != -1) 
+     recorder.record_field("accept_time", accept_time, $bits(accept_time), UVM_TIME);
+  if(initiator != null) begin
+    uvm_recursion_policy_enum p = recorder.policy;
+    recorder.policy = UVM_REFERENCE;
+    recorder.record_object("initiator", initiator);
+    recorder.policy = p;
+  end
 endfunction
 
 // get_tr_handle

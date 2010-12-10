@@ -585,14 +585,26 @@
         `m_uvm_record_int(ARG, FLAG) \
       UVM_PRINT: \
         begin \
-          m_sc.printer.print_field(`"ARG`", ARG, $bits(ARG), uvm_radix_enum'(FLAG&UVM_RADIX)); \
+          m_sc.printer.print_int(`"ARG`", ARG, $bits(ARG), uvm_radix_enum'(FLAG&UVM_RADIX)); \
         end \
       UVM_SETINT: \
         begin \
+          bit matched; \
           m_sc.scope.set_arg(`"ARG`"); \
-          void'(uvm_object::m_do_set (str__, `"ARG`", ARG, what__, FLAG)); \
+          matched = uvm_is_match(str__, m_sc.scope.get()); \
+          if(matched) begin \
+            if(FLAG &UVM_READONLY) begin \
+              uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
+                 m_sc.get_full_scope_arg()), UVM_NONE); \
+            end \
+            else begin \
+              print_field_match("set_int()", str__); \
+              ARG = uvm_object::m_sc.bitstream; \
+              uvm_object::m_sc.status = 1; \
+            end \
+          end \
           m_sc.scope.unset_arg(`"ARG`"); \
-      end \
+        end \
     endcase \
   end
 
@@ -872,7 +884,7 @@
         end \
       UVM_PRINT: \
         begin \
-          m_sc.printer.print_field_real(`"ARG`", ARG); \
+          m_sc.printer.print_real(`"ARG`", ARG); \
         end \
       UVM_SETINT: \
         begin \
@@ -1014,8 +1026,7 @@
         `m_uvm_record_qda_int(ARG, FLAG, $size(ARG))  \
       UVM_PRINT: \
         begin \
-          if(((FLAG)&UVM_NOPRINT) == 0 && \
-                  m_sc.printer.knobs.print_fields == 1) begin \
+          if(((FLAG)&UVM_NOPRINT) == 0) begin \
              `uvm_print_sarray_int3(ARG, uvm_radix_enum'((FLAG)&(UVM_RADIX)), \
                                    m_sc.printer) \
           end \
@@ -1122,8 +1133,7 @@
         `m_uvm_record_qda_object(ARG,FLAG,$size(ARG)) \
       UVM_PRINT: \
         begin \
-          if(((FLAG)&UVM_NOPRINT) == 0 && \
-                  m_sc.printer.knobs.print_fields == 1) begin \
+          if(((FLAG)&UVM_NOPRINT) == 0) begin \
              `uvm_print_sarray_object3(ARG, m_sc.printer, FLAG) \
           end \
         end \
@@ -1221,8 +1231,7 @@
         end \
       UVM_PRINT: \
         begin \
-          if(((FLAG)&UVM_NOPRINT) == 0 && \
-                  m_sc.printer.knobs.print_fields == 1) begin \
+          if(((FLAG)&UVM_NOPRINT) == 0) begin \
              `uvm_print_sarray_string2(ARG, m_sc.printer) \
           end \
         end \
@@ -1317,8 +1326,7 @@
         `m_uvm_record_qda_enum(ARG, FLAG, $size(ARG)) \
       UVM_PRINT: \
         begin \
-          if(((FLAG)&UVM_NOPRINT) == 0 && \
-                  m_sc.printer.knobs.print_fields == 1) begin \
+          if(((FLAG)&UVM_NOPRINT) == 0) begin \
              `uvm_print_qda_enum(ARG, m_sc.printer, array, T) \
           end \
         end \
@@ -1458,8 +1466,7 @@
         `m_uvm_record_qda_int(ARG, FLAG, ARG.size()) \
       UVM_PRINT: \
         begin \
-          if(((FLAG)&UVM_NOPRINT) == 0 && \
-                  m_sc.printer.knobs.print_fields == 1) begin \
+          if(((FLAG)&UVM_NOPRINT) == 0) begin \
              `uvm_print_array_int3(ARG, uvm_radix_enum'((FLAG)&(UVM_RADIX)), \
                                    m_sc.printer) \
           end \
@@ -1579,8 +1586,7 @@
         `m_uvm_record_qda_object(ARG,FLAG,ARG.size()) \
       UVM_PRINT: \
         begin \
-          if(((FLAG)&UVM_NOPRINT) == 0 && \
-                  m_sc.printer.knobs.print_fields == 1) begin \
+          if(((FLAG)&UVM_NOPRINT) == 0) begin \
              `uvm_print_array_object3(ARG, m_sc.printer,FLAG) \
           end \
         end \
@@ -1706,8 +1712,7 @@
         `m_uvm_record_qda_string(ARG,FLAG,ARG.size()) \
       UVM_PRINT: \
         begin \
-          if(((FLAG)&UVM_NOPRINT) == 0 && \
-                  m_sc.printer.knobs.print_fields == 1) begin \
+          if(((FLAG)&UVM_NOPRINT) == 0) begin \
              `uvm_print_array_string2(ARG, m_sc.printer) \
           end \
         end \
@@ -1823,8 +1828,7 @@
         /**/`m_uvm_record_qda_enum(ARG,FLAG,ARG.size()) \
       UVM_PRINT: \
         begin \
-          if(((FLAG)&UVM_NOPRINT) == 0 && \
-                  m_sc.printer.knobs.print_fields == 1) begin \
+          if(((FLAG)&UVM_NOPRINT) == 0) begin \
              `uvm_print_qda_enum(ARG, m_sc.printer, array, T) \
           end \
         end \
@@ -2744,11 +2748,13 @@
               end \
               string_aa_key = ""; \
               while(ARG.next(string_aa_key)) begin \
+                string s; \
                 m_sc.scope.set_arg({"[",string_aa_key,"]"}); \
-                void'(m_do_data({`"ARG[`", string_aa_key, "]"}, \
-                    ARG[string_aa_key], \
-                    local_data__.ARG[string_aa_key], what__, \
-                    $bits(ARG[string_aa_key]), FLAG)); \
+                s = {`"ARG[`",string_aa_key,"]"}; \
+                if($bits(ARG[string_aa_key]) <= 64) \
+                  void'(m_sc.comparer.compare_field_int(s, ARG[string_aa_key], local_data__.ARG[string_aa_key], $bits(ARG[string_aa_key]), uvm_radix_enum'(FLAG&UVM_RADIX))); \
+                else \
+                  void'(m_sc.comparer.compare_field(s, ARG[string_aa_key], local_data__.ARG[string_aa_key], $bits(ARG[string_aa_key]), uvm_radix_enum'(FLAG&UVM_RADIX))); \
                 m_sc.scope.unset_arg(string_aa_key); \
               end \
             end \
@@ -2801,12 +2807,14 @@
               end \
               if(ARG.first(aa_key)) \
                 do begin \
+                  string s; \
                   $swrite(string_aa_key, "%0d", aa_key); \
                   m_sc.scope.set_arg({"[",string_aa_key,"]"}); \
-                  void'(m_do_data({`"ARG[`", string_aa_key, "]"}, \
-                    ARG[aa_key], \
-                    local_data__.ARG[aa_key], what__, \
-                    $bits(ARG[aa_key]), FLAG)); \
+                  s = {`"ARG[`",string_aa_key,"]"}; \
+                  if($bits(ARG[aa_key]) <= 64) \
+                    void'(m_sc.comparer.compare_field_int(s, ARG[aa_key], local_data__.ARG[aa_key], $bits(ARG[aa_key]), uvm_radix_enum'(FLAG&UVM_RADIX))); \
+                  else \
+                    void'(m_sc.comparer.compare_field(s, ARG[aa_key], local_data__.ARG[aa_key], $bits(ARG[aa_key]), uvm_radix_enum'(FLAG&UVM_RADIX))); \
                   m_sc.scope.unset_arg(string_aa_key); \
                 end while(ARG.next(aa_key)); \
             end \
@@ -2880,13 +2888,13 @@
             begin \
               if(ARG.first(aa_key)) \
                 do begin \
-                  m_sc.printer.print_field( \
+                  m_sc.printer.print_int( \
                     {"[",aa_key.name(),"]"}, ARG[aa_key], $bits(ARG[aa_key]), \
                     uvm_radix_enum'((FLAG)&UVM_RADIX), "[" ); \
                 end while(ARG.next(aa_key)); \
             end \
             p__.print_array_footer(ARG.num()); \
-            p__.print_footer(); \
+            //p__.print_footer(); \
           end \
       endcase \
     end \
@@ -2914,13 +2922,29 @@
               end \
               string_aa_key = ""; \
               while(ARG.next(string_aa_key)) begin \
-                uvm_object tmp; \
-                /* Since m_do_data_object is inout, need a uvm_object for */ \
-                /* assignment compatibility. We must cast back the return. */ \
-                tmp = ARG[string_aa_key]; \
+                uvm_object lhs; \
+                uvm_object rhs; \
+                lhs = ARG[string_aa_key]; \
+                rhs = local_data__.ARG[string_aa_key]; \
                 m_sc.scope.down({"[",string_aa_key,"]"}); \
-                void'(m_do_data_object({"[", string_aa_key, "]"}, tmp, \
-                    local_data__.ARG[string_aa_key], what__, FLAG)); \
+                //if the object are the same then don't need to do a deep compare \
+                if(rhs != lhs) begin \
+                  bit refcmp; \
+                  refcmp = (FLAG & UVM_SHALLOW) && !(m_sc.comparer.policy == UVM_DEEP); \
+                  //do a deep compare here  \
+                  if(!refcmp && !(m_sc.comparer.policy == UVM_REFERENCE)) begin \
+                    if(((rhs == null) && (lhs != null)) || ((lhs==null) && (rhs!=null))) begin \
+                      m_sc.comparer.print_msg_object(lhs, rhs); \
+                    end \
+                    else begin \
+                      if (lhs != null)  \
+                        void'(lhs.compare(rhs, m_sc.comparer)); \
+                    end \
+                  end \
+                  else begin //reference compare \
+                    m_sc.comparer.print_msg_object(lhs, rhs); \
+                  end \
+                end \
                 m_sc.scope.up_element(); \
               end \
             end \
@@ -2973,14 +2997,28 @@
               end \
               if(ARG.first(key__)) begin \
                 do begin \
-                  uvm_object tmp__; \
-                  /* Since m_do_data_object is inout, need a uvm_object for */ \
-                  /* assignment compatibility. We must cast back the return. */ \
-                  tmp__ = ARG[key__]; \
-                  $swrite(m_sc.stringv, "[%0d]", key__); \
+                  uvm_object lhs; \
+                  uvm_object rhs; \
+                  lhs = ARG[key__]; \
+                  rhs = local_data__.ARG[key__]; \
                   m_sc.scope.down_element(key__); \
-                  void'(m_do_data_object(m_sc.stringv, tmp__, \
-                      local_data__.ARG[key__], what__, FLAG)); \
+                  if(rhs != lhs) begin \
+                    bit refcmp; \
+                    refcmp = (FLAG & UVM_SHALLOW) && !(m_sc.comparer.policy == UVM_DEEP); \
+                    //do a deep compare here  \
+                    if(!refcmp && !(m_sc.comparer.policy == UVM_REFERENCE)) begin \
+                      if(((rhs == null) && (lhs != null)) || ((lhs==null) && (rhs!=null))) begin \
+                        m_sc.comparer.print_msg_object(lhs, rhs); \
+                      end \
+                      else begin \
+                        if (lhs != null)  \
+                          void'(lhs.compare(rhs, m_sc.comparer)); \
+                      end \
+                    end \
+                    else begin //reference compare \
+                      m_sc.comparer.print_msg_object(lhs, rhs); \
+                    end \
+                  end \
                   m_sc.scope.up_element(); \
                 end while(ARG.next(key__)); \
               end \
@@ -3038,9 +3076,10 @@
               string_aa_key = ""; \
               while(ARG.next(string_aa_key)) begin \
                 m_sc.scope.set_arg({"[",string_aa_key,"]"}); \
-                void'(m_do_data_string({`"ARG[`", string_aa_key, "]"}, \
-                    ARG[string_aa_key], \
-                    local_data__.ARG[string_aa_key], what__, FLAG) ); \
+                if(ARG[string_aa_key] != local_data__.ARG[string_aa_key]) begin \
+                   m_sc.stringv = { "lhs = \"", ARG[string_aa_key], "\" : rhs = \"", local_data__.ARG[string_aa_key], "\""}; \
+                   m_sc.comparer.print_msg(m_sc.stringv); \
+                end \
                 m_sc.scope.unset_arg(string_aa_key); \
               end \
             end \

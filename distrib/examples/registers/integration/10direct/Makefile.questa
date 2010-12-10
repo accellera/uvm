@@ -32,7 +32,11 @@ comp:
 		+incdir+../../common/apb \
 		../common/test.sv
 
-run: hw_reset
+run: built_in_tests
+
+built_in_tests:
+	$(VSIM) +UVM_TESTNAME=built_in_tests
+	$(CHECK)
 
 hw_reset:
 	$(VSIM) +UVM_TESTNAME=hw_reset_test

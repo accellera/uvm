@@ -32,6 +32,38 @@ import apb_pkg::*;
 `include "regmodel.sv"
 `include "tb_env.sv"
 
+class built_in_tests extends uvm_test;
+
+   function new(string name = "built_in_tests", uvm_component parent = null);
+      super.new(name, parent);
+   endfunction
+
+   `uvm_component_utils(built_in_tests)
+   
+   virtual task run();
+      tb_top.rst = 1;
+      repeat (5) @(negedge tb_top.clk);
+      tb_top.rst = 0;
+
+      #100;
+
+      begin
+         uvm_reg_mem_built_in_seq seq;
+         tb_env env;
+         
+         $cast(env, uvm_top.find("env"));
+
+         seq = uvm_reg_mem_built_in_seq::type_id::create("uvm_reg_mem_built_in_seq",,
+                                                     get_full_name());
+         seq.model = env.regmodel;
+         seq.start(null);
+      end
+      
+      global_stop_request();
+   endtask
+endclass
+
+
 class hw_reset_test extends uvm_test;
 
    function new(string name = "hw_reset_test", uvm_component parent = null);

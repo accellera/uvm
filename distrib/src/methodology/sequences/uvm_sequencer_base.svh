@@ -190,14 +190,14 @@ class uvm_sequencer_base extends uvm_component;
     super.do_print(printer);
     if(sequences.size() != 0) begin
       printer.print_string("default_sequence", default_sequence);
-      printer.print_field("count", count, $bits(count), UVM_DEC);
-      printer.print_field("max_random_count", max_random_count, 
+      printer.print_int("count", count, $bits(count), UVM_DEC);
+      printer.print_int("max_random_count", max_random_count, 
         $bits(max_random_count), UVM_DEC);
       printer.print_array_header("sequences", sequences.size());
       for(int i=0; i<sequences.size(); ++i)
         printer.print_string($psprintf("[%0d]", i), sequences[i], "[");
       printer.print_array_footer(sequences.size());
-      printer.print_field("max_random_depth", max_random_depth, 
+      printer.print_int("max_random_depth", max_random_depth, 
         $bits(max_random_depth), UVM_DEC);
     end
   endfunction

@@ -60,14 +60,14 @@ module test;
       byte unsigned bytes[];
       myobject cp;
       string exp = {
-        "----------------------------------------------------------------------\n",
-        "Name                     Type                Size                Value\n",
-        "----------------------------------------------------------------------\n",
-        "obj                      myobject            -                       -\n",
-        "  i                      integral            32                 'h5555\n",
-        "  b                      integral            8                    'h55\n",
-        "  bigint                 integral            128  'haaaa5555aaaa5555a+\n",
-        "----------------------------------------------------------------------\n" 
+        "----------------------------------------------------\n",
+        "Name      Type      Size  Value                     \n",
+        "----------------------------------------------------\n",
+        "obj       myobject  -     -                         \n",
+        "  i       integral  32    'h5555                    \n",
+        "  b       integral  8     'h55                      \n",
+        "  bigint  integral  128   'haaaa5555aaaa5555aaaa5555\n",
+        "----------------------------------------------------\n"
       };
 
       obj.set_name("obj");
@@ -102,8 +102,14 @@ module test;
 
 
       uvm_default_printer.knobs.reference=0;
-      if(exp != obj.sprint())
+      if(exp != obj.sprint()) begin
+        string s = obj.sprint();
+        foreach (exp[i]) begin
+          $write("%c",s[i]);
+          if (exp[i] != s[i]) $write("X"); else $write(" ");
+        end
         uvm_report_info("FAILED", "*** UVM TEST FAILED print failed ***", UVM_NONE);
+      end
 
       obj.print();
       uvm_report_info("PASSED", "*** UVM TEST PASSED ***", UVM_NONE);

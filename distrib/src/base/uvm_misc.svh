@@ -209,7 +209,9 @@ class uvm_status_container;
   // The scope stack is used for messages that are emitted by policy classes.
   uvm_scope_stack scope  = new;
 
-  extern function string get_full_scope_arg ();
+  function string get_full_scope_arg ();
+    get_full_scope_arg = scope.get();
+  endfunction
 
   //Used for checking cycles. When a data function is entered, if the depth is
   //non-zero, then then the existeance of the object in the map means that a
@@ -279,6 +281,11 @@ class uvm_seed_map;
 endclass
 
 uvm_seed_map uvm_random_seed_table_lookup [string];
+
+
+//------------------------------------------------------------------------------
+// Utility functions
+//------------------------------------------------------------------------------
 
 
 // Function- uvm_instance_scope
@@ -381,7 +388,8 @@ endfunction
 // --------------------
 
 function string uvm_object_value_str(uvm_object v);
-  if(v == null) return "<null>";
+  if (v == null)
+    return "<null>";
   uvm_object_value_str.itoa(v.get_inst_id());
   uvm_object_value_str = {"@",uvm_object_value_str};
 endfunction
@@ -424,6 +432,108 @@ function string uvm_leaf_scope (string full_name, byte scope_separator = ".");
   end
 endfunction
 
+
+// uvm_vector_to_string
+
+function string uvm_vector_to_string (uvm_bitstream_t value, int size,
+                                      uvm_radix_enum radix=UVM_NORADIX,
+                                      string radix_str="");
+
+  // sign extend & don't show radix for negative values
+  if (radix == UVM_DEC && value[size-1] === 1)
+    return $sformatf("%0d", value);
+
+  value &= (1 << size)-1;
+
+  case(radix)
+    UVM_BIN:      return $sformatf("%0s%0b", radix_str, value);
+    UVM_OCT:      return $sformatf("%0s%0o", radix_str, value);
+    UVM_UNSIGNED: return $sformatf("%0s%0d", radix_str, value);
+    UVM_STRING:   return $sformatf("%0s%0s", radix_str, value);
+    UVM_TIME:     return $sformatf("%0s%0t", radix_str, value);
+    UVM_DEC:      return $sformatf("%0s%0d", radix_str, value);
+    default:      return $sformatf("%0s%0x", radix_str, value);
+  endcase
+endfunction
+
+
+// uvm_get_array_index_int
+//
+// The following functions check to see if a string is representing an array
+// index, and if so, what the index is.
+
+function int uvm_get_array_index_int(string arg, output bit is_wildcard);
+  int i;
+  uvm_get_array_index_int = 0;
+  is_wildcard = 1;
+  i = arg.len() - 1;
+  if(arg[i] == "]")
+    while(i > 0 && (arg[i] != "[")) begin
+      --i;
+      if((arg[i] == "*") || (arg[i] == "?")) i=0;
+      else if((arg[i] < "0") || (arg[i] > "9") && (arg[i] != "[")) begin
+        uvm_get_array_index_int = -1; //illegal integral index
+        i=0;
+      end
+    end
+  else begin
+    is_wildcard = 0;
+    return 0;
+  end
+
+  if(i>0) begin
+    arg = arg.substr(i+1, arg.len()-2);
+    uvm_get_array_index_int = arg.atoi(); 
+    is_wildcard = 0;
+  end
+endfunction 
+  
+
+// uvm_get_array_index_string
+
+function string uvm_get_array_index_string(string arg, output bit is_wildcard);
+  int i;
+  uvm_get_array_index_string = "";
+  is_wildcard = 1;
+  i = arg.len() - 1;
+  if(arg[i] == "]")
+    while(i > 0 && (arg[i] != "[")) begin
+      if((arg[i] == "*") || (arg[i] == "?")) i=0;
+      --i;
+    end
+  if(i>0) begin
+    uvm_get_array_index_string = arg.substr(i+1, arg.len()-2);
+    is_wildcard = 0;
+  end
+endfunction
+
+
+// uvm_is_array
+
+function bit uvm_is_array(string arg);
+  return arg[arg.len()-1] == "]";
+endfunction
+
+
+// uvm_has_wildcard
+
+function bit uvm_has_wildcard (string arg);
+  //if it is a regex then return true
+  if( (arg.len() > 1) && (arg[0] == "/") && (arg[arg.len()-1] == "/") )
+    return 1;
+
+  //check if it has globs
+  foreach(arg[i])
+    if( (arg[i] == "*") || (arg[i] == "+") || (arg[i] == "?") )
+      return 1;
+
+  return 0;
+endfunction
+
+
+//------------------------------------------------------------------------------
+// Recording functions
+//------------------------------------------------------------------------------
 
 // UVM does not provide any kind of recording functionality, but provides hooks
 // when a component/object may need such a hook.
@@ -519,197 +629,3 @@ endfunction
 `endif // UVM_RECORD_INTERFACE
 
 
-//------------------------------------------------------------------------------
-//
-// Loose functions for utility-
-//   int uvm_num_characters (uvm_radix_enum radix, uvm_bitstream_t value, int size)
-//   string uvm_vector_to_string (uvm_bitstream_t value, int size, 
-//                                uvm_radix_enum radix=UVM_NORADIX);
-// 
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// uvm_num_characters
-// --------------
-//
-// int uvm_num_characters (uvm_radix_enum radix, uvm_bitstream_t value, int size)
-//   Precondition:
-//     radix: the radix to use to calculate the number of characters
-//     value: integral value to test to find number of characters
-//     size:  number of bits in value
-//     radix_str: the string that identifes the radix
-//   Postcondition:
-//     Returns the minimum number of ascii characters needed to represent
-//     value in the desired base.
-//------------------------------------------------------------------------------
-
-function automatic int uvm_num_characters (uvm_radix_enum radix, uvm_bitstream_t value, 
-      int size, string radix_str="");
-  int chars;
-  int r;
-  uvm_bitstream_t mask;
-  if(radix==UVM_NORADIX)
-    radix = UVM_HEX;
-
-  mask = {UVM_STREAMBITS{1'b1}};
-  mask <<= size;
-  mask = ~mask;
-  value &= mask;
-
-  //fast way of finding number of characters is to use division, slow way
-  //is to construct a string. But, if x's are in the value then the  
-  //string method is much easier.
-  if((^value) !== 1'bx) begin
-    case(radix)
-      UVM_BIN: r = 2;
-      UVM_OCT: r = 8;
-      UVM_UNSIGNED: r = 10;
-      UVM_DEC: r = 10;
-      UVM_HEX: r = 16;
-      UVM_TIME: r = 10;
-      UVM_STRING: return size/8;
-      default:  r = 16;
-    endcase
-    chars = radix_str.len() + 1;
-    if((radix == UVM_DEC) && (value[size-1] === 1)) begin
-      //sign extend and get 2's complement of value
-      mask = ~mask;
-      value |= mask;
-      value = ~value + 1;
-      chars++; //for the negative
-    end
-    for(uvm_bitstream_t i=r; value/i != 0; i*=r) 
-      chars++;
-    return chars;
-  end
-  else begin
-    string s;
-    s = uvm_vector_to_string(value, size, radix, radix_str);
-    return s.len();
-  end
-endfunction
-
-
-// uvm_vector_to_string
-
-function string uvm_vector_to_string (uvm_bitstream_t value, int size,
-                                      uvm_radix_enum radix=UVM_NORADIX,
-                                      string radix_str="");
-  uvm_bitstream_t mask;
-  string str;
-
-  mask = {UVM_STREAMBITS{1'b1}};
-  mask <<= size;
-  mask = ~mask;
-
-  case(radix)
-    UVM_BIN:     begin
-               $swrite(str, "%0s%0b", radix_str, value&mask);
-             end
-    UVM_OCT:     begin
-               $swrite(str, "%0s%0o", radix_str, value&mask);
-             end
-    UVM_UNSIGNED: begin
-               $swrite(str, "%0s%0d", radix_str, (value&mask));
-             end
-    UVM_DEC:     begin
-               if(value[size-1] === 1) begin
-                 //sign extend for negative value
-                 uvm_bitstream_t sval; mask = ~mask; 
-                 sval = (value|mask);
-                 //don't show radix for negative
-                 $swrite(str, "%0d", sval);
-               end
-               else begin
-                 $swrite(str, "%0s%0d", radix_str, (value&mask));
-               end
-             end
-    UVM_STRING:  begin
-               $swrite(str, "%0s%0s", radix_str, value&mask);
-             end
-    UVM_TIME:    begin
-               $swrite(str, "%0s%0t", radix_str, value&mask);
-             end
-    default: begin
-               $swrite(str, "%0s%0x", radix_str, value&mask);
-             end
-  endcase
-  return str;
-endfunction
-
-
-// uvm_get_array_index_int
-//
-// The following functions check to see if a string is representing an array
-// index, and if so, what the index is.
-
-function int uvm_get_array_index_int(string arg, output bit is_wildcard);
-  int i;
-  uvm_get_array_index_int = 0;
-  is_wildcard = 1;
-  i = arg.len() - 1;
-  if(arg[i] == "]")
-    while(i > 0 && (arg[i] != "[")) begin
-      --i;
-      if((arg[i] == "*") || (arg[i] == "?")) i=0;
-      else if((arg[i] < "0") || (arg[i] > "9") && (arg[i] != "[")) begin
-        uvm_get_array_index_int = -1; //illegal integral index
-        i=0;
-      end
-    end
-  else begin
-    is_wildcard = 0;
-    return 0;
-  end
-
-  if(i>0) begin
-    arg = arg.substr(i+1, arg.len()-2);
-    uvm_get_array_index_int = arg.atoi(); 
-    is_wildcard = 0;
-  end
-endfunction 
-  
-
-// uvm_get_array_index_string
-
-function string uvm_get_array_index_string(string arg, output bit is_wildcard);
-  int i;
-  uvm_get_array_index_string = "";
-  is_wildcard = 1;
-  i = arg.len() - 1;
-  if(arg[i] == "]")
-    while(i > 0 && (arg[i] != "[")) begin
-      if((arg[i] == "*") || (arg[i] == "?")) i=0;
-      --i;
-    end
-  if(i>0) begin
-    uvm_get_array_index_string = arg.substr(i+1, arg.len()-2);
-    is_wildcard = 0;
-  end
-endfunction
-
-
-// uvm_is_array
-
-function bit uvm_is_array(string arg);
-  int last;
-  uvm_is_array = 0;
-  last = arg.len()-1;
-  if(arg[last] == "]") uvm_is_array = 1;
-endfunction
-
-
-// uvm_has_wildcard
-
-function bit uvm_has_wildcard (string arg);
-  //if it is a regex then return true
-  if( (arg.len() > 1) && (arg[0] == "/") && (arg[arg.len()-1] == "/") )
-    return 1;
-
-  //check if it has globs
-  foreach(arg[i])
-    if( (arg[i] == "*") || (arg[i] == "+") || (arg[i] == "?") )
-      return 1;
-
-  return 0;
-endfunction

@@ -303,7 +303,7 @@ virtual class uvm_object extends uvm_void;
   //|   int f1;
   //|   virtual function void do_print (uvm_printer printer);
   //|     super.do_print(printer);
-  //|     printer.print_field("f1", f1, $bits(f1), DEC);
+  //|     printer.print_int("f1", f1, $bits(f1), DEC);
   //|     printer.print_object("data", data);
   //|   endfunction
   //
@@ -770,60 +770,29 @@ virtual class uvm_object extends uvm_void;
   // when a field is set using one of the set methods.
 
   local string m_leaf_name;
+  local int m_inst_id;
+  static protected int m_inst_count = 0;
 
+  typedef enum {UVM_NONE_T, UVM_INT_T, UVM_STR_T, UVM_OBJ_T} uvm_apply_t;
+  static protected uvm_apply_t m_field_array[string];
   static bit print_matches = 0;
+  static /*protected*/ uvm_status_container m_sc = new;
 
   extern static function void print_field_match (string fnc, string match);
 
-  extern virtual function void m_field_automation (uvm_object  tmp_data__,  
-                                                   int what__, 
-                                                   string str__);
-  extern protected function int m_do_data (string arg,
-                                           inout uvm_bitstream_t lhs,
-                                           input uvm_bitstream_t rhs,
-                                           int what, int bits, int flag);
-  extern protected function int m_do_data_real (string arg,
-                                                inout real lhs,
-                                                input real rhs,
-                                                int what, int flag);
-  extern protected function int m_do_data_object (string arg,
-                                                  inout uvm_object  lhs,
-                                                  input uvm_object  rhs,
-                                                  int what, int flag);
-  extern protected function int m_do_data_string (string arg,
-                                                  inout string lhs,
-                                                  input string rhs,
-                                                  int what, int flag);
-  extern protected function void m_record_field_object (string arg,
-                                          uvm_object value,
-                                          uvm_recorder recorder=null,
-                                          int flag=UVM_DEFAULT);
-  extern protected function int m_do_set (string match, string arg,
-                                          inout uvm_bitstream_t  lhs, 
-                                          input int what, int flag);
-  extern protected function int m_do_set_string (string match,
-                                                 string arg, inout string lhs,
-                                                 input int what, int flag);
-  extern protected function int m_do_set_object (string match,
-                                                 string arg,
-                                                 inout uvm_object lhsobj, 
-                                                 input int what, int flag);
+  extern virtual function void m_field_automation (uvm_object tmp_data__,  
+                                                   int        what__, 
+                                                   string     str__);
 
   extern protected function string  m_get_function_type  (int what);
 
-  static protected int m_inst_count = 0;
-  local int m_inst_id;
-
   extern protected virtual function uvm_report_object m_get_report_object();
-
-  static /*protected*/ uvm_status_container m_sc = new;
 
   static function uvm_status_container m_get_status(); return m_sc; endfunction
 
   // The following members are used for verifying the integrity of the 
   // optional uvm_field macros.
-  typedef enum {UVM_NONE_T, UVM_INT_T, UVM_STR_T, UVM_OBJ_T} uvm_apply_t;
-  static protected uvm_apply_t m_field_array[string];
+
   extern protected function void m_do_field_check(string field, uvm_apply_t t_t = UVM_NONE_T);
   extern static protected function void m_delete_field_array();
   extern protected function void m_print_field_array();
@@ -831,6 +800,7 @@ virtual class uvm_object extends uvm_void;
 endclass
 
 
+uvm_copy_map uvm_global_copy_map = new;
 
 //------------------------------------------------------------------------------
 // IMPLEMENTATION
@@ -918,21 +888,9 @@ endfunction
 // -----
  
 function void uvm_object::print(uvm_printer printer=null);
-
-  if(printer==null)
+  if (printer==null)
     printer = uvm_default_printer;
-
-  if(printer.istop()) begin
-    printer.print_object(get_name(), this);
-  end
-  else begin
-    //do m_field_automation here so user doesn't need to call anything to get
-    //automation.
-    m_sc.printer = printer;
-    m_field_automation(null, UVM_PRINT, "");
-    //call user override
-    do_print(printer);
-  end
+  $display(sprint(printer)); 
 endfunction
 
 
@@ -945,13 +903,15 @@ function string uvm_object::sprint(uvm_printer printer=null);
   if(printer==null)
     printer = uvm_default_printer;
 
-  p = printer.knobs.sprint;
-  printer.knobs.sprint = 1;
-
-  print(printer);
-
-  printer.knobs.sprint = p;  //revert back to regular printing
-  return printer.m_string;
+  if(printer.istop()) begin
+    printer.print_object(get_name(), this);
+    return printer.emit();
+  end
+  else begin
+    m_sc.printer = printer;
+    m_field_automation(null, UVM_PRINT, "");
+    do_print(printer);
+  end
 endfunction
 
 
@@ -1051,208 +1011,16 @@ function void  uvm_object::set_string_local (string field_name,
 endfunction
 
 
-// m_do_set (static)
-// ------------
-
-// function m_do_set (match, arg, lhs, what, flag)
-//   Precondition:
-//     match     -- a match string to test against arg to do the set
-//     arg       -- the name of the short name of the lhs object
-//     lhs       -- the lhs to do on (left hand side)
-//     what      -- integer, what to do
-//     flag      -- object flags
-//
-//     uvm_object::m_sc.bitstream -- rhs object used for set/get
-//     uvm_object::m_sc.status        -- return status for set/get calls
-//
-
-
-function int uvm_object::m_do_set (string match,
-                                       string arg,
-                                       inout uvm_bitstream_t lhs, 
-                                       input int what,
-                                       int flag);
-
-  bit matched;
-
-  if (what < UVM_START_FUNCS || what > UVM_END_FUNCS)
-     return 0;
-
-  matched = uvm_is_match(match, m_sc.scope.get());
-
-  case (what)
-    UVM_SETINT:
-      begin
-        if(matched) begin
-          if(flag &UVM_READONLY) begin
-            uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored", 
-               m_sc.get_full_scope_arg()), UVM_NONE);
-            return 0;
-          end
-          print_field_match("set_int()", match);
-          lhs = uvm_object::m_sc.bitstream;
-          uvm_object::m_sc.status = 1;
-          return 1;
-        end
-      end
-    default:
-      begin
-        if(matched) begin
-          uvm_report_warning("MTCTYP", $psprintf("matched integral field %s, %s", 
-          m_sc.get_full_scope_arg(),
-          "but expected a non-integral type"), UVM_NONE);
-        end
-      end
-  endcase
-  return 0;
-endfunction
-
-
-// m_do_set_string (static)
-// -------------------
-
-// function m_do_set_string (match, arg, lhs, what, flag)
-//   Precondition:
-//     match     -- a match string to test against arg to do the set
-//     arg       -- the name of the short name of the lhs object
-//     lhs       -- the lhs to do get or set on (left hand side)
-//     what      -- integer, what to do
-//     flag      -- object flags
-//
-//     uvm_object::m_sc.stringv    -- rhs object used for set/get
-//     uvm_object::m_sc.status        -- return status for set/get calls
-//
-
-function int uvm_object::m_do_set_string(string match,
-                                             string arg,
-                                             inout string lhs, 
-                                             input int what,
-                                             int flag);
-
-  bit matched;
-  string s;
-
-  if (what < UVM_START_FUNCS || what > UVM_END_FUNCS)
-     return 0;
-
-  matched = uvm_is_match(match, m_sc.scope.get());
-
-  case (what)
-    UVM_SETSTR:
-      begin
-        if(matched) begin
-          if(flag &UVM_READONLY) begin
-            uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored", 
-               m_sc.get_full_scope_arg()), UVM_NONE);
-            return 0;
-          end
-          print_field_match("set_string()", match);
-          lhs = uvm_object::m_sc.stringv;
-          uvm_object::m_sc.status = 1;
-          return 1;
-        end
-      end
-    default:
-      begin
-        if(matched) begin
-          uvm_report_warning("MTCTYP", $psprintf("matched string field %s, %s", 
-          m_sc.get_full_scope_arg(),
-          "but expected a non-string type"), UVM_NONE);
-        end
-      end
-  endcase
-  return 0;
-endfunction
-
-
-// m_do_set_object (static)
-// -----------------
-
-// function m_do_set_object (match, arg, lhsobj, what, flag)
-//   Precondition:
-//     match     -- a match string to test against arg to do the set
-//     arg       -- the name of the short name of the lhs object
-//     lhsobj    -- the object to do set_object on (left hand side)
-//     what      -- integer, what to do
-//     flag      -- object flags
-//
-//     uvm_object::m_sc.object -- rhs object used for set
-//     uvm_object::m_sc.status     -- return status for set/get calls. set
-//       always returns 0.
-//
-//   Postcondition:
-//     Performs the set or get operation on an object. If the object doesn't
-//     match then the object is recursed. The get* operations return true if
-//     an index was returned. The set* always return 0.
-
-function int uvm_object::m_do_set_object (string match,
-                                            string arg,
-                                            inout uvm_object lhsobj, 
-                                            input int what,
-                                                  int flag);
-
-  bit matched;
-  bit prev;
-  int cnt;
-
-  if (what < UVM_START_FUNCS || what > UVM_END_FUNCS)
-     return 0;
-
-  matched = uvm_is_match(match, m_sc.scope.get());
-
-  case (what)
-    UVM_SETOBJ:
-      begin
-        if(matched) begin
-          if(flag &UVM_READONLY) begin
-            uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored", 
-               m_sc.get_full_scope_arg()), UVM_NONE);
-            return 0;
-          end
-          print_field_match("set_object()", match);
-          lhsobj = uvm_object::m_sc.object;
-          uvm_object::m_sc.status = 1;
-        end
-        else if(lhsobj==null) return 0;
-        if(flag &UVM_READONLY) 
-          return 0; 
-        //Only traverse if there is a possible match.
-        for(cnt=0; cnt<match.len(); ++cnt) begin
-          if(match[cnt] == "." || match[cnt] == "*") break;
-        end
-        if(cnt!=match.len())
-          lhsobj.m_field_automation(null, UVM_SETOBJ, match);
-        return uvm_object::m_sc.status;
-      end
-  endcase
-
-  if(matched) begin
-    uvm_report_warning("MTCTYP", $psprintf("matched object field %s, %s", 
-          m_sc.get_full_scope_arg(),
-          "but expected a non-object type"), UVM_NONE);
-  end
-  if(lhsobj==null) return 0;
-  lhsobj.m_field_automation(null, what, match);
-
-  return uvm_object::m_sc.status;
-
-endfunction
-
 // clone
 // -----
 
 function uvm_object uvm_object::clone();
   uvm_object tmp;
   tmp = this.create(get_name());
-  if(tmp == null) begin
-//    uvm_report_warning("CRFLD", $psprintf("The create method failed for %s,  object will be copied using shallow copy", get_name()));
-//    tmp = new this;
+  if(tmp == null)
     uvm_report_warning("CRFLD", $psprintf("The create method failed for %s,  object cannot be cloned", get_name()), UVM_NONE);
-  end
-  else begin
+  else
     tmp.copy(this);
-  end
-
   return(tmp);
 endfunction
 
@@ -1260,7 +1028,6 @@ endfunction
 // copy
 // ----
 
-uvm_copy_map uvm_global_copy_map = new;
 function void uvm_object::copy (uvm_object rhs);
   //For cycle checking
   static int depth;
@@ -1379,11 +1146,9 @@ function void uvm_object::m_field_automation ( uvm_object tmp_data__,
 endfunction
 
 
-// check_fields
+// m_do_field_checks
 //
 // Checks to see if a new field is a duplicate of one already in this object
-// ------------
-
 function void uvm_object::m_do_field_check(string field,
                                            uvm_apply_t t_t = UVM_NONE_T);
  `ifdef UVM_ENABLE_FIELD_CHECKS                                           
@@ -1633,457 +1398,5 @@ endfunction
 
 function uvm_report_object uvm_object::m_get_report_object();
   return null;
-endfunction
-
-
-// m_record_field_object (static)
-// ---------------------
-
-function void uvm_object::m_record_field_object (string arg,
-                                               uvm_object value,
-                                               uvm_recorder recorder =null,
-                                               int flag = UVM_DEFAULT);
-  begin
-    uvm_recursion_policy_enum p;
-
-    if(recorder == null)
-      recorder=m_sc.recorder;
-
-    p = recorder.policy;
-
-    if((flag&UVM_REFERENCE) != 0) return;
-      recorder.policy = UVM_REFERENCE;
-
-    recorder.record_object(arg, value);
-
-    recorder.policy = p;
-  end
-endfunction
-
-
-// m_do_data (static)
-// ---------
-
-// function m_do_data (arg, lhs, rhs, what, flag)
-//   Precondition:
-//     arg       -- the name of the short name of the lhs object
-//     lhs       -- the lhs to do work on (left hand side)
-//     lhs       -- the rhs to do work from (right hand side)
-//     what      -- integer, what to do
-//     flag      -- object flags
-
-function int uvm_object::m_do_data (string arg,
-                                  inout uvm_bitstream_t lhs,
-                                  input uvm_bitstream_t rhs,
-                                        int what,
-                                        int bits,
-                                        int flag);
-
-
-  if (what > UVM_END_DATA_EXTRA)
-     return 0;
-  if(bits > UVM_STREAMBITS) begin
-    uvm_report_error("FLDTNC",$psprintf("%s is %0d bits; maximum field size is %0d, truncating",
-                 arg, bits, UVM_STREAMBITS), UVM_NONE);
-  end
-  case (what)
-    UVM_COPY:
-      begin
-        if(((flag)&UVM_NOCOPY) == 0) begin
-          uvm_bitstream_t mask;
-          mask = -1;
-          mask >>= (UVM_STREAMBITS-bits);
-          lhs = rhs & mask;
-        end
-        return 0;
-      end
-    UVM_COMPARE:
-      begin
-        if(((flag)&UVM_NOCOMPARE) == 0) begin
-          bit r;
-          if(bits <= 64)
-            r = m_sc.comparer.compare_field_int(arg, lhs, rhs, bits, uvm_radix_enum'(flag&UVM_RADIX));
-          else
-            r = m_sc.comparer.compare_field(arg, lhs, rhs, bits, uvm_radix_enum'(flag&UVM_RADIX));
-        end
-        return 0;
-      end
-    UVM_PACK:
-      begin
-        if(((flag)&UVM_NOPACK) == 0) begin
-          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
-            if(bits<=64)
-              m_sc.packer.pack_field_int(lhs, bits);
-            else
-              m_sc.packer.pack_field(lhs, bits);
-          end
-        end
-        return 0;
-      end
-    UVM_UNPACK:
-      begin
-        if(((flag)&UVM_NOPACK) == 0) begin
-          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
-            if(bits<=64)
-              lhs=m_sc.packer.unpack_field_int(bits);
-            else
-              lhs=m_sc.packer.unpack_field(bits);
-          end
-        end
-        return 0;
-      end
-    UVM_PRINT:
-      begin
-        if(((flag)&UVM_NOPRINT) == 0) 
-        begin  
-          uvm_printer printer; 
-          uvm_radix_enum radix;
-          radix = uvm_radix_enum'(flag&UVM_RADIX);
-          printer = m_sc.printer; 
-          printer.print_field(arg, lhs, bits, radix);
-        end
-      end
-    UVM_RECORD:
-      begin
-        if(((flag)&UVM_NORECORD) == 0) 
-        begin 
-          integer h;
-          uvm_radix_enum radix;
-
-          radix = uvm_radix_enum'(flag&UVM_RADIX);
-          m_sc.recorder.record_field(arg, lhs, bits, radix);
-        end 
-      end
-  endcase
-  return 0;
-endfunction
-
-
-// m_do_data_real (static)
-// --------------
-
-// function m_do_data_real (arg, lhs, rhs, what, flag)
-//   Precondition:
-//     arg       -- the name of the short name of the lhs object
-//     lhs       -- the lhs to do work on (left hand side)
-//     lhs       -- the rhs to do work from (right hand side)
-//     what      -- integer, what to do
-//     flag      -- object flags
-
-function int uvm_object::m_do_data_real (string arg,
-                                  inout real lhs,
-                                  input real rhs,
-                                        int what,
-                                        int flag);
-
-
-  if (what > UVM_END_DATA_EXTRA)
-     return 0;
-  case (what)
-    UVM_COPY:
-      begin
-        if(((flag)&UVM_NOCOPY) == 0) begin
-          lhs = rhs;
-        end
-        return 0;
-      end
-    UVM_COMPARE:
-      begin
-        if(((flag)&UVM_NOCOMPARE) == 0) begin
-          bit r;
-          r = m_sc.comparer.compare_field_real(arg, lhs, rhs);
-        end
-        return 0;
-      end
-    UVM_PACK:
-      begin
-        if(((flag)&UVM_NOPACK) == 0) begin
-          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
-            m_sc.packer.pack_field_int($realtobits(lhs), 64);
-          end
-        end
-        return 0;
-      end
-    UVM_UNPACK:
-      begin
-        if(((flag)&UVM_NOPACK) == 0) begin
-          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
-            lhs=$bitstoreal(m_sc.packer.unpack_field_int(64));
-          end
-        end
-        return 0;
-      end
-    UVM_PRINT:
-      begin
-        if(((flag)&UVM_NOPRINT) == 0) 
-        begin  
-          uvm_printer printer; 
-          printer = m_sc.printer; 
-          printer.print_field_real(arg, lhs);
-        end
-      end
-    UVM_RECORD:
-      begin
-        if(((flag)&UVM_NORECORD) == 0) 
-        begin 
-          m_sc.recorder.record_field_real(arg, lhs);
-        end 
-      end
-  endcase
-  return 0;
-endfunction
-
-
-// m_do_data_object (static)
-// ----------------
-
-// function m_do_data_object (arg, lhs, rhs, what, flag)
-//   Precondition:
-//     arg       -- the name of the short name of the lhs object
-//     lhs       -- the lhs to do work on (left hand side)
-//     lhs       -- the rhs to do work from (right hand side)
-//     what      -- integer, what to do
-//     flag      -- object flags
-
-function int uvm_object::m_do_data_object (string arg,
-                                       inout uvm_object lhs,
-                                       input uvm_object rhs,
-                                             int what,
-                                             int flag);
-
-  uvm_object lhs_obj;
-
-  if (what > UVM_END_DATA_EXTRA)
-     return 0;
-
-  case (what)
-    UVM_COPY:
-      begin
-        int rval;
-        if(((flag)&UVM_NOCOPY) != 0) begin
-          return 0;
-        end
-        if(rhs == null) begin
-          lhs = null;
-          return UVM_REFERENCE;
-        end
-
-        if(flag & UVM_SHALLOW) begin
-          rval = UVM_SHALLOW;
-        end
-        else if(flag & UVM_REFERENCE) begin
-          lhs = rhs;
-          rval = UVM_REFERENCE;
-        end
-        else  //deepcopy
-        begin
-          uvm_object v;
-          v = uvm_global_copy_map.get(rhs);
-          if(v != null) begin
-            lhs = v;
-            rval = UVM_REFERENCE;
-          end
-          else if(lhs==null) begin
-            lhs = rhs.clone();
-            lhs.set_name(arg);
-            rval = UVM_REFERENCE;
-          end
-          else if(rhs == null) begin
-            rval = UVM_REFERENCE;
-          end
-          else begin
-            //lhs doesn't change for this case, so don't need to copy back
-            lhs.copy(rhs);
-             rval = 0;
-          end
-        end
-        return rval;
-      end
-    UVM_COMPARE:
-      begin
-        bit refcmp;
-
-        if(((flag)&UVM_NOCOMPARE) != 0) begin
-          return 0;
-        end
-
-        //if the object are the same then don't need to do a deep compare
-        if(rhs == lhs) return 0;
-
-        refcmp = (flag & UVM_SHALLOW) && !(m_sc.comparer.policy == UVM_DEEP);
-
-        //do a deep compare here 
-        if(!refcmp && !(m_sc.comparer.policy == UVM_REFERENCE))
-        begin
-          if(((rhs == null) && (lhs != null)) || ((lhs==null) && (rhs!=null))) begin
-            m_sc.comparer.print_msg_object(lhs, rhs);
-            return 1;  //miscompare
-          end
-          if((rhs == null) && (lhs==null))
-            return 0;
-          else begin
-            bit r;
-            r = lhs.compare(rhs, m_sc.comparer);
-            if(r == 0) begin
-              return 1;
-            end
-            else begin
-              return 0;
-            end
-          end
-        end
-        else begin //reference compare
-          if(lhs != rhs) begin
-            m_sc.comparer.print_msg_object(lhs, rhs);
-            return 1;
-          end
-        end
-      end
-    UVM_PACK:
-      begin
-        if(((flag&UVM_NOPACK) == 0) && ((flag&UVM_REFERENCE)==0)) begin
-          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
-            m_sc.packer.pack_object(lhs);
-          end
-        end
-        return 0;
-      end
-    UVM_UNPACK:
-      begin
-        if(((flag&UVM_NOPACK) == 0) && ((flag&UVM_REFERENCE)==0)) begin
-          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
-          m_sc.packer.unpack_object_ext(lhs);
-          end
-        end
-        return 0;
-      end
-    UVM_PRINT:
-      begin
-        if(((flag)&UVM_NOPRINT) == 0) 
-        begin  
-          if(((flag)&UVM_REFERENCE) || (lhs == null)) begin
-            int d;
-            d = m_sc.printer.knobs.depth;
-            m_sc.printer.knobs.depth = 0;
-            m_sc.printer.print_object(arg, lhs);
-            m_sc.printer.knobs.depth = d;
-          end
-          else begin
-            uvm_component obj;
-            if(lhs != null) begin
-              m_sc.printer.print_object(arg, lhs);
-            end
-          end
-        end
-      end
-    UVM_RECORD:
-      begin
-        if(((flag)&UVM_NORECORD) == 0) 
-        begin 
-          if(lhs != null && lhs.get_name()!="") arg = lhs.get_name(); 
-          m_record_field_object(arg, lhs, m_sc.recorder,flag);
-        end 
-      end
-  endcase
-  return 0;
-endfunction
-
-
-// m_do_data_string (static)
-// ----------------
-
-// function m_do_data_string (arg, lhs, rhs, what, flag)
-//   Precondition:
-//     arg       -- the name of the short name of the lhs object
-//     lhs       -- the lhs to do work on (left hand side)
-//     lhs       -- the rhs to do work from (right hand side)
-//     what      -- integer, what to do
-//     flag      -- object flags
-//
-
-function int uvm_object::m_do_data_string(string arg,
-                                      inout string lhs,
-                                      input string rhs,
-                                            int what,
-                                            int flag);
-
-  if (what > UVM_END_DATA_EXTRA)
-     return 0;
-
-  case (what)
-    UVM_COPY:
-      begin
-        if(((flag)&UVM_NOCOPY) == 0) begin
-          lhs = rhs;
-        end
-        return 0;
-      end
-    UVM_COMPARE:
-      begin
-        if(((flag)&UVM_NOCOMPARE) == 0) begin
-          if(lhs != rhs) begin
-            m_sc.stringv = { "lhs = \"", lhs, "\" : rhs = \"", rhs, "\""};
-            m_sc.comparer.print_msg(m_sc.stringv);
-            return 1;
-          end
-        end
-        return 0;
-      end
-    UVM_PACK:
-      begin 
-        if(((flag)&UVM_NOPACK) == 0) begin
-          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
-          m_sc.packer.pack_string(lhs);
-          end
-        end
-        return 0;
-      end
-    UVM_UNPACK:
-      begin
-        if(((flag)&UVM_NOPACK) == 0) begin
-          if(((flag&UVM_ABSTRACT) && m_sc.packer.abstract) ||
-             (!(flag&UVM_ABSTRACT) && m_sc.packer.physical)) begin
-          lhs = m_sc.packer.unpack_string();
-          end
-        end
-        return 0;
-      end
-    UVM_PRINT:
-      begin
-        if(((flag)&UVM_NOPRINT) == 0) 
-        begin  
-          m_sc.printer.print_string(arg, lhs);
-        end
-      end
-    UVM_RECORD:
-      begin
-        if(((flag)&UVM_NORECORD) == 0) 
-        begin 
-          m_sc.scope.up(); //need to scope up since gets scoped down before
-          m_sc.recorder.record_string(arg, lhs);
-          m_sc.scope.down(arg); //need to scope back dwon
-        end 
-      end
-  endcase
-  return 0;
-
-endfunction
-
-
-//-----------------------------------------------------------------------------
-//
-// uvm_status_container
-//
-//-----------------------------------------------------------------------------
-
-function string uvm_status_container::get_full_scope_arg ();
-  get_full_scope_arg = scope.get();
 endfunction
 

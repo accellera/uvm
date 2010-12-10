@@ -85,6 +85,4 @@
   // Command Line Processor
   `include "base/uvm_cmdline_processor.svh"
 
-  `include "base/uvm_extern_report_server.svh"
-
 `endif // UVM_BASE_SVH
