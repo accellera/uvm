@@ -43,7 +43,7 @@ class test extends uvm_test;
    endfunction
 
    virtual function void build();
-     env = new("env");
+     env = new("env",this);
    endfunction
 
    virtual task run();

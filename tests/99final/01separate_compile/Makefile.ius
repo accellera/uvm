@@ -19,13 +19,13 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../..
+UVM_HOME	= ../../../distrib
 
-include ../../Makefile.ius
-
-
-all: reg_user_test
-
-%_test:
-	$(IUS) -incdir ../primer -incdir ../common/apb ../primer/tb_top.sv test.sv -smartorder *.vhd -top tb_top -top test -top someregfile +UVM_TESTNAME=$@ -access rw
+#
+# compiles uvm_pkg and test.sv in two different compile scopes 
+# requires that uvm_macros.svh really provide all symbols
+# well this cannot be checked but for instance `UVM_REG_DATA_WIDTH was missing before
+#
+all: 
+	irun -uvmhome $(UVM_HOME) $(UVM_HOME)/src/dpi/uvm_dpi.cc -access -rw +UVM_TESTNAME=test +UVM_VERBOSITY=HIGH +define+NUM_REGS=10 -clean test1.sv
 	$(CHECK)

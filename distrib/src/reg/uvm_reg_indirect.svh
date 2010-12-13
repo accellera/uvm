@@ -50,7 +50,7 @@ class uvm_reg_indirect_data extends uvm_reg;
    function new(string name = "uvm_reg_indirect",
                 int unsigned n_bits,
                 int has_cover);
-      super.new(name,8,UVM_NO_COVERAGE);
+      super.new(name,n_bits,has_cover);
    endfunction: new
 
    virtual function void build();
@@ -78,7 +78,8 @@ class uvm_reg_indirect_data extends uvm_reg;
       m_tbl = reg_a;
 
       // Not testable using pre-defined sequences
-      set_attribute("NO_REG_TESTS", "1");
+      uvm_resource_db#(int)::set({"REG::", get_full_name()},
+                                 "NO_REG_TESTS", 1);
 
       // Add a frontdoor to each indirectly-accessed register
       // for every address map this register is in.

@@ -101,8 +101,8 @@ endclass
 //
 //----------------------------------------------------------------------
 
-class uvm_tlm_b_target_socket #(type T=uvm_tlm_generic_payload,
-                             type IMP=int)
+class uvm_tlm_b_target_socket #(type IMP=int,
+                                type T=uvm_tlm_generic_payload)
   extends uvm_tlm_b_target_socket_base #(T);
 
   local IMP m_imp;
@@ -151,9 +151,9 @@ endclass
 //
 //----------------------------------------------------------------------
 
-class uvm_tlm_nb_initiator_socket #(type T=uvm_tlm_generic_payload,
-                                 type P=uvm_tlm_phase_e,
-                                 type IMP=int)
+class uvm_tlm_nb_initiator_socket #(type IMP=int,
+                                    type T=uvm_tlm_generic_payload,
+                                    type P=uvm_tlm_phase_e)
   extends uvm_tlm_nb_initiator_socket_base #(T,P);
 
   uvm_tlm_nb_transport_bw_imp #(T,P,IMP) bw_imp;
@@ -220,9 +220,9 @@ endclass
 //
 //----------------------------------------------------------------------
 
-class uvm_tlm_nb_target_socket #(type T=uvm_tlm_generic_payload,
-                              type P=uvm_tlm_phase_e,
-                              type IMP=int)
+class uvm_tlm_nb_target_socket #(type IMP=int,
+                                 type T=uvm_tlm_generic_payload,
+                                 type P=uvm_tlm_phase_e)
   extends uvm_tlm_nb_target_socket_base #(T,P);
 
   local IMP m_imp;

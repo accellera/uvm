@@ -34,29 +34,6 @@
 // Defines, Constants, enums.
 
 
-// Macro: `UVM_TLM_ADDR_SIZE
-// 
-// Define generic uvm_tlm_addr_size width of TLM generic payload
-
-`define UVM_TLM_ADDR_SIZE 64
-
-
-// Const: uvm_tlm_addr_size
-//
-// Constant to hold default TLM GP Address size
-//
-
-const int unsigned uvm_tlm_addr_size = `UVM_TLM_ADDR_SIZE;
-
-
-// Typedef: uvm_tlm_addr_t
-//
-// Constant to hold default TLM generic payload address size
-//
-
-typedef bit[`UVM_TLM_ADDR_SIZE-1:0] uvm_tlm_addr_t;
-
-
 // Enum: uvm_tlm_command_e
 //
 // Command atribute type definition
@@ -144,7 +121,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // for example) it shall generate a standard error response. The
    // recommended response status is ~UVM_TLM_ADDRESS_ERROR_RESPONSE~.
 
-   rand uvm_tlm_addr_t             m_address;
+   rand bit [63:0]             m_address;
  
    // Variable: m_command
    //
@@ -185,7 +162,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // target (honoring the semantics of the byte enable) but by no other
    // component.
 
-   rand byte                   m_data[];
+   rand byte unsigned             m_data[];
 
    // Variable: m_length
    //
@@ -292,7 +269,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // component or target should not modify the values of disabled
    // bytes in the <m_data> array.
    
-   rand byte                   m_byte_enable[];
+   rand byte unsigned          m_byte_enable[];
 
    // Variable: m_byte_enable_length
    // The number of elements in the <m_byte_enable> array.
@@ -432,11 +409,9 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
     string msg;
     string addr_fmt;
     string s;
-    int unsigned addr_chars = (uvm_tlm_addr_size >> 2) + ((uvm_tlm_addr_size & 'hf) > 0);
+     int unsigned addr_chars = 16;
 
-    $sformat(addr_fmt, "%%%0dx", addr_chars);
-    $sformat(s, addr_fmt, m_address);
-    $sformat(msg, "%s [%s] =", m_command.name(), s);
+    $sformat(msg, "%s [0x%16x] =", m_command.name(), m_address);
 
     for(int unsigned i = 0; i < m_data.size(); i++) begin
       $sformat(s, " %02x", m_data[i]);
@@ -517,7 +492,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // Function: set_address
    //
    // Set the value of the <m_address> variable
-  virtual function void set_address(uvm_tlm_addr_t addr);
+  virtual function void set_address(bit [63:0] addr);
     m_address = addr;
   endfunction
 
@@ -525,7 +500,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    //
    // Get the value of the <m_address> variable
  
-  virtual function uvm_tlm_addr_t get_address();
+  virtual function bit [63:0] get_address();
     return m_address;
   endfunction
 
@@ -533,7 +508,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    //
    // Return the value of the <m_data> array
  
-  virtual function void get_data (output byte p []);
+  virtual function void get_data (output byte unsigned p []);
     p = m_data;
   endfunction
 
@@ -541,7 +516,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    //
    // Set the value of the <m_data> array  
 
-  virtual function void set_data(ref byte p []);
+  virtual function void set_data(ref byte unsigned p []);
     m_data = p;
   endfunction 
   
@@ -580,7 +555,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // Function: get_byte_enable
    //
    // Return the value of the <m_byte_enable> array
-  virtual function void get_byte_enable(output byte p[]);
+  virtual function void get_byte_enable(output byte unsigned p[]);
     p = m_byte_enable;
   endfunction
 
@@ -588,7 +563,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    //
    // Set the value of the <m_byte_enable> array
    
-  virtual function void set_byte_enable(ref byte p[]);
+  virtual function void set_byte_enable(ref byte unsigned p[]);
     m_byte_enable = p;
   endfunction
 
@@ -647,7 +622,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // is ~UVM_TLM_OK_RESPONSE~
 
   virtual function bit is_response_ok();
-    return (m_response_status > 0);
+    return (int'(m_response_status) > 0);
   endfunction
 
    // Function: is_response_error
@@ -860,7 +835,11 @@ class uvm_tlm_extension #(type T=int) extends uvm_tlm_extension_base;
   endfunction
 
   virtual function string get_type_handle_name();
+`ifndef UVM_USE_TYPENAME
+     return "";
+`else
      return $typename(T);
+`endif
   endfunction
 
   virtual function void do_copy(uvm_object rhs);

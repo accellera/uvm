@@ -65,12 +65,12 @@
 // of the queue.
 //
 // The classes defined here form the low level layer of the resource
-// database.  The clases includ the resource container and the database
+// database.  The classes include the resource container and the database
 // that holds the containers.  The following set of classes are defined
 // here:
 //
 // <uvm_resource_types>: A class without methods or members, only
-// typedefs and enums. These types and enums ware used throughout the
+// typedefs and enums. These types and enums are used throughout the
 // resources facility.  Putting the types in a class keeps them confined
 // to a specific name space.
 //
@@ -109,7 +109,8 @@ class uvm_resource_types;
 
   // types uses for setting overrides
   typedef bit[1:0] override_t;
-  typedef enum override_t { TYPE_OVERRIDE = 2'b01, NAME_OVERRIDE = 2'b10 } override_e;
+  typedef enum override_t { TYPE_OVERRIDE = 2'b01,
+                            NAME_OVERRIDE = 2'b10 } override_e;
 
    // general purpose queue of resourcex
   typedef uvm_queue#(uvm_resource_base) rsrc_q_t;
@@ -200,6 +201,7 @@ endclass
 virtual class uvm_resource_base extends uvm_object;
 
   protected semaphore sm;
+  protected int lock_state;
   protected string scope;
   protected bit modified;
   protected bit read_only;
@@ -237,6 +239,7 @@ virtual class uvm_resource_base extends uvm_object;
     super.new(name);
     set_scope(s);
     sm = new(1);
+    lock_state = 1;
     modified = 0;
     read_only = 0;
     precedence = default_precedence;
@@ -273,6 +276,7 @@ virtual class uvm_resource_base extends uvm_object;
 
   task lock();
     sm.get();
+    lock_state -= 1;
   endtask
 
   // Function: try_lock
@@ -282,7 +286,10 @@ virtual class uvm_resource_base extends uvm_object;
   // the lock then a one is returned, otherwise a zero is returned.
 
   function bit try_lock();
-    return sm.try_get();
+    bit ok = sm.try_get();
+    if(ok)
+      lock_state -= 1;
+    return ok;
   endfunction
 
   // Function: unlock
@@ -291,6 +298,7 @@ virtual class uvm_resource_base extends uvm_object;
 
   function void unlock();
     sm.put();
+    lock_state += 1;
   endfunction
 
 
@@ -1434,14 +1442,16 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   
   // Function: set_override
   //
-  // Put a resource into the global resource pool as an override.
-  // This means it gets put at the head of the list and is searched
-  // before other existing resources that occupy the same position in
-  // the name map or the type map.
+  // Put a resource into the global resource pool as an override.  This
+  // means it gets put at the head of the list and is searched before
+  // other existing resources that occupy the same position in the name
+  // map or the type map.  The default is to override both the name and
+  // type maps.  However, using the ~override~ argument you can specify
+  // that either the name map or type map is overridden.
 
-  function void set_override();
+  function void set_override(uvm_resource_types::override_t override = 2'b11);
     uvm_resource_pool rp = uvm_resource_pool::get();
-    rp.set(this, (uvm_resource_types::NAME_OVERRIDE | uvm_resource_types::TYPE_OVERRIDE));
+    rp.set(this, override);
   endfunction
 
 
@@ -1534,6 +1544,20 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
 
     string str;
 
+    // Has the resource been locked by the locking interface?  If so,
+    // issue an error.  Since we are doing a read which does not modify
+    // the contents of the resource, why issue an error and not just a
+    // warning?  The resource may be undergoing a value change and so we
+    // cannot be sure that the current value is the same as when the
+    // resource is subsequently unlocked. It may be or it may not be.
+    // Since we can't tell the user may be getting the incorrect value.
+
+    if(lock_state == 0) begin
+      string msg;
+      $sformat(msg, "Resource %s is being read by the non-locking interface while it is locked by the locking interface.  This could result in the incorrect value being returned", get_name());
+      uvm_report_error("LOCKED_READ", msg);
+    end
+
     // If an accessor object is supplied then get the accessor record.
     // Otherwise create a new access record.  In either case populate
     // the access record with information about this access.  Check
@@ -1572,6 +1596,13 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
 
     if(is_read_only()) begin
       uvm_report_error("resource", $psprintf("resource %s is read only -- cannot modify", get_name()));
+      return;
+    end
+
+    if(lock_state == 0) begin
+      string msg;
+      $sformat(msg, "Resource %s is locked and cannot be modified at this time", get_name());
+      uvm_report_error("LOCKED_WRITE", msg);
       return;
     end
 
@@ -1630,7 +1661,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // interface is the use of a semaphore to guarantee exclusive access.
 
 
-  // Task: read_with_lock
+  // Task: read_with_loc;
   //
   // Locking version of read().  Like read(), this returns the contents
   // of the resource container.  In addtion it obeys the lock.

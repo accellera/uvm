@@ -38,14 +38,12 @@ typedef class uvm_objection;
 // Hierarchy - provides methods for searching and traversing the component
 //     hierarchy.
 //
+// Phasing - defines a phased test flow that all components follow, with a
+//     group of standard phase methods and an API for custom phases and
+//     multiple independent phasing domains to mirror DUT behavior e.g. power
+//
 // Configuration - provides methods for configuring component topology and other
 //     parameters ahead of and during component construction.
-//
-// Phasing - defines a phased test flow that all components follow. Derived
-//     components implement one or more of the predefined phase callback methods
-//     to perform their function. During simulation, all components' callbacks
-//     are executed in precise order. Phasing is controlled by uvm_top, the
-//     singleton instance of <uvm_root>.
 //
 // Reporting - provides a convenience interface to the <uvm_report_handler>. All
 //     messages, warnings, and errors are processed through this interface.
@@ -176,90 +174,15 @@ virtual class uvm_component extends uvm_report_object;
   //----------------------------------------------------------------------------
   // Group: Phasing Interface
   //----------------------------------------------------------------------------
-  // Components execute their behavior in strictly ordered, pre-defined phases.
-  // Each phase is defined by its own method, which derived components can
-  // override to incorporate component-specific behavior. During simulation,
-  // the phases are executed one by one, where one phase must complete before
-  // the next phase begins. The following briefly describe each phase:
   //
-  // new - Also known as the ~constructor~, the component does basic
-  //     initialization of any members not subject to configuration.
-  //
-  // build - The component constructs its children. It uses the get_config
-  //     interface to obtain any configuration for itself, the set_config
-  //     interface to set any configuration for its own children, and the
-  //     factory interface for actually creating the children and other
-  //     objects it might need.
-  // 
-  // connect - The component now makes connections (binds TLM ports and
-  //     exports) from child-to-child or from child-to-self (i.e. to promote a
-  //     child port or export up the hierarchy for external access. Afterward,
-  //     all connections are checked via <resolve_bindings> before entering
-  //     the <end_of_elaboration> phase. 
-  //
-  // end_of_elaboration - At this point, the entire testbench environment has
-  //     been built and connected. No new components and connections may be
-  //     created from this point forward. Components can do final checks for
-  //     proper connectivity, and it can initiate communication with other tools
-  //     that require stable, quasi-static component structure..
-  //
-  // start_of_simulation - The simulation is about to begin, and this phase
-  //     can be used to perform any pre-run activity such as displaying banners,
-  //     printing final testbench topology and configuration information.
-  //
-  // run - This is where verification takes place. It is the only predefined,
-  //     time-consuming phase. A component's primary function is implemented
-  //     in the <run> task. Other processes may be forked if desired. When
-  //     a component returns from its run task, it does not signify completion
-  //     of its run phase. Any processes that it may have forked ~continue to
-  //     run~. The run phase terminates in one of four ways:
-  //
-  //     stop - When a component's <enable_stop_interrupt> bit is set and
-  //            <global_stop_request> is called, the component's <stop> task
-  //            is called. Components can implement stop to allow completion
-  //            of in-progress transactions, flush queues, etc. Upon return
-  //            from stop() by all enabled components, a <do_kill_all> is
-  //            issued. If the <uvm_test_done_objection> is being used,
-  //            this stopping procedure is deferred until all outstanding
-  //            objections on <uvm_test_done> have been dropped.
-  //
-  //     objections dropped - The <uvm_test_done_objection> will implicitly
-  //            call <global_stop_request> when all objections to ending the
-  //            phase are dropped. The stop procedure described above is
-  //            then allowed to proceed normally.
-  //
-  //     kill - When called, all component's <run> processes are killed
-  //            immediately. While kill can be called directly, it is
-  //            recommended that components use the stopping mechanism,
-  //            which affords a more ordered and safe shut-down.
-  //
-  //     timeout - If a timeout was set, then the phase ends if it expires
-  //            before either of the above occur. Without a stop, kill, or
-  //            timeout, simulation can continue "forever", or the simulator
-  //            may end simulation prematurely if it determines that
-  //            all processes are waiting.
-  //
-  // extract - This phase can be used to extract simulation results from
-  //     coverage collectors and scoreboards, collect status/error counts,
-  //     statistics, and other information from components in bottom-up order.
-  //     Being a separate phase, extract ensures all relevant data from
-  //     potentially independent sources (i.e. other components) are collected
-  //     before being checked in the next phase.
-  //
-  // check - Having extracted vital simulation results in the previous phase,
-  //     the check phase can be used to validate such data and determine
-  //     the overall simulation outcome. It too executes bottom-up.
-  //
-  // report - Finally, the report phase is used to output results to files
-  //     and/or the screen. 
-  //
-  // All task-based phases (<run> is the only pre-defined task phase) will run
-  // forever until killed or stopped via <kill> or <global_stop_request>.
-  // The latter causes each component's <stop> task to get called back if
-  // its <enable_stop_interrupt> bit is set. After all components' stop tasks
-  // return, the UVM will end the phase.
+  // These methods implement an interface which allows all components to step
+  // through a standard schedule of phases, or a customized schedule, and
+  // also an API to allow independent phase domains which can jump like state
+  // machines to reflect behavior e.g. power domains on the DUT in different
+  // portions of the testbench
   //
   //----------------------------------------------------------------------------
+
 
   // Function: build
   //
@@ -274,22 +197,21 @@ virtual class uvm_component extends uvm_report_object;
   // Starting after the initial construction phase (<new> method) has completed,
   // the build phase consists of calling all components' build methods
   // recursively top-down, i.e., parents' build are executed before the
-  // children. This is the only phase that executes top-down.
+  // children. This is the only phase that executes top-down, except finalize()
   //
   // The build phase of the uvm_component class executes the automatic
   // configuration of fields registed in the component by calling 
   // <apply_config_settings>.  To turn off automatic configuration for a component, 
   // do not call super.build() in the subtype's build method.
   //
-  // See <uvm_phase> for more information on phases.
+  // See <uvm_phases> for more information on phases.
 
-  extern virtual function void build ();
-
+  extern virtual function void build();
 
   // Function: connect
   //
-  // The connect phase callback is one of several methods automatically called
-  // during the course of simulation.
+  // The connect phase callback is one of several predefined phase
+  // methods automatically called during the course of simulation.
   //
   // Starting after the <build> phase has completed, the connect phase consists
   // of calling all components' connect methods recursively in depth-first,
@@ -301,15 +223,14 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly. 
   //
-  // See <uvm_phase> for more information on phases.
+  // See <uvm_phases> for more information on phases.
 
-  extern virtual function void connect ();
-
+  extern virtual function void connect();
 
   // Function: end_of_elaboration
   //
-  // The end_of_elaboration phase callback is one of several methods
-  // automatically called during the course of simulation.
+  // The end_of_elaboration phase callback is one of several predefined phase
+  // methods automatically called during the course of simulation.
   //
   // Starting after the <connect> phase has completed, this phase consists of
   // calling all components' end_of_elaboration methods recursively in
@@ -322,15 +243,14 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
   //
-  // See <uvm_phase> for more information on phases.
+  // See <uvm_phases> for more information on phases.
 
-  extern virtual function void end_of_elaboration ();
-
+  extern virtual function void end_of_elaboration();
 
   // Function: start_of_simulation
   //
-  // The start_of_simulation phase callback is one of several methods
-  // automatically called during the course of simulation.
+  // The start_of_simulation phase callback is one of several predefined phase
+  // methods automatically called during the course of simulation.
   //
   // Starting after the <end_of_elaboration> phase has completed, this phase
   // consists of calling all components' start_of_simulation methods recursively
@@ -343,14 +263,13 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
   //
-  // See <uvm_phase> for more information on phases.
+  // See <uvm_phases> for more information on phases.
 
-  extern virtual function void start_of_simulation ();
-
+  extern virtual function void start_of_simulation();
 
   // Task: run
   //
-  // The run phase callback is the only predefined phase that is time-consuming,
+  // The run phase callback is a predefined phase that is time-consuming,
   // i.e., task-based. It executes after the <start_of_simulation> phase has
   // completed. Derived classes should override this method to perform the bulk
   // of its functionality, forking additional processes if needed.
@@ -397,15 +316,14 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The run task should never be called directly.
   //
-  // See <uvm_phase> for more information on phases.
+  // See <uvm_phases> for more information on phases.
 
-  extern virtual task run ();
-
+  extern virtual task run();
 
   // Function: extract
   //
-  // The extract phase callback is one of several methods automatically called
-  // during the course of simulation. 
+  // The extract phase callback is one of several predefined phase
+  // methods automatically called during the course of simulation.
   //
   // Starting after the <run> phase has completed, the extract phase consists of
   // calling all components' extract methods recursively in depth-first,
@@ -418,15 +336,14 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
   //
-  // See <uvm_phase> for more information on phases.
+  // See <uvm_phases> for more information on phases.
 
-  extern virtual function void extract ();
-
+  extern virtual function void extract();
 
   // Function: check
   //
-  // The check phase callback is one of several methods automatically called
-  // during the course of simulation.
+  // The check phase callback is one of several predefined phase
+  // methods automatically called during the course of simulation.
   //
   // Starting after the <extract> phase has completed, the check phase consists of
   // calling all components' check methods recursively in depth-first, bottom-up
@@ -437,14 +354,13 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
   //
-  // See <uvm_phase> for more information on phases.
+  // See <uvm_phases> for more information on phases.
 
-  extern virtual function void check ();
-
+  extern virtual function void check();
 
   // Function: report
   //
-  // The report phase callback is the last of several predefined phase
+  // The report phase callback is one of several predefined phase
   // methods automatically called during the course of simulation.
   //
   // Starting after the <check> phase has completed, the report phase consists
@@ -457,9 +373,254 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
   //
-  // See <uvm_phase> for more information on phases.
+  // See <uvm_phases> for more information on phases.
 
-  extern virtual function void report ();
+  extern virtual function void report();
+
+  // Function: finalize
+  //
+  // The report phase callback is the last of several predefined phase
+  // methods automatically called during the course of simulation.
+  //
+  // Starting after the <report> phase has completed, the finalize phase consists
+  // of calling all components' finalize methods recursively in top-down
+  // order, i.e., parents are executed before their children. 
+  //
+  // The finalize phase callback is used to support multiple concatenated
+  // test schemes where the build..report phases (or subset of them) are
+  // executed repeatedly once per test, looping back after the report phase.
+  // This provides one final phase after that looping, before simulation exit.
+  //
+  // This method should never be called directly.
+  //
+  // See <uvm_phases> for more information on phases.
+  
+  extern virtual function void finalize();
+
+  // Task: pre_reset
+  //
+  // UVM standard runtime phase
+  // This is the first UVM runtime phase commencing in parallel with run()
+
+  extern virtual task pre_reset();
+
+  // Task: reset
+  //
+  // UVM standard runtime phase
+
+  extern virtual task reset();
+
+  // Task: post_reset
+  //
+  // UVM standard runtime phase
+
+  extern virtual task post_reset();
+
+  // Task: pre_configure
+  //
+  // UVM standard runtime phase
+
+  extern virtual task pre_configure();
+
+  // Task: configure
+  //
+  // UVM standard runtime phase
+
+  extern virtual task configure();
+
+  // Task: post_configure
+  //
+  // UVM standard runtime phase
+
+  extern virtual task post_configure();
+
+  // Task: pre_main
+  //
+  // UVM standard runtime phase
+
+  extern virtual task pre_main();
+
+  // Task: main
+  //
+  // UVM standard runtime phase
+
+  extern virtual task main();
+
+  // Task: post_main
+  //
+  // UVM standard runtime phase
+  // Not normally used - included only for symmetry
+
+  extern virtual task post_main();
+
+  // Task: pre_shutdown
+  //
+  // UVM standard runtime phase
+  // Not normally used - included only for symmetry
+
+  extern virtual task pre_shutdown();
+
+  // Task: shutdown
+  //
+  // UVM standard runtime phase
+  // This phase is the one jumped to at end of test / global stop request
+
+  extern virtual task shutdown();
+
+  // Task: post_shutdown
+  //
+  // UVM standard runtime phase
+  // This is the last UVM runtime task-based phase before the extract phase
+
+  extern virtual task post_shutdown();
+
+
+  //--------------------------------------------------------------------
+  // current phase convenience API
+  //--------------------------------------------------------------------
+
+
+  // Function: phase_started
+  // Phase transition callback, invoked at beginning of each phase
+  //   phase - the current phase schedule node in the graph
+
+  extern virtual function void phase_started (uvm_phase_schedule phase);
+
+  // Function: phase_ended
+  // Phase transition callback, invoked at end of each phase
+  //   phase - the current phase schedule node in the graph
+  
+  extern virtual function void phase_ended (uvm_phase_schedule phase);
+  
+  // Function: get_current_phase
+  // Return the phase schedule node which initiated the current process thread
+
+  extern function uvm_phase_schedule get_current_phase();
+
+  // Function: find_phase_domain
+  // Return the domain name set for our uvm schedule (or another specific schedule)
+  //   schedule_name - the schedule name to return domain for - default 'uvm'
+  
+  extern function string find_phase_domain(string schedule_name="uvm_pkg::uvm");
+
+  // Function: find_phase_schedule
+  // Locate a schedule/domain pair in this component's list, "*" matches any name
+
+  extern function uvm_phase_schedule find_phase_schedule(string name, string domain);
+
+  // Function: add_phase_schedule
+  // insert a new schedule/domain entry in this component's domain membership list
+
+  extern function void add_phase_schedule(uvm_phase_schedule schedule, string domain);
+
+  // Function: delete_phase_schedule
+  // delete a schedule entry from this component's domain membership list
+
+  extern function void delete_phase_schedule(uvm_phase_schedule schedule);
+
+
+  //--------------------------------------------------------------------
+  // phase / schedule / domain API
+  //--------------------------------------------------------------------
+
+  
+  // Function: set_phase_domain
+  // Apply a phase domain to this component (by default, also to it's children)
+  // Sets up all schedule data structures in master phasing graph if a new domain.
+
+  extern virtual function void set_phase_domain(string domain_name, int hier=1);
+
+  // Function: set_phase_schedule
+  //
+  // Defines the phase schedule for this base type of component, adds it to the master.
+  //
+  // Here we define the structure and organization of a schedule for this component
+  // base type (uvm_component). We give that schedule a name ('uvm') and we add a named
+  // instance of the schedule (a 'domain') to the master phasing schedule graph, if it
+  // does not already exist there.
+  //
+  // Custom component base classes requiring a custom phasing schedule to augment or
+  // replace the default UVM schedule can override this method. They can inherit the
+  // parent schedule and build on it by calling super.set_phase_schedule(domain_name)
+  // or they can create a new schedule from scratch by not calling the super method.
+
+  extern virtual function void set_phase_schedule(string domain_name);
+
+  // Function: set_phase_imp
+  //
+  // Override the default implementation for a phase on this component (tree) with a
+  // custom one, which must be created as a singleton object extending the default
+  // one and implementing required behavior in exec and traverse methods
+  //
+  // Can choose whether to apply the custom functor to the whole tree or just component
+
+  extern function void set_phase_imp(uvm_phase_imp phase, uvm_phase_imp imp, int hier=1);
+
+  // Function: raise_objection
+  //
+  // Raises an objection to the end of the current phase. The current phase
+  // ends when all objections to the phase have been dropped. The ~phase~
+  // argument must be provided. If null, uvm will call <get_current_phase>
+  // but this is only successful if the function call is made in the
+  // main phase process (not from a child process). It is a good practice
+  // to get the phase process before forking any child process. For example:
+  //
+  //| task main;
+  //|   uvm_phase_schedule phase = get_current_phase();
+  //|   fork begin
+  //|     raise_objection(phase);
+  //|     ...
+  //|     drop_objection(phase);
+  //|   end join_none
+  //|   ...
+  //| endtask
+
+  extern function void raise_objection(uvm_phase_schedule phase=null);
+
+
+  // Function: drop_objection
+  //
+  // Drops an objection to the end of the current phase. The current phase
+  // ends when all objections to the phase have been dropped. The ~phase~
+  // argument must be provided. If null, uvm will call <get_current_phase>
+  // but this is only successful if the function call is made in the
+  // main phase process (not from a child process). It is a good practice
+  // to get the phase process before forking any child process. 
+
+  extern function void drop_objection(uvm_phase_schedule phase=null); 
+
+
+  // Function: terminate_phase
+  //
+  // Forces all objections to the ~phase~ to be immediately dropped
+  // so that the phase can end.
+
+  extern function void terminate_phase(uvm_phase_schedule phase=null);
+
+  
+  // Function: jump
+  extern function void jump(uvm_phase_imp phase);
+  
+  // Function: jump_all_domains
+  extern function void jump_all_domains(uvm_phase_imp phase);
+  
+  // Function: set_default_thread_mode
+  // Specify default thread semantic for all phases on this component
+  extern function void set_default_thread_mode(uvm_thread_mode_t thread_mode);
+  
+  // Function: set_thread_mode
+  // Override default thread semantic for the current phase on this component
+  extern function void set_thread_mode(uvm_thread_mode_t thread_mode);
+  
+  // Phasing implementation
+  // Internal members for phasing process control, hierarchical schedules, functors
+  
+  string             m_phase_domains[uvm_phase_schedule]; // domain(s) we have set, per schedule
+  uvm_phase_thread   m_phase_threads[uvm_phase_schedule]; // phases we have active threads for
+  uvm_phase_imp      m_phase_imps[uvm_phase_imp];         // functors to override ovm_root defaults
+  uvm_thread_mode_t  m_phase_thread_mode;                 // default thread semantic for this comp
+  uvm_phase_schedule m_current_phase;                     // the most recently executed phase
+  /*protected*/ bit  m_build_done=0;
 
 
   // Task: suspend
@@ -751,9 +912,8 @@ virtual class uvm_component extends uvm_report_object;
   //
   // If you do not want apply_config_settings to be called for a component,
   // then the build() method should be overloaded and you should not call
-  // super.build(). If this case, you must also set the m_build_done
-  // bit. Likewise, apply_config_settings can be overloaded to customize
-  // automated configuration.
+  // super.build(). Likewise, apply_config_settings can be overloaded to
+  // customize automated configuration.
   //
   // When the ~verbose~ bit is set, all overrides are printed as they are
   // applied. If the component's <print_config_matches> property is set, then
@@ -1369,22 +1529,16 @@ virtual class uvm_component extends uvm_report_object;
   extern local function bit m_add_child (uvm_component child);
   extern virtual local function void m_set_full_name ();
 
-  extern virtual function void  do_func_phase (uvm_phase phase);
-  extern virtual task do_task_phase (uvm_phase phase);
-
   extern          function void  do_resolve_bindings ();
   extern          function void  do_flush();
 
   extern virtual function void flush ();
 
-  uvm_phase m_curr_phase=null;
-
-  protected bit m_build_done=0;
+  //AK uvm_phase m_curr_phase=null;
 
   extern local function void m_extract_name(string name ,
                                             output string leaf ,
                                             output string remainder );
-  local static bit m_phases_loaded = 0;
 
   // overridden to disable
   extern virtual function uvm_object create (string name=""); 
@@ -1397,10 +1551,7 @@ virtual class uvm_component extends uvm_report_object;
               string stream_name="main", string label="",
               string desc="", time begin_time=0);
 
-  `ifdef UVM_USE_FPC
   protected process m_phase_process;
-  `endif
-  protected event m_kill_request;
 
   string m_name;
 

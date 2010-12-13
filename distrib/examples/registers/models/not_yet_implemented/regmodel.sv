@@ -54,12 +54,12 @@ class block_B extends uvm_reg_block;
       default_map = create_map("", 0, 4, UVM_BIG_ENDIAN);
 
       R1 = reg_R1::type_id::create("R1",,get_full_name());
-      R1.build();
       R1.configure(this, null);
+      R1.build();
 
       R2 = reg_R2::type_id::create("R2",,get_full_name());
-      R2.build();
       R2.configure(this, null);
+      R2.build();
 
       default_map.add_reg(R1, 'h00,  "RW");
       default_map.add_reg(R2, 'h04,  "RW");

@@ -17,14 +17,51 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+//--------------
+// Group: Macros
+//--------------
 
-`ifndef UVM_RAL_ADDR_WIDTH
-`define UVM_RAL_ADDR_WIDTH 64
+// Macro: `UVM_REG_ADDR_WIDTH
+//
+// Maximum address width in bits
+//
+// Default value is 64. Used to define the <uvm_reg_addr_t> type.
+//
+`ifndef UVM_REG_ADDR_WIDTH
+ `define UVM_REG_ADDR_WIDTH 64
 `endif
 
-`ifndef UVM_RAL_DATA_WIDTH
-`define UVM_RAL_DATA_WIDTH 64
+
+// Macro: `UVM_REG_DATA_WIDTH
+//
+// Maximum data width in bits
+//
+// Default value is 64. Used to define the <uvm_reg_data_t> type.
+//
+`ifndef UVM_REG_DATA_WIDTH
+ `define UVM_REG_DATA_WIDTH 64
 `endif
 
 
+// Macro: `UVM_REG_BYTENABLE_WIDTH
+//
+// Maximum number of byte enable bits
+//
+// Default value is one per byte in <`UVM_REG_DATA_WIDTH>.
+// Used to define the <uvm_reg_byte_en_t> type.
+//
+`ifndef UVM_REG_BYTENABLE_WIDTH 
+  `define UVM_REG_BYTENABLE_WIDTH ((`UVM_REG_DATA_WIDTH-1)/8+1) 
+`endif
+
+
+// Macro: `UVM_REG_CVR_WIDTH
+//
+// Maximum number of bits in a <uvm_reg_cvr_t> coverage model set.
+//
+// Default value is 32.
+//
+`ifndef UVM_REG_CVR_WIDTH
+ `define UVM_REG_CVR_WIDTH 32
+`endif
 

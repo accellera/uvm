@@ -89,12 +89,13 @@ endpackage
 package user_pkg;
 import uvm_pkg::*;
 import top_pkg::*;
+
 //---------------------------------------------------------------------
 // component driver
 //----------------------------------------------------------------------
 class driver extends uvm_component;
 
-  virtual pin_if pif;
+  pin_vif pif;
 
   function new(string name, uvm_component parent = null);
     super.new(name, parent);
@@ -120,7 +121,7 @@ endclass
 //----------------------------------------------------------------------
 class env extends uvm_env;
 
-  local virtual pin_if pif;
+  local pin_vif pif;
   driver d;
 
   function new(string name, uvm_component parent = null);
@@ -178,7 +179,8 @@ module top;
 
   initial begin
     e = new("env");
-    uvm_resource_db#(pin_vif)::write_and_set("pif", "env.driver", pif);
+    uvm_resource_db#(pin_vif)::set("env.driver", "pif", pif);
+    uvm_resource_db#(pin_vif)::dump();
     run_test();
     //$finish;
   end

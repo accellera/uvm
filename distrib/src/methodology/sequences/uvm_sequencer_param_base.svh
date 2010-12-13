@@ -254,8 +254,20 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   virtual task start_default_sequence();
     uvm_sequence_base m_seq ;
 
-    if(sequences.size() == 2 && 
-       sequences[0] == "uvm_random_sequence" &&
+    if(m_default_seq_set == 0 && m_phase_domains.num() != 1) begin
+      default_sequence = "";
+      `uvm_info("NODEFSEQ", $sformatf("The \"default_sequence\" has not been set. Since this sequencer has a runtime phase schedule, the uvm_random_sequence is not being started for the run phase."), UVM_HIGH)
+      return;
+    end
+
+    if(uvm_config_seq::exists(this, "", "run_ph", 0) || 
+       m_default_sequences.exists(uvm_run_ph))
+    begin
+      `uvm_warning("MULDEFSEQ", "A default sequence has been set via the \"default_sequence\" configuration option and the set_default_seq() method. The \"default_sequence\" configuration option is ignored.")
+      return;
+    end
+
+    if(sequences.size() == 2 && sequences[0] == "uvm_random_sequence" &&
        sequences[1] == "uvm_exhaustive_sequence") begin
       uvm_report_warning("NOUSERSEQ",
                          "No user sequence available.  Not starting the default sequence.",
