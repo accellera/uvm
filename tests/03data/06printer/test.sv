@@ -200,8 +200,8 @@ module test;
   import uvm_pkg::*;
   `include "uvm_macros.svh"
 
-  typedef enum { ONE, TWO, THREE, FOUR } numbers;
-  typedef enum { RED, ORANGE, YELLOW, GREEN, BLUE, INDIGO, VIOLET } colors;
+  typedef enum bit [1:0] { ONE, TWO, THREE, FOUR } numbers;
+  typedef enum bit [2:0] { RED, ORANGE, YELLOW, GREEN, BLUE, INDIGO, VIOLET } colors;
 
   string strings[$] = '{"S1","S2","S3","S4"};
 
@@ -307,7 +307,7 @@ module test;
     function new(string name="myobject_inst");
       i = 'h5555;
       b = 'haa;
-      bigint = 128'h1aaaa5555aaaa5555aaaa5555+i;
+      bigint = 128'h1aaaa5555aaaa5555aaaa5555;
       s = "ABCDEFG";
       ob = new;
       r = 123.456;
@@ -379,6 +379,9 @@ module test;
         end
       end
 
+      for (i=4; i <= 14; i++)
+        iq.push_back('h1000 + i*'h1000);
+
     endfunction
 
   endclass
@@ -388,18 +391,53 @@ module test;
     myobject obj = new;
 
     task run;
-      uvm_default_printer.knobs.reference = 0;
-      if(expected != obj.sprint()) begin
-        string s = obj.sprint();
-        foreach (expected[i]) begin
-          $write("%c",s[i]);
-          if (expected[i] != s[i]) $write("X"); else $write(" ");
-        end
-        uvm_report_error("FAILED", "*** UVM TEST FAILED print failed ***", UVM_NONE);
+      integer mcd;
+      int error;
+      bit fail;
+
+      obj.print();
+
+      mcd = $fopen("actual_table.log");
+      uvm_default_table_printer.knobs.mcd = mcd;
+      uvm_default_table_printer.knobs.reference = 0;
+      obj.print(uvm_default_table_printer);
+      $fclose(mcd);
+
+      mcd = $fopen("actual_tree.log");
+      uvm_default_tree_printer.knobs.mcd = mcd;
+      uvm_default_tree_printer.knobs.reference = 0;
+      obj.print(uvm_default_tree_printer);
+      $fclose(mcd);
+
+      mcd = $fopen("actual_line.log");
+      uvm_default_line_printer.knobs.mcd = mcd;
+      uvm_default_line_printer.knobs.reference = 0;
+      obj.print(uvm_default_line_printer);
+      $fclose(mcd);
+
+      error = $system("diff expected_table.txt actual_table.log");
+      if (error) begin
+        `uvm_error("BAD_TABLE_PRINTER","Table printer actual output not as expected")
+        fail = 1;
       end
+
+      error = $system("diff expected_tree.txt  actual_tree.log");
+      if (error) begin
+        `uvm_error("BAD_TREE_PRINTER","Table printer actual output not as expected")
+        fail = 1;
+      end
+
+      error = $system("diff expected_line.txt  actual_line.log");
+      if (error) begin
+        `uvm_error("BAD_LINE_PRINTER","Table printer actual output not as expected")
+        fail = 1;
+      end
+
+      if (fail)
+        uvm_report_info("FAILED", "*** UVM TEST FAILED ***", UVM_NONE);
       else
-        obj.print();
-      uvm_report_info("PASSED", "*** UVM TEST PASSED ***", UVM_NONE);
+        uvm_report_info("PASSED", "*** UVM TEST PASSED ***", UVM_NONE);
+
       global_stop_request();
     endtask
   endclass

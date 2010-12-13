@@ -890,7 +890,9 @@ endfunction
 function void uvm_object::print(uvm_printer printer=null);
   if (printer==null)
     printer = uvm_default_printer;
-  $display(sprint(printer)); 
+  if (printer == null)
+    `uvm_error("NULLPRINTER","uvm_default_printer is null")
+  $fwrite(printer.knobs.mcd,sprint(printer)); 
 endfunction
 
 

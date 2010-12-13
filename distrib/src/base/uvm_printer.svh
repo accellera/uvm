@@ -45,8 +45,6 @@ typedef struct {
 // A user-defined printer format can be created, or one of the following four
 // built-in printers can be used:
 //
-// (see uvm_ref_printer.gif)
-//
 // - <uvm_printer> - provides base printer functionality; must be overridden.
 //
 // - <uvm_table_printer> - prints the object in a tabular form. 
@@ -59,10 +57,7 @@ typedef struct {
 // Printers have knobs that you use to control what and how information is printed.
 // These knobs are contained in a separate knob class:
 //
-// (see uvm_ref_printer_knobs.gif)
-//
 // - <uvm_printer_knobs> - common printer settings
-//
 //
 // For convenience, global instances of each printer type are available for
 // direct reference in your testbenches.
@@ -72,8 +67,8 @@ typedef struct {
 //  -  <uvm_default_table_printer>
 //  -  <uvm_default_printer> (set to default_table_printer by default)
 //
-// The <uvm_default_printer> is used by <uvm_object::print> and <uvm_object::sprint>
-// when the optional ~uvm_printer~ argument to these methods is not provided. 
+// When <uvm_object::print> and <uvm_object::sprint> are called without 
+// specifying a printer, the <uvm_default_printer> is used.
 //
 //------------------------------------------------------------------------------
 
@@ -384,7 +379,7 @@ class uvm_line_printer extends uvm_tree_printer;
   // and indentation.
 
   function new(); 
-    newline = "";
+    newline = " ";
     knobs.indent = 0;
   endfunction
 
@@ -419,19 +414,10 @@ class uvm_printer_knobs;
   bit footer = 1;
 
 
-  // Variable: global_indent
-  //
-  // Specifies the number of spaces of indentation to add whenever a newline
-  // is printed.
-
-  int global_indent = 0;
-
-
   // Variable: full_name
   //
   // Indicates whether <adjust_name> should print the full name of an identifier
-  // or just the leaf name. The line, table, and tree printers ignore this
-  // bit and always print only the leaf name.
+  // or just the leaf name.
 
   bit full_name = 0;
 
@@ -442,6 +428,20 @@ class uvm_printer_knobs;
   // in cases where you just want the values of an object, but no identifiers.
 
   bit identifier = 1;
+
+
+  // Variable: type_name
+  //
+  // Controls whether to print a field's type name. 
+
+  bit type_name = 1;
+
+
+  // Variable: size
+  //
+  // Controls whether to print a field's size. 
+
+  bit size = 1;
 
 
   // Variable: depth
@@ -458,20 +458,6 @@ class uvm_printer_knobs;
   // The behavior of this knob is simulator-dependent.
 
   bit reference = 1;
-
-
-  // Variable: type_name
-  //
-  // Controls whether to print a field's type name. 
-
-  bit type_name = 1;
-
-
-  // Variable: size
-  //
-  // Controls whether to print a field's size. 
-
-  bit size = 1;
 
 
   // Variable: begin_elements
@@ -697,7 +683,7 @@ function void uvm_printer::print_array_range(int min, int max);
      max = min;
   if(max < min)
      return;
-  print_generic("...", "...", -2, " ...");
+  print_generic("...", "...", -2, "...");
 endfunction
 
 
@@ -817,9 +803,11 @@ function void uvm_printer::print_generic (string name,
   row_info = '{m_scope.depth(),
                adjust_name(name,scope_separator),
                type_name,
-               $sformatf(value.len()),
+               (size == -2 ? "..." : $sformatf("%0d",size)),
                (value == "" ? "\"\"" : value)
               };
+
+  m_rows.push_back(row_info);
 
 endfunction
 
@@ -985,28 +973,37 @@ function string uvm_table_printer::emit();
   string user_format;
   string dash = "---------------------------------------------------------------------------------------------------";
   string space= "                                                                                                   ";
+  string dashes;
+
+  string linefeed = {"\n", knobs.prefix};
 
   calculate_max_widths(); 
 
   if (knobs.header) begin
+    string header;
     user_format = format_header();
     if (user_format == "") begin
-      s = $sformatf("%s--%s--%s--%s\n",dash.substr(1,m_max_name),
-                                       dash.substr(1,m_max_type),
-                                       dash.substr(1,m_max_size),
-                                       dash.substr(1,m_max_value));
-      s = {s,$sformatf("%s%s  %s%s  %s%s  %s%s\n",
-                           "Name",  space.substr(1,m_max_name-4),
-                           "Type",  space.substr(1,m_max_type-4),
-                           "Size",  space.substr(1,m_max_size-4),
-                           "Value", space.substr(1,m_max_value-5))};
-      s = {s,$sformatf("%s--%s--%s--%s\n",dash.substr(1,m_max_name),
-                                          dash.substr(1,m_max_type),
-                                          dash.substr(1,m_max_size),
-                                          dash.substr(1,m_max_value))};
+      string dash_id, dash_typ, dash_sz;
+      string head_id, head_typ, head_sz;
+      if (knobs.identifier) begin
+        dashes = {dash.substr(1,m_max_name+2)};
+        header = {"Name",space.substr(1,m_max_name-2)};
+      end
+      if (knobs.type_name) begin
+        dashes = {dashes, dash.substr(1,m_max_type+2)};
+        header = {header, "Type",space.substr(1,m_max_type-2)};
+      end
+      if (knobs.size) begin
+        dashes = {dashes, dash.substr(1,m_max_size+2)};
+        header = {header, "Size",space.substr(1,m_max_size-2)};
+      end
+      dashes = {dashes, dash.substr(1,m_max_value), linefeed};
+      header = {header, "Value", space.substr(1,m_max_value-5), linefeed};
+
+      s = {s, dashes, header, dashes};
     end
     else begin
-      s = {s, user_format};
+      s = {s, user_format, linefeed};
     end
   end
 
@@ -1014,29 +1011,26 @@ function string uvm_table_printer::emit();
     uvm_printer_row_info row = m_rows[i];
     user_format = format_row(row);
     if (user_format == "") begin
-      string indent_str;
-      indent_str = space.substr(1,row.level * knobs.indent); 
-      s = {s,$sformatf("%s%s%s",indent_str,row.name,space.substr(1,m_max_name-row.name.len()-indent_str.len()))};
-      s = {s,$sformatf("  %s%s",row.type_name,space.substr(1,m_max_type-row.type_name.len()))};
-      s = {s,$sformatf("  %s%s",row.size,space.substr(1,m_max_size-row.size.len()))};
-      s = {s,$sformatf("  %s%s",row.val,space.substr(1,m_max_value-row.val.len()))};
-      s = {s,"\n"};
+      string row_str;
+      if (knobs.identifier)
+        row_str = {space.substr(1,row.level * knobs.indent), row.name,
+                   space.substr(1,m_max_name-row.name.len()-(row.level*knobs.indent)+2)};
+      if (knobs.type_name)
+        row_str = {row_str, row.type_name, space.substr(1,m_max_type-row.type_name.len()+2)};
+      if (knobs.size)
+        row_str = {row_str, row.size, space.substr(1,m_max_size-row.size.len()+2)};
+      s = {s, row_str, row.val, space.substr(1,m_max_value-row.val.len()), linefeed};
     end
     else
-      s = {s, user_format};
+      s = {s, user_format, linefeed};
   end
  
   if (knobs.footer) begin
     user_format = format_footer();
-    if (user_format == "") begin
-      s = {s, $sformatf("%s--%s--%s--%s\n",dash.substr(1,m_max_name),
-                                           dash.substr(1,m_max_type),
-                                           dash.substr(1,m_max_size),
-                                           dash.substr(1,m_max_value))};
-    end
-    else begin
-      s = {s, user_format};
-    end
+    if (user_format == "")
+      s = {s, dashes};
+    else
+      s = {s, user_format, linefeed};
   end
 
   emit = s;
@@ -1052,26 +1046,32 @@ endfunction
 
 // new
 // ---
+
 function uvm_tree_printer::new();
   super.new();
   knobs.size = 0;
+  knobs.type_name = 0;
+  knobs.header = 0;
+  knobs.footer = 0;
 endfunction
 
 
-// Function: emit
-//
-// Formats the collected information from prior calls to ~print_*~
-// into hierarchical tree format.
-//
+// emit
+// ----
+
 function string uvm_tree_printer::emit();
 
-  string s = "";
+  string s = knobs.prefix;
   string space= "                                                                                                   ";
   string user_format;
 
+  string linefeed = newline == "" || newline == " " ? newline : {newline, knobs.prefix};
+
+  // Header
   if (knobs.header) begin
     user_format = format_header();
-    s = {s, user_format};
+    if (user_format != "")
+      s = {s, user_format, linefeed};
   end
 
   foreach (m_rows[i]) begin
@@ -1080,28 +1080,41 @@ function string uvm_tree_printer::emit();
     if (user_format == "") begin
       string indent_str;
       indent_str = space.substr(1,row.level * knobs.indent); 
-      s = {s,indent_str, row.name};
-      if (row.name != "" && row.name != "...")
-        s = {s, ": "};
 
-      if (row.type_name != "" || row.type_name != "-") begin
-        if (row.val[0] == "@")
-          s = {s,"(",row.type_name,row.val,") "};
-        //s = {s,"(",row.type_name};
-        //if (row.val[0] == "@")
-        //  s = {s,row.val};
-        //s = {s, ") "};
+      // Name (id)
+      if (knobs.identifier) begin
+        s = {s,indent_str, row.name};
+        if (row.name != "" && row.name != "...")
+          s = {s, ": "};
+      end
+
+      // Type Name
+      if (row.val[0] == "@") // is an object w/ knobs.reference on
+        s = {s,"(",row.type_name,row.val,") "};
+      else
+        if (knobs.type_name &&
+             (row.type_name != "" ||
+              row.type_name != "-" ||
+              row.type_name != "..."))
+          s = {s,"(",row.type_name,") "};
+        
+      // Size
+      if (knobs.size) begin
+        if (row.size != "" || row.size != "-")
+            s = {s,"(",row.size,") "};
       end
 
       if (i < m_rows.size()-1) begin
         if (m_rows[i+1].level > row.level) begin
-          s = {s, "{", newline};
+          s = {s, "{", linefeed};
           continue;
         end
       end
 
-      s = {s, row.val, " ", newline};
+      // Value (unconditional)
+      s = {s, row.val, " ", linefeed};
 
+      // Scope handling...
       if (i <= m_rows.size()-1) begin
         int end_level;
         if (i == m_rows.size()-1)
@@ -1112,7 +1125,7 @@ function string uvm_tree_printer::emit();
           string indent_str;
           for (int l=row.level-1; l >= end_level; l--) begin
             indent_str = space.substr(1,l * knobs.indent); 
-            s = {s, indent_str, "}", newline};
+            s = {s, indent_str, "}", linefeed};
           end
         end
       end
@@ -1122,10 +1135,15 @@ function string uvm_tree_printer::emit();
       s = {s, user_format};
   end
  
+  // Footer
   if (knobs.footer) begin
     user_format = format_footer();
-    s = {s, user_format};
+    if (user_format != "")
+      s = {s, user_format, linefeed};
   end
+
+  if (newline == "" || newline == " ")
+    s = {s, "\n"};
 
   emit = s;
   m_rows = '{}; 
