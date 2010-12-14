@@ -74,7 +74,7 @@
   `include "base/uvm_factory.svh"
   `include "base/uvm_registry.svh"
 
-  `include "base/uvm_component.svh"
+  `include "base/uvm_component.sv"
 
   // Objection interface
   `include "base/uvm_objection.svh"
