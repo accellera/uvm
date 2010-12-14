@@ -646,12 +646,12 @@ function void uvm_printer::print_array_header (string name,
   if(name != "")
     m_scope.set_arg(name);
 
-  row_info = '{m_scope.depth(),
-               adjust_name (m_scope.get(), scope_separator),
-               arraytype,
-               $sformatf("%0d",size),
-               "-"
-              };
+  row_info.level = m_scope.depth();
+  row_info.name = adjust_name(m_scope.get(),scope_separator);
+  row_info.type_name = arraytype;
+  row_info.size = $sformatf("%0d",size);
+  row_info.val = "-";
+
   m_rows.push_back(row_info);
 
   m_scope.down(name);
@@ -713,12 +713,11 @@ function void uvm_printer::print_object_header (string name,
   if(name != "")
     m_scope.set_arg(name);
 
-  row_info = '{m_scope.depth(),
-               adjust_name (m_scope.get(), scope_separator),
-               (value != null) ?  value.get_type_name() : "object",
-               "-",
-               knobs.reference ? uvm_object_value_str(value) : "-"
-              };
+  row_info.level = m_scope.depth();
+  row_info.name = adjust_name(m_scope.get(),scope_separator);
+  row_info.type_name = (value != null) ?  value.get_type_name() : "object";
+  row_info.size = "-";
+  row_info.val = knobs.reference ? uvm_object_value_str(value) : "-";
 
   m_rows.push_back(row_info);
 
@@ -800,12 +799,11 @@ function void uvm_printer::print_generic (string name,
     name = m_scope.get();
   end
 
-  row_info = '{m_scope.depth(),
-               adjust_name(name,scope_separator),
-               type_name,
-               (size == -2 ? "..." : $sformatf("%0d",size)),
-               (value == "" ? "\"\"" : value)
-              };
+  row_info.level = m_scope.depth();
+  row_info.name = adjust_name(name,scope_separator);
+  row_info.type_name = type_name;
+  row_info.size = (size == -2 ? "..." : $sformatf("%0d",size));
+  row_info.val = (value == "" ? "\"\"" : value);
 
   m_rows.push_back(row_info);
 
@@ -847,11 +845,11 @@ function void uvm_printer::print_int (string name,
   val_str = uvm_vector_to_string (value, size, radix,
                                   knobs.get_radix_str(radix));
 
-  row_info = '{m_scope.depth(),
-               adjust_name(name,scope_separator),
-               type_name,
-               sz_str,
-               val_str};
+  row_info.level = m_scope.depth();
+  row_info.name = adjust_name(name,scope_separator);
+  row_info.type_name = type_name;
+  row_info.size = sz_str;
+  row_info.val = val_str;
 
   m_rows.push_back(row_info);
 
@@ -880,12 +878,11 @@ function void uvm_printer::print_string (string name,
   if(name != "")
     m_scope.set_arg(name);
 
-  row_info = '{m_scope.depth(),
-               adjust_name(m_scope.get(),scope_separator),
-               "string",
-               $sformatf("%0d",value.len()),
-               (value == "" ? "\"\"" : value)
-              };
+  row_info.level = m_scope.depth();
+  row_info.name = adjust_name(m_scope.get(),scope_separator);
+  row_info.type_name = "string";
+  row_info.size = $sformatf("%0d",value.len());
+  row_info.val = (value == "" ? "\"\"" : value);
 
   m_rows.push_back(row_info);
 
@@ -906,12 +903,11 @@ function void uvm_printer::print_real (string name,
     name = m_scope.get();
   end
 
-  row_info = '{m_scope.depth(),
-               adjust_name(name,scope_separator),
-               "real",
-               "64",
-               $sformatf("%f",value)
-              };
+  row_info.level = m_scope.depth();
+  row_info.name = adjust_name(m_scope.get(),scope_separator);
+  row_info.type_name = "real";
+  row_info.size = "64";
+  row_info.val = $sformatf("%f",value);
 
   m_rows.push_back(row_info);
 
@@ -1034,7 +1030,7 @@ function string uvm_table_printer::emit();
   end
 
   emit = s;
-  m_rows = '{}; 
+  `uvm_clear_queue(m_rows)
 endfunction
 
 
@@ -1146,6 +1142,6 @@ function string uvm_tree_printer::emit();
     s = {s, "\n"};
 
   emit = s;
-  m_rows = '{}; 
+  `uvm_clear_queue(m_rows)
 endfunction
 

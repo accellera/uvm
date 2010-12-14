@@ -3060,6 +3060,13 @@
   begin \
     if((what__ & (FLAG)) || (what__ >= UVM_MACRO_EXTRAS)) begin \
       case (what__) \
+        UVM_COPY: \
+          begin \
+            if(!((FLAG)&UVM_NOCOPY) && (local_data__ !=null)) \
+              ARG = local_data__.ARG ; \
+          end \
+        UVM_PRINT: \
+          `uvm_print_aa_string_string2(ARG, m_sc.printer) \
         UVM_COMPARE: \
            begin \
             if(!((FLAG)&UVM_NOCOMPARE) && (tmp_data__ != null) ) \
@@ -3075,27 +3082,16 @@
               end \
               string_aa_key = ""; \
               while(ARG.next(string_aa_key)) begin \
+                string s__ = ARG[string_aa_key]; \
                 m_sc.scope.set_arg({"[",string_aa_key,"]"}); \
                 if(ARG[string_aa_key] != local_data__.ARG[string_aa_key]) begin \
-                   m_sc.stringv = { "lhs = \"", ARG[string_aa_key], "\" : rhs = \"", local_data__.ARG[string_aa_key], "\""}; \
+                   m_sc.stringv = { "lhs = \"", s__, "\" : rhs = \"", local_data__.ARG[string_aa_key], "\""}; \
                    m_sc.comparer.print_msg(m_sc.stringv); \
                 end \
                 m_sc.scope.unset_arg(string_aa_key); \
               end \
             end \
            end \
-        UVM_COPY: \
-          begin \
-            if(!((FLAG)&UVM_NOCOPY) && (local_data__ !=null)) \
-            begin \
-              ARG.delete(); \
-              string_aa_key = ""; \
-              while(local_data__.ARG.next(string_aa_key)) \
-                ARG[string_aa_key] = local_data__.ARG[string_aa_key]; \
-            end \
-          end \
-        UVM_PRINT: \
-          `uvm_print_aa_string_string2(ARG, m_sc.printer) \
       endcase \
     end \
   end

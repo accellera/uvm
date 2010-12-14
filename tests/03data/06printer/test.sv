@@ -203,7 +203,7 @@ module test;
   typedef enum bit [1:0] { ONE, TWO, THREE, FOUR } numbers;
   typedef enum bit [2:0] { RED, ORANGE, YELLOW, GREEN, BLUE, INDIGO, VIOLET } colors;
 
-  string strings[$] = '{"S1","S2","S3","S4"};
+  string strings[$];
 
   class subobject extends uvm_object;
     colors color = RED;
@@ -442,6 +442,12 @@ module test;
     endtask
   endclass
 
-  initial run_test();
+  initial begin
+    strings.push_back("S1");
+    strings.push_back("S2");
+    strings.push_back("S3");
+    strings.push_back("S4");
+    run_test();
+  end
 
 endmodule
