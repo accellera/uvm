@@ -24,12 +24,19 @@ UVM_HOME	= ../../../..
 include ../../../Makefile.ius
 
 
+ifdef EXPLICIT_MON
+  OPT += +define+EXPLICIT_MON
+endif
+
+
+
 all: run
 
-run: hw_reset
+run: uvm_reg_mem_built_in_seq
 
-hw_reset:
-	$(IUS)	-incdir ../common \
+uvm_%_seq: 
+	$(IUS)	$(OPT) -incdir ../common \
 		-incdir ../../common/apb \
-		../common/test.sv +UVM_TESTNAME=hw_reset_test
+		../common/test.sv \
+	        +UVM_SEQUENCE=$@
 	$(CHECK)

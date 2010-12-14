@@ -62,11 +62,11 @@ class uvm_reg_mem_hdl_paths_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
     virtual task body();
 
         if (model == null) begin
-            uvm_report_error("RegModel", "Register model handle is null");
+            uvm_report_error("uvm_reg_mem_hdl_paths_seq", "Register model handle is null");
             return;
         end
 
-       `uvm_info("RegModel",
+       `uvm_info("uvm_reg_mem_hdl_paths_seq",
                  {"checking HDL paths for all registers/memories in ",
                   model.get_full_name()}, UVM_LOW);
 
@@ -77,7 +77,7 @@ class uvm_reg_mem_hdl_paths_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
              do_block(model, abstractions[i]);
        end
 
-        `uvm_info("RegModel", "HDL path validation completed ",UVM_LOW);
+        `uvm_info("uvm_reg_mem_hdl_paths_seq", "HDL path validation completed ",UVM_LOW);
         
     endtask: body
 
@@ -93,7 +93,7 @@ class uvm_reg_mem_hdl_paths_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
         uvm_reg       regs[$];
         uvm_mem       mems[$];
 
-       `uvm_info("RegModel",
+       `uvm_info("uvm_reg_mem_hdl_paths_seq",
                  {"Validating HDL paths in ", blk.get_full_name(),
                   " for ", (kind == "") ? "default" : kind,
                   " design abstraction"}, UVM_MEDIUM) 
@@ -133,8 +133,13 @@ class uvm_reg_mem_hdl_paths_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
             uvm_hdl_path_concat path=paths[p];
             foreach (path.slices[j]) begin
                 string p_ = path.slices[j].path;
+                uvm_reg_data_t d;
+                if (!uvm_hdl_read(p_,d))
+                    `uvm_error("uvm_reg_mem_hdl_paths_seq",
+                               $psprintf("HDL path \"%s\" for register \"%s\" is not readable",
+                                         p_, r.get_full_name()));
                 if (!uvm_hdl_check_path(p_))
-                    `uvm_error("RegModel",
+                    `uvm_error("uvm_reg_mem_hdl_paths_seq",
                                $psprintf("HDL path \"%s\" for register \"%s\" is not accessible",
                                          p_, r.get_full_name()));
             end
@@ -159,7 +164,7 @@ class uvm_reg_mem_hdl_paths_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
             begin
                 string p_ = path.slices[j].path;
                 if(!uvm_hdl_check_path(p_))
-                    `uvm_error("RegModel",
+                    `uvm_error("uvm_reg_mem_hdl_paths_seq",
                                $psprintf("HDL path \"%s\" for memory \"%s\" is not accessible",
                                          p_, m.get_full_name()));
             end

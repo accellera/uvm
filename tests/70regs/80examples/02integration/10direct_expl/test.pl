@@ -1,2 +1,2 @@
 return &make_example("$uvm_home/examples/registers/integration/10direct",
-                     "EXPLICIT=1");
+                     "EXPLICIT_MON=1");

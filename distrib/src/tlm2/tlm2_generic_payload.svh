@@ -622,7 +622,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // is ~UVM_TLM_OK_RESPONSE~
 
   virtual function bit is_response_ok();
-    return (m_response_status > 0);
+    return (int'(m_response_status) > 0);
   endfunction
 
    // Function: is_response_error
@@ -835,7 +835,11 @@ class uvm_tlm_extension #(type T=int) extends uvm_tlm_extension_base;
   endfunction
 
   virtual function string get_type_handle_name();
+`ifndef UVM_USE_TYPENAME
+     return "";
+`else
      return $typename(T);
+`endif
   endfunction
 
   virtual function void do_copy(uvm_object rhs);

@@ -70,6 +70,21 @@ class uvm_objection extends uvm_report_object;
   `uvm_register_cb(uvm_objection, uvm_objection_cb)
   uvm_root top = uvm_root::get();
 
+  // Function: clear
+  //
+  // Clears the objection state. All counts are cleared. The draintime
+  // is not effected.
+
+  protected bit m_cleared = 0; /* for checking obj count<0 */
+
+  function void clear();
+    //Should there be a warning if there are outstanding objections?
+    m_source_count.delete();
+    m_total_count.delete();
+    m_draining.delete();
+    m_cleared = 1;
+  endfunction
+
   // Function: new
   //
   // Creates a new objection instance. Accesses the command line
@@ -250,6 +265,7 @@ class uvm_objection extends uvm_report_object;
   function void raise_objection (uvm_object obj=null, string description="",
        int count=1);
     if(obj == null) obj = uvm_root::get();
+    m_cleared = 0;
     m_raise (obj, obj, description, count);
   endfunction
 
@@ -279,7 +295,7 @@ class uvm_objection extends uvm_report_object;
       m_report(obj,source_obj,description,count,"raised");
 
     raised(obj, source_obj, description, count);
-    `uvm_do_callbacks(uvm_objection,uvm_objection_cb,raised(obj,source_obj,description,count))
+    `uvm_do_callbacks(uvm_objection,uvm_objection_cb,raised(this,obj,source_obj,description,count))
 
     // If this object is still draining from a previous drop, then
     // raise the count and return. Any propagation will be handled
@@ -370,12 +386,14 @@ class uvm_objection extends uvm_report_object;
       obj = top;
 
     if (!m_total_count.exists(obj) || (count > m_total_count[obj])) begin
+      if(m_cleared) return;
       uvm_report_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
         "\" attempted to drop objection count below zero."});
       return;
     end
     if ((obj == source_obj) && 
         (!m_source_count.exists(obj) || (count > m_source_count[obj]))) begin
+      if(m_cleared) return;
       uvm_report_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
         "\" attempted to drop objection count below zero."});
       return;
@@ -385,8 +403,10 @@ class uvm_objection extends uvm_report_object;
     if(m_total_count[obj] == 0) m_total_count.delete(obj);
 
     if (source_obj==obj) begin
-      m_source_count[obj] -= count;
-      if(m_source_count[obj] == 0) m_source_count.delete(obj);
+      if(m_source_count.exists(obj)) begin
+        m_source_count[obj] -= count;
+        if(m_source_count[obj] == 0) m_source_count.delete(obj);
+      end
       source_obj = obj;
     end
  
@@ -394,7 +414,7 @@ class uvm_objection extends uvm_report_object;
       m_report(obj,source_obj,description,count,"dropped");
     
     dropped(obj, source_obj, description, count);
-    `uvm_do_callbacks(uvm_objection,uvm_objection_cb,dropped(obj,source_obj,description,count))
+    `uvm_do_callbacks(uvm_objection,uvm_objection_cb,dropped(this,obj,source_obj,description,count))
   
     // if count != 0, no reason to fork
     if (m_total_count.exists(obj) && m_total_count[obj] != 0) begin
@@ -467,7 +487,7 @@ class uvm_objection extends uvm_report_object;
                      m_report(obj,source_obj,description,count,"all_dropped");
     
                   all_dropped(obj,source_obj,description, count);
-                  `uvm_do_callbacks(uvm_objection,uvm_objection_cb,all_dropped(obj,source_obj,description,count))
+                  `uvm_do_callbacks(uvm_objection,uvm_objection_cb,all_dropped(this,obj,source_obj,description,count))
   
                   // wait for all_dropped cbs to complete
                   wait fork;
@@ -480,7 +500,8 @@ class uvm_objection extends uvm_report_object;
 
           m_draining.delete(obj);
 
-          diff_count = m_total_count[obj] - count;
+          if(!m_total_count.exists(obj)) diff_count = -count;
+          else diff_count = m_total_count[obj] - count;
 
           // no propagation if the re-raise cancels the drop
           if (diff_count != 0) begin
@@ -580,6 +601,12 @@ class uvm_objection extends uvm_report_object;
   endfunction
 
 
+   task wait_get_objection_total(uvm_object obj=null);
+     if(!m_total_count.exists(obj)) return;
+     wait(m_total_count[obj] == 0);      
+   endtask
+   
+
   // Function: get_objection_count
   //
   // Returns the current number of objections raised by the given ~object~.
@@ -609,7 +636,10 @@ class uvm_objection extends uvm_report_object;
       return m_total_count[obj];
     else begin
       if ($cast(c,obj)) begin
-        get_objection_total = m_source_count[obj];
+        if (!m_source_count.exists(obj))
+          get_objection_total = 0;
+        else
+          get_objection_total = m_source_count[obj];
         if (c.get_first_child(ch))
         do
           get_objection_total += get_objection_total(c.get_child(ch));
@@ -766,10 +796,11 @@ endclass
 // <uvm_objection::all_dropped>.
 //
 //| class my_objection_cb extends uvm_objection_cb;
-//|    virtual function void raised (uvm_object obj, uvm_object source_obj,
-//|      string description, int count);
+//|    virtual function void raised (uvm_objection objection, uvm_object obj, 
+//|      uvm_object source_obj, string description, int count);
 //|      if(obj == source_obj)
-//|        $display("Got raise: %s from object %s", description, obj.get_full_name());
+//|        $display("Got %s raise: %s from object %s", objection.get_name(),
+//|           description, obj.get_full_name());
 //|    endfunction
 //| endclass
 //|
@@ -784,14 +815,14 @@ class uvm_objection_cb extends uvm_callback;
   function new(string name);
     super.new(name);
   endfunction
-  virtual function void raised (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
+  virtual function void raised (uvm_objection objection, uvm_object obj, 
+      uvm_object source_obj, string description, int count);
   endfunction
-  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
+  virtual function void dropped (uvm_objection objection, uvm_object obj, 
+      uvm_object source_obj, string description, int count);
   endfunction
-  virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
+  virtual task all_dropped (uvm_objection objection, uvm_object obj, 
+      uvm_object source_obj, string description, int count);
   endtask
 endclass
 
