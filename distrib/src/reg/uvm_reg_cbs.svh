@@ -218,11 +218,16 @@ virtual class uvm_reg_cbs extends uvm_callback;
    // Called by the <uvm_reg_field::predict()> method
    // after a successful UVM_PREDICT_READ or UVM_PREDICT_WRITE prediction.
    //
-   virtual function void post_predict(uvm_reg_field  fld,
-                                      uvm_reg_data_t value,
-                                      uvm_predict_e  kind,
-                                      uvm_path_e     path,
-                                      uvm_reg_map    map);
+   // ~previous~ is the previous value in the mirror and
+   // ~value~ is the latest predicted value. Any change to ~value~ will
+   // modify the predicted mirror value.
+   //
+   virtual function void post_predict(input uvm_reg_field  fld,
+                                      input uvm_reg_data_t previous,
+                                      inout uvm_reg_data_t value,
+                                      input uvm_predict_e  kind,
+                                      input uvm_path_e     path,
+                                      input uvm_reg_map    map);
    endfunction
 
 
@@ -388,7 +393,7 @@ class uvm_reg_read_only_cbs extends uvm_reg_cbs;
          name = rg.get_full_name();
       end
       
-      `uvm_error("RegMem",
+      `uvm_error("UVM/REG/READONLY",
                  {name, " is read-only. Cannot call write() method."});
 
       rw.status = UVM_NOT_OK;
@@ -473,7 +478,7 @@ class uvm_reg_write_only_cbs extends uvm_reg_cbs;
          name = rg.get_full_name();
       end
       
-      `uvm_error("RegMem",
+      `uvm_error("UVM/REG/WRTEONLY",
                  {name, " is write-only. Cannot call read() method."});
 
       rw.status = UVM_NOT_OK;

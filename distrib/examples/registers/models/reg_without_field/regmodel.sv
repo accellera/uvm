@@ -35,8 +35,8 @@ class block_B extends uvm_reg_block;
       default_map = create_map("", 0, 4, UVM_BIG_ENDIAN);
 
       this.R = reg_R::type_id::create("R");
-      this.R.build();
       this.R.configure(this, null);
+      this.R.build();
 
       default_map.add_reg(R, 'h0,  "RW");
    endfunction : build

@@ -35,16 +35,10 @@ class my_catcher extends uvm_report_catcher;
    static int seen = 0;
    virtual function action_e catch();
       if (get_severity() == UVM_ERROR &&
-          get_id() == "RegMem") begin
-         string txt = get_message();
-         txt = txt.substr(5,27);
-         if (txt == "read-only. Cannot call " ||
-             txt == "write-only. Cannot call") begin
-            seen++;
-            set_severity(UVM_INFO);
-            set_action(UVM_DISPLAY);
-            return THROW;
-         end
+          (get_id() == "UVM/REG/READONLY" ||
+           get_id() == "UVM/REG/WRTEONLY")) begin
+          seen++;
+          set_severity(UVM_INFO);
       end
       return THROW;
    endfunction
@@ -148,6 +142,16 @@ class test extends uvm_test;
       end
       global_stop_request();
    endtask
+
+   virtual function void report();
+	uvm_report_server svr =  _global_reporter.get_report_server();
+   if (svr.get_severity_count(UVM_FATAL) +
+       svr.get_severity_count(UVM_ERROR) +
+       svr.get_severity_count(UVM_WARNING) == 0)
+      $write("** UVM TEST PASSED **\n");
+   else
+      $write("!! UVM TEST FAILED !!\n");
+   endfunction
 endclass
 
 
@@ -162,12 +166,6 @@ initial begin
    
    run_test();
 
-   if (svr.get_severity_count(UVM_FATAL) +
-       svr.get_severity_count(UVM_ERROR) +
-       svr.get_severity_count(UVM_WARNING) == 0)
-      $write("** UVM TEST PASSED **\n");
-   else
-      $write("!! UVM TEST FAILED !!\n");
 end
 
 endprogram

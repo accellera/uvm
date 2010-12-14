@@ -20,13 +20,14 @@
 ## 
 
 UVM_HOME	= ../../..
+USES_DPI = 1
 
 include ../../Makefile.questa
 
 
 all: prepare comp uvm_reg_mem_built_in_seq
 
-comp:
+comp: prepare
 	$(VLOG) +incdir+../common/wishbone \
 		+define+SINGLE_RAM_VARIABLE+RAM128x64 \
 		+incdir+../common/oc_ethernet_rtl \
@@ -48,7 +49,7 @@ help:
 	@echo "    uvm_reg_mem_built_in_seq   (e.g. all the built-in tests)"
 	@echo
 
-uvm_%_seq:
+uvm_%_seq: comp
 	$(VSIM) +UVM_SEQUENCE=$@
 	$(CHECK)
 

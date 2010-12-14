@@ -19,7 +19,7 @@
 
 
 
-`ifndef UVM_HDL_NO_DPI
+`ifndef UVM_REGEX_NO_DPI
 import "DPI-C" function int uvm_re_match(string re, string str);
 import "DPI-C" function void uvm_dump_re_cache();
 import "DPI-C" function string uvm_glob_to_re(string glob);

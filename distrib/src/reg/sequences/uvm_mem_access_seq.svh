@@ -32,6 +32,15 @@
 // then reading it via the backdoor, then reversing the process,
 // making sure that the resulting value matches the written value.
 //
+// If bit-type resource named
+// "NO_REG_TESTS", "NO_MEM_TESTS", or "NO_MEM_ACCESS_TEST"
+// in the "REG::" namespace
+// matches the full name of the memory,
+// the memory is not tested.
+//
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.mem0.get_full_name()},
+//|                            "NO_MEM_TESTS", 1, this);
+//
 // Memories without an available backdoor
 // cannot be tested.
 //
@@ -58,26 +67,28 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
       int n_bits;
 
       if (mem == null) begin
-         `uvm_error("RegModel", "No register specified to run sequence on");
+         `uvm_error("uvm_mem_access_seq", "No register specified to run sequence on");
          return;
       end
 
       // Memories with some attributes are not to be tested
-      if (mem.get_attribute("NO_REG_TESTS") != "" ||
-          mem.get_attribute("NO_MEM_TESTS") != "" ||
-	  mem.get_attribute("NO_MEM_ACCESS_TEST") != "") return;
+      if (uvm_resource_db#(bit)::get_by_name({"REG::",mem.get_full_name()},
+                                             "NO_REG_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",mem.get_full_name()},
+                                             "NO_MEM_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",mem.get_full_name()},
+                                             "NO_MEM_ACCESS_TEST", 0) != null)
+         return;
 
       // Can only deal with memories with backdoor access
       if (mem.get_backdoor() == null && !mem.has_hdl_path()) begin
-         `uvm_error("RegModel", {"Memory '",mem.get_full_name(),
+         `uvm_error("uvm_mem_access_seq", {"Memory '",mem.get_full_name(),
              "' does not have a backdoor mechanism available"})
          return;
       end
 
       n_bits = mem.get_n_bits();
       
-      `uvm_info("RegMem",$psprintf("***** n_bits =%0d",n_bits),UVM_DEBUG)
-
       // Memories may be accessible from multiple physical interfaces (maps)
       mem.get_maps(maps);
 
@@ -86,7 +97,7 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
          uvm_status_e status;
          uvm_reg_data_t  val, exp, v;
          
-         `uvm_info("RegModel", {"Verifying access of memory '",
+         `uvm_info("uvm_mem_access_seq", {"Verifying access of memory '",
              mem.get_full_name(),"' in map '", maps[j].get_full_name(),
              "' ..."}, UVM_LOW)
 
@@ -104,7 +115,7 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
             if (mode == "RO") begin
                mem.peek(status, k, exp);
                if (status != UVM_IS_OK) begin
-                  `uvm_error("RegModel", $psprintf("Status was %s when reading \"%s[%0d]\" through backdoor.",
+                  `uvm_error("uvm_mem_access_seq", $psprintf("Status was %s when reading \"%s[%0d]\" through backdoor.",
                                               status.name(), mem.get_full_name(), k))
                end
             end
@@ -112,7 +123,7 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
             
             mem.write(status, k, val, UVM_FRONTDOOR, maps[j], this);
             if (status != UVM_IS_OK) begin
-               `uvm_error("RegModel", $psprintf("Status was %s when writing \"%s[%0d]\" through map \"%s\".",
+               `uvm_error("uvm_mem_access_seq", $psprintf("Status was %s when writing \"%s[%0d]\" through map \"%s\".",
                                            status.name(), mem.get_full_name(), k, maps[j].get_full_name()))
             end
             #1;
@@ -120,12 +131,12 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
             val = 'x;
             mem.peek(status, k, val);
             if (status != UVM_IS_OK) begin
-               `uvm_error("RegModel", $psprintf("Status was %s when reading \"%s[%0d]\" through backdoor.",
+               `uvm_error("uvm_mem_access_seq", $psprintf("Status was %s when reading \"%s[%0d]\" through backdoor.",
                                            status.name(), mem.get_full_name(), k))
             end
             else begin
                if (val !== exp) begin
-                  `uvm_error("RegModel", $psprintf("Backdoor \"%s[%0d]\" read back as 'h%h instead of 'h%h.",
+                  `uvm_error("uvm_mem_access_seq", $psprintf("Backdoor \"%s[%0d]\" read back as 'h%h instead of 'h%h.",
                                               mem.get_full_name(), k, val, exp))
                end
             end
@@ -133,25 +144,25 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
             exp = ~exp & ((1'b1<<n_bits)-1);
             mem.poke(status, k, exp);
             if (status != UVM_IS_OK) begin
-               `uvm_error("RegModel", $psprintf("Status was %s when writing \"%s[%0d-1]\" through backdoor.",
+               `uvm_error("uvm_mem_access_seq", $psprintf("Status was %s when writing \"%s[%0d-1]\" through backdoor.",
                                            status.name(), mem.get_full_name(), k))
             end
             
             mem.read(status, k, val, UVM_FRONTDOOR, maps[j], this);
             if (status != UVM_IS_OK) begin
-               `uvm_error("RegModel", $psprintf("Status was %s when reading \"%s[%0d]\" through map \"%s\".",
+               `uvm_error("uvm_mem_access_seq", $psprintf("Status was %s when reading \"%s[%0d]\" through map \"%s\".",
                                            status.name(), mem.get_full_name(), k, maps[j].get_full_name()))
             end
             else begin
                if (mode == "WO") begin
                   if (val !== '0) begin
-                     `uvm_error("RegModel", $psprintf("Front door \"%s[%0d]\" read back as 'h%h instead of 'h%h.",
+                     `uvm_error("uvm_mem_access_seq", $psprintf("Front door \"%s[%0d]\" read back as 'h%h instead of 'h%h.",
                                                  mem.get_full_name(), k, val, 0))
                   end
                end
                else begin
                   if (val !== exp) begin
-                     `uvm_error("RegModel", $psprintf("Front door \"%s[%0d]\" read back as 'h%h instead of 'h%h.",
+                     `uvm_error("uvm_mem_access_seq", $psprintf("Front door \"%s[%0d]\" read back as 'h%h instead of 'h%h.",
                                                  mem.get_full_name(), k, val, exp))
                   end
                end
@@ -171,8 +182,14 @@ endclass: uvm_mem_single_access_seq
 // by executing the <uvm_mem_single_access_seq> sequence on
 // every memory within it.
 //
-// Blocks and memories with the ~NO_REG_TESTS~ or
-// the ~NO_MEM_ACCESS_TEST~ attribute are not verified.
+// If bit-type resource named
+// "NO_REG_TESTS", "NO_MEM_TESTS", or "NO_MEM_ACCESS_TEST"
+// in the "REG::" namespace
+// matches the full name of the block,
+// the block is not tested.
+//
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.get_full_name(),".*"},
+//|                            "NO_MEM_TESTS", 1, this);
 //
 
 class uvm_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item));
@@ -202,10 +219,9 @@ class uvm_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item)
    // Do not call directly. Use seq.start() instead.
    //
    virtual task body();
-      uvm_reg_block blks[$];
 
       if (model == null) begin
-         `uvm_error("RegModel", "Not block or system specified to run sequence on");
+         `uvm_error("uvm_mem_access_seq", "No register model specified to run sequence on");
          return;
       end
 
@@ -217,10 +233,6 @@ class uvm_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item)
       model.reset();
 
       do_block(model);
-      model.get_blocks(blks);
-      foreach (blks[i]) begin
-         do_block(blks[i]);
-      end
    endtask: body
 
 
@@ -231,30 +243,45 @@ class uvm_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item)
    protected virtual task do_block(uvm_reg_block blk);
       uvm_mem mems[$];
       
-      if (blk.get_attribute("NO_REG_TESTS") != "" ||
-          blk.get_attribute("NO_MEM_TESTS") != "" ||
-          blk.get_attribute("NO_MEM_ACCESS_TEST") != "")
+      if (uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_REG_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_MEM_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_MEM_ACCESS_TEST", 0) != null )
          return;
       
       // Iterate over all memories, checking accesses
       blk.get_memories(mems, UVM_NO_HIER);
       foreach (mems[i]) begin
          // Registers with some attributes are not to be tested
-         if (mems[i].get_attribute("NO_REG_TESTS") != "" ||
-             mems[i].get_attribute("NO_MEM_TESTS") != "" ||
-	     mems[i].get_attribute("NO_MEM_ACCESS_TEST") != "")
+         if (uvm_resource_db#(bit)::get_by_name({"REG::",mems[i].get_full_name()},
+                                                "NO_REG_TESTS", 0) != null ||
+             uvm_resource_db#(bit)::get_by_name({"REG::",mems[i].get_full_name()},
+                                                "NO_MEM_TESTS", 0) != null ||
+	     uvm_resource_db#(bit)::get_by_name({"REG::",mems[i].get_full_name()},
+                                                "NO_MEM_ACCESS_TEST", 0) != null )
            continue;
          
          // Can only deal with memories with backdoor access
          if (mems[i].get_backdoor() == null &&
              !mems[i].has_hdl_path()) begin
-            `uvm_warning("RegModel", $psprintf("Memory \"%s\" does not have a backdoor mechanism available",
+            `uvm_warning("uvm_mem_access_seq", $psprintf("Memory \"%s\" does not have a backdoor mechanism available",
                                                mems[i].get_full_name()));
             continue;
          end
          
          mem_seq.mem = mems[i];
          mem_seq.start(null, this);
+      end
+
+      begin
+         uvm_reg_block blks[$];
+         
+         blk.get_blocks(blks);
+         foreach (blks[i]) begin
+            do_block(blks[i]);
+         end
       end
    endtask: do_block
 

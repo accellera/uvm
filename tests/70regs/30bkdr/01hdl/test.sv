@@ -102,6 +102,13 @@ begin
    op(READ,   "dut.w",            , 'h0F, `__LINE__);
    op(READ,   "dut.q[1]",         , 'h01, `__LINE__);
 
+    // check support for $root
+`ifndef QUESTA   
+   op(READ,   "$root.dut.q",            , 'h0F, `__LINE__);
+   op(READ,   "$root.dut.w",            , 'h0F, `__LINE__);
+   op(READ,   "$root.dut.q[1]",         , 'h01, `__LINE__);   
+`endif   
+
    op(DEPOSIT, "dut.q",       'h3C, 'h3C, `__LINE__);
    op(DEPOSIT, "dut.q[4]",    'h00, 'h00, `__LINE__);
    op(DEPOSIT, "dut.q[6]",    'h01, 'h01, `__LINE__);

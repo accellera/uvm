@@ -80,6 +80,7 @@ Group: Factory  {
 
 Group: Configuration and Resources  {
 
+   File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/config_and_res.txt)
    File: uvm_resource  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_resource.svh)
    File: uvm_resource_db  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_resource_db.svh)
    File: uvm_config_db  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_config_db.svh)
@@ -97,6 +98,7 @@ Group: Synchronization  {
 
 Group: Containers  {
 
+   File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/containers.txt)
    File: uvm_pool  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_pool.svh)
    File: uvm_queue  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_queue.svh)
    }  # Group: Containers
@@ -115,19 +117,6 @@ Group: TLM  {
    File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/tlm_ifs_and_ports.txt)
    File: Analysis Ports  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_analysis_port.svh)
 
-   Group: TLM2  {
-
-      File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/tlm2.txt)
-      File: Generic Payload  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_generic_payload.svh)
-      File: Sockets  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_sockets.svh)
-      File: Ports  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_ports.svh)
-      File: Implementation  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_imps.svh)
-      File: Exports  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_exports.svh)
-      File: Interfaces  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_ifs.svh)
-      File: Macros  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_defines.svh)
-      File: Socket Base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_sockets_base.svh)
-      }  # Group: TLM2
-
    Group: TLM1  {
 
       File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/tlm1.txt)
@@ -138,6 +127,20 @@ Group: TLM  {
       File: uvm_*_port  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_ports.svh)
       File: uvm_tlm_fifo_base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_tlm_fifo_base.svh)
       }  # Group: TLM1
+
+   Group: TLM2  {
+
+      File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/tlm2.txt)
+      File: Generic Payload  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_generic_payload.svh)
+      File: Sockets  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_sockets.svh)
+      File: uvm_tlm_time  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_time.svh)
+      File: Ports  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_ports.svh)
+      File: Implementation  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_imps.svh)
+      File: Exports  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_exports.svh)
+      File: Interfaces  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_ifs.svh)
+      File: Macros  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_defines.svh)
+      File: Socket Base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_sockets_base.svh)
+      }  # Group: TLM2
 
    Group: Sequencer Ports  {
 
@@ -177,7 +180,7 @@ Group: Components  {
 Group: Sequencers  {
 
    File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/sequencers.txt)
-   File: uvm_sequencer_base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/methodology/sequences/uvm_sequencer_base.svh)
+   File: uvm_sequencer_base  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/methodology/sequences/uvm_sequencer_base.svh)
    File: uvm_sequencer_param_base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/methodology/sequences/uvm_sequencer_param_base.svh)
    File: uvm_sequencer  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/methodology/sequences/uvm_sequencer.svh)
    File: uvm_push_sequencer  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/methodology/sequences/uvm_push_sequencer.svh)
@@ -215,6 +218,7 @@ Group: Register Layer  {
       File: Fields  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_reg_field.svh)
       File: Memories  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_mem.svh)
       File: Indirect Registers  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_reg_indirect.svh)
+      File: FIFO Registers  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_reg_fifo.svh)
       File: Virtual Registers  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_vreg.svh)
       File: Virtual Fields  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_vreg_field.svh)
       File: Callbacks  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_reg_cbs.svh)
@@ -239,10 +243,16 @@ Group: Register Layer  {
       File: Shared Access  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/sequences/uvm_reg_mem_shared_access_seq.svh)
       File: Memory Access  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/sequences/uvm_mem_access_seq.svh)
       File: Memory Walk  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/sequences/uvm_mem_walk_seq.svh)
-      File: Register Backdoor Access Test Sequence  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/sequences/uvm_reg_access_backdoor_check.svh)
+      File: HDL Paths Checking  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/sequences/uvm_reg_mem_hdl_paths_seq.svh)
       }  # Group: Test Sequences
 
    }  # Group: Register Layer
+
+Group: Command Line Processor  {
+
+   File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/cmdlineproc.txt)
+   File: uvm_cmdline_processor  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_cmdline_processor.svh)
+   }  # Group: Command Line Processor
 
 Group: Index  {
 

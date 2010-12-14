@@ -33,8 +33,14 @@
 // via all of the available address maps,
 // comparing the value read with the expected reset value.
 //
-// Blocks and registers with the ~NO_REG_TESTS~ or
-// the ~NO_HW_RESET_TEST~ attribute are not verified.
+// If bit-type resource named
+// "NO_REG_TESTS" or "NO_REG_HW_RESET_TEST"
+// in the "REG::" namespace
+// matches the full name of the block or register,
+// the block or register is not tested.
+//
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.get_full_name(),".*"},
+//|                            "NO_REG_TESTS", 1, this);
 //
 // This is usually the first test executed on any DUT.
 //
@@ -62,51 +68,56 @@ class uvm_reg_hw_reset_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_ite
 
    virtual task body();
 
+      uvm_reg regs[$];
+      uvm_reg_map maps[$];
+
       if (model == null) begin
-         `uvm_error("RegModel", "Not block or system specified to run sequence on");
+         `uvm_error("uvm_reg_hw_reset_seq", "Not block or system specified to run sequence on");
          return;
       end
       
       uvm_report_info("STARTING_SEQ",{"\n\nStarting ",get_name()," sequence...\n"},UVM_LOW);
 
-      if (model.get_attribute("NO_REG_TESTS") == "" &&
-          model.get_attribute("NO_HW_RESET_TEST") == "") begin
-        uvm_reg regs[$];
-        uvm_reg_map maps[$];
+      if (uvm_resource_db#(bit)::get_by_name({"REG::",model.get_full_name()},
+                                             "NO_REG_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",model.get_full_name()},
+                                             "NO_REG_HW_RESET_TEST", 0) != null )
+            return;
 
+      this.reset_blk(model);
+      model.reset();
+      model.get_maps(maps);
 
-        this.reset_blk(model);
-        model.reset();
-        model.get_maps(maps);
+      // Iterate over all maps defined for the RegModel block
 
-        // Iterate over all maps defined for the RegModel block
+      foreach (maps[d]) begin
 
-        foreach (maps[d]) begin
+        // Iterate over all registers in the map, checking accesses
+        // Note: if map were in inner loop, could test simulataneous
+        // access to same reg via different bus interfaces 
+        maps[d].get_registers(regs);
 
-          // Iterate over all registers in the map, checking accesses
-          // Note: if map were in inner loop, could test simulataneous
-          // access to same reg via different bus interfaces 
-          maps[d].get_registers(regs);
+        foreach (regs[i]) begin
 
-          foreach (regs[i]) begin
+          uvm_status_e status;
 
-            uvm_status_e status;
+          // Registers with certain attributes are not to be tested
+          if (uvm_resource_db#(bit)::get_by_name({"REG::",regs[i].get_full_name()},
+                                                 "NO_REG_TESTS", 0) != null ||
+              uvm_resource_db#(bit)::get_by_name({"REG::",regs[i].get_full_name()},
+                                                 "NO_REG_HW_RESET_TEST", 0) != null )
+              continue;
 
-            // Registers with certain attributes are not to be tested
-            if (regs[i].get_attribute("NO_REG_TESTS") != "" ||
-	        regs[i].get_attribute("NO_HW_RESET_TEST") != "") continue;
-
-            `uvm_info(get_type_name(),
-                      $psprintf("Verifying reset value of register %s in map \"%s\"...",
-                      regs[i].get_full_name(), maps[d].get_full_name()), UVM_LOW);
+          `uvm_info(get_type_name(),
+                    $psprintf("Verifying reset value of register %s in map \"%s\"...",
+                    regs[i].get_full_name(), maps[d].get_full_name()), UVM_LOW);
             
-            regs[i].mirror(status, UVM_CHECK, UVM_FRONTDOOR, maps[d], this);
+          regs[i].mirror(status, UVM_CHECK, UVM_FRONTDOOR, maps[d], this);
 
-            if (status != UVM_IS_OK) begin
-               `uvm_error(get_type_name(),
-                      $psprintf("Status was %s when reading reset value of register \"%s\" through map \"%s\".",
-                      status.name(), regs[i].get_full_name(), maps[d].get_full_name()));
-            end
+          if (status != UVM_IS_OK) begin
+             `uvm_error(get_type_name(),
+                    $psprintf("Status was %s when reading reset value of register \"%s\" through map \"%s\".",
+                    status.name(), regs[i].get_full_name(), maps[d].get_full_name()));
           end
         end
       end

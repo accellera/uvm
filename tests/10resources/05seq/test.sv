@@ -65,8 +65,8 @@ module top;
     // and put them into the propoer part of the component space, if
     // necessary.
 
-    mem_if_rsrc_t::write_and_set("mif1", "vif.mem_if1", mif1);
-    mem_if_rsrc_t::write_and_set("mif2", "vif.mem_if2", mif2);
+    mem_if_rsrc_t::set("vif.mem_if1", "mif1", mif1);
+    mem_if_rsrc_t::set("vif.mem_if2", "mif2", mif2);
 
     run_test();
   end
@@ -115,8 +115,8 @@ class env #(int unsigned ADDR_SIZE=16, int unsigned DATA_SIZE=8)
        `uvm_error("Test", "read_by_type() failed");
     end
 
-    mem_if_rsrc_t::write_and_set("mif1", "*.mem_agent1.*", mif1, this);
-    mem_if_rsrc_t::write_and_set("mif2", "*.mem_agent2.*", mif2, this);
+    mem_if_rsrc_t::set("*.mem_agent1.*", "mif1", mif1, this);
+    mem_if_rsrc_t::set("*.mem_agent2.*", "mif2", mif2, this);
 
     // instantiate the agents
     agnt1 = new("mem_agent1", this);
@@ -145,24 +145,24 @@ class test extends uvm_component;
     mem_agent_config mem_cfg  = new();
     mem_cfg.initial_sequence = mem_seq_rand#(8,8)::get_type();
 
-    // turn off resource auditting
-    uvm_resource_options::turn_off_auditting();
+    // turn off resource auditing
+    uvm_resource_options::turn_off_auditing();
 
      
     // create the configuration resource and set it into the resoures
     // database
-    uvm_resource_db#(mem_agent_config)::write_and_set("mem_cfg", "*.mem_agent*",
-                                                       mem_cfg, this);
+    uvm_resource_db#(mem_agent_config)::set("*.mem_agent*", "mem_cfg",
+                                            mem_cfg, this);
     // establish the loop count for the main sequence
-    uvm_resource_db#(int unsigned)::write_and_set("loop_count", "mem_seq",
-                                                         1000, this);
+    uvm_resource_db#(int unsigned)::set("mem_seq", "loop_count",
+                                         1000, this);
     
     e = new("env", this);
   endfunction
 
   task run();
-    global_stop_request();
-    print_config(1);
+     global_stop_request();
+     print_config(1);
   endtask
 
   function void report();
@@ -174,7 +174,7 @@ class test extends uvm_component;
       $display("** UVM TEST PASSED **");
 
     // The '1' argument to dump() instructs the function to also dump
-    // the audit trail.  However, since we turned auditting off above we
+    // the audit trail.  However, since we turned auditing off above we
     // should not see an audit trail appear.
     rp.dump(1);
   endfunction

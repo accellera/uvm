@@ -60,6 +60,9 @@
   // Base transaction object
   `include "base/uvm_transaction.sv"
 
+  // data structure for phasing, depends on report_object
+  `include "base/uvm_graph.sv"
+
   // The phase declarations. uvm_component does the actual phasing.
   `include "base/uvm_phases.sv"
 
@@ -81,6 +84,9 @@
   `include "base/uvm_heartbeat.svh"
 
   `include "base/uvm_globals.svh"
+
+  // Command Line Processor
+  `include "base/uvm_cmdline_processor.svh"
 
   `include "base/uvm_extern_report_server.svh"
 

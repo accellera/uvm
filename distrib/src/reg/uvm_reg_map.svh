@@ -50,9 +50,10 @@ class uvm_reg_map extends uvm_object;
    `uvm_object_utils(uvm_reg_map)
    
    // info that is valid only if top-level map
+   local uvm_reg_addr_t     m_base_addr;
    local int unsigned       m_n_bytes;
    local uvm_endianness_e   m_endian;
-   local uvm_reg_addr_t     m_base_addr;
+   local bit                m_byte_addressing;
    local uvm_object_wrapper m_sequence_wrapper;
    local uvm_reg_adapter    m_adapter;
    local uvm_sequencer_base m_sequencer;
@@ -69,8 +70,6 @@ class uvm_reg_map extends uvm_object;
 
    local uvm_reg_map_info   m_regs_info[uvm_reg];
    local uvm_reg_map_info   m_mems_info[uvm_mem];
-
-   local string             m_attributes[string];
 
    local uvm_reg            m_regs_by_offset[uvm_reg_addr_t];
                             // Use only in addition to above if a RO and a WO
@@ -98,7 +97,8 @@ class uvm_reg_map extends uvm_object;
    /*local*/ extern function void configure(uvm_reg_block     parent,
                                             uvm_reg_addr_t    base_addr,
                                             int unsigned      n_bytes,
-                                            uvm_endianness_e  endian);
+                                            uvm_endianness_e  endian,
+                                            bit byte_addressing=0);
 
    // Function: add_reg
    //
@@ -539,52 +539,6 @@ class uvm_reg_map extends uvm_object;
                                         output int lsb,
                                         output int addr_skip);
 
-   //------------------
-   // Group: Attributes
-   //------------------
-
-   // Function: set_attribute
-   //
-   // Set an attribute.
-   //
-   // Set the specified attribute to the specified value for this address map.
-   // If the value is specified as "", the specified attribute is deleted.
-   // A warning is issued if an existing attribute is modified.
-   // 
-   // Attribute names are case sensitive. 
-   //
-   extern virtual function void set_attribute(string name, string value);
-
-
-   // Function: get_attribute
-   //
-   // Get an attribute value.
-   //
-   // Get the value of the specified attribute for this address map.
-   // If the attribute does not exists, "" is returned.
-   // If ~inherited~ is specifed as TRUE, the value of the attribute
-   // is inherited from the nearest block ancestor for which the attribute
-   // is set if it is not specified for this address map.
-   // If ~inherited~ is specified as FALSE, the value "" is returned
-   // if it does not exists in the this address map.
-   // 
-   // Attribute names are case sensitive.
-   // 
-   extern virtual function string get_attribute(string name, bit inherited = 1);
-
-
-   // Function: get_attributes
-   //
-   // Get all attribute values.
-   //
-   // Get the value for all attribute for this address map.
-   // If ~inherited~ is specifed as TRUE, the value for all attributes
-   // inherited from all block ancestors are included.
-   // 
-   extern virtual function void get_attributes(ref string names[string],
-                                               input bit inherited=1);
-
-
    extern virtual function string      convert2string();
    extern virtual function uvm_object  clone();
    extern virtual function void        do_print (uvm_printer printer);
@@ -612,14 +566,16 @@ endfunction
 
 // configure
 
-function void uvm_reg_map::configure(uvm_reg_block          parent,
-                                     uvm_reg_addr_t         base_addr,
-                                     int unsigned           n_bytes,
-                                     uvm_endianness_e  endian);
+function void uvm_reg_map::configure(uvm_reg_block    parent,
+                                     uvm_reg_addr_t   base_addr,
+                                     int unsigned     n_bytes,
+                                     uvm_endianness_e endian,
+                                     bit              byte_addressing=0);
    m_parent     = parent;
    m_n_bytes    = n_bytes;
    m_endian     = endian;
    m_base_addr  = base_addr;
+   m_byte_addressing = byte_addressing;
 endfunction: configure
 
 
@@ -1312,6 +1268,7 @@ function int uvm_reg_map::get_physical_addresses(uvm_reg_addr_t     base_addr,
    int bus_width = get_n_bytes(UVM_NO_HIER);
    uvm_reg_map  up_map;
    uvm_reg_addr_t  local_addr[];
+   int multiplier = m_byte_addressing ? bus_width : 1;
 
    addr = new [0];
    
@@ -1324,25 +1281,25 @@ function int uvm_reg_map::get_physical_addresses(uvm_reg_addr_t     base_addr,
    // First, identify the addresses within the block/system
    if (n_bytes <= bus_width) begin
       local_addr = new [1];
-      local_addr[0] = base_addr + mem_offset;
+      local_addr[0] = base_addr + (mem_offset * multiplier);
    end else begin
       int n;
 
       n = ((n_bytes-1) / bus_width) + 1;
       local_addr = new [n];
       
-      base_addr = base_addr + mem_offset * n;
+      base_addr = base_addr + mem_offset * (n * multiplier);
 
       case (get_endian(UVM_NO_HIER))
          UVM_LITTLE_ENDIAN: begin
             foreach (local_addr[i]) begin
-               local_addr[i] = base_addr + i;
+               local_addr[i] = base_addr + (i * multiplier);
             end
          end
          UVM_BIG_ENDIAN: begin
             foreach (local_addr[i]) begin
                n--;
-               local_addr[i] = base_addr + n;
+               local_addr[i] = base_addr + (n * multiplier);
             end
          end
          UVM_LITTLE_FIFO: begin
@@ -1639,10 +1596,13 @@ task uvm_reg_map::do_write(uvm_reg_item rw);
   uvm_reg_adapter adapter = system_map.get_adapter();
   uvm_sequencer_base sequencer = system_map.get_sequencer();
 
+  if (rw.parent == null)
+    rw.parent = new("default_parent_seq");
+
   if (adapter == null) begin
     rw.set_sequencer(sequencer);
-    rw.m_start_item(sequencer,rw.parent,rw.prior);
-    rw.m_finish_item(sequencer,rw.parent);
+    rw.parent.start_item(rw,rw.prior);
+    rw.parent.finish_item(rw);
     rw.end_event.wait_on();
   end
   else begin
@@ -1660,10 +1620,13 @@ task uvm_reg_map::do_read(uvm_reg_item rw);
   uvm_reg_adapter adapter = system_map.get_adapter();
   uvm_sequencer_base sequencer = system_map.get_sequencer();
 
+  if (rw.parent == null)
+    rw.parent = new("default_parent_seq");
+
   if (adapter == null) begin
     rw.set_sequencer(sequencer);
-    rw.m_start_item(sequencer,rw.parent,rw.prior);
-    rw.m_finish_item(sequencer,rw.parent);
+    rw.parent.start_item(rw,rw.prior);
+    rw.parent.finish_item(rw);
     rw.end_event.wait_on();
   end
   else begin
@@ -1726,7 +1689,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
               
     foreach(addrs[i]) begin: foreach_addr
 
-      uvm_sequence_item bus_req = new("bus_wr");
+      uvm_sequence_item bus_req;
       uvm_reg_bus_op rw_access;
       uvm_reg_data_t data;
 
@@ -1734,7 +1697,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
        
       `uvm_info(get_type_name(),
          $psprintf("Writing 'h%0h at 'h%0h via map \"%s\"...",
-              data, addrs[i], rw.map.get_full_name()), UVM_HIGH);
+              data, addrs[i], rw.map.get_full_name()), UVM_FULL);
 
       if (rw.element_kind == UVM_FIELD) begin
         for (int z=0;z<bus_width;z++)
@@ -1747,15 +1710,14 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
       rw_access.n_bits  = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
       rw_access.byte_en = byte_en;
 
-      bus_req.m_start_item(sequencer,rw.parent,rw.prior);
+      bus_req = adapter.reg2bus(rw_access);
+      bus_req.set_sequencer(sequencer);
+      rw.parent.start_item(bus_req,rw.prior);
 
       if (rw.parent != null && rw_access.addr == addrs[0])
         rw.parent.mid_do(rw);
 
-      bus_req = adapter.reg2bus(rw_access);
-
-      bus_req.set_sequencer(sequencer);
-      bus_req.m_finish_item(sequencer,rw.parent);
+      rw.parent.finish_item(bus_req);
       bus_req.end_event.wait_on();
 
       if (adapter.provides_responses) begin
@@ -1776,7 +1738,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
 
       `uvm_info(get_type_name(),
          $psprintf("Wrote 'h%0h at 'h%0h via map \"%s\": %s...",
-            data, addrs[i], rw.map.get_full_name(), rw.status.name()), UVM_HIGH)
+            data, addrs[i], rw.map.get_full_name(), rw.status.name()), UVM_FULL)
 
       if (rw.status == UVM_NOT_OK)
          break;
@@ -1846,13 +1808,13 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
               
     foreach (addrs[i]) begin
 
-      uvm_sequence_item bus_req = new("bus_rd");
+      uvm_sequence_item bus_req;
       uvm_reg_bus_op rw_access;
       uvm_reg_data_logic_t data;
        
       `uvm_info(get_type_name(),
          $psprintf("Reading address 'h%0h via map \"%s\"...",
-                   addrs[i], get_full_name()), UVM_HIGH);
+                   addrs[i], get_full_name()), UVM_FULL);
                 
       if (rw.element_kind == UVM_FIELD)
         for (int z=0;z<bus_width;z++)
@@ -1864,16 +1826,16 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       rw_access.byte_en = byte_en;
       rw_access.n_bits = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
                           
-      bus_req.m_start_item(sequencer,rw.parent,rw.prior);
+      bus_req = adapter.reg2bus(rw_access);
+      bus_req.set_sequencer(sequencer);
+      rw.parent.start_item(bus_req,rw.prior);
 
       if (rw.parent != null && rw_access.addr == addrs[0]) begin
         rw.parent.pre_do(1);
         rw.parent.mid_do(rw);
       end
 
-      bus_req = adapter.reg2bus(rw_access);
-      bus_req.set_sequencer(sequencer);
-      bus_req.m_finish_item(sequencer,rw.parent);
+      rw.parent.finish_item(bus_req);
       bus_req.end_event.wait_on();
 
       if (adapter.provides_responses) begin
@@ -1896,7 +1858,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
          
       `uvm_info(get_type_name(),
          $psprintf("Read 'h%0h at 'h%0h via map \"%s\": %s...", data,
-                   addrs[i], get_full_name(), rw.status.name()), UVM_HIGH);
+                   addrs[i], get_full_name(), rw.status.name()), UVM_FULL);
 
       if (rw.status == UVM_NOT_OK)
          break;
@@ -1915,71 +1877,6 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
   end
 
 endtask: do_bus_read
-
-
-
-//-----------
-// Attributes
-//-----------
-
-// set_attribute
-
-function void uvm_reg_map::set_attribute(string name, string value);
-
-   if (name == "") begin
-      `uvm_error("RegModel", {"Cannot set attribute with empty name for map ",
-         get_full_name(),"'."})
-      return;
-   end
-
-   if (m_attributes.exists(name)) begin
-      if (value != "") begin
-         `uvm_warning("RegModel", {"Redefining attribute '",
-            name,"' in map '",get_full_name(),"' to '",value,"'"})
-         m_attributes[name] = value;
-      end
-      else begin
-         m_attributes.delete(name);
-      end
-      return;
-   end
-
-   if (value == "") begin
-      `uvm_warning("RegModel", {"Attempting to delete non-existent attribute '",
-          name,"' in map '",get_full_name(),"'"})
-      return;
-   end
-
-   m_attributes[name] = value;
-
-endfunction: set_attribute
-
-
-// get_attribute
-
-function string uvm_reg_map::get_attribute(string name, bit inherited = 1);
-
-   if (inherited && m_parent_map != null)
-      get_attribute = m_parent_map.get_attribute(name);
-
-   if (get_attribute == "" && m_attributes.exists(name))
-      return m_attributes[name];
-
-   return "";
-endfunction: get_attribute
-
-
-// get_attributes
-
-function void uvm_reg_map::get_attributes(ref string names[string],
-                                          input bit inherited = 1);
-   if (inherited && m_parent_map != null)
-     m_parent_map.get_attributes(names,1);
-
-   foreach (m_attributes[nm])
-     if (!names.exists(nm))
-       names[nm] = m_attributes[nm];
-endfunction
 
 
 

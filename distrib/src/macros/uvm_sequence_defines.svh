@@ -38,7 +38,7 @@
 //
 // This macro is used to set up a specific sequencer type with the
 // sequence type the macro is placed in. This macro is implicit in the
-// <uvm_sequence_utils> macro, but may be used directly in cases when
+// <`uvm_sequence_utils> macro, but may be used directly in cases when
 // the sequence is not to be registered in the sequencer's library.
 //
 // The example below shows using the the uvm_declare_p_sequencer macro
@@ -81,8 +81,8 @@
 
 // MACRO: `uvm_sequence_utils
 //
-// The sequence macros can be used in non-parameterized <uvm_sequence>
-// extensions to pre-register the sequence with a given <uvm_sequencer>
+// The sequence macros can be used in non-parameterized <uvm_sequence #(REQ,RSP)>
+// extensions to pre-register the sequence with a given <uvm_sequencer #(REQ,RSP)>
 // type.
 //
 // For sequences that do not use any `uvm_field macros:
@@ -246,8 +246,8 @@
 // Group: Sequence Action Macros
 //
 // These macros are used to start sequences and sequence items that were either
-// registered with a <`uvm-sequence_utils> macro or whose associated sequencer
-// was already set using the <set_sequencer> method.
+// registered with a <`uvm_sequence_utils> macro or whose associated sequencer
+// was already set using the <uvm_sequence_item::set_sequencer> method.
 //-----------------------------------------------------------------------------
 
 // MACRO: `uvm_create

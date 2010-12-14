@@ -75,7 +75,7 @@ class wb_driver extends uvm_driver #(wb_cycle);
                                        input  bit        lock,
                                        output wb_cycle::status_e status);
 
-   extern task reset(int cycles);
+   extern task reset_wb(int cycles);
 
 endclass: wb_driver
 
@@ -106,7 +106,7 @@ task wb_driver::run();
       end
       else begin
          if (tr.m_reset) begin
-           this.reset(tr.m_data);
+           this.reset_wb(tr.m_data);
          end
          else
          case (tr.m_kind)
@@ -227,7 +227,7 @@ task wb_driver::write(input  bit [63:0] addr,
 endtask: write
 
 
-task wb_driver::reset(int cycles);
+task wb_driver::reset_wb(int cycles);
    `uvm_info("WB_DRIVER", $sformatf("Resetting Wishbone for %0d cycles...", cycles), UVM_LOW);
    this.sigs.sysck.rst <= 1;
    repeat (cycles)
@@ -237,6 +237,6 @@ task wb_driver::reset(int cycles);
      @(sigs.sysck);
 `endif
    this.sigs.sysck.rst <= 0;
-endtask: reset
+endtask: reset_wb
 
 

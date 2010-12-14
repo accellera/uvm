@@ -35,6 +35,15 @@
 // via every address map in which the register is mapped,
 // making sure that the resulting value matches the mirrored value.
 //
+// If bit-type resource named
+// "NO_REG_TESTS" or "NO_REG_BIT_BASH_TEST"
+// in the "REG::" namespace
+// matches the full name of the register,
+// the register is not tested.
+//
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.r0.get_full_name()},
+//|                            "NO_REG_TESTS", 1, this);
+//
 // Registers that contain fields with unknown access policies
 // cannot be tested.
 //
@@ -63,13 +72,16 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
       int n_bits;
          
       if (rg == null) begin
-         `uvm_error("RegModel", "No register specified to run sequence on");
+         `uvm_error("uvm_reg_bit_bash_seq", "No register specified to run sequence on");
          return;
       end
 
       // Registers with some attributes are not to be tested
-      if (rg.get_attribute("NO_REG_TESTS") != "" ||
-	  rg.get_attribute("NO_BIT_BASH_TEST") != "") return;
+      if (uvm_resource_db#(bit)::get_by_name({"REG::",rg.get_full_name()},
+                                             "NO_REG_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",rg.get_full_name()},
+                                             "NO_REG_BIT_BASH_TEST", 0) != null )
+            return;
       
       n_bits = rg.get_n_bytes() * 8;
          
@@ -108,17 +120,17 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
             end
          end
          // Any unused bits on the left side of the MSB?
-         while (next_lsb < `UVM_REG_DATA_WIDTH) mode[next_lsb++] = "RO";
+         while (next_lsb < `UVM_REG_DATA_WIDTH)
+            mode[next_lsb++] = "RO";
          
-         if (uvm_report_enabled(UVM_NONE,UVM_INFO,"RegModel"))
-	 	`uvm_info("RegModel", $psprintf("Verifying bits in register %s in map \"%s\"...",
+         `uvm_info("uvm_reg_bit_bash_seq", $psprintf("Verifying bits in register %s in map \"%s\"...",
                                     rg.get_full_name(), maps[j].get_full_name()),UVM_LOW);
          
          // Bash the kth bit
          for (int k = 0; k < n_bits; k++) begin
             // Cannot test unpredictable bit behavior
             if (dc_mask[k]) continue;
-            
+
             bash_kth_bit(rg, k, mode[k], maps[j], dc_mask);
          end
             
@@ -135,7 +147,7 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
       uvm_reg_data_t  val, exp, v;
       bit bit_val;
 
-      `uvm_info("RegModel", $psprintf("...Bashing %s bit #%0d", mode, k),UVM_MEDIUM);
+      `uvm_info("uvm_reg_bit_bash_seq", $psprintf("...Bashing %s bit #%0d", mode, k),UVM_HIGH);
       
       repeat (2) begin
          val = rg.get();
@@ -146,20 +158,20 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
          
          rg.write(status, val, UVM_FRONTDOOR, map, this);
          if (status != UVM_IS_OK) begin
-            `uvm_error("RegModel", $psprintf("Status was %s when writing to register \"%s\" through map \"%s\".",
+            `uvm_error("uvm_reg_bit_bash_seq", $psprintf("Status was %s when writing to register \"%s\" through map \"%s\".",
                                         status, rg.get_full_name(), map.get_full_name()));
          end
          
          exp = rg.get() & ~dc_mask;
          rg.read(status, val, UVM_FRONTDOOR, map, this);
          if (status != UVM_IS_OK) begin
-            `uvm_error("RegModel", $psprintf("Status was %s when reading register \"%s\" through map \"%s\".",
+            `uvm_error("uvm_reg_bit_bash_seq", $psprintf("Status was %s when reading register \"%s\" through map \"%s\".",
                                         status, rg.get_full_name(), map.get_full_name()));
          end
 
          val &= ~dc_mask;
          if (val !== exp) begin
-            `uvm_error("RegModel", $psprintf("Writing a %b in bit #%0d of register \"%s\" with initial value 'h%h yielded 'h%h instead of 'h%h",
+            `uvm_error("uvm_reg_bit_bash_seq", $psprintf("Writing a %b in bit #%0d of register \"%s\" with initial value 'h%h yielded 'h%h instead of 'h%h",
                                         bit_val, k, rg.get_full_name(), v, val, exp));
          end
       end
@@ -175,8 +187,14 @@ endclass: uvm_reg_single_bit_bash_seq
 // Verify the implementation of all registers in a block
 // by executing the <uvm_reg_single_bit_bash_seq> sequence on it.
 //
-// Blocks and registers with the ~NO_REG_TESTS~ or
-// the ~NO_BIT_BASH_TEST~ attribute are not verified.
+// If bit-type resource named
+// "NO_REG_TESTS" or "NO_REG_BIT_BASH_TEST"
+// in the "REG::" namespace
+// matches the full name of the block,
+// the block is not tested.
+//
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.get_full_name(),".*"},
+//|                            "NO_REG_TESTS", 1, this);
 //
 //------------------------------------------------------------------------------
 
@@ -208,10 +226,9 @@ class uvm_reg_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_ite
    // Do not call directly. Use seq.start() instead.
    //
    virtual task body();
-      uvm_reg_block blks[$];
       
       if (model == null) begin
-         `uvm_error("RegModel", "Not block or system specified to run sequence on");
+         `uvm_error("uvm_reg_bit_bash_seq", "No register model specified to run sequence on");
          return;
       end
 
@@ -223,10 +240,6 @@ class uvm_reg_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_ite
       model.reset();
 
       do_block(model);
-      model.get_blocks(blks);
-      foreach (blks[i]) begin
-         do_block(blks[i]);
-      end
    endtask
 
 
@@ -237,18 +250,33 @@ class uvm_reg_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_ite
    protected virtual task do_block(uvm_reg_block blk);
       uvm_reg regs[$];
 
-      if (blk.get_attribute("NO_REG_TESTS") != "") return;
-      if (blk.get_attribute("NO_BIT_BASH_TEST") != "") return;
+      if (uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_REG_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",blk.get_full_name()},
+                                             "NO_REG_BIT_BASH_TEST", 0) != null )
+         return;
 
       // Iterate over all registers, checking accesses
       blk.get_registers(regs, UVM_NO_HIER);
       foreach (regs[i]) begin
          // Registers with some attributes are not to be tested
-         if (regs[i].get_attribute("NO_REG_TESTS") != "" ||
-	     regs[i].get_attribute("NO_BIT_BASH_TEST") != "") continue;
+         if (uvm_resource_db#(bit)::get_by_name({"REG::",regs[i].get_full_name()},
+                                                "NO_REG_TESTS", 0) != null ||
+	     uvm_resource_db#(bit)::get_by_name({"REG::",regs[i].get_full_name()},
+                                                "NO_REG_BIT_BASH_TEST", 0) != null )
+            continue;
          
          reg_seq.rg = regs[i];
          reg_seq.start(null,this);
+      end
+
+      begin
+         uvm_reg_block blks[$];
+         
+         blk.get_blocks(blks);
+         foreach (blks[i]) begin
+            do_block(blks[i]);
+         end
       end
    endtask: do_block
 

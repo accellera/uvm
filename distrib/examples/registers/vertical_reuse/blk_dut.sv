@@ -20,7 +20,8 @@
 // -------------------------------------------------------------
 // 
 
-module blk_dut #(int BASE_ADDR='h0) (apb_if apb);
+module blk_dut #(int BASE_ADDR='h0) (apb_if    apb,
+                                     input bit rst);
 
 reg [7:0] R;
 
@@ -38,7 +39,7 @@ assign apb.prdata = (apb.psel && apb.penable && !apb.pwrite && in_range) ? pr_da
 
 always @ (posedge apb.pclk)
   begin
-   if (apb.rst) begin
+   if (rst) begin
       R <= 'h00;
       pr_data <= 32'h0;
    end

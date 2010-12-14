@@ -142,6 +142,8 @@ typedef enum bit { UVM_PASSIVE=0, UVM_ACTIVE=1 } uvm_active_passive_enum;
 // UVM_DEEP      - Object field will be deep copied
 // UVM_SHALLOW   - Object field will be shallow copied
 // UVM_REFERENCE - Object field will copied by reference
+//
+// UVM_READONLY  - Object field will NOT be automatically configured.
 
 
 parameter UVM_MACRO_NUMFLAGS    = 17;

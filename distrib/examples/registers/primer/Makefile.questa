@@ -20,6 +20,7 @@
 ## 
 
 UVM_HOME	= ../../..
+USES_DPI = 1
 
 include ../../Makefile.questa
 
@@ -33,11 +34,11 @@ comp:
 run: hw_reset reg_user
 
 hw_reset:
-	$(VSIM) +UVM_TESTNAME=hw_reset_test
+	$(VSIM) +UVM_TESTNAME=cmdline_test +UVM_REG_SEQ=uvm_reg_hw_reset_seq
 	$(CHECK)
 
 reg_user:
-	$(VSIM) +UVM_TESTNAME=reg_user_test
+	$(VSIM) +UVM_TESTNAME=cmdline_test +UVM_REG_SEQ=user_test_seq
 	$(CHECK)
 
 

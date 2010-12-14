@@ -37,7 +37,6 @@ virtual class uvm_reg_file extends uvm_object;
    local uvm_reg_file   m_rf;
    local string            default_hdl_path = "RTL";
    local uvm_object_string_pool #(uvm_queue #(string)) hdl_paths_pool;
-   local string            attributes[string];
 
 
    //----------------------
@@ -76,51 +75,6 @@ virtual class uvm_reg_file extends uvm_object;
                                         uvm_reg_file regfile_parent,
                                         string hdl_path = "");
  
-   //------------------
-   // Group: Attributes
-   //------------------
-
-   //
-   // FUNCTION: set_attribute
-   // Set an attribute.
-   //
-   // Set the specified attribute to the specified value for this register file.
-   // If the value is specified as "", the specified attribute is deleted.
-   // A warning is issued if an existing attribute is modified.
-   // 
-   // Attribute names are case sensitive. 
-   //
-   extern virtual function void   set_attribute   (string name, string value);
-
-   //
-   // FUNCTION: get_attribute
-   // Get an attribute value.
-   //
-   // Get the value of the specified attribute for this register file.
-   // If the attribute does not exists, "" is returned.
-   // If ~inherited~ is specifed as TRUE, the value of the attribute
-   // is inherited from the nearest register file or block ancestor
-   // for which the attribute
-   // is set if it is not specified for this register file.
-   // If ~inherited~ is specified as FALSE, the value "" is returned
-   // if it does not exists in the this register file.
-   // 
-   // Attribute names are case sensitive.
-   // 
-   extern virtual function string get_attribute   (string name, bit inherited = 1);
-
-   //
-   // FUNCTION: get_attributes
-   // Get all attribute values.
-   //
-   // Get the name of all attribute for this register file.
-   // If ~inherited~ is specifed as TRUE, the value for all attributes
-   // inherited from all register file and block ancestors are included.
-   // 
-   extern virtual function void   get_attributes  (ref string names[string],
-                                                   input bit inherited = 1);
-
-
    //---------------------
    // Group: Introspection
    //---------------------
@@ -142,14 +96,14 @@ virtual class uvm_reg_file extends uvm_object;
    extern virtual function string        get_full_name();
 
    //
-   // FUNCTION: get_parent
+   // Function: get_parent
    // Get the parent block
    //
    extern virtual function uvm_reg_block get_parent ();
    extern virtual function uvm_reg_block get_block  ();
 
    //
-   // FUNCTION: get_regfile
+   // Function: get_regfile
    // Get the parent register file
    //
    // Returns ~null~ if this register file is instantiated in a block.
@@ -284,79 +238,6 @@ function void uvm_reg_file::configure(uvm_reg_block blk_parent, uvm_reg_file reg
    this.m_rf = regfile_parent;
    this.add_hdl_path(hdl_path);
 endfunction: configure
-
-
-//-----------
-// ATTRIBUTES
-//-----------
-
-// set_attribute
-
-function void uvm_reg_file::set_attribute(string name,
-                                             string value);
-   if (name == "") begin
-      `uvm_error("RegModel", {"Cannot set anonymous attribute \"\" in register '",
-                         get_full_name(),"'"})
-      return;
-   end
-
-   if (this.attributes.exists(name)) begin
-      if (value != "") begin
-         `uvm_warning("RegModel", {"Redefining attribute '",name,"' in register '",
-                         get_full_name(),"' to '",value,"'"})
-         this.attributes[name] = value;
-      end
-      else begin
-         this.attributes.delete(name);
-      end
-      return;
-   end
-
-   if (value == "") begin
-      `uvm_warning("RegModel", {"Attempting to delete non-existent attribute '",
-                          name, "' in register '", get_full_name(), "'"})
-      return;
-   end
-
-   this.attributes[name] = value;
-endfunction: set_attribute
-
-
-// get_attribute
-
-function string uvm_reg_file::get_attribute(string name,
-                                               bit inherited = 1);
-   if (inherited) begin
-      if (m_rf != null)
-         get_attribute = parent.get_attribute(name);
-      else if (parent != null)
-         get_attribute = parent.get_attribute(name);
-   end
-
-   if (get_attribute == "" && this.attributes.exists(name))
-      return this.attributes[name];
-
-   return "";
-endfunction: get_attribute
-
-
-// get_attributes
-
-function void uvm_reg_file::get_attributes(ref string names[string],
-                                              input bit inherited = 1);
-   // attributes at higher levels supercede those at lower levels
-   if (inherited) begin
-      if (m_rf != null)
-         this.parent.get_attributes(names,1);
-      else if (parent != null)
-         this.parent.get_attributes(names,1);
-   end
-
-   foreach (attributes[nm])
-     if (!names.exists(nm))
-       names[nm] = attributes[nm];
-
-endfunction: get_attributes
 
 
 // get_block

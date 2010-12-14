@@ -1,0 +1,1 @@
+return &make_example(".");

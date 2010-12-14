@@ -23,7 +23,8 @@
 
 `timescale 1ns/1ns
 
-module slave(apb_if apb);
+module slave(apb_if    apb,
+             input bit rst);
 
 reg [31:0] pr_data;
 assign apb.prdata = (apb.psel && apb.penable && !apb.pwrite) ? pr_data : 'z;
@@ -41,7 +42,7 @@ reg [31:0] DMA[1024];
 
 always @ (posedge apb.pclk)
   begin
-   if (apb.rst) begin
+   if (rst) begin
       INDEX <= 'h00;
       foreach (TABLES[i]) begin
          TABLES[i] <= 32'h0000_0000;

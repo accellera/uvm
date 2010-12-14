@@ -20,17 +20,18 @@
 ## 
 
 UVM_HOME	= ../../../..
+USES_DPI = 1
 
 include ../../../Makefile.questa
 
 
-all: prepare comp run
+all: run
 
-comp:
+comp: prepare
 	$(VLOG) +incdir+../../common \
 		blk_run.sv
 
-run:
+run: comp
 	$(VSIM) +UVM_TESTNAME=blk_test
 	$(CHECK)
 

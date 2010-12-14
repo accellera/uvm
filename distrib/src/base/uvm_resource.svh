@@ -65,12 +65,12 @@
 // of the queue.
 //
 // The classes defined here form the low level layer of the resource
-// database.  The clases includ the resource container and the database
+// database.  The classes include the resource container and the database
 // that holds the containers.  The following set of classes are defined
 // here:
 //
 // <uvm_resource_types>: A class without methods or members, only
-// typedefs and enums. These types and enums ware used throughout the
+// typedefs and enums. These types and enums are used throughout the
 // resources facility.  Putting the types in a class keeps them confined
 // to a specific name space.
 //
@@ -97,7 +97,7 @@ typedef class uvm_resource_base; // forward reference
 //----------------------------------------------------------------------
 // Class: uvm_resource_types
 //
-// Provides typedefs and enumas used throughout the resources facility.
+// Provides typedefs and enums used throughout the resources facility.
 // This class has no members or methods, only typedefs.  It's used in
 // lieu of package-scope types.  When needed, other classes can use
 // these types by prefixing their usage with uvm_resource_types::.  E.g.
@@ -109,7 +109,8 @@ class uvm_resource_types;
 
   // types uses for setting overrides
   typedef bit[1:0] override_t;
-  typedef enum override_t { TYPE_OVERRIDE = 2'b01, NAME_OVERRIDE = 2'b10 } override_e;
+  typedef enum override_t { TYPE_OVERRIDE = 2'b01,
+                            NAME_OVERRIDE = 2'b10 } override_e;
 
    // general purpose queue of resourcex
   typedef uvm_queue#(uvm_resource_base) rsrc_q_t;
@@ -143,46 +144,46 @@ endclass
 
 // Options include:
 //
-//  * auditting:  on/off
+//  * auditing:  on/off
 //
-//    The default for auditting is on.  You may wish to turn it off to
-//    for performance reasons.  With auditting off memory is not
-//    consumed for storage of auditting information and time is not
-//    spent collecting and storing auditting information.  Of course,
-//    during the period when auditting is off no audit trail information
+//    The default for auditing is on.  You may wish to turn it off to
+//    for performance reasons.  With auditing off memory is not
+//    consumed for storage of auditing information and time is not
+//    spent collecting and storing auditing information.  Of course,
+//    during the period when auditing is off no audit trail information
 //    is available
 //
 //----------------------------------------------------------------------
 class uvm_resource_options;
 
-  static local bit auditting = 1;
+  static local bit auditing = 1;
 
-  // Function: turn_on_auditting
+  // Function: turn_on_auditing
   //
-  // Turn auditting on for the resource database. This causes all
+  // Turn auditing on for the resource database. This causes all
   // reads and writes to the database to store information about
   // the accesses.
 
-  static function void turn_on_auditting();
-    auditting = 1;
+  static function void turn_on_auditing();
+    auditing = 1;
   endfunction
 
-  // Function: turn_off_auditting
+  // Function: turn_off_auditing
   //
-  // Turn auditting off for the resource database. If auditting is
+  // Turn auditing off for the resource database. If auditing is
   // it is not possible to get extra information about resource
   // database accesses.
 
-  static function void turn_off_auditting();
-    auditting = 0;
+  static function void turn_off_auditing();
+    auditing = 0;
   endfunction
 
-  // Function: is_auditting
+  // Function: is_auditing
   //
-  // Returns 1 if the auditting facility is on and 0 if it is off.
+  // Returns 1 if the auditing facility is on and 0 if it is off.
 
-  static function bit is_auditting();
-    return auditting;
+  static function bit is_auditing();
+    return auditing;
   endfunction
 
 endclass
@@ -200,6 +201,7 @@ endclass
 virtual class uvm_resource_base extends uvm_object;
 
   protected semaphore sm;
+  protected int lock_state;
   protected string scope;
   protected bit modified;
   protected bit read_only;
@@ -237,6 +239,7 @@ virtual class uvm_resource_base extends uvm_object;
     super.new(name);
     set_scope(s);
     sm = new(1);
+    lock_state = 1;
     modified = 0;
     read_only = 0;
     precedence = default_precedence;
@@ -273,6 +276,7 @@ virtual class uvm_resource_base extends uvm_object;
 
   task lock();
     sm.get();
+    lock_state -= 1;
   endtask
 
   // Function: try_lock
@@ -282,7 +286,10 @@ virtual class uvm_resource_base extends uvm_object;
   // the lock then a one is returned, otherwise a zero is returned.
 
   function bit try_lock();
-    return sm.try_get();
+    bit ok = sm.try_get();
+    if(ok)
+      lock_state -= 1;
+    return ok;
   endfunction
 
   // Function: unlock
@@ -291,6 +298,7 @@ virtual class uvm_resource_base extends uvm_object;
 
   function void unlock();
     sm.put();
+    lock_state += 1;
   endfunction
 
 
@@ -647,7 +655,7 @@ endclass
 // whether you get by name or by type the resource's visibility is
 // the same.
 //
-// As an auditting capability, the pool contains a history of gets.  A
+// As an auditing capability, the pool contains a history of gets.  A
 // record of each get, whether by <get_by_type> or <get_by_name>, is stored 
 // in the audit record.  Both successful and failed gets are recorded. At
 // the end of simulation, or any time for that matter, you can dump the
@@ -816,9 +824,9 @@ class uvm_resource_pool;
                                   uvm_resource_base rsrc);
     get_t impt;
 
-    // if auditting is turned off then there is no reason
+    // if auditing is turned off then there is no reason
     // to save a get record
-    if(!uvm_resource_options::is_auditting())
+    if(!uvm_resource_options::is_auditing())
       return;
 
     impt = new();
@@ -1434,14 +1442,16 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   
   // Function: set_override
   //
-  // Put a resource into the global resource pool as an override.
-  // This means it gets put at the head of the list and is searched
-  // before other existing resources that occupy the same position in
-  // the name map or the type map.
+  // Put a resource into the global resource pool as an override.  This
+  // means it gets put at the head of the list and is searched before
+  // other existing resources that occupy the same position in the name
+  // map or the type map.  The default is to override both the name and
+  // type maps.  However, using the ~override~ argument you can specify
+  // that either the name map or type map is overridden.
 
-  function void set_override();
+  function void set_override(uvm_resource_types::override_t override = 2'b11);
     uvm_resource_pool rp = uvm_resource_pool::get();
-    rp.set(this, (uvm_resource_types::NAME_OVERRIDE | uvm_resource_types::TYPE_OVERRIDE));
+    rp.set(this, override);
   endfunction
 
 
@@ -1534,12 +1544,26 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
 
     string str;
 
+    // Has the resource been locked by the locking interface?  If so,
+    // issue an error.  Since we are doing a read which does not modify
+    // the contents of the resource, why issue an error and not just a
+    // warning?  The resource may be undergoing a value change and so we
+    // cannot be sure that the current value is the same as when the
+    // resource is subsequently unlocked. It may be or it may not be.
+    // Since we can't tell the user may be getting the incorrect value.
+
+    if(lock_state == 0) begin
+      string msg;
+      $sformat(msg, "Resource %s is being read by the non-locking interface while it is locked by the locking interface.  This could result in the incorrect value being returned", get_name());
+      uvm_report_error("LOCKED_READ", msg);
+    end
+
     // If an accessor object is supplied then get the accessor record.
     // Otherwise create a new access record.  In either case populate
     // the access record with information about this access.  Check
-    // first to make sure that auditting is turned on.
+    // first to make sure that auditing is turned on.
 
-    if(uvm_resource_options::is_auditting()) begin
+    if(uvm_resource_options::is_auditing()) begin
       if(accessor != null) begin
         uvm_resource_types::access_t access_record;
         str = accessor.get_full_name();
@@ -1575,12 +1599,19 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
       return;
     end
 
+    if(lock_state == 0) begin
+      string msg;
+      $sformat(msg, "Resource %s is locked and cannot be modified at this time", get_name());
+      uvm_report_error("LOCKED_WRITE", msg);
+      return;
+    end
+
     // If an accessor object is supplied then get the accessor record.
     // Otherwise create a new access record.  In either case populate
     // the access record with information about this access.  Check
-    // first that auditting is turned on
+    // first that auditing is turned on
 
-    if(uvm_resource_options::is_auditting()) begin
+    if(uvm_resource_options::is_auditing()) begin
       if(accessor != null) begin
         uvm_resource_types::access_t access_record;
         string str;
@@ -1630,7 +1661,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // interface is the use of a semaphore to guarantee exclusive access.
 
 
-  // Task: read_with_lock
+  // Task: read_with_loc;
   //
   // Locking version of read().  Like read(), this returns the contents
   // of the resource container.  In addtion it obeys the lock.
@@ -1713,11 +1744,12 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
 
     // Locate first resources in the queue whose type is T
     for(first = 0; first < q.size() && !$cast(rsrc, q.get(first)); first++);
-    prec = rsrc.precedence;
 
     // no resource in the queue whose type is T
     if(rsrc == null)
       return null;
+
+    prec = rsrc.precedence;
 
     // start searching from the next resource after the first resource
     // whose type is T

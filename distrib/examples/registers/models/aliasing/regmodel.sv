@@ -77,11 +77,12 @@ class write_also_to_F extends uvm_reg_cbs;
       m_toF = toF;
    endfunction
    
-   virtual function void post_predict(uvm_reg_field  fld,
-                                      uvm_reg_data_t value,
-                                      uvm_predict_e  kind,
-                                      uvm_path_e     path,
-                                      uvm_reg_map    map);
+   virtual function void post_predict(input uvm_reg_field  fld,
+                                      input uvm_reg_data_t previous,
+                                      inout uvm_reg_data_t value,
+                                      input uvm_predict_e  kind,
+                                      input uvm_path_e     path,
+                                      input uvm_reg_map    map);
       if (kind != UVM_PREDICT_WRITE) return;
 
       void'(m_toF.predict(value, -1, UVM_PREDICT_DIRECT, path, map));

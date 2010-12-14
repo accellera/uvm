@@ -129,8 +129,8 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
     if(size > maxsize)
     {
       vpi_printf("ERROR UVM_register : hdl path '%s' is %0d bits,\n",path,size);
-      vpi_printf(" but the maximum size is %0d, redefine using a compile\n",maxsize);
-      vpi_printf(" flag. i.e. %s\n", "vlog ... +define+UVM_HDL_MAX_WIDTH=<value>\n");
+      vpi_printf(" but the maximum size is %0d. You can increase the maximum\n",maxsize);
+      vpi_printf(" via a compile-time flag: +define+UVM_HDL_MAX_WIDTH=<value>\n");
       //tf_dofinish();
 #ifndef VCS
       vpi_release_handle(r);
@@ -144,7 +144,6 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
     /*dpi and vpi are reversed*/
     for(i=0;i<chunks; ++i)
     {
-      // Code for Questa & VCS
       value[i].aval = value_s.value.vector[i].aval;
       value[i].bval = value_s.value.vector[i].bval;
     }

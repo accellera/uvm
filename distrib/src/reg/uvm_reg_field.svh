@@ -58,7 +58,6 @@ class uvm_reg_field extends uvm_object;
    local int             m_lineno = 0;
    local int             m_cover_on;
    local bit             m_individually_accessible = 0;
-   local string          m_attributes[string];
    local uvm_check_e     m_check;
 
    local static int m_max_size = 0;
@@ -673,53 +672,6 @@ class uvm_reg_field extends uvm_object;
    extern function void post_randomize();
 
 
-   //------------------
-   // Group: Attributes
-   //------------------
-
-   // Function: set_attribute
-   //
-   // Set an attribute.
-   //
-   // Set the specified attribute to the specified value for this field.
-   // If the value is specified as "", the specified attribute is deleted.
-   // A warning is issued if an existing attribute is modified.
-   // 
-   // Attribute names are case sensitive. 
-   //
-   extern virtual function void set_attribute(string name,
-                                              string value);
-
-
-   // Function: get_attribute
-   //
-   // Get an attribute value.
-   //
-   // Get the value of the specified attribute for this field.
-   // If the attribute does not exists, "" is returned.
-   // If ~inherited~ is specifed as TRUE, the value of the attribute
-   // is inherited from its parent register
-   // if it is not specified for this field.
-   // If ~inherited~ is specified as FALSE, the value "" is returned
-   // if it does not exists in the this field.
-   // 
-   // Attribute names are case sensitive.
-   // 
-   extern virtual function string get_attribute(string name,
-                                                bit inherited = 1);
-
- 
-   // Function: get_attributes
-   //
-   // Get all attribute values.
-   //
-   // Get the name of all attribute for this field.
-   // If ~inherited~ is specifed as TRUE, the value for all attributes
-   // inherited from the parent register are included.
-   // 
-   extern virtual function void get_attributes(ref string names[string],
-                                               input bit inherited = 1);
-
    //-----------------
    // Group: Callbacks
    //-----------------
@@ -841,12 +793,14 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    m_lsb       = lsb_pos;
    m_cover_on  = UVM_NO_COVERAGE;
    m_written   = 0;
+   m_check     = UVM_CHECK;
    m_individually_accessible = individually_accessible;
 
    if (has_reset)
       set_reset(reset);
    else
-      set_attribute("NO_HW_RESET_TEST","ON");
+      uvm_resource_db#(bit)::set({"REG::", get_full_name()},
+                                 "NO_REG_HW_RESET_TEST", 1);
 
    m_parent.add_field(this);
 
@@ -1063,71 +1017,6 @@ function bit uvm_reg_field::is_volatile();
 endfunction
 
 
-//-----------
-// ATTRIBUTES
-//-----------
-
-// set_attribute
-
-function void uvm_reg_field::set_attribute(string name,
-                                           string value);
-   if (name == "") begin
-      `uvm_error("RegModel", {"Cannot set anonymous attribute \"\" in field '",
-                         get_full_name(),"'"})
-      return;
-   end
-
-   if (m_attributes.exists(name)) begin
-      if (value != "") begin
-         `uvm_warning("RegModel", {"Redefining attribute '",name,"' in field '",
-                         get_full_name(),"' to '",value,"'"})
-         m_attributes[name] = value;
-      end
-      else begin
-         m_attributes.delete(name);
-      end
-      return;
-   end
-
-   if (value == "") begin
-      `uvm_warning("RegModel", {"Attempting to delete non-existent attribute '",
-                          name, "' in field '", get_full_name(), "'"})
-      return;
-   end
-
-   m_attributes[name] = value;
-endfunction: set_attribute
-
-
-// get_attribute
-
-function string uvm_reg_field::get_attribute(string name,
-                                             bit inherited = 1);
-   if (inherited && m_parent != null)
-      get_attribute = m_parent.get_attribute(name);
-
-   if (get_attribute == "" && m_attributes.exists(name))
-      return m_attributes[name];
-
-   return "";
-endfunction: get_attribute
-
-
-// get_attributes
-
-function void uvm_reg_field::get_attributes(ref string names[string],
-                                            input bit inherited = 1);
-   // attributes at higher levels supercede those at lower levels
-   if (inherited && m_parent != null)
-     m_parent.get_attributes(names,1);
-
-   foreach (m_attributes[nm])
-     if (!names.exists(nm))
-       names[nm] = m_attributes[nm];
-
-endfunction
-
-
 // XpredictX
 
 function uvm_reg_data_t uvm_reg_field::XpredictX (uvm_reg_data_t cur_val,
@@ -1207,16 +1096,19 @@ function void uvm_reg_field::Xpredict_readX (uvm_reg_data_t value,
       end
    end
 
-   m_mirrored  = value;
-   m_desired   = value;
-   this.value  = value;
-
    begin
       uvm_reg_field_cb_iter cbs = new(this);
 
       for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next())
-         cb.post_predict(this, value, UVM_PREDICT_READ, path, map);
+         cb.post_predict(this, m_mirrored, value, UVM_PREDICT_READ, path, map);
    end
+
+   value &= ('b1 << m_size)-1;
+
+   m_mirrored  = value;
+   m_desired   = value;
+   this.value  = value;
+
 endfunction: Xpredict_readX
 
 
@@ -1225,15 +1117,16 @@ endfunction: Xpredict_readX
 function void uvm_reg_field::Xpredict_writeX (uvm_reg_data_t value,
                                               uvm_path_e     path,
                                               uvm_reg_map    map);
+   uvm_reg_data_t previous;
+   
    value &= ('b1 << m_size)-1;
+
+   previous = m_mirrored;
 
    if (path == UVM_FRONTDOOR)
       m_mirrored = XpredictX(m_mirrored, value, map);
    else
       m_mirrored = value;
-
-   m_desired  = m_mirrored;
-   this.value = m_mirrored;
 
    m_written = 1;
 
@@ -1241,8 +1134,14 @@ function void uvm_reg_field::Xpredict_writeX (uvm_reg_data_t value,
       uvm_reg_field_cb_iter cbs = new(this);
 
       for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next())
-         cb.post_predict(this, value, UVM_PREDICT_WRITE, path, map);
+         cb.post_predict(this, previous, m_mirrored, UVM_PREDICT_WRITE, path, map);
    end
+
+   m_mirrored &= ('b1 << m_size)-1;
+
+   m_desired  = m_mirrored;
+   this.value = m_mirrored;
+
 endfunction: Xpredict_writeX
 
 
@@ -2046,14 +1945,6 @@ function string uvm_reg_field::convert2string();
       if (m_fname != "" && m_lineno != 0)
          $sformat(res_str, " from %s:%0d",m_fname, m_lineno);
       convert2string = {convert2string, "\n", res_str, "currently being written"}; 
-   end
-   if (m_attributes.num() > 0) begin
-      string name;
-      void'(m_attributes.first(name));
-      convert2string = {convert2string, "\n", prefix, "Attributes:"};
-      do begin
-         $sformat(convert2string, " %s=\"%s\"", name, m_attributes[name]);
-      end while (m_attributes.next(name));
    end
 endfunction: convert2string
 

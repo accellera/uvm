@@ -10,6 +10,8 @@ core.*
 # ius results are not for the vc
 irun.log
 INCA_libs
+.simvision
+irun.key
 
 # created by flow
 *.fails
@@ -20,4 +22,15 @@ simv*
 vc_hdrs.h
 ucli.key
 *.err
+
+# editor tmp / save files
+*.orig
+*.swp
+
+# questa results are not for the vc
+vsim.wlf
+questa.tops
+work
+*.vstf
+
 
