@@ -116,19 +116,27 @@ class uvm_sequencer_base extends uvm_component;
         if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_MODE_DEFAULT)
           m_seq_thread_mode[phase.m_phase] = m_phase_thread_mode;
 
-        if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_PROACTIVE)
+        if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_PROACTIVE ||
+           m_seq_thread_mode[phase.m_phase] == UVM_PHASE_REACTIVE)
           phase.phase_done.raise_objection(this, {"default phase from ", get_full_name()});
 
         //JLR: really needs to be managed by the phasing code, so need to schedule
         //the process to be run under this component's phase process based on
         //phasing semantics.
         fork begin
-          seq.start(this);
+          //For a reactive thread, we can drop the implicit objection 
+          //immediately.
           m_phase_sequences[phase] = seq;
           m_processes[phase] = new(process::self());
+          if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_REACTIVE) begin
+            phase.phase_done.drop_objection(this, {"default phase from ", get_full_name()});
+          end
+          seq.start(this);
           if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_PROACTIVE) begin
             phase.phase_done.drop_objection(this, {"default phase from ", get_full_name()});
           end
+          wait fork;
+          m_processes[phase].is_defunct = 1;
         end join_none
       end
     end
@@ -144,7 +152,8 @@ class uvm_sequencer_base extends uvm_component;
       if((m_seq_thread_mode[phase.m_phase] != UVM_PHASE_PERSISTENT) &&
          (m_processes[phase].is_active()) ) 
       begin
-        m_processes[phase].m_process_id.kill();
+        if(!m_processes[phase].is_defunct)
+          m_processes[phase].m_process_id.kill();
 
         // Remove the phase sequence
         if(m_phase_sequences.exists(phase)) begin
