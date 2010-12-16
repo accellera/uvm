@@ -131,25 +131,6 @@ module test;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-
-    // The component needs to override teh set_phase_schedule to add
-    // the new schedule.
-    function void set_phase_schedule(string domain_name);
-      uvm_phase_schedule new_phase;
-      super.set_phase_schedule(domain_name);
-      my_sched = find_phase_schedule("uvm_pkg::uvm", domain_name);
-
-      assert(my_sched != null);
-
-      //Add the new phase if needed
-      new_phase = my_sched.find_schedule("my_cfg");
-      if(new_phase == null) begin
-        my_sched.add_phase(my_cfg_phase#(mycomp)::get(),
-          .after_phase(my_sched.find_schedule("pre_configure")),
-          .before_phase(my_sched.find_schedule("configure")));
-      end
-    endfunction
-
     task reset;
       start_reset = $time;
       `uvm_info("RST", "IN RESET", UVM_NONE)
