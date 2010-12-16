@@ -258,6 +258,8 @@ module test;
 //to be looked at
 `ifdef WORKAROUND
 run_ph.phase_done.drop_objection();
+`else
+    `uvm_info("RUN", "WORKAROUND NOT IN PLACE, THIS WILL FAIL BECAUSE UVM DOESN'T KNOW THERE IS A USE PHASE", UVM_NONE)
 `endif
     endtask
   endclass
