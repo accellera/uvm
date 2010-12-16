@@ -69,6 +69,9 @@
   `ifndef INCA_UVM_USE_FILE_LINE
     `undef  UVM_USE_FILE_LINE
   `endif
+  `ifndef INCA_UVM_USE_FPC
+    `undef UVM_USE_FPC
+  `endif
   `define UVM_USE_PROCESS_CONTAINER
   `undef  UVM_DA_TO_QUEUE
   `define UVM_DA_TO_QUEUE(Q,DA)  foreach (DA[idx]) Q.push_back(DA[idx]);
