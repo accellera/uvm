@@ -3309,5 +3309,99 @@
 
 `endif //UVM_EMPTY_MACROS
 
+
+// Group: Recording Macros
+
+
+// Macro: `record_attribute
+//
+// Vendor-independent macro for recording attributes (fields)
+// to an existing handle to a recording database transaction.
+
+`ifdef MODEL_TECH
+  `define record_attribute(TR_HANDLE,NAME,VAR) \
+     $add_attribute(TR_HANDLE,NAME,VAR);
+`endif
+
+`ifdef VCS
+  `define record_attribute(TR_HANDLE,NAME,VAR) \
+     $add_attribute(TR_HANDLE,NAME,VAR);
+`endif
+
+`ifdef IUS
+  `define record_attribute(TR_HANDLE,NAME,VAR) \
+     $add_attribute(TR_HANDLE,NAME,VAR);
+`endif
+
+
+// Group: Packing / Unpacking Macros
+
+// Macro: uvm_pack_scalar
+//
+// Pack any non-array variable.
+
+`define uvm_pack_scalar(VAR,SIZE) \
+   packer.m_bits[packer.count +: SIZE] = VAR; \
+   packer.count += SIZE;
+
+
+// Macro: uvm_pack_array
+//
+// Pack an dynamic array variable.
+
+`define uvm_pack_array(VAR,SIZE=$bits(VAR[0])) \
+    `uvm_pack_scalar(VAR.size(),32) \
+    foreach (VAR `` [index]) begin \
+      packer.m_bits[packer.count+:SIZE] = VAR[index]; \
+      packer.count += SIZE; \
+    end
+
+
+// Macro: uvm_pack_queue
+//
+// Pack a queue.
+
+`define uvm_pack_queue(VAR,SIZE) \
+   `uvm_pack_array(VAR,SIZE)
+
+
+// Macro: uvm_unpack_scalar
+//
+// Unpack a non-array variable.
+
+`define uvm_unpack_scalar(VAR,SIZE) \
+   VAR = packer.m_bits[packer.count +: SIZE]; \
+   packer.count += SIZE;
+
+
+// Macro: uvm_unpack_queue
+//
+// 
+
+`define uvm_unpack_queue(VAR,SIZE) \
+    begin \
+    int sz; \
+    `uvm_unpack_scalar(sz,32) \
+    while (VAR.size() > sz) \
+      void'(VAR.pop_back()); \
+    for (int i=0; i<sz; i++) begin \
+      VAR[i]=packer.m_bits[packer.count+:SIZE];\
+      packer.count += SIZE; \
+    end \
+end
+
+// Macro: uvm_unpack_and_cast
+//
+// 
+
+`define uvm_unpack_and_cast(TYPE,VAR,SIZE) \
+   VAR = TYPE'(packer.m_bits[packer.count +: \
+                                     SIZE]); \
+   packer.count += SIZE;
+
+
+
+
+
 `endif  // UVM_OBJECT_DEFINES_SVH
 

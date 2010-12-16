@@ -40,6 +40,13 @@
 `ifdef VCS
 `endif
 
+
+`ifdef MODEL_TECH
+`ifndef QUESTA
+`define QUESTA
+`endif
+`endif
+
 `ifdef QUESTA
   `undef  uvm_clear_queue
   `define uvm_clear_queue(Q) Q = '{};
