@@ -950,7 +950,7 @@ virtual class uvm_reg extends uvm_object;
    // Returns the sum of all coverage models to be built in the
    // register model.
    //
-   extern virtual protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
+   extern protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
 
 
    // Function: add_coverage
@@ -1848,8 +1848,8 @@ endfunction
 function void uvm_reg::include_coverage(string scope,
                                         uvm_reg_cvr_t models,
                                         uvm_object accessor = null);
-   uvm_reg_cvr_rsrc_db::set("include_coverage",
-                            {"uvm_reg::", scope},
+   uvm_reg_cvr_rsrc_db::set({"uvm_reg::", scope},
+                            "include_coverage",
                             models, accessor);
 endfunction
 
@@ -2690,6 +2690,8 @@ function uvm_status_e uvm_reg::backdoor_read_func(uvm_reg_item rw);
         end
      end
 
+     val &= (1 << m_n_bits)-1;
+
      if (i == 0)
         rw.value[0] = val;
 
@@ -2744,7 +2746,7 @@ task uvm_reg::poke(output uvm_status_e      status,
    rw.element_kind = UVM_REG;
    rw.kind         = UVM_WRITE;
    rw.bd_kind      = kind;
-   rw.value[0]     = value;
+   rw.value[0]     = value & ((1 << m_n_bits)-1);
    rw.parent       = parent;
    rw.extension    = extension;
    rw.fname        = fname;

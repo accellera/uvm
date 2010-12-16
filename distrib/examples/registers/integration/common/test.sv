@@ -32,73 +32,27 @@ import apb_pkg::*;
 `include "regmodel.sv"
 `include "tb_env.sv"
 
-class built_in_tests extends uvm_test;
-
-   function new(string name = "built_in_tests", uvm_component parent = null);
-      super.new(name, parent);
-   endfunction
-
-   `uvm_component_utils(built_in_tests)
-   
-   virtual task run();
-      tb_top.rst = 1;
-      repeat (5) @(negedge tb_top.clk);
-      tb_top.rst = 0;
-
-      #100;
-
-      begin
-         uvm_reg_mem_built_in_seq seq;
-         tb_env env;
-         
-         $cast(env, uvm_top.find("env"));
-
-         seq = uvm_reg_mem_built_in_seq::type_id::create("uvm_reg_mem_built_in_seq",,
-                                                     get_full_name());
-         seq.model = env.regmodel;
-         seq.start(null);
-      end
-      
-      global_stop_request();
-   endtask
-endclass
-
-
-class hw_reset_test extends uvm_test;
-
-   function new(string name = "hw_reset_test", uvm_component parent = null);
-      super.new(name, parent);
-   endfunction
-
-   `uvm_component_utils(hw_reset_test)
-   
-   virtual task run();
-      tb_top.rst = 1;
-      repeat (5) @(negedge tb_top.clk);
-      tb_top.rst = 0;
-
-      #100;
-
-      begin
-         uvm_reg_hw_reset_seq seq;
-         tb_env env;
-         
-         $cast(env, uvm_top.find("env"));
-
-         seq = uvm_reg_hw_reset_seq::type_id::create("uvm_reg_hw_reset_seq",,
-                                                     get_full_name());
-         seq.model = env.regmodel;
-         seq.start(null);
-      end
-      
-      global_stop_request();
-   endtask
-endclass
-
-
 initial
 begin
    static tb_env env = new("env");
+
+   begin
+     uvm_report_server svr;
+     svr = _global_reporter.get_report_server();
+     svr.set_max_quit_count(10);
+   end
+
+   begin
+     string seq_name;
+     if ($value$plusargs("UVM_SEQUENCE=%s",seq_name)) begin
+       uvm_reg_sequence seq;
+       seq = uvm_utils #(uvm_reg_sequence)::create_type_by_name(seq_name,"tb");
+       if (seq == null) 
+         uvm_report_fatal("NO_SEQUENCE",
+           "This env requires you to specify the sequence to run using UVM_SEQUENCE=<name>");
+       env.seq = seq;
+     end
+   end
 
    uvm_config_db#(apb_vif)::set(env, "apb", "vif", $root.tb_top.apb0);
 

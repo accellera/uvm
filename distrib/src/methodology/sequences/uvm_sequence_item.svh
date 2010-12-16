@@ -395,6 +395,34 @@ bit        print_sequence_info = 0;
   // for the item/sequence using <set_sequencer> (or <start_item>), then the global 
   // reporter will be used.
 
+  // The sequence path string is an on-demand string. To avoid building this name
+  // information continuously, we save the info here. The m_get_client_info function
+  // should only be called for a message that has passed the is_enabled check, 
+  // e.g. from the `uvm_info macro.
+  protected string m_client_str;
+  protected uvm_report_object m_client;
+  protected uvm_report_handler m_rh;
+
+  virtual function string m_get_client_info (output uvm_report_object client);
+    if(m_client_str != "") begin
+      client = m_client;
+      return m_client_str;
+    end
+    if(m_sequencer != null)
+      m_client = m_sequencer;
+    else 
+      m_client = uvm_root::get();
+    m_rh = m_client.get_report_handler();
+    client = m_client;
+  
+    m_client_str = client.get_full_name();
+    if(m_client_str == "")
+      m_client_str = {"reporter@@", get_sequence_path()};
+    else
+      m_client_str = {m_client_str,"@@", get_sequence_path()};
+    return m_client_str;
+  endfunction
+
   // Function: uvm_report_info
 
   virtual function void uvm_report_info( string id,
@@ -402,10 +430,11 @@ bit        print_sequence_info = 0;
                                          int verbosity = UVM_MEDIUM,
                                          string filename = "",
                                          int line = 0);
-    if(m_sequencer != null)
-      m_sequencer.uvm_report_info(id,message,verbosity,filename,line);
-    else
-      uvm_top.uvm_report_info(id,message,verbosity,filename,line);
+    uvm_report_object client;
+    string str = m_get_client_info(client);
+
+    m_rh.report(UVM_INFO, str, id, message, verbosity, filename,
+      line, client);
   endfunction
 
   // Function: uvm_report_warning
@@ -415,10 +444,11 @@ bit        print_sequence_info = 0;
                                             int verbosity = UVM_MEDIUM,
                                             string filename = "",
                                             int line = 0);
-    if(m_sequencer != null)
-      m_sequencer.uvm_report_warning(id,message,verbosity,filename,line);
-    else
-      uvm_top.uvm_report_warning(id,message,verbosity,filename,line);
+    uvm_report_object client;
+    string str = m_get_client_info(client);
+
+    m_rh.report(UVM_WARNING, str, id, message, verbosity, filename,
+      line, client);
   endfunction
 
   // Function: uvm_report_error
@@ -428,10 +458,11 @@ bit        print_sequence_info = 0;
                                           int verbosity = UVM_LOW,
                                           string filename = "",
                                           int line = 0);
-    if(m_sequencer != null)
-      m_sequencer.uvm_report_error(id,message,verbosity,filename,line);
-    else
-      uvm_top.uvm_report_error(id,message,verbosity,filename,line);
+    uvm_report_object client;
+    string str = m_get_client_info(client);
+
+    m_rh.report(UVM_ERROR, str, id, message, verbosity, filename,
+      line, client);
   endfunction
 
   // Function: uvm_report_fatal
@@ -446,10 +477,25 @@ bit        print_sequence_info = 0;
                                           int verbosity = UVM_NONE,
                                           string filename = "",
                                           int line = 0);
-    if(m_sequencer != null)
-      m_sequencer.uvm_report_error(id,message,verbosity,filename,line);
+    uvm_report_object client;
+    string str = m_get_client_info(client);
+
+    m_rh.report(UVM_FATAL, str, id, message, verbosity, filename,
+      line, client);
+  endfunction
+
+
+  function int uvm_report_enabled(int verbosity, 
+                          uvm_severity severity=UVM_INFO, string id="");
+    if(m_client == null) begin
+      if(m_sequencer != null) m_client = m_sequencer;
+      else m_client = uvm_root::get();
+    end
+    if (m_client.get_report_verbosity_level(severity, id) < verbosity ||
+        m_client.get_report_action(severity,id) == uvm_action'(UVM_NO_ACTION))
+      return 0;
     else
-      uvm_top.uvm_report_error(id,message,verbosity,filename,line);
+      return 1;
   endfunction
 
 

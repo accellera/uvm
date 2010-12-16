@@ -111,7 +111,8 @@
     int curr, max__; max__=0; curr=0; \
     if(P!=null) p__ = P; \
     else p__ = uvm_default_printer; \
-    max__=$size(F); \
+    foreach(F[i]) max__ = i+1; \
+//    max__=$size(F); \
     p__.print_array_header (`"F`", max__,`"T``(integral)`"); \
     k__ = p__.knobs; \
     if((p__.knobs.depth == -1) || (p__.m_scope.depth() < p__.knobs.depth+1)) \
@@ -145,7 +146,8 @@
     int curr, max__; max__=0; curr=0; \
     if(P!=null) p__ = P; \
     else p__ = uvm_default_printer; \
-    max__=$size(F); \
+    foreach(F[i]) max__ = i+1; \
+    //max__=$size(F); \
     p__.print_array_header (`"F`", max__,`"T``(``ET``)`"); \
     k__ = p__.knobs; \
     if((p__.knobs.depth == -1) || (p__.m_scope.depth() < p__.knobs.depth+1)) \
@@ -197,7 +199,8 @@
     max__=0; curr=0; \
     if(P!=null) p__ = P; \
     else p__ = uvm_default_printer; \
-    max__=$size(F); \
+    //max__=$size(F); \
+    foreach(F[i]) max__ = i+1; \
 \
     //p__.print_header();\
 \
@@ -253,7 +256,8 @@
     int curr, max__; \
     uvm_printer p__; \
     max__=0; curr=0; \
-    max__=$size(F); \
+    //max__=$size(F); \
+    foreach(F[i]) max__ = i+1; \
     if(P!=null) p__ = P; \
     else p__ = uvm_default_printer; \
 \

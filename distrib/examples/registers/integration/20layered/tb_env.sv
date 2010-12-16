@@ -39,6 +39,7 @@ class tb_env extends uvm_component;
    dut_regmodel                 regmodel; 
    uvm_sequencer#(uvm_reg_item) reg_seqr;
    reg2apb_seq_t                reg2apb_seq;
+   uvm_reg_sequence             seq;
    apb_agent                    apb;
 `ifdef EXPLICIT_MON
    uvm_reg_predictor#(apb_rw)   apb2reg_predictor;
@@ -59,9 +60,17 @@ class tb_env extends uvm_component;
          reg2apb_seq = new();
          apb = apb_agent::type_id::create("apb", this);
 `ifdef EXPLICIT_MON
+werwe
          apb2reg_predictor = new("apb2reg_predictor", this);
 `endif
       end
+
+      begin
+        string hdl_root = "tb_top.dut";
+        void'($value$plusargs("ROOT_HDL_PATH=%s",hdl_root));
+        regmodel.set_hdl_path_root(hdl_root);
+      end
+
    endfunction
 
    virtual function void connect();
@@ -82,7 +91,29 @@ class tb_env extends uvm_component;
    endfunction
 
    virtual task run();
-      reg2apb_seq.start(apb.sqr);
+     if (seq == null) begin
+       uvm_report_fatal("NO_SEQUENCE","Env's sequence is not defined. Nothing to do. Exiting.");
+       return;
+     end
+
+     begin : do_reset
+       uvm_report_info("RESET","Performing reset of 5 cycles");
+       tb_top.rst <= 1;
+       repeat (5) @(posedge tb_top.clk);
+       tb_top.rst <= 0;
+     end
+
+     #100;
+
+     fork
+       reg2apb_seq.start(apb.sqr);
+     join_none
+     uvm_report_info("START_SEQ",{"Starting sequence '",seq.get_name(),"'"});
+     seq.model = regmodel;
+     seq.start(null);
+     global_stop_request();
+
+
    endtask
 
 endclass

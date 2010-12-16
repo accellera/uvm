@@ -24,20 +24,22 @@ USES_DPI = 1
 
 include ../../../Makefile.questa
 
+ifdef EXPLICIT_MON
+  OPT = +define+EXPLICIT_MON
+endif
 
-all: prepare comp run
 
-comp:
-	$(VLOG) +incdir+../common \
+all: run
+
+comp: prepare
+	$(VLOG) $(OPT) +incdir+../common \
 		+incdir+../../common/apb \
 		../common/test.sv
 
-run: built_in_tests
+run: comp uvm_reg_mem_built_in_seq
 
-built_in_tests:
-	$(VSIM) +UVM_TESTNAME=built_in_tests
+
+uvm_%_seq: comp
+	$(VSIM) +UVM_SEQUENCE=$@
 	$(CHECK)
 
-hw_reset:
-	$(VSIM) +UVM_TESTNAME=hw_reset_test
-	$(CHECK)

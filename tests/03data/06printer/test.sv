@@ -203,7 +203,7 @@ module test;
   typedef enum bit [1:0] { ONE, TWO, THREE, FOUR } numbers;
   typedef enum bit [2:0] { RED, ORANGE, YELLOW, GREEN, BLUE, INDIGO, VIOLET } colors;
 
-  string strings[$] = '{"S1","S2","S3","S4"};
+  string strings[$];
 
   class subobject extends uvm_object;
     colors color = RED;
@@ -386,6 +386,9 @@ module test;
 
   endclass
   class test extends uvm_test;
+     string str;
+     integer diff;
+     integer fd;
     `uvm_new_func
     `uvm_component_utils(test)
     myobject obj = new;
@@ -414,21 +417,24 @@ module test;
       uvm_default_line_printer.knobs.reference = 0;
       obj.print(uvm_default_line_printer);
       $fclose(mcd);
-
-      error = $system("diff expected_table.txt actual_table.log");
-      if (error) begin
+      
+       $system("rm -f diff.log; diff expected_table.txt actual_table.log >  diff.log ");      
+       fd = $fopen("diff.log","r"); diff= $fgets(str, fd);  $fclose(fd);       
+      if (diff >0) begin
         `uvm_error("BAD_TABLE_PRINTER","Table printer actual output not as expected")
         fail = 1;
       end
 
-      error = $system("diff expected_tree.txt  actual_tree.log");
-      if (error) begin
+       $system("rm -f diff.log; diff expected_tree.txt actual_tree.log >  diff.log ");      
+       fd = $fopen("diff.log","r"); diff= $fgets(str, fd);  $fclose(fd);
+      if (diff >0) begin
         `uvm_error("BAD_TREE_PRINTER","Table printer actual output not as expected")
         fail = 1;
       end
 
-      error = $system("diff expected_line.txt  actual_line.log");
-      if (error) begin
+       $system("rm -f diff.log; diff expected_line.txt actual_line.log >  diff.log ");      
+       fd = $fopen("diff.log","r"); diff= $fgets(str, fd);  $fclose(fd);
+      if (diff >0) begin
         `uvm_error("BAD_LINE_PRINTER","Table printer actual output not as expected")
         fail = 1;
       end
@@ -442,6 +448,12 @@ module test;
     endtask
   endclass
 
-  initial run_test();
+  initial begin
+    strings.push_back("S1");
+    strings.push_back("S2");
+    strings.push_back("S3");
+    strings.push_back("S4");
+    run_test();
+  end
 
 endmodule

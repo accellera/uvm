@@ -109,7 +109,7 @@ class dut_regmodel extends uvm_reg_block;
       RAM.configure(this,"DMA");
 
       // define default map
-      default_map = create_map("default_map", 'h0, 4, UVM_LITTLE_ENDIAN);
+      default_map = create_map("default_map", 'h0, 4, UVM_LITTLE_ENDIAN, 1);
       default_map.add_reg(ID,   'h0,  "RW");
       default_map.add_reg(DATA, 'h24, "RW");
       foreach (SOCKET[i])

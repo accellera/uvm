@@ -81,6 +81,7 @@ class uvm_resource_db #(type T=uvm_object);
   // add a new item into the resources database.  The item will not be
   // written to so it will have its default value. The resource is
   // created using ~name~ and ~scope~ as the lookup parameters.
+
   static function rsrc_t set_default(string scope, string name);
 
     rsrc_t r;
@@ -120,6 +121,49 @@ class uvm_resource_db #(type T=uvm_object);
 
   endfunction
 
+  // function set_override
+  //
+  // Create a new resource, write ~val~ to it, and set it into the
+  // database.  Set it at the beginning of the queue in the type map and
+  // the name map so that it will be (currently) the highest priority
+  // resource with the specified name and type.
+
+  function void set_override(input string scope, input string name,
+                             T val, uvm_object accessor = null);
+    rsrc_t rsrc = new(name, scope);
+    rsrc.write(val, accessor);
+    rsrc.set_override();
+  endfunction
+
+  // function set_override_type
+  //
+  // Create a new resource, write ~val~ to it, and set it into the
+  // database.  Set it at the beginning of the queue in the type map so
+  // that it will be (currently) the highest priority resource with the
+  // specified type. It will be normal priority (i.e. at the end of the
+  // queue) in the name map.
+
+  function void set_override_type(input string scope, input string name,
+                                  T val, uvm_object accessor = null);
+    rsrc_t rsrc = new(name, scope);
+    rsrc.write(val, accessor);
+    rsrc.set_override(uvm_resource_types::TYPE_OVERRIDE);
+  endfunction
+
+  // function set_override_name
+  //
+  // Create a new resource, write ~val~ to it, and set it into the
+  // database.  Set it at the beginning of the queue in the name map so
+  // that it will be (currently) the highest priority resource with the
+  // specified name. It will be normal priority (i.e. at the end of the
+  // queue) in the type map.
+
+  function void set_override_name(input string scope, input string name,
+                                  T val, uvm_object accessor = null);
+    rsrc_t rsrc = new(name, scope);
+    rsrc.write(val, accessor);
+    rsrc.set_override(uvm_resource_types::NAME_OVERRIDE);
+  endfunction
 
   // function: read_by_name
   //
