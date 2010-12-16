@@ -188,7 +188,9 @@ class uvm_root extends uvm_component;
   extern local task m_stop_process ();
   extern /*local*/ task m_stop_request (time timeout=0, bit forced = 0);
   extern local task m_do_stop_all  (uvm_component comp);
-     
+
+  local int m_n_stop_threads = 0;
+
   // phasing implementation
 
   local mailbox #(uvm_phase_schedule) m_phase_hopper;
@@ -1005,7 +1007,7 @@ task uvm_root::m_stop_request(time timeout=0, bit forced = 0);
         wait(m_objections_outstanding==0);
         m_executing_stop_processes = 1;
         m_do_stop_all(this);
-        wait fork;
+        wait (m_n_stop_threads == 0);
         m_executing_stop_processes = 0;
       end
       begin
@@ -1050,12 +1052,13 @@ task uvm_root::m_do_stop_all(uvm_component comp);
     while (comp.get_next_child(name));
 
   if (comp.enable_stop_interrupt) begin
+    m_n_stop_threads++;
     fork begin
       comp.stop("TBD"); // TBD (m_curr_phase.get_name());
+      m_n_stop_threads--;
     end
     join_none
   end
-
 endtask
 
 
