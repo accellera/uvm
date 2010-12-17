@@ -80,6 +80,25 @@ class uvm_sequencer_base extends uvm_component;
   protected uvm_sequence_base  m_phase_sequences[uvm_phase_schedule];
 
   virtual function void phase_started(uvm_phase_schedule phase);
+    start_phase_sequence();
+  endfunction
+
+  // Function: start_phase_sequence
+  //
+  // This function looks for the user specified phase sequence
+  // that is associated with the given phase. A sequence can be
+  // associated with a sequence by using <set_phase_seq> or by
+  // setting the phase configuration property for the phase
+  // using uvm_config_seq::set().
+  //
+  //| // User sets a phase sequence via set_phase_seq
+  //| myseqr.set_phase_seq (uvm_main_ph, myseq_type::type_id::get() );
+  //|
+  //| // or the user sets the phase sequence via a config property
+  //| uvm_config_seq::set(this, "myseqr", "main_ph"
+  //|     myseq_type::type_id::get() );
+
+  virtual function void start_phase_sequence(uvm_phase_schedule phase);
     uvm_object_wrapper w;
     uvm_sequence_base seq;
     uvm_factory f = uvm_factory::get();
@@ -179,11 +198,12 @@ class uvm_sequencer_base extends uvm_component;
   //
   // If no phase sequence has been set by using this function, then
   // <uvm_config_db#(T)::get> (with T=uvm_object_wrapper) is used to access the 
-  // default sequence using the field name ~PHASE~_ph. For example, the following 
-  // configuration setting will set the default sequence for the ~main~ phase on 
-  // sequencer u1.u2.seqr:
+  // default sequence using the field name ~PHASE~_ph. The simplification
+  // typedef uvm_config_seq is provided for this purpose.  For example, the  
+  // following configuration setting will set the default sequence for the 
+  // ~main~ phase on sequencer u1.u2.seqr:
   //
-  //| uvm_config_db#(uvm_object_wrapper)::get(this, "u1.u2.seqr", 
+  //| uvm_config_seq::set(this, "u1.u2.seqr", 
   //|       "main_ph", myseq_type::type_id::get());
   
 
