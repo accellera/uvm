@@ -1,3 +1,3 @@
 vlib work
 vlog -f compile_questa_sv.f
-vsim +UVM_TESTNAME=test_read_modify_write -do vsim.do -c -suppress 3829 ubus_tb_top
+vsim +UVM_TESTNAME=test_2m_4s -c -do vsim.do -suppress 3829 -sv_lib $UVM_HOME/distrib/src/dpi/uvm_dpi ubus_tb_top 

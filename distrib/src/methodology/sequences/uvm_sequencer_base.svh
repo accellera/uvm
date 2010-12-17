@@ -632,7 +632,7 @@ class uvm_sequencer_base extends uvm_component;
       highest_sequences = avail_sequences.find with (item == i);
       if (highest_sequences.size() == 0) begin
         uvm_report_fatal("Sequencer", $psprintf("Error in User arbitration, sequence %0d not available\n%s",
-                                                i, display_queues()), UVM_NONE);
+                                                i, display_queues()), UVM_NONE); // 
       end
       return(i);
     end

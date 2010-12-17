@@ -950,7 +950,7 @@ virtual class uvm_reg extends uvm_object;
    // Returns the sum of all coverage models to be built in the
    // register model.
    //
-   extern virtual protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
+   extern protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
 
 
    // Function: add_coverage
@@ -1848,8 +1848,8 @@ endfunction
 function void uvm_reg::include_coverage(string scope,
                                         uvm_reg_cvr_t models,
                                         uvm_object accessor = null);
-   uvm_reg_cvr_rsrc_db::set("include_coverage",
-                            {"uvm_reg::", scope},
+   uvm_reg_cvr_rsrc_db::set({"uvm_reg::", scope},
+                            "include_coverage",
                             models, accessor);
 endfunction
 
@@ -1861,7 +1861,7 @@ function uvm_reg_cvr_t uvm_reg::build_coverage(uvm_reg_cvr_t models);
    void'(uvm_reg_cvr_rsrc_db::read_by_name({"uvm_reg::", get_full_name()},
                                            "include_coverage",
                                            build_coverage, this));
-   return models;
+   return build_coverage & models;
 endfunction: build_coverage
 
 

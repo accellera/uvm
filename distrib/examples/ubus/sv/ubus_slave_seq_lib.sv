@@ -34,12 +34,15 @@ class simple_response_seq extends uvm_sequence #(ubus_transfer);
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(simple_response_seq, ubus_slave_sequencer)
+//  `uvm_sequence_utils(simple_response_seq, ubus_slave_sequencer)
+    
+  `uvm_object_utils(simple_response_seq)
+  `uvm_declare_p_sequencer(ubus_slave_sequencer)
 
   ubus_transfer util_transfer;
 
   virtual task body();
-    p_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s starting...",
       get_sequence_path()), UVM_MEDIUM);
     forever begin
@@ -71,7 +74,10 @@ class slave_memory_seq extends uvm_sequence #(ubus_transfer);
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(slave_memory_seq, ubus_slave_sequencer)
+//  `uvm_sequence_utils(slave_memory_seq, ubus_slave_sequencer)
+
+  `uvm_object_utils(slave_memory_seq)
+  `uvm_declare_p_sequencer(ubus_slave_sequencer)
 
   ubus_transfer util_transfer;
 
@@ -109,7 +115,7 @@ class slave_memory_seq extends uvm_sequence #(ubus_transfer);
   endfunction
 
   virtual task body();
-    p_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s starting...",
       get_sequence_path()), UVM_MEDIUM);
 
@@ -123,12 +129,8 @@ class slave_memory_seq extends uvm_sequence #(ubus_transfer);
       // to be stopped in the middle of a transfer.
       uvm_test_done.raise_objection(this);
 
-      wait_for_grant();
-      pre_do(1);
-      mid_do(req);
-      send_request(req);
-      wait_for_item_done();
-      post_do(req);
+      start_item(req);
+      finish_item(req);
 
       uvm_test_done.drop_objection(this);
     end

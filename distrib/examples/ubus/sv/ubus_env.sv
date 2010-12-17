@@ -35,8 +35,8 @@ class ubus_env extends uvm_env;
 
   // Control properties
   protected bit has_bus_monitor = 1;
-  protected int unsigned num_masters = 0;
-  protected int unsigned num_slaves = 0;
+  protected int num_masters = 0;
+  protected int num_slaves = 0;
 
   // The following two bits are used to control whether checks and coverage are
   // done both in the bus monitor class and the interface.
@@ -70,16 +70,27 @@ class ubus_env extends uvm_env;
 	 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"}) 
        else
           void'(ubus_vif_config::get(this, get_full_name(),"vif",vif));
-        ubus_vif_config::set(this,"*","vif", vif); // config all vifs on ubus env
+    ubus_vif_config::set(this,"*","vif", vif); // config all vifs on ubus env
+    
     if(has_bus_monitor == 1) begin
       bus_monitor = ubus_bus_monitor::type_id::create("bus_monitor", this);
     end
+    
+    uvm_resource_db#(int)::read_by_name(get_full_name(),
+					"num_masters",
+					num_masters,this);
+    
     masters = new[num_masters];
     for(int i = 0; i < num_masters; i++) begin
       $sformat(inst_name, "masters[%0d]", i);
       masters[i] = ubus_master_agent::type_id::create(inst_name, this);
       set_config_int({inst_name, "*"}, "master_id", i);
     end
+    
+    uvm_resource_db#(int)::read_by_name(get_full_name(),
+					"num_slaves",
+					num_slaves,this);
+    
     slaves = new[num_slaves];
     for(int i = 0; i < num_slaves; i++) begin
       $sformat(inst_name, "slaves[%0d]", i);

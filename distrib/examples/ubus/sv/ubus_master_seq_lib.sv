@@ -70,7 +70,7 @@ class read_byte_seq extends ubus_base_sequence;
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(read_byte_seq, ubus_master_sequencer)    
+  `uvm_object_utils(read_byte_seq)
 
   rand bit [15:0] start_addr;
   rand int unsigned transmit_del = 0;
@@ -84,7 +84,7 @@ class read_byte_seq extends ubus_base_sequence;
         req.error_pos == 1000;
         req.transmit_delay == transmit_del; } )
     get_response(rsp);
-    p_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s read : addr = `x%0h, data[0] = `x%0h",
       get_sequence_path(), rsp.addr, rsp.data[0]), 
       UVM_HIGH);
@@ -105,7 +105,7 @@ class read_half_word_seq extends ubus_base_sequence;
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(read_half_word_seq, ubus_master_sequencer)
+  `uvm_object_utils(read_half_word_seq)
 
   rand bit [15:0] start_addr;
   rand int unsigned transmit_del = 0;
@@ -119,7 +119,7 @@ class read_half_word_seq extends ubus_base_sequence;
         req.error_pos == 1000;
         req.transmit_delay == transmit_del; } )
     get_response(rsp);
-    p_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s read : addr = `x%0h, data[0] = `x%0h, data[1] = `x%0h", 
       get_sequence_path(), rsp.addr, rsp.data[0], rsp.data[1]), UVM_HIGH);
   endtask
@@ -139,7 +139,7 @@ class read_word_seq extends ubus_base_sequence;
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(read_word_seq, ubus_master_sequencer)
+  `uvm_object_utils(read_word_seq)
 
   rand bit [15:0] start_addr;
   rand int unsigned transmit_del = 0;
@@ -153,7 +153,7 @@ class read_word_seq extends ubus_base_sequence;
         req.error_pos == 1000;
         req.transmit_delay == transmit_del; } )
     get_response(rsp);
-    p_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s read : addr = `x%0h, data[0] = `x%0h, \
       data[1] = `x%0h, data[2] = `x%0h, data[3] = `x%0h",
       get_sequence_path(), rsp.addr, rsp.data[0], rsp.data[1], 
@@ -175,7 +175,7 @@ class read_double_word_seq extends ubus_base_sequence;
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(read_double_word_seq, ubus_master_sequencer)    
+  `uvm_object_utils(read_double_word_seq)
 
   rand bit [15:0] start_addr;
   rand int unsigned transmit_del = 0;
@@ -189,7 +189,7 @@ class read_double_word_seq extends ubus_base_sequence;
         req.error_pos == 1000;
         req.transmit_delay == transmit_del; } )
     get_response(rsp);
-    p_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s read : addr = `x%0h, data[0] = `x%0h, \
       data[1] = `x%0h, data[2] = `x%0h, data[3] = `x%0h, data[4] = `x%0h, \
       data[5] = `x%0h, data[6] = `x%0h, data[7] = `x%0h",
@@ -213,7 +213,7 @@ class write_byte_seq extends ubus_base_sequence;
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(write_byte_seq, ubus_master_sequencer)
+  `uvm_object_utils(write_byte_seq)
     
   rand bit [15:0] start_addr;
   rand bit [7:0] data0;
@@ -228,7 +228,7 @@ class write_byte_seq extends ubus_base_sequence;
         req.data[0] == data0;
         req.error_pos == 1000;
         req.transmit_delay == transmit_del; } )
-    p_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s wrote : addr = `x%0h, data[0] = `x%0h",
       get_sequence_path(), req.addr, req.data[0]),
       UVM_HIGH);
@@ -249,7 +249,7 @@ class write_half_word_seq extends ubus_base_sequence;
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(write_half_word_seq, ubus_master_sequencer)
+  `uvm_object_utils(write_half_word_seq)
     
   rand bit [15:0] start_addr;
   rand bit [7:0] data0;
@@ -265,7 +265,7 @@ class write_half_word_seq extends ubus_base_sequence;
         req.data[0] == data0; req.data[1] == data1;
         req.error_pos == 1000; 
         req.transmit_delay == transmit_del; } )
-    p_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s wrote : addr = `x%0h, data[0] = `x%0h, data[1] = `x%0h",
       get_sequence_path(), req.addr, req.data[0], req.data[1]), UVM_HIGH);
   endtask
@@ -285,7 +285,7 @@ class write_word_seq extends ubus_base_sequence;
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(write_word_seq, ubus_master_sequencer)
+  `uvm_object_utils(write_word_seq)
     
   rand bit [15:0] start_addr;
   rand bit [7:0] data0; rand bit [7:0] data1;
@@ -302,7 +302,7 @@ class write_word_seq extends ubus_base_sequence;
          req.data[2] == data2; req.data[3] == data3;
         req.error_pos == 1000;
         req.transmit_delay == transmit_del; } )
-    p_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s wrote : addr = `x%0h, data[0] = `x%0h, \
       data[1] = `x%0h, data[2] = `x%0h, data[3] = `x%0h", 
       get_sequence_path(), req.addr, req.data[0],
@@ -325,7 +325,7 @@ class write_double_word_seq extends ubus_base_sequence;
     super.new(name);
   endfunction
 
-  `uvm_sequence_utils(write_double_word_seq, ubus_master_sequencer)
+  `uvm_object_utils(write_double_word_seq)
     
   rand bit [15:0] start_addr;
   rand bit [7:0] data0; rand bit [7:0] data1;
@@ -346,7 +346,7 @@ class write_double_word_seq extends ubus_base_sequence;
          req.data[6] == data6; req.data[7] == data7;
         req.error_pos == 1000;
         req.transmit_delay == transmit_del; } )
-    p_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("Writing  %s : addr = `x%0h, data[0] = `x%0h, \
       data[1] = `x%0h, data[2] = `x%0h, data[3] = `x%0h, data[4] = `x%0h, \
       data[5] = `x%0h, data[6] = `x%0h, data[7] = `x%0h",

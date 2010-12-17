@@ -260,7 +260,7 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
       return;
     end
 
-    if(uvm_config_seq::exists(this, "", "run_ph", 0) || 
+    if(uvm_config_seq::exists(this, "", "run_ph", 0) && 
        m_default_sequences.exists(uvm_run_ph))
     begin
       `uvm_warning("MULDEFSEQ", "A default sequence has been set via the \"default_sequence\" configuration option and the set_default_seq() method. The \"default_sequence\" configuration option is ignored.")

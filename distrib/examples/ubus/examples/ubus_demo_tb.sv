@@ -53,8 +53,11 @@ class ubus_demo_tb extends uvm_env;
   // build
   virtual function void build();
     super.build();
-    set_config_int("ubus0", "num_masters", 1);
-    set_config_int("ubus0", "num_slaves", 1);
+    uvm_resource_db#(int)::set({get_full_name(),".ubus0"}, "num_masters", 1, this);
+    uvm_resource_db#(int)::set({get_full_name(),".ubus0"}, "num_slaves", 1, this);     
+    
+//    set_config_int("ubus0", "num_masters", 1);
+//    set_config_int("ubus0", "num_slaves", 1);
     ubus0 = ubus_env::type_id::create("ubus0", this);
     scoreboard0 = ubus_demo_scoreboard::type_id::create("scoreboard0", this);
   endfunction : build

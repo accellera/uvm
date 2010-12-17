@@ -31,7 +31,7 @@ class incr_read_byte_seq extends ubus_base_sequence;
     super.new(name);
   endfunction : new
 
-  `uvm_sequence_utils(incr_read_byte_seq, ubus_master_sequencer)
+  `uvm_object_utils(incr_read_byte_seq)
 
   read_byte_seq read_byte_seq0;
 
@@ -42,7 +42,7 @@ class incr_read_byte_seq extends ubus_base_sequence;
     constraint transmit_del_ct { (incr_transmit_del <= 10); }
  
   virtual task body();
-    p_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s starting with count = %0d", 
       get_sequence_path(), count), UVM_MEDIUM);
     repeat(count) begin : repeat_block
@@ -68,7 +68,7 @@ class incr_write_byte_seq extends ubus_base_sequence;
     super.new(name);
   endfunction : new
 
-  `uvm_sequence_utils(incr_write_byte_seq, ubus_master_sequencer)
+  `uvm_object_utils(incr_write_byte_seq)
     
   write_byte_seq write_byte_seq0;
 
@@ -79,7 +79,7 @@ class incr_write_byte_seq extends ubus_base_sequence;
     constraint transmit_del_ct { (incr_transmit_del <= 10); }
 
   virtual task body();
-    p_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s starting with count = %0d",
       get_sequence_path(), count), UVM_MEDIUM);
     repeat(count) begin : repeat_block
@@ -105,13 +105,13 @@ class incr_read_write_read_seq extends ubus_base_sequence;
     super.new(name);
   endfunction : new
 
-  `uvm_sequence_utils(incr_read_write_read_seq, ubus_master_sequencer)
+  `uvm_object_utils(incr_read_write_read_seq)
 
   incr_read_byte_seq  read0;
   incr_write_byte_seq write0;
 
   virtual task body();
-    p_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s starting sequence",
       get_sequence_path()), UVM_MEDIUM);
     `uvm_do(read0)
@@ -134,7 +134,7 @@ class r8_w8_r4_w4_seq extends ubus_base_sequence;
     super.new(name);
   endfunction : new
 
-  `uvm_sequence_utils(r8_w8_r4_w4_seq, ubus_master_sequencer)    
+  `uvm_object_utils(r8_w8_r4_w4_seq)
 
   read_word_seq read_word_seq0;
   read_double_word_seq read_double_word_seq0;
@@ -146,7 +146,7 @@ class r8_w8_r4_w4_seq extends ubus_base_sequence;
   constraint start_address_ct { (start_address == 16'h4000); }
 
   virtual task body();
-    p_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s starting...",
       get_sequence_path()), UVM_MEDIUM);
     `uvm_do_with(read_double_word_seq0, 
@@ -179,7 +179,7 @@ class read_modify_write_seq extends ubus_base_sequence;
     super.new(name);
   endfunction : new
 
-  `uvm_sequence_utils(read_modify_write_seq, ubus_master_sequencer)    
+  `uvm_object_utils(read_modify_write_seq)
 
   read_byte_seq read_byte_seq0;
   write_byte_seq write_byte_seq0;
@@ -188,11 +188,11 @@ class read_modify_write_seq extends ubus_base_sequence;
   bit [7:0] m_data0_check;
 
   virtual task body();
-    p_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s starting...",
       get_sequence_path()), UVM_MEDIUM);
     // READ A RANDOM LOCATION
-    `uvm_do_with(read_byte_seq0, {read_byte_seq0.start_addr == 'h12;
+    `uvm_do_with(read_byte_seq0, {/*read_byte_seq0.start_addr == 'h12;*/
        read_byte_seq0.transmit_del == 0; })
     addr_check = read_byte_seq0.rsp.addr;
     m_data0_check = read_byte_seq0.rsp.data[0] + 1;
@@ -204,9 +204,9 @@ class read_modify_write_seq extends ubus_base_sequence;
     `uvm_do_with(read_byte_seq0,
       { read_byte_seq0.start_addr == addr_check; } )
     assert(m_data0_check == read_byte_seq0.rsp.data[0]) else
-      p_sequencer.uvm_report_error(get_type_name(),
-        $psprintf("%s Read Modify Write Read error!", 
-        get_sequence_path()));
+      `uvm_error(get_type_name(),
+        $psprintf("%s Read Modify Write Read error!\n\tADDR: %h, EXP: %h, ACT: %h", 
+        get_sequence_path(),addr_check,m_data0_check,read_byte_seq0.rsp.data[0]));
   endtask : body
 
 endclass : read_modify_write_seq
@@ -226,15 +226,15 @@ class loop_read_modify_write_seq extends ubus_base_sequence;
     super.new(name);
   endfunction : new
 
-  `uvm_sequence_utils(loop_read_modify_write_seq, ubus_master_sequencer)    
+  `uvm_object_utils(loop_read_modify_write_seq)
 
   read_modify_write_seq rmw_seq;
 
   virtual task body();
-    void'(p_sequencer.get_config_int("loop_read_modify_write_seq.itr", itr));
-    p_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("%s starting...",
-      get_sequence_path()), UVM_MEDIUM);
+    void'(uvm_resource_db#(int)::read_by_name(get_full_name(),"itr", itr,this));
+    `uvm_info(get_type_name(),
+      $psprintf("%s starting...itr = %0d",
+      get_sequence_path(),itr), UVM_MEDIUM);
     for(int i = 0; i < itr; i++) begin
       `uvm_do(rmw_seq)
     end

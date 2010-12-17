@@ -71,15 +71,15 @@ class test_read_modify_write extends ubus_demo_base_test;
   endfunction : new
 
   virtual function void build();
-    // Set the default sequence for the master and slave
-    set_config_string("ubus_demo_tb0.ubus0.masters[0].sequencer",
-      "default_sequence", "read_modify_write_seq");
-    set_config_string("ubus_demo_tb0.ubus0.slaves[0].sequencer", 
-      "default_sequence", "slave_memory_seq");
     // Create the tb
     super.build();
   endfunction : build
 
+  virtual function void end_of_elaboration();
+    ubus_demo_tb0.ubus0.masters[0].sequencer.set_phase_seq(uvm_run_ph, read_modify_write_seq::type_id::get());
+    ubus_demo_tb0.ubus0.slaves[0].sequencer.set_phase_seq(uvm_run_ph, slave_memory_seq::type_id::get());
+  endfunction // void
+  
 endclass : test_read_modify_write
 
 
@@ -93,14 +93,14 @@ class test_r8_w8_r4_w4 extends ubus_demo_base_test;
   endfunction : new
 
   virtual function void build();
-    // Set the default sequence for the master and slave
-    set_config_string("ubus_demo_tb0.ubus0.masters[0].sequencer", 
-      "default_sequence", "r8_w8_r4_w4_seq");
-    set_config_string("ubus_demo_tb0.ubus0.slaves[0].sequencer", 
-      "default_sequence", "slave_memory_seq");
-    // Create the tb
     super.build();
   endfunction : build
+
+  virtual function void end_of_elaboration();
+    // Set the default sequence for the master and slave
+    ubus_demo_tb0.ubus0.masters[0].sequencer.set_phase_seq(uvm_run_ph, r8_w8_r4_w4_seq::type_id::get());
+    ubus_demo_tb0.ubus0.slaves[0].sequencer.set_phase_seq(uvm_run_ph, slave_memory_seq::type_id::get());
+  endfunction // void
 
 endclass : test_r8_w8_r4_w4 
 
@@ -117,18 +117,14 @@ class test_2m_4s extends ubus_demo_base_test;
   virtual function void build();
     // Overides to the ubus_demo_tb build()
     // Set the topology to 2 masters, 4 slaves
-    set_config_int("ubus_demo_tb0.ubus0", "num_masters", 2);
-    set_config_int("ubus_demo_tb0.ubus0", "num_slaves", 4);
-    // Set the default sequence for the master and slave
-    set_config_string("ubus_demo_tb0.ubus0.master*.sequencer", 
-      "default_sequence", "loop_read_modify_write_seq");
-    set_config_string("ubus_demo_tb0.ubus0.slave*.sequencer", 
-      "default_sequence", "slave_memory_seq");
+    uvm_resource_db#(int)::set({get_full_name(),".ubus_demo_tb0.ubus0"}, 
+			       "num_masters", 2, this);
+    uvm_resource_db#(int)::set({get_full_name(),".ubus_demo_tb0.ubus0"}, 
+			       "num_slaves", 4, this);     
+
     // Control the number of RMW loops
-    set_config_int("ubus_demo_tb0.ubus0.masters[0].sequencer",
-      "loop_read_modify_write_seq.itr", 4);
-    set_config_int("ubus_demo_tb0.ubus0.masters[1].sequencer",
-      "loop_read_modify_write_seq.itr", 3);
+    uvm_resource_db#(int)::set({get_name(),".ubus_demo_tb0.ubus0.masters[0].sequencer", ".loop_read_modify_write_seq"}, "itr", 3);
+    uvm_resource_db#(int)::set({get_name(),".ubus_demo_tb0.ubus0.masters[1].sequencer",".loop_read_modify_write_seq"}, "itr", 4);
     // Create the tb
     super.build();
   endfunction : build
@@ -149,6 +145,14 @@ class test_2m_4s extends ubus_demo_base_test;
     ubus_demo_tb0.ubus0.set_slave_address_map("slaves[1]", 16'h4000, 16'h7fff);
     ubus_demo_tb0.ubus0.set_slave_address_map("slaves[2]", 16'h8000, 16'hBfff);
     ubus_demo_tb0.ubus0.set_slave_address_map("slaves[3]", 16'hC000, 16'hFfff);
+
+    ubus_demo_tb0.ubus0.masters[0].sequencer.set_phase_seq(uvm_run_ph, loop_read_modify_write_seq::type_id::get());
+    ubus_demo_tb0.ubus0.masters[1].sequencer.set_phase_seq(uvm_run_ph, loop_read_modify_write_seq::type_id::get());
+    ubus_demo_tb0.ubus0.slaves[0].sequencer.set_phase_seq(uvm_run_ph, slave_memory_seq::type_id::get());
+    ubus_demo_tb0.ubus0.slaves[1].sequencer.set_phase_seq(uvm_run_ph, slave_memory_seq::type_id::get());
+    ubus_demo_tb0.ubus0.slaves[2].sequencer.set_phase_seq(uvm_run_ph, slave_memory_seq::type_id::get());
+    ubus_demo_tb0.ubus0.slaves[3].sequencer.set_phase_seq(uvm_run_ph, slave_memory_seq::type_id::get());
+  
     super.end_of_elaboration();
   endfunction : end_of_elaboration
 

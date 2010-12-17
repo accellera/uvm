@@ -815,7 +815,7 @@ class uvm_mem extends uvm_object;
    // Returns the sum of all coverage models to be built in the
    // memory model.
    //
-   extern virtual protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
+   extern protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
 
 
    // Function: add_coverage
@@ -1381,7 +1381,7 @@ function uvm_reg_cvr_t uvm_mem::build_coverage(uvm_reg_cvr_t models);
    void'(uvm_reg_cvr_rsrc_db::read_by_name({"uvm_reg::", get_full_name()},
                                            "include_coverage",
                                            build_coverage, this));
-   return models;
+   return build_coverage & models;
 endfunction: build_coverage
 
 
