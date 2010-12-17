@@ -291,17 +291,17 @@ class uvm_hb_callback extends uvm_objection_cb;
     else this.target = uvm_root::get();
   endfunction
 
-  virtual function void raised (uvm_object obj, uvm_object source_obj,
-      string description, int count);
+  virtual function void raised (uvm_objection objection, uvm_object obj, 
+      uvm_object source_obj, string description, int count);
     if(obj == target) begin
       if(!cnt.exists(source_obj)) cnt[source_obj] = 0;
       cnt[source_obj] = cnt[source_obj]+1;
       last_trigger[source_obj] = $time;
     end
   endfunction
-  virtual function void dropped (uvm_object obj, uvm_object source_obj,
-      string description, int count);
-    raised(obj,source_obj,description,count);
+  virtual function void dropped (uvm_objection objection, uvm_object obj, 
+      uvm_object source_obj, string description, int count);
+    raised(objection,obj,source_obj,description,count);
   endfunction
 
   function void reset_counts;

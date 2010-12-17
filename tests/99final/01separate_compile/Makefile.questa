@@ -19,17 +19,42 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../..
+UVM_HOME = ../../../distrib
+USES_DPI = 1
 
 include $(UVM_HOME)/examples/Makefile.questa
 
 
 all: run
 
-comp: vlib
-	$(VLOG) +incdir+. \
-		tb_run.sv
+comp : prepare
+	# compile UVM
+	vlog -timescale "1ns/1ns" \
+             +acc=rmb \
+             -mfcu \
+             -suppress 2181 \
+             +incdir+$(UVM_HOME)/src \
+             $(UVM_HOME)/src/uvm_pkg.sv -incr
+	
+	# compile USER CODE
+	vlog -timescale "1ns/1ns" \
+             -mfcu \
+             -suppress 2181 \
+             +acc=rmb \
+             $(UVM_HOME)/src/uvm_macros.svh \
+             +incdir+../../../distrib/src \
+             +incdir+../common/apb \
+             +define+NUM_REGS=10 \
+             test1.sv
 
 run: comp
-	$(VSIM)
+	vsim +UVM_VERBOSITY=HIGH \
+             -sv_lib ../../../distrib/lib/libuvm_questa \
+             -c \
+             -do "run -all; q" \
+             -l questa.log \
+             +UVM_TESTNAME=test \
+             testm
 	$(CHECK)
+
+

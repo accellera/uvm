@@ -38,6 +38,7 @@
 
 /* 
  * VARIABLE: UVM_HDL_MAX_WIDTH
+ * Sets the maximum size bit vector for backdoor access. 
  * This parameter will be looked up by the 
  * DPI-C code using:
  *   vpi_handle_by_name(
