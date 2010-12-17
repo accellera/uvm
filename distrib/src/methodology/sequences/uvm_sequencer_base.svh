@@ -85,7 +85,7 @@ class uvm_sequencer_base extends uvm_component;
 
   // Function: start_phase_sequence
   //
-  // This function looks for the user specified phase sequence
+  // This function starts the user specified phase sequence
   // that is associated with the given phase. A sequence can be
   // associated with a sequence by using <set_phase_seq> or by
   // setting the phase configuration property for the phase
@@ -193,12 +193,13 @@ class uvm_sequencer_base extends uvm_component;
   // will be created and randomized at the time the phase starts. If ~imp~ is
   // null then no default sequence will be executed.
   //
-  // Example of setting the phase sequence for the UVM main phase:
+  // The phase sequence for the UVM main phase can be set as shown:
+  //
   //|  seqr.set_phase_seq(uvm_main_ph, myseq_type::type_id::get());
   //
   // If no phase sequence has been set by using this function, then
   // <uvm_config_db#(T)::get> (with T=uvm_object_wrapper) is used to access the 
-  // default sequence using the field name ~PHASE~_ph. The simplification
+  // default sequence using the field name ~<phase>_ph~. The simplification
   // typedef uvm_config_seq is provided for this purpose.  For example, the  
   // following configuration setting will set the default sequence for the 
   // ~main~ phase on sequencer u1.u2.seqr:
