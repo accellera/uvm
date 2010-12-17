@@ -80,7 +80,7 @@ class uvm_sequencer_base extends uvm_component;
   protected uvm_sequence_base  m_phase_sequences[uvm_phase_schedule];
 
   virtual function void phase_started(uvm_phase_schedule phase);
-    start_phase_sequence();
+    start_phase_sequence(phase);
   endfunction
 
   // Function: start_phase_sequence
