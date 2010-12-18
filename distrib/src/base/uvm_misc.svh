@@ -93,7 +93,7 @@ class uvm_scope_stack;
   // ---------
   
   function void set (string s);
-    `uvm_clear_queue(m_stack);
+    m_stack.delete();
     
     m_stack.push_back(s);
     m_arg = "";
@@ -205,6 +205,40 @@ class uvm_status_container;
   string       key        = "";
   uvm_object   object     = null;
   bit          array_warning_done = 0;
+
+  typedef enum {UVM_NONE_T, UVM_INT_T, UVM_STR_T, UVM_OBJ_T} uvm_apply_t;
+  static uvm_apply_t field_array[string];
+
+  static bit print_matches;
+
+  function void do_field_check(string field, uvm_apply_t t_t = UVM_NONE_T);
+   `ifdef UVM_ENABLE_FIELD_CHECKS                                           
+    if(field_array.exists(field) && (field_array[field] == 1)) begin
+      uvm_report_error("MLTFLD", $psprintf("Field %s is defined multiple times in type %s",
+         field, get_type_name()), UVM_NONE);
+    end
+    `endif
+    field_array[field] = t_t;
+  endfunction
+
+
+  function string get_function_type (int what);
+    case (what)
+      UVM_COPY:    return "copy";
+      UVM_COMPARE: return "compare";
+      UVM_PRINT:   return "print";
+      UVM_RECORD:  return "record";
+      UVM_PACK:    return "pack";
+      UVM_UNPACK:  return "unpack";
+      UVM_FLAGS:   return "get_flags";
+      UVM_SETINT:  return "set";
+      UVM_SETOBJ:  return "set_object";
+      UVM_SETSTR:  return "set_string";
+      default:     return "unknown";
+    endcase
+  endfunction
+
+
 
   // The scope stack is used for messages that are emitted by policy classes.
   uvm_scope_stack scope  = new;

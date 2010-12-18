@@ -1061,7 +1061,7 @@ function uvm_object uvm_factory::create_object_by_name (string requested_type_na
   else
     inst_path = parent_inst_path;
 
-  `uvm_clear_queue(m_override_info)
+  m_override_info.delete();
 
   wrapper = find_override_by_name(requested_type_name, inst_path);
 
@@ -1096,7 +1096,7 @@ function uvm_object uvm_factory::create_object_by_type (uvm_object_wrapper reque
   else
     full_inst_path = parent_inst_path;
 
-  `uvm_clear_queue(m_override_info)
+  m_override_info.delete();
 
   requested_type = find_override_by_type(requested_type, full_inst_path);
 
@@ -1122,7 +1122,7 @@ function uvm_component uvm_factory::create_component_by_name (string requested_t
   else
     inst_path = parent_inst_path;
 
-  `uvm_clear_queue(m_override_info)
+  m_override_info.delete();
 
   wrapper = find_override_by_name(requested_type_name, inst_path);
 
@@ -1157,7 +1157,7 @@ function uvm_component uvm_factory::create_component_by_type (uvm_object_wrapper
   else
     full_inst_path = parent_inst_path;
 
-  `uvm_clear_queue(m_override_info)
+  m_override_info.delete();
 
   requested_type = find_override_by_type(requested_type, full_inst_path);
 
@@ -1520,7 +1520,7 @@ function void  uvm_factory::m_debug_create (string requested_type_name,
   else
     full_inst_path = parent_inst_path;
 
-  `uvm_clear_queue(m_override_info)
+  m_override_info.delete();
 
   if (requested_type == null) begin
     if (!m_type_names.exists(requested_type_name) &&

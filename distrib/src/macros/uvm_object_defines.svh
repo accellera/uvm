@@ -555,7 +555,9 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_do_field_check(`"ARG`", UVM_INT_T); \
+        begin \
+          m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
+        end \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -598,7 +600,8 @@
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
             else begin \
-              print_field_match("set_int()", str__); \
+              if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
               ARG = uvm_object::m_sc.bitstream; \
               uvm_object::m_sc.status = 1; \
             end \
@@ -622,7 +625,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_do_field_check(`"ARG`", UVM_OBJ_T); \
+        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_OBJ_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -689,7 +692,8 @@
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
             else begin \
-              print_field_match("set_object()", str__); \
+              if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_object()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
               if($cast(ARG,uvm_object::m_sc.object)) \
                 uvm_object::m_sc.status = 1; \
             end \
@@ -724,7 +728,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_do_field_check(`"ARG`", UVM_STR_T); \
+        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_STR_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -763,7 +767,8 @@
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
             else begin \
-              print_field_match("set_str()", str__); \
+              if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_str()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
               ARG = uvm_object::m_sc.stringv; \
               m_sc.status = 1; \
             end \
@@ -788,7 +793,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_do_field_check(`"ARG`", UVM_INT_T); \
+        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -830,7 +835,8 @@
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
             else begin \
-              print_field_match("set_int()", str__); \
+              if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
               ARG = T'(uvm_object::m_sc.bitstream); \
               m_sc.status = 1; \
             end \
@@ -854,7 +860,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_do_field_check(`"ARG`", UVM_INT_T); \
+        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -895,7 +901,8 @@
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
             else begin \
-              print_field_match("set_int()", str__); \
+              if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
               ARG = $bitstoreal(uvm_object::m_sc.bitstream); \
               m_sc.status = 1; \
             end \
@@ -979,7 +986,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_do_field_check(`"ARG`", UVM_INT_T); \
+        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1048,7 +1055,8 @@
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
               if(uvm_is_match(str__, m_sc.scope.get())) begin \
-                print_field_match("set_int()", str__); \
+                if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
                 ARG[i] =  uvm_object::m_sc.bitstream; \
                 m_sc.status = 1; \
               end \
@@ -1074,7 +1082,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_do_field_check(`"ARG`", UVM_OBJ_T); \
+        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_OBJ_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1145,7 +1153,8 @@
               $swrite(s,`"ARG[%0d]`",i); \
               m_sc.scope.set_arg(s); \
               if(uvm_is_match(str__, m_sc.scope.get())) begin \
-                print_field_match("set_object()", str__); \
+                if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_object()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
                 if($cast(ARG[i],uvm_object::m_sc.object)) \
                   uvm_object::m_sc.status = 1; \
               end \
@@ -1182,7 +1191,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_do_field_check(`"ARG`", UVM_STR_T); \
+        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_STR_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1252,7 +1261,8 @@
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
               if(uvm_is_match(str__, m_sc.scope.get())) begin \
-                print_field_match("set_int()", str__); \
+                if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
                 ARG[i] =  uvm_object::m_sc.stringv; \
                 m_sc.status = 1; \
               end \
@@ -1278,7 +1288,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_do_field_check(`"ARG`", UVM_INT_T); \
+        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1347,7 +1357,8 @@
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
               if(uvm_is_match(str__, m_sc.scope.get())) begin \
-                print_field_match("set_int()", str__); \
+                if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
                 ARG[i] =  T'(uvm_object::m_sc.bitstream); \
                 m_sc.status = 1; \
               end \
@@ -1408,7 +1419,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_do_field_check(`"ARG`", UVM_INT_T); \
+        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
       UVM_COPY: \
         begin \
           if (local_data__ == null) return; \
@@ -1481,7 +1492,8 @@
             end \
             /**/ else begin \
             /**/   int sz =  uvm_object::m_sc.bitstream; \
-            /**/   print_field_match("set_int()", str__); \
+            /**/   if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
             /**/   if(ARG.size() !=  sz) begin \
             /**/     `M_UVM_``TYPE``_RESIZE(ARG,0) \
             /**/   end \
@@ -1492,7 +1504,8 @@
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
               if(uvm_is_match(str__, m_sc.scope.get())) begin \
-                print_field_match("set_int()", str__); \
+                if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
                 ARG[i] =  uvm_object::m_sc.bitstream; \
                 m_sc.status = 1; \
               end \
@@ -1521,7 +1534,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_do_field_check(`"ARG`", UVM_OBJ_T); \
+        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_OBJ_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1600,7 +1613,8 @@
             end \
             else begin \
               int sz =  uvm_object::m_sc.bitstream; \
-              print_field_match("set_int()", str__); \
+              if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
               if(ARG.size() !=  sz) begin \
                 `M_UVM_``TYPE``_RESIZE(ARG,null) \
               end \
@@ -1616,7 +1630,8 @@
               $swrite(s,`"ARG[%0d]`",i); \
               m_sc.scope.set_arg(s); \
               if(uvm_is_match(str__, m_sc.scope.get())) begin \
-                print_field_match("set_object()", str__); \
+                if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_object()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
                 if($cast(ARG[i],uvm_object::m_sc.object)) \
                   uvm_object::m_sc.status = 1; \
               end \
@@ -1656,7 +1671,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_do_field_check(`"ARG`", UVM_STR_T); \
+        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_STR_T); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1726,7 +1741,8 @@
             end \
             else begin \
               int sz =  uvm_object::m_sc.bitstream; \
-              print_field_match("set_int()", str__); \
+              if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
               if(ARG.size() !=  sz) begin \
                 `M_UVM_``TYPE``_RESIZE(ARG,"") \
               end \
@@ -1740,7 +1756,8 @@
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
               if(uvm_is_match(str__, m_sc.scope.get())) begin \
-                print_field_match("set_int()", str__); \
+                if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
                 ARG[i] =  uvm_object::m_sc.stringv; \
                 m_sc.status = 1; \
               end \
@@ -1770,7 +1787,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_do_field_check(`"ARG`", UVM_INT_T); \
+        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
       UVM_COPY: \
         begin \
           if(!(FLAG&UVM_NOCOPY)) ARG = local_data__.ARG; \
@@ -1842,7 +1859,8 @@
             end \
             /**/else begin \
             /**/  int sz =  uvm_object::m_sc.bitstream; \
-            /**/  print_field_match("set_int()", str__); \
+            /**/  if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
             /**/  if(ARG.size() !=  sz) begin \
             /**/    T tmp__; \
             /**/    `M_UVM_``TYPE``_RESIZE(ARG,tmp__) \
@@ -1854,7 +1872,8 @@
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
               if(uvm_is_match(str__, m_sc.scope.get())) begin \
-                print_field_match("set_int()", str__); \
+                if (m_sc.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", m_sc.get_full_scope_arg()}, UVM_LOW); \
                 ARG[i] =  T'(uvm_object::m_sc.bitstream); \
                 m_sc.status = 1; \
               end \
@@ -1947,7 +1966,7 @@
 
 `define uvm_field_aa_int_string(ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_INT_T); \
+  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
   `M_UVM_FIELD_DATA_AA_int_string(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_TYPE(string, INT, ARG, m_sc.bitstream, FLAG)  \
   end
@@ -1966,7 +1985,7 @@
 
 `define uvm_field_aa_object_string(ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_OBJ_T); \
+  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_OBJ_T); \
   `M_UVM_FIELD_DATA_AA_object_string(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_OBJECT_TYPE(string, ARG, FLAG)  \
   end
@@ -1985,7 +2004,7 @@
 
 `define uvm_field_aa_string_string(ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_STR_T); \
+  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_STR_T); \
   `M_UVM_FIELD_DATA_AA_string_string(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_TYPE(string, STR, ARG, m_sc.stringv, FLAG)  \
   end
@@ -2012,7 +2031,7 @@
 
 `define uvm_field_aa_object_int(ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_OBJ_T); \
+  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_OBJ_T); \
   `M_UVM_FIELD_DATA_AA_object_int(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_OBJECT_TYPE(int, ARG, FLAG)  \
   end
@@ -2181,7 +2200,7 @@
 
 `define uvm_field_aa_int_key(KEY, ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_INT_T); \
+  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
   `M_UVM_FIELD_DATA_AA_int_key(KEY,ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_INT_TYPE(KEY, INT, ARG, m_sc.bitstream, FLAG)  \
   end
@@ -2200,7 +2219,7 @@
 
 `define uvm_field_aa_int_enumkey(KEY, ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_do_field_check(`"ARG`", UVM_INT_T); \
+  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
   `M_UVM_FIELD_DATA_AA_enum_key(KEY,ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_INT_ENUMTYPE(KEY, INT, ARG, m_sc.bitstream, FLAG)  \
   end
@@ -2341,7 +2360,7 @@
     T lh__, rh__; \
     m_sc.scope.down(`"ARG`",null); \
     if(what__ == UVM_CHECK_FIELDS) \
-      m_do_field_check(`"ARG`", UVM_INT_T); \
+      m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
     if((what__ == UVM_PRINT) && !(UVM_NOPRINT&(FLAG))) \
       `uvm_print_qda_enum(ARG, uvm_auto_options_object.printer, array, T) \
     else if((what__ == UVM_RECORD) && !(UVM_NORECORD&(FLAG))) \

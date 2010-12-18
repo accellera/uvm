@@ -1188,7 +1188,7 @@ function void uvm_root::m_objection_scheduler();
           obj.m_execute_scheduled_forks();
         end join_none
       end
-      `uvm_clear_queue(m_objection_watcher_list);
+      m_objection_watcher_list.delete();
     end
   end join_none
 endfunction

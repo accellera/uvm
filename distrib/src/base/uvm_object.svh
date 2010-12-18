@@ -770,32 +770,17 @@ virtual class uvm_object extends uvm_void;
   // when a field is set using one of the set methods.
 
   local string m_leaf_name;
+
   local int m_inst_id;
   static protected int m_inst_count = 0;
 
-  typedef enum {UVM_NONE_T, UVM_INT_T, UVM_STR_T, UVM_OBJ_T} uvm_apply_t;
-  static protected uvm_apply_t m_field_array[string];
-  static bit print_matches = 0;
   static /*protected*/ uvm_status_container m_sc = new;
-
-  extern static function void print_field_match (string fnc, string match);
 
   extern virtual function void m_field_automation (uvm_object tmp_data__,  
                                                    int        what__, 
                                                    string     str__);
 
-  extern protected function string  m_get_function_type  (int what);
-
   extern protected virtual function uvm_report_object m_get_report_object();
-
-  static function uvm_status_container m_get_status(); return m_sc; endfunction
-
-  // The following members are used for verifying the integrity of the 
-  // optional uvm_field macros.
-
-  extern protected function void m_do_field_check(string field, uvm_apply_t t_t = UVM_NONE_T);
-  extern static protected function void m_delete_field_array();
-  extern protected function void m_print_field_array();
 
 endclass
 
@@ -924,21 +909,6 @@ function string uvm_object::convert2string();
   return "";
 endfunction
 
-
-// print_field_match (static)
-// -----------------
-
-function void uvm_object::print_field_match(string fnc, string match);
-  string scratch;
-
-  if(print_matches) begin
-    int style;
-    scratch = {
-      fnc, ": Matched string ", match, " to field ", m_sc.get_full_scope_arg()
-    };
-    uvm_report_info("STRMTC", scratch, UVM_LOW);
-  end
-endfunction
 
 // set
 // ---
@@ -1139,52 +1109,15 @@ endfunction
 
 
 // m_field_automation
-// --------------
+// ------------------
 
-function void uvm_object::m_field_automation ( uvm_object tmp_data__,
-                                             int        what__,
-                                             string     str__ );
+function void uvm_object::m_field_automation (uvm_object tmp_data__,
+                                              int        what__,
+                                              string     str__ );
   return;
 endfunction
 
 
-// m_do_field_checks
-//
-// Checks to see if a new field is a duplicate of one already in this object
-function void uvm_object::m_do_field_check(string field,
-                                           uvm_apply_t t_t = UVM_NONE_T);
- `ifdef UVM_ENABLE_FIELD_CHECKS                                           
-  if(m_field_array.exists(field) && (m_field_array[field] == 1)) begin
-    uvm_report_error("MLTFLD", $psprintf("Field %s is defined multiple times in type %s",
-       field, get_type_name()), UVM_NONE);
-  end
-  `endif
-  m_field_array[field] = t_t;
-endfunction
-
-// m_print_field_array
-//
-// Prints all the fields and their types in the field array.  This
-// function is useful for debugging field automation facility and is
-// otherwise generally not used.
-// ------------
-
-function void uvm_object::m_print_field_array();
-  $display("field array for %s", get_full_name());
-  foreach (m_field_array[name]) begin
-    $display("  %s : %s", name, m_field_array[name].name());
-  end
-endfunction
-
-// m_delete_field_array
-//
-// Frees the memory used by the field array.  Useful for optimizing
-// memory intensive design
-// ------------
-
-function void uvm_object::m_delete_field_array();
-  m_field_array.delete();
-endfunction
 
 // do_print (virtual override)
 // ------------
@@ -1348,7 +1281,7 @@ endfunction
 // ------
 
 function void uvm_object::record (uvm_recorder recorder=null);
-//mxg  if(!recorder) 
+
   if(recorder == null) 
     recorder = uvm_default_recorder;
 
@@ -1372,26 +1305,6 @@ endfunction
 
 function void uvm_object::do_record (uvm_recorder recorder);
   return;
-endfunction
-
-
-// m_get_function_type (static)
-// -------------------
-
-function string uvm_object::m_get_function_type (int what);
-  case (what)
-    UVM_COPY:              return "copy";
-    UVM_COMPARE:           return "compare";
-    UVM_PRINT:             return "print";
-    UVM_RECORD:            return "record";
-    UVM_PACK:              return "pack";
-    UVM_UNPACK:            return "unpack";
-    UVM_FLAGS:             return "get_flags";
-    UVM_SETINT:            return "set";
-    UVM_SETOBJ:            return "set_object";
-    UVM_SETSTR:            return "set_string";
-    default:           return "unknown";
-  endcase
 endfunction
 
 

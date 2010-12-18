@@ -891,7 +891,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Empties the response queue for this sequence.
 
   virtual function void clear_response_queue();
-    `uvm_clear_queue(response_queue);
+    response_queue.delete();
   endfunction
 
 

@@ -606,7 +606,7 @@ class uvm_sequencer_base extends uvm_component;
       for (i = 0; i < avail_sequences.size(); i++) begin
         if (get_seq_item_priority(arb_sequence_q[avail_sequences[i]]) > highest_pri) begin
           // New highest priority, so start new list
-          `uvm_clear_queue(highest_sequences)
+          highest_sequences.delete();
           highest_sequences.push_back(avail_sequences[i]);
           highest_pri = get_seq_item_priority(arb_sequence_q[avail_sequences[i]]);
         end

@@ -1309,6 +1309,8 @@ function void uvm_component::apply_config_settings (bit verbose=0);
   int unsigned i;
   int unsigned j;
 
+  m_field_automation (null, UVM_CHECK_FIELDS, "");
+
   if(verbose)
     $display("applying configuration settings for %s", get_full_name());
 
@@ -1319,31 +1321,30 @@ function void uvm_component::apply_config_settings (bit verbose=0);
 
     // does name have brackets [] in it?
     for(j = 0; j < name.len(); j++) begin
-      if(name[j] == "[")
+      if(name[j] == "[" || name[j] == ".")
         break;
     end
     // If it does have brackets then we'll use the name
-    // up to the brackets to search m_field_array
+    // up to the brackets to search m_sc.field_array
     if(j < name.len())
       search_name = name.substr(0, j-1);
     else
       search_name = name;
 
-    if(!m_field_array.exists(search_name))
+    if(!m_sc.field_array.exists(search_name))
       continue;
 
     if(verbose)
-      $display("applying %s [%s] in %s", name, m_field_array[search_name],
+      $display("applying %s [%s] in %s", name, m_sc.field_array[search_name],
                                          get_full_name());
 
-    case (m_field_array[search_name])
+    case (m_sc.field_array[search_name])
 
-      UVM_INT_T:
+      uvm_status_container::UVM_INT_T:
         begin
           uvm_resource#(int) ri;
           uvm_resource#(int unsigned) riu;
           uvm_resource#(uvm_bitstream_t) rbs;
-$display("SET INT FIELD %s", name);
           if($cast(ri, r))
             set_int_local(name, ri.read(this));
           else
@@ -1358,7 +1359,7 @@ $display("SET INT FIELD %s", name);
               end
         end
 
-      UVM_STR_T:
+      uvm_status_container::UVM_STR_T:
         begin
           uvm_resource#(string) rs;
 
@@ -1371,7 +1372,7 @@ $display("SET INT FIELD %s", name);
         
         end
 
-      UVM_OBJ_T:
+      uvm_status_container::UVM_OBJ_T:
         begin
           uvm_resource#(uvm_object) ro;
 
@@ -1384,6 +1385,7 @@ $display("SET INT FIELD %s", name);
         end
     endcase
   end
+  m_sc.field_array.delete();
   
 endfunction
 

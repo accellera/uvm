@@ -1030,7 +1030,7 @@ function string uvm_table_printer::emit();
   end
 
   emit = s;
-  `uvm_clear_queue(m_rows)
+  m_rows.delete();
 endfunction
 
 
@@ -1142,6 +1142,6 @@ function string uvm_tree_printer::emit();
     s = {s, "\n"};
 
   emit = s;
-  `uvm_clear_queue(m_rows)
+  m_rows.delete();
 endfunction
 

@@ -98,7 +98,7 @@ class test extends uvm_test;
          `uvm_error("TEST", "Callback execution order for a1 was not 1, 2, 4, 5.");
          pass = 0;
       end
-      `uvm_clear_queue(exp)
+      exp.delete();
       exp.push_back(2); exp.push_back(3); 
       exp.push_back(4);
       fail = 0;

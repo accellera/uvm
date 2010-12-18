@@ -596,7 +596,7 @@ class uvm_objection extends uvm_report_object;
   // raised an objection but have not dropped it).
 
   function void get_objectors(ref uvm_object list[$]);
-    `uvm_clear_queue(list)
+    list.delete();
     foreach (m_source_count[obj]) list.push_back(obj); 
   endfunction
 
