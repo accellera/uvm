@@ -798,7 +798,6 @@ function uvm_object::new (string name="");
 
   m_inst_id = m_inst_count++;
   m_leaf_name = name;
-  m_field_automation (null, UVM_CHECK_FIELDS, "");
 endfunction
 
 

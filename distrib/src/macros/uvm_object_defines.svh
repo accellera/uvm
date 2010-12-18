@@ -133,7 +133,6 @@
 // for an abstract class (i.e. virtual class).
 
 `define uvm_field_utils_begin(T) \
-   static bit m_fields_checked = 0; \
    function void m_field_automation (uvm_object tmp_data__, \
                                      int what__, \
                                      string str__); \
@@ -141,13 +140,6 @@
      T local_data__; /* Used for copy and compare */ \
      typedef T ___local_type____; \
      string string_aa_key; /* Used for associative array lookups */ \
-     /* Check the fields if not already checked */ \
-     if(what__ == UVM_CHECK_FIELDS) begin \
-       if(m_fields_checked) \
-         return; \
-       else \
-         m_fields_checked = 1; \
-     end \
      /* Type is verified by uvm_object::compare() */ \
      super.m_field_automation(tmp_data__, what__, str__); \
      if(tmp_data__ != null) \
@@ -3364,7 +3356,7 @@
 //
 // Pack an dynamic array variable.
 
-`define uvm_pack_array(VAR,SIZE=$bits(VAR[0])) \
+`define uvm_pack_array(VAR,SIZE) \
     `uvm_pack_scalar(VAR.size(),32) \
     foreach (VAR `` [index]) begin \
       packer.m_bits[packer.count+:SIZE] = VAR[index]; \
