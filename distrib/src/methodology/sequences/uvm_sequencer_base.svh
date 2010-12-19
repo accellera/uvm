@@ -185,19 +185,6 @@ class uvm_sequencer_base extends uvm_component;
   endfunction
 
 
-  // Variable: pound_zero_count
-  //
-  // Set this variable via set_config_int to set the number of delta cycles
-  // to insert in the wait_for_sequences task. The delta cycles are used
-  // to ensure that a sequence with back-to-back items has an opportunity
-  // to fill the action queue when the driver uses the non-blocking try_get
-  // interface.
-
-  int unsigned pound_zero_count = 6;
-
-  //protected int m_seq_item_port_connect_size;
-
-
 
   // Variable: count
   //
@@ -274,18 +261,21 @@ class uvm_sequencer_base extends uvm_component;
     void'(get_config_int("count", count));
     void'(get_config_int("max_random_count", max_random_count));
     void'(get_config_int("max_random_depth", max_random_depth));
-    void'(get_config_int("pound_zero_count", pound_zero_count));
   endfunction
 
 
 
   virtual function void build();
+    int dummy;
     super.build();
     void'(get_config_string("default_sequence", default_sequence));
     void'(get_config_int("count", count));
     void'(get_config_int("max_random_count", max_random_count));
     void'(get_config_int("max_random_depth", max_random_depth));
-    void'(get_config_int("pound_zero_count", pound_zero_count));
+    if (get_config_int("pound_zero_count", dummy))
+      `uvm_warning("UVM_DEPRECATED",
+        {"Pound_zero_count was set but ignored. ",
+         "Sequencer/driver synchronization uses 'uvm_wait_for_nba_region' now."})
   endfunction
 
 
@@ -1218,16 +1208,12 @@ class uvm_sequencer_base extends uvm_component;
 
   // Task: wait_for_sequences
   //
-  // Waits for a sequence to have a new item available. The default
-  // implementation in the sequencer delays pound_zero_count delta cycles.
-  // (This variable is defined in uvm_sequencer_base.) User-derived sequencers
-  // may override its wait_for_sequences implementation to perform some other
-  // application-specific implementation.
+  // Waits for a sequence to have a new item available. Uses
+  // <uvm_wait_for_nba_region> to give a sequence as much time as
+  // possible to deliver an item before advancing time.
 
   virtual task wait_for_sequences();
-    for (int i = 0; i < pound_zero_count; i++) begin
-      #0;
-    end
+    uvm_wait_for_nba_region();
   endtask
 
 
