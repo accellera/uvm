@@ -426,14 +426,49 @@ virtual class uvm_task_phase extends uvm_phase_imp;
     phase.phase_done.raise_objection(comp, {"raise implicit ", phase.get_name(), " objection for ", comp.get_full_name()});
     fork
       begin
-        uvm_phase_thread thread = new(phase,comp); // store thread process ID
+        uvm_phase_thread thread;
+        bit task_started = 0;
+        bit task_ended = 0;
         comp.m_current_phase = phase;
         comp.phase_started(phase); //GSA TBD do this in separate traversal?
-        exec_task(comp,phase);
-        if( phase.phase_done.get_objection_count(comp) > 0)
-          phase.phase_done.drop_objection(comp, {"drop implicit ", phase.get_name(), " objection for ", comp.get_full_name()});
+
+        // For a persistent and reactive threads we need a wrapper fork so that the wait/fork
+        // at the main phase doesn't block. We need to let the task have a chance to 
+        // start in case the setting is made in the task;
+        fork begin
+          thread = new(phase,comp); // store thread process ID
+          task_started = 1;
+          exec_task(comp,phase);
+          task_ended = 1;
+          wait fork;
+          thread.is_defunct = 1;
+        end join_none
+        // Let the user thread have a chance to activate
+        wait(task_started);
+        // Check if the a setting is made and is different from the start. 
+        if((phase.m_threads[comp].m_thread_mode == UVM_PHASE_PERSISTENT) ||
+           (phase.m_threads[comp].m_thread_mode == UVM_PHASE_REACTIVE))
+        begin
+          // for persistent or reactive we immediately drop the
+          // the objection because we don't want to hold the phase.
+          if(phase.phase_done.get_objection_count(comp) > 0) begin
+              phase.phase_done.drop_objection(comp, {"drop implicit ", phase.get_name(), " objection for ", comp.get_full_name()});
+          end
+        end
+        // For the active case, we need to wait for the task to finish and then drop
+        // the implicit objection
+        else begin
+          wait(task_ended);
+          if(phase.phase_done.get_objection_count(comp) > 0) begin
+              phase.phase_done.drop_objection(comp, {"drop implicit ", phase.get_name(), " objection for ", comp.get_full_name()});
+          end
+        end
+
         phase.wait_no_objections();
         comp.phase_ended(phase); //GSA TBD do this in separate traversal?
+
+        // We can do the basic cleanup here. This will keep persistent
+        // threads but kill active and reactive if not defunct.
         thread.cleanup(); // kill thread process, depending on chosen semantic
       end
     join_none
@@ -446,6 +481,7 @@ endclass
 
 class uvm_process;
   process m_process_id;  
+  bit is_defunct = 0;
   function new(process pid);
     m_process_id = pid;
   endfunction
@@ -517,7 +553,8 @@ class uvm_phase_thread extends uvm_process;
     if (m_thread_mode != UVM_PHASE_PERSISTENT || forced) begin
       m_comp.m_phase_threads.delete(m_phase);
       m_phase.m_threads.delete(m_comp);
-      m_process_id.kill();
+      if(!is_defunct)
+        m_process_id.kill();
     end
   endfunction
 
@@ -1054,25 +1091,12 @@ task uvm_phase_schedule::execute();
   // kills whichever forked process is still remaining.
   if (m_phase != null) begin
     // skip sentinel node with no phase imp to do
-    fork: ex_ph
-      bit order = 0;
-      begin
-        wait (order); // force this process to run last
-        wait_no_objections(uvm_root::get());
-        kill();
-      end
-      begin
-        m_phase_proc = process::self();
-        m_phase.traverse(top,this);
-        order = 1;
-        wait fork;
-      end
-    join_any
-          
-    // kill child processes which includes the component task processes
-    // and the terminations process.
-    // TDB move this functionality to the thread class
-    disable fork;
+    fork begin
+      m_phase_proc = process::self();
+      m_phase.traverse(top,this);
+      // Threads are cleaned up by the process when the thread ends
+      wait_no_objections(uvm_root::get());
+    end join 
   end
 
   // This phase is now done
