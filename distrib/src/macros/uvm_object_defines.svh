@@ -548,7 +548,7 @@
     case (what__) \
       UVM_CHECK_FIELDS: \
         begin \
-          m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
+          m_sc.do_field_check(`"ARG`", this); \
         end \
       UVM_COPY: \
         begin \
@@ -617,7 +617,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_OBJ_T); \
+        m_sc.do_field_check(`"ARG`", this); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -720,7 +720,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_STR_T); \
+        m_sc.do_field_check(`"ARG`", this); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -785,7 +785,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
+        m_sc.do_field_check(`"ARG`", this); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -852,7 +852,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
+        m_sc.do_field_check(`"ARG`", this); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -978,7 +978,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
+        m_sc.do_field_check(`"ARG`", this); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1074,7 +1074,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_OBJ_T); \
+        m_sc.do_field_check(`"ARG`", this); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1183,7 +1183,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_STR_T); \
+        m_sc.do_field_check(`"ARG`", this); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1280,7 +1280,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
+        m_sc.do_field_check(`"ARG`", this); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1411,7 +1411,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
+        m_sc.do_field_check(`"ARG`", this); \
       UVM_COPY: \
         begin \
           if (local_data__ == null) return; \
@@ -1526,7 +1526,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_OBJ_T); \
+        m_sc.do_field_check(`"ARG`", this); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1663,7 +1663,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_STR_T); \
+        m_sc.do_field_check(`"ARG`", this); \
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
@@ -1779,7 +1779,7 @@
   begin \
     case (what__) \
       UVM_CHECK_FIELDS: \
-        m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
+        m_sc.do_field_check(`"ARG`", this); \
       UVM_COPY: \
         begin \
           if(!(FLAG&UVM_NOCOPY)) ARG = local_data__.ARG; \
@@ -1958,7 +1958,7 @@
 
 `define uvm_field_aa_int_string(ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
+  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", this); \
   `M_UVM_FIELD_DATA_AA_int_string(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_TYPE(string, INT, ARG, m_sc.bitstream, FLAG)  \
   end
@@ -1977,7 +1977,7 @@
 
 `define uvm_field_aa_object_string(ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_OBJ_T); \
+  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", this); \
   `M_UVM_FIELD_DATA_AA_object_string(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_OBJECT_TYPE(string, ARG, FLAG)  \
   end
@@ -1996,7 +1996,7 @@
 
 `define uvm_field_aa_string_string(ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_STR_T); \
+  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", this); \
   `M_UVM_FIELD_DATA_AA_string_string(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_TYPE(string, STR, ARG, m_sc.stringv, FLAG)  \
   end
@@ -2023,7 +2023,7 @@
 
 `define uvm_field_aa_object_int(ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_OBJ_T); \
+  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", this); \
   `M_UVM_FIELD_DATA_AA_object_int(ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_OBJECT_TYPE(int, ARG, FLAG)  \
   end
@@ -2192,7 +2192,7 @@
 
 `define uvm_field_aa_int_key(KEY, ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
+  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", this); \
   `M_UVM_FIELD_DATA_AA_int_key(KEY,ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_INT_TYPE(KEY, INT, ARG, m_sc.bitstream, FLAG)  \
   end
@@ -2211,7 +2211,7 @@
 
 `define uvm_field_aa_int_enumkey(KEY, ARG, FLAG) \
   begin \
-  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
+  if(what__==UVM_CHECK_FIELDS) m_sc.do_field_check(`"ARG`", this); \
   `M_UVM_FIELD_DATA_AA_enum_key(KEY,ARG,FLAG) \
   `M_UVM_FIELD_SET_AA_INT_ENUMTYPE(KEY, INT, ARG, m_sc.bitstream, FLAG)  \
   end
@@ -2352,7 +2352,7 @@
     T lh__, rh__; \
     m_sc.scope.down(`"ARG`",null); \
     if(what__ == UVM_CHECK_FIELDS) \
-      m_sc.do_field_check(`"ARG`", uvm_status_container::UVM_INT_T); \
+      m_sc.do_field_check(`"ARG`", this); \
     if((what__ == UVM_PRINT) && !(UVM_NOPRINT&(FLAG))) \
       `uvm_print_qda_enum(ARG, uvm_auto_options_object.printer, array, T) \
     else if((what__ == UVM_RECORD) && !(UVM_NORECORD&(FLAG))) \

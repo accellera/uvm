@@ -98,6 +98,11 @@ cfg_field_set_clone.print();
         uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_sub is not set correctly ***", UVM_NONE);
    
       recording_detail=UVM_LOW;
+
+      uvm_report_info("PASSED", "*** UVM TEST PASSED ***", UVM_NONE);
+
+      global_stop_request();
+
     endtask
   endclass
 

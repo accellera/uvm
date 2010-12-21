@@ -909,8 +909,8 @@ function string uvm_object::convert2string();
 endfunction
 
 
-// set
-// ---
+// set_int_local
+// -------------
 
 function void  uvm_object::set_int_local (string      field_name,
                                           uvm_bitstream_t value,
