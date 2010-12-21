@@ -1166,18 +1166,12 @@ function void uvm_root::print_topology(uvm_printer printer=null);
   if (printer==null)
     printer = uvm_default_printer;
 
-  if (printer.knobs.sprint)
-    s = printer.m_string;
-
   foreach (m_children[c]) begin
     if(m_children[c].print_enabled) begin
       printer.print_object("", m_children[c]);  
-      if(printer.knobs.sprint)
-        s = {s, printer.m_string};
     end
   end
-
-  printer.m_string = s;
+  $display(printer.emit());
 
 endfunction
 
@@ -1197,7 +1191,7 @@ function void uvm_root::m_objection_scheduler();
           obj.m_execute_scheduled_forks();
         end join_none
       end
-      `uvm_clear_queue(m_objection_watcher_list);
+      m_objection_watcher_list.delete();
     end
   end join_none
 endfunction

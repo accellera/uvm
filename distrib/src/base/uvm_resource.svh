@@ -895,8 +895,6 @@ class uvm_resource_pool;
     uvm_resource_base rsrc;
     uvm_resource_base r;
 
-    `uvm_clear_queue(q);
-
     // resources with empty names are anonymous and do not exist in the name map
     if(name == "")
       return q;
@@ -997,8 +995,6 @@ class uvm_resource_pool;
     uvm_resource_types::rsrc_q_t rq;
     uvm_resource_base r;
     int unsigned i;
-
-    `uvm_clear_queue(q);
 
     if(type_handle == null || !ttab.exists(type_handle)) begin
       return q;

@@ -1,3 +1,5 @@
+`include "uvm_macros.svh"
+
 module top;
   import uvm_pkg::*;
   `include "uvm_macros.svh"

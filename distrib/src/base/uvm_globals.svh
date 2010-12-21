@@ -323,8 +323,10 @@ endfunction
 //
 // Task: uvm_wait_for_nba_region
 //
-// Call this task to wait for a delta cycle. Program blocks don't have an nba
-// so just delay for a #0 in a program block.
+// Callers of this task will not return until the NBA region, thus allowing
+// other processes any number of delta cycles (#0) to settle out before
+// continuing. See <uvm_sequencer_base::wait_for_sequences> for example usage.
+//
 //----------------------------------------------------------------------------
 
 task uvm_wait_for_nba_region;
@@ -336,18 +338,19 @@ task uvm_wait_for_nba_region;
 
   //If `included directly in a program block, can't use a non-blocking assign,
   //but it isn't needed since program blocks are in a seperate region.
-`ifndef UVM_PROGRAM_BLOCK
+`ifndef UVM_NO_WAIT_FOR_NBA
   if (nba_scheduled == 0) begin
-    nba_scheduled = 1;
+    nba_scheduled = 1; 
     nba = 0;
     nba <= 1;
-    @(posedge nba) nba_scheduled = 0;
+    @(posedge nba)
+      nba_scheduled = 0;
   end
   else begin
     @(posedge nba);
   end
 `else
-  #0;
+  repeat(`UVM_POUND_ZERO_COUNT) #0;
 `endif
 
 

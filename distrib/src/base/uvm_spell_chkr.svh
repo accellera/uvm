@@ -68,7 +68,7 @@ class uvm_spell_chkr #(type T=int);
         // set a new minimum.  Clean out the queue since previous
         // alternatives are now invalidated.
         min = distance;
-        `uvm_clear_queue(min_key)
+        min_key.delete();
         min_key.push_back(key);
         continue;
       end
