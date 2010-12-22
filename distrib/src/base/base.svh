@@ -61,9 +61,9 @@
   `include "base/uvm_transaction.svh"
 
   // data structure for phasing, depends on report_object
-  `include "base/uvm_graph.sv"
+  `include "base/uvm_graph.svh"
 
-  // The phase declarations. uvm_component does the actual phasing.
+  // The phase declarations
   `include "base/uvm_phases.svh"
 
   // Resources/configuration facility
@@ -73,11 +73,10 @@
   `include "base/uvm_config_db.svh"
   `include "base/uvm_resource_specializations.svh"
 
-  // uvm_component has a co-dependency with the factory. 
   `include "base/uvm_factory.svh"
   `include "base/uvm_registry.svh"
 
-  `include "base/uvm_component.sv"
+  `include "base/uvm_component.svh"
 
   // Objection interface
   `include "base/uvm_objection.svh"

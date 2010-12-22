@@ -108,7 +108,7 @@ sub run_the_test($$$) {
         }
         my $clib = "-sv_lib $uvm_home/lib/uvm_dpi";
         my $vsim = ("vsim +UVM_TESTNAME=test $run_opts $clib -c $toplevels -do 'run -all;quit -f'");
-        system("cd ./$testdir/$uvm_home/examples; make -f Makefile.questa svlib") && die "DPI Library Compilation Problem" ;
+        system("cd ./$testdir/$uvm_home/examples; make -f Makefile.questa --quiet svlib") && die "DPI Library Compilation Problem" ;
 
         &questa_run("cd ./$testdir && $vsim $redirect ".&runtime_log_fname()." 2>&1");
     }
