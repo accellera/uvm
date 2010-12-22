@@ -20,12 +20,7 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
-`ifndef UVM_COMPONENT_SVH
-`define UVM_COMPONENT_SVH
-
 typedef class uvm_objection;
-
-//`include "base/uvm_config.svh"
 
 //------------------------------------------------------------------------------
 //
@@ -1564,7 +1559,4 @@ virtual class uvm_component extends uvm_report_object;
   extern         function void   do_print(uvm_printer printer);
 
 endclass : uvm_component
-
-
-`endif // UVM_COMPONENT_SVH
 

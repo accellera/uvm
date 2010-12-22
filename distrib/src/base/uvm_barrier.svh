@@ -188,10 +188,10 @@ class uvm_barrier extends uvm_object;
   endtask
 
   virtual function void do_print (uvm_printer printer);
-    printer.print_field("threshold", threshold, $bits(threshold), UVM_DEC, ".", "int");
-    printer.print_field("num_waiters", num_waiters, $bits(num_waiters), UVM_DEC, ".", "int");
-    printer.print_field("at_threshold", at_threshold, $bits(at_threshold), UVM_BIN, ".", "bit");
-    printer.print_field("auto_reset", auto_reset, $bits(auto_reset), UVM_BIN, ".", "bit");
+    printer.print_int("threshold", threshold, $bits(threshold), UVM_DEC, ".", "int");
+    printer.print_int("num_waiters", num_waiters, $bits(num_waiters), UVM_DEC, ".", "int");
+    printer.print_int("at_threshold", at_threshold, $bits(at_threshold), UVM_BIN, ".", "bit");
+    printer.print_int("auto_reset", auto_reset, $bits(auto_reset), UVM_BIN, ".", "bit");
   endfunction
 
   virtual function void do_copy (uvm_object rhs);

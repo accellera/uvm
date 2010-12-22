@@ -24,6 +24,10 @@
 `include "base/uvm_root.svh"
 
 //------------------------------------------------------------------------------
+// IMPLEMENTATION
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
 //
 // CLASS- uvm_component
 //
@@ -1299,87 +1303,73 @@ function void uvm_component::apply_config_settings (bit verbose=0);
   uvm_resource_pool rp = uvm_resource_pool::get();
   uvm_queue#(uvm_resource_base) rq;
   uvm_resource_base r;
-  string msg;
   string name;
   string search_name;
   int unsigned i;
   int unsigned j;
 
+  m_field_automation (null, UVM_CHECK_FIELDS, "");
+
   if(verbose)
     $display("applying configuration settings for %s", get_full_name());
 
   rq = rp.lookup_scope(get_full_name());
+
   for(int i=0; i<rq.size(); ++i) begin
+
     r = rq.get(i);
     name = r.get_name();
 
     // does name have brackets [] in it?
-    for(j = 0; j < name.len(); j++) begin
-      if(name[j] == "[")
+    for(j = 0; j < name.len(); j++)
+      if(name[j] == "[" || name[j] == ".")
         break;
-    end
+
     // If it does have brackets then we'll use the name
-    // up to the brackets to search m_field_array
+    // up to the brackets to search m_sc.field_array
     if(j < name.len())
       search_name = name.substr(0, j-1);
     else
       search_name = name;
 
-    if(!m_field_array.exists(search_name))
+    if(!m_sc.field_array.exists(search_name))
       continue;
 
     if(verbose)
-      $display("applying %s [%s] in %s", name, m_field_array[search_name],
+      $display("applying %s [%s] in %s", name, m_sc.field_array[search_name],
                                          get_full_name());
 
-    case (m_field_array[search_name])
-
-      UVM_INT_T:
-        begin
-          uvm_resource#(int) ri;
-          uvm_resource#(int unsigned) riu;
-          uvm_resource#(uvm_bitstream_t) rbs;
-
-          if($cast(ri, r))
-            set_int_local(name, ri.read(this));
-          else
-            if($cast(riu, r))
-              set_int_local(name, riu.read(this));
-            else
-              if($cast(rbs, r))
-                set_int_local(name, rbs.read(this));
-              else begin
-                $sformat(msg, "You told me %s was an int, but it apparently is not.  Auto-config not completed.  To make sure auto-config works correctly use uvm_config_int as the type of your integer resources.", name);
-                `uvm_error("BADTYPE", msg);
-              end
-        end
-
-      UVM_STR_T:
-        begin
+    begin
+    uvm_resource#(uvm_bitstream_t) rbs;
+    if($cast(rbs, r))
+      set_int_local(name, rbs.read(this));
+    else begin
+      /*
+      uvm_resource#(int) ri;
+      if($cast(ri, r))
+        set_int_local(name, ri.read(this));
+      else begin
+        uvm_resource#(int unsigned) riu;
+        if($cast(riu, r))
+          set_int_local(name, riu.read(this));
+        else begin
+        */
           uvm_resource#(string) rs;
-
           if($cast(rs, r))
             set_string_local(name, rs.read(this));
           else begin
-            $sformat(msg, "You told me %s was a string, but it apparently is not.  Auto-config not completed. To make sure auto-config works correctly use uvm_config_string or uvm_resource#(string) as the type of your string resources.", name);
-             `uvm_error("BADTYPE", msg);
+            uvm_resource#(uvm_object) ro;
+            if($cast(ro, r))
+              set_object_local(name, ro.read(this), 0);
           end
-        
-        end
+        //end
+      //end
+    end
+    end
 
-      UVM_OBJ_T:
-        begin
-          uvm_resource#(uvm_object) ro;
-
-          if($cast(ro,r))
-            set_object_local(name, ro.read(this), 0);
-          else begin
-            $sformat(msg, "You told me %s was a uvm_object, but it apparently is not.  Auto-config not completed. To make sure auto-config works correctly use uvm_config_obj or uvm_resource#(uvm_object) as the type of your object resources.", name);
-             `uvm_error("BADTYPE", msg);
-          end
-        end
-    endcase
   end
+
+  m_sc.field_array.delete();
   
 endfunction
 
@@ -1440,12 +1430,12 @@ function void uvm_component::do_print(uvm_printer printer);
         $bits(recording_detail), "UVM_HIGH");
       UVM_FULL : printer.print_generic("recording_detail", "uvm_verbosity", 
         $bits(recording_detail), "UVM_FULL");
-      default : printer.print_field("recording_detail", recording_detail, 
+      default : printer.print_int("recording_detail", recording_detail, 
         $bits(recording_detail), UVM_DEC, , "integral");
     endcase
 
   if (enable_stop_interrupt != 0) begin
-    printer.print_field("enable_stop_interrupt", enable_stop_interrupt,
+    printer.print_int("enable_stop_interrupt", enable_stop_interrupt,
                         $bits(enable_stop_interrupt), UVM_BIN, ".", "bit");
   end
 

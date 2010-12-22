@@ -33,22 +33,33 @@
 `ifndef UVM_PRINTER_DEFINES_SVH
 `define UVM_PRINTER_DEFINES_SVH
 
+// uvm_print_int*
+// --------------
+
 `define uvm_print_int(F, R) \
   `uvm_print_int3(F, R, uvm_default_printer)
-
-`define print_integral_field(F, R, NM, P) \
-    P.print_field(NM, F, $bits(F), R, "[");
-
-`define print_enum_field(T, F, NM, P) \
-    P.print_generic(NM, `"T`", $bits(F), F.name(), "[");
 
 `define uvm_print_int3(F, R, P) \
    do begin \
      uvm_printer p__; \
      if(P!=null) p__ = P; \
      else p__ = uvm_default_printer; \
-     `print_integral_field(F, R, `"F`", p__) \
+     `uvm_print_int4(F, R, `"F`", p__) \
    end while(0);
+
+`define uvm_print_int4(F, R, NM, P) \
+    P.print_int(NM, F, $bits(F), R, "[");
+
+
+// uvm_print_enum
+// --------------
+
+`define uvm_print_enum(T, F, NM, P) \
+    P.print_generic(NM, `"T`", $bits(F), F.name(), "[");
+
+
+// uvm_print_object*
+// -----------------
 
 `define uvm_print_object(F) \
   `uvm_print_object2(F, uvm_default_printer)
@@ -61,6 +72,10 @@
      p__.print_object(`"F`", F, "["); \
    end while(0);
 
+
+// uvm_print_string*
+// -----------------
+
 `define uvm_print_string(F) \
   `uvm_print_string2(F, uvm_default_printer)
 
@@ -72,11 +87,19 @@
      p__.print_string(`"F`", F, "["); \
    end while(0);
 
+
+// uvm_print_array*
+// ----------------
+
 `define uvm_print_array_int(F, R) \
   `uvm_print_array_int3(F, R, uvm_default_printer)
    
 `define uvm_print_array_int3(F, R, P) \
   `uvm_print_qda_int4(F, R, P, da)
+
+
+// uvm_print_sarray*
+// -----------------
 
 `define uvm_print_sarray_int3(F, R, P) \
   `uvm_print_qda_int4(F, R, P, sa)
@@ -88,14 +111,15 @@
     int curr, max__; max__=0; curr=0; \
     if(P!=null) p__ = P; \
     else p__ = uvm_default_printer; \
-    foreach(F[i__]) max__++; \
+    foreach(F[i]) max__ = i+1; \
+//    max__=$size(F); \
     p__.print_array_header (`"F`", max__,`"T``(integral)`"); \
     k__ = p__.knobs; \
     if((p__.knobs.depth == -1) || (p__.m_scope.depth() < p__.knobs.depth+1)) \
     begin \
       foreach(F[i__]) begin \
         if(k__.begin_elements == -1 || k__.end_elements == -1 || curr < k__.begin_elements ) begin \
-          `print_integral_field(F[curr], R, p__.index_string(curr), p__) \
+          `uvm_print_int4(F[curr], R, p__.index_string(curr), p__) \
         end \
         else break; \
         curr++; \
@@ -107,12 +131,12 @@
           p__.print_array_range(k__.begin_elements, curr-1); \
         end \
         for(curr=curr; curr<max__; ++curr) begin \
-          `print_integral_field(F[curr], R, p__.index_string(curr), p__) \
+          `uvm_print_int4(F[curr], R, p__.index_string(curr), p__) \
         end \
       end \
     end \
     p__.print_array_footer(max__); \
-    p__.print_footer(); \
+    //p__.print_footer(); \
   end
  
 `define uvm_print_qda_enum(F, P, T, ET) \
@@ -122,14 +146,15 @@
     int curr, max__; max__=0; curr=0; \
     if(P!=null) p__ = P; \
     else p__ = uvm_default_printer; \
-    foreach(F[i__]) max__++; \
+    foreach(F[i]) max__ = i+1; \
+    //max__=$size(F); \
     p__.print_array_header (`"F`", max__,`"T``(``ET``)`"); \
     k__ = p__.knobs; \
     if((p__.knobs.depth == -1) || (p__.m_scope.depth() < p__.knobs.depth+1)) \
     begin \
       foreach(F[i__]) begin \
         if(k__.begin_elements == -1 || k__.end_elements == -1 || curr < k__.begin_elements ) begin \
-          `print_enum_field(ET, F[curr], p__.index_string(curr), p__) \
+          `uvm_print_enum(ET, F[curr], p__.index_string(curr), p__) \
         end \
         else break; \
         curr++; \
@@ -141,12 +166,12 @@
           p__.print_array_range(k__.begin_elements, curr-1); \
         end \
         for(curr=curr; curr<max__; ++curr) begin \
-          `print_enum_field(ET, F[curr], p__.index_string(curr), p__) \
+          `uvm_print_enum(ET, F[curr], p__.index_string(curr), p__) \
         end \
       end \
     end \
     p__.print_array_footer(max__); \
-    p__.print_footer(); \
+    //p__.print_footer(); \
   end
  
 `define uvm_print_queue_int(F, R) \
@@ -174,9 +199,10 @@
     max__=0; curr=0; \
     if(P!=null) p__ = P; \
     else p__ = uvm_default_printer; \
-    foreach(F[i__]) max__++; \
+    //max__=$size(F); \
+    foreach(F[i]) max__ = i+1; \
 \
-    p__.print_header();\
+    //p__.print_header();\
 \
     p__.m_scope.set_arg(`"F`");\
     p__.print_array_header(`"F`", max__, `"T``(object)`");\
@@ -205,7 +231,7 @@
     end \
 \
     p__.print_array_footer(max__); \
-    p__.print_footer(); \
+    //p__.print_footer(); \
   end while(0);
  
 `define uvm_print_object_queue(F,FLAG) \
@@ -230,11 +256,12 @@
     int curr, max__; \
     uvm_printer p__; \
     max__=0; curr=0; \
-    foreach(F[i__]) max__++; \
+    //max__=$size(F); \
+    foreach(F[i]) max__ = i+1; \
     if(P!=null) p__ = P; \
     else p__ = uvm_default_printer; \
 \
-    p__.print_header();\
+    //p__.print_header();\
 \
     p__.m_scope.set_arg(`"F`");\
     p__.print_array_header(`"F`", max__, `"T``(string)`");\
@@ -256,7 +283,7 @@
     end \
 \
     p__.print_array_footer(max__); \
-    p__.print_footer(); \
+    //p__.print_footer(); \
   end while(0);
  
 `define uvm_print_string_queue(F) \
@@ -287,11 +314,11 @@
     if((p__.knobs.depth == -1) || (p__.m_scope.depth() < p__.knobs.depth+1)) \
     begin \
       foreach(F[string_aa_key]) \
-          `print_integral_field(F[string_aa_key], R,  \
+          `uvm_print_int4(F[string_aa_key], R,  \
                                 {"[", string_aa_key, "]"}, p__) \
     end \
     p__.print_array_footer(F.num()); \
-    p__.print_footer(); \
+    //p__.print_footer(); \
   end
 
 `define uvm_print_aa_string_object(F,FLAG) \
@@ -316,7 +343,7 @@
       end \
     end \
     p__.print_array_footer(F.num()); \
-    p__.print_footer(); \
+    //p__.print_footer(); \
   end
 
 `define uvm_print_aa_string_string(F) \
@@ -336,7 +363,7 @@
           p__.print_string({"[", string_aa_key, "]"}, F[string_aa_key], "["); \
     end \
     p__.print_array_footer(F.num()); \
-    p__.print_footer(); \
+    //p__.print_footer(); \
   end
 
 `define uvm_print_aa_int_object(F,FLAG) \
@@ -363,7 +390,7 @@
       end \
     end \
     p__.print_array_footer(F.num()); \
-    p__.print_footer(); \
+    //p__.print_footer(); \
   end
 
 `define uvm_print_aa_int_key4(KEY, F, R, P) \
@@ -381,12 +408,12 @@
     if((p__.knobs.depth == -1) || (p__.m_scope.depth() < p__.knobs.depth+1)) \
     begin \
       foreach(F[aa_key]) begin \
-          `print_integral_field(F[aa_key], R,  \
+          `uvm_print_int4(F[aa_key], R,  \
                                 {"[", $psprintf("%0d",aa_key), "]"}, p__) \
       end \
     end \
     p__.print_array_footer(F.num()); \
-    p__.print_footer(); \
+    //p__.print_footer(); \
   end
 
 `endif

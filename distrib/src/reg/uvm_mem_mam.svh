@@ -784,7 +784,7 @@ endfunction: release_region
 
 
 function void uvm_mem_mam::release_all_regions();
-  `uvm_clear_queue(in_use)
+  in_use.delete();
 endfunction: release_all_regions
 
 

@@ -32,7 +32,6 @@ import apb_pkg::*;
 `include "regmodel.sv"
 `include "tb_env.sv"
 
-
 initial
 begin
    static tb_env env = new("env");
