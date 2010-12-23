@@ -39,13 +39,29 @@ class blk_R_test_seq extends uvm_reg_sequence;
 
    virtual task body();
       uvm_status_e status;
-      uvm_reg_data_t    data;
+      uvm_reg_data_t data, rd_data;
       int n;
 
       // Initialize R with a random value then check against mirror
       data[7:0] = $urandom();
+
       write_reg(model.R, status, data);
+      read_reg (model.R, status, rd_data);
+
+      if (data != rd_data)
+        `uvm_error("MISCOMPARE","Unexpected value on read")
+
+      model.R.set(23);
+      update_reg(model.R, status);
       mirror_reg(model.R, status, UVM_CHECK);
+
+      data[7:0] = $urandom();
+
+      poke_reg(model.R, status, data);
+      peek_reg(model.R, status, rd_data);
+
+      if (data != rd_data)
+        `uvm_error("MISCOMPARE","Unexpected value on peek")
 
       // Perform a random number of INC operations
       n = ($urandom() % 7) + 3;

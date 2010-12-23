@@ -66,7 +66,7 @@ class reg_block_B extends uvm_reg_block;
 
       // build regs
       R.build   ();
-      R.configure(this, null);
+      R.configure(this, null, "R");
       CTL.build ();
       CTL.configure(this, null);
 

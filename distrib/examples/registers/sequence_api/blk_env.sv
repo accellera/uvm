@@ -40,6 +40,7 @@ class blk_env extends uvm_env;
       if (model == null) begin
          model = reg_block_B::type_id::create("reg_blk_B");
          model.build();
+         model.set_hdl_path_root("blk_top.dut");
          model.lock_model();
 
          apb = apb_agent::type_id::create("apb",this);
