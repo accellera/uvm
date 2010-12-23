@@ -30,7 +30,8 @@ UVM_VERBOSITY =	UVM_MEDIUM
 
 
 LIBDIR  = $(UVM_HOME)/lib
-GCC     = $(MTI_HOME)/gcc-4.1.2-linux/bin/g++
+#GCC     = $(MTI_HOME)/gcc-4.1.2-linux/bin/g++
+GCC     = g++
 TEST    = /usr/bin/test
 BITS    = 32
 

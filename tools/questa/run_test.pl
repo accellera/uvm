@@ -30,11 +30,11 @@
 
 sub questa_support($$$) {
     my ($series,$letter,$beta) = @_;
-    return(1) if ( ($series eq "6.6" && $letter ge "d") || ($series eq "10.0") || ($series eq "10.1"));
-    die "Questa version \"$series$letter$beta\" does not fully support UVM.\n".
-      #"- required version 6.4f, 6.5e, 6.6a or later\n";
+    if (!(($series eq "6.6" && $letter ge "d") || ($series gt "6.6"))) {
+      print "Questa version \"$series$letter$beta\" does not fully support UVM.\n".
       "- required version 6.6d or later\n";
-    exit(1);
+    }
+    return 1;
 }
 
 sub questa_checkversion() {

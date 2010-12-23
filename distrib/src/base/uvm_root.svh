@@ -1018,15 +1018,19 @@ task uvm_root::m_stop_request(time timeout=0, bit forced = 0);
   end
   join
 
-  // all stop processes have completed, or a timeout has occured
-  `uvm_info("STOPREQ", "Stop request has been processed, jumping to the extract phase", UVM_MEDIUM)
-  jump_all_domains(uvm_extract_ph);
-
-  //Temporary hack because jump_all_domains is not jumping out of the run phase
   begin
-    uvm_phase_schedule r = find_phase_schedule("uvm_pkg::common","*");
-    r = r.find_schedule("run");
-    r.phase_done.clear();
+    uvm_phase_schedule sched = find_phase_schedule("uvm_pkg::common","*");
+    run_ph = sched.find_schedule("run");
+
+    // all stop processes have completed, or a timeout has occured
+    `uvm_info("STOPREQ", "Stop request has been processed, jumping to the extract phase", UVM_MEDIUM)
+    jump_all_domains(uvm_extract_ph);
+
+    //Temporary hack because jump_all_domains is not jumping out of the run phase
+    run_ph.phase_done.drop_objection(this, "Stop-request occurred. Dropping objection for run phase");
+
+    #0;
+    run_ph.phase_done.clear();
     uvm_test_done.clear();
   end
 
@@ -1068,7 +1072,8 @@ endtask
 
 function void uvm_root::raised (uvm_objection objection, uvm_object source_obj, 
                               string description, int count);
-  if(objection != test_done_objection()) return;
+  if (objection != test_done_objection())
+    return;
   if (m_executing_stop_processes) begin
     string desc = description == "" ? "" : {" (\"", description, "\") "};
     uvm_report_warning("ILLRAISE", {"An uvm_test_done objection ", desc, "was raised during the execution of component stop processes for the stop_request. The objection is ignored by the stop process."}, UVM_NONE);
@@ -1084,7 +1089,8 @@ endfunction
 
 task uvm_root::all_dropped (uvm_objection objection, uvm_object source_obj, 
                           string description, int count);
-  if(objection != test_done_objection()) return;
+  if(objection != test_done_objection())
+    return;
   m_objections_outstanding = 0;
 endtask
 

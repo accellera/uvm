@@ -29,6 +29,8 @@ typedef class uvm_sequence_base;
 typedef class uvm_objection_cb;
 typedef uvm_callbacks #(uvm_objection,uvm_objection_cb) uvm_objection_cbs_t;
 
+
+
 //------------------------------------------------------------------------------
 // Title: Objection Mechanism
 //------------------------------------------------------------------------------
@@ -64,6 +66,9 @@ class uvm_objection extends uvm_report_object;
   protected int  m_total_count [uvm_object];
   protected time m_drain_time  [uvm_object];
   protected bit  m_draining    [uvm_object];
+
+  uvm_objection_context_object m_context_pool[$];
+  uvm_objection_context_object m_scheduled_list[$];
 
   protected bit m_hier_mode = 1;
 
@@ -127,15 +132,16 @@ class uvm_objection extends uvm_report_object;
   function void m_report(uvm_object obj, uvm_object source_obj, string description, int count, string action);
     string desc;
     int _count = m_source_count.exists(obj) ? m_source_count[obj] : 0;
-    int _total = m_total_count[obj];
+    int _total = m_total_count.exists(obj) ? m_total_count[obj] : 0;
     if (!uvm_report_enabled(UVM_NONE,UVM_INFO,"OBJTN_TRC") || !m_trace_mode) return;
 
-    desc = description == "" ? "" : {" - (", description, ")" };
+    //desc = description == "" ? "" : {" ", description, "" };
     if (source_obj == obj)
 
       uvm_report_info("OBJTN_TRC", 
-        $sformatf("Object %0s %0s %0d objection(s), count=%0d  total=%0d%s",
-           obj.get_full_name()==""?"uvm_top":obj.get_full_name(), action, count, _count, _total,desc), UVM_NONE);
+        $sformatf("Object %0s %0s %0d objection(s)%s: count=%0d  total=%0d",
+           obj.get_full_name()==""?"uvm_top":obj.get_full_name(), action,
+           count, description != ""? {" (",description,")"}:"", _count, _total), UVM_NONE);
     else begin
       int cpath = 0, last_dot=0;
       string sname = source_obj.get_full_name(), nm = obj.get_full_name();
@@ -150,9 +156,10 @@ class uvm_objection extends uvm_report_object;
 
       if(last_dot) sname = sname.substr(last_dot+1, sname.len());
       uvm_report_info("OBJTN_TRC",
-        $sformatf("Object %0s %0s %0d objection(s) from its total (%s from source object %s), count=%0d  total=%0d%s",
+        $sformatf("Object %0s %0s %0d objection(s) %0s its total (%s from source object %s%s): count=%0d  total=%0d",
            obj.get_full_name()==""?"uvm_top":obj.get_full_name(), action=="raised"?"added":"subtracted",
-            count, action, sname, _count, _total, desc), UVM_NONE);
+            count, action=="raised"?"to":"from", action, sname, 
+            description != ""?{", ",description}:"", _count, _total), UVM_NONE);
     end
   endfunction
 
@@ -193,8 +200,12 @@ class uvm_objection extends uvm_report_object;
   // raise : indicator of whether the objection is being raised or lowered. A
   //   1 indicates the objection is being raised.
 
-  function void m_propagate (uvm_object obj, uvm_object source_obj, 
-       string description, int count, bit raise, int in_top_thread);
+  function void m_propagate (uvm_object obj,
+                             uvm_object source_obj,
+                             string description,
+                             int count,
+                             bit raise,
+                             int in_top_thread);
     if (obj != null && obj != top) begin
       obj = m_get_parent(obj);
       if(raise)
@@ -262,9 +273,11 @@ class uvm_objection extends uvm_report_object;
   //   hierarchy.
   //
 
-  function void raise_objection (uvm_object obj=null, string description="",
-       int count=1);
-    if(obj == null) obj = uvm_root::get();
+  function void raise_objection (uvm_object obj=null,
+                                 string description="",
+                                 int count=1);
+    if(obj == null)
+      obj = top;
     m_cleared = 0;
     m_raise (obj, obj, description, count);
   endfunction
@@ -272,12 +285,11 @@ class uvm_objection extends uvm_report_object;
 
   // Function- m_raise
 
-  function void m_raise (uvm_object obj, uvm_object source_obj, 
-       string description="", int count=1);
+  function void m_raise (uvm_object obj,
+                         uvm_object source_obj,
+                         string description="",
+                         int count=1);
 
-    if (obj == null)
-      obj = top;
-  
     if (m_total_count.exists(obj))
       m_total_count[obj] += count;
     else 
@@ -288,7 +300,6 @@ class uvm_objection extends uvm_report_object;
         m_source_count[obj] += count;
       else
         m_source_count[obj] = count;
-      source_obj = obj;
     end
   
     if (m_trace_mode)
@@ -370,20 +381,22 @@ class uvm_objection extends uvm_report_object;
   // registered callbacks, the forked process can be skipped and propagation
   // proceeds immediately to the parent as described. 
 
-  function void drop_objection (uvm_object obj=null, string description="", 
-       int count=1);
-    if(obj == null) obj = uvm_root::get();
+  function void drop_objection (uvm_object obj=null,
+                                string description="",
+                                int count=1);
+    if(obj == null)
+      obj = top;
     m_drop (obj, obj, description, count, 0);
   endfunction
 
 
   // Function- m_drop
 
-  function void m_drop (uvm_object obj, uvm_object source_obj, 
-       string description="", int count=1, int in_top_thread=0);
-
-    if (obj == null)
-      obj = top;
+  function void m_drop (uvm_object obj,
+                        uvm_object source_obj,
+                        string description="",
+                        int count=1,
+                        int in_top_thread=0);
 
     if (!m_total_count.exists(obj) || (count > m_total_count[obj])) begin
       if(m_cleared) return;
@@ -391,25 +404,20 @@ class uvm_objection extends uvm_report_object;
         "\" attempted to drop objection count below zero."});
       return;
     end
-    if ((obj == source_obj) && 
-        (!m_source_count.exists(obj) || (count > m_source_count[obj]))) begin
-      if(m_cleared) return;
-      uvm_report_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
-        "\" attempted to drop objection count below zero."});
-      return;
+
+    if (obj == source_obj) begin
+      if (!m_source_count.exists(obj) || (count > m_source_count[obj])) begin
+        if(m_cleared)
+          return;
+        uvm_report_fatal("OBJTN_ZERO", {"Object \"", obj.get_full_name(), 
+          "\" attempted to drop objection count below zero."});
+        return;
+      end
+      m_source_count[obj] -= count;
     end
 
     m_total_count[obj] -= count;
-    if(m_total_count[obj] == 0) m_total_count.delete(obj);
 
-    if (source_obj==obj) begin
-      if(m_source_count.exists(obj)) begin
-        m_source_count[obj] -= count;
-        if(m_source_count[obj] == 0) m_source_count.delete(obj);
-      end
-      source_obj = obj;
-    end
- 
     if (m_trace_mode)
       m_report(obj,source_obj,description,count,"dropped");
     
@@ -417,8 +425,7 @@ class uvm_objection extends uvm_report_object;
     `uvm_do_callbacks(uvm_objection,uvm_objection_cb,dropped(this,obj,source_obj,description,count))
   
     // if count != 0, no reason to fork
-    if (m_total_count.exists(obj) && m_total_count[obj] != 0) begin
-
+    if (m_total_count[obj] != 0) begin
       if (!m_hier_mode && obj != top)
         m_drop(top,source_obj,description, count, in_top_thread);
       else if (obj != top) begin
@@ -427,37 +434,32 @@ class uvm_objection extends uvm_report_object;
 
     end
     else begin
-        // need to make sure we are safe from the dropping thread terminating
-        // while the drain time is being honored. Can call immediatiately if
-        // we are in the top thread, otherwise we have to schedule it.
-        m_schedule_forked_drop(obj, source_obj, description, count, in_top_thread);
+      // need to make sure we are safe from the dropping thread terminating
+      // while the drain time is being honored. Can call immediatiately if
+      // we are in the top thread, otherwise we have to schedule it.
+      m_draining[obj] = 1;
+      if(in_top_thread) begin
+        m_forked_drop(obj, source_obj, description, count, in_top_thread);
+      end
+      else
+      begin
+        uvm_objection_context_object ctxt;
+        if(m_context_pool.size())
+          ctxt = m_context_pool.pop_front();
+        else
+          ctxt = new;
+        ctxt.obj = obj;
+        ctxt.source_obj = source_obj;
+        ctxt.description = description;
+        ctxt.count = count;
+        m_scheduled_list.push_back(ctxt); 
+      end
     end
 
   endfunction
 
-  uvm_objection_context_object m_context_pool[$];
 
-  // List of scheduled objects
-  uvm_objection_context_object m_scheduled_list[$];
-
-  function void m_schedule_forked_drop (uvm_object obj, uvm_object source_obj, 
-       string description="", int count=1, int in_top_thread=0);
-    m_draining[obj] = 1;
-    if(in_top_thread) begin
-      m_forked_drop(obj, source_obj, description, count, in_top_thread);
-    end
-    else begin
-      uvm_objection_context_object ctxt;
-      if(m_context_pool.size()) ctxt = m_context_pool.pop_front();
-      else ctxt = new;
-      ctxt.obj = obj;
-      ctxt.source_obj = source_obj;
-      ctxt.description = description;
-      ctxt.count = count;
-      m_scheduled_list.push_back(ctxt); 
-    end
-  endfunction
-
+  // background process; when non
   task m_execute_scheduled_forks;
     uvm_objection_context_object ctxt;
     while(1) begin
@@ -469,62 +471,76 @@ class uvm_objection extends uvm_report_object;
   endtask
 
 
-  function void m_forked_drop (uvm_object obj, uvm_object source_obj, 
-       string description="", int count=1, int in_top_thread=0);
+  function void m_forked_drop (uvm_object obj,
+                               uvm_object source_obj,
+                               string description="",
+                               int count=1,
+                               int in_top_thread=0);
 
-        int diff_count;
+    int diff_count;
+
+    fork   // join_none, so this can be a function ; also
+    begin  // serves as guard proc to disable fork
+
+      fork
+        begin
+          if (m_drain_time.exists(obj))
+            #(m_drain_time[obj]);
+ 
+           if (m_trace_mode)
+             m_report(obj,source_obj,description,count,"all_dropped");
+    
+          all_dropped(obj,source_obj,description, count);
+          `uvm_do_callbacks(uvm_objection,uvm_objection_cb,all_dropped(this,obj,source_obj,description,count))
+ 
+          // wait for all_dropped cbs to complete
+          wait fork;
+        end
+        wait (m_total_count.exists(obj) && m_total_count[obj] != 0);
+      join_any
+      disable fork;
+
+      m_draining.delete(obj);
+
+      if(!m_total_count.exists(obj))
+        diff_count = -count;
+      else
+        diff_count = m_total_count[obj] - count;
+
+      // no propagation if a re-raise cancels the drop
+      if (diff_count != 0) begin
         bit reraise;
 
-        fork begin
-         if (m_total_count.exists(obj) || m_total_count[obj] == 0) begin
-           fork begin //wrapper thread for disable fork
-              fork
-                begin
-                  if (m_drain_time.exists(obj))
-                    #(m_drain_time[obj]);
+        if (diff_count > 0)
+          reraise = 1;
+        reraise = diff_count > 0 ? 1 : 0;
+ 
+        if (diff_count < 0)
+          diff_count = -diff_count;
 
-                   if (m_trace_mode)
-                     m_report(obj,source_obj,description,count,"all_dropped");
-    
-                  all_dropped(obj,source_obj,description, count);
-                  `uvm_do_callbacks(uvm_objection,uvm_objection_cb,all_dropped(this,obj,source_obj,description,count))
-  
-                  // wait for all_dropped cbs to complete
-                  wait fork;
-                end
-                wait (m_total_count.exists(obj) && m_total_count[obj] != 0);
-              join_any
-              disable fork;
-           end join
-          end
+        // we are ready to delete the 0-count entries for the current
+        // object before propagating up the hierarchy. 
+        if (m_source_count.exists(obj) && m_source_count[obj] == 0)
+            m_source_count.delete(obj);
 
-          m_draining.delete(obj);
+        if (m_total_count.exists(obj) && m_total_count[obj] == 0)
+           m_total_count.delete(obj);
 
-          if(!m_total_count.exists(obj)) diff_count = -count;
-          else diff_count = m_total_count[obj] - count;
-
-          // no propagation if the re-raise cancels the drop
-          if (diff_count != 0) begin
-            reraise = diff_count > 0 ? 1 : 0;
-
-            if (diff_count < 0)
-              diff_count = -diff_count;
-
-            if (!m_hier_mode && obj != top) begin
-              if (reraise)
-                m_raise(top,source_obj,description,diff_count);
-              else begin
-                m_drop(top,source_obj,description, diff_count, 1);
-              end
-            end
-            else
-              if (obj != top) begin
-                this.m_propagate(obj, source_obj, description, diff_count, reraise, 1);
-              end
-          end
-
+        if (!m_hier_mode && obj != top) begin
+          if (reraise)
+            m_raise(top,source_obj,description,diff_count);
+          else
+            m_drop(top,source_obj,description, diff_count, 1);
         end
-        join_none
+        else begin
+          if (obj != top)
+            this.m_propagate(obj, source_obj, description, diff_count, reraise, 1);
+        end
+      end
+
+    end
+    join_none
+ 
   endfunction
 
   // Function: set_drain_time
@@ -539,13 +555,18 @@ class uvm_objection extends uvm_report_object;
   // during the drain time or during execution of the all_dropped callbacks,
   // the drain_time/all_dropped execution is terminated. 
 
-  function void set_drain_time (uvm_object obj, time drain);
+  // AE: set_drain_time(drain,obj=null)?
+  function void set_drain_time (uvm_object obj=null, time drain);
+    if (obj==null)
+      obj = top;
     m_drain_time[obj] = drain;
     m_set_hier_mode(obj);
   endfunction
   
 
+  //----------------------
   // Group: Callback Hooks
+  //----------------------
 
   // Function: raised
   //
@@ -588,7 +609,9 @@ class uvm_objection extends uvm_report_object;
   endtask
 
 
+  //------------------------
   // Group: Objection Status
+  //------------------------
 
   // Function: get_objectors
   //
@@ -601,9 +624,16 @@ class uvm_objection extends uvm_report_object;
   endfunction
 
 
-   task wait_get_objection_total(uvm_object obj=null);
-     if(!m_total_count.exists(obj)) return;
-     wait(m_total_count[obj] == 0);      
+   task wait_for_total_count(uvm_object obj=null, int count=0);
+     if (obj==null)
+       obj = top;
+
+     if(!m_total_count.exists(obj) && count == 0)
+       return;
+     if (count == 0)
+        wait (!m_total_count.exists(obj) && count == 0);
+     else
+        wait (m_total_count.exists(obj) && m_total_count[obj] == count);
    endtask
    
 
@@ -611,7 +641,10 @@ class uvm_objection extends uvm_report_object;
   //
   // Returns the current number of objections raised by the given ~object~.
 
-  function int get_objection_count (uvm_object obj);
+  function int get_objection_count (uvm_object obj=null);
+    if (obj==null)
+      obj = top;
+
     if (!m_source_count.exists(obj))
       return 0;
     return m_source_count[obj];
@@ -656,7 +689,10 @@ class uvm_objection extends uvm_report_object;
   //
   // Returns the current drain time set for the given ~object~ (default: 0 ns).
 
-  function time get_drain_time (uvm_object obj);
+  function time get_drain_time (uvm_object obj=null);
+    if (obj==null)
+      obj = top;
+
     if (!m_drain_time.exists(obj))
       return 0;
     return m_drain_time[obj];
@@ -810,7 +846,6 @@ endclass
 //| initial uvm_callbacks#(uvm_objection)::add(null,cb);
 //------------------------------------------------------------------------------
 
-
 class uvm_objection_cb extends uvm_callback;
   function new(string name);
     super.new(name);
@@ -906,14 +941,15 @@ class uvm_test_done_objection extends uvm_objection;
   endfunction
 
 
-  // Function: drop
+  // Function: drop_objection
   //
   // Calls <uvm_objection::drop_objection> after calling <qualify>. 
   // If the ~object~ is not provided or is ~null~, then the implicit top-level
   // component, ~uvm_top~, is chosen.
 
   virtual function void drop_objection (uvm_object obj=null, 
-      string description="", int count=1);
+                                        string description="",
+                                        int count=1);
     if(obj==null)
       obj=top;
     else
@@ -980,5 +1016,35 @@ class uvm_objection_context_object;
   int count;
 endclass
 
+
+
+//------------------------------------------------------------------------------
+//
+// Class: uvm_phase_object_cb
+//
+//------------------------------------------------------------------------------
+
+typedef class uvm_phase_schedule;
+
+class uvm_phase_object_cb extends uvm_objection_cb;
+  function new(string name);
+    super.new(name);
+  endfunction
+  uvm_phase_schedule phase_sched;
+  virtual task all_dropped (uvm_objection objection,
+                            uvm_object obj,
+                            uvm_object source_obj,
+                            string description,
+                            int count);
+     // if uvm_top
+     if (obj == uvm_root::get()) begin
+     end
+     
+  endtask
+endclass
+
+
+
 `endif
+
 
