@@ -206,19 +206,17 @@ class uvm_status_container;
   uvm_object   object     = null;
   bit          array_warning_done = 0;
 
-  typedef enum {UVM_NONE_T, UVM_INT_T, UVM_STR_T, UVM_OBJ_T} uvm_apply_t;
-  static uvm_apply_t field_array[string];
+  static bit field_array[string];
 
   static bit print_matches;
 
-  function void do_field_check(string field, uvm_apply_t t_t = UVM_NONE_T);
+  function void do_field_check(string field, uvm_object obj);
    `ifdef UVM_ENABLE_FIELD_CHECKS                                           
-    if(field_array.exists(field) && (field_array[field] == 1)) begin
-      uvm_report_error("MLTFLD", $psprintf("Field %s is defined multiple times in type %s",
-         field, get_type_name()), UVM_NONE);
-    end
+    if (field_array.exists(field))
+      uvm_report_error("MLTFLD", $psprintf("Field %s is defined multiple times in type '%s'",
+         field, obj.get_type_name()), UVM_NONE);
     `endif
-    field_array[field] = t_t;
+    field_array[field] = 1;
   endfunction
 
 

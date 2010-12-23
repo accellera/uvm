@@ -1,8 +1,0 @@
-The auto-config is not correctly configuring inside of container
-objects. For example, if you have an integral field inside of an
-object, you should be able to say:
-  uvm_config_int("comp_path", "object.field", value);
-
-Currently the resources version of configuration does not poke into
-the container object.
-

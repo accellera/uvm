@@ -106,21 +106,24 @@ module test;
       end
       else begin
 
-      if (cfg_field_set_sub2.object.color != ORANGE) begin
-        cfg_field_set_sub2.print();
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_sub2.object.color is not set correctly ***", UVM_NONE);
+        if (cfg_field_set_sub2.object.color != ORANGE) begin
+          cfg_field_set_sub2.print();
+          uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_sub2.object.color is not set correctly ***", UVM_NONE);
+        end
+
+        if (cfg_field_set_sub2.object.i != 15) begin
+          cfg_field_set_sub2.print();
+          uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_sub2.object.i is not set correctly ***", UVM_NONE);
+        end
+
+        if (cfg_field_set_sub2.object.str != "substr val") begin
+          cfg_field_set_sub2.print();
+          uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_sub2.object.str is not set correctly ***", UVM_NONE);
+        end
+
       end
 
-      if (cfg_field_set_sub2.object.i != 15) begin
-        cfg_field_set_sub2.print();
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_sub2.object.i is not set correctly ***", UVM_NONE);
-      end
-
-      if (cfg_field_set_sub2.object.str != "substr val") begin
-        cfg_field_set_sub2.print();
-        uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_sub2.object.str is not set correctly ***", UVM_NONE);
-      end
-      end
+      uvm_report_info("PASSED", "*** UVM TEST PASSED ***", UVM_NONE);
 
       global_stop_request();
     endtask
