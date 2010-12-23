@@ -776,6 +776,8 @@ task uvm_root::run_test(string test_name="");
   // since it needs to be in an initial block to fork a process.
   m_objection_scheduler();
 
+`ifndef UVM_NO_DPI
+
   // Retrieve the test names provided on the command line.  Command line
   // overrides the argument.
   test_name_count = clp.get_arg_values("+UVM_TESTNAME=", test_names);
@@ -799,6 +801,16 @@ task uvm_root::run_test(string test_name="");
     uvm_report_warning("MULTTST", 
       $psprintf("Multiple (%0d) +UVM_TESTNAME arguments provided on the command line.  '%s' will be used.  Provided list: %s.", test_name_count, test_name, test_list), UVM_NONE);
   end
+
+`else
+
+     // plusarg overrides argument
+  if ($value$plusargs("UVM_TESTNAME=%s", test_name)) begin
+    `uvm_info("NO_DPI_TSTNAME", "Using the non-DPI means to retrieve UVM_TESTNAME.", UVM_NONE)
+    testname_plusarg = 1;
+  end
+
+`endif
 
   // if test now defined, create it using common factory
   if (test_name != "") begin
