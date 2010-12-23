@@ -2885,7 +2885,6 @@ function void uvm_component::apply_config_settings (bit verbose=0);
     if($cast(rbs, r))
       set_int_local(name, rbs.read(this));
     else begin
-      /*
       uvm_resource#(int) ri;
       if($cast(ri, r))
         set_int_local(name, ri.read(this));
@@ -2894,7 +2893,6 @@ function void uvm_component::apply_config_settings (bit verbose=0);
         if($cast(riu, r))
           set_int_local(name, riu.read(this));
         else begin
-        */
           uvm_resource#(string) rs;
           if($cast(rs, r))
             set_string_local(name, rs.read(this));
@@ -2903,8 +2901,8 @@ function void uvm_component::apply_config_settings (bit verbose=0);
             if($cast(ro, r))
               set_object_local(name, ro.read(this), 0);
           end
-        //end
-      //end
+        end
+      end
     end
     end
 
