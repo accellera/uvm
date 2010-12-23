@@ -814,8 +814,8 @@ task uvm_phase_schedule::wait_no_objections(uvm_component waiter=null);
       while(phase_done.get_objection_total(top) + 
             uvm_test_done.get_objection_total(top) )
       begin
-        uvm_test_done.wait_for_total_count(top);	 
-        phase_done.wait_for_total_count(top);	 
+        uvm_test_done.wait_for_total_count(top,0);	 
+        phase_done.wait_for_total_count(top,0);	 
       end
 
       begin
@@ -840,12 +840,12 @@ task uvm_phase_schedule::wait_no_objections(uvm_component waiter=null);
     while(phase_done.get_objection_total(top) + 
           uvm_test_done.get_objection_total(top) )
     begin
-      uvm_test_done.wait_for_total_count(top);	 
-      phase_done.wait_for_total_count(top);	 
+      uvm_test_done.wait_for_total_count(top,0);	 
+      phase_done.wait_for_total_count(top,0);
     end
   end
   else begin
-    phase_done.wait_for_total_count(top);	 
+    phase_done.wait_for_total_count(top,0);
   end
 endtask
 

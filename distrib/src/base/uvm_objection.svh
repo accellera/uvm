@@ -479,8 +479,8 @@ class uvm_objection extends uvm_report_object;
 
     int diff_count;
 
-    fork   // join_none, so this can be a function ; also
-    begin  // serves as guard proc to disable fork
+    fork   // join_none, so this can be a function
+    begin  //  also serves as guard proc to embedded disable fork
 
       fork
         begin
