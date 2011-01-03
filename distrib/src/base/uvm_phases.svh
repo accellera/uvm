@@ -1285,7 +1285,7 @@ endfunction
 //|       class uvm_PHASE_phase extends uvm_bottomup_phase("PHASE");
 //
 // 2. implement your exec_task or exec_func method:
-//|       task void exec_task(uvm_component comp, uvm_phase_schedule schedule);
+//|       task exec_task(uvm_component comp, uvm_phase_schedule schedule);
 //|       function void exec_func(uvm_component comp, uvm_phase_schedule schedule);
 //
 // 3. the default ones simply call the related method on the component:
