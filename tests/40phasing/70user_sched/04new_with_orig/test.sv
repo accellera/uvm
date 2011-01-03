@@ -232,9 +232,24 @@ module test;
       scmd.set_phase_domain("mydomain"); //switch domain for this instance
     endfunction
     function bit check_times() ;
-      if (!mc.compare_phase_times( {0,40,70,100})) return 1 ;
-      if (!scsd.compare_phase_times( {0,40,60})) return 1 ;
-      if (!scmd.compare_phase_times( {0,70,100})) return 1 ;
+      time mc_times[$], scsd_times[$], scmd_times[$];
+
+      mc_times.push_back(0); 
+      mc_times.push_back(40); 
+      mc_times.push_back(70); 
+      mc_times.push_back(100);
+
+      scsd_times.push_back(0);
+      scsd_times.push_back(40);
+      scsd_times.push_back(60);
+
+      scmd_times.push_back(0);
+      scmd_times.push_back(70);
+      scmd_times.push_back(100);
+
+      if (!mc.compare_phase_times(mc_times)) return 1 ;
+      if (!scsd.compare_phase_times(scsd_times)) return 1 ;
+      if (!scmd.compare_phase_times(scmd_times)) return 1 ;
       return 0 ;
     endfunction
     task run;
