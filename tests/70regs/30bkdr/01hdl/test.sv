@@ -40,10 +40,10 @@ import uvm_pkg::*;
 
 typedef enum { READ, DEPOSIT, FORCE, RELEASE } op_e;
 
-task  op(op_e oper, string hdl, bit [7:0] wr_val=0, bit [7:0] exp_val, int lineno, time force_time=0);
+task automatic op(op_e oper, string hdl, bit [7:0] wr_val=0, bit [7:0] exp_val, int lineno, time force_time=0);
 
 
-  automatic bit [7:0] rd_val = 0;
+  bit [7:0] rd_val = 0;
 
   if (oper == DEPOSIT) begin
    if (!uvm_hdl_deposit(hdl,wr_val))
