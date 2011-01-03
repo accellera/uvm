@@ -26,14 +26,9 @@
 
 // Default settings
 `define _protected protected   
-`define uvm_clear_queue(Q) Q.delete();
 `define UVM_USE_FPC
-`define UVM_USE_PROCESS_STATE
-`define UVM_USE_SUSPEND_RESUME
 `define UVM_USE_P_FORMAT
 `define UVM_USE_FILE_LINE
-`define UVM_USE_ALT_PHASING
-`define UVM_USE_TYPENAME
 `define UVM_DA_TO_QUEUE(Q,DA) Q=DA;
 `undef  UVM_USE_PROCESS_CONTAINER
 
@@ -43,10 +38,14 @@
 `ifdef VCS
 `endif
 
+
+`ifdef MODEL_TECH
+`ifndef QUESTA
+`define QUESTA
+`endif
+`endif
+
 `ifdef QUESTA
-  `undef  uvm_clear_queue
-  `define uvm_clear_queue(Q) Q = '{};
-  `undef  UVM_USE_ALT_PHASING
 `endif
 
 `ifdef INCA
@@ -54,20 +53,17 @@
     `undef _protected
     `define _protected 
   `endif
-  `ifndef INCA_UVM_USE_PROCESS_STATE
-    `undef  UVM_USE_PROCESS_STATE
-  `endif
-  `ifndef INCA_UVM_USE_SUSPEND_RESUME
-    `undef  UVM_USE_SUSPEND_RESUME
+  `ifndef INCA_UVM_USE_FPC
+    `undef  UVM_USE_FPC
   `endif
   `ifndef INCA_UVM_USE_P_FORMAT
     `undef  UVM_USE_P_FORMAT
   `endif
-  `ifndef INCA_UVM_USE_TYPENAME
-    `undef UVM_USE_TYPENAME
-  `endif
   `ifndef INCA_UVM_USE_FILE_LINE
     `undef  UVM_USE_FILE_LINE
+  `endif
+  `ifndef INCA_UVM_USE_FPC
+    `undef UVM_USE_FPC
   `endif
   `define UVM_USE_PROCESS_CONTAINER
   `undef  UVM_DA_TO_QUEUE

@@ -188,7 +188,9 @@ class uvm_root extends uvm_component;
   extern local task m_stop_process ();
   extern /*local*/ task m_stop_request (time timeout=0, bit forced = 0);
   extern local task m_do_stop_all  (uvm_component comp);
-     
+
+  local int m_n_stop_threads = 0;
+
   // phasing implementation
 
   local mailbox #(uvm_phase_schedule) m_phase_hopper;
@@ -912,7 +914,7 @@ endtask
 //--------------------------------------------------------------------
 function void uvm_root::phase_initiate(uvm_phase_schedule phase);
   void'(m_phase_hopper.try_put(phase));
- endfunction
+endfunction
 
 
 //--------------------------------------------------------------------
@@ -1021,7 +1023,7 @@ task uvm_root::m_stop_request(time timeout=0, bit forced = 0);
         wait(m_objections_outstanding==0);
         m_executing_stop_processes = 1;
         m_do_stop_all(this);
-        wait fork;
+        wait (m_n_stop_threads == 0);
         m_executing_stop_processes = 0;
       end
       begin
@@ -1034,15 +1036,19 @@ task uvm_root::m_stop_request(time timeout=0, bit forced = 0);
   end
   join
 
-  // all stop processes have completed, or a timeout has occured
-  `uvm_info("STOPREQ", "Stop request has been processed, jumping to the extract phase", UVM_MEDIUM)
-  jump_all_domains(uvm_extract_ph);
-
-  //Temporary hack because jump_all_domains is not jumping out of the run phase
   begin
-    uvm_phase_schedule r = find_phase_schedule("uvm_pkg::common","*");
-    r = r.find_schedule("run");
-    r.phase_done.clear();
+    uvm_phase_schedule sched = find_phase_schedule("uvm_pkg::common","*");
+    run_ph = sched.find_schedule("run");
+
+    // all stop processes have completed, or a timeout has occured
+    `uvm_info("STOPREQ", "Stop request has been processed, jumping to the extract phase", UVM_MEDIUM)
+    jump_all_domains(uvm_extract_ph);
+
+    //Temporary hack because jump_all_domains is not jumping out of the run phase
+    run_ph.phase_done.drop_objection(this, "Stop-request occurred. Dropping objection for run phase");
+
+    #0;
+    run_ph.phase_done.clear();
     uvm_test_done.clear();
   end
 
@@ -1066,12 +1072,13 @@ task uvm_root::m_do_stop_all(uvm_component comp);
     while (comp.get_next_child(name));
 
   if (comp.enable_stop_interrupt) begin
+    m_n_stop_threads++;
     fork begin
       comp.stop("TBD"); // TBD (m_curr_phase.get_name());
+      m_n_stop_threads--;
     end
     join_none
   end
-
 endtask
 
 
@@ -1084,7 +1091,8 @@ endtask
 
 function void uvm_root::raised (uvm_objection objection, uvm_object source_obj, 
                               string description, int count);
-  if(objection != test_done_objection()) return;
+  if (objection != test_done_objection())
+    return;
   if (m_executing_stop_processes) begin
     string desc = description == "" ? "" : {" (\"", description, "\") "};
     uvm_report_warning("ILLRAISE", {"An uvm_test_done objection ", desc, "was raised during the execution of component stop processes for the stop_request. The objection is ignored by the stop process."}, UVM_NONE);
@@ -1100,7 +1108,8 @@ endfunction
 
 task uvm_root::all_dropped (uvm_objection objection, uvm_object source_obj, 
                           string description, int count);
-  if(objection != test_done_objection()) return;
+  if(objection != test_done_objection())
+    return;
   m_objections_outstanding = 0;
 endtask
 
@@ -1179,18 +1188,12 @@ function void uvm_root::print_topology(uvm_printer printer=null);
   if (printer==null)
     printer = uvm_default_printer;
 
-  if (printer.knobs.sprint)
-    s = printer.m_string;
-
   foreach (m_children[c]) begin
     if(m_children[c].print_enabled) begin
       printer.print_object("", m_children[c]);  
-      if(printer.knobs.sprint)
-        s = {s, printer.m_string};
     end
   end
-
-  printer.m_string = s;
+  $display(printer.emit());
 
 endfunction
 
@@ -1210,7 +1213,7 @@ function void uvm_root::m_objection_scheduler();
           obj.m_execute_scheduled_forks();
         end join_none
       end
-      `uvm_clear_queue(m_objection_watcher_list);
+      m_objection_watcher_list.delete();
     end
   end join_none
 endfunction

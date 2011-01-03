@@ -50,8 +50,8 @@ always @ (posedge apb.pclk)
          if (apb.pwrite) begin
             casex (apb.paddr)
               16'h0024: DATA <= apb.pwdata;
-              16'h1XX0: SOCKET[apb.paddr[11:2]][63:32] <= apb.pwdata;
-              16'h1XX4: SOCKET[apb.paddr[11:2]][32: 0] <= apb.pwdata;
+              16'h1XX0: SOCKET[apb.paddr[11:4]][63:32] <= apb.pwdata; 
+              16'h1XX4: SOCKET[apb.paddr[11:4]][31: 0] <= apb.pwdata;
               16'h2XXX: DMA[apb.paddr[11:2]] <= apb.pwdata;
             endcase
          end
@@ -59,8 +59,8 @@ always @ (posedge apb.pclk)
             casex (apb.paddr)
               16'h0000: pr_data <= {4'h0, 10'h176, 8'h5A, 8'h03};
               16'h0024: pr_data <= DATA;
-              16'h1XX0: pr_data <= SOCKET[apb.paddr[11:2]][63:32];
-              16'h1XX4: pr_data <= SOCKET[apb.paddr[11:2]][32: 0];
+              16'h1XX0: pr_data <= SOCKET[apb.paddr[11:4]][63:32];
+              16'h1XX4: pr_data <= SOCKET[apb.paddr[11:4]][31: 0];
               16'h2XXX: pr_data <= DMA[apb.paddr[11:2]];
             endcase
          end

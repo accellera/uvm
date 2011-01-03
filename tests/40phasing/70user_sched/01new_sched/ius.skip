@@ -1,0 +1,3 @@
+Due to the way stop integration is done right now, if a user schedule is
+put in somewhere but the uvm runtime schedule is not used at all it can
+cause the run phase to hang (if the schedule is in parallel with run).

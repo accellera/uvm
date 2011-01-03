@@ -40,10 +40,10 @@ import uvm_pkg::*;
 
 typedef enum { READ, DEPOSIT, FORCE, RELEASE } op_e;
 
-task  op(op_e oper, string hdl, bit [7:0] wr_val=0, bit [7:0] exp_val, int lineno, time force_time=0);
+task automatic op(op_e oper, string hdl, bit [7:0] wr_val=0, bit [7:0] exp_val, int lineno, time force_time=0);
 
 
-  bit [7:0] rd_val;
+  bit [7:0] rd_val = 0;
 
   if (oper == DEPOSIT) begin
    if (!uvm_hdl_deposit(hdl,wr_val))
@@ -60,12 +60,10 @@ task  op(op_e oper, string hdl, bit [7:0] wr_val=0, bit [7:0] exp_val, int linen
   end
   else if (oper == RELEASE) begin
    if (!uvm_hdl_release(hdl))
-   //if (!uvm_hdl_release_and_read(hdl,rd_val))
       `uvm_error(hdl,"uvm_hdl_release returned FALSE")
   end
 
   if (!uvm_hdl_read(hdl,rd_val))
-  //if (oper != RELEASE && !uvm_hdl_read(hdl,rd_val))
     `uvm_error(hdl, "uvm_hdl_read returned FALSE")
 
   if (rd_val !== exp_val) begin
@@ -103,21 +101,19 @@ begin
    op(READ,   "dut.q[1]",         , 'h01, `__LINE__);
 
     // check support for $root
-`ifndef QUESTA   
    op(READ,   "$root.dut.q",            , 'h0F, `__LINE__);
    op(READ,   "$root.dut.w",            , 'h0F, `__LINE__);
    op(READ,   "$root.dut.q[1]",         , 'h01, `__LINE__);   
-`endif   
 
    op(DEPOSIT, "dut.q",       'h3C, 'h3C, `__LINE__);
    op(DEPOSIT, "dut.q[4]",    'h00, 'h00, `__LINE__);
    op(DEPOSIT, "dut.q[6]",    'h01, 'h01, `__LINE__);
 
-`ifdef VCS
+//`ifdef VCS
    op(DEPOSIT, "dut.q[6:4]",  'h02, 'h02, `__LINE__);
    op(READ,    "dut.q",           , 'h2C, `__LINE__);
    op(DEPOSIT, "dut.q[7:4]",  'h06, 'h06, `__LINE__);
-`endif
+//`endif
    
    #0;
    op(READ,    "dut.w",           , 'h6C, `__LINE__); // w is now q

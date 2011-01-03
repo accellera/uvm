@@ -75,7 +75,7 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
       uvm_reg_map maps[$];
 
       if (rg == null) begin
-         `uvm_error("RegModel", "No register specified to run sequence on")
+         `uvm_error("uvm_reg_access_seq", "No register specified to run sequence on")
          return;
       end
 
@@ -88,7 +88,7 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
 
       // Can only deal with registers with backdoor access
       if (rg.get_backdoor() == null && !rg.has_hdl_path()) begin
-         `uvm_error("RegModel", {"Register '",rg.get_full_name(),
+         `uvm_error("uvm_reg_access_seq", {"Register '",rg.get_full_name(),
          "' does not have a backdoor mechanism available"})
          return;
       end
@@ -104,12 +104,12 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
          foreach (fields[j]) begin
             foreach (maps[k]) begin
                if (fields[j].get_access(maps[k]) == "RO") begin
-                  `uvm_warning("RegModel", {"Register '",
+                  `uvm_warning("uvm_reg_access_seq", {"Register '",
                                rg.get_full_name(),"' has RO fields"})
                   return;
                end
                if (!fields[j].is_known_access(maps[k])) begin
-                  `uvm_warning("RegModel", {"Register '",rg.get_full_name(),
+                  `uvm_warning("uvm_reg_access_seq", {"Register '",rg.get_full_name(),
                     "' has field with unknown access type '",
                     fields[j].get_access(maps[k]),"'"})
                   return;
@@ -127,7 +127,7 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
          uvm_status_e status;
          uvm_reg_data_t  v, exp;
          
-         `uvm_info("RegModel", {"Verifying access of register '",
+         `uvm_info("uvm_reg_access_seq", {"Verifying access of register '",
              rg.get_full_name(),"' in map '", maps[j].get_full_name(),
              "' ..."}, UVM_LOW)
          
@@ -136,7 +136,7 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
          rg.write(status, ~v, UVM_FRONTDOOR, maps[j], this);
 
          if (status != UVM_IS_OK) begin
-            `uvm_error("RegModel", {"Status was '",status.name(),
+            `uvm_error("uvm_reg_access_seq", {"Status was '",status.name(),
                                  "' when writing '",rg.get_full_name(),
                                  "' through map '",maps[j].get_full_name(),"'"})
          end
@@ -144,21 +144,21 @@ class uvm_reg_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
          
          rg.mirror(status, UVM_CHECK, UVM_BACKDOOR, uvm_reg_map::backdoor(), this);
          if (status != UVM_IS_OK) begin
-            `uvm_error("RegModel", {"Status was '",status.name(),
+            `uvm_error("uvm_reg_access_seq", {"Status was '",status.name(),
                                  "' when reading reset value of register '",
                                  rg.get_full_name(), "' through backdoor"})
          end
          
          rg.write(status, v, UVM_BACKDOOR, maps[j], this);
          if (status != UVM_IS_OK) begin
-            `uvm_error("RegModel", {"Status was '",status.name(),
+            `uvm_error("uvm_reg_access_seq", {"Status was '",status.name(),
                                  "' when writing '",rg.get_full_name(),
                                  "' through backdoor"})
          end
          
          rg.mirror(status, UVM_CHECK, UVM_FRONTDOOR, maps[j], this);
          if (status != UVM_IS_OK) begin
-            `uvm_error("RegModel", {"Status was '",status.name(),
+            `uvm_error("uvm_reg_access_seq", {"Status was '",status.name(),
                                  "' when reading reset value of register '",
                                  rg.get_full_name(), "' through map '",
                                  maps[j].get_full_name(),"'"})
@@ -217,7 +217,7 @@ class uvm_reg_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item)
    virtual task body();
 
       if (model == null) begin
-         `uvm_error("RegModel", "No register model specified to run sequence on")
+         `uvm_error("uvm_reg_access_seq", "No register model specified to run sequence on")
          return;
       end
 
@@ -257,7 +257,7 @@ class uvm_reg_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item)
          
          // Can only deal with registers with backdoor access
          if (regs[i].get_backdoor() == null && !regs[i].has_hdl_path()) begin
-            `uvm_warning("RegModel", {"Register '",regs[i].get_full_name(),
+            `uvm_warning("uvm_reg_access_seq", {"Register '",regs[i].get_full_name(),
                    "' does not have a backdoor mechanism available"})
             continue;
          end
@@ -321,7 +321,7 @@ class uvm_reg_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_i
    virtual task body();
 
       if (model == null) begin
-         `uvm_error("RegModel", "Register model handle is null")
+         `uvm_error("uvm_reg_mem_access_seq", "Register model handle is null")
          return;
       end
 

@@ -67,7 +67,7 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
       int n_bits;
 
       if (mem == null) begin
-         `uvm_error("RegModel", "No register specified to run sequence on");
+         `uvm_error("uvm_mem_access_seq", "No register specified to run sequence on");
          return;
       end
 
@@ -82,15 +82,13 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
 
       // Can only deal with memories with backdoor access
       if (mem.get_backdoor() == null && !mem.has_hdl_path()) begin
-         `uvm_error("RegModel", {"Memory '",mem.get_full_name(),
+         `uvm_error("uvm_mem_access_seq", {"Memory '",mem.get_full_name(),
              "' does not have a backdoor mechanism available"})
          return;
       end
 
       n_bits = mem.get_n_bits();
       
-      `uvm_info("RegMem",$psprintf("***** n_bits =%0d",n_bits),UVM_DEBUG)
-
       // Memories may be accessible from multiple physical interfaces (maps)
       mem.get_maps(maps);
 
@@ -99,7 +97,7 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
          uvm_status_e status;
          uvm_reg_data_t  val, exp, v;
          
-         `uvm_info("RegModel", {"Verifying access of memory '",
+         `uvm_info("uvm_mem_access_seq", {"Verifying access of memory '",
              mem.get_full_name(),"' in map '", maps[j].get_full_name(),
              "' ..."}, UVM_LOW)
 
@@ -117,7 +115,7 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
             if (mode == "RO") begin
                mem.peek(status, k, exp);
                if (status != UVM_IS_OK) begin
-                  `uvm_error("RegModel", $psprintf("Status was %s when reading \"%s[%0d]\" through backdoor.",
+                  `uvm_error("uvm_mem_access_seq", $psprintf("Status was %s when reading \"%s[%0d]\" through backdoor.",
                                               status.name(), mem.get_full_name(), k))
                end
             end
@@ -125,7 +123,7 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
             
             mem.write(status, k, val, UVM_FRONTDOOR, maps[j], this);
             if (status != UVM_IS_OK) begin
-               `uvm_error("RegModel", $psprintf("Status was %s when writing \"%s[%0d]\" through map \"%s\".",
+               `uvm_error("uvm_mem_access_seq", $psprintf("Status was %s when writing \"%s[%0d]\" through map \"%s\".",
                                            status.name(), mem.get_full_name(), k, maps[j].get_full_name()))
             end
             #1;
@@ -133,12 +131,12 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
             val = 'x;
             mem.peek(status, k, val);
             if (status != UVM_IS_OK) begin
-               `uvm_error("RegModel", $psprintf("Status was %s when reading \"%s[%0d]\" through backdoor.",
+               `uvm_error("uvm_mem_access_seq", $psprintf("Status was %s when reading \"%s[%0d]\" through backdoor.",
                                            status.name(), mem.get_full_name(), k))
             end
             else begin
                if (val !== exp) begin
-                  `uvm_error("RegModel", $psprintf("Backdoor \"%s[%0d]\" read back as 'h%h instead of 'h%h.",
+                  `uvm_error("uvm_mem_access_seq", $psprintf("Backdoor \"%s[%0d]\" read back as 'h%h instead of 'h%h.",
                                               mem.get_full_name(), k, val, exp))
                end
             end
@@ -146,25 +144,25 @@ class uvm_mem_single_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
             exp = ~exp & ((1'b1<<n_bits)-1);
             mem.poke(status, k, exp);
             if (status != UVM_IS_OK) begin
-               `uvm_error("RegModel", $psprintf("Status was %s when writing \"%s[%0d-1]\" through backdoor.",
+               `uvm_error("uvm_mem_access_seq", $psprintf("Status was %s when writing \"%s[%0d-1]\" through backdoor.",
                                            status.name(), mem.get_full_name(), k))
             end
             
             mem.read(status, k, val, UVM_FRONTDOOR, maps[j], this);
             if (status != UVM_IS_OK) begin
-               `uvm_error("RegModel", $psprintf("Status was %s when reading \"%s[%0d]\" through map \"%s\".",
+               `uvm_error("uvm_mem_access_seq", $psprintf("Status was %s when reading \"%s[%0d]\" through map \"%s\".",
                                            status.name(), mem.get_full_name(), k, maps[j].get_full_name()))
             end
             else begin
                if (mode == "WO") begin
                   if (val !== '0) begin
-                     `uvm_error("RegModel", $psprintf("Front door \"%s[%0d]\" read back as 'h%h instead of 'h%h.",
+                     `uvm_error("uvm_mem_access_seq", $psprintf("Front door \"%s[%0d]\" read back as 'h%h instead of 'h%h.",
                                                  mem.get_full_name(), k, val, 0))
                   end
                end
                else begin
                   if (val !== exp) begin
-                     `uvm_error("RegModel", $psprintf("Front door \"%s[%0d]\" read back as 'h%h instead of 'h%h.",
+                     `uvm_error("uvm_mem_access_seq", $psprintf("Front door \"%s[%0d]\" read back as 'h%h instead of 'h%h.",
                                                  mem.get_full_name(), k, val, exp))
                   end
                end
@@ -223,7 +221,7 @@ class uvm_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item)
    virtual task body();
 
       if (model == null) begin
-         `uvm_error("RegModel", "No register model specified to run sequence on");
+         `uvm_error("uvm_mem_access_seq", "No register model specified to run sequence on");
          return;
       end
 
@@ -268,7 +266,7 @@ class uvm_mem_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_item)
          // Can only deal with memories with backdoor access
          if (mems[i].get_backdoor() == null &&
              !mems[i].has_hdl_path()) begin
-            `uvm_warning("RegModel", $psprintf("Memory \"%s\" does not have a backdoor mechanism available",
+            `uvm_warning("uvm_mem_access_seq", $psprintf("Memory \"%s\" does not have a backdoor mechanism available",
                                                mems[i].get_full_name()));
             continue;
          end

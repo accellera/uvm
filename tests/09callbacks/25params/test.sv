@@ -223,7 +223,7 @@ class test extends uvm_test;
          pass = 0;
       end
 
-      `uvm_clear_queue(p)
+      p.delete();
       p.push_back("my_generic_cb::generic_f(*)");
       p.push_back("my_special_cb::specific_f(a2)");
       p.push_back("my_special_cb::special#(2)_f(a2)");

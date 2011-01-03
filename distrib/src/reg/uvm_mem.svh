@@ -614,7 +614,7 @@ class uvm_mem extends uvm_object;
    extern function uvm_reg_backdoor get_backdoor(bit inherited = 1);
 
 
-   // Function:  clear_hdl_path
+   // Function: clear_hdl_path
    //
    // Delete HDL paths
    //
@@ -624,7 +624,7 @@ class uvm_mem extends uvm_object;
    extern function void clear_hdl_path (string kind = "RTL");
 
    
-   // Function:  add_hdl_path
+   // Function: add_hdl_path
    //
    // Add an HDL path
    //
@@ -651,7 +651,7 @@ class uvm_mem extends uvm_object;
                                            string kind = "RTL");
 
 
-   // Function:   has_hdl_path
+   // Function: has_hdl_path
    //
    // Check if a HDL path is specified
    //
@@ -662,7 +662,7 @@ class uvm_mem extends uvm_object;
    extern function bit  has_hdl_path (string kind = "");
 
 
-   // Function:  get_hdl_path
+   // Function: get_hdl_path
    //
    // Get the incremental HDL path(s)
    //
@@ -678,7 +678,7 @@ class uvm_mem extends uvm_object;
                                       input string kind = "");
 
 
-   // Function:  get_full_hdl_path
+   // Function: get_full_hdl_path
    //
    // Get the full hierarchical HDL path(s)
    //
@@ -696,7 +696,7 @@ class uvm_mem extends uvm_object;
                                            input string kind = "",
                                            input string separator = ".");
 
-   // Function:  get_hdl_path_kinds
+   // Function: get_hdl_path_kinds
    //
    // Get design abstractions for which HDL paths have been defined
    //
@@ -815,7 +815,7 @@ class uvm_mem extends uvm_object;
    // Returns the sum of all coverage models to be built in the
    // memory model.
    //
-   extern virtual protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
+   extern protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
 
 
    // Function: add_coverage
@@ -1381,7 +1381,7 @@ function uvm_reg_cvr_t uvm_mem::build_coverage(uvm_reg_cvr_t models);
    void'(uvm_reg_cvr_rsrc_db::read_by_name({"uvm_reg::", get_full_name()},
                                            "include_coverage",
                                            build_coverage, this));
-   return models;
+   return build_coverage & models;
 endfunction: build_coverage
 
 
@@ -1646,7 +1646,7 @@ task uvm_mem::do_write(uvm_reg_item rw);
       cb.post_write(rw);
 
    // REPORT
-   if (uvm_report_enabled(UVM_MEDIUM)) begin
+   if (uvm_report_enabled(UVM_HIGH)) begin
      string path_s,value_s,pre_s,range_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -1668,7 +1668,7 @@ task uvm_mem::do_write(uvm_reg_item rw);
      end
 
      `uvm_info("RegModel", {pre_s,"Wrote memory via ",path_s,": ",
-                            get_full_name(),range_s,value_s},UVM_MEDIUM)
+                            get_full_name(),range_s,value_s},UVM_HIGH)
    end
 
    m_write_in_progress = 1'b0;
@@ -1748,7 +1748,7 @@ task uvm_mem::do_read(uvm_reg_item rw);
       cb.post_read(rw);
 
    // REPORT
-   if (uvm_report_enabled(UVM_MEDIUM)) begin
+   if (uvm_report_enabled(UVM_HIGH)) begin
      string path_s,value_s,pre_s,range_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -1770,7 +1770,7 @@ task uvm_mem::do_read(uvm_reg_item rw);
      end
 
      `uvm_info("RegModel", {pre_s,"Read memory via ",path_s,": ",
-                            get_full_name(),range_s,value_s},UVM_MEDIUM)
+                            get_full_name(),range_s,value_s},UVM_HIGH)
    end
 
    m_read_in_progress = 1'b0;
@@ -1889,7 +1889,7 @@ task uvm_mem::poke(output uvm_status_e      status,
    rw.element_kind = UVM_MEM;
    rw.kind         = UVM_WRITE;
    rw.offset       = offset;
-   rw.value[0]     = value;
+   rw.value[0]     = value & ((1 << m_n_bits)-1);
    rw.bd_kind      = kind;
    rw.parent       = parent;
    rw.extension    = extension;
@@ -1904,7 +1904,7 @@ task uvm_mem::poke(output uvm_status_e      status,
    status = rw.status;
 
    `uvm_info("RegModel", $psprintf("Poked memory '%s[%0d]' with value 'h%h",
-                              get_full_name(), offset, value),UVM_MEDIUM);
+                              get_full_name(), offset, value),UVM_HIGH);
 
 endtask: poke
 
@@ -1954,7 +1954,7 @@ task uvm_mem::peek(output uvm_status_e      status,
    value  = rw.value[0];
 
    `uvm_info("RegModel", $psprintf("Peeked memory '%s[%0d]' has value 'h%h",
-                         get_full_name(), offset, value),UVM_MEDIUM);
+                         get_full_name(), offset, value),UVM_HIGH);
 endtask: peek
 
 
@@ -2046,7 +2046,7 @@ endfunction: get_backdoor
 function uvm_status_e uvm_mem::backdoor_read_func(uvm_reg_item rw);
 
   uvm_hdl_path_concat paths[$];
-  uvm_reg_data_t val;
+  uvm_hdl_data_t val;
   bit ok=1;
 
   get_full_hdl_path(paths,rw.bd_kind);
@@ -2055,33 +2055,37 @@ function uvm_status_e uvm_mem::backdoor_read_func(uvm_reg_item rw);
      string idx;
      idx.itoa(rw.offset + mem_idx);
      foreach (paths[i]) begin
-     uvm_hdl_path_concat hdl_concat = paths[i];
+        uvm_hdl_path_concat hdl_concat = paths[i];
         val = 0;
-     foreach (hdl_concat.slices[j]) begin
-        `uvm_info("RegModel", $psprintf("backdoor_read from %s ",hdl_concat.slices[j].path),UVM_DEBUG);
+        foreach (hdl_concat.slices[j]) begin
+           string hdl_path = {hdl_concat.slices[j].path, "[", idx, "]"};
+
+           `uvm_info("RegModel", {"backdoor_read from ",hdl_path},UVM_DEBUG)
  
-        if (hdl_concat.slices[j].offset < 0) begin
-           ok &= uvm_hdl_read({hdl_concat.slices[j].path, "[", idx, "]"},val);
+           if (hdl_concat.slices[j].offset < 0) begin
+              ok &= uvm_hdl_read(hdl_path, val);
               continue;
            end
            begin
               uvm_reg_data_t slice;
-           int k = hdl_concat.slices[j].offset;
-           ok &= uvm_hdl_read({hdl_concat.slices[j].path,"[", idx, "]"}, slice);
-           repeat (hdl_concat.slices[j].size) begin
+              int k = hdl_concat.slices[j].offset;
+              ok &= uvm_hdl_read(hdl_path, slice);
+              repeat (hdl_concat.slices[j].size) begin
                  val[k++] = slice[0];
                  slice >>= 1;
               end
            end
         end
 
+        val &= (1 << m_n_bits)-1;
+
         if (i == 0)
            rw.value[mem_idx] = val;
 
         if (val != rw.value[mem_idx]) begin
            `uvm_error("RegModel", $psprintf("Backdoor read of register %s with multiple HDL copies: values are not the same: %0h at path '%s', and %0h at path '%s'. Returning first value.",
-                  get_full_name(), rw.value[mem_idx], uvm_hdl_concat2string(paths[0]),
-                  val, uvm_hdl_concat2string(paths[i]))); 
+               get_full_name(), rw.value[mem_idx], uvm_hdl_concat2string(paths[0]),
+               val, uvm_hdl_concat2string(paths[i]))); 
            return UVM_NOT_OK;
          end
       end

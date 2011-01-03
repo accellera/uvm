@@ -49,6 +49,7 @@ module top;
     set_config_int("uvm_test_top", "sa_num[0]", ONE);
     set_config_int("uvm_test_top", "da_num", 3);
     set_config_int("uvm_test_top", "da_num[0]", TWO);
+    set_config_int("uvm_test_top", "q_num", 1);
     set_config_int("uvm_test_top", "q_num[0]", THREE);
     run_test();
   end

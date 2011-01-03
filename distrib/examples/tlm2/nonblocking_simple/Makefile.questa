@@ -19,9 +19,9 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../..
+UVM_HOME	= ../../..
 
-include ../Makefile.questa
+include $(UVM_HOME)/examples/Makefile.questa
 
 
 all: run
