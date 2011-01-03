@@ -93,6 +93,14 @@ class uvm_sequencer_base extends uvm_component;
   extern function new (string name, uvm_component parent);
 
 
+  // Function: is_child
+  //
+  // Returns 1 if the child sequence is a child of the parent sequence,
+  // 0 otherwise.
+  //
+  extern function bit is_child (uvm_sequence_base parent, uvm_sequence_base child);
+
+
   // Function: set_phase_seq
   //
   // Set the phase sequence that will automatically start for the given
@@ -202,14 +210,6 @@ class uvm_sequencer_base extends uvm_component;
   // operations on the sequencer
   //
   extern function bit has_lock(uvm_sequence_base sequence_ptr);
-
-
-  // Function: is_child
-  //
-  // Returns 1 if the child sequence is a child of the parent sequence,
-  // 0 otherwise.
-  //
-  extern function bit is_child (uvm_sequence_base parent, uvm_sequence_base child);
 
 
   // Task: lock
@@ -341,34 +341,15 @@ class uvm_sequencer_base extends uvm_component;
   // INTERNAL METHODS - DO NOT CALL DIRECTLY, ONLY OVERLOAD IF VIRTUAL
   //----------------------------------------------------------------------------
  
-  // Function- grant_queued_locks
-  //
-  // Any lock or grab requests that are at the front of the queue will be
-  // granted at the earliest possible time.  This function grants any queues
-  // at the front that are not locked out
-
   extern protected function void grant_queued_locks();
     
         
-  extern protected task m_select_sequence();
+  extern protected task          m_select_sequence();
+  extern protected function int  m_choose_next_request();
+  extern           task          m_wait_for_arbitration_completed(int request_id);
+  extern           function void m_set_arbitration_completed(int request_id);
 
 
-  // Function- m_choose_next_request
-  //
-
-  extern protected function int m_choose_next_request();
-
-  
-  extern task m_wait_for_arbitration_completed(int request_id);
-
-  extern function void m_set_arbitration_completed(int request_id);
-
-
-  // Task- m_lock_req
-  // 
-  // Internal method. Called by a sequence to request a lock.
-  // Puts the lock request onto the arbitration queue.
-  
   extern local task m_lock_req(uvm_sequence_base sequence_ptr, bit lock);
     
 
@@ -380,20 +361,13 @@ class uvm_sequencer_base extends uvm_component;
   extern function void m_unlock_req(uvm_sequence_base sequence_ptr);
 
 
-  // Function- remove_sequence_from_queues
-
   extern local function void remove_sequence_from_queues(uvm_sequence_base sequence_ptr);
-
-
-
   extern function void m_sequence_exiting(uvm_sequence_base sequence_ptr);
   extern function void kill_sequence(uvm_sequence_base sequence_ptr);
-
 
   extern virtual function void analysis_write(uvm_sequence_item t);
 
   extern function void remove_sequence(string type_name);
-
 
 
   extern virtual   function void   phase_started(uvm_phase_schedule phase);
@@ -420,7 +394,7 @@ class uvm_sequencer_base extends uvm_component;
 
 
   //----------------------------------------------------------------------------
-  // DEPRECATED - DO NOT USE IN NEW DESIGNS
+  // DEPRECATED - DO NOT USE IN NEW DESIGNS - NOT PART OF UVM STANDARD
   //----------------------------------------------------------------------------
 
   // Variable- count
@@ -444,7 +418,6 @@ class uvm_sequencer_base extends uvm_component;
   protected bit m_default_seq_set;
 
 
-
   string sequences[$];
   protected int sequence_ids[string];
   protected rand int seq_kind;
@@ -456,6 +429,7 @@ class uvm_sequencer_base extends uvm_component;
   extern function uvm_sequence_base get_sequence(int req_kind);
   extern function int               num_sequences();
   extern virtual function void      m_add_builtin_seqs(bit add_simple = 1);
+  extern virtual task               run();
 
 endclass
 
@@ -1048,7 +1022,7 @@ endfunction
 
 function bit uvm_sequencer_base::is_child (uvm_sequence_base parent,
                                            uvm_sequence_base child);
-  uvm_sequence_base sequence_ptr;
+  uvm_sequence_base child_parent;
 
   if (child == null) begin
     uvm_report_fatal("uvm_sequencer", "is_child passed null child", UVM_NONE);
@@ -1058,12 +1032,12 @@ function bit uvm_sequencer_base::is_child (uvm_sequence_base parent,
     uvm_report_fatal("uvm_sequencer", "is_child passed null parent", UVM_NONE);
   end
 
-  sequence_ptr = child.get_parent_sequence();
-  while (sequence_ptr != null) begin
-    if (sequence_ptr.get_inst_id() == parent.get_inst_id()) begin
+  child_parent = child.get_parent_sequence();
+  while (child_parent != null) begin
+    if (child_parent.get_inst_id() == parent.get_inst_id()) begin
       return 1;
     end
-    sequence_ptr = sequence_ptr.get_parent_sequence();
+    child_parent = child_parent.get_parent_sequence();
   end
   return 0;
 endfunction
@@ -1194,6 +1168,8 @@ endfunction
 
 // m_lock_req
 // ----------
+// Internal method. Called by a sequence to request a lock.
+// Puts the lock request onto the arbitration queue.
 
 task uvm_sequencer_base::m_lock_req(uvm_sequence_base sequence_ptr, bit lock);
   int my_seq_id;
@@ -1229,8 +1205,8 @@ task uvm_sequencer_base::m_lock_req(uvm_sequence_base sequence_ptr, bit lock);
 endtask
   
 
-// Task- m_unlock_req
-// 
+// m_unlock_req
+// ------------
 // Called by a sequence to request an unlock.  This
 // will remove a lock for this sequence if it exists
 
@@ -1256,55 +1232,40 @@ function void uvm_sequencer_base::m_unlock_req(uvm_sequence_base sequence_ptr);
 endfunction
 
 
-// Task: lock
-//
-// Requests a lock for the sequence specified by sequence_ptr.
-//
-// A lock request will be arbitrated the same as any other request. A lock is
-// granted after all earlier requests are completed and no other locks or
-// grabs are blocking this sequence.
-//
-// The lock call will return when the lock has been granted.
+// lock
+// ----
 
 task uvm_sequencer_base::lock(uvm_sequence_base sequence_ptr);
   m_lock_req(sequence_ptr, 1);
 endtask
 
 
-// Task: grab
-//
-// Requests a lock for the sequence specified by sequence_ptr. 
-//
-// A grab request is put in front of the arbitration queue. It will be
-// arbitrated before any other requests. A grab is granted when no other
-// grabs or locks are blocking this sequence.
-//
-// The grab call will return when the grab has been granted.
+// grab
+// ----
 
 task uvm_sequencer_base::grab(uvm_sequence_base sequence_ptr);
   m_lock_req(sequence_ptr, 0);
 endtask
 
 
-// Function: unlock
-//
-// Removes any locks and grabs obtained by the specified sequence_ptr.
+// unlock
+// ------
 
 function void uvm_sequencer_base::unlock(uvm_sequence_base sequence_ptr);
   m_unlock_req(sequence_ptr);
 endfunction
 
 
-// Function: ungrab
-//
-// Removes any locks and grabs obtained by the specified sequence_ptr.
+// ungrab
+// ------
 
 function void  uvm_sequencer_base::ungrab(uvm_sequence_base sequence_ptr);
   m_unlock_req(sequence_ptr);
 endfunction
 
 
-// Function- remove_sequence_from_queues
+// remove_sequence_from_queues
+// ---------------------------
 
 function void uvm_sequencer_base::remove_sequence_from_queues(
                                        uvm_sequence_base sequence_ptr);
@@ -1478,6 +1439,8 @@ endfunction
 //                              *** DEPRECATED ***
 //
 //                        - DO NOT USE IN NEW DESIGNS -
+//
+//                        - NOT PART OF UVM STANDARD -
 //----------------------------------------------------------------------------
 
 // add_sequence
@@ -1652,6 +1615,16 @@ function void uvm_sequencer_base::m_add_builtin_seqs(bit add_simple=1);
       add_sequence("uvm_simple_sequence");
   end
 endfunction
+
+
+// run
+// ---
+
+task uvm_sequencer_base::run();
+  if (default_sequence != "" && count != 0)
+    start_default_sequence();
+endtask
+
 
 
 //------------------------------------------------------------------------------

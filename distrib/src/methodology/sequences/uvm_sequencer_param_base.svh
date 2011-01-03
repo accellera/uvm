@@ -86,7 +86,6 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   endfunction
 
 
-
   //----------------
   // Group: Requests
   //----------------
