@@ -896,7 +896,7 @@ endtask
 //--------------------------------------------------------------------
 function void uvm_root::phase_initiate(uvm_phase_schedule phase);
   void'(m_phase_hopper.try_put(phase));
- endfunction
+endfunction
 
 
 //--------------------------------------------------------------------

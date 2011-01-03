@@ -1,5 +1,5 @@
-`ifndef UVM_GRAPH_SV
-`define UVM_GRAPH_SV
+`ifndef UVM_GRAPH_SVH
+`define UVM_GRAPH_SVH
 //------------------------------------------------------------------------------
 //   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc. 
