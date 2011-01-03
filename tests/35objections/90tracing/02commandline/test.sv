@@ -89,16 +89,18 @@ module top;
       end
 
       // Note that there are 35 objections from run for 15 implicit raise/drop
-      // plus 5 alldrop messages. The implicit drops can potentially be canceled
-      // so the total number of traces will be between 169 and 183.
-      if(ctchr.id_cnt["OBJTN_TRC"] < 169 || ctchr.id_cnt["OBJTN_TRC"] > 183) begin
-        $display("** UVM TEST FAILED ** Saw %0d OBJTN_TRC messages but expected between 169 and 183", ctchr.id_cnt["OBJTN_TRC"]);
+      // plus 5 alldrop messages.
+      if(ctchr.id_cnt["OBJTN_TRC"] != 185) begin
+        $display("** UVM TEST FAILED ** Saw %0d OBJTN_TRC messages instead of 185", ctchr.id_cnt["OBJTN_TRC"]);
+        return;
       end
-      if(my_catcher::msg_cnt < 169 || my_catcher::msg_cnt > 183) begin
-        $display("** UVM TEST FAILED ** Saw %0d messages but expected between 169 and 183", my_catcher::msg_cnt);
+      if(my_catcher::msg_cnt != 185) begin
+        $display("** UVM TEST FAILED ** Saw %0d messages instead of 185", my_catcher::msg_cnt);
+        return;
       end
-      if(cli_cnt < 169 || cli_cnt > 183) begin
-        $display("** UVM TEST FAILED ** Saw %0d clients but expected between 169 and 183", cli_cnt);
+      if(cli_cnt != 185) begin
+        $display("** UVM TEST FAILED ** Saw %0d clients instead of 185", cli_cnt);
+        return;
       end
 
       $display("** UVM TEST PASSED **");

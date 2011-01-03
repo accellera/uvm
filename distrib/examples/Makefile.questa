@@ -30,8 +30,8 @@ UVM_VERBOSITY =	UVM_MEDIUM
 
 
 LIBDIR  = $(UVM_HOME)/lib
-SONAME  = $(shell $(UVM_HOME)/bin/uvm_dpi_name)
-GCC     = $(MTI_HOME)/gcc-4.1.2-linux/bin/g++
+#GCC     = $(MTI_HOME)/gcc-4.1.2-linux/bin/g++
+GCC     = g++
 TEST    = /usr/bin/test
 BITS    = 32
 
@@ -39,19 +39,24 @@ BITS    = 32
 GCCCMD =  $(GCC) \
         -m$(BITS) \
         -fPIC \
+        -DQUESTA \
         -g \
+        -W \
+        -shared \
         -I$(MTI_HOME)/include \
         $(UVM_HOME)/src/dpi/uvm_dpi.cc \
-        -shared \
-        -o $(LIBDIR)/libuvm_questa.so
+        -o $(LIBDIR)/uvm_dpi.so
 
 GCC_WINCMD = \
-        $(WIN_GCC) -g \
-        -I$(MTI_HOME)/include \
-        $(UVM_HOME)/src/dpi/uvm_dpi.cc \
+        $(WIN_GCC) \
+        -g \
+        -DQUESTA \
+        -W \
         -shared \
         -Bsymbolic \
-        -o $(LIBDIR)/libuvm_questa_win32.so
+        -I$(MTI_HOME)/include \
+        $(UVM_HOME)/src/dpi/uvm_dpi.cc \
+        -o $(LIBDIR)/uvm_dpi.so
 
 VLIB =  vlib work
 
@@ -88,7 +93,7 @@ CHECK = \
 
 ifeq ($(USES_DPI),1)
   SVLIB_VLOG_OPT = 
-  SVLIB_VSIM_OPT = -sv_lib $(LIBDIR)/libuvm_questa 
+  SVLIB_VSIM_OPT = -sv_lib $(LIBDIR)/uvm_dpi 
   SVLIB_TARGET = svlib
 else
   SVLIB_VLOG_OPT = +define+UVM_NO_DPI 
@@ -123,6 +128,6 @@ vlib: $(SVLIB_TARGET)
 	vlib work
 
 clean:
-	rm -rf *~ work vsim.wlf* *.log $(LIBDIR)/libuvm_questa* questa.tops transcript *.vstf
+	rm -rf *~ work vsim.wlf* *.log $(LIBDIR)/uvm_dpi.* questa.tops transcript *.vstf
 
 

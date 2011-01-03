@@ -96,8 +96,8 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   //
   function void do_print (uvm_printer printer);
     super.do_print(printer);
-    printer.print_field("num_last_reqs", m_num_last_reqs, $bits(m_num_last_reqs), UVM_DEC);
-    printer.print_field("num_last_rsps", m_num_last_rsps, $bits(m_num_last_rsps), UVM_DEC);
+    printer.print_int("num_last_reqs", m_num_last_reqs, $bits(m_num_last_reqs), UVM_DEC);
+    printer.print_int("num_last_rsps", m_num_last_rsps, $bits(m_num_last_rsps), UVM_DEC);
   endfunction
 
 

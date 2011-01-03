@@ -42,16 +42,22 @@ module test;
     `uvm_component_utils(test)
     function void build();
       super.build();
-      drv1 = new("drv1", this); drv2 = new("drv2", this); drv3 = new("drv3", this);
-      drv1.i = 1; drv2.i = 2; drv3.i = 3;
+      drv1 = new("drv1", this);
+      drv2 = new("drv2", this);
+      drv3 = new("drv3", this);
+      drv1.i = 1;
+      drv2.i = 2;
+      drv3.i = 3;
     endfunction
     function void start_of_simulation();
       this.print();
     endfunction
     function void report();
       //drv3 will go for 30, so it should be last to finish
-      if($time == 30) $display("** UVM TEST PASSED **");
-      else $display("** UVM TEST FAILED **");
+      if($time == 30)
+        $display("** UVM TEST PASSED **");
+      else
+        $display("** UVM TEST FAILED **");
     endfunction 
   endclass : test
 

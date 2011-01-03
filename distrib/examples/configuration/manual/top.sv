@@ -27,7 +27,7 @@ module top;
   my_env topenv;
 
   initial begin
-    uvm_default_printer = uvm_default_tree_printer;
+    uvm_default_printer = uvm_default_table_printer;
     uvm_top.enable_print_topology = 1;
 
     //set configuration prior to creating the environment

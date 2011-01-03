@@ -1,5 +1,6 @@
 //----------------------------------------------------------------------
 //   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010 Mentor Graphics Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -17,9 +18,9 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-//--------------
-// Group: Macros
-//--------------
+//------------------------
+// Group: Register Defines
+//------------------------
 
 // Macro: `UVM_REG_ADDR_WIDTH
 //

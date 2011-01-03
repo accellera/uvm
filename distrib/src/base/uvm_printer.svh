@@ -20,33 +20,44 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
-`ifndef UVM_PRINTER_SVH
-`define UVM_PRINTER_SVH
-
 
 typedef class uvm_printer_knobs;
-typedef class uvm_hier_printer_knobs;
-typedef class uvm_table_printer_knobs;
-typedef class uvm_tree_printer_knobs;
 
 parameter UVM_STDOUT = 1;  // Writes to standard out and logfile
 
+typedef struct {
+  int    level;
+  string name;
+  string type_name;
+  string size;
+  string val;
+} uvm_printer_row_info;
+
+
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_printer
+// Class: uvm_printer
 //
-// The uvm_printer class provides the base interface for printing <uvm_objects>
-// in various formats. Subtypes of uvm_printer implement different print
-// formats, or "policies".
+// The uvm_printer class provides an interface for printing <uvm_objects> in
+// various formats. Subtypes of uvm_printer implement different print formats,
+// or policies.
 //
 // A user-defined printer format can be created, or one of the following four
 // built-in printers can be used:
 //
-// (see uvm_ref_printer.gif)
+// - <uvm_printer> - provides base printer functionality; must be overridden.
 //
-// Printers have knobs that you use to control what and how information is
-// printed. This section defines the knobs classes used by each built-in
-// printer policy.
+// - <uvm_table_printer> - prints the object in a tabular form. 
+//
+// - <uvm_tree_printer> - prints the object in a tree form. 
+//
+// - <uvm_line_printer> - prints the information on a single line, but uses the
+//   same object separators as the tree printer.
+//
+// Printers have knobs that you use to control what and how information is printed.
+// These knobs are contained in a separate knob class:
+//
+// - <uvm_printer_knobs> - common printer settings
 //
 // For convenience, global instances of each printer type are available for
 // direct reference in your testbenches.
@@ -56,33 +67,18 @@ parameter UVM_STDOUT = 1;  // Writes to standard out and logfile
 //  -  <uvm_default_table_printer>
 //  -  <uvm_default_printer> (set to default_table_printer by default)
 //
-// The <uvm_default_printer> is used by <uvm_object::print> and
-// <uvm_object::sprint> when the optional ~uvm_printer~ argument to these
-// methods is not provided. 
+// When <uvm_object::print> and <uvm_object::sprint> are called without 
+// specifying a printer, the <uvm_default_printer> is used.
 //
 //------------------------------------------------------------------------------
 
-
-//------------------------------------------------------------------------------
-//
-// CLASS: uvm_printer
-//
-// The uvm_printer class provides an interface for printing <uvm_objects> in
-// various formats. Subtypes of uvm_printer implement different print formats,
-// or policies.
-//------------------------------------------------------------------------------
-
-class uvm_printer;
+virtual class uvm_printer;
 
   // Variable: knobs
   //
   // The knob object provides access to the variety of knobs associated with a
   // specific printer instance. 
   //
-  // Each derived printer class overwrites the knobs variable with the
-  // a derived knob class that extends <uvm_printer_knobs>. The derived knobs
-  // class adds more knobs to the base knobs.
-
   uvm_printer_knobs knobs = new;
 
 
@@ -91,7 +87,7 @@ class uvm_printer;
   // These functions are called from <uvm_object::print>, or they are called
   // directly on any data to get formatted printing.
 
-  // Function: print_field
+  // Function: print_int
   //
   // Prints an integral field.
   //
@@ -104,25 +100,22 @@ class uvm_printer;
   //           print the leaf name of a field.  Typical values for the separator
   //           are . (dot) or [ (open bracket).
 
-  extern virtual function void print_field (string  name, 
-                                            uvm_bitstream_t value, 
-                                            int     size, 
-                                            uvm_radix_enum  radix=UVM_NORADIX,
-                                            byte    scope_separator=".",
-                                            string  type_name="");
+  extern virtual function void print_int (string          name, 
+                                          uvm_bitstream_t value, 
+                                          int             size, 
+                                          uvm_radix_enum  radix=UVM_NORADIX,
+                                          byte            scope_separator=".",
+                                          string          type_name="");
 
-
-  // Function: print_object_header
-  //
-  // Prints the header of an object. 
-  //
-  // This function is called when an object is printed by reference. 
-  // For this function, the object will not be recursed.
-
-  extern virtual function void print_object_header (
-                                            string     name,
-                                            uvm_object value, 
-                                            byte       scope_separator=".");
+  // backward compatibility
+  virtual function void print_field (string          name, 
+                                          uvm_bitstream_t value, 
+                                          int             size, 
+                                          uvm_radix_enum  radix=UVM_NORADIX,
+                                          byte            scope_separator=".",
+                                          string          type_name="");
+    print_int (name, value, size, radix, scope_separator, type_name);
+  endfunction
 
 
   // Function: print_object
@@ -138,6 +131,11 @@ class uvm_printer;
   extern virtual function void print_object (string     name,
                                              uvm_object value, 
                                              byte       scope_separator=".");
+
+
+  extern virtual function void print_object_header (string name,
+                                                    uvm_object value,
+                                                    byte scope_separator=".");
 
 
   // Function: print_string
@@ -162,106 +160,66 @@ class uvm_printer;
                                            byte   scope_separator=".");
 
 
+  // Function: print_string
+  //
+  // Prints a string field.
+
+  extern virtual function void print_real (string  name, 
+                                           real    value,
+                                           byte    scope_separator=".");
+
+  // Function: print_generic
+  //
+  // Prints a field having the given ~name~, ~type_name~, ~size~, and ~value~.
+
+  extern virtual function void print_generic (string  name, 
+                                              string  type_name, 
+                                              int     size, 
+                                              string  value,
+                                              byte    scope_separator=".");
+
   // Group: Methods for printer subtyping
 
-  // Function: print_header
+  // Function: emit
   //
-  // Prints header information. It is called when the current depth is 0,
-  // before any fields have been printed.
-
-  extern virtual function void print_header ();
-
-
-  // Function: print_footer
+  // Emits a string representing the contents of an object
+  // in a format defined by an extension of this object.
   //
-  // Prints footer information.  It is called when the current depth is 0,
-  // after all fields have been printed.
-
-  extern virtual function void print_footer ();
+  extern virtual function string emit (); 
 
 
-  // Function: print_id
+  // Function: format_row
+  //
+  // Hook for producing custom output of a single field (row).
+  //
+  extern virtual function string format_row (uvm_printer_row_info row);
+
+
+  // Function: format_row
+  //
+  // Hook to override base header with a custom header. 
+  virtual function string format_header();
+    return "";
+  endfunction
+
+
+  // Function: format_header
+  //
+  // Hook to override base footer with a custom footer. 
+  virtual function string format_footer();
+    return "";
+  endfunction
+
+
+  // Function: adjust_name
   //
   // Prints a field's name, or ~id~, which is the full instance name.
   //
   // The intent of the separator is to mark where the leaf name starts if the
   // printer if configured to print only the leaf name of the identifier. 
 
-  extern virtual protected function void print_id (string id, 
+  extern virtual protected function string adjust_name (string id, 
                                                    byte scope_separator=".");
-
-
-  // Function: print_type_name
-  //
-  // Prints a field's type name. 
-  //
-  // The ~is_object~ bit indicates that the item being printed is an object
-  // derived from <uvm_object>.
-
-  extern virtual protected function void print_type_name (string name,
-                                                          bit is_object=0);
-
-
-  // Function: print_size
-  //
-  // Prints a field's size.  A size of -1 indicates that no size is available,
-  // in which case the printer inserts the appropriate white space if the format
-  // requires it.
-
-  extern virtual protected function void print_size (int size=-1);
-
-
-  // Function: print_newline
-  //
-  // Prints a newline character.  It is up to the printer to determine how
-  // or whether to display new lines.  The ~do_global_indent~ bit indicates
-  // whether the call to print_newline() should honor the indent knob.
-
-  extern virtual protected function void print_newline (bit do_global_indent=1);
-
-
-  // Function: print_value
-  //
-  // Prints an integral field's value. 
-  //
-  // The ~value~ vector is up to 4096 bits, and the ~size~ input indicates the
-  // number of bits to actually print. 
-  //
-  // The ~radix~ input is the radix that should be used for printing the value.
-
-  extern virtual protected function void print_value (uvm_bitstream_t value, 
-                                             int size, 
-                                             uvm_radix_enum  radix=UVM_NORADIX);
-  
-  
-  // Function: print_value_object
-  //
-  // Prints a unique handle identifier for the given object.
-  
-  extern virtual protected function void print_value_object (uvm_object value);
-
-
-  // Function: print_value_string
-  //
-  // Prints a string field's value.
-
-  extern virtual protected function void print_value_string (string value);
-
-
-  // Function: print_value_array
-  //
-  // Prints an array's value. 
-  //
-  // This only prints the header value of the array, which means that it
-  // implements the printer-specific print_array_header(). 
-  //
-  // ~value~ is the value to be printed for the array. It is generally the
-  // string representation of ~size~, but it may be any string. ~size~ is the
-  // number of elements in the array.
-
-  extern virtual  function void print_value_array (string value="", 
-                                                   int size=0);
-
 
   // Function: print_array_header
   //
@@ -269,12 +227,10 @@ class uvm_printer;
   // individual element is printed. <print_array_footer> is called to mark the
   // completion of array printing.
 
-  extern virtual  function void print_array_header(
-                                         string name,
-                                         int    size,     
-                                         string arraytype="array",
-                                         byte   scope_separator=".");
-
+  extern virtual  function void print_array_header(string name,
+                                                   int    size,     
+                                                   string arraytype="array",
+                                                   byte   scope_separator=".");
 
   // Function: print_array_range
   //
@@ -283,7 +239,7 @@ class uvm_printer;
   // <uvm_printer_knobs::begin_elements> and <uvm_printer_knobs::end_elements>. 
   //
   // This function should be called after begin_elements have been printed
-  // and after end_elements have been printed.
+  // and before end_elements have been printed.
 
   extern virtual function void print_array_range (int min, int max);
 
@@ -298,40 +254,25 @@ class uvm_printer;
 
 
 
-  extern virtual protected function void indent (int    depth, 
-                                                 string indent_str="  ");
-
-
-
-  extern virtual function void print_field_real (string  name, 
-                                           real    value,
-                                           byte    scope_separator=".");
-
-
-  extern virtual function void print_generic (string  name, 
-                                              string  type_name, 
-                                              int     size, 
-                                              string  value,
-                                              byte    scope_separator=".");
-
   // Utility methods
   extern  function bit istop ();
-  extern  function int index (string name);
   extern  function string index_string (int index, string name="");
-  extern protected function void  write_stream (string str);
 
   protected bit m_array_stack[$];
   uvm_scope_stack m_scope = new;
   string m_string = "";
+
+  // holds each cell entry
+  protected uvm_printer_row_info m_rows[$];
 
 endclass
 
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_table_printer
+// Class: uvm_table_printer
 //
-// Prints output in a tabular format.
+// The table printer prints output in a tabular format.
 //
 // The following shows sample output from the table printer.
 //
@@ -353,31 +294,26 @@ class uvm_table_printer extends uvm_printer;
   // Variable: new
   //
   // Creates a new instance of ~uvm_table_printer~.
-
-  extern  function new(); 
-
-  // Variable: knobs
   //
-  // An instance of <uvm_table_printer_knobs>, which govern the content
-  // and format of the printed table.
+  extern function new(); 
 
-  uvm_table_printer_knobs knobs = new;
+  // Function: emit
+  //
+  // Formats the collected information from prior calls to ~print_*~
+  // into table format.
+  //
+  extern virtual function string emit();
 
-  // Adds column headers
-  extern virtual function void print_header       ();
-  extern virtual function void print_footer       ();
+  // Variables- m_max_*
+  //
+  // holds max size of each column, so table columns can be resized dynamically
 
-  // Puts information in column format
-  extern virtual function void print_id (string id, byte scope_separator=".");
-  extern virtual function void print_size         (int         size=-1);
-  extern virtual function void print_type_name    (string      name, bit is_object=0);
-  extern virtual function void print_value (uvm_bitstream_t value, 
-                                            int size, 
-                                            uvm_radix_enum  radix=UVM_NORADIX);
-  extern virtual function void print_value_object (uvm_object  value);
-  extern virtual function void print_value_string (string      value);
-  extern virtual function void print_value_array  (string      value="", 
-                                        int         size=0);
+  protected int m_max_name;
+  protected int m_max_type;
+  protected int m_max_size;
+  protected int m_max_value;
+
+  extern function void calculate_max_widths();
 
 endclass
 
@@ -386,7 +322,8 @@ endclass
 //
 // Class: uvm_tree_printer
 //
-// Prints output in a hierarchical tree format.
+// By overriding various methods of the <uvm_printer> super class,
+// the tree printer prints output in a tree format.
 //
 // The following shows sample output from the tree printer.
 //
@@ -403,51 +340,30 @@ endclass
 
 class uvm_tree_printer extends uvm_printer;
 
+  string newline = "\n";
+
   // Variable: new
   //
   // Creates a new instance of ~uvm_tree_printer~.
 
-  extern function new(); 
+  extern function new();
 
-  // Variable: knobs
+  // Function: emit
   //
-  // An instance of <uvm_tree_printer_knobs>, which govern the content
-  // and format of the printed tree.
-
-  uvm_tree_printer_knobs knobs = new;
-
-
-  // Information to print at the opening/closing of a scope
-  extern virtual function void print_scope_open   ();
-  extern virtual function void print_scope_close  ();
-
-  // Puts information in tree format
-  extern virtual function void print_id           (string id,
-                                        byte   scope_separator=".");
-  extern virtual function void print_type_name    (string name, bit is_object=0);
-  extern virtual function void print_object_header(string      name,
-                                        uvm_object  value, 
-                                        byte        scope_separator=".");
-  extern virtual function void print_object       (string      name,
-                                        uvm_object  value, 
-                                        byte        scope_separator=".");
-  extern virtual function void print_string       ( string      name,
-                                        string      value, 
-                                        byte        scope_separator=".");
-  extern virtual function void print_value_object (uvm_object value);
-  extern virtual function void print_value_array  (string      value="", 
-                                        int         size=0);
-  extern virtual function void print_array_footer (int         size=0);
+  // Formats the collected information from prior calls to ~print_*~
+  // into hierarchical tree format.
+  //
+  extern virtual function string emit();
 
 endclass
+
 
 
 //------------------------------------------------------------------------------
 //
 // Class: uvm_line_printer
 //
-// Prints output on a single line. Same as <uvm_tree_printer> but without line
-// feeds.
+// The line printer prints output in a line format.
 //
 // The following shows sample output from the line printer.
 //
@@ -458,16 +374,14 @@ class uvm_line_printer extends uvm_tree_printer;
 
   // Variable: new
   //
-  // Creates a new instance of ~uvm_line_printer~.
+  // Creates a new instance of ~uvm_line_printer~. It differs from the
+  // <uvm_tree_printer> only in that the output contains no line-feeds
+  // and indentation.
 
-  extern function new(); 
-
-  // Function: print_newline
-  //
-  // Overrides <uvm_printer::print_newline> to not print a newline,
-  // effectively making everything appear on a single line.
-
-  extern virtual function void print_newline (bit do_global_indent=1);
+  function new(); 
+    newline = " ";
+    knobs.indent = 0;
+  endfunction
 
 endclass
 
@@ -477,70 +391,57 @@ endclass
 //
 // Class: uvm_printer_knobs
 //
-// Defines the printer settings available to all
-// printer subtypes.  Printer subtypes may subtype this class to provide
-// additional knobs for their specific format. For example, the
-// <uvm_table_printer> uses the <uvm_table_printer_knobs>, which defines knobs
-// for setting table column widths.
+// The ~uvm_printer_knobs~ class defines the printer settings available to all
+// printer subtypes. 
 //
 //------------------------------------------------------------------------------
 
 class uvm_printer_knobs;
 
-  // Variable: max_width
-  //
-  // The maximum with of a field. Any field that requires more characters will
-  // be truncated.
-
-  int max_width = 999;
-
-
-  // Variable: truncation
-  //
-  // Specifies the character to use to indicate a field was truncated.
-
-  string truncation = "+"; 
-
-
   // Variable: header
   //
-  // Indicates whether the <uvm_printer::print_header> function should be called
-  // when printing an object.
+  // Indicates whether the <print_header> function should be called when
+  // printing an object.
 
   bit header = 1;
 
 
   // Variable: footer
   //
-  // Indicates whether the <uvm_printer::print_footer> function should be called 
-  // when printing an object. 
+  // Indicates whether the <print_footer> function should be called when
+  // printing an object. 
 
   bit footer = 1;
 
 
-  // Variable: global_indent
-  //
-  // Specifies the number of spaces of indentation to add whenever a newline
-  // is printed.
-
-  int global_indent = 0;
-
-
   // Variable: full_name
   //
-  // Indicates whether <uvm_printer::print_id> should print the full name of an
-  // identifier or just the leaf name. The line, table, and tree printers ignore 
-  // this bit and always print only the leaf name.
+  // Indicates whether <adjust_name> should print the full name of an identifier
+  // or just the leaf name.
 
-  bit full_name = 1;
+  bit full_name = 0;
 
 
   // Variable: identifier
   //
-  // Indicates whether <uvm_printer::print_id> should print the identifier. This is 
-  // useful in cases where you just want the values of an object, but no identifiers.
+  // Indicates whether <adjust_name> should print the identifier. This is useful
+  // in cases where you just want the values of an object, but no identifiers.
 
   bit identifier = 1;
+
+
+  // Variable: type_name
+  //
+  // Controls whether to print a field's type name. 
+
+  bit type_name = 1;
+
+
+  // Variable: size
+  //
+  // Controls whether to print a field's size. 
+
+  bit size = 1;
 
 
   // Variable: depth
@@ -559,20 +460,6 @@ class uvm_printer_knobs;
   bit reference = 1;
 
 
-  // Variable: type_name
-  //
-  // Controls whether to print a field's type name. 
-
-  bit type_name = 1;
-
-
-  // Variable: size
-  //
-  // Controls whether to print a field's size. 
-
-  bit size = 1;
-
-
   // Variable: begin_elements
   //
   // Defines the number of elements at the head of a list to print.
@@ -589,19 +476,28 @@ class uvm_printer_knobs;
   int end_elements = 5;
 
 
-  // Variable: show_radix
-  //
-  // Indicates whether the radix string ('h, and so on) should be prepended to
-  // an integral value when one is printed.
-
-  bit show_radix = 1;
-
-
   // Variable: prefix
   //
   // Specifies the string prepended to each output line
   
   string prefix = ""; 
+
+
+  // Variable: indent
+  //
+  // This knob specifies the number of spaces to use for level indentation. 
+  // The default level indentation is two spaces.
+
+  int indent = 2;
+
+
+  // Variable: show_root
+  //
+  // This setting indicates whether or not the initial object that is printed
+  // (when current depth is 0) prints the full path name. By default, the first
+  // object is treated like all other objects and only the leaf name is printed.
+
+  bit show_root = 0;
 
 
   // Variable: mcd
@@ -614,10 +510,26 @@ class uvm_printer_knobs;
   int mcd = UVM_STDOUT; 
 
 
+  // Variable: separator
+  //
+  // For tree printers only, determines the opening and closing
+  // separators used for nested objects.
+
+  string separator = "{}";
+
+
+  // Variable: show_radix
+  //
+  // Indicates whether the radix string ('h, and so on) should be prepended to
+  // an integral value when one is printed.
+
+  bit show_radix = 1;
+
+
   // Variable: default_radix
   //
   // This knob sets the default radix to use for integral values when no radix
-  // enum is explicitly supplied to the print_field() method.
+  // enum is explicitly supplied to the print_int() method.
 
   uvm_radix_enum default_radix = UVM_HEX;
 
@@ -671,108 +583,565 @@ class uvm_printer_knobs;
   // Converts the radix from an enumerated to a printable radix according to
   // the radix printing knobs (bin_radix, and so on).
 
-  extern function string get_radix_str (uvm_radix_enum radix);
+  function string get_radix_str(uvm_radix_enum radix);
+    if(show_radix == 0)
+      return "";
+    if(radix == UVM_NORADIX)
+      radix = default_radix;
+    case(radix)
+      UVM_BIN: return bin_radix;
+      UVM_OCT: return oct_radix;
+      UVM_DEC: return dec_radix;
+      UVM_HEX: return hex_radix;
+      UVM_UNSIGNED: return unsigned_radix;
+      default: return "";
+    endcase
+  endfunction
 
-  // For internal use
-
-  int column = 0;
-  bit sprint = 0; 
-  bit print_fields = 1;
-
-endclass
-
-
-//------------------------------------------------------------------------------
-//
-// Class: uvm_hier_printer_knobs
-//
-// Extends <uvm_printer_knobs> with settings specific to printing
-// in hierarchical format.
-//------------------------------------------------------------------------------
-
-class uvm_hier_printer_knobs extends uvm_printer_knobs;
-
-  // Variable: indent_str
-  //
-  // This knob specifies the string to use for level indentation. 
-  // The default level indentation is two spaces.
-
-  string indent_str = "  ";
-
-
-  // Variable: show_root
-  //
-  // This setting indicates whether or not the initial object that is printed
-  // (when current depth is 0) prints the full path name. By default, the first
-  // object is treated like all other objects and only the leaf name is printed.
-
-  bit show_root = 0;
-
-  extern function new(); 
+  // Deprecated knobs, hereafter ignored
+  int max_width = 999;
+  string truncation = "+"; 
+  int name_width = -1;
+  int type_width = -1;
+  int size_width = -1;
+  int value_width = -1;
 
 endclass
 
 
-//------------------------------------------------------------------------------
-//
-// Class: uvm_table_printer_knobs
-//
-// Extends <uvm_hier_printer_knobs> with settings specific to
-// printing in table format.
-//------------------------------------------------------------------------------
-
-class uvm_table_printer_knobs extends uvm_hier_printer_knobs;
-
-  // Variable: name_width
-  //
-  // Sets the width of the ~name~ column. If set to 0, the column is not printed.
-
-  int name_width = 25;
-
-
-  // Variable: type_width
-  //
-  // Sets the width of the ~type~ column. If set to 0, the column is not printed.
-
-  int type_width = 20;
-
-
-  // Variable: size_width
-  //
-  // Sets the width of the ~size~ column. If set to 0, the column is not printed.
-
-  int size_width = 5;
-
-
-  // Variable: value_width
-  //
-  // Sets the width of the ~value~ column. If set to 0, the column is not printed.
-
-  int value_width = 20;
-
-endclass
+typedef uvm_printer_knobs uvm_table_printer_knobs;
+typedef uvm_printer_knobs uvm_tree_printer_knobs;
 
 
 //------------------------------------------------------------------------------
-//
-// Class: uvm_tree_printer_knobs
-//
-// Extends <uvm_hier_printer_knobs> with settings specific to
-// printing in tree format.
+// IMPLEMENTATION
 //------------------------------------------------------------------------------
 
-class uvm_tree_printer_knobs extends uvm_hier_printer_knobs;
+// emit
+// ----
 
-  // Variable: separator
-  //
-  // Determines the opening and closing separators used for
-  // nested objects.
-
-  string separator = "{}";
-
-endclass
+function string uvm_printer::emit (); 
+  `uvm_error("NO_OVERRIDE","emit() method not overridden in printer subtype")
+  return "";
+endfunction
 
 
-`endif // UVM_PRINTER_SVH
+// format_row
+// ----------
 
+function string uvm_printer::format_row (uvm_printer_row_info row);
+  return "";
+endfunction
+
+
+// print_array_header
+// ------------------
+
+function void uvm_printer::print_array_header (string name,
+                                               int size,
+                                               string arraytype="array",
+                                               byte scope_separator=".");
+  uvm_printer_row_info row_info;
+
+  if(name != "")
+    m_scope.set_arg(name);
+
+  row_info.level = m_scope.depth();
+  row_info.name = adjust_name(m_scope.get(),scope_separator);
+  row_info.type_name = arraytype;
+  row_info.size = $sformatf("%0d",size);
+  row_info.val = "-";
+
+  m_rows.push_back(row_info);
+
+  m_scope.down(name);
+  m_array_stack.push_back(1);
+endfunction
+
+
+// print_array_footer
+// ------------------
+
+function void  uvm_printer::print_array_footer (int size=0);
+  if(m_array_stack.size()) begin
+    m_scope.up();
+    void'(m_array_stack.pop_front());
+  end
+endfunction
+
+
+// print_array_range
+// -----------------
+
+function void uvm_printer::print_array_range(int min, int max);
+  string tmpstr;
+  if(min == -1 && max == -1)
+     return;
+  if(min == -1)
+     min = max;
+  if(max == -1)
+     max = min;
+  if(max < min)
+     return;
+  print_generic("...", "...", -2, "...");
+endfunction
+
+
+// print_object_header
+// -------------------
+
+function void uvm_printer::print_object_header (string name,
+                                                uvm_object value,
+                                                byte scope_separator=".");
+  uvm_printer_row_info row_info;
+  uvm_component comp;
+
+  if(name == "") begin
+    if(value!=null) begin
+      if((m_scope.depth()==0) && $cast(comp, value)) begin
+        name = comp.get_full_name();
+      end
+      else begin
+        name=value.get_name();
+      end
+    end
+  end
+        
+  if(name == "") 
+    name = "<unnamed>";
+
+  if(name != "")
+    m_scope.set_arg(name);
+
+  row_info.level = m_scope.depth();
+  row_info.name = adjust_name(m_scope.get(),scope_separator);
+  row_info.type_name = (value != null) ?  value.get_type_name() : "object";
+  row_info.size = "-";
+  row_info.val = knobs.reference ? uvm_object_value_str(value) : "-";
+
+  m_rows.push_back(row_info);
+
+endfunction
+
+
+// print_object
+// ------------
+
+function void uvm_printer::print_object (string name, uvm_object value,
+                                         byte scope_separator=".");
+  uvm_component comp, child_comp;
+
+  print_object_header(name,value,scope_separator);
+
+  if(value != null)  begin
+    if((knobs.depth == -1 || (knobs.depth > m_scope.depth())) &&
+          !value.m_sc.cycle_check.exists(value)) begin
+
+      value.m_sc.cycle_check[value] = 1;
+      m_scope.down(name);
+
+      //Handle children of the comp
+      if($cast(comp, value)) begin
+        string name;
+        if (comp.get_first_child(name))
+          do begin
+            child_comp = comp.get_child(name);
+            if(child_comp.print_enabled)
+              this.print_object("",child_comp);
+          end while (comp.get_next_child(name));
+      end
+
+      // print members of object
+      void'(value.sprint(this));
+
+      if(name[0] == "[")
+        m_scope.up("[");
+      else
+        m_scope.up(".");
+      value.m_sc.cycle_check.delete(value);
+    end
+  end
+
+endfunction
+
+
+// istop
+// -----
+
+function bit uvm_printer::istop ();
+  return (m_scope.depth() == 0);
+endfunction
+
+
+// adjust_name
+// -----------
+
+function string uvm_printer::adjust_name(string id, byte scope_separator=".");
+  if (knobs.show_root && m_scope.depth()==0 || knobs.full_name || id == "...")
+    return id;
+  return uvm_leaf_scope(id, scope_separator);
+endfunction
+
+
+// print_generic
+// -------------
+
+function void uvm_printer::print_generic (string name,
+                                          string type_name,        
+                                          int size,
+                                          string value,
+                                          byte scope_separator=".");
+
+  uvm_printer_row_info row_info;
+
+  if (name != "" && name != "...") begin
+    m_scope.set_arg(name);
+    name = m_scope.get();
+  end
+
+  row_info.level = m_scope.depth();
+  row_info.name = adjust_name(name,scope_separator);
+  row_info.type_name = type_name;
+  row_info.size = (size == -2 ? "..." : $sformatf("%0d",size));
+  row_info.val = (value == "" ? "\"\"" : value);
+
+  m_rows.push_back(row_info);
+
+endfunction
+
+
+// print_int
+// ---------
+
+function void uvm_printer::print_int (string name,
+                                      uvm_bitstream_t value, 
+                                      int size, 
+                                      uvm_radix_enum radix=UVM_NORADIX,
+                                      byte scope_separator=".",
+                                      string type_name="");
+  
+  uvm_printer_row_info row_info;
+  string sz_str, val_str;
+
+  if(name != "") begin
+    m_scope.set_arg(name);
+    name = m_scope.get();
+  end
+
+  if(type_name == "") begin
+    if(radix == UVM_TIME)
+      type_name ="time";
+    else if(radix == UVM_STRING)
+      type_name ="string";
+    else
+      type_name ="integral";
+  end
+
+  sz_str.itoa(size);
+
+  if(radix == UVM_NORADIX)
+    radix = knobs.default_radix;
+
+  val_str = uvm_vector_to_string (value, size, radix,
+                                  knobs.get_radix_str(radix));
+
+  row_info.level = m_scope.depth();
+  row_info.name = adjust_name(name,scope_separator);
+  row_info.type_name = type_name;
+  row_info.size = sz_str;
+  row_info.val = val_str;
+
+  m_rows.push_back(row_info);
+
+endfunction
+  
+
+// print_time
+// ----------
+
+function void uvm_printer::print_time (string name,
+                                       time value,
+                                       byte scope_separator=".");
+  print_int(name, value, 64, UVM_TIME, scope_separator);
+endfunction
+
+
+// print_string
+// ------------
+
+function void uvm_printer::print_string (string name,
+                                         string value,
+                                         byte scope_separator=".");
+
+  uvm_printer_row_info row_info;
+
+  if(name != "")
+    m_scope.set_arg(name);
+
+  row_info.level = m_scope.depth();
+  row_info.name = adjust_name(m_scope.get(),scope_separator);
+  row_info.type_name = "string";
+  row_info.size = $sformatf("%0d",value.len());
+  row_info.val = (value == "" ? "\"\"" : value);
+
+  m_rows.push_back(row_info);
+
+endfunction
+
+
+// print_real
+// ----------
+
+function void uvm_printer::print_real (string name,
+                                       real value,
+                                       byte scope_separator=".");
+
+  uvm_printer_row_info row_info;
+
+  if (name != "" && name != "...") begin
+    m_scope.set_arg(name);
+    name = m_scope.get();
+  end
+
+  row_info.level = m_scope.depth();
+  row_info.name = adjust_name(m_scope.get(),scope_separator);
+  row_info.type_name = "real";
+  row_info.size = "64";
+  row_info.val = $sformatf("%f",value);
+
+  m_rows.push_back(row_info);
+
+endfunction
+
+
+// index_string
+// ------------
+
+function string uvm_printer::index_string(int index, string name="");
+  index_string.itoa(index);
+  index_string = { name, "[", index_string, "]" }; 
+endfunction
+
+
+
+//------------------------------------------------------------------------------
+// Class- uvm_table_printer
+//------------------------------------------------------------------------------
+
+// new
+// ---
+
+function uvm_table_printer::new(); 
+  super.new();
+endfunction
+
+
+// calculate_max_widths
+// --------------------
+
+function void uvm_table_printer::calculate_max_widths();
+   foreach(m_rows[j]) begin
+      int name_len;
+      uvm_printer_row_info row = m_rows[j];
+      name_len = knobs.indent*row.level + row.name.len();
+      if (name_len > m_max_name)
+        m_max_name = name_len;
+      if (row.type_name.len() > m_max_type)
+        m_max_type = row.type_name.len();
+      if (row.size.len() > m_max_size)
+        m_max_size = row.size.len();
+      if (row.val.len() > m_max_value)
+        m_max_value = row.val.len();
+   end
+   if (m_max_name < 4) m_max_name = 4;
+   if (m_max_type < 4) m_max_type = 4;
+   if (m_max_size < 4) m_max_size = 4;
+   if (m_max_value< 5) m_max_value= 5;
+endfunction
+
+
+// emit
+// ----
+
+function string uvm_table_printer::emit();
+
+  string s = "";
+  string user_format;
+  string dash = "---------------------------------------------------------------------------------------------------";
+  string space= "                                                                                                   ";
+  string dashes;
+
+  string linefeed = {"\n", knobs.prefix};
+
+  calculate_max_widths(); 
+
+  if (knobs.header) begin
+    string header;
+    user_format = format_header();
+    if (user_format == "") begin
+      string dash_id, dash_typ, dash_sz;
+      string head_id, head_typ, head_sz;
+      if (knobs.identifier) begin
+        dashes = {dash.substr(1,m_max_name+2)};
+        header = {"Name",space.substr(1,m_max_name-2)};
+      end
+      if (knobs.type_name) begin
+        dashes = {dashes, dash.substr(1,m_max_type+2)};
+        header = {header, "Type",space.substr(1,m_max_type-2)};
+      end
+      if (knobs.size) begin
+        dashes = {dashes, dash.substr(1,m_max_size+2)};
+        header = {header, "Size",space.substr(1,m_max_size-2)};
+      end
+      dashes = {dashes, dash.substr(1,m_max_value), linefeed};
+      header = {header, "Value", space.substr(1,m_max_value-5), linefeed};
+
+      s = {s, dashes, header, dashes};
+    end
+    else begin
+      s = {s, user_format, linefeed};
+    end
+  end
+
+  foreach (m_rows[i]) begin
+    uvm_printer_row_info row = m_rows[i];
+    user_format = format_row(row);
+    if (user_format == "") begin
+      string row_str;
+      if (knobs.identifier)
+        row_str = {space.substr(1,row.level * knobs.indent), row.name,
+                   space.substr(1,m_max_name-row.name.len()-(row.level*knobs.indent)+2)};
+      if (knobs.type_name)
+        row_str = {row_str, row.type_name, space.substr(1,m_max_type-row.type_name.len()+2)};
+      if (knobs.size)
+        row_str = {row_str, row.size, space.substr(1,m_max_size-row.size.len()+2)};
+      s = {s, row_str, row.val, space.substr(1,m_max_value-row.val.len()), linefeed};
+    end
+    else
+      s = {s, user_format, linefeed};
+  end
+ 
+  if (knobs.footer) begin
+    user_format = format_footer();
+    if (user_format == "")
+      s = {s, dashes};
+    else
+      s = {s, user_format, linefeed};
+  end
+
+  emit = s;
+  m_rows.delete();
+endfunction
+
+
+
+//------------------------------------------------------------------------------
+// Class- uvm_tree_printer
+//------------------------------------------------------------------------------
+
+
+// new
+// ---
+
+function uvm_tree_printer::new();
+  super.new();
+  knobs.size = 0;
+  knobs.type_name = 0;
+  knobs.header = 0;
+  knobs.footer = 0;
+endfunction
+
+
+// emit
+// ----
+
+function string uvm_tree_printer::emit();
+
+  string s = knobs.prefix;
+  string space= "                                                                                                   ";
+  string user_format;
+
+  string linefeed = newline == "" || newline == " " ? newline : {newline, knobs.prefix};
+
+  // Header
+  if (knobs.header) begin
+    user_format = format_header();
+    if (user_format != "")
+      s = {s, user_format, linefeed};
+  end
+
+  foreach (m_rows[i]) begin
+    uvm_printer_row_info row = m_rows[i];
+    user_format = format_row(row);
+    if (user_format == "") begin
+      string indent_str;
+      indent_str = space.substr(1,row.level * knobs.indent); 
+
+      // Name (id)
+      if (knobs.identifier) begin
+        s = {s,indent_str, row.name};
+        if (row.name != "" && row.name != "...")
+          s = {s, ": "};
+      end
+
+      // Type Name
+      if (row.val[0] == "@") // is an object w/ knobs.reference on
+        s = {s,"(",row.type_name,row.val,") "};
+      else
+        if (knobs.type_name &&
+             (row.type_name != "" ||
+              row.type_name != "-" ||
+              row.type_name != "..."))
+          s = {s,"(",row.type_name,") "};
+        
+      // Size
+      if (knobs.size) begin
+        if (row.size != "" || row.size != "-")
+            s = {s,"(",row.size,") "};
+      end
+
+      if (i < m_rows.size()-1) begin
+        if (m_rows[i+1].level > row.level) begin
+          s = {s, "{", linefeed};
+          continue;
+        end
+      end
+
+      // Value (unconditional)
+      s = {s, row.val, " ", linefeed};
+
+      // Scope handling...
+      if (i <= m_rows.size()-1) begin
+        int end_level;
+        if (i == m_rows.size()-1)
+          end_level = 0;
+        else
+          end_level = m_rows[i+1].level;
+        if (end_level < row.level) begin
+          string indent_str;
+          for (int l=row.level-1; l >= end_level; l--) begin
+            indent_str = space.substr(1,l * knobs.indent); 
+            s = {s, indent_str, "}", linefeed};
+          end
+        end
+      end
+
+    end
+    else
+      s = {s, user_format};
+  end
+ 
+  // Footer
+  if (knobs.footer) begin
+    user_format = format_footer();
+    if (user_format != "")
+      s = {s, user_format, linefeed};
+  end
+
+  if (newline == "" || newline == " ")
+    s = {s, "\n"};
+
+  emit = s;
+  m_rows.delete();
+endfunction
 
