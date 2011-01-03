@@ -1564,6 +1564,19 @@ virtual class uvm_component extends uvm_report_object;
   extern function void m_set_cl_action;
   extern function void m_set_cl_sev;
 
+  // The verbosity settings may have a specific phase to start at. 
+  // We will do this work in the phase_started callback. May need a
+  // seperate internal callback so the user doesn't have to remember to call
+  // the phase started callback.
+
+  typedef struct {
+    string phase;
+    time   offset;
+    uvm_verbosity verbosity;
+    string id;
+  } m_verbosity_setting;
+  m_verbosity_setting m_verbosity_settings[$];
+
 endclass : uvm_component
 
 
@@ -2167,19 +2180,6 @@ task          uvm_component::pre_shutdown();        return; endtask
 task          uvm_component::shutdown();            return; endtask
 task          uvm_component::post_shutdown();       return; endtask
 
-
-// The verbosity settings may have a specific phase to start at. 
-// We will do this work in the phase_started callback. May need a
-// seperate internal callback so the user doesn't have to remember to call
-// the phase started callback.
-
-typedef struct {
-  string phase;
-  time   offset;
-  uvm_verbosity verbosity;
-  string id;
-} m_verbosity_setting;
-m_verbosity_setting m_verbosity_settings[$];
 
 // current phase convenience API
 //------------------------------
@@ -3059,16 +3059,18 @@ function void uvm_component::m_set_cl_verb;
   static string values[$];
   static bit first = 1;
   string args[$];
-  uvm_verbosity verb;
   uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
 
   if(!values.size())
     void'(uvm_cmdline_proc.get_arg_values("+uvm_set_verbosity=",values));
 
   foreach(values[i]) begin
+    uvm_verbosity verb;
     string phase="";
     time   offset= 0;
+    args.delete();
     uvm_split_string(values[i], ",", args);
+
     // Warning is already issued in uvm_root, so just don't keep it
     if(first && ( ((args.size() != 4) && (args.size() != 5)) || 
                   (clp.m_convert_verb(args[2], verb) == 0))  )
@@ -3076,6 +3078,7 @@ function void uvm_component::m_set_cl_verb;
       values.delete(i);
     end
     else if (uvm_is_match(args[0], get_full_name()) ) begin
+      void'(clp.m_convert_verb(args[2], verb));
       phase = args[3];
       if(args.size() == 5) begin
         offset = args[4].atoi();
@@ -3092,12 +3095,13 @@ function void uvm_component::m_set_cl_verb;
             uvm_verbosity lverb = verb;
             string lid = args[1];
             time t = offset;
- 
             #t;
-            if(lid == "_ALL_") 
+            if(lid == "_ALL_") begin
               set_report_verbosity_level(lverb);
-            else 
+            end
+            else begin
               set_report_id_verbosity(lid, lverb);
+            end
           end join_none
         end
         else begin
