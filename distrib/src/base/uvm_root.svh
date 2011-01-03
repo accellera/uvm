@@ -348,7 +348,6 @@ function uvm_root::new();
   set_report_handler(rh);
 
   clp = uvm_cmdline_processor::get_inst();
-  check_verbosity();
 
   report_header();
   print_enabled=0;
