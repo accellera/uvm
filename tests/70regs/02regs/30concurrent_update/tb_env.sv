@@ -53,7 +53,7 @@ class tb_env extends uvm_env;
 
       bus = reg_agent#(dut_rw)::type_id::create("bus", this);
 
-      regmodel.set_hdl_path_root("$root.dut");
+      regmodel.set_hdl_path_root("dut");
   endfunction: build
 
    virtual function void connect();

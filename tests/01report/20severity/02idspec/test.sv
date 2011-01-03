@@ -44,6 +44,11 @@ class my_catcher extends uvm_report_catcher;
    virtual function action_e catch(); 
       string s_str;
       string exp_sev;
+
+      // Ignore messages from root
+      if(get_client() == uvm_root::get())
+        return THROW;
+
       p = new(uvm_severity_type'(get_severity()), get_id());
       
       sev[p] ++;

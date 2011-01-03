@@ -33,8 +33,14 @@
 // via all of the available address maps,
 // comparing the value read with the expected reset value.
 //
-// Blocks and registers with the ~NO_REG_TESTS~ or
-// the ~NO_HW_RESET_TEST~ attribute are not verified.
+// If bit-type resource named
+// "NO_REG_TESTS" or "NO_REG_HW_RESET_TEST"
+// in the "REG::" namespace
+// matches the full name of the block or register,
+// the block or register is not tested.
+//
+//| uvm_resource_db#(bit)::set({"REG::",regmodel.blk.get_full_name(),".*"},
+//|                            "NO_REG_TESTS", 1, this);
 //
 // This is usually the first test executed on any DUT.
 //
@@ -66,14 +72,16 @@ class uvm_reg_hw_reset_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_ite
       uvm_reg_map maps[$];
 
       if (model == null) begin
-         `uvm_error("RegModel", "Not block or system specified to run sequence on");
+         `uvm_error("uvm_reg_hw_reset_seq", "Not block or system specified to run sequence on");
          return;
       end
       
       uvm_report_info("STARTING_SEQ",{"\n\nStarting ",get_name()," sequence...\n"},UVM_LOW);
 
-      if (model.has_attribute("NO_REG_TESTS") ||
-          model.has_attribute("NO_HW_RESET_TEST"))
+      if (uvm_resource_db#(bit)::get_by_name({"REG::",model.get_full_name()},
+                                             "NO_REG_TESTS", 0) != null ||
+          uvm_resource_db#(bit)::get_by_name({"REG::",model.get_full_name()},
+                                             "NO_REG_HW_RESET_TEST", 0) != null )
             return;
 
       this.reset_blk(model);
@@ -94,8 +102,10 @@ class uvm_reg_hw_reset_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_ite
           uvm_status_e status;
 
           // Registers with certain attributes are not to be tested
-          if (regs[i].has_attribute("NO_REG_TESTS") ||
-              regs[i].has_attribute("NO_HW_RESET_TEST"))
+          if (uvm_resource_db#(bit)::get_by_name({"REG::",regs[i].get_full_name()},
+                                                 "NO_REG_TESTS", 0) != null ||
+              uvm_resource_db#(bit)::get_by_name({"REG::",regs[i].get_full_name()},
+                                                 "NO_REG_HW_RESET_TEST", 0) != null )
               continue;
 
           `uvm_info(get_type_name(),

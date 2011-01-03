@@ -28,19 +28,19 @@
   // part of UVM.
   `include "base/uvm_version.svh"
   `include "base/uvm_object_globals.svh"
-  `include "base/uvm_misc.sv"
+  `include "base/uvm_misc.svh"
 
   // The base object element. Contains data methods (copy/compare etc) and
   // factory creation methods (create). Also includes control classes.
-  `include "base/uvm_object.sv"
+  `include "base/uvm_object.svh"
 
   `include "base/uvm_pool.svh"
   `include "base/uvm_queue.svh"
 
   // Policies
-  `include "base/uvm_printer.sv"
+  `include "base/uvm_printer.svh"
   `include "base/uvm_comparer.svh"
-  `include "base/uvm_packer.sv"
+  `include "base/uvm_packer.svh"
   `include "base/uvm_recorder.svh"
 
   // Event interface
@@ -58,10 +58,13 @@
   `include "base/uvm_report_object.svh"
 
   // Base transaction object
-  `include "base/uvm_transaction.sv"
+  `include "base/uvm_transaction.svh"
 
-  // The phase declarations. uvm_component does the actual phasing.
-  `include "base/uvm_phases.sv"
+  // data structure for phasing, depends on report_object
+  `include "base/uvm_graph.svh"
+
+  // The phase declarations
+  `include "base/uvm_phases.svh"
 
   // Resources/configuration facility
   `include "base/uvm_spell_chkr.svh"
@@ -70,11 +73,10 @@
   `include "base/uvm_config_db.svh"
   `include "base/uvm_resource_specializations.svh"
 
-  // uvm_component has a co-dependency with the factory. 
-  `include "base/uvm_factory.sv"
+  `include "base/uvm_factory.svh"
   `include "base/uvm_registry.svh"
 
-  `include "base/uvm_component.sv"
+  `include "base/uvm_component.svh"
 
   // Objection interface
   `include "base/uvm_objection.svh"
@@ -84,7 +86,5 @@
 
   // Command Line Processor
   `include "base/uvm_cmdline_processor.svh"
-
-  `include "base/uvm_extern_report_server.svh"
 
 `endif // UVM_BASE_SVH

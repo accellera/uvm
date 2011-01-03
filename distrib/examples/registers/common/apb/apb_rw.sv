@@ -72,7 +72,7 @@ class reg2apb_adapter extends uvm_reg_adapter;
       `uvm_fatal("NOT_APB_TYPE","Provided bus_item is not of the correct type")
       return;
     end
-    rw.kind = apb.kind ? UVM_READ : UVM_WRITE;
+    rw.kind = apb.kind == apb_rw::READ ? UVM_READ : UVM_WRITE;
     rw.addr = apb.addr;
     rw.data = apb.data;
     rw.status = UVM_IS_OK;

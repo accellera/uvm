@@ -37,8 +37,8 @@ class test extends uvm_test;
        end
        "ncsim" : begin
          $display("Doing IUS checks");
-         if(raw_args.size() != 24) begin
-           $display("  Incorrect number of arguments %0d found (expected 24)", raw_args.size());
+         if(raw_args.size() != 22) begin
+           $display("  Incorrect number of arguments %0d found (expected 22)", raw_args.size());
            pass_the_test = pass_the_test & 0;
          end
          else

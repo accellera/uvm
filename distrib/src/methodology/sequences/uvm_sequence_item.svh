@@ -39,22 +39,22 @@ typedef class uvm_sequencer_base;
 
 class uvm_sequence_item extends uvm_transaction;
 
-local      int                m_sequence_id = -1;
-protected  bit                m_use_sequence_info = 0;
-protected  int                m_depth = -1;
-protected  uvm_sequencer_base m_sequencer = null;
-protected  uvm_sequence_base  m_parent_sequence = null;
-static     bit issued1=0,issued2=0;
-bit        print_sequence_info = 0;
+  local      int                m_sequence_id = -1;
+  protected  bit                m_use_sequence_info = 0;
+  protected  int                m_depth = -1;
+  protected  uvm_sequencer_base m_sequencer = null;
+  protected  uvm_sequence_base  m_parent_sequence = null;
+  static     bit issued1=0,issued2=0;
+  bit        print_sequence_info = 0;
 
 
   // Function: new
   //
   // The constructor method for uvm_sequence_item. 
   
-  function new (string             name = "uvm_sequence_item");
+  function new (string name = "uvm_sequence_item");
     super.new(name);
-  endfunction // new
+  endfunction
 
   function string get_type_name();
     return "uvm_sequence_item";
@@ -238,51 +238,59 @@ bit        print_sequence_info = 0;
   // to use the default sequencer specified by m_sequencer.  Randomization
   // may be done between start_item and finish_item to ensure late generation
 
-  virtual task start_item(uvm_sequence_item item, int set_priority = -1);
-    if(item == null)
-      m_sequencer.uvm_report_fatal("NULLITM", {"attempting to start a null item from item/sequence '", get_full_name(), "'"}, UVM_NONE);
-    item.m_start_item(m_sequencer, this, set_priority);
+  virtual task start_item (uvm_sequence_item item_or_seq,
+                           int set_priority = -1,
+                           uvm_sequencer_base sequencer=null);
+    if(item_or_seq == null)
+      uvm_report_fatal("NULLITM",
+         {"attempting to start a null item or sequence from sequence '",
+          get_full_name(), "'"}, UVM_NONE);
+    if (sequencer == null)
+      sequencer = get_sequencer();
+    item_or_seq.m_start_item_or_seq(sequencer, this, set_priority);
   endtask  
 
 
-  // Function- m_start_item
+  // Function- m_start_item_or_seq
   //
-  // Internal method.
+  // Internal method. Called when starting an item.
   
-  virtual task m_start_item(uvm_sequencer_base sequencer_ptr, uvm_sequence_item sequence_ptr,
-                            int set_priority);
-    uvm_sequence_base this_seq;
-    uvm_sequencer_base target_seqr;
+  virtual task m_start_item_or_seq(uvm_sequencer_base sequencer,
+                                   uvm_sequence_item parent_seq,
+                                   int set_priority);
+    uvm_sequence_base parent_seq_;
     
-    target_seqr = this.get_sequencer();
-    if (!$cast(this_seq, sequence_ptr))
-      uvm_report_fatal ("CASTFL", "start_item failed to cast sequence_ptr to sequence type", UVM_NONE);
+    if (!$cast(parent_seq_, parent_seq))
+      uvm_report_fatal ("CASTFL",
+        "start_item failed: parent_seq is not a sequence", UVM_NONE);
+
+    if (sequencer == null)
+      sequencer = get_sequencer();
     
-    if (target_seqr == null) begin
-      if (sequencer_ptr == null) begin
+    if (sequencer == null) begin
         uvm_report_fatal("STRITM", "sequence_item has null sequencer", UVM_NONE);
-      end else begin
-        target_seqr  = sequencer_ptr;
-        set_use_sequence_info(1);
-        set_sequencer(sequencer_ptr);
-        set_parent_sequence(this_seq);
-        reseed();
-      end
     end
+
+    set_use_sequence_info(1);
+    set_sequencer(sequencer);
+    set_parent_sequence(parent_seq_);
+    reseed();
     
-    target_seqr.wait_for_grant(this_seq, set_priority);
-    void'(target_seqr.begin_tr(this, "aggregate_items"));
-    sequence_ptr.pre_do(1);
+    sequencer.wait_for_grant(parent_seq_, set_priority);
+    void'(sequencer.begin_tr(this, "aggregate_items"));
+    parent_seq_.pre_do(1);
   endtask  
 
 
   // Function: finish_item
   //
-  // Finishes execution of a sequence_item or sequence. Finish_item must be called
-  // after <start_item> with no delays or delta-cycles.  Randomization, or other
-  // functions may be called between the <start_item> and finish_item calls.
+  // Finishes execution of a sequence item or sequence. Finish_item must be
+  // called after <start_item> returns with no delays or delta-cycles. 
+  // Randomization, or other functions may be called between the <start_item>
+  // and ~finish_item~ calls.
   
-  virtual task finish_item(uvm_sequence_item item, int set_priority = -1);
+  virtual task finish_item (uvm_sequence_item item,
+                            int set_priority = -1);
     item.m_finish_item(item.get_sequencer(), this, set_priority);
   endtask
 
@@ -291,21 +299,23 @@ bit        print_sequence_info = 0;
   //
   // Internal method. This method is called when <finish_item> is called with a sequence_item argument.
   
-  virtual task m_finish_item(uvm_sequencer_base sequencer_ptr, uvm_sequence_item sequence_ptr, int set_priority = -1);
-    uvm_sequence_base this_seq;
-    uvm_sequencer_base target_seqr;
+  virtual task m_finish_item (uvm_sequencer_base sequencer,
+                              uvm_sequence_item parent_seq,
+                              int set_priority = -1);
+    uvm_sequence_base parent_seq_;
 
-    target_seqr = this.get_sequencer();
-    if (target_seqr == null)
-      target_seqr = sequencer_ptr;
-    if (!$cast(this_seq, sequence_ptr))
-       uvm_report_fatal ("CASTFL", "finish_item failed to cast sequence_ptr to sequence type", UVM_NONE);
-    sequence_ptr.mid_do(this);
-    target_seqr.send_request(this_seq, this);
-    target_seqr.wait_for_item_done(this_seq, -1);
-    target_seqr.end_tr(this);
+    if (sequencer == null) begin
+        uvm_report_fatal("STRITM", "sequence_item has null sequencer", UVM_NONE);
+    end
 
-    sequence_ptr.post_do(this);
+    if (!$cast(parent_seq_, parent_seq))
+       uvm_report_fatal ("CASTFL", "finish_item failed: parent_seq is not a sequence", UVM_NONE);
+
+    parent_seq_.mid_do(this);
+    sequencer.send_request(parent_seq_, this);
+    sequencer.wait_for_item_done(parent_seq_, -1);
+    sequencer.end_tr(this);
+    parent_seq_.post_do(this);
   endtask
 
 
@@ -388,12 +398,43 @@ bit        print_sequence_info = 0;
     end
   endfunction
 
+
+  //---------------------------
   // Group: Reporting Interface
+  //---------------------------
   //
   // Sequence items and sequences will use the sequencer which they are
   // associated with for reporting messages. If no sequencer has been set
   // for the item/sequence using <set_sequencer> (or <start_item>), then the global 
   // reporter will be used.
+
+  // The sequence path string is an on-demand string. To avoid building this name
+  // information continuously, we save the info here. The m_get_client_info function
+  // should only be called for a message that has passed the is_enabled check, 
+  // e.g. from the `uvm_info macro.
+  protected string m_client_str;
+  protected uvm_report_object m_client;
+  protected uvm_report_handler m_rh;
+
+  virtual function string m_get_client_info (output uvm_report_object client);
+    if(m_client_str != "") begin
+      client = m_client;
+      return m_client_str;
+    end
+    if(m_sequencer != null)
+      m_client = m_sequencer;
+    else 
+      m_client = uvm_root::get();
+    m_rh = m_client.get_report_handler();
+    client = m_client;
+  
+    m_client_str = client.get_full_name();
+    if(m_client_str == "")
+      m_client_str = {"reporter@@", get_sequence_path()};
+    else
+      m_client_str = {m_client_str,"@@", get_sequence_path()};
+    return m_client_str;
+  endfunction
 
   // Function: uvm_report_info
 
@@ -402,10 +443,11 @@ bit        print_sequence_info = 0;
                                          int verbosity = UVM_MEDIUM,
                                          string filename = "",
                                          int line = 0);
-    if(m_sequencer != null)
-      m_sequencer.uvm_report_info(id,message,verbosity,filename,line);
-    else
-      uvm_top.uvm_report_info(id,message,verbosity,filename,line);
+    uvm_report_object client;
+    string str = m_get_client_info(client);
+
+    m_rh.report(UVM_INFO, str, id, message, verbosity, filename,
+      line, client);
   endfunction
 
   // Function: uvm_report_warning
@@ -415,10 +457,11 @@ bit        print_sequence_info = 0;
                                             int verbosity = UVM_MEDIUM,
                                             string filename = "",
                                             int line = 0);
-    if(m_sequencer != null)
-      m_sequencer.uvm_report_warning(id,message,verbosity,filename,line);
-    else
-      uvm_top.uvm_report_warning(id,message,verbosity,filename,line);
+    uvm_report_object client;
+    string str = m_get_client_info(client);
+
+    m_rh.report(UVM_WARNING, str, id, message, verbosity, filename,
+      line, client);
   endfunction
 
   // Function: uvm_report_error
@@ -428,10 +471,11 @@ bit        print_sequence_info = 0;
                                           int verbosity = UVM_LOW,
                                           string filename = "",
                                           int line = 0);
-    if(m_sequencer != null)
-      m_sequencer.uvm_report_error(id,message,verbosity,filename,line);
-    else
-      uvm_top.uvm_report_error(id,message,verbosity,filename,line);
+    uvm_report_object client;
+    string str = m_get_client_info(client);
+
+    m_rh.report(UVM_ERROR, str, id, message, verbosity, filename,
+      line, client);
   endfunction
 
   // Function: uvm_report_fatal
@@ -446,10 +490,25 @@ bit        print_sequence_info = 0;
                                           int verbosity = UVM_NONE,
                                           string filename = "",
                                           int line = 0);
-    if(m_sequencer != null)
-      m_sequencer.uvm_report_error(id,message,verbosity,filename,line);
+    uvm_report_object client;
+    string str = m_get_client_info(client);
+
+    m_rh.report(UVM_FATAL, str, id, message, verbosity, filename,
+      line, client);
+  endfunction
+
+
+  function int uvm_report_enabled(int verbosity, 
+                          uvm_severity severity=UVM_INFO, string id="");
+    if(m_client == null) begin
+      if(m_sequencer != null) m_client = m_sequencer;
+      else m_client = uvm_root::get();
+    end
+    if (m_client.get_report_verbosity_level(severity, id) < verbosity ||
+        m_client.get_report_action(severity,id) == uvm_action'(UVM_NO_ACTION))
+      return 0;
     else
-      uvm_top.uvm_report_error(id,message,verbosity,filename,line);
+      return 1;
   endfunction
 
 
@@ -462,7 +521,7 @@ bit        print_sequence_info = 0;
     int depth = get_depth();
     super.do_print(printer);
     if(print_sequence_info || m_use_sequence_info) begin
-      printer.print_field("depth", depth, $bits(depth), UVM_DEC, ".", "int");
+      printer.print_int("depth", depth, $bits(depth), UVM_DEC, ".", "int");
       if(m_parent_sequence != null) begin
         temp_str0 = m_parent_sequence.get_name();
         temp_str1 = m_parent_sequence.get_full_name();
@@ -477,9 +536,10 @@ bit        print_sequence_info = 0;
     end
   endfunction
 
+  /*
   virtual task pre_do(bit is_item);
     return;
-  endtask // pre_body
+  endtask
 
   virtual task body();
     return;
@@ -492,6 +552,7 @@ bit        print_sequence_info = 0;
   virtual function void post_do(uvm_sequence_item this_item);
     return;
   endfunction
+  */
 
   virtual task wait_for_grant(int item_priority = -1, bit  lock_request = 0);
     return;
@@ -503,7 +564,7 @@ bit        print_sequence_info = 0;
 
   virtual task wait_for_item_done(int transaction_id = -1);
     return;
-  endtask // wait_for_item_done
+  endtask
 
 endclass
 `endif 

@@ -80,6 +80,7 @@ Group: Factory  {
 
 Group: Configuration and Resources  {
 
+   File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/config_and_res.txt)
    File: uvm_resource  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_resource.svh)
    File: uvm_resource_db  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_resource_db.svh)
    File: uvm_config_db  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_config_db.svh)
@@ -97,6 +98,7 @@ Group: Synchronization  {
 
 Group: Containers  {
 
+   File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/containers.txt)
    File: uvm_pool  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_pool.svh)
    File: uvm_queue  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_queue.svh)
    }  # Group: Containers
@@ -115,6 +117,17 @@ Group: TLM  {
    File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/tlm_ifs_and_ports.txt)
    File: Analysis Ports  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_analysis_port.svh)
 
+   Group: TLM1  {
+
+      File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/tlm1.txt)
+      File: TLM FIFOs  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_tlm_fifos.svh)
+      File: uvm_tlm_req_rsp_channel  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_tlm_req_rsp.svh)
+      File: uvm_*_export  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_exports.svh)
+      File: uvm_*_imp ports  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_imps.svh)
+      File: uvm_*_port  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_ports.svh)
+      File: uvm_tlm_fifo_base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_tlm_fifo_base.svh)
+      }  # Group: TLM1
+
    Group: TLM2  {
 
       File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/tlm2.txt)
@@ -128,17 +141,6 @@ Group: TLM  {
       File: Macros  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_defines.svh)
       File: Socket Base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_sockets_base.svh)
       }  # Group: TLM2
-
-   Group: TLM1  {
-
-      File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/tlm1.txt)
-      File: TLM FIFOs  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_tlm_fifos.svh)
-      File: uvm_tlm_req_rsp_channel  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_tlm_req_rsp.svh)
-      File: uvm_*_export  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_exports.svh)
-      File: uvm_*_imp ports  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_imps.svh)
-      File: uvm_*_port  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_ports.svh)
-      File: uvm_tlm_fifo_base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/uvm_tlm/uvm_tlm_fifo_base.svh)
-      }  # Group: TLM1
 
    Group: Sequencer Ports  {
 
@@ -216,6 +218,7 @@ Group: Register Layer  {
       File: Fields  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_reg_field.svh)
       File: Memories  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_mem.svh)
       File: Indirect Registers  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_reg_indirect.svh)
+      File: FIFO Registers  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_reg_fifo.svh)
       File: Virtual Registers  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_vreg.svh)
       File: Virtual Fields  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_vreg_field.svh)
       File: Callbacks  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/reg/uvm_reg_cbs.svh)
@@ -262,7 +265,6 @@ Group: Index  {
    Variable Index: Variables
    Constant Index: Constants
    Port Index: Ports
-   Typedef Index: Typedefs
    }  # Group: Index
 
 

@@ -66,7 +66,8 @@ class uvm_random_sequence extends uvm_sequence #(uvm_sequence_item);
 // be sequencer.count, which may be -1.
 
 function int unsigned get_count();
-  if(l_count == -1) return m_sequencer.count;
+  if(l_count == -1)
+    return m_sequencer.count;
   return l_count;
 endfunction
 
@@ -84,8 +85,8 @@ endfunction
 task body();
   pick_sequence.constraint_mode(0);
   if (m_sequencer.count == -1) begin
-    if (!randomize(l_count) with { l_count > 0 && l_count <
-      m_sequencer.max_random_count; })
+    if (!randomize(l_count) with { l_count > 0 &&
+                                   l_count < m_sequencer.max_random_count; })
       uvm_report_fatal("RANDSEQ", "Randomization for l_count failed in random sequence body", UVM_NONE);
     m_sequencer.count = l_count;
   end
@@ -122,7 +123,7 @@ function bit do_compare (uvm_object rhs, uvm_comparer comparer);
 endfunction
 
 function void do_print (uvm_printer printer);
-  printer.print_field("l_count", l_count, $bits(l_count));
+  printer.print_int("l_count", l_count, $bits(l_count));
 endfunction
 
 function void do_record (uvm_recorder recorder);
@@ -223,7 +224,7 @@ function bit do_compare (uvm_object rhs, uvm_comparer comparer);
 endfunction
 
 function void do_print (uvm_printer printer);
-  printer.print_field("l_count", l_count, $bits(l_count));
+  printer.print_int("l_count", l_count, $bits(l_count));
 endfunction
 
 function void do_record (uvm_recorder recorder);

@@ -52,7 +52,6 @@ endtask
 uvm_test_done_objection uvm_test_done = uvm_test_done_objection::get();
 
 
-
 // Method: global_stop_request 
 //
 // Convenience function for uvm_top.stop_request(). See 
@@ -94,6 +93,17 @@ function void set_global_stop_timeout(time timeout);
   uvm_root top;
   top = uvm_root::get();
   top.stop_timeout = timeout;
+endfunction
+
+
+// Function - phase_initiate
+// Internal use only: convenience function for uvm_top.phase_initiate
+// See uvm_root for more information
+
+function void phase_initiate(uvm_phase_schedule phase);
+  uvm_root top;
+  top = uvm_root::get();
+  top.phase_initiate(phase);
 endfunction
 
 
@@ -171,7 +181,7 @@ endfunction
 // used in module-based code to use the same reporting mechanism as class-based
 // components. See <uvm_report_object> for details on the reporting mechanism. 
 //
-// Note: Verbosity is ignored for warnings, errors, and fatals to ensure users
+// *Note:* Verbosity is ignored for warnings, errors, and fatals to ensure users
 // do not inadvertently filter them out. It remains in the methods for backward
 // compatibility.
 
@@ -313,8 +323,10 @@ endfunction
 //
 // Task: uvm_wait_for_nba_region
 //
-// Call this task to wait for a delta cycle. Program blocks don't have an nba
-// so just delay for a #0 in a program block.
+// Callers of this task will not return until the NBA region, thus allowing
+// other processes any number of delta cycles (#0) to settle out before
+// continuing. See <uvm_sequencer_base::wait_for_sequences> for example usage.
+//
 //----------------------------------------------------------------------------
 
 task uvm_wait_for_nba_region;
@@ -326,18 +338,19 @@ task uvm_wait_for_nba_region;
 
   //If `included directly in a program block, can't use a non-blocking assign,
   //but it isn't needed since program blocks are in a seperate region.
-`ifndef UVM_PROGRAM_BLOCK
+`ifndef UVM_NO_WAIT_FOR_NBA
   if (nba_scheduled == 0) begin
-    nba_scheduled = 1;
+    nba_scheduled = 1; 
     nba = 0;
     nba <= 1;
-    @(posedge nba) nba_scheduled = 0;
+    @(posedge nba)
+      nba_scheduled = 0;
   end
   else begin
     @(posedge nba);
   end
 `else
-  #0;
+  repeat(`UVM_POUND_ZERO_COUNT) #0;
 `endif
 
 

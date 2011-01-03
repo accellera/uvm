@@ -349,7 +349,7 @@ class test extends uvm_test;
          pass = 0;
       end
 
-      `uvm_clear_queue(p);
+      p.delete();
       p.push_back("my_base_cb::base_f(*)");
       p.push_back("my_a_cb::base_f(a*)"); //----
       p.push_back("my_a_cb::a_f(a*)");
@@ -363,7 +363,7 @@ class test extends uvm_test;
          pass = 0;
       end
 
-      `uvm_clear_queue(p);
+      p.delete();
       p.push_back("my_base_cb::base_f(*)");
       p.push_back("my_a_cb::base_f(a*)");
       p.push_back("my_ax_cb::base_f(ax1)");
@@ -383,7 +383,7 @@ class test extends uvm_test;
          pass = 0;
       end
 
-      `uvm_clear_queue(p);
+      p.delete();
       p.push_back("my_base_cb::base_f(*)");
       p.push_back("my_a_cb::base_f(a*)"); 
       p.push_back("my_ax_cb::base_f(ax*)");
@@ -400,7 +400,7 @@ class test extends uvm_test;
          pass = 0;
       end
 
-      `uvm_clear_queue(p);
+      p.delete();
       p.push_back("my_base_cb::base_f(*)");
       p.push_back("my_b_cb::base_f(b1)");
       p.push_back("my_b_cb::base_f(b*)");
@@ -415,7 +415,7 @@ class test extends uvm_test;
          pass = 0;
       end
 
-      `uvm_clear_queue(p);
+      p.delete();
       p.push_back("my_base_cb::base_f(*)");
       p.push_back("my_b_cb::base_f(b*)"); //----
       p.push_back("my_b_cb::b_f(b*)");

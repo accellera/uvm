@@ -29,7 +29,7 @@ class target extends uvm_component;
 
    local bit [31:0] m_data;
    
-   uvm_tlm_b_target_socket #(apb_rw, target) sock;
+   uvm_tlm_b_target_socket #(target, apb_rw) sock;
 
    `uvm_component_utils(target)
    

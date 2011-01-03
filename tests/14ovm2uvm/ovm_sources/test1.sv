@@ -87,3 +87,34 @@ endclass
 
 // this should be now in global space
 my_component.global_stop_request();
+
+
+          `message(OVM_LOW,
+            ($psprintf("%s to existing address...Updating address : %0h with data : %0h", 
+            trans.read_write.name(), trans.addr + i, data)));
+
+          `dut_error(
+            ($psprintf("Read data mismatch.  Expected : %0h. Actual : %0h", exp, data)));
+
+        `message(OVM_LOW,
+          ($psprintf("%s to empty address...Updating address : %0h with data : %0h", 
+          trans.read_write.name(), trans.addr + i, data)));
+
+      `message(OVM_LOW,
+        ($psprintf("Reporting scoreboard information...\n%s", this.sprint())));
+
+
+  task put (T p);
+    lock.get();
+    count++;
+//    void'(accept_tr(p));
+    accept_tr(p);
+    #10;
+    void'(begin_tr(p));
+    #30; 
+    end_tr(p); 
+    `ovm_info("consumer", $sformatf("Received %0s local_count=%0d",p.get_name(),count), OVM_MEDIUM)
+    if (`ovm_msg_detail(OVM_HIGH))
+      p.print();
+    lock.put();
+  endtask 

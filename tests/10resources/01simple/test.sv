@@ -121,21 +121,21 @@ class test extends uvm_component;
     // create and export a resource that is available only in the "mom"
     // sub-hierarchy.  We use a glob to represent the set of scopes over
     // which this resource is visible
-    uvm_resource_db#(int)::write_and_set("size", "*.mom.*", 16, this);
+    uvm_resource_db#(int)::set("*.mom.*", "size", 16, this);
 
     // create and export a resource that is available only in the "dad"
     // sub-hierarchy.  Here we use a regex to represent the set of
     // scopes over which this resource is visible.  Note the % as the
     // lead character
-    uvm_resource_db#(int)::write_and_set("size", "/.*\\.dad\\..*/", 32, this);
+    uvm_resource_db#(int)::set("/.*\\.dad\\..*/", "size", 32, this);
     
     // create and export a resource that is available only in leaves
     // named child1.
-    uvm_resource_db#(bit)::write_and_set("flag", "*.child1", 1, this);
+    uvm_resource_db#(bit)::set("*.child1", "flag", 1, this);
 
     // create and export a resource that is available anywhere in the
     // sub-herarchy rooted at this this component.
-    uvm_resource_db#(mode_t)::write_and_set("mode", "*", MODE_CONFIGURE, this);
+    uvm_resource_db#(mode_t)::set("*", "mode", MODE_CONFIGURE, this);
   endfunction
 
   task run();

@@ -32,5 +32,6 @@ vsim.wlf
 questa.tops
 work
 *.vstf
-
-
+*.log
+transcript
+*.out

@@ -126,6 +126,7 @@ module test;
       //for the drain-off.
       if($time == 343) $display("** UVM TEST PASSED **");
       else $display("** UVM TEST FAILED **");
+      $display("Time=%0t",$time);
     endfunction 
   endclass : test
 

@@ -50,7 +50,6 @@ class uvm_mem extends uvm_object;
    local bit               m_maps[uvm_reg_map];
    local int unsigned      m_n_bits;
    local uvm_reg_backdoor  m_backdoor;
-   local string            m_attributes[string];
    local bit               m_is_powered_down;
    local int               m_has_cover;
    local int               m_cover_on;
@@ -387,64 +386,6 @@ class uvm_mem extends uvm_object;
    extern virtual function int get_addresses(uvm_reg_addr_t     offset = 0,
                                              uvm_reg_map        map=null,
                                              ref uvm_reg_addr_t addr[]);
-
-
-   //------------------
-   // Group: Attributes
-   //------------------
-
-   // Function: set_attribute
-   //
-   // Set an attribute.
-   //
-   // Set the specified attribute to the specified value for this memory.
-   // If the value is specified as "", the specified attribute is deleted.
-   // A warning is issued if an existing attribute is modified.
-   // 
-   // Attribute names are case sensitive. 
-   //
-   extern virtual function void set_attribute(string name,
-                                              string value);
-
-
-   // Function: has_attribute
-   //
-   // Returns TRUE if attribute exists.
-   //
-   // See <get_attribute> for details on ~inherited~ argument.
-   //
-   extern virtual function bit has_attribute(string name, bit inherited = 1);
-   
-   
-   // Function: get_attribute
-   //
-   // Get an attribute value.
-   //
-   // Get the value of the specified attribute for this memory.
-   // If the attribute does not exists, "" is returned.
-   // If ~inherited~ is specifed as TRUE, the value of the attribute
-   // is inherited from the nearest block ancestor
-   // for which the attribute
-   // is set if it is not specified for this memory.
-   // If ~inherited~ is specified as FALSE, the value "" is returned
-   // if it does not exists in the this memory.
-   // 
-   // Attribute names are case sensitive.
-   // 
-   extern virtual function string get_attribute(string name,
-                                                bit inherited = 1);
-
-
-   // Function: get_attributes
-   //
-   // Get all attribute values.
-   //
-   // Get the name of all attribute for this memory.
-   // If ~inherited~ is specifed as TRUE, the value for all attributes
-   // inherited from all block ancestors are included.
-   // 
-   extern virtual function void get_attributes(ref string names[string],
-                                               input bit inherited = 1);
 
 
    //------------------
@@ -874,7 +815,7 @@ class uvm_mem extends uvm_object;
    // Returns the sum of all coverage models to be built in the
    // memory model.
    //
-   extern virtual protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
+   extern protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
 
 
    // Function: add_coverage
@@ -1088,20 +1029,10 @@ endfunction: Xlock_modelX
 // get_full_name
 
 function string uvm_mem::get_full_name();
-   uvm_reg_block blk;
-
-   get_full_name = get_name();
-
-   // Do not include top-level name in full name
-   blk = get_block();
-
-   if (blk == null)
-     return get_full_name;
-
-   if (blk.get_parent() == null)
-     return get_full_name;
-
-   get_full_name = {m_parent.get_full_name(), ".", get_full_name};
+   if (m_parent == null)
+      return get_name();
+   
+   return {m_parent.get_full_name(), ".", get_name()};
 
 endfunction: get_full_name
 
@@ -1440,86 +1371,6 @@ endfunction: get_n_bytes
 
 
 
-//-----------
-// ATTRIBUTES
-//-----------
-
-// set_attribute
-
-function void uvm_mem::set_attribute(string name,
-                                     string value);
-   if (name == "") begin
-      `uvm_error("RegModel", {"Cannot set anonymous attribute \"\" in memory '",
-                         get_full_name(),"'"})
-      return;
-   end
-
-   if (m_attributes.exists(name)) begin
-      if (value != "") begin
-         `uvm_warning("RegModel", {"Redefining attribute '",name,"' in memory '",
-                         get_full_name(),"' to '",value,"'"})
-         m_attributes[name] = value;
-      end
-      else begin
-         m_attributes.delete(name);
-      end
-      return;
-   end
-
-   if (value == "") begin
-      `uvm_warning("RegModel", {"Attempting to delete non-existent attribute '",
-                          name, "' in memory '", get_full_name(), "'"})
-      return;
-   end
-
-   m_attributes[name] = value;
-endfunction: set_attribute
-
-
-// has_attribute
-
-function bit uvm_mem::has_attribute(string name, bit inherited = 1);
-   if (m_attributes.exists(name))
-      return 1;
-
-   if (inherited && m_parent != null)
-      if (m_parent.get_attribute(name,1) != "")
-        return 1;
-
-   return 0;
-endfunction
-
-
-// get_attribute
-
-function string uvm_mem::get_attribute(string name,
-                                       bit inherited = 1);
-   if (inherited && m_parent != null)
-      get_attribute = m_parent.get_attribute(name,1);
-
-   if (get_attribute == "" && m_attributes.exists(name))
-      return m_attributes[name];
-
-   return "";
-endfunction: get_attribute
-
-
-// get_attributes
-
-function void uvm_mem::get_attributes(ref string names[string],
-                                      input bit inherited = 1);
-   // attributes at higher levels supercede those at lower levels
-   if (inherited && m_parent != null)
-     m_parent.get_attributes(names,1);
-
-   foreach (m_attributes[nm])
-     if (!names.exists(nm))
-       names[nm] = m_attributes[nm];
-
-endfunction: get_attributes
-
-
-
 //---------
 // COVERAGE
 //---------
@@ -1530,7 +1381,7 @@ function uvm_reg_cvr_t uvm_mem::build_coverage(uvm_reg_cvr_t models);
    void'(uvm_reg_cvr_rsrc_db::read_by_name({"uvm_reg::", get_full_name()},
                                            "include_coverage",
                                            build_coverage, this));
-   return models;
+   return build_coverage & models;
 endfunction: build_coverage
 
 
@@ -1795,7 +1646,7 @@ task uvm_mem::do_write(uvm_reg_item rw);
       cb.post_write(rw);
 
    // REPORT
-   if (uvm_report_enabled(UVM_MEDIUM)) begin
+   if (uvm_report_enabled(UVM_HIGH)) begin
      string path_s,value_s,pre_s,range_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -1817,7 +1668,7 @@ task uvm_mem::do_write(uvm_reg_item rw);
      end
 
      `uvm_info("RegModel", {pre_s,"Wrote memory via ",path_s,": ",
-                            get_full_name(),range_s,value_s},UVM_MEDIUM)
+                            get_full_name(),range_s,value_s},UVM_HIGH)
    end
 
    m_write_in_progress = 1'b0;
@@ -1897,7 +1748,7 @@ task uvm_mem::do_read(uvm_reg_item rw);
       cb.post_read(rw);
 
    // REPORT
-   if (uvm_report_enabled(UVM_MEDIUM)) begin
+   if (uvm_report_enabled(UVM_HIGH)) begin
      string path_s,value_s,pre_s,range_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -1919,7 +1770,7 @@ task uvm_mem::do_read(uvm_reg_item rw);
      end
 
      `uvm_info("RegModel", {pre_s,"Read memory via ",path_s,": ",
-                            get_full_name(),range_s,value_s},UVM_MEDIUM)
+                            get_full_name(),range_s,value_s},UVM_HIGH)
    end
 
    m_read_in_progress = 1'b0;
@@ -2038,7 +1889,7 @@ task uvm_mem::poke(output uvm_status_e      status,
    rw.element_kind = UVM_MEM;
    rw.kind         = UVM_WRITE;
    rw.offset       = offset;
-   rw.value[0]     = value;
+   rw.value[0]     = value & ((1 << m_n_bits)-1);
    rw.bd_kind      = kind;
    rw.parent       = parent;
    rw.extension    = extension;
@@ -2053,7 +1904,7 @@ task uvm_mem::poke(output uvm_status_e      status,
    status = rw.status;
 
    `uvm_info("RegModel", $psprintf("Poked memory '%s[%0d]' with value 'h%h",
-                              get_full_name(), offset, value),UVM_MEDIUM);
+                              get_full_name(), offset, value),UVM_HIGH);
 
 endtask: poke
 
@@ -2103,7 +1954,7 @@ task uvm_mem::peek(output uvm_status_e      status,
    value  = rw.value[0];
 
    `uvm_info("RegModel", $psprintf("Peeked memory '%s[%0d]' has value 'h%h",
-                         get_full_name(), offset, value),UVM_MEDIUM);
+                         get_full_name(), offset, value),UVM_HIGH);
 endtask: peek
 
 
@@ -2195,7 +2046,7 @@ endfunction: get_backdoor
 function uvm_status_e uvm_mem::backdoor_read_func(uvm_reg_item rw);
 
   uvm_hdl_path_concat paths[$];
-  uvm_reg_data_t val;
+  uvm_hdl_data_t val;
   bit ok=1;
 
   get_full_hdl_path(paths,rw.bd_kind);
@@ -2204,33 +2055,37 @@ function uvm_status_e uvm_mem::backdoor_read_func(uvm_reg_item rw);
      string idx;
      idx.itoa(rw.offset + mem_idx);
      foreach (paths[i]) begin
-     uvm_hdl_path_concat hdl_concat = paths[i];
+        uvm_hdl_path_concat hdl_concat = paths[i];
         val = 0;
-     foreach (hdl_concat.slices[j]) begin
-        `uvm_info("RegModel", $psprintf("backdoor_read from %s ",hdl_concat.slices[j].path),UVM_DEBUG);
+        foreach (hdl_concat.slices[j]) begin
+           string hdl_path = {hdl_concat.slices[j].path, "[", idx, "]"};
+
+           `uvm_info("RegModel", {"backdoor_read from ",hdl_path},UVM_DEBUG)
  
-        if (hdl_concat.slices[j].offset < 0) begin
-           ok &= uvm_hdl_read({hdl_concat.slices[j].path, "[", idx, "]"},val);
+           if (hdl_concat.slices[j].offset < 0) begin
+              ok &= uvm_hdl_read(hdl_path, val);
               continue;
            end
            begin
               uvm_reg_data_t slice;
-           int k = hdl_concat.slices[j].offset;
-           ok &= uvm_hdl_read({hdl_concat.slices[j].path,"[", idx, "]"}, slice);
-           repeat (hdl_concat.slices[j].size) begin
+              int k = hdl_concat.slices[j].offset;
+              ok &= uvm_hdl_read(hdl_path, slice);
+              repeat (hdl_concat.slices[j].size) begin
                  val[k++] = slice[0];
                  slice >>= 1;
               end
            end
         end
 
+        val &= (1 << m_n_bits)-1;
+
         if (i == 0)
            rw.value[mem_idx] = val;
 
         if (val != rw.value[mem_idx]) begin
            `uvm_error("RegModel", $psprintf("Backdoor read of register %s with multiple HDL copies: values are not the same: %0h at path '%s', and %0h at path '%s'. Returning first value.",
-                  get_full_name(), rw.value[mem_idx], uvm_hdl_concat2string(paths[0]),
-                  val, uvm_hdl_concat2string(paths[i]))); 
+               get_full_name(), rw.value[mem_idx], uvm_hdl_concat2string(paths[0]),
+               val, uvm_hdl_concat2string(paths[i]))); 
            return UVM_NOT_OK;
          end
       end

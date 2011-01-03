@@ -21,15 +21,13 @@
 //-----------------------------------------------------------------------------
 
 
-`ifndef UVM_OBJECT_SVH
-`define UVM_OBJECT_SVH
-
 typedef class uvm_report_object;
 typedef class uvm_object_wrapper;
 typedef class uvm_objection;
+typedef class uvm_component;
+
 
 // internal
-//typedef class uvm_copy_map;
 typedef class uvm_status_container;
 
 //------------------------------------------------------------------------------
@@ -171,7 +169,7 @@ virtual class uvm_object extends uvm_void;
   // <uvm_object_wrapper>. This method, if implemented, can be used as convenient
   // means of supplying those arguments. This method is the same as the static
   // <get_type> method, but uses an already allocated object to determine
-  // the type-proxy to access (instead of using the static object.
+  // the type-proxy to access (instead of using the static object).
   //
   // The default implementation of this method does a factory lookup of the
   // proxy using the return value from <get_type_name>. If the type returned
@@ -305,7 +303,7 @@ virtual class uvm_object extends uvm_void;
   //|   int f1;
   //|   virtual function void do_print (uvm_printer printer);
   //|     super.do_print(printer);
-  //|     printer.print_field("f1", f1, $bits(f1), DEC);
+  //|     printer.print_int("f1", f1, $bits(f1), DEC);
   //|     printer.print_object("data", data);
   //|   endfunction
   //
@@ -773,142 +771,546 @@ virtual class uvm_object extends uvm_void;
 
   local string m_leaf_name;
 
-  static bit print_matches = 0;
-
-  extern static function void print_field_match (string fnc, string match);
-
-  extern virtual function void m_field_automation (uvm_object  tmp_data__,  
-                                                   int what__, 
-                                                   string str__);
-  extern protected function int m_do_data (string arg,
-                                           inout uvm_bitstream_t lhs,
-                                           input uvm_bitstream_t rhs,
-                                           int what, int bits, int flag);
-  extern protected function int m_do_data_real (string arg,
-                                                inout real lhs,
-                                                input real rhs,
-                                                int what, int flag);
-  extern protected function int m_do_data_object (string arg,
-                                                  inout uvm_object  lhs,
-                                                  input uvm_object  rhs,
-                                                  int what, int flag);
-  extern protected function int m_do_data_string (string arg,
-                                                  inout string lhs,
-                                                  input string rhs,
-                                                  int what, int flag);
-  extern protected function void m_record_field_object (string arg,
-                                          uvm_object value,
-                                          uvm_recorder recorder=null,
-                                          int flag=UVM_DEFAULT);
-  extern protected function int m_do_set (string match, string arg,
-                                          inout uvm_bitstream_t  lhs, 
-                                          input int what, int flag);
-  extern protected function int m_do_set_string (string match,
-                                                 string arg, inout string lhs,
-                                                 input int what, int flag);
-  extern protected function int m_do_set_object (string match,
-                                                 string arg,
-                                                 inout uvm_object lhsobj, 
-                                                 input int what, int flag);
-
-  extern protected function string  m_get_function_type  (int what);
-
-  static protected int m_inst_count = 0;
   local int m_inst_id;
+  static protected int m_inst_count = 0;
+
+  static /*protected*/ uvm_status_container m_sc = new;
+
+  extern virtual function void m_field_automation (uvm_object tmp_data__,  
+                                                   int        what__, 
+                                                   string     str__);
 
   extern protected virtual function uvm_report_object m_get_report_object();
 
-  extern static function uvm_status_container init_status();
-
-  static protected uvm_status_container m_sc = init_status();
-
-  static function uvm_status_container m_get_status(); return m_sc; endfunction
-
-  // The following members are used for verifying the integrity of the 
-  // optional uvm_field macros.
-  typedef enum {UVM_NONE_T, UVM_INT_T, UVM_STR_T, UVM_OBJ_T} uvm_apply_t;
-  static protected uvm_apply_t m_field_array[string];
-  extern protected function void m_do_field_check(string field, uvm_apply_t t_t = UVM_NONE_T);
-  extern static protected function void m_delete_field_array();
-  extern protected function void m_print_field_array();
-
 endclass
 
 
-//------------------------------------------------------------------------------
-//
-// CLASS- uvm_status_container
-//
-// Internal class to contain status information for automation methods.
-//
-//------------------------------------------------------------------------------
-
-class uvm_status_container;
-  //Since there is a cost to saving the field string, only do so if needed.
-  static bit          save_last_field = 0;
-  static string       last_field     = "";
-
-  static bit          warning    = 0;
-  static bit          status     = 0;
-  static uvm_bitstream_t  bitstream  = 0;
-  static int          intv       = 0;
-  static int          element    = 0;
-  static string       stringv    = "";
-  static string       scratch1   = "";
-  static string       scratch2   = "";
-  static string       key        = "";
-  static uvm_object   object     = null;
-  static bit          array_warning_done = 0;
-  static uvm_scope_stack scope       = init_scope();  //For get-set operations
-
-  extern static function string get_full_scope_arg ();
-  extern static function uvm_scope_stack init_scope();
-endclass
+uvm_copy_map uvm_global_copy_map = new;
 
 //------------------------------------------------------------------------------
-//
-// CLASS- uvm_copy_map
-//
-//
-// Internal class used to map rhs to lhs so when a cycle is found in the rhs,
-// the correct lhs object can be bound to it.
+// IMPLEMENTATION
 //------------------------------------------------------------------------------
 
-class uvm_copy_map;
-  local uvm_object m_map[uvm_object];
-  function void set(uvm_object key, uvm_object obj);
-    m_map[key] = obj;
-  endfunction
-  function uvm_object get(uvm_object key);
-    if (m_map.exists(key))
-       return m_map[key];
-    return null;
-  endfunction
-  function void clear();
-    m_map.delete();
-  endfunction 
-  function void delete(uvm_object v);
-    m_map.delete(v);
-  endfunction 
-endclass
+// new
+// ---
+
+function uvm_object::new (string name="");
+
+  m_inst_id = m_inst_count++;
+  m_leaf_name = name;
+endfunction
 
 
-//------------------------------------------------------------------------------
-//
-// CLASS- uvm_options_container
-//
-// Internal class.
-//------------------------------------------------------------------------------
+// reseed
+// ------
 
-class uvm_options_container;
-  uvm_comparer    comparer;
-  uvm_packer      packer;
-  uvm_recorder    recorder;
-  uvm_printer     printer;
-  bit             clone = 1;
-  extern function new();
-  extern static function uvm_options_container init();
-endclass
+function void uvm_object::reseed ();
+  if(use_uvm_seeding)
+    this.srandom(uvm_create_random_seed(get_type_name(), get_full_name()));
+endfunction
 
 
-`endif // UVM_OBJECT_SVH
+// get type
+// --------
+
+function uvm_object_wrapper uvm_object::get_type();
+  uvm_report_error("NOTYPID", "get_type not implemented in derived class.", UVM_NONE);
+  return null;
+endfunction
+
+
+// get inst_id
+// -----------
+
+function int uvm_object::get_inst_id();
+  return m_inst_id;
+endfunction
+
+
+// get_object_type
+// ---------------
+
+function uvm_object_wrapper uvm_object::get_object_type();
+  if(get_type_name() == "<unknown>") return null;
+  return factory.find_by_name(get_type_name());
+endfunction
+
+
+// get inst_count
+// --------------
+
+function int uvm_object::get_inst_count();
+  return m_inst_count;
+endfunction
+
+
+// get_name
+// --------
+
+function string uvm_object::get_name ();
+  return m_leaf_name;
+endfunction
+
+
+// get_full_name
+// -------------
+
+function string uvm_object::get_full_name ();
+  return get_name();
+endfunction
+
+
+// set_name
+// --------
+
+function void uvm_object::set_name (string name);
+  m_leaf_name = name;
+endfunction
+
+
+// print 
+// -----
+ 
+function void uvm_object::print(uvm_printer printer=null);
+  if (printer==null)
+    printer = uvm_default_printer;
+  if (printer == null)
+    `uvm_error("NULLPRINTER","uvm_default_printer is null")
+  $fwrite(printer.knobs.mcd,sprint(printer)); 
+endfunction
+
+
+// sprint
+// ------
+
+function string uvm_object::sprint(uvm_printer printer=null);
+  bit p;
+
+  if(printer==null)
+    printer = uvm_default_printer;
+
+  if(printer.istop()) begin
+    printer.print_object(get_name(), this);
+    return printer.emit();
+  end
+  else begin
+    m_sc.printer = printer;
+    m_field_automation(null, UVM_PRINT, "");
+    do_print(printer);
+  end
+endfunction
+
+
+// convert2string (virtual)
+// --------------
+
+function string uvm_object::convert2string();
+  return "";
+endfunction
+
+
+// set_int_local
+// -------------
+
+function void  uvm_object::set_int_local (string      field_name,
+                                          uvm_bitstream_t value,
+                                          bit         recurse=1);
+  if(m_sc.cycle_check.exists(this)) return;
+  m_sc.cycle_check[this] = 1;
+
+  this.m_sc.status = 0;
+  this.m_sc.bitstream = value;
+
+  m_field_automation(null, UVM_SETINT, field_name);
+
+  if(m_sc.warning && !this.m_sc.status) begin
+    uvm_report_error("NOMTC", $psprintf("did not find a match for field %s", field_name),UVM_NONE);
+  end
+  m_sc.cycle_check.delete(this);
+
+endfunction
+
+
+// set_object_local
+// ----------------
+
+function void  uvm_object::set_object_local (string     field_name,
+                                             uvm_object value,
+                                             bit        clone=1,
+                                             bit        recurse=1);
+  uvm_object cc;
+  if(m_sc.cycle_check.exists(this)) return;
+  m_sc.cycle_check[this] = 1;
+
+  if(clone && (value!=null)) begin 
+    cc = value.clone();
+    if(cc != null) cc.set_name(field_name); 
+    value = cc; 
+  end 
+
+  this.m_sc.status = 0;
+  this.m_sc.object = value;
+  m_sc.clone = clone;
+
+  m_field_automation(null, UVM_SETOBJ, field_name);
+
+  if(m_sc.warning && !this.m_sc.status) begin
+    uvm_report_error("NOMTC", $psprintf("did not find a match for field %s", field_name), UVM_NONE);
+  end
+
+  m_sc.cycle_check.delete(this);
+endfunction
+
+
+// set_string_local
+// ----------------
+function void  uvm_object::set_string_local (string field_name,
+                                             string value,
+                                             bit    recurse=1);
+  if(m_sc.cycle_check.exists(this)) return;
+  m_sc.cycle_check[this] = 1;
+
+  this.m_sc.status = 0;
+  this.m_sc.stringv = value;
+
+  m_field_automation(null, UVM_SETSTR, field_name);
+
+  if(m_sc.warning && !this.m_sc.status) begin
+    uvm_report_error("NOMTC", $psprintf("did not find a match for field %s (@%0d)", field_name, this.get_inst_id()), UVM_NONE);
+  end
+  m_sc.cycle_check.delete(this);
+endfunction
+
+
+// clone
+// -----
+
+function uvm_object uvm_object::clone();
+  uvm_object tmp;
+  tmp = this.create(get_name());
+  if(tmp == null)
+    uvm_report_warning("CRFLD", $psprintf("The create method failed for %s,  object cannot be cloned", get_name()), UVM_NONE);
+  else
+    tmp.copy(this);
+  return(tmp);
+endfunction
+
+
+// copy
+// ----
+
+function void uvm_object::copy (uvm_object rhs);
+  //For cycle checking
+  static int depth;
+  if((rhs !=null)  && (uvm_global_copy_map.get(rhs) != null)) begin
+    return;
+  end
+
+  if(rhs==null) begin
+    uvm_report_warning("NULLCP", "A null object was supplied to copy; copy is ignored", UVM_NONE);
+    return;
+  end
+
+  uvm_global_copy_map.set(rhs, this); 
+  ++depth;
+
+  do_copy(rhs);
+  m_field_automation(rhs, UVM_COPY, "");
+
+  --depth;
+  if(depth==0) begin
+    uvm_global_copy_map.clear();
+  end
+endfunction
+
+
+// do_copy
+// -------
+
+function void uvm_object::do_copy (uvm_object rhs);
+  return;
+endfunction
+
+
+// compare
+// -------
+
+function bit  uvm_object::compare (uvm_object rhs,
+                                   uvm_comparer comparer=null);
+  bit t, dc;
+  static int style;
+  bit done;
+  done = 0;
+  if(comparer != null) 
+    m_sc.comparer = comparer;
+  else 
+    m_sc.comparer = uvm_default_comparer;
+  comparer = m_sc.comparer;
+
+  if(!m_sc.scope.depth()) begin
+    comparer.compare_map.clear();
+    comparer.result = 0;
+    comparer.miscompares = "";
+    comparer.scope = m_sc.scope;
+    if(get_name() == "")
+      m_sc.scope.down("<object>");
+    else
+      m_sc.scope.down(this.get_name());
+  end
+  if(!done && (rhs == null)) begin
+    if(m_sc.scope.depth()) begin
+      comparer.print_msg_object(this, rhs);
+    end
+    else begin
+      comparer.print_msg_object(this, rhs);
+      uvm_report_info("MISCMP",
+           $psprintf("%0d Miscompare(s) for object %s@%0d vs. %s@%0d", 
+           comparer.result, m_sc.scope.get(), this.get_inst_id(), m_sc.scope.get_arg(), rhs.get_inst_id()), m_sc.comparer.verbosity);
+      done = 1;
+    end
+  end
+
+  if(!done && (comparer.compare_map.get(rhs) != null)) begin
+    if(comparer.compare_map.get(rhs) != this) begin
+      comparer.print_msg_object(this, comparer.compare_map.get(rhs));
+    end 
+    done = 1;  //don't do any more work after this case, but do cleanup
+  end
+
+  if(!done && comparer.check_type && get_type_name() != rhs.get_type_name()) begin
+    m_sc.stringv = { "lhs type = \"", get_type_name(), 
+                     "\" : rhs type = \"", rhs.get_type_name(), "\""};
+    comparer.print_msg(m_sc.stringv);
+  end
+
+  if(!done) begin
+    comparer.compare_map.set(rhs, this);
+    m_field_automation(rhs, UVM_COMPARE, "");
+    dc = do_compare(rhs, comparer);
+  end
+
+  if(m_sc.scope.depth()==1)  begin
+    m_sc.scope.up();
+  end
+
+  comparer.print_rollup(this, rhs);
+  return (comparer.result == 0 && dc == 1);
+endfunction
+
+
+// do_compare
+// ----------
+
+function bit  uvm_object::do_compare (uvm_object rhs,
+                                      uvm_comparer comparer);
+  return 1;
+endfunction
+
+
+// m_field_automation
+// ------------------
+
+function void uvm_object::m_field_automation (uvm_object tmp_data__,
+                                              int        what__,
+                                              string     str__ );
+  return;
+endfunction
+
+
+
+// do_print (virtual override)
+// ------------
+
+function void uvm_object::do_print(uvm_printer printer);
+  return;
+endfunction
+
+
+// m_pack
+// ------
+
+function void uvm_object::m_pack (inout uvm_packer packer);
+
+  if(packer!=null) 
+    m_sc.packer = packer;
+  else  
+    m_sc.packer = uvm_default_packer;
+  packer = m_sc.packer;
+
+  packer.reset();
+  packer.scope.down(get_name());
+
+  m_field_automation(null, UVM_PACK, "");
+  do_pack(packer);
+
+  packer.set_packed_size();
+
+  packer.scope.up(); 
+
+endfunction
+  
+
+// pack
+// ---- 
+  
+function int uvm_object::pack (ref bit bitstream [],
+                               input uvm_packer packer =null );
+  m_pack(packer);
+  packer.get_bits(bitstream);
+  return packer.get_packed_size();
+endfunction
+
+// pack_bytes
+// ----------
+
+function int uvm_object::pack_bytes (ref byte unsigned bytestream [],
+                                     input uvm_packer packer=null );
+  m_pack(packer);
+  packer.get_bytes(bytestream);
+  return packer.get_packed_size();
+endfunction
+
+
+// pack_ints
+// ---------
+
+function int uvm_object::pack_ints (ref int unsigned intstream [],
+                                    input uvm_packer packer=null );
+  m_pack(packer);
+  packer.get_ints(intstream);
+  return packer.get_packed_size();
+endfunction
+
+
+// do_pack
+// -------
+
+function void uvm_object::do_pack (uvm_packer packer );
+  return;
+endfunction
+
+
+// m_unpack_pre
+// ------------
+  
+function void uvm_object::m_unpack_pre (inout uvm_packer packer);
+  if(packer!=null)
+    m_sc.packer = packer;
+  else
+    m_sc.packer = uvm_default_packer;
+  packer = m_sc.packer;
+  packer.reset();
+endfunction
+  
+
+// m_unpack_post
+// -------------
+
+function void uvm_object::m_unpack_post (uvm_packer packer);
+
+  int provided_size; 
+
+  provided_size = packer.get_packed_size();
+
+  //Put this object into the hierarchy
+  packer.scope.down(get_name());
+
+  m_field_automation(null, UVM_UNPACK, "");
+
+  do_unpack(packer);
+
+  //Scope back up before leaving
+  packer.scope.up();
+
+  if(packer.get_packed_size() != provided_size) begin
+    uvm_report_warning("BDUNPK", $psprintf("Unpack operation unsuccessful: unpacked %0d bits from a total of %0d bits", packer.get_packed_size(), provided_size), UVM_NONE);
+  end
+
+endfunction
+
+
+// unpack
+// ------
+
+function int uvm_object::unpack (ref    bit        bitstream [],
+                                 input  uvm_packer packer=null);
+  m_unpack_pre(packer);
+  packer.put_bits(bitstream);
+  m_unpack_post(packer);
+  packer.set_packed_size();
+  return packer.get_packed_size();
+endfunction
+
+
+// unpack_bytes
+// ------------
+
+function int uvm_object::unpack_bytes (ref    byte unsigned bytestream [],
+                                       input  uvm_packer packer=null);
+  m_unpack_pre(packer);
+  packer.put_bytes(bytestream);
+  m_unpack_post(packer);
+  packer.set_packed_size();
+  return packer.get_packed_size();
+endfunction
+
+
+// unpack_ints
+// -----------
+  
+function int uvm_object::unpack_ints (ref    int unsigned intstream [],
+                                      input  uvm_packer packer=null);
+  m_unpack_pre(packer);
+  packer.put_ints(intstream);
+  m_unpack_post(packer);
+  packer.set_packed_size();
+  return packer.get_packed_size();
+endfunction
+
+
+// do_unpack
+// ---------
+
+function void uvm_object::do_unpack (uvm_packer packer);
+  return;
+endfunction
+
+
+// record
+// ------
+
+function void uvm_object::record (uvm_recorder recorder=null);
+
+  if(recorder == null) 
+    recorder = uvm_default_recorder;
+
+  if(!recorder.tr_handle) return;
+
+  m_sc.recorder = recorder;
+  recorder.recording_depth++;
+  m_field_automation(null, UVM_RECORD, "");
+  do_record(recorder);
+
+  recorder.recording_depth--;
+
+  if(recorder.recording_depth==0) begin
+    recorder.tr_handle = 0;
+  end
+endfunction
+
+
+// do_record (virtual)
+// ---------
+
+function void uvm_object::do_record (uvm_recorder recorder);
+  return;
+endfunction
+
+
+// m_get_report_object
+// -------------------
+
+function uvm_report_object uvm_object::m_get_report_object();
+  return null;
+endfunction
+

@@ -75,7 +75,7 @@ Consider for example a consumer component with a blocking target socket.
 
 Example:
 | class consumer extends uvm_component;
-|    tlm2_b_target_socket #(trans, consumer) target_socket;
+|    tlm2_b_target_socket #(consumer, trans) target_socket;
 |    function new(string name, uvm_component parent);
 |      super.new(name, parent);
 |    endfunction

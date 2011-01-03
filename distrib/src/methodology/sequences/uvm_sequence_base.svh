@@ -110,7 +110,7 @@
 // User code
 //
 //| parent_seq.start_item(item, priority);
-//| sub_seq.randomize(...);
+//| sub_seq.randomize(...) [with {constraints}];
 //| parent_seq.finish_item(item);
 //|
 //| or
@@ -167,7 +167,6 @@ class uvm_sequence_base extends uvm_sequence_item;
   //
   // The constructor for uvm_sequence_base. 
   //
-
   function new (string name = "uvm_sequence");
 
     super.new(name);
@@ -179,11 +178,10 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Function: is_item
   //
   // Returns 1 on items and 0 on sequences. As this object is a sequence,
-  // ~is_item~ will return 0.
-  // This function may be called on any sequence_item or sequence object.
-
+  // ~is_item~ will always return 0.
+  //
   virtual function bit is_item();
-    return(0);
+    return 0;
   endfunction
 
 
@@ -272,7 +270,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
     // Register the sequence with the sequencer if defined.
     if (m_sequencer != null) begin
-      void'(m_sequencer.register_sequence(this));
+      void'(m_sequencer.m_register_sequence(this));
     end
     
     `ifndef UVM_USE_FPC
@@ -340,7 +338,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     // were forcibly stoped, this step has already taken place
     if (m_sequence_state != STOPPED) begin
       if (m_sequencer != null)
-        m_sequencer.sequence_exiting(this);
+        m_sequencer.m_sequence_exiting(this);
     end
 
     #0; // allow stopped and finish waiters to resume
@@ -452,7 +450,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // This function returns the current priority of the sequence.
 
   function int get_priority();
-    return (m_priority);
+    return m_priority;
   endfunction
 
 
@@ -506,33 +504,6 @@ class uvm_sequence_base extends uvm_sequence_item;
   endtask
  
 
-  // Function: is_blocked
-  //
-  // Returns a bit indicating whether this sequence is currently prevented from
-  // running due to another lock or grab. A 1 is returned if the sequence is
-  // currently blocked. A 0 is returned if no lock or grab prevents this
-  // sequence from executing. Note that even if a sequence is not blocked, it
-  // is possible for another sequence to issue a lock or grab before this
-  // sequence can issue a request.
-
-  function bit is_blocked();
-    return(m_sequencer.is_blocked(this));
-  endfunction
-
-
-  // Function: has_lock
-  //
-  // Returns 1 if this sequence has a lock, 0 otherwise.
-  //
-  // Note that even if this sequence has a lock, a child sequence may also have
-  // a lock, in which case the sequence is still blocked from issuing
-  // operations on the sequencer.
-
-  function bit has_lock();
-    return(m_sequencer.has_lock(this));
-  endfunction
-
-
   // Task: lock
   //
   // Requests a lock on the specified sequencer. If sequencer is null, the lock
@@ -545,15 +516,13 @@ class uvm_sequence_base extends uvm_sequence_item;
   // The lock call will return when the lock has been granted.
 
   task lock(uvm_sequencer_base sequencer = null);
-    if (sequencer == null) begin
-      if (m_sequencer == null) begin
-        uvm_report_fatal("ISRELVNT", "Null m_sequencer reference", UVM_NONE);
-      end
-      m_sequencer.lock(this);
-    end
-    else begin
-      sequencer.lock(this);
-    end
+    if (sequencer == null)
+      sequencer = m_sequencer;
+
+    if (sequencer == null)
+      uvm_report_fatal("LOCKSEQR", "Null m_sequencer reference", UVM_NONE);
+
+    sequencer.lock(this);
   endtask
 
 
@@ -610,9 +579,67 @@ class uvm_sequence_base extends uvm_sequence_item;
   endfunction
 
 
-  //---------------------------------------
-  // Group: Fine-grained Sequence Execution
-  //---------------------------------------
+  // Function: is_blocked
+  //
+  // Returns a bit indicating whether this sequence is currently prevented from
+  // running due to another lock or grab. A 1 is returned if the sequence is
+  // currently blocked. A 0 is returned if no lock or grab prevents this
+  // sequence from executing. Note that even if a sequence is not blocked, it
+  // is possible for another sequence to issue a lock or grab before this
+  // sequence can issue a request.
+
+  function bit is_blocked();
+    return m_sequencer.is_blocked(this);
+  endfunction
+
+
+  // Function: has_lock
+  //
+  // Returns 1 if this sequence has a lock, 0 otherwise.
+  //
+  // Note that even if this sequence has a lock, a child sequence may also have
+  // a lock, in which case the sequence is still blocked from issuing
+  // operations on the sequencer.
+
+  function bit has_lock();
+    return m_sequencer.has_lock(this);
+  endfunction
+
+
+  // Function: kill
+  //
+  // This function will kill the sequence, and cause all current locks and
+  // requests in the sequence's default sequencer to be removed. The sequence
+  // state will change to STOPPED, and its post_body() method, if  will not b
+  //
+  // If a sequence has issued locks, grabs, or requests on sequencers other than
+  // the default sequencer, then care must be taken to unregister the sequence
+  // with the other sequencer(s) using the sequencer unregister_sequence() 
+  // method.
+
+  function void kill();
+`ifdef UVM_USE_FPC
+    if (m_sequence_process != null) begin
+`else
+    if (m_sequence_started != 0) begin
+`endif
+      // If we are not connected to a sequencer, then issue
+      // kill locally.
+      if (m_sequencer == null) begin
+        m_kill();
+        return;
+      end
+      // If we are attached to a sequencer, then the sequencer
+      // will clear out queues, and then kill this sequence
+      m_sequencer.kill_sequence(this);
+      return;
+    end
+  endfunction
+
+
+  //-------------------------------
+  // Group: Sequence Item Execution
+  //-------------------------------
 
   // Function: create_item
   //
@@ -645,23 +672,23 @@ class uvm_sequence_base extends uvm_sequence_item;
   //
   //| virtual task start_item(uvm_sequence_item item, int set_priority = -1);
 
-  // Function- m_start_item
+  // Function- m_start_item_or_seq
   //
   // Internal method.
   //   seq.start_item(item,prior) calls
-  //   item.m_start_item(get_sequencer(), seq, prior);
+  //   item.m_start_item_or_seq(get_sequencer(), seq, prior);
 
-  virtual task m_start_item(uvm_sequencer_base sequencer_ptr, uvm_sequence_item sequence_ptr,
-                            int set_priority);
-    uvm_sequence_base this_seq;
+  virtual task m_start_item_or_seq(uvm_sequencer_base sequencer,
+                                   uvm_sequence_item parent_seq,
+                                   int set_priority);
     
-    if (this.get_sequencer() == null) begin
-      if (!$cast(this_seq, sequence_ptr)) begin
+    if (get_sequencer() == null) begin
+      uvm_sequence_base parent_seq_;
+      if (!$cast(parent_seq_, parent_seq))
         uvm_report_fatal("SEQMSTART", "Failure to cast sequence item", UVM_NONE);
-      end
       set_use_sequence_info(1);
-      set_parent_sequence(this_seq);
-      set_sequencer(sequencer_ptr);
+      set_parent_sequence(parent_seq_);
+      set_sequencer(sequencer);
       reseed();
     end
     return;
@@ -683,13 +710,13 @@ class uvm_sequence_base extends uvm_sequence_item;
   //   seq.finish_item(item,prior) calls
   //   item.m_finish_item(get_sequencer(), seq, prior);
 
-  virtual task m_finish_item(uvm_sequencer_base sequencer_ptr, 
-                             uvm_sequence_item sequence_ptr, 
+  virtual task m_finish_item(uvm_sequencer_base sequencer, 
+                             uvm_sequence_item parent_seq, 
                              int set_priority = -1);
-    uvm_sequence_base seq_base_ptr;
+    uvm_sequence_base parent_seq_;
     int prior;
 
-    if (!$cast(seq_base_ptr, sequence_ptr))
+    if (!$cast(parent_seq_, parent_seq))
         uvm_report_fatal("SEQMFINISH", "Failure to cast sequence item", UVM_NONE);
 
     // determine priority
@@ -697,7 +724,7 @@ class uvm_sequence_base extends uvm_sequence_item;
             (get_priority() >= 0 ? get_priority() :
              100));
 
-    start(sequencer_ptr, seq_base_ptr, prior, 0);
+    start(sequencer, parent_seq_, prior, 0);
     
   endtask  
 
@@ -773,38 +800,9 @@ class uvm_sequence_base extends uvm_sequence_item;
   endfunction
 
 
-  // Function: kill
-  //
-  // This function will kill the sequence, and cause all current locks and
-  // requests in the sequence's default sequencer to be removed. The sequence
-  // state will change to STOPPED, and its post_body() method, if  will not b
-  //
-  // If a sequence has issued locks, grabs, or requests on sequencers other than
-  // the default sequencer, then care must be taken to unregister the sequence
-  // with the other sequencer(s) using the sequencer unregister_sequence() 
-  // method.
-
-  function void kill();
-`ifdef UVM_USE_FPC
-    if (m_sequence_process != null) begin
-`else
-    if (m_sequence_started != 0) begin
-`endif
-      // If we are not connected to a sequencer, then issue
-      // kill locally.
-      if (m_sequencer == null) begin
-        m_kill();
-        return;
-      end
-      // If we are attached to a sequencer, then the sequencer
-      // will clear out queues, and then kill this sequence
-      m_sequencer.kill_sequence(this);
-      return;
-    end
-  endfunction
-
-
+  //--------------------
   // Group: Response API
+  //--------------------
 
   // Function: use_response_handler
   //
@@ -827,7 +825,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Returns the state of the use_response_handler bit.
 
   function bit get_use_response_handler();
-    return(m_use_response_handler);
+    return m_use_response_handler;
   endfunction
 
 
@@ -860,7 +858,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // reports are generated.
 
   function bit get_response_queue_error_report_disabled();
-    return(response_queue_error_report_disabled);
+    return response_queue_error_report_disabled;
   endfunction
 
 
@@ -882,7 +880,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Returns the current depth setting for the response queue.
 
   function int get_response_queue_depth();
-    return(response_queue_depth);
+    return response_queue_depth;
   endfunction  
 
 
@@ -891,7 +889,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Empties the response queue for this sequence.
 
   virtual function void clear_response_queue();
-    `uvm_clear_queue(response_queue);
+    response_queue.delete();
   endfunction
 
 
@@ -935,11 +933,11 @@ class uvm_sequence_base extends uvm_sequence_item;
 
 
   //------------------------
-  // Group: Sequence Library
+  // Group- Sequence Library DEPRECATED
   //------------------------
 
 
-  // Variable: seq_kind
+  // Variable- seq_kind
   //
   // Used as an identifier in constraints for a specific sequence type.
 
@@ -952,24 +950,26 @@ class uvm_sequence_base extends uvm_sequence_item;
        (seq_kind <  num_sequences()) || (seq_kind == 0); }
 
 
-  // Function: num_sequences
+  // Function- num_sequences
   // 
   // Returns the number of sequences in the sequencer's sequence library.
 
   function int num_sequences();
-    if (m_sequencer == null) return (0);
+    if (m_sequencer == null)
+      return 0;
     return (m_sequencer.num_sequences());
   endfunction
 
 
 
-  // Function: get_seq_kind
+  // Function- get_seq_kind
   //
   // This function returns an int representing the sequence kind that has
-  // been registerd with the sequencer.  The seq_kind int may be used with
-  // the get_sequence or do_sequence_kind methods.
+  // been registerd with the sequencer.  The return value may be used with
+  // the <get_sequence> or <do_sequence_kind> methods.
 
   function int get_seq_kind(string type_name);
+    `uvm_warning("DEPRECATED","get_seq_kind() deprecated.");
     if(m_sequencer != null)
       return m_sequencer.get_seq_kind(type_name);
     else 
@@ -978,15 +978,16 @@ class uvm_sequence_base extends uvm_sequence_item;
   endfunction
 
 
-  // Function: get_sequence
+  // Function- get_sequence
   //
-  // This function returns a reference to a sequence specified by req_kind,
-  // which can be obtained using the get_seq_kind method.
+  // This function returns a reference to a sequence specified by ~req_kind~,
+  // which can be obtained using the <get_seq_kind> method.
 
   function uvm_sequence_base get_sequence(int unsigned req_kind);
     uvm_sequence_base m_seq;
     string m_seq_type;
     uvm_factory factory = uvm_factory::get();
+    `uvm_warning("DEPRECATED","get_sequence() deprecated.");
     if (req_kind < 0 || req_kind >= m_sequencer.sequences.size()) begin
       uvm_report_error("SEQRNG", 
         $psprintf("Kind arg '%0d' out of range. Need 0-%0d",
@@ -1003,30 +1004,16 @@ class uvm_sequence_base extends uvm_sequence_item;
   endfunction
 
 
-  // Function: get_sequence_by_name
+  // Task- do_sequence_kind
   //
-  // Internal method.
-
-  function uvm_sequence_base get_sequence_by_name(string seq_name);
-    uvm_sequence_base m_seq;
-    if (!$cast(m_seq, factory.create_object_by_name(seq_name, get_full_name(), seq_name))) begin
-      uvm_report_fatal("FCTSEQ", 
-        $psprintf("Factory can not produce a sequence of type %0s.", seq_name), UVM_NONE);
-    end
-    m_seq.set_use_sequence_info(1);
-    return m_seq;
-  endfunction
-
-
-  // Task: do_sequence_kind
-  //
-  // This task will start a sequence of kind specified by req_kind, which can
-  // be obtained using the get_seq_kind method.
+  // This task will start a sequence of kind specified by ~req_kind~,
+  // which can be obtained using the <get_seq_kind> method.
 
   task do_sequence_kind(int unsigned req_kind);
     string m_seq_type;
     uvm_sequence_base m_seq;
     uvm_factory factory = uvm_factory::get();
+    `uvm_warning("DEPRECATED","do_sequence_kind() deprecated.");
     m_seq_type = m_sequencer.sequences[req_kind];
     if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
       uvm_report_fatal("FCTSEQ", 
@@ -1046,44 +1033,60 @@ class uvm_sequence_base extends uvm_sequence_item;
   endtask
 
 
+  // Function- get_sequence_by_name
+  //
+  // Internal method.
+
+  function uvm_sequence_base get_sequence_by_name(string seq_name);
+    uvm_sequence_base m_seq;
+    `uvm_warning("DEPRECATED","get_sequence_by_name() deprecated.");
+    if (!$cast(m_seq, factory.create_object_by_name(seq_name, get_full_name(), seq_name))) begin
+      uvm_report_fatal("FCTSEQ", 
+        $psprintf("Factory can not produce a sequence of type %0s.", seq_name), UVM_NONE);
+    end
+    m_seq.set_use_sequence_info(1);
+    return m_seq;
+  endfunction
+
+
   // Task- create_and_start_sequence_by_name
   //
   // Internal method.
 
   task create_and_start_sequence_by_name(string seq_name);
     uvm_sequence_base m_seq;
+    `uvm_warning("DEPRECATED","create_and_start_sequence_by_name() deprecated.");
     m_seq = get_sequence_by_name(seq_name);
     m_seq.start(m_sequencer, this, this.get_priority(), 0);
   endtask
 
 
 
-  // Misc Internal methods.
+  //----------------------
+  // Misc Internal methods
+  //----------------------
 
 
-  // Function- m_get_sqr_sequence_id
-  //
-  // Internal method.
+  // m_get_sqr_sequence_id
+  // ---------------------
 
   function int m_get_sqr_sequence_id(int sequencer_id, bit update_sequence_id);
     if (m_sqr_seq_ids.exists(sequencer_id)) begin
       if (update_sequence_id == 1) begin
         set_sequence_id(m_sqr_seq_ids[sequencer_id]);
       end
-      return(m_sqr_seq_ids[sequencer_id]);
+      return m_sqr_seq_ids[sequencer_id];
     end
-    else begin
-      if (update_sequence_id == 1) begin
-        set_sequence_id(-1);
-      end
-      return(-1);
-    end
+
+    if (update_sequence_id == 1)
+      set_sequence_id(-1);
+
+    return -1;
   endfunction
   
 
-  // Function- m_set_sqr_sequence_id
-  //
-  // Internal method.
+  // m_set_sqr_sequence_id
+  // ---------------------
 
   function void m_set_sqr_sequence_id(int sequencer_id, int sequence_id);
     m_sqr_seq_ids[sequencer_id] = sequence_id;

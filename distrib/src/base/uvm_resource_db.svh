@@ -30,14 +30,14 @@
 // All of the functions in uvm_resource_db#(T) are static, so they
 // must be called using the :: operator.  For example:
 //
-//|  uvm_resource_db#(int)::write_and_set("A", "*", 17, this);
+//|  uvm_resource_db#(int)::set("A", "*", 17, this);
 //
 // The parameter value "int" identifies the resource type as
 // uvm_resource#(int).  Thus, the type of the object in the resource
 // container is int. This maintains the type-safety characteristics of
 // resource operations.
 //----------------------------------------------------------------------
-class uvm_resource_db #(type T=int);
+class uvm_resource_db #(type T=uvm_object);
 
   typedef uvm_resource #(T) rsrc_t;
 
@@ -63,7 +63,7 @@ class uvm_resource_db #(type T=int);
   endfunction
 
   // function: get_by_name
-
+  //
   // Imports a resource by ~name~.  The first argument is the ~name~ of the
   // resource to be retrieved and the second argument is the current
   // ~scope~. The ~rpterr~ flag indicates whether or not to generate
@@ -76,27 +76,29 @@ class uvm_resource_db #(type T=int);
     return rsrc_t::get_by_name(scope, name, rpterr);
   endfunction
 
-  // function: set 
+  // function: set_default
   //
   // add a new item into the resources database.  The item will not be
   // written to so it will have its default value. The resource is
   // created using ~name~ and ~scope~ as the lookup parameters.
-  static function rsrc_t set(string name, string scope);
+
+  static function rsrc_t set_default(string scope, string name);
 
     rsrc_t r;
     
     r = new(name, scope);
-    uvm_resources.set(r);
+    r.set();
     return r;
   endfunction
 
-  // function: write_and_set
+
+  // function: set
   //
   // Create a new resource, write a ~val~ to it, and set it into the
   // database using ~name~ and ~scope~ as the lookup parameters. The
   // ~accessor~ is used for auditting.
-  static function void write_and_set(input string name, input string scope,
-                                        T val, input uvm_object accessor = null);
+  static function void set(input string scope, input string name,
+                           T val, input uvm_object accessor = null);
 
     rsrc_t rsrc = new(name, scope);
     rsrc.write(val, accessor);
@@ -104,14 +106,14 @@ class uvm_resource_db #(type T=int);
 
   endfunction
 
-  // function: write_and_set_anonymous
+  // function: set_anonymous
   //
   // Create a new resource, write a ~val~ to it, and set it into the
   // database.  The resource has no name and therefore will not be
   // entered into the name map. But is does have a ~scope~ for lookup
   // purposes. The ~accessor~ is used for auditting.
-  static function void write_and_set_anonymous(input string scope,
-                                                  T val, input uvm_object accessor = null);
+  static function void set_anonymous(input string scope,
+                                     T val, input uvm_object accessor = null);
 
     rsrc_t rsrc = new("", scope);
     rsrc.write(val, accessor);
@@ -119,6 +121,49 @@ class uvm_resource_db #(type T=int);
 
   endfunction
 
+  // function set_override
+  //
+  // Create a new resource, write ~val~ to it, and set it into the
+  // database.  Set it at the beginning of the queue in the type map and
+  // the name map so that it will be (currently) the highest priority
+  // resource with the specified name and type.
+
+  function void set_override(input string scope, input string name,
+                             T val, uvm_object accessor = null);
+    rsrc_t rsrc = new(name, scope);
+    rsrc.write(val, accessor);
+    rsrc.set_override();
+  endfunction
+
+  // function set_override_type
+  //
+  // Create a new resource, write ~val~ to it, and set it into the
+  // database.  Set it at the beginning of the queue in the type map so
+  // that it will be (currently) the highest priority resource with the
+  // specified type. It will be normal priority (i.e. at the end of the
+  // queue) in the name map.
+
+  function void set_override_type(input string scope, input string name,
+                                  T val, uvm_object accessor = null);
+    rsrc_t rsrc = new(name, scope);
+    rsrc.write(val, accessor);
+    rsrc.set_override(uvm_resource_types::TYPE_OVERRIDE);
+  endfunction
+
+  // function set_override_name
+  //
+  // Create a new resource, write ~val~ to it, and set it into the
+  // database.  Set it at the beginning of the queue in the name map so
+  // that it will be (currently) the highest priority resource with the
+  // specified name. It will be normal priority (i.e. at the end of the
+  // queue) in the type map.
+
+  function void set_override_name(input string scope, input string name,
+                                  T val, uvm_object accessor = null);
+    rsrc_t rsrc = new(name, scope);
+    rsrc.write(val, accessor);
+    rsrc.set_override(uvm_resource_types::NAME_OVERRIDE);
+  endfunction
 
   // function: read_by_name
   //
@@ -172,7 +217,7 @@ class uvm_resource_db #(type T=int);
   // a <get_by_name> match is found for ~name~ and ~scope~ then ~val~
   // will be written to that matching resource and thus may impact
   // other scopes which also match the resource.
-  static function bit write_by_name(input string name, input string scope,
+  static function bit write_by_name(input string scope, input string name,
                                      T val, input uvm_object accessor = null);
 
     rsrc_t rsrc = get_by_name(scope, name);
@@ -208,6 +253,18 @@ class uvm_resource_db #(type T=int);
 
     rsrc.write(val, accessor);
     return 1;
+  endfunction
+
+  // function: dump
+  //
+  // Dump all the resources in the resource pool. This is useful for
+  // debugging purposes.  This function does not use the parameter T, so
+  // it will dump the same thing -- the entire database -- no matter the
+  // value of the parameter.
+
+  static function void dump();
+    uvm_resource_pool rp = uvm_resource_pool::get();
+    rp.dump();
   endfunction
 
 endclass
