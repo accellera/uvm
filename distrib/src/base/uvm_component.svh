@@ -3125,7 +3125,6 @@ function void uvm_component::m_set_cl_action;
   // +uvm_set_action=uvm_test_top.env0.*,_ALL_,UVM_ERROR,UVM_NO_ACTION
 
   static string values[$];
-  static bit first = 1;
   string args[$];
   uvm_severity sev;
   uvm_action action;
@@ -3141,7 +3140,7 @@ function void uvm_component::m_set_cl_action;
       break;
     end
     if (!uvm_is_match(args[0], get_full_name()) ) break; 
-    if(!uvm_string_to_severity(args[2], sev)) begin
+    if((args[2] != "_ALL_") && !uvm_string_to_severity(args[2], sev)) begin
       `uvm_warning("INVLCMDARGS", $sformatf("Bad severity argument \"%s\" given to command +uvm_set_action=%s, Usage: +uvm_set_action=<comp>,<id>,<severity>,<action[|action]>", args[2], values[i]))
       values.delete(i);
       break;
@@ -3152,14 +3151,26 @@ function void uvm_component::m_set_cl_action;
       break;
     end
     if(args[1] == "_ALL_") begin
-      set_report_severity_action(sev, action);
+      if(args[2] == "_ALL_") begin
+        set_report_severity_action(UVM_INFO, action);
+        set_report_severity_action(UVM_WARNING, action);
+        set_report_severity_action(UVM_ERROR, action);
+        set_report_severity_action(UVM_FATAL, action);
+      end
+      else begin
+        set_report_severity_action(sev, action);
+      end
     end
     else begin
-      set_report_severity_id_action(sev, args[1], action);
+      if(args[2] == "_ALL_") begin
+        set_report_id_action(args[1], action);
+      end
+      else begin
+        set_report_severity_id_action(sev, args[1], action);
+      end
     end
   end
 
-  first = 0;
 endfunction
 
 function void uvm_component::m_set_cl_sev;
