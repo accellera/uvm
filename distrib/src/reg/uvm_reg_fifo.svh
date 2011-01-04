@@ -207,29 +207,30 @@ class uvm_reg_fifo extends uvm_reg;
     endfunction
 
 
-    // Function: predict
+    // Function: do_predict
     //
     // Updates the abstract (mirror) FIFO based on <write()> and
-    // <read()> operations.  When auto-prediction is off, this method
-    // is called upon receipt and conversion of an observed bus
-    // operation to this register.  If a write prediction, the observed
+    // <read()> operations.  When auto-prediction is on, this method
+    // is called before each read, write, peek, or poke operation returns.
+    // When auto-prediction is off, this method is called by a 
+    // <uvm_reg_predictor> upon receipt and conversion of an observed bus
+    // operation to this register.
+    //
+    // If a write prediction, the observed
     // write value is pushed to the abstract FIFO as long as it is 
     // not full and the operation did not originate from an <update()>.
     // If a read prediction, the observed read value is compared
     // with the frontmost value in the abstract FIFO if <set_compare()>
     // enabled comparison and the FIFO is not empty.
     //
-    virtual function bit predict(uvm_reg_data_t    value,
-                                 uvm_reg_byte_en_t be = -1,
-                                 uvm_predict_e     kind = UVM_PREDICT_DIRECT,
-                                 uvm_path_e        path = UVM_FRONTDOOR,
-                                 uvm_reg_map       map = null,
-                                 string            fname = "",
-                                 int               lineno = 0);
+    virtual function void do_predict(uvm_reg_item      rw,
+                                     uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                     uvm_reg_byte_en_t be = -1);
 
-      value &= ((1 << get_n_bits())-1);
+      super.do_predict(rw,kind,be);
 
-      predict = super.predict(value,be,kind,path,map,fname,lineno);
+      if (rw.status == UVM_NOT_OK)
+        return;
 
       case (kind)
 
@@ -242,9 +243,10 @@ class uvm_reg_fifo extends uvm_reg;
 
         UVM_PREDICT_READ:
         begin
+           uvm_reg_data_t value = rw.value[0] & ((1 << get_n_bits())-1);
            uvm_reg_data_t mirror_val;
            if (fifo.size() == 0) begin
-             return predict;
+             return;
            end
            mirror_val = fifo.pop_front();
            if (this.value.get_compare() == UVM_CHECK && mirror_val != value) begin
@@ -254,8 +256,6 @@ class uvm_reg_fifo extends uvm_reg;
         end
 
       endcase
-
-      return predict;
 
     endfunction
 
@@ -285,25 +285,6 @@ class uvm_reg_fifo extends uvm_reg;
     endtask
 
 
-    //ADAM: not required if predict() is single entry point for auto and non-auto predict
-    //ADAM: should not need to define/allocate/register cb for this
-
-    // Task: post_write
-    //
-    // Special post-processing for a <write()> or <update()>.
-    // If the operation did not originate from an ~update()~ and
-    // auto-prediction is enabled, pushes the written value to
-    // the abstract FIFO.
-    //
-    task post_write(uvm_reg_item rw);
-      if (m_set_cnt == 0) begin
-        uvm_reg_map system_map = rw.map.get_root_map();
-        if (system_map.get_auto_predict())
-          fifo.push_back(rw.value[0]);
-      end
-    endtask
-
-
     // Task: pre_read
     //
     // Special post-processing for a <write()> or <update()>.
@@ -317,25 +298,6 @@ class uvm_reg_fifo extends uvm_reg;
       if (fifo.size() == 0) begin
         rw.status = UVM_NOT_OK;
         return;
-      end
-    endtask
-
-
-    //ADAM: not required if predict() is single entry point for auto and non-auto predict
-    //ADAM: should not need to define/allocate/register cb for this
-
-    // Task: post_read
-    //
-    // Special post-processing for a <write()> or <update()>.
-    //
-    task post_read(uvm_reg_item rw);
-      uvm_reg_map system_map = rw.map.get_root_map();
-      if (rw.map.get_auto_predict()) begin
-        uvm_reg_data_t mirror_val = fifo.pop_front();
-        if (mirror_val != rw.value[0]) begin
-          `uvm_warning("MIRROR_MISMATCH",
-             $sformatf("DUT read value 'h%0h != mirror value 'h%0h",rw.value[0],mirror_val))
-        end
       end
     endtask
 

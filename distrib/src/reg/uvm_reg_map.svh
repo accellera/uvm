@@ -98,7 +98,7 @@ class uvm_reg_map extends uvm_object;
                                             uvm_reg_addr_t    base_addr,
                                             int unsigned      n_bytes,
                                             uvm_endianness_e  endian,
-                                            bit byte_addressing=0);
+                                            bit byte_addressing=1);
 
    // Function: add_reg
    //
@@ -570,7 +570,7 @@ function void uvm_reg_map::configure(uvm_reg_block    parent,
                                      uvm_reg_addr_t   base_addr,
                                      int unsigned     n_bytes,
                                      uvm_endianness_e endian,
-                                     bit              byte_addressing=0);
+                                     bit              byte_addressing=1);
    m_parent     = parent;
    m_n_bytes    = n_bytes;
    m_endian     = endian;

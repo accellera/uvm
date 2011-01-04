@@ -893,11 +893,14 @@ function string uvm_object::sprint(uvm_printer printer=null);
     printer.print_object(get_name(), this);
     return printer.emit();
   end
-  else begin
-    m_sc.printer = printer;
-    m_field_automation(null, UVM_PRINT, "");
-    do_print(printer);
-  end
+  
+  m_sc.printer = printer;
+  m_field_automation(null, UVM_PRINT, "");
+  do_print(printer);
+
+  // not top-level, so don't "emit" yet
+  return "";
+
 endfunction
 
 
