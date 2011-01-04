@@ -20,8 +20,7 @@
 
 program top;
 
-import uvm_pkg::*;
-`include "uvm_macros.svh"
+`include "uvm.svh"
 
 class test extends uvm_test;
 

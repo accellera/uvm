@@ -19,10 +19,11 @@
 //   the License for the specific language governing
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
-`ifndef UVM_SV
-`define UVM_SV
+`ifndef UVM_SVH
+`define UVM_SVH
 
 `include "uvm_macros.svh"
-`include "uvm_pkg.sv"
+import uvm_pkg::*;
 
-`endif // UVM_SV
+`endif // UVM_SVH
+

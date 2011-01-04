@@ -49,14 +49,9 @@ Using the UVM
 
 You must compile the file $UVM_HOME/src/uvm.sv first.  You can then
 make the UVM library accessible by your SystemVerilog code by
-importing the declarations in the package "uvm_pkg".
+including the file "uvm.svh" at the appropriate scope.
 
-   import uvm_pkg::*;
-
-If you are using the report or field automation macros you will also
-need to include the macro defintions. E.g.
-
-   `include "uvm_macros.svh"
+   `include "uvm.svh"
 
 You will need to put the location of $UVM_HOME/src as a include
 directory in your compilation command line.
