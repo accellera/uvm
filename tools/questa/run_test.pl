@@ -77,7 +77,7 @@ sub questa_run($) {
 sub run_the_test($$$) {
     my ($testdir,$compile_opts,$run_opts) = @_;
     &questa_checkversion();
-    my $uvm_opts = "+incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv";
+    my $uvm_opts = "+incdir+$uvm_home/src $uvm_home/src/uvm.sv";
 
     # how to direct output - verbose/silent
     my $redirect = ($opt_v) ? "| tee -a" : ">>";

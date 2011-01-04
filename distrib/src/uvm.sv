@@ -19,13 +19,10 @@
 //   the License for the specific language governing
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
-`ifndef UVM_SVH
-`define UVM_SVH
-  `include "uvm_macros.svh"
-  `include "dpi/uvm_dpi.svh"
-  `include "base/base.svh"
-  `include "uvm_tlm/uvm_tlm.svh"
-  `include "methodology/methodology.svh"
-  `include "tlm2/tlm2.svh"
-  `include "reg/uvm_reg_model.svh"
-`endif // UVM_SVH
+`ifndef UVM_SV
+`define UVM_SV
+
+`include "uvm_macros.svh"
+`include "uvm_pkg.sv"
+
+`endif // UVM_SV
