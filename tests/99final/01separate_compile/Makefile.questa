@@ -49,7 +49,7 @@ comp : prepare
 
 run: comp
 	vsim +UVM_VERBOSITY=HIGH \
-             -sv_lib ../../../distrib/lib/libuvm_questa \
+             -sv_lib ../../../distrib/lib/uvm_dpi \
              -c \
              -do "run -all; q" \
              -l questa.log \
