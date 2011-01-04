@@ -81,6 +81,7 @@ endclass
 class my_reactive_configure extends my_reactive;
   `uvm_object_utils(my_reactive_configure)
   task body;
+    `uvm_info("REACT", $sformatf("Starting %s !!!",get_name()), UVM_NONE)
     #5 
     while(1) begin
       configure_cnt++;
@@ -91,6 +92,7 @@ endclass
 class my_reactive_main extends my_reactive;
   `uvm_object_utils(my_reactive_main)
   task body;
+    `uvm_info("REACT", $sformatf("Starting %s !!!",get_name()), UVM_NONE)
     #5 
     while(1) begin
       main_cnt++;
@@ -101,6 +103,7 @@ endclass
 class my_reactive_shutdown extends my_reactive;
   `uvm_object_utils(my_reactive_shutdown)
   task body;
+    `uvm_info("REACT", $sformatf("Starting %s !!!",get_name()), UVM_NONE)
     #5 
     while(1) begin
       shutdown_cnt++;

@@ -188,7 +188,9 @@ class uvm_root extends uvm_component;
   extern local task m_stop_process ();
   extern /*local*/ task m_stop_request (time timeout=0, bit forced = 0);
   extern local task m_do_stop_all  (uvm_component comp);
-     
+
+  local int m_n_stop_threads = 0;
+
   // phasing implementation
 
   local mailbox #(uvm_phase_schedule) m_phase_hopper;
@@ -348,7 +350,6 @@ function uvm_root::new();
   set_report_handler(rh);
 
   clp = uvm_cmdline_processor::get_inst();
-  check_verbosity();
 
   report_header();
   print_enabled=0;
@@ -357,6 +358,9 @@ function uvm_root::new();
   m_phase_hopper = new();
   m_phase_all_done = 0;
 
+  // This sets up the global verbosity. Other command line args may
+  // change individual component verbosity.
+  check_verbosity();
 endfunction
 
 
@@ -366,6 +370,8 @@ endfunction
 function void uvm_root::build();
 
   super.build();
+
+  m_set_cl_msg_args();
 
   m_check_set_verbs();
   m_do_timeout_settings();
@@ -771,6 +777,8 @@ task uvm_root::run_test(string test_name="");
   // since it needs to be in an initial block to fork a process.
   m_objection_scheduler();
 
+`ifndef UVM_NO_DPI
+
   // Retrieve the test names provided on the command line.  Command line
   // overrides the argument.
   test_name_count = clp.get_arg_values("+UVM_TESTNAME=", test_names);
@@ -794,6 +802,16 @@ task uvm_root::run_test(string test_name="");
     uvm_report_warning("MULTTST", 
       $psprintf("Multiple (%0d) +UVM_TESTNAME arguments provided on the command line.  '%s' will be used.  Provided list: %s.", test_name_count, test_name, test_list), UVM_NONE);
   end
+
+`else
+
+     // plusarg overrides argument
+  if ($value$plusargs("UVM_TESTNAME=%s", test_name)) begin
+    `uvm_info("NO_DPI_TSTNAME", "Using the non-DPI means to retrieve UVM_TESTNAME.", UVM_NONE)
+    testname_plusarg = 1;
+  end
+
+`endif
 
   // if test now defined, create it using common factory
   if (test_name != "") begin
@@ -1005,7 +1023,7 @@ task uvm_root::m_stop_request(time timeout=0, bit forced = 0);
         wait(m_objections_outstanding==0);
         m_executing_stop_processes = 1;
         m_do_stop_all(this);
-        wait fork;
+        wait (m_n_stop_threads == 0);
         m_executing_stop_processes = 0;
       end
       begin
@@ -1054,12 +1072,13 @@ task uvm_root::m_do_stop_all(uvm_component comp);
     while (comp.get_next_child(name));
 
   if (comp.enable_stop_interrupt) begin
+    m_n_stop_threads++;
     fork begin
       comp.stop("TBD"); // TBD (m_curr_phase.get_name());
+      m_n_stop_threads--;
     end
     join_none
   end
-
 endtask
 
 

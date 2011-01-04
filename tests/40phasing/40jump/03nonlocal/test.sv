@@ -31,20 +31,20 @@ class test extends phasing_test;
   function new(string name="anon", uvm_component parent=null);
     super.new(name,parent);
     uvm_report_info("Test", "Testing correct phase order...");
-    predicted_phasing = { "new",
-                          "common/build",
-                          "common/connect",
-                          "common/end_of_elaboration",
-                          "common/start_of_simulation",
-                          "common/run",
-                          "uvm/pre_reset",
-                          "uvm/reset",
-                          "uvm/post_reset",
-                          "uvm/pre_configure",
-                          "uvm/configure",
-                          "uvm/post_configure",
-                          "uvm/pre_main",
-                          "uvm/main",
+    predicted_phasing.push_back("new");
+    predicted_phasing.push_back("common/build");
+    predicted_phasing.push_back("common/connect");
+    predicted_phasing.push_back("common/end_of_elaboration");
+    predicted_phasing.push_back("common/start_of_simulation");
+    predicted_phasing.push_back("common/run");
+    predicted_phasing.push_back("uvm/pre_reset");
+    predicted_phasing.push_back("uvm/reset");
+    predicted_phasing.push_back("uvm/post_reset");
+    predicted_phasing.push_back("uvm/pre_configure");
+    predicted_phasing.push_back("uvm/configure");
+    predicted_phasing.push_back("uvm/post_configure");
+    predicted_phasing.push_back("uvm/pre_main");
+    predicted_phasing.push_back("uvm/main");
 
                           // jump(check_ph)
                           // (skipped) "uvm/post_main",
@@ -52,10 +52,9 @@ class test extends phasing_test;
                           // (skipped) "uvm/shutdown",
                           // (skipped) "uvm/post_shutdown",
                           // (skipped) "common/extract",
-                          "common/check",
-                          "common/report",
-                          "common/finalize"
-                          };
+    predicted_phasing.push_back("common/check");
+    predicted_phasing.push_back("common/report");
+    predicted_phasing.push_back("common/finalize");
     set_phase_domain("uvm");
     first_time_around=1;
   endfunction

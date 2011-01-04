@@ -80,6 +80,26 @@ class uvm_sequencer_base extends uvm_component;
   protected uvm_sequence_base  m_phase_sequences[uvm_phase_schedule];
 
   virtual function void phase_started(uvm_phase_schedule phase);
+    super.phase_started(phase);
+    start_phase_sequence(phase);
+  endfunction
+
+  // Function: start_phase_sequence
+  //
+  // This function starts the user specified phase sequence
+  // that is associated with the given phase. A sequence can be
+  // associated with a sequence by using <set_phase_seq> or by
+  // setting the phase configuration property for the phase
+  // using uvm_config_seq::set().
+  //
+  //| // User sets a phase sequence via set_phase_seq
+  //| myseqr.set_phase_seq (uvm_main_ph, myseq_type::type_id::get() );
+  //|
+  //| // or the user sets the phase sequence via a config property
+  //| uvm_config_seq::set(this, "myseqr", "main_ph"
+  //|     myseq_type::type_id::get() );
+
+  virtual function void start_phase_sequence(uvm_phase_schedule phase);
     uvm_object_wrapper w;
     uvm_sequence_base seq;
     uvm_factory f = uvm_factory::get();
@@ -116,19 +136,27 @@ class uvm_sequencer_base extends uvm_component;
         if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_MODE_DEFAULT)
           m_seq_thread_mode[phase.m_phase] = m_phase_thread_mode;
 
-        if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_PROACTIVE)
+        if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_PROACTIVE ||
+           m_seq_thread_mode[phase.m_phase] == UVM_PHASE_REACTIVE)
           phase.phase_done.raise_objection(this, {"default phase from ", get_full_name()});
 
         //JLR: really needs to be managed by the phasing code, so need to schedule
         //the process to be run under this component's phase process based on
         //phasing semantics.
         fork begin
-          seq.start(this);
+          //For a reactive thread, we can drop the implicit objection 
+          //immediately.
           m_phase_sequences[phase] = seq;
           m_processes[phase] = new(process::self());
+          if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_REACTIVE) begin
+            phase.phase_done.drop_objection(this, {"default phase from ", get_full_name()});
+          end
+          seq.start(this);
           if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_PROACTIVE) begin
             phase.phase_done.drop_objection(this, {"default phase from ", get_full_name()});
           end
+          wait fork;
+          m_processes[phase].is_defunct = 1;
         end join_none
       end
     end
@@ -144,7 +172,8 @@ class uvm_sequencer_base extends uvm_component;
       if((m_seq_thread_mode[phase.m_phase] != UVM_PHASE_PERSISTENT) &&
          (m_processes[phase].is_active()) ) 
       begin
-        m_processes[phase].m_process_id.kill();
+        if(!m_processes[phase].is_defunct)
+          m_processes[phase].m_process_id.kill();
 
         // Remove the phase sequence
         if(m_phase_sequences.exists(phase)) begin
@@ -165,16 +194,18 @@ class uvm_sequencer_base extends uvm_component;
   // will be created and randomized at the time the phase starts. If ~imp~ is
   // null then no default sequence will be executed.
   //
-  // Example of setting the phase sequence for the UVM main phase:
+  // The phase sequence for the UVM main phase can be set as shown:
+  //
   //|  seqr.set_phase_seq(uvm_main_ph, myseq_type::type_id::get());
   //
   // If no phase sequence has been set by using this function, then
   // <uvm_config_db#(T)::get> (with T=uvm_object_wrapper) is used to access the 
-  // default sequence using the field name ~PHASE~_ph. For example, the following 
-  // configuration setting will set the default sequence for the ~main~ phase on 
-  // sequencer u1.u2.seqr:
+  // default sequence using the field name ~<phase>_ph~. The simplification
+  // typedef uvm_config_seq is provided for this purpose.  For example, the  
+  // following configuration setting will set the default sequence for the 
+  // ~main~ phase on sequencer u1.u2.seqr:
   //
-  //| uvm_config_db#(uvm_object_wrapper)::get(this, "u1.u2.seqr", 
+  //| uvm_config_seq::set(this, "u1.u2.seqr", 
   //|       "main_ph", myseq_type::type_id::get());
   
 

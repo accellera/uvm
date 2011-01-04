@@ -74,60 +74,41 @@ module top;
       foreach(dropped_counter[idx]) $display("Dropped: %s : %0d", idx, dropped_counter[idx]);
       foreach(all_dropped_counter[idx]) $display("All dropped: %s : %0d", idx, all_dropped_counter[idx]);
 
-      // Total of 12 unique strings plus the implicit objections
-      if(raised_counter.num()+dropped_counter.num()+all_dropped_counter.num() != 21)
-      begin
-        $display("** UVM TEST FAILED **");
-        return;
-      end
-
       if(raised_counter[""] != 3) begin
-        $display("** UVM TEST FAILED **");
-        return;
+        $display("** UVM TEST FAILED 2**");
       end
       if(raised_counter["raise foo from uvm_test_top.tc.mc"] != 2) begin
-        $display("** UVM TEST FAILED **");
-        return;
+        $display("** UVM TEST FAILED 3**");
       end
       if(raised_counter["raise foo from uvm_test_top.tc.mc.lc"] != 3) begin
-        $display("** UVM TEST FAILED **");
-        return;
+        $display("** UVM TEST FAILED 4**");
       end
       if(raised_counter["raise test done from uvm_test_top.tc.mc"] != 4) begin
         $display("** UVM TEST FAILED **");
-        return;
       end
       if(raised_counter["raise test done from uvm_test_top.tc.mc.lc"] != 3) begin
-        $display("** UVM TEST FAILED **");
-        return;
+        $display("** UVM TEST FAILED 5**");
       end
       if(dropped_counter[""] != 3) begin
-        $display("** UVM TEST FAILED **");
-        return;
+        $display("** UVM TEST FAILED 6**");
       end
       if(dropped_counter["drop foo from uvm_test_top.tc.mc"] != 2) begin
-        $display("** UVM TEST FAILED **");
-        return;
+        $display("** UVM TEST FAILED 7**");
       end
       if(dropped_counter["drop foo from uvm_test_top.tc.mc.lc"] != 3) begin
-        $display("** UVM TEST FAILED **");
-        return;
+        $display("** UVM TEST FAILED 8**");
       end
       if(dropped_counter["drop test done from uvm_test_top.tc.mc"] != 4) begin
-        $display("** UVM TEST FAILED **");
-        return;
+        $display("** UVM TEST FAILED 9**");
       end
       if(dropped_counter["drop test done from uvm_test_top.tc.mc.lc"] != 3) begin
-        $display("** UVM TEST FAILED **");
-        return;
+        $display("** UVM TEST FAILED 10**");
       end
       if(all_dropped_counter["drop foo from uvm_test_top.tc.mc.lc"] != 1) begin
-        $display("** UVM TEST FAILED **");
-        return;
+        $display("** UVM TEST FAILED 11**");
       end
       if(all_dropped_counter["drop test done from uvm_test_top.tc.mc"] != 1) begin
-        $display("** UVM TEST FAILED **");
-        return;
+        $display("** UVM TEST FAILED 12**");
       end
 
       $display("** UVM TEST PASSED **");

@@ -1558,6 +1558,25 @@ virtual class uvm_component extends uvm_report_object;
   int unsigned recording_detail = UVM_NONE;
   extern         function void   do_print(uvm_printer printer);
 
+  // Internal methods for setting up command line messaging stuff
+  extern function void m_set_cl_msg_args;
+  extern function void m_set_cl_verb;
+  extern function void m_set_cl_action;
+  extern function void m_set_cl_sev;
+
+  // The verbosity settings may have a specific phase to start at. 
+  // We will do this work in the phase_started callback. May need a
+  // seperate internal callback so the user doesn't have to remember to call
+  // the phase started callback.
+
+  typedef struct {
+    string phase;
+    time   offset;
+    uvm_verbosity verbosity;
+    string id;
+  } m_verbosity_setting;
+  m_verbosity_setting m_verbosity_settings[$];
+
 endclass : uvm_component
 
 
@@ -1660,6 +1679,8 @@ function uvm_component::new (string name, uvm_component parent);
 
   set_report_id_action("CFGOVR", UVM_NO_ACTION);
   set_report_id_action("CFGSET", UVM_NO_ACTION);
+
+  m_set_cl_msg_args();
 
   uvm_top.set_report_id_action("CFGOVR", UVM_NO_ACTION);
   uvm_top.set_report_id_action("CFGSET", UVM_NO_ACTION);
@@ -2170,6 +2191,28 @@ task          uvm_component::post_shutdown();       return; endtask
 // extender can decide what to do, if anything, for each phase.
 
 function void uvm_component::phase_started(uvm_phase_schedule phase);
+  foreach(m_verbosity_settings[i]) begin
+    if(phase.get_name() == m_verbosity_settings[i].phase) begin
+      if( m_verbosity_settings[i].offset == 0 ) begin
+          if(m_verbosity_settings[i].id == "_ALL_") 
+            set_report_verbosity_level(m_verbosity_settings[i].verbosity);
+          else 
+            set_report_id_verbosity(m_verbosity_settings[i].id, m_verbosity_settings[i].verbosity);
+      end
+      else begin
+        fork begin
+          m_verbosity_setting setting = m_verbosity_settings[i];
+          #setting.offset;
+          if(setting.id == "_ALL_") 
+            set_report_verbosity_level(setting.verbosity);
+          else 
+            set_report_id_verbosity(setting.id, setting.verbosity);
+        end join_none;
+      end
+      // Remove after use
+      m_verbosity_settings.delete(i);
+    end
+  end
 endfunction
 
 
@@ -2997,4 +3040,188 @@ function void uvm_component::set_int_local (string field_name,
 
 endfunction
 
+
+// Internal methods for setting messagin parameters from command line switches
+
+typedef class uvm_cmdline_processor;
+
+function void uvm_component::m_set_cl_msg_args;
+  m_set_cl_verb();
+  m_set_cl_action();
+  m_set_cl_sev();
+endfunction
+
+function void uvm_component::m_set_cl_verb;
+  // _ALL_ can be used for ids
+  // +uvm_set_verbosity=<comp>,<id>,<verbosity>,<phase|time>,<offset>
+  // +uvm_set_verbosity=uvm_test_top.env0.agent1.*,_ALL_,UVM_FULL,time,800
+ 
+  static string values[$];
+  static bit first = 1;
+  string args[$];
+  uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
+
+  if(!values.size())
+    void'(uvm_cmdline_proc.get_arg_values("+uvm_set_verbosity=",values));
+
+  foreach(values[i]) begin
+    uvm_verbosity verb;
+    string phase="";
+    time   offset= 0;
+    args.delete();
+    uvm_split_string(values[i], ",", args);
+
+    // Warning is already issued in uvm_root, so just don't keep it
+    if(first && ( ((args.size() != 4) && (args.size() != 5)) || 
+                  (clp.m_convert_verb(args[2], verb) == 0))  )
+    begin
+      values.delete(i);
+    end
+    else if (uvm_is_match(args[0], get_full_name()) ) begin
+      void'(clp.m_convert_verb(args[2], verb));
+      phase = args[3];
+      if(args.size() == 5) begin
+        offset = args[4].atoi();
+      end
+      if((phase == "" || phase == "build" || phase == "time") && (offset == 0) ) begin
+        if(args[1] == "_ALL_") 
+          set_report_verbosity_level(verb);
+        else
+          set_report_id_verbosity(args[1], verb);
+      end
+      else begin
+        if(phase == "time") begin
+          fork begin
+            uvm_verbosity lverb = verb;
+            string lid = args[1];
+            time t = offset;
+            #t;
+            if(lid == "_ALL_") begin
+              set_report_verbosity_level(lverb);
+            end
+            else begin
+              set_report_id_verbosity(lid, lverb);
+            end
+          end join_none
+        end
+        else begin
+          m_verbosity_setting setting;
+          setting.phase = phase;
+          setting.offset = offset;
+          setting.verbosity = verb;
+          setting.id = args[1];
+          m_verbosity_settings.push_back(setting);
+        end
+      end
+    end
+  end
+  first = 0;
+endfunction
+
+
+function void uvm_component::m_set_cl_action;
+  // _ALL_ can be used for ids or severities
+  // +uvm_set_action=<comp>,<id>,<severity>,<action[|action]>
+  // +uvm_set_action=uvm_test_top.env0.*,_ALL_,UVM_ERROR,UVM_NO_ACTION
+
+  static string values[$];
+  string args[$];
+  uvm_severity sev;
+  uvm_action action;
+
+  if(!values.size())
+    void'(uvm_cmdline_proc.get_arg_values("+uvm_set_action=",values));
+
+  foreach(values[i]) begin
+    uvm_split_string(values[i], ",", args);
+    if(args.size() != 4) begin
+      `uvm_warning("INVLCMDARGS", $sformatf("+uvm_set_action requires 4 arguments, only %0d given for command +uvm_set_action=%s, Usage: +uvm_set_action=<comp>,<id>,<severity>,<action[|action]>", args.size(), values[i]))
+      values.delete(i);
+      break;
+    end
+    if (!uvm_is_match(args[0], get_full_name()) ) break; 
+    if((args[2] != "_ALL_") && !uvm_string_to_severity(args[2], sev)) begin
+      `uvm_warning("INVLCMDARGS", $sformatf("Bad severity argument \"%s\" given to command +uvm_set_action=%s, Usage: +uvm_set_action=<comp>,<id>,<severity>,<action[|action]>", args[2], values[i]))
+      values.delete(i);
+      break;
+    end
+    if(!uvm_string_to_action(args[3], action)) begin
+      `uvm_warning("INVLCMDARGS", $sformatf("Bad action argument \"%s\" given to command +uvm_set_action=%s, Usage: +uvm_set_action=<comp>,<id>,<severity>,<action[|action]>", args[3], values[i]))
+      values.delete(i);
+      break;
+    end
+    if(args[1] == "_ALL_") begin
+      if(args[2] == "_ALL_") begin
+        set_report_severity_action(UVM_INFO, action);
+        set_report_severity_action(UVM_WARNING, action);
+        set_report_severity_action(UVM_ERROR, action);
+        set_report_severity_action(UVM_FATAL, action);
+      end
+      else begin
+        set_report_severity_action(sev, action);
+      end
+    end
+    else begin
+      if(args[2] == "_ALL_") begin
+        set_report_id_action(args[1], action);
+      end
+      else begin
+        set_report_severity_id_action(sev, args[1], action);
+      end
+    end
+  end
+
+endfunction
+
+function void uvm_component::m_set_cl_sev;
+  // _ALL_ can be used for ids or severities
+  //  +uvm_set_severity=<comp>,<id>,<orig_severity>,<new_severity>
+  //  +uvm_set_severity=uvm_test_top.env0.*,BAD_CRC,UVM_ERROR,UVM_WARNING
+
+  static string values[$];
+  static bit first = 1;
+  string args[$];
+  uvm_severity orig_sev, sev;
+
+  if(!values.size())
+    void'(uvm_cmdline_proc.get_arg_values("+uvm_set_severity=",values));
+
+  foreach(values[i]) begin
+    uvm_split_string(values[i], ",", args);
+    if(args.size() != 4) begin
+      `uvm_warning("INVLCMDARGS", $sformatf("+uvm_set_severity requires 4 arguments, only %0d given for command +uvm_set_severity=%s, Usage: +uvm_set_severity=<comp>,<id>,<orig_severity>,<new_severity>", args.size(), values[i]))
+      values.delete(i);
+      break;
+    end
+    if (!uvm_is_match(args[0], get_full_name()) ) break; 
+    if(args[2] != "_ALL_" && !uvm_string_to_severity(args[2], orig_sev)) begin
+      `uvm_warning("INVLCMDARGS", $sformatf("Bad severity argument \"%s\" given to command +uvm_set_severity=%s, Usage: +uvm_set_severity=<comp>,<id>,<orig_severity>,<new_severity>", args[2], values[i]))
+      values.delete(i);
+      break;
+    end
+    if(!uvm_string_to_severity(args[3], sev)) begin
+      `uvm_warning("INVLCMDARGS", $sformatf("Bad severity argument \"%s\" given to command +uvm_set_severity=%s, Usage: +uvm_set_severity=<comp>,<id>,<orig_severity>,<new_severity>", args[3], values[i]))
+      values.delete(i);
+      break;
+    end
+    if(args[1] == "_ALL_" && args[2] == "_ALL_") begin
+      set_report_severity_override(UVM_INFO,sev);
+      set_report_severity_override(UVM_WARNING,sev);
+      set_report_severity_override(UVM_ERROR,sev);
+      set_report_severity_override(UVM_FATAL,sev);
+    end
+    else if(args[1] == "_ALL_") begin
+      set_report_severity_override(orig_sev,sev);
+    end
+    else if(args[2] == "_ALL_") begin
+      set_report_severity_id_override(UVM_INFO,args[1],sev);
+      set_report_severity_id_override(UVM_WARNING,args[1],sev);
+      set_report_severity_id_override(UVM_ERROR,args[1],sev);
+      set_report_severity_id_override(UVM_FATAL,args[1],sev);
+    end
+    else begin
+      set_report_severity_id_override(orig_sev,args[1],sev);
+    end
+  end
+endfunction
 

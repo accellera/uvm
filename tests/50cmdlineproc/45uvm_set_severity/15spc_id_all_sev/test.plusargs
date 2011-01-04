@@ -1,2 +1,2 @@
 +UVM_VERBOSITY=UVM_MEDIUM
-// need settings
++uvm_set_severity=uvm_test_top,A,_ALL_,UVM_INFO

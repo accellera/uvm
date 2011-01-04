@@ -254,6 +254,8 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   virtual task start_default_sequence();
     uvm_sequence_base m_seq ;
 
+    if(default_sequence == "") return;
+
     if(m_default_seq_set == 0 && m_phase_domains.num() != 1) begin
       default_sequence = "";
       `uvm_info("NODEFSEQ", $sformatf("The \"default_sequence\" has not been set. Since this sequencer has a runtime phase schedule, the uvm_random_sequence is not being started for the run phase."), UVM_HIGH)
