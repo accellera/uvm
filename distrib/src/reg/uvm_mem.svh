@@ -614,7 +614,7 @@ class uvm_mem extends uvm_object;
    extern function uvm_reg_backdoor get_backdoor(bit inherited = 1);
 
 
-   // Function:  clear_hdl_path
+   // Function: clear_hdl_path
    //
    // Delete HDL paths
    //
@@ -624,7 +624,7 @@ class uvm_mem extends uvm_object;
    extern function void clear_hdl_path (string kind = "RTL");
 
    
-   // Function:  add_hdl_path
+   // Function: add_hdl_path
    //
    // Add an HDL path
    //
@@ -651,7 +651,7 @@ class uvm_mem extends uvm_object;
                                            string kind = "RTL");
 
 
-   // Function:   has_hdl_path
+   // Function: has_hdl_path
    //
    // Check if a HDL path is specified
    //
@@ -662,7 +662,7 @@ class uvm_mem extends uvm_object;
    extern function bit  has_hdl_path (string kind = "");
 
 
-   // Function:  get_hdl_path
+   // Function: get_hdl_path
    //
    // Get the incremental HDL path(s)
    //
@@ -678,7 +678,7 @@ class uvm_mem extends uvm_object;
                                       input string kind = "");
 
 
-   // Function:  get_full_hdl_path
+   // Function: get_full_hdl_path
    //
    // Get the full hierarchical HDL path(s)
    //
@@ -696,7 +696,7 @@ class uvm_mem extends uvm_object;
                                            input string kind = "",
                                            input string separator = ".");
 
-   // Function:  get_hdl_path_kinds
+   // Function: get_hdl_path_kinds
    //
    // Get design abstractions for which HDL paths have been defined
    //

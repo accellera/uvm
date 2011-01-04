@@ -260,7 +260,6 @@ class uvm_report_handler;
   function uvm_action get_action(uvm_severity severity, string id);
 
     id_actions_array array;
-
     if(severity_id_actions.exists(severity)) begin
       array = severity_id_actions[severity];
       if(array.exists(id))

@@ -350,7 +350,6 @@ function uvm_root::new();
   set_report_handler(rh);
 
   clp = uvm_cmdline_processor::get_inst();
-  check_verbosity();
 
   report_header();
   print_enabled=0;
@@ -359,6 +358,9 @@ function uvm_root::new();
   m_phase_hopper = new();
   m_phase_all_done = 0;
 
+  // This sets up the global verbosity. Other command line args may
+  // change individual component verbosity.
+  check_verbosity();
 endfunction
 
 
@@ -368,6 +370,8 @@ endfunction
 function void uvm_root::build();
 
   super.build();
+
+  m_set_cl_msg_args();
 
   m_check_set_verbs();
   m_do_timeout_settings();
@@ -773,6 +777,8 @@ task uvm_root::run_test(string test_name="");
   // since it needs to be in an initial block to fork a process.
   m_objection_scheduler();
 
+`ifndef UVM_NO_DPI
+
   // Retrieve the test names provided on the command line.  Command line
   // overrides the argument.
   test_name_count = clp.get_arg_values("+UVM_TESTNAME=", test_names);
@@ -796,6 +802,16 @@ task uvm_root::run_test(string test_name="");
     uvm_report_warning("MULTTST", 
       $psprintf("Multiple (%0d) +UVM_TESTNAME arguments provided on the command line.  '%s' will be used.  Provided list: %s.", test_name_count, test_name, test_list), UVM_NONE);
   end
+
+`else
+
+     // plusarg overrides argument
+  if ($value$plusargs("UVM_TESTNAME=%s", test_name)) begin
+    `uvm_info("NO_DPI_TSTNAME", "Using the non-DPI means to retrieve UVM_TESTNAME.", UVM_NONE)
+    testname_plusarg = 1;
+  end
+
+`endif
 
   // if test now defined, create it using common factory
   if (test_name != "") begin
@@ -898,7 +914,7 @@ endtask
 //--------------------------------------------------------------------
 function void uvm_root::phase_initiate(uvm_phase_schedule phase);
   void'(m_phase_hopper.try_put(phase));
- endfunction
+endfunction
 
 
 //--------------------------------------------------------------------
@@ -1020,15 +1036,19 @@ task uvm_root::m_stop_request(time timeout=0, bit forced = 0);
   end
   join
 
-  // all stop processes have completed, or a timeout has occured
-  `uvm_info("STOPREQ", "Stop request has been processed, jumping to the extract phase", UVM_MEDIUM)
-  jump_all_domains(uvm_extract_ph);
-
-  //Temporary hack because jump_all_domains is not jumping out of the run phase
   begin
-    uvm_phase_schedule r = find_phase_schedule("uvm_pkg::common","*");
-    r = r.find_schedule("run");
-    r.phase_done.clear();
+    uvm_phase_schedule sched = find_phase_schedule("uvm_pkg::common","*");
+    run_ph = sched.find_schedule("run");
+
+    // all stop processes have completed, or a timeout has occured
+    `uvm_info("STOPREQ", "Stop request has been processed, jumping to the extract phase", UVM_MEDIUM)
+    jump_all_domains(uvm_extract_ph);
+
+    //Temporary hack because jump_all_domains is not jumping out of the run phase
+    run_ph.phase_done.drop_objection(this, "Stop-request occurred. Dropping objection for run phase");
+
+    #0;
+    run_ph.phase_done.clear();
     uvm_test_done.clear();
   end
 
@@ -1071,7 +1091,8 @@ endtask
 
 function void uvm_root::raised (uvm_objection objection, uvm_object source_obj, 
                               string description, int count);
-  if(objection != test_done_objection()) return;
+  if (objection != test_done_objection())
+    return;
   if (m_executing_stop_processes) begin
     string desc = description == "" ? "" : {" (\"", description, "\") "};
     uvm_report_warning("ILLRAISE", {"An uvm_test_done objection ", desc, "was raised during the execution of component stop processes for the stop_request. The objection is ignored by the stop process."}, UVM_NONE);
@@ -1087,7 +1108,8 @@ endfunction
 
 task uvm_root::all_dropped (uvm_objection objection, uvm_object source_obj, 
                           string description, int count);
-  if(objection != test_done_objection()) return;
+  if(objection != test_done_objection())
+    return;
   m_objections_outstanding = 0;
 endtask
 

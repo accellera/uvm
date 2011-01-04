@@ -760,6 +760,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
 
   function void m_kill();
+    do_kill();
 `ifdef UVM_USE_FPC
     if (m_sequence_process != null) begin
       m_sequence_process.kill;
@@ -801,6 +802,17 @@ class uvm_sequence_base extends uvm_sequence_item;
       m_sequencer.kill_sequence(this);
       return;
     end
+  endfunction
+
+
+  // Function: do_kill
+  // 
+  // This function is a user hook that is called whenever a sequence is
+  // terminated by using either sequence.kill() or sequencer.stop_sequences()
+  // (which effectively calls sequence.kill()).
+
+  virtual function void do_kill();
+    return;
   endfunction
 
 

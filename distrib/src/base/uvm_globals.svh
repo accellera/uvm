@@ -195,6 +195,37 @@ function void uvm_report_fatal(string id,
   top.uvm_report_fatal(id, message, verbosity, filename, line);
 endfunction
 
+
+function bit uvm_string_to_severity (string sev_str, output uvm_severity sev);
+  case (sev_str)
+    "UVM_INFO": sev = UVM_INFO;
+    "UVM_WARNING": sev = UVM_WARNING;
+    "UVM_ERROR": sev = UVM_ERROR;
+    "UVM_FATAL": sev = UVM_FATAL;
+    default: return 0;
+  endcase
+  return 1;
+endfunction
+
+function bit uvm_string_to_action (string action_str, output uvm_action action);
+  string actions[$];
+  uvm_split_string(action_str,"|",actions);
+  action = 0;
+  foreach(actions[i]) begin
+    case (action_str)
+      "UVM_NO_ACTION": action |= UVM_NO_ACTION;
+      "UVM_DISPLAY":   action |= UVM_DISPLAY;
+      "UVM_LOG":       action |= UVM_LOG;
+      "UVM_COUNT":     action |= UVM_COUNT;
+      "UVM_EXIT":      action |= UVM_EXIT;
+      "UVM_CALL_HOOK": action |= UVM_CALL_HOOK;
+      "UVM_STOP":      action |= UVM_STOP;
+      default: return 0;
+    endcase
+  end
+  return 1;
+endfunction
+
   
 //------------------------------------------------------------------------------
 //

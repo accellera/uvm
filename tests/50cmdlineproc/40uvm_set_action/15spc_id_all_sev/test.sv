@@ -16,16 +16,21 @@ class test extends uvm_test;
    endfunction
 
    virtual task run();
+      `uvm_info("A", "A Info", UVM_NONE)
+      `uvm_warning("A", "A Warning")
+      `uvm_error("A", "A Error")
+      `uvm_fatal("A", "A Fatal")
       #1000;
       uvm_top.stop_request();
    endtask
 
+   //+UVM_VERBOSITY=UVM_MEDIUM
+   //+uvm_set_action=uvm_test_top,A,_ALL_,UVM_NO_ACTION
+
    virtual function void report();
-/*
      uvm_report_server rs = uvm_report_server::get_server();
-     if(rs.get_id_count("INVLCMDARGS") == 1)
+     if(rs.get_id_count("A") == 0)
        $write("** UVM TEST PASSED **\n");
-*/
    endfunction
 
 endclass
