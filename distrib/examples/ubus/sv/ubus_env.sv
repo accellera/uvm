@@ -79,7 +79,7 @@ class ubus_env extends uvm_env;
     uvm_resource_db#(int)::read_by_name(get_full_name(),
 					"num_masters",
 					num_masters,this);
-    
+   
     masters = new[num_masters];
     for(int i = 0; i < num_masters; i++) begin
       $sformat(inst_name, "masters[%0d]", i);

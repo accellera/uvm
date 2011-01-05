@@ -109,7 +109,7 @@ class slave_memory_seq extends uvm_sequence #(ubus_transfer);
     // For writes, update the m_mem associative array
     if( util_transfer.read_write == WRITE ) begin : WRITE_block
       for(int unsigned i = 0 ; i < req.size ; i ++) begin : for_block
-        m_mem[req.addr + i] = req.data[i] ;
+        m_mem[req.addr + i] = req.data[i];
       end : for_block
     end
   endfunction

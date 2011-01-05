@@ -192,8 +192,7 @@ class read_modify_write_seq extends ubus_base_sequence;
       $psprintf("%s starting...",
       get_sequence_path()), UVM_MEDIUM);
     // READ A RANDOM LOCATION
-    `uvm_do_with(read_byte_seq0, {/*read_byte_seq0.start_addr == 'h12;*/
-       read_byte_seq0.transmit_del == 0; })
+    `uvm_do_with(read_byte_seq0, {read_byte_seq0.transmit_del == 0; })
     addr_check = read_byte_seq0.rsp.addr;
     m_data0_check = read_byte_seq0.rsp.data[0] + 1;
     // WRITE MODIFIED READ DATA

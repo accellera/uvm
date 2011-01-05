@@ -29,6 +29,7 @@ class ubus_demo_base_test extends uvm_test;
 
   ubus_demo_tb ubus_demo_tb0;
   uvm_table_printer printer;
+  bit test_pass = 1;
 
   function new(string name = "ubus_demo_base_test", 
     uvm_component parent=null);
@@ -57,6 +58,20 @@ class ubus_demo_base_test extends uvm_test;
     //set a drain-time for the environment if desired
     uvm_test_done.set_drain_time(this, 50);
   endtask : run
+
+  function void extract();
+    if(ubus_demo_tb0.scoreboard0.sbd_error)
+      test_pass = 1'b0;
+  endfunction // void
+  
+  function void report();
+    if(test_pass) begin
+      `uvm_info(get_type_name(), "** UVM TEST PASSED **", UVM_NONE)
+    end
+    else begin
+      `uvm_error(get_type_name(), "** UVM TEST FAIL **")
+    end
+  endfunction
 
 endclass : ubus_demo_base_test
 

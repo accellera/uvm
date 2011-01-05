@@ -47,11 +47,11 @@ class ubus_master_driver extends uvm_driver #(ubus_transfer);
   endfunction : new
 
   function void build();
+    super.build();
        if (!ubus_vif_config::exists(this, get_full_name(),"vif",1))
 	 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"}) 
        else
           void'(ubus_vif_config::get(this, get_full_name(),"vif",vif));
-    void'(get_config_int("master_id",master_id));
   endfunction: build
 
   // run phase

@@ -36,6 +36,7 @@ class ubus_demo_scoreboard extends uvm_scoreboard;
   protected int num_writes = 0;
   protected int num_init_reads = 0;
   protected int num_uninit_reads = 0;
+  int sbd_error = 0;
 
   protected int unsigned m_mem_expected[int unsigned];
 
@@ -80,6 +81,7 @@ class ubus_demo_scoreboard extends uvm_scoreboard;
             `uvm_error(get_type_name(),
               $psprintf("Read data mismatch.  Expected : %0h.  Actual : %0h", 
               exp, data))
+	      sbd_error = 1;
           end
           num_init_reads++;
         end
