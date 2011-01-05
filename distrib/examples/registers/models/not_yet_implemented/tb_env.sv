@@ -93,10 +93,8 @@ class reg_R2_fd extends uvm_reg_frontdoor;
       $cast(R, rw_info.element);
       if (rw_info.kind == UVM_READ) rw_info.value[0] = R.get();
       
-      R.predict(rw_info.value[0], -1,
-                (rw_info.kind == UVM_READ) ? UVM_PREDICT_READ : UVM_PREDICT_WRITE,
-                rw_info.path,
-                rw_info.map);
+      R.do_predict(rw_info,
+              (rw_info.kind == UVM_READ)? UVM_PREDICT_READ : UVM_PREDICT_WRITE);
    endtask
 
    // Function: new

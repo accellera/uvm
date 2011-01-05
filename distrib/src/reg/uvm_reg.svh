@@ -600,12 +600,11 @@ virtual class uvm_reg extends uvm_object;
                               input  uvm_object        extension = null,
                               input string             fname = "",
                               input int                lineno = 0);
-  
 
 
    // Function: predict
    //
-   // Update the mirrored value for this register
+   // Update the mirrored value for this register.
    //
    // Predict the mirror value of the fields in the register
    // based on the specified observed ~value~ on a specified adress ~map~,
@@ -634,16 +633,6 @@ virtual class uvm_reg extends uvm_object;
 
    /*local*/ extern function void Xset_busyX(bit busy);
 
-
-   extern local virtual function void Xpredict_readX (uvm_reg_data_t value,
-                                                      uvm_path_e     path,
-                                                      uvm_reg_map    map);
-
-   extern local virtual function void Xpredict_writeX(uvm_reg_data_t value,
-                                                      uvm_path_e     path,
-                                                      uvm_reg_map    map);
-
-
    /*local*/ extern task XreadX (output uvm_status_e      status,
                                  output uvm_reg_data_t    value,
                                  input  uvm_path_e        path,
@@ -668,6 +657,10 @@ virtual class uvm_reg extends uvm_object;
 
    extern virtual task do_read(uvm_reg_item rw);
 
+   extern virtual function void do_predict
+                                (uvm_reg_item      rw,
+                                 uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                 uvm_reg_byte_en_t be = -1);
    //-----------------
    // Group: Frontdoor
    //-----------------
@@ -1925,33 +1918,52 @@ endfunction: set
 
 // predict
 
-function bit uvm_reg::predict(uvm_reg_data_t    value,
-                              uvm_reg_byte_en_t be = -1,
-                              uvm_predict_e     kind = UVM_PREDICT_DIRECT,
-                              uvm_path_e        path = UVM_FRONTDOOR,
-                              uvm_reg_map       map = null,
-                              string            fname = "",
-                              int               lineno = 0);
-   m_fname = fname;
-   m_lineno = lineno;
+function bit uvm_reg::predict (uvm_reg_data_t    value,
+                               uvm_reg_byte_en_t be = -1,
+                               uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                               uvm_path_e        path = UVM_FRONTDOOR,
+                               uvm_reg_map       map = null,
+                               string            fname = "",
+                               int               lineno = 0);
+  uvm_reg_item rw = new;
+  rw.value[0] = value;
+  rw.path = path;
+  rw.map = map;
+  rw.fname = fname;
+  rw.lineno = lineno;
+  do_predict(rw, kind, be);
+  predict = (rw.status == UVM_NOT_OK) ? 0 : 1;
+endfunction: predict
+
+
+// do_predict
+
+function void uvm_reg::do_predict(uvm_reg_item      rw,
+                                  uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                  uvm_reg_byte_en_t be = -1);
+
+   uvm_reg_data_t reg_value = rw.value[0];
+   m_fname = rw.fname;
+   m_lineno = rw.lineno;
+
+   rw.status = UVM_IS_OK;
 
    if (m_is_busy && kind == UVM_PREDICT_DIRECT) begin
       `uvm_warning("RegModel", {"Trying to predict value of register '",
                   get_full_name(),"' while it is being accessed"})
-      return 0;
+      rw.status = UVM_NOT_OK;
+      return;
    end
    
-   predict = 1;
-   
-   // Fields are stored in LSB to MSB order
    foreach (m_fields[i]) begin
-      predict &= m_fields[i].predict(
-          (value >> m_fields[i].get_lsb_pos()) &
-          ((1 << m_fields[i].get_n_bits()) - 1),
-          be >> (m_fields[i].get_lsb_pos()/8),
-          kind,path,map,fname,lineno);
+      rw.value[0] = (reg_value >> m_fields[i].get_lsb_pos()) &
+                                 ((1 << m_fields[i].get_n_bits())-1);
+      m_fields[i].do_predict(rw, kind, be>>(m_fields[i].get_lsb_pos()/8));
    end
-endfunction: predict
+
+   rw.value[0] = reg_value;
+
+endfunction: do_predict
 
 
 // get
@@ -1992,33 +2004,6 @@ function uvm_reg_data_t uvm_reg::get_reset(string kind = "HARD");
    foreach (m_fields[i])
       get_reset |= m_fields[i].get_reset(kind) << m_fields[i].get_lsb_pos();
 endfunction: get_reset
-
-
-// Xpredict_writeX
-
-function void uvm_reg::Xpredict_writeX(uvm_reg_data_t value,
-                                       uvm_path_e     path,
-                                       uvm_reg_map    map);
-   // Fields are stored in LSB to MSB order
-   foreach (m_fields[i]) begin
-      m_fields[i].Xpredict_writeX(
-            (value >> m_fields[i].get_lsb_pos()) &
-            ((1 << m_fields[i].get_n_bits()) - 1), path, map);
-   end
-endfunction: Xpredict_writeX
-
-
-// Xpredict_readX
-
-function void uvm_reg::Xpredict_readX(uvm_reg_data_t value,
-                                      uvm_path_e     path,
-                                      uvm_reg_map    map);
-   foreach (m_fields[i]) begin
-      m_fields[i].Xpredict_readX(
-            (value >> m_fields[i].get_lsb_pos()) &
-            ((1 << m_fields[i].get_n_bits()) - 1), path, map);
-   end
-endfunction: Xpredict_readX
 
 
 // has_reset
@@ -2235,7 +2220,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
          else
            backdoor_write(rw);
 
-         Xpredict_writeX(rw.value[0], rw.path, null);
+         do_predict(rw, UVM_PREDICT_WRITE);
       end
 
       UVM_FRONTDOOR: begin
@@ -2268,7 +2253,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
                m_parent.XsampleX(map_info.offset, 0, rw.map);
             end
 
-           Xpredict_writeX(rw.value[0], rw.path, rw.map);
+           do_predict(rw, UVM_PREDICT_WRITE);
          end
       end
       
@@ -2467,7 +2452,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
             end
 
             rw.value[0] &= ~wo_mask;
-            Xpredict_readX(rw.value[0], rw.path, null);
+            do_predict(rw, UVM_PREDICT_READ);
          end
       end
 
@@ -2500,7 +2485,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
                m_parent.XsampleX(map_info.offset, 1, rw.map);
             end
 
-           Xpredict_readX(rw.value[0], rw.path, rw.map);
+          do_predict(rw, UVM_PREDICT_READ);
          end
       end
       
@@ -2762,7 +2747,7 @@ task uvm_reg::poke(output uvm_status_e      status,
    `uvm_info("RegModel", $psprintf("Poked register \"%s\": 'h%h",
                               get_full_name(), value),UVM_HIGH);
 
-   Xpredict_writeX(value, UVM_BACKDOOR, null);
+   do_predict(rw, UVM_PREDICT_WRITE);
 
    if (!m_is_locked_by_field)
      XatomicX(0);
@@ -2819,7 +2804,7 @@ task uvm_reg::peek(output uvm_status_e      status,
    `uvm_info("RegModel", $psprintf("Peeked register \"%s\": 'h%h",
                           get_full_name(), value),UVM_HIGH);
 
-   Xpredict_readX(value, UVM_BACKDOOR, null);
+   do_predict(rw, UVM_PREDICT_READ);
 
    if (!m_is_locked_by_field)
       XatomicX(0);

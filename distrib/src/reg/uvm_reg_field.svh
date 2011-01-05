@@ -613,11 +613,10 @@ class uvm_reg_field extends uvm_object;
 
    // Function: predict
    //
-   // Update the mirrored value for this field
+   // Update the mirrored value for this field.
    //
-   // Predict the mirror value of the field
-   // based on the specified observed ~value~ on a specified adress ~map~,
-   // or based on a calculated value.
+   // Predict the mirror value of the field based on the specified
+   // observed ~value~ on a bus using the specified address ~map~.
    //
    // If ~kind~ is specified as <UVM_PREDICT_READ>, the value
    // was observed in a read transaction on the specified address ~map~ or
@@ -630,43 +629,43 @@ class uvm_reg_field extends uvm_object;
    // For example, the mirrored value of a read-only field is modified
    // by this method if ~kind~ is specified as <UVM_PREDICT_DIRECT>.
    //
-   // This method does not allow any explicit update of the mirror
+   // This method does not allow an update of the mirror
    // when the register containing this field is busy executing
    // a transaction because the results are unpredictable and
    // indicative of a race condition in the testbench.
    //
    // Returns TRUE if the prediction was succesful.
    //
-   extern virtual function bit predict (uvm_reg_data_t    value,
-                                        uvm_reg_byte_en_t be = -1,
-                                        uvm_predict_e     kind = UVM_PREDICT_DIRECT,
-                                        uvm_path_e        path = UVM_FRONTDOOR,
-                                        uvm_reg_map       map = null,
-                                        string            fname = "",
-                                        int               lineno = 0);
+   extern function bit predict (uvm_reg_data_t    value,
+                                uvm_reg_byte_en_t be = -1,
+                                uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                uvm_path_e        path = UVM_FRONTDOOR,
+                                uvm_reg_map       map = null,
+                                string            fname = "",
+                                int               lineno = 0);
 
 
 
-   /*local*/ extern virtual function uvm_reg_data_t XpredictX (uvm_reg_data_t cur_val,
-                                                               uvm_reg_data_t wr_val,
-                                                               uvm_reg_map    map);
+   /*local*/
+   extern virtual function uvm_reg_data_t XpredictX (uvm_reg_data_t cur_val,
+                                                     uvm_reg_data_t wr_val,
+                                                     uvm_reg_map    map);
 
-   /*local*/ extern virtual function void Xpredict_readX (uvm_reg_data_t value,
-                                                          uvm_path_e     path,
-                                                          uvm_reg_map    map);
-
-   /*local*/ extern virtual function void Xpredict_writeX(uvm_reg_data_t value,
-                                                          uvm_path_e     path,
-                                                          uvm_reg_map    map);
-
-   /*local*/ extern virtual function uvm_reg_data_t XupdateX();
+   /*local*/
+   extern virtual function uvm_reg_data_t XupdateX();
   
-   /*local*/ extern function bit Xcheck_accessX (input uvm_reg_item rw,
-                                                 output uvm_reg_map_info map_info,
-                                                 input string caller);
+   /*local*/
+   extern function bit Xcheck_accessX (input uvm_reg_item rw,
+                                       output uvm_reg_map_info map_info,
+                                       input string caller);
 
    extern virtual task do_write(uvm_reg_item rw);
    extern virtual task do_read(uvm_reg_item rw);
+   extern virtual function void do_predict 
+                                  (uvm_reg_item rw,
+                                   uvm_predict_e kind=UVM_PREDICT_DIRECT,
+                                   uvm_reg_byte_en_t be = -1);
+
 
    extern function void pre_randomize();
    extern function void post_randomize();
@@ -680,6 +679,7 @@ class uvm_reg_field extends uvm_object;
 
 
    // Task: pre_write
+   //
    // Called before field write.
    //
    // If the specified data value, access ~path~ or address ~map~ are modified,
@@ -1058,91 +1058,116 @@ function uvm_reg_data_t uvm_reg_field::XpredictX (uvm_reg_data_t cur_val,
 endfunction: XpredictX
 
 
-// Xpredict_readX
 
-function void uvm_reg_field::Xpredict_readX (uvm_reg_data_t value,
-                                             uvm_path_e     path,
-                                             uvm_reg_map    map);
-   value &= ('b1 << m_size)-1;
+// predict
 
-   if (path == UVM_FRONTDOOR) begin
-
-      string acc = get_access(map);
-
-      // If the value was obtained via a front-door access
-      // then a RC field will have been cleared
-      if (acc == "RC" ||
-          acc == "WRC" ||
-          acc == "W1SRC" ||
-          acc == "W0SRC")
-        value = 0;
-
-      // If the value was obtained via a front-door access
-      // then a RS field will have been set
-      else if (acc == "RS" ||
-               acc == "WRS" ||
-               acc == "W1CRS" ||
-               acc == "W0CRS")
-        value = ('b1 << m_size)-1;
-
-      // If the value of a WO field was obtained via a front-door access
-      // it will always read back as 0 and the value of the field
-      // cannot be inferred from it
-      else if (acc == "WO" ||
-               acc == "WOC" ||
-               acc == "WOS" ||
-               acc == "WO1") begin
-        return;
-      end
-   end
-
-   begin
-      uvm_reg_field_cb_iter cbs = new(this);
-
-      for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next())
-         cb.post_predict(this, m_mirrored, value, UVM_PREDICT_READ, path, map);
-   end
-
-   value &= ('b1 << m_size)-1;
-
-   m_mirrored  = value;
-   m_desired   = value;
-   this.value  = value;
-
-endfunction: Xpredict_readX
+function bit uvm_reg_field::predict (uvm_reg_data_t    value,
+                                     uvm_reg_byte_en_t be = -1,
+                                     uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                     uvm_path_e        path = UVM_FRONTDOOR,
+                                     uvm_reg_map       map = null,
+                                     string            fname = "",
+                                     int               lineno = 0);
+  uvm_reg_item rw = new;
+  rw.value[0] = value;
+  rw.path = path;
+  rw.map = map;
+  rw.fname = fname;
+  rw.lineno = lineno;
+  do_predict(rw, kind, be);
+  predict = (rw.status == UVM_NOT_OK) ? 0 : 1;
+endfunction: predict
 
 
-// Xpredict_writeX 
+// do_predict
 
-function void uvm_reg_field::Xpredict_writeX (uvm_reg_data_t value,
-                                              uvm_path_e     path,
-                                              uvm_reg_map    map);
-   uvm_reg_data_t previous;
+function void uvm_reg_field::do_predict(uvm_reg_item      rw,
+                                        uvm_predict_e     kind = UVM_PREDICT_DIRECT,
+                                        uvm_reg_byte_en_t be = -1);
    
-   value &= ('b1 << m_size)-1;
+   uvm_reg_data_t field_val = rw.value[0] & ((1 << m_size)-1);
 
-   previous = m_mirrored;
+   if (rw.status != UVM_NOT_OK)
+     rw.status = UVM_IS_OK;
 
-   if (path == UVM_FRONTDOOR)
-      m_mirrored = XpredictX(m_mirrored, value, map);
-   else
-      m_mirrored = value;
+   // Assume that the entire field is enabled
+   if (!be[0])
+     return;
 
-   m_written = 1;
+   m_fname = rw.fname;
+   m_lineno = rw.lineno;
 
-   begin
-      uvm_reg_field_cb_iter cbs = new(this);
+   case (kind)
 
-      for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next())
-         cb.post_predict(this, previous, m_mirrored, UVM_PREDICT_WRITE, path, map);
-   end
+     UVM_PREDICT_WRITE:
+       begin
+         uvm_reg_field_cb_iter cbs = new(this);
 
-   m_mirrored &= ('b1 << m_size)-1;
+         if (rw.path == UVM_FRONTDOOR || rw.path == UVM_PREDICT)
+            field_val = XpredictX(m_mirrored, field_val, rw.map);
 
-   m_desired  = m_mirrored;
-   this.value = m_mirrored;
+         m_written = 1;
 
-endfunction: Xpredict_writeX
+         for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next())
+            cb.post_predict(this, m_mirrored, field_val, 
+                            UVM_PREDICT_WRITE, rw.path, rw.map);
+
+         field_val &= ('b1 << m_size)-1;
+
+       end
+
+     UVM_PREDICT_READ:
+       begin
+         uvm_reg_field_cb_iter cbs = new(this);
+
+         if (rw.path == UVM_FRONTDOOR || rw.path == UVM_PREDICT) begin
+
+            string acc = get_access(rw.map);
+
+            if (acc == "RC" ||
+                acc == "WRC" ||
+                acc == "W1SRC" ||
+                acc == "W0SRC")
+              field_val = 0;  // (clear)
+
+            else if (acc == "RS" ||
+                     acc == "WRS" ||
+                     acc == "W1CRS" ||
+                     acc == "W0CRS")
+              field_val = ('b1 << m_size)-1; // all 1's (set)
+
+            else if (acc == "WO" ||
+                     acc == "WOC" ||
+                     acc == "WOS" ||
+                     acc == "WO1")
+              return;
+         end
+
+         for (uvm_reg_cbs cb = cbs.first(); cb != null; cb = cbs.next())
+            cb.post_predict(this, m_mirrored, field_val,
+                            UVM_PREDICT_READ, rw.path, rw.map);
+
+         field_val &= ('b1 << m_size)-1;
+
+       end
+
+     UVM_PREDICT_DIRECT:
+       begin
+         if (m_parent.is_busy()) begin
+           `uvm_warning("RegModel", {"Trying to predict value of field '",
+              get_name(),"' while register '",m_parent.get_full_name(),
+              "' is being accessed"})
+           rw.status = UVM_NOT_OK;
+         end
+       end
+   endcase
+
+   // update the mirror with predicted value
+   m_mirrored = field_val;
+   m_desired  = field_val;
+   this.value = field_val;
+
+endfunction: do_predict
 
 
 // XupdateX
@@ -1181,47 +1206,6 @@ function uvm_reg_data_t  uvm_reg_field::XupdateX();
       default: XupdateX = m_desired;
    endcase
 endfunction: XupdateX
-
-
-// predict
-
-function bit uvm_reg_field::predict(uvm_reg_data_t    value,
-                                    uvm_reg_byte_en_t be = -1,
-                                    uvm_predict_e     kind = UVM_PREDICT_DIRECT,
-                                    uvm_path_e        path = UVM_FRONTDOOR,
-                                    uvm_reg_map       map = null,
-                                    string            fname = "",
-                                    int               lineno = 0);
-   // Assume that the entire field is enabled
-   if (!be[0]) return 1;
-   
-   m_fname = fname;
-   m_lineno = lineno;
-   if (m_parent.is_busy() && kind == UVM_PREDICT_DIRECT) begin
-      `uvm_warning("RegModel", {"Trying to predict value of field '",
-        get_name(),"' while register '",m_parent.get_full_name(),
-        "' is being accessed"})
-      return 0;
-   end
-
-   if (kind == UVM_PREDICT_READ) begin
-     Xpredict_readX(value,path,map);
-     return 1;
-   end
-
-   if (kind == UVM_PREDICT_WRITE) begin
-     Xpredict_writeX(value,path,map);
-     return 1;
-   end
-
-   // update the mirror with value as-is
-   value &= ('b1 << m_size)-1;
-   m_mirrored = value;
-   m_desired = value;
-   this.value   = value;
-
-   return 1;
-endfunction: predict
 
 
 // set
@@ -1380,20 +1364,13 @@ function bit uvm_reg_field::Xcheck_accessX(input uvm_reg_item rw,
 
      map_info = rw.local_map.get_reg_map_info(m_parent);
 
-     if (map_info.frontdoor == null) begin
-
-        if (rw.parent == null)
-          `uvm_fatal("RegModel",
-               "Built-in frontdoor write requires non-null parent argument")
-
-        if (map_info.unmapped) begin
-           `uvm_error("RegModel", {"Field '",get_full_name(),
-                    "' in register that is unmapped in map '",
-                    rw.map.get_full_name(),
-                    "' and does not have a user-defined frontdoor"})
-           rw.status = UVM_NOT_OK;
-           return 0;
-        end
+     if (map_info.frontdoor == null && map_info.unmapped) begin
+        `uvm_error("RegModel", {"Field '",get_full_name(),
+                   "' in register that is unmapped in map '",
+                   rw.map.get_full_name(),
+                   "' and does not have a user-defined frontdoor"})
+        rw.status = UVM_NOT_OK;
+        return 0;
      end
 
      if (rw.map == null)
@@ -1534,7 +1511,7 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
 
      if (system_map.get_auto_predict())
         // ToDo: Call parent.XsampleX();
-        Xpredict_writeX(rw.value[0], rw.path, rw.map);
+        do_predict(rw, UVM_PREDICT_WRITE);
 
      post_write(rw);
      for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())
@@ -1642,7 +1619,7 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
 
      if (system_map.get_auto_predict())
         // ToDo: Call parent.XsampleX();
-        Xpredict_readX(rw.value[0], rw.path, rw.map);
+        do_predict(rw, UVM_PREDICT_READ);
 
      post_read(rw);
      for (uvm_reg_cbs cb=cbs.first(); cb!=null; cb=cbs.next())

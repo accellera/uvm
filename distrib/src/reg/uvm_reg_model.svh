@@ -55,35 +55,35 @@ typedef class uvm_reg_adapter;
 //
 // 2-state data value with <`UVM_REG_DATA_WIDTH> bits
 //
-typedef  bit [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_t ;
+typedef  bit unsigned [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_t ;
 
 
 // Type: uvm_reg_data_logic_t
 //
 // 4-state data value with <`UVM_REG_DATA_WIDTH> bits
 //
-typedef  logic [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_logic_t ;
+typedef  logic unsigned [`UVM_REG_DATA_WIDTH-1:0]  uvm_reg_data_logic_t ;
 
 
 // Type: uvm_reg_addr_t
 //
 // 2-state address value with <`UVM_REG_ADDR_WIDTH> bits
 //
-typedef  bit [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_t ;
+typedef  bit unsigned [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_t ;
 
 
 // Type: uvm_reg_addr_logic_t
 //
 // 4-state address value with <`UVM_REG_ADDR_WIDTH> bits
 //
-typedef  logic [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_logic_t ;
+typedef  logic unsigned [`UVM_REG_ADDR_WIDTH-1:0]  uvm_reg_addr_logic_t ;
 
 
 // Type: uvm_reg_byte_en_t
 //
 // 2-state byte_enable value with <`UVM_REG_BYTENABLE_WIDTH> bits
 //
-typedef  bit [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
+typedef  bit unsigned [`UVM_REG_BYTENABLE_WIDTH-1:0]  uvm_reg_byte_en_t ;
 
 
 // Type: uvm_reg_cvr_t
