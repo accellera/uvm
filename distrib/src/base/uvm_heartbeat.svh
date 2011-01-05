@@ -29,6 +29,11 @@ typedef enum {
   UVM_NO_HB_MODE
 } uvm_heartbeat_modes;
 
+typedef class uvm_hb_objection;
+typedef class uvm_hb_callback;
+typedef uvm_callbacks #(uvm_hb_objection,uvm_hb_callback) uvm_hb_cbs_t;
+
+
 //------------------------------------------------------------------------------
 //
 // Class: uvm_heartbeat
@@ -38,7 +43,8 @@ typedef enum {
 // descendants are alive. A uvm_heartbeat is associated with a specific
 // objection object. A component that is being tracked by the heartbeat
 // object must raise (or drop) the synchronizing objection during
-// the heartbeat window.
+// the heartbeat window. The synchronizing objection must be a
+// <uvm_hb_objection> type.
 //
 // The uvm_heartbeat object has a list of participating objects. The heartbeat
 // can be configured so that all components (UVM_ALL_ACTIVE), exactly one
@@ -49,7 +55,7 @@ typedef enum {
 typedef class uvm_hb_callback;
 class uvm_heartbeat extends uvm_object;
 
-  protected uvm_objection   m_objection = null;
+  protected uvm_hb_objection m_objection = null;
   protected uvm_hb_callback m_cb = null;
   protected uvm_component   m_cntxt;
   protected uvm_heartbeat_modes   m_mode;
@@ -61,17 +67,18 @@ class uvm_heartbeat extends uvm_object;
   // Function: new
   //
   // Creates a new heartbeat instance associated with ~cntxt~. The context
-  // is the hierarchical locationa that the heartbeat objections will flow
+  // is the hierarchical location that the heartbeat objections will flow
   // through and be monitored at. The ~objection~ associated with the heartbeat 
-  // is optional, if it is left null then the uvm_test_done objection is used. 
+  // is optional, if it is left null but it must be set before the heartbeat
+  // monitor will activate.
   //
-  //| uvm_objection myobjection = new("myobjection"); //some shared objection
+  //| uvm_hb_objection myobjection = new("myobjection"); //some shared objection
   //| class myenv extends uvm_env;
   //|    uvm_heartbeat hb = new("hb", this, myobjection);
   //|    ...
   //| endclass
 
-  function new(string name, uvm_component cntxt, uvm_objection objection=null);
+  function new(string name, uvm_component cntxt, uvm_hb_objection objection=null);
     super.new(name);
     m_objection = objection;
     
@@ -80,7 +87,6 @@ class uvm_heartbeat extends uvm_object;
     else m_cntxt = uvm_root::get();
 
     m_cb = new({name,"_cb"},m_cntxt);
-    if(m_objection == null) m_objection = uvm_test_done_objection::get();
 
   endfunction
 
@@ -197,12 +203,13 @@ class uvm_heartbeat extends uvm_object;
     join_none
   endfunction
 
+  protected bit m_added = 0;
   function void m_enable_cb;
-    static bit added = 0;
     void'(m_cb.callback_mode(1));
-    if(!added) 
-      uvm_callbacks#(uvm_objection,uvm_objection_cb)::add(m_objection, m_cb);
-    added = 1;
+    if(m_objection == null) return;
+    if(!m_added) 
+      uvm_hb_cbs_t::add(m_objection, m_cb);
+    m_added = 1;
   endfunction
 
   function void m_disable_cb;
@@ -280,7 +287,34 @@ class uvm_heartbeat extends uvm_object;
   endtask
 endclass
 
-class uvm_hb_callback extends uvm_objection_cb;
+//------------------------------------------------------------------------------
+//
+// Class: uvm_hb_objection
+//
+//------------------------------------------------------------------------------
+// The uvm_hb_objection is a specialized <uvm_objection> which contains
+// callbacks for the raised and dropped events. Whenever the objection is
+// raised or dropped, the component which did the raise/drop is considered
+// to be alived.
+//
+
+
+class uvm_hb_objection extends uvm_objection;
+  `uvm_register_cb(uvm_hb_objection, uvm_hb_callback)
+  function new(string name="");
+    super.new(name);
+  endfunction
+  virtual function void raised (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+    `uvm_do_callbacks(uvm_hb_objection,uvm_hb_callback,raised(this,obj,source_obj,description,count))
+  endfunction
+  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+    `uvm_do_callbacks(uvm_hb_objection,uvm_hb_callback,dropped(this,obj,source_obj,description,count))
+  endfunction
+endclass
+
+class uvm_hb_callback extends uvm_callback;
   int  cnt [uvm_object];
   time last_trigger [uvm_object];
   uvm_object target;

@@ -38,7 +38,7 @@ module test;
      endfunction
   endclass
 
-  uvm_objection myobj = new("myobj");
+  uvm_hb_objection myobj = new("myobj");
 
   class mycomp extends uvm_component;
     time active_start, active_stop;
