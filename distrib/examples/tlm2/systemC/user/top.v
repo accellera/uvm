@@ -20,11 +20,15 @@
 // 
 
 
+`include "uvm_tlm2_sv_bind.svh"
+
 module top;
 
 import uvm_pkg::*;
+import uvm_tlm2_sv_bind_pkg::*;
 
 `include "tb_env.sv"
+`include "test.sv"
 
    // SystemC models
    sc_top design();  

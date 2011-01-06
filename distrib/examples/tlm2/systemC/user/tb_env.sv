@@ -25,9 +25,6 @@
 `include "initiator.sv"
 `include "target.sv"
 
-`include "uvm_tlm2_sv_bind.svh"
-
-
 class tb_env extends uvm_env;
    `uvm_component_utils(tb_env);
 

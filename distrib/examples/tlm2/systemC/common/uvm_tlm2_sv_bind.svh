@@ -21,25 +21,33 @@
 
 
 `ifndef UVM_TLM2_SV_BIND
- `define UVM_TLM2_SV_BIND
+`define UVM_TLM2_SV_BIND
 
-typedef enum {UVM_TLM_B_INITIATOR,
-              UVM_TLM_B_TARGET,
-              UVM_TLM_NB_INITIATOR,
-              UVM_TLM_NB_TARGET,
-              UVM_TLM_ANALYSIS_PORT,
-              UVM_TLM_ANALYSIS_EXPORT
-              } uvm_tlm_typ_e;
+package uvm_tlm2_sv_bind_pkg;
+
+import uvm_pkg::*;
+
+   typedef enum {UVM_TLM_B_INITIATOR,
+                 UVM_TLM_B_TARGET,
+                 UVM_TLM_NB_INITIATOR,
+                 UVM_TLM_NB_TARGET,
+                 UVM_TLM_ANALYSIS_PORT,
+                 UVM_TLM_ANALYSIS_EXPORT
+                 } uvm_tlm_typ_e;
 
 
 class uvm_tlm2_sv_bind #(type T = uvm_tlm_gp);
-
+   
    static function void connect(uvm_port_base #(uvm_tlm_if #(T)) tlm_intf,
                                 uvm_tlm_typ_e port_type,
                                 string port_name);
+
       `uvm_fatal("uvm_tlm2_sv_bind",
                  "Vendor implementation for uvm_tlm2_sv_bind::connect() is needed")
    endfunction
-
+   
 endclass
+
+endpackage
+
 `endif

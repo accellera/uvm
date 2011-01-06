@@ -23,10 +23,8 @@
 #ifndef _UVM_INTERFACE_BASE_H_
 #define _UVM_INTERFACE_BASE_H_
 
-#include <systemc.h>
+#include <systemc>
 #include "tlm.h"
-
-#include "uvm_tlm2_sc_bind_decl.h"
 
 enum uvm_tlm_socket_typ {UVM_TLM_B, UVM_TLM_NB};
 
@@ -42,7 +40,8 @@ void uvm_tlm2_bind_sc_target(
     uvm_tlm_socket_typ type, 
     std::string uniq_id)
 {
-    #include "uvm_tlm2_bind_sc_target_impl.cpp"
+    cout << "Error: Vendor implementation for uvm_tlm2_bind_sc_target is needed." << endl;
+
     return;
 }
 
@@ -59,7 +58,8 @@ void uvm_tlm2_bind_sc_initiator(
     uvm_tlm_socket_typ type, 
     std::string uniq_id)
 {
-    #include "uvm_tlm2_bind_sc_initiator_impl.cpp"
+    cout << "Error: Vendor implementation for uvm_tlm2_bind_sc_initiator is needed." << endl;
+
     return;
 }
 
@@ -70,7 +70,8 @@ void uvm_tlm2_bind_sc_analysis_port(
     tlm::tlm_analysis_port<TRANS>& conn,
     std::string uniq_id)
 {
-    #include "uvm_tlm2_bind_sc_analysis_port_impl.cpp"
+    cout << "Error: Vendor implementation for uvm_tlm2_bind_sc_analysis_port is needed." << endl;
+
     return;
 }
 
@@ -81,7 +82,8 @@ void uvm_tlm2_bind_sc_analysis_export(
     tlm::tlm_analysis_if<TRANS>& conn,
     std::string uniq_id)
 {
-    #include "uvm_tlm2_bind_sc_analysis_export_impl.cpp"
+    cout << "Error: Vendor implementation for uvm_tlm2_bind_sc_analysis_export is needed." << endl;
+
     return;
 }
 

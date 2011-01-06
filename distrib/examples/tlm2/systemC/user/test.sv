@@ -29,8 +29,10 @@ class test extends uvm_component;
   function void end_of_elaboration();
      // Set verbosity for  demo
      set_report_verbosity_level(UVM_FULL);
-     uvm_report_info(get_type_name(),
-                     $psprintf("Printing the test topology :\n%s", this.sprint()), UVM_LOW);
+     begin
+        uvm_root top = uvm_root::get();
+        top.print_topology();
+     end
   endfunction : end_of_elaboration
 
    task run();
