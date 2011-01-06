@@ -35,7 +35,7 @@ function int uvm_re_match(string re, string str);
   es = 0; ss = 0;
 
   if(re.len() == 0)
-    return 1;
+    return 0;
 
   // The ^ used to be used to remove the implicit wildcard, but now we don't
   // use implicit wildcard so this character is just stripped.
@@ -46,7 +46,7 @@ function int uvm_re_match(string re, string str);
   //be a *. 
   while (s != str.len() && re.getc(e) != "*") begin
     if ((re.getc(e) != str.getc(s)) && (re.getc(e) != "?"))
-      return 0;
+      return 1;
     e++; s++;
   end
 
@@ -54,7 +54,7 @@ function int uvm_re_match(string re, string str);
     if (re.getc(e) == "*") begin
       e++;
       if (e == re.len()) begin
-        return 1;
+        return 0;
       end
       es = e;
       ss = s+1;
@@ -71,10 +71,10 @@ function int uvm_re_match(string re, string str);
   while (re.getc(e) == "*")
     e++;
   if(e == re.len()) begin
-    return 1;
+    return 0;
   end
   else begin
-    return 0;
+    return 1;
   end
 endfunction
 
