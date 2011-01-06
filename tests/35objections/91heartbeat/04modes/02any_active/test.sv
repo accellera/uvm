@@ -60,7 +60,7 @@ module test;
      endfunction
   endclass
 
-  uvm_hb_objection myobj = new("myobj");
+  uvm_heartbeat_objection myobj = new("myobj");
 
   class mycomp extends uvm_component;
     time del;
@@ -93,7 +93,7 @@ module test;
       agent = new("agent", this);
 
       hb = new("myhb", this, myobj);
-      void'(hb.hb_mode(UVM_ANY_ACTIVE));
+      void'(hb.set_mode(UVM_ANY_ACTIVE));
       hb.add(agent.mc1);
       hb.add(agent.mc2);
       hb.add(agent);
