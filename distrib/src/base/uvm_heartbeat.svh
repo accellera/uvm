@@ -287,6 +287,8 @@ class uvm_heartbeat extends uvm_object;
   endtask
 endclass
 
+
+
 //------------------------------------------------------------------------------
 //
 // Class: uvm_hb_objection
@@ -295,46 +297,77 @@ endclass
 // The uvm_hb_objection is a specialized <uvm_objection> which contains
 // callbacks for the raised and dropped events. Whenever the objection is
 // raised or dropped, the component which did the raise/drop is considered
-// to be alived.
-//
+// to be alive.
 
 
 class uvm_hb_objection extends uvm_objection;
+
   `uvm_register_cb(uvm_hb_objection, uvm_hb_callback)
+
   function new(string name="");
     super.new(name);
   endfunction
-  virtual function void raised (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
-    `uvm_do_callbacks(uvm_hb_objection,uvm_hb_callback,raised(this,obj,source_obj,description,count))
+
+  virtual function void raised (uvm_object obj,
+                                uvm_object source_obj, 
+                                string description,
+                                int count);
+    super.raised(obj,source_obj,description,count);
+    `uvm_do_callbacks(uvm_hb_objection,uvm_hb_callback,
+                      raised(this,obj,source_obj,description,count))
   endfunction
-  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
-    `uvm_do_callbacks(uvm_hb_objection,uvm_hb_callback,dropped(this,obj,source_obj,description,count))
+
+  virtual function void dropped (uvm_object obj,
+                                 uvm_object source_obj,
+                                 string description,
+                                 int count);
+    super.dropped(obj,source_obj,description,count);
+    `uvm_do_callbacks(uvm_hb_objection,uvm_hb_callback,
+                      dropped(this,obj,source_obj,description,count))
   endfunction
+
 endclass
 
+
+
+//------------------------------------------------------------------------------
+//
+// Class: uvm_hb_callback
+//
+//------------------------------------------------------------------------------
+
 class uvm_hb_callback extends uvm_callback;
-  int  cnt [uvm_object];
+
+  int cnt [uvm_object];
   time last_trigger [uvm_object];
   uvm_object target;
 
   function new(string name, uvm_object target);
     super.new(name);
-    if(target != null) this.target = target;
-    else this.target = uvm_root::get();
+    if (target != null)
+       this.target = target;
+    else
+       this.target = uvm_root::get();
   endfunction
 
-  virtual function void raised (uvm_objection objection, uvm_object obj, 
-      uvm_object source_obj, string description, int count);
+  virtual function void raised (uvm_objection objection,
+                                uvm_object obj,
+                                uvm_object source_obj,
+                                string description,
+                                int count);
     if(obj == target) begin
-      if(!cnt.exists(source_obj)) cnt[source_obj] = 0;
+      if(!cnt.exists(source_obj))
+        cnt[source_obj] = 0;
       cnt[source_obj] = cnt[source_obj]+1;
       last_trigger[source_obj] = $time;
     end
   endfunction
-  virtual function void dropped (uvm_objection objection, uvm_object obj, 
-      uvm_object source_obj, string description, int count);
+
+  virtual function void dropped (uvm_objection objection,
+                                 uvm_object obj,
+                                 uvm_object source_obj,
+                                 string description,
+                                 int count);
     raised(objection,obj,source_obj,description,count);
   endfunction
 
@@ -344,8 +377,11 @@ class uvm_hb_callback extends uvm_callback;
 
   function int objects_triggered;
     objects_triggered = 0; 
-    foreach(cnt[i]) if (cnt[i] != 0) objects_triggered++;
+    foreach(cnt[i])
+      if (cnt[i] != 0)
+        objects_triggered++;
   endfunction
+
 endclass
 
 `endif
