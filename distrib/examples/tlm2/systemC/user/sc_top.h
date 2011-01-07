@@ -31,14 +31,14 @@
 class sc_top : public sc_module
 {
 public:
-   initiator  init0;
+   initiator  init1;
    target     trgt0;
 
    SC_CTOR(sc_top) : trgt0("trgt0")
-                      ,init0("init0") 
+                      ,init1("init1") 
    {
       uvm_tlm2_bind_sc_target(trgt0.target_socket,UVM_TLM_B,"port0");
-      uvm_tlm2_bind_sc_initiator(init0.initiator_socket,UVM_TLM_B,"port1");
+      uvm_tlm2_bind_sc_initiator(init1.initiator_socket,UVM_TLM_B,"port1");
 
    }
 

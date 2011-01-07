@@ -29,7 +29,7 @@ class tb_env extends uvm_env;
    `uvm_component_utils(tb_env);
 
    initiator initiator0;
-   target    target0;
+   target    target1;
 
    function new(string name, uvm_component parent = null);
      super.new(name, parent);
@@ -38,7 +38,7 @@ class tb_env extends uvm_env;
    function void build();
       super.build();
       initiator0 = initiator::type_id::create("initiator0", this);
-      target0    = target::type_id::create("target0", this);
+      target1    = target::type_id::create("target1", this);
    endfunction : build
    
    function void connect();
@@ -46,7 +46,7 @@ class tb_env extends uvm_env;
                                           UVM_TLM_B_INITIATOR,
                                           "port0");
 
-      uvm_tlm2_sv_bind#(payload)::connect(target0.socket,
+      uvm_tlm2_sv_bind#(payload)::connect(target1.socket,
                                           UVM_TLM_B_TARGET,
                                           "port1");
    endfunction : connect
