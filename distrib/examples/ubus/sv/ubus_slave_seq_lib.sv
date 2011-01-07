@@ -29,7 +29,8 @@
 //------------------------------------------------------------------------------
 
 class simple_response_seq extends uvm_sequence #(ubus_transfer);
-
+   ubus_slave_sequencer p_sequencer;
+   
   function new(string name="simple_response_seq");
     super.new(name);
   endfunction
@@ -37,11 +38,12 @@ class simple_response_seq extends uvm_sequence #(ubus_transfer);
 //  `uvm_sequence_utils(simple_response_seq, ubus_slave_sequencer)
     
   `uvm_object_utils(simple_response_seq)
-  `uvm_declare_p_sequencer(ubus_slave_sequencer)
 
   ubus_transfer util_transfer;
 
   virtual task body();
+     $cast(p_sequencer, m_sequencer);
+     
     `uvm_info(get_type_name(),
       $psprintf("%s starting...",
       get_sequence_path()), UVM_MEDIUM);

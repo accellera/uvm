@@ -1044,9 +1044,6 @@ task uvm_root::m_stop_request(time timeout=0, bit forced = 0);
     `uvm_info("STOPREQ", "Stop request has been processed, jumping to the extract phase", UVM_MEDIUM)
     jump_all_domains(uvm_extract_ph);
 
-    //Temporary hack because jump_all_domains is not jumping out of the run phase
-    run_ph.phase_done.drop_objection(this, "Stop-request occurred. Dropping objection for run phase");
-
     #0;
     run_ph.phase_done.clear();
     uvm_test_done.clear();

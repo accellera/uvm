@@ -32,5 +32,5 @@ comp: vlib
 		ubus_tb_top.sv
 
 run: comp
-	$(VSIM) +UVM_TESTNAME=test_read_modify_write
+	$(VSIM) +UVM_TESTNAME=test_2m_4s
 	$(CHECK)

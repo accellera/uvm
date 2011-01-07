@@ -88,13 +88,18 @@ class test_read_modify_write extends ubus_demo_base_test;
   virtual function void build();
     // Create the tb
     super.build();
+    uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
+			       ".ubus_demo_tb0.ubus0.masters[0].sequencer"}, 
+			       "run_ph",
+				read_modify_write_seq::type_id::get(),
+				this);
+    uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
+			       ".ubus_demo_tb0.ubus0.slaves[0].sequencer"}, 
+			       "run_ph",
+				slave_memory_seq::type_id::get(),
+				this);
   endfunction : build
 
-  virtual function void end_of_elaboration();
-    ubus_demo_tb0.ubus0.masters[0].sequencer.set_phase_seq(uvm_run_ph, read_modify_write_seq::type_id::get());
-    ubus_demo_tb0.ubus0.slaves[0].sequencer.set_phase_seq(uvm_run_ph, slave_memory_seq::type_id::get());
-  endfunction // void
-  
 endclass : test_read_modify_write
 
 
@@ -109,13 +114,17 @@ class test_r8_w8_r4_w4 extends ubus_demo_base_test;
 
   virtual function void build();
     super.build();
+    uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
+			       ".ubus_demo_tb0.ubus0.masters[0].sequencer"}, 
+			       "run_ph",
+				r8_w8_r4_w4_seq::type_id::get(),
+				this);
+    uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
+			       ".ubus_demo_tb0.ubus0.slaves[0].sequencer"}, 
+			       "run_ph",
+				slave_memory_seq::type_id::get(),
+				this);
   endfunction : build
-
-  virtual function void end_of_elaboration();
-    // Set the default sequence for the master and slave
-    ubus_demo_tb0.ubus0.masters[0].sequencer.set_phase_seq(uvm_run_ph, r8_w8_r4_w4_seq::type_id::get());
-    ubus_demo_tb0.ubus0.slaves[0].sequencer.set_phase_seq(uvm_run_ph, slave_memory_seq::type_id::get());
-  endfunction // void
 
 endclass : test_r8_w8_r4_w4 
 
@@ -140,6 +149,29 @@ class test_2m_4s extends ubus_demo_base_test;
     // Control the number of RMW loops
     uvm_resource_db#(int)::set({get_name(),".ubus_demo_tb0.ubus0.masters[0].sequencer", ".loop_read_modify_write_seq"}, "itr", 3);
     uvm_resource_db#(int)::set({get_name(),".ubus_demo_tb0.ubus0.masters[1].sequencer",".loop_read_modify_write_seq"}, "itr", 4);
+
+     // Define the sequences to run in the run phase
+    uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
+			       ".ubus_demo_tb0.ubus0.masters[0].sequencer"}, 
+			       "run_ph",
+				loop_read_modify_write_seq::type_id::get(),
+				this);
+    uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
+			       ".ubus_demo_tb0.ubus0.masters[1].sequencer"}, 
+			       "run_ph",
+				loop_read_modify_write_seq::type_id::get(),
+				this);
+
+     for(int i = 0; i < 4; i++) begin
+	string slname;
+	$swrite(slname,"%s.ubus_demo_tb0.ubus0.slaves[%0d].sequencer",
+		get_full_name(),i);
+	uvm_resource_db#(uvm_object_wrapper)::set(slname, 
+						  "run_ph",
+						  slave_memory_seq::type_id::get(),
+						  this);
+     end
+     
     // Create the tb
     super.build();
   endfunction : build
@@ -160,15 +192,6 @@ class test_2m_4s extends ubus_demo_base_test;
     ubus_demo_tb0.ubus0.set_slave_address_map("slaves[1]", 16'h4000, 16'h7fff);
     ubus_demo_tb0.ubus0.set_slave_address_map("slaves[2]", 16'h8000, 16'hBfff);
     ubus_demo_tb0.ubus0.set_slave_address_map("slaves[3]", 16'hC000, 16'hFfff);
-
-    ubus_demo_tb0.ubus0.masters[0].sequencer.set_phase_seq(uvm_run_ph, loop_read_modify_write_seq::type_id::get());
-    ubus_demo_tb0.ubus0.masters[1].sequencer.set_phase_seq(uvm_run_ph, loop_read_modify_write_seq::type_id::get());
-    ubus_demo_tb0.ubus0.slaves[0].sequencer.set_phase_seq(uvm_run_ph, slave_memory_seq::type_id::get());
-    ubus_demo_tb0.ubus0.slaves[1].sequencer.set_phase_seq(uvm_run_ph, slave_memory_seq::type_id::get());
-    ubus_demo_tb0.ubus0.slaves[2].sequencer.set_phase_seq(uvm_run_ph, slave_memory_seq::type_id::get());
-    ubus_demo_tb0.ubus0.slaves[3].sequencer.set_phase_seq(uvm_run_ph, slave_memory_seq::type_id::get());
-  
-    super.end_of_elaboration();
   endfunction : end_of_elaboration
 
 endclass : test_2m_4s

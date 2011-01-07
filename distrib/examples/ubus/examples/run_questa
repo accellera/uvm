@@ -1,3 +1,4 @@
 vlib work
 vlog -f compile_questa_sv.f
-vsim +UVM_TESTNAME=test_2m_4s -c -do vsim.do -suppress 3829 -sv_lib $UVM_HOME/distrib/src/dpi/uvm_dpi ubus_tb_top 
+pushd $UVM_HOME/examples; make -f Makefile.questa BITS=64 dpi_lib; popd
+vsim +UVM_TESTNAME=test_2m_4s -c -do vsim.do -suppress 3829 -sv_lib $UVM_HOME/lib/uvm_dpi ubus_tb_top 
