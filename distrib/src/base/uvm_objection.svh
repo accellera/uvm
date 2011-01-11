@@ -69,6 +69,8 @@ class uvm_objection extends uvm_report_object;
 
   protected uvm_root m_top = uvm_root::get();
 
+  static uvm_objection m_objections[$];
+
   local uvm_objection_context_object m_context_pool[$];
   local uvm_objection_context_object m_scheduled_list[$];
 
@@ -91,6 +93,7 @@ class uvm_objection extends uvm_report_object;
     m_cleared = 1;
   endfunction
 
+
   // Function: new
   //
   // Creates a new objection instance. Accesses the command line
@@ -108,9 +111,9 @@ class uvm_objection extends uvm_report_object;
     if(clp.get_arg_matches("+UVM_OBJECTION_TRACE", trace_args)) begin
       m_trace_mode=1;
     end
-    // Needed to allow threads dropping objections to be killed
-    m_top.m_create_objection_watcher(this);
+    m_objections.push_back(this);
   endfunction
+
 
   // Function: trace_mode
   //
@@ -219,8 +222,11 @@ class uvm_objection extends uvm_report_object;
 
   // Group: Objection Control
   
+  // Function: m_set_hier_mode
+  //
   // Hierarchical mode only needs to be set for intermediate components, not
   // for uvm_root or a leaf component.
+
   function void m_set_hier_mode (uvm_object obj);
     uvm_component c;
     if((m_hier_mode == 1) || (obj == m_top)) begin
@@ -255,6 +261,7 @@ class uvm_objection extends uvm_report_object;
     
     m_hier_mode = 1;
   endfunction
+
 
   // Function: raise_objection
   //
@@ -457,6 +464,21 @@ class uvm_objection extends uvm_report_object;
       end
     end
 
+  endfunction
+
+  static function void m_start_objection_processes();
+    fork begin
+      while(1) begin
+        wait(m_objections.size() != 0);
+        foreach(m_objections[i]) begin
+          automatic uvm_objection obj = m_objections[i];
+          fork
+            obj.m_execute_scheduled_forks();
+          join_none
+        end
+        m_objections.delete();
+      end
+    end join_none
   endfunction
 
 
@@ -700,6 +722,8 @@ class uvm_objection extends uvm_report_object;
   endfunction
 
 
+  // m_display_objections
+
   protected function string m_display_objections(uvm_object obj=null, bit show_header=1);
 
     static string blank="                                                                                   ";
@@ -908,14 +932,17 @@ class uvm_test_done_objection extends uvm_objection;
   // Thus, after calling <uvm_objection::all_dropped>, this method will call
   // <global_stop_request> to stop the current task-based phase (e.g. run).
   
-  virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
+  virtual task all_dropped (uvm_object obj,
+                            uvm_object source_obj,
+                            string description,
+                            int count);
     super.all_dropped(obj,source_obj,description,count);
     if (obj == m_top) begin
-      string msg = "", msg2 = "";
+      string msg = "";
+      m_top.m_objections_outstanding = 0;
       if (!m_forced)
         msg = "All end_of_test objections have been dropped. ";
-      if (!m_top.m_in_stop_request) begin
+      if (!m_top.in_stop_request()) begin
         msg = {msg, "Calling global_stop_request()"};
         m_top.stop_request();
       end
@@ -979,7 +1006,36 @@ class uvm_test_done_objection extends uvm_objection;
     m_forced = 0;
   endtask
 
-  // Below is all of the basic data stuff that is needed for an uvm_object
+
+  // Function: raised
+  //
+  // Callback called during processing of <raise_objection>, this override
+  // implements a   implementation with a check for ~obj~ 
+
+  virtual function void raised (uvm_object obj, 
+                                uvm_object source_obj,
+                                string description,
+                                int count);
+    uvm_root top;
+    top = uvm_root::get();
+    if (obj != top)
+      super.raised(obj,source_obj,description,count);
+    else begin
+      if (top.is_executing_stop_processes()) begin
+        string desc = description == "" ? "" : {"(\"", description, "\") "};
+        `uvm_warning("ILLRAISE", {"The uvm_test_done objection was ",
+          "raised ", desc, "during processing of a stop_request, i.e. stop ",
+          "task execution. The objection is ignored by the stop process."})
+      end
+      else begin
+        top.m_objections_outstanding = 1;
+      end
+    end
+
+  endfunction
+
+
+  // Below are basic data operations needed for all uvm_objects
   // for factory registration, printing, comparing, etc.
 
   typedef uvm_object_registry#(uvm_test_done_objection,"uvm_test_done") type_id;
@@ -1004,10 +1060,7 @@ class uvm_test_done_objection extends uvm_objection;
 
 endclass
 
-typedef class uvm_root;
-function uvm_test_done_objection uvm_root::test_done_objection();
-  return uvm_test_done_objection::get();
-endfunction
+
 
 // Have a pool of context objects to use
 class uvm_objection_context_object;
