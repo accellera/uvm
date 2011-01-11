@@ -108,7 +108,7 @@ sub run_the_test($$$) {
         }
         my $clib = "";
         if ($compile_opts !~ /UVM_NO_DPI/) {
-          system("cd ./$testdir/$uvm_home/examples; make -f Makefile.questa --quiet dpi_lib") && die "DPI Library Compilation Problem" ;
+          system("cd ./$testdir/$uvm_home/examples; make -f Makefile.questa $opt_M --quiet dpi_lib") && die "DPI Library Compilation Problem" ;
           $clib = "-sv_lib $uvm_home/lib/uvm_dpi";
         }
 
