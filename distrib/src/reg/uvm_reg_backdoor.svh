@@ -290,16 +290,16 @@ function void uvm_reg_backdoor::start_update_thread(uvm_object element);
             r_item.element = rg;
             r_item.element_kind = UVM_REG;
             this.read(r_item);
+            val = r_item.value[0];
             if (r_item.status != UVM_IS_OK) begin
                `uvm_error("RegModel", $psprintf("Backdoor read of register '%s' failed.",
                           rg.get_name()));
             end
             foreach (fields[i]) begin
                if (this.is_auto_updated(fields[i])) begin
-                  uvm_reg_data_t  fld_val
-                     = val >> fields[i].get_lsb_pos();
-                  fld_val = fld_val & ((1 << fields[i].get_n_bits())-1);
-                  void'(fields[i].predict(fld_val));
+                  r_item.value[0] = (val >> fields[i].get_lsb_pos()) &
+                                    ((1 << fields[i].get_n_bits())-1);
+                  fields[i].do_predict(r_item);
                 end
             end
             this.wait_for_change(element);

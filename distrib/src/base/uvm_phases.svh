@@ -1323,133 +1323,105 @@ endfunction
 // with a prefix other than uvm_.
 //
 //
-// Group: Common Schedule
+
+
+//------------------------------------------------------------------------------
+// Class: Global Phases and Phase Implementations
+//------------------------------------------------------------------------------
 //
-// The common schedule is the set of function and task phases that all
-// components have by default. All components are always synchronized
-// with respect to the common schedule.
+// This section describes the set of global phases and phase implementations
+// provided as a standard part of the UVM library.
+//
+// Group: Common Phases
+//
+// The common phases are the set of function and task phases that all
+// components execute together. All components are always synchronized
+// with respect to the common phases.
 //
 // Variable: uvm_build_ph
 //
-// The build phase implementation which is part of the uvm_pkg::common schedule.
-// It is a top-down function implementation which calls
-// <uvm_component::build>.
-//
 // Variable: uvm_connect_ph
-//
-// The connect phase implementation which is part of the uvm_pkg::common schedule.
-// It is a bottom-up function implementation which calls
-// <uvm_component::connect>.
 //
 // Variable: uvm_end_of_elaboration_ph
 //
-// The end_of_elaboration phase implementation which is part of the uvm_pkg::common 
-// schedule. It is a bottom-up function implementation which calls
-// <uvm_component::end_of_elaboration>.
-//
 // Variable: uvm_start_of_simulation_ph
-//
-// The start_of_simulation phase implementation which is part of the uvm_pkg::common 
-// schedule. It is a bottom-up function implementation which calls
-// <uvm_component::start_of_simulation>.
 //
 // Variable: uvm_run_ph
 //
-// The run phase implementation which is part of the uvm_pkg::common 
-// schedule. It is a task implementation which calls <uvm_component::run>.
-//
 // Variable: uvm_extract_ph
-//
-// The extract phase implementation which is part of the uvm_pkg::common 
-// schedule. It is a bottom-up function implementation which calls
-// <uvm_component::extract>.
 //
 // Variable: uvm_check_ph
 //
-// The check phase implementation which is part of the uvm_pkg::common 
-// schedule. It is a bottom-up function implementation which calls
-// <uvm_component::check>.
-//
 // Variable: uvm_report_ph
-//
-// The report phase implementation which is part of the uvm_pkg::common 
-// schedule. It is a bottom-up function implementation which calls
-// <uvm_component::report>.
 //
 // Variable: uvm_finalize_ph
 //
-// The finalize phase implementation which is part of the uvm_pkg::common 
-// schedule. It is a bottom-up function implementation which calls
-// <uvm_component::finalize>.
-
-// Group: uvm Schedule
+// These variables are the phase implementations for the common phases. The
+// implementation calls the associated task/function in the <uvm_component>
+// class. For example, the uvm_build_ph implementation calls the
+// function <uvm_component::build>. They are of type <uvm_phase_imp>.
 //
-// The uvm schedule is the run time schedule which runs conncurrently
-// to the run phase in the <Common Schedule>. It is possible for
-// components to belong to different domains in which case thier
+// Variable: build_ph
+//
+// Variable: connect_ph
+//
+// Variable: end_of_elaboration_ph
+//
+// Variable: start_of_simulation_ph
+//
+// Variable: run_ph
+//
+// Variable: extract_ph
+//
+// Variable: check_ph
+//
+// Variable: report_ph
+//
+// Variable: finalize_ph
+//
+// These variables are the phase state objects for the common phases. These
+// global objects can be used to synchronize to the global phases or
+// to get state information of the global phases. They are of type
+// <uvm_phase_schedule>.
+
+// Group: uvm_pkg::uvm Schedule
+//
+// The uvm schedule is the run time phase schedule which runs concurrently
+// to the global run phase. It is possible for
+// components to belong to different domains in which case their
 // uvm schedules will be unsynchronized, but by default multiple
 // components using the uvm schedule would be synchronized with
 // respect to the phases in the schedule.
 //
 // Variable: uvm_pre_reset_ph
 //
-// The pre_reset phase implementation which is part of the uvm_pkg::uvm 
-// schedule. It is a task implementation which calls <uvm_component::pre_reset>.
-//
 // Variable: uvm_reset_ph
-//
-// The reset phase implementation which is part of the uvm_pkg::uvm 
-// schedule. It is a task implementation which calls <uvm_component::reset>.
 //
 // Variable: uvm_post_reset_ph
 //
-// The post_reset phase implementation which is part of the uvm_pkg::uvm 
-// schedule. It is a task implementation which calls <uvm_component::post_reset>.
-//
 // Variable: uvm_pre_configure_ph
-//
-// The pre_configure phase implementation which is part of the uvm_pkg::uvm 
-// schedule. It is a task implementation which calls <uvm_component::pre_configure>.
 //
 // Variable: uvm_configure_ph
 //
-// The configure phase implementation which is part of the uvm_pkg::uvm 
-// schedule. It is a task implementation which calls <uvm_component::configure>.
-//
 // Variable: uvm_post_configure_ph
-//
-// The post_configure phase implementation which is part of the uvm_pkg::uvm 
-// schedule. It is a task implementation which calls <uvm_component::post_configure>.
 //
 // Variable: uvm_pre_main_ph
 //
-// The pre_main phase implementation which is part of the uvm_pkg::uvm 
-// schedule. It is a task implementation which calls <uvm_component::pre_main>.
-//
 // Variable: uvm_main_ph
-//
-// The main phase implementation which is part of the uvm_pkg::uvm 
-// schedule. It is a task implementation which calls <uvm_component::main>.
 //
 // Variable: uvm_post_main_ph
 //
-// The post_main phase implementation which is part of the uvm_pkg::uvm 
-// schedule. It is a task implementation which calls <uvm_component::post_main>.
-//
 // Variable: uvm_pre_shutdown_ph
-//
-// The pre_shutdown phase implementation which is part of the uvm_pkg::uvm 
-// schedule. It is a task implementation which calls <uvm_component::pre_shutdown>.
 //
 // Variable: uvm_shutdown_ph
 //
-// The shutdown phase implementation which is part of the uvm_pkg::uvm 
-// schedule. It is a task implementation which calls <uvm_component::shutdown>.
-//
 // Variable: uvm_post_shutdown_ph
 //
-// The post_shutdown phase implementation which is part of the uvm_pkg::uvm 
-// schedule. It is a task implementation which calls <uvm_component::post_shutdown>.
+// These are the phase implementations for the predefined runtime phases
+// (the phases which run concurrently with the <uvm_run_ph> phase. These
+// implementations execute the associated task in <uvm_component>. For 
+// example, the uvm_main_ph implementation executes the 
+// task <uvm_component::main>.
 //
 
 

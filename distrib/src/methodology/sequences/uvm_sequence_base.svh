@@ -240,6 +240,14 @@ class uvm_sequence_base extends uvm_sequence_item;
                       integer this_priority = 100,
                       bit call_pre_post = 1);
 
+
+    if (!(m_sequence_state != CREATED ||
+          m_sequence_state != STOPPED ||
+          m_sequence_state != FINISHED)) begin
+      uvm_report_fatal("SEQ_NOT_DONE", 
+         {"Sequence ", get_full_name(), " already started"},UVM_NONE);
+    end
+
     if ((this_priority < 1) |  (^this_priority === 1'bx)) begin
       uvm_report_fatal("SEQPRI", $psprintf("Sequence %s start has illegal priority: %0d",
                                            get_full_name(),

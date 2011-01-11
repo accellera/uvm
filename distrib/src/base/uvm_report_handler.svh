@@ -47,10 +47,10 @@ typedef class uvm_report_server;
 //
 //------------------------------------------------------------------------------
 
-typedef uvm_pool#(string, uvm_action) id_actions_array;
-typedef uvm_pool#(string, UVM_FILE) id_file_array;
-typedef uvm_pool#(string, int) id_verbosities_array;
-typedef uvm_pool#(uvm_severity, uvm_severity) sev_override_array;
+typedef uvm_pool#(string, uvm_action) uvm_id_actions_array;
+typedef uvm_pool#(string, UVM_FILE) uvm_id_file_array;
+typedef uvm_pool#(string, int) uvm_id_verbosities_array;
+typedef uvm_pool#(uvm_severity, uvm_severity) uvm_sev_override_array;
 
 class uvm_report_handler;
 
@@ -60,23 +60,23 @@ class uvm_report_handler;
 
   uvm_action severity_actions[uvm_severity];
 
-  id_actions_array id_actions=new;
-  id_actions_array severity_id_actions[uvm_severity];
+  uvm_id_actions_array id_actions=new;
+  uvm_id_actions_array severity_id_actions[uvm_severity];
 
   // id verbosity settings : default and severity
-  id_verbosities_array id_verbosities=new;
-  id_verbosities_array severity_id_verbosities[uvm_severity];
+  uvm_id_verbosities_array id_verbosities=new;
+  uvm_id_verbosities_array severity_id_verbosities[uvm_severity];
 
   // severity overrides
-  sev_override_array sev_overrides = new;
-  sev_override_array sev_id_overrides [string];
+  uvm_sev_override_array sev_overrides = new;
+  uvm_sev_override_array sev_id_overrides [string];
 
 
   // file handles : default, severity, action, (severity,id)
   UVM_FILE default_file_handle;
   UVM_FILE severity_file_handles[uvm_severity];
-  id_file_array id_file_handles=new;
-  id_file_array severity_id_file_handles[uvm_severity];
+  uvm_id_file_array id_file_handles=new;
+  uvm_id_file_array severity_id_file_handles[uvm_severity];
 
 
   // Function: new
@@ -192,7 +192,7 @@ class uvm_report_handler;
 
   local function UVM_FILE get_severity_id_file(uvm_severity severity, string id);
 
-    id_file_array array;
+    uvm_id_file_array array;
 
     if(severity_id_file_handles.exists(severity)) begin
       array = severity_id_file_handles[severity];      
@@ -231,7 +231,7 @@ class uvm_report_handler;
 
   function int get_verbosity_level(uvm_severity severity=UVM_INFO, string id="" );
 
-    id_verbosities_array array;
+    uvm_id_verbosities_array array;
     if(severity_id_verbosities.exists(severity)) begin
       array = severity_id_verbosities[severity];
       if(array.exists(id)) begin
@@ -259,7 +259,7 @@ class uvm_report_handler;
 
   function uvm_action get_action(uvm_severity severity, string id);
 
-    id_actions_array array;
+    uvm_id_actions_array array;
     if(severity_id_actions.exists(severity)) begin
       array = severity_id_actions[severity];
       if(array.exists(id))
@@ -457,7 +457,7 @@ class uvm_report_handler;
                                          uvm_severity new_severity);
     // has precedence over set_severity_override
     // silently override previous setting
-    sev_override_array arr;
+    uvm_sev_override_array arr;
     if(!sev_id_overrides.exists(id))
       sev_id_overrides[id] = new;
  
@@ -478,9 +478,9 @@ class uvm_report_handler;
     UVM_FILE file;
     uvm_report_server srvr;
  
-    id_actions_array id_a_ary;
-    id_verbosities_array id_v_ary;
-    id_file_array id_f_ary;
+    uvm_id_actions_array id_a_ary;
+    uvm_id_verbosities_array id_v_ary;
+    uvm_id_file_array id_f_ary;
 
     srvr = uvm_report_server::get_server();
 

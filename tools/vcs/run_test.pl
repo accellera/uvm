@@ -45,7 +45,7 @@ $vcs_mo = $2;
 $vcs_rl = $4;
 if ($vcs_yr < 2010) { &vcs_too_old($vcs_version); }
 if ($vcs_yr == 2010 && $vcs_mo == 6) { 
-  if ($vcs_rl < "3") { &vcs_too_old($vcs_version); }
+  if ($vcs_rl ne "SP1" && $vcs_rl < "3") { &vcs_too_old($vcs_version); }
 }
 
 sub vcs_too_old {
