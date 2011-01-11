@@ -67,13 +67,14 @@ class uvm_objection extends uvm_report_object;
   protected time m_drain_time  [uvm_object];
   protected bit  m_draining    [uvm_object];
 
-  uvm_objection_context_object m_context_pool[$];
-  uvm_objection_context_object m_scheduled_list[$];
+  protected uvm_root m_top = uvm_root::get();
+
+  local uvm_objection_context_object m_context_pool[$];
+  local uvm_objection_context_object m_scheduled_list[$];
 
   protected bit m_hier_mode = 1;
 
   `uvm_register_cb(uvm_objection, uvm_objection_cb)
-  uvm_root top = uvm_root::get();
 
   // Function: clear
   //
@@ -100,7 +101,7 @@ class uvm_objection extends uvm_report_object;
     uvm_cmdline_processor clp;
     string trace_args[$];
     super.new(name);
-    set_report_verbosity_level(top.get_report_verbosity_level());
+    set_report_verbosity_level(m_top.get_report_verbosity_level());
 
     // Get the command line trace mode setting
     clp = uvm_cmdline_processor::get_inst();
@@ -108,7 +109,7 @@ class uvm_objection extends uvm_report_object;
       m_trace_mode=1;
     end
     // Needed to allow threads dropping objections to be killed
-    top.m_create_objection_watcher(this);
+    m_top.m_create_objection_watcher(this);
   endfunction
 
   // Function: trace_mode
@@ -179,9 +180,9 @@ class uvm_objection extends uvm_report_object;
        obj = seq.get_sequencer();
     end
     else
-      obj = top;
+      obj = m_top;
     if (obj == null)
-      obj = top;
+      obj = m_top;
     return obj;
   endfunction
 
@@ -206,7 +207,7 @@ class uvm_objection extends uvm_report_object;
                              int count,
                              bit raise,
                              int in_top_thread);
-    if (obj != null && obj != top) begin
+    if (obj != null && obj != m_top) begin
       obj = m_get_parent(obj);
       if(raise)
         m_raise(obj, source_obj, description, count);
@@ -222,7 +223,7 @@ class uvm_objection extends uvm_report_object;
   // for uvm_root or a leaf component.
   function void m_set_hier_mode (uvm_object obj);
     uvm_component c;
-    if((m_hier_mode == 1) || (obj == top)) begin
+    if((m_hier_mode == 1) || (obj == m_top)) begin
       // Don't set if already set or the object is uvm_top.
       return;
     end
@@ -277,7 +278,7 @@ class uvm_objection extends uvm_report_object;
                                  string description="",
                                  int count=1);
     if(obj == null)
-      obj = top;
+      obj = m_top;
     m_cleared = 0;
     m_raise (obj, obj, description, count);
   endfunction
@@ -314,9 +315,9 @@ class uvm_objection extends uvm_report_object;
     if (m_draining.exists(obj))
       return;
 
-    if (!m_hier_mode && obj != top)
-      m_raise(top,source_obj,description,count);
-    else if (obj != top)
+    if (!m_hier_mode && obj != m_top)
+      m_raise(m_top,source_obj,description,count);
+    else if (obj != m_top)
       m_propagate(obj, source_obj, description, count, 1, 0);
   
   endfunction
@@ -385,7 +386,7 @@ class uvm_objection extends uvm_report_object;
                                 string description="",
                                 int count=1);
     if(obj == null)
-      obj = top;
+      obj = m_top;
     m_drop (obj, obj, description, count, 0);
   endfunction
 
@@ -426,9 +427,9 @@ class uvm_objection extends uvm_report_object;
   
     // if count != 0, no reason to fork
     if (m_total_count[obj] != 0) begin
-      if (!m_hier_mode && obj != top)
-        m_drop(top,source_obj,description, count, in_top_thread);
-      else if (obj != top) begin
+      if (!m_hier_mode && obj != m_top)
+        m_drop(m_top,source_obj,description, count, in_top_thread);
+      else if (obj != m_top) begin
         this.m_propagate(obj, source_obj, description, count, 0, in_top_thread);
       end
 
@@ -526,14 +527,14 @@ class uvm_objection extends uvm_report_object;
         if (m_total_count.exists(obj) && m_total_count[obj] == 0)
            m_total_count.delete(obj);
 
-        if (!m_hier_mode && obj != top) begin
+        if (!m_hier_mode && obj != m_top) begin
           if (reraise)
-            m_raise(top,source_obj,description,diff_count);
+            m_raise(m_top,source_obj,description,diff_count);
           else
-            m_drop(top,source_obj,description, diff_count, 1);
+            m_drop(m_top,source_obj,description, diff_count, 1);
         end
         else begin
-          if (obj != top)
+          if (obj != m_top)
             this.m_propagate(obj, source_obj, description, diff_count, reraise, 1);
         end
       end
@@ -558,7 +559,7 @@ class uvm_objection extends uvm_report_object;
   // AE: set_drain_time(drain,obj=null)?
   function void set_drain_time (uvm_object obj=null, time drain);
     if (obj==null)
-      obj = top;
+      obj = m_top;
     m_drain_time[obj] = drain;
     m_set_hier_mode(obj);
   endfunction
@@ -626,7 +627,7 @@ class uvm_objection extends uvm_report_object;
 
    task wait_for_total_count(uvm_object obj=null, int count=0);
      if (obj==null)
-       obj = top;
+       obj = m_top;
 
      if(!m_total_count.exists(obj) && count == 0)
        return;
@@ -643,7 +644,7 @@ class uvm_objection extends uvm_report_object;
 
   function int get_objection_count (uvm_object obj=null);
     if (obj==null)
-      obj = top;
+      obj = m_top;
 
     if (!m_source_count.exists(obj))
       return 0;
@@ -661,7 +662,7 @@ class uvm_objection extends uvm_report_object;
     string ch;
  
     if (obj==null)
-      obj = top;
+      obj = m_top;
 
     if (!m_total_count.exists(obj))
       return 0;
@@ -691,7 +692,7 @@ class uvm_objection extends uvm_report_object;
 
   function time get_drain_time (uvm_object obj=null);
     if (obj==null)
-      obj = top;
+      obj = m_top;
 
     if (!m_drain_time.exists(obj))
       return 0;
@@ -719,7 +720,7 @@ class uvm_objection extends uvm_report_object;
     end
 
     if (obj==null)
-      obj = top;
+      obj = m_top;
 
     total = get_objection_total(obj);
     
@@ -776,7 +777,7 @@ class uvm_objection extends uvm_report_object;
   
 
   function string convert2string();
-    return m_display_objections(top,1);
+    return m_display_objections(m_top,1);
   endfunction
   
   
@@ -910,13 +911,13 @@ class uvm_test_done_objection extends uvm_objection;
   virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
       string description, int count);
     super.all_dropped(obj,source_obj,description,count);
-    if (obj == top) begin
+    if (obj == m_top) begin
       string msg = "", msg2 = "";
       if (!m_forced)
         msg = "All end_of_test objections have been dropped. ";
-      if (!top.m_in_stop_request) begin
+      if (!m_top.m_in_stop_request) begin
         msg = {msg, "Calling global_stop_request()"};
-        top.stop_request();
+        m_top.stop_request();
       end
       else
         msg = {msg, "Previous call to global_stop_request() will now be honored."};
@@ -934,7 +935,7 @@ class uvm_test_done_objection extends uvm_objection;
   virtual function void raise_objection (uvm_object obj=null, 
       string description="", int count=1);
     if(obj==null)
-      obj=top;
+      obj=m_top;
     else
       qualify(obj, 1, description);
     super.raise_objection(obj,description,count);
@@ -951,7 +952,7 @@ class uvm_test_done_objection extends uvm_objection;
                                         string description="",
                                         int count=1);
     if(obj==null)
-      obj=top;
+      obj=m_top;
     else
       qualify(obj, 0, description);
     super.drop_objection(obj,description,count);
@@ -967,14 +968,14 @@ class uvm_test_done_objection extends uvm_objection;
   virtual task force_stop(uvm_object obj=null);
     string name;
     if (obj==null)
-      obj=top;
+      obj=m_top;
     name = obj.get_full_name();
     if (name == "")
       name = "uvm_top";
     m_forced = 1;
     uvm_report_warning("FORCE_STOP",{"Object '",name,"' called force_stop. ",
        "Ending run phase"});
-    all_dropped(uvm_top, obj, "", 0);
+    all_dropped(m_top, obj, "", 0);
     m_forced = 0;
   endtask
 
