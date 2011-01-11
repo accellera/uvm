@@ -399,7 +399,9 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
   static function types_t find_all(uvm_component start);
     uvm_component list[$];
     types_t types;
-    uvm_top.find_all("*",list,start);
+    uvm_root top;
+    top = uvm_root::get();
+    top.find_all("*",list,start);
     foreach (list[i]) begin
       TYPE typ;
       if ($cast(typ,list[i]))

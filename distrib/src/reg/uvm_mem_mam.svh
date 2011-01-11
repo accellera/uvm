@@ -660,11 +660,16 @@ endfunction: new
 
 
 function uvm_mem_mam_cfg uvm_mem_mam::reconfigure(uvm_mem_mam_cfg cfg = null);
-   if (cfg == null) return this.cfg;
+   uvm_root top;
+
+   if (cfg == null)
+     return this.cfg;
+
+   top = uvm_root::get();
 
    // Cannot reconfigure n_bytes
    if (cfg.n_bytes !== this.cfg.n_bytes) begin
-      uvm_top.uvm_report_error("uvm_mem_mam",
+      top.uvm_report_error("uvm_mem_mam",
                  $psprintf("Cannot reconfigure Memory Allocation Manager with a different number of bytes (%0d !== %0d)",
                            cfg.n_bytes, this.cfg.n_bytes), UVM_LOW);
       return this.cfg;
@@ -674,7 +679,7 @@ function uvm_mem_mam_cfg uvm_mem_mam::reconfigure(uvm_mem_mam_cfg cfg = null);
    foreach (this.in_use[i]) begin
       if (this.in_use[i].get_start_offset() < cfg.start_offset ||
           this.in_use[i].get_end_offset() > cfg.end_offset) begin
-         uvm_top.uvm_report_error("uvm_mem_mam",
+         top.uvm_report_error("uvm_mem_mam",
                     $psprintf("Cannot reconfigure Memory Allocation Manager with a currently allocated region outside of the managed address range ([%0d:%0d] outside of [%0d:%0d])",
                               this.in_use[i].get_start_offset(),
                               this.in_use[i].get_end_offset(),

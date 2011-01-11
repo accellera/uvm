@@ -31,8 +31,8 @@
 // and user-defined callbacks.
 //------------------------------------------------------------------------------
 
+typedef uvm_root;
 typedef class uvm_callback;
-//typedef class uvm_callbacks;
 typedef class uvm_callbacks_base;
 
 //------------------------------------------------------------------------------
@@ -630,11 +630,15 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   // the component hierarchy to start the search for ~name~. See <uvm_root::find_all>
   // for more details on searching by name.
 
-  static function void add_by_name(string name, uvm_callback cb,
-     uvm_component root, uvm_apprepend ordering=UVM_APPEND);
+  static function void add_by_name(string name,
+                                   uvm_callback cb,
+                                   uvm_component root,
+                                   uvm_apprepend ordering=UVM_APPEND);
     uvm_component cq[$];
+    uvm_root top;
     T t;
     void'(initialize());
+    top = uvm_root::get();
 
     if(cb==null) begin
        uvm_report_error("CBUNREG", { "Null callback object cannot be registered with object(s) ",
@@ -643,7 +647,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     end
     `uvm_cb_trace_noobj(cb,$sformatf("Add (%s) callback %0s by name to object(s) %0s ",
                     ordering.name(), cb.get_name(), name))
-    void'(uvm_top.find_all(name,cq,root));
+    void'(top.find_all(name,cq,root));
     if(cq.size() == 0) begin
       uvm_report_warning("CBNOMTC", { "add_by_name failed to find any components matching the name ",
         name, ", callback ", cb.get_name(), " will not be registered." }, UVM_NONE);
@@ -711,12 +715,14 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
   static function void delete_by_name(string name, uvm_callback cb,
      uvm_component root);
     uvm_component cq[$];
+    uvm_root top;
     T t;
     void'(initialize());
+    top = uvm_root::get();
 
     `uvm_cb_trace_noobj(cb,$sformatf("Delete callback %0s by name from object(s) %0s ",
                     cb.get_name(), name))
-    void'(uvm_top.find_all(name,cq,root));
+    void'(top.find_all(name,cq,root));
     if(cq.size() == 0) begin
       uvm_report_warning("CBNOMTC", { "delete_by_name failed to find any components matching the name ",
         name, ", callback ", cb.get_name(), " will not be unregistered." }, UVM_NONE);
