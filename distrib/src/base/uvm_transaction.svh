@@ -335,7 +335,7 @@ virtual class uvm_transaction extends uvm_object;
                                                 integer parent_handle=0,
                                                 bit     has_parent=0);
 
-  local integer m_transaction_id = 0;
+  local integer m_transaction_id = -1;
 
   local time    begin_time=-1;
   local time    end_time=-1;
