@@ -109,7 +109,7 @@ begin
    op(DEPOSIT, "dut.q[4]",    'h00, 'h00, `__LINE__);
    op(DEPOSIT, "dut.q[6]",    'h01, 'h01, `__LINE__);
 
-`ifndef IUS
+`ifndef INCA
    op(DEPOSIT, "dut.q[6:4]",  'h02, 'h02, `__LINE__);
    op(READ,    "dut.q",           , 'h2C, `__LINE__);
    op(DEPOSIT, "dut.q[7:4]",  'h06, 'h06, `__LINE__);
