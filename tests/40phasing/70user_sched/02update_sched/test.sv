@@ -117,13 +117,13 @@ module test;
       end
     endfunction
 
-    task reset;
+    task reset_phase;
       start_reset = $time;
       `uvm_info("RST", "IN RESET", UVM_NONE)
       #30 `uvm_info("RST", "END RESET", UVM_NONE)
       end_reset = $time;
     endtask
-    task pre_configure;
+    task pre_configure_phase;
       start_pre_configure = $time;
       `uvm_info("PRECFG", "IN PRECFG", UVM_NONE)
       #30 `uvm_info("PRECFG", "END PRECFG", UVM_NONE)
@@ -135,7 +135,7 @@ module test;
       #30 `uvm_info("MYCFG", "END MY CFG", UVM_NONE)
       end_my_cfg = $time;
     endtask
-    task configure;
+    task configure_phase;
       start_configure = $time;
       `uvm_info("CFG", "IN CONFIGURE", UVM_NONE)
       #30 `uvm_info("CFG", "END CONFIGURE", UVM_NONE)
@@ -153,19 +153,19 @@ module test;
       set_phase_domain("uvm");
     endfunction
 
-    task reset;
+    task reset_phase;
       start_reset = $time;
       `uvm_info("RST", "IN RESET", UVM_NONE)
       #40 `uvm_info("RST", "END RESET", UVM_NONE)
       end_reset = $time;
     endtask
-    task pre_configure;
+    task pre_configure_phase;
       start_pre_configure = $time;
       `uvm_info("PRECFG", "IN PRECFG", UVM_NONE)
       #20 `uvm_info("PRECFG", "END PRECFG", UVM_NONE)
       end_pre_configure = $time;
     endtask
-    task configure;
+    task configure_phase;
       start_configure = $time;
       `uvm_info("CFG", "IN CONFIGURE", UVM_NONE)
       #40 `uvm_info("CFG", "END CONFIGURE", UVM_NONE)
@@ -182,7 +182,7 @@ module test;
       mc = new("mc", this);
       oc = new("oc", this);
     endfunction
-    task run;
+    task run_phase;
       `uvm_info("RUN", "In run", UVM_NONE)
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
 //Current global stop integration has an issue here... needs
@@ -201,7 +201,7 @@ run_ph.phase_done.drop_objection();
       super.new(name,parent);
       me = new("me", this);
     endfunction
-    function void report;
+    function void report_phase;
       if(me.mc.start_reset != 0 || 
          me.oc.start_reset != 0) begin
         $display("*** UVM TEST FAILED , reset started at time %t/%0t instead of 0", me.mc.start_reset, me.oc.start_reset);

@@ -139,8 +139,8 @@ class test_base extends uvm_test;
     $display( "\nTest %s created.\n\n", n );
   endfunction : new
 
-  virtual function void build();
-    super.build();
+  virtual function void build_phase();
+    super.build_phase();
 
     top0 = top_env::type_id::create( "top0", this);
     top1 = top_env::type_id::create( "top1", this);
@@ -156,10 +156,10 @@ class test_base extends uvm_test;
     // it can jump individually.
     this.set_phase_domain("uvm");
 
-  endfunction : build
+  endfunction : build_phase
 
-  virtual function void connect();
-    super.connect();
+  virtual function void connect_phase();
+    super.connect_phase();
 
     //1 - reset
     seqr0.set_phase_seq( uvm_pre_reset_ph, test_pre_reset_seq::type_id::get());
@@ -185,9 +185,9 @@ class test_base extends uvm_test;
     this.set_phase_imp( uvm_post_main_ph, test_base_post_main_phase_imp::type_id::create("post_main_imp"),
                         .hier(0));
 
-  endfunction : connect
+  endfunction : connect_phase
 
-  function void end_of_elaboration();
+  function void end_of_elaboration_phase();
     uvm_top.print_topology();
 
     $display( "//--------------------------------------------------------\n",
@@ -201,9 +201,9 @@ class test_base extends uvm_test;
               "//                 bot0  bot1  bot2  bot3                 \n",
               "//                                                        \n",
               "//--------------------------------------------------------\n");
-  endfunction : end_of_elaboration
+  endfunction : end_of_elaboration_phase
 
-  function void report();
+  function void report_phase();
     uvm_report_server svr = _global_reporter.get_report_server();
     svr.summarize();
 
@@ -213,7 +213,7 @@ class test_base extends uvm_test;
     end else begin
       `uvm_info("REPORT", "!! UVM TEST FAILED !!\n", UVM_NONE);
     end
-  endfunction : report
+  endfunction : report_phase
 
   //Debug messages when phase started & ended
   function void phase_started( uvm_phase_schedule phase);

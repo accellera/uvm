@@ -31,7 +31,7 @@ class test extends uvm_test;
 
    string last_phase = "";
 
-   function void check_phase(string prev, string curr);
+   function void check_the_phase(string prev, string curr);
       `uvm_info("Test", $psprintf("Executing phase \"%s\"...", curr), UVM_LOW)
       if (prev != last_phase) begin
 `uvm_error("Test", $psprintf("Phase before \"%s\" was \"%s\" instead of \"%s\".",
@@ -41,7 +41,7 @@ class test extends uvm_test;
       n_ph++;
    endfunction
    
-   task check_phase_t(string prev, string curr);
+   task check_the_phase_t(string prev, string curr);
       `uvm_info("Test", $psprintf("Starting phase \"%s\"...", curr), UVM_LOW)
       #10;
       if (prev != last_phase) begin
@@ -59,91 +59,91 @@ class test extends uvm_test;
       set_phase_domain("uvm");
    endfunction
 
-   function void build();
-      check_phase("", "build");
+   function void build_phase();
+      check_the_phase("", "build");
    endfunction
    
-   function void connect();
-      check_phase("build", "connect");
+   function void connect_phase();
+      check_the_phase("build", "connect");
    endfunction
    
-   function void end_of_elaboration();
-      check_phase("connect", "end_of_elaboration");
+   function void end_of_elaboration_phase();
+      check_the_phase("connect", "end_of_elaboration");
    endfunction
    
-   function void start_of_simulation();
-      check_phase("end_of_elaboration", "start_of_simulation");
+   function void start_of_simulation_phase();
+      check_the_phase("end_of_elaboration", "start_of_simulation");
    endfunction
    
-   task run();
-      check_phase_t("start_of_simulation", "run");
+   task run_phase();
+      check_the_phase_t("start_of_simulation", "run");
    endtask
    
-   task pre_reset();
-      check_phase_t("start_of_simulation", "pre_reset");
+   task pre_reset_phase();
+      check_the_phase_t("start_of_simulation", "pre_reset");
       // Make sure the last phase is not "run"
       #10;
       last_phase = "pre_reset";
    endtask
    
-   task reset();
-      check_phase_t("pre_reset", "reset");
+   task reset_phase();
+      check_the_phase_t("pre_reset", "reset");
    endtask
    
-   task post_reset();
-      check_phase_t("reset", "post_reset");
+   task post_reset_phase();
+      check_the_phase_t("reset", "post_reset");
    endtask
    
-   task pre_configure();
-      check_phase_t("post_reset", "pre_configure");
+   task pre_configure_phase();
+      check_the_phase_t("post_reset", "pre_configure");
    endtask
    
-   task configure();
-      check_phase_t("pre_configure", "configure");
+   task configure_phase();
+      check_the_phase_t("pre_configure", "configure");
    endtask
    
-   task post_configure();
-      check_phase_t("configure", "post_configure");
+   task post_configure_phase();
+      check_the_phase_t("configure", "post_configure");
    endtask
    
-   task pre_main();
-      check_phase_t("post_configure", "pre_main");
+   task pre_main_phase();
+      check_the_phase_t("post_configure", "pre_main");
    endtask
    
-   task main();
-      check_phase_t("pre_main", "main");
+   task main_phase();
+      check_the_phase_t("pre_main", "main");
    endtask
    
-   task post_main();
-      check_phase_t("main", "post_main");
+   task post_main_phase();
+      check_the_phase_t("main", "post_main");
    endtask
    
-   task pre_shutdown();
-      check_phase_t("post_main", "pre_shutdown");
+   task pre_shutdown_phase();
+      check_the_phase_t("post_main", "pre_shutdown");
    endtask
    
-   task shutdown();
-      check_phase_t("pre_shutdown", "shutdown");
+   task shutdown_phase();
+      check_the_phase_t("pre_shutdown", "shutdown");
    endtask
    
-   task post_shutdown();
-      check_phase_t("shutdown", "post_shutdown");
+   task post_shutdown_phase();
+      check_the_phase_t("shutdown", "post_shutdown");
    endtask
    
-   function void extract();
-      check_phase("post_shutdown", "extract");
+   function void extract_phase();
+      check_the_phase("post_shutdown", "extract");
    endfunction
    
-   function void check();
-      check_phase("extract", "check");
+   function void check_phase();
+      check_the_phase("extract", "check");
    endfunction
    
-   function void report();
-      check_phase("check", "report");
+   function void report_phase();
+      check_the_phase("check", "report");
    endfunction
    
-   function void finalize();
-      check_phase("report", "finalize");
+   function void finalize_phase();
+      check_the_phase("report", "finalize");
    endfunction
    
 endclass

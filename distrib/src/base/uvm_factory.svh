@@ -429,7 +429,7 @@ endclass
 //|    endfunction
 //|
 //|    // using the factory allows pkt overrides from outside the class
-//|    virtual function void build();
+//|    virtual function void build_phase();
 //|      pkt = packet::type_id::create("pkt",this);
 //|    endfunction
 //|
@@ -495,7 +495,7 @@ endclass
 //|      super.new(name,parent);
 //|    endfunction
 //|
-//|    virtual function void build();
+//|    virtual function void build_phase();
 //|
 //|      // override the packet type for driver0 and below
 //|      packet::type_id::set_inst_override(packetD::get_type(),"driver0.*");
@@ -523,7 +523,7 @@ endclass
 //|      super.new(name,parent);
 //|    endfunction
 //|
-//|    virtual function void build();
+//|    virtual function void build_phase();
 //|
 //|      // three methods to set an instance override for agent1.driver1
 //|      // - via component convenience method...
@@ -547,11 +547,11 @@ endclass
 //|    endfunction
 //|
 //|    // at end_of_elaboration, print topology and factory state to verify
-//|    virtual function void end_of_elaboration();
+//|    virtual function void end_of_elaboration_phase();
 //|      uvm_top.print_topology();
 //|    endfunction
 //|
-//|    virtual task run();
+//|    virtual task run_phase();
 //|      #100 global_stop_request();
 //|    endfunction
 //|
@@ -601,7 +601,7 @@ endclass
 //|  endmodule
 //
 // When the above example is run, the resulting topology (displayed via a call to
-// <uvm_root::print_topology> in env's <uvm_component::end_of_elaboration> method)
+// <uvm_root::print_topology> in env's <uvm_component::end_of_elaboration_phase> method)
 // is similar to the following:
 //
 //| # UVM_INFO @ 0 [RNTST] Running test ...
