@@ -19,11 +19,7 @@
 //   the License for the specific language governing
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
-`ifndef UVM_SVH
-`define UVM_SVH
 
 `include "uvm_macros.svh"
 import uvm_pkg::*;
-
-`endif // UVM_SVH
 

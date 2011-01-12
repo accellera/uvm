@@ -18,6 +18,21 @@
 //----------------------------------------------------------------------
 
 
+module m;
+
+`include "uvm.svh"
+
+class comp extends uvm_component;
+   `uvm_component_utils(comp)
+
+   function new(string name, uvm_component parent = null);
+      super.new(name, parent);
+   endfunction
+
+endclass
+
+endmodule
+
 program top;
 
 `include "uvm.svh"
