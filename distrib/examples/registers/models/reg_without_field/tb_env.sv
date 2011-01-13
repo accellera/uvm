@@ -43,6 +43,7 @@ class tb_env extends uvm_env;
       // Use a user-defined front-door in lieu of a bus-agent
       reg_R_fd fd = new;
       regmodel.R.set_frontdoor(fd);
+      regmodel.default_map.set_auto_predict(1);
    endfunction
 
 endclass

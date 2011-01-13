@@ -60,7 +60,6 @@ class tb_env extends uvm_component;
          reg2apb_seq = new();
          apb = apb_agent::type_id::create("apb", this);
 `ifdef EXPLICIT_MON
-werwe
          apb2reg_predictor = new("apb2reg_predictor", this);
 `endif
       end
@@ -86,6 +85,8 @@ werwe
          apb2reg_predictor.adapter = reg2apb;
          regmodel.default_map.set_auto_predict(0);
          apb.mon.ap.connect(apb2reg_predictor.bus_in);
+ `else
+         regmodel.default_map.set_auto_predict(1);
 `endif
       end
    endfunction

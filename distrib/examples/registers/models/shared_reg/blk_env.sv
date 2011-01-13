@@ -164,7 +164,9 @@ class blk_env extends uvm_env;
       reg2apb_adapter reg2apb = new;
       reg2wsh_adapter reg2wsh = new;
       model.APB.set_sequencer(apb.sqr, reg2apb);
+      model.APB.set_auto_predict();
       model.WSH.set_sequencer(wsh.sqr, reg2wsh);
+      model.WSH.set_auto_predict();
       apb.drv.base_addr = 'h20;
    endfunction
 
