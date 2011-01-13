@@ -47,17 +47,29 @@ tool-specific sub-directory.
 Using the UVM
 -------------
 
-You must compile the file $UVM_HOME/src/uvm.sv first.  You can then
-make the UVM library accessible by your SystemVerilog code by
-including the file "uvm.svh" at the appropriate scope.
+You must compile the file $UVM_HOME/src/uvm.sv first. You will need
+to specify the location of $UVM_HOME/src as a include directory in your
+compilation command line using the +incdir+ command-line option.
 
-   `include "uvm.svh"
+You can then make the UVM library accessible to your SystemVerilog
+code by importing the package 'uvm_pkg' in the appropriate scope.
 
-You will need to put the location of $UVM_HOME/src as a include
-directory in your compilation command line.
+   import uvm_pkg::*;
 
-You will need to specify the location of the UVM DPI shared library to
-your simulator. This is a simulator-specific specification.  Please
-refer to your simulator documentation.
+To use the UVM short-hand macros, it is necessary to include the file
+"uvm_macros.svh". This will also necessitate that you specify the
+location of $UVM_HOME/src as a include directory.
+
+`include "uvm_macros.svh"
+
+Alternatively, you can include the file "uvm.svh" to include the
+macro definitions and import the UVM package in the current scope.
+
+`include "uvm.svh"
+
+You will also need to compile the file $UVM_HOME/src/dpi/uvm_dpi.cc
+and/or specify the location of the resulting UVM DPI shared library to
+your simulator. This is a simulator-specific process.  Please refer to
+your simulator documentation.
 
 ------------------------------------------------------------------------
