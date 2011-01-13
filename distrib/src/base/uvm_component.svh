@@ -551,48 +551,6 @@ virtual class uvm_component extends uvm_report_object;
 
   extern function void set_phase_imp(uvm_phase_imp phase, uvm_phase_imp imp, int hier=1);
 
-  // Function: raise_objection
-  //
-  // Raises an objection to the end of the current phase. The current phase
-  // ends when all objections to the phase have been dropped. The ~phase~
-  // argument must be provided. If null, uvm will call <get_current_phase>
-  // but this is only successful if the function call is made in the
-  // main phase process (not from a child process). It is a good practice
-  // to get the phase process before forking any child process. For example:
-  //
-  //| task main;
-  //|   uvm_phase_schedule phase = get_current_phase();
-  //|   fork begin
-  //|     raise_objection(phase);
-  //|     ...
-  //|     drop_objection(phase);
-  //|   end join_none
-  //|   ...
-  //| endtask
-
-  extern function void raise_objection(uvm_phase_schedule phase=null);
-
-
-  // Function: drop_objection
-  //
-  // Drops an objection to the end of the current phase. The current phase
-  // ends when all objections to the phase have been dropped. The ~phase~
-  // argument must be provided. If null, uvm will call <get_current_phase>
-  // but this is only successful if the function call is made in the
-  // main phase process (not from a child process). It is a good practice
-  // to get the phase process before forking any child process. 
-
-  extern function void drop_objection(uvm_phase_schedule phase=null); 
-
-
-  // Function: terminate_phase
-  //
-  // Forces all objections to the ~phase~ to be immediately dropped
-  // so that the phase can end.
-
-  extern function void terminate_phase(uvm_phase_schedule phase=null);
-
-  
   // Function: jump
   extern function void jump(uvm_phase_imp phase);
   
@@ -1309,7 +1267,25 @@ virtual class uvm_component extends uvm_report_object;
   // and their meaning.
 
     extern function void set_report_verbosity_level_hier (int verbosity);
-  
+ 
+
+  // Function: pre_abort
+  //
+  // This callback is executed when the message system is executing a
+  // <UVM_EXIT> action. The exit action causes an immediate termination of
+  // the simulation, but the pre_abort callback hook gives components an 
+  // opportunity to provide additional information to the user before
+  // the termination happens. For example, a test may want to executed
+  // the report function of a particular component even when an error
+  // condition has happened to force a premature termination you would
+  // write a function like:
+  //
+  //| function void mycomponent::pre_abort();
+  //|   report();
+  //| endfunction
+
+  virtual function void pre_abort;
+  endfunction
 
   //----------------------------------------------------------------------------
   // Group: Recording Interface
@@ -1577,6 +1553,8 @@ virtual class uvm_component extends uvm_report_object;
   } m_verbosity_setting;
   m_verbosity_setting m_verbosity_settings[$];
 
+  // does the pre abort callback hierarchically
+  extern /*local*/ function void m_do_pre_abort;
 endclass : uvm_component
 
 
@@ -1599,29 +1577,32 @@ endclass : uvm_component
 
 function uvm_component::new (string name, uvm_component parent);
   string error_str;
+  uvm_root top;
 
   super.new(name);
 
   // If uvm_top, reset name to "" so it doesn't show in full paths then return
   if (parent==null && name == "__top__") begin
-    set_name("");
+    set_name(""); // *** VIRTUAL
     return;
   end
+
+  top = uvm_top; // calling uvm_root::get() causes infinite recursion
 
   // Check that we're not in or past end_of_elaboration
   begin
     uvm_phase_schedule common, end_of_elab;
-    common = uvm_top.find_phase_schedule("uvm_pkg::common","common");
+    common = top.find_phase_schedule("uvm_pkg::common","common");
     if (common != null) begin
       // only check if we have got phasing set up yet
       end_of_elab = common.find_schedule("end_of_elaboration");
-      if (end_of_elab.get_state == UVM_PHASE_EXECUTING ||
-          end_of_elab.get_run_count > 0 ) begin
+      if (end_of_elab.get_state() == UVM_PHASE_EXECUTING ||
+          end_of_elab.get_run_count() > 0 ) begin
         uvm_phase_schedule curr_phase;
-        curr_phase = uvm_top.get_current_phase();
+        curr_phase = top.get_current_phase();
         uvm_report_fatal("ILLCRT", {"It is illegal to create a component once",
-                                    " phasing reaches end_of_elaboration. The current phase is ", 
-                                    curr_phase.get_phase_name()}, UVM_NONE);
+                  " phasing reaches end_of_elaboration. The current phase is ", 
+                  curr_phase.get_phase_name()}, UVM_NONE);
       end
     end
   end
@@ -1636,14 +1617,14 @@ function uvm_component::new (string name, uvm_component parent);
   end
 
   if (parent == null)
-    parent = uvm_top;
+    parent = top;
 
   if(uvm_report_enabled(UVM_MEDIUM+1, UVM_INFO, "NEWCOMP"))
-    `uvm_info("NEWCOMP",$psprintf("this=%0s, parent=%0s, name=%s",
-                    this.get_full_name(),parent.get_full_name(),name),UVM_MEDIUM+1)
+    `uvm_info("NEWCOMP", {"Creating ",
+      (parent==top?"uvm_top":parent.get_full_name()),".",name},UVM_MEDIUM+1)
 
   if (parent.has_child(name) && this != parent.get_child(name)) begin
-    if (parent == uvm_top) begin
+    if (parent == top) begin
       error_str = {"Name '",name,"' is not unique to other top-level ",
       "instances. If parent is a module, build a unique name by combining the ",
       "the module name and component name: $psprintf(\"\%m.\%s\",\"",name,"\")."};
@@ -1659,7 +1640,7 @@ function uvm_component::new (string name, uvm_component parent);
 
   m_parent = parent;
 
-  set_name(name);
+  set_name(name); // *** VIRTUAL
 
   if (!m_parent.m_add_child(this))
     m_parent = null;
@@ -1673,17 +1654,17 @@ function uvm_component::new (string name, uvm_component parent);
   reseed();
 
   // Do local configuration settings
-  void'(get_config_int("recording_detail", recording_detail));
+  void'(get_config_int("recording_detail", recording_detail)); // *** VIRTUAL
 
-  set_report_verbosity_level(uvm_top.get_report_verbosity_level());
+  set_report_verbosity_level(parent.get_report_verbosity_level());
 
   set_report_id_action("CFGOVR", UVM_NO_ACTION);
   set_report_id_action("CFGSET", UVM_NO_ACTION);
 
   m_set_cl_msg_args();
 
-  uvm_top.set_report_id_action("CFGOVR", UVM_NO_ACTION);
-  uvm_top.set_report_id_action("CFGSET", UVM_NO_ACTION);
+  top.set_report_id_action("CFGOVR", UVM_NO_ACTION);
+  top.set_report_id_action("CFGSET", UVM_NO_ACTION);
 endfunction
 
 
@@ -1803,7 +1784,9 @@ endfunction
 // ---------------
 
 function void uvm_component::m_set_full_name();
-  if (m_parent == uvm_top || m_parent==null)
+  uvm_root top;
+  top = uvm_top;
+  if (m_parent == top || m_parent==null)
     m_name = get_name();
   else 
     m_name = {m_parent.get_full_name(), ".", get_name()};
@@ -1824,13 +1807,15 @@ function uvm_component uvm_component::lookup( string name );
 
   string leaf , remainder;
   uvm_component comp;
+  uvm_root top;
+  top = uvm_root::get();
 
   comp = this;
   
   m_extract_name(name, leaf, remainder);
 
   if (leaf == "") begin
-    comp = uvm_top; // absolute lookup
+    comp = top; // absolute lookup
     m_extract_name(remainder, leaf, remainder);
   end
   
@@ -2271,10 +2256,12 @@ endfunction
 
 function void uvm_component::set_phase_schedule(string domain_name);
   const string schedule_name = "uvm_pkg::uvm";
+  uvm_root top;
   uvm_phase_schedule uvm;
+  top = uvm_root::get();
 
   // find this schedule/domain in the master schedule if it exists
-  uvm = uvm_top.find_phase_schedule(schedule_name, domain_name);
+  uvm = top.find_phase_schedule(schedule_name, domain_name);
 
   // create it and add it to master schedule if it doesn't exist
   if (uvm == null) begin
@@ -2297,11 +2284,11 @@ function void uvm_component::set_phase_schedule(string domain_name);
     // of the "uvm_pkg::common" schedule, for the specified domain
     begin
       uvm_phase_schedule common;
-      common = uvm_top.find_phase_schedule("uvm_pkg::common","common");
+      common = top.find_phase_schedule("uvm_pkg::common","common");
       common.add_schedule(uvm, .with_phase(common.find_schedule("run")));
     end
     // schedule/domain pair is added to the master list
-    uvm_top.add_phase_schedule(uvm, domain_name);
+    top.add_phase_schedule(uvm, domain_name);
   end
 
   // add schedule to this component's list, replacing any existing entry found
@@ -2352,24 +2339,6 @@ function void uvm_component::jump_all_domains(uvm_phase_imp phase);
   uvm_phase_schedule current_phase;
   current_phase = get_current_phase();
   current_phase.jump_all(phase);
-endfunction
-
-function void uvm_component::raise_objection(uvm_phase_schedule phase=null);
-  if(phase == null)
-    phase = get_current_phase();
-  phase.phase_done.raise_objection(this);
-endfunction
-
-function void uvm_component::drop_objection(uvm_phase_schedule phase=null);
-  if(phase == null)
-    phase = get_current_phase();
-  phase.phase_done.drop_objection(this);
-endfunction
-
-function void uvm_component::terminate_phase(uvm_phase_schedule phase=null);
-  if(phase == null)
-    phase = get_current_phase();
-  phase.terminate_phase();
 endfunction
 
 
@@ -3225,3 +3194,8 @@ function void uvm_component::m_set_cl_sev;
   end
 endfunction
 
+function void uvm_component::m_do_pre_abort;
+  foreach(m_children[i])
+    m_children[i].m_do_pre_abort(); 
+  pre_abort(); 
+endfunction

@@ -127,18 +127,24 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   //| set_config_string(...) => uvm_config_db#(string)::set(cntxt,...)
   //| set_config_object(...) => uvm_config_db#(uvm_object)::set(cntxt,...)
 
-  static function void set(uvm_component cntxt, string inst_name,
-      string field_name, T value);
-    uvm_phase_schedule curr_phase = uvm_top.get_current_phase();
+  static function void set(uvm_component cntxt,
+                           string inst_name,
+                           string field_name,
+                           T value);
+
+    uvm_root top;
+    uvm_phase_schedule curr_phase;
     uvm_resource#(T) r;
     bit exists = 0;
     
     //take care of random stability during allocation
     process p = process::self();
     string rstate = p.get_randstate();
+    top = uvm_root::get();
+    curr_phase = top.get_current_phase();
 
     if(cntxt == null) 
-      cntxt = uvm_root::get();
+      cntxt = top;
     if(inst_name == "") 
       inst_name = cntxt.get_full_name();
     else if(cntxt.get_full_name() != "") 
@@ -223,7 +229,8 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     string rstate = p.get_randstate();
     m_uvm_waiter waiter;
 
-    if(cntxt == null) cntxt = uvm_root::get();
+    if(cntxt == null)
+      cntxt = uvm_root::get();
     if(cntxt != uvm_root::get()) begin
       if(inst_name != "")
         inst_name = {cntxt.get_full_name(),".",inst_name};

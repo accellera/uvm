@@ -126,7 +126,7 @@ module test;
 
     task do_phase_test(uvm_phase_schedule phase);
       //Raise the objection
-      phase.phase_done.raise_objection(this, {"test ", phase.get_name(), " objection"});
+      phase.raise_objection(this, {"test ", phase.get_name(), " objection"});
      
       //Wait for phase to be started
       wait(phase.get_state() == UVM_PHASE_EXECUTING);
@@ -135,7 +135,7 @@ module test;
       #(phase_transition_time);
 
       //Drop the objection
-      phase.phase_done.drop_objection(this, {"test ", phase.get_name(), " objection"});
+      phase.drop_objection(this, {"test ", phase.get_name(), " objection"});
       ++phases_run;
     endtask
 

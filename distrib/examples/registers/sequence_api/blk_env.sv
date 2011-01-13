@@ -51,6 +51,7 @@ class blk_env extends uvm_env;
       if (model.get_parent() == null) begin
          reg2apb_adapter reg2apb = new;
          model.default_map.set_sequencer(apb.sqr, reg2apb);
+         model.default_map.set_auto_predict(1);
       end
    endfunction
 

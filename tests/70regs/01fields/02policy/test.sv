@@ -227,6 +227,7 @@ begin
    rg.build();
    rg.configure(blk);
    blk.default_map.add_reg(rg, 0, "RW", 1, fd);
+   blk.default_map.set_auto_predict();
    
    rg.reset();
    

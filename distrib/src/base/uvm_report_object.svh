@@ -272,6 +272,10 @@ class uvm_report_object extends uvm_object;
   // with ~$finish~.
 
   virtual function void die();
+    // make the pre_abort callbacks
+    uvm_root top = uvm_root::get();
+    top.m_do_pre_abort();
+
     report_summarize();
     $finish;
   endfunction
