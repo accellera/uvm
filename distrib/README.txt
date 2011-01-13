@@ -62,11 +62,6 @@ location of $UVM_HOME/src as a include directory.
 
 `include "uvm_macros.svh"
 
-Alternatively, you can include the file "uvm.svh" to include the
-macro definitions and import the UVM package in the current scope.
-
-`include "uvm.svh"
-
 You will also need to compile the file $UVM_HOME/src/dpi/uvm_dpi.cc
 and/or specify the location of the resulting UVM DPI shared library to
 your simulator. This is a simulator-specific process.  Please refer to
