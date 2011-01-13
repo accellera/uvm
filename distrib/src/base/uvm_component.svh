@@ -1275,13 +1275,13 @@ virtual class uvm_component extends uvm_report_object;
   // <UVM_EXIT> action. The exit action causes an immediate termination of
   // the simulation, but the pre_abort callback hook gives components an 
   // opportunity to provide additional information to the user before
-  // the termination happens. For example, a test may want to print the
-  // report summary when it is prematurely aborted and thus would have
-  // a function like:
+  // the termination happens. For example, a test may want to executed
+  // the report function of a particular component even when an error
+  // condition has happened to force a premature termination you would
+  // write a function like:
   //
   //| function void mycomponent::pre_abort();
-  //|   uvm_report_server srv = uvm_report_server::get_server();
-  //|   srv.summarize();
+  //|   report();
   //| endfunction
 
   virtual function void pre_abort;
