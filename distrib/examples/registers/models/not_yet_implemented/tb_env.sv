@@ -75,6 +75,7 @@ class tb_env extends uvm_env;
    virtual function void connect();
       reg2rw_adapter reg2rw  = new("reg2rw");
       regmodel.default_map.set_sequencer(bus.sqr, reg2rw);
+      regmodel.default_map.set_auto_predict();
 
       // Use a user-defined front-door for unimplemented registers
       begin
