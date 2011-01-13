@@ -842,7 +842,7 @@ class uvm_phase_schedule extends uvm_graph;
   // which calls <uvm_objection::drop_objection> for this phases local
   // objection.
 
-  extern function void drop_objection (uvm_object obj=null,
+  extern function void drop_objection (uvm_object obj,
                                        string description="",
                                        int count=1);
 
