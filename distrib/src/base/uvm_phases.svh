@@ -805,7 +805,49 @@ class uvm_phase_schedule extends uvm_graph;
            (m_parent==null) ? "null" : m_parent.m_schedule_name, super.convert2string());
   endfunction
 
-  // Wait for the objection counters to go to zero at the root.
+  // Group: Objections
+  //
+  // The objection api allows components to object to a phase ending and subsequently
+  // drop its objection. This provides greater control over the phase flow for
+  // processes which are not implicit objectors to the phase.
+
+  // Function: raise_objection
+  //
+  // Raises an objection to the end of the this phase. This is useful
+  // for processes that are not active processes of the phase. This is a
+  // delegate function which calls <uvm_objection::raise_objection> for this 
+  // phases local objection. For example, a phase process may be set as 
+  // <UVM_PHASE_PERSISTENT>, but may need to raise and drop objections when certain 
+  // conditions occur.
+  //
+  //| task main;
+  //|   set_thread_mode(UVM_PHASE_PERSISTENT);
+  //|   while(1) begin
+  //|     some_phase.raise_objection(this);
+  //|     ...
+  //|     some_phase.drop_objection(this);
+  //|   end 
+  //|   ...
+  //| endtask
+
+  extern function void raise_objection (uvm_object obj,
+                                        string description="",
+                                        int count=1);
+
+
+  // Function: drop_objection
+  //
+  // Drops the objection to the end of the this phase. The drop is
+  // expected to be aligned with an earlier raise. This is a delegate function
+  // which calls <uvm_objection::drop_objection> for this phases local
+  // objection.
+
+  extern function void drop_objection (uvm_object obj=null,
+                                       string description="",
+                                       int count=1);
+
+
+  // Wait for the objection counters for this phase to go to zero. 
   extern task wait_no_objections(uvm_component waiter=null);
 
   // Partial backward compatibility
@@ -843,6 +885,8 @@ endfunction
 
 task uvm_phase_schedule::wait_no_objections(uvm_component waiter=null);
   uvm_root top=uvm_root::get();
+  if(waiter == null) waiter = top;
+
   if(get_name() == "run" && waiter==top) begin
     fork begin // wrapper fork to protect siblings
     fork 
@@ -1254,6 +1298,24 @@ function void uvm_phase_schedule::print_termination_state();
             $psprintf("phase %s outstanding objections = %0d",
                       get_name(), phase_done.get_objection_total(uvm_top)),
             UVM_DEBUG);
+endfunction
+
+
+//--------------------------------------------------------------------
+// raise_objection
+//--------------------------------------------------------------------
+function void uvm_phase_schedule::raise_objection (uvm_object obj,
+                                  string description="", int count=1);
+  phase_done.raise_objection(obj, description, count);
+endfunction
+
+
+//--------------------------------------------------------------------
+// drop_objection
+//--------------------------------------------------------------------
+function void uvm_phase_schedule::drop_objection (uvm_object obj,
+                                  string description="", int count=1);
+  phase_done.drop_objection(obj, description, count);
 endfunction
 
 
