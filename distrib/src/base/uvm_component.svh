@@ -1267,7 +1267,25 @@ virtual class uvm_component extends uvm_report_object;
   // and their meaning.
 
     extern function void set_report_verbosity_level_hier (int verbosity);
-  
+ 
+
+  // Function: pre_abort
+  //
+  // This callback is executed when the message system is executing a
+  // <UVM_EXIT> action. The exit action causes an immediate termination of
+  // the simulation, but the pre_abort callback hook gives components an 
+  // opportunity to provide additional information to the user before
+  // the termination happens. For example, a test may want to print the
+  // report summary when it is prematurely aborted and thus would have
+  // a function like:
+  //
+  //| function void mycomponent::pre_abort();
+  //|   uvm_report_server srv = uvm_report_server::get_server();
+  //|   srv.summarize();
+  //| endfunction
+
+  virtual function void pre_abort;
+  endfunction
 
   //----------------------------------------------------------------------------
   // Group: Recording Interface
@@ -1535,6 +1553,8 @@ virtual class uvm_component extends uvm_report_object;
   } m_verbosity_setting;
   m_verbosity_setting m_verbosity_settings[$];
 
+  // does the pre abort callback hierarchically
+  extern /*local*/ function void m_do_pre_abort;
 endclass : uvm_component
 
 
@@ -3174,3 +3194,8 @@ function void uvm_component::m_set_cl_sev;
   end
 endfunction
 
+function void uvm_component::m_do_pre_abort;
+  foreach(m_children[i])
+    m_children[i].m_do_pre_abort(); 
+  pre_abort(); 
+endfunction
