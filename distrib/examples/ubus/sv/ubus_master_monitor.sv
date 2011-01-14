@@ -103,19 +103,19 @@ class ubus_master_monitor extends uvm_monitor;
     item_collected_port = new("item_collected_port", this);
   endfunction : new
 
-  function void build();
+  function void build_phase();
        if (!ubus_vif_config::exists(this, get_full_name(),"vif",1))
 	`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"}) 
        else
 	     void'(uvm_config_db#(virtual ubus_if)::get(this, get_full_name(),"vif",vif));
-  endfunction: build
+  endfunction: build_phase
 
   // run phase
-  virtual task run();
+  virtual task run_phase();
     fork
       collect_transactions();
     join
-  endtask : run
+  endtask : run_phase
 
   // collect_transactions
   virtual protected task collect_transactions();

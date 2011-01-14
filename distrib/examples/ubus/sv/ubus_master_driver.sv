@@ -46,21 +46,21 @@ class ubus_master_driver extends uvm_driver #(ubus_transfer);
     super.new(name, parent);
   endfunction : new
 
-  function void build();
-    super.build();
+  function void build_phase();
+    super.build_phase();
        if (!ubus_vif_config::exists(this, get_full_name(),"vif",1))
 	 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"}) 
        else
           void'(ubus_vif_config::get(this, get_full_name(),"vif",vif));
-  endfunction: build
+  endfunction: build_phase
 
   // run phase
-  virtual task run();
+  virtual task run_phase();
     fork
       get_and_drive();
       reset_signals();
     join
-  endtask : run
+  endtask : run_phase
 
   // get_and_drive 
   virtual protected task get_and_drive();
@@ -71,7 +71,8 @@ class ubus_master_driver extends uvm_driver #(ubus_transfer);
       $cast(rsp, req.clone());
       rsp.set_id_info(req);
       drive_transfer(rsp);
-      seq_item_port.item_done(rsp);
+      seq_item_port.item_done();
+      seq_item_port.put_response(rsp);
     end
   endtask : get_and_drive
 

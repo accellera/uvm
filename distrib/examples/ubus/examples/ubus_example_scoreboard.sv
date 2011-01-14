@@ -19,18 +19,18 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UBUS_DEMO_SCOREBOARD_SVH
-`define UBUS_DEMO_SCOREBOARD_SVH
+`ifndef UBUS_EXAMPLE_SCOREBOARD_SVH
+`define UBUS_EXAMPLE_SCOREBOARD_SVH
 
 //------------------------------------------------------------------------------
 //
-// CLASS: ubus_demo_scoreboard
+// CLASS: ubus_example_scoreboard
 //
 //------------------------------------------------------------------------------
 
-class ubus_demo_scoreboard extends uvm_scoreboard;
+class ubus_example_scoreboard extends uvm_scoreboard;
 
-  uvm_analysis_imp#(ubus_transfer, ubus_demo_scoreboard) item_collected_export;
+  uvm_analysis_imp#(ubus_transfer, ubus_example_scoreboard) item_collected_export;
 
   protected bit disable_scoreboard = 0;
   protected int num_writes = 0;
@@ -41,7 +41,7 @@ class ubus_demo_scoreboard extends uvm_scoreboard;
   protected int unsigned m_mem_expected[int unsigned];
 
   // Provide implementations of virtual methods such as get_type_name and create
-  `uvm_component_utils_begin(ubus_demo_scoreboard)
+  `uvm_component_utils_begin(ubus_example_scoreboard)
     `uvm_field_int(disable_scoreboard, UVM_DEFAULT)
     `uvm_field_int(num_writes, UVM_DEFAULT|UVM_DEC)
     `uvm_field_int(num_init_reads, UVM_DEFAULT|UVM_DEC)
@@ -53,8 +53,8 @@ class ubus_demo_scoreboard extends uvm_scoreboard;
     super.new(name, parent);
   endfunction : new
 
-  //build
-  function void build();
+  //build_phase
+  function void build_phase();
     item_collected_export = new("item_collected_export", this);
   endfunction
 
@@ -111,14 +111,14 @@ class ubus_demo_scoreboard extends uvm_scoreboard;
   endfunction : memory_verify
 
   // report
-  virtual function void report();
+  virtual function void report_phase();
     if(!disable_scoreboard) begin
       `uvm_info(get_type_name(),
         $psprintf("Reporting scoreboard information...\n%s", this.sprint()), UVM_LOW)
     end
-  endfunction : report
+  endfunction : report_phase
 
-endclass : ubus_demo_scoreboard
+endclass : ubus_example_scoreboard
 
-`endif // UBUS_DEMO_SCOREBOARD_SVH
+`endif // UBUS_EXAMPLE_SCOREBOARD_SVH
 

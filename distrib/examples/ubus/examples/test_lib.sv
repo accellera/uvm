@@ -19,52 +19,53 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`include "ubus_demo_tb.sv"
+`include "ubus_example_tb.sv"
 
 
 // Base Test
-class ubus_demo_base_test extends uvm_test;
+class ubus_example_base_test extends uvm_test;
 
-  `uvm_component_utils(ubus_demo_base_test)
+  `uvm_component_utils(ubus_example_base_test)
 
-  ubus_demo_tb ubus_demo_tb0;
+  ubus_example_tb ubus_example_tb0;
   uvm_table_printer printer;
   bit test_pass = 1;
 
-  function new(string name = "ubus_demo_base_test", 
+  function new(string name = "ubus_example_base_test", 
     uvm_component parent=null);
     super.new(name,parent);
   endfunction : new
 
-  virtual function void build();
-    super.build();
+  virtual function void build_phase();
+    super.build_phase();
     // Enable transaction recording for everything
     set_config_int("*", "recording_detail", UVM_FULL);
     // Create the tb
-    ubus_demo_tb0 = ubus_demo_tb::type_id::create("ubus_demo_tb0", this);
+    ubus_example_tb0 = ubus_example_tb::type_id::create("ubus_example_tb0", this);
     // Create a specific depth printer for printing the created topology
     printer = new();
     printer.knobs.depth = 3;
-  endfunction : build
+  endfunction : build_phase
 
-  function void end_of_elaboration();
+  function void end_of_elaboration_phase();
     // Set verbosity for the bus monitor for this demo
-    ubus_demo_tb0.ubus0.bus_monitor.set_report_verbosity_level(UVM_FULL);
+     if(ubus_example_tb0.ubus0.bus_monitor != null)
+       ubus_example_tb0.ubus0.bus_monitor.set_report_verbosity_level(UVM_FULL);
     `uvm_info(get_type_name(),
       $psprintf("Printing the test topology :\n%s", this.sprint(printer)), UVM_LOW)
-  endfunction : end_of_elaboration
+  endfunction : end_of_elaboration_phase
 
-  task run();
+  task run_phase();
     //set a drain-time for the environment if desired
     uvm_test_done.set_drain_time(this, 50);
-  endtask : run
+  endtask : run_phase
 
-  function void extract();
-    if(ubus_demo_tb0.scoreboard0.sbd_error)
+  function void extract_phase();
+    if(ubus_example_tb0.scoreboard0.sbd_error)
       test_pass = 1'b0;
   endfunction // void
   
-  function void report();
+  function void report_phase();
     if(test_pass) begin
       `uvm_info(get_type_name(), "** UVM TEST PASSED **", UVM_NONE)
     end
@@ -73,11 +74,11 @@ class ubus_demo_base_test extends uvm_test;
     end
   endfunction
 
-endclass : ubus_demo_base_test
+endclass : ubus_example_base_test
 
 
 // Read Modify Write Read Test
-class test_read_modify_write extends ubus_demo_base_test;
+class test_read_modify_write extends ubus_example_base_test;
 
   `uvm_component_utils(test_read_modify_write)
 
@@ -85,26 +86,26 @@ class test_read_modify_write extends ubus_demo_base_test;
     super.new(name,parent);
   endfunction : new
 
-  virtual function void build();
-    // Create the tb
-    super.build();
+  virtual function void build_phase();
     uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
-			       ".ubus_demo_tb0.ubus0.masters[0].sequencer"}, 
-			       "run_ph",
+			       ".ubus_example_tb0.ubus0.masters[0].sequencer"}, 
+			       "main_ph",
 				read_modify_write_seq::type_id::get(),
 				this);
     uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
-			       ".ubus_demo_tb0.ubus0.slaves[0].sequencer"}, 
+			       ".ubus_example_tb0.ubus0.slaves[0].sequencer"}, 
 			       "run_ph",
 				slave_memory_seq::type_id::get(),
 				this);
-  endfunction : build
+    // Create the tb
+    super.build_phase();
+  endfunction : build_phase
 
 endclass : test_read_modify_write
 
 
 // Large word read/write test
-class test_r8_w8_r4_w4 extends ubus_demo_base_test;
+class test_r8_w8_r4_w4 extends ubus_example_base_test;
 
   `uvm_component_utils(test_r8_w8_r4_w4)
 
@@ -112,25 +113,25 @@ class test_r8_w8_r4_w4 extends ubus_demo_base_test;
     super.new(name,parent);
   endfunction : new
 
-  virtual function void build();
-    super.build();
+  virtual function void build_phase();
+    super.build_phase();
     uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
-			       ".ubus_demo_tb0.ubus0.masters[0].sequencer"}, 
+			       ".ubus_example_tb0.ubus0.masters[0].sequencer"}, 
 			       "run_ph",
 				r8_w8_r4_w4_seq::type_id::get(),
 				this);
     uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
-			       ".ubus_demo_tb0.ubus0.slaves[0].sequencer"}, 
+			       ".ubus_example_tb0.ubus0.slaves[0].sequencer"}, 
 			       "run_ph",
 				slave_memory_seq::type_id::get(),
 				this);
-  endfunction : build
+  endfunction : build_phase
 
 endclass : test_r8_w8_r4_w4 
 
 
 // 2 Master, 4 Slave test
-class test_2m_4s extends ubus_demo_base_test;
+class test_2m_4s extends ubus_example_base_test;
 
   `uvm_component_utils(test_2m_4s)
 
@@ -138,33 +139,33 @@ class test_2m_4s extends ubus_demo_base_test;
     super.new(name,parent);
   endfunction : new
 
-  virtual function void build();
-    // Overides to the ubus_demo_tb build()
+  virtual function void build_phase();
+    // Overides to the ubus_example_tb build_phase()
     // Set the topology to 2 masters, 4 slaves
-    uvm_resource_db#(int)::set({get_full_name(),".ubus_demo_tb0.ubus0"}, 
+    uvm_resource_db#(int)::set({get_full_name(),".ubus_example_tb0.ubus0"}, 
 			       "num_masters", 2, this);
-    uvm_resource_db#(int)::set({get_full_name(),".ubus_demo_tb0.ubus0"}, 
-			       "num_slaves", 4, this);     
-
-    // Control the number of RMW loops
-    uvm_resource_db#(int)::set({get_name(),".ubus_demo_tb0.ubus0.masters[0].sequencer", ".loop_read_modify_write_seq"}, "itr", 3);
-    uvm_resource_db#(int)::set({get_name(),".ubus_demo_tb0.ubus0.masters[1].sequencer",".loop_read_modify_write_seq"}, "itr", 4);
+    uvm_resource_db#(int)::set({get_full_name(),".ubus_example_tb0.ubus0"}, 
+			       "num_slaves", 4, this);
+     
+   // Control the number of RMW loops
+    uvm_resource_db#(int)::set({get_name(),".ubus_example_tb0.ubus0.masters[0].sequencer", ".loop_read_modify_write_seq"}, "itr", 3);
+    uvm_resource_db#(int)::set({get_name(),".ubus_example_tb0.ubus0.masters[1].sequencer",".loop_read_modify_write_seq"}, "itr", 4);
 
      // Define the sequences to run in the run phase
     uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
-			       ".ubus_demo_tb0.ubus0.masters[0].sequencer"}, 
+			       ".ubus_example_tb0.ubus0.masters[0].sequencer"}, 
 			       "run_ph",
 				loop_read_modify_write_seq::type_id::get(),
 				this);
     uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
-			       ".ubus_demo_tb0.ubus0.masters[1].sequencer"}, 
+			       ".ubus_example_tb0.ubus0.masters[1].sequencer"}, 
 			       "run_ph",
 				loop_read_modify_write_seq::type_id::get(),
 				this);
 
      for(int i = 0; i < 4; i++) begin
 	string slname;
-	$swrite(slname,"%s.ubus_demo_tb0.ubus0.slaves[%0d].sequencer",
+	$swrite(slname,"%s.ubus_example_tb0.ubus0.slaves[%0d].sequencer",
 		get_full_name(),i);
 	uvm_resource_db#(uvm_object_wrapper)::set(slname, 
 						  "run_ph",
@@ -173,25 +174,26 @@ class test_2m_4s extends ubus_demo_base_test;
      end
      
     // Create the tb
-    super.build();
-  endfunction : build
+    super.build_phase();
+  endfunction : build_phase
 
-  function void connect();
+  function void connect_phase();
     // Connect other slaves monitor to scoreboard
-    ubus_demo_tb0.ubus0.slaves[1].monitor.item_collected_port.connect(
-      ubus_demo_tb0.scoreboard0.item_collected_export);
-    ubus_demo_tb0.ubus0.slaves[2].monitor.item_collected_port.connect(
-      ubus_demo_tb0.scoreboard0.item_collected_export);
-    ubus_demo_tb0.ubus0.slaves[3].monitor.item_collected_port.connect(
-      ubus_demo_tb0.scoreboard0.item_collected_export);
-  endfunction : connect
+    ubus_example_tb0.ubus0.slaves[1].monitor.item_collected_port.connect(
+      ubus_example_tb0.scoreboard0.item_collected_export);
+    ubus_example_tb0.ubus0.slaves[2].monitor.item_collected_port.connect(
+      ubus_example_tb0.scoreboard0.item_collected_export);
+    ubus_example_tb0.ubus0.slaves[3].monitor.item_collected_port.connect(
+      ubus_example_tb0.scoreboard0.item_collected_export);
+  endfunction : connect_phase
   
-  function void end_of_elaboration();
+  function void end_of_elaboration_phase();
     // Set up slave address map for ubus0 (slaves[0] is overwritten here)
-    ubus_demo_tb0.ubus0.set_slave_address_map("slaves[0]", 16'h0000, 16'h3fff);
-    ubus_demo_tb0.ubus0.set_slave_address_map("slaves[1]", 16'h4000, 16'h7fff);
-    ubus_demo_tb0.ubus0.set_slave_address_map("slaves[2]", 16'h8000, 16'hBfff);
-    ubus_demo_tb0.ubus0.set_slave_address_map("slaves[3]", 16'hC000, 16'hFfff);
-  endfunction : end_of_elaboration
+    ubus_example_tb0.ubus0.set_slave_address_map("slaves[0]", 16'h0000, 16'h3fff);
+    ubus_example_tb0.ubus0.set_slave_address_map("slaves[1]", 16'h4000, 16'h7fff);
+    ubus_example_tb0.ubus0.set_slave_address_map("slaves[2]", 16'h8000, 16'hBfff);
+    ubus_example_tb0.ubus0.set_slave_address_map("slaves[3]", 16'hC000, 16'hFfff);
+     super.end_of_elaboration_phase();
+  endfunction : end_of_elaboration_phase
 
 endclass : test_2m_4s

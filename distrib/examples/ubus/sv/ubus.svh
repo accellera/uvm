@@ -28,7 +28,7 @@ import uvm_pkg::*;
 `include "uvm_macros.svh"
 
 typedef uvm_config_db#(virtual ubus_if) ubus_vif_config;
-  
+typedef uvm_resource_db#(virtual ubus_if) ubus_resrc_config;
 
 `include "ubus_transfer.sv"
 

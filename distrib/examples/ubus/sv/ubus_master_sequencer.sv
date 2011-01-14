@@ -30,21 +30,11 @@
 
 class ubus_master_sequencer extends uvm_sequencer #(ubus_transfer);
 
-  // Master Id
-  protected int master_id;
-
-  `uvm_component_utils_begin(ubus_master_sequencer)
-    `uvm_field_int(master_id, UVM_DEFAULT)
-  `uvm_component_utils_end
-  /*
-  `uvm_sequencer_utils_begin(ubus_master_sequencer)
-    `uvm_field_int(master_id, UVM_DEFAULT)
-  `uvm_sequencer_utils_end
-*/
+   `uvm_component_utils(ubus_master_sequencer)
+     
   // new - constructor
   function new (string name, uvm_component parent);
     super.new(name, parent);
- //   `uvm_update_sequence_lib_and_item(ubus_transfer)
     set_phase_domain("uvm");
   endfunction : new
 

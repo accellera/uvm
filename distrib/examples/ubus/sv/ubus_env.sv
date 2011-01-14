@@ -63,15 +63,12 @@ class ubus_env extends uvm_env;
   endfunction : new
 
   // build
-  function void build();
+  function void build_phase();
     string inst_name;
-    super.build();
-       if (!ubus_vif_config::exists(this, get_full_name(),"vif",1))
-	 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"}) 
-       else
-          void'(ubus_vif_config::get(this, get_full_name(),"vif",vif));
-    ubus_vif_config::set(this,"*","vif", vif); // config all vifs on ubus env
-    
+    super.build_phase();
+     if(!uvm_resource_db#(virtual ubus_if)::read_by_name(get_full_name(),"vif",vif,this))
+       `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
+     
     if(has_bus_monitor == 1) begin
       bus_monitor = ubus_bus_monitor::type_id::create("bus_monitor", this);
     end
@@ -84,7 +81,8 @@ class ubus_env extends uvm_env;
     for(int i = 0; i < num_masters; i++) begin
       $sformat(inst_name, "masters[%0d]", i);
       masters[i] = ubus_master_agent::type_id::create(inst_name, this);
-      set_config_int({inst_name, "*"}, "master_id", i);
+      uvm_resource_db#(int)::set({get_full_name(),".",inst_name,"*"}, 
+				 "master_id", i, this);
     end
     
     uvm_resource_db#(int)::read_by_name(get_full_name(),
@@ -96,7 +94,7 @@ class ubus_env extends uvm_env;
       $sformat(inst_name, "slaves[%0d]", i);
       slaves[i] = ubus_slave_agent::type_id::create(inst_name, this);
     end
-  endfunction : build
+  endfunction : build_phase
 
   // set_slave_address_map
   function void set_slave_address_map(string slave_name, 
@@ -121,11 +119,11 @@ class ubus_env extends uvm_env;
   endtask : update_vif_enables
 
   // implement run task
-  task run;
+  task run_phase();
     fork
       update_vif_enables();
     join
-  endtask : run
+  endtask : run_phase
 
 endclass : ubus_env
 

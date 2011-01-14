@@ -31,7 +31,7 @@ module ubus_tb_top;
   import ubus_pkg::*;
   `include "test_lib.sv" 
 
-  ubus_if vif();
+  ubus_if vif(); // SystemVerilog Interface
   
   dut_dummy dut(
     vif.sig_request[0],
@@ -52,7 +52,7 @@ module ubus_tb_top;
   );
 
   initial begin
-    ubus_vif_config::set(null,"*.ubus_demo_tb0.ubus0","vif", vif);  
+    uvm_resource_db#(virtual ubus_if)::set("*.ubus_example_tb0.*","vif",vif);
     run_test();
   end
 

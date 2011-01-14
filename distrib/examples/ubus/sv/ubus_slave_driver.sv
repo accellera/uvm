@@ -41,20 +41,20 @@ class ubus_slave_driver extends uvm_driver #(ubus_transfer);
     super.new(name, parent);
   endfunction : new
 
-  function void build();
+  function void build_phase();
        if (!ubus_vif_config::exists(this, get_full_name(),"vif",1))
 	 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"}) 
        else
           void'(ubus_vif_config::get(this, get_full_name(),"vif",vif));
-  endfunction: build
+  endfunction: build_phase
 
   // run phase
-  virtual task run();
+  virtual task run_phase();
     fork
       get_and_drive();
       reset_signals();
     join
-  endtask : run
+  endtask : run_phase
 
   // get_and_drive
   virtual protected task get_and_drive();

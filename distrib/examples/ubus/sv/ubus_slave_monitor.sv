@@ -111,12 +111,12 @@ class ubus_slave_monitor extends uvm_monitor;
     addr_ph_imp = new("addr_ph_imp", this);
   endfunction : new
 
-  function void build();
+  function void build_phase();
        if (!ubus_vif_config::exists(this, get_full_name(),"vif",1))
 	 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"}) 
        else
           void'(ubus_vif_config::get(this, get_full_name(),"vif",vif));
-  endfunction: build
+  endfunction: build_phase
 
   // set the monitor's address range
   function void set_addr_range(bit [15:0] min_addr, bit [15:0] max_addr);
@@ -135,11 +135,11 @@ class ubus_slave_monitor extends uvm_monitor;
   endfunction : get_max_addr
 
   // run phase
-  virtual task run();
+  virtual task run_phase();
     fork
       collect_transactions();
     join
-  endtask : run
+  endtask : run_phase
 
   // collect_transactions
   virtual protected task collect_transactions();

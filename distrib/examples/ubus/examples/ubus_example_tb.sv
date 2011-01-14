@@ -19,10 +19,10 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UBUS_DEMO_TB_SV
-`define UBUS_DEMO_TB_SV
+`ifndef UBUS_EXAMPLE_TB_SV
+`define UBUS_EXAMPLE_TB_SV
 
-`include "ubus_demo_scoreboard.sv"
+`include "ubus_example_scoreboard.sv"
 `include "ubus_master_seq_lib.sv"
 `include "ubus_example_master_seq_lib.sv"
 `include "ubus_slave_seq_lib.sv"
@@ -30,20 +30,20 @@
 
 //------------------------------------------------------------------------------
 //
-// CLASS: ubus_demo_tb
+// CLASS: ubus_example_tb
 //
 //------------------------------------------------------------------------------
 
-class ubus_demo_tb extends uvm_env;
+class ubus_example_tb extends uvm_env;
 
   // Provide implementations of virtual methods such as get_type_name and create
-  `uvm_component_utils(ubus_demo_tb)
+  `uvm_component_utils(ubus_example_tb)
 
   // ubus environment
   ubus_env ubus0;
 
   // Scoreboard to check the memory operation of the slave.
-  ubus_demo_scoreboard scoreboard0;
+  ubus_example_scoreboard scoreboard0;
 
   // new
   function new (string name, uvm_component parent=null);
@@ -51,29 +51,29 @@ class ubus_demo_tb extends uvm_env;
   endfunction : new
 
   // build
-  virtual function void build();
-    super.build();
-    uvm_resource_db#(int)::set({get_full_name(),".ubus0"}, "num_masters", 1, this);
-    uvm_resource_db#(int)::set({get_full_name(),".ubus0"}, "num_slaves", 1, this);     
+  virtual function void build_phase();
+    super.build_phase();
+    uvm_resource_db#(int)::set({get_full_name(),".ubus0"}, 
+			       "num_masters", 1, this);
+    uvm_resource_db#(int)::set({get_full_name(),".ubus0"}, 
+			       "num_slaves", 1, this);     
     
-//    set_config_int("ubus0", "num_masters", 1);
-//    set_config_int("ubus0", "num_slaves", 1);
     ubus0 = ubus_env::type_id::create("ubus0", this);
-    scoreboard0 = ubus_demo_scoreboard::type_id::create("scoreboard0", this);
-  endfunction : build
+    scoreboard0 = ubus_example_scoreboard::type_id::create("scoreboard0", this);
+  endfunction : build_phase
 
-  function void connect();
+  function void connect_phase();
     // Connect slave0 monitor to scoreboard
     ubus0.slaves[0].monitor.item_collected_port.connect(
       scoreboard0.item_collected_export);
-  endfunction : connect
+  endfunction : connect_phase
 
-  function void end_of_elaboration();
+  function void end_of_elaboration_phase();
     // Set up slave address map for ubus0 (basic default)
     ubus0.set_slave_address_map("slaves[0]", 0, 16'hffff);
-  endfunction : end_of_elaboration
+  endfunction : end_of_elaboration_phase
 
-endclass : ubus_demo_tb
+endclass : ubus_example_tb
 
-`endif // UBUS_DEMO_TB_SV
+`endif // UBUS_EXAMPLE_TB_SV
 
