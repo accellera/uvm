@@ -605,6 +605,7 @@ class uvm_printer_knobs;
   int type_width = -1;
   int size_width = -1;
   int value_width = -1;
+  string sprint;
 
 endclass
 

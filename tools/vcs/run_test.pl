@@ -45,7 +45,7 @@ $vcs_mo = $2;
 $vcs_rl = $4;
 if ($vcs_yr < 2010) { &vcs_too_old($vcs_version); }
 if ($vcs_yr == 2010 && $vcs_mo == 6) { 
-  if ($vcs_rl < "3") { &vcs_too_old($vcs_version); }
+  if ($vcs_rl ne "SP1" && $vcs_rl < "3") { &vcs_too_old($vcs_version); }
 }
 
 sub vcs_too_old {
@@ -69,7 +69,7 @@ sub vcs_too_old {
 sub run_the_test {
   local($testdir, $vcs_opts, $simv_opts, $_) = @_;
 
-  $vcs = "$vcs_bin -sverilog +acc +vpi -timescale=1ns/1ns +incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv test.sv $uvm_home/src/dpi/uvm_dpi.cc -CFLAGS -DVCS -l vcs.log $vcs_opts";
+  $vcs = "$vcs_bin -sverilog +acc +vpi -timescale=1ns/1ns +incdir+$uvm_home/src $uvm_home/src/uvm.sv test.sv $uvm_home/src/dpi/uvm_dpi.cc -CFLAGS -DVCS -l vcs.log $vcs_opts";
   $vcs .= " > /dev/null 2>&1" unless $opt_v;
 
   system("cd $testdir; rm -f simv vcs.log simv.log; $vcs");

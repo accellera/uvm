@@ -834,7 +834,7 @@ class uvm_resource_pool;
     impt.name  = name;
     impt.scope = scope;
     impt.rsrc  = rsrc;
-    impt.t     = $time;
+    impt.t     = $realtime;
 
     get_record.push_back(impt);
   endfunction
@@ -1568,7 +1568,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
         else
           init_access_record(access_record);
         access_record.read_count++;
-        access_record.read_time = $time;
+        access_record.read_time = $realtime;
         access[str] = access_record;
       end
     end
@@ -1616,7 +1616,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
         else
           init_access_record(access_record);
         access_record.write_count++;
-        access_record.write_time = $time;
+        access_record.write_time = $realtime;
         access[str] = access_record;
       end
     end

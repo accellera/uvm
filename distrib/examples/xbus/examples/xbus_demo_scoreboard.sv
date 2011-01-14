@@ -52,8 +52,8 @@ class xbus_demo_scoreboard extends uvm_scoreboard;
     super.new(name, parent);
   endfunction : new
 
-  //build
-  function void build();
+  //build_phase
+  function void build_phase();
     item_collected_export = new("item_collected_export", this);
   endfunction
 
@@ -108,13 +108,13 @@ class xbus_demo_scoreboard extends uvm_scoreboard;
     end
   endfunction : memory_verify
 
-  // report
-  virtual function void report();
+  // report_phase
+  virtual function void report_phase();
     if(!disable_scoreboard) begin
       `uvm_info(get_type_name(),
         $psprintf("Reporting scoreboard information...\n%s", this.sprint()), UVM_LOW)
     end
-  endfunction : report
+  endfunction : report_phase
 
 endclass : xbus_demo_scoreboard
 

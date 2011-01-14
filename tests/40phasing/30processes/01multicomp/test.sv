@@ -33,7 +33,7 @@ class passive_comp extends uvm_component;
     set_phase_domain("uvm");
   endfunction
 
-  task main;
+  task main_phase;
     fork
       doit;
     join_none
@@ -56,12 +56,12 @@ class active_comp extends uvm_component;
     set_phase_domain("uvm");
   endfunction
 
-  task main;
+  task main_phase;
     started = 1;
     #105;
     ended = 1;
   endtask
-  task post_main;
+  task post_main_phase;
     post_started = 1;
     #105;
     post_ended = 1;
@@ -83,7 +83,7 @@ class test extends uvm_test;
       a_comp = new("a_comp", this);
    endfunction
 
-   function void report;
+   function void report_phase;
      //The passive component should count to 10 (every 10 units for
      //105 units. We want to verify that it terminated correctly.
      if(p_comp.cnt != 10) begin

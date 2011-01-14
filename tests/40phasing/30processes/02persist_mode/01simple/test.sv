@@ -43,7 +43,7 @@ class low extends uvm_component;
    bit reset_activated = 0; 
    bit main_started = 0; 
 
-   task reset();
+   task reset_phase();
       uvm_phase_schedule s = get_current_phase();
       set_thread_mode(UVM_PHASE_PERSISTENT);
       `uvm_info("RESET", "Start reset...", UVM_NONE)
@@ -56,7 +56,7 @@ class low extends uvm_component;
       `uvm_info("RESET", "Finish reset task...", UVM_NONE)
    endtask
    
-   task main();
+   task main_phase();
      main_started = 1;
      if($time != 0) begin
         failed = 1;
@@ -77,7 +77,7 @@ class sub extends uvm_component;
       set_default_thread_mode(UVM_PHASE_PERSISTENT);  
    endfunction
 
-   task configure();
+   task configure_phase();
       uvm_phase_schedule s = get_current_phase();
       `uvm_info("CFG", "Start configure...", UVM_NONE)
       #10;
@@ -99,12 +99,12 @@ class test extends uvm_component;
    function new(string name = "test1", uvm_component parent = null);
       super.new(name, parent);
    endfunction
-   function void build();
-      super.build();    
+   function void build_phase();
+      super.build_phase();    
       sub_inst = sub::type_id::create("sub_inst", this);
       low_inst = low::type_id::create("low_inst", this);
    endfunction
-   function void finalize();
+   function void finalize_phase();
      if(!low_inst.reset_activated) begin
        failed = 1;
        `uvm_error("RSTFAIL", "low_inst.reset phase did not reactivate as expected")

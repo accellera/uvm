@@ -77,7 +77,8 @@ class uvm_push_driver #(type REQ=uvm_sequence_item,
                                req_export.size()), UVM_NONE);
   endfunction
   
-  virtual function void end_of_elaboration();
+  virtual function void end_of_elaboration_phase();
+    super.end_of_elaboration_phase();
     check_port_connections();
   endfunction
   

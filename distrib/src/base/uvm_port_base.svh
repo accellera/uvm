@@ -85,8 +85,9 @@ virtual class uvm_port_component_base extends uvm_component;
 
   pure virtual function bit is_imp();
 
-  // Turn off auto config by not calling build()
-  virtual function void build();
+  // Turn off auto config by not calling build_phase()
+  virtual function void build_phase();
+    build(); //for backward compat
     return;
   endfunction
 

@@ -142,17 +142,17 @@ module test;
     endfunction
 
     // component can implement standard phases ...
-    task reset;
+    task reset_phase;
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("RST", "IN STD RESET", UVM_NONE)
       #30 `uvm_info("RST", "END STD RESET", UVM_NONE)
     endtask
-    task main;
+    task main_phase;
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("MAIN", "IN STD MAIN", UVM_NONE)
       #30 `uvm_info("MAIN", "END STD MAIN", UVM_NONE)
     endtask
-    task shutdown;
+    task shutdown_phase;
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("SHTDWN", "IN STD SHUTDOWN", UVM_NONE)
       #30 `uvm_info("SHTDWN", "END STD SHUTDOWN", UVM_NONE)
@@ -189,17 +189,17 @@ module test;
     endfunction
     
     // component can implement one or more of the phase methods
-    task reset;
+    task reset_phase;
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("RST", "IN STD RESET", UVM_NONE)
       #40 `uvm_info("RST", "END STD RESET", UVM_NONE)
     endtask
-    task main;
+    task main_phase;
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("MAIN", "IN STD MAIN", UVM_NONE)
       #20 `uvm_info("MAIN", "END STD MAIN", UVM_NONE)
     endtask
-    task shutdown;
+    task shutdown_phase;
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("SHTDWN", "IN STD SHUTDOWN", UVM_NONE)
       #40 `uvm_info("SHTDWN", "END STD SHUTDOWN", UVM_NONE)
@@ -252,7 +252,7 @@ module test;
       if (!scmd.compare_phase_times(scmd_times)) return 1 ;
       return 0 ;
     endfunction
-    task run;
+    task run_phase;
       `uvm_info("RUN", "In run", UVM_NONE)
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
     endtask
@@ -268,7 +268,7 @@ module test;
       me = new("me", this);
     endfunction
 
-    function void report();
+    function void report_phase();
       failed += me.check_times() ;
       if(failed) $display("*** UVM TEST FAILED ***");
       else $display("*** UVM TEST PASSED ***");

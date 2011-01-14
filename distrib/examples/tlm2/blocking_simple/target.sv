@@ -47,11 +47,11 @@ class target extends uvm_component;
       #5;
    endtask
 
-   function void start_of_simulation();
+   function void start_of_simulation_phase();
       `uvm_info("TRGT/RPT/START", $psprintf("m_data: 'h%h", m_data), UVM_NONE)
    endfunction
    
-   function void report();
+   function void report_phase();
       `uvm_info("TRGT/RPT/FINAL", $psprintf("m_data: 'h%h", m_data), UVM_NONE)
    endfunction
 

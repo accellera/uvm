@@ -40,6 +40,8 @@ Options:
    -F fname Write list of failing tests in specfied file instead of
                "tool.fails" (can later be used with -f)
    -h       Print this message
+   -M opts  Add the specified options to makefile command line
+              (applies to makefile-based tests)
    -R opts  Add the specified options to the simulation command
    -S       Do not skip tests
    -u dir   Use the UVM distribution in the specified directory
@@ -50,7 +52,7 @@ USAGE
 }
 
 require "getopts.pl"
-&Getopts("cC:df:F:hR:Su:v");
+&Getopts("cC:df:F:hR:Su:M:v");
 &usage if $opt_h || $#ARGV < 0;
 
 $tool = shift(@ARGV);
@@ -563,7 +565,7 @@ sub make_example {
 
   $result = 0;
   if (!$opt_c) {
-    $cmd = "cd $dir && make -f Makefile.$tool $opts";
+    $cmd = "cd $dir && make -f Makefile.$tool $opts $opt_M OPT_C=\"$opt_C\" OPT_R=\"$opt_R\" all";
     $cmd .= " > /dev/null 2>&1" unless $opt_v;
     $result = system($cmd);
   }

@@ -98,12 +98,19 @@ class uvm_root extends uvm_component;
   extern function void stop_request();
 
   
-  // Function: in_stop_request
+  // Function- in_stop_request
   //
-  // This function returns 1 if a stop request is currently active, and 0
-  // otherwise.
-
+  // Returns 1 if stop_request() was called, 0 otherwise.
+  //
   extern function bit in_stop_request();
+
+
+  // Function- is_executing_stop_processes
+  //
+  // Returns 1 if <in_stop_request> returns 1 and all objections to the
+  // <uvm_test_done> objection have been dropped.
+  //
+  extern function bit is_executing_stop_processes();
 
 
   // Function: find
@@ -173,9 +180,9 @@ class uvm_root extends uvm_component;
   // PRIVATE members
 
   extern `_protected function new ();
-  extern function void build();
-  extern function void end_of_elaboration();
-  extern local function void m_check_set_verbs();
+  extern function void build_phase();
+  extern function void end_of_elaboration_phase();
+  extern local function void m_do_verbosity_settings();
   extern local function void m_do_timeout_settings();
   extern local function void m_do_factory_settings();
   extern local function void m_process_inst_override(string ovr);
@@ -206,28 +213,15 @@ class uvm_root extends uvm_component;
   extern local function void print_active_phases();
   extern function int unsigned phase_process_count(); // TBD local
    
-  local  event      m_stop_request_e;
+  local  event m_stop_request_e;
 
   // singleton handle
   static local uvm_root m_inst;
 
   // For communicating all objections dropped.
   bit m_objections_outstanding = 0;
-  bit m_in_stop_request = 0;
-  bit m_executing_stop_processes = 0;
-
-  extern virtual task all_dropped (uvm_objection objection, 
-           uvm_object source_obj, string description, int count);
-  extern virtual function void raised (uvm_objection objection, 
-           uvm_object source_obj, string description, int count);
-  extern function uvm_test_done_objection test_done_objection();
-
-  // Need to create objection watcher processes from uvm_root because
-  // simulators may not allow processes to be created by static initializers,
-  // so the process cannot go in the objection class.
-  local uvm_objection m_objection_watcher_list[$];
-  extern function void m_objection_scheduler();
-  extern function void m_create_objection_watcher(uvm_objection objection);
+  local bit m_in_stop_request = 0;
+  local bit m_executing_stop_processes = 0;
 
   // At end of elab phase we need to do tlm binding resolution.
   function void phase_ended(uvm_phase_schedule phase);
@@ -364,16 +358,16 @@ function uvm_root::new();
 endfunction
 
 
-// build
+// build_phase
 // -----
 
-function void uvm_root::build();
+function void uvm_root::build_phase();
 
-  super.build();
+  super.build_phase();
 
   m_set_cl_msg_args();
 
-  m_check_set_verbs();
+  m_do_verbosity_settings();
   m_do_timeout_settings();
   m_do_factory_settings();
   m_do_config_settings();
@@ -383,10 +377,10 @@ function void uvm_root::build();
 endfunction
 
 
-// end_of_elaboration
-// ------------------
+// end_of_elaboration_phase
+// ------------------------
 
-function void uvm_root::end_of_elaboration();
+function void uvm_root::end_of_elaboration_phase();
   // For backward compatibility, the run phase never releases its objection until
   // the stop request comes in.
   uvm_phase_schedule run_ph = find_phase_schedule("uvm_pkg::common","*");
@@ -402,10 +396,10 @@ function void uvm_root::end_of_elaboration();
 endfunction
 
 
-// m_check_set_verbs
-// -----------------
+// m_do_verbosity_settings
+// -----------------------
 
-function void uvm_root::m_check_set_verbs();
+function void uvm_root::m_do_verbosity_settings();
   string set_verbosity_settings[$];
   string split_vals[$];
   uvm_verbosity tmp_verb;
@@ -427,7 +421,8 @@ function void uvm_root::m_check_set_verbs();
         set_verbosity_settings[i]), UVM_NONE, "", "");
     end
   end
-endfunction // void
+endfunction
+
 
 // m_do_timeout_settings
 // ---------------------
@@ -467,21 +462,23 @@ function void uvm_root::m_do_timeout_settings();
   end
 endfunction
 
+
 // m_do_factory_settings
 // ---------------------
 
 function void uvm_root::m_do_factory_settings();
   string args[$];
 
-  void'(clp.get_arg_matches("/^\\+[Uu][Vv][Mm]_[Ss][Ee][Tt]_[Ii][Nn][Ss][Tt]_[Oo][Vv][Ee][Rr][Rr][Ii][Dd][Ee]=/",args));
+  void'(clp.get_arg_matches("/^\\+(UVM_SET_INST_OVERRIDE|uvm_set_inst_override)=/",args));
   foreach(args[i]) begin
     m_process_inst_override(args[i].substr(23, args[i].len()-1));
   end
-  void'(clp.get_arg_matches("/^\\+[Uu][Vv][Mm]_[Ss][Ee][Tt]_[Tt][Yy][Pp][Ee]_[Oo][Vv][Ee][Rr][Rr][Ii][Dd][Ee]=/",args));
+  void'(clp.get_arg_matches("/^\\+(UVM_SET_TYPE_OVERRIDE|uvm_set_type_override)=/",args));
   foreach(args[i]) begin
     m_process_type_override(args[i].substr(23, args[i].len()-1));
   end
 endfunction
+
 
 // m_process_inst_override
 // -----------------------
@@ -501,6 +498,7 @@ function void uvm_root::m_process_inst_override(string ovr);
   uvm_report_info("INSTOVR", {"Applying instance override from the command line: +uvm_set_inst_override=", ovr}, UVM_NONE);
   fact.set_inst_override_by_name(split_val[0], split_val[1], split_val[2]);
 endfunction
+
 
 // m_process_type_override
 // -----------------------
@@ -531,6 +529,7 @@ function void uvm_root::m_process_type_override(string ovr);
   uvm_report_info("UVM_CMDLINE_PROC", {"Applying type override from the command line: +uvm_set_type_override=", ovr}, UVM_NONE);
   fact.set_type_override_by_name(split_val[0], split_val[1], replace);
 endfunction
+
 
 // m_process_config
 // ----------------
@@ -588,21 +587,23 @@ function void uvm_root::m_process_config(string cfg, bit is_int);
 
 endfunction
 
+
 // m_do_config_settings
 // --------------------
 
 function void uvm_root::m_do_config_settings();
   string args[$];
 
-  void'(clp.get_arg_matches("/^\\+[Uu][Vv][Mm]_[Ss][Ee][Tt]_[Cc][Oo][Nn][Ff][Ii][Gg]_[Ii][Nn][Tt]=/",args));
+  void'(clp.get_arg_matches("/^\\+(UVM_SET_CONFIG_INT|uvm_set_config_int)=/",args));
   foreach(args[i]) begin
     m_process_config(args[i].substr(20, args[i].len()-1), 1);
   end
-  void'(clp.get_arg_matches("/^\\+[Uu][Vv][Mm]_[Ss][Ee][Tt]_[Cc][Oo][Nn][Ff][Ii][Gg]_[Ss][Tt][Rr][Ii][Nn][Gg]=/",args));
+  void'(clp.get_arg_matches("/^\\+(UVM_SET_CONFIG_STRING|uvm_set_config_string)=/",args));
   foreach(args[i]) begin
     m_process_config(args[i].substr(23, args[i].len()-1), 0);
   end
 endfunction
+
 
 // m_do_max_quit_settings
 // ----------------------
@@ -775,7 +776,7 @@ task uvm_root::run_test(string test_name="");
   // Set up the process that watches objections to handle the all_dropped
   // situation to be safe from killing threads. Needs to be done in run_test
   // since it needs to be in an initial block to fork a process.
-  m_objection_scheduler();
+  uvm_objection::m_start_objection_processes();
 
 `ifndef UVM_NO_DPI
 
@@ -985,6 +986,7 @@ task uvm_root::m_stop_process();
   m_stop_request(stop_timeout);
 endtask
 
+
 // in_stop_request
 // ---------------
 
@@ -992,13 +994,22 @@ function bit uvm_root::in_stop_request();
   return m_in_stop_request;
 endfunction
 
+
+// is_executing_stop_processes
+// ---------------------------
+
+function bit uvm_root::is_executing_stop_processes();
+  return m_executing_stop_processes;
+endfunction
+
+
 // m_stop_request
 // --------------
 
 task uvm_root::m_stop_request(time timeout=0, bit forced = 0);
 
   if (timeout == 0 && !forced)
-    timeout = `UVM_DEFAULT_TIMEOUT - $time;
+    timeout = `UVM_DEFAULT_TIMEOUT - $realtime;
 
   // stop request valid for running task-based phases only
 //  uvm_report_fatal("DEV","TBD in uvm_root::m_stop_request() needs coded");
@@ -1079,38 +1090,6 @@ task uvm_root::m_do_stop_all(uvm_component comp);
     end
     join_none
   end
-endtask
-
-
-// This objection is used to communicate all objections dropped at the
-// root level so that the uvm_top can start the shutdown.
-
-// Function - raised
-//
-//
-
-function void uvm_root::raised (uvm_objection objection, uvm_object source_obj, 
-                              string description, int count);
-  if (objection != test_done_objection())
-    return;
-  if (m_executing_stop_processes) begin
-    string desc = description == "" ? "" : {" (\"", description, "\") "};
-    uvm_report_warning("ILLRAISE", {"An uvm_test_done objection ", desc, "was raised during the execution of component stop processes for the stop_request. The objection is ignored by the stop process."}, UVM_NONE);
-  end
-  else
-    m_objections_outstanding = 1;
-endfunction
-
-
-// Task - all_dropped
-//
-//
-
-task uvm_root::all_dropped (uvm_objection objection, uvm_object source_obj, 
-                          string description, int count);
-  if(objection != test_done_objection())
-    return;
-  m_objections_outstanding = 0;
 endtask
 
 
@@ -1197,25 +1176,5 @@ function void uvm_root::print_topology(uvm_printer printer=null);
 
 endfunction
 
-
-function void uvm_root::m_create_objection_watcher(uvm_objection objection);
-  m_objection_watcher_list.push_back(objection);
-endfunction
-
-
-function void uvm_root::m_objection_scheduler();
-  fork begin
-    while(1) begin
-      wait(m_objection_watcher_list.size() != 0);
-      foreach(m_objection_watcher_list[i]) begin
-        automatic uvm_objection obj = m_objection_watcher_list[i];
-        fork begin
-          obj.m_execute_scheduled_forks();
-        end join_none
-      end
-      m_objection_watcher_list.delete();
-    end
-  end join_none
-endfunction
 
 `endif //UVM_ROOT_SVH

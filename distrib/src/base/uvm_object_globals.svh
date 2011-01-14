@@ -281,8 +281,6 @@ typedef enum {
 
 
 typedef int UVM_FILE;
-uvm_action s_default_action_array[string]; // default is already NO_ACTION
-UVM_FILE s_default_file_array[string]; // default is already 0
 
 
 //-----------------

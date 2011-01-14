@@ -133,11 +133,11 @@ class xbus_slave_monitor extends uvm_monitor;
   endfunction : get_max_addr
 
   // run phase
-  virtual task run();
+  virtual task run_phase();
     fork
       collect_transactions();
     join
-  endtask : run
+  endtask : run_phase
 
   // collect_transactions
   virtual protected task collect_transactions();

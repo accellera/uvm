@@ -49,7 +49,7 @@ static int uvm_hdl_max_width()
   vpiHandle ms;
   s_vpi_value value_s = { vpiIntVal, 0 };
   ms = vpi_handle_by_name(
-        "uvm_pkg::UVM_HDL_MAX_WIDTH", 0);
+      (PLI_BYTE8*) "uvm_pkg::UVM_HDL_MAX_WIDTH", 0);
   if(ms == 0) 
     return 1024;  /* If nothing else is defined, 
                      this is the DEFAULT */
@@ -207,8 +207,8 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 
   if(r == 0)
   {
-    vpi_printf("ERROR UVM : set: unable to locate hdl path (%s)\n",path);
-    vpi_printf(" Either the name is incorrect, or you may not have PLI/ACC visibility to that name\n");
+      vpi_printf((PLI_BYTE8*) "ERROR UVM : set: unable to locate hdl path (%s)\n",path);
+      vpi_printf((PLI_BYTE8*) " Either the name is incorrect, or you may not have PLI/ACC visibility to that name\n");
     return 0;
   }
   else
@@ -272,8 +272,8 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 
   if(r == 0)
   {
-    vpi_printf("ERROR UVM : get: unable to locate hdl path %s\n", path);
-    vpi_printf(" Either the name is incorrect, or you may not have PLI/ACC visibility to that name\n");
+      vpi_printf((PLI_BYTE8*) "ERROR UVM : get: unable to locate hdl path %s\n", path);
+      vpi_printf((PLI_BYTE8*) " Either the name is incorrect, or you may not have PLI/ACC visibility to that name\n");
     // Exiting is too harsh. Just return instead.
     // tf_dofinish();
     return 0;
@@ -286,9 +286,9 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
     size = vpi_get(vpiSize, r);
     if(size > maxsize)
     {
-      vpi_printf("ERROR UVM_register : hdl path '%s' is %0d bits,\n",path,size);
-      vpi_printf(" but the maximum size is %0d. You can increase the maximum\n",maxsize);
-      vpi_printf(" via a compile-time flag: +define+UVM_HDL_MAX_WIDTH=<value>\n");
+        vpi_printf((PLI_BYTE8*) "ERROR UVM_register : hdl path '%s' is %0d bits,\n",path,size);
+        vpi_printf((PLI_BYTE8*) " but the maximum size is %0d. You can increase the maximum\n",maxsize);
+        vpi_printf((PLI_BYTE8*) " via a compile-time flag: +define+UVM_HDL_MAX_WIDTH=<value>\n");
       //tf_dofinish();
 #ifndef VCS
       vpi_release_handle(r);

@@ -80,7 +80,7 @@ sub run_the_test {
   local($testdir, $ius_comp_opts, $ius_sim_opts, $_) = @_;
   local($uvm_dpi_lib) = qx($uvm_home/bin/uvm_dpi_name);
   
-  $ius = "irun -uvmhome $uvm_home -uvmnoautocompile $uvm_home/src/dpi/uvm_dpi.cc -incdir $uvm_home/src $uvm_home/src/uvm_pkg.sv $ius_comp_opts test.sv +UVM_TESTNAME=test $ius_sim_opts";
+  $ius = "irun -uvmhome $uvm_home -uvmnoautocompile $uvm_home/src/dpi/uvm_dpi.cc -incdir $uvm_home/src $uvm_home/src/uvm.sv $ius_comp_opts test.sv +UVM_TESTNAME=test $ius_sim_opts";
   $ius .= " -nostdout" unless $opt_v;
 
   print "$ius\n" if $opt_v;

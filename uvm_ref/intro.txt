@@ -38,12 +38,18 @@ allows dynamically configurable component hierarchies and object substitutions
 without having to modify their code and without breaking encapsulation.
 See <Factory Classes> for details.
 
-Configuration and Resources - Need content.
+Configuration and Resources - The <Configuration and Resource Classes> are
+a set of classes which provide a configuration database. The configuration
+database is used to store and retrieve both configuration time and
+run time properties.
 
 Sychronization - The UVM provides event and barrier synchronization classes
 for process synchronization. See <Synchronization Classes> for more information.
 
-Containers - Need content.
+Containers - The <Container Classes> are type parameterized datastructures 
+which provide queue and pool services. The class based queue and pool types
+allow for efficient sharing of the datastructures compared with their
+SystemVerilog built-in counterparts.
 
 Policies - Each of UVM's policy classes perform a specific task for
 <uvm_object>-based objects: printing, comparing, recording, packing, and unpacking.

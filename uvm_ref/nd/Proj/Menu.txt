@@ -58,8 +58,9 @@ Group: Base  {
    File: uvm_object  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_object.svh)
    File: uvm_transaction  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_transaction.svh)
    File: uvm_root  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_root.svh)
-   File: uvm_phase  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_phases.sv)
    File: uvm_port_base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_port_base.svh)
+   File: Phase Scheduling API  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_phases.svh)
+   File: uvm_graph  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_graph.svh)
    }  # Group: Base
 
 Group: Reporting  {
@@ -202,6 +203,7 @@ Group: Macros  {
    File: Sequence and Do Action  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/macros/uvm_sequence_defines.svh)
    File: Callbacks  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/macros/uvm_callback_defines.svh)
    File: TLM Implementation Port Declaration Macros  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/macros/uvm_tlm_defines.svh)
+   File: uvm_reg_defines.svh  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/macros/uvm_reg_defines.svh)
    }  # Group: Macros
 
 Group: Register Layer  {

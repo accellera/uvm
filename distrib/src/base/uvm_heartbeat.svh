@@ -276,7 +276,7 @@ class uvm_heartbeat extends uvm_object;
             endcase
           end 
           m_cb.reset_counts();
-          last_trigger = $time;
+          last_trigger = $realtime;
           triggered = 1;
         end
       end
@@ -303,7 +303,7 @@ class uvm_hb_callback extends uvm_objection_callback;
     if(obj == target) begin
       if(!cnt.exists(source_obj)) cnt[source_obj] = 0;
       cnt[source_obj] = cnt[source_obj]+1;
-      last_trigger[source_obj] = $time;
+      last_trigger[source_obj] = $realtime;
     end
   endfunction
   virtual function void dropped (uvm_objection objection, uvm_object obj, 

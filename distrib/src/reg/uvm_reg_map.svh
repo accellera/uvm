@@ -91,14 +91,40 @@ class uvm_reg_map extends uvm_object;
    // Group: Initialization
    //----------------------
 
-   /*local*/ extern function new(string name = "");
+
+   // Function: new
+   //
+   // Create a new instance
+   //
+   extern function new(string name="uvm_reg_map");
 
 
-   /*local*/ extern function void configure(uvm_reg_block     parent,
-                                            uvm_reg_addr_t    base_addr,
-                                            int unsigned      n_bytes,
-                                            uvm_endianness_e  endian,
-                                            bit byte_addressing=1);
+   // Function: configure
+   //
+   // Instance-specific configuration
+   //
+   // Configures this map with the following properties.
+   //
+   // parent    - the block in which this map is created and applied
+   //
+   // base_addr - the base address for this map. All registers, memories,
+   //             and sub-blocks will be at offsets to this address
+   //
+   // n_bytes   - the byte-width of the bus on which this map is used 
+   //
+   // endian    - the endian format. See <uvm_endianness_e> for possible
+   //             values
+   //
+   // byte_addressing - specifies whether the address increment is on a
+   //             per-byte basis. For example, consecutive memory locations
+   //             with ~n_bytes~=4 (32-bit bus) are 4 apart: 0, 4, 8, and
+   //             so on. Default is TRUE.
+   //
+   extern function void configure(uvm_reg_block     parent,
+                                  uvm_reg_addr_t    base_addr,
+                                  int unsigned      n_bytes,
+                                  uvm_endianness_e  endian,
+                                  bit byte_addressing=1);
 
    // Function: add_reg
    //
@@ -438,8 +464,8 @@ class uvm_reg_map extends uvm_object;
                                                       ref uvm_reg_addr_t    addr[]);
    
 
-   //
    // Function: get_reg_by_offset
+   //
    // Get register mapped at offset
    //
    // Identify the register located at the specified offset within
@@ -491,6 +517,8 @@ class uvm_reg_map extends uvm_object;
    // While more complex, this mode will capture all register read/write
    // activity, including that not directly descendant from calls to
    // <uvm_reg::write> and <uvm_reg::read>.
+   //
+   // By default, auto-prediction is turned off.
    // 
    function void set_auto_predict(bit on=1); m_auto_predict = on; endfunction
 
@@ -558,9 +586,9 @@ endclass: uvm_reg_map
 
 // new
 
-function uvm_reg_map::new(string name = "");
+function uvm_reg_map::new(string name = "uvm_reg_map");
    super.new((name == "") ? "default_map" : name);
-   m_auto_predict = 1;
+   m_auto_predict = 0;
 endfunction
 
 
