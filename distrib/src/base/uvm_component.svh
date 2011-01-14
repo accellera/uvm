@@ -2635,7 +2635,7 @@ function integer uvm_component::record_error_tr (string stream_name="main",
   if(keep_active) etype = "Error, Link";
   else etype = "Error";
 
-  if(error_time == 0) error_time = $time;
+  if(error_time == 0) error_time = $realtime;
 
   stream_h = m_stream_handle[stream_name];
   if (uvm_check_handle_kind("Fiber", stream_h) != 1) begin  
@@ -2669,7 +2669,7 @@ function integer uvm_component::record_event_tr (string stream_name="main",
   if(keep_active) etype = "Event, Link";
   else etype = "Event";
 
-  if(event_time == 0) event_time = $time;
+  if(event_time == 0) event_time = $realtime;
 
   stream_h = m_stream_handle[stream_name];
   if (uvm_check_handle_kind("Fiber", stream_h) != 1) begin  

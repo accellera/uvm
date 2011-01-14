@@ -1009,7 +1009,7 @@ endfunction
 task uvm_root::m_stop_request(time timeout=0, bit forced = 0);
 
   if (timeout == 0 && !forced)
-    timeout = `UVM_DEFAULT_TIMEOUT - $time;
+    timeout = `UVM_DEFAULT_TIMEOUT - $realtime;
 
   // stop request valid for running task-based phases only
 //  uvm_report_fatal("DEV","TBD in uvm_root::m_stop_request() needs coded");
