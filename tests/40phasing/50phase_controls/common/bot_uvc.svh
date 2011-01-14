@@ -48,7 +48,7 @@ class bot_driver extends uvm_driver#(bot_item);
       get_and_drive();
       reset_signals();
     join_none;
-  endtask : run
+  endtask : run_phase
 
   // get_and_drive
   virtual protected task get_and_drive();
