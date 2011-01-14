@@ -34,8 +34,8 @@ class blk_env extends uvm_env;
       super.new(name, parent);
    endfunction: new
 
-   virtual function void build();
-      super.build();
+   virtual function void build_phase();
+      super.build_phase();
 
       if (model == null) begin
          model = reg_block_B::type_id::create("reg_blk_B");
@@ -45,9 +45,9 @@ class blk_env extends uvm_env;
 
          apb = apb_agent::type_id::create("apb",this);
       end
-   endfunction: build
+   endfunction: build_phase
 
-   virtual function void connect();
+   virtual function void connect_phase();
       if (model.get_parent() == null) begin
          reg2apb_adapter reg2apb = new;
          model.default_map.set_sequencer(apb.sqr, reg2apb);

@@ -39,7 +39,7 @@ class initiator extends uvm_component;
    //
    // Execute a simple read-modify-write
    //
-   virtual task run();
+   virtual task run_phase();
       apb_rw rw;
       uvm_tlm_time delay = new;
 

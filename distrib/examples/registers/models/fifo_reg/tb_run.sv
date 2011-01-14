@@ -66,7 +66,7 @@ class my_test extends tb_env;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
+   virtual task run_phase();
       uvm_status_e   status;
       uvm_reg_data_t data;
       uvm_reg_data_t expected[];

@@ -34,7 +34,7 @@ class lower extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  task run();
+  task run_phase();
     #10 $display("%0t: %s HI", $time, get_full_name());
   endtask
 
@@ -42,7 +42,7 @@ class lower extends uvm_component;
     return "lower";
   endfunction
 
-  function void build();
+  function void build_phase();
      void'(get_config_int("data", data));
      void'(get_config_string("str", str));
   endfunction 
@@ -72,7 +72,7 @@ class myunit extends uvm_component;
     a = new[5]; for(int i=0; i<5;++i) a[i] = i*i;
   endfunction
 
-  task run();
+  task run_phase();
     #10 $display("%0t: %s HI", $time, get_full_name());
   endtask
 

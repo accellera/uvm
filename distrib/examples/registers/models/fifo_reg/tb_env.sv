@@ -33,7 +33,7 @@ class tb_env extends uvm_env;
       super.new(name, parent);
    endfunction: new
 
-   virtual function void build();
+   virtual function void build_phase();
       if (regmodel == null) begin
          regmodel = reg_block_B::type_id::create("regmodel");
          regmodel.build();
@@ -43,9 +43,9 @@ class tb_env extends uvm_env;
       apb = apb_agent::type_id::create("apb", this);
       predict = uvm_reg_predictor#(apb_rw)::type_id::create("predict", this);
 
-  endfunction: build
+  endfunction: build_phase
 
-   virtual function void connect();
+   virtual function void connect_phase();
       if (regmodel.get_parent() == null) begin
 
         reg2apb_adapter apb_adapter  = new("apb_adapter");

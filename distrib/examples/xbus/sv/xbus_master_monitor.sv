@@ -109,11 +109,11 @@ class xbus_master_monitor extends uvm_monitor;
   endfunction
 
   // run phase
-  virtual task run();
+  virtual task run_phase();
     fork
       collect_transactions();
     join
-  endtask : run
+  endtask : run_phase
 
   // collect_transactions
   virtual protected task collect_transactions();

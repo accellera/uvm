@@ -26,18 +26,18 @@ class test extends uvm_component;
       super.new(name, parent);
    endfunction
 
-  function void end_of_elaboration();
+  function void end_of_elaboration_phase();
      // Set verbosity for  demo
      set_report_verbosity_level(UVM_FULL);
      begin
         uvm_root top = uvm_root::get();
         top.print_topology();
      end
-  endfunction : end_of_elaboration
+  endfunction : end_of_elaboration_phase
 
-   task run();
+   task run_phase();
       #100;
       global_stop_request();
-   endtask // run
+   endtask // run_phase
    
 endclass
