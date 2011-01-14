@@ -885,7 +885,6 @@ endfunction
 
 task uvm_phase_schedule::wait_no_objections(uvm_component waiter=null);
   uvm_root top=uvm_root::get();
-  if(waiter == null) waiter = top;
 
   if(get_name() == "run" && waiter==top) begin
     fork begin // wrapper fork to protect siblings
