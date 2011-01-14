@@ -517,6 +517,8 @@ class uvm_reg_map extends uvm_object;
    // While more complex, this mode will capture all register read/write
    // activity, including that not directly descendant from calls to
    // <uvm_reg::write> and <uvm_reg::read>.
+   //
+   // By default, auto-prediction is turned off.
    // 
    function void set_auto_predict(bit on=1); m_auto_predict = on; endfunction
 
@@ -586,7 +588,7 @@ endclass: uvm_reg_map
 
 function uvm_reg_map::new(string name = "uvm_reg_map");
    super.new((name == "") ? "default_map" : name);
-   m_auto_predict = 1;
+   m_auto_predict = 0;
 endfunction
 
 

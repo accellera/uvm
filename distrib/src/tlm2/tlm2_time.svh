@@ -273,7 +273,7 @@ endclass
 //|    a A = new; 
 //|    A.f(t); 
 //|    #t; 
-//|    $write("T=%0d ps (10,000)\n", $time());
+//|    $write("T=%0d ps (10,000)\n", $realtime());
 //| end
 //| endprogram
 //  
@@ -315,7 +315,7 @@ endclass
 //|       a A = new;
 //|       A.f(t);
 //|       #(t.get_realtime(1ns));
-//|       $write("T=%0d ps (10,000)\n", $time());
+//|       $write("T=%0d ps (10,000)\n", $realtime());
 //| end
 //| endprogram
 //

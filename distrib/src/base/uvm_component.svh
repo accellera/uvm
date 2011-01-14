@@ -581,48 +581,6 @@ virtual class uvm_component extends uvm_report_object;
 
   extern function void set_phase_imp(uvm_phase_imp phase, uvm_phase_imp imp, int hier=1);
 
-  // Function: raise_objection
-  //
-  // Raises an objection to the end of the current phase. The current phase
-  // ends when all objections to the phase have been dropped. The ~phase~
-  // argument must be provided. If null, uvm will call <get_current_phase>
-  // but this is only successful if the function call is made in the
-  // main phase process (not from a child process). It is a good practice
-  // to get the phase process before forking any child process. For example:
-  //
-  //| task main_phase;
-  //|   uvm_phase_schedule phase = get_current_phase();
-  //|   fork begin
-  //|     raise_objection(phase);
-  //|     ...
-  //|     drop_objection(phase);
-  //|   end join_none
-  //|   ...
-  //| endtask
-
-  extern function void raise_objection(uvm_phase_schedule phase=null);
-
-
-  // Function: drop_objection
-  //
-  // Drops an objection to the end of the current phase. The current phase
-  // ends when all objections to the phase have been dropped. The ~phase~
-  // argument must be provided. If null, uvm will call <get_current_phase>
-  // but this is only successful if the function call is made in the
-  // main phase process (not from a child process). It is a good practice
-  // to get the phase process before forking any child process. 
-
-  extern function void drop_objection(uvm_phase_schedule phase=null); 
-
-
-  // Function: terminate_phase
-  //
-  // Forces all objections to the ~phase~ to be immediately dropped
-  // so that the phase can end.
-
-  extern function void terminate_phase(uvm_phase_schedule phase=null);
-
-  
   // Function: jump
   extern function void jump(uvm_phase_imp phase);
   
@@ -1339,7 +1297,25 @@ virtual class uvm_component extends uvm_report_object;
   // and their meaning.
 
     extern function void set_report_verbosity_level_hier (int verbosity);
-  
+ 
+
+  // Function: pre_abort
+  //
+  // This callback is executed when the message system is executing a
+  // <UVM_EXIT> action. The exit action causes an immediate termination of
+  // the simulation, but the pre_abort callback hook gives components an 
+  // opportunity to provide additional information to the user before
+  // the termination happens. For example, a test may want to executed
+  // the report function of a particular component even when an error
+  // condition has happened to force a premature termination you would
+  // write a function like:
+  //
+  //| function void mycomponent::pre_abort();
+  //|   report();
+  //| endfunction
+
+  virtual function void pre_abort;
+  endfunction
 
   //----------------------------------------------------------------------------
   // Group: Recording Interface
@@ -1607,6 +1583,8 @@ virtual class uvm_component extends uvm_report_object;
   } m_verbosity_setting;
   m_verbosity_setting m_verbosity_settings[$];
 
+  // does the pre abort callback hierarchically
+  extern /*local*/ function void m_do_pre_abort;
 endclass : uvm_component
 
 
@@ -2438,24 +2416,6 @@ function void uvm_component::jump_all_domains(uvm_phase_imp phase);
   current_phase.jump_all(phase);
 endfunction
 
-function void uvm_component::raise_objection(uvm_phase_schedule phase=null);
-  if(phase == null)
-    phase = get_current_phase();
-  phase.phase_done.raise_objection(this);
-endfunction
-
-function void uvm_component::drop_objection(uvm_phase_schedule phase=null);
-  if(phase == null)
-    phase = get_current_phase();
-  phase.phase_done.drop_objection(this);
-endfunction
-
-function void uvm_component::terminate_phase(uvm_phase_schedule phase=null);
-  if(phase == null)
-    phase = get_current_phase();
-  phase.terminate_phase();
-endfunction
-
 
 // do_kill_all
 // -----------
@@ -2750,7 +2710,7 @@ function integer uvm_component::record_error_tr (string stream_name="main",
   if(keep_active) etype = "Error, Link";
   else etype = "Error";
 
-  if(error_time == 0) error_time = $time;
+  if(error_time == 0) error_time = $realtime;
 
   stream_h = m_stream_handle[stream_name];
   if (uvm_check_handle_kind("Fiber", stream_h) != 1) begin  
@@ -2784,7 +2744,7 @@ function integer uvm_component::record_event_tr (string stream_name="main",
   if(keep_active) etype = "Event, Link";
   else etype = "Event";
 
-  if(event_time == 0) event_time = $time;
+  if(event_time == 0) event_time = $realtime;
 
   stream_h = m_stream_handle[stream_name];
   if (uvm_check_handle_kind("Fiber", stream_h) != 1) begin  
@@ -3309,3 +3269,8 @@ function void uvm_component::m_set_cl_sev;
   end
 endfunction
 
+function void uvm_component::m_do_pre_abort;
+  foreach(m_children[i])
+    m_children[i].m_do_pre_abort(); 
+  pre_abort(); 
+endfunction

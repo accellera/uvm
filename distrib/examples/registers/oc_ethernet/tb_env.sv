@@ -64,6 +64,7 @@ class oc_ethernet_env extends uvm_env;
       reg2wsh_adapter reg2wsh = new;
       seqr = uvm_utils#(wb_sequencer)::find(host);
       model.default_map.set_sequencer(seqr,reg2wsh);
+      model.default_map.set_auto_predict();
       this.host.drv.bind_vitf(tb_top.wb_sl);
    endfunction
 
