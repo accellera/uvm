@@ -41,7 +41,7 @@ class simple_driver extends uvm_driver #(simple_item);
     super.new(name, parent);
   endfunction : new
 
-  task run ();
+  task run_phase ();
     while(1) begin
       #10;
       seq_item_port.get_next_item(req);
@@ -49,7 +49,7 @@ class simple_driver extends uvm_driver #(simple_item);
       req.print();
       seq_item_port.item_done();
     end
-  endtask: run
+  endtask: run_phase
 
 endclass : simple_driver
 

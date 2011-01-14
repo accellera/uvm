@@ -58,9 +58,9 @@ virtual class uvm_agent extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  function void build();
+  function void build_phase();
     int active;
-    super.build();
+    super.build_phase();
     if(get_config_int("is_active", active)) is_active = uvm_active_passive_enum'(active);
   endfunction
 

@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------- 
-//   Copyright 2010 Synopsys, Inc. 
+//   Copyright 2011 Cadence Design Systems, Inc. 
 //   All Rights Reserved Worldwide 
 // 
 //   Licensed under the Apache License, Version 2.0 (the 
@@ -18,16 +18,24 @@
 //----------------------------------------------------------------------
 
 
-program top;
+module top;
 
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 
-class test extends uvm_test;
+// This test checks for two modes of the name change:
+//   1. a component uses only the old OVM phase names
+//   2. a component uses the new phase names but extends from one which uses
+//      the old names.
+
+// base class uses old OVM style names for the common phases. These all need to
+// executed even though the extended class is using the new phase names.
+
+class base extends uvm_test;
 
    static int n_ph = 0;
 
-   `uvm_component_utils(test)
+   `uvm_component_utils(base)
 
    string last_phase = "";
 
@@ -52,106 +60,102 @@ class test extends uvm_test;
       last_phase = curr;
       `uvm_info("Test", $psprintf("Ending phase \"%s\"...", curr), UVM_LOW)
       n_ph++;
+      global_stop_request();
    endtask
 
    function new(string name = "my_comp", uvm_component parent = null);
       super.new(name, parent);
-      set_phase_domain("uvm");
    endfunction
 
-   function void build_phase();
+   function void build();
       check_the_phase("", "build");
    endfunction
    
-   function void connect_phase();
+   function void connect();
       check_the_phase("build", "connect");
    endfunction
    
-   function void end_of_elaboration_phase();
+   function void end_of_elaboration();
       check_the_phase("connect", "end_of_elaboration");
    endfunction
    
-   function void start_of_simulation_phase();
+   function void start_of_simulation();
       check_the_phase("end_of_elaboration", "start_of_simulation");
    endfunction
    
-   task run_phase();
+   task run();
       check_the_phase_t("start_of_simulation", "run");
    endtask
    
-   task pre_reset_phase();
-      check_the_phase_t("start_of_simulation", "pre_reset");
-      // Make sure the last phase is not "run"
-      #10;
-      last_phase = "pre_reset";
-   endtask
-   
-   task reset_phase();
-      check_the_phase_t("pre_reset", "reset");
-   endtask
-   
-   task post_reset_phase();
-      check_the_phase_t("reset", "post_reset");
-   endtask
-   
-   task pre_configure_phase();
-      check_the_phase_t("post_reset", "pre_configure");
-   endtask
-   
-   task configure_phase();
-      check_the_phase_t("pre_configure", "configure");
-   endtask
-   
-   task post_configure_phase();
-      check_the_phase_t("configure", "post_configure");
-   endtask
-   
-   task pre_main_phase();
-      check_the_phase_t("post_configure", "pre_main");
-   endtask
-   
-   task main_phase();
-      check_the_phase_t("pre_main", "main");
-   endtask
-   
-   task post_main_phase();
-      check_the_phase_t("main", "post_main");
-   endtask
-   
-   task pre_shutdown_phase();
-      check_the_phase_t("post_main", "pre_shutdown");
-   endtask
-   
-   task shutdown_phase();
-      check_the_phase_t("pre_shutdown", "shutdown");
-   endtask
-   
-   task post_shutdown_phase();
-      check_the_phase_t("shutdown", "post_shutdown");
-   endtask
-   
-   function void extract_phase();
-      check_the_phase("post_shutdown", "extract");
+   function void extract();
+      check_the_phase("run", "extract");
    endfunction
-   
-   function void check_phase();
+
+   function void check();
       check_the_phase("extract", "check");
    endfunction
-   
-   function void report_phase();
+
+   function void report();
       check_the_phase("check", "report");
    endfunction
-   
+
    function void finalize_phase();
       check_the_phase("report", "finalize");
    endfunction
+endclass
+
+// Extended class uses the new names
+
+class test extends base;
+   base b;  //extends one component that just uses the old style
+   `uvm_component_utils(test)
+
+   function new(string name = "my_comp", uvm_component parent = null);
+      super.new(name, parent);
+      b = new("b", this);
+   endfunction
+
+   function void build_phase();
+      super.build_phase();
+   endfunction
    
+   function void connect_phase();
+      super.connect_phase();
+   endfunction
+   
+   function void end_of_elaboration_phase();
+      super.end_of_elaboration_phase();
+   endfunction
+   
+   function void start_of_simulation_phase();
+      super.start_of_simulation_phase();
+   endfunction
+   
+   task run_phase();
+      super.run_phase();
+   endtask
+   
+   function void extract_phase();
+      super.extract_phase();
+   endfunction
+
+   function void check_phase();
+      super.check_phase();
+   endfunction
+
+   function void report_phase();
+      super.report_phase();
+   endfunction
+
+   function void finalize_phase();
+      super.finalize_phase();
+   endfunction
 endclass
 
 initial
 begin
    uvm_top.finish_on_completion = 0;
-   `uvm_info("Test", "Phasing one component through default phases...", UVM_NONE);
+   `uvm_info("Test", "Phasing one component common phases...", UVM_NONE);
    
    run_test();
 
@@ -163,10 +167,11 @@ begin
                                       t.last_phase));
       end
    end
-   
-   if (test::n_ph != 21) begin
-      `uvm_error("Test", $psprintf("A total of %0d phase methods were executed instead of 21.",
-                                   test::n_ph));
+  
+   // 9 phases for each of the components
+   if (test::n_ph != 18) begin
+      `uvm_error("Test", $psprintf("A total of %0d phase methods were executed instead of 18.",
+                                   base::n_ph));
    end
    
    begin
@@ -183,4 +188,4 @@ begin
    end
 end
 
-endprogram
+endmodule

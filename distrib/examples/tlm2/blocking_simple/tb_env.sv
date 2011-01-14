@@ -29,12 +29,12 @@ class tb_env extends uvm_component;
       super.new(name, parent);
    endfunction
 
-   function void build();
+   function void build_phase();
       master = initiator::type_id::create("master", this);
       slave  = target::type_id::create("slave", this);
    endfunction
 
-   function void connect();
+   function void connect_phase();
       master.sock.connect(slave.sock);
    endfunction
 

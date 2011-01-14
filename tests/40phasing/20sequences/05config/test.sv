@@ -48,7 +48,7 @@ class myseqr extends uvm_sequencer;
   endfunction
   `uvm_component_utils(myseqr)
 
-  task run;
+  task run_phase;
     `uvm_info("RUN","In run!!", UVM_NONE)
     #100;
   endtask
@@ -64,7 +64,7 @@ class test extends uvm_test;
 
    `uvm_component_utils(test)
 
-   function void build();
+   function void build_phase();
       uvm_phase_schedule domain;
       uvm_object_wrapper w;
       seqr = new("seqr", this);
@@ -75,7 +75,7 @@ class test extends uvm_test;
       uvm_config_seq::set(this, "seqr", "main_ph",  w);
    endfunction
    
-   function void report();
+   function void report_phase();
      if(myseq::start_cnt != 2 && myseq::end_cnt != 2)
        $display("*** UVM TEST FAILED ***");
       else

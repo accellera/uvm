@@ -37,7 +37,7 @@ module top;
     function new(string name, uvm_component parent);
       super.new(name, parent);
     endfunction
-    task run();
+    task run_phase();
       forever begin
         #20;
       end
@@ -54,12 +54,12 @@ module top;
       super.new(name, parent);
     endfunction
 
-    task run();
+    task run_phase();
       #10 global_stop_request(); 
       #10;
     endtask
 
-    function void report;
+    function void report_phase;
       if($time == 10) $display("*** UVM TEST PASSED ***");
       else $display("*** UVM TEST FAILED ***");
     endfunction

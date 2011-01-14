@@ -44,22 +44,22 @@ module test;
 
 
 
-    task reset;
+    task reset_phase;
       if(dodelay) #thedelay;
       `uvm_info("RESET",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
     endtask
 
-    task main;
+    task main_phase;
       if(dodelay) #thedelay;
       `uvm_info("MAIN",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
     endtask
 
-    task shutdown;
+    task shutdown_phase;
       if(dodelay) #thedelay;
       `uvm_info("SHUTDOWN",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
     endtask
 
-    task run;
+    task run_phase;
 
 // if(dodelay) #(5*thedelay);
     endtask
@@ -158,7 +158,7 @@ module test;
       dom2.set_phase_domain("domain2");
     endfunction
 
-    function void finalize();
+    function void finalize_phase();
       if(failed) $display("*** UVM TEST FAILED ***");
       else $display("*** UVM TEST PASSED ***");
     endfunction

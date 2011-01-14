@@ -296,9 +296,9 @@ class uvm_sequencer_base extends uvm_component;
 
 
 
-  virtual function void build();
+  virtual function void build_phase();
     int dummy;
-    super.build();
+    super.build_phase();
     void'(get_config_string("default_sequence", default_sequence));
     void'(get_config_int("count", count));
     void'(get_config_int("max_random_count", max_random_count));

@@ -51,7 +51,7 @@ class master extends uvm_component;
     rsp_port = new("rsp_port", this);
   endfunction
    
-  task run;
+  task run_phase;
     fork
       request_process;
       response_process;
@@ -99,7 +99,7 @@ class slave extends uvm_component;
     rsp_port = new("rsp_port", this);
   endfunction // new
    
-  task run;
+  task run_phase;
 
     int request, response;
     string request_str, response_str;
@@ -137,14 +137,14 @@ class bidir_env extends uvm_env;
     req_rsp = new("req_rsp_channel", this);
   endfunction
 
-  function void connect;
+  function void connect_phase;
     m.req_port.connect(req_rsp.blocking_put_request_export);
     m.rsp_port.connect(req_rsp.blocking_get_response_export);
     s.req_port.connect(req_rsp.blocking_get_request_export);
     s.rsp_port.connect(req_rsp.blocking_put_response_export);
   endfunction
 
-  task run;
+  task run_phase;
     #10 global_stop_request();
   endtask
    

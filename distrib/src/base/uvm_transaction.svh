@@ -558,7 +558,7 @@ function void uvm_transaction::accept_tr (time accept_time = 0);
   if(accept_time != 0)
     this.accept_time = accept_time;
   else
-    this.accept_time = $time;
+    this.accept_time = $realtime;
 
   do_accept_tr();
   e = events.get("accept");
@@ -592,7 +592,7 @@ function integer uvm_transaction::m_begin_tr (time begin_time=0,
   if(begin_time != 0)
     this.begin_time = begin_time;
   else
-    this.begin_time = $time;
+    this.begin_time = $realtime;
    
   // May want to establish predecessor/successor relation 
   // (don't free handle until then)
@@ -637,7 +637,7 @@ function void uvm_transaction::end_tr (time end_time=0, bit free_handle=1);
   if(end_time != 0)
     this.end_time = end_time;
   else
-    this.end_time = $time;
+    this.end_time = $realtime;
 
   do_end_tr(); // Callback prior to actual ending of transaction
 

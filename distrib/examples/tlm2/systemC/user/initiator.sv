@@ -36,7 +36,7 @@ class initiator extends uvm_component;
       done = 0;
    endfunction
 
-   task run();
+   task run_phase();
       payload trans; 
       int i;
       uvm_tlm_time delay = new;

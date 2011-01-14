@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------- 
-//   Copyright 2010 Synopsys, Inc. 
+//   Copyright 2010 Cadence Design Systems, Inc. 
 //   All Rights Reserved Worldwide 
 // 
 //   Licensed under the Apache License, Version 2.0 (the 
@@ -18,7 +18,14 @@
 //----------------------------------------------------------------------
 
 
-program top;
+module top;
+
+  // This test verifies that the new phase names do not conflict with
+  // basic user names like reset, configure, main and shutdown.
+  //
+  // The user derived class uses these names but with arg values and
+  // verifies that they are never called but that the basic phases
+  // are called.
 
 import uvm_pkg::*;
 `include "uvm_macros.svh"
@@ -26,10 +33,30 @@ import uvm_pkg::*;
 class test extends uvm_test;
 
    static int n_ph = 0;
+   static int n_called = 0;
 
    `uvm_component_utils(test)
 
    string last_phase = "";
+
+   // Some user task names that are not phase tasks.
+   task reset (string reset_type="SOFT");
+      n_called ++;
+   endtask
+
+   task configure(int arg);
+     n_called++;
+   endtask
+
+   task main;
+     n_called++;
+   endtask
+
+   task shutdown(int arg1, int arg2);
+     n_called++;
+   endtask
+
+   // Testing the basic phases
 
    function void check_the_phase(string prev, string curr);
       `uvm_info("Test", $psprintf("Executing phase \"%s\"...", curr), UVM_LOW)
@@ -164,6 +191,11 @@ begin
       end
    end
    
+   if (test::n_called != 0) begin
+      `uvm_error("Test", $psprintf("Expected no user tasks to get called, but %0d were",
+                                   test::n_called));
+   end
+   
    if (test::n_ph != 21) begin
       `uvm_error("Test", $psprintf("A total of %0d phase methods were executed instead of 21.",
                                    test::n_ph));
@@ -183,4 +215,4 @@ begin
    end
 end
 
-endprogram
+endmodule

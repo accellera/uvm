@@ -9,17 +9,17 @@ class comp1 extends uvm_component;
       super.new(name, parent);
    endfunction
 
-   task main();
+   task main_phase();
       `uvm_info("comp1", "main thread started...", UVM_LOW);
       #5000;
       `uvm_info("comp1", "main thread completed...", UVM_LOW);
    endtask
 
-   virtual task run();
+   virtual task run_phase();
       enable_stop_interrupt = 1;
       `uvm_info("comp1", "run phase started...", UVM_LOW);
       fork
-         main();
+         main_phase();
       join_none
       #100;
       `uvm_info("comp1", "run phase ended...", UVM_LOW);
@@ -40,14 +40,14 @@ class comp1 extends uvm_component;
       `uvm_info("comp1", {"stop ", ph_name, " phase ended..."}, UVM_LOW);
    endtask
 
-   virtual function void extract();
+   virtual function void extract_phase();
       `uvm_info("comp1", "extract phase started...", UVM_LOW);
       if ($time() != 600) begin
          `uvm_error("test", $psprintf("extract() phase started at %0d instead of 600.", $time));
       end
    endfunction
 
-   virtual function void report();
+   virtual function void report_phase();
       $write("** UVM TEST PASSED **\n");
    endfunction
 endclass

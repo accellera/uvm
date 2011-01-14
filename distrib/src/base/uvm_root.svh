@@ -180,8 +180,8 @@ class uvm_root extends uvm_component;
   // PRIVATE members
 
   extern `_protected function new ();
-  extern function void build();
-  extern function void end_of_elaboration();
+  extern function void build_phase();
+  extern function void end_of_elaboration_phase();
   extern local function void m_do_verbosity_settings();
   extern local function void m_do_timeout_settings();
   extern local function void m_do_factory_settings();
@@ -358,12 +358,12 @@ function uvm_root::new();
 endfunction
 
 
-// build
+// build_phase
 // -----
 
-function void uvm_root::build();
+function void uvm_root::build_phase();
 
-  super.build();
+  super.build_phase();
 
   m_set_cl_msg_args();
 
@@ -377,10 +377,10 @@ function void uvm_root::build();
 endfunction
 
 
-// end_of_elaboration
-// ------------------
+// end_of_elaboration_phase
+// ------------------------
 
-function void uvm_root::end_of_elaboration();
+function void uvm_root::end_of_elaboration_phase();
   // For backward compatibility, the run phase never releases its objection until
   // the stop request comes in.
   uvm_phase_schedule run_ph = find_phase_schedule("uvm_pkg::common","*");
@@ -1009,7 +1009,7 @@ endfunction
 task uvm_root::m_stop_request(time timeout=0, bit forced = 0);
 
   if (timeout == 0 && !forced)
-    timeout = `UVM_DEFAULT_TIMEOUT - $time;
+    timeout = `UVM_DEFAULT_TIMEOUT - $realtime;
 
   // stop request valid for running task-based phases only
 //  uvm_report_fatal("DEV","TBD in uvm_root::m_stop_request() needs coded");

@@ -48,22 +48,22 @@ class xbus_master_agent extends uvm_agent;
     super.new(name, parent);
   endfunction : new
 
-  // build
-  function void build();
-    super.build();
+  // build_phase
+  function void build_phase();
+    super.build_phase();
     monitor = xbus_master_monitor::type_id::create("monitor", this);
     if(is_active == UVM_ACTIVE) begin
       sequencer = xbus_master_sequencer::type_id::create("sequencer", this);
       driver = xbus_master_driver::type_id::create("driver", this);
     end
-  endfunction : build
+  endfunction : build_phase
 
-  // connect
-  function void connect();
+  // connect_phase
+  function void connect_phase();
     if(is_active == UVM_ACTIVE) begin
       driver.seq_item_port.connect(sequencer.seq_item_export);
     end
-  endfunction : connect
+  endfunction : connect_phase
 
   // assign the virtual interfaces of the agent's children
   function void assign_vi(virtual interface xbus_if xmi);

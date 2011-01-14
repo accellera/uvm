@@ -123,7 +123,7 @@ class uvm_algorithmic_comparator #( type BEFORE=int,
     return type_name;
   endfunction
 
-  virtual function void connect();
+  virtual function void connect_phase();
     after_export.connect( comp.after_export );
   endfunction
 
