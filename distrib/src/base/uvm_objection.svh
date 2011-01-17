@@ -35,7 +35,7 @@ typedef uvm_callbacks #(uvm_callbacks_objection,uvm_objection_callback) uvm_obje
 // Title: Objection Mechanism
 //------------------------------------------------------------------------------
 // The following classes define the objection mechanism and end-of-test
-// functionality, which is based on <ovm_objection>.
+// functionality, which is based on <uvm_objection>.
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
