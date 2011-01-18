@@ -19,25 +19,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-typedef class uvm_sequencer_base;
-
-typedef enum {SEQ_TYPE_REQ, SEQ_TYPE_LOCK, SEQ_TYPE_GRAB} SEQ_REQ_TYPE;
-typedef enum {SEQ_ARB_FIFO, SEQ_ARB_WEIGHTED, SEQ_ARB_RANDOM, SEQ_ARB_STRICT_FIFO, SEQ_ARB_STRICT_RANDOM, SEQ_ARB_USER} 
-        SEQ_ARB_TYPE;
-
-class seq_req_class;
-  static int        g_request_id = 0;
-  bit               grant;
-  int               sequence_id;
-  int               request_id;
-  int               item_priority;
-  SEQ_REQ_TYPE      request;
-  uvm_sequence_base sequence_ptr;
-
-  function new(string name= "");
-  endfunction
-endclass  
-
 
 //------------------------------------------------------------------------------
 //
@@ -53,168 +34,129 @@ typedef uvm_config_db#(uvm_object_wrapper) uvm_config_seq;
 
 class uvm_sequencer_base extends uvm_component;
 
-  protected seq_req_class       arb_sequence_q[$];
+  typedef enum {SEQ_TYPE_REQ,
+                SEQ_TYPE_LOCK,
+                SEQ_TYPE_GRAB} seq_req_t;
 
-  // The arb_completed associative array is used to indicate when a particular request_id
-  // has been completed.  The array in indexed by request_id, and sequences will wait based
-  // on the request_id assigned in the arb_sequence_q
+  typedef struct { bit        grant;
+                   int        sequence_id;
+                   int        request_id;
+                   int        item_priority;
+                   seq_req_t  request;
+                   uvm_sequence_base sequence_ptr;
+                 } seq_request;
+
+
+  protected seq_request         arb_sequence_q[$];
+
   protected bit                 arb_completed[int];
 
   protected uvm_sequence_base   lock_list[$];
-  local     SEQ_ARB_TYPE        arbitration = SEQ_ARB_FIFO;
   protected uvm_sequence_base   reg_sequences[int];
-  local     static int          g_sequence_id = 1;
-  local     static int          g_sequencer_id = 1;
   protected int                 m_sequencer_id;
   protected int                 m_lock_arb_size;  // used for waiting processes
   protected int                 m_arb_size;       // used for waiting processes
-  protected int                 m_wait_for_item_sequence_id, m_wait_for_item_transaction_id;
+  protected int                 m_wait_for_item_sequence_id,
+                                m_wait_for_item_transaction_id;
 
-  // Default sequence processing. At the start of any phase, look up
-  // the default sequence and run it. A manually set default sequence
-  // will have precedence over one set with set_config_object.
+  local uvm_sequencer_arb_mode  m_arbitration = SEQ_ARB_FIFO;
+  local static int              g_request_id = 0;
+  local static int              g_sequence_id = 1;
+  local static int              g_sequencer_id = 1;
 
-  protected uvm_object_wrapper m_default_sequences[uvm_phase_imp];
-  protected uvm_thread_mode_t  m_seq_thread_mode[uvm_phase_imp];
-  protected uvm_process        m_processes[uvm_phase_schedule];
-  protected uvm_sequence_base  m_phase_sequences[uvm_phase_schedule];
-
-  virtual function void phase_started(uvm_phase_schedule phase);
-    super.phase_started(phase);
-    start_phase_sequence(phase);
-  endfunction
 
   // Function: start_phase_sequence
   //
-  // This function starts the user specified phase sequence
-  // that is associated with the given phase. A sequence can be
-  // associated with a sequence by using <set_phase_seq> or by
-  // setting the phase configuration property for the phase
-  // using uvm_config_seq::set().
+  // Start the default sequence for this phase, if any.
+  // The default sequence is configured using resources using
+  // either a sequence instance or sequence object wrapper.
   //
-  //| // User sets a phase sequence via set_phase_seq
-  //| myseqr.set_phase_seq (uvm_main_ph, myseq_type::type_id::get() );
-  //|
-  //| // or the user sets the phase sequence via a config property
-  //| uvm_config_seq::set(this, "myseqr", "main_ph"
-  //|     myseq_type::type_id::get() );
+  // Configure by instance:
+  //
+  // Allows pre-initialization, setting rand_mode, use of inline 
+  // constraints, etc.
+  //
+  //| myseq_t myseq_inst = new("myseq_inst");
+  //| myseq_inst.randomize() with { ... };
+  //| uvm_config_db #(uvm_sequence_base)::set(this, "myseqr",
+  //|                                         "main_ph", myseq_inst);
+  //
+  //or configure by type:
+  //
+  //| uvm_config_db #(uvm_object_wrapper)::set(this, "myseqr", "main_ph"
+  //|                                           myseq_type::type_id::get());
 
   virtual function void start_phase_sequence(uvm_phase_schedule phase);
-    uvm_object_wrapper w;
-    uvm_sequence_base seq;
+    uvm_object_wrapper wrapper;
+    uvm_sequence_base  seq;
+    uvm_thread_mode mode;
     uvm_factory f = uvm_factory::get();
 
-    if(m_default_sequences.exists(phase.m_phase))
-      w = m_default_sequences[phase.m_phase];
-    else begin
-      void'(uvm_config_seq::get(this, "", {phase.get_name(),"_ph"}, w) );
-    end
+    //$display("** Start default seq for phase ",{phase.get_name(),"_ph"});
 
-    if(w == null)
-      return;
-
-    if(!$cast(seq , f.create_object_by_type(w, get_full_name(), w.get_type_name()))) begin
-      `uvm_warning("BDFCT", $sformatf("Default phase object for %s did not cast to a sequence type", {phase.get_name(),"_ph"}) )
-    end
-
-    if(seq == null) begin
-      `uvm_info("PHASESEQ", $sformatf("No default phase sequence for phase %s", phase.get_name()), UVM_FULL )
-    end
-    else begin
-      `uvm_info("PHASESEQ", $sformatf("Starting default phase sequence %s for phase %s", w.get_type_name(), phase.get_name()), UVM_FULL )
-      seq.print_sequence_info = 1;
-      seq.set_parent_sequence(null);
-      seq.set_sequencer(this);
-      seq.reseed();
-      if (!seq.randomize()) begin
-        `uvm_warning("STRDEFSEQ", $sformatf("Failed to randomize default sequence %s for phase %s", w.get_type_name(), phase.get_name()));
-      end
-      else begin
-        if(!m_seq_thread_mode.exists(phase.m_phase))
-          m_seq_thread_mode[phase.m_phase] = UVM_PHASE_MODE_DEFAULT;
-
-        if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_MODE_DEFAULT)
-          m_seq_thread_mode[phase.m_phase] = m_phase_thread_mode;
-
-        if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_PROACTIVE ||
-           m_seq_thread_mode[phase.m_phase] == UVM_PHASE_REACTIVE)
-          phase.phase_done.raise_objection(this, {"default phase from ", get_full_name()});
-
-        //JLR: really needs to be managed by the phasing code, so need to schedule
-        //the process to be run under this component's phase process based on
-        //phasing semantics.
-        fork begin
-          //For a reactive thread, we can drop the implicit objection 
-          //immediately.
-          m_phase_sequences[phase] = seq;
-          m_processes[phase] = new(process::self());
-          if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_REACTIVE) begin
-            phase.phase_done.drop_objection(this, {"default phase from ", get_full_name()});
-          end
-          seq.start(this);
-          if(m_seq_thread_mode[phase.m_phase] == UVM_PHASE_PROACTIVE) begin
-            phase.phase_done.drop_objection(this, {"default phase from ", get_full_name()});
-          end
-          wait fork;
-          m_processes[phase].is_defunct = 1;
-        end join_none
-      end
-    end
-  endfunction
-
-
-  // Cleanup default phases. If the phase is persistent then we don't clean up
-  // the sequences, otherwise we do.
-  virtual function void phase_ended(uvm_phase_schedule phase);
-    uvm_sequence_base seq_ptr;
-
-    if(m_processes.exists(phase)) begin
-      if((m_seq_thread_mode[phase.m_phase] != UVM_PHASE_PERSISTENT) &&
-         (m_processes[phase].is_active()) ) 
-      begin
-        if(!m_processes[phase].is_defunct)
-          m_processes[phase].m_process_id.kill();
-
-        // Remove the phase sequence
-        if(m_phase_sequences.exists(phase)) begin
-          seq_ptr = find_sequence(m_phase_sequences[phase].get_sequence_id());
-          if(seq_ptr != null)
-            kill_sequence(seq_ptr);
+    // default sequence instance?
+    if (!uvm_config_db #(uvm_sequence_base)::get(
+          this, "", {phase.get_name(),"_ph"}, seq) ) begin
+      // default sequence object wrapper?
+      if (uvm_config_db #(uvm_object_wrapper)::get(
+               this, "", {phase.get_name(),"_ph"}, wrapper) ) begin
+        // use wrapper is a sequence type        
+        if(!$cast(seq , f.create_object_by_type(
+              wrapper, get_full_name(), wrapper.get_type_name()))) begin
+          `uvm_warning("PHASESEQ", {"Default sequence for phase '",
+                       phase.get_name(),"_ph' %s is not a sequence type"})
+          return;
         end
       end
+      else begin
+        `uvm_info("PHASESEQ", {"No default phase sequence for phase '",
+                               phase.get_name(),"'"}, UVM_FULL)
+        return;
+      end
     end
+
+    `uvm_info("PHASESEQ", {"Starting default sequence '",
+       seq.get_type_name(),"' for phase ", phase.get_name()}, UVM_FULL)
+
+    seq.print_sequence_info = 1;
+    seq.set_sequencer(this);
+    seq.reseed();
+    seq.starting_phase = phase;
+
+    if (seq.is_randomized && !seq.randomize()) begin
+      `uvm_warning("STRDEFSEQ", {"Randomization failed for default sequence '",
+       seq.get_type_name(),"' for phase ", phase.get_name()})
+       return;
+    end
+
+    fork begin
+      mode = m_def_phase_thread_mode;
+
+      if (mode == UVM_PHASE_MODE_DEFAULT) begin
+        if (phase.get_name() == "run")
+          mode = UVM_PHASE_PASSIVE;
+        else
+          mode = UVM_PHASE_ACTIVE;
+      end
+
+      void'(uvm_config_db #(uvm_thread_mode)::get(this,"",
+                                    {phase.get_name(),"_ph"},mode));
+
+      if (mode == UVM_PHASE_ACTIVE ||
+          mode == UVM_PHASE_ACTIVE_PERSISTENT)
+        phase.phase_done.raise_objection(seq, {phase.get_name(),
+            " objection for default sequence ",
+            get_full_name(),".",seq.get_name()});
+      seq.start(this);
+      if (mode == UVM_PHASE_ACTIVE ||
+           mode == UVM_PHASE_ACTIVE_PERSISTENT)
+        phase.phase_done.drop_objection(seq, {phase.get_name(),
+            " objection for default sequence ",
+            get_full_name(),".",seq.get_name()});
+    end
+    join_none
+
   endfunction
-
-
-  // Function: set_phase_seq
-  //
-  // Set the phase sequence that will automatically start for the given
-  // <uvm_phase_schedule>. ~phase~ is a <uvm_phase_imp>
-  // and ~imp~ is a <uvm_sequence_base> factory wrapper. The sequence object, ~imp~,
-  // will be created and randomized at the time the phase starts. If ~imp~ is
-  // null then no default sequence will be executed.
-  //
-  // The phase sequence for the UVM main phase can be set as shown:
-  //
-  //|  seqr.set_phase_seq(uvm_main_ph, myseq_type::type_id::get());
-  //
-  // If no phase sequence has been set by using this function, then
-  // <uvm_config_db#(T)::get> (with T=uvm_object_wrapper) is used to access the 
-  // default sequence using the field name ~<phase>_ph~. The simplification
-  // typedef uvm_config_seq is provided for this purpose.  For example, the  
-  // following configuration setting will set the default sequence for the 
-  // ~main~ phase on sequencer u1.u2.seqr:
-  //
-  //| uvm_config_seq::set(this, "u1.u2.seqr", 
-  //|       "main_ph", myseq_type::type_id::get());
-  
-
-  function void set_phase_seq (uvm_phase_imp phase, uvm_object_wrapper imp,
-      uvm_thread_mode_t thread_mode=UVM_PHASE_MODE_DEFAULT); 
-    m_default_sequences[phase] = imp;
-    m_seq_thread_mode[phase] = thread_mode;
-  endfunction
-
 
 
   // Variable: count
@@ -287,6 +229,8 @@ class uvm_sequencer_base extends uvm_component;
     super.new(name, parent);
     m_sequencer_id = g_sequencer_id++;
     m_lock_arb_size = -1;
+    //if (m_def_phase_thread_mode == UVM_PHASE_MODE_DEFAULT)
+    //  m_def_phase_thread_mode = UVM_PHASE_ACTIVE;
     if(get_config_string("default_sequence", default_sequence))
       m_default_seq_set = 1;
     void'(get_config_int("count", count));
@@ -555,7 +499,7 @@ class uvm_sequencer_base extends uvm_component;
         if (arb_sequence_q[i].request == SEQ_TYPE_REQ)
           if (is_blocked(arb_sequence_q[i].sequence_ptr) == 0)
             if (arb_sequence_q[i].sequence_ptr.is_relevant() == 1) begin
-              if (arbitration == SEQ_ARB_FIFO) begin
+              if (m_arbitration == SEQ_ARB_FIFO) begin
                 return (i);
               end
               else avail_sequences.push_back(i);
@@ -563,7 +507,7 @@ class uvm_sequencer_base extends uvm_component;
     end
 
     // Return immediately if there are 0 or 1 available sequences
-    if (arbitration == SEQ_ARB_FIFO) begin
+    if (m_arbitration == SEQ_ARB_FIFO) begin
       return (-1);
     end
     if (avail_sequences.size() < 1)  begin
@@ -590,7 +534,7 @@ class uvm_sequencer_base extends uvm_component;
     ///////////////////////////////////
     //  Weighted Priority Distribution
     ///////////////////////////////////
-    if (arbitration == SEQ_ARB_WEIGHTED) begin
+    if (m_arbitration == SEQ_ARB_WEIGHTED) begin
       sum_priority_val = 0;
       for (i = 0; i < avail_sequences.size(); i++) begin
         sum_priority_val += get_seq_item_priority(arb_sequence_q[avail_sequences[i]]);
@@ -608,12 +552,12 @@ class uvm_sequencer_base extends uvm_component;
         sum_priority_val += get_seq_item_priority(arb_sequence_q[avail_sequences[i]]);
       end
       uvm_report_fatal("Sequencer", "UVM Internal error in weighted arbitration code", UVM_NONE);
-    end // if (arbitration == SEQ_ARB_WEIGHTED)
+    end
     
     ///////////////////////////////////
     //  Random Distribution
     ///////////////////////////////////
-    if (arbitration == SEQ_ARB_RANDOM) begin
+    if (m_arbitration == SEQ_ARB_RANDOM) begin
       i = $urandom_range(avail_sequences.size()-1, 0);
       return (avail_sequences[i]);
     end
@@ -621,7 +565,7 @@ class uvm_sequencer_base extends uvm_component;
     ///////////////////////////////////
     //  Strict Fifo
     ///////////////////////////////////
-    if ((arbitration == SEQ_ARB_STRICT_FIFO) || arbitration == SEQ_ARB_STRICT_RANDOM) begin
+    if ((m_arbitration == SEQ_ARB_STRICT_FIFO) || m_arbitration == SEQ_ARB_STRICT_RANDOM) begin
       highest_pri = 0;
       // Build a list of sequences at the highest priority
       for (i = 0; i < avail_sequences.size(); i++) begin
@@ -637,15 +581,15 @@ class uvm_sequencer_base extends uvm_component;
       end
 
       // Now choose one based on arbitration type
-      if (arbitration == SEQ_ARB_STRICT_FIFO) begin
+      if (m_arbitration == SEQ_ARB_STRICT_FIFO) begin
         return(highest_sequences[0]);
       end
       
       i = $urandom_range(highest_sequences.size()-1, 0);
       return (highest_sequences[i]);
-    end // if ((arbitration == SEQ_ARB_STRICT_FIFO) || arbitration == SEQ_ARB_STRICT_RANDOM)
+    end 
 
-    if (arbitration == SEQ_ARB_USER) begin
+    if (m_arbitration == SEQ_ARB_USER) begin
       i = user_priority_arbitration( avail_sequences);
 
       // Check that the returned sequence is in the list of available sequences.  Failure to
@@ -736,7 +680,7 @@ class uvm_sequencer_base extends uvm_component;
   //
   // private
 
-  protected function int get_seq_item_priority(seq_req_class seq_q_entry);
+  protected function int get_seq_item_priority(seq_request seq_q_entry);
     // If the priority was set on the item, then that is used
     if (seq_q_entry.item_priority != -1) begin
       if (seq_q_entry.item_priority <= 0) begin
@@ -782,6 +726,10 @@ class uvm_sequencer_base extends uvm_component;
   // Function- set_arbitration_completed
   //
   // private
+  //
+  // The arb_completed associative array is used to indicate when a particular
+  // request_id has been completed. The array in indexed by request_id, and
+  // sequences will wait based on the request_id assigned in the arb_sequence_q
 
   function void set_arbitration_completed(int request_id);
     arb_completed[request_id] = 1;
@@ -829,7 +777,7 @@ class uvm_sequencer_base extends uvm_component;
   // item to be sent via the send_request call.
   
   virtual task wait_for_grant(uvm_sequence_base sequence_ptr, int item_priority = -1, bit lock_request = 0);
-    seq_req_class req_s;
+    seq_request req_s;
     int my_seq_id;
 
     if (sequence_ptr == null) begin
@@ -841,23 +789,21 @@ class uvm_sequencer_base extends uvm_component;
     // If lock_request is asserted, then issue a lock.  Don't wait for the response, since
     // there is a request immediately following the lock request
     if (lock_request == 1) begin
-      req_s = new();
       req_s.grant = 0;
       req_s.sequence_id = my_seq_id;
       req_s.request = SEQ_TYPE_LOCK;
       req_s.sequence_ptr = sequence_ptr;
-      req_s.request_id = req_s.g_request_id++;
+      req_s.request_id = g_request_id++;
       arb_sequence_q.push_back(req_s);
     end
         
     // Push the request onto the queue
-    req_s = new();
     req_s.grant = 0;
     req_s.request = SEQ_TYPE_REQ;
     req_s.sequence_id = my_seq_id;
     req_s.item_priority = item_priority;
     req_s.sequence_ptr = sequence_ptr;
-    req_s.request_id = req_s.g_request_id++;
+    req_s.request_id = g_request_id++;
     arb_sequence_q.push_back(req_s);
     m_update_lists();
 
@@ -959,18 +905,17 @@ class uvm_sequencer_base extends uvm_component;
   
   local task lock_req(uvm_sequence_base sequence_ptr, bit lock);
     int my_seq_id;
-    seq_req_class new_req;
+    seq_request new_req;
     
     if (sequence_ptr == null)
       uvm_report_fatal("uvm_sequence_controller", "lock_req passed null sequence_ptr", UVM_NONE);
 
     my_seq_id = register_sequence(sequence_ptr);
-    new_req = new();
     new_req.grant = 0;
     new_req.sequence_id = sequence_ptr.get_sequence_id();
     new_req.request = SEQ_TYPE_LOCK;
     new_req.sequence_ptr = sequence_ptr;
-    new_req.request_id = new_req.g_request_id++;
+    new_req.request_id = g_request_id++;
     
     if (lock == 1) begin
       // Locks are arbitrated just like all other requests
@@ -1196,29 +1141,23 @@ class uvm_sequencer_base extends uvm_component;
     return (0);
   endfunction
 
-
  
   // Function: set_arbitration
   //
-  // Specifies the arbitration mode for the sequencer. It is one of
+  // Sets the arbitration mode, SEQ_ARB_FIFO by default. See
+  // <uvm_sequencer_arb_mode> for other available modes.
   //
-  // SEQ_ARB_FIFO          - Requests are granted in FIFO order (default)
-  // SEQ_ARB_WEIGHTED      - Requests are granted randomly by weight
-  // SEQ_ARB_RANDOM        - Requests are granted randomly
-  // SEQ_ARB_STRICT_FIFO   - Requests at highest priority granted in fifo order
-  // SEQ_ARB_STRICT_RANDOM - Requests at highest priority granted in randomly
-  // SEQ_ARB_USER          - Arbitration is delegated to the user-defined 
-  //                         function, user_priority_arbitration. That function
-  //                         will specify the next sequence to grant.
-  //
-  // The default user function specifies FIFO order.
-
-  function void set_arbitration(SEQ_ARB_TYPE val);
-    arbitration = val;
+  function void set_arbitration(uvm_sequencer_arb_mode arb_mode);
+    m_arbitration = arb_mode;
   endfunction
 
-  function SEQ_ARB_TYPE get_arbitration();
-    return (arbitration);
+
+  // Function: get_arbitration
+  //
+  // Get the arbitration mode.
+  //
+  function uvm_sequencer_arb_mode get_arbitration();
+    return m_arbitration;
   endfunction
 
 
@@ -1368,4 +1307,6 @@ class uvm_sequencer_base extends uvm_component;
   endfunction
 
 endclass
+
+
 

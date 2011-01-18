@@ -311,6 +311,32 @@ typedef enum {
 // Group: Sequences
 //-----------------
 
+// Enum: uvm_sequencer_arb_mode
+//
+// Specifies a sequencer's arbitration mode
+//
+// SEQ_ARB_FIFO          - Requests are granted in FIFO order (default)
+// SEQ_ARB_WEIGHTED      - Requests are granted randomly by weight
+// SEQ_ARB_RANDOM        - Requests are granted randomly
+// SEQ_ARB_STRICT_FIFO   - Requests at highest priority granted in fifo order
+// SEQ_ARB_STRICT_RANDOM - Requests at highest priority granted in randomly
+// SEQ_ARB_USER          - Arbitration is delegated to the user-defined 
+//                         function, user_priority_arbitration. That function
+//                         will specify the next sequence to grant.
+
+
+typedef enum { SEQ_ARB_FIFO,
+               SEQ_ARB_WEIGHTED,
+               SEQ_ARB_RANDOM,
+               SEQ_ARB_STRICT_FIFO,
+               SEQ_ARB_STRICT_RANDOM,
+               SEQ_ARB_USER
+} uvm_sequencer_arb_mode;
+
+
+typedef uvm_sequencer_arb_mode SEQ_ARB_TYPE; // backward compat
+
+
 // Enum: uvm_sequence_state_enum
 //
 // Defines current sequence state
@@ -334,7 +360,171 @@ typedef enum { CREATED   = 1,
                POST_BODY = 8,
                ENDED     = 16,
                STOPPED   = 32,
-               FINISHED  = 64} uvm_sequence_state_enum;
+               FINISHED  = 64
+} uvm_sequence_state;
+
+typedef uvm_sequence_state uvm_sequence_state_enum; // backward compat
+
+
+
+//---------------
+// Group: Phasing
+//---------------
+
+// Enum: uvm_phase_type
+//
+// This is an attribute of a <uvm_phase_imp> object which defines the phase
+// execution type. Every phase we define has a type. It is used only for 
+// information, as the type behavior is captured in three derived classes 
+// uvm_task/topdown/bottomup_phase.
+//
+//   UVM_PHASE_TASK - The phase is a task-based phase, a fork is done for 
+//   each participating component and so the traversal order is arbitrary
+//
+//   UVM_PHASE_TOPDOWN -  The phase is a function phase, components are 
+//   traversed from top-down, allowing them to add to the component tree 
+//   as they go.
+//
+//   UVM_PHASE_BOTTOMUP - The phase is a function phase, components are 
+//   traversed from the bottom up, allowing roll-up / consolidation 
+//   functionality.
+//
+typedef enum { UVM_PHASE_TASK,
+               UVM_PHASE_TOPDOWN,
+               UVM_PHASE_BOTTOMUP
+} uvm_phase_type;
+
+
+// Enum: uvm_thread_mode
+//
+// This is an attribute of a particular component's runtime usage of a phase
+// which defines the behavior of the behavior of the threads that are created
+// for the phases.
+//
+// It's value is set by (1) the overall default, (2) the component can specify
+// a default mode, and (3) a phase task can switch thread modes while being run
+// (no lasting effect, only affects that thread).
+//
+// It is used by (a) the phaser when it spawns tasks, to decide what processes
+// to keep track of, and (b) at phase end, to decide what to kill, and
+// (c) in jump() operations, to decide what to kill
+//
+//   UVM_PHASE_ACTIVE - An active thread implicitly objects to the
+//               end-of-phase until it returns from the phase task. 
+//               Threads for all ACTIVE and PASSIVE components are killed
+//               once all ACTIVE components' phase tasks return.
+//
+//   UVM_PHASE_PASSIVE -  A passive thread (e.g. for monitoring) does not
+//               object to end-of-phase because it continues forever. It's
+//               threads are killed by the phaser when all ACTIVE components'
+//               return from their phase tasks.
+//
+//   UVM_PHASE_ACTIVE_PERSISTENT - An active persistent thread implicitly
+//               objects to end-of-phase, and its child processes persist once
+//               the end-of-phase occurs. The main process ~must~ at some point
+//               return from the phase task once it no longer objects to
+//               end-of-phase. When end-of-phase does occur, all child
+//               processes remain alive. It is the obligation of the user to
+//               manage such child threads, which will not be managed by the
+//               phaser except during a <uvm_component::jump> operation.
+//
+//   UVM_PHASE_PASSIVE_PERSISTENT - A passive persistent thread does not object
+//               to end-of-phase and is not killed when end-of-phase occurs. 
+//               It is the obligation of the user to manage such threads, which
+//               are not managed or killed by the phaser except during a
+//               <uvm_component::jump> operation.
+//
+typedef enum { UVM_PHASE_ACTIVE,
+               UVM_PHASE_ACTIVE_PERSISTENT,
+               UVM_PHASE_PASSIVE,
+               UVM_PHASE_PASSIVE_PERSISTENT,
+               UVM_PHASE_MODE_DEFAULT
+} uvm_thread_mode;
+
+
+// Enum: uvm_phase_state
+// ---------------------
+//
+// The set of possible states of a phase. This is an attribute of a schedule
+// node in the graph, not of a phase, to maintain independent per-domain state
+//
+//   UVM_PHASE_DORMANT -  Nothing has happened with the phase in this domain.
+//
+//   UVM_PHASE_SCHEDULED - At least one immediate predecessor has completed.
+//              Scheduled phases block until all predecessors complete or
+//              until a jump is executed.
+//
+//   UVM_PHASE_STARTED - phase ready to execute, running phase_started() callback
+//
+//   UVM_PHASE_EXECUTING - An executing phase is one where the phase callbacks are
+//              being executed. It's process is tracked by the phaser.
+//
+//   UVM_PHASE_READY_TO_END - no objections remain, awaiting completion of
+//              predecessors of its successors. For example, when phase 'run'
+//              is ready to end, its successor will be 'extract', whose
+//              predecessors are 'run' and 'post_shutdown'. Therefore, 'run'
+//              will be waiting for 'post_shutdown' to be ready to end.
+//
+//   UVM_PHASE_ENDED - phase completed execution, now running phase_ended() callback
+//
+//   UVM_PHASE_CLEANUP - all processes related to phase are being killed
+//
+//   UVM_PHASE_DONE - A phase is done after it terminated execution.  Becoming
+//              done may enable a waiting successor phase to execute.
+//
+//    The state transitions occur as follows:
+//
+//|     DORMANT -->SCHEDULED-->STARTED-->EXECUTING-->ENDED-->CLEANUP-->DONE --+
+//|        ^                                                   |
+//|        |          <-- jump_to                              v
+//|        +---------------------------------------------------+
+
+   typedef enum { UVM_PHASE_DORMANT,
+                  UVM_PHASE_SCHEDULED,
+                  UVM_PHASE_STARTED,
+                  UVM_PHASE_EXECUTING,
+                  UVM_PHASE_READY_TO_END,
+                  UVM_PHASE_ENDED,
+                  UVM_PHASE_CLEANUP,
+                  UVM_PHASE_DONE
+                  } uvm_phase_state;
+
+
+
+// Enum: uvm_phase_transition
+//
+// These are the phase state transition for callbacks which provide
+// additional information that may be useful during callbacks
+//
+// UVM_COMPLETED   - the phase completed normally
+// UVM_FORCED_STOP - the phase was forced to terminate prematurely
+// UVM_SKIPPED     - the phase was in the path of a forward jump
+// UVM_RERUN       - the phase was in the path of a backwards jump
+//
+typedef enum { UVM_COMPLETED   = 'h01, 
+               UVM_FORCED_STOP = 'h02,
+               UVM_SKIPPED     = 'h04, 
+               UVM_RERUN       = 'h08   
+} uvm_phase_transition;
+
+
+//------------------
+// Group: Objections
+//------------------
+
+// Enum: uvm_objection_event
+//
+// Enumerated the possible objection events one could wait on. See
+// <uvm_objection::wait_for>.
+//
+// UVM_RAISED      - an objection was raised
+// UVM_DROPPED     - an objection was raised
+// UVM_ALL_DROPPED - all objections have been dropped
+//
+typedef enum { UVM_RAISED      = 'h01, 
+               UVM_DROPPED     = 'h02,
+               UVM_ALL_DROPPED = 'h04
+} uvm_objection_event;
 
 
 

@@ -126,10 +126,15 @@ class test extends uvm_test;
     this.print();
   endfunction : build
 
+  typedef uvm_config_db #(uvm_sequence_base) sequence_rsrc;
+
   function void connect();
     super.connect();
+    myseq seq = new;
+    seq.randomize();
     driver.seq_item_port.connect(sequencer.seq_item_export);
     sequencer.set_phase_seq( uvm_main_ph, basic_main_phase_seq::type_id::get());
+    sequence_rsrc::set(this, "seqr1", "main_ph", seq);
   endfunction : connect
 
   virtual task run();

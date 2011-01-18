@@ -23,6 +23,7 @@
 `define UVM_SVH
   `include "uvm_macros.svh"
   `include "dpi/uvm_dpi.svh"
+  //`include "tr_hooks.sv"
   `include "base/base.svh"
   `include "uvm_tlm/uvm_tlm.svh"
   `include "methodology/methodology.svh"
