@@ -57,20 +57,21 @@ typedef class uvm_callbacks_objection;
 // objections from the command line using the option +UVM_OBJECTION_TRACE.
 //------------------------------------------------------------------------------
 
-class uvm_objection extends uvm_report_object;
+class uvm_objection_event_info;
+    int waiters;
+    event raised;
+    event dropped;
+    event all_dropped;
+endclass
 
-  typedef struct { int waiters;
-                   event raised;
-                   event dropped;
-                   event all_dropped;
-                 } event_t;
+class uvm_objection extends uvm_report_object;
 
   protected bit     m_trace_mode=0;
   protected int     m_source_count[uvm_object];
   protected int     m_total_count [uvm_object];
   protected time    m_drain_time  [uvm_object];
   protected bit     m_draining    [uvm_object];
-  protected event_t m_events      [uvm_object];
+  protected uvm_objection_event_info m_events[uvm_object];
   protected bit     m_top_all_dropped;
   protected process m_background_proc;
 
@@ -679,7 +680,7 @@ class uvm_objection extends uvm_report_object;
   // have been executed.
   //
   task wait_for(uvm_objection_event objt_event, uvm_object obj=null);
-     event_t events;
+     uvm_objection_event_info events;
 
      if (obj==null)
        obj = m_top;
@@ -688,7 +689,10 @@ class uvm_objection extends uvm_report_object;
        return;
 
      if (!m_events.exists(obj))
-       m_events[obj] = events;
+     begin
+        events=new;
+        m_events[obj] = events;
+     end
 
      m_events[obj].waiters++;
 

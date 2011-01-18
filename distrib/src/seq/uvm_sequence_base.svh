@@ -152,7 +152,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   rand bit is_randomized = 0;
   constraint c_randomized {
     is_randomized == 1;
-  };
+  }
 
 
   `ifdef UVM_USE_FPC

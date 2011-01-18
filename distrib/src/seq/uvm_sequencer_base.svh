@@ -32,22 +32,22 @@
 // Typedef for configuring default sequences.
 typedef uvm_config_db#(uvm_object_wrapper) uvm_config_seq;
 
+typedef enum {SEQ_TYPE_REQ,
+                SEQ_TYPE_LOCK,
+                SEQ_TYPE_GRAB} uvm_seq_request_t;
+                
+class uvm_seq_request_info;
+    bit        grant;
+    int        sequence_id;
+    int        request_id;
+    int        item_priority;
+    uvm_seq_request_t  request;
+    uvm_sequence_base sequence_ptr;
+endclass
+
 class uvm_sequencer_base extends uvm_component;
 
-  typedef enum {SEQ_TYPE_REQ,
-                SEQ_TYPE_LOCK,
-                SEQ_TYPE_GRAB} seq_req_t;
-
-  typedef struct { bit        grant;
-                   int        sequence_id;
-                   int        request_id;
-                   int        item_priority;
-                   seq_req_t  request;
-                   uvm_sequence_base sequence_ptr;
-                 } seq_request;
-
-
-  protected seq_request         arb_sequence_q[$];
+  protected  uvm_seq_request_info        arb_sequence_q[$];
 
   protected bit                 arb_completed[int];
 
@@ -680,7 +680,7 @@ class uvm_sequencer_base extends uvm_component;
   //
   // private
 
-  protected function int get_seq_item_priority(seq_request seq_q_entry);
+  protected function int get_seq_item_priority(uvm_seq_request_info seq_q_entry);
     // If the priority was set on the item, then that is used
     if (seq_q_entry.item_priority != -1) begin
       if (seq_q_entry.item_priority <= 0) begin
@@ -777,7 +777,7 @@ class uvm_sequencer_base extends uvm_component;
   // item to be sent via the send_request call.
   
   virtual task wait_for_grant(uvm_sequence_base sequence_ptr, int item_priority = -1, bit lock_request = 0);
-    seq_request req_s;
+    uvm_seq_request_info req_s=new();
     int my_seq_id;
 
     if (sequence_ptr == null) begin
@@ -796,7 +796,8 @@ class uvm_sequencer_base extends uvm_component;
       req_s.request_id = g_request_id++;
       arb_sequence_q.push_back(req_s);
     end
-        
+     
+    req_s = new();   
     // Push the request onto the queue
     req_s.grant = 0;
     req_s.request = SEQ_TYPE_REQ;
@@ -905,7 +906,7 @@ class uvm_sequencer_base extends uvm_component;
   
   local task lock_req(uvm_sequence_base sequence_ptr, bit lock);
     int my_seq_id;
-    seq_request new_req;
+    uvm_seq_request_info new_req=new();
     
     if (sequence_ptr == null)
       uvm_report_fatal("uvm_sequence_controller", "lock_req passed null sequence_ptr", UVM_NONE);
@@ -1234,7 +1235,7 @@ class uvm_sequencer_base extends uvm_component;
   // Function: get_seq_kind
   //
   // Returns an int seq_kind correlating to the sequence of type type_name
-  // in the sequencer¿s sequence library. If the named sequence is not
+  // in the sequencerï¿½s sequence library. If the named sequence is not
   // registered a SEQNF warning is issued and -1 is returned.
 
   function int get_seq_kind(string type_name);
@@ -1285,7 +1286,7 @@ class uvm_sequencer_base extends uvm_component;
 
   // Function: num_sequences
   //
-  // Returns the number of sequences in the sequencer¿s sequence library.
+  // Returns the number of sequences in the sequencerï¿½s sequence library.
 
   function int num_sequences();
     return (sequences.size());

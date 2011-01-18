@@ -210,7 +210,7 @@ virtual class uvm_phase_imp extends uvm_object;
   //
   // Provides the required per-component execution flow. Called by <traverse>.
   //
-  pure protected virtual function void execute(uvm_component comp,
+  protected pure virtual function void execute(uvm_component comp,
                                                uvm_phase_schedule phase);
 
 endclass
@@ -500,25 +500,33 @@ class uvm_process;
     return m_process_id;
   endfunction
 
+/*
   virtual function process::state status();
     return m_process_id.status();
   endfunction
+*/
 
   virtual function void kill();
     m_process_id.kill();
   endfunction
 
+/*
   task await();
     m_process_id.await();
   endtask
+*/
 
+/*
   function void suspend();
    m_process_id.suspend();
   endfunction
+*/
 
+/*
   function void resume();
    m_process_id.resume();
   endfunction
+*/
 
 endclass
 //`else
@@ -589,13 +597,15 @@ class uvm_phase_thread extends uvm_process;
               m_phase.get_name(), " objection for ", m_comp.get_full_name()});
   endfunction
 
+/*
 `ifdef INCA
-  virtual state function void status();
+  virtual function process::status status();
     if (m_task_ended)
       return FINISHED;
     return proc.status();
   endfunction
 `endif
+*/
   virtual function void kill();
     m_comp.m_phase_threads.delete(m_phase);
     m_phase.m_threads.delete(m_comp);
