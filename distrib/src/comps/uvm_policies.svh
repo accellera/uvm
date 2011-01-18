@@ -20,9 +20,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UVM_POLICIES_SVH
-`define UVM_POLICIES_SVH
-
 
 // Title: Policy Classes
 //
@@ -146,6 +143,4 @@ class uvm_class_clone #(type T=int);
   endfunction
 
 endclass
-
-`endif // UVM_POLICIES_SVH
 

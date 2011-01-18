@@ -20,9 +20,6 @@
 //   permissions and limitations under the License.
 //-----------------------------------------------------------------------------
 
-`ifndef UVM_MONITOR_SVH
-`define UVM_MONITOR_SVH
-
 //-----------------------------------------------------------------------------
 // CLASS: uvm_monitor
 //
@@ -53,6 +50,4 @@ virtual class uvm_monitor extends uvm_component;
   endfunction
 
 endclass
-
-`endif // UVM_MONITOR_SVH
 
