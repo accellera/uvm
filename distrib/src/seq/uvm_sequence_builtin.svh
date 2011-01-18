@@ -21,9 +21,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UVM_SEQUENCE_BUILTIN_SVH
-`define UVM_SEQUENCE_BUILTIN_SVH
-
 //------------------------------------------------------------------------------
 // Title: Predefined Sequences
 //
@@ -296,4 +293,3 @@ class uvm_simple_sequence extends uvm_sequence #(uvm_sequence_item);
 
 endclass
 
-`endif // UVM_SEQUENCE_BUILTIN_SVH

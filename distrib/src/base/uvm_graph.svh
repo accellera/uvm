@@ -38,7 +38,7 @@ class uvm_graph;
 
   // graph structure
   protected string m_name;
-  protected uvm_graph m_predecessors[$];
+  /*protected*/ uvm_graph m_predecessors[$];
   protected uvm_graph m_successors[$];
 
   //----------------------------------------------------------------------

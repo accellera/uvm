@@ -96,17 +96,6 @@ function void set_global_stop_timeout(time timeout);
 endfunction
 
 
-// Function - phase_initiate
-// Internal use only: convenience function for uvm_top.phase_initiate
-// See uvm_root for more information
-
-function void phase_initiate(uvm_phase_schedule phase);
-  uvm_root top;
-  top = uvm_root::get();
-  top.phase_initiate(phase);
-endfunction
-
-
 //----------------------------------------------------------------------------
 //
 // Group: Reporting

@@ -61,7 +61,10 @@ GCC_WINCMD = \
         -Bsymbolic \
         -I$(MTI_HOME)/include \
         $(DPI_SRC) \
-        -o $(LIBDIR)/$(LIBNAME).dll
+        -o $(LIBDIR)/$(LIBNAME).dll \
+		$(MTI_HOME)/win32/mtipli.dll -lregex
+
+WIN_GCC = $(MTI_HOME)/gcc-4.2.1-mingw32vc9/bin/g++.exe
 
 VLIB =  vlib work
 
@@ -151,14 +154,13 @@ help:
 prepare: clean vlib $(DPILIB_TARGET)
 
 
-dpi_lib: $(DPI_SRC)
+dpi_lib:
 	mkdir -p $(LIBDIR)
 	$(GCCCMD)
 
 dpi_libWin:
 	mkdir -p $(LIBDIR)
-	$(WIN_GCCCMD)
-	$(MTI_HOME)/win32/mtipli.dll -lregex
+	$(GCC_WINCMD)
 
 dpi_lib32:
 	make -f Makefile.questa BITS=32 dpi_lib
@@ -170,6 +172,6 @@ vlib: $(DPILIB_TARGET)
 	vlib work
 
 clean:
-	rm -rf *~ work vsim.wlf* *.log $(LIBDIR)/uvm_dpi* questa.tops transcript *.vstf
+	rm -rf *~ work vsim.wlf* *.log questa.tops transcript *.vstf
 
 

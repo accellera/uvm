@@ -40,7 +40,11 @@ import uvm_pkg::*;
 
 typedef class myseqr;
 class wrapper;
-  int array[time];
+  int array[time] 
+   `ifndef INCA
+   = '{default:0}
+   `endif
+   ;
 endclass
 
 wrapper seqr_seqs[myseqr];
@@ -152,6 +156,7 @@ class myseqr extends uvm_sequencer;
   `uvm_component_utils(myseqr)
 
   task run_phase;
+     set_thread_mode(UVM_PHASE_ACTIVE);
     `uvm_info("RUN","In run!!!", UVM_NONE)
     #500;
     `uvm_info("RUN","Exit run!!!", UVM_NONE)
@@ -167,16 +172,23 @@ class test extends uvm_test;
 
    `uvm_component_utils(test)
 
+   typedef uvm_config_db #(uvm_object_wrapper) phase_rsrc;
+   typedef uvm_config_db #(uvm_thread_mode) thread_rsrc;
+
    function void build_phase();
       uvm_phase_schedule domain, cfg, main;
       seqr1 = new("seqr1", this);
       seqr2 = new("seqr2", this);
-      seqr1.set_phase_seq(uvm_configure_ph, my_config_seq::type_id::get());
-      seqr1.set_phase_seq(uvm_main_ph, my_main_seq::type_id::get());
-      seqr1.set_phase_seq(uvm_shutdown_ph, my_shutdown_seq::type_id::get());
-      seqr2.set_phase_seq(uvm_configure_ph, my_reactive_configure::type_id::get(), UVM_PHASE_REACTIVE);
-      seqr2.set_phase_seq(uvm_main_ph, my_reactive_main::type_id::get(), UVM_PHASE_REACTIVE);
-      seqr2.set_phase_seq(uvm_shutdown_ph, my_reactive_shutdown::type_id::get(), UVM_PHASE_REACTIVE);
+      phase_rsrc::set(this, "seqr1", "configure_ph", my_config_seq::type_id::get());
+      phase_rsrc::set(this, "seqr1", "main_ph",      my_main_seq::type_id::get());
+      phase_rsrc::set(this, "seqr1", "shutdown_ph",  my_shutdown_seq::type_id::get());
+      phase_rsrc::set(this, "seqr2", "configure_ph", my_reactive_configure::type_id::get());
+      phase_rsrc::set(this, "seqr2", "main_ph",      my_reactive_main::type_id::get());
+      phase_rsrc::set(this, "seqr2", "shutdown_ph",  my_reactive_shutdown::type_id::get());
+      // override default thread mode for components in non-run phase (UVM_PHASE_ACTIVE)
+      thread_rsrc::set(this, "seqr2", "configure_ph", UVM_PHASE_PASSIVE);
+      thread_rsrc::set(this, "seqr2", "main_ph",      UVM_PHASE_PASSIVE);
+      thread_rsrc::set(this, "seqr2", "shutdown_ph",  UVM_PHASE_PASSIVE);
    endfunction
    
    function void report_phase();

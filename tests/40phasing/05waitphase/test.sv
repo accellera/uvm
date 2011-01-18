@@ -30,7 +30,7 @@ module test;
 
   bit failed = 0;
   time phase_transition_time = 300;
-  bit phase_run[uvm_phase_imp];
+  bit phase_run[uvm_phase];
 
   class base extends uvm_component;
     time delay = 100;

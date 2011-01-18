@@ -133,11 +133,11 @@
 
 class uvm_sequence_base extends uvm_sequence_item;
 
-  protected uvm_sequence_state_enum   m_sequence_state;
-            int                       m_next_transaction_id = 1;
-  local     int                       m_priority = -1;
-            int                       m_tr_handle;
-            int                       m_wait_for_grant_semaphore;
+  protected uvm_sequence_state m_sequence_state;
+            int                m_next_transaction_id = 1;
+  local     int                m_priority = -1;
+            int                m_tr_handle;
+            int                m_wait_for_grant_semaphore;
 
   // Each sequencer will assign a sequence id.  When a sequence is talking to multiple
   // sequencers, each sequence_id is managed seperately
@@ -147,6 +147,13 @@ class uvm_sequence_base extends uvm_sequence_item;
   protected int               response_queue_depth = 8;
   protected bit               response_queue_error_report_disabled = 0;
 
+  uvm_phase_schedule starting_phase;
+
+  rand bit is_randomized = 0;
+  constraint c_randomized {
+    is_randomized == 1;
+  };
+
 
   `ifdef UVM_USE_FPC
   protected process  m_sequence_process;
@@ -154,9 +161,9 @@ class uvm_sequence_base extends uvm_sequence_item;
   protected bit m_sequence_started = 0;
   protected event m_kill_event;
   `endif
-  local bit                       m_use_response_handler = 0;
+  local bit m_use_response_handler = 0;
 
-  static string type_name = "uvm_sequenc_base";
+  static string type_name = "uvm_sequence_base";
 
   // bits to detect if is_relevant()/wait_for_relevant() are implemented
   local bit is_rel_default;
@@ -209,6 +216,30 @@ class uvm_sequence_base extends uvm_sequence_item;
     wait (m_sequence_state == state);
   endtask
 
+  /* AE- probably don't need this
+  // Function: raise_objection
+  //
+  // Raise an objection to ending the phase
+  //
+  virtual function void raise_objection (uvm_object obj, 
+                                         string description="",
+                                         int count=1);
+    if (starting_phase != null)
+      starting_phase.raise_objection(obj,description,count);
+  endfunction
+
+
+  // Function: drop_objection
+  //
+  // Drop an objection to ending this phase
+  //
+  virtual function void drop_objection (uvm_object obj, 
+                                        string description="",
+                                        int count=1);
+    if (starting_phase != null)
+      starting_phase.drop_objection(obj,description,count);
+  endfunction
+  */
 
 
   //--------------------------
@@ -645,10 +676,10 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   // Function: start_item
   //
-  // start_item and finish_item together will initiate operation of either
-  // a sequence_item or sequence object.  If the object has not been initiated 
-  // using create_item, then start_item will be initialized in start_item
-  // to use the default sequencer specified by m_sequencer.  Randomization
+  // ~start_item~ and <finish_item> together will initiate operation of either
+  // a sequence item or sequence.  If the item or sequence has not already been
+  // initialized using create_item, then it will be initialized here to use
+  // the default sequencer specified by m_sequencer.  Randomization
   // may be done between start_item and finish_item to ensure late generation
   //
   //| virtual task start_item(uvm_sequence_item item, int set_priority = -1);

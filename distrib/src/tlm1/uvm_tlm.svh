@@ -20,20 +20,20 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`include "uvm_tlm/uvm_tlm_ifs.svh"
-`include "uvm_tlm/sqr_ifs.svh"
+`include "tlm1/uvm_tlm_ifs.svh"
+`include "tlm1/sqr_ifs.svh"
 `include "base/uvm_port_base.svh"
 
-`include "uvm_tlm/uvm_tlm_imps.svh"
+`include "tlm1/uvm_tlm_imps.svh"
 
-`include "uvm_tlm/uvm_imps.svh"
-`include "uvm_tlm/uvm_ports.svh"
-`include "uvm_tlm/uvm_exports.svh"
-`include "uvm_tlm/uvm_analysis_port.svh"
+`include "tlm1/uvm_imps.svh"
+`include "tlm1/uvm_ports.svh"
+`include "tlm1/uvm_exports.svh"
+`include "tlm1/uvm_analysis_port.svh"
 
-`include "uvm_tlm/uvm_tlm_fifo_base.svh"
-`include "uvm_tlm/uvm_tlm_fifos.svh"
-`include "uvm_tlm/uvm_tlm_req_rsp.svh"
+`include "tlm1/uvm_tlm_fifo_base.svh"
+`include "tlm1/uvm_tlm_fifos.svh"
+`include "tlm1/uvm_tlm_req_rsp.svh"
 
-`include "uvm_tlm/sqr_connections.svh"
+`include "tlm1/sqr_connections.svh"
 

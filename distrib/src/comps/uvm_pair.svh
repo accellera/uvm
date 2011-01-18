@@ -20,9 +20,6 @@
 //   permissions and limitations under the License.
 //-----------------------------------------------------------------------------
 
-`ifndef UVM_PAIR_SVH
-`define UVM_PAIR_SVH
-
 //-----------------------------------------------------------------------------
 // Title: uvm_pair classes
 //-----------------------------------------------------------------------------
@@ -167,6 +164,4 @@ class uvm_built_in_pair #(type T1=int, T2=T1) extends uvm_transaction;
   endfunction
 
 endclass
-
-`endif // UVM_PAIR_SVH
 

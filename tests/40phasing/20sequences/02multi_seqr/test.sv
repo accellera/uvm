@@ -39,7 +39,11 @@ import uvm_pkg::*;
 
 typedef class myseqr;
 class wrapper;
-  int array[time];
+  int array[time]
+    `ifdef QUESTA
+    = '{ default:0 }
+    `endif
+    ;
 endclass
 
 wrapper seqr_seqs[myseqr];
@@ -49,7 +53,9 @@ class myseq extends uvm_sequence;
   `uvm_object_utils(myseq)
  
   wrapper w; 
+
   task body;
+
     int c;
     myseqr seqr;
 
@@ -66,22 +72,26 @@ class myseq extends uvm_sequence;
     c = w.array[$time];
     w.array[$time] = c+1;
    
-    `uvm_info("INBODY", "Starting myseq!!!", UVM_NONE)
+    `uvm_info("INBODY", {seqr.get_name()," Starting myseq in phase ",starting_phase.get_name()}, UVM_NONE)
     #10;
-    `uvm_info("INBODY", "Ending myseq!!!", UVM_NONE)
+    `uvm_info("INBODY", {seqr.get_name()," Ending myseq!!!"}, UVM_NONE)
     end_cnt++;
+
   endtask
+
 endclass
 
 class myseqr extends uvm_sequencer;
   function new(string name, uvm_component parent);
     super.new(name,parent);
     set_phase_domain("uvm", .hier(0));
+    set_default_thread_mode(UVM_PHASE_ACTIVE);
   endfunction
   `uvm_component_utils(myseqr)
 
   task main_phase;
     `uvm_info("MAIN","In main!!!", UVM_NONE)
+    set_thread_mode(UVM_PHASE_ACTIVE);
     #100;
   endtask
 endclass
@@ -95,16 +105,18 @@ class test extends uvm_test;
 
    `uvm_component_utils(test)
 
+   typedef uvm_config_db #(uvm_object_wrapper) phase_rsrc;
+
    function void build_phase();
       uvm_phase_schedule domain, cfg, main;
       seqr1 = new("seqr1", this);
       seqr2 = new("seqr2", this);
-      seqr1.set_phase_seq(uvm_configure_ph, myseq::type_id::get());
-      seqr1.set_phase_seq(uvm_main_ph, myseq::type_id::get());
-      seqr1.set_phase_seq(uvm_shutdown_ph, myseq::type_id::get());
-      seqr2.set_phase_seq(uvm_pre_configure_ph, myseq::type_id::get());
-      seqr2.set_phase_seq(uvm_pre_main_ph, myseq::type_id::get());
-      seqr2.set_phase_seq(uvm_shutdown_ph, myseq::type_id::get());
+      phase_rsrc::set(this, "seqr1", "configure_ph", myseq::type_id::get());
+      phase_rsrc::set(this, "seqr1", "main_ph", myseq::type_id::get());
+      phase_rsrc::set(this, "seqr1", "shutdown_ph", myseq::type_id::get());
+      phase_rsrc::set(this, "seqr2", "pre_configure_ph", myseq::type_id::get());
+      phase_rsrc::set(this, "seqr2", "pre_main_ph", myseq::type_id::get());
+      phase_rsrc::set(this, "seqr2", "shutdown_ph", myseq::type_id::get());
    endfunction
    
    function void report_phase();

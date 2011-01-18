@@ -201,7 +201,7 @@ virtual class uvm_component extends uvm_report_object;
   // <apply_config_settings>.  To turn off automatic configuration for a component, 
   // do not call super.build_phase() in the subtype's build_phase method.
   //
-  // See <uvm_phases> for more information on phases.
+  // See <Phase Scheduling API> for more information on phases.
 
   extern virtual function void build_phase();
 
@@ -224,7 +224,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly. 
   //
-  // See <uvm_phases> for more information on phases.
+  // See <Phase Scheduling API> for more information on phases.
 
   extern virtual function void connect();
 
@@ -247,7 +247,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
   //
-  // See <uvm_phases> for more information on phases.
+  // See <Phase Scheduling API> for more information on phases.
 
   extern virtual function void end_of_elaboration_phase();
 
@@ -270,7 +270,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
   //
-  // See <uvm_phases> for more information on phases.
+  // See <Phase Scheduling API> for more information on phases.
 
   extern virtual function void start_of_simulation_phase();
 
@@ -326,7 +326,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The run_phase task should never be called directly.
   //
-  // See <uvm_phases> for more information on phases.
+  // See <Phase Scheduling API> for more information on phases.
 
   extern virtual task run_phase();
 
@@ -349,7 +349,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
   //
-  // See <uvm_phases> for more information on phases.
+  // See <Phase Scheduling API> for more information on phases.
 
   extern virtual function void extract_phase();
 
@@ -370,7 +370,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
   //
-  // See <uvm_phases> for more information on phases.
+  // See <Phase Scheduling API> for more information on phases.
 
   extern virtual function void check_phase();
 
@@ -392,7 +392,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
   //
-  // See <uvm_phases> for more information on phases.
+  // See <Phase Scheduling API> for more information on phases.
 
   extern virtual function void report_phase();
 
@@ -415,7 +415,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
   //
-  // See <uvm_phases> for more information on phases.
+  // See <Phase Scheduling API> for more information on phases.
   
   extern virtual function void finalize_phase();
 
@@ -571,40 +571,45 @@ virtual class uvm_component extends uvm_report_object;
 
   extern virtual function void set_phase_schedule(string domain_name);
 
+
   // Function: set_phase_imp
   //
   // Override the default implementation for a phase on this component (tree) with a
   // custom one, which must be created as a singleton object extending the default
   // one and implementing required behavior in exec and traverse methods
   //
-  // Can choose whether to apply the custom functor to the whole tree or just component
+  // The ~hier~ specifies whether to apply the custom functor to the whole tree or
+  // just this component.
 
   extern function void set_phase_imp(uvm_phase_imp phase, uvm_phase_imp imp, int hier=1);
 
   // Function: jump
+  //
+  //
+  //
   extern function void jump(uvm_phase_imp phase);
+
   
   // Function: jump_all_domains
+  //
+  //
+  //
   extern function void jump_all_domains(uvm_phase_imp phase);
+
   
   // Function: set_default_thread_mode
+  //
   // Specify default thread semantic for all phases on this component
-  extern function void set_default_thread_mode(uvm_thread_mode_t thread_mode);
+  //
+  extern function void set_default_thread_mode(uvm_thread_mode thread_mode);
   
-  // Function: set_thread_mode
-  // Override default thread semantic for the current phase on this component
-  extern function void set_thread_mode(uvm_thread_mode_t thread_mode);
-  
-  // Phasing implementation
-  // Internal members for phasing process control, hierarchical schedules, functors
-  
-  string             m_phase_domains[uvm_phase_schedule]; // domain(s) we have set, per schedule
-  uvm_phase_thread   m_phase_threads[uvm_phase_schedule]; // phases we have active threads for
-  uvm_phase_imp      m_phase_imps[uvm_phase_imp];         // functors to override ovm_root defaults
-  uvm_thread_mode_t  m_phase_thread_mode;                 // default thread semantic for this comp
-  uvm_phase_schedule m_current_phase;                     // the most recently executed phase
-  /*protected*/ bit  m_build_done=0;
 
+  // Function: set_thread_mode
+  //
+  // Override default thread semantic for the current phase on this component
+  //
+  extern function void set_thread_mode(uvm_thread_mode thread_mode);
+  
 
   // Task: suspend
   //
@@ -1520,6 +1525,17 @@ virtual class uvm_component extends uvm_report_object;
   // tions are freely available via the open-source license.
   //----------------------------------------------------------------------------
 
+  // Phasing implementation
+  // Internal members for phasing process control, hierarchical schedules, functors
+  
+  string             m_phase_domains[uvm_phase_schedule]; // domain(s) we have set, per schedule
+  uvm_phase_thread   m_phase_threads[uvm_phase_schedule]; // phases we have active threads for
+  uvm_phase_imp      m_phase_imps[uvm_phase_imp];         // functors to override ovm_root defaults
+  uvm_thread_mode    m_def_phase_thread_mode=UVM_PHASE_MODE_DEFAULT; // default thread semantic
+  uvm_phase_schedule m_current_phase;                     // the most recently executed phase
+  /*protected*/ bit  m_build_done=0;
+
+
   extern       function void set_int_local (string field_name, 
                                uvm_bitstream_t value,
                                bit recurse=1);
@@ -1534,8 +1550,6 @@ virtual class uvm_component extends uvm_report_object;
   extern          function void  do_flush();
 
   extern virtual function void flush ();
-
-  //AK uvm_phase m_curr_phase=null;
 
   extern local function void m_extract_name(string name ,
                                             output string leaf ,
@@ -1677,14 +1691,17 @@ function uvm_component::new (string name, uvm_component parent);
 
   event_pool = new("event_pool");
 
-  foreach(parent.m_phase_domains[schedule])
-    m_phase_domains[schedule] = parent.m_phase_domains[schedule];
+  m_phase_domains = parent.m_phase_domains;
   
   // Now that inst name is established, reseed (if use_uvm_seeding is set)
   reseed();
 
   // Do local configuration settings
   void'(get_config_int("recording_detail", recording_detail)); // *** VIRTUAL
+
+  void'(uvm_config_db #(uvm_thread_mode)::get(this,"","default_phase_thread_mode",
+       m_def_phase_thread_mode));
+
 
   set_report_verbosity_level(parent.get_report_verbosity_level());
 
@@ -2241,10 +2258,13 @@ task          uvm_component::shutdown_phase();            return; endtask
 task          uvm_component::post_shutdown_phase();       return; endtask
 
 
+//------------------------------
 // current phase convenience API
 //------------------------------
 
 
+// phase_started
+// -------------
 // phase_started() and phase_ended() are extra callbacks called at the
 // beginning and end of each phase, respectively.  Since they are
 // called for all phases the phase is passed in as an argument so the
@@ -2276,17 +2296,29 @@ function void uvm_component::phase_started(uvm_phase_schedule phase);
 endfunction
 
 
+// phase_ended
+// -----------
+
 function void uvm_component::phase_ended(uvm_phase_schedule phase);
 endfunction
 
 
+// get_current_phase
+// -----------------
+
+
+// won't work for child processes or outside callers
+// they'l get most recently spawned phase for this component, even if not active
 function uvm_phase_schedule uvm_component::get_current_phase();
   foreach (m_phase_threads[phase])
-    if (m_phase_threads[phase].is_current_process()) return phase;
-
+    if (m_phase_threads[phase].is_current_process())
+      return phase;
   return m_current_phase;
 endfunction
 
+
+// find_phase_domain
+// -----------------
 
 function string uvm_component::find_phase_domain(string schedule_name="uvm_pkg::uvm");
   foreach (m_phase_domains[schedule])
@@ -2295,6 +2327,9 @@ function string uvm_component::find_phase_domain(string schedule_name="uvm_pkg::
   uvm_report_fatal("BADDOMAIN", {"component has no '", schedule_name, "' schedule domain"});
 endfunction
 
+
+// find_phase_schedule
+// -------------------
 
 function uvm_phase_schedule uvm_component::find_phase_schedule(string name, string domain);
   foreach (m_phase_domains[schedule])
@@ -2305,16 +2340,23 @@ function uvm_phase_schedule uvm_component::find_phase_schedule(string name, stri
 endfunction
 
 
+// add_phase_schedule
+// ------------------
+
 function void uvm_component::add_phase_schedule(uvm_phase_schedule schedule, string domain);
   m_phase_domains[schedule] = domain;
 endfunction
 
+
+// delete_phase_schedule
+// ---------------------
 
 function void uvm_component::delete_phase_schedule(uvm_phase_schedule schedule);
   m_phase_domains.delete(schedule);
 endfunction
 
 
+//------------------------------
 // phase / schedule / domain API
 //------------------------------
 // methods for VIP creators and integrators to use to set up schedule domains
@@ -2329,6 +2371,9 @@ endfunction
 
 // components using these phases must subscribe by calling set_domain(name)
 
+// set_phase_schedule
+// ------------------
+
 function void uvm_component::set_phase_schedule(string domain_name);
   const string schedule_name = "uvm_pkg::uvm";
   uvm_root top;
@@ -2341,7 +2386,7 @@ function void uvm_component::set_phase_schedule(string domain_name);
   // create it and add it to master schedule if it doesn't exist
   if (uvm == null) begin
     uvm = new(schedule_name);
-    uvm_root::m_has_rt_phases=1;
+    uvm_phase_schedule::m_has_rt_phases=1;
     // schedule consists of a linear list of predefined phases
     uvm.add_phase(uvm_pre_reset_ph);
     uvm.add_phase(uvm_reset_ph);
@@ -2372,25 +2417,45 @@ function void uvm_component::set_phase_schedule(string domain_name);
   add_phase_schedule(uvm, domain_name);
 endfunction
 
+
+// set_phase_domain
+// ----------------
+
 function void uvm_component::set_phase_domain(string domain_name, int hier=1);
   set_phase_schedule(domain_name);
-  if (hier) foreach (m_children[c]) m_children[c].set_phase_domain(domain_name,hier);
+  if (hier)
+    foreach (m_children[c])
+      m_children[c].set_phase_domain(domain_name,hier);
 endfunction
+
+
+// set_phase_imp
+// -------------
 
 function void uvm_component::set_phase_imp(uvm_phase_imp phase, uvm_phase_imp imp, int hier=1);
   m_phase_imps[phase] = imp;
-  if (hier) foreach (m_children[c]) m_children[c].set_phase_imp(phase,imp,hier);
+  if (hier)
+    foreach (m_children[c])
+      m_children[c].set_phase_imp(phase,imp,hier);
 endfunction
 
 
+//-------------------------------------
 // phase process / thread semantics API
 //-------------------------------------
 
-function void uvm_component::set_default_thread_mode(uvm_thread_mode_t thread_mode);
-  m_phase_thread_mode = thread_mode;
+// set_default_thread_mode
+// -----------------------
+
+function void uvm_component::set_default_thread_mode(uvm_thread_mode thread_mode);
+  m_def_phase_thread_mode = thread_mode;
 endfunction
 
-function void uvm_component::set_thread_mode(uvm_thread_mode_t thread_mode);
+
+// set_thread_mode
+// ---------------
+
+function void uvm_component::set_thread_mode(uvm_thread_mode thread_mode);
   foreach (m_phase_threads[phase]) begin
     if (m_phase_threads[phase].is_current_process()) begin
       m_phase_threads[phase].set_thread_mode(thread_mode);
@@ -2401,14 +2466,21 @@ function void uvm_component::set_thread_mode(uvm_thread_mode_t thread_mode);
 endfunction
 
 
+//--------------------------
 // phase runtime control API
-// -------------------------
+//--------------------------
+
+// jump
+// ----
 
 function void uvm_component::jump(uvm_phase_imp phase);
   uvm_phase_schedule current_phase;
   current_phase = get_current_phase();
   current_phase.jump(phase);
 endfunction
+
+// jump_all_domains
+// ----------------
 
 function void uvm_component::jump_all_domains(uvm_phase_imp phase);
   uvm_phase_schedule current_phase;

@@ -20,9 +20,6 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
-`ifndef UVM_AGENT_SVH
-`define UVM_AGENT_SVH
-
 //------------------------------------------------------------------------------
 //
 // CLASS: uvm_agent
@@ -83,4 +80,3 @@ virtual class uvm_agent extends uvm_component;
   endfunction
 endclass
 
-`endif // UVM_AGENT_SVH
