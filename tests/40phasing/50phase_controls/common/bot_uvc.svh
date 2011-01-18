@@ -43,12 +43,12 @@ class bot_driver extends uvm_driver#(bot_item);
     super.new(name, parent);
   endfunction : new
 
-  virtual task run();
+  virtual task run_phase();
     fork
       get_and_drive();
       reset_signals();
     join_none;
-  endtask : run
+  endtask : run_phase
 
   // get_and_drive
   virtual protected task get_and_drive();
@@ -83,9 +83,9 @@ class bot_driver extends uvm_driver#(bot_item);
     disable reset_signals;
   endtask : stop_driving
 
-  task post_shutdown();
+  task post_shutdown_phase();
     stop_driving();
-  endtask : post_shutdown
+  endtask : post_shutdown_phase
 
 endclass : bot_driver
 
@@ -105,21 +105,21 @@ class bot_agent extends uvm_agent;
     super.new(name, parent);
   endfunction : new
 
-  // build
-  function void build();
-    super.build();
+  // build_phase
+  function void build_phase();
+    super.build_phase();
     if(is_active == UVM_ACTIVE) begin
       sequencer  = bot_sequencer::type_id::create( {get_name(), "_sequencer"}, this);
       driver = bot_driver::type_id::create( {get_name(), "_driver"}, this);
     end
-  endfunction : build
+  endfunction : build_phase
 
-  // connect
-  function void connect();
+  // connect_phase
+  function void connect_phase();
     if(is_active == UVM_ACTIVE) begin
       driver.seq_item_port.connect(sequencer.seq_item_export);
     end
-  endfunction : connect
+  endfunction : connect_phase
 
 endclass : bot_agent
 
@@ -135,10 +135,10 @@ class bot_env extends uvm_env;
     super.new(name, parent);
   endfunction : new
 
-  // build
-  function void build();
+  // build_phase
+  function void build_phase();
     agent  = bot_agent::type_id::create( get_name(), this);
-  endfunction : build
+  endfunction : build_phase
 
   //Debug messages when phase started & ended
   function void phase_started( uvm_phase_schedule phase);

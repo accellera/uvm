@@ -29,13 +29,14 @@ typedef class uvm_sequence_base;
 typedef class uvm_objection_cb;
 typedef uvm_callbacks #(uvm_objection,uvm_objection_cb) uvm_objection_cbs_t;
 typedef class uvm_cmdline_processor;
-
+typedef class uvm_callbacks_objection;
+typedef class uvm_objection_callback;
 
 //------------------------------------------------------------------------------
 // Title: Objection Mechanism
 //------------------------------------------------------------------------------
 // The following classes define the objection mechanism and end-of-test
-// functionality, which is based on <ovm_objection>.
+// functionality, which is based on <uvm_objection>.
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
@@ -83,7 +84,7 @@ class uvm_objection extends uvm_report_object;
 
   protected bit m_hier_mode = 1;
 
-  `uvm_register_cb(uvm_objection, uvm_objection_cb)
+  uvm_root top = uvm_root::get();
 
   // Function: clear
   //
@@ -330,7 +331,6 @@ class uvm_objection extends uvm_report_object;
       m_report(obj,source_obj,description,count,"raised");
 
     raised(obj, source_obj, description, count);
-    `uvm_do_callbacks(uvm_objection,uvm_objection_cb,raised(this,obj,source_obj,description,count))
 
     // If this object is still draining from a previous drop, then
     // raise the count and return. Any propagation will be handled
@@ -447,7 +447,6 @@ class uvm_objection extends uvm_report_object;
       m_report(obj,source_obj,description,count,"dropped");
     
     dropped(obj, source_obj, description, count);
-    `uvm_do_callbacks(uvm_objection,uvm_objection_cb,dropped(this,obj,source_obj,description,count))
   
     // if count != 0, no reason to fork
     if (m_total_count[obj] != 0) begin
@@ -534,7 +533,6 @@ class uvm_objection extends uvm_report_object;
              m_report(obj,source_obj,description,count,"all_dropped");
     
           all_dropped(obj,source_obj,description, count);
-          `uvm_do_callbacks(uvm_objection,uvm_objection_cb,all_dropped(this,obj,source_obj,description,count))
  
           // wait for all_dropped cbs to complete
           wait fork;
@@ -911,46 +909,6 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// Class: uvm_objection_cb
-//
-//------------------------------------------------------------------------------
-// This class allows for external consumers to attach to the various
-// objection callbacks, <uvm_objection::raised>, <uvm_objection::dropped> and 
-// <uvm_objection::all_dropped>.
-//
-//| class my_objection_cb extends uvm_objection_cb;
-//|    virtual function void raised (uvm_objection objection, uvm_object obj, 
-//|      uvm_object source_obj, string description, int count);
-//|      if(obj == source_obj)
-//|        $display("Got %s raise: %s from object %s", objection.get_name(),
-//|           description, obj.get_full_name());
-//|    endfunction
-//| endclass
-//|
-//| my_objection_cb cb = new;
-//|
-//| //add to every type of objection
-//| initial uvm_callbacks#(uvm_objection)::add(null,cb);
-//------------------------------------------------------------------------------
-
-class uvm_objection_cb extends uvm_callback;
-  function new(string name);
-    super.new(name);
-  endfunction
-  virtual function void raised (uvm_objection objection, uvm_object obj, 
-      uvm_object source_obj, string description, int count);
-  endfunction
-  virtual function void dropped (uvm_objection objection, uvm_object obj, 
-      uvm_object source_obj, string description, int count);
-  endfunction
-  virtual task all_dropped (uvm_objection objection, uvm_object obj, 
-      uvm_object source_obj, string description, int count);
-  endtask
-endclass
-
-
-//------------------------------------------------------------------------------
-//
 // Class: uvm_test_done_objection
 //
 // Provides built-in end-of-test coordination
@@ -1138,32 +1096,119 @@ class uvm_objection_context_object;
 endclass
 
 
-
 //------------------------------------------------------------------------------
 //
-// Class: uvm_phase_object_cb
+// Class: uvm_callbacks_objection
 //
 //------------------------------------------------------------------------------
+// The uvm_callbacks_objection is a specialized <uvm_objection> which contains
+// callbacks for the raised and dropped events. Callbacks happend for the three
+// standard callback activities, <raised>, <dropped>, and <all_dropped>.
+//
+// The <uvm_heartbeat> mechanism use objections of this type for creating
+// heartbeat conditions.  Whenever the objection is raised or dropped, the component 
+// which did the raise/drop is considered to be alive.
+//
 
-typedef class uvm_phase_schedule;
 
-class uvm_phase_object_cb extends uvm_objection_cb;
-  function new(string name);
+class uvm_callbacks_objection extends uvm_objection;
+  `uvm_register_cb(uvm_callbacks_objection, uvm_objection_callback)
+  function new(string name="");
     super.new(name);
   endfunction
-  uvm_phase_schedule phase_sched;
-  virtual task all_dropped (uvm_objection objection,
-                            uvm_object obj,
-                            uvm_object source_obj,
-                            string description,
-                            int count);
-     // if uvm_top
-     if (obj == uvm_root::get()) begin
-     end
-     
+
+  // Function: raised
+  //
+  // Executes the <uvm_objection_callback::raised> method in the user callback
+  // class whenever this objection is raised at the object ~obj~.
+
+  virtual function void raised (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+    `uvm_do_callbacks(uvm_callbacks_objection,uvm_objection_callback,raised(this,obj,source_obj,description,count))
+  endfunction
+
+  // Function: dropped
+  //
+  // Executes the <uvm_objection_callback::dropped> method in the user callback
+  // class whenever this objection is dropped at the object ~obj~.
+
+  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+    `uvm_do_callbacks(uvm_callbacks_objection,uvm_objection_callback,dropped(this,obj,source_obj,description,count))
+  endfunction
+
+  // Function: all_dropped
+  //
+  // Executes the <uvm_objection_callback::all_dropped> task in the user callback
+  // class whenever the objection count for this objection in reference to ~obj~
+  // goes to zero.
+
+  virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
+      string description, int count);
+    `uvm_do_callbacks(uvm_callbacks_objection,uvm_objection_callback,all_dropped(this,obj,source_obj,description,count))
   endtask
 endclass
 
+
+//------------------------------------------------------------------------------
+//
+// Class: uvm_objection_callback
+//
+//------------------------------------------------------------------------------
+// The uvm_objection is the callback type that defines the callback 
+// implementations for an objection callback. A user uses the callback
+// type uvm_objection_cbs_t to add callbacks to specific objections.
+//
+// For example:
+//
+//| class my_objection_cb extends uvm_objection_callback;
+//|   function new(string name);
+//|     super.new(name);
+//|   endfunction
+//|
+//|   virtual function void raised (uvm_objection objection, uvm_object obj, 
+//|       uvm_object source_obj, string description, int count);
+//|     $display("%0t: Objection %s: Raised for %s", $time, objection.get_name(),
+//|         obj.get_full_name());
+//|   endfunction
+//| endclass
+//| ...
+//| initial begin
+//|   my_objection_cb cb = new("cb");
+//|   uvm_objection_cbs_t::add(null, cb); //typewide callback
+//| end
+
+
+class uvm_objection_callback extends uvm_callback;
+  function new(string name);
+    super.new(name);
+  endfunction
+
+  // Function: raised
+  //
+  // Objection raised callback function. Called by <uvm_callbacks_objection::raised>.
+
+  virtual function void raised (uvm_objection objection, uvm_object obj, 
+      uvm_object source_obj, string description, int count);
+  endfunction
+
+  // Function: dropped
+  //
+  // Objection dropped callback function. Called by <uvm_callbacks_objection::dropped>.
+
+  virtual function void dropped (uvm_objection objection, uvm_object obj, 
+      uvm_object source_obj, string description, int count);
+  endfunction
+
+  // Function: all_dropped
+  //
+  // Objection all_dropped callback function. Called by <uvm_callbacks_objection::all_dropped>.
+
+  virtual task all_dropped (uvm_objection objection, uvm_object obj, 
+      uvm_object source_obj, string description, int count);
+  endtask
+
+endclass
 
 
 `endif

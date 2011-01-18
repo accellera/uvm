@@ -83,7 +83,7 @@ class reg_driver #(type DO=int) extends uvm_component;
    endfunction
    
 
-   task run();
+   task run_phase();
       reg_monitor mon;
       $cast(mon, m_parent.get_child("mon"));
            
@@ -119,7 +119,7 @@ class reg_agent #(type DO=int) extends uvm_agent;
       mon = new("mon", this);
    endfunction: new
 
-   virtual function void connect();
+   virtual function void connect_phase();
       drv.seqr_port.connect(sqr.seq_item_export);
    endfunction
 endclass

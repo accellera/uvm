@@ -251,7 +251,7 @@ module test;
       mc = new("mc", this);
       oc = new("oc", this);
     endfunction
-    task run;
+    task run_phase;
       `uvm_info("RUN", "In run", UVM_NONE)
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
 //Current global stop integration has an issue here... needs
@@ -272,7 +272,7 @@ run_ph.phase_done.drop_objection();
       super.new(name,parent);
       me = new("me", this);
     endfunction
-    function void report;
+    function void report_phase;
       if(me.mc.start_reset != 0 || 
          me.oc.start_reset != 0) begin
         $display("*** UVM TEST FAILED , reset started at time %t/%0t instead of 0", me.mc.start_reset, me.oc.start_reset);

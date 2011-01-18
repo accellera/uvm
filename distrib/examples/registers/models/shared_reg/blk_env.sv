@@ -150,7 +150,7 @@ class blk_env extends uvm_env;
       super.new(name, parent);
    endfunction: new
 
-   virtual function void build();
+   virtual function void build_phase();
       begin // FIXME 839607
       any_driver#(apb_item)::type_id::set_type_override(my_apb_driver::get_type());
       end
@@ -158,13 +158,15 @@ class blk_env extends uvm_env;
       wsh =   wsh_agent::type_id::create("wsh_agent",this);
       model = reg_block_B::type_id::create("reg_blk_B");
       model.build();
-   endfunction: build
+   endfunction: build_phase
 
-   virtual function void connect();
+   virtual function void connect_phase();
       reg2apb_adapter reg2apb = new;
       reg2wsh_adapter reg2wsh = new;
       model.APB.set_sequencer(apb.sqr, reg2apb);
+      model.APB.set_auto_predict();
       model.WSH.set_sequencer(wsh.sqr, reg2wsh);
+      model.WSH.set_auto_predict();
       apb.drv.base_addr = 'h20;
    endfunction
 

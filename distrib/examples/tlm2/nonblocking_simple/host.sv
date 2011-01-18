@@ -68,7 +68,7 @@ class host extends uvm_component;
    //
    // Execute an OUT followed by an IN bulk transfer
    //
-   virtual task run();
+   virtual task run_phase();
 
       xfer = usb_xfer::type_id::create("xfer",,get_full_name());
 

@@ -133,9 +133,10 @@ class uvm_recorder;
 
   virtual function void record_field_real (string name, 
                                            real value);
+    bit[63:0] ival = $realtobits(value);
     if(tr_handle==0) return;
     scope.set_arg(name);
-    uvm_set_attribute_by_name(tr_handle, scope.get(), value, "'r");
+    uvm_set_attribute_by_name(tr_handle, scope.get(), ival, "'r");
   endfunction
 
 

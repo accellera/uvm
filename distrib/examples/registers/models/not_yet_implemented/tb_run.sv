@@ -38,7 +38,7 @@ class tb_test extends uvm_test;
    endfunction
 
    
-   virtual task run();
+   virtual task run_phase();
       tb_env env;
 
       if (!$cast(env, uvm_top.find("env")) || env == null) begin

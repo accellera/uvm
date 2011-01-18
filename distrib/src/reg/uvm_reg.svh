@@ -2293,7 +2293,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
      else
        path_s = (get_backdoor() != null) ? "user backdoor" : "DPI backdoor";
 
-     value_s = $sformatf("=%0h",rw.value[0]);
+     value_s = $sformatf("=0x%0h",rw.value[0]);
 
      `uvm_info("RegModel", {"Wrote register via ",path_s,": ",
                             get_full_name(),value_s},UVM_HIGH)

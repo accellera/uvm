@@ -34,8 +34,8 @@ package my_env_pkg;
       super.new(name, parent);
     endfunction
   
-    function void build();
-      super.build();
+    function void build_phase();
+      super.build_phase();
       void'(get_config_int("debug", debug));
       set_config_int("inst1.u2", "v", 5);
       set_config_int("inst2.u1", "v", 3);
@@ -43,8 +43,8 @@ package my_env_pkg;
   
       $display("%s: In Build: debug = %0d", get_full_name(), debug);
   
-      inst1 = new("inst1", this); inst1.build();
-      inst2 = new("inst2", this); inst2.build();
+      inst1 = new("inst1", this);
+      inst2 = new("inst2", this);
     endfunction
   
     function string get_type_name();
@@ -53,7 +53,7 @@ package my_env_pkg;
     function void do_print(uvm_printer printer);
       printer.print_field("debug", debug, 1);
     endfunction
-    task run;
+    task run_phase;
       begin end
     endtask
   endclass

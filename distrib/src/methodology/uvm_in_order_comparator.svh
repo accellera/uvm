@@ -132,13 +132,13 @@ class uvm_in_order_comparator
     return type_name;
   endfunction
 
-  virtual function void connect();
+  virtual function void connect_phase();
     before_export.connect(m_before_fifo.analysis_export);
     after_export.connect(m_after_fifo.analysis_export);
   endfunction
 
 
-  // Task- run
+  // Task- run_phase
   //
   // Internal method.
   //
@@ -146,14 +146,14 @@ class uvm_in_order_comparator
   // Status information is updated according to the results of the comparison.
   // Each pair is published to the pair_ap analysis port.
 
-  virtual task run();
+  virtual task run_phase();
  
     pair_type pair;
     T b;
     T a;
   
     string s;
-   
+    super.run_phase(); 
     forever begin
       
       m_before_fifo.get(b);

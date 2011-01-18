@@ -14,7 +14,7 @@ class test extends test_base;
   endfunction : new
   `uvm_component_utils(test);
 
-  task main();
+  task main_phase();
     #20;
     if( jump_reset_num ) begin
       `uvm_info( "JUMP_RESET", $psprintf("Jump backward to reset phase from : main"), UVM_NONE);
@@ -26,9 +26,9 @@ class test extends test_base;
     //now jump to shutdown (skip post_main and pre_shutdown)
     `uvm_info( "JUMP_SHUTDOWN", $psprintf("Jump forward to shutdown phase from : main"), UVM_NONE);
     jump( uvm_shutdown_ph );
-  endtask : main
+  endtask : main_phase
 
-  function void check();
+  function void check_phase();
 //normal test
 //  [top_random_seq]    10
 //  [bot_random_seq]    24
@@ -85,7 +85,7 @@ class test extends test_base;
       `uvm_error( "ID_COUNT", $psprintf( "Expected %1d [%s] message(s).  Got %1d",
                                          e_prs_c, "pre_shutdown", prs_c));
     end
-  endfunction : check
+  endfunction : check_phase
 
 endclass : test
 

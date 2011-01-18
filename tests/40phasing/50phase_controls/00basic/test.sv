@@ -33,14 +33,14 @@ class basic_driver extends uvm_driver #(basic_item);
     end
   endtask : get_and_send
 
-  task run ();
+  task run_phase ();
     get_and_send();
-  endtask: run
+  endtask: run_phase
 
-  task post_shutdown();
+  task post_shutdown_phase();
     //Should stop accepting and sending request here.
     disable get_and_send;
-  endtask : post_shutdown
+  endtask : post_shutdown_phase
 
 endclass : basic_driver
 
@@ -128,26 +128,26 @@ class test extends uvm_test;
 
   typedef uvm_config_db #(uvm_sequence_base) sequence_rsrc;
 
-  function void connect();
+  function void connect_phase();
     super.connect();
     myseq seq = new;
     seq.randomize();
     driver.seq_item_port.connect(sequencer.seq_item_export);
-    sequencer.set_phase_seq( uvm_main_ph, basic_main_phase_seq::type_id::get());
     sequence_rsrc::set(this, "seqr1", "main_ph", seq);
-  endfunction : connect
+  endfunction : connect_phase
 
-  virtual task run();
+  virtual task run_phase();
+    set_thread_mode(UVM_PHASE_ACTIVE);
     //basic_seq run_seq; run_seq = new( "basic_seq_in_run" ); run_seq.start( sequencer );
     //`uvm_info( "RUN", "Done run phase", UVM_NONE );
-  endtask : run
+  endtask : run_phase
 
-  virtual task main();
+  virtual task main_phase();
     basic_seq main_seq; main_seq = new( "basic_seq_in_main" ); main_seq.start( sequencer );
     `uvm_info( "RUN", "Done main phase", UVM_NONE );
-  endtask : main
+  endtask : main_phase
 
-  function void report();
+  function void report_phase();
     uvm_report_server svr;
     svr = _global_reporter.get_report_server();
 
@@ -159,7 +159,7 @@ class test extends uvm_test;
     end else begin
       `uvm_info("REPORT", "!! UVM TEST FAILED !!\n", UVM_NONE);
     end
-  endfunction : report
+  endfunction : report_phase
 
   function void phase_started( uvm_phase_schedule phase);
     `uvm_info( "PHASE", $sformatf( "Phase %s() STATED ----------------------------\n",

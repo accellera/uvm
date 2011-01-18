@@ -101,17 +101,17 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   endfunction
 
 
-  // Function- connect
+  // Function- connect_phase
   //
-  function void connect();
+  function void connect_phase();
     rsp_export.connect(sqr_rsp_analysis_fifo.analysis_export);
   endfunction // void
 
 
   // Function- build
   //
-  virtual function void build();
-    super.build();
+  virtual function void build_phase();
+    super.build_phase();
     sqr_rsp_analysis_fifo.sequencer_ptr = this;
   endfunction // function
   
@@ -304,11 +304,12 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
 
 
 
-  // Task- run
+  // Task- run_phase
   //
   // Do not call directly except by overrides in derived classes
 
-  task run();
+  task run_phase();
+    super.run_phase();
     start_default_sequence();
   endtask // run
 

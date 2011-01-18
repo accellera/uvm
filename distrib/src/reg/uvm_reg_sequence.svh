@@ -727,11 +727,12 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
   endfunction
 
   
-  // Function: check
+  // Function: check_phase
   //
   // Checks that no pending register transactions are still enqueued.
 
-  virtual function void check();
+  virtual function void check_phase();
+     super.check_phase();
     if (m_pending.num() > 0) begin
       `uvm_error("PENDING REG ITEMS",{"There are ",$sformatf("%0d",m_pending.num()),
                  " incomplete register transactions still pending completion:"})

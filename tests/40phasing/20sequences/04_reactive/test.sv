@@ -155,7 +155,7 @@ class myseqr extends uvm_sequencer;
   endfunction
   `uvm_component_utils(myseqr)
 
-  task run;
+  task run_phase;
      set_thread_mode(UVM_PHASE_ACTIVE);
     `uvm_info("RUN","In run!!!", UVM_NONE)
     #500;
@@ -175,7 +175,7 @@ class test extends uvm_test;
    typedef uvm_config_db #(uvm_object_wrapper) phase_rsrc;
    typedef uvm_config_db #(uvm_thread_mode) thread_rsrc;
 
-   function void build();
+   function void build_phase();
       uvm_phase_schedule domain, cfg, main;
       seqr1 = new("seqr1", this);
       seqr2 = new("seqr2", this);
@@ -191,7 +191,7 @@ class test extends uvm_test;
       thread_rsrc::set(this, "seqr2", "shutdown_ph",  UVM_PHASE_PASSIVE);
    endfunction
    
-   function void report();
+   function void report_phase();
      wrapper w;
 
      // Check the active sequences

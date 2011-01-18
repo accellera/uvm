@@ -53,7 +53,7 @@ class uvm_push_sequencer #(type REQ = uvm_sequence_item,
   endfunction 
 
 
-  // Task: run
+  // Task: run_phase
   //
   // The push sequencer continuously selects from its list of available
   // sequences and sends the next item from the selected sequence out its
@@ -62,12 +62,12 @@ class uvm_push_sequencer #(type REQ = uvm_sequence_item,
   // <uvm_push_driver #(REQ,RSP)>, which would be responsible for
   // executing the item.
 
-  task run();
+  task run_phase();
     REQ t;
     int selected_sequence;
 
     fork
-      super.run();
+      super.run_phase();
       forever
         begin
           do 

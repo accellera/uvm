@@ -62,10 +62,10 @@ class xbus_env extends uvm_env;
     super.new(name, parent);
   endfunction : new
 
-  // build
-  function void build();
+  // build_phase
+  function void build_phase();
     string inst_name;
-    super.build();
+    super.build_phase();
     if(has_bus_monitor == 1) begin
       bus_monitor = xbus_bus_monitor::type_id::create("bus_monitor", this);
     end
@@ -80,7 +80,7 @@ class xbus_env extends uvm_env;
       $sformat(inst_name, "slaves[%0d]", i);
       slaves[i] = xbus_slave_agent::type_id::create(inst_name, this);
     end
-  endfunction : build
+  endfunction : build_phase
 
   // set_slave_address_map
   function void set_slave_address_map(string slave_name, 
@@ -118,12 +118,12 @@ class xbus_env extends uvm_env;
     end
   endtask : update_vif_enables
 
-  // implement run task
-  task run;
+  // implement run_phase task
+  task run_phase;
     fork
       update_vif_enables();
     join
-  endtask : run
+  endtask : run_phase
 
 endclass : xbus_env
 

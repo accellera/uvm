@@ -9,7 +9,7 @@ class test extends test_base;
   endfunction : new
   `uvm_component_utils(test);
 
-  function void check();
+  function void check_phase();
     //normal test
     //  [top_random_seq]    10
     //  [bot_random_seq]    24
@@ -28,7 +28,7 @@ class test extends test_base;
       `uvm_error( "ID_COUNT", $psprintf( "Expected %1d [%s] message(s).  Got %1d",
                                          e_brs_c, "bottom_random_seq", brs_c));
     end
-  endfunction : check
+  endfunction : check_phase
 
 endclass : test
 
