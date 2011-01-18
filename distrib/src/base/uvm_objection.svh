@@ -26,11 +26,10 @@
 typedef class uvm_objection_context_object;
 typedef class uvm_objection;
 typedef class uvm_sequence_base;
-typedef class uvm_objection_cb;
-typedef uvm_callbacks #(uvm_objection,uvm_objection_cb) uvm_objection_cbs_t;
+typedef class uvm_objection_callback;
+typedef uvm_callbacks #(uvm_objection,uvm_objection_callback) uvm_objection_cbs_t;
 typedef class uvm_cmdline_processor;
 typedef class uvm_callbacks_objection;
-typedef class uvm_objection_callback;
 
 //------------------------------------------------------------------------------
 // Title: Objection Mechanism
