@@ -838,12 +838,12 @@ function void uvm_root::stop_request();
   //TBD               "none (not started":m_curr_phase.get_name()), UVM_NONE);
   //TBD   return;
   //TBD end
+  uvm_test_done_objection tdo = uvm_test_done_objection::get();
   ->m_stop_request_e;
-  if (uvm_test_done_objection::m_startup) begin
-    uvm_test_done_objection tdo = uvm_test_done_objection::get();
+  if (tdo.m_startup) begin
     uvm_test_done_objection::m_stop_request_called=1;
     tdo.drop_objection(this,"stop_request called; start-up test_done objection");
-    uvm_test_done_objection::m_startup=0;
+    tdo.m_startup=0;
   end
 endfunction
 

@@ -210,7 +210,7 @@ virtual class uvm_phase_imp extends uvm_object;
   //
   // Provides the required per-component execution flow. Called by <traverse>.
   //
-  pure protected virtual function void execute(uvm_component comp,
+  pure virtual protected function void execute(uvm_component comp,
                                                uvm_phase_schedule phase);
 
 endclass
@@ -500,12 +500,13 @@ class uvm_process;
     return m_process_id;
   endfunction
 
-  virtual function process::state status();
-    return m_process_id.status();
-  endfunction
-
   virtual function void kill();
     m_process_id.kill();
+  endfunction
+
+`ifdef UVM_USE_FPC
+  virtual function process::state status();
+    return m_process_id.status();
   endfunction
 
   task await();
@@ -519,6 +520,11 @@ class uvm_process;
   function void resume();
    m_process_id.resume();
   endfunction
+`else
+  virtual function int status();
+    return m_process_id.status();
+  endfunction
+`endif
 
 endclass
 //`else
@@ -589,10 +595,10 @@ class uvm_phase_thread extends uvm_process;
               m_phase.get_name(), " objection for ", m_comp.get_full_name()});
   endfunction
 
-`ifdef INCA
-  virtual state function void status();
+`ifdef NOT_DEFINED 
+  virtual function state status();
     if (m_task_ended)
-      return FINISHED;
+      return process::FINISHED;
     return proc.status();
   endfunction
 `endif
@@ -1116,10 +1122,11 @@ endclass
 // ---
 
 function uvm_phase_schedule::new(string name, uvm_phase_schedule parent=null);
-  super.new();
+  super.new(name);
 
-  if (name == "run")
+  if (name == "run") begin
     phase_done = uvm_test_done_objection::get();
+  end
   else
     phase_done = new(name);
 
@@ -1573,8 +1580,9 @@ task uvm_phase_schedule::execute();
              fork
                begin
                  // Process 1: wait for no objections
-                 if (phase_done.get_objection_total())
+                 if (phase_done.get_objection_total()) begin
                    phase_done.wait_for(UVM_ALL_DROPPED, top);
+                 end
                  else begin
                    //$display("** WAITING FOR ALL PROCS TO RETURN");
                    wait (task_phase.num_procs_not_yet_returned == 0);
