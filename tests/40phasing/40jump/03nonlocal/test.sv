@@ -54,7 +54,7 @@ class test extends phasing_test;
                           // (skipped) "common/extract",
     predicted_phasing.push_back("common/check");
     predicted_phasing.push_back("common/report");
-    predicted_phasing.push_back("common/finalize");
+    predicted_phasing.push_back("common/final");
     set_phase_domain("uvm");
     first_time_around=1;
   endfunction
@@ -128,7 +128,7 @@ class phasing_test extends uvm_test;
   function void extract_phase();  audit("common/extract");     endfunction
   function void check_phase();    audit("common/check");       endfunction
   function void report_phase();   audit("common/report");      endfunction
-  function void finalize_phase(); audit("common/finalize");    endfunction
+  function void final_phase(); audit("common/final");    endfunction
 endclass
 
 

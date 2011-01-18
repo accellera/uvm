@@ -256,7 +256,7 @@ uvm_phase_schedule run_ph = null;
 uvm_phase_schedule extract_ph = null;
 uvm_phase_schedule check_ph = null;
 uvm_phase_schedule report_ph = null;
-uvm_phase_schedule finalize_ph = null;
+uvm_phase_schedule final_ph = null;
 
 function void uvm_root::m_initialize_common_schedule();
   // initialize phase schedule to "common", or inherit it from parent component
@@ -278,7 +278,7 @@ function void uvm_root::m_initialize_common_schedule();
   common.add_phase(uvm_extract_phase::get());
   common.add_phase(uvm_check_phase::get());
   common.add_phase(uvm_report_phase::get());
-  common.add_phase(uvm_finalize_phase::get());
+  common.add_phase(uvm_final_phase::get());
 
   // for backward compatibility, make common schedules available
   build_ph = common.find_schedule("build");
@@ -289,7 +289,7 @@ function void uvm_root::m_initialize_common_schedule();
   extract_ph = common.find_schedule("extract");
   check_ph = common.find_schedule("check");
   report_ph = common.find_schedule("report");
-  finalize_ph = common.find_schedule("finalize");
+  final_ph = common.find_schedule("final");
 
   m_inst.add_phase_schedule(common, "common");
 endfunction 

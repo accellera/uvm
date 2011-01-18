@@ -1016,7 +1016,7 @@ endclass
 //
 // Variable: uvm_report_ph
 //
-// Variable: uvm_finalize_ph
+// Variable: uvm_final_ph
 //
 // These variables are the phase implementations for the common phases. The
 // implementation calls the associated task/function in the <uvm_component>
@@ -1039,7 +1039,7 @@ endclass
 //
 // Variable: report_ph
 //
-// Variable: finalize_ph
+// Variable: final_ph
 //
 // These variables are the phase state objects for the common phases. These
 // global objects can be used to synchronize to the global phases or
@@ -1110,7 +1110,7 @@ endclass
 `uvm_builtin_bottomup_phase(extract)
 `uvm_builtin_bottomup_phase(check)
 `uvm_builtin_bottomup_phase(report)
-`uvm_builtin_topdown_phase(finalize)
+`uvm_builtin_topdown_phase(final)
 
 
 

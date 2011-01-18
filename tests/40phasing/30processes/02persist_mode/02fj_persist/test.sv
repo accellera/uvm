@@ -142,8 +142,8 @@ class base extends uvm_component;
       check_the_phase("check", "report");
    endfunction
    
-   function void finalize_phase();
-      check_the_phase("report", "finalize");
+   function void final_phase();
+      check_the_phase("report", "final");
    endfunction
    
 endclass 
@@ -200,8 +200,8 @@ begin
    begin
       test t;
       $cast(t, uvm_top.find("uvm_test_top"));
-      if (t.last_phase != "finalize") begin
-         `uvm_error("Test", $psprintf("Last phase was \"%s\" instead of \"finalize\".",
+      if (t.last_phase != "final") begin
+         `uvm_error("Test", $psprintf("Last phase was \"%s\" instead of \"final\".",
                                       t.last_phase));
       end
    end
