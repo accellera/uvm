@@ -308,8 +308,8 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   //
   // Do not call directly except by overrides in derived classes
 
-  task run_phase();
-    super.run_phase();
+  task run_phase(uvm_phase_schedule phase);
+    super.run_phase(phase);
     start_default_sequence();
   endtask // run
 

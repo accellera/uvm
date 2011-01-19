@@ -102,58 +102,58 @@ class test extends uvm_test;
       check_the_phase("end_of_elaboration", "start_of_simulation");
    endfunction
    
-   task run_phase();
+   task run_phase(uvm_phase_schedule phase);
       check_the_phase_t("start_of_simulation", "run");
    endtask
    
-   task pre_reset_phase();
+   task pre_reset_phase(uvm_phase_schedule phase);
       check_the_phase_t("start_of_simulation", "pre_reset");
       // Make sure the last phase is not "run"
       #10;
       last_phase = "pre_reset";
    endtask
    
-   task reset_phase();
+   task reset_phase(uvm_phase_schedule phase);
       check_the_phase_t("pre_reset", "reset");
    endtask
    
-   task post_reset_phase();
+   task post_reset_phase(uvm_phase_schedule phase);
       check_the_phase_t("reset", "post_reset");
    endtask
    
-   task pre_configure_phase();
+   task pre_configure_phase(uvm_phase_schedule phase);
       check_the_phase_t("post_reset", "pre_configure");
    endtask
    
-   task configure_phase();
+   task configure_phase(uvm_phase_schedule phase);
       check_the_phase_t("pre_configure", "configure");
    endtask
    
-   task post_configure_phase();
+   task post_configure_phase(uvm_phase_schedule phase);
       check_the_phase_t("configure", "post_configure");
    endtask
    
-   task pre_main_phase();
+   task pre_main_phase(uvm_phase_schedule phase);
       check_the_phase_t("post_configure", "pre_main");
    endtask
    
-   task main_phase();
+   task main_phase(uvm_phase_schedule phase);
       check_the_phase_t("pre_main", "main");
    endtask
    
-   task post_main_phase();
+   task post_main_phase(uvm_phase_schedule phase);
       check_the_phase_t("main", "post_main");
    endtask
    
-   task pre_shutdown_phase();
+   task pre_shutdown_phase(uvm_phase_schedule phase);
       check_the_phase_t("post_main", "pre_shutdown");
    endtask
    
-   task shutdown_phase();
+   task shutdown_phase(uvm_phase_schedule phase);
       check_the_phase_t("pre_shutdown", "shutdown");
    endtask
    
-   task post_shutdown_phase();
+   task post_shutdown_phase(uvm_phase_schedule phase);
       check_the_phase_t("shutdown", "post_shutdown");
    endtask
    

@@ -37,7 +37,7 @@ module top;
     function new(string name, uvm_component parent);
       super.new(name, parent);
     endfunction
-    task run_phase();
+    task run_phase(uvm_phase_schedule phase);
       forever begin
         #20;
       end
@@ -54,7 +54,7 @@ module top;
       super.new(name, parent);
     endfunction
 
-    task run_phase();
+    task run_phase(uvm_phase_schedule phase);
       #10 global_stop_request(); 
       #10;
     endtask

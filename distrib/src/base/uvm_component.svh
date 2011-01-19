@@ -178,6 +178,8 @@ virtual class uvm_component extends uvm_report_object;
   // name with the _phase suffix. For example, the build phase function is
   // <build_phase>.
   //
+  // All processes associated with a task-based phase are killed when the phase
+  // ends. See <uvm_phase_imp::execute> for more details.
   //----------------------------------------------------------------------------
 
 
@@ -328,7 +330,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // See <Phase Scheduling API> for more information on phases.
 
-  extern virtual task run_phase();
+  extern virtual task run_phase(uvm_phase_schedule phase);
 
   // For backward compatibility the base run_phase method calls run.
   extern virtual task run();
@@ -426,78 +428,112 @@ virtual class uvm_component extends uvm_report_object;
   //
   // UVM standard runtime phase
   // This is the first UVM runtime phase commencing in parallel with run.
-
-  extern virtual task pre_reset_phase();
+  //
+  // All processes associated with a phase are killed when the phase ends.
+  // See <uvm_phase_imp::execute> for more details.
+  //
+  extern virtual task pre_reset_phase(uvm_phase_schedule phase);
 
   // Task: reset_phase
   //
   // UVM standard runtime phase
+  //
+  // All processes associated with a phase are killed when the phase ends.
+  // See <uvm_phase_imp::execute> for more details.
 
-  extern virtual task reset_phase();
+  extern virtual task reset_phase(uvm_phase_schedule phase);
 
   // Task: post_reset_phase
   //
   // UVM standard runtime phase
+  //
+  // All processes associated with a phase are killed when the phase ends.
+  // See <uvm_phase_imp::execute> for more details.
 
-  extern virtual task post_reset_phase();
+  extern virtual task post_reset_phase(uvm_phase_schedule phase);
 
   // Task: pre_configure_phase
   //
   // UVM standard runtime phase
+  //
+  // All processes associated with a phase are killed when the phase ends.
+  // See <uvm_phase_imp::execute> for more details.
 
-  extern virtual task pre_configure_phase();
+  extern virtual task pre_configure_phase(uvm_phase_schedule phase);
 
   // Task: configure_phase
   //
   // UVM standard runtime phase
+  //
+  // All processes associated with a phase are killed when the phase ends.
+  // See <uvm_phase_imp::execute> for more details.
 
-  extern virtual task configure_phase();
+  extern virtual task configure_phase(uvm_phase_schedule phase);
 
   // Task: post_configure_phase
   //
   // UVM standard runtime phase
+  //
+  // All processes associated with a phase are killed when the phase ends.
+  // See <uvm_phase_imp::execute> for more details.
 
-  extern virtual task post_configure_phase();
+  extern virtual task post_configure_phase(uvm_phase_schedule phase);
 
   // Task: pre_main_phase
   //
   // UVM standard runtime phase
+  //
+  // All processes associated with a phase are killed when the phase ends.
+  // See <uvm_phase_imp::execute> for more details.
 
-  extern virtual task pre_main_phase();
+  extern virtual task pre_main_phase(uvm_phase_schedule phase);
 
   // Task: main_phase
   //
   // UVM standard runtime phase
+  //
+  // All processes associated with a phase are killed when the phase ends.
+  // See <uvm_phase_imp::execute> for more details.
 
-  extern virtual task main_phase();
+  extern virtual task main_phase(uvm_phase_schedule phase);
 
   // Task: post_main_phase
   //
   // UVM standard runtime phase
-  // Not normally used - included only for symmetry
+  //
+  // All processes associated with a phase are killed when the phase ends.
+  // See <uvm_phase_imp::execute> for more details.
 
-  extern virtual task post_main_phase();
+  extern virtual task post_main_phase(uvm_phase_schedule phase);
 
   // Task: pre_shutdown_phase
   //
   // UVM standard runtime phase
-  // Not normally used - included only for symmetry
+  //
+  // All processes associated with a phase are killed when the phase ends.
+  // See <uvm_phase_imp::execute> for more details.
 
-  extern virtual task pre_shutdown_phase();
+  extern virtual task pre_shutdown_phase(uvm_phase_schedule phase);
 
   // Task: shutdown_phase
   //
   // UVM standard runtime phase
   // This phase is the one jumped to at end of test / global stop request
+  //
+  // All processes associated with a phase are killed when the phase ends.
+  // See <uvm_phase_imp::execute> for more details.
 
-  extern virtual task shutdown_phase();
+  extern virtual task shutdown_phase(uvm_phase_schedule phase);
 
   // Task: post_shutdown_phase
   //
   // UVM standard runtime phase
   // This is the last UVM runtime task-based phase before the extract phase
+  //
+  // All processes associated with a phase are killed when the phase ends.
+  // See <uvm_phase_imp::execute> for more details.
 
-  extern virtual task post_shutdown_phase();
+  extern virtual task post_shutdown_phase(uvm_phase_schedule phase);
 
 
   //--------------------------------------------------------------------
@@ -506,14 +542,18 @@ virtual class uvm_component extends uvm_report_object;
 
 
   // Function: phase_started
-  // Phase transition callback, invoked at beginning of each phase
-  //   phase - the current phase schedule node in the graph
+  //
+  // Invoked at the start of each phase. The ~phase~ argument specifies
+  // the phase being started. Any threads spawned in this callback are
+  // not affected when the phase ends.
 
   extern virtual function void phase_started (uvm_phase_schedule phase);
 
   // Function: phase_ended
-  // Phase transition callback, invoked at end of each phase
-  //   phase - the current phase schedule node in the graph
+  //
+  // Invoked at the end of each phase. The ~phase~ argument specifies
+  // the phase that is ending.  Any threads spawned in this callback are
+  // not affected when the phase ends.
   
   extern virtual function void phase_ended (uvm_phase_schedule phase);
   
@@ -2208,7 +2248,7 @@ function void uvm_component::end_of_elaboration_phase();
   end_of_elaboration();
   return; 
 endfunction
-task          uvm_component::run_phase();
+task          uvm_component::run_phase(uvm_phase_schedule phase);
   run();
   return; 
 endtask
@@ -2244,18 +2284,18 @@ function void uvm_component::finalize();            return; endfunction
 
 // these runtime phase methods are only called if a set_domain() is done
 
-task          uvm_component::pre_reset_phase();           return; endtask
-task          uvm_component::reset_phase();               return; endtask
-task          uvm_component::post_reset_phase();          return; endtask
-task          uvm_component::pre_configure_phase();       return; endtask
-task          uvm_component::configure_phase();           return; endtask
-task          uvm_component::post_configure_phase();      return; endtask
-task          uvm_component::pre_main_phase();            return; endtask
-task          uvm_component::main_phase();                return; endtask
-task          uvm_component::post_main_phase();           return; endtask
-task          uvm_component::pre_shutdown_phase();        return; endtask
-task          uvm_component::shutdown_phase();            return; endtask
-task          uvm_component::post_shutdown_phase();       return; endtask
+task uvm_component::pre_reset_phase(uvm_phase_schedule phase);      return; endtask
+task uvm_component::reset_phase(uvm_phase_schedule phase);          return; endtask
+task uvm_component::post_reset_phase(uvm_phase_schedule phase);     return; endtask
+task uvm_component::pre_configure_phase(uvm_phase_schedule phase);  return; endtask
+task uvm_component::configure_phase(uvm_phase_schedule phase);      return; endtask
+task uvm_component::post_configure_phase(uvm_phase_schedule phase); return; endtask
+task uvm_component::pre_main_phase(uvm_phase_schedule phase);       return; endtask
+task uvm_component::main_phase(uvm_phase_schedule phase);           return; endtask
+task uvm_component::post_main_phase(uvm_phase_schedule phase);      return; endtask
+task uvm_component::pre_shutdown_phase(uvm_phase_schedule phase);   return; endtask
+task uvm_component::shutdown_phase(uvm_phase_schedule phase);       return; endtask
+task uvm_component::post_shutdown_phase(uvm_phase_schedule phase);  return; endtask
 
 
 //------------------------------

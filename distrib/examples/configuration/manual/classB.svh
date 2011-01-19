@@ -47,7 +47,7 @@ class B extends uvm_component;
   function void do_print(uvm_printer printer);
     printer.print_field("debug", debug, 1);
   endfunction
-  task run_phase;
+  task run_phase(uvm_phase_schedule phase);
     begin end
   endtask
 endclass

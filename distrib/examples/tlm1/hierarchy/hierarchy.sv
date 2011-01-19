@@ -96,7 +96,7 @@ module test;
       put_port = new("put_port", this);
     endfunction
     
-    task run_phase;
+    task run_phase(uvm_phase_schedule phase);
       transaction t;
       string msg;
       
@@ -127,7 +127,7 @@ module test;
       ap = new("analysis_port", this);
     endfunction
     
-    task run_phase;
+    task run_phase(uvm_phase_schedule phase);
       transaction t;
       
       forever begin
@@ -151,7 +151,7 @@ module test;
       get_port = new("get_port", this);
     endfunction
     
-    task run_phase;
+    task run_phase(uvm_phase_schedule phase);
       transaction t;
       
       forever begin
@@ -246,7 +246,7 @@ module test;
       p.put_port.connect(c.put_export);
       p.ap.connect(l.analysis_export);
     endfunction
-    task run_phase;
+    task run_phase(uvm_phase_schedule phase);
       begin
       end
     endtask
@@ -264,7 +264,7 @@ module test;
       t = new("top", this);
     endfunction
     
-    task run_phase;
+    task run_phase(uvm_phase_schedule phase);
       #1000; 
       global_stop_request();
     endtask

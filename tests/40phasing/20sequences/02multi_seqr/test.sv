@@ -85,13 +85,13 @@ class myseqr extends uvm_sequencer;
   function new(string name, uvm_component parent);
     super.new(name,parent);
     set_phase_domain("uvm", .hier(0));
-    set_default_thread_mode(UVM_PHASE_ACTIVE);
+    set_default_thread_mode(UVM_PHASE_IMPLICIT_OBJECTION);
   endfunction
   `uvm_component_utils(myseqr)
 
-  task main_phase;
+  task main_phase(uvm_phase_schedule phase);
     `uvm_info("MAIN","In main!!!", UVM_NONE)
-    set_thread_mode(UVM_PHASE_ACTIVE);
+    set_thread_mode(UVM_PHASE_IMPLICIT_OBJECTION);
     #100;
   endtask
 endclass

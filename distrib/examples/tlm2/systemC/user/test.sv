@@ -35,7 +35,7 @@ class test extends uvm_component;
      end
   endfunction : end_of_elaboration_phase
 
-   task run_phase();
+   task run_phase(uvm_phase_schedule phase);
       #100;
       global_stop_request();
    endtask // run_phase

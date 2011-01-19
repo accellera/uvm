@@ -37,6 +37,8 @@
 class uvm_class_pair #(type T1=int, T2=T1) extends uvm_transaction;
 
   typedef uvm_class_pair #(T1, T2 ) this_type;
+
+  `uvm_object_param_utils(this_type);
   
   const static string type_name = "uvm_class_pair #(T1,T2)";
 
@@ -49,7 +51,7 @@ class uvm_class_pair #(type T1=int, T2=T1) extends uvm_transaction;
   // as provided by the first two arguments. The optional ~name~ argument
   // gives a name to the new pair object.
 
-  function new (T1 f=null, T2 s=null, string name="");
+  function new (string name="", T1 f=null, T2 s=null);
 
     super.new(name);
 
@@ -65,12 +67,6 @@ class uvm_class_pair #(type T1=int, T2=T1) extends uvm_transaction;
 
   endfunction  
   
-  virtual function uvm_object create (string name=""); 
-    this_type v;
-    v = new(.name(name));
-    return v;
-  endfunction
-
   virtual function string get_type_name ();
     return type_name;
   endfunction
@@ -82,22 +78,19 @@ class uvm_class_pair #(type T1=int, T2=T1) extends uvm_transaction;
     return s;    
   endfunction
 
-  function bit comp(this_type t);
-    return t.first.comp(first) && t.second.comp(second);
+  virtual function bit do_compare(uvm_object rhs, uvm_comparer comparer);
+    this_type rhs_;
+    assert($cast(rhs_,rhs));
+    return first.compare(rhs_.first) && second.compare(rhs_.second);
   endfunction
 
-  function void copy (this_type t);
-    first.copy(t.first);
-    second.copy(t.second);
+  virtual function void do_copy (uvm_object rhs);
+    this_type rhs_;
+    assert($cast(rhs_,rhs));
+    first.copy(rhs_.first);
+    second.copy(rhs_.second);
   endfunction
 
-  virtual function uvm_object clone();
-    this_type t;
-    t = new;
-    t.copy(this);
-    return t;
-  endfunction
-  
 endclass
 
 //-----------------------------------------------------------------------------
@@ -110,6 +103,8 @@ endclass
 class uvm_built_in_pair #(type T1=int, T2=T1) extends uvm_transaction;
 
   typedef uvm_built_in_pair #(T1,T2) this_type;
+
+  `uvm_object_param_utils(this_type);
   
   const static string type_name = "uvm_built_in_pair #(T1,T2)";
 
@@ -122,18 +117,10 @@ class uvm_built_in_pair #(type T1=int, T2=T1) extends uvm_transaction;
   // as provided by the first two arguments. The optional name argument
   // gives a name to the new pair object.
 
-  function new (T1 f, T2 s, string name="");
+  function new (string name="");
     super.new(name);
-    first = f;
-    second = s;
   endfunction  
   
-  virtual function uvm_object create (string name=""); 
-    this_type v;
-    v = new(first,second,name);
-    return v;
-  endfunction
-
   virtual function string get_type_name ();
     return type_name;
   endfunction
@@ -148,20 +135,18 @@ class uvm_built_in_pair #(type T1=int, T2=T1) extends uvm_transaction;
     return s;
   endfunction
 
-  function bit comp (this_type t);
-    return t.first == first && t.second == second;
+  virtual function bit do_compare(uvm_object rhs, uvm_comparer comparer);
+    this_type rhs_;
+    assert($cast(rhs_,rhs));
+    return first == rhs_.first && second == rhs_.second;
   endfunction
 
-  function void copy (this_type t);
-    first = t.first;
-    second = t.second;
+  function void do_copy (uvm_object rhs);
+    this_type rhs_;
+    assert($cast(rhs_,rhs));
+    first = rhs_.first;
+    second = rhs_.second;
   endfunction
   
-  virtual function uvm_object clone();
-    this_type t;
-    t = new(first,second);
-    return t;
-  endfunction
-
 endclass
 

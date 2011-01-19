@@ -436,8 +436,11 @@ virtual class uvm_task_phase extends uvm_phase_imp;
   // Executes the task-based phase ~phase~ for the component ~comp~. 
   //
   // Task-based phase execution occurs in a separate forked process for each
-  // component. 
-
+  // component.  When there is no longer any objections to ending a phase,
+  // as governed by the <uvm_phase_schedule::phase_done> objection, the
+  // forked process and all its children are terminated before proceeding
+  // to the next phase.
+  //
   protected virtual function void execute(uvm_component comp,
                                           uvm_phase_schedule phase);
 
@@ -570,20 +573,15 @@ class uvm_phase_thread extends uvm_process;
     m_mode = m_comp.m_def_phase_thread_mode;
 
     if (m_mode == UVM_PHASE_MODE_DEFAULT)
-      if (phase.get_name() == "run")
-        m_mode = UVM_PHASE_PASSIVE;
-      else
-      m_mode = UVM_PHASE_ACTIVE;
+      m_mode = UVM_PHASE_NO_IMPLICIT_OBJECTION;
 
-    if (m_mode == UVM_PHASE_ACTIVE ||
-        m_mode == UVM_PHASE_ACTIVE_PERSISTENT)
+    if (m_mode == UVM_PHASE_IMPLICIT_OBJECTION)
       m_phase.phase_done.raise_objection(m_comp, {"raise implicit ",
            m_phase.get_name(), " objection for ", m_comp.get_full_name()});
   endfunction
 
   function void task_ended();
-    if (m_mode == UVM_PHASE_ACTIVE ||
-        m_mode == UVM_PHASE_ACTIVE_PERSISTENT)
+    if (m_mode == UVM_PHASE_IMPLICIT_OBJECTION)
       if(m_phase.phase_done.get_objection_count(m_comp) > 0) // why this conditional?
          m_phase.phase_done.drop_objection(m_comp, {"drop implicit ",
               m_phase.get_name(), " objection for ", m_comp.get_full_name()});
@@ -604,18 +602,14 @@ class uvm_phase_thread extends uvm_process;
   
   function void set_thread_mode(uvm_thread_mode mode);
     // if passive -> active, we need to raise an implicit objection now
-    if ((m_mode == UVM_PHASE_PASSIVE ||
-         m_mode == UVM_PHASE_PASSIVE_PERSISTENT) &&
-        (mode == UVM_PHASE_ACTIVE ||
-         mode == UVM_PHASE_ACTIVE_PERSISTENT))
+    if (m_mode == UVM_PHASE_NO_IMPLICIT_OBJECTION &&
+          mode == UVM_PHASE_IMPLICIT_OBJECTION)
       m_phase.phase_done.raise_objection(m_comp, {"mode change- raise implicit ",
             m_phase.get_name(), " objection for ", m_comp.get_full_name()});
 
     // if active -> passive, we need to drop the implicit objection now
-    if ((m_mode == UVM_PHASE_PASSIVE ||
-         m_mode == UVM_PHASE_PASSIVE_PERSISTENT) &&
-        (mode == UVM_PHASE_ACTIVE ||
-         mode == UVM_PHASE_ACTIVE_PERSISTENT))
+    if (m_mode == UVM_PHASE_NO_IMPLICIT_OBJECTION &&
+          mode == UVM_PHASE_IMPLICIT_OBJECTION)
       m_phase.phase_done.drop_objection(m_comp, {"mode change- drop implicit ",
             m_phase.get_name(), " objection for ", m_comp.get_full_name()});
 
@@ -765,12 +759,12 @@ class uvm_phase_schedule extends uvm_graph;
   // Components es greater control over the phase flow for
   // processes which are not implicit objectors to the phase.
   //
-  // For example, a phase process may be set as <UVM_PHASE_PASSIVE>,
+  // For example, a phase process may be set as <UVM_PHASE_NO_IMPLICIT_OBJECTION>,
   // but may need to raise and drop objections when certain 
   // conditions occur.
   //
   //| task main;
-  //|   set_thread_mode(UVM_PHASE_PASSIVE);
+  //|   set_thread_mode(UVM_PHASE_NO_IMPLICIT_OBJECTION);
   //|   while(1) begin
   //|     some_phase.raise_objection(this);
   //|     ...
@@ -1649,16 +1643,9 @@ task uvm_phase_schedule::execute();
     // CLEANUP:
     //---------
     // kill this phase's threads
-    // AE: without the PERSISTENT, we would not need uvm_thread or any of the
-    // support code. A simple m_phase_proc.kill() would suffice.
     m_state = UVM_PHASE_CLEANUP;
-    if (m_phase_proc != null) begin
-      foreach (m_threads[comp]) begin
-        uvm_thread_mode mode = m_threads[comp].m_mode;
-        if (mode == UVM_PHASE_ACTIVE || mode == UVM_PHASE_PASSIVE)
-          m_threads[comp].kill();
-      end
-    end
+    if (m_phase_proc != null)
+      m_phase_proc.kill();
 
   end // m_phase != null
   else begin

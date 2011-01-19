@@ -26,7 +26,7 @@ module test;
   `include "uvm_macros.svh"
 
   bit failed = 0;
-  bit phase_run[uvm_phase];
+  bit phase_run[uvm_phase_imp];
 
   class base extends uvm_component;
     bit dodelay=1;
@@ -43,7 +43,7 @@ module test;
       end
       `uvm_info("BUILD", "Ending Build", UVM_NONE)
     endfunction
-    task reset_phase;
+    task reset_phase(uvm_phase_schedule phase);
       phase_run[uvm_reset_ph] = 1;
       `uvm_info("RESET", "Starting Reset", UVM_NONE)
       if($time != 0)  begin
@@ -53,7 +53,7 @@ module test;
       if(dodelay) #100;
       `uvm_info("RESET", "Ending Reset", UVM_NONE)
     endtask
-    task main_phase;
+    task main_phase(uvm_phase_schedule phase);
       phase_run[uvm_main_ph] = 1;
       `uvm_info("MAIN", "Starting Main", UVM_NONE)
       if($time != 100)  begin
@@ -63,7 +63,7 @@ module test;
       if(dodelay) #100;
       `uvm_info("MAIN", "Ending Main", UVM_NONE)
     endtask
-    task run_phase;
+    task run_phase(uvm_phase_schedule phase);
       phase_run[uvm_run_ph] = 1;
       `uvm_info("RUN", "Starting Run", UVM_NONE)
       if($time != 0)  begin

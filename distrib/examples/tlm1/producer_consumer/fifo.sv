@@ -55,7 +55,7 @@ module test;
       
     endfunction
     
-    task run_phase;
+    task run_phase(uvm_phase_schedule phase);
       
       int randval;
       
@@ -82,7 +82,7 @@ module test;
       get_port = new("get_port", this);
     endfunction
     
-    task run_phase;
+    task run_phase(uvm_phase_schedule phase);
       
       int val;
       
@@ -117,7 +117,7 @@ module test;
       c.get_port.connect(f.get_export);
     endfunction
     
-    task run_phase();
+    task run_phase(uvm_phase_schedule phase);
       #1000 global_stop_request();
     endtask
     

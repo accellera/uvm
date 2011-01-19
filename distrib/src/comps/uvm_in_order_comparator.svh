@@ -146,14 +146,14 @@ class uvm_in_order_comparator
   // Status information is updated according to the results of the comparison.
   // Each pair is published to the pair_ap analysis port.
 
-  virtual task run_phase();
+  virtual task run_phase(uvm_phase_schedule phase);
  
     pair_type pair;
     T b;
     T a;
   
     string s;
-    super.run_phase(); 
+    super.run_phase(phase); 
     forever begin
       
       m_before_fifo.get(b);

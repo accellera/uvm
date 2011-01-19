@@ -132,24 +132,18 @@ class uvm_sequencer_base extends uvm_component;
     fork begin
       mode = m_def_phase_thread_mode;
 
-      if (mode == UVM_PHASE_MODE_DEFAULT) begin
-        if (phase.get_name() == "run")
-          mode = UVM_PHASE_PASSIVE;
-        else
-          mode = UVM_PHASE_ACTIVE;
-      end
+      if (mode == UVM_PHASE_MODE_DEFAULT)
+        mode = UVM_PHASE_NO_IMPLICIT_OBJECTION;
 
       void'(uvm_config_db #(uvm_thread_mode)::get(this,"",
                                     {phase.get_name(),"_ph"},mode));
 
-      if (mode == UVM_PHASE_ACTIVE ||
-          mode == UVM_PHASE_ACTIVE_PERSISTENT)
+      if (mode == UVM_PHASE_IMPLICIT_OBJECTION)
         phase.phase_done.raise_objection(seq, {phase.get_name(),
             " objection for default sequence ",
             get_full_name(),".",seq.get_name()});
       seq.start(this);
-      if (mode == UVM_PHASE_ACTIVE ||
-           mode == UVM_PHASE_ACTIVE_PERSISTENT)
+      if (mode == UVM_PHASE_IMPLICIT_OBJECTION)
         phase.phase_done.drop_objection(seq, {phase.get_name(),
             " objection for default sequence ",
             get_full_name(),".",seq.get_name()});
@@ -229,8 +223,6 @@ class uvm_sequencer_base extends uvm_component;
     super.new(name, parent);
     m_sequencer_id = g_sequencer_id++;
     m_lock_arb_size = -1;
-    //if (m_def_phase_thread_mode == UVM_PHASE_MODE_DEFAULT)
-    //  m_def_phase_thread_mode = UVM_PHASE_ACTIVE;
     if(get_config_string("default_sequence", default_sequence))
       m_default_seq_set = 1;
     void'(get_config_int("count", count));

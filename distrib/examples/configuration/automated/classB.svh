@@ -42,7 +42,7 @@ class B extends uvm_component;
 
     u1 = new("u1", this);
   endfunction
-  task run_phase;
+  task run_phase(uvm_phase_schedule phase);
     begin end
   endtask
 endclass

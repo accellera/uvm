@@ -155,8 +155,8 @@ class myseqr extends uvm_sequencer;
   endfunction
   `uvm_component_utils(myseqr)
 
-  task run_phase;
-     set_thread_mode(UVM_PHASE_ACTIVE);
+  task run_phase(uvm_phase_schedule phase);
+     set_thread_mode(UVM_PHASE_IMPLICIT_OBJECTION);
     `uvm_info("RUN","In run!!!", UVM_NONE)
     #500;
     `uvm_info("RUN","Exit run!!!", UVM_NONE)
@@ -185,10 +185,10 @@ class test extends uvm_test;
       phase_rsrc::set(this, "seqr2", "configure_ph", my_reactive_configure::type_id::get());
       phase_rsrc::set(this, "seqr2", "main_ph",      my_reactive_main::type_id::get());
       phase_rsrc::set(this, "seqr2", "shutdown_ph",  my_reactive_shutdown::type_id::get());
-      // override default thread mode for components in non-run phase (UVM_PHASE_ACTIVE)
-      thread_rsrc::set(this, "seqr2", "configure_ph", UVM_PHASE_PASSIVE);
-      thread_rsrc::set(this, "seqr2", "main_ph",      UVM_PHASE_PASSIVE);
-      thread_rsrc::set(this, "seqr2", "shutdown_ph",  UVM_PHASE_PASSIVE);
+      // override default thread mode for components in non-run phase (UVM_PHASE_IMPLICIT_OBJECTION)
+      thread_rsrc::set(this, "seqr2", "configure_ph", UVM_PHASE_NO_IMPLICIT_OBJECTION);
+      thread_rsrc::set(this, "seqr2", "main_ph",      UVM_PHASE_NO_IMPLICIT_OBJECTION);
+      thread_rsrc::set(this, "seqr2", "shutdown_ph",  UVM_PHASE_NO_IMPLICIT_OBJECTION);
    endfunction
    
    function void report_phase();

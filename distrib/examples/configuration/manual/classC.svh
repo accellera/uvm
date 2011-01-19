@@ -65,7 +65,7 @@ class C extends uvm_component;
     myaa[index] = value;
   endfunction
 
-  task run_phase;
+  task run_phase(uvm_phase_schedule phase);
     begin end
   endtask
 endclass

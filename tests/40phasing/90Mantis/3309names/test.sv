@@ -131,8 +131,8 @@ class test extends base;
       super.start_of_simulation_phase();
    endfunction
    
-   task run_phase();
-      super.run_phase();
+   task run_phase(uvm_phase_schedule phase);
+      super.run_phase(phase);
    endtask
    
    function void extract_phase();

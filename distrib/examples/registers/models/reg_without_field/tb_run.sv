@@ -38,7 +38,7 @@ class tb_test extends uvm_test;
    endfunction
 
    
-   virtual task run_phase();
+   virtual task run_phase(uvm_phase_schedule phase);
       tb_env env;
       uvm_status_e status;
       uvm_reg_data_t dat;

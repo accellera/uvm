@@ -83,7 +83,7 @@ class reg_driver #(type DO=int) extends uvm_component;
    endfunction
    
 
-   task run_phase();
+   task run_phase(uvm_phase_schedule phase);
       reg_monitor mon;
       $cast(mon, m_parent.get_child("mon"));
            

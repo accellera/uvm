@@ -68,7 +68,7 @@ class oc_ethernet_env extends uvm_env;
       this.host.drv.bind_vitf(tb_top.wb_sl);
    endfunction
 
-   virtual task run_phase();
+   virtual task run_phase(uvm_phase_schedule phase);
      if (seq == null) begin
        uvm_report_fatal("NO_SEQUENCE","Env's sequence is not defined. Nothing to do. Exiting.");
        return;

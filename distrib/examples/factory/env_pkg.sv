@@ -42,7 +42,7 @@ package env_pkg;
 
     endfunction
 
-    task run_phase();
+    task run_phase(uvm_phase_schedule phase);
       packet p;
       uvm_default_tree_printer.knobs.separator = "";
       repeat(5) begin

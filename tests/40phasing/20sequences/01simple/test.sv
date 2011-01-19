@@ -46,7 +46,7 @@ class myseqr extends uvm_sequencer;
   endfunction
   `uvm_component_utils(myseqr)
 
-  task main_phase;
+  task main_phase(uvm_phase_schedule phase);
     `uvm_info("MAIN","In main!!!", UVM_NONE)
     #100;
     `uvm_info("MAIN","Exiting main!!!", UVM_NONE)

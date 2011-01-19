@@ -33,11 +33,11 @@ class basic_driver extends uvm_driver #(basic_item);
     end
   endtask : get_and_send
 
-  task run_phase ();
+  task run_phase (uvm_phase_schedule phase);
     get_and_send();
   endtask: run_phase
 
-  task post_shutdown_phase();
+  task post_shutdown_phase(uvm_phase_schedule phase);
     //Should stop accepting and sending request here.
     disable get_and_send;
   endtask : post_shutdown_phase
@@ -129,20 +129,20 @@ class test extends uvm_test;
   typedef uvm_config_db #(uvm_sequence_base) sequence_rsrc;
 
   function void connect_phase();
+    basic_seq seq = new;
     super.connect();
-    myseq seq = new;
     seq.randomize();
     driver.seq_item_port.connect(sequencer.seq_item_export);
     sequence_rsrc::set(this, "seqr1", "main_ph", seq);
   endfunction : connect_phase
 
-  virtual task run_phase();
-    set_thread_mode(UVM_PHASE_ACTIVE);
+  virtual task run_phase(uvm_phase_schedule phase);
+    set_thread_mode(UVM_PHASE_IMPLICIT_OBJECTION);
     //basic_seq run_seq; run_seq = new( "basic_seq_in_run" ); run_seq.start( sequencer );
     //`uvm_info( "RUN", "Done run phase", UVM_NONE );
   endtask : run_phase
 
-  virtual task main_phase();
+  virtual task main_phase(uvm_phase_schedule phase);
     basic_seq main_seq; main_seq = new( "basic_seq_in_main" ); main_seq.start( sequencer );
     `uvm_info( "RUN", "Done main phase", UVM_NONE );
   endtask : main_phase

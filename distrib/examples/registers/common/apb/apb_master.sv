@@ -55,8 +55,8 @@ class apb_master extends uvm_driver#(apb_rw);
       end
    endfunction
 
-   virtual protected task run_phase();
-      super.run_phase();
+   virtual protected task run_phase(uvm_phase_schedule phase);
+      super.run_phase(phase);
 
       this.sigs.mck.psel    <= '0;
       this.sigs.mck.penable <= '0;

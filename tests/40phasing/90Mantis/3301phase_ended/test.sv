@@ -44,22 +44,22 @@ module test;
 
 
 
-    task reset_phase;
+    task reset_phase(uvm_phase_schedule phase);
       if(dodelay) #thedelay;
       `uvm_info("RESET",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
     endtask
 
-    task main_phase;
+    task main_phase(uvm_phase_schedule phase);
       if(dodelay) #thedelay;
       `uvm_info("MAIN",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
     endtask
 
-    task shutdown_phase;
+    task shutdown_phase(uvm_phase_schedule phase);
       if(dodelay) #thedelay;
       `uvm_info("SHUTDOWN",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
     endtask
 
-    task run_phase;
+    task run_phase(uvm_phase_schedule phase);
 
 // if(dodelay) #(5*thedelay);
     endtask
