@@ -105,7 +105,7 @@ module test;
         "extract": begin pre_phase = "post_shutdown"; pre_phase2 = "run"; end
         "check": begin pre_phase = "extract"; end
         "report": begin pre_phase = "check"; end
-        "finalize": begin pre_phase = "report"; end
+        "final": begin pre_phase = "report"; end
         // RT phases
         "pre_reset": begin pre_phase = "start_of_simulation"; end
         "reset": begin pre_phase = "pre_reset"; end
@@ -159,7 +159,7 @@ module test;
 //      this.set_phase_domain("uvm", .hier(0)); //turn on rt phases for this
     endfunction
 
-    function void finalize_phase();
+    function void final_phase();
       if(failed) $display("*** UVM TEST FAILED ***");
       else $display("*** UVM TEST PASSED ***");
     endfunction

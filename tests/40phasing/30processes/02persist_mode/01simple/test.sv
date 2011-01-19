@@ -115,13 +115,14 @@ class test extends uvm_component;
       sub_inst = sub::type_id::create("sub_inst", this);
       low_inst = low::type_id::create("low_inst", this);
    endfunction
+
    task run_phase(uvm_phase_schedule phase);
       phase.raise_objection(this);
       #200;
       phase.drop_objection(this);
    endtask
       
-   function void finalize_phase();
+   function void final_phase();
      if(!low_inst.reset_activated) begin
        failed = 1;
        `uvm_error("RSTFAIL", "low_inst.reset phase did not reactivate as expected")

@@ -196,7 +196,7 @@ virtual class uvm_component extends uvm_report_object;
   // Starting after the initial construction phase (<new> method) has completed,
   // the build phase consists of calling all components' build_phase methods
   // recursively top-down, i.e., parents' build_phase are executed before the
-  // children. This is the only phase that executes top-down, except finalize.
+  // children. This is the only phase that executes top-down, except final.
   //
   // The build phase of the uvm_component class executes the automatic
   // configuration of fields registed in the component by calling 
@@ -401,16 +401,16 @@ virtual class uvm_component extends uvm_report_object;
   // For backward compatibility the base report_phase method calls report.
   extern virtual function void report();
 
-  // Function: finalize_phase
+  // Function: final_phase
   //
-  // The finalize phase callback is the last of several predefined phase
+  // The final phase callback is the last of several predefined phase
   // methods automatically called during the course of simulation.
   //
-  // Starting after the report phase has completed, the finalize phase consists
-  // of calling all components' finalize_phase methods recursively in top-down
+  // Starting after the report phase has completed, the final phase consists
+  // of calling all components' final_phase methods recursively in top-down
   // order, i.e., parents are executed before their children. 
   //
-  // The finalize phase callback is used to support multiple concatenated
+  // The final phase callback is used to support multiple concatenated
   // test schemes where the build..report phases (or subset of them) are
   // executed repeatedly once per test, looping back after the report phase.
   // This provides one final phase after that looping, before simulation exit.
@@ -419,10 +419,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // See <Phase Scheduling API> for more information on phases.
   
-  extern virtual function void finalize_phase();
-
-  // For backward compatibility the base finalize_phase method calls finalize.
-  extern virtual function void finalize();
+  extern virtual function void final_phase();
 
   // Task: pre_reset_phase
   //
@@ -2264,10 +2261,6 @@ function void uvm_component::report_phase();
   report();
   return; 
 endfunction
-function void uvm_component::finalize_phase();
-  finalize();
-  return; 
-endfunction
 
 
 // These are the old style phase names. In order for runtime phase names
@@ -2280,7 +2273,7 @@ task          uvm_component::run();                 return; endtask
 function void uvm_component::extract();             return; endfunction
 function void uvm_component::check();               return; endfunction
 function void uvm_component::report();              return; endfunction
-function void uvm_component::finalize();            return; endfunction
+function void uvm_component::final_phase();         return; endfunction
 
 // these runtime phase methods are only called if a set_domain() is done
 

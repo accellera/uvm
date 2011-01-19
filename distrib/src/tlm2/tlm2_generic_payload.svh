@@ -740,10 +740,6 @@ typedef uvm_tlm_generic_payload uvm_tlm_gp;
 
 
 //----------------------------------------------------------------------
-// Section: TLM extensions
-//----------------------------------------------------------------------
-
-//----------------------------------------------------------------------
 // Class: uvm_tlm_extension_base
 //
 // The class uvm_tlm_extension_base is the non-parameterized base class for
@@ -811,7 +807,7 @@ endclass
 //|   int ID;
 //|
 //|   `uvm_object_utils_begin(my_ID)
-//       `uvm_field_int(ID, UVM_ALL_ON)
+//|      `uvm_field_int(ID, UVM_ALL_ON)
 //|   `uvm_object_utils_end
 //|
 //|   function new(string name = "my_ID");

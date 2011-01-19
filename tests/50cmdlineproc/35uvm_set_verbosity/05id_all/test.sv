@@ -75,7 +75,7 @@ class test extends uvm_test;
    //+uvm_set_verbosity=*,_ALL_,UVM_FULL,check
    //+uvm_set_verbosity=*,_ALL_,UVM_LOW,report
 
-   virtual function void finalize();
+   virtual function void final_phase();
      uvm_report_server rs = uvm_report_server::get_server();
 
      //Should get none and low in build
