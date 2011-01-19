@@ -1529,6 +1529,7 @@ task uvm_phase_schedule::execute();
     // Phase execution is starting
     // Threads started in phase_started functions are not cleaned up
     m_state = UVM_PHASE_STARTED;
+    #0; // LET ANY WAITERS WAKE UP
     m_phase.traverse(top,this,UVM_PHASE_STARTED);
 
     if (m_phase.get_phase_type() != UVM_PHASE_TASK) begin
@@ -1537,6 +1538,7 @@ task uvm_phase_schedule::execute();
       // EXECUTING: (function phases)
       //-----------
       m_state = UVM_PHASE_EXECUTING;
+      #0; // LET ANY WAITERS WAKE UP
       m_phase.traverse(top,this,UVM_PHASE_EXECUTING);
 
     end
@@ -1575,6 +1577,7 @@ task uvm_phase_schedule::execute();
                begin
                  // Process 1: wait for no objections
                  if (phase_done.get_objection_total()) begin
+                   //$display("** WAITING FOR OBJECTION COUNT->0 from %0d",phase_done.get_objection_total());
                    phase_done.wait_for(UVM_ALL_DROPPED, top);
                  end
                  else begin
@@ -1599,68 +1602,68 @@ task uvm_phase_schedule::execute();
 
     end
 
-
-    //--------------
-    // READY_TO_END:
-    //--------------
-    // Phase exit criterion met (no objections)
-    m_state = UVM_PHASE_READY_TO_END;
-    `uvm_info("PH_READY_TO_END", $psprintf("PHASE READY TO END %0s (in schedule %0s)",
-                        this.get_name(),this.get_schedule_name()), UVM_DEBUG);
-
-    begin
-    bit pred_of_succ[uvm_graph];
-
-
-    //-----------------------
-    // WAIT FOR PREDECESSORS:
-    //-----------------------
-    // to our successor(s) to be ready to proceed
-    //$display("  ** Successors to phase '",get_name(),"':");
-    //foreach (m_successors[i]) begin
-    //  $display("  **   ",m_successors[i].get_name());
-    //end
-    foreach (m_successors[i]) begin
-      uvm_graph succ = m_successors[i];
-      foreach(succ.m_predecessors[j])
-        pred_of_succ[ succ.m_predecessors[j] ] = 1;
-    end
-    pred_of_succ.delete(this);
-    //foreach (pred_of_succ[pred]) begin
-    //  $display("  ** Waiting for phase '",pred.get_name(),"' to be ready to end");
-    //end
-    foreach (pred_of_succ[pred]) begin
-      uvm_phase_schedule sched;
-      assert($cast(sched, pred));
-      wait (sched.m_state == UVM_PHASE_READY_TO_END);
-    end
-    end
-
-
-    //-------
-    // ENDED:
-    //-------
-    // execeute 'phase_ended' callbacks
-    m_state = UVM_PHASE_ENDED;
-    m_phase.traverse(top,this,UVM_PHASE_ENDED);
-    `uvm_info("PH_END", $psprintf("ENDING PHASE %0s (in schedule %0s)",
-                        this.get_name(),this.get_schedule_name()), UVM_DEBUG);
-
-
-    //---------
-    // CLEANUP:
-    //---------
-    // kill this phase's threads
-    m_state = UVM_PHASE_CLEANUP;
-    if (m_phase_proc != null)
-      m_phase_proc.kill();
-
-  end // m_phase != null
-  else begin
-    // begin/end nodes need to be in READY_TO_END state for at least a delta
-    m_state = UVM_PHASE_READY_TO_END;
-    #0;
   end
+
+  //--------------
+  // READY_TO_END:
+  //--------------
+  // Phase exit criterion met (no objections)
+  // stay in READY_TO_END state for at least a delta
+  `uvm_info("PH_READY_TO_END", $psprintf("PHASE READY TO END %0s (in schedule %0s)",
+                      this.get_name(),this.get_schedule_name()), UVM_DEBUG);
+  m_state = UVM_PHASE_READY_TO_END;
+
+
+  //-----------------------
+  // WAIT FOR PREDECESSORS:
+  //-----------------------
+  // to our successor(s) to be ready to proceed
+  //$display("  ** Successors to phase '",get_name(),"':");
+  //foreach (m_successors[i])
+    //$display("  **   ",m_successors[i].get_name());
+  begin
+  bit pred_of_succ[uvm_graph];
+
+  foreach (m_successors[i]) begin
+    uvm_graph succ = m_successors[i];
+    foreach(succ.m_predecessors[j])
+      pred_of_succ[ succ.m_predecessors[j] ] = 1;
+  end
+  pred_of_succ.delete(this);
+  foreach (pred_of_succ[pred]) begin
+    uvm_phase_schedule sched;
+    assert($cast(sched, pred));
+    //$display("  ** Waiting for phase '",sched.get_name(),"' to be ready to end");
+    //$display("  **    Current state is ",sched.m_state.name());
+    wait (sched.m_state == UVM_PHASE_READY_TO_END);
+    #0; // prevents any waiters from falling through until all reach ready-to-end
+    //$display("  ** Released: Phase '",sched.get_name(),"' is now ready to end");
+  end
+  end
+  #0; // LET ANY WAITERS WAKE UP
+
+
+  //-------
+  // ENDED:
+  //-------
+  // execeute 'phase_ended' callbacks
+  `uvm_info("PH_END", $psprintf("ENDING PHASE %0s (in schedule %0s)",
+                      this.get_name(),this.get_schedule_name()), UVM_DEBUG);
+  m_state = UVM_PHASE_ENDED;
+  if (m_phase != null)
+    m_phase.traverse(top,this,UVM_PHASE_ENDED);
+  #0; // LET ANY WAITERS WAKE UP
+
+
+  //---------
+  // CLEANUP:
+  //---------
+  // kill this phase's threads
+  m_state = UVM_PHASE_CLEANUP;
+  if (m_phase_proc != null)
+    m_phase_proc.kill();
+  #0; // LET ANY WAITERS WAKE UP
+
 
 
   //------
@@ -1668,8 +1671,11 @@ task uvm_phase_schedule::execute();
   //------
   // If no successors, we're done. (Presumes final node is always shared.)
   // Otherwise, schedule all the successor phases.
+  `uvm_info("PH_DONE", $psprintf("PHASE DONE %0s (in schedule %0s)",
+                      this.get_name(),this.get_schedule_name()), UVM_DEBUG);
   m_state = UVM_PHASE_DONE;
   m_phase_proc = null;
+  #0; // LET ANY WAITERS WAKE UP
 
 
   // If jump_to() was called then we need to kill all the successor
@@ -1708,6 +1714,7 @@ task uvm_phase_schedule::execute();
       assert($cast(phase, m_successors[i]));
       if(phase.m_state != UVM_PHASE_SCHEDULED) begin
         phase.m_state = UVM_PHASE_SCHEDULED; // moved here from begin of execute()
+        #0; // LET ANY WAITERS WAKE UP
         void'(m_phase_hopper.try_put(phase));
       end
     end

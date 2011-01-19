@@ -141,12 +141,13 @@ module test;
     int end_cnt = 0;
 
     //By the time this runs, the run phase is done, so make sure
-    //that extract is already scheduled.
+    //that run is ready to end
     task main_phase(uvm_phase_schedule phase);
-      if(extract_ph.get_state() != UVM_PHASE_SCHEDULED) begin
-        uvm_phase_state state = extract_ph.get_state();
+      if(run_ph.get_state() != UVM_PHASE_READY_TO_END) begin
+        uvm_phase_state state = run_ph.get_state();
+        $display("Extract schedule name = %s",run_ph.get_schedule_name());
         failed = 1;
-        `uvm_error("SCHED", $sformatf("Expected extract phase be scheduled, but it %s", state.name()))
+        `uvm_error("READY_TO_END", $sformatf("Expected run phase be READY_TO_END, but it is %s", state.name()))
       end
     endtask
 
