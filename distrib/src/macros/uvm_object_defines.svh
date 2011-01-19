@@ -2969,7 +2969,7 @@
 // Pack an integral variable.
 //
 `define uvm_pack_enumN(VAR,SIZE) \
-   `uvm_pack_int(VAR,SIZE)
+   `uvm_pack_intN(VAR,SIZE)
 
 
 // Macro: `uvm_pack_string
@@ -2989,7 +2989,7 @@
 //
 `define uvm_pack_real(VAR) \
    begin \
-   longint unsigned real_bits64 = $realtobits(VAR) \
+   longint unsigned real_bits64 = $realtobits(VAR); \
    packer.m_bits[packer.count +: 64] = real_bits64; \
    packer.count += 64; \
    end
@@ -3014,8 +3014,8 @@
 //
 `define uvm_pack_arrayN(VAR,SIZE) \
     begin \
-    `uvm_pack_int(VAR.size(),32) \
-    `uvm_pack_sarray(VAR,SIZE) \
+    `uvm_pack_intN(VAR.size(),32) \
+    `uvm_pack_sarrayN(VAR,SIZE) \
     end
 
 
@@ -3029,9 +3029,9 @@
 
 `define uvm_pack_int(VAR)     `uvm_pack_intN(VAR,$bits(VAR))
 `define uvm_pack_enum(VAR)    `uvm_pack_enumN(VAR,$bits(VAR))
-`define uvm_pack_sarray(VAR)  `uvm_pack_sarrayN(VAR,$bits(VAR))
-`define uvm_pack_array(VAR)   `uvm_pack_arrayN(VAR,$bits(VAR))
-`define uvm_pack_queue(VAR)   `uvm_pack_queueN(VAR,$bits(VAR))
+`define uvm_pack_sarray(VAR)  `uvm_pack_sarrayN(VAR,$bits(VAR[0]))
+`define uvm_pack_array(VAR)   `uvm_pack_arrayN(VAR,$bits(VAR[0]))
+`define uvm_pack_queue(VAR)   `uvm_pack_queueN(VAR,$bits(VAR[0]))
 
 
 //------------------------------------------------------------------------------
@@ -3071,7 +3071,7 @@
     begin \
     int sz; \
     VAR = ""; \
-    `uvm_unpack_int(sz,32) \
+    `uvm_unpack_intN(sz,32) \
     for (int i=0; i<sz; i++) begin \
       VAR[i]=packer.m_bits[packer.count+:8]; \
       packer.count += 8; \
@@ -3096,7 +3096,7 @@
 //
 // Unpack enum of type ~TYPE~ into ~VAR~.
 
-`define uvm_unpack_enumN(TYPE,VAR,SIZE) \
+`define uvm_unpack_enumN(VAR,SIZE,TYPE) \
    VAR = TYPE'(packer.m_bits[packer.count +: \
                                      SIZE]); \
    packer.count += SIZE;
@@ -3122,9 +3122,9 @@
 `define uvm_unpack_arrayN(VAR,SIZE) \
     begin \
     int sz; \
-    `uvm_unpack_int(sz,32) \
+    `uvm_unpack_intN(sz,32) \
     VAR = new[sz]; \
-    `uvm_unpack_sarray(VAR,SIZE) \
+    `uvm_unpack_sarrayN(VAR,SIZE) \
     end
 
 
@@ -3135,7 +3135,7 @@
 `define uvm_unpack_queueN(VAR,SIZE) \
     begin \
     int sz; \
-    `uvm_unpack_int(sz,32) \
+    `uvm_unpack_intN(sz,32) \
     while (VAR.size() > sz) \
       void'(VAR.pop_back()); \
     for (int i=0; i<sz; i++) begin \
@@ -3146,7 +3146,7 @@
 
 
 `define uvm_unpack_int(VAR)       `uvm_unpack_intN(VAR,$bits(VAR))
-`define uvm_unpack_enum(TYPE,VAR) `uvm_unpack_enumN(TYPE,VAR,$bits(VAR))
+`define uvm_unpack_enum(VAR,TYPE) `uvm_unpack_enumN(VAR,$bits(VAR),TYPE)
 `define uvm_unpack_sarray(VAR)    `uvm_unpack_sarrayN(VAR,$bits(VAR))
 `define uvm_unpack_array(VAR)     `uvm_unpack_arrayN(VAR,$bits(VAR))
 `define uvm_unpack_queue(VAR)     `uvm_unpack_queueN(VAR,$bits(VAR))
