@@ -101,6 +101,20 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual function string get_full_name ();
 
 
+  // Function: get_children
+  //
+  // This function fills up the ~children~ array with the list of
+  // this component's children. On return, the ~children~ array will
+  // contain only the immediate children of this component.
+  //
+  //|   uvm_component array[$];
+  //|   my_comp.get_children(array);
+  //|   foreach(array[i]) 
+  //|     do_something(array[i]);
+
+  extern function void get_children(ref uvm_component children[$]);
+
+
   // Function: get_child
   extern function uvm_component get_child (string name);
 
@@ -1580,7 +1594,7 @@ virtual class uvm_component extends uvm_report_object;
   /*protected*/ uvm_component m_parent;
   protected uvm_component m_children[string];
   protected uvm_component m_children_by_handle[uvm_component];
-  extern local function bit m_add_child (uvm_component child);
+  extern protected virtual function bit m_add_child (uvm_component child);
   extern virtual local function void m_set_full_name ();
 
   extern          function void  do_resolve_bindings ();
@@ -1786,6 +1800,16 @@ endfunction
 // Hierarchy Methods
 // 
 //------------------------------------------------------------------------------
+
+
+// get_children
+// ------------
+
+function void uvm_component::get_children(ref uvm_component children[$]);
+  children.delete();
+  foreach(m_children[i]) 
+    children.push_back(m_children[i]);
+endfunction
 
 
 // get_first_child

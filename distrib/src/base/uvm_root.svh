@@ -85,6 +85,16 @@ class uvm_root extends uvm_component;
   extern virtual task run_test (string test_name="");
 
 
+  // Variable: top_levels
+  //
+  // This variable is a list of all of the top level components in UVM. It
+  // includes the uvm_test_top component that is created by <run_test> as
+  // well as any other top level components that have been instantiated
+  // anywhere in the hierarchy.
+
+  uvm_component top_levels[$];
+
+
   // Function: stop_request
   //
   // Calling this function triggers the process of shutting down the currently
@@ -163,8 +173,8 @@ class uvm_root extends uvm_component;
 
 
   // PRIVATE members
-
   extern `_protected function new ();
+  extern protected virtual function bit m_add_child (uvm_component child);
   extern function void build_phase();
   extern local function void m_do_verbosity_settings();
   extern local function void m_do_timeout_settings();
@@ -310,11 +320,26 @@ function uvm_root::new();
   clp = uvm_cmdline_processor::get_inst();
 
   report_header();
-  print_enabled=0;
 
   // This sets up the global verbosity. Other command line args may
   // change individual component verbosity.
   check_verbosity();
+endfunction
+
+// m_add_child
+// -----------
+
+// Add to the top levels array
+function bit uvm_root::m_add_child (uvm_component child);
+  if(super.m_add_child(child)) begin
+    if(child.get_name() == "uvm_test_top")
+      top_levels.push_front(child);
+    else
+      top_levels.push_back(child);
+    return 1;
+  end
+  else
+    return 0;
 endfunction
 
 
