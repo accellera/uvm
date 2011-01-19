@@ -16,7 +16,7 @@
 //   the License for the specific language governing
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
-
+`timescale 1ns/1ns
 module mb_test;
 
   // This is an example of using the objection mechanism from a module scope.

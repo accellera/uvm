@@ -76,7 +76,7 @@ endclass
 //
 // This policy class is used to clone built-in types via the = operator.
 //
-// Provides a clone metod that returns a copy of the built-in type, T.
+// Provides a clone method that returns a copy of the built-in type, T.
 //----------------------------------------------------------------------
 
 class uvm_built_in_clone #(type T=int);
@@ -94,14 +94,14 @@ endclass
 // This policy class is used to compare two objects of the same type.
 //
 // Provides a comp method that compares two objects of type T. The
-// class T must implement the comp method, to which this class delegates
-// the operation.
+// class T must implement the <uvm_object::do_compare> method (or
+// utilize the `uvm_field macros). 
 //----------------------------------------------------------------------
 
 class uvm_class_comp #(type T=int);
 
   static function bit comp(input T a, input T b);
-    return a.comp(b);
+    return a.compare(b);
   endfunction
 
 endclass
@@ -131,7 +131,7 @@ endclass
 //
 // This policy class is used to clone class objects.
 //
-// Provides a clone metod that returns a copy of the built-in type, T.
+// Provides a clone method that returns a copy of the built-in type, T.
 // The class T must implement the clone method, to which this class
 // delegates the operation.
 //----------------------------------------------------------------------
