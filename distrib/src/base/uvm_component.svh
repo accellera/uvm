@@ -185,25 +185,15 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: build_phase
   //
-  // The build_phase phase callback is the first of several methods automatically
-  // called during the course of simulation. The build phase is the second of
-  // a two-pass construction process (the first is the built-in new method).
+  // The <Pre-Defined Phases::uvm_build_ph> phase implementation method.
   //
-  // The build phase can add additional hierarchy based on configuration
-  // information not available at time of initial construction. 
-  // Any override should call super.build().
-  //
-  // Starting after the initial construction phase (<new> method) has completed,
-  // the build phase consists of calling all components' build_phase methods
-  // recursively top-down, i.e., parents' build_phase are executed before the
-  // children. This is the only phase that executes top-down, except final.
-  //
-  // The build phase of the uvm_component class executes the automatic
+  // Any override should call super.build_phase() to execute the automatic
   // configuration of fields registed in the component by calling 
-  // <apply_config_settings>.  To turn off automatic configuration for a component, 
-  // do not call super.build_phase() in the subtype's build_phase method.
+  // <apply_config_settings>.
+  // To turn off automatic configuration for a component, 
+  // do not call super.build_phase().
   //
-  // See <Phase Scheduling API> for more information on phases.
+  // This method should never be called directly. 
 
   extern virtual function void build_phase();
 
@@ -213,43 +203,20 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: connect_phase
   //
-  // The connect phase callback is one of several predefined phase
-  // methods automatically called during the course of simulation.
-  //
-  // Starting after the build phase has completed, the connect phase consists
-  // of calling all components' connect_phase methods recursively in depth-first,
-  // bottom-up order, i.e., children are executed before their parents.
-  //
-  // Generally, derived classes should override this method to make port and
-  // export connections via the similarly-named <uvm_port_base #(IF)::connect>
-  // method. Any override should call super.connect_phase().
+  // The <Pre-Defined Phases::uvm_connect_ph> phase implementation method.
   //
   // This method should never be called directly. 
-  //
-  // See <Phase Scheduling API> for more information on phases.
 
-  extern virtual function void connect();
+  extern virtual function void connect_phase();
 
   // For backward compatibility the base connect_phase method calls connect.
-  extern virtual function void connect_phase();
+  extern virtual function void connect();
 
   // Function: end_of_elaboration_phase
   //
-  // The end_of_elaboration phase callback is one of several predefined phase
-  // methods automatically called during the course of simulation.
-  //
-  // Starting after the connect phase has completed, this phase consists of
-  // calling all components' end_of_elaboration_phase methods recursively in
-  // depth-first, bottom-up order, i.e., children are executed before their
-  // parents. 
-  //
-  // Generally, derived classes should override this method to perform any
-  // checks on the elaborated hierarchy before the simulation phases begin.
-  // Any override should call super.end_of_elaboration_phase().
+  // The <Pre-Defined Phases::uvm_end_of_elaboration_ph> phase implementation method.
   //
   // This method should never be called directly.
-  //
-  // See <Phase Scheduling API> for more information on phases.
 
   extern virtual function void end_of_elaboration_phase();
 
@@ -258,21 +225,9 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: start_of_simulation_phase
   //
-  // The start_of_simulation phase callback is one of several predefined phase
-  // methods automatically called during the course of simulation.
-  //
-  // Starting after the end_of_elaboration phase has completed, this phase
-  // consists of calling all components' start_of_simulation_phase methods recursively
-  // in depth-first, bottom-up order, i.e. children are executed before their
-  // parents. 
-  //
-  // Generally, derived classes should override this method to perform component-
-  // specific pre-run operations, such as discovery of the elaborated hierarchy,
-  // printing banners, etc. Any override should call super.start_of_simulation_phase().
+  // The <Pre-Defined Phases::uvm_start_of_simulation_ph> phase implementation method.
   //
   // This method should never be called directly.
-  //
-  // See <Phase Scheduling API> for more information on phases.
 
   extern virtual function void start_of_simulation_phase();
 
@@ -281,77 +236,144 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: run_phase
   //
-  // The run phase callback is a predefined phase that is time-consuming,
-  // i.e., task-based. It executes after the start_of_simulation phase has
-  // completed. Derived classes should override this method to perform the bulk
-  // of its functionality, forking additional processes if needed.
+  // The <Pre-Defined Phases::uvm_run_ph> phase implementation method.
   //
-  // In the run phase, all components' run_phase tasks are forked as independent
-  // processes.  Returning from its run_phase task does not signify completion of a
-  // component's run phase; any processes forked by run_phase continue to run.
-  //
-  // The run phase terminates in one of four ways.
-  //
-  // 1 - explicit call to <global_stop_request> - 
-  //   When <global_stop_request> is called, an ordered shut-down for the
-  //   currently running phase begins. First, all enabled components' status
-  //   tasks are called bottom-up, i.e., childrens' <stop> tasks are called before
-  //   the parent's. A component is enabled by its enable_stop_interrupt bit.
-  //   Each component can implement stop to allow completion of in-progress
-  //   transactions, flush queues, and other shut-down activities. Upon return
-  //   from stop by all enabled components, the recursive do_kill_all is called
-  //   on all top-level component(s).  If the <uvm_test_done> objection> is being
-  //   used, this stopping procedure is deferred until all outstanding objections
-  //   on <uvm_test_done> have been dropped.
-  //
-  // 2 - all objections to <uvm_test_done> have been dropped -
-  //   When all objections on the <uvm_test_done> objection have been dropped,
-  //   <global_stop_request> is called automatically, thus kicking off the
-  //   stopping procedure described above. See <uvm_objection> for details on
-  //   using the objection mechanism.
-  //
-  // 3 - explicit call to <kill> or <do_kill_all> -
-  //   When <kill> is called, this component's run_phase processes are killed immediately.
-  //   The <do_kill_all> methods applies to this component and all its
-  //   descendants. Use of this method is not recommended. It is better to use
-  //   the stopping mechanism, which affords a more ordered, safer shut-down.
-  //
-  // 4 - timeout -
-  //   The phase ends if the timeout expires before an explicit call to
-  //   <global_stop_request> or kill. By default, the timeout is set to near the
-  //   maximum simulation time possible. You may override this via
-  //   <set_global_timeout>, but you cannot disable the timeout completely.
-  //
-  //   If the default timeout occurs in your simulation, or if simulation never
-  //   ends despite completion of your test stimulus, then it usually indicates
-  //   a missing call to <global_stop_request>.
+  // Returning from this task does not signify completion of a
+  // component's run phase.
+  // Any processes forked by this task continue to run.
   //
   // The run_phase task should never be called directly.
-  //
-  // See <Phase Scheduling API> for more information on phases.
 
   extern virtual task run_phase(uvm_phase_schedule phase);
 
   // For backward compatibility the base run_phase method calls run.
   extern virtual task run();
 
+  // Task: pre_reset_phase
+  //
+  // The <Pre-Defined Phases::uvm_pre_reset_ph> phase implementation method.
+  //
+  // Returning from this task does not signify completion of the
+  // component's pre-reset phase.
+  // Any processes forked by this task continue to run.
+  //
+  extern virtual task pre_reset_phase(uvm_phase_schedule phase);
+
+  // Task: reset_phase
+  //
+  // The <Pre-Defined Phases::uvm_reset_ph> phase implementation method.
+  //
+  // Returning from this task does not signify completion of the
+  // component's reset phase.
+  // Any processes forked by this task continue to run.
+
+  extern virtual task reset_phase(uvm_phase_schedule phase);
+
+  // Task: post_reset_phase
+  //
+  // The <Pre-Defined Phases::uvm_post_reset_ph> phase implementation method.
+  //
+  // Returning from this task does not signify completion of the
+  // component's post-reset phase.
+  // Any processes forked by this task continue to run.
+
+  extern virtual task post_reset_phase(uvm_phase_schedule phase);
+
+  // Task: pre_configure_phase
+  //
+  // The <Pre-Defined Phases::uvm_pre_configure_ph> phase implementation method.
+  //
+  // Returning from this task does not signify completion of the
+  // component's pre_configure phase.
+  // Any processes forked by this task continue to run.
+
+  extern virtual task pre_configure_phase(uvm_phase_schedule phase);
+
+  // Task: configure_phase
+  //
+  // The <Pre-Defined Phases::uvm_configure_ph> phase implementation method.
+  //
+  // Returning from this task does not signify completion of the
+  // component's configure phase.
+  // Any processes forked by this task continue to run.
+
+  extern virtual task configure_phase(uvm_phase_schedule phase);
+
+  // Task: post_configure_phase
+  //
+  // The <Pre-Defined Phases::uvm_post_configure_ph> phase implementation method.
+  //
+  // Returning from this task does not signify completion of the
+  // component's post-configure phase.
+  // Any processes forked by this task continue to run.
+
+  extern virtual task post_configure_phase(uvm_phase_schedule phase);
+
+  // Task: pre_main_phase
+  //
+  // The <Pre-Defined Phases::uvm_pre_main_ph> phase implementation method.
+  //
+  // Returning from this task does not signify completion of the
+  // component's pre-main phase.
+  // Any processes forked by this task continue to run.
+
+  extern virtual task pre_main_phase(uvm_phase_schedule phase);
+
+  // Task: main_phase
+  //
+  // The <Pre-Defined Phases::uvm_main_ph> phase implementation method.
+  //
+  // Returning from this task does not signify completion of the
+  // component's main phase.
+  // Any processes forked by this task continue to run.
+
+  extern virtual task main_phase(uvm_phase_schedule phase);
+
+  // Task: post_main_phase
+  //
+  // The <Pre-Defined Phases::uvm_post_main_ph> phase implementation method.
+  //
+  // Returning from this task does not signify completion of the
+  // component's post-main phase.
+  // Any processes forked by this task continue to run.
+
+  extern virtual task post_main_phase(uvm_phase_schedule phase);
+
+  // Task: pre_shutdown_phase
+  //
+  // The <Pre-Defined Phases::uvm_pre_shutdown_ph> phase implementation method.
+  //
+  // Returning from this task does not signify completion of the
+  // component's pre-shutdown phase.
+  // Any processes forked by this task continue to run.
+
+  extern virtual task pre_shutdown_phase(uvm_phase_schedule phase);
+
+  // Task: shutdown_phase
+  //
+  // The <Pre-Defined Phases::uvm_shutdown_ph> phase implementation method.
+  //
+  // Returning from this task does not signify completion of the
+  // component's shutdown phase.
+  // Any processes forked by this task continue to run.
+
+  extern virtual task shutdown_phase(uvm_phase_schedule phase);
+
+  // Task: post_shutdown_phase
+  //
+  // The <Pre-Defined Phases::uvm_post_shutdown_ph> phase implementation method.
+  //
+  // Returning from this task does not signify completion of the
+  // component's post-shutdown phase.
+  // Any processes forked by this task continue to run.
+
+  extern virtual task post_shutdown_phase(uvm_phase_schedule phase);
+
   // Function: extract_phase
   //
-  // The extract phase callback is one of several predefined phase
-  // methods automatically called during the course of simulation.
-  //
-  // Starting after the run phase has completed, the extract phase consists of
-  // calling all components' extract_phase methods recursively in depth-first,
-  // bottom-up order, i.e., children are executed before their parents. 
-  //
-  // Generally, derived classes should override this method to collect
-  // information for the subsequent check phase when such information needs to
-  // be collected in a hierarchical, bottom-up manner. Any override should
-  // call super.extract_phase().
+  // The <Pre-Defined Phases::uvm_extract_ph> phase implementation method.
   //
   // This method should never be called directly.
-  //
-  // See <Phase Scheduling API> for more information on phases.
 
   extern virtual function void extract_phase();
 
@@ -360,19 +382,9 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: check_phase
   //
-  // The check phase callback is one of several predefined phase
-  // methods automatically called during the course of simulation.
-  //
-  // Starting after the extract phase has completed, the check phase consists of
-  // calling all components' check_phase methods recursively in depth-first, bottom-up
-  // order, i.e., children are executed before their parents. 
-  //
-  // Generally, derived classes should override this method to perform component
-  // specific, end-of-test checks. Any override should call super.check_phase().
+  // The <Pre-Defined Phases::uvm_check_ph> phase implementation method.
   //
   // This method should never be called directly.
-  //
-  // See <Phase Scheduling API> for more information on phases.
 
   extern virtual function void check_phase();
 
@@ -381,20 +393,9 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: report_phase
   //
-  // The report phase callback is one of several predefined phase
-  // methods automatically called during the course of simulation.
-  //
-  // Starting after the check phase has completed, the report phase consists
-  // of calling all components' report_phase methods recursively in depth-first,
-  // bottom-up order, i.e., children are executed before their parents. 
-  //
-  // Generally, derived classes should override this method to perform
-  // component-specific reporting of test results. Any override should
-  // call super.report_phase().
+  // The <Pre-Defined Phases::uvm_report_ph> phase implementation method.
   //
   // This method should never be called directly.
-  //
-  // See <Phase Scheduling API> for more information on phases.
 
   extern virtual function void report_phase();
 
@@ -403,134 +404,11 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: final_phase
   //
-  // The final phase callback is the last of several predefined phase
-  // methods automatically called during the course of simulation.
-  //
-  // Starting after the report phase has completed, the final phase consists
-  // of calling all components' final_phase methods recursively in top-down
-  // order, i.e., parents are executed before their children. 
-  //
-  // The final phase callback is used to support multiple concatenated
-  // test schemes where the build..report phases (or subset of them) are
-  // executed repeatedly once per test, looping back after the report phase.
-  // This provides one final phase after that looping, before simulation exit.
+  // The <Pre-Defined Phases::uvm_final_ph> phase implementation method.
   //
   // This method should never be called directly.
-  //
-  // See <Phase Scheduling API> for more information on phases.
   
   extern virtual function void final_phase();
-
-  // Task: pre_reset_phase
-  //
-  // UVM standard runtime phase
-  // This is the first UVM runtime phase commencing in parallel with run.
-  //
-  // All processes associated with a phase are killed when the phase ends.
-  // See <uvm_phase_imp::execute> for more details.
-  //
-  extern virtual task pre_reset_phase(uvm_phase_schedule phase);
-
-  // Task: reset_phase
-  //
-  // UVM standard runtime phase
-  //
-  // All processes associated with a phase are killed when the phase ends.
-  // See <uvm_phase_imp::execute> for more details.
-
-  extern virtual task reset_phase(uvm_phase_schedule phase);
-
-  // Task: post_reset_phase
-  //
-  // UVM standard runtime phase
-  //
-  // All processes associated with a phase are killed when the phase ends.
-  // See <uvm_phase_imp::execute> for more details.
-
-  extern virtual task post_reset_phase(uvm_phase_schedule phase);
-
-  // Task: pre_configure_phase
-  //
-  // UVM standard runtime phase
-  //
-  // All processes associated with a phase are killed when the phase ends.
-  // See <uvm_phase_imp::execute> for more details.
-
-  extern virtual task pre_configure_phase(uvm_phase_schedule phase);
-
-  // Task: configure_phase
-  //
-  // UVM standard runtime phase
-  //
-  // All processes associated with a phase are killed when the phase ends.
-  // See <uvm_phase_imp::execute> for more details.
-
-  extern virtual task configure_phase(uvm_phase_schedule phase);
-
-  // Task: post_configure_phase
-  //
-  // UVM standard runtime phase
-  //
-  // All processes associated with a phase are killed when the phase ends.
-  // See <uvm_phase_imp::execute> for more details.
-
-  extern virtual task post_configure_phase(uvm_phase_schedule phase);
-
-  // Task: pre_main_phase
-  //
-  // UVM standard runtime phase
-  //
-  // All processes associated with a phase are killed when the phase ends.
-  // See <uvm_phase_imp::execute> for more details.
-
-  extern virtual task pre_main_phase(uvm_phase_schedule phase);
-
-  // Task: main_phase
-  //
-  // UVM standard runtime phase
-  //
-  // All processes associated with a phase are killed when the phase ends.
-  // See <uvm_phase_imp::execute> for more details.
-
-  extern virtual task main_phase(uvm_phase_schedule phase);
-
-  // Task: post_main_phase
-  //
-  // UVM standard runtime phase
-  //
-  // All processes associated with a phase are killed when the phase ends.
-  // See <uvm_phase_imp::execute> for more details.
-
-  extern virtual task post_main_phase(uvm_phase_schedule phase);
-
-  // Task: pre_shutdown_phase
-  //
-  // UVM standard runtime phase
-  //
-  // All processes associated with a phase are killed when the phase ends.
-  // See <uvm_phase_imp::execute> for more details.
-
-  extern virtual task pre_shutdown_phase(uvm_phase_schedule phase);
-
-  // Task: shutdown_phase
-  //
-  // UVM standard runtime phase
-  // This phase is the one jumped to at end of test / global stop request
-  //
-  // All processes associated with a phase are killed when the phase ends.
-  // See <uvm_phase_imp::execute> for more details.
-
-  extern virtual task shutdown_phase(uvm_phase_schedule phase);
-
-  // Task: post_shutdown_phase
-  //
-  // UVM standard runtime phase
-  // This is the last UVM runtime task-based phase before the extract phase
-  //
-  // All processes associated with a phase are killed when the phase ends.
-  // See <uvm_phase_imp::execute> for more details.
-
-  extern virtual task post_shutdown_phase(uvm_phase_schedule phase);
 
 
   //--------------------------------------------------------------------
