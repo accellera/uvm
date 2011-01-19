@@ -551,12 +551,12 @@
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOPY)) ARG = local_data__.ARG; \
+          if(!((FLAG)&UVM_NOCOPY)) ARG = local_data__.ARG; \
         end \
       UVM_COMPARE: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOMPARE)) begin \
+          if(!((FLAG)&UVM_NOCOMPARE)) begin \
             if(ARG !== local_data__.ARG) begin \
                void'(m_sc.comparer.compare_field(`"ARG`", ARG, local_data__.ARG, $bits(ARG))); \
                if(m_sc.comparer.result && (m_sc.comparer.show_max <= m_sc.comparer.result)) return; \
@@ -577,7 +577,7 @@
         `m_uvm_record_int(ARG, FLAG) \
       UVM_PRINT: \
         begin \
-          m_sc.printer.print_int(`"ARG`", ARG, $bits(ARG), uvm_radix_enum'(FLAG&UVM_RADIX)); \
+          m_sc.printer.print_int(`"ARG`", ARG, $bits(ARG), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
         end \
       UVM_SETINT: \
         begin \
@@ -585,7 +585,7 @@
           m_sc.scope.set_arg(`"ARG`"); \
           matched = uvm_is_match(str__, m_sc.scope.get()); \
           if(matched) begin \
-            if(FLAG &UVM_READONLY) begin \
+            if((FLAG)&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
@@ -619,8 +619,8 @@
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOPY)) begin \
-            if(FLAG&UVM_REFERENCE) ARG = local_data__.ARG; \
+          if(!((FLAG)&UVM_NOCOPY)) begin \
+            if((FLAG)&UVM_REFERENCE) ARG = local_data__.ARG; \
             else begin \
               if(local_data__.ARG.get_name() == "") local_data__.ARG.set_name(`"ARG`"); \
               $cast(ARG, local_data__.ARG.clone()); \
@@ -631,27 +631,27 @@
       UVM_COMPARE: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOMPARE)) begin \
+          if(!((FLAG)&UVM_NOCOMPARE)) begin \
             void'(m_sc.comparer.compare_object(`"ARG`", ARG, local_data__.ARG)); \
             if(m_sc.comparer.result && (m_sc.comparer.show_max <= m_sc.comparer.result)) return; \
           end \
         end \
       UVM_PACK: \
         begin \
-          if((FLAG&UVM_NOPACK) == 0 && (FLAG&UVM_REFERENCE) == 0) \
+          if(((FLAG)&UVM_NOPACK) == 0 && ((FLAG)&UVM_REFERENCE) == 0) \
             m_sc.packer.pack_object(ARG); \
         end \
       UVM_UNPACK: \
         begin \
-          if((FLAG&UVM_NOPACK) == 0 && (FLAG&UVM_REFERENCE) == 0) \
+          if(((FLAG)&UVM_NOPACK) == 0 && ((FLAG)&UVM_REFERENCE) == 0) \
             m_sc.packer.unpack_object(ARG); \
         end \
       UVM_RECORD: \
         `m_uvm_record_object(ARG,FLAG) \
       UVM_PRINT: \
         begin \
-          if(!(FLAG&UVM_NOPRINT)) begin \
-            if((FLAG&UVM_REFERENCE) != 0) \
+          if(!((FLAG)&UVM_NOPRINT)) begin \
+            if(((FLAG)&UVM_REFERENCE) != 0) \
               m_sc.printer.print_object_header(`"ARG`", ARG); \
             else \
               m_sc.printer.print_object(`"ARG`", ARG); \
@@ -659,7 +659,7 @@
         end \
       UVM_SETINT: \
         begin \
-          if((ARG != null) && ((FLAG&UVM_READONLY)==0) && ((FLAG&UVM_REFERENCE)==0)) begin \
+          if((ARG != null) && (((FLAG)&UVM_READONLY)==0) && (((FLAG)&UVM_REFERENCE)==0)) begin \
             m_sc.scope.down(`"ARG`"); \
             ARG.m_field_automation(null, UVM_SETINT, str__); \
             m_sc.scope.up(); \
@@ -667,7 +667,7 @@
         end \
       UVM_SETSTR: \
         begin \
-          if((ARG != null) && ((FLAG&UVM_READONLY)==0) && ((FLAG&UVM_REFERENCE)==0)) begin \
+          if((ARG != null) && (((FLAG)&UVM_READONLY)==0) && (((FLAG)&UVM_REFERENCE)==0)) begin \
             m_sc.scope.down(`"ARG`"); \
             ARG.m_field_automation(null, UVM_SETSTR, str__); \
             m_sc.scope.up(); \
@@ -677,7 +677,7 @@
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
           if(uvm_is_match(str__, m_sc.scope.get())) begin \
-            if(FLAG &UVM_READONLY) begin \
+            if((FLAG)&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
@@ -688,7 +688,7 @@
                 uvm_object::m_sc.status = 1; \
             end \
           end \
-          else if(ARG!=null && (FLAG &UVM_READONLY) == 0) begin \
+          else if(ARG!=null && ((FLAG)&UVM_READONLY) == 0) begin \
             int cnt; \
             //Only traverse if there is a possible match. \
             for(cnt=0; cnt<str__.len(); ++cnt) begin \
@@ -722,12 +722,12 @@
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOPY)) ARG = local_data__.ARG; \
+          if(!((FLAG)&UVM_NOCOPY)) ARG = local_data__.ARG; \
         end \
       UVM_COMPARE: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOMPARE)) begin \
+          if(!((FLAG)&UVM_NOCOMPARE)) begin \
             if(ARG != local_data__.ARG) begin \
                void'(m_sc.comparer.compare_string(`"ARG`", ARG, local_data__.ARG)); \
                if(m_sc.comparer.result && (m_sc.comparer.show_max <= m_sc.comparer.result)) return; \
@@ -752,7 +752,7 @@
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
           if(uvm_is_match(str__, m_sc.scope.get())) begin \
-            if(FLAG&UVM_READONLY) begin \
+            if((FLAG)&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
@@ -786,12 +786,12 @@
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOPY)) ARG = local_data__.ARG; \
+          if(!((FLAG)&UVM_NOCOPY)) ARG = local_data__.ARG; \
         end \
       UVM_COMPARE: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOMPARE)) begin \
+          if(!((FLAG)&UVM_NOCOMPARE)) begin \
             if(ARG !== local_data__.ARG) begin \
                m_sc.scope.set_arg(`"ARG`"); \
                $swrite(m_sc.stringv, "lhs = %0s : rhs = %0s", \
@@ -819,7 +819,7 @@
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
           if(uvm_is_match(str__, m_sc.scope.get())) begin \
-            if(FLAG&UVM_READONLY) begin \
+            if((FLAG)&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
@@ -852,12 +852,12 @@
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOPY)) ARG = local_data__.ARG; \
+          if(!((FLAG)&UVM_NOCOPY)) ARG = local_data__.ARG; \
         end \
       UVM_COMPARE: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOMPARE)) begin \
+          if(!((FLAG)&UVM_NOCOMPARE)) begin \
             if(ARG != local_data__.ARG) begin \
                void'(m_sc.comparer.compare_field_real(`"ARG`", ARG, local_data__.ARG)); \
                if(m_sc.comparer.result && (m_sc.comparer.show_max <= m_sc.comparer.result)) return; \
@@ -873,7 +873,7 @@
           ARG = $bitstoreal(m_sc.packer.unpack_field_int(64)); \
         end \
       UVM_RECORD: \
-        if(!(FLAG&UVM_NORECORD)) begin \
+        if(!((FLAG)&UVM_NORECORD)) begin \
           m_sc.recorder.record_field_real(`"ARG`", ARG); \
         end \
       UVM_PRINT: \
@@ -884,7 +884,7 @@
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
           if(uvm_is_match(str__, m_sc.scope.get())) begin \
-            if(FLAG&UVM_READONLY) begin \
+            if((FLAG)&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
@@ -915,12 +915,12 @@
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOPY)) ARG = local_data__.ARG; \
+          if(!((FLAG)&UVM_NOCOPY)) ARG = local_data__.ARG; \
         end \
       UVM_COMPARE: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOMPARE)) begin \
+          if(!((FLAG)&UVM_NOCOMPARE)) begin \
             if(ARG != local_data__.ARG) begin \
                m_sc.scope.down(`"ARG`"); \
                m_sc.comparer.print_msg(""); \
@@ -977,12 +977,12 @@
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOPY)) ARG = local_data__.ARG; \
+          if(!((FLAG)&UVM_NOCOPY)) ARG = local_data__.ARG; \
         end \
       UVM_COMPARE: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOMPARE)) begin \
+          if(!((FLAG)&UVM_NOCOMPARE)) begin \
             if(ARG !== local_data__.ARG) begin \
                if(m_sc.comparer.show_max == 1) begin \
                  m_sc.scope.set_arg(`"ARG`"); \
@@ -996,9 +996,9 @@
                    end \
                  end \
                end \
-               else if ((m_sc.comparer.physical&&(FLAG&UVM_PHYSICAL)) || \
-                        (m_sc.comparer.abstract&&(FLAG&UVM_ABSTRACT)) || \
-                        (!(FLAG&UVM_PHYSICAL) && !(FLAG&UVM_ABSTRACT)) ) \
+               else if ((m_sc.comparer.physical&&((FLAG)&UVM_PHYSICAL)) || \
+                        (m_sc.comparer.abstract&&((FLAG)&UVM_ABSTRACT)) || \
+                        (!((FLAG)&UVM_PHYSICAL) && !((FLAG)&UVM_ABSTRACT)) ) \
                  m_sc.comparer.result++; \
                if(m_sc.comparer.result && (m_sc.comparer.show_max <= m_sc.comparer.result)) return; \
             end \
@@ -1029,7 +1029,7 @@
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
           if(uvm_is_match(str__, m_sc.scope.get())) begin \
-            if(FLAG&UVM_READONLY) begin \
+            if((FLAG)&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
@@ -1038,7 +1038,7 @@
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
           end \
-          else if(!(FLAG&UVM_READONLY)) begin \
+          else if(!((FLAG)&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
               if(uvm_is_match(str__, m_sc.scope.get())) begin \
@@ -1073,8 +1073,8 @@
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOPY)) begin \
-            if((FLAG&UVM_REFERENCE)) \
+          if(!((FLAG)&UVM_NOCOPY)) begin \
+            if(((FLAG)&UVM_REFERENCE)) \
               ARG = local_data__.ARG; \
             else \
               foreach(ARG[i]) begin \
@@ -1090,15 +1090,15 @@
       UVM_COMPARE: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOMPARE)) begin \
-            if((FLAG&UVM_REFERENCE) && (m_sc.comparer.show_max <= 1) && (ARG !== local_data__.ARG) ) begin \
+          if(!((FLAG)&UVM_NOCOMPARE)) begin \
+            if(((FLAG)&UVM_REFERENCE) && (m_sc.comparer.show_max <= 1) && (ARG !== local_data__.ARG) ) begin \
                if(m_sc.comparer.show_max == 1) begin \
                  m_sc.scope.set_arg(`"ARG`"); \
                  m_sc.comparer.print_msg(""); \
                end \
-               else if ((m_sc.comparer.physical&&(FLAG&UVM_PHYSICAL)) || \
-                        (m_sc.comparer.abstract&&(FLAG&UVM_ABSTRACT)) || \
-                        (!(FLAG&UVM_PHYSICAL) && !(FLAG&UVM_ABSTRACT)) ) \
+               else if ((m_sc.comparer.physical&&((FLAG)&UVM_PHYSICAL)) || \
+                        (m_sc.comparer.abstract&&((FLAG)&UVM_ABSTRACT)) || \
+                        (!((FLAG)&UVM_PHYSICAL) && !((FLAG)&UVM_ABSTRACT)) ) \
                  m_sc.comparer.result++; \
                if(m_sc.comparer.result && (m_sc.comparer.show_max <= m_sc.comparer.result)) return; \
             end \
@@ -1135,7 +1135,7 @@
       UVM_SETOBJ: \
         begin \
           string s; \
-          if(!(FLAG &UVM_READONLY)) begin \
+          if(!((FLAG)&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               $swrite(s,`"ARG[%0d]`",i); \
               m_sc.scope.set_arg(s); \
@@ -1145,7 +1145,7 @@
                 if($cast(ARG[i],uvm_object::m_sc.object)) \
                   uvm_object::m_sc.status = 1; \
               end \
-              else if(ARG[i]!=null && !(FLAG&UVM_REFERENCE)) begin \
+              else if(ARG[i]!=null && !((FLAG)&UVM_REFERENCE)) begin \
                 int cnt; \
                 //Only traverse if there is a possible match. \
                 for(cnt=0; cnt<str__.len(); ++cnt) begin \
@@ -1182,12 +1182,12 @@
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOPY)) ARG = local_data__.ARG; \
+          if(!((FLAG)&UVM_NOCOPY)) ARG = local_data__.ARG; \
         end \
       UVM_COMPARE: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOMPARE)) begin \
+          if(!((FLAG)&UVM_NOCOMPARE)) begin \
             if(ARG != local_data__.ARG) begin \
                if(m_sc.comparer.show_max == 1) begin \
                  m_sc.scope.set_arg(`"ARG`"); \
@@ -1201,9 +1201,9 @@
                    end \
                  end \
                end \
-               else if ((m_sc.comparer.physical&&(FLAG&UVM_PHYSICAL)) || \
-                        (m_sc.comparer.abstract&&(FLAG&UVM_ABSTRACT)) || \
-                        (!(FLAG&UVM_PHYSICAL) && !(FLAG&UVM_ABSTRACT)) ) \
+               else if ((m_sc.comparer.physical&&((FLAG)&UVM_PHYSICAL)) || \
+                        (m_sc.comparer.abstract&&((FLAG)&UVM_ABSTRACT)) || \
+                        (!((FLAG)&UVM_PHYSICAL) && !((FLAG)&UVM_ABSTRACT)) ) \
                  m_sc.comparer.result++; \
                if(m_sc.comparer.result && (m_sc.comparer.show_max <= m_sc.comparer.result)) return; \
             end \
@@ -1235,7 +1235,7 @@
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
           if(uvm_is_match(str__, m_sc.scope.get())) begin \
-            if(FLAG&UVM_READONLY) begin \
+            if((FLAG)&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
@@ -1244,7 +1244,7 @@
               ": static arrays cannot be resized via configuraton."}, UVM_NONE); \
             end \
           end \
-          else if(!(FLAG&UVM_READONLY)) begin \
+          else if(!((FLAG)&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
               if(uvm_is_match(str__, m_sc.scope.get())) begin \
@@ -1279,12 +1279,12 @@
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOPY)) ARG = local_data__.ARG; \
+          if(!((FLAG)&UVM_NOCOPY)) ARG = local_data__.ARG; \
         end \
       UVM_COMPARE: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOMPARE)) begin \
+          if(!((FLAG)&UVM_NOCOMPARE)) begin \
             if(ARG !== local_data__.ARG) begin \
                if(m_sc.comparer.show_max == 1) begin \
                  m_sc.scope.set_arg(`"ARG`"); \
@@ -1301,9 +1301,9 @@
                    end \
                  end \
                end \
-               else if ((m_sc.comparer.physical&&(FLAG&UVM_PHYSICAL)) || \
-                        (m_sc.comparer.abstract&&(FLAG&UVM_ABSTRACT)) || \
-                        (!(FLAG&UVM_PHYSICAL) && !(FLAG&UVM_ABSTRACT)) ) \
+               else if ((m_sc.comparer.physical&&((FLAG)&UVM_PHYSICAL)) || \
+                        (m_sc.comparer.abstract&&((FLAG)&UVM_ABSTRACT)) || \
+                        (!((FLAG)&UVM_PHYSICAL) && !((FLAG)&UVM_ABSTRACT)) ) \
                  m_sc.comparer.result++; \
                if(m_sc.comparer.result && (m_sc.comparer.show_max <= m_sc.comparer.result)) return; \
             end \
@@ -1331,7 +1331,7 @@
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
           if(uvm_is_match(str__, m_sc.scope.get())) begin \
-            if(FLAG&UVM_READONLY) begin \
+            if((FLAG)&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
@@ -1340,7 +1340,7 @@
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
           end \
-          else if(!(FLAG&UVM_READONLY)) begin \
+          else if(!((FLAG)&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
               if(uvm_is_match(str__, m_sc.scope.get())) begin \
@@ -1405,12 +1405,12 @@
       UVM_COPY: \
         begin \
           if (local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOPY)) ARG = local_data__.ARG; \
+          if(!((FLAG)&UVM_NOCOPY)) ARG = local_data__.ARG; \
         end \
       UVM_COMPARE: \
         begin \
           if (local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOMPARE)) begin \
+          if(!((FLAG)&UVM_NOCOMPARE)) begin \
             if(ARG !== local_data__.ARG) begin \
                if(m_sc.comparer.show_max == 1) begin \
                  m_sc.scope.set_arg(`"ARG`"); \
@@ -1429,9 +1429,9 @@
                    end \
                  end \
                end \
-               else if ((m_sc.comparer.physical&&(FLAG&UVM_PHYSICAL)) || \
-                        (m_sc.comparer.abstract&&(FLAG&UVM_ABSTRACT)) || \
-                        (!(FLAG&UVM_PHYSICAL) && !(FLAG&UVM_ABSTRACT)) ) \
+               else if ((m_sc.comparer.physical&&((FLAG)&UVM_PHYSICAL)) || \
+                        (m_sc.comparer.abstract&&((FLAG)&UVM_ABSTRACT)) || \
+                        (!((FLAG)&UVM_PHYSICAL) && !((FLAG)&UVM_ABSTRACT)) ) \
                  m_sc.comparer.result++; \
                if(m_sc.comparer.result && (m_sc.comparer.show_max <= m_sc.comparer.result)) return; \
             end \
@@ -1468,7 +1468,7 @@
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
           if(uvm_is_match(str__, m_sc.scope.get())) begin \
-            if(FLAG&UVM_READONLY) begin \
+            if((FLAG)&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
@@ -1482,7 +1482,7 @@
             /**/   m_sc.status = 1; \
             /**/ end \
           end \
-          else if(!(FLAG&UVM_READONLY)) begin \
+          else if(!((FLAG)&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
               if(uvm_is_match(str__, m_sc.scope.get())) begin \
@@ -1535,8 +1535,8 @@
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOPY)) begin \
-            if((FLAG&UVM_REFERENCE)) \
+          if(!((FLAG)&UVM_NOCOPY)) begin \
+            if(((FLAG)&UVM_REFERENCE)) \
               ARG = local_data__.ARG; \
             else \
               foreach(ARG[i]) begin \
@@ -1552,15 +1552,15 @@
       UVM_COMPARE: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOMPARE)) begin \
-            if((FLAG&UVM_REFERENCE) && (m_sc.comparer.show_max <= 1) && (ARG !== local_data__.ARG) ) begin \
+          if(!((FLAG)&UVM_NOCOMPARE)) begin \
+            if(((FLAG)&UVM_REFERENCE) && (m_sc.comparer.show_max <= 1) && (ARG !== local_data__.ARG) ) begin \
                if(m_sc.comparer.show_max == 1) begin \
                  m_sc.scope.set_arg(`"ARG`"); \
                  m_sc.comparer.print_msg(""); \
                end \
-               else if ((m_sc.comparer.physical&&(FLAG&UVM_PHYSICAL)) || \
-                        (m_sc.comparer.abstract&&(FLAG&UVM_ABSTRACT)) || \
-                        (!(FLAG&UVM_PHYSICAL) && !(FLAG&UVM_ABSTRACT)) ) \
+               else if ((m_sc.comparer.physical&&((FLAG)&UVM_PHYSICAL)) || \
+                        (m_sc.comparer.abstract&&((FLAG)&UVM_ABSTRACT)) || \
+                        (!((FLAG)&UVM_PHYSICAL) && !((FLAG)&UVM_ABSTRACT)) ) \
                  m_sc.comparer.result++; \
                if(m_sc.comparer.result && (m_sc.comparer.show_max <= m_sc.comparer.result)) return; \
             end \
@@ -1604,7 +1604,7 @@
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
           if(uvm_is_match(str__, m_sc.scope.get())) begin \
-            if(FLAG&UVM_READONLY) begin \
+            if((FLAG)&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
@@ -1622,7 +1622,7 @@
       UVM_SETOBJ: \
         begin \
           string s; \
-          if(!(FLAG &UVM_READONLY)) begin \
+          if(!((FLAG)&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               $swrite(s,`"ARG[%0d]`",i); \
               m_sc.scope.set_arg(s); \
@@ -1632,7 +1632,7 @@
                 if($cast(ARG[i],uvm_object::m_sc.object)) \
                   uvm_object::m_sc.status = 1; \
               end \
-              else if(ARG[i]!=null && !(FLAG&UVM_REFERENCE)) begin \
+              else if(ARG[i]!=null && !((FLAG)&UVM_REFERENCE)) begin \
                 int cnt; \
                 //Only traverse if there is a possible match. \
                 for(cnt=0; cnt<str__.len(); ++cnt) begin \
@@ -1672,12 +1672,12 @@
       UVM_COPY: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOPY)) ARG = local_data__.ARG; \
+          if(!((FLAG)&UVM_NOCOPY)) ARG = local_data__.ARG; \
         end \
       UVM_COMPARE: \
         begin \
           if(local_data__ == null) return; \
-          if(!(FLAG&UVM_NOCOMPARE)) begin \
+          if(!((FLAG)&UVM_NOCOMPARE)) begin \
             if(ARG != local_data__.ARG) begin \
                if(m_sc.comparer.show_max == 1) begin \
                  m_sc.scope.set_arg(`"ARG`"); \
@@ -1696,9 +1696,9 @@
                    end \
                  end \
                end \
-               else if ((m_sc.comparer.physical&&(FLAG&UVM_PHYSICAL)) || \
-                        (m_sc.comparer.abstract&&(FLAG&UVM_ABSTRACT)) || \
-                        (!(FLAG&UVM_PHYSICAL) && !(FLAG&UVM_ABSTRACT)) ) \
+               else if ((m_sc.comparer.physical&&((FLAG)&UVM_PHYSICAL)) || \
+                        (m_sc.comparer.abstract&&((FLAG)&UVM_ABSTRACT)) || \
+                        (!((FLAG)&UVM_PHYSICAL) && !((FLAG)&UVM_ABSTRACT)) ) \
                  m_sc.comparer.result++; \
                if(m_sc.comparer.result && (m_sc.comparer.show_max <= m_sc.comparer.result)) return; \
             end \
@@ -1732,7 +1732,7 @@
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
           if(uvm_is_match(str__, m_sc.scope.get())) begin \
-            if(FLAG&UVM_READONLY) begin \
+            if((FLAG)&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
@@ -1749,7 +1749,7 @@
         end \
       UVM_SETSTR: \
         begin \
-          if(!(FLAG&UVM_READONLY)) begin \
+          if(!((FLAG)&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
               if(uvm_is_match(str__, m_sc.scope.get())) begin \
@@ -1787,11 +1787,11 @@
         m_sc.do_field_check(`"ARG`", this); \
       UVM_COPY: \
         begin \
-          if(!(FLAG&UVM_NOCOPY)) ARG = local_data__.ARG; \
+          if(!((FLAG)&UVM_NOCOPY)) ARG = local_data__.ARG; \
         end \
       UVM_COMPARE: \
         begin \
-          if(!(FLAG&UVM_NOCOMPARE)) begin \
+          if(!((FLAG)&UVM_NOCOMPARE)) begin \
             if(ARG !== local_data__.ARG) begin \
                if(m_sc.comparer.show_max == 1) begin \
                  m_sc.scope.set_arg(`"ARG`"); \
@@ -1813,9 +1813,9 @@
                    end \
                  /**/end \
                end \
-               else if ((m_sc.comparer.physical&&(FLAG&UVM_PHYSICAL)) || \
-                        (m_sc.comparer.abstract&&(FLAG&UVM_ABSTRACT)) || \
-                        (!(FLAG&UVM_PHYSICAL) && !(FLAG&UVM_ABSTRACT)) ) \
+               else if ((m_sc.comparer.physical&&((FLAG)&UVM_PHYSICAL)) || \
+                        (m_sc.comparer.abstract&&((FLAG)&UVM_ABSTRACT)) || \
+                        (!((FLAG)&UVM_PHYSICAL) && !((FLAG)&UVM_ABSTRACT)) ) \
                  m_sc.comparer.result++; \
                if(m_sc.comparer.result && (m_sc.comparer.show_max <= m_sc.comparer.result)) return; \
             end \
@@ -1850,7 +1850,7 @@
         begin \
           m_sc.scope.set_arg(`"ARG`"); \
           if(uvm_is_match(str__, m_sc.scope.get())) begin \
-            if(FLAG&UVM_READONLY) begin \
+            if((FLAG)&UVM_READONLY) begin \
               uvm_report_warning("RDONLY", $psprintf("Readonly argument match %s is ignored",  \
                  m_sc.get_full_scope_arg()), UVM_NONE); \
             end \
@@ -1865,7 +1865,7 @@
             /**/  m_sc.status = 1; \
             /**/end \
           end \
-          else if(!(FLAG&UVM_READONLY)) begin \
+          else if(!((FLAG)&UVM_READONLY)) begin \
             foreach(ARG[i]) begin \
               m_sc.scope.set_arg_element(`"ARG`",i); \
               if(uvm_is_match(str__, m_sc.scope.get())) begin \
@@ -2237,7 +2237,7 @@
 // Postcondition: ~ARG~ is printed using the format set by the FLAGS.
 
 `define m_uvm_record_int(ARG,FLAG) \
-  if(!(FLAG&UVM_NORECORD)) begin \
+  if(!((FLAG)&UVM_NORECORD)) begin \
     m_sc.recorder.record_field(`"ARG`", ARG,  $bits(ARG), uvm_radix_enum'((FLAG)&(UVM_RADIX))); \
   end
 
@@ -2253,7 +2253,7 @@
       
 
 `define m_uvm_record_string(ARG,STR,FLAG) \
-  if(!(FLAG&UVM_NORECORD)) begin \
+  if(!((FLAG)&UVM_NORECORD)) begin \
     m_sc.recorder.record_string(`"ARG`", STR); \
   end
 
@@ -2270,7 +2270,7 @@
 
 
 `define m_uvm_record_object(ARG,FLAG) \
-  if(!(FLAG&UVM_NORECORD)) begin \
+  if(!((FLAG)&UVM_NORECORD)) begin \
     m_sc.recorder.record_object(`"ARG`", ARG); \
   end
 
@@ -2280,7 +2280,7 @@
 
 `define m_uvm_record_qda_int(ARG, FLAG, SZ) \
   begin \
-    if(!(FLAG&UVM_NORECORD)) begin \
+    if(!((FLAG)&UVM_NORECORD)) begin \
       int sz__ = SZ; \
       if(sz__ == 0) begin \
         m_sc.recorder.record_field(`"ARG_size`", 0, 32, UVM_DEC); \
@@ -2310,7 +2310,7 @@
 
 `define m_uvm_record_qda_enum(ARG, FLAG, SZ) \
   begin \
-    if(!(FLAG&UVM_NORECORD) && (m_sc.recorder.tr_handle != 0)) begin \
+    if(!((FLAG)&UVM_NORECORD) && (m_sc.recorder.tr_handle != 0)) begin \
       int sz__ = SZ; \
       if(sz__ == 0) begin \
         m_sc.recorder.record_field(`"ARG_size`", 0, 32, UVM_DEC); \
@@ -2340,7 +2340,7 @@
 
 `define m_uvm_record_qda_object(ARG, FLAG, SZ) \
   begin \
-    if(!(FLAG&UVM_NORECORD)) begin \
+    if(!((FLAG)&UVM_NORECORD)) begin \
       int sz__ = SZ; \
       string s; \
       if(sz__ == 0 ) begin \
@@ -2372,7 +2372,7 @@
 `define m_uvm_record_qda_string(ARG, FLAG, SZ) \
   begin \
     int sz__ = SZ; \
-    if(!(FLAG&UVM_NORECORD)) begin \
+    if(!((FLAG)&UVM_NORECORD)) begin \
       if(sz__ == 0) begin \
         m_sc.recorder.record_field(`"ARG_size`", 0, 32, UVM_DEC); \
       end \
@@ -2422,9 +2422,9 @@
                 m_sc.scope.set_arg({"[",string_aa_key,"]"}); \
                 s = {`"ARG[`",string_aa_key,"]"}; \
                 if($bits(ARG[string_aa_key]) <= 64) \
-                  void'(m_sc.comparer.compare_field_int(s, ARG[string_aa_key], local_data__.ARG[string_aa_key], $bits(ARG[string_aa_key]), uvm_radix_enum'(FLAG&UVM_RADIX))); \
+                  void'(m_sc.comparer.compare_field_int(s, ARG[string_aa_key], local_data__.ARG[string_aa_key], $bits(ARG[string_aa_key]), uvm_radix_enum'((FLAG)&UVM_RADIX))); \
                 else \
-                  void'(m_sc.comparer.compare_field(s, ARG[string_aa_key], local_data__.ARG[string_aa_key], $bits(ARG[string_aa_key]), uvm_radix_enum'(FLAG&UVM_RADIX))); \
+                  void'(m_sc.comparer.compare_field(s, ARG[string_aa_key], local_data__.ARG[string_aa_key], $bits(ARG[string_aa_key]), uvm_radix_enum'((FLAG)&UVM_RADIX))); \
                 m_sc.scope.unset_arg(string_aa_key); \
               end \
             end \
@@ -2483,9 +2483,9 @@
                   m_sc.scope.set_arg({"[",string_aa_key,"]"}); \
                   s = {`"ARG[`",string_aa_key,"]"}; \
                   if($bits(ARG[aa_key]) <= 64) \
-                    void'(m_sc.comparer.compare_field_int(s, ARG[aa_key], local_data__.ARG[aa_key], $bits(ARG[aa_key]), uvm_radix_enum'(FLAG&UVM_RADIX))); \
+                    void'(m_sc.comparer.compare_field_int(s, ARG[aa_key], local_data__.ARG[aa_key], $bits(ARG[aa_key]), uvm_radix_enum'((FLAG)&UVM_RADIX))); \
                   else \
-                    void'(m_sc.comparer.compare_field(s, ARG[aa_key], local_data__.ARG[aa_key], $bits(ARG[aa_key]), uvm_radix_enum'(FLAG&UVM_RADIX))); \
+                    void'(m_sc.comparer.compare_field(s, ARG[aa_key], local_data__.ARG[aa_key], $bits(ARG[aa_key]), uvm_radix_enum'((FLAG)&UVM_RADIX))); \
                   m_sc.scope.unset_arg(string_aa_key); \
                 end while(ARG.next(aa_key)); \
             end \
@@ -2602,7 +2602,7 @@
                 //if the object are the same then don't need to do a deep compare \
                 if(rhs != lhs) begin \
                   bit refcmp; \
-                  refcmp = (FLAG & UVM_SHALLOW) && !(m_sc.comparer.policy == UVM_DEEP); \
+                  refcmp = ((FLAG)& UVM_SHALLOW) && !(m_sc.comparer.policy == UVM_DEEP); \
                   //do a deep compare here  \
                   if(!refcmp && !(m_sc.comparer.policy == UVM_REFERENCE)) begin \
                     if(((rhs == null) && (lhs != null)) || ((lhs==null) && (rhs!=null))) begin \
@@ -2677,7 +2677,7 @@
                   m_sc.scope.down_element(key__); \
                   if(rhs != lhs) begin \
                     bit refcmp; \
-                    refcmp = (FLAG & UVM_SHALLOW) && !(m_sc.comparer.policy == UVM_DEEP); \
+                    refcmp = ((FLAG)& UVM_SHALLOW) && !(m_sc.comparer.policy == UVM_DEEP); \
                     //do a deep compare here  \
                     if(!refcmp && !(m_sc.comparer.policy == UVM_REFERENCE)) begin \
                       if(((rhs == null) && (lhs != null)) || ((lhs==null) && (rhs!=null))) begin \
