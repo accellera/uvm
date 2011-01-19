@@ -48,7 +48,7 @@ module top;
     endfunction
     function void report();
       if($time == 33ms) $display("** UVM TEST PASSED **");
-      else $display("** UVM TEST FAILED **");
+      else $display("** UVM TEST FAILED **", $time);
     endfunction
   endclass
 
@@ -57,6 +57,6 @@ module top;
   initial begin
     
     //safety check
-    #34ms  $display("** UVM TEST FAILED **");
+    #34ms  $display("** UVM TEST FAILED **", $time);
   end
 endmodule

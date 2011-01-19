@@ -516,9 +516,9 @@ class uvm_process;
     m_process_id.await();
   endtask
 
-  function void suspend();
+  task suspend();
    m_process_id.suspend();
-  endfunction
+  endtask
 
   function void resume();
    m_process_id.resume();
