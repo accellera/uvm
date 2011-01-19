@@ -23,8 +23,594 @@
 `ifndef UVM_PHASES_SVH
 `define UVM_PHASES_SVH
 
+
+
+//------------------------------------------------------------------------------
+// TITLE: Phasing
+//------------------------------------------------------------------------------
+//
+// UVM implements an automated mechanism for phasing the execution of
+// the various components in a testbench.
+//
+
+
+//------------------------------------------------------------------------------
+//
+// Class: Pre-Defined Phases
+//
+//------------------------------------------------------------------------------
+//
+// This section describes the set of pre-defined phases
+// provided as a standard part of the UVM library.
+//
+// Group: Common Phases Global Variables
+//
+// The common phases are the set of function and task phases that all
+// <uvm_component>s execute together.
+// All <uvm_component>s are always synchronized
+// with respect to the common phases.
+//
+// The common phases are executed in the sequence they are specified below.
+//
+// Variable: uvm_build_ph
+//
+// Creation and configuration of testbench structure
+//
+// <uvm_topdown_phase> that calls the
+// <uvm_component::build_phase> method.
+//
+// Upon entry:
+//  - The top-level components have been instantiated under <uvm_root>.
+//  - Current simulation time is still equal to 0 but some "delta cycles" may have occurred
+//
+// Typical Uses:
+//  - Instantiate sub-components.
+//  - Instantiate register model.
+//  - Get configuration values for the component being built.
+//  - Set configuration values for sub-components.
+//
+// Exit Criteria:
+//  - All <uvm_component>s have been instantiated.
+//
+//
+// Variable: uvm_connect_ph
+//
+// Establish cross-component connections.
+//
+// <uvm_bottomup_phase> that calls the
+// <uvm_component::connect_phase> method.
+//
+// Upon Entry:
+// - All components have been instantiated.
+// - Current simulation time is still equal to 0
+//   but some "delta cycles" may have occurred.
+//
+// Typical Uses:
+// - Connect TLM ports and exports.
+// - Connect TLM initiator sockets and target sockets.
+// - Connect register model to adapter components.
+//
+// Exit Criteria:
+// - All cross-component connections have been established.
+//
+//
+// Variable: uvm_end_of_elaboration_ph
+//
+// Fine-tuning of the testbench.
+//
+// <uvm_bottomup_phase> that calls the
+// <uvm_component::end_of_elaboration_phase> method.
+//
+// Upon Entry:
+// - The verification environment has been completely assembled.
+// - Current simulation time is still equal to 0
+//   but some "delta cycles" may have occurred.
+//
+// Typical Uses:
+// - Display environment topology.
+// - Open files.
+// - Define additional configuration settings for components.
+//
+// Exit Criteria:
+// - None.
+//                              
+//
+// Variable: uvm_start_of_simulation_ph
+//
+// Get ready for DUT to be simulated.
+//
+// <uvm_bottomup_phase> that calls the
+// <uvm_component::start_of_simulation_phase> method.
+//
+// Upon Entry:
+// - Other simulation engines, debuggers, hardware assisted platforms and
+//   all other run-time tools have been started and synchronized.
+// - The verification environment has been completely configured
+//   and is ready to start.
+// - Current simulation time is still equal to 0
+//   but some "delta cycles" may have occurred.
+//
+// Typical Uses:
+// - Display environment topology
+// - Set debugger breakpoint
+// - Set run-time configuration values.
+//
+// Exit Criteria:
+// - None.
+//
+//
+// Variable: uvm_run_ph
+//
+// What to do while the DUT is simulated.
+//
+// <uvm_task_phase> that calls the
+// <uvm_component::run_phase> method.
+//
+// Upon Entry:
+// - Indicates that power has been applied.
+// - There should not have been any active clock edges before entry
+//   into this phase (e.g. x->1 transitions via initial blocks).
+// - Current simulation time is still equal to 0
+//   but some "delta cycles" may have occurred.
+//
+// Typical Uses:
+// - Components implement behavior that is exhibited for the entire
+//   run-time, across the various run-time phases.
+// - Backward compatibility with OVM.
+//
+// Exit Criteria:
+// - The DUT no longer needs to be simulated.
+//
+// The run phase terminates in one of four ways.
+//
+// 1. Explicit call to <global_stop_request>:
+//
+//   When <global_stop_request> is called, an ordered shut-down for the
+//   currently running phase begins.
+//   First, all enabled components' <uvm_component::stop> tasks 
+//   are called bottom-up, i.e., childrens' <uvm_component::stop> tasks
+//   are called before the parent's.
+//
+//   A component is enabled by its <uvm_component::enable_stop_interrupt> bit.
+//   Each component can implement <uvm_component::stop>
+//   to allow completion of in-progress transactions, flush queues,
+//   and other shut-down activities.
+//   Upon return from <uvm_component::stop> by all enabled components,
+//   the recursive <uvm_component::do_kill_all> is called
+//   on all top-level component(s).
+//   If the <uvm_test_done> objection is being used,
+//   this stopping procedure is deferred until all outstanding objections
+//   on <uvm_test_done> have been dropped.
+//
+// 2. All objections to <uvm_test_done> have been dropped:
+//
+//   When all objections on the <uvm_test_done> objection have been dropped,
+//   <global_stop_request> is called automatically, thus kicking off the
+//   stopping procedure described above. See <uvm_objection> for details on
+//   using the objection mechanism.
+//
+// 3. Explicit call to <uvm_component::kill> or <uvm_component::do_kill_all>:
+//
+//   When <uvm_component::kill> is called,
+//   that component's <uvm_component::run_phase> processes are killed
+//   immediately.
+//   The <uvm_component::do_kill_all> methods applies to the component
+//   and all its descendants.
+//
+//   Use of this method is not recommended.
+//   It is better to use the stopping mechanism, which affords a more ordered,
+//   safer shut-down.
+//
+// 4. Timeout:
+//
+//   The phase ends if the timeout expires before an explicit call to
+//   <global_stop_request> or <uvm_component::kill>.
+//   By default, the timeout is set to 9200ns.
+//   You may override this via <set_global_timeout>,
+//   but you cannot disable the timeout completely.
+//
+//   If the default timeout occurs in your simulation, or if simulation never
+//   ends despite completion of your test stimulus, then it usually indicates
+//   a missing call to <global_stop_request>.
+//
+//
+//
+// Variable: uvm_extract_ph
+//
+// Is there anything left behind?
+//
+// <uvm_bottomup_phase> that calls the
+// <uvm_component::extract_phase> method.
+//
+// Upon Entry:
+// - The DUT no longer needs to be simulated.
+// - Simulation time will no longer advance.
+//
+// Typical Uses:
+// - Extract any remaining data and final state information
+//   from scoreboard and testbench components
+// - Probe the DUT (via zero-time hierarchical references
+//   and/or backdoor accesses) for final state information.
+// - Compute statistics and summaries.
+// - Display final state information
+// - Close files.
+//
+// Exit Criteria:
+// - All data has been collected and summarized.
+//
+//
+// Variable: uvm_check_ph
+//
+// Were there any errors?
+//
+// <uvm_bottomup_phase> that calls the
+// <uvm_component::check_phase> method.
+//
+// Upon Entry:
+// - All data has been collected.
+//
+// Typical Uses:
+// - Check that no unaccounted-for data remain.
+//
+// Exit Criteria:
+// - Test is known to have passed or failed.
+//
+//
+// Variable: uvm_report_ph
+//
+// What is the verdict?
+//
+// <uvm_bottomup_phase> that calls the
+// <uvm_component::report_phase> method.
+//
+// Upon Entry:
+// - Test is known to have passed or failed.
+//
+// Typical Uses:
+// - Report test results.
+// - Write results to file.
+//
+// Exit Criteria:
+// - End of test.
+//
+//
+// Variable: uvm_final_ph
+//
+// Tie up loose ends.
+//
+// <uvm_topdown_phase> that calls the
+// <uvm_component::final_phase> method.
+//
+// Upon Entry:
+// - All test-related activity has completed.
+//
+// Typical Uses:
+// - Close files.
+// - Terminate co-simulation engines.
+//
+// Exit Criteria:
+// - Ready to exit simulator.
+//
+//
+// Group: Run-Time Schedule Global Variables
+//
+// The run-time schedule is the pre-defined phase schedule
+// which runs concurrently to the <uvm_run_ph> global run phase.
+// By default, all <uvm_component>s using the run-time schedule
+// are synchronized with respect to the pre-defined phases in the schedule.
+// It is possible for components to belong to different domains
+// in which case their schedules will be unsynchronized.
+//
+// Variable: uvm_pre_reset_ph
+//
+// Before reset is asserted.
+//
+// <uvm_task_phase> that calls the
+// <uvm_component::pre_reset_phase> method.
+//
+// Upon Entry:
+// - Indicates that power has been applied but not necessarily valid or stable.
+// - There should not have been any active clock edges
+//   before entry into this phase.
+//
+// Typical Uses:
+// - Wait for power good.
+// - Components connected to virtual interfaces should initialize
+//   their output to X's or Z's.
+// - Initialize the clock signals to a valid value
+// - Assign reset signals to X (power-on reset).
+// - Wait for reset signal to be asserted
+//   if not driven by the verification environment.
+//
+// Exit Criteria:
+// - Reset signal, if driven by the verification environment,
+//   is ready to be asserted.
+// - Reset signal, if not driven by the verification environment, is asserted.
+//
+//
+// Variable: uvm_reset_ph
+//
+// Reset is asserted.
+//
+// <uvm_task_phase> that calls the
+// <uvm_component::reset_phase> method.
+//
+// Upon Entry:
+// - Indicates that the hardware reset signal is ready to be asserted.
+//
+// Typical Uses:
+// - Assert reset signals.
+// - Components connected to virtual interfaces should drive their output
+//   to their specified reset or idle value.
+// - Components and environments should initialize their state variables.
+// - Clock generators start generating active edges.
+// - De-assert the reset signal(s)  just before exit.
+// - Wait for the reset signal(s) to be de-asserted.
+//
+// Exit Criteria:
+// - Reset signal has just been de-asserted.
+// - Main or base clock is working and stable.
+// - At least one active clock edge has occurred.
+// - Output signals and state variables have been initialized.
+//
+//
+// Variable: uvm_post_reset_ph
+//
+// After reset is de-asserted.
+//
+// <uvm_task_phase> that calls the
+// <uvm_component::post_reset_phase> method.
+//
+// Upon Entry:
+// - Indicates that the DUT reset signal has been de-asserted.
+//
+// Typical Uses:
+// - Components should start behavior appropriate for reset being inactive.
+//   For example, components may start to transmit idle transactions
+//   or interface training and rate negotiation.
+//   This behavior typically continues beyond the end of this phase.
+//
+// Exit Criteria:
+// - The testbench and the DUT are in a known, active state.
+//
+//
+// Variable: uvm_pre_configure_ph
+//
+// Before the DUT is configured by the SW.
+//
+// <uvm_task_phase> that calls the
+// <uvm_component::pre_configure_phase> method.
+//
+// Upon Entry:
+// - Indicates that the DUT has been completed reset
+//  and is ready to be configured.
+//
+// Typical Uses:
+// - Procedurally modify the DUT configuration information as described
+//   in the environment (and that will be eventually uploaded into the DUT).
+// - Wait for components required for DUT configuration to complete
+//   training and rate negotiation.
+//
+// Exit Criteria:
+// - DUT configuration information is defined.
+//
+//
+// Variable: uvm_configure_ph
+//
+// The SW configures the DUT.
+//
+// <uvm_task_phase> that calls the
+// <uvm_component::configure_phase> method.
+//
+// Upon Entry:
+// - Indicates that the DUT is ready to be configured.
+//
+// Typical Uses:
+// - Components required for DUT configuration execute transactions normally.
+// - Set signals and program the DUT and memories
+//   (e.g. read/write operations and sequences)
+//   to match the desired configuration for the test and environment.
+//
+// Exit Criteria:
+// - The DUT has been configured and is ready to operate normally.
+//
+//
+// Variable: uvm_post_configure_ph
+//
+// After the SW has configured the DUT.
+//
+// <uvm_task_phase> that calls the
+// <uvm_component::post_configure_phase> method.
+//
+// Upon Entry:
+// - Indicates that the configuration information has been fully uploaded.
+//
+// Typical Uses:
+// - Wait for configuration information to fully propagate and take effect.
+// - Wait for components to complete training and rate negotiation.
+// - Enable the DUT.
+// - Sample DUT configuration coverage.
+//
+// Exit Criteria:
+// - The DUT has been fully configured and enabled
+//   and is ready to start operating normally.
+//
+//
+// Variable: uvm_pre_main_ph
+//
+// Before the primary test stimulus starts.
+//
+// <uvm_task_phase> that calls the
+// <uvm_component::pre_main_phase> method.
+//
+// Upon Entry:
+// - Indicates that the DUT has been fully configured.
+//
+// Typical Uses:
+// - Wait for components to complete training and rate negotiation.
+//
+// Exit Criteria:
+// - All components have completed training and rate negotiation.
+// - All components are ready to generate and/or observe normal stimulus.
+//
+//
+// Variable: uvm_main_ph
+//
+// Primary test stimulus.
+//
+// <uvm_task_phase> that calls the
+// <uvm_component::main_phase> method.
+//
+// Upon Entry:
+// - The stimulus associated with the test objectives is ready to be applied.
+//
+// Typical Uses:
+// - Components execute transactions normally.
+// - Data stimulus sequences are started.
+// - Wait for a time-out or certain amount of time,
+//   or completion of stimulus sequences.
+//
+// Exit Criteria:
+// - Enough stimulus has been applied to meet the primary
+//   stimulus objective of the test.
+//
+//
+// Variable: uvm_post_main_ph
+//
+// After enough of the primary test stimulus.
+//
+// <uvm_task_phase> that calls the
+// <uvm_component::post_main_phase> method.
+//
+// Upon Entry:
+// - The primary stimulus objective of the test has been met.
+//
+// Typical Uses:
+// - Included for symmetry.
+//
+// Exit Criteria:
+// - None.
+//
+//
+// Variable: uvm_pre_shutdown_ph
+//
+// Before things settle down.
+//
+// <uvm_task_phase> that calls the
+// <uvm_component::pre_shutdown_phase> method.
+//
+// Upon Entry:
+// - None.
+//
+// Typical Uses:
+// - Included for symmetry.
+//
+// Exit Criteria:
+// - None.
+//
+//
+// Variable: uvm_shutdown_ph
+//
+// Letting things settle down.
+//
+// <uvm_task_phase> that calls the
+// <uvm_component::shutdown_phase> method.
+//
+// Upon Entry:
+// - None.
+//
+// Typical Uses:
+// - Wait for all data to be drained out of the DUT.
+// - Extract data still buffered in the DUT,
+//   usually through read/write operations or sequences.
+//
+// Exit Criteria:
+// - All data has been drained or extracted from the DUT.
+// - All interfaces are idle.
+//
+//
+// Variable: uvm_post_shutdown_ph
+//
+// After things have settled down.
+//
+// <uvm_task_phase> that calls the
+// <uvm_component::post_shutdown_phase> method.
+//
+// Upon Entry:
+// - No more "data" stimulus is applied to the DUT.
+//
+// Typical Uses:
+// - Perform final checks that require run-time access to the DUT
+//   (e.g. read accounting registers or dump the content of memories).
+//
+// Exit Criteria:
+// - All run-time checks have been satisfied.
+//
+//
+
+typedef class uvm_topdown_phase;
+typedef class uvm_bottomup_phase;
+typedef class uvm_task_phase;
+typedef class uvm_phase_schedule;
+
+`uvm_builtin_topdown_phase(build)
+`uvm_builtin_bottomup_phase(connect)
+`uvm_builtin_bottomup_phase(end_of_elaboration)
+`uvm_builtin_bottomup_phase(start_of_simulation)
+
+`uvm_builtin_task_phase(run)
+
+`uvm_builtin_task_phase(pre_reset)
+`uvm_builtin_task_phase(reset)
+`uvm_builtin_task_phase(post_reset)
+`uvm_builtin_task_phase(pre_configure)
+`uvm_builtin_task_phase(configure)
+`uvm_builtin_task_phase(post_configure)
+`uvm_builtin_task_phase(pre_main)
+`uvm_builtin_task_phase(main)
+`uvm_builtin_task_phase(post_main)
+`uvm_builtin_task_phase(pre_shutdown)
+`uvm_builtin_task_phase(shutdown)
+`uvm_builtin_task_phase(post_shutdown)
+
+`uvm_builtin_bottomup_phase(extract)
+`uvm_builtin_bottomup_phase(check)
+`uvm_builtin_bottomup_phase(report)
+`uvm_builtin_topdown_phase(final)
+
+
+
+//------------------------------------------------------------------------------
+//
+// Class: User-Defined Phases
+//
+//------------------------------------------------------------------------------
+//
+// To defined your own custom phase, use the following pattern
+//
+// 1. extend the appropriate base class for your phase type
+//|       class my_PHASE_phase extends uvm_task_phase("PHASE");
+//|       class my_PHASE_phase extends uvm_topdown_phase("PHASE");
+//|       class my_PHASE_phase extends uvm_bottomup_phase("PHASE");
+//
+// 2. implement your exec_task or exec_func method
+//|       task exec_task(uvm_component comp, uvm_phase_schedule schedule);
+//|       function void exec_func(uvm_component comp, uvm_phase_schedule schedule);
+//
+// 3. the implementation usually calls the related method on the component
+//|          comp.PHASE_phase();
+//
+// 4. after declaring your phase singleton class, instantiate one for global use
+//|       static my_``PHASE``_phase my_``PHASE``_ph = new();
+//
+// 5. insert the phase in a schedule using the
+//    <uvm_phase_schedule::add_phase>.method.
+//
+//------------------------------------------------------------------------------
+
+
 //-----------------------------------------------------------------------------
-// Title: Phase Scheduling API                                          
+// Class: Phasing Implementation
 //-----------------------------------------------------------------------------
 //                                                                             
 // The API described here provides a general purpose testbench phasing         
@@ -46,8 +632,9 @@
 // Class hierarchy:
 //------------------------------------------------------------------------------
 //
-// Two separate data class hierarchies are required to represent a phase:
-// the phase schedule, which builds a graph of serial and parallel
+// Two separate data class hierarchies are required
+// to represent a phase: the phase schedule,
+// which builds a graph of serial and parallel
 // phase relationships and stores current state as the phaser progresses,
 // and the phase implementation which specifies required component behavior
 // (by extension into component context if non-default behavior required.)
@@ -942,169 +1529,6 @@ class uvm_phase_schedule extends uvm_graph;
 
 
 endclass
-
-
-
-//------------------------------------------------------------------------------
-//
-// Class: uvm_*_phase
-//
-//------------------------------------------------------------------------------
-//
-// There are macros (see macros/uvm_phase_defines.svh) to help repetitive
-// declarations These both declare and instantiate the phase default imp class.
-// If you are doing one manually for your own custom phase, use the following
-// template:
-//
-// 1. extend the appropriate base class for your phase type:
-//|       class uvm_PHASE_phase extends uvm_task_phase("PHASE");
-//|       class uvm_PHASE_phase extends uvm_topdown_phase("PHASE");
-//|       class uvm_PHASE_phase extends uvm_bottomup_phase("PHASE");
-//
-// 2. implement your exec_task or exec_func method:
-//|       task exec_task(uvm_component comp, uvm_phase_schedule schedule);
-//|       function void exec_func(uvm_component comp, uvm_phase_schedule schedule);
-//
-// 3. the default ones simply call the related method on the component:
-//|       comp.PHASE();
-//
-// 4. after declaring your phase singleton class, instantiate one for global use:
-//|       uvm_``PHASE``_phase uvm_``PHASE``_ph = new();
-//
-// Note that the macros and template above are specific to UVM builtin phases.
-// User custom phases should instantiate the singleton class in their own package
-// with a prefix other than uvm_.
-//
-//
-//------------------------------------------------------------------------------
-
-
-//------------------------------------------------------------------------------
-//
-// Class: Global Phases and Phase Implementations
-//
-//------------------------------------------------------------------------------
-//
-// This section describes the set of global phases and phase implementations
-// provided as a standard part of the UVM library.
-//
-// Group: Common Phases
-//
-// The common phases are the set of function and task phases that all
-// components execute together. All components are always synchronized
-// with respect to the common phases.
-//
-// Variable: uvm_build_ph
-//
-// Variable: uvm_connect_ph
-//
-// Variable: uvm_end_of_elaboration_ph
-//
-// Variable: uvm_start_of_simulation_ph
-//
-// Variable: uvm_run_ph
-//
-// Variable: uvm_extract_ph
-//
-// Variable: uvm_check_ph
-//
-// Variable: uvm_report_ph
-//
-// Variable: uvm_final_ph
-//
-// These variables are the phase implementations for the common phases. The
-// implementation calls the associated task/function in the <uvm_component>
-// class. For example, the uvm_build_ph implementation calls the
-// function <uvm_component::build>. They are of type <uvm_phase_imp>.
-//
-// Variable: build_ph
-//
-// Variable: connect_ph
-//
-// Variable: end_of_elaboration_ph
-//
-// Variable: start_of_simulation_ph
-//
-// Variable: run_ph
-//
-// Variable: extract_ph
-//
-// Variable: check_ph
-//
-// Variable: report_ph
-//
-// Variable: final_ph
-//
-// These variables are the phase state objects for the common phases. These
-// global objects can be used to synchronize to the global phases or
-// to get state information of the global phases. They are of type
-// <uvm_phase_schedule>.
-
-// Group: uvm_pkg::uvm Schedule
-//
-// The uvm schedule is the run time phase schedule which runs concurrently
-// to the global run phase. It is possible for
-// components to belong to different domains in which case their
-// uvm schedules will be unsynchronized, but by default multiple
-// components using the uvm schedule would be synchronized with
-// respect to the phases in the schedule.
-//
-// Variable: uvm_pre_reset_ph
-//
-// Variable: uvm_reset_ph
-//
-// Variable: uvm_post_reset_ph
-//
-// Variable: uvm_pre_configure_ph
-//
-// Variable: uvm_configure_ph
-//
-// Variable: uvm_post_configure_ph
-//
-// Variable: uvm_pre_main_ph
-//
-// Variable: uvm_main_ph
-//
-// Variable: uvm_post_main_ph
-//
-// Variable: uvm_pre_shutdown_ph
-//
-// Variable: uvm_shutdown_ph
-//
-// Variable: uvm_post_shutdown_ph
-//
-// These are the phase implementations for the predefined runtime phases
-// (the phases which run concurrently with the <uvm_run_ph> phase. These
-// implementations execute the associated task in <uvm_component>. For 
-// example, the uvm_main_ph implementation executes the 
-// task <uvm_component::main>.
-//
-
-
-`uvm_builtin_topdown_phase(build)
-`uvm_builtin_bottomup_phase(connect)
-`uvm_builtin_bottomup_phase(end_of_elaboration)
-`uvm_builtin_bottomup_phase(start_of_simulation)
-
-`uvm_builtin_task_phase(run)
-
-`uvm_builtin_task_phase(pre_reset)
-`uvm_builtin_task_phase(reset)
-`uvm_builtin_task_phase(post_reset)
-`uvm_builtin_task_phase(pre_configure)
-`uvm_builtin_task_phase(configure)
-`uvm_builtin_task_phase(post_configure)
-`uvm_builtin_task_phase(pre_main)
-`uvm_builtin_task_phase(main)
-`uvm_builtin_task_phase(post_main)
-`uvm_builtin_task_phase(pre_shutdown)
-`uvm_builtin_task_phase(shutdown)
-`uvm_builtin_task_phase(post_shutdown)
-
-`uvm_builtin_bottomup_phase(extract)
-`uvm_builtin_bottomup_phase(check)
-`uvm_builtin_bottomup_phase(report)
-`uvm_builtin_topdown_phase(final)
 
 
 
