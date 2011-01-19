@@ -61,7 +61,7 @@ class any_monitor #(type REQ=int,RSP=REQ) extends uvm_component;
   REQ req;
   RSP rsp;
 
-  virtual task run_phase();
+  virtual task run_phase(uvm_phase_schedule phase);
     fork
       forever begin
         @req;
@@ -156,7 +156,7 @@ class any_driver #(type REQ=int,RSP=REQ) extends uvm_component;
     post_req(req);
   endtask
 
-  task run_phase();
+  task run_phase(uvm_phase_schedule phase);
 
     REQ req;
     RSP rsp;

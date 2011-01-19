@@ -131,9 +131,6 @@ module test;
     virtual function void raised (uvm_objection objection, 
       uvm_object source_obj, string description, int count);
 
-      //ignore run phase implicit objection
-      if(objection == run_ph.phase_done) return;
-
       cb("RAISED", objection, source_obj, count);
       rcnt+=count;
       if(source_obj != this && description != "foo") begin
@@ -143,9 +140,6 @@ module test;
     endfunction
     virtual function void dropped (uvm_objection objection, 
       uvm_object source_obj, string description, int count);
-
-      //ignore run phase implicit objection
-      if(objection == run_ph.phase_done) return;
 
       cb("DROPPED", objection, source_obj, count);
       dcnt += count;

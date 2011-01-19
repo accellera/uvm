@@ -98,21 +98,6 @@ class uvm_root extends uvm_component;
   extern function void stop_request();
 
   
-  // Function- in_stop_request
-  //
-  // Returns 1 if stop_request() was called, 0 otherwise.
-  //
-  extern function bit in_stop_request();
-
-
-  // Function- is_executing_stop_processes
-  //
-  // Returns 1 if <in_stop_request> returns 1 and all objections to the
-  // <uvm_test_done> objection have been dropped.
-  //
-  extern function bit is_executing_stop_processes();
-
-
   // Function: find
 
   extern function uvm_component find (string comp_match);
@@ -181,7 +166,6 @@ class uvm_root extends uvm_component;
 
   extern `_protected function new ();
   extern function void build_phase();
-  extern function void end_of_elaboration_phase();
   extern local function void m_do_verbosity_settings();
   extern local function void m_do_timeout_settings();
   extern local function void m_do_factory_settings();
@@ -197,31 +181,16 @@ class uvm_root extends uvm_component;
   extern local task m_do_stop_all  (uvm_component comp);
 
   local int m_n_stop_threads = 0;
-
-  // phasing implementation
-
-  local mailbox #(uvm_phase_schedule) m_phase_hopper;
-  local uvm_process m_phase_processes[uvm_phase_schedule];
-  local bit m_phase_all_done;
-  static bit m_has_rt_phases=0;
-
-  extern local task phase_runner(); // main phase machine
-  extern function void phase_initiate(uvm_phase_schedule phase);
-  extern function void phase_all_done(); // kill phase_runner() and end run_test
-//JLR: this function is never used. It is local and uvm_root never uses.!!!!
-  extern local function void terminate(uvm_phase_schedule phase);
-  extern local function void print_active_phases();
-  extern function int unsigned phase_process_count(); // TBD local
-   
   local  event m_stop_request_e;
 
   // singleton handle
   static local uvm_root m_inst;
 
-  // For communicating all objections dropped.
+  // For communicating all objections dropped and end of phasing
   bit m_objections_outstanding = 0;
-  local bit m_in_stop_request = 0;
-  local bit m_executing_stop_processes = 0;
+  bit m_phase_all_done;
+  bit m_in_stop_request = 0;
+  bit m_executing_stop_processes = 0;
 
   // At end of elab phase we need to do tlm binding resolution.
   function void phase_ended(uvm_phase_schedule phase);
@@ -234,29 +203,23 @@ endclass
 
 
 // Class- uvm_root_report_handler
-//
+// Root report has name "reporter"
 
 class uvm_root_report_handler extends uvm_report_handler;
-
-  virtual function void report(
-      uvm_severity severity,
-      string name,
-      string id,
-      string message,
-      int verbosity_level,
-      string filename,
-      int line,
-      uvm_report_object client
-      );
-
+  virtual function void report(uvm_severity severity,
+                               string name,
+                               string id,
+                               string message,
+                               int verbosity_level,
+                               string filename,
+                               int line,
+                               uvm_report_object client);
     if(name == "")
       name = "reporter";
-
     super.report(severity, name, id, message, verbosity_level, filename, line, client);
-
   endfunction 
-
 endclass
+
 
 //-----------------------------------------------------------------------------
 //
@@ -293,7 +256,7 @@ uvm_phase_schedule run_ph = null;
 uvm_phase_schedule extract_ph = null;
 uvm_phase_schedule check_ph = null;
 uvm_phase_schedule report_ph = null;
-uvm_phase_schedule finalize_ph = null;
+uvm_phase_schedule final_ph = null;
 
 function void uvm_root::m_initialize_common_schedule();
   // initialize phase schedule to "common", or inherit it from parent component
@@ -315,7 +278,7 @@ function void uvm_root::m_initialize_common_schedule();
   common.add_phase(uvm_extract_phase::get());
   common.add_phase(uvm_check_phase::get());
   common.add_phase(uvm_report_phase::get());
-  common.add_phase(uvm_finalize_phase::get());
+  common.add_phase(uvm_final_phase::get());
 
   // for backward compatibility, make common schedules available
   build_ph = common.find_schedule("build");
@@ -326,10 +289,11 @@ function void uvm_root::m_initialize_common_schedule();
   extract_ph = common.find_schedule("extract");
   check_ph = common.find_schedule("check");
   report_ph = common.find_schedule("report");
-  finalize_ph = common.find_schedule("finalize");
+  final_ph = common.find_schedule("final");
 
   m_inst.add_phase_schedule(common, "common");
 endfunction 
+
 
 // new
 // ---
@@ -347,10 +311,6 @@ function uvm_root::new();
 
   report_header();
   print_enabled=0;
-
-  // initialize phasing machinery
-  m_phase_hopper = new();
-  m_phase_all_done = 0;
 
   // This sets up the global verbosity. Other command line args may
   // change individual component verbosity.
@@ -374,25 +334,6 @@ function void uvm_root::build_phase();
   m_do_max_quit_settings();
   m_do_dump_args();
 
-endfunction
-
-
-// end_of_elaboration_phase
-// ------------------------
-
-function void uvm_root::end_of_elaboration_phase();
-  // For backward compatibility, the run phase never releases its objection until
-  // the stop request comes in.
-  uvm_phase_schedule run_ph = find_phase_schedule("uvm_pkg::common","*");
-  uvm_phase_schedule uvm = find_phase_schedule("uvm_pkg::uvm", "*");
-
-  run_ph = run_ph.find_schedule("run");
-
-  // For semantic backward compatibilty, run phase should not end until
-  // stop request happens. But, we may not want this.
-  if(uvm==null) begin
-    run_ph.phase_done.raise_objection(this, "Root objection for run phase");
-  end
 endfunction
 
 
@@ -645,6 +586,7 @@ function void uvm_root::m_do_max_quit_settings();
   end
 endfunction
 
+
 // m_do_dump_args
 // --------------
 
@@ -662,6 +604,7 @@ function void uvm_root::m_do_dump_args();
     uvm_report_info("DUMPARGS", out_string, UVM_NONE);
   end
 endfunction
+
 
 // check_verbosity
 // ---------------
@@ -853,21 +796,17 @@ task uvm_root::run_test(string test_name="");
     begin
       // spawn the phase runner task
       phase_runner_proc = process::self();
-      phase_runner();
+      uvm_phase_schedule::m_run_phases();
     end
   join_none
-  
-  // initiate phasing by starting the first phase in the common domain
   #0; // let the phase runner start
-  void'(m_phase_hopper.try_put(find_phase_schedule("uvm_pkg::common","common")));
   
   // wait for all phasing to be completed
-  // - blocks until m_phase_all_done == 1
-  // - m_phase_all_done is set to 1 by the phase_all_done() method
-  //   which can be called from global global_all_done() function
+  // - blocks until m_phase_all_done == 1 (set from uvm_phase_schedule::execute)
   // - this is called at the end of the global_stop_request process or will
   //   be called by a phase schedule when there are no more phases in the
   //   active phase list and the current phase has no successors
+
   wait (m_phase_all_done == 1);
   uvm_report_info("PHDONE","** phasing all done **", UVM_DEBUG);
   
@@ -876,93 +815,10 @@ task uvm_root::run_test(string test_name="");
 
   report_summarize();
 
-  if (finish_on_completion) begin
-    // forking allows current delta to complete
-    fork
-      $finish;
-    join_none
-  end
+  if (finish_on_completion)
+    $finish;
 
 endtask
-
-
-//--------------------------------------------------------------------
-// Task: phase_runner
-//
-// This task contains the top-level process that owns all the phase
-// processes.  By hosting the phase processes here we avoid problems
-// associated with phase processes related as parents/children
-//--------------------------------------------------------------------
-task uvm_root::phase_runner(); // GSA TBD cleanup
-  forever begin
-    uvm_phase_schedule phase;
-    uvm_process proc;
-    m_phase_hopper.get(phase);
-    fork
-      begin
-        proc = new(process::self());
-        phase.execute();
-      end
-    join_none
-    m_phase_processes[phase] = proc;
-    #0;  // let the process start running
-  end
-endtask
-
-
-//--------------------------------------------------------------------
-// phase_initiate
-//--------------------------------------------------------------------
-function void uvm_root::phase_initiate(uvm_phase_schedule phase);
-  void'(m_phase_hopper.try_put(phase));
-endfunction
-
-
-//--------------------------------------------------------------------
-// phase_all_done
-// signal to the run_test process that it's time to end phasing
-//--------------------------------------------------------------------
-function void uvm_root::phase_all_done();
-  m_phase_all_done = 1;
-endfunction
-
-
-//--------------------------------------------------------------------
-// terminate
-// terminate a phase buy removing it from the active list
-//--------------------------------------------------------------------
-function void uvm_root::terminate(uvm_phase_schedule phase); // GSA TBD cleanup
-  if(!m_phase_processes.exists(phase)) begin
-    uvm_report_fatal("PHBADTERM",$psprintf("terminate(%s) - phase is not in active list", phase.get_name()));
-    return;
-  end
-  m_phase_processes.delete(phase);
-endfunction
-
-
-//--------------------------------------------------------------------
-// print_active_phases
-// print the phases in the active list
-//--------------------------------------------------------------------
-function void uvm_root::print_active_phases(); // GSA TBD cleanup
-  string s;
-  s = "active phases:";
-  foreach (m_phase_processes[p]) begin
-    uvm_phase_state_t state;
-    state = p.get_state();
-    s = $psprintf("%s %s[%s]", s, p.get_name(), phase_state_string[state]);
-  end
-  uvm_report_info("PHPRACT",s);
-endfunction
-
-
-//--------------------------------------------------------------------
-// phase_process_count
-// return the number of phase processes currently in the active list
-//--------------------------------------------------------------------
-function int unsigned uvm_root::phase_process_count(); // GSA TBD cleanup
-  return m_phase_processes.size();
-endfunction
 
 
 
@@ -974,7 +830,21 @@ endfunction
 // ------------
 
 function void uvm_root::stop_request();
+  // stop request valid for running task-based phases only
+  //TBD if (m_curr_phase == null || !m_curr_phase.is_task()) begin
+  //TBD   uvm_report_warning("STPNA",
+  //TBD     $psprintf("Stop-request has no effect outside non-time-consuming phases%s%s",
+  //TBD               "current phase is ",m_curr_phase==null?
+  //TBD               "none (not started":m_curr_phase.get_name()), UVM_NONE);
+  //TBD   return;
+  //TBD end
+  uvm_test_done_objection tdo = uvm_test_done_objection::get();
   ->m_stop_request_e;
+  if (tdo.m_startup) begin
+    uvm_test_done_objection::m_stop_request_called=1;
+    tdo.drop_objection(this,"stop_request called; start-up test_done objection");
+    tdo.m_startup=0;
+  end
 endfunction
 
 
@@ -987,22 +857,6 @@ task uvm_root::m_stop_process();
 endtask
 
 
-// in_stop_request
-// ---------------
-
-function bit uvm_root::in_stop_request();
-  return m_in_stop_request;
-endfunction
-
-
-// is_executing_stop_processes
-// ---------------------------
-
-function bit uvm_root::is_executing_stop_processes();
-  return m_executing_stop_processes;
-endfunction
-
-
 // m_stop_request
 // --------------
 
@@ -1011,15 +865,6 @@ task uvm_root::m_stop_request(time timeout=0, bit forced = 0);
   if (timeout == 0 && !forced)
     timeout = `UVM_DEFAULT_TIMEOUT - $realtime;
 
-  // stop request valid for running task-based phases only
-//  uvm_report_fatal("DEV","TBD in uvm_root::m_stop_request() needs coded");
-  //TBD if (m_curr_phase == null || !m_curr_phase.is_task()) begin
-  //TBD   uvm_report_warning("STPNA",
-  //TBD     $psprintf("Stop-request has no effect outside non-time-consuming phases%s%s",
-  //TBD               "current phase is ",m_curr_phase==null?
-  //TBD               "none (not started":m_curr_phase.get_name()), UVM_NONE);
-  //TBD   return;
-  //TBD end
   m_in_stop_request=1;
 
   // All stop tasks are forked from a single thread so 'wait fork'
@@ -1035,6 +880,7 @@ task uvm_root::m_stop_request(time timeout=0, bit forced = 0);
         m_executing_stop_processes = 1;
         m_do_stop_all(this);
         wait (m_n_stop_threads == 0);
+        #0; // cede control for at least 1 delta to create negedge
         m_executing_stop_processes = 0;
       end
       begin
@@ -1047,20 +893,9 @@ task uvm_root::m_stop_request(time timeout=0, bit forced = 0);
   end
   join
 
-  begin
-    uvm_phase_schedule sched = find_phase_schedule("uvm_pkg::common","*");
-    run_ph = sched.find_schedule("run");
-
-    // all stop processes have completed, or a timeout has occured
-    `uvm_info("STOPREQ", "Stop request has been processed, jumping to the extract phase", UVM_MEDIUM)
-    jump_all_domains(uvm_extract_ph);
-
-    #0;
-    run_ph.phase_done.clear();
-    uvm_test_done.clear();
-  end
-
+  `uvm_info("STOPREQ", "Stop request has been processed, 'run' phase ready to proceed to the extract phase", UVM_MEDIUM)
   m_in_stop_request=0;
+
 endtask
 
 
@@ -1082,7 +917,7 @@ task uvm_root::m_do_stop_all(uvm_component comp);
   if (comp.enable_stop_interrupt) begin
     m_n_stop_threads++;
     fork begin
-      comp.stop("TBD"); // TBD (m_curr_phase.get_name());
+      comp.stop("run"); // TBD (m_curr_phase.get_name());
       m_n_stop_threads--;
     end
     join_none

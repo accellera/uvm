@@ -14,7 +14,7 @@ class test extends test_base;
   endfunction : new
   `uvm_component_utils(test);
 
-  task main_phase();
+  task main_phase(uvm_phase_schedule phase);
     #20;
     if( jump_reset_num ) begin
       `uvm_info( "JUMP_RESET", $psprintf("Jump backward to reset phase from : main"), UVM_NONE);

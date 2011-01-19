@@ -91,7 +91,7 @@ class tb_env extends uvm_component;
       end
    endfunction
 
-   virtual task run_phase();
+   virtual task run_phase(uvm_phase_schedule phase);
      if (seq == null) begin
        uvm_report_fatal("NO_SEQUENCE","Env's sequence is not defined. Nothing to do. Exiting.");
        return;

@@ -105,7 +105,7 @@ module test;
     function void report_phase();
       $display("%0t: %0s:  report", $time, get_full_name());
     endfunction
-    task run_phase();
+    task run_phase(uvm_phase_schedule phase);
       $display("%0t: %0s:  start run phase", $time, get_full_name());
       #delay;
       $display("%0t: %0s:  end run phase", $time, get_full_name());
@@ -140,7 +140,7 @@ module test;
     function void report_phase();
       $display("%0t: %0s:  report", $time, get_full_name());
     endfunction
-    task run_phase();
+    task run_phase(uvm_phase_schedule phase);
       $display("%0t: %0s:  start run phase", $time, get_full_name());
       #delay;
       $display("%0t: %0s:  end run phase", $time, get_full_name());
@@ -174,7 +174,7 @@ module test;
     function void report_phase();
       $display("%0t: %0s:  report", $time, get_full_name());
     endfunction
-    task run_phase();
+    task run_phase(uvm_phase_schedule phase);
       $display("%0t: %0s:  start run phase", $time, get_full_name());
       #500;
       $display("%0t: %0s:  end run phase", $time, get_full_name());

@@ -119,7 +119,7 @@ class xbus_env extends uvm_env;
   endtask : update_vif_enables
 
   // implement run_phase task
-  task run_phase;
+  task run_phase(uvm_phase_schedule phase);
     fork
       update_vif_enables();
     join

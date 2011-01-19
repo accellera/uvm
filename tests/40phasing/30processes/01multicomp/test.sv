@@ -33,7 +33,7 @@ class passive_comp extends uvm_component;
     set_phase_domain("uvm");
   endfunction
 
-  task main_phase;
+  task main_phase(uvm_phase_schedule phase);
     fork
       doit;
     join_none
@@ -56,12 +56,12 @@ class active_comp extends uvm_component;
     set_phase_domain("uvm");
   endfunction
 
-  task main_phase;
+  task main_phase(uvm_phase_schedule phase);
     started = 1;
     #105;
     ended = 1;
   endtask
-  task post_main_phase;
+  task post_main_phase(uvm_phase_schedule phase);
     post_started = 1;
     #105;
     post_ended = 1;

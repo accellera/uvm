@@ -36,7 +36,7 @@
 `define uvm_builtin_task_phase(PHASE) \
         class uvm_``PHASE``_phase extends uvm_task_phase(`"PHASE`"); \
           task exec_task(uvm_component comp, uvm_phase_schedule phase); \
-            comp.``PHASE``_phase(); \
+            comp.``PHASE``_phase(phase); \
           endtask \
           static uvm_``PHASE``_phase m_inst = get(); \
           static function uvm_``PHASE``_phase get(); \

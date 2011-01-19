@@ -37,7 +37,7 @@ class consumer #(type T=packet) extends uvm_component;
     `uvm_field_int(count,UVM_ALL_ON + UVM_READONLY + UVM_DEC)
   `uvm_component_utils_end
 
-  task run_phase ();
+  task run_phase(uvm_phase_schedule phase);
     T p;
     while(out.size()) begin
       out.get(p);

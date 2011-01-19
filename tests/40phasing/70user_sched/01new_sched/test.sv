@@ -50,7 +50,7 @@
      task exec_task(uvm_component comp, uvm_phase_schedule phase); \
        T mycomp; \
        if($cast(mycomp, comp)) begin \
-         mycomp.``PHASE ; \
+         mycomp.``PHASE(uvm_phase_schedule phase) ; \
        end \
      endtask \
      function new(string name); \
@@ -73,9 +73,9 @@ package mypkg;
   // defining the schedule. When SV supports interface classes,
   // this would be an interface class.
   virtual class my_component;
-    pure virtual task myreset;
-    pure virtual task mymain;
-    pure virtual task myshutdown;
+    pure virtual task myreset(uvm_phase_schedule phase);
+    pure virtual task mymain(uvm_phase_schedule phase);
+    pure virtual task myshutdown(uvm_phase_schedule phase);
   endclass
 
   // Create the paramterized class definitions for:
@@ -182,19 +182,19 @@ module test;
       add_phase_schedule(my_sched, domain_name);
     endfunction
 
-    task myreset;
+    task myreset(uvm_phase_schedule phase);
       start_reset = $time;
       `uvm_info("RST", "IN MY RESET", UVM_NONE)
       #30 `uvm_info("RST", "END MY RESET", UVM_NONE)
       end_reset = $time;
     endtask
-    task mymain;
+    task mymain(uvm_phase_schedule phase);
       start_main = $time;
       `uvm_info("MAIN", "IN MY MAIN", UVM_NONE)
       #30 `uvm_info("MAIN", "END MY MAIN", UVM_NONE)
       end_main = $time;
     endtask
-    task myshutdown;
+    task myshutdown(uvm_phase_schedule phase);
       start_shutdown = $time;
       `uvm_info("SHTDWN", "IN MY SHUTDOWN", UVM_NONE)
       #30 `uvm_info("SHTDWN", "END MY SHUTDOWN", UVM_NONE)
@@ -222,19 +222,19 @@ module test;
       add_phase_schedule(my_sched, domain_name);
     endfunction
 
-    task myreset;
+    task myreset(uvm_phase_schedule phase);
       start_reset = $time;
       `uvm_info("RST", "IN MY RESET", UVM_NONE)
       #40 `uvm_info("RST", "END MY RESET", UVM_NONE)
       end_reset = $time;
     endtask
-    task mymain;
+    task mymain(uvm_phase_schedule phase);
       start_main = $time;
       `uvm_info("MAIN", "IN MY MAIN", UVM_NONE)
       #20 `uvm_info("MAIN", "END MY MAIN", UVM_NONE)
       end_main = $time;
     endtask
-    task myshutdown;
+    task myshutdown(uvm_phase_schedule phase);
       start_shutdown = $time;
       `uvm_info("SHTDWN", "IN MY SHUTDOWN", UVM_NONE)
       #40 `uvm_info("SHTDWN", "END MY SHUTDOWN", UVM_NONE)
@@ -251,7 +251,7 @@ module test;
       mc = new("mc", this);
       oc = new("oc", this);
     endfunction
-    task run_phase;
+    task run_phase(uvm_phase_schedule phase);
       `uvm_info("RUN", "In run", UVM_NONE)
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
 //Current global stop integration has an issue here... needs

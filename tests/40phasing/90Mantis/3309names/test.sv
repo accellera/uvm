@@ -99,8 +99,8 @@ class base extends uvm_test;
       check_the_phase("check", "report");
    endfunction
 
-   function void finalize_phase();
-      check_the_phase("report", "finalize");
+   function void final_phase();
+      check_the_phase("report", "final");
    endfunction
 endclass
 
@@ -131,8 +131,8 @@ class test extends base;
       super.start_of_simulation_phase();
    endfunction
    
-   task run_phase();
-      super.run_phase();
+   task run_phase(uvm_phase_schedule phase);
+      super.run_phase(phase);
    endtask
    
    function void extract_phase();
@@ -147,8 +147,8 @@ class test extends base;
       super.report_phase();
    endfunction
 
-   function void finalize_phase();
-      super.finalize_phase();
+   function void final_phase();
+      super.final_phase();
    endfunction
 endclass
 
@@ -162,8 +162,8 @@ begin
    begin
       test t;
       $cast(t, uvm_top.find("uvm_test_top"));
-      if (t.last_phase != "finalize") begin
-         `uvm_error("Test", $psprintf("Last phase was \"%s\" instead of \"finalize\".",
+      if (t.last_phase != "final") begin
+         `uvm_error("Test", $psprintf("Last phase was \"%s\" instead of \"final\".",
                                       t.last_phase));
       end
    end

@@ -19,9 +19,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UVM_SEQUENCE_ITEM_SVH
-`define UVM_SEQUENCE_ITEM_SVH
-
 typedef class uvm_sequence_base;
 typedef class uvm_sequencer_base;
 
@@ -552,4 +549,3 @@ bit        print_sequence_info = 0;
   endtask // wait_for_item_done
 
 endclass
-`endif 

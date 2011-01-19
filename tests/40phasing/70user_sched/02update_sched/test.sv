@@ -52,7 +52,7 @@
      task exec_task(uvm_component comp, uvm_phase_schedule phase); \
        T mycomp; \
        if($cast(mycomp, comp)) begin \
-         mycomp.``PHASE ; \
+         mycomp.``PHASE (uvm_phase_schedule phase); \
        end \
      endtask \
      function new(string name); \
@@ -75,7 +75,7 @@ package mypkg;
   // defining the schedule. When SV supports interface classes,
   // this would be an interface class.
   virtual class my_component;
-    pure virtual task my_cfg;
+    pure virtual task my_cfg(uvm_phase_schedule phase);
   endclass
 
   // Create the paramterized class definitions for:
@@ -117,25 +117,25 @@ module test;
       end
     endfunction
 
-    task reset_phase;
+    task reset_phase(uvm_phase_schedule phase);
       start_reset = $time;
       `uvm_info("RST", "IN RESET", UVM_NONE)
       #30 `uvm_info("RST", "END RESET", UVM_NONE)
       end_reset = $time;
     endtask
-    task pre_configure_phase;
+    task pre_configure_phase(uvm_phase_schedule phase);
       start_pre_configure = $time;
       `uvm_info("PRECFG", "IN PRECFG", UVM_NONE)
       #30 `uvm_info("PRECFG", "END PRECFG", UVM_NONE)
       end_pre_configure = $time;
     endtask
-    task my_cfg;
+    task my_cfg(uvm_phase_schedule phase);
       start_my_cfg = $time;
       `uvm_info("MYCFG", "IN MY CFG", UVM_NONE)
       #30 `uvm_info("MYCFG", "END MY CFG", UVM_NONE)
       end_my_cfg = $time;
     endtask
-    task configure_phase;
+    task configure_phase(uvm_phase_schedule phase);
       start_configure = $time;
       `uvm_info("CFG", "IN CONFIGURE", UVM_NONE)
       #30 `uvm_info("CFG", "END CONFIGURE", UVM_NONE)
@@ -153,19 +153,19 @@ module test;
       set_phase_domain("uvm");
     endfunction
 
-    task reset_phase;
+    task reset_phase(uvm_phase_schedule phase);
       start_reset = $time;
       `uvm_info("RST", "IN RESET", UVM_NONE)
       #40 `uvm_info("RST", "END RESET", UVM_NONE)
       end_reset = $time;
     endtask
-    task pre_configure_phase;
+    task pre_configure_phase(uvm_phase_schedule phase);
       start_pre_configure = $time;
       `uvm_info("PRECFG", "IN PRECFG", UVM_NONE)
       #20 `uvm_info("PRECFG", "END PRECFG", UVM_NONE)
       end_pre_configure = $time;
     endtask
-    task configure_phase;
+    task configure_phase(uvm_phase_schedule phase);
       start_configure = $time;
       `uvm_info("CFG", "IN CONFIGURE", UVM_NONE)
       #40 `uvm_info("CFG", "END CONFIGURE", UVM_NONE)
@@ -182,7 +182,7 @@ module test;
       mc = new("mc", this);
       oc = new("oc", this);
     endfunction
-    task run_phase;
+    task run_phase(uvm_phase_schedule phase);
       `uvm_info("RUN", "In run", UVM_NONE)
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
 //Current global stop integration has an issue here... needs

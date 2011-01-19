@@ -9,17 +9,17 @@ class comp1 extends uvm_component;
       super.new(name, parent);
    endfunction
 
-   task main_phase();
+   task main_phase(uvm_phase_schedule phase);
       `uvm_info("comp1", "main thread started...", UVM_LOW);
       #5000;
       `uvm_info("comp1", "main thread completed...", UVM_LOW);
    endtask
 
-   virtual task run_phase();
+   virtual task run_phase(uvm_phase_schedule phase);
       enable_stop_interrupt = 1;
       `uvm_info("comp1", "run phase started...", UVM_LOW);
       fork
-         main_phase();
+         main_phase(phase);
       join_none
       #100;
       `uvm_info("comp1", "run phase ended...", UVM_LOW);

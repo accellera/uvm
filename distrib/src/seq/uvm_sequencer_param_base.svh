@@ -262,10 +262,10 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
       return;
     end
 
-    if(uvm_config_seq::exists(this, "", "run_ph", 0) && 
-       m_default_sequences.exists(uvm_run_ph))
+    if (uvm_config_db #(uvm_sequence_base)::exists(this, "", "run_ph", 0) || 
+        uvm_config_db #(uvm_object_wrapper)::exists(this, "", "run_ph", 0))
     begin
-      `uvm_warning("MULDEFSEQ", "A default sequence has been set via the \"default_sequence\" configuration option and the set_default_seq() method. The \"default_sequence\" configuration option is ignored.")
+      `uvm_warning("MULDEFSEQ", "A default phase sequence has been set in addition to the deprecated \"default_sequence\" configuration option. The \"default_sequence\" configuration option is ignored.")
       return;
     end
 
@@ -308,8 +308,8 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   //
   // Do not call directly except by overrides in derived classes
 
-  task run_phase();
-    super.run_phase();
+  task run_phase(uvm_phase_schedule phase);
+    super.run_phase(phase);
     start_default_sequence();
   endtask // run
 

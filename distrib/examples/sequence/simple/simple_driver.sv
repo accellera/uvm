@@ -41,7 +41,7 @@ class simple_driver extends uvm_driver #(simple_item);
     super.new(name, parent);
   endfunction : new
 
-  task run_phase ();
+  task run_phase(uvm_phase_schedule phase);
     while(1) begin
       #10;
       seq_item_port.get_next_item(req);

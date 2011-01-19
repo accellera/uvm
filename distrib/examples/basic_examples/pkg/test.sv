@@ -32,7 +32,7 @@ module test;
       super.new(name, parent);
     endfunction
 
-    task run_phase();
+    task run_phase(uvm_phase_schedule phase);
       $display("%0t: %m: start run", $time);
       #10 $display("%0t: %s HI", $time, get_full_name());
     endtask
@@ -71,7 +71,7 @@ module test;
       a = new[5]; for(int i=0; i<5;++i) a[i] = i*i;
     endfunction
 
-    task run_phase();
+    task run_phase(uvm_phase_schedule phase);
       #10 $display("%0t: %s HI", $time, get_full_name());
     endtask
 

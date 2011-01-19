@@ -46,7 +46,7 @@ class myseqr extends uvm_sequencer;
   endfunction
   `uvm_component_utils(myseqr)
 
-  task main_phase;
+  task main_phase(uvm_phase_schedule phase);
     `uvm_info("MAIN","In main!!!", UVM_NONE)
     #100;
     `uvm_info("MAIN","Exiting main!!!", UVM_NONE)
@@ -67,8 +67,8 @@ class test extends uvm_test;
       uvm_phase_schedule domain, cfg, main;
       seqr = new("seqr", this);
       domain = seqr.find_phase_schedule("uvm_pkg::uvm","*");
-      seqr.set_phase_seq(uvm_configure_ph, myseq::type_id::get());
-      seqr.set_phase_seq(uvm_main_ph, myseq::type_id::get());
+      uvm_config_db #(uvm_object_wrapper)::set(this, "seqr", "configure_ph", myseq::type_id::get());
+      uvm_config_db #(uvm_object_wrapper)::set(this, "seqr", "main_ph", myseq::type_id::get());
    endfunction
    
    function void report_phase();

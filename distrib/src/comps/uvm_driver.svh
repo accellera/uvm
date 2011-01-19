@@ -20,6 +20,8 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
+typedef class uvm_sequence_item;
+
 //------------------------------------------------------------------------------
 //
 // CLASS: uvm_driver #(REQ,RSP)

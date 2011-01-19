@@ -47,7 +47,7 @@ module test;
       end
       `uvm_info("BUILD", "Ending Build", UVM_NONE)
     endfunction
-    task reset_phase;
+    task reset_phase(uvm_phase_schedule phase);
       phase_run[uvm_reset_ph] = 1;
       `uvm_info("RESET", "Starting Reset", UVM_NONE)
       if($time != 0)  begin
@@ -57,7 +57,7 @@ module test;
       #100;
       `uvm_info("RESET", "Ending Reset", UVM_NONE)
     endtask
-    task main_phase;
+    task main_phase(uvm_phase_schedule phase);
       phase_run[uvm_main_ph] = 1;
       `uvm_info("MAIN", "Starting Main", UVM_NONE)
       // Even though there is not configure phase, the test is holding
@@ -69,7 +69,7 @@ module test;
       #100;
       `uvm_info("MAIN", "Ending Main", UVM_NONE)
     endtask
-    task run_phase;
+    task run_phase(uvm_phase_schedule phase);
       phase_run[uvm_run_ph] = 1;
       `uvm_info("RUN", "Starting Run", UVM_NONE)
       if($time != 0)  begin
@@ -110,7 +110,7 @@ module test;
     endfunction
 
     // Do objections to phases proceeding
-    task run_phase;
+    task run_phase(uvm_phase_schedule phase);
       uvm_phase_schedule uvm_p = find_phase_schedule("*", "uvm");
       uvm_phase_schedule reset_p = uvm_p.find_schedule("reset");
       uvm_phase_schedule config_p = uvm_p.find_schedule("configure");

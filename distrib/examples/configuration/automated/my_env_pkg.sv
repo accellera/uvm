@@ -47,10 +47,6 @@ package my_env_pkg;
       inst2 = new("inst2", this);
     endfunction
 
-    task run_phase;
-      begin end
-    endtask
-  
     `uvm_component_utils_begin(my_env)
       `uvm_field_int(debug, UVM_DEFAULT)
     `uvm_component_utils_end

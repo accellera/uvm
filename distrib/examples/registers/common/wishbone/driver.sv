@@ -55,7 +55,7 @@ class wb_driver extends uvm_driver #(wb_cycle);
       this.sigs = sigs;
    endfunction
 
-   extern virtual task run_phase();
+   extern virtual task run_phase(uvm_phase_schedule phase);
 
    extern protected virtual task read(input  bit [63:0] addr,
                                       output bit [63:0] data,
@@ -80,7 +80,7 @@ class wb_driver extends uvm_driver #(wb_cycle);
 endclass: wb_driver
 
 
-task wb_driver::run_phase();
+task wb_driver::run_phase(uvm_phase_schedule phase);
    if (!get_config_int("max_n_wss", this.m_max_n_wss)) begin
       this.m_max_n_wss = 10;
    end

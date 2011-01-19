@@ -106,7 +106,7 @@ class driver extends uvm_component;
                                                     "pif", pif));
   endfunction
 
-  task run_phase;
+  task run_phase(uvm_phase_schedule phase);
     forever begin
       @(posedge pif.clk);
       `uvm_info("driver", "posedge clk", UVM_NONE);
@@ -129,7 +129,7 @@ class env extends uvm_env;
     d = new("driver", this);
   endfunction
 
-  task run_phase();
+  task run_phase(uvm_phase_schedule phase);
     #100 global_stop_request();
   endtask
 

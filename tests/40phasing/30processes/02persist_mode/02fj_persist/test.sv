@@ -75,58 +75,58 @@ class base extends uvm_component;
       check_the_phase("end_of_elaboration", "start_of_simulation");
    endfunction
    
-   task run_phase();
+   task run_phase(uvm_phase_schedule phase);
       check_the_phase_t("start_of_simulation", "run");
    endtask
    
-   task pre_reset_phase();
+   task pre_reset_phase(uvm_phase_schedule phase);
       check_the_phase_t("start_of_simulation", "pre_reset");
       // Make sure the last phase is not "run"
       #50;
       last_phase = "pre_reset";
    endtask
    
-   task reset_phase();
+   task reset_phase(uvm_phase_schedule phase);
       check_the_phase_t("pre_reset", "reset");
    endtask
    
-   task post_reset_phase();
+   task post_reset_phase(uvm_phase_schedule phase);
       check_the_phase_t("reset", "post_reset");
    endtask
    
-   task pre_configure_phase();
+   task pre_configure_phase(uvm_phase_schedule phase);
       check_the_phase_t("post_reset", "pre_configure");
    endtask
    
-   task configure_phase();
+   task configure_phase(uvm_phase_schedule phase);
       check_the_phase_t("pre_configure", "configure");
    endtask
    
-   task post_configure_phase();
+   task post_configure_phase(uvm_phase_schedule phase);
       check_the_phase_t("configure", "post_configure");
    endtask
    
-   task pre_main_phase();
+   task pre_main_phase(uvm_phase_schedule phase);
       check_the_phase_t("post_configure", "pre_main");
    endtask
    
-   task main_phase();
+   task main_phase(uvm_phase_schedule phase);
       check_the_phase_t("pre_main", "main");
    endtask
    
-   task post_main_phase();
+   task post_main_phase(uvm_phase_schedule phase);
       check_the_phase_t("main", "post_main");
    endtask
    
-   task pre_shutdown_phase();
+   task pre_shutdown_phase(uvm_phase_schedule phase);
       check_the_phase_t("post_main", "pre_shutdown");
    endtask
    
-   task shutdown_phase();
+   task shutdown_phase(uvm_phase_schedule phase);
       check_the_phase_t("pre_shutdown", "shutdown");
    endtask
    
-   task post_shutdown_phase();
+   task post_shutdown_phase(uvm_phase_schedule phase);
       check_the_phase_t("shutdown", "post_shutdown");
    endtask
    
@@ -142,8 +142,8 @@ class base extends uvm_component;
       check_the_phase("check", "report");
    endfunction
    
-   function void finalize_phase();
-      check_the_phase("report", "finalize");
+   function void final_phase();
+      check_the_phase("report", "final");
    endfunction
    
 endclass 
@@ -155,16 +155,20 @@ class sub extends base;
       super.new(name, parent);    
    endfunction
 
-     task run_phase();
-       set_thread_mode(UVM_PHASE_PERSISTENT);  
-       n_ph++; //don't call the check_the_phase because it would create a race
-	fork begin
-	   `uvm_info("RUN", "HELLO",UVM_NONE);
-	   #100 `uvm_info("RUN","WORLD",UVM_NONE); 
+     process pid;
+
+     function void phase_started(uvm_phase_schedule phase);
+       if (phase.get_name() == "run") begin
+        n_ph++; //don't call the check_the_phase because it would create a race
+        fork begin
+           pid = process::self();
+           `uvm_info("RUN", "HELLO",UVM_NONE);
+           #100 `uvm_info("RUN","WORLD",UVM_NONE); 
            sub_run_thread_completed = 1;
-	   end
-	   join_none
-     endtask  
+           end
+         join_none
+       end
+     endfunction
 endclass
 
 bit test_run_thread_completed = 0;
@@ -173,23 +177,25 @@ class test extends base;
      sub sub_inst;
    function new(string name = "test1", uvm_component parent = null);
       super.new(name, parent);
-      set_default_thread_mode(UVM_PHASE_PERSISTENT);  
    endfunction
    function void build_phase();
       super.build_phase();    
       sub_inst = sub::type_id::create("sub_inst", this);
    endfunction
-   task run_phase();
+
+     function void phase_started(uvm_phase_schedule phase);
+       if (phase.get_name() == "run") begin
        n_ph++; //don't call the check_the_phase because it would create a race
-	fork begin
-	   `uvm_info("RUN", "HELLO",UVM_NONE);
-	   #150 `uvm_info("RUN","WORLD",UVM_NONE); 
+        fork begin
+           `uvm_info("RUN", "HELLO",UVM_NONE);
+           #150 `uvm_info("RUN","WORLD",UVM_NONE); 
            test_run_thread_completed = 1;
-	   end
-	   join_none
-   endtask  
+        end
+        join_none
+       end
+   endfunction  
 endclass
-	 
+         
 initial
 begin
    uvm_top.finish_on_completion = 0;
@@ -200,8 +206,8 @@ begin
    begin
       test t;
       $cast(t, uvm_top.find("uvm_test_top"));
-      if (t.last_phase != "finalize") begin
-         `uvm_error("Test", $psprintf("Last phase was \"%s\" instead of \"finalize\".",
+      if (t.last_phase != "final") begin
+         `uvm_error("Test", $psprintf("Last phase was \"%s\" instead of \"final\".",
                                       t.last_phase));
       end
    end
