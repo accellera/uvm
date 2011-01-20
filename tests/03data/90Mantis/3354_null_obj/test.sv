@@ -42,10 +42,12 @@ class my_class extends uvm_sequence_item;
 
   rand int a;
   base_class b;
+  base_class c;
 
   `uvm_object_utils_begin(my_class)
     `uvm_field_int(a, UVM_ALL_ON|UVM_DEC)
     `uvm_field_object(b, UVM_ALL_ON|UVM_DEEP)
+    `uvm_field_object(c, UVM_ALL_ON|UVM_DEEP)
   `uvm_object_utils_end
 
   constraint valid {
@@ -55,6 +57,7 @@ class my_class extends uvm_sequence_item;
   function new(string name="my_class");
     super.new(name);
     b = null;
+    c = new("c");
   endfunction
 
 endclass
@@ -65,20 +68,37 @@ class test extends uvm_test;
   `uvm_component_utils(test)
 
   task run;
-    my_class class_a, class_b;
+    my_class a, b, c;
+    byte unsigned bytes[];
 
-    class_a = new("class_a");
-    class_b = new("class_b");
+    a = new("a");
+    b = new("b");
 
-    assert(class_a.randomize());
+    assert(a.randomize());
 
-    class_b.copy(class_a);
+    b.copy(a);
 
-    class_a.print();
-    class_b.print();
+    a.print();
+    b.print();
 
-    if (!class_a.compare(class_b)) begin
+    if (!a.compare(b)) begin
        `uvm_error("EPILOG", "Object did not copy or compare");
+    end
+
+    uvm_default_packer.use_metadata = 1;
+
+    assert(a.randomize());
+    void'(a.pack_bytes(bytes));
+
+    c = new("c");
+
+    void'(c.unpack_bytes(bytes));
+
+    a.print();
+    c.print();
+
+    if (!a.compare(c)) begin
+       `uvm_error("EPILOG", "Object did not pack/unpack or compare");
     end
 
     global_stop_request();
