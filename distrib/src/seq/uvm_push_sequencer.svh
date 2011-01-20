@@ -62,12 +62,12 @@ class uvm_push_sequencer #(type REQ = uvm_sequence_item,
   // <uvm_push_driver #(REQ,RSP)>, which would be responsible for
   // executing the item.
 
-  task run_phase();
+  task run_phase(uvm_phase_schedule phase);
     REQ t;
     int selected_sequence;
 
     fork
-      super.run_phase();
+      super.run_phase(phase);
       forever
         begin
           do 
