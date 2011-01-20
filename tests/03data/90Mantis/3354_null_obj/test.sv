@@ -38,6 +38,7 @@ class base_class extends uvm_sequence_item;
 
 endclass
 
+
 class my_class extends uvm_sequence_item;
 
   rand int a;
@@ -91,6 +92,10 @@ class test extends uvm_test;
     void'(a.pack_bytes(bytes));
 
     c = new("c");
+`ifdef ALLOC_SUBOBJ
+    // Should data be unpacked in a newly allocated sub-object??
+    c.c = null;
+`endif
 
     void'(c.unpack_bytes(bytes));
 
