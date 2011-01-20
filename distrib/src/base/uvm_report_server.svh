@@ -367,7 +367,7 @@ class uvm_report_server extends uvm_object;
     string line_str;
     
     sv = uvm_severity_type'(severity);
-    $swrite(time_str, "%0t", $time);
+    $swrite(time_str, "%0t", $realtime);
  
     case(1)
       (name == "" && filename == ""):

@@ -61,22 +61,22 @@ module test;
     function new (string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    function void build();
+    function void build_phase();
       $display("%0t: %0s:  build", $time, get_full_name());
     endfunction
-    function void end_of_elaboration();
+    function void end_of_elaboration_phase();
       $display("%0t: %0s:  end_of_elaboration", $time, get_full_name());
     endfunction
-    function void start_of_simulation();
+    function void start_of_simulation_phase();
       $display("%0t: %0s:  start_of_simulation", $time, get_full_name());
     endfunction
-    function void extract();
+    function void extract_phase();
       $display("%0t: %0s:  extract", $time, get_full_name());
     endfunction
-    function void check();
+    function void check_phase();
       $display("%0t: %0s:  check", $time, get_full_name());
     endfunction
-    function void report();
+    function void report_phase();
       $display("%0t: %0s:  report", $time, get_full_name());
     endfunction
   endclass
@@ -87,25 +87,25 @@ module test;
     function new (string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    function void build();
+    function void build_phase();
       $display("%0t: %0s:  build", $time, get_full_name());
     endfunction
-    function void end_of_elaboration();
+    function void end_of_elaboration_phase();
       $display("%0t: %0s:  end_of_elaboration", $time, get_full_name());
     endfunction
-    function void start_of_simulation();
+    function void start_of_simulation_phase();
       $display("%0t: %0s:  start_of_simulation", $time, get_full_name());
     endfunction
-    function void extract();
+    function void extract_phase();
       $display("%0t: %0s:  extract", $time, get_full_name());
     endfunction
-    function void check();
+    function void check_phase();
       $display("%0t: %0s:  check", $time, get_full_name());
     endfunction
-    function void report();
+    function void report_phase();
       $display("%0t: %0s:  report", $time, get_full_name());
     endfunction
-    task run();
+    task run_phase(uvm_phase_schedule phase);
       $display("%0t: %0s:  start run phase", $time, get_full_name());
       #delay;
       $display("%0t: %0s:  end run phase", $time, get_full_name());
@@ -122,25 +122,25 @@ module test;
       b1 = new("b1", this);
       d1 = new("d1", this);
     endfunction
-    function void build();
+    function void build_phase();
       $display("%0t: %0s:  build", $time, get_full_name());
     endfunction
-    function void end_of_elaboration();
+    function void end_of_elaboration_phase();
       $display("%0t: %0s:  end_of_elaboration", $time, get_full_name());
     endfunction
-    function void start_of_simulation();
+    function void start_of_simulation_phase();
       $display("%0t: %0s:  start_of_simulation", $time, get_full_name());
     endfunction
-    function void extract();
+    function void extract_phase();
       $display("%0t: %0s:  extract", $time, get_full_name());
     endfunction
-    function void check();
+    function void check_phase();
       $display("%0t: %0s:  check", $time, get_full_name());
     endfunction
-    function void report();
+    function void report_phase();
       $display("%0t: %0s:  report", $time, get_full_name());
     endfunction
-    task run();
+    task run_phase(uvm_phase_schedule phase);
       $display("%0t: %0s:  start run phase", $time, get_full_name());
       #delay;
       $display("%0t: %0s:  end run phase", $time, get_full_name());
@@ -156,25 +156,25 @@ module test;
       a1 = new("a1", this);
       a2 = new("a2", this);
     endfunction
-    function void build();
+    function void build_phase();
       $display("%0t: %0s:  build", $time, get_full_name());
     endfunction
-    function void end_of_elaboration();
+    function void end_of_elaboration_phase();
       $display("%0t: %0s:  end_of_elaboration", $time, get_full_name());
     endfunction
-    function void start_of_simulation();
+    function void start_of_simulation_phase();
       $display("%0t: %0s:  start_of_simulation", $time, get_full_name());
     endfunction
-    function void extract();
+    function void extract_phase();
       $display("%0t: %0s:  extract", $time, get_full_name());
     endfunction
-    function void check();
+    function void check_phase();
       $display("%0t: %0s:  check", $time, get_full_name());
     endfunction
-    function void report();
+    function void report_phase();
       $display("%0t: %0s:  report", $time, get_full_name());
     endfunction
-    task run();
+    task run_phase(uvm_phase_schedule phase);
       $display("%0t: %0s:  start run phase", $time, get_full_name());
       #500;
       $display("%0t: %0s:  end run phase", $time, get_full_name());

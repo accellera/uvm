@@ -7,7 +7,7 @@
 
 #define ARGV_STACK_PTR_SIZE 32
 
-extern char *dpi_get_next_arg_c ()
+extern const char *dpi_get_next_arg_c ()
 {
   s_vpi_vlog_info info;
   static char*** argv_stack = NULL;
@@ -89,8 +89,8 @@ extern regex_t* dpi_regcomp (char* pattern)
   int status = regcomp(re, pattern, REG_NOSUB|REG_EXTENDED);
   if(status)
   {
-    vpi_printf("Unable to compile regex: %s\n", pattern);
-    vpi_printf("Element 0 is: %c\n", pattern[0]);
+    vpi_printf((char *)"Unable to compile regex: %s\n", pattern);
+    vpi_printf((char *)"Element 0 is: %c\n", pattern[0]);
     return NULL;
   }
   return re;

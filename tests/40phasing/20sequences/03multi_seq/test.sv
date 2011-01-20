@@ -39,7 +39,11 @@ import uvm_pkg::*;
 
 typedef class myseqr;
 class wrapper;
-  int array[time];
+  int array[time]
+  `ifndef INCA
+  = '{default:0}
+  `endif
+  ;
 endclass
 
 wrapper seqr_seqs[myseqr];
@@ -122,7 +126,11 @@ class myseqr extends uvm_sequencer;
   endfunction
   `uvm_component_utils(myseqr)
 
-  task main;
+  task run_phase(uvm_phase_schedule phase);
+    set_thread_mode(UVM_PHASE_IMPLICIT_OBJECTION);
+  endtask
+
+  task main_phase(uvm_phase_schedule phase);
     `uvm_info("MAIN","In main!!!", UVM_NONE)
     #100;
     `uvm_info("MAIN","Exit main!!!", UVM_NONE)
@@ -138,19 +146,21 @@ class test extends uvm_test;
 
    `uvm_component_utils(test)
 
-   function void build();
+   typedef uvm_config_db #(uvm_object_wrapper) phase_rsrc;
+
+   function void build_phase();
       uvm_phase_schedule domain, cfg, main;
       seqr1 = new("seqr1", this);
       seqr2 = new("seqr2", this);
-      seqr1.set_phase_seq(uvm_configure_ph, my_config_seq::type_id::get());
-      seqr1.set_phase_seq(uvm_main_ph, my_main_seq::type_id::get());
-      seqr1.set_phase_seq(uvm_shutdown_ph, my_shutdown_seq::type_id::get());
-      seqr2.set_phase_seq(uvm_pre_configure_ph, my_preconfig_seq::type_id::get());
-      seqr2.set_phase_seq(uvm_pre_main_ph, my_premain_seq::type_id::get());
-      seqr2.set_phase_seq(uvm_shutdown_ph, my_shutdown_seq::type_id::get());
+      phase_rsrc::set(this, "seqr1", "configure_ph",     my_config_seq::type_id::get());
+      phase_rsrc::set(this, "seqr1", "main_ph",          my_main_seq::type_id::get());
+      phase_rsrc::set(this, "seqr1", "shutdown_ph",      my_shutdown_seq::type_id::get());
+      phase_rsrc::set(this, "seqr2", "pre_configure_ph", my_preconfig_seq::type_id::get());
+      phase_rsrc::set(this, "seqr2", "pre_main_ph",      my_premain_seq::type_id::get());
+      phase_rsrc::set(this, "seqr2", "shutdown_ph",      my_shutdown_seq::type_id::get());
    endfunction
    
-   function void report();
+   function void report_phase();
      wrapper w;
 
      if(seqr_seqs.num() != 2) begin

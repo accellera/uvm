@@ -460,8 +460,8 @@ virtual class uvm_object extends uvm_void;
 
   // Function: compare
   //
-  // The compare method deep compares this data object with the object provided
-  // in the ~rhs~ (right-hand side) argument.
+  // Deep compares members of this data object with those of the object provided
+  // in the ~rhs~ (right-hand side) argument, returning 1 on a match, 0 othewise.
   //
   // The compare method is not virtual and should not be overloaded in derived
   // classes. To compare the fields of a derived class, that class should
@@ -481,7 +481,8 @@ virtual class uvm_object extends uvm_void;
   //
   // The do_compare method is the user-definable hook called by the <compare>
   // method. A derived class should override this method to include its fields
-  // in a compare operation.
+  // in a compare operation. It should return 1 if the comparison succeeds, 0
+  // otherwise.
   //
   // A typical implementation is as follows:
   //
@@ -889,15 +890,22 @@ function string uvm_object::sprint(uvm_printer printer=null);
   if(printer==null)
     printer = uvm_default_printer;
 
-  if(printer.istop()) begin
-    printer.print_object(get_name(), this);
-    return printer.emit();
-  end
-  else begin
+  // not at top-level, must be recursing into sub-object
+  if(!printer.istop()) begin
     m_sc.printer = printer;
     m_field_automation(null, UVM_PRINT, "");
     do_print(printer);
+    return "";
   end
+  
+  printer.print_object(get_name(), this);
+  // backward compat with sprint knob: if used, 
+  //    print that, do not call emit()
+  if (printer.knobs.sprint != "")
+    return printer.knobs.sprint;
+
+  return printer.emit();
+
 endfunction
 
 

@@ -38,7 +38,7 @@ module test;
       super.new(name,parent);
       set_phase_schedule("uvm");
     endfunction
-    function void build;
+    function void build_phase;
       phase_run[uvm_build_ph] = 1;
       `uvm_info("BUILD", "Starting Build", UVM_NONE)
       if($time != 0)  begin
@@ -47,7 +47,7 @@ module test;
       end
       `uvm_info("BUILD", "Ending Build", UVM_NONE)
     endfunction
-    task reset;
+    task reset_phase(uvm_phase_schedule phase);
       phase_run[uvm_reset_ph] = 1;
       `uvm_info("RESET", "Starting Reset", UVM_NONE)
       if($time != 0)  begin
@@ -57,7 +57,7 @@ module test;
       if(dodelay) #thedelay;
       `uvm_info("RESET", "Ending Reset", UVM_NONE)
     endtask
-    task main;
+    task main_phase(uvm_phase_schedule phase);
       phase_run[uvm_main_ph] = 1;
       `uvm_info("MAIN", "Starting Main", UVM_NONE)
       if($time != thedelay)  begin
@@ -67,7 +67,7 @@ module test;
       if(dodelay) #thedelay;
       `uvm_info("MAIN", "Ending Main", UVM_NONE)
     endtask
-    task shutdown;
+    task shutdown_phase(uvm_phase_schedule phase);
       phase_run[uvm_shutdown_ph] = 1;
       `uvm_info("SHUTDOWN", "Starting Shutdown", UVM_NONE)
       if($time != (2*thedelay))  begin
@@ -77,7 +77,7 @@ module test;
       if(dodelay) #thedelay;
       `uvm_info("SHUTDOWN", "Ending Shutdown", UVM_NONE)
     endtask
-    task run;
+    task run_phase(uvm_phase_schedule phase);
       phase_run[uvm_run_ph] = 1;
       `uvm_info("RUN", "Starting Run", UVM_NONE)
       if($time != 0)  begin
@@ -87,7 +87,7 @@ module test;
       if(dodelay) #(5*thedelay);
       `uvm_info("RUN", "Ending Run", UVM_NONE)
     endtask
-    function void extract;
+    function void extract_phase;
       phase_run[uvm_extract_ph] = 1;
       `uvm_info("EXTRACT", "Starting Extract", UVM_NONE)
       if($time != maxdelay)  begin
@@ -115,7 +115,7 @@ module test;
       l1.set_phase_domain("domain1");
       l2.set_phase_domain("domain2");
     endfunction
-    function void report();
+    function void report_phase();
       phase_run[uvm_report_ph] = 1;
       if(phase_run.num() != 7) begin
         failed = 1;

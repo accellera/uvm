@@ -30,15 +30,15 @@ class B extends uvm_component;
   function new(string name, uvm_component parent);
     super.new(name, parent);
   endfunction
-  function void build();
-    super.build();
+  function void build_phase();
+    super.build_phase();
 
     void'(get_config_int("debug", debug));
     set_config_int("u1", "v", 0);
 
     $display("%s: In Build: debug = %0d", get_full_name(), debug);
 
-    u1 = new("u1", this); u1.build();
+    u1 = new("u1", this);
   endfunction
 
   function string get_type_name();
@@ -47,7 +47,7 @@ class B extends uvm_component;
   function void do_print(uvm_printer printer);
     printer.print_field("debug", debug, 1);
   endfunction
-  task run;
+  task run_phase(uvm_phase_schedule phase);
     begin end
   endtask
 endclass

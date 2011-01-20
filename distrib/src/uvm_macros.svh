@@ -30,7 +30,11 @@
 `define UVM_USE_P_FORMAT
 `define UVM_USE_FILE_LINE
 `define UVM_DA_TO_QUEUE(Q,DA) Q=DA;
-`undef  UVM_USE_PROCESS_CONTAINER
+`ifndef UVM_ENABLE_NEW_SEMANTIC
+ `define UVM_USE_OVM_RUN_SEMANTIC
+`endif 
+//`undef  UVM_NO_DPI
+//`undef  UVM_USE_PROCESS_CONTAINER
 
 //
 // Any vendor specific defines go here.
@@ -46,6 +50,7 @@
 `endif
 
 `ifdef QUESTA
+//`define UVM_USE_BITSTREAM_OPS
 `endif
 
 `ifdef INCA
@@ -61,6 +66,9 @@
   `endif
   `ifndef INCA_UVM_USE_FILE_LINE
     `undef  UVM_USE_FILE_LINE
+  `endif
+  `ifndef INCA_UVM_USE_FPC
+    `undef UVM_USE_FPC
   `endif
   `define UVM_USE_PROCESS_CONTAINER
   `undef  UVM_DA_TO_QUEUE

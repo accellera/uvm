@@ -161,6 +161,23 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // command, the contents of the data array shall be overwritten by the
    // target (honoring the semantics of the byte enable) but by no other
    // component.
+   //
+   // Unlike the OSCI TLM-2.0 LRM, there is no requirement on the endiannes
+   // of multi-byte data in the generic payload to match the host endianness.
+   // Unlike C++, it is not possible in SystemVerilog to cast an arbitrary
+   // data type as an array of bytes. Therefore, matching the host
+   // endianness is not necessary. In constrast, arbitrary data types may be
+   // converted to and from a byte array using the streaming operator and
+   // <uvm_object> objects may be further converted using the
+   // <uvm_object::pack_bytes()> and <uvm_object::unpack_bytes()> methods.
+   // All that is required is that a consistent mechanism is used to
+   // fill the payload data array and later extract data from it.
+   //
+   // Should a generic payload be transfered to/from a systemC model,
+   // it will be necessary for any multi-byte data in that generic payload
+   // to use/be interpreted using the host endianness.
+   // However, this process is currently outside the scope of this standard.
+   //
 
    rand byte unsigned             m_data[];
 
@@ -723,10 +740,6 @@ typedef uvm_tlm_generic_payload uvm_tlm_gp;
 
 
 //----------------------------------------------------------------------
-// Section: TLM extensions
-//----------------------------------------------------------------------
-
-//----------------------------------------------------------------------
 // Class: uvm_tlm_extension_base
 //
 // The class uvm_tlm_extension_base is the non-parameterized base class for
@@ -794,7 +807,7 @@ endclass
 //|   int ID;
 //|
 //|   `uvm_object_utils_begin(my_ID)
-//       `uvm_field_int(ID, UVM_ALL_ON)
+//|      `uvm_field_int(ID, UVM_ALL_ON)
 //|   `uvm_object_utils_end
 //|
 //|   function new(string name = "my_ID");

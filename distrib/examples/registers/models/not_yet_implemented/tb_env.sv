@@ -64,17 +64,18 @@ class tb_env extends uvm_env;
       super.new(name, parent);
    endfunction: new
 
-   virtual function void build();
+   virtual function void build_phase();
       regmodel = block_B::type_id::create("regmodel",,get_full_name());
       regmodel.build();
       regmodel.lock_model();
 
       bus = reg_agent#(dut)::type_id::create("bus", this);
-   endfunction: build
+   endfunction: build_phase
 
-   virtual function void connect();
+   virtual function void connect_phase();
       reg2rw_adapter reg2rw  = new("reg2rw");
       regmodel.default_map.set_sequencer(bus.sqr, reg2rw);
+      regmodel.default_map.set_auto_predict();
 
       // Use a user-defined front-door for unimplemented registers
       begin
@@ -93,10 +94,8 @@ class reg_R2_fd extends uvm_reg_frontdoor;
       $cast(R, rw_info.element);
       if (rw_info.kind == UVM_READ) rw_info.value[0] = R.get();
       
-      R.predict(rw_info.value[0], -1,
-                (rw_info.kind == UVM_READ) ? UVM_PREDICT_READ : UVM_PREDICT_WRITE,
-                rw_info.path,
-                rw_info.map);
+      R.do_predict(rw_info,
+              (rw_info.kind == UVM_READ)? UVM_PREDICT_READ : UVM_PREDICT_WRITE);
    endtask
 
    // Function: new

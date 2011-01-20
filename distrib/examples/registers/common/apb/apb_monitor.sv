@@ -46,7 +46,7 @@ class apb_monitor extends uvm_monitor;
       ap = new("ap", this);
    endfunction: new
 
-   virtual function void build();
+   virtual function void build_phase();
       apb_agent agent;
       if ($cast(agent, get_parent()) && agent != null) begin
          sigs = agent.vif;
@@ -60,8 +60,8 @@ class apb_monitor extends uvm_monitor;
       end
    endfunction
 
-   virtual protected task run();
-      super.run();
+   virtual protected task run_phase(uvm_phase_schedule phase);
+      super.run_phase(phase);
       forever begin
          apb_rw tr;
          
@@ -89,7 +89,7 @@ class apb_monitor extends uvm_monitor;
 
          ap.write(tr);
       end
-   endtask: run
+   endtask: run_phase
 
    virtual protected task trans_observed(apb_rw tr);
    endtask

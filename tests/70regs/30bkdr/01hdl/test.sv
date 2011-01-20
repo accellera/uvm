@@ -40,10 +40,10 @@ import uvm_pkg::*;
 
 typedef enum { READ, DEPOSIT, FORCE, RELEASE } op_e;
 
-task  op(op_e oper, string hdl, bit [7:0] wr_val=0, bit [7:0] exp_val, int lineno, time force_time=0);
+task automatic op(op_e oper, string hdl, bit [7:0] wr_val=0, bit [7:0] exp_val, int lineno, time force_time=0);
 
 
-  automatic bit [7:0] rd_val = 0;
+  bit [7:0] rd_val = 0;
 
   if (oper == DEPOSIT) begin
    if (!uvm_hdl_deposit(hdl,wr_val))
@@ -109,11 +109,11 @@ begin
    op(DEPOSIT, "dut.q[4]",    'h00, 'h00, `__LINE__);
    op(DEPOSIT, "dut.q[6]",    'h01, 'h01, `__LINE__);
 
-//`ifdef VCS
+`ifndef INCA
    op(DEPOSIT, "dut.q[6:4]",  'h02, 'h02, `__LINE__);
    op(READ,    "dut.q",           , 'h2C, `__LINE__);
    op(DEPOSIT, "dut.q[7:4]",  'h06, 'h06, `__LINE__);
-//`endif
+`endif
    
    #0;
    op(READ,    "dut.w",           , 'h6C, `__LINE__); // w is now q
@@ -123,7 +123,12 @@ begin
    op(DEPOSIT, "dut.q",       'hA5, 'hA5, `__LINE__); // deposit on 'dut.q'
 
    #0;
+   `ifdef QUESTA
+   // only bits of q that changed propagate to w
+   op(READ,    "dut.w",           , 'hB5, `__LINE__); // w is now q
+   `else
    op(READ,    "dut.w",           , 'hA5, `__LINE__); // w is now q
+   `endif
 
 
    #100; // d propagates to q,w
@@ -138,8 +143,6 @@ begin
 
    op(READ,    "dut.q",           , 'h3C, `__LINE__); // q and w still forced, not d's value (F0)
    op(READ,    "dut.w",           , 'hA5, `__LINE__);
-
-   //op(READ,    "dut.d",           , 'hF0, `__LINE__); // if uncommented, next two lines fail if use release_and_read
 
    op(RELEASE, "dut.q",           , 'h3C, `__LINE__); // q stays until reassigned, should be C3?
    op(RELEASE, "dut.w",           , 'h3C, `__LINE__); // w is re-evaluated, now q

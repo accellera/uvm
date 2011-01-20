@@ -20,8 +20,8 @@
 
 program top;
 
-import uvm_pkg::*;
 `include "uvm_macros.svh"
+import uvm_pkg::*;
 
 class test extends uvm_test;
 
@@ -32,7 +32,7 @@ class test extends uvm_test;
    endfunction
 
    virtual task run();
-      uvm_top.stop_request();
+      #10 uvm_top.stop_request();
    endtask
 
    virtual function void report();

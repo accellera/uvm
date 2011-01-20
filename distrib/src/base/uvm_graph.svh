@@ -30,15 +30,33 @@
 // It has no dependencies on any other UVM class and can be used wherever required.
 // Structure is node-oriented - each instance is a node connected to others to form the graph
 //
-// TBD insert DAG descriptive text from concept doc
-//
+// Each node in the graph has zero or more successors, and zero or more
+// predecessors. For our purposes the graph must be connected, meaning
+// there can be no nodes that have both zero predecessors and zero
+// successors. We will stipulate that there is exactly one node that has
+// zero predecessors. This is the root node. Also the graph is acyclic,
+// meaning for all nodes in the graph, by following the forward arrows
+// you will never end up back where you started but you will eventually
+// reach a node that has no successors.  The following three directed
+// graph fragments illustrate how nodes are connected in a directed graph
+// to form different orderings.
 // (see uvm_graph_example_dag.gif)
+// Graph (1) in the figure above illustrates three elements in sequence,
+// B follows A, and C follows B. A is a predecessor of B and B is a
+// predecessor of C, which defines an ordering of {A,B,C}. Similarly, C
+// is a successor of B and B is a successor of A.
+// In graph (2), B, and C both have A as a predecessor and each have no
+// successors. A has both B and C as successor. B and C each have A as a
+// predecessor and neither have successors.  Reconvergence is illustrated
+// in graph (3). A, B, and C have the same successor relationships as in
+// graph (2), with the difference that B and C each have as a successor
+// D. D, in turn, has both B and C as predecessors.
 
 class uvm_graph;
 
   // graph structure
   protected string m_name;
-  protected uvm_graph m_predecessors[$];
+  /*protected*/ uvm_graph m_predecessors[$];
   protected uvm_graph m_successors[$];
 
   //----------------------------------------------------------------------

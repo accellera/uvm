@@ -705,11 +705,10 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
                               local_map);
               end
 
-              void'(rg.predict(reg_item.value[0], rw.byte_en,
-                               predict_kind, UVM_FRONTDOOR));
               `uvm_info("REG_PREDICT", {"Observed ",reg_item.kind.name(),
                         " transaction to register ",rg.get_full_name(), ": value='h",
                          $sformatf("%0h",reg_item.value[0])},UVM_HIGH)
+              rg.do_predict(reg_item, predict_kind, rw.byte_en);
               reg_ap.write(reg_item);
               m_pending.delete(rg);
            end
@@ -728,11 +727,12 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
   endfunction
 
   
-  // Function: check
+  // Function: check_phase
   //
   // Checks that no pending register transactions are still enqueued.
 
-  virtual function void check();
+  virtual function void check_phase();
+     super.check_phase();
     if (m_pending.num() > 0) begin
       `uvm_error("PENDING REG ITEMS",{"There are ",$sformatf("%0d",m_pending.num()),
                  " incomplete register transactions still pending completion:"})

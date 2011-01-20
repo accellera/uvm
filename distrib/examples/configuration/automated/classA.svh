@@ -35,16 +35,16 @@ class A extends uvm_component;
   function new(string name, uvm_component parent);
     super.new(name, parent);
   endfunction
-  function void build();
-    super.build();
+  function void build_phase();
+    super.build_phase();
     set_config_int("*", "v", 0);
 
     $display("%s: In Build: debug = %0d", get_full_name(), debug);
 
-    u1 = new("u1", this); u1.build();
-    u2 = new("u2", this); u2.build();
+    u1 = new("u1", this); 
+    u2 = new("u2", this);
   endfunction
-  task run;
+  task run_phase(uvm_phase_schedule phase);
     begin end
   endtask
 endclass

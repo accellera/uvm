@@ -66,12 +66,12 @@ module test;
     function new (string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run();
+    task run_phase(uvm_phase_schedule phase);
       $display("%0t: %0s:  start run phase", $time, get_full_name());
       #delay;
       $display("%0t: %0s:  end run phase", $time, get_full_name());
     endtask
-    function void report();
+    function void report_phase();
       $display("%0t: %0s:  In report phase", $time, get_full_name());
     endfunction
   endclass
@@ -89,7 +89,7 @@ module test;
       //Interrupt a stop request to allow to finish processing
       enable_stop_interrupt = 1;
     endfunction
-    task run();
+    task run_phase(uvm_phase_schedule phase);
       $display("%0t: %0s:  start run phase", $time, get_full_name());
       #delay;
       $display("%0t: %0s:  end run phase", $time, get_full_name());
@@ -115,7 +115,7 @@ module test;
       a1 = new("a1", this);
       a2 = new("a2", this);
     endfunction
-    task run();
+    task run_phase(uvm_phase_schedule phase);
       $display("%0t: %0s:  start run phase", $time, get_full_name());
       #75 global_stop_request();
       //can also just use stop_request() on this env

@@ -160,6 +160,36 @@ class uvm_tlm_time;
          reset();
       end
    endfunction
+
+
+   // Function: get_abstime
+   // Return the current canonical time value,
+   // in the number of specified time unit, reguardless of the
+   // current timescale of the caller.
+   //
+   // ~secs~ is the number of seconds in the desired time unit
+   // e.g. 1e-9 for nanoseconds.
+   //
+   //| $write("%.3f ps\n", delay.get_abstime(1e-12));
+   //
+   function real get_abstime(real secs);
+      return m_time*m_res/secs;
+   endfunction
+   
+
+   // Function: set_abstime
+   // Set the current canonical time value,
+   // to the number of specified time unit, reguardless of the
+   // current timescale of the caller.
+   //
+   // ~secs~ is the number of seconds in the time unit in the value ~t~
+   // e.g. 1e-9 for nanoseconds.
+   //
+   //| delay.set_abstime(1.5, 1e-12));
+   //
+   function void set_abstime(real t, real secs);
+      m_time = t*secs/m_res;
+   endfunction
 endclass
 
 
@@ -243,7 +273,7 @@ endclass
 //|    a A = new; 
 //|    A.f(t); 
 //|    #t; 
-//|    $write("T=%0d ps (10,000)\n", $time());
+//|    $write("T=%0d ps (10,000)\n", $realtime());
 //| end
 //| endprogram
 //  
@@ -285,7 +315,7 @@ endclass
 //|       a A = new;
 //|       A.f(t);
 //|       #(t.get_realtime(1ns));
-//|       $write("T=%0d ps (10,000)\n", $time());
+//|       $write("T=%0d ps (10,000)\n", $realtime());
 //| end
 //| endprogram
 //

@@ -193,12 +193,12 @@ class xbus_bus_monitor extends uvm_monitor;
   endfunction
 
   // run phase
-  task run();
+  task run_phase(uvm_phase_schedule phase);
     fork
       observe_reset();
       collect_transactions();
     join
-  endtask : run
+  endtask : run_phase
 
   // observe_reset
   task observe_reset();

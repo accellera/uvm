@@ -46,7 +46,7 @@ class apb_agent extends uvm_agent;
       super.new(name, parent);
    endfunction
 
-   virtual function void build();
+   virtual function void build_phase();
       sqr = apb_sequencer::type_id::create("sqr", this);
       drv = apb_master::type_id::create("drv", this);
       mon = apb_monitor::type_id::create("mon", this);
@@ -54,9 +54,9 @@ class apb_agent extends uvm_agent;
       if (!uvm_config_db#(apb_vif)::get(this, "", "vif", vif)) begin
          `uvm_fatal("APB/AGT/NOVIF", "No virtual interface specified for this agent instance")
       end
-   endfunction: build
+   endfunction: build_phase
 
-   virtual function void connect();
+   virtual function void connect_phase();
       drv.seq_item_port.connect(sqr.seq_item_export);
    endfunction
 endclass: apb_agent

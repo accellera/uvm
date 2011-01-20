@@ -52,12 +52,12 @@ class xbus_master_driver extends uvm_driver #(xbus_transfer);
   endfunction : assign_vi
 
   // run phase
-  virtual task run();
+  virtual task run_phase(uvm_phase_schedule phase);
     fork
       get_and_drive();
       reset_signals();
     join
-  endtask : run
+  endtask : run_phase
 
   // get_and_drive 
   virtual protected task get_and_drive();

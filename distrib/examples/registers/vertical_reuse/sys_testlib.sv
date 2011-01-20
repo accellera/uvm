@@ -33,12 +33,12 @@ class sys_R_test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   function void build();
+   function void build_phase();
       if (env == null)
          $cast(env, uvm_top.find("env"));
    endfunction
 
-   task run();
+   task run_phase(uvm_phase_schedule phase);
       uvm_sequence_base reset_seq;
       sys_R_test_seq seq;
 

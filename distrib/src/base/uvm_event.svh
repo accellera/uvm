@@ -181,7 +181,7 @@ class uvm_event extends uvm_object;
       end
       num_waiters = 0;
       on = 1;
-      trigger_time = $time;
+      trigger_time = $realtime;
       trigger_data = data;
     end
   endfunction

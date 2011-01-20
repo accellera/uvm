@@ -18,7 +18,7 @@ module test;
      endfunction
   endclass
 
-  uvm_objection myobj = new("myobj");
+  uvm_callbacks_objection myobj = new("myobj");
 
   class mycomp extends uvm_component;
     time del;

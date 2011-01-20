@@ -30,11 +30,11 @@ class blk_test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   function void build();
+   function void build_phase();
      env = blk_env::type_id::create("blk_env",this);
    endfunction
 
-   task run();
+   task run_phase(uvm_phase_schedule phase);
       blk_AXW_test_seq seq = blk_AXW_test_seq::type_id::create("blk_AXW_test_seq",this);
       seq.model = env.model;
 
