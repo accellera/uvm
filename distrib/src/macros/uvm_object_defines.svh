@@ -620,7 +620,7 @@
         begin \
           if(local_data__ == null) return; \
           if(!((FLAG)&UVM_NOCOPY)) begin \
-            if((FLAG)&UVM_REFERENCE) ARG = local_data__.ARG; \
+            if((FLAG)&UVM_REFERENCE || local_data__.ARG == null) ARG = local_data__.ARG; \
             else begin \
               if(local_data__.ARG.get_name() == "") local_data__.ARG.set_name(`"ARG`"); \
               $cast(ARG, local_data__.ARG.clone()); \
