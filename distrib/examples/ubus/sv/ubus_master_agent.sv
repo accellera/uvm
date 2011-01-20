@@ -19,9 +19,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UBUS_MASTER_AGENT_SV
-`define UBUS_MASTER_AGENT_SV
-
 //------------------------------------------------------------------------------
 //
 // CLASS: ubus_master_agent
@@ -67,5 +64,4 @@ class ubus_master_agent extends uvm_agent;
 
 endclass : ubus_master_agent
 
-`endif // UBUS_MASTER_AGENT_SV
 

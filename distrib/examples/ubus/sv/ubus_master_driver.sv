@@ -19,9 +19,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UBUS_MASTER_DRIVER_SV
-`define UBUS_MASTER_DRIVER_SV
-
 //------------------------------------------------------------------------------
 //
 // CLASS: ubus_master_driver
@@ -55,7 +52,7 @@ class ubus_master_driver extends uvm_driver #(ubus_transfer);
   endfunction: build_phase
 
   // run phase
-  virtual task run_phase();
+  virtual task run_phase(uvm_phase_schedule phase);
     fork
       get_and_drive();
       reset_signals();
@@ -173,5 +170,4 @@ class ubus_master_driver extends uvm_driver #(ubus_transfer);
 
 endclass : ubus_master_driver
 
-`endif // UBUS_MASTER_DRIVER_SV
 

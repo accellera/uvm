@@ -19,9 +19,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UBUS_SLAVE_SEQ_LIB_SV
-`define UBUS_SLAVE_SEQ_LIB_SV
-
 //------------------------------------------------------------------------------
 //
 // SEQUENCE: simple_response_seq
@@ -140,5 +137,4 @@ class slave_memory_seq extends uvm_sequence #(ubus_transfer);
 
 endclass : slave_memory_seq
 
-`endif // UBUS_SLAVE_SEQ_LIB_SV
 

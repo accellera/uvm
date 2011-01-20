@@ -19,9 +19,6 @@
 //   permissions and limitaions under the License.
 //----------------------------------------------------------------------
 
-`ifndef UBUS_BUS_MONITOR_SV
-`define UBUS_BUS_MONITOR_SV
-
 //------------------------------------------------------------------------------
 //
 // CLASS: slave_address_map_info
@@ -195,7 +192,7 @@ class ubus_bus_monitor extends uvm_monitor;
   endfunction: build_phase
 
   // run phase
-  task run_phase();
+  task run_phase(uvm_phase_schedule phase);
     fork
       observe_reset();
       collect_transactions();
@@ -369,5 +366,4 @@ class ubus_bus_monitor extends uvm_monitor;
 
 endclass : ubus_bus_monitor
 
-`endif // UBUS_BUS_MONITOR_SV
 

@@ -19,9 +19,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UBUS_EXAMPLE_TB_SV
-`define UBUS_EXAMPLE_TB_SV
-
 `include "ubus_example_scoreboard.sv"
 `include "ubus_master_seq_lib.sv"
 `include "ubus_example_master_seq_lib.sv"
@@ -75,5 +72,4 @@ class ubus_example_tb extends uvm_env;
 
 endclass : ubus_example_tb
 
-`endif // UBUS_EXAMPLE_TB_SV
 

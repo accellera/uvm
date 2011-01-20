@@ -19,9 +19,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UBUS_MASTER_MONITOR_SV
-`define UBUS_MASTER_MONITOR_SV
-
 //------------------------------------------------------------------------------
 //
 // CLASS: ubus_master_monitor
@@ -111,7 +108,7 @@ class ubus_master_monitor extends uvm_monitor;
   endfunction: build_phase
 
   // run phase
-  virtual task run_phase();
+  virtual task run_phase(uvm_phase_schedule phase);
     fork
       collect_transactions();
     join
@@ -209,5 +206,4 @@ class ubus_master_monitor extends uvm_monitor;
 
 endclass : ubus_master_monitor
 
-`endif // UBUS_MASTER_MONITOR_SVH
 

@@ -19,9 +19,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UBUS_ENV_SV
-`define UBUS_ENV_SV
-
 //------------------------------------------------------------------------------
 //
 // CLASS: ubus_env
@@ -119,7 +116,7 @@ class ubus_env extends uvm_env;
   endtask : update_vif_enables
 
   // implement run task
-  task run_phase();
+  task run_phase(uvm_phase_schedule phase);
     fork
       update_vif_enables();
     join
@@ -127,5 +124,4 @@ class ubus_env extends uvm_env;
 
 endclass : ubus_env
 
-`endif // UBUS_ENV_SVH
 

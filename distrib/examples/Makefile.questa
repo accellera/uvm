@@ -166,7 +166,7 @@ dpi_lib32:
 	make -f Makefile.questa BITS=32 dpi_lib
 
 dpi_lib64:
-	make -f Makefile.questa LIBNAME=uvm_dpi_64 BITS=64 dpi_lib
+	make -f Makefile.questa LIBNAME=uvm_dpi BITS=64 dpi_lib
 
 vlib: $(DPILIB_TARGET)
 	vlib work

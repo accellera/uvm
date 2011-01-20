@@ -19,9 +19,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UBUS_MASTER_SEQ_LIB_SV
-`define UBUS_MASTER_SEQ_LIB_SV
-
 //------------------------------------------------------------------------------
 //
 // SEQUENCE: ubus_base_sequence
@@ -41,7 +38,7 @@ virtual class ubus_base_sequence extends uvm_sequence #(ubus_transfer);
   // There is no need to raise for sub-sequences since the root sequence
   // will encapsulate the sub-sequence. 
   virtual task pre_body();
-    m_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s pre_body() raising an uvm_test_done objection", 
       get_sequence_path()), UVM_MEDIUM);
     uvm_test_done.raise_objection(this);
@@ -50,7 +47,7 @@ virtual class ubus_base_sequence extends uvm_sequence #(ubus_transfer);
   // Drop the objection in the post_body so the objection is removed when
   // the root sequence is complete. 
   virtual task post_body();
-    m_sequencer.uvm_report_info(get_type_name(),
+    `uvm_info(get_type_name(),
       $psprintf("%s post_body() dropping an uvm_test_done objection", 
       get_sequence_path()), UVM_MEDIUM);
     uvm_test_done.drop_objection(this);
@@ -357,5 +354,4 @@ class write_double_word_seq extends ubus_base_sequence;
 
 endclass : write_double_word_seq
 
-`endif // UBUS_MASTER_SEQ_LIB_SV
 

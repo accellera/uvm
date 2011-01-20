@@ -19,9 +19,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UBUS_SLAVE_MONITOR_SV
-`define UBUS_SLAVE_MONITOR_SV
-
 //------------------------------------------------------------------------------
 //
 // CLASS: ubus_slave_monitor
@@ -135,7 +132,7 @@ class ubus_slave_monitor extends uvm_monitor;
   endfunction : get_max_addr
 
   // run phase
-  virtual task run_phase();
+  virtual task run_phase(uvm_phase_schedule phase);
     fork
       collect_transactions();
     join
@@ -245,5 +242,4 @@ class ubus_slave_monitor extends uvm_monitor;
 
 endclass : ubus_slave_monitor
 
-`endif // UBUS_SLAVE_MONITOR_SV
 

@@ -19,9 +19,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UBUS_MASTER_SEQUENCER_SV
-`define UBUS_MASTER_SEQUENCER_SV
-
 //------------------------------------------------------------------------------
 //
 // CLASS: ubus_master_sequencer
@@ -40,5 +37,4 @@ class ubus_master_sequencer extends uvm_sequencer #(ubus_transfer);
 
 endclass : ubus_master_sequencer
 
-`endif // UBUS_MASTER_SEQUENCER_SV
 

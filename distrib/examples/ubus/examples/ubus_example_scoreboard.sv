@@ -19,9 +19,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UBUS_EXAMPLE_SCOREBOARD_SVH
-`define UBUS_EXAMPLE_SCOREBOARD_SVH
-
 //------------------------------------------------------------------------------
 //
 // CLASS: ubus_example_scoreboard
@@ -120,5 +117,4 @@ class ubus_example_scoreboard extends uvm_scoreboard;
 
 endclass : ubus_example_scoreboard
 
-`endif // UBUS_EXAMPLE_SCOREBOARD_SVH
 

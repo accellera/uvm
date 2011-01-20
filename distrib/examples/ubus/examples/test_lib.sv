@@ -55,7 +55,7 @@ class ubus_example_base_test extends uvm_test;
       $psprintf("Printing the test topology :\n%s", this.sprint(printer)), UVM_LOW)
   endfunction : end_of_elaboration_phase
 
-  task run_phase();
+  task run_phase(uvm_phase_schedule phase);
     //set a drain-time for the environment if desired
     uvm_test_done.set_drain_time(this, 50);
   endtask : run_phase

@@ -19,9 +19,6 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef UBUS_TRANSFER_SV
-`define UBUS_TRANSFER_SV
-
 //------------------------------------------------------------------------------
 //
 // ubus transfer enums, parameters, and events
@@ -84,5 +81,4 @@ class ubus_transfer extends uvm_sequence_item;
 
 endclass : ubus_transfer
 
-`endif // UBUS_TRANSFER_SV
 
