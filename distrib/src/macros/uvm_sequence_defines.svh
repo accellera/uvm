@@ -159,7 +159,7 @@
 
 //-----------------------------------------------------------------------------
 //
-// Group: Pre-Existing Sequence Action Macros
+// Group: Sequence Action Macros for Pre-Existing Sequences
 //
 // These macros are used to start sequences and sequence items that have
 // already been allocated, i.e. do not need to be created. 
@@ -242,35 +242,4 @@
 `define uvm_do_seq_with(UVM_SEQ, SEQR_CONS_IF, CONSTRAINTS) \
   `uvm_do_on_with(UVM_SEQ, SEQR_CONS_IF.consumer_seqr, CONSTRAINTS) \
 
-
-//-----------------------------------------------------------------------------
-//
-// MACRO- `uvm_package
-//
-// Use `uvm_package to define the SV package and to create a bogus type to help 
-// automate triggering the static initializers of the package.
-// Use uvm_end_package to endpackage.
-//-----------------------------------------------------------------------------
-
-`define uvm_package(PKG) \
-  package PKG; \
-  class uvm_bogus_class extends uvm::uvm_sequence;\
-  endclass
-
-`define uvm_end_package \
-   endpackage
-
-
-//-----------------------------------------------------------------------------
-//
-// MACRO- `uvm_sequence_library_package
-//
-// This macro is used to trigger static initializers in packages. `uvm_package
-// creates a bogus type which gets referred to by uvm_sequence_library_package
-// to make a package-based variable of the bogus type.
-//-----------------------------------------------------------------------------
-
-`define uvm_sequence_library_package(PKG_NAME) \
-  import PKG_NAME``::*; \
-  PKG_NAME``::uvm_bogus_class M_``PKG_NAME``uvm_bogus_class
 
