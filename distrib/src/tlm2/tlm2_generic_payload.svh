@@ -795,7 +795,7 @@ endclass
 // generic payload can contain one extension object of each type; it
 // cannot contain two instances of the same extension type.
 //
-// The extension type can be identified using the <get_tlm_gp_ext_type()>
+// The extension type can be identified using the <get_ext_type_id()>
 // method.
 //
 // To implement a generic payload extension, simply derive a new class
@@ -820,7 +820,7 @@ class uvm_tlm_extension #(type T=int) extends uvm_tlm_extension_base;
 
    typedef uvm_tlm_extension#(T) this_type;
 
-   local static this_type m_my_tlm_ext_type = get_tlm_gp_ext_type();
+   local static this_type m_my_tlm_ext_type = get_ext_type_id();
 
    // Function: new
    //
@@ -830,21 +830,21 @@ class uvm_tlm_extension #(type T=int) extends uvm_tlm_extension_base;
      super.new(name);
    endfunction
 
-   // Function: get_tlm_gp_ext_type
+   // Function: get_ext_type_id()
    //
-   // Return the type of this TLM extension.
+   // Return the unique ID of this TLM extension type.
    // This method is used to identify the type of the extension to retrieve
    // from a <uvm_tlm_generic_payload> instance,
    // using the <uvm_tlm_generic_payload::get_extension()> method.
    //
-  static function this_type get_tlm_gp_ext_type();
+  static function this_type get_ext_type_id();
     if (m_my_tlm_ext_type == null)
       m_my_tlm_ext_type = new();
     return m_my_tlm_ext_type;
   endfunction
 
   virtual function uvm_tlm_extension_base get_type_handle();
-     return get_tlm_gp_ext_type();
+     return get_ext_type_id();
   endfunction
 
   virtual function string get_type_handle_name();
