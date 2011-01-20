@@ -2906,6 +2906,8 @@
 `endif //!UVM_EMPTY_MACROS
 
 
+
+
 //------------------------------------------------------------------------------
 // Group: Recording Macros
 //------------------------------------------------------------------------------
@@ -2937,8 +2939,9 @@
 // to an existing handle to a recording database transaction.
 
 `define uvm_record_field(NAME,VALUE) \
-   if (recorder != null && recorder.tr_handle != 0) \
-     `uvm_record_attribute(recorder.tr_handle,NAME,VALUE)
+   if (recorder != null && recorder.tr_handle != 0) begin \
+     `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+   end
 
 //------------------------------------------------------------------------------
 // Group: Packing Macros
@@ -2978,8 +2981,8 @@
 //
 `define uvm_pack_string(VAR) \
     begin \
-    `uvm_pack_int(VAR.len(),32) \
     `uvm_pack_sarray(VAR,8) \
+    `uvm_pack_intN(0,8) \
     end
 
 
@@ -3069,13 +3072,14 @@
 //
 `define uvm_unpack_string(VAR) \
     begin \
-    int sz; \
+    bit [7:0] char; \
     VAR = ""; \
-    `uvm_unpack_intN(sz,32) \
-    for (int i=0; i<sz; i++) begin \
-      VAR[i]=packer.m_bits[packer.count+:8]; \
+    do begin \
+      char = packer.m_bits[packer.count+:8]; \
       packer.count += 8; \
-    end \
+      if (char != 0) \
+        VAR = {VAR, char}; \
+    end while (char != 0); \
     end
 
 
@@ -3153,4 +3157,5 @@
 
 
 `endif  // UVM_OBJECT_DEFINES_SVH
+
 

@@ -86,7 +86,7 @@ class uvm_pool #(type KEY=int, T=uvm_void) extends uvm_object;
   virtual function T get (KEY key);
     if (!pool.exists(key)) begin
       T default_value;
-      return default_value;
+      pool[key] = default_value;
     end
     return pool[key];
   endfunction

@@ -31,6 +31,13 @@ typedef uvm_callbacks #(uvm_objection,uvm_objection_callback) uvm_objection_cbs_
 typedef class uvm_cmdline_processor;
 typedef class uvm_callbacks_objection;
 
+class uvm_objection_events;
+  int waiters;
+  event raised;
+  event dropped;
+  event all_dropped;
+endclass
+
 //------------------------------------------------------------------------------
 // Title: Objection Mechanism
 //------------------------------------------------------------------------------
@@ -56,13 +63,6 @@ typedef class uvm_callbacks_objection;
 // instance with <uvm_objection::trace_mode>, or it can be set for all 
 // objections from the command line using the option +UVM_OBJECTION_TRACE.
 //------------------------------------------------------------------------------
-
-class uvm_objection_events;
-  int waiters;
-  event raised;
-  event dropped;
-  event all_dropped;
-endclass
 
 class uvm_objection extends uvm_report_object;
 

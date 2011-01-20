@@ -34,7 +34,7 @@
 //
 // (see uvm_graph_example_dag.gif)
 
-class uvm_graph;
+class uvm_graph extends uvm_object;
 
   // graph structure
   protected string m_name;
