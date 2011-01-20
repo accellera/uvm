@@ -258,15 +258,15 @@ endfunction
 // immediately available.
 
 // Common schedules
-uvm_phase_schedule build_ph = null;
-uvm_phase_schedule connect_ph = null;
-uvm_phase_schedule end_of_elaboration_ph = null;
-uvm_phase_schedule start_of_simulation_ph = null;
-uvm_phase_schedule run_ph = null;
-uvm_phase_schedule extract_ph = null;
-uvm_phase_schedule check_ph = null;
-uvm_phase_schedule report_ph = null;
-uvm_phase_schedule final_ph = null;
+uvm_phase_schedule build_ph ;
+uvm_phase_schedule connect_ph ;
+uvm_phase_schedule end_of_elaboration_ph ;
+uvm_phase_schedule start_of_simulation_ph ;
+uvm_phase_schedule run_ph ;
+uvm_phase_schedule extract_ph ;
+uvm_phase_schedule check_ph ;
+uvm_phase_schedule report_ph ;
+uvm_phase_schedule final_ph ;
 
 function void uvm_root::m_initialize_common_schedule();
   // initialize phase schedule to "common", or inherit it from parent component
@@ -295,7 +295,7 @@ function void uvm_root::m_initialize_common_schedule();
   connect_ph = common.find_schedule("connect");
   end_of_elaboration_ph = common.find_schedule("end_of_elaboration");
   start_of_simulation_ph = common.find_schedule("start_of_simulation");
-  run_ph = common.find_schedule("run");
+  run_ph = common.find_schedule("run");   
   extract_ph = common.find_schedule("extract");
   check_ph = common.find_schedule("check");
   report_ph = common.find_schedule("report");
