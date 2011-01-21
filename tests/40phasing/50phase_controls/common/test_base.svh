@@ -24,7 +24,8 @@ class test_pre_reset_seq extends my_seq;
   endtask : body
 
   function void do_kill();
-    starting_phase.drop_objection(this);
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
   endfunction
 endclass : test_pre_reset_seq
 
@@ -39,7 +40,8 @@ class test_reset_seq extends my_seq;
     starting_phase.drop_objection(this);
   endtask : body
   function void do_kill();
-    starting_phase.drop_objection(this);
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
   endfunction
 endclass : test_reset_seq
 
@@ -55,7 +57,8 @@ class top_training_seq extends top_sequence;
     starting_phase.drop_objection(this);
   endtask : body
   function void do_kill();
-    starting_phase.drop_objection(this);
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
   endfunction
 endclass : top_training_seq
 
@@ -70,7 +73,8 @@ class bot_training_seq extends bot_sequence;
     starting_phase.drop_objection(this);
   endtask : body
   function void do_kill();
-    starting_phase.drop_objection(this);
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
   endfunction
 endclass : bot_training_seq
 
@@ -92,7 +96,8 @@ class top_configure_seq extends top_sequence;
     starting_phase.drop_objection(this);
   endtask : body
   function void do_kill();
-    starting_phase.drop_objection(this);
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
   endfunction
 endclass : top_configure_seq
 
@@ -115,7 +120,8 @@ class top_random_seq extends top_sequence;
     starting_phase.drop_objection(this);
   endtask : body
   function void do_kill();
-    starting_phase.drop_objection(this);
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
   endfunction
 endclass : top_random_seq
 
@@ -137,7 +143,8 @@ class bot_random_seq extends bot_sequence;
     starting_phase.drop_objection(this);
   endtask : body
   function void do_kill();
-    starting_phase.drop_objection(this);
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
   endfunction
 endclass : bot_random_seq
 

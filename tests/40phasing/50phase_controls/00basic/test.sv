@@ -70,7 +70,8 @@ class basic_default_seq extends uvm_sequence #(basic_item);
     starting_phase.drop_objection(this);
   endtask
   function void do_kill();
-    starting_phase.drop_objection(this);
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
   endfunction
 endclass : basic_default_seq
 
@@ -92,7 +93,8 @@ class basic_seq extends uvm_sequence #(basic_item);
     if(starting_phase != null) starting_phase.drop_objection(this);
   endtask
   function void do_kill();
-    if(starting_phase != null) starting_phase.drop_objection(this);
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
   endfunction
 endclass : basic_seq
 
@@ -114,7 +116,8 @@ class basic_main_phase_seq extends uvm_sequence #(basic_item);
     starting_phase.drop_objection(this);
   endtask
   function void do_kill();
-    starting_phase.drop_objection(this);
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
   endfunction
 endclass : basic_main_phase_seq
 
