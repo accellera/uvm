@@ -61,12 +61,17 @@ class basic_default_seq extends uvm_sequence #(basic_item);
   `uvm_object_utils(basic_default_seq)
 
   virtual task body();
+    starting_phase.raise_objection(this);
     for( int i=1; i< 4; i++) begin
       `uvm_info(get_name(), $psprintf("In body() of %s, doing req #(%1d out of 3) ...",
                                       get_name(), i ),UVM_NONE);
       `uvm_do(req)
     end
+    starting_phase.drop_objection(this);
   endtask
+  function void do_kill();
+    starting_phase.drop_objection(this);
+  endfunction
 endclass : basic_default_seq
 
 class basic_seq extends uvm_sequence #(basic_item);
@@ -77,13 +82,18 @@ class basic_seq extends uvm_sequence #(basic_item);
   `uvm_object_utils(basic_seq)
 
   virtual task body();
+    if(starting_phase != null) starting_phase.raise_objection(this);
     for( int i=1; i< 9; i++) begin
       #(i+1);
       `uvm_info(get_name(), $psprintf("In body() of %s, doing req #(00%1d out of 8) ...",
                                       get_name(), i ),UVM_NONE);
       `uvm_do(req)       //This sequence would run fine if this line is commented out.
     end
+    if(starting_phase != null) starting_phase.drop_objection(this);
   endtask
+  function void do_kill();
+    if(starting_phase != null) starting_phase.drop_objection(this);
+  endfunction
 endclass : basic_seq
 
 class basic_main_phase_seq extends uvm_sequence #(basic_item);
@@ -94,13 +104,18 @@ class basic_main_phase_seq extends uvm_sequence #(basic_item);
   `uvm_object_utils(basic_main_phase_seq)
 
   virtual task body();
+    starting_phase.raise_objection(this);
     for( int i=1; i< 13; i++) begin
       #(i+1);
       `uvm_info(get_name(), $psprintf("In body() of %s, doing req #(__%1d out of 12) ...",
                                       get_name(), i ),UVM_NONE);
       `uvm_do(req)       //This sequence would run fine if this line is commented out.
     end
+    starting_phase.drop_objection(this);
   endtask
+  function void do_kill();
+    starting_phase.drop_objection(this);
+  endfunction
 endclass : basic_main_phase_seq
 
 class test extends uvm_test;

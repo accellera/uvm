@@ -15,6 +15,7 @@ class test extends test_base;
   `uvm_component_utils(test);
 
   task main_phase(uvm_phase_schedule phase);
+    phase.raise_objection(this);
     #20;
     if( jump_reset_num ) begin
       `uvm_info( "JUMP_RESET", $psprintf("Jump backward to reset phase from : main"), UVM_NONE);
@@ -26,6 +27,7 @@ class test extends test_base;
     //now jump to shutdown (skip post_main and pre_shutdown)
     `uvm_info( "JUMP_SHUTDOWN", $psprintf("Jump forward to shutdown phase from : main"), UVM_NONE);
     jump( uvm_shutdown_ph );
+    phase.drop_objection(this);
   endtask : main_phase
 
   function void check_phase();

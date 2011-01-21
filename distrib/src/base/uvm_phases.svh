@@ -1985,6 +1985,7 @@ task uvm_phase_schedule::execute();
         m_state = UVM_PHASE_EXECUTING;
         task_phase.traverse(top,this,UVM_PHASE_EXECUTING);
 
+        uvm_wait_for_nba_region(); //Give sequences, etc. a chance to object
         wait (task_phase.procs_not_yet_started == 0);
 
         if (top.phase_timeout == 0)  begin
