@@ -76,7 +76,6 @@ class base extends uvm_component;
    endfunction
    
    task run_phase(uvm_phase_schedule phase);
-      check_the_phase_t("start_of_simulation", "run");
    endtask
    
    task pre_reset_phase(uvm_phase_schedule phase);
@@ -158,7 +157,8 @@ class sub extends base;
      process pid;
 
      function void phase_started(uvm_phase_schedule phase);
-       if (phase.get_name() == "run") begin
+       super.phase_started(phase);
+       if (phase.get_name() == "pre_reset") begin
         n_ph++; //don't call the check_the_phase because it would create a race
         fork begin
            pid = process::self();
@@ -184,7 +184,8 @@ class test extends base;
    endfunction
 
      function void phase_started(uvm_phase_schedule phase);
-       if (phase.get_name() == "run") begin
+       super.phase_started(phase);
+       if (phase.get_name() == "pre_reset") begin
        n_ph++; //don't call the check_the_phase because it would create a race
         fork begin
            `uvm_info("RUN", "HELLO",UVM_NONE);
