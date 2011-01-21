@@ -10,9 +10,11 @@ class comp1 extends uvm_component;
    endfunction
 
    task main_phase(uvm_phase_schedule phase);
+      phase.raise_objection(this, "raising main phase");
       `uvm_info("comp1", "main thread started...", UVM_LOW);
       #5000;
       `uvm_info("comp1", "main thread completed...", UVM_LOW);
+      phase.drop_objection(this, "dropping main phase");
    endtask
 
    virtual task run_phase(uvm_phase_schedule phase);
@@ -42,8 +44,8 @@ class comp1 extends uvm_component;
 
    virtual function void extract_phase();
       `uvm_info("comp1", "extract phase started...", UVM_LOW);
-      if ($time() != 600) begin
-         `uvm_error("test", $psprintf("extract() phase started at %0d instead of 600.", $time));
+      if ($time() != 5100) begin
+         `uvm_error("test", $psprintf("extract() phase started at %0d instead of 5100.", $time));
       end
    endfunction
 
