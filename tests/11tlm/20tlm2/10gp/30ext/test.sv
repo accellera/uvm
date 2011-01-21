@@ -98,38 +98,38 @@ class test extends uvm_test;
       end
       gp2.set_extension(x3);
 
-      if (!$cast(y1, gp1.get_extension(ext1::get_ext_type_id()))) begin
+      if (!$cast(y1, gp1.get_extension(ext1::ID()))) begin
          `uvm_error("TEST", "GP1 did not return the correct EXT1 extension");
       end
       if (y1 != x1) begin
          `uvm_error("TEST", "GP1 did not return the correct EXT1 instance");
       end
-      if (!$cast(y2, gp1.get_extension(ext2::get_ext_type_id()))) begin
+      if (!$cast(y2, gp1.get_extension(ext2::ID()))) begin
          `uvm_error("TEST", "GP1 did not return the correct EXT2 extension");
       end
       if (y2 != null) begin
          `uvm_error("TEST", "GP1 did not return the correct EXT2 instance");
       end
-      if (!$cast(y3, gp1.get_extension(ext3::get_ext_type_id()))) begin
+      if (!$cast(y3, gp1.get_extension(ext3::ID()))) begin
          `uvm_error("TEST", "GP1 did not return the correct EXT3 extension");
       end
       if (y3 != null) begin
          `uvm_error("TEST", "GP1 did not return the correct EXT3 instance");
       end
       
-      if (!$cast(y1, gp2.get_extension(ext1::get_ext_type_id()))) begin
+      if (!$cast(y1, gp2.get_extension(ext1::ID()))) begin
          `uvm_error("TEST", "GP2 did not return the correct EXT1 extension");
       end
       if (y1 != null) begin
          `uvm_error("TEST", "GP2 did not return the correct EXT1 instance");
       end
-      if (!$cast(y2, gp2.get_extension(ext2::get_ext_type_id()))) begin
+      if (!$cast(y2, gp2.get_extension(ext2::ID()))) begin
          `uvm_error("TEST", "GP2 did not return the correct EXT2 extension");
       end
       if (y2 != null) begin
          `uvm_error("TEST", "GP2 did not return the correct EXT2 instance");
       end
-      if (!$cast(y3, gp2.get_extension(ext3::get_ext_type_id()))) begin
+      if (!$cast(y3, gp2.get_extension(ext3::ID()))) begin
          `uvm_error("TEST", "GP2 did not return the correct EXT3 extension");
       end
       if (y3 != x3) begin
@@ -140,19 +140,19 @@ class test extends uvm_test;
          `uvm_error("TEST", "Unable to clone GP2");
       end
       
-      if (!$cast(y1, gp3.get_extension(ext1::get_ext_type_id()))) begin
+      if (!$cast(y1, gp3.get_extension(ext1::ID()))) begin
          `uvm_error("TEST", "GP3 did not return the correct EXT1 extension");
       end
       if (y1 != null) begin
          `uvm_error("TEST", "GP3 did not return the correct EXT1 instance");
       end
-      if (!$cast(y2, gp3.get_extension(ext2::get_ext_type_id()))) begin
+      if (!$cast(y2, gp3.get_extension(ext2::ID()))) begin
          `uvm_error("TEST", "GP3 did not return the correct EXT2 extension");
       end
       if (y2 != null) begin
          `uvm_error("TEST", "GP3 did not return the correct EXT2 instance");
       end
-      if (!$cast(y3, gp3.get_extension(ext3::get_ext_type_id()))) begin
+      if (!$cast(y3, gp3.get_extension(ext3::ID()))) begin
          `uvm_error("TEST", "GP3 did not return the correct EXT3 extension");
       end
       if (y3 == null) begin
