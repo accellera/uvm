@@ -33,14 +33,23 @@ class passive_comp extends uvm_component;
     set_phase_domain("uvm");
   endfunction
 
+  process pid;
+
   task main_phase(uvm_phase_schedule phase);
     phase.raise_objection(this, "start main phase for passive component");
     fork begin
+      pid = process::self();
       doit;
     end join_none
     #15;
     phase.drop_objection(this, "end main phase for passive component");
   endtask
+
+  function void phase_ended(uvm_phase_schedule phase);
+`ifdef INCA
+    if(phase.get_name() == "main") pid.kill();
+`endif
+  endfunction
 
   task doit;
     forever #10 cnt++;
