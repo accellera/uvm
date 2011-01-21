@@ -73,7 +73,7 @@ class uvm_sequencer_base extends uvm_component;
   extern function bit is_child (uvm_sequence_base parent, uvm_sequence_base child);
 
 
-  // Function: start_phase_sequence
+  // Task: start_phase_sequence
   //
   // Start the default sequence for this phase, if any.
   // The default sequence is configured using resources using
@@ -94,7 +94,7 @@ class uvm_sequencer_base extends uvm_component;
   //| uvm_config_db #(uvm_object_wrapper)::set(this, "myseqr", "main_ph"
   //|                                           myseq_type::type_id::get());
 
-  virtual function void start_phase_sequence(uvm_phase_schedule phase);
+  virtual task start_phase_sequence(uvm_phase_schedule phase);
     uvm_object_wrapper wrapper;
     uvm_sequence_base  seq;
     uvm_thread_mode mode;
@@ -102,10 +102,10 @@ class uvm_sequencer_base extends uvm_component;
 
     // default sequence instance?
     if (!uvm_config_db #(uvm_sequence_base)::get(
-          this, "", {phase.get_name(),"_ph"}, seq) ) begin
+          this, {phase.get_name(),"_ph"}, "default_sequence", seq) ) begin
       // default sequence object wrapper?
       if (uvm_config_db #(uvm_object_wrapper)::get(
-               this, "", {phase.get_name(),"_ph"}, wrapper) ) begin
+               this, {phase.get_name(),"_ph"}, "default_sequence", wrapper) ) begin
         // use wrapper is a sequence type        
         if(!$cast(seq , f.create_object_by_type(
               wrapper, get_full_name(), wrapper.get_type_name()))) begin
@@ -129,7 +129,7 @@ class uvm_sequencer_base extends uvm_component;
     seq.reseed();
     seq.starting_phase = phase;
 
-    if (seq.is_randomized && !seq.randomize()) begin
+    if (!seq.is_randomized && !seq.randomize()) begin
       `uvm_warning("STRDEFSEQ", {"Randomization failed for default sequence '",
        seq.get_type_name(),"' for phase ", phase.get_name()})
        return;
@@ -141,8 +141,8 @@ class uvm_sequencer_base extends uvm_component;
       if (mode == UVM_PHASE_MODE_DEFAULT)
         mode = UVM_PHASE_NO_IMPLICIT_OBJECTION;
 
-      void'(uvm_config_db #(uvm_thread_mode)::get(this,"",
-                                    {phase.get_name(),"_ph"},mode));
+      void'(uvm_config_db #(uvm_thread_mode)::get(this,
+                                    {phase.get_name(),"_ph"},"default_sequence.thread_mode",mode));
 
       if (mode == UVM_PHASE_IMPLICIT_OBJECTION)
         phase.phase_done.raise_objection(seq, {phase.get_name(),
@@ -156,7 +156,7 @@ class uvm_sequencer_base extends uvm_component;
     end
     join_none
 
-  endfunction
+  endtask
 
 
   // Function: user_priority_arbitration
@@ -1344,17 +1344,6 @@ task uvm_sequencer_base::wait_for_sequences();
 endtask
 
 
-// remove_sequence
-// ---------------
-
-function void uvm_sequencer_base::remove_sequence(string type_name);
-  sequence_ids.delete(type_name);
-  for (int i = 0; i < this.sequences.size(); i++) begin
-    if (this.sequences[i] == type_name)
-      this.sequences.delete(i);
-  end
-endfunction
-
 
 // send_request
 // ------------
@@ -1376,6 +1365,8 @@ endfunction
 //                        - NOT PART OF UVM STANDARD -
 //----------------------------------------------------------------------------
 
+`ifndef UVM_NO_DEPRECATED
+
 // add_sequence
 // ------------
 //
@@ -1395,6 +1386,18 @@ function void uvm_sequencer_base::add_sequence(string type_name);
     //used w/ get_sequence to return a uvm_sequence factory object that 
     //matches an int id
     sequences.push_back(type_name);
+  end
+endfunction
+
+
+// remove_sequence
+// ---------------
+
+function void uvm_sequencer_base::remove_sequence(string type_name);
+  sequence_ids.delete(type_name);
+  for (int i = 0; i < this.sequences.size(); i++) begin
+    if (this.sequences[i] == type_name)
+      this.sequences.delete(i);
   end
 endfunction
 
@@ -1420,8 +1423,7 @@ endfunction
 // Sequencers provide the start_default_sequence task to execute the default
 // sequence in the run phase. This method is not intended to be called
 // externally, but may be overridden in a derivative sequencer class if 
-// special behavior is needed when the default sequence is started. The
-// user class <uvm_sequencer_param_base #(REQ,RSP)> implements this method.
+// special behavior is needed when the default sequence is started. T
 
 
 task uvm_sequencer_base::start_default_sequence();
@@ -1559,6 +1561,7 @@ task uvm_sequencer_base::run();
 endtask
 
 
+`endif // UVM_NO_DEPRECATED
 
 //------------------------------------------------------------------------------
 //

@@ -183,7 +183,7 @@
 
 `define uvm_error_context(ID, MSG, CNTXT) \
    begin \
-     if (uvm_report_enabled(UVM_NONE,UVM_ERROR,ID)) \
+     if (CNTXT.uvm_report_enabled(UVM_NONE,UVM_ERROR,ID)) \
        CNTXT.uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
    end
 

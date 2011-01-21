@@ -1,5 +1,4 @@
-//
-//------------------------------------------------------------------------------
+//----------------------------------------------------------------------
 //   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
@@ -18,22 +17,31 @@
 //   CONDITIONS OF ANY KIND, either express or implied.  See
 //   the License for the specific language governing
 //   permissions and limitations under the License.
+//----------------------------------------------------------------------
+
+`ifndef SIMPLE_SEQUENCER_SV
+`define SIMPLE_SEQUENCER_SV
+
+
+//------------------------------------------------------------------------------
+//
+// CLASS: simple_sequencer
+//
+// declaration
 //------------------------------------------------------------------------------
 
-`include "seq/uvm_sequence_item.svh"
-`include "seq/uvm_sequencer_base.svh"
-`include "seq/uvm_sequencer_analysis_fifo.svh"
-`include "seq/uvm_sequencer_param_base.svh"
-`include "seq/uvm_sequencer.svh"
-`include "seq/uvm_push_sequencer.svh"
-`include "seq/uvm_sequence_base.svh"
-`include "seq/uvm_sequence.svh"
-`include "seq/uvm_sequence_library.svh"
+class simple_sequencer extends uvm_sequencer #(simple_item);
+
+  // Constructor
+  function new (string name, uvm_component parent);
+    super.new(name, parent);
+    set_phase_schedule("uvm");
+  endfunction
+
+  // Provide implementations of virtual methods such as get_type_name and create
+  `uvm_component_utils(simple_sequencer)
+
+endclass : simple_sequencer
 
 
-`include "seq/uvm_sequence_builtin.svh"
-
-typedef uvm_sequence  #(uvm_sequence_item, uvm_sequence_item) uvm_default_sequence_type;
-typedef uvm_sequencer #(uvm_sequence_item, uvm_sequence_item) uvm_default_sequencer_type;
-typedef uvm_driver    #(uvm_sequence_item, uvm_sequence_item) uvm_default_driver_type;
-typedef uvm_sequencer_param_base #(uvm_sequence_item, uvm_sequence_item) uvm_default_sequencer_param_type;
+`endif // SIMPLE_SEQUENCER_SV

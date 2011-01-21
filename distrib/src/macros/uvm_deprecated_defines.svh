@@ -31,38 +31,6 @@
 `define m_uvm_register_sequence(TYPE_NAME, SEQUENCER) \
   static bit is_registered_with_sequencer = SEQUENCER``::add_typewide_sequence(`"TYPE_NAME`");
 
-// MACRO- `uvm_declare_p_sequencer
-//
-// This macro is used to set up a specific sequencer type with the
-// sequence type the macro is placed in. This macro is implicit in the
-// <`uvm_sequence_utils> macro, but may be used directly in cases when
-// the sequence is not to be registered in the sequencer's library.
-//
-// The example below shows using the the uvm_declare_p_sequencer macro
-// along with the uvm_object_utils macros to set up the sequence but
-// not register the sequence in the sequencer's library.
-//
-//| class mysequence extends uvm_sequence#(mydata);
-//|   `uvm_object_utils(mysequence)
-//|   `uvm_declare_p_sequencer(some_seqr_type)
-//|   task body;
-//|     //Access some variable in the user's custom sequencer
-//|     if(p_sequencer.some_variable) begin
-//|       ...
-//|     end
-//|   endtask
-//| endclass
-//
-
-`define uvm_declare_p_sequencer(SEQUENCER) \
-  SEQUENCER p_sequencer;\
-  virtual function void m_set_p_sequencer();\
-    super.m_set_p_sequencer(); \
-    if( !$cast(p_sequencer, m_sequencer)) \
-        `uvm_fatal("DCLPSQ", \
-        $psprintf("%m %s Error casting p_sequencer, please verify that this sequence/sequence item is intended to execute on this type of sequencer", get_full_name())) \
-  endfunction  
-
 
 // MACRO- `uvm_sequence_utils_begin
 //
