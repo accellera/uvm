@@ -25,52 +25,23 @@ module top;
   `include "simple_sequencer.sv"
   `include "simple_driver.sv"
 
-
-  `define seq_decl(TYPE,BASE,REGISTRATIONS) \
-  \
-  class TYPE extends BASE; \
-    function new(string name=`"TYPE`"); \
-      super.new(name); \
-    endfunction \
-    `uvm_object_utils(TYPE)     \
-    REGISTRATIONS \
-    virtual task body(); \
-      `uvm_info("SEQ_START", {"Executing sequence '", get_full_name(), "' (",get_type_name(),")"},UVM_HIGH) \
-      #1; \
-    endtask \
-  endclass
-
-
-
-  `define uvm_add_to_seq_lib(TYPE,LIBTYPE) \
-     static bit add_``TYPE``_to_seq_lib_``LIBTYPE =\
-        LIBTYPE::add_typewide_sequence(TYPE::get_type());
-
+  // SEQUENCE LIBRARY SUBTYPE DECLARATIONS
+  //
+  // subtypes use the `uvm_sequence_library_utils macro;
+  // we create subtypes here so that we can statically initialize
+  // (register) sequences within the declarations of those sequence.
+  // Other reasons to subtype include implementation of the
+  // USER sequence selection mode, adding constraints, etc.
 
   typedef uvm_sequence_library #(simple_item) simple_seq_lib;
 
   `define uvm_seq_lib_decl(TYPE,BASE) \
     class TYPE extends BASE; \
       `uvm_object_utils(TYPE) \
-      static protected uvm_object_wrapper m_typewide_sequences[$]; \
-      local bit m_added_typewide_seqs; \
-      protected uvm_object_wrapper sequences[$]; \
+      `uvm_sequence_library_utils(TYPE) \
       function new(string name=""); \
         super.new(name); \
       endfunction \
-      virtual function void m_add_typewide_sequences(ref uvm_object_wrapper seq_types[$]); \
-        if (!m_added_typewide_seqs) begin \
-          super.m_add_typewide_sequences(seq_types); \
-          foreach (TYPE::m_typewide_sequences[i]) \
-            seq_types.push_back(m_typewide_sequences[i]); \
-          m_added_typewide_seqs = 1; \
-        end \
-      endfunction \
-     static function bit add_typewide_sequence(uvm_object_wrapper seq_type); \
-       if (m_type_check(seq_type)) \
-         m_typewide_sequences.push_back(seq_type); \
-       return 1; \
-     endfunction \
     endclass
 
   `uvm_seq_lib_decl(simple_seq_lib_RST,simple_seq_lib)
@@ -79,56 +50,90 @@ module top;
   `uvm_seq_lib_decl(simple_seq_lib_SHUT,simple_seq_lib)
 
 
-  `define Aseqlibs `uvm_add_to_seq_lib(seqA, simple_seq_lib_RST)
-  `define Bseqlibs `uvm_add_to_seq_lib(seqB, simple_seq_lib_RST)
-  `define Cseqlibs `uvm_add_to_seq_lib(seqC, simple_seq_lib_CFG)
+  // SEQUENCES DECLARATIONS
+  //
+  // Quickly define a bunch of skeleton sequences for testing purposes.
+  // (they do nothing in body() except print the fact they are executing).
+  //
+  // Each sequence will invoke one or more `uvm_add_to_seq_lib macros to
+  // statically register it with one or more sequence library types previously
+  // defined. We pass such invocations as a parameter to the macro so we
+  //
 
-  `define Dseqlibs `uvm_add_to_seq_lib(seqD, simple_seq_lib_CFG) \
-                   `uvm_add_to_seq_lib(seqD, simple_seq_lib_MAIN) 
+  `define seq_decl_1lib(TYPE,BASE,LIBTYPE) \
+    class TYPE extends BASE; \
+      function new(string name=`"TYPE`"); \
+        super.new(name); \
+      endfunction \
+      `uvm_object_utils(TYPE)     \
+      `uvm_add_to_seq_lib(TYPE, LIBTYPE) \
+      virtual task body(); \
+        `uvm_info("SEQ_START", {"Executing sequence '", \
+           get_full_name(),"' (",get_type_name(),")"},UVM_HIGH) \
+        #1; \
+      endtask \
+    endclass
 
-  `define Eseqlibs `uvm_add_to_seq_lib(seqE, simple_seq_lib_MAIN)
-  `define Fseqlibs `uvm_add_to_seq_lib(seqF, simple_seq_lib_MAIN)
-  `define Gseqlibs `uvm_add_to_seq_lib(seqG, simple_seq_lib)
-
-
-  `define U1seqlibs `uvm_add_to_seq_lib(seqU1, simple_seq_lib_SHUT)
-  `define U2seqlibs `uvm_add_to_seq_lib(seqU2, simple_seq_lib_SHUT)
-  `define U3seqlibs `uvm_add_to_seq_lib(seqU3, simple_seq_lib_SHUT)
+  `define seq_decl_2lib(TYPE,BASE,LIBTYPE1,LIBTYPE2) \
+    class TYPE extends BASE; \
+      function new(string name=`"TYPE`"); \
+        super.new(name); \
+      endfunction \
+      `uvm_object_utils(TYPE)     \
+      `uvm_add_to_seq_lib(TYPE, LIBTYPE1) \
+      `uvm_add_to_seq_lib(TYPE, LIBTYPE2) \
+      virtual task body(); \
+        `uvm_info("SEQ_START", {"Executing sequence '", \
+           get_full_name(),"' (",get_type_name(),")"},UVM_HIGH) \
+        #1; \
+      endtask \
+    endclass
 
    typedef uvm_sequence #(simple_item) simple_seq;
 
-  `seq_decl(seqA,simple_seq,`Aseqlibs)
-  `seq_decl(seqB,simple_seq,`Bseqlibs)
-  `seq_decl(seqC,simple_seq,`Cseqlibs)
-  `seq_decl(seqD,simple_seq,`Dseqlibs)
-  `seq_decl(seqE,simple_seq,`Eseqlibs)
-  `seq_decl(seqF,simple_seq,`Fseqlibs)
-  `seq_decl(seqG,simple_seq,`Gseqlibs)
+  `seq_decl_1lib(seqA,simple_seq,simple_seq_lib_RST)
+  `seq_decl_1lib(seqB,simple_seq,simple_seq_lib_RST)
+  `seq_decl_1lib(seqC,simple_seq,simple_seq_lib_CFG)
+  `seq_decl_2lib(seqD,simple_seq,simple_seq_lib_CFG,simple_seq_lib_MAIN)
+  `seq_decl_1lib(seqE,simple_seq,simple_seq_lib_MAIN)
+  `seq_decl_1lib(seqF,simple_seq,simple_seq_lib_MAIN)
+  `seq_decl_1lib(seqG,simple_seq,simple_seq_lib)
 
-  `seq_decl(seqU1,simple_seq,`U1seqlibs)
-  `seq_decl(seqU2,simple_seq,`U2seqlibs)
-  `seq_decl(seqU3,simple_seq,`U3seqlibs)
+  `seq_decl_1lib(seqU1,simple_seq,simple_seq_lib_SHUT)
+  `seq_decl_1lib(seqU2,simple_seq,simple_seq_lib_SHUT)
+  `seq_decl_1lib(seqU3,simple_seq,simple_seq_lib_SHUT)
 
-  `seq_decl(seqAextend,seqA,`uvm_add_to_seq_lib(seqAextend,simple_seq_lib_RST))
-  `seq_decl(seqEextend,seqE,`uvm_add_to_seq_lib(seqEextend,simple_seq_lib_MAIN))
-  `seq_decl(seqGextend,seqG,`uvm_add_to_seq_lib(seqGextend,simple_seq_lib))
+  `seq_decl_1lib(seqAextend,seqA,simple_seq_lib_RST)
+  `seq_decl_1lib(seqEextend,seqE,simple_seq_lib_MAIN)
+  `seq_decl_1lib(seqGextend,seqG,simple_seq_lib)
 
+
+  // SIMPLE TEST COMPONENT
+  //
+  // Normal component in most respects. Test infrastructure
+  // requires top-level component be called 'test'
 
   class test extends uvm_component;
+
      `uvm_component_utils(test)
+
      function new(string name, uvm_component parent=null);
        super.new(name,parent);
      endfunction
+
      simple_sequencer sequencer;
      simple_driver driver;
+
      virtual function void build_phase();
        sequencer = new("sequencer", this);
        driver = new("driver", this);
-     endfunction
-     virtual function void connect_phase();
-       driver.seq_item_port.connect(sequencer.seq_item_export);
        uvm_default_printer=uvm_default_line_printer;
      endfunction
+
+     virtual function void connect_phase();
+       driver.seq_item_port.connect(sequencer.seq_item_export);
+     endfunction
+
      virtual function void report();
        uvm_root top = uvm_root::get();
        uvm_report_server svr = top.get_report_server();
@@ -136,40 +141,61 @@ module top;
            svr.get_severity_count(UVM_ERROR) == 0)
          $write("** UVM TEST PASSED **\n");
        else
-         $write("** UVM TEST PASSED **\n");
+         $write("** UVM TEST FAILED **\n");
      endfunction
+
   endclass
+
+
+  // TEST CONFIGURATION.
+  //
+  // This could be inside the test class.
 
   typedef uvm_config_db #(uvm_object_wrapper) phase_rsrc;
 
-
   initial begin
 
+    // Set the default sequence to run for 4 of the run-time phases.
+    // The instance path is the path to the sequencer concatenated with the phase name
+    // The field name is "default_sequence"
     phase_rsrc::set(null, "uvm_test_top.sequencer.reset_ph",     "default_sequence", simple_seq_lib_RST::get_type());
     phase_rsrc::set(null, "uvm_test_top.sequencer.configure_ph", "default_sequence", simple_seq_lib_CFG::get_type());
     phase_rsrc::set(null, "uvm_test_top.sequencer.main_ph",      "default_sequence", simple_seq_lib_MAIN::get_type());
     phase_rsrc::set(null, "uvm_test_top.sequencer.shutdown_ph",  "default_sequence", simple_seq_lib_SHUT::get_type());
 
+    // Set the sequence selection mode different for each sequence library.
+    // Had we created instances of the seq lib first, we could configure the
+    // mode and min/max settings, apply randomize...with constraints, etc.
+    // then set those instances to be the default sequence.
+
+    // set mode for all phases in sequencer to "ITEM"
     uvm_config_db #(uvm_sequence_lib_mode)::set(null,
                                           "uvm_test_top.sequencer.*",
-                                          "selection_mode",
+                                          "default_sequence.selection_mode",
                                           UVM_SEQ_LIB_ITEM);
 
+    // then override the mode for three of the four phases.
+    // this tests the the config overrides work  
     uvm_config_db #(uvm_sequence_lib_mode)::set(null,
                                           "uvm_test_top.sequencer.reset_ph",
-                                          "selection_mode",
+                                          "default_sequence.selection_mode",
                                           UVM_SEQ_LIB_RAND);
 
     uvm_config_db #(uvm_sequence_lib_mode)::set(null,
                                           "uvm_test_top.sequencer.configure_ph",
-                                          "selection_mode",
+                                          "default_sequence.selection_mode",
                                           UVM_SEQ_LIB_RANDC);
 
     uvm_config_db #(uvm_sequence_lib_mode)::set(null,
                                           "uvm_test_top.sequencer.shutdown_ph",
-                                          "selection_mode",
+                                          "default_sequence.selection_mode",
                                           UVM_SEQ_LIB_USER);
 
+    // we set the sequencer's thread mode to raise implicit objection.
+    // The default sequences that get started will take on the mode of the
+    // sequencer they run on unless we explicitly set them for the
+    // default sequence in individual phases.
+    // set(null, "uvm_test_top.sequencer.main_ph", "default_sequence.thread_mode",
     uvm_config_db #(uvm_thread_mode)::set(null,
                                           "uvm_test_top.sequencer",
                                           "default_phase_thread_mode",

@@ -159,7 +159,7 @@
 
 `define uvm_info_context(ID, MSG, VERBOSITY, CNTXT) \
    begin \
-     if (uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) \
+     if (CNTXT.uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) \
        CNTXT.uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line); \
    end
 
@@ -171,7 +171,7 @@
 
 `define uvm_warning_context(ID, MSG, CNTXT) \
    begin \
-     if (uvm_report_enabled(UVM_NONE,UVM_WARNING,ID)) \
+     if (CNTXT.uvm_report_enabled(UVM_NONE,UVM_WARNING,ID)) \
        CNTXT.uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
    end
 
@@ -195,7 +195,7 @@
 
 `define uvm_fatal_context(ID, MSG, CNTXT) \
    begin \
-     if (uvm_report_enabled(UVM_NONE,UVM_FATAL,ID)) \
+     if (CNTXT.uvm_report_enabled(UVM_NONE,UVM_FATAL,ID)) \
        CNTXT.uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
    end
 

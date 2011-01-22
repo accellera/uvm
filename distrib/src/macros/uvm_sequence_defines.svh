@@ -19,7 +19,8 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
-// Title: Do Action and Sequencer Macros
+// Title: Sequence-Related Macros
+
 
 
 //-----------------------------------------------------------------------------
@@ -244,7 +245,115 @@
 
 
 
+//-----------------------------------------------------------------------------
+//
+// Group: Sequence Library
+//
+//-----------------------------------------------------------------------------
+
+
+// MACRO: `uvm_add_to_sequence_library
+//
+// Adds the given sequence ~TYPE~ to the given sequence library ~LIBTYPE~
+//
+// Invoke any number of times within a sequence declaration to statically add
+// that sequence to one or more sequence library types. The sequence will then
+// be available for selection and execution in all instances of the given
+// sequencer types.
+//
+//| class seqA extends uvm_sequence_base #(simple_item);
+//|
+//|    function new(string name=`"TYPE`");
+//|      super.new(name);
+//|    endfunction
+//|
+//|    `uvm_object_utils(seqA)
+//|
+//|    `uvm_add_to_seq_lib(seqA, simple_seq_lib_RST)
+//|    `uvm_add_to_seq_lib(seqA, simple_seq_lib_CFG)
+//|
+//|    virtual task body(); \
+//|      `uvm_info("SEQ_START", {"Executing sequence '", get_full_name(),
+//|                             "' (",get_type_name(),")"},UVM_HIGH)
+//|      #10;
+//|    endtask
+//|
+//|  endclass
+
+
+`define uvm_add_to_seq_lib(TYPE,LIBTYPE) \
+   static bit add_``TYPE``_to_seq_lib_``LIBTYPE =\
+      LIBTYPE::m_add_typewide_sequence(TYPE::get_type());
+
+
+
+// MACRO: `uvm_sequence_library_utils
+//
+// Declares the infrastructure needed to define extensions to the
+// <uvm_sequence_library> class. You define new sequence library subtypes
+// to statically specify sequence membership from within sequence
+// definitions. See also <`uvm_add_to_sequence_library> for more information.
+
+// 
+//
+//| typedef simple_seq_lib uvm_sequence_library #(simple_item);
+//|
+//| class simple_seq_lib_RST extends simple_seq_lib;
+//|
+//|   `uvm_object_utils(this_type)
+//|
+//|   `uvm_sequence_library_utils(simple_seq_lib_RST)
+//|
+//|   function new(string name="");
+//|     super.new(name);
+//|   endfunction
+//|
+//| endclass
+//
+// Each library, itself a sequence, can then be started independently
+// on different sequencers or in different phases of the same sequencer.
+// See <uvm_sequencer_base::start_phase_sequence> for information on
+// starting default sequences.
+
+`define uvm_sequence_library_utils(TYPE) \
+\
+   static protected uvm_object_wrapper m_typewide_sequences[$]; \
+   \
+   static local bit m_added_typewide_seqs; \
+   \
+   protected uvm_object_wrapper sequences[$]; \
+   \
+   virtual function void m_add_typewide_sequences(ref uvm_object_wrapper seq_types[$]); \
+     if (!m_added_typewide_seqs) begin \
+       super.m_add_typewide_sequences(seq_types); \
+       foreach (TYPE::m_typewide_sequences[i]) \
+         seq_types.push_back(TYPE::m_typewide_sequences[i]); \
+       m_added_typewide_seqs = 1; \
+     end \
+   endfunction \
+   \
+   static function void add_typewide_sequence(uvm_object_wrapper seq_type); \
+     if (m_static_check(seq_type)) \
+       m_typewide_sequences.push_back(seq_type); \
+   endfunction \
+   \
+   static function void add_typewide_sequences(uvm_object_wrapper seq_types[$]); \
+     foreach (seq_types[i]) \
+       add_typewide_sequence(seq_types[i]); \
+   endfunction \
+   \
+   static function bit m_add_typewide_sequence(uvm_object_wrapper seq_type); \
+     TYPE::add_typewide_sequence(seq_type); \
+     return 1; \
+   endfunction
+
+
+
+//-----------------------------------------------------------------------------
+//
 // Group: Sequencer Subtypes
+//
+//-----------------------------------------------------------------------------
 
 
 // MACRO: `uvm_declare_p_sequencer
