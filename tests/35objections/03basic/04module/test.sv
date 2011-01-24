@@ -25,11 +25,13 @@ module mb_test;
   import uvm_pkg::*;
 
   initial begin     
-    uvm_test_done.set_drain_time(uvm_top, 93);     
+    uvm_test_done_objection tdo;
+    tdo = uvm_test_done_objection::get();
+    tdo.set_drain_time(uvm_top, 93);     
     //AK wait(run_ph.get_state() == UVM_PHASE_EXECUTING); //make sure we are in the run phase
-    uvm_test_done.raise_objection();
+    tdo.raise_objection();
     #200;
-    uvm_test_done.drop_objection();
+    tdo.drop_objection();
   end
 
 

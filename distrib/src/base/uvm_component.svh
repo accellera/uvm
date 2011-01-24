@@ -617,7 +617,7 @@ virtual class uvm_component extends uvm_report_object;
   // immediate killing of its run-time processes should set this bit and
   // implement the stop task to prepare for shutdown.
 
-  protected int enable_stop_interrupt = 0;
+  int enable_stop_interrupt = 0;
 
 
   // Function: resolve_bindings

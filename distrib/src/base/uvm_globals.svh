@@ -54,45 +54,39 @@ uvm_test_done_objection uvm_test_done = uvm_test_done_objection::get();
 
 // Method: global_stop_request 
 //
-// Convenience function for uvm_top.stop_request(). See 
-// <uvm_root::stop_request> for more information.
+// Convenience function for uvm_test_done.stop_request(). See 
+// <uvm_test_done_objection::stop_request> for more information.
 
 function void global_stop_request();
-  uvm_root top;
-  top = uvm_root::get();
-  top.stop_request();
+  uvm_test_done_objection tdo;
+  tdo = uvm_test_done_objection::get();
+  tdo.stop_request();
 endfunction
 
 
 // Method: set_global_timeout 
 //
-// Convenience function for uvm_top.phase_timeout = timeout. See 
-// <uvm_root::phase_timeout> for more information.  The overridable bit 
+// Convenience function for uvm_top.set_timeout(). See 
+// <uvm_root::set_timeout> for more information.  The overridable bit 
 // controls whether subsequent settings will be honored.
 
 
 function void set_global_timeout(time timeout, bit overridable = 1);
   uvm_root top;
-  static bit m_uvm_timeout_overridable = 1;
   top = uvm_root::get();
-  if (m_uvm_timeout_overridable == 0) begin
-    uvm_report_info("NOTIMOUTOVR", $psprintf("The global timeout setting of %0d is not overridable to %0d due to a previous setting.", top.phase_timeout, timeout), UVM_NONE);
-    return;
-  end
-  m_uvm_timeout_overridable = overridable;
-  top.phase_timeout = timeout;
+  top.set_timeout(timeout,overridable);
 endfunction
 
 
 // Function: set_global_stop_timeout
 //
-// Convenience function for uvm_top.stop_timeout = timeout.
-// See <uvm_root::stop_timeout> for more information.
+// Convenience function for uvm_test_done.stop_timeout = timeout.
+// See <uvm_uvm_test_done::stop_timeout> for more information.
 
 function void set_global_stop_timeout(time timeout);
-  uvm_root top;
-  top = uvm_root::get();
-  top.stop_timeout = timeout;
+  uvm_test_done_objection tdo;
+  tdo = uvm_test_done_objection::get();
+  tdo.stop_timeout = timeout;
 endfunction
 
 

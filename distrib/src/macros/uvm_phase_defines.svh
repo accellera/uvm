@@ -33,43 +33,69 @@
 // the pattern of the macros below, but customize the exec_task() or exec_func()
 // contents to suit your enhanced functionality or derived component type/methods.
 
-`define uvm_builtin_task_phase(PHASE) \
-        class uvm_``PHASE``_phase extends uvm_task_phase(`"PHASE`"); \
+`define m_uvm_task_phase(PHASE,COMP,PREFIX) \
+        class PREFIX``PHASE``_phase extends uvm_task_phase(`"PHASE`"); \
           task exec_task(uvm_component comp, uvm_phase_schedule phase); \
-            comp.``PHASE``_phase(phase); \
+            COMP comp_; \
+            if ($cast(comp_,comp)) \
+              comp_.``PHASE``_phase(phase); \
           endtask \
-          static uvm_``PHASE``_phase m_inst = get(); \
-          static function uvm_``PHASE``_phase get(); \
+          static PREFIX``PHASE``_phase m_inst = get(); \
+          static function PREFIX``PHASE``_phase get(); \
             if(m_inst == null) m_inst = new; \
             return m_inst; \
           endfunction \
         endclass \
-        uvm_``PHASE``_phase uvm_``PHASE``_ph = uvm_``PHASE``_phase::get();
+        PREFIX``PHASE``_phase PREFIX``PHASE``_ph = PREFIX``PHASE``_phase::get();
+
+`define m_uvm_topdown_phase(PHASE,COMP,PREFIX) \
+        class PREFIX``PHASE``_phase extends uvm_topdown_phase(`"PHASE`"); \
+          function void exec_func(COMP comp, uvm_phase_schedule phase); \
+            COMP comp_; \
+            if ($cast(comp_,comp)) \
+              comp_.``PHASE``_phase(); \
+          endfunction \
+          static PREFIX``PHASE``_phase m_inst = get(); \
+          static function PREFIX``PHASE``_phase get(); \
+            if(m_inst == null) m_inst = new; \
+            return m_inst; \
+          endfunction \
+        endclass \
+        PREFIX``PHASE``_phase PREFIX``PHASE``_ph = PREFIX``PHASE``_phase::get();
+
+`define m_uvm_bottomup_phase(PHASE,COMP,PREFIX) \
+        class PREFIX``PHASE``_phase extends uvm_bottomup_phase(`"PHASE`"); \
+          function void exec_func(COMP comp, uvm_phase_schedule phase); \
+            COMP comp_; \
+            if ($cast(comp_,comp)) \
+              comp_.``PHASE``_phase(); \
+          endfunction \
+          static PREFIX``PHASE``_phase m_inst = get(); \
+          static function PREFIX``PHASE``_phase get(); \
+            if(m_inst == null) m_inst = new; \
+            return m_inst; \
+          endfunction \
+        endclass \
+        PREFIX``PHASE``_phase PREFIX``PHASE``_ph = PREFIX``PHASE``_phase::get();
+
+
+`define uvm_builtin_task_phase(PHASE) \
+        `m_uvm_task_phase(PHASE,uvm_component,uvm_)
 
 `define uvm_builtin_topdown_phase(PHASE) \
-        class uvm_``PHASE``_phase extends uvm_topdown_phase(`"PHASE`"); \
-          function void exec_func(uvm_component comp, uvm_phase_schedule phase); \
-            comp.``PHASE``_phase(); \
-          endfunction \
-          static uvm_``PHASE``_phase m_inst = get(); \
-          static function uvm_``PHASE``_phase get(); \
-            if(m_inst == null) m_inst = new; \
-            return m_inst; \
-          endfunction \
-        endclass \
-        uvm_``PHASE``_phase uvm_``PHASE``_ph = uvm_``PHASE``_phase::get();
+        `m_uvm_topdown_phase(PHASE,uvm_component,uvm_)
 
 `define uvm_builtin_bottomup_phase(PHASE) \
-        class uvm_``PHASE``_phase extends uvm_bottomup_phase(`"PHASE`"); \
-          function void exec_func(uvm_component comp, uvm_phase_schedule phase); \
-            comp.``PHASE``_phase(); \
-          endfunction \
-          static uvm_``PHASE``_phase m_inst = get(); \
-          static function uvm_``PHASE``_phase get(); \
-            if(m_inst == null) m_inst = new; \
-            return m_inst; \
-          endfunction \
-        endclass \
-        uvm_``PHASE``_phase uvm_``PHASE``_ph = uvm_``PHASE``_phase::get();
+        `m_uvm_bottomup_phase(PHASE,uvm_component,uvm_)
+
+
+`define uvm_user_task_phase(PHASE,COMP,PREFIX) \
+        `m_uvm_task_phase(PHASE,COMP,PREFIX)
+
+`define uvm_user_topdown_phase(PHASE,COMP) \
+        `m_uvm_topdown_phase(PHASE,COMP,PREFIX)
+
+`define uvm_user_bottomup_phase(PHASE,COMP) \
+        `m_uvm_bottomup_phase(PHASE,COMP,PREFIX)
 
 `endif

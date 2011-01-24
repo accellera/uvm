@@ -41,49 +41,22 @@
 
 `include "uvm_macros.svh"
 
-// Macro for creating a phase that calls a phase implementation
-// task for a specific component type which implements. The implemenation
-// has to be a parameterized type parameterized to a component type which
-// has the phase implementation as part of this. The alternative would be
-// to explicitly call set_phase_imp in each component ctor.
 
-`define my_task_phase(PHASE) \
-   class ``PHASE``_phase#(type T=my_component) extends uvm_task_phase; \
-     task exec_task(uvm_component comp, uvm_phase_schedule phase); \
-       T mycomp; \
-       if($cast(mycomp, comp)) begin \
-         mycomp.``PHASE (uvm_phase_schedule phase); \
-       end \
-     endtask \
-     function new(string name); \
-       super.new(`"PHASE`"); \
-       set_name(`"PHASE`"); \
-     endfunction \
-     static ``PHASE``_phase#(T) m_inst = get(); \
-     static function ``PHASE``_phase#(T) get(); \
-       if(m_inst == null) begin \
-         m_inst = new(`"PHASE`"); \
-       end \
-       return m_inst; \
-     endfunction \
-   endclass \
-
-package mypkg;
+//package mypkg;
   import uvm_pkg::*;
 
   // Pseudo interface class for phase schedule just for
   // defining the schedule. When SV supports interface classes,
   // this would be an interface class.
   virtual class my_component;
-    pure virtual task my_cfg(uvm_phase_schedule phase);
+    pure virtual task cfg_phase(uvm_phase_schedule phase);
   endclass
 
-  // Create the paramterized class definitions for:
-  // my_cfg_phase#(T)
+  `uvm_user_task_phase(cfg,my_component,my_)
 
-  `my_task_phase(my_cfg)
 
   // default phase imp that doesn't do anything
+  /*
   class default_imp extends uvm_task_phase;
     function new(string name);
       super.new(name);
@@ -91,9 +64,11 @@ package mypkg;
     endfunction
   endclass
   default_imp cfg_imp;
+  */
 
   // method for adding the phase to some specific domain
-  function automatic uvm_phase_schedule  set_my_schedule;
+  function automatic uvm_phase_schedule set_my_schedule();
+
     uvm_phase_schedule new_phase;
     uvm_phase_schedule my_sched;
     uvm_root top  = uvm_root::get();
@@ -108,8 +83,9 @@ package mypkg;
     //Add the new phase if needed
     new_phase = my_sched.find_schedule("my_cfg");
     if(new_phase == null) begin
-      cfg_imp = new("my_cfg");
-      my_sched.add_phase(cfg_imp,
+      my_cfg_ph ph;
+      ph = new("cfg_ph");
+      my_sched.add_phase(ph,
         .after_phase(my_sched.find_schedule("pre_configure")),
         .before_phase(my_sched.find_schedule("configure")));
     end
@@ -117,50 +93,18 @@ package mypkg;
   endfunction
 
   uvm_phase_schedule my_sched = set_my_schedule();
-endpackage
+//endpackage
 
 module test;
   import uvm_pkg::*;
   import mypkg::*;
 
-  // Some component that will use the new schedule
-  class mycomp extends uvm_component;
-    time start_reset, start_pre_configure, start_my_cfg, start_configure;
-    time end_reset, end_pre_configure, end_my_cfg, end_configure;
-
-    function new(string name, uvm_component parent);
-      super.new(name,parent);
-    endfunction
-    task reset_phase(uvm_phase_schedule phase);
-      start_reset = $time;
-      `uvm_info("RST", "IN RESET", UVM_NONE)
-      #30 `uvm_info("RST", "END RESET", UVM_NONE)
-      end_reset = $time;
-    endtask
-    task pre_configure_phase(uvm_phase_schedule phase);
-      start_pre_configure = $time;
-      `uvm_info("PRECFG", "IN PRECFG", UVM_NONE)
-      #30 `uvm_info("PRECFG", "END PRECFG", UVM_NONE)
-      end_pre_configure = $time;
-    endtask
-    task my_cfg(uvm_phase_schedule phase);
-      start_my_cfg = $time;
-      `uvm_info("MYCFG", "IN MY CFG", UVM_NONE)
-      #30 `uvm_info("MYCFG", "END MY CFG", UVM_NONE)
-      end_my_cfg = $time;
-    endtask
-    task configure_phase(uvm_phase_schedule phase);
-      start_configure = $time;
-      `uvm_info("CFG", "IN CONFIGURE", UVM_NONE)
-      #30 `uvm_info("CFG", "END CONFIGURE", UVM_NONE)
-      end_configure = $time;
-    endtask
-  endclass
-
   // Some other component that will use the new schedule
   class othercomp extends uvm_component;
     time start_reset, start_pre_configure, start_configure;
     time end_reset, end_pre_configure, end_configure;
+
+    time delay = 40ns;
 
     function new(string name, uvm_component parent);
       super.new(name,parent);
@@ -169,22 +113,42 @@ module test;
     task reset_phase(uvm_phase_schedule phase);
       start_reset = $time;
       `uvm_info("RST", "IN RESET", UVM_NONE)
-      #40 `uvm_info("RST", "END RESET", UVM_NONE)
+      #delay `uvm_info("RST", "END RESET", UVM_NONE)
       end_reset = $time;
     endtask
     task pre_configure_phase(uvm_phase_schedule phase);
       start_pre_configure = $time;
       `uvm_info("PRECFG", "IN PRECFG", UVM_NONE)
-      #20 `uvm_info("PRECFG", "END PRECFG", UVM_NONE)
+      #(60 - delay) `uvm_info("PRECFG", "END PRECFG", UVM_NONE)
       end_pre_configure = $time;
     endtask
     task configure_phase(uvm_phase_schedule phase);
       start_configure = $time;
       `uvm_info("CFG", "IN CONFIGURE", UVM_NONE)
-      #40 `uvm_info("CFG", "END CONFIGURE", UVM_NONE)
+      #delay `uvm_info("CFG", "END CONFIGURE", UVM_NONE)
       end_configure = $time;
     endtask
   endclass
+
+
+  // Some component that will use the new schedule
+
+  class mycomp extends uvm_component;
+    time start_my_cfg;
+    time end_my_cfg;
+
+    function new(string name, uvm_component parent);
+      super.new(name,parent);
+      delay = 30ns;
+    endfunction
+    task cfg_phase(uvm_phase_schedule phase);
+      start_my_cfg = $time;
+      `uvm_info("MYCFG", "IN MY CFG", UVM_NONE)
+      #30 `uvm_info("MYCFG", "END MY CFG", UVM_NONE)
+      end_my_cfg = $time;
+    endtask
+  endclass
+
 
   // Normal environment adds the two sub component.
   class myenv extends uvm_component;
@@ -195,8 +159,8 @@ module test;
       mc = new("mc", this);
       oc = new("oc", this);
     endfunction
-    function void connect_phase;
-      my_cfg_phase#(mycomp) mc_imp = new("mc_imp");
+    function void connect_phase();
+      my_cfg_phase mc_imp = new;
       mc.set_phase_imp(cfg_imp,mc_imp);
     endfunction
     task run_phase(uvm_phase_schedule phase);
@@ -204,6 +168,7 @@ module test;
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
     endtask
   endclass
+
 
   // Normal test that contains just the one env.
   class test extends uvm_component;
