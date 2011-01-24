@@ -151,19 +151,19 @@ module test;
       #delay `uvm_info("MYCFG", "END MY CFG", UVM_NONE)
       end_my_cfg = $time;
     endtask
-    task reset_phase(uvm_phase_schedule phase);
+    task reset_phase(uvm_phase phase);
       start_reset = $time;
       `uvm_info("RST", "IN RESET", UVM_NONE)
       #delay `uvm_info("RST", "END RESET", UVM_NONE)
       end_reset = $time;
     endtask
-    task pre_configure_phase(uvm_phase_schedule phase);
+    task pre_configure_phase(uvm_phase phase);
       start_pre_configure = $time;
       `uvm_info("PRECFG", "IN PRECFG", UVM_NONE)
       #(60 - delay) `uvm_info("PRECFG", "END PRECFG", UVM_NONE)
       end_pre_configure = $time;
     endtask
-    task configure_phase(uvm_phase_schedule phase);
+    task configure_phase(uvm_phase phase);
       start_configure = $time;
       `uvm_info("CFG", "IN CONFIGURE", UVM_NONE)
       #delay `uvm_info("CFG", "END CONFIGURE", UVM_NONE)
