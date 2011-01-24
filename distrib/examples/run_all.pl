@@ -36,6 +36,7 @@ Examples:
 
    $0 make -f Makefile.vcs
    $0 make -f Makefile.questa
+   $0 make -f Makefile.ius
 
 USAGE
    exit(1);

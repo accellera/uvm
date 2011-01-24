@@ -116,12 +116,14 @@ module test;
       uvm_phase_schedule config_p = uvm_p.find_schedule("configure");
       uvm_phase_schedule main_p = uvm_p.find_schedule("main");
 
+      `uvm_info("TEST_RUN","Setting up objections to certain phases",UVM_NONE)
       //Do the raise, wait, drop for each phase
       fork
         do_phase_test(reset_p);
         do_phase_test(config_p);
         do_phase_test(main_p);
       join
+      `uvm_info("TEST_RUN","Ending run phase",UVM_NONE)
     endtask
 
     task do_phase_test(uvm_phase_schedule phase);

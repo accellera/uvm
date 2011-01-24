@@ -5,7 +5,7 @@ Format: Development Release 01-12-2008 (1.35 base)
 # Title: [project name]
 # SubTitle: [subtitle]
 
-Footer: Copyright 2008-2010 Mentor Graphics Corp., Copyright 2008-2010 Cadence Design Systems, Inc., Copyright 2010 Synopsys, Inc.
+Footer: Copyright 2008-2011 Mentor Graphics Corp., Copyright 2008-2011 Cadence Design Systems, Inc., Copyright 2011 Synopsys, Inc.
 Timestamp: Updated month day, year
 #   m     - One or two digit month.  January is "1"
 #   mm    - Always two digit month.  January is "01"
@@ -43,13 +43,7 @@ Timestamp: Updated month day, year
 # --------------------------------------------------------------------------
 
 
-File: Intro  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/intro.txt)
-
-Group: Globals  {
-
-   File: Types, Enums, Policies  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_object_globals.svh)
-   File: Globals  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_globals.svh)
-   }  # Group: Globals
+File: Classes and Utilities  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/intro.txt)
 
 Group: Base  {
 
@@ -59,8 +53,8 @@ Group: Base  {
    File: uvm_transaction  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_transaction.svh)
    File: uvm_root  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_root.svh)
    File: uvm_port_base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_port_base.svh)
-   File: Phasing  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_phases.svh)
    File: uvm_graph  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_graph.svh)
+   File: Phasing  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_phases.svh)
    }  # Group: Base
 
 Group: Reporting  {
@@ -255,6 +249,12 @@ Group: Command Line Processor  {
    File: Overview  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/uvm_ref/cmdlineproc.txt)
    File: uvm_cmdline_processor  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_cmdline_processor.svh)
    }  # Group: Command Line Processor
+
+Group: Globals  {
+
+   File: Types, Enums, Policies  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_object_globals.svh)
+   File: Globals  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_globals.svh)
+   }  # Group: Globals
 
 Group: Index  {
 

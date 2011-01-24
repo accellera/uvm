@@ -43,7 +43,7 @@ class bot_driver extends uvm_driver#(bot_item);
     super.new(name, parent);
   endfunction : new
 
-  virtual task run_phase();
+  virtual task run_phase(uvm_phase_schedule phase);
     fork
       get_and_drive();
       reset_signals();
@@ -83,8 +83,10 @@ class bot_driver extends uvm_driver#(bot_item);
     disable reset_signals;
   endtask : stop_driving
 
-  task post_shutdown_phase();
+  task post_shutdown_phase(uvm_phase_schedule phase);
+    phase.raise_objection(this);
     stop_driving();
+    phase.drop_objection(this);
   endtask : post_shutdown_phase
 
 endclass : bot_driver

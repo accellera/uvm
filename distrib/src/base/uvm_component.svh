@@ -103,9 +103,8 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: get_children
   //
-  // This function fills up the ~children~ array with the list of
-  // this component's children. On return, the ~children~ array will
-  // contain only the immediate children of this component.
+  // This function populates the end of the ~children~ array with the 
+  // list of this component's children. 
   //
   //|   uvm_component array[$];
   //|   my_comp.get_children(array);
@@ -618,7 +617,7 @@ virtual class uvm_component extends uvm_report_object;
   // immediate killing of its run-time processes should set this bit and
   // implement the stop task to prepare for shutdown.
 
-  protected int enable_stop_interrupt = 0;
+  int enable_stop_interrupt = 0;
 
 
   // Function: resolve_bindings
@@ -1684,7 +1683,6 @@ endfunction
 // ------------
 
 function void uvm_component::get_children(ref uvm_component children[$]);
-  children.delete();
   foreach(m_children[i]) 
     children.push_back(m_children[i]);
 endfunction

@@ -957,8 +957,8 @@ endclass
 
 virtual class uvm_task_phase extends uvm_phase_imp;
 
-  int procs_not_yet_started;
-  int num_procs_not_yet_returned;
+  int m_procs_not_yet_started;
+  int m_num_procs_not_yet_returned;
 
   // Function: new
   //
@@ -979,8 +979,8 @@ virtual class uvm_task_phase extends uvm_phase_imp;
   virtual function void traverse(uvm_component comp,
                                  uvm_phase_schedule phase,
                                  uvm_phase_state state);
-    procs_not_yet_started = 0;
-    num_procs_not_yet_returned = 0;
+    m_procs_not_yet_started = 0;
+    m_num_procs_not_yet_returned = 0;
     m_traverse(comp, phase, state);
   endfunction
 
@@ -1031,7 +1031,7 @@ virtual class uvm_task_phase extends uvm_phase_imp;
   protected virtual function void execute(uvm_component comp,
                                           uvm_phase_schedule phase);
 
-    procs_not_yet_started++;
+    m_procs_not_yet_started++;
 
     fork
       begin
@@ -1042,11 +1042,11 @@ virtual class uvm_task_phase extends uvm_phase_imp;
         // for this component instance in the executing phase
         thread = new(phase,comp);
 
-        procs_not_yet_started--;
-        num_procs_not_yet_returned++;
+        m_procs_not_yet_started--;
+        m_num_procs_not_yet_returned++;
 
         // hold back everybody until all reach this point; a kind of barrier
-        wait(procs_not_yet_started==0);
+        wait(m_procs_not_yet_started==0);
 
         if ($cast(seqr,comp))
           seqr.start_phase_sequence(phase);
@@ -1057,10 +1057,10 @@ virtual class uvm_task_phase extends uvm_phase_imp;
         // inform the thread manager the task returned
         thread.task_ended();
 
-        num_procs_not_yet_returned--;
+        m_num_procs_not_yet_returned--;
 
         // let somebody else decide when to kill (based on objections)
-        wait(0);
+        //wait(0);
 
       end
     join_none
@@ -1157,8 +1157,8 @@ class uvm_phase_thread extends uvm_process;
     m_phase = phase;
     m_comp  = comp;
 
-    assert (!m_comp.m_phase_threads.exists(m_phase)); // sanity check
-    assert (!m_phase.m_threads.exists(m_comp));       // sanity check
+    //assert (!m_comp.m_phase_threads.exists(m_phase)); // sanity check
+    //assert (!m_phase.m_threads.exists(m_comp));       // sanity check
 
     m_comp.m_phase_threads[m_phase] = this;
     m_phase.m_threads[m_comp] = this;
@@ -1348,7 +1348,6 @@ class uvm_phase_schedule extends uvm_graph;
   // Function: raise_objection
   //
   // Raise an objection to ending this phase
-  //
   // Components es greater control over the phase flow for
   // processes which are not implicit objectors to the phase.
   //
@@ -1501,12 +1500,13 @@ class uvm_phase_schedule extends uvm_graph;
   uvm_phase_imp            m_phase;         // phase imp to call when we execute this node
   uvm_objection            phase_done;      // phase done objection
   uvm_phase_thread         m_threads[uvm_component]; // all active process threads
-  uvm_phase_thread         m_persistent_threads[uvm_component];
+  event                    m_ready_to_end;
 
 
   local static mailbox #(uvm_phase_schedule) m_phase_hopper = new();
   local static uvm_process m_phase_top_procs[uvm_phase_schedule];
-  static bit m_has_rt_phases=0;
+  local bit m_exit_on_task_return = 0;
+  static bit m_has_rt_phases;
 
   extern static task m_run_phases();
 
@@ -1535,12 +1535,20 @@ endclass
 //------------------------------------------------------------------------------
 //                               IMPLEMENTATION
 //------------------------------------------------------------------------------
+typedef class uvm_cmdline_processor;
 
 // new
 // ---
 
 function uvm_phase_schedule::new(string name, uvm_phase_schedule parent=null);
+  string trace_args[$];
+  uvm_cmdline_processor clp;
+
   super.new(name);
+
+  clp = uvm_cmdline_processor::get_inst();
+  if(clp.get_arg_matches("+UVM_EXIT_RUN_ON_TASK_RETURN", trace_args))
+    m_exit_on_task_return = 1;
 
   if (name == "run") begin
     phase_done = uvm_test_done_objection::get();
@@ -1947,6 +1955,10 @@ task uvm_phase_schedule::execute();
  
   if (m_phase != null) begin
 
+    // TODO: Needed?
+    if (m_phase.get_name() == "run")
+      phase_done = uvm_test_done_objection::get();
+
     //---------
     // STARTED:
     //---------
@@ -1971,58 +1983,66 @@ task uvm_phase_schedule::execute();
       uvm_task_phase task_phase;
       assert($cast(task_phase,m_phase));
 
-      fork begin : master_phase_process
+      fork : master_phase_process
+        begin
 
-        m_phase_proc = process::self();
+          m_phase_proc = process::self();
 
-        //-----------
-        // EXECUTING: (task phases)
-        //-----------
-        m_state = UVM_PHASE_EXECUTING;
-        task_phase.traverse(top,this,UVM_PHASE_EXECUTING);
+          //-----------
+          // EXECUTING: (task phases)
+          //-----------
+          m_state = UVM_PHASE_EXECUTING;
+          task_phase.traverse(top,this,UVM_PHASE_EXECUTING);
 
-        wait (task_phase.procs_not_yet_started == 0);
+          wait(0); // stay alive for later kill
 
-        if (top.phase_timeout == 0)  begin
-          if (phase_done.get_objection_total()) begin
-            //$display("** WAITING FOR OBJECTION COUNT->0 from %0d",phase_done.get_objection_total());
-            phase_done.wait_for(UVM_ALL_DROPPED, top);
-          end
-          else begin
-            //$display("** WAITING FOR ALL PROCS TO RETURN");
-            wait (task_phase.num_procs_not_yet_returned == 0);
-          end
         end
-        // phase timeout is non-zero, so we must establish a timeout watchdog
-        else begin
-          fork
-          begin // guard
-             fork
-               begin
-                 // Process 1: wait for no objections
-                 if (phase_done.get_objection_total()) begin
-                   //$display("** WAITING FOR OBJECTION COUNT->0 from %0d",phase_done.get_objection_total());
-                   phase_done.wait_for(UVM_ALL_DROPPED, top);
-                 end
-                 else begin
-                   //$display("** WAITING FOR ALL PROCS TO RETURN");
-                   wait (task_phase.num_procs_not_yet_returned == 0);
-                 end
-               end
-               // Process 2: timeout watchdog
-               begin
-                 #(top.phase_timeout) `uvm_error("PH_TIMEOUT",
-                     $sformatf("Phase timeout of %t hit, ending test", top.phase_timeout))
-                 top.m_stop_request(0,.forced(1));
-               end
-             join_any
-             disable fork;
-          end
-          join // guard
-        end
+      join_none
 
-      end : master_phase_process
-      join
+      uvm_wait_for_nba_region(); //Give sequences, etc. a chance to object
+      wait (task_phase.m_procs_not_yet_started == 0);
+
+      // Now wait for one of three criterion for end-of-phase.
+      fork
+      begin // guard
+         fork
+           // EXIT CRITERIA 1: All objections dropped
+           begin
+             phase_done.wait_for(UVM_ALL_DROPPED, top);
+	      `uvm_info("PH_EXIT-1", $psprintf("PHASE EXIT CRIETRIA %0s (in schedule %0s) %0d",
+                      this.get_name(),this.get_schedule_name(), get_inst_id()), UVM_DEBUG);
+           end
+           // EXIT CRITERIA 2: All phase tasks return and no objections
+           begin
+               if (m_exit_on_task_return || m_phase.get_name() != "run") begin
+                 wait (task_phase.m_num_procs_not_yet_returned == 0);
+                 if (phase_done.get_objection_total() != 0)
+                   wait (0);
+	      `uvm_info("PH_EXIT-2.1", $psprintf("PHASE EXIT CRIETRIA %0s (in schedule %0s) %0d",
+                      this.get_name(),this.get_schedule_name(), get_inst_id()), UVM_DEBUG);
+               end else
+               begin 
+		  wait (0);
+	      `uvm_info("PH_EXIT-2.2", $psprintf("PHASE EXIT CRIETRIA %0s (in schedule %0s) %0d",
+                      this.get_name(),this.get_schedule_name(), get_inst_id()), UVM_DEBUG);
+		  end
+           end
+           // EXIT CRITERIA 3: Phase timeout
+           begin
+             if (top.phase_timeout == 0)
+               wait(top.phase_timeout != 0);
+             #(top.phase_timeout);
+             `uvm_error("PH_TIMEOUT",
+                 $sformatf("Phase timeout of %0t hit, phase '%s' ready to end",
+                           top.phase_timeout, get_name()))
+             phase_done.clear(this);
+            `uvm_info("PH_EXIT-3", $psprintf("PHASE EXIT CRIETRIA %0s (in schedule %0s) %0d",
+                      this.get_name(),this.get_schedule_name(), get_inst_id()), UVM_DEBUG);
+           end
+         join_any
+         disable fork;
+      end
+      join // guard
 
     end
 
@@ -2033,9 +2053,10 @@ task uvm_phase_schedule::execute();
   //--------------
   // Phase exit criterion met (no objections)
   // stay in READY_TO_END state for at least a delta
-  `uvm_info("PH_READY_TO_END", $psprintf("PHASE READY TO END %0s (in schedule %0s)",
-                      this.get_name(),this.get_schedule_name()), UVM_DEBUG);
+  `uvm_info("PH_READY_TO_END", $psprintf("PHASE READY TO END %0s (in schedule %0s) %0d",
+                      this.get_name(),this.get_schedule_name(), get_inst_id()), UVM_DEBUG);
   m_state = UVM_PHASE_READY_TO_END;
+  ->m_ready_to_end;
 
 
   //-----------------------
@@ -2044,25 +2065,28 @@ task uvm_phase_schedule::execute();
   // to our successor(s) to be ready to proceed
   //$display("  ** Successors to phase '",get_name(),"':");
   //foreach (m_successors[i])
-    //$display("  **   ",m_successors[i].get_name());
+  //  $display("  **   ",m_successors[i].get_name());
   begin
-  bit pred_of_succ[uvm_graph];
+    bit pred_of_succ[uvm_graph];
 
-  foreach (m_successors[i]) begin
-    uvm_graph succ = m_successors[i];
-    foreach(succ.m_predecessors[j])
-      pred_of_succ[ succ.m_predecessors[j] ] = 1;
-  end
-  pred_of_succ.delete(this);
-  foreach (pred_of_succ[pred]) begin
-    uvm_phase_schedule sched;
-    assert($cast(sched, pred));
-    //$display("  ** Waiting for phase '",sched.get_name(),"' to be ready to end");
-    //$display("  **    Current state is ",sched.m_state.name());
-    wait (sched.m_state == UVM_PHASE_READY_TO_END);
-    #0; // prevents any waiters from falling through until all reach ready-to-end
-    //$display("  ** Released: Phase '",sched.get_name(),"' is now ready to end");
-  end
+    foreach (m_successors[i]) begin
+      uvm_graph succ = m_successors[i];
+      foreach(succ.m_predecessors[j])
+        pred_of_succ[ succ.m_predecessors[j] ] = 1;
+    end
+    pred_of_succ.delete(this);
+    foreach (pred_of_succ[pred]) begin
+      uvm_phase_schedule sched;
+      assert($cast(sched, pred));
+      //$display("  ** ", get_name(), " Waiting for phase '",
+      //   sched.get_name(),"' (",sched.get_inst_id(),") to be ready to end");
+      //$display("  ** ", get_name(), "    Current state is ",sched.m_state.name());
+      if (sched.m_state != UVM_PHASE_READY_TO_END)
+        //wait (sched.m_state == UVM_PHASE_READY_TO_END);
+        wait(sched.m_ready_to_end.triggered);
+      #0; // prevents any waiters from falling through until all reach ready-to-end
+      //$display("  ** ", get_name(), " Released: Phase '",sched.get_name(),"' is now ready to end");
+    end
   end
   #0; // LET ANY WAITERS WAKE UP
 
@@ -2084,8 +2108,10 @@ task uvm_phase_schedule::execute();
   //---------
   // kill this phase's threads
   m_state = UVM_PHASE_CLEANUP;
-  if (m_phase_proc != null)
+  if (m_phase_proc != null) begin
     m_phase_proc.kill();
+    m_phase_proc = null;
+  end
   #0; // LET ANY WAITERS WAKE UP
 
 

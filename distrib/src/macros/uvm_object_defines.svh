@@ -564,19 +564,19 @@
           end \
         end \
       UVM_PACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           if($bits(ARG) <= 64) m_sc.packer.pack_field_int(ARG, $bits(ARG)); \
           else m_sc.packer.pack_field(ARG, $bits(ARG)); \
         end \
       UVM_UNPACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           if($bits(ARG) <= 64) ARG =  m_sc.packer.unpack_field_int($bits(ARG)); \
           else ARG = m_sc.packer.unpack_field($bits(ARG)); \
         end \
       UVM_RECORD: \
         `m_uvm_record_int(ARG, FLAG) \
       UVM_PRINT: \
-        begin \
+        if(!((FLAG)&UVM_NOPRINT)) begin \
           m_sc.printer.print_int(`"ARG`", ARG, $bits(ARG), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
         end \
       UVM_SETINT: \
@@ -620,7 +620,7 @@
         begin \
           if(local_data__ == null) return; \
           if(!((FLAG)&UVM_NOCOPY)) begin \
-            if((FLAG)&UVM_REFERENCE) ARG = local_data__.ARG; \
+            if((FLAG)&UVM_REFERENCE || local_data__.ARG == null) ARG = local_data__.ARG; \
             else begin \
               if(local_data__.ARG.get_name() == "") local_data__.ARG.set_name(`"ARG`"); \
               $cast(ARG, local_data__.ARG.clone()); \
@@ -637,12 +637,12 @@
           end \
         end \
       UVM_PACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           if(((FLAG)&UVM_NOPACK) == 0 && ((FLAG)&UVM_REFERENCE) == 0) \
             m_sc.packer.pack_object(ARG); \
         end \
       UVM_UNPACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           if(((FLAG)&UVM_NOPACK) == 0 && ((FLAG)&UVM_REFERENCE) == 0) \
             m_sc.packer.unpack_object(ARG); \
         end \
@@ -735,17 +735,17 @@
           end \
         end \
       UVM_PACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           m_sc.packer.pack_string(ARG); \
         end \
       UVM_UNPACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           ARG = m_sc.packer.unpack_string(); \
         end \
       UVM_RECORD: \
         `m_uvm_record_string(ARG, ARG, FLAG) \
       UVM_PRINT: \
-        begin \
+        if(!((FLAG)&UVM_NOPRINT)) begin \
           m_sc.printer.print_string(`"ARG`", ARG); \
         end \
       UVM_SETSTR: \
@@ -802,17 +802,17 @@
           end \
         end \
       UVM_PACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           m_sc.packer.pack_field(ARG, $bits(ARG)); \
         end \
       UVM_UNPACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           ARG =  T'(m_sc.packer.unpack_field_int($bits(ARG))); \
         end \
       UVM_RECORD: \
         `m_uvm_record_string(ARG, ARG.name(), FLAG) \
       UVM_PRINT: \
-        begin \
+        if(!((FLAG)&UVM_NOPRINT)) begin \
           m_sc.printer.print_generic(`"ARG`", `"T`", $bits(ARG), ARG.name()); \
         end \
       UVM_SETINT: \
@@ -865,11 +865,11 @@
           end \
         end \
       UVM_PACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           m_sc.packer.pack_field_int($realtobits(ARG), 64); \
         end \
       UVM_UNPACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           ARG = $bitstoreal(m_sc.packer.unpack_field_int(64)); \
         end \
       UVM_RECORD: \
@@ -877,7 +877,7 @@
           m_sc.recorder.record_field_real(`"ARG`", ARG); \
         end \
       UVM_PRINT: \
-        begin \
+        if(!((FLAG)&UVM_NOPRINT)) begin \
           m_sc.printer.print_real(`"ARG`", ARG); \
         end \
       UVM_SETINT: \
@@ -929,18 +929,18 @@
           end \
         end \
       UVM_PACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           // Events aren't packed or unpacked  \
         end \
       UVM_UNPACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
         end \
       UVM_RECORD: \
         begin \
           // Events are not recorded  \
         end \
       UVM_PRINT: \
-        begin \
+        if(!((FLAG)&UVM_NOPRINT)) begin \
           m_sc.printer.print_generic(`"ARG`", "event", -1, ""); \
         end \
       UVM_SETINT: \
@@ -1005,13 +1005,13 @@
           end \
         end \
       UVM_PACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           foreach(ARG[i])  \
             if($bits(ARG[i]) <= 64) m_sc.packer.pack_field_int(ARG[i], $bits(ARG[i])); \
             else m_sc.packer.pack_field(ARG[i], $bits(ARG[i])); \
         end \
       UVM_UNPACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           foreach(ARG[i]) \
             if($bits(ARG[i]) <= 64) ARG[i] = m_sc.packer.unpack_field_int($bits(ARG[i])); \
             else ARG[i] = m_sc.packer.unpack_field($bits(ARG[i])); \
@@ -1019,7 +1019,7 @@
       UVM_RECORD: \
         `m_uvm_record_qda_int(ARG, FLAG, $size(ARG))  \
       UVM_PRINT: \
-        begin \
+        if(!((FLAG)&UVM_NOPRINT)) begin \
           if(((FLAG)&UVM_NOPRINT) == 0) begin \
              `uvm_print_sarray_int3(ARG, uvm_radix_enum'((FLAG)&(UVM_RADIX)), \
                                    m_sc.printer) \
@@ -1115,12 +1115,12 @@
           end \
         end \
       UVM_PACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           foreach(ARG[i])  \
             void'(m_sc.packer.pack_object(ARG[i])); \
         end \
       UVM_UNPACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           foreach(ARG[i]) \
             void'(m_sc.packer.unpack_object(ARG[i])); \
         end \
@@ -1210,12 +1210,12 @@
           end \
         end \
       UVM_PACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           foreach(ARG[i])  \
             m_sc.packer.pack_string(ARG[i]); \
         end \
       UVM_UNPACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           foreach(ARG[i]) \
             ARG[i] = m_sc.packer.unpack_string(); \
         end \
@@ -1310,12 +1310,12 @@
           end \
         end \
       UVM_PACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           foreach(ARG[i])  \
             m_sc.packer.pack_field_int(int'(ARG[i]), $bits(ARG[i])); \
         end \
       UVM_UNPACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           foreach(ARG[i]) \
             ARG[i] = T'(m_sc.packer.unpack_field_int($bits(ARG[i]))); \
         end \
@@ -1438,14 +1438,14 @@
           end \
         end \
       UVM_PACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           /**/ if(m_sc.packer.use_metadata) m_sc.packer.pack_field_int(ARG.size(), 32); \
           foreach(ARG[i])  \
             if($bits(ARG[i]) <= 64) m_sc.packer.pack_field_int(ARG[i], $bits(ARG[i])); \
             else m_sc.packer.pack_field(ARG[i], $bits(ARG[i])); \
         end \
       UVM_UNPACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           /**/ int sz = ARG.size(); \
           /**/ if(m_sc.packer.use_metadata) sz = m_sc.packer.unpack_field_int(32); \
           if(sz != ARG.size()) begin \
@@ -1577,13 +1577,13 @@
           end \
         end \
       UVM_PACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           if(m_sc.packer.use_metadata) m_sc.packer.pack_field_int(ARG.size(), 32); \
           foreach(ARG[i])  \
             void'(m_sc.packer.pack_object(ARG[i])); \
         end \
       UVM_UNPACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           int sz = ARG.size(); \
           if(m_sc.packer.use_metadata) sz = m_sc.packer.unpack_field_int(32); \
           if(sz != ARG.size()) begin \
@@ -1705,13 +1705,13 @@
           end \
         end \
       UVM_PACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           if(m_sc.packer.use_metadata) m_sc.packer.pack_field_int(ARG.size(), 32); \
           foreach(ARG[i])  \
             m_sc.packer.pack_string(ARG[i]); \
         end \
       UVM_UNPACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           int sz = ARG.size(); \
           if(m_sc.packer.use_metadata) sz = m_sc.packer.unpack_field_int(32); \
           if(sz != ARG.size()) begin \
@@ -1822,13 +1822,13 @@
           end \
         end \
       UVM_PACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           /**/if(m_sc.packer.use_metadata) m_sc.packer.pack_field_int(ARG.size(), 32); \
           foreach(ARG[i])  \
             m_sc.packer.pack_field_int(int'(ARG[i]), $bits(ARG[i])); \
         end \
       UVM_UNPACK: \
-        begin \
+        if(!((FLAG)&UVM_NOPACK)) begin \
           /**/int sz = ARG.size(); \
           /**/if(m_sc.packer.use_metadata) sz = m_sc.packer.unpack_field_int(32); \
           /**/if(sz != ARG.size()) begin \
@@ -2441,8 +2441,10 @@
             end \
           end \
         UVM_PRINT: \
-          `uvm_print_aa_``KEY``_``TYPE``3(ARG, uvm_radix_enum'((FLAG)&(UVM_RADIX)), \
-             m_sc.printer) \
+          if(!((FLAG)&UVM_NOPRINT)) begin \
+            `uvm_print_aa_``KEY``_``TYPE``3(ARG, uvm_radix_enum'((FLAG)&(UVM_RADIX)), \
+                                            m_sc.printer) \
+          end \
       endcase \
     end \
   end
@@ -2503,8 +2505,10 @@
             end \
           end \
         UVM_PRINT: \
-          `uvm_print_aa_int_key4(KEY,ARG, uvm_radix_enum'((FLAG)&(UVM_RADIX)), \
-             m_sc.printer) \
+          if(!((FLAG)&UVM_NOPRINT)) begin \
+             `uvm_print_aa_int_key4(KEY,ARG, uvm_radix_enum'((FLAG)&(UVM_RADIX)), \
+                                    m_sc.printer) \
+          end \
       endcase \
     end \
   end
@@ -2552,7 +2556,7 @@
             end \
           end \
         UVM_PRINT: \
-          begin \
+          if(!((FLAG)&UVM_NOPRINT)) begin \
             uvm_printer p__ = m_sc.printer; \
             p__.print_array_header (`"ARG`", ARG.num(),`"aa_``KEY`"); \
             if((p__.knobs.depth == -1) || (m_sc.printer.m_scope.depth() < p__.knobs.depth+1)) \
@@ -2641,7 +2645,9 @@
            end \
           end \
         UVM_PRINT: \
-          `uvm_print_aa_string_object3(ARG, m_sc.printer,FLAG) \
+          if(!((FLAG)&UVM_NOPRINT)) begin \
+            `uvm_print_aa_string_object3(ARG, m_sc.printer,FLAG) \
+          end \
       endcase \
     end \
   end
@@ -2721,7 +2727,9 @@
            end \
          end \
         UVM_PRINT: \
-          `uvm_print_aa_int_object3(ARG, m_sc.printer,FLAG) \
+          if(!((FLAG)&UVM_NOPRINT)) begin \
+             `uvm_print_aa_int_object3(ARG, m_sc.printer,FLAG) \
+          end \
       endcase \
     end \
   end
@@ -2740,7 +2748,9 @@
               ARG = local_data__.ARG ; \
           end \
         UVM_PRINT: \
-          `uvm_print_aa_string_string2(ARG, m_sc.printer) \
+          if(!((FLAG)&UVM_NOPRINT)) begin \
+            `uvm_print_aa_string_string2(ARG, m_sc.printer) \
+          end \
         UVM_COMPARE: \
            begin \
             if(!((FLAG)&UVM_NOCOMPARE) && (tmp_data__ != null) ) \
@@ -2906,6 +2916,8 @@
 `endif //!UVM_EMPTY_MACROS
 
 
+
+
 //------------------------------------------------------------------------------
 // Group: Recording Macros
 //------------------------------------------------------------------------------
@@ -2937,8 +2949,9 @@
 // to an existing handle to a recording database transaction.
 
 `define uvm_record_field(NAME,VALUE) \
-   if (recorder != null && recorder.tr_handle != 0) \
-     `uvm_record_attribute(recorder.tr_handle,NAME,VALUE)
+   if (recorder != null && recorder.tr_handle != 0) begin \
+     `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+   end
 
 //------------------------------------------------------------------------------
 // Group: Packing Macros
@@ -2978,8 +2991,8 @@
 //
 `define uvm_pack_string(VAR) \
     begin \
-    `uvm_pack_int(VAR.len(),32) \
     `uvm_pack_sarray(VAR,8) \
+    `uvm_pack_intN(0,8) \
     end
 
 
@@ -3069,13 +3082,14 @@
 //
 `define uvm_unpack_string(VAR) \
     begin \
-    int sz; \
+    bit [7:0] char; \
     VAR = ""; \
-    `uvm_unpack_intN(sz,32) \
-    for (int i=0; i<sz; i++) begin \
-      VAR[i]=packer.m_bits[packer.count+:8]; \
+    do begin \
+      char = packer.m_bits[packer.count+:8]; \
       packer.count += 8; \
-    end \
+      if (char != 0) \
+        VAR = {VAR, char}; \
+    end while (char != 0); \
     end
 
 
@@ -3153,4 +3167,5 @@
 
 
 `endif  // UVM_OBJECT_DEFINES_SVH
+
 

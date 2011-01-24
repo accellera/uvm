@@ -7,7 +7,7 @@ class test extends test_base;
   function new(string name = "01simple", uvm_component parent = null);
     super.new(name, parent);
   endfunction : new
-  `uvm_component_utils(test);
+  `uvm_component_utils(test)
 
   function void check_phase();
     //normal test
