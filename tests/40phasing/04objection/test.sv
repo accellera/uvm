@@ -131,7 +131,7 @@ module test;
       phase.raise_objection(this, {"test ", phase.get_name(), " objection"});
      
       //Wait for phase to be started
-      wait(phase.get_state() == UVM_PHASE_EXECUTING);
+       phase.wait_for_state(UVM_PHASE_EXECUTING, EQ);
 
       //Wait for the desired time 
       #(phase_transition_time);

@@ -552,6 +552,8 @@ typedef class uvm_topdown_phase;
 typedef class uvm_bottomup_phase;
 typedef class uvm_task_phase;
 typedef class uvm_phase;
+typedef enum {LT=-1,NONEQ=0,EQ=1,GT=2} operand; //used for wait_for_state
+
 
 `uvm_builtin_topdown_phase(build)
 `uvm_builtin_bottomup_phase(connect)
@@ -1288,6 +1290,13 @@ class uvm_phase extends uvm_graph;
   extern function uvm_phase_state get_state();
 
 
+  // Function: m_wait_for_state
+  //
+  // Internal Accessor to return wait for current state of this phase to match operand requirement
+  //
+  extern task wait_for_state(uvm_phase_state m_wait_for_state, operand m_op=1);
+
+   
   // Function: add_phase
   //
   // Build up a schedule structure inserting phase by phase, specifying linkage
@@ -1603,6 +1612,17 @@ function uvm_phase_state uvm_phase::get_state();
   return m_state;
 endfunction
 
+// wait_for_state
+// ---------
+
+task uvm_phase::wait_for_state(uvm_phase_state m_wait_for_state, operand m_op=1);
+case (m_op)
+  LT:     wait(m_wait_for_state  < m_state);
+  NONEQ:  wait(m_wait_for_state != m_state);
+  EQ:     wait(m_wait_for_state == m_state);
+  GT:     wait(m_wait_for_state  > m_state);
+endcase
+endtask
 
 // add_phase
 // ---------

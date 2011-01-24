@@ -161,14 +161,14 @@ module test;
       end
 
       //Wait for phase to be started
-      wait(phase.get_state() == UVM_PHASE_EXECUTING);
+       phase.wait_for_state(UVM_PHASE_EXECUTING, EQ);
       start_cnt++;
       if($time != start_time) begin
         failed = 1;
         `uvm_error("START", $sformatf("Expected start time of %0t for phase %s, got %0t", start_time, phase.get_name(), $time))
       end
 
-      wait(phase.get_state() == UVM_PHASE_DONE);
+       phase.wait_for_state(UVM_PHASE_DONE, EQ);
       end_cnt++;
       if($time != start_time+phase_transition_time) begin
         failed = 1;
