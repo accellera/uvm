@@ -459,14 +459,14 @@ typedef enum { UVM_PHASE_NO_IMPLICIT_OBJECTION,
 //|        |          <-- jump_to                              v
 //|        +---------------------------------------------------+
 
-   typedef enum { UVM_PHASE_DORMANT,
-                  UVM_PHASE_SCHEDULED,
-                  UVM_PHASE_STARTED,
-                  UVM_PHASE_EXECUTING,
-                  UVM_PHASE_READY_TO_END,
-                  UVM_PHASE_ENDED,
-                  UVM_PHASE_CLEANUP,
-                  UVM_PHASE_DONE
+   typedef enum { UVM_PHASE_DORMANT      = 1,
+                  UVM_PHASE_SCHEDULED    = 2,
+                  UVM_PHASE_STARTED      = 4,
+                  UVM_PHASE_EXECUTING    = 8,
+                  UVM_PHASE_READY_TO_END = 16,
+                  UVM_PHASE_ENDED        = 32,
+                  UVM_PHASE_CLEANUP      = 64,
+                  UVM_PHASE_DONE         = 128
                   } uvm_phase_state;
 
 
@@ -486,6 +486,26 @@ typedef enum { UVM_COMPLETED   = 'h01,
                UVM_SKIPPED     = 'h04, 
                UVM_RERUN       = 'h08   
 } uvm_phase_transition;
+
+
+// Enum: uvm_wait_op
+//
+// Specifies the operand when using methods like <uvm_phase::wait_for_state>.
+//
+// UVM_EQ  - equal
+// UVM_NE  - not equal
+// UVM_LT  - less than
+// UVM_LTE - less than or equal to
+// UVM_GT  - greater than
+// UVM_GTE - greater than or equal to
+//
+typedef enum { UVM_LT,
+               UVM_LTE,
+               UVM_NE,
+               UVM_EQ,
+               UVM_GT,
+               UVM_GTE
+} uvm_wait_op;
 
 
 //------------------

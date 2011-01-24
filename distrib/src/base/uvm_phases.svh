@@ -552,7 +552,6 @@ typedef class uvm_topdown_phase;
 typedef class uvm_bottomup_phase;
 typedef class uvm_task_phase;
 typedef class uvm_phase;
-typedef enum {LT=-1,NONEQ=0,EQ=1,GT=2} operand; //used for wait_for_state
 
 
 `uvm_builtin_topdown_phase(build)
@@ -1290,13 +1289,6 @@ class uvm_phase extends uvm_graph;
   extern function uvm_phase_state get_state();
 
 
-  // Function: m_wait_for_state
-  //
-  // Internal Accessor to return wait for current state of this phase to match operand requirement
-  //
-  extern task wait_for_state(uvm_phase_state m_wait_for_state, operand m_op=1);
-
-   
   // Function: add_phase
   //
   // Build up a schedule structure inserting phase by phase, specifying linkage
@@ -1450,6 +1442,26 @@ class uvm_phase extends uvm_graph;
                               uvm_phase_imp after_phase=null,
                               uvm_phase_imp before_phase=null);
 
+
+
+  // Function: wait_for_state
+  //
+  // Wait until this phase compares with the given ~state~ and ~op~ operand.
+  // For <UVM_EQ> and <UVM_NE> operands, several <uvm_phase_states> can be
+  // supplied by ORing their enum constants, in which case the caller will
+  // wait until the phase state is any of (UVM_EQ) or none of (UVM_NE) the
+  // provided states.
+  //
+  // To wait for the phase to be at the started state or after
+  //
+  //| wait_for_state(UVM_PHASE_STARTED, UVM_GT);
+  //
+  // To wait for the phase to be either started or executing
+  //
+  //| wait_for_state(UVM_PHASE_STARTED | UVM_PHASE_EXECUTING, UVM_EQ);
+  //
+  extern task wait_for_state(uvm_phase_state state, uvm_wait_op op=UVM_EQ);
+   
   //---------------
   // Group: Jumping
   //---------------
@@ -1519,15 +1531,16 @@ class uvm_phase extends uvm_graph;
 
   extern static task m_run_phases();
 
-  extern function void clear       (uvm_phase_state state = UVM_PHASE_DORMANT);
+  extern function void clear (uvm_phase_state state = UVM_PHASE_DORMANT);
   extern function void clear_successors(
-                                   uvm_phase_state state = UVM_PHASE_DORMANT);
+                             uvm_phase_state state = UVM_PHASE_DORMANT);
 
   extern task          execute();
   extern function void terminate_phase();
   extern function void print_termination_state();
   extern function void kill();
   extern function void kill_successors();
+
 
 
   // TBD add more useful debug
@@ -1612,25 +1625,28 @@ function uvm_phase_state uvm_phase::get_state();
   return m_state;
 endfunction
 
-// wait_for_state
-// ---------
 
-task uvm_phase::wait_for_state(uvm_phase_state m_wait_for_state, operand m_op=1);
-case (m_op)
-  LT:     wait(m_wait_for_state  < m_state);
-  NONEQ:  wait(m_wait_for_state != m_state);
-  EQ:     wait(m_wait_for_state == m_state);
-  GT:     wait(m_wait_for_state  > m_state);
-endcase
+// wait_for_state
+// --------------
+
+task uvm_phase::wait_for_state(uvm_phase_state state, uvm_wait_op op=UVM_EQ);
+  case (op)
+    UVM_EQ:  wait(m_state == (state&m_state));
+    UVM_NE:  wait(m_state != (state&m_state));
+    UVM_LT:  wait(m_state <  state);
+    UVM_LTE: wait(m_state <= state);
+    UVM_GT:  wait(m_state >  state);
+    UVM_GTE: wait(m_state >= state);
+  endcase
 endtask
 
 // add_phase
 // ---------
 
 function void uvm_phase::add_phase(uvm_phase_imp phase,
-                                            uvm_phase with_phase=null,
-                                            uvm_phase after_phase=null,
-                                            uvm_phase before_phase=null);
+                                   uvm_phase with_phase=null,
+                                   uvm_phase after_phase=null,
+                                   uvm_phase before_phase=null);
   uvm_phase new_node;
   assert(phase != null);
   new_node = new(phase.get_name(),this);
@@ -1845,8 +1861,7 @@ endfunction
 // clear
 // -----
 // for internal graph maintenance after a forward jump
-function void uvm_phase::clear(
-                                   uvm_phase_state state = UVM_PHASE_DORMANT);
+function void uvm_phase::clear(uvm_phase_state state = UVM_PHASE_DORMANT);
   m_state = state;
   m_phase_proc = null;
   phase_done.clear();
@@ -1858,8 +1873,7 @@ endfunction
 // for internal graph maintenance after a forward jump
 // - called only by execute()
 // - depth-first traversal of the DAG, calliing clear() on each node
-function void uvm_phase::clear_successors(
-                                   uvm_phase_state state = UVM_PHASE_DORMANT);
+function void uvm_phase::clear_successors(uvm_phase_state state = UVM_PHASE_DORMANT);
   clear(state);
   foreach(m_successors[i]) begin
     uvm_phase p;
@@ -1975,7 +1989,7 @@ task uvm_phase::execute();
  
   if (m_phase != null) begin
 
-    // TODO: Needed?
+    // TODO: Find out why needed; this may overwrite any apriori raised objections for the run phase
     if (m_phase.get_name() == "run")
       phase_done = uvm_test_done_objection::get();
 
