@@ -58,6 +58,9 @@ module test;
 
     function new(string name, uvm_component parent);
       super.new(name,parent);
+    endfunction
+
+    function void connect();
       set_phase_domain("uvm");
     endfunction
 
@@ -90,8 +93,11 @@ module test;
 
     function new(string name, uvm_component parent);
       super.new(name,parent);
-      set_phase_domain("uvm");
       delay = 30ns;
+    endfunction
+
+    function void connect();
+      set_phase_domain("uvm");
     endfunction
 
     // The component needs to override teh set_phase_schedule to add
