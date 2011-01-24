@@ -1956,8 +1956,8 @@ task uvm_phase::execute();
   if (m_phase != null) begin
 
     // TODO: Needed?
-    //if (m_phase.get_name() == "run")
-    //  phase_done = uvm_test_done_objection::get();
+    if (m_phase.get_name() == "run")
+      phase_done = uvm_test_done_objection::get();
 
     //---------
     // STARTED:
@@ -2009,6 +2009,8 @@ task uvm_phase::execute();
            // EXIT CRITERIA 1: All objections dropped
            begin
              phase_done.wait_for(UVM_ALL_DROPPED, top);
+	      `uvm_info("PH_EXIT-1", $psprintf("PHASE EXIT CRIETRIA %0s (in schedule %0s) %0d",
+                      this.get_name(),this.get_schedule_name(), get_inst_id()), UVM_DEBUG);
            end
            // EXIT CRITERIA 2: All phase tasks return and no objections
            begin
@@ -2016,9 +2018,14 @@ task uvm_phase::execute();
                  wait (task_phase.m_num_procs_not_yet_returned == 0);
                  if (phase_done.get_objection_total() != 0)
                    wait (0);
-               end
-               else
-                 wait (0);
+	      `uvm_info("PH_EXIT-2.1", $psprintf("PHASE EXIT CRIETRIA %0s (in schedule %0s) %0d",
+                      this.get_name(),this.get_schedule_name(), get_inst_id()), UVM_DEBUG);
+               end else
+               begin 
+		  wait (0);
+	      `uvm_info("PH_EXIT-2.2", $psprintf("PHASE EXIT CRIETRIA %0s (in schedule %0s) %0d",
+                      this.get_name(),this.get_schedule_name(), get_inst_id()), UVM_DEBUG);
+		  end
            end
            // EXIT CRITERIA 3: Phase timeout
            begin
@@ -2029,6 +2036,8 @@ task uvm_phase::execute();
                  $sformatf("Phase timeout of %0t hit, phase '%s' ready to end",
                            top.phase_timeout, get_name()))
              phase_done.clear(this);
+            `uvm_info("PH_EXIT-3", $psprintf("PHASE EXIT CRIETRIA %0s (in schedule %0s) %0d",
+                      this.get_name(),this.get_schedule_name(), get_inst_id()), UVM_DEBUG);
            end
          join_any
          disable fork;

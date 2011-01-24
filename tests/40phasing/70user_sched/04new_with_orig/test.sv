@@ -54,7 +54,7 @@
      task exec_task(uvm_component comp, uvm_phase phase); \
        T mycomp; \
        if($cast(mycomp, comp)) begin \
-         mycomp.``PHASE (uvm_phase phase); \
+         mycomp.``PHASE (phase); \
        end \
      endtask \
      function new(string name); \
@@ -116,9 +116,11 @@ module test;
 
     function new(string name, uvm_component parent);
       super.new(name,parent);
-      set_phase_domain("mydomain"); //choose some name other than standard "uvm" or the phase modifications will affect all standard components
     endfunction
 
+    function void connect();
+      set_phase_domain("mydomain"); //choose some name other than standard "uvm" or the phase modifications will affect all standard components
+    endfunction
 
     // The component needs to override the set_phase_schedule to add
     // the new schedule.
@@ -143,9 +145,11 @@ module test;
 
     // component can implement standard phases ...
     task reset_phase(uvm_phase phase);
+      phase.raise_objection(this);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("RST", "IN STD RESET", UVM_NONE)
       #30 `uvm_info("RST", "END STD RESET", UVM_NONE)
+      phase.drop_objection(this);
     endtask
     task main_phase(uvm_phase phase);
       phase_times.push_back($time) ; // for self-checking only
@@ -170,6 +174,9 @@ module test;
   class stdcomp extends uvm_component;
     function new(string name, uvm_component parent);
       super.new(name,parent);
+    endfunction
+
+    function void connect();
       set_phase_domain("uvm");  // should not be necessary once domain membership is built-in
     endfunction
 
@@ -190,9 +197,11 @@ module test;
     
     // component can implement one or more of the phase methods
     task reset_phase(uvm_phase phase);
+      phase.raise_objection(this);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("RST", "IN STD RESET", UVM_NONE)
       #40 `uvm_info("RST", "END STD RESET", UVM_NONE)
+      phase.drop_objection(this);
     endtask
     task main_phase(uvm_phase phase);
       phase_times.push_back($time) ; // for self-checking only
@@ -229,8 +238,11 @@ module test;
       mc = new("mc", this);
       scsd = new("scsd", this);
       scmd = new("scmd", this);
-      scmd.set_phase_domain("mydomain"); //switch domain for this instance
     endfunction
+    function void connect();
+      scmd.set_phase_domain("mydomain"); 
+    endfunction
+
     function bit check_times() ;
       time mc_times[$], scsd_times[$], scmd_times[$];
 
