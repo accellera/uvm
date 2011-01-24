@@ -1290,7 +1290,7 @@ class uvm_phase extends uvm_graph;
   //
   // Internal Accessor to return wait for current state of this phase to match operand requirement
   //
-  extern task wait_for_state(uvm_phase_state m_wait_for_state, operand m_op=1);
+  extern task wait_for_state(uvm_phase_state m_wait_for_state, operand m_op=EQ);
 
    
   // Function: add_phase
@@ -1611,7 +1611,7 @@ endfunction
 // wait_for_state
 // ---------
 
-task uvm_phase::wait_for_state(uvm_phase_state m_wait_for_state, operand m_op=1);
+task uvm_phase::wait_for_state(uvm_phase_state m_wait_for_state, operand m_op=EQ);
 case (m_op)
   LT:     wait(m_wait_for_state  < m_state);
   NONEQ:  wait(m_wait_for_state != m_state);
