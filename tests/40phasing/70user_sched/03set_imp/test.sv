@@ -48,9 +48,10 @@ package mypkg;
   // Pseudo interface class for phase schedule just for
   // defining the schedule. When SV supports interface classes,
   // this would be an interface class.
-  virtual class my_component extends uvm_component;
+  class my_component extends uvm_component;
     `uvm_component_utils(my_component)
-    pure virtual task cfg_phase(uvm_phase_schedule phase);
+   virtual task cfg_phase(uvm_phase_schedule phase);
+  endtask
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
