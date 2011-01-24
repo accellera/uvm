@@ -2020,7 +2020,7 @@ task uvm_phase_schedule::execute();
                    wait (0);
 	      `uvm_info("PH_EXIT-2.1", $psprintf("PHASE EXIT CRIETRIA %0s (in schedule %0s) %0d",
                       this.get_name(),this.get_schedule_name(), get_inst_id()), UVM_DEBUG);
-               end
+               end else
                begin 
 		  wait (0);
 	      `uvm_info("PH_EXIT-2.2", $psprintf("PHASE EXIT CRIETRIA %0s (in schedule %0s) %0d",
