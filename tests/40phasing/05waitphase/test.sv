@@ -38,7 +38,7 @@ module test;
       super.new(name,parent);
       set_phase_schedule("uvm");
     endfunction
-    function void build_phase;
+    function void build_phase(uvm_phase phase);
       phase_run[uvm_build_ph] = 1;
       `uvm_info("BUILD", "Starting Build", UVM_NONE)
       if($time != 0)  begin
@@ -47,7 +47,7 @@ module test;
       end
       `uvm_info("BUILD", "Ending Build", UVM_NONE)
     endfunction
-    task reset_phase(uvm_phase_schedule phase);
+    task reset_phase(uvm_phase phase);
       phase_run[uvm_reset_ph] = 1;
       `uvm_info("RESET", "Starting Reset", UVM_NONE)
       if($time != 0)  begin
@@ -57,7 +57,7 @@ module test;
       #(delay);
       `uvm_info("RESET", "Ending Reset", UVM_NONE)
     endtask
-    task main_phase(uvm_phase_schedule phase);
+    task main_phase(uvm_phase phase);
       phase_run[uvm_main_ph] = 1;
       `uvm_info("MAIN", "Starting Main", UVM_NONE)
       // Even though there is not configure phase, the test is holding
@@ -69,7 +69,7 @@ module test;
       #(delay);
       `uvm_info("MAIN", "Ending Main", UVM_NONE)
     endtask
-    task shutdown_phase(uvm_phase_schedule phase);
+    task shutdown_phase(uvm_phase phase);
       phase_run[uvm_shutdown_ph] = 1;
       `uvm_info("SHUTDOWN", "Starting Shutdown", UVM_NONE)
       // Even though there is not configure phase, the test is holding
@@ -81,7 +81,7 @@ module test;
       #(delay);
       `uvm_info("SHUTDOWN", "Ending Shutdown", UVM_NONE)
     endtask
-    task run_phase(uvm_phase_schedule phase);
+    task run_phase(uvm_phase phase);
       phase_run[uvm_run_ph] = 1;
       `uvm_info("RUN", "Starting Run", UVM_NONE)
       if($time != 0)  begin
@@ -91,7 +91,7 @@ module test;
       #100;
       `uvm_info("RUN", "Ending Run", UVM_NONE)
     endtask
-    function void extract_phase;
+    function void extract_phase(uvm_phase phase);
       phase_run[uvm_extract_ph] = 1;
       `uvm_info("EXTRACT", "Starting Extract", UVM_NONE)
       if($time != 3*phase_transition_time)  begin
@@ -118,16 +118,16 @@ module test;
       l2 = new("l2", this);
       l2.delay = phase_transition_time;
     endfunction
-    function void connect_phase();
+    function void connect_phase(uvm_phase phase);
       set_phase_domain("uvm");
     endfunction
 
     //Start up the checkers
-    function void start_of_simulation_phase;
-      uvm_phase_schedule uvm_p = find_phase_schedule("*", "uvm");
-      uvm_phase_schedule reset_p = uvm_p.find_schedule("reset");
-      uvm_phase_schedule main_p = uvm_p.find_schedule("main");
-      uvm_phase_schedule shutdown_p = uvm_p.find_schedule("shutdown");
+    function void start_of_simulation_phase(uvm_phase phase);
+      uvm_phase uvm_p = find_phase_schedule("*", "uvm");
+      uvm_phase reset_p = uvm_p.find_schedule("reset");
+      uvm_phase main_p = uvm_p.find_schedule("main");
+      uvm_phase shutdown_p = uvm_p.find_schedule("shutdown");
 
       //Do the raise, wait, drop for each phase
       fork
@@ -142,7 +142,7 @@ module test;
 
     //By the time this runs, the run phase is done, so make sure
     //that run is ready to end
-    task main_phase(uvm_phase_schedule phase);
+    task main_phase(uvm_phase phase);
       if(run_ph.get_state() != UVM_PHASE_READY_TO_END) begin
         uvm_phase_state state = run_ph.get_state();
         $display("Extract schedule name = %s",run_ph.get_schedule_name());
@@ -151,7 +151,7 @@ module test;
       end
     endtask
 
-    task do_phase_test(uvm_phase_schedule phase, time start_time);
+    task do_phase_test(uvm_phase phase, time start_time);
       //Phase must either be dormant or scheduled at the very start
       if(phase.get_state() != UVM_PHASE_DORMANT && phase.get_state() != UVM_PHASE_SCHEDULED) 
       begin
@@ -176,7 +176,7 @@ module test;
       end
     endtask
 
-    function void report_phase();
+    function void report_phase(uvm_phase phase);
       phase_run[uvm_report_ph] = 1;
       if(start_cnt != 3) begin
         failed = 1;

@@ -14,7 +14,7 @@ class test extends test_base;
   endfunction : new
   `uvm_component_utils(test);
 
-  task main_phase(uvm_phase_schedule phase);
+  task main_phase(uvm_phase phase);
     phase.raise_objection(this);
     #20;
     if( jump_reset_num ) begin
@@ -30,7 +30,7 @@ class test extends test_base;
     phase.drop_objection(this);
   endtask : main_phase
 
-  function void check_phase();
+  function void check_phase(uvm_phase phase);
 //normal test
 //  [top_random_seq]    10
 //  [bot_random_seq]    24

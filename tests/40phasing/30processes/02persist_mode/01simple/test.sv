@@ -43,7 +43,7 @@ class low extends uvm_component;
    bit reset_activated = 0; 
    bit main_started = 0; 
 
-   function void phase_started(uvm_phase_schedule phase);
+   function void phase_started(uvm_phase phase);
      if (phase.get_name() == "reset") begin
       fork begin
        `uvm_info("RESET", "Start reset...", UVM_NONE)
@@ -83,7 +83,7 @@ class sub extends uvm_component;
       set_phase_domain("uvm");
    endfunction
 
-   function void phase_started(uvm_phase_schedule phase);
+   function void phase_started(uvm_phase phase);
      if (phase.get_name() == "configure") begin
        fork begin
          my_persist_config_proc = process::self();
@@ -110,19 +110,19 @@ class test extends uvm_component;
    function new(string name = "test1", uvm_component parent = null);
       super.new(name, parent);
    endfunction
-   function void build_phase();
-      super.build_phase();    
+   function void build_phase(uvm_phase phase);
+      super.build_phase(phase);    
       sub_inst = sub::type_id::create("sub_inst", this);
       low_inst = low::type_id::create("low_inst", this);
    endfunction
 
-   task run_phase(uvm_phase_schedule phase);
+   task run_phase(uvm_phase phase);
       phase.raise_objection(this);
       #200;
       phase.drop_objection(this);
    endtask
       
-   function void final_phase();
+   function void final_phase(uvm_phase phase);
      if(!low_inst.reset_activated) begin
        failed = 1;
        `uvm_error("RSTFAIL", "low_inst.reset phase did not reactivate as expected")

@@ -429,7 +429,7 @@ endclass
 //|    endfunction
 //|
 //|    // using the factory allows pkt overrides from outside the class
-//|    virtual function void build_phase();
+//|    virtual function void build_phase(uvm_phase phase);
 //|      pkt = packet::type_id::create("pkt",this);
 //|    endfunction
 //|
@@ -495,7 +495,7 @@ endclass
 //|      super.new(name,parent);
 //|    endfunction
 //|
-//|    virtual function void build_phase();
+//|    virtual function void build_phase(uvm_phase phase);
 //|
 //|      // override the packet type for driver0 and below
 //|      packet::type_id::set_inst_override(packetD::get_type(),"driver0.*");
@@ -523,7 +523,7 @@ endclass
 //|      super.new(name,parent);
 //|    endfunction
 //|
-//|    virtual function void build_phase();
+//|    virtual function void build_phase(uvm_phase phase);
 //|
 //|      // three methods to set an instance override for agent1.driver1
 //|      // - via component convenience method...
@@ -547,11 +547,11 @@ endclass
 //|    endfunction
 //|
 //|    // at end_of_elaboration, print topology and factory state to verify
-//|    virtual function void end_of_elaboration_phase();
+//|    virtual function void end_of_elaboration_phase(uvm_phase phase);
 //|      uvm_top.print_topology();
 //|    endfunction
 //|
-//|    virtual task run_phase();
+//|    virtual task run_phase(uvm_phase phase);
 //|      #100 global_stop_request();
 //|    endfunction
 //|

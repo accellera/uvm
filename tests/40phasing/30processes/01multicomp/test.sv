@@ -35,7 +35,7 @@ class passive_comp extends uvm_component;
 
   process pid;
 
-  task main_phase(uvm_phase_schedule phase);
+  task main_phase(uvm_phase phase);
     phase.raise_objection(this, "start main phase for passive component");
     fork begin
       pid = process::self();
@@ -45,7 +45,7 @@ class passive_comp extends uvm_component;
     phase.drop_objection(this, "end main phase for passive component");
   endtask
 
-  function void phase_ended(uvm_phase_schedule phase);
+  function void phase_ended(uvm_phase phase);
 `ifdef INCA
     if(phase.get_name() == "main") pid.kill();
 `endif
@@ -67,14 +67,14 @@ class active_comp extends uvm_component;
     set_phase_domain("uvm");
   endfunction
 
-  task main_phase(uvm_phase_schedule phase);
+  task main_phase(uvm_phase phase);
     phase.raise_objection(this, "start main phase for active component");
     started = 1;
     #105;
     ended = 1;
     phase.drop_objection(this, "end main phase for active component");
   endtask
-  task post_main_phase(uvm_phase_schedule phase);
+  task post_main_phase(uvm_phase phase);
     phase.raise_objection(this, "start post_main phase for active component");
     post_started = 1;
     #105;
@@ -98,7 +98,7 @@ class test extends uvm_test;
       a_comp = new("a_comp", this);
    endfunction
 
-   function void report_phase;
+   function void report_phase(uvm_phase phase);
      //The passive component should count to 10 (every 10 units for
      //105 units. We want to verify that it terminated correctly.
      if(p_comp.cnt != 10) begin

@@ -44,22 +44,22 @@ module test;
 
 
 
-    task reset_phase(uvm_phase_schedule phase);
+    task reset_phase(uvm_phase phase);
       if(dodelay) #thedelay;
       `uvm_info("RESET",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
     endtask
 
-    task main_phase(uvm_phase_schedule phase);
+    task main_phase(uvm_phase phase);
       if(dodelay) #thedelay;
       `uvm_info("MAIN",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
     endtask
 
-    task shutdown_phase(uvm_phase_schedule phase);
+    task shutdown_phase(uvm_phase phase);
       if(dodelay) #thedelay;
       `uvm_info("SHUTDOWN",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
     endtask
 
-    task run_phase(uvm_phase_schedule phase);
+    task run_phase(uvm_phase phase);
 
 // if(dodelay) #(5*thedelay);
     endtask
@@ -90,7 +90,7 @@ module test;
       leaf2.thedelay = 100 ;
       thedelay = 0 ;
     endfunction
-    function void phase_started (uvm_phase_schedule phase);
+    function void phase_started (uvm_phase phase);
       string pre_phase = "NONE", pre_phase2 = "NONE";
       time pre_phase_end_time=-1; 
       `uvm_info("PHASE",$psprintf("Starting %s",phase.get_phase_name()),UVM_NONE);
@@ -136,7 +136,7 @@ module test;
       end
     endfunction
 
-    function void phase_ended (uvm_phase_schedule phase);
+    function void phase_ended (uvm_phase phase);
       phase_ended_called[phase.get_phase_name()] = $time;
       `uvm_info("PHASE",$psprintf("Ending %s",phase.get_phase_name()),UVM_NONE);
     endfunction
@@ -158,7 +158,7 @@ module test;
       dom2.set_phase_domain("domain2");
     endfunction
 
-    function void final_phase();
+    function void final_phase(uvm_phase phase);
       if(failed) $display("*** UVM TEST FAILED ***");
       else $display("*** UVM TEST PASSED ***");
     endfunction

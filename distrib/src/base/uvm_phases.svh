@@ -551,7 +551,7 @@
 typedef class uvm_topdown_phase;
 typedef class uvm_bottomup_phase;
 typedef class uvm_task_phase;
-typedef class uvm_phase_schedule;
+typedef class uvm_phase;
 
 `uvm_builtin_topdown_phase(build)
 `uvm_builtin_bottomup_phase(connect)
@@ -594,17 +594,17 @@ typedef class uvm_phase_schedule;
 //|       class my_PHASE_phase extends uvm_bottomup_phase("PHASE");
 //
 // 2. implement your exec_task or exec_func method
-//|       task exec_task(uvm_component comp, uvm_phase_schedule schedule);
-//|       function void exec_func(uvm_component comp, uvm_phase_schedule schedule);
+//|       task exec_task(uvm_component comp, uvm_phase schedule);
+//|       function void exec_func(uvm_component comp, uvm_phase schedule);
 //
 // 3. the implementation usually calls the related method on the component
-//|          comp.PHASE_phase();
+//|          comp.PHASE_phase(uvm_phase phase);
 //
 // 4. after declaring your phase singleton class, instantiate one for global use
 //|       static my_``PHASE``_phase my_``PHASE``_ph = new();
 //
 // 5. insert the phase in a schedule using the
-//    <uvm_phase_schedule::add_phase>.method.
+//    <uvm_phase::add_phase>.method.
 //
 //------------------------------------------------------------------------------
 
@@ -645,7 +645,7 @@ typedef class uvm_phase_schedule;
 //|  +----------+                  +---------+                |             |
 //|       ^                             ^                     |             |
 //|  +-------------+           +------------------+           |             |
-//|  |uvm_phase_imp|------1---o|uvm_phase_schedule|----1..*--o|[domains]    |
+//|  |uvm_phase_imp|------1---o|uvm_phase|----1..*--o|[domains]    |
 //|  +-------------+\          +-------------------           |             |
 //|       ^          `-----------------------|---------0..*--o|[overrides]  |
 //|  +-------------------------------+       |                |             |
@@ -670,11 +670,11 @@ typedef class uvm_phase_schedule;
 //
 // <uvm_task_phase> : A phase implemenation for task phases.
 //
-// <uvm_phase_schedule> : A node in the phase graph (a single phase or a group of phases) 
+// <uvm_phase> : A node in the phase graph (a single phase or a group of phases) 
 //
 
 typedef class uvm_phase_imp;          // phase implementation
-typedef class uvm_phase_schedule; // phase context and state
+typedef class uvm_phase; // phase context and state
 typedef class uvm_phase_thread;   // phase process on a component
 typedef class uvm_test_done_objection;
 typedef class uvm_sequencer_base;
@@ -747,7 +747,7 @@ virtual class uvm_phase_imp extends uvm_object;
   //   comp  - the component to execute the functionality upon
   //   phase - the phase schedule that originated this phase call
   //
-  virtual function void exec_func(uvm_component comp, uvm_phase_schedule phase);
+  virtual function void exec_func(uvm_component comp, uvm_phase phase);
   endfunction
 
 
@@ -757,7 +757,7 @@ virtual class uvm_phase_imp extends uvm_object;
   //   comp  - the component to execute the functionality upon
   //   phase - the phase schedule that originated this phase call
   //
-  virtual task exec_task(uvm_component comp, uvm_phase_schedule phase);
+  virtual task exec_task(uvm_component comp, uvm_phase phase);
   endtask
 
 
@@ -766,7 +766,7 @@ virtual class uvm_phase_imp extends uvm_object;
   // Generic notification function called prior to exec_func()/exec_task()
   //   phase - the phase schedule that originated this phase call
   //
-  virtual function void phase_started(uvm_phase_schedule phase);
+  virtual function void phase_started(uvm_phase phase);
   endfunction
 
 
@@ -775,7 +775,7 @@ virtual class uvm_phase_imp extends uvm_object;
   // Generic notification function called after exec_func()/exec_task()
   //   phase - the phase schedule that originated this phase call
   //
-  virtual function void phase_ended(uvm_phase_schedule phase);
+  virtual function void phase_ended(uvm_phase phase);
   endfunction
 
 
@@ -786,10 +786,10 @@ virtual class uvm_phase_imp extends uvm_object;
   // Function: traverse
   //
   // Provides the required component traversal behavior. Called by
-  // <uvm_phase_schedule::execute>.
+  // <uvm_phase::execute>.
   //
   pure virtual function void traverse(uvm_component comp,
-                                      uvm_phase_schedule phase,
+                                      uvm_phase phase,
                                       uvm_phase_state state);
 
 
@@ -798,7 +798,7 @@ virtual class uvm_phase_imp extends uvm_object;
   // Provides the required per-component execution flow. Called by <traverse>.
   //
   pure virtual protected function void execute(uvm_component comp,
-                                               uvm_phase_schedule phase);
+                                               uvm_phase phase);
 
 endclass
 
@@ -829,7 +829,7 @@ virtual class uvm_bottomup_phase extends uvm_phase_imp;
   // each component.
   //
   virtual function void traverse(uvm_component comp,
-                                 uvm_phase_schedule phase,
+                                 uvm_phase phase,
                                  uvm_phase_state state);
     string name;
     if (comp.get_first_child(name))
@@ -865,7 +865,7 @@ virtual class uvm_bottomup_phase extends uvm_phase_imp;
   // Executes the bottom-up phase ~phase~ for the component ~comp~. 
   //
   protected virtual function void execute(uvm_component comp,
-                                          uvm_phase_schedule phase);
+                                          uvm_phase phase);
     comp.m_current_phase = phase;
     comp.phase_started(phase);
     exec_func(comp,phase);
@@ -900,7 +900,7 @@ virtual class uvm_topdown_phase extends uvm_phase_imp;
   // each component.
   //
   virtual function void traverse(uvm_component comp,
-                                 uvm_phase_schedule phase,
+                                 uvm_phase phase,
                                  uvm_phase_state state);
     string name;
     if (comp.m_phase_domains.exists(phase.m_parent)) begin
@@ -937,7 +937,7 @@ virtual class uvm_topdown_phase extends uvm_phase_imp;
   // Executes the top-down phase ~phase~ for the component ~comp~. 
   //
   protected virtual function void execute(uvm_component comp,
-                                          uvm_phase_schedule phase);
+                                          uvm_phase phase);
     comp.m_current_phase = phase;
     comp.phase_started(phase);
     exec_func(comp,phase);
@@ -977,7 +977,7 @@ virtual class uvm_task_phase extends uvm_phase_imp;
   // starting order is not deterministic.
   //
   virtual function void traverse(uvm_component comp,
-                                 uvm_phase_schedule phase,
+                                 uvm_phase phase,
                                  uvm_phase_state state);
     m_procs_not_yet_started = 0;
     m_num_procs_not_yet_returned = 0;
@@ -985,7 +985,7 @@ virtual class uvm_task_phase extends uvm_phase_imp;
   endfunction
 
   function void m_traverse(uvm_component comp,
-                           uvm_phase_schedule phase,
+                           uvm_phase phase,
                            uvm_phase_state state);
     string name;
     
@@ -1024,12 +1024,12 @@ virtual class uvm_task_phase extends uvm_phase_imp;
   //
   // Task-based phase execution occurs in a separate forked process for each
   // component.  When there is no longer any objections to ending a phase,
-  // as governed by the <uvm_phase_schedule::phase_done> objection, the
+  // as governed by the <uvm_phase::phase_done> objection, the
   // forked process and all its children are terminated before proceeding
   // to the next phase.
   //
   protected virtual function void execute(uvm_component comp,
-                                          uvm_phase_schedule phase);
+                                          uvm_phase phase);
 
     m_procs_not_yet_started++;
 
@@ -1140,7 +1140,7 @@ endclass
 
 class uvm_phase_thread extends uvm_process;
 
-  uvm_phase_schedule m_phase; // the phase this thread was spawned from
+  uvm_phase m_phase; // the phase this thread was spawned from
   uvm_component      m_comp;  // the component this thread is running on
   uvm_thread_mode    m_mode;  // threading semantics in force for this pid
   bit m_task_ended = 0;
@@ -1151,7 +1151,7 @@ class uvm_phase_thread extends uvm_process;
   // nodes. Capture the PID for future tracking and cleanup. Set the default
   // thread semantics from the component.
 
-  function new(uvm_phase_schedule phase, uvm_component comp);
+  function new(uvm_phase phase, uvm_component comp);
     // process ID of this phase/component thread
     super.new(process::self());
     m_phase = phase;
@@ -1218,7 +1218,7 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// Class: uvm_phase_schedule
+// Class: uvm_phase
 //
 //------------------------------------------------------------------------------
 // This is the base class which defines a phase's context/state (not behavior).
@@ -1232,7 +1232,7 @@ endclass
 // The main build operations are: construct, add phases, and instantiate
 // hierarchically within another schedule.
 
-class uvm_phase_schedule extends uvm_graph;
+class uvm_phase extends uvm_graph;
 
 
   //--------------------
@@ -1257,7 +1257,7 @@ class uvm_phase_schedule extends uvm_graph;
   //   name - a name for the new schedule or for the new phase added to an existing one
   //   parent - handle to an existing structure, or null to create a new empty one
   // 
-  extern function new(string name, uvm_phase_schedule parent=null);
+  extern function new(string name, uvm_phase parent=null);
 
 
   // Function: get_schedule_name
@@ -1301,9 +1301,9 @@ class uvm_phase_schedule extends uvm_graph;
   //   before_phase - specify to add the new phase as predecessor to this one
   //
   extern function void add_phase(uvm_phase_imp phase,
-                                 uvm_phase_schedule with_phase=null,
-                                 uvm_phase_schedule after_phase=null,
-                                 uvm_phase_schedule before_phase=null);
+                                 uvm_phase with_phase=null,
+                                 uvm_phase after_phase=null,
+                                 uvm_phase before_phase=null);
 
   // Function: add_schedule
   //
@@ -1318,10 +1318,10 @@ class uvm_phase_schedule extends uvm_graph;
   //   after_phase  - specify to add the schedule as successor to this phase node
   //   before_phase - specify to add the schedule as predecessor to this phase node
   //
-  extern function void add_schedule(uvm_phase_schedule schedule,
-                                    uvm_phase_schedule with_phase=null,
-                                    uvm_phase_schedule after_phase=null,
-                                    uvm_phase_schedule before_phase=null);
+  extern function void add_schedule(uvm_phase schedule,
+                                    uvm_phase with_phase=null,
+                                    uvm_phase after_phase=null,
+                                    uvm_phase before_phase=null);
 
 
   // Miscellaneous VIP-integrator API - looking up schedules and phases
@@ -1331,7 +1331,7 @@ class uvm_phase_schedule extends uvm_graph;
   //
   // Locate a phase node with the specified ~name~ and return its handle.
   //
-  extern function uvm_phase_schedule find_schedule(string name);
+  extern function uvm_phase find_schedule(string name);
 
 
   // Function: find_phase
@@ -1419,7 +1419,7 @@ class uvm_phase_schedule extends uvm_graph;
   //   after_phase  - optional diff target-domain phase to synchronize after
   //   before_phase - optional diff target-domain phase to synchronize before
   //
-  extern function void sync(uvm_phase_schedule target,
+  extern function void sync(uvm_phase target,
                             uvm_phase_imp phase=null,
                             uvm_phase_imp with_phase=null,
                             uvm_phase_imp after_phase=null,
@@ -1435,7 +1435,7 @@ class uvm_phase_schedule extends uvm_graph;
   //   after_phase  - optional diff target-domain phase to un-synchronize after
   //   before_phase - optional diff target-domain phase to un-synchronize before
   //
-  extern function void unsync(uvm_phase_schedule target,
+  extern function void unsync(uvm_phase target,
                               uvm_phase_imp phase=null,
                               uvm_phase_imp with_phase=null,
                               uvm_phase_imp after_phase=null,
@@ -1492,19 +1492,19 @@ class uvm_phase_schedule extends uvm_graph;
   local process            m_phase_proc;
   local bit                m_jump_bkwd;
   local bit                m_jump_fwd;
-  local uvm_phase_schedule m_jump_phase;
+  local uvm_phase m_jump_phase;
 
   protected string         m_schedule_name; // schedule unique name
-  uvm_phase_schedule       m_parent;        // our 'begin' node [or points 'up' one level]
-  uvm_phase_schedule       m_sync[];        // schedule instance to which we are synced
+  uvm_phase       m_parent;        // our 'begin' node [or points 'up' one level]
+  uvm_phase       m_sync[];        // schedule instance to which we are synced
   uvm_phase_imp            m_phase;         // phase imp to call when we execute this node
   uvm_objection            phase_done;      // phase done objection
   uvm_phase_thread         m_threads[uvm_component]; // all active process threads
   event                    m_ready_to_end;
 
 
-  local static mailbox #(uvm_phase_schedule) m_phase_hopper = new();
-  local static uvm_process m_phase_top_procs[uvm_phase_schedule];
+  local static mailbox #(uvm_phase) m_phase_hopper = new();
+  local static uvm_process m_phase_top_procs[uvm_phase];
   local bit m_exit_on_task_return = 0;
   static bit m_has_rt_phases;
 
@@ -1540,7 +1540,7 @@ typedef class uvm_cmdline_processor;
 // new
 // ---
 
-function uvm_phase_schedule::new(string name, uvm_phase_schedule parent=null);
+function uvm_phase::new(string name, uvm_phase parent=null);
   string trace_args[$];
   uvm_cmdline_processor clp;
 
@@ -1557,7 +1557,7 @@ function uvm_phase_schedule::new(string name, uvm_phase_schedule parent=null);
     phase_done = new(name);
 
   if (parent == null) begin
-    uvm_phase_schedule end_node;
+    uvm_phase end_node;
     m_parent = this;
     set_name("begin");
     m_schedule_name = name;
@@ -1575,7 +1575,7 @@ endfunction
 // get_schedule_name
 // -----------------
 
-function string uvm_phase_schedule::get_schedule_name();
+function string uvm_phase::get_schedule_name();
   return m_schedule_name;
 endfunction
 
@@ -1583,7 +1583,7 @@ endfunction
 // get_phase_name
 // --------------
 
-function string uvm_phase_schedule::get_phase_name();
+function string uvm_phase::get_phase_name();
   return (m_phase) ? m_phase.get_name() : "";
 endfunction
 
@@ -1591,7 +1591,7 @@ endfunction
 // get_run_count
 // -------------
 
-function int uvm_phase_schedule::get_run_count();
+function int uvm_phase::get_run_count();
   return m_run_count;
 endfunction
 
@@ -1599,7 +1599,7 @@ endfunction
 // get_state
 // ---------
 
-function uvm_phase_state uvm_phase_schedule::get_state();
+function uvm_phase_state uvm_phase::get_state();
   return m_state;
 endfunction
 
@@ -1607,11 +1607,11 @@ endfunction
 // add_phase
 // ---------
 
-function void uvm_phase_schedule::add_phase(uvm_phase_imp phase,
-                                            uvm_phase_schedule with_phase=null,
-                                            uvm_phase_schedule after_phase=null,
-                                            uvm_phase_schedule before_phase=null);
-  uvm_phase_schedule new_node;
+function void uvm_phase::add_phase(uvm_phase_imp phase,
+                                            uvm_phase with_phase=null,
+                                            uvm_phase after_phase=null,
+                                            uvm_phase before_phase=null);
+  uvm_phase new_node;
   assert(phase != null);
   new_node = new(phase.get_name(),this);
   new_node.m_phase = phase;
@@ -1683,11 +1683,11 @@ endfunction
 // add_schedule
 // ------------
 
-function void uvm_phase_schedule::add_schedule(uvm_phase_schedule schedule,
-                                               uvm_phase_schedule with_phase=null,
-                                               uvm_phase_schedule after_phase=null,
-                                               uvm_phase_schedule before_phase=null);
-  uvm_phase_schedule begin_node, end_node;
+function void uvm_phase::add_schedule(uvm_phase schedule,
+                                               uvm_phase with_phase=null,
+                                               uvm_phase after_phase=null,
+                                               uvm_phase before_phase=null);
+  uvm_phase begin_node, end_node;
   assert(schedule != null);
   begin_node = schedule.m_parent;
   end_node = schedule.find_schedule("end");
@@ -1739,8 +1739,8 @@ endfunction
 // find_schedule
 // -------------
 
-function uvm_phase_schedule uvm_phase_schedule::find_schedule(string name);
-  uvm_phase_schedule phase;
+function uvm_phase uvm_phase::find_schedule(string name);
+  uvm_phase phase;
   uvm_graph graph_node;
   graph_node = super.find(name);
   assert($cast(phase, graph_node));
@@ -1751,8 +1751,8 @@ endfunction
 // find_phase
 // ----------
 
-function uvm_phase_imp uvm_phase_schedule::find_phase(string name);
-  uvm_phase_schedule phase;
+function uvm_phase_imp uvm_phase::find_phase(string name);
+  uvm_phase phase;
   phase = this.find_schedule(name);
   return (phase != null) ? phase.m_phase : null;
 endfunction
@@ -1766,7 +1766,7 @@ endfunction
 // Rather, flags are set which execute() uses to determine
 // that a jump has been requested and performs the jump.
 
-function void uvm_phase_schedule::jump(uvm_phase_imp phase);
+function void uvm_phase::jump(uvm_phase_imp phase);
   uvm_graph d;
 
   `uvm_info("PH_JUMP",
@@ -1817,7 +1817,7 @@ endfunction
 // jump_all
 // --------
 
-function void uvm_phase_schedule::jump_all(uvm_phase_imp phase);
+function void uvm_phase::jump_all(uvm_phase_imp phase);
   // TBD integration task ongoing
 endfunction
 
@@ -1825,7 +1825,7 @@ endfunction
 // clear
 // -----
 // for internal graph maintenance after a forward jump
-function void uvm_phase_schedule::clear(
+function void uvm_phase::clear(
                                    uvm_phase_state state = UVM_PHASE_DORMANT);
   m_state = state;
   m_phase_proc = null;
@@ -1838,11 +1838,11 @@ endfunction
 // for internal graph maintenance after a forward jump
 // - called only by execute()
 // - depth-first traversal of the DAG, calliing clear() on each node
-function void uvm_phase_schedule::clear_successors(
+function void uvm_phase::clear_successors(
                                    uvm_phase_state state = UVM_PHASE_DORMANT);
   clear(state);
   foreach(m_successors[i]) begin
-    uvm_phase_schedule p;
+    uvm_phase p;
     assert($cast(p, m_successors[i]));
     p.clear_successors(state);
   end
@@ -1852,7 +1852,7 @@ endfunction
 // kill
 // ----
 
-function void uvm_phase_schedule::kill();
+function void uvm_phase::kill();
 
   `uvm_info("PH_KILL", {"killing phase '", get_name(),"'"}, UVM_DEBUG);
 
@@ -1869,9 +1869,9 @@ endfunction
 
 // Using a depth-first traversal, kill all the successor phases of the
 // current phase.
-function void uvm_phase_schedule::kill_successors();
+function void uvm_phase::kill_successors();
   foreach (m_successors[i]) begin
-    uvm_phase_schedule phase;
+    uvm_phase phase;
     uvm_graph graph_node;
     graph_node = m_successors[i];
     assert($cast(phase, graph_node));
@@ -1887,14 +1887,14 @@ endfunction
 // This task contains the top-level process that owns all the phase
 // processes.  By hosting the phase processes here we avoid problems
 // associated with phase processes related as parents/children
-task uvm_phase_schedule::m_run_phases();
+task uvm_phase::m_run_phases();
   uvm_root top = uvm_root::get();
 
   // initiate by starting first phase in common domain
   void'(m_phase_hopper.try_put(top.find_phase_schedule("uvm_pkg::common","common")));
 
   forever begin
-    uvm_phase_schedule phase;
+    uvm_phase phase;
     uvm_process proc;
     m_phase_hopper.get(phase);
     fork
@@ -1918,7 +1918,7 @@ endtask
 // - called by m_run_phases
 // - calls uvm_phase_imp::traverse using our phase handle
 
-task uvm_phase_schedule::execute();
+task uvm_phase::execute();
 
   uvm_root top;
   top = uvm_root::get();
@@ -1926,7 +1926,7 @@ task uvm_phase_schedule::execute();
   // are the predecessors done, or are there no predecessors?
   // block until all the predecessors are done
   foreach (m_predecessors[i]) begin
-    uvm_phase_schedule p;
+    uvm_phase p;
     assert($cast(p, m_predecessors[i]));
     wait (p.m_state == UVM_PHASE_DONE);
   end
@@ -1937,7 +1937,7 @@ task uvm_phase_schedule::execute();
   // block until all the synced phases are executing
   // GSA avoid lockup
   foreach (m_sync[i]) begin
-    uvm_phase_schedule p;
+    uvm_phase p;
     assert($cast(p, m_sync[i]));
     wait (p.m_state != UVM_PHASE_DORMANT);
   end
@@ -2067,7 +2067,7 @@ task uvm_phase_schedule::execute();
     end
     pred_of_succ.delete(this);
     foreach (pred_of_succ[pred]) begin
-      uvm_phase_schedule sched;
+      uvm_phase sched;
       assert($cast(sched, pred));
       //$display("  ** ", get_name(), " Waiting for phase '",
       //   sched.get_name(),"' (",sched.get_inst_id(),") to be ready to end");
@@ -2151,7 +2151,7 @@ task uvm_phase_schedule::execute();
   else begin
     // execute all the successors
     foreach (m_successors[i]) begin
-      uvm_phase_schedule phase;
+      uvm_phase phase;
       assert($cast(phase, m_successors[i]));
       if(phase.m_state != UVM_PHASE_SCHEDULED) begin
         phase.m_state = UVM_PHASE_SCHEDULED; // moved here from begin of execute()
@@ -2167,7 +2167,7 @@ endtask
 // raise_objection
 // ---------------
 
-function void uvm_phase_schedule::raise_objection (uvm_object obj, 
+function void uvm_phase::raise_objection (uvm_object obj, 
                                                    string description="",
                                                    int count=1);
   phase_done.raise_objection(obj,description,count);
@@ -2177,7 +2177,7 @@ endfunction
 // drop_objection
 // --------------
 
-function void uvm_phase_schedule::drop_objection (uvm_object obj, 
+function void uvm_phase::drop_objection (uvm_object obj, 
                                                   string description="",
                                                   int count=1);
   phase_done.drop_objection(obj,description,count);
@@ -2187,7 +2187,7 @@ endfunction
 // sync
 // ----
 
-function void uvm_phase_schedule::sync(uvm_phase_schedule target,
+function void uvm_phase::sync(uvm_phase target,
                                        uvm_phase_imp phase=null,
                                        uvm_phase_imp with_phase=null,
                                        uvm_phase_imp after_phase=null,
@@ -2198,7 +2198,7 @@ endfunction
 // unsync
 // ------
 
-function void uvm_phase_schedule::unsync(uvm_phase_schedule target,
+function void uvm_phase::unsync(uvm_phase target,
                                          uvm_phase_imp phase=null,
                                          uvm_phase_imp with_phase=null,
                                          uvm_phase_imp after_phase=null,
@@ -2209,7 +2209,7 @@ endfunction
 // terminate_phase
 // ---------------
 
-function void uvm_phase_schedule::terminate_phase();
+function void uvm_phase::terminate_phase();
   phase_done.clear();
 endfunction
 
@@ -2217,7 +2217,7 @@ endfunction
 // print_termination_state
 // -----------------------
 
-function void uvm_phase_schedule::print_termination_state();
+function void uvm_phase::print_termination_state();
   `uvm_info("PH_TERMSTATE",
             $psprintf("phase %s outstanding objections = %0d",
                       get_name(), phase_done.get_objection_total(uvm_top)),

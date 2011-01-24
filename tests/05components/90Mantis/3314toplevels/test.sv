@@ -90,8 +90,8 @@ module test;
     task run;
       uvm_top.stop_request();
     endtask
-    function void report_phase();
-      super.report_phase();
+    function void report_phase(uvm_phase phase);
+      super.report_phase(phase);
 
       //check the root top levels
       if(uvm_top.top_levels.size() != 3) begin

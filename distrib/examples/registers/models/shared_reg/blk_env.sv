@@ -150,7 +150,7 @@ class blk_env extends uvm_env;
       super.new(name, parent);
    endfunction: new
 
-   virtual function void build_phase();
+   virtual function void build_phase(uvm_phase phase);
       begin // FIXME 839607
       any_driver#(apb_item)::type_id::set_type_override(my_apb_driver::get_type());
       end
@@ -160,7 +160,7 @@ class blk_env extends uvm_env;
       model.build();
    endfunction: build_phase
 
-   virtual function void connect_phase();
+   virtual function void connect_phase(uvm_phase phase);
       reg2apb_adapter reg2apb = new;
       reg2wsh_adapter reg2wsh = new;
       model.APB.set_sequencer(apb.sqr, reg2apb);

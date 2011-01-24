@@ -35,8 +35,8 @@ package my_env_pkg;
       super.new(name, parent);
     endfunction
   
-    function void build_phase();
-      super.build_phase();
+    function void build_phase(uvm_phase phase);
+      super.build_phase(phase);
       set_config_int("inst1.u2", "v", 5);
       set_config_int("inst2.u1", "v", 3);
       set_config_int("inst1.*", "s", 'h10);

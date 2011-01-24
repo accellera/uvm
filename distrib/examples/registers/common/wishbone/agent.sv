@@ -46,7 +46,7 @@ class wb_agent extends uvm_agent;
       is_active = UVM_ACTIVE;
    endfunction
 
-   virtual function void build_phase();
+   virtual function void build_phase(uvm_phase phase);
       // mon  = wb_monitor::type_id::create("mon", this);
       if (this.is_active == UVM_ACTIVE) begin
          drv  = wb_driver::type_id::create("drv", this);
@@ -54,7 +54,7 @@ class wb_agent extends uvm_agent;
       end
    endfunction
 
-   virtual function void connect_phase();
+   virtual function void connect_phase(uvm_phase phase);
       if (drv != null && seqr != null) begin
          drv.seq_item_port.connect(seqr.seq_item_export);
       end

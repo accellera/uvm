@@ -43,7 +43,7 @@ class bot_driver extends uvm_driver#(bot_item);
     super.new(name, parent);
   endfunction : new
 
-  virtual task run_phase(uvm_phase_schedule phase);
+  virtual task run_phase(uvm_phase phase);
     fork
       get_and_drive();
       reset_signals();
@@ -83,7 +83,7 @@ class bot_driver extends uvm_driver#(bot_item);
     disable reset_signals;
   endtask : stop_driving
 
-  task post_shutdown_phase(uvm_phase_schedule phase);
+  task post_shutdown_phase(uvm_phase phase);
     phase.raise_objection(this);
     stop_driving();
     phase.drop_objection(this);
@@ -108,8 +108,8 @@ class bot_agent extends uvm_agent;
   endfunction : new
 
   // build_phase
-  function void build_phase();
-    super.build_phase();
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
     if(is_active == UVM_ACTIVE) begin
       sequencer  = bot_sequencer::type_id::create( {get_name(), "_sequencer"}, this);
       driver = bot_driver::type_id::create( {get_name(), "_driver"}, this);
@@ -117,7 +117,7 @@ class bot_agent extends uvm_agent;
   endfunction : build_phase
 
   // connect_phase
-  function void connect_phase();
+  function void connect_phase(uvm_phase phase);
     if(is_active == UVM_ACTIVE) begin
       driver.seq_item_port.connect(sequencer.seq_item_export);
     end
@@ -138,13 +138,13 @@ class bot_env extends uvm_env;
   endfunction : new
 
   // build_phase
-  function void build_phase();
+  function void build_phase(uvm_phase phase);
     agent  = bot_agent::type_id::create( get_name(), this);
   endfunction : build_phase
 
   //Debug messages when phase started & ended
-  function void phase_started( uvm_phase_schedule phase);
-    uvm_phase_schedule current_phase;
+  function void phase_started( uvm_phase phase);
+    uvm_phase current_phase;
     current_phase = get_current_phase();
     `uvm_info( "PHASE", $sformatf( "Phase %s() STATED ----------------------------",
                                    phase.get_name()), UVM_MEDIUM);
@@ -152,7 +152,7 @@ class bot_env extends uvm_env;
 
   endfunction : phase_started
 
-  function void phase_ended( uvm_phase_schedule phase);
+  function void phase_ended( uvm_phase phase);
     super.phase_ended( phase );
     `uvm_info( "PHASE", $sformatf( "Phase %s() ENDED  ----------------------------\n\n",
                                    phase.get_name()), UVM_MEDIUM);

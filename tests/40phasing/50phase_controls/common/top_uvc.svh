@@ -43,7 +43,7 @@ class top_driver extends uvm_driver#(top_item);
     super.new(name, parent);
   endfunction : new
 
-  virtual task run_phase(uvm_phase_schedule phase);
+  virtual task run_phase(uvm_phase phase);
     fork
       get_and_drive();
       reset_signals();
@@ -82,7 +82,7 @@ class top_driver extends uvm_driver#(top_item);
     disable reset_signals;
   endtask : stop_driving
 
-  task post_shutdown_phase(uvm_phase_schedule phase);
+  task post_shutdown_phase(uvm_phase phase);
     phase.raise_objection(this);
     stop_driving();
     phase.drop_objection(this);
@@ -107,7 +107,7 @@ class top_agent extends uvm_agent;
   endfunction : new
 
   // build
-  function void build_phase();
+  function void build_phase(uvm_phase phase);
     super.build();
     if(is_active == UVM_ACTIVE) begin
       sequencer  = top_sequencer::type_id::create( {get_name(), "_sequencer"}, this);
@@ -116,7 +116,7 @@ class top_agent extends uvm_agent;
   endfunction : build_phase
 
   // connect_phase
-  function void connect_phase();
+  function void connect_phase(uvm_phase phase);
     if(is_active == UVM_ACTIVE) begin
       driver.seq_item_port.connect(sequencer.seq_item_export);
     end
@@ -137,7 +137,7 @@ class top_env extends uvm_env;
   endfunction : new
 
   // build
-  function void build_phase();
+  function void build_phase(uvm_phase phase);
     agent  = top_agent::type_id::create( get_name(), this);
   endfunction : build_phase
 

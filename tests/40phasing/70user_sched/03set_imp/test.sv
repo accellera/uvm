@@ -49,7 +49,7 @@
   // defining the schedule. When SV supports interface classes,
   // this would be an interface class.
   virtual class my_component;
-    pure virtual task cfg_phase(uvm_phase_schedule phase);
+    pure virtual task cfg_phase(uvm_phase phase);
   endclass
 
   `uvm_user_task_phase(cfg,my_component,my_)
@@ -67,10 +67,10 @@
   */
 
   // method for adding the phase to some specific domain
-  function automatic uvm_phase_schedule set_my_schedule();
+  function automatic uvm_phase set_my_schedule();
 
-    uvm_phase_schedule new_phase;
-    uvm_phase_schedule my_sched;
+    uvm_phase new_phase;
+    uvm_phase my_sched;
     uvm_root top  = uvm_root::get();
     my_sched = top.find_phase_schedule("uvm_pkg::uvm", "*");
 
@@ -92,7 +92,7 @@
     return my_sched;
   endfunction
 
-  uvm_phase_schedule my_sched = set_my_schedule();
+  uvm_phase my_sched = set_my_schedule();
 //endpackage
 
 module test;
@@ -110,19 +110,19 @@ module test;
       super.new(name,parent);
       set_phase_domain("uvm");
     endfunction
-    task reset_phase(uvm_phase_schedule phase);
+    task reset_phase(uvm_phase phase);
       start_reset = $time;
       `uvm_info("RST", "IN RESET", UVM_NONE)
       #delay `uvm_info("RST", "END RESET", UVM_NONE)
       end_reset = $time;
     endtask
-    task pre_configure_phase(uvm_phase_schedule phase);
+    task pre_configure_phase(uvm_phase phase);
       start_pre_configure = $time;
       `uvm_info("PRECFG", "IN PRECFG", UVM_NONE)
       #(60 - delay) `uvm_info("PRECFG", "END PRECFG", UVM_NONE)
       end_pre_configure = $time;
     endtask
-    task configure_phase(uvm_phase_schedule phase);
+    task configure_phase(uvm_phase phase);
       start_configure = $time;
       `uvm_info("CFG", "IN CONFIGURE", UVM_NONE)
       #delay `uvm_info("CFG", "END CONFIGURE", UVM_NONE)
@@ -141,7 +141,7 @@ module test;
       super.new(name,parent);
       delay = 30ns;
     endfunction
-    task cfg_phase(uvm_phase_schedule phase);
+    task cfg_phase(uvm_phase phase);
       start_my_cfg = $time;
       `uvm_info("MYCFG", "IN MY CFG", UVM_NONE)
       #30 `uvm_info("MYCFG", "END MY CFG", UVM_NONE)
@@ -159,11 +159,11 @@ module test;
       mc = new("mc", this);
       oc = new("oc", this);
     endfunction
-    function void connect_phase();
+    function void connect_phase(uvm_phase phase);
       my_cfg_phase mc_imp = new;
       mc.set_phase_imp(cfg_imp,mc_imp);
     endfunction
-    task run_phase(uvm_phase_schedule phase);
+    task run_phase(uvm_phase phase);
       `uvm_info("RUN", "In run", UVM_NONE)
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
     endtask
@@ -178,7 +178,7 @@ module test;
       super.new(name,parent);
       me = new("me", this);
     endfunction
-    function void report_phase;
+    function void report_phase(uvm_phase phase);
       if(me.mc.start_reset != 0 || 
          me.oc.start_reset != 0) begin
         $display("*** UVM TEST FAILED , reset started at time %t/%0t instead of 0", me.mc.start_reset, me.oc.start_reset);
