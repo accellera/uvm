@@ -51,7 +51,7 @@
 
 `define my_task_phase(PHASE) \
    class ``PHASE``_phase#(type T=my_component) extends uvm_task_phase; \
-     task exec_task(uvm_component comp, uvm_phase_schedule phase); \
+     task exec_task(uvm_component comp, uvm_phase phase); \
        T mycomp; \
        if($cast(mycomp, comp)) begin \
          mycomp.``PHASE (phase); \
@@ -79,7 +79,7 @@ package mypkg;
   // defining the schedule. When SV supports interface classes,
   // this would be an interface class.
   virtual class my_component;
-    pure virtual task myreset2(uvm_phase_schedule phase);
+    pure virtual task myreset2(uvm_phase phase);
   endclass
 
   // Create the parameterized class definitions for:
@@ -97,7 +97,7 @@ module test;
 
   // Some component that will use the new schedule
   class mycomp extends uvm_component;
-    uvm_phase_schedule my_sched;
+    uvm_phase my_sched;
 
     // this code here only for self-checking purpose
     time phase_times[$] ;
@@ -125,7 +125,7 @@ module test;
     // The component needs to override the set_phase_schedule to add
     // the new schedule.
     function void set_phase_schedule(string domain_name);
-      uvm_phase_schedule new_phase;
+      uvm_phase new_phase;
       super.set_phase_schedule(domain_name) ; // use built-in schedule as a base
       my_sched = find_phase_schedule("uvm_pkg::uvm",domain_name) ; // get built-in schedule
       assert(my_sched != null); // check nothing has gone horribly wrong
@@ -144,26 +144,26 @@ module test;
     endfunction
 
     // component can implement standard phases ...
-    task reset_phase(uvm_phase_schedule phase);
+    task reset_phase(uvm_phase phase);
       phase.raise_objection(this);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("RST", "IN STD RESET", UVM_NONE)
       #30 `uvm_info("RST", "END STD RESET", UVM_NONE)
       phase.drop_objection(this);
     endtask
-    task main_phase(uvm_phase_schedule phase);
+    task main_phase(uvm_phase phase);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("MAIN", "IN STD MAIN", UVM_NONE)
       #30 `uvm_info("MAIN", "END STD MAIN", UVM_NONE)
     endtask
-    task shutdown_phase(uvm_phase_schedule phase);
+    task shutdown_phase(uvm_phase phase);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("SHTDWN", "IN STD SHUTDOWN", UVM_NONE)
       #30 `uvm_info("SHTDWN", "END STD SHUTDOWN", UVM_NONE)
     endtask
 
     // ... and also new phase
-    task myreset2(uvm_phase_schedule phase);
+    task myreset2(uvm_phase phase);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("RST2", "IN MY RESET2", UVM_NONE)
       #30 `uvm_info("RST2", "END MY RESET2", UVM_NONE)
@@ -196,19 +196,19 @@ module test;
     endfunction
     
     // component can implement one or more of the phase methods
-    task reset_phase(uvm_phase_schedule phase);
+    task reset_phase(uvm_phase phase);
       phase.raise_objection(this);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("RST", "IN STD RESET", UVM_NONE)
       #40 `uvm_info("RST", "END STD RESET", UVM_NONE)
       phase.drop_objection(this);
     endtask
-    task main_phase(uvm_phase_schedule phase);
+    task main_phase(uvm_phase phase);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("MAIN", "IN STD MAIN", UVM_NONE)
       #20 `uvm_info("MAIN", "END STD MAIN", UVM_NONE)
     endtask
-    task shutdown_phase(uvm_phase_schedule phase);
+    task shutdown_phase(uvm_phase phase);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("SHTDWN", "IN STD SHUTDOWN", UVM_NONE)
       #40 `uvm_info("SHTDWN", "END STD SHUTDOWN", UVM_NONE)
@@ -219,7 +219,7 @@ module test;
     // illustrate that components run all the phases in their domain; it is
     // not expected that a standard component would implement a user-defined
     // phase
-    task myreset2(uvm_phase_schedule phase);
+    task myreset2(uvm_phase phase);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("RST2", "IN MY RESET2", UVM_NONE)
       #30 `uvm_info("RST2", "END MY RESET2", UVM_NONE)
@@ -264,7 +264,7 @@ module test;
       if (!scmd.compare_phase_times(scmd_times)) return 1 ;
       return 0 ;
     endfunction
-    task run_phase(uvm_phase_schedule phase);
+    task run_phase(uvm_phase phase);
       `uvm_info("RUN", "In run", UVM_NONE)
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
     endtask
@@ -280,7 +280,7 @@ module test;
       me = new("me", this);
     endfunction
 
-    function void report_phase();
+    function void report_phase(uvm_phase phase);
       failed += me.check_times() ;
       if(failed) $display("*** UVM TEST FAILED ***");
       else $display("*** UVM TEST PASSED ***");

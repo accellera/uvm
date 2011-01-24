@@ -155,7 +155,7 @@ class test_base_post_main_phase_imp extends uvm_task_phase;
     super.new(n);
   endfunction : new
 
-  task exec_task(uvm_component comp, uvm_phase_schedule phase);
+  task exec_task(uvm_component comp, uvm_phase phase);
     `uvm_info( "POST_MAIN", $psprintf("Component %s executing phase %s", comp.get_name(), phase.get_name()), UVM_NONE);
   endtask
 endclass : test_base_post_main_phase_imp
@@ -182,8 +182,8 @@ class test_base extends uvm_test;
     $display( "\nTest %s created.\n\n", n );
   endfunction : new
 
-  virtual function void build_phase();
-    super.build_phase();
+  virtual function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
 
     top0 = top_env::type_id::create( "top0", this);
     top1 = top_env::type_id::create( "top1", this);
@@ -201,8 +201,8 @@ class test_base extends uvm_test;
 
   endfunction : build_phase
 
-  virtual function void connect_phase();
-    super.connect_phase();
+  virtual function void connect_phase(uvm_phase phase);
+    super.connect_phase(phase);
 
     //1 - reset
     uvm_config_seq::set(this, "seqr0", "pre_reset_ph", test_pre_reset_seq::type_id::get());
@@ -229,7 +229,7 @@ class test_base extends uvm_test;
 
   endfunction : connect_phase
 
-  function void end_of_elaboration_phase();
+  function void end_of_elaboration_phase(uvm_phase phase);
     uvm_top.print_topology();
 
     $display( "//--------------------------------------------------------\n",
@@ -245,7 +245,7 @@ class test_base extends uvm_test;
               "//--------------------------------------------------------\n");
   endfunction : end_of_elaboration_phase
 
-  function void report_phase();
+  function void report_phase(uvm_phase phase);
     uvm_report_server svr = _global_reporter.get_report_server();
     svr.summarize();
 
@@ -258,8 +258,8 @@ class test_base extends uvm_test;
   endfunction : report_phase
 
   //Debug messages when phase started & ended
-  function void phase_started( uvm_phase_schedule phase);
-    uvm_phase_schedule current_phase;
+  function void phase_started( uvm_phase phase);
+    uvm_phase current_phase;
     current_phase = get_current_phase();
     `uvm_info( phase.get_name(), $sformatf( "Phase %s() STATED ----------------------------",
                                    phase.get_name()), UVM_NONE);
@@ -267,7 +267,7 @@ class test_base extends uvm_test;
 
   endfunction : phase_started
 
-  function void phase_ended( uvm_phase_schedule phase);
+  function void phase_ended( uvm_phase phase);
     super.phase_ended( phase );
     `uvm_info( phase.get_name(), $sformatf( "Phase %s() ENDED  ----------------------------\n\n",
                                    phase.get_name()), UVM_NONE);

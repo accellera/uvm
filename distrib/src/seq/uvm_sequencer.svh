@@ -77,12 +77,12 @@ class uvm_sequencer #(type REQ = uvm_sequence_item,
     return "uvm_sequencer";
   endfunction 
 
-  function void connect_phase();
-    super.connect_phase();
+  function void connect_phase(uvm_phase phase);
+    super.connect_phase(phase);
   endfunction // void
 
-  virtual function void build_phase();
-    super.build_phase();
+  virtual function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
   endfunction // function
   
   // Counting the number of of connections is done at end of

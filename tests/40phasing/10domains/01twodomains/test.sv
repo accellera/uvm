@@ -38,7 +38,7 @@ module test;
       super.new(name,parent);
       set_phase_schedule("uvm");
     endfunction
-    function void build_phase;
+    function void build_phase(uvm_phase phase);
       phase_run[uvm_build_ph] = 1;
       `uvm_info("BUILD", "Starting Build", UVM_NONE)
       if($time != 0)  begin
@@ -47,7 +47,7 @@ module test;
       end
       `uvm_info("BUILD", "Ending Build", UVM_NONE)
     endfunction
-    task reset_phase(uvm_phase_schedule phase);
+    task reset_phase(uvm_phase phase);
       phase.raise_objection(this,"start reset");
       phase_run[uvm_reset_ph] = 1;
       `uvm_info("RESET", "Starting Reset", UVM_NONE)
@@ -59,7 +59,7 @@ module test;
       `uvm_info("RESET", "Ending Reset", UVM_NONE)
       phase.drop_objection(this,"end reset");
     endtask
-    task main_phase(uvm_phase_schedule phase);
+    task main_phase(uvm_phase phase);
       phase.raise_objection(this,"start main");
       phase_run[uvm_main_ph] = 1;
       `uvm_info("MAIN", "Starting Main", UVM_NONE)
@@ -71,7 +71,7 @@ module test;
       `uvm_info("MAIN", "Ending Main", UVM_NONE)
       phase.drop_objection(this,"end main");
     endtask
-    task shutdown_phase(uvm_phase_schedule phase);
+    task shutdown_phase(uvm_phase phase);
       phase.raise_objection(this,"start shutdown");
       phase_run[uvm_shutdown_ph] = 1;
       `uvm_info("SHUTDOWN", "Starting Shutdown", UVM_NONE)
@@ -83,7 +83,7 @@ module test;
       `uvm_info("SHUTDOWN", "Ending Shutdown", UVM_NONE)
       phase.drop_objection(this,"end shutdown");
     endtask
-    task run_phase(uvm_phase_schedule phase);
+    task run_phase(uvm_phase phase);
       phase.raise_objection(this,"start run");
       phase_run[uvm_run_ph] = 1;
       `uvm_info("RUN", "Starting Run", UVM_NONE)
@@ -95,7 +95,7 @@ module test;
       `uvm_info("RUN", "Ending Run", UVM_NONE)
       phase.drop_objection(this,"end run");
     endtask
-    function void extract_phase;
+    function void extract_phase(uvm_phase phase);
       phase_run[uvm_extract_ph] = 1;
       `uvm_info("EXTRACT", "Starting Extract", UVM_NONE)
       if($time != maxdelay)  begin
@@ -123,7 +123,7 @@ module test;
       l1.set_phase_domain("domain1");
       l2.set_phase_domain("domain2");
     endfunction
-    function void report_phase();
+    function void report_phase(uvm_phase phase);
       phase_run[uvm_report_ph] = 1;
       if(phase_run.num() != 7) begin
         failed = 1;

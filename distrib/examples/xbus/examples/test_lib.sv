@@ -35,8 +35,8 @@ class xbus_demo_base_test extends uvm_test;
     super.new(name,parent);
   endfunction : new
 
-  virtual function void build_phase();
-    super.build_phase();
+  virtual function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
     // Enable transaction recording for everything
     set_config_int("*", "recording_detail", UVM_FULL);
     // Create the tb
@@ -46,14 +46,14 @@ class xbus_demo_base_test extends uvm_test;
     printer.knobs.depth = 3;
   endfunction : build_phase
 
-  function void end_of_elaboration_phase();
+  function void end_of_elaboration_phase(uvm_phase phase);
     // Set verbosity for the bus monitor for this demo
     xbus_demo_tb0.xbus0.bus_monitor.set_report_verbosity_level(UVM_FULL);
     `uvm_info(get_type_name(),
       $psprintf("Printing the test topology :\n%s", this.sprint(printer)), UVM_LOW)
   endfunction : end_of_elaboration_phase
 
-  task run_phase(uvm_phase_schedule phase);
+  task run_phase(uvm_phase phase);
     //set a drain-time for the environment if desired
     uvm_test_done.set_drain_time(this, 50);
   endtask : run_phase
@@ -70,14 +70,14 @@ class test_read_modify_write extends xbus_demo_base_test;
     super.new(name,parent);
   endfunction : new
 
-  virtual function void build_phase();
+  virtual function void build_phase(uvm_phase phase);
     // Set the default sequence for the master and slave
     set_config_string("xbus_demo_tb0.xbus0.masters[0].sequencer",
       "default_sequence", "read_modify_write_seq");
     set_config_string("xbus_demo_tb0.xbus0.slaves[0].sequencer", 
       "default_sequence", "slave_memory_seq");
     // Create the tb
-    super.build_phase();
+    super.build_phase(phase);
   endfunction : build_phase
 
 endclass : test_read_modify_write
@@ -92,14 +92,14 @@ class test_r8_w8_r4_w4 extends xbus_demo_base_test;
     super.new(name,parent);
   endfunction : new
 
-  virtual function void build_phase();
+  virtual function void build_phase(uvm_phase phase);
     // Set the default sequence for the master and slave
     set_config_string("xbus_demo_tb0.xbus0.masters[0].sequencer", 
       "default_sequence", "r8_w8_r4_w4_seq");
     set_config_string("xbus_demo_tb0.xbus0.slaves[0].sequencer", 
       "default_sequence", "slave_memory_seq");
     // Create the tb
-    super.build_phase();
+    super.build_phase(phase);
   endfunction : build_phase
 
 endclass : test_r8_w8_r4_w4 
@@ -114,7 +114,7 @@ class test_2m_4s extends xbus_demo_base_test;
     super.new(name,parent);
   endfunction : new
 
-  virtual function void build_phase();
+  virtual function void build_phase(uvm_phase phase);
     // Overides to the xbus_demo_tb build_phase()
     // Set the topology to 2 masters, 4 slaves
     set_config_int("xbus_demo_tb0.xbus0", "num_masters", 2);
@@ -130,10 +130,10 @@ class test_2m_4s extends xbus_demo_base_test;
     set_config_int("xbus_demo_tb0.xbus0.masters[1].sequencer",
       "loop_read_modify_write_seq.itr", 3);
     // Create the tb
-    super.build_phase();
+    super.build_phase(phase);
   endfunction : build_phase
 
-  function void connect_phase();
+  function void connect_phase(uvm_phase phase);
     // Connect other slaves monitor to scoreboard
     xbus_demo_tb0.xbus0.slaves[1].monitor.item_collected_port.connect(
       xbus_demo_tb0.scoreboard0.item_collected_export);
@@ -143,13 +143,13 @@ class test_2m_4s extends xbus_demo_base_test;
       xbus_demo_tb0.scoreboard0.item_collected_export);
   endfunction : connect_phase
   
-  function void end_of_elaboration_phase();
+  function void end_of_elaboration_phase(uvm_phase phase);
     // Set up slave address map for xbus0 (slaves[0] is overwritten here)
     xbus_demo_tb0.xbus0.set_slave_address_map("slaves[0]", 16'h0000, 16'h3fff);
     xbus_demo_tb0.xbus0.set_slave_address_map("slaves[1]", 16'h4000, 16'h7fff);
     xbus_demo_tb0.xbus0.set_slave_address_map("slaves[2]", 16'h8000, 16'hBfff);
     xbus_demo_tb0.xbus0.set_slave_address_map("slaves[3]", 16'hC000, 16'hFfff);
-    super.end_of_elaboration_phase();
+    super.end_of_elaboration_phase(phase);
   endfunction : end_of_elaboration_phase
 
 endclass : test_2m_4s

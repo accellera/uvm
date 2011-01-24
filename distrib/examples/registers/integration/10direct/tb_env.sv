@@ -44,7 +44,7 @@ class tb_env extends uvm_component;
       super.new(name,parent);
    endfunction
 
-   virtual function void build_phase();
+   virtual function void build_phase(uvm_phase phase);
       if (regmodel == null) begin
          regmodel = dut_regmodel::type_id::create("regmodel",,get_full_name());
          regmodel.build();
@@ -64,7 +64,7 @@ class tb_env extends uvm_component;
 
    endfunction
 
-   virtual function void connect_phase();
+   virtual function void connect_phase(uvm_phase phase);
       if (apb != null) begin
          reg2apb_adapter reg2apb = new;
          regmodel.default_map.set_sequencer(apb.sqr,reg2apb);
@@ -80,7 +80,7 @@ class tb_env extends uvm_component;
       end
    endfunction
 
-   virtual task run_phase(uvm_phase_schedule phase);
+   virtual task run_phase(uvm_phase phase);
      if (seq == null) begin
        uvm_report_fatal("NO_SEQUENCE","Env's sequence is not defined. Nothing to do. Exiting.");
        return;

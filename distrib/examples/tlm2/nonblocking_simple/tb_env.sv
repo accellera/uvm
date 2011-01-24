@@ -28,12 +28,12 @@ class tb_env extends uvm_component;
       super.new(name, parent);
    endfunction
 
-   function void build_phase();
+   function void build_phase(uvm_phase phase);
       hst = host::type_id::create("hst", this);
       dev = device::type_id::create("dev", this);
    endfunction
 
-   function void connect_phase();
+   function void connect_phase(uvm_phase phase);
       hst.sock.connect(dev.sock);
    endfunction
 

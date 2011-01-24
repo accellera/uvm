@@ -55,11 +55,11 @@ class target extends uvm_component;
       $write("Trgt: delay = %0.3f ps...\n", delay.get_realtime(1ns));
    endtask
 
-   function void start_of_simulation_phase();
+   function void start_of_simulation_phase(uvm_phase phase);
       `uvm_info("TRGT/RPT/START", $psprintf("m_data: 'h%h", m_data), UVM_NONE)
    endfunction
    
-   function void report_phase();
+   function void report_phase(uvm_phase phase);
       `uvm_info("TRGT/RPT/FINAL", $psprintf("m_data: 'h%h", m_data), UVM_NONE)
    endfunction
 

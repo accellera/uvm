@@ -53,7 +53,7 @@ class any_monitor #(type REQ=int,RSP=REQ) extends uvm_component;
     super.new(name,parent);
   endfunction
 
-  function void build_phase();
+  function void build_phase(uvm_phase phase);
     req_ap = new("req_ap",this);
     rsp_ap = new("rsp_ap",this);
   endfunction
@@ -61,7 +61,7 @@ class any_monitor #(type REQ=int,RSP=REQ) extends uvm_component;
   REQ req;
   RSP rsp;
 
-  virtual task run_phase(uvm_phase_schedule phase);
+  virtual task run_phase(uvm_phase phase);
     fork
       forever begin
         @req;
@@ -156,7 +156,7 @@ class any_driver #(type REQ=int,RSP=REQ) extends uvm_component;
     post_req(req);
   endtask
 
-  task run_phase(uvm_phase_schedule phase);
+  task run_phase(uvm_phase phase);
 
     REQ req;
     RSP rsp;
@@ -221,7 +221,7 @@ class any_agent #(type REQ=int, RSP=REQ) extends uvm_component;
   any_driver    #(REQ,RSP) drv;
   any_monitor   #(REQ,RSP) mon;
 
-  virtual function void build_phase();
+  virtual function void build_phase(uvm_phase phase);
     req_ap = new("req_ap",this);
     rsp_ap = new("rsp_ap",this);
     sqr = any_sequencer#(REQ,RSP)::type_id::create("sqr",this);
@@ -229,7 +229,7 @@ class any_agent #(type REQ=int, RSP=REQ) extends uvm_component;
     mon =   any_monitor#(REQ,RSP)::type_id::create("mon",this);
   endfunction
 
-  virtual function void connect_phase();
+  virtual function void connect_phase(uvm_phase phase);
     drv.seqr_port.connect(sqr.seq_item_export);
     mon.req_ap.connect(req_ap);
     mon.rsp_ap.connect(rsp_ap);

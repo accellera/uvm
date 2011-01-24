@@ -64,19 +64,19 @@ module test;
       set_phase_domain("uvm");
     endfunction
 
-    task reset_phase(uvm_phase_schedule phase);
+    task reset_phase(uvm_phase phase);
       start_reset = $time;
       `uvm_info("RST", "IN RESET", UVM_NONE)
       #delay `uvm_info("RST", "END RESET", UVM_NONE)
       end_reset = $time;
     endtask
-    task pre_configure_phase(uvm_phase_schedule phase);
+    task pre_configure_phase(uvm_phase phase);
       start_pre_configure = $time;
       `uvm_info("PRECFG", "IN PRECFG", UVM_NONE)
       #delay `uvm_info("PRECFG", "END PRECFG", UVM_NONE)
       end_pre_configure = $time;
     endtask
-    task configure_phase(uvm_phase_schedule phase);
+    task configure_phase(uvm_phase phase);
       start_configure = $time;
       `uvm_info("CFG", "IN CONFIGURE", UVM_NONE)
       #delay `uvm_info("CFG", "END CONFIGURE", UVM_NONE)
@@ -89,7 +89,7 @@ module test;
     time start_my_cfg;
     time end_my_cfg;
 
-    uvm_phase_schedule my_sched;
+    uvm_phase my_sched;
 
     function new(string name, uvm_component parent);
       super.new(name,parent);
@@ -103,7 +103,7 @@ module test;
     // The component needs to override teh set_phase_schedule to add
     // the new schedule.
     function void set_phase_schedule(string domain_name);
-      uvm_phase_schedule new_phase;
+      uvm_phase new_phase;
       super.set_phase_schedule(domain_name);
       my_sched = find_phase_schedule("uvm_pkg::uvm", domain_name);
 
@@ -118,7 +118,7 @@ module test;
       end
     endfunction
 
-    task cfg_phase(uvm_phase_schedule phase);
+    task cfg_phase(uvm_phase phase);
       start_my_cfg = $time;
       `uvm_info("MYCFG", "IN MY CFG", UVM_NONE)
       #delay `uvm_info("MYCFG", "END MY CFG", UVM_NONE)
@@ -135,7 +135,7 @@ module test;
       mc = new("mc", this);
       oc = new("oc", this);
     endfunction
-    task run_phase(uvm_phase_schedule phase);
+    task run_phase(uvm_phase phase);
       `uvm_info("RUN", "In run", UVM_NONE)
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
     endtask
@@ -149,7 +149,7 @@ module test;
       super.new(name,parent);
       me = new("me", this);
     endfunction
-    function void report_phase;
+    function void report_phase(uvm_phase phase);
       if(me.mc.start_reset != 0 || 
          me.oc.start_reset != 0) begin
         $display("*** UVM TEST FAILED , reset started at time %t/%0t instead of 0", me.mc.start_reset, me.oc.start_reset);

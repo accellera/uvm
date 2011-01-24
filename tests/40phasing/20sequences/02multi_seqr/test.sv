@@ -89,7 +89,7 @@ class myseqr extends uvm_sequencer;
   endfunction
   `uvm_component_utils(myseqr)
 
-  task main_phase(uvm_phase_schedule phase);
+  task main_phase(uvm_phase phase);
     `uvm_info("MAIN","In main!!!", UVM_NONE)
     set_thread_mode(UVM_PHASE_IMPLICIT_OBJECTION);
     #100;
@@ -107,8 +107,8 @@ class test extends uvm_test;
 
    typedef uvm_config_db #(uvm_object_wrapper) phase_rsrc;
 
-   function void build_phase();
-      uvm_phase_schedule domain, cfg, main;
+   function void build_phase(uvm_phase phase);
+      uvm_phase domain, cfg, main;
       seqr1 = new("seqr1", this);
       seqr2 = new("seqr2", this);
       phase_rsrc::set(this, "seqr1", "configure_ph", myseq::type_id::get());
@@ -119,7 +119,7 @@ class test extends uvm_test;
       phase_rsrc::set(this, "seqr2", "shutdown_ph", myseq::type_id::get());
    endfunction
    
-   function void report_phase();
+   function void report_phase(uvm_phase phase);
      wrapper w;
 
      if(seqr_seqs.num() != 2) begin

@@ -43,7 +43,7 @@ class apb_master extends uvm_driver#(apb_rw);
       super.new(name,parent);
    endfunction
    
-   virtual function void build_phase();
+   virtual function void build_phase(uvm_phase phase);
       apb_agent agent;
       if ($cast(agent, get_parent()) && agent != null) begin
          sigs = agent.vif;
@@ -55,7 +55,7 @@ class apb_master extends uvm_driver#(apb_rw);
       end
    endfunction
 
-   virtual protected task run_phase(uvm_phase_schedule phase);
+   virtual protected task run_phase(uvm_phase phase);
       super.run_phase(phase);
 
       this.sigs.mck.psel    <= '0;

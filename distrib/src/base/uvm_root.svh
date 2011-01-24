@@ -160,7 +160,7 @@ class uvm_root extends uvm_component;
   
   extern `_protected function new ();
   extern protected virtual function bit m_add_child (uvm_component child);
-  extern function void build_phase();
+  extern function void build_phase(uvm_phase phase);
   extern local function void m_do_verbosity_settings();
   extern local function void m_do_timeout_settings();
   extern local function void m_do_factory_settings();
@@ -176,9 +176,9 @@ class uvm_root extends uvm_component;
 
 
   // At end of elab phase we need to do tlm binding resolution.
-  function void phase_ended(uvm_phase_schedule phase);
-    uvm_phase_schedule domain = find_phase_schedule("uvm_pkg::common","*");
-    uvm_phase_schedule elab_ph = domain.find_schedule("end_of_elaboration");
+  function void phase_ended(uvm_phase phase);
+    uvm_phase domain = find_phase_schedule("uvm_pkg::common","*");
+    uvm_phase elab_ph = domain.find_schedule("end_of_elaboration");
     if(phase == elab_ph)
       do_resolve_bindings(); 
   endfunction
@@ -373,7 +373,7 @@ task uvm_root::run_test(string test_name="");
   fork begin
     // spawn the phase runner task
     phase_runner_proc = process::self();
-    uvm_phase_schedule::m_run_phases();
+    uvm_phase::m_run_phases();
   end
   join_none
   #0; // let the phase runner start
@@ -504,22 +504,22 @@ endfunction
 // immediately available.
 
 // Common schedules
-uvm_phase_schedule build_ph ;
-uvm_phase_schedule connect_ph ;
-uvm_phase_schedule end_of_elaboration_ph ;
-uvm_phase_schedule start_of_simulation_ph ;
-uvm_phase_schedule run_ph ;
-uvm_phase_schedule extract_ph ;
-uvm_phase_schedule check_ph ;
-uvm_phase_schedule report_ph ;
-uvm_phase_schedule final_ph ;
+uvm_phase build_ph ;
+uvm_phase connect_ph ;
+uvm_phase end_of_elaboration_ph ;
+uvm_phase start_of_simulation_ph ;
+uvm_phase run_ph ;
+uvm_phase extract_ph ;
+uvm_phase check_ph ;
+uvm_phase report_ph ;
+uvm_phase final_ph ;
 
 function void uvm_root::m_initialize_common_schedule();
   // initialize phase schedule to "common", or inherit it from parent component
   // - domain can be overridden by set_phase_domain()
   // - schedule can be augmented by set_phase_schedule()
 
-  static uvm_phase_schedule common = null;
+  static uvm_phase common = null;
   if(common != null) return;
 
   // build phase schedule 'uvm_pkg::common', used by all uvm_component instances
@@ -571,9 +571,9 @@ endfunction
 // build_phase
 // -----
 
-function void uvm_root::build_phase();
+function void uvm_root::build_phase(uvm_phase phase);
 
-  super.build_phase();
+  super.build_phase(phase);
 
   m_set_cl_msg_args();
 
