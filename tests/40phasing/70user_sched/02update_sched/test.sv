@@ -44,7 +44,6 @@
 module test;
 
   import uvm_pkg::*;
-  import mypkg::*;
 
   typedef class mycomp;
 
