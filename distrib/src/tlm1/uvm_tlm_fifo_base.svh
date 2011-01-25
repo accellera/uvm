@@ -163,7 +163,7 @@ virtual class uvm_tlm_fifo_base #(type T=int) extends uvm_component;
   endfunction
 
   //turn off auto config
-  function void build_phase();
+  function void build_phase(uvm_phase phase);
     build(); //for backward compat, won't cause auto-config
     return;
   endfunction

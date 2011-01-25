@@ -52,7 +52,7 @@ class ubus_master_driver extends uvm_driver #(ubus_transfer);
   endfunction: build_phase
 
   // run phase
-  virtual task run_phase(uvm_phase_schedule phase);
+  virtual task run_phase(uvm_phase phase);
     fork
       get_and_drive();
       reset_signals();

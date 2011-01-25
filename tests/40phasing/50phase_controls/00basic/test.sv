@@ -33,11 +33,11 @@ class basic_driver extends uvm_driver #(basic_item);
     end
   endtask : get_and_send
 
-  task run_phase (uvm_phase_schedule phase);
+  task run_phase (uvm_phase phase);
     get_and_send();
   endtask: run_phase
 
-  task post_shutdown_phase(uvm_phase_schedule phase);
+  task post_shutdown_phase(uvm_phase phase);
     //Should stop accepting and sending request here.
     disable get_and_send;
   endtask : post_shutdown_phase
@@ -146,7 +146,7 @@ class test extends uvm_test;
 
   typedef uvm_config_db #(uvm_sequence_base) sequence_rsrc;
 
-  function void connect_phase();
+  function void connect_phase(uvm_phase phase);
     basic_seq seq = new;
     super.connect();
     seq.randomize();
@@ -154,18 +154,18 @@ class test extends uvm_test;
     sequence_rsrc::set(this, "seqr1", "main_ph", seq);
   endfunction : connect_phase
 
-  virtual task run_phase(uvm_phase_schedule phase);
+  virtual task run_phase(uvm_phase phase);
     set_thread_mode(UVM_PHASE_IMPLICIT_OBJECTION);
     //basic_seq run_seq; run_seq = new( "basic_seq_in_run" ); run_seq.start( sequencer );
     //`uvm_info( "RUN", "Done run phase", UVM_NONE );
   endtask : run_phase
 
-  virtual task main_phase(uvm_phase_schedule phase);
+  virtual task main_phase(uvm_phase phase);
     basic_seq main_seq; main_seq = new( "basic_seq_in_main" ); main_seq.start( sequencer );
     `uvm_info( "RUN", "Done main phase", UVM_NONE );
   endtask : main_phase
 
-  function void report_phase();
+  function void report_phase(uvm_phase phase);
     uvm_report_server svr;
     svr = _global_reporter.get_report_server();
 
@@ -179,13 +179,13 @@ class test extends uvm_test;
     end
   endfunction : report_phase
 
-  function void phase_started( uvm_phase_schedule phase);
+  function void phase_started( uvm_phase phase);
     `uvm_info( "PHASE", $sformatf( "Phase %s() STATED ----------------------------\n",
                                    phase.get_name()), UVM_NONE);
     super.phase_started( phase );
   endfunction : phase_started
 
-  function void phase_ended( uvm_phase_schedule phase);
+  function void phase_ended( uvm_phase phase);
     super.phase_ended( phase );
     `uvm_info( "PHASE", $sformatf( "Phase %s() ENDED  ----------------------------\n",
                                    phase.get_name()), UVM_NONE);

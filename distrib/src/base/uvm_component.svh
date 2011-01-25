@@ -200,15 +200,15 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The <Pre-Defined Phases::uvm_build_ph> phase implementation method.
   //
-  // Any override should call super.build_phase() to execute the automatic
+  // Any override should call super.build_phase(phase) to execute the automatic
   // configuration of fields registed in the component by calling 
   // <apply_config_settings>.
   // To turn off automatic configuration for a component, 
-  // do not call super.build_phase().
+  // do not call super.build_phase(phase).
   //
   // This method should never be called directly. 
 
-  extern virtual function void build_phase();
+  extern virtual function void build_phase(uvm_phase phase);
 
   // For backward compatibility the base build_phase method calls build.
   extern virtual function void build();
@@ -220,7 +220,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly. 
 
-  extern virtual function void connect_phase();
+  extern virtual function void connect_phase(uvm_phase phase);
 
   // For backward compatibility the base connect_phase method calls connect.
   extern virtual function void connect();
@@ -231,7 +231,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
 
-  extern virtual function void end_of_elaboration_phase();
+  extern virtual function void end_of_elaboration_phase(uvm_phase phase);
 
   // For backward compatibility the base end_of_elaboration_phase method calls end_of_elaboration.
   extern virtual function void end_of_elaboration();
@@ -242,7 +242,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
 
-  extern virtual function void start_of_simulation_phase();
+  extern virtual function void start_of_simulation_phase(uvm_phase phase);
 
   // For backward compatibility the base start_of_simulation_phase method calls start_of_simulation.
   extern virtual function void start_of_simulation();
@@ -251,13 +251,22 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The <Pre-Defined Phases::uvm_run_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of a
-  // component's run phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // Unlike other task phases, it is not necessary to raise
+  // an objection to cause it to persist: it will persists
+  // until <global_stop_request()> is called.
+  // However, if a single phase objection is raised using
+  // ~phase.raise_objection()~, then the phase will automatically
+  // ends once all objections are dropped using ~phase.drop_objection()~.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
   //
   // The run_phase task should never be called directly.
 
-  extern virtual task run_phase(uvm_phase_schedule phase);
+  extern virtual task run_phase(uvm_phase phase);
 
   // For backward compatibility the base run_phase method calls run.
   extern virtual task run();
@@ -266,121 +275,241 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The <Pre-Defined Phases::uvm_pre_reset_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's pre-reset phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
   //
-  extern virtual task pre_reset_phase(uvm_phase_schedule phase);
+  // This method should not be called directly.
+
+  extern virtual task pre_reset_phase(uvm_phase phase);
 
   // Task: reset_phase
   //
   // The <Pre-Defined Phases::uvm_reset_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's reset phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
-  extern virtual task reset_phase(uvm_phase_schedule phase);
+  extern virtual task reset_phase(uvm_phase phase);
 
   // Task: post_reset_phase
   //
   // The <Pre-Defined Phases::uvm_post_reset_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's post-reset phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
-  extern virtual task post_reset_phase(uvm_phase_schedule phase);
+  extern virtual task post_reset_phase(uvm_phase phase);
 
   // Task: pre_configure_phase
   //
   // The <Pre-Defined Phases::uvm_pre_configure_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's pre_configure phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
-  extern virtual task pre_configure_phase(uvm_phase_schedule phase);
+  extern virtual task pre_configure_phase(uvm_phase phase);
 
   // Task: configure_phase
   //
   // The <Pre-Defined Phases::uvm_configure_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's configure phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
-  extern virtual task configure_phase(uvm_phase_schedule phase);
+  extern virtual task configure_phase(uvm_phase phase);
 
   // Task: post_configure_phase
   //
   // The <Pre-Defined Phases::uvm_post_configure_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's post-configure phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
-  extern virtual task post_configure_phase(uvm_phase_schedule phase);
+  extern virtual task post_configure_phase(uvm_phase phase);
 
   // Task: pre_main_phase
   //
   // The <Pre-Defined Phases::uvm_pre_main_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's pre-main phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
-  extern virtual task pre_main_phase(uvm_phase_schedule phase);
+  extern virtual task pre_main_phase(uvm_phase phase);
 
   // Task: main_phase
   //
   // The <Pre-Defined Phases::uvm_main_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's main phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
-  extern virtual task main_phase(uvm_phase_schedule phase);
+  extern virtual task main_phase(uvm_phase phase);
 
   // Task: post_main_phase
   //
   // The <Pre-Defined Phases::uvm_post_main_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's post-main phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
-  extern virtual task post_main_phase(uvm_phase_schedule phase);
+  extern virtual task post_main_phase(uvm_phase phase);
 
   // Task: pre_shutdown_phase
   //
   // The <Pre-Defined Phases::uvm_pre_shutdown_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's pre-shutdown phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
-  extern virtual task pre_shutdown_phase(uvm_phase_schedule phase);
+  extern virtual task pre_shutdown_phase(uvm_phase phase);
 
   // Task: shutdown_phase
   //
   // The <Pre-Defined Phases::uvm_shutdown_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's shutdown phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
-  extern virtual task shutdown_phase(uvm_phase_schedule phase);
+  extern virtual task shutdown_phase(uvm_phase phase);
 
   // Task: post_shutdown_phase
   //
   // The <Pre-Defined Phases::uvm_post_shutdown_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's post-shutdown phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
-  extern virtual task post_shutdown_phase(uvm_phase_schedule phase);
+  extern virtual task post_shutdown_phase(uvm_phase phase);
 
   // Function: extract_phase
   //
@@ -388,7 +517,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
 
-  extern virtual function void extract_phase();
+  extern virtual function void extract_phase(uvm_phase phase);
 
   // For backward compatibility the base extract_phase method calls extract.
   extern virtual function void extract();
@@ -399,7 +528,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
 
-  extern virtual function void check_phase();
+  extern virtual function void check_phase(uvm_phase phase);
 
   // For backward compatibility the base check_phase method calls check.
   extern virtual function void check();
@@ -410,7 +539,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
 
-  extern virtual function void report_phase();
+  extern virtual function void report_phase(uvm_phase phase);
 
   // For backward compatibility the base report_phase method calls report.
   extern virtual function void report();
@@ -421,7 +550,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This method should never be called directly.
   
-  extern virtual function void final_phase();
+  extern virtual function void final_phase(uvm_phase phase);
 
 
   //--------------------------------------------------------------------
@@ -435,7 +564,7 @@ virtual class uvm_component extends uvm_report_object;
   // the phase being started. Any threads spawned in this callback are
   // not affected when the phase ends.
 
-  extern virtual function void phase_started (uvm_phase_schedule phase);
+  extern virtual function void phase_started (uvm_phase phase);
 
   // Function: phase_ended
   //
@@ -443,12 +572,12 @@ virtual class uvm_component extends uvm_report_object;
   // the phase that is ending.  Any threads spawned in this callback are
   // not affected when the phase ends.
   
-  extern virtual function void phase_ended (uvm_phase_schedule phase);
+  extern virtual function void phase_ended (uvm_phase phase);
   
   // Function: get_current_phase
   // Return the phase schedule node which initiated the current process thread
 
-  extern function uvm_phase_schedule get_current_phase();
+  extern function uvm_phase get_current_phase();
 
   // Function: find_phase_domain
   // Return the domain name set for our uvm schedule (or another specific schedule)
@@ -459,17 +588,17 @@ virtual class uvm_component extends uvm_report_object;
   // Function: find_phase_schedule
   // Locate a schedule/domain pair in this component's list, "*" matches any name
 
-  extern function uvm_phase_schedule find_phase_schedule(string name, string domain);
+  extern function uvm_phase find_phase_schedule(string name, string domain);
 
   // Function: add_phase_schedule
   // insert a new schedule/domain entry in this component's domain membership list
 
-  extern function void add_phase_schedule(uvm_phase_schedule schedule, string domain);
+  extern function void add_phase_schedule(uvm_phase schedule, string domain);
 
   // Function: delete_phase_schedule
   // delete a schedule entry from this component's domain membership list
 
-  extern function void delete_phase_schedule(uvm_phase_schedule schedule);
+  extern function void delete_phase_schedule(uvm_phase schedule);
 
 
   //--------------------------------------------------------------------
@@ -762,9 +891,9 @@ virtual class uvm_component extends uvm_report_object;
   //|
   //|    local myobj_t data;
   //|
-  //|    function void build_phase();
+  //|    function void build_phase(uvm_phase phase);
   //|      uvm_object tmp;
-  //|      super.build_phase();
+  //|      super.build_phase(phase);
   //|      if(get_config_object("data", tmp))
   //|        if (!$cast(data, tmp))
   //|          $display("error! config setting for 'data' not of type myobj_t");
@@ -772,7 +901,7 @@ virtual class uvm_component extends uvm_report_object;
   //|      ...
   //
   // The above example overrides the <build_phase> method. If you want to retain
-  // any base functionality, you must call super.build_phase().
+  // any base functionality, you must call super.build_phase(uvm_phase phase).
   //
   // The ~clone~ bit clones the data inbound. The get_config_object method can
   // also clone the data outbound.
@@ -799,7 +928,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // To get all configuration information prior to the run phase, do something 
   // like this in your top object:
-  //|  function void start_of_simulation_phase();
+  //|  function void start_of_simulation_phase(uvm_phase phase);
   //|    set_report_id_action_hier("CFGOVR", UVM_DISPLAY);
   //|    set_report_id_action_hier("CFGSET", UVM_DISPLAY);
   //|    check_config_usage();
@@ -828,7 +957,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // If you do not want apply_config_settings to be called for a component,
   // then the build_phase() method should be overloaded and you should not call
-  // super.build_phase(). Likewise, apply_config_settings can be overloaded to
+  // super.build_phase(phase). Likewise, apply_config_settings can be overloaded to
   // customize automated configuration.
   //
   // When the ~verbose~ bit is set, all overrides are printed as they are
@@ -1062,7 +1191,7 @@ virtual class uvm_component extends uvm_report_object;
   //|  class block extends uvm_component;
   //|    `uvm_component_utils(block)
   //|    comp c_inst;
-  //|    virtual function void build_phase();
+  //|    virtual function void build_phase(uvm_phase phase);
   //|      set_inst_override_by_type("c_inst",comp::get_type(),
   //|                                         mycomp::get_type());
   //|    endfunction
@@ -1456,11 +1585,11 @@ virtual class uvm_component extends uvm_report_object;
   // Phasing implementation
   // Internal members for phasing process control, hierarchical schedules, functors
   
-  string             m_phase_domains[uvm_phase_schedule]; // domain(s) we have set, per schedule
-  uvm_phase_thread   m_phase_threads[uvm_phase_schedule]; // phases we have active threads for
+  string             m_phase_domains[uvm_phase]; // domain(s) we have set, per schedule
+  uvm_phase_thread   m_phase_threads[uvm_phase]; // phases we have active threads for
   uvm_phase_imp      m_phase_imps[uvm_phase_imp];         // functors to override ovm_root defaults
   uvm_thread_mode    m_def_phase_thread_mode=UVM_PHASE_MODE_DEFAULT; // default thread semantic
-  uvm_phase_schedule m_current_phase;                     // the most recently executed phase
+  uvm_phase m_current_phase;                     // the most recently executed phase
   /*protected*/ bit  m_build_done=0;
 
 
@@ -1563,14 +1692,14 @@ function uvm_component::new (string name, uvm_component parent);
 
   // Check that we're not in or past end_of_elaboration
   begin
-    uvm_phase_schedule common, end_of_elab;
+    uvm_phase common, end_of_elab;
     common = top.find_phase_schedule("uvm_pkg::common","common");
     if (common != null) begin
       // only check if we have got phasing set up yet
       end_of_elab = common.find_schedule("end_of_elaboration");
       if (end_of_elab.get_state() == UVM_PHASE_EXECUTING ||
           end_of_elab.get_run_count() > 0 ) begin
-        uvm_phase_schedule curr_phase;
+        uvm_phase curr_phase;
         curr_phase = top.get_current_phase();
         uvm_report_fatal("ILLCRT", {"It is illegal to create a component once",
                   " phasing reaches end_of_elaboration. The current phase is ", 
@@ -2118,7 +2247,7 @@ endfunction
 // these are prototypes for the methods to be implemented in user components
 // build_phase() has a default implementation, the others have an empty default
 
-function void uvm_component::build_phase();
+function void uvm_component::build_phase(uvm_phase phase);
   m_build_done = 1;
   apply_config_settings(print_config_matches);
   build();
@@ -2133,31 +2262,31 @@ endfunction
 // these phase methods are common to all components in UVM. For backward
 // compatibility, they call the old style name (without the _phse)
 
-function void uvm_component::connect_phase();
+function void uvm_component::connect_phase(uvm_phase phase);
   connect();
   return; 
 endfunction
-function void uvm_component::start_of_simulation_phase();
+function void uvm_component::start_of_simulation_phase(uvm_phase phase);
   start_of_simulation();
   return; 
 endfunction
-function void uvm_component::end_of_elaboration_phase();
+function void uvm_component::end_of_elaboration_phase(uvm_phase phase);
   end_of_elaboration();
   return; 
 endfunction
-task          uvm_component::run_phase(uvm_phase_schedule phase);
+task          uvm_component::run_phase(uvm_phase phase);
   run();
   return; 
 endtask
-function void uvm_component::extract_phase();
+function void uvm_component::extract_phase(uvm_phase phase);
   extract();
   return; 
 endfunction
-function void uvm_component::check_phase();
+function void uvm_component::check_phase(uvm_phase phase);
   check();
   return; 
 endfunction
-function void uvm_component::report_phase();
+function void uvm_component::report_phase(uvm_phase phase);
   report();
   return; 
 endfunction
@@ -2173,22 +2302,22 @@ task          uvm_component::run();                 return; endtask
 function void uvm_component::extract();             return; endfunction
 function void uvm_component::check();               return; endfunction
 function void uvm_component::report();              return; endfunction
-function void uvm_component::final_phase();         return; endfunction
+function void uvm_component::final_phase(uvm_phase phase);         return; endfunction
 
 // these runtime phase methods are only called if a set_domain() is done
 
-task uvm_component::pre_reset_phase(uvm_phase_schedule phase);      return; endtask
-task uvm_component::reset_phase(uvm_phase_schedule phase);          return; endtask
-task uvm_component::post_reset_phase(uvm_phase_schedule phase);     return; endtask
-task uvm_component::pre_configure_phase(uvm_phase_schedule phase);  return; endtask
-task uvm_component::configure_phase(uvm_phase_schedule phase);      return; endtask
-task uvm_component::post_configure_phase(uvm_phase_schedule phase); return; endtask
-task uvm_component::pre_main_phase(uvm_phase_schedule phase);       return; endtask
-task uvm_component::main_phase(uvm_phase_schedule phase);           return; endtask
-task uvm_component::post_main_phase(uvm_phase_schedule phase);      return; endtask
-task uvm_component::pre_shutdown_phase(uvm_phase_schedule phase);   return; endtask
-task uvm_component::shutdown_phase(uvm_phase_schedule phase);       return; endtask
-task uvm_component::post_shutdown_phase(uvm_phase_schedule phase);  return; endtask
+task uvm_component::pre_reset_phase(uvm_phase phase);      return; endtask
+task uvm_component::reset_phase(uvm_phase phase);          return; endtask
+task uvm_component::post_reset_phase(uvm_phase phase);     return; endtask
+task uvm_component::pre_configure_phase(uvm_phase phase);  return; endtask
+task uvm_component::configure_phase(uvm_phase phase);      return; endtask
+task uvm_component::post_configure_phase(uvm_phase phase); return; endtask
+task uvm_component::pre_main_phase(uvm_phase phase);       return; endtask
+task uvm_component::main_phase(uvm_phase phase);           return; endtask
+task uvm_component::post_main_phase(uvm_phase phase);      return; endtask
+task uvm_component::pre_shutdown_phase(uvm_phase phase);   return; endtask
+task uvm_component::shutdown_phase(uvm_phase phase);       return; endtask
+task uvm_component::post_shutdown_phase(uvm_phase phase);  return; endtask
 
 
 //------------------------------
@@ -2203,7 +2332,7 @@ task uvm_component::post_shutdown_phase(uvm_phase_schedule phase);  return; endt
 // called for all phases the phase is passed in as an argument so the
 // extender can decide what to do, if anything, for each phase.
 
-function void uvm_component::phase_started(uvm_phase_schedule phase);
+function void uvm_component::phase_started(uvm_phase phase);
   foreach(m_verbosity_settings[i]) begin
     if(phase.get_name() == m_verbosity_settings[i].phase) begin
       if( m_verbosity_settings[i].offset == 0 ) begin
@@ -2232,7 +2361,7 @@ endfunction
 // phase_ended
 // -----------
 
-function void uvm_component::phase_ended(uvm_phase_schedule phase);
+function void uvm_component::phase_ended(uvm_phase phase);
 endfunction
 
 
@@ -2242,7 +2371,7 @@ endfunction
 
 // won't work for child processes or outside callers
 // they'l get most recently spawned phase for this component, even if not active
-function uvm_phase_schedule uvm_component::get_current_phase();
+function uvm_phase uvm_component::get_current_phase();
   foreach (m_phase_threads[phase])
     if (m_phase_threads[phase].is_current_process())
       return phase;
@@ -2264,7 +2393,7 @@ endfunction
 // find_phase_schedule
 // -------------------
 
-function uvm_phase_schedule uvm_component::find_phase_schedule(string name, string domain);
+function uvm_phase uvm_component::find_phase_schedule(string name, string domain);
   foreach (m_phase_domains[schedule])
     if (((name == "*") || (schedule.get_schedule_name() == name)) &&
         ((domain == "*") || (m_phase_domains[schedule] == domain)))
@@ -2276,7 +2405,7 @@ endfunction
 // add_phase_schedule
 // ------------------
 
-function void uvm_component::add_phase_schedule(uvm_phase_schedule schedule, string domain);
+function void uvm_component::add_phase_schedule(uvm_phase schedule, string domain);
   m_phase_domains[schedule] = domain;
 endfunction
 
@@ -2284,7 +2413,7 @@ endfunction
 // delete_phase_schedule
 // ---------------------
 
-function void uvm_component::delete_phase_schedule(uvm_phase_schedule schedule);
+function void uvm_component::delete_phase_schedule(uvm_phase schedule);
   m_phase_domains.delete(schedule);
 endfunction
 
@@ -2310,7 +2439,7 @@ endfunction
 function void uvm_component::set_phase_schedule(string domain_name);
   const string schedule_name = "uvm_pkg::uvm";
   uvm_root top;
-  uvm_phase_schedule uvm;
+  uvm_phase uvm;
   top = uvm_root::get();
 
   // find this schedule/domain in the master schedule if it exists
@@ -2319,7 +2448,7 @@ function void uvm_component::set_phase_schedule(string domain_name);
   // create it and add it to master schedule if it doesn't exist
   if (uvm == null) begin
     uvm = new(schedule_name);
-    uvm_phase_schedule::m_has_rt_phases=1;
+    uvm_phase::m_has_rt_phases=1;
     // schedule consists of a linear list of predefined phases
     uvm.add_phase(uvm_pre_reset_ph);
     uvm.add_phase(uvm_reset_ph);
@@ -2336,7 +2465,7 @@ function void uvm_component::set_phase_schedule(string domain_name);
     // schedule is integrated hierarchically in parallel with the "run" phase
     // of the "uvm_pkg::common" schedule, for the specified domain
     begin
-      uvm_phase_schedule common;
+      uvm_phase common;
       common = top.find_phase_schedule("uvm_pkg::common","common");
       common.add_schedule(uvm, .with_phase(common.find_schedule("run")));
     end
@@ -2407,7 +2536,7 @@ endfunction
 // ----
 
 function void uvm_component::jump(uvm_phase_imp phase);
-  uvm_phase_schedule current_phase;
+  uvm_phase current_phase;
   current_phase = get_current_phase();
   current_phase.jump(phase);
 endfunction
@@ -2416,7 +2545,7 @@ endfunction
 // ----------------
 
 function void uvm_component::jump_all_domains(uvm_phase_imp phase);
-  uvm_phase_schedule current_phase;
+  uvm_phase current_phase;
   current_phase = get_current_phase();
   current_phase.jump_all(phase);
 endfunction

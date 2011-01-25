@@ -46,9 +46,9 @@ package mypkg;
   // defining the schedule. When SV supports interface classes,
   // this would be an interface class.
   virtual class my_component;
-    pure virtual task custom_reset_phase(uvm_phase_schedule phase);
-    pure virtual task custom_main_phase(uvm_phase_schedule phase);
-    pure virtual task custom_shutdown_phase(uvm_phase_schedule phase);
+    pure virtual task custom_reset_phase(uvm_phase phase);
+    pure virtual task custom_main_phase(uvm_phase phase);
+    pure virtual task custom_shutdown_phase(uvm_phase phase);
   endclass
 
   `uvm_user_task_phase(custom_reset,my_component,my_)
@@ -59,8 +59,8 @@ package mypkg;
   class my_schedule#(string S="spec_sched");
 
     // The base schedule puts new schedule into the master schedule.
-    static function uvm_phase_schedule get_my_base_schedule(string domain);
-      uvm_phase_schedule common, my_sched;
+    static function uvm_phase get_my_base_schedule(string domain);
+      uvm_phase common, my_sched;
       uvm_root top;
       top = uvm_root::get();
 
@@ -86,8 +86,8 @@ package mypkg;
     endfunction
 
     // This creates the actual schedule for the particular component type.
-    static function uvm_phase_schedule get_my_schedule(string domain);
-      uvm_phase_schedule common, my_sched, my_base_sched;
+    static function uvm_phase get_my_schedule(string domain);
+      uvm_phase common, my_sched, my_base_sched;
       uvm_root top;
       top = uvm_root::get();
   
@@ -132,11 +132,16 @@ module test;
 
     time delay=40ns;
 
-    uvm_phase_schedule other_sched;
+    uvm_phase other_sched;
+
     function new(string name, uvm_component parent);
       super.new(name,parent);
+    endfunction
+
+    function void connect();
       set_phase_domain("base_domain");
     endfunction
+
 
     // The component needs to override teh set_phase_schedule to add
     // the new schedule.
@@ -149,19 +154,19 @@ module test;
       end
     endfunction
 
-    task custom_reset(uvm_phase_schedule phase);
+    task custom_reset(uvm_phase phase);
       start_reset = $time;
       `uvm_info("RST", "IN MY RESET", UVM_NONE)
       #delay `uvm_info("RST", "END MY RESET", UVM_NONE)
       end_reset = $time;
     endtask
-    task custom_main(uvm_phase_schedule phase);
+    task custom_main(uvm_phase phase);
       start_main = $time;
       `uvm_info("MAIN", "IN MY MAIN", UVM_NONE)
       #(60-delay) `uvm_info("MAIN", "END MY MAIN", UVM_NONE)
       end_main = $time;
     endtask
-    task custom_shutdown(uvm_phase_schedule phase);
+    task custom_shutdown(uvm_phase phase);
       start_shutdown = $time;
       `uvm_info("SHTDWN", "IN MY SHUTDOWN", UVM_NONE)
       #delay `uvm_info("SHTDWN", "END MY SHUTDOWN", UVM_NONE)
@@ -173,11 +178,15 @@ module test;
   // Some component that will use the new schedule
   class mycomp extends othercomp;
 
-    uvm_phase_schedule my_sched;
+    uvm_phase my_sched;
+
     function new(string name, uvm_component parent);
       super.new(name,parent);
-      set_phase_domain("base_domain");
       delay=30ns;
+    endfunction
+
+    function void connect();
+      set_phase_domain("base_domain");
     endfunction
 
     // The component needs to override teh set_phase_schedule to add
@@ -203,16 +212,9 @@ module test;
       mc = new("mc", this);
       oc = new("oc", this);
     endfunction
-    task run_phase(uvm_phase_schedule phase);
+    task run_phase(uvm_phase phase);
       `uvm_info("RUN", "In run", UVM_NONE)
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
-//Current global stop integration has an issue here... needs
-//to be looked at
-`ifdef WORKAROUND
-run_ph.phase_done.drop_objection();
-`else
-    `uvm_info("RUN", "WORKAROUND NOT IN PLACE, THIS WILL FAIL BECAUSE UVM DOESN'T KNOW THERE IS A USE PHASE", UVM_NONE)
-`endif
     endtask
   endclass
 
@@ -224,7 +226,7 @@ run_ph.phase_done.drop_objection();
       super.new(name,parent);
       me = new("me", this);
     endfunction
-    function void report_phase;
+    function void report_phase(uvm_phase phase);
       if(me.mc.start_reset != 0 || 
          me.oc.start_reset != 0) begin
         $display("*** UVM TEST FAILED , reset started at time %t/%0t instead of 0", me.mc.start_reset, me.oc.start_reset);

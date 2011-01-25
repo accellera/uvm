@@ -132,7 +132,7 @@ class uvm_in_order_comparator
     return type_name;
   endfunction
 
-  virtual function void connect_phase();
+  virtual function void connect_phase(uvm_phase phase);
     before_export.connect(m_before_fifo.analysis_export);
     after_export.connect(m_after_fifo.analysis_export);
   endfunction
@@ -146,7 +146,7 @@ class uvm_in_order_comparator
   // Status information is updated according to the results of the comparison.
   // Each pair is published to the pair_ap analysis port.
 
-  virtual task run_phase(uvm_phase_schedule phase);
+  virtual task run_phase(uvm_phase phase);
  
     pair_type pair;
     T b;

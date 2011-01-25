@@ -33,13 +33,13 @@ class tb_env extends uvm_env;
       super.new(name, parent);
    endfunction: new
 
-   virtual function void build_phase();
+   virtual function void build_phase(uvm_phase phase);
       regmodel = block_B::type_id::create("regmodel");
       regmodel.build();
       regmodel.lock_model();
    endfunction: build_phase
 
-   virtual function void connect_phase();
+   virtual function void connect_phase(uvm_phase phase);
       // Use a user-defined front-door in lieu of a bus-agent
       reg_R_fd fd = new;
       regmodel.R.set_frontdoor(fd);

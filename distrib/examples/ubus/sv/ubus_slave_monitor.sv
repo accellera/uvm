@@ -132,7 +132,7 @@ class ubus_slave_monitor extends uvm_monitor;
   endfunction : get_max_addr
 
   // run phase
-  virtual task run_phase(uvm_phase_schedule phase);
+  virtual task run_phase(uvm_phase phase);
     fork
       collect_transactions();
     join

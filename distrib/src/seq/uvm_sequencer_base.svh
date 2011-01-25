@@ -79,7 +79,7 @@ class uvm_sequencer_base extends uvm_component;
   //| uvm_config_db #(uvm_object_wrapper)::set(this, "myseqr", "main_ph"
   //|                                           myseq_type::type_id::get());
 
-  virtual function void start_phase_sequence(uvm_phase_schedule phase);
+  virtual function void start_phase_sequence(uvm_phase phase);
     uvm_object_wrapper wrapper;
     uvm_sequence_base  seq;
     uvm_thread_mode mode;
@@ -225,9 +225,9 @@ class uvm_sequencer_base extends uvm_component;
 
 
 
-  virtual function void build_phase();
+  virtual function void build_phase(uvm_phase phase);
     int dummy;
-    super.build_phase();
+    super.build_phase(phase);
     void'(get_config_string("default_sequence", default_sequence));
     void'(get_config_int("count", count));
     void'(get_config_int("max_random_count", max_random_count));

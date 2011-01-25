@@ -47,8 +47,8 @@ class ubus_example_tb extends uvm_env;
     super.new(name, parent);
   endfunction : new
 
-  // build
-  virtual function void build_phase();
+  // build_phase
+  virtual function void build_phase(uvm_phase phase);
     super.build_phase();
     uvm_resource_db#(int)::set({get_full_name(),".ubus0"}, 
 			       "num_masters", 1, this);
@@ -59,13 +59,13 @@ class ubus_example_tb extends uvm_env;
     scoreboard0 = ubus_example_scoreboard::type_id::create("scoreboard0", this);
   endfunction : build_phase
 
-  function void connect_phase();
+  function void connect_phase(uvm_phase phase);
     // Connect slave0 monitor to scoreboard
     ubus0.slaves[0].monitor.item_collected_port.connect(
       scoreboard0.item_collected_export);
   endfunction : connect_phase
 
-  function void end_of_elaboration_phase();
+  function void end_of_elaboration_phase(uvm_phase phase);
     // Set up slave address map for ubus0 (basic default)
     ubus0.set_slave_address_map("slaves[0]", 0, 16'hffff);
   endfunction : end_of_elaboration_phase
