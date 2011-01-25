@@ -2885,6 +2885,11 @@ function void uvm_component::set_config_object(string inst_name,
                                                bit clone = 1);
   uvm_object tmp;
 
+  if(value == null)
+    `uvm_warning("NULLCFG", {"A null object was provided as a ",
+       $sformatf("configuration object for set_config_object(\"%s\",\"%s\")",
+       inst_name, field_name), ". Verify that this is intended."})
+
   if(clone && (value != null)) begin
     tmp = value.clone();
     if(tmp == null) begin
