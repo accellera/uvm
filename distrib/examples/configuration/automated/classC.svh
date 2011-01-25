@@ -30,11 +30,11 @@ class C extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  function void build_phase();
-    super.build_phase();
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
     $display("%s: In Build: v = %0d  s = %0d", get_full_name(), v, s);
   endfunction
-  task run_phase;
+  task run_phase(uvm_phase phase);
     begin end
   endtask
 

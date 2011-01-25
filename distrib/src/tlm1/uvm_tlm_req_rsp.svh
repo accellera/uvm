@@ -227,7 +227,7 @@ class uvm_tlm_req_rsp_channel #(type REQ=int, type RSP=REQ) extends uvm_componen
 
   endfunction
 
-  virtual function void connect_phase();
+  virtual function void connect_phase(uvm_phase phase);
     put_request_export.connect       (m_request_fifo.put_export);
     get_peek_request_export.connect  (m_request_fifo.get_peek_export);
     m_request_fifo.put_ap.connect    (request_ap);

@@ -63,9 +63,9 @@ class xbus_env extends uvm_env;
   endfunction : new
 
   // build_phase
-  function void build_phase();
+  function void build_phase(uvm_phase phase);
     string inst_name;
-    super.build_phase();
+    super.build_phase(phase);
     if(has_bus_monitor == 1) begin
       bus_monitor = xbus_bus_monitor::type_id::create("bus_monitor", this);
     end
@@ -119,7 +119,7 @@ class xbus_env extends uvm_env;
   endtask : update_vif_enables
 
   // implement run_phase task
-  task run_phase;
+  task run_phase(uvm_phase phase);
     fork
       update_vif_enables();
     join

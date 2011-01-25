@@ -23,18 +23,14 @@ module test;
 
   class simple_driver extends uvm_component;
 
-    int i = 0;
-
     function new (string name, uvm_component parent);
       super.new(name, parent);
-    endfunction : new
+    endfunction
 
     `uvm_component_utils(simple_driver)
 
     task run();
-      uvm_test_done.raise_objection(this);
-      repeat(i) #10;
-    endtask: run
+    endtask
 
 
   endclass : simple_driver
@@ -54,9 +50,7 @@ module test;
       drv1 = new("drv1", this);
       drv2 = new("drv2", this);
       drv3 = new("drv3", this);
-      drv1.i = 1;
-      drv2.i = 2;
-      drv3.i = 3;
+      enable_stop_interrupt = 1;
     endfunction
 
     function void start_of_simulation();
@@ -69,10 +63,11 @@ module test;
     endtask
 
     task stop(string ph_name);
-      wait(1);
+      wait(0);
     endtask
 
     function void report();
+      $write("UVM TEST EXPECT 1 UVM_ERROR\n");
       if ($time != 201)
         $display("** UVM TEST FAILED time: %0d  exp: 200", $time);
       else

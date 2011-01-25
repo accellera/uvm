@@ -16,20 +16,33 @@ class test_pre_reset_seq extends my_seq;
   `uvm_object_utils(test_pre_reset_seq)
 
   task body;
+    starting_phase.raise_objection(this);
     `uvm_info( "POWER_GOOD", "Waiting for power_good signal.", UVM_NONE);
     #10;
     `uvm_info( "POWER_GOOD", "Done power_good.", UVM_NONE);
+    starting_phase.drop_objection(this);
   endtask : body
+
+  function void do_kill();
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
+  endfunction
 endclass : test_pre_reset_seq
 
 // PRE_RESET_PH sequence
 class test_reset_seq extends my_seq;
   `uvm_object_utils(test_reset_seq)
   task body;
+    starting_phase.raise_objection(this);
     `uvm_info( "HARD_RESET", "Wait for hard reset signal come and go", UVM_NONE);
     #15;
     `uvm_info( "HARD_RESET", "Done hard reset", UVM_NONE);
+    starting_phase.drop_objection(this);
   endtask : body
+  function void do_kill();
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
+  endfunction
 endclass : test_reset_seq
 
 // TRAINING sequences
@@ -37,20 +50,32 @@ class top_training_seq extends top_sequence;
   int unsigned delay  = $urandom_range( 20, 30);
   `uvm_object_utils(top_training_seq)
   task body;
+    starting_phase.raise_objection(this);
     `uvm_info( "TRAINING", "Doing TOP interface training.", UVM_NONE);
     #(delay);
     `uvm_info( "TRAINING", "Done TOP training.", UVM_NONE);
+    starting_phase.drop_objection(this);
   endtask : body
+  function void do_kill();
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
+  endfunction
 endclass : top_training_seq
 
 class bot_training_seq extends bot_sequence;
   int unsigned delay  = $urandom_range( 20, 30);
   `uvm_object_utils(bot_training_seq)
   task body;
+    starting_phase.raise_objection(this);
     `uvm_info( "TRAINING", "Doing BOTTOM interface training.", UVM_NONE);
     #(delay);
     `uvm_info( "TRAINING", "Done BOTTOM training.", UVM_NONE);
+    starting_phase.drop_objection(this);
   endtask : body
+  function void do_kill();
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
+  endfunction
 endclass : bot_training_seq
 
 // CONFIG sequences
@@ -58,6 +83,7 @@ class top_configure_seq extends top_sequence;
   int unsigned delay  = $urandom_range( 20, 30);
   `uvm_object_utils(top_configure_seq)
   task body;
+    starting_phase.raise_objection(this);
     `uvm_info( "CONFIG", $psprintf("Random traffic from %s.",
                                  p_sequencer.get_name()), UVM_NONE);
     for( int i = 1; i< 5; i++) begin
@@ -67,7 +93,12 @@ class top_configure_seq extends top_sequence;
     end
     `uvm_info( "CONFIG", $psprintf("Done random traffic from %s.",
                                  p_sequencer.get_name()), UVM_NONE);
+    starting_phase.drop_objection(this);
   endtask : body
+  function void do_kill();
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
+  endfunction
 endclass : top_configure_seq
 
 // MAIN sequences
@@ -76,6 +107,7 @@ class top_random_seq extends top_sequence;
   `uvm_sequence_utils_begin(top_random_seq, top_sequencer)
   `uvm_sequence_utils_end
   task body;
+    starting_phase.raise_objection(this);
     `uvm_info( "MAIN", $psprintf("Random traffic from %s.",
                                  p_sequencer.get_name()), UVM_NONE);
     for( int i = 1; i< 6; i++) begin
@@ -85,7 +117,12 @@ class top_random_seq extends top_sequence;
     end
     `uvm_info( "MAIN", $psprintf("Done random traffic from %s.",
                                  p_sequencer.get_name()), UVM_NONE);
+    starting_phase.drop_objection(this);
   endtask : body
+  function void do_kill();
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
+  endfunction
 endclass : top_random_seq
 
 class bot_random_seq extends bot_sequence;
@@ -93,6 +130,7 @@ class bot_random_seq extends bot_sequence;
   `uvm_sequence_utils_begin(bot_random_seq, bot_sequencer)
   `uvm_sequence_utils_end
   task body;
+    starting_phase.raise_objection(this);
     `uvm_info( "MAIN", $psprintf("Random traffic from %s.",
                                  p_sequencer.get_name()), UVM_NONE);
     for( int i = 1; i< 7; i++) begin
@@ -102,7 +140,12 @@ class bot_random_seq extends bot_sequence;
     end
     `uvm_info( "MAIN", $psprintf("Done random traffic from %s.",
                                  p_sequencer.get_name()), UVM_NONE);
+    starting_phase.drop_objection(this);
   endtask : body
+  function void do_kill();
+    if(starting_phase.phase_done.get_objection_count(this))
+      starting_phase.drop_objection(this);
+  endfunction
 endclass : bot_random_seq
 
 // MAIN phase imp
@@ -112,7 +155,7 @@ class test_base_post_main_phase_imp extends uvm_task_phase;
     super.new(n);
   endfunction : new
 
-  task exec_task(uvm_component comp, uvm_phase_schedule phase);
+  task exec_task(uvm_component comp, uvm_phase phase);
     `uvm_info( "POST_MAIN", $psprintf("Component %s executing phase %s", comp.get_name(), phase.get_name()), UVM_NONE);
   endtask
 endclass : test_base_post_main_phase_imp
@@ -139,8 +182,8 @@ class test_base extends uvm_test;
     $display( "\nTest %s created.\n\n", n );
   endfunction : new
 
-  virtual function void build_phase();
-    super.build_phase();
+  virtual function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
 
     top0 = top_env::type_id::create( "top0", this);
     top1 = top_env::type_id::create( "top1", this);
@@ -158,19 +201,19 @@ class test_base extends uvm_test;
 
   endfunction : build_phase
 
-  virtual function void connect_phase();
-    super.connect_phase();
+  virtual function void connect_phase(uvm_phase phase);
+    super.connect_phase(phase);
 
     //1 - reset
-    seqr0.set_phase_seq( uvm_pre_reset_ph, test_pre_reset_seq::type_id::get());
-    seqr0.set_phase_seq( uvm_reset_ph,     test_reset_seq::type_id::get());
+    uvm_config_seq::set(this, "seqr0", "pre_reset_ph", test_pre_reset_seq::type_id::get());
+    uvm_config_seq::set(this, "seqr0", "reset_ph", test_reset_seq::type_id::get());
 
     //2a - pre configure - training at the TOP interface
     uvm_config_seq::set(this, "top*.*.*sequencer", "pre_configure_ph",
                         top_training_seq::type_id::get());
 
     //2b - configure - configure the DUT from the TOP interface
-    top0.agent.sequencer.set_phase_seq( uvm_configure_ph, top_configure_seq::type_id::get());
+    uvm_config_seq::set(top0.agent, "sequencer", "configure_ph", top_configure_seq::type_id::get());
 
     //2c - post_configure - training at the BOT interface
     uvm_config_seq::set(this, "bot*.*.*sequencer", "post_configure_ph",
@@ -182,12 +225,11 @@ class test_base extends uvm_test;
     uvm_config_seq::set(this, "bot*.*.*sequencer", "main_ph",
                         bot_random_seq::type_id::get());
 
-    this.set_phase_imp( uvm_post_main_ph, test_base_post_main_phase_imp::type_id::create("post_main_imp"),
-                        .hier(0));
+    uvm_config_seq::set(this, "", "post_main_ph", test_base_post_main_phase_imp::type_id::get());
 
   endfunction : connect_phase
 
-  function void end_of_elaboration_phase();
+  function void end_of_elaboration_phase(uvm_phase phase);
     uvm_top.print_topology();
 
     $display( "//--------------------------------------------------------\n",
@@ -203,7 +245,7 @@ class test_base extends uvm_test;
               "//--------------------------------------------------------\n");
   endfunction : end_of_elaboration_phase
 
-  function void report_phase();
+  function void report_phase(uvm_phase phase);
     uvm_report_server svr = _global_reporter.get_report_server();
     svr.summarize();
 
@@ -216,8 +258,8 @@ class test_base extends uvm_test;
   endfunction : report_phase
 
   //Debug messages when phase started & ended
-  function void phase_started( uvm_phase_schedule phase);
-    uvm_phase_schedule current_phase;
+  function void phase_started( uvm_phase phase);
+    uvm_phase current_phase;
     current_phase = get_current_phase();
     `uvm_info( phase.get_name(), $sformatf( "Phase %s() STATED ----------------------------",
                                    phase.get_name()), UVM_NONE);
@@ -225,7 +267,7 @@ class test_base extends uvm_test;
 
   endfunction : phase_started
 
-  function void phase_ended( uvm_phase_schedule phase);
+  function void phase_ended( uvm_phase phase);
     super.phase_ended( phase );
     `uvm_info( phase.get_name(), $sformatf( "Phase %s() ENDED  ----------------------------\n\n",
                                    phase.get_name()), UVM_NONE);

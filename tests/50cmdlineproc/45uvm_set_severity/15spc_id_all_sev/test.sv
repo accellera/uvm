@@ -25,9 +25,10 @@ class test extends uvm_test;
 
    virtual function void report();
      uvm_report_server rs = uvm_report_server::get_server();
-     if((rs.get_id_count("A") == 3) && (rs.get_severity_count(UVM_INFO) == 5) &&
-       (rs.get_severity_count(UVM_WARNING) == 0) && (rs.get_severity_count(UVM_ERROR) == 0) &&
-       (rs.get_severity_count(UVM_FATAL) == 0))
+     if((rs.get_id_count("A") == 3) &&
+        (rs.get_severity_count(UVM_WARNING) == 0) &&
+        (rs.get_severity_count(UVM_ERROR) == 0) &&
+        (rs.get_severity_count(UVM_FATAL) == 0))
        $write("** UVM TEST PASSED **\n");
    endfunction
 

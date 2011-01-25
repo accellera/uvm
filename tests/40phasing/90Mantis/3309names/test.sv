@@ -99,8 +99,8 @@ class base extends uvm_test;
       check_the_phase("check", "report");
    endfunction
 
-   function void finalize_phase();
-      check_the_phase("report", "finalize");
+   function void final_phase(uvm_phase phase);
+      check_the_phase("report", "final");
    endfunction
 endclass
 
@@ -115,40 +115,40 @@ class test extends base;
       b = new("b", this);
    endfunction
 
-   function void build_phase();
-      super.build_phase();
+   function void build_phase(uvm_phase phase);
+      super.build_phase(phase);
    endfunction
    
-   function void connect_phase();
-      super.connect_phase();
+   function void connect_phase(uvm_phase phase);
+      super.connect_phase(phase);
    endfunction
    
-   function void end_of_elaboration_phase();
-      super.end_of_elaboration_phase();
+   function void end_of_elaboration_phase(uvm_phase phase);
+      super.end_of_elaboration_phase(phase);
    endfunction
    
-   function void start_of_simulation_phase();
-      super.start_of_simulation_phase();
+   function void start_of_simulation_phase(uvm_phase phase);
+      super.start_of_simulation_phase(phase);
    endfunction
    
-   task run_phase();
-      super.run_phase();
+   task run_phase(uvm_phase phase);
+      super.run_phase(phase);
    endtask
    
-   function void extract_phase();
-      super.extract_phase();
+   function void extract_phase(uvm_phase phase);
+      super.extract_phase(phase);
    endfunction
 
-   function void check_phase();
-      super.check_phase();
+   function void check_phase(uvm_phase phase);
+      super.check_phase(phase);
    endfunction
 
-   function void report_phase();
-      super.report_phase();
+   function void report_phase(uvm_phase phase);
+      super.report_phase(phase);
    endfunction
 
-   function void finalize_phase();
-      super.finalize_phase();
+   function void final_phase(uvm_phase phase);
+      super.final_phase(phase);
    endfunction
 endclass
 
@@ -162,8 +162,8 @@ begin
    begin
       test t;
       $cast(t, uvm_top.find("uvm_test_top"));
-      if (t.last_phase != "finalize") begin
-         `uvm_error("Test", $psprintf("Last phase was \"%s\" instead of \"finalize\".",
+      if (t.last_phase != "final") begin
+         `uvm_error("Test", $psprintf("Last phase was \"%s\" instead of \"final\".",
                                       t.last_phase));
       end
    end

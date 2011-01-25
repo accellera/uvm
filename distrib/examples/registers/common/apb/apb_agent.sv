@@ -46,7 +46,7 @@ class apb_agent extends uvm_agent;
       super.new(name, parent);
    endfunction
 
-   virtual function void build_phase();
+   virtual function void build_phase(uvm_phase phase);
       sqr = apb_sequencer::type_id::create("sqr", this);
       drv = apb_master::type_id::create("drv", this);
       mon = apb_monitor::type_id::create("mon", this);
@@ -56,7 +56,7 @@ class apb_agent extends uvm_agent;
       end
    endfunction: build_phase
 
-   virtual function void connect_phase();
+   virtual function void connect_phase(uvm_phase phase);
       drv.seq_item_port.connect(sqr.seq_item_export);
    endfunction
 endclass: apb_agent

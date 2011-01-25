@@ -55,7 +55,7 @@ module test;
       
     endfunction
     
-    task run_phase;
+    task run_phase(uvm_phase phase);
       
       int randval;
       
@@ -82,7 +82,7 @@ module test;
       get_port = new("get_port", this);
     endfunction
     
-    task run_phase;
+    task run_phase(uvm_phase phase);
       
       int val;
       
@@ -112,12 +112,12 @@ module test;
       $display("fifo put_export: %s", f.m_name);
     endfunction
     
-    function void connect_phase();
+    function void connect_phase(uvm_phase phase);
       p.put_port.connect(f.put_export);
       c.get_port.connect(f.get_export);
     endfunction
     
-    task run_phase();
+    task run_phase(uvm_phase phase);
       #1000 global_stop_request();
     endtask
     

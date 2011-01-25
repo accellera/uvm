@@ -7,9 +7,9 @@ class test extends test_base;
   function new(string name = "01simple", uvm_component parent = null);
     super.new(name, parent);
   endfunction : new
-  `uvm_component_utils(test);
+  `uvm_component_utils(test)
 
-  function void check_phase();
+  function void check_phase(uvm_phase phase);
     //normal test
     //  [top_random_seq]    10
     //  [bot_random_seq]    24

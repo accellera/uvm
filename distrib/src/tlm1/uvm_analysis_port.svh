@@ -44,7 +44,7 @@
 //|      ap = new("ap", this);
 //|   endfunction
 //|
-//|   task run_phase();
+//|   task run_phase(uvm_phase phase);
 //|       trans t;
 //|       ...
 //|       ap.write(t);

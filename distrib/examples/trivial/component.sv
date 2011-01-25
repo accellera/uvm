@@ -30,7 +30,7 @@ class my_component extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  task run_phase();
+  task run_phase(uvm_phase phase);
     `uvm_info("component", "hello out there!", UVM_MEDIUM)
     global_stop_request();
   endtask

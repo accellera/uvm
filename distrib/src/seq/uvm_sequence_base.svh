@@ -147,7 +147,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   protected int               response_queue_depth = 8;
   protected bit               response_queue_error_report_disabled = 0;
 
-  uvm_phase_schedule starting_phase;
+  uvm_phase starting_phase;
 
   rand bit is_randomized = 0;
   constraint c_randomized {

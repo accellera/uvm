@@ -42,7 +42,7 @@ class oc_ethernet_env extends uvm_env;
       super.new(name, parent);
    endfunction: new
 
-   virtual function void build_phase();
+   virtual function void build_phase(uvm_phase phase);
 
       string hdl_root = "tb_top.dut";
 
@@ -60,7 +60,7 @@ class oc_ethernet_env extends uvm_env;
 
    endfunction: build_phase
 
-   virtual function void connect_phase();
+   virtual function void connect_phase(uvm_phase phase);
       reg2wsh_adapter reg2wsh = new;
       seqr = uvm_utils#(wb_sequencer)::find(host);
       model.default_map.set_sequencer(seqr,reg2wsh);
@@ -68,7 +68,7 @@ class oc_ethernet_env extends uvm_env;
       this.host.drv.bind_vitf(tb_top.wb_sl);
    endfunction
 
-   virtual task run_phase();
+   virtual task run_phase(uvm_phase phase);
      if (seq == null) begin
        uvm_report_fatal("NO_SEQUENCE","Env's sequence is not defined. Nothing to do. Exiting.");
        return;

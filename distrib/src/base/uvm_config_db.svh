@@ -133,7 +133,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
                            T value);
 
     uvm_root top;
-    uvm_phase_schedule curr_phase;
+    uvm_phase curr_phase;
     uvm_resource#(T) r;
     bit exists = 0;
     

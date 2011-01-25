@@ -30,9 +30,6 @@
 `define UVM_USE_P_FORMAT
 `define UVM_USE_FILE_LINE
 `define UVM_DA_TO_QUEUE(Q,DA) Q=DA;
-`define UVM_USE_OVM_RUN_SEMANTIC
-//`undef  UVM_NO_DPI
-//`undef  UVM_USE_PROCESS_CONTAINER
 
 //
 // Any vendor specific defines go here.

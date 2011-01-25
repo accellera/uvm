@@ -26,7 +26,7 @@ class test extends uvm_component;
       super.new(name, parent);
    endfunction
 
-  function void end_of_elaboration_phase();
+  function void end_of_elaboration_phase(uvm_phase phase);
      // Set verbosity for  demo
      set_report_verbosity_level(UVM_FULL);
      begin
@@ -35,7 +35,7 @@ class test extends uvm_component;
      end
   endfunction : end_of_elaboration_phase
 
-   task run_phase();
+   task run_phase(uvm_phase phase);
       #100;
       global_stop_request();
    endtask // run_phase

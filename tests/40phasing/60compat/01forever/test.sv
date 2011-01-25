@@ -37,7 +37,7 @@ module top;
     function new(string name, uvm_component parent);
       super.new(name, parent);
     endfunction
-    task run_phase();
+    task run_phase(uvm_phase phase);
       forever begin
         #20;
       end
@@ -54,12 +54,21 @@ module top;
       super.new(name, parent);
     endfunction
 
-    task run_phase();
+`ifdef UVM_USE_OVM_RUN_SEMANTIC
+    task run_phase(uvm_phase phase);
       #10 global_stop_request(); 
       #10;
     endtask
+`else
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this, "raise run objection for UVM semantic");
+      #10; 
+      phase.drop_objection(this, "drop run objection for UVM semantic");
+      #10;
+    endtask
+`endif
 
-    function void report_phase;
+    function void report_phase(uvm_phase phase);
       if($time == 10) $display("*** UVM TEST PASSED ***");
       else $display("*** UVM TEST FAILED ***");
     endfunction

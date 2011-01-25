@@ -44,22 +44,22 @@ module test;
 
 
 
-    task reset_phase;
+    task reset_phase(uvm_phase phase);
       if(dodelay) #thedelay;
       `uvm_info("RESET",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
     endtask
 
-    task main_phase;
+    task main_phase(uvm_phase phase);
       if(dodelay) #thedelay;
       `uvm_info("MAIN",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
     endtask
 
-    task shutdown_phase;
+    task shutdown_phase(uvm_phase phase);
       if(dodelay) #thedelay;
       `uvm_info("SHUTDOWN",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
     endtask
 
-    task run_phase;
+    task run_phase(uvm_phase phase);
 
 // if(dodelay) #(5*thedelay);
     endtask
@@ -90,7 +90,7 @@ module test;
       leaf2.thedelay = 100 ;
       thedelay = 0 ;
     endfunction
-    function void phase_started (uvm_phase_schedule phase);
+    function void phase_started (uvm_phase phase);
       string pre_phase = "NONE", pre_phase2 = "NONE";
       time pre_phase_end_time=-1; 
       `uvm_info("PHASE",$psprintf("Starting %s",phase.get_phase_name()),UVM_NONE);
@@ -105,7 +105,7 @@ module test;
         "extract": begin pre_phase = "post_shutdown"; pre_phase2 = "run"; end
         "check": begin pre_phase = "extract"; end
         "report": begin pre_phase = "check"; end
-        "finalize": begin pre_phase = "report"; end
+        "final": begin pre_phase = "report"; end
         // RT phases
         "pre_reset": begin pre_phase = "start_of_simulation"; end
         "reset": begin pre_phase = "pre_reset"; end
@@ -136,7 +136,7 @@ module test;
       end
     endfunction
 
-    function void phase_ended (uvm_phase_schedule phase);
+    function void phase_ended (uvm_phase phase);
       phase_ended_called[phase.get_phase_name()] = $time;
       `uvm_info("PHASE",$psprintf("Ending %s",phase.get_phase_name()),UVM_NONE);
     endfunction
@@ -159,7 +159,7 @@ module test;
 //      this.set_phase_domain("uvm", .hier(0)); //turn on rt phases for this
     endfunction
 
-    function void finalize_phase();
+    function void final_phase(uvm_phase phase);
       if(failed) $display("*** UVM TEST FAILED ***");
       else $display("*** UVM TEST PASSED ***");
     endfunction

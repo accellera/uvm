@@ -32,7 +32,7 @@ class tb_env extends uvm_component;
       super.new(name,parent);
    endfunction
 
-   virtual function void build_phase();
+   virtual function void build_phase(uvm_phase phase);
       if (model == null) begin
          model = reg_block_slave::type_id::create("model",this);
          model.build();
@@ -42,7 +42,7 @@ class tb_env extends uvm_component;
       apb = apb_agent::type_id::create("apb", this);
    endfunction
 
-   virtual function void connect_phase();
+   virtual function void connect_phase(uvm_phase phase);
       if (model.get_parent() == null) begin
          reg2apb_adapter reg2apb = new;
          model.default_map.set_sequencer(apb.sqr,reg2apb);

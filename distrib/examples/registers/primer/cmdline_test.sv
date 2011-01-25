@@ -31,7 +31,7 @@ class cmdline_test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run_phase();
+   virtual task run_phase(uvm_phase phase);
       tb_env env;
       $cast(env, uvm_top.find("env"));
 

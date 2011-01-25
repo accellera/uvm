@@ -29,9 +29,9 @@ class C extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  function void build_phase();
+  function void build_phase(uvm_phase phase);
     string str;
-    super.build_phase();
+    super.build_phase(phase);
     void'(get_config_int("v", v));
     void'(get_config_int("s", s));
     if(get_config_string("myaa[foo]", str)) myaa["foo"] = str;
@@ -65,7 +65,7 @@ class C extends uvm_component;
     myaa[index] = value;
   endfunction
 
-  task run_phase;
+  task run_phase(uvm_phase phase);
     begin end
   endtask
 endclass

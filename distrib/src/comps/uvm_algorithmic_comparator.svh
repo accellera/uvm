@@ -75,6 +75,8 @@ class uvm_algorithmic_comparator #( type BEFORE=int,
                                         AFTER , 
                                         TRANSFORMER ) this_type;
   
+  `uvm_component_param_utils(this_type)
+
 
   // Port: before_export
   //
@@ -83,7 +85,7 @@ class uvm_algorithmic_comparator #( type BEFORE=int,
   // transactions against which the transformed BEFORE transactions will
   // (be compared.
 
-  uvm_analysis_imp    #(BEFORE, this_type) before_export;
+  uvm_analysis_imp #(BEFORE, this_type) before_export;
 
 
   // Port: after_export
@@ -106,14 +108,12 @@ class uvm_algorithmic_comparator #( type BEFORE=int,
   // which must already be allocated (no null handles) and must implement
   // the transform() method.
 
- function new( TRANSFORMER transformer,
-		string name ,
-		uvm_component parent );
+ function new(string name, uvm_component parent=null, TRANSFORMER transformer=null);
 
     super.new( name , parent );
      
     m_transformer = transformer;
-    comp = new("comp" , this );
+    comp = new("comp", this );
     
     before_export = new("before_analysis_export" , this );
     after_export = new("after_analysis_export" , this );
@@ -123,7 +123,7 @@ class uvm_algorithmic_comparator #( type BEFORE=int,
     return type_name;
   endfunction
 
-  virtual function void connect_phase();
+  virtual function void connect_phase(uvm_phase phase);
     after_export.connect( comp.after_export );
   endfunction
 

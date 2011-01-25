@@ -39,7 +39,7 @@ class producer #(type T=packet) extends uvm_component;
     `uvm_field_int(count, UVM_ALL_ON + UVM_DEC + UVM_READONLY)
   `uvm_component_utils_end
 
-  task run_phase();
+  task run_phase(uvm_phase phase);
     T p;
     string image, num;
 

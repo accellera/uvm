@@ -51,7 +51,7 @@ module test;
       super.new(name,parent);
       data_out = new("data_out", this);
     endfunction
-    task run_phase();
+    task run_phase(uvm_phase phase);
       packet p, pp;
       #1 p=new(0);
       while(data_out.try_put(p)) begin 
@@ -70,7 +70,7 @@ module test;
       super.new(name,parent);
       data_in = new("data_in", this);
     endfunction
-    task run_phase();
+    task run_phase(uvm_phase phase);
       packet p;
       #100;  // fifo will fill up
       $display("%0t: getting one", $time);

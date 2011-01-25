@@ -91,7 +91,7 @@
 //|    uvm_tlm_nb_initiator_socket
 //|          #(trans, uvm_tlm_phase_e, this_t) initiator_socket;
 //|
-//|    function void build_phase();
+//|    function void build_phase(uvm_phase phase);
 //|       initiator_socket = new("initiator_socket", this, this);
 //|    endfunction
 //|

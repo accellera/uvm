@@ -32,22 +32,15 @@
 // Typedef for configuring default sequences.
 typedef uvm_config_db#(uvm_object_wrapper) uvm_config_seq;
 
-typedef enum {SEQ_TYPE_REQ,
-                SEQ_TYPE_LOCK,
-                SEQ_TYPE_GRAB} uvm_seq_request_t;
-                
-class uvm_seq_request_info;
-    bit        grant;
-    int        sequence_id;
-    int        request_id;
-    int        item_priority;
-    uvm_seq_request_t  request;
-    uvm_sequence_base sequence_ptr;
-endclass
+typedef class uvm_sequence_request;
 
 class uvm_sequencer_base extends uvm_component;
 
-  protected  uvm_seq_request_info        arb_sequence_q[$];
+  typedef enum {SEQ_TYPE_REQ,
+                SEQ_TYPE_LOCK,
+                SEQ_TYPE_GRAB} seq_req_t;
+
+  protected uvm_sequence_request arb_sequence_q[$];
 
   protected bit                 arb_completed[int];
 
@@ -86,7 +79,7 @@ class uvm_sequencer_base extends uvm_component;
   //| uvm_config_db #(uvm_object_wrapper)::set(this, "myseqr", "main_ph"
   //|                                           myseq_type::type_id::get());
 
-  virtual function void start_phase_sequence(uvm_phase_schedule phase);
+  virtual function void start_phase_sequence(uvm_phase phase);
     uvm_object_wrapper wrapper;
     uvm_sequence_base  seq;
     uvm_thread_mode mode;
@@ -132,24 +125,18 @@ class uvm_sequencer_base extends uvm_component;
     fork begin
       mode = m_def_phase_thread_mode;
 
-      if (mode == UVM_PHASE_MODE_DEFAULT) begin
-        if (phase.get_name() == "run")
-          mode = UVM_PHASE_PASSIVE;
-        else
-          mode = UVM_PHASE_ACTIVE;
-      end
+      if (mode == UVM_PHASE_MODE_DEFAULT)
+        mode = UVM_PHASE_NO_IMPLICIT_OBJECTION;
 
       void'(uvm_config_db #(uvm_thread_mode)::get(this,"",
                                     {phase.get_name(),"_ph"},mode));
 
-      if (mode == UVM_PHASE_ACTIVE ||
-          mode == UVM_PHASE_ACTIVE_PERSISTENT)
+      if (mode == UVM_PHASE_IMPLICIT_OBJECTION)
         phase.phase_done.raise_objection(seq, {phase.get_name(),
             " objection for default sequence ",
             get_full_name(),".",seq.get_name()});
       seq.start(this);
-      if (mode == UVM_PHASE_ACTIVE ||
-           mode == UVM_PHASE_ACTIVE_PERSISTENT)
+      if (mode == UVM_PHASE_IMPLICIT_OBJECTION)
         phase.phase_done.drop_objection(seq, {phase.get_name(),
             " objection for default sequence ",
             get_full_name(),".",seq.get_name()});
@@ -229,8 +216,6 @@ class uvm_sequencer_base extends uvm_component;
     super.new(name, parent);
     m_sequencer_id = g_sequencer_id++;
     m_lock_arb_size = -1;
-    //if (m_def_phase_thread_mode == UVM_PHASE_MODE_DEFAULT)
-    //  m_def_phase_thread_mode = UVM_PHASE_ACTIVE;
     if(get_config_string("default_sequence", default_sequence))
       m_default_seq_set = 1;
     void'(get_config_int("count", count));
@@ -240,9 +225,9 @@ class uvm_sequencer_base extends uvm_component;
 
 
 
-  virtual function void build_phase();
+  virtual function void build_phase(uvm_phase phase);
     int dummy;
-    super.build_phase();
+    super.build_phase(phase);
     void'(get_config_string("default_sequence", default_sequence));
     void'(get_config_int("count", count));
     void'(get_config_int("max_random_count", max_random_count));
@@ -680,7 +665,7 @@ class uvm_sequencer_base extends uvm_component;
   //
   // private
 
-  protected function int get_seq_item_priority(uvm_seq_request_info seq_q_entry);
+  protected function int get_seq_item_priority(uvm_sequence_request seq_q_entry);
     // If the priority was set on the item, then that is used
     if (seq_q_entry.item_priority != -1) begin
       if (seq_q_entry.item_priority <= 0) begin
@@ -777,7 +762,7 @@ class uvm_sequencer_base extends uvm_component;
   // item to be sent via the send_request call.
   
   virtual task wait_for_grant(uvm_sequence_base sequence_ptr, int item_priority = -1, bit lock_request = 0);
-    uvm_seq_request_info req_s=new();
+    uvm_sequence_request req_s;
     int my_seq_id;
 
     if (sequence_ptr == null) begin
@@ -789,6 +774,7 @@ class uvm_sequencer_base extends uvm_component;
     // If lock_request is asserted, then issue a lock.  Don't wait for the response, since
     // there is a request immediately following the lock request
     if (lock_request == 1) begin
+      req_s = new;
       req_s.grant = 0;
       req_s.sequence_id = my_seq_id;
       req_s.request = SEQ_TYPE_LOCK;
@@ -796,9 +782,9 @@ class uvm_sequencer_base extends uvm_component;
       req_s.request_id = g_request_id++;
       arb_sequence_q.push_back(req_s);
     end
-     
-    req_s = new();   
+        
     // Push the request onto the queue
+    req_s = new;
     req_s.grant = 0;
     req_s.request = SEQ_TYPE_REQ;
     req_s.sequence_id = my_seq_id;
@@ -906,7 +892,7 @@ class uvm_sequencer_base extends uvm_component;
   
   local task lock_req(uvm_sequence_base sequence_ptr, bit lock);
     int my_seq_id;
-    uvm_seq_request_info new_req=new();
+    uvm_sequence_request new_req = new;
     
     if (sequence_ptr == null)
       uvm_report_fatal("uvm_sequence_controller", "lock_req passed null sequence_ptr", UVM_NONE);
@@ -1235,7 +1221,7 @@ class uvm_sequencer_base extends uvm_component;
   // Function: get_seq_kind
   //
   // Returns an int seq_kind correlating to the sequence of type type_name
-  // in the sequencer�s sequence library. If the named sequence is not
+  // in the sequencers sequence library. If the named sequence is not
   // registered a SEQNF warning is issued and -1 is returned.
 
   function int get_seq_kind(string type_name);
@@ -1286,7 +1272,7 @@ class uvm_sequencer_base extends uvm_component;
 
   // Function: num_sequences
   //
-  // Returns the number of sequences in the sequencer�s sequence library.
+  // Returns the number of sequences in the sequencers sequence library.
 
   function int num_sequences();
     return (sequences.size());
@@ -1309,5 +1295,14 @@ class uvm_sequencer_base extends uvm_component;
 
 endclass
 
+
+class uvm_sequence_request;
+  bit        grant;
+  int        sequence_id;
+  int        request_id;
+  int        item_priority;
+  uvm_sequencer_base::seq_req_t  request;
+  uvm_sequence_base sequence_ptr;
+endclass
 
 

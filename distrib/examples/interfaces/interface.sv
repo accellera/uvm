@@ -101,12 +101,12 @@ class driver extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  function void connect_phase();
+  function void connect_phase(uvm_phase phase);
      assert(uvm_resource_db#(pin_vif)::read_by_name(get_full_name(),
                                                     "pif", pif));
   endfunction
 
-  task run_phase;
+  task run_phase(uvm_phase phase);
     forever begin
       @(posedge pif.clk);
       `uvm_info("driver", "posedge clk", UVM_NONE);
@@ -129,7 +129,7 @@ class env extends uvm_env;
     d = new("driver", this);
   endfunction
 
-  task run_phase();
+  task run_phase(uvm_phase phase);
     #100 global_stop_request();
   endtask
 

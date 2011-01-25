@@ -122,7 +122,7 @@ class my_driver #(type REQ = uvm_sequence_item,
     super.new(name, parent);
   endfunction
 
-  task run_phase();
+  task run_phase(uvm_phase phase);
 
     REQ req;
     RSP rsp;
@@ -222,7 +222,7 @@ class env extends uvm_env;
     drv.seq_item_port.connect(sqr.seq_item_export);
   endfunction
 
-task run_phase();
+task run_phase(uvm_phase phase);
     int i;
 
     for (i = 0; i < `NUM_SEQS; i++) begin
