@@ -1573,6 +1573,7 @@ function uvm_phase::new(string name, uvm_phase parent=null);
   else
     phase_done = new(name);
 
+  m_state = UVM_PHASE_DORMANT;
   if (parent == null) begin
     uvm_phase end_node;
     m_parent = this;
@@ -1627,8 +1628,8 @@ endfunction
 
 task uvm_phase::wait_for_state(uvm_phase_state state, uvm_wait_op op=UVM_EQ);
   case (op)
-    UVM_EQ:  wait(m_state == (state&m_state));
-    UVM_NE:  wait(m_state != (state&m_state));
+    UVM_EQ:  wait((state&m_state) != 0);
+    UVM_NE:  wait((state&m_state) == 0);
     UVM_LT:  wait(m_state <  state);
     UVM_LTE: wait(m_state <= state);
     UVM_GT:  wait(m_state >  state);
