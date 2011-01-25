@@ -1285,16 +1285,6 @@ class uvm_phase extends uvm_graph;
   extern function uvm_phase_state get_state();
 
 
-<<<<<<< HEAD
-=======
-  // Function: m_wait_for_state
-  //
-  // Internal Accessor to return wait for current state of this phase to match operand requirement
-  //
-  extern task wait_for_state(uvm_phase_state m_wait_for_state, operand m_op=EQ);
-
-   
->>>>>>> 3a7931298128557c29d5cd61f8cb827506d5c449
   // Function: add_phase
   //
   // Build up a schedule structure inserting phase by phase, specifying linkage
@@ -1467,6 +1457,7 @@ class uvm_phase extends uvm_graph;
   //| wait_for_state(UVM_PHASE_STARTED | UVM_PHASE_EXECUTING, UVM_EQ);
   //
   extern task wait_for_state(uvm_phase_state state, uvm_wait_op op=UVM_EQ);
+
    
   //---------------
   // Group: Jumping
