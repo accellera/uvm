@@ -30,6 +30,7 @@ import apb_pkg::*;
 import vip_pkg::*;
 
 `include "sym_sb.svh"
+`include "apb2txrx.svh"
 `include "tb_env.svh"
 
 class test extends uvm_test;

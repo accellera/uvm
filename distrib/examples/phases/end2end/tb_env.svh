@@ -34,8 +34,9 @@ class tb_env extends uvm_env;
 
    vip_agent  vip;
 
-   // ToDo: Self-checking
-   sym_sb     frm_dut;
+   sym_sb     ingress;  // VIP->DUT
+   sym_sb     egress;   // DUT->VIP
+   apb2txrx   adapt;
 
    `uvm_component_utils(tb_env)
 
@@ -62,7 +63,9 @@ class tb_env extends uvm_env;
 
       vip = vip_agent::type_id::create("vip", this);
 
-      frm_dut = sym_sb::type_id::create("frm_dut", this);
+      ingress = sym_sb::type_id::create("ingress", this);
+      egress = sym_sb::type_id::create("egress", this);
+      adapt = apb2txrx::type_id::create("adapt", this);
    endfunction
 
    function void connect_phase(uvm_phase phase);
@@ -72,29 +75,41 @@ class tb_env extends uvm_env;
          regmodel.default_map.set_auto_predict(1);
       end
 
-      vip.tx_mon.ap.connect(frm_dut.rx);
+      apb.mon.ap.connect(adapt.apb);
+
+      vip.tx_mon.ap.connect(ingress.expected);
+      vip.rx_mon.ap.connect(egress.observed);
+      adapt.tx_ap.connect(egress.expected);
+      adapt.rx_ap.connect(ingress.observed);
    endfunction
 
    
    task pre_reset_phase(uvm_phase phase);
+      phase.raise_objection(this, "Waiting for reset to be valid");
       wait (vif.rst !== 1'bx);
+      phase.drop_objection(this, "Reset is no longer X");
    endtask
 
 
    task reset_phase(uvm_phase phase);
+      phase.raise_objection(this, "Asserting reset for 10 clock cycles");
       regmodel.reset();
       vip.drv.do_reset();
       repeat (10) @(posedge vif.clk);
       vif.rst = 1'b0;
+      phase.drop_objection(this, "HW reset done");
    endtask
 
 
    task pre_configure_phase(uvm_phase phase);
+      phase.raise_objection(this, "Letting the interfaces go idle");
       repeat (10) @(posedge vif.clk);
+      phase.drop_objection(this, "Ready to configure");
    endtask
 
 
    task configure_phase(uvm_phase phase);
+      phase.raise_objection(this, "Programming DUT");
       regmodel.IntMask.SA.set(1);
       
       regmodel.TxStatus.TxEn.set(1);
@@ -105,13 +120,32 @@ class tb_env extends uvm_env;
       vip.drv.resume();
       vip.tx_mon.resume();
       vip.rx_mon.resume();
+      phase.drop_objection(this, "Everything is ready to go");
    endtask
 
    task pre_main_phase(uvm_phase phase);
-      // Wait until the VIP has acquired DUT->VIP symbol sync
-      while (!vip.rx_mon.is_in_sync()) begin
-         vip.rx_mon.wait_for_sync_change();
-      end
+      phase.raise_objection(this, "Waiting for VIPs and DUT to acquire SYNC");
+      // Wait until the VIP has acquired symbol syncs
+      fork
+         begin
+            fork
+               begin
+                  // Should not take more than 35 symbols
+                  repeat (35 * 8) @(posedge vif.sclk);
+                  `uvm_fatal("TB/TIMEOUT",
+                             "VIP failed to acquire syncs")
+               end
+            join_none
+            
+            while (!vip.rx_mon.is_in_sync()) begin
+               vip.rx_mon.wait_for_sync_change();
+            end
+            while (!vip.tx_mon.is_in_sync()) begin
+               vip.tx_mon.wait_for_sync_change();
+            end
+            disable fork;
+         end
+      join
 
       // Wait until the DUT has acquired symbol sync
       data = 0;
@@ -121,13 +155,11 @@ class tb_env extends uvm_env;
          regmodel.RxStatus.read(status, data);
       end
 
-      // The VIP should have acquired symbol VIP->DUT sync as well
-      if (!vip.tx_mon.is_in_sync()) begin
-         `uvm_fatal("ENV/TXMON/OOS", "The VIP->DUT monitor has not acquired SYNC whereas the DUT has");
-      end
+      phase.drop_objection(this, "Everyone is in SYNC");
    endtask
 
    task main_phase(uvm_phase phase);
+      phase.raise_objection(this, "Applying primary stimulus");
       fork
          begin
             bit can_kill = 0;
@@ -140,7 +172,7 @@ class tb_env extends uvm_env;
             begin
                // ToDo: replace with sequence
                vip_tr tr;
-               repeat (10) begin
+               repeat (1000) begin
                   tr = new;
                   tr.randomize();
                   `uvm_info("RX/CHR", $sformatf("RX->DUT: 0x%h...\n", tr.chr),
@@ -153,10 +185,13 @@ class tb_env extends uvm_env;
             disable fork;
          end
       join
+      phase.drop_objection(this, "Primary stimulus applied");
    endtask
 
 
    task shutdown_phase(uvm_phase phase);
+      phase.raise_objection(this, "Draining the DUT");
+
       // Flush the RxFIFO
       regmodel.IntSrc.read(status, data);
       while (!data[4]) begin
@@ -176,6 +211,8 @@ class tb_env extends uvm_env;
       end
       // Make sure the last symbol is transmitted
       repeat (16) @(posedge vif.sclk);
+
+      phase.drop_objection(this, "DUT is empty");
    endtask
 
    

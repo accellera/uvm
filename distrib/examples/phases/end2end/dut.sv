@@ -153,7 +153,6 @@ end
 //
 always begin: TX
    wait (rst != 1 && TxEn);
-   @ (negedge sclk);
 
    if (TxValid) begin
       bit [7:0] symbol;
@@ -180,7 +179,7 @@ task send(input bit [7:0] symbol);
    end
    repeat (8) begin
       tx = symbol[7];
-      @(negedge clk);
+      @(negedge sclk);
       symbol = symbol << 1;
    end
    tx_cnt = (tx_cnt + 1) % 6;

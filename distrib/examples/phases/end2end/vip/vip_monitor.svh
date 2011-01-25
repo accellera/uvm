@@ -118,7 +118,7 @@ class vip_monitor extends uvm_monitor;
                   // Must now find 3 more, 7 symbols apart
                   ok = 1;
                   repeat (3) begin
-                     repeat (21 * 8) begin
+                     repeat (7 * 8) begin
                         @(posedge vif.clk);
                         symbol = {symbol[6:0], vif.Rx};
                      end
