@@ -104,6 +104,7 @@ begin
    uvm_report_cb::add(null, c);
 
    b.build();
+   b.print();
    
    begin
       uvm_report_server svr;

@@ -2990,7 +2990,10 @@ endfunction: convert2string
 // do_print
 
 function void uvm_reg::do_print (uvm_printer printer);
+  uvm_reg_field f[$];
   super.do_print(printer);
+  get_fields(f);
+  foreach(f[i]) printer.print_generic(f[i].get_name(),f[i].get_type_name(),-2,f[i].convert2string());
 endfunction
 
 

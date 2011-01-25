@@ -2098,12 +2098,17 @@ endfunction
 //----------------------------------
 
 // do_print
-
+`define iterate(expr) foreach(expr[i]) printer.print_object(i.get_name(),i)
 function void uvm_reg_block::do_print (uvm_printer printer);
   uvm_reg_block prnt = get_parent();
   super.do_print(printer);
-  printer.print_generic("initiator", prnt.get_type_name(), -1, convert2string());
+
+   `iterate(blks);
+   `iterate(regs);
+   `iterate(vregs);
+   `iterate(mems);
 endfunction
+
 
 
 // clone
