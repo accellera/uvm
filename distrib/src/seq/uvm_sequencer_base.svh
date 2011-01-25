@@ -82,7 +82,7 @@ class uvm_sequencer_base extends uvm_component;
   virtual function void start_phase_sequence(uvm_phase phase);
     uvm_object_wrapper wrapper;
     uvm_sequence_base  seq;
-    uvm_thread_mode mode;
+    //uvm_thread_mode mode;
     uvm_factory f = uvm_factory::get();
 
     //$display("** Start default seq for phase ",{phase.get_name(),"_ph"});
@@ -123,6 +123,7 @@ class uvm_sequencer_base extends uvm_component;
     end
 
     fork begin
+      /*
       mode = m_def_phase_thread_mode;
 
       if (mode == UVM_PHASE_MODE_DEFAULT)
@@ -135,11 +136,14 @@ class uvm_sequencer_base extends uvm_component;
         phase.phase_done.raise_objection(seq, {phase.get_name(),
             " objection for default sequence ",
             get_full_name(),".",seq.get_name()});
+      */
       seq.start(this);
+      /*
       if (mode == UVM_PHASE_IMPLICIT_OBJECTION)
         phase.phase_done.drop_objection(seq, {phase.get_name(),
             " objection for default sequence ",
             get_full_name(),".",seq.get_name()});
+      */
     end
     join_none
 

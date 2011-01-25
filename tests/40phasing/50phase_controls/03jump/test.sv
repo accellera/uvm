@@ -21,12 +21,12 @@ class test extends test_base;
       `uvm_info( "JUMP_RESET", $psprintf("Jump backward to reset phase from : main"), UVM_NONE);
       jump_reset_num --;
 
-      jump( uvm_reset_ph );
+      phase.jump( uvm_reset_ph );
     end
     #10;
     //now jump to shutdown (skip post_main and pre_shutdown)
     `uvm_info( "JUMP_SHUTDOWN", $psprintf("Jump forward to shutdown phase from : main"), UVM_NONE);
-    jump( uvm_shutdown_ph );
+    phase.jump( uvm_shutdown_ph );
     phase.drop_objection(this);
   endtask : main_phase
 

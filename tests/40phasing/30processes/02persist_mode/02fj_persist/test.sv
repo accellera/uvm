@@ -41,7 +41,8 @@ class base extends uvm_component;
       n_ph++;
    endfunction
    
-   task check_the_phase_t(string prev, string curr);
+   task check_the_phase_t(string prev, string curr, uvm_phase phase);
+      phase.raise_objection(this);
       `uvm_info("Test", $psprintf("Starting phase \"%s\"...", curr), UVM_LOW)
       #10;
       if (prev != last_phase) begin
@@ -52,6 +53,7 @@ class base extends uvm_component;
       last_phase = curr;
       `uvm_info("Test", $psprintf("Ending phase \"%s\"...", curr), UVM_LOW)
       n_ph++;
+      phase.drop_objection(this);
    endtask
 
    function new(string name = "my_comp", uvm_component parent = null);
@@ -76,57 +78,58 @@ class base extends uvm_component;
    endfunction
    
    task run_phase(uvm_phase phase);
+     global_stop_request();
    endtask
    
    task pre_reset_phase(uvm_phase phase);
-      check_the_phase_t("start_of_simulation", "pre_reset");
+      check_the_phase_t("start_of_simulation", "pre_reset",phase);
       // Make sure the last phase is not "run"
       #50;
       last_phase = "pre_reset";
    endtask
    
    task reset_phase(uvm_phase phase);
-      check_the_phase_t("pre_reset", "reset");
+      check_the_phase_t("pre_reset", "reset",phase);
    endtask
    
    task post_reset_phase(uvm_phase phase);
-      check_the_phase_t("reset", "post_reset");
+      check_the_phase_t("reset", "post_reset",phase);
    endtask
    
    task pre_configure_phase(uvm_phase phase);
-      check_the_phase_t("post_reset", "pre_configure");
+      check_the_phase_t("post_reset", "pre_configure",phase);
    endtask
    
    task configure_phase(uvm_phase phase);
-      check_the_phase_t("pre_configure", "configure");
+      check_the_phase_t("pre_configure", "configure",phase);
    endtask
    
    task post_configure_phase(uvm_phase phase);
-      check_the_phase_t("configure", "post_configure");
+      check_the_phase_t("configure", "post_configure",phase);
    endtask
    
    task pre_main_phase(uvm_phase phase);
-      check_the_phase_t("post_configure", "pre_main");
+      check_the_phase_t("post_configure", "pre_main",phase);
    endtask
    
    task main_phase(uvm_phase phase);
-      check_the_phase_t("pre_main", "main");
+      check_the_phase_t("pre_main", "main",phase);
    endtask
    
    task post_main_phase(uvm_phase phase);
-      check_the_phase_t("main", "post_main");
+      check_the_phase_t("main", "post_main",phase);
    endtask
    
    task pre_shutdown_phase(uvm_phase phase);
-      check_the_phase_t("post_main", "pre_shutdown");
+      check_the_phase_t("post_main", "pre_shutdown",phase);
    endtask
    
    task shutdown_phase(uvm_phase phase);
-      check_the_phase_t("pre_shutdown", "shutdown");
+      check_the_phase_t("pre_shutdown", "shutdown",phase);
    endtask
    
    task post_shutdown_phase(uvm_phase phase);
-      check_the_phase_t("shutdown", "post_shutdown");
+      check_the_phase_t("shutdown", "post_shutdown",phase);
    endtask
    
    function void extract_phase(uvm_phase phase);

@@ -70,10 +70,12 @@ class phasing_test extends uvm_test;
     end
   endfunction
 
-  task audit_task(string item="");
+  task audit_task(uvm_phase phase, string item="");
+    phase.raise_objection(this);
     #10;
     audit(item);
     #10;
+    phase.drop_objection(this);
   endtask
 
   static function void check_phasing();
@@ -102,19 +104,19 @@ class phasing_test extends uvm_test;
   function void connect_phase(uvm_phase phase);  audit("common/connect");     endfunction
   function void end_of_elaboration_phase(uvm_phase phase);  audit("common/end_of_elaboration"); endfunction
   function void start_of_simulation_phase(uvm_phase phase); audit("common/start_of_simulation"); endfunction
-  task run_phase(uvm_phase phase);               audit_task("common/run");         endtask
-  task pre_reset_phase(uvm_phase phase);         audit_task("uvm/pre_reset_phase");      endtask
-  task reset_phase(uvm_phase phase);             audit_task("uvm/reset_phase");          endtask
-  task post_reset_phase(uvm_phase phase);        audit_task("uvm/post_reset_phase");     endtask
-  task pre_configure_phase(uvm_phase phase);     audit_task("uvm/pre_configure");  endtask
-  task configure_phase(uvm_phase phase);         audit_task("uvm/configure");      endtask
-  task post_configure_phase(uvm_phase phase);    audit_task("uvm/post_configure"); endtask
-  task pre_main_phase(uvm_phase phase);          audit_task("uvm/pre_main");       endtask
-  task main_phase(uvm_phase phase);              audit_task("uvm/main");           endtask
-  task post_main_phase(uvm_phase phase);         audit_task("uvm/post_main");      endtask
-  task pre_shutdown_phase(uvm_phase phase);      audit_task("uvm/pre_shutdown");   endtask
-  task shutdown_phase(uvm_phase phase);          audit_task("uvm/shutdown");       endtask
-  task post_shutdown_phase(uvm_phase phase);     audit_task("uvm/post_shutdown");  endtask
+  task run_phase(uvm_phase phase);               audit_task(phase,"common/run");         endtask
+  task pre_reset_phase(uvm_phase phase);         audit_task(phase,"uvm/pre_reset_phase");      endtask
+  task reset_phase(uvm_phase phase);             audit_task(phase,"uvm/reset_phase");          endtask
+  task post_reset_phase(uvm_phase phase);        audit_task(phase,"uvm/post_reset_phase");     endtask
+  task pre_configure_phase(uvm_phase phase);     audit_task(phase,"uvm/pre_configure");  endtask
+  task configure_phase(uvm_phase phase);         audit_task(phase,"uvm/configure");      endtask
+  task post_configure_phase(uvm_phase phase);    audit_task(phase,"uvm/post_configure"); endtask
+  task pre_main_phase(uvm_phase phase);          audit_task(phase,"uvm/pre_main");       endtask
+  task main_phase(uvm_phase phase);              audit_task(phase,"uvm/main");           endtask
+  task post_main_phase(uvm_phase phase);         audit_task(phase,"uvm/post_main");      endtask
+  task pre_shutdown_phase(uvm_phase phase);      audit_task(phase,"uvm/pre_shutdown");   endtask
+  task shutdown_phase(uvm_phase phase);          audit_task(phase,"uvm/shutdown");       endtask
+  task post_shutdown_phase(uvm_phase phase);     audit_task(phase,"uvm/post_shutdown");  endtask
   function void extract_phase(uvm_phase phase);  audit("common/extract");     endfunction
   function void check_phase(uvm_phase phase);    audit("common/check");       endfunction
   function void report_phase(uvm_phase phase);   audit("common/report");      endfunction
