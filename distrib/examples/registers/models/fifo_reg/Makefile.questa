@@ -27,7 +27,7 @@ include ../../../Makefile.questa
 all: prepare comp run
 
 comp:
-	$(VLOG) +incdir+../../common/apb tb_run.sv
+	$(VLOG) +incdir+../../../apb tb_run.sv
 
 run:
 	$(VSIM)

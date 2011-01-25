@@ -29,12 +29,12 @@ all: run
 run: hw_reset reg_user
 
 hw_reset:
-	$(IUS) -incdir ../common/apb tb_top.sv test.sv \
+	$(IUS) -incdir ../../apb tb_top.sv test.sv \
 		+UVM_TESTNAME=cmdline_test +UVM_REG_SEQ=uvm_reg_hw_reset_seq
 	$(CHECK)
 
 reg_user:
-	$(IUS) -incdir ../common/apb tb_top.sv test.sv \
+	$(IUS) -incdir ../../apb tb_top.sv test.sv \
 		+UVM_TESTNAME=cmdline_test +UVM_REG_SEQ=user_test_seq
 	$(CHECK)
 

@@ -525,9 +525,11 @@ class uvm_objection extends uvm_report_object;
     uvm_objection_context_object ctxt;
     while(1) begin
       wait(m_scheduled_list.size() != 0);
-      ctxt = m_scheduled_list.pop_front();
-      m_forked_drop(ctxt.obj, ctxt.source_obj, ctxt.description, ctxt.count, 1);
-      m_context_pool.push_back(ctxt);
+      if(m_scheduled_list.size() != 0) begin
+	 ctxt = m_scheduled_list.pop_front();
+	 m_forked_drop(ctxt.obj, ctxt.source_obj, ctxt.description, ctxt.count, 1);
+	 m_context_pool.push_back(ctxt);
+      end
     end
   endtask
 

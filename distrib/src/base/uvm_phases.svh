@@ -171,23 +171,29 @@
 //   are called bottom-up, i.e., childrens' <uvm_component::stop> tasks
 //   are called before the parent's.
 //
-//   A component is enabled by its <uvm_component::enable_stop_interrupt> bit.
+//   Stopping a component is enabled by its
+//   <uvm_component::enable_stop_interrupt> bit.
 //   Each component can implement <uvm_component::stop>
 //   to allow completion of in-progress transactions, flush queues,
 //   and other shut-down activities.
 //   Upon return from <uvm_component::stop> by all enabled components,
 //   the recursive <uvm_component::do_kill_all> is called
 //   on all top-level component(s).
-//   If the <uvm_test_done> objection is being used,
+//
+//   If any component raised a phase objection in <uvm_component::run_phase()>,
 //   this stopping procedure is deferred until all outstanding objections
-//   on <uvm_test_done> have been dropped.
+//   have been dropped.
 //
-// 2. All objections to <uvm_test_done> have been dropped:
+// 2. All phase objections have been dropped after having been raised:
 //
-//   When all objections on the <uvm_test_done> objection have been dropped,
+//   When all objections on the phase objection have been dropped
+//   by the <uvm_component::run_phase()> methods,
 //   <global_stop_request> is called automatically, thus kicking off the
-//   stopping procedure described above. See <uvm_objection> for details on
-//   using the objection mechanism.
+//   stopping procedure described above.
+//
+//   If no component ever raises a phase objection, this termination
+//   mechanism never happens.
+//   
 //
 // 3. Explicit call to <uvm_component::kill> or <uvm_component::do_kill_all>:
 //
@@ -205,11 +211,10 @@
 //
 //   The phase ends if the timeout expires before an explicit call to
 //   <global_stop_request> or <uvm_component::kill>.
-//   By default, the timeout is set to 9200ns.
-//   You may override this via <set_global_timeout>,
-//   but you cannot disable the timeout completely.
+//   By default, the timeout is set to 0, which is no timeout.
+//   You may override this via <set_global_timeout>.
 //
-//   If the default timeout occurs in your simulation, or if simulation never
+//   If a timeout occurs in your simulation, or if simulation never
 //   ends despite completion of your test stimulus, then it usually indicates
 //   a missing call to <global_stop_request>.
 //
@@ -810,6 +815,10 @@ endclass
 // Virtual base class for function phases that operate bottom-up.
 // The pure virtual function execute() is called for each component.
 // This is the default traversal so is included only for naming.
+//
+// A bottom-up function phase completes when the <execute()> method
+// has been called and returned on all applicable components
+// in the hierarchy.
 
 virtual class uvm_bottomup_phase extends uvm_phase_imp;
 
@@ -879,6 +888,11 @@ endclass
 //------------------------------------------------------------------------------
 // Virtual base class for function phases that operate top-down.
 // The pure virtual function execute() is called for each component.
+//
+// A top-down function phase completes when the <execute()> method
+// has been called and returned on all applicable components
+// in the hierarchy.
+
 virtual class uvm_topdown_phase extends uvm_phase_imp;
 
 
@@ -947,8 +961,27 @@ endclass
 // Class: uvm_task_phase
 //
 //------------------------------------------------------------------------------
-// Base class for all task phases. exec_task() is forked for each comp
-// Completion of exec_task() is a tacit agreement to shutdown.
+// Base class for all task phases.
+// It forks a call to <uvm_phase_imp::exec_task()>
+// for each component in the hierarchy.
+//
+// A task phase completes when there are no raised objections
+// to the end of phase. The completion of the task
+// does not imply, nor is it required for, the end of phase.
+// Once the phase completes, any remaining forked <uvm_phase_imp::exec_task()>
+// threads are forcibly and immediately killed.
+//
+// The only way for a task phase to extend over time is if there is
+// at least one component that raises an objection.
+//
+//| class my_comp extends uvm_component;
+//|    task main_phase(uvm_phase phase);
+//|       phase.raise_objection(this, "Applying stimulus")
+//|       ...
+//|       phase.drop_objection(this, "Applied enough stimulus")
+//|    endtask
+//| endclass
+// 
 
 virtual class uvm_task_phase extends uvm_phase_imp;
 
@@ -1015,13 +1048,7 @@ virtual class uvm_task_phase extends uvm_phase_imp;
 
   // Function: execute
   //
-  // Executes the task-based phase ~phase~ for the component ~comp~. 
-  //
-  // Task-based phase execution occurs in a separate forked process for each
-  // component.  When there is no longer any objections to ending a phase,
-  // as governed by the <uvm_phase::phase_done> objection, the
-  // forked process and all its children are terminated before proceeding
-  // to the next phase.
+  // Fork the task-based phase ~phase~ for the component ~comp~. 
   //
   protected virtual function void execute(uvm_component comp,
                                           uvm_phase phase);
