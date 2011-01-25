@@ -49,7 +49,7 @@ class ubus_example_tb extends uvm_env;
 
   // build_phase
   virtual function void build_phase(uvm_phase phase);
-    super.build_phase();
+    super.build_phase(phase);
     uvm_resource_db#(int)::set({get_full_name(),".ubus0"}, 
 			       "num_masters", 1, this);
     uvm_resource_db#(int)::set({get_full_name(),".ubus0"}, 

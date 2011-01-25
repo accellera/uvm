@@ -36,8 +36,8 @@ class ubus_example_base_test extends uvm_test;
     super.new(name,parent);
   endfunction : new
 
-  virtual function void build_phase();
-    super.build_phase();
+  virtual function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
     // Enable transaction recording for everything
     set_config_int("*", "recording_detail", UVM_FULL);
     // Create the tb
@@ -47,7 +47,7 @@ class ubus_example_base_test extends uvm_test;
     printer.knobs.depth = 3;
   endfunction : build_phase
 
-  function void end_of_elaboration_phase();
+  function void end_of_elaboration_phase(uvm_phase phase);
     // Set verbosity for the bus monitor for this demo
      if(ubus_example_tb0.ubus0.bus_monitor != null)
        ubus_example_tb0.ubus0.bus_monitor.set_report_verbosity_level(UVM_FULL);
@@ -55,17 +55,17 @@ class ubus_example_base_test extends uvm_test;
       $psprintf("Printing the test topology :\n%s", this.sprint(printer)), UVM_LOW)
   endfunction : end_of_elaboration_phase
 
-  task run_phase(uvm_phase_schedule phase);
+  task run_phase(uvm_phase phase);
     //set a drain-time for the environment if desired
     uvm_test_done.set_drain_time(this, 50);
   endtask : run_phase
 
-  function void extract_phase();
+  function void extract_phase(uvm_phase phase);
     if(ubus_example_tb0.scoreboard0.sbd_error)
       test_pass = 1'b0;
   endfunction // void
   
-  function void report_phase();
+  function void report_phase(uvm_phase phase);
     if(test_pass) begin
       `uvm_info(get_type_name(), "** UVM TEST PASSED **", UVM_NONE)
     end
@@ -86,7 +86,7 @@ class test_read_modify_write extends ubus_example_base_test;
     super.new(name,parent);
   endfunction : new
 
-  virtual function void build_phase();
+  virtual function void build_phase(uvm_phase phase);
     uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
 			       ".ubus_example_tb0.ubus0.masters[0].sequencer"}, 
 			       "main_ph",
@@ -98,7 +98,7 @@ class test_read_modify_write extends ubus_example_base_test;
 				slave_memory_seq::type_id::get(),
 				this);
     // Create the tb
-    super.build_phase();
+    super.build_phase(phase);
   endfunction : build_phase
 
 endclass : test_read_modify_write
@@ -113,8 +113,8 @@ class test_r8_w8_r4_w4 extends ubus_example_base_test;
     super.new(name,parent);
   endfunction : new
 
-  virtual function void build_phase();
-    super.build_phase();
+  virtual function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
     uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
 			       ".ubus_example_tb0.ubus0.masters[0].sequencer"}, 
 			       "run_ph",
@@ -139,7 +139,7 @@ class test_2m_4s extends ubus_example_base_test;
     super.new(name,parent);
   endfunction : new
 
-  virtual function void build_phase();
+  virtual function void build_phase(uvm_phase phase);
     // Overides to the ubus_example_tb build_phase()
     // Set the topology to 2 masters, 4 slaves
     uvm_resource_db#(int)::set({get_full_name(),".ubus_example_tb0.ubus0"}, 
@@ -174,10 +174,10 @@ class test_2m_4s extends ubus_example_base_test;
      end
      
     // Create the tb
-    super.build_phase();
+    super.build_phase(phase);
   endfunction : build_phase
 
-  function void connect_phase();
+  function void connect_phase(uvm_phase phase);
     // Connect other slaves monitor to scoreboard
     ubus_example_tb0.ubus0.slaves[1].monitor.item_collected_port.connect(
       ubus_example_tb0.scoreboard0.item_collected_export);
@@ -187,13 +187,13 @@ class test_2m_4s extends ubus_example_base_test;
       ubus_example_tb0.scoreboard0.item_collected_export);
   endfunction : connect_phase
   
-  function void end_of_elaboration_phase();
+  function void end_of_elaboration_phase(uvm_phase phase);
     // Set up slave address map for ubus0 (slaves[0] is overwritten here)
     ubus_example_tb0.ubus0.set_slave_address_map("slaves[0]", 16'h0000, 16'h3fff);
     ubus_example_tb0.ubus0.set_slave_address_map("slaves[1]", 16'h4000, 16'h7fff);
     ubus_example_tb0.ubus0.set_slave_address_map("slaves[2]", 16'h8000, 16'hBfff);
     ubus_example_tb0.ubus0.set_slave_address_map("slaves[3]", 16'hC000, 16'hFfff);
-     super.end_of_elaboration_phase();
+     super.end_of_elaboration_phase(phase);
   endfunction : end_of_elaboration_phase
 
 endclass : test_2m_4s

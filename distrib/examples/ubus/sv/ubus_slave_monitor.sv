@@ -108,7 +108,7 @@ class ubus_slave_monitor extends uvm_monitor;
     addr_ph_imp = new("addr_ph_imp", this);
   endfunction : new
 
-  function void build_phase();
+  function void build_phase(uvm_phase phase);
        if (!ubus_vif_config::exists(this, get_full_name(),"vif",1))
 	 `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"}) 
        else

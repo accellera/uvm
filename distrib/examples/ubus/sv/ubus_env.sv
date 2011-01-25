@@ -62,7 +62,7 @@ class ubus_env extends uvm_env;
   // build_phase
   function void build_phase(uvm_phase phase);
     string inst_name;
-    super.build_phase();
+    super.build_phase(phase);
      if(!uvm_resource_db#(virtual ubus_if)::read_by_name(get_full_name(),"vif",vif,this))
        `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
      
@@ -115,13 +115,8 @@ class ubus_env extends uvm_env;
     end
   endtask : update_vif_enables
 
-<<<<<<< HEAD:distrib/examples/ubus/sv/ubus_env.sv
   // implement run task
-  task run_phase(uvm_phase_schedule phase);
-=======
-  // implement run_phase task
   task run_phase(uvm_phase phase);
->>>>>>> origin/master:distrib/examples/xbus/sv/xbus_env.sv
     fork
       update_vif_enables();
     join

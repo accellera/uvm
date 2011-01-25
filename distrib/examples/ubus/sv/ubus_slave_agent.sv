@@ -45,7 +45,7 @@ class ubus_slave_agent extends uvm_agent;
 
   // build_phase
   virtual function void build_phase(uvm_phase phase);
-    super.build_phase();
+    super.build_phase(phase);
     monitor = ubus_slave_monitor::type_id::create("monitor", this);
     if(is_active == UVM_ACTIVE) begin
       driver = ubus_slave_driver::type_id::create("driver", this);

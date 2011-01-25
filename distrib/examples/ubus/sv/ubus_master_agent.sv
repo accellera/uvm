@@ -47,7 +47,7 @@ class ubus_master_agent extends uvm_agent;
 
   // build_phase
   function void build_phase(uvm_phase phase);
-    super.build_phase();
+    super.build_phase(phase);
     monitor = ubus_master_monitor::type_id::create("monitor", this);
     if(is_active == UVM_ACTIVE) begin
       sequencer = ubus_master_sequencer::type_id::create("sequencer", this);

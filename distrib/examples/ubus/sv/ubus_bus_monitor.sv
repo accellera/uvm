@@ -184,7 +184,7 @@ class ubus_bus_monitor extends uvm_monitor;
     slave_addr_map[slave_name].set_address_map(min_addr, max_addr);
   endfunction : set_slave_configs
 
-  function void build_phase();
+  function void build_phase(uvm_phase phase);
        if (!ubus_vif_config::exists(this, get_full_name(),"vif",1))
 	`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"}) 
        else
