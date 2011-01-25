@@ -2316,12 +2316,15 @@ function string uvm_mem::convert2string();
      int unsigned offset;
      while (parent_map != null) begin
        uvm_reg_map this_map = parent_map;
+       uvm_endianness_e endian_name;
        parent_map = this_map.get_parent_map();
+       endian_name=this_map.get_endian();
+       
        offset = parent_map == null ? this_map.get_base_addr(UVM_NO_HIER) :
                                      parent_map.get_submap_offset(this_map);
        prefix = {prefix, "  "};
-       $sformat(convert2string, "%sMapped in '%s' -- %0d bytes, %s, offset 'h%0h\n", prefix,
-            this_map.get_full_name(), this_map.get_n_bytes(), this_map.get_endian(), offset);
+       $sformat(convert2string, "%sMapped in '%s' -- buswidth %0d bytes, %s, offset 'h%0h, size 'h%0h, %s\n", prefix,
+            this_map.get_full_name(), this_map.get_n_bytes(), endian_name.name(), offset,get_size(),get_access(this_map));
      end
    end
    prefix = "  ";
@@ -2344,7 +2347,7 @@ endfunction
 
 function void uvm_mem::do_print (uvm_printer printer);
   super.do_print(printer);
-  printer.print_generic("initiator", m_parent.get_type_name(), -1, convert2string());
+  printer.print_generic(" ", " ", -1, convert2string());
 endfunction
 
 

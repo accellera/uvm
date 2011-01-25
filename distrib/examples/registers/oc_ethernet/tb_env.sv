@@ -65,6 +65,7 @@ class oc_ethernet_env extends uvm_env;
       seqr = uvm_utils#(wb_sequencer)::find(host);
       model.default_map.set_sequencer(seqr,reg2wsh);
       model.default_map.set_auto_predict();
+      model.print();
       this.host.drv.bind_vitf(tb_top.wb_sl);
    endfunction
 

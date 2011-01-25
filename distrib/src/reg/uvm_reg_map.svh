@@ -1915,8 +1915,41 @@ endtask: do_bus_read
 // do_print
 
 function void uvm_reg_map::do_print (uvm_printer printer);
-  super.do_print(printer);
-  // Use printer object to print contents of map
+   uvm_reg  regs[$];
+   uvm_vreg vregs[$];
+   uvm_mem  mems[$];
+   uvm_endianness_e endian;
+   uvm_reg_map maps[$];
+   string prefix = "";
+   uvm_sequencer_base sqr=get_sequencer();
+  
+   super.do_print(printer);
+//  printer.print_generic(get_name(), get_type_name(), -1, convert2string()); 
+
+   endian = get_endian(UVM_NO_HIER);
+//   $sformat(convert2string, "%s -- %0d bytes (%s)", convert2string,
+//            get_n_bytes(UVM_NO_HIER), endian.name());
+   
+   printer.print_generic("endian","",-2,endian.name()); 
+   if(sqr)
+    printer.print_generic("effective sequencer",sqr.get_type_name(),-2,sqr.get_full_name());     
+             
+   get_registers(regs,UVM_NO_HIER);
+   foreach (regs[j]) 
+        printer.print_generic(regs[j].get_name(), regs[j].get_type_name(),-2,$psprintf("@%0d +'h%0x",regs[j].get_inst_id(),regs[j].get_address(this)));
+   
+   
+   get_memories(mems);
+   foreach (mems[j]) 
+        printer.print_generic(mems[j].get_name(), mems[j].get_type_name(),-2,$psprintf("@%0d +'h%0x",mems[j].get_inst_id(),mems[j].get_address(0,this)));
+   
+   get_virtual_registers(vregs);
+   foreach (vregs[j]) 
+        printer.print_generic(vregs[j].get_name(), vregs[j].get_type_name(),-2,$psprintf("@%0d +'h%0x",vregs[j].get_inst_id(),vregs[j].get_address(0,this)));
+    
+   get_submaps(maps);
+   foreach (maps[j]) 
+        printer.print_object(maps[j].get_name(),maps[j]);
 endfunction
 
 // convert2string

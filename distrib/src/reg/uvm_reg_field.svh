@@ -1890,8 +1890,7 @@ endfunction: post_randomize
 // do_print
 
 function void uvm_reg_field::do_print (uvm_printer printer);
-  super.do_print(printer);
-  printer.print_generic("initiator", m_parent.get_type_name(), -1, convert2string());
+  printer.print_generic(get_name(), get_type_name(), -1, convert2string());
 endfunction
 
 
@@ -1903,15 +1902,17 @@ function string uvm_reg_field::convert2string();
    string t_str = "";
    bit with_debug_info = 0;
    string prefix = "";
+   uvm_reg reg_=get_register();
 
    $sformat(fmt, "%0d'h%%%0dh", get_n_bits(),
             (get_n_bits()-1)/4 + 1);
-   $sformat(convert2string, {"%s%s[%0d-%0d] = ",fmt,"%s"}, prefix,
-            get_name(),
+   $sformat(convert2string, {"%s %s %s[%0d:%0d]=",fmt,"%s"}, prefix,
+            get_access(),
+            reg_.get_name(),
             get_lsb_pos() + get_n_bits() - 1,
             get_lsb_pos(), m_desired,
             (m_desired != m_mirrored) ? $psprintf({" (Mirror: ",fmt,")"},
-               m_mirrored) : "");
+               m_mirrored) : ""); 
 
    if (m_read_in_progress == 1'b1) begin
       if (m_fname != "" && m_lineno != 0)
