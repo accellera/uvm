@@ -133,10 +133,15 @@ module test;
     time delay=40ns;
 
     uvm_phase other_sched;
+
     function new(string name, uvm_component parent);
       super.new(name,parent);
+    endfunction
+
+    function void connect();
       set_phase_domain("base_domain");
     endfunction
+
 
     // The component needs to override teh set_phase_schedule to add
     // the new schedule.
@@ -174,10 +179,14 @@ module test;
   class mycomp extends othercomp;
 
     uvm_phase my_sched;
+
     function new(string name, uvm_component parent);
       super.new(name,parent);
-      set_phase_domain("base_domain");
       delay=30ns;
+    endfunction
+
+    function void connect();
+      set_phase_domain("base_domain");
     endfunction
 
     // The component needs to override teh set_phase_schedule to add
@@ -206,13 +215,6 @@ module test;
     task run_phase(uvm_phase phase);
       `uvm_info("RUN", "In run", UVM_NONE)
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
-//Current global stop integration has an issue here... needs
-//to be looked at
-`ifdef WORKAROUND
-run_ph.phase_done.drop_objection();
-`else
-    `uvm_info("RUN", "WORKAROUND NOT IN PLACE, THIS WILL FAIL BECAUSE UVM DOESN'T KNOW THERE IS A USE PHASE", UVM_NONE)
-`endif
     endtask
   endclass
 

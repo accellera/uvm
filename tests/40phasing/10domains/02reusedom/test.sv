@@ -22,6 +22,21 @@
 // independently in the runtime phases but togehter in the common
 // phases.
 
+`define TASK(NAME,DELAY,STARTTIME) \
+    task NAME``_phase(uvm_phase phase); \
+      phase.raise_objection(this,`"start NAME`"); \
+      phase_run[uvm_``NAME``_ph] = 1; \
+      `uvm_info(`"NAME`", `"Starting NAME`", UVM_NONE) \
+      if($time != STARTTIME)  begin \
+        failed = 1; \
+        `uvm_error(`"NAME`", $sformatf(`"Expected NAME start time of %0t`",STARTTIME)) \
+      end \
+      #DELAY; \
+      `uvm_info(`"NAME`", `"Ending NAME`", UVM_NONE) \
+      phase.drop_objection(this,`"end NAME`"); \
+    endtask
+
+
 module test;
   import uvm_pkg::*;
   `include "uvm_macros.svh"
@@ -30,71 +45,18 @@ module test;
   bit phase_run[uvm_phase_imp];
 
   class base extends uvm_component;
-    bit dodelay=1;
-    time thedelay = 300;
-    time maxdelay = 5*thedelay;
+    time delay = 300;
+    time maxdelay = 5*delay;
 
     function new(string name, uvm_component parent);
       super.new(name,parent);
-      set_phase_schedule("uvm");
     endfunction
-    function void build_phase(uvm_phase phase);
-      phase_run[uvm_build_ph] = 1;
-      `uvm_info("BUILD", "Starting Build", UVM_NONE)
-      if($time != 0)  begin
-        failed = 1;
-        `uvm_error("BUILD", "Expected Build start time of 0")
-      end
-      `uvm_info("BUILD", "Ending Build", UVM_NONE)
-    endfunction
-    task reset_phase(uvm_phase phase);
-      phase.raise_objection(this,"start reset phase");
-      phase_run[uvm_reset_ph] = 1;
-      `uvm_info("RESET", "Starting Reset", UVM_NONE)
-      if($time != 0)  begin
-        failed = 1;
-        `uvm_error("RESET", "Expected Reset start time of 0")
-      end
-      if(dodelay) #thedelay;
-      `uvm_info("RESET", "Ending Reset", UVM_NONE)
-      phase.drop_objection(this,"end reset phase");
-    endtask
-    task main_phase(uvm_phase phase);
-      phase.raise_objection(this,"start main phase");
-      phase_run[uvm_main_ph] = 1;
-      `uvm_info("MAIN", "Starting Main", UVM_NONE)
-      if($time != thedelay)  begin
-        failed = 1;
-        `uvm_error("MAIN", $sformatf("Expected Main start time of %0t",thedelay))
-      end
-      if(dodelay) #thedelay;
-      `uvm_info("MAIN", "Ending Main", UVM_NONE)
-      phase.drop_objection(this,"end main phase");
-    endtask
-    task shutdown_phase(uvm_phase phase);
-      phase.raise_objection(this,"start shutdown phase");
-      phase_run[uvm_shutdown_ph] = 1;
-      `uvm_info("SHUTDOWN", "Starting Shutdown", UVM_NONE)
-      if($time != (2*thedelay))  begin
-        failed = 1;
-        `uvm_error("SHUTDOWN", $sformatf("Expected Shutdown start time of %0t",2*thedelay))
-      end
-      if(dodelay) #thedelay;
-      `uvm_info("SHUTDOWN", "Ending Shutdown", UVM_NONE)
-      phase.drop_objection(this,"end shutdown phase");
-    endtask
-    task run_phase(uvm_phase phase);
-      phase.raise_objection(this,"start run phase");
-      phase_run[uvm_run_ph] = 1;
-      `uvm_info("RUN", "Starting Run", UVM_NONE)
-      if($time != 0)  begin
-        failed = 1;
-        `uvm_error("RUN", "Expected Run start time of 0")
-      end
-      if(dodelay) #(5*thedelay);
-      `uvm_info("RUN", "Ending Run", UVM_NONE)
-      phase.drop_objection(this,"end run phase");
-    endtask
+
+    `TASK(reset,delay,0)
+    `TASK(main,delay,delay)
+    `TASK(shutdown,delay,2*delay)
+    `TASK(run,maxdelay,0)
+
     function void extract_phase(uvm_phase phase);
       phase_run[uvm_extract_ph] = 1;
       `uvm_info("EXTRACT", "Starting Extract", UVM_NONE)
@@ -111,18 +73,22 @@ module test;
       super.new(name,parent);
     endfunction
   endclass
+
   class env extends base;
     leaf l1, l2; 
     `uvm_component_utils(env)
     function new(string name, uvm_component parent);
       super.new(name,parent);
       l1 = new("l1", this);
-      l1.thedelay = 150;
       l1.maxdelay = 1500;
       l2 = new("l2", this);
+    endfunction
+
+    function void connect_phase(uvm_phase phase);
       l1.set_phase_domain("domain1");
       l2.set_phase_domain("domain2");
     endfunction
+
   endclass
 
   class test extends base;
@@ -133,19 +99,23 @@ module test;
       env1 = new("env1", this);
       env2 = new("env2", this);
 
-      env1.l1.thedelay = 200;
-      env1.l2.thedelay = 300;
+      env1.l1.delay = 200;
+      env1.l2.delay = 300;
 
-      env2.l1.thedelay = 100;
-      env2.l2.thedelay = 150;
+      env2.l1.delay = 100;
+      env2.l2.delay = 150;
 
+    endfunction
+
+    function void connect_phase(uvm_phase phase);
       //env1 and env2 comps are in different domains
       env2.l1.set_phase_domain("env_domain1");
       env2.l2.set_phase_domain("env_domain2");
     endfunction
+
     function void report_phase(uvm_phase phase);
       phase_run[uvm_report_ph] = 1;
-      if(phase_run.num() != 7) begin
+      if(phase_run.num() != 6) begin
         failed = 1;
         `uvm_error("NUMPHASES", $sformatf("Expected 6 phases, got %0d", phase_run.num()))
       end
