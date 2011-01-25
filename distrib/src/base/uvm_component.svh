@@ -251,9 +251,18 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The <Pre-Defined Phases::uvm_run_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of a
-  // component's run phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // Unlike other task phases, it is not necessary to raise
+  // an objection to cause it to persist: it will persists
+  // until <global_stop_request()> is called.
+  // However, if a single phase objection is raised using
+  // ~phase.raise_objection()~, then the phase will automatically
+  // ends once all objections are dropped using ~phase.drop_objection()~.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
   //
   // The run_phase task should never be called directly.
 
@@ -266,19 +275,39 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The <Pre-Defined Phases::uvm_pre_reset_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's pre-reset phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
   //
+  // This method should not be called directly.
+
   extern virtual task pre_reset_phase(uvm_phase phase);
 
   // Task: reset_phase
   //
   // The <Pre-Defined Phases::uvm_reset_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's reset phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
   extern virtual task reset_phase(uvm_phase phase);
 
@@ -286,9 +315,19 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The <Pre-Defined Phases::uvm_post_reset_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's post-reset phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
   extern virtual task post_reset_phase(uvm_phase phase);
 
@@ -296,9 +335,19 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The <Pre-Defined Phases::uvm_pre_configure_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's pre_configure phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
   extern virtual task pre_configure_phase(uvm_phase phase);
 
@@ -306,9 +355,19 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The <Pre-Defined Phases::uvm_configure_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's configure phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
   extern virtual task configure_phase(uvm_phase phase);
 
@@ -316,9 +375,19 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The <Pre-Defined Phases::uvm_post_configure_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's post-configure phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
   extern virtual task post_configure_phase(uvm_phase phase);
 
@@ -326,9 +395,19 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The <Pre-Defined Phases::uvm_pre_main_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's pre-main phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
   extern virtual task pre_main_phase(uvm_phase phase);
 
@@ -336,9 +415,19 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The <Pre-Defined Phases::uvm_main_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's main phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
   extern virtual task main_phase(uvm_phase phase);
 
@@ -346,9 +435,19 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The <Pre-Defined Phases::uvm_post_main_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's post-main phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
   extern virtual task post_main_phase(uvm_phase phase);
 
@@ -356,9 +455,19 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The <Pre-Defined Phases::uvm_pre_shutdown_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's pre-shutdown phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
   extern virtual task pre_shutdown_phase(uvm_phase phase);
 
@@ -366,9 +475,19 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The <Pre-Defined Phases::uvm_shutdown_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's shutdown phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
   extern virtual task shutdown_phase(uvm_phase phase);
 
@@ -376,9 +495,19 @@ virtual class uvm_component extends uvm_report_object;
   //
   // The <Pre-Defined Phases::uvm_post_shutdown_ph> phase implementation method.
   //
-  // Returning from this task does not signify completion of the
-  // component's post-shutdown phase.
-  // Any processes forked by this task continue to run.
+  // This task returning or not does not indicate the end
+  // or persistence of this phase.
+  // It is necessary to raise an objection
+  // using ~phase.raise_objection()~ to cause the phase to persist.
+  // Once all components have dropped their respective objection
+  // using ~phase.drop_objection()~, or if no components raises an
+  // objection, the phase is ended.
+  // 
+  // Any processes forked by this task continue to run
+  // after the task returns,
+  // but they will be killed once the phase ends.
+  //
+  // This method should not be called directly.
 
   extern virtual task post_shutdown_phase(uvm_phase phase);
 
