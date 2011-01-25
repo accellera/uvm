@@ -144,8 +144,6 @@ class bot_env extends uvm_env;
 
   //Debug messages when phase started & ended
   function void phase_started( uvm_phase phase);
-    uvm_phase current_phase;
-    current_phase = get_current_phase();
     `uvm_info( "PHASE", $sformatf( "Phase %s() STATED ----------------------------",
                                    phase.get_name()), UVM_MEDIUM);
     super.phase_started( phase );
