@@ -851,7 +851,7 @@ virtual class uvm_bottomup_phase extends uvm_phase_imp;
           ph.execute(comp, phase);
           end
         UVM_PHASE_ENDED: begin
-          comp.phase_started(phase);
+          comp.phase_ended(phase);
           comp.m_current_phase = null;
           end
         default:
@@ -868,9 +868,7 @@ virtual class uvm_bottomup_phase extends uvm_phase_imp;
   protected virtual function void execute(uvm_component comp,
                                           uvm_phase phase);
     comp.m_current_phase = phase;
-    comp.phase_started(phase);
     exec_func(comp,phase);
-    comp.phase_ended(phase);
   endfunction
 
 endclass
@@ -905,17 +903,18 @@ virtual class uvm_topdown_phase extends uvm_phase_imp;
                                  uvm_phase_state state);
     string name;
     if (comp.m_phase_domains.exists(phase.m_parent)) begin
-      if(phase.get_name() != "build" || comp.m_build_done == 0) begin
         case (state)
           UVM_PHASE_STARTED: begin
             comp.m_current_phase = phase;
             comp.phase_started(phase);
             end
           UVM_PHASE_EXECUTING: begin
-            uvm_phase_imp ph = this; 
-            if (comp.m_phase_imps.exists(this))
-              ph = comp.m_phase_imps[this];
-            ph.execute(comp, phase);
+            if(phase.get_name() != "build" || comp.m_build_done == 0) begin
+              uvm_phase_imp ph = this; 
+              if (comp.m_phase_imps.exists(this))
+                ph = comp.m_phase_imps[this];
+              ph.execute(comp, phase);
+            end
             end
           UVM_PHASE_ENDED: begin
             comp.phase_ended(phase);
@@ -924,7 +923,6 @@ virtual class uvm_topdown_phase extends uvm_phase_imp;
           default:
             `uvm_fatal("PH_BADEXEC","topdown phase traverse internal error")
         endcase
-      end
     end
     if(comp.get_first_child(name))
       do
@@ -940,9 +938,7 @@ virtual class uvm_topdown_phase extends uvm_phase_imp;
   protected virtual function void execute(uvm_component comp,
                                           uvm_phase phase);
     comp.m_current_phase = phase;
-    comp.phase_started(phase);
     exec_func(comp,phase);
-    comp.phase_ended(phase);
   endfunction
 
 endclass
@@ -1289,6 +1285,16 @@ class uvm_phase extends uvm_graph;
   extern function uvm_phase_state get_state();
 
 
+<<<<<<< HEAD
+=======
+  // Function: m_wait_for_state
+  //
+  // Internal Accessor to return wait for current state of this phase to match operand requirement
+  //
+  extern task wait_for_state(uvm_phase_state m_wait_for_state, operand m_op=EQ);
+
+   
+>>>>>>> 3a7931298128557c29d5cd61f8cb827506d5c449
   // Function: add_phase
   //
   // Build up a schedule structure inserting phase by phase, specifying linkage
