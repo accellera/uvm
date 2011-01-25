@@ -34,7 +34,7 @@ all: run
 
 comp: prepare
 	$(VLOG) $(OPT) +incdir+../common \
-		+incdir+../../common/apb \
+		+incdir+../../../apb \
 		../common/test.sv
 
 run: uvm_reg_mem_built_in_seq

@@ -1,6 +1,7 @@
 ## 
 ## -------------------------------------------------------------
 ##    Copyright 2010 Synopsys, Inc.
+##    Copyright 2010 Cadence Design, Inc.
 ##    All Rights Reserved Worldwide
 ## 
 ##    Licensed under the Apache License, Version 2.0 (the
@@ -21,19 +22,11 @@
 
 UVM_HOME	= ../../..
 
-include ../../Makefile.vcs
+include ../../Makefile.ius
 
 
-all: blk
+all: run
 
-
-blk: comp_blk run_blk
-
-blk_comp comp_blk:
-	$(VCS) +incdir+../../apb \
-		blk_run.sv
-
-blk_run run_blk:
-	$(SIMV) +UVM_TESTNAME=blk_R_test
+run:
+	$(IUS) -incdir ../../apb -incdir vip tb_top.sv test.sv
 	$(CHECK)
-

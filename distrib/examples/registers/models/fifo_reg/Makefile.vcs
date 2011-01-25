@@ -27,7 +27,7 @@ include ../../../Makefile.vcs
 all: comp run
 
 comp:
-	$(VCS) +incdir+../../common/apb tb_run.sv
+	$(VCS) +incdir+../../../apb tb_run.sv
 
 run:
 	$(SIMV)

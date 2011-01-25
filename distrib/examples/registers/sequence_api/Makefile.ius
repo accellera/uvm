@@ -28,6 +28,6 @@ all: run_blk
 
 
 run_blk:
-	$(IUS) -incdir ../common/apb blk_run.sv +UVM_TESTNAME=blk_R_test
+	$(IUS) -incdir ../../apb blk_run.sv +UVM_TESTNAME=blk_R_test
 	$(CHECK)
 

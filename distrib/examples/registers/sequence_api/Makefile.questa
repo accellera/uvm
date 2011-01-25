@@ -31,7 +31,7 @@ all: prepare blk
 blk: comp_blk run_blk
 
 blk_comp comp_blk:
-	$(VLOG) +incdir+../common/apb \
+	$(VLOG) +incdir+../../apb \
 		blk_run.sv
 
 blk_run run_blk:

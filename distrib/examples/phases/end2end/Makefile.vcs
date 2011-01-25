@@ -24,16 +24,14 @@ UVM_HOME	= ../../..
 include ../../Makefile.vcs
 
 
-all: blk
+all: comp run
 
+comp:
+	$(VCS) $(COPTS) +incdir+../../apb+vip \
+		tb_top.sv test.sv
 
-blk: comp_blk run_blk
-
-blk_comp comp_blk:
-	$(VCS) +incdir+../../apb \
-		blk_run.sv
-
-blk_run run_blk:
-	$(SIMV) +UVM_TESTNAME=blk_R_test
+run:
+	$(SIMV) $(ROPTS)
 	$(CHECK)
 
+debug: $(SIMV) +UVM_OBJECTION_TRACE
