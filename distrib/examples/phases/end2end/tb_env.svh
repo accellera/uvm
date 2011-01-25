@@ -35,6 +35,7 @@ class tb_env extends uvm_env;
    vip_agent  vip;
 
    // ToDo: Self-checking
+   sym_sb     frm_dut;
 
    `uvm_component_utils(tb_env)
 
@@ -60,6 +61,8 @@ class tb_env extends uvm_env;
       end
 
       vip = vip_agent::type_id::create("vip", this);
+
+      frm_dut = sym_sb::type_id::create("frm_dut", this);
    endfunction
 
    function void connect_phase(uvm_phase phase);
@@ -68,6 +71,8 @@ class tb_env extends uvm_env;
          regmodel.default_map.set_sequencer(apb.sqr,reg2apb);
          regmodel.default_map.set_auto_predict(1);
       end
+
+      vip.tx_mon.ap.connect(frm_dut.rx);
    endfunction
 
    
@@ -98,10 +103,15 @@ class tb_env extends uvm_env;
       regmodel.update(status);
 
       vip.drv.resume();
+      vip.tx_mon.resume();
+      vip.rx_mon.resume();
    endtask
 
    task pre_main_phase(uvm_phase phase);
-      // Wait until the VIP has acquired symbol sync
+      // Wait until the VIP has acquired DUT->VIP symbol sync
+      while (!vip.rx_mon.is_in_sync()) begin
+         vip.rx_mon.wait_for_sync_change();
+      end
 
       // Wait until the DUT has acquired symbol sync
       data = 0;
@@ -110,7 +120,11 @@ class tb_env extends uvm_env;
          regmodel.IntSrc.write(status, 'h100);
          regmodel.RxStatus.read(status, data);
       end
-      
+
+      // The VIP should have acquired symbol VIP->DUT sync as well
+      if (!vip.tx_mon.is_in_sync()) begin
+         `uvm_fatal("ENV/TXMON/OOS", "The VIP->DUT monitor has not acquired SYNC whereas the DUT has");
+      end
    endtask
 
    task main_phase(uvm_phase phase);
@@ -155,7 +169,10 @@ class tb_env extends uvm_env;
       if (!data[0]) begin
          // Wait for TxFIFO to be empty
          regmodel.IntMask.write(status, 'h001);
-         wait(vif.intr);
+         if (vif.intr !== 0) begin
+            `uvm_error("TB/SHTDWN/TX", "Interrupt did not clear on TxFIFO not empty");
+         end
+         wait (vif.intr);
       end
       // Make sure the last symbol is transmitted
       repeat (16) @(posedge vif.sclk);

@@ -29,6 +29,7 @@ import uvm_pkg::*;
 import apb_pkg::*;
 import vip_pkg::*;
 
+`include "sym_sb.svh"
 `include "tb_env.svh"
 
 class test extends uvm_test;
@@ -58,19 +59,6 @@ begin
    uvm_config_db#(vip_vif)::set(null, "env.vip", "vif", tb_top.vip0);
    
    run_test("test");
-
-   begin
-      uvm_report_server svr;
-      svr = _global_reporter.get_report_server();
-
-      svr.summarize();
-
-      if (svr.get_severity_count(UVM_FATAL) +
-          svr.get_severity_count(UVM_ERROR) == 0)
-         $write("** UVM TEST PASSED **\n");
-      else
-         $write("!! UVM TEST FAILED !!\n");
-   end
 end
 
 endprogram

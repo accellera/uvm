@@ -25,9 +25,25 @@
 
 `timescale 1ns/1ns
 
+
+interface vip_tx_if(input  bit clk,
+                    output reg Tx);
+endinterface: vip_tx_if
+
+
+interface vip_rx_if(input bit clk,
+                    input reg Rx);
+endinterface: vip_rx_if
+
+
 interface vip_if(input  bit clk,
                  output reg Tx,
                  input  wire Rx);
+
+vip_tx_if tx(clk, Tx);
+vip_rx_if rx(clk, Rx);
+vip_rx_if tx_mon(clk, Tx);
+
 endinterface: vip_if
 
 `endif

@@ -24,14 +24,16 @@ class vip_agent extends uvm_agent;
 
    vip_sequencer sqr;
    vip_driver    drv;
-//   vip_monitor   mon;
+   vip_monitor   tx_mon;
+   vip_monitor   rx_mon;
 
    vip_vif       vif;
 
    `uvm_component_utils_begin(vip_agent)
       `uvm_field_object(sqr, UVM_ALL_ON)
       `uvm_field_object(drv, UVM_ALL_ON)
-//      `uvm_field_object(mon, UVM_ALL_ON)
+      `uvm_field_object(tx_mon, UVM_ALL_ON)
+      `uvm_field_object(rx_mon, UVM_ALL_ON)
    `uvm_component_utils_end
    
    function new(string name, uvm_component parent = null);
@@ -41,11 +43,14 @@ class vip_agent extends uvm_agent;
    virtual function void build_phase(uvm_phase phase);
       sqr = vip_sequencer::type_id::create("sqr", this);
       drv = vip_driver::type_id::create("drv", this);
-//      mon = vip_monitor::type_id::create("mon", this);
+      tx_mon = vip_monitor::type_id::create("tx_mon", this);
+      rx_mon = vip_monitor::type_id::create("rx_mon", this);
       
       if (!uvm_config_db#(vip_vif)::get(this, "", "vif", vif)) begin
          `uvm_fatal("VIP/AGT/NOVIF", "No virtual interface specified for this agent instance")
       end
+      uvm_config_db#(vip_rx_vif)::set(this, "tx_mon", "vif", vif.tx_mon);
+      uvm_config_db#(vip_rx_vif)::set(this, "rx_mon", "vif", vif.rx);
    endfunction: build_phase
 
    virtual function void connect_phase(uvm_phase phase);

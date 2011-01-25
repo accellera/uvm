@@ -35,7 +35,7 @@ class vip_driver extends uvm_driver#(vip_tr);
    `uvm_component_utils(vip_driver)
    `uvm_register_cb(vip_driver, vip_driver_cbs)
   
-   vip_vif vif;
+   vip_tx_vif vif;
 
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
@@ -44,10 +44,10 @@ class vip_driver extends uvm_driver#(vip_tr);
    virtual function void build_phase(uvm_phase phase);
       vip_agent agent;
       if ($cast(agent, get_parent()) && agent != null) begin
-         vif = agent.vif;
+         vif = agent.vif.tx;
       end
       else begin
-         if (!uvm_config_db#(vip_vif)::get(this, "", "vif", vif)) begin
+         if (!uvm_config_db#(vip_tx_vif)::get(this, "", "vif", vif)) begin
             `uvm_fatal("VIP/DRV/NOVIF", "No virtual interface specified for this driver instance")
          end
       end
@@ -138,7 +138,7 @@ class vip_driver extends uvm_driver#(vip_tr);
       pre_tx(data);
       `uvm_do_callbacks(vip_driver, vip_driver_cbs, pre_tx(this, data))
 
-      `uvm_info("VIP/DRV/TX", $sformatf("Sending 0x%h...\n", data),
+      `uvm_info("VIP/DRV/TX", $sformatf("Sending 0x%h", data),
                 UVM_HIGH);
       
       repeat (8) begin

@@ -17,26 +17,21 @@
 //    the License for the specific language governing
 //    permissions and limitations under the License.
 // -------------------------------------------------------------
-// 
+//
 
-`include "vip_if.sv"
 
-package vip_pkg; 
+class sym_sb extends uvm_component;
 
-  import uvm_pkg::*;
+   uvm_analysis_imp#(vip_tr, sym_sb) rx;
 
-  typedef virtual vip_if    vip_vif;
-  typedef virtual vip_tx_if vip_tx_vif;
-  typedef virtual vip_rx_if vip_rx_vif;
+   `uvm_component_utils(sym_sb)
 
- `include "vip_tr.svh"
+   function new(string name, uvm_component parent = null);
+      super.new(name, parent);
+      rx = new("rx", this);
+   endfunction
 
-  typedef class vip_agent;
-  typedef uvm_sequencer#(vip_tr) vip_sequencer;
-
- `include "vip_driver.svh"
- `include "vip_monitor.svh"
- `include "vip_agent.svh"
-
- `include "vip_seqlib.svh"
-endpackage
+   function void write(vip_tr tr);
+      `uvm_info("TX/CHR", $sformatf("Tx: 0x%h", tr.chr), UVM_LOW)
+   endfunction
+endclass
