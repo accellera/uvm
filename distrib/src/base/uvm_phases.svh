@@ -211,11 +211,10 @@
 //
 //   The phase ends if the timeout expires before an explicit call to
 //   <global_stop_request> or <uvm_component::kill>.
-//   By default, the timeout is set to 9200ns.
-//   You may override this via <set_global_timeout>,
-//   but you cannot disable the timeout completely.
+//   By default, the timeout is set to 0, which is no timeout.
+//   You may override this via <set_global_timeout>.
 //
-//   If the default timeout occurs in your simulation, or if simulation never
+//   If a timeout occurs in your simulation, or if simulation never
 //   ends despite completion of your test stimulus, then it usually indicates
 //   a missing call to <global_stop_request>.
 //
