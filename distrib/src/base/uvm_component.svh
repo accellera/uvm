@@ -2420,8 +2420,12 @@ function void uvm_component::set_phase_schedule(string domain_name);
   end
 
   // add schedule to this component's list, replacing any existing entry found
-  if (find_phase_schedule(schedule_name,"*"))
-    delete_phase_schedule(find_phase_schedule(schedule_name,"*"));
+  begin
+    uvm_phase any;
+    any = find_phase_schedule(schedule_name,"*");
+    if (any != null)
+      delete_phase_schedule(any);
+  end
   add_phase_schedule(uvm, domain_name);
 endfunction
 
@@ -2976,7 +2980,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
   int unsigned i;
   int unsigned j;
 
-  m_field_automation (null, UVM_CHECK_FIELDS, "");
+  __m_uvm_field_automation (null, UVM_CHECK_FIELDS, "");
 
   if(verbose)
     $display("applying configuration settings for %s", get_full_name());
@@ -2994,17 +2998,17 @@ function void uvm_component::apply_config_settings (bit verbose=0);
         break;
 
     // If it does have brackets then we'll use the name
-    // up to the brackets to search m_sc.field_array
+    // up to the brackets to search __m_uvm_status_container.field_array
     if(j < name.len())
       search_name = name.substr(0, j-1);
     else
       search_name = name;
 
-    if(!m_sc.field_array.exists(search_name))
+    if(!__m_uvm_status_container.field_array.exists(search_name))
       continue;
 
     if(verbose)
-      $display("applying %s [%s] in %s", name, m_sc.field_array[search_name],
+      $display("applying %s [%s] in %s", name, __m_uvm_status_container.field_array[search_name],
                                          get_full_name());
 
     begin
@@ -3035,7 +3039,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
 
   end
 
-  m_sc.field_array.delete();
+  __m_uvm_status_container.field_array.delete();
   
 endfunction
 

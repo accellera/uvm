@@ -91,9 +91,12 @@ VSIM =  vsim \
         -l questa.log \
         -f questa.tops
 
+N_ERRS = 0
+N_FATALS = 0
+
 CHECK = \
-	@$(TEST) \( `grep -c 'UVM_ERROR :    0' questa.log` -eq 1 \) -a \
-		 \( `grep -c 'UVM_FATAL :    0' questa.log` -eq 1 \)
+	@$(TEST) \( `grep -c 'UVM_ERROR :    $(N_ERRS)' questa.log` -eq 1 \) -a \
+		 \( `grep -c 'UVM_FATAL :    $(N_FATALS)' questa.log` -eq 1 \)
 
 #---------------------------------------------------------------
 # If USES_DPI is set, enables compilation and loading of DPI

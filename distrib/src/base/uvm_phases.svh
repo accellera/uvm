@@ -1268,7 +1268,7 @@ class uvm_phase extends uvm_graph;
   // Return the <uvm_objection> that gates the termination of the phase.
 
   function uvm_objection get_objection();
-     return phase_done;
+     return this.phase_done;
   endfunction
 
   // Function: raise_objection
@@ -1533,7 +1533,7 @@ endfunction
 // --------------
 
 function string uvm_phase::get_phase_name();
-  return (m_phase) ? m_phase.get_name() : "";
+  return (m_phase != null) ? m_phase.get_name() : "";
 endfunction
 
 
@@ -2187,7 +2187,7 @@ endfunction
 function void uvm_phase::print_termination_state();
   `uvm_info("PH_TERMSTATE",
             $psprintf("phase %s outstanding objections = %0d",
-                      get_name(), phase_done.get_objection_total(uvm_top)),
+            get_name(), phase_done.get_objection_total(uvm_root::get())),
             UVM_DEBUG);
 endfunction
 

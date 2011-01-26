@@ -395,35 +395,6 @@ typedef enum { UVM_PHASE_TASK,
 } uvm_phase_type;
 
 
-/*
-// Enum: uvm_thread_mode
-//
-// Defines whether an implicit objection is raised before calling a component's
-// task-based phase method and dropped upon return from that method. This has
-// the effect of preventing a phase from ending until all implicitly and
-// explicitly raised objections have been dropped. 
-// for a given component. 
-//
-//   UVM_PHASE_NO_IMPLICIT_OBJECTION -  Do not raise an implicit objection.
-//               The component will either raise/drop explicitly, or may
-//               not even return from the task. The component task may
-//               never end on its own accord, such as with many driver and
-//               monitor implementations. This components' threads are killed
-//               by the phasing mechanism when all components that actively
-//               object to end-of-phase drop their objections.
-//
-//   UVM_PHASE_IMPLICIT_OBJECTION - Raise an implicit objection before calling
-//               the phase task, then drop it upon return. Components setting
-//               themselves to this mode ~must~ return from task else the
-//               phase will never end.
-//
-typedef enum { UVM_PHASE_NO_IMPLICIT_OBJECTION,
-               UVM_PHASE_IMPLICIT_OBJECTION,
-               UVM_PHASE_MODE_DEFAULT
-} uvm_thread_mode;
-*/
-
-
 // Enum: uvm_phase_state
 // ---------------------
 //

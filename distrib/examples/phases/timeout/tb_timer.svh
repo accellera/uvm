@@ -70,7 +70,7 @@ class tb_timer extends uvm_component;
       if (uvm_config_db#(time)::get(this, "reset", "timeout", t) &&
           t > 0) begin
          #(t * 1ns);
-         `uvm_fatal("TIMEOUT", "Time-out expired in pre_reset phase")
+         `uvm_fatal("TIMEOUT", "Time-out expired in reset phase")
       end
    endtask
 
@@ -79,7 +79,7 @@ class tb_timer extends uvm_component;
       if (uvm_config_db#(time)::get(this, "post_reset", "timeout", t) &&
           t > 0) begin
          #(t * 1ns);
-         `uvm_fatal("TIMEOUT", "Time-out expired in pre_reset phase")
+         `uvm_fatal("TIMEOUT", "Time-out expired in post_reset phase")
       end
    endtask
 
@@ -97,7 +97,7 @@ class tb_timer extends uvm_component;
       if (uvm_config_db#(time)::get(this, "configure", "timeout", t) &&
           t > 0) begin
          #(t * 1ns);
-         `uvm_fatal("TIMEOUT", "Time-out expired in pre_configure phase")
+         `uvm_fatal("TIMEOUT", "Time-out expired in configure phase")
       end
    endtask
 
@@ -106,7 +106,7 @@ class tb_timer extends uvm_component;
       if (uvm_config_db#(time)::get(this, "post_configure", "timeout", t) &&
           t > 0) begin
          #(t * 1ns);
-         `uvm_fatal("TIMEOUT", "Time-out expired in pre_configure phase")
+         `uvm_fatal("TIMEOUT", "Time-out expired in post_configure phase")
       end
    endtask
    
@@ -124,7 +124,7 @@ class tb_timer extends uvm_component;
       if (uvm_config_db#(time)::get(this, "main", "timeout", t) &&
           t > 0) begin
          #(t * 1ns);
-         `uvm_fatal("TIMEOUT", "Time-out expired in pre_main phase")
+         `uvm_fatal("TIMEOUT", "Time-out expired in main phase")
       end
    endtask
 
@@ -133,7 +133,7 @@ class tb_timer extends uvm_component;
       if (uvm_config_db#(time)::get(this, "post_main", "timeout", t) &&
           t > 0) begin
          #(t * 1ns);
-         `uvm_fatal("TIMEOUT", "Time-out expired in pre_main phase")
+         `uvm_fatal("TIMEOUT", "Time-out expired in post_main phase")
       end
    endtask
 
@@ -151,7 +151,7 @@ class tb_timer extends uvm_component;
       if (uvm_config_db#(time)::get(this, "shutdown", "timeout", t) &&
           t > 0) begin
          #(t * 1ns);
-         `uvm_fatal("TIMEOUT", "Time-out expired in pre_shutdown phase")
+         `uvm_fatal("TIMEOUT", "Time-out expired in shutdown phase")
       end
    endtask
 
@@ -160,7 +160,7 @@ class tb_timer extends uvm_component;
       if (uvm_config_db#(time)::get(this, "post_shutdown", "timeout", t) &&
           t > 0) begin
          #(t * 1ns);
-         `uvm_fatal("TIMEOUT", "Time-out expired in pre_shutdown phase")
+         `uvm_fatal("TIMEOUT", "Time-out expired in post_shutdown phase")
       end
    endtask
 
