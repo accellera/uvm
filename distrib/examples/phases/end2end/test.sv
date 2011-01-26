@@ -49,6 +49,9 @@ class test extends uvm_test;
 
 endclass
 
+`include "testlib.svh"
+
+
 tb_env env;
 
 initial
@@ -58,8 +61,8 @@ begin
    uvm_config_db#(tb_ctl_vif)::set(null, "env", "vif", tb_top.ctl);
    uvm_config_db#(apb_vif)::set(null, "env.apb", "vif", tb_top.apb0);
    uvm_config_db#(vip_vif)::set(null, "env.vip", "vif", tb_top.vip0);
-   
-   run_test("test");
+
+   run_test();
 end
 
 endprogram

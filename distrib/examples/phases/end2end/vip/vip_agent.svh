@@ -52,6 +52,14 @@ class vip_agent extends uvm_agent;
       drv.seq_item_port.connect(sqr.seq_item_export);
    endfunction
 
+   
+   task pre_reset_phase(uvm_phase phase);
+      phase.raise_objection(this, "Resetting agent");
+      reset_and_suspend();
+      phase.drop_objection(this);
+   endtask
+
+
 
    virtual task reset_and_suspend();
       fork
@@ -59,6 +67,7 @@ class vip_agent extends uvm_agent;
          tx_mon.reset_and_suspend();
          rx_mon.reset_and_suspend();
       join
+      sqr.stop_sequences();
    endtask
 
    virtual task suspend();

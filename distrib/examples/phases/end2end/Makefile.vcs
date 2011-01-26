@@ -30,9 +30,12 @@ comp:
 	$(VCS) $(COPTS) +incdir+../../apb+vip \
 		tb_top.sv test.sv
 
-run:
+run: test hw_reset_test
+
+test:
 	$(SIMV) $(ROPTS)
 	$(CHECK)
 
-debug:
-	$(SIMV) +UVM_OBJECTION_TRACE
+hw_reset hw_reset_test:
+	$(SIMV) $(ROPTS) +UVM_TESTNAME=hw_reset_test
+	$(CHECK)

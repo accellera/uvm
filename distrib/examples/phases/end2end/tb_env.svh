@@ -91,15 +91,43 @@ class tb_env extends uvm_env;
    endfunction
 
 
-   local bit m_in_shutdown = 0;   
+   local bit m_in_shutdown = 0;
+   local process pull_from_RxFIFO_thread;
    function void phase_started(uvm_phase phase);
-      case (phase.get_phase_name())
+      string name = phase.get_phase_name();
+      
+      m_in_shutdown = 0;
+
+      case (name)
+       "reset":
+          // OK to jump back to reset phase
+          if (pull_from_RxFIFO_thread != null) begin
+             pull_from_RxFIFO_thread.kill();
+             pull_from_RxFIFO_thread = null;
+          end
+       
        "main":
           fork
-             pull_from_RxFIFO(phase);
+             begin
+                pull_from_RxFIFO_thread = process::self();
+                pull_from_RxFIFO(phase);
+             end
           join_none
+       
        "shutdown":
           m_in_shutdown = 1;
+
+      endcase
+   endfunction
+   
+
+   function void phase_ended(uvm_phase phase);
+      case (phase.get_phase_name())
+       "shutdown":
+          begin
+             pull_from_RxFIFO_thread = null;
+             m_in_shutdown = 0;
+          end
       endcase
    endfunction
    
@@ -116,6 +144,7 @@ class tb_env extends uvm_env;
 
       `uvm_info("TB/TRACE", "Resetting DUT...", UVM_NONE);
       
+      vif.rst = 1'b1;
       regmodel.reset();
       vip.reset_and_suspend();
       repeat (10) @(posedge vif.clk);
@@ -156,7 +185,7 @@ class tb_env extends uvm_env;
          begin
             repeat (100 * 8) @(posedge vif.sclk);
             `uvm_fatal("TB/TIMEOUT",
-                       "VIP failed to acquire syncs")
+                       "VIP and/or DUT failed to acquire syncs")
          end
       join_none
 

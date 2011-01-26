@@ -67,6 +67,7 @@ class sym_sb extends uvm_component;
 
    task reset_phase(uvm_phase phase);
       m_n_obs = 0;
+      m_sb.delete();
    endtask
             
    task main_phase(uvm_phase phase);

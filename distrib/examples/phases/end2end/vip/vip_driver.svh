@@ -109,7 +109,8 @@ class vip_driver extends uvm_driver#(vip_tr);
       
       forever begin
          if (tr != null) seq_item_port.item_done();
-         
+
+         // Reset and suspend
          m_suspended = 1;
          wait (!m_suspend);
          m_suspended = 0;
@@ -120,6 +121,7 @@ class vip_driver extends uvm_driver#(vip_tr);
 
                forever begin
 
+                  // Suspend without reset
                   if (m_suspend) begin
                      m_suspended = 1;
                      wait (!m_suspend);
@@ -149,6 +151,7 @@ class vip_driver extends uvm_driver#(vip_tr);
                end
             end
          join
+
       end
    endtask
 
