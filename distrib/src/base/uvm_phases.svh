@@ -1434,6 +1434,7 @@ class uvm_phase extends uvm_graph;
   // internal - implementation
   //--------------------------
 
+  local static bit         m_phase_trace;
   local uvm_phase_state    m_state;
   local int                m_run_count; // num times this phase has executed
   local process            m_phase_proc;
@@ -1852,6 +1853,16 @@ endfunction
 task uvm_phase::m_run_phases();
   uvm_root top = uvm_root::get();
 
+  m_phase_trace=0;
+  begin
+    uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
+    string args[$];
+    if(clp.get_arg_matches("+UVM_PHASE_TRACE", args)) begin
+      m_phase_trace=1;
+    end
+  end
+  
+
   // initiate by starting first phase in common domain
   void'(m_phase_hopper.try_put(top.find_phase_schedule("uvm_pkg::common","common")));
 
@@ -1912,6 +1923,12 @@ task uvm_phase::execute();
   
   m_run_count++;
 
+  if (m_phase_trace) begin
+     `uvm_info("PH/TRC/STRT",
+               $psprintf("Starting phase %0s (in schedule %0s)",
+                         this.get_name(),this.get_schedule_name()), UVM_LOW);
+     
+  end
   `uvm_info("PH_START", $psprintf("STARTING PHASE %0s (in schedule %0s)",
                         this.get_name(),this.get_schedule_name()), UVM_DEBUG);
  
@@ -1975,6 +1992,13 @@ task uvm_phase::execute();
                 `uvm_info("PH_EXIT-1", $psprintf("PHASE EXIT CRITERIA %0s (in schedule %0s) %0d",
                       this.get_name(),this.get_schedule_name(), get_inst_id()), UVM_DEBUG);
              end
+             else if (m_phase.get_name() != "run") begin
+                if (m_phase_trace) begin
+                   `uvm_info("PH/TRC/SKIP",
+                             $psprintf("Skipping task phase %0s (in schedule %0s) because there were no objections",
+                                       this.get_name(),this.get_schedule_name()), UVM_LOW);
+                end
+             end
            end
            // EXIT CRITERIA 2: RUN PHASE ONLY - +plusarg, all run_phase tasks return, and no objections
            begin
@@ -1989,7 +2013,7 @@ task uvm_phase::execute();
                   wait (0);
                end
            end
-           // EXIT CRITERIA 2: Phase timeout
+           // EXIT CRITERIA 3: Phase timeout
            begin
              if (top.phase_timeout == 0)
                wait(top.phase_timeout != 0);
@@ -2052,7 +2076,7 @@ task uvm_phase::execute();
   //-------
   // ENDED:
   //-------
-  // execeute 'phase_ended' callbacks
+  // execute 'phase_ended' callbacks
   `uvm_info("PH_END", $psprintf("ENDING PHASE %0s (in schedule %0s)",
                       this.get_name(),this.get_schedule_name()), UVM_DEBUG);
   m_state = UVM_PHASE_ENDED;
@@ -2079,6 +2103,12 @@ task uvm_phase::execute();
   //------
   // If no successors, we're done. (Presumes final node is always shared.)
   // Otherwise, schedule all the successor phases.
+  if (m_phase_trace) begin
+     `uvm_info("PH/TRC/DONE",
+               $psprintf("Completed phase %0s (in schedule %0s)",
+                         this.get_name(),this.get_schedule_name()), UVM_LOW);
+     
+  end
   `uvm_info("PH_DONE", $psprintf("PHASE DONE %0s (in schedule %0s)",
                       this.get_name(),this.get_schedule_name()), UVM_DEBUG);
   m_state = UVM_PHASE_DONE;
