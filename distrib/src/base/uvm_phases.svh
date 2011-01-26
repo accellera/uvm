@@ -1268,7 +1268,7 @@ class uvm_phase extends uvm_graph;
   // Return the <uvm_objection> that gates the termination of the phase.
 
   function uvm_objection get_objection();
-     return phase_done;
+     return this.phase_done;
   endfunction
 
   // Function: raise_objection
