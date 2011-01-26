@@ -505,11 +505,11 @@ endfunction
 // so that it is immediately available.
 // TBD could possibly just use define_phase_schedule() here?
 
-uvm_domain uvm_common_domain; // topmost node of phasing graph
+uvm_domain uvm_common_domain = uvm_domain::get_common_domain(); // topmost node of phasing graph
 
 function void uvm_root::m_phase_setup();
   // create topmost phase domain
-  uvm_common_domain=new("common");
+  uvm_common_domain=uvm_domain::get_common_domain();
   // add "common" schedule to it and populate all the common phases
   begin
     uvm_phase schedule;

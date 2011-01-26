@@ -2012,7 +2012,7 @@ task uvm_phase::m_run_phases();
   uvm_root top = uvm_root::get();
 
   // initiate by starting first phase in common domain
-  void'(m_phase_hopper.try_put(uvm_common_domain));
+  void'(m_phase_hopper.try_put(uvm_domain::get_common_domain()));
 
   forever begin
     uvm_phase phase;
@@ -2059,6 +2059,19 @@ endfunction
 //
 
 class uvm_domain extends uvm_phase;
+  static local uvm_domain m_common_domain;
+
+// Function: get_common_domain
+//
+// Get the common domain objection which consists of the common phases that
+// all components executed together (build, connect, ..., report, final).
+
+  static function uvm_domain get_common_domain();
+    if(m_common_domain == null)
+      m_common_domain = new("common");
+    return m_common_domain;
+  endfunction
+
   function new(string name);
     super.new(name,UVM_PHASE_DOMAIN_NODE);
   endfunction
