@@ -1263,6 +1263,14 @@ class uvm_phase extends uvm_graph;
   // Group: Synchronization
   //-----------------------
 
+  // Function: get_objection
+  //
+  // Return the <uvm_objection> that gates the termination of the phase.
+
+  function uvm_objection get_objection();
+     return phase_done;
+  endfunction
+
   // Function: raise_objection
   //
   // Raise an objection to ending this phase
