@@ -36,13 +36,11 @@ class passive_comp extends uvm_component;
   process pid;
 
   task main_phase(uvm_phase phase);
-    phase.raise_objection(this, "start main phase for passive component");
     fork begin
       pid = process::self();
       doit;
     end join_none
     #15;
-    phase.drop_objection(this, "end main phase for passive component");
   endtask
 
   function void phase_ended(uvm_phase phase);
@@ -68,6 +66,7 @@ class active_comp extends uvm_component;
   endfunction
 
   task main_phase(uvm_phase phase);
+  global_stop_request();
     phase.raise_objection(this, "start main phase for active component");
     started = 1;
     #105;

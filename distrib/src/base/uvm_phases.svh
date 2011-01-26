@@ -644,7 +644,6 @@ typedef class uvm_phase;
 // phase relationships and stores current state as the phaser progresses,
 // and the phase implementation which specifies required component behavior
 // (by extension into component context if non-default behavior required.)
-// There are further implementation-internal classes e.g. uvm_phase_thread.
 //
 //|  +----------+                  +---------+                +-------------+
 //|  |uvm_object|                  |uvm_graph|                |uvm_component|
@@ -653,14 +652,14 @@ typedef class uvm_phase;
 //|  +-------------+           +------------------+           |             |
 //|  |uvm_phase_imp|------1---o|uvm_phase         |----1..*--o|[domains]    |
 //|  +-------------+\          +------------------+           |             |
-//|       ^          `-----------------------|---------0..*--o|[overrides]  |
-//|  +-------------------------------+       |                |             |
-//|  |uvm_task/topdown/bottomup_phase|      0..*              |             |
-//|  +-------------------------------+       |                |             |
-//|       ^                                  |                |             |
-//|  +--------------+               +----------------+        |             |
-//|  |uvm_NAME_phase|               |uvm_phase_thread|--0..*-o|[threads]    |
-//|  +--------------+               +----------------+        +-------------+
+//|       ^          `---------------------------------0..*--o|[overrides]  |
+//|  +-------------------------------+                        |             |
+//|  |uvm_task/topdown/bottomup_phase|                        |             |
+//|  +-------------------------------+                        |             |
+//|       ^                                                   |             |
+//|  +--------------+                                         |             |
+//|  |uvm_NAME_phase|                                         |             |
+//|  +--------------+                                         +-------------+
 //|       ^                                                          ^       
 //|  +-------------------------------------+               +----------------+
 //|  |uvm_NAME_phase (type T=uvm_component)| . . . . . . . |custom_component|
@@ -681,7 +680,6 @@ typedef class uvm_phase;
 
 typedef class uvm_phase_imp;          // phase implementation
 typedef class uvm_phase; // phase context and state
-typedef class uvm_phase_thread;   // phase process on a component
 typedef class uvm_test_done_objection;
 typedef class uvm_sequencer_base;
 
@@ -1059,13 +1057,8 @@ virtual class uvm_task_phase extends uvm_phase_imp;
 
     fork
       begin
-        uvm_phase_thread thread;
         uvm_sequencer_base seqr;
         
-        // initialize a thread object for this top-level process for
-        // for this component instance in the executing phase
-        thread = new(phase,comp);
-
         m_procs_not_yet_started--;
         m_num_procs_not_yet_returned++;
 
@@ -1078,13 +1071,7 @@ virtual class uvm_task_phase extends uvm_phase_imp;
         // execute the task for this component
         exec_task(comp,phase);
 
-        // inform the thread manager the task returned
-        thread.task_ended();
-
         m_num_procs_not_yet_returned--;
-
-        // let somebody else decide when to kill (based on objections)
-        //wait(0);
 
       end
     join_none
@@ -1145,99 +1132,6 @@ endclass
 //typedef process uvm_process;
 //`endif
 
-
-//------------------------------------------------------------------------------
-//
-// Class - uvm_phase_thread
-//
-//------------------------------------------------------------------------------
-// This is a wrapper around a process handle which serves to associate
-// a phase schedule with a component, capturing the process ID of the
-// thread that phase is running on that component, together with the
-// required thread mode. Also contained are thread maintenance methods.
-// Both component and phase schedule classes have a member which lists
-// the outstanding threads running on that component, or that phase.
-// These are used to determine completeness and execute cleanup semantics.
-
-// TBD benchmark the assoc arrays - given that this class holds both
-// TBD comp and sched handles, it is possible to use a simpler darray
-
-class uvm_phase_thread extends uvm_process;
-
-  uvm_phase m_phase; // the phase this thread was spawned from
-  uvm_component      m_comp;  // the component this thread is running on
-  uvm_thread_mode    m_mode;  // threading semantics in force for this pid
-  bit m_task_ended = 0;
-
-  // Function - new
-  //
-  // Register a new thread with it's collaborating phase schedule and component
-  // nodes. Capture the PID for future tracking and cleanup. Set the default
-  // thread semantics from the component.
-
-  function new(uvm_phase phase, uvm_component comp);
-    // process ID of this phase/component thread
-    super.new(process::self());
-    m_phase = phase;
-    m_comp  = comp;
-
-    //assert (!m_comp.m_phase_threads.exists(m_phase)); // sanity check
-    //assert (!m_phase.m_threads.exists(m_comp));       // sanity check
-
-    m_comp.m_phase_threads[m_phase] = this;
-    m_phase.m_threads[m_comp] = this;
-
-    m_mode = m_comp.m_def_phase_thread_mode;
-
-    if (m_mode == UVM_PHASE_MODE_DEFAULT)
-      m_mode = UVM_PHASE_NO_IMPLICIT_OBJECTION;
-
-    if (m_mode == UVM_PHASE_IMPLICIT_OBJECTION)
-      m_phase.phase_done.raise_objection(m_comp, {"raise implicit ",
-           m_phase.get_name(), " objection for ", m_comp.get_full_name()});
-  endfunction
-
-  function void task_ended();
-    if (m_mode == UVM_PHASE_IMPLICIT_OBJECTION)
-      if(m_phase.phase_done.get_objection_count(m_comp) > 0) // why this conditional?
-         m_phase.phase_done.drop_objection(m_comp, {"drop implicit ",
-              m_phase.get_name(), " objection for ", m_comp.get_full_name()});
-  endfunction
-
-`ifdef NOT_DEFINED 
-  virtual function state status();
-    if (m_task_ended)
-      return process::FINISHED;
-    return proc.status();
-  endfunction
-`endif
-  virtual function void kill();
-    m_comp.m_phase_threads.delete(m_phase);
-    m_phase.m_threads.delete(m_comp);
-    super.kill();
-  endfunction
-  
-  function void set_thread_mode(uvm_thread_mode mode);
-    // if passive -> active, we need to raise an implicit objection now
-    if (m_mode == UVM_PHASE_NO_IMPLICIT_OBJECTION &&
-          mode == UVM_PHASE_IMPLICIT_OBJECTION)
-      m_phase.phase_done.raise_objection(m_comp, {"mode change- raise implicit ",
-            m_phase.get_name(), " objection for ", m_comp.get_full_name()});
-
-    // if active -> passive, we need to drop the implicit objection now
-    if (m_mode == UVM_PHASE_NO_IMPLICIT_OBJECTION &&
-          mode == UVM_PHASE_IMPLICIT_OBJECTION)
-      m_phase.phase_done.drop_objection(m_comp, {"mode change- drop implicit ",
-            m_phase.get_name(), " objection for ", m_comp.get_full_name()});
-
-    m_mode = mode;
-  endfunction
-
-  function int is_current_process();
-    process pid = process::self();
-    return (m_process_id == pid);
-  endfunction
-endclass
 
 
 //------------------------------------------------------------------------------
@@ -1537,20 +1431,19 @@ class uvm_phase extends uvm_graph;
   local process            m_phase_proc;
   local bit                m_jump_bkwd;
   local bit                m_jump_fwd;
-  local uvm_phase m_jump_phase;
+  local uvm_phase          m_jump_phase;
 
   protected string         m_schedule_name; // schedule unique name
   uvm_phase                m_parent;        // our 'begin' node [or points 'up' one level]
   uvm_phase                m_sync[];        // schedule instance to which we are synced
   uvm_phase_imp            m_phase;         // phase imp to call when we execute this node
   uvm_objection            phase_done;      // phase done objection
-  uvm_phase_thread         m_threads[uvm_component]; // all active process threads
 
 
   local static mailbox #(uvm_phase) m_phase_hopper = new();
   local static uvm_process m_phase_top_procs[uvm_phase];
-  local bit m_exit_on_task_return = 0;
   static bit m_has_rt_phases;
+  local bit m_exit_on_task_return;
 
   extern static task m_run_phases();
 
@@ -1591,14 +1484,16 @@ function uvm_phase::new(string name, uvm_phase parent=null);
 
   super.new(name);
 
+  // provide undocumented way out of run, as a debug aide
   clp = uvm_cmdline_processor::get_inst();
   if(clp.get_arg_matches("+UVM_EXIT_RUN_ON_TASK_RETURN", trace_args))
     m_exit_on_task_return = 1;
 
   if (name == "run")
     phase_done = uvm_test_done_objection::get();
-  else
+  else begin
     phase_done = new(name);
+  end
 
   m_state = UVM_PHASE_DORMANT;
   if (parent == null) begin
@@ -1907,6 +1802,7 @@ function void uvm_phase::clear_successors(uvm_phase_state state = UVM_PHASE_DORM
 endfunction
 
 
+
 // kill
 // ----
 
@@ -2057,8 +1953,8 @@ task uvm_phase::execute();
         end
       join_none
 
-      uvm_wait_for_nba_region(); //Give sequences, etc. a chance to object
       wait (task_phase.m_procs_not_yet_started == 0);
+      uvm_wait_for_nba_region(); //Give sequences, etc. a chance to object
 
       // Now wait for one of three criterion for end-of-phase.
       fork
@@ -2066,26 +1962,26 @@ task uvm_phase::execute();
          fork
            // EXIT CRITERIA 1: All objections dropped
            begin
-             phase_done.wait_for(UVM_ALL_DROPPED, top);
-              `uvm_info("PH_EXIT-1", $psprintf("PHASE EXIT CRITERIA %0s (in schedule %0s) %0d",
+             if (phase_done.get_objection_total(top) || m_phase.get_name() == "run") begin
+               phase_done.wait_for(UVM_ALL_DROPPED, top);
+                `uvm_info("PH_EXIT-1", $psprintf("PHASE EXIT CRITERIA %0s (in schedule %0s) %0d",
                       this.get_name(),this.get_schedule_name(), get_inst_id()), UVM_DEBUG);
+             end
            end
-           // EXIT CRITERIA 2: All phase tasks return and no objections
+           // EXIT CRITERIA 2: RUN PHASE ONLY - +plusarg, all run_phase tasks return, and no objections
            begin
-               if (m_exit_on_task_return || m_phase.get_name() != "run") begin
+               if (m_exit_on_task_return && m_phase.get_name() == "run") begin
                  wait (task_phase.m_num_procs_not_yet_returned == 0);
                  if (phase_done.get_objection_total() != 0)
                    wait (0);
-              `uvm_info("PH_EXIT-2.1", $psprintf("PHASE EXIT CRITERIA %0s (in schedule %0s) %0d",
+                   `uvm_info("PH_EXIT-2", $psprintf("PHASE EXIT CRITERIA %0s (in schedule %0s) %0d",
                       this.get_name(),this.get_schedule_name(), get_inst_id()), UVM_DEBUG);
                end else
                begin 
                   wait (0);
-              `uvm_info("PH_EXIT-2.2", $psprintf("PHASE EXIT CRITERIA %0s (in schedule %0s) %0d",
-                      this.get_name(),this.get_schedule_name(), get_inst_id()), UVM_DEBUG);
-                  end
+               end
            end
-           // EXIT CRITERIA 3: Phase timeout
+           // EXIT CRITERIA 2: Phase timeout
            begin
              if (top.phase_timeout == 0)
                wait(top.phase_timeout != 0);

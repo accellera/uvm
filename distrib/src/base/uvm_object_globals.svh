@@ -395,6 +395,7 @@ typedef enum { UVM_PHASE_TASK,
 } uvm_phase_type;
 
 
+/*
 // Enum: uvm_thread_mode
 //
 // Defines whether an implicit objection is raised before calling a component's
@@ -420,6 +421,7 @@ typedef enum { UVM_PHASE_NO_IMPLICIT_OBJECTION,
                UVM_PHASE_IMPLICIT_OBJECTION,
                UVM_PHASE_MODE_DEFAULT
 } uvm_thread_mode;
+*/
 
 
 // Enum: uvm_phase_state

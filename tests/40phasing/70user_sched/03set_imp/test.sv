@@ -112,22 +112,28 @@ module test;
       set_phase_domain("uvm");
     endfunction
     task reset_phase(uvm_phase phase);
+      phase.raise_objection(this);
       start_reset = $time;
       `uvm_info("RST", "IN RESET", UVM_NONE)
       #delay `uvm_info("RST", "END RESET", UVM_NONE)
       end_reset = $time;
+      phase.drop_objection(this);
     endtask
     task pre_configure_phase(uvm_phase phase);
+      phase.raise_objection(this);
       start_pre_configure = $time;
       `uvm_info("PRECFG", "IN PRECFG", UVM_NONE)
       #(60 - delay) `uvm_info("PRECFG", "END PRECFG", UVM_NONE)
       end_pre_configure = $time;
+      phase.drop_objection(this);
     endtask
     task configure_phase(uvm_phase phase);
+      phase.raise_objection(this);
       start_configure = $time;
       `uvm_info("CFG", "IN CONFIGURE", UVM_NONE)
       #delay `uvm_info("CFG", "END CONFIGURE", UVM_NONE)
       end_configure = $time;
+      phase.drop_objection(this);
     endtask
   endclass
 
@@ -146,28 +152,36 @@ module test;
       super.new(name,parent);
     endfunction
     task cfg_phase(uvm_phase phase);
+      phase.raise_objection(this);
       start_my_cfg = $time;
       `uvm_info("MYCFG", "IN MY CFG", UVM_NONE)
       #delay `uvm_info("MYCFG", "END MY CFG", UVM_NONE)
       end_my_cfg = $time;
+      phase.drop_objection(this);
     endtask
     task reset_phase(uvm_phase phase);
+      phase.raise_objection(this);
       start_reset = $time;
       `uvm_info("RST", "IN RESET", UVM_NONE)
       #delay `uvm_info("RST", "END RESET", UVM_NONE)
       end_reset = $time;
+      phase.drop_objection(this);
     endtask
     task pre_configure_phase(uvm_phase phase);
+      phase.raise_objection(this);
       start_pre_configure = $time;
       `uvm_info("PRECFG", "IN PRECFG", UVM_NONE)
       #(60 - delay) `uvm_info("PRECFG", "END PRECFG", UVM_NONE)
       end_pre_configure = $time;
+      phase.drop_objection(this);
     endtask
     task configure_phase(uvm_phase phase);
+      phase.raise_objection(this);
       start_configure = $time;
       `uvm_info("CFG", "IN CONFIGURE", UVM_NONE)
       #delay `uvm_info("CFG", "END CONFIGURE", UVM_NONE)
       end_configure = $time;
+      phase.drop_objection(this);
     endtask
   endclass
 

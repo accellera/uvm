@@ -155,7 +155,6 @@ class test extends uvm_test;
   endfunction : connect_phase
 
   virtual task run_phase(uvm_phase phase);
-    set_thread_mode(UVM_PHASE_IMPLICIT_OBJECTION);
     //basic_seq run_seq; run_seq = new( "basic_seq_in_run" ); run_seq.start( sequencer );
     //`uvm_info( "RUN", "Done run phase", UVM_NONE );
   endtask : run_phase

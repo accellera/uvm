@@ -32,10 +32,12 @@ class myseq extends uvm_sequence;
   
   task body;
     start_cnt++;
+    if (starting_phase!=null) starting_phase.raise_objection(this);
     `uvm_info("INBODY", "Starting myseq!!!", UVM_NONE)
     #10;
     `uvm_info("INBODY", "Ending myseq!!!", UVM_NONE)
     end_cnt++;
+    if (starting_phase!=null) starting_phase.drop_objection(this);
   endtask
 endclass
 
@@ -69,6 +71,7 @@ class test extends uvm_test;
       domain = seqr.find_phase_schedule("uvm_pkg::uvm","*");
       uvm_config_db #(uvm_object_wrapper)::set(this, "seqr", "configure_ph", myseq::type_id::get());
       uvm_config_db #(uvm_object_wrapper)::set(this, "seqr", "main_ph", myseq::type_id::get());
+      global_stop_request(); // end run phase
    endfunction
    
    function void report_phase(uvm_phase phase);

@@ -152,21 +152,27 @@ module test;
       phase.drop_objection(this);
     endtask
     task main_phase(uvm_phase phase);
+      phase.raise_objection(this);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("MAIN", "IN STD MAIN", UVM_NONE)
       #30 `uvm_info("MAIN", "END STD MAIN", UVM_NONE)
+      phase.drop_objection(this);
     endtask
     task shutdown_phase(uvm_phase phase);
+      phase.raise_objection(this);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("SHTDWN", "IN STD SHUTDOWN", UVM_NONE)
       #30 `uvm_info("SHTDWN", "END STD SHUTDOWN", UVM_NONE)
+      phase.drop_objection(this);
     endtask
 
     // ... and also new phase
     task myreset2(uvm_phase phase);
+      phase.raise_objection(this);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("RST2", "IN MY RESET2", UVM_NONE)
       #30 `uvm_info("RST2", "END MY RESET2", UVM_NONE)
+      phase.drop_objection(this);
     endtask
   endclass
 
@@ -204,14 +210,18 @@ module test;
       phase.drop_objection(this);
     endtask
     task main_phase(uvm_phase phase);
+      phase.raise_objection(this);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("MAIN", "IN STD MAIN", UVM_NONE)
       #20 `uvm_info("MAIN", "END STD MAIN", UVM_NONE)
+      phase.drop_objection(this);
     endtask
     task shutdown_phase(uvm_phase phase);
+      phase.raise_objection(this);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("SHTDWN", "IN STD SHUTDOWN", UVM_NONE)
       #40 `uvm_info("SHTDWN", "END STD SHUTDOWN", UVM_NONE)
+      phase.drop_objection(this);
     endtask
 
     // this task will not be called automatically unless the component is in a 
@@ -220,9 +230,11 @@ module test;
     // not expected that a standard component would implement a user-defined
     // phase
     task myreset2(uvm_phase phase);
+      phase.raise_objection(this);
       phase_times.push_back($time) ; // for self-checking only
       `uvm_info("RST2", "IN MY RESET2", UVM_NONE)
       #30 `uvm_info("RST2", "END MY RESET2", UVM_NONE)
+      phase.drop_objection(this);
     endtask
   endclass
 
