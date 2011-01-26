@@ -62,6 +62,14 @@ class vip_monitor extends uvm_monitor;
       end
    endfunction
 
+
+   task reset_phase(uvm_phase phase);
+      phase.raise_objection(this, "Resetting driver");
+      reset_and_suspend();
+      phase.drop_objection(this);
+   endtask
+
+
    //
    // Abruptly interrupt and suspend this monitor
    //

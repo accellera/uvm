@@ -56,11 +56,26 @@ class vip_driver extends uvm_driver#(vip_tr);
       m_suspended = 1;
    endfunction
 
+
+   task pre_reset_phase(uvm_phase phase);
+      phase.raise_objection(this, "Resetting driver");
+      vif.Tx = 1'bx;
+      m_interrupt();
+      phase.drop_objection(this);
+   endtask
+
+
+   task reset_phase(uvm_phase phase);
+      phase.raise_objection(this, "Resetting driver");
+      reset_and_suspend();
+      phase.drop_objection(this);
+   endtask
+
+
    //
    // Abruptly interrupt and suspend this driver
    //
-   virtual task reset_and_suspend();
-      vif.Tx = 0;
+   local task m_interrupt();
       m_suspend = 1;
 
       if (m_proc.size() > 0) begin
@@ -69,6 +84,11 @@ class vip_driver extends uvm_driver#(vip_tr);
          
          wait (m_suspended);
       end
+   endtask
+
+   virtual task reset_and_suspend();
+      vif.Tx = 0;
+      m_interrupt();
    endtask
 
    virtual task suspend();
