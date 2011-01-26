@@ -90,7 +90,20 @@ class tb_env extends uvm_env;
       adapt.rx_ap.connect(ingress.observed);
    endfunction
 
+
+   local bit m_in_shutdown = 0;   
+   function void phase_started(uvm_phase phase);
+      case (phase.get_phase_name())
+       "main":
+          fork
+             pull_from_RxFIFO(phase);
+          join_none
+       "shutdown":
+          m_in_shutdown = 1;
+      endcase
+   endfunction
    
+
    task pre_reset_phase(uvm_phase phase);
       phase.raise_objection(this, "Waiting for reset to be valid");
       wait (vif.rst !== 1'bx);
@@ -141,8 +154,7 @@ class tb_env extends uvm_env;
 
       fork
          begin
-            // Should not take more than 35 symbols
-            repeat (10*35 * 8) @(posedge vif.sclk);
+            repeat (100 * 8) @(posedge vif.sclk);
             `uvm_fatal("TB/TIMEOUT",
                        "VIP failed to acquire syncs")
          end
@@ -169,6 +181,48 @@ class tb_env extends uvm_env;
 
       phase.drop_objection(this, "Everyone is in SYNC");
    endtask
+
+
+   //
+   // This task is a thread that will span the main and shutdown phase
+   //
+   task pull_from_RxFIFO(uvm_phase phase);
+      uvm_phase shutdown_ph = phase.find_schedule("shutdown");
+      shutdown_ph.raise_objection(this, "Pulling data from RxFIFO");
+      
+      regmodel.IntMask.SA.set(1);
+      regmodel.IntMask.RxHigh.set(1);
+      regmodel.IntMask.update(status);
+      
+      forever begin
+         wait (vif.intr || m_in_shutdown);
+
+         m_isr.raise_objection(this, "Servicing RxHigh");
+               
+         regmodel.IntSrc.mirror(status);
+         if (regmodel.IntSrc.SA.get()) begin
+            `uvm_fatal("TB/DUT/SYNCLOSS", "DUT has lost SYNC");
+         end
+         if (!regmodel.IntSrc.RxHigh.get() && !m_in_shutdown) begin
+            m_isr.drop_objection(this, "RxHigh does not need service");
+            m_isr.wait_for(UVM_ALL_DROPPED);
+            continue;
+         end
+               
+         // Stop reading data once it is empty
+         while (!regmodel.IntSrc.RxEmpty.get()) begin
+            regmodel.TxRx.mirror(status);
+            regmodel.IntSrc.mirror(status);
+         end
+         m_isr.drop_objection(this, "RxHigh has been fully serviced");
+
+         if (m_in_shutdown) begin
+            shutdown_ph.drop_objection(this, "All data pulled from RxFIFO");
+            break;
+         end
+      end
+   endtask
+
 
    task main_phase(uvm_phase phase);
 
@@ -228,44 +282,6 @@ class tb_env extends uvm_env;
             regmodel.IntMask.TxLow.set(0);
             regmodel.IntMask.update(status);
          end
-
-         begin
-            phase.raise_objection(this, "Configuring ISR for ->DUT stimulus");
-            regmodel.IntMask.SA.set(1);
-            regmodel.IntMask.RxHigh.set(1);
-            regmodel.IntMask.update(status);
-            phase.drop_objection(this, "ISR ready ->DUT stimulus");
-                  
-            forever begin
-               wait (vif.intr);
-
-               m_isr.raise_objection(this, "Servicing RxHigh");
-               phase.raise_objection(this, "Extracting ->DUT response");
-               
-               regmodel.IntSrc.mirror(status);
-               if (regmodel.IntSrc.SA.get()) begin
-                  `uvm_fatal("TB/DUT/SYNCLOSS", "DUT has lost SYNC");
-                  m_isr.drop_objection(this, "RxHigh no longer needs service");
-                  phase.drop_objection(this, "No more ->DUT response");
-                  break;
-               end
-               if (!regmodel.IntSrc.RxHigh.get()) begin
-                  m_isr.drop_objection(this, "RxHigh does not need service");
-                  phase.drop_objection(this, "No ->DUT response");
-                  m_isr.wait_for(UVM_ALL_DROPPED);
-                  continue;
-               end
-               
-               // Stop reading data once it is empty
-               while (!regmodel.IntSrc.RxEmpty.get()) begin
-                  regmodel.TxRx.mirror(status);
-
-                  regmodel.IntSrc.mirror(status);
-               end
-               m_isr.drop_objection(this, "RxHigh has been fully serviced");
-               phase.drop_objection(this, "No more ->DUT response");
-            end
-         end
       join
    endtask
 
@@ -275,15 +291,6 @@ class tb_env extends uvm_env;
 
       `uvm_info("TB/TRACE", "Draining the DUT...", UVM_NONE);
 
-      // Flush the RxFIFO
-      regmodel.IntSrc.mirror(status);
-      while (!regmodel.IntSrc.RxEmpty.get()) begin
-
-         // Stop reading data once it is empty
-         regmodel.TxRx.mirror(status);
-         regmodel.IntSrc.mirror(status);
-      end
-      
       if (!regmodel.IntSrc.TxEmpty.get()) begin
          // Wait for TxFIFO to be empty
          regmodel.IntMask.write(status, 'h001);
