@@ -139,7 +139,7 @@ class uvm_scope_stack;
     while(m_stack.size() && !found ) begin
       s = m_stack.pop_back();
       if(separator == ".") begin
-        if (s == "" || (s[0] != "[" && s[0] == "(" && s[0] == "{"))
+        if (s == "" || (s[0] != "[" && s[0] != "(" && s[0] != "{"))
           found = 1;
       end
       else begin
