@@ -755,7 +755,7 @@ function void uvm_printer::print_object (string name, uvm_object value,
       // print members of object
       void'(value.sprint(this));
 
-      if(name[0] == "[")
+      if(name != "" && name[0] == "[")
         m_scope.up("[");
       else
         m_scope.up(".");

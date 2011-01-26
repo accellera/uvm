@@ -1525,7 +1525,7 @@ endfunction
 // --------------
 
 function string uvm_phase::get_phase_name();
-  return (m_phase) ? m_phase.get_name() : "";
+  return (m_phase != null) ? m_phase.get_name() : "";
 endfunction
 
 
@@ -2179,7 +2179,7 @@ endfunction
 function void uvm_phase::print_termination_state();
   `uvm_info("PH_TERMSTATE",
             $psprintf("phase %s outstanding objections = %0d",
-                      get_name(), phase_done.get_objection_total(uvm_top)),
+            get_name(), phase_done.get_objection_total(uvm_root::get())),
             UVM_DEBUG);
 endfunction
 

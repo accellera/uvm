@@ -2420,8 +2420,12 @@ function void uvm_component::set_phase_schedule(string domain_name);
   end
 
   // add schedule to this component's list, replacing any existing entry found
-  if (find_phase_schedule(schedule_name,"*"))
-    delete_phase_schedule(find_phase_schedule(schedule_name,"*"));
+  begin
+    uvm_phase any;
+    any = find_phase_schedule(schedule_name,"*");
+    if (any != null)
+      delete_phase_schedule(any);
+  end
   add_phase_schedule(uvm, domain_name);
 endfunction
 
