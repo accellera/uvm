@@ -91,7 +91,7 @@ virtual class uvm_port_component_base extends uvm_component;
     return;
   endfunction
 
-  virtual task do_task_phase (uvm_phase_imp phase);
+  virtual task do_task_phase (uvm_phase phase);
   endtask
 endclass
 
@@ -426,8 +426,8 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
 
   virtual function void connect (this_type provider);
     uvm_root top = uvm_root::get();
-    uvm_phase domain = top.find_phase_schedule("uvm_pkg::common","*");
-    uvm_phase elab_ph = domain.find_schedule("end_of_elaboration");
+    uvm_phase domain = top.find_phase_schedule("uvm_pkg::common","*"); // TBD refactor for new API
+    uvm_phase elab_ph = domain.find_schedule("end_of_elaboration"); // TBD refactor for new API
     if (elab_ph.get_state() == UVM_PHASE_EXECUTING ||
         elab_ph.get_state() == UVM_PHASE_DONE ) begin
        m_comp.uvm_report_warning("Late Connection", 
@@ -516,8 +516,8 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
                get_full_name()," (",get_type_name(),")\n",save,"\n"};
       if (m_imp_list.num() == 0) begin
         uvm_root top = uvm_root::get();
-        uvm_phase domain = top.find_phase_schedule("uvm_pkg::common","*");
-        uvm_phase elab_ph = domain.find_schedule("end_of_elaboration");
+        uvm_phase domain = top.find_phase_schedule("uvm_pkg::common","*"); // TBD refactor for new API
+        uvm_phase elab_ph = domain.find_schedule("end_of_elaboration"); // TBD refactor for new API
         if (elab_ph.get_state() == UVM_PHASE_EXECUTING ||
             elab_ph.get_state() == UVM_PHASE_DONE ) 
            save = {save,"  Connected implementations: none\n"};

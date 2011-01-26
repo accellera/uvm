@@ -1020,7 +1020,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
     if (comp.enable_stop_interrupt) begin
       m_n_stop_threads++;
       fork begin
-        comp.stop("run");
+        comp.stop_phase(run_ph);
         m_n_stop_threads--;
       end
       join_none

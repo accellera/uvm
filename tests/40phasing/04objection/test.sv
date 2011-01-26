@@ -31,7 +31,7 @@ module test;
 
   bit failed = 0;
   time phase_transition_time = 1000;
-  bit phase_run[uvm_phase_imp];
+  bit phase_run[uvm_phase];
 
   class base extends uvm_component;
     function new(string name, uvm_component parent);
