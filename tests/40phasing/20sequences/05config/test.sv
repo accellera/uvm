@@ -75,8 +75,8 @@ class test extends uvm_test;
       domain = seqr.find_phase_schedule("uvm_pkg::uvm","*");
 
       w = myseq::type_id::get();
-      uvm_config_seq::set(this, "seqr", "configure_ph",  w);
-      uvm_config_seq::set(this, "seqr", "main_ph",  w);
+      uvm_config_seq::set(this, "seqr.configure_phase", "default_sequence",  w);
+      uvm_config_seq::set(this, "seqr.main_phase", "default_sequence",  w);
    endfunction
    
    function void report_phase(uvm_phase phase);

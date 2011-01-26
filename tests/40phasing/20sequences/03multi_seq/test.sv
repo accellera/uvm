@@ -131,12 +131,12 @@ class test extends uvm_test;
       uvm_phase domain, cfg, main;
       seqr1 = new("seqr1", this);
       seqr2 = new("seqr2", this);
-      phase_rsrc::set(this, "seqr1", "configure_ph",     my_config_seq::type_id::get());
-      phase_rsrc::set(this, "seqr1", "main_ph",          my_main_seq::type_id::get());
-      phase_rsrc::set(this, "seqr1", "shutdown_ph",      my_shutdown_seq::type_id::get());
-      phase_rsrc::set(this, "seqr2", "pre_configure_ph", my_preconfig_seq::type_id::get());
-      phase_rsrc::set(this, "seqr2", "pre_main_ph",      my_premain_seq::type_id::get());
-      phase_rsrc::set(this, "seqr2", "shutdown_ph",      my_shutdown_seq::type_id::get());
+      phase_rsrc::set(this, "seqr1.configure_phase", "default_sequence",     my_config_seq::type_id::get());
+      phase_rsrc::set(this, "seqr1.main_phase", "default_sequence",          my_main_seq::type_id::get());
+      phase_rsrc::set(this, "seqr1.shutdown_phase", "default_sequence",      my_shutdown_seq::type_id::get());
+      phase_rsrc::set(this, "seqr2.pre_configure_phase", "default_sequence", my_preconfig_seq::type_id::get());
+      phase_rsrc::set(this, "seqr2.pre_main_phase", "default_sequence",      my_premain_seq::type_id::get());
+      phase_rsrc::set(this, "seqr2.shutdown_phase", "default_sequence",      my_shutdown_seq::type_id::get());
    endfunction
    
    function void report_phase(uvm_phase phase);

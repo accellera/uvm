@@ -249,7 +249,7 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   // Task: start_default_sequence
   //
   // Called when the run phase begins, this method starts the default sequence,
-  // as specified by the default_sequence member variable.
+  // as specified by the <uvm_sequencer_base::default_sequence> member variable.
 
   virtual task start_default_sequence();
     uvm_sequence_base m_seq ;
@@ -262,10 +262,10 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
       return;
     end
 
-    if (uvm_config_db #(uvm_sequence_base)::exists(this, "", "run_ph", 0) || 
-        uvm_config_db #(uvm_object_wrapper)::exists(this, "", "run_ph", 0))
+    if (uvm_config_db #(uvm_sequence_base)::exists(this, "run_phase", "default_sequence", 0) || 
+        uvm_config_db #(uvm_object_wrapper)::exists(this, "run_phase", "default_sequence", 0))
     begin
-      `uvm_warning("MULDEFSEQ", "A default phase sequence has been set in addition to the deprecated \"default_sequence\" configuration option. The \"default_sequence\" configuration option is ignored.")
+      `uvm_warning("MULDEFSEQ", "A run phase sequence has been set in addition to the deprecated \"default_sequence\" configuration option. The \"default_sequence\" configuration option is ignored.")
       return;
     end
 
