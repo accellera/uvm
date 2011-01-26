@@ -736,9 +736,9 @@ function void uvm_printer::print_object (string name, uvm_object value,
 
   if(value != null)  begin
     if((knobs.depth == -1 || (knobs.depth > m_scope.depth())) &&
-          !value.m_sc.cycle_check.exists(value)) begin
+          !value.__m_uvm_status_container.cycle_check.exists(value)) begin
 
-      value.m_sc.cycle_check[value] = 1;
+      value.__m_uvm_status_container.cycle_check[value] = 1;
       m_scope.down(name);
 
       //Handle children of the comp
@@ -759,7 +759,7 @@ function void uvm_printer::print_object (string name, uvm_object value,
         m_scope.up("[");
       else
         m_scope.up(".");
-      value.m_sc.cycle_check.delete(value);
+      value.__m_uvm_status_container.cycle_check.delete(value);
     end
   end
 

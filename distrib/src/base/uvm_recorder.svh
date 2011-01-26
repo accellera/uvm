@@ -162,12 +162,12 @@ class uvm_recorder;
  
     if(policy != UVM_REFERENCE) begin
       if(value!=null) begin
-        if(value.m_sc.cycle_check.exists(value)) return;
-        value.m_sc.cycle_check[value] = 1;
+        if(value.__m_uvm_status_container.cycle_check.exists(value)) return;
+        value.__m_uvm_status_container.cycle_check[value] = 1;
         scope.down(name);
         value.record(this);
         scope.up();
-        value.m_sc.cycle_check.delete(value);
+        value.__m_uvm_status_container.cycle_check.delete(value);
       end
     end
 
