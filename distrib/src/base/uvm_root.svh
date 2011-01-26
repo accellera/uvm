@@ -179,9 +179,7 @@ class uvm_root extends uvm_component;
 
   // At end of elab phase we need to do tlm binding resolution.
   function void phase_ended(uvm_phase phase);
-    uvm_phase domain = find_phase_schedule("uvm_pkg::common","*");
-    uvm_phase elab_ph = domain.find_schedule("end_of_elaboration");
-    if(phase == elab_ph)
+    if(phase == end_of_elaboration_ph)
       do_resolve_bindings(); 
   endfunction
 
@@ -505,7 +503,7 @@ endfunction
 // Every component runs these 9 phases build..connect...run...report..final
 // To be done immediately after the m_inst object has been set for uvm_root
 // so that it is immediately available.
-// TBD could possibly just use get_phase_schedule() here?
+// TBD could possibly just use define_phase_schedule() here?
 
 uvm_domain uvm_common_domain; // topmost node of phasing graph
 
@@ -515,7 +513,7 @@ function void uvm_root::m_phase_setup();
   // add "common" schedule to it and populate all the common phases
   begin
     uvm_phase schedule;
-    schedule = new("common",UVM_SCHEDULE_NODE);
+    schedule = new("common",UVM_PHASE_SCHEDULE_NODE);
     schedule.add_phase(uvm_build_phase::get());
     schedule.add_phase(uvm_connect_phase::get());
     schedule.add_phase(uvm_end_of_elaboration_phase::get());

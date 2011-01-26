@@ -578,7 +578,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // Apply a phase domain to this component (by default, also to it's children).
   // Get a copy of the schedule graph for this component base class as defined
-  // by virtual get_phase_schedule(), and add an instance of that to our domain
+  // by virtual define_phase_schedule(), and add an instance of that to our domain
   // branch in the master phasing schedule graph, if it does not already exist.
 
   extern function void set_domain(uvm_domain domain, int hier=1);
@@ -586,24 +586,29 @@ virtual class uvm_component extends uvm_report_object;
   // Function: get_domain
   // Return handle to the phase domain set on this component
   
-  function uvm_domain get_domain(); return m_domain; endfunction
+  extern function uvm_domain get_domain();
 
-  // Function: get_phase_schedule
+  // Function: get_schedule
+  // Return handle to the phase schedule graph that applies to this component
+  
+  extern function uvm_phase get_schedule();
+
+  // Function: define_phase_schedule
   //
   // Builds and returns the required phase schedule subgraph for this component base
   //
   // Here we define the structure and organization of a schedule for this component
   // base type (uvm_component). We give that schedule a name (default 'uvm') and return
   // a handle to it to the caller (either the set_domain() method, or a subclass's
-  // get_phase_schedule() having called super.get_phase_schedule(), ready to be added
+  // define_phase_schedule() having called super.define_phase_schedule(), ready to be added
   // into the main schedule graph.
   //
   // Custom component base classes requiring a custom phasing schedule to augment or
   // replace the default UVM schedule can override this method. They can inherit the
-  // parent schedule and build on it by calling super.get_phase_schedule(MYNAME)
+  // parent schedule and build on it by calling super.define_phase_schedule(MYNAME)
   // or they can create a new schedule from scratch by not calling the super method.
 
-  extern virtual protected function uvm_phase get_phase_schedule(uvm_domain domain,
+  extern virtual protected function uvm_phase define_phase_schedule(uvm_domain domain,
                                                                  string name="uvm");
 
   // Function: set_phase_imp
@@ -709,7 +714,6 @@ virtual class uvm_component extends uvm_report_object;
   // Users should not call directly.
 
   extern virtual function void resolve_bindings ();
-
 
 
   //----------------------------------------------------------------------------
@@ -1535,7 +1539,8 @@ virtual class uvm_component extends uvm_report_object;
   // Phasing implementation - process control, hierarchical schedules, functors
   protected uvm_domain m_domain;                   // set_domain stores our domain handle
   protected uvm_phase  m_schedule;                 // and this our uvm/custom phase schedule
-  protected uvm_phase  m_phase_imps[uvm_phase];    // functors to override ovm_root defaults
+  /*protected*/ uvm_phase  m_phase_imps[uvm_phase];    // functors to override ovm_root defaults
+                   //TND review protected, provide read-only accessor.
   uvm_phase            m_current_phase;            // the most recently executed phase
   protected process    m_phase_process;
 
@@ -1637,13 +1642,12 @@ function uvm_component::new (string name, uvm_component parent);
 
   // Check that we're not in or past end_of_elaboration
   begin
-      // only check if we have got phasing set up yet
-      if (end_of_elab_ph.get_state() == UVM_PHASE_EXECUTING ||
-          end_of_elab_ph.get_run_count() > 0 ) begin
-        uvm_report_fatal("ILLCRT", {"It is illegal to create a component once",
-                                    " phasing reaches end_of_elaboration."}
-                         UVM_NONE);
-      end
+    // only check if we have got phasing set up yet
+    if (end_of_elaboration_ph.get_state() == UVM_PHASE_EXECUTING ||
+        end_of_elaboration_ph.get_run_count() > 0 ) begin
+      uvm_report_fatal("ILLCRT", {"It is illegal to create a component once",
+                                  " phasing reaches end_of_elaboration."},
+                       UVM_NONE);
     end
   end
 
@@ -2309,17 +2313,18 @@ endfunction
 // - a domain is a named instance of a schedule in the master phasing schedule
 
 
-// get_phase_schedule
+// define_phase_schedule
 // ------------------
 
-function uvm_phase uvm_component::get_phase_schedule(uvm_domain domain, string name="uvm");
+function uvm_phase uvm_component::define_phase_schedule(uvm_domain domain,
+                                                        string name="uvm");
   uvm_phase schedule;
   // NOTE: if overriding this method, always follow this pattern
   // - only build a new schedule if one of that name does not yet exist under this domain
-  // - to augment this base schedule, use result of super.get_phase_schedule(domain,MYNAME);
-  schedule = domain.find(name,.node_type(UVM_SCHEDULE_NODE));
+  // - to augment this base schedule, use result of super.define_phase_schedule(domain,MYNAME);
+  schedule = domain.find(name); // TBD ,.node_type(UVM_SCHEDULE_NODE));
   if (schedule == null) begin
-    schedule = new(name, UVM_SCHEDULE_NODE);
+    schedule = new(name, UVM_PHASE_SCHEDULE_NODE);
     // this schedule consists of a linear list of 12 predefined phases
     schedule.add_phase(uvm_pre_reset_phase::get());
     schedule.add_phase(uvm_reset_phase::get());
@@ -2347,13 +2352,28 @@ function void uvm_component::set_domain(uvm_domain domain, int hier=1);
   uvm_phase schedule;
   uvm_phase::m_has_rt_phases=1;
   m_domain = domain;                       // store the domain
-  m_schedule = get_phase_schedule(domain); // build and store the schedule
+  m_schedule = define_phase_schedule(domain); // build and store the schedule
   if (domain.get_parent() == null) begin
-    uvm_common_domain.add_phase(domain,.with(run_ph));
+    uvm_common_domain.add_phase(domain,.with_phase(run_ph));
   end
   if (hier)
     foreach (m_children[c])
       m_children[c].set_domain(domain,hier);
+endfunction
+
+// get_domain
+// ----------
+//
+function uvm_domain uvm_component::get_domain();
+  return m_domain;
+endfunction
+
+
+// get_schedule
+// ----------
+//
+function uvm_phase uvm_component::get_schedule();
+  return m_schedule;
 endfunction
 
 
@@ -2470,8 +2490,8 @@ endtask
 // stop_phase
 // ----------
 
-task uvm_component::stop_phase(uvm_phase ph);
-  stop(ph.get_name());
+task uvm_component::stop_phase(uvm_phase phase);
+  stop(phase.get_name());
   return;
 endtask
 

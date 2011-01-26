@@ -256,7 +256,7 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
 
     if(default_sequence == "") return;
 
-    if(m_default_seq_set == 0 && m_phase_domains.num() != 1) begin // TBD fix for new phasing API
+    if(m_default_seq_set == 0 && get_domain() != null) begin // TBD fix for new phasing API
       default_sequence = "";
       `uvm_info("NODEFSEQ", $sformatf("The \"default_sequence\" has not been set. Since this sequencer has a runtime phase schedule, the uvm_random_sequence is not being started for the run phase."), UVM_HIGH)
       return;
