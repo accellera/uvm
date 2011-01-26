@@ -96,6 +96,9 @@ class tb_env extends uvm_env;
 
    task reset_phase(uvm_phase phase);
       phase.raise_objection(this, "Asserting reset for 10 clock cycles");
+
+      `uvm_info("TB/TRACE", "Resetting DUT...", UVM_NONE);
+      
       regmodel.reset();
       vip.drv.do_reset();
       repeat (10) @(posedge vif.clk);
@@ -106,6 +109,9 @@ class tb_env extends uvm_env;
 
    task pre_configure_phase(uvm_phase phase);
       phase.raise_objection(this, "Letting the interfaces go idle");
+
+      `uvm_info("TB/TRACE", "Configuring DUT...", UVM_NONE);
+
       repeat (10) @(posedge vif.clk);
       phase.drop_objection(this, "Ready to configure");
    endtask
@@ -128,6 +134,9 @@ class tb_env extends uvm_env;
 
    task pre_main_phase(uvm_phase phase);
       phase.raise_objection(this, "Waiting for VIPs and DUT to acquire SYNC");
+
+      `uvm_info("TB/TRACE", "Synchronizing interfaces...", UVM_NONE);
+
       // Wait until the VIP has acquired symbol syncs
       fork
          begin
@@ -162,6 +171,9 @@ class tb_env extends uvm_env;
    endtask
 
    task main_phase(uvm_phase phase);
+
+      `uvm_info("TB/TRACE", "Applying primary stimulus...", UVM_NONE);
+
       fork
          begin
             // ToDo: replace with phase sequence in sequencer?
@@ -260,6 +272,8 @@ class tb_env extends uvm_env;
 
    task shutdown_phase(uvm_phase phase);
       phase.raise_objection(this, "Draining the DUT");
+
+      `uvm_info("TB/TRACE", "Draining the DUT...", UVM_NONE);
 
       // Flush the RxFIFO
       regmodel.IntSrc.mirror(status);

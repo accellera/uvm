@@ -31,6 +31,8 @@ class sym_sb extends uvm_component;
    int n_obs_thresh = 10;
    local int m_n_obs;
 
+   local bit [7:0] m_sb[$];
+
    `uvm_component_utils(sym_sb)
 
    function new(string name, uvm_component parent = null);
@@ -44,11 +46,21 @@ class sym_sb extends uvm_component;
    endfunction
 
    function void write_sym_sb_expected(vip_tr tr);
-      `uvm_info("SB/EXP", $sformatf("Expected: 0x%h", tr.chr), UVM_LOW)
+      `uvm_info("SB/EXP", $sformatf("Expected: 0x%h", tr.chr), UVM_MEDIUM)
+      m_sb.push_back(tr.chr);
    endfunction
 
    function void write_sym_sb_observed(vip_tr tr);
-      `uvm_info("SB/OBS", $sformatf("Observed: 0x%h", tr.chr), UVM_LOW)
+      bit [7:0] exp;
+      
+      `uvm_info("SB/OBS", $sformatf("Observed: 0x%h", tr.chr), UVM_MEDIUM)
+
+      exp = m_sb.pop_front();
+      if (tr.chr !== exp) begin
+         `uvm_error("SB/MISMTCH",
+                    $sformatf("Symbol 0x%h observed instead of expected 0x%h",
+                              tr.chr, exp));
+      end
       m_n_obs++;
    endfunction
 
