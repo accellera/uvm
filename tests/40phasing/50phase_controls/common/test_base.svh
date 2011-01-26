@@ -205,27 +205,27 @@ class test_base extends uvm_test;
     super.connect_phase(phase);
 
     //1 - reset
-    uvm_config_seq::set(this, "seqr0", "pre_reset_ph", test_pre_reset_seq::type_id::get());
-    uvm_config_seq::set(this, "seqr0", "reset_ph", test_reset_seq::type_id::get());
+    uvm_config_seq::set(this, "seqr0.pre_reset_phase", "default_sequence", test_pre_reset_seq::type_id::get());
+    uvm_config_seq::set(this, "seqr0.reset_phase", "default_sequence", test_reset_seq::type_id::get());
 
     //2a - pre configure - training at the TOP interface
-    uvm_config_seq::set(this, "top*.*.*sequencer", "pre_configure_ph",
+    uvm_config_seq::set(this, "top*.*.*sequencer.pre_configure_phase", "default_sequence",
                         top_training_seq::type_id::get());
 
     //2b - configure - configure the DUT from the TOP interface
-    uvm_config_seq::set(top0.agent, "sequencer", "configure_ph", top_configure_seq::type_id::get());
+    uvm_config_seq::set(top0.agent, "sequencer.configure_phase", "default_sequence", top_configure_seq::type_id::get());
 
     //2c - post_configure - training at the BOT interface
-    uvm_config_seq::set(this, "bot*.*.*sequencer", "post_configure_ph",
+    uvm_config_seq::set(this, "bot*.*.*sequencer.post_configure_phase", "default_sequence",
                         bot_training_seq::type_id::get());
 
     //3 - random traffic from top/bot
-    uvm_config_seq::set(this, "top*.*.*sequencer", "main_ph",
+    uvm_config_seq::set(this, "top*.*.*sequencer.main_phase", "default_sequence",
                         top_random_seq::type_id::get());
-    uvm_config_seq::set(this, "bot*.*.*sequencer", "main_ph",
+    uvm_config_seq::set(this, "bot*.*.*sequencer.main_phase", "default_sequence",
                         bot_random_seq::type_id::get());
 
-    uvm_config_seq::set(this, "", "post_main_ph", test_base_post_main_phase_imp::type_id::get());
+    uvm_config_seq::set(this, ".post_main_phase", "default_sequence", test_base_post_main_phase_imp::type_id::get());
 
   endfunction : connect_phase
 
