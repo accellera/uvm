@@ -556,11 +556,11 @@ endfunction
 
 function void uvm_packer::pack_object(uvm_object value);
 
-  if(value.m_sc.cycle_check.exists(value)) begin
+  if(value.__m_uvm_status_container.cycle_check.exists(value)) begin
     uvm_report_warning("CYCFND", $psprintf("Cycle detected for object @%0d during pack", value.get_inst_id()), UVM_NONE);
     return;
   end
-  value.m_sc.cycle_check[value] = 1;
+  value.__m_uvm_status_container.cycle_check[value] = 1;
 
   if((policy != UVM_REFERENCE) && (value != null) ) begin
       if(use_metadata == 1) begin
@@ -568,7 +568,7 @@ function void uvm_packer::pack_object(uvm_object value);
         count += 4; // to better debug when display packed bits in hexidecimal
       end
       scope.down(value.get_name());
-      value.m_field_automation(null, UVM_PACK,"");
+      value.__m_uvm_field_automation(null, UVM_PACK,"");
       value.do_pack(this);
       scope.up();
   end
@@ -576,7 +576,7 @@ function void uvm_packer::pack_object(uvm_object value);
     m_bits[count +: 4] = 0;
     count += 4;
   end
-  value.m_sc.cycle_check.delete(value);
+  value.__m_uvm_status_container.cycle_check.delete(value);
 endfunction
 
   
@@ -666,11 +666,11 @@ function void uvm_packer::unpack_object(uvm_object value);
 
   byte is_non_null; is_non_null = 1;
 
-  if(value.m_sc.cycle_check.exists(value)) begin
+  if(value.__m_uvm_status_container.cycle_check.exists(value)) begin
     uvm_report_warning("CYCFND", $psprintf("Cycle detected for object @%0d during unpack", value.get_inst_id()), UVM_NONE);
     return;
   end
-  value.m_sc.cycle_check[value] = 1;
+  value.__m_uvm_status_container.cycle_check[value] = 1;
 
   if(use_metadata == 1) begin
     is_non_null = m_bits[count +: 4];
@@ -682,7 +682,7 @@ function void uvm_packer::unpack_object(uvm_object value);
   if (value != null)begin
     if (is_non_null > 0) begin
       scope.down(value.get_name());
-      value.m_field_automation(null, UVM_UNPACK,"");
+      value.__m_uvm_field_automation(null, UVM_UNPACK,"");
       value.do_unpack(this);
       scope.up();
     end
@@ -695,7 +695,7 @@ function void uvm_packer::unpack_object(uvm_object value);
   else if ((is_non_null != 0) && (value == null)) begin
      uvm_report_error("UNPOBJ","can not unpack into null object", UVM_NONE);
   end
-  value.m_sc.cycle_check.delete(value);
+  value.__m_uvm_status_container.cycle_check.delete(value);
 
 endfunction
 

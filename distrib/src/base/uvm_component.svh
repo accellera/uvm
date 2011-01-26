@@ -2889,6 +2889,11 @@ function void uvm_component::set_config_object(string inst_name,
                                                bit clone = 1);
   uvm_object tmp;
 
+  if(value == null)
+    `uvm_warning("NULLCFG", {"A null object was provided as a ",
+       $sformatf("configuration object for set_config_object(\"%s\",\"%s\")",
+       inst_name, field_name), ". Verify that this is intended."})
+
   if(clone && (value != null)) begin
     tmp = value.clone();
     if(tmp == null) begin
@@ -2975,7 +2980,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
   int unsigned i;
   int unsigned j;
 
-  m_field_automation (null, UVM_CHECK_FIELDS, "");
+  __m_uvm_field_automation (null, UVM_CHECK_FIELDS, "");
 
   if(verbose)
     $display("applying configuration settings for %s", get_full_name());
@@ -2993,17 +2998,17 @@ function void uvm_component::apply_config_settings (bit verbose=0);
         break;
 
     // If it does have brackets then we'll use the name
-    // up to the brackets to search m_sc.field_array
+    // up to the brackets to search __m_uvm_status_container.field_array
     if(j < name.len())
       search_name = name.substr(0, j-1);
     else
       search_name = name;
 
-    if(!m_sc.field_array.exists(search_name))
+    if(!__m_uvm_status_container.field_array.exists(search_name))
       continue;
 
     if(verbose)
-      $display("applying %s [%s] in %s", name, m_sc.field_array[search_name],
+      $display("applying %s [%s] in %s", name, __m_uvm_status_container.field_array[search_name],
                                          get_full_name());
 
     begin
@@ -3034,7 +3039,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
 
   end
 
-  m_sc.field_array.delete();
+  __m_uvm_status_container.field_array.delete();
   
 endfunction
 

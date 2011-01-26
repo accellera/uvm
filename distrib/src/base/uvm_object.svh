@@ -775,9 +775,9 @@ virtual class uvm_object extends uvm_void;
   local int m_inst_id;
   static protected int m_inst_count = 0;
 
-  static /*protected*/ uvm_status_container m_sc = new;
+  static /*protected*/ uvm_status_container __m_uvm_status_container = new;
 
-  extern virtual function void m_field_automation (uvm_object tmp_data__,  
+  extern virtual function void __m_uvm_field_automation (uvm_object tmp_data__,  
                                                    int        what__, 
                                                    string     str__);
 
@@ -892,8 +892,8 @@ function string uvm_object::sprint(uvm_printer printer=null);
 
   // not at top-level, must be recursing into sub-object
   if(!printer.istop()) begin
-    m_sc.printer = printer;
-    m_field_automation(null, UVM_PRINT, "");
+    __m_uvm_status_container.printer = printer;
+    __m_uvm_field_automation(null, UVM_PRINT, "");
     do_print(printer);
     return "";
   end
@@ -923,18 +923,18 @@ endfunction
 function void  uvm_object::set_int_local (string      field_name,
                                           uvm_bitstream_t value,
                                           bit         recurse=1);
-  if(m_sc.cycle_check.exists(this)) return;
-  m_sc.cycle_check[this] = 1;
+  if(__m_uvm_status_container.cycle_check.exists(this)) return;
+  __m_uvm_status_container.cycle_check[this] = 1;
 
-  this.m_sc.status = 0;
-  this.m_sc.bitstream = value;
+  this.__m_uvm_status_container.status = 0;
+  this.__m_uvm_status_container.bitstream = value;
 
-  m_field_automation(null, UVM_SETINT, field_name);
+  __m_uvm_field_automation(null, UVM_SETINT, field_name);
 
-  if(m_sc.warning && !this.m_sc.status) begin
+  if(__m_uvm_status_container.warning && !this.__m_uvm_status_container.status) begin
     uvm_report_error("NOMTC", $psprintf("did not find a match for field %s", field_name),UVM_NONE);
   end
-  m_sc.cycle_check.delete(this);
+  __m_uvm_status_container.cycle_check.delete(this);
 
 endfunction
 
@@ -947,8 +947,8 @@ function void  uvm_object::set_object_local (string     field_name,
                                              bit        clone=1,
                                              bit        recurse=1);
   uvm_object cc;
-  if(m_sc.cycle_check.exists(this)) return;
-  m_sc.cycle_check[this] = 1;
+  if(__m_uvm_status_container.cycle_check.exists(this)) return;
+  __m_uvm_status_container.cycle_check[this] = 1;
 
   if(clone && (value!=null)) begin 
     cc = value.clone();
@@ -956,17 +956,17 @@ function void  uvm_object::set_object_local (string     field_name,
     value = cc; 
   end 
 
-  this.m_sc.status = 0;
-  this.m_sc.object = value;
-  m_sc.clone = clone;
+  this.__m_uvm_status_container.status = 0;
+  this.__m_uvm_status_container.object = value;
+  __m_uvm_status_container.clone = clone;
 
-  m_field_automation(null, UVM_SETOBJ, field_name);
+  __m_uvm_field_automation(null, UVM_SETOBJ, field_name);
 
-  if(m_sc.warning && !this.m_sc.status) begin
+  if(__m_uvm_status_container.warning && !this.__m_uvm_status_container.status) begin
     uvm_report_error("NOMTC", $psprintf("did not find a match for field %s", field_name), UVM_NONE);
   end
 
-  m_sc.cycle_check.delete(this);
+  __m_uvm_status_container.cycle_check.delete(this);
 endfunction
 
 
@@ -975,18 +975,18 @@ endfunction
 function void  uvm_object::set_string_local (string field_name,
                                              string value,
                                              bit    recurse=1);
-  if(m_sc.cycle_check.exists(this)) return;
-  m_sc.cycle_check[this] = 1;
+  if(__m_uvm_status_container.cycle_check.exists(this)) return;
+  __m_uvm_status_container.cycle_check[this] = 1;
 
-  this.m_sc.status = 0;
-  this.m_sc.stringv = value;
+  this.__m_uvm_status_container.status = 0;
+  this.__m_uvm_status_container.stringv = value;
 
-  m_field_automation(null, UVM_SETSTR, field_name);
+  __m_uvm_field_automation(null, UVM_SETSTR, field_name);
 
-  if(m_sc.warning && !this.m_sc.status) begin
+  if(__m_uvm_status_container.warning && !this.__m_uvm_status_container.status) begin
     uvm_report_error("NOMTC", $psprintf("did not find a match for field %s (@%0d)", field_name, this.get_inst_id()), UVM_NONE);
   end
-  m_sc.cycle_check.delete(this);
+  __m_uvm_status_container.cycle_check.delete(this);
 endfunction
 
 
@@ -1023,7 +1023,7 @@ function void uvm_object::copy (uvm_object rhs);
   ++depth;
 
   do_copy(rhs);
-  m_field_automation(rhs, UVM_COPY, "");
+  __m_uvm_field_automation(rhs, UVM_COPY, "");
 
   --depth;
   if(depth==0) begin
@@ -1050,30 +1050,30 @@ function bit  uvm_object::compare (uvm_object rhs,
   bit done;
   done = 0;
   if(comparer != null) 
-    m_sc.comparer = comparer;
+    __m_uvm_status_container.comparer = comparer;
   else 
-    m_sc.comparer = uvm_default_comparer;
-  comparer = m_sc.comparer;
+    __m_uvm_status_container.comparer = uvm_default_comparer;
+  comparer = __m_uvm_status_container.comparer;
 
-  if(!m_sc.scope.depth()) begin
+  if(!__m_uvm_status_container.scope.depth()) begin
     comparer.compare_map.clear();
     comparer.result = 0;
     comparer.miscompares = "";
-    comparer.scope = m_sc.scope;
+    comparer.scope = __m_uvm_status_container.scope;
     if(get_name() == "")
-      m_sc.scope.down("<object>");
+      __m_uvm_status_container.scope.down("<object>");
     else
-      m_sc.scope.down(this.get_name());
+      __m_uvm_status_container.scope.down(this.get_name());
   end
   if(!done && (rhs == null)) begin
-    if(m_sc.scope.depth()) begin
+    if(__m_uvm_status_container.scope.depth()) begin
       comparer.print_msg_object(this, rhs);
     end
     else begin
       comparer.print_msg_object(this, rhs);
       uvm_report_info("MISCMP",
            $psprintf("%0d Miscompare(s) for object %s@%0d vs. %s@%0d", 
-           comparer.result, m_sc.scope.get(), this.get_inst_id(), m_sc.scope.get_arg(), rhs.get_inst_id()), m_sc.comparer.verbosity);
+           comparer.result, __m_uvm_status_container.scope.get(), this.get_inst_id(), __m_uvm_status_container.scope.get_arg(), rhs.get_inst_id()), __m_uvm_status_container.comparer.verbosity);
       done = 1;
     end
   end
@@ -1086,19 +1086,19 @@ function bit  uvm_object::compare (uvm_object rhs,
   end
 
   if(!done && comparer.check_type && get_type_name() != rhs.get_type_name()) begin
-    m_sc.stringv = { "lhs type = \"", get_type_name(), 
+    __m_uvm_status_container.stringv = { "lhs type = \"", get_type_name(), 
                      "\" : rhs type = \"", rhs.get_type_name(), "\""};
-    comparer.print_msg(m_sc.stringv);
+    comparer.print_msg(__m_uvm_status_container.stringv);
   end
 
   if(!done) begin
     comparer.compare_map.set(rhs, this);
-    m_field_automation(rhs, UVM_COMPARE, "");
+    __m_uvm_field_automation(rhs, UVM_COMPARE, "");
     dc = do_compare(rhs, comparer);
   end
 
-  if(m_sc.scope.depth()==1)  begin
-    m_sc.scope.up();
+  if(__m_uvm_status_container.scope.depth()==1)  begin
+    __m_uvm_status_container.scope.up();
   end
 
   comparer.print_rollup(this, rhs);
@@ -1115,10 +1115,10 @@ function bit  uvm_object::do_compare (uvm_object rhs,
 endfunction
 
 
-// m_field_automation
+// __m_uvm_field_automation
 // ------------------
 
-function void uvm_object::m_field_automation (uvm_object tmp_data__,
+function void uvm_object::__m_uvm_field_automation (uvm_object tmp_data__,
                                               int        what__,
                                               string     str__ );
   return;
@@ -1140,15 +1140,15 @@ endfunction
 function void uvm_object::m_pack (inout uvm_packer packer);
 
   if(packer!=null) 
-    m_sc.packer = packer;
+    __m_uvm_status_container.packer = packer;
   else  
-    m_sc.packer = uvm_default_packer;
-  packer = m_sc.packer;
+    __m_uvm_status_container.packer = uvm_default_packer;
+  packer = __m_uvm_status_container.packer;
 
   packer.reset();
   packer.scope.down(get_name());
 
-  m_field_automation(null, UVM_PACK, "");
+  __m_uvm_field_automation(null, UVM_PACK, "");
   do_pack(packer);
 
   packer.set_packed_size();
@@ -1203,10 +1203,10 @@ endfunction
   
 function void uvm_object::m_unpack_pre (inout uvm_packer packer);
   if(packer!=null)
-    m_sc.packer = packer;
+    __m_uvm_status_container.packer = packer;
   else
-    m_sc.packer = uvm_default_packer;
-  packer = m_sc.packer;
+    __m_uvm_status_container.packer = uvm_default_packer;
+  packer = __m_uvm_status_container.packer;
   packer.reset();
 endfunction
   
@@ -1223,7 +1223,7 @@ function void uvm_object::m_unpack_post (uvm_packer packer);
   //Put this object into the hierarchy
   packer.scope.down(get_name());
 
-  m_field_automation(null, UVM_UNPACK, "");
+  __m_uvm_field_automation(null, UVM_UNPACK, "");
 
   do_unpack(packer);
 
@@ -1294,9 +1294,9 @@ function void uvm_object::record (uvm_recorder recorder=null);
 
   if(!recorder.tr_handle) return;
 
-  m_sc.recorder = recorder;
+  __m_uvm_status_container.recorder = recorder;
   recorder.recording_depth++;
-  m_field_automation(null, UVM_RECORD, "");
+  __m_uvm_field_automation(null, UVM_RECORD, "");
   do_record(recorder);
 
   recorder.recording_depth--;
