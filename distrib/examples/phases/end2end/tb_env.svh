@@ -68,11 +68,10 @@ class tb_env extends uvm_env;
       egress = sym_sb::type_id::create("egress", this);
       adapt = apb2txrx::type_id::create("adapt", this);
 
-      m_isr = new({get_full_name(), ".isr"});
-
       uvm_config_db #(uvm_object_wrapper)::set(this, "vip.sqr.main_phase",
                                                "default_sequence",
                                                vip_sentence_seq::type_id::get());
+      m_isr = new({get_full_name(), ".isr"});
    endfunction
 
    function void connect_phase(uvm_phase phase);
@@ -150,6 +149,12 @@ class tb_env extends uvm_env;
       repeat (10) @(posedge vif.clk);
       vif.rst = 1'b0;
       vip.resume();
+
+      // Clear any outstanding objections 
+      if (m_isr.get_objection_count(this) > 0) begin
+         m_isr.drop_objection(this, "Clearing outstanding objections",
+                              m_isr.get_objection_count(this));
+      end
       phase.drop_objection(this, "HW reset done");
    endtask
 
@@ -175,6 +180,7 @@ class tb_env extends uvm_env;
 
       phase.drop_objection(this, "Everything is ready to go");
    endtask
+
 
    task pre_main_phase(uvm_phase phase);
       phase.raise_objection(this, "Waiting for VIPs and DUT to acquire SYNC");
