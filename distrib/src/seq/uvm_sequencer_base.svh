@@ -58,79 +58,18 @@ class uvm_sequencer_base extends uvm_component;
   local static int              g_sequencer_id = 1;
 
 
-  // Function: start_phase_sequence
-  //
-  // Start the default sequence for this phase, if any.
-  // The default sequence is configured using resources using
-  // either a sequence instance or sequence object wrapper.
-  //
-  // Configure by instance:
-  //
-  // Allows pre-initialization, setting rand_mode, use of inline 
-  // constraints, etc.
-  //
-  //| myseq_t myseq_inst = new("myseq_inst");
-  //| myseq_inst.randomize() with { ... };
-  //| uvm_config_db #(uvm_sequence_base)::set(this, "myseqr",
-  //|                                         "main_ph", myseq_inst);
-  //
-  //or configure by type:
-  //
-  //| uvm_config_db #(uvm_object_wrapper)::set(this, "myseqr", "main_ph"
-  //|                                           myseq_type::type_id::get());
-
-  virtual function void start_phase_sequence(uvm_phase phase);
-    uvm_object_wrapper wrapper;
-    uvm_sequence_base  seq;
-    uvm_factory f = uvm_factory::get();
-
-    // default sequence instance?
-    if (!uvm_config_db #(uvm_sequence_base)::get(
-          this, "", {phase.get_name(),"_ph"}, seq) ) begin
-      // default sequence object wrapper?
-      if (uvm_config_db #(uvm_object_wrapper)::get(
-               this, "", {phase.get_name(),"_ph"}, wrapper) ) begin
-        // use wrapper is a sequence type        
-        if(!$cast(seq , f.create_object_by_type(
-              wrapper, get_full_name(), wrapper.get_type_name()))) begin
-          `uvm_warning("PHASESEQ", {"Default sequence for phase '",
-                       phase.get_name(),"_ph' %s is not a sequence type"})
-          return;
-        end
-      end
-      else begin
-        `uvm_info("PHASESEQ", {"No default phase sequence for phase '",
-                               phase.get_name(),"'"}, UVM_FULL)
-        return;
-      end
-    end
-
-    `uvm_info("PHASESEQ", {"Starting default sequence '",
-       seq.get_type_name(),"' for phase ", phase.get_name()}, UVM_FULL)
-
-    seq.print_sequence_info = 1;
-    seq.set_sequencer(this);
-    seq.reseed();
-    seq.starting_phase = phase;
-
-    if (seq.is_randomized && !seq.randomize()) begin
-      `uvm_warning("STRDEFSEQ", {"Randomization failed for default sequence '",
-       seq.get_type_name(),"' for phase ", phase.get_name()})
-       return;
-    end
-
-    fork
-      seq.start(this);
-    join_none
-
-  endfunction
-
-
   // Variable: count
   //
   // Sets the number of items to execute.
   //
-  // Supercedes the max_random_count variable for uvm_random_sequence class
+  // If equal to 0,
+  // this sequencer does not start a sequence in the ~run~ phase,
+  // but start other phase sequences
+  // and will execute items and sequences explicitly started.
+  // If less than 0, executes an infinite number of items.
+  // Default value is -1.
+  //
+  // Supercedes the <max_random_count> variable for <uvm_random_sequence> class
   // for backward compatibility.
 
   int count = -1;
@@ -143,7 +82,7 @@ class uvm_sequencer_base extends uvm_component;
 
   // Variable: max_random_count
   //
-  // Set this variable via set_config_int to set the number of sequence items
+  // Set this variable via uvm_config_db#(int) to set the number of sequence items
   // to generate, at the discretion of the derived sequence. The predefined
   // uvm_random_sequence uses count to determine the number of random items
   // to generate.
@@ -162,15 +101,22 @@ class uvm_sequencer_base extends uvm_component;
   // Variable: default_sequence
   //
   // This property defines the sequence type (by name) that will be
-  // auto-started. The default sequence is initially set to uvm_random_sequence.
-  // It can be configured through the uvm_component's set_config_string method
+  // auto-started during the run phase if the sequencer is not
+  // in a phase domain.
+  // If the sequencer is in one or more phase domain,
+  // this variable is ignored in favor of phase sequences.
+  // See <start_phase_sequence> for more details.
+  //
+  // The default sequence is initially set to "uvm_random_sequence".
+  // It can be configured tvia uvm_config_db#(string)
   // using the field name "default_sequence".
+  //
 
   protected string default_sequence = "uvm_random_sequence";               
   protected bit    m_default_seq_set = 0;
 
 
-  // The sequeunce aray holds the type names of the sequence types registered
+  // The sequence array holds the type names of the sequence types registered
   // to this sequencer; the factory will actually create the instances on demand.
 
   string sequences[$];
@@ -216,6 +162,78 @@ class uvm_sequencer_base extends uvm_component;
       `uvm_warning("UVM_DEPRECATED",
         {"Pound_zero_count was set but ignored. ",
          "Sequencer/driver synchronization uses 'uvm_wait_for_nba_region' now."})
+  endfunction
+
+
+  // Function: start_phase_sequence
+  //
+  // Start the default sequence for this phase, if any.
+  // The default sequence is configured using resources using
+  // either a sequence instance or sequence object wrapper.
+  // The resource name is the name of the phase suffixed
+  // with "_phase.default_sequence".
+  //
+  // Configuration by instances
+  // allows pre-initialization, setting rand_mode, use of inline 
+  // constraints, etc.
+  //
+  //| myseq_t myseq_inst = new("myseq_inst");
+  //| myseq_inst.randomize() with { ... };
+  //| uvm_config_db #(uvm_sequence_base)::set(this, "myseqr.main_phase",
+  //|                                         "default_sequence",
+  //|                                         myseq_inst);
+  //
+  // Configuration by type is shorter and can be substituted via the
+  // the factory.
+  //
+  //| uvm_config_db #(uvm_object_wrapper)::set(this, "myseqr.main_phase",
+  //|                                          "default_sequence",
+  //|                                          myseq_type::type_id::get());
+
+  virtual function void start_phase_sequence(uvm_phase phase);
+    uvm_object_wrapper wrapper;
+    uvm_sequence_base  seq;
+    uvm_factory f = uvm_factory::get();
+
+    // default sequence instance?
+    if (!uvm_config_db #(uvm_sequence_base)::get(
+          this, {phase.get_name(),"_phase"}, "default_sequence", seq) ) begin
+      // default sequence object wrapper?
+      if (uvm_config_db #(uvm_object_wrapper)::get(
+               this, {phase.get_name(),"_phase"}, "default_sequence", wrapper) ) begin
+        // use wrapper is a sequence type        
+        if(!$cast(seq , f.create_object_by_type(
+              wrapper, get_full_name(), wrapper.get_type_name()))) begin
+          `uvm_warning("PHASESEQ", {"Default sequence for phase '",
+                       phase.get_name(),"' %s is not a sequence type"})
+          return;
+        end
+      end
+      else begin
+        `uvm_info("PHASESEQ", {"No default phase sequence for phase '",
+                               phase.get_name(),"'"}, UVM_FULL)
+        return;
+      end
+    end
+
+    `uvm_info("PHASESEQ", {"Starting default sequence '",
+       seq.get_type_name(),"' for phase '", phase.get_name()}, UVM_FULL)
+
+    seq.print_sequence_info = 1;
+    seq.set_sequencer(this);
+    seq.reseed();
+    seq.starting_phase = phase;
+
+    if (seq.is_randomized && !seq.randomize()) begin
+      `uvm_warning("STRDEFSEQ", {"Randomization failed for default sequence '",
+       seq.get_type_name(),"' for phase ", phase.get_name()})
+       return;
+    end
+
+    fork
+      seq.start(this);
+    join_none
+
   endfunction
 
 

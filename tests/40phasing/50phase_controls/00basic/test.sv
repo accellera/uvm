@@ -151,7 +151,7 @@ class test extends uvm_test;
     super.connect();
     seq.randomize();
     driver.seq_item_port.connect(sequencer.seq_item_export);
-    sequence_rsrc::set(this, "seqr1", "main_ph", seq);
+    sequence_rsrc::set(this, "seqr1.main_phase", "default_sequence", seq);
   endfunction : connect_phase
 
   virtual task run_phase(uvm_phase phase);
