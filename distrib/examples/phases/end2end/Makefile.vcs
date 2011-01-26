@@ -34,4 +34,5 @@ run:
 	$(SIMV) $(ROPTS)
 	$(CHECK)
 
-debug: $(SIMV) +UVM_OBJECTION_TRACE
+debug:
+	$(SIMV) +UVM_OBJECTION_TRACE

@@ -239,7 +239,9 @@ always begin: RX
             RxByte = symbol;
             escaped = 0;
          end
-         else if (symbol == ESC) escaped = 1; 
+         else if (symbol == ESC) begin
+            escaped = 1;
+         end
       end
       repeat (8) begin
          @ (posedge sclk);

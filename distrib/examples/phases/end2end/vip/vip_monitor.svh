@@ -167,13 +167,11 @@ class vip_monitor extends uvm_monitor;
                      repeat (8) begin
                         @(posedge vif.clk);
                         symbol = {symbol[6:0], vif.Rx};
-
-                        
                      end
                      if (symbol != 8'hB2) begin
                         m_in_sync = 0;
                         
-                        `uvm_info("VIP/MON/SYNC/LOST", "SYNC lost!", UVM_MEDIUM);
+                        `uvm_warning("VIP/MON/SYNC/LOST", "SYNC lost!");
                      end
                   end
                end

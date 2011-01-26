@@ -120,6 +120,7 @@ class vip_driver extends uvm_driver#(vip_tr);
                            send(8'hB2); // SYNC
                            count = 0;
                         end
+                        else count++;
                      end
                      send(tr.chr);
                      

@@ -42,6 +42,7 @@ class tb_env extends uvm_env;
 
    local uvm_status_e status;
    local uvm_reg_data_t data;
+   local uvm_objection  m_isr;
 
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
@@ -66,6 +67,8 @@ class tb_env extends uvm_env;
       ingress = sym_sb::type_id::create("ingress", this);
       egress = sym_sb::type_id::create("egress", this);
       adapt = apb2txrx::type_id::create("adapt", this);
+
+      m_isr = new({get_full_name(), ".isr"});
    endfunction
 
    function void connect_phase(uvm_phase phase);
@@ -159,33 +162,99 @@ class tb_env extends uvm_env;
    endtask
 
    task main_phase(uvm_phase phase);
-      phase.raise_objection(this, "Applying primary stimulus");
       fork
          begin
-            bit can_kill = 0;
-            
-            fork
-               TxRxSide(can_kill);
-            join_none
-
-            // Send a sentence to DUT
-            begin
-               // ToDo: replace with sequence
+            // ToDo: replace with phase sequence in sequencer?
+            phase.raise_objection(this, "Applying ->DUT stimulus");
+            repeat (100) begin
                vip_tr tr;
-               repeat (1000) begin
-                  tr = new;
-                  tr.randomize();
-                  `uvm_info("RX/CHR", $sformatf("RX->DUT: 0x%h...\n", tr.chr),
-                            UVM_MEDIUM);
-                  vip.sqr.execute_item(tr);
-               end
+               tr = vip_tr::type_id::create("tr",,get_full_name());
+               tr.randomize();
+               vip.sqr.execute_item(tr);
             end
+            phase.drop_objection(this, "Primary ->DUT stimulus applied");
+         end
       
-            wait (can_kill);
-            disable fork;
+         begin
+            uvm_objection ph_obj = phase.get_objection();
+            
+            phase.raise_objection(this, "Configuring ISR for DUT-> stimulus");
+            regmodel.IntMask.TxLow.set(1);
+            regmodel.IntMask.update(status);
+                  
+            forever begin
+               phase.drop_objection(this, "ISR ready DUT-> stimulus");
+
+               wait (vif.intr);
+
+               // If the egress scoreboard is not objecting,
+               // don't service the interrupt
+               if (ph_obj.get_objection_total(egress) == 0) break;
+
+               m_isr.raise_objection(this, "Servicing TxLow");
+               phase.raise_objection(this, "Applying DUT-> stimulus");
+               
+               regmodel.IntSrc.mirror(status);
+               if (!regmodel.IntSrc.TxLow.get()) begin
+                  m_isr.drop_objection(this, "TxLow does not need service");
+                  m_isr.wait_for(UVM_ALL_DROPPED);
+                  continue;
+               end
+               
+               // Stop supplying data once it is full
+               // or the egress scoreboard has had enough
+               while (!regmodel.IntSrc.TxFull.get() &&
+                      ph_obj.get_objection_total(egress) > 0) begin
+                  vip_tr tr = new; // Should be pulling from a sequencer
+                  tr.randomize();
+                  regmodel.TxRx.write(status, tr.chr);
+
+                  regmodel.IntSrc.mirror(status);
+               end
+               m_isr.drop_objection(this, "TxLow has been fully serviced");
+            end
+            regmodel.IntMask.TxLow.set(0);
+            regmodel.IntMask.update(status);
+         end
+
+         begin
+            phase.raise_objection(this, "Configuring ISR for ->DUT stimulus");
+            regmodel.IntMask.SA.set(1);
+            regmodel.IntMask.RxHigh.set(1);
+            regmodel.IntMask.update(status);
+            phase.drop_objection(this, "ISR ready ->DUT stimulus");
+                  
+            forever begin
+               wait (vif.intr);
+
+               m_isr.raise_objection(this, "Servicing RxHigh");
+               phase.raise_objection(this, "Extracting ->DUT response");
+               
+               regmodel.IntSrc.mirror(status);
+               if (regmodel.IntSrc.SA.get()) begin
+                  `uvm_error("TB/DUT/SYNCLOSS", "DUT has lost SYNC");
+                  m_isr.drop_objection(this, "RxHigh no longer needs service");
+                  phase.drop_objection(this, "No more ->DUT response");
+                  break;
+               end
+               if (!regmodel.IntSrc.RxHigh.get()) begin
+                  m_isr.drop_objection(this, "RxHigh does not need service");
+                  phase.drop_objection(this, "No ->DUT response");
+                  m_isr.wait_for(UVM_ALL_DROPPED);
+                  continue;
+               end
+               
+               // Stop reading data once it is empty
+               while (!regmodel.IntSrc.RxEmpty.get()) begin
+                  regmodel.TxRx.mirror(status);
+
+                  regmodel.IntSrc.mirror(status);
+               end
+               m_isr.drop_objection(this, "RxHigh has been fully serviced");
+               phase.drop_objection(this, "No more ->DUT response");
+            end
          end
       join
-      phase.drop_objection(this, "Primary stimulus applied");
    endtask
 
 
@@ -193,20 +262,17 @@ class tb_env extends uvm_env;
       phase.raise_objection(this, "Draining the DUT");
 
       // Flush the RxFIFO
-      regmodel.IntSrc.read(status, data);
-      while (!data[4]) begin
-         uvm_reg_data_t rx;
-         regmodel.TxRx.read(status, rx);
-         `uvm_info("RX/CHR", $sformatf("Rx: 0x%h", rx[7:0]), UVM_LOW)
-         regmodel.IntSrc.read(status, data);
-      end
+      regmodel.IntSrc.mirror(status);
+      while (!regmodel.IntSrc.RxEmpty.get()) begin
 
-      if (!data[0]) begin
+         // Stop reading data once it is empty
+         regmodel.TxRx.mirror(status);
+         regmodel.IntSrc.mirror(status);
+      end
+      
+      if (!regmodel.IntSrc.TxEmpty.get()) begin
          // Wait for TxFIFO to be empty
          regmodel.IntMask.write(status, 'h001);
-         if (vif.intr !== 0) begin
-            `uvm_error("TB/SHTDWN/TX", "Interrupt did not clear on TxFIFO not empty");
-         end
          wait (vif.intr);
       end
       // Make sure the last symbol is transmitted
