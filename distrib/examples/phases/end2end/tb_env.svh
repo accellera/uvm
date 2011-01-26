@@ -137,27 +137,22 @@ class tb_env extends uvm_env;
 
       `uvm_info("TB/TRACE", "Synchronizing interfaces...", UVM_NONE);
 
-      // Wait until the VIP has acquired symbol syncs
       fork
          begin
-            fork
-               begin
-                  // Should not take more than 35 symbols
-                  repeat (35 * 8) @(posedge vif.sclk);
-                  `uvm_fatal("TB/TIMEOUT",
-                             "VIP failed to acquire syncs")
-               end
-            join_none
-            
-            while (!vip.rx_mon.is_in_sync()) begin
-               vip.rx_mon.wait_for_sync_change();
-            end
-            while (!vip.tx_mon.is_in_sync()) begin
-               vip.tx_mon.wait_for_sync_change();
-            end
-            disable fork;
+            // Should not take more than 35 symbols
+            repeat (35 * 8) @(posedge vif.sclk);
+            `uvm_fatal("TB/TIMEOUT",
+                       "VIP failed to acquire syncs")
          end
-      join
+      join_none
+            
+      // Wait until the VIP has acquired symbol syncs
+      while (!vip.rx_mon.is_in_sync()) begin
+         vip.rx_mon.wait_for_sync_change();
+      end
+      while (!vip.tx_mon.is_in_sync()) begin
+         vip.tx_mon.wait_for_sync_change();
+      end
 
       // Wait until the DUT has acquired symbol sync
       data = 0;
