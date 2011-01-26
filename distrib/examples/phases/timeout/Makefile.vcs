@@ -22,6 +22,7 @@
 UVM_HOME	= ../../..
 
 include ../../Makefile.vcs
+N_FATALS = 1
 
 
 all: comp run
@@ -32,3 +33,4 @@ comp:
 
 run:
 	$(SIMV)
+	$(CHECK)

@@ -22,7 +22,7 @@
 UVM_HOME	= ../../..
 
 include ../../Makefile.questa
-
+N_FATALS = 1
 
 all: run
 
@@ -32,3 +32,4 @@ comp: vlib
 
 run: comp
 	$(VSIM)
+	$(CHECK)
