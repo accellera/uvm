@@ -44,9 +44,11 @@ class vip_sentence_seq extends uvm_sequence#(vip_tr);
   endfunction
   
   virtual task body();
+     if (starting_phase != null) starting_phase.raise_objection(this);
      repeat (128) begin
         `uvm_do(req)
      end
+     if (starting_phase != null) starting_phase.drop_objection(this);
   endtask
   
 endclass

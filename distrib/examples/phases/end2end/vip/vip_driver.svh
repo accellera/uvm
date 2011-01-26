@@ -59,7 +59,7 @@ class vip_driver extends uvm_driver#(vip_tr);
    //
    // Abruptly interrupt and suspend this driver
    //
-   virtual task do_reset();
+   virtual task reset_and_suspend();
       vif.Tx = 0;
       m_suspend = 1;
 
@@ -85,8 +85,6 @@ class vip_driver extends uvm_driver#(vip_tr);
       int    count = 0;
       vip_tr tr;
       
-      super.run_phase(phase);
-
       vif.Tx = 1'bx;
       
       forever begin

@@ -29,12 +29,7 @@ class vip_agent extends uvm_agent;
 
    vip_vif       vif;
 
-   `uvm_component_utils_begin(vip_agent)
-      `uvm_field_object(sqr, UVM_ALL_ON)
-      `uvm_field_object(drv, UVM_ALL_ON)
-      `uvm_field_object(tx_mon, UVM_ALL_ON)
-      `uvm_field_object(rx_mon, UVM_ALL_ON)
-   `uvm_component_utils_end
+   `uvm_component_utils(vip_agent)
    
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
@@ -56,4 +51,30 @@ class vip_agent extends uvm_agent;
    virtual function void connect_phase(uvm_phase phase);
       drv.seq_item_port.connect(sqr.seq_item_export);
    endfunction
+
+
+   virtual task reset_and_suspend();
+      fork
+         drv.reset_and_suspend();
+         tx_mon.reset_and_suspend();
+         rx_mon.reset_and_suspend();
+      join
+   endtask
+
+   virtual task suspend();
+      fork
+         drv.suspend();
+         tx_mon.suspend();
+         rx_mon.suspend();
+      join
+   endtask
+
+   virtual task resume();
+      fork
+         drv.resume();
+         tx_mon.resume();
+         rx_mon.resume();
+      join
+   endtask
+
 endclass: vip_agent

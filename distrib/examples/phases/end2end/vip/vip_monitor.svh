@@ -65,7 +65,7 @@ class vip_monitor extends uvm_monitor;
    //
    // Abruptly interrupt and suspend this monitor
    //
-   virtual task do_reset();
+   virtual task reset_and_suspend();
       m_suspend = 1;
 
       if (m_proc.size() > 0) begin
@@ -77,7 +77,7 @@ class vip_monitor extends uvm_monitor;
    endtask
 
    virtual task suspend();
-      do_reset();
+      reset_and_suspend();
    endtask
 
    virtual task resume();
@@ -86,8 +86,6 @@ class vip_monitor extends uvm_monitor;
    endtask
 
    virtual protected task run_phase(uvm_phase phase);
-      super.run_phase(phase);
-
       forever begin
          m_suspended = 1;
          m_in_sync = 0;

@@ -46,7 +46,7 @@ class test extends uvm_test;
    function void start_of_simulation_phase(uvm_phase phase);
       $cast(env, uvm_top.find("env"));
    endfunction
-   
+
 endclass
 
 tb_env env;
