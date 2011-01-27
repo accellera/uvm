@@ -1118,7 +1118,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
       end
       join // guard
   
-      `uvm_info_context("STOP_REQ", {"'run' phase is ready ",
+      `uvm_info_context("TEST_DONE", {"'run' phase is ready ",
                         "to proceed to the 'extract' phase"}, UVM_LOW,m_top)
 
     end
