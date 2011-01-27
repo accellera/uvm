@@ -2920,13 +2920,21 @@
 
 //------------------------------------------------------------------------------
 // Group: Recording Macros
+//
+// The recording macros assist users who implement the <uvm_object::do_record>
+// method. They help ensure that the fields are recorded using a vendor-
+// independent API. Unlike the <uvm_recorder> policy, fields recorded using
+// the <`uvm_record_field> macro do not lose type information--they are passed
+// directly to the vendor-specific API. This results in more efficient recording
+// and no artificial limit on bit-widths. See your simulator vendor's 
+// documentation for more information on its transaction recording capabilities.
 //------------------------------------------------------------------------------
 
 
 // Macro: `uvm_record_attribute
 //
 // Vendor-independent macro for recording attributes (fields)
-// to an existing handle to a recording database transaction.
+// to a vendor-specific transaction database.
 
 `ifdef QUESTA
   `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
@@ -2945,8 +2953,9 @@
 
 // Macro: `uvm_record_field
 //
-// Vendor-independent macro for recording attributes (fields)
-// to an existing handle to a recording database transaction.
+// Macro for recording name-value pairs into a transaction recording database.
+// Requires a valid transaction handle, as provided by the
+// <uvm_transaction::begin_tr> and <uvm_component::begin_tr> methods. 
 
 `define uvm_record_field(NAME,VALUE) \
    if (recorder != null && recorder.tr_handle != 0) begin \
@@ -2961,37 +2970,110 @@
 // unpack operation. See also <Unpacking Macros>.
 //
 //| virtual function void do_pack(uvm_packer packer);
-//|   `uvm_pack_int(cmd,32)
-//|   `uvm_pack_int(addr,32)
-//|   `uvm_pack_array(data,32)
+//|   `uvm_pack_int(cmd)
+//|   `uvm_pack_int(addr)
+//|   `uvm_pack_array(data)
 //| endfunction
 //
+// The 'N' versions of these macros take a explicit size argument.
 //------------------------------------------------------------------------------
 
-// Macro: `uvm_pack_int
+//--------------------------------
+// Group: Packing - With Size Info
+//--------------------------------
+
+// Macro: `uvm_pack_intN
 //
 // Pack an integral variable.
+//
+//| `uvm_pack_intN(VAR,SIZE)
 //
 `define uvm_pack_intN(VAR,SIZE) \
    packer.m_bits[packer.count +: SIZE] = VAR; \
    packer.count += SIZE;
 
 
-// Macro: `uvm_pack_enum
+// Macro: `uvm_pack_enumN
 //
 // Pack an integral variable.
 //
+//| `uvm_pack_enumN(VAR,SIZE)
+//
 `define uvm_pack_enumN(VAR,SIZE) \
    `uvm_pack_intN(VAR,SIZE)
+
+
+// Macro: `uvm_pack_sarrayN
+//
+// Pack a static array of integrals.
+//
+//| `uvm_pack_sarray(VAR,SIZE)
+//
+`define uvm_pack_sarrayN(VAR,SIZE) \
+    begin \
+    foreach (VAR `` [index]) begin \
+      packer.m_bits[packer.count+:SIZE] = VAR[index]; \
+      packer.count += SIZE; \
+    end \
+    end
+
+
+// Macro: `uvm_pack_arrayN
+//
+// Pack a dynamic array of integrals.
+//
+//| `uvm_pack_arrayN(VAR,SIZE)
+//
+`define uvm_pack_arrayN(VAR,SIZE) \
+    begin \
+    `uvm_pack_intN(VAR.size(),32) \
+    `uvm_pack_sarrayN(VAR,SIZE) \
+    end
+
+
+// Macro: `uvm_pack_queueN
+//
+// Pack a queue of integrals.
+//
+//| `uvm_pack_queueN(VAR,SIZE)
+//
+`define uvm_pack_queueN(VAR,SIZE) \
+   `uvm_pack_arrayN(VAR,SIZE)
+
+
+//------------------------------
+// Group: Packing - No Size Info
+//------------------------------
+
+// Macro: `uvm_pack_int
+//
+// Pack an integral variable without having to also specify the bit size.
+//
+//| `uvm_pack_int(VAR)
+//
+`define uvm_pack_int(VAR) \
+   `uvm_pack_intN(VAR,$bits(VAR))
+
+
+// Macro: `uvm_pack_enum
+//
+// Pack an enumeration value. Packing does not require its type be specified.
+//
+//| `uvm_pack_enum(VAR)
+//
+`define uvm_pack_enum(VAR) \
+   `uvm_pack_enumN(VAR,$bits(VAR))
 
 
 // Macro: `uvm_pack_string
 //
 // Pack a string variable.
 //
+//| `uvm_pack_string(VAR)
+//
 `define uvm_pack_string(VAR) \
     begin \
-    `uvm_pack_sarray(VAR,8) \
+    `uvm_pack_sarrayN(VAR,8) \
     `uvm_pack_intN(0,8) \
     end
 
@@ -2999,6 +3081,8 @@
 // Macro: `uvm_pack_real
 //
 // Pack a variable of type real.
+//
+//| `uvm_pack_real(VAR)
 //
 `define uvm_pack_real(VAR) \
    begin \
@@ -3010,41 +3094,36 @@
 
 // Macro: `uvm_pack_sarray
 //
-// Pack a static array of integrals.
+// Pack a static array without having to also specify the bit size
+// of its elements.
 //
-`define uvm_pack_sarrayN(VAR,SIZE) \
-    begin \
-    foreach (VAR `` [index]) begin \
-      packer.m_bits[packer.count+:SIZE] = VAR[index]; \
-      packer.count += SIZE; \
-    end \
-    end
+//| `uvm_pack_sarray(VAR)
+//
+`define uvm_pack_sarray(VAR)  \
+   `uvm_pack_sarrayN(VAR,$bits(VAR[0]))
 
 
 // Macro: `uvm_pack_array
 //
-// Pack a dynamic array of integrals.
+// Pack a dynamic array without having to also specify the bit size
+// of its elements. Array size must be non-zero.
 //
-`define uvm_pack_arrayN(VAR,SIZE) \
-    begin \
-    `uvm_pack_intN(VAR.size(),32) \
-    `uvm_pack_sarrayN(VAR,SIZE) \
-    end
+//| `uvm_pack_array(VAR)
+//
+`define uvm_pack_array(VAR) \
+   `uvm_pack_arrayN(VAR,$bits(VAR[0]))
 
 
 // Macro: `uvm_pack_queue
 //
-// Pack a queue of integrals.
+// Pack a queue without having to also specify the bit size
+// of its elements. Queue must not be empty.
 //
-`define uvm_pack_queueN(VAR,SIZE) \
-   `uvm_pack_array(VAR,SIZE)
+//| `uvm_pack_queue(VAR)
+//
+`define uvm_pack_queue(VAR) \
+   `uvm_pack_queueN(VAR,$bits(VAR[0]))
 
-
-`define uvm_pack_int(VAR)     `uvm_pack_intN(VAR,$bits(VAR))
-`define uvm_pack_enum(VAR)    `uvm_pack_enumN(VAR,$bits(VAR))
-`define uvm_pack_sarray(VAR)  `uvm_pack_sarrayN(VAR,$bits(VAR[0]))
-`define uvm_pack_array(VAR)   `uvm_pack_arrayN(VAR,$bits(VAR[0]))
-`define uvm_pack_queue(VAR)   `uvm_pack_queueN(VAR,$bits(VAR[0]))
 
 
 //------------------------------------------------------------------------------
@@ -3055,19 +3134,23 @@
 // the pack operation. See also <Packing Macros>.
 //
 //| virtual function void do_unpack(uvm_packer packer);
-//|   `uvm_unpack_and_cast(cmd,32)
-//|   `uvm_unpack_int(addr,32)
-//|   `uvm_unpack_array(data,32)
+//|   `uvm_unpack_enum(cmd,cmd_t)
+//|   `uvm_unpack_int(addr)
+//|   `uvm_unpack_array(data)
 //| endfunction
 //
-// Note that enumeration types such as 'cmd' above must be cast from the packed
-// bit vector.
-//
+// The 'N' versions of these macros take a explicit size argument.
 //------------------------------------------------------------------------------
 
-// Macro: `uvm_unpack_int
+//----------------------------------
+// Group: Unpacking - With Size Info
+//----------------------------------
+
+// Macro: `uvm_unpack_intN
 //
 // Unpack into an integral variable.
+//
+//| `uvm_unpack_intN(VAR,SIZE)
 //
 `define uvm_unpack_intN(VAR,SIZE) \
    begin \
@@ -3076,9 +3159,97 @@
    end
 
 
+// Macro: `uvm_unpack_enumN
+//
+// Unpack enum of type ~TYPE~ into ~VAR~.
+//
+// `uvm_unpack_enumN(VAR,SIZE,TYPE)
+//
+`define uvm_unpack_enumN(VAR,SIZE,TYPE) \
+   VAR = TYPE'(packer.m_bits[packer.count +: \
+                                     SIZE]); \
+   packer.count += SIZE;
+
+
+// Macro: `uvm_unpack_sarrayN
+//
+// Unpack a static (fixed) array of integrals.
+//
+//| `uvm_unpack_sarrayN(VAR,SIZE)
+//
+`define uvm_unpack_sarrayN(VAR,SIZE) \
+    begin \
+    foreach (VAR `` [i]) begin \
+      VAR[i]=packer.m_bits[packer.count+:SIZE];\
+      packer.count += SIZE; \
+    end \
+    end
+
+
+// Macro: `uvm_unpack_arrayN
+//
+// Unpack into a dynamic array of integrals.
+//
+//| `uvm_unpack_arrayN(VAR,SIZE)
+//
+`define uvm_unpack_arrayN(VAR,SIZE) \
+    begin \
+    int sz; \
+    `uvm_unpack_intN(sz,32) \
+    VAR = new[sz]; \
+    `uvm_unpack_sarrayN(VAR,SIZE) \
+    end
+
+
+// Macro: `uvm_unpack_queueN
+//
+// Unpack into a queue of integrals.
+//
+//| `uvm_unpack_queue(VAR,SIZE)
+//
+`define uvm_unpack_queueN(VAR,SIZE) \
+    begin \
+    int sz; \
+    `uvm_unpack_intN(sz,32) \
+    while (VAR.size() > sz) \
+      void'(VAR.pop_back()); \
+    for (int i=0; i<sz; i++) begin \
+      VAR[i]=packer.m_bits[packer.count+:SIZE]; \
+      packer.count += SIZE; \
+    end \
+    end
+
+
+//--------------------------------
+// Group: Unpacking - No Size Info
+//--------------------------------
+
+
+// Macro: `uvm_unpack_int
+//
+// Unpack an integral variable without having to also specify the bit size.
+//
+//| `uvm_unpack_int(VAR)
+//
+`define uvm_unpack_int(VAR) \
+   `uvm_unpack_intN(VAR,$bits(VAR))
+
+
+// Macro: `uvm_unpack_enum
+//
+// Unpack an enumeration value, which requires its type be specified.
+//
+//| `uvm_unpack_enum(VAR,TYPE)
+//
+`define uvm_unpack_enum(VAR,TYPE) \
+   `uvm_unpack_enumN(VAR,$bits(VAR),TYPE)
+
+
 // Macro: `uvm_unpack_string
 //
 // Pack a string variable.
+//
+//| `uvm_unpack_string(VAR)
 //
 `define uvm_unpack_string(VAR) \
     begin \
@@ -3097,6 +3268,8 @@
 //
 // Unpack a variable of type real.
 //
+//| `uvm_unpack_real(VAR)
+//
 `define uvm_unpack_real(VAR) \
    begin \
    longint unsigned real_bits64; \
@@ -3106,64 +3279,37 @@
    end
 
 
-// Macro: `uvm_unpack_enum
-//
-// Unpack enum of type ~TYPE~ into ~VAR~.
-
-`define uvm_unpack_enumN(VAR,SIZE,TYPE) \
-   VAR = TYPE'(packer.m_bits[packer.count +: \
-                                     SIZE]); \
-   packer.count += SIZE;
-
-
 // Macro: `uvm_unpack_sarray
 //
-// Unpack a static (fixed) array of integrals.
+// Unpack a static array without having to also specify the bit size
+// of its elements.
 //
-`define uvm_unpack_sarrayN(VAR,SIZE) \
-    begin \
-    foreach (VAR `` [i]) begin \
-      VAR[i]=packer.m_bits[packer.count+:SIZE];\
-      packer.count += SIZE; \
-    end \
-    end
+// | `uvm_unpack_sarray(VAR)
+//
+`define uvm_unpack_sarray(VAR)  \
+   `uvm_unpack_sarrayN(VAR,$bits(VAR[0]))
 
 
 // Macro: `uvm_unpack_array
 //
-// Unpack a dynamic array of integrals.
+// Unpack a dynamic array without having to also specify the bit size
+// of its elements. Array size must be non-zero.
 //
-`define uvm_unpack_arrayN(VAR,SIZE) \
-    begin \
-    int sz; \
-    `uvm_unpack_intN(sz,32) \
-    VAR = new[sz]; \
-    `uvm_unpack_sarrayN(VAR,SIZE) \
-    end
+//| `uvm_unpack_array(VAR)
+//
+`define uvm_unpack_array(VAR) \
+   `uvm_unpack_arrayN(VAR,$bits(VAR[0]))
 
 
 // Macro: `uvm_unpack_queue
 //
-// Unpack into a queue of integrals.
-
-`define uvm_unpack_queueN(VAR,SIZE) \
-    begin \
-    int sz; \
-    `uvm_unpack_intN(sz,32) \
-    while (VAR.size() > sz) \
-      void'(VAR.pop_back()); \
-    for (int i=0; i<sz; i++) begin \
-      VAR[i]=packer.m_bits[packer.count+:SIZE]; \
-      packer.count += SIZE; \
-    end \
-    end
-
-
-`define uvm_unpack_int(VAR)       `uvm_unpack_intN(VAR,$bits(VAR))
-`define uvm_unpack_enum(VAR,TYPE) `uvm_unpack_enumN(VAR,$bits(VAR),TYPE)
-`define uvm_unpack_sarray(VAR)    `uvm_unpack_sarrayN(VAR,$bits(VAR))
-`define uvm_unpack_array(VAR)     `uvm_unpack_arrayN(VAR,$bits(VAR))
-`define uvm_unpack_queue(VAR)     `uvm_unpack_queueN(VAR,$bits(VAR))
+// Unpack a queue without having to also specify the bit size
+// of its elements. Queue must not be empty.
+//
+//| `uvm_unpack_queue(VAR)
+//
+`define uvm_unpack_queue(VAR) \
+   `uvm_unpack_queueN(VAR,$bits(VAR[0]))
 
 
 `endif  // UVM_OBJECT_DEFINES_SVH
