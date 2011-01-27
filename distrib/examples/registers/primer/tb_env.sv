@@ -23,32 +23,38 @@
 
 class tb_env extends uvm_component;
 
-   `uvm_component_utils(tb_env)
+    `uvm_component_utils(tb_env)
 
-   reg_block_slave model; 
-   apb_agent apb;
+    reg_block_slave model; 
+    apb_agent apb;
 
-   function new(string name, uvm_component parent=null);
-      super.new(name,parent);
-   endfunction
+    function new(string name, uvm_component parent=null);
+        super.new(name,parent);
+    endfunction
 
    virtual function void build_phase(uvm_phase phase);
-      if (model == null) begin
-         model = reg_block_slave::type_id::create("model",this);
-         model.build();
-         model.lock_model();
-      end
+        if (model == null) begin
+            model = reg_block_slave::type_id::create("model",this);
+            model.build();
+            model.lock_model();
+        end
          
-      apb = apb_agent::type_id::create("apb", this);
-   endfunction
+        apb = apb_agent::type_id::create("apb", this);
+    endfunction
 
    virtual function void connect_phase(uvm_phase phase);
-      if (model.get_parent() == null) begin
-         reg2apb_adapter reg2apb = new;
-         model.default_map.set_sequencer(apb.sqr,reg2apb);
-         model.default_map.set_auto_predict(1);
-      end
-   endfunction
+        if (model.get_parent() == null) begin
+            reg2apb_adapter reg2apb = new;
+            model.default_map.set_sequencer(apb.sqr,reg2apb);
+            model.default_map.set_auto_predict(1);
 
+         
+        end
+    endfunction
+    
+    virtual function void end_of_elaboration();
+        model.print();
+    endfunction
+                      
 endclass
 

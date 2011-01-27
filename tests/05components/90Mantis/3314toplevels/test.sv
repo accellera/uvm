@@ -88,6 +88,7 @@ module test;
       super.new(name,parent);
     endfunction
     task run;
+    uvm_top.print_topology();
       uvm_top.stop_request();
     endtask
     function void report_phase(uvm_phase phase);

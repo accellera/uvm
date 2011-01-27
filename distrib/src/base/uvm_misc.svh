@@ -70,7 +70,7 @@ class uvm_scope_stack;
     get = m_stack[0];
     for(int i=1; i<m_stack.size(); ++i) begin
       v = m_stack[i];
-      if(v[0] == "[" || v[0] == "(" || v[0] == "{")
+      if(v != "" && (v[0] == "[" || v[0] == "(" || v[0] == "{"))
         get = {get,v};
       else
         get = {get,".",v};
@@ -117,14 +117,17 @@ class uvm_scope_stack;
     m_arg = "";
   endfunction
   
+
   // up_element
   // ------------
   
   function void up_element ();
     string s;
-    if(!m_stack.size()) return;
+    if(!m_stack.size())
+      return;
     s = m_stack.pop_back();
-    if(s[0] != "[") m_stack.push_back(s);
+    if(s != "" && s[0] != "[")
+      m_stack.push_back(s);
   endfunction
   
   // up
@@ -136,15 +139,12 @@ class uvm_scope_stack;
     while(m_stack.size() && !found ) begin
       s = m_stack.pop_back();
       if(separator == ".") begin
-        case (s[0])
-          "[": found = 0;
-          "(": found = 0;
-          "{": found = 0;
-          default: found = 1;
-        endcase
+        if (s == "" || (s[0] != "[" && s[0] != "(" && s[0] != "{"))
+          found = 1;
       end
       else begin
-        if(s[0] == separator) found = 1;
+        if(s != "" && s[0] == separator)
+          found = 1;
       end
     end
     m_arg = "";

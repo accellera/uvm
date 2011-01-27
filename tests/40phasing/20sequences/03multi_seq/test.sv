@@ -56,6 +56,9 @@ class myseq extends uvm_sequence;
     int c;
     myseqr seqr;
 
+    if (starting_phase!=null) starting_phase.raise_objection(this);
+    else $display("starting_phase is NULL!");
+
     $cast(seqr, m_sequencer);
     if(seqr_seqs.exists(seqr))
       w = seqr_seqs[seqr];
@@ -70,69 +73,45 @@ class myseq extends uvm_sequence;
     `uvm_info("INBODY", $sformatf("Starting %s !!!",get_name()), UVM_NONE)
     #10;
     `uvm_info("INBODY", $sformatf("Ending %s !!!",get_name()), UVM_NONE)
+
+    if (starting_phase!=null) starting_phase.drop_objection(this);
+
   endtask
 endclass
 
-class my_preconfig_seq extends myseq;
-  static int start_cnt = 0, end_cnt = 0;
-  `uvm_object_utils(my_preconfig_seq)
-  task body;
-    start_cnt++;
-    super.body();
-    end_cnt++;
-  endtask
+`define SEQ(NAME) \
+class my_``NAME``_seq extends myseq; \
+  static int start_cnt = 0, end_cnt = 0; \
+  `uvm_object_utils(my_``NAME``_seq) \
+  task body; \
+    start_cnt++; \
+    super.body(); \
+    end_cnt++; \
+  endtask \
 endclass
-class my_config_seq extends myseq;
-  static int start_cnt = 0, end_cnt = 0;
-  `uvm_object_utils(my_config_seq)
-  task body;
-    start_cnt++;
-    super.body();
-    end_cnt++;
-  endtask
-endclass
-class my_premain_seq extends myseq;
-  static int start_cnt = 0, end_cnt = 0;
-  `uvm_object_utils(my_premain_seq)
-  task body;
-    start_cnt++;
-    super.body();
-    end_cnt++;
-  endtask
-endclass
-class my_main_seq extends myseq;
-  static int start_cnt = 0, end_cnt = 0;
-  `uvm_object_utils(my_main_seq)
-  task body;
-    start_cnt++;
-    super.body();
-    end_cnt++;
-  endtask
-endclass
-class my_shutdown_seq extends myseq;
-  static int start_cnt = 0, end_cnt = 0;
-  `uvm_object_utils(my_shutdown_seq)
-  task body;
-    start_cnt++;
-    super.body();
-    end_cnt++;
-  endtask
-endclass
+
+`SEQ(preconfig)
+`SEQ(config)
+`SEQ(premain)
+`SEQ(main)
+`SEQ(shutdown)
 
 class myseqr extends uvm_sequencer;
   function new(string name, uvm_component parent);
     super.new(name,parent);
     set_phase_domain("uvm", .hier(0));
-    set_default_thread_mode(UVM_PHASE_IMPLICIT_OBJECTION);
   endfunction
   `uvm_component_utils(myseqr)
 
   task run_phase(uvm_phase phase);
+      global_stop_request(); // end run phase
   endtask
 
   task main_phase(uvm_phase phase);
     `uvm_info("MAIN","In main!!!", UVM_NONE)
+    phase.raise_objection(this);
     #100;
+    phase.drop_objection(this);
     `uvm_info("MAIN","Exit main!!!", UVM_NONE)
   endtask
 endclass
@@ -152,12 +131,12 @@ class test extends uvm_test;
       uvm_phase domain, cfg, main;
       seqr1 = new("seqr1", this);
       seqr2 = new("seqr2", this);
-      phase_rsrc::set(this, "seqr1", "configure_ph",     my_config_seq::type_id::get());
-      phase_rsrc::set(this, "seqr1", "main_ph",          my_main_seq::type_id::get());
-      phase_rsrc::set(this, "seqr1", "shutdown_ph",      my_shutdown_seq::type_id::get());
-      phase_rsrc::set(this, "seqr2", "pre_configure_ph", my_preconfig_seq::type_id::get());
-      phase_rsrc::set(this, "seqr2", "pre_main_ph",      my_premain_seq::type_id::get());
-      phase_rsrc::set(this, "seqr2", "shutdown_ph",      my_shutdown_seq::type_id::get());
+      phase_rsrc::set(this, "seqr1.configure_phase", "default_sequence",     my_config_seq::type_id::get());
+      phase_rsrc::set(this, "seqr1.main_phase", "default_sequence",          my_main_seq::type_id::get());
+      phase_rsrc::set(this, "seqr1.shutdown_phase", "default_sequence",      my_shutdown_seq::type_id::get());
+      phase_rsrc::set(this, "seqr2.pre_configure_phase", "default_sequence", my_preconfig_seq::type_id::get());
+      phase_rsrc::set(this, "seqr2.pre_main_phase", "default_sequence",      my_premain_seq::type_id::get());
+      phase_rsrc::set(this, "seqr2.shutdown_phase", "default_sequence",      my_shutdown_seq::type_id::get());
    endfunction
    
    function void report_phase(uvm_phase phase);

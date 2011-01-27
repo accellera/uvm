@@ -65,8 +65,8 @@ class reg_slave_SOCKET extends uvm_reg;
    endfunction: new
 
    virtual function void build();
-      this.IP   = uvm_reg_field::type_id::create("value");
-      this.PORT = uvm_reg_field::type_id::create("value");
+      this.IP   = uvm_reg_field::type_id::create("IP");
+      this.PORT = uvm_reg_field::type_id::create("PORT");
       
         this.IP.configure(this, 48,  0, "RW", 0, 48'h0, 1, 0, 1);
       this.PORT.configure(this, 16, 48, "RW", 0, 16'h0, 1, 0, 1);

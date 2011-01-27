@@ -89,7 +89,7 @@ class test_read_modify_write extends ubus_example_base_test;
   virtual function void build_phase(uvm_phase phase);
     uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
 			       ".ubus_example_tb0.ubus0.masters[0].sequencer"}, 
-			       "main_ph",
+			       "run_ph",
 				read_modify_write_seq::type_id::get(),
 				this);
     uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
@@ -152,8 +152,9 @@ class test_2m_4s extends ubus_example_base_test;
     uvm_resource_db#(int)::set({get_name(),".ubus_example_tb0.ubus0.masters[1].sequencer",".loop_read_modify_write_seq"}, "itr", 4);
 
      // Define the sequences to run in the run phase
-    uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
-			       ".ubus_example_tb0.ubus0.masters[0].sequencer"}, 
+//    uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
+//			       ".ubus_example_tb0.ubus0.masters[0].sequencer"}, 
+    uvm_resource_db#(uvm_object_wrapper)::set("*.ubus0.masters[0].sequencer", 
 			       "run_ph",
 				loop_read_modify_write_seq::type_id::get(),
 				this);

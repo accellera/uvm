@@ -174,6 +174,8 @@ class uvm_root extends uvm_component;
   // singleton handle
   static local uvm_root m_inst;
 
+  // For error checking
+  extern virtual task run_phase (uvm_phase phase);
 
   // At end of elab phase we need to do tlm binding resolution.
   function void phase_ended(uvm_phase phase);
@@ -333,7 +335,7 @@ task uvm_root::run_test(string test_name="");
 
      // plusarg overrides argument
   if ($value$plusargs("UVM_TESTNAME=%s", test_name)) begin
-    `uvm_info("NO_DPI_TSTNAME", "Using the non-DPI means to retrieve UVM_TESTNAME.", UVM_NONE)
+    `uvm_info("NO_DPI_TSTNAME", "Using the UVM_NO_DPI define means to retrieve UVM_TESTNAME without DPI", UVM_NONE)
     testname_plusarg = 1;
   end
 
@@ -929,4 +931,13 @@ function void uvm_root::m_check_verbosity();
   set_report_verbosity_level_hier(verbosity);
 
 endfunction
+
+// It is required that the run phase start at simulation time 0
+task uvm_root::run_phase (uvm_phase phase);
+  if($time > 0)
+    `uvm_fatal("RUNPHSTIME", {"The run phase must start at time 0, current time is ",
+       $sformatf("%0t", $realtime), ". No non-zero delays are allowed before ",
+       "run_test(), and pre-run user defined phases may not consume ",
+       "simulation time before the start of the run phase."})
+endtask
 

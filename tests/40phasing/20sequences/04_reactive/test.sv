@@ -49,7 +49,7 @@ endclass
 
 wrapper seqr_seqs[myseqr];
 
-class myseq extends uvm_sequence;
+class myseq extends uvm_sequence #(uvm_sequence_item);
   time t = 10;
   `uvm_object_utils(myseq)
  
@@ -58,6 +58,7 @@ class myseq extends uvm_sequence;
     int c;
     myseqr seqr;
 
+    if (starting_phase!=null) starting_phase.raise_objection(this);
     $cast(seqr, m_sequencer);
     if(seqr_seqs.exists(seqr))
       w = seqr_seqs[seqr];
@@ -72,6 +73,8 @@ class myseq extends uvm_sequence;
     `uvm_info("INBODY", $sformatf("Starting %s !!!",get_name()), UVM_NONE)
     #(t);
     `uvm_info("INBODY", $sformatf("Ending %s !!!",get_name()), UVM_NONE)
+    if (starting_phase!=null) starting_phase.drop_objection(this);
+
   endtask
 endclass
 
@@ -121,36 +124,30 @@ class my_config_seq extends myseq;
   static int start_cnt = 0, end_cnt = 0;
   `uvm_object_utils(my_config_seq)
   task body;
-    starting_phase.raise_objection(this);
     start_cnt++;
     t = 10;
     super.body();
     end_cnt++;
-    starting_phase.drop_objection(this);
   endtask
 endclass
 class my_main_seq extends myseq;
   static int start_cnt = 0, end_cnt = 0;
   `uvm_object_utils(my_main_seq)
   task body;
-    starting_phase.raise_objection(this);
     start_cnt++;
     t = 30;
     super.body();
     end_cnt++;
-    starting_phase.drop_objection(this);
   endtask
 endclass
 class my_shutdown_seq extends myseq;
   static int start_cnt = 0, end_cnt = 0;
   `uvm_object_utils(my_shutdown_seq)
   task body;
-    starting_phase.raise_objection(this);
     start_cnt++;
     t = 130;
     super.body();
     end_cnt++;
-    starting_phase.drop_objection(this);
   endtask
 endclass
 
@@ -162,10 +159,11 @@ class myseqr extends uvm_sequencer;
   `uvm_component_utils(myseqr)
 
   task run_phase(uvm_phase phase);
-     set_thread_mode(UVM_PHASE_IMPLICIT_OBJECTION);
+    phase.raise_objection(this);
     `uvm_info("RUN","In run!!!", UVM_NONE)
     #500;
     `uvm_info("RUN","Exit run!!!", UVM_NONE)
+    phase.drop_objection(this);
   endtask
 endclass
 
@@ -179,18 +177,17 @@ class test extends uvm_test;
    `uvm_component_utils(test)
 
    typedef uvm_config_db #(uvm_object_wrapper) phase_rsrc;
-   typedef uvm_config_db #(uvm_thread_mode) thread_rsrc;
 
    function void build_phase(uvm_phase phase);
       uvm_phase domain, cfg, main;
       seqr1 = new("seqr1", this);
       seqr2 = new("seqr2", this);
-      phase_rsrc::set(this, "seqr1", "configure_ph", my_config_seq::type_id::get());
-      phase_rsrc::set(this, "seqr1", "main_ph",      my_main_seq::type_id::get());
-      phase_rsrc::set(this, "seqr1", "shutdown_ph",  my_shutdown_seq::type_id::get());
-      phase_rsrc::set(this, "seqr2", "configure_ph", my_reactive_configure::type_id::get());
-      phase_rsrc::set(this, "seqr2", "main_ph",      my_reactive_main::type_id::get());
-      phase_rsrc::set(this, "seqr2", "shutdown_ph",  my_reactive_shutdown::type_id::get());
+      phase_rsrc::set(this, "seqr1.configure_phase", "default_sequence", my_config_seq::type_id::get());
+      phase_rsrc::set(this, "seqr1.main_phase", "default_sequence",      my_main_seq::type_id::get());
+      phase_rsrc::set(this, "seqr1.shutdown_phase", "default_sequence",  my_shutdown_seq::type_id::get());
+      phase_rsrc::set(this, "seqr2.configure_phase", "default_sequence", my_reactive_configure::type_id::get());
+      phase_rsrc::set(this, "seqr2.main_phase", "default_sequence",      my_reactive_main::type_id::get());
+      phase_rsrc::set(this, "seqr2.shutdown_phase", "default_sequence",  my_reactive_shutdown::type_id::get());
    endfunction
    
    function void report_phase(uvm_phase phase);

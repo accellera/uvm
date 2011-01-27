@@ -1105,7 +1105,7 @@ function void uvm_reg_block::lock_model();
 
          if (n > 1) begin
             `uvm_error("UVM/REG/DUPLROOT",
-                       $sformatf("There are %0d root register models named \"%s\". This may create confusion when configuring register model components.",
+                       $sformatf("There are %0d root register models named \"%s\". The names of the root register models have to be unique",
                                  n, get_name()))
          end
       end
@@ -2098,12 +2098,17 @@ endfunction
 //----------------------------------
 
 // do_print
-
 function void uvm_reg_block::do_print (uvm_printer printer);
-  uvm_reg_block prnt = get_parent();
   super.do_print(printer);
-  printer.print_generic("initiator", prnt.get_type_name(), -1, convert2string());
+
+  foreach(blks[i])  printer.print_object(i.get_name(),uvm_object'(i));
+  foreach(regs[i])  printer.print_object(i.get_name(),uvm_object'(i));
+  foreach(vregs[i]) printer.print_object(i.get_name(),uvm_object'(i));
+  foreach(mems[i])  printer.print_object(i.get_name(),uvm_object'(i));
+  foreach(maps[i])  printer.print_object(i.get_name(),uvm_object'(i));
+  
 endfunction
+
 
 
 // clone

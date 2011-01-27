@@ -574,11 +574,6 @@ virtual class uvm_component extends uvm_report_object;
   
   extern virtual function void phase_ended (uvm_phase phase);
   
-  // Function: get_current_phase
-  // Return the phase schedule node which initiated the current process thread
-
-  extern function uvm_phase get_current_phase();
-
   // Function: find_phase_domain
   // Return the domain name set for our uvm schedule (or another specific schedule)
   //   schedule_name - the schedule name to return domain for - default 'uvm'
@@ -640,54 +635,47 @@ virtual class uvm_component extends uvm_report_object;
 
   extern function void set_phase_imp(uvm_phase_imp phase, uvm_phase_imp imp, int hier=1);
 
-  // Function: jump
-  //
-  //
-  //
-  extern function void jump(uvm_phase_imp phase);
-
   
-  // Function: jump_all_domains
-  //
-  //
-  //
-  extern function void jump_all_domains(uvm_phase_imp phase);
-
-  
-  // Function: set_default_thread_mode
-  //
-  // Specify default thread semantic for all phases on this component
-  //
-  extern function void set_default_thread_mode(uvm_thread_mode thread_mode);
-  
-
-  // Function: set_thread_mode
-  //
-  // Override default thread semantic for the current phase on this component
-  //
-  extern function void set_thread_mode(uvm_thread_mode thread_mode);
-  
-
   // Task: suspend
   //
-  // Suspends the process tree spawned from this component's currently
-  // executing task-based phase, e.g. <run_phase>.
+  // Suspend this component.
+  //
+  // This method must be implemented by the user to suspend the
+  // component according to the protocol and functionality it implements.
+  // A suspended component can be subsequently resumed using <resume()>. 
 
   extern virtual task suspend ();
 
 
   // Task: resume
   //
-  // Resumes the process tree spawned from this component's currently
-  // executing task-based phase, e.g. <run_phase>.
+  // Resume this component.
+  //
+  // This method must be implemented by the user to resume a component
+  // that was previously suspended using <suspend()>.
+  // Some component may start in the suspended state and
+  // may need to be explicitly resumed.
 
   extern virtual task resume ();
 
 
   // Function: status
   //
-  // Returns the status of the parent process associated with the currently
-  // running task-based phase, e.g., <run_phase>.
+  // Returns the status of this component.
+  //
+  // Returns a string that describes the current status of the
+  // components. Possible values include, but are not limited to
+  //
+  // "<unknown>"   - Status is unknown (default)
+  // "FINISHED"    - Component has stopped on its own accord. May be resumed.
+  // "RUNNING"     - Component is running.
+  //                 May be suspended after normal completion
+  //                 of operation in progress.
+  // "WAITING"     - Component is waiting. May be suspended immediately.
+  // "SUSPENDED"   - Component is suspended. May be resumed.
+  // "KILLED"      - Component has been killed and is unable to operate
+  //                 any further. It cannot be resumed.
+
 
   extern function string status ();
 
@@ -1586,9 +1574,7 @@ virtual class uvm_component extends uvm_report_object;
   // Internal members for phasing process control, hierarchical schedules, functors
   
   string             m_phase_domains[uvm_phase]; // domain(s) we have set, per schedule
-  uvm_phase_thread   m_phase_threads[uvm_phase]; // phases we have active threads for
   uvm_phase_imp      m_phase_imps[uvm_phase_imp];         // functors to override ovm_root defaults
-  uvm_thread_mode    m_def_phase_thread_mode=UVM_PHASE_MODE_DEFAULT; // default thread semantic
   uvm_phase m_current_phase;                     // the most recently executed phase
   /*protected*/ bit  m_build_done=0;
 
@@ -1700,10 +1686,8 @@ function uvm_component::new (string name, uvm_component parent);
       if (end_of_elab.get_state() == UVM_PHASE_EXECUTING ||
           end_of_elab.get_run_count() > 0 ) begin
         uvm_phase curr_phase;
-        curr_phase = top.get_current_phase();
         uvm_report_fatal("ILLCRT", {"It is illegal to create a component once",
-                  " phasing reaches end_of_elaboration. The current phase is ", 
-                  curr_phase.get_phase_name()}, UVM_NONE);
+                  " phasing reaches end_of_elaboration."}, UVM_NONE);
       end
     end
   end
@@ -1755,10 +1739,6 @@ function uvm_component::new (string name, uvm_component parent);
 
   // Do local configuration settings
   void'(get_config_int("recording_detail", recording_detail)); // *** VIRTUAL
-
-  void'(uvm_config_db #(uvm_thread_mode)::get(this,"","default_phase_thread_mode",
-       m_def_phase_thread_mode));
-
 
   set_report_verbosity_level(parent.get_report_verbosity_level());
 
@@ -2365,20 +2345,6 @@ function void uvm_component::phase_ended(uvm_phase phase);
 endfunction
 
 
-// get_current_phase
-// -----------------
-
-
-// won't work for child processes or outside callers
-// they'l get most recently spawned phase for this component, even if not active
-function uvm_phase uvm_component::get_current_phase();
-  foreach (m_phase_threads[phase])
-    if (m_phase_threads[phase].is_current_process())
-      return phase;
-  return m_current_phase;
-endfunction
-
-
 // find_phase_domain
 // -----------------
 
@@ -2474,8 +2440,12 @@ function void uvm_component::set_phase_schedule(string domain_name);
   end
 
   // add schedule to this component's list, replacing any existing entry found
-  if (find_phase_schedule(schedule_name,"*"))
-    delete_phase_schedule(find_phase_schedule(schedule_name,"*"));
+  begin
+    uvm_phase any;
+    any = find_phase_schedule(schedule_name,"*");
+    if (any != null)
+      delete_phase_schedule(any);
+  end
   add_phase_schedule(uvm, domain_name);
 endfunction
 
@@ -2502,54 +2472,9 @@ function void uvm_component::set_phase_imp(uvm_phase_imp phase, uvm_phase_imp im
 endfunction
 
 
-//-------------------------------------
-// phase process / thread semantics API
-//-------------------------------------
-
-// set_default_thread_mode
-// -----------------------
-
-function void uvm_component::set_default_thread_mode(uvm_thread_mode thread_mode);
-  m_def_phase_thread_mode = thread_mode;
-endfunction
-
-
-// set_thread_mode
-// ---------------
-
-function void uvm_component::set_thread_mode(uvm_thread_mode thread_mode);
-  foreach (m_phase_threads[phase]) begin
-    if (m_phase_threads[phase].is_current_process()) begin
-      m_phase_threads[phase].set_thread_mode(thread_mode);
-      return;
-    end
-  end
-  //TBD fatal
-endfunction
-
-
 //--------------------------
 // phase runtime control API
 //--------------------------
-
-// jump
-// ----
-
-function void uvm_component::jump(uvm_phase_imp phase);
-  uvm_phase current_phase;
-  current_phase = get_current_phase();
-  current_phase.jump(phase);
-endfunction
-
-// jump_all_domains
-// ----------------
-
-function void uvm_component::jump_all_domains(uvm_phase_imp phase);
-  uvm_phase current_phase;
-  current_phase = get_current_phase();
-  current_phase.jump_all(phase);
-endfunction
-
 
 // do_kill_all
 // -----------
@@ -2580,7 +2505,7 @@ task uvm_component::suspend();
     if(m_phase_process != null)
       m_phase_process.suspend;
   `else
-    `uvm_error("UNIMP", "suspend not implemented")
+    `uvm_error("UNIMP", "suspend() not implemented")
   `endif
 endtask
 
@@ -2593,7 +2518,7 @@ task uvm_component::resume();
     if(m_phase_process!=null) 
       m_phase_process.resume;
   `else
-     `uvm_error("UNIMP", "resume not implemented")
+     `uvm_error("UNIMP", "resume() not implemented")
   `endif
 endtask
 
@@ -2612,7 +2537,8 @@ endtask
 
 function string uvm_component::status();
 
-  `ifdef UVM_USE_PROCESS_STATE
+  `ifdef UVM_USE_SUSPEND_RESUME
+   `ifdef UVM_USE_PROCESS_STATE
     process::state ps;
 
     if(m_phase_process == null)
@@ -2633,7 +2559,10 @@ function string uvm_component::status();
       4: return "KILLED";
       default: return "<unknown>";
     endcase
+  `endif
   `endif 
+
+   return "<unknown>";
    
 endfunction
 
@@ -2984,6 +2913,11 @@ function void uvm_component::set_config_object(string inst_name,
                                                bit clone = 1);
   uvm_object tmp;
 
+  if(value == null)
+    `uvm_warning("NULLCFG", {"A null object was provided as a ",
+       $sformatf("configuration object for set_config_object(\"%s\",\"%s\")",
+       inst_name, field_name), ". Verify that this is intended."})
+
   if(clone && (value != null)) begin
     tmp = value.clone();
     if(tmp == null) begin
@@ -3070,7 +3004,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
   int unsigned i;
   int unsigned j;
 
-  m_field_automation (null, UVM_CHECK_FIELDS, "");
+  __m_uvm_field_automation (null, UVM_CHECK_FIELDS, "");
 
   if(verbose)
     $display("applying configuration settings for %s", get_full_name());
@@ -3088,17 +3022,17 @@ function void uvm_component::apply_config_settings (bit verbose=0);
         break;
 
     // If it does have brackets then we'll use the name
-    // up to the brackets to search m_sc.field_array
+    // up to the brackets to search __m_uvm_status_container.field_array
     if(j < name.len())
       search_name = name.substr(0, j-1);
     else
       search_name = name;
 
-    if(!m_sc.field_array.exists(search_name))
+    if(!__m_uvm_status_container.field_array.exists(search_name))
       continue;
 
     if(verbose)
-      $display("applying %s [%s] in %s", name, m_sc.field_array[search_name],
+      $display("applying %s [%s] in %s", name, __m_uvm_status_container.field_array[search_name],
                                          get_full_name());
 
     begin
@@ -3129,7 +3063,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
 
   end
 
-  m_sc.field_array.delete();
+  __m_uvm_status_container.field_array.delete();
   
 endfunction
 

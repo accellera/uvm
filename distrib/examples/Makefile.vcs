@@ -37,6 +37,8 @@ UVM_VERBOSITY =	UVM_LOW
 
 
 TEST = /usr/bin/test
+N_ERRS = 0
+N_FATALS = 0
 
 VCS =	vcs -sverilog -timescale=1ns/1ns \
 	+acc +vpi \
@@ -48,8 +50,8 @@ SIMV = 	./simv +UVM_VERBOSITY=$(UVM_VERBOSITY) -l vcs.log
 URG  = urg -format text -dir simv.vdb
 
 CHECK = \
-	@$(TEST) \( `grep -c 'UVM_ERROR :    0' vcs.log` -eq 1 \) -a \
-		 \( `grep -c 'UVM_FATAL :    0' vcs.log` -eq 1 \)
+	@$(TEST) \( `grep -c 'UVM_ERROR :    $(N_ERRS)' vcs.log` -eq 1 \) -a \
+		 \( `grep -c 'UVM_FATAL :    $(N_FATALS)' vcs.log` -eq 1 \)
 
 clean:
 	rm -rf *~ core csrc simv* vc_hdrs.h ucli.key urg* *.log
