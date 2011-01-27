@@ -988,7 +988,6 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Returns the number of sequences in the sequencer's sequence library.
 
   function int num_sequences();
-    `uvm_warning("UVM_DEPRECATED",$sformatf("%m deprecated."))
     if (m_sequencer == null)
       return 0;
     return (m_sequencer.num_sequences());
