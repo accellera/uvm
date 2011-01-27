@@ -28,7 +28,7 @@ include ../../Makefile.questa
 all: prepare comp run
 
 comp:
-	$(VLOG) +incdir+../common/apb \
+	$(VLOG) +incdir+../../apb \
 		tb_top.sv test.sv
 
 run: hw_reset reg_user

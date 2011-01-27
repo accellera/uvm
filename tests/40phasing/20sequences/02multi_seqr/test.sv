@@ -59,6 +59,8 @@ class myseq extends uvm_sequence;
     int c;
     myseqr seqr;
 
+    if (starting_phase!=null) starting_phase.raise_objection(this);
+
     start_cnt++;
 
     $cast(seqr, m_sequencer);
@@ -76,6 +78,7 @@ class myseq extends uvm_sequence;
     #10;
     `uvm_info("INBODY", {seqr.get_name()," Ending myseq!!!"}, UVM_NONE)
     end_cnt++;
+    if (starting_phase!=null) starting_phase.drop_objection(this);
 
   endtask
 
@@ -85,14 +88,14 @@ class myseqr extends uvm_sequencer;
   function new(string name, uvm_component parent);
     super.new(name,parent);
     set_phase_domain("uvm", .hier(0));
-    set_default_thread_mode(UVM_PHASE_IMPLICIT_OBJECTION);
   endfunction
   `uvm_component_utils(myseqr)
 
   task main_phase(uvm_phase phase);
+    phase.raise_objection(this);
     `uvm_info("MAIN","In main!!!", UVM_NONE)
-    set_thread_mode(UVM_PHASE_IMPLICIT_OBJECTION);
     #100;
+    phase.drop_objection(this);
   endtask
 endclass
 
@@ -111,12 +114,13 @@ class test extends uvm_test;
       uvm_phase domain, cfg, main;
       seqr1 = new("seqr1", this);
       seqr2 = new("seqr2", this);
-      phase_rsrc::set(this, "seqr1", "configure_ph", myseq::type_id::get());
-      phase_rsrc::set(this, "seqr1", "main_ph", myseq::type_id::get());
-      phase_rsrc::set(this, "seqr1", "shutdown_ph", myseq::type_id::get());
-      phase_rsrc::set(this, "seqr2", "pre_configure_ph", myseq::type_id::get());
-      phase_rsrc::set(this, "seqr2", "pre_main_ph", myseq::type_id::get());
-      phase_rsrc::set(this, "seqr2", "shutdown_ph", myseq::type_id::get());
+      phase_rsrc::set(this, "seqr1.configure_phase", "default_sequence", myseq::type_id::get());
+      phase_rsrc::set(this, "seqr1.main_phase", "default_sequence", myseq::type_id::get());
+      phase_rsrc::set(this, "seqr1.shutdown_phase", "default_sequence", myseq::type_id::get());
+      phase_rsrc::set(this, "seqr2.pre_configure_phase", "default_sequence", myseq::type_id::get());
+      phase_rsrc::set(this, "seqr2.pre_main_phase", "default_sequence", myseq::type_id::get());
+      phase_rsrc::set(this, "seqr2.shutdown_phase", "default_sequence", myseq::type_id::get());
+      global_stop_request();
    endfunction
    
    function void report_phase(uvm_phase phase);

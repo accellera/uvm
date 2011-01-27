@@ -330,6 +330,11 @@ class uvm_cmdline_processor extends uvm_report_object;
     //
 
 
+    // Variable: +UVM_PHASE_TRACE
+    //
+    // ~+UVM_PHASE_TRACE~ turns on tracing of phase executions.  Users simply need to put the
+    // argument on the command line.
+
     // Variable: +UVM_OBJECTION_TRACE
     //
     // ~+UVM_OBJECTION_TRACE~ turns on tracing of objection activity.  Users simply need to put the

@@ -103,9 +103,10 @@ class uvm_objection extends uvm_report_object;
     name = obj.get_full_name();
     if (name == "")
       name = "uvm_top";
+    else
+      name = obj.get_full_name();
     uvm_report_warning("OBJTN_CLEAR",{"Object '",name,"' cleared objection counts for ",get_name()});
     //Should there be a warning if there are outstanding objections?
-    m_background_proc.kill();
     m_source_count.delete();
     m_total_count.delete();
     m_draining.delete();
@@ -113,6 +114,7 @@ class uvm_objection extends uvm_report_object;
     m_cleared = 1;
     if (m_events.exists(obj))
       ->m_events[obj].all_dropped;
+    m_background_proc.kill();
 
     fork
       begin

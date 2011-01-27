@@ -36,7 +36,7 @@ run: uvm_reg_mem_built_in_seq
 
 uvm_%_seq: 
 	$(IUS)	$(OPT) -incdir ../common \
-		-incdir ../../common/apb \
+		-incdir ../../../apb \
 		../common/test.sv \
 	        +UVM_SEQUENCE=$@
 	$(CHECK)

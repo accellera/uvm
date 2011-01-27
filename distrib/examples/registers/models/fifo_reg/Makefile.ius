@@ -25,6 +25,6 @@ include ../../../Makefile.ius
 
 
 all: 
-	$(IUS)  +incdir+../../common/apb tb_run.sv
+	$(IUS)  +incdir+../../../apb tb_run.sv
 	$(CHECK)
 
