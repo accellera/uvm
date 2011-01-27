@@ -25,8 +25,13 @@ UVM_HOME	= ../../..
 include ../../Makefile.ius
 
 
-all: run
+all run: test hw_reset
 
-run:
+test:
 	$(IUS) -incdir ../../apb -incdir vip tb_top.sv test.sv
+	$(CHECK)
+
+hw_reset:
+	$(IUS) -incdir ../../apb -incdir vip tb_top.sv test.sv \
+		+UVM_TESTNAME=hw_reset_test
 	$(CHECK)

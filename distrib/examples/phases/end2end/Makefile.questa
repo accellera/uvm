@@ -24,7 +24,7 @@ UVM_HOME	= ../../..
 include ../../Makefile.questa
 
 
-all: run
+all: run hs_reset
 
 comp: vlib
 	$(VLOG) +incdir+../../apb+vip \
@@ -32,4 +32,8 @@ comp: vlib
 
 run: comp
 	$(VSIM)
+	$(CHECK)
+
+hw_reset hw_reset_test: comp
+	$(VSIM) +UVM_TESTNAME=hw_reset_test
 	$(CHECK)
