@@ -13,7 +13,9 @@ module top;
       // This will be the last setting, so it should be the
       // one used.
       `uvm_info("SETTO","Setting timeout to 33ms", UVM_NONE)
-      uvm_top.set_config_int("", "timeout", 33ms);
+      //uvm_top.set_config_int("", "timeout", 33ms);
+      uvm_top.set_timeout(33ms);
+      
     endfunction
   endclass
   class middle_comp extends uvm_component;
@@ -24,7 +26,8 @@ module top;
     endfunction
     function void end_of_elaboration();
       `uvm_info("SETTO","Setting timeout to 88ns", UVM_NONE)
-      uvm_top.set_config_int("", "timeout", 88ns);
+      //uvm_top.set_config_int("", "timeout", 88ns);
+      uvm_top.set_timeout(88ns);
     endfunction
   endclass
   class top_comp extends uvm_component;
@@ -35,7 +38,8 @@ module top;
     endfunction
     function void build();
       `uvm_info("SETTO","Setting timeout to 7s", UVM_NONE)
-      uvm_top.set_config_int("", "timeout", 7s);
+      //uvm_top.set_config_int("", "timeout", 7s);
+      uvm_top.set_timeout(7s);
     endfunction
   endclass
   class test extends uvm_component;

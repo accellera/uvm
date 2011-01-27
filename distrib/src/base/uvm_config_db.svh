@@ -133,7 +133,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
                            T value);
 
     uvm_root top;
-    uvm_phase_schedule curr_phase;
+    uvm_phase curr_phase;
     uvm_resource#(T) r;
     bit exists = 0;
     
@@ -141,7 +141,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     process p = process::self();
     string rstate = p.get_randstate();
     top = uvm_root::get();
-    curr_phase = top.get_current_phase();
+    curr_phase = top.m_current_phase;
 
     if(cntxt == null) 
       cntxt = top;

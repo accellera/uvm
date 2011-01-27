@@ -47,7 +47,7 @@ extern "C" {
 static int uvm_hdl_max_width()
 {
   vpiHandle ms;
-  s_vpi_value value_s = { vpiIntVal, 0 };
+  s_vpi_value value_s = { vpiIntVal, { 0 } };
   ms = vpi_handle_by_name(
       (PLI_BYTE8*) "uvm_pkg::UVM_HDL_MAX_WIDTH", 0);
   if(ms == 0) 
@@ -186,7 +186,7 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 {
   static int maxsize = -1;
   vpiHandle r;
-  s_vpi_value value_s = { vpiIntVal, 0 };
+  s_vpi_value value_s = { vpiIntVal, { 0 } };
   s_vpi_time  time_s = { vpiSimTime, 0, 0, 0.0 };
 
   //vpi_printf("uvm_hdl_set_vlog(%s,%0x)\n",path,value[0].aval);

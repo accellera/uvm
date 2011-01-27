@@ -17,7 +17,7 @@
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
 
-`include "transaction.sv";
+`include "transaction.sv"
 
 module top;
 

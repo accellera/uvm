@@ -73,92 +73,6 @@ class uvm_sequencer_base extends uvm_component;
   extern function bit is_child (uvm_sequence_base parent, uvm_sequence_base child);
 
 
-  // Task: start_phase_sequence
-  //
-  // Start the default sequence for this phase, if any.
-  // The default sequence is configured using resources using
-  // either a sequence instance or sequence object wrapper.
-  //
-  // Configure by instance:
-  //
-  // Allows pre-initialization, setting rand_mode, use of inline 
-  // constraints, etc.
-  //
-  //| myseq_t myseq_inst = new("myseq_inst");
-  //| myseq_inst.randomize() with { ... };
-  //| uvm_config_db #(uvm_sequence_base)::set(this, "myseqr",
-  //|                                         "main_ph", myseq_inst);
-  //
-  //or configure by type:
-  //
-  //| uvm_config_db #(uvm_object_wrapper)::set(this, "myseqr", "main_ph"
-  //|                                           myseq_type::type_id::get());
-
-  virtual task start_phase_sequence(uvm_phase_schedule phase);
-    uvm_object_wrapper wrapper;
-    uvm_sequence_base  seq;
-    uvm_thread_mode mode;
-    uvm_factory f = uvm_factory::get();
-
-    // default sequence instance?
-    if (!uvm_config_db #(uvm_sequence_base)::get(
-          this, {phase.get_name(),"_ph"}, "default_sequence", seq) ) begin
-      // default sequence object wrapper?
-      if (uvm_config_db #(uvm_object_wrapper)::get(
-               this, {phase.get_name(),"_ph"}, "default_sequence", wrapper) ) begin
-        // use wrapper is a sequence type        
-        if(!$cast(seq , f.create_object_by_type(
-              wrapper, get_full_name(), wrapper.get_type_name()))) begin
-          `uvm_warning("PHASESEQ", {"Default sequence for phase '",
-                       phase.get_name(),"_ph' %s is not a sequence type"})
-          return;
-        end
-      end
-      else begin
-        `uvm_info("PHASESEQ", {"No default phase sequence for phase '",
-                               phase.get_name(),"'"}, UVM_FULL)
-        return;
-      end
-    end
-
-    `uvm_info("PHASESEQ", {"Starting default sequence '",
-       seq.get_type_name(),"' for phase ", phase.get_name()}, UVM_FULL)
-
-    seq.print_sequence_info = 1;
-    seq.set_sequencer(this);
-    seq.reseed();
-    seq.starting_phase = phase;
-
-    if (!seq.is_randomized && !seq.randomize()) begin
-      `uvm_warning("STRDEFSEQ", {"Randomization failed for default sequence '",
-       seq.get_type_name(),"' for phase ", phase.get_name()})
-       return;
-    end
-
-    fork begin
-      mode = m_def_phase_thread_mode;
-
-      if (mode == UVM_PHASE_MODE_DEFAULT)
-        mode = UVM_PHASE_NO_IMPLICIT_OBJECTION;
-
-      void'(uvm_config_db #(uvm_thread_mode)::get(this,
-                                    {phase.get_name(),"_ph"},"default_sequence.thread_mode",mode));
-
-      if (mode == UVM_PHASE_IMPLICIT_OBJECTION)
-        phase.phase_done.raise_objection(seq, {phase.get_name(),
-            " objection for default sequence ",
-            get_full_name(),".",seq.get_name()});
-      seq.start(this);
-      if (mode == UVM_PHASE_IMPLICIT_OBJECTION)
-        phase.phase_done.drop_objection(seq, {phase.get_name(),
-            " objection for default sequence ",
-            get_full_name(),".",seq.get_name()});
-    end
-    join_none
-
-  endtask
-
-
   // Function: user_priority_arbitration
   //
   // When the sequencer arbitration mode is set to SEQ_ARB_USER (via the
@@ -186,6 +100,33 @@ class uvm_sequencer_base extends uvm_component;
 
   extern virtual task execute_item(uvm_sequence_item item);
 
+
+  // Function: start_phase_sequence
+  //
+  // Start the default sequence for this phase, if any.
+  // The default sequence is configured using resources using
+  // either a sequence instance or sequence object wrapper.
+  // The resource name is the name of the phase suffixed
+  // with "_phase.default_sequence".
+  //
+  // Configuration by instances
+  // allows pre-initialization, setting rand_mode, use of inline 
+  // constraints, etc.
+  //
+  //| myseq_t myseq_inst = new("myseq_inst");
+  //| myseq_inst.randomize() with { ... };
+  //| uvm_config_db #(uvm_sequence_base)::set(this, "myseqr.main_phase",
+  //|                                         "default_sequence",
+  //|                                         myseq_inst);
+  //
+  // Configuration by type is shorter and can be substituted via the
+  // the factory.
+  //
+  //| uvm_config_db #(uvm_object_wrapper)::set(this, "myseqr.main_phase",
+  //|                                          "default_sequence",
+  //|                                          myseq_type::type_id::get());
+
+  extern virtual function void start_phase_sequence(uvm_phase phase);
 
   // Task: wait_for_grant
   //
@@ -402,7 +343,7 @@ class uvm_sequencer_base extends uvm_component;
   extern function void remove_sequence(string type_name);
 
 
-  extern virtual   function void   build_phase();
+  extern virtual   function void   build_phase(uvm_phase phase);
   extern           function void   do_print (uvm_printer printer);
 
 
@@ -413,7 +354,7 @@ class uvm_sequencer_base extends uvm_component;
                  uvm_sequence_base m_find_sequence(int sequence_id);
 
   extern protected function void   m_update_lists();
-  extern           function string m_display_queues();
+  extern           function string convert2string();
   extern protected
            virtual function int    m_find_number_driver_connections();
   extern protected task            m_wait_arb_not_equal();
@@ -459,7 +400,7 @@ class uvm_sequencer_base extends uvm_component;
   extern function uvm_sequence_base get_sequence(int req_kind);
   extern function int               num_sequences();
   extern virtual function void      m_add_builtin_seqs(bit add_simple = 1);
-  extern virtual task               run();
+  extern virtual task               run_phase(uvm_phase phase);
 
 endclass
 
@@ -478,7 +419,15 @@ function uvm_sequencer_base::new (string name, uvm_component parent);
   super.new(name, parent);
   m_sequencer_id = g_sequencer_id++;
   m_lock_arb_size = -1;
+endfunction
 
+
+// build_phase
+// -----------
+
+function void uvm_sequencer_base::build_phase(uvm_phase phase);
+  int dummy;
+  super.build();
   // deprecated parameters for sequencer. Use uvm_sequence_library class
   // for sequence library functionality.
   if (get_config_string("default_sequence", default_sequence)) begin
@@ -499,23 +448,10 @@ function uvm_sequencer_base::new (string name, uvm_component parent);
                  "part of the UVM standard. Use 'uvm_sequence_library' class for ",
                  "sequence library functionality"})
   end
-endfunction
-
-
-// build_phase
-// -----------
-
-function void uvm_sequencer_base::build_phase();
-  int dummy;
-  super.build();
-  void'(get_config_string("default_sequence", default_sequence));
-  void'(get_config_int("count", count));
-  void'(get_config_int("max_random_count", max_random_count));
-  void'(get_config_int("max_random_depth", max_random_depth));
   if (get_config_int("pound_zero_count", dummy))
     `uvm_warning("UVM_DEPRECATED",
       {"pound_zero_count was set but ignored. ",
-       "Sequencer/driver synchronization uses 'uvm_wait_for_nba_region' now."})
+       "Sequencer/driver synchronization now uses 'uvm_wait_for_nba_region'"})
 endfunction
 
 
@@ -524,19 +460,17 @@ endfunction
 
 function void uvm_sequencer_base::do_print (uvm_printer printer);
   super.do_print(printer);
-  // ACE:deprecated, not visible; why isn't sequence arb queue printed?
-  //if(sequences.size() != 0) begin
-    //printer.print_string("default_sequence", default_sequence);
-    //printer.print_int("count", count, $bits(count), UVM_DEC);
-    //printer.print_int("max_random_count", max_random_count, 
-    //  $bits(max_random_count), UVM_DEC);
-    //printer.print_array_header("sequences", sequences.size());
-    //for(int i=0; i<sequences.size(); ++i)
-    //  printer.print_string($psprintf("[%0d]", i), sequences[i], "[");
-    //printer.print_array_footer(sequences.size());
-    //printer.print_int("max_random_depth", max_random_depth, 
-    //  $bits(max_random_depth), UVM_DEC);
-  //end
+  printer.print_array_header("arbitration_queue", arb_sequence_q.size());
+  foreach (arb_sequence_q[i])
+    printer.print_string($psprintf("[%0d]", i),
+       $sformatf("%s@seqid%0d",arb_sequence_q[i].request.name(),arb_sequence_q[i].sequence_id), "[");
+  printer.print_array_footer(arb_sequence_q.size());
+
+  printer.print_array_header("lock_queue", lock_list.size());
+  foreach(lock_list[i])
+    printer.print_string($psprintf("[%0d]", i),
+       $sformatf("%s@seqid%0d",lock_list[i].get_full_name(),lock_list[i].get_sequence_id()), "[");
+  printer.print_array_footer(lock_list.size());
 endfunction
  
 
@@ -548,10 +482,10 @@ function void uvm_sequencer_base::m_update_lists();
 endfunction
 
 
-// m_display_queues
+// convert2string
 // ----------------
 
-function string uvm_sequencer_base::m_display_queues();
+function string uvm_sequencer_base::convert2string();
   string s;
   
   $sformat(s, "  -- arb i/id/type: ");
@@ -816,7 +750,7 @@ function int uvm_sequencer_base::m_choose_next_request();
     if (highest_sequences.size() == 0) begin
       uvm_report_fatal("Sequencer",
           $psprintf("Error in User arbitration, sequence %0d not available\n%s",
-                    i, m_display_queues()), UVM_NONE);
+                    i, convert2string()), UVM_NONE);
     end
     return(i);
   end
@@ -1355,6 +1289,56 @@ function void uvm_sequencer_base::send_request(uvm_sequence_base sequence_ptr,
 endfunction
 
 
+// start_phase_sequence
+// --------------------
+
+function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
+    uvm_object_wrapper wrapper;
+    uvm_sequence_base  seq;
+    uvm_factory f = uvm_factory::get();
+
+    // default sequence instance?
+    if (!uvm_config_db #(uvm_sequence_base)::get(
+          this, {phase.get_name(),"_phase"}, "default_sequence", seq) ) begin
+      // default sequence object wrapper?
+      if (uvm_config_db #(uvm_object_wrapper)::get(
+               this, {phase.get_name(),"_phase"}, "default_sequence", wrapper) ) begin
+        // use wrapper is a sequence type        
+        if(!$cast(seq , f.create_object_by_type(
+              wrapper, get_full_name(), wrapper.get_type_name()))) begin
+          `uvm_warning("PHASESEQ", {"Default sequence for phase '",
+                       phase.get_name(),"' %s is not a sequence type"})
+          return;
+        end
+      end
+      else begin
+        `uvm_info("PHASESEQ", {"No default phase sequence for phase '",
+                               phase.get_name(),"'"}, UVM_FULL)
+        return;
+      end
+    end
+
+    `uvm_info("PHASESEQ", {"Starting default sequence '",
+       seq.get_type_name(),"' for phase '", phase.get_name()}, UVM_FULL)
+
+    seq.print_sequence_info = 1;
+    seq.set_sequencer(this);
+    seq.reseed();
+    seq.starting_phase = phase;
+
+    if (seq.is_randomized && !seq.randomize()) begin
+      `uvm_warning("STRDEFSEQ", {"Randomization failed for default sequence '",
+       seq.get_type_name(),"' for phase ", phase.get_name()})
+       return;
+    end
+
+    fork
+      seq.start(this);
+    join_none
+
+endfunction
+
+
 
 //----------------------------------------------------------------------------
 //
@@ -1420,11 +1404,6 @@ endfunction
 // Called when the run phase begins, this method starts the default sequence,
 // as specified by the default_sequence member variable.
 //
-// Sequencers provide the start_default_sequence task to execute the default
-// sequence in the run phase. This method is not intended to be called
-// externally, but may be overridden in a derivative sequencer class if 
-// special behavior is needed when the default sequence is started. T
-
 
 task uvm_sequencer_base::start_default_sequence();
   uvm_sequence_base m_seq ;
@@ -1437,8 +1416,8 @@ task uvm_sequencer_base::start_default_sequence();
     return;
   end
 
-  if (uvm_config_db #(uvm_sequence_base)::exists(this, "", "run_ph", 0) ||
-      uvm_config_db #(uvm_object_wrapper)::exists(this, "", "run_ph", 0))
+  if (uvm_config_db #(uvm_sequence_base)::exists(this, "run_phase", "default_sequence", 0) ||
+      uvm_config_db #(uvm_object_wrapper)::exists(this, "run_phase", "default_sequence", 0))
   begin
     `uvm_warning("MULDEFSEQ", {"A default sequence has been set via the ",
        "\"default_sequence\" configuration option and the set_default_seq()",
@@ -1552,10 +1531,11 @@ function void uvm_sequencer_base::m_add_builtin_seqs(bit add_simple=1);
 endfunction
 
 
-// run
-// ---
+// run_phase
+// ---------
 
-task uvm_sequencer_base::run();
+task uvm_sequencer_base::run_phase(uvm_phase phase);
+  super.run_phase(phase);
   if (default_sequence != "" && count != 0)
     start_default_sequence();
 endtask

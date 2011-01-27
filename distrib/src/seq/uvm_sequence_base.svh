@@ -147,8 +147,6 @@ class uvm_sequence_base extends uvm_sequence_item;
   protected int               response_queue_depth = 8;
   protected bit               response_queue_error_report_disabled = 0;
 
-  /* protected */ uvm_phase_schedule starting_phase;
-
   rand bit is_randomized = 0;
   constraint c_randomized {
     is_randomized == 1;
@@ -213,31 +211,6 @@ class uvm_sequence_base extends uvm_sequence_item;
   task wait_for_sequence_state(uvm_sequence_state_enum state);
     wait (m_sequence_state == state);
   endtask
-
-  /* AE- probably don't need this
-  // Function: raise_objection
-  //
-  // Raise an objection to ending the phase
-  //
-  virtual function void raise_objection (uvm_object obj, 
-                                         string description="",
-                                         int count=1);
-    if (starting_phase != null)
-      starting_phase.raise_objection(obj,description,count);
-  endfunction
-
-
-  // Function: drop_objection
-  //
-  // Drop an objection to ending this phase
-  //
-  virtual function void drop_objection (uvm_object obj, 
-                                        string description="",
-                                        int count=1);
-    if (starting_phase != null)
-      starting_phase.drop_objection(obj,description,count);
-  endfunction
-  */
 
 
   //--------------------------
@@ -465,6 +438,15 @@ class uvm_sequence_base extends uvm_sequence_item;
     return;
   endtask
     
+
+  // Variable: starting_phase
+  //
+  // If non-null, specifies the phase in which this sequence was started.
+  // The ~starting_phase~ is set automatically when this sequence is 
+  // started as the default sequence. See 
+  // <uvm_sequencer_base::start_phase_sequence>.
+  //
+  uvm_phase starting_phase;
 
   //------------------------
   // Group: Sequence Control

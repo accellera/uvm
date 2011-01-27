@@ -41,7 +41,8 @@ class base extends uvm_component;
       n_ph++;
    endfunction
    
-   task check_the_phase_t(string prev, string curr);
+   task check_the_phase_t(string prev, string curr, uvm_phase phase);
+      phase.raise_objection(this);
       `uvm_info("Test", $psprintf("Starting phase \"%s\"...", curr), UVM_LOW)
       #10;
       if (prev != last_phase) begin
@@ -52,6 +53,7 @@ class base extends uvm_component;
       last_phase = curr;
       `uvm_info("Test", $psprintf("Ending phase \"%s\"...", curr), UVM_LOW)
       n_ph++;
+      phase.drop_objection(this);
    endtask
 
    function new(string name = "my_comp", uvm_component parent = null);
@@ -59,90 +61,90 @@ class base extends uvm_component;
       set_phase_domain("uvm");
    endfunction
 
-   function void build_phase();
+   function void build_phase(uvm_phase phase);
       check_the_phase("", "build");
    endfunction
    
-   function void connect_phase();
+   function void connect_phase(uvm_phase phase);
       check_the_phase("build", "connect");
    endfunction
    
-   function void end_of_elaboration_phase();
+   function void end_of_elaboration_phase(uvm_phase phase);
       check_the_phase("connect", "end_of_elaboration");
    endfunction
    
-   function void start_of_simulation_phase();
+   function void start_of_simulation_phase(uvm_phase phase);
       check_the_phase("end_of_elaboration", "start_of_simulation");
    endfunction
    
-   task run_phase(uvm_phase_schedule phase);
-      check_the_phase_t("start_of_simulation", "run");
+   task run_phase(uvm_phase phase);
+     global_stop_request();
    endtask
    
-   task pre_reset_phase(uvm_phase_schedule phase);
-      check_the_phase_t("start_of_simulation", "pre_reset");
+   task pre_reset_phase(uvm_phase phase);
+      check_the_phase_t("start_of_simulation", "pre_reset",phase);
       // Make sure the last phase is not "run"
       #50;
       last_phase = "pre_reset";
    endtask
    
-   task reset_phase(uvm_phase_schedule phase);
-      check_the_phase_t("pre_reset", "reset");
+   task reset_phase(uvm_phase phase);
+      check_the_phase_t("pre_reset", "reset",phase);
    endtask
    
-   task post_reset_phase(uvm_phase_schedule phase);
-      check_the_phase_t("reset", "post_reset");
+   task post_reset_phase(uvm_phase phase);
+      check_the_phase_t("reset", "post_reset",phase);
    endtask
    
-   task pre_configure_phase(uvm_phase_schedule phase);
-      check_the_phase_t("post_reset", "pre_configure");
+   task pre_configure_phase(uvm_phase phase);
+      check_the_phase_t("post_reset", "pre_configure",phase);
    endtask
    
-   task configure_phase(uvm_phase_schedule phase);
-      check_the_phase_t("pre_configure", "configure");
+   task configure_phase(uvm_phase phase);
+      check_the_phase_t("pre_configure", "configure",phase);
    endtask
    
-   task post_configure_phase(uvm_phase_schedule phase);
-      check_the_phase_t("configure", "post_configure");
+   task post_configure_phase(uvm_phase phase);
+      check_the_phase_t("configure", "post_configure",phase);
    endtask
    
-   task pre_main_phase(uvm_phase_schedule phase);
-      check_the_phase_t("post_configure", "pre_main");
+   task pre_main_phase(uvm_phase phase);
+      check_the_phase_t("post_configure", "pre_main",phase);
    endtask
    
-   task main_phase(uvm_phase_schedule phase);
-      check_the_phase_t("pre_main", "main");
+   task main_phase(uvm_phase phase);
+      check_the_phase_t("pre_main", "main",phase);
    endtask
    
-   task post_main_phase(uvm_phase_schedule phase);
-      check_the_phase_t("main", "post_main");
+   task post_main_phase(uvm_phase phase);
+      check_the_phase_t("main", "post_main",phase);
    endtask
    
-   task pre_shutdown_phase(uvm_phase_schedule phase);
-      check_the_phase_t("post_main", "pre_shutdown");
+   task pre_shutdown_phase(uvm_phase phase);
+      check_the_phase_t("post_main", "pre_shutdown",phase);
    endtask
    
-   task shutdown_phase(uvm_phase_schedule phase);
-      check_the_phase_t("pre_shutdown", "shutdown");
+   task shutdown_phase(uvm_phase phase);
+      check_the_phase_t("pre_shutdown", "shutdown",phase);
    endtask
    
-   task post_shutdown_phase(uvm_phase_schedule phase);
-      check_the_phase_t("shutdown", "post_shutdown");
+   task post_shutdown_phase(uvm_phase phase);
+      check_the_phase_t("shutdown", "post_shutdown",phase);
    endtask
    
-   function void extract_phase();
+   function void extract_phase(uvm_phase phase);
       check_the_phase("post_shutdown", "extract");
    endfunction
    
-   function void check_phase();
+   function void check_phase(uvm_phase phase);
       check_the_phase("extract", "check");
    endfunction
    
-   function void report_phase();
+   function void report_phase(uvm_phase phase);
       check_the_phase("check", "report");
    endfunction
    
-   function void final_phase();
+   function void final_phase(uvm_phase phase);
       check_the_phase("report", "final");
    endfunction
    
@@ -157,8 +159,9 @@ class sub extends base;
 
      process pid;
 
-     function void phase_started(uvm_phase_schedule phase);
-       if (phase.get_name() == "run") begin
+     function void phase_started(uvm_phase phase);
+       super.phase_started(phase);
+       if (phase.get_name() == "pre_reset") begin
         n_ph++; //don't call the check_the_phase because it would create a race
         fork begin
            pid = process::self();
@@ -178,13 +181,14 @@ class test extends base;
    function new(string name = "test1", uvm_component parent = null);
       super.new(name, parent);
    endfunction
-   function void build_phase();
-      super.build_phase();    
+   function void build_phase(uvm_phase phase);
+      super.build_phase(phase);    
       sub_inst = sub::type_id::create("sub_inst", this);
    endfunction
 
-     function void phase_started(uvm_phase_schedule phase);
-       if (phase.get_name() == "run") begin
+     function void phase_started(uvm_phase phase);
+       super.phase_started(phase);
+       if (phase.get_name() == "pre_reset") begin
        n_ph++; //don't call the check_the_phase because it would create a race
         fork begin
            `uvm_info("RUN", "HELLO",UVM_NONE);

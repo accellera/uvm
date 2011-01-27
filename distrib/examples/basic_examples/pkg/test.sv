@@ -32,7 +32,7 @@ module test;
       super.new(name, parent);
     endfunction
 
-    task run_phase(uvm_phase_schedule phase);
+    task run_phase(uvm_phase phase);
       $display("%0t: %m: start run", $time);
       #10 $display("%0t: %s HI", $time, get_full_name());
     endtask
@@ -41,7 +41,7 @@ module test;
       return "lower";
     endfunction
 
-    function void build_phase();
+    function void build_phase(uvm_phase phase);
        void'(get_config_int("data", data));
        void'(get_config_string("str", str));
     endfunction 
@@ -71,7 +71,7 @@ module test;
       a = new[5]; for(int i=0; i<5;++i) a[i] = i*i;
     endfunction
 
-    task run_phase(uvm_phase_schedule phase);
+    task run_phase(uvm_phase phase);
       #10 $display("%0t: %s HI", $time, get_full_name());
     endtask
 

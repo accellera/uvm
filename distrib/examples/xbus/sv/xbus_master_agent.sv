@@ -49,8 +49,8 @@ class xbus_master_agent extends uvm_agent;
   endfunction : new
 
   // build_phase
-  function void build_phase();
-    super.build_phase();
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
     monitor = xbus_master_monitor::type_id::create("monitor", this);
     if(is_active == UVM_ACTIVE) begin
       sequencer = xbus_master_sequencer::type_id::create("sequencer", this);
@@ -59,7 +59,7 @@ class xbus_master_agent extends uvm_agent;
   endfunction : build_phase
 
   // connect_phase
-  function void connect_phase();
+  function void connect_phase(uvm_phase phase);
     if(is_active == UVM_ACTIVE) begin
       driver.seq_item_port.connect(sequencer.seq_item_export);
     end

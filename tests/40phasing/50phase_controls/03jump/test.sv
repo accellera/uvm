@@ -14,21 +14,23 @@ class test extends test_base;
   endfunction : new
   `uvm_component_utils(test);
 
-  task main_phase(uvm_phase_schedule phase);
+  task main_phase(uvm_phase phase);
+    phase.raise_objection(this);
     #20;
     if( jump_reset_num ) begin
       `uvm_info( "JUMP_RESET", $psprintf("Jump backward to reset phase from : main"), UVM_NONE);
       jump_reset_num --;
 
-      jump( uvm_reset_ph );
+      phase.jump( uvm_reset_ph );
     end
     #10;
     //now jump to shutdown (skip post_main and pre_shutdown)
     `uvm_info( "JUMP_SHUTDOWN", $psprintf("Jump forward to shutdown phase from : main"), UVM_NONE);
-    jump( uvm_shutdown_ph );
+    phase.jump( uvm_shutdown_ph );
+    phase.drop_objection(this);
   endtask : main_phase
 
-  function void check_phase();
+  function void check_phase(uvm_phase phase);
 //normal test
 //  [top_random_seq]    10
 //  [bot_random_seq]    24

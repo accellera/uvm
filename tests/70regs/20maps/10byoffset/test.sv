@@ -53,7 +53,7 @@ endclass
 
 
 class dut extends uvm_reg_block;
-
+   `uvm_object_utils(dut)
    rand reg32 r0;
    rand reg8  r1;
    rand reg32 r2;
@@ -111,6 +111,7 @@ begin
    catcher ctchr = new;
 
    blk.build();
+   blk.print();
    $write("%s\n", blk.convert2string());
 
    uvm_report_cb::add(null,ctchr);

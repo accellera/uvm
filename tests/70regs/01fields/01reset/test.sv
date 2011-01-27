@@ -84,6 +84,8 @@ begin
    data = rg.get();
    if (data !== 'h2895A30) `uvm_error("Test", $psprintf("Hard reset value is 'h%h instead of 'h2895A30", data));
    
+   rg.print();
+   
    begin
       uvm_report_server svr;
       svr = _global_reporter.get_report_server();

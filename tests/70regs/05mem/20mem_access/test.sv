@@ -189,7 +189,8 @@ module tbtest();
 
     function void end_of_elaboration();
       uvm_default_printer=uvm_default_tree_printer;
-      this.print();
+      this.print(); 
+      model.print();   
     endfunction
 
     task run();

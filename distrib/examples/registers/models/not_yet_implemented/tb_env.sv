@@ -64,7 +64,7 @@ class tb_env extends uvm_env;
       super.new(name, parent);
    endfunction: new
 
-   virtual function void build_phase();
+   virtual function void build_phase(uvm_phase phase);
       regmodel = block_B::type_id::create("regmodel",,get_full_name());
       regmodel.build();
       regmodel.lock_model();
@@ -72,7 +72,7 @@ class tb_env extends uvm_env;
       bus = reg_agent#(dut)::type_id::create("bus", this);
    endfunction: build_phase
 
-   virtual function void connect_phase();
+   virtual function void connect_phase(uvm_phase phase);
       reg2rw_adapter reg2rw  = new("reg2rw");
       regmodel.default_map.set_sequencer(bus.sqr, reg2rw);
       regmodel.default_map.set_auto_predict();

@@ -99,6 +99,7 @@ begin
          foreach (blks[i]) begin
             `uvm_info("Test", $psprintf("Root block: \"%s\"",
                                         blks[i].get_full_name()), UVM_NONE)
+                                        
          end
       end
    end

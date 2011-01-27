@@ -204,9 +204,8 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
 
   /* local */ extern function void m_last_rsp_push_front(RSP item);
   /* local */ extern function void put_response (RSP t);
-  /* local */ extern virtual function void build_phase();
-  /* local */ extern virtual function void connect_phase();
-  /* local */ extern virtual task          run      ();
+  /* local */ extern virtual function void build_phase(uvm_phase phase);
+  /* local */ extern virtual function void connect_phase(uvm_phase phase);
   /* local */ extern virtual function void do_print (uvm_printer printer);
   /* local */ extern virtual function void analysis_write(uvm_sequence_item t);
   /* local */ extern function void m_last_req_push_front(REQ item);
@@ -247,7 +246,7 @@ endfunction
 // connect_phase
 // -------------
 
-function void uvm_sequencer_param_base::connect_phase();
+function void uvm_sequencer_param_base::connect_phase(uvm_phase phase);
   rsp_export.connect(sqr_rsp_analysis_fifo.analysis_export);
 endfunction
 
@@ -255,8 +254,8 @@ endfunction
 // build_phase
 // -----------
 
-function void uvm_sequencer_param_base::build_phase();
-  super.build_phase();
+function void uvm_sequencer_param_base::build_phase(uvm_phase phase);
+  super.build_phase(phase);
   sqr_rsp_analysis_fifo.sequencer_ptr = this;
 endfunction
 
@@ -356,15 +355,6 @@ function void uvm_sequencer_param_base::analysis_write(uvm_sequence_item t);
   end
   put_response(response);
 endfunction
-
-
-// run
-// ---
-
-task uvm_sequencer_param_base::run();
-  if (default_sequence != "" && count != 0)
-    start_default_sequence();
-endtask
 
 
 // get_num_reqs_sent

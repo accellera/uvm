@@ -52,7 +52,7 @@
 // graph (2), with the difference that B and C each have as a successor
 // D. D, in turn, has both B and C as predecessors.
 
-class uvm_graph;
+class uvm_graph extends uvm_object;
 
   // graph structure
   protected string m_name;

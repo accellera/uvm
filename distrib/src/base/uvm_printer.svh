@@ -109,11 +109,11 @@ virtual class uvm_printer;
 
   // backward compatibility
   virtual function void print_field (string          name, 
-                                          uvm_bitstream_t value, 
-                                          int             size, 
-                                          uvm_radix_enum  radix=UVM_NORADIX,
-                                          byte            scope_separator=".",
-                                          string          type_name="");
+                                     uvm_bitstream_t value, 
+                                     int             size, 
+                                     uvm_radix_enum  radix=UVM_NORADIX,
+                                     byte            scope_separator=".",
+                                     string          type_name="");
     print_int (name, value, size, radix, scope_separator, type_name);
   endfunction
 
@@ -711,8 +711,7 @@ function void uvm_printer::print_object_header (string name,
   if(name == "") 
     name = "<unnamed>";
 
-  if(name != "")
-    m_scope.set_arg(name);
+  m_scope.set_arg(name);
 
   row_info.level = m_scope.depth();
   row_info.name = adjust_name(m_scope.get(),scope_separator);
@@ -736,9 +735,9 @@ function void uvm_printer::print_object (string name, uvm_object value,
 
   if(value != null)  begin
     if((knobs.depth == -1 || (knobs.depth > m_scope.depth())) &&
-          !value.m_sc.cycle_check.exists(value)) begin
+          !value.__m_uvm_status_container.cycle_check.exists(value)) begin
 
-      value.m_sc.cycle_check[value] = 1;
+      value.__m_uvm_status_container.cycle_check[value] = 1;
       m_scope.down(name);
 
       //Handle children of the comp
@@ -755,11 +754,11 @@ function void uvm_printer::print_object (string name, uvm_object value,
       // print members of object
       void'(value.sprint(this));
 
-      if(name[0] == "[")
+      if(name != "" && name[0] == "[")
         m_scope.up("[");
       else
         m_scope.up(".");
-      value.m_sc.cycle_check.delete(value);
+      value.__m_uvm_status_container.cycle_check.delete(value);
     end
   end
 

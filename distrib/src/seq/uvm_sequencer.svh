@@ -218,7 +218,8 @@ function void uvm_sequencer::item_done(RSP item = null);
   get_next_item_called = 0;
   
   if (m_req_fifo.try_get(t) == 0) begin
-    uvm_report_fatal(get_full_name(), "Item_done() called with no outstanding requests.  Each call to item_done() must be paired with a previous call to get_next_item().");
+    uvm_report_fatal(get_full_name(), {"Item_done() called with no outstanding requests.",
+      " Each call to item_done() must be paired with a previous call to get_next_item()."});
   end else begin
     m_wait_for_item_sequence_id = t.get_sequence_id();
     m_wait_for_item_transaction_id = t.get_transaction_id();

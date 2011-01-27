@@ -1,6 +1,6 @@
 uvm_sequence_item: {
   i: 'hf 
-  b: aa 
+  b: -86 
   bigint: 'h1aaaa5555aaaa5555aaaa5555 
   num: TWO 
   s: ABCDEFG 

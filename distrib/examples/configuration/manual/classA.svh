@@ -31,8 +31,8 @@ class A extends uvm_component;
   function new(string name, uvm_component parent);
     super.new(name, parent);
   endfunction
-  function void build_phase();
-    super.build_phase();
+  function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
 
     void'(get_config_int("debug", debug));
     set_config_int("*", "v", 0);
@@ -49,7 +49,7 @@ class A extends uvm_component;
   function void do_print(uvm_printer printer);
     printer.print_field("debug", debug, 1);
   endfunction
-  task run_phase(uvm_phase_schedule phase);
+  task run_phase(uvm_phase phase);
     begin end
   endtask
 endclass

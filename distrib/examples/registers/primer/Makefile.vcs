@@ -27,7 +27,7 @@ include ../../Makefile.vcs
 all: comp run
 
 comp:
-	$(VCS) +incdir+../common/apb \
+	$(VCS) +incdir+../../apb \
 		tb_top.sv test.sv
 
 run: hw_reset reg_user

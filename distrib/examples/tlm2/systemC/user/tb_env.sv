@@ -35,13 +35,13 @@ class tb_env extends uvm_env;
      super.new(name, parent);
    endfunction: new
 
-   function void build_phase();
-      super.build_phase();
+   function void build_phase(uvm_phase phase);
+      super.build_phase(phase);
       initiator0 = initiator::type_id::create("initiator0", this);
       target1    = target::type_id::create("target1", this);
    endfunction : build_phase
    
-   function void connect_phase();
+   function void connect_phase(uvm_phase phase);
       uvm_tlm2_sv_bind#(payload)::connect(initiator0.socket,
                                           UVM_TLM_B_INITIATOR,
                                           "port0");

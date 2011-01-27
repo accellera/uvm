@@ -30,7 +30,7 @@ all: blk sys
 blk: comp_blk run_blk
 
 blk_comp comp_blk:
-	$(VCS) +incdir+../common/apb \
+	$(VCS) +incdir+../../apb \
 		blk_run.sv
 
 blk_run run_blk:
@@ -41,7 +41,7 @@ blk_run run_blk:
 sys: comp_sys run_sys
 
 sys_comp comp_sys:
-	$(VCS) +incdir+../common/apb \
+	$(VCS) +incdir+../../apb \
 		sys_run.sv
 
 sys_run run_sys:

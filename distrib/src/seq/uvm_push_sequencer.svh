@@ -60,7 +60,7 @@ class uvm_push_sequencer #(type REQ=uvm_sequence_item, RSP=REQ)
   // <uvm_push_driver #(REQ,RSP)>, which would be responsible for
   // executing the item.
   //
-  task run_phase(uvm_phase_schedule phase);
+  task run_phase(uvm_phase phase);
     REQ t;
     int selected_sequence;
 

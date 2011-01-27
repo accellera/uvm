@@ -32,10 +32,12 @@ class myseq extends uvm_sequence;
   
   task body;
     start_cnt++;
+    if (starting_phase!=null) starting_phase.raise_objection(this);
     `uvm_info("INBODY", "Starting myseq!!!", UVM_NONE)
     #10;
     `uvm_info("INBODY", "Ending myseq!!!", UVM_NONE)
     end_cnt++;
+    if (starting_phase!=null) starting_phase.drop_objection(this);
   endtask
 endclass
 
@@ -46,7 +48,7 @@ class myseqr extends uvm_sequencer;
   endfunction
   `uvm_component_utils(myseqr)
 
-  task main_phase(uvm_phase_schedule phase);
+  task main_phase(uvm_phase phase);
     `uvm_info("MAIN","In main!!!", UVM_NONE)
     #100;
     `uvm_info("MAIN","Exiting main!!!", UVM_NONE)
@@ -63,15 +65,16 @@ class test extends uvm_test;
 
    `uvm_component_utils(test)
 
-   function void build_phase();
-      uvm_phase_schedule domain, cfg, main;
+   function void build_phase(uvm_phase phase);
+      uvm_phase domain, cfg, main;
       seqr = new("seqr", this);
       domain = seqr.find_phase_schedule("uvm_pkg::uvm","*");
-      uvm_config_db #(uvm_object_wrapper)::set(this, "seqr", "configure_ph", myseq::type_id::get());
-      uvm_config_db #(uvm_object_wrapper)::set(this, "seqr", "main_ph", myseq::type_id::get());
+      uvm_config_db #(uvm_object_wrapper)::set(this, "seqr.configure_phase", "default_sequence", myseq::type_id::get());
+      uvm_config_db #(uvm_object_wrapper)::set(this, "seqr.main_phase", "default_sequence", myseq::type_id::get());
+      global_stop_request(); // end run phase
    endfunction
    
-   function void report_phase();
+   function void report_phase(uvm_phase phase);
      if(myseq::start_cnt != 2 && myseq::end_cnt != 2)
        $display("*** UVM TEST FAILED ***");
       else

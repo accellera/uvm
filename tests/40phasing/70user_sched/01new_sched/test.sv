@@ -39,33 +39,6 @@
 
 `include "uvm_macros.svh"
 
-// Macro for creating a phase that calls a phase implementation
-// task for a specific component type which implements. The implemenation
-// has to be a parameterized type parameterized to a component type which
-// has the phase implementation as part of this. The alternative would be
-// to explicitly call set_phase_imp in each component ctor.
-
-`define my_task_phase(PHASE) \
-   class ``PHASE``_phase#(type T=my_component) extends uvm_task_phase; \
-     task exec_task(uvm_component comp, uvm_phase_schedule phase); \
-       T mycomp; \
-       if($cast(mycomp, comp)) begin \
-         mycomp.``PHASE(uvm_phase_schedule phase) ; \
-       end \
-     endtask \
-     function new(string name); \
-       super.new(`"PHASE`"); \
-       set_name(`"PHASE`"); \
-     endfunction \
-     static ``PHASE``_phase#(T) m_inst = get(); \
-     static function ``PHASE``_phase#(T) get(); \
-       if(m_inst == null) begin \
-         m_inst = new(`"PHASE`"); \
-       end \
-       return m_inst; \
-     endfunction \
-   endclass \
-
 package mypkg;
   import uvm_pkg::*;
 
@@ -73,31 +46,21 @@ package mypkg;
   // defining the schedule. When SV supports interface classes,
   // this would be an interface class.
   virtual class my_component;
-    pure virtual task myreset(uvm_phase_schedule phase);
-    pure virtual task mymain(uvm_phase_schedule phase);
-    pure virtual task myshutdown(uvm_phase_schedule phase);
+    pure virtual task custom_reset_phase(uvm_phase phase);
+    pure virtual task custom_main_phase(uvm_phase phase);
+    pure virtual task custom_shutdown_phase(uvm_phase phase);
   endclass
 
-  // Create the paramterized class definitions for:
-  // myreset_phase#(T), mymain#(T) and myshutdown#(T).
+  `uvm_user_task_phase(custom_reset,my_component,my_)
+  `uvm_user_task_phase(custom_main,my_component,my_)
+  `uvm_user_task_phase(custom_shutdown,my_component,my_)
 
-  `my_task_phase(myreset)
-  `my_task_phase(mymain)
-  `my_task_phase(myshutdown)
 
-  // Parameterized class for creating a schedule for a specific
-  // component type. This code gets executed by a derived component's
-  // set_phase_schedule function to get the special schedule into
-  // the component.
-  // 
-  // T is the component type. S is a component specific schedule name
-  // to keep the different schedules uniquely named.
-
-  class my_schedule#(type T=uvm_component, string S="spec_sched");
+  class my_schedule#(string S="spec_sched");
 
     // The base schedule puts new schedule into the master schedule.
-    static function uvm_phase_schedule get_my_base_schedule(string domain);
-      uvm_phase_schedule common, my_sched;
+    static function uvm_phase get_my_base_schedule(string domain);
+      uvm_phase common, my_sched;
       uvm_root top;
       top = uvm_root::get();
 
@@ -110,9 +73,9 @@ package mypkg;
       common = top.find_phase_schedule("uvm_pkg::common", "common");
   
       my_sched = new("mypkg::my_sched");
-      my_sched.add_phase(myreset_phase::get());
-      my_sched.add_phase(mymain_phase::get());
-      my_sched.add_phase(myshutdown_phase::get());
+      my_sched.add_phase(my_custom_reset_phase::get());
+      my_sched.add_phase(my_custom_main_phase::get());
+      my_sched.add_phase(my_custom_shutdown_phase::get());
 
       common.add_schedule(my_sched, .with_phase(common.find_schedule("run")));
 
@@ -123,8 +86,8 @@ package mypkg;
     endfunction
 
     // This creates the actual schedule for the particular component type.
-    static function uvm_phase_schedule get_my_schedule(string domain);
-      uvm_phase_schedule common, my_sched, my_base_sched;
+    static function uvm_phase get_my_schedule(string domain);
+      uvm_phase common, my_sched, my_base_sched;
       uvm_root top;
       top = uvm_root::get();
   
@@ -142,9 +105,9 @@ package mypkg;
       // Create the new schedule and add its phases with respect to the
       // base schedule.
       my_sched = new({"mypkg::",S});
-      my_sched.add_phase(myreset_phase#(T)::get(), .with_phase(my_base_sched.find_schedule("myreset")));
-      my_sched.add_phase(mymain_phase#(T)::get(), .with_phase(my_base_sched.find_schedule("mymain")));
-      my_sched.add_phase(myshutdown_phase#(T)::get(), .with_phase(my_base_sched.find_schedule("myshutdown")));
+      my_sched.add_phase(my_custom_reset_phase::get(), .with_phase(my_base_sched.find_schedule("myreset")));
+      my_sched.add_phase(my_custom_main_phase::get(), .with_phase(my_base_sched.find_schedule("mymain")));
+      my_sched.add_phase(my_custom_shutdown_phase::get(), .with_phase(my_base_sched.find_schedule("myshutdown")));
 
       //Add to the master schedule
       common.add_schedule(my_sched, .with_phase(common.find_schedule("run")));
@@ -160,87 +123,85 @@ module test;
   import uvm_pkg::*;
   import mypkg::*;
 
-  // Some component that will use the new schedule
-  class mycomp extends uvm_component;
-    time start_reset, start_main, start_shutdown;
-    time end_reset, end_main, end_shutdown;
-
-    uvm_phase_schedule my_sched;
-    function new(string name, uvm_component parent);
-      super.new(name,parent);
-      set_phase_domain("base_domain");
-    endfunction
-
-    // The component needs to override teh set_phase_schedule to add
-    // the new schedule.
-    function void set_phase_schedule(string domain_name);
-      my_sched = my_schedule#(mycomp,"mycomp")::get_my_schedule(domain_name);
-
-      // enforce one domain per component per schedule.
-      if (find_phase_schedule("my_pkg::mycomp","*"))
-        delete_phase_schedule(find_phase_schedule("my_pkg::mycomp","*"));
-      add_phase_schedule(my_sched, domain_name);
-    endfunction
-
-    task myreset(uvm_phase_schedule phase);
-      start_reset = $time;
-      `uvm_info("RST", "IN MY RESET", UVM_NONE)
-      #30 `uvm_info("RST", "END MY RESET", UVM_NONE)
-      end_reset = $time;
-    endtask
-    task mymain(uvm_phase_schedule phase);
-      start_main = $time;
-      `uvm_info("MAIN", "IN MY MAIN", UVM_NONE)
-      #30 `uvm_info("MAIN", "END MY MAIN", UVM_NONE)
-      end_main = $time;
-    endtask
-    task myshutdown(uvm_phase_schedule phase);
-      start_shutdown = $time;
-      `uvm_info("SHTDWN", "IN MY SHUTDOWN", UVM_NONE)
-      #30 `uvm_info("SHTDWN", "END MY SHUTDOWN", UVM_NONE)
-      end_shutdown = $time;
-    endtask
-  endclass
+  typedef class mycomp;
 
   // Some other component that will use the new schedule
   class othercomp extends uvm_component;
     time start_reset, start_main, start_shutdown;
     time end_reset, end_main, end_shutdown;
 
-    uvm_phase_schedule my_sched;
+    time delay=40ns;
+
+    uvm_phase other_sched;
+
     function new(string name, uvm_component parent);
       super.new(name,parent);
+    endfunction
+
+    function void connect();
+      set_phase_domain("base_domain");
+    endfunction
+
+
+    // The component needs to override teh set_phase_schedule to add
+    // the new schedule.
+    function void set_phase_schedule(string domain_name);
+      if (other_sched==null) begin
+        other_sched = my_schedule#("othercomp")::get_my_schedule(domain_name);
+        if (find_phase_schedule("my_pkg::othercomp","*"))
+          delete_phase_schedule(find_phase_schedule("my_pkg::othercomp","*"));
+        add_phase_schedule(other_sched, domain_name);
+      end
+    endfunction
+
+    task custom_reset(uvm_phase phase);
+      start_reset = $time;
+      `uvm_info("RST", "IN MY RESET", UVM_NONE)
+      #delay `uvm_info("RST", "END MY RESET", UVM_NONE)
+      end_reset = $time;
+    endtask
+    task custom_main(uvm_phase phase);
+      start_main = $time;
+      `uvm_info("MAIN", "IN MY MAIN", UVM_NONE)
+      #(60-delay) `uvm_info("MAIN", "END MY MAIN", UVM_NONE)
+      end_main = $time;
+    endtask
+    task custom_shutdown(uvm_phase phase);
+      start_shutdown = $time;
+      `uvm_info("SHTDWN", "IN MY SHUTDOWN", UVM_NONE)
+      #delay `uvm_info("SHTDWN", "END MY SHUTDOWN", UVM_NONE)
+      end_shutdown = $time;
+    endtask
+  endclass
+
+
+  // Some component that will use the new schedule
+  class mycomp extends othercomp;
+
+    uvm_phase my_sched;
+
+    function new(string name, uvm_component parent);
+      super.new(name,parent);
+      delay=30ns;
+    endfunction
+
+    function void connect();
       set_phase_domain("base_domain");
     endfunction
 
     // The component needs to override teh set_phase_schedule to add
     // the new schedule.
     function void set_phase_schedule(string domain_name);
-      my_sched = my_schedule#(othercomp,"othercomp")::get_my_schedule(domain_name);
-      if (find_phase_schedule("my_pkg::othercomp","*"))
-        delete_phase_schedule(find_phase_schedule("my_pkg::othercomp","*"));
+      super.set_phase_schedule(domain_name);
+      my_sched = my_schedule#("mycomp")::get_my_schedule(domain_name);
+      // enforce one domain per component per schedule.
+      if (find_phase_schedule("my_pkg::mycomp","*"))
+        delete_phase_schedule(find_phase_schedule("my_pkg::mycomp","*"));
       add_phase_schedule(my_sched, domain_name);
     endfunction
-
-    task myreset(uvm_phase_schedule phase);
-      start_reset = $time;
-      `uvm_info("RST", "IN MY RESET", UVM_NONE)
-      #40 `uvm_info("RST", "END MY RESET", UVM_NONE)
-      end_reset = $time;
-    endtask
-    task mymain(uvm_phase_schedule phase);
-      start_main = $time;
-      `uvm_info("MAIN", "IN MY MAIN", UVM_NONE)
-      #20 `uvm_info("MAIN", "END MY MAIN", UVM_NONE)
-      end_main = $time;
-    endtask
-    task myshutdown(uvm_phase_schedule phase);
-      start_shutdown = $time;
-      `uvm_info("SHTDWN", "IN MY SHUTDOWN", UVM_NONE)
-      #40 `uvm_info("SHTDWN", "END MY SHUTDOWN", UVM_NONE)
-      end_shutdown = $time;
-    endtask
   endclass
+
+
 
   // Normal environment adds the two sub component.
   class myenv extends uvm_component;
@@ -251,16 +212,9 @@ module test;
       mc = new("mc", this);
       oc = new("oc", this);
     endfunction
-    task run_phase(uvm_phase_schedule phase);
+    task run_phase(uvm_phase phase);
       `uvm_info("RUN", "In run", UVM_NONE)
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
-//Current global stop integration has an issue here... needs
-//to be looked at
-`ifdef WORKAROUND
-run_ph.phase_done.drop_objection();
-`else
-    `uvm_info("RUN", "WORKAROUND NOT IN PLACE, THIS WILL FAIL BECAUSE UVM DOESN'T KNOW THERE IS A USE PHASE", UVM_NONE)
-`endif
     endtask
   endclass
 
@@ -272,7 +226,7 @@ run_ph.phase_done.drop_objection();
       super.new(name,parent);
       me = new("me", this);
     endfunction
-    function void report_phase;
+    function void report_phase(uvm_phase phase);
       if(me.mc.start_reset != 0 || 
          me.oc.start_reset != 0) begin
         $display("*** UVM TEST FAILED , reset started at time %t/%0t instead of 0", me.mc.start_reset, me.oc.start_reset);

@@ -3,7 +3,7 @@ Name               Type               Size  Value
 -----------------------------------------------------------------------
 uvm_sequence_item  myobject           -     -                          
   i                integral           32    'hf                        
-  b                integral           8     aa                         
+  b                integral           8     -86                        
   bigint           integral           129   'h1aaaa5555aaaa5555aaaa5555
   num              numbers            2     TWO                        
   s                string             7     ABCDEFG                    

@@ -382,11 +382,11 @@
     if((p__.knobs.depth == -1) || (p__.m_scope.depth() < p__.knobs.depth+1)) \
     begin \
       foreach(F[key]) begin \
-          $swrite(m_sc.stringv, "[%0d]", key); \
+          $swrite(__m_uvm_status_container.stringv, "[%0d]", key); \
           if(((FLAG)&UVM_REFERENCE)==0) \
-            p__.print_object(m_sc.stringv, F[key], "[");\
+            p__.print_object(__m_uvm_status_container.stringv, F[key], "[");\
           else \
-            p__.print_object_header(m_sc.stringv, F[key], "[");\
+            p__.print_object_header(__m_uvm_status_container.stringv, F[key], "[");\
       end \
     end \
     p__.print_array_footer(F.num()); \
@@ -399,11 +399,11 @@
     uvm_printer_knobs k__; \
     if(P!=null) p__ = P; \
     else p__ = uvm_default_printer; \
-    m_sc.stringv = "aa(int,int)"; \
-    for(int i=0; i<m_sc.stringv.len(); ++i) \
-      if(m_sc.stringv[i] == " ") \
-        m_sc.stringv[i] = "_"; \
-    p__.print_array_header (`"F`", F.num(), m_sc.stringv); \
+    __m_uvm_status_container.stringv = "aa(int,int)"; \
+    for(int i=0; i<__m_uvm_status_container.stringv.len(); ++i) \
+      if(__m_uvm_status_container.stringv[i] == " ") \
+        __m_uvm_status_container.stringv[i] = "_"; \
+    p__.print_array_header (`"F`", F.num(), __m_uvm_status_container.stringv); \
     k__ = p__.knobs; \
     if((p__.knobs.depth == -1) || (p__.m_scope.depth() < p__.knobs.depth+1)) \
     begin \

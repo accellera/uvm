@@ -50,7 +50,7 @@ module test;
     // Register with the factory.
     `uvm_component_utils(simple_test)
 
-    task run_phase;
+    virtual task run_phase(uvm_phase phase);
       // Set a drain time on the objection if needed
       uvm_report_info("drain", "Setting drain time of 10", UVM_NONE);
       uvm_test_done.set_drain_time(this,10);

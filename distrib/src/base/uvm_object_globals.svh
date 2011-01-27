@@ -419,33 +419,6 @@ typedef enum { UVM_PHASE_TASK,
 } uvm_phase_type;
 
 
-// Enum: uvm_thread_mode
-//
-// Defines whether an implicit objection is raised before calling a component's
-// task-based phase method and dropped upon return from that method. This has
-// the effect of preventing a phase from ending until all implicitly and
-// explicitly raised objections have been dropped. 
-// for a given component. 
-//
-//   UVM_PHASE_NO_IMPLICIT_OBJECTION -  Do not raise an implicit objection.
-//               The component will either raise/drop explicitly, or may
-//               not even return from the task. The component task may
-//               never end on its own accord, such as with many driver and
-//               monitor implementations. This components' threads are killed
-//               by the phasing mechanism when all components that actively
-//               object to end-of-phase drop their objections.
-//
-//   UVM_PHASE_IMPLICIT_OBJECTION - Raise an implicit objection before calling
-//               the phase task, then drop it upon return. Components setting
-//               themselves to this mode ~must~ return from task else the
-//               phase will never end.
-//
-typedef enum { UVM_PHASE_NO_IMPLICIT_OBJECTION,
-               UVM_PHASE_IMPLICIT_OBJECTION,
-               UVM_PHASE_MODE_DEFAULT
-} uvm_thread_mode;
-
-
 // Enum: uvm_phase_state
 // ---------------------
 //
@@ -483,14 +456,14 @@ typedef enum { UVM_PHASE_NO_IMPLICIT_OBJECTION,
 //|        |          <-- jump_to                              v
 //|        +---------------------------------------------------+
 
-   typedef enum { UVM_PHASE_DORMANT,
-                  UVM_PHASE_SCHEDULED,
-                  UVM_PHASE_STARTED,
-                  UVM_PHASE_EXECUTING,
-                  UVM_PHASE_READY_TO_END,
-                  UVM_PHASE_ENDED,
-                  UVM_PHASE_CLEANUP,
-                  UVM_PHASE_DONE
+   typedef enum { UVM_PHASE_DORMANT      = 1,
+                  UVM_PHASE_SCHEDULED    = 2,
+                  UVM_PHASE_STARTED      = 4,
+                  UVM_PHASE_EXECUTING    = 8,
+                  UVM_PHASE_READY_TO_END = 16,
+                  UVM_PHASE_ENDED        = 32,
+                  UVM_PHASE_CLEANUP      = 64,
+                  UVM_PHASE_DONE         = 128
                   } uvm_phase_state;
 
 
@@ -510,6 +483,26 @@ typedef enum { UVM_COMPLETED   = 'h01,
                UVM_SKIPPED     = 'h04, 
                UVM_RERUN       = 'h08   
 } uvm_phase_transition;
+
+
+// Enum: uvm_wait_op
+//
+// Specifies the operand when using methods like <uvm_phase::wait_for_state>.
+//
+// UVM_EQ  - equal
+// UVM_NE  - not equal
+// UVM_LT  - less than
+// UVM_LTE - less than or equal to
+// UVM_GT  - greater than
+// UVM_GTE - greater than or equal to
+//
+typedef enum { UVM_LT,
+               UVM_LTE,
+               UVM_NE,
+               UVM_EQ,
+               UVM_GT,
+               UVM_GTE
+} uvm_wait_op;
 
 
 //------------------
