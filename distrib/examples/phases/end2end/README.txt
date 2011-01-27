@@ -32,7 +32,7 @@ Bytes written to the TxFIFO are transmitted MSB-first in order
 received. If there are no bytes to be transmitted, IDLE is
 transmitted.
 
-Reveived bytes are added to the RxFIFO if it is not full. SYNC, IDLE
+Received bytes are added to the RxFIFO if it is not full. SYNC, IDLE
 and ESC characters are ignored.
 
 The bit stream is identical in both direction. There is a SYNC
@@ -42,17 +42,20 @@ represent invalid data, unless escaped by a preceeding ESC character
 they must be preceeded by a ESC characted. The SYNC character, when
 found in a position other than the SYNC slot is a valid character.
 
-For example, the phrase 0xADB2EF81E7FEED, assuming it starts
-immediately after a SYNC character, would be transmitted as:
+For example, the phrase 0xADB2EF81E7FEED could be transmitted as:
 
-   B2 AD B2 EF E7 81 E7 B2 E7 FE ED
-   SS VV VV VV EE VV EE SS VV VV VV
+   B2 81 81 81 81 AD B2 B2 81 EF 81 E7 81 E7 B2 E7 81 E7 FE ED 81 B2
+   SS .. .. .. .. vv vv SS .. vv .. EE vv EE SS vv .. EE vv vv .. SS
 
 SS = SYNC
 EE = ESC
-VV = Valid data
+.. = IDLE
+vv = Valid data
 
 Bits are valid at the rising edge of the clock.
+
+
+
 
 The following host-accessible registers are available:
 
@@ -67,12 +70,15 @@ Address	      Bits	Name
   RO	      5:5 	RxHigh	  Rx FIFO is at or above high water mark
   RO	      6:6	RxFull	  Rx FIFO is full (32)
   W1C	      8:8	SA	  Symbol alignment has been acquired or lost
+				  Resets to 'b000010001
 
 0x0004			IntMask	  Interrupt Mask
   RW          8:0       If '0', masks the corresponding interrupt source
+				  Resets to all 0's
 
 0x0010			TxStatus
   RW          0:0       TxEn      Enable transmit path
+				  Resets to 0
 
 0x0014			TxLWM
   RW          4:0       TxLWM     Low water mark for the Tx FIFO
@@ -81,6 +87,7 @@ Address	      Bits	Name
 0x0020			RxStatus
   RW          0:0       RxEn      Enable receive path
   RO          1:1       ALIGN     Symbol alignment status
+				  Resets to all 0's
 
 0x0024			RxHWM
   RW          4:0       RxHWM     High water mark for the Rx FIFO
@@ -90,3 +97,5 @@ Address	      Bits	Name
   WO	      7:0	TxData    Write data to TxFIFO if not full
   RO	      7:0	RxData	  Read data from RxFIFO if not empty
 
+
+All unspecified bits are RO and read at 0's.
