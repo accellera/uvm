@@ -670,7 +670,7 @@ task uvm_sequence_library::execute(uvm_object_wrapper wrap);
   if (!seq_or_item.randomize())
      `uvm_error("SEQ_LIB_RAND_FAIL", "Failed to randomize sequence")
   finish_item(seq_or_item);
-  seqs_distrib[seq_or_item.get_type_name()]++;
+  seqs_distrib[seq_or_item.get_type_name()] = seqs_distrib[seq_or_item.get_type_name()]+1;
 
   sequences_executed++;
 
