@@ -1105,7 +1105,7 @@ function void uvm_reg_block::lock_model();
 
          if (n > 1) begin
             `uvm_error("UVM/REG/DUPLROOT",
-                       $sformatf("There are %0d root register models named \"%s\". This may create confusion when configuring register model components.",
+                       $sformatf("There are %0d root register models named \"%s\". The names of the root register models have to be unique",
                                  n, get_name()))
          end
       end
