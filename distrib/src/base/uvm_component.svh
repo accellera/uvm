@@ -636,9 +636,9 @@ virtual class uvm_component extends uvm_report_object;
   extern function void set_phase_imp(uvm_phase_imp phase, uvm_phase_imp imp, int hier=1);
 
   
-  // Task: suspend
+  // Task- suspend
   //
-  // Suspend this component.
+  // Deprecated. Suspend this component.
   //
   // This method must be implemented by the user to suspend the
   // component according to the protocol and functionality it implements.
@@ -647,9 +647,9 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual task suspend ();
 
 
-  // Task: resume
+  // Task- resume
   //
-  // Resume this component.
+  // Deprecated. Resume this component.
   //
   // This method must be implemented by the user to resume a component
   // that was previously suspended using <suspend()>.
@@ -659,9 +659,9 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual task resume ();
 
 
-  // Function: status
+  // Function- status
   //
-  // Returns the status of this component.
+  // Deprecated. Returns the status of this component.
   //
   // Returns a string that describes the current status of the
   // components. Possible values include, but are not limited to,
