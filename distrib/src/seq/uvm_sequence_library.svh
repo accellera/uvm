@@ -240,7 +240,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    extern virtual function int unsigned select_sequence(int unsigned max);
 
 
-   // Function: pre_randomize
+   // Function- pre_randomize
    //
    // Loads all statically registered sequence types. Subtypes of this class
    // must call ~super.pre_randomize()~
@@ -269,7 +269,6 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    // type. The sequence types will be available for selection by all instances
    // of this class. Sequence types already registered are silently ignored.
    //
-   //
    extern static function void add_typewide_sequences(uvm_object_wrapper seq_types[$]);
 
 
@@ -277,7 +276,6 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    //
    // Registers the provided sequence type with this sequence library
    // instance. Sequence types already registered are silently ignored.
-   //
    //
    extern function void add_sequence(uvm_object_wrapper seq_type);
 
@@ -287,15 +285,23 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    // Registers the provided sequence types with this sequence library
    // instance. Sequence types already registered are silently ignored.
    //
-   //
    extern virtual function void add_sequences(uvm_object_wrapper seq_types[$]);
+
+
+   // Function: remove_sequence
+   //
+   // Removes the given sequence type from this sequence library
+   // instance. If the type was registered statically, the sequence queues of
+   // all instances of this library will be updated accordingly.
+   // A warning is issued if te sequence is not registered.
+   //
+   extern virtual function void remove_sequence(uvm_object_wrapper seq_type);
 
 
    // Function: get_sequences
    //
    // 
    // Append to the provided ~seq_types~ array the list of registered <sequences>.
-   //
    //
    extern virtual function void get_sequences(ref uvm_object_wrapper seq_types[$]);
 
@@ -424,6 +430,18 @@ endfunction
 function void uvm_sequence_library::add_sequences(uvm_object_wrapper seq_types[$]);
   foreach (seq_types[i])
     add_sequence(seq_types[i]);
+endfunction
+
+
+// remove_sequence
+// ---------------
+
+function void uvm_sequence_library::remove_sequence(uvm_object_wrapper seq_type);
+  foreach (sequences[i])
+    if (sequences[i] == seq_type) begin
+      sequences.delete(i);
+      return;
+    end
 endfunction
 
 
