@@ -27,6 +27,10 @@ class uvm_reg_map_info;
    uvm_reg_addr_t         addr[];
    uvm_reg_frontdoor      frontdoor;
    uvm_reg_map_addr_range mem_range; 
+   
+   // if set marks the uvm_reg_map_info as initialized, prevents using an uninitialized map (for instance if the model 
+   // has not been locked accidently and the maps have not been computed before)
+   bit                    is_initialized;
 endclass
 
 
@@ -919,10 +923,10 @@ function void uvm_reg_map::add_submap (uvm_reg_map child_map,
      end
      if (get_parent() != child_blk.get_parent()) begin
         `uvm_error("RegModel",
-          {"Submap '",child_map.get_full_name(),"' may not be added this ",
+          {"Submap '",child_map.get_full_name(),"' may not be added to this ",
           "address map, '", get_full_name(),"', as the submap's parent block, '",
           child_blk.get_full_name(),"', is not a child of this map's parent block, '",
-          m_parent.get_full_name()})
+          m_parent.get_full_name(),"'"})
       return;
      end
    end
@@ -993,7 +997,7 @@ function void uvm_reg_map::set_sequencer(uvm_sequencer_base sequencer,
 
    if (adapter == null) begin
       `uvm_info("REG_NO_ADAPT", {"Adapter not specified for map '",get_full_name(),
-        "'. Accesses via this map will send abstract 'uvm_reg_items' to sequencer '",
+        "'. Accesses via this map will send abstract 'uvm_reg_item' items to sequencer '",
         sequencer.get_full_name(),"'"},UVM_MEDIUM)
    end
 
@@ -1197,12 +1201,17 @@ endfunction
 // get_reg_map_info
 
 function uvm_reg_map_info uvm_reg_map::get_reg_map_info(uvm_reg rg, bit error=1);
+  uvm_reg_map_info result;
   if (!m_regs_info.exists(rg)) begin
     if (error)
       `uvm_error("REG_NO_MAP",{"Register '",rg.get_name(),"' not in map '",get_name(),"'"})
     return null;
   end
-  return m_regs_info[rg];
+  result = m_regs_info[rg];
+  if(!result.is_initialized)
+    `uvm_warning("RegModel",{"map '",get_name(),"' does not seem to be initialized correctly, check that the top register model is locked()"})
+    
+  return result;
 endfunction
 
 
@@ -1475,6 +1484,7 @@ function void uvm_reg_map::Xinit_address_mapX();
 
    foreach (m_regs_info[rg_]) begin
      uvm_reg rg = rg_;
+     m_regs_info[rg].is_initialized=1;
      if (!m_regs_info[rg].unmapped) begin
         string rg_acc = rg.Xget_fields_accessX(this);
        uvm_reg_addr_t addrs[];
@@ -1739,6 +1749,8 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
       rw_access.byte_en = byte_en;
 
       bus_req = adapter.reg2bus(rw_access);
+      assert (bus_req!=null) else `uvm_fatal("RegMem",{"adapter [",adapter.get_name(),"] didnt return a bus transaction"});
+      
       bus_req.set_sequencer(sequencer);
       rw.parent.start_item(bus_req,rw.prior);
 
@@ -1915,8 +1927,41 @@ endtask: do_bus_read
 // do_print
 
 function void uvm_reg_map::do_print (uvm_printer printer);
-  super.do_print(printer);
-  // Use printer object to print contents of map
+   uvm_reg  regs[$];
+   uvm_vreg vregs[$];
+   uvm_mem  mems[$];
+   uvm_endianness_e endian;
+   uvm_reg_map maps[$];
+   string prefix = "";
+   uvm_sequencer_base sqr=get_sequencer();
+  
+   super.do_print(printer);
+//  printer.print_generic(get_name(), get_type_name(), -1, convert2string()); 
+
+   endian = get_endian(UVM_NO_HIER);
+//   $sformat(convert2string, "%s -- %0d bytes (%s)", convert2string,
+//            get_n_bytes(UVM_NO_HIER), endian.name());
+   
+   printer.print_generic("endian","",-2,endian.name()); 
+   if(sqr)
+    printer.print_generic("effective sequencer",sqr.get_type_name(),-2,sqr.get_full_name());     
+             
+   get_registers(regs,UVM_NO_HIER);
+   foreach (regs[j]) 
+        printer.print_generic(regs[j].get_name(), regs[j].get_type_name(),-2,$psprintf("@%0d +'h%0x",regs[j].get_inst_id(),regs[j].get_address(this)));
+   
+   
+   get_memories(mems);
+   foreach (mems[j]) 
+        printer.print_generic(mems[j].get_name(), mems[j].get_type_name(),-2,$psprintf("@%0d +'h%0x",mems[j].get_inst_id(),mems[j].get_address(0,this)));
+   
+   get_virtual_registers(vregs);
+   foreach (vregs[j]) 
+        printer.print_generic(vregs[j].get_name(), vregs[j].get_type_name(),-2,$psprintf("@%0d +'h%0x",vregs[j].get_inst_id(),vregs[j].get_address(0,this)));
+    
+   get_submaps(maps);
+   foreach (maps[j]) 
+        printer.print_object(maps[j].get_name(),maps[j]);
 endfunction
 
 // convert2string

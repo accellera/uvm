@@ -711,8 +711,7 @@ function void uvm_printer::print_object_header (string name,
   if(name == "") 
     name = "<unnamed>";
 
-  if(name != "")
-    m_scope.set_arg(name);
+  m_scope.set_arg(name);
 
   row_info.level = m_scope.depth();
   row_info.name = adjust_name(m_scope.get(),scope_separator);

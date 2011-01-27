@@ -77,6 +77,8 @@ module testm();
       // Set model's sequencer and adapter sequence
       reg2ovc_adapter reg2ovc = new;
       model.default_map.set_sequencer(uenv.uos, reg2ovc);
+      model.print();    
+      model.default_map.print();  
       uenv.uod.vif=testm.pif;
     endfunction
 

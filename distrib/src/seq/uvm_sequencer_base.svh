@@ -1219,7 +1219,7 @@ class uvm_sequencer_base extends uvm_component;
   // Function: get_seq_kind
   //
   // Returns an int seq_kind correlating to the sequence of type type_name
-  // in the sequencer¿s sequence library. If the named sequence is not
+  // in the sequencers sequence library. If the named sequence is not
   // registered a SEQNF warning is issued and -1 is returned.
 
   function int get_seq_kind(string type_name);
@@ -1270,7 +1270,7 @@ class uvm_sequencer_base extends uvm_component;
 
   // Function: num_sequences
   //
-  // Returns the number of sequences in the sequencer¿s sequence library.
+  // Returns the number of sequences in the sequencers sequence library.
 
   function int num_sequences();
     return (sequences.size());
