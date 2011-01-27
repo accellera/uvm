@@ -2098,15 +2098,14 @@ endfunction
 //----------------------------------
 
 // do_print
-`define iterate(expr) foreach(expr[i]) printer.print_object(i.get_name(),i)
 function void uvm_reg_block::do_print (uvm_printer printer);
-  uvm_reg_block prnt = get_parent();
   super.do_print(printer);
 
-   `iterate(blks);
-   `iterate(regs);
-   `iterate(vregs);
-   `iterate(mems);
+  foreach(blks[i]) printer.print_object(i.get_name(),i);
+  foreach(regs[i]) printer.print_object(i.get_name(),i);
+  foreach(vregs[i]) printer.print_object(i.get_name(),i);
+  foreach(mems[i]) printer.print_object(i.get_name(),i);
+  
 endfunction
 
 

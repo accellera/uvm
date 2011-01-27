@@ -231,6 +231,7 @@ begin
    
    rg.reset();
    blk.print();
+   blk.lock_model();
    
    begin   
       uvm_reg_single_bit_bash_seq seq;
