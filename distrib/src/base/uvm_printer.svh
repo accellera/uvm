@@ -109,11 +109,11 @@ virtual class uvm_printer;
 
   // backward compatibility
   virtual function void print_field (string          name, 
-                                          uvm_bitstream_t value, 
-                                          int             size, 
-                                          uvm_radix_enum  radix=UVM_NORADIX,
-                                          byte            scope_separator=".",
-                                          string          type_name="");
+                                     uvm_bitstream_t value, 
+                                     int             size, 
+                                     uvm_radix_enum  radix=UVM_NORADIX,
+                                     byte            scope_separator=".",
+                                     string          type_name="");
     print_int (name, value, size, radix, scope_separator, type_name);
   endfunction
 
