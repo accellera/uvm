@@ -68,7 +68,6 @@ class tb_env extends uvm_component;
       if (apb != null) begin
          reg2apb_adapter reg2apb = new;
          regmodel.default_map.set_sequencer(apb.sqr,reg2apb);
-
 `ifdef EXPLICIT_MON
          apb2reg_predictor.map = regmodel.default_map;
          apb2reg_predictor.adapter = reg2apb;
@@ -78,6 +77,7 @@ class tb_env extends uvm_component;
          regmodel.default_map.set_auto_predict(1);
 `endif
       end
+      regmodel.print();
    endfunction
 
    virtual task run_phase(uvm_phase phase);
