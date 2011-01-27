@@ -433,7 +433,7 @@ function void uvm_sequencer_base::build_phase(uvm_phase phase);
   // for sequence library functionality.
   if (get_config_string("default_sequence", default_sequence)) begin
     `uvm_warning("UVM_DEPRECATED",{"default_sequence config parameter is deprecated and not ",
-                 "part of the UVM standard. Use 'set_phase_seq' instead."})
+                 "part of the UVM standard. See documentation for uvm_sequencer_base::start_phase_sequence()."})
     this.m_default_seq_set = 1;
   end
   if (get_config_int("count", count)) begin
