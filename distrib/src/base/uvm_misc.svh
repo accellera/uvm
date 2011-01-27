@@ -76,7 +76,10 @@ class uvm_scope_stack;
         get = {get,".",v};
     end
     if(m_arg != "") begin
-      get = {get, ".", m_arg};
+      if(get != "")
+        get = {get, ".", m_arg};
+      else
+        get = m_arg;
     end
   endfunction
   
