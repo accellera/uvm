@@ -116,7 +116,7 @@ begin
              16'h0024: pr_data <= RxHWM;
              16'h0100: if (RxFIFO.size() > 0) begin
                 pr_data <= RxFIFO[0];
-                RxFIFO.pop_front();
+                void'(RxFIFO.pop_front());
              end
             endcase
          end
@@ -129,7 +129,7 @@ begin
    if (!TxValid && TxFIFO.size() > 0) begin
       TxByte = TxFIFO[0];
       TxValid = 1;
-      TxFIFO.pop_front();
+      void'(TxFIFO.pop_front());
    end
    TxEmpty <= TxFIFO.size() == 0;
    TxLow   <= TxFIFO.size() <= TxLWM;
@@ -167,7 +167,7 @@ always begin: TX
 end
 
 task send(input bit [7:0] symbol);
-   int tx_cnt = 0;
+   static int tx_cnt = 0;
 
    if (tx_cnt == 0) begin
       automatic bit [7:0] sync = 8'hB2;

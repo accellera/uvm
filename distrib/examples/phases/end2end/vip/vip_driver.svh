@@ -30,7 +30,7 @@ class vip_driver extends uvm_driver#(vip_tr);
 
    local bit m_suspend;
    local bit m_suspended;
-   local process m_proc[$];
+   local uvm_process m_proc[$];
 
    `uvm_component_utils(vip_driver)
    `uvm_register_cb(vip_driver, vip_driver_cbs)
@@ -117,7 +117,8 @@ class vip_driver extends uvm_driver#(vip_tr);
 
          fork
             begin
-               m_proc.push_back(process::self());
+               uvm_process p = new(process::self());
+               m_proc.push_back(p);
 
                forever begin
 

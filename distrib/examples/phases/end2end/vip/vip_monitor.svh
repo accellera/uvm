@@ -36,7 +36,7 @@ class vip_monitor extends uvm_monitor;
    local bit m_in_sync;
    local bit m_suspend;
    local bit m_suspended;
-   local process m_proc[$];
+   local uvm_process m_proc[$];
 
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
@@ -104,8 +104,8 @@ class vip_monitor extends uvm_monitor;
          fork
             begin
                bit [7:0] symbol;
-               
-               m_proc.push_back(process::self());
+               uvm_process p = new(process::self()); 
+               m_proc.push_back(p);
 
                forever begin
                   bit ok;
