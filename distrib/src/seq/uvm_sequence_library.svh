@@ -21,8 +21,10 @@
 typedef class uvm_sequence_library_cfg;
 
 //------------------------------------------------------------------------------
+//               PROTOTYPE CODE - NOT PART OF UVM 1.0 STANDARD
+//------------------------------------------------------------------------------
 //
-// CLASS: uvm_sequence_library
+// CLASS- uvm_sequence_library
 //
 // The ~uvm_sequence_library~ is a sequence that contains a list of registered
 // sequence types. It can be configured to create and execute these sequences
@@ -44,14 +46,14 @@ typedef class uvm_sequence_library_cfg;
 
 class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RSP);
 
-   // Function: new
+   // Function- new
    //
    // Create a new instance of this class
    //
    extern function new(string name="");
 
 
-   // Function: get_type_name
+   // Function- get_type_name
    //
    // Get the type name of this class
    //
@@ -60,10 +62,10 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
 
 
    //--------------------------
-   // Group: Sequence selection
+   // Group- Sequence selection
    //--------------------------
 
-   // Variable: selection_mode
+   // Variable- selection_mode
    //
    // Specifies the mode used to select sequences for execution
    //
@@ -121,7 +123,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    protected uvm_sequence_lib_mode selection_mode;
 
 
-   // Variable: min_random_count
+   // Variable- min_random_count
    //
    // Sets the minimum number of items to execute. Use the configuration
    // mechanism to set. See <selection_mode> for an example.
@@ -129,7 +131,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    protected int unsigned min_random_count=20;
 
 
-   // Variable: max_random_count
+   // Variable- max_random_count
    //
    // Sets the maximum number of items to execute. Use the configuration
    // mechanism to set. See <selection_mode> for an example.
@@ -139,7 +141,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
 
 
 
-   // Variable: sequences_executed
+   // Variable- sequences_executed
    //
    // Indicates the number of sequences executed, not including the
    // currently executing sequence, if any.
@@ -147,7 +149,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    protected int unsigned sequences_executed;
 
 
-   // Variable: sequence_count
+   // Variable- sequence_count
    //
    // Specifies the number of sequences to execute when this sequence
    // library is started. If in <UVM_SEQ_LIB_ITEM> mode, specifies the
@@ -156,7 +158,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    rand  int unsigned sequence_count;
 
 
-   // Variable: select_rand
+   // Variable- select_rand
    //
    // The index variable that is randomized to select the next sequence
    // to execute when in UVM_SEQ_LIB_RAND mode
@@ -166,7 +168,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    rand  int unsigned select_rand;
 
 
-   // Variable: select_randc
+   // Variable- select_randc
    //
    // The index variable that is randomized to select the next sequence
    // to execute when in UVM_SEQ_LIB_RANDC mode
@@ -188,7 +190,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    ;
 
 
-   // Variable: sequences
+   // Variable- sequences
    //
    // The container of all registered sequence types. For <sequence_count>
    // times, this sequence library will randomly select and execute a
@@ -198,7 +200,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
 
 
 
-   // Constraint: valid_rand_selection
+   // Constraint- valid_rand_selection
    //
    // Constrains <select_rand> to be a valid index into the ~sequences~ array
    //
@@ -208,7 +210,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
 
 
 
-   // Constraint: valid_randc_selection
+   // Constraint- valid_randc_selection
    //
    // Constrains <select_randc> to be a valid index into the ~sequences~ array
    //
@@ -218,7 +220,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
 
 
 
-   // Constraint: valid_sequence_count
+   // Constraint- valid_sequence_count
    //
    // Constrains <sequence_count> to lie within the range defined by
    // <min_random_count> and <max_random_count>.
@@ -229,7 +231,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
 
 
 
-   // Function: select_sequence
+   // Function- select_sequence
    //
    // Generates an index used to select the next sequence to execute. 
    // Overrides must return a value between 0 and ~max~, inclusive.
@@ -250,10 +252,10 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
 
 
    //-----------------------------
-   // Group: Sequence registration
+   // Group- Sequence registration
    //-----------------------------
 
-   // Function: add_typewide_sequence
+   // Function- add_typewide_sequence
    //
    // Registers the provided sequence type with this sequence library
    // type. The sequence type will be available for selection by all instances
@@ -263,7 +265,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
 
 
 
-   // Function: add_typewide_sequences
+   // Function- add_typewide_sequences
    //
    // Registers the provided sequence types with this sequence library
    // type. The sequence types will be available for selection by all instances
@@ -272,7 +274,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    extern static function void add_typewide_sequences(uvm_object_wrapper seq_types[$]);
 
 
-   // Function: add_sequence
+   // Function- add_sequence
    //
    // Registers the provided sequence type with this sequence library
    // instance. Sequence types already registered are silently ignored.
@@ -280,7 +282,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    extern function void add_sequence(uvm_object_wrapper seq_type);
 
 
-   // Function: add_sequences
+   // Function- add_sequences
    //
    // Registers the provided sequence types with this sequence library
    // instance. Sequence types already registered are silently ignored.
@@ -288,7 +290,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    extern virtual function void add_sequences(uvm_object_wrapper seq_types[$]);
 
 
-   // Function: remove_sequence
+   // Function- remove_sequence
    //
    // Removes the given sequence type from this sequence library
    // instance. If the type was registered statically, the sequence queues of
@@ -298,7 +300,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    extern virtual function void remove_sequence(uvm_object_wrapper seq_type);
 
 
-   // Function: get_sequences
+   // Function- get_sequences
    //
    // 
    // Append to the provided ~seq_types~ array the list of registered <sequences>.
@@ -334,7 +336,7 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_sequence_library_cfg
+// CLASS- uvm_sequence_library_cfg
 //
 // A convenient container class for configuring all the sequence library
 // parameters using a single ~set~ command.

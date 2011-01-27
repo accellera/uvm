@@ -18,6 +18,8 @@
 //------------------------------------------------------------------------------
 
 
+`ifndef UVM_NO_DEPRECATED
+
 //-----------------------------------------------------------------------------
 //
 // *** DEPRECATED ***
@@ -244,3 +246,4 @@
   import PKG_NAME``::*; \
   PKG_NAME``::uvm_bogus_class M_``PKG_NAME``uvm_bogus_class
 
+`endif // UVM_NO_DEPRECATED

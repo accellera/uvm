@@ -21,6 +21,8 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+`ifndef UVM_NO_DEPRECATED
+
 //------------------------------------------------------------------------------
 // Title: Predefined Sequences
 //
@@ -294,3 +296,4 @@ class uvm_simple_sequence extends uvm_sequence #(uvm_sequence_item);
 
 endclass
 
+`endif // UVM_NO_DEPRECATED

@@ -340,8 +340,6 @@ class uvm_sequencer_base extends uvm_component;
 
   extern virtual function void analysis_write(uvm_sequence_item t);
 
-  extern function void remove_sequence(string type_name);
-
 
   extern virtual   function void   build_phase(uvm_phase phase);
   extern           function void   do_print (uvm_printer printer);
@@ -368,6 +366,7 @@ class uvm_sequencer_base extends uvm_component;
   // DEPRECATED - DO NOT USE IN NEW DESIGNS - NOT PART OF UVM STANDARD
   //----------------------------------------------------------------------------
 
+`ifndef UVM_NO_DEPRECATED
   // Variable- count
   //
   // Sets the number of items to execute.
@@ -377,7 +376,6 @@ class uvm_sequencer_base extends uvm_component;
 
   int count = -1;
 
-  // testing fields
   int m_random_count = 0;
   int m_exhaustive_count = 0;
   int m_simple_count = 0;
@@ -385,7 +383,7 @@ class uvm_sequencer_base extends uvm_component;
   int unsigned max_random_count = 10;
   int unsigned max_random_depth = 4;
 
-  protected string default_sequence = "uvm_random_sequence";               
+  protected string default_sequence = "uvm_random_sequence";
   protected bit m_default_seq_set;
 
 
@@ -394,6 +392,7 @@ class uvm_sequencer_base extends uvm_component;
   protected rand int seq_kind;
 
   extern function void              add_sequence(string type_name);
+  extern function void              remove_sequence(string type_name);
   extern function void              set_sequences_queue(ref string sequencer_sequence_lib[$]);
   extern virtual task               start_default_sequence();
   extern function int               get_seq_kind(string type_name);
@@ -401,6 +400,7 @@ class uvm_sequencer_base extends uvm_component;
   extern function int               num_sequences();
   extern virtual function void      m_add_builtin_seqs(bit add_simple = 1);
   extern virtual task               run_phase(uvm_phase phase);
+`endif
 
 endclass
 
@@ -428,6 +428,7 @@ endfunction
 function void uvm_sequencer_base::build_phase(uvm_phase phase);
   int dummy;
   super.build();
+  `ifndef UVM_NO_DEPRECATED
   // deprecated parameters for sequencer. Use uvm_sequence_library class
   // for sequence library functionality.
   if (get_config_string("default_sequence", default_sequence)) begin
@@ -452,6 +453,7 @@ function void uvm_sequencer_base::build_phase(uvm_phase phase);
     `uvm_warning("UVM_DEPRECATED",
       {"pound_zero_count was set but ignored. ",
        "Sequencer/driver synchronization now uses 'uvm_wait_for_nba_region'"})
+  `endif // UVM_NO_DEPRECATED
 endfunction
 
 
@@ -1359,9 +1361,8 @@ endfunction
 
 function void uvm_sequencer_base::add_sequence(string type_name);
 
-  `uvm_warning("DEPRECATED",{"Registering sequence '",type_name,
-     "' with sequencer '",get_full_name(),"' is deprecated. ",
-     "Use uvm_sequence_library base class instead."})
+  `uvm_warning("UVM_DEPRECATED",{"Registering sequence '",type_name,
+     "' with sequencer '",get_full_name(),"' is deprecated. "})
 
   //assign typename key to an int based on size
   //used with get_seq_kind to return an int key to match a type name
@@ -1408,6 +1409,11 @@ endfunction
 task uvm_sequencer_base::start_default_sequence();
   uvm_sequence_base m_seq ;
 
+  // Default sequence was cleared, or the count is zero
+  if (default_sequence == "" || count == 0)
+    return;
+
+  // Have run-time phases and no user setting of default sequence
   if(this.m_default_seq_set == 0 && m_phase_domains.num() != 1) begin
     default_sequence = "";
     `uvm_info("NODEFSEQ", {"The \"default_sequence\" has not been set. ",
@@ -1416,22 +1422,29 @@ task uvm_sequencer_base::start_default_sequence();
     return;
   end
 
-  if (uvm_config_db #(uvm_sequence_base)::exists(this, "run_phase", "default_sequence", 0) ||
-      uvm_config_db #(uvm_object_wrapper)::exists(this, "run_phase", "default_sequence", 0))
+  // Have a user setting for both old and new default sequence mechanisms
+  if (this.m_default_seq_set == 1 &&
+     (uvm_config_db #(uvm_sequence_base)::exists(this, "run_phase", "default_sequence", 0) ||
+      uvm_config_db #(uvm_object_wrapper)::exists(this, "run_phase", "default_sequence", 0)))
   begin
-    `uvm_warning("MULDEFSEQ", {"A default sequence has been set via the ",
-       "\"default_sequence\" configuration option and the set_default_seq()",
-       "method. The \"default_sequence\" configuration option is ignored."})
+    `uvm_warning("MULDEFSEQ", {"A default phase sequence has been set via the ",
+       "\"<phase_name>.default_sequence\" configuration option.",
+       "The deprecated \"default_sequence\" configuration option is ignored."})
     return;
   end
 
-  if(sequences.size() == 2 && sequences[0] == "uvm_random_sequence" &&
+  // no user sequences to choose from
+  if(sequences.size() == 2 &&
+     sequences[0] == "uvm_random_sequence" &&
      sequences[1] == "uvm_exhaustive_sequence") begin
     uvm_report_warning("NOUSERSEQ", {"No user sequence available. ",
-                       "Not starting the default sequence."}, UVM_NONE);
+                       "Not starting the (deprecated) default sequence."}, UVM_HIGH);
     return;
   end
   
+  `uvm_warning("UVM_DEPRECATED",{"Starting (deprecated) default sequence '",default_sequence,
+     "' on sequencer '",get_full_name(),"'"})
+
   if(sequences.size() != 0) begin
     //create the sequence object
     if (!$cast(m_seq, factory.create_object_by_name(default_sequence, 
@@ -1464,12 +1477,14 @@ endtask
 
 function int uvm_sequencer_base::get_seq_kind(string type_name);
 
+  `uvm_warning("UVM_DEPRECATED", $sformatf("%m is deprecated"))
+
   if (sequence_ids.exists(type_name))
     return sequence_ids[type_name];
 
-  uvm_report_warning("SEQNF", 
-    $psprintf("Sequence type_name '%0s' not registered with this sequencer.",
-    type_name), UVM_NONE);
+  `uvm_warning("SEQNF", 
+    {"Sequence type_name '",type_name,"' not registered with this sequencer."})
+    
   return -1;
 endfunction
 
@@ -1484,6 +1499,8 @@ function uvm_sequence_base uvm_sequencer_base::get_sequence(int req_kind);
   uvm_factory factory = uvm_factory::get();
   uvm_sequence_base m_seq ;
   string m_seq_type;
+
+  `uvm_warning("UVM_DEPRECATED", $sformatf("%m is deprecated"))
 
   if (req_kind < 0 || req_kind >= sequences.size()) begin
     uvm_report_error("SEQRNG", 
@@ -1536,8 +1553,7 @@ endfunction
 
 task uvm_sequencer_base::run_phase(uvm_phase phase);
   super.run_phase(phase);
-  if (default_sequence != "" && count != 0)
-    start_default_sequence();
+  start_default_sequence();
 endtask
 
 
