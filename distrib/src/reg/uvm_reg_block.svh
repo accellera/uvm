@@ -2101,10 +2101,11 @@ endfunction
 function void uvm_reg_block::do_print (uvm_printer printer);
   super.do_print(printer);
 
-  foreach(blks[i]) printer.print_object(i.get_name(),i);
-  foreach(regs[i]) printer.print_object(i.get_name(),i);
-  foreach(vregs[i]) printer.print_object(i.get_name(),i);
-  foreach(mems[i]) printer.print_object(i.get_name(),i);
+  foreach(blks[i])  printer.print_object(i.get_name(),uvm_object'(i));
+  foreach(regs[i])  printer.print_object(i.get_name(),uvm_object'(i));
+  foreach(vregs[i]) printer.print_object(i.get_name(),uvm_object'(i));
+  foreach(mems[i])  printer.print_object(i.get_name(),uvm_object'(i));
+  foreach(maps[i])  printer.print_object(i.get_name(),uvm_object'(i));
   
 endfunction
 
