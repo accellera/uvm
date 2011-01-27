@@ -19,7 +19,7 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-typedef uvm_config_db#(uvm_object_wrapper) uvm_config_seq;
+typedef uvm_config_db#(uvm_sequence_base) uvm_config_seq;
 typedef class uvm_sequence_request;
 
 
