@@ -143,32 +143,32 @@
   uvm_update_sequence_lib();
 
 
-// MACRO: `uvm_sequencer_utils
+// MACRO- `uvm_sequencer_utils
 
 `define uvm_sequencer_utils(TYPE_NAME) \
   `uvm_sequencer_utils_begin(TYPE_NAME) \
   `uvm_sequencer_utils_end
 
-// MACRO: `uvm_sequencer_utils_begin
+// MACRO- `uvm_sequencer_utils_begin
 
 `define uvm_sequencer_utils_begin(TYPE_NAME) \
   `uvm_declare_sequence_lib \
   `uvm_component_utils_begin(TYPE_NAME)
 
-// MACRO: `uvm_sequencer_param_utils
+// MACRO- `uvm_sequencer_param_utils
 
 `define uvm_sequencer_param_utils(TYPE_NAME) \
   `uvm_sequencer_param_utils_begin(TYPE_NAME) \
   `uvm_sequencer_utils_end
 
-// MACRO: `uvm_sequencer_param_utils_begin
+// MACRO- `uvm_sequencer_param_utils_begin
 
 `define uvm_sequencer_param_utils_begin(TYPE_NAME) \
   `uvm_declare_sequence_lib \
   `uvm_component_param_utils_begin(TYPE_NAME)
 
 
-// MACRO: `uvm_sequencer_utils_end
+// MACRO- `uvm_sequencer_utils_end
 //
 // The sequencer macros are used in uvm_sequencer-based class declarations
 // in one of four ways.

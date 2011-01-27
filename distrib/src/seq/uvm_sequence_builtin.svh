@@ -24,14 +24,14 @@
 `ifndef UVM_NO_DEPRECATED
 
 //------------------------------------------------------------------------------
-// Title: Predefined Sequences
+// Title- Predefined Sequences
 //
 // This section defines several sequences that ship with the UVM library.
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_random_sequence
+// CLASS- uvm_random_sequence
 //
 // This sequence randomly selects and executes a sequence from the sequencer's
 // sequence library, excluding uvm_random_sequence itself, and
@@ -54,7 +54,7 @@ class uvm_random_sequence extends uvm_sequence #(uvm_sequence_item);
   rand local int unsigned l_kind;
   protected bit m_success;
 
-// Function: get_count
+// Function- get_count
 //
 // Returns the count of the number of sub-sequences which are randomly generated.
 // By default, count is equal to the value from the sequencer's count variable.
@@ -146,7 +146,7 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_exhaustive_sequence
+// CLASS- uvm_exhaustive_sequence
 //
 // This sequence randomly selects and executes each sequence from the
 // sequencer's sequence library once, excluding itself and uvm_random_sequence.
@@ -247,7 +247,7 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_simple_sequence
+// CLASS- uvm_simple_sequence
 //
 // This sequence simply executes a single sequence item. 
 //
