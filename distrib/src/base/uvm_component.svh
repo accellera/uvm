@@ -636,9 +636,9 @@ virtual class uvm_component extends uvm_report_object;
   extern function void set_phase_imp(uvm_phase_imp phase, uvm_phase_imp imp, int hier=1);
 
   
-  // Task- suspend
+  // Task: suspend
   //
-  // Deprecated. Suspend this component.
+  // Suspend this component.
   //
   // This method must be implemented by the user to suspend the
   // component according to the protocol and functionality it implements.
@@ -647,9 +647,9 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual task suspend ();
 
 
-  // Task- resume
+  // Task: resume
   //
-  // Deprecated. Resume this component.
+  // Resume this component.
   //
   // This method must be implemented by the user to resume a component
   // that was previously suspended using <suspend()>.
@@ -659,15 +659,22 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual task resume ();
 
 
-  // Function- status
+  // Function: status
   //
-  // Deprecated. Returns the status of this component.
+  // Returns the status of this component.
   //
   // Returns a string that describes the current status of the
-  // components. Possible values include, but are not limited to,
-  // "<unknown>", "FINISHED", "RUNNING", "WAITING", "SUSPENDED",
-  // and "KILLED".
-  // By default, this method returns "<unknown>".
+  // components. Possible values include, but are not limited to
+  //
+  // "<unknown>"   - Status is unknown (default)
+  // "FINISHED"    - Component has stopped on its own accord. May be resumed.
+  // "RUNNING"     - Component is running.
+  //                 May be suspended after normal completion
+  //                 of operation in progress.
+  // "WAITING"     - Component is waiting. May be suspended immediately.
+  // "SUSPENDED"   - Component is suspended. May be resumed.
+  // "KILLED"      - Component has been killed and is unable to operate
+  //                 any further. It cannot be resumed.
 
 
   extern function string status ();
