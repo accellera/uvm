@@ -40,6 +40,9 @@ class my_catcher extends uvm_report_catcher;
           seen++;
           set_severity(UVM_INFO);
       end
+      if (get_severity() == UVM_WARNING &&
+           get_id() == "UVM_DEPRECATED")
+         set_severity((UVM_INFO);
       return THROW;
    endfunction
 endclass

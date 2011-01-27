@@ -23,11 +23,11 @@
 `include "apb.sv"
 `include "vip.sv"
 
-program test;
-
 import uvm_pkg::*;
 import apb_pkg::*;
 import vip_pkg::*;
+
+program test;
 
 `include "sym_sb.svh"
 `include "apb2txrx.svh"
@@ -44,7 +44,8 @@ class test extends uvm_test;
    endfunction
 
    function void start_of_simulation_phase(uvm_phase phase);
-      $cast(env, uvm_top.find("env"));
+      uvm_root top = uvm_root::get();
+      $cast(env, top.find("env"));
    endfunction
 
 endclass

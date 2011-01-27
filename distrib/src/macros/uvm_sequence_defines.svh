@@ -31,9 +31,8 @@
 // sequencer, <uvm_sequence_base::m_sequencer>. The default sequencer is set
 // any number of ways. 
 // - the sequencer handle provided in the <uvm_sequence_base::start> method
-// - the sequencer used by the parent sequence, the were either
-// registered with a <`uvm_sequence_utils> macro or whose associated sequencer
-// was already set using the <uvm_sequence_item::set_sequencer> method.
+// - the sequencer used by the parent sequence
+// - the sequencer that was set using the <uvm_sequence_item::set_sequencer> method
 //-----------------------------------------------------------------------------
 
 // MACRO: `uvm_create
@@ -358,12 +357,12 @@
 
 // MACRO: `uvm_declare_p_sequencer
 //
-// This macro is used to set up a specific sequencer type with the
-// sequence type the macro is placed in. This macro is implicit in the
-// <`uvm_sequence_utils> macro, but may be used directly in cases when
-// the sequence is not to be registered in the sequencer's library.
+//| `uvm_declare_p_sequencer(SEQUENCER)
 //
-// The example below shows using the the uvm_declare_p_sequencer macro
+// This macro is used to declare a variable ~p_sequencer~ whose type is
+// specified by ~SEQUENCER~.
+//
+// The example below shows using the the `uvm_declare_p_sequencer macro
 // along with the uvm_object_utils macros to set up the sequence but
 // not register the sequence in the sequencer's library.
 //
