@@ -23,6 +23,32 @@
 `include "reg_model.svh"
 
 
+class rx_isr_seq extends uvm_reg_sequence;
+   reg_dut regmodel;
+
+   `uvm_object_utils(rx_isr_seq)
+
+   function new(string name = "");
+      super.new(name);
+   endfunction
+
+   task pre_body();
+      $cast(regmodel, model);
+   endtask
+
+   task body;
+      uvm_status_e status;
+      
+      // Keep reading data until FIFO is empty
+      while (!regmodel.IntSrc.RxEmpty.get()) begin
+         regmodel.TxRx.mirror(status);
+         regmodel.IntSrc.mirror(status);
+      end
+   endtask
+endclass
+
+
+
 typedef virtual tb_ctl_if tb_ctl_vif;
 
 class tb_env extends uvm_env;
@@ -254,11 +280,11 @@ class tb_env extends uvm_env;
             wait (!m_isr);
             continue;
          end
-               
-         // Stop reading data once it is empty
-         while (!regmodel.IntSrc.RxEmpty.get()) begin
-            regmodel.TxRx.mirror(status);
-            regmodel.IntSrc.mirror(status);
+
+         begin
+            uvm_reg_sequence rx_seq = rx_isr_seq::type_id::create("rx_seq",,get_full_name());
+            rx_seq.model = regmodel;
+            rx_seq.start(null);
          end
          m_isr[RX_ISR] = 0;
 
