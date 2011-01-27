@@ -125,6 +125,20 @@ class uvm_sequencer_base extends uvm_component;
   //| uvm_config_db #(uvm_object_wrapper)::set(this, "myseqr.main_phase",
   //|                                          "default_sequence",
   //|                                          myseq_type::type_id::get());
+  //
+  // The uvm_resource_db can similarly be used.
+  //| myseq_t myseq_inst = new("myseq_inst");
+  //| myseq_inst.randomize() with { ... };
+  //| uvm_resource_db #(uvm_sequence_base)::set({get_full_name(), ".myseqr.main_phase",
+  //|                                           "default_sequence",
+  //|                                           myseq_inst, this);
+  //
+  //| uvm_resource_db #(uvm_object_wrapper)::set({get_full_name(), ".myseqr.main_phase",
+  //|                                            "default_sequence",
+  //|                                            myseq_type::type_id::get(),
+  //|                                            this );
+     
+     
 
   extern virtual function void start_phase_sequence(uvm_phase phase);
 
