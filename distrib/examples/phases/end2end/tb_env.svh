@@ -29,8 +29,10 @@ class tb_env extends uvm_env;
 
    tb_ctl_vif vif;
 
-   apb_agent  apb;
-   reg_dut    regmodel;
+   apb_agent     apb;
+   reg_dut       regmodel;
+   vip_sequencer tx_src;
+   uvm_seq_item_pull_port#(vip_tr) tx_src_seq_port;
 
    vip_agent  vip;
 
@@ -40,9 +42,10 @@ class tb_env extends uvm_env;
 
    `uvm_component_utils(tb_env)
 
-   local uvm_status_e status;
+   local uvm_status_e   status;
    local uvm_reg_data_t data;
-   local uvm_objection  m_isr;
+   local bit [1:0]      m_isr;
+   typedef enum {TX_ISR, RX_ISR} m_isr_bit_e;
 
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
@@ -61,6 +64,8 @@ class tb_env extends uvm_env;
          regmodel.build();
          regmodel.lock_model();
       end
+      tx_src = vip_sequencer::type_id::create("tx_src", this);
+      tx_src_seq_port = new("tx_src_seq_port", this);
 
       vip = vip_agent::type_id::create("vip", this);
 
@@ -71,7 +76,11 @@ class tb_env extends uvm_env;
       uvm_config_db #(uvm_object_wrapper)::set(this, "vip.sqr.main_phase",
                                                "default_sequence",
                                                vip_sentence_seq::type_id::get());
-      m_isr = new({get_full_name(), ".isr"});
+      uvm_config_db #(uvm_object_wrapper)::set(this, "tx_src.main_phase",
+                                               "default_sequence",
+                                               vip_sentence_seq::type_id::get());
+
+      m_isr = 0;
    endfunction
 
    function void connect_phase(uvm_phase phase);
@@ -80,6 +89,8 @@ class tb_env extends uvm_env;
          regmodel.default_map.set_sequencer(apb.sqr,reg2apb);
          regmodel.default_map.set_auto_predict(1);
       end
+
+      tx_src_seq_port.connect(tx_src.seq_item_export);
 
       apb.mon.ap.connect(adapt.apb);
 
@@ -122,6 +133,9 @@ class tb_env extends uvm_env;
 
    function void phase_ended(uvm_phase phase);
       case (phase.get_phase_name())
+       "main":
+          m_isr[TX_ISR] = 0;
+       
        "shutdown":
           begin
              pull_from_RxFIFO_thread = null;
@@ -150,11 +164,9 @@ class tb_env extends uvm_env;
       vif.rst = 1'b0;
       vip.resume();
 
-      // Clear any outstanding objections 
-      if (m_isr.get_objection_count(this) > 0) begin
-         m_isr.drop_objection(this, "Clearing outstanding objections",
-                              m_isr.get_objection_count(this));
-      end
+      m_isr = 0;
+      tx_src.stop_sequences();
+
       phase.drop_objection(this, "HW reset done");
    endtask
 
@@ -225,22 +237,21 @@ class tb_env extends uvm_env;
       uvm_phase shutdown_ph = phase.find_schedule("shutdown");
       shutdown_ph.raise_objection(this, "Pulling data from RxFIFO");
       
-      regmodel.IntMask.SA.set(1);
-      regmodel.IntMask.RxHigh.set(1);
-      regmodel.IntMask.update(status);
-      
       forever begin
+         m_isr[RX_ISR] = 0;
+
+         // When in shutdown, don't wait for the interrupt
          wait (vif.intr || m_in_shutdown);
 
-         m_isr.raise_objection(this, "Servicing RxHigh");
+         m_isr[RX_ISR] = 1;
                
          regmodel.IntSrc.mirror(status);
          if (regmodel.IntSrc.SA.get()) begin
             `uvm_fatal("TB/DUT/SYNCLOSS", "DUT has lost SYNC");
          end
          if (!regmodel.IntSrc.RxHigh.get() && !m_in_shutdown) begin
-            m_isr.drop_objection(this, "RxHigh does not need service");
-            m_isr.wait_for(UVM_ALL_DROPPED);
+            m_isr[RX_ISR] = 0;
+            wait (!m_isr);
             continue;
          end
                
@@ -249,7 +260,7 @@ class tb_env extends uvm_env;
             regmodel.TxRx.mirror(status);
             regmodel.IntSrc.mirror(status);
          end
-         m_isr.drop_objection(this, "RxHigh has been fully serviced");
+         m_isr[RX_ISR] = 0;
 
          if (m_in_shutdown) begin
             shutdown_ph.drop_objection(this, "All data pulled from RxFIFO");
@@ -265,57 +276,60 @@ class tb_env extends uvm_env;
 
       fork
          begin
-            // ToDo: replace with phase sequence in sequencer?
-            phase.raise_objection(this, "Applying ->DUT stimulus");
-            repeat (100) begin
-               vip_tr tr;
-               tr = vip_tr::type_id::create("tr",,get_full_name());
-               tr.randomize();
-               vip.sqr.execute_item(tr);
-            end
-            phase.drop_objection(this, "Primary ->DUT stimulus applied");
+            uvm_objection obj;
+            #2000000;
+            obj = phase.get_objection();
+            obj.display_objections();
+            $finish;
          end
-      
          begin
             uvm_objection ph_obj = phase.get_objection();
             
-            phase.raise_objection(this, "Configuring ISR for DUT-> stimulus");
+            phase.raise_objection(this, "Configuring ISR");
+            regmodel.IntMask.set(0);
+            regmodel.IntMask.SA.set(1);
+            regmodel.IntMask.RxHigh.set(1);
             regmodel.IntMask.TxLow.set(1);
             regmodel.IntMask.update(status);
                   
             forever begin
                phase.drop_objection(this, "ISR ready DUT-> stimulus");
 
+               m_isr[TX_ISR] = 0;
+
                wait (vif.intr);
 
-               // If the egress scoreboard is not objecting,
-               // don't service the interrupt
-               if (ph_obj.get_objection_total(egress) == 0) break;
-
-               m_isr.raise_objection(this, "Servicing TxLow");
+               m_isr[TX_ISR] = 1;
                phase.raise_objection(this, "Applying DUT-> stimulus");
                
                regmodel.IntSrc.mirror(status);
                if (!regmodel.IntSrc.TxLow.get()) begin
-                  m_isr.drop_objection(this, "TxLow does not need service");
-                  m_isr.wait_for(UVM_ALL_DROPPED);
+                  m_isr[TX_ISR] = 0;
+                  wait (!m_isr);
                   continue;
                end
+
+               m_isr[TX_ISR] = 0;
+               regmodel.IntMask.TxLow.set(0);
+               regmodel.IntMask.update(status);
                
                // Stop supplying data once it is full
                // or the egress scoreboard has had enough
-               while (!regmodel.IntSrc.TxFull.get() &&
-                      ph_obj.get_objection_total(egress) > 0) begin
-                  vip_tr tr = new; // Should be pulling from a sequencer
-                  tr.randomize();
+               while (!regmodel.IntSrc.TxFull.get() > 0) begin
+                  vip_tr tr;
+
+                  phase.drop_objection(this, "Waiting for DUT-> stimulus from tx_src sequencer");
+                  tx_src_seq_port.get_next_item(tr);
+                  tx_src_seq_port.item_done();
+                  phase.raise_objection(this, "Applying DUT-> stimulus from tx_src sequencer");
                   regmodel.TxRx.write(status, tr.chr);
 
                   regmodel.IntSrc.mirror(status);
                end
-               m_isr.drop_objection(this, "TxLow has been fully serviced");
+
+               regmodel.IntMask.TxLow.set(1);
+               regmodel.IntMask.update(status);
             end
-            regmodel.IntMask.TxLow.set(0);
-            regmodel.IntMask.update(status);
          end
       join
    endtask

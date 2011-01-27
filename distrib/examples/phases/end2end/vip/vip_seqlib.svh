@@ -20,7 +20,28 @@
 // 
 
 
-class vip_one_char_seq extends uvm_sequence#(vip_tr);
+virtual class vip_sequence extends uvm_sequence#(vip_tr);
+
+  function new(string name);
+    super.new(name);
+  endfunction
+  
+  virtual task pre_body();
+     if (starting_phase != null)
+        starting_phase.raise_objection(this, {"Running sequence '",
+                                              get_full_name(), "'"});
+  endtask
+  
+  virtual task post_body();
+     if (starting_phase != null)
+        starting_phase.drop_objection(this, {"Completed sequence '",
+                                             get_full_name(), "'"});
+  endtask
+  
+endclass
+
+
+class vip_one_char_seq extends vip_sequence;
 
   `uvm_object_utils(vip_one_char_seq)
    
@@ -35,7 +56,7 @@ class vip_one_char_seq extends uvm_sequence#(vip_tr);
 endclass
 
 
-class vip_sentence_seq extends uvm_sequence#(vip_tr);
+class vip_sentence_seq extends vip_sequence;
 
   `uvm_object_utils(vip_sentence_seq)
 
@@ -44,17 +65,15 @@ class vip_sentence_seq extends uvm_sequence#(vip_tr);
   endfunction
   
   virtual task body();
-     if (starting_phase != null) starting_phase.raise_objection(this);
      repeat (128) begin
         `uvm_do(req)
      end
-     if (starting_phase != null) starting_phase.drop_objection(this);
   endtask
   
 endclass
 
 
-class vip_idle_esc_seq extends uvm_sequence#(vip_tr);
+class vip_idle_esc_seq extends vip_sequence;
 
   `uvm_object_utils(vip_idle_esc_seq)
 
