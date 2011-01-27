@@ -1410,7 +1410,8 @@ task uvm_sequencer_base::start_default_sequence();
   uvm_sequence_base m_seq ;
 
   // Default sequence was cleared, or the count is zero
-  if (default_sequence == "" || count == 0)
+  if (default_sequence == "" || count == 0 ||
+        (sequences.size() == 0 && default_sequence == "uvm_random_sequence"))
     return;
 
   // Have run-time phases and no user setting of default sequence
