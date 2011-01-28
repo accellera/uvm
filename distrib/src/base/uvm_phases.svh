@@ -54,7 +54,7 @@
 //
 // Variable: uvm_build_ph
 //
-// Creation and configuration of testbench structure
+// Create and configure of testbench structure
 //
 // <uvm_topdown_phase> that calls the
 // <uvm_component::build_phase> method.
@@ -89,14 +89,16 @@
 // - Connect TLM ports and exports.
 // - Connect TLM initiator sockets and target sockets.
 // - Connect register model to adapter components.
+// - Setup explicit phase domains.
 //
 // Exit Criteria:
 // - All cross-component connections have been established.
+// - All independent phase domains are set.
 //
 //
 // Variable: uvm_end_of_elaboration_ph
 //
-// Fine-tuning of the testbench.
+// Fine-tune the testbench.
 //
 // <uvm_bottomup_phase> that calls the
 // <uvm_component::end_of_elaboration_phase> method.
@@ -133,7 +135,7 @@
 // Typical Uses:
 // - Display environment topology
 // - Set debugger breakpoint
-// - Set run-time configuration values.
+// - Set initial run-time configuration values.
 //
 // Exit Criteria:
 // - None.
@@ -141,10 +143,14 @@
 //
 // Variable: uvm_run_ph
 //
-// What to do while the DUT is simulated.
+// Stimulate the DUT.
 //
-// <uvm_task_phase> that calls the
-// <uvm_component::run_phase> method.
+// This <uvm_task_phase> calls the
+// <uvm_component::run_phase> virtual method. This phase runs in
+// parallel to the runtime phases, <uvm_pre_reset_ph> through
+// <uvm_post_shutdown_ph>. All components in the testbench
+// are synchronized with respect to the run phase regardles of
+// the phase domain they belong to.
 //
 // Upon Entry:
 // - Indicates that power has been applied.
@@ -159,14 +165,15 @@
 // - Backward compatibility with OVM.
 //
 // Exit Criteria:
-// - The DUT no longer needs to be simulated.
+// - The DUT no longer needs to be simulated, and 
+// - The <uvm_post_shutdown_ph> is ready to end
 //
 // The run phase terminates in one of four ways.
 //
 // 1. Explicit call to <global_stop_request>:
 //
 //   When <global_stop_request> is called, an ordered shut-down for the
-//   currently running phase begins.
+//   run phase begins.
 //   First, all enabled components' <uvm_component::stop> tasks 
 //   are called bottom-up, i.e., childrens' <uvm_component::stop> tasks
 //   are called before the parent's.
@@ -177,16 +184,17 @@
 //   to allow completion of in-progress transactions, flush queues,
 //   and other shut-down activities.
 //   Upon return from <uvm_component::stop> by all enabled components,
-//   the recursive <uvm_component::do_kill_all> is called
-//   on all top-level component(s).
+//   the run phase becomes ready to end pending completion of the
+//   runtime phases (i.e. the <uvm_post_shutdown_ph> being ready to
+//   end.
 //
 //   If any component raised a phase objection in <uvm_component::run_phase()>,
 //   this stopping procedure is deferred until all outstanding objections
 //   have been dropped.
 //
-// 2. All phase objections have been dropped after having been raised:
+// 2. All run phase objections have been dropped after having been raised:
 //
-//   When all objections on the phase objection have been dropped
+//   When all objections on the run phase objection have been dropped
 //   by the <uvm_component::run_phase()> methods,
 //   <global_stop_request> is called automatically, thus kicking off the
 //   stopping procedure described above.
@@ -205,7 +213,10 @@
 //
 //   Use of this method is not recommended.
 //   It is better to use the stopping mechanism, which affords a more ordered,
-//   safer shut-down.
+//   safer shut-down. If an immediate termination is desired, a 
+//   <uvm_component::jump> to the <uvm_extract_ph> phase is recommended as
+//   this will cause both the run phase and the parallel runtime phases to
+//   immediately end and go to extract.
 //
 // 4. Timeout:
 //
@@ -222,7 +233,7 @@
 //
 // Variable: uvm_extract_ph
 //
-// Is there anything left behind?
+// Extract data from different points of the verficiation environment.
 //
 // <uvm_bottomup_phase> that calls the
 // <uvm_component::extract_phase> method.
@@ -246,7 +257,7 @@
 //
 // Variable: uvm_check_ph
 //
-// Were there any errors?
+// Check for any unexpected conditions in the verification environment.
 //
 // <uvm_bottomup_phase> that calls the
 // <uvm_component::check_phase> method.
@@ -263,7 +274,7 @@
 //
 // Variable: uvm_report_ph
 //
-// What is the verdict?
+// Report results of the test.
 //
 // <uvm_bottomup_phase> that calls the
 // <uvm_component::report_phase> method.
@@ -311,7 +322,9 @@
 // Before reset is asserted.
 //
 // <uvm_task_phase> that calls the
-// <uvm_component::pre_reset_phase> method.
+// <uvm_component::pre_reset_phase> method. This phase starts at the
+// same time as the <uvm_run_ph> unless a user defined phase is inserted
+// in front of this phase.
 //
 // Upon Entry:
 // - Indicates that power has been applied but not necessarily valid or stable.
@@ -425,7 +438,7 @@
 // After the SW has configured the DUT.
 //
 // <uvm_task_phase> that calls the
-// <uvm_component::post_configure_phase> method.
+// <uvm_component::post_configure_phase> method. 
 //
 // Upon Entry:
 // - Indicates that the configuration information has been fully uploaded.
@@ -539,7 +552,9 @@
 // After things have settled down.
 //
 // <uvm_task_phase> that calls the
-// <uvm_component::post_shutdown_phase> method.
+// <uvm_component::post_shutdown_phase> method.  The end of this phase is
+// synchronized to the end of the <uvm_run_ph> phase unless a user defined
+// phase is added after this phase.
 //
 // Upon Entry:
 // - No more "data" stimulus is applied to the DUT.
@@ -550,6 +565,7 @@
 //
 // Exit Criteria:
 // - All run-time checks have been satisfied.
+// - The <uvm_run_ph> phase is ready to end.
 //
 //
 
