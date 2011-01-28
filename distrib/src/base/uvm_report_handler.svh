@@ -60,15 +60,15 @@ class uvm_report_handler;
 
   uvm_action severity_actions[uvm_severity];
 
-  uvm_id_actions_array id_actions=new;
+  uvm_id_actions_array id_actions;
   uvm_id_actions_array severity_id_actions[uvm_severity];
 
   // id verbosity settings : default and severity
-  uvm_id_verbosities_array id_verbosities=new;
+  uvm_id_verbosities_array id_verbosities;
   uvm_id_verbosities_array severity_id_verbosities[uvm_severity];
 
   // severity overrides
-  uvm_sev_override_array sev_overrides = new;
+  uvm_sev_override_array sev_overrides;
   uvm_sev_override_array sev_id_overrides [string];
 
 
@@ -84,6 +84,9 @@ class uvm_report_handler;
   // Creates and initializes a new uvm_report_handler object.
 
   function new();
+    id_actions=new();
+    id_verbosities=new();
+    sev_overrides=new();
     initialize;
   endfunction
 
