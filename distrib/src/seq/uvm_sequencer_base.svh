@@ -106,36 +106,44 @@ class uvm_sequencer_base extends uvm_component;
   // Start the default sequence for this phase, if any.
   // The default sequence is configured using resources using
   // either a sequence instance or sequence object wrapper.
-  // The resource name is the name of the phase suffixed
-  // with "_phase.default_sequence".
+  //
+  // When setting the resource using ~set~, the 1st argument specifies the
+  // context pointer, usually "this" for components or "null" when executed from
+  // outside the component hierarchy (i.e. in module).  
+  // The 2nd argument is the instance string, which is a path name to the
+  // target sequencer, relative to the context pointer.  The path must include
+  // the name of the phase with a "_phase" suffix. The 3rd argument is the
+  // resource name, which is "default_sequence". The 4th argument is either
+  // an object wrapper for the sequence type, or an instance of a sequence.
   //
   // Configuration by instances
   // allows pre-initialization, setting rand_mode, use of inline 
   // constraints, etc.
   //
-  //| myseq_t myseq_inst = new("myseq_inst");
-  //| myseq_inst.randomize() with { ... };
-  //| uvm_config_db #(uvm_sequence_base)::set(this, "myseqr.main_phase",
+  //| myseq_t myseq = new("myseq");
+  //| myseq.randomize() with { ... };
+  //| uvm_config_db #(uvm_sequence_base)::set(null, "top.agent.myseqr.main_phase",
   //|                                         "default_sequence",
-  //|                                         myseq_inst);
+  //|                                         myseq);
   //
   // Configuration by type is shorter and can be substituted via the
   // the factory.
   //
-  //| uvm_config_db #(uvm_object_wrapper)::set(this, "myseqr.main_phase",
+  //| uvm_config_db #(uvm_object_wrapper)::set(null, "top.agent.myseqr.main_phase",
   //|                                          "default_sequence",
   //|                                          myseq_type::type_id::get());
   //
   // The uvm_resource_db can similarly be used.
-  //| myseq_t myseq_inst = new("myseq_inst");
-  //| myseq_inst.randomize() with { ... };
+  //
+  //| myseq_t myseq = new("myseq");
+  //| myseq.randomize() with { ... };
   //| uvm_resource_db #(uvm_sequence_base)::set({get_full_name(), ".myseqr.main_phase",
   //|                                           "default_sequence",
-  //|                                           myseq_inst, this);
+  //|                                           myseq, this);
   //
   //| uvm_resource_db #(uvm_object_wrapper)::set({get_full_name(), ".myseqr.main_phase",
   //|                                            "default_sequence",
-  //|                                            myseq_type::type_id::get(),
+  //|                                            myseq_t::type_id::get(),
   //|                                            this );
      
      
@@ -155,7 +163,9 @@ class uvm_sequencer_base extends uvm_component;
   // other than delta cycles.  The driver is currently waiting for the next
   // item to be sent via the send_request call.
   
-  extern virtual task wait_for_grant(uvm_sequence_base sequence_ptr, int item_priority = -1, bit lock_request = 0);
+  extern virtual task wait_for_grant(uvm_sequence_base sequence_ptr,
+                                     int item_priority = -1,
+                                     bit lock_request = 0);
 
 
   // Task: wait_for_item_done
@@ -171,7 +181,8 @@ class uvm_sequencer_base extends uvm_component;
   // has already issued an item_done or put for that transaction, then the call
   // will hang waiting for that specific transaction_id.
   //
-  extern virtual task wait_for_item_done(uvm_sequence_base sequence_ptr, int transaction_id);
+  extern virtual task wait_for_item_done(uvm_sequence_base sequence_ptr,
+                                         int transaction_id);
 
 
   // Function: is_blocked
@@ -1342,7 +1353,7 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
     seq.reseed();
     seq.starting_phase = phase;
 
-    if (seq.is_randomized && !seq.randomize()) begin
+    if (!seq.is_randomized && !seq.randomize()) begin
       `uvm_warning("STRDEFSEQ", {"Randomization failed for default sequence '",
        seq.get_type_name(),"' for phase ", phase.get_name()})
        return;

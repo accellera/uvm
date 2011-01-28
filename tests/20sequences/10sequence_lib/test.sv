@@ -69,7 +69,7 @@ module top;
       `uvm_add_to_seq_lib(TYPE, LIBTYPE) \
       virtual task body(); \
         `uvm_info("SEQ_START", {"Executing sequence '", \
-           get_full_name(),"' (",get_type_name(),")"},UVM_HIGH) \
+           get_full_name(),"' (",get_type_name(),")"},UVM_DEBUG) \
         #1; \
       endtask \
     endclass
@@ -84,7 +84,7 @@ module top;
       `uvm_add_to_seq_lib(TYPE, LIBTYPE2) \
       virtual task body(); \
         `uvm_info("SEQ_START", {"Executing sequence '", \
-           get_full_name(),"' (",get_type_name(),")"},UVM_HIGH) \
+           get_full_name(),"' (",get_type_name(),")"},UVM_DEBUG) \
         #1; \
       endtask \
     endclass
@@ -162,10 +162,10 @@ module top;
     // Set the default sequence to run for 4 of the run-time phases.
     // The instance path is the path to the sequencer concatenated with the phase name
     // The field name is "default_sequence"
-    phase_rsrc::set(null, "uvm_test_top.sequencer.reset_ph",     "default_sequence", simple_seq_lib_RST::get_type());
-    phase_rsrc::set(null, "uvm_test_top.sequencer.configure_ph", "default_sequence", simple_seq_lib_CFG::get_type());
-    phase_rsrc::set(null, "uvm_test_top.sequencer.main_ph",      "default_sequence", simple_seq_lib_MAIN::get_type());
-    phase_rsrc::set(null, "uvm_test_top.sequencer.shutdown_ph",  "default_sequence", simple_seq_lib_SHUT::get_type());
+    phase_rsrc::set(null, "uvm_test_top.sequencer.reset_phase",     "default_sequence", simple_seq_lib_RST::get_type());
+    phase_rsrc::set(null, "uvm_test_top.sequencer.configure_phase", "default_sequence", simple_seq_lib_CFG::get_type());
+    phase_rsrc::set(null, "uvm_test_top.sequencer.main_phase",      "default_sequence", simple_seq_lib_MAIN::get_type());
+    phase_rsrc::set(null, "uvm_test_top.sequencer.shutdown_phase",  "default_sequence", simple_seq_lib_SHUT::get_type());
 
     // Set the sequence selection mode different for each sequence library.
     // Had we created instances of the seq lib first, we could configure the
@@ -181,17 +181,17 @@ module top;
     // then override the mode for three of the four phases.
     // this tests the the config overrides work  
     uvm_config_db #(uvm_sequence_lib_mode)::set(null,
-                                          "uvm_test_top.sequencer.reset_ph",
+                                          "uvm_test_top.sequencer.reset_phase",
                                           "default_sequence.selection_mode",
                                           UVM_SEQ_LIB_RAND);
 
     uvm_config_db #(uvm_sequence_lib_mode)::set(null,
-                                          "uvm_test_top.sequencer.configure_ph",
+                                          "uvm_test_top.sequencer.configure_phase",
                                           "default_sequence.selection_mode",
                                           UVM_SEQ_LIB_RANDC);
 
     uvm_config_db #(uvm_sequence_lib_mode)::set(null,
-                                          "uvm_test_top.sequencer.shutdown_ph",
+                                          "uvm_test_top.sequencer.shutdown_phase",
                                           "default_sequence.selection_mode",
                                           UVM_SEQ_LIB_USER);
 
