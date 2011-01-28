@@ -2940,8 +2940,7 @@
 `endif
 
 `ifdef VCS
-  `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
-     $add_attribute(TR_HANDLE,VALUE,NAME);
+  `define uvm_record_attribute(TR_HANDLE,NAME,VALUE)
 `endif
 
 `ifdef IUS
@@ -3251,14 +3250,14 @@
 //
 `define uvm_unpack_string(VAR) \
     begin \
-    bit [7:0] char; \
+    bit [7:0] chr; \
     VAR = ""; \
     do begin \
-      char = packer.m_bits[packer.count+:8]; \
+      chr = packer.m_bits[packer.count+:8]; \
       packer.count += 8; \
-      if (char != 0) \
-        VAR = {VAR, char}; \
-    end while (char != 0); \
+      if (chr != 0) \
+        VAR = {VAR, string'(chr)}; \
+    end while (chr != 0); \
     end
 
 

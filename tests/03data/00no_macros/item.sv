@@ -371,7 +371,7 @@ class item extends uvm_sequence_item;
     for (int i=0; i < str_size; i++) begin
       byte ele;
       void'(std::randomize(ele) with { ele inside {[32:126]}; });
-      str = {str, ele};
+      str = {str, string'(ele)};
     end
   endfunction
 
