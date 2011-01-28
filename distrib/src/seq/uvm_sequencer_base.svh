@@ -1440,7 +1440,7 @@ task uvm_sequencer_base::start_default_sequence();
     return;
 
   // Have run-time phases and no user setting of default sequence
-  if(this.m_default_seq_set == 0 && m_phase_domains.num() != 1) begin
+  if(this.m_default_seq_set == 0 && m_domain != null) begin
     default_sequence = "";
     `uvm_info("NODEFSEQ", {"The \"default_sequence\" has not been set. ",
        "Since this sequencer has a runtime phase schedule, the ",

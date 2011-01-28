@@ -1425,7 +1425,7 @@ task uvm_phase::execute_phase();
                 `uvm_info("PH_EXIT-1", $psprintf("PHASE EXIT CRITERIA %0s (in schedule %0s) %0d",
                       this.get_name(),this.get_schedule_name(), get_inst_id()), UVM_DEBUG);
              end
-             else if (m_phase.get_name() != "run") begin
+             else if (m_imp.get_name() != "run") begin
                 if (m_phase_trace) begin
                    `uvm_info("PH/TRC/SKIP",
                              $psprintf("Skipping task phase %0s (in schedule %0s) because there were no objections",
