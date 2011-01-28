@@ -35,7 +35,10 @@ class simple_sequencer extends uvm_sequencer #(simple_item);
   // Constructor
   function new (string name, uvm_component parent);
     super.new(name, parent);
-    set_phase_schedule("uvm");
+  endfunction
+
+  virtual function void build_phase(uvm_phase phase);
+    set_phase_domain("uvm");
   endfunction
 
   // Provide implementations of virtual methods such as get_type_name and create
