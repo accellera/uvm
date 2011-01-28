@@ -20,7 +20,7 @@
 ##   permissions and limitations under the License. 
 ##----------------------------------------------------------------------
 
-rm -fr some_ve *.patch *.tar.gz *.diff
+rm -fr some_ve *.patch *.tar.gz *.diff */*~
 cp -fr ovm_sources  some_ve
 
 
