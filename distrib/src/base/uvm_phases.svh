@@ -1293,12 +1293,6 @@ class uvm_phase extends uvm_graph;
   // Components es greater control over the phase flow for
   // processes which are not implicit objectors to the phase.
   //
-  // For example, a phase process may be set as <UVM_PHASE_NO_IMPLICIT_OBJECTION>,
-  // but may need to raise and drop objections when certain 
-  // conditions occur.
-  //
-  //| task main;
-  //|   set_thread_mode(UVM_PHASE_NO_IMPLICIT_OBJECTION);
   //|   while(1) begin
   //|     some_phase.raise_objection(this);
   //|     ...

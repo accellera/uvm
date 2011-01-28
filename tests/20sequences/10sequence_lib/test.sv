@@ -124,15 +124,19 @@ module top;
      simple_sequencer sequencer;
      simple_driver driver;
 
-     virtual function void build_phase();
+     virtual function void build_phase(uvm_phase phase);
        sequencer = new("sequencer", this);
        driver = new("driver", this);
        uvm_default_printer=uvm_default_line_printer;
      endfunction
 
-     virtual function void connect_phase();
+     virtual function void connect_phase(uvm_phase phase);
        driver.seq_item_port.connect(sequencer.seq_item_export);
      endfunction
+
+     virtual task post_shutdown(uvm_phase phase);
+        global_stop_request();
+     endtask
 
      virtual function void report();
        uvm_root top = uvm_root::get();
@@ -190,16 +194,6 @@ module top;
                                           "uvm_test_top.sequencer.shutdown_ph",
                                           "default_sequence.selection_mode",
                                           UVM_SEQ_LIB_USER);
-
-    // we set the sequencer's thread mode to raise implicit objection.
-    // The default sequences that get started will take on the mode of the
-    // sequencer they run on unless we explicitly set them for the
-    // default sequence in individual phases.
-    // set(null, "uvm_test_top.sequencer.main_ph", "default_sequence.thread_mode",
-    uvm_config_db #(uvm_thread_mode)::set(null,
-                                          "uvm_test_top.sequencer",
-                                          "default_phase_thread_mode",
-                                          UVM_PHASE_IMPLICIT_OBJECTION);
 
     run_test();
 
