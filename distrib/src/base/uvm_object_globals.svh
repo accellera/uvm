@@ -270,7 +270,8 @@ typedef enum
 //  UVM_FULL   - Report is issued if configured verbosity is set to UVM_FULL
 //               or above.
 
-typedef enum {
+typedef enum
+{
   UVM_NONE   = 0,
   UVM_LOW    = 100,
   UVM_MEDIUM = 200,
@@ -300,7 +301,8 @@ typedef int UVM_FILE;
 //                      parameter, and it is bound to the component that
 //                      implements the interface.
 
-typedef enum {
+typedef enum
+{
   UVM_PORT ,
   UVM_EXPORT ,
   UVM_IMPLEMENTATION
@@ -325,12 +327,14 @@ typedef enum {
 //                         will specify the next sequence to grant.
 
 
-typedef enum { SEQ_ARB_FIFO,
-               SEQ_ARB_WEIGHTED,
-               SEQ_ARB_RANDOM,
-               SEQ_ARB_STRICT_FIFO,
-               SEQ_ARB_STRICT_RANDOM,
-               SEQ_ARB_USER
+typedef enum
+{
+  SEQ_ARB_FIFO,
+  SEQ_ARB_WEIGHTED,
+  SEQ_ARB_RANDOM,
+  SEQ_ARB_STRICT_FIFO,
+  SEQ_ARB_STRICT_RANDOM,
+  SEQ_ARB_USER
 } uvm_sequencer_arb_mode;
 
 
@@ -354,16 +358,36 @@ typedef uvm_sequencer_arb_mode SEQ_ARB_TYPE; // backward compat
 //                      kill() on the sequence.
 // FINISHED           - The sequence is completely finished executing.
 
-typedef enum { CREATED   = 1,
-               PRE_BODY  = 2,
-               BODY      = 4,
-               POST_BODY = 8,
-               ENDED     = 16,
-               STOPPED   = 32,
-               FINISHED  = 64
+typedef enum
+{
+  CREATED   = 1,
+  PRE_BODY  = 2,
+  BODY      = 4,
+  POST_BODY = 8,
+  ENDED     = 16,
+  STOPPED   = 32,
+  FINISHED  = 64
 } uvm_sequence_state;
 
 typedef uvm_sequence_state uvm_sequence_state_enum; // backward compat
+
+
+// Enum: uvm_sequence_lib_mode
+//
+// Specifies the random selection mode of a sequence library
+//
+// UVM_SEQ_LIB_RAND  - Random sequence selection
+// UVM_SEQ_LIB_RANDC - Random cyclic sequence selection
+// UVM_SEQ_LIB_ITEM  - Emit only items, no sequence execution
+// UVM_SEQ_LIB_USER  - Apply a user-defined random-selection algorithm
+
+typedef enum
+{
+  UVM_SEQ_LIB_RAND,
+  UVM_SEQ_LIB_RANDC,
+  UVM_SEQ_LIB_ITEM,
+  UVM_SEQ_LIB_USER
+} uvm_sequence_lib_mode;
 
 
 

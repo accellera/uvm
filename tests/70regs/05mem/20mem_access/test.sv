@@ -212,7 +212,8 @@ module tbtest();
 	uvm_report_server svr =  _global_reporter.get_report_server();
    if (svr.get_severity_count(UVM_FATAL) +
        svr.get_severity_count(UVM_ERROR) +
-       svr.get_severity_count(UVM_WARNING) == 0)
+       svr.get_severity_count(UVM_WARNING) == 1)
+       // accounts for deprecated WARNING for usage of 'count' variable in build()
       $write("** UVM TEST PASSED **\n");
    else
       $write("!! UVM TEST FAILED !!\n");

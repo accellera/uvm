@@ -76,7 +76,10 @@ class uvm_scope_stack;
         get = {get,".",v};
     end
     if(m_arg != "") begin
-      get = {get, ".", m_arg};
+      if(get != "")
+        get = {get, ".", m_arg};
+      else
+        get = m_arg;
     end
   endfunction
   
@@ -550,6 +553,8 @@ endfunction
 // uvm_has_wildcard
 
 function bit uvm_has_wildcard (string arg);
+  uvm_has_wildcard = 0;
+
   //if it is a regex then return true
   if( (arg.len() > 1) && (arg[0] == "/") && (arg[arg.len()-1] == "/") )
     return 1;
@@ -557,9 +562,8 @@ function bit uvm_has_wildcard (string arg);
   //check if it has globs
   foreach(arg[i])
     if( (arg[i] == "*") || (arg[i] == "+") || (arg[i] == "?") )
-      return 1;
+      uvm_has_wildcard = 1;
 
-  return 0;
 endfunction
 
 

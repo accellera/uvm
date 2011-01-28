@@ -1943,7 +1943,7 @@ function void uvm_reg_map::do_print (uvm_printer printer);
 //            get_n_bytes(UVM_NO_HIER), endian.name());
    
    printer.print_generic("endian","",-2,endian.name()); 
-   if(sqr)
+   if(sqr!=null)
     printer.print_generic("effective sequencer",sqr.get_type_name(),-2,sqr.get_full_name());     
              
    get_registers(regs,UVM_NO_HIER);

@@ -35,9 +35,13 @@ class myseq extends uvm_sequence;
   task body;
     if (starting_phase!=null) starting_phase.raise_objection(this);
     start_cnt++;
-    `uvm_info("INBODY", "Starting myseq!!!", UVM_NONE)
+    `uvm_info("INBODY", 
+	      {starting_phase.get_name()," Starting myseq!!!"}, 
+	      UVM_NONE)
     #10;
-    `uvm_info("INBODY", "Ending myseq!!!", UVM_NONE)
+    `uvm_info("INBODY", 
+	      {starting_phase.get_name()," Ending myseq!!!"}, 
+	      UVM_NONE)
     end_cnt++;
     if (starting_phase!=null) starting_phase.drop_objection(this);
   endtask
@@ -70,13 +74,16 @@ class test extends uvm_test;
 
    function void build_phase(uvm_phase phase);
       uvm_phase domain;
-      uvm_object_wrapper w;
+      myseq mseq;
+
       seqr = new("seqr", this);
       domain = seqr.find_phase_schedule("uvm_pkg::uvm","*");
 
-      w = myseq::type_id::get();
-      uvm_config_seq::set(this, "seqr.configure_phase", "default_sequence",  w);
-      uvm_config_seq::set(this, "seqr.main_phase", "default_sequence",  w);
+      uvm_config_wrapper::set(this, "seqr.configure_phase", 
+			      "default_sequence",  myseq::type_id::get());
+      mseq = myseq::type_id::create("myseq1",,get_full_name());
+      void'(mseq.randomize());
+      uvm_config_seq::set(this, "seqr.main_phase", "default_sequence",  mseq);
    endfunction
    
    function void report_phase(uvm_phase phase);

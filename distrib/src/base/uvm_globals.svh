@@ -193,6 +193,7 @@ endfunction
 function bit uvm_string_to_action (string action_str, output uvm_action action);
   string actions[$];
   uvm_split_string(action_str,"|",actions);
+  uvm_string_to_action = 1;
   action = 0;
   foreach(actions[i]) begin
     case (action_str)
@@ -203,10 +204,9 @@ function bit uvm_string_to_action (string action_str, output uvm_action action);
       "UVM_EXIT":      action |= UVM_EXIT;
       "UVM_CALL_HOOK": action |= UVM_CALL_HOOK;
       "UVM_STOP":      action |= UVM_STOP;
-      default: return 0;
+      default: uvm_string_to_action = 0;
     endcase
   end
-  return 1;
 endfunction
 
   

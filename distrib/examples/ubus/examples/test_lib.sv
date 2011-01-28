@@ -152,15 +152,13 @@ class test_2m_4s extends ubus_example_base_test;
     uvm_resource_db#(int)::set({get_name(),".ubus_example_tb0.ubus0.masters[1].sequencer",".loop_read_modify_write_seq"}, "itr", 4);
 
      // Define the sequences to run in the run phase
-//    uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
-//			       ".ubus_example_tb0.ubus0.masters[0].sequencer"}, 
-    uvm_resource_db#(uvm_object_wrapper)::set("*.ubus0.masters[0].sequencer", 
-			       "run_ph",
+    uvm_resource_db#(uvm_object_wrapper)::set("*.ubus0.masters[0].sequencer.run_phase", 
+			       "default_sequence",
 				loop_read_modify_write_seq::type_id::get(),
 				this);
     uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
-			       ".ubus_example_tb0.ubus0.masters[1].sequencer"}, 
-			       "run_ph",
+			       ".ubus_example_tb0.ubus0.masters[1].sequencer.run_phase"}, 
+			       "default_sequence",
 				loop_read_modify_write_seq::type_id::get(),
 				this);
 
@@ -168,8 +166,8 @@ class test_2m_4s extends ubus_example_base_test;
 	string slname;
 	$swrite(slname,"%s.ubus_example_tb0.ubus0.slaves[%0d].sequencer",
 		get_full_name(),i);
-	uvm_resource_db#(uvm_object_wrapper)::set(slname, 
-						  "run_ph",
+	uvm_resource_db#(uvm_object_wrapper)::set({slname,".run_phase"}, 
+						  "default_sequence",
 						  slave_memory_seq::type_id::get(),
 						  this);
      end

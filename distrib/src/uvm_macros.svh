@@ -79,5 +79,6 @@
 `include "macros/uvm_sequence_defines.svh"
 `include "macros/uvm_callback_defines.svh"
 `include "macros/uvm_reg_defines.svh"
+`include "macros/uvm_deprecated_defines.svh"
 
 `endif

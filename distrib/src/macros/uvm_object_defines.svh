@@ -299,8 +299,6 @@
 // except that they also start a block in which `uvm_field_* macros can be
 // placed. The block must be terminated by `uvm_component_utils_end.
 //
-// Components deriving from uvm_sequencer must use the `uvm_sequencer_* macros
-// instead of these macros.  See `uvm_sequencer_utils for details.
 
 `define uvm_component_utils(T) \
    `m_uvm_component_registry_internal(T,T) \
