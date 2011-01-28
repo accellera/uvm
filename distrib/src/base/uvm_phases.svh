@@ -813,15 +813,24 @@ class uvm_phase extends uvm_object;
 
   // Function: is
   //
-  extern function is(uvm_phase phase);
+  // returns 1 if the containing uvm_phase refers to the same phase
+  // as the phase argument, 0 otherwise
+  //
+  extern function bit is(uvm_phase phase);
 
   // Function: is_before
   //
-  extern function is_before(uvm_phase phase);
+  // Returns 1 if the containing uvm_phase refers to a phase that is earlier
+  // than the phase argument, 0 otherwise
+  //
+  extern function bit is_before(uvm_phase phase);
 
   // Function: is_after
   //
-  extern function is_after(uvm_phase phase);
+  // returns 1 if the containing uvm_phase refers to a phase that is later
+  // than the phase argument, 0 otherwise
+  //
+  extern function bit is_after(uvm_phase phase);
 
 
   //-----------------
@@ -930,7 +939,7 @@ class uvm_phase extends uvm_object;
   // Function: raise_objection
   //
   // Raise an objection to ending this phase
-  // Components es greater control over the phase flow for
+  // Provides components with greater control over the phase flow for
   // processes which are not implicit objectors to the phase.
   //
   //|   while(1) begin
@@ -1056,17 +1065,19 @@ class uvm_phase extends uvm_object;
  
   // Function: jump
   //
-  // Jump to a specified ~phase~. The jump happens within the current 
-  // phase schedule. If the jump-to ~phase~ is outside of the current schedule
-  // then the jump affects other schedules which share the phase.
+  // Jump to a specified ~phase~. If the destination ~phase~ is within the current 
+  // phase schedule, a simple local jump takes place. If the jump-to ~phase~ is
+  // outside of the current schedule then the jump affects other schedules which
+  // share the phase.
   //
   extern function void jump(uvm_phase phase);
 
 
   // Function: jump_all
   //
-  // Make all schedules jump to a specified ~phase~. The jump happens to all
-  // phase schedules that contain the jump-to ~phase~, i.e. a global jump. 
+  // Make all schedules jump to a specified ~phase~, even if the jump target is local.
+  // The jump happens to all phase schedules that contain the jump-to ~phase~,
+  // i.e. a global jump. 
   //
   extern static function void jump_all(uvm_phase phase);
 
@@ -1276,14 +1287,14 @@ endfunction
 // is
 // --
   
-function uvm_phase::is(uvm_phase phase);
+function bit uvm_phase::is(uvm_phase phase);
   return (m_imp == phase); 
 endfunction
   
 // is_before
 // ---------
 
-function uvm_phase::is_before(uvm_phase phase);
+function bit uvm_phase::is_before(uvm_phase phase);
   return (m_find_successor(phase.get_name()) != null);
 endfunction
 // TBD refactor - make use of new BFS by handle not string
@@ -1291,7 +1302,7 @@ endfunction
 // is_after
 // --------
   
-function uvm_phase::is_after(uvm_phase phase);
+function bit uvm_phase::is_after(uvm_phase phase);
   return (m_find_predecessor(phase.get_name()) != null);
 endfunction
 // TBD refactor - make use of new BFS by handle not string
