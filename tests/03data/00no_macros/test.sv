@@ -16,11 +16,20 @@ module top;
 `include "item.sv"
 `include "item_macro.sv"
 
-
+`ifdef UVM_USE_P_FORMAT
 `define DO_CMP(STYLE,OP,OP1,OP2) \
     for (int i=0; i< `NUM_TRANS; i++) \
       if(!OP1.OP(OP2)) \
-        $display("MISCOMPARE! op1=%p op2=%p",OP1,OP2); \
+        `uvm_fatal("MISCOMPARE",$psprintf("op1=%p op2=%p",OP1,OP2)) \
+        
+`else
+`define DO_CMP(STYLE,OP,OP1,OP2) \
+    for (int i=0; i< `NUM_TRANS; i++) \
+      if(!OP1.OP(OP2)) \
+        `uvm_fatal("MISCOMPARE",$psprintf("MISCOMPARE! op1=%s op2=%s",OP1.convert2string(),OP2.convert2string())) \
+
+`endif        
+        
 
 `define DO_IT(STYLE,OP,OP1,OP2) \
     for (int i=0; i< `NUM_TRANS; i++) \
@@ -85,7 +94,9 @@ module top;
     mac2.uint16 = man2.uint16;
     mac2.uint8  = man2.uint8;
     mac2.uint1  = man2.uint1;
+`ifndef INCA    
     mac2.real32 = man2.real32;
+`endif    
     mac2.real64 = man2.real64;
     mac2.time64 = man2.time64;
     mac2.str    = man2.str;
@@ -135,9 +146,10 @@ module top;
       void'(mac1.pack(bits));
       void'(mac2.unpack(bits));
       if (!mac1.do_compare(mac2,null)) begin
-        $display("MISCOMPARE!");
         mac1.print();
         mac2.print();
+        `uvm_fatal("MISCOMPARE","mismatch in pack/unpack")
+        
       end
     end
     end
