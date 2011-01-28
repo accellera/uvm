@@ -46,7 +46,9 @@ class item_macro extends uvm_sequence_item;
   rand byte unsigned     uint8;
   rand bit unsigned      uint1;
 
+`ifndef INCA
        shortreal         real32;
+`endif       
        real              real64;
 
        time              time64;
@@ -79,8 +81,9 @@ class item_macro extends uvm_sequence_item;
      `uvm_field_int(uint16,UVM_ALL_ON)
      `uvm_field_int(uint8,UVM_ALL_ON)
      `uvm_field_int(uint1,UVM_ALL_ON)
-
+`ifndef INCA
      `uvm_field_real(real32,UVM_ALL_ON)
+`endif     
      `uvm_field_real(real64,UVM_ALL_ON)
 
      `uvm_field_int(time64,UVM_ALL_ON|UVM_TIME)

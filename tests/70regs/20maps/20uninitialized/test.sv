@@ -88,8 +88,7 @@ program two_sequencers_with_same_map;
         endfunction
     endclass
            
-    class whatever_agent#(type T=uvm_object) extends uvm_agent;
-        class whatever_driver extends uvm_driver#(T);
+        class whatever_driver #(type T=uvm_object) extends uvm_driver#(T);
             `uvm_component_utils(whatever_driver)
             function new(string name, uvm_component parent=null);
                 super.new(name,parent);
@@ -106,19 +105,21 @@ program two_sequencers_with_same_map;
         endclass
             
         class whatever_sequencer#(type T=uvm_object) extends uvm_sequencer#(T);
-            `uvm_sequencer_param_utils(whatever_sequencer#(T))
+            `uvm_component_param_utils(whatever_sequencer#(T))
             function new(string name, uvm_component parent=null);
                 super.new(name,parent);
-                `uvm_update_sequence_lib_and_item(T)
             endfunction
         endclass
 
-        whatever_sequencer#(T) sequencer = new("sqr",this);
-        whatever_driver driver = new("driver",this);
+    class whatever_agent#(type T=uvm_object) extends uvm_agent;
+        whatever_sequencer#(T) sequencer;
+        whatever_driver#(T) driver;
     
         `uvm_component_param_utils(whatever_agent#(T))
         function new(string name, uvm_component parent=null);
             super.new(name,parent);
+            sequencer = new("sqr",this);
+            driver = new("driver",this);
         endfunction
         
         virtual function void build();
@@ -126,9 +127,6 @@ program two_sequencers_with_same_map;
         endfunction
     endclass
     
-    class test extends uvm_test;
-        `uvm_component_utils(test)
-            
         class my_adapter extends uvm_reg_adapter;
             virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
                 whatever_trans t = new;
@@ -165,17 +163,22 @@ program two_sequencers_with_same_map;
             endtask 
         endclass
 
+    class test extends uvm_test;
+        `uvm_component_utils(test)
+            
+
         reg_block_slave model; 
 
-        whatever_agent#(whatever_trans) m0 = new("M0",this);
-        whatever_agent#(whatever_trans) m1 = new("M1",this);
+        whatever_agent#(whatever_trans) m0;
+        whatever_agent#(whatever_trans) m1;
 
         function new(string name, uvm_component parent=null);
             super.new(name,parent);
+            m0 = new("M0",this);
+            m1 = new("M1",this);
         endfunction
 
         virtual function void build_phase(uvm_phase phase);
-            set_config_int("*","count",0);
         
             if (model == null) begin
                 model = reg_block_slave::type_id::create("model",this);

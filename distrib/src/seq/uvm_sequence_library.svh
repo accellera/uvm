@@ -128,7 +128,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    // Sets the minimum number of items to execute. Use the configuration
    // mechanism to set. See <selection_mode> for an example.
    //
-   protected int unsigned min_random_count=20;
+   protected int unsigned min_random_count=1;
 
 
    // Variable- max_random_count
@@ -137,7 +137,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    // mechanism to set. See <selection_mode> for an example.
    //
    //
-   protected int unsigned max_random_count=20;
+   protected int unsigned max_random_count=10;
 
 
 
@@ -175,7 +175,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    //
    // Extensions may place additional constraints on this variable.
    //
-   randc int unsigned select_randc;
+   randc bit [31:0] select_randc;
 
 
 
@@ -516,9 +516,8 @@ endfunction
 
 function bit uvm_sequence_library::m_check(uvm_object_wrapper seq_type);
   foreach (sequences[i])
-    if (sequences[i] == seq_type) begin
+    if (sequences[i] == seq_type)
       return 0;
-    end
 endfunction
 
 
@@ -530,7 +529,7 @@ function void uvm_sequence_library::m_get_config();
   uvm_sequence_library_cfg cfg;
 
   if (uvm_config_db #(uvm_sequence_library_cfg)::get(m_sequencer, 
-                                        {starting_phase.get_name(),"_ph"},
+                                        {starting_phase.get_name(),"_phase"},
                                         "default_sequence.config",
                                         cfg) ) begin
     selection_mode = cfg.selection_mode; 
@@ -539,17 +538,17 @@ function void uvm_sequence_library::m_get_config();
   end
   else begin
     void'(uvm_config_db #(int unsigned)::get(m_sequencer, 
-                                        {starting_phase.get_name(),"_ph"},
+                                        {starting_phase.get_name(),"_phase"},
                                         "default_sequence.min_random_count",
                                         min_random_count) );
 
     void'(uvm_config_db #(int unsigned)::get(m_sequencer, 
-                                        {starting_phase.get_name(),"_ph"},
+                                        {starting_phase.get_name(),"_phase"},
                                         "default_sequence.max_random_count",
                                         max_random_count) );
 
     void'(uvm_config_db #(uvm_sequence_lib_mode)::get(m_sequencer, 
-                                        {starting_phase.get_name(),"_ph"},
+                                        {starting_phase.get_name(),"_phase"},
                                         "default_sequence.selection_mode",
                                         selection_mode) );
   end
@@ -576,6 +575,10 @@ endfunction
 task uvm_sequence_library::body();
 
   uvm_object_wrapper wrap;
+
+  if (starting_phase != null)
+    starting_phase.raise_objection(this,
+       {"starting sequence library ",get_full_name()," (", get_type_name(),")"});
 
   m_get_config();
 
@@ -647,6 +650,10 @@ task uvm_sequence_library::body();
   `uvm_info("SEQ_LIB_ENDED",{"Ending sequence library in phase ",starting_phase.get_name()},UVM_LOW)
   `uvm_info("SEQ_LIB_DSTRB",$sformatf("%p",seqs_distrib),UVM_HIGH)
 
+  if (starting_phase != null)
+    starting_phase.drop_objection(this,
+       {"starting sequence library ",get_full_name()," (", get_type_name(),")"});
+
 endtask
 
 
@@ -662,9 +669,11 @@ task uvm_sequence_library::execute(uvm_object_wrapper wrap);
   factory = uvm_factory::get();
 
   obj = factory.create_object_by_type(wrap,get_full_name(),
-           $sformatf("seq_%0d",sequences_executed+1));
+           $sformatf("%0d",sequences_executed+1));
   void'($cast(seq_or_item,obj)); // already qualified, 
 
+  `uvm_info("SEQ_LIB_EXEC",{"Executing ",(seq_or_item.is_item() ? "item " : "sequence "),seq_or_item.get_name(),
+                           " (",seq_or_item.get_type_name(),")"},UVM_FULL)
   seq_or_item.print_sequence_info = 1;
   start_item(seq_or_item);
   if (!seq_or_item.randomize())
