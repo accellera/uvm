@@ -63,7 +63,7 @@ typedef class uvm_cmdline_processor;
 class uvm_root extends uvm_component;
 
   extern static function uvm_root get();
-  extern local  function void m_initialize_common_schedule();
+  extern local  function void m_phase_setup();
 
   uvm_cmdline_processor clp;
 
@@ -179,9 +179,7 @@ class uvm_root extends uvm_component;
 
   // At end of elab phase we need to do tlm binding resolution.
   function void phase_ended(uvm_phase phase);
-    uvm_phase domain = find_phase_schedule("uvm_pkg::common","*");
-    uvm_phase elab_ph = domain.find_schedule("end_of_elaboration");
-    if(phase == elab_ph)
+    if(phase == end_of_elaboration_ph)
       do_resolve_bindings(); 
   endfunction
 
@@ -252,8 +250,8 @@ endclass
 function uvm_root uvm_root::get();
   if (m_inst == null) begin
     m_inst = new();
-    //Need m_inst to be set so that recusion won't happen in ctor
-    m_inst.m_initialize_common_schedule();
+    //Need m_inst to be set so that recursion won't happen in ctor
+    m_inst.m_phase_setup();
   end
   return m_inst;
 endfunction
@@ -498,58 +496,35 @@ function void uvm_root::m_find_all_recurse(string comp_match, ref uvm_component 
 endfunction
 
 
-// m_initialize_common_schedule
-// ----------------------------
+// m_phase_setup
+// -------------
 
-// Create the common phase schedule. To be done immediately after
-// the m_inst object has been set for uvm_root so that it is
-// immediately available.
+// Create the toplevel common phase domain and schedule of 9 phases.
+// Every component runs these 9 phases build..connect...run...report..final
+// To be done immediately after the m_inst object has been set for uvm_root
+// so that it is immediately available.
+// TBD could possibly just use define_phase_schedule() here?
 
-// Common schedules
-uvm_phase build_ph ;
-uvm_phase connect_ph ;
-uvm_phase end_of_elaboration_ph ;
-uvm_phase start_of_simulation_ph ;
-uvm_phase run_ph ;
-uvm_phase extract_ph ;
-uvm_phase check_ph ;
-uvm_phase report_ph ;
-uvm_phase final_ph ;
+uvm_domain uvm_common_domain = uvm_domain::get_common_domain(); // topmost node of phasing graph
 
-function void uvm_root::m_initialize_common_schedule();
-  // initialize phase schedule to "common", or inherit it from parent component
-  // - domain can be overridden by set_phase_domain()
-  // - schedule can be augmented by set_phase_schedule()
-
-  static uvm_phase common = null;
-  if(common != null) return;
-
-  // build phase schedule 'uvm_pkg::common', used by all uvm_component instances
-  // - it is a linear list of predefined phases (see uvm_globals.svh) as follows:
-  common = new("uvm_pkg::common");
-  // note - could not do this in uvm_root::new() due to static initialization ordering
-  common.add_phase(uvm_build_phase::get());
-  common.add_phase(uvm_connect_phase::get());
-  common.add_phase(uvm_end_of_elaboration_phase::get());
-  common.add_phase(uvm_start_of_simulation_phase::get());
-  common.add_phase(uvm_run_phase::get());
-  common.add_phase(uvm_extract_phase::get());
-  common.add_phase(uvm_check_phase::get());
-  common.add_phase(uvm_report_phase::get());
-  common.add_phase(uvm_final_phase::get());
-
-  // for backward compatibility, make common schedules available
-  build_ph               = common.find_schedule("build");
-  connect_ph             = common.find_schedule("connect");
-  end_of_elaboration_ph  = common.find_schedule("end_of_elaboration");
-  start_of_simulation_ph = common.find_schedule("start_of_simulation");
-  run_ph                 = common.find_schedule("run");   
-  extract_ph             = common.find_schedule("extract");
-  check_ph               = common.find_schedule("check");
-  report_ph              = common.find_schedule("report");
-  final_ph               = common.find_schedule("final");
-
-  m_inst.add_phase_schedule(common, "common");
+function void uvm_root::m_phase_setup();
+  // create topmost phase domain
+  uvm_common_domain=uvm_domain::get_common_domain();
+  // add "common" schedule to it and populate all the common phases
+  begin
+    uvm_phase schedule;
+    schedule = new("common",UVM_PHASE_SCHEDULE_NODE);
+    schedule.add_phase(uvm_build_phase::get());
+    schedule.add_phase(uvm_connect_phase::get());
+    schedule.add_phase(uvm_end_of_elaboration_phase::get());
+    schedule.add_phase(uvm_start_of_simulation_phase::get());
+    schedule.add_phase(uvm_run_phase::get());
+    schedule.add_phase(uvm_extract_phase::get());
+    schedule.add_phase(uvm_check_phase::get());
+    schedule.add_phase(uvm_report_phase::get());
+    schedule.add_phase(uvm_final_phase::get());
+    uvm_common_domain.add_schedule(schedule);
+  end
 endfunction 
 
 
@@ -933,6 +908,8 @@ function void uvm_root::m_check_verbosity();
 endfunction
 
 // It is required that the run phase start at simulation time 0
+// TBD this looks wrong - taking advantage of uvm_root not doing anything else?
+// TBD move to phase_started callback?
 task uvm_root::run_phase (uvm_phase phase);
   if($time > 0)
     `uvm_fatal("RUNPHSTIME", {"The run phase must start at time 0, current time is ",

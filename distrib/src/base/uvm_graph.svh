@@ -23,7 +23,7 @@
 
 
 //----------------------------------------------------------------------
-// Class: uvm_graph
+// Class - uvm_graph
 //----------------------------------------------------------------------
 //
 // This is a generic data structure class implementing a DAG (Directed Acyclic Graph).
@@ -60,13 +60,13 @@ class uvm_graph extends uvm_object;
   protected uvm_graph m_successors[$];
 
   //----------------------------------------------------------------------
-  // Group: graph creation
+  // Group - graph creation
   //----------------------------------------------------------------------
   // These methods are called in order to construct or manipulate the graph
   // The hookup between nodes can be specified in new(), and/or done later using
   // the insert methods to adjust the graph, add links, or merge graphs together
 
-  // Function: new
+  // Function - new
   // Create a new graph node and optionally link it up to others to make a graph
   //   name         - name of this graph node, user specified, free format, not interpreted
   //   predeceessor - optionally hookup the new node after this existing node
@@ -76,17 +76,17 @@ class uvm_graph extends uvm_object;
                       uvm_graph predecessor=null,
                       uvm_graph successor=null );
 
-  // Function: set_name
+  // Function - set_name
   // set a string node name. name is not interpreted. Only for use by extending class
 
   protected function void set_name(string name); m_name = name; endfunction
 
-  // Function: get_name
+  // Function - get_name
   // return string node name
 
   function string get_name(); return m_name; endfunction
 
-  // Function: insert
+  // Function - insert
   // Hookup this already-created node as part of a graph
   //   predeceessor - hook up after this existing node
   //   successor    - hook up before this existing node
@@ -94,13 +94,13 @@ class uvm_graph extends uvm_object;
   extern function void insert(uvm_graph predecessor,
                               uvm_graph successor = null);
 
-  // Function: insert_predecessor
+  // Function - insert_predecessor
   // Link this node after an existing predeccessor node
   //   predeceessor - hook up after this existing node
   
   extern function void insert_predecessor(uvm_graph predecessor);
 
-  // Function: insert_successor
+  // Function - insert_successor
   // Link this node before an existing successor node
   //   successor - hook up before this existing node
 
@@ -108,47 +108,47 @@ class uvm_graph extends uvm_object;
 
 
   //----------------------------------------------------------------------
-  // Group: graph search and traversal
+  // Group - graph search and traversal
   //----------------------------------------------------------------------
   // These user methods allow lookup, search of named nodes, and iteration
 
-  // Function: find
+  // Function - find
   // Traverse all predecessor/successor nodes until matching named node is found.
   //   name - the exact string node name to locate
   //   return - handle of matching node, or null if no match was found
 
   extern function uvm_graph find(string name);
 
-  // Function: find_predecessor
+  // Function - find_predecessor
   // Traverse all predecessor nodes until matching named node is found.
   //   name - the exact string node name to locate
   //   return - handle of matching node, or null if no match was found
 
   extern function uvm_graph find_predecessor(string name);
 
-  // Function: find_successor
+  // Function - find_successor
   // Traverse all successor nodes until matching named node is found.
   //   name - the exact string node name to locate
   //   return - handle of matching node, or null if no match was found
   
   extern function uvm_graph find_successor(string name);
 
-  // Function: compare
+  // Function - compare
   // virtual comparison function for override by extenders to add functionality
   //   name - string name to match with node name
   
   extern virtual function int compare(string name);
 
   //----------------------------------------------------------------------
-  // Group: graph debug
+  // Group - graph debug
   //----------------------------------------------------------------------
 
-  // Function: print
+  // Function - print
   // print the phase DAG using a depth-first traversal
   
   extern function void print();
 
-  // Function: print_dot
+  // Function - print_dot
   // print the phase DAG using a depth-first traversal into dot file format
   
   extern function void print_dot(string file_name = "dag.dot");

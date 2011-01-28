@@ -42,7 +42,7 @@ module test;
   `include "uvm_macros.svh"
 
   bit failed = 0;
-  bit phase_run[uvm_phase_imp];
+  bit phase_run[uvm_phase];
 
   class base extends uvm_component;
     time delay = 300;

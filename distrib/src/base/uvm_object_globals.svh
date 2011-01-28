@@ -397,7 +397,7 @@ typedef enum
 
 // Enum: uvm_phase_type
 //
-// This is an attribute of a <uvm_phase_imp> object which defines the phase
+// This is an attribute of a <uvm_phase> object which defines the phase
 // execution type. Every phase we define has a type. It is used only for 
 // information, as the type behavior is captured in three derived classes 
 // uvm_task/topdown/bottomup_phase.
@@ -405,7 +405,7 @@ typedef enum
 //   UVM_PHASE_TASK - The phase is a task-based phase, a fork is done for 
 //   each participating component and so the traversal order is arbitrary
 //
-//   UVM_PHASE_TOPDOWN -  The phase is a function phase, components are 
+//   UVM_PHASE_TOPDOWN - The phase is a function phase, components are 
 //   traversed from top-down, allowing them to add to the component tree 
 //   as they go.
 //
@@ -413,9 +413,21 @@ typedef enum
 //   traversed from the bottom up, allowing roll-up / consolidation 
 //   functionality.
 //
+//   UVM_PHASE_SCHEDULE_NODE - The phase is not an imp, but a dummy phase
+//   graph node representing the beginning of a VIP schedule of phases.
+//
+//   UVM_PHASE_ENDSCHEDULE_NODE - The phase is not an imp, but a dummy
+//   phase graph node representing the end of a VIP schedule of phases
+//
+//   UVM_PHASE_DOMAIN_NODE - The phase is not an imp, but a dummy phase
+//   graph node representing an entire domain branch with schedules beneath
+//
 typedef enum { UVM_PHASE_TASK,
                UVM_PHASE_TOPDOWN,
-               UVM_PHASE_BOTTOMUP
+               UVM_PHASE_BOTTOMUP,
+               UVM_PHASE_SCHEDULE_NODE,    // internal only
+               UVM_PHASE_ENDSCHEDULE_NODE, // internal only
+               UVM_PHASE_DOMAIN_NODE       // internal only
 } uvm_phase_type;
 
 
@@ -430,6 +442,9 @@ typedef enum { UVM_PHASE_TASK,
 //   UVM_PHASE_SCHEDULED - At least one immediate predecessor has completed.
 //              Scheduled phases block until all predecessors complete or
 //              until a jump is executed.
+//
+//   UVM_PHASE_SYNCING - All predecessors complete, checking that all synced
+//              phases (e.g. across domains) are at or beyond this point
 //
 //   UVM_PHASE_STARTED - phase ready to execute, running phase_started() callback
 //
@@ -451,19 +466,20 @@ typedef enum { UVM_PHASE_TASK,
 //
 //    The state transitions occur as follows:
 //
-//|     DORMANT -->SCHEDULED-->STARTED-->EXECUTING-->ENDED-->CLEANUP-->DONE --+
-//|        ^                                                   |
-//|        |          <-- jump_to                              v
-//|        +---------------------------------------------------+
+//|   DORMANT -> SCHED -> SYNC -> START -> EXEC -> READY -> END -> CLEAN -> DONE
+//|      ^                                                            |
+//|      |                      <-- jump_to                           v
+//|      +------------------------------------------------------------+
 
    typedef enum { UVM_PHASE_DORMANT      = 1,
                   UVM_PHASE_SCHEDULED    = 2,
-                  UVM_PHASE_STARTED      = 4,
-                  UVM_PHASE_EXECUTING    = 8,
-                  UVM_PHASE_READY_TO_END = 16,
-                  UVM_PHASE_ENDED        = 32,
-                  UVM_PHASE_CLEANUP      = 64,
-                  UVM_PHASE_DONE         = 128
+                  UVM_PHASE_SYNCING      = 4,
+                  UVM_PHASE_STARTED      = 8,
+                  UVM_PHASE_EXECUTING    = 16,
+                  UVM_PHASE_READY_TO_END = 32,
+                  UVM_PHASE_ENDED        = 64,
+                  UVM_PHASE_CLEANUP      = 128,
+                  UVM_PHASE_DONE         = 256
                   } uvm_phase_state;
 
 
@@ -483,6 +499,7 @@ typedef enum { UVM_COMPLETED   = 'h01,
                UVM_SKIPPED     = 'h04, 
                UVM_RERUN       = 'h08   
 } uvm_phase_transition;
+
 
 
 // Enum: uvm_wait_op

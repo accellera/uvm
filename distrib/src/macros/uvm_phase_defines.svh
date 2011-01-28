@@ -2,9 +2,9 @@
 `define UVM_PHASE_DEFINES_SVH
 //
 //----------------------------------------------------------------------
-//   Copyright 2007-2010 Mentor Graphics Corporation
-//   Copyright 2007-2010 Cadence Design Systems, Inc. 
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2011 Cadence Design Systems, Inc. 
+//   Copyright 2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -26,12 +26,14 @@
 // uvm_root.svh uses these macros to simplify creation of all the phases.
 // they are only to be used for UVM builtin phases, because they are simple
 // delegate imps that call the corresponding methods on uvm_component.
-// Also, they declare classes and singleton instances with the uvm_ prefix.
+// Also, they declare classes (uvm_XXXXX_phase) and singleton instances (XXXXX_ph)
 
 // If you require more complex phase functors for your custom phase, code your
 // own imp class extending uvm_task/topdown/bottomup_phase base classes, following
 // the pattern of the macros below, but customize the exec_task() or exec_func()
 // contents to suit your enhanced functionality or derived component type/methods.
+// The uvm_user_xxx_phase() macros are provided for your convenience.
+
 
 `define m_uvm_task_phase(PHASE,COMP,PREFIX) \
         class PREFIX``PHASE``_phase extends uvm_task_phase(`"PHASE`"); \
@@ -45,8 +47,12 @@
             if(m_inst == null) m_inst = new; \
             return m_inst; \
           endfunction \
+          function uvm_object clone(); \
+            PREFIX``PHASE``_phase obj = new; \
+            return obj; \
+          endfunction \
         endclass \
-        PREFIX``PHASE``_phase PREFIX``PHASE``_ph = PREFIX``PHASE``_phase::get();
+        PREFIX``PHASE``_phase PHASE``_ph = PREFIX``PHASE``_phase::get();
 
 `define m_uvm_topdown_phase(PHASE,COMP,PREFIX) \
         class PREFIX``PHASE``_phase extends uvm_topdown_phase(`"PHASE`"); \
@@ -60,8 +66,12 @@
             if(m_inst == null) m_inst = new; \
             return m_inst; \
           endfunction \
+          function uvm_object clone(); \
+            PREFIX``PHASE``_phase obj = new; \
+            return obj; \
+          endfunction \
         endclass \
-        PREFIX``PHASE``_phase PREFIX``PHASE``_ph = PREFIX``PHASE``_phase::get();
+        PREFIX``PHASE``_phase PHASE``_ph = PREFIX``PHASE``_phase::get();
 
 `define m_uvm_bottomup_phase(PHASE,COMP,PREFIX) \
         class PREFIX``PHASE``_phase extends uvm_bottomup_phase(`"PHASE`"); \
@@ -75,8 +85,12 @@
             if(m_inst == null) m_inst = new; \
             return m_inst; \
           endfunction \
+          function uvm_object clone(); \
+            PREFIX``PHASE``_phase obj = new; \
+            return obj; \
+          endfunction \
         endclass \
-        PREFIX``PHASE``_phase PREFIX``PHASE``_ph = PREFIX``PHASE``_phase::get();
+        PREFIX``PHASE``_phase PHASE``_ph = PREFIX``PHASE``_phase::get();
 
 
 `define uvm_builtin_task_phase(PHASE) \
