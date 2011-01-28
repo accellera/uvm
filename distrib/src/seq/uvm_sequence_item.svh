@@ -36,22 +36,22 @@ typedef class uvm_sequencer_base;
 
 class uvm_sequence_item extends uvm_transaction;
 
-local      int                m_sequence_id = -1;
-protected  bit                m_use_sequence_info = 0;
-protected  int                m_depth = -1;
-protected  uvm_sequencer_base m_sequencer = null;
-protected  uvm_sequence_base  m_parent_sequence = null;
-static     bit issued1=0,issued2=0;
-bit        print_sequence_info = 0;
+  local      int                m_sequence_id = -1;
+  protected  bit                m_use_sequence_info = 0;
+  protected  int                m_depth = -1;
+  protected  uvm_sequencer_base m_sequencer = null;
+  protected  uvm_sequence_base  m_parent_sequence = null;
+  static     bit issued1=0,issued2=0;
+  bit        print_sequence_info = 0;
 
 
   // Function: new
   //
   // The constructor method for uvm_sequence_item. 
   
-  function new (string             name = "uvm_sequence_item");
+  function new (string name = "uvm_sequence_item");
     super.new(name);
-  endfunction // new
+  endfunction
 
   function string get_type_name();
     return "uvm_sequence_item";
@@ -235,51 +235,59 @@ bit        print_sequence_info = 0;
   // to use the default sequencer specified by m_sequencer.  Randomization
   // may be done between start_item and finish_item to ensure late generation
 
-  virtual task start_item(uvm_sequence_item item, int set_priority = -1);
-    if(item == null)
-      m_sequencer.uvm_report_fatal("NULLITM", {"attempting to start a null item from item/sequence '", get_full_name(), "'"}, UVM_NONE);
-    item.m_start_item(m_sequencer, this, set_priority);
+  virtual task start_item (uvm_sequence_item item_or_seq,
+                           int set_priority = -1,
+                           uvm_sequencer_base sequencer=null);
+    if(item_or_seq == null)
+      uvm_report_fatal("NULLITM",
+         {"attempting to start a null item or sequence from sequence '",
+          get_full_name(), "'"}, UVM_NONE);
+    if (sequencer == null)
+      sequencer = get_sequencer();
+    item_or_seq.m_start_item_or_seq(sequencer, this, set_priority);
   endtask  
 
 
-  // Function- m_start_item
+  // Function- m_start_item_or_seq
   //
-  // Internal method.
+  // Internal method. Called when starting an item.
   
-  virtual task m_start_item(uvm_sequencer_base sequencer_ptr, uvm_sequence_item sequence_ptr,
-                            int set_priority);
-    uvm_sequence_base this_seq;
-    uvm_sequencer_base target_seqr;
+  virtual task m_start_item_or_seq(uvm_sequencer_base sequencer,
+                                   uvm_sequence_item parent_seq,
+                                   int set_priority);
+    uvm_sequence_base parent_seq_;
     
-    target_seqr = this.get_sequencer();
-    if (!$cast(this_seq, sequence_ptr))
-      uvm_report_fatal ("CASTFL", "start_item failed to cast sequence_ptr to sequence type", UVM_NONE);
+    if (!$cast(parent_seq_, parent_seq))
+      uvm_report_fatal ("CASTFL",
+        "start_item failed: parent_seq is not a sequence", UVM_NONE);
+
+    if (sequencer == null)
+      sequencer = get_sequencer();
     
-    if (target_seqr == null) begin
-      if (sequencer_ptr == null) begin
+    if (sequencer == null) begin
         uvm_report_fatal("STRITM", "sequence_item has null sequencer", UVM_NONE);
-      end else begin
-        target_seqr  = sequencer_ptr;
-        set_use_sequence_info(1);
-        set_sequencer(sequencer_ptr);
-        set_parent_sequence(this_seq);
-        reseed();
-      end
     end
+
+    set_use_sequence_info(1);
+    set_sequencer(sequencer);
+    set_parent_sequence(parent_seq_);
+    reseed();
     
-    target_seqr.wait_for_grant(this_seq, set_priority);
-    void'(target_seqr.begin_tr(this, "aggregate_items"));
-    sequence_ptr.pre_do(1);
+    sequencer.wait_for_grant(parent_seq_, set_priority);
+    void'(sequencer.begin_tr(this, "aggregate_items"));
+    parent_seq_.pre_do(1);
   endtask  
 
 
   // Function: finish_item
   //
-  // Finishes execution of a sequence_item or sequence. Finish_item must be called
-  // after <start_item> with no delays or delta-cycles.  Randomization, or other
-  // functions may be called between the <start_item> and finish_item calls.
+  // Finishes execution of a sequence item or sequence. Finish_item must be
+  // called after <start_item> returns with no delays or delta-cycles. 
+  // Randomization, or other functions may be called between the <start_item>
+  // and ~finish_item~ calls.
   
-  virtual task finish_item(uvm_sequence_item item, int set_priority = -1);
+  virtual task finish_item (uvm_sequence_item item,
+                            int set_priority = -1);
     item.m_finish_item(item.get_sequencer(), this, set_priority);
   endtask
 
@@ -288,21 +296,23 @@ bit        print_sequence_info = 0;
   //
   // Internal method. This method is called when <finish_item> is called with a sequence_item argument.
   
-  virtual task m_finish_item(uvm_sequencer_base sequencer_ptr, uvm_sequence_item sequence_ptr, int set_priority = -1);
-    uvm_sequence_base this_seq;
-    uvm_sequencer_base target_seqr;
+  virtual task m_finish_item (uvm_sequencer_base sequencer,
+                              uvm_sequence_item parent_seq,
+                              int set_priority = -1);
+    uvm_sequence_base parent_seq_;
 
-    target_seqr = this.get_sequencer();
-    if (target_seqr == null)
-      target_seqr = sequencer_ptr;
-    if (!$cast(this_seq, sequence_ptr))
-       uvm_report_fatal ("CASTFL", "finish_item failed to cast sequence_ptr to sequence type", UVM_NONE);
-    sequence_ptr.mid_do(this);
-    target_seqr.send_request(this_seq, this);
-    target_seqr.wait_for_item_done(this_seq, -1);
-    target_seqr.end_tr(this);
+    if (sequencer == null) begin
+        uvm_report_fatal("STRITM", "sequence_item has null sequencer", UVM_NONE);
+    end
 
-    sequence_ptr.post_do(this);
+    if (!$cast(parent_seq_, parent_seq))
+       uvm_report_fatal ("CASTFL", "finish_item failed: parent_seq is not a sequence", UVM_NONE);
+
+    parent_seq_.mid_do(this);
+    sequencer.send_request(parent_seq_, this);
+    sequencer.wait_for_item_done(parent_seq_, -1);
+    sequencer.end_tr(this);
+    parent_seq_.post_do(this);
   endtask
 
 
@@ -385,7 +395,10 @@ bit        print_sequence_info = 0;
     end
   endfunction
 
+
+  //---------------------------
   // Group: Reporting Interface
+  //---------------------------
   //
   // Sequence items and sequences will use the sequencer which they are
   // associated with for reporting messages. If no sequencer has been set
@@ -520,9 +533,10 @@ bit        print_sequence_info = 0;
     end
   endfunction
 
+  /*
   virtual task pre_do(bit is_item);
     return;
-  endtask // pre_body
+  endtask
 
   virtual task body();
     return;
@@ -535,6 +549,7 @@ bit        print_sequence_info = 0;
   virtual function void post_do(uvm_sequence_item this_item);
     return;
   endfunction
+  */
 
   virtual task wait_for_grant(int item_priority = -1, bit  lock_request = 0);
     return;
@@ -546,6 +561,6 @@ bit        print_sequence_info = 0;
 
   virtual task wait_for_item_done(int transaction_id = -1);
     return;
-  endtask // wait_for_item_done
+  endtask
 
 endclass

@@ -638,24 +638,44 @@ virtual class uvm_component extends uvm_report_object;
   
   // Task: suspend
   //
-  // Suspends the process tree spawned from this component's currently
-  // executing task-based phase, e.g. <run_phase>.
+  // Suspend this component.
+  //
+  // This method must be implemented by the user to suspend the
+  // component according to the protocol and functionality it implements.
+  // A suspended component can be subsequently resumed using <resume()>. 
 
   extern virtual task suspend ();
 
 
   // Task: resume
   //
-  // Resumes the process tree spawned from this component's currently
-  // executing task-based phase, e.g. <run_phase>.
+  // Resume this component.
+  //
+  // This method must be implemented by the user to resume a component
+  // that was previously suspended using <suspend()>.
+  // Some component may start in the suspended state and
+  // may need to be explicitly resumed.
 
   extern virtual task resume ();
 
 
   // Function: status
   //
-  // Returns the status of the parent process associated with the currently
-  // running task-based phase, e.g., <run_phase>.
+  // Returns the status of this component.
+  //
+  // Returns a string that describes the current status of the
+  // components. Possible values include, but are not limited to
+  //
+  // "<unknown>"   - Status is unknown (default)
+  // "FINISHED"    - Component has stopped on its own accord. May be resumed.
+  // "RUNNING"     - Component is running.
+  //                 May be suspended after normal completion
+  //                 of operation in progress.
+  // "WAITING"     - Component is waiting. May be suspended immediately.
+  // "SUSPENDED"   - Component is suspended. May be resumed.
+  // "KILLED"      - Component has been killed and is unable to operate
+  //                 any further. It cannot be resumed.
+
 
   extern function string status ();
 
@@ -2485,7 +2505,7 @@ task uvm_component::suspend();
     if(m_phase_process != null)
       m_phase_process.suspend;
   `else
-    `uvm_error("UNIMP", "suspend not implemented")
+    `uvm_error("UNIMP", "suspend() not implemented")
   `endif
 endtask
 
@@ -2498,7 +2518,7 @@ task uvm_component::resume();
     if(m_phase_process!=null) 
       m_phase_process.resume;
   `else
-     `uvm_error("UNIMP", "resume not implemented")
+     `uvm_error("UNIMP", "resume() not implemented")
   `endif
 endtask
 
@@ -2517,7 +2537,8 @@ endtask
 
 function string uvm_component::status();
 
-  `ifdef UVM_USE_PROCESS_STATE
+  `ifdef UVM_USE_SUSPEND_RESUME
+   `ifdef UVM_USE_PROCESS_STATE
     process::state ps;
 
     if(m_phase_process == null)
@@ -2538,7 +2559,10 @@ function string uvm_component::status();
       4: return "KILLED";
       default: return "<unknown>";
     endcase
+  `endif
   `endif 
+
+   return "<unknown>";
    
 endfunction
 

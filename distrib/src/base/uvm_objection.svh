@@ -1041,7 +1041,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   function void stop_request();
     `uvm_info_context("STOP_REQ",
                       "Stop-request called. Waiting for all-dropped on uvm_test_done",
-                      UVM_MEDIUM,m_top);
+                      UVM_FULL,m_top);
     fork
       m_stop_request();
     join_none
@@ -1096,7 +1096,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
     if(m_cleared == 0) begin
       `uvm_info_context("TEST_DONE",
                       "All end-of-test objections have been dropped. Calling stop tasks",
-                      UVM_MEDIUM,m_top);
+                      UVM_FULL,m_top);
       fork begin // guard
         fork
           begin
@@ -1118,8 +1118,8 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
       end
       join // guard
   
-      `uvm_info_context("STOP_REQ", {"Stop request has been processed, 'run' phase ready ",
-                        "to proceed to the extract phase"}, UVM_MEDIUM,m_top)
+      `uvm_info_context("TEST_DONE", {"'run' phase is ready ",
+                        "to proceed to the 'extract' phase"}, UVM_LOW,m_top)
 
     end
 

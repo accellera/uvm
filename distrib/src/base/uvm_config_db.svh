@@ -276,3 +276,6 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     return pool.get(lookup);
   endfunction
 endclass
+
+typedef uvm_config_db#(uvm_object_wrapper) uvm_config_wrapper;
+

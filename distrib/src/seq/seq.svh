@@ -28,6 +28,9 @@
 `include "seq/uvm_push_sequencer.svh"
 `include "seq/uvm_sequence_base.svh"
 `include "seq/uvm_sequence.svh"
+`include "seq/uvm_sequence_library.svh"
+
+
 `include "seq/uvm_sequence_builtin.svh"
 
 typedef uvm_sequence  #(uvm_sequence_item, uvm_sequence_item) uvm_default_sequence_type;

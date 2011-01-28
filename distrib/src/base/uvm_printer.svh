@@ -109,11 +109,11 @@ virtual class uvm_printer;
 
   // backward compatibility
   virtual function void print_field (string          name, 
-                                          uvm_bitstream_t value, 
-                                          int             size, 
-                                          uvm_radix_enum  radix=UVM_NORADIX,
-                                          byte            scope_separator=".",
-                                          string          type_name="");
+                                     uvm_bitstream_t value, 
+                                     int             size, 
+                                     uvm_radix_enum  radix=UVM_NORADIX,
+                                     byte            scope_separator=".",
+                                     string          type_name="");
     print_int (name, value, size, radix, scope_separator, type_name);
   endfunction
 
@@ -708,7 +708,7 @@ function void uvm_printer::print_object_header (string name,
     end
   end
         
-  if(name == "") 
+  if(name == "")
     name = "<unnamed>";
 
   m_scope.set_arg(name);
@@ -738,7 +738,10 @@ function void uvm_printer::print_object (string name, uvm_object value,
           !value.__m_uvm_status_container.cycle_check.exists(value)) begin
 
       value.__m_uvm_status_container.cycle_check[value] = 1;
-      m_scope.down(name);
+      if(name=="" && value!=null) 
+        m_scope.down(value.get_name());
+      else
+        m_scope.down(name);
 
       //Handle children of the comp
       if($cast(comp, value)) begin

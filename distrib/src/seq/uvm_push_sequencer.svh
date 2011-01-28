@@ -19,7 +19,6 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
-typedef class uvm_sequence_base;
 
 //------------------------------------------------------------------------------
 //
@@ -27,27 +26,26 @@ typedef class uvm_sequence_base;
 //
 //------------------------------------------------------------------------------
 
-class uvm_push_sequencer #(type REQ = uvm_sequence_item,
-                           type RSP = REQ) extends uvm_sequencer_param_base #(REQ, RSP);
+class uvm_push_sequencer #(type REQ=uvm_sequence_item, RSP=REQ)
+                                   extends uvm_sequencer_param_base #(REQ, RSP);
 
   typedef uvm_push_sequencer #( REQ , RSP) this_type;
 
   // Port: req_port
   //
   // The push sequencer requires access to a blocking put interface.
-  // Continual sequence items, based on the list of available sequences
-  // loaded into this sequencer, are sent out this port.
-
+  // A continuous stream of sequence items are sent out this port, based on
+  // the list of available sequences loaded into this sequencer.
+  //
   uvm_blocking_put_port #(REQ) req_port;
 
 
   // Function: new
   //
-  // Creates and initializes an instance of this class using the normal
-  // constructor arguments for <uvm_component>: ~name~ is the name of the
-  // instance, and ~parent~ is the handle to the hierarchical parent, if any.
-
-  function new (string name, uvm_component parent);
+  // Standard component constructor that creates an instance of this class
+  // using the given ~name~ and ~parent~, if any.
+  //
+  function new (string name, uvm_component parent=null);
     super.new(name, parent);
     req_port = new ("req_port", this);
   endfunction 
@@ -61,7 +59,7 @@ class uvm_push_sequencer #(type REQ = uvm_sequence_item,
   // connected to the req_export on an instance of an
   // <uvm_push_driver #(REQ,RSP)>, which would be responsible for
   // executing the item.
-
+  //
   task run_phase(uvm_phase phase);
     REQ t;
     int selected_sequence;
@@ -70,30 +68,17 @@ class uvm_push_sequencer #(type REQ = uvm_sequence_item,
       super.run_phase(phase);
       forever
         begin
-          do 
-            begin
-              wait_for_sequences();
-              selected_sequence = choose_next_request();
-              if (selected_sequence == -1) begin
-                wait_for_available_sequence();
-              end
-            end while (selected_sequence == -1);
-          // issue grant
-          if (selected_sequence >= 0) begin
-            set_arbitration_completed(arb_sequence_q[selected_sequence].request_id);
-            arb_sequence_q.delete(selected_sequence);
-            m_update_lists();
-          end
+          m_select_sequence();
           m_req_fifo.get(t);
           req_port.put(t);
           m_wait_for_item_sequence_id = t.get_sequence_id();
           m_wait_for_item_transaction_id = t.get_transaction_id();
-        end // forever begin
+        end
     join
   endtask
 
   protected virtual function int  m_find_number_driver_connections();
-    return(req_port.size());
+    return req_port.size();
   endfunction
 
 endclass

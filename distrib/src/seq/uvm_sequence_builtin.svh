@@ -21,15 +21,17 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+`ifndef UVM_NO_DEPRECATED
+
 //------------------------------------------------------------------------------
-// Title: Predefined Sequences
+// Title- Predefined Sequences
 //
 // This section defines several sequences that ship with the UVM library.
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_random_sequence
+// CLASS- uvm_random_sequence
 //
 // This sequence randomly selects and executes a sequence from the sequencer's
 // sequence library, excluding uvm_random_sequence itself, and
@@ -52,7 +54,7 @@ class uvm_random_sequence extends uvm_sequence #(uvm_sequence_item);
   rand local int unsigned l_kind;
   protected bit m_success;
 
-// Function: get_count
+// Function- get_count
 //
 // Returns the count of the number of sub-sequences which are randomly generated.
 // By default, count is equal to the value from the sequencer's count variable.
@@ -63,7 +65,8 @@ class uvm_random_sequence extends uvm_sequence #(uvm_sequence_item);
 // be sequencer.count, which may be -1.
 
 function int unsigned get_count();
-  if(l_count == -1) return m_sequencer.count;
+  if(l_count == -1)
+    return m_sequencer.count;
   return l_count;
 endfunction
 
@@ -81,8 +84,8 @@ endfunction
 task body();
   pick_sequence.constraint_mode(0);
   if (m_sequencer.count == -1) begin
-    if (!randomize(l_count) with { l_count > 0 && l_count <
-      m_sequencer.max_random_count; })
+    if (!randomize(l_count) with { l_count > 0 &&
+                                   l_count < m_sequencer.max_random_count; })
       uvm_report_fatal("RANDSEQ", "Randomization for l_count failed in random sequence body", UVM_NONE);
     m_sequencer.count = l_count;
   end
@@ -143,7 +146,7 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_exhaustive_sequence
+// CLASS- uvm_exhaustive_sequence
 //
 // This sequence randomly selects and executes each sequence from the
 // sequencer's sequence library once, excluding itself and uvm_random_sequence.
@@ -244,7 +247,7 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_simple_sequence
+// CLASS- uvm_simple_sequence
 //
 // This sequence simply executes a single sequence item. 
 //
@@ -293,3 +296,4 @@ class uvm_simple_sequence extends uvm_sequence #(uvm_sequence_item);
 
 endclass
 
+`endif // UVM_NO_DEPRECATED
