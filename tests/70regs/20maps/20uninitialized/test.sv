@@ -112,12 +112,14 @@ program two_sequencers_with_same_map;
         endclass
 
     class whatever_agent#(type T=uvm_object) extends uvm_agent;
-        whatever_sequencer#(T) sequencer = new("sqr",this);
-        whatever_driver#(T) driver = new("driver",this);
+        whatever_sequencer#(T) sequencer;
+        whatever_driver#(T) driver;
     
         `uvm_component_param_utils(whatever_agent#(T))
         function new(string name, uvm_component parent=null);
             super.new(name,parent);
+            sequencer = new("sqr",this);
+            driver = new("driver",this);
         endfunction
         
         virtual function void build();
@@ -160,17 +162,20 @@ program two_sequencers_with_same_map;
                 end 
             endtask 
         endclass
+
     class test extends uvm_test;
         `uvm_component_utils(test)
             
 
         reg_block_slave model; 
 
-        whatever_agent#(whatever_trans) m0 = new("M0",this);
-        whatever_agent#(whatever_trans) m1 = new("M1",this);
+        whatever_agent#(whatever_trans) m0;
+        whatever_agent#(whatever_trans) m1;
 
         function new(string name, uvm_component parent=null);
             super.new(name,parent);
+            m0 = new("M0",this);
+            m1 = new("M1",this);
         endfunction
 
         virtual function void build_phase(uvm_phase phase);
