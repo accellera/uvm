@@ -101,7 +101,7 @@ class ubus_master_monitor extends uvm_monitor;
   endfunction : new
 
   function void build_phase(uvm_phase phase);
-    if(!uvm_resource_db#(virtual ubus_if)::read_by_name(get_full_name(),"vif",vif,this))
+    if(!uvm_resource_db#(virtual ubus_if)::read_by_type("UBUS",vif,this))
        `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
   endfunction: build_phase
 

@@ -185,10 +185,8 @@ class ubus_bus_monitor extends uvm_monitor;
   endfunction : set_slave_configs
 
   function void build_phase(uvm_phase phase);
-       if (!ubus_vif_config::exists(this, get_full_name(),"vif",1))
-	`uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"}) 
-       else
-	     void'(uvm_config_db#(virtual ubus_if)::get(this, get_full_name(),"vif",vif));
+      if(!uvm_resource_db#(virtual ubus_if)::read_by_type("UBUS",vif,this))
+       `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
   endfunction: build_phase
 
   // run phase

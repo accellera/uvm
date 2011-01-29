@@ -52,7 +52,7 @@ module ubus_tb_top;
   );
 
   initial begin
-    uvm_resource_db#(virtual ubus_if)::set("*.ubus_example_tb0.*","vif",vif);
+    uvm_resource_db#(virtual ubus_if)::set("UBUS","vif",vif);
     run_test();
   end
 
