@@ -166,11 +166,11 @@ always begin: TX
    else send(IDLE);
 end
 
-task send(input bit [7:0] symbol);
+task automatic send(input bit [7:0] symbol);
    static int tx_cnt = 0;
 
    if (tx_cnt == 0) begin
-      automatic bit [7:0] sync = 8'hB2;
+      bit [7:0] sync = 8'hB2;
       repeat (8) begin
          tx = sync[7];
          @(negedge sclk);
