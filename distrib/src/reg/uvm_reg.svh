@@ -1608,6 +1608,23 @@ function uvm_reg_map uvm_reg::get_local_map(uvm_reg_map map, string caller="");
        parent_map = parent_map.get_parent_map();
      end
    end
+   
+`ifdef ENABLE_MAP_DELEGATE
+    // the register didnt have the map
+    // also the parent maps didnt know about the map
+    // now we finally check if the map knows about the register 
+    // in case this is a cloned-map or a delegate-map
+    begin
+       uvm_reg regs[$];
+       map.get_registers(regs);
+       regs = regs.find_first(item) with (item == this);
+       if(regs.size()!=0) begin
+            `uvm_info("RegModel",{"register ",this.get_full_name()," doesnt know the map ",map.get_full_name()," but the map knows the register (might be a cloned/delegate map)"},UVM_FULL)
+            return map; 
+       end
+    end
+`endif   
+
    `uvm_warning("RegModel", 
        {"Register '",get_full_name(),"' is not contained within map '",map.get_full_name(),"'",
         (caller == "" ? "": {" (called from ",caller,")"}) })

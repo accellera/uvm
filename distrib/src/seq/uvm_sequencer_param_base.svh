@@ -116,7 +116,7 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   // Function: last_req
   //
   // Returns the last request item by default.  If n is not 0, then it will get
-  // the n¿th before last request item.  If n is greater than the last request
+  // the nï¿½ï¿½ï¿½th before last request item.  If n is greater than the last request
   // buffer size, the function will return null.
   //
   function REQ last_req(int unsigned n = 0);
@@ -288,7 +288,7 @@ function void uvm_sequencer_param_base::send_request(uvm_sequence_base sequence_
     end
     m_last_req_push_front(param_t);
   end else begin
-    uvm_report_fatal(get_name(),$psprintf("send_request failed to cast sequence item"), UVM_NONE);
+    uvm_report_fatal(get_name(),{"send_request failed to cast sequence item '",t.get_name(),"' of type '",t.get_type_name(),"'"}, UVM_NONE);
   end
 
   param_t.set_sequence_id(sequence_ptr.m_get_sqr_sequence_id(m_sequencer_id, 1));
