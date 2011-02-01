@@ -46,7 +46,10 @@ class item extends uvm_sequence_item;
   rand byte unsigned     uint8;
   rand bit unsigned      uint1;
 
+`ifndef INCA
        shortreal         real32;
+`endif
+
        real              real64;
 
        time              time64;
@@ -100,7 +103,9 @@ class item extends uvm_sequence_item;
     aa     = rhs_.aa;
 
     real64 = rhs_.real64;
+`ifndef INCA    
     real32 = rhs_.real32;
+`endif
 
     bits   = rhs_.bits;
     logics = rhs_.logics;
@@ -137,8 +142,9 @@ class item extends uvm_sequence_item;
              da     == rhs_.da &&
 
              $realtobits(real64) == $realtobits(rhs_.real64) &&
+`ifndef INCA             
              $shortrealtobits(real32) == $shortrealtobits(rhs_.real32) &&
-             
+`endif             
              bits   == rhs_.bits &&
              logics === rhs_.logics
              ;
@@ -157,51 +163,52 @@ class item extends uvm_sequence_item;
      return $sformatf("%p",this);
    `else
      string s;
-     s = {s, $sformat("enum2:%s ",enum2.name()};
+     s = {s, $psprintf("enum2:%s ",enum2.name())};
 
-     s = {s, $sformat("int64:%0h ",int64};
-     s = {s, $sformat("int32:%0h ",int32};
-     s = {s, $sformat("int16:%0h ",int16};
-     s = {s, $sformat("int8:%0h ", int8};
-     s = {s, $sformat("int1:%0h ", int1};
+     s = {s, $psprintf("int64:%0h ",int64)};
+     s = {s, $psprintf("int32:%0h ",int32)};
+     s = {s, $psprintf("int16:%0h ",int16)};
+     s = {s, $psprintf("int8:%0h ", int8)};
+     s = {s, $psprintf("int1:%0h ", int1)};
       
-     s = {s, $sformat("uint64:%0h ",uint64};
-     s = {s, $sformat("uint32:%0h ",uint32};
-     s = {s, $sformat("uint16:%0h ",uint16};
-     s = {s, $sformat("uint8:%0h ", uint8};
-     s = {s, $sformat("uint1:%0h ", uint1};
+     s = {s, $psprintf("uint64:%0h ",uint64)};
+     s = {s, $psprintf("uint32:%0h ",uint32)};
+     s = {s, $psprintf("uint16:%0h ",uint16)};
+     s = {s, $psprintf("uint8:%0h ", uint8)};
+     s = {s, $psprintf("uint1:%0h ", uint1)};
       
-     s = {s, $sformat("real64:%0f ", real64};
-     s = {s, $sformat("real32:%0f ", real32};
+     s = {s, $psprintf("real64:%0f ", real64)};
+`ifndef INCA     
+     s = {s, $psprintf("real32:%0f ", real32)};
+`endif      
+     s = {s, $psprintf("time64:%0t ", time64)};
       
-     s = {s, $sformat("time64:%0t ", time64};
-      
-     s = {s, $sformat("str:%0s ", str};
+     s = {s, $psprintf("str:%0s ", str)};
 
      s = {s, "sa:'{"};
      foreach (sa[i])
-       s = {s, $sformat("%s%0h", i==0?"":" ",sa[i]};
+       s = {s, $psprintf("%s%0h", i==0?"":" ",sa[i])};
      s = {s, "} "};
 
      s = {s, "da:'{"};
      foreach (da[i])
-       s = {s, $sformat("%s%0h", i==0?"":" ",da[i]};
+       s = {s, $psprintf("%s%0h", i==0?"":" ",da[i])};
      s = {s, "} "};
 
      s = {s, "q:'{"};
      foreach (q[i])
-       s = {s, $sformat("%s%0h", i==0?"":" ",q[i]};
+       s = {s, $psprintf("%s%0h", i==0?"":" ",q[i])};
      s = {s, "} "};
 
      begin bit first=0;
      s = {s, "aa:'{"};
      foreach (aa[key])
-       s = {s, $sformat("%s%0h:%0h", first?""," ",key, aa[key]};
+       s = {s, $psprintf("%s%0h:%0h", first?"":" ",key, aa[key])};
      s = {s, "} "};
      end
 
-     s = {s, "bits:%0h", bits};
-     s = {s, "logics:%0b", logics};
+     s = {s, $psprintf("bits:%0h", bits)};
+     s = {s, $psprintf("logics:%0b", logics)};
 
     `endif
   endfunction
@@ -248,7 +255,9 @@ class item extends uvm_sequence_item;
     printer.print_array_footer();
 
     printer.print_real("real64",real64);
+`ifndef INCA
     printer.print_real("real32",real32);
+`endif    
     `else
     if(printer.knobs.sprint)
       printer.m_string = convert2string();
@@ -286,14 +295,19 @@ class item extends uvm_sequence_item;
       `uvm_record_field($sformatf("\\q[%0d] ", i), q[i])
     foreach(sa[i])
       `uvm_record_field($sformatf("\\sa[%0d] ", i), sa[i])
+// currently no support to store sa into db 
+`ifndef INCA      
     `uvm_record_field("sa",sa);
+`endif    
     foreach(da[i])
       `uvm_record_field($sformatf("\\da[%0d] ", i), da[i])
     foreach(aa[i])
       `uvm_record_field($sformatf("\\aa[%0d] ", i), aa[i])
 
     `uvm_record_field("real64",real64)
+`ifndef INCA    
     `uvm_record_field("real32",real32)
+`endif
 
   endfunction
 
@@ -312,7 +326,9 @@ class item extends uvm_sequence_item;
     `uvm_pack_int(uint16)
     `uvm_pack_int(uint8)
     `uvm_pack_int(uint1)
+`ifndef INCA    
     `uvm_pack_real(real32)
+`endif    
     `uvm_pack_real(real64)
     `uvm_pack_int(time64)
     `uvm_pack_string(str)
@@ -336,7 +352,9 @@ class item extends uvm_sequence_item;
     `uvm_unpack_int(uint16)
     `uvm_unpack_int(uint8)
     `uvm_unpack_int(uint1)
+`ifndef INCA
     `uvm_unpack_real(real32)
+`endif
     `uvm_unpack_real(real64)
     `uvm_unpack_int(time64)
     `uvm_unpack_string(str)
@@ -371,14 +389,16 @@ class item extends uvm_sequence_item;
     for (int i=0; i < str_size; i++) begin
       byte ele;
       void'(std::randomize(ele) with { ele inside {[32:126]}; });
-      str = {str, string'(ele)};
+      str = {str, $psprintf("%s",ele)};
     end
   endfunction
 
   function void post_randomize();
     // reals derive from quotient of two randomized ints
     real64 = real'(uint64) / real'(uint32);
+`ifndef INCA    
     real32 = real'(uint32) / real'(uint16);
+`endif    
   endfunction
 
 endclass

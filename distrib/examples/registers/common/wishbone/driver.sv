@@ -1,6 +1,7 @@
 // 
 // -------------------------------------------------------------
 //    Copyright 2004-2009 Synopsys, Inc.
+//    Copyright 2011 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
 // 
 //    Licensed under the Apache License, Version 2.0 (the
@@ -18,24 +19,6 @@
 //    permissions and limitations under the License.
 // -------------------------------------------------------------
 // 
-
-
-`ifdef ToDo
-typedef class wb_driver;
-  
-virtual class wb_driver_callbacks extends vmm_xactor_callbacks;
-
-   virtual task pre_cycle(wb_driver xactor,
-                          wb_cycle  cycle,
-                          ref bit   drop);
-   endtask
-
-   virtual task post_cycle(wb_driver xactor,
-                           /*const*/ wb_cycle  cycle);
-   endtask
-
-endclass: wb_driver_callbacks
-`endif
    
 
 class wb_driver extends uvm_driver #(wb_cycle);
@@ -93,12 +76,6 @@ task wb_driver::run_phase(uvm_phase phase);
 
       seq_item_port.get_next_item(tr);
 
-`ifdef ToDo
-      `vmm_callback(wb_driver_callbacks,
-                    pre_cycle(this, tr, drop));
-      if (drop) continue;
-`endif
-
       if (tr.m_next_cycle !== wb_cycle::CLASSIC ||
           (tr.m_kind !== wb_cycle::READ && tr.m_kind != wb_cycle::WRITE )) begin
          `uvm_error("WB_DRIVER", "Only single read/write classic cycles are supported");
@@ -120,11 +97,6 @@ task wb_driver::run_phase(uvm_phase phase);
       end
 
       `uvm_info("WB_DRIVER", {"Transaction Completed:\n", tr.sprint()}, UVM_HIGH);
-
-`ifdef ToDO
-      `vmm_callback(wb_driver_callbacks,
-                    post_cycle(this, tr));
-`endif
 
       seq_item_port.item_done();
    end
