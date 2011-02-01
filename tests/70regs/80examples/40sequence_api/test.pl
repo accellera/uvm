@@ -1,1 +1,1 @@
-return &make_example("$uvm_home/examples/registers/sequence_api");
+return &make_example("$uvm_home/examples/simple/registers/sequence_api");

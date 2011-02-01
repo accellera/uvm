@@ -1,1 +1,1 @@
-return &make_example("$uvm_home/examples/phases/run_test");
+return &make_example("$uvm_home/examples/simple/phases/run_test");

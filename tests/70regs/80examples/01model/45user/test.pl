@@ -1,1 +1,1 @@
-return &make_example("$uvm_home/examples/registers/models/user-defined");
+return &make_example("$uvm_home/examples/simple/registers/models/user-defined");
