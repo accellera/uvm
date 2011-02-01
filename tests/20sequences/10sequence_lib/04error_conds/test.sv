@@ -67,7 +67,7 @@ module top;
     endfunction
     constraint rand_fail { select_rand >= 30; }
     constraint randc_fail { select_randc >= 30; }
-    function unsigned int select_sequence(int unsigned max);
+    function int unsigned select_sequence(int unsigned max);
       return max+1;
     endfunction
     virtual task body();
