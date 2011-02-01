@@ -42,14 +42,18 @@ initial
 begin
    uvm_in_order_class_comparator#(c) sb;
 
-   uvm_analysis_port#(c) exp = new("exp", null);
-   uvm_analysis_port#(c) obs = new("obs", null);
+   uvm_analysis_port#(c) exp;
+   uvm_analysis_port#(c) obs;
 
    int v[10] = '{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
+   exp = new("exp", null);
+   obs = new("obs", null);
+
    fork
       foreach (v[i]) begin
-         automatic c e = new();
+         c e;
+         e = new();
          e.i = v[i];
          exp.write(e);
       end
@@ -57,7 +61,8 @@ begin
 
    #10;
    foreach (v[i]) begin
-      automatic c o = new();
+      c o;
+      o = new();
       o.i = v[i];
       obs.write(o);
    end
