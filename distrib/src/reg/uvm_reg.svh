@@ -1641,7 +1641,7 @@ function uvm_reg_map uvm_reg::get_default_map(string caller="");
      uvm_reg_block blk = map.get_parent();
      uvm_reg_map default_map = blk.get_default_map();
      if (default_map != null) begin
-       uvm_reg_map local_map = get_local_map(default_map);
+       uvm_reg_map local_map = get_local_map(default_map,"get_default_map()");
        if (local_map != null)
          return local_map;
      end
@@ -2560,7 +2560,7 @@ function bit uvm_reg::Xcheck_accessX (input uvm_reg_item rw,
 
    if (rw.path != UVM_BACKDOOR) begin
 
-     rw.local_map = get_local_map(rw.map,"write()");
+     rw.local_map = get_local_map(rw.map,caller);
 
      if (rw.local_map == null) begin
         `uvm_error(get_type_name(), 

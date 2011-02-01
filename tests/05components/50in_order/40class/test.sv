@@ -49,7 +49,7 @@ begin
 
    fork
       foreach (v[i]) begin
-         c e = new();
+         automatic c e = new();
          e.i = v[i];
          exp.write(e);
       end
@@ -57,7 +57,7 @@ begin
 
    #10;
    foreach (v[i]) begin
-      c o = new();
+      automatic c o = new();
       o.i = v[i];
       obs.write(o);
    end

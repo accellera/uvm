@@ -1127,5 +1127,21 @@ class uvm_sequence_base extends uvm_sequence_item;
     set_sequence_id(sequence_id);
   endfunction
 
+
+  // Function- create_request
+  //
+  // Returns an instance of teh ~REQ~ type in a <uvm_sequence_item> base handle
+  virtual function uvm_sequence_item create_request ();
+    return null;
+  endfunction
+
+  // Function- create_response
+  //
+  // Returns an instance of teh ~RSP~ type in a <uvm_sequence_item> base handle
+  virtual function uvm_sequence_item create_response ();
+    return null;
+  endfunction
+
+
 endclass                
 
