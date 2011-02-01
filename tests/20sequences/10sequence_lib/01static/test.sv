@@ -41,6 +41,7 @@ module top;
       `uvm_sequence_library_utils(TYPE) \
       function new(string name=""); \
         super.new(name); \
+        init_sequence_library(); \
       endfunction \
     endclass
 
@@ -195,6 +196,100 @@ module top;
                                           "uvm_test_top.sequencer.shutdown_phase",
                                           "default_sequence.selection_mode",
                                           UVM_SEQ_LIB_USER);
+
+    repeat (10) #0;
+    // Verify simple_seq_lib
+    begin
+
+    simple_seq_lib lib;  // MUST NOT INITIALIZE LIB HERE; CREATES RACE CONDITION
+    uvm_object_wrapper seqs[$];
+    bit seq_aa[string];
+    lib = new("lib");
+    lib.get_sequences(seqs);
+    if (seqs.size() != 2) begin
+      `uvm_error("BAD_BASE_SEQ_LIB",$sformatf("Base simple_seq_lib size is %0d, expected 2",seqs.size()))
+    end
+    foreach (seqs[i])
+      seq_aa[seqs[i].get_type_name()] = 1;
+    if (!seq_aa.exists("seqG"))       `uvm_error("SEQ_NOT_FOUND",{"seqG not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqGextend")) `uvm_error("SEQ_NOT_FOUND",{"seqGextend not found in library  ",lib.get_name()})
+    end
+
+    // Verify simple_seq_lib_RST
+    begin
+    simple_seq_lib_RST lib;
+    uvm_object_wrapper seqs[$];
+    bit seq_aa[string];
+    lib = new("lib");
+    lib.get_sequences(seqs);
+    if (seqs.size() != 5) begin
+      `uvm_error("BAD_RST_SEQ_LIB",$sformatf("%s size is %0d, expected 5",lib.get_name(),seqs.size()))
+    end
+    foreach (seqs[i])
+      seq_aa[seqs[i].get_type_name()] = 1;
+    if (!seq_aa.exists("seqA"))       `uvm_error("SEQ_NOT_FOUND",{"seqA not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqAextend")) `uvm_error("SEQ_NOT_FOUND",{"seqAextend not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqB"))       `uvm_error("SEQ_NOT_FOUND",{"seqB not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqG"))       `uvm_error("SEQ_NOT_FOUND",{"seqG not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqGextend")) `uvm_error("SEQ_NOT_FOUND",{"seqGextend not found in library  ",lib.get_name()})
+    end
+
+    // Verify simple_seq_lib_CFG
+    begin
+    simple_seq_lib_CFG lib;
+    uvm_object_wrapper seqs[$];
+    bit seq_aa[string];
+    lib = new("lib");
+    lib.get_sequences(seqs);
+    if (seqs.size() != 4) begin
+      `uvm_error("BAD_CFG_SEQ_LIB",$sformatf("%s size is %0d, expected 4",lib.get_name(),seqs.size()))
+    end
+    foreach (seqs[i])
+      seq_aa[seqs[i].get_type_name()] = 1;
+    if (!seq_aa.exists("seqC"))       `uvm_error("SEQ_NOT_FOUND",{"seqC not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqD"))       `uvm_error("SEQ_NOT_FOUND",{"seqD not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqG"))       `uvm_error("SEQ_NOT_FOUND",{"seqG not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqGextend")) `uvm_error("SEQ_NOT_FOUND",{"seqGextend not found in library  ",lib.get_name()})
+    end
+
+    // Verify simple_seq_lib_MAIN
+    begin
+    simple_seq_lib_MAIN lib;
+    uvm_object_wrapper seqs[$];
+    bit seq_aa[string];
+    lib = new("lib");
+    lib.get_sequences(seqs);
+    if (seqs.size() != 6) begin
+      `uvm_error("BAD_MAIN_SEQ_LIB",$sformatf("%s size is %0d, expected 6",lib.get_name(),seqs.size()))
+    end
+    foreach (seqs[i])
+      seq_aa[seqs[i].get_type_name()] = 1;
+    if (!seq_aa.exists("seqD"))       `uvm_error("SEQ_NOT_FOUND",{"seqD not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqE"))       `uvm_error("SEQ_NOT_FOUND",{"seqE not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqF"))       `uvm_error("SEQ_NOT_FOUND",{"seqF not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqG"))       `uvm_error("SEQ_NOT_FOUND",{"seqG not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqGextend")) `uvm_error("SEQ_NOT_FOUND",{"seqGextend not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqEextend")) `uvm_error("SEQ_NOT_FOUND",{"seqEextend not found in library  ",lib.get_name()})
+    end
+
+    // Verify simple_seq_lib_SHUT
+    begin
+    simple_seq_lib_SHUT lib;
+    uvm_object_wrapper seqs[$];
+    bit seq_aa[string];
+    lib = new("lib");
+    lib.get_sequences(seqs);
+    if (seqs.size() != 5) begin
+      `uvm_error("BAD_SHUT_SEQ_LIB",$sformatf("%s size is %0d, expected 5",lib.get_name(),seqs.size()))
+    end
+    foreach (seqs[i])
+      seq_aa[seqs[i].get_type_name()] = 1;
+    if (!seq_aa.exists("seqU1"))      `uvm_error("SEQ_NOT_FOUND",{"seqU1 not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqU2"))      `uvm_error("SEQ_NOT_FOUND",{"seqU2 not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqU3"))      `uvm_error("SEQ_NOT_FOUND",{"seqU3 not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqG"))       `uvm_error("SEQ_NOT_FOUND",{"seqG not found in library  ",lib.get_name()})
+    if (!seq_aa.exists("seqGextend")) `uvm_error("SEQ_NOT_FOUND",{"seqGextend not found in library  ",lib.get_name()})
+    end
 
     run_test();
 

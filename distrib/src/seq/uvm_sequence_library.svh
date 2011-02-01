@@ -42,6 +42,23 @@ typedef class uvm_sequence_library_cfg;
 // next sequence to start. Users can override this method in subtypes to
 // implement custom selection algorithms.
 //
+// Creating a subtype of a sequence library requires invocation of the
+// <`uvm_sequence_library_utils> macro in its declaration and calling
+// the <init_sequence_library> method in its constructor. The macro
+// and function are needed to populate the sequence library with any
+// sequences that were statically registered with it or any of its base
+// classes.
+//
+//| class my_seq_lib extends uvm_sequence_library #(my_item);
+//|   `uvm_object_utils(my_item)
+//|   `uvm_sequence_library_utils(my_seq_lib)
+//|    function new(string name="");
+//|      super.new(name);
+//|      init_sequence_library();
+//|    endfunction
+//|    ...
+//| endclass
+//
 //------------------------------------------------------------------------------
 
 class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RSP);
@@ -82,18 +99,12 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    // 
    //
    //| uvm_config_db #(uvm_object_wrapper)::set(null,
-   //|                                    "env.agent.sequencer.main_ph",
+   //|                                    "env.agent.sequencer.main_phase",
    //|                                    "default_sequence",
    //|                                    main_seq_lib::get_type());
    //|
-   //| // default sequences inherit sequencer's thread mode
-   //| uvm_config_db #(uvm_thread_mode)::set(null,
-   //|                                    "env.agent.sequencer.main_ph",
-   //|                                    "default_sequence.thread_mode",
-   //|                                    UVM_PHASE_IMPLICIT_OBJECTION);
-   //|
    //| uvm_config_db #(uvm_sequence_lib_mode)::set(null,
-   //|                                    "env.agent.sequencer.main_ph",
+   //|                                    "env.agent.sequencer.main_phase",
    //|                                    "default_sequence.selection_mode",
    //|                                    UVM_SEQ_LIB_RANDC);
    //
@@ -110,17 +121,12 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    //| void'(my_seq_lib.randomize());
    //|
    //| uvm_config_db #(uvm_sequence_base)::set(null,
-   //|                                    "env.agent.sequencer.main_ph",
+   //|                                    "env.agent.sequencer.main_phase",
    //|                                    "default_sequence",
    //|                                    my_seq_lib);
    //|
-   //| uvm_config_db #(uvm_thread_mode)::set(null,
-   //|                                    "env.sequencer",
-   //|                                    "default_sequence.thread_mode",
-   //|                                    UVM_PHASE_IMPLICIT_OBJECTION);
-   //|
    //
-   protected uvm_sequence_lib_mode selection_mode;
+   uvm_sequence_lib_mode selection_mode;
 
 
    // Variable- min_random_count
@@ -128,7 +134,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    // Sets the minimum number of items to execute. Use the configuration
    // mechanism to set. See <selection_mode> for an example.
    //
-   protected int unsigned min_random_count=1;
+   int unsigned min_random_count=10;
 
 
    // Variable- max_random_count
@@ -137,7 +143,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    // mechanism to set. See <selection_mode> for an example.
    //
    //
-   protected int unsigned max_random_count=10;
+   int unsigned max_random_count=10;
 
 
 
@@ -205,7 +211,8 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    // Constrains <select_rand> to be a valid index into the ~sequences~ array
    //
    constraint valid_rand_selection {
-      select_rand < sequences.size();
+      if (sequences.size() > 0)
+        select_rand < sequences.size();
    }
 
 
@@ -215,9 +222,9 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    // Constrains <select_randc> to be a valid index into the ~sequences~ array
    //
    constraint valid_randc_selection {
-      select_randc < sequences.size();
+      if (sequences.size() > 0)
+        select_randc < sequences.size();
    }
-
 
 
    // Constraint- valid_sequence_count
@@ -240,14 +247,6 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    // wrapping back to 0 when reaching ~max~.
    //
    extern virtual function int unsigned select_sequence(int unsigned max);
-
-
-   // Function- pre_randomize
-   //
-   // Loads all statically registered sequence types. Subtypes of this class
-   // must call ~super.pre_randomize()~
-   //
-   extern function void pre_randomize();
 
 
 
@@ -308,6 +307,26 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    extern virtual function void get_sequences(ref uvm_object_wrapper seq_types[$]);
 
 
+   // Function- init_sequence_library
+   //
+   // All subtypes of this class must call init_sequence_library in its
+   // constructor.
+   extern function void init_sequence_library();
+
+   // Macro- uvm_sequence_library_utils
+   //
+   // All subtypes of this class must invoke the `uvm_sequence_library_utils
+   // macro.
+   //
+   //| class my_seq_lib extends uvm_sequence_library #(my_item);
+   //|   `uvm_object_utils(my_item)
+   //|   `uvm_sequence_library_utils(my_seq_lib)
+   //|    function new(string name="");
+   //|      super.new(name);
+   //|      init_sequence_library();
+   //|    endfunction
+   //|    ...
+   //| endclass
 
    //------------------------------------------
    // PRIVATE - INTERNAL - NOT PART OF STANDARD
@@ -318,17 +337,18 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
 
    static const string type_name = "uvm_sequence_library #(REQ,RSP)";
    static protected uvm_object_wrapper m_typewide_sequences[$];
+   bit m_abort;
 
    extern static   function bit  m_static_check(uvm_object_wrapper seq_type);
-   extern          function bit  m_check(uvm_object_wrapper seq_type);
+   extern static   function bit  m_check(uvm_object_wrapper seq_type, this_type lib);
+   extern          function bit  m_dyn_check(uvm_object_wrapper seq_type);
    extern          function void m_get_config();
    extern static   function bit  m_add_typewide_sequence(uvm_object_wrapper seq_type);
-   extern virtual  function void m_add_typewide_sequences
-                                  (ref uvm_object_wrapper seq_types[$]);
    extern virtual  task          execute(uvm_object_wrapper wrap);
 
    extern virtual  task          body();
    extern virtual  function void do_print(uvm_printer printer);
+   extern          function void pre_randomize();
 
 endclass
 
@@ -378,7 +398,9 @@ endclass
 
 function uvm_sequence_library::new(string name="");
    super.new(name);
-   //m_add_typewide_sequences(sequences);
+   init_sequence_library();
+   valid_rand_selection.constraint_mode(0);
+   valid_randc_selection.constraint_mode(0);
 endfunction
 
 
@@ -421,7 +443,7 @@ endfunction
 // ------------
 
 function void uvm_sequence_library::add_sequence(uvm_object_wrapper seq_type);
-  if (m_check(seq_type))
+  if (m_dyn_check(seq_type))
     sequences.push_back(seq_type);
 endfunction
 
@@ -468,25 +490,19 @@ function int unsigned uvm_sequence_library::select_sequence(int unsigned max);
 endfunction
 
 
-// pre_randomize
-// -------------
-
-function void uvm_sequence_library::pre_randomize();
-   m_add_typewide_sequences(sequences);
-endfunction
-
-
 //----------//
 // INTERNAL //
 //----------//
 
-// m_add_typewide_sequences
-// ------------------------
 
-function void uvm_sequence_library::m_add_typewide_sequences(ref uvm_object_wrapper seq_types[$]);
+// init_sequence_library
+// ---------------------
+
+function void uvm_sequence_library::init_sequence_library();
   foreach (this_type::m_typewide_sequences[i])
-    seq_types.push_back(this_type::m_typewide_sequences[i]);
+    sequences.push_back(this_type::m_typewide_sequences[i]);
 endfunction
+
 
 
 // m_static_check
@@ -494,18 +510,23 @@ endfunction
 
 
 function bit uvm_sequence_library::m_static_check(uvm_object_wrapper seq_type);
-  uvm_object obj;
-  uvm_sequence #(REQ,RSP) seq; 
-  obj = seq_type.create_object();
-  if (!$cast(seq,obj)) begin
-     uvm_root top = uvm_root::get();
-    `uvm_error_context("BAD_SEQ_TYPE",
-       {"Registered object '",obj.get_type_name(),
-       "' is not a sequence of type ",REQ::type_name},top)
+  if (!m_check(seq_type,null))
     return 0;
-  end
   foreach (m_typewide_sequences[i])
     if (m_typewide_sequences[i] == seq_type)
+      return 0;
+  return 1;
+endfunction
+
+
+// m_dyn_check
+// -----------
+
+function bit uvm_sequence_library::m_dyn_check(uvm_object_wrapper seq_type);
+  if (!m_check(seq_type,this))
+    return 0;
+  foreach (sequences[i])
+    if (sequences[i] == seq_type)
       return 0;
   return 1;
 endfunction
@@ -514,10 +535,61 @@ endfunction
 // m_check
 // -------
 
-function bit uvm_sequence_library::m_check(uvm_object_wrapper seq_type);
-  foreach (sequences[i])
-    if (sequences[i] == seq_type)
-      return 0;
+function bit uvm_sequence_library::m_check(uvm_object_wrapper seq_type, this_type lib);
+  uvm_object obj;
+  uvm_sequence_base seq;
+  uvm_root top;
+  string name;
+  string typ;
+  obj = seq_type.create_object();
+  name = (lib == null) ? type_name : lib.get_full_name();
+  typ = (lib == null) ? type_name : lib.get_type_name();
+  top = uvm_root::get();
+
+  if (!$cast(seq, obj)) begin
+    `uvm_error_context("SEQLIB/BAD_SEQ_TYPE",
+        {"Object '",obj.get_type_name(),
+        "' is not a sequence. Cannot add to sequence library '",name,
+        "'"},top)
+     return 0;
+  end
+  begin
+    uvm_sequence_item req_to_add;
+    REQ req;
+    req = new("req");
+    req_to_add = seq.create_request();
+    if (!( $cast(req, req_to_add))) begin
+      `uvm_error_context("SEQLIB/BAD_REQ_TYPE",
+        {"Can not add sequence '",seq.get_type_name(),"' ",
+        "to sequence library of type '",typ,"' (instance ",name,") ",
+        "as the request type '", req_to_add.get_type_name(), "' is not type-compatible with ",
+        "the request type of the sequence library '",req.get_type_name(),"'"},top)
+       return 0;
+    end 
+  end
+  begin
+    uvm_sequence_item rsp_to_add;
+    RSP rsp;
+    rsp = new("rsp");
+    rsp_to_add = seq.create_response();
+    if (!( $cast(rsp, rsp_to_add))) begin
+      `uvm_error_context("SEQLIB/BAD_RSP_TYPE",
+        {"Can not add sequence '",seq.get_type_name(),"' ",
+        "to sequence library of type '",typ,"' (instance ",name,") ",
+        "as the response type '", rsp_to_add.get_type_name(), "' is not type-compatible with ",
+        "the response type of the sequence library '",rsp.get_type_name(),"'"},top)
+       return 0;
+    end 
+  end
+  return 1;
+endfunction
+
+
+// pre_randomize
+// -------------
+
+function void uvm_sequence_library::pre_randomize();
+  m_get_config();
 endfunction
 
 
@@ -527,9 +599,13 @@ endfunction
 function void uvm_sequence_library::m_get_config();
 
   uvm_sequence_library_cfg cfg;
+  string phase_name;
 
+  if (starting_phase != null) begin
+    phase_name = {starting_phase.get_name(),"_phase"};
+  end
   if (uvm_config_db #(uvm_sequence_library_cfg)::get(m_sequencer, 
-                                        {starting_phase.get_name(),"_phase"},
+                                        phase_name,
                                         "default_sequence.config",
                                         cfg) ) begin
     selection_mode = cfg.selection_mode; 
@@ -538,32 +614,49 @@ function void uvm_sequence_library::m_get_config();
   end
   else begin
     void'(uvm_config_db #(int unsigned)::get(m_sequencer, 
-                                        {starting_phase.get_name(),"_phase"},
+                                        phase_name,
                                         "default_sequence.min_random_count",
                                         min_random_count) );
 
     void'(uvm_config_db #(int unsigned)::get(m_sequencer, 
-                                        {starting_phase.get_name(),"_phase"},
+                                        phase_name,
                                         "default_sequence.max_random_count",
                                         max_random_count) );
 
     void'(uvm_config_db #(uvm_sequence_lib_mode)::get(m_sequencer, 
-                                        {starting_phase.get_name(),"_phase"},
+                                        phase_name,
                                         "default_sequence.selection_mode",
                                         selection_mode) );
   end
 
-  if (min_random_count > max_random_count) begin
-    `uvm_error("BAD_MIN_MAX",
-       $sformatf("min_random_count (%0d) greater than max_random_count (%0d)",
+  if (max_random_count == 0) begin
+    `uvm_warning("SEQLIB/MAX_ZERO",
+       $sformatf("max_random_count (%0d) zero. Nothing will be done.",
+       max_random_count))
+    if (min_random_count > max_random_count)
+      min_random_count = max_random_count;
+  end
+  else if (min_random_count > max_random_count) begin
+    `uvm_error("SEQLIB/MIN_GT_MAX",
+       $sformatf("min_random_count (%0d) greater than max_random_count (%0d). Setting min to max.",
        min_random_count,max_random_count))
     min_random_count = max_random_count;
   end
-
-  if (min_random_count < 1) begin
-    `uvm_error("BAD_MIN_MAX",
-       $sformatf("min_random_count (%0d) less then one. Nothing will be done.",
-       min_random_count))
+  else begin
+    if (selection_mode == UVM_SEQ_LIB_ITEM) begin
+      uvm_sequencer #(REQ,RSP) seqr;
+      REQ req = new();
+      if (req.get_type_name() == "uvm_sequence_item") begin
+        `uvm_error("SEQLIB/BASE_ITEM", {"selection_mode cannot be UVM_SEQ_LIB_ITEM when ",
+          "the REQ type is the base uvm_sequence_item. Using UVM_SEQ_LIB_RAND mode"})
+        selection_mode = UVM_SEQ_LIB_RAND;
+      end
+      if (m_sequencer == null || !$cast(seqr,m_sequencer)) begin
+        `uvm_error("SEQLIB/VIRT_SEQ", {"selection_mode cannot be UVM_SEQ_LIB_ITEM when ",
+          "running as a virtual sequence. Using UVM_SEQ_LIB_RAND mode"})
+        selection_mode = UVM_SEQ_LIB_RAND;
+      end
+    end
   end
 
 endfunction
@@ -576,25 +669,35 @@ task uvm_sequence_library::body();
 
   uvm_object_wrapper wrap;
 
+  if (m_sequencer == null) begin
+    `uvm_fatal("SEQLIB/VIRT_SEQ", {"Sequence library 'm_sequencer' handle is null; ",
+      " no current support for running as a virtual sequence."})
+     return;
+  end
+
+  if (!is_randomized)
+    m_get_config();
+
   if (starting_phase != null)
     starting_phase.raise_objection(this,
        {"starting sequence library ",get_full_name()," (", get_type_name(),")"});
 
-  m_get_config();
+  `uvm_info("SEQLIB/START",
+     $sformatf("Starting sequence library %s in %s phase: %0d iterations in mode %s",
+      get_type_name(),
+      (starting_phase != null ? starting_phase.get_name() : "unknown"),
+      sequence_count, selection_mode.name()),UVM_LOW)
 
-  `uvm_info("SEQ_LIB_START",{"Starting sequence library in phase ",starting_phase.get_name()},UVM_LOW)
-
-  //print(uvm_default_table_printer);
-
-  `uvm_info("SEQ_LIB_MODE", {"Mode is ",selection_mode.name()},UVM_MEDIUM)
+   `uvm_info("SEQLIB/SPRINT",{"\n",sprint(uvm_default_table_printer)},UVM_FULL)
 
     case (selection_mode)
 
       UVM_SEQ_LIB_RAND: begin
+        valid_rand_selection.constraint_mode(1);
         for (int i=1; i<=sequence_count; i++) begin
           if (!randomize(select_rand)) begin
-            `uvm_error("SEQ_LIB_RAND_FAIL", "Random sequence selection failed")
-            wrap = REQ::get_type();
+            `uvm_error("SEQLIB/RAND_FAIL", "Random sequence selection failed")
+            break;
           end
           else begin
             wrap = sequences[select_rand];
@@ -605,10 +708,11 @@ task uvm_sequence_library::body();
 
       UVM_SEQ_LIB_RANDC: begin
         uvm_object_wrapper q[$];
+        valid_randc_selection.constraint_mode(1);
         for (int i=1; i<=sequence_count; i++) begin
           if (!randomize(select_randc)) begin
-            `uvm_error("SEQ_LIB_RANDC_FAIL", "Random sequence selection failed")
-            wrap = REQ::get_type();
+            `uvm_error("SEQLIB/RANDC_FAIL", "Random sequence selection failed")
+            break;
           end
           else begin
             wrap = sequences[select_randc];
@@ -631,7 +735,7 @@ task uvm_sequence_library::body();
           int user_selection;
           user_selection = select_sequence(sequences.size()-1);
           if (user_selection >= sequences.size()) begin
-            `uvm_error("SEQ_LIB_USER_FAIL", "User sequence selection out of range")
+            `uvm_error("SEQLIB/USER_FAIL", "User sequence selection out of range")
             wrap = REQ::get_type();
           end
           else begin
@@ -642,13 +746,14 @@ task uvm_sequence_library::body();
       end
 
       default: begin
-        `uvm_fatal("SEQ_LIB_RAND_MODE", 
+        `uvm_fatal("SEQLIB/RAND_MODE", 
            $sformatf("Unknown random sequence selection mode: %0d",selection_mode))
       end
      endcase
 
-  `uvm_info("SEQ_LIB_ENDED",{"Ending sequence library in phase ",starting_phase.get_name()},UVM_LOW)
-  `uvm_info("SEQ_LIB_DSTRB",$sformatf("%p",seqs_distrib),UVM_HIGH)
+  `uvm_info("SEQLIB/END",{"Ending sequence library in phase ",
+            (starting_phase != null ? starting_phase.get_name() : "unknown")},UVM_LOW)
+  `uvm_info("SEQLIB/DSTRB",$sformatf("%p",seqs_distrib),UVM_HIGH)
 
   if (starting_phase != null)
     starting_phase.drop_objection(this,
@@ -672,12 +777,12 @@ task uvm_sequence_library::execute(uvm_object_wrapper wrap);
            $sformatf("%0d",sequences_executed+1));
   void'($cast(seq_or_item,obj)); // already qualified, 
 
-  `uvm_info("SEQ_LIB_EXEC",{"Executing ",(seq_or_item.is_item() ? "item " : "sequence "),seq_or_item.get_name(),
+  `uvm_info("SEQLIB/EXEC",{"Executing ",(seq_or_item.is_item() ? "item " : "sequence "),seq_or_item.get_name(),
                            " (",seq_or_item.get_type_name(),")"},UVM_FULL)
   seq_or_item.print_sequence_info = 1;
   start_item(seq_or_item);
   if (!seq_or_item.randomize())
-     `uvm_error("SEQ_LIB_RAND_FAIL", "Failed to randomize sequence")
+     `uvm_error("SEQLIB/SEQ_RAND_FAIL", "Failed to randomize sequence")
   finish_item(seq_or_item);
   seqs_distrib[seq_or_item.get_type_name()] = seqs_distrib[seq_or_item.get_type_name()]+1;
 

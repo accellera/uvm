@@ -142,5 +142,27 @@ virtual class uvm_sequence #(type REQ = uvm_sequence_item,
   endfunction
 
   
+  
+
+  // Function: create_request
+  //
+  // Returns an instance of teh ~REQ~ type in a <uvm_sequence_item> base handle
+  virtual function uvm_sequence_item create_request ();
+    REQ req;
+    req = new("req");
+    return req;
+  endfunction
+
+  // Function: create_response
+  //
+  // Returns an instance of teh ~RSP~ type in a <uvm_sequence_item> base handle
+  virtual function uvm_sequence_item create_response ();
+    RSP rsp;
+    rsp = new("rsp");
+    return rsp;
+  endfunction
+
+
+
 
 endclass
