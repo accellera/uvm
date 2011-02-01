@@ -177,7 +177,9 @@ class uvm_in_order_comparator
       // analysis" is safe from being edited by another process.
       // Hence, it is safe not to clone a and b.
       
-      pair = new(a, b);
+      pair = new("after/before");
+      pair.first = a;
+      pair.second = b;
       pair_ap.write(pair);
     end
   

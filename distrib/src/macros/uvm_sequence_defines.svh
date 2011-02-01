@@ -246,12 +246,12 @@
 
 //-----------------------------------------------------------------------------
 //
-// Group: Sequence Library
+// Group- Sequence Library
 //
 //-----------------------------------------------------------------------------
 
 
-// MACRO: `uvm_add_to_sequence_library
+// MACRO- `uvm_add_to_sequence_library
 //
 // Adds the given sequence ~TYPE~ to the given sequence library ~LIBTYPE~
 //
@@ -286,7 +286,7 @@
 
 
 
-// MACRO: `uvm_sequence_library_utils
+// MACRO- `uvm_sequence_library_utils
 //
 // Declares the infrastructure needed to define extensions to the
 // <uvm_sequence_library> class. You define new sequence library subtypes
@@ -318,27 +318,19 @@
 \
    static protected uvm_object_wrapper m_typewide_sequences[$]; \
    \
-   static local bit m_added_typewide_seqs; \
-   \
-   protected uvm_object_wrapper sequences[$]; \
-   \
-   virtual function void m_add_typewide_sequences(ref uvm_object_wrapper seq_types[$]); \
-     if (!m_added_typewide_seqs) begin \
-       super.m_add_typewide_sequences(seq_types); \
-       foreach (TYPE::m_typewide_sequences[i]) \
-         seq_types.push_back(TYPE::m_typewide_sequences[i]); \
-       m_added_typewide_seqs = 1; \
-     end \
+   function void init_sequence_library(); \
+     foreach (TYPE::m_typewide_sequences[i]) \
+       sequences.push_back(TYPE::m_typewide_sequences[i]); \
    endfunction \
    \
    static function void add_typewide_sequence(uvm_object_wrapper seq_type); \
      if (m_static_check(seq_type)) \
-       m_typewide_sequences.push_back(seq_type); \
+       TYPE::m_typewide_sequences.push_back(seq_type); \
    endfunction \
    \
    static function void add_typewide_sequences(uvm_object_wrapper seq_types[$]); \
      foreach (seq_types[i]) \
-       add_typewide_sequence(seq_types[i]); \
+       TYPE::add_typewide_sequence(seq_types[i]); \
    endfunction \
    \
    static function bit m_add_typewide_sequence(uvm_object_wrapper seq_type); \
