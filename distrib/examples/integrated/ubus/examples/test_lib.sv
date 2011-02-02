@@ -87,6 +87,7 @@ class test_read_modify_write extends ubus_example_base_test;
   endfunction : new
 
   virtual function void build_phase(uvm_phase phase);
+  begin
     uvm_config_db#(uvm_object_wrapper)::set(this,
 			       "ubus_example_tb0.ubus0.masters[0].sequencer", 
 			       "run_ph",
@@ -97,6 +98,7 @@ class test_read_modify_write extends ubus_example_base_test;
 				slave_memory_seq::type_id::get());
     // Create the tb
     super.build_phase(phase);
+  end
   endfunction : build_phase
 
 endclass : test_read_modify_write
@@ -112,6 +114,7 @@ class test_r8_w8_r4_w4 extends ubus_example_base_test;
   endfunction : new
 
   virtual function void build_phase(uvm_phase phase);
+  begin
     super.build_phase(phase);
     uvm_config_db#(uvm_object_wrapper)::set(this,
 			       "ubus_example_tb0.ubus0.masters[0].sequencer", 
@@ -121,6 +124,7 @@ class test_r8_w8_r4_w4 extends ubus_example_base_test;
 			       ".ubus_example_tb0.ubus0.slaves[0].sequencer", 
 			       "run_ph",
 				slave_memory_seq::type_id::get());
+  end
   endfunction : build_phase
 
 endclass : test_r8_w8_r4_w4 
@@ -136,6 +140,7 @@ class test_2m_4s extends ubus_example_base_test;
   endfunction : new
 
   virtual function void build_phase(uvm_phase phase);
+  begin
     // Overides to the ubus_example_tb build_phase()
     // Set the topology to 2 masters, 4 slaves
     uvm_config_db#(int)::set(this,"ubus_example_tb0.ubus0", 
@@ -166,6 +171,7 @@ class test_2m_4s extends ubus_example_base_test;
      
     // Create the tb
     super.build_phase(phase);
+  end
   endfunction : build_phase
 
   function void connect_phase(uvm_phase phase);
