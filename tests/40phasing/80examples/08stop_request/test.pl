@@ -1,1 +1,1 @@
-return &make_example("$uvm_home/examples/phases/stop_request");
+return &make_example("$uvm_home/examples/simple/phases/stop_request");

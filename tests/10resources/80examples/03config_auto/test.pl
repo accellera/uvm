@@ -1,1 +1,1 @@
-return &make_example("$uvm_home/examples/configuration/automated");
+return &make_example("$uvm_home/examples/simple/configuration/automated");
