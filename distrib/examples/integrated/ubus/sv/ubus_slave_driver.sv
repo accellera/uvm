@@ -39,7 +39,7 @@ class ubus_slave_driver extends uvm_driver #(ubus_transfer);
   endfunction : new
 
   function void build_phase(uvm_phase phase);
-     if(!uvm_config_db#(virtual ubus_if)::get(this, "UBUS", "vif", vif))
+     if(!uvm_config_db#(virtual ubus_if)::get(this, "", "vif", vif))
        `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
   endfunction: build_phase
 

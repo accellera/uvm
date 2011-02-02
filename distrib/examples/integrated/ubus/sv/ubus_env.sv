@@ -64,7 +64,7 @@ class ubus_env extends uvm_env;
     string inst_name;
 //    set_phase_domain("uvm");
     super.build_phase(phase);
-     if(!uvm_config_db#(virtual ubus_if)::get(this, "UBUS", "vif", vif))
+     if(!uvm_config_db#(virtual ubus_if)::get(this, "", "vif", vif))
        `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
      
     if(has_bus_monitor == 1) begin

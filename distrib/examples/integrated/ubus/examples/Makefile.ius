@@ -27,9 +27,9 @@ include ../../../Makefile.ius
 all: comp run
 
 comp:
-	$(IUS) +incdir+../sv \
-		ubus_tb_top.sv
+	$(IUS) -c +incdir+../sv \
+              ubus_tb_top.sv
 
 run:
-	$(IUS) +UVM_TESTNAME=test_2m_4s
+	$(IUS) +incdir+../sv ubus_tb_top.sv +UVM_TESTNAME=test_2m_4s
 	$(CHECK)
