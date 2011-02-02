@@ -87,16 +87,14 @@ class test_read_modify_write extends ubus_example_base_test;
   endfunction : new
 
   virtual function void build_phase(uvm_phase phase);
-    uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
-			       ".ubus_example_tb0.ubus0.masters[0].sequencer"}, 
+    uvm_config_db#(uvm_object_wrapper)::set(this,
+			       "ubus_example_tb0.ubus0.masters[0].sequencer", 
 			       "run_ph",
-				read_modify_write_seq::type_id::get(),
-				this);
-    uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
-			       ".ubus_example_tb0.ubus0.slaves[0].sequencer"}, 
+				read_modify_write_seq::type_id::get());
+    uvm_config_db#(uvm_object_wrapper)::set(this,
+			       "ubus_example_tb0.ubus0.slaves[0].sequencer", 
 			       "run_ph",
-				slave_memory_seq::type_id::get(),
-				this);
+				slave_memory_seq::type_id::get());
     // Create the tb
     super.build_phase(phase);
   endfunction : build_phase
@@ -115,16 +113,14 @@ class test_r8_w8_r4_w4 extends ubus_example_base_test;
 
   virtual function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
-			       ".ubus_example_tb0.ubus0.masters[0].sequencer"}, 
+    uvm_config_db#(uvm_object_wrapper)::set(this,
+			       "ubus_example_tb0.ubus0.masters[0].sequencer", 
 			       "run_ph",
-				r8_w8_r4_w4_seq::type_id::get(),
-				this);
-    uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
-			       ".ubus_example_tb0.ubus0.slaves[0].sequencer"}, 
+				r8_w8_r4_w4_seq::type_id::get());
+    uvm_config_db#(uvm_object_wrapper)::set(this,
+			       ".ubus_example_tb0.ubus0.slaves[0].sequencer", 
 			       "run_ph",
-				slave_memory_seq::type_id::get(),
-				this);
+				slave_memory_seq::type_id::get());
   endfunction : build_phase
 
 endclass : test_r8_w8_r4_w4 
@@ -142,34 +138,30 @@ class test_2m_4s extends ubus_example_base_test;
   virtual function void build_phase(uvm_phase phase);
     // Overides to the ubus_example_tb build_phase()
     // Set the topology to 2 masters, 4 slaves
-    uvm_resource_db#(int)::set({get_full_name(),".ubus_example_tb0.ubus0"}, 
-			       "num_masters", 2, this);
-    uvm_resource_db#(int)::set({get_full_name(),".ubus_example_tb0.ubus0"}, 
-			       "num_slaves", 4, this);
+    uvm_config_db#(int)::set(this,"ubus_example_tb0.ubus0", 
+			       "num_masters", 2);
+    uvm_config_db#(int)::set(this,"ubus_example_tb0.ubus0", 
+			       "num_slaves", 4);
      
    // Control the number of RMW loops
-    uvm_resource_db#(int)::set({get_name(),".ubus_example_tb0.ubus0.masters[0].sequencer", ".loop_read_modify_write_seq"}, "itr", 3);
-    uvm_resource_db#(int)::set({get_name(),".ubus_example_tb0.ubus0.masters[1].sequencer",".loop_read_modify_write_seq"}, "itr", 4);
+    uvm_config_db#(int)::set(this,"ubus_example_tb0.ubus0.masters[0].sequencer.loop_read_modify_write_seq", "itr", 3);
+    uvm_config_db#(int)::set(this,"ubus_example_tb0.ubus0.masters[1].sequencer.loop_read_modify_write_seq", "itr", 4);
 
      // Define the sequences to run in the run phase
-    uvm_resource_db#(uvm_object_wrapper)::set("*.ubus0.masters[0].sequencer.run_phase", 
+    uvm_config_db#(uvm_object_wrapper)::set(this,"*.ubus0.masters[0].sequencer.run_phase", 
 			       "default_sequence",
-				loop_read_modify_write_seq::type_id::get(),
-				this);
-    uvm_resource_db#(uvm_object_wrapper)::set({get_full_name(),
-			       ".ubus_example_tb0.ubus0.masters[1].sequencer.run_phase"}, 
+				loop_read_modify_write_seq::type_id::get());
+    uvm_config_db#(uvm_object_wrapper)::set(this,
+			       "ubus_example_tb0.ubus0.masters[1].sequencer.run_phase", 
 			       "default_sequence",
-				loop_read_modify_write_seq::type_id::get(),
-				this);
+				loop_read_modify_write_seq::type_id::get());
 
      for(int i = 0; i < 4; i++) begin
 	string slname;
-	$swrite(slname,"%s.ubus_example_tb0.ubus0.slaves[%0d].sequencer",
-		get_full_name(),i);
-	uvm_resource_db#(uvm_object_wrapper)::set({slname,".run_phase"}, 
+	$swrite(slname,"ubus_example_tb0.ubus0.slaves[%0d].sequencer", i);
+	uvm_config_db#(uvm_object_wrapper)::set(this, {slname,".run_phase"}, 
 						  "default_sequence",
-						  slave_memory_seq::type_id::get(),
-						  this);
+						  slave_memory_seq::type_id::get());
      end
      
     // Create the tb

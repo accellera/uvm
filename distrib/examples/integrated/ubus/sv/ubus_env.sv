@@ -64,28 +64,24 @@ class ubus_env extends uvm_env;
     string inst_name;
 //    set_phase_domain("uvm");
     super.build_phase(phase);
-     if(!uvm_resource_db#(virtual ubus_if)::read_by_type("UBUS",vif,this))
+     if(!uvm_config_db#(virtual ubus_if)::get(this, "UBUS", "vif", vif))
        `uvm_fatal("NOVIF",{"virtual interface must be set for: ",get_full_name(),".vif"});
      
     if(has_bus_monitor == 1) begin
       bus_monitor = ubus_bus_monitor::type_id::create("bus_monitor", this);
     end
     
-    uvm_resource_db#(int)::read_by_name(get_full_name(),
-					"num_masters",
-					num_masters,this);
+    void'(uvm_config_db#(int)::get(this, "", "num_masters", num_masters));
    
     masters = new[num_masters];
     for(int i = 0; i < num_masters; i++) begin
       $sformat(inst_name, "masters[%0d]", i);
       masters[i] = ubus_master_agent::type_id::create(inst_name, this);
-      uvm_resource_db#(int)::set({get_full_name(),".",inst_name,"*"}, 
-				 "master_id", i, this);
+      void'(uvm_config_db#(int)::set(this,{inst_name,"*"}, 
+				 "master_id", i));
     end
     
-    uvm_resource_db#(int)::read_by_name(get_full_name(),
-					"num_slaves",
-					num_slaves,this);
+    void'(uvm_config_db#(int)::get(this, "", "num_slaves", num_slaves));
     
     slaves = new[num_slaves];
     for(int i = 0; i < num_slaves; i++) begin

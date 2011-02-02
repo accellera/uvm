@@ -21,9 +21,9 @@
 
 `define UBUS_ADDR_WIDTH 16
 
+`include "ubus_pkg.sv"
 `include "dut_dummy.v"
 `include "ubus_if.sv"
-`include "ubus_pkg.sv"
 
 
 module ubus_tb_top;
@@ -52,7 +52,7 @@ module ubus_tb_top;
   );
 
   initial begin
-    uvm_resource_db#(virtual ubus_if)::set("UBUS","vif",vif);
+    uvm_config_db#(virtual ubus_if)::set(uvm_root::get(), "*UBUS", "vif", vif);
     run_test();
   end
 
