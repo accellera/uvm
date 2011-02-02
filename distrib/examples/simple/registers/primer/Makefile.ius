@@ -34,7 +34,7 @@ hw_reset:
 	$(CHECK)
 
 reg_user:
-	$(IUS) -incdir ../../../apb tb_top.sv test.sv \
+	$(IUS) -incdir ../../../integrated/apb tb_top.sv test.sv \
 		+UVM_TESTNAME=cmdline_test +UVM_REG_SEQ=user_test_seq
 	$(CHECK)
 
