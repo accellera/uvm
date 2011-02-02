@@ -25,6 +25,6 @@ include ../../../../Makefile.ius
 
 
 all: 
-	$(IUS) +UVM_TESTNAME=blk_test  -incdir ../../../common blk_run.sv
+	$(IUS) +UVM_TESTNAME=blk_test  -incdir ../../common blk_run.sv
 	$(CHECK)
 
