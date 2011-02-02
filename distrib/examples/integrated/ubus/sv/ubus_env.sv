@@ -71,9 +71,9 @@ class ubus_env extends uvm_env;
       bus_monitor = ubus_bus_monitor::type_id::create("bus_monitor", this);
     end
     
-    uvm_resource_db#(int)::read_by_name(get_full_name(),
+    void'(uvm_resource_db#(int)::read_by_name(get_full_name(),
 					"num_masters",
-					num_masters,this);
+					num_masters,this));
    
     masters = new[num_masters];
     for(int i = 0; i < num_masters; i++) begin
@@ -83,9 +83,9 @@ class ubus_env extends uvm_env;
 				 "master_id", i, this);
     end
     
-    uvm_resource_db#(int)::read_by_name(get_full_name(),
+    void'(uvm_resource_db#(int)::read_by_name(get_full_name(),
 					"num_slaves",
-					num_slaves,this);
+					num_slaves,this));
     
     slaves = new[num_slaves];
     for(int i = 0; i < num_slaves; i++) begin
