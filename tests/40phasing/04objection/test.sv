@@ -36,7 +36,6 @@ module test;
   class base extends uvm_component;
     function new(string name, uvm_component parent);
       super.new(name,parent);
-      set_phase_schedule("uvm");
     endfunction
     function void build_phase(uvm_phase phase);
       phase_run[uvm_build_ph] = 1;
@@ -116,10 +115,10 @@ module test;
 
     // Do objections to phases proceeding
     task run_phase(uvm_phase phase);
-      uvm_phase uvm_p = find_phase_schedule("*", "uvm");
-      uvm_phase reset_p = uvm_p.find_schedule("reset");
-      uvm_phase config_p = uvm_p.find_schedule("configure");
-      uvm_phase main_p = uvm_p.find_schedule("main");
+      uvm_domain uvm_d = uvm_domain::get_uvm_domain();
+      uvm_phase reset_p = uvm_d.find(uvm_reset_phase::get());
+      uvm_phase config_p = uvm_d.find(uvm_configure_phase::get());
+      uvm_phase main_p = uvm_d.find(uvm_main_phase::get());
 
       `uvm_info("TEST_RUN","Setting up objections to certain phases",UVM_NONE)
       //Do the raise, wait, drop for each phase
