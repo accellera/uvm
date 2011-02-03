@@ -86,9 +86,10 @@ module test;
       l2.maxdelay = 1500;
     endfunction
     function void connect_phase(uvm_phase phase);
-      set_phase_domain("uvm",0);
-      l1.set_phase_domain("domain1");
-      l2.set_phase_domain("domain2");
+      uvm_domain domain1 = new("domain1");
+      uvm_domain domain2 = new("domain2");
+      l1.set_domain(domain1);
+      l2.set_domain(domain2);
     endfunction
     function void report_phase(uvm_phase phase);
       phase_run[uvm_report_ph] = 1;

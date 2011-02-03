@@ -127,7 +127,6 @@ module test;
       l2.delay = phase_transition_time;
     endfunction
     function void connect_phase(uvm_phase phase);
-      set_phase_domain("uvm");
     endfunction
 
     //Start up the checkers

@@ -52,7 +52,7 @@
             return obj; \
           endfunction \
         endclass \
-        PREFIX``PHASE``_phase PHASE``_ph = PREFIX``PHASE``_phase::get();
+        PREFIX``PHASE``_phase PREFIX``PHASE``_ph = PREFIX``PHASE``_phase::get();
 
 `define m_uvm_topdown_phase(PHASE,COMP,PREFIX) \
         class PREFIX``PHASE``_phase extends uvm_topdown_phase(`"PHASE`"); \
@@ -71,7 +71,7 @@
             return obj; \
           endfunction \
         endclass \
-        PREFIX``PHASE``_phase PHASE``_ph = PREFIX``PHASE``_phase::get();
+        PREFIX``PHASE``_phase PREFIX``PHASE``_ph = PREFIX``PHASE``_phase::get();
 
 `define m_uvm_bottomup_phase(PHASE,COMP,PREFIX) \
         class PREFIX``PHASE``_phase extends uvm_bottomup_phase(`"PHASE`"); \
@@ -90,7 +90,7 @@
             return obj; \
           endfunction \
         endclass \
-        PREFIX``PHASE``_phase PHASE``_ph = PREFIX``PHASE``_phase::get();
+        PREFIX``PHASE``_phase PREFIX``PHASE``_ph = PREFIX``PHASE``_phase::get();
 
 
 `define uvm_builtin_task_phase(PHASE) \

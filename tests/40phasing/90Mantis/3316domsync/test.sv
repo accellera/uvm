@@ -148,14 +148,17 @@ module test;
     hier dom1, dom2;
     `uvm_component_utils(test)
     function new(string name, uvm_component parent);
+      uvm_domain domain1, domain2;
       super.new(name,parent);
       thedelay = 0 ;
       dom1 = new("dom1", this);
       dom2 = new("dom2", this);
       dom2.leaf1.thedelay = 75 ;
       dom2.leaf2.thedelay = 50 ;
-      dom1.set_phase_domain("domain1");
-      dom2.set_phase_domain("domain2");
+      domain1 = new("domain1");
+      domain2 = new("domain2");
+      dom1.set_phase_domain(domain1);
+      dom2.set_phase_domain(domain2);
     endfunction
 
     function void final_phase(uvm_phase phase);

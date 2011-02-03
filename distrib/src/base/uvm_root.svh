@@ -63,7 +63,6 @@ typedef class uvm_cmdline_processor;
 class uvm_root extends uvm_component;
 
   extern static function uvm_root get();
-  extern local  function void m_phase_setup();
 
   uvm_cmdline_processor clp;
 
@@ -178,8 +177,8 @@ class uvm_root extends uvm_component;
   extern virtual task run_phase (uvm_phase phase);
 
   // At end of elab phase we need to do tlm binding resolution.
-  function void phase_ended(uvm_phase phase);
-    if(phase == end_of_elaboration_ph)
+  function void phase_started(uvm_phase phase);
+    if (phase == end_of_elaboration_ph)
       do_resolve_bindings(); 
   endfunction
 
@@ -250,8 +249,8 @@ endclass
 function uvm_root uvm_root::get();
   if (m_inst == null) begin
     m_inst = new();
-    //Need m_inst to be set so that recursion won't happen in ctor
-    m_inst.m_phase_setup();
+    void'(uvm_domain::get_common_domain());
+    m_inst.m_domain = uvm_domain::get_uvm_domain();
   end
   return m_inst;
 endfunction
@@ -379,7 +378,6 @@ task uvm_root::run_test(string test_name="");
   #0; // let the phase runner start
   
   wait (m_phase_all_done == 1);
-  uvm_report_info("PHDONE","** phasing all done **", UVM_DEBUG);
   
   // clean up after ourselves
   phase_runner_proc.kill();
@@ -472,10 +470,6 @@ function void uvm_root::set_timeout(time timeout, bit overridable=1);
 endfunction
 
 
-//----------------//
-// IMPLEMENTATION //
-//----------------//
-
 
 // m_find_all_recurse
 // ------------------
@@ -494,38 +488,6 @@ function void uvm_root::m_find_all_recurse(string comp_match, ref uvm_component 
     comps.push_back(comp);
 
 endfunction
-
-
-// m_phase_setup
-// -------------
-
-// Create the toplevel common phase domain and schedule of 9 phases.
-// Every component runs these 9 phases build..connect...run...report..final
-// To be done immediately after the m_inst object has been set for uvm_root
-// so that it is immediately available.
-// TBD could possibly just use define_phase_schedule() here?
-
-uvm_domain uvm_common_domain = uvm_domain::get_common_domain(); // topmost node of phasing graph
-
-function void uvm_root::m_phase_setup();
-  // create topmost phase domain
-  uvm_common_domain=uvm_domain::get_common_domain();
-  // add "common" schedule to it and populate all the common phases
-  begin
-    uvm_phase schedule;
-    schedule = new("common",UVM_PHASE_SCHEDULE_NODE);
-    schedule.add_phase(uvm_build_phase::get());
-    schedule.add_phase(uvm_connect_phase::get());
-    schedule.add_phase(uvm_end_of_elaboration_phase::get());
-    schedule.add_phase(uvm_start_of_simulation_phase::get());
-    schedule.add_phase(uvm_run_phase::get());
-    schedule.add_phase(uvm_extract_phase::get());
-    schedule.add_phase(uvm_check_phase::get());
-    schedule.add_phase(uvm_report_phase::get());
-    schedule.add_phase(uvm_final_phase::get());
-    uvm_common_domain.add_schedule(schedule);
-  end
-endfunction 
 
 
 // m_add_child

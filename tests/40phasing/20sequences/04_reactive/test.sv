@@ -154,7 +154,6 @@ endclass
 class myseqr extends uvm_sequencer;
   function new(string name, uvm_component parent);
     super.new(name,parent);
-    set_phase_domain("uvm", .hier(0));
   endfunction
   `uvm_component_utils(myseqr)
 
@@ -179,7 +178,6 @@ class test extends uvm_test;
    typedef uvm_config_db #(uvm_object_wrapper) phase_rsrc;
 
    function void build_phase(uvm_phase phase);
-      uvm_phase domain, cfg, main;
       seqr1 = new("seqr1", this);
       seqr2 = new("seqr2", this);
       phase_rsrc::set(this, "seqr1.configure_phase", "default_sequence", my_config_seq::type_id::get());

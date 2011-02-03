@@ -164,7 +164,6 @@ module top;
 
      virtual function void connect_phase(uvm_phase phase);
        driver.seq_item_port.connect(sequencer.seq_item_export);
-       set_phase_domain("uvm");
      endfunction
 
      virtual task main_phase(uvm_phase phase);

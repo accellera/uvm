@@ -112,7 +112,6 @@ module test;
       l2 = new("l2", this);
     endfunction
     function void connect_phase(uvm_phase phase);
-      set_phase_domain("uvm");
     endfunction
 
     // Do objections to phases proceeding

@@ -140,7 +140,6 @@ class test extends uvm_test;
     sequencer = basic_sequencer::type_id::create("sequencer", this);
     driver    = basic_driver::type_id::create("driver", this);
 
-    set_phase_domain("uvm");
     this.print();
   endfunction : build
 

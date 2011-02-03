@@ -395,7 +395,7 @@ typedef enum
 // Group: Phasing
 //---------------
 
-// Enum: uvm_phase_type
+// Enum- uvm_phase_type
 //
 // This is an attribute of a <uvm_phase> object which defines the phase
 // execution type. Every phase we define has a type. It is used only for 
@@ -413,21 +413,13 @@ typedef enum
 //   traversed from the bottom up, allowing roll-up / consolidation 
 //   functionality.
 //
-//   UVM_PHASE_SCHEDULE_NODE - The phase is not an imp, but a dummy phase
-//   graph node representing the beginning of a VIP schedule of phases.
-//
-//   UVM_PHASE_ENDSCHEDULE_NODE - The phase is not an imp, but a dummy
-//   phase graph node representing the end of a VIP schedule of phases
-//
-//   UVM_PHASE_DOMAIN_NODE - The phase is not an imp, but a dummy phase
-//   graph node representing an entire domain branch with schedules beneath
-//
 typedef enum { UVM_PHASE_TASK,
                UVM_PHASE_TOPDOWN,
                UVM_PHASE_BOTTOMUP,
-               UVM_PHASE_SCHEDULE_NODE,    // internal only
-               UVM_PHASE_ENDSCHEDULE_NODE, // internal only
-               UVM_PHASE_DOMAIN_NODE       // internal only
+               UVM_PHASE_IMP,      // internal only
+               UVM_PHASE_NODE,     // internal only
+               UVM_PHASE_SCHEDULE, // internal only
+               UVM_PHASE_DOMAIN    // internal only
 } uvm_phase_type;
 
 

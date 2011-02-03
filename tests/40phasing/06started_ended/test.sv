@@ -60,10 +60,6 @@ module test;
       super.new(name,parent);
     endfunction
 
-    function void connect();
-      set_phase_domain("uvm");
-    endfunction
-
     //for parallel phase have two possible last phases
     function void check_phase_callback(uvm_phase phase, string last, string last2);
       string ph = phase.get_name();

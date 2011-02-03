@@ -85,8 +85,9 @@ module test;
     endfunction
 
     function void connect_phase(uvm_phase phase);
-      l1.set_phase_domain("domain1");
-      l2.set_phase_domain("domain2");
+      uvm_domain domain1 = new("domain1");
+      l1.set_domain(domain1);
+      l2.set_domain(domain2);
     endfunction
 
   endclass

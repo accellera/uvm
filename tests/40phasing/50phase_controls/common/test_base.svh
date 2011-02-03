@@ -197,7 +197,7 @@ class test_base extends uvm_test;
 
     // Each bot_env belongs to a separate domain so that
     // it can jump individually.
-    this.set_phase_domain("uvm");
+    //this.set_domain(uvm_domain::get_uvm_domain());
 
   endfunction : build_phase
 

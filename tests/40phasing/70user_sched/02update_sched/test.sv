@@ -102,10 +102,6 @@ module test;
       delay = 30ns;
     endfunction
 
-    function void connect();
-      set_phase_domain("uvm");
-    endfunction
-
     // The component needs to override teh set_phase_schedule to add
     // the new schedule.
     function void set_phase_schedule(string domain_name);
