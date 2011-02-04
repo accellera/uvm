@@ -35,7 +35,6 @@ class test extends uvm_test;
 
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
-      set_phase_domain("uvm");
    endfunction
 
    task pre_main_phase(uvm_phase phase);

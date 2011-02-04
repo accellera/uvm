@@ -1465,15 +1465,12 @@ endfunction
 function uvm_domain uvm_phase::get_domain();
   uvm_phase phase;
   phase = this;
-  $display("%m HERE 1");
   while (phase != null && phase.m_phase_type != UVM_PHASE_DOMAIN) begin
-    $display("phase=%s (%s)",phase.get_name(),phase.get_phase_type());
+    //$display("phase=%s (%s)",phase.get_name(),phase.get_phase_type());
     phase = phase.m_parent;
   end
-  $display("%m HERE 2");
   if (phase == null) // no parent domain 
     return null;
-  $display("%m HERE 3");
   assert($cast(get_domain,phase));
 endfunction
 
@@ -1486,7 +1483,6 @@ function string uvm_phase::get_domain_name();
   domain = get_domain();
   if (domain == null)
     return "unknown";
-  $display("%m HERE 4");
   return domain.get_name();
 endfunction
 

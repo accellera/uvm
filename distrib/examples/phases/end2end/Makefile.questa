@@ -24,7 +24,7 @@ UVM_HOME	= ../../..
 include ../../Makefile.questa
 
 
-all: run hs_reset
+all: run hw_reset
 
 comp: vlib
 	$(VLOG) +incdir+../../apb+vip \

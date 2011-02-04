@@ -44,7 +44,6 @@ class tb_timer extends uvm_component;
 
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
-      set_phase_domain("uvm");
    endfunction
       
    task run_phase(uvm_phase phase);
