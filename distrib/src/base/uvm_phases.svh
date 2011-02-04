@@ -2283,7 +2283,10 @@ task uvm_phase::m_run_phases();
   
 
   // initiate by starting first phase in common domain
-  void'(m_phase_hopper.try_put(uvm_domain::get_common_domain()));
+  begin
+    uvm_phase ph = uvm_domain::get_common_domain();
+    void'(m_phase_hopper.try_put(ph));
+  end
 
   /*
   begin
