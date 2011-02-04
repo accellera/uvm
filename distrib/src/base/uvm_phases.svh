@@ -1145,6 +1145,7 @@ class uvm_phase extends uvm_object;
   extern function uvm_phase m_find_predecessor(uvm_phase phase, bit stay_in_domain=1);
   extern function uvm_phase m_find_successor(uvm_phase phase, bit stay_in_domain=1);
   extern function uvm_phase m_find_predecessor_by_name(string name, bit stay_in_domain=1);
+  extern function void m_print_successors();
   extern function uvm_phase m_find_successor_by_name(string name, bit stay_in_domain=1);
 
   // Implementation - Callbacks
@@ -1164,8 +1165,10 @@ class uvm_phase extends uvm_object;
   protected string m_schedule_name; // schedule unique name
   protected bit  m_predecessors[uvm_phase];
   protected bit  m_successors[uvm_phase];
-  /*protected*/ bit m_begin_nodes[uvm_phase];
-  /*protected*/ bit m_end_nodes[uvm_phase];
+  //protected uvm_phase m_begin_node;
+  protected uvm_phase m_end_node;
+  function uvm_phase get_begin_node(); if (m_imp != null) return this; return null; endfunction
+  function uvm_phase get_end_node();   return m_end_node; endfunction
 
   // Implementation - Synchronization
   //---------------------------------
@@ -1207,8 +1210,8 @@ class uvm_phase extends uvm_object;
                      (m_parent==null) ? "null" : get_schedule_name(),
                      m_aa2string(m_predecessors),
                      m_aa2string(m_successors));
-      foreach (m_begin_nodes[bn])
-      s = {s, "\n  m_begin_node=",bn.convert2string()};
+      //if (m_begin_node != null) 
+      //  s = {s, "\n  m_begin_node=",m_begin_node.convert2string()};
     return s;
   endfunction
 
@@ -1305,6 +1308,13 @@ function uvm_phase::new(string name="uvm_phase",
   m_run_count = 0;
   m_parent = parent;
 
+  if (parent == null) begin
+    m_parent = this;
+    m_end_node = new({name,"_end"}, UVM_PHASE_TERMINAL, this);
+    this.m_successors[m_end_node] = 1;
+    m_end_node.m_predecessors[this] = 1;
+  end
+
 endfunction
 
 
@@ -1319,9 +1329,9 @@ function void uvm_phase::add_phase(uvm_phase phase,
   uvm_phase new_node, begin_node, end_node;
   assert(phase != null);
 
-
- /* begin
-  uvm_phase_type typ = phase.get_phase_type();
+  /*
+  begin
+    uvm_phase_type typ = phase.get_phase_type();
     $display({get_name()," (",m_phase_type.name(),") ADD_PHASE: phase=",phase.get_full_name()," (",
       typ.name(),")",
       " with_phase=", (with_phase == null) ? "null" : with_phase.get_name(), 
@@ -1330,10 +1340,14 @@ function void uvm_phase::add_phase(uvm_phase phase,
   end
   */
 
-  if (with_phase != null && (after_phase != null || before_phase != null)) begin
-    `uvm_fatal("PH_BADPHADD",
+  if (with_phase != null && (after_phase != null || before_phase != null))
+    `uvm_fatal("PH_BAD_ADD",
        "cannot specify both 'with' and 'before/after' phase relationships")
-  end
+
+  if (before_phase == this || after_phase == m_end_node ||
+      with_phase == this || with_phase == m_end_node)
+    `uvm_fatal("PH_BAD_ADD",
+       "cannot add before begin node, after end node, or with begin or end nodes")
 
   // if with/after/before not specified, insert at end
   if (phase.get_phase_type() == UVM_PHASE_IMP) begin
@@ -1343,25 +1357,13 @@ function void uvm_phase::add_phase(uvm_phase phase,
     end_node = new_node;
   end
   else begin
-    phase.m_parent = this;
     begin_node = phase;
-    end_node   = phase;
+    end_node   = phase.m_end_node;
+    phase.m_parent = this;
   end
 
-  // if this is first phase/schedule being added, set m_begin/end_node
-  if (m_end_nodes.num() == 0) begin
-    m_begin_nodes[begin_node] = 1;
-    m_end_nodes[end_node] = 1;
-    return;
-  end
-  else if (with_phase == null && after_phase == null && before_phase == null) begin
-    foreach (m_end_nodes[en]) begin
-      en.m_successors[end_node] = 1;
-      end_node.m_predecessors[en] = 1;
-    end
-    m_end_nodes.delete();
-    m_end_nodes[end_node] = 1;
-    return;
+  if (with_phase == null && after_phase == null && before_phase == null) begin
+    before_phase = m_end_node;
   end
 
   // INSERT IN PARALLEL WITH 'WITH' PHASE
@@ -1385,10 +1387,6 @@ function void uvm_phase::add_phase(uvm_phase phase,
     end
     before_phase.m_predecessors.delete();
     before_phase.m_predecessors[end_node] = 1;
-    if (m_begin_nodes.exists(before_phase)) begin
-      m_begin_nodes.delete(before_phase);
-      m_begin_nodes[begin_node] = 1;
-    end
   end
   
 
@@ -1402,10 +1400,6 @@ function void uvm_phase::add_phase(uvm_phase phase,
     end
     after_phase.m_successors.delete();
     after_phase.m_successors[begin_node] = 1;
-    if (m_end_nodes.exists(after_phase)) begin
-      m_end_nodes.delete(after_phase);
-      m_end_nodes[end_node] = 1;
-    end
   end
   
 
@@ -1471,10 +1465,15 @@ endfunction
 function uvm_domain uvm_phase::get_domain();
   uvm_phase phase;
   phase = this;
-  while (phase != null && phase.m_phase_type != UVM_PHASE_DOMAIN)
+  $display("%m HERE 1");
+  while (phase != null && phase.m_phase_type != UVM_PHASE_DOMAIN) begin
+    $display("phase=%s (%s)",phase.get_name(),phase.get_phase_type());
     phase = phase.m_parent;
+  end
+  $display("%m HERE 2");
   if (phase == null) // no parent domain 
     return null;
+  $display("%m HERE 3");
   assert($cast(get_domain,phase));
 endfunction
 
@@ -1487,6 +1486,7 @@ function string uvm_phase::get_domain_name();
   domain = get_domain();
   if (domain == null)
     return "unknown";
+  $display("%m HERE 4");
   return domain.get_name();
 endfunction
 
@@ -1498,15 +1498,15 @@ function string uvm_phase::get_schedule_name();
   uvm_phase sched;
   string s;
   sched = this;
-  if (m_phase_type != UVM_PHASE_DOMAIN)
+  if (m_phase_type == UVM_PHASE_SCHEDULE)
     s = this.get_name();
-  while (sched.m_parent != null &&
+  /*
+  while (sched.m_parent != null && sched.m_parent != sched &&
           (sched.m_parent.get_phase_type() == UVM_PHASE_SCHEDULE)) begin
     sched = sched.m_parent;
-    s = {sched.get_name,".",s};
+    s = {sched.get_name(),(s.len()>0?".":""),s};
   end
-  if (s == ".")
-    return "";
+  */
   return s;
 endfunction
 
@@ -1545,8 +1545,6 @@ function uvm_phase uvm_phase::m_find_predecessor(uvm_phase phase, bit stay_in_do
   //$display({get_name, " (",m_phase_type.name(),")  FIND PRED ",phase.get_name()});
   if (phase == m_imp || phase == this)
     return this;
-  //foreach (m_end_nodes[en])
-  //  en.m_find_predecessor(phase,stay_in_domain);
   foreach (m_predecessors[pred]) begin
     if (!stay_in_domain || pred.get_domain() == get_domain()) begin
       uvm_phase found = pred.m_find_predecessor(phase,stay_in_domain);
@@ -1564,8 +1562,6 @@ endfunction
 function uvm_phase uvm_phase::m_find_predecessor_by_name(string name, bit stay_in_domain=1);
   if (get_name() == name)
     return this;
-  //foreach (m_end_nodes[en])
-  //  en.m_find_predecessor_by_name(name,stay_in_domain);
   foreach (m_predecessors[pred]) begin
     if (!stay_in_domain || pred.get_domain() == get_domain()) begin
       uvm_phase found = pred.m_find_predecessor_by_name(name,stay_in_domain);
@@ -1577,6 +1573,21 @@ function uvm_phase uvm_phase::m_find_predecessor_by_name(string name, bit stay_i
 endfunction
 
 
+// ----------------
+
+function void uvm_phase::m_print_successors();
+  uvm_phase found;
+  static string spaces = "                                                 ";
+  static int level = 0;
+  $display(spaces.substr(0,level*2),get_name(), " (",m_phase_type.name(),")");
+  level++;
+  foreach (m_successors[succ]) begin
+    succ.m_print_successors();
+  end
+  level--;
+endfunction
+
+
 // m_find_successor
 // ----------------
 
@@ -1585,11 +1596,6 @@ function uvm_phase uvm_phase::m_find_successor(uvm_phase phase, bit stay_in_doma
   //$display({get_name, " (",m_phase_type.name(),")  FIND SUCC ",phase.get_name()});
   if (phase == m_imp || phase == this)
     return this;
-  foreach (m_begin_nodes[bn]) begin
-    found = bn.m_find_successor(phase,stay_in_domain);
-    if (found != null)
-      return found;
-  end
   foreach (m_successors[succ]) begin
     if (!stay_in_domain || succ.get_domain() == get_domain()) begin
       found = succ.m_find_successor(phase,stay_in_domain);
@@ -1608,12 +1614,6 @@ function uvm_phase uvm_phase::m_find_successor_by_name(string name, bit stay_in_
   uvm_phase found;
   if (get_name() == name)
     return this;
-  foreach (m_begin_nodes[bn]) begin
-    bn.m_find_successor_by_name(name,stay_in_domain);
-    found = bn.m_find_successor_by_name(name,stay_in_domain);
-    if (found != null)
-      return found;
-  end
   foreach (m_successors[succ]) begin
     if (!stay_in_domain || succ.get_domain() == get_domain()) begin
       found = succ.m_find_successor_by_name(name,stay_in_domain);
@@ -1631,7 +1631,8 @@ endfunction
 function uvm_phase uvm_phase::find(uvm_phase phase);
   // TBD full search
   uvm_phase found;
-  if (m_imp == phase)
+  //$display({get_name, " (",m_phase_type.name(),")  FIND ",phase.get_name()});
+  if (phase == m_imp || phase == this)
     return phase;
   found = m_find_predecessor(phase);
   if (found != null)
@@ -1702,12 +1703,15 @@ task uvm_phase::execute_phase();
   uvm_root top;
   top = uvm_root::get();
 
-  // are the predecessors done, or are there no predecessors?
+  // If we jumped forward to this phase, we must wait for
+  // all its predecessor nodes to be marked DONE. are the
+  // predecessors done, or are there no predecessors?
   // block until all the predecessors are done
   // AE: why is this needed? - wait for pred to succs is done at end of this routine
-  //foreach (m_predecessors[pred]) begin
-  //  wait (pred.m_state == UVM_PHASE_DONE);
-  //end
+  
+  foreach (m_predecessors[pred]) begin
+    wait (pred.m_state == UVM_PHASE_DONE);
+  end
 
   /** kill predecessor procs here **/
   
@@ -1718,7 +1722,10 @@ task uvm_phase::execute_phase();
   if (m_state == UVM_PHASE_DONE)
     return;
   
-  // SYNCING state:
+
+  //---------
+  // SYNCING:
+  //---------
   // Wait for phases with which we have a sync() relationship to be ready
   // Sync can be 2-way - this additional state avoids deadlock.
 
@@ -1740,39 +1747,17 @@ task uvm_phase::execute_phase();
      
   end
 
-  // find the leaf NODE
-  if (m_imp == null) begin
-    //uvm_phase phase;
-    //phase = this;
-    //while (phase.m_begin_node != null) begin
-      //phase = phase.m_begin_node;
-    if (m_begin_nodes.num() != 0) begin
-      m_state = UVM_PHASE_STARTED;
-      #0;
-      m_state = UVM_PHASE_EXECUTING;
-      #0;
-      foreach (m_begin_nodes[begin_node]) begin
-        if(begin_node.m_state != UVM_PHASE_SCHEDULED) begin
-        uvm_phase_type typ=begin_node.get_phase_type();
-        //$display("PHASE-SCHED SCHEDULING %s (%s)",begin_node.get_name(),typ);
-          begin_node.m_state = UVM_PHASE_SCHEDULED;
-          #0; // LET ANY WAITERS WAKE UP
-          void'(m_phase_hopper.try_put(begin_node));
-        end
-      end
-      foreach (m_end_nodes[en]) begin
-        //$display("***** %s WAITING FOR  %s",get_name(),en.get_name());
-        en.wait_for_state(UVM_PHASE_DONE, UVM_EQ);
-        //$display("***** %s DONE WAITING FOR  %s",get_name(),en.get_name());
-      end
-        //$display("***** %s DONE WAITING FOR ALL END NODES ",get_name());
-    end
-    else
-      `uvm_fatal("NO BEGIN NODES",{"PHASE ",get_name()," has null imp but no begin_nodes"})
+  // If we're a schedule or domain, then schedule all
+  // begin nodes and wait for all end_nodes to be DONE
+  if (m_phase_type != UVM_PHASE_NODE) begin
+    m_state = UVM_PHASE_STARTED;
+    #0;
+    m_state = UVM_PHASE_EXECUTING;
+    #0;
   end
 
 
-  if (m_imp != null) begin
+  else begin // PHASE NODE
     uvm_task_phase task_phase;
 
     // TODO: Find out why needed on VCS; this may overwrite any apriori
@@ -1885,6 +1870,28 @@ task uvm_phase::execute_phase();
   m_state = UVM_PHASE_READY_TO_END;
 
 
+  // If jump_to() was called then we need to kill all the successor
+  // phases which may still be running and then initiate the new
+  // phase.  The return is necessary so we don't start new successor
+  // phases.  If we are doing a forward jump then we want to set the
+  // state of this phase's successors to UVM_PHASE_DONE.  This
+  // will let us pretend that all the phases between here and there
+  // were executed and completed.  Thus any dependencies will be
+  // satisfied preventing deadlocks.
+  // GSA TBD insert new jump support
+  if(m_jump_fwd || m_jump_bkwd) begin
+    //kill_successors();
+    if(m_jump_fwd) begin
+      clear_successors(UVM_PHASE_DONE);
+    end
+    m_jump_phase.clear_successors();
+    m_jump_fwd = 0;
+    m_jump_bkwd = 0;
+    void'(m_phase_hopper.try_put(m_jump_phase));
+    m_jump_phase = null;
+    return;
+  end
+
   //-----------------------
   // WAIT FOR PREDECESSORS:
   //-----------------------
@@ -1958,51 +1965,28 @@ task uvm_phase::execute_phase();
   #0; // LET ANY WAITERS WAKE UP
 
 
-  // If jump_to() was called then we need to kill all the successor
-  // phases which may still be running and then initiate the new
-  // phase.  The return is necessary so we don't start new successor
-  // phases.  If we are doing a forward jump then we want to set the
-  // state of this phase's successors to UVM_PHASE_DONE.  This
-  // will let us pretend that all the phases between here and there
-  // were executed and completed.  Thus any dependencies will be
-  // satisfied preventing deadlocks.
-  // GSA TBD insert new jump support
-  if(m_jump_fwd || m_jump_bkwd) begin
-    kill_successors();
-    if(m_jump_fwd) begin
-      clear_successors(UVM_PHASE_DONE);
-    end
-    m_jump_phase.clear_successors();
-    m_jump_fwd = 0;
-    m_jump_bkwd = 0;
-    void'(m_phase_hopper.try_put(m_jump_phase));
-    m_jump_phase = null;
-    return;
-  end
-
 
   //-----------
   // SCHEDULED:
   //-----------
   // If more successors, schedule them to run now
   begin
+    /*
     uvm_phase parent = m_parent;
     bit found;
     while (parent != null && parent.m_state == UVM_PHASE_DONE) begin
       parent = parent.m_parent;
     end
     if (parent == null) begin
-      if (m_phase_trace)
-      `uvm_info("PH/TRC/ALL_DONE",
-               $psprintf("Completed phase %0s (in schedule %0s, domain %s)",
-                         this.get_name(),this.get_schedule_name(), get_domain_name()), UVM_LOW);
+    */
+    if (m_successors.size() == 0) begin
       top.m_phase_all_done=1;
     end 
     else begin
       // execute all the successors
       foreach (m_successors[succ]) begin
         if(succ.m_state != UVM_PHASE_SCHEDULED) begin
-        //$display("SCHEDULING phase %s",succ.get_name());
+        //$display("\n\nSCHEDULING phase %s\n\n",succ.get_name());
           succ.m_state = UVM_PHASE_SCHEDULED;
           #0; // LET ANY WAITERS WAKE UP
           void'(m_phase_hopper.try_put(succ));
@@ -2243,7 +2227,8 @@ endfunction
 // - called only by execute_phase()
 // - depth-first traversal of the DAG, calliing clear() on each node
 function void uvm_phase::clear_successors(uvm_phase_state state = UVM_PHASE_DORMANT);
-  clear(state);
+  if (m_state == UVM_PHASE_EXECUTING)
+    clear(state);
   foreach(m_successors[succ])
     succ.clear_successors(state);
 endfunction
@@ -2303,6 +2288,13 @@ task uvm_phase::m_run_phases();
 
   // initiate by starting first phase in common domain
   void'(m_phase_hopper.try_put(uvm_domain::get_common_domain()));
+
+  /*
+  begin
+    uvm_domain d = uvm_domain::get_common_domain();
+    d.m_print_successors();
+  end
+  */
 
   forever begin
     uvm_phase phase;
@@ -2437,7 +2429,7 @@ class uvm_domain extends uvm_phase;
          return null;
       end
       domain = new(name);
-      schedule = new(name, UVM_PHASE_SCHEDULE);
+      schedule = new({name,"_sched"}, UVM_PHASE_SCHEDULE);
       schedule.add_phase(uvm_pre_reset_phase::get());
       schedule.add_phase(uvm_reset_phase::get());
       schedule.add_phase(uvm_post_reset_phase::get());

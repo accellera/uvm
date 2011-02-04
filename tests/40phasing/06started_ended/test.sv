@@ -123,6 +123,7 @@ module test;
       if(last2 == "") last2 = last;
       check_phase_callback(phase, last, last2); 
     endfunction    
+
     function void phase_ended(uvm_phase phase);
       string last, last2;
       `uvm_info("ENDED", $sformatf("Phase ended for phase %s", phase.get_name()), UVM_NONE)

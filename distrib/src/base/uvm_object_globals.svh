@@ -416,6 +416,7 @@ typedef enum
 typedef enum { UVM_PHASE_TASK,
                UVM_PHASE_TOPDOWN,
                UVM_PHASE_BOTTOMUP,
+               UVM_PHASE_TERMINAL,
                UVM_PHASE_IMP,      // internal only
                UVM_PHASE_NODE,     // internal only
                UVM_PHASE_SCHEDULE, // internal only

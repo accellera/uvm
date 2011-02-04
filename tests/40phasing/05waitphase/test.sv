@@ -36,7 +36,6 @@ module test;
     time delay = 100;
     function new(string name, uvm_component parent);
       super.new(name,parent);
-      set_phase_schedule("uvm");
     endfunction
     function void build_phase(uvm_phase phase);
       phase_run[uvm_build_ph] = 1;
@@ -131,12 +130,11 @@ module test;
 
     //Start up the checkers
     function void start_of_simulation_phase(uvm_phase phase);
-      uvm_phase uvm_p = find_phase_schedule("*", "uvm");
-      uvm_phase reset_p = uvm_p.find_schedule("reset");
-      uvm_phase main_p = uvm_p.find_schedule("main");
-      uvm_phase shutdown_p = uvm_p.find_schedule("shutdown");
+      uvm_domain uvm_d = uvm_domain::get_uvm_domain();
+      uvm_phase reset_p = uvm_d.find(uvm_reset_phase::get());
+      uvm_phase main_p = uvm_d.find(uvm_main_phase::get());
+      uvm_phase shutdown_p = uvm_d.find(uvm_shutdown_phase::get());
 
-      //Do the raise, wait, drop for each phase
       fork
         do_phase_test(reset_p, 0);
         do_phase_test(main_p, phase_transition_time);

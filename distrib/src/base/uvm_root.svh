@@ -176,6 +176,9 @@ class uvm_root extends uvm_component;
   // For error checking
   extern virtual task run_phase (uvm_phase phase);
 
+
+  // phase_started
+  // -------------
   // At end of elab phase we need to do tlm binding resolution.
   function void phase_started(uvm_phase phase);
     if (phase == end_of_elaboration_ph)
@@ -184,11 +187,12 @@ class uvm_root extends uvm_component;
 
   bit m_phase_all_done;
 
-  
+
+  // stop_request
+  // ------------
 
   // backward compat only 
   // call global_stop_request() or uvm_test_done.stop_request() instead
-
   function void stop_request();
     uvm_test_done_objection tdo;
     tdo = uvm_test_done_objection::get();
