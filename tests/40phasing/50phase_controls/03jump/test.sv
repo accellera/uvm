@@ -11,6 +11,7 @@ class test extends test_base;
 
   function new(string name = "03killing", uvm_component parent = null);
     super.new(name, parent);
+    global_stop_request();
   endfunction : new
   `uvm_component_utils(test);
 
@@ -20,6 +21,8 @@ class test extends test_base;
     if( jump_reset_num ) begin
       `uvm_info( "JUMP_RESET", $psprintf("Jump backward to reset phase from : main"), UVM_NONE);
       jump_reset_num --;
+      $display("uvm_reset_ph=%p",uvm_reset_ph);
+      uvm_reset_ph.m_print_successors();
 
       phase.jump( uvm_reset_ph );
     end

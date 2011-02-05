@@ -16,21 +16,19 @@ class bot_item extends uvm_sequence_item;
 endclass : bot_item
 
 class bot_sequencer extends uvm_sequencer #(bot_item);
-  `uvm_sequencer_utils_begin(bot_sequencer)
-  `uvm_sequencer_utils_end
+  `uvm_component_utils(bot_sequencer)
 
   // new - constructor
   function new (string name="bot_sequencer", uvm_component parent);
     super.new(name, parent);
-    `uvm_update_sequence_lib_and_item(bot_item);
     count = 0;
   endfunction : new
 endclass : bot_sequencer
 
 class bot_sequence extends uvm_sequence #(bot_item);
-  `uvm_sequence_utils_begin(bot_sequence, bot_sequencer)
+  `uvm_object_utils_begin(bot_sequence)
     `uvm_field_object ( req, UVM_ALL_ON )
-  `uvm_sequence_utils_end
+  `uvm_object_utils_end
 
 endclass : bot_sequence
 
@@ -152,7 +150,7 @@ class bot_env extends uvm_env;
 
   function void phase_ended( uvm_phase phase);
     super.phase_ended( phase );
-    `uvm_info( "PHASE", $sformatf( "Phase %s() ENDED  ----------------------------\n\n",
+    `uvm_info( "PHASE", $sformatf( "Phase %s() ENDED  ----------------------------",
                                    phase.get_name()), UVM_MEDIUM);
   endfunction : phase_ended
 

@@ -76,6 +76,9 @@ module test;
 
   class env extends base;
     leaf l1, l2; 
+    static uvm_domain domain1 = new("domain1");
+    static uvm_domain domain2 = new("domain2");
+
     `uvm_component_utils(env)
     function new(string name, uvm_component parent);
       super.new(name,parent);
@@ -85,7 +88,6 @@ module test;
     endfunction
 
     function void connect_phase(uvm_phase phase);
-      uvm_domain domain1 = new("domain1");
       l1.set_domain(domain1);
       l2.set_domain(domain2);
     endfunction
@@ -99,19 +101,18 @@ module test;
       super.new(name,parent);
       env1 = new("env1", this);
       env2 = new("env2", this);
-
-      env1.l1.delay = 200;
+      env1.l1.delay = 205;
       env1.l2.delay = 300;
-
-      env2.l1.delay = 100;
-      env2.l2.delay = 150;
-
+      env2.l1.delay = 108;
+      env2.l2.delay = 151;
     endfunction
 
     function void connect_phase(uvm_phase phase);
       //env1 and env2 comps are in different domains
-      env2.l1.set_phase_domain("env_domain1");
-      env2.l2.set_phase_domain("env_domain2");
+      uvm_domain domain1 = new("env_domain1");
+      uvm_domain domain2 = new("env_domain2");
+      env2.l1.set_domain(domain1);
+      env2.l2.set_domain(domain2);
     endfunction
 
     function void report_phase(uvm_phase phase);

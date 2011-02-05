@@ -36,8 +36,8 @@
 
 
 `define m_uvm_task_phase(PHASE,COMP,PREFIX) \
-        class PREFIX``PHASE``_phase extends uvm_task_phase(`"PHASE`"); \
-          task exec_task(uvm_component comp, uvm_phase phase); \
+        class PREFIX``PHASE``_phase extends uvm_task_phase; \
+          virtual task exec_task(uvm_component comp, uvm_phase phase); \
             COMP comp_; \
             if ($cast(comp_,comp)) \
               comp_.``PHASE``_phase(phase); \
@@ -47,7 +47,10 @@
             if(m_inst == null) m_inst = new; \
             return m_inst; \
           endfunction \
-          function uvm_object clone(); \
+          function new(string name=`"PHASE`"); \
+            super.new(name); \
+          endfunction \
+          virtual function uvm_object clone(); \
             PREFIX``PHASE``_phase obj = new; \
             return obj; \
           endfunction \
@@ -55,8 +58,8 @@
         PREFIX``PHASE``_phase PREFIX``PHASE``_ph = PREFIX``PHASE``_phase::get();
 
 `define m_uvm_topdown_phase(PHASE,COMP,PREFIX) \
-        class PREFIX``PHASE``_phase extends uvm_topdown_phase(`"PHASE`"); \
-          function void exec_func(COMP comp, uvm_phase phase); \
+        class PREFIX``PHASE``_phase extends uvm_topdown_phase; \
+          virtual function void exec_func(COMP comp, uvm_phase phase); \
             COMP comp_; \
             if ($cast(comp_,comp)) \
               comp_.``PHASE``_phase(phase); \
@@ -66,7 +69,10 @@
             if(m_inst == null) m_inst = new; \
             return m_inst; \
           endfunction \
-          function uvm_object clone(); \
+          function new(string name=`"PHASE`"); \
+            super.new(name); \
+          endfunction \
+          virtual function uvm_object clone(); \
             PREFIX``PHASE``_phase obj = new; \
             return obj; \
           endfunction \
@@ -74,8 +80,8 @@
         PREFIX``PHASE``_phase PREFIX``PHASE``_ph = PREFIX``PHASE``_phase::get();
 
 `define m_uvm_bottomup_phase(PHASE,COMP,PREFIX) \
-        class PREFIX``PHASE``_phase extends uvm_bottomup_phase(`"PHASE`"); \
-          function void exec_func(COMP comp, uvm_phase phase); \
+        class PREFIX``PHASE``_phase extends uvm_bottomup_phase; \
+          virtual function void exec_func(COMP comp, uvm_phase phase); \
             COMP comp_; \
             if ($cast(comp_,comp)) \
               comp_.``PHASE``_phase(phase); \
@@ -85,7 +91,10 @@
             if(m_inst == null) m_inst = new; \
             return m_inst; \
           endfunction \
-          function uvm_object clone(); \
+          function new(string name=`"PHASE`"); \
+            super.new(name); \
+          endfunction \
+          virtual function uvm_object clone(); \
             PREFIX``PHASE``_phase obj = new; \
             return obj; \
           endfunction \

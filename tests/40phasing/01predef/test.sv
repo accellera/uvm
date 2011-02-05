@@ -78,7 +78,6 @@ class test extends uvm_test;
    
    task run_phase(uvm_phase phase);
       check_the_phase_t("start_of_simulation", "run", phase);
-      //global_stop_request();
    endtask
    
    task pre_reset_phase(uvm_phase phase);

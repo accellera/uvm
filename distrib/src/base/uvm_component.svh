@@ -576,10 +576,12 @@ virtual class uvm_component extends uvm_report_object;
   
   // Function: set_domain
   //
-  // Apply a phase domain to this component (by default, also to it's children).
-  // Get a copy of the schedule graph for this component base class as defined
-  // by virtual define_phase_schedule(), and add an instance of that to our domain
-  // branch in the master phasing schedule graph, if it does not already exist.
+  // Apply a phase domain to this component and, if ~hier~ is set, 
+  // recursively to all its children. 
+  //
+  // Calls the virtual <define_domain> method, which derived components can
+  // override to augment or replace the domain definition of ita base class.
+  //
 
   extern function void set_domain(uvm_domain domain, int hier=1);
 
@@ -591,30 +593,38 @@ virtual class uvm_component extends uvm_report_object;
   extern function uvm_domain get_domain();
 
 
-  // Function: get_schedule
+  // Function: define_domain
   //
-  // Return handle to the phase schedule graph that applies to this component
-  
-  extern function uvm_phase get_schedule();
+  // Builds custom phase schedules into the provided ~domain~ handle.
+  //
+  // This method is called by <set_domain>, which integrators use to specify
+  // this component belongs in a domain apart from the default 'uvm' domain.
+  //
+  // Custom component base classes requiring a custom phasing schedule can
+  // augment or replace the domain definition they inherit by overriding
+  // <defined_domain>. To augment, overrides would call super.define_domain().
+  // To replace, overrides would not call super.define_domain().
+  // 
+  // The default implementation adds a copy of the ~uvm~ phasing schedule to
+  // the given ~domain~, if one doesn't already exist, and only if the domain
+  // is currently empty.
+  //
+  // Calling <set_domain>
+  // with the default ~uvm~ domain (see <uvm_domain::get_uvm_domain>) on
+  // a component with no ~define_domain~ override effectively reverts the
+  // that component to using the default ~uvm~ domain. This may be useful
+  // if a branch of the testbench hierarchy defines a custom domain, but
+  // some child sub-branch should remain in the default ~uvm~ domain.  In
+  // this case, <set_domain> with a different domain instance handle and
+  // ~hier~ set is called on the primary branch, and <set_domain> with
+  // the default ~uvm~ domain is called on the sub-branch.
+  //
+  // Alternatively, the integrator can define a domain externally,
+  // then call <set_domain> to set it for this component (and its children
+  // if ~hier~ is set).
 
+  extern virtual protected function void define_domain(uvm_domain domain);
 
-  // Function: define_phase_schedule
-  //
-  // Builds and returns the required phase schedule subgraph for this component base
-  //
-  // Here we define the structure and organization of a schedule for this component
-  // base type (uvm_component). We give that schedule a name (default 'uvm') and return
-  // a handle to it to the caller (either the set_domain() method, or a subclass's
-  // define_phase_schedule() having called super.define_phase_schedule(), ready to be added
-  // into the main schedule graph.
-  //
-  // Custom component base classes requiring a custom phasing schedule to augment or
-  // replace the default UVM schedule can override this method. They can inherit the
-  // parent schedule and build on it by calling super.define_phase_schedule(MYNAME)
-  // or they can create a new schedule from scratch by not calling the super method.
-
-  extern virtual protected function uvm_phase define_phase_schedule(uvm_domain domain,
-                                                                 string name="uvm");
 
   // Function: set_phase_imp
   //
@@ -1565,7 +1575,6 @@ virtual class uvm_component extends uvm_report_object;
   //----------------------------------------------------------------------------
 
   protected uvm_domain m_domain;    // set_domain stores our domain handle
-  protected uvm_phase  m_schedule;  // and this our uvm/custom phase schedule
 
   /*protected*/ uvm_phase  m_phase_imps[uvm_phase];    // functors to override ovm_root defaults
 
@@ -1606,6 +1615,11 @@ virtual class uvm_component extends uvm_report_object;
               string desc="", time begin_time=0);
 
   string m_name;
+
+  const static string type_name = "uvm_component";
+  virtual function string get_type_name();
+    return type_name;
+  endfunction
 
   protected uvm_event_pool event_pool;
 
@@ -1723,7 +1737,6 @@ function uvm_component::new (string name, uvm_component parent);
   event_pool = new("event_pool");
 
   m_domain = parent.m_domain;     // by default, inherit domains from parents
-  m_schedule = parent.m_schedule; // TBD but we might not be the same VIP schedule as parents!!!
   
   // Now that inst name is established, reseed (if use_uvm_seeding is set)
   reseed();
@@ -2220,7 +2233,6 @@ endfunction
 
 function void uvm_component::build_phase(uvm_phase phase);
   m_build_done = 1;
-  //set_domain(m_parent.m_domain); // inherit domain by default (with correct schedule!)
   apply_config_settings(print_config_matches);
   build();
 endfunction
@@ -2344,29 +2356,23 @@ endfunction
 // - a domain is a named instance of a schedule in the master phasing schedule
 
 
-// define_phase_schedule
-// ------------------
+// define_domain
+// -------------
 
-function uvm_phase uvm_component::define_phase_schedule(uvm_domain domain,
-                                                        string name="uvm");
+function void uvm_component::define_domain(uvm_domain domain);
   uvm_phase schedule;
-
-  // NOTE: if overriding this method, always follow this pattern
-  // - only build a new schedule if one of that name does not yet exist under this domain
-  // - to augment this base schedule, use result of super.define_phase_schedule(domain,MYNAME);
-
-  schedule = domain.find_by_name(name); // TBD arg really needs to be a handle
-
-  // set_domain calls this method if not overridden. If an integrator calls
-  // set_domain and the component does not override this method, the behavior is
-  // - that the base method if name=="uvm", get global, otherwise create
-  // new instance of "uvm" schedule and put in domain named "name"
+  //schedule = domain.find(uvm_domain::get_uvm_schedule());
+  schedule = domain.find_by_name("uvm_sched");
   if (schedule == null) begin
-    uvm_domain domain;
-    domain = uvm_domain::get_uvm_domain(name);
+    uvm_domain common;
+    schedule = new("uvm_sched", UVM_PHASE_SCHEDULE);
+    uvm_domain::add_uvm_phases(schedule);
+    domain.add(schedule);
+    common = uvm_domain::get_common_domain();
+    if (common.find(domain,0) == null)
+      common.add(domain,.with_phase(uvm_run_phase::get()));
   end
-  //return domain.m_begin_node;
-  return null;
+
 endfunction
 
 
@@ -2378,21 +2384,13 @@ endfunction
 // isn't needed and we need a way to prevent children from inheriting this component's domain
 
 function void uvm_component::set_domain(uvm_domain domain, int hier=1);
-  //uvm_phase schedule;
-  if (domain != m_domain) begin
-    m_domain = domain;
-    void'(define_phase_schedule(domain)); // build and store the schedule
-    if (domain.get_name() != "uvm" && domain.get_parent() == null) begin
-      uvm_domain domain;
-      domain = uvm_domain::get_common_domain();
-      domain.add_phase(domain,.with_phase(run_ph));
-    end
-    //m_schedule = schedule;
-  end
+
+  // build and store the custom domain
+  m_domain = domain;
+  define_domain(domain);
   if (hier)
-    m_domain = domain;
     foreach (m_children[c])
-      m_children[c].set_domain(domain,hier);
+      m_children[c].set_domain(domain);
 endfunction
 
 // get_domain
@@ -2400,14 +2398,6 @@ endfunction
 //
 function uvm_domain uvm_component::get_domain();
   return m_domain;
-endfunction
-
-
-// get_schedule
-// ------------
-//
-function uvm_phase uvm_component::get_schedule();
-  return m_schedule;
 endfunction
 
 

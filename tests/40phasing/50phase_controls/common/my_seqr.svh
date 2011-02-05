@@ -1,6 +1,5 @@
 class my_seqr extends uvm_sequencer;
-  `uvm_sequencer_utils_begin(my_seqr)
-  `uvm_sequencer_utils_end
+  `uvm_component_utils(my_seqr)
 
   function new (string name="my_seqr0", uvm_component parent);
     super.new(name, parent);

@@ -395,32 +395,44 @@ typedef enum
 // Group: Phasing
 //---------------
 
-// Enum- uvm_phase_type
+// Enum: uvm_phase_type
 //
 // This is an attribute of a <uvm_phase> object which defines the phase
-// execution type. Every phase we define has a type. It is used only for 
-// information, as the type behavior is captured in three derived classes 
-// uvm_task/topdown/bottomup_phase.
+// type. 
 //
-//   UVM_PHASE_TASK - The phase is a task-based phase, a fork is done for 
-//   each participating component and so the traversal order is arbitrary
+//   UVM_PHASE_IMP      - The phase object is used to traverse the component
+//                        hierarchy and call the component phase method as
+//                        well as the ~phase_started~ and ~phase_ended~ callbacks.
+//                        These nodes are created by the phase macros,
+//                        `uvm_builtin_task_phase, `uvm_builtin_topdown_phase,
+//                        and `uvm_builtin_bottomup_phase. These nodes represent
+//                        the phase type, i.e. uvm_run_phase, uvm_main_phase.
 //
-//   UVM_PHASE_TOPDOWN - The phase is a function phase, components are 
-//   traversed from top-down, allowing them to add to the component tree 
-//   as they go.
+//   UVM_PHASE_NODE     - The object represents a simple node instance in
+//                        the graph. These nodes will contain a reference to
+//                        their corresponding IMP object. 
 //
-//   UVM_PHASE_BOTTOMUP - The phase is a function phase, components are 
-//   traversed from the bottom up, allowing roll-up / consolidation 
-//   functionality.
+//   UVM_PHASE_SCHEDULE - The object represents a portion of the phasing graph,
+//                        typically consisting of several NODE types, in series,
+//                        parallel, or both.
 //
-typedef enum { UVM_PHASE_TASK,
-               UVM_PHASE_TOPDOWN,
-               UVM_PHASE_BOTTOMUP,
+//   UVM_PHASE_TERMINAL - This internal object serves as the termination NODE
+//                        for a SCHEDULE phase object.
+//
+//   UVM_PHASE_DOMAIN   - This object represents an entire graph segment that
+//                        executes in parallel with the 'run' phase.
+//                        Domains may define any network of NODEs and
+//                        SCHEDULEs. The built-in domain, ~uvm~, consists
+//                        of a single schedule of all the run-time phases,
+//                        starting with ~pre_reset~ and ending with
+//                        ~post_shutdown~.
+//
+typedef enum { UVM_PHASE_IMP,
+               UVM_PHASE_NODE,
                UVM_PHASE_TERMINAL,
-               UVM_PHASE_IMP,      // internal only
-               UVM_PHASE_NODE,     // internal only
-               UVM_PHASE_SCHEDULE, // internal only
-               UVM_PHASE_DOMAIN    // internal only
+               UVM_PHASE_SCHEDULE,
+               UVM_PHASE_DOMAIN,
+               UVM_PHASE_GLOBAL
 } uvm_phase_type;
 
 
@@ -472,7 +484,8 @@ typedef enum { UVM_PHASE_TASK,
                   UVM_PHASE_READY_TO_END = 32,
                   UVM_PHASE_ENDED        = 64,
                   UVM_PHASE_CLEANUP      = 128,
-                  UVM_PHASE_DONE         = 256
+                  UVM_PHASE_DONE         = 256,
+                  UVM_PHASE_JUMPING      = 512
                   } uvm_phase_state;
 
 

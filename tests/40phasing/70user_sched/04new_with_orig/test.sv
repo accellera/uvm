@@ -50,7 +50,7 @@
 // to explicitly call set_phase_imp in each component ctor.
 
 `define my_task_phase(PHASE) \
-   class ``PHASE``_phase#(type T=my_component) extends uvm_task_phase; \
+   class PHASE``_phase#(type T=my_component) extends uvm_task_phase; \
      task exec_task(uvm_component comp, uvm_phase phase); \
        T mycomp; \
        if($cast(mycomp, comp)) begin \
@@ -59,13 +59,11 @@
      endtask \
      function new(string name); \
        super.new(`"PHASE`"); \
-       set_name(`"PHASE`"); \
      endfunction \
      static ``PHASE``_phase#(T) m_inst = get(); \
      static function ``PHASE``_phase#(T) get(); \
-       if(m_inst == null) begin \
+       if(m_inst == null) \
          m_inst = new(`"PHASE`"); \
-       end \
        return m_inst; \
      endfunction \
    endclass \
@@ -97,7 +95,6 @@ module test;
 
   // Some component that will use the new schedule
   class mycomp extends uvm_component;
-    uvm_phase my_sched;
 
     // this code here only for self-checking purpose
     time phase_times[$] ;
@@ -119,28 +116,32 @@ module test;
     endfunction
 
     function void connect();
-      set_phase_domain("mydomain"); //choose some name other than standard "uvm" or the phase modifications will affect all standard components
+      //set_domain(mydomain); //choose some name other than standard "uvm" or the phase modifications will affect all standard components
     endfunction
 
     // The component needs to override the set_phase_schedule to add
     // the new schedule.
-    function void set_phase_schedule(string domain_name);
+    function void define_domain(uvm_domain domain);
+      uvm_phase sched;
       uvm_phase new_phase;
-      super.set_phase_schedule(domain_name) ; // use built-in schedule as a base
-      my_sched = find_phase_schedule("uvm_pkg::uvm",domain_name) ; // get built-in schedule
-      assert(my_sched != null); // check nothing has gone horribly wrong
 
-      new_phase = my_sched.find_schedule("myreset2"); // if another component has added it, just use it...
-      if (new_phase == null) begin // ... otherwise, add it here
-        my_sched.add_phase(myreset2_phase#(mycomp)::get(), //myreset2 from pkg above
-          .after_phase(my_sched.find_schedule("reset")), // put it after reset phase
-          .before_phase(my_sched.find_schedule("post_reset"))); // and before post_reset
+      // INIT DOMAIN WITH 'UVM_SCHED' COPY
+      // the caller, set_domain, adds our 'domain' to the master graph (unless already added)
+      // upon return
+      super.define_domain(domain) ;
+
+      // GET 'UVM_SCHED' HANDLE
+      sched = domain.find_by_name("uvm_sched"); // get built-in 'uvm_sched' schedule
+      assert(sched != null); // check nothing has gone horribly wrong
+
+      // ADD 'MYRESET2' CUSTOM PHASE TO 'UVM_SCHED'
+      // add new_phase unless another component instance already did
+      new_phase = sched.find(myreset2_phase#(mycomp)::get());
+      if (new_phase == null) begin
+        sched.add(myreset2_phase#(mycomp)::get(), //myreset2 from pkg above
+                  .after_phase(uvm_reset_phase::get()), 
+                  .before_phase(uvm_post_reset_phase::get()));
       end
-
-      // enforce one domain per component per schedule.
-      if (find_phase_schedule("mypkg::mycomp","*"))
-        delete_phase_schedule(find_phase_schedule("mypkg::mycomp","*"));
-      add_phase_schedule(my_sched, domain_name);
     endfunction
 
     // component can implement standard phases ...
@@ -180,10 +181,6 @@ module test;
   class stdcomp extends uvm_component;
     function new(string name, uvm_component parent);
       super.new(name,parent);
-    endfunction
-
-    function void connect();
-      set_phase_domain("uvm");  // should not be necessary once domain membership is built-in
     endfunction
 
     // this code here only for self-checking purpose
@@ -252,7 +249,15 @@ module test;
       scmd = new("scmd", this);
     endfunction
     function void connect();
-      scmd.set_phase_domain("mydomain"); 
+      uvm_domain mydomain = new("mydomain");
+      mc.set_domain(mydomain);
+      scmd.set_domain(mydomain); 
+      /*
+      begin
+        uvm_domain d = uvm_domain::get_common_domain();
+        d.m_print_successors();
+      end
+      */
     endfunction
 
     function bit check_times() ;
@@ -279,6 +284,7 @@ module test;
     task run_phase(uvm_phase phase);
       `uvm_info("RUN", "In run", UVM_NONE)
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
+      global_stop_request();
     endtask
   endclass
 

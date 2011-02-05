@@ -45,56 +45,67 @@
 package mypkg;
   import uvm_pkg::*;
 
+  typedef class my_cfg_phase;
   // Pseudo interface class for phase schedule just for
   // defining the schedule. When SV supports interface classes,
   // this would be an interface class.
   class my_component extends uvm_component;
     `uvm_component_utils(my_component)
-   virtual task cfg_phase(uvm_phase phase);
-  endtask
+  
+    virtual task cfg_phase(uvm_phase phase);
+    endtask
+  
+    static uvm_phase my_sched;
+
+    function void define_domain(uvm_domain domain);
+  
+      uvm_phase cfg_phase;
+      uvm_phase sched;
+      uvm_root top  = uvm_root::get();
+
+      // adds the "uvm_sched" to 'domain', if not already added,
+      // then adds 'domain' to the master graph, if not already added
+      super.define_domain(domain);
+
+      sched = domain.find_by_name("uvm_sched");
+      if (sched == null)
+        `uvm_fatal("NO_UVM_SCHED",
+          {"Could not find required 'uvm_sched' in domain ",domain.get_name()})
+
+      // Add my cfg phase to the "uvm_sched" in given domain
+      cfg_phase = sched.find(my_cfg_phase::get());
+      if(cfg_phase == null)
+        sched.add(my_cfg_phase::get(),
+                  .after_phase(sched.find(uvm_pre_configure_phase::get())),
+                  .before_phase(sched.find(uvm_configure_phase::get())));
+    endfunction
+
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
+  
   endclass
-
+  
   `uvm_user_task_phase(cfg,my_component,my_)
-
-
-  // default phase imp that doesn't do anything
-  class default_imp extends uvm_task_phase;
+  
+  int my_cfg_phase_imp_called;
+  
+  class my_cfg_phase_imp extends my_cfg_phase;
     function new(string name);
       super.new(name);
-      set_name(name);
     endfunction
+    virtual task exec_task(uvm_component comp, uvm_phase phase);
+      my_component mycomp;
+      if ($cast(mycomp,comp))
+        my_cfg_phase_imp_called++;
+      super.exec_task(comp,phase);
+    endtask
   endclass
-  default_imp cfg_imp;
+  
+  my_cfg_phase_imp cfg_imp = new("my_cfg_imp_override");
 
-  // method for adding the phase to some specific domain
-  function automatic uvm_phase set_my_schedule();
-
-    uvm_phase new_phase;
-    uvm_phase my_sched;
-    uvm_root top  = uvm_root::get();
-    my_sched = top.find_phase_schedule("uvm_pkg::uvm", "*");
-
-    if(my_sched == null) begin
-      top.set_phase_domain("uvm");
-      my_sched = top.find_phase_schedule("uvm_pkg::uvm", "*");
-    end
-    assert(my_sched != null);
-
-    //Add the new phase if needed
-    new_phase = my_sched.find_schedule("my_cfg");
-    if(new_phase == null) begin
-      my_sched.add_phase(my_cfg_ph,
-        .after_phase(my_sched.find_schedule("pre_configure")),
-        .before_phase(my_sched.find_schedule("configure")));
-    end
-    return my_sched;
-  endfunction
-
-  uvm_phase my_sched = set_my_schedule();
 endpackage
+
 
 module test;
   import uvm_pkg::*;
@@ -109,7 +120,6 @@ module test;
 
     function new(string name, uvm_component parent);
       super.new(name,parent);
-      set_phase_domain("uvm");
     endfunction
     task reset_phase(uvm_phase phase);
       phase.raise_objection(this);
@@ -197,11 +207,14 @@ module test;
     endfunction
     function void connect_phase(uvm_phase phase);
       my_cfg_phase mc_imp = new;
-      mc.set_phase_imp(cfg_imp,my_cfg_ph);
+      $display("cfg_imp=%p",cfg_imp);
+      mc.set_phase_imp(my_cfg_phase::get(),cfg_imp);
+      mc.set_domain(uvm_domain::get_uvm_domain());
     endfunction
     task run_phase(uvm_phase phase);
       `uvm_info("RUN", "In run", UVM_NONE)
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
+      global_stop_request();
     endtask
   endclass
 
@@ -252,6 +265,9 @@ module test;
          me.oc.end_configure != 140) begin
         $display("*** UVM TEST FAILED , configure end times (%0t/%0t)", me.mc.end_configure, me.oc.end_configure);
         return;
+      end
+      if (my_cfg_phase_imp_called != 1) begin
+        $display("*** UVM TEST FAILED , the my_cfg_phase_imp override was used %0d times instead of expected 1",my_cfg_phase_imp_called);
       end
       $display("**** UVM TEST PASSED *****");
 
