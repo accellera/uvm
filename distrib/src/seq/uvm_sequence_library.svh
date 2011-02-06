@@ -181,7 +181,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    //
    // Extensions may place additional constraints on this variable.
    //
-   randc bit [31:0] select_randc;
+   randc bit [15:0] select_randc;
 
 
 

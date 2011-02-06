@@ -1,1 +1,1 @@
-return &make_example("$uvm_home/examples/registers/integration/10direct");
+return &make_example("$uvm_home/examples/simple/registers/integration/10direct");

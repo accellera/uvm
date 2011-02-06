@@ -1,1 +1,1 @@
-return &make_example("$uvm_home/examples/tlm1/hierarchy");
+return &make_example("$uvm_home/examples/simple/tlm1/hierarchy");

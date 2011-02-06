@@ -207,7 +207,9 @@ module test;
     endfunction
     function void connect_phase(uvm_phase phase);
       my_cfg_phase mc_imp = new;
+`ifdef UVM_USE_P_FORMAT
       $display("cfg_imp=%p",cfg_imp);
+`endif
       mc.set_phase_imp(my_cfg_phase::get(),cfg_imp);
       mc.set_domain(uvm_domain::get_uvm_domain());
     endfunction

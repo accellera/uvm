@@ -1,1 +1,1 @@
-return &make_example("$uvm_home/examples/registers/models/coverage");
+return &make_example("$uvm_home/examples/simple/registers/models/coverage");
