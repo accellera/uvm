@@ -48,7 +48,7 @@
 //
 // The common phases are executed in the sequence they are specified below.
 //
-// Variable: build_ph
+// Variable: uvm_build_ph
 //
 // Create and configure of testbench structure
 //
@@ -69,7 +69,7 @@
 //  - All <uvm_component>s have been instantiated.
 //
 //
-// Variable: connect_ph
+// Variable: uvm_connect_ph
 //
 // Establish cross-component connections.
 //
@@ -92,7 +92,7 @@
 // - All independent phase domains are set.
 //
 //
-// Variable: end_of_elaboration_ph
+// Variable: uvm_end_of_elaboration_ph
 //
 // Fine-tune the testbench.
 //
@@ -113,7 +113,7 @@
 // - None.
 //                              
 //
-// Variable: start_of_simulation_ph
+// Variable: uvm_start_of_simulation_ph
 //
 // Get ready for DUT to be simulated.
 //
@@ -137,7 +137,7 @@
 // - None.
 //
 //
-// Variable: run_ph
+// Variable: uvm_run_ph
 //
 // Stimulate the DUT.
 //
@@ -227,7 +227,7 @@
 //
 //
 //
-// Variable: extract_ph
+// Variable: uvm_extract_ph
 //
 // Extract data from different points of the verficiation environment.
 //
@@ -251,7 +251,7 @@
 // - All data has been collected and summarized.
 //
 //
-// Variable: check_ph
+// Variable: uvm_check_ph
 //
 // Check for any unexpected conditions in the verification environment.
 //
@@ -268,7 +268,7 @@
 // - Test is known to have passed or failed.
 //
 //
-// Variable: report_ph
+// Variable: uvm_report_ph
 //
 // Report results of the test.
 //
@@ -286,7 +286,7 @@
 // - End of test.
 //
 //
-// Variable: final_ph
+// Variable: uvm_final_ph
 //
 // Tie up loose ends.
 //
@@ -307,13 +307,13 @@
 // Group: Run-Time Schedule Global Variables
 //
 // The run-time schedule is the pre-defined phase schedule
-// which runs concurrently to the <run_ph> global run phase.
+// which runs concurrently to the <uvm_run_ph> global run phase.
 // By default, all <uvm_component>s using the run-time schedule
 // are synchronized with respect to the pre-defined phases in the schedule.
 // It is possible for components to belong to different domains
 // in which case their schedules can be unsynchronized.
 //
-// Variable: pre_reset_ph
+// Variable: uvm_pre_reset_ph
 //
 // Before reset is asserted.
 //
@@ -342,7 +342,7 @@
 // - Reset signal, if not driven by the verification environment, is asserted.
 //
 //
-// Variable: reset_ph
+// Variable: uvm_reset_ph
 //
 // Reset is asserted.
 //
@@ -368,7 +368,7 @@
 // - Output signals and state variables have been initialized.
 //
 //
-// Variable: post_reset_ph
+// Variable: uvm_post_reset_ph
 //
 // After reset is de-asserted.
 //
@@ -388,7 +388,7 @@
 // - The testbench and the DUT are in a known, active state.
 //
 //
-// Variable: pre_configure_ph
+// Variable: uvm_pre_configure_ph
 //
 // Before the DUT is configured by the SW.
 //
@@ -409,7 +409,7 @@
 // - DUT configuration information is defined.
 //
 //
-// Variable: configure_ph
+// Variable: uvm_configure_ph
 //
 // The SW configures the DUT.
 //
@@ -429,7 +429,7 @@
 // - The DUT has been configured and is ready to operate normally.
 //
 //
-// Variable: post_configure_ph
+// Variable: uvm_post_configure_ph
 //
 // After the SW has configured the DUT.
 //
@@ -450,7 +450,7 @@
 //   and is ready to start operating normally.
 //
 //
-// Variable: pre_main_ph
+// Variable: uvm_pre_main_ph
 //
 // Before the primary test stimulus starts.
 //
@@ -468,7 +468,7 @@
 // - All components are ready to generate and/or observe normal stimulus.
 //
 //
-// Variable: main_ph
+// Variable: uvm_main_ph
 //
 // Primary test stimulus.
 //
@@ -489,7 +489,7 @@
 //   stimulus objective of the test.
 //
 //
-// Variable: post_main_ph
+// Variable: uvm_post_main_ph
 //
 // After enough of the primary test stimulus.
 //
@@ -506,7 +506,7 @@
 // - None.
 //
 //
-// Variable: pre_shutdown_ph
+// Variable: uvm_pre_shutdown_ph
 //
 // Before things settle down.
 //
@@ -523,7 +523,7 @@
 // - None.
 //
 //
-// Variable: shutdown_ph
+// Variable: uvm_shutdown_ph
 //
 // Letting things settle down.
 //
@@ -543,7 +543,7 @@
 // - All interfaces are idle.
 //
 //
-// Variable: post_shutdown_ph
+// Variable: uvm_post_shutdown_ph
 //
 // After things have settled down.
 //
@@ -566,7 +566,7 @@
 //
 
 
-// Define classes and declare singletons called PHASE_ph for predefined phases
+// Define classes and declare singletons called uvm_PHASE_ph for predefined phases
 
 typedef class uvm_phase;
 typedef class uvm_domain;
@@ -641,8 +641,8 @@ uvm_phase report_ph ;
 //|       static my_``PHASE``_phase my_``PHASE``_ph = new();
 //
 // 5. insert the phase in a phase schedule or domain using the
-//    <uvm_phase::add>.method in side your VIP base class's definition
-//    of the <uvm_phase::define_phase_schedule> method.
+//    <uvm_phase::add> method inside your VIP base class's definition
+//    of the <uvm_phase::define_domain> method.
 //
 //------------------------------------------------------------------------------
 
@@ -948,14 +948,14 @@ class uvm_phase extends uvm_object;
   extern function string get_schedule_name(bit hier=0);
 
 
-  // Function- get_domain
+  // Function: get_domain
   //
   // Returns the enclosing domain
   //
   extern function uvm_domain get_domain();
 
 
-  // Function- get_imp
+  // Function: get_imp
   //
   // Returns the phase implementation for this this node.
   // Returns null if this phase type is not a UVM_PHASE_LEAF_NODE. 
@@ -963,7 +963,7 @@ class uvm_phase extends uvm_object;
   extern function uvm_phase get_imp();
 
 
-  // Function- get_domain_name
+  // Function: get_domain_name
   //
   // Returns the domain name associated with this phase node
   //
@@ -2460,7 +2460,7 @@ class uvm_domain extends uvm_phase;
   static local uvm_phase m_uvm_schedule;
 
 
-  // Function- get_domains
+  // Function: get_domains
   //
   // Provies a list of all domains in the provided ~domains~ argument. 
   //
@@ -2469,7 +2469,7 @@ class uvm_domain extends uvm_phase;
   endfunction 
 
 
-  // Function- get_uvm_schedule
+  // Function: get_uvm_schedule
   //
   //
   static function uvm_phase get_uvm_schedule();
@@ -2527,8 +2527,9 @@ class uvm_domain extends uvm_phase;
   endfunction
 
 
-  // Function- add_uvm_phases
+  // Function: add_uvm_phases
   //
+  // Appends to the given ~schedule~ the built-in UVM phases.
   //
   static function void add_uvm_phases(uvm_phase schedule);
 
@@ -2548,7 +2549,7 @@ class uvm_domain extends uvm_phase;
   endfunction
 
 
-  // Function- get_uvm_domain
+  // Function: get_uvm_domain
   //
   // Get a handle to the singleton ~uvm~ domain
   //
@@ -2564,9 +2565,9 @@ class uvm_domain extends uvm_phase;
   endfunction
 
 
-  // Function- new
+  // Function: new
   //
-  //
+  // Create a new instance of a phase domain.
   function new(string name);
     super.new(name,UVM_PHASE_DOMAIN);
     m_domains[name] = this;
