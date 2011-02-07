@@ -60,6 +60,9 @@ module testm();
           `uvm_info("USRDRV", $psprintf("Write addr=0x%0x Data=0x%0x", req.addr, req.data), UVM_HIGH)
         else
           `uvm_info("USRDRV", $psprintf("Read addr=0x%0x Data=0x%0x", req.addr, req.data), UVM_HIGH)
+          
+        item_collected_port.write(req);
+        
         seq_item_port.item_done();
       end
     endtask
