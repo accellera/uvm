@@ -50,7 +50,7 @@
 
 `define m_uvm_topdown_phase(PHASE,COMP,PREFIX) \
         class PREFIX``PHASE``_phase extends uvm_topdown_phase(`"PHASE`"); \
-          function void exec_func(COMP comp, uvm_phase phase); \
+          function void exec_func(uvm_component comp, uvm_phase phase); \
             COMP comp_; \
             if ($cast(comp_,comp)) \
               comp_.``PHASE``_phase(phase); \
@@ -65,7 +65,7 @@
 
 `define m_uvm_bottomup_phase(PHASE,COMP,PREFIX) \
         class PREFIX``PHASE``_phase extends uvm_bottomup_phase(`"PHASE`"); \
-          function void exec_func(COMP comp, uvm_phase phase); \
+          function void exec_func(uvm_component comp, uvm_phase phase); \
             COMP comp_; \
             if ($cast(comp_,comp)) \
               comp_.``PHASE``_phase(phase); \
