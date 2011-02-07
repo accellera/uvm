@@ -29,10 +29,8 @@ class ubus_master_sequencer extends uvm_sequencer #(ubus_transfer);
 
    `uvm_component_utils(ubus_master_sequencer)
      
-  // new - constructor
   function new (string name, uvm_component parent);
     super.new(name, parent);
-    set_phase_domain("uvm");
   endfunction : new
 
 endclass : ubus_master_sequencer
