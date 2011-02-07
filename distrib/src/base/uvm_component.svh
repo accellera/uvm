@@ -613,15 +613,16 @@ virtual class uvm_component extends uvm_report_object;
   // with the default ~uvm~ domain (see <uvm_domain::get_uvm_domain>) on
   // a component with no ~define_domain~ override effectively reverts the
   // that component to using the default ~uvm~ domain. This may be useful
-  // if a branch of the testbench hierarchy defines a custom domain, but
-  // some child sub-branch should remain in the default ~uvm~ domain.  In
-  // this case, <set_domain> with a different domain instance handle and
-  // ~hier~ set is called on the primary branch, and <set_domain> with
-  // the default ~uvm~ domain is called on the sub-branch.
   //
-  // Alternatively, the integrator can define a domain externally,
-  // then call <set_domain> to set it for this component (and its children
-  // if ~hier~ is set).
+  // If a branch of the testbench hierarchy defines a custom domain, but
+  // some child sub-branch should remain in the default ~uvm~ domain,
+  // call <set_domain> with a new domain instance handle with ~hier~ set.
+  // Then, in the sub-branch, call <set_domain> with the default ~uvm~ domain handle,
+  // obtained via <uvm_domain::get_uvm_domain()>.
+  //
+  // Alternatively, the integrator may define the graph in a new domain externally,
+  // then call <set_domain> to apply it to a component.
+
 
   extern virtual protected function void define_domain(uvm_domain domain);
 
