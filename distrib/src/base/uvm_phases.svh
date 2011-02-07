@@ -2150,7 +2150,7 @@ function void uvm_phase::sync(uvm_domain target,
   else if (!target.is_domain()) begin
     `uvm_fatal("PH_BADSYNC","sync() called with a non-domain phase schedule node as target");
   end
-  else if (phase == null && with_phase) begin
+  else if (phase == null && with_phase != null) begin
     `uvm_fatal("PH_BADSYNC","sync() called with null phase and non-null with phase");
   end
   else if (phase == null) begin
@@ -2162,8 +2162,9 @@ function void uvm_phase::sync(uvm_domain target,
     while (queue.size()) begin
       uvm_phase node;
       node = queue.pop_front();
-      if (node.m_imp != null)
+      if (node.m_imp != null) begin
         sync(target, node.m_imp);
+      end
       foreach (node.m_successors[succ]) begin
         if (!visited.exists(succ)) begin
           queue.push_back(succ);
@@ -2176,8 +2177,10 @@ function void uvm_phase::sync(uvm_domain target,
     // this is a 2-way ('with') sync and we check first in case it is already there
     uvm_phase from_node, to_node;
     int found_to[$], found_from[$];
-    from_node = target.find(phase);
-    to_node = target.find(phase);
+    if(with_phase == null) with_phase = phase;
+    from_node = find(phase);
+    to_node = target.find(with_phase);
+    if(from_node == null || to_node == null) return;
     found_to = from_node.m_sync.find_index(node) with (node == to_node);
     found_from = to_node.m_sync.find_index(node) with (node == from_node);
     if (found_to.size() == 0) from_node.m_sync.push_back(to_node);
