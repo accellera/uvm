@@ -26,13 +26,10 @@
 
 // Default settings
 `define _protected protected   
-`define uvm_clear_queue(Q) Q.delete();
 `define UVM_USE_FPC
 `define UVM_USE_P_FORMAT
 `define UVM_USE_FILE_LINE
-`define UVM_USE_ALT_PHASING
 `define UVM_DA_TO_QUEUE(Q,DA) Q=DA;
-`undef  UVM_USE_PROCESS_CONTAINER
 
 //
 // Any vendor specific defines go here.
@@ -40,10 +37,15 @@
 `ifdef VCS
 `endif
 
+
+`ifdef MODEL_TECH
+`ifndef QUESTA
+`define QUESTA
+`endif
+`endif
+
 `ifdef QUESTA
-  `undef  uvm_clear_queue
-  `define uvm_clear_queue(Q) Q = '{};
-  `undef  UVM_USE_ALT_PHASING
+//`define UVM_USE_BITSTREAM_OPS
 `endif
 
 `ifdef INCA
@@ -60,6 +62,9 @@
   `ifndef INCA_UVM_USE_FILE_LINE
     `undef  UVM_USE_FILE_LINE
   `endif
+  `ifndef INCA_UVM_USE_FPC
+    `undef UVM_USE_FPC
+  `endif
   `define UVM_USE_PROCESS_CONTAINER
   `undef  UVM_DA_TO_QUEUE
   `define UVM_DA_TO_QUEUE(Q,DA)  foreach (DA[idx]) Q.push_back(DA[idx]);
@@ -74,5 +79,6 @@
 `include "macros/uvm_sequence_defines.svh"
 `include "macros/uvm_callback_defines.svh"
 `include "macros/uvm_reg_defines.svh"
+`include "macros/uvm_deprecated_defines.svh"
 
 `endif

@@ -44,7 +44,7 @@
 //| class my_comp extends uvm_component;
 //|   `uvm_register_cb(my_comp,mycb)
 //|   ...
-//|   task run;
+//|   task run_phase(uvm_phase phase);
 //|     ...
 //|     `uvm_do_callbacks(my_comp, mycb, doit())
 //|   endtask
@@ -72,7 +72,7 @@
 //| class my_comp extends uvm_component;
 //|   `uvm_register_cb(my_comp,mycb)
 //|   ...
-//|   task run;
+//|   task run_phase(uvm_phase phase);
 //|     ...
 //|     `uvm_do_callbacks(my_comp, mycb, doit())
 //|   endtask
@@ -81,7 +81,7 @@
 //| class my_derived_comp extends my_comp;
 //|   `uvm_set_super_type(my_derived_comp,my_comp)
 //|   ...
-//|   task run;
+//|   task run_phase(uvm_phase phase);
 //|     ...
 //|     `uvm_do_callbacks(my_comp, mycb, doit())
 //|   endtask
@@ -118,7 +118,7 @@
 //
 // A component would invoke the macro as
 //
-//| task mycomp::run(); 
+//| task mycomp::run_phase(uvm_phase phase); 
 //|    int curr_addr, curr_data;
 //|    ...
 //|    `uvm_do_callbacks(mycb, mycomp, my_function(this, curr_addr, curr_data))
@@ -193,7 +193,7 @@
 //
 // A component would invoke the macro as
 //
-//| task mycomp::run(); 
+//| task mycomp::run_phase(uvm_phase phase); 
 //|    my_trans trans;
 //|    forever begin
 //|      get_port.get(trans);

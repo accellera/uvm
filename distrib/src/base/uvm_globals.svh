@@ -52,48 +52,41 @@ endtask
 uvm_test_done_objection uvm_test_done = uvm_test_done_objection::get();
 
 
-
 // Method: global_stop_request 
 //
-// Convenience function for uvm_top.stop_request(). See 
-// <uvm_root::stop_request> for more information.
+// Convenience function for uvm_test_done.stop_request(). See 
+// <uvm_test_done_objection::stop_request> for more information.
 
 function void global_stop_request();
-  uvm_root top;
-  top = uvm_root::get();
-  top.stop_request();
+  uvm_test_done_objection tdo;
+  tdo = uvm_test_done_objection::get();
+  tdo.stop_request();
 endfunction
 
 
 // Method: set_global_timeout 
 //
-// Convenience function for uvm_top.phase_timeout = timeout. See 
-// <uvm_root::phase_timeout> for more information.  The overridable bit 
+// Convenience function for uvm_top.set_timeout(). See 
+// <uvm_root::set_timeout> for more information.  The overridable bit 
 // controls whether subsequent settings will be honored.
 
 
 function void set_global_timeout(time timeout, bit overridable = 1);
   uvm_root top;
-  static bit m_uvm_timeout_overridable = 1;
   top = uvm_root::get();
-  if (m_uvm_timeout_overridable == 0) begin
-    uvm_report_info("NOTIMOUTOVR", $psprintf("The global timeout setting of %0d is not overridable to %0d due to a previous setting.", top.phase_timeout, timeout), UVM_NONE);
-    return;
-  end
-  m_uvm_timeout_overridable = overridable;
-  top.phase_timeout = timeout;
+  top.set_timeout(timeout,overridable);
 endfunction
 
 
 // Function: set_global_stop_timeout
 //
-// Convenience function for uvm_top.stop_timeout = timeout.
-// See <uvm_root::stop_timeout> for more information.
+// Convenience function for uvm_test_done.stop_timeout = timeout.
+// See <uvm_uvm_test_done::stop_timeout> for more information.
 
 function void set_global_stop_timeout(time timeout);
-  uvm_root top;
-  top = uvm_root::get();
-  top.stop_timeout = timeout;
+  uvm_test_done_objection tdo;
+  tdo = uvm_test_done_objection::get();
+  tdo.stop_timeout = timeout;
 endfunction
 
 
@@ -183,6 +176,37 @@ function void uvm_report_fatal(string id,
   uvm_root top;
   top = uvm_root::get();
   top.uvm_report_fatal(id, message, verbosity, filename, line);
+endfunction
+
+
+function bit uvm_string_to_severity (string sev_str, output uvm_severity sev);
+  case (sev_str)
+    "UVM_INFO": sev = UVM_INFO;
+    "UVM_WARNING": sev = UVM_WARNING;
+    "UVM_ERROR": sev = UVM_ERROR;
+    "UVM_FATAL": sev = UVM_FATAL;
+    default: return 0;
+  endcase
+  return 1;
+endfunction
+
+function bit uvm_string_to_action (string action_str, output uvm_action action);
+  string actions[$];
+  uvm_split_string(action_str,"|",actions);
+  uvm_string_to_action = 1;
+  action = 0;
+  foreach(actions[i]) begin
+    case (action_str)
+      "UVM_NO_ACTION": action |= UVM_NO_ACTION;
+      "UVM_DISPLAY":   action |= UVM_DISPLAY;
+      "UVM_LOG":       action |= UVM_LOG;
+      "UVM_COUNT":     action |= UVM_COUNT;
+      "UVM_EXIT":      action |= UVM_EXIT;
+      "UVM_CALL_HOOK": action |= UVM_CALL_HOOK;
+      "UVM_STOP":      action |= UVM_STOP;
+      default: uvm_string_to_action = 0;
+    endcase
+  end
 endfunction
 
   
@@ -313,8 +337,10 @@ endfunction
 //
 // Task: uvm_wait_for_nba_region
 //
-// Call this task to wait for a delta cycle. Program blocks don't have an nba
-// so just delay for a #0 in a program block.
+// Callers of this task will not return until the NBA region, thus allowing
+// other processes any number of delta cycles (#0) to settle out before
+// continuing. See <uvm_sequencer_base::wait_for_sequences> for example usage.
+//
 //----------------------------------------------------------------------------
 
 task uvm_wait_for_nba_region;
@@ -326,18 +352,19 @@ task uvm_wait_for_nba_region;
 
   //If `included directly in a program block, can't use a non-blocking assign,
   //but it isn't needed since program blocks are in a seperate region.
-`ifndef UVM_PROGRAM_BLOCK
+`ifndef UVM_NO_WAIT_FOR_NBA
   if (nba_scheduled == 0) begin
-    nba_scheduled = 1;
+    nba_scheduled = 1; 
     nba = 0;
     nba <= 1;
-    @(posedge nba) nba_scheduled = 0;
+    @(posedge nba)
+      nba_scheduled = 0;
   end
   else begin
     @(posedge nba);
   end
 `else
-  #0;
+  repeat(`UVM_POUND_ZERO_COUNT) #0;
 `endif
 
 

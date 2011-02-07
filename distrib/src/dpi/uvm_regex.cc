@@ -48,7 +48,7 @@ class uvm_re_cache
  protected:
   uvm_re_cache() {}
   uvm_re_cache(const uvm_re_cache&) {}
-  uvm_re_cache& operator= (const uvm_re_cache&) {}
+//  uvm_re_cache& operator= (const uvm_re_cache&) {}
 
  private:
   static uvm_re_cache *inst;

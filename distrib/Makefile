@@ -24,7 +24,7 @@ UVM_HOME = .
 
 OS	= $(shell $(UVM_HOME)/bin/uvm_os_name)
 
-SRCDIR	= $(UVM_HOME)/src/C
+SRCDIR	= $(UVM_HOME)/src/dpi
 SONAME	= $(shell $(UVM_HOME)/bin/uvm_dpi_name)
 LIBDIR	= $(shell dirname $(SONAME))
 
@@ -49,7 +49,7 @@ endif
 
 ifeq ($(TOOL),questa)
 CFLAGS += -DQUESTA -I$(MTI_HOME)/include -m32
-CC = $(MTI_HOME)/gcc-4.1.2-linux/bin/gcc
+CC = $(MTI_HOME)/gcc-4.3.3-linux_x86_64/bin/gcc
 endif
 
 ifeq ($(TOOL),ius)

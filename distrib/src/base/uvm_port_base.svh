@@ -85,12 +85,13 @@ virtual class uvm_port_component_base extends uvm_component;
 
   pure virtual function bit is_imp();
 
-  // Turn off auto config by not calling build()
-  virtual function void build();
+  // Turn off auto config by not calling build_phase()
+  virtual function void build_phase(uvm_phase phase);
+    build(); //for backward compat
     return;
   endfunction
 
-  virtual task do_task_phase (uvm_phase phase);
+  virtual task do_task_phase (uvm_phase_imp phase);
   endtask
 endclass
 
@@ -424,15 +425,16 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   // port's connect method calls are made.
 
   virtual function void connect (this_type provider);
-
-    if (end_of_elaboration_ph.is_done() ||
-        end_of_elaboration_ph.is_in_progress()) begin
-      //m_comp.uvm_report_warning(s_connection_warning_id, 
-      m_comp.uvm_report_warning("Late Connection", 
-        {"Attempt to connect ",this.get_full_name()," (of type ",this.get_type_name(),
-         ") at or after end_of_elaboration phase.  Ignoring."});
-      return;
-    end
+    uvm_root top = uvm_root::get();
+    uvm_phase domain = top.find_phase_schedule("uvm_pkg::common","*");
+    uvm_phase elab_ph = domain.find_schedule("end_of_elaboration");
+    if (elab_ph.get_state() == UVM_PHASE_EXECUTING ||
+        elab_ph.get_state() == UVM_PHASE_DONE ) begin
+       m_comp.uvm_report_warning("Late Connection", 
+         {"Attempt to connect ",this.get_full_name()," (of type ",this.get_type_name(),
+          ") at or after end_of_elaboration phase.  Ignoring."});
+       return;
+     end
 
     if (provider == null) begin
       m_comp.uvm_report_error(s_connection_error_id,
@@ -513,12 +515,15 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
         save = {"This port's fanout network:\n\n  ",
                get_full_name()," (",get_type_name(),")\n",save,"\n"};
       if (m_imp_list.num() == 0) begin
-        if (end_of_elaboration_ph.is_done() ||
-            end_of_elaboration_ph.is_in_progress())
-          save = {save,"  Connected implementations: none\n"};
+        uvm_root top = uvm_root::get();
+        uvm_phase domain = top.find_phase_schedule("uvm_pkg::common","*");
+        uvm_phase elab_ph = domain.find_schedule("end_of_elaboration");
+        if (elab_ph.get_state() == UVM_PHASE_EXECUTING ||
+            elab_ph.get_state() == UVM_PHASE_DONE ) 
+           save = {save,"  Connected implementations: none\n"};
         else
-        save = {save,
-                "  Connected implementations: not resolved until end-of-elab\n"};
+           save = {save,
+                 "  Connected implementations: not resolved until end-of-elab\n"};
       end
       else begin
         save = {save,"  Resolved implementation list:\n"};

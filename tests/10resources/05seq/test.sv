@@ -155,14 +155,15 @@ class test extends uvm_component;
                                             mem_cfg, this);
     // establish the loop count for the main sequence
     uvm_resource_db#(int unsigned)::set("mem_seq", "loop_count",
-                                         1000, this);
+                                         1, this);
     
     e = new("env", this);
   endfunction
 
   task run();
-    global_stop_request();
-    print_config(1);
+  #1;
+     global_stop_request();
+     print_config(1);
   endtask
 
   function void report();

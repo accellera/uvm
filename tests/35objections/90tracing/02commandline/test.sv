@@ -2,6 +2,62 @@
 // The top object traps all objections and stores their string
 // descriptions in an aa for checking.
 
+// Testbench structure
+//     test
+//      |
+//      -- tc (top_comp)
+//       |
+//       -- mc (middle_comp)
+//       |
+//       -- lc (lower_comp)
+//
+
+// Objections:
+//   lower_comp
+//     6 uvm_test_done raise
+//     6 uvm_test_done drop
+//     1 uvm_test_done all_dropped
+//     3 foo raise
+//     3 foo drop
+//     1 foo all_dropped
+//     -----------------
+//     9 raised
+//     9 dropped
+//     2 all_dropped
+//   middle_comp
+//     4 uvm_test_done raise 
+//     4 uvm_test_done drop
+//     1 uvm_test_done all_dropped
+//     2 foo raise
+//     2 foo drop
+//     1 foo all_dropped
+//     ---------------------
+//     6 + 9 (15) raised
+//     6 + 9 (15) dropped
+//     2 all_dropped
+//   top_comp
+//     (all from below)
+//     15 raised
+//     15 dropped
+//      2 all_dropped
+//   test
+//     (all from below)
+//     15 raised
+//     15 dropped
+//      2 all_dropped
+//   uvm_top
+//     15 raised
+//     15 dropped
+//      2 all_dropped
+//
+// Total objections seen: 
+//    69 raised
+//    69 dropped
+//    10 all_dropped
+//   ---------------
+//   148
+//     
+
 module top;
   import uvm_pkg::*;
   `include "uvm_macros.svh"
@@ -87,6 +143,9 @@ module top;
         $display("OBJ: %0s : %0d", obj.get_full_name(), ctchr.client_cnt[idx]);
         cli_cnt += ctchr.client_cnt[idx];
       end
+
+      // Note that there are 35 objections from run for 15 implicit raise/drop
+      // plus 5 alldrop messages.
       if(ctchr.id_cnt["OBJTN_TRC"] != 148) begin
         $display("** UVM TEST FAILED ** Saw %0d OBJTN_TRC messages instead of 148", ctchr.id_cnt["OBJTN_TRC"]);
         return;

@@ -227,8 +227,11 @@ begin
    rg.build();
    rg.configure(blk);
    blk.default_map.add_reg(rg, 0, "RW", 1, fd);
+   blk.default_map.set_auto_predict();
    
    rg.reset();
+   blk.print();
+   blk.lock_model();
    
    begin   
       uvm_reg_single_bit_bash_seq seq;

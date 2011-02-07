@@ -139,7 +139,7 @@ class uvm_tlm_if #(type T=uvm_tlm_generic_payload,
    //| class master extends uvm_component;
    //     uvm_tlm_nb_initiator_socket #(trans, uvm_tlm_phase_e, this_t) initiator_socket;
    //|    ...
-   //|    function void build();
+   //|    function void build_phase(uvm_phase phase);
    //        initiator_socket = new("initiator_socket", this, this);
    //|    endfunction
    //|

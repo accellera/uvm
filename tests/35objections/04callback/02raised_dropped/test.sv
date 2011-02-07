@@ -130,7 +130,8 @@ module test;
     endtask
     virtual function void raised (uvm_objection objection, 
       uvm_object source_obj, string description, int count);
-          cb("RAISED", objection, source_obj, count);
+
+      cb("RAISED", objection, source_obj, count);
       rcnt+=count;
       if(source_obj != this && description != "foo") begin
          failed = 1;
@@ -139,7 +140,8 @@ module test;
     endfunction
     virtual function void dropped (uvm_objection objection, 
       uvm_object source_obj, string description, int count);
-          cb("DROPPED", objection, source_obj, count);
+
+      cb("DROPPED", objection, source_obj, count);
       dcnt += count;
       if(source_obj != this && description != "bar") begin
          failed = 1;

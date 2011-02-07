@@ -16,16 +16,23 @@ class test extends uvm_test;
    endfunction
 
    virtual task run();
+      `uvm_warning("A", "A Warning but downgrading to an Info!!!")
+      `uvm_error("B", "B Error but downgrading to an Info!!!")
+      `uvm_fatal("C", "C Fatal but downgrading to an Info!!!")
       #1000;
       uvm_top.stop_request();
    endtask
 
    virtual function void report();
-/*
      uvm_report_server rs = uvm_report_server::get_server();
-     if(rs.get_id_count("INVLCMDARGS") == 1)
+     if((rs.get_id_count("A") == 1) &&
+        (rs.get_id_count("B") == 1) &&
+        (rs.get_id_count("C") == 1) &&
+        //(rs.get_severity_count(UVM_INFO) == 5) &&
+        (rs.get_severity_count(UVM_WARNING) == 0) &&
+        (rs.get_severity_count(UVM_ERROR) == 0) &&
+        (rs.get_severity_count(UVM_FATAL) == 0))
        $write("** UVM TEST PASSED **\n");
-*/
    endfunction
 
 endclass

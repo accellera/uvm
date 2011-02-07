@@ -119,7 +119,7 @@ module test;
 
   class my_catcher extends uvm_report_catcher;
      virtual function action_e catch();
-        if(get_id() == "TIMOUT") begin
+        if(get_id() == "PH_TIMEOUT") begin
           set_severity(UVM_INFO);
         end
         return THROW;

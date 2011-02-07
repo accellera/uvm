@@ -270,7 +270,8 @@ typedef enum
 //  UVM_FULL   - Report is issued if configured verbosity is set to UVM_FULL
 //               or above.
 
-typedef enum {
+typedef enum
+{
   UVM_NONE   = 0,
   UVM_LOW    = 100,
   UVM_MEDIUM = 200,
@@ -281,8 +282,6 @@ typedef enum {
 
 
 typedef int UVM_FILE;
-uvm_action s_default_action_array[string]; // default is already NO_ACTION
-UVM_FILE s_default_file_array[string]; // default is already 0
 
 
 //-----------------
@@ -302,7 +301,8 @@ UVM_FILE s_default_file_array[string]; // default is already 0
 //                      parameter, and it is bound to the component that
 //                      implements the interface.
 
-typedef enum {
+typedef enum
+{
   UVM_PORT ,
   UVM_EXPORT ,
   UVM_IMPLEMENTATION
@@ -312,6 +312,34 @@ typedef enum {
 //-----------------
 // Group: Sequences
 //-----------------
+
+// Enum: uvm_sequencer_arb_mode
+//
+// Specifies a sequencer's arbitration mode
+//
+// SEQ_ARB_FIFO          - Requests are granted in FIFO order (default)
+// SEQ_ARB_WEIGHTED      - Requests are granted randomly by weight
+// SEQ_ARB_RANDOM        - Requests are granted randomly
+// SEQ_ARB_STRICT_FIFO   - Requests at highest priority granted in fifo order
+// SEQ_ARB_STRICT_RANDOM - Requests at highest priority granted in randomly
+// SEQ_ARB_USER          - Arbitration is delegated to the user-defined 
+//                         function, user_priority_arbitration. That function
+//                         will specify the next sequence to grant.
+
+
+typedef enum
+{
+  SEQ_ARB_FIFO,
+  SEQ_ARB_WEIGHTED,
+  SEQ_ARB_RANDOM,
+  SEQ_ARB_STRICT_FIFO,
+  SEQ_ARB_STRICT_RANDOM,
+  SEQ_ARB_USER
+} uvm_sequencer_arb_mode;
+
+
+typedef uvm_sequencer_arb_mode SEQ_ARB_TYPE; // backward compat
+
 
 // Enum: uvm_sequence_state_enum
 //
@@ -330,13 +358,170 @@ typedef enum {
 //                      kill() on the sequence.
 // FINISHED           - The sequence is completely finished executing.
 
-typedef enum { CREATED   = 1,
-               PRE_BODY  = 2,
-               BODY      = 4,
-               POST_BODY = 8,
-               ENDED     = 16,
-               STOPPED   = 32,
-               FINISHED  = 64} uvm_sequence_state_enum;
+typedef enum
+{
+  CREATED   = 1,
+  PRE_BODY  = 2,
+  BODY      = 4,
+  POST_BODY = 8,
+  ENDED     = 16,
+  STOPPED   = 32,
+  FINISHED  = 64
+} uvm_sequence_state;
+
+typedef uvm_sequence_state uvm_sequence_state_enum; // backward compat
+
+
+// Enum: uvm_sequence_lib_mode
+//
+// Specifies the random selection mode of a sequence library
+//
+// UVM_SEQ_LIB_RAND  - Random sequence selection
+// UVM_SEQ_LIB_RANDC - Random cyclic sequence selection
+// UVM_SEQ_LIB_ITEM  - Emit only items, no sequence execution
+// UVM_SEQ_LIB_USER  - Apply a user-defined random-selection algorithm
+
+typedef enum
+{
+  UVM_SEQ_LIB_RAND,
+  UVM_SEQ_LIB_RANDC,
+  UVM_SEQ_LIB_ITEM,
+  UVM_SEQ_LIB_USER
+} uvm_sequence_lib_mode;
+
+
+
+//---------------
+// Group: Phasing
+//---------------
+
+// Enum: uvm_phase_type
+//
+// This is an attribute of a <uvm_phase_imp> object which defines the phase
+// execution type. Every phase we define has a type. It is used only for 
+// information, as the type behavior is captured in three derived classes 
+// uvm_task/topdown/bottomup_phase.
+//
+//   UVM_PHASE_TASK - The phase is a task-based phase, a fork is done for 
+//   each participating component and so the traversal order is arbitrary
+//
+//   UVM_PHASE_TOPDOWN -  The phase is a function phase, components are 
+//   traversed from top-down, allowing them to add to the component tree 
+//   as they go.
+//
+//   UVM_PHASE_BOTTOMUP - The phase is a function phase, components are 
+//   traversed from the bottom up, allowing roll-up / consolidation 
+//   functionality.
+//
+typedef enum { UVM_PHASE_TASK,
+               UVM_PHASE_TOPDOWN,
+               UVM_PHASE_BOTTOMUP
+} uvm_phase_type;
+
+
+// Enum: uvm_phase_state
+// ---------------------
+//
+// The set of possible states of a phase. This is an attribute of a schedule
+// node in the graph, not of a phase, to maintain independent per-domain state
+//
+//   UVM_PHASE_DORMANT -  Nothing has happened with the phase in this domain.
+//
+//   UVM_PHASE_SCHEDULED - At least one immediate predecessor has completed.
+//              Scheduled phases block until all predecessors complete or
+//              until a jump is executed.
+//
+//   UVM_PHASE_STARTED - phase ready to execute, running phase_started() callback
+//
+//   UVM_PHASE_EXECUTING - An executing phase is one where the phase callbacks are
+//              being executed. It's process is tracked by the phaser.
+//
+//   UVM_PHASE_READY_TO_END - no objections remain, awaiting completion of
+//              predecessors of its successors. For example, when phase 'run'
+//              is ready to end, its successor will be 'extract', whose
+//              predecessors are 'run' and 'post_shutdown'. Therefore, 'run'
+//              will be waiting for 'post_shutdown' to be ready to end.
+//
+//   UVM_PHASE_ENDED - phase completed execution, now running phase_ended() callback
+//
+//   UVM_PHASE_CLEANUP - all processes related to phase are being killed
+//
+//   UVM_PHASE_DONE - A phase is done after it terminated execution.  Becoming
+//              done may enable a waiting successor phase to execute.
+//
+//    The state transitions occur as follows:
+//
+//|     DORMANT -->SCHEDULED-->STARTED-->EXECUTING-->ENDED-->CLEANUP-->DONE --+
+//|        ^                                                   |
+//|        |          <-- jump_to                              v
+//|        +---------------------------------------------------+
+
+   typedef enum { UVM_PHASE_DORMANT      = 1,
+                  UVM_PHASE_SCHEDULED    = 2,
+                  UVM_PHASE_STARTED      = 4,
+                  UVM_PHASE_EXECUTING    = 8,
+                  UVM_PHASE_READY_TO_END = 16,
+                  UVM_PHASE_ENDED        = 32,
+                  UVM_PHASE_CLEANUP      = 64,
+                  UVM_PHASE_DONE         = 128
+                  } uvm_phase_state;
+
+
+
+// Enum: uvm_phase_transition
+//
+// These are the phase state transition for callbacks which provide
+// additional information that may be useful during callbacks
+//
+// UVM_COMPLETED   - the phase completed normally
+// UVM_FORCED_STOP - the phase was forced to terminate prematurely
+// UVM_SKIPPED     - the phase was in the path of a forward jump
+// UVM_RERUN       - the phase was in the path of a backwards jump
+//
+typedef enum { UVM_COMPLETED   = 'h01, 
+               UVM_FORCED_STOP = 'h02,
+               UVM_SKIPPED     = 'h04, 
+               UVM_RERUN       = 'h08   
+} uvm_phase_transition;
+
+
+// Enum: uvm_wait_op
+//
+// Specifies the operand when using methods like <uvm_phase::wait_for_state>.
+//
+// UVM_EQ  - equal
+// UVM_NE  - not equal
+// UVM_LT  - less than
+// UVM_LTE - less than or equal to
+// UVM_GT  - greater than
+// UVM_GTE - greater than or equal to
+//
+typedef enum { UVM_LT,
+               UVM_LTE,
+               UVM_NE,
+               UVM_EQ,
+               UVM_GT,
+               UVM_GTE
+} uvm_wait_op;
+
+
+//------------------
+// Group: Objections
+//------------------
+
+// Enum: uvm_objection_event
+//
+// Enumerated the possible objection events one could wait on. See
+// <uvm_objection::wait_for>.
+//
+// UVM_RAISED      - an objection was raised
+// UVM_DROPPED     - an objection was raised
+// UVM_ALL_DROPPED - all objections have been dropped
+//
+typedef enum { UVM_RAISED      = 'h01, 
+               UVM_DROPPED     = 'h02,
+               UVM_ALL_DROPPED = 'h04
+} uvm_objection_event;
 
 
 

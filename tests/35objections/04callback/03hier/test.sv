@@ -137,14 +137,17 @@ module test;
       end
     endtask
     virtual function void raised (uvm_objection objection, uvm_object source_obj, string description, int count);
+
       uvm_report_info("Raised", $sformatf("%0s raised from %0s : local total count is %0d", objection.get_name(), source_obj.get_full_name(), objection.get_objection_total(this)), UVM_NONE);
       cnts[source_obj.get_full_name()]+=count;
     endfunction
     virtual function void dropped (uvm_objection objection, uvm_object source_obj, string description, int count);
+
       uvm_report_info("Dropped", $sformatf("%0s dropped from %0s : local total count is %0d", objection.get_name(), source_obj.get_full_name(), objection.get_objection_total(this)), UVM_NONE);
       cnts[source_obj.get_full_name()]+=count;
     endfunction
     virtual task all_dropped (uvm_objection objection, uvm_object source_obj, string description, int count);
+
       uvm_report_info("AllDropped", $sformatf("%0s all objections dropped from %0s : local total count is %0d", objection.get_name(), source_obj.get_full_name(), objection.get_objection_total(this)), UVM_NONE);
       ad++;
     endtask

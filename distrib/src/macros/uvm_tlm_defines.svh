@@ -567,4 +567,4 @@ endclass
 
 `define SEQ_ITEM_PUSH_MASK  (`SEQ_ITEM_PUT_MASK)
 
-`include "uvm_tlm/uvm_tlm_imps.svh"
+`include "tlm1/uvm_tlm_imps.svh"

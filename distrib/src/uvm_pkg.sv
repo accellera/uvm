@@ -2,7 +2,7 @@
 //----------------------------------------------------------------------
 //   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc. 
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -22,9 +22,17 @@
 `ifndef UVM_PKG_SV
 `define UVM_PKG_SV
 
+`include "uvm_macros.svh"
+
 package uvm_pkg;
 
-  `include "uvm.svh"
+  `include "dpi/uvm_dpi.svh"
+  `include "base/base.svh"
+  `include "tlm1/uvm_tlm.svh"
+  `include "comps/comps.svh"
+  `include "seq/seq.svh"
+  `include "tlm2/tlm2.svh"
+  `include "reg/uvm_reg_model.svh"
 
 endpackage
 

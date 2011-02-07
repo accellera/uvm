@@ -21,7 +21,34 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
+`ifdef INCA
+
+typedef class ext1;
+typedef class ext2;
+typedef class ext3;
+typedef ext1 ext1_ext;
+typedef ext2 ext2_ext;
+typedef ext3 ext3_ext;
+
+class ext1 extends uvm_tlm_extension#(ext1_ext);
+   `uvm_object_utils(ext1)
+endclass
+
+class ext2 extends uvm_tlm_extension#(ext2_ext);
+   `uvm_object_utils(ext2)
+endclass
+
+class ext3 extends uvm_tlm_extension#(ext3_ext);
+   `uvm_object_utils(ext3)
+endclass
+
+class ext3x extends ext3;
+   `uvm_object_utils(ext3x)
+endclass
+
+`else
 
 class ext1 extends uvm_tlm_extension#(ext1);
    `uvm_object_utils(ext1)
@@ -38,6 +65,8 @@ endclass
 class ext3x extends ext3;
    `uvm_object_utils(ext3x)
 endclass
+
+`endif
 
 class test extends uvm_test;
    bit pass = 1;
@@ -69,38 +98,38 @@ class test extends uvm_test;
       end
       gp2.set_extension(x3);
 
-      if (!$cast(y1, gp1.get_extension(ext1::get_tlm_gp_ext_type()))) begin
+      if (!$cast(y1, gp1.get_extension(ext1::ID()))) begin
          `uvm_error("TEST", "GP1 did not return the correct EXT1 extension");
       end
       if (y1 != x1) begin
          `uvm_error("TEST", "GP1 did not return the correct EXT1 instance");
       end
-      if (!$cast(y2, gp1.get_extension(ext2::get_tlm_gp_ext_type()))) begin
+      if (!$cast(y2, gp1.get_extension(ext2::ID()))) begin
          `uvm_error("TEST", "GP1 did not return the correct EXT2 extension");
       end
       if (y2 != null) begin
          `uvm_error("TEST", "GP1 did not return the correct EXT2 instance");
       end
-      if (!$cast(y3, gp1.get_extension(ext3::get_tlm_gp_ext_type()))) begin
+      if (!$cast(y3, gp1.get_extension(ext3::ID()))) begin
          `uvm_error("TEST", "GP1 did not return the correct EXT3 extension");
       end
       if (y3 != null) begin
          `uvm_error("TEST", "GP1 did not return the correct EXT3 instance");
       end
       
-      if (!$cast(y1, gp2.get_extension(ext1::get_tlm_gp_ext_type()))) begin
+      if (!$cast(y1, gp2.get_extension(ext1::ID()))) begin
          `uvm_error("TEST", "GP2 did not return the correct EXT1 extension");
       end
       if (y1 != null) begin
          `uvm_error("TEST", "GP2 did not return the correct EXT1 instance");
       end
-      if (!$cast(y2, gp2.get_extension(ext2::get_tlm_gp_ext_type()))) begin
+      if (!$cast(y2, gp2.get_extension(ext2::ID()))) begin
          `uvm_error("TEST", "GP2 did not return the correct EXT2 extension");
       end
       if (y2 != null) begin
          `uvm_error("TEST", "GP2 did not return the correct EXT2 instance");
       end
-      if (!$cast(y3, gp2.get_extension(ext3::get_tlm_gp_ext_type()))) begin
+      if (!$cast(y3, gp2.get_extension(ext3::ID()))) begin
          `uvm_error("TEST", "GP2 did not return the correct EXT3 extension");
       end
       if (y3 != x3) begin
@@ -111,19 +140,19 @@ class test extends uvm_test;
          `uvm_error("TEST", "Unable to clone GP2");
       end
       
-      if (!$cast(y1, gp3.get_extension(ext1::get_tlm_gp_ext_type()))) begin
+      if (!$cast(y1, gp3.get_extension(ext1::ID()))) begin
          `uvm_error("TEST", "GP3 did not return the correct EXT1 extension");
       end
       if (y1 != null) begin
          `uvm_error("TEST", "GP3 did not return the correct EXT1 instance");
       end
-      if (!$cast(y2, gp3.get_extension(ext2::get_tlm_gp_ext_type()))) begin
+      if (!$cast(y2, gp3.get_extension(ext2::ID()))) begin
          `uvm_error("TEST", "GP3 did not return the correct EXT2 extension");
       end
       if (y2 != null) begin
          `uvm_error("TEST", "GP3 did not return the correct EXT2 instance");
       end
-      if (!$cast(y3, gp3.get_extension(ext3::get_tlm_gp_ext_type()))) begin
+      if (!$cast(y3, gp3.get_extension(ext3::ID()))) begin
          `uvm_error("TEST", "GP3 did not return the correct EXT3 extension");
       end
       if (y3 == null) begin

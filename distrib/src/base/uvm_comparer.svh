@@ -153,7 +153,7 @@ class uvm_comparer;
     mask = -1;
     mask >>= (UVM_STREAMBITS-size);
     if((lhs & mask) !== (rhs & mask)) begin
-      scope.set_arg(name);
+      uvm_object::__m_uvm_status_container.scope.set_arg(name);
       case (radix)
         UVM_BIN: begin
               $swrite(msg, "lhs = 'b%0b : rhs = 'b%0b", 
@@ -210,7 +210,7 @@ class uvm_comparer;
     mask = -1;
     mask >>= (64-size);
     if((lhs & mask) !== (rhs & mask)) begin
-      scope.set_arg(name);
+      uvm_object::__m_uvm_status_container.scope.set_arg(name);
       case (radix)
         UVM_BIN: begin
               $swrite(msg, "lhs = 'b%0b : rhs = 'b%0b", 
@@ -260,7 +260,7 @@ class uvm_comparer;
     string msg;
   
     if(lhs != rhs) begin
-      scope.set_arg(name);
+      uvm_object::__m_uvm_status_container.scope.set_arg(name);
       $swrite(msg, "lhs = ", lhs, " : rhs = ", rhs);
       print_msg(msg);
       return 0;
@@ -289,20 +289,20 @@ class uvm_comparer;
       return 1;
 
     if (policy == UVM_REFERENCE && lhs != rhs) begin
-      scope.set_arg(name);
+      uvm_object::__m_uvm_status_container.scope.set_arg(name);
       print_msg_object(lhs, rhs);
       return 0;
     end
 
     if (rhs == null || lhs == null) begin
-      scope.set_arg(name);
+      uvm_object::__m_uvm_status_container.scope.set_arg(name);
       print_msg_object(lhs, rhs);
       return 0;  //miscompare
     end
 
-    scope.down(name, null);
+    uvm_object::__m_uvm_status_container.scope.down(name);
     compare_object = lhs.compare(rhs, this);
-    scope.up(null);
+    uvm_object::__m_uvm_status_container.scope.up();
 
   endfunction
   
@@ -320,7 +320,7 @@ class uvm_comparer;
                                        string rhs);
     string msg;
     if(lhs != rhs) begin
-      scope.set_arg(name);
+      uvm_object::__m_uvm_status_container.scope.set_arg(name);
       msg = { "lhs = \"", lhs, "\" : rhs = \"", rhs, "\""};
       print_msg(msg);
       return 0;
@@ -342,10 +342,10 @@ class uvm_comparer;
   function void print_msg (string msg);
     result++;
     if(result <= show_max) begin
-       msg = {"Miscompare for ", scope.get_arg(), ": ", msg};
+       msg = {"Miscompare for ", uvm_object::__m_uvm_status_container.scope.get(), ": ", msg};
        uvm_report_info("MISCMP", msg, UVM_LOW);
     end
-    miscompares = { miscompares, scope.get_arg(), ": ", msg, "\n" };
+    miscompares = { miscompares, uvm_object::__m_uvm_status_container.scope.get(), ": ", msg, "\n" };
   endfunction
 
 
@@ -358,13 +358,14 @@ class uvm_comparer;
   //Need this function because sformat doesn't support objects
   function void print_rollup(uvm_object rhs, uvm_object lhs);
     string msg;
-    if(scope.depth() == 0) begin
+    if(uvm_object::__m_uvm_status_container.scope.depth() == 0) begin
       if(result && (show_max || (uvm_severity_type'(sev) != UVM_INFO))) begin
         if(show_max < result) 
            $swrite(msg, "%0d Miscompare(s) (%0d shown) for object ",
              result, show_max);
-        else
+        else begin
            $swrite(msg, "%0d Miscompare(s) for object ", result);
+        end
 
         case (sev)
           UVM_WARNING: begin 
@@ -393,10 +394,10 @@ class uvm_comparer;
     if(result <= show_max) begin
       uvm_report_info("MISCMP", 
         $psprintf("Miscompare for %0s: lhs = @%0d : rhs = @%0d", 
-        scope.get_arg(), (lhs!=null ? lhs.get_inst_id() : 0), (rhs != null ? rhs.get_inst_id() : 0)), verbosity);
+        uvm_object::__m_uvm_status_container.scope.get(), (lhs!=null ? lhs.get_inst_id() : 0), (rhs != null ? rhs.get_inst_id() : 0)), verbosity);
     end
     $swrite(miscompares, "%s%s: lhs = @%0d : rhs = @%0d",
-        miscompares, scope.get_arg(), (lhs != null ? lhs.get_inst_id() : 0), (rhs != null ? rhs.get_inst_id() : 0));
+        miscompares, uvm_object::__m_uvm_status_container.scope.get(), (lhs != null ? lhs.get_inst_id() : 0), (rhs != null ? rhs.get_inst_id() : 0));
   endfunction
 
 

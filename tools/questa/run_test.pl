@@ -30,13 +30,11 @@
 
 sub questa_support($$$) {
     my ($series,$letter,$beta) = @_;
-    return(1) if ( ($series eq "6.6" && $letter ge "d") || ($series eq "10.0") || ($series eq "10.1")); #||
-                  #(($series eq "6.5") && ($letter ge "e")) ||
-                  #(($series eq "6.4") && ($letter ge "f")));
-    die "Questa version \"$series$letter$beta\" does not fully support UVM.\n".
-      #"- required version 6.4f, 6.5e, 6.6a or later\n";
+    if (!(($series eq "6.6" && $letter ge "d") || ($series > 6.6))) {
+      print "Questa version \"$series$letter$beta\" does not fully support UVM.\n".
       "- required version 6.6d or later\n";
-    exit(1);
+    }
+    return 1;
 }
 
 sub questa_checkversion() {
@@ -79,7 +77,7 @@ sub questa_run($) {
 sub run_the_test($$$) {
     my ($testdir,$compile_opts,$run_opts) = @_;
     &questa_checkversion();
-    my $uvm_opts = "+incdir+$uvm_home/src $uvm_home/src/uvm_pkg.sv";
+    my $uvm_opts = "+incdir+$uvm_home/src $uvm_home/src/uvm.sv";
 
     # how to direct output - verbose/silent
     my $redirect = ($opt_v) ? "| tee -a" : ">>";
@@ -89,7 +87,8 @@ sub run_the_test($$$) {
 
     # compile commands
     my $vlib = ("vlib work");
-    my $vlog = ("vlog -suppress 2218,2181 -mfcu $compile_opts -timescale 1ns/1ns $uvm_opts test.sv");
+    # +acc=rmb needed for DPI backdoor access
+    my $vlog = ("vlog -suppress 2218,2181 -mfcu +acc=rmb $compile_opts -timescale 1ns/1ns $uvm_opts test.sv");
     &questa_run("cd ./$testdir && ($vlib && $vlog && touch qa) $redirect ".&comptime_log_fname()." 2>&1");
 
     # only run if the compile succeeded in reaching QA
@@ -107,10 +106,13 @@ sub run_the_test($$$) {
             close(COMPILE_LOG);
             $toplevels =~ s/\s\s+/ /g; # remove excess whitespace
         }
-        my $clib = "-sv_lib $uvm_home/src/dpi/uvm_dpi";
-        my $vsim = ("vsim +UVM_TESTNAME=test $run_opts $clib -c $toplevels -do 'run -all;quit -f'");
-        system("cd ./$testdir/$uvm_home/src/dpi; make --quiet") && die "DPI Library Compilation Problem" ;
+        my $clib = "";
+        if ($compile_opts !~ /UVM_NO_DPI/) {
+          system("cd ./$testdir/$uvm_home/examples; make -f Makefile.questa $opt_M --quiet dpi_lib") && die "DPI Library Compilation Problem" ;
+          $clib = "-sv_lib $uvm_home/lib/uvm_dpi";
+        }
 
+        my $vsim = ("vsim +UVM_TESTNAME=test $run_opts $clib -c $toplevels -do 'run -all;quit -f'");
         &questa_run("cd ./$testdir && $vsim $redirect ".&runtime_log_fname()." 2>&1");
     }
     return(0);

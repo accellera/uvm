@@ -116,7 +116,8 @@ virtual class uvm_reg_block extends uvm_object;
    extern virtual function uvm_reg_map create_map(string name,
                                                   uvm_reg_addr_t base_addr,
                                                   int unsigned n_bytes,
-                                                  uvm_endianness_e endian);
+                                                  uvm_endianness_e endian,
+                                                  bit byte_addressing=0);
 
 
    // Function: check_data_width
@@ -479,7 +480,7 @@ virtual class uvm_reg_block extends uvm_object;
    // Returns the sum of all coverage models to be built in the
    // block model.
    //
-   extern virtual protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
+   extern protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
 
 
    // Function: add_coverage
@@ -1104,7 +1105,7 @@ function void uvm_reg_block::lock_model();
 
          if (n > 1) begin
             `uvm_error("UVM/REG/DUPLROOT",
-                       $sformatf("There are %0d root register models named \"%s\". This may create confusion when configuring register model components.",
+                       $sformatf("There are %0d root register models named \"%s\". The names of the root register models have to be unique",
                                  n, get_name()))
          end
       end
@@ -1529,7 +1530,7 @@ function uvm_reg_cvr_t uvm_reg_block::build_coverage(uvm_reg_cvr_t models);
    void'(uvm_reg_cvr_rsrc_db::read_by_name({"uvm_reg::", get_full_name()},
                                            "include_coverage",
                                            build_coverage, this));
-   return models;
+   return build_coverage & models;
 endfunction: build_coverage
 
 
@@ -1781,7 +1782,11 @@ endtask: writememh
 
 // create_map
 
-function uvm_reg_map uvm_reg_block::create_map(string name, uvm_reg_addr_t base_addr, int unsigned n_bytes, uvm_endianness_e endian);
+function uvm_reg_map uvm_reg_block::create_map(string name,
+                                               uvm_reg_addr_t base_addr,
+                                               int unsigned n_bytes,
+                                               uvm_endianness_e endian,
+                                               bit byte_addressing=0);
 
    uvm_reg_map  map;
 
@@ -1791,7 +1796,7 @@ function uvm_reg_map uvm_reg_block::create_map(string name, uvm_reg_addr_t base_
    end
 
    map = uvm_reg_map::type_id::create(name,,this.get_full_name());
-   map.configure(this,base_addr,n_bytes,endian);
+   map.configure(this,base_addr,n_bytes,endian,byte_addressing);
 
    this.maps[map] = 1;
    if (maps.num() == 1)
@@ -2093,12 +2098,41 @@ endfunction
 //----------------------------------
 
 // do_print
-
 function void uvm_reg_block::do_print (uvm_printer printer);
-  uvm_reg_block prnt = get_parent();
   super.do_print(printer);
-  printer.print_generic("initiator", prnt.get_type_name(), -1, convert2string());
+
+  foreach(blks[i]) begin
+     uvm_reg_block b = i;
+     uvm_object obj = b;
+     printer.print_object(obj.get_name(), obj);
+  end
+   
+  foreach(regs[i]) begin
+     uvm_reg r = i;
+     uvm_object obj = r;
+     printer.print_object(obj.get_name(), obj);
+  end
+
+  foreach(vregs[i]) begin
+     uvm_vreg r = i;
+     uvm_object obj = r;
+     printer.print_object(obj.get_name(), obj);
+  end
+
+  foreach(mems[i]) begin
+     uvm_mem m = i;
+     uvm_object obj = m;
+     printer.print_object(obj.get_name(), obj);
+  end
+
+  foreach(maps[i]) begin
+     uvm_reg_map m = i;
+     uvm_object obj = m;
+     printer.print_object(obj.get_name(), obj);
+  end
+  
 endfunction
+
 
 
 // clone
