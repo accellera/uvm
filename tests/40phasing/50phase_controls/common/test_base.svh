@@ -257,7 +257,7 @@ class test_base extends uvm_test;
 
   //Debug messages when phase started & ended
   function void phase_started( uvm_phase phase);
-    `uvm_info( phase.get_name(), $sformatf( "Phase %s() STATED ----------------------------",
+    `uvm_info( phase.get_name(), $sformatf( "Phase %s() STARTED ----------------------------",
                                    phase.get_name()), UVM_NONE);
     super.phase_started( phase );
 
