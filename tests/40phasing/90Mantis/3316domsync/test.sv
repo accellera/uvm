@@ -44,18 +44,24 @@ module test;
 
 
     task reset_phase(uvm_phase phase);
+      phase.raise_objection(this, "start reset");
       if(dodelay) #thedelay;
       `uvm_info("RESET",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
+      phase.drop_objection(this, "start reset");
     endtask
 
     task main_phase(uvm_phase phase);
+      phase.raise_objection(this, "start main");
       if(dodelay) #thedelay;
       `uvm_info("MAIN",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
+      phase.drop_objection(this, "start main");
     endtask
 
     task shutdown_phase(uvm_phase phase);
+      phase.raise_objection(this, "start shutdown");
       if(dodelay) #thedelay;
       `uvm_info("SHUTDOWN",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
+      phase.drop_objection(this, "start shutdown");
     endtask
 
     task run_phase(uvm_phase phase);
