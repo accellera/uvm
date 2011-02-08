@@ -901,8 +901,8 @@ function string uvm_object::sprint(uvm_printer printer=null);
   printer.print_object(get_name(), this);
   // backward compat with sprint knob: if used, 
   //    print that, do not call emit()
-  if (printer.knobs.sprint != "")
-    return printer.knobs.sprint;
+  if (printer.m_string != "")
+    return printer.m_string;
 
   return printer.emit();
 
