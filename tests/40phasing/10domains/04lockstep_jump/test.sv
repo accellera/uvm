@@ -205,14 +205,19 @@ module test;
       domain1.sync(domain3);
     endfunction
     task run_phase(uvm_phase phase);
+      uvm_phase reset_ph = domain3.find_by_name("reset");
       uvm_phase main_ph = domain3.find_by_name("main");
       phase.raise_objection(this,"run phase");
       #350;
       repeat (3) begin
+        // We will be in main or reset when we jump
         $display("!!!!!! JUMP TO RESET !!!!!");
         //domain3.jump_all(uvm_reset_ph);
         reset_time = $time;
-        main_ph.jump(uvm_reset_ph);
+        if(reset_ph.get_state() == UVM_PHASE_EXECUTING)
+          reset_ph.jump(uvm_reset_ph);
+        else
+          main_ph.jump(uvm_reset_ph);
         #150;
       end
       phase.drop_objection(this,"run phase");
@@ -237,7 +242,7 @@ module test;
       end
 
       reset_ph = domain3.find_by_name("reset");
-      if(reset_ph.get_run_count() != 3) begin
+      if(reset_ph.get_run_count() != 4) begin
         failed = 1;
         `uvm_error("domain3", $sformatf("Expected domain 3 to run reset 3 time, got %0d",reset_ph.get_run_count()))
       end
