@@ -485,7 +485,7 @@ function int unsigned uvm_sequence_library::select_sequence(int unsigned max);
   static int unsigned counter;
   select_sequence = counter;
   counter++;
-  if (counter > max)
+  if (counter >= max)
     counter = 0;
 endfunction
 
