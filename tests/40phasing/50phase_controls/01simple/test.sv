@@ -6,6 +6,7 @@ module top;
 class test extends test_base;
   function new(string name = "01simple", uvm_component parent = null);
     super.new(name, parent);
+    global_stop_request();
   endfunction : new
   `uvm_component_utils(test)
 

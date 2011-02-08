@@ -85,14 +85,14 @@ class top_configure_seq extends top_sequence;
   task body;
     starting_phase.raise_objection(this);
     `uvm_info( "CONFIG", $psprintf("Random traffic from %s.",
-                                 p_sequencer.get_name()), UVM_NONE);
+                                 m_sequencer.get_name()), UVM_NONE);
     for( int i = 1; i< 5; i++) begin
       delay  = $urandom_range( 1, 4); #(delay);
       `uvm_info(get_name(), $psprintf("Doing req #(%1d out of 4) ...", i),UVM_NONE);
       `uvm_do( req );
     end
     `uvm_info( "CONFIG", $psprintf("Done random traffic from %s.",
-                                 p_sequencer.get_name()), UVM_NONE);
+                                 m_sequencer.get_name()), UVM_NONE);
     starting_phase.drop_objection(this);
   endtask : body
   function void do_kill();
@@ -104,19 +104,18 @@ endclass : top_configure_seq
 // MAIN sequences
 class top_random_seq extends top_sequence;
   int unsigned delay = $urandom_range( 20, 30);
-  `uvm_sequence_utils_begin(top_random_seq, top_sequencer)
-  `uvm_sequence_utils_end
+  `uvm_object_utils(top_random_seq)
   task body;
     starting_phase.raise_objection(this);
     `uvm_info( "MAIN", $psprintf("Random traffic from %s.",
-                                 p_sequencer.get_name()), UVM_NONE);
+                                 m_sequencer.get_name()), UVM_NONE);
     for( int i = 1; i< 6; i++) begin
       #(4);
       `uvm_info(get_name(), $psprintf("Doing req #(%1d out of 5) ...", i),UVM_NONE);
       `uvm_do( req );
     end
     `uvm_info( "MAIN", $psprintf("Done random traffic from %s.",
-                                 p_sequencer.get_name()), UVM_NONE);
+                                 m_sequencer.get_name()), UVM_NONE);
     starting_phase.drop_objection(this);
   endtask : body
   function void do_kill();
@@ -127,19 +126,18 @@ endclass : top_random_seq
 
 class bot_random_seq extends bot_sequence;
   int unsigned delay = $urandom_range( 20, 30);
-  `uvm_sequence_utils_begin(bot_random_seq, bot_sequencer)
-  `uvm_sequence_utils_end
+  `uvm_object_utils(bot_random_seq)
   task body;
     starting_phase.raise_objection(this);
     `uvm_info( "MAIN", $psprintf("Random traffic from %s.",
-                                 p_sequencer.get_name()), UVM_NONE);
+                                 m_sequencer.get_name()), UVM_NONE);
     for( int i = 1; i< 7; i++) begin
       #(3);
       `uvm_info(get_name(), $psprintf("Doing req #(%1d out of 6) ...", i),UVM_NONE);
       `uvm_do( req );
     end
     `uvm_info( "MAIN", $psprintf("Done random traffic from %s.",
-                                 p_sequencer.get_name()), UVM_NONE);
+                                 m_sequencer.get_name()), UVM_NONE);
     starting_phase.drop_objection(this);
   endtask : body
   function void do_kill();
@@ -197,7 +195,7 @@ class test_base extends uvm_test;
 
     // Each bot_env belongs to a separate domain so that
     // it can jump individually.
-    this.set_phase_domain("uvm");
+    //this.set_domain(uvm_domain::get_uvm_domain());
 
   endfunction : build_phase
 
@@ -259,7 +257,7 @@ class test_base extends uvm_test;
 
   //Debug messages when phase started & ended
   function void phase_started( uvm_phase phase);
-    `uvm_info( phase.get_name(), $sformatf( "Phase %s() STATED ----------------------------",
+    `uvm_info( phase.get_name(), $sformatf( "Phase %s() STARTED ----------------------------",
                                    phase.get_name()), UVM_NONE);
     super.phase_started( phase );
 

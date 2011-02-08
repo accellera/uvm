@@ -94,8 +94,8 @@ endclass
 // This policy class is used to compare two objects of the same type.
 //
 // Provides a comp method that compares two objects of type T. The
-// class T must implement the <uvm_object::do_compare> method (or
-// utilize the `uvm_field macros). 
+// class T must provide the method "function bit compare(T rhs)",
+// similar to the <uvm_object::compare> method.
 //----------------------------------------------------------------------
 
 class uvm_class_comp #(type T=int);
@@ -112,9 +112,10 @@ endclass
 //
 // This policy class is used to convert a class object to a string.
 //
-// Provides a convert2string method that converts the built-in type, T,
-// to a string. The class T must implement the convert2string method,
-// to which this class delegates the operation.
+// Provides a convert2string method that converts an instance of type T
+// to a string. The class T must provide the method
+// "function string convert2string()",
+// similar to the <uvm_object::convert2string> method.
 //----------------------------------------------------------------------
 
 class uvm_class_converter #(type T=int);
@@ -133,7 +134,9 @@ endclass
 //
 // Provides a clone method that returns a copy of the built-in type, T.
 // The class T must implement the clone method, to which this class
-// delegates the operation.
+// delegates the operation. If T is derived from <uvm_object>, then
+// T must instead implement <uvm_object::do_copy>, either directly or
+// indirectly through use of the `uvm_field macros.
 //----------------------------------------------------------------------
 
 class uvm_class_clone #(type T=int);

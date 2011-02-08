@@ -33,13 +33,10 @@ class ubus_slave_sequencer extends uvm_sequencer #(ubus_transfer);
   // Provide implementations of virtual methods such as get_type_name and create
   `uvm_component_utils(ubus_slave_sequencer)
 
-  // new - constructor
+  
   function new (string name, uvm_component parent);
     super.new(name, parent);
-//    `uvm_update_sequence_lib_and_item(ubus_transfer)
     addr_ph_port = new("addr_ph_port", this);
-    set_phase_domain("uvm");
-    
   endfunction : new
 
 endclass : ubus_slave_sequencer

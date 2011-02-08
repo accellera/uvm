@@ -61,9 +61,6 @@
   // Base transaction object
   `include "base/uvm_transaction.svh"
 
-  // data structure for phasing, depends on report_object
-  `include "base/uvm_graph.svh"
-
   // The phase declarations
   `include "base/uvm_phases.svh"
 

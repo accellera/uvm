@@ -30,7 +30,6 @@ class passive_comp extends uvm_component;
 
   function new (string name, uvm_component parent);
     super.new(name,parent);
-    set_phase_domain("uvm");
   endfunction
 
   process pid;
@@ -62,7 +61,6 @@ class active_comp extends uvm_component;
 
   function new (string name, uvm_component parent);
     super.new(name,parent);
-    set_phase_domain("uvm");
   endfunction
 
   task main_phase(uvm_phase phase);
@@ -91,7 +89,6 @@ class test extends uvm_test;
 
    function new(string name, uvm_component parent);
       super.new(name, parent);
-      set_phase_domain("uvm");
 
       p_comp = new("p_comp", this);
       a_comp = new("a_comp", this);

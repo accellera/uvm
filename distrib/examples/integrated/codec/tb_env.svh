@@ -75,7 +75,6 @@ class tb_env extends uvm_env;
 
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
-      set_phase_domain("uvm");
    endfunction
       
 
@@ -130,7 +129,7 @@ class tb_env extends uvm_env;
    local bit m_in_shutdown = 0;
    local process pull_from_RxFIFO_thread;
    function void phase_started(uvm_phase phase);
-      string name = phase.get_phase_name();
+      string name = phase.get_name();
       
       m_in_shutdown = 0;
 
@@ -158,7 +157,7 @@ class tb_env extends uvm_env;
    
 
    function void phase_ended(uvm_phase phase);
-      case (phase.get_phase_name())
+      case (phase.get_name())
        "main":
           m_isr[TX_ISR] = 0;
        
@@ -260,7 +259,7 @@ class tb_env extends uvm_env;
    // This task is a thread that will span the main and shutdown phase
    //
    task pull_from_RxFIFO(uvm_phase phase);
-      uvm_phase shutdown_ph = phase.find_schedule("shutdown");
+      uvm_phase shutdown_ph = phase.find_by_name("shutdown");
       shutdown_ph.raise_objection(this, "Pulling data from RxFIFO");
       
       forever begin

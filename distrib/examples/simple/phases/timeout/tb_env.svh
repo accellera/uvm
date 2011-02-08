@@ -25,7 +25,6 @@ class tb_env extends uvm_env;
 
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
-      set_phase_domain("uvm");
    endfunction
 
    function void build_phase(uvm_phase phase);

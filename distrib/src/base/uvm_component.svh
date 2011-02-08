@@ -192,13 +192,13 @@ virtual class uvm_component extends uvm_report_object;
   // <build_phase>.
   //
   // All processes associated with a task-based phase are killed when the phase
-  // ends. See <uvm_phase_imp::execute> for more details.
+  // ends. See <uvm_phase::execute> for more details.
   //----------------------------------------------------------------------------
 
 
   // Function: build_phase
   //
-  // The <Pre-Defined Phases::uvm_build_ph> phase implementation method.
+  // The <Pre-Defined Phases::build_ph> phase implementation method.
   //
   // Any override should call super.build_phase(phase) to execute the automatic
   // configuration of fields registed in the component by calling 
@@ -216,7 +216,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: connect_phase
   //
-  // The <Pre-Defined Phases::uvm_connect_ph> phase implementation method.
+  // The <Pre-Defined Phases::connect_ph> phase implementation method.
   //
   // This method should never be called directly. 
 
@@ -227,7 +227,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: end_of_elaboration_phase
   //
-  // The <Pre-Defined Phases::uvm_end_of_elaboration_ph> phase implementation method.
+  // The <Pre-Defined Phases::end_of_elaboration_ph> phase implementation method.
   //
   // This method should never be called directly.
 
@@ -238,7 +238,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: start_of_simulation_phase
   //
-  // The <Pre-Defined Phases::uvm_start_of_simulation_ph> phase implementation method.
+  // The <Pre-Defined Phases::start_of_simulation_ph> phase implementation method.
   //
   // This method should never be called directly.
 
@@ -249,7 +249,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: run_phase
   //
-  // The <Pre-Defined Phases::uvm_run_ph> phase implementation method.
+  // The <Pre-Defined Phases::run_ph> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -273,7 +273,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: pre_reset_phase
   //
-  // The <Pre-Defined Phases::uvm_pre_reset_ph> phase implementation method.
+  // The <Pre-Defined Phases::pre_reset_ph> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -293,7 +293,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: reset_phase
   //
-  // The <Pre-Defined Phases::uvm_reset_ph> phase implementation method.
+  // The <Pre-Defined Phases::reset_ph> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -313,7 +313,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: post_reset_phase
   //
-  // The <Pre-Defined Phases::uvm_post_reset_ph> phase implementation method.
+  // The <Pre-Defined Phases::post_reset_ph> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -333,7 +333,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: pre_configure_phase
   //
-  // The <Pre-Defined Phases::uvm_pre_configure_ph> phase implementation method.
+  // The <Pre-Defined Phases::pre_configure_ph> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -353,7 +353,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: configure_phase
   //
-  // The <Pre-Defined Phases::uvm_configure_ph> phase implementation method.
+  // The <Pre-Defined Phases::configure_ph> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -373,7 +373,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: post_configure_phase
   //
-  // The <Pre-Defined Phases::uvm_post_configure_ph> phase implementation method.
+  // The <Pre-Defined Phases::post_configure_ph> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -393,7 +393,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: pre_main_phase
   //
-  // The <Pre-Defined Phases::uvm_pre_main_ph> phase implementation method.
+  // The <Pre-Defined Phases::pre_main_ph> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -413,7 +413,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: main_phase
   //
-  // The <Pre-Defined Phases::uvm_main_ph> phase implementation method.
+  // The <Pre-Defined Phases::main_ph> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -433,7 +433,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: post_main_phase
   //
-  // The <Pre-Defined Phases::uvm_post_main_ph> phase implementation method.
+  // The <Pre-Defined Phases::post_main_ph> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -453,7 +453,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: pre_shutdown_phase
   //
-  // The <Pre-Defined Phases::uvm_pre_shutdown_ph> phase implementation method.
+  // The <Pre-Defined Phases::pre_shutdown_ph> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -473,7 +473,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: shutdown_phase
   //
-  // The <Pre-Defined Phases::uvm_shutdown_ph> phase implementation method.
+  // The <Pre-Defined Phases::shutdown_ph> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -493,7 +493,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: post_shutdown_phase
   //
-  // The <Pre-Defined Phases::uvm_post_shutdown_ph> phase implementation method.
+  // The <Pre-Defined Phases::post_shutdown_ph> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -513,7 +513,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: extract_phase
   //
-  // The <Pre-Defined Phases::uvm_extract_ph> phase implementation method.
+  // The <Pre-Defined Phases::extract_ph> phase implementation method.
   //
   // This method should never be called directly.
 
@@ -524,7 +524,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: check_phase
   //
-  // The <Pre-Defined Phases::uvm_check_ph> phase implementation method.
+  // The <Pre-Defined Phases::check_ph> phase implementation method.
   //
   // This method should never be called directly.
 
@@ -535,7 +535,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: report_phase
   //
-  // The <Pre-Defined Phases::uvm_report_ph> phase implementation method.
+  // The <Pre-Defined Phases::report_ph> phase implementation method.
   //
   // This method should never be called directly.
 
@@ -546,17 +546,11 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: final_phase
   //
-  // The <Pre-Defined Phases::uvm_final_ph> phase implementation method.
+  // The <Pre-Defined Phases::final_ph> phase implementation method.
   //
   // This method should never be called directly.
   
   extern virtual function void final_phase(uvm_phase phase);
-
-
-  //--------------------------------------------------------------------
-  // current phase convenience API
-  //--------------------------------------------------------------------
-
 
   // Function: phase_started
   //
@@ -573,55 +567,64 @@ virtual class uvm_component extends uvm_report_object;
   // not affected when the phase ends.
   
   extern virtual function void phase_ended (uvm_phase phase);
+
   
-  // Function: find_phase_domain
-  // Return the domain name set for our uvm schedule (or another specific schedule)
-  //   schedule_name - the schedule name to return domain for - default 'uvm'
-  
-  extern function string find_phase_domain(string schedule_name="uvm_pkg::uvm");
-
-  // Function: find_phase_schedule
-  // Locate a schedule/domain pair in this component's list, "*" matches any name
-
-  extern function uvm_phase find_phase_schedule(string name, string domain);
-
-  // Function: add_phase_schedule
-  // insert a new schedule/domain entry in this component's domain membership list
-
-  extern function void add_phase_schedule(uvm_phase schedule, string domain);
-
-  // Function: delete_phase_schedule
-  // delete a schedule entry from this component's domain membership list
-
-  extern function void delete_phase_schedule(uvm_phase schedule);
-
-
   //--------------------------------------------------------------------
   // phase / schedule / domain API
   //--------------------------------------------------------------------
 
   
-  // Function: set_phase_domain
-  // Apply a phase domain to this component (by default, also to it's children)
-  // Sets up all schedule data structures in master phasing graph if a new domain.
-
-  extern virtual function void set_phase_domain(string domain_name, int hier=1);
-
-  // Function: set_phase_schedule
+  // Function: set_domain
   //
-  // Defines the phase schedule for this base type of component, adds it to the master.
+  // Apply a phase domain to this component and, if ~hier~ is set, 
+  // recursively to all its children. 
   //
-  // Here we define the structure and organization of a schedule for this component
-  // base type (uvm_component). We give that schedule a name ('uvm') and we add a named
-  // instance of the schedule (a 'domain') to the master phasing schedule graph, if it
-  // does not already exist there.
+  // Calls the virtual <define_domain> method, which derived components can
+  // override to augment or replace the domain definition of ita base class.
   //
-  // Custom component base classes requiring a custom phasing schedule to augment or
-  // replace the default UVM schedule can override this method. They can inherit the
-  // parent schedule and build on it by calling super.set_phase_schedule(domain_name)
-  // or they can create a new schedule from scratch by not calling the super method.
 
-  extern virtual function void set_phase_schedule(string domain_name);
+  extern function void set_domain(uvm_domain domain, int hier=1);
+
+
+  // Function: get_domain
+  //
+  // Return handle to the phase domain set on this component
+  
+  extern function uvm_domain get_domain();
+
+
+  // Function: define_domain
+  //
+  // Builds custom phase schedules into the provided ~domain~ handle.
+  //
+  // This method is called by <set_domain>, which integrators use to specify
+  // this component belongs in a domain apart from the default 'uvm' domain.
+  //
+  // Custom component base classes requiring a custom phasing schedule can
+  // augment or replace the domain definition they inherit by overriding
+  // <defined_domain>. To augment, overrides would call super.define_domain().
+  // To replace, overrides would not call super.define_domain().
+  // 
+  // The default implementation adds a copy of the ~uvm~ phasing schedule to
+  // the given ~domain~, if one doesn't already exist, and only if the domain
+  // is currently empty.
+  //
+  // Calling <set_domain>
+  // with the default ~uvm~ domain (see <uvm_domain::get_uvm_domain>) on
+  // a component with no ~define_domain~ override effectively reverts the
+  // that component to using the default ~uvm~ domain. This may be useful
+  //
+  // If a branch of the testbench hierarchy defines a custom domain, but
+  // some child sub-branch should remain in the default ~uvm~ domain,
+  // call <set_domain> with a new domain instance handle with ~hier~ set.
+  // Then, in the sub-branch, call <set_domain> with the default ~uvm~ domain handle,
+  // obtained via <uvm_domain::get_uvm_domain()>.
+  //
+  // Alternatively, the integrator may define the graph in a new domain externally,
+  // then call <set_domain> to apply it to a component.
+
+
+  extern virtual protected function void define_domain(uvm_domain domain);
 
 
   // Function: set_phase_imp
@@ -633,7 +636,7 @@ virtual class uvm_component extends uvm_report_object;
   // The ~hier~ specifies whether to apply the custom functor to the whole tree or
   // just this component.
 
-  extern function void set_phase_imp(uvm_phase_imp phase, uvm_phase_imp imp, int hier=1);
+  extern function void set_phase_imp(uvm_phase phase, uvm_phase imp, int hier=1);
 
   
   // Task: suspend
@@ -702,24 +705,27 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual  function void  do_kill_all ();
 
 
-  // Task: stop
+  // Task: stop_phase
   //
-  // The stop task is called when this component's <enable_stop_interrupt> bit
-  // is set and <global_stop_request> is called during a task-based phase,
+  // The stop_phase task is called when this component's <enable_stop_interrupt>
+  // bit is set and <global_stop_request> is called during a task-based phase,
   // e.g., run.
   //
   // Before a phase is abruptly ended, e.g., when a test deems the simulation
   // complete, some components may need extra time to shut down cleanly. Such
-  // components may implement stop to finish the currently executing
+  // components may implement stop_phase to finish the currently executing
   // transaction, flush the queue, or perform other cleanup. Upon return from
-  // its stop, a component signals it is ready to be stopped. 
+  // stop_phase, a component signals it is ready to be stopped. 
   //
-  // The stop method will not be called if <enable_stop_interrupt> is 0.
+  // The ~stop_phase~ method will not be called if <enable_stop_interrupt> is 0.
   //
-  // The default implementation of stop is empty, i.e., it will return immediately.
+  // The default implementation is empty, i.e., it will return immediately.
   //
   // This method should never be called directly.
 
+  extern virtual task stop_phase(uvm_phase phase);
+
+  // backward compat
   extern virtual task stop (string ph_name);
 
 
@@ -747,7 +753,6 @@ virtual class uvm_component extends uvm_report_object;
   // Users should not call directly.
 
   extern virtual function void resolve_bindings ();
-
 
 
   //----------------------------------------------------------------------------
@@ -1570,33 +1575,34 @@ virtual class uvm_component extends uvm_report_object;
   // tions are freely available via the open-source license.
   //----------------------------------------------------------------------------
 
-  // Phasing implementation
-  // Internal members for phasing process control, hierarchical schedules, functors
-  
-  string             m_phase_domains[uvm_phase]; // domain(s) we have set, per schedule
-  uvm_phase_imp      m_phase_imps[uvm_phase_imp];         // functors to override ovm_root defaults
-  uvm_phase m_current_phase;                     // the most recently executed phase
+  protected uvm_domain m_domain;    // set_domain stores our domain handle
+
+  /*protected*/ uvm_phase  m_phase_imps[uvm_phase];    // functors to override ovm_root defaults
+
+  //TND review protected, provide read-only accessor.
+  uvm_phase            m_current_phase;            // the most recently executed phase
+  protected process    m_phase_process;
+
   /*protected*/ bit  m_build_done=0;
 
-
-  extern       function void set_int_local (string field_name, 
-                               uvm_bitstream_t value,
-                               bit recurse=1);
+  extern                   function void set_int_local(string field_name, 
+                                                       uvm_bitstream_t value,
+                                                       bit recurse=1);
 
   /*protected*/ uvm_component m_parent;
-  protected uvm_component m_children[string];
-  protected uvm_component m_children_by_handle[uvm_component];
-  extern protected virtual function bit m_add_child (uvm_component child);
-  extern virtual local function void m_set_full_name ();
+  protected     uvm_component m_children[string];
+  protected     uvm_component m_children_by_handle[uvm_component];
+  extern protected virtual function bit  m_add_child(uvm_component child);
+  extern local     virtual function void m_set_full_name();
 
-  extern          function void  do_resolve_bindings ();
-  extern          function void  do_flush();
+  extern                   function void do_resolve_bindings();
+  extern                   function void do_flush();
 
-  extern virtual function void flush ();
+  extern virtual           function void flush ();
 
-  extern local function void m_extract_name(string name ,
-                                            output string leaf ,
-                                            output string remainder );
+  extern local             function void m_extract_name(string name ,
+                                                        output string leaf ,
+                                                        output string remainder );
 
   // overridden to disable
   extern virtual function uvm_object create (string name=""); 
@@ -1609,12 +1615,14 @@ virtual class uvm_component extends uvm_report_object;
               string stream_name="main", string label="",
               string desc="", time begin_time=0);
 
-  protected process m_phase_process;
-
   string m_name;
 
-  protected uvm_event_pool event_pool;
+  const static string type_name = "uvm_component";
+  virtual function string get_type_name();
+    return type_name;
+  endfunction
 
+  protected uvm_event_pool event_pool;
 
   extern virtual task restart ();
 
@@ -1678,17 +1686,14 @@ function uvm_component::new (string name, uvm_component parent);
 
   // Check that we're not in or past end_of_elaboration
   begin
-    uvm_phase common, end_of_elab;
-    common = top.find_phase_schedule("uvm_pkg::common","common");
-    if (common != null) begin
-      // only check if we have got phasing set up yet
-      end_of_elab = common.find_schedule("end_of_elaboration");
-      if (end_of_elab.get_state() == UVM_PHASE_EXECUTING ||
-          end_of_elab.get_run_count() > 0 ) begin
-        uvm_phase curr_phase;
-        uvm_report_fatal("ILLCRT", {"It is illegal to create a component once",
-                  " phasing reaches end_of_elaboration."}, UVM_NONE);
-      end
+    uvm_end_of_elaboration_phase eoe;
+    eoe = uvm_end_of_elaboration_phase::get();
+    // only check if we have got phasing set up yet
+    if (eoe.get_state() == UVM_PHASE_EXECUTING ||
+        eoe.get_run_count() > 0 ) begin
+      uvm_report_fatal("ILLCRT", {"It is illegal to create a component once",
+                                  " phasing reaches end_of_elaboration."},
+                       UVM_NONE);
     end
   end
 
@@ -1732,7 +1737,7 @@ function uvm_component::new (string name, uvm_component parent);
 
   event_pool = new("event_pool");
 
-  m_phase_domains = parent.m_phase_domains;
+  m_domain = parent.m_domain;     // by default, inherit domains from parents
   
   // Now that inst name is established, reseed (if use_uvm_seeding is set)
   reseed();
@@ -2344,46 +2349,6 @@ endfunction
 function void uvm_component::phase_ended(uvm_phase phase);
 endfunction
 
-
-// find_phase_domain
-// -----------------
-
-function string uvm_component::find_phase_domain(string schedule_name="uvm_pkg::uvm");
-  foreach (m_phase_domains[schedule])
-    if (schedule.get_schedule_name() == schedule_name)
-      return m_phase_domains[schedule];
-  uvm_report_fatal("BADDOMAIN", {"component has no '", schedule_name, "' schedule domain"});
-endfunction
-
-
-// find_phase_schedule
-// -------------------
-
-function uvm_phase uvm_component::find_phase_schedule(string name, string domain);
-  foreach (m_phase_domains[schedule])
-    if (((name == "*") || (schedule.get_schedule_name() == name)) &&
-        ((domain == "*") || (m_phase_domains[schedule] == domain)))
-      return schedule;
-  return null;
-endfunction
-
-
-// add_phase_schedule
-// ------------------
-
-function void uvm_component::add_phase_schedule(uvm_phase schedule, string domain);
-  m_phase_domains[schedule] = domain;
-endfunction
-
-
-// delete_phase_schedule
-// ---------------------
-
-function void uvm_component::delete_phase_schedule(uvm_phase schedule);
-  m_phase_domains.delete(schedule);
-endfunction
-
-
 //------------------------------
 // phase / schedule / domain API
 //------------------------------
@@ -2392,79 +2357,55 @@ endfunction
 // - a domain is a named instance of a schedule in the master phasing schedule
 
 
-// here we define the "uvm_pkg::uvm" schedule containing the UVM runtime phases
-// - and add a named instance of it to the root schedule [if not already there]
-// - and add the schedule handle to this component's domain membership list
-// [replacing any existing handles comp has to this schedule in other domains]
+// define_domain
+// -------------
 
-// components using these phases must subscribe by calling set_domain(name)
-
-// set_phase_schedule
-// ------------------
-
-function void uvm_component::set_phase_schedule(string domain_name);
-  const string schedule_name = "uvm_pkg::uvm";
-  uvm_root top;
-  uvm_phase uvm;
-  top = uvm_root::get();
-
-  // find this schedule/domain in the master schedule if it exists
-  uvm = top.find_phase_schedule(schedule_name, domain_name);
-
-  // create it and add it to master schedule if it doesn't exist
-  if (uvm == null) begin
-    uvm = new(schedule_name);
-    uvm_phase::m_has_rt_phases=1;
-    // schedule consists of a linear list of predefined phases
-    uvm.add_phase(uvm_pre_reset_ph);
-    uvm.add_phase(uvm_reset_ph);
-    uvm.add_phase(uvm_post_reset_ph);
-    uvm.add_phase(uvm_pre_configure_ph);
-    uvm.add_phase(uvm_configure_ph);
-    uvm.add_phase(uvm_post_configure_ph);
-    uvm.add_phase(uvm_pre_main_ph);
-    uvm.add_phase(uvm_main_ph);
-    uvm.add_phase(uvm_post_main_ph);
-    uvm.add_phase(uvm_pre_shutdown_ph);
-    uvm.add_phase(uvm_shutdown_ph);
-    uvm.add_phase(uvm_post_shutdown_ph);
-    // schedule is integrated hierarchically in parallel with the "run" phase
-    // of the "uvm_pkg::common" schedule, for the specified domain
-    begin
-      uvm_phase common;
-      common = top.find_phase_schedule("uvm_pkg::common","common");
-      common.add_schedule(uvm, .with_phase(common.find_schedule("run")));
-    end
-    // schedule/domain pair is added to the master list
-    top.add_phase_schedule(uvm, domain_name);
+function void uvm_component::define_domain(uvm_domain domain);
+  uvm_phase schedule;
+  //schedule = domain.find(uvm_domain::get_uvm_schedule());
+  schedule = domain.find_by_name("uvm_sched");
+  if (schedule == null) begin
+    uvm_domain common;
+    schedule = new("uvm_sched", UVM_PHASE_SCHEDULE);
+    uvm_domain::add_uvm_phases(schedule);
+    domain.add(schedule);
+    common = uvm_domain::get_common_domain();
+    if (common.find(domain,0) == null)
+      common.add(domain,.with_phase(uvm_run_phase::get()));
   end
 
-  // add schedule to this component's list, replacing any existing entry found
-  begin
-    uvm_phase any;
-    any = find_phase_schedule(schedule_name,"*");
-    if (any != null)
-      delete_phase_schedule(any);
-  end
-  add_phase_schedule(uvm, domain_name);
 endfunction
 
 
-// set_phase_domain
-// ----------------
+// set_domain
+// ----------
+// assigns this component [tree] to a domain. adds required schedules into graph
+// If called from build, ~hier~ won't recurse into all chilren (which don't exist yet)
+// If we have components inherit their parent's domain by default, then ~hier~
+// isn't needed and we need a way to prevent children from inheriting this component's domain
 
-function void uvm_component::set_phase_domain(string domain_name, int hier=1);
-  set_phase_schedule(domain_name);
+function void uvm_component::set_domain(uvm_domain domain, int hier=1);
+
+  // build and store the custom domain
+  m_domain = domain;
+  define_domain(domain);
   if (hier)
     foreach (m_children[c])
-      m_children[c].set_phase_domain(domain_name,hier);
+      m_children[c].set_domain(domain);
+endfunction
+
+// get_domain
+// ----------
+//
+function uvm_domain uvm_component::get_domain();
+  return m_domain;
 endfunction
 
 
 // set_phase_imp
 // -------------
 
-function void uvm_component::set_phase_imp(uvm_phase_imp phase, uvm_phase_imp imp, int hier=1);
+function void uvm_component::set_phase_imp(uvm_phase phase, uvm_phase imp, int hier=1);
   m_phase_imps[phase] = imp;
   if (hier)
     foreach (m_children[c])
@@ -2571,6 +2512,15 @@ endfunction
 // ----
 
 task uvm_component::stop(string ph_name);
+  return;
+endtask
+
+
+// stop_phase
+// ----------
+
+task uvm_component::stop_phase(uvm_phase phase);
+  stop(phase.get_name());
   return;
 endtask
 

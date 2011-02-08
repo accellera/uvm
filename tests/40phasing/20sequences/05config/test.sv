@@ -50,7 +50,6 @@ endclass
 class myseqr extends uvm_sequencer;
   function new(string name, uvm_component parent);
     super.new(name,parent);
-    set_phase_domain("uvm", .hier(0));
   endfunction
   `uvm_component_utils(myseqr)
 
@@ -73,11 +72,9 @@ class test extends uvm_test;
    `uvm_component_utils(test)
 
    function void build_phase(uvm_phase phase);
-      uvm_phase domain;
       myseq mseq;
 
       seqr = new("seqr", this);
-      domain = seqr.find_phase_schedule("uvm_pkg::uvm","*");
 
       uvm_config_wrapper::set(this, "seqr.configure_phase", 
 			      "default_sequence",  myseq::type_id::get());

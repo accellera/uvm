@@ -39,24 +39,29 @@ module test;
 
     function new(string name, uvm_component parent);
       super.new(name,parent);
-      set_phase_schedule("uvm");
     endfunction
 
 
 
     task reset_phase(uvm_phase phase);
+      phase.raise_objection(this, "start reset");
       if(dodelay) #thedelay;
       `uvm_info("RESET",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
+      phase.drop_objection(this, "start reset");
     endtask
 
     task main_phase(uvm_phase phase);
+      phase.raise_objection(this, "start main");
       if(dodelay) #thedelay;
       `uvm_info("MAIN",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
+      phase.drop_objection(this, "start main");
     endtask
 
     task shutdown_phase(uvm_phase phase);
+      phase.raise_objection(this, "start shutdown");
       if(dodelay) #thedelay;
       `uvm_info("SHUTDOWN",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
+      phase.drop_objection(this, "start shutdown");
     endtask
 
     task run_phase(uvm_phase phase);
@@ -93,8 +98,8 @@ module test;
     function void phase_started (uvm_phase phase);
       string pre_phase = "NONE", pre_phase2 = "NONE";
       time pre_phase_end_time=-1; 
-      `uvm_info("PHASE",$psprintf("Starting %s",phase.get_phase_name()),UVM_NONE);
-      phase_started_called[phase.get_phase_name()] = $time;
+      `uvm_info("PHASE",$psprintf("Starting %s",phase.get_name()),UVM_NONE);
+      phase_started_called[phase.get_name()] = $time;
       case(phase.get_name())
         // Common phases
         "build": begin pre_phase = "NONE"; end
@@ -137,8 +142,8 @@ module test;
     endfunction
 
     function void phase_ended (uvm_phase phase);
-      phase_ended_called[phase.get_phase_name()] = $time;
-      `uvm_info("PHASE",$psprintf("Ending %s",phase.get_phase_name()),UVM_NONE);
+      phase_ended_called[phase.get_name()] = $time;
+      `uvm_info("PHASE",$psprintf("Ending %s",phase.get_name()),UVM_NONE);
     endfunction
   endclass
 
@@ -148,14 +153,18 @@ module test;
     hier dom1, dom2;
     `uvm_component_utils(test)
     function new(string name, uvm_component parent);
+      uvm_domain domain1, domain2;
       super.new(name,parent);
       thedelay = 0 ;
       dom1 = new("dom1", this);
       dom2 = new("dom2", this);
       dom2.leaf1.thedelay = 75 ;
       dom2.leaf2.thedelay = 50 ;
-      dom1.set_phase_domain("domain1");
-      dom2.set_phase_domain("domain2");
+      domain1 = new("domain1");
+      domain2 = new("domain2");
+      dom1.set_domain(domain1);
+      dom2.set_domain(domain2);
+      global_stop_request();
     endfunction
 
     function void final_phase(uvm_phase phase);

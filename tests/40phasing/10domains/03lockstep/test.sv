@@ -17,9 +17,9 @@
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
 
-// This test creates a simple hierarchy and makes sure that phases
-// start at the correct time. The env has no delays in it so all
-// phase processed in the env end immediately.
+// This test creates a simple hierarchy where three leaf cells belong
+// to three different domains. The environment puts the three
+// domains into lockstep to make sure they are phased together.
 
 module test;
   import uvm_pkg::*;
@@ -29,11 +29,13 @@ module test;
   bit phase_run[uvm_phase];
 
   class base extends uvm_component;
-    bit dodelay=1;
+    time localdelay = 100;
+    time domaindelay = 300;
+
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    function void build_phase(uvm_phase phase);
+    function void build;
       phase_run[uvm_build_ph] = 1;
       `uvm_info("BUILD", "Starting Build", UVM_NONE)
       if($time != 0)  begin
@@ -50,7 +52,7 @@ module test;
         failed = 1;
         `uvm_error("RESET", "Expected Reset start time of 0")
       end
-      if(dodelay) #100;
+      #localdelay;
       `uvm_info("RESET", "Ending Reset", UVM_NONE)
       phase.drop_objection(this);
     endtask
@@ -58,12 +60,24 @@ module test;
       phase.raise_objection(this);
       phase_run[uvm_main_ph] = 1;
       `uvm_info("MAIN", "Starting Main", UVM_NONE)
-      if($time != 100)  begin
+      if($time != domaindelay)  begin
         failed = 1;
-        `uvm_error("MAIN", "Expected Main start time of 0")
+        `uvm_error("MAIN", $sformatf("Expected Main start time of %0t",domaindelay))
       end
-      if(dodelay) #100;
+      #localdelay;
       `uvm_info("MAIN", "Ending Main", UVM_NONE)
+      phase.drop_objection(this);
+    endtask
+    task shutdown_phase(uvm_phase phase);
+      phase.raise_objection(this);
+      phase_run[uvm_shutdown_ph] = 1;
+      `uvm_info("SHUTDOWN", "Starting Shutdown", UVM_NONE)
+      if($time != (2*domaindelay))  begin
+        failed = 1;
+        `uvm_error("SHUTDOWN", $sformatf("Expected Shutdown start time of %0t",2*domaindelay))
+      end
+      #localdelay;
+      `uvm_info("SHUTDOWN", "Ending Shutdown", UVM_NONE)
       phase.drop_objection(this);
     endtask
     task run_phase(uvm_phase phase);
@@ -74,16 +88,16 @@ module test;
         failed = 1;
         `uvm_error("RUN", "Expected Run start time of 0")
       end
-      if(dodelay) #1000;
+      #(5*localdelay);
       `uvm_info("RUN", "Ending Run", UVM_NONE)
       phase.drop_objection(this);
     endtask
-    function void extract_phase(uvm_phase phase);
+    function void extract;
       phase_run[uvm_extract_ph] = 1;
       `uvm_info("EXTRACT", "Starting Extract", UVM_NONE)
-      if($time != 1000)  begin
+      if($time != 5*domaindelay)  begin
         failed = 1;
-        `uvm_error("extract", "Expected extract start time of 1000")
+        `uvm_error("extract", $sformatf("Expected extract start time of %0t",5*domaindelay))
       end
       `uvm_info("EXTRACT", "Ending Extract", UVM_NONE)
     endfunction
@@ -95,17 +109,35 @@ module test;
     endfunction
   endclass
   class test extends base;
-    leaf l1, l2; 
+    leaf l1, l2, l3; 
+    uvm_domain domain1=new("domain1"), domain2=new("domain2"), domain3=new("domain3");
+
     `uvm_component_utils(test)
     function new(string name, uvm_component parent);
       super.new(name,parent);
       l1 = new("l1", this);
       l2 = new("l2", this);
-      dodelay = 0;
+      l3 = new("l3", this);
+      l3.localdelay = 250;
+      l1.localdelay = l1.domaindelay;
+      set_domain(domain1);
+      //l1.set_domain(domain1);
+      l2.set_domain(domain2);
+      l3.set_domain(domain3);
+
+      //Lockstep the domains
+      l2.domaindelay = l1.domaindelay;
+      l3.domaindelay = l1.domaindelay;
+      domain1.sync(domain2);
+      domain1.sync(domain3);
     endfunction
-    function void report_phase(uvm_phase phase);
+//    task run_phase(uvm_phase phase);
+//      phase.raise_objection(this);
+//      phase.drop_objection(this);
+//    endtask
+    function void report();
       phase_run[uvm_report_ph] = 1;
-      if(phase_run.num() != 6) begin
+      if(phase_run.num() != 7) begin
         failed = 1;
         `uvm_error("NUMPHASES", $sformatf("Expected 6 phases, got %0d", phase_run.num()))
       end

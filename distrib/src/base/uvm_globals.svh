@@ -347,22 +347,15 @@ task uvm_wait_for_nba_region;
 
   string s;
 
-  bit nba;
-  bit nba_scheduled;
+  int nba;
+  int next_nba;
 
   //If `included directly in a program block, can't use a non-blocking assign,
   //but it isn't needed since program blocks are in a seperate region.
 `ifndef UVM_NO_WAIT_FOR_NBA
-  if (nba_scheduled == 0) begin
-    nba_scheduled = 1; 
-    nba = 0;
-    nba <= 1;
-    @(posedge nba)
-      nba_scheduled = 0;
-  end
-  else begin
-    @(posedge nba);
-  end
+  next_nba++;
+  nba <= next_nba;
+  @(nba);
 `else
   repeat(`UVM_POUND_ZERO_COUNT) #0;
 `endif
