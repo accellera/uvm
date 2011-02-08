@@ -43,5 +43,6 @@ module test;
     e = ep.get("george");
     uvm_default_table_printer.knobs.reference = 0;
     ep.print();
+    $display("UVM TEST PASSED");
   end
 endmodule
