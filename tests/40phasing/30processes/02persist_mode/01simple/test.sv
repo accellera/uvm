@@ -37,7 +37,6 @@ class low extends uvm_component;
 
    function new(string name = "my_comp", uvm_component parent = null);
       super.new(name, parent);
-      set_phase_domain("uvm");
    endfunction
 
    bit reset_activated = 0; 
@@ -80,7 +79,6 @@ class sub extends uvm_component;
    `uvm_component_utils(sub)   
    function new(string name = "sub1", uvm_component parent = null);
       super.new(name, parent);    
-      set_phase_domain("uvm");
    endfunction
 
    function void phase_started(uvm_phase phase);

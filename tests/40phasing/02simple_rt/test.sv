@@ -26,13 +26,12 @@ module test;
   `include "uvm_macros.svh"
 
   bit failed = 0;
-  bit phase_run[uvm_phase_imp];
+  bit phase_run[uvm_phase];
 
   class base extends uvm_component;
     bit dodelay=1;
     function new(string name, uvm_component parent);
       super.new(name,parent);
-      set_phase_schedule("uvm");
     endfunction
     function void build_phase(uvm_phase phase);
       phase_run[uvm_build_ph] = 1;

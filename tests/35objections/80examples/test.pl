@@ -1,1 +1,1 @@
-return &make_example("$uvm_home/examples/objections");
+return &make_example("$uvm_home/examples/simple/objections");

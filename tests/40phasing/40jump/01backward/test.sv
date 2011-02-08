@@ -63,7 +63,6 @@ class test extends phasing_test;
     predicted_phasing.push_back("common/check");
     predicted_phasing.push_back("common/report");
     predicted_phasing.push_back("common/final");
-    set_phase_domain("uvm");
     first_time_around=1;
   endfunction
 

@@ -60,10 +60,6 @@ module test;
       super.new(name,parent);
     endfunction
 
-    function void connect();
-      set_phase_domain("uvm");
-    endfunction
-
     task reset_phase(uvm_phase phase);
       phase.raise_objection(this);
       start_reset = $time;
@@ -95,33 +91,28 @@ module test;
     time start_my_cfg;
     time end_my_cfg;
 
-    uvm_phase my_sched;
-
     function new(string name, uvm_component parent);
       super.new(name,parent);
       delay = 30ns;
     endfunction
 
     function void connect();
-      set_phase_domain("uvm");
+      set_domain(uvm_domain::get_uvm_domain());
     endfunction
 
     // The component needs to override teh set_phase_schedule to add
     // the new schedule.
-    function void set_phase_schedule(string domain_name);
-      uvm_phase new_phase;
-      super.set_phase_schedule(domain_name);
-      my_sched = find_phase_schedule("uvm_pkg::uvm", domain_name);
+    function void define_domain(uvm_domain domain);
+      uvm_phase sched;
+      sched = domain.find_by_name("uvm_sched");
 
-      assert(my_sched != null);
+      assert(sched != null);
 
       //Add the new phase if needed
-      new_phase = my_sched.find_schedule("my_cfg");
-      if(new_phase == null) begin
-        my_sched.add_phase(my_cfg_phase::get(),
-                           .after_phase(my_sched.find_schedule("pre_configure")),
-                           .before_phase(my_sched.find_schedule("configure")));
-      end
+      if (sched.find(my_cfg_phase::get()) == null)
+        sched.add(my_cfg_phase::get(),
+                  .after_phase(uvm_pre_configure_phase::get()),
+                  .before_phase(uvm_configure_phase::get()));
     endfunction
 
     task cfg_phase(uvm_phase phase);
@@ -146,6 +137,7 @@ module test;
     task run_phase(uvm_phase phase);
       `uvm_info("RUN", "In run", UVM_NONE)
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
+      global_stop_request();
     endtask
   endclass
 

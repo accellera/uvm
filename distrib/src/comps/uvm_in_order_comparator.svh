@@ -40,26 +40,24 @@
 //
 //   T       - Specifies the type of transactions to be compared.
 //
-//   comp    - The type of the comparator to be used to compare the two
-//             transaction streams.
+//   comp_type - A policy class to compare the two
+//               transaction streams. It must provide the method
+//               "function bit comp(T a, T b)" which returns ~TRUE~
+//               if ~a~ and ~b~ are the same.
 //
-//   convert - A policy class to allow convert2string() to be called on the
-//             transactions being compared. If T is an extension of
-//             uvm_transaction, then it uses T::convert2string(). If T is a
-//             built-in type, then the policy provides a convert2string()
-//             method for the comparator to call. 
+//   convert - A policy class to convert the transactions being compared
+//             to a string. It must provide the method
+//             "function string convert2string(T a)".
 //
 //  pair_type - A policy class to allow pairs of transactions to be handled as
-//             a single uvm_transaction type.
+//              a single <uvm_object> type.
 //
 // Built in types (such as ints, bits, logic, and structs) can be compared using
 // the default values for comp_type, convert, and pair_type. For convenience,
 // you can use the subtype, <uvm_in_order_built_in_comparator #(T)> 
 // for built-in types.
 //
-// When T is a class, T must implement comp and convert2string, and you must
-// specify class-based policy classes for comp_type, convert, and pair_type.
-// In most cases, you can use the convenient subtype,
+// When T is a <uvm_object>, you can use the convenience subtype
 // <uvm_in_order_class_comparator #(T)>.
 //
 // Comparisons are commutative, meaning it does not matter which data stream is
@@ -235,7 +233,7 @@ endclass
 //
 // This class uses the uvm_class_* comparison, converter, and pair classes.
 // Use this class for comparing user-defined objects of type T, which must
-// provide implementations of comp and convert2string.
+// provide compare() and convert2string() method.
 //
 //------------------------------------------------------------------------------
 

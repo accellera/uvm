@@ -16,21 +16,19 @@ class top_item extends uvm_sequence_item;
 endclass : top_item
 
 class top_sequencer extends uvm_sequencer #(top_item);
-  `uvm_sequencer_utils_begin(top_sequencer)
-  `uvm_sequencer_utils_end
+  `uvm_component_utils(top_sequencer)
 
   // new - constructor
   function new (string name="top_sequencer", uvm_component parent);
     super.new(name, parent);
-    `uvm_update_sequence_lib_and_item(top_item);
     count = 0;
   endfunction : new
 endclass : top_sequencer
 
 class top_sequence extends uvm_sequence #(top_item);
-  `uvm_sequence_utils_begin(top_sequence, top_sequencer)
+  `uvm_object_utils_begin(top_sequence)
     `uvm_field_object ( req, UVM_ALL_ON )
-  `uvm_sequence_utils_end
+  `uvm_object_utils_end
 
 endclass : top_sequence
 

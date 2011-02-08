@@ -34,7 +34,7 @@
 // type parameters, T1 and T2.
 //-----------------------------------------------------------------------------
 
-class uvm_class_pair #(type T1=int, T2=T1) extends uvm_transaction;
+class uvm_class_pair #(type T1=int, T2=T1) extends uvm_object;
 
   typedef uvm_class_pair #(T1, T2 ) this_type;
 
@@ -42,14 +42,22 @@ class uvm_class_pair #(type T1=int, T2=T1) extends uvm_transaction;
   
   const static string type_name = "uvm_class_pair #(T1,T2)";
 
+// Variable: T1 first
+//
+// The handle to the first object in the pair
+
   T1 first;
+
+// Variable: T2 second
+//
+// The second variable in the pair
+
   T2 second;
 
   // Function: new
   //
-  // Creates an instance of uvm_pair that holds a handle to two objects,
-  // as provided by the first two arguments. The optional ~name~ argument
-  // gives a name to the new pair object.
+  // Creates an instance of uvm_pair that holds two built-in type values.
+  // The optional name argument gives a name to the new pair object.
 
   function new (string name="", T1 f=null, T2 s=null);
 

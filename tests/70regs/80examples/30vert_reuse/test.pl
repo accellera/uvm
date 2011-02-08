@@ -1,1 +1,1 @@
-return &make_example("$uvm_home/examples/registers/vertical_reuse");
+return &make_example("$uvm_home/examples/simple/registers/vertical_reuse");

@@ -58,7 +58,6 @@ class test extends uvm_test;
 
    function new(string name = "my_comp", uvm_component parent = null);
       super.new(name, parent);
-      set_phase_domain("uvm");
    endfunction
 
    function void build_phase(uvm_phase phase);
@@ -79,7 +78,6 @@ class test extends uvm_test;
    
    task run_phase(uvm_phase phase);
       check_the_phase_t("start_of_simulation", "run", phase);
-      //global_stop_request();
    endtask
    
    task pre_reset_phase(uvm_phase phase);

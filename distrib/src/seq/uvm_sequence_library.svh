@@ -181,7 +181,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    //
    // Extensions may place additional constraints on this variable.
    //
-   randc bit [31:0] select_randc;
+   randc bit [15:0] select_randc;
 
 
 
@@ -485,7 +485,7 @@ function int unsigned uvm_sequence_library::select_sequence(int unsigned max);
   static int unsigned counter;
   select_sequence = counter;
   counter++;
-  if (counter > max)
+  if (counter >= max)
     counter = 0;
 endfunction
 
