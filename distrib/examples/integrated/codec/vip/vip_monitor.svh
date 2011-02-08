@@ -104,7 +104,8 @@ class vip_monitor extends uvm_monitor;
          fork
             begin
                bit [7:0] symbol;
-               uvm_process p = new(process::self()); 
+               uvm_process p;
+               p = new(process::self()); 
                m_proc.push_back(p);
 
                forever begin

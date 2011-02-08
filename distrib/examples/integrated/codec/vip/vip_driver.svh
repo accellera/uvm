@@ -121,7 +121,8 @@ class vip_driver extends uvm_driver#(vip_tr);
 
          fork
             begin
-               uvm_process p = new(process::self());
+               uvm_process p;
+               p = new(process::self());
                m_proc.push_back(p);
 
                forever begin
