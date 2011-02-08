@@ -3,12 +3,12 @@
 
 module top;
   import uvm_pkg::*;
-//`include "../common/common.svh"
+`include "common.svh"
 
-//class test extends test_base;
-class test extends uvm_component;
+class test extends test_base;
   function new(string name = "02killing", uvm_component parent = null);
     super.new(name, parent);
+    global_stop_request();
   endfunction : new
 
   `uvm_component_utils(test)
@@ -17,7 +17,7 @@ class test extends uvm_component;
     #20;
     `uvm_info( "KILLING_MAIN", $psprintf("Killing current phase: %s",
                                       phase.get_name()), UVM_NONE);
-    phase.kill();
+    phase.phase_done.clear();
 
   endtask : main_phase
 
@@ -54,6 +54,7 @@ class test extends uvm_component;
                                          e_brs_c, "bottom_random_seq", brs_c));
     end
   endfunction : check_phase
+
 
 endclass : test
 
