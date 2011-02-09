@@ -190,7 +190,7 @@ module test;
       #10;
       if(first) begin
         first = 0;
-        phase.jump (uvm_reset_ph);
+        phase.jump (uvm_reset_phase::get());
       end
       phase.drop_objection(this);
     endtask

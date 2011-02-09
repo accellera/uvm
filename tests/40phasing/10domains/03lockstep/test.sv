@@ -36,7 +36,7 @@ module test;
       super.new(name,parent);
     endfunction
     function void build;
-      phase_run[uvm_build_ph] = 1;
+      phase_run[uvm_build_phase::get()] = 1;
       `uvm_info("BUILD", "Starting Build", UVM_NONE)
       if($time != 0)  begin
         failed = 1;
@@ -46,7 +46,7 @@ module test;
     endfunction
     task reset_phase(uvm_phase phase);
       phase.raise_objection(this);
-      phase_run[uvm_reset_ph] = 1;
+      phase_run[uvm_reset_phase::get()] = 1;
       `uvm_info("RESET", "Starting Reset", UVM_NONE)
       if($time != 0)  begin
         failed = 1;
@@ -58,7 +58,7 @@ module test;
     endtask
     task main_phase(uvm_phase phase);
       phase.raise_objection(this);
-      phase_run[uvm_main_ph] = 1;
+      phase_run[uvm_main_phase::get()] = 1;
       `uvm_info("MAIN", "Starting Main", UVM_NONE)
       if($time != domaindelay)  begin
         failed = 1;
@@ -70,7 +70,7 @@ module test;
     endtask
     task shutdown_phase(uvm_phase phase);
       phase.raise_objection(this);
-      phase_run[uvm_shutdown_ph] = 1;
+      phase_run[uvm_shutdown_phase::get()] = 1;
       `uvm_info("SHUTDOWN", "Starting Shutdown", UVM_NONE)
       if($time != (2*domaindelay))  begin
         failed = 1;
@@ -82,7 +82,7 @@ module test;
     endtask
     task run_phase(uvm_phase phase);
       phase.raise_objection(this);
-      phase_run[uvm_run_ph] = 1;
+      phase_run[uvm_run_phase::get()] = 1;
       `uvm_info("RUN", "Starting Run", UVM_NONE)
       if($time != 0)  begin
         failed = 1;
@@ -93,7 +93,7 @@ module test;
       phase.drop_objection(this);
     endtask
     function void extract;
-      phase_run[uvm_extract_ph] = 1;
+      phase_run[uvm_extract_phase::get()] = 1;
       `uvm_info("EXTRACT", "Starting Extract", UVM_NONE)
       if($time != 5*domaindelay)  begin
         failed = 1;
@@ -136,7 +136,7 @@ module test;
 //      phase.drop_objection(this);
 //    endtask
     function void report();
-      phase_run[uvm_report_ph] = 1;
+      phase_run[uvm_report_phase::get()] = 1;
       if(phase_run.num() != 7) begin
         failed = 1;
         `uvm_error("NUMPHASES", $sformatf("Expected 6 phases, got %0d", phase_run.num()))

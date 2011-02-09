@@ -59,16 +59,16 @@ module test;
     endtask
     function void phase_started(uvm_phase phase);
       case (1)
-        phase.is(uvm_reset_ph): start_reset = $time;
-        phase.is(uvm_main_ph): start_main = $time;
-        phase.is(uvm_shutdown_ph): start_shutdown = $time;
+        phase.is(uvm_reset_phase::get()): start_reset = $time;
+        phase.is(uvm_main_phase::get()): start_main = $time;
+        phase.is(uvm_shutdown_phase::get()): start_shutdown = $time;
       endcase
     endfunction
     function void phase_ended(uvm_phase phase);
       case (1)
-        phase.is(uvm_reset_ph): end_reset = $time;
-        phase.is(uvm_main_ph): end_main = $time;
-        phase.is(uvm_shutdown_ph): end_shutdown = $time;
+        phase.is(uvm_reset_phase::get()): end_reset = $time;
+        phase.is(uvm_main_phase::get()): end_main = $time;
+        phase.is(uvm_shutdown_phase::get()): end_shutdown = $time;
       endcase
     endfunction
   endclass
@@ -87,7 +87,7 @@ module test;
       l2.set_domain(domain2);
 
       //Sync domain2 start of main with domain1 start of post_reset_ph
-      domain1.sync(domain2, uvm_main_ph, uvm_post_reset_ph);
+      domain1.sync(domain2, uvm_main_phase::get(), uvm_post_reset_phase::get());
     endfunction
 
     // This needs to be fixed. Right now it is needed.

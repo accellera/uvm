@@ -38,7 +38,7 @@ module test;
       super.new(name,parent);
     endfunction
     function void build_phase(uvm_phase phase);
-      phase_run[uvm_build_ph] = 1;
+      phase_run[uvm_build_phase::get()] = 1;
       `uvm_info("BUILD", "Starting Build", UVM_NONE)
       if($time != 0)  begin
         failed = 1;
@@ -48,7 +48,7 @@ module test;
     endfunction
     task reset_phase(uvm_phase phase);
       phase.raise_objection(this);
-      phase_run[uvm_reset_ph] = 1;
+      phase_run[uvm_reset_phase::get()] = 1;
       `uvm_info("RESET", "Starting Reset", UVM_NONE)
       if($time != 0)  begin
         failed = 1;
@@ -60,7 +60,7 @@ module test;
     endtask
     task main_phase(uvm_phase phase);
       phase.raise_objection(this);
-      phase_run[uvm_main_ph] = 1;
+      phase_run[uvm_main_phase::get()] = 1;
       `uvm_info("MAIN", "Starting Main", UVM_NONE)
       // Even though there is not configure phase, the test is holding
       // up the configure phase.
@@ -74,7 +74,7 @@ module test;
     endtask
     task shutdown_phase(uvm_phase phase);
       phase.raise_objection(this);
-      phase_run[uvm_shutdown_ph] = 1;
+      phase_run[uvm_shutdown_phase::get()] = 1;
       `uvm_info("SHUTDOWN", "Starting Shutdown", UVM_NONE)
       // Even though there is not configure phase, the test is holding
       // up the configure phase.
@@ -88,7 +88,7 @@ module test;
     endtask
     task run_phase(uvm_phase phase);
       phase.raise_objection(this);
-      phase_run[uvm_run_ph] = 1;
+      phase_run[uvm_run_phase::get()] = 1;
       `uvm_info("RUN", "Starting Run", UVM_NONE)
       if($time != 0)  begin
         failed = 1;
@@ -99,7 +99,7 @@ module test;
       phase.drop_objection(this);
     endtask
     function void extract_phase(uvm_phase phase);
-      phase_run[uvm_extract_ph] = 1;
+      phase_run[uvm_extract_phase::get()] = 1;
       `uvm_info("EXTRACT", "Starting Extract", UVM_NONE)
       if($time != 3*phase_transition_time)  begin
         failed = 1;
@@ -182,7 +182,7 @@ module test;
     endtask
 
     function void report_phase(uvm_phase phase);
-      phase_run[uvm_report_ph] = 1;
+      phase_run[uvm_report_phase::get()] = 1;
       if(start_cnt != 3) begin
         failed = 1;
         `uvm_error("NUMSTART", $sformatf("Expected 3 phases to start but got %0d", start_cnt))
