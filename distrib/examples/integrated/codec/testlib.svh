@@ -35,7 +35,7 @@ class hw_reset_test extends test;
          repeat (100 * 8) @(posedge env.vif.sclk);
          // This will clear the objection
          `uvm_info("TEST", "Jumping back to reset phase", UVM_NONE);
-         phase.jump(uvm_pkg::uvm_reset_ph);
+         phase.jump(uvm_pkg::uvm_reset_phase::get());
       end
    endtask
    
