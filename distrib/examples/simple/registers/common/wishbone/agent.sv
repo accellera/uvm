@@ -32,8 +32,6 @@ endclass
 
 class wb_agent extends uvm_agent;
 
-   uvm_active_passive_enum is_active;
-
    wb_driver     drv;
    // wb_monitor   mon;
    wb_sequencer seqr;
@@ -43,12 +41,11 @@ class wb_agent extends uvm_agent;
 
    function new(string name = "", uvm_component parent = null);
       super.new(name, parent);
-      is_active = UVM_ACTIVE;
    endfunction
 
    virtual function void build_phase(uvm_phase phase);
       // mon  = wb_monitor::type_id::create("mon", this);
-      if (this.is_active == UVM_ACTIVE) begin
+      if get_is_active() == UVM_ACTIVE) begin
          drv  = wb_driver::type_id::create("drv", this);
          seqr = wb_sequencer::type_id::create("seqr", this);
       end
