@@ -1780,7 +1780,7 @@ endfunction
 function bit uvm_phase::is_before(uvm_phase phase);
   //$display("this=%s is before phase=%s?",get_name(),phase.get_name());
   // TODO: add support for 'stay_in_scope=1' functionality
-  return (m_find_successor(phase,0,this) != null);
+  return (!is(phase) && m_find_successor(phase,0,this) != null);
 endfunction
 
 
@@ -1790,7 +1790,7 @@ endfunction
 function bit uvm_phase::is_after(uvm_phase phase);
   //$display("this=%s is after phase=%s?",get_name(),phase.get_name());
   // TODO: add support for 'stay_in_scope=1' functionality
-  return (m_find_predecessor(phase,0,this) != null);
+  return (!is(phase) && m_find_predecessor(phase,0,this) != null);
 endfunction
 
 

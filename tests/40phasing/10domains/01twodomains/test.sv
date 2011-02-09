@@ -25,7 +25,7 @@
 `define TASK(NAME,DELAY,STARTTIME) \
     task NAME``_phase(uvm_phase phase); \
       phase.raise_objection(this,`"start NAME`"); \
-      phase_run[uvm_``NAME``_ph] = 1; \
+      phase_run[uvm_``NAME``_phase::get()] = 1; \
       `uvm_info(`"NAME`", `"Starting NAME`", UVM_NONE) \
       if($time != STARTTIME)  begin \
         failed = 1; \
@@ -59,7 +59,7 @@ module test;
 
     function void extract_phase(uvm_phase phase);
       if (get_name() == "l1") return;
-      phase_run[uvm_extract_ph] = 1;
+      phase_run[uvm_extract_phase::get()] = 1;
       `uvm_info("EXTRACT", "Starting Extract", UVM_NONE)
       if($time != maxdelay)  begin
         failed = 1;
@@ -92,7 +92,7 @@ module test;
       l2.set_domain(domain2);
     endfunction
     function void report_phase(uvm_phase phase);
-      phase_run[uvm_report_ph] = 1;
+      phase_run[uvm_report_phase::get()] = 1;
       if(phase_run.num() != 6) begin
         failed = 1;
         `uvm_error("NUMPHASES", $sformatf("Expected 6 phases, got %0d", phase_run.num()))

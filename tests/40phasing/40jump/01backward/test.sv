@@ -71,7 +71,7 @@ class test extends phasing_test;
     //phase.raise_objection(this);
     if (first_time_around) begin
       first_time_around = 0;
-      phase.jump(uvm_pkg::uvm_reset_ph);
+      phase.jump(uvm_reset_phase::get());
     end
     //phase.drop_objection(this);
   endtask

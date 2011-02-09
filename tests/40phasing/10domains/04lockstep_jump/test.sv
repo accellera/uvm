@@ -40,7 +40,7 @@ module test;
       super.new(name,parent);
     endfunction
     function void build_phase(uvm_phase phase);
-      phase_run[uvm_build_ph] = 1;
+      phase_run[uvm_build_phase::get()] = 1;
       `uvm_info("BUILD", "Starting Build", UVM_NONE)
       if($time != 0)  begin
         failed = 1;
@@ -50,7 +50,7 @@ module test;
     endfunction
     task reset_phase(uvm_phase phase);
       phase.raise_objection(this,"reset phase");
-      phase_run[uvm_reset_ph] = 1;
+      phase_run[uvm_reset_phase::get()] = 1;
       `uvm_info("RESET", "Starting Reset", UVM_NONE)
       if($time != 0)  begin
         failed = 1;
@@ -62,7 +62,7 @@ module test;
     endtask
     task main_phase(uvm_phase phase);
       phase.raise_objection(this,"main phase");
-      phase_run[uvm_main_ph] = 1;
+      phase_run[uvm_main_phase::get()] = 1;
       `uvm_info("MAIN", "Starting Main", UVM_NONE)
       if($time != domaindelay)  begin
         failed = 1;
@@ -74,7 +74,7 @@ module test;
     endtask
     task shutdown_phase(uvm_phase phase);
       phase.raise_objection(this,"shutdown phase");
-      phase_run[uvm_shutdown_ph] = 1;
+      phase_run[uvm_shutdown_phase::get()] = 1;
       `uvm_info("SHUTDOWN", "Starting Shutdown", UVM_NONE)
       if($time != shutdown_time)  begin
         failed = 1;
@@ -86,7 +86,7 @@ module test;
     endtask
     task run_phase(uvm_phase phase);
       phase.raise_objection(this,"run phase");
-      phase_run[uvm_run_ph] = 1;
+      phase_run[uvm_run_phase::get()] = 1;
       `uvm_info("RUN", "Starting Run", UVM_NONE)
       if($time != 0)  begin
         failed = 1;
@@ -97,7 +97,7 @@ module test;
       phase.drop_objection(this,"run phase");
     endtask
     function void extract_phase(uvm_phase phase);
-      phase_run[uvm_extract_ph] = 1;
+      phase_run[uvm_extract_phase::get()] = 1;
       `uvm_info("EXTRACT", "Starting Extract", UVM_NONE)
       if($time != 5*domaindelay)  begin
         failed = 1;
@@ -117,7 +117,7 @@ module test;
       super.new(name,parent);
     endfunction
     function void build_phase(uvm_phase phase);
-      phase_run[uvm_build_ph] = 1;
+      phase_run[uvm_build_phase::get()] = 1;
       `uvm_info("BUILD", "Starting Build", UVM_NONE)
       if($time != 0)  begin
         failed = 1;
@@ -132,7 +132,7 @@ module test;
       was_reset = phase.get_run_count() == 1 ? 0 : 1;
 
       $display("RUN COUNT: %0d", phase.get_run_count());
-      phase_run[uvm_reset_ph] = 1;
+      phase_run[uvm_reset_phase::get()] = 1;
       `uvm_info("RESET", "Starting Reset", UVM_NONE)
       if($time != reset_time)  begin
         failed = 1;
@@ -146,7 +146,7 @@ module test;
       time expdelay;
       was_reset = phase.get_run_count() == 1 ? 0 : 1;
       phase.raise_objection(this,"main phase");
-      phase_run[uvm_main_ph] = 1;
+      phase_run[uvm_main_phase::get()] = 1;
       `uvm_info("MAIN", "Starting Main", UVM_NONE)
       if(was_reset) expdelay = reset_time + localdelay;
       else expdelay = domaindelay;
@@ -162,7 +162,7 @@ module test;
     endtask
     task shutdown_phase(uvm_phase phase);
       phase.raise_objection(this,"shutdown phase");
-      phase_run[uvm_shutdown_ph] = 1;
+      phase_run[uvm_shutdown_phase::get()] = 1;
       `uvm_info("SHUTDOWN", "Starting Shutdown", UVM_NONE)
       if($time != shutdown_time)  begin
         failed = 1;
@@ -215,9 +215,9 @@ module test;
         //domain3.jump_all(uvm_reset_ph);
         reset_time = $time;
         if(reset_ph.get_state() == UVM_PHASE_EXECUTING)
-          reset_ph.jump(uvm_reset_ph);
+          reset_ph.jump(uvm_reset_phase::get());
         else
-          main_ph.jump(uvm_reset_ph);
+          main_ph.jump(uvm_reset_phase::get());
         #150;
       end
       phase.drop_objection(this,"run phase");
@@ -225,7 +225,7 @@ module test;
 
     function void report_phase(uvm_phase phase);
       uvm_phase reset_ph;
-      phase_run[uvm_report_ph] = 1;
+      phase_run[uvm_report_phase::get()] = 1;
 
       //Check that each domain executed the reset phase the correct
       //number of times.

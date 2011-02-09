@@ -46,7 +46,7 @@ class test extends phasing_test;
     predicted_phasing.push_back("uvm/pre_main");
     predicted_phasing.push_back("uvm/main");
 
-                          // jump(uvm_pkg::check_ph)
+                          // jump(uvm_check_phase::get())
                           // (skipped) "uvm/post_main",
                           // (skipped) "uvm/pre_shutdown",
                           // (skipped) "uvm/shutdown",
@@ -60,7 +60,7 @@ class test extends phasing_test;
 
   task main_phase(uvm_phase phase);
     super.main_phase(phase);
-    phase.jump(uvm_pkg::uvm_check_ph);
+    phase.jump(uvm_check_phase::get());
   endtask
 
 endclass
