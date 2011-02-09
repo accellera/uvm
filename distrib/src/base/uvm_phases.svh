@@ -1013,9 +1013,9 @@ class uvm_phase extends uvm_object;
   //
   // Summary of usage:
   //| target::sync(.source(domain)
-  //|              [,.phase(phase)[,.with/after/before_phase(phase)]]);
+  //|              [,.phase(phase)[,.with_phase(phase)]]);
   //| target::unsync(.source(domain)
-  //|                [,.phase(phase)[,.with/after/before_phase(phase)]]);
+  //|                [,.phase(phase)[,.with_phase(phase)]]);
   //
   // Components in different schedule domains can be phased independently or in sync
   // with each other. An API is provided to specify synchronization rules between any
@@ -1026,10 +1026,8 @@ class uvm_phase extends uvm_object;
   // - or a more detailed arbitrary synchronization between any two phases
   //
   // Each kind of synchronization causes the same underlying data structures to
-  // be managed. Like other APIs, we use the parameter dot-notation to allow
-  // optional parameters and specify relationships using the keywords 'before'
-  // to specify a successor, or 'after' to specify a predecessor, or 'with' to
-  // specify parallel.
+  // be managed. Like other APIs, we use the parameter dot-notation to set
+  // optional parameters.
   //
   // When a domain is synced with another domain, all of the matching phases in
   // the two domains get a 'with' relationship between them. Likewise, if a domain
@@ -1044,8 +1042,10 @@ class uvm_phase extends uvm_object;
   // Synchronize two domains, fully or partially
   //
   //   target       - handle of target domain to synchronize this one to
-  //   phase        - optional single phase to synchronize, otherwise all
-  //   with_phase   - optional different target-domain phase to synchronize with
+  //   phase        - optional single phase in this domain to synchronize, 
+  //                  otherwise sync all
+  //   with_phase   - optional different target-domain phase to synchronize with,
+  //                  otherwise use ~phase~ in the target domain
   //
   extern function void sync(uvm_domain target,
                             uvm_phase phase=null,
@@ -1056,8 +1056,10 @@ class uvm_phase extends uvm_object;
   // Remove synchronization between two domains, fully or partially
   //
   //   target       - handle of target domain to remove synchronization from
-  //   phase        - optional single phase to un-synchronize, otherwise all
-  //   with_phase   - optional different target-domain phase to un-synchronize with
+  //   phase        - optional single phase in this domain to un-synchronize, 
+  //                  otherwise unsync all
+  //   with_phase   - optional different target-domain phase to un-synchronize with,
+  //                  otherwise use ~phase~ in the target domain
   //
   extern function void unsync(uvm_domain target,
                               uvm_phase phase=null,

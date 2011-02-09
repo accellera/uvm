@@ -452,7 +452,7 @@ endfunction
 
 function void uvm_sequencer_base::build_phase(uvm_phase phase);
   int dummy;
-  super.build();
+  super.build_phase(phase);
   `ifndef UVM_NO_DEPRECATED
   // deprecated parameters for sequencer. Use uvm_sequence_library class
   // for sequence library functionality.
