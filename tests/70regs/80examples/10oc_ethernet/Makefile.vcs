@@ -19,18 +19,20 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../../..
 
-include ../../../Makefile.vcs
+UVM_HOME	= ../../../../distrib
 
+OC_DIR = $(UVM_HOME)/../test/70regs/common/oc_ethernet_rtl
+
+include $(UVM_HOME)/examples/Makefile.vcs
 
 all: comp uvm_reg_mem_built_in_seq
 
 comp:
-	$(VCS) +incdir+../common/wishbone \
+	$(VCS) +incdir+$(UVM_HOME)/examples/simple/registers/common/wishbone \
 		+define+SINGLE_RAM_VARIABLE+RAM128x64 \
-		+incdir+../common/oc_ethernet_rtl \
-		-F ../common/oc_ethernet_rtl/rtl_file_list.lst \
+		+incdir+$(OC_DIR) \
+		-F $(OC_DIR)/rtl_file_list.lst \
 		+verilog1995ext+.v \
 		tb_top.sv tb_env.sv
 

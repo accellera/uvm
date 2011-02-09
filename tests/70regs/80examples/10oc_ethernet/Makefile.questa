@@ -19,19 +19,22 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../../..
-USES_DPI = 1
+UVM_HOME	= ../../../../distrib
 
-include ../../../Makefile.questa
+include $(UVM_HOME)/examples/Makefile.questa
+
+OC_DIR = $(UVM_HOME)/../tests/70regs/common/oc_ethernet_rtl
+
+USES_DPI = 1
 
 
 all: prepare comp uvm_reg_mem_built_in_seq
 
 comp: prepare
-	$(VLOG) +incdir+../common/wishbone \
+	$(VLOG) +incdir+$(UVM_HOME)/examples/simple/registers/common/wishbone \
 		+define+SINGLE_RAM_VARIABLE+RAM128x64 \
-		+incdir+../common/oc_ethernet_rtl \
-		-f ../common/oc_ethernet_rtl/rtl_file_list2.lst \
+		+incdir+$(OC_DIR) \
+		-f $(OC_DIR)/rtl_file_list2.lst \
 		tb_top.sv \
                 tb_env.sv
 
