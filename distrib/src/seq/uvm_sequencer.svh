@@ -197,6 +197,30 @@ endtask
 // -------------
 
 task uvm_sequencer::try_next_item(output REQ t);
+  int selected_sequence;
+
+  if (get_next_item_called == 1) begin
+    uvm_report_error(get_full_name(), "get_next_item/try_next_item called twice without item_done or get in between", UVM_NONE);
+    return;
+  end
+    
+  wait_for_sequences();
+  selected_sequence = m_choose_next_request();
+  if (selected_sequence == -1) begin
+    t = null;
+    return;
+  end
+
+  m_set_arbitration_completed(arb_sequence_q[selected_sequence].request_id);
+  arb_sequence_q.delete(selected_sequence);
+  m_update_lists();
+  sequence_item_requested = 1;
+  get_next_item_called = 1;
+  m_req_fifo.peek(t);
+endtask
+
+/*
+task uvm_sequencer::try_next_item(output REQ t);
   wait_for_sequences();
   if (has_do_available() == 0) begin
     t = null;
@@ -204,6 +228,7 @@ task uvm_sequencer::try_next_item(output REQ t);
   end
   get_next_item(t);
 endtask
+*/
 
 
 

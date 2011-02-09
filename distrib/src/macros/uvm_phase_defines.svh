@@ -50,7 +50,7 @@
             end \
             return m_inst; \
           endfunction \
-          function new(string name=`"PHASE`"); \
+          `_local function new(string name=`"PHASE`"); \
             super.new(name); \
           endfunction \
           virtual function string get_type_name(); \
