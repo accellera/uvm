@@ -206,7 +206,6 @@ module test;
       oc = new("oc", this);
     endfunction
     function void connect_phase(uvm_phase phase);
-      my_cfg_phase mc_imp = new;
 `ifdef UVM_USE_P_FORMAT
       $display("cfg_imp=%p",cfg_imp);
 `endif
