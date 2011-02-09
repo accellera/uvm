@@ -45,7 +45,7 @@ class wb_agent extends uvm_agent;
 
    virtual function void build_phase(uvm_phase phase);
       // mon  = wb_monitor::type_id::create("mon", this);
-      if get_is_active() == UVM_ACTIVE) begin
+      if(get_is_active() == UVM_ACTIVE) begin
          drv  = wb_driver::type_id::create("drv", this);
          seqr = wb_sequencer::type_id::create("seqr", this);
       end
