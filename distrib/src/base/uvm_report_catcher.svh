@@ -587,9 +587,9 @@ virtual class uvm_report_catcher extends uvm_callback;
   
   local static function void f_display(UVM_FILE file, string str);
     if (file == 0)
-      $display(str);
+      $display("%s", str);
     else
-      $fdisplay(file, str);
+      $fdisplay(file, "%s", str);
   endfunction
 
   // Function: summarize_report_catcher

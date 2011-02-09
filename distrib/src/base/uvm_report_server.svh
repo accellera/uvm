@@ -230,9 +230,9 @@ class uvm_report_server extends uvm_object;
 
   function void f_display(UVM_FILE file, string str);
     if (file == 0)
-      $display(str);
+      $display("%s", str);
     else
-      $fdisplay(file, str);
+      $fdisplay(file, "%s", str);
   endfunction
 
 
