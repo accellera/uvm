@@ -199,6 +199,7 @@ endtask
 task uvm_sequencer::try_next_item(output REQ t);
   int selected_sequence;
   time arb_time;
+  uvm_sequence_base seq;
 
   if (get_next_item_called == 1) begin
     uvm_report_error(get_full_name(), "get_next_item/try_next_item called twice without item_done or get in between", UVM_NONE);
@@ -220,6 +221,7 @@ task uvm_sequencer::try_next_item(output REQ t);
 
   // now, allow chosen sequence to resume
   m_set_arbitration_completed(arb_sequence_q[selected_sequence].request_id);
+  seq = arb_sequence_q[selected_sequence].sequence_ptr;
   arb_sequence_q.delete(selected_sequence);
   m_update_lists();
   sequence_item_requested = 1;
@@ -230,11 +232,10 @@ task uvm_sequencer::try_next_item(output REQ t);
 
   // attempt to get the item; if it fails, produce an error and return
   if (!m_req_fifo.try_peek(t))
-  $display("%p %p",arb_sequence_q[selected_sequence],
-                arb_sequence_q[selected_sequence].sequence_ptr);
-    uvm_report_error(get_full_name(), {"try_next_item: selected sequence '",
-      arb_sequence_q[selected_sequence].sequence_ptr.get_full_name(),
-      "' did not produce an item within an nba delay"}, UVM_NONE);
+    uvm_report_error("TRY_NEXT_BLOCKED", {"try_next_item: the selected sequence '",
+      seq.get_full_name(), "' did not produce an item within an NBA delay. ",
+      "Sequences should not consume time between calls to start_item and finish_item. ",
+      "Returning null item."}, UVM_NONE);
 
 endtask
 
