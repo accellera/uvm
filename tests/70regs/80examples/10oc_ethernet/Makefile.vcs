@@ -22,7 +22,7 @@
 
 UVM_HOME	= ../../../../distrib
 
-OC_DIR = $(UVM_HOME)/../test/70regs/common/oc_ethernet_rtl
+OC_DIR = $(UVM_HOME)/../tests/70regs/common/oc_ethernet_rtl
 
 include $(UVM_HOME)/examples/Makefile.vcs
 
