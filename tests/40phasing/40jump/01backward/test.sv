@@ -47,6 +47,8 @@ class test extends phasing_test;
     predicted_phasing.push_back("uvm/main");
 
                           // jump(reset_ph)
+    predicted_jumps.push_back("main->reset");
+
     predicted_phasing.push_back("uvm/reset");
     predicted_phasing.push_back("uvm/post_reset");
     predicted_phasing.push_back("uvm/pre_configure");
@@ -85,6 +87,18 @@ class phasing_test extends uvm_test;
   static string predicted_phasing[$]; // ordered list of DOMAIN/PHASE strings to check against
   static string audited_phasing[$]; // ordered list of DOMAIN/PHASE strings to check against
 
+  static string predicted_jumps[$];
+  static string audited_jumps[$];
+
+  static bit pass = 1;
+
+  function void phase_ended(uvm_phase phase);
+     uvm_phase goto = phase.get_jump_target();
+     if (goto != null) begin
+        audited_jumps.push_back({phase.get_name(),"->",goto.get_name()});
+     end
+  endfunction
+   
   function void audit(string item="");
     if (item != "") begin
       audited_phasing.push_back(item);
@@ -115,8 +129,31 @@ class phasing_test extends uvm_test;
       audited = (i >= audited_phasing.size()) ? "" : audited_phasing[i];
       if (predicted == audited)
         $display("  | %-27s | %-27s |     match", predicted, audited);
-      else
+      else begin
         $display("  | %-27s | %-27s | <<< MISMATCH", predicted, audited);
+        pass = 0;
+      end
+    end
+    $display("  +-----------------------------+-----------------------------+");
+
+
+    $display("");
+    $display("Checking jumps:");
+    $display("  +-----------------------------+-----------------------------+");
+    $display("  | Predicted Jump              | Actual Jump                 |");
+    $display("  +-----------------------------+-----------------------------+");
+    n_phases = predicted_jumps.size();
+    if (audited_jumps.size() > n_phases) n_phases = audited_jumps.size();
+    for (int i=0; (i < n_phases); i++) begin
+      string predicted, audited;
+      predicted = (i >= predicted_jumps.size()) ? "" : predicted_jumps[i];
+      audited = (i >= audited_jumps.size()) ? "" : audited_jumps[i];
+      if (predicted == audited)
+        $display("  | %-27s | %-27s |     match", predicted, audited);
+      else begin
+        $display("  | %-27s | %-27s | <<< MISMATCH", predicted, audited);
+         pass = 0;
+      end
     end
     $display("  +-----------------------------+-----------------------------+");
   endfunction
@@ -154,8 +191,9 @@ initial begin
     uvm_report_server svr;
     svr = _global_reporter.get_report_server();
     svr.summarize();
-    if (svr.get_severity_count(UVM_FATAL) +
-        svr.get_severity_count(UVM_ERROR) == 0)
+    if (phasing_test::pass &&
+        (svr.get_severity_count(UVM_FATAL) +
+         svr.get_severity_count(UVM_ERROR) == 0))
       $write("** UVM TEST PASSED **\n");
     else
       $write("!! UVM TEST FAILED !!\n");

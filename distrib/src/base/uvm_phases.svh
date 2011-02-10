@@ -1985,6 +1985,14 @@ task uvm_phase::execute_phase();
   // satisfied preventing deadlocks.
   // GSA TBD insert new jump support
   if(m_jump_fwd || m_jump_bkwd) begin
+  // execute 'phase_ended' callbacks
+     if (m_phase_trace)
+        `uvm_info("PH_END", $psprintf("JUMPING OUT OF PHASE %0s (in schedule %0s, domain %s)",
+                                      this.get_name(),this.get_schedule_name(), get_domain_name()), UVM_HIGH);
+     m_state = UVM_PHASE_ENDED;
+     if (m_imp != null)
+        m_imp.traverse(top,this,UVM_PHASE_ENDED);
+
     //kill_successors();
     #0; // LET ANY WAITERS ON READY_TO_END TO WAKE UP
     if (m_phase_proc != null) begin
