@@ -41,12 +41,12 @@
 //   T       - Specifies the type of transactions to be compared.
 //
 //   comp_type - A policy class to compare the two
-//               transaction streams. It must provide the method
+//               transaction streams. It must provide the static method
 //               "function bit comp(T a, T b)" which returns ~TRUE~
 //               if ~a~ and ~b~ are the same.
 //
 //   convert - A policy class to convert the transactions being compared
-//             to a string. It must provide the method
+//             to a string. It must provide the static method
 //             "function string convert2string(T a)".
 //
 //  pair_type - A policy class to allow pairs of transactions to be handled as
