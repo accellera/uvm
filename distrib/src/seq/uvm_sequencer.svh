@@ -198,38 +198,45 @@ endtask
 
 task uvm_sequencer::try_next_item(output REQ t);
   int selected_sequence;
+  time arb_time;
 
   if (get_next_item_called == 1) begin
     uvm_report_error(get_full_name(), "get_next_item/try_next_item called twice without item_done or get in between", UVM_NONE);
     return;
   end
     
+  // allow state from last transaction to settle such that sequences'
+  // relevancy can be determined with up-to-date information
   wait_for_sequences();
+
+  // choose the sequence based on relevancy
   selected_sequence = m_choose_next_request();
+
+  // return if none available
   if (selected_sequence == -1) begin
     t = null;
     return;
   end
 
+  // now, allow chosen sequence to resume
   m_set_arbitration_completed(arb_sequence_q[selected_sequence].request_id);
   arb_sequence_q.delete(selected_sequence);
   m_update_lists();
   sequence_item_requested = 1;
   get_next_item_called = 1;
-  m_req_fifo.peek(t);
-endtask
 
-/*
-task uvm_sequencer::try_next_item(output REQ t);
+  // give it one NBA to put a new item in the fifo
   wait_for_sequences();
-  if (has_do_available() == 0) begin
-    t = null;
-    return;
-  end
-  get_next_item(t);
-endtask
-*/
 
+  // attempt to get the item; if it fails, produce an error and return
+  if (!m_req_fifo.try_peek(t))
+  $display("%p %p",arb_sequence_q[selected_sequence],
+                arb_sequence_q[selected_sequence].sequence_ptr);
+    uvm_report_error(get_full_name(), {"try_next_item: selected sequence '",
+      arb_sequence_q[selected_sequence].sequence_ptr.get_full_name(),
+      "' did not produce an item within an nba delay"}, UVM_NONE);
+
+endtask
 
 
 // item_done

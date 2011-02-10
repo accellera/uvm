@@ -1191,6 +1191,7 @@ class uvm_phase extends uvm_object;
   local uvm_phase_state    m_state;
   local int                m_run_count; // num times this phase has executed
   local process            m_phase_proc;
+  int                      m_num_procs_not_yet_returned;
   extern function uvm_phase m_find_predecessor(uvm_phase phase, bit stay_in_scope=1, uvm_phase orig_phase=null);
   extern function uvm_phase m_find_successor(uvm_phase phase, bit stay_in_scope=1, uvm_phase orig_phase=null);
   extern function uvm_phase m_find_predecessor_by_name(string name, bit stay_in_scope=1, uvm_phase orig_phase=null);
@@ -1909,7 +1910,6 @@ task uvm_phase::execute_phase();
         end
       join_none
 
-      wait (task_phase.m_procs_not_yet_started == 0);
       uvm_wait_for_nba_region(); //Give sequences, etc. a chance to object
 
       // Now wait for one of three criterion for end-of-phase.
@@ -1934,7 +1934,7 @@ task uvm_phase::execute_phase();
            // EXIT CRITERIA 2: RUN PHASE ONLY - +plusarg, all run_phase tasks return, and no objections
            begin
                if (m_exit_on_task_return && m_imp.get_name() == "run") begin
-                 wait (task_phase.m_num_procs_not_yet_returned == 0);
+                 wait (m_num_procs_not_yet_returned == 0);
                  if (phase_done.get_objection_total() != 0)
                    wait (0);
                    `uvm_info("PH_EXIT-2", $psprintf("PHASE EXIT CRITERIA %0s (in schedule %0s, domain %s) %0d",
@@ -2776,8 +2776,6 @@ endclass
 
 virtual class uvm_task_phase extends uvm_phase;
 
-  int m_procs_not_yet_started;
-  int m_num_procs_not_yet_returned;
 
   // Function: new
   //
@@ -2798,8 +2796,7 @@ virtual class uvm_task_phase extends uvm_phase;
   virtual function void traverse(uvm_component comp,
                                  uvm_phase phase,
                                  uvm_phase_state state);
-    m_procs_not_yet_started = 0;
-    m_num_procs_not_yet_returned = 0;
+    phase.m_num_procs_not_yet_returned = 0;
     m_traverse(comp, phase, state);
   endfunction
 
@@ -2853,25 +2850,18 @@ virtual class uvm_task_phase extends uvm_phase;
   protected virtual function void execute(uvm_component comp,
                                           uvm_phase phase);
 
-    m_procs_not_yet_started++;
-
     fork
       begin
         uvm_sequencer_base seqr;
         
-        m_procs_not_yet_started--;
-        m_num_procs_not_yet_returned++;
-
-        // hold back everybody until all reach this point; a kind of barrier
-        wait(m_procs_not_yet_started==0);
+        phase.m_num_procs_not_yet_returned++;
 
         if ($cast(seqr,comp))
           seqr.start_phase_sequence(phase);
 
-        // execute the task for this component
         exec_task(comp,phase);
 
-        m_num_procs_not_yet_returned--;
+        phase.m_num_procs_not_yet_returned--;
 
       end
     join_none
