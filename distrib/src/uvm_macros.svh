@@ -30,6 +30,7 @@
 `define UVM_USE_P_FORMAT
 `define UVM_USE_FILE_LINE
 `define UVM_DA_TO_QUEUE(Q,DA) Q=DA;
+`define _local local
 
 //
 // Any vendor specific defines go here.
@@ -52,6 +53,10 @@
   `ifndef INCA_PROTECTED_CTOR
     `undef _protected
     `define _protected 
+  `endif
+  `ifndef INCA_LOCAL_CTOR
+    `undef _local
+    `define _local 
   `endif
   `ifndef INCA_UVM_USE_FPC
     `undef  UVM_USE_FPC

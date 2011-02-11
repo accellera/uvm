@@ -157,6 +157,16 @@ class tb_env extends uvm_env;
    
 
    function void phase_ended(uvm_phase phase);
+      uvm_phase goto = phase.get_jump_target();
+
+      // This environment supports jump to RESET *only*
+      if (goto != null) begin
+         if (goto.get_name() != "reset") begin
+            `uvm_fatal("ENV/BADJMP", $sformatf("Environment does not support jumping to phase %s from phase %s. Only jumping to \"reset\" is supported",
+                                               goto.get_name(), phase.get_name()))
+         end
+      end
+      
       case (phase.get_name())
        "main":
           m_isr[TX_ISR] = 0;

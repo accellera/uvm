@@ -230,9 +230,9 @@ class uvm_report_server extends uvm_object;
 
   function void f_display(UVM_FILE file, string str);
     if (file == 0)
-      $display(str);
+      $display("%s", str);
     else
-      $fdisplay(file, str);
+      $fdisplay(file, "%s", str);
   endfunction
 
 
@@ -326,9 +326,19 @@ class uvm_report_server extends uvm_object;
     if(action & UVM_DISPLAY)
       $display("%s",composed_message);
 
+    // if log is set we need to send to the file but not resend to the
+    // display. So, we need to mask off stdout for an mcd or we need
+    // to ignore the stdout file handle for a file handle.
     if(action & UVM_LOG)
-      if(file != 0 || !(action & UVM_DISPLAY)) // don't display twice
-        $fdisplay(file, "%s", composed_message);
+      if( (file == 0) || (file != 32'h8000_0001) ) //ignore stdout handle
+      begin
+        UVM_FILE tmp_file = file;
+        if( (file&32'h8000_0000) == 0) //is an mcd so mask off stdout
+        begin
+           tmp_file = file & 32'hffff_fffe;
+        end
+        f_display(tmp_file,composed_message);
+      end    
 
     if(action & UVM_EXIT) client.die();
 

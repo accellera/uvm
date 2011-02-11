@@ -190,7 +190,7 @@ module test;
       #10;
       if(first) begin
         first = 0;
-        phase.jump (uvm_reset_ph);
+        phase.jump (uvm_reset_phase::get());
       end
       phase.drop_objection(this);
     endtask
@@ -204,8 +204,8 @@ module test;
       //    phase_ended: 84 for STARTED, 81 for ENDED
       // But, the ENDED callbacks for *this* final phase won't have been counted yet.
       // So we expect 84 for STARTED (fully counted, because it is a bottom-up phase),
-      // and 78 for ENDED => 162
-      if(counter != 162) begin
+      // and 81 for ENDED => 165
+      if(counter != 165) begin
         failed = 1;
         `uvm_error("NUMPHASES", $sformatf("Expected 162 phases, got %0d", counter))
       end
