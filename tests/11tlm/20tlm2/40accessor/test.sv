@@ -50,11 +50,19 @@ class test extends uvm_test;
      
       obj.m_address           = 'hF00D;
       obj.m_command           = UVM_TLM_WRITE_COMMAND;
-      obj.m_data              = new [3] ('{2, 3, 4});
+      begin
+	byte unsigned x[3]='{2,3,4};
+        obj.m_data=x;
+      end 
+      // obj.m_data              = new [3] ('{2, 3, 4});
       obj.m_length            = 3;
       obj.m_response_status   = UVM_TLM_INCOMPLETE_RESPONSE;
       obj.m_dmi               = 0; //NYI
-      obj.m_byte_enable       = new [3] ('{1, 0, 1});
+      begin
+	byte unsigned  x[3]='{1,0,1};
+	obj.m_byte_enable=x;
+      end
+      //obj.m_byte_enable       = new [3] ('{1, 0, 1});
       obj.m_byte_enable_length= obj.m_length;
       obj.m_streaming_width   = obj.m_length; 
 
@@ -130,7 +138,11 @@ class test extends uvm_test;
       if(UVM_TLM_BYTE_ENABLE_ERROR_RESPONSE !=  obj.m_response_status   ) begin
          `uvm_error("TEST", "set_response_status");
       end
-      da = new[4] ('{2, 3, 4, 5});
+      //da = new[4] ('{2, 3, 4, 5});
+begin
+	byte unsigned x[4]='{2,3,4,5};
+	da=x;
+end
       obj.set_data(da);
       foreach (obj.m_data[i])
 	if (da[i] !=	obj.m_data[i] ) begin
@@ -145,7 +157,12 @@ class test extends uvm_test;
           `uvm_error("TEST", "set_streaming_width");
      end
 
-      be = new [4] ('{0,1, 0,1});
+//      be = new [4] ('{0,1, 0,1});
+begin
+byte unsigned x[4]='{0,1,0,1};
+be=x;
+end
+
       obj.set_byte_enable(be);
       foreach (obj.m_byte_enable[i])
 	if (be[i]!= obj.m_byte_enable[i]    ) begin
