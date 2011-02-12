@@ -714,9 +714,11 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
   // Remove the instance-specific extension bound under the specified key.
    
   function void clear_extension(uvm_tlm_extension_base ext_handle);
-    if(!m_extensions.exists(ext_handle))
-      return;
-    m_extensions.delete(ext_handle);
+    if(m_extensions.exists(ext_handle))
+      m_extensions.delete(ext_handle);
+    else
+      `uvm_info("GP_EXT", $sformatf("Unable to find extension to clear"), UVM_MEDIUM);
+
   endfunction: clear_extension
 
   // Function: clear_extensions
