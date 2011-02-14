@@ -1130,6 +1130,62 @@
              `uvm_print_sarray_object3(ARG, __m_uvm_status_container.printer, FLAG) \
           end \
         end \
+      UVM_SETINT: \
+        begin \
+          string s; \
+          if(!((FLAG)&UVM_READONLY)) begin \
+            foreach(ARG[i]) begin \
+              $swrite(s,`"ARG[%0d]`",i); \
+              __m_uvm_status_container.scope.set_arg(s); \
+              if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \
+                if (__m_uvm_status_container.print_matches) \
+                  uvm_report_info("STRMTC", {"set_object()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg()}, UVM_LOW); \
+                if($cast(ARG[i],uvm_object::__m_uvm_status_container.object)) \
+                  uvm_object::__m_uvm_status_container.status = 1; \
+              end \
+              else if(ARG[i]!=null && !((FLAG)&UVM_REFERENCE)) begin \
+                int cnt; \
+                //Only traverse if there is a possible match. \
+                for(cnt=0; cnt<str__.len(); ++cnt) begin \
+                  if(str__[cnt] == "." || str__[cnt] == "*") break; \
+                end \
+                if(cnt!=str__.len()) begin \
+                  __m_uvm_status_container.scope.down(s); \
+                  ARG[i].__m_uvm_field_automation(null, UVM_SETINT, str__); \
+                  __m_uvm_status_container.scope.up(); \
+                end \
+              end \
+            end \
+          end \
+        end \
+      UVM_SETSTR: \
+        begin \
+          string s; \
+          if(!((FLAG)&UVM_READONLY)) begin \
+            foreach(ARG[i]) begin \
+              $swrite(s,`"ARG[%0d]`",i); \
+              __m_uvm_status_container.scope.set_arg(s); \
+              if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \
+                if (__m_uvm_status_container.print_matches) \
+                  uvm_report_info("STRMTC", {"set_object()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg()}, UVM_LOW); \
+                if($cast(ARG[i],uvm_object::__m_uvm_status_container.object)) \
+                  uvm_object::__m_uvm_status_container.status = 1; \
+              end \
+              else if(ARG[i]!=null && !((FLAG)&UVM_REFERENCE)) begin \
+                int cnt; \
+                //Only traverse if there is a possible match. \
+                for(cnt=0; cnt<str__.len(); ++cnt) begin \
+                  if(str__[cnt] == "." || str__[cnt] == "*") break; \
+                end \
+                if(cnt!=str__.len()) begin \
+                  __m_uvm_status_container.scope.down(s); \
+                  ARG[i].__m_uvm_field_automation(null, UVM_SETSTR, str__); \
+                  __m_uvm_status_container.scope.up(); \
+                end \
+              end \
+            end \
+          end \
+        end \
       UVM_SETOBJ: \
         begin \
           string s; \
