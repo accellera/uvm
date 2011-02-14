@@ -57,7 +57,7 @@ class ubus_example_base_test extends uvm_test;
 
   task run_phase(uvm_phase phase);
     //set a drain-time for the environment if desired
-    uvm_test_done.set_drain_time(this, 50);
+    phase.phase_done.set_drain_time(this, 50);
   endtask : run_phase
 
   function void extract_phase(uvm_phase phase);
@@ -155,12 +155,12 @@ class test_2m_4s extends ubus_example_base_test;
     uvm_config_db#(int)::set(this,"ubus_example_tb0.ubus0.masters[1].sequencer.loop_read_modify_write_seq", "itr", 4);
 
      // Define the sequences to run in the run phase
-    uvm_config_db#(uvm_object_wrapper)::set(this,"*.ubus0.masters[0].sequencer.run_phase", 
+    uvm_config_db#(uvm_object_wrapper)::set(this,"*.ubus0.masters[0].sequencer.main_phase", 
 			       "default_sequence",
 				loop_read_modify_write_seq::type_id::get());
      lrmw_seq = loop_read_modify_write_seq::type_id::create("loop_seq");
     uvm_config_db#(uvm_sequence_base)::set(this,
-			       "ubus_example_tb0.ubus0.masters[1].sequencer.run_phase", 
+			       "ubus_example_tb0.ubus0.masters[1].sequencer.main_phase", 
 			       "default_sequence",
 				lrmw_seq);
 

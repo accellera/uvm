@@ -33,15 +33,24 @@ typedef ext2 ext2_ext;
 typedef ext3 ext3_ext;
 
 class ext1 extends uvm_tlm_extension#(ext1_ext);
-   `uvm_object_utils(ext1)
+   byte a;
+   `uvm_object_utils_begin(ext1)      
+     `uvm_field_int(a, UVM_DEFAULT)
+   `uvm_object_utils_end
 endclass
 
 class ext2 extends uvm_tlm_extension#(ext2_ext);
-   `uvm_object_utils(ext2)
+   byte b;
+   `uvm_object_utils_begin(ext2)      
+     `uvm_field_int(b, UVM_DEFAULT)
+   `uvm_object_utils_end
 endclass
 
 class ext3 extends uvm_tlm_extension#(ext3_ext);
-   `uvm_object_utils(ext3)
+   byte c;
+   `uvm_object_utils_begin(ext3)      
+     `uvm_field_int(c, UVM_DEFAULT)
+   `uvm_object_utils_end
 endclass
 
 class ext3x extends ext3;
@@ -51,15 +60,25 @@ endclass
 `else
 
 class ext1 extends uvm_tlm_extension#(ext1);
-   `uvm_object_utils(ext1)
+ byte a;
+   `uvm_object_utils_begin(ext1)      
+     `uvm_field_int(a, UVM_DEFAULT)
+   `uvm_object_utils_end
+
 endclass
 
 class ext2 extends uvm_tlm_extension#(ext2);
-   `uvm_object_utils(ext2)
+   byte b;
+   `uvm_object_utils_begin(ext2)      
+     `uvm_field_int(b, UVM_DEFAULT)
+   `uvm_object_utils_end
 endclass
 
 class ext3 extends uvm_tlm_extension#(ext3);
-   `uvm_object_utils(ext3)
+ byte c;
+   `uvm_object_utils_begin(ext3)      
+     `uvm_field_int(c, UVM_DEFAULT)
+   `uvm_object_utils_end
 endclass
 
 class ext3x extends ext3;
@@ -77,7 +96,7 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
       uvm_tlm_gp gp1 = new;
       uvm_tlm_gp gp2 = new;
       uvm_tlm_gp gp3;
@@ -91,10 +110,12 @@ class test extends uvm_test;
 
       gp1.set_extension(x1);
       if (gp1.get_num_extensions() != 1) begin
-         `uvm_error("TEST", $psprintf("Number of GP1 extensions reported as %0d instead of 1", gp1.get_num_extensions()));
+         `uvm_error("TEST", $psprintf("Number of GP1 extensions reported as %0d instead of 1", 
+				      gp1.get_num_extensions()));
       end
       if (gp2.get_num_extensions() != 0) begin
-         `uvm_error("TEST", $psprintf("Number of GP2 extensions reported as %0d instead of 0", gp2.get_num_extensions()));
+         `uvm_error("TEST", $psprintf("Number of GP2 extensions reported as %0d instead of 0", 
+				      gp2.get_num_extensions()));
       end
       gp2.set_extension(x3);
 
@@ -161,6 +182,13 @@ class test extends uvm_test;
       if (y3 == x3) begin
          `uvm_error("TEST", "GP3 did not deep-copy EXT3 instance");
       end
+      gp1.print();
+
+     gp1.clear_extensions();
+      if (gp1.get_num_extensions() != 0) begin
+         `uvm_error("TEST", $psprintf("Number of GP1 extensions reported as %0d instead of 0", 
+				      gp1.get_num_extensions()));
+      end
 
       gp3.print();
 
@@ -173,8 +201,6 @@ class test extends uvm_test;
       $write("** UVM TEST %sED **\n", (pass) ? "PASS" : "FAIL");
    endfunction
 endclass
-
-
 
 initial
 begin

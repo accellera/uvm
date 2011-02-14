@@ -1,5 +1,6 @@
 //----------------------------------------------------------------------
 //   Copyright 2010 Mentor Graphics Corporation
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -46,11 +47,11 @@ class producer extends uvm_component;
     enable_stop_interrupt = 1;
   endfunction
 
-  function void build();
-    initiator_socket = new("initator_socket", this);
+  function void build_phase(uvm_phase phase);
+     initiator_socket = new("initator_socket", this);
   endfunction
 
-  task run();
+  task run_phase(uvm_phase phase);
 
     int unsigned i;
     uvm_tlm_time delay = new;
@@ -58,12 +59,11 @@ class producer extends uvm_component;
 
     for(i = 0; i < 10; i++) begin
       t = generate_transaction();
-      uvm_report_info("producer", t.convert2string());
+      $display("producer", t.convert2string());
       initiator_socket.b_transport(t, delay);
     end
 
     done = 1;
-
   endtask
 
   task stop(string ph_name);
@@ -73,7 +73,7 @@ class producer extends uvm_component;
   //--------------------------------------------------------------------
   // generate_transaction
   //
-  // generat a new, randomized transaction
+  // generate a new, randomized transaction
   //--------------------------------------------------------------------
   function trans generate_transaction();
 
@@ -113,8 +113,8 @@ class consumer extends uvm_component;
     transaction_count = 0;
   endfunction
 
-  function void build();
-    target_socket = new("target_socket", this, this);
+  function void build_phase(uvm_phase phase);
+   target_socket = new("target_socket", this, this);
   endfunction
 
   task b_transport(trans t, uvm_tlm_time delay);
@@ -123,7 +123,7 @@ class consumer extends uvm_component;
     transaction_count++;
   endtask
 
-  function void report();
+  function void report_phase(uvm_phase phase);
     if(transaction_count == 10)
       $display("** UVM TEST PASSED **");
     else
@@ -146,12 +146,12 @@ class env extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  function void build();
+  function void build_phase(uvm_phase phase);
     p = new("producer", this);
     c = new("consumer", this);
   endfunction
 
-  function void connect();
+  function void connect_phase(uvm_phase phase);
     p.initiator_socket.connect(c.target_socket);
   endfunction
 
@@ -170,12 +170,12 @@ class test extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  function void build();
+  function void build_phase(uvm_phase phase);
     e = new("env", this);
   endfunction
 
-  task run();
-    #100 global_stop_request();
+  task run_phase(uvm_phase phase);
+    #100 global_stop_request();     
   endtask
 
 endclass

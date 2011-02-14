@@ -50,7 +50,7 @@
             end \
             return m_inst; \
           endfunction \
-          `_local function new(string name=`"PHASE`"); \
+          `_protected function new(string name=`"PHASE`"); \
             super.new(name); \
           endfunction \
           virtual function string get_type_name(); \
@@ -74,7 +74,7 @@
             end \
             return m_inst; \
           endfunction \
-          `_local function new(string name=`"PHASE`"); \
+          `_protected function new(string name=`"PHASE`"); \
             super.new(name); \
           endfunction \
           virtual function string get_type_name(); \
@@ -98,7 +98,7 @@
             end \
             return m_inst; \
           endfunction \
-          `_local function new(string name=`"PHASE`"); \
+          `_protected function new(string name=`"PHASE`"); \
             super.new(name); \
           endfunction \
           virtual function string get_type_name(); \

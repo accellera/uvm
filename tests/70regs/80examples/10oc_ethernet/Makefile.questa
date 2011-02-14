@@ -1,6 +1,6 @@
 ## 
 ## -------------------------------------------------------------
-##    Copyright 2010 Cadence
+##    Copyright 2010 Mentor Graphics Corp.
 ##    All Rights Reserved Worldwide
 ## 
 ##    Licensed under the Apache License, Version 2.0 (the
@@ -19,16 +19,24 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../../..
+UVM_HOME	= ../../../../distrib
 
-include ../../../Makefile.ius
+include $(UVM_HOME)/examples/Makefile.questa
 
-all: uvm_reg_mem_built_in_seq uvm_reg_mem_hdl_paths_seq
+OC_DIR = $(UVM_HOME)/../tests/70regs/common/oc_ethernet_rtl
 
-IRUN=$(IUS) -define SINGLE_RAM_VARIABLE -define RAM128x64 -define USE_SLICE_API \
-	-incdir ../common/wishbone -incdir ../common/oc_ethernet_rtl \
-	-F ../common/oc_ethernet_rtl/rtl_file_list.lst \
-	tb_top.sv tb_env.sv
+USES_DPI = 1
+
+
+all: prepare comp uvm_reg_mem_built_in_seq
+
+comp: prepare
+	$(VLOG) +incdir+$(UVM_HOME)/examples/simple/registers/common/wishbone \
+		+define+SINGLE_RAM_VARIABLE+RAM128x64 \
+		+incdir+$(OC_DIR) \
+		-f $(OC_DIR)/rtl_file_list2.lst \
+		tb_top.sv \
+                tb_env.sv
 
 help:
 	@echo " Available run-time targets:"
@@ -44,7 +52,7 @@ help:
 	@echo "    uvm_reg_mem_built_in_seq   (e.g. all the built-in tests)"
 	@echo
 
-uvm_%_seq:
-	$(IRUN) +UVM_SEQUENCE=$@
+uvm_%_seq: comp
+	$(VSIM) +UVM_SEQUENCE=$@
 	$(CHECK)
 

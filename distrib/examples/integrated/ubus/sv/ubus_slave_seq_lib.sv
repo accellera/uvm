@@ -126,12 +126,12 @@ class slave_memory_seq extends uvm_sequence #(ubus_transfer);
 
       // Need to raise/drop objection before each item because we don't want
       // to be stopped in the middle of a transfer.
-      uvm_test_done.raise_objection(this);
+      starting_phase.raise_objection(this);
 
       start_item(req);
       finish_item(req);
 
-      uvm_test_done.drop_objection(this);
+      starting_phase.drop_objection(this);
     end
   endtask : body
 
