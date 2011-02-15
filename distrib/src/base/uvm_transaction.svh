@@ -209,12 +209,12 @@ virtual class uvm_transaction extends uvm_object;
   // Function: enable_recording
   //
   // Turns on recording to the stream specified by stream, whose interpretation
-  // is implementation specific.
+  // is implementation specific. The optional ~recorder~ argument specifies
   //
   // If transaction recording is on, then a call to record is made when the
   // transaction is started and when it is ended.
 
-  extern function void enable_recording (string stream);
+  extern function void enable_recording (string stream, uvm_recorder recorder=null);
 
 
   // Function: is_recording_enabled
@@ -349,6 +349,7 @@ virtual class uvm_transaction extends uvm_object;
   local integer       stream_handle;
   local integer       tr_handle;      
   local bit           record_enable = 0;
+  local uvm_recorder  m_recorder;
 
 endclass
 
@@ -530,7 +531,7 @@ endfunction
 // enable_recording
 // ----------------
 
-function void uvm_transaction::enable_recording (string stream);
+function void uvm_transaction::enable_recording (string stream, uvm_recorder recorder=null);
   string scope;
   int lastdot;
   for(lastdot=stream.len()-1; lastdot>0; --lastdot)
@@ -540,7 +541,12 @@ function void uvm_transaction::enable_recording (string stream);
     scope = stream.substr(0, lastdot-1);
     stream = stream.substr(lastdot+1, stream.len()-1);
   end
-  this.stream_handle = uvm_create_fiber(stream, "TVM", scope);
+
+  if (recorder == null)
+    recorder = uvm_default_recorder;
+  m_recorder = recorder;
+
+  this.stream_handle = m_recorder.create_fiber(stream, "TVM", scope);
   record_enable = 1;
 endfunction
 
@@ -602,23 +608,23 @@ function integer uvm_transaction::m_begin_tr (time begin_time=0,
   // (don't free handle until then)
   if(record_enable) begin 
 
-    if(uvm_check_handle_kind("Transaction", tr_handle)==1)
+    if(m_recorder.check_handle_kind("Transaction", tr_handle)==1)
       end_tr(); 
 
     if(!has_parent)
-      tr_handle = uvm_begin_transaction("Begin_No_Parent, Link", 
+      tr_handle = m_recorder.begin_transaction("Begin_No_Parent, Link", 
                     stream_handle, get_type_name(),"","",begin_time);
     else begin
-      tr_handle = uvm_begin_transaction("Begin_End, Link", 
+      tr_handle = m_recorder.begin_transaction("Begin_End, Link", 
                     stream_handle, get_type_name(),"","",begin_time);
       if(parent_handle)
-        uvm_link_transaction(parent_handle, tr_handle, "child");
+        m_recorder.link_transaction(parent_handle, tr_handle, "child");
     end
 
-    uvm_default_recorder.tr_handle = tr_handle;
-    record(uvm_default_recorder);
+    m_recorder.tr_handle = tr_handle;
+    record(m_recorder);
 
-    if(uvm_check_handle_kind("Transaction", tr_handle)!=1)
+    if(m_recorder.check_handle_kind("Transaction", tr_handle)!=1)
       $display("tr handle %0d not valid!",tr_handle);
 
   end
@@ -646,14 +652,14 @@ function void uvm_transaction::end_tr (time end_time=0, bit free_handle=1);
   do_end_tr(); // Callback prior to actual ending of transaction
 
   if(is_active()) begin
-    uvm_default_recorder.tr_handle = tr_handle;
-    record(uvm_default_recorder);
+    m_recorder.tr_handle = tr_handle;
+    record(m_recorder);
   
-    uvm_end_transaction(tr_handle,end_time);
+    m_recorder.end_transaction(tr_handle,end_time);
 
-    if(free_handle && uvm_check_handle_kind("Transaction", tr_handle)==1) 
+    if(free_handle && m_recorder.check_handle_kind("Transaction", tr_handle)==1) 
     begin  
-      uvm_free_transaction_handle(tr_handle);
+      m_recorder.free_transaction_handle(tr_handle);
     end
     tr_handle = 0;
   end

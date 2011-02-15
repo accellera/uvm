@@ -33,11 +33,6 @@
 //
 //-------------------------------------------------------------------------------
 
-// Maximum bytes for the packer array.
-`ifndef UVM_PACKER_MAX_BYTES
-  `define UVM_PACKER_MAX_BYTES UVM_STREAMBITS
-`endif
-
 typedef bit signed [(`UVM_PACKER_MAX_BYTES*8)-1:0] uvm_pack_bitstream_t;
 
 class uvm_packer;

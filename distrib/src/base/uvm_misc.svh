@@ -319,9 +319,8 @@ uvm_seed_map uvm_random_seed_table_lookup [string];
 
 
 //------------------------------------------------------------------------------
-// Utility functions
+// Internal utility functions
 //------------------------------------------------------------------------------
-
 
 // Function- uvm_instance_scope
 //
@@ -419,9 +418,9 @@ function int unsigned uvm_create_random_seed ( string type_id, string inst_id=""
 endfunction
 
 
-// uvm_object_value_str 
-// --------------------
-
+// Function- uvm_object_value_str 
+//
+//
 function string uvm_object_value_str(uvm_object v);
   if (v == null)
     return "<null>";
@@ -430,9 +429,9 @@ function string uvm_object_value_str(uvm_object v);
 endfunction
 
 
-// uvm_leaf_scope
-// --------------
-
+// Function- uvm_leaf_scope
+//
+//
 function string uvm_leaf_scope (string full_name, byte scope_separator = ".");
   byte bracket_match;
   int  pos;
@@ -468,8 +467,9 @@ function string uvm_leaf_scope (string full_name, byte scope_separator = ".");
 endfunction
 
 
-// uvm_vector_to_string
-
+// Function- uvm_vector_to_string
+//
+//
 function string uvm_vector_to_string (uvm_bitstream_t value, int size,
                                       uvm_radix_enum radix=UVM_NORADIX,
                                       string radix_str="");
@@ -492,7 +492,7 @@ function string uvm_vector_to_string (uvm_bitstream_t value, int size,
 endfunction
 
 
-// uvm_get_array_index_int
+// Function- uvm_get_array_index_int
 //
 // The following functions check to see if a string is representing an array
 // index, and if so, what the index is.
@@ -524,8 +524,9 @@ function int uvm_get_array_index_int(string arg, output bit is_wildcard);
 endfunction 
   
 
-// uvm_get_array_index_string
-
+// Function- uvm_get_array_index_string
+//
+//
 function string uvm_get_array_index_string(string arg, output bit is_wildcard);
   int i;
   uvm_get_array_index_string = "";
@@ -543,15 +544,17 @@ function string uvm_get_array_index_string(string arg, output bit is_wildcard);
 endfunction
 
 
-// uvm_is_array
-
+// Function- uvm_is_array
+//
+//
 function bit uvm_is_array(string arg);
   return arg[arg.len()-1] == "]";
 endfunction
 
 
-// uvm_has_wildcard
-
+// Function- uvm_has_wildcard
+//
+//
 function bit uvm_has_wildcard (string arg);
   uvm_has_wildcard = 0;
 
@@ -565,103 +568,4 @@ function bit uvm_has_wildcard (string arg);
       uvm_has_wildcard = 1;
 
 endfunction
-
-
-//------------------------------------------------------------------------------
-// Recording functions
-//------------------------------------------------------------------------------
-
-// UVM does not provide any kind of recording functionality, but provides hooks
-// when a component/object may need such a hook.
-
-
-`ifndef UVM_RECORD_INTERFACE
-`define UVM_RECORD_INTERFACE
-
-// uvm_create_fiber
-// ----------------
-
-function integer uvm_create_fiber (string name,
-                                   string t,
-                                   string scope);
-  return 0;
-endfunction
-
-// uvm_set_index_attribute_by_name
-// -------------------------------
-
-function void uvm_set_index_attribute_by_name (integer txh,
-                                         string nm,
-                                         int index,
-                                         logic [1023:0] value,
-                                         string radix,
-                                         integer numbits=32);
-  return;
-endfunction
-
-
-// uvm_set_attribute_by_name
-// -------------------------
-
-function void uvm_set_attribute_by_name (integer txh,
-                                         string nm,
-                                         logic [1023:0] value,
-                                         string radix,
-                                         integer numbits=0);
-  return;
-endfunction
-
-
-// uvm_check_handle_kind
-// ---------------------
-
-function integer uvm_check_handle_kind (string htype, integer handle);
-  return 1;
-endfunction
-
-
-// uvm_begin_transaction
-// ---------------
-
-function integer uvm_begin_transaction(string txtype,
-                                 integer stream,
-                                 string nm
-                                 , string label="",
-                                 string desc="",
-                                 time begin_time=0
-                                 );
-  static int h = 1;
-  return h++;
-endfunction
-
-
-// uvm_end_transaction
-// -------------------
-
-function void uvm_end_transaction (integer handle
-                                 , time end_time=0
-);
-  return;
-endfunction
-
-
-// uvm_link_transaction
-// --------------------
-
-function void uvm_link_transaction(integer h1, integer h2,
-                                   string relation="");
-  return;
-endfunction
-
-
-
-// uvm_free_transaction_handle
-// ---------------------------
-
-function void uvm_free_transaction_handle(integer handle);
-  return;
-endfunction
-
-`endif // UVM_RECORD_INTERFACE
-
 

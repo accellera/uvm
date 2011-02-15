@@ -1,6 +1,6 @@
 
 `ifndef NUM_TRANS
-`define NUM_TRANS 10
+`define NUM_TRANS 1
 `endif
 
 
@@ -51,9 +51,6 @@ module top;
     uvm_default_packer.big_endian = 0;
 
     uvm_top.set_report_id_action("ILLEGALNAME",UVM_NO_ACTION);
-
-    //man1.enable_recording("man1");
-    //mac1.enable_recording("mac1");
 
     $display("\NUM_TRANS=%0d",`NUM_TRANS);
 
@@ -160,6 +157,10 @@ module top;
     //---------------------------------
 
     begin
+    $display("HERE RECORD");
+    man1.enable_recording("man1");
+    mac1.enable_recording("mac1");
+
     for (int i=0; i< `NUM_TRANS; i++) begin
       void'(man1.begin_tr());
       #10;
@@ -173,6 +174,7 @@ module top;
       mac1.int32 = i;
       mac1.end_tr();
     end
+    $display("END RECORD");
     end
 
     //---------------------------------

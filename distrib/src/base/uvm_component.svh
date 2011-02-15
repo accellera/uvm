@@ -1457,7 +1457,8 @@ virtual class uvm_component extends uvm_report_object;
                                     string stream_name="main",
                                     string label="",
                                     string desc="",
-                                    time begin_time=0);
+                                    time begin_time=0,
+                                    integer parent_handle=0);
 
 
   // Function: begin_child_tr
@@ -1578,6 +1579,13 @@ virtual class uvm_component extends uvm_report_object;
 
   bit print_enabled = 1;
 
+
+  // Variable: recorder
+  //
+  // Specifies the <uvm_recorder> object to use for <begin_tr> and other
+  // methods in the <Recording Interface>. Default is <uvm_default_recorder>.
+  //
+  uvm_recorder recorder;
 
   //----------------------------------------------------------------------------
   //                     PRIVATE or PSUEDO-PRIVATE members
@@ -2572,8 +2580,9 @@ function integer uvm_component::begin_tr (uvm_transaction tr,
                                           string stream_name ="main",
                                           string label="",
                                           string desc="",
-                                          time begin_time=0);
-  return m_begin_tr(tr, 0, 0, stream_name, label, desc, begin_time);
+                                          time begin_time=0,
+                                          integer parent_handle=0);
+  return m_begin_tr(tr, parent_handle, (parent_handle!=0), stream_name, label, desc, begin_time);
 endfunction
 
 // begin_child_tr
@@ -2603,6 +2612,9 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
   integer tr_h;
   integer link_tr_h;
   string name;
+  string kind;
+  uvm_recorder recordr;
+  recordr = (recorder == null) ? uvm_default_recorder : recorder;
 
   tr_h = 0;
   if(has_parent)
@@ -2622,34 +2634,22 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
     if(m_stream_handle.exists(stream_name))
         stream_h = m_stream_handle[stream_name];
 
-    if (uvm_check_handle_kind("Fiber", stream_h) != 1) 
-      begin  
-        stream_h = uvm_create_fiber(stream_name, "TVM", get_full_name());
+    if (recordr.check_handle_kind("Fiber", stream_h) != 1) begin  
+        stream_h = recordr.create_fiber(stream_name, "TVM", get_full_name());
         m_stream_handle[stream_name] = stream_h;
-      end
-
-    if(has_parent == 0) 
-      tr_h = uvm_begin_transaction("Begin_No_Parent, Link", 
-                             stream_h,
-                             name,
-                             label,
-                             desc,
-                             begin_time);
-    else begin
-      tr_h = uvm_begin_transaction("Begin_End, Link", 
-                             stream_h,
-                             name,
-                             label,
-                             desc,
-                             begin_time);
-      if(parent_handle!=0)
-        uvm_link_transaction(parent_handle, tr_h, "child");
     end
+
+    kind = (has_parent == 0) ? "Begin_No_Parent, Link" : "Begin_End, Link";
+
+    tr_h = recordr.begin_transaction(kind, stream_h, name, label, desc, begin_time);
+
+    if (has_parent && parent_handle != 0)
+        recordr.link_transaction(parent_handle, tr_h, "child");
 
     m_tr_h[tr] = tr_h;
 
-    if (uvm_check_handle_kind("Transaction", link_tr_h) == 1)
-      uvm_link_transaction(tr_h,link_tr_h);
+    if (recordr.check_handle_kind("Transaction", link_tr_h) == 1)
+      recordr.link_transaction(tr_h,link_tr_h);
         
     do_begin_tr(tr,stream_name,tr_h); 
         
@@ -2672,6 +2672,8 @@ function void uvm_component::end_tr (uvm_transaction tr,
                                      bit free_handle=1);
   uvm_event e;
   integer tr_h;
+  uvm_recorder recordr;
+  recordr = (recorder == null) ? uvm_default_recorder : recorder;
   tr_h = 0;
 
   tr.end_tr(end_time,free_handle);
@@ -2686,15 +2688,15 @@ function void uvm_component::end_tr (uvm_transaction tr,
 
       m_tr_h.delete(tr);
 
-      if (uvm_check_handle_kind("Transaction", tr_h) == 1) begin  
+      if (recordr.check_handle_kind("Transaction", tr_h) == 1) begin  
 
-        uvm_default_recorder.tr_handle = tr_h;
-        tr.record(uvm_default_recorder);
+        recordr.tr_handle = tr_h;
+        tr.record(recordr);
 
-        uvm_end_transaction(tr_h,end_time);
+        recordr.end_transaction(tr_h,end_time);
 
         if (free_handle)
-           uvm_free_transaction_handle(tr_h);
+           recordr.free_transaction_handle(tr_h);
 
       end
     end
@@ -2710,6 +2712,7 @@ function void uvm_component::end_tr (uvm_transaction tr,
 
 endfunction
 
+
 // record_error_tr
 // ---------------
 
@@ -2721,6 +2724,8 @@ function integer uvm_component::record_error_tr (string stream_name="main",
                                               bit    keep_active=0);
   string etype;
   integer stream_h;
+  uvm_recorder recordr;
+  recordr = (recorder == null) ? uvm_default_recorder : recorder;
 
   if(keep_active) etype = "Error, Link";
   else etype = "Error";
@@ -2728,19 +2733,19 @@ function integer uvm_component::record_error_tr (string stream_name="main",
   if(error_time == 0) error_time = $realtime;
 
   stream_h = m_stream_handle[stream_name];
-  if (uvm_check_handle_kind("Fiber", stream_h) != 1) begin  
-    stream_h = uvm_create_fiber(stream_name, "TVM", get_full_name());
+  if (recordr.check_handle_kind("Fiber", stream_h) != 1) begin  
+    stream_h = recordr.create_fiber(stream_name, "TVM", get_full_name());
     m_stream_handle[stream_name] = stream_h;
   end
 
-  record_error_tr = uvm_begin_transaction(etype, stream_h, label,
+  record_error_tr = recordr.begin_transaction(etype, stream_h, label,
                          label, desc, error_time);
   if(info!=null) begin
-    uvm_default_recorder.tr_handle = record_error_tr;
-    info.record(uvm_default_recorder);
+    recordr.tr_handle = record_error_tr;
+    info.record(recordr);
   end
 
-  uvm_end_transaction(record_error_tr,error_time);
+  recordr.end_transaction(record_error_tr,error_time);
 endfunction
 
 
@@ -2755,6 +2760,8 @@ function integer uvm_component::record_event_tr (string stream_name="main",
                                               bit    keep_active=0);
   string etype;
   integer stream_h;
+  uvm_recorder recordr;
+  recordr = (recorder == null) ? uvm_default_recorder : recorder;
 
   if(keep_active) etype = "Event, Link";
   else etype = "Event";
@@ -2762,19 +2769,19 @@ function integer uvm_component::record_event_tr (string stream_name="main",
   if(event_time == 0) event_time = $realtime;
 
   stream_h = m_stream_handle[stream_name];
-  if (uvm_check_handle_kind("Fiber", stream_h) != 1) begin  
-    stream_h = uvm_create_fiber(stream_name, "TVM", get_full_name());
+  if (recordr.check_handle_kind("Fiber", stream_h) != 1) begin  
+    stream_h = recordr.create_fiber(stream_name, "TVM", get_full_name());
     m_stream_handle[stream_name] = stream_h;
   end
 
-  record_event_tr = uvm_begin_transaction(etype, stream_h, label,
+  record_event_tr = recordr.begin_transaction(etype, stream_h, label,
                          label, desc, event_time);
   if(info!=null) begin
-    uvm_default_recorder.tr_handle = record_event_tr;
-    info.record(uvm_default_recorder);
+    recordr.tr_handle = record_event_tr;
+    info.record(recordr);
   end
 
-  uvm_end_transaction(record_event_tr,event_time);
+  recordr.end_transaction(record_event_tr,event_time);
 endfunction
 
 // do_accept_tr

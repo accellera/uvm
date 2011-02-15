@@ -42,7 +42,25 @@ bit uvm_start_uvm_declarations = 1;
 `define UVM_MAX_STREAMBITS 4096
 `endif
 
+
+// Macro: `UVM_PACKER_MAX_BYTES
+//
+// Defines the maximum bytes to allocate for packing an object using
+// the <uvm_packer>. Default is <`UVM_MAX_STREAMBITS>, in ~bytes~.
+
+`ifndef UVM_PACKER_MAX_BYTES
+  `define UVM_PACKER_MAX_BYTES UVM_STREAMBITS
+`endif
+
 parameter UVM_STREAMBITS = `UVM_MAX_STREAMBITS; 
+
+
+// Macro: `UVM_DEFAULT_TIMEOUT
+//
+// The default timeout for all phases, if not overridden by
+// <uvm_root::set_timeout> or <+UVM_TIMEOUT>
+
+`define UVM_DEFAULT_TIMEOUT 9200s
 
 
 // Type: uvm_bitstream_t
@@ -72,11 +90,16 @@ typedef enum {
    UVM_BIN       = 'h1000000,
    UVM_DEC       = 'h2000000,
    UVM_UNSIGNED  = 'h3000000,
-   UVM_OCT       = 'h4000000,
-   UVM_HEX       = 'h5000000,
-   UVM_STRING    = 'h6000000,
-   UVM_TIME      = 'h7000000,
-   UVM_ENUM      = 'h8000000,
+   UVM_UNFORMAT2 = 'h4000000,
+   UVM_UNFORMAT4 = 'h5000000,
+   UVM_OCT       = 'h6000000,
+   UVM_HEX       = 'h7000000,
+   UVM_STRING    = 'h8000000,
+   UVM_TIME      = 'h9000000,
+   UVM_ENUM      = 'ha000000,
+   UVM_REAL      = 'hb000000,
+   UVM_REAL_DEC  = 'hc000000,
+   UVM_REAL_EXP  = 'hd000000,
    UVM_NORADIX   = 0
 } uvm_radix_enum;
 
@@ -87,12 +110,20 @@ parameter UVM_RADIX = 'hf000000; //4 bits setting the radix
 
 function string uvm_radix_to_string(uvm_radix_enum radix);
   case(radix)
-    UVM_BIN:     return "'b";
-    UVM_OCT:     return "'o";
-    UVM_DEC:     return "'s";
-    UVM_TIME:    return "'u";
-    UVM_STRING:  return "'a";
-    default: return "'x";
+    UVM_BIN:        return "b";
+    UVM_OCT:        return "o";
+    UVM_DEC:        return "d";
+    UVM_HEX:        return "h";
+    UVM_UNSIGNED:   return "u";
+    UVM_UNFORMAT2:  return "u";
+    UVM_UNFORMAT4:  return "z";
+    UVM_STRING:     return "s";
+    UVM_TIME:       return "t";
+    UVM_ENUM:       return "s";
+    UVM_REAL:       return "g";
+    UVM_REAL_DEC:   return "f";
+    UVM_REAL_EXP:   return "e";
+    default:        return "x"; //hex
   endcase
 endfunction
 

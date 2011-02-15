@@ -20,6 +20,8 @@
 //   permissions and limitations under the License.
 //-----------------------------------------------------------------------------
 
+typedef class uvm_object_registry; 
+
 //------------------------------------------------------------------------------
 //
 // CLASS: uvm_recorder
@@ -32,9 +34,13 @@
 //
 //------------------------------------------------------------------------------
 
-class uvm_recorder;
+class uvm_recorder extends uvm_object;
+
+  `uvm_object_utils(uvm_recorder)
 
   int recording_depth = 0; 
+  UVM_FILE file;
+  string filename = "tr_db.txt";
 
 
   // Variable: tr_handle
@@ -98,6 +104,15 @@ class uvm_recorder;
   uvm_recursion_policy_enum policy = UVM_DEFAULT_POLICY;
 
 
+  // Function: get_type_name
+  //
+  // Returns type name of the recorder. Subtypes must override this method
+  // to enable the <`uvm_record_field> macro.
+  //
+  //| virtual function string get_type_name()
+
+
+
   // Function: record_field
   //
   // Records an integral field (less than or equal to 4096 bits). ~name~ is the
@@ -116,14 +131,8 @@ class uvm_recorder;
     if(!radix)
       radix = default_radix;
 
-    case(radix)
-      UVM_BIN:     uvm_set_attribute_by_name(tr_handle, scope.get(), value, "'b",size);
-      UVM_OCT:     uvm_set_attribute_by_name(tr_handle, scope.get(), value, "'o",size);
-      UVM_DEC:     uvm_set_attribute_by_name(tr_handle, scope.get(), value, "'s",size);
-      UVM_TIME:    uvm_set_attribute_by_name(tr_handle, scope.get(), value, "'u",size);
-      UVM_STRING:  uvm_set_attribute_by_name(tr_handle, scope.get(), value, "'a",size);
-      default: uvm_set_attribute_by_name(tr_handle, scope.get(), value, "'x",size);
-    endcase
+    set_attribute(tr_handle, scope.get(), value, radix, size);
+
   endfunction
 
 
@@ -136,7 +145,7 @@ class uvm_recorder;
     bit[63:0] ival = $realtobits(value);
     if(tr_handle==0) return;
     scope.set_arg(name);
-    uvm_set_attribute_by_name(tr_handle, scope.get(), ival, "'r");
+    set_attribute(tr_handle, scope.get(), ival, UVM_REAL, 64);
   endfunction
 
 
@@ -157,7 +166,7 @@ class uvm_recorder;
         v = str.atoi(); 
       end
       scope.set_arg(name);
-      uvm_set_attribute_by_name(tr_handle, scope.get(), v, "'s");
+      set_attribute(tr_handle, scope.get(), v, UVM_DEC, 32);
     end
  
     if(policy != UVM_REFERENCE) begin
@@ -180,7 +189,8 @@ class uvm_recorder;
   
   virtual function void record_string (string name, string value);
     scope.set_arg(name);
-    uvm_set_attribute_by_name(tr_handle, scope.get(), uvm_string_to_bits(value), "'a");
+    set_attribute(tr_handle, scope.get(), uvm_string_to_bits(value),
+                   UVM_STRING, 8*value.len());
   endfunction
 
 
@@ -190,7 +200,8 @@ class uvm_recorder;
   
   
   virtual function void record_time (string name, time value); 
-    record_field(name, value, 64, UVM_TIME); 
+    scope.set_arg(name);
+    set_attribute(tr_handle, scope.get(), value, UVM_TIME, 64);
   endfunction
 
 
@@ -202,13 +213,131 @@ class uvm_recorder;
   //| recorder.record_generic("myvar",$sformatf("%0d",myvar));
   
   virtual function void record_generic (string name, string value);
-    record_string(name, value);
+    scope.set_arg(name);
+    set_attribute(tr_handle, scope.get(), uvm_string_to_bits(value),
+                   UVM_STRING, 8*value.len());
   endfunction
 
 
   uvm_scope_stack scope = new;
 
+
+
+  //------------------------------
+  // Group- Vendor-Independent API
+  //------------------------------
+
+
+  // UVM provides only a text-based default implementation.
+  // Vendors provide subtype implementations and overwrite the
+  // <uvm_default_recorder> handle.
+
+
+  // Function- open_file
+  //
+  //
+  function bit open_file();
+    if (file == 0)
+      file = $fopen(filename);
+    return (file > 0);
+  endfunction
+
+
+  // Function- create_fiber
+  //
+  //
+  function integer create_fiber (string name,
+                                 string t,
+                                 string scope);
+    return 0;
+  endfunction
+
+   
+  // Function- m_set_attribute
+  //
+  //
+  function void m_set_attribute (integer txh,
+                                 string nm,
+                                 string value);
+    if (open_file())
+      $fdisplay(file,"  SET_ATTR: {TXH:%-5d NAME:%-20s VALUE:%s}", txh,nm,value);
+  endfunction
+  
+  
+  // Function- set_attribute
+  //
+  //
+  function void set_attribute (integer txh,
+                               string nm,
+                               logic [1023:0] value,
+                               uvm_radix_enum radix,
+                               integer numbits=1024);
+    string rdx=uvm_radix_to_string(radix);
+    if (open_file())
+      $fdisplay(file,"  SET_ATTR: {TXH:%-5d NAME:%-20s VALUE:%0d RADIX:%s BITS=%-5d}",
+                 txh, nm, (value & ((1<<numbits)-1)),radix,numbits);
+  endfunction
+  
+  
+  // Function- check_handle_kind
+  //
+  //
+  function integer check_handle_kind (string htype, integer handle);
+    return 1;
+  endfunction
+  
+  
+  // Function- begin_transaction
+  //
+  //
+  function integer begin_transaction(string txtype,
+                                     integer stream,
+                                     string nm,
+                                     string label="",
+                                     string desc="",
+                                     time begin_time=0);
+    static int h = 1;
+    if (open_file()) begin
+      h++;
+      $fdisplay(file,"BEGIN: {TXH:%-5d TYPE:\"%0s\" STREAM:%-5d NAME:%-20s TIME=%0t LABEL:\"%0s\" DESC=\"%0s\"",
+        h,txtype,stream,nm,begin_time,label,desc);
+      return h;
+    end
+    return -1;
+  endfunction
+  
+  
+  // Function- end_transaction
+  //
+  //
+  function void end_transaction (integer handle, time end_time=0);
+    if (open_file())
+      $fdisplay(file,"END: {TXH:%-5d TIME=%0t}",handle,end_time);
+  endfunction
+  
+  
+  // Function- link_transaction
+  //
+  //
+  function void link_transaction(integer h1,
+                                 integer h2,
+                                 string relation="");
+    if (open_file())
+      $fdisplay(file,"  LINK: {TXH1:%-5d TXH2:%-5d RELATION=%0s}", h1,h2,relation);
+  endfunction
+  
+  
+  
+  // Function- free_transaction_handle
+  //
+  //
+  function void free_transaction_handle(integer handle);
+    if (open_file())
+      $fdisplay(file,"  FREE: {TXH:%-5d}", handle);
+  endfunction
+  
+
 endclass
-
-
-
+  
+  
+  

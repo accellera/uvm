@@ -2955,9 +2955,40 @@
 
 `define uvm_record_field(NAME,VALUE) \
    if (recorder != null && recorder.tr_handle != 0) begin \
-     `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+     if (recorder.get_type_name() != "uvm_recorder") begin \
+       `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+     end \
+     else \
+       `ifdef UVM_USE_P_FORMAT \
+       recorder.m_set_attribute(recorder.tr_handle,NAME,$sformatf("%p",VALUE)); \
+       `else \
+       recorder.m_set_attribute(recorder.tr_handle,NAME,`"value of VALUE`")); \
+       `endif \
    end
 
+
+
+// Use the following if the simulator's recording API can not
+// distinguish types.
+
+`define uvm_record_int(NAME,VALUE,SIZE,RADIX) \
+  recorder.m_set_attribute(recorder.tr_handle,NAME, \
+     $sformatf({"%0",uvm_radix_to_string(RADIX)},VALUE)); \
+
+`define uvm_record_string(NAME,VALUE) \
+  recorder.m_set_attribute(recorder.tr_handle,NAME,VALUE);
+
+`define uvm_record_time(NAME,VALUE) \
+  recorder.m_set_attribute(recorder.tr_handle,NAME, \
+     $sformatf("%0u",VALUE&((1<<64)-1))); \
+
+`define uvm_record_real(NAME,VALUE) \
+  begin \
+  bit[63:0] ival = $realtobits(VALUE); \
+  recorder.m_set_attribute(recorder.tr_handle,NAME,ival); \
+  end
+
+  
 //------------------------------------------------------------------------------
 // Group: Packing Macros
 //
@@ -3319,6 +3350,7 @@
 //
 `define uvm_unpack_queue(VAR) \
    `uvm_unpack_queueN(VAR,$bits(VAR[0]))
+
 
 
 `endif  // UVM_OBJECT_DEFINES_SVH

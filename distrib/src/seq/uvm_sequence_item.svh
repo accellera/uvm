@@ -274,7 +274,12 @@ class uvm_sequence_item extends uvm_transaction;
     reseed();
     
     sequencer.wait_for_grant(parent_seq_, set_priority);
-    void'(sequencer.begin_tr(this, "aggregate_items"));
+    `ifndef UVM_DISABLE_AUTO_ITEM_RECORDING
+    if (parent_seq_ == null)
+      void'(sequencer.begin_tr(this, "aggregate_items"));
+    else
+      void'(sequencer.begin_child_tr(this, parent_seq_.m_tr_handle, get_root_sequence_name()));
+    `endif
     parent_seq_.pre_do(1);
   endtask  
 

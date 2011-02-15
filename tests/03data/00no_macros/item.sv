@@ -227,28 +227,30 @@ class item extends uvm_sequence_item;
     printer.print_int("int8",  int8,   8);
     printer.print_int("int1",  int1,   1);
 
-    printer.print_int("uint64", uint64, 64, UVM_UNSIGNED);
-    printer.print_int("uint32", uint32, 32, UVM_UNSIGNED);
-    printer.print_int("uint16", uint16, 16, UVM_UNSIGNED);
-    printer.print_int("uint8",  uint8,   8, UVM_UNSIGNED);
-    printer.print_int("uint1",  uint1,   1, UVM_UNSIGNED);
+    printer.print_int("uint64", uint64, 64);
+    printer.print_int("uint32", uint32, 32);
+    printer.print_int("uint16", uint16, 16);
+    printer.print_int("uint8",  uint8,   8);
+    printer.print_int("uint1",  uint1,   1);
 
     printer.print_time("time64", time64);
     printer.print_string("str", str);
 
-    printer.print_array_header("q",q.size(),"queue(int)");
-    foreach(q[i])
-      printer.print_int($sformatf("[%0d]", i), q[i], 32);
-    printer.print_array_footer();
-
     printer.print_array_header("sa",3,"sa(int)");
     foreach(sa[i])
-      printer.print_int($sformatf("[%0d]", i), sa[i], 16);
+      printer.print_int($sformatf("[%0d]", i), sa[i], 32);
     printer.print_array_footer();
+
     printer.print_array_header("da",da.size(),"da(int)");
     foreach(da[i])
-      printer.print_int($sformatf("[%0d]", i), da[i], 8);
+      printer.print_int($sformatf("[%0d]", i), da[i], 16);
     printer.print_array_footer();
+
+    printer.print_array_header("q",q.size(),"queue(int)");
+    foreach(q[i])
+      printer.print_int($sformatf("[%0d]", i), q[i], 8);
+    printer.print_array_footer();
+
     printer.print_array_header("aa",aa.num(),"aa(int)");
     foreach(aa[i])
       printer.print_int($sformatf("[%0d]", i), aa[i], 16);
@@ -275,7 +277,6 @@ class item extends uvm_sequence_item;
     if (!is_recording_enabled())
       return;
     super.do_record(recorder);
-
     `uvm_record_field("int64", int64)
     `uvm_record_field("int32", int32)
     `uvm_record_field("int16", int16)
@@ -291,16 +292,19 @@ class item extends uvm_sequence_item;
     `uvm_record_field("time64", time64)
     `uvm_record_field("str", str)
 
-    foreach(q[i])
-      `uvm_record_field($sformatf("\\q[%0d] ", i), q[i])
+`ifdef INCA      
     foreach(sa[i])
       `uvm_record_field($sformatf("\\sa[%0d] ", i), sa[i])
-// currently no support to store sa into db 
-`ifndef INCA      
+    // currently no support to store sa into db 
+`else
     `uvm_record_field("sa",sa);
 `endif    
     foreach(da[i])
       `uvm_record_field($sformatf("\\da[%0d] ", i), da[i])
+
+    foreach(q[i])
+      `uvm_record_field($sformatf("\\q[%0d] ", i), q[i])
+
     foreach(aa[i])
       `uvm_record_field($sformatf("\\aa[%0d] ", i), aa[i])
 
