@@ -10,20 +10,14 @@ class comp1 extends uvm_component;
    endfunction
 
    task main_phase(uvm_phase phase);
-      // uncomment and test will end at 5100.
-      //phase.raise_objection(this);
       `uvm_info("comp1", "main thread started...", UVM_LOW);
       #5000;
       `uvm_info("comp1", "main thread completed...", UVM_LOW);
-      //phase.drop_objection(this);
    endtask
 
    virtual task run_phase(uvm_phase phase);
       enable_stop_interrupt = 1;
       `uvm_info("comp1", "run phase started...", UVM_LOW);
-      fork begin
-         main(phase);
-      end join_none
       #100;
       `uvm_info("comp1", "run phase ended...", UVM_LOW);
    endtask
