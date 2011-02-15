@@ -25,6 +25,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <regex.h>
+#include "vpi_user.h"
 
 using namespace std;
 
@@ -119,7 +120,7 @@ class uvm_re_cache
       err = re_compile(*re_str); 
       if(err != 0)
       {
-        cout << "regex compiler: invalid glob or regular expression: " << *re_str << endl;
+      	      vpi_printf("UVM_ERROR: regex compiler: invalid glob or regular expression: |%s|\n",re);
         return err;
       }
       rexp = cache[*re_str];
