@@ -1863,7 +1863,7 @@ task uvm_phase::execute_phase();
                  wait(top.phase_timeout != 0);
                #(top.phase_timeout);
                `uvm_error("PH_TIMEOUT",
-                   $sformatf("Phase timeout of %0t hit, phase '%0t' ready to end",
+                   $sformatf("Phase timeout of %0t hit, phase '%0s' ready to end",
                              top.phase_timeout, get_name()))
                phase_done.clear(this);
                `PH_TRACE("PH/TRC/EXE/3","PHASE EXIT TIMEOUT",this,UVM_DEBUG)
