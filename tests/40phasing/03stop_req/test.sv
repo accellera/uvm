@@ -9,7 +9,7 @@ class comp1 extends uvm_component;
       super.new(name, parent);
    endfunction
 
-   task main(uvm_phase phase);
+   task main_phase(uvm_phase phase);
       // uncomment and test will end at 5100.
       //phase.raise_objection(this);
       `uvm_info("comp1", "main thread started...", UVM_LOW);

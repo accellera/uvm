@@ -9,7 +9,7 @@ module top();
     function new (string name, uvm_component parent);
       super.new(name, parent);
     endfunction
-    task run;
+    task run();
       foo_objection.raise_objection(this);
     endtask
     `uvm_component_utils(test)

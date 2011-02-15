@@ -72,7 +72,7 @@ class uvm_objection extends uvm_report_object;
   protected time    m_drain_time  [uvm_object];
   protected bit     m_draining    [uvm_object];
   protected uvm_objection_events m_events [uvm_object];
-  protected bit     m_top_all_dropped;
+  /*protected*/ bit     m_top_all_dropped;
   protected process m_background_proc;
 
   protected uvm_root m_top = uvm_root::get();
@@ -105,7 +105,9 @@ class uvm_objection extends uvm_report_object;
       name = "uvm_top";
     else
       name = obj.get_full_name();
-    uvm_report_warning("OBJTN_CLEAR",{"Object '",name,"' cleared objection counts for ",get_name()});
+    if (!m_top_all_dropped && get_objection_total(m_top))
+      uvm_report_warning("OBJTN_CLEAR",{"Object '",name,
+            "' cleared objection counts for ",get_name()});
     //Should there be a warning if there are outstanding objections?
     m_source_count.delete();
     m_total_count.delete();
@@ -640,8 +642,10 @@ class uvm_objection extends uvm_report_object;
   // Objection callback that is called when a <raise_objection> has reached ~obj~.
   // The default implementation calls <uvm_component::raised>.
 
-  virtual function void raised (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
+  virtual function void raised (uvm_object obj,
+                                uvm_object source_obj,
+                                string description,
+                                int count);
     uvm_component comp;
     if ($cast(comp,obj))    
       comp.raised(this, source_obj, description, count);
@@ -655,8 +659,10 @@ class uvm_objection extends uvm_report_object;
   // Objection callback that is called when a <drop_objection> has reached ~obj~.
   // The default implementation calls <uvm_component::dropped>.
 
-  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
+  virtual function void dropped (uvm_object obj,
+                                 uvm_object source_obj,
+                                 string description,
+                                 int count);
     uvm_component comp;
     if($cast(comp,obj))    
       comp.dropped(this, source_obj, description, count);
@@ -946,9 +952,11 @@ endclass
 
 typedef class uvm_cmdline_processor;
 
+
+
 //------------------------------------------------------------------------------
 //
-// Class: uvm_test_done_objection
+// Class- uvm_test_done_objection
 //
 // Provides built-in end-of-test coordination
 //------------------------------------------------------------------------------
@@ -957,31 +965,23 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
 
   protected static uvm_test_done_objection m_inst = get();
   protected bit m_forced;
-  //          bit m_startup;
 
   // For communicating all objections dropped and end of phasing
   local  bit m_executing_stop_processes;
   local  int m_n_stop_threads;
 
 
-  // Function: new
+  // Function- new
   //
   // Creates the singleton test_done objection. Users must not to call
   // this method directly.
 
-  /* local */
   function new(string name="uvm_test_done");
-    //uvm_cmdline_processor clp;
     super.new(name);
-    //clp = uvm_cmdline_processor::get_inst();
-    //if(!clp.get_arg_matches("+UVM_USE_UVM_RUN_SEMANTIC", trace_args)) begin
-      //raise_objection(m_top,"start-up test_done objection");
-      //m_startup=1;
-    //end
   endfunction
 
 
-  // Function: qualify
+  // Function- qualify
   //
   // Checks that the given ~object~ is derived from either <uvm_component> or
   // <uvm_sequence_base>.
@@ -1028,7 +1028,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   endtask
  
 
-  // Function: stop_request
+  // Function- stop_request
   //
   // Calling this function triggers the process of shutting down the currently
   // running task-based phase. This process involves calling all components'
@@ -1045,11 +1045,6 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
     fork
       m_stop_request();
     join_none
-
-    //if (m_startup) begin
-      //drop_objection(m_top,"stop_request called; start-up test_done objection");
-      //m_startup=0;
-    //end
   endfunction
 
   task m_stop_request();
@@ -1059,7 +1054,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   endtask
 
 
-  // Variable: stop_timeout
+  // Variable- stop_timeout
   //
   // These set watchdog timers for task-based phases and stop tasks. You can not
   // disable the timeouts. When set to 0, a timeout of the maximum time possible
@@ -1070,7 +1065,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   time stop_timeout = 0;
 
 
-  // Task: all_dropped
+  // Task- all_dropped
   //
   // This callback is called when the given ~object's~ objection count reaches
   // zero; if the ~object~ is the implicit top-level, <uvm_root> then it means
@@ -1087,7 +1082,6 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
       return;
     end
 
-
     m_top.all_dropped(this, source_obj, description, count);
 
     // All stop tasks are forked from a single thread within a 'guard' process
@@ -1095,8 +1089,8 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   
     if(m_cleared == 0) begin
       `uvm_info_context("TEST_DONE",
-                      "All end-of-test objections have been dropped. Calling stop tasks",
-                      UVM_FULL,m_top);
+          "All end-of-test objections have been dropped. Calling stop tasks",
+          UVM_FULL,m_top);
       fork begin // guard
         fork
           begin
@@ -1110,8 +1104,8 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
               wait(stop_timeout != 0);
             #stop_timeout;
             `uvm_error("STOP_TIMEOUT",
-              $sformatf("Stop-task timeout of %0t expired. 'run' phase ready to proceed to extract phase",
-                               stop_timeout))
+              {$sformatf("Stop-task timeout of %0t expired. ", stop_timeout),
+                 "'run' phase ready to proceed to extract phase"})
           end
         join_any
         disable fork;
@@ -1130,7 +1124,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   endtask
 
 
-  // Function: raise_objection
+  // Function- raise_objection
   //
   // Calls <uvm_objection::raise_objection> after calling <qualify>. 
   // If the ~object~ is not provided or is ~null~, then the implicit top-level
@@ -1154,16 +1148,10 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
 
     super.raise_objection(obj,description,count);
 
-    /*
-    if (m_startup) begin
-      drop_objection(m_top,"dropping start-up test_done objection");
-      m_startup = 0;
-    end
-    */
   endfunction
 
 
-  // Function: drop_objection
+  // Function- drop_objection
   //
   // Calls <uvm_objection::drop_objection> after calling <qualify>. 
   // If the ~object~ is not provided or is ~null~, then the implicit top-level
@@ -1180,7 +1168,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   endfunction
 
 
-  // Task: force_stop
+  // Task- force_stop
   //
   // Forces the propagation of the all_dropped() callback, even if there are still
   // outstanding objections. The net effect of this action is to forcibly end

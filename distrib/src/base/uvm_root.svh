@@ -142,7 +142,7 @@ class uvm_root extends uvm_component;
   //
   // Specifies the timeout for task-based phases. Default is 0, or no timeout.
 
-  time phase_timeout = 0;
+  time phase_timeout = `UVM_DEFAULT_TIMEOUT;
 
 
   // Function: set_timeout

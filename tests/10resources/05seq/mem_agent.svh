@@ -207,14 +207,11 @@ class mem_agent #(type CONFIG=int,
   local uvm_sequencer #(mem_seq_item #(ADDR_SIZE, DATA_SIZE)) sqr;
 
   local uvm_sequence_base m_initial_sequence;
-  local bit m_done;
 
   CONFIG cfg;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
-    m_done = 0;
-    enable_stop_interrupt = 1;
   endfunction
 
   function void build();
@@ -249,14 +246,11 @@ class mem_agent #(type CONFIG=int,
       mon.ap.connect(tlk.analysis_export);
   endfunction
 
-  task run();
+  task run_phase(uvm_phase phase);
+    phase.raise_objection(this);
     if(m_initial_sequence != null)
       m_initial_sequence.start(sqr);
-    m_done = 1;
-  endtask
-
-  task stop(string ph_name);
-    wait(m_done == 1);
+    phase.drop_objection(this);
   endtask
 
 endclass

@@ -560,6 +560,21 @@ virtual class uvm_component extends uvm_report_object;
 
   extern virtual function void phase_started (uvm_phase phase);
 
+  // Function: phase_ready_to_end
+  //
+  // Invoked when all objections to ending the given ~phase~ have been
+  // dropped, thus indicating that ~phase~ is ready to end. All this
+  // component's processes forked for the given phase will be killed
+  // upon return from this method. Components needing to consume delta
+  // cycles or advance time to perform a clean exit from the phase
+  // may raise the phase's objection. This effectively resets the
+  // wait-for-all-objections-dropped loop for ~phase~. It is the
+  // responsibility of this component to drop the objection once
+  // it is ready for this phase to end (and processes killed).
+  
+  extern virtual function void phase_ready_to_end (uvm_phase phase);
+
+
   // Function: phase_ended
   //
   // Invoked at the end of each phase. The ~phase~ argument specifies
@@ -1028,10 +1043,12 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: raised
   //
-  // The raised callback is called when a decendant of the component instance
-  // raises the specfied ~objection~. The ~source_obj~ is the object which
-  // originally raised the object. ~count~ is an optional count that was used
-  // to indicate a number of objections which were raised.
+  // The ~raised~ callback is called when this or a descendant of this component
+  // instance raises the specfied ~objection~. The ~source_obj~ is the object
+  // that originally raised the objection. 
+  // The ~description~ is optionally provided by the ~source_obj~ to give a
+  // reason for raising the objection. The ~count~ indicates the number of
+  // objections raised by the ~source_obj~.
 
   virtual function void raised (uvm_objection objection, uvm_object source_obj, 
       string description, int count);
@@ -1040,10 +1057,12 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: dropped
   //
-  // The dropped callback is called when a decendant of the component instance
-  // raises the specfied ~objection~. The ~source_obj~ is the object which
-  // originally dropped the object. ~count~ is an optional count that was used
-  // to indicate a number of objections which were dropped.
+  // The ~dropped~ callback is called when this or a descendant of this component
+  // instance drops the specfied ~objection~. The ~source_obj~ is the object
+  // that originally dropped the objection. 
+  // The ~description~ is optionally provided by the ~source_obj~ to give a
+  // reason for dropping the objection. The ~count~ indicates the number of
+  // objections dropped by the the ~source_obj~.
 
   virtual function void dropped (uvm_objection objection, uvm_object source_obj, 
       string description, int count);
@@ -1052,12 +1071,12 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: all_dropped
   //
-  // The all_dropped callback is called when a decendant of the component instance
-  // raises the specfied ~objection~. The ~source_obj~ is the object which
-  // originally all_dropped the object. ~count~ is an optional count that was used
-  // to indicate a number of objections which were dropped. This callback is
-  // time-consuming and the all_dropped conditional will not be propagated
-  // up to the object's parent until the callback returns.
+  // The ~all_droppped~ callback is called when all objections have been 
+  // dropped by this component and all its descendants.  The ~source_obj~ is the
+  // object that dropped the last objection.
+  // The ~description~ is optionally provided by the ~source_obj~ to give a
+  // reason for raising the objection. The ~count~ indicates the number of
+  // objections dropped by the the ~source_obj~.
 
   virtual task all_dropped (uvm_objection objection, uvm_object source_obj, 
       string description, int count);
@@ -1634,11 +1653,10 @@ virtual class uvm_component extends uvm_report_object;
   extern function void m_set_cl_verb;
   extern function void m_set_cl_action;
   extern function void m_set_cl_sev;
+  extern function void m_apply_verbosity_settings(uvm_phase phase);
 
   // The verbosity settings may have a specific phase to start at. 
-  // We will do this work in the phase_started callback. May need a
-  // seperate internal callback so the user doesn't have to remember to call
-  // the phase started callback.
+  // We will do this work in the phase_started callback. 
 
   typedef struct {
     string phase;
@@ -2318,35 +2336,19 @@ task uvm_component::post_shutdown_phase(uvm_phase phase);  return; endtask
 // extender can decide what to do, if anything, for each phase.
 
 function void uvm_component::phase_started(uvm_phase phase);
-  foreach(m_verbosity_settings[i]) begin
-    if(phase.get_name() == m_verbosity_settings[i].phase) begin
-      if( m_verbosity_settings[i].offset == 0 ) begin
-          if(m_verbosity_settings[i].id == "_ALL_") 
-            set_report_verbosity_level(m_verbosity_settings[i].verbosity);
-          else 
-            set_report_id_verbosity(m_verbosity_settings[i].id, m_verbosity_settings[i].verbosity);
-      end
-      else begin
-        fork begin
-          m_verbosity_setting setting = m_verbosity_settings[i];
-          #setting.offset;
-          if(setting.id == "_ALL_") 
-            set_report_verbosity_level(setting.verbosity);
-          else 
-            set_report_id_verbosity(setting.id, setting.verbosity);
-        end join_none;
-      end
-      // Remove after use
-      m_verbosity_settings.delete(i);
-    end
-  end
 endfunction
-
 
 // phase_ended
 // -----------
 
 function void uvm_component::phase_ended(uvm_phase phase);
+endfunction
+
+
+// phase_ready_to_end
+// ------------------
+
+function void uvm_component::phase_ready_to_end (uvm_phase phase);
 endfunction
 
 //------------------------------
@@ -3107,11 +3109,19 @@ endfunction
 
 typedef class uvm_cmdline_processor;
 
+
+// m_set_cl_msg_args
+// -----------------
+
 function void uvm_component::m_set_cl_msg_args;
   m_set_cl_verb();
   m_set_cl_action();
   m_set_cl_sev();
 endfunction
+
+
+// m_set_cl_verb
+// -------------
 
 function void uvm_component::m_set_cl_verb;
   // _ALL_ can be used for ids
@@ -3181,6 +3191,9 @@ function void uvm_component::m_set_cl_verb;
 endfunction
 
 
+// m_set_cl_action
+// ---------------
+
 function void uvm_component::m_set_cl_action;
   // _ALL_ can be used for ids or severities
   // +uvm_set_action=<comp>,<id>,<severity>,<action[|action]>
@@ -3235,6 +3248,10 @@ function void uvm_component::m_set_cl_action;
 
 endfunction
 
+
+// m_set_cl_sev
+// ------------
+
 function void uvm_component::m_set_cl_sev;
   // _ALL_ can be used for ids or severities
   //  +uvm_set_severity=<comp>,<id>,<orig_severity>,<new_severity>
@@ -3286,6 +3303,39 @@ function void uvm_component::m_set_cl_sev;
     end
   end
 endfunction
+
+
+// m_apply_verbosity_settings
+// --------------------------
+
+function void uvm_component::m_apply_verbosity_settings(uvm_phase phase);
+  foreach(m_verbosity_settings[i]) begin
+    if(phase.get_name() == m_verbosity_settings[i].phase) begin
+      if( m_verbosity_settings[i].offset == 0 ) begin
+          if(m_verbosity_settings[i].id == "_ALL_") 
+            set_report_verbosity_level(m_verbosity_settings[i].verbosity);
+          else 
+            set_report_id_verbosity(m_verbosity_settings[i].id, m_verbosity_settings[i].verbosity);
+      end
+      else begin
+        fork begin
+          m_verbosity_setting setting = m_verbosity_settings[i];
+          #setting.offset;
+          if(setting.id == "_ALL_") 
+            set_report_verbosity_level(setting.verbosity);
+          else 
+            set_report_id_verbosity(setting.id, setting.verbosity);
+        end join_none;
+      end
+      // Remove after use
+      m_verbosity_settings.delete(i);
+    end
+  end
+endfunction
+
+
+// m_do_pre_abort
+// --------------
 
 function void uvm_component::m_do_pre_abort;
   foreach(m_children[i])
