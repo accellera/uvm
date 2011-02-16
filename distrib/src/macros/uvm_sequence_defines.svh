@@ -28,8 +28,7 @@
 // Group: Sequence Action Macros
 //
 // These macros are used to start sequences and sequence items on the default
-// sequencer, <uvm_sequence_base::m_sequencer>. The default sequencer is set
-// any number of ways. 
+// sequencer, ~m_sequencer~. This is determined a number of ways. 
 // - the sequencer handle provided in the <uvm_sequence_base::start> method
 // - the sequencer used by the parent sequence
 // - the sequencer that was set using the <uvm_sequence_item::set_sequencer> method
@@ -37,15 +36,19 @@
 
 // MACRO: `uvm_create
 //
+//| `uvm_create(SEQ_OR_ITEM)
+//
 // This action creates the item or sequence using the factory.  It intentionally
 // does zero processing.  After this action completes, the user can manually set
 // values, manipulate rand_mode and constraint_mode, etc.
 
-`define uvm_create(UVM_SEQUENCE_ITEM) \
-  `uvm_create_on(UVM_SEQUENCE_ITEM, m_sequencer)
+`define uvm_create(SEQ_OR_ITEM) \
+  `uvm_create_on(SEQ_OR_ITEM, m_sequencer)
 
 
 // MACRO: `uvm_do
+//
+//| `uvm_do(SEQ_OR_ITEM)
 //
 // This macro takes as an argument a uvm_sequence_item variable or object.  
 // uvm_sequence_item's are randomized ~at the time~ the sequencer grants the
@@ -53,37 +56,43 @@
 // In the case of a sequence a sub-sequence is spawned. In the case of an item,
 // the item is sent to the driver through the associated sequencer.
 
-`define uvm_do(UVM_SEQUENCE_ITEM) \
-  `uvm_do_on_pri_with(UVM_SEQUENCE_ITEM, m_sequencer, -1, {})
+`define uvm_do(SEQ_OR_ITEM) \
+  `uvm_do_on_pri_with(SEQ_OR_ITEM, m_sequencer, -1, {})
 
 
 // MACRO: `uvm_do_pri
 //
+//| `uvm_do_pri(SEQ_OR_ITEM, PRIORITY)
+//
 // This is the same as `uvm_do except that the sequene item or sequence is
 // executed with the priority specified in the argument
 
-`define uvm_do_pri(UVM_SEQUENCE_ITEM, PRIORITY) \
-  `uvm_do_on_pri_with(UVM_SEQUENCE_ITEM, m_sequencer, PRIORITY, {})
+`define uvm_do_pri(SEQ_OR_ITEM, PRIORITY) \
+  `uvm_do_on_pri_with(SEQ_OR_ITEM, m_sequencer, PRIORITY, {})
 
 
 // MACRO: `uvm_do_with
+//
+//| `uvm_do_with(SEQ_OR_ITEM, CONSTRAINTS)
 //
 // This is the same as `uvm_do except that the constraint block in the 2nd
 // argument is applied to the item or sequence in a randomize with statement
 // before execution.
 
-`define uvm_do_with(UVM_SEQUENCE_ITEM, CONSTRAINTS) \
-  `uvm_do_on_pri_with(UVM_SEQUENCE_ITEM, m_sequencer, -1, CONSTRAINTS)
+`define uvm_do_with(SEQ_OR_ITEM, CONSTRAINTS) \
+  `uvm_do_on_pri_with(SEQ_OR_ITEM, m_sequencer, -1, CONSTRAINTS)
 
 
 // MACRO: `uvm_do_pri_with
+//
+//| `uvm_do_pri_with(SEQ_OR_ITEM, PRIORITY, CONSTRAINTS)
 //
 // This is the same as `uvm_do_pri except that the given constraint block is
 // applied to the item or sequence in a randomize with statement before
 // execution.
 
-`define uvm_do_pri_with(UVM_SEQUENCE_ITEM, PRIORITY, CONSTRAINTS) \
-  `uvm_do_on_pri_with(UVM_SEQUENCER_ITEM, m_sequencer, PRIORITY, CONSTRAINTS)
+`define uvm_do_pri_with(SEQ_OR_ITEM, PRIORITY, CONSTRAINTS) \
+  `uvm_do_on_pri_with(SEQ_OR_ITEM, m_sequencer, PRIORITY, CONSTRAINTS)
 
 
 //-----------------------------------------------------------------------------
@@ -97,63 +106,73 @@
 
 // MACRO: `uvm_create_on
 //
+//| `uvm_create_on(SEQ_OR_ITEM, SEQR)
+//
 // This is the same as <`uvm_create> except that it also sets the parent sequence
 // to the sequence in which the macro is invoked, and it sets the sequencer to
-// the specified ~SEQUENCER_REF~ argument.
+// the specified ~SEQR~ argument.
 
-`define uvm_create_on(UVM_SEQUENCE_ITEM, SEQUENCER_REF) \
+`define uvm_create_on(SEQ_OR_ITEM, SEQR) \
   begin \
   uvm_object_wrapper w_; \
-  w_ = UVM_SEQUENCE_ITEM.get_type(); \
-  $cast(UVM_SEQUENCE_ITEM , create_item(w_, SEQUENCER_REF, `"UVM_SEQUENCE_ITEM`"));\
+  w_ = SEQ_OR_ITEM.get_type(); \
+  $cast(SEQ_OR_ITEM , create_item(w_, SEQR, `"SEQ_OR_ITEM`"));\
   end
 
 
 // MACRO: `uvm_do_on
 //
+//| `uvm_do_on(SEQ_OR_ITEM, SEQR)
+//
 // This is the same as <`uvm_do> except that it also sets the parent sequence to
 // the sequence in which the macro is invoked, and it sets the sequencer to the
-// specified ~SEQUENCER_REF~ argument.
+// specified ~SEQR~ argument.
 
-`define uvm_do_on(UVM_SEQUENCE_ITEM, SEQUENCER_REF) \
-  `uvm_do_on_pri_with(UVM_SEQUENCE_ITEM, SEQUENCER_REF, -1, {})
+`define uvm_do_on(SEQ_OR_ITEM, SEQR) \
+  `uvm_do_on_pri_with(SEQ_OR_ITEM, SEQR, -1, {})
 
 
 // MACRO: `uvm_do_on_pri
 //
+//| `uvm_do_on_pri(SEQ_OR_ITEM, SEQR, PRIORITY)
+//
 // This is the same as <`uvm_do_pri> except that it also sets the parent sequence
 // to the sequence in which the macro is invoked, and it sets the sequencer to
-// the specified ~SEQUENCER_REF~ argument.
+// the specified ~SEQR~ argument.
 
-`define uvm_do_on_pri(UVM_SEQUENCE_ITEM, SEQUENCER_REF, PRIORITY) \
-  `uvm_do_on_pri_with(UVM_SEQUENCE_ITEM, SEQUENCER_REF, PRIORITY, {})
+`define uvm_do_on_pri(SEQ_OR_ITEM, SEQR, PRIORITY) \
+  `uvm_do_on_pri_with(SEQ_OR_ITEM, SEQR, PRIORITY, {})
 
 
 // MACRO: `uvm_do_on_with
 //
+//| `uvm_do_on_with(SEQ_OR_ITEM, SEQR, CONSTRAINTS)
+//
 // This is the same as <`uvm_do_with> except that it also sets the parent
 // sequence to the sequence in which the macro is invoked, and it sets the
-// sequencer to the specified ~SEQUENCER_REF~ argument.
+// sequencer to the specified ~SEQR~ argument.
 // The user must supply brackets around the constraints.
 
-`define uvm_do_on_with(UVM_SEQUENCE_ITEM, SEQUENCER_REF, CONSTRAINTS) \
-  `uvm_do_on_pri_with(UVM_SEQUENCE_ITEM, SEQUENCER_REF, -1, CONSTRAINTS)
+`define uvm_do_on_with(SEQ_OR_ITEM, SEQR, CONSTRAINTS) \
+  `uvm_do_on_pri_with(SEQ_OR_ITEM, SEQR, -1, CONSTRAINTS)
 
 
 // MACRO: `uvm_do_on_pri_with
 //
+//| `uvm_do_on_pri_with(SEQ_OR_ITEM, SEQR, PRIORITY, CONSTRAINTS)
+//
 // This is the same as `uvm_do_pri_with except that it also sets the parent
 // sequence to the sequence in which the macro is invoked, and it sets the
-// sequencer to the specified ~SEQUENCER_REF~ argument.
+// sequencer to the specified ~SEQR~ argument.
 
-`define uvm_do_on_pri_with(UVM_SEQUENCE_ITEM, SEQUENCER_REF, PRIORITY, CONSTRAINTS) \
+`define uvm_do_on_pri_with(SEQ_OR_ITEM, SEQR, PRIORITY, CONSTRAINTS) \
   begin \
-  `uvm_create_on(UVM_SEQUENCE_ITEM, SEQUENCER_REF) \
-  start_item(UVM_SEQUENCE_ITEM, PRIORITY);\
-  if (!UVM_SEQUENCE_ITEM.randomize() with CONSTRAINTS ) begin \
+  `uvm_create_on(SEQ_OR_ITEM, SEQR) \
+  start_item(SEQ_OR_ITEM, PRIORITY);\
+  if (!SEQ_OR_ITEM.randomize() with CONSTRAINTS ) begin \
     `uvm_warning("RNDFLD", "Randomization failed in uvm_do_with action") \
   end\
-  finish_item(UVM_SEQUENCE_ITEM, PRIORITY);\
+  finish_item(SEQ_OR_ITEM, PRIORITY);\
   end
 
 
@@ -161,75 +180,87 @@
 //
 // Group: Sequence Action Macros for Pre-Existing Sequences
 //
-// These macros are used to start sequences and sequence items that have
-// already been allocated, i.e. do not need to be created. 
+// These macros are used to start sequences and sequence items that do not
+// need to be created. 
 //-----------------------------------------------------------------------------
 
 
 // MACRO: `uvm_send
 //
+//| `uvm_send(SEQ_OR_ITEM)
+//
 // This macro processes the item or sequence that has been created using
 // `uvm_create.  The processing is done without randomization.  Essentially, an
 // `uvm_do without the create or randomization.
 
-`define uvm_send(UVM_SEQUENCE_ITEM) \
-  `uvm_send_pri(UVM_SEQUENCE_ITEM, -1)
+`define uvm_send(SEQ_OR_ITEM) \
+  `uvm_send_pri(SEQ_OR_ITEM, -1)
   
 
 // MACRO: `uvm_send_pri
 //
+//| `uvm_send_pri(SEQ_OR_ITEM, PRIORITY)
+//
 // This is the same as `uvm_send except that the sequene item or sequence is
 // executed with the priority specified in the argument.
 
-`define uvm_send_pri(UVM_SEQUENCE_ITEM, PRIORITY) \
+`define uvm_send_pri(SEQ_OR_ITEM, PRIORITY) \
   begin \
-  start_item(UVM_SEQUENCE_ITEM, PRIORITY); \
-  finish_item(UVM_SEQUENCE_ITEM, PRIORITY);\
+  start_item(SEQ_OR_ITEM, PRIORITY); \
+  finish_item(SEQ_OR_ITEM, PRIORITY);\
   end\
   
 
 // MACRO: `uvm_rand_send
 //
+//| `uvm_rand_send(SEQ_OR_ITEM)
+//
 // This macro processes the item or sequence that has been already been
 // allocated (possibly with `uvm_create). The processing is done with
 // randomization.  Essentially, an `uvm_do without the create.
 
-`define uvm_rand_send(UVM_SEQUENCE_ITEM) \
-  `uvm_rand_send_pri_with(UVM_SEQUENCE_ITEM, -1, {})
+`define uvm_rand_send(SEQ_OR_ITEM) \
+  `uvm_rand_send_pri_with(SEQ_OR_ITEM, -1, {})
 
 
 // MACRO: `uvm_rand_send_pri
 //
+//| `uvm_rand_send_pri(SEQ_OR_ITEM, PRIORITY)
+//
 // This is the same as `uvm_rand_send except that the sequene item or sequence
 // is executed with the priority specified in the argument.
 
-`define uvm_rand_send_pri(UVM_SEQUENCE_ITEM, PRIORITY) \
-  `uvm_rand_send_pri_with(UVM_SEQUENCE_ITEM, PRIORITY, {})
+`define uvm_rand_send_pri(SEQ_OR_ITEM, PRIORITY) \
+  `uvm_rand_send_pri_with(SEQ_OR_ITEM, PRIORITY, {})
 
 
 // MACRO: `uvm_rand_send_with
+//
+//| `uvm_rand_send_with(SEQ_OR_ITEM, CONSTRAINTS)
 //
 // This is the same as `uvm_rand_send except that the given constraint block is
 // applied to the item or sequence in a randomize with statement before
 // execution.
 
-`define uvm_rand_send_with(UVM_SEQUENCE_ITEM, CONSTRAINTS) \
-  `uvm_rand_send_pri_with(UVM_SEQUENCE_ITEM, -1, CONSTRAINTS)
+`define uvm_rand_send_with(SEQ_OR_ITEM, CONSTRAINTS) \
+  `uvm_rand_send_pri_with(SEQ_OR_ITEM, -1, CONSTRAINTS)
 
 
 // MACRO: `uvm_rand_send_pri_with
+//
+//| `uvm_rand_send_pri_with(SEQ_OR_ITEM, PRIORITY, CONSTRAINTS)
 //
 // This is the same as `uvm_rand_send_pri except that the given constraint block
 // is applied to the item or sequence in a randomize with statement before
 // execution.
 
-`define uvm_rand_send_pri_with(UVM_SEQUENCE_ITEM, PRIORITY, CONSTRAINTS) \
+`define uvm_rand_send_pri_with(SEQ_OR_ITEM, PRIORITY, CONSTRAINTS) \
   begin \
-  start_item(UVM_SEQUENCE_ITEM, PRIORITY); \
-  if (!UVM_SEQUENCE_ITEM.randomize() with CONSTRAINTS ) begin \
+  start_item(SEQ_OR_ITEM, PRIORITY); \
+  if (!SEQ_OR_ITEM.randomize() with CONSTRAINTS ) begin \
     `uvm_warning("RNDFLD", "Randomization failed in uvm_rand_send_with action") \
   end \
-  finish_item(UVM_SEQUENCE_ITEM, PRIORITY);\
+  finish_item(SEQ_OR_ITEM, PRIORITY);\
   end\
 
 
@@ -254,6 +285,8 @@
 // MACRO- `uvm_add_to_sequence_library
 //
 // Adds the given sequence ~TYPE~ to the given sequence library ~LIBTYPE~
+//
+//| `uvm_add_to_seq_lib(TYPE,LIBTYPE)
 //
 // Invoke any number of times within a sequence declaration to statically add
 // that sequence to one or more sequence library types. The sequence will then
@@ -288,12 +321,13 @@
 
 // MACRO- `uvm_sequence_library_utils
 //
+//| `uvm_sequence_library_utils(TYPE)
+// 
 // Declares the infrastructure needed to define extensions to the
 // <uvm_sequence_library> class. You define new sequence library subtypes
 // to statically specify sequence membership from within sequence
 // definitions. See also <`uvm_add_to_sequence_library> for more information.
-
-// 
+//
 //
 //| typedef simple_seq_lib uvm_sequence_library #(simple_item);
 //|
@@ -349,10 +383,10 @@
 
 // MACRO: `uvm_declare_p_sequencer
 //
-//| `uvm_declare_p_sequencer(SEQUENCER)
-//
 // This macro is used to declare a variable ~p_sequencer~ whose type is
 // specified by ~SEQUENCER~.
+//
+//| `uvm_declare_p_sequencer(SEQUENCER)
 //
 // The example below shows using the the `uvm_declare_p_sequencer macro
 // along with the uvm_object_utils macros to set up the sequence but

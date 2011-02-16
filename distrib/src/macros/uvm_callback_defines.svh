@@ -24,11 +24,16 @@
 
 
 //-----------------------------------------------------------------------------
-// Group: Callback Macros
+// Title: Callback Macros
+//
+// These macros are used to register and execute callbacks extending
+// from ~uvm_callbacks~.
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 // MACRO: `uvm_register_cb
+//
+//| `uvm_register_cb(T,CB)
 //
 // Registers the given ~CB~ callback type with the given ~T~ object type. If
 // a type-callback pair is not registered then a warning is issued if an
@@ -58,7 +63,9 @@
 //-----------------------------------------------------------------------------
 // MACRO: `uvm_set_super_type
 //
-// Defines the super type of T to be ST. This allows for derived class
+//| `uvm_set_super_type(T,ST)
+//
+// Defines the super type of ~T~ to be ~ST~. This allows for derived class
 // objects to inherit typewide callbacks that are registered with the base
 // class.
 //
@@ -95,6 +102,8 @@
 //-----------------------------------------------------------------------------
 // MACRO: `uvm_do_callbacks
 //
+//| `uvm_do_callbacks(T,CB,METHOD,CALL)
+//
 // Calls the given ~METHOD~ of all callbacks of type ~CB~ registered with
 // the calling object (i.e. ~this~ object), which is or is based on type ~T~.
 //
@@ -127,12 +136,14 @@
 //-----------------------------------------------------------------------------
 
 
-`define uvm_do_callbacks(T,CB,METHOD_CALL) \
-  `uvm_do_obj_callbacks(T,CB,this,METHOD_CALL)
+`define uvm_do_callbacks(T,CB,METHOD) \
+  `uvm_do_obj_callbacks(T,CB,this,METHOD)
 
 
 //-----------------------------------------------------------------------------
 // MACRO: `uvm_do_obj_callbacks
+//
+//| `uvm_do_obj_callbacks(T,CB,OBJ,METHOD)
 //
 // Calls the given ~METHOD~ of all callbacks based on type ~CB~ registered with
 // the given object, ~OBJ~, which is or is based on type ~T~.
@@ -148,13 +159,13 @@
 //|    ...
 //-----------------------------------------------------------------------------
 
-`define uvm_do_obj_callbacks(T,CB,OBJ,METHOD_CALL) \
+`define uvm_do_obj_callbacks(T,CB,OBJ,METHOD) \
    begin \
      uvm_callback_iter#(T,CB) iter = new(OBJ); \
      CB cb = iter.first(); \
      while(cb != null) begin \
-       `uvm_cb_trace_noobj(cb,$sformatf(`"Executing callback method METHOD_CALL for callback %s (CB) from %s (T)`",cb.get_name(), OBJ.get_full_name())) \
-       cb.METHOD_CALL; \
+       `uvm_cb_trace_noobj(cb,$sformatf(`"Executing callback method 'METHOD' for callback %s (CB) from %s (T)`",cb.get_name(), OBJ.get_full_name())) \
+       cb.METHOD; \
        cb = iter.next(); \
      end \
    end
@@ -164,6 +175,8 @@
 
 //-----------------------------------------------------------------------------
 // MACRO: `uvm_do_callbacks_exit_on
+//
+//| `uvm_do_callbacks_exit_on(T,CB,METHOD,VAL)
 //
 // Calls the given ~METHOD~ of all callbacks of type ~CB~ registered with
 // the calling object (i.e. ~this~ object), which is or is based on type ~T~,
@@ -210,12 +223,14 @@
 //-----------------------------------------------------------------------------
 
 
-`define uvm_do_callbacks_exit_on(T,CB,METHOD_CALL,VAL) \
-  `uvm_do_obj_callbacks_exit_on(T,CB,this,METHOD_CALL,VAL) \
+`define uvm_do_callbacks_exit_on(T,CB,METHOD,VAL) \
+  `uvm_do_obj_callbacks_exit_on(T,CB,this,METHOD,VAL) \
 
 
 //-----------------------------------------------------------------------------
 // MACRO: `uvm_do_obj_callbacks_exit_on
+//
+//| `uvm_do_obj_callbacks_exit_on(T,CB,OBJ,METHOD,VAL)
 //
 // Calls the given ~METHOD~ of all callbacks of type ~CB~ registered with
 // the given object ~OBJ~, which must be or be based on type ~T~, and returns
@@ -230,16 +245,16 @@
 //| ...
 //-----------------------------------------------------------------------------
 
-`define uvm_do_obj_callbacks_exit_on(T,CB,OBJ,METHOD_CALL,VAL) \
+`define uvm_do_obj_callbacks_exit_on(T,CB,OBJ,METHOD,VAL) \
    begin \
      uvm_callback_iter#(T,CB) iter = new(OBJ); \
      CB cb = iter.first(); \
      while(cb != null) begin \
-       if (cb.METHOD_CALL == VAL) begin \
-         `uvm_cb_trace_noobj(cb,$sformatf(`"Executed callback method METHOD_CALL for callback %s (CB) from %s (T) : returned value VAL (other callbacks will be ignored)`",cb.get_name(), OBJ.get_full_name())) \
+       if (cb.METHOD == VAL) begin \
+         `uvm_cb_trace_noobj(cb,$sformatf(`"Executed callback method 'METHOD' for callback %s (CB) from %s (T) : returned value VAL (other callbacks will be ignored)`",cb.get_name(), OBJ.get_full_name())) \
          return VAL; \
        end \
-       `uvm_cb_trace_noobj(cb,$sformatf(`"Executed callback method METHOD_CALL for callback %s (CB) from %s (T) : did not return value VAL`",cb.get_name(), OBJ.get_full_name())) \
+       `uvm_cb_trace_noobj(cb,$sformatf(`"Executed callback method 'METHOD' for callback %s (CB) from %s (T) : did not return value VAL`",cb.get_name(), OBJ.get_full_name())) \
        cb = iter.next(); \
      end \
      return 1-VAL; \
