@@ -98,18 +98,22 @@
 
 // MACRO: `uvm_info
 //
+//| `uvm_info(ID,MSG,VERBOSITY)
+//
 // Calls uvm_report_info if ~VERBOSITY~ is lower than the configured verbosity of
 // the associated reporter. ~ID~ is given as the message tag and ~MSG~ is given as
 // the message text. The file and line are also sent to the uvm_report_info call.
 //
 
-`define uvm_info(ID, MSG, VERBOSITY) \
+`define uvm_info(ID,MSG,VERBOSITY) \
    begin \
      if (uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) \
        uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line); \
    end
 
 // MACRO: `uvm_warning
+//
+//| `uvm_warning(ID,MSG)
 //
 // Calls uvm_report_warning with a verbosity of UVM_NONE. The message can not
 // be turned off using the reporter's verbosity setting, but can be turned off
@@ -125,6 +129,8 @@
 
 // MACRO: `uvm_error
 //
+//| `uvm_error(ID,MSG)
+//
 // Calls uvm_report_error with a verbosity of UVM_NONE. The message can not
 // be turned off using the reporter's verbosity setting, but can be turned off
 // by setting the action for the message.  ~ID~ is given as the message tag and 
@@ -138,6 +144,8 @@
    end
 
 // MACRO: `uvm_fatal
+//
+//| `uvm_fatal(ID,MSG)
 //
 // Calls uvm_report_fatal with a verbosity of UVM_NONE. The message can not
 // be turned off using the reporter's verbosity setting, but can be turned off
@@ -153,6 +161,8 @@
 
 // MACRO: `uvm_info_context
 //
+//| `uvm_info_context(ID,MSG,VERBOSITY,CNTXT)
+//
 // Operates identically to `uvm_info but requires that the
 // context in which the message is printed be explicitly supplied as a
 // macro argument.
@@ -164,6 +174,8 @@
    end
 
 // MACRO: `uvm_warning_context
+//
+//| `uvm_warning_context(ID,MSG,CNTXT)
 //
 // Operates identically to `uvm_warning but requires that the
 // context in which the message is printed be explicitly supplied as a
@@ -177,6 +189,8 @@
 
 // MACRO: `uvm_error_context
 //
+//| `uvm_error_context(ID,MSG,CNTXT)
+//
 // Operates identically to `uvm_error but requires that the
 // context in which the message is printed be explicitly supplied as a
 // macro argument.
@@ -188,6 +202,8 @@
    end
 
 // MACRO: `uvm_fatal_context
+//
+//| `uvm_fatal_context(ID,MSG,CNTXT)
 //
 // Operates identically to `uvm_fatal but requires that the
 // context in which the message is printed be explicitly supplied as a

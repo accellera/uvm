@@ -32,9 +32,9 @@ typedef class uvm_component;
 // Inheriting all the methods of uvm_object, uvm_transaction adds a timing and
 // recording interface.
 //
-// The class uvm_transaction is deprecated and the <uvm_sequence_item> class,
-// which is a derivative of uvm_transaction, is recommended to be used in
-// its place.
+// Use of the class ~uvm_transaction~ as a base for user-defined transactions
+// is deprecated. Its subtype, <uvm_sequence_item>, shall be used as the
+// base class for all user-defined transaction types. 
 //
 //------------------------------------------------------------------------------
     

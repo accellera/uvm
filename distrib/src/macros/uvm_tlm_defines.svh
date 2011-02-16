@@ -23,7 +23,7 @@
 //
 // Title: TLM Implementation Port Declaration Macros
 //
-// The TLM implemenation declaration macros provide a way for an implementer
+// The TLM implemenation declaration macros provide a way for components
 // to provide multiple implemenation ports of the same implementation 
 // interface. When an implementation port is defined using the built-in
 // set of imps, there must be exactly one implementation of the interface.
@@ -76,6 +76,8 @@
 
 // MACRO: `uvm_blocking_put_imp_decl
 //
+//| `uvm_blocking_put_imp_decl(SFX)
+//
 // Define the class uvm_blocking_put_impSFX for providing blocking put
 // implementations.  ~SFX~ is the suffix for the new class type.
 
@@ -88,6 +90,8 @@ endclass
 
 // MACRO: `uvm_nonblocking_put_imp_decl
 //
+//| `uvm_nonblocking_put_imp_decl(SFX)
+//
 // Define the class uvm_nonblocking_put_impSFX for providing non-blocking 
 // put implementations.  ~SFX~ is the suffix for the new class type.
 
@@ -99,6 +103,8 @@ class uvm_nonblocking_put_imp``SFX #(type T=int, type IMP=int) \
 endclass
 
 // MACRO: `uvm_put_imp_decl
+//
+//| `uvm_put_imp_decl(SFX)
 //
 // Define the class uvm_put_impSFX for providing both blocking and
 // non-blocking put implementations.  ~SFX~ is the suffix for the new class
@@ -114,6 +120,8 @@ endclass
 
 // MACRO: `uvm_blocking_get_imp_decl
 //
+//| `uvm_blocking_get_imp_decl(SFX)
+//
 // Define the class uvm_blocking_get_impSFX for providing blocking get
 // implementations.  ~SFX~ is the suffix for the new class type.
 
@@ -126,6 +134,8 @@ endclass
 
 // MACRO: `uvm_nonblocking_get_imp_decl
 //
+//| `uvm_nonblocking_get_imp_decl(SFX)
+//
 // Define the class uvm_nonblocking_get_impSFX for providing non-blocking 
 // get implementations.  ~SFX~ is the suffix for the new class type.
 
@@ -137,6 +147,8 @@ class uvm_nonblocking_get_imp``SFX #(type T=int, type IMP=int) \
 endclass
 
 // MACRO: `uvm_get_imp_decl
+//
+//| `uvm_get_imp_decl(SFX)
 //
 // Define the class uvm_get_impSFX for providing both blocking and
 // non-blocking get implementations.  ~SFX~ is the suffix for the new class
@@ -152,6 +164,8 @@ endclass
 
 // MACRO: `uvm_blocking_peek_imp_decl
 //
+//| `uvm_blocking_peek_imp_decl(SFX)
+//
 // Define the class uvm_blocking_peek_impSFX for providing blocking peek
 // implementations.  ~SFX~ is the suffix for the new class type.
 
@@ -164,6 +178,8 @@ endclass
 
 // MACRO: `uvm_nonblocking_peek_imp_decl
 //
+//| `uvm_nonblocking_peek_imp_decl(SFX)
+//
 // Define the class uvm_nonblocking_peek_impSFX for providing non-blocking 
 // peek implementations.  ~SFX~ is the suffix for the new class type.
 
@@ -175,6 +191,8 @@ class uvm_nonblocking_peek_imp``SFX #(type T=int, type IMP=int) \
 endclass
 
 // MACRO: `uvm_peek_imp_decl
+//
+//| `uvm_peek_imp_decl(SFX)
 //
 // Define the class uvm_peek_impSFX for providing both blocking and
 // non-blocking peek implementations.  ~SFX~ is the suffix for the new class
@@ -191,6 +209,8 @@ endclass
 
 // MACRO: `uvm_blocking_get_peek_imp_decl
 //
+//| `uvm_blocking_get_peek_imp_decl(SFX)
+//
 // Define the class uvm_blocking_get_peek_impSFX for providing the
 // blocking get_peek implemenation.
 
@@ -203,6 +223,8 @@ class uvm_blocking_get_peek_imp``SFX #(type T=int, type IMP=int) \
 endclass
 
 // MACRO: `uvm_nonblocking_get_peek_imp_decl
+//
+//| `uvm_nonblocking_get_peek_imp_decl(SFX)
 //
 // Define the class uvm_nonblocking_get_peek_impSFX for providing non-blocking 
 // get_peek implemenation.
@@ -217,6 +239,8 @@ endclass
 
 
 // MACRO: `uvm_get_peek_imp_decl
+//
+//| `uvm_get_peek_imp_decl(SFX)
 //
 // Define the class uvm_get_peek_impSFX for providing both blocking and
 // non-blocking get_peek implementations.  ~SFX~ is the suffix for the new class
@@ -233,6 +257,8 @@ class uvm_get_peek_imp``SFX #(type T=int, type IMP=int) \
 endclass
 
 // MACRO: `uvm_blocking_master_imp_decl
+//
+//| `uvm_blocking_master_imp_decl(SFX)
 //
 // Define the class uvm_blocking_master_impSFX for providing the
 // blocking master implemenation.
@@ -255,6 +281,8 @@ endclass
 
 // MACRO: `uvm_nonblocking_master_imp_decl
 //
+//| `uvm_nonblocking_master_imp_decl(SFX)
+//
 // Define the class uvm_nonblocking_master_impSFX for providing the
 // non-blocking master implemenation.
 
@@ -275,6 +303,8 @@ class uvm_nonblocking_master_imp``SFX #(type REQ=int, type RSP=int, type IMP=int
 endclass
 
 // MACRO: `uvm_master_imp_decl
+//
+//| `uvm_master_imp_decl(SFX)
 //
 // Define the class uvm_master_impSFX for providing both blocking and
 // non-blocking master implementations.  ~SFX~ is the suffix for the new class
@@ -301,6 +331,8 @@ endclass
 
 // MACRO: `uvm_blocking_slave_imp_decl
 //
+//| `uvm_blocking_slave_imp_decl(SFX)
+//
 // Define the class uvm_blocking_slave_impSFX for providing the
 // blocking slave implemenation.
 
@@ -322,6 +354,8 @@ endclass
 
 // MACRO: `uvm_nonblocking_slave_imp_decl
 //
+//| `uvm_nonblocking_slave_imp_decl(SFX)
+//
 // Define the class uvm_nonblocking_slave_impSFX for providing the
 // non-blocking slave implemenation.
 
@@ -342,6 +376,8 @@ class uvm_nonblocking_slave_imp``SFX #(type REQ=int, type RSP=int, type IMP=int,
 endclass
 
 // MACRO: `uvm_slave_imp_decl
+//
+//| `uvm_slave_imp_decl(SFX)
 //
 // Define the class uvm_slave_impSFX for providing both blocking and
 // non-blocking slave implementations.  ~SFX~ is the suffix for the new class
@@ -368,6 +404,8 @@ endclass
 
 // MACRO: `uvm_blocking_transport_imp_decl
 //
+//| `uvm_blocking_transport_imp_decl(SFX)
+//
 // Define the class uvm_blocking_transport_impSFX for providing the
 // blocking transport implemenation.
 
@@ -380,11 +418,10 @@ endclass
 
 // MACRO: `uvm_nonblocking_transport_imp_decl
 //
+//| `uvm_nonblocking_transport_imp_decl(SFX)
+//
 // Define the class uvm_nonblocking_transport_impSFX for providing the
 // non-blocking transport implemenation.
-
-`define uvm_non_blocking_transport_imp_decl(SFX) \
-  uvm_nonblocking_transport_imp_decl(SFX)
 
 `define uvm_nonblocking_transport_imp_decl(SFX) \
 class uvm_nonblocking_transport_imp``SFX #(type REQ=int, type RSP=int, type IMP=int) \
@@ -393,7 +430,12 @@ class uvm_nonblocking_transport_imp``SFX #(type REQ=int, type RSP=int, type IMP=
   `NONBLOCKING_TRANSPORT_IMP_SFX(SFX, m_imp, REQ, RSP, req, rsp) \
 endclass
 
+`define uvm_non_blocking_transport_imp_decl(SFX) \
+  uvm_nonblocking_transport_imp_decl(SFX)
+
 // MACRO: `uvm_transport_imp_decl
+//
+//| `uvm_transport_imp_decl(SFX)
 //
 // Define the class uvm_transport_impSFX for providing both blocking and
 // non-blocking transport implementations.  ~SFX~ is the suffix for the new class
@@ -408,6 +450,8 @@ class uvm_transport_imp``SFX #(type REQ=int, type RSP=int, type IMP=int) \
 endclass
 
 // MACRO: `uvm_analysis_imp_decl
+//
+//| `uvm_analysis_imp_decl(SFX)
 //
 // Define the class uvm_analysis_impSFX for providing an analysis
 // implementation. ~SFX~ is the suffix for the new class type. The analysis 
