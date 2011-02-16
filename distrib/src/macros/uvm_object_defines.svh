@@ -3018,7 +3018,7 @@
        `ifdef UVM_USE_P_FORMAT \
        recorder.m_set_attribute(recorder.tr_handle,NAME,$sformatf("%p",VALUE)); \
        `else \
-       recorder.m_set_attribute(recorder.tr_handle,NAME,`"value of VALUE`")); \
+       recorder.m_set_attribute(recorder.tr_handle,NAME,`"value of VALUE`"); \
        `endif \
    end
 

@@ -262,7 +262,7 @@ class uvm_recorder extends uvm_object;
                                  string nm,
                                  string value);
     if (open_file())
-      $fdisplay(file,"  SET_ATTR: {TXH:%-5d NAME:%-20s VALUE:%s}", txh,nm,value);
+      $fdisplay(file,"  SET_ATTR: {TXH:%-5d NAME:%s VALUE:%s}", txh,nm,value);
   endfunction
   
   
@@ -276,8 +276,8 @@ class uvm_recorder extends uvm_object;
                                integer numbits=1024);
     string rdx=uvm_radix_to_string(radix);
     if (open_file())
-      $fdisplay(file,"  SET_ATTR: {TXH:%-5d NAME:%-20s VALUE:%0d RADIX:%s BITS=%-5d}",
-                 txh, nm, (value & ((1<<numbits)-1)),radix,numbits);
+      $fdisplay(file,"  SET_ATTR: {TXH:%-5d NAME:%s VALUE:%0d RADIX:%s BITS=%-5d}",
+                 txh, nm, (value & ((1<<numbits)-1)),radix.name(),numbits);
   endfunction
   
   
@@ -301,7 +301,7 @@ class uvm_recorder extends uvm_object;
     static int h = 1;
     if (open_file()) begin
       h++;
-      $fdisplay(file,"BEGIN: {TXH:%-5d TYPE:\"%0s\" STREAM:%-5d NAME:%-20s TIME=%0t LABEL:\"%0s\" DESC=\"%0s\"",
+      $fdisplay(file,"BEGIN: {TXH:%-5d TYPE:\"%0s\" STREAM:%-5d NAME:%s TIME=%0t LABEL:\"%0s\" DESC=\"%0s\"",
         h,txtype,stream,nm,begin_time,label,desc);
       return h;
     end

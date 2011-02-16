@@ -207,7 +207,7 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 
   if(r == 0)
   {
-      vpi_printf((PLI_BYTE8*) "ERROR UVM : set: unable to locate hdl path (%s)\n",path);
+      vpi_printf((PLI_BYTE8*) "UVM_ERROR: set: unable to locate hdl path (%s)\n",path);
       vpi_printf((PLI_BYTE8*) " Either the name is incorrect, or you may not have PLI/ACC visibility to that name\n");
     return 0;
   }
@@ -272,7 +272,7 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 
   if(r == 0)
   {
-      vpi_printf((PLI_BYTE8*) "ERROR UVM : get: unable to locate hdl path %s\n", path);
+      vpi_printf((PLI_BYTE8*) "UVM_ERROR: get: unable to locate hdl path %s\n", path);
       vpi_printf((PLI_BYTE8*) " Either the name is incorrect, or you may not have PLI/ACC visibility to that name\n");
     // Exiting is too harsh. Just return instead.
     // tf_dofinish();
@@ -286,7 +286,7 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
     size = vpi_get(vpiSize, r);
     if(size > maxsize)
     {
-        vpi_printf((PLI_BYTE8*) "ERROR UVM_register : hdl path '%s' is %0d bits,\n",path,size);
+    	    vpi_printf((PLI_BYTE8*) "UVM_ERROR: uvm_reg : hdl path '%s' is %0d bits,\n",path,size);
         vpi_printf((PLI_BYTE8*) " but the maximum size is %0d. You can increase the maximum\n",maxsize);
         vpi_printf((PLI_BYTE8*) " via a compile-time flag: +define+UVM_HDL_MAX_WIDTH=<value>\n");
       //tf_dofinish();
