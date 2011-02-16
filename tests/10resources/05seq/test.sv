@@ -160,10 +160,11 @@ class test extends uvm_component;
     e = new("env", this);
   endfunction
 
-  task run();
-  #1;
-     global_stop_request();
+  task run_phase(uvm_phase phase);
+     phase.raise_objection(this);
+     #100;
      print_config(1);
+     phase.drop_objection(this);
   endtask
 
   function void report();

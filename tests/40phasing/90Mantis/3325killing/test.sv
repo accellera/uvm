@@ -8,7 +8,6 @@ module top;
 class test extends test_base;
   function new(string name = "02killing", uvm_component parent = null);
     super.new(name, parent);
-    global_stop_request();
   endfunction : new
 
   `uvm_component_utils(test)
@@ -63,7 +62,6 @@ endclass : test
       run_test();
       #2000 begin
         `uvm_error( "TIMEOUT", "TIME OUT OCCURED." );
-        global_stop_request();
       end
     join
   end

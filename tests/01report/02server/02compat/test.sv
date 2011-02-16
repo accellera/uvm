@@ -55,7 +55,6 @@ class test extends uvm_test;
      `uvm_info("MSG1", "Some message again", UVM_LOW)
      `uvm_info("MSG2", "Another message again", UVM_LOW)
 
-      global_stop_request();
    endtask
 
    virtual function void report();

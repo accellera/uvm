@@ -25,10 +25,12 @@ module test;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       repeat(10) #del begin
         myobj.raise_objection(this);
       end
+      phase.drop_objection(this);
     endtask
   endclass
   class myagent extends uvm_component;
@@ -53,10 +55,11 @@ module test;
       hb.add(agent.mc1);
       hb.add(agent.mc2);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       uvm_event e = new("e");
       uvm_event e2 = new("e2");
       uvm_component l[$];
+      phase.raise_objection(this);
       hb.start(e);
       fork
         #10 hb.start(e2); //cause error since is started and e is event
@@ -74,7 +77,7 @@ module test;
         end
         repeat(8) #60 e.trigger();
       join
-      uvm_top.stop_request(); 
+      phase.drop_objection(this);
     endtask
   endclass
 

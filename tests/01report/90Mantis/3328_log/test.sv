@@ -53,8 +53,8 @@ class test extends uvm_component;
     `uvm_error("STDOUT", "Message for STDOUT");
     `uvm_error("FP", "Message for FP");
     $display("*** UVM TEST EXPECT 3 UVM_ERROR ***");
-    #1 global_stop_request();
   endtask
+
   function void report();
     string s1,s2,s3,s4,s5,s6,s7,s8,s9;
     int eof;

@@ -1,3 +1,21 @@
+//---------------------------------------------------------------------- 
+//   Copyright 2011 Mentor Graphics Corp.
+//   All Rights Reserved Worldwide 
+// 
+//   Licensed under the Apache License, Version 2.0 (the 
+//   "License"); you may not use this file except in 
+//   compliance with the License.  You may obtain a copy of 
+//   the License at 
+// 
+//       http://www.apache.org/licenses/LICENSE-2.0 
+// 
+//   Unless required by applicable law or agreed to in 
+//   writing, software distributed under the License is 
+//   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+//   CONDITIONS OF ANY KIND, either express or implied.  See 
+//   the License for the specific language governing 
+//   permissions and limitations under the License. 
+//----------------------------------------------------------------------
 
 `ifndef NUM_TRANS
 `define NUM_TRANS 1
@@ -44,8 +62,8 @@ module top;
 
 
 
-    item       man1=new,man2=new;
-    item_macro mac1=new,mac2=new;
+    item       man1=new("man1"),man2=new("man2");
+    item_macro mac1=new("mac1"),mac2=new("mac2");
 
     uvm_default_packer.use_metadata = 1;
     uvm_default_packer.big_endian = 0;
@@ -54,14 +72,10 @@ module top;
 
     $display("\NUM_TRANS=%0d",`NUM_TRANS);
 
-    assert(man1.randomize());
-    assert(mac1.randomize());
+    assert(man2.randomize());
+    //assert(mac2.randomize());
 
-    $display("\nManual:");
-    man1.print();
-    $display("\nMacro:");
-    mac1.print();
-
+    /*
     man2.sa[0] = 1;
     man2.sa[1] = 2;
     man2.sa[2] = 3;
@@ -79,8 +93,13 @@ module top;
     man2.str="HELLO";
     man2.bits = 'b1010111;
     man2.logics = 'bxz01zx1;
+    */
 
-    //mac2.enum2  = man2.enum2;
+    case (man2.enum2)
+      item::NOP: mac2.enum2 = item_macro::NOP;
+      item::READ: mac2.enum2 = item_macro::READ;
+      item::WRITE: mac2.enum2 = item_macro::WRITE;
+    endcase
     mac2.int64  = man2.int64;
     mac2.int32  = man2.int32;
     mac2.int16  = man2.int16;
@@ -104,6 +123,11 @@ module top;
     mac2.bits   = man2.bits;
     mac2.logics = man2.logics;
 
+    $display("\nManual:");
+    man2.print();
+    $display("\nMacro:");
+    mac2.print();
+
     //---------------------------------
     // COPY
     //---------------------------------
@@ -118,8 +142,8 @@ module top;
     `DO_CMP("Manual: ",compare,man1,man2);
     `DO_CMP("Macros: ",compare,mac1,mac2);
 
-    //$display("man1:",man1.convert2string());
-    //$display("man2:",man2.convert2string());
+    $display("man1:",man1.convert2string());
+    $display("man2:",mac1.convert2string());
 
     //---------------------------------
     // PACK/UNPACK
@@ -131,7 +155,7 @@ module top;
     for (int i=0; i< `NUM_TRANS; i++) begin
       void'(man1.pack(bits));
       void'(man2.unpack(bits));
-      if (!man1.do_compare(man2,null)) begin
+      if (!man1.compare(man2)) begin
         $display("MISCOMPARE!");
         man1.print();
         man2.print();
@@ -142,7 +166,7 @@ module top;
     for (int i=0; i< `NUM_TRANS; i++) begin
       void'(mac1.pack(bits));
       void'(mac2.unpack(bits));
-      if (!mac1.do_compare(mac2,null)) begin
+      if (!mac1.compare(mac2)) begin
         mac1.print();
         mac2.print();
         `uvm_fatal("MISCOMPARE","mismatch in pack/unpack")
@@ -157,7 +181,6 @@ module top;
     //---------------------------------
 
     begin
-    $display("HERE RECORD");
     man1.enable_recording("man1");
     mac1.enable_recording("mac1");
 
@@ -174,7 +197,6 @@ module top;
       mac1.int32 = i;
       mac1.end_tr();
     end
-    $display("END RECORD");
     end
 
     //---------------------------------

@@ -148,7 +148,6 @@ class test extends uvm_test;
        `uvm_error("EPILOG", "Object did not pack/unpack or compare");
     end
 
-    global_stop_request();
   endtask
 
    function void report();

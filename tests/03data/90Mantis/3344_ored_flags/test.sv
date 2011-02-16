@@ -78,7 +78,6 @@ class test extends uvm_test;
       end
     end
 
-    global_stop_request();
   endtask
 
 endclass

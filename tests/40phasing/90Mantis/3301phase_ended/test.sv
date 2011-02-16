@@ -58,11 +58,6 @@ module test;
       `uvm_info("SHUTDOWN",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
     endtask
 
-    task run_phase(uvm_phase phase);
-      global_stop_request();
-    endtask
-
-
   endclass
 
   /////////////////////////////////////////

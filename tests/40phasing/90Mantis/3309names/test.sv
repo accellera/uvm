@@ -51,16 +51,13 @@ class base extends uvm_test;
    
    task check_the_phase_t(string prev, string curr);
       `uvm_info("Test", $psprintf("Starting phase \"%s\"...", curr), UVM_LOW)
-      #10;
       if (prev != last_phase) begin
 `uvm_error("Test", $psprintf("Previous phase was \"%s\" instead of \"%s\".",
                              last_phase, prev));
       end
-      #10;
       last_phase = curr;
       `uvm_info("Test", $psprintf("Ending phase \"%s\"...", curr), UVM_LOW)
       n_ph++;
-      global_stop_request();
    endtask
 
    function new(string name = "my_comp", uvm_component parent = null);

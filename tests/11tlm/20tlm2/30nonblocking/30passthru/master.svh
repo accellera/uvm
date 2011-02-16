@@ -43,7 +43,7 @@ class master extends uvm_component;
   //--------------------------------------------------------------------
   function void build();
     initiator_socket = new("initiator_socket", this);
-    barrier = uvm_pool#(string, uvm_barrier)::get_global("barrier");
+    barrier = uvm_object_string_pool#(uvm_barrier)::get_global("barrier");
     barrier.set_threshold(barrier.get_threshold() + 1);
   endfunction
 
@@ -67,7 +67,7 @@ class master extends uvm_component;
   //--------------------------------------------------------------------
   // run
   //--------------------------------------------------------------------
-  task run();
+  task run_phaes(uvm_phase phase);
 
     fork
       begin
@@ -78,6 +78,7 @@ class master extends uvm_component;
 
     #0;
     state = BEGIN_REQ; // start the state machin running
+    #1000;
 
     // wait barrier
     barrier.wait_for();

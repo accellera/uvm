@@ -156,23 +156,15 @@ class env extends uvm_component;
   local slave s;
   local shell #(trans, uvm_tlm_phase_e) c;
 
-  local uvm_barrier barrier;
-
   function new(string name, uvm_component parent);
     super.new(name, parent);
     enable_stop_interrupt = 1;
   endfunction
 
   function void build();
-    uvm_pool#(string, uvm_barrier) bpool = uvm_pool#(string, uvm_barrier)::get_global_pool();
     m = new("master", this);
     s = new("slave", this);
     c = new("shell", this);
-
-    barrier = new("barrier");
-    barrier.set_threshold(1);
-
-    bpool.add("barrier", barrier);
   endfunction
 
   function void connect();
@@ -180,15 +172,10 @@ class env extends uvm_component;
     c.initiator_socket.connect(s.target_socket);
   endfunction
 
-  task stop(string ph_name);
+  task run_phase(uvm_phase phase);
+    phase.raise_objection(this);
     #1000;
-    barrier.wait_for();
-
-    if($time == 1000)
-      $display("** UVM TEST PASSED **");
-    else
-      $display("** UVM TEST FAILED **"); 
-
+    phase.drop_objection(this);
   endtask
 
 endclass
@@ -206,13 +193,16 @@ class test extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  function void build();
+  function void build_phase(uvm_phase phase);
     e = new("env", this);
   endfunction
 
-  task run();
-     global_stop_request();
-  endtask
+  function void report_phase(uvm_phase phase);
+    if($time == 1000)
+      $display("** UVM TEST PASSED **");
+    else
+      $display("** UVM TEST FAILED **"); 
+  endfunction
 
 endclass
 

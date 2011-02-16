@@ -21,9 +21,6 @@
 // a forever loop in some component. That component is passive and
 // does not effect the end of test.
 //
-// For this example, the global stop request is used to indicate the
-// run being done. But, this can also be done with the uvm_test_done 
-// objection.
 
 module top;
 
@@ -54,19 +51,12 @@ module top;
       super.new(name, parent);
     endfunction
 
-`ifdef UVM_USE_OVM_RUN_SEMANTIC
-    task run_phase(uvm_phase phase);
-      #10 global_stop_request(); 
-      #10;
-    endtask
-`else
     task run_phase(uvm_phase phase);
       phase.raise_objection(this, "raise run objection for UVM semantic");
       #10; 
       phase.drop_objection(this, "drop run objection for UVM semantic");
       #10;
     endtask
-`endif
 
     function void report_phase(uvm_phase phase);
       if($time == 10) $display("*** UVM TEST PASSED ***");

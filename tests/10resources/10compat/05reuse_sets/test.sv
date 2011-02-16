@@ -91,7 +91,6 @@ class test extends uvm_component;
         failed=1;
       end 
     end
-    global_stop_request();
   endtask
 
   function void report();

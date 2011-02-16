@@ -32,7 +32,6 @@ class test extends uvm_test;
 
     //If it gets to here, it is okay because it didn't have a null pointer
     $display("*** UVM TEST PASSED ***");
-    global_stop_request();
   endtask 
 endclass
 

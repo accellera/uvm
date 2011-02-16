@@ -173,12 +173,6 @@ module test;
     function void phase_ended(uvm_phase phase);
     endfunction
 
-    task run_phase(uvm_phase phase);
-      //if (phase.get_imp() == uvm_shutdown_phase::get();
-      //shutdown.wait_for(UVM_READY_TO_END);
-      global_stop_request();
-    endtask
-
     function void final_phase(uvm_phase phase);
       `uvm_info("FINAL", "Starting Final", UVM_NONE)
       if (phases != 21)

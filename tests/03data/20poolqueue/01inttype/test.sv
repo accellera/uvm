@@ -19,9 +19,6 @@ module top;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
-      global_stop_request();
-    endtask
   endclass
 
   initial begin

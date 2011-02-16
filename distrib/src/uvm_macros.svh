@@ -31,6 +31,7 @@
 `define UVM_USE_FILE_LINE
 `define UVM_DA_TO_QUEUE(Q,DA) Q=DA;
 `define _local local
+`define uvm_delay(TIME) #(TIME);
 
 //
 // Any vendor specific defines go here.

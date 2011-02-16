@@ -175,7 +175,9 @@ class test extends uvm_component;
   endfunction
 
   task run_phase(uvm_phase phase);
-    #100 global_stop_request();     
+    phase.raise_objection(this);
+    #100;
+    phase.drop_objection(this);
   endtask
 
 endclass

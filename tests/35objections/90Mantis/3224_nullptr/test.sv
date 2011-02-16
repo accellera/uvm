@@ -9,13 +9,17 @@ module top();
     function new (string name, uvm_component parent);
       super.new(name, parent);
     endfunction
-    task run();
+    task run_phase(uvm_phase phase);
       foo_objection.raise_objection(this);
+      #101;
+      $display("Ending run");
+      foo_objection.drop_objection(this);
     endtask
     `uvm_component_utils(test)
   endclass
 
   initial begin
+    uvm_top.finish_on_completion = 0;
     run_test();
   end
 
@@ -28,7 +32,6 @@ module top();
     if(objs.size() != 2) $display("*** UVM TEST FAILED ***");
     foreach(objs[i]) $display(": objector: %s", objs[i].get_full_name());
     foo_objection.drop_objection();
-    global_stop_request();
     $display("*** UVM TEST PASSED ***");
   end
 

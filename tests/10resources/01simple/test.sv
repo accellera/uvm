@@ -142,7 +142,6 @@ class test extends uvm_component;
     uvm_resources.dump();
     $display("--- unused resources ---");
     uvm_resources.print_resources(uvm_resources.find_unused_resources);
-    global_stop_request();
   endtask
 
   function void report();

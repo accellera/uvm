@@ -555,7 +555,7 @@ class uvm_objection extends uvm_report_object;
       fork
         begin
           if (m_drain_time.exists(obj))
-            #(m_drain_time[obj]);
+            `uvm_delay(m_drain_time[obj])
  
            if (m_trace_mode)
              m_report(obj,source_obj,description,count,"all_dropped");
@@ -956,7 +956,7 @@ typedef class uvm_cmdline_processor;
 
 //------------------------------------------------------------------------------
 //
-// Class- uvm_test_done_objection
+// Class- uvm_test_done_objection DEPRECATED
 //
 // Provides built-in end-of-test coordination
 //------------------------------------------------------------------------------
@@ -971,7 +971,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   local  int m_n_stop_threads;
 
 
-  // Function- new
+  // Function- new DEPRECATED
   //
   // Creates the singleton test_done objection. Users must not to call
   // this method directly.
@@ -981,7 +981,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   endfunction
 
 
-  // Function- qualify
+  // Function- qualify DEPRECATED
   //
   // Checks that the given ~object~ is derived from either <uvm_component> or
   // <uvm_sequence_base>.
@@ -1028,7 +1028,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   endtask
  
 
-  // Function- stop_request
+  // Function- stop_request DEPRECATED
   //
   // Calling this function triggers the process of shutting down the currently
   // running task-based phase. This process involves calling all components'
@@ -1054,7 +1054,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   endtask
 
 
-  // Variable- stop_timeout
+  // Variable- stop_timeout DEPRECATED
   //
   // These set watchdog timers for task-based phases and stop tasks. You can not
   // disable the timeouts. When set to 0, a timeout of the maximum time possible
@@ -1065,7 +1065,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   time stop_timeout = 0;
 
 
-  // Task- all_dropped
+  // Task- all_dropped DEPRECATED
   //
   // This callback is called when the given ~object's~ objection count reaches
   // zero; if the ~object~ is the implicit top-level, <uvm_root> then it means
@@ -1102,7 +1102,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
           begin
             if (stop_timeout == 0)
               wait(stop_timeout != 0);
-            #stop_timeout;
+            `uvm_delay(stop_timeout)
             `uvm_error("STOP_TIMEOUT",
               {$sformatf("Stop-task timeout of %0t expired. ", stop_timeout),
                  "'run' phase ready to proceed to extract phase"})
@@ -1124,7 +1124,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   endtask
 
 
-  // Function- raise_objection
+  // Function- raise_objection DEPRECATED
   //
   // Calls <uvm_objection::raise_objection> after calling <qualify>. 
   // If the ~object~ is not provided or is ~null~, then the implicit top-level
@@ -1151,7 +1151,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   endfunction
 
 
-  // Function- drop_objection
+  // Function- drop_objection DEPRECATED
   //
   // Calls <uvm_objection::drop_objection> after calling <qualify>. 
   // If the ~object~ is not provided or is ~null~, then the implicit top-level
@@ -1168,7 +1168,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   endfunction
 
 
-  // Task- force_stop
+  // Task- force_stop DEPRECATED
   //
   // Forces the propagation of the all_dropped() callback, even if there are still
   // outstanding objections. The net effect of this action is to forcibly end

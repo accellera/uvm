@@ -139,7 +139,8 @@ class test extends uvm_component;
     uvm_config_db#(cfgobj)::set(this,"c2","field2",obj);
   endfunction
 
-  task run();
+  task run_phase(uvm_phase phase);
+    phase.raise_objection(this);
     for(int i= 30; i<130; i+=20) begin
       #10;
       set_config_int("c1","field1",i);
@@ -149,7 +150,7 @@ class test extends uvm_component;
       obj = new(i+30);
       uvm_config_db#(cfgobj)::set(this,"c2","field2",obj);
     end  
-    uvm_top.stop_request();
+    phase.drop_objection(this);
   endtask
 
   function void report();

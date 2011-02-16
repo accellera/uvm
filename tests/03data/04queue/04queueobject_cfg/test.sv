@@ -1,5 +1,6 @@
 //---------------------------------------------------------------------- 
 //   Copyright 2010 Cadence Design Systems, Inc.
+//   Copyright 2010 Mentor Graphics Corp.
 //   All Rights Reserved Worldwide 
 // 
 //   Licensed under the Apache License, Version 2.0 (the 
@@ -100,7 +101,6 @@ cfg_field_set_clone.print();
         uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_set_sub is not set correctly ***", UVM_NONE);
    
       uvm_report_info("PASSED", "*** UVM TEST PASSED ***", UVM_NONE);
-      global_stop_request();
     endtask
   endclass
 

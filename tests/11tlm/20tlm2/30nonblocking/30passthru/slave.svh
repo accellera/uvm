@@ -42,7 +42,7 @@ class slave extends uvm_component;
   //--------------------------------------------------------------------
   function void build();
     target_socket = new("target_socket", this);
-    barrier = uvm_pool#(string, uvm_barrier)::get_global("barrier");
+    barrier = uvm_object_string_pool#(uvm_barrier)::get_global("barrier");
     barrier.set_threshold(barrier.get_threshold() + 1);
   endfunction
 
@@ -65,15 +65,15 @@ class slave extends uvm_component;
   //--------------------------------------------------------------------
   // run
   //--------------------------------------------------------------------
-  task run();
+  task run_phase(uvm_phase phase);
 
-    fork
-      begin
+    fork begin
         fsm_proc = process::self();
         fsm();
-      end
+    end
     join_none
 
+    #500;
     // wait barrier
     barrier.wait_for();
 

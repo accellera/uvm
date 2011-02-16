@@ -30,7 +30,6 @@ module test;
        failed = 1;
       end
       if(!failed) $display("*** UVM TEST PASSED ***");
-      global_stop_request();
     endtask
   endclass
 

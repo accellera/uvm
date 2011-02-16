@@ -29,15 +29,17 @@ module top;
 
     task run;
       data d1;
-      d1 = new; d1.set_name("d1");
 
+      void'(begin_tr(d1));
+      end_tr(d1);
+
+      d1 = new; d1.set_name("d1");
       void'(d1.randomize());
 
       void'(begin_tr(d1));
       end_tr(d1);
 
       uvm_report_info("SUCCESS", "**** UVM TEST PASSED ****", UVM_INFO);
-      global_stop_request();
     endtask
   endclass
 

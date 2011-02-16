@@ -119,7 +119,6 @@ class test extends uvm_test;
     end
 
     uvm_top.print_topology();
-    global_stop_request();
   endfunction
 
 endclass

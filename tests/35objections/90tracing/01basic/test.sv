@@ -30,15 +30,17 @@ module top;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this); 
       fork 
-        repeat(3) #40 uvm_test_done.raise_objection(this);
-        repeat(3) #25 uvm_test_done.raise_objection(this,get_full_name());
+        repeat(3) #40 phase.raise_objection(this);
+        repeat(3) #25 phase.raise_objection(this,get_full_name());
         repeat(3) #25 foo.raise_objection(this);
-        repeat(3) #70 uvm_test_done.drop_objection(this,get_full_name());
+        repeat(3) #70 phase.drop_objection(this,get_full_name());
         repeat(3) #70 foo.drop_objection(this);
-        repeat(3) #90 uvm_test_done.drop_objection(this);
+        repeat(3) #90 phase.drop_objection(this);
       join
+      phase.drop_objection(this); 
     endtask
   endclass
   class middle_comp extends uvm_component;
@@ -56,9 +58,6 @@ module top;
     endfunction
   endclass
   class test extends uvm_component;
-    int raised_counter[string];
-    int dropped_counter[string];
-    int all_dropped_counter[string];
     my_catcher ctchr = new;
 
     top_comp tc;
@@ -86,25 +85,25 @@ module top;
         $display("OBJ: %0s : %0d", obj.get_full_name(), ctchr.client_cnt[idx]);
         cli_cnt += ctchr.client_cnt[idx];
       end
-      if(ctchr.id_cnt["OBJTN_TRC"] != 65) begin
-        $display("** UVM TEST FAILED **");
-        return;
+      if(ctchr.id_cnt["OBJTN_TRC"] != 75) begin
+        $display("** UVM TEST FAILED 1 **");
+        //return;
       end
-      if(msg_cnt != 65 || cli_cnt != 65) begin
-        $display("** UVM TEST FAILED **");
-        return;
+      if(msg_cnt != 75 || cli_cnt != 75) begin
+        $display("** UVM TEST FAILED 2 **");
+        //return;
       end
       //pick an arbitrary message to look at
       obj=uvm_test_done;
-      if(ctchr.client_cnt[obj] != 65) 
+      if(ctchr.client_cnt[obj] != 75) 
       begin
-        $display("** UVM TEST FAILED **");
-        return;
+        $display("** UVM TEST FAILED 3 **");
+        //return;
       end
       if(ctchr.client_cnt.exists(foo)) 
       begin
-        $display("** UVM TEST FAILED **");
-        return;
+        $display("** UVM TEST FAILED 4 **");
+        //return;
       end
       $display("** UVM TEST PASSED **");
     endfunction

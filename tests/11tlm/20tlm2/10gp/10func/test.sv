@@ -1,5 +1,6 @@
 //----------------------------------------------------------------------
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2011 Mentor Graphics Corporation
+//   Copyright 2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -54,11 +55,7 @@ module top;
     for (int i=0; i< `NUM_TRANS; i++) \
       void'(OP1.sprint(OP2)); \
 
-initial 
- fork
-    run_test();
-    #100  global_stop_request();
- join_none
+initial run_test();
    
 class test extends uvm_test;
    bit pass = 1;
@@ -69,6 +66,8 @@ class test extends uvm_test;
 
    task run_phase(uvm_phase phase);
       uvm_tlm_gp  obj1=new,obj2=new;
+
+    phase.raise_objection(this);
 
     uvm_default_packer.use_metadata = 1;
     uvm_default_packer.big_endian = 0;
@@ -129,7 +128,7 @@ class test extends uvm_test;
     for (int i=0; i< `NUM_TRANS; i++) begin
       void'(obj1.pack(bits));
       void'(obj2.unpack(bits));
-      if (!obj1.do_compare(obj2,null)) begin
+      if (!obj1.compare(obj2)) begin
                  `uvm_error("TEST", "MISCOMPARE");
         obj1.print();
         obj2.print();
@@ -172,7 +171,7 @@ class test extends uvm_test;
     end
 
 //    $display("*** UVM TEST PASSED ***");
-
+    phase.drop_objection(this);
 
 endtask // run_phase
    

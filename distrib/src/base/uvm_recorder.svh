@@ -40,7 +40,7 @@ class uvm_recorder extends uvm_object;
 
   int recording_depth = 0; 
   UVM_FILE file;
-  string filename = "tr_db.txt";
+  string filename = "tr_db.log";
 
 
   // Variable: tr_handle
@@ -235,6 +235,8 @@ class uvm_recorder extends uvm_object;
 
   // Function- open_file
   //
+  // Opens the file in the <filename> property and assigns to the
+  // file descriptor <file>.
   //
   function bit open_file();
     if (file == 0)

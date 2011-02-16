@@ -281,11 +281,6 @@ module test;
       if (!scmd.compare_phase_times(scmd_times)) return 1 ;
       return 0 ;
     endfunction
-    task run_phase(uvm_phase phase);
-      `uvm_info("RUN", "In run", UVM_NONE)
-      #10 `uvm_info("RUN", "Done with run", UVM_NONE)
-      global_stop_request();
-    endtask
   endclass
 
   // Normal test that contains just the one env.

@@ -34,8 +34,6 @@ module test;
   //         b.  has a drain time of #93 (odd on purpose!).
   //   3.  A test that:
   //         a.  contains the agent
-  //   4.  This also shows global_stop_request() begin called explicitly and
-  //       being ignored due to outstanding objections.
 
   import uvm_pkg::*;
   `include "uvm_macros.svh"
@@ -45,21 +43,25 @@ module test;
       super.new(name, parent);
     endfunction : new
     `uvm_component_utils(simple_component)
-    task run();
-      #10 uvm_test_done.raise_objection(this);
-      #100 uvm_test_done.drop_objection(this);
-      #90 uvm_test_done.raise_objection(this);
-      #150 uvm_test_done.drop_objection(this);
-    endtask : run
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
+      #10 phase.raise_objection(this);
+      #100 phase.drop_objection(this);
+      #90 phase.raise_objection(this);
+      #150 phase.drop_objection(this);
+      phase.drop_objection(this);
+    endtask
   endclass : simple_component
 
   class simple_agent extends uvm_agent;
     simple_component component;
     function new (string name, uvm_component parent);
       super.new(name, parent);
-      // Set the agent's drain time.  uvm_test_done is the default.
-      uvm_test_done.set_drain_time(this, 93);
     endfunction : new
+    // Set the agent's drain time.
+    task run_phase(uvm_phase phase);
+      phase.phase_done.set_drain_time(this, 93);
+    endtask
     `uvm_component_utils(simple_agent)
     function void build();
       super.build();
@@ -92,11 +94,9 @@ module test;
   endclass : test
 
   initial begin
-    uvm_test_done.set_report_verbosity_level(UVM_FULL);
+    //uvm_test_done.set_report_verbosity_level(UVM_FULL);
     run_test("test");
   end
 
-  initial
-    #100 global_stop_request();
 
 endmodule

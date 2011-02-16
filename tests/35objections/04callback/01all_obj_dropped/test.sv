@@ -62,11 +62,11 @@ module test;
     virtual task body();
       p_sequencer.uvm_report_info("SEQ_BODY", "simple_seq body() is starting...", UVM_LOW);
       repeat(2) begin
+        // Raising one uvm_test_done objection
+        uvm_test_done.raise_objection(this);
         //The second time through, the count is 0 but the all dropped cb
         //in the test allows this comp to reraise.
         #50;
-        // Raising one uvm_test_done objection
-        uvm_test_done.raise_objection(this);
         for (int i = 0; i < 10; i++) begin
           `uvm_do(req)
           #10;

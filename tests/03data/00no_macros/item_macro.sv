@@ -51,7 +51,7 @@ class item_macro extends uvm_sequence_item;
 `endif       
        real              real64;
 
-       time              time64;
+  rand time              time64;
 
        string            str;
 
@@ -65,6 +65,11 @@ class item_macro extends uvm_sequence_item;
 
   constraint C_q_size  { q.size  inside {[1:11]}; }
   constraint C_da_size { da.size inside {[1:11]}; }
+
+
+  function new(string name="");
+    super.new(name);
+  endfunction
 
   `uvm_object_utils_begin(item_macro)
 
@@ -99,5 +104,65 @@ class item_macro extends uvm_sequence_item;
      `uvm_field_int(logics,UVM_ALL_ON)
 
   `uvm_object_utils_end
+
+ // convert2string
+  //---------------
+
+  virtual function string convert2string();
+
+   `ifdef UVM_USE_P_FORMAT
+     return $sformatf("%p",this);
+   `else
+     string s;
+     s = {s, $psprintf("enum2:%s ",enum2.name())};
+
+     s = {s, $psprintf("int64:%0h ",int64)};
+     s = {s, $psprintf("int32:%0h ",int32)};
+     s = {s, $psprintf("int16:%0h ",int16)};
+     s = {s, $psprintf("int8:%0h ", int8)};
+     s = {s, $psprintf("int1:%0h ", int1)};
+      
+     s = {s, $psprintf("uint64:%0h ",uint64)};
+     s = {s, $psprintf("uint32:%0h ",uint32)};
+     s = {s, $psprintf("uint16:%0h ",uint16)};
+     s = {s, $psprintf("uint8:%0h ", uint8)};
+     s = {s, $psprintf("uint1:%0h ", uint1)};
+      
+     s = {s, $psprintf("real64:%0f ", real64)};
+`ifndef INCA     
+     s = {s, $psprintf("real32:%0f ", real32)};
+`endif      
+     s = {s, $psprintf("time64:%0t ", time64)};
+      
+     s = {s, $psprintf("str:%0s ", str)};
+
+     s = {s, "sa:'{"};
+     foreach (sa[i])
+       s = {s, $psprintf("%s%0h", i==0?"":" ",sa[i])};
+     s = {s, "} "};
+
+     s = {s, "da:'{"};
+     foreach (da[i])
+       s = {s, $psprintf("%s%0h", i==0?"":" ",da[i])};
+     s = {s, "} "};
+
+     s = {s, "q:'{"};
+     foreach (q[i])
+       s = {s, $psprintf("%s%0h", i==0?"":" ",q[i])};
+     s = {s, "} "};
+
+     begin bit first=0;
+     s = {s, "aa:'{"};
+     foreach (aa[key])
+       s = {s, $psprintf("%s%0h:%0h", first?"":" ",key, aa[key])};
+     s = {s, "} "};
+     end
+
+     s = {s, $psprintf("bits:%0h", bits)};
+     s = {s, $psprintf("logics:%0b", logics)};
+
+    `endif
+  endfunction
+
 
 endclass

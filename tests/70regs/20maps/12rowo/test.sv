@@ -54,7 +54,7 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
       tb_env env;
       uvm_status_e   status;
       uvm_reg_data_t data;
@@ -65,11 +65,14 @@ class test extends uvm_test;
          `uvm_fatal("test", "Cannot find tb_env");
       end
 
+      phase.raise_objection(this);
+
       env.regmodel.reset();
 
       begin
          uvm_sequence_base seq = new;
             
+
          `uvm_info("Test", "Testing RO/WO sharing...", UVM_NONE)
 
          `uvm_info("test", "Testing normal operations...", UVM_LOW)
@@ -140,7 +143,7 @@ class test extends uvm_test;
                                          data, exp));
          end
       end
-      global_stop_request();
+      phase.drop_objection(this);
    endtask
 
    virtual function void report();

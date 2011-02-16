@@ -49,14 +49,15 @@ module test;
       hb.add(agent.mc1);
       hb.add(agent.mc2);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       uvm_event e = new("e");
+      phase.raise_objection(this);
       hb.start(e);
       fork
         repeat(11) #60 e.trigger();
         #550 hb.remove(agent.mc1);
       join
-      uvm_top.stop_request(); 
+      phase.drop_objection(this);
     endtask
   endclass
 

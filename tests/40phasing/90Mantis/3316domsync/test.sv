@@ -164,7 +164,6 @@ module test;
       domain2 = new("domain2");
       dom1.set_domain(domain1);
       dom2.set_domain(domain2);
-      global_stop_request();
     endfunction
 
     function void final_phase(uvm_phase phase);

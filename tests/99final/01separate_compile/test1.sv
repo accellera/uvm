@@ -97,14 +97,15 @@ module testm();
       this.print();
     endfunction
 
-    task run();
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       // Create register sequence
       seq=test_seq::type_id::create("test_seq", this);
       // Set sequence's container
       seq.model=model.rfile0;
       // Procedurally start sequence
       seq.start(null);
-      #10000 global_stop_request();
+      phase.drop_objection(this);
     endtask
 
     `uvm_component_utils(test)

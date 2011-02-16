@@ -64,7 +64,6 @@ class active_comp extends uvm_component;
   endfunction
 
   task main_phase(uvm_phase phase);
-  global_stop_request();
     phase.raise_objection(this, "start main phase for active component");
     started = 1;
     #105;

@@ -67,9 +67,7 @@ endclass
 initial
 begin
    comp1 c = new("c", null);
-   fork
-      run_test;
-   join_none
+   run_test();
    #500 global_stop_request;
 end
 

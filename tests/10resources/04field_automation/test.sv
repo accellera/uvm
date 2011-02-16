@@ -142,7 +142,6 @@ class test extends uvm_component;
 
   task run();
     print_config_with_audit(1);
-    global_stop_request();
   endtask
 
   function void report();

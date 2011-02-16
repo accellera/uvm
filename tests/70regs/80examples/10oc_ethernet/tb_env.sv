@@ -70,6 +70,7 @@ class oc_ethernet_env extends uvm_env;
    endfunction
 
    virtual task run_phase(uvm_phase phase);
+     phase.raise_objection(this);
      if (seq == null) begin
        uvm_report_fatal("NO_SEQUENCE","Env's sequence is not defined. Nothing to do. Exiting.");
        return;
@@ -85,7 +86,7 @@ class oc_ethernet_env extends uvm_env;
      uvm_report_info("START_SEQ",{"Starting sequence '",seq.get_name(),"'"});
      seq.model = model;
      seq.start(null);
-     global_stop_request();
+     phase.drop_objection(this);
    endtask
 
 endclass: oc_ethernet_env

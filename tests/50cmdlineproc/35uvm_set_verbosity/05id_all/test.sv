@@ -51,14 +51,15 @@ class test extends uvm_test;
      messages("report");
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       #100;
       messages("run");
       #200;
       messages("run");
       #700;
       messages("run");
-      uvm_top.stop_request();
+      phase.drop_objection(this);
    endtask
 
 

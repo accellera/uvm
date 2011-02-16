@@ -23,10 +23,12 @@ module test;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       repeat(10) #del myobj.raise_objection(this);
       repeat(10) #del;
       repeat(10) #del myobj.raise_objection(this);
+      phase.drop_objection(this);
     endtask
   endclass
   class myagent extends uvm_component;
@@ -54,8 +56,9 @@ module test;
       hb.add(agent.mc1);
       hb.add(agent.mc2);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       uvm_event e = new("e");
+      phase.raise_objection(this);
       hb.start(e);
       fork
         repeat(30) #60 e.trigger(); //0-1800 every 60
@@ -70,7 +73,7 @@ module test;
           #610 hb.remove(agent.mc2); //one msg at 1140 
         end
       join
-      uvm_top.stop_request(); 
+      phase.drop_objection(this);
     endtask
   endclass
 

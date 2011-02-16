@@ -15,13 +15,14 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       `uvm_error("A", "A Error but downgrading to an Info!!!")
       `uvm_error("B", "B Error but downgrading to an Info!!!")
       `uvm_error("C", "C Error but downgrading to an Info!!!")
       `uvm_error("D", "D Error but downgrading to an Info!!!")
       #1000;
-      uvm_top.stop_request();
+      phase.drop_objection(this);
    endtask
 
    virtual function void report();
@@ -35,9 +36,6 @@ class test extends uvm_test;
 endclass
 
 
-initial
-  begin
-     run_test();
-  end
+initial run_test();
 
 endprogram

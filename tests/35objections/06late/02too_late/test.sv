@@ -31,21 +31,24 @@ module top;
       super.new(name, parent);
     endfunction : new
     `uvm_component_utils(simple_component)
-    task run();
-      #10 uvm_test_done.raise_objection(this);
-      #100 uvm_test_done.drop_objection(this);
-      #100 uvm_test_done.raise_objection(this);
-      #150 uvm_test_done.drop_objection(this);
-    endtask : run
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
+      #10; 
+      #100 phase.drop_objection(this);
+      #100 phase.raise_objection(this);
+      #150 phase.drop_objection(this);
+    endtask 
   endclass : simple_component
 
   class simple_agent extends uvm_agent;
     simple_component component;
     function new (string name, uvm_component parent);
       super.new(name, parent);
-      // Set the agent's drain time.  uvm_test_done is the default.
-      uvm_test_done.set_drain_time(this, 93);
     endfunction : new
+    // Set the agent's drain time.
+    task run_phase(uvm_phase phase);
+      phase.phase_done.set_drain_time(this, 93);
+    endtask
     `uvm_component_utils(simple_agent)
     function void build();
       super.build();
@@ -79,8 +82,5 @@ module top;
 
   initial
     run_test("test");
-
-  initial
-    #100 global_stop_request();
 
 endmodule

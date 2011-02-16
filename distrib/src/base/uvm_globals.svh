@@ -41,7 +41,7 @@ task run_test (string test_name="");
 endtask
 
 
-// Variable- uvm_test_done - deprecated
+// Variable- uvm_test_done - DEPRECATED
 //
 // An instance of the <uvm_test_done_objection> class, this object is
 // used by components to coordinate when to end the currently running
@@ -52,7 +52,7 @@ endtask
 uvm_test_done_objection uvm_test_done = uvm_test_done_objection::get();
 
 
-// Method- global_stop_request  - deprecated
+// Method- global_stop_request  - DEPRECATED
 //
 // Convenience function for uvm_test_done.stop_request(). See 
 // <uvm_test_done_objection::stop_request> for more information.
@@ -64,7 +64,7 @@ function void global_stop_request();
 endfunction
 
 
-// Method- set_global_timeout  - deprecated
+// Method- set_global_timeout  - DEPRECATED
 //
 // Convenience function for uvm_top.set_timeout(). See 
 // <uvm_root::set_timeout> for more information.  The overridable bit 
@@ -78,7 +78,7 @@ function void set_global_timeout(time timeout, bit overridable = 1);
 endfunction
 
 
-// Function- set_global_stop_timeout - deprecated
+// Function- set_global_stop_timeout - DEPRECATED
 //
 // Convenience function for uvm_test_done.stop_timeout = timeout.
 // See <uvm_uvm_test_done::stop_timeout> for more information.

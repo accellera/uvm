@@ -51,12 +51,13 @@ module top;
     `uvm_new_func
     `uvm_component_utils(mysequencer)
     my_catcher catcher;
-    task run;
+    task run_phase(uvm_phase phase);
       myseq seq = myseq::type_id::create("myseq",this);
       catcher = new(this);
       uvm_report_cb::add(null,catcher);
+      phase.raise_objection(this);
       seq.start(this);
-      global_stop_request();
+      phase.drop_objection(this);
     endtask
     function void report();
       int failed = 0;

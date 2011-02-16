@@ -42,9 +42,10 @@ class test extends uvm_env;
       this.print();
    endfunction 
    
-   task run();
+   task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       #7000;
-      global_stop_request();
+      phase.drop_objection(this);
    endtask
 endclass
    

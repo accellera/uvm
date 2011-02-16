@@ -57,6 +57,7 @@
 //   ---------------
 //   148
 //     
+// extra raise/drop for lower and middle comp adds 10 (lower) + 8 (middle) extra trace messages
 
 module top;
   import uvm_pkg::*;
@@ -85,15 +86,17 @@ module top;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       fork 
-        repeat(3) #40 uvm_test_done.raise_objection(this);
-        repeat(3) #25 uvm_test_done.raise_objection(this,get_full_name());
+        repeat(3) #40 phase.raise_objection(this);
+        repeat(3) #25 phase.raise_objection(this,get_full_name());
         repeat(3) #25 foo.raise_objection(this);
-        repeat(3) #70 uvm_test_done.drop_objection(this,get_full_name());
+        repeat(3) #70 phase.drop_objection(this,get_full_name());
         repeat(3) #70 foo.drop_objection(this);
-        repeat(3) #90 uvm_test_done.drop_objection(this);
+        repeat(3) #90 phase.drop_objection(this);
       join
+      phase.drop_objection(this);
     endtask
   endclass
   class middle_comp extends uvm_component;
@@ -102,13 +105,15 @@ module top;
       super.new(name,parent);
       lc = new("lc", this);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       fork 
-        repeat(4) #25 uvm_test_done.raise_objection(this);
+        repeat(4) #25 phase.raise_objection(this);
         repeat(2) #25 foo.raise_objection(this);
-        repeat(4) #70 uvm_test_done.drop_objection(this);
+        repeat(4) #70 phase.drop_objection(this);
         repeat(2) #70 foo.drop_objection(this);
       join
+      phase.drop_objection(this);
     endtask
   endclass
   class top_comp extends uvm_component;
@@ -119,9 +124,6 @@ module top;
     endfunction
   endclass
   class test extends uvm_component;
-    int raised_counter[string];
-    int dropped_counter[string];
-    int all_dropped_counter[string];
     my_catcher ctchr = new;
 
     top_comp tc;
@@ -146,17 +148,17 @@ module top;
 
       // Note that there are 35 objections from run for 15 implicit raise/drop
       // plus 5 alldrop messages.
-      if(ctchr.id_cnt["OBJTN_TRC"] != 148) begin
-        $display("** UVM TEST FAILED ** Saw %0d OBJTN_TRC messages instead of 148", ctchr.id_cnt["OBJTN_TRC"]);
-        return;
+      if(ctchr.id_cnt["OBJTN_TRC"] != 166) begin
+        $display("** UVM TEST FAILED ** Saw %0d OBJTN_TRC messages instead of 166", ctchr.id_cnt["OBJTN_TRC"]);
+        //return;
       end
-      if(my_catcher::msg_cnt != 148) begin
-        $display("** UVM TEST FAILED ** Saw %0d messages instead of 148", my_catcher::msg_cnt);
-        return;
+      if(my_catcher::msg_cnt != 166) begin
+        $display("** UVM TEST FAILED ** Saw %0d messages instead of 166", my_catcher::msg_cnt);
+        //return;
       end
-      if(cli_cnt != 148) begin
-        $display("** UVM TEST FAILED ** Saw %0d clients instead of 148", cli_cnt);
-        return;
+      if(cli_cnt != 166) begin
+        $display("** UVM TEST FAILED ** Saw %0d clients instead of 166", cli_cnt);
+        //return;
       end
 
       $display("** UVM TEST PASSED **");

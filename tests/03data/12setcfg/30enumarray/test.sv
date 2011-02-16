@@ -19,9 +19,6 @@ module top;
       recording_detail = UVM_LOW;
     endfunction
 
-    task run;
-      global_stop_request();
-    endtask
     function void report();
       bit failed=0;
       if(da_num.size() != 3) begin

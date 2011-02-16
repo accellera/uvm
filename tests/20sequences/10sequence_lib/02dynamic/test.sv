@@ -117,10 +117,6 @@ module top;
        driver.seq_item_port.connect(sequencer.seq_item_export);
      endfunction
 
-     virtual task post_shutdown_phase(uvm_phase phase);
-        global_stop_request();
-     endtask
-
      virtual function void report();
        uvm_root top = uvm_root::get();
        uvm_report_server svr = top.get_report_server();

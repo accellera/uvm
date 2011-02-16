@@ -14,7 +14,6 @@ module test;
       $display("achoo: %0d", achoo);
       if(achoo != 10) $display("*** UVM TEST FAILED ***");
       else $display("*** UVM TEST PASSED ***");
-      global_stop_request();
     endtask
   endclass
 

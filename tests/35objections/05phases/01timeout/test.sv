@@ -29,10 +29,6 @@ module test;
 
     `uvm_component_utils(simple_driver)
 
-    task run();
-    endtask
-
-
   endclass : simple_driver
 
   class test extends uvm_test;
@@ -55,10 +51,10 @@ module test;
 
     function void start_of_simulation();
       this.print();
+      set_global_stop_timeout(200);
     endfunction
 
-    task run;
-      set_global_stop_timeout(200);
+    task run_phase(uvm_phase phase);
       #1 global_stop_request();
     endtask
 
