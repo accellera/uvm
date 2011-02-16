@@ -275,7 +275,7 @@ class uvm_recorder extends uvm_object;
     string rdx=uvm_radix_to_string(radix);
     if (open_file())
       $fdisplay(file,"  SET_ATTR: {TXH:%-5d NAME:%s VALUE:%0d RADIX:%s BITS=%-5d}",
-                 txh, nm, (value & ((1<<numbits)-1)),radix,numbits);
+                 txh, nm, (value & ((1<<numbits)-1)),radix.name(),numbits);
   endfunction
   
   
