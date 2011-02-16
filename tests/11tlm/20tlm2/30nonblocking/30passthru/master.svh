@@ -30,8 +30,9 @@ class master extends uvm_component;
   local trans transaction;
 
   local process fsm_proc;
-  local uvm_barrier barrier;
 
+  int n_trans = 0;
+   
   function new(string name, uvm_component parent);
     super.new(name, parent);
     state = UNINITIALIZED_PHASE;
@@ -43,8 +44,6 @@ class master extends uvm_component;
   //--------------------------------------------------------------------
   function void build();
     initiator_socket = new("initiator_socket", this);
-    barrier = uvm_pool#(string, uvm_barrier)::get_global("barrier");
-    barrier.set_threshold(barrier.get_threshold() + 1);
   endfunction
 
   //--------------------------------------------------------------------
@@ -78,14 +77,6 @@ class master extends uvm_component;
 
     #0;
     state = BEGIN_REQ; // start the state machin running
-
-    // wait barrier
-    barrier.wait_for();
-
-    // clean up
-    fsm_proc.kill();
-
-    `uvm_info("master", "shutting down...", UVM_NONE);
 
   endtask
 
@@ -143,6 +134,7 @@ class master extends uvm_component;
             delay.reset();
             sync = initiator_socket.nb_transport_fw(transaction, state, delay);
             state = BEGIN_REQ;
+            n_trans++;
             #0;
           end
 

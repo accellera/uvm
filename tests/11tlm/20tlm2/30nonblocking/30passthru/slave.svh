@@ -30,7 +30,8 @@ class slave extends uvm_component;
   local trans transaction;
 
   local process fsm_proc;
-  local uvm_barrier barrier;
+
+   int n_trans = 0;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -42,8 +43,6 @@ class slave extends uvm_component;
   //--------------------------------------------------------------------
   function void build();
     target_socket = new("target_socket", this);
-    barrier = uvm_pool#(string, uvm_barrier)::get_global("barrier");
-    barrier.set_threshold(barrier.get_threshold() + 1);
   endfunction
 
   //--------------------------------------------------------------------
@@ -73,14 +72,6 @@ class slave extends uvm_component;
         fsm();
       end
     join_none
-
-    // wait barrier
-    barrier.wait_for();
-
-    // clean up
-    fsm_proc.kill();
-
-    `uvm_info("slave", "shutting down...", UVM_NONE);
 
   endtask
 
@@ -132,7 +123,8 @@ class slave extends uvm_component;
           end
 
         END_RESP:
-          begin
+         begin
+            n_trans++;
             #(delay_time.get_realtime(1ns));
             `uvm_info("slave", "end rsp", UVM_NONE);
             wait (state != END_RESP);

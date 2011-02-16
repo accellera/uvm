@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
 //   Copyright 2010 Mentor Graphics Corporation
-//   Copyright 2010 Synopsys Inc
+//   Copyright 2011 Synopsys Inc
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -152,44 +152,24 @@ class env extends uvm_component;
 
   `uvm_component_utils(env)
 
-  local master m;
-  local slave s;
-  local shell #(trans, uvm_tlm_phase_e) c;
-
-  local uvm_barrier barrier;
+  master m;
+  slave s;
+  shell #(trans, uvm_tlm_phase_e) c;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
-    enable_stop_interrupt = 1;
   endfunction
 
   function void build();
-    uvm_pool#(string, uvm_barrier) bpool = uvm_pool#(string, uvm_barrier)::get_global_pool();
     m = new("master", this);
     s = new("slave", this);
     c = new("shell", this);
-
-    barrier = new("barrier");
-    barrier.set_threshold(1);
-
-    bpool.add("barrier", barrier);
   endfunction
 
   function void connect();
     m.initiator_socket.connect(c.target_socket);
     c.initiator_socket.connect(s.target_socket);
   endfunction
-
-  task stop(string ph_name);
-    #1000;
-    barrier.wait_for();
-
-    if($time == 1000)
-      $display("** UVM TEST PASSED **");
-    else
-      $display("** UVM TEST FAILED **"); 
-
-  endtask
 
 endclass
 
@@ -211,8 +191,24 @@ class test extends uvm_component;
   endfunction
 
   task run();
+     #1000;
      global_stop_request();
   endtask
+
+  function void check();
+     if (e.m.n_trans != e.s.n_trans) begin
+        `uvm_error("TEST",
+                   $sformatf("Master (%0d) and slave (%0d) saw different # of completed transactions",
+                             e.m.n_trans, e.s.n_trans))
+     end
+
+     if (e.m.n_trans < 5) begin
+        `uvm_error("TEST",
+                   $sformatf("Master completed too few (%0d) transactions",
+                             e.m.n_trans))
+     end
+
+  endfunction
 
 endclass
 
@@ -221,6 +217,23 @@ endclass
 //----------------------------------------------------------------------
 module top;
 
-  initial run_test();
+initial
+begin
+   uvm_root top = uvm_root::get();
+
+   top.finish_on_completion = 0;
+   run_test("test");
+
+   begin
+      uvm_report_server svr;
+      svr = _global_reporter.get_report_server();
+
+      if (svr.get_severity_count(UVM_FATAL) +
+          svr.get_severity_count(UVM_ERROR) == 0)
+         $write("** UVM TEST PASSED **\n");
+      else
+         $write("!! UVM TEST FAILED !!\n");
+   end
+end
 
 endmodule
