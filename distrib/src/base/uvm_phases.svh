@@ -39,7 +39,7 @@
 // This section describes the set of pre-defined phases
 // provided as a standard part of the UVM library.
 //
-// Group: Common Phases Global Variables
+// Group: Common Phases
 //
 // The common phases are the set of function and task phases that all
 // <uvm_component>s execute together.
@@ -48,7 +48,7 @@
 //
 // The common phases are executed in the sequence they are specified below.
 //
-// Variable: uvm_build_ph
+// Class: uvm_build_phase
 //
 // Create and configure of testbench structure
 //
@@ -69,7 +69,7 @@
 //  - All <uvm_component>s have been instantiated.
 //
 //
-// Variable: uvm_connect_ph
+// Class: uvm_connect_phase
 //
 // Establish cross-component connections.
 //
@@ -92,7 +92,7 @@
 // - All independent phase domains are set.
 //
 //
-// Variable: uvm_end_of_elaboration_ph
+// Class: uvm_end_of_elaboration_phase
 //
 // Fine-tune the testbench.
 //
@@ -113,7 +113,7 @@
 // - None.
 //                              
 //
-// Variable: uvm_start_of_simulation_ph
+// Class: uvm_start_of_simulation_phase
 //
 // Get ready for DUT to be simulated.
 //
@@ -137,7 +137,7 @@
 // - None.
 //
 //
-// Variable: uvm_run_ph
+// Class: uvm_run_phase
 //
 // Stimulate the DUT.
 //
@@ -227,7 +227,7 @@
 //
 //
 //
-// Variable: uvm_extract_ph
+// Class: uvm_extract_phase
 //
 // Extract data from different points of the verficiation environment.
 //
@@ -251,7 +251,7 @@
 // - All data has been collected and summarized.
 //
 //
-// Variable: uvm_check_ph
+// Class: uvm_check_phase
 //
 // Check for any unexpected conditions in the verification environment.
 //
@@ -268,7 +268,7 @@
 // - Test is known to have passed or failed.
 //
 //
-// Variable: uvm_report_ph
+// Class: uvm_report_phase
 //
 // Report results of the test.
 //
@@ -286,7 +286,7 @@
 // - End of test.
 //
 //
-// Variable: uvm_final_ph
+// Class: uvm_final_phase
 //
 // Tie up loose ends.
 //
@@ -304,7 +304,7 @@
 // - Ready to exit simulator.
 //
 //
-// Group: Run-Time Schedule Global Variables
+// Group: Run-Time Phases
 //
 // The run-time schedule is the pre-defined phase schedule
 // which runs concurrently to the <uvm_run_ph> global run phase.
@@ -313,7 +313,7 @@
 // It is possible for components to belong to different domains
 // in which case their schedules can be unsynchronized.
 //
-// Variable: uvm_pre_reset_ph
+// Class: uvm_pre_reset_phase
 //
 // Before reset is asserted.
 //
@@ -342,7 +342,7 @@
 // - Reset signal, if not driven by the verification environment, is asserted.
 //
 //
-// Variable: uvm_reset_ph
+// Class: uvm_reset_phase
 //
 // Reset is asserted.
 //
@@ -368,7 +368,7 @@
 // - Output signals and state variables have been initialized.
 //
 //
-// Variable: uvm_post_reset_ph
+// Class: uvm_post_reset_phase
 //
 // After reset is de-asserted.
 //
@@ -388,7 +388,7 @@
 // - The testbench and the DUT are in a known, active state.
 //
 //
-// Variable: uvm_pre_configure_ph
+// Class: uvm_pre_configure_phase
 //
 // Before the DUT is configured by the SW.
 //
@@ -409,7 +409,7 @@
 // - DUT configuration information is defined.
 //
 //
-// Variable: uvm_configure_ph
+// Class: uvm_configure_phase
 //
 // The SW configures the DUT.
 //
@@ -429,7 +429,7 @@
 // - The DUT has been configured and is ready to operate normally.
 //
 //
-// Variable: uvm_post_configure_ph
+// Class: uvm_post_configure_phase
 //
 // After the SW has configured the DUT.
 //
@@ -450,7 +450,7 @@
 //   and is ready to start operating normally.
 //
 //
-// Variable: uvm_pre_main_ph
+// Class: uvm_pre_main_phase
 //
 // Before the primary test stimulus starts.
 //
@@ -468,7 +468,7 @@
 // - All components are ready to generate and/or observe normal stimulus.
 //
 //
-// Variable: uvm_main_ph
+// Class: uvm_main_phase
 //
 // Primary test stimulus.
 //
@@ -489,7 +489,7 @@
 //   stimulus objective of the test.
 //
 //
-// Variable: uvm_post_main_ph
+// Class: uvm_post_main_phase
 //
 // After enough of the primary test stimulus.
 //
@@ -506,7 +506,7 @@
 // - None.
 //
 //
-// Variable: uvm_pre_shutdown_ph
+// Class: uvm_pre_shutdown_phase
 //
 // Before things settle down.
 //
@@ -523,7 +523,7 @@
 // - None.
 //
 //
-// Variable: uvm_shutdown_ph
+// Class: uvm_shutdown_phase
 //
 // Letting things settle down.
 //
@@ -543,7 +543,7 @@
 // - All interfaces are idle.
 //
 //
-// Variable: uvm_post_shutdown_ph
+// Class: uvm_post_shutdown_phase
 //
 // After things have settled down.
 //
