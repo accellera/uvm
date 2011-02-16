@@ -1849,12 +1849,12 @@ task uvm_phase::execute_phase();
                `uvm_delay(top.phase_timeout)
                if ($time == `UVM_DEFAULT_TIMEOUT) begin
                  `uvm_error("PH_TIMEOUT",
-                     $sformatf("Default phase timeout of %0t hit. All processes are waiting, indicating a probable testbench issue. Phase '%0t' ready to end",
+                     $sformatf("Default phase timeout of %0t hit. All processes are waiting, indicating a probable testbench issue. Phase '%0s' ready to end",
                              top.phase_timeout, get_name()))
                end
                else begin
                  `uvm_error("PH_TIMEOUT",
-                     $sformatf("Phase timeout of %0t hit, phase '%0t' ready to end",
+                     $sformatf("Phase timeout of %0t hit, phase '%0s' ready to end",
                              top.phase_timeout, get_name()))
                end
                phase_done.clear(this);
