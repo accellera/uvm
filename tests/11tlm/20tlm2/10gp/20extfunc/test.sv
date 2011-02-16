@@ -54,11 +54,7 @@ module top;
     for (int i=0; i< `NUM_TRANS; i++) \
       void'(OP1.sprint(OP2)); \
 
-initial 
- fork
-    run_test();
-    #100  global_stop_request();
- join_none
+initial run_test();
    
  `ifdef INCA
 typedef class ext1;
@@ -95,6 +91,8 @@ class test extends uvm_test;
       ext1 x1 = new;
        ext1 x2 = new;
      
+      phase.raise_objection(this);
+
       assert(x1.randomize());
       assert(x2.randomize() with {a != x1.a;});
    
@@ -154,7 +152,7 @@ class test extends uvm_test;
     // PACK/UNPACK
     //---------------------------------
 /* -----\/----- EXCLUDED -----\/-----
-TODO: fix the do_compare to not include object reference handles
+TODO: fix the compare to not include object reference handles
    begin : pack
     bit bits[];
    uvm_comparer cmpr = new();
@@ -163,7 +161,7 @@ TODO: fix the do_compare to not include object reference handles
     for (int i=0; i< `NUM_TRANS; i++) begin
       void'(obj1.pack(bits));
       void'(obj2.unpack(bits));
-      if (!obj1.do_compare(obj2,cmpr)) begin
+      if (!obj1.compare(obj2,cmpr)) begin
                  `uvm_error("TEST", "MISCOMPARE");
         obj1.print();
         obj2.print();
@@ -209,6 +207,7 @@ TODO: fix the do_compare to not include object reference handles
 
 //    $display("*** UVM TEST PASSED ***");
 
+  phase.drop_objection(this);
 
 endtask // run_phase
    

@@ -169,8 +169,6 @@ module top;
      virtual task main_phase(uvm_phase phase);
        uvm_sequence_library #(uvm_sequence_item) base_seq_lib;
 
-       global_stop_request();
-
        phase.raise_objection(this);
 
        // ERROR: SEQLIB/BASE_ITEM

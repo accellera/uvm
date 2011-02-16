@@ -1,5 +1,6 @@
 //---------------------------------------------------------------------- 
 //   Copyright 2010 Cadence Design Systems, Inc. 
+//   Copyright 2011 Mentor Graphics Corp.
 //   All Rights Reserved Worldwide 
 // 
 //   Licensed under the Apache License, Version 2.0 (the 
@@ -75,7 +76,8 @@ class test extends uvm_test;
    endfunction
 
    my_catcher ctchr = new;
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       uvm_report_cb::add(null,ctchr);
 
       // Set severities to INFO and then do a couple of messages of each type
@@ -97,7 +99,7 @@ class test extends uvm_test;
       set_id_severities("id1", UVM_FATAL);
       try_severities("id1", "UVM_FATAL");
 
-      uvm_top.stop_request();
+      phase.drop_objection(this);
    endtask
 
    virtual function void report();

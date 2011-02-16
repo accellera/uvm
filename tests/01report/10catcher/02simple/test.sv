@@ -1,5 +1,6 @@
 //---------------------------------------------------------------------- 
 //   Copyright 2010 Synopsys, Inc. 
+//   Copyright 2011 Mentor Graphics Corp.
 //   All Rights Reserved Worldwide 
 // 
 //   Licensed under the Apache License, Version 2.0 (the 
@@ -65,8 +66,9 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
       my_catcher ctchr = new;
+      phase.raise_objection(this);
       $write("UVM TEST EXPECT 2 UVM_ERROR\n");
       `uvm_error("Test", "Error 1...");
       if (my_catcher::seen != 0) begin
@@ -97,7 +99,7 @@ class test extends uvm_test;
          $write("ERROR: Message was caught after all catcher removed!\n");
          pass = 0;
       end
-      uvm_top.stop_request();
+      phase.drop_objection(this);
    endtask
 
    virtual function void report();

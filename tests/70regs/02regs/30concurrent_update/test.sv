@@ -46,9 +46,11 @@ class test extends uvm_test;
      env = new("env",this);
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
       uvm_status_e  status1,status2,status3;
       uvm_reg_data_t exp,act;
+
+      phase.raise_objection(this);
 
       env.regmodel.reset();
 
@@ -78,7 +80,7 @@ class test extends uvm_test;
         $display("** UVM TEST PASSED **\n");
       end
 
-      global_stop_request();
+      phase.drop_objection(this);
    endtask
 
 endclass

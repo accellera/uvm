@@ -57,7 +57,8 @@ module test();
     function new(string name, uvm_component parent);
       super.new(name, parent);
     endfunction
-    task run();
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       #1;
       $display("%t calling try_next_item...", $time);
       seq_item_port.try_next_item(req);
@@ -71,6 +72,7 @@ module test();
         try_return_time = $time;
         $display("%t try_next_item returned null", $time);
       end
+      phase.drop_objection(this);
     endtask
   endclass
 
@@ -99,9 +101,10 @@ module test();
       md0.seq_item_port.connect(ms0.seq_item_export);
     endfunction
 
-    task run();
+    task run_phase(uvm_phase phase);
       my_sequence the_seq;
       the_seq = my_sequence::type_id::create("the_seq", this);
+      phase.raise_objection(this);
       fork
         the_seq.start(ms0);
       join_none
@@ -112,7 +115,7 @@ module test();
       ms0.rel_var = 0;
       #300;
       ms0.rel_var = 1;
-      global_stop_request();
+      phase.drop_objection(this);
     endtask
 
     function void report_phase(uvm_phase phase);

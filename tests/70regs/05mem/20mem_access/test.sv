@@ -193,14 +193,15 @@ module tbtest();
       model.print();   
     endfunction
 
-    task run();
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       // Create register sequence
       seq=user_test_seq::type_id::create("user_test_seq", this);
       // Set sequence's container
       seq.model=model;
       // Procedurally start sequence
       seq.start(null);
-      #10000 global_stop_request();
+      phase.drop_objection(this);
     endtask
 
     `uvm_component_utils(test)

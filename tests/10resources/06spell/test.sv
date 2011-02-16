@@ -46,7 +46,6 @@ class test extends uvm_component;
     void'(uvm_spell_chkr#(int)::check(strtab, "ern"));
     void'(uvm_spell_chkr#(int)::check(strtab, "erni"));
 
-    global_stop_request();
   endtask
 
   function void report();

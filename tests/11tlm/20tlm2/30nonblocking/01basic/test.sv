@@ -30,8 +30,6 @@ class producer extends uvm_component;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
-    enable_stop_interrupt = 1;
-    done = 0;
   endfunction
 
   function void build();
@@ -44,28 +42,26 @@ class producer extends uvm_component;
     uvm_report_warning("producer", "nb_transport_bw is not implemented");
   endfunction
 
-  task run();
+  task run_phase(uvm_phase phase);
 
     int unsigned i;
     uvm_tlm_time delay = new;
-    uvm_tlm_phase_e phase;
+    uvm_tlm_phase_e ph;
     uvm_tlm_sync_e sync;
     uvm_tlm_generic_payload t;
 
+    phase.raise_objection(this);
+
     delay.incr(1, 1ns);
 
+    // not really nb - consumer should accept the trans nb fashion, but consume time executing it
     for(i = 0; i < 10; i++) begin
       t = generate_transaction();
       uvm_report_info("producer", t.convert2string());
-      sync = initiator_socket.nb_transport_fw(t, phase, delay);
+      sync = initiator_socket.nb_transport_fw(t, ph, delay);
     end
 
-    done = 1;
-
-  endtask
-
-  task stop(string ph_name);
-    wait(done == 1);
+    phase.drop_objection(this);
   endtask
 
   //--------------------------------------------------------------------
@@ -174,10 +170,6 @@ class test extends uvm_component;
   function void build();
     e = new("env", this);
   endfunction
-
-  task run();
-    global_stop_request();
-  endtask
 
 endclass
 

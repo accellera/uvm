@@ -102,10 +102,6 @@ class myseqr extends uvm_sequencer;
   endfunction
   `uvm_component_utils(myseqr)
 
-  task run_phase(uvm_phase phase);
-      global_stop_request(); // end run phase
-  endtask
-
   task main_phase(uvm_phase phase);
     `uvm_info("MAIN","In main!!!", UVM_NONE)
     phase.raise_objection(this);

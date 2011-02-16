@@ -66,7 +66,7 @@ class master extends uvm_component;
   //--------------------------------------------------------------------
   // run
   //--------------------------------------------------------------------
-  task run();
+  task run_phase(uvm_phase phase);
 
     fork
       begin
@@ -77,7 +77,6 @@ class master extends uvm_component;
 
     #0;
     state = BEGIN_REQ; // start the state machin running
-
   endtask
 
   //--------------------------------------------------------------------

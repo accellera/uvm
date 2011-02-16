@@ -40,7 +40,7 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
      my_server serv = new;
      // Emit a message before setting the server to make sure counts are
      // properly copied over.
@@ -54,7 +54,6 @@ class test extends uvm_test;
      `uvm_info("MSG1", "Some message again", UVM_LOW)
      `uvm_info("MSG2", "Another message again", UVM_LOW)
 
-      global_stop_request();
    endtask
 
    virtual function void report();

@@ -135,10 +135,9 @@ $display("BYTES: %0d", bytes.size());
       uvm_report_info("PASSED", "*** UVM TEST PASSED ***", UVM_NONE);
 
       recording_detail=UVM_LOW;
-      begin_tr(obj);
+      void'(begin_tr(obj));
       end_tr(obj);
 
-      global_stop_request();
     endtask
   endclass
 

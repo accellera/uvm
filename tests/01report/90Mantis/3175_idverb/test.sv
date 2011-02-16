@@ -144,9 +144,7 @@ class test extends uvm_component;
 
 
   endfunction
-  task run;
-    #1 global_stop_request();
-  endtask
+
   function void report();
     int fails = 0;
     fails += check_object(middle1, 3);

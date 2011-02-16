@@ -104,10 +104,6 @@ class test extends uvm_component;
     uvm_resource_db#(uvm_object)::set("*", "D", d, this);
   endfunction
 
-  task run();
-    global_stop_request();
-  endtask
-
   function void report();
     uvm_resource_pool rp = uvm_resource_pool::get();
     rp.dump();

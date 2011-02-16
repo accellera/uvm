@@ -171,6 +171,12 @@ class env extends uvm_component;
     c.initiator_socket.connect(s.target_socket);
   endfunction
 
+  task run_phase(uvm_phase phase);
+    phase.raise_objection(this);
+    #1000;
+    phase.drop_objection(this);
+  endtask
+
 endclass
 
 //----------------------------------------------------------------------
@@ -186,14 +192,9 @@ class test extends uvm_component;
     super.new(name, parent);
   endfunction
 
-  function void build();
+  function void build_phase(uvm_phase phase);
     e = new("env", this);
   endfunction
-
-  task run();
-     #1000;
-     global_stop_request();
-  endtask
 
   function void check();
      if (e.m.n_trans != e.s.n_trans) begin

@@ -212,11 +212,6 @@ module test;
       mc.set_phase_imp(my_cfg_phase::get(),cfg_imp);
       mc.set_domain(uvm_domain::get_uvm_domain());
     endfunction
-    task run_phase(uvm_phase phase);
-      `uvm_info("RUN", "In run", UVM_NONE)
-      #10 `uvm_info("RUN", "Done with run", UVM_NONE)
-      global_stop_request();
-    endtask
   endclass
 
 

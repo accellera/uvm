@@ -82,7 +82,6 @@ class test extends uvm_test;
    passive_comp pc;
    function new(string name, uvm_component parent);
       super.new(name,parent);
-      global_stop_request();
    endfunction
    function void build();
      ac = new("ac", this);

@@ -567,7 +567,11 @@ virtual class uvm_component extends uvm_report_object;
   // component's processes forked for the given phase will be killed
   // upon return from this method. Components needing to consume delta
   // cycles or advance time to perform a clean exit from the phase
-  // may raise the phase's objection. This effectively resets the
+  // may raise the phase's objection. 
+  //
+  // |phase.raise_objection(this,"Reason");
+  //
+  // This effectively resets the
   // wait-for-all-objections-dropped loop for ~phase~. It is the
   // responsibility of this component to drop the objection once
   // it is ready for this phase to end (and processes killed).
@@ -2614,6 +2618,10 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
   string name;
   string kind;
   uvm_recorder recordr;
+
+  if (tr == null)
+    return 0;
+
   recordr = (recorder == null) ? uvm_default_recorder : recorder;
 
   tr_h = 0;
@@ -2673,6 +2681,10 @@ function void uvm_component::end_tr (uvm_transaction tr,
   uvm_event e;
   integer tr_h;
   uvm_recorder recordr;
+
+  if (tr == null)
+    return;
+
   recordr = (recorder == null) ? uvm_default_recorder : recorder;
   tr_h = 0;
 

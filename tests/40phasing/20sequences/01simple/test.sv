@@ -68,7 +68,6 @@ class test extends uvm_test;
       seqr = new("seqr", this);
       uvm_config_db #(uvm_object_wrapper)::set(this, "seqr.configure_phase", "default_sequence", myseq::type_id::get());
       uvm_config_db #(uvm_object_wrapper)::set(this, "seqr.main_phase", "default_sequence", myseq::type_id::get());
-      global_stop_request(); // end run phase
    endfunction
    
    function void report_phase(uvm_phase phase);

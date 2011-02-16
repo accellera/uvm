@@ -50,6 +50,10 @@ module top;
       tc = new("tc", this);
       uvm_top.set_report_id_action_hier("PH_TIMEOUT", UVM_NO_ACTION);
     endfunction
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
+    endtask
+       
     function void report();
       if($time == 33ms) $display("** UVM TEST PASSED **");
       else $display("** UVM TEST FAILED **", $time);

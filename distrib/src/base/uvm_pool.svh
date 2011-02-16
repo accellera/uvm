@@ -284,6 +284,17 @@ class uvm_object_string_pool #(type T=uvm_object) extends uvm_pool #(string,T);
   endfunction
 
 
+  // Function: get_global
+  //
+  // Returns the specified item instance from the global item pool. 
+
+  static function T get_global (string key);
+    this_type gpool;
+    gpool = get_global_pool(); 
+    return gpool.get(key);
+  endfunction
+
+
   // Function: get
   //
   // Returns the object item at the given string ~key~.

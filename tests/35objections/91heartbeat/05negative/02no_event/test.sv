@@ -25,10 +25,12 @@ module test;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       repeat(10) #del begin
         myobj.raise_objection(this);
       end
+      phase.drop_objection(this);
     endtask
   endclass
   class myagent extends uvm_component;
@@ -53,8 +55,9 @@ module test;
       hb.add(agent.mc1);
       hb.add(agent.mc2);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       uvm_component l[$];
+      phase.raise_objection(this);
       //This is an error because start was called with no event and 
       //none is set.
       #10 hb.start();
@@ -68,7 +71,7 @@ module test;
       //state.
       #40 hb.start();
 
-      uvm_top.stop_request(); 
+      phase.drop_objection(this);
     endtask
   endclass
 

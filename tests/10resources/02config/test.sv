@@ -166,10 +166,6 @@ class test extends uvm_component;
     e = new("env", this);
   endfunction
 
-  task run();
-    #10
-    global_stop_request();
-  endtask
 
   function void report();
     // We print the configuration datbase just for reference.  The

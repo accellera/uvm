@@ -10,7 +10,6 @@ module test;
       `uvm_info("SinglePercent", "This is a message with a single % sign in it", UVM_NONE)
       `uvm_info("PercentPercent", "This is a message with a %% in it", UVM_NONE)
       $display("*** UVM TEST PASSED ***");
-      global_stop_request();
     endtask
 
   endclass

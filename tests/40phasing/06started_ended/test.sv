@@ -179,11 +179,7 @@ module test;
       l1 = new("l1", this);
       l2 = new("l2", this);
     endfunction
-    task run_phase(uvm_phase phase);
-      //phase.raise_objection(this);
-      //phase.drop_objection(this);
-      global_stop_request(); // same as raise/drop
-    endtask
+
     task main_phase(uvm_phase phase);
       static bit first=1;
       phase.raise_objection(this);

@@ -76,10 +76,6 @@ class base extends uvm_component;
       check_the_phase("end_of_elaboration", "start_of_simulation");
    endfunction
    
-   task run_phase(uvm_phase phase);
-     global_stop_request();
-   endtask
-   
    task pre_reset_phase(uvm_phase phase);
       check_the_phase_t("start_of_simulation", "pre_reset",phase);
       // Make sure the last phase is not "run"

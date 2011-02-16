@@ -93,9 +93,7 @@ virtual class uvm_transaction extends uvm_object;
   //   any time, past or future, but should not be less than the accept time.
   //
   // - If recording is enabled, then a new database-transaction is started with
-  //   the same begin time as above. The record method inherited from <uvm_object>
-  //   is then called, which records the current property values to this new
-  //   transaction.
+  //   the same begin time as above.
   //
   // - The <do_begin_tr> method is called to allow for any post-begin action in
   //   derived classes.
@@ -622,7 +620,6 @@ function integer uvm_transaction::m_begin_tr (time begin_time=0,
     end
 
     m_recorder.tr_handle = tr_handle;
-    record(m_recorder);
 
     if(m_recorder.check_handle_kind("Transaction", tr_handle)!=1)
       $display("tr handle %0d not valid!",tr_handle);

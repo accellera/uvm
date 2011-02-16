@@ -64,13 +64,12 @@ class slave extends uvm_component;
   //--------------------------------------------------------------------
   // run
   //--------------------------------------------------------------------
-  task run();
+  task run_phase(uvm_phase phase);
 
-    fork
-      begin
+    fork begin
         fsm_proc = process::self();
         fsm();
-      end
+    end
     join_none
 
   endtask

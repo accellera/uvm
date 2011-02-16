@@ -33,8 +33,10 @@ module test;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       repeat(10) #del myobj.raise_objection(this);
+      phase.drop_objection(this);
     endtask
   endclass
   class myagent extends uvm_component;
@@ -62,10 +64,11 @@ module test;
       hb = new("myhb", this, myobj);
       hb.set_heartbeat(e,clist);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       hb.start(e);
       repeat(11) #60 e.trigger();
-      uvm_top.stop_request(); 
+      phase.drop_objection(this);
     endtask
   endclass
 

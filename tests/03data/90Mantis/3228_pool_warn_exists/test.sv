@@ -65,7 +65,6 @@ class test extends uvm_test;
         return;
       end
       $display("** UVM TEST PASSED! **");
-      global_stop_request();
    endtask
 
 endclass

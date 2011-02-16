@@ -11,15 +11,17 @@ module top;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       fork 
-        repeat(3) #40 uvm_test_done.raise_objection(this);
-        repeat(3) #25 uvm_test_done.raise_objection(this,{"raise test done from ", get_full_name()});
+        repeat(3) #40 phase.raise_objection(this);
+        repeat(3) #25 phase.raise_objection(this,{"raise test done from ", get_full_name()});
         repeat(3) #25 foo.raise_objection(this,{"raise foo from ", get_full_name()});
-        repeat(3) #70 uvm_test_done.drop_objection(this,{"drop test done from ", get_full_name()});
+        repeat(3) #70 phase.drop_objection(this,{"drop test done from ", get_full_name()});
         repeat(3) #70 foo.drop_objection(this,{"drop foo from ", get_full_name()});
-        repeat(3) #90 uvm_test_done.drop_objection(this);
+        repeat(3) #90 phase.drop_objection(this);
       join
+      phase.drop_objection(this);
     endtask
   endclass
   class middle_comp extends uvm_component;
@@ -28,13 +30,15 @@ module top;
       super.new(name,parent);
       lc = new("lc", this);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       fork 
-        repeat(4) #25 uvm_test_done.raise_objection(this,{"raise test done from ", get_full_name()});
+        repeat(4) #25 phase.raise_objection(this,{"raise test done from ", get_full_name()});
         repeat(2) #25 foo.raise_objection(this,{"raise foo from ", get_full_name()});
-        repeat(4) #70 uvm_test_done.drop_objection(this,{"drop test done from ", get_full_name()});
+        repeat(4) #70 phase.drop_objection(this,{"drop test done from ", get_full_name()});
         repeat(2) #70 foo.drop_objection(this,{"drop foo from ", get_full_name()});
       join
+      phase.drop_objection(this);
     endtask
   endclass
   class top_comp extends uvm_component;
@@ -45,9 +49,18 @@ module top;
     endfunction
   endclass
   class test extends uvm_component;
-    int raised_counter[string];
-    int dropped_counter[string];
-    int all_dropped_counter[string];
+    int raised_counter[string] `ifndef INCA
+      = '{default:0}
+      `endif
+      ;
+    int dropped_counter[string] `ifndef INCA
+      = '{default:0}
+      `endif
+      ;
+    int all_dropped_counter[string] `ifndef INCA
+      = '{default:0}
+      `endif
+      ;
     top_comp tc;
     `uvm_component_utils(test)
     function new(string name, uvm_component parent);
@@ -74,7 +87,7 @@ module top;
       foreach(dropped_counter[idx]) $display("Dropped: %s : %0d", idx, dropped_counter[idx]);
       foreach(all_dropped_counter[idx]) $display("All dropped: %s : %0d", idx, all_dropped_counter[idx]);
 
-      if(raised_counter[""] != 3) begin
+      if(raised_counter[""] != 5) begin
         $display("** UVM TEST FAILED 2**");
       end
       if(raised_counter["raise foo from uvm_test_top.tc.mc"] != 2) begin
@@ -89,7 +102,7 @@ module top;
       if(raised_counter["raise test done from uvm_test_top.tc.mc.lc"] != 3) begin
         $display("** UVM TEST FAILED 5**");
       end
-      if(dropped_counter[""] != 3) begin
+      if(dropped_counter[""] != 5) begin
         $display("** UVM TEST FAILED 6**");
       end
       if(dropped_counter["drop foo from uvm_test_top.tc.mc"] != 2) begin
@@ -107,7 +120,7 @@ module top;
       if(all_dropped_counter["drop foo from uvm_test_top.tc.mc.lc"] != 1) begin
         $display("** UVM TEST FAILED 11**");
       end
-      if(all_dropped_counter["drop test done from uvm_test_top.tc.mc"] != 1) begin
+      if(all_dropped_counter[""] != 1) begin
         $display("** UVM TEST FAILED 12**");
       end
 

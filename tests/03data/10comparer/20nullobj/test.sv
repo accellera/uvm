@@ -41,7 +41,6 @@ module top;
         return;
       end
       uvm_report_info("SUCCESS", "**** UVM TEST PASSED ****", UVM_NONE);
-      global_stop_request();
     endtask
   endclass
 

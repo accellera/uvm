@@ -884,21 +884,6 @@ class uvm_phase extends uvm_object;
   virtual task exec_task(uvm_component comp, uvm_phase phase); endtask
 
 
-  // Function: phase_started
-  //
-  // Generic notification function called prior to exec_func()/exec_task()
-  //   phase - the phase schedule that originated this phase call
-  //
-  virtual function void phase_started(uvm_phase phase); endfunction
-
-
-  // Function: phase_ended
-  //
-  // Generic notification function called after exec_func()/exec_task()
-  //   phase - the phase schedule that originated this phase call
-  //
-  virtual function void phase_ended(uvm_phase phase); endfunction
-
 
   //----------------
   // Group: Schedule
@@ -1220,7 +1205,7 @@ class uvm_phase extends uvm_object;
   // TBD add more useful debug
   //---------------------------------
   protected static bit m_phase_trace;
-  local static bit m_use_global_stop_request;
+  local static bit m_use_ovm_run_semantic;
 
 
   function string convert2string();
@@ -1847,7 +1832,7 @@ task uvm_phase::execute_phase();
              begin
                // OVM semantic: don't end until objection raised or stop request
                if (phase_done.get_objection_total(top) ||
-                   m_use_global_stop_request && m_imp.get_name() == "run") begin
+                   m_use_ovm_run_semantic && m_imp.get_name() == "run") begin
                  phase_done.wait_for(UVM_ALL_DROPPED, top);
                  `PH_TRACE("PH/TRC/EXE/ALLDROP","PHASE EXIT ALL_DROPPED",this,UVM_DEBUG)
                end
@@ -1861,10 +1846,17 @@ task uvm_phase::execute_phase();
              begin
                if (top.phase_timeout == 0)
                  wait(top.phase_timeout != 0);
-               #(top.phase_timeout);
-               `uvm_error("PH_TIMEOUT",
-                   $sformatf("Phase timeout of %0t hit, phase '%0s' ready to end",
+               `uvm_delay(top.phase_timeout)
+               if ($time == `UVM_DEFAULT_TIMEOUT) begin
+                 `uvm_error("PH_TIMEOUT",
+                     $sformatf("Default phase timeout of %0t hit. All processes are waiting, indicating a probable testbench issue. Phase '%0s' ready to end",
                              top.phase_timeout, get_name()))
+               end
+               else begin
+                 `uvm_error("PH_TIMEOUT",
+                     $sformatf("Phase timeout of %0t hit, phase '%0s' ready to end",
+                             top.phase_timeout, get_name()))
+               end
                phase_done.clear(this);
                `PH_TRACE("PH/TRC/EXE/3","PHASE EXIT TIMEOUT",this,UVM_DEBUG)
              end
@@ -2313,14 +2305,14 @@ task uvm_phase::m_run_phases();
   uvm_root top = uvm_root::get();
 
   m_phase_trace = 0;
-  m_use_global_stop_request = 1;
+  m_use_ovm_run_semantic = 0;
   begin
     uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
-    string args[$];
-    if(clp.get_arg_matches("+UVM_PHASE_TRACE", args))
-      m_phase_trace=1;
-    if(clp.get_arg_matches("+UVM_USE_GLOBAL_STOP_REQUEST", args))
-      m_use_global_stop_request = 1;
+    string val;
+    if (clp.get_arg_value("+UVM_PHASE_TRACE", val))
+      m_phase_trace = 1;
+    if (clp.get_arg_value("+UVM_USE_OVM_RUN_SEMANTIC", val))
+      m_use_ovm_run_semantic = 1;
   end
   
   // initiate by starting first phase in common domain

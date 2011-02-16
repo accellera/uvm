@@ -135,9 +135,10 @@ module test;
       oc = new("oc", this);
     endfunction
     task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       `uvm_info("RUN", "In run", UVM_NONE)
       #10 `uvm_info("RUN", "Done with run", UVM_NONE)
-      global_stop_request();
+      phase.drop_objection(this);
     endtask
   endclass
 

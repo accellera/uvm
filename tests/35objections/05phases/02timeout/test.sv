@@ -48,10 +48,10 @@ module test;
     endfunction
     `uvm_sequence_utils(simple_seq, simple_sequencer)    
     virtual task body();
+      uvm_test_done.raise_objection(this);
       p_sequencer.uvm_report_info("SEQ_BODY", "simple_seq body() is starting...", UVM_LOW);
       #50;
       // Raising one uvm_test_done objection
-      uvm_test_done.raise_objection(this);
       for (int i = 0; i < 10; i++) begin
         `uvm_do(req)
         #10;

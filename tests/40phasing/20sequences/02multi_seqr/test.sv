@@ -118,7 +118,6 @@ class test extends uvm_test;
       phase_rsrc::set(this, "seqr2.pre_configure_phase", "default_sequence", myseq::type_id::get());
       phase_rsrc::set(this, "seqr2.pre_main_phase", "default_sequence", myseq::type_id::get());
       phase_rsrc::set(this, "seqr2.shutdown_phase", "default_sequence", myseq::type_id::get());
-      global_stop_request();
    endfunction
    
    function void report_phase(uvm_phase phase);

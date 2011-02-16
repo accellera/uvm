@@ -19,20 +19,19 @@ class test extends uvm_test;
      rs.set_max_quit_count(10);
    endfunction
 
-   task run();
+   task run_phase(uvm_phase phase);
+     phase.raise_objection(this);
      for (int i = 0; i < 20; i++) begin
        #100;
        `uvm_error("TESTERR", "An error.")
      end
+     phase.drop_objection(this);
    endtask
 
 endclass
 
 
-initial
-  begin
-     run_test();
-  end
+initial run_test();
 
 final
   begin

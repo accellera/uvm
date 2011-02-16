@@ -26,11 +26,7 @@ import uvm_pkg::*;
 
 module top;
 
-initial 
- fork
-    run_test();
-    #100  global_stop_request();
- join_none
+initial run_test();
    
    
 class test extends uvm_test;

@@ -34,9 +34,6 @@ class test extends uvm_test;
        $display("  Correct number of +UVM_VERBOSITY= values found");
    endfunction
 
-   virtual task run();
-      uvm_top.stop_request();
-   endtask
 
    virtual function void report();
      uvm_report_server rs = uvm_report_server::get_server();
@@ -48,9 +45,6 @@ class test extends uvm_test;
 endclass
 
 
-initial
-  begin
-     run_test();
-  end
+initial run_test();
 
 endprogram

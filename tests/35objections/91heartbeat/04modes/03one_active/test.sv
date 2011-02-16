@@ -45,12 +45,14 @@ module test;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       repeat(10) 
         #50 if($time>=active_start && $time<=active_stop) begin
            $display("%0t: %s raised", $time, get_full_name());
            myobj.raise_objection(this);
         end
+      phase.drop_objection(this);
     endtask
   endclass
   class myagent extends uvm_component;
@@ -63,7 +65,8 @@ module test;
       mc1.active_start = 0; mc1.active_stop = 200;
       mc2.active_start = 180; mc2.active_stop = 300;
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       #240;
       //create overlap error between mc2 and this at time 300
       repeat(4) begin
@@ -71,6 +74,7 @@ module test;
            $display("%0t: %s raised", $time, get_full_name());
            myobj.raise_objection(this);
       end
+      phase.drop_objection(this);
     endtask
   endclass
   class myenv extends uvm_component;
@@ -87,13 +91,13 @@ module test;
       hb.add(agent.mc2);
       hb.add(agent);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       uvm_event e = new("e");
+      phase.raise_objection(this);
       hb.start(e);
       repeat(9) #60 e.trigger(); 
       //should have error for no triggers @540
-
-      uvm_top.stop_request(); 
+      phase.drop_objection(this);
     endtask
   endclass
 

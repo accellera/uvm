@@ -11,8 +11,8 @@ class test extends test_base;
 
   function new(string name = "03killing", uvm_component parent = null);
     super.new(name, parent);
-    global_stop_request();
   endfunction : new
+
   `uvm_component_utils(test);
 
   task main_phase(uvm_phase phase);

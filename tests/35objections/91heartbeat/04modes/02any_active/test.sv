@@ -67,8 +67,10 @@ module test;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       repeat(10) #del myobj.raise_objection(this);
+      phase.drop_objection(this);
     endtask
   endclass
   class myagent extends uvm_component;
@@ -80,8 +82,10 @@ module test;
       mc1.del = 55;
       mc2.del = 45;
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       repeat(10) #50 myobj.raise_objection(this);
+      phase.drop_objection(this);
     endtask
   endclass
   class myenv extends uvm_component;
@@ -98,13 +102,13 @@ module test;
       hb.add(agent.mc2);
       hb.add(agent);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       uvm_event e = new("e");
+      phase.raise_objection(this);
       hb.start(e);
       repeat(11) #60 e.trigger(); 
       //should have error on agent.mc1 @660
-
-      uvm_top.stop_request(); 
+      phase.drop_objection(this);
     endtask
   endclass
 

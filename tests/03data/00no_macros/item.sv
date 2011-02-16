@@ -28,6 +28,12 @@
 
 class item extends uvm_sequence_item;
 
+  `uvm_object_utils(item)
+
+  function new(string name="");
+    super.new(name);
+  endfunction
+
   typedef enum bit [1:0] { NOP, READ, WRITE } enum_t;
    
   bit                    pad[$];
@@ -52,7 +58,7 @@ class item extends uvm_sequence_item;
 
        real              real64;
 
-       time              time64;
+  rand time              time64;
 
        string            str;
 
@@ -260,6 +266,8 @@ class item extends uvm_sequence_item;
 `ifndef INCA
     printer.print_real("real32",real32);
 `endif    
+    printer.print_int("bits", bits, $bits(bits));
+    printer.print_int("logics", logics, $bits(logics));
     `else
     if(printer.knobs.sprint)
       printer.m_string = convert2string();
@@ -312,6 +320,8 @@ class item extends uvm_sequence_item;
 `ifndef INCA    
     `uvm_record_field("real32",real32)
 `endif
+    `uvm_record_field("bits",bits)
+    `uvm_record_field("logics",logics)
 
   endfunction
 
@@ -330,6 +340,8 @@ class item extends uvm_sequence_item;
     `uvm_pack_int(uint16)
     `uvm_pack_int(uint8)
     `uvm_pack_int(uint1)
+    `uvm_pack_int(bits)
+    `uvm_pack_int(logics)
 `ifndef INCA    
     `uvm_pack_real(real32)
 `endif    
@@ -356,6 +368,8 @@ class item extends uvm_sequence_item;
     `uvm_unpack_int(uint16)
     `uvm_unpack_int(uint8)
     `uvm_unpack_int(uint1)
+    `uvm_unpack_int(bits)
+    `uvm_unpack_int(logics)
 `ifndef INCA
     `uvm_unpack_real(real32)
 `endif

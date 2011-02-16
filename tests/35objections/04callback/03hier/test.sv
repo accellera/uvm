@@ -32,9 +32,10 @@ module test;
         // The #1 is to make sure nothing gets cancelled. Normally
         // cancelling is okay, but for this test I want all drops
         // propagated.
-        #1 uvm_test_done.raise_objection(this);
-        #del
+        uvm_test_done.raise_objection(this);
+        #del;
         uvm_test_done.drop_objection(this);
+        #1;
       end
     endtask
   endclass
@@ -51,9 +52,10 @@ module test;
     endfunction
     task run;
       repeat(20) begin
-        #1 uvm_test_done.raise_objection(this);
-        #del
+        uvm_test_done.raise_objection(this);
+        #del;
         uvm_test_done.drop_objection(this);
+        #1;
       end
     endtask
   endclass
@@ -70,9 +72,10 @@ module test;
     endfunction
     task run;
       repeat(20) begin
-        #1 uvm_test_done.raise_objection(this);
-        #del
+        uvm_test_done.raise_objection(this);
+        #del;
         uvm_test_done.drop_objection(this);
+        #1;
       end
     endtask
   endclass
@@ -89,9 +92,10 @@ module test;
     endfunction
     task run;
       repeat(20) begin
-        #1 uvm_test_done.raise_objection(this);
-        #del
+        uvm_test_done.raise_objection(this);
+        #del;
         uvm_test_done.drop_objection(this);
+        #1;
       end
     endtask
   endclass
@@ -108,9 +112,10 @@ module test;
     endfunction
     task run;
       repeat(20) begin
-        #1 uvm_test_done.raise_objection(this);
-        #del
+        uvm_test_done.raise_objection(this);
+        #del;
         uvm_test_done.drop_objection(this);
+        #1;
       end
     endtask
   endclass
@@ -131,9 +136,10 @@ module test;
     endfunction
     task run;
       repeat(20) begin
-        #1 uvm_test_done.raise_objection(this);
-        #del
+        uvm_test_done.raise_objection(this);
+        #del;
         uvm_test_done.drop_objection(this);
+        #1;
       end
     endtask
     virtual function void raised (uvm_objection objection, uvm_object source_obj, string description, int count);

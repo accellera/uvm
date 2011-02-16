@@ -17,18 +17,16 @@ class test extends uvm_test;
      set_global_timeout(500);
    endfunction
 
-   task run();
+   task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       #1000;
-      uvm_top.stop_request();
+      phase.drop_objection(this);
    endtask
 
 endclass
 
 
-initial
-  begin
-     run_test();
-  end
+initial run_test();
 
 uvm_report_server rs = uvm_report_server::get_server();
 

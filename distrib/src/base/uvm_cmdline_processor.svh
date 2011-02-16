@@ -144,7 +144,7 @@ class uvm_cmdline_processor extends uvm_report_object;
   // the number of command line arguments that match the ~match~ string, and
   // ~value~ is the value of the first match.
   
-  function int get_arg_value (string match, output string value);
+  function int get_arg_value (string match, ref string value);
     int chars = match.len();
     get_arg_value = 0;
     foreach (m_argv[i]) begin

@@ -13,8 +13,10 @@ module test;
       super.build();
       void'(get_config_int("value", build_val));
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       #5 void'(get_config_int("value", run_val));
+      phase.drop_objection(this);
     endtask
   endclass
  
@@ -30,8 +32,10 @@ module test;
       set_config_int("mc", "value", 33);
       leaf = new("leaf", this);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       #2 set_config_int("leaf", "value", 55);
+      phase.drop_objection(this);
     endtask
   endclass
 
@@ -48,9 +52,10 @@ module test;
       mc = new("mc", this);
     endfunction
 
-    task run;
+    task run_phase(uvm_phase phase);
       bit failed = 0;
 
+      phase.raise_objection(this);
       set_config_int("mc.leaf", "value", 44); //takes precedence because of hierarhcy
       #10;
       if(mc.leaf.build_val != 22) begin 
@@ -65,7 +70,7 @@ module test;
         failed = 1;
       end
       if(!failed) $display("*** UVM TEST PASSED ***");
-      global_stop_request();
+      phase.drop_objection(this);
     endtask
   endclass
 

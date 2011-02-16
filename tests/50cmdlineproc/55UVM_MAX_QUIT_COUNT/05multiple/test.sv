@@ -13,20 +13,19 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   task run();
+   task run_phase(uvm_phase phase);
+     phase.raise_objection(this);
      for (int i = 0; i < 20; i++) begin
        #100;
        `uvm_error("TESTERR", "An error.")
      end
+     phase.drop_objection(this);
    endtask
 
 endclass
 
 
-initial
-  begin
-     run_test();
-  end
+initial run_test();
 
 uvm_report_server rs;
 
