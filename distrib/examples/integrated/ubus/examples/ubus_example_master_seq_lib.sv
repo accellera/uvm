@@ -230,10 +230,10 @@ class loop_read_modify_write_seq extends ubus_base_sequence;
   read_modify_write_seq rmw_seq;
 
   virtual task body();
-    void'(uvm_resource_db#(int)::read_by_name(get_full_name(),"itr", itr,this));
+    void'(uvm_config_db#(int)::get(null,get_full_name(),"itr", itr));
     `uvm_info(get_type_name(),
       $psprintf("%s starting...itr = %0d",
-      get_sequence_path(),itr), UVM_MEDIUM);
+      get_sequence_path(),itr), UVM_NONE);
     for(int i = 0; i < itr; i++) begin
       `uvm_do(rmw_seq)
     end

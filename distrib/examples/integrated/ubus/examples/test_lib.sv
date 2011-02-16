@@ -158,7 +158,7 @@ class test_2m_4s extends ubus_example_base_test;
     uvm_config_db#(uvm_object_wrapper)::set(this,"*.ubus0.masters[0].sequencer.main_phase", 
 			       "default_sequence",
 				loop_read_modify_write_seq::type_id::get());
-     lrmw_seq = loop_read_modify_write_seq::type_id::create("loop_seq");
+     lrmw_seq = loop_read_modify_write_seq::type_id::create();
     uvm_config_db#(uvm_sequence_base)::set(this,
 			       "ubus_example_tb0.ubus0.masters[1].sequencer.main_phase", 
 			       "default_sequence",
