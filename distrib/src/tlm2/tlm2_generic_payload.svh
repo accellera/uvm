@@ -255,8 +255,8 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // The variable should be used only when constraining.
    //
    // The elements in the byte enable array shall be interpreted as
-   // follows. A value of 0 shall indicate that that
-   // corresponding byte is disabled, and a value of 1 shall
+   // follows. A value of 8'h00 shall indicate that that
+   // corresponding byte is disabled, and a value of 8'hFF shall
    // indicate that the corresponding byte is enabled.
    //
    // Byte enables may be used to create burst transfers where the
@@ -275,7 +275,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    // The byte enable array shall be set by the initiator and shall
    // not be overwritten by any interconnect component or target.
    //
-   // If the byte enable pointer is non-null, the target shall either
+   // If the byte enable pointer is not empty, the target shall either
    // implement the semantics of the byte enable as defined below or
    // shall generate a standard error response. The recommended response
    // status is UVM_TLM_BYTE_ENABLE_ERROR_RESPONSE.

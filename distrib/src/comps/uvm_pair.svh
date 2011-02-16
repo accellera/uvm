@@ -28,7 +28,7 @@
 
 
 //-----------------------------------------------------------------------------
-// Class: uvm_pair #(T1,T2)
+// Class: uvm_class_pair #(T1,T2)
 //
 // Container holding handles to two objects whose types are specified by the
 // type parameters, T1 and T2.
@@ -56,7 +56,7 @@ class uvm_class_pair #(type T1=int, T2=T1) extends uvm_object;
 
   // Function: new
   //
-  // Creates an instance of uvm_pair that holds two built-in type values.
+  // Creates an instance that holds a handle to two objects.
   // The optional name argument gives a name to the new pair object.
 
   function new (string name="", T1 f=null, T2 s=null);
@@ -108,7 +108,7 @@ endclass
 // types are specified by the type parameters, T1 and T2.
 //-----------------------------------------------------------------------------
 
-class uvm_built_in_pair #(type T1=int, T2=T1) extends uvm_transaction;
+class uvm_built_in_pair #(type T1=int, T2=T1) extends uvm_object;
 
   typedef uvm_built_in_pair #(T1,T2) this_type;
 
@@ -116,14 +116,22 @@ class uvm_built_in_pair #(type T1=int, T2=T1) extends uvm_transaction;
   
   const static string type_name = "uvm_built_in_pair #(T1,T2)";
 
+// Variable: T1 first
+//
+// The first value in the pair
+
   T1 first;
+
+// Variable: T2 second
+//
+// The second value in the pair
+
   T2 second;
   
   // Function: new
   //
-  // Creates an instance of uvm_pair that holds a handle to two elements,
-  // as provided by the first two arguments. The optional name argument
-  // gives a name to the new pair object.
+  // Creates an instance that holds two built-in type values.
+  // The optional name argument gives a name to the new pair object.
 
   function new (string name="");
     super.new(name);
