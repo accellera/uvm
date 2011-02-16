@@ -997,6 +997,8 @@ class uvm_phase extends uvm_object;
                                                int count=1);
 
 
+  // Functions: sync and unsync
+  //
   // Add soft sync relationships between nodes
   //
   // Summary of usage:
