@@ -50,7 +50,7 @@ class uvm_class_pair #(type T1=int, T2=T1) extends uvm_object;
 
 // Variable: T2 second
 //
-// The second variable in the pair
+// The handle to the second object in the pair
 
   T2 second;
 
