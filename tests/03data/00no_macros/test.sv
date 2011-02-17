@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------- 
-//   Copyright 2011 Mentor Graphics Corp.
+//   Copyright 2011 Mentor Graphics Corporation
 //   All Rights Reserved Worldwide 
 // 
 //   Licensed under the Apache License, Version 2.0 (the 

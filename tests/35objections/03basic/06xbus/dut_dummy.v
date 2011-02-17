@@ -1,6 +1,6 @@
 // $Id: dut_dummy.v,v 1.1 2009/12/14 21:13:19 redelman Exp $
 //----------------------------------------------------------------------
-//   Copyright 2007-2008 Mentor Graphics Corporation
+//   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2008 Cadence Design Systems, Inc.
 //   All Rights Reserved Worldwide
 //
