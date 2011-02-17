@@ -153,12 +153,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   }
 
 
-  `ifdef UVM_USE_FPC
   protected process  m_sequence_process;
-  `else
-  protected bit m_sequence_started = 0;
-  protected event m_kill_event;
-  `endif
   local bit m_use_response_handler = 0;
 
   static string type_name = "uvm_sequence_base";
@@ -285,15 +280,9 @@ class uvm_sequence_base extends uvm_sequence_item;
       void'(m_sequencer.m_register_sequence(this));
     end
     
-    `ifndef UVM_USE_FPC
-    fork begin //wrap the fork/join_any to only effect this block
-    `endif
-
     fork
       begin
-        `ifdef UVM_USE_FPC
         m_sequence_process = process::self();
-        `endif
 
         if (call_pre_post == 1) begin
           m_sequence_state = PRE_BODY;
@@ -327,20 +316,7 @@ class uvm_sequence_base extends uvm_sequence_item;
         #0;
 
       end
-    `ifdef UVM_USE_FPC
     join
-    `else
-      begin
-        m_sequence_started = 1;
-        @(m_kill_event or m_sequence_state==FINISHED);
-      end
-    join_any
-    if(m_sequence_state!=FINISHED) begin
-       disable fork;
-    end
-    
-    end join // wrapper process
-    `endif
 
     if (m_sequencer != null) begin      
       m_sequencer.end_tr(this);
@@ -639,11 +615,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // method.
 
   function void kill();
-`ifdef UVM_USE_FPC
     if (m_sequence_process != null) begin
-`else
-    if (m_sequence_started != 0) begin
-`endif
       // If we are not connected to a sequencer, then issue
       // kill locally.
       if (m_sequencer == null) begin
@@ -670,15 +642,10 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   function void m_kill();
     do_kill();
-`ifdef UVM_USE_FPC
     if (m_sequence_process != null) begin
       m_sequence_process.kill;
       m_sequence_process = null;
     end
-`else
-    ->m_kill_event;
-    m_sequence_started=0;
-`endif
     m_sequence_state = STOPPED;
   endfunction
 
