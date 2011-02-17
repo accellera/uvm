@@ -1,7 +1,7 @@
 //
 // -------------------------------------------------------------
 //    Copyright 2010 Synopsys, Inc.
-//    Copyright 2010-2011 Cadence Design Systems, Inc.
+//    Copyright 2010 Cadence Design Systems, Inc.
 //    Copyright 2011 Mentor Graphics Corporation
 //    All Rights Reserved Worldwide
 //

@@ -2,7 +2,7 @@ eval 'exec perl -S $0 ${1+"$@"}'
 if 0;
 # -*- mode: cperl -*-
 #----------------------------------------------------------------------
-#   Copyright 2007-2011 Cadence Design Systems, Inc.
+#   Copyright 2007-2010 Cadence Design Systems, Inc.
 #   Copyright 2010 Synopsys Inc.
 #   Copyright 2010 Mentor Graphics Corporation
 #   All Rights Reserved Worldwide

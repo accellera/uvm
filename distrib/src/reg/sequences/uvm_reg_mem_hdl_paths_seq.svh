@@ -1,6 +1,6 @@
 // 
 // -------------------------------------------------------------
-//    Copyright 2010-2011 Cadence.
+//    Copyright 2010 Cadence.
 //    Copyright 2011 Mentor Graphics Corporation
 //    All Rights Reserved Worldwide
 // 
