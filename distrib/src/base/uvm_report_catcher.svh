@@ -1,6 +1,6 @@
 // $Id: uvm_report_catcher.svh,v 1.1.2.10 2010/04/09 15:03:25 janick Exp $
 //------------------------------------------------------------------------------
-//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2009 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide

@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2010 Mentor Graphics Corporation
 <<<<<<< HEAD:distrib/examples/simple/configuration/automated/classC.svh
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010-2011 Synopsys, Inc.

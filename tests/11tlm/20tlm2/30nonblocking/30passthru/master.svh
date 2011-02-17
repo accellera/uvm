@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-//   Copyright 2010-2011 Mentor Graphics Corporation
+//   Copyright 2010 Mentor Graphics Corporation
 //   Copyright 2010-2011 Synopsys Inc
 //   All Rights Reserved Worldwide
 //
