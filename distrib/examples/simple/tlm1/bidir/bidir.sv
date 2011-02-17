@@ -1,8 +1,8 @@
 //
 //----------------------------------------------------------------------
-//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -145,7 +145,9 @@ class bidir_env extends uvm_env;
   endfunction
 
   task run_phase(uvm_phase phase);
-    #10 global_stop_request();
+    phase.raise_objection(this);
+     #10;
+    phase.drop_objection(this);
   endtask
    
 endclass

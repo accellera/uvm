@@ -1,7 +1,7 @@
 // 
 // -------------------------------------------------------------
-//    Copyright 2004-2008 Synopsys, Inc.
-//    Copyright 2010-2011 Mentor Graphics Corporation
+//    Copyright 2004-2011 Synopsys, Inc.
+//    Copyright 2010 Mentor Graphics Corporation
 //    All Rights Reserved Worldwide
 // 
 //    Licensed under the Apache License, Version 2.0 (the

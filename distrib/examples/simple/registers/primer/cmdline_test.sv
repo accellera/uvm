@@ -1,7 +1,7 @@
 // 
 // -------------------------------------------------------------
-//    Copyright 2004-2008 Synopsys, Inc.
-//    Copyright 2010-2011 Mentor Graphics Corporation
+//    Copyright 2004-2011 Synopsys, Inc.
+//    Copyright 2010 Mentor Graphics Corporation
 //    Copyright 2010-2011 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
 // 
@@ -33,6 +33,9 @@ class cmdline_test extends uvm_test;
 
    virtual task run_phase(uvm_phase phase);
       tb_env env;
+
+      phase.raise_objection(this);
+
       $cast(env, uvm_top.find("env"));
 
       begin
@@ -60,8 +63,8 @@ class cmdline_test extends uvm_test;
          seq.model = env.model;
          seq.start(null);
       end
-      global_stop_request();
 
+      phase.drop_objection(this);
    endtask : run_phase
 
 endclass : cmdline_test

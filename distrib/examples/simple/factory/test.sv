@@ -1,8 +1,8 @@
 
 //----------------------------------------------------------------------
-//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -83,8 +83,6 @@ module top;
     //create method to create an object of the desired type.
     run_test("env");
   end
-
-  initial #100 uvm_top.stop_request();
 
 endmodule 
 

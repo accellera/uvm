@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -40,15 +40,11 @@ module hello_world;
     set_config_int("top.producer1","num_packets",2);
     set_config_int("top.producer2","num_packets",4);
     set_config_int("*","recording_detail",UVM_LOW);
-    uvm_top.enable_print_topology = 1;
     //uvm_default_printer = uvm_default_tree_printer;
     uvm_default_printer.knobs.reference=0;
     mytop = new("top"); 
     uvm_default_table_printer.knobs.type_width=20;
     run_test();
   end
-
-  initial #1us uvm_top.stop_request(); // stops run phase @ 1us
-
 endmodule
 

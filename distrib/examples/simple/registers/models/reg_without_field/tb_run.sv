@@ -1,7 +1,7 @@
 // 
 // -------------------------------------------------------------
-//    Copyright 2004-2008 Synopsys, Inc.
-//    Copyright 2010-2011 Mentor Graphics Corporation
+//    Copyright 2004-2011 Synopsys, Inc.
+//    Copyright 2010 Mentor Graphics Corporation
 //    Copyright 2010-2011 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
 // 
@@ -43,6 +43,8 @@ class tb_test extends uvm_test;
       uvm_status_e status;
       uvm_reg_data_t dat;
 
+      phase.raise_objection(this);
+      
       if (!$cast(env, uvm_top.find("env")) || env == null) begin
          `uvm_fatal("test", "Cannot find tb_env");
       end
@@ -57,7 +59,7 @@ class tb_test extends uvm_test;
       dat = env.regmodel.R.get();
       if (dat != 8'hA5) `uvm_error("Test", $psprintf("R is not as expected after randomize: 'h%0h instead of 'hA5", dat));
             
-      global_stop_request();
+      phase.drop_objection(this);
    endtask
 endclass
 

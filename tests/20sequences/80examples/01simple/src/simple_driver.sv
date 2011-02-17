@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
@@ -19,33 +19,39 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef SIMPLE_ITEM_SV
-`define SIMPLE_ITEM_SV
+`ifndef SIMPLE_DRIVER_SV
+`define SIMPLE_DRIVER_SV
+
 
 //------------------------------------------------------------------------------
 //
-// CLASS: simple_item
+// CLASS: simple_driver
 //
 // declaration
 //------------------------------------------------------------------------------
 
-class simple_item extends uvm_sequence_item;
 
-  rand int unsigned addr;
-    constraint c1 { addr < 16'h2000; }
-  rand int unsigned data;
-    constraint c2 { data < 16'h1000; }
+class simple_driver extends uvm_driver #(simple_item);
 
-  `uvm_object_utils_begin(simple_item)
-    `uvm_field_int(addr, UVM_ALL_ON)
-    `uvm_field_int(data, UVM_ALL_ON)
-  `uvm_object_utils_end
+  // Provide implementations of virtual methods such as get_type_name and create
+  `uvm_component_utils(simple_driver)
 
-  // new - constructor
-  function new (string name = "simple_item");
-    super.new(name);
+  // Constructor
+  function new (string name, uvm_component parent);
+    super.new(name, parent);
   endfunction : new
 
-endclass : simple_item
+  task run_phase(uvm_phase phase);
+    while(1) begin
+      #10;
+      seq_item_port.get_next_item(req);
+      `uvm_info("Driver", "Printing received item :", UVM_MEDIUM)
+      req.print();
+      seq_item_port.item_done();
+    end
+  endtask: run_phase
 
-`endif // SIMPLE_ITEM_SV
+endclass : simple_driver
+
+
+`endif // SIMPLE_DRIVER_SV

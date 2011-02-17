@@ -1,8 +1,8 @@
 
 //----------------------------------------------------------------------
-//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+>>>>>>> c31299a6c1084d71a7123d42d21c1d13527ae376:distrib/examples/simple/phases/run_test/test.sv
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -39,8 +39,6 @@
 //Walk through the test:
 //the main idea is to create a topology of components which had no run phase, and threads which had a run phase, and through the run phase of the top 
 //uvm_env ensure phasing is correct.
-//
-//uvm_env calls global_stop_request, at the run task
 //
 //at the top module level the env will use the run_test mode.
 //
@@ -175,10 +173,11 @@ module test;
       $display("%0t: %0s:  report", $time, get_full_name());
     endfunction
     task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       $display("%0t: %0s:  start run phase", $time, get_full_name());
       #500;
       $display("%0t: %0s:  end run phase", $time, get_full_name());
-	
+      phase.drop_objection(this);
     endtask
   endclass
 
@@ -191,7 +190,5 @@ module test;
 
     run_test();
   end
-
-  initial #1us global_stop_request();
 
 endmodule

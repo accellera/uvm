@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
-//   Copyright 2010-2011 Mentor Graphics Corporation
-//   Copyright 2010 Synopsys, Inc
+//   Copyright 2010 Mentor Graphics Corporation
+//   Copyright 2010-2011 Synopsys, Inc
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -43,6 +43,8 @@ class initiator extends uvm_component;
       apb_rw rw;
       uvm_tlm_time delay = new;
 
+      phase.raise_objection(this);
+
       rw = apb_rw::type_id::create("rw",,get_full_name());
       rw.kind = apb_rw::READ;
       rw.addr = 32'h0000_FF00;
@@ -61,7 +63,7 @@ class initiator extends uvm_component;
       $write("Init: delay = %0.3f ns\n", delay.get_realtime(1ns));
       #(delay.get_realtime(1ns));
 
-      global_stop_request();
+      phase.drop_objection(this);
    endtask
 
 endclass

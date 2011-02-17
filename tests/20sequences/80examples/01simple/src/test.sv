@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 //   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
-//   Copyright 2010-2011 Synopsys, Inc.
+//   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -18,31 +18,43 @@
 //   the License for the specific language governing
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
+module test;
 
-
-module top;
   import uvm_pkg::*;
-  import my_env_pkg::*;
 
-  my_env topenv;
+  `include "simple_item.sv"
+  `include "simple_sequencer.sv"
+  `include "simple_driver.sv"
+  `include "simple_seq_lib.sv"
+
+  class test extends uvm_test;
+
+     `uvm_component_utils(test)
+
+     function new(string name = "", uvm_component parent = null);
+        super.new(name, parent);
+     endfunction
+
+     task run_phase(uvm_phase phase);
+        phase.raise_objection(null);
+        #2000;
+        phase.drop_objection(null);
+     endtask
+  endclass
+
+  simple_sequencer sequencer;
+  simple_driver driver;
 
   initial begin
-    uvm_default_printer = uvm_default_table_printer;
-    uvm_top.enable_print_topology = 1;
+    set_config_string("sequencer", "default_sequence", "simple_seq_sub_seqs");
+    sequencer = new("sequencer", null); sequencer.build();
+    driver = new("driver", null); driver.build();
+    driver.seq_item_port.connect(sequencer.seq_item_export);
+    uvm_default_printer=uvm_default_tree_printer;
+    sequencer.print();
+    driver.print();
 
-    //set configuration prior to creating the environment
-    set_config_int("topenv.*.u1", "v", 30);
-    set_config_int("topenv.inst2.u1", "v", 10);
-    set_config_int("topenv.*", "debug", 1);
-    set_config_string("*", "myaa[foo]", "hi");
-    set_config_string("*", "myaa[bar]", "bye");
-    set_config_string("*", "myaa[foobar]", "howdy");
-    set_config_string("topenv.inst1.u1", "myaa[foo]", "boo");
-    set_config_string("topenv.inst1.u1", "myaa[foobar]", "boobah");
-
-    topenv = new("topenv", null);
-    run_test();
-
+    run_test("test");
   end
 
 endmodule
