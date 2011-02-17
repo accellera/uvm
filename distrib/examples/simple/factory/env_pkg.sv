@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -44,11 +44,14 @@ package env_pkg;
 
     task run_phase(uvm_phase phase);
       packet p;
+      phase.raise_objection(this);
       uvm_default_tree_printer.knobs.separator = "";
       repeat(5) begin
         #15 p = gen1.get_packet();
         `uvm_info("PKTGEN", $psprintf("Got packet: %s", p.sprint(uvm_default_tree_printer)), UVM_NONE)
       end
+      #15;
+      phase.drop_objection(this);
     endtask
   endclass
 endpackage

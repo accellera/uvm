@@ -1,6 +1,6 @@
 ## 
 ## -------------------------------------------------------------
-##    Copyright 2010 Synopsys, Inc.
+##    Copyright 2010 Mentor Graphics Corporation
 ##    All Rights Reserved Worldwide
 ## 
 ##    Licensed under the Apache License, Version 2.0 (the
@@ -19,17 +19,17 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../../..
+UVM_HOME	= ../../../../../distrib
 
-include ../../../Makefile.vcs
+include ../../../../../distrib/examples/Makefile.questa
 
 
-all: comp run
+all: run
 
-comp:
-	$(VCS) +incdir+. \
+comp: vlib
+	$(VLOG) +incdir+. \
 		test.sv
 
-run:
-	$(SIMV)
+run: comp
+	$(VSIM)
 	$(CHECK)

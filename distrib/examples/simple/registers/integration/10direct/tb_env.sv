@@ -1,7 +1,7 @@
 // 
 // -------------------------------------------------------------
-//    Copyright 2004-2010 Synopsys, Inc.
-//    Copyright 2010-2011 Mentor Graphics Corporation
+//    Copyright 2004-2011 Synopsys, Inc.
+//    Copyright 2010 Mentor Graphics Corporation
 //    Copyright 2010-2011 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
 // 
@@ -81,6 +81,7 @@ class tb_env extends uvm_component;
    endfunction
 
    virtual task run_phase(uvm_phase phase);
+     phase.raise_objection(this);
      if (seq == null) begin
        uvm_report_fatal("NO_SEQUENCE","Env's sequence is not defined. Nothing to do. Exiting.");
        return;
@@ -98,7 +99,7 @@ class tb_env extends uvm_component;
      uvm_report_info("START_SEQ",{"Starting sequence '",seq.get_name(),"'"});
      seq.model = regmodel;
      seq.start(null);
-     global_stop_request();
+     phase.drop_objection(this);
    endtask
 
 

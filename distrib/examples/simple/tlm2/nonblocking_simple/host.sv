@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-//   Copyright 2010 Synopsys, Inc
+//   Copyright 2010-2011 Synopsys, Inc
 //   Copyright 2011 Cadence Design Systems, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -71,6 +71,8 @@ class host extends uvm_component;
    //
    virtual task run_phase(uvm_phase phase);
 
+      phase.raise_objection(this);
+      
       xfer = usb_xfer::type_id::create("xfer",,get_full_name());
 
       // OUT bulk transfer
@@ -145,7 +147,7 @@ class host extends uvm_component;
 
       `uvm_info("USB/HST/IN/DONE", xfer.convert2string(), UVM_NONE);
 
-      global_stop_request();
+      phase.drop_objection(this);
    endtask
 
    

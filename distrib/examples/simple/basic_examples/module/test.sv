@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -35,7 +35,9 @@ class lower extends uvm_component;
   endfunction
 
   task run_phase(uvm_phase phase);
+    phase.raise_objection(this);
     #10 $display("%0t: %s HI", $time, get_full_name());
+    phase.drop_objection(this);
   endtask
 
   function string get_type_name();
@@ -73,7 +75,9 @@ class myunit extends uvm_component;
   endfunction
 
   task run_phase(uvm_phase phase);
+    phase.raise_objection(this);
     #10 $display("%0t: %s HI", $time, get_full_name());
+    phase.drop_objection(this);
   endtask
 
   function string get_type_name();
@@ -130,7 +134,4 @@ module top;
     run_test();
     mu.print();
   end
-
-  initial #100 uvm_top.stop_request();
-
 endmodule

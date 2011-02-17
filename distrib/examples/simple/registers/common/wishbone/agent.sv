@@ -1,6 +1,6 @@
 // 
 // -------------------------------------------------------------
-//    Copyright 2004-2009 Synopsys, Inc.
+//    Copyright 2004-2011 Synopsys, Inc.
 //    Copyright 2011 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
 // 

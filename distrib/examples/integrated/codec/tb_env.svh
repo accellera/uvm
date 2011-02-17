@@ -387,11 +387,6 @@ class tb_env extends uvm_env;
    endtask
 
    
-   task post_shutdown_phase(uvm_phase phase);
-      global_stop_request();
-   endtask
-
-   
    function void report_phase(uvm_phase phase);
       uvm_report_server svr;
       svr = _global_reporter.get_report_server();

@@ -2,7 +2,7 @@ eval 'exec perl -S $0 ${1+"$@"}'
 if 0;
 
 ##---------------------------------------------------------------------- 
-##   Copyright 2010 Synopsys, Inc. 
+##   Copyright 2010-2011 Synopsys, Inc. 
 ##   Copyright 2010-2011 Mentor Graphics Corporation
 ##   All Rights Reserved Worldwide 
 ## 

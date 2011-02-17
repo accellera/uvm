@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
@@ -18,30 +18,30 @@
 //   the License for the specific language governing
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
-module test;
 
-  import uvm_pkg::*;
+`ifndef SIMPLE_SEQUENCER_SV
+`define SIMPLE_SEQUENCER_SV
 
-  `include "simple_item.sv"
-  `include "simple_sequencer.sv"
-  `include "simple_driver.sv"
-  `include "simple_seq_lib.sv"
 
-  simple_sequencer sequencer;
-  simple_driver driver;
+//------------------------------------------------------------------------------
+//
+// CLASS: simple_sequencer
+//
+// declaration
+//------------------------------------------------------------------------------
 
-  initial begin
-    set_config_string("sequencer", "default_sequence", "simple_seq_sub_seqs");
-    sequencer = new("sequencer", null); sequencer.build();
-    driver = new("driver", null); driver.build();
-    driver.seq_item_port.connect(sequencer.seq_item_export);
-    uvm_default_printer=uvm_default_tree_printer;
-    sequencer.print();
-    driver.print();
-    fork 
-      run_test();
-      #2000 global_stop_request();
-    join
-  end
+class simple_sequencer extends uvm_sequencer #(simple_item);
 
-endmodule
+  // Constructor
+  function new (string name, uvm_component parent);
+    super.new(name, parent);
+    `uvm_update_sequence_lib_and_item(simple_item)
+  endfunction : new
+
+  // Provide implementations of virtual methods such as get_type_name and create
+  `uvm_sequencer_utils(simple_sequencer)
+
+endclass : simple_sequencer
+
+
+`endif // SIMPLE_SEQUENCER_SV

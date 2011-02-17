@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
 //   Copyright 2010-2011 Mentor Graphics Corporation
-//   Copyright 2010 Synopsys, Inc
+//   Copyright 2010-2011 Synopsys, Inc
 //   Copyright 2011 Cadence Design Systems, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -38,6 +38,8 @@ class initiator extends uvm_component;
       apb_rw rw;
       uvm_tlm_time delay = new;
 
+      phase.raise_objection(this);
+      
       rw = apb_rw::type_id::create("rw",,get_full_name());
       rw.kind = apb_rw::READ;
       rw.addr = 32'h0000_FF00;
@@ -50,7 +52,7 @@ class initiator extends uvm_component;
 
       sock.b_transport(rw, delay);
 
-      global_stop_request();
+      phase.drop_objection(this);
    endtask
 
 endclass

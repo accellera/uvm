@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
@@ -19,29 +19,33 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef SIMPLE_SEQUENCER_SV
-`define SIMPLE_SEQUENCER_SV
-
+`ifndef SIMPLE_ITEM_SV
+`define SIMPLE_ITEM_SV
 
 //------------------------------------------------------------------------------
 //
-// CLASS: simple_sequencer
+// CLASS: simple_item
 //
 // declaration
 //------------------------------------------------------------------------------
 
-class simple_sequencer extends uvm_sequencer #(simple_item);
+class simple_item extends uvm_sequence_item;
 
-  // Constructor
-  function new (string name, uvm_component parent);
-    super.new(name, parent);
-    `uvm_update_sequence_lib_and_item(simple_item)
+  rand int unsigned addr;
+    constraint c1 { addr < 16'h2000; }
+  rand int unsigned data;
+    constraint c2 { data < 16'h1000; }
+
+  `uvm_object_utils_begin(simple_item)
+    `uvm_field_int(addr, UVM_ALL_ON)
+    `uvm_field_int(data, UVM_ALL_ON)
+  `uvm_object_utils_end
+
+  // new - constructor
+  function new (string name = "simple_item");
+    super.new(name);
   endfunction : new
 
-  // Provide implementations of virtual methods such as get_type_name and create
-  `uvm_sequencer_utils(simple_sequencer)
+endclass : simple_item
 
-endclass : simple_sequencer
-
-
-`endif // SIMPLE_SEQUENCER_SV
+`endif // SIMPLE_ITEM_SV

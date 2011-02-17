@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -46,6 +46,13 @@ package my_env_pkg;
       inst1 = new("inst1", this);
       inst2 = new("inst2", this);
     endfunction
+
+    task run_phase(uvm_phase phase);
+       phase.raise_objection(this);
+       uvm_top.print_topology();
+       #10;
+       phase.drop_objection(this);
+    endtask
 
     `uvm_component_utils_begin(my_env)
       `uvm_field_int(debug, UVM_DEFAULT)

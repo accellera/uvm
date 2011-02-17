@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -225,6 +225,7 @@ class env extends uvm_env;
 task run_phase(uvm_phase phase);
     int i;
 
+    phase.raise_objection(this);
     for (i = 0; i < `NUM_SEQS; i++) begin
       fork
         sequence_a[i].start(sqr, null);
@@ -232,7 +233,7 @@ task run_phase(uvm_phase phase);
       #0;
     end
     wait fork;
-    global_stop_request();
+    phase.drop_objection(this);
 endtask
 
 endclass
