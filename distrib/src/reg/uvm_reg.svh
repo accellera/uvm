@@ -2126,7 +2126,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
 
    uvm_reg_cb_iter  cbs = new(this);
    uvm_reg_map_info map_info;
-   uvm_reg_addr_t   value;
+   uvm_reg_data_t   value; 
 
    m_fname  = rw.fname;
    m_lineno = rw.lineno;
