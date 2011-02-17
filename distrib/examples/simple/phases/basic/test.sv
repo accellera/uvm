@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -160,10 +160,11 @@ module top;
       $display("%0t: %0s:  report", $time, get_full_name());
     endfunction
     task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       $display("%0t: %0s:  start run phase", $time, get_full_name());
       #500;
       $display("%0t: %0s:  end run phase", $time, get_full_name());
-	global_stop_request();
+      phase.drop_objection(this);
     endtask
   endclass
 
@@ -176,7 +177,4 @@ module top;
 
     run_test();
   end
-
-  initial #1us global_stop_request();
-
 endmodule

@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -27,6 +27,21 @@ module test;
   `include "simple_driver.sv"
   `include "simple_seq_lib.sv"
 
+  class test extends uvm_test;
+
+     `uvm_component_utils(test)
+
+     function new(string name = "", uvm_component parent = null);
+        super.new(name, parent);
+     endfunction
+
+     task run_phase(uvm_phase phase);
+        phase.raise_objection(null);
+        #2000;
+        phase.drop_objection(null);
+     endtask
+  endclass
+
   simple_sequencer sequencer;
   simple_driver driver;
 
@@ -38,10 +53,8 @@ module test;
     uvm_default_printer=uvm_default_tree_printer;
     sequencer.print();
     driver.print();
-    fork 
-      run_test();
-      #2000 global_stop_request();
-    join
+
+    run_test("test");
   end
 
 endmodule

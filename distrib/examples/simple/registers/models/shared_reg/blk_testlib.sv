@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //    Copyright 2010-2011 Mentor Graphics Corporation
 //    Copyright 2010 Cadence Design Systems, Inc.
 //   All Rights Reserved Worldwide
@@ -38,10 +38,12 @@ class blk_test extends uvm_test;
       blk_AXW_test_seq seq = blk_AXW_test_seq::type_id::create("blk_AXW_test_seq",this);
       seq.model = env.model;
 
+      phase.raise_objection(this);
+      
       seq.start(null);
       seq.wait_for_sequence_state(FINISHED);
 
-      global_stop_request();
+      phase.drop_objection(this);
    endtask
    
 endclass

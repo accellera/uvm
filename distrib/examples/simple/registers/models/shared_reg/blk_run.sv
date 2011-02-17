@@ -1,6 +1,6 @@
 // 
 // -------------------------------------------------------------
-//    Copyright 2004-2008 Synopsys, Inc.
+//    Copyright 2004-2010 Synopsys, Inc.
 //    Copyright 2010-2011 Mentor Graphics Corporation
 //    All Rights Reserved Worldwide
 // 

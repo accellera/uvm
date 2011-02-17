@@ -2,7 +2,7 @@
 //----------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -84,6 +84,22 @@ module test;
     endtask
   endclass
 
+
+  class test extends uvm_test;
+
+     `uvm_component_utils(test)
+
+     function new(string name = "", uvm_component parent = null);
+        super.new(name, parent);
+     endfunction
+
+     task run_phase(uvm_phase phase);
+        phase.raise_objection(null);
+        #5us;
+        phase.drop_objection(null);
+     endtask
+  endclass
+
   producer prod = new("prod", null);
   consumer cons = new("cons", null);
   uvm_tlm_fifo #(packet) fifo = new("fifo", null, 10);
@@ -93,12 +109,11 @@ module test;
     cons.data_in.connect(fifo.get_export);
 
     fork
-      run_test();
+      run_test("test");
       repeat(30) begin
         $display("%0t:   FIFO level %0d of %0d", $time, fifo.used(), fifo.size());
         #10;
       end
-      #5us global_stop_request();
     join
   end
 

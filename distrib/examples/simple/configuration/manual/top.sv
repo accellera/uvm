@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -40,11 +40,9 @@ module top;
     set_config_string("topenv.inst1.u1", "myaa[foo]", "boo");
     set_config_string("topenv.inst1.u1", "myaa[foobar]", "boobah");
 
-    topenv = new("topenv", null); topenv.build();
+    topenv = new("topenv", null);
     run_test();
 
   end
-
-  initial #1 uvm_top.stop_request();
 
 endmodule

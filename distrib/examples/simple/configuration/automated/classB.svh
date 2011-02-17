@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -42,9 +42,6 @@ class B extends uvm_component;
 
     u1 = new("u1", this);
   endfunction
-  task run_phase(uvm_phase phase);
-    begin end
-  endtask
 endclass
 
 `endif

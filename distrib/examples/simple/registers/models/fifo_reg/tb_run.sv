@@ -1,6 +1,6 @@
 // 
 // -------------------------------------------------------------
-//    Copyright 2004-2008 Synopsys, Inc.
+//    Copyright 2004-2011 Synopsys, Inc.
 //    Copyright 2010-2011 Mentor Graphics Corporation
 //    Copyright 2010 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
@@ -73,6 +73,7 @@ class my_test extends tb_env;
       int max;
       fifo_reg FIFO;
 
+      phase.raise_objection(this);
 
       `uvm_info("Test", "Resetting DUT and Register Model...", UVM_LOW)
       begin
@@ -119,8 +120,7 @@ class my_test extends tb_env;
         end
       end
 
-      
-      global_stop_request();
+      phase.drop_objection(this);
    endtask
 endclass
 

@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -53,9 +53,14 @@ package my_env_pkg;
     function void do_print(uvm_printer printer);
       printer.print_field("debug", debug, 1);
     endfunction
+
     task run_phase(uvm_phase phase);
-      begin end
+       phase.raise_objection(this);
+       uvm_top.print_topology();
+       #10;
+       phase.drop_objection(this);
     endtask
+
   endclass
   
 endpackage : my_env_pkg

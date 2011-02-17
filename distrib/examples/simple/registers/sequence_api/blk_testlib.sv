@@ -1,6 +1,6 @@
 //
 //----------------------------------------------------------------------
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   Copyright 2010-2011 Mentor Graphics Corporation
 //   Copyright 2010 Cadence Design Systems, Inc.
 //   All Rights Reserved Worldwide
@@ -42,6 +42,8 @@ class blk_R_test extends uvm_test;
       uvm_sequence_base reset_seq;
       blk_R_test_seq seq;
 
+      phase.raise_objection(this);
+      
       begin
          dut_reset_seq rst_seq;
          rst_seq = dut_reset_seq::type_id::create("rst_seq", this);
@@ -53,7 +55,7 @@ class blk_R_test extends uvm_test;
       seq.model = env.model;
       seq.start(null);
 
-      global_stop_request();
+      phase.drop_objection(this);
    endtask
    
 endclass
