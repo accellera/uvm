@@ -53,7 +53,7 @@ USAGE
 }
 
 require "getopts.pl"
-&Getopts("cC:df:F:hR:Su:M:v");
+&Getopts("cC:df:F:PhR:Su:M:v");
 &usage if $opt_h || $#ARGV < 0;
 
 $tool = shift(@ARGV);
@@ -234,12 +234,12 @@ sub run_one_test {
      if (-e $pl) {
        $post_test = 0;
 
-       print "<running>\n" if $opt_v;
+       print "<running>\n" if ($opt_v || $opt_P);
        local($cwd) = $ENV{'PWD'};
        chdir $testdir;
        $failed = do "test.pl";
        chdir $cwd;
-       print "$testdir $dots " if $opt_v;
+       print "$testdir $dots " if ($opt_v || $opt_P);
 
        if (!defined($failed) || $@) {
          print "**FAIL** (Invalid test.pl)\n";
@@ -263,7 +263,7 @@ sub run_one_test {
    }
 
    if (!$opt_c) {
-     print "<running>\n" if $opt_v;
+     print "<running>\n" if ($opt_v || $opt_P);
 
      $comp_args = "";
      if (-e "$testdir/$tool.comp.args") {
@@ -318,7 +318,7 @@ sub run_one_test {
      &run_the_test($testdir, "$comp_args $opt_C $defs",
 		   "$run_args $opt_R $plusargs");
 
-     print "$testdir $dots " if $opt_v;
+     print "$testdir $dots " if ($opt_v || $opt_P);
    }  
  
    #
