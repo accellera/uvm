@@ -1,7 +1,7 @@
 //
 //----------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
-//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 // 
@@ -58,9 +58,6 @@
   `ifndef INCA_LOCAL_CTOR
     `undef _local
     `define _local 
-  `endif
-  `ifndef INCA_UVM_USE_FPC
-    `undef  UVM_USE_FPC
   `endif
   `ifndef INCA_UVM_USE_P_FORMAT
     `undef  UVM_USE_P_FORMAT
