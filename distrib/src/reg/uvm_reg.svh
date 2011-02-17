@@ -1,8 +1,8 @@
 //
 // -------------------------------------------------------------
 //    Copyright 2004-2009 Synopsys, Inc.
-//    Copyright 2010 Mentor Graphics Corp.
-//    Copyright 2010 Cadence Design Systems, Inc.
+//    Copyright 2010-2011 Mentor Graphics Corporation
+//    Copyright 2010-2011 Cadence Design Systems, Inc.
 //    All Rights Reserved Worldwide
 //
 //    Licensed under the Apache License, Version 2.0 (the
@@ -2126,7 +2126,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
 
    uvm_reg_cb_iter  cbs = new(this);
    uvm_reg_map_info map_info;
-   uvm_reg_addr_t   value;
+   uvm_reg_data_t   value; 
 
    m_fname  = rw.fname;
    m_lineno = rw.lineno;

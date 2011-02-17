@@ -1,7 +1,7 @@
 //
 //------------------------------------------------------------------------------
-//   Copyright 2007-2010 Mentor Graphics Corporation
-//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -336,7 +336,7 @@ task uvm_root::run_test(string test_name="");
 
      // plusarg overrides argument
   if ($value$plusargs("UVM_TESTNAME=%s", test_name)) begin
-    `uvm_info("NO_DPI_TSTNAME", "Using the UVM_NO_DPI define means to retrieve UVM_TESTNAME without DPI", UVM_NONE)
+    `uvm_info("NO_DPI_TSTNAME", "UVM_NO_DPI defined--getting UVM_TESTNAME directly, without DPI", UVM_NONE)
     testname_plusarg = 1;
   end
 

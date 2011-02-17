@@ -1,7 +1,7 @@
 //
 //-----------------------------------------------------------------------------
-//   Copyright 2007-2010 Mentor Graphics Corporation
-//   Copyright 2007-2010 Cadence Design Systems, Inc. 
+//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2011 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -544,7 +544,7 @@ function void uvm_transaction::enable_recording (string stream, uvm_recorder rec
     recorder = uvm_default_recorder;
   m_recorder = recorder;
 
-  this.stream_handle = m_recorder.create_fiber(stream, "TVM", scope);
+  this.stream_handle = m_recorder.create_stream(stream, "TVM", scope);
   record_enable = 1;
 endfunction
 
@@ -610,13 +610,13 @@ function integer uvm_transaction::m_begin_tr (time begin_time=0,
       end_tr(); 
 
     if(!has_parent)
-      tr_handle = m_recorder.begin_transaction("Begin_No_Parent, Link", 
+      tr_handle = m_recorder.begin_tr("Begin_No_Parent, Link", 
                     stream_handle, get_type_name(),"","",begin_time);
     else begin
-      tr_handle = m_recorder.begin_transaction("Begin_End, Link", 
+      tr_handle = m_recorder.begin_tr("Begin_End, Link", 
                     stream_handle, get_type_name(),"","",begin_time);
       if(parent_handle)
-        m_recorder.link_transaction(parent_handle, tr_handle, "child");
+        m_recorder.link_tr(parent_handle, tr_handle, "child");
     end
 
     m_recorder.tr_handle = tr_handle;
@@ -652,11 +652,11 @@ function void uvm_transaction::end_tr (time end_time=0, bit free_handle=1);
     m_recorder.tr_handle = tr_handle;
     record(m_recorder);
   
-    m_recorder.end_transaction(tr_handle,end_time);
+    m_recorder.end_tr(tr_handle,end_time);
 
     if(free_handle && m_recorder.check_handle_kind("Transaction", tr_handle)==1) 
     begin  
-      m_recorder.free_transaction_handle(tr_handle);
+      m_recorder.free_tr(tr_handle);
     end
     tr_handle = 0;
   end

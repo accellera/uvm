@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2010 Mentor Graphics Corporation
-//   Copyright 2007-2010 Cadence Design Systems, Inc. 
+//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2011 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -316,7 +316,9 @@ class uvm_sequence_item extends uvm_transaction;
     parent_seq_.mid_do(this);
     sequencer.send_request(parent_seq_, this);
     sequencer.wait_for_item_done(parent_seq_, -1);
+    `ifndef UVM_DISABLE_AUTO_ITEM_RECORDING
     sequencer.end_tr(this);
+    `endif
     parent_seq_.post_do(this);
   endtask
 

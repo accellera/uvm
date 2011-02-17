@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2009 Mentor Graphics Corporation
+//   Copyright 2007-2011 Mentor Graphics Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -120,7 +120,7 @@ class uvm_re_cache
       err = re_compile(*re_str); 
       if(err != 0)
       {
-      	      vpi_printf("UVM_ERROR: regex compiler: invalid glob or regular expression: |%s|\n",re);
+      	      vpi_printf((PLI_BYTE8*)  "UVM_ERROR: regex compiler: invalid glob or regular expression: |%s|\n",re);
         return err;
       }
       rexp = cache[*re_str];

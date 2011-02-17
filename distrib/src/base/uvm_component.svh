@@ -1,7 +1,7 @@
 //
 //------------------------------------------------------------------------------
-//   Copyright 2007-2010 Mentor Graphics Corporation
-//   Copyright 2007-2010 Cadence Design Systems, Inc.
+//   Copyright 2007-2011 Mentor Graphics Corporation
+//   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -2646,21 +2646,21 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
         stream_h = m_stream_handle[stream_name];
 
     if (recordr.check_handle_kind("Fiber", stream_h) != 1) begin  
-        stream_h = recordr.create_fiber(stream_name, "TVM", get_full_name());
+        stream_h = recordr.create_stream(stream_name, "TVM", get_full_name());
         m_stream_handle[stream_name] = stream_h;
     end
 
     kind = (has_parent == 0) ? "Begin_No_Parent, Link" : "Begin_End, Link";
 
-    tr_h = recordr.begin_transaction(kind, stream_h, name, label, desc, begin_time);
+    tr_h = recordr.begin_tr(kind, stream_h, name, label, desc, begin_time);
 
     if (has_parent && parent_handle != 0)
-        recordr.link_transaction(parent_handle, tr_h, "child");
+        recordr.link_tr(parent_handle, tr_h, "child");
 
     m_tr_h[tr] = tr_h;
 
     if (recordr.check_handle_kind("Transaction", link_tr_h) == 1)
-      recordr.link_transaction(tr_h,link_tr_h);
+      recordr.link_tr(tr_h,link_tr_h);
         
     do_begin_tr(tr,stream_name,tr_h); 
         
@@ -2708,10 +2708,10 @@ function void uvm_component::end_tr (uvm_transaction tr,
         recordr.tr_handle = tr_h;
         tr.record(recordr);
 
-        recordr.end_transaction(tr_h,end_time);
+        recordr.end_tr(tr_h,end_time);
 
         if (free_handle)
-           recordr.free_transaction_handle(tr_h);
+           recordr.free_tr(tr_h);
 
       end
     end
@@ -2749,18 +2749,18 @@ function integer uvm_component::record_error_tr (string stream_name="main",
 
   stream_h = m_stream_handle[stream_name];
   if (recordr.check_handle_kind("Fiber", stream_h) != 1) begin  
-    stream_h = recordr.create_fiber(stream_name, "TVM", get_full_name());
+    stream_h = recordr.create_stream(stream_name, "TVM", get_full_name());
     m_stream_handle[stream_name] = stream_h;
   end
 
-  record_error_tr = recordr.begin_transaction(etype, stream_h, label,
+  record_error_tr = recordr.begin_tr(etype, stream_h, label,
                          label, desc, error_time);
   if(info!=null) begin
     recordr.tr_handle = record_error_tr;
     info.record(recordr);
   end
 
-  recordr.end_transaction(record_error_tr,error_time);
+  recordr.end_tr(record_error_tr,error_time);
 endfunction
 
 
@@ -2785,18 +2785,18 @@ function integer uvm_component::record_event_tr (string stream_name="main",
 
   stream_h = m_stream_handle[stream_name];
   if (recordr.check_handle_kind("Fiber", stream_h) != 1) begin  
-    stream_h = recordr.create_fiber(stream_name, "TVM", get_full_name());
+    stream_h = recordr.create_stream(stream_name, "TVM", get_full_name());
     m_stream_handle[stream_name] = stream_h;
   end
 
-  record_event_tr = recordr.begin_transaction(etype, stream_h, label,
+  record_event_tr = recordr.begin_tr(etype, stream_h, label,
                          label, desc, event_time);
   if(info!=null) begin
     recordr.tr_handle = record_event_tr;
     info.record(recordr);
   end
 
-  recordr.end_transaction(record_event_tr,event_time);
+  recordr.end_tr(record_event_tr,event_time);
 endfunction
 
 // do_accept_tr

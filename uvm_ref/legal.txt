@@ -1,5 +1,5 @@
 Universal Verification Methodology 
-(UVM) EA 1.0 Class Reference
+(UVM) 1.0 Class Reference
 
 May 2010
 
