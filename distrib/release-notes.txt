@@ -1,3 +1,108 @@
+Release Notes for UVM-1.0
+February 17, 2011
+
+** Overview
+
+  - This is the first release of the Universal Verification Methodology (UVM) 
+    reference implementation from Accellera.  This distribution includes a 
+    SystemVerilog based class library, examples, Reference Guide, and User 
+    Guide. The UVM Standard is available at
+    http://www.accellera.org/activities/vip; the class library is a
+    reference implementation of the standard; the examples and User Guide
+    provide guidance to users of the library. For additional information
+    on the Accellera standard, see http://www.accellera.org/activities/vip.
+
+  - The UVM is built on the code base of OVM-2.1.1 but there are changes
+    to UVM 1.0 that create incompatibilities for certain OVM environments.
+    Backward compatibility issues are listed in the Compatibility section
+    of these notes. The key issue is that ALL environments which use the
+    global_stop_request() mechanism from OVM to stop the run phase must
+    add the switch +UVM_USE_OVM_RUN_SEMANTIC to keep the run phase
+    from ending immediately.
+
+** New Features - added since UVM-1.0EA
+
+  - Register modeling with uvm_reg. Provides the base classes for creating
+    register verification models and stimulating and checking the DUT
+    registers. Also includes backdoor access to DUT registers.
+
+  - Runtime phases. Provides the ability to section the run phase into
+    multiple run time phases. Components can further be sectioned into
+    seperate domains for fine grained phase synchronization. And, it is 
+    possible to jump from phases either forward or backward giving full 
+    control of the phasing control flow.
+
+  - TLM 2 SystemVerilog implementation. Provides a SystemVerilog
+    implementation for many of the classes from TLM 2, including (but not
+    limited to), generic payload and sockets.
+
+  - Resource and configuration database. Extends the configuration mechanism
+    to allow generic datatypes to be used for configuration. And, allows for
+    resources to be disassociated from the verification hierarchy.
+
+  - Command line processor. Provides access to all simulator command line
+    arguments (similar to the SystemVerilog $value$plusargs but with access to
+    all argument matches, not just first matches).
+
+  - Sequence library. This functionality replaces the string based sequence
+    library that was available in UVM 1.0EA. The sequence library is not yet 
+    part of the standard. It is a late addition to serve as a replacement for
+    the deprecated string based sequence library.
+
+  - Regular expression matching. The glob style expression matching from UVM
+    1.0EA has been enhanced to allow for posix regular expression matching on
+    top of the glob style matching.
+
+  ** Note: the regular expression matching, HDL backdoor and command line
+     processor all require DPI import functions. The c++ file,
+     $UVM_HOME/src/dpi/uvm_dpi.cc provides the necessary implementation code.
+
+** API changes and backward incompatibilities with UVM 1.0EA
+
+  - The API for defining user-defined phases is changed. If a user is
+    using user defined phases, they will either need to change to use
+    the new runtime phases, or they will need to create their own
+    custom phases using the new phasing API.
+
+  - The run phase semantic is changed to match the semantics of the new
+    runtime phases. The run phase is now immediately ready to end unless a
+    component has explicitly raised the phase_done objection for the run phase
+    during the first nba region of the phase, whereas, in the past the run 
+    phase would not be ready to end unless there was an explicit call to 
+    global_stop_request() or a test_done objection was raised/dropped. The OVM
+    semantic can be used if the option +UVM_USE_OVM_RUN_SEMANTIC is specified.
+    Note: the use of the OVM semantic is deprecated and is intended only
+    as a temporary convenience for migration purposes.
+
+  - The stop mechanism, including the uvm_component::stop() callback and
+    the stop_request function is deprecated. Users should use the 
+    uvm_component::phase_ready_to_end() callback for similar
+    capability.
+
+  - The use of the default_sequence and the `uvm_sequence_utils,
+    `uvm_declare_sequence_lib, `uvm_update_sequence_lib,
+    `uvm_update_sequence_lib_and_item and `uvm_sequencer_utils are deprecated.
+    It is suggested that users move to the new uvm_sequence_library for the 
+    same functionality.
+
+  - The default_sequence may be used as a deprecated mechanism to start a
+    sequence for the run phase, but it is suggested that users switch to
+    using the phase specific default_sequence for the run phase.
+
+  - Some policy object, printer/comparer knobs and functions removed. For
+    example, the table printer now auto-sizes based on column widths so the
+    knobs for controlling the column widths no longer apply.
+
+  - Phase function/task names have a new signature. The old signature will
+    continue to work, but is deprecated. The new signature includes _phase in
+    the name and takes the uvm_phase as an argument. For example:
+
+      function void connect(); 
+    becomes
+      function void connect_phase(uvm_phase phase);
+
+
+-----------------------------------------------------------------------------
 Release Notes for UVM-1.0EA
 May 17, 2010
 
