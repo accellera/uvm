@@ -1,6 +1,7 @@
 //
 //------------------------------------------------------------------------------
 //   Copyright 2011 (Authors)
+//   Copyright 2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
