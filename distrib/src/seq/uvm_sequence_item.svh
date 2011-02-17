@@ -316,7 +316,9 @@ class uvm_sequence_item extends uvm_transaction;
     parent_seq_.mid_do(this);
     sequencer.send_request(parent_seq_, this);
     sequencer.wait_for_item_done(parent_seq_, -1);
+    `ifndef UVM_DISABLE_AUTO_ITEM_RECORDING
     sequencer.end_tr(this);
+    `endif
     parent_seq_.post_do(this);
   endtask
 

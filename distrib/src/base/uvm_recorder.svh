@@ -245,10 +245,10 @@ class uvm_recorder extends uvm_object;
   endfunction
 
 
-  // Function- create_fiber
+  // Function- create_stream
   //
   //
-  function integer create_fiber (string name,
+  function integer create_stream (string name,
                                  string t,
                                  string scope);
     return 0;
@@ -289,10 +289,10 @@ class uvm_recorder extends uvm_object;
   endfunction
   
   
-  // Function- begin_transaction
+  // Function- begin_tr
   //
   //
-  function integer begin_transaction(string txtype,
+  function integer begin_tr(string txtype,
                                      integer stream,
                                      string nm,
                                      string label="",
@@ -309,19 +309,19 @@ class uvm_recorder extends uvm_object;
   endfunction
   
   
-  // Function- end_transaction
+  // Function- end_tr
   //
   //
-  function void end_transaction (integer handle, time end_time=0);
+  function void end_tr (integer handle, time end_time=0);
     if (open_file())
       $fdisplay(file,"END: {TXH:%-5d TIME=%0t}",handle,end_time);
   endfunction
   
   
-  // Function- link_transaction
+  // Function- link_tr
   //
   //
-  function void link_transaction(integer h1,
+  function void link_tr(integer h1,
                                  integer h2,
                                  string relation="");
     if (open_file())
@@ -330,10 +330,10 @@ class uvm_recorder extends uvm_object;
   
   
   
-  // Function- free_transaction_handle
+  // Function- free_tr
   //
   //
-  function void free_transaction_handle(integer handle);
+  function void free_tr(integer handle);
     if (open_file())
       $fdisplay(file,"  FREE: {TXH:%-5d}", handle);
   endfunction
