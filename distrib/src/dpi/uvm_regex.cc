@@ -120,7 +120,7 @@ class uvm_re_cache
       err = re_compile(*re_str); 
       if(err != 0)
       {
-      	      vpi_printf("UVM_ERROR: regex compiler: invalid glob or regular expression: |%s|\n",re);
+      	      vpi_printf((PLI_BYTE8*)  "UVM_ERROR: regex compiler: invalid glob or regular expression: |%s|\n",re);
         return err;
       }
       rexp = cache[*re_str];
