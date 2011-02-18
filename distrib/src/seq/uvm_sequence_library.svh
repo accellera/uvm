@@ -754,7 +754,13 @@ task uvm_sequence_library::body();
 
   `uvm_info("SEQLIB/END",{"Ending sequence library in phase ",
             (starting_phase != null ? starting_phase.get_name() : "unknown")},UVM_LOW)
+
+`ifdef UVM_USE_P_FORMAT            
   `uvm_info("SEQLIB/DSTRB",$sformatf("%p",seqs_distrib),UVM_HIGH)
+`else
+    foreach(seqs_distrib[idx])
+        `uvm_info("SEQLIB/DSTRB",$sformatf("%s -> %d",idx,seqs_distrib[idx]),UVM_HIGH)  
+`endif
 
   if (starting_phase != null)
     starting_phase.drop_objection(this,
@@ -813,8 +819,9 @@ function void uvm_sequence_library::do_print(uvm_printer printer);
    printer.print_array_footer();
 
    printer.print_array_header("seqs_distrib",seqs_distrib.num(),"as_int_string");
-   foreach (seqs_distrib[typ])
-     printer.print_int({"[",typ,"]"},seqs_distrib[typ],UVM_DEC,,"int unsigned");
+   foreach (seqs_distrib[typ]) begin
+     printer.print_int({"[",typ,"]"},seqs_distrib[typ],32,,UVM_DEC,"int unsigned");
+   end
    printer.print_array_footer();
 endfunction
 
