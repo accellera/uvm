@@ -1,0 +1,7 @@
+-clean 
+  rdb.sv
+  uvc_pkg.sv
+  top.sv
+  +UVM_VERBOSITY=HIGH
+  +access+rw
+  +define+NUM_REGS=10
