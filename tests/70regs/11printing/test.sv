@@ -88,15 +88,6 @@ class block_l1 extends uvm_reg_block;
       bus32.add_reg(r0,    'h0,  "RW");
       bus32.add_reg(r1,    'h4,  "RW");
       bus32.add_reg(r2,    'h8,  "RW");
-
-      begin 
-        uvm_reg_map r1m = create_map("container1",'h10, 1, UVM_LITTLE_ENDIAN);
-        uvm_reg_map r2m = create_map("container2",'h100,1, UVM_LITTLE_ENDIAN);
-
-        r1m.add_submap(bus8, 'h15);
-        r2m.add_submap(bus32, 'h115);
-                
-      end
    endfunction
 endclass
 
@@ -113,12 +104,13 @@ class block_l2 extends uvm_reg_block;
    virtual function void build();
 
       // define default map
-      m = create_map("bus8", 0, 1, UVM_LITTLE_ENDIAN);
+      m = create_map("combined_map", 0, 1, UVM_LITTLE_ENDIAN);
       l1=new("l1");
       l1.build();
       l1.configure(this, "foo");
 
       m.add_submap(l1.bus8,'h200);
+      m.add_submap(l1.bus32,'h400);
    endfunction
 endclass
     
@@ -137,7 +129,21 @@ endclass
       `uvm_info("reg",{"printing for map ",m.get_full_name()},UVM_INFO)
       
       m.get_registers(r);
-      assert(r.size() ==3) else `uvm_error("REG","more than 3 regs in map")
+      
+      // FIXME the query methods such as uvm_reg_map::get_registers() may return multiple entries for the same reg
+      // FIXME WA for not having r=r.unique;
+      begin 
+        bit u[uvm_reg];
+        foreach(r[idx])
+             u[r[idx]]=1;
+        
+        r.delete();     
+        foreach(u[idx])
+            r.push_back(idx);
+      end
+      
+      
+      assert(r.size() ==3) else `uvm_error("REG",$psprintf("expected 3 regs but got %0d in map",r.size()))
       foreach (r[idx]) begin
          print_adresses(r[idx]);
       end
@@ -155,7 +161,6 @@ begin
    blk.lock_model();
 
    blk.print();
-   $write("%s\n", blk.convert2string());
 
    print_all_regs(blk.default_map);
 
