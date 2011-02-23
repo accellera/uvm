@@ -1,0 +1,1 @@
++UVM_TESTNAME=test
