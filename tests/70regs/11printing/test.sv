@@ -109,6 +109,7 @@ class block_l2 extends uvm_reg_block;
       l1.build();
       l1.configure(this, "foo");
 
+    // FIXME notion of "offset" is unclear 
       m.add_submap(l1.bus8,'h200);
       m.add_submap(l1.bus32,'h400);
    endfunction
@@ -117,6 +118,8 @@ endclass
     
     function automatic void print_adresses(uvm_reg r);
       uvm_reg_map m[$];
+      
+      // FIXME seems only to return offset within the direct parent map
       r.get_maps(m);
       foreach(m[idx]) begin
          uvm_reg_map map = m[idx];
