@@ -2634,9 +2634,11 @@ virtual class uvm_topdown_phase extends uvm_phase;
           UVM_PHASE_EXECUTING: begin
             if (!(phase.get_name() == "build" && comp.m_build_done)) begin
               uvm_phase ph = this; 
+              comp.m_phasing_active++;
               if (comp.m_phase_imps.exists(this))
                 ph = comp.m_phase_imps[this];
               ph.execute(comp, phase);
+              comp.m_phasing_active--;
             end
             end
           UVM_PHASE_READY_TO_END: begin

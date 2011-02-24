@@ -1615,6 +1615,7 @@ virtual class uvm_component extends uvm_report_object;
   protected process    m_phase_process;
 
   /*protected*/ bit  m_build_done=0;
+  /*protected*/ int  m_phasing_active=0;
 
   extern                   function void set_int_local(string field_name, 
                                                        uvm_bitstream_t value,
@@ -2267,7 +2268,6 @@ endfunction
 
 function void uvm_component::build_phase(uvm_phase phase);
   m_build_done = 1;
-  apply_config_settings(print_config_matches);
   build();
 endfunction
 
@@ -2275,6 +2275,10 @@ endfunction
 
 function void uvm_component::build();
   m_build_done = 1;
+  apply_config_settings(print_config_matches);
+  if(m_phasing_active == 0) begin
+    uvm_report_warning("deprecated", "build()/build_phase() has been called explicitly, outside of the phasing system. This usage of build is deprecated and may lead to unexpected behavior.");
+  end
 endfunction
 
 // these phase methods are common to all components in UVM. For backward
