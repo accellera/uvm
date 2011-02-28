@@ -212,8 +212,7 @@ class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RS
    // Constrains <select_rand> to be a valid index into the ~sequences~ array
    //
    constraint valid_rand_selection {
-      if (sequences.size() > 0)
-        select_rand < sequences.size();
+         select_rand inside {[0:sequences.size()-1]};
    }
 
 
