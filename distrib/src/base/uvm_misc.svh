@@ -555,7 +555,7 @@ endfunction
 // Function- uvm_has_wildcard
 //
 //
-function bit uvm_has_wildcard (string arg);
+function automatic bit uvm_has_wildcard (string arg);
   uvm_has_wildcard = 0;
 
   //if it is a regex then return true

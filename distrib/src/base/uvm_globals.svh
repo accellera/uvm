@@ -190,7 +190,7 @@ function bit uvm_string_to_severity (string sev_str, output uvm_severity sev);
   return 1;
 endfunction
 
-function bit uvm_string_to_action (string action_str, output uvm_action action);
+ function automatic bit uvm_string_to_action (string action_str, output uvm_action action);
   string actions[$];
   uvm_split_string(action_str,"|",actions);
   uvm_string_to_action = 1;
