@@ -27,7 +27,7 @@
 `define UVM_NAME UVM
 `define UVM_MAJOR_REV 1
 `define UVM_MINOR_REV 0
-`define UVM_FIX_REV 
+`define UVM_FIX_REV p2-dev
 
 
 // Whole version identifiers that can be used in `ifdefs and `ifndefs
@@ -37,11 +37,11 @@
 `define UVM_MAJOR_REV_1
 `define UVM_MINOR_REV_0
 
-// When there is a FIX_REV, print as "M.m.f"
+// When there is a FIX_REV, print as "M.mf"
 // When there is NO FIX_REV, print as "M.m".
 // Fix rev kind of string:
-//`define UVM_VERSION_STRING `"`UVM_NAME``-```UVM_MAJOR_REV``.```UVM_MINOR_REV``.```UVM_FIX_REV`"
+`define UVM_VERSION_STRING `"`UVM_NAME``-```UVM_MAJOR_REV``.```UVM_MINOR_REV`UVM_FIX_REV`"
 // No fix rev kind of string:
-`define UVM_VERSION_STRING `"`UVM_NAME``-```UVM_MAJOR_REV``.```UVM_MINOR_REV```"
+//`define UVM_VERSION_STRING `"`UVM_NAME``-```UVM_MAJOR_REV``.```UVM_MINOR_REV```"
 
 `endif // UVM_VERSION_DEFINES_SVH
