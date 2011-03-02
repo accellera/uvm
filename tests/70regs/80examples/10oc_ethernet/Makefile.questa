@@ -19,11 +19,9 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../../../distrib
-
 include $(UVM_HOME)/examples/Makefile.questa
 
-OC_DIR = $(UVM_HOME)/../tests/70regs/common/oc_ethernet_rtl
+OC_DIR = ../../../tests/70regs/common/oc_ethernet_rtl
 
 USES_DPI = 1
 

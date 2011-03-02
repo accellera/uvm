@@ -1,2 +1,2 @@
-+incdir+../../../../distrib/examples/simple/registers/models/ro_wo_same_addr
-+incdir+../../../../distrib/examples/simple/registers/common
++incdir+$UVM_HOME/examples/simple/registers/models/ro_wo_same_addr
++incdir+$UVM_HOME/examples/simple/registers/common

@@ -19,8 +19,6 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../../distrib
-
 TOOL= vcs -sverilog -timescale=1ns/1ns \
         +acc +vpi \
         +incdir+$(UVM_HOME)/src $(UVM_HOME)/src/uvm.sv \

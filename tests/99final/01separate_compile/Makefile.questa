@@ -18,8 +18,6 @@
 ##    permissions and limitations under the License.
 ## -------------------------------------------------------------
 ## 
-
-UVM_HOME = ../../../distrib
 USES_DPI = 1
 
 include $(UVM_HOME)/examples/Makefile.questa
@@ -42,14 +40,14 @@ comp : prepare
              -suppress 2181 \
              +acc=rmb \
              $(UVM_HOME)/src/uvm_macros.svh \
-             +incdir+../../../distrib/src \
+             +incdir+$(UVM_HOME)/src \
              +incdir+../common/apb \
              +define+NUM_REGS=10 \
              test1.sv
 
 run: comp
 	vsim +UVM_VERBOSITY=HIGH \
-             -sv_lib ../../../distrib/lib/uvm_dpi \
+             -sv_lib $(UVM_HOME)/lib/uvm_dpi \
              -c \
              -do "run -all; q" \
              -l questa.log \

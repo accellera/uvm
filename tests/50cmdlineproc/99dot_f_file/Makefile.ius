@@ -19,8 +19,6 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../../distrib
-
 IRUN=irun -uvmhome $(UVM_HOME)  -incdir $(UVM_HOME)/src/dpi $(UVM_HOME)/src/dpi/uvm_dpi.cc testfile.sv
 
 include $(UVM_HOME)/examples/Makefile.ius

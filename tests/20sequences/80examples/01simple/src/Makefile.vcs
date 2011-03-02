@@ -19,9 +19,7 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../../../../distrib
-
-include ../../../../../distrib/examples/Makefile.vcs
+include $(UVM_HOME)/examples/Makefile.vcs
 
 
 all: comp run
