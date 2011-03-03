@@ -37,7 +37,7 @@ class bcast_on_write_cbs extends uvm_reg_cbs;
       if (kind != UVM_PREDICT_WRITE) return;
 
       foreach (bcast_to[i]) begin
-         bcast_to[i].predict(value, .path(path));
+         void'(bcast_to[i].predict(value, .path(path)));
       end
    endfunction
    
@@ -150,15 +150,23 @@ class block_soc extends uvm_reg_block;
 
          cb = new;
          uvm_reg_field_cb::add(all_blks.mode.value, cb);
-         cb.bcast_to = '{blk[0].mode.value,
+         
+         begin
+            uvm_reg_field t[3]='{blk[0].mode.value,
                          blk[1].mode.value,
                          blk[2].mode.value};
+            cb.bcast_to = t;
+         end
 
          cb = new;
          uvm_reg_field_cb::add(all_blks.rate.value, cb);
-         cb.bcast_to = '{blk[0].rate.value,
+         
+         begin
+             uvm_reg_field t[3]= '{blk[0].rate.value,
                          blk[1].rate.value,
                          blk[2].rate.value};
+            cb.bcast_to = t;
+         end
       end
 
       uvm_resource_db#(bit)::set({"REG::",all_blks.get_full_name(),".*"},
