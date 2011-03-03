@@ -26,8 +26,6 @@
 #include <string.h>
 
 
-extern "C" {
-
 /* 
  * UVM HDL access C code.
  *
@@ -337,9 +335,6 @@ int uvm_hdl_check_path(char *path)
       return 0;
   else 
     return 1;
-#ifndef VCS
-  vpi_release_handle(r);
-#endif
 }
 
 
@@ -392,4 +387,3 @@ int uvm_hdl_release(char *path)
   return uvm_hdl_set_vlog(path, valuep, vpiReleaseFlag);
 }
 
-} // extern "C"

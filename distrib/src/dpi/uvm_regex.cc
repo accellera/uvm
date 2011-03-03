@@ -64,7 +64,7 @@ class uvm_re_cache
   }
   
  private:
-  typedef map<const string, regex_t*>re_cache_t;
+  typedef map<string, regex_t*>re_cache_t;
   re_cache_t cache;
   
   //--------------------------------------------------------------------
