@@ -27,7 +27,7 @@ use Data::Dumper;
 #
 # Make sure the version of IUS can run these tests
 #
-@ius_min_version_required=(9,20,33);
+@ius_min_version_required=(9,20,35);
 $ius = `irun -version`;
 chomp $ius;
 if ($ius !~ /TOOL:\s+\S+\s+(\d+)\.(\d+)-([A-z])(\d+)/) {
@@ -93,18 +93,24 @@ sub ius_version_string {
 #
 sub run_the_test {
   local($testdir, $ius_comp_opts, $ius_sim_opts, $_) = @_;
-  local($uvm_dpi_lib) = qx($uvm_home/bin/uvm_dpi_name);
-  
-  $ius = "irun -uvmhome $uvm_home -uvmnoautocompile $uvm_home/src/dpi/uvm_dpi.cc -nocopyright -incdir $uvm_home/src $uvm_home/src/uvm.sv $ius_comp_opts test.sv +UVM_TESTNAME=test $ius_sim_opts";
+  local($dpi) = get_options_for_dpi($uvm_home);
+
+  $ius = "irun -uvmhome $uvm_home $dpi -uvmnoautocompile $uvm_home/src/uvm.sv $ius_comp_opts test.sv +UVM_TESTNAME=test $ius_sim_opts";
   $ius .= " -nostdout" unless $opt_v;
 
   print "$ius\n" if $opt_v;
-  system("cd $testdir; rm -rf INCA_libs irun.log;");
-  system("cd $testdir; $ius");
-
-  return 0;
+  return system("cd $testdir; rm -rf INCA_libs irun.log; $ius");
 }
 
+sub get_options_for_dpi {
+  my($uvmhome)=@_;
+
+  if(-e "$uvmhome/lib/libuvmdpi.so") {
+    return "";
+  } else {
+    return " $uvm_home/src/dpi/uvm_dpi.cc ";
+  }
+}
 
 #
 # Return the name of the compile-time logfile
