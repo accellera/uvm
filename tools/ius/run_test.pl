@@ -95,7 +95,7 @@ sub run_the_test {
   local($testdir, $ius_comp_opts, $ius_sim_opts, $_) = @_;
   local($dpi) = get_options_for_dpi($uvm_home);
 
-  $ius = "irun -uvmhome $uvm_home $dpi -uvmnoautocompile $uvm_home/src/uvm.sv $ius_comp_opts test.sv +UVM_TESTNAME=test $ius_sim_opts";
+  $ius = "irun -uvmhome $uvm_home $dpi -nocopyright -uvmnoautocompile $uvm_home/src/uvm.sv $ius_comp_opts test.sv +UVM_TESTNAME=test $ius_sim_opts";
   $ius .= " -nostdout" unless $opt_v;
 
   print "$ius\n" if $opt_v;
