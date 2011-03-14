@@ -1713,7 +1713,7 @@ function uvm_component::new (string name, uvm_component parent);
     return;
   end
 
-  top = uvm_top; // calling uvm_root::get() causes infinite recursion
+  top = uvm_root::get();
 
   // Check that we're not in or past end_of_elaboration
   begin

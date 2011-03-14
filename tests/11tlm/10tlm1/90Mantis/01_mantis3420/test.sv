@@ -5,10 +5,11 @@ module test;
     `uvm_non_blocking_transport_imp_decl(_foo)
 
     class test extends uvm_component;
-        uvm_nonblocking_transport_imp_foo#(uvm_object, uvm_object, test) foo = new("comp",this); 
+        uvm_nonblocking_transport_imp_foo#(uvm_object, uvm_object, test) foo;
         `uvm_component_utils(test)
         function new(string name="", uvm_component parent=null);
             super.new(name,parent);
+            foo = new("comp",this); 
         endfunction
         
         function bit nb_transport_foo( input uvm_object req_arg, output uvm_object rsp_arg); 
