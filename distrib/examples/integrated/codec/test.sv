@@ -20,6 +20,8 @@
 //
 
 
+`include "uvm_macros.svh"
+
 `include "apb.sv"
 `include "vip.sv"
 
