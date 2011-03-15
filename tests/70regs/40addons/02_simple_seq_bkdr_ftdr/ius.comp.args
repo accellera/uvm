@@ -1,1 +1,1 @@
--clean rdb.sv uvc_pkg.sv tb_top.sv +access+rw
+-clean +access+rw

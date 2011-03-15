@@ -19,7 +19,7 @@
 ## -------------------------------------------------------------
 ## 
 
-OC_DIR = ../../../tests/70regs/common/oc_ethernet_rtl
+OC_DIR = ../../common/oc_ethernet_rtl
 
 include $(UVM_HOME)/examples/Makefile.vcs
 

@@ -30,6 +30,10 @@
    E ) Reset DUT & shadow with different values. Frontdoor mirror block. Post-mirror, check registers
 */
 
+`include "rdb.sv"
+`include "uvc_pkg.sv"
+`include "top.sv"
+
 module test();
 
   import uvm_pkg::*;

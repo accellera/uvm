@@ -1,5 +1,6 @@
 //----------------------------------------------------------------------
 //   Copyright 2010-2011 Cadence Design Systems, Inc.
+//   Copyright 2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -29,6 +30,10 @@
    Db) Backdoor mirror block. Expect no error
    E ) Reset DUT & shadow with different values. Frontdoor mirror block. Post-mirror, check registers
 */
+
+`include "rdb.sv"
+`include "uvc_pkg.sv"
+`include "tb_top.sv"
 
 module test_top();
 
