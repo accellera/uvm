@@ -119,3 +119,8 @@ global_stop_request();
       p.print();
     lock.put();
   endtask 
+
+
+factory.set_type_override_by_name("some","other");
+factory.set_type_override_by_name("some","other");
+factory.set_type_override_by_type(some,other);

@@ -216,6 +216,12 @@ sub replace_trivial{
     # FIX ovm_factory::print() -> factory.print
     $t =~ s/ovm_factory::print\(\)/factory.print()/g;
 
+    # FIX ovm_factory:: set_type_override  -> factory. set_type_override_by_name ()
+    $t =~ s/ovm_factory::set_type_override_by_name/factory.set_type_override_by_name/g;
+    $t =~ s/ovm_factory::set_type_override_by_type/factory.set_type_override_by_type/g;
+    $t =~ s/ovm_factory::set_type_override\(/factory.set_type_override_by_name(/g;
+      
+
     # FIX `dut_error(MSG) -> uvm_error
     $t =~ s/(?s)\`dut_error\(\((.*?)\)\s*\)/\`uvm_error(\"DUT\",\$psprintf($1))/g;
     $t =~ s/(?s)\`dut_error\((.*?)\)/\`uvm_error(\"DUT\",$1)/g;

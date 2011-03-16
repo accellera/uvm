@@ -118,3 +118,8 @@ my_component.global_stop_request();
       p.print();
     lock.put();
   endtask 
+
+
+ovm_factory::set_type_override("some","other");
+ovm_factory::set_type_override_by_name("some","other");
+ovm_factory::set_type_override_by_type(some,other);
