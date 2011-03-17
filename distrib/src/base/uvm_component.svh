@@ -1717,16 +1717,16 @@ function uvm_component::new (string name, uvm_component parent);
 
   // Check that we're not in or past end_of_elaboration
   begin
-    uvm_phase bld;
+    uvm_phase conn;
     uvm_domain common;
     common = uvm_domain::get_common_domain();
-    bld = common.find(uvm_build_phase::get());
-    assert(bld!=null);
-    if (bld.get_state() == UVM_PHASE_DONE) begin
+    conn = common.find(uvm_connect_phase::get());
+    assert(conn!=null);
+    if (conn.get_state() == UVM_PHASE_DONE) begin
       uvm_report_fatal("ILLCRT", {"It is illegal to create a component ('",
                 name,"' under '",
                 (parent == null ? top.get_full_name() : parent.get_full_name()),
-               "') after the build() phase has ended."},
+               "') after the connect() phase has ended."},
                        UVM_NONE);
     end
   end
