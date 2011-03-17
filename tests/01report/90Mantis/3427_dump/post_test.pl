@@ -75,7 +75,7 @@ close LOG;
 system("diff $gold $newlog > $path/output.df");
 if($? == 0) {
   $post_test = "gold file matched";
-  system("rm output.df");
+  system("rm -f output.df");
   return 0;
 }
 
