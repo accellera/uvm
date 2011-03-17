@@ -75,10 +75,12 @@ close LOG;
 system("diff $gold $newlog > $path/output.df");
 if($? == 0) {
   $post_test = "gold file matched";
-  system("rm -f output.df");
+  system("rm -f $path/output.df");
+  system("rm -f $newlog") unless $opt_d;
   return 0;
 }
 
 $post_test = "gold file mismatched";
+system("rm -f $newlog") unless $opt_d;
 return 1;
 
