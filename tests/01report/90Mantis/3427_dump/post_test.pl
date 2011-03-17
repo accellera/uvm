@@ -62,7 +62,8 @@ while($log_line = <LOG>) {
   } else {
     if($log_line =~ /END OF GOLD FILE/) { $is_started = 0; }
     else {
-      #$log_line =~ /^#?(.*)/;
+      # remove '# ' from logs (Questa)
+      $log_line =~ s/^# //;
       print NEWLOG "$log_line";
     }
   }

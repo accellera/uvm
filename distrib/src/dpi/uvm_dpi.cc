@@ -26,10 +26,15 @@
 // or by compiling individual files then linking them together.
 //
 
-#include "uvm_regex.cc"
-
+#ifdef __cplusplus
 extern "C" {
-  #include "uvm_hdl.c"
-  #include "uvm_svcmd_dpi.c"
+#endif
+
+#include "uvm_regex.cc"
+#include "uvm_hdl.c"
+#include "uvm_svcmd_dpi.c"
+
+#ifdef __cplusplus
 }
+#endif
 

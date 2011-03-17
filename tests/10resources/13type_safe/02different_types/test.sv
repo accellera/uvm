@@ -59,7 +59,7 @@ class test extends uvm_component;
     c1.val = 1;
     
     uvm_config_db#(child1)::set(null,"top.test", "child", c1);
-    uvm_config_db#(child1)::get(null,"top.test", "child", c2);  // UVM TEST COMPILE-TIME FAILURE
+    uvm_config_db#(child1)::get(null,"top.test", "child", c2);  // UVM TEST COMPILE-TIME FAILURE UVM TEST RUN-TIME FAILURE
   endfunction
 
   function void report();
