@@ -1711,7 +1711,7 @@
               end \
               else if(uvm_is_match(str__, {__m_uvm_status_container.get_full_scope_arg(),$psprintf("[%0d]", index__)})) begin \
                 if(index__+1 > ARG.size()) begin \
-                  int sz = index__; \
+                  int sz = index__+1; \
                   `M_UVM_``TYPE``_RESIZE(ARG,null) \
                 end \
                 if (__m_uvm_status_container.print_matches) \

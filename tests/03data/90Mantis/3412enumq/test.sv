@@ -57,7 +57,7 @@ module test;
     `uvm_component_utils_end
 
     myobject obj = new;
-    task run;
+    task run_phase(uvm_phase phase);
       bit failed=0;
       if(cfg_field_enum[2] != FOUR) begin
           uvm_report_info("FAILED", "*** UVM TEST FAILED cfg_field_enum[2] is not set ***", UVM_NONE);
