@@ -1778,11 +1778,6 @@ task uvm_phase::execute_phase();
   else begin // PHASE NODE
     uvm_task_phase task_phase;
 
-    // TODO: Find out why needed on VCS; this may overwrite any apriori
-    //       raised objections for the run phase
-    if (get_name() == "run")
-      phase_done = uvm_test_done_objection::get();
-
     //---------
     // STARTED:
     //---------

@@ -963,7 +963,7 @@ typedef class uvm_cmdline_processor;
 
 class uvm_test_done_objection extends m_uvm_test_done_objection_base;
 
-  protected static uvm_test_done_objection m_inst = get();
+   protected static uvm_test_done_objection m_inst;
   protected bit m_forced;
 
   // For communicating all objections dropped and end of phasing
