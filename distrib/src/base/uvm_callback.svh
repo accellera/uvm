@@ -500,7 +500,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     if(m_inst != null) return m_inst;
     void'(uvm_typed_callbacks#(T)::initialize());
     create_m_inst();
-    assert( m_inst != null );
+    if (m_inst == null)
+      `uvm_fatal("CB/INTERNAL","initialize: m_inst is null")
     return m_inst;
   endfunction
 

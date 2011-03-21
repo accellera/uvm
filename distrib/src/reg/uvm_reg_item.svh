@@ -211,7 +211,9 @@ class uvm_reg_item extends uvm_sequence_item;
   //
   virtual function void do_copy(uvm_object rhs);
     uvm_reg_item rhs_;
-    assert(rhs != null);
+    if (rhs == null)
+     `uvm_fatal("REG/NULL","do_copy: rhs argument is null") 
+
     if (!$cast(rhs_,rhs)) begin
       `uvm_error("WRONG_TYPE","Provided rhs is not of type uvm_reg_item")
       return;

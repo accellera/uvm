@@ -1721,7 +1721,9 @@ function uvm_component::new (string name, uvm_component parent);
     uvm_domain common;
     common = uvm_domain::get_common_domain();
     bld = common.find(uvm_build_phase::get());
-    assert(bld!=null);
+    if (bld == null)
+      uvm_report_fatal("COMP/INTERNAL",
+                       "attempt to find build phase object failed",UVM_NONE);
     if (bld.get_state() == UVM_PHASE_DONE) begin
       uvm_report_fatal("ILLCRT", {"It is illegal to create a component ('",
                 name,"' under '",

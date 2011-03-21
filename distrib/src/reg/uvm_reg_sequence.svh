@@ -170,8 +170,11 @@ class uvm_reg_sequence #(type BASE=uvm_sequence #(uvm_reg_item)) extends BASE;
   // this sequencer.
   //
   virtual task do_reg_item(uvm_reg_item rw);
-    assert(m_sequencer != null);
-    assert(adapter != null);
+    if (m_sequencer == null)
+     `uvm_fatal("REG/DO_ITEM/NULL","do_reg_item: m_sequencer is null") 
+    if (adapter == null)
+     `uvm_fatal("REG/DO_ITEM/NULL","do_reg_item: adapter handle is null") 
+
     `uvm_info("DO_RW_ACCESS",{"Doing transaction: ",rw.convert2string()},UVM_HIGH)
 
     if (parent_select == LOCAL) begin
@@ -645,7 +648,8 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
   virtual function void write(BUSTYPE tr);
      uvm_reg rg;
      uvm_reg_bus_op rw;
-     assert(adapter != null);
+    if (adapter == null)
+     `uvm_fatal("REG/WRITE/NULL","write: adapter handle is null") 
 
      // In case they forget to set byte_en
      rw.byte_en = -1;
