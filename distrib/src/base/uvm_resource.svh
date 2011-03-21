@@ -1360,6 +1360,27 @@ endclass
 
 
 
+//------------------------------------------------------------------------------
+//
+// CLASS: uvm_resource_converter
+//
+// The uvm_resource_converter class provides a policy object for doing
+// convertion from resource value to string.
+//
+//------------------------------------------------------------------------------
+class uvm_resource_converter #(type T=int);
+
+   // Function: convert2string
+   // Convert a value of type ~T~ to a string that can be displayed.
+   //
+   // By default, returns the name of the type
+   //
+   virtual function string convert2string(T val);
+      return $typename(T);
+   endfunction
+endclass
+
+   
 //----------------------------------------------------------------------
 // Class: uvm_resource #(T)
 //
@@ -1368,6 +1389,7 @@ endclass
 // methods including.
 //
 //----------------------------------------------------------------------
+
 
 class uvm_resource #(type T=int) extends uvm_resource_base;
 
@@ -1382,6 +1404,31 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   function new(string name="", scope="");
     super.new(name, scope);
   endfunction
+
+  // Singleton used to convert this resource to a string
+  static uvm_resource_converter#(T) m_r2s;
+
+  // Function: set_converter
+  // Specify how to convert the value of a resource of this type to a string
+  //
+  // If not specified (or set to ~null~),
+ //  the name of the resource type is displayed,
+  // not the content of the resource.
+  // Default conversion functions are specified for the built-in type.
+  //
+  static function void set_converter(uvm_resource_converter#(T) r2s);
+    m_r2s = r2s;
+  endfunction
+
+   
+  function string convert2string();
+    if (m_r2s != null)
+      return m_r2s.convert2string(val);
+     
+    return {"(", $typename(T), ")"};
+  endfunction
+
+
 
 
   //----------------------
@@ -1771,3 +1818,160 @@ endclass
 //----------------------------------------------------------------------
 const uvm_resource_pool uvm_resources = uvm_resource_pool::get();
 
+
+
+//----------------------------------------------------------------------
+//
+// CLASS: uvm_resource_default_converter
+// Define a default resource value converter using '%p'.
+//
+// May be used for almost all types, except virtual interfaces.
+// Default resource converters are already defined for the
+// built-in singular types using the <uvm_resource_default_converters>
+// class.
+//
+//----------------------------------------------------------------------
+
+class uvm_resource_default_converter#(type T=int) extends uvm_resource_converter#(T);
+
+   virtual function string convert2string(T val);
+      return $sformatf("(%s) %0p", $typename(T), val);
+   endfunction
+   
+   local static bit m_singleton = register();
+   local function new();
+      uvm_resource#(T)::set_converter(this);
+   endfunction
+
+   // Function: register
+   // Register the default resource value conversion function
+   // for this resource type.
+   //
+   //| void'(uvm_resource_default_converter#(bit[7:0])::register());
+   //
+   static function bit register();
+      if (!m_singleton) begin
+         uvm_resource_default_converter#(T) _this = new();
+         m_singleton = 1;
+      end
+      return 1;
+   endfunction
+endclass
+
+
+//----------------------------------------------------------------------
+//
+// CLASS: uvm_resource_class_converter
+// Define a default resource value converter using convert2string() method
+//
+// May be used for all class types that contain a ~convert2string()~ method,
+// such as <uvm_object>.
+//
+//----------------------------------------------------------------------
+
+class uvm_resource_class_converter#(type T=int) extends uvm_resource_converter#(T);
+
+   virtual function string convert2string(T val);
+      return $sformatf("(%s) %0s", $typename(T),
+                       (val == null) ? "(null)" : val.convert2string());
+   endfunction
+   
+   local static bit m_singleton = register();
+   local function new();
+      uvm_resource#(T)::set_converter(this);
+   endfunction
+
+   // Function: register
+   // Register the default resource value conversion function
+   // for this resource type.
+   //
+   //| void'(uvm_resource_class_converter#(my_obj)::register());
+   //
+   static function bit register();
+      if (!m_singleton) begin
+         uvm_resource_class_converter#(T) _this = new();
+         m_singleton = 1;
+      end
+      return 1;
+   endfunction
+endclass
+
+
+//----------------------------------------------------------------------
+//
+// CLASS: uvm_resource_sprint_converter
+// Define a default resource value converter using sprint() method
+//
+// May be used for all class types that contain a ~sprint()~ method,
+// such as <uvm_object>.
+//
+//----------------------------------------------------------------------
+
+class uvm_resource_sprint_converter#(type T=int) extends uvm_resource_converter#(T);
+
+   virtual function string convert2string(T val);
+      return $sformatf("(%s) %0s", $typename(T),
+                       (val == null) ? "(null)" : {"\n",val.sprint()});
+   endfunction
+   
+   local static bit m_singleton = register();
+   local function new();
+      uvm_resource#(T)::set_converter(this);
+   endfunction
+
+   // Function: register
+   // Register the default resource value conversion function
+   // for this resource type.
+   //
+   //| void'(uvm_resource_sprint_converter#(my_obj)::register());
+   //
+   static function bit register();
+      if (!m_singleton) begin
+         uvm_resource_sprint_converter#(T) _this = new();
+         m_singleton = 1;
+      end
+      return 1;
+   endfunction
+endclass
+
+
+//
+// CLASS: uvm_resource_default_converters
+// Singleton used to register default resource value converters
+// for the built-in singular types.
+//
+class uvm_resource_default_converters;
+   
+   local static bit m_singleton = register();
+   local function new();
+   endfunction
+
+   // Function: register
+   // Explicitly initialize the singleton to eliminate race conditions
+   //
+   static function bit register();
+      if (!m_singleton) begin
+
+         `define __built_in(T) uvm_resource_default_converter#(T)::register();
+            
+         `__built_in(shortint);
+         `__built_in(int);
+         `__built_in(longint);
+         `__built_in(byte);
+         `__built_in(bit);
+         `__built_in(logic);
+         `__built_in(reg);
+         `__built_in(integer);
+         `__built_in(time);
+         `__built_in(real);
+         `__built_in(shortreal);
+         `__built_in(realtime);
+         `__built_in(string);
+
+         `undef __built_in
+
+         m_singleton = 1;
+      end
+      return 1;
+   endfunction
+endclass
