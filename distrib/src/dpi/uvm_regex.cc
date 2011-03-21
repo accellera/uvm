@@ -74,19 +74,24 @@ int uvm_re_match(const char * re, const char *str)
 
   rexp = (regex_t*)malloc(sizeof(regex_t));
 
+  if (rexp == NULL) {
+    vpi_printf((PLI_BYTE8*)  "UVM_ERROR: uvm_re_match: internal memory allocation error");
+    return 1;
+  }
+
   err = regcomp(rexp, rex, REG_EXTENDED);
 
   if (err != 0) {
     vpi_printf((PLI_BYTE8*)  "UVM_ERROR: uvm_re_match: invalid glob or regular expression: |%s|\n",re);
+    regfree(rexp);
     return err;
   }
 
   err = regexec(rexp, str, 0, NULL, 0);
 
   //vpi_printf((PLI_BYTE8*)  "UVM_INFO: uvm_re_match: re=%s str=%s ERR=%0d\n",rex,str,err);
-  
 
-  free(rexp);
+  regfree(rexp);
 
   return err;
 }
