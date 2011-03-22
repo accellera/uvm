@@ -1376,7 +1376,7 @@ class uvm_resource_converter #(type T=int);
    // By default, returns the name of the type
    //
    virtual function string convert2string(T val);
-      return $typename(T);
+      return {"(", $typename(T), ") ?"};;
    endfunction
 endclass
 
@@ -1425,7 +1425,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     if (m_r2s != null)
       return m_r2s.convert2string(val);
      
-    return {"(", $typename(T), ")"};
+    return {"(", $typename(T), ") ?"};
   endfunction
 
 
