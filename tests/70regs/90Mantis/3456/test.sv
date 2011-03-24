@@ -92,12 +92,19 @@ class blk2 extends uvm_reg_block;
 endclass
 
 
-function void check_address(uvm_reg rg, uvm_reg_addr_t exp);
+function void check_address(uvm_reg rg,
+                            uvm_reg_addr_t off,
+                            uvm_reg_addr_t addr);
    $write("Checking address of \"%s\"...\n", rg.get_full_name());
-   if (rg.get_address() !== exp) begin
+   if (rg.get_offset() !== off) begin
+      `uvm_error("TEST",
+                 $sformatf("Register \"%s\" is at offset 'h%h instead of 'h%h",
+                           rg.get_full_name(), rg.get_offset(), off));
+   end
+   if (rg.get_address() !== addr) begin
       `uvm_error("TEST",
                  $sformatf("Register \"%s\" is at address 'h%h instead of 'h%h",
-                           rg.get_full_name(), rg.get_address(), exp));
+                           rg.get_full_name(), rg.get_address(), addr));
    end
 endfunction
 
@@ -107,10 +114,10 @@ begin
    blk.build();
    blk.lock_model();
 
-   check_address(blk.b1.r1, 'h0000);
-   check_address(blk.b1.r2, 'h0040);
-   check_address(blk.b2.r1, 'h1000);
-   check_address(blk.b2.r2, 'h1040);
+   check_address(blk.b1.r1, 'h0000, 'h0000);
+   check_address(blk.b1.r2, 'h0010, 'h0040);
+   check_address(blk.b2.r1, 'h0000, 'h1000);
+   check_address(blk.b2.r2, 'h0010, 'h1040);
           
    begin
       uvm_report_server svr;
