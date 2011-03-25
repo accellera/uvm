@@ -68,6 +68,7 @@
   `include "base/uvm_spell_chkr.svh"
   `include "base/uvm_resource.svh"
   `include "base/uvm_resource_db.svh"
+  `include "base/uvm_locking_resource_db.svh"
   `include "base/uvm_config_db.svh"
   `include "base/uvm_resource_specializations.svh"
 

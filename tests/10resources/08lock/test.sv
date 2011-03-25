@@ -41,6 +41,7 @@ endfunction
 class env extends uvm_component;
 
   uvm_resource#(int) r;
+  uvm_locking_resource#(int) rlk;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -48,6 +49,7 @@ class env extends uvm_component;
 
   function void build();
     r = uvm_resource_db#(int)::get_by_name(get_full_name(), "A");
+    rlk = uvm_locking_resource_db#(int)::get_by_name(get_full_name(), "B");
   endfunction
 
   task run_phase(uvm_phase phase);
@@ -67,13 +69,13 @@ class env extends uvm_component;
     forever begin
       d = rand_delay();
       # d;
-      r.read_with_lock(i, this);
+      rlk.read(i, this);
       $display("%0t:    locking:  i = %0d", $time, i);
 
       d = rand_delay();
       # d;
       i++;
-      r.write_with_lock(i, this);
+      rlk.write(i, this);
     end
 
   endtask
@@ -118,6 +120,9 @@ class test extends uvm_component;
     e = new("env", this);
 
     uvm_resource_db#(int)::set("*", "A", 0, this);
+    fork
+      uvm_locking_resource_db#(int)::set("*", "A", 0, this);
+    join_none
   endfunction
 
   task run_phase(uvm_phase phase);

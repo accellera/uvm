@@ -131,8 +131,6 @@ class uvm_resource_types;
 
 endclass
 
-
-
 //----------------------------------------------------------------------
 // Class: uvm_resource_options
 //
@@ -275,22 +273,20 @@ virtual class uvm_resource_base extends uvm_object;
   // Retrieves a lock for this resource.  The task blocks until the lock
   // is obtained.
 
-  task lock();
-    sm.get();
-    lock_state -= 1;
+  virtual task lock();
+    uvm_report_error("lock", "Locking is not supported in this resource type.  Use uvm_locking_resource instead");
   endtask
 
   // Function: try_lock
+
   //
   // Retrives the lock for this resource.  The function is nonblocking,
   // so it will return immediately.  If it was successfull in retrieving
   // the lock then a one is returned, otherwise a zero is returned.
 
   function bit try_lock();
-    bit ok = sm.try_get();
-    if(ok)
-      lock_state -= 1;
-    return ok;
+    uvm_report_error("lock", "Locking is not supported in this resource type.  Use uvm_locking_resource instead");
+    return 0;
   endfunction
 
   // Function: unlock
@@ -298,8 +294,7 @@ virtual class uvm_resource_base extends uvm_object;
   // Releases the lock held by this semaphore.
 
   function void unlock();
-    sm.put();
-    lock_state += 1;
+    uvm_report_error("lock", "Locking is not supported in this resource type.  Use uvm_locking_resource instead");
   endfunction
 
 
@@ -1361,20 +1356,16 @@ endclass
 
 
 //----------------------------------------------------------------------
-// Class: uvm_resource #(T)
+// Class: uvm_resource_param_base #(T)
 //
-// Parameterized resource.  Provides essential access methods to read
-// from and write to the resource database.  Also provides locking access 
-// methods including.
+// Parameterized resource base class.
 //
 //----------------------------------------------------------------------
 
-class uvm_resource #(type T=int) extends uvm_resource_base;
+virtual class uvm_resource_param_base #(type T=int)
+  extends uvm_resource_base;
 
-  typedef uvm_resource#(T) this_type;
-
-  // singleton handle that represents the type of this resource
-  static this_type my_type = get_type();
+  typedef uvm_resource_param_base #(T) this_type;
 
   // Can't be rand since things like rand strings are not legal.
   protected T val;
@@ -1383,37 +1374,6 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     super.new(name, scope);
   endfunction
 
-
-  //----------------------
-  // Group: Type Interface
-  //----------------------
-  //
-  // Resources can be identified by type using a static type handle.
-  // The parent class provides the virtual function interface
-  // <get_type_handle>.  Here we implement it by returning the static type
-  // handle.
-
-  // Function: get_type
-  //
-  // Static function that returns the static type handle.  The return
-  // type is this_type, which is the type of the parameterized class.
-
-  static function this_type get_type();
-    if(my_type == null)
-      my_type = new();
-    return my_type;
-  endfunction
-
-  // Function: get_type_handle
-  //
-  // Returns the static type handle of this resource in a polymorphic
-  // fashion.  The return type of get_type_handle() is
-  // uvm_resource_base.  This function is not static and therefore can
-  // only be used by instances of a parameterized resource.
-
-  function uvm_resource_base get_type_handle();
-    return get_type();
-  endfunction
 
   //-------------------------
   // Group: Set/Get Interface
@@ -1452,7 +1412,174 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   endfunction
 
 
-  // Function: get_by_name
+ 
+  //----------------------------
+  // Group: Basic Read/Write Interface
+  //----------------------------
+  //
+  // <basic_read> and <basic_write> provide a type-safe interface for
+  // getting and setting the object in the resource container.  The
+  // interface is type safe because the value argument for <write> and
+  // the return value of <read> are T, the type supplied in the class
+  // parameter.  If either of these functions is used in an incorrect
+  // type context the compiler will complain.
+
+
+  // Function: basic_read
+  //
+  // Return the object stored in the resource container.  If an ~accessor~
+  // object is supplied then also update the accessor record for this
+  // resource.
+
+  protected function T basic_read(uvm_object accessor = null);
+
+    string str;
+
+    // If an accessor object is supplied then get the accessor record.
+    // Otherwise create a new access record.  In either case populate
+    // the access record with information about this access.  Check
+    // first to make sure that auditing is turned on.
+
+    if(uvm_resource_options::is_auditing()) begin
+      if(accessor != null) begin
+        uvm_resource_types::access_t access_record;
+        str = accessor.get_full_name();
+        if(access.exists(str))
+          access_record = access[str];
+        else
+          init_access_record(access_record);
+        access_record.read_count++;
+        access_record.read_time = $realtime;
+        access[str] = access_record;
+      end
+    end
+
+    // get the value
+    return val;
+  endfunction
+
+
+  // Function: basic_write
+  //
+  // Modify the object stored in this resource container.  If the
+  // resource is read-only then issue an error message and return
+  // without modifying the object in the container.  If the resource is
+  // not read-only and an ~accessor~ object has been supplied then also
+  // update the accessor record.  Lastly, replace the object value in the
+  // container with the value supplied as the  argument, ~t~, and 
+  // release any processes blocked on <uvm_resource_base::wait_modified>.
+
+  function void basic_write(T t, uvm_object accessor = null);
+
+    if(is_read_only()) begin
+      uvm_report_error("resource", $psprintf("resource %s is read only -- cannot modify", get_name()));
+      return;
+    end
+
+    // If an accessor object is supplied then get the accessor record.
+    // Otherwise create a new access record.  In either case populate
+    // the access record with information about this access.  Check
+    // first that auditing is turned on
+
+    if(uvm_resource_options::is_auditing()) begin
+      if(accessor != null) begin
+        uvm_resource_types::access_t access_record;
+        string str;
+        if(access.exists(str))
+          access_record = access[str];
+        else
+          init_access_record(access_record);
+        access_record.write_count++;
+        access_record.write_time = $realtime;
+        access[str] = access_record;
+      end
+    end
+
+    // set the value and set the dirty bit
+    val = t;
+    modified = 1;
+  endfunction
+
+  //----------------
+  // Group: Priority
+  //----------------
+  //
+  // Functions for manipulating the search priority of resources.  These
+  // implementations of the interface defined in the base class delegate
+  // to the resource pool. 
+
+
+  // Function: set priority
+  //
+  // Change the search priority of the resource based on the value of
+  // the priority enum argument, ~pri~.
+
+  function void set_priority (uvm_resource_types::priority_e pri);
+    uvm_resource_pool rp = uvm_resource_pool::get();
+    rp.set_priority(this, pri);
+  endfunction
+
+
+  // Function: get_highest_precedence
+  //
+  // In a queue of resources, locate the first one with the highest
+  // precedence whose type is T.  This function is static so that it can
+  // be called from anywhere.
+
+endclass
+
+//----------------------------------------------------------------------
+// Class: uvm_resource #(T)
+//
+// Parameterized resource.  Provides essential access methods to read
+// from and write to the resource database.  Also provides locking access 
+// methods including.
+//
+//----------------------------------------------------------------------
+
+class uvm_resource #(type T=int) extends uvm_resource_param_base #(T);
+
+  typedef uvm_resource #(T) this_type;
+
+  function new(string name="", scope="");
+    super.new(name, scope);
+  endfunction
+
+  //----------------------
+  // Group: Type Interface
+  //----------------------
+  //
+  // Resources can be identified by type using a static type handle.
+  // The parent class provides the virtual function interface
+  // <get_type_handle>.  Here we implement it by returning the static type
+  // handle.
+
+  // singleton handle that represents the type of this resource
+  static this_type my_type = get_type();
+
+  // Function: get_type
+  //
+  // Static function that returns the static type handle.  The return
+  // type is this_type, which is the type of the parameterized class.
+
+  static function this_type get_type();
+    if(my_type == null)
+      my_type = new();
+    return my_type;
+  endfunction
+
+  // Function: get_type_handle
+  //
+  // Returns the static type handle of this resource in a polymorphic
+  // fashion.  The return type of get_type_handle() is
+  // uvm_resource_base.  This function is not static and therefore can
+  // only be used by instances of a parameterized resource.
+
+  function uvm_resource_base get_type_handle();
+    return get_type();
+  endfunction
+
+ // Function: get_by_name
   //
   // looks up a resource by ~name~ in the name map. The first resource
   // with the specified name that is visible in the specified ~scope~ is
@@ -1485,7 +1612,6 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     
   endfunction
 
-
   // Function: get_by_type
   //
   // looks up a resource by ~type_handle~ in the type map. The first resource
@@ -1517,212 +1643,6 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     return rsrc;
 
   endfunction
-  
-
-  //----------------------------
-  // Group: Read/Write Interface
-  //----------------------------
-  //
-  // <read> and <write> provide a type-safe interface for getting and
-  // setting the object in the resource container.  The interface is
-  // type safe because the value argument for <write> and the return
-  // value of <read> are T, the type supplied in the class parameter.
-  // If either of these functions is used in an incorrect type context
-  // the compiler will complain.
-
-
-  // Function: read
-  //
-  // Return the object stored in the resource container.  If an ~accessor~
-  // object is supplied then also update the accessor record for this
-  // resource.
-
-  function T read(uvm_object accessor = null);
-
-    string str;
-
-    // Has the resource been locked by the locking interface?  If so,
-    // issue an error.  Since we are doing a read which does not modify
-    // the contents of the resource, why issue an error and not just a
-    // warning?  The resource may be undergoing a value change and so we
-    // cannot be sure that the current value is the same as when the
-    // resource is subsequently unlocked. It may be or it may not be.
-    // Since we can't tell the user may be getting the incorrect value.
-
-    if(lock_state == 0) begin
-      string msg;
-      $sformat(msg, "Resource %s is being read by the non-locking interface while it is locked by the locking interface.  This could result in the incorrect value being returned", get_name());
-      uvm_report_error("LOCKED_READ", msg);
-    end
-
-    // If an accessor object is supplied then get the accessor record.
-    // Otherwise create a new access record.  In either case populate
-    // the access record with information about this access.  Check
-    // first to make sure that auditing is turned on.
-
-    if(uvm_resource_options::is_auditing()) begin
-      if(accessor != null) begin
-        uvm_resource_types::access_t access_record;
-        str = accessor.get_full_name();
-        if(access.exists(str))
-          access_record = access[str];
-        else
-          init_access_record(access_record);
-        access_record.read_count++;
-        access_record.read_time = $realtime;
-        access[str] = access_record;
-      end
-    end
-
-    // get the value
-    return val;
-  endfunction
-
-
-  // Function: write
-  //
-  // Modify the object stored in this resource container.  If the
-  // resource is read-only then issue an error message and return
-  // without modifying the object in the container.  If the resource is
-  // not read-only and an ~accessor~ object has been supplied then also
-  // update the accessor record.  Lastly, replace the object value in the
-  // container with the value supplied as the  argument, ~t~, and 
-  // release any processes blocked on <uvm_resource_base::wait_modified>.
-
-  function void write(T t, uvm_object accessor = null);
-
-    if(is_read_only()) begin
-      uvm_report_error("resource", $psprintf("resource %s is read only -- cannot modify", get_name()));
-      return;
-    end
-
-    if(lock_state == 0) begin
-      string msg;
-      $sformat(msg, "Resource %s is locked and cannot be modified at this time", get_name());
-      uvm_report_error("LOCKED_WRITE", msg);
-      return;
-    end
-
-    // If an accessor object is supplied then get the accessor record.
-    // Otherwise create a new access record.  In either case populate
-    // the access record with information about this access.  Check
-    // first that auditing is turned on
-
-    if(uvm_resource_options::is_auditing()) begin
-      if(accessor != null) begin
-        uvm_resource_types::access_t access_record;
-        string str;
-        if(access.exists(str))
-          access_record = access[str];
-        else
-          init_access_record(access_record);
-        access_record.write_count++;
-        access_record.write_time = $realtime;
-        access[str] = access_record;
-      end
-    end
-
-    // set the value and set the dirty bit
-    val = t;
-    modified = 1;
-  endfunction
-
-
-  //----------------
-  // Group: Priority
-  //----------------
-  //
-  // Functions for manipulating the search priority of resources.  These
-  // implementations of the interface defined in the base class delegate
-  // to the resource pool. 
-
-
-  // Function: set priority
-  //
-  // Change the search priority of the resource based on the value of
-  // the priority enum argument, ~pri~.
-
-  function void set_priority (uvm_resource_types::priority_e pri);
-    uvm_resource_pool rp = uvm_resource_pool::get();
-    rp.set_priority(this, pri);
-  endfunction
-
-
-  //-------------------------
-  // Group: Locking Interface
-  //-------------------------
-  //
-  // This interface is optional, you can choose to lock a resource or
-  // not. These methods are wrappers around the read/write interface.
-  // The difference between read/write interface and the locking
-  // interface is the use of a semaphore to guarantee exclusive access.
-
-
-  // Task: read_with_loc;
-  //
-  // Locking version of read().  Like read(), this returns the contents
-  // of the resource container.  In addtion it obeys the lock.
-
-  task read_with_lock (output T t, input uvm_object accessor = null);
-    lock();
-    t = read(accessor);
-    unlock();
-  endtask
-
-
-  // Function: try_read_with_lock
-  //
-  // Nonblocking form of read_with_lock().  If the lock is availble it
-  // grabs the lock and returns one.  If the lock is not available then
-  // it returns a 0.  In either case the return is immediate with no
-  // blocking.
-
-  function bit try_read_with_lock(output T t, input uvm_object accessor = null);
-    if(!try_lock())
-      return 0;
-    t = read(accessor);
-    unlock();
-    return 1;
-  endfunction
-
-
-  // Task: write_with_lock
-  //
-  // Locking form of write().  Like write(), write_with_lock() sets the
-  // contents of the resource container.  In addition it locks the
-  // resource before doing the write and unlocks it when the write is
-  // complete.  If the lock is currently not available write_with_lock()
-  // will block until it is.
-
-  task write_with_lock (input T t, uvm_object accessor = null);
-    lock();
-    write(t, accessor);
-    unlock();
-  endtask
-
-
-  // Function: try_write_with_lock
-  //
-  // Nonblocking form of write_with_lock(). If the lock is available
-  // then the write() occurs immediately and a one is returned.  If the
-  // lock is not available then the write does not occur and a zero is
-  // returned.  IN either case try_write_with_lock() returns immediately
-  // with no blocking.
-
-  function bit try_write_with_lock(input T t, uvm_object accessor = null);
-    if(!try_lock())
-      return 0;
-    write(t, accessor);
-    unlock();
-    return 1;
-  endfunction
-
-
-  // Function: get_highest_precedence
-  //
-  // In a queue of resources, locate the first one with the highest
-  // precedence whose type is T.  This function is static so that it can
-  // be called from anywhere.
 
   static function this_type get_highest_precedence(ref uvm_resource_types::rsrc_q_t q);
 
@@ -1763,8 +1683,273 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
 
   endfunction
 
+  
+  virtual function T read(uvm_object accessor = null);
+    return basic_read(accessor);
+  endfunction
+
+  virtual function void write(T t, uvm_object accessor = null);
+    basic_write(t, accessor);
+  endfunction
+ 
 endclass
 
+//----------------------------------------------------------------------
+// class: uvm_locking_resource
+//----------------------------------------------------------------------
+class uvm_locking_resource #(type T=int)
+  extends uvm_resource_param_base #(T);
+
+  typedef uvm_locking_resource #(T) this_type;
+
+  function new(string name="", scope="");
+    super.new(name, scope);
+  endfunction
+
+  //----------------------
+  // Group: Type Interface
+  //----------------------
+  //
+  // Resources can be identified by type using a static type handle.
+  // The parent class provides the virtual function interface
+  // <get_type_handle>.  Here we implement it by returning the static type
+  // handle.
+
+  // singleton handle that represents the type of this resource
+  static this_type my_type = get_type();
+
+  // Function: get_type
+  //
+  // Static function that returns the static type handle.  The return
+  // type is this_type, which is the type of the parameterized class.
+
+  static function this_type get_type();
+    if(my_type == null)
+      my_type = new();
+    return my_type;
+  endfunction
+
+  // Function: get_type_handle
+  //
+  // Returns the static type handle of this resource in a polymorphic
+  // fashion.  The return type of get_type_handle() is
+  // uvm_resource_base.  This function is not static and therefore can
+  // only be used by instances of a parameterized resource.
+
+  function uvm_resource_base get_type_handle();
+    return get_type();
+  endfunction
+
+ // Function: get_by_name
+  //
+  // looks up a resource by ~name~ in the name map. The first resource
+  // with the specified name that is visible in the specified ~scope~ is
+  // returned, if one exists.  The ~rpterr~ flag indicates whether or not
+  // an error should be reported if the search fails.  If ~rpterr~ is set
+  // to one then a failure message is issued, including suggested
+  // spelling alternatives, based on resource names that exist in the
+  // database, gathered by the spell checker.
+
+  static function this_type get_by_name(string scope,
+                                        string name,
+                                        bit rpterr = 1);
+
+    uvm_resource_pool rp = uvm_resource_pool::get();
+    uvm_resource_base rsrc_base;
+    this_type rsrc;
+    string msg;
+
+    rsrc_base = rp.get_by_name(scope, name, rpterr);
+    if(rsrc_base == null)
+      return null;
+
+    if(!$cast(rsrc, rsrc_base)) begin
+      $sformat(msg, "Resource with name %s in scope %s has incorrect type", name, scope);
+      `uvm_warning("RSRCTYPE", msg);
+      return null;
+    end
+
+    return rsrc;
+    
+  endfunction
+
+  // Function: get_by_type
+  //
+  // looks up a resource by ~type_handle~ in the type map. The first resource
+  // with the specified ~type_handle~ that is visible in the specified ~scope~ is
+  // returned, if one exists. Null is returned if there is no resource matching
+  // the specifications.
+
+  static function this_type get_by_type(string scope = "",
+                                        uvm_resource_base type_handle);
+
+    uvm_resource_pool rp = uvm_resource_pool::get();
+    uvm_resource_base rsrc_base;
+    this_type rsrc;
+    string msg;
+
+    if(type_handle == null)
+      return null;
+
+    rsrc_base = rp.get_by_type(scope, type_handle);
+    if(rsrc_base == null)
+      return null;
+
+    if(!$cast(rsrc, rsrc_base)) begin
+      $sformat(msg, "Resource with specified type handle in scope %s was not located", scope);
+      `uvm_warning("RSRCNF", msg);
+      return null;
+    end
+
+    return rsrc;
+
+  endfunction
+
+  static function this_type get_highest_precedence(ref uvm_resource_types::rsrc_q_t q);
+
+    this_type rsrc;
+    this_type r;
+    int unsigned i;
+    int unsigned prec;
+    int unsigned first;
+
+    if(q.size() == 0)
+      return null;
+
+    first = 0;
+    rsrc = null;
+    prec = 0;
+
+    // Locate first resources in the queue whose type is T
+    for(first = 0; first < q.size() && !$cast(rsrc, q.get(first)); first++);
+
+    // no resource in the queue whose type is T
+    if(rsrc == null)
+      return null;
+
+    prec = rsrc.precedence;
+
+    // start searching from the next resource after the first resource
+    // whose type is T
+    for(int i = first+1; i < q.size(); ++i) begin
+      if($cast(r, q.get(i))) begin
+        if(r.precedence > prec) begin
+          rsrc = r;
+          prec = r.precedence;
+        end
+      end
+    end
+
+    return rsrc;
+
+  endfunction
+
+  //-------------------------
+  // Group: Locking Interface
+  //-------------------------
+  //
+  // The task <lock> and the functions <try_lock> and <unlock> form a
+  // locking interface for resources.  These can be used for thread-safe
+  // reads and writes.  The interface methods write_with_lock and
+  // read_with_lock and their nonblocking counterparts in
+  // <uvm_resource#(T)> (a family of resource subclasses) obey the lock
+  // when reading and writing.  See documentation in <uvm_resource#(T)>
+  // for more information on put/get.  The lock interface is a wrapper
+  // around a local semaphore.
+
+  // Task: lock
+  //
+  // Retrieves a lock for this resource.  The task blocks until the lock
+  // is obtained.
+
+  task lock();
+    sm.get();
+  endtask
+
+  // Function: try_lock
+  //
+  // Retrives the lock for this resource.  The function is nonblocking,
+  // so it will return immediately.  If it was successfull in retrieving
+  // the lock then a one is returned, otherwise a zero is returned.
+
+  function bit try_lock();
+    bit ok = sm.try_get();
+    return ok;
+  endfunction
+
+  // Function: unlock
+  //
+  // Releases the lock held by this semaphore.
+
+  function void unlock();
+    sm.put();
+  endfunction
+
+  //-------------------------
+  // Group: Read/Write Interface
+  //-------------------------
+  //
+
+  // Task: read;
+  //
+  // Locking version of read().  Like read(), this returns the contents
+  // of the resource container.  In addtion it obeys the lock.
+
+  task read (output T t, input uvm_object accessor = null);
+    lock();
+    t = basic_read(accessor);
+    unlock();
+  endtask
+
+
+  // Function: try_read
+  //
+  // Nonblocking form of read_with_lock().  If the lock is availble it
+  // grabs the lock and returns one.  If the lock is not available then
+  // it returns a 0.  In either case the return is immediate with no
+  // blocking.
+
+  function bit try_read(output T t, input uvm_object accessor = null);
+    if(!try_lock())
+      return 0;
+    t = basic_read(accessor);
+    unlock();
+    return 1;
+  endfunction
+
+
+  // Task: write
+  //
+  // Locking form of write().  Like write(), write_with_lock() sets the
+  // contents of the resource container.  In addition it locks the
+  // resource before doing the write and unlocks it when the write is
+  // complete.  If the lock is currently not available write_with_lock()
+  // will block until it is.
+
+  task write (input T t, uvm_object accessor = null);
+    lock();
+    basic_write(t, accessor);
+    unlock();
+  endtask
+
+
+  // Function: try_write
+  //
+  // Nonblocking form of write_with_lock(). If the lock is available
+  // then the write() occurs immediately and a one is returned.  If the
+  // lock is not available then the write does not occur and a zero is
+  // returned.  IN either case try_write_with_lock() returns immediately
+  // with no blocking.
+
+  function bit try_write(input T t, uvm_object accessor = null);
+    if(!try_lock())
+      return 0;
+    basic_write(t, accessor);
+    unlock();
+    return 1;
+  endfunction
+
+endclass
 
 //----------------------------------------------------------------------
 // static global resource pool handle
