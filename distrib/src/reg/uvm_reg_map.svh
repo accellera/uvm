@@ -1226,9 +1226,11 @@ function void uvm_reg_map::set_base_addr(uvm_reg_addr_t offset);
       m_parent_map.set_submap_offset(this, offset);
    end
    else begin
-      uvm_reg_map top_map = get_root_map();
       m_base_addr = offset;
-      top_map.Xinit_address_mapX();
+      if (m_parent.is_locked()) begin
+         uvm_reg_map top_map = get_root_map();
+         top_map.Xinit_address_mapX();
+      end
    end
 endfunction
 
@@ -1364,6 +1366,9 @@ function int uvm_reg_map::get_physical_addresses(uvm_reg_addr_t     base_addr,
    if (up_map == null) begin
       // This is the top-most system/block!
       addr = new [local_addr.size()] (local_addr);
+      foreach (addr[i]) begin
+         addr[i] += m_base_addr;
+      end
    end else begin
       uvm_reg_addr_t  sys_addr[];
       uvm_reg_addr_t  base_addr;
