@@ -46,6 +46,8 @@ while ($_ = <LOG>) {
   next unless ($do);
   last if (m/^\s*$/);
 
+  s/\@\d+/\@X/;
+
   print L $_;
 }
 
