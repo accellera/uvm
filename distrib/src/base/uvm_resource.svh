@@ -79,9 +79,9 @@
 // as auditing, which effect resources.
 //
 // <uvm_resource_base>: the base (untyped) resource class living in the
-// resource database.  This class includes the interface for locking,
-// setting a resource as read-only, notification, scope management,
-// altering search priority, and managing auditing.
+// resource database.  This class includes the interface for setting a
+// resource as read-only, notification, scope management, altering
+// search priority, and managing auditing.
 //
 // <uvm_resource#(T)>: parameterized resource container.  This class
 // includes the interfaces for reading and writing each resource.
@@ -189,20 +189,16 @@ class uvm_resource_options;
 
 endclass
 
-
-
 //----------------------------------------------------------------------
 // Class: uvm_resource_base
 //
 // Non-parameterized base class for resources.  Supports interfaces for
-// locking/unlocking, scope matching, and virtual functions for printing
-// the resource and for printing the accessor list
+// scope matching, and virtual functions for printing the resource and
+// for printing the accessor list
 //----------------------------------------------------------------------
 
 virtual class uvm_resource_base extends uvm_object;
 
-  protected semaphore sm;
-  protected int lock_state;
   protected string scope;
   protected bit modified;
   protected bit read_only;
@@ -239,8 +235,6 @@ virtual class uvm_resource_base extends uvm_object;
   function new(string name = "", string s = "*");
     super.new(name);
     set_scope(s);
-    sm = new(1);
-    lock_state = 1;
     modified = 0;
     read_only = 0;
     precedence = default_precedence;
@@ -254,53 +248,6 @@ virtual class uvm_resource_base extends uvm_object;
   // container.
 
   pure virtual function uvm_resource_base get_type_handle();
-
-
-  //-------------------------
-  // Group: Locking Interface
-  //-------------------------
-  //
-  // The task <lock> and the functions <try_lock> and <unlock> form a
-  // locking interface for resources.  These can be used for thread-safe
-  // reads and writes.  The interface methods write_with_lock and
-  // read_with_lock and their nonblocking counterparts in
-  // <uvm_resource#(T)> (a family of resource subclasses) obey the lock
-  // when reading and writing.  See documentation in <uvm_resource#(T)>
-  // for more information on put/get.  The lock interface is a wrapper
-  // around a local semaphore.
-
-
-  // Task: lock
-  //
-  // Retrieves a lock for this resource.  The task blocks until the lock
-  // is obtained.
-
-  task lock();
-    sm.get();
-    lock_state -= 1;
-  endtask
-
-  // Function: try_lock
-  //
-  // Retrives the lock for this resource.  The function is nonblocking,
-  // so it will return immediately.  If it was successfull in retrieving
-  // the lock then a one is returned, otherwise a zero is returned.
-
-  function bit try_lock();
-    bit ok = sm.try_get();
-    if(ok)
-      lock_state -= 1;
-    return ok;
-  endfunction
-
-  // Function: unlock
-  //
-  // Releases the lock held by this semaphore.
-
-  function void unlock();
-    sm.put();
-    lock_state += 1;
-  endfunction
 
 
   //---------------------------
@@ -545,6 +492,58 @@ virtual class uvm_resource_base extends uvm_object;
   // and the particular operation performed (read or write).
   //
   // Auditting is controlled through the <uvm_resource_options> class.
+
+  // function: record_read_access
+
+  function void record_read_access(uvm_object accessor = null);
+
+    string str;
+
+    // If an accessor object is supplied then get the accessor record.
+    // Otherwise create a new access record.  In either case populate
+    // the access record with information about this access.  Check
+    // first to make sure that auditing is turned on.
+
+    if(uvm_resource_options::is_auditing()) begin
+      if(accessor != null) begin
+        uvm_resource_types::access_t access_record;
+        str = accessor.get_full_name();
+        if(access.exists(str))
+          access_record = access[str];
+        else
+          init_access_record(access_record);
+        access_record.read_count++;
+        access_record.read_time = $realtime;
+        access[str] = access_record;
+      end
+    end
+  endfunction
+
+  // function: record_write_access
+
+  function void record_write_access(uvm_object accessor = null);
+
+    string str;
+
+    // If an accessor object is supplied then get the accessor record.
+    // Otherwise create a new access record.  In either case populate
+    // the access record with information about this access.  Check
+    // first that auditing is turned on
+
+    if(uvm_resource_options::is_auditing()) begin
+      if(accessor != null) begin
+        uvm_resource_types::access_t access_record;
+        string str;
+        if(access.exists(str))
+          access_record = access[str];
+        else
+          init_access_record(access_record);
+        access_record.write_count++;
+        access_record.write_time = $realtime;
+        access[str] = access_record;
+      end
+    end
+  endfunction
 
 
   // Function: print_accessors
@@ -1364,11 +1363,8 @@ endclass
 // Class: uvm_resource #(T)
 //
 // Parameterized resource.  Provides essential access methods to read
-// from and write to the resource database.  Also provides locking access 
-// methods including.
-//
+// from and write to the resource database. 
 //----------------------------------------------------------------------
-
 class uvm_resource #(type T=int) extends uvm_resource_base;
 
   typedef uvm_resource#(T) this_type;
@@ -1518,7 +1514,6 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
 
   endfunction
   
-
   //----------------------------
   // Group: Read/Write Interface
   //----------------------------
@@ -1538,43 +1533,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // resource.
 
   function T read(uvm_object accessor = null);
-
-    string str;
-
-    // Has the resource been locked by the locking interface?  If so,
-    // issue an error.  Since we are doing a read which does not modify
-    // the contents of the resource, why issue an error and not just a
-    // warning?  The resource may be undergoing a value change and so we
-    // cannot be sure that the current value is the same as when the
-    // resource is subsequently unlocked. It may be or it may not be.
-    // Since we can't tell the user may be getting the incorrect value.
-
-    if(lock_state == 0) begin
-      string msg;
-      $sformat(msg, "Resource %s is being read by the non-locking interface while it is locked by the locking interface.  This could result in the incorrect value being returned", get_name());
-      uvm_report_error("LOCKED_READ", msg);
-    end
-
-    // If an accessor object is supplied then get the accessor record.
-    // Otherwise create a new access record.  In either case populate
-    // the access record with information about this access.  Check
-    // first to make sure that auditing is turned on.
-
-    if(uvm_resource_options::is_auditing()) begin
-      if(accessor != null) begin
-        uvm_resource_types::access_t access_record;
-        str = accessor.get_full_name();
-        if(access.exists(str))
-          access_record = access[str];
-        else
-          init_access_record(access_record);
-        access_record.read_count++;
-        access_record.read_time = $realtime;
-        access[str] = access_record;
-      end
-    end
-
-    // get the value
+    record_read_access(accessor);
     return val;
   endfunction
 
@@ -1596,32 +1555,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
       return;
     end
 
-    if(lock_state == 0) begin
-      string msg;
-      $sformat(msg, "Resource %s is locked and cannot be modified at this time", get_name());
-      uvm_report_error("LOCKED_WRITE", msg);
-      return;
-    end
-
-    // If an accessor object is supplied then get the accessor record.
-    // Otherwise create a new access record.  In either case populate
-    // the access record with information about this access.  Check
-    // first that auditing is turned on
-
-    if(uvm_resource_options::is_auditing()) begin
-      if(accessor != null) begin
-        uvm_resource_types::access_t access_record;
-        string str;
-        if(access.exists(str))
-          access_record = access[str];
-        else
-          init_access_record(access_record);
-        access_record.write_count++;
-        access_record.write_time = $realtime;
-        access[str] = access_record;
-      end
-    end
-
+    record_write_access(accessor);
     // set the value and set the dirty bit
     val = t;
     modified = 1;
@@ -1645,76 +1579,6 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   function void set_priority (uvm_resource_types::priority_e pri);
     uvm_resource_pool rp = uvm_resource_pool::get();
     rp.set_priority(this, pri);
-  endfunction
-
-
-  //-------------------------
-  // Group: Locking Interface
-  //-------------------------
-  //
-  // This interface is optional, you can choose to lock a resource or
-  // not. These methods are wrappers around the read/write interface.
-  // The difference between read/write interface and the locking
-  // interface is the use of a semaphore to guarantee exclusive access.
-
-
-  // Task: read_with_loc;
-  //
-  // Locking version of read().  Like read(), this returns the contents
-  // of the resource container.  In addtion it obeys the lock.
-
-  task read_with_lock (output T t, input uvm_object accessor = null);
-    lock();
-    t = read(accessor);
-    unlock();
-  endtask
-
-
-  // Function: try_read_with_lock
-  //
-  // Nonblocking form of read_with_lock().  If the lock is availble it
-  // grabs the lock and returns one.  If the lock is not available then
-  // it returns a 0.  In either case the return is immediate with no
-  // blocking.
-
-  function bit try_read_with_lock(output T t, input uvm_object accessor = null);
-    if(!try_lock())
-      return 0;
-    t = read(accessor);
-    unlock();
-    return 1;
-  endfunction
-
-
-  // Task: write_with_lock
-  //
-  // Locking form of write().  Like write(), write_with_lock() sets the
-  // contents of the resource container.  In addition it locks the
-  // resource before doing the write and unlocks it when the write is
-  // complete.  If the lock is currently not available write_with_lock()
-  // will block until it is.
-
-  task write_with_lock (input T t, uvm_object accessor = null);
-    lock();
-    write(t, accessor);
-    unlock();
-  endtask
-
-
-  // Function: try_write_with_lock
-  //
-  // Nonblocking form of write_with_lock(). If the lock is available
-  // then the write() occurs immediately and a one is returned.  If the
-  // lock is not available then the write does not occur and a zero is
-  // returned.  IN either case try_write_with_lock() returns immediately
-  // with no blocking.
-
-  function bit try_write_with_lock(input T t, uvm_object accessor = null);
-    if(!try_lock())
-      return 0;
-    write(t, accessor);
-    unlock();
-    return 1;
   endfunction
 
 

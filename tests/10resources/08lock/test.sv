@@ -40,61 +40,41 @@ endfunction
 //----------------------------------------------------------------------
 class env extends uvm_component;
 
-  uvm_resource#(int) r;
+  uvm_resource #(uvm_locker#(int)) r;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
   endfunction
 
   function void build();
-    r = uvm_resource_db#(int)::get_by_name(get_full_name(), "A");
+    r = uvm_resource_locking_db#(int)::get_by_name(get_full_name(), "A");
   endfunction
 
   task run_phase(uvm_phase phase);
     fork
-      locking();
-      nonlocking();
+      locking("p1");
+      locking("p2");
     join
   endtask
 
   //-----------------------------------
   // locking process
   //-----------------------------------
-  task locking();
+  task locking(string id);
     int i;
     int unsigned d;
 
     forever begin
-      d = rand_delay();
-      # d;
-      r.read_with_lock(i, this);
-      $display("%0t:    locking:  i = %0d", $time, i);
+      #1;
+      uvm_resource_locking_db#(int)::lock(r);
+      uvm_resource_locking_db#(int)::read(r, i, this);
+      $display("%0t:  %s read :  i = %0d", $time, id, i);
 
-      d = rand_delay();
-      # d;
+      #1;
       i++;
-      r.write_with_lock(i, this);
-    end
-
-  endtask
-
-  //-----------------------------------
-  // non-locking process
-  //-----------------------------------
-  task nonlocking();
-    int i;
-    int unsigned d;
-
-    forever begin
-      i = r.read(this);
-      $display("%0t: nonlocking:  i = %0d", $time, i);
-      d = rand_delay();
-      # d
-
-      i++;
-      r.write(i, this);
-      d = rand_delay();
-      # d;
+      uvm_resource_locking_db#(int)::write(r, i, this);
+      $display("%0t:  %s write:  i = %0d", $time, id, i);
+      uvm_resource_locking_db#(int)::unlock(r);
     end
 
   endtask
@@ -115,16 +95,21 @@ class test extends uvm_component;
   endfunction
 
   function void build();
+    int i;
     e = new("env", this);
 
-    uvm_resource_db#(int)::set("*", "A", 0, this);
+    uvm_resource_locking_db#(int)::set("*", "A", i, this);
+  endfunction
+
+  function void end_of_elaboration();
+    uvm_resource_db#(int)::dump();
   endfunction
 
   task run_phase(uvm_phase phase);
     uvm_report_server srvr = get_report_server();
     phase.raise_objection(this);
 
-    #500;
+    #100;
     $display("UVM TEST EXPECT %0d UVM_ERROR", srvr.get_severity_count(UVM_ERROR));
     $display("** UVM TEST PASSED **");
     phase.drop_objection(this);
