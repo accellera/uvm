@@ -2279,7 +2279,7 @@ function void uvm_component::build();
   m_build_done = 1;
   apply_config_settings(print_config_matches);
   if(m_phasing_active == 0) begin
-    uvm_report_warning("deprecated", "build()/build_phase() has been called explicitly, outside of the phasing system. This usage of build is deprecated and may lead to unexpected behavior.");
+    uvm_report_warning("UVM_DEPRECATED", "build()/build_phase() has been called explicitly, outside of the phasing system. This usage of build is deprecated and may lead to unexpected behavior.");
   end
 endfunction
 
