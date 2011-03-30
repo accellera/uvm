@@ -1612,6 +1612,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
       if(accessor != null) begin
         uvm_resource_types::access_t access_record;
         string str;
+        str = accessor.get_full_name();
         if(access.exists(str))
           access_record = access[str];
         else

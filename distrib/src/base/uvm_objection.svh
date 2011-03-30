@@ -90,7 +90,7 @@ class uvm_objection extends uvm_report_object;
   protected bit m_cleared = 0; /* for checking obj count<0 */
 
 
-  // Fuction: clear
+  // Function: clear
   //
   // Immediately clears the objection state. All counts are cleared and the
   // <all_dropped> callback for <uvm_top> is called. 
