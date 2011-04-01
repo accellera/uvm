@@ -1391,6 +1391,8 @@ virtual class uvm_component extends uvm_report_object;
   //| function void mycomponent::pre_abort();
   //|   report();
   //| endfunction
+  //
+  // The pre_abort() callback hooks are called in a bottom-up fashion.
 
   virtual function void pre_abort;
   endfunction
