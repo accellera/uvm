@@ -75,6 +75,13 @@ class myunit extends uvm_component;
   endfunction
 
   task run_phase(uvm_phase phase);
+    //Check config from initial block
+    if(l1.data != 55)
+      `uvm_error("BADCFG", $sformatf("Expected l1.data = 55, got %0d", l1.data))
+    if(l2.data != 101)
+      `uvm_error("BADCFG", $sformatf("Expected l2.data = 101, got %0d", l2.data))
+    if(l1.str != l2.str && l1.str != "hi")
+      `uvm_error("BADCFG", $sformatf("Expected l1.str = \"hi\" and l2.str = \"hi\", got l1.str = \"%s\" and l2.str = \"%s\"", l1.str, l2.str))
     phase.raise_objection(this);
     #10 $display("%0t: %s HI", $time, get_full_name());
     phase.drop_objection(this);
