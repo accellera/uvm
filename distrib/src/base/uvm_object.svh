@@ -1022,8 +1022,8 @@ function void uvm_object::copy (uvm_object rhs);
   uvm_global_copy_map.set(rhs, this); 
   ++depth;
 
-  do_copy(rhs);
   __m_uvm_field_automation(rhs, UVM_COPY, "");
+  do_copy(rhs);
 
   --depth;
   if(depth==0) begin
