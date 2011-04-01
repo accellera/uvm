@@ -1592,7 +1592,9 @@
           if(!((FLAG)&UVM_NOCOPY)) begin \
             if(((FLAG)&UVM_REFERENCE)) \
               ARG = local_data__.ARG; \
-            else \
+            else begin \
+              int sz = local_data__.ARG.size(); \
+              `M_UVM_``TYPE``_RESIZE(ARG,null) \
               foreach(ARG[i]) begin \
                 if(ARG[i] != null && local_data__.ARG[i] != null) \
                   ARG[i].copy(local_data__.ARG[i]); \
@@ -1601,6 +1603,7 @@
                 else \
                   ARG[i] = null; \
               end \
+            end \
           end \
         end \
       UVM_COMPARE: \
@@ -1620,7 +1623,13 @@
             end \
             else begin \
               string s; \
-              foreach(ARG[i]) begin \
+              if(ARG.size() != local_data__.ARG.size()) begin \
+                if(__m_uvm_status_container.comparer.show_max == 1) begin \
+                  __m_uvm_status_container.scope.set_arg(`"ARG`"); \
+                  __m_uvm_status_container.comparer.print_msg($sformatf("size mismatch: lhs: %0d  rhs: %0d", ARG.size(), local_data__.ARG.size())); \
+                end \
+              end \
+              for(int i=0; i<ARG.size() && i<local_data__.ARG.size(); ++i) begin \
                 if(ARG[i] != null && local_data__.ARG[i] != null) begin \
                   $swrite(s,`"ARG[%0d]`",i); \
                   void'(__m_uvm_status_container.comparer.compare_object(s, ARG[i], local_data__.ARG[i])); \

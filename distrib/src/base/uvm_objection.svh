@@ -90,7 +90,7 @@ class uvm_objection extends uvm_report_object;
   protected bit m_cleared = 0; /* for checking obj count<0 */
 
 
-  // Fuction: clear
+  // Function: clear
   //
   // Immediately clears the objection state. All counts are cleared and the
   // <all_dropped> callback for <uvm_top> is called. 
@@ -963,7 +963,7 @@ typedef class uvm_cmdline_processor;
 
 class uvm_test_done_objection extends m_uvm_test_done_objection_base;
 
-  protected static uvm_test_done_objection m_inst = get();
+   protected static uvm_test_done_objection m_inst;
   protected bit m_forced;
 
   // For communicating all objections dropped and end of phasing

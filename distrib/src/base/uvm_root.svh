@@ -181,8 +181,10 @@ class uvm_root extends uvm_component;
   // -------------
   // At end of elab phase we need to do tlm binding resolution.
   function void phase_started(uvm_phase phase);
-    if (phase == end_of_elaboration_ph)
+    if (phase == end_of_elaboration_ph) begin
       do_resolve_bindings(); 
+      if (enable_print_topology) print_topology();
+    end
   endfunction
 
   bit m_phase_all_done;

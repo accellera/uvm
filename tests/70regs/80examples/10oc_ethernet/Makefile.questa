@@ -19,8 +19,6 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../../../distrib
-
 include $(UVM_HOME)/examples/Makefile.questa
 
 OC_DIR = $(UVM_HOME)/../tests/70regs/common/oc_ethernet_rtl

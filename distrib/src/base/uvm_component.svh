@@ -1391,6 +1391,8 @@ virtual class uvm_component extends uvm_report_object;
   //| function void mycomponent::pre_abort();
   //|   report();
   //| endfunction
+  //
+  // The pre_abort() callback hooks are called in a bottom-up fashion.
 
   virtual function void pre_abort;
   endfunction
@@ -1615,6 +1617,7 @@ virtual class uvm_component extends uvm_report_object;
   protected process    m_phase_process;
 
   /*protected*/ bit  m_build_done=0;
+  /*protected*/ int  m_phasing_active=0;
 
   extern                   function void set_int_local(string field_name, 
                                                        uvm_bitstream_t value,
@@ -1712,7 +1715,7 @@ function uvm_component::new (string name, uvm_component parent);
     return;
   end
 
-  top = uvm_top; // calling uvm_root::get() causes infinite recursion
+  top = uvm_root::get();
 
   // Check that we're not in or past end_of_elaboration
   begin
@@ -1720,7 +1723,9 @@ function uvm_component::new (string name, uvm_component parent);
     uvm_domain common;
     common = uvm_domain::get_common_domain();
     bld = common.find(uvm_build_phase::get());
-    assert(bld!=null);
+    if (bld == null)
+      uvm_report_fatal("COMP/INTERNAL",
+                       "attempt to find build phase object failed",UVM_NONE);
     if (bld.get_state() == UVM_PHASE_DONE) begin
       uvm_report_fatal("ILLCRT", {"It is illegal to create a component ('",
                 name,"' under '",
@@ -2267,7 +2272,6 @@ endfunction
 
 function void uvm_component::build_phase(uvm_phase phase);
   m_build_done = 1;
-  apply_config_settings(print_config_matches);
   build();
 endfunction
 
@@ -2275,6 +2279,10 @@ endfunction
 
 function void uvm_component::build();
   m_build_done = 1;
+  apply_config_settings(print_config_matches);
+  if(m_phasing_active == 0) begin
+    uvm_report_warning("UVM_DEPRECATED", "build()/build_phase() has been called explicitly, outside of the phasing system. This usage of build is deprecated and may lead to unexpected behavior.");
+  end
 endfunction
 
 // these phase methods are common to all components in UVM. For backward

@@ -2060,6 +2060,8 @@ task uvm_reg::update(output uvm_status_e      status,
 
    status = UVM_IS_OK;
 
+   if (!needs_update()) return;
+      
    if (m_update_in_progress) begin
      @(negedge m_update_in_progress);
      return;
@@ -2889,7 +2891,7 @@ task uvm_reg::mirror(output uvm_status_e       status,
 
       if ((v|dc) !== (exp|dc)) begin
          `uvm_error("RegModel", $psprintf("Register \"%s\" value read from DUT (0x%h) does not match mirrored value (0x%h)",
-                                     get_name(), v, (exp ^ ('x & dc))));
+                                     get_full_name(), v, (exp ^ ('x & dc))));
                                      
           foreach(m_fields[i]) begin
              if(m_fields[i].get_compare() == UVM_CHECK) begin

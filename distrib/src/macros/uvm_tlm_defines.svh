@@ -431,7 +431,7 @@ class uvm_nonblocking_transport_imp``SFX #(type REQ=int, type RSP=int, type IMP=
 endclass
 
 `define uvm_non_blocking_transport_imp_decl(SFX) \
-  uvm_nonblocking_transport_imp_decl(SFX)
+  `uvm_nonblocking_transport_imp_decl(SFX)
 
 // MACRO: `uvm_transport_imp_decl
 //

@@ -961,7 +961,8 @@ endfunction: new
 function void uvm_mem::configure(uvm_reg_block  parent,
                                  string         hdl_path="");
 
-   assert(parent!=null);
+   if (parent == null)
+     `uvm_fatal("REG/NULL_PARENT","configure: parent argument is null") 
 
    m_parent = parent;
 

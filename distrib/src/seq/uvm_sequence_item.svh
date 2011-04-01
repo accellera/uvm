@@ -242,8 +242,16 @@ class uvm_sequence_item extends uvm_transaction;
       uvm_report_fatal("NULLITM",
          {"attempting to start a null item or sequence from sequence '",
           get_full_name(), "'"}, UVM_NONE);
+          
     if (sequencer == null)
-      sequencer = get_sequencer();
+        sequencer = item_or_seq.get_sequencer();
+        
+    if(sequencer == null)
+        sequencer =  get_sequencer();   
+        
+    if(sequencer == null)
+        uvm_report_fatal("SEQ",{"neither the items sequencer nor dedicated sequencer has been supplied to start item in ",get_full_name()},UVM_NONE);
+      
     item_or_seq.m_start_item_or_seq(sequencer, this, set_priority);
   endtask  
 

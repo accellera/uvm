@@ -19,8 +19,6 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../../distrib
-
 #
 # compiles uvm_pkg and test.sv in two different compile scopes 
 # requires that uvm_macros.svh really provide all symbols

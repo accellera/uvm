@@ -423,7 +423,7 @@ virtual class uvm_object extends uvm_void;
 
   // Function: copy
   //
-  // The copy method returns a deep copy of this object.
+  // The copy makes this object a copy of the specified object.
   //
   // The copy method is not virtual and should not be overloaded in derived
   // classes. To copy the fields of a derived class, that class should override

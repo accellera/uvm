@@ -19,9 +19,7 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../../../distrib
-
-OC_DIR = $(UVM_HOME)/../tests/70regs/common/oc_ethernet_rtl
+OC_DIR = ../../common/oc_ethernet_rtl
 
 include $(UVM_HOME)/examples/Makefile.ius
 
@@ -50,6 +48,7 @@ help:
 	@echo
 
 uvm_%_seq:
+	@echo "using uvmhome $(UVM_HOME)"
 	$(IRUN) +UVM_SEQUENCE=$@
 	$(CHECK)
 
