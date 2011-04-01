@@ -1659,7 +1659,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // interface is the use of a semaphore to guarantee exclusive access.
 
 
-  // Task: read_with_loc;
+  // Task: read_with_lock
   //
   // Locking version of read().  Like read(), this returns the contents
   // of the resource container.  In addtion it obeys the lock.
