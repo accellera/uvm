@@ -66,7 +66,7 @@ class myunit extends uvm_component;
   function new (string name, uvm_component parent);
     super.new(name, parent);
     set_config_string("l1", "str", "hi");
-    set_config_int("*", "da*", 'h100);
+    set_config_int("*", "data", 'h100);
     l1 = new ("l1", this);
     l2 = new ("l2", this);
     l1.data = 'h30;
@@ -123,14 +123,12 @@ module top;
   mydata bar = new;
 
   initial begin
+    uvm_top.finish_on_completion = 0;
     set_config_int("mu.*", "data", 101);
     set_config_string("mu.*", "str", "hi");
     set_config_int("mu.l1", "data", 55);
     set_config_object("mu.*", "obj", bar);
-    uvm_default_printer.knobs.reference=0;
-    mu.print_config_settings("", null, 1);
     mu.print();
-    factory.print(1);
     run_test();
     mu.print();
   end
