@@ -732,8 +732,8 @@ class uvm_resource_pool;
   // <set_override>, <set_name_override>, or <set_type_override>
   // functions.
   //
-  function void set (uvm_resource_base rsrc,
-                     uvm_resource_types::override_t override = 2'b00);
+  function void set (uvm_resource_base rsrc, 
+                     uvm_resource_types::override_t override = 0);
 
     uvm_resource_types::rsrc_q_t rq;
     string name;
@@ -1659,7 +1659,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // interface is the use of a semaphore to guarantee exclusive access.
 
 
-  // Task: read_with_loc;
+  // Task: read_with_lock
   //
   // Locking version of read().  Like read(), this returns the contents
   // of the resource container.  In addtion it obeys the lock.

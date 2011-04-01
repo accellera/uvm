@@ -66,7 +66,7 @@ class myunit extends uvm_component;
   function new (string name, uvm_component parent);
     super.new(name, parent);
     set_config_string("l1", "str", "hi");
-    set_config_int("*", "da*", 'h100);
+    set_config_int("*", "data", 'h100);
     l1 = new ("l1", this);
     l2 = new ("l2", this);
     l1.data = 'h30;
@@ -75,6 +75,13 @@ class myunit extends uvm_component;
   endfunction
 
   task run_phase(uvm_phase phase);
+    //Check config from initial block
+    if(l1.data != 55)
+      `uvm_error("BADCFG", $sformatf("Expected l1.data = 55, got %0d", l1.data))
+    if(l2.data != 101)
+      `uvm_error("BADCFG", $sformatf("Expected l2.data = 101, got %0d", l2.data))
+    if(l1.str != l2.str && l1.str != "hi")
+      `uvm_error("BADCFG", $sformatf("Expected l1.str = \"hi\" and l2.str = \"hi\", got l1.str = \"%s\" and l2.str = \"%s\"", l1.str, l2.str))
     phase.raise_objection(this);
     #10 $display("%0t: %s HI", $time, get_full_name());
     phase.drop_objection(this);
@@ -123,14 +130,12 @@ module top;
   mydata bar = new;
 
   initial begin
+    uvm_top.finish_on_completion = 0;
     set_config_int("mu.*", "data", 101);
     set_config_string("mu.*", "str", "hi");
     set_config_int("mu.l1", "data", 55);
     set_config_object("mu.*", "obj", bar);
-    uvm_default_printer.knobs.reference=0;
-    mu.print_config_settings("", null, 1);
     mu.print();
-    factory.print(1);
     run_test();
     mu.print();
   end
