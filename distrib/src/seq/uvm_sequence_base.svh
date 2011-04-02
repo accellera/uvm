@@ -234,7 +234,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   virtual task start (uvm_sequencer_base sequencer,
                       uvm_sequence_base parent_sequence = null,
-                      integer this_priority = 100,
+                      int this_priority = -1,
                       bit call_pre_post = 1);
 
 
@@ -245,11 +245,15 @@ class uvm_sequence_base extends uvm_sequence_item;
          {"Sequence ", get_full_name(), " already started"},UVM_NONE);
     end
 
-    if ((this_priority < 1) |  (^this_priority === 1'bx)) begin
+    if (this_priority < -1) begin
       uvm_report_fatal("SEQPRI", $psprintf("Sequence %s start has illegal priority: %0d",
                                            get_full_name(),
                                            this_priority), UVM_NONE);
-      end
+    end
+    if (this_priority < 0) begin
+       if (parent_sequence == null) this_priority = 100;
+       else this_priority = parent_sequence.get_priority();
+    end
 
     // Check that the response queue is empty from earlier runs
     clear_response_queue();
@@ -727,17 +731,11 @@ class uvm_sequence_base extends uvm_sequence_item;
                              uvm_sequence_item parent_seq, 
                              int set_priority = -1);
     uvm_sequence_base parent_seq_;
-    int prior;
 
     if (!$cast(parent_seq_, parent_seq))
         uvm_report_fatal("SEQMFINISH", "Failure to cast sequence item", UVM_NONE);
 
-    // determine priority
-    prior = (set_priority   >= 0 ? set_priority :
-            (get_priority() >= 0 ? get_priority() :
-             100));
-
-    start(sequencer, parent_seq_, prior, 0);
+    start(sequencer, parent_seq_, set_priority, 0);
     
   endtask  
 

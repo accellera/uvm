@@ -280,6 +280,8 @@ class uvm_sequence_item extends uvm_transaction;
     set_sequencer(sequencer);
     set_parent_sequence(parent_seq_);
     reseed();
+
+    if (set_priority < 0) set_priority = parent_seq_.get_priority();
     
     sequencer.wait_for_grant(parent_seq_, set_priority);
     `ifndef UVM_DISABLE_AUTO_ITEM_RECORDING
