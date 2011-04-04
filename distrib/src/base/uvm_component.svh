@@ -1391,6 +1391,8 @@ virtual class uvm_component extends uvm_report_object;
   //| function void mycomponent::pre_abort();
   //|   report();
   //| endfunction
+  //
+  // The pre_abort() callback hooks are called in a bottom-up fashion.
 
   virtual function void pre_abort;
   endfunction
@@ -1717,16 +1719,18 @@ function uvm_component::new (string name, uvm_component parent);
 
   // Check that we're not in or past end_of_elaboration
   begin
-    uvm_phase conn;
+    uvm_phase bld;
     uvm_domain common;
     common = uvm_domain::get_common_domain();
-    conn = common.find(uvm_connect_phase::get());
-    assert(conn!=null);
-    if (conn.get_state() == UVM_PHASE_DONE) begin
+    bld = common.find(uvm_build_phase::get());
+    if (bld == null)
+      uvm_report_fatal("COMP/INTERNAL",
+                       "attempt to find build phase object failed",UVM_NONE);
+    if (bld.get_state() == UVM_PHASE_DONE) begin
       uvm_report_fatal("ILLCRT", {"It is illegal to create a component ('",
                 name,"' under '",
                 (parent == null ? top.get_full_name() : parent.get_full_name()),
-               "') after the connect() phase has ended."},
+               "') after the build phase has ended."},
                        UVM_NONE);
     end
   end
@@ -2277,7 +2281,7 @@ function void uvm_component::build();
   m_build_done = 1;
   apply_config_settings(print_config_matches);
   if(m_phasing_active == 0) begin
-    uvm_report_warning("deprecated", "build()/build_phase() has been called explicitly, outside of the phasing system. This usage of build is deprecated and may lead to unexpected behavior.");
+    uvm_report_warning("UVM_DEPRECATED", "build()/build_phase() has been called explicitly, outside of the phasing system. This usage of build is deprecated and may lead to unexpected behavior.");
   end
 endfunction
 

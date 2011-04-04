@@ -43,16 +43,26 @@
 
 if (! -e $log) {
    $post_test = "No logfile";
+   &remove_tmp_files();
    return 1;
 }
 
 $path = `dirname $log`; chomp $path;
 
-$gold = "$path/output.au";
 $newlog = "$path/output";
 
-open NEWLOG,">  $newlog"  or return 0;
-open LOG, "<  $log"  or return 0;
+open NEWLOG,">  $newlog";
+if(tell NEWLOG == -1) { 
+  $post_test="can't open $newlog"; 
+  &remove_tmp_files();
+  return 1;
+}
+open LOG, "<  $log";
+if (tell LOG == -1) {
+  $post_test="can't open $log"; 
+  &remove_tmp_files();
+  return 1;
+}
 
 $log_line = "";
 $is_started = 0;
@@ -64,6 +74,8 @@ while($log_line = <LOG>) {
     else {
       # remove '# ' from logs (Questa)
       $log_line =~ s/^# //;
+      # remove file name paths
+      $log_line =~ s#[^\w]+/test.sv#test.sv#;
       print NEWLOG "$log_line";
     }
   }
@@ -72,15 +84,72 @@ while($log_line = <LOG>) {
 close NEWLOG;
 close LOG;
 
-system("diff $gold $newlog > $path/output.df");
-if($? == 0) {
-  $post_test = "gold file matched";
-  system("rm -f $path/output.df");
-  system("rm -f $newlog") unless $opt_d;
+$rval = &do_diff("$newlog");
+if($rval) {
+  &remove_tmp_files();
+  return 1;
+}
+
+&strip_path("$path/mcd2") or return 1;
+$rval = &do_diff("$path/mcd2");
+if($rval) {
+  &remove_tmp_files();
+  return 1;
+}
+
+&strip_path("$path/mcd1") or return 1;
+$rval = &do_diff("$path/mcd1");
+if($rval) {
+  &remove_tmp_files();
+  return 1;
+}
+
+&strip_path("$path/fp1") or return 1;
+$rval = &do_diff("$path/fp1");
+if($rval) {
+  &remove_tmp_files();
+  return 1;
+}
+
+&remove_tmp_files();
+$post_test = "gold files matched";
+return 0;
+
+sub strip_path {
+  $fname = shift;
+  open FIN,"<  $fname";
+  if (tell FIN == -1) {
+    $post_test = "unable to open $fname";
+    &remove_tmp_files();
+    return 0;
+  }
+  open FOUT, ">  $fname.mod"  or return 0;
+  while(<FIN>) {
+      s#[^\w]+/test.sv#test.sv#;
+      print FOUT "$_";
+  }
+  close FIN;
+  close FOUT;
+  system("mv $fname.mod $fname");
+  return 1;
+}
+
+sub do_diff {
+  $fname = shift;
+  
+  system("diff $fname.au $fname > $fname.df");
+  if($? != 0) {
+    $post_test = "$fname file mismatched";
+    return 1;
+  }
+  system("rm -f $fname.df");
   return 0;
 }
 
-$post_test = "gold file mismatched";
-system("rm -f $newlog") unless $opt_d;
-return 1;
+sub remove_tmp_files {
+  @tmp_files = ( 'mcd1', 'mcd2', 'fp1', 'output' );
+  foreach (@tmp_files) {
+    system("rm -f $path/$_") unless $opt_d;
+  }
+}
 

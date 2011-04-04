@@ -67,7 +67,7 @@
 // - The `__FILE__ and `__LINE__ information is automatically provided to the
 //   underlying uvm_report_* call. Having the file and line number from where
 //   a report was issued aides in debug. You can disable display of file and
-//   line information in reports by defining UVM_DISABLE_REPORT_FILE_LINE on
+//   line information in reports by defining UVM_REPORT_DISABLE_FILE_LINE on
 //   the command line.
 //
 // The macros also enforce a verbosity setting of UVM_NONE for warnings, errors

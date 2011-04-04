@@ -2060,6 +2060,8 @@ task uvm_reg::update(output uvm_status_e      status,
 
    status = UVM_IS_OK;
 
+   if (!needs_update()) return;
+      
    if (m_update_in_progress) begin
      @(negedge m_update_in_progress);
      return;

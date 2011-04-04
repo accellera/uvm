@@ -1299,7 +1299,8 @@ function void uvm_phase::add(uvm_phase phase,
                              uvm_phase after_phase=null,
                              uvm_phase before_phase=null);
   uvm_phase new_node, begin_node, end_node;
-  assert(phase != null);
+  if (phase == null)
+      `uvm_fatal("PH/NULL", "add: phase argument is null")
 
   if (with_phase != null && with_phase.get_phase_type() == UVM_PHASE_IMP) begin
     string nm = with_phase.get_name();
@@ -1478,7 +1479,8 @@ function uvm_domain uvm_phase::get_domain();
     phase = phase.m_parent;
   if (phase == null) // no parent domain 
     return null;
-  assert($cast(get_domain,phase));
+  if(!$cast(get_domain,phase))
+      `uvm_fatal("PH/INTERNAL", "get_domain: m_phase_type is DOMAIN but $cast to uvm_domain fails")
 endfunction
 
 
@@ -1777,11 +1779,6 @@ task uvm_phase::execute_phase();
 
   else begin // PHASE NODE
     uvm_task_phase task_phase;
-
-    // TODO: Find out why needed on VCS; this may overwrite any apriori
-    //       raised objections for the run phase
-    if (get_name() == "run")
-      phase_done = uvm_test_done_objection::get();
 
     //---------
     // STARTED:

@@ -428,15 +428,11 @@ virtual class uvm_resource_base extends uvm_object;
   // conversion are handled by three DPI functions:
   // 
   //|    function int uvm_re_match(string re, string str);
-  //|    function void uvm_dump_re_cache();
   //|    function string uvm_glob_to_re(string glob);
   // 
-  // uvm_re_match both compiles and matches the regular expression.  It
-  // uses internal caching of compiled information so that each match
-  // does not necessarily require a new compilation of the regular
-  // expression string.  All of the matching is done using regular
-  // expressions, so globs are converted to regular expressions and then
-  // processed.
+  // uvm_re_match both compiles and matches the regular expression.
+  // of the matching is done using regular expressions, so globs are
+  // converted to regular expressions and then processed.
 
 
   // Function: set_scope
@@ -732,8 +728,8 @@ class uvm_resource_pool;
   // <set_override>, <set_name_override>, or <set_type_override>
   // functions.
   //
-  function void set (uvm_resource_base rsrc,
-                     uvm_resource_types::override_t override = 2'b00);
+  function void set (uvm_resource_base rsrc, 
+                     uvm_resource_types::override_t override = 0);
 
     uvm_resource_types::rsrc_q_t rq;
     string name;
@@ -1612,6 +1608,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
       if(accessor != null) begin
         uvm_resource_types::access_t access_record;
         string str;
+        str = accessor.get_full_name();
         if(access.exists(str))
           access_record = access[str];
         else
@@ -1658,7 +1655,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // interface is the use of a semaphore to guarantee exclusive access.
 
 
-  // Task: read_with_loc;
+  // Task: read_with_lock
   //
   // Locking version of read().  Like read(), this returns the contents
   // of the resource container.  In addtion it obeys the lock.

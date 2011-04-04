@@ -366,6 +366,7 @@ class uvm_sequencer_base extends uvm_component;
   extern virtual function void analysis_write(uvm_sequence_item t);
 
 
+  extern virtual   function void   build();
   extern virtual   function void   build_phase(uvm_phase phase);
   extern           function void   do_print (uvm_printer printer);
 
@@ -451,8 +452,17 @@ endfunction
 // -----------
 
 function void uvm_sequencer_base::build_phase(uvm_phase phase);
-  int dummy;
+  // For mantis 3402, the config stuff must be done in the deprecated
+  // build() phase in order for a manual build call to work. Both
+  // the manual build call and the config settings in build() are
+  // deprecated.
   super.build_phase(phase);
+endfunction
+
+
+function void uvm_sequencer_base::build();
+  int dummy;
+  super.build();
   `ifndef UVM_NO_DEPRECATED
   // deprecated parameters for sequencer. Use uvm_sequence_library class
   // for sequence library functionality.

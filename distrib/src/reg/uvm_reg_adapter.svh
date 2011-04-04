@@ -186,7 +186,8 @@ class uvm_reg_tlm_adapter extends uvm_reg_adapter;
     uvm_tlm_gp gp;
     int nbytes;
 
-    assert(bus_item!=null);
+    if (bus_item == null)
+     `uvm_fatal("REG/NULL_ITEM","bus2reg: bus_item argument is null") 
 
     if (!$cast(gp,bus_item)) begin
       `uvm_error("WRONG_TYPE","Provided bus_item is not of type uvm_tlm_gp")

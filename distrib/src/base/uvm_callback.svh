@@ -225,7 +225,10 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
     T me;
     uvm_queue#(uvm_callback) q;
     if(m_cb_find(m_t_inst.m_twcb,cb) == -1) begin
-      m_t_inst.m_twcb.push_back(cb);
+       if(ordering == UVM_APPEND)
+          m_t_inst.m_twcb.push_back(cb);
+       else
+          m_t_inst.m_twcb.push_front(cb);
     end
     if(m_t_inst.m_pool.first(obj)) begin
       do begin
@@ -500,7 +503,8 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
     if(m_inst != null) return m_inst;
     void'(uvm_typed_callbacks#(T)::initialize());
     create_m_inst();
-    assert( m_inst != null );
+    if (m_inst == null)
+      `uvm_fatal("CB/INTERNAL","initialize: m_inst is null")
     return m_inst;
   endfunction
 

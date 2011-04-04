@@ -30,6 +30,21 @@ class cb_catch extends uvm_report_catcher;
    static int seen = 0;
 
    virtual function action_e catch();
+      $write("Catch?...\n");
+      if (get_id() == "ILLCRT" && get_severity() == UVM_FATAL) begin
+         seen++;
+         $write("Shoudl be caught...\n");
+         return CAUGHT;
+      end
+      return THROW;
+   endfunction
+endclass
+
+class cb_demote extends uvm_report_catcher;
+   static int seen = 0;
+
+   virtual function action_e catch();
+      $write("Demote?...\n");
       if (get_id() == "ILLCRT" && get_severity() == UVM_FATAL) begin
          set_severity(UVM_WARNING);
          set_action(UVM_DISPLAY);
@@ -59,16 +74,21 @@ class test extends uvm_test;
    endfunction
 
    function void connect_phase(uvm_phase phase);
-      comp c = new("connect_phase", this);
+      comp c;
+      cb_catch cth = new;
+      
+      uvm_report_cb::add(null,cth,UVM_PREPEND);
+      c = new("connect_phase", this);
+      uvm_report_cb::delete(null,cth);
 
-      if (cb_catch::seen !== 0) begin
+      if (cb_catch::seen !== 1) begin
          `uvm_error("TEST", "Components not allowed to be created in connect phase")
       end
    endfunction
 
    function void end_of_elaboration_phase(uvm_phase phase);
       comp c = new("eoe_phase", this);
-      if (cb_catch::seen == 0) begin
+      if (cb_demote::seen == 0) begin
          `uvm_error("TEST", "Components allowed to be created past the connect phase")
       end
    endfunction
@@ -87,7 +107,7 @@ endclass
 
 initial
 begin
-   cb_catch cth = new;
+   cb_demote cth = new;
    uvm_report_cb::add(null,cth);
       
    run_test("test");

@@ -1434,10 +1434,15 @@ function void uvm_factory::print (int all_types=1);
     if (!m_type_overrides.size())
       $display("\nNo type overrides are registered with this factory");
     else begin
+      // Resize for type overrides
+      if (max1 < 14) max1 = 14;
+      if (max2 < 13) max2 = 13;
+      if (max3 < 13) max3 = 13;
+
       foreach (m_type_overrides[i]) begin
         if (m_type_overrides[i].orig_type_name.len() > max1)
           max1=m_type_overrides[i].orig_type_name.len();
-        if (m_type_overrides[i].ovrd_type_name.len() > max3)
+        if (m_type_overrides[i].ovrd_type_name.len() > max2)
           max2=m_type_overrides[i].ovrd_type_name.len();
       end
       if (max1 < 14) max1 = 14;

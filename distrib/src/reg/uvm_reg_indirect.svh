@@ -38,8 +38,8 @@ typedef class uvm_reg_indirect_ftdr_seq;
 
 class uvm_reg_indirect_data extends uvm_reg;
 
-   local uvm_reg m_idx;
-   local uvm_reg m_tbl[];
+   protected uvm_reg m_idx;
+   protected uvm_reg m_tbl[];
 
    // Function: new
    // Create an instance of this class

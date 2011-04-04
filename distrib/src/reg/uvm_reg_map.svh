@@ -1226,9 +1226,11 @@ function void uvm_reg_map::set_base_addr(uvm_reg_addr_t offset);
       m_parent_map.set_submap_offset(this, offset);
    end
    else begin
-      uvm_reg_map top_map = get_root_map();
       m_base_addr = offset;
-      top_map.Xinit_address_mapX();
+      if (m_parent.is_locked()) begin
+         uvm_reg_map top_map = get_root_map();
+         top_map.Xinit_address_mapX();
+      end
    end
 endfunction
 
@@ -1364,6 +1366,9 @@ function int uvm_reg_map::get_physical_addresses(uvm_reg_addr_t     base_addr,
    if (up_map == null) begin
       // This is the top-most system/block!
       addr = new [local_addr.size()] (local_addr);
+      foreach (addr[i]) begin
+         addr[i] += m_base_addr;
+      end
    end else begin
       uvm_reg_addr_t  sys_addr[];
       uvm_reg_addr_t  base_addr;
@@ -1407,7 +1412,10 @@ endfunction: get_physical_addresses
 // set_submap_offset
 
 function void uvm_reg_map::set_submap_offset(uvm_reg_map submap, uvm_reg_addr_t offset);
-  assert(submap != null);
+  if (submap == null) begin
+    `uvm_error("REG/NULL","set_submap_offset: submap handle is null")
+    return;
+  end
   m_submaps[submap] = offset;
   if (m_parent.is_locked()) begin
     uvm_reg_map root_map = get_root_map();
@@ -1419,7 +1427,10 @@ endfunction
 // get_submap_offset
 
 function uvm_reg_addr_t uvm_reg_map::get_submap_offset(uvm_reg_map submap);
-  assert(submap != null);
+  if (submap == null) begin
+    `uvm_error("REG/NULL","set_submap_offset: submap handle is null")
+    return -1;
+  end
   if (!m_submaps.exists(submap)) begin
     `uvm_error("RegModel",{"Map '",submap.get_full_name(),
                       "' is not a submap of '",get_full_name(),"'"})
@@ -1603,19 +1614,25 @@ function void uvm_reg_map::Xget_bus_infoX(uvm_reg_item rw,
 
   if (rw.element_kind == UVM_MEM) begin
     uvm_mem mem;
-    assert($cast(mem,rw.element));
+    if(rw.element == null || !$cast(mem,rw.element))
+      `uvm_fatal("REG/CAST", {"uvm_reg_item 'element_kind' is UVM_MEM, ",
+                 "but 'element' does not point to a memory: ",rw.get_name()})
     map_info = get_mem_map_info(mem);
     size = mem.get_n_bits();
   end
   else if (rw.element_kind == UVM_REG) begin
     uvm_reg rg;
-    assert($cast(rg,rw.element));
+    if(rw.element == null || !$cast(rg,rw.element))
+      `uvm_fatal("REG/CAST", {"uvm_reg_item 'element_kind' is UVM_REG, ",
+                 "but 'element' does not point to a register: ",rw.get_name()})
     map_info = get_reg_map_info(rg);
     size = rg.get_n_bits();
   end
   else if (rw.element_kind == UVM_FIELD) begin
     uvm_reg_field field;
-    assert($cast(field,rw.element));
+    if(rw.element == null || !$cast(field,rw.element))
+      `uvm_fatal("REG/CAST", {"uvm_reg_item 'element_kind' is UVM_FIELD, ",
+                 "but 'element' does not point to a field: ",rw.get_name()})
     map_info = get_reg_map_info(field.get_parent());
     size = field.get_n_bits();
     lsb = field.get_lsb_pos();
@@ -1749,7 +1766,8 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
       rw_access.byte_en = byte_en;
 
       bus_req = adapter.reg2bus(rw_access);
-      assert (bus_req!=null) else `uvm_fatal("RegMem",{"adapter [",adapter.get_name(),"] didnt return a bus transaction"});
+      if (bus_req == null)
+        `uvm_fatal("RegMem",{"adapter [",adapter.get_name(),"] didnt return a bus transaction"});
       
       bus_req.set_sequencer(sequencer);
       rw.parent.start_item(bus_req,rw.prior);
@@ -1867,6 +1885,9 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       rw_access.n_bits = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
                           
       bus_req = adapter.reg2bus(rw_access);
+      if (bus_req == null)
+        `uvm_fatal("RegMem",{"adapter [",adapter.get_name(),"] didnt return a bus transaction"});
+
       bus_req.set_sequencer(sequencer);
       rw.parent.start_item(bus_req,rw.prior);
 

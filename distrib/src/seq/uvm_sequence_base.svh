@@ -65,9 +65,8 @@
 // A sequence can also be indirectly started as a child in the <body> of a
 // parent sequence. The child sequence's <start> method is called indirectly
 // via calls to its <start_item>/<finish_item> methods or by invoking
-// any of the `uvm_do macros. Child sequences can also be started by
-// the predefined sequences, <uvm_random_sequence> and
-// <uvm_exhaustive_sequence>. In all these cases, <start> is called with
+// any of the `uvm_do macros.
+// In all these cases, <start> is called with
 // ~call_pre_post~ set to 0, preventing the started sequence's <pre_body> and
 // <post_body> methods from being called. During execution of the
 // child sequence, the parent's <pre_do>, <mid_do>, and <post_do> methods
