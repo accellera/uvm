@@ -209,9 +209,10 @@ sub replace_trivial{
     $t =~ s/include\s+\"ovm_(?!macros).*?\.svh\".*/$& \/\/ $opt_marker FIXME include of ovm file other than ovm_macros.svh detected, you should move to an import based methodology/g;
 
     # FIX  `message(sev,(...)) -> uvm_info("FIXME","...",sev)
-    $t =~ s|(?s)\`message\(([^,]+),\s*\(\s*\$psprintf\((.*?)\)\s*\)\s*\)|\`uvm_info("FIXME",\$psprintf($2),$1)|g;
-    $t =~ s|(?s)\`message\(([^,]+),\s*\((.*?)\)\s*\)|\`uvm_info("FIXME",\$psprintf($2),$1)|g;
-    $t =~ s|(?s)\`message\(([^,]+),\s*(.*?)\)|\`uvm_info("FIXME",\$psprintf($2),$1)|g;
+    $t =~ s|(?s)\`message\(([^,]+),\s*\(\s*\$psprintf\((.*?)\)\s*\)\s*\)|\`uvm_info("FIXME",\$sformatf($2),$1)|g;
+    $t =~ s|(?s)\`message\(([^,]+),\s*\(\s*\$sformatf\((.*?)\)\s*\)\s*\)|\`uvm_info("FIXME",\$sformatf($2),$1)|g;
+    $t =~ s|(?s)\`message\(([^,]+),\s*\((.*?)\)\s*\)|\`uvm_info("FIXME",\$sformatf($2),$1)|g;
+    $t =~ s|(?s)\`message\(([^,]+),\s*(.*?)\)|\`uvm_info("FIXME",\$sformatf($2),$1)|g;
 
     # FIX ovm_factory::print() -> factory.print
     $t =~ s/ovm_factory::print\(\)/factory.print()/g;
