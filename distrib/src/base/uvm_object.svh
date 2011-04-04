@@ -423,7 +423,7 @@ virtual class uvm_object extends uvm_void;
 
   // Function: copy
   //
-  // The copy method returns a deep copy of this object.
+  // The copy makes this object a copy of the specified object.
   //
   // The copy method is not virtual and should not be overloaded in derived
   // classes. To copy the fields of a derived class, that class should override
@@ -1022,8 +1022,8 @@ function void uvm_object::copy (uvm_object rhs);
   uvm_global_copy_map.set(rhs, this); 
   ++depth;
 
-  do_copy(rhs);
   __m_uvm_field_automation(rhs, UVM_COPY, "");
+  do_copy(rhs);
 
   --depth;
   if(depth==0) begin
@@ -1072,8 +1072,8 @@ function bit  uvm_object::compare (uvm_object rhs,
     else begin
       comparer.print_msg_object(this, rhs);
       uvm_report_info("MISCMP",
-           $psprintf("%0d Miscompare(s) for object %s@%0d vs. %s@%0d", 
-           comparer.result, __m_uvm_status_container.scope.get(), this.get_inst_id(), __m_uvm_status_container.scope.get_arg(), rhs.get_inst_id()), __m_uvm_status_container.comparer.verbosity);
+           $psprintf("%0d Miscompare(s) for object %s@%0d vs. null", 
+           comparer.result, __m_uvm_status_container.scope.get(), this.get_inst_id(), __m_uvm_status_container.scope.get_arg()), __m_uvm_status_container.comparer.verbosity);
       done = 1;
     end
   end
@@ -1085,7 +1085,7 @@ function bit  uvm_object::compare (uvm_object rhs,
     done = 1;  //don't do any more work after this case, but do cleanup
   end
 
-  if(!done && comparer.check_type && get_type_name() != rhs.get_type_name()) begin
+  if(!done && comparer.check_type && (rhs != null) && (get_type_name() != rhs.get_type_name())) begin
     __m_uvm_status_container.stringv = { "lhs type = \"", get_type_name(), 
                      "\" : rhs type = \"", rhs.get_type_name(), "\""};
     comparer.print_msg(__m_uvm_status_container.stringv);
@@ -1101,7 +1101,8 @@ function bit  uvm_object::compare (uvm_object rhs,
     __m_uvm_status_container.scope.up();
   end
 
-  comparer.print_rollup(this, rhs);
+  if(rhs != null)
+    comparer.print_rollup(this, rhs);
   return (comparer.result == 0 && dc == 1);
 endfunction
 

@@ -264,11 +264,9 @@ class uvm_report_object extends uvm_object;
   // quit count or has an UVM_EXIT action associated with it, e.g., as with
   // fatal errors.
   //
-  // If this report object is an <uvm_component> and we're in a task-based
-  // phase (e.g. run), then die will issue a <global_stop_request>, which ends the
-  // phase and allows simulation to continue to the next phase. 
-  //
-  // If not a component, die calls <report_summarize> and terminates simulation
+  // Calls the <uvm_component::pre_abort()> method
+  // on the entire <uvm_component> hierarchy in a bottom-up fashion.
+  // It then call calls <report_summarize> and terminates the simulation
   // with ~$finish~.
 
   virtual function void die();

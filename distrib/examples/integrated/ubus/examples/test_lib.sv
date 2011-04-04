@@ -39,7 +39,7 @@ class ubus_example_base_test extends uvm_test;
   virtual function void build_phase(uvm_phase phase);
     super.build_phase(phase);
     // Enable transaction recording for everything
-    set_config_int("*", "recording_detail", UVM_FULL);
+    uvm_config_db#(int)::set(this, "*", "recording_detail", UVM_FULL);
     // Create the tb
     ubus_example_tb0 = ubus_example_tb::type_id::create("ubus_example_tb0", this);
     // Create a specific depth printer for printing the created topology
@@ -151,8 +151,8 @@ class test_2m_4s extends ubus_example_base_test;
 			       "num_slaves", 4);
      
    // Control the number of RMW loops
-    uvm_config_db#(int)::set(this,"ubus_example_tb0.ubus0.masters[0].sequencer.loop_read_modify_write_seq", "itr", 3);
-    uvm_config_db#(int)::set(this,"ubus_example_tb0.ubus0.masters[1].sequencer.loop_read_modify_write_seq", "itr", 4);
+    uvm_config_db#(int)::set(this,"ubus_example_tb0.ubus0.masters[0].sequencer.loop_read_modify_write_seq", "itr", 6);
+    uvm_config_db#(int)::set(this,"ubus_example_tb0.ubus0.masters[1].sequencer.loop_read_modify_write_seq", "itr", 8);
 
      // Define the sequences to run in the run phase
     uvm_config_db#(uvm_object_wrapper)::set(this,"*.ubus0.masters[0].sequencer.main_phase", 
