@@ -1072,8 +1072,11 @@ function bit  uvm_object::compare (uvm_object rhs,
     else begin
       comparer.print_msg_object(this, rhs);
       uvm_report_info("MISCMP",
-           $psprintf("%0d Miscompare(s) for object %s@%0d vs. null", 
-           comparer.result, __m_uvm_status_container.scope.get(), this.get_inst_id(), __m_uvm_status_container.scope.get_arg()), __m_uvm_status_container.comparer.verbosity);
+           $sformatf("%0d Miscompare(s) for object %s@%0d vs. null", 
+           comparer.result, 
+           __m_uvm_status_container.scope.get(),
+            this.get_inst_id()),
+            __m_uvm_status_container.comparer.verbosity);
       done = 1;
     end
   end

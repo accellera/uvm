@@ -104,8 +104,7 @@ class ubus_master_monitor extends uvm_monitor;
 
   // run phase
   virtual task run_phase(uvm_phase phase);
-    `uvm_info({get_full_name," MASTER ID"},$psprintf(" = %0d",master_id),
-	      UVM_MEDIUM)
+    `uvm_info({get_full_name()," MASTER ID"},$sformatf(" = %0d",master_id),UVM_MEDIUM)
     fork
       collect_transactions();
     join
