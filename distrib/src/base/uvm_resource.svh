@@ -1588,7 +1588,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   function void write(T t, uvm_object accessor = null);
 
     if(is_read_only()) begin
-      uvm_report_error("resource", $psprintf("resource %s is read only -- cannot modify", get_name()));
+      uvm_report_error("resource", $sformatf("resource %s is read only -- cannot modify", get_name()));
       return;
     end
 

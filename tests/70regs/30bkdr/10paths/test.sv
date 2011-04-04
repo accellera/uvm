@@ -86,7 +86,7 @@ program top;
         foreach (roots[i]) begin
             $write("   %s\n", roots[i]);
             if (roots[i] != exp[i]) begin
-                `uvm_error("ROOTS", $psprintf(" Root does not match \"%s\".", exp[i]));
+                `uvm_error("ROOTS", $sformatf(" Root does not match \"%s\".", exp[i]));
             end
         end
    
@@ -98,7 +98,7 @@ program top;
                               uvm_hdl_path_concat exp[]);
         $write("Path(s) to %s:\n", name);
        if (paths.size() != exp.size()) begin
-`uvm_error("Test", $psprintf("%0d paths found instead of the expected %0d.",
+`uvm_error("Test", $sformatf("%0d paths found instead of the expected %0d.",
                              paths.size(), exp.size()))
           
           foreach (paths[i]) begin
@@ -120,7 +120,7 @@ program top;
             $write("   %s\n", uvm_hdl_concat2string(concat));
             foreach (concat.slices[j]) begin
                 if (concat.slices[j].path != exp_sl.slices[j].path) begin
-                    `uvm_error("PATHS", $psprintf(" Path does not match \"%s\".", exp_sl.slices[j].path));
+                    `uvm_error("PATHS", $sformatf(" Path does not match \"%s\".", exp_sl.slices[j].path));
                 end
             end
         end

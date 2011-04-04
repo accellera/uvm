@@ -216,7 +216,7 @@ class uvm_status_container;
   function void do_field_check(string field, uvm_object obj);
    `ifdef UVM_ENABLE_FIELD_CHECKS                                           
     if (field_array.exists(field))
-      uvm_report_error("MLTFLD", $psprintf("Field %s is defined multiple times in type '%s'",
+      uvm_report_error("MLTFLD", $sformatf("Field %s is defined multiple times in type '%s'",
          field, obj.get_type_name()), UVM_NONE);
     `endif
     field_array[field] = 1;
@@ -343,7 +343,7 @@ function string uvm_instance_scope();
   while(pos && (c != ".") && (c != ":")) 
     c = uvm_instance_scope[--pos];
   if(pos == 0)
-    uvm_report_error("SCPSTR", $psprintf("Illegal name %s in scope string",uvm_instance_scope));
+    uvm_report_error("SCPSTR", $sformatf("Illegal name %s in scope string",uvm_instance_scope));
   uvm_instance_scope = uvm_instance_scope.substr(0,pos);
 endfunction
 

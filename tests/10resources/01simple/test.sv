@@ -41,11 +41,11 @@ class child_component extends uvm_component;
     super.build();
 
     if(!uvm_resource_db#(int)::read_by_name(get_full_name(), "size", size))
-      `uvm_warning("RSRCNF", $psprintf("resource size in scope %s not found", get_full_name()));
+      `uvm_warning("RSRCNF", $sformatf("resource size in scope %s not found", get_full_name()));
     $display("%s: size = %0d", get_full_name(), size);
 
     if(!uvm_resource_db#(bit)::read_by_name(get_full_name(), "flag", flag))
-      `uvm_warning("RSRCNF", $psprintf("resource flag in scope %s not found", get_full_name()));
+      `uvm_warning("RSRCNF", $sformatf("resource flag in scope %s not found", get_full_name()));
     $display("%s: flag = %0d", get_full_name(), flag);
 
   endfunction

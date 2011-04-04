@@ -2181,7 +2181,7 @@ function void uvm_phase::jump(uvm_phase phase);
   // TBD refactor
 
   `uvm_info("PH_JUMP",
-            $psprintf("phase %s (schedule %s, domain %s) is jumping to phase %s",
+            $sformatf("phase %s (schedule %s, domain %s) is jumping to phase %s",
              get_name(), get_schedule_name(), get_domain_name(), phase.get_name()),
             UVM_MEDIUM);
 
@@ -2210,13 +2210,13 @@ function void uvm_phase::jump(uvm_phase phase);
     end
     else begin
       m_jump_fwd = 1;
-      `uvm_info("PH_JUMPF",$psprintf("jumping forward to phase %s", phase.get_name()),
+      `uvm_info("PH_JUMPF",$sformatf("jumping forward to phase %s", phase.get_name()),
                 UVM_DEBUG);
     end
   end
   else begin
     m_jump_bkwd = 1;
-    `uvm_info("PH_JUMPB",$psprintf("jumping backward to phase %s", phase.get_name()),
+    `uvm_info("PH_JUMPB",$sformatf("jumping backward to phase %s", phase.get_name()),
               UVM_DEBUG);
   end
   
@@ -2349,7 +2349,7 @@ endfunction
 
 function void uvm_phase::m_print_termination_state();
   `uvm_info("PH_TERMSTATE",
-            $psprintf("phase %s outstanding objections = %0d",
+            $sformatf("phase %s outstanding objections = %0d",
             get_name(), phase_done.get_objection_total(uvm_root::get())),
             UVM_DEBUG);
 endfunction

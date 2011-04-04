@@ -119,7 +119,7 @@ class ubus_master_monitor extends uvm_monitor;
       collect_arbitration_phase();
       collect_address_phase();
       collect_data_phase();
-      `uvm_info(get_full_name(), $psprintf("Transfer collected :\n%s",
+      `uvm_info(get_full_name(), $sformatf("Transfer collected :\n%s",
         trans_collected.sprint()), UVM_MEDIUM)
       if (checks_enable)
         perform_transfer_checks();
@@ -201,7 +201,7 @@ class ubus_master_monitor extends uvm_monitor;
   endfunction : perform_transfer_coverage
 
   virtual function void report_phase(uvm_phase phase);
-    `uvm_info(get_full_name(),$psprintf("Covergroup 'cov_trans' coverage: %2f",
+    `uvm_info(get_full_name(),$sformatf("Covergroup 'cov_trans' coverage: %2f",
 					cov_trans.get_inst_coverage()),UVM_LOW)
   endfunction
 

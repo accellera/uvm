@@ -96,20 +96,20 @@ class my_rf0_t extends uvm_reg_block;
     for(int x=1; x<=16; x++)
     begin
       reg_table_a[x] = reg_table_a_t::type_id::create(
-        $psprintf("reg_table_a[%0d]", x), , get_full_name());
+        $sformatf("reg_table_a[%0d]", x), , get_full_name());
     end
     for(int y=0; y<=1; y++)
     begin
       for(int x=0; x<=7; x++)
       begin
           reg_table_b[x][y] = reg_table_b_t::type_id::create(
-          $psprintf("reg_table_b[%0d][%0d]", x, y), , get_full_name());
+          $sformatf("reg_table_b[%0d][%0d]", x, y), , get_full_name());
       end
     end
     for(int x=1; x<=4; x++)
     begin
       reg_table_c[x] = reg_table_c_t::type_id::create(
-        $psprintf("reg_table_c[%0d]", x), , get_full_name());
+        $sformatf("reg_table_c[%0d]", x), , get_full_name());
     end
 
     // Now build the registers. Set parent and hdl_paths
@@ -117,7 +117,7 @@ class my_rf0_t extends uvm_reg_block;
     for(int x=1; x<=16; x++)
     begin
       uvm_reg_addr_t laddr='h11+((x-1)*8)-1;
-      reg_table_a[x].configure(this, null, $psprintf("reg_a[%0d]", x));
+      reg_table_a[x].configure(this, null, $sformatf("reg_a[%0d]", x));
       reg_table_a[x].build();
     end
     for(int y=0; y<=1; y++)
@@ -125,14 +125,14 @@ class my_rf0_t extends uvm_reg_block;
       for(int x=0; x<=7; x++)
       begin
         uvm_reg_addr_t laddr='h200*(y+1)+((x)*4);
-        reg_table_b[x][y].configure(this, null, $psprintf("reg_b[%0d][%0d]", y, x));
+        reg_table_b[x][y].configure(this, null, $sformatf("reg_b[%0d][%0d]", y, x));
         reg_table_b[x][y].build();
       end
     end
     for(int x=1; x<=4; x++)
     begin
       uvm_reg_addr_t laddr='h1001+((x-1)*4)-1;
-      reg_table_c[x].configure(this, null, $psprintf("reg_c%0d",x));
+      reg_table_c[x].configure(this, null, $sformatf("reg_c%0d",x));
       reg_table_c[x].build();
     end
     // Now define address mappings

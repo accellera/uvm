@@ -245,7 +245,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     end
 
     if ((this_priority < 1) |  (^this_priority === 1'bx)) begin
-      uvm_report_fatal("SEQPRI", $psprintf("Sequence %s start has illegal priority: %0d",
+      uvm_report_fatal("SEQPRI", $sformatf("Sequence %s start has illegal priority: %0d",
                                            get_full_name(),
                                            this_priority), UVM_NONE);
       end
@@ -972,7 +972,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     if(m_sequencer != null)
       return m_sequencer.get_seq_kind(type_name);
     else 
-      uvm_report_warning("NULLSQ", $psprintf("%0s sequencer is null.",
+      uvm_report_warning("NULLSQ", $sformatf("%0s sequencer is null.",
                                            get_type_name()), UVM_NONE);
   endfunction
 
@@ -989,13 +989,13 @@ class uvm_sequence_base extends uvm_sequence_item;
     `uvm_warning("UVM_DEPRECATED",$sformatf("%m deprecated."))
     if (req_kind < 0 || req_kind >= m_sequencer.sequences.size()) begin
       uvm_report_error("SEQRNG", 
-        $psprintf("Kind arg '%0d' out of range. Need 0-%0d",
+        $sformatf("Kind arg '%0d' out of range. Need 0-%0d",
         req_kind, m_sequencer.sequences.size()-1), UVM_NONE);
     end
     m_seq_type = m_sequencer.sequences[req_kind];
     if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
       uvm_report_fatal("FCTSEQ", 
-        $psprintf("Factory can not produce a sequence of type %0s.",
+        $sformatf("Factory can not produce a sequence of type %0s.",
         m_seq_type), UVM_NONE);
     end
     m_seq.set_use_sequence_info(1);
@@ -1016,7 +1016,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     m_seq_type = m_sequencer.sequences[req_kind];
     if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
       uvm_report_fatal("FCTSEQ", 
-        $psprintf("Factory can not produce a sequence of type %0s.", m_seq_type), UVM_NONE);
+        $sformatf("Factory can not produce a sequence of type %0s.", m_seq_type), UVM_NONE);
     end
     m_seq.set_use_sequence_info(1);
     m_seq.set_parent_sequence(this);
@@ -1041,7 +1041,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     `uvm_warning("UVM_DEPRECATED",$sformatf("%m deprecated."))
     if (!$cast(m_seq, factory.create_object_by_name(seq_name, get_full_name(), seq_name))) begin
       uvm_report_fatal("FCTSEQ", 
-        $psprintf("Factory can not produce a sequence of type %0s.", seq_name), UVM_NONE);
+        $sformatf("Factory can not produce a sequence of type %0s.", seq_name), UVM_NONE);
     end
     m_seq.set_use_sequence_info(1);
     return m_seq;

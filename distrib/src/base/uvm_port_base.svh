@@ -452,7 +452,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
     // IMP.connect(anything) is illegal
     if (is_imp()) begin
       m_comp.uvm_report_error(s_connection_error_id,
-        $psprintf(
+        $sformatf(
 "Cannot call an imp port's connect method. An imp is connected only to the component passed in its constructor. (You attempted to bind this imp to %s)", provider.get_full_name()), UVM_NONE);
       return;
     end
@@ -460,7 +460,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
     // EXPORT.connect(PORT) are illegal
     if (is_export() && provider.is_port()) begin
       m_comp.uvm_report_error(s_connection_error_id,
-        $psprintf(
+        $sformatf(
 "Cannot connect exports to ports Try calling port.connect(export) instead. (You attempted to bind this export to %s).", provider.get_full_name()), UVM_NONE);
       return;
     end
@@ -729,13 +729,13 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   
     if (size() < min_size() ) begin
       m_comp.uvm_report_error(s_connection_error_id, 
-        $psprintf("connection count of %0d does not meet required minimum of %0d",
+        $sformatf("connection count of %0d does not meet required minimum of %0d",
         size(), min_size()), UVM_NONE);
     end
   
     if (max_size() != UVM_UNBOUNDED_CONNECTIONS && size() > max_size() ) begin
       m_comp.uvm_report_error(s_connection_error_id, 
-        $psprintf("connection count of %0d exceeds maximum of %0d",
+        $sformatf("connection count of %0d exceeds maximum of %0d",
         size(), max_size()), UVM_NONE);
     end
 

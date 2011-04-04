@@ -94,7 +94,7 @@ class myunit extends uvm_component;
   function void do_print(uvm_printer printer);
     printer.print_array_header("a", a.size());
     for(int i=0; i<a.size(); ++i) 
-      printer.print_field( $psprintf("a[%0d]", i), a[i], 32, UVM_HEX, "[");
+      printer.print_field( $sformatf("a[%0d]", i), a[i], 32, UVM_HEX, "[");
     printer.print_array_footer();
   endfunction
     

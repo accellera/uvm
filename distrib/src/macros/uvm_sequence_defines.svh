@@ -410,6 +410,6 @@
     super.m_set_p_sequencer(); \
     if( !$cast(p_sequencer, m_sequencer)) \
         `uvm_fatal("DCLPSQ", \
-        $psprintf("%m %s Error casting p_sequencer, please verify that this sequence/sequence item is intended to execute on this type of sequencer", get_full_name())) \
+        $sformatf("%m %s Error casting p_sequencer, please verify that this sequence/sequence item is intended to execute on this type of sequencer", get_full_name())) \
   endfunction  
 

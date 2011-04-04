@@ -37,8 +37,8 @@ module test();
        int data;
        model.get_registers(r);
        `uvm_info("TEST_SEQ", "<><><><><><><><><><><><><><><><><><><><><><><>", UVM_LOW)
-       `uvm_info("TEST_SEQ", $psprintf("  Starting Blk Sequence. Container=%s", model.get_full_name()), UVM_LOW)
-       `uvm_info("TEST_SEQ", $psprintf("  Number of Registers = %0d", r.size()), UVM_LOW)
+       `uvm_info("TEST_SEQ", $sformatf("  Starting Blk Sequence. Container=%s", model.get_full_name()), UVM_LOW)
+       `uvm_info("TEST_SEQ", $sformatf("  Number of Registers = %0d", r.size()), UVM_LOW)
        `uvm_info("TEST_SEQ", "<><><><><><><><><><><><><><><><><><><><><><><>\n", UVM_LOW)
        // Drive all register frontdoor
        foreach(r[i])
@@ -59,7 +59,7 @@ module test();
   
      virtual task body();
        `uvm_info("TEST_SEQ", "<><><><><><><><><><><><><><><><><><><><><><><>", UVM_LOW)
-       `uvm_info("TEST_SEQ", $psprintf("  Starting Sub-System Sequence. Container=%s", model.get_full_name()), UVM_LOW)
+       `uvm_info("TEST_SEQ", $sformatf("  Starting Sub-System Sequence. Container=%s", model.get_full_name()), UVM_LOW)
        `uvm_info("TEST_SEQ", "<><><><><><><><><><><><><><><><><><><><><><><>\n", UVM_LOW)
        for (int i=0; i < 2; i++) begin
           seq = blk_seq::type_id::create($sformatf("blk_seq%0d",i),,get_full_name());
@@ -106,10 +106,10 @@ module test();
         seq_item_port.get_next_item(req);
         #1;
         if(req.r_wn) begin
-          `uvm_info("USRDRV", $psprintf("Read addr=0x%0x", req.addr), UVM_LOW)
+          `uvm_info("USRDRV", $sformatf("Read addr=0x%0x", req.addr), UVM_LOW)
         end
         else begin
-          `uvm_info("USRDRV", $psprintf("Write addr=0x%0x Data=0x%0x", req.addr, req.data), UVM_LOW)
+          `uvm_info("USRDRV", $sformatf("Write addr=0x%0x Data=0x%0x", req.addr, req.data), UVM_LOW)
         end
         seq_item_port.item_done();
       end

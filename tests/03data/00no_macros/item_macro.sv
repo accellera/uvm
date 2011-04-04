@@ -114,52 +114,52 @@ class item_macro extends uvm_sequence_item;
      return $sformatf("%p",this);
    `else
      string s;
-     s = {s, $psprintf("enum2:%s ",enum2.name())};
+     s = {s, $sformatf("enum2:%s ",enum2.name())};
 
-     s = {s, $psprintf("int64:%0h ",int64)};
-     s = {s, $psprintf("int32:%0h ",int32)};
-     s = {s, $psprintf("int16:%0h ",int16)};
-     s = {s, $psprintf("int8:%0h ", int8)};
-     s = {s, $psprintf("int1:%0h ", int1)};
+     s = {s, $sformatf("int64:%0h ",int64)};
+     s = {s, $sformatf("int32:%0h ",int32)};
+     s = {s, $sformatf("int16:%0h ",int16)};
+     s = {s, $sformatf("int8:%0h ", int8)};
+     s = {s, $sformatf("int1:%0h ", int1)};
       
-     s = {s, $psprintf("uint64:%0h ",uint64)};
-     s = {s, $psprintf("uint32:%0h ",uint32)};
-     s = {s, $psprintf("uint16:%0h ",uint16)};
-     s = {s, $psprintf("uint8:%0h ", uint8)};
-     s = {s, $psprintf("uint1:%0h ", uint1)};
+     s = {s, $sformatf("uint64:%0h ",uint64)};
+     s = {s, $sformatf("uint32:%0h ",uint32)};
+     s = {s, $sformatf("uint16:%0h ",uint16)};
+     s = {s, $sformatf("uint8:%0h ", uint8)};
+     s = {s, $sformatf("uint1:%0h ", uint1)};
       
-     s = {s, $psprintf("real64:%0f ", real64)};
+     s = {s, $sformatf("real64:%0f ", real64)};
 `ifndef INCA     
-     s = {s, $psprintf("real32:%0f ", real32)};
+     s = {s, $sformatf("real32:%0f ", real32)};
 `endif      
-     s = {s, $psprintf("time64:%0t ", time64)};
+     s = {s, $sformatf("time64:%0t ", time64)};
       
-     s = {s, $psprintf("str:%0s ", str)};
+     s = {s, $sformatf("str:%0s ", str)};
 
      s = {s, "sa:'{"};
      foreach (sa[i])
-       s = {s, $psprintf("%s%0h", i==0?"":" ",sa[i])};
+       s = {s, $sformatf("%s%0h", i==0?"":" ",sa[i])};
      s = {s, "} "};
 
      s = {s, "da:'{"};
      foreach (da[i])
-       s = {s, $psprintf("%s%0h", i==0?"":" ",da[i])};
+       s = {s, $sformatf("%s%0h", i==0?"":" ",da[i])};
      s = {s, "} "};
 
      s = {s, "q:'{"};
      foreach (q[i])
-       s = {s, $psprintf("%s%0h", i==0?"":" ",q[i])};
+       s = {s, $sformatf("%s%0h", i==0?"":" ",q[i])};
      s = {s, "} "};
 
      begin bit first=0;
      s = {s, "aa:'{"};
      foreach (aa[key])
-       s = {s, $psprintf("%s%0h:%0h", first?"":" ",key, aa[key])};
+       s = {s, $sformatf("%s%0h:%0h", first?"":" ",key, aa[key])};
      s = {s, "} "};
      end
 
-     s = {s, $psprintf("bits:%0h", bits)};
-     s = {s, $psprintf("logics:%0b", logics)};
+     s = {s, $sformatf("bits:%0h", bits)};
+     s = {s, $sformatf("logics:%0b", logics)};
 
     `endif
   endfunction

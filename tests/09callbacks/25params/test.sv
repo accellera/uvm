@@ -154,7 +154,7 @@ class my_special_cb #(int N = 0) extends special_cb#(N);
    endfunction
 
    virtual function void special_f(ref string q[$], input int n);
-      q.push_back($psprintf("my_special_cb::special#(%0d)_f(%s)",
+      q.push_back($sformatf("my_special_cb::special#(%0d)_f(%s)",
                             n, m_id));
    endfunction
 endclass

@@ -499,13 +499,13 @@ function void uvm_sequencer_base::do_print (uvm_printer printer);
   super.do_print(printer);
   printer.print_array_header("arbitration_queue", arb_sequence_q.size());
   foreach (arb_sequence_q[i])
-    printer.print_string($psprintf("[%0d]", i),
+    printer.print_string($sformatf("[%0d]", i),
        $sformatf("%s@seqid%0d",arb_sequence_q[i].request.name(),arb_sequence_q[i].sequence_id), "[");
   printer.print_array_footer(arb_sequence_q.size());
 
   printer.print_array_header("lock_queue", lock_list.size());
   foreach(lock_list[i])
-    printer.print_string($psprintf("[%0d]", i),
+    printer.print_string($sformatf("[%0d]", i),
        $sformatf("%s@seqid%0d",lock_list[i].get_full_name(),lock_list[i].get_sequence_id()), "[");
   printer.print_array_footer(lock_list.size());
 endfunction
@@ -786,7 +786,7 @@ function int uvm_sequencer_base::m_choose_next_request();
     highest_sequences = avail_sequences.find with (item == i);
     if (highest_sequences.size() == 0) begin
       uvm_report_fatal("Sequencer",
-          $psprintf("Error in User arbitration, sequence %0d not available\n%s",
+          $sformatf("Error in User arbitration, sequence %0d not available\n%s",
                     i, convert2string()), UVM_NONE);
     end
     return(i);
@@ -876,7 +876,7 @@ function int uvm_sequencer_base::m_get_seq_item_priority(uvm_sequence_request se
   if (seq_q_entry.item_priority != -1) begin
     if (seq_q_entry.item_priority <= 0) begin
       uvm_report_fatal("SEQITEMPRI",
-                    $psprintf("Sequence item from %s has illegal priority: %0d",
+                    $sformatf("Sequence item from %s has illegal priority: %0d",
                             seq_q_entry.sequence_ptr.get_full_name(),
                             seq_q_entry.item_priority), UVM_NONE);
     end
@@ -885,7 +885,7 @@ function int uvm_sequencer_base::m_get_seq_item_priority(uvm_sequence_request se
   // Otherwise, use the priority of the calling sequence
   if (seq_q_entry.sequence_ptr.get_priority() < 0) begin
     uvm_report_fatal("SEQDEFPRI",
-                    $psprintf("Sequence %s has illegal priority: %0d",
+                    $sformatf("Sequence %s has illegal priority: %0d",
                             seq_q_entry.sequence_ptr.get_full_name(),
                             seq_q_entry.sequence_ptr.get_priority()), UVM_NONE);
   end
@@ -1540,7 +1540,7 @@ function uvm_sequence_base uvm_sequencer_base::get_sequence(int req_kind);
 
   if (req_kind < 0 || req_kind >= sequences.size()) begin
     uvm_report_error("SEQRNG", 
-      $psprintf("Kind arg '%0d' out of range. Need 0-%0d", 
+      $sformatf("Kind arg '%0d' out of range. Need 0-%0d", 
       req_kind, sequences.size()-1));
   end
 
@@ -1550,7 +1550,7 @@ function uvm_sequence_base uvm_sequencer_base::get_sequence(int req_kind);
                                           m_seq_type))) 
   begin
       uvm_report_fatal("FCTSEQ", 
-        $psprintf("Factory can not produce a sequence of type %0s.",
+        $sformatf("Factory can not produce a sequence of type %0s.",
         m_seq_type), UVM_NONE);
   end
 

@@ -354,7 +354,7 @@ virtual class uvm_object extends uvm_void;
   //|   obj2 child = new;
   //|   virtual function string convert2string();
   //|      convert2string = {super.convert2string(),
-  //|        $psprintf(" write=%0d addr=%8h data=%8h ",write,addr,data),
+  //|        $sformatf(" write=%0d addr=%8h data=%8h ",write,addr,data),
   //|        child.convert2string()};
   //|   endfunction
   //| endclass
@@ -932,7 +932,7 @@ function void  uvm_object::set_int_local (string      field_name,
   __m_uvm_field_automation(null, UVM_SETINT, field_name);
 
   if(__m_uvm_status_container.warning && !this.__m_uvm_status_container.status) begin
-    uvm_report_error("NOMTC", $psprintf("did not find a match for field %s", field_name),UVM_NONE);
+    uvm_report_error("NOMTC", $sformatf("did not find a match for field %s", field_name),UVM_NONE);
   end
   __m_uvm_status_container.cycle_check.delete(this);
 
@@ -963,7 +963,7 @@ function void  uvm_object::set_object_local (string     field_name,
   __m_uvm_field_automation(null, UVM_SETOBJ, field_name);
 
   if(__m_uvm_status_container.warning && !this.__m_uvm_status_container.status) begin
-    uvm_report_error("NOMTC", $psprintf("did not find a match for field %s", field_name), UVM_NONE);
+    uvm_report_error("NOMTC", $sformatf("did not find a match for field %s", field_name), UVM_NONE);
   end
 
   __m_uvm_status_container.cycle_check.delete(this);
@@ -984,7 +984,7 @@ function void  uvm_object::set_string_local (string field_name,
   __m_uvm_field_automation(null, UVM_SETSTR, field_name);
 
   if(__m_uvm_status_container.warning && !this.__m_uvm_status_container.status) begin
-    uvm_report_error("NOMTC", $psprintf("did not find a match for field %s (@%0d)", field_name, this.get_inst_id()), UVM_NONE);
+    uvm_report_error("NOMTC", $sformatf("did not find a match for field %s (@%0d)", field_name, this.get_inst_id()), UVM_NONE);
   end
   __m_uvm_status_container.cycle_check.delete(this);
 endfunction
@@ -997,7 +997,7 @@ function uvm_object uvm_object::clone();
   uvm_object tmp;
   tmp = this.create(get_name());
   if(tmp == null)
-    uvm_report_warning("CRFLD", $psprintf("The create method failed for %s,  object cannot be cloned", get_name()), UVM_NONE);
+    uvm_report_warning("CRFLD", $sformatf("The create method failed for %s,  object cannot be cloned", get_name()), UVM_NONE);
   else
     tmp.copy(this);
   return(tmp);
@@ -1235,7 +1235,7 @@ function void uvm_object::m_unpack_post (uvm_packer packer);
   packer.scope.up();
 
   if(packer.get_packed_size() != provided_size) begin
-    uvm_report_warning("BDUNPK", $psprintf("Unpack operation unsuccessful: unpacked %0d bits from a total of %0d bits", packer.get_packed_size(), provided_size), UVM_NONE);
+    uvm_report_warning("BDUNPK", $sformatf("Unpack operation unsuccessful: unpacked %0d bits from a total of %0d bits", packer.get_packed_size(), provided_size), UVM_NONE);
   end
 
 endfunction

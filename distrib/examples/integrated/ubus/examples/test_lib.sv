@@ -52,7 +52,7 @@ class ubus_example_base_test extends uvm_test;
      if(ubus_example_tb0.ubus0.bus_monitor != null)
        ubus_example_tb0.ubus0.bus_monitor.set_report_verbosity_level(UVM_FULL);
     `uvm_info(get_type_name(),
-      $psprintf("Printing the test topology :\n%s", this.sprint(printer)), UVM_LOW)
+      $sformatf("Printing the test topology :\n%s", this.sprint(printer)), UVM_LOW)
   endfunction : end_of_elaboration_phase
 
   task run_phase(uvm_phase phase);

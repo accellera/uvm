@@ -85,7 +85,7 @@ class basic_default_seq extends uvm_sequence #(basic_item);
   virtual task body();
     starting_phase.raise_objection(this);
     for( int i=1; i< 4; i++) begin
-      `uvm_info(get_name(), $psprintf("In body() of %s, doing req #(%1d out of 3) ...",
+      `uvm_info(get_name(), $sformatf("In body() of %s, doing req #(%1d out of 3) ...",
                                       get_name(), i ),UVM_NONE);
       `uvm_do(req)
     end
@@ -108,7 +108,7 @@ class basic_seq extends uvm_sequence #(basic_item);
     if(starting_phase != null) starting_phase.raise_objection(this);
     for( int i=1; i< 9; i++) begin
       #(i+1);
-      `uvm_info(get_name(), $psprintf("In body() of %s, doing req #(00%1d out of 8) ...",
+      `uvm_info(get_name(), $sformatf("In body() of %s, doing req #(00%1d out of 8) ...",
                                       get_name(), i ),UVM_NONE);
       `uvm_do(req)       //This sequence would run fine if this line is commented out.
     end
@@ -131,7 +131,7 @@ class basic_main_phase_seq extends uvm_sequence #(basic_item);
     starting_phase.raise_objection(this);
     for( int i=1; i< 13; i++) begin
       #(i+1);
-      `uvm_info(get_name(), $psprintf("In body() of %s, doing req #(__%1d out of 12) ...",
+      `uvm_info(get_name(), $sformatf("In body() of %s, doing req #(__%1d out of 12) ...",
                                       get_name(), i ),UVM_NONE);
       `uvm_do(req)       //This sequence would run fine if this line is commented out.
     end

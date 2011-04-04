@@ -111,7 +111,7 @@ class component #(type CONFIG = int) extends uvm_component;
       test_error = 1;
     end
     else
-      uvm_report_info("build", $psprintf("got config object: %s",
+      uvm_report_info("build", $sformatf("got config object: %s",
                       cfg.sprint()));
 
     // retrieve a virtual interface from the resource database by type
@@ -132,7 +132,7 @@ class component #(type CONFIG = int) extends uvm_component;
       `uvm_error("TESTERROR", "non-existant int mysteriously located in resource pool");
       test_error = 1;
     end
-    uvm_report_info("build", $psprintf("ii = %0d", ii));
+    uvm_report_info("build", $sformatf("ii = %0d", ii));
 
     // here we get a resource by name   
     if(!uvm_resource_db#(bit [7:0])::read_by_name(get_full_name(), "data", data, this)) begin
@@ -140,7 +140,7 @@ class component #(type CONFIG = int) extends uvm_component;
       test_error = 1;
     end
     else begin
-      uvm_report_info("build", $psprintf("data = %0d", data));
+      uvm_report_info("build", $sformatf("data = %0d", data));
     end
    
   endfunction

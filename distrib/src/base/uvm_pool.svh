@@ -118,7 +118,7 @@ class uvm_pool #(type KEY=int, T=uvm_void) extends uvm_object;
   virtual function void delete (KEY key);
     if (!exists(key)) begin
       uvm_report_warning("POOLDEL",
-        $psprintf("delete: pool key doesn't exist. Ignoring delete request"));
+        $sformatf("delete: pool key doesn't exist. Ignoring delete request"));
       return;
     end
     pool.delete(key);
@@ -316,7 +316,7 @@ class uvm_object_string_pool #(type T=uvm_object) extends uvm_pool #(string,T);
   virtual function void delete (string key);
     if (!exists(key)) begin
       uvm_report_warning("POOLDEL",
-        $psprintf("delete: key '%s' doesn't exist", key));
+        $sformatf("delete: key '%s' doesn't exist", key));
       return;
     end
     pool.delete(key);

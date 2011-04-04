@@ -66,11 +66,11 @@ begin
 
    rg.reset("SOFT");
    data = rg.get();
-   if (data !== 'h2893CFC) `uvm_error("Test", $psprintf("Soft reset value is 'h%h instead of 'h2893CFC", data));
+   if (data !== 'h2893CFC) `uvm_error("Test", $sformatf("Soft reset value is 'h%h instead of 'h2893CFC", data));
    
    rg.reset();
    data = rg.get();
-   if (data !== 'h1763C30) `uvm_error("Test", $psprintf("Hard reset value is 'h%h instead of 'h1765A30", data));
+   if (data !== 'h1763C30) `uvm_error("Test", $sformatf("Hard reset value is 'h%h instead of 'h1765A30", data));
 
    
    rg.REVISION_ID.set(8'hFC);
@@ -83,7 +83,7 @@ begin
    rg.CHIP_ID.set_reset(8'h5A);
    rg.reset();
    data = rg.get();
-   if (data !== 'h2895A30) `uvm_error("Test", $psprintf("Hard reset value is 'h%h instead of 'h2895A30", data));
+   if (data !== 'h2895A30) `uvm_error("Test", $sformatf("Hard reset value is 'h%h instead of 'h2895A30", data));
    
    rg.print();
    

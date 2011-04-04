@@ -35,7 +35,7 @@ class test extends test_base;
 
   task main_phase(uvm_phase phase);
     #20;
-    `uvm_info( "KILLING_MAIN", $psprintf("Killing current phase: %s",
+    `uvm_info( "KILLING_MAIN", $sformatf("Killing current phase: %s",
                                       phase.get_name()), UVM_NONE);
     phase.phase_done.clear();
 
@@ -60,17 +60,17 @@ class test extends test_base;
     int brs_c  = svr.get_id_count( "bot_random_seq" );
 
     if( km_c != e_km_c ) begin
-      `uvm_error( "ID_COUNT", $psprintf( "Expected %1d %s message(s).  Got %1d",
+      `uvm_error( "ID_COUNT", $sformatf( "Expected %1d %s message(s).  Got %1d",
                                             e_km_c, "KILLING_MAIN", km_c));
     end
 
 
     if( trs_c != e_trs_c ) begin
-      `uvm_error( "ID_COUNT", $psprintf( "Expected %1d [%s] message(s).  Got %1d",
+      `uvm_error( "ID_COUNT", $sformatf( "Expected %1d [%s] message(s).  Got %1d",
                                          e_trs_c, "top_random_seq", trs_c));
     end
     if( brs_c != e_brs_c) begin
-      `uvm_error( "ID_COUNT", $psprintf( "Expected %1d [%s] message(s).  Got %1d",
+      `uvm_error( "ID_COUNT", $sformatf( "Expected %1d [%s] message(s).  Got %1d",
                                          e_brs_c, "bottom_random_seq", brs_c));
     end
   endfunction : check_phase

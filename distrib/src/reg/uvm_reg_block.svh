@@ -935,7 +935,7 @@ endclass: uvm_reg_block
 function bit uvm_reg_block::check_data_width(int unsigned width);
    if (width <= $bits(uvm_reg_data_t)) return 1;
 
-   `uvm_fatal("RegModel", $psprintf("Register model requires that UVM_REG_DATA_WIDTH be defined as %0d or greater. Currently defined as %0d", width, `UVM_REG_DATA_WIDTH))
+   `uvm_fatal("RegModel", $sformatf("Register model requires that UVM_REG_DATA_WIDTH be defined as %0d or greater. Currently defined as %0d", width, `UVM_REG_DATA_WIDTH))
 
    return 0;
 endfunction
@@ -1083,7 +1083,7 @@ function void uvm_reg_block::lock_model();
          max_size = uvm_mem::get_max_size();
 
       if (max_size > `UVM_REG_DATA_WIDTH) begin
-         `uvm_fatal("RegModel", $psprintf("Register model requires that UVM_REG_DATA_WIDTH be defined as %0d or greater. Currently defined as %0d", max_size, `UVM_REG_DATA_WIDTH))
+         `uvm_fatal("RegModel", $sformatf("Register model requires that UVM_REG_DATA_WIDTH be defined as %0d or greater. Currently defined as %0d", max_size, `UVM_REG_DATA_WIDTH))
       end
 
       Xinit_address_mapsX();

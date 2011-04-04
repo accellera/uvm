@@ -1755,12 +1755,12 @@ function uvm_component::new (string name, uvm_component parent);
     if (parent == top) begin
       error_str = {"Name '",name,"' is not unique to other top-level ",
       "instances. If parent is a module, build a unique name by combining the ",
-      "the module name and component name: $psprintf(\"\%m.\%s\",\"",name,"\")."};
+      "the module name and component name: $sformatf(\"\%m.\%s\",\"",name,"\")."};
       `uvm_fatal("CLDEXT",error_str)
     end
     else
       `uvm_fatal("CLDEXT",
-        $psprintf("Cannot set '%s' as a child of '%s', %s",
+        $sformatf("Cannot set '%s' as a child of '%s', %s",
                   name, parent.get_full_name(),
                   "which already has a child by that name."))
     return;
@@ -1803,14 +1803,14 @@ function bit uvm_component::m_add_child(uvm_component child);
   if (m_children.exists(child.get_name()) &&
       m_children[child.get_name()] != child) begin
       `uvm_warning("BDCLD",
-        $psprintf("A child with the name '%0s' (type=%0s) already exists.",
+        $sformatf("A child with the name '%0s' (type=%0s) already exists.",
            child.get_name(), m_children[child.get_name()].get_type_name()))
       return 0;
   end
 
   if (m_children_by_handle.exists(child)) begin
       `uvm_warning("BDCHLD",
-        $psprintf("A child with the name '%0s' %0s %0s'",
+        $sformatf("A child with the name '%0s' %0s %0s'",
                   child.get_name(),
                   "already exists in parent under name '",
                   m_children_by_handle[child].get_name()))
@@ -1957,7 +1957,7 @@ function uvm_component uvm_component::lookup( string name );
   
   if (!comp.has_child(leaf)) begin
     `uvm_warning("Lookup Error", 
-       $psprintf("Cannot find child %0s",leaf))
+       $sformatf("Cannot find child %0s",leaf))
     return null;
   end
 
@@ -2494,7 +2494,7 @@ endtask
 
 task uvm_component::restart();
   `uvm_warning("UNIMP",
-      $psprintf("%0s: restart not implemented",this.get_name()))
+      $sformatf("%0s: restart not implemented",this.get_name()))
 endtask
 
 

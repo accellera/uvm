@@ -37,14 +37,14 @@ class obj_example_seq extends uvm_sequence #(xbus_transfer);
 
   virtual task pre_body();
     p_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("%s pre_body() raising an uvm_test_done objection", 
+      $sformatf("%s pre_body() raising an uvm_test_done objection", 
       get_sequence_path()), UVM_MEDIUM);
     uvm_test_done.raise_objection(this);
   endtask
   
   virtual task body();
     p_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("%s body() starting with count = %0d", 
+      $sformatf("%s body() starting with count = %0d", 
       get_sequence_path(), count), UVM_MEDIUM);
     repeat(count) begin : repeat_block
       `uvm_do(write_byte_seq0)
@@ -53,7 +53,7 @@ class obj_example_seq extends uvm_sequence #(xbus_transfer);
   
   virtual task post_body();
     p_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("%s post_body() dropping an uvm_test_done objection after count %0d items", 
+      $sformatf("%s post_body() dropping an uvm_test_done objection after count %0d items", 
       get_sequence_path(), count), UVM_MEDIUM);
     uvm_test_done.drop_objection(this);
   endtask

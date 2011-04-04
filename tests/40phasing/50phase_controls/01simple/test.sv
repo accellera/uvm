@@ -42,11 +42,11 @@ class test extends test_base;
     int brs_c  = svr.get_id_count( "bot_random_seq" );
 
     if( trs_c != e_trs_c ) begin
-      `uvm_error( "ID_COUNT", $psprintf( "Expected %1d [%s] message(s).  Got %1d",
+      `uvm_error( "ID_COUNT", $sformatf( "Expected %1d [%s] message(s).  Got %1d",
                                          e_trs_c, "top_random_seq", trs_c));
     end
     if( brs_c != e_brs_c) begin
-      `uvm_error( "ID_COUNT", $psprintf( "Expected %1d [%s] message(s).  Got %1d",
+      `uvm_error( "ID_COUNT", $sformatf( "Expected %1d [%s] message(s).  Got %1d",
                                          e_brs_c, "bottom_random_seq", brs_c));
     end
   endfunction : check_phase

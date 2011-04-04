@@ -59,7 +59,7 @@ module test_top();
 
        `uvm_info("TEST_SEQ", "<><><><><><><><><><><><><><><><><><><><><><><>", UVM_LOW)
        `uvm_info("TEST_SEQ", "  Starting Test Sequence", UVM_LOW)
-       `uvm_info("TEST_SEQ", $psprintf("  Number of Registers = %0d", r.size()), UVM_LOW)
+       `uvm_info("TEST_SEQ", $sformatf("  Number of Registers = %0d", r.size()), UVM_LOW)
        `uvm_info("TEST_SEQ", "<><><><><><><><><><><><><><><><><><><><><><><>\n", UVM_LOW)
 
        `uvm_info("TEST_SEQ", "<><><><><><><><><- PART A -><><><><><><><><><><><><>", UVM_LOW)
@@ -131,11 +131,11 @@ module test_top();
        begin
          r[i].peek(status, data);
          if(r[i].get()!==data)
-           `uvm_error("TEST_SEQ", $psprintf(
+           `uvm_error("TEST_SEQ", $sformatf(
              "Registers mismatched. [%s] Shadow=0x%0x, DUT=0x%0x\n", 
                r[i].get_name(), r[i].get(), data))
          else
-           `uvm_info("TEST_SEQ", $psprintf("Registers matched. [%s] Shaodow=0x%0x DUT=0x%0x", 
+           `uvm_info("TEST_SEQ", $sformatf("Registers matched. [%s] Shaodow=0x%0x DUT=0x%0x", 
              r[i].get_name(), r[i].get(), data), UVM_LOW)
        end
        $display();

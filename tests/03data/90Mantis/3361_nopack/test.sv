@@ -132,7 +132,7 @@ class test extends uvm_test;
     a.mid.a = 13;
     a.mid.base = new[7];
     foreach(a.mid.base[i]) begin
-      a.mid.base[i] = new($psprintf("b[%0d]", i));
+      a.mid.base[i] = new($sformatf("b[%0d]", i));
       a.mid.base[i].a = $urandom_range(1, 100);
     end
     assert(a.randomize());

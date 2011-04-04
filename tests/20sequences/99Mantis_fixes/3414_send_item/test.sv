@@ -113,7 +113,7 @@ module top();
     endfunction
 
     function void end_of_elaboration();
-      `uvm_info(get_type_name(), $psprintf("The topology:\n%s", this.sprint()), UVM_HIGH)
+      `uvm_info(get_type_name(), $sformatf("The topology:\n%s", this.sprint()), UVM_HIGH)
     endfunction
 
     task run();

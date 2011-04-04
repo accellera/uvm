@@ -336,7 +336,7 @@ class uvm_event extends uvm_object;
     printer.print_object("trigger_data", trigger_data);
     printer.m_scope.down("callbacks");
     foreach(callbacks[e]) begin
-      printer.print_object($psprintf("[%0d]",e), callbacks[e], "[");
+      printer.print_object($sformatf("[%0d]",e), callbacks[e], "[");
     end
     printer.m_scope.up();
   endfunction

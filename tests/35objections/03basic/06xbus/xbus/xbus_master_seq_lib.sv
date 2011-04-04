@@ -42,7 +42,7 @@ virtual class xbus_base_sequence extends uvm_sequence #(xbus_transfer);
   // will encapsulate the sub-sequence. 
   virtual task pre_body();
     m_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("%s pre_body() raising an uvm_test_done objection", 
+      $sformatf("%s pre_body() raising an uvm_test_done objection", 
       get_sequence_path()), UVM_MEDIUM);
     uvm_test_done.raise_objection(this);
   endtask
@@ -51,7 +51,7 @@ virtual class xbus_base_sequence extends uvm_sequence #(xbus_transfer);
   // the root sequence is complete. 
   virtual task post_body();
     m_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("%s post_body() dropping an uvm_test_done objection", 
+      $sformatf("%s post_body() dropping an uvm_test_done objection", 
       get_sequence_path()), UVM_MEDIUM);
     uvm_test_done.drop_objection(this);
   endtask
@@ -85,7 +85,7 @@ class read_byte_seq extends xbus_base_sequence;
         req.transmit_delay == transmit_del; } )
     get_response(rsp);
     p_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("%s read : addr = `x%0h, data[0] = `x%0h",
+      $sformatf("%s read : addr = `x%0h, data[0] = `x%0h",
       get_sequence_path(), rsp.addr, rsp.data[0]), 
       UVM_HIGH);
   endtask
@@ -120,7 +120,7 @@ class read_half_word_seq extends xbus_base_sequence;
         req.transmit_delay == transmit_del; } )
     get_response(rsp);
     p_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("%s read : addr = `x%0h, data[0] = `x%0h, data[1] = `x%0h", 
+      $sformatf("%s read : addr = `x%0h, data[0] = `x%0h, data[1] = `x%0h", 
       get_sequence_path(), rsp.addr, rsp.data[0], rsp.data[1]), UVM_HIGH);
   endtask
 
@@ -154,7 +154,7 @@ class read_word_seq extends xbus_base_sequence;
         req.transmit_delay == transmit_del; } )
     get_response(rsp);
     p_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("%s read : addr = `x%0h, data[0] = `x%0h, \
+      $sformatf("%s read : addr = `x%0h, data[0] = `x%0h, \
       data[1] = `x%0h, data[2] = `x%0h, data[3] = `x%0h",
       get_sequence_path(), rsp.addr, rsp.data[0], rsp.data[1], 
       rsp.data[2], rsp.data[3]), UVM_HIGH);
@@ -190,7 +190,7 @@ class read_double_word_seq extends xbus_base_sequence;
         req.transmit_delay == transmit_del; } )
     get_response(rsp);
     p_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("%s read : addr = `x%0h, data[0] = `x%0h, \
+      $sformatf("%s read : addr = `x%0h, data[0] = `x%0h, \
       data[1] = `x%0h, data[2] = `x%0h, data[3] = `x%0h, data[4] = `x%0h, \
       data[5] = `x%0h, data[6] = `x%0h, data[7] = `x%0h",
       get_sequence_path(), rsp.addr, rsp.data[0], rsp.data[1], rsp.data[2],
@@ -229,7 +229,7 @@ class write_byte_seq extends xbus_base_sequence;
         req.error_pos == 1000;
         req.transmit_delay == transmit_del; } )
     p_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("%s wrote : addr = `x%0h, data[0] = `x%0h",
+      $sformatf("%s wrote : addr = `x%0h, data[0] = `x%0h",
       get_sequence_path(), req.addr, req.data[0]),
       UVM_HIGH);
   endtask
@@ -266,7 +266,7 @@ class write_half_word_seq extends xbus_base_sequence;
         req.error_pos == 1000; 
         req.transmit_delay == transmit_del; } )
     p_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("%s wrote : addr = `x%0h, data[0] = `x%0h, data[1] = `x%0h",
+      $sformatf("%s wrote : addr = `x%0h, data[0] = `x%0h, data[1] = `x%0h",
       get_sequence_path(), req.addr, req.data[0], req.data[1]), UVM_HIGH);
   endtask
 
@@ -303,7 +303,7 @@ class write_word_seq extends xbus_base_sequence;
         req.error_pos == 1000;
         req.transmit_delay == transmit_del; } )
     p_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("%s wrote : addr = `x%0h, data[0] = `x%0h, \
+      $sformatf("%s wrote : addr = `x%0h, data[0] = `x%0h, \
       data[1] = `x%0h, data[2] = `x%0h, data[3] = `x%0h", 
       get_sequence_path(), req.addr, req.data[0],
       req.data[1], req.data[2], req.data[3]),
@@ -347,7 +347,7 @@ class write_double_word_seq extends xbus_base_sequence;
         req.error_pos == 1000;
         req.transmit_delay == transmit_del; } )
     p_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("Writing  %s : addr = `x%0h, data[0] = `x%0h, \
+      $sformatf("Writing  %s : addr = `x%0h, data[0] = `x%0h, \
       data[1] = `x%0h, data[2] = `x%0h, data[3] = `x%0h, data[4] = `x%0h, \
       data[5] = `x%0h, data[6] = `x%0h, data[7] = `x%0h",
       get_sequence_path(), req.addr, req.data[0], req.data[1], req.data[2], 
