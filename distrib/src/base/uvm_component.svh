@@ -1730,7 +1730,7 @@ function uvm_component::new (string name, uvm_component parent);
       uvm_report_fatal("ILLCRT", {"It is illegal to create a component ('",
                 name,"' under '",
                 (parent == null ? top.get_full_name() : parent.get_full_name()),
-               "') after the build() phase has ended."},
+               "') after the build phase has ended."},
                        UVM_NONE);
     end
   end
