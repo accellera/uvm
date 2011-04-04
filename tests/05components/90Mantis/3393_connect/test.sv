@@ -30,10 +30,8 @@ class cb_catch extends uvm_report_catcher;
    static int seen = 0;
 
    virtual function action_e catch();
-      $write("Catch?...\n");
       if (get_id() == "ILLCRT" && get_severity() == UVM_FATAL) begin
          seen++;
-         $write("Shoudl be caught...\n");
          return CAUGHT;
       end
       return THROW;
@@ -44,7 +42,6 @@ class cb_demote extends uvm_report_catcher;
    static int seen = 0;
 
    virtual function action_e catch();
-      $write("Demote?...\n");
       if (get_id() == "ILLCRT" && get_severity() == UVM_FATAL) begin
          set_severity(UVM_WARNING);
          set_action(UVM_DISPLAY);
