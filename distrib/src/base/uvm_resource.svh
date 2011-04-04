@@ -428,15 +428,11 @@ virtual class uvm_resource_base extends uvm_object;
   // conversion are handled by three DPI functions:
   // 
   //|    function int uvm_re_match(string re, string str);
-  //|    function void uvm_dump_re_cache();
   //|    function string uvm_glob_to_re(string glob);
   // 
-  // uvm_re_match both compiles and matches the regular expression.  It
-  // uses internal caching of compiled information so that each match
-  // does not necessarily require a new compilation of the regular
-  // expression string.  All of the matching is done using regular
-  // expressions, so globs are converted to regular expressions and then
-  // processed.
+  // uvm_re_match both compiles and matches the regular expression.
+  // of the matching is done using regular expressions, so globs are
+  // converted to regular expressions and then processed.
 
 
   // Function: set_scope
