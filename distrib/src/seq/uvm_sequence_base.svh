@@ -28,8 +28,7 @@
 // of sequence items and/or other sequences.
 //
 // A sequence is executed by calling its <start> method, either directly
-// or indirectly via <start_item>/<finish_item> or invocation of any of
-// the `uvm_do_* macros.
+// or invocation of any of the `uvm_do_* macros.
 // 
 // Executing sequences via <start>:
 // 
@@ -60,14 +59,12 @@
 //|   sub_seq.post_body          (task)  if call_pre_post==1
 // 
 //
-// Executing sub-sequences via <start_item>/<finish_item> or `uvm_do macros:
+// Executing sub-sequences via `uvm_do macros:
 //
 // A sequence can also be indirectly started as a child in the <body> of a
 // parent sequence. The child sequence's <start> method is called indirectly
-// via calls to its <start_item>/<finish_item> methods or by invoking
-// any of the `uvm_do macros. Child sequences can also be started by
-// the predefined sequences, <uvm_random_sequence> and
-// <uvm_exhaustive_sequence>. In all these cases, <start> is called with
+// by invoking any of the `uvm_do macros.
+// In thise cases, <start> is called with
 // ~call_pre_post~ set to 0, preventing the started sequence's <pre_body> and
 // <post_body> methods from being called. During execution of the
 // child sequence, the parent's <pre_do>, <mid_do>, and <post_do> methods
@@ -77,11 +74,6 @@
 // 
 // User code
 //
-//| parent_seq.start_item(sub_seq, priority);
-//| sub_seq.randomize(...);
-//| parent_seq.finish_item(sub_seq);
-//|
-//| or
 //|
 //| `uvm_do_with_prior(seq_seq, { constraints }, priority)
 //|
@@ -110,7 +102,7 @@
 // User code
 //
 //| parent_seq.start_item(item, priority);
-//| sub_seq.randomize(...) [with {constraints}];
+//| item.randomize(...) [with {constraints}];
 //| parent_seq.finish_item(item);
 //|
 //| or
@@ -237,6 +229,13 @@ class uvm_sequence_base extends uvm_sequence_item;
                       int this_priority = -1,
                       bit call_pre_post = 1);
 
+    if (parent_sequence != null) begin
+       set_parent_sequence(parent_sequence);
+       set_use_sequence_info(1);
+       if (sequencer == null) sequencer = parent_sequence.get_sequencer();
+       reseed();
+    end
+    set_sequencer(sequencer);
 
     if (!(m_sequence_state != CREATED ||
           m_sequence_state != STOPPED ||
@@ -681,65 +680,55 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   // Function: start_item
   //
-  // ~start_item~ and <finish_item> together will initiate operation of either
-  // a sequence item or sequence.  If the item or sequence has not already been
+  // ~start_item~ and <finish_item> together will initiate operation of
+  // a sequence item.  If the item has not already been
   // initialized using create_item, then it will be initialized here to use
   // the default sequencer specified by m_sequencer.  Randomization
   // may be done between start_item and finish_item to ensure late generation
   //
-  //| virtual task start_item(uvm_sequence_item item, int set_priority = -1);
 
-  // Function- m_start_item_or_seq
-  //
-  // Internal method.
-  //   seq.start_item(item,prior) calls
-  //   item.m_start_item_or_seq(get_sequencer(), seq, prior);
-
-  virtual task m_start_item_or_seq(uvm_sequencer_base sequencer,
-                                   uvm_sequence_item parent_seq,
-                                   int set_priority);
-    
-    if (get_sequencer() == null) begin
-      uvm_sequence_base parent_seq_;
-      if (!$cast(parent_seq_, parent_seq))
-        uvm_report_fatal("SEQMSTART", "Failure to cast sequence item", UVM_NONE);
-      set_use_sequence_info(1);
-      set_parent_sequence(parent_seq_);
-      set_sequencer(sequencer);
-      reseed();
-    end
-    return;
+  virtual task start_item (uvm_sequence_item item,
+                           int set_priority = -1,
+                           uvm_sequencer_base sequencer=null);
+    uvm_sequence_base seq;
+     
+    if(item == null)
+      uvm_report_fatal("NULLITM",
+         {"attempting to start a null item from sequence '",
+          get_full_name(), "'"}, UVM_NONE);
+          
+    if($cast(seq, item))
+      uvm_report_fatal("SEQNOTITM",
+         {"attempting to start a sequence using start_item() from sequence '",
+          get_full_name(), "'. Use seq.start() instead."}, UVM_NONE);
+          
+    if (sequencer == null)
+        sequencer = item.get_sequencer();
+        
+    if(sequencer == null)
+        sequencer = get_sequencer();   
+        
+    if(sequencer == null)
+        uvm_report_fatal("SEQ",{"neither the item's sequencer nor dedicated sequencer has been supplied to start item in ",get_full_name()},UVM_NONE);
+      
+    item.m_start_item(sequencer, this, set_priority);
   endtask  
 
 
   // Function: finish_item
   //
   // finish_item, together with start_item together will initiate operation of 
-  // either a sequence_item or sequence object.  Finish_item must be called
+  // a sequence_item.  Finish_item must be called
   // after start_item with no delays or delta-cycles.  Randomization, or other
   // functions may be called between the start_item and finish_item calls.
   //
-  //|virtual task finish_item(uvm_sequence_item item, int set_priority = -1);
+
+  virtual task finish_item (uvm_sequence_item item,
+                            int set_priority = -1);
+    item.m_finish_item(item.get_sequencer(), this, set_priority);
+  endtask
+
   
-  // Function- m_finish_item
-  //
-  // Internal method.
-  //   seq.finish_item(item,prior) calls
-  //   item.m_finish_item(get_sequencer(), seq, prior);
-
-  virtual task m_finish_item(uvm_sequencer_base sequencer, 
-                             uvm_sequence_item parent_seq, 
-                             int set_priority = -1);
-    uvm_sequence_base parent_seq_;
-
-    if (!$cast(parent_seq_, parent_seq))
-        uvm_report_fatal("SEQMFINISH", "Failure to cast sequence item", UVM_NONE);
-
-    start(sequencer, parent_seq_, set_priority, 0);
-    
-  endtask  
-
-
   // Task: wait_for_grant
   //
   // This task issues a request to the current sequencer.  If item_priority is

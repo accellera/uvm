@@ -227,42 +227,13 @@ class uvm_sequence_item extends uvm_transaction;
   endfunction
 
 
-  // Function: start_item
-  //
-  // start_item and finish_item together will initiate operation of either
-  // a sequence_item or sequence object.  If the object has not been initiated 
-  // using create_item, then start_item will be initialized in start_item
-  // to use the default sequencer specified by m_sequencer.  Randomization
-  // may be done between start_item and finish_item to ensure late generation
-
-  virtual task start_item (uvm_sequence_item item_or_seq,
-                           int set_priority = -1,
-                           uvm_sequencer_base sequencer=null);
-    if(item_or_seq == null)
-      uvm_report_fatal("NULLITM",
-         {"attempting to start a null item or sequence from sequence '",
-          get_full_name(), "'"}, UVM_NONE);
-          
-    if (sequencer == null)
-        sequencer = item_or_seq.get_sequencer();
-        
-    if(sequencer == null)
-        sequencer =  get_sequencer();   
-        
-    if(sequencer == null)
-        uvm_report_fatal("SEQ",{"neither the items sequencer nor dedicated sequencer has been supplied to start item in ",get_full_name()},UVM_NONE);
-      
-    item_or_seq.m_start_item_or_seq(sequencer, this, set_priority);
-  endtask  
-
-
-  // Function- m_start_item_or_seq
+  // Function- m_start_item
   //
   // Internal method. Called when starting an item.
   
-  virtual task m_start_item_or_seq(uvm_sequencer_base sequencer,
-                                   uvm_sequence_item parent_seq,
-                                   int set_priority);
+  virtual task m_start_item(uvm_sequencer_base sequencer,
+                            uvm_sequence_item parent_seq,
+                            int set_priority);
     uvm_sequence_base parent_seq_;
     
     if (!$cast(parent_seq_, parent_seq))
@@ -294,42 +265,29 @@ class uvm_sequence_item extends uvm_transaction;
   endtask  
 
 
-  // Function: finish_item
-  //
-  // Finishes execution of a sequence item or sequence. Finish_item must be
-  // called after <start_item> returns with no delays or delta-cycles. 
-  // Randomization, or other functions may be called between the <start_item>
-  // and ~finish_item~ calls.
-  
-  virtual task finish_item (uvm_sequence_item item,
-                            int set_priority = -1);
-    item.m_finish_item(item.get_sequencer(), this, set_priority);
-  endtask
-
-
   // Function- m_finish_item
   //
-  // Internal method. This method is called when <finish_item> is called with a sequence_item argument.
+  // Internal method. This method is called when <finish_item>
+  //  is called with a sequence_item argument.
   
   virtual task m_finish_item (uvm_sequencer_base sequencer,
-                              uvm_sequence_item parent_seq,
+                              uvm_sequence_base seq,
                               int set_priority = -1);
-    uvm_sequence_base parent_seq_;
 
     if (sequencer == null) begin
         uvm_report_fatal("STRITM", "sequence_item has null sequencer", UVM_NONE);
     end
 
-    if (!$cast(parent_seq_, parent_seq))
-       uvm_report_fatal ("CASTFL", "finish_item failed: parent_seq is not a sequence", UVM_NONE);
+    if (seq == null)
+       uvm_report_fatal ("ITEMNOSEQ", "finish_item failed: parent seq is null", UVM_NONE);
 
-    parent_seq_.mid_do(this);
-    sequencer.send_request(parent_seq_, this);
-    sequencer.wait_for_item_done(parent_seq_, -1);
+    seq.mid_do(this);
+    sequencer.send_request(seq, this);
+    sequencer.wait_for_item_done(seq, -1);
     `ifndef UVM_DISABLE_AUTO_ITEM_RECORDING
     sequencer.end_tr(this);
     `endif
-    parent_seq_.post_do(this);
+    seq.post_do(this);
   endtask
 
 
