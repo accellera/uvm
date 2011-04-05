@@ -101,6 +101,31 @@ class uvm_resource_db #(type T=uvm_object);
     return r;
   endfunction
 
+  // function: show_msg
+  // internal helper function to print resource accesses
+  protected static function void show_msg(
+          input string id,
+          input string rtype,
+          input string action,
+          input string scope,
+          input string name,
+          input uvm_object accessor,
+          input rsrc_t rsrc);
+
+      if(uvm_resource_db_options::is_tracing()) begin
+`ifdef UVM_USE_TYPENAME 
+          string msg=$typename(T);
+`else
+          string msg ="unknown";
+`endif 
+          $sformat(msg, "%s '%s%s' (type %s) %s by %s = %s",
+              rtype,scope, name=="" ? "" : {".",name}, msg,action,
+              (accessor != null) ? accessor.get_full_name() : "<unknown>",
+              rsrc.convert2string());
+
+          `uvm_info(id, msg, UVM_LOW)
+      end
+  endfunction
 
   // function: set
   //
@@ -114,17 +139,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set();
 
-    if(uvm_resource_db_options::is_tracing()) begin
-       string msg;
-
-       $sformat(msg, "Resource '%s.%s' (type %s) set by %s = %s",
-                scope, name, $typename(T),
-                (accessor != null) ? accessor.get_full_name() : "<unknown>",
-                rsrc.convert2string());
-
-       `uvm_info("RSRCDB/SET", msg, UVM_LOW)
-    end
-
+    show_msg("RSRCDB/SET", "Resource","set", scope, name, accessor, rsrc);
   endfunction
 
   // function: set_anonymous
@@ -140,17 +155,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set();
 
-    if(uvm_resource_db_options::is_tracing()) begin
-       string msg;
-
-       $sformat(msg, "Resource '%s' (type %s) set by %s = %s",
-                scope, $typename(T),
-                (accessor != null) ? accessor.get_full_name() : "<unknown>",
-                rsrc.convert2string());
-
-       `uvm_info("RSRCDB/SETANON", msg, UVM_LOW)
-    end
-
+    show_msg("RSRCDB/SETANON","Resource", "set", scope, "", accessor, rsrc);
   endfunction
 
   // function set_override
@@ -166,19 +171,11 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set_override();
 
-    if(uvm_resource_db_options::is_tracing()) begin
-       string msg;
-
-       $sformat(msg, "Resource '%s.%s' (type %s) set by %s = %s",
-                scope, name, $typename(T),
-                (accessor != null) ? accessor.get_full_name() : "<unknown>",
-                rsrc.convert2string());
-
-       `uvm_info("RSRCDB/SETOVRD", msg, UVM_LOW)
-    end
-
+    show_msg("RSRCDB/SETOVRD", "Resource","set", scope, name, accessor, rsrc);
   endfunction
 
+
+    
   // function set_override_type
   //
   // Create a new resource, write ~val~ to it, and set it into the
@@ -193,17 +190,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set_override(uvm_resource_types::TYPE_OVERRIDE);
 
-    if(uvm_resource_db_options::is_tracing()) begin
-       string msg;
-
-       $sformat(msg, "Resource '%s.%s' (type %s) set by %s = %s",
-                scope, name, $typename(T),
-                (accessor != null) ? accessor.get_full_name() : "<unknown>",
-                rsrc.convert2string());
-
-       `uvm_info("RSRCDB/SETOVRDTYP", msg, UVM_LOW)
-    end
-
+    show_msg("RSRCDB/SETOVRDTYP","Resource", "set", scope, name, accessor, rsrc);
   endfunction
 
   // function set_override_name
@@ -220,17 +207,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set_override(uvm_resource_types::NAME_OVERRIDE);
 
-    if(uvm_resource_db_options::is_tracing()) begin
-       string msg;
-
-       $sformat(msg, "Resource '%s.%s' (type %s) set by %s = %s",
-                scope, name, $typename(T),
-                (accessor != null) ? accessor.get_full_name() : "<unknown>",
-                rsrc.convert2string());
-
-       `uvm_info("RSRCDB/SETOVRDNAM", msg, UVM_LOW)
-    end
-
+    show_msg("RSRCDB/SETOVRDNAM","Resource", "set", scope, name, accessor, rsrc);
   endfunction
 
   // function: read_by_name
@@ -250,17 +227,7 @@ class uvm_resource_db #(type T=uvm_object);
 
     val = rsrc.read(accessor);
 
-    if(uvm_resource_db_options::is_tracing()) begin
-       string msg;
-
-       $sformat(msg, "Resource '%s.%s' (type %s) read by %s = %s",
-                scope, name, $typename(T),
-                (accessor != null) ? accessor.get_full_name() : "<unknown>",
-                rsrc.convert2string());
-
-       `uvm_info("RSRCDB/RDBYNAM", msg, UVM_LOW)
-    end
-
+    show_msg("RSRCDB/RDBYNAM","Resource", "read", scope, name, accessor, rsrc);
     return 1;
   
   endfunction
@@ -282,17 +249,7 @@ class uvm_resource_db #(type T=uvm_object);
 
     val = rsrc.read(accessor);
 
-    if(uvm_resource_db_options::is_tracing()) begin
-       string msg;
-
-       $sformat(msg, "Resource '%s' (type %s) read by %s = %s",
-                scope, $typename(T),
-                (accessor != null) ? accessor.get_full_name() : "<unknown>",
-                rsrc.convert2string());
-
-       `uvm_info("RSRCDB/RDBYTYP", msg, UVM_LOW)
-    end
-
+    show_msg("RSRCDB/RDBYTYP", "Resource","read", scope, "", accessor, rsrc);
     return 1;
 
   endfunction
@@ -319,17 +276,7 @@ class uvm_resource_db #(type T=uvm_object);
 
     rsrc.write(val, accessor);
 
-    if(uvm_resource_db_options::is_tracing()) begin
-       string msg;
-
-       $sformat(msg, "Resource '%s.%s' (type %s) written by %s = %s",
-                scope, name, $typename(T),
-                (accessor != null) ? accessor.get_full_name() : "<unknown>",
-                rsrc.convert2string());
-
-       `uvm_info("RSRCDB/WR", msg, UVM_LOW)
-    end
-
+    show_msg("RSRCDB/WR","Resource", "written", scope, name, accessor, rsrc);
     return 1;
 
   endfunction
@@ -357,17 +304,7 @@ class uvm_resource_db #(type T=uvm_object);
 
     rsrc.write(val, accessor);
 
-    if(uvm_resource_db_options::is_tracing()) begin
-       string msg;
-
-       $sformat(msg, "Resource '%s' (type %s) written by %s = %s",
-                scope, $typename(T),
-                (accessor != null) ? accessor.get_full_name() : "<unknown>",
-                rsrc.convert2string());
-
-       `uvm_info("RSRCDB/WRTYP", msg, UVM_LOW)
-    end
-
+    show_msg("RSRCDB/WRTYP", "Resource","written", scope, "", accessor, rsrc);
     return 1;
   endfunction
 

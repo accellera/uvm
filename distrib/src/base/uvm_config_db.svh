@@ -102,17 +102,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
 
     value = r.read(cntxt);
 
-    if(uvm_config_db_options::is_tracing()) begin
-       string msg;
-
-       $sformat(msg, "Configuration '%s.%s' (type %s) read by %s = %s",
-                inst_name, field_name, $typename(T),
-                (cntxt != null) ? cntxt.get_full_name() : "<unknown>",
-                r.convert2string());
-
-       `uvm_info("CFGDB/GET", msg, UVM_LOW)
-    end
-
+    show_msg("CFGDB/GET", "Configuration","read", inst_name, field_name, cntxt, r);
     return 1;
   endfunction
 
@@ -209,17 +199,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
 
     p.set_randstate(rstate);
 
-    if(uvm_config_db_options::is_tracing()) begin
-       string msg;
-
-       $sformat(msg, "Configuration '%s.%s' (type %s) set by %s = %s",
-                inst_name, field_name, $typename(T),
-                (cntxt != null) ? cntxt.get_full_name() : "<unknown>",
-                r.convert2string());
-
-       `uvm_info("CFGDB/SET", msg, UVM_LOW)
-    end
-
+    show_msg("CFGDB/SET", "Configuration","set", inst_name, field_name, cntxt, r);
   endfunction
 
 
