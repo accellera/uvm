@@ -22,9 +22,9 @@
 //----------------------------------------------------------------------
 class uvm_locker #(type T=int);
 
-  local semaphore sm;
   local process pid;
   local T val;
+  local semaphore sm;
 
   function new();
     sm = new(1);
@@ -51,7 +51,7 @@ class uvm_locker #(type T=int);
 
   task lock();
     sm.get();
-    pid = process::self;
+    set_process(process::self);
   endtask
 
   // Function: try_lock
@@ -61,8 +61,12 @@ class uvm_locker #(type T=int);
   // the lock then a one is returned, otherwise a zero is returned.
 
   function bit try_lock();
-    bit ok = sm.try_get();
-    return ok;
+    if(sm.try_get()) begin
+      set_process(process::self);
+      return 1;
+    end
+    else
+      return 0;
   endfunction
 
   // Function: unlock
@@ -70,8 +74,24 @@ class uvm_locker #(type T=int);
   // Releases the lock held by this semaphore.
 
   function void unlock();
-    sm.put();
-    pid = null;
+    // is the lock already unlocked?  If so,
+    // don't unlock it again.
+    if(sm.try_get()) begin
+      sm.put();
+      $display("warning: lock is already unlocked.  Ignoring unlock request");
+    end
+    else begin
+      sm.put();
+      pid = null;
+    end
+  endfunction
+
+  function void set_process(process p = null);
+    pid = p;
+  endfunction
+
+  function process get_process();
+    return pid;
   endfunction
 
   //-------------------------

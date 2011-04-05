@@ -1,4 +1,5 @@
 //----------------------------------------------------------------------
+//   Copyright 2011 Cypress Semiconductor
 //   Copyright 2010 Mentor Graphics Corporation
 //   Copyright 2011 Cadence Design Systems, Inc. 
 //   All Rights Reserved Worldwide
@@ -130,8 +131,6 @@ class uvm_resource_types;
   } access_t;
 
 endclass
-
-
 
 //----------------------------------------------------------------------
 // Class: uvm_resource_options
@@ -302,7 +301,6 @@ virtual class uvm_resource_base extends uvm_object;
     modified = 0;
   endtask
 
-
   //-----------------------
   // Group: Scope Interface
   //-----------------------
@@ -397,7 +395,6 @@ virtual class uvm_resource_base extends uvm_object;
     scope = uvm_glob_to_re(s);
   endfunction
 
-
   // Function: get_scope
   //
   // Retrieve the regular expression string that identifies the set of
@@ -406,7 +403,6 @@ virtual class uvm_resource_base extends uvm_object;
   function string get_scope();
     return scope;
   endfunction
-
 
   // Function: match_scope
   //
@@ -418,7 +414,6 @@ virtual class uvm_resource_base extends uvm_object;
     return (err == 0);
   endfunction
 
-
   //----------------
   // Group: Priority
   //----------------
@@ -428,14 +423,12 @@ virtual class uvm_resource_base extends uvm_object;
   // derived classes.  The definitons serve as a priority management
   // interface.
 
-
   // Function: set priority
   //
   // Change the search priority of the resource based on the value of
   // the priority enum argument.
   //
   pure virtual function void set_priority (uvm_resource_types::priority_e pri);
-
 
   //-------------------------
   // Group: Utility Functions
@@ -452,7 +445,6 @@ virtual class uvm_resource_base extends uvm_object;
     return "?";
   endfunction
 
-
   // Function: do_print
   //
   // Implementation of do_print which is called by print().
@@ -460,7 +452,6 @@ virtual class uvm_resource_base extends uvm_object;
   function void do_print (uvm_printer printer);
     $display("%s [%s] : %s", get_name(), get_scope(), convert2string());
   endfunction
-
 
   //-------------------
   // Group: Audit Trail
@@ -545,7 +536,6 @@ virtual class uvm_resource_base extends uvm_object;
     end
   endfunction
 
-
   // Function: print_accessors
   //
   // Dump the access records for this resource
@@ -604,7 +594,6 @@ class get_t;
   uvm_resource_base rsrc;
   time t;
 endclass
-
 
 //----------------------------------------------------------------------
 // Class: uvm_resource_pool
@@ -785,7 +774,6 @@ class uvm_resource_pool;
       m_has_wildcard_names = 1;
   endfunction
 
-
   // Function: set_override
   //
   // The resource provided as an argument will be entered into the pool
@@ -839,7 +827,6 @@ class uvm_resource_pool;
     get_record.push_back(impt);
   endfunction
 
-
   // function - dump_get_records
   //
   // Format and print the get history list.
@@ -859,7 +846,6 @@ class uvm_resource_pool;
                record.t);
     end
   endfunction
-
 
   //--------------
   // Group: Lookup
@@ -916,7 +902,6 @@ class uvm_resource_pool;
     return q;
 
   endfunction
-
 
   // Function: get_highest_precedence
   //
@@ -1010,7 +995,6 @@ class uvm_resource_pool;
     return q;
 
   endfunction
-
 
   // Function: get_by_type
   //
@@ -1257,7 +1241,6 @@ class uvm_resource_pool;
     set_priority_name(rsrc, pri);
   endfunction
 
-
   //--------------------------------------------------------------------
   // Group: Debug
   //--------------------------------------------------------------------
@@ -1357,8 +1340,6 @@ class uvm_resource_pool;
 
 endclass
 
-
-
 //----------------------------------------------------------------------
 // Class: uvm_resource #(T)
 //
@@ -1378,7 +1359,6 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   function new(string name="", scope="");
     super.new(name, scope);
   endfunction
-
 
   //----------------------
   // Group: Type Interface
@@ -1447,7 +1427,6 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     rp.set(this, override);
   endfunction
 
-
   // Function: get_by_name
   //
   // looks up a resource by ~name~ in the name map. The first resource
@@ -1480,7 +1459,6 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     return rsrc;
     
   endfunction
-
 
   // Function: get_by_type
   //
@@ -1525,7 +1503,6 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // If either of these functions is used in an incorrect type context
   // the compiler will complain.
 
-
   // Function: read
   //
   // Return the object stored in the resource container.  If an ~accessor~
@@ -1561,7 +1538,6 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     modified = 1;
   endfunction
 
-
   //----------------
   // Group: Priority
   //----------------
@@ -1580,7 +1556,6 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     uvm_resource_pool rp = uvm_resource_pool::get();
     rp.set_priority(this, pri);
   endfunction
-
 
   // Function: get_highest_precedence
   //
@@ -1628,7 +1603,6 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   endfunction
 
 endclass
-
 
 //----------------------------------------------------------------------
 // static global resource pool handle

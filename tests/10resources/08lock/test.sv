@@ -54,6 +54,7 @@ class env extends uvm_component;
     fork
       locking("p1");
       locking("p2");
+      locking("p3");
     join
   endtask
 
