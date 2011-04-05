@@ -163,7 +163,7 @@ class uvm_resource_options;
   //
   // Turn auditing on for the resource database. This causes all
   // reads and writes to the database to store information about
-  // the accesses.
+  // the accesses. Auditing is turned on by default.
 
   static function void turn_on_auditing();
     auditing = 1;
@@ -171,7 +171,7 @@ class uvm_resource_options;
 
   // Function: turn_off_auditing
   //
-  // Turn auditing off for the resource database. If auditing is
+  // Turn auditing off for the resource database. If auditing is turned off,
   // it is not possible to get extra information about resource
   // database accesses.
 
@@ -186,7 +186,6 @@ class uvm_resource_options;
   static function bit is_auditing();
     return auditing;
   endfunction
-
 endclass
 
 

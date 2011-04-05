@@ -17,6 +17,8 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+typedef class uvm_resource_db_options;
+
 //----------------------------------------------------------------------
 // class: uvm_resource_db
 //
@@ -36,6 +38,9 @@
 // uvm_resource#(int).  Thus, the type of the object in the resource
 // container is int. This maintains the type-safety characteristics of
 // resource operations.
+//
+// If the run-time ~+UVM_RESOURCE_DB_TRACE~ command line option is specified,
+// all resource DB accesses (read and write) are displayed.
 //----------------------------------------------------------------------
 class uvm_resource_db #(type T=uvm_object);
 
@@ -104,6 +109,17 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set();
 
+    if(uvm_resource_db_options::is_tracing()) begin
+       string msg;
+
+       $sformat(msg, "Resource '%s.%s' (type %s) set by %s = %s",
+                scope, name, $typename(T),
+                (accessor != null) ? accessor.get_full_name() : "<unknown>",
+                rsrc.convert2string());
+
+       `uvm_info("RSRCDB/SET", msg, UVM_LOW)
+    end
+
   endfunction
 
   // function: set_anonymous
@@ -119,6 +135,17 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set();
 
+    if(uvm_resource_db_options::is_tracing()) begin
+       string msg;
+
+       $sformat(msg, "Resource '%s' (type %s) set by %s = %s",
+                scope, $typename(T),
+                (accessor != null) ? accessor.get_full_name() : "<unknown>",
+                rsrc.convert2string());
+
+       `uvm_info("RSRCDB/SETANON", msg, UVM_LOW)
+    end
+
   endfunction
 
   // function set_override
@@ -133,6 +160,18 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc_t rsrc = new(name, scope);
     rsrc.write(val, accessor);
     rsrc.set_override();
+
+    if(uvm_resource_db_options::is_tracing()) begin
+       string msg;
+
+       $sformat(msg, "Resource '%s.%s' (type %s) set by %s = %s",
+                scope, name, $typename(T),
+                (accessor != null) ? accessor.get_full_name() : "<unknown>",
+                rsrc.convert2string());
+
+       `uvm_info("RSRCDB/SETOVRD", msg, UVM_LOW)
+    end
+
   endfunction
 
   // function set_override_type
@@ -148,6 +187,18 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc_t rsrc = new(name, scope);
     rsrc.write(val, accessor);
     rsrc.set_override(uvm_resource_types::TYPE_OVERRIDE);
+
+    if(uvm_resource_db_options::is_tracing()) begin
+       string msg;
+
+       $sformat(msg, "Resource '%s.%s' (type %s) set by %s = %s",
+                scope, name, $typename(T),
+                (accessor != null) ? accessor.get_full_name() : "<unknown>",
+                rsrc.convert2string());
+
+       `uvm_info("RSRCDB/SETOVRDTYP", msg, UVM_LOW)
+    end
+
   endfunction
 
   // function set_override_name
@@ -163,6 +214,18 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc_t rsrc = new(name, scope);
     rsrc.write(val, accessor);
     rsrc.set_override(uvm_resource_types::NAME_OVERRIDE);
+
+    if(uvm_resource_db_options::is_tracing()) begin
+       string msg;
+
+       $sformat(msg, "Resource '%s.%s' (type %s) set by %s = %s",
+                scope, name, $typename(T),
+                (accessor != null) ? accessor.get_full_name() : "<unknown>",
+                rsrc.convert2string());
+
+       `uvm_info("RSRCDB/SETOVRDNAM", msg, UVM_LOW)
+    end
+
   endfunction
 
   // function: read_by_name
@@ -181,6 +244,18 @@ class uvm_resource_db #(type T=uvm_object);
       return 0;
 
     val = rsrc.read(accessor);
+
+    if(uvm_resource_db_options::is_tracing()) begin
+       string msg;
+
+       $sformat(msg, "Resource '%s.%s' (type %s) read by %s = %s",
+                scope, name, $typename(T),
+                (accessor != null) ? accessor.get_full_name() : "<unknown>",
+                rsrc.convert2string());
+
+       `uvm_info("RSRCDB/RDBYNAM", msg, UVM_LOW)
+    end
+
     return 1;
   
   endfunction
@@ -201,6 +276,18 @@ class uvm_resource_db #(type T=uvm_object);
       return 0;
 
     val = rsrc.read(accessor);
+
+    if(uvm_resource_db_options::is_tracing()) begin
+       string msg;
+
+       $sformat(msg, "Resource '%s' (type %s) read by %s = %s",
+                scope, $typename(T),
+                (accessor != null) ? accessor.get_full_name() : "<unknown>",
+                rsrc.convert2string());
+
+       `uvm_info("RSRCDB/RDBYTYP", msg, UVM_LOW)
+    end
+
     return 1;
 
   endfunction
@@ -226,6 +313,18 @@ class uvm_resource_db #(type T=uvm_object);
       return 0;
 
     rsrc.write(val, accessor);
+
+    if(uvm_resource_db_options::is_tracing()) begin
+       string msg;
+
+       $sformat(msg, "Resource '%s.%s' (type %s) written by %s = %s",
+                scope, name, $typename(T),
+                (accessor != null) ? accessor.get_full_name() : "<unknown>",
+                rsrc.convert2string());
+
+       `uvm_info("RSRCDB/WR", msg, UVM_LOW)
+    end
+
     return 1;
 
   endfunction
@@ -252,6 +351,18 @@ class uvm_resource_db #(type T=uvm_object);
       return 0;
 
     rsrc.write(val, accessor);
+
+    if(uvm_resource_db_options::is_tracing()) begin
+       string msg;
+
+       $sformat(msg, "Resource '%s' (type %s) written by %s = %s",
+                scope, $typename(T),
+                (accessor != null) ? accessor.get_full_name() : "<unknown>",
+                rsrc.convert2string());
+
+       `uvm_info("RSRCDB/WRTYP", msg, UVM_LOW)
+    end
+
     return 1;
   endfunction
 
@@ -265,6 +376,76 @@ class uvm_resource_db #(type T=uvm_object);
   static function void dump();
     uvm_resource_pool rp = uvm_resource_pool::get();
     rp.dump();
+  endfunction
+
+endclass
+
+
+//----------------------------------------------------------------------
+// Class: uvm_resource_db_options
+//
+// Provides a namespace for managing options for the
+// resources DB facility.  The only thing allowed in this class is static
+// local data members and static functions for manipulating and
+// retrieving the value of the data members.  The static local data
+// members represent options and settings that control the behavior of
+// the resources DB facility.
+
+// Options include:
+//
+//  * tracing:  on/off
+//
+//    The default for tracing is off.
+//
+//----------------------------------------------------------------------
+class uvm_resource_db_options;
+   
+  static local bit ready;
+  static local bit tracing;
+
+  // Function: turn_on_tracing
+  //
+  // Turn tracing on for the resource database. This causes all
+  // reads and writes to the database to display information about
+  // the accesses. Tracing is off by default.
+  //
+  // This method is implicitly called by the ~+UVM_RESOURCE_DB_TRACE~.
+
+  static function void turn_on_tracing();
+     if (!ready) init();
+    tracing = 1;
+  endfunction
+
+  // Function: turn_off_tracing
+  //
+  // Turn tracing off for the resource database.
+
+  static function void turn_off_tracing();
+     if (!ready) init();
+    tracing = 0;
+  endfunction
+
+  // Function: is_tracing
+  //
+  // Returns 1 if the tracing facility is on and 0 if it is off.
+
+  static function bit is_tracing();
+    if (!ready) init();
+    return tracing;
+  endfunction
+
+
+  static local function void init();
+     uvm_cmdline_processor clp;
+     string trace_args[$];
+     
+     clp = uvm_cmdline_processor::get_inst();
+
+     if (clp.get_arg_matches("+UVM_RESOURCE_DB_TRACE", trace_args)) begin
+        tracing = 1;
+     end
+
+     ready = 1;
   endfunction
 
 endclass
