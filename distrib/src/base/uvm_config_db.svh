@@ -17,6 +17,17 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+//----------------------------------------------------------------------
+// Title: UVM Configuration Database
+//
+// The <uvm_config_db> class provides a convenience interface 
+// on top of the <uvm_resource_db> to simplify the basic interface
+// that is used for configuring <uvm_component> instances.
+//
+// If the run-time ~+UVM_CONFIG_DB_TRACE~ command line option is specified,
+// all configuration DB accesses (read and write) are displayed.
+//----------------------------------------------------------------------
+
 //Internal class for config waiters
 class m_uvm_waiter;
   string inst_name;
@@ -31,11 +42,7 @@ endclass
 typedef class uvm_config_db_options;
 
 //----------------------------------------------------------------------
-// class: uvm_config_db#(T)
-//
-// The uvm_config_db#(T) class provides a convenience interface 
-// on top of the <uvm_resource_db> to simplify the basic interface
-// that is used for reading and writing into the resource database.
+// class: uvm_config_db
 //
 // All of the functions in uvm_config_db#(T) are static, so they
 // must be called using the :: operator.  For example:

@@ -17,17 +17,24 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-typedef class uvm_resource_db_options;
-
 //----------------------------------------------------------------------
-// class: uvm_resource_db
+// Title: UVM Resource Database
 //
-// The uvm_resource_db#(T) class provides a convenience interface for
+// The <uvm_resource_db> class provides a convenience interface for
 // the resources facility.  In many cases basic operations such as
 // creating and setting a resource or getting a resource could take
 // multiple lines of code using the interfaces in <uvm_resource_base> or
 // <uvm_resource#(T)>.  The convenience layer in uvm_resource_db#(T)
 // reduces many of those operations to a single line of code.
+//
+// If the run-time ~+UVM_RESOURCE_DB_TRACE~ command line option is specified,
+// all resource DB accesses (read and write) are displayed.
+//----------------------------------------------------------------------
+
+typedef class uvm_resource_db_options;
+
+//----------------------------------------------------------------------
+// class: uvm_resource_db
 //
 // All of the functions in uvm_resource_db#(T) are static, so they
 // must be called using the :: operator.  For example:
@@ -39,8 +46,6 @@ typedef class uvm_resource_db_options;
 // container is int. This maintains the type-safety characteristics of
 // resource operations.
 //
-// If the run-time ~+UVM_RESOURCE_DB_TRACE~ command line option is specified,
-// all resource DB accesses (read and write) are displayed.
 //----------------------------------------------------------------------
 class uvm_resource_db #(type T=uvm_object);
 
