@@ -37,6 +37,9 @@
   `include "base/uvm_pool.svh"
   `include "base/uvm_queue.svh"
 
+  `include "base/uvm_factory.svh"
+  `include "base/uvm_registry.svh"
+
 
   // Policies
   `include "base/uvm_printer.svh"
@@ -70,9 +73,6 @@
   `include "base/uvm_resource_db.svh"
   `include "base/uvm_config_db.svh"
   `include "base/uvm_resource_specializations.svh"
-
-  `include "base/uvm_factory.svh"
-  `include "base/uvm_registry.svh"
 
   `include "base/uvm_component.svh"
 
