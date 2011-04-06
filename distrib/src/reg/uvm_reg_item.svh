@@ -34,7 +34,7 @@
 // CLASS: uvm_reg_item
 //
 // Defines an abstract register transaction item. No bus-specific information
-// is present, although a handle a <uvm_reg_map> is provided in case the user
+// is present, although a handle to a <uvm_reg_map> is provided in case a user
 // wishes to implement a custom address translation algorithm.
 //------------------------------------------------------------------------------
 
@@ -136,8 +136,8 @@ class uvm_reg_item extends uvm_sequence_item;
 
   // Variable: extension
   //
-  // Handle to optional user data, as conveyed in the call to write, read,
-  // mirror, or update call. Must derive from uvm_object. 
+  // Handle to optional user data, as conveyed in the call to
+  // write(), read(), mirror(), or update() used to trigger the operation.
   //
   rand uvm_object extension;
 
@@ -256,11 +256,18 @@ endclass
 
 typedef struct {
 
-  // Variable: info
+  // Variable: item
   //
-  // The bus-independent read/write information. See <uvm_reg_item>.
+  // The bus-independent read/write information that corresponds to
+  // the generic bus transaction.
+  // This class property is valid and not null only in the
+  // <uvm_reg_adapter::reg2bus()> method.
+  // The content of the <uvm_reg_item> instance, if present,
+  // must not be modified
+  // and used strictly to obtain additional information about the operation.
 
-  //uvm_reg_item info;
+  uvm_reg_item item;
+   
 
   // Variable: kind
   //

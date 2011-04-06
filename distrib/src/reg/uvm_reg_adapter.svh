@@ -69,9 +69,10 @@ virtual class uvm_reg_adapter extends uvm_object;
   // <uvm_reg_item> to the <uvm_sequence_item> subtype that defines the bus
   // transaction.
   //
-  // The method must allocate a new bus item, assign its members from
-  // the corresponding members from the given ~bus_rw~ item, then
-  // return it. The bus item gets returned in a <uvm_sequence_item> base handle.
+  // The method must allocate a new bus-specific <uvm_sequence_item>,
+  // assign its members from
+  // the corresponding members from the given generic ~rw~ bus operation, then
+  // return it.
 
   pure virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
 
@@ -79,7 +80,7 @@ virtual class uvm_reg_adapter extends uvm_object;
   // Function: bus2reg
   //
   // Extensions of this class ~must~ implement this method to copy members
-  // of the given ~bus_item~ to corresponding members of the provided
+  // of the given bus-specific ~bus_item~ to corresponding members of the provided
   // ~bus_rw~ instance. Unlike <reg2bus>, the resulting transaction
   // is not allocated from scratch. This is to accommodate applications
   // where the bus response must be returned in the original request.
