@@ -128,7 +128,7 @@ class uvm_reg_map extends uvm_object;
                                   uvm_reg_addr_t    base_addr,
                                   int unsigned      n_bytes,
                                   uvm_endianness_e  endian,
-                                  bit byte_addressing=1);
+                                  bit byte_addressing = 1);
 
    // Function: add_reg
    //

@@ -110,6 +110,8 @@ virtual class uvm_reg_block extends uvm_object;
    // this address map.
    // ~endian~ specifies the endianness, should a register or sub-map with
    // a greater number of bytes be accessed.
+   // ~byte_addressing~ indicates if consecutive address values refer to
+   // the next byte (TRUE) or the next ~n_bytes~ (FALSE, default).
    //
    //| APB = create_map("APB", 0, 1, UVM_LITTLE_ENDIAN);
    //
@@ -117,7 +119,7 @@ virtual class uvm_reg_block extends uvm_object;
                                                   uvm_reg_addr_t base_addr,
                                                   int unsigned n_bytes,
                                                   uvm_endianness_e endian,
-                                                  bit byte_addressing=0);
+                                                  bit byte_addressing = 0);
 
 
    // Function: check_data_width
