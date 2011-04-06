@@ -1748,6 +1748,8 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
       uvm_reg_bus_op rw_access;
       uvm_reg_data_t data;
 
+      rw_access.item = rw;
+
       data = (value >> (curr_byte*8)) & ((1'b1 << (bus_width * 8))-1);
        
       `uvm_info(get_type_name(),
@@ -1870,6 +1872,8 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       uvm_reg_bus_op rw_access;
       uvm_reg_data_logic_t data;
        
+      rw_access.item = rw;
+
       `uvm_info(get_type_name(),
          $sformatf("Reading address 'h%0h via map \"%s\"...",
                    addrs[i], get_full_name()), UVM_FULL);
