@@ -50,11 +50,42 @@
 //
 //| `uvm_do(SEQ_OR_ITEM)
 //
-// This macro takes as an argument a uvm_sequence_item variable or object.  
-// uvm_sequence_item's are randomized ~at the time~ the sequencer grants the
-// do request. This is called late-randomization or late-generation. 
-// In the case of a sequence a sub-sequence is spawned. In the case of an item,
+// This macro takes as an argument a uvm_sequence_item variable or object.
+// The argument is created using <`uvm_create> if necessary,
+// then randomized.
+// In the case of an item, it is randomized after the call to
+// <uvm_sequence_base::start_item()> returns.
+// This is called late-randomization. 
+// In the case of a sequence, the sub-sequence is started using
+// <uvm_sequence_base::start()> with ~call_pre_post~ set to 0.
+// In the case of an item,
 // the item is sent to the driver through the associated sequencer.
+//
+// For a sequence item, the following are called, in order
+//
+//|
+//|   `uvm_create(item)
+//|   sequencer.wait_for_grant(prior) (task)
+//|   this.pre_do(1)                  (task)
+//|   item.randomize()
+//|   this.mid_do(item)               (func)
+//|   sequencer.send_request(item)    (func)
+//|   sequencer.wait_for_item_done()  (task)
+//|   this.post_do(item)              (func)
+//|
+//
+// For a sequence, the following are called, in order
+//
+//|
+//|   `uvm_create(sub_seq)
+//|   sub_seq.randomize()
+//|   sub_seq.pre_start()         (task)
+//|   this.pre_do(0)              (task)
+//|   this.mid_do(sub_seq)        (func)
+//|   sub_seq.body()              (task)
+//|   this.post_do(sub_seq)       (func)
+//|   sub_seq.post_start()        (task)
+//|
 
 `define uvm_do(SEQ_OR_ITEM) \
   `uvm_do_on_pri_with(SEQ_OR_ITEM, m_sequencer, -1, {})

@@ -36,22 +36,22 @@
 // whether <pre_do>, <mid_do>, and <post_do> are called *in the parent*
 // sequence. It also has a ~call_pre_post~ argument that controls whether its
 // <pre_body> and <post_body> methods are called.
+// In all cases, its <pre_start> and <post_start> methods are always called.
 // 
 // When <start> is called directly, you can provide the appropriate arguments
 // according to your application.
 //
-// The sequence execution flow looks like
+// The sequence execution flow looks like this
 // 
 // User code
 //
 //| sub_seq.randomize(...); // optional
-//| sub_seq.start(seqr, parent_seq, priority, *call_pre_post*)
+//| sub_seq.start(seqr, parent_seq, priority, call_pre_post)
 //|
 //
 // The following methods are called, in order
 //
 //|
-//|   sub_seq.pre_start()        (task)
 //|   sub_seq.pre_body()         (task)  if call_pre_post==1
 //|     parent_seq.pre_do(0)     (task)  if parent_sequence!=null
 //|     parent_seq.mid_do(this)  (func)  if parent_sequence!=null
@@ -83,11 +83,14 @@
 // The following methods are called, in order
 //
 //|
+//|   sub_seq.pre_start()        (task)
 //|   parent_seq.pre_do(0)        (task)
 //|   parent_req.mid_do(sub_seq)  (func)
 //|     sub_seq.body              (task)
 //|   parent_seq.post_do(sub_seq) (func)
-// 
+//|   sub_seq.post_start()        (task)
+//|
+//
 // Remember, it is the *parent* sequence's pre|mid|post_do that are called, not
 // the sequence being executed. 
 //
@@ -123,6 +126,8 @@
 //|   sequencer.wait_for_item_done()  (task)  /
 //|   parent_seq.post_do(item)        (func) /
 // 
+// Attempting to execute a sequence via <start_item>/<finish_item>
+// will produce a run-time error.
 //------------------------------------------------------------------------------
 
 class uvm_sequence_base extends uvm_sequence_item;
@@ -725,15 +730,19 @@ class uvm_sequence_base extends uvm_sequence_item;
                            uvm_sequencer_base sequencer=null);
     uvm_sequence_base seq;
      
-    if(item == null)
+    if(item == null) begin
       uvm_report_fatal("NULLITM",
          {"attempting to start a null item from sequence '",
           get_full_name(), "'"}, UVM_NONE);
+      return;
+    end
           
-    if($cast(seq, item))
+    if($cast(seq, item)) begin
       uvm_report_fatal("SEQNOTITM",
          {"attempting to start a sequence using start_item() from sequence '",
           get_full_name(), "'. Use seq.start() instead."}, UVM_NONE);
+      return;
+    end
           
     if (sequencer == null)
         sequencer = item.get_sequencer();
@@ -741,8 +750,10 @@ class uvm_sequence_base extends uvm_sequence_item;
     if(sequencer == null)
         sequencer = get_sequencer();   
         
-    if(sequencer == null)
+    if(sequencer == null) begin
         uvm_report_fatal("SEQ",{"neither the item's sequencer nor dedicated sequencer has been supplied to start item in ",get_full_name()},UVM_NONE);
+       return;
+    end
       
     item.m_start_item(sequencer, this, set_priority);
   endtask  
