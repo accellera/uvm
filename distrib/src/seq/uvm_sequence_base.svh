@@ -51,12 +51,14 @@
 // The following methods are called, in order
 //
 //|
-//|   sub_seq.pre_body           (task)  if call_pre_post==1
+//|   sub_seq.pre_start()        (task)
+//|   sub_seq.pre_body()         (task)  if call_pre_post==1
 //|     parent_seq.pre_do(0)     (task)  if parent_sequence!=null
 //|     parent_seq.mid_do(this)  (func)  if parent_sequence!=null
 //|   sub_seq.body               (task)  YOUR STIMULUS CODE
 //|     parent_seq.post_do(this) (func)  if parent_sequence!=null
-//|   sub_seq.post_body          (task)  if call_pre_post==1
+//|   sub_seq.post_body()        (task)  if call_pre_post==1
+//|   sub_seq.post_start()       (task)
 // 
 //
 // Executing sub-sequences via `uvm_do macros:
@@ -217,8 +219,11 @@ class uvm_sequence_base extends uvm_sequence_item;
   // pre_do, mid_do, and post_do methods will be called during the execution
   // of this sequence.
   //
-  // By default, the ~priority~ of a sequence is 100. A different priority may be
-  // specified by ~this_priority~. Higher numbers indicate higher priority.
+  // By default, the ~priority~ of a sequence
+  // is the priority of its parent sequence.
+  // If it is a root sequence, its default priority is 100.
+  // A different priority may be specified by ~this_priority~.
+  // Higher numbers indicate higher priority.
   //
   // If ~call_pre_post~ is set to 1 (default), then the <pre_body> and
   // <post_body> tasks will be called before and after the sequence
@@ -287,6 +292,10 @@ class uvm_sequence_base extends uvm_sequence_item;
       begin
         m_sequence_process = process::self();
 
+        m_sequence_state = PRE_START;
+        #0;
+        pre_start();
+
         if (call_pre_post == 1) begin
           m_sequence_state = PRE_BODY;
           #0;
@@ -315,6 +324,10 @@ class uvm_sequence_base extends uvm_sequence_item;
           post_body();
         end
 
+        m_sequence_state = POST_START;
+        #0;
+        post_start();
+
         m_sequence_state = FINISHED;
         #0;
 
@@ -334,6 +347,17 @@ class uvm_sequence_base extends uvm_sequence_item;
 
     #0; // allow stopped and finish waiters to resume
 
+  endtask
+
+
+  // Task: pre_start
+  //
+  // This task is a user-definable callback that is called before the
+  // optional execution of <pre_body>.
+  // This method should not be called directly by the user.
+
+  virtual task pre_start();  
+    return;
   endtask
 
 
@@ -401,8 +425,6 @@ class uvm_sequence_base extends uvm_sequence_item;
   endfunction
 
 
-
-
   // Task: post_body
   //
   // This task is a user-definable callback task that is called after the
@@ -417,6 +439,17 @@ class uvm_sequence_base extends uvm_sequence_item;
     return;
   endtask
     
+
+  // Task: post_start
+  //
+  // This task is a user-definable callback that is called after the
+  // optional execution of <post_body>.
+  // This method should not be called directly by the user.
+
+  virtual task post_start();  
+    return;
+  endtask
+
 
   // Variable: starting_phase
   //
