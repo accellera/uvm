@@ -52,6 +52,7 @@
 // The following methods are called, in order
 //
 //|
+//|   sub_seq.pre_start()        (task)
 //|   sub_seq.pre_body()         (task)  if call_pre_post==1
 //|     parent_seq.pre_do(0)     (task)  if parent_sequence!=null
 //|     parent_seq.mid_do(this)  (func)  if parent_sequence!=null
