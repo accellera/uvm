@@ -102,7 +102,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
 
     value = r.read(cntxt);
 
-    show_msg("CFGDB/GET", "Configuration","read", inst_name, field_name, cntxt, r);
+    m_show_msg("CFGDB/GET", "Configuration","read", inst_name, field_name, cntxt, r);
     return 1;
   endfunction
 
@@ -199,7 +199,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
 
     p.set_randstate(rstate);
 
-    show_msg("CFGDB/SET", "Configuration","set", inst_name, field_name, cntxt, r);
+    m_show_msg("CFGDB/SET", "Configuration","set", inst_name, field_name, cntxt, r);
   endfunction
 
 

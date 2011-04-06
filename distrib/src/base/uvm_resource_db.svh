@@ -103,7 +103,7 @@ class uvm_resource_db #(type T=uvm_object);
 
   // function: show_msg
   // internal helper function to print resource accesses
-  protected static function void show_msg(
+  protected static function void m_show_msg(
           input string id,
           input string rtype,
           input string action,
@@ -139,7 +139,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set();
 
-    show_msg("RSRCDB/SET", "Resource","set", scope, name, accessor, rsrc);
+    m_show_msg("RSRCDB/SET", "Resource","set", scope, name, accessor, rsrc);
   endfunction
 
   // function: set_anonymous
@@ -155,7 +155,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set();
 
-    show_msg("RSRCDB/SETANON","Resource", "set", scope, "", accessor, rsrc);
+    m_show_msg("RSRCDB/SETANON","Resource", "set", scope, "", accessor, rsrc);
   endfunction
 
   // function set_override
@@ -171,7 +171,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set_override();
 
-    show_msg("RSRCDB/SETOVRD", "Resource","set", scope, name, accessor, rsrc);
+    m_show_msg("RSRCDB/SETOVRD", "Resource","set", scope, name, accessor, rsrc);
   endfunction
 
 
@@ -190,7 +190,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set_override(uvm_resource_types::TYPE_OVERRIDE);
 
-    show_msg("RSRCDB/SETOVRDTYP","Resource", "set", scope, name, accessor, rsrc);
+    m_show_msg("RSRCDB/SETOVRDTYP","Resource", "set", scope, name, accessor, rsrc);
   endfunction
 
   // function set_override_name
@@ -207,7 +207,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set_override(uvm_resource_types::NAME_OVERRIDE);
 
-    show_msg("RSRCDB/SETOVRDNAM","Resource", "set", scope, name, accessor, rsrc);
+    m_show_msg("RSRCDB/SETOVRDNAM","Resource", "set", scope, name, accessor, rsrc);
   endfunction
 
   // function: read_by_name
@@ -227,7 +227,7 @@ class uvm_resource_db #(type T=uvm_object);
 
     val = rsrc.read(accessor);
 
-    show_msg("RSRCDB/RDBYNAM","Resource", "read", scope, name, accessor, rsrc);
+    m_show_msg("RSRCDB/RDBYNAM","Resource", "read", scope, name, accessor, rsrc);
     return 1;
   
   endfunction
@@ -249,7 +249,7 @@ class uvm_resource_db #(type T=uvm_object);
 
     val = rsrc.read(accessor);
 
-    show_msg("RSRCDB/RDBYTYP", "Resource","read", scope, "", accessor, rsrc);
+    m_show_msg("RSRCDB/RDBYTYP", "Resource","read", scope, "", accessor, rsrc);
     return 1;
 
   endfunction
@@ -276,7 +276,7 @@ class uvm_resource_db #(type T=uvm_object);
 
     rsrc.write(val, accessor);
 
-    show_msg("RSRCDB/WR","Resource", "written", scope, name, accessor, rsrc);
+    m_show_msg("RSRCDB/WR","Resource", "written", scope, name, accessor, rsrc);
     return 1;
 
   endfunction
@@ -304,7 +304,7 @@ class uvm_resource_db #(type T=uvm_object);
 
     rsrc.write(val, accessor);
 
-    show_msg("RSRCDB/WRTYP", "Resource","written", scope, "", accessor, rsrc);
+    m_show_msg("RSRCDB/WRTYP", "Resource","written", scope, "", accessor, rsrc);
     return 1;
   endfunction
 
