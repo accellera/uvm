@@ -83,10 +83,10 @@
 // The following methods are called, in order
 //
 //|
-//|   sub_seq.pre_start()        (task)
+//|   sub_seq.pre_start()         (task)
 //|   parent_seq.pre_do(0)        (task)
 //|   parent_req.mid_do(sub_seq)  (func)
-//|     sub_seq.body              (task)
+//|     sub_seq.body()            (task)
 //|   parent_seq.post_do(sub_seq) (func)
 //|   sub_seq.post_start()        (task)
 //|
