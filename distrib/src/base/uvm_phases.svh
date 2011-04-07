@@ -164,7 +164,7 @@
 // - The DUT no longer needs to be simulated, and 
 // - The <uvm_post_shutdown_ph> is ready to end
 //
-// The run phase terminates in one of three ways.
+// The run phase terminates in one of two ways.
 //
 // 1. All run_phase objections are dropped:
 //
@@ -174,22 +174,7 @@
 //   entering the phase, the phase ends immediately.
 //   
 //
-// 2. Explicit call to <uvm_component::kill> or <uvm_component::do_kill_all>:
-//
-//   When <uvm_component::kill> is called,
-//   that component's <uvm_component::run_phase> processes are killed
-//   immediately.
-//   The <uvm_component::do_kill_all> methods applies to the component
-//   and all its descendants.
-//
-//   Use of this method is not recommended.
-//   It is better to use the stopping mechanism, which affords a more ordered,
-//   safer shut-down. If an immediate termination is desired, a 
-//   <uvm_component::jump> to the <uvm_extract_ph> phase is recommended as
-//   this will cause both the run phase and the parallel runtime phases to
-//   immediately end and go to extract.
-//
-// 3. Timeout:
+// 2. Timeout:
 //
 //   The phase ends if the timeout expires before all objections are dropped.
 //   By default, the timeout is set to 9200 seconds.
