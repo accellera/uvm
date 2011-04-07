@@ -714,9 +714,9 @@ virtual class uvm_component extends uvm_report_object;
   // See <run_phase> for better options to ending a task-based phase.
 
   extern virtual  function void  do_kill_all ();
-`endif
 
-  // Task- stop_phase
+
+  // Task- stop_phase  -- DEPRECATED
   //
   // The stop_phase task is called when this component's <enable_stop_interrupt>
   // bit is set and <global_stop_request> is called during a task-based phase,
@@ -740,7 +740,7 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual task stop (string ph_name);
 
 
-  // Variable: enable_stop_interrupt
+  // Variable- enable_stop_interrupt  - DEPRECATED
   //
   // This bit allows a component to raise an objection to the stopping of the
   // current phase. It affects only time consuming phases (such as the run
@@ -752,6 +752,7 @@ virtual class uvm_component extends uvm_report_object;
   // implement the stop task to prepare for shutdown.
 
   int enable_stop_interrupt = 0;
+`endif
 
 
   // Function: resolve_bindings
@@ -2504,7 +2505,6 @@ function string uvm_component::status();
    return "<unknown>";
    
 endfunction
-`endif
 
 // stop
 // ----
@@ -2521,6 +2521,7 @@ task uvm_component::stop_phase(uvm_phase phase);
   stop(phase.get_name());
   return;
 endtask
+`endif
 
 
 // resolve_bindings
@@ -3083,11 +3084,12 @@ function void uvm_component::do_print(uvm_printer printer);
         $bits(recording_detail), UVM_DEC, , "integral");
     endcase
 
+`ifndef UVM_NO_DEPRECATED
   if (enable_stop_interrupt != 0) begin
     printer.print_int("enable_stop_interrupt", enable_stop_interrupt,
                         $bits(enable_stop_interrupt), UVM_BIN, ".", "bit");
   end
-
+ `endif
 endfunction
 
 

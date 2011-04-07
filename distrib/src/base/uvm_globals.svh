@@ -41,6 +41,7 @@ task run_test (string test_name="");
 endtask
 
 
+`ifndef UVM_NO_DEPRECATED
 // Variable- uvm_test_done - DEPRECATED
 //
 // An instance of the <uvm_test_done_objection> class, this object is
@@ -88,6 +89,7 @@ function void set_global_stop_timeout(time timeout);
   tdo = uvm_test_done_objection::get();
   tdo.stop_timeout = timeout;
 endfunction
+`endif
 
 
 //----------------------------------------------------------------------------

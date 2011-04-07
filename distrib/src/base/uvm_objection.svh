@@ -997,6 +997,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   endfunction
 
   
+`ifndef UVM_NO_DEPRECATED
   // m_do_stop_all
   // -------------
 
@@ -1058,7 +1059,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
   // simulations. 
 
   time stop_timeout = 0;
-
+   
 
   // Task- all_dropped DEPRECATED
   //
@@ -1176,6 +1177,7 @@ class uvm_test_done_objection extends m_uvm_test_done_objection_base;
     all_dropped(m_top,obj,"force_stop() called",1);
     clear(obj);
   endtask
+`endif
 
 
   // Below are basic data operations needed for all uvm_objects

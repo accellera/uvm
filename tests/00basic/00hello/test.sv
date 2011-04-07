@@ -32,10 +32,6 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
-      #10 uvm_top.stop_request();
-   endtask
-
    virtual function void report();
       $write("** UVM TEST PASSED **\n");
    endfunction
