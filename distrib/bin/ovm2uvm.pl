@@ -47,7 +47,7 @@ local $opt_all_text_files;
 local $opt_sv_ext="\.(s?vh?|inc)\$";
 
 # regexp of mime types for files considered for a change with the --all option
-local $text_file_mime_regexp="(text\/|application\/x-shellscript)";
+local $text_file_mime_regexp="(text\/|application\/x-shellscript|regular file)";
 
 # ignore pattern
 local $file_ignore_pattern="(/(.hg|.git|INCA_libs|.daidir|.vdb|simv|csrc|DVEfiles)\/|[#~]\$|\.(zip|gz|bz2|orig|diff|patch)\$)";
@@ -138,7 +138,7 @@ sub write_back_files {
 
         my($fh,$fname) = tempfile();
 	print $fh join("\n",keys(%content));
-	system "tar cz --files-from $fname --file ovm2uvm_back_$$.tar.gz";
+	system "tar cf - -I $fname | gzip -9v > ovm2uvm_back_$$.tar.gz";
     }
 
     if($opt_write) {
