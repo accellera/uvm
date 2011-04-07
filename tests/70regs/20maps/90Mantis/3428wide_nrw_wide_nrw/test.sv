@@ -143,11 +143,16 @@ begin
 
    rg = dut.br.l.r;
 
+`ifndef POSSIBLE_OPTIMIZATION
    check_map(rg, dut.bus8_0, '{'h40, 'h41, 'h42, 'h43,
                                'h44, 'h45, 'h46, 'h47});
 
    check_map(rg, dut.bus8_1, '{'h40, 'h41, 'h42, 'h43,
                                'h44, 'h45, 'h46, 'h47});
+`else
+   check_map(rg, dut.bus8_0, '{'h40, 'h44});
+   check_map(rg, dut.bus8_1, '{'h40, 'h44});
+`endif
 
    begin
       uvm_report_server svr;
