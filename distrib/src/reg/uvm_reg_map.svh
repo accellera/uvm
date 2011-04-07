@@ -1747,8 +1747,6 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
       uvm_reg_bus_op rw_access;
       uvm_reg_data_t data;
 
-      //rw_access.item = rw;
-      adapter.set_item(rw);
 
       data = (value >> (curr_byte*8)) & ((1'b1 << (bus_width * 8))-1);
        
@@ -1767,7 +1765,10 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
       rw_access.n_bits  = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
       rw_access.byte_en = byte_en;
 
+      adapter.m_set_item(rw);
       bus_req = adapter.reg2bus(rw_access);
+      adapter.m_set_item(null);
+      
       if (bus_req == null)
         `uvm_fatal("RegMem",{"adapter [",adapter.get_name(),"] didnt return a bus transaction"});
       
@@ -1872,8 +1873,6 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       uvm_reg_bus_op rw_access;
       uvm_reg_data_logic_t data;
        
-      //rw_access.item = rw;
-      adapter.set_item(rw);
 
       `uvm_info(get_type_name(),
          $sformatf("Reading address 'h%0h via map \"%s\"...",
@@ -1889,7 +1888,9 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       rw_access.byte_en = byte_en;
       rw_access.n_bits = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
                           
+      adapter.m_set_item(rw);
       bus_req = adapter.reg2bus(rw_access);
+      adapter.m_set_item(null);
       if (bus_req == null)
         `uvm_fatal("RegMem",{"adapter [",adapter.get_name(),"] didnt return a bus transaction"});
 

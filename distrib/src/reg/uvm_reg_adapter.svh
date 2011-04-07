@@ -104,10 +104,7 @@ virtual class uvm_reg_adapter extends uvm_object;
     return item;
   endfunction
   
-  // function set_item
-  //
-  // sets the current item - see get_item()
-  virtual function void set_item(uvm_reg_item item);
+  virtual function void m_set_item(uvm_reg_item item);
     this.item=item;
   endfunction
 endclass

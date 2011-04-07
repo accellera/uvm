@@ -678,10 +678,6 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
        end
        predict_info = m_pending[rg];
        reg_item = predict_info.reg_item;
-       //rw.item  = reg_item;
-       // FIXME according to the spec the item is ONLY valid 
-       // during the adapter.bus2reg and reg2bus calls 
-       adapter.set_item(reg_item); 
 
        if (predict_info.addr.exists(rw.addr)) begin
           `uvm_error("REG_PREDICT_COLLISION",{"Collision detected for register '",
