@@ -198,7 +198,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: build_phase
   //
-  // The <Pre-Defined Phases::uvm_build_phase> phase implementation method.
+  // The <uvm_build_phase> phase implementation method.
   //
   // Any override should call super.build_phase(phase) to execute the automatic
   // configuration of fields registed in the component by calling 
@@ -216,7 +216,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: connect_phase
   //
-  // The <Pre-Defined Phases::uvm_connect_phase> phase implementation method.
+  // The <uvm_connect_phase> phase implementation method.
   //
   // This method should never be called directly. 
 
@@ -227,7 +227,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: end_of_elaboration_phase
   //
-  // The <Pre-Defined Phases::uvm_end_of_elaboration_phase> phase implementation method.
+  // The <uvm_end_of_elaboration_phase> phase implementation method.
   //
   // This method should never be called directly.
 
@@ -238,7 +238,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: start_of_simulation_phase
   //
-  // The <Pre-Defined Phases::uvm_start_of_simulation_phase> phase implementation method.
+  // The <uvm_start_of_simulation_phase> phase implementation method.
   //
   // This method should never be called directly.
 
@@ -249,7 +249,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: run_phase
   //
-  // The <Pre-Defined Phases::uvm_run_phase> phase implementation method.
+  // The <uvm_run_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -273,7 +273,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: pre_reset_phase
   //
-  // The <Pre-Defined Phases::uvm_pre_reset_phase> phase implementation method.
+  // The <uvm_pre_reset_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -293,7 +293,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: reset_phase
   //
-  // The <Pre-Defined Phases::uvm_reset_phase> phase implementation method.
+  // The <uvm_reset_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -313,7 +313,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: post_reset_phase
   //
-  // The <Pre-Defined Phases::uvm_post_reset_phase> phase implementation method.
+  // The <uvm_post_reset_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -333,7 +333,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: pre_configure_phase
   //
-  // The <Pre-Defined Phases::uvm_pre_configure_phase> phase implementation method.
+  // The <uvm_pre_configure_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -353,7 +353,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: configure_phase
   //
-  // The <Pre-Defined Phases::uvm_configure_phase> phase implementation method.
+  // The <uvm_configure_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -373,7 +373,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: post_configure_phase
   //
-  // The <Pre-Defined Phases::uvm_post_configure_phase> phase implementation method.
+  // The <uvm_post_configure_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -393,7 +393,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: pre_main_phase
   //
-  // The <Pre-Defined Phases::uvm_pre_main_phase> phase implementation method.
+  // The <uvm_pre_main_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -413,7 +413,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: main_phase
   //
-  // The <Pre-Defined Phases::uvm_main_phase> phase implementation method.
+  // The <uvm_main_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -433,7 +433,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: post_main_phase
   //
-  // The <Pre-Defined Phases::uvm_post_main_phase> phase implementation method.
+  // The <uvm_post_main_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -453,7 +453,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: pre_shutdown_phase
   //
-  // The <Pre-Defined Phases::uvm_pre_shutdown_phase> phase implementation method.
+  // The <uvm_pre_shutdown_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -473,7 +473,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: shutdown_phase
   //
-  // The <Pre-Defined Phases::uvm_shutdown_phase> phase implementation method.
+  // The <uvm_shutdown_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -493,7 +493,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: post_shutdown_phase
   //
-  // The <Pre-Defined Phases::uvm_post_shutdown_phase> phase implementation method.
+  // The <uvm_post_shutdown_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -513,7 +513,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: extract_phase
   //
-  // The <Pre-Defined Phases::uvm_extract_phase> phase implementation method.
+  // The <uvm_extract_phase> phase implementation method.
   //
   // This method should never be called directly.
 
@@ -524,7 +524,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: check_phase
   //
-  // The <Pre-Defined Phases::uvm_check_phase> phase implementation method.
+  // The <uvm_check_phase> phase implementation method.
   //
   // This method should never be called directly.
 
@@ -535,7 +535,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: report_phase
   //
-  // The <Pre-Defined Phases::uvm_report_phase> phase implementation method.
+  // The <uvm_report_phase> phase implementation method.
   //
   // This method should never be called directly.
 
@@ -546,7 +546,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: final_phase
   //
-  // The <Pre-Defined Phases::uvm_final_phase> phase implementation method.
+  // The <uvm_final_phase> phase implementation method.
   //
   // This method should never be called directly.
   
