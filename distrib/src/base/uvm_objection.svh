@@ -52,11 +52,6 @@ endclass
 //------------------------------------------------------------------------------
 // Objections provide a facility for coordinating status information between
 // two or more participating components, objects, and even module-based IP.
-// In particular, the ~uvm_test_done~ built-in objection provides a means for
-// coordinating when to end a test, i.e. when to call <global_stop_request> to
-// end the <uvm_component::run> phase.  When all participating components have
-// dropped their raised objections with ~uvm_test_done~, an implicit call to
-// ~global_stop_request~ is issued.
 //
 // Tracing of objection activity can be turned on to follow the activity of
 // the objection mechanism. It may be turned on for a specific objection
@@ -93,7 +88,7 @@ class uvm_objection extends uvm_report_object;
   // Function: clear
   //
   // Immediately clears the objection state. All counts are cleared and the
-  // <all_dropped> callback for <uvm_top> is called. 
+  // <all_dropped> callback for <uvm_root> is called. 
   // Any drain_times set by the user are not effected.
   //
   virtual function void clear(uvm_object obj=null);
@@ -301,7 +296,7 @@ class uvm_objection extends uvm_report_object;
   // Raises the number of objections for the source ~object~ by ~count~, which
   // defaults to 1.  The ~object~ is usually the ~this~ handle of the caller.
   // If ~object~ is not specified or null, the implicit top-level component,
-  // ~uvm_top~, is chosen.
+  // <uvm_root>, is chosen.
   //
   // Rasing an objection causes the following.
   //
@@ -367,7 +362,7 @@ class uvm_objection extends uvm_report_object;
   // Drops the number of objections for the source ~object~ by ~count~, which
   // defaults to 1.  The ~object~ is usually the ~this~ handle of the caller.
   // If ~object~ is not specified or null, the implicit top-level component,
-  // ~uvm_top~, is chosen.
+  // <uvm_root>, is chosen.
   //
   // Dropping an objection causes the following.
   //

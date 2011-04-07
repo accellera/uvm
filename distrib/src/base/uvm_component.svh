@@ -724,7 +724,7 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual  function void  do_kill_all ();
 
 
-  // Task: stop_phase
+  // Task- stop_phase
   //
   // The stop_phase task is called when this component's <enable_stop_interrupt>
   // bit is set and <global_stop_request> is called during a task-based phase,
