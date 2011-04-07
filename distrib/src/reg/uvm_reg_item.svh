@@ -256,19 +256,6 @@ endclass
 
 typedef struct {
 
-  // Variable: item
-  //
-  // The bus-independent read/write information that corresponds to
-  // the generic bus transaction.
-  // This class property is valid and not null only in the
-  // <uvm_reg_adapter::reg2bus()> method.
-  // The content of the <uvm_reg_item> instance, if present,
-  // must not be modified
-  // and used strictly to obtain additional information about the operation.
-
-  uvm_reg_item item;
-   
-
   // Variable: kind
   //
   // Kind of access: READ or WRITE.

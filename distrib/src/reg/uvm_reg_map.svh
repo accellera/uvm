@@ -579,7 +579,6 @@ class uvm_reg_map extends uvm_object;
    //extern virtual function void      do_pack (uvm_packer packer);
    //extern virtual function void      do_unpack (uvm_packer packer);
 
-
 endclass: uvm_reg_map
    
 
@@ -1748,7 +1747,8 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
       uvm_reg_bus_op rw_access;
       uvm_reg_data_t data;
 
-      rw_access.item = rw;
+      //rw_access.item = rw;
+      adapter.set_item(rw);
 
       data = (value >> (curr_byte*8)) & ((1'b1 << (bus_width * 8))-1);
        
@@ -1872,7 +1872,8 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       uvm_reg_bus_op rw_access;
       uvm_reg_data_logic_t data;
        
-      rw_access.item = rw;
+      //rw_access.item = rw;
+      adapter.set_item(rw);
 
       `uvm_info(get_type_name(),
          $sformatf("Reading address 'h%0h via map \"%s\"...",
