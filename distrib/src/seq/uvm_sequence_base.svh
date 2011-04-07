@@ -28,8 +28,7 @@
 // of sequence items and/or other sequences.
 //
 // A sequence is executed by calling its <start> method, either directly
-// or indirectly via <start_item>/<finish_item> or invocation of any of
-// the `uvm_do_* macros.
+// or invocation of any of the `uvm_do_* macros.
 // 
 // Executing sequences via <start>:
 // 
@@ -37,36 +36,38 @@
 // whether <pre_do>, <mid_do>, and <post_do> are called *in the parent*
 // sequence. It also has a ~call_pre_post~ argument that controls whether its
 // <pre_body> and <post_body> methods are called.
+// In all cases, its <pre_start> and <post_start> methods are always called.
 // 
 // When <start> is called directly, you can provide the appropriate arguments
 // according to your application.
 //
-// The sequence execution flow looks like
+// The sequence execution flow looks like this
 // 
 // User code
 //
 //| sub_seq.randomize(...); // optional
-//| sub_seq.start(seqr, parent_seq, priority, *call_pre_post*)
+//| sub_seq.start(seqr, parent_seq, priority, call_pre_post)
 //|
 //
 // The following methods are called, in order
 //
 //|
-//|   sub_seq.pre_body           (task)  if call_pre_post==1
+//|   sub_seq.pre_start()        (task)
+//|   sub_seq.pre_body()         (task)  if call_pre_post==1
 //|     parent_seq.pre_do(0)     (task)  if parent_sequence!=null
 //|     parent_seq.mid_do(this)  (func)  if parent_sequence!=null
 //|   sub_seq.body               (task)  YOUR STIMULUS CODE
 //|     parent_seq.post_do(this) (func)  if parent_sequence!=null
-//|   sub_seq.post_body          (task)  if call_pre_post==1
+//|   sub_seq.post_body()        (task)  if call_pre_post==1
+//|   sub_seq.post_start()       (task)
 // 
 //
-// Executing sub-sequences via <start_item>/<finish_item> or `uvm_do macros:
+// Executing sub-sequences via `uvm_do macros:
 //
 // A sequence can also be indirectly started as a child in the <body> of a
 // parent sequence. The child sequence's <start> method is called indirectly
-// via calls to its <start_item>/<finish_item> methods or by invoking
-// any of the `uvm_do macros.
-// In all these cases, <start> is called with
+// by invoking any of the `uvm_do macros.
+// In thise cases, <start> is called with
 // ~call_pre_post~ set to 0, preventing the started sequence's <pre_body> and
 // <post_body> methods from being called. During execution of the
 // child sequence, the parent's <pre_do>, <mid_do>, and <post_do> methods
@@ -76,11 +77,6 @@
 // 
 // User code
 //
-//| parent_seq.start_item(sub_seq, priority);
-//| sub_seq.randomize(...);
-//| parent_seq.finish_item(sub_seq);
-//|
-//| or
 //|
 //| `uvm_do_with_prior(seq_seq, { constraints }, priority)
 //|
@@ -88,11 +84,14 @@
 // The following methods are called, in order
 //
 //|
+//|   sub_seq.pre_start()         (task)
 //|   parent_seq.pre_do(0)        (task)
 //|   parent_req.mid_do(sub_seq)  (func)
-//|     sub_seq.body              (task)
+//|     sub_seq.body()            (task)
 //|   parent_seq.post_do(sub_seq) (func)
-// 
+//|   sub_seq.post_start()        (task)
+//|
+//
 // Remember, it is the *parent* sequence's pre|mid|post_do that are called, not
 // the sequence being executed. 
 //
@@ -109,7 +108,7 @@
 // User code
 //
 //| parent_seq.start_item(item, priority);
-//| sub_seq.randomize(...) [with {constraints}];
+//| item.randomize(...) [with {constraints}];
 //| parent_seq.finish_item(item);
 //|
 //| or
@@ -128,6 +127,8 @@
 //|   sequencer.wait_for_item_done()  (task)  /
 //|   parent_seq.post_do(item)        (func) /
 // 
+// Attempting to execute a sequence via <start_item>/<finish_item>
+// will produce a run-time error.
 //------------------------------------------------------------------------------
 
 class uvm_sequence_base extends uvm_sequence_item;
@@ -224,8 +225,11 @@ class uvm_sequence_base extends uvm_sequence_item;
   // pre_do, mid_do, and post_do methods will be called during the execution
   // of this sequence.
   //
-  // By default, the ~priority~ of a sequence is 100. A different priority may be
-  // specified by ~this_priority~. Higher numbers indicate higher priority.
+  // By default, the ~priority~ of a sequence
+  // is the priority of its parent sequence.
+  // If it is a root sequence, its default priority is 100.
+  // A different priority may be specified by ~this_priority~.
+  // Higher numbers indicate higher priority.
   //
   // If ~call_pre_post~ is set to 1 (default), then the <pre_body> and
   // <post_body> tasks will be called before and after the sequence
@@ -233,9 +237,16 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   virtual task start (uvm_sequencer_base sequencer,
                       uvm_sequence_base parent_sequence = null,
-                      integer this_priority = 100,
+                      int this_priority = -1,
                       bit call_pre_post = 1);
 
+    if (parent_sequence != null) begin
+       set_parent_sequence(parent_sequence);
+       set_use_sequence_info(1);
+       if (sequencer == null) sequencer = parent_sequence.get_sequencer();
+       reseed();
+    end
+    set_sequencer(sequencer);
 
     if (!(m_sequence_state != CREATED ||
           m_sequence_state != STOPPED ||
@@ -244,11 +255,15 @@ class uvm_sequence_base extends uvm_sequence_item;
          {"Sequence ", get_full_name(), " already started"},UVM_NONE);
     end
 
-    if ((this_priority < 1) |  (^this_priority === 1'bx)) begin
-      uvm_report_fatal("SEQPRI", $sformatf("Sequence %s start has illegal priority: %0d",
+    if (this_priority < -1) begin
+      uvm_report_fatal("SEQPRI", $psprintf("Sequence %s start has illegal priority: %0d",
                                            get_full_name(),
                                            this_priority), UVM_NONE);
-      end
+    end
+    if (this_priority < 0) begin
+       if (parent_sequence == null) this_priority = 100;
+       else this_priority = parent_sequence.get_priority();
+    end
 
     // Check that the response queue is empty from earlier runs
     clear_response_queue();
@@ -283,6 +298,10 @@ class uvm_sequence_base extends uvm_sequence_item;
       begin
         m_sequence_process = process::self();
 
+        m_sequence_state = PRE_START;
+        #0;
+        pre_start();
+
         if (call_pre_post == 1) begin
           m_sequence_state = PRE_BODY;
           #0;
@@ -311,6 +330,10 @@ class uvm_sequence_base extends uvm_sequence_item;
           post_body();
         end
 
+        m_sequence_state = POST_START;
+        #0;
+        post_start();
+
         m_sequence_state = FINISHED;
         #0;
 
@@ -330,6 +353,17 @@ class uvm_sequence_base extends uvm_sequence_item;
 
     #0; // allow stopped and finish waiters to resume
 
+  endtask
+
+
+  // Task: pre_start
+  //
+  // This task is a user-definable callback that is called before the
+  // optional execution of <pre_body>.
+  // This method should not be called directly by the user.
+
+  virtual task pre_start();  
+    return;
   endtask
 
 
@@ -397,8 +431,6 @@ class uvm_sequence_base extends uvm_sequence_item;
   endfunction
 
 
-
-
   // Task: post_body
   //
   // This task is a user-definable callback task that is called after the
@@ -413,6 +445,17 @@ class uvm_sequence_base extends uvm_sequence_item;
     return;
   endtask
     
+
+  // Task: post_start
+  //
+  // This task is a user-definable callback that is called after the
+  // optional execution of <post_body>.
+  // This method should not be called directly by the user.
+
+  virtual task post_start();  
+    return;
+  endtask
+
 
   // Variable: starting_phase
   //
@@ -676,71 +719,61 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   // Function: start_item
   //
-  // ~start_item~ and <finish_item> together will initiate operation of either
-  // a sequence item or sequence.  If the item or sequence has not already been
+  // ~start_item~ and <finish_item> together will initiate operation of
+  // a sequence item.  If the item has not already been
   // initialized using create_item, then it will be initialized here to use
   // the default sequencer specified by m_sequencer.  Randomization
   // may be done between start_item and finish_item to ensure late generation
   //
-  //| virtual task start_item(uvm_sequence_item item, int set_priority = -1);
 
-  // Function- m_start_item_or_seq
-  //
-  // Internal method.
-  //   seq.start_item(item,prior) calls
-  //   item.m_start_item_or_seq(get_sequencer(), seq, prior);
-
-  virtual task m_start_item_or_seq(uvm_sequencer_base sequencer,
-                                   uvm_sequence_item parent_seq,
-                                   int set_priority);
-    
-    if (get_sequencer() == null) begin
-      uvm_sequence_base parent_seq_;
-      if (!$cast(parent_seq_, parent_seq))
-        uvm_report_fatal("SEQMSTART", "Failure to cast sequence item", UVM_NONE);
-      set_use_sequence_info(1);
-      set_parent_sequence(parent_seq_);
-      set_sequencer(sequencer);
-      reseed();
+  virtual task start_item (uvm_sequence_item item,
+                           int set_priority = -1,
+                           uvm_sequencer_base sequencer=null);
+    uvm_sequence_base seq;
+     
+    if(item == null) begin
+      uvm_report_fatal("NULLITM",
+         {"attempting to start a null item from sequence '",
+          get_full_name(), "'"}, UVM_NONE);
+      return;
     end
-    return;
+          
+    if($cast(seq, item)) begin
+      uvm_report_fatal("SEQNOTITM",
+         {"attempting to start a sequence using start_item() from sequence '",
+          get_full_name(), "'. Use seq.start() instead."}, UVM_NONE);
+      return;
+    end
+          
+    if (sequencer == null)
+        sequencer = item.get_sequencer();
+        
+    if(sequencer == null)
+        sequencer = get_sequencer();   
+        
+    if(sequencer == null) begin
+        uvm_report_fatal("SEQ",{"neither the item's sequencer nor dedicated sequencer has been supplied to start item in ",get_full_name()},UVM_NONE);
+       return;
+    end
+      
+    item.m_start_item(sequencer, this, set_priority);
   endtask  
 
 
   // Function: finish_item
   //
   // finish_item, together with start_item together will initiate operation of 
-  // either a sequence_item or sequence object.  Finish_item must be called
+  // a sequence_item.  Finish_item must be called
   // after start_item with no delays or delta-cycles.  Randomization, or other
   // functions may be called between the start_item and finish_item calls.
   //
-  //|virtual task finish_item(uvm_sequence_item item, int set_priority = -1);
+
+  virtual task finish_item (uvm_sequence_item item,
+                            int set_priority = -1);
+    item.m_finish_item(item.get_sequencer(), this, set_priority);
+  endtask
+
   
-  // Function- m_finish_item
-  //
-  // Internal method.
-  //   seq.finish_item(item,prior) calls
-  //   item.m_finish_item(get_sequencer(), seq, prior);
-
-  virtual task m_finish_item(uvm_sequencer_base sequencer, 
-                             uvm_sequence_item parent_seq, 
-                             int set_priority = -1);
-    uvm_sequence_base parent_seq_;
-    int prior;
-
-    if (!$cast(parent_seq_, parent_seq))
-        uvm_report_fatal("SEQMFINISH", "Failure to cast sequence item", UVM_NONE);
-
-    // determine priority
-    prior = (set_priority   >= 0 ? set_priority :
-            (get_priority() >= 0 ? get_priority() :
-             100));
-
-    start(sequencer, parent_seq_, prior, 0);
-    
-  endtask  
-
-
   // Task: wait_for_grant
   //
   // This task issues a request to the current sequencer.  If item_priority is
