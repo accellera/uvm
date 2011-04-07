@@ -33,7 +33,7 @@ use File::Path;
 use File::Copy;
 use Data::Dumper;
 use File::stat;
-
+use Archive::Tar;
 
 my @all_files=();
 my %content=();
@@ -136,9 +136,9 @@ sub write_back_files {
     if($opt_backup) {
 	NoteMessage("making backup of current files before writing back in [ovm2uvm_back_$$.tar.gz]");
 
-        my($fh,$fname) = tempfile();
-	print $fh join("\n",keys(%content));
-	system "tar cf - -I $fname | gzip -9v > ovm2uvm_back_$$.tar.gz";
+	my $tar=Archive::Tar->new;
+	$tar->add_files(keys(%content));
+	$tar->write("ovm2uvm_back_$$.tar.gz",COMPRESS_GZIP);
     }
 
     if($opt_write) {
