@@ -780,7 +780,8 @@ class uvm_resource_pool;
   // and will override both by name and type.
 
   function void set_override(uvm_resource_base rsrc);
-    set(rsrc, (uvm_resource_types::NAME_OVERRIDE | uvm_resource_types::TYPE_OVERRIDE));
+    set(rsrc, (uvm_resource_types::NAME_OVERRIDE | 
+               uvm_resource_types::TYPE_OVERRIDE));
   endfunction
 
 
@@ -1153,7 +1154,7 @@ class uvm_resource_pool;
     end
 
     if(r != rsrc) begin
-      $sformat(msg, "Handle for resource named %s is not in the name name; cannot change its priority", name);
+      $sformat(msg, "Handle for resource named %s cannot be located; cannot change its priority", name);
       uvm_report_error("NORSRC", msg);
       return;
     end

@@ -1,4 +1,5 @@
 //----------------------------------------------------------------------
+//   Copyright 2011 Cypress Semiconductor
 //   Copyright 2010 Mentor Graphics Corporation
 //   All Rights Reserved Worldwide
 //
@@ -97,6 +98,7 @@ class uvm_resource_db #(type T=uvm_object);
   // Create a new resource, write a ~val~ to it, and set it into the
   // database using ~name~ and ~scope~ as the lookup parameters. The
   // ~accessor~ is used for auditting.
+
   static function void set(input string scope, input string name,
                            T val, input uvm_object accessor = null);
 
@@ -112,6 +114,7 @@ class uvm_resource_db #(type T=uvm_object);
   // database.  The resource has no name and therefore will not be
   // entered into the name map. But is does have a ~scope~ for lookup
   // purposes. The ~accessor~ is used for auditting.
+
   static function void set_anonymous(input string scope,
                                      T val, input uvm_object accessor = null);
 
@@ -121,7 +124,7 @@ class uvm_resource_db #(type T=uvm_object);
 
   endfunction
 
-  // function set_override
+  // function: set_override
   //
   // Create a new resource, write ~val~ to it, and set it into the
   // database.  Set it at the beginning of the queue in the type map and
@@ -135,7 +138,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.set_override();
   endfunction
 
-  // function set_override_type
+  // function: set_override_type
   //
   // Create a new resource, write ~val~ to it, and set it into the
   // database.  Set it at the beginning of the queue in the type map so
@@ -150,7 +153,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.set_override(uvm_resource_types::TYPE_OVERRIDE);
   endfunction
 
-  // function set_override_name
+  // function: set_override_name
   //
   // Create a new resource, write ~val~ to it, and set it into the
   // database.  Set it at the beginning of the queue in the name map so
