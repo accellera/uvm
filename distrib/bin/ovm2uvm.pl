@@ -42,6 +42,7 @@ local $opt_help;
 local $opt_backup;
 local $opt_write;
 local $opt_all_text_files;
+local $opt_tar_exec="tar";
 
 # regexp to match sv files (can be overriden using --sv_ext)
 local $opt_sv_ext="\.(s?vh?|inc)\$";
@@ -60,7 +61,8 @@ my @Options=(
 	  ["write","really write the changed files back to disk (by default it runs in dry mode)"],
 	  ["marker=s", "use the marker supplied instead of the default marker [$opt_marker]"],
 	  ["sv_ext=s","a regexp matching all sv files default:[$opt_sv_ext]"],
-	  ["all_text_files","apply the simple \"o2u\" transformation to all files where the MIME-type of matches [$text_file_mime_regexp]"]
+	  ["all_text_files","apply the simple \"o2u\" transformation to all files where the MIME-type of matches [$text_file_mime_regexp]"],
+	  ["tar_exec=s","the script assume a gtar compatible tar, if your gtar compatible tar is not avail point to it via --tar_exec"]
 	  );	  
  
 
@@ -78,6 +80,7 @@ NoteMessage("$DUMMY");
 NoteMessage("$VerID");
 
 NoteMessage("traversing directory [$opt_top_dir] to find files");
+NoteMessage("-*- this script requires a gtar compatible tar to make backups -*-");
 
 search_all_relevant_files($opt_top_dir);
 
@@ -136,9 +139,12 @@ sub write_back_files {
     if($opt_backup) {
 	NoteMessage("making backup of current files before writing back in [ovm2uvm_back_$$.tar.gz]");
 
-	my $tar=Archive::Tar->new;
-	$tar->add_files(keys(%content));
-	$tar->write("ovm2uvm_back_$$.tar.gz",COMPRESS_GZIP);
+#	my $tar=Archive::Tar->new;
+#	$tar->add_files(keys(%content));
+#	$tar->write("ovm2uvm_back_$$.tar.gz",COMPRESS_GZIP);
+        my($fh,$fname) = tempfile();
+        print $fh join("\n",keys(%content));
+        system "$opt_tar_exec cf - -I $fname | gzip -9v > ovm2uvm_back_$$.tar.gz";
     }
 
     if($opt_write) {
