@@ -91,21 +91,21 @@ virtual class uvm_reg_adapter extends uvm_object;
 
   // function: get_item
   //
-  //
-  // The bus-independent read/write information that corresponds to
-  // the generic bus transaction.
-  // This class property is valid and not null only in the
+  // Returns the bus-independent read/write information that corresponds to
+  // the generic bus transaction currently translated to a bus-specific
+  // transaction.
+  // This function returns a value reference only when called in the
   // <uvm_reg_adapter::reg2bus()> method.
-  // The content of the <uvm_reg_item> instance, if present,
-  // must not be modified
+  // It returns null at all other times.
+  // The content of the return <uvm_reg_item> instance must not be modified
   // and used strictly to obtain additional information about the operation.  
-  local uvm_reg_item item;
+  local uvm_reg_item m_item;
   virtual function uvm_reg_item get_item();
-    return item;
+    return m_item;
   endfunction
   
   virtual function void m_set_item(uvm_reg_item item);
-    this.item=item;
+    m_item = item;
   endfunction
 endclass
 
