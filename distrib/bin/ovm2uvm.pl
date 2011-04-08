@@ -33,7 +33,10 @@ use File::Path;
 use File::Copy;
 use Data::Dumper;
 use File::stat;
-use Archive::Tar;
+# Tar module may not be available
+if (eval {require Archive::Tar; 1;}) {
+  $Tar_Pm = 1;
+}
 
 my @all_files=();
 my %content=();
@@ -136,9 +139,15 @@ sub write_back_files {
     if($opt_backup) {
 	NoteMessage("making backup of current files before writing back in [ovm2uvm_back_$$.tar.gz]");
 
-	my $tar=Archive::Tar->new;
-	$tar->add_files(keys(%content));
-	$tar->write("ovm2uvm_back_$$.tar.gz",COMPRESS_GZIP);
+	if ($Tar_Pm) {
+	  my $tar=Archive::Tar->new;
+	  $tar->add_files(keys(%content));
+	  $tar->write("ovm2uvm_back_$$.tar.gz",COMPRESS_GZIP);
+	} else {
+	  my($fh,$fname) = tempfile();
+	  print $fh join("\n",keys(%content));
+	  system "tar cf - -T $fname | gzip -9v > ovm2uvm_back_$$.tar.gz";
+	}
     }
 
     if($opt_write) {
