@@ -485,8 +485,6 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
       $cast(m_base_inst, m_inst);
       // The base inst in the super class gets set to this base inst
       m_t_inst = m_base_inst;
-      // The base inst the most super class gets set to the base inst
-      m_b_inst = m_base_inst;
 
       uvm_typeid_base::typeid_map[m_typeid] = m_inst; 
       uvm_typeid_base::type_map[m_b_inst] = m_typeid;
@@ -494,7 +492,7 @@ class uvm_callbacks#(type T=uvm_object, type CB=uvm_callback)
 
     if(cb_base_type != this_cb_type) begin
       m_base_inst = uvm_callbacks#(T,uvm_callback)::get();
-      m_b_inst.m_this_type.push_back(m_inst);
+      m_base_inst.m_this_type.push_back(m_inst);
     end
 
   endfunction
