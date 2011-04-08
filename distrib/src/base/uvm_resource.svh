@@ -948,33 +948,6 @@ class uvm_resource_pool;
 
   endfunction
 
-  function uvm_resource_base get_highest_precedence_compatible_type(ref uvm_resource_types::rsrc_q_t q);
-
-    uvm_resource_base rsrc;
-    uvm_resource_base r;
-    int unsigned i;
-    int unsigned prec;
-
-    if(q.size() == 0)
-      return null;
-
-    // get the first resources in the queue
-    rsrc = q.get(0);
-    prec = rsrc.precedence;
-
-    // start searching from the second resource
-    for(int i = 1; i < q.size(); ++i) begin
-      r = q.get(i);
-      if(r.precedence > prec) begin
-        rsrc = r;
-        prec = r.precedence;
-      end
-    end
-
-    return rsrc;
-
-  endfunction
-
   // Function: get_by_name
   //
   // Lookup a resource by ~name~ and ~scope~.  Whether the get succeeds
@@ -1504,22 +1477,24 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
             return null;   
         end         
         else begin
-            // rsrc_base = rp.get_highest_precedence_compatible_type(q);
+            // rsrc_base = rp.get_highest_precedence(q);
             rsrc =null;
             
             if(q.size() == 0)
                 return null;
             else begin
                 // get the first resources in the queue
-                int prec = -1;
+                int unsigned prec = 0;
+                bit isValid=0;
 
                 // start searching from the second resource
-                for(int i = 0; i < q.size(); ++i) begin
+                for(int i = 0; i < q.size(); i++) begin
                     uvm_resource_base r = q.get(i);
                     this_type rt;
-                    if(r.precedence > prec && $cast(rt,r)) begin
+                    if(((r.precedence > prec) || !isValid) && $cast(rt,r)) begin
                         rsrc = rt;
                         prec = r.precedence;
+                        isValid=1;
                     end
                 end
             end 
