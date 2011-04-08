@@ -948,6 +948,32 @@ class uvm_resource_pool;
 
   endfunction
 
+  function uvm_resource_base get_highest_precedence_compatible_type(ref uvm_resource_types::rsrc_q_t q);
+
+    uvm_resource_base rsrc;
+    uvm_resource_base r;
+    int unsigned i;
+    int unsigned prec;
+
+    if(q.size() == 0)
+      return null;
+
+    // get the first resources in the queue
+    rsrc = q.get(0);
+    prec = rsrc.precedence;
+
+    // start searching from the second resource
+    for(int i = 1; i < q.size(); ++i) begin
+      r = q.get(i);
+      if(r.precedence > prec) begin
+        rsrc = r;
+        prec = r.precedence;
+      end
+    end
+
+    return rsrc;
+
+  endfunction
 
   // Function: get_by_name
   //
@@ -1466,11 +1492,44 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     this_type rsrc;
     string msg;
 
-    rsrc_base = rp.get_by_name(scope, name, rpterr);
-    if(rsrc_base == null)
-      return null;
+    // ORIG rsrc_base = rp.get_by_name(scope, name, rpterr);
+    // GETBYNAME
+    begin
+        uvm_resource_types::rsrc_q_t q;
 
-    if(!$cast(rsrc, rsrc_base)) begin
+        q = rp.lookup_name(scope, name, rpterr);
+
+        if(q.size() == 0) begin
+            rp.push_get_record(name, scope, null);
+            return null;   
+        end         
+        else begin
+            // rsrc_base = rp.get_highest_precedence_compatible_type(q);
+            rsrc =null;
+            
+            if(q.size() == 0)
+                return null;
+            else begin
+                // get the first resources in the queue
+                int prec = -1;
+
+                // start searching from the second resource
+                for(int i = 0; i < q.size(); ++i) begin
+                    uvm_resource_base r = q.get(i);
+                    this_type rt;
+                    if(r.precedence > prec && $cast(rt,r)) begin
+                        rsrc = rt;
+                        prec = r.precedence;
+                    end
+                end
+            end 
+            if(rsrc)
+                rp.push_get_record(name, scope, rsrc);
+        end
+    end
+
+
+    if(!rsrc) begin
       $sformat(msg, "Resource with name %s in scope %s has incorrect type", name, scope);
       `uvm_warning("RSRCTYPE", msg);
       return null;
