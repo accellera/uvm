@@ -131,7 +131,7 @@ class uvm_resource_db #(type T=uvm_object);
   // the name map so that it will be (currently) the highest priority
   // resource with the specified name and type.
 
-  function void set_override(input string scope, input string name,
+  static function void set_override(input string scope, input string name,
                              T val, uvm_object accessor = null);
     rsrc_t rsrc = new(name, scope);
     rsrc.write(val, accessor);
@@ -146,7 +146,7 @@ class uvm_resource_db #(type T=uvm_object);
   // specified type. It will be normal priority (i.e. at the end of the
   // queue) in the name map.
 
-  function void set_override_type(input string scope, input string name,
+  static function void set_override_type(input string scope, input string name,
                                   T val, uvm_object accessor = null);
     rsrc_t rsrc = new(name, scope);
     rsrc.write(val, accessor);
@@ -161,7 +161,7 @@ class uvm_resource_db #(type T=uvm_object);
   // specified name. It will be normal priority (i.e. at the end of the
   // queue) in the type map.
 
-  function void set_override_name(input string scope, input string name,
+  static function void set_override_name(input string scope, input string name,
                                   T val, uvm_object accessor = null);
     rsrc_t rsrc = new(name, scope);
     rsrc.write(val, accessor);

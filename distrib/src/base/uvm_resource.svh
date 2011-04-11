@@ -876,6 +876,7 @@ class uvm_resource_pool;
 
   function uvm_resource_types::rsrc_q_t lookup_name(string scope = "",
                                                     string name,
+                                                    uvm_resource_base type_handle = null,
                                                     bit rpterr = 1);
     uvm_resource_types::rsrc_q_t rq;
     uvm_resource_types::rsrc_q_t q = new();
@@ -896,7 +897,10 @@ class uvm_resource_pool;
     rq = rtab[name];
     for(int i=0; i<rq.size(); ++i) begin 
       r = rq.get(i);
-      if(r.match_scope(scope))
+      // does the scope match?
+      if(r.match_scope(scope) &&
+         // does the type match?
+         (type_handle == null || (r.get_type_handle() == type_handle)))
         q.push_back(r);
     end
 
@@ -949,12 +953,13 @@ class uvm_resource_pool;
 
   function uvm_resource_base get_by_name(string scope = "",
                                          string name,
+                                         uvm_resource_base type_handle,
                                          bit rpterr = 1);
 
     uvm_resource_types::rsrc_q_t q;
     uvm_resource_base rsrc;
 
-    q = lookup_name(scope, name, rpterr);
+    q = lookup_name(scope, name, type_handle, rpterr);
 
     if(q.size() == 0) begin
       push_get_record(name, scope, null);
@@ -1026,11 +1031,12 @@ class uvm_resource_pool;
   // This utility function answers the question, for a given ~name~ and
   // ~scope~, what are all of the resources with a matching name (where the
   // resource name may be a regular expression) and a matching scope
-  // (where the resoucre scope may be a regular expression). ~name~ and
+  // (where the resource scope may be a regular expression). ~name~ and
   // ~scope~ are explicit values.
 
   function uvm_resource_types::rsrc_q_t lookup_regex_names(string scope,
-                                                           string name);
+                                                           string name,
+                                                           uvm_resource_base type_handle = null);
 
     uvm_resource_types::rsrc_q_t rq;
     uvm_resource_types::rsrc_q_t result_q;
@@ -1040,7 +1046,7 @@ class uvm_resource_pool;
     //For the simple case where no wildcard names exist, then we can
     //just return the queue associated with name.
     if(!m_has_wildcard_names) begin
-      result_q = lookup_name(scope, name, 0);
+      result_q = lookup_name(scope, name, type_handle, 0);
       return result_q;
     end
 
@@ -1050,8 +1056,11 @@ class uvm_resource_pool;
       rq = rtab[re];
       for(i = 0; i < rq.size(); i++) begin
         r = rq.get(i);
+        // does the scope match?
         if(uvm_re_match(uvm_glob_to_re(re),name) == 0)
-          if(r.match_scope(scope))
+          if(r.match_scope(scope) && 
+            // does the type match?
+            (type_handle == null || (r.get_type_handle() == type_handle)))
             result_q.push_back(r);
       end
     end
@@ -1447,13 +1456,15 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     this_type rsrc;
     string msg;
 
-    rsrc_base = rp.get_by_name(scope, name, rpterr);
+    rsrc_base = rp.get_by_name(scope, name, my_type, rpterr);
     if(rsrc_base == null)
       return null;
 
     if(!$cast(rsrc, rsrc_base)) begin
-      $sformat(msg, "Resource with name %s in scope %s has incorrect type", name, scope);
-      `uvm_warning("RSRCTYPE", msg);
+      if(rpterr) begin
+        $sformat(msg, "Resource with name %s in scope %s has incorrect type", name, scope);
+        `uvm_warning("RSRCTYPE", msg);
+      end
       return null;
     end
 
