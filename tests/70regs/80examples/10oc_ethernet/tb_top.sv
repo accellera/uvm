@@ -22,7 +22,7 @@
 
 
 `include "timescale.v"
-
+`include "uvm_macros.svh"
 `include "wb_if.sv"
 
 module tb_top;
