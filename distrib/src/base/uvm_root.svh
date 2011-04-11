@@ -352,7 +352,7 @@ task uvm_root::run_test(string test_name="");
       #0; // forces shutdown because $finish is forked
     end
     $cast(uvm_test_top, factory.create_component_by_name(test_name,
-          "uvm_test_top", "uvm_test_top", null));
+          "", "uvm_test_top", null));
 
     if (uvm_test_top == null) begin
       msg = testname_plusarg ? {"command line +UVM_TESTNAME=",test_name} : 
