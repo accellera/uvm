@@ -19,6 +19,7 @@
 // -------------------------------------------------------------
 // 
 
+`include "uvm_macros.svh"
 `include "tb_top.sv"
 `include "apb.sv"
 

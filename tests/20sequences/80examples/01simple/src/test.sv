@@ -21,6 +21,7 @@
 module test;
 
   import uvm_pkg::*;
+  `include "uvm_macros.svh"
 
   `include "simple_item.sv"
   `include "simple_sequencer.sv"
