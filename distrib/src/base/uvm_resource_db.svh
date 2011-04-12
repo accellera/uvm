@@ -1,4 +1,5 @@
 //----------------------------------------------------------------------
+//   Copyright 2011 Cypress Semiconductor
 //   Copyright 2010 Mentor Graphics Corporation
 //   All Rights Reserved Worldwide
 //

@@ -45,7 +45,7 @@ module top;
       rq = rp.lookup_regex_names({get_full_name(),".foo"}, "bar");
 
       r = uvm_resource#(int unsigned)::get_highest_precedence(rq);
-      rb = p.get_by_name("foo","bar");
+      rb = p.get_by_name("foo","bar", uvm_resource#(int unsigned)::get_type());
 
       //void'(uvm_config_db#(int unsigned)::get(this,"foo","bar",bar));
       if(rb != null)

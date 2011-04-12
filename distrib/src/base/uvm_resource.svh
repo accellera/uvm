@@ -775,7 +775,8 @@ class uvm_resource_pool;
   // and will override both by name and type.
 
   function void set_override(uvm_resource_base rsrc);
-    set(rsrc, (uvm_resource_types::NAME_OVERRIDE | uvm_resource_types::TYPE_OVERRIDE));
+    set(rsrc, (uvm_resource_types::NAME_OVERRIDE |
+               uvm_resource_types::TYPE_OVERRIDE));
   endfunction
 
 
@@ -870,6 +871,7 @@ class uvm_resource_pool;
 
   function uvm_resource_types::rsrc_q_t lookup_name(string scope = "",
                                                     string name,
+                                                    uvm_resource_base type_handle = null,
                                                     bit rpterr = 1);
     uvm_resource_types::rsrc_q_t rq;
     uvm_resource_types::rsrc_q_t q = new();
@@ -890,7 +892,10 @@ class uvm_resource_pool;
     rq = rtab[name];
     for(int i=0; i<rq.size(); ++i) begin 
       r = rq.get(i);
-      if(r.match_scope(scope))
+      // does the scope match?
+      if(r.match_scope(scope) &&
+         // does the type match?
+         ((type_handle == null) || (r.get_type_handle() == type_handle)))
         q.push_back(r);
     end
 
@@ -942,12 +947,13 @@ class uvm_resource_pool;
 
   function uvm_resource_base get_by_name(string scope = "",
                                          string name,
+                                         uvm_resource_base type_handle,
                                          bit rpterr = 1);
 
     uvm_resource_types::rsrc_q_t q;
     uvm_resource_base rsrc;
 
-    q = lookup_name(scope, name, rpterr);
+    q = lookup_name(scope, name, type_handle, rpterr);
 
     if(q.size() == 0) begin
       push_get_record(name, scope, null);
@@ -1023,7 +1029,8 @@ class uvm_resource_pool;
   // ~scope~ are explicit values.
 
   function uvm_resource_types::rsrc_q_t lookup_regex_names(string scope,
-                                                           string name);
+                                                           string name,
+                                                           uvm_resource_base type_handle = null);
 
     uvm_resource_types::rsrc_q_t rq;
     uvm_resource_types::rsrc_q_t result_q;
@@ -1033,7 +1040,7 @@ class uvm_resource_pool;
     //For the simple case where no wildcard names exist, then we can
     //just return the queue associated with name.
     if(!m_has_wildcard_names) begin
-      result_q = lookup_name(scope, name, 0);
+      result_q = lookup_name(scope, name, type_handle, 0);
       return result_q;
     end
 
@@ -1044,7 +1051,10 @@ class uvm_resource_pool;
       for(i = 0; i < rq.size(); i++) begin
         r = rq.get(i);
         if(uvm_re_match(uvm_glob_to_re(re),name) == 0)
-          if(r.match_scope(scope))
+          // does the scope match?
+          if(r.match_scope(scope) &&
+            // does the type match?
+            ((type_handle == null) || (r.get_type_handle() == type_handle)))
             result_q.push_back(r);
       end
     end
@@ -1440,54 +1450,22 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     this_type rsrc;
     string msg;
 
-    // ORIG rsrc_base = rp.get_by_name(scope, name, rpterr);
-    // GETBYNAME
-    begin
-        uvm_resource_types::rsrc_q_t q;
+    rsrc_base = rp.get_by_name(scope, name, my_type, rpterr);
+    if(rsrc_base == null)
+      return null;
 
-        q = rp.lookup_name(scope, name, rpterr);
-
-        if(q.size() == 0) begin
-            rp.push_get_record(name, scope, null);
-            return null;   
-        end         
-        else begin
-            // rsrc_base = rp.get_highest_precedence(q);
-            rsrc =null;
-            
-            if(q.size() == 0)
-                return null;
-            else begin
-                // get the first resources in the queue
-                int unsigned prec = 0;
-                bit isValid=0;
-
-                // start searching from the second resource
-                for(int i = 0; i < q.size(); i++) begin
-                    uvm_resource_base r = q.get(i);
-                    this_type rt;
-                    if(((r.precedence > prec) || !isValid) && $cast(rt,r)) begin
-                        rsrc = rt;
-                        prec = r.precedence;
-                        isValid=1;
-                    end
-                end
-            end 
-            if(rsrc)
-                rp.push_get_record(name, scope, rsrc);
-        end
-    end
-
-
-    if(!rsrc) begin
-      $sformat(msg, "Resource with name %s in scope %s has incorrect type", name, scope);
-      `uvm_warning("RSRCTYPE", msg);
+    if(!$cast(rsrc, rsrc_base)) begin
+      if(rpterr) begin
+        $sformat(msg, "Resource with name %s in scope %s has incorrect type", name, scope);
+        `uvm_warning("RSRCTYPE", msg);
+      end
       return null;
     end
 
     return rsrc;
     
   endfunction
+
 
   // Function: get_by_type
   //
