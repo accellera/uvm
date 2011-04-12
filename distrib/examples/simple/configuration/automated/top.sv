@@ -56,13 +56,12 @@ module top;
     //set configuration prior to creating the environment
     set_config_int("topenv.*.u1", "v", 30);
     set_config_int("topenv.inst2.u1", "v", 10);
-    set_config_int("topenv.*", "debug", 1);
     set_config_int("*", "recording_detail", 0);
+    set_config_string("topenv.inst1.u1", "myaa[foo]", "boo");
+    set_config_string("topenv.inst1.u1", "myaa[foobar]", "boobah");
     set_config_string("*", "myaa[foo]", "hi");
     set_config_string("*", "myaa[bar]", "bye");
     set_config_string("*", "myaa[foobar]", "howdy");
-    set_config_string("topenv.inst1.u1", "myaa[foo]", "boo");
-    set_config_string("topenv.inst1.u1", "myaa[foobar]", "boobah");
 
     topenv = new("topenv", null);
 
