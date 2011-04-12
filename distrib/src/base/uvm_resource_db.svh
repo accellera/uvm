@@ -1,4 +1,5 @@
 //----------------------------------------------------------------------
+//   Copyright 2011 Cypress Semiconductor
 //   Copyright 2010 Mentor Graphics Corporation
 //   All Rights Reserved Worldwide
 //
@@ -27,8 +28,8 @@
 // <uvm_resource#(T)>.  The convenience layer in uvm_resource_db#(T)
 // reduces many of those operations to a single line of code.
 //
-// If the run-time ~+UVM_RESOURCE_DB_TRACE~ command line option is specified,
-// all resource DB accesses (read and write) are displayed.
+// If the run-time ~+UVM_RESOURCE_DB_TRACE~ command line option is
+// specified, all resource DB accesses (read and write) are displayed.
 //----------------------------------------------------------------------
 
 typedef class uvm_resource_db_options;
@@ -102,7 +103,9 @@ class uvm_resource_db #(type T=uvm_object);
   endfunction
 
   // function: show_msg
+
   // internal helper function to print resource accesses
+
   protected static function void m_show_msg(
           input string id,
           input string rtype,
@@ -165,8 +168,8 @@ class uvm_resource_db #(type T=uvm_object);
   // the name map so that it will be (currently) the highest priority
   // resource with the specified name and type.
 
-  function void set_override(input string scope, input string name,
-                             T val, uvm_object accessor = null);
+  static function void set_override(input string scope, input string name,
+                                    T val, uvm_object accessor = null);
     rsrc_t rsrc = new(name, scope);
     rsrc.write(val, accessor);
     rsrc.set_override();
@@ -184,8 +187,8 @@ class uvm_resource_db #(type T=uvm_object);
   // specified type. It will be normal priority (i.e. at the end of the
   // queue) in the name map.
 
-  function void set_override_type(input string scope, input string name,
-                                  T val, uvm_object accessor = null);
+  static function void set_override_type(input string scope, input string name,
+                                         T val, uvm_object accessor = null);
     rsrc_t rsrc = new(name, scope);
     rsrc.write(val, accessor);
     rsrc.set_override(uvm_resource_types::TYPE_OVERRIDE);
@@ -201,7 +204,7 @@ class uvm_resource_db #(type T=uvm_object);
   // specified name. It will be normal priority (i.e. at the end of the
   // queue) in the type map.
 
-  function void set_override_name(input string scope, input string name,
+  static function void set_override_name(input string scope, input string name,
                                   T val, uvm_object accessor = null);
     rsrc_t rsrc = new(name, scope);
     rsrc.write(val, accessor);

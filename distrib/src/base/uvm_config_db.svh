@@ -1,4 +1,5 @@
 //----------------------------------------------------------------------
+//   Copyright 2011 Cypress Semiconductor
 //   Copyright 2010-2011 Mentor Graphics Corporation
 //   All Rights Reserved Worldwide
 //
@@ -94,7 +95,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     else if(cntxt.get_full_name() != "") 
       inst_name = {cntxt.get_full_name(), ".", inst_name};
  
-    rq = rp.lookup_regex_names(inst_name, field_name);
+    rq = rp.lookup_regex_names(inst_name, field_name, uvm_resource#(T)::get_type());
     r = uvm_resource#(T)::get_highest_precedence(rq);
     
     if(r == null)
