@@ -159,7 +159,7 @@ class test extends uvm_test;
    endtask
 
    virtual task run_phase(uvm_phase phase);
-      int exp_pri[$] = '{500, 100, 10};
+      int exp_pri[3] = '{500, 100, 10};
       
       phase.raise_objection(this);
 
