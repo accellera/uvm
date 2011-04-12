@@ -2854,6 +2854,7 @@
     index__ = uvm_get_array_index_``INDEX_TYPE(str__, wildcard_index__); \
     if(what__==UVM_SET``ARRAY_TYPE) \
     begin \
+      __m_uvm_status_container.scope.down(`"ARRAY`"); \
       if(uvm_is_array(str__) ) begin\
         if(wildcard_index__) begin \
           if(ARRAY.first(index__)) \
@@ -2874,6 +2875,7 @@
           __m_uvm_status_container.status = 1; \
         end \
       end \
+      __m_uvm_status_container.scope.up(); \
     end \
  end
 
@@ -2888,6 +2890,7 @@
     index__ = uvm_get_array_index_``INDEX_TYPE(str__, wildcard_index__); \
     if(what__==UVM_SETOBJ) \
     begin \
+      __m_uvm_status_container.scope.down(`"ARRAY`"); \
       if(uvm_is_array(str__) ) begin\
         if(wildcard_index__) begin \
           if(ARRAY.first(index__)) \
@@ -2911,6 +2914,7 @@
           __m_uvm_status_container.status = 1; \
         end \
       end \
+      __m_uvm_status_container.scope.up(); \
     end \
  end
 
@@ -2926,6 +2930,7 @@
     index__ = uvm_get_array_index_int(str__, wildcard_index__); \
     if(what__==UVM_SET``ARRAY_TYPE) \
     begin \
+      __m_uvm_status_container.scope.down(`"ARRAY`"); \
       if(uvm_is_array(str__) ) begin\
         if(wildcard_index__) begin \
           if(ARRAY.first(index__)) \
@@ -2942,6 +2947,7 @@
           __m_uvm_status_container.status = 1; \
         end  \
       end \
+      __m_uvm_status_container.scope.up(); \
     end \
  end
 
@@ -2957,6 +2963,7 @@
     index__ = INDEX_TYPE'(uvm_get_array_index_int(str__, wildcard_index__)); \
     if(what__==UVM_SET``ARRAY_TYPE) \
     begin \
+      __m_uvm_status_container.scope.down(`"ARRAY`"); \
       if(uvm_is_array(str__) ) begin\
         if(wildcard_index__) begin \
           if(ARRAY.first(index__)) \
@@ -2973,6 +2980,7 @@
           __m_uvm_status_container.status = 1; \
         end  \
       end \
+      __m_uvm_status_container.scope.up(); \
     end \
  end
 
