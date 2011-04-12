@@ -71,10 +71,12 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   // function: get_by_name
   //
-  // Imports a resource by ~name~.  The first argument is the ~name~ of the
-  // resource to be retrieved and the second argument is the current
-  // ~scope~. The ~rpterr~ flag indicates whether or not to generate
-  // a warning if no matching resource is found.
+  // looks up a resource by ~name~.  The first argument is the ~name~ of
+  // the resource to be retrieved and the second argument is the current
+  // ~scope~. The ~rpterr~ flag indicates whether or not to generate a
+  // warning if no matching resource is found.  Whether or not the
+  // rpterr flag is set, null is returned if a resource matching the
+  // supplied criteria is not found.
 
   static function rsrc_t get_by_name(string scope,
                                      string name,
@@ -103,19 +105,18 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   endfunction
 
-
   // function: set
   //
-  // Create a new resource, write a ~val~ to it, and set it into the
-  // database using ~name~ and ~scope~ as the lookup parameters. The
-  // ~accessor~ is used for auditting.  This method is a function so it
-  // will never block.  It uses try_lock() instead of lock() to ensure
-  // that nothing changes during the write operation.  That odds that
-  // anything will change, or that even any other thread will have
-  // access to the resource is negligible since the resource is created
-  // immediately before it is used.  The reason that this method is a
-  // function and not a task, is so we can call set() in functions, most
-  // notably build().
+  // Create a new locker and a new resource, write ~val~ to the locker,
+  // and set it into the database using ~name~ and ~scope~ as the lookup
+  // parameters. The ~accessor~ is used for auditing.  This method is a
+  // function so it will never block.  It uses try_lock() instead of
+  // lock() to ensure that nothing changes during the write operation.
+  // That odds that anything will change, or that even any other thread
+  // will have access to the resource is negligible since the resource
+  // is created immediately before it is used.  The reason that this
+  // method is a function and not a task, is so we can call set() in
+  // functions, most notably build().
 
   static function void set(input string scope,
                            input string name,
@@ -135,12 +136,12 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   // function: set_anonymous
   //
-  // Create a new resource, write a ~val~ to it, and set it into the
-  // database.  The resource has no name and therefore will not be
-  // entered into the name map. But is does have a ~scope~ for lookup
-  // purposes. The ~accessor~ is used for auditting.  Like set(), this
-  // method is a function so that it can be called from other functions,
-  // such as build().
+  // Create a new resource and a locker, write ~val~ to the locker, and
+  // set it into the database.  The resource has no name and therefore
+  // will not be entered into the name map. But is does have a ~scope~
+  // for lookup purposes. The ~accessor~ is used for auditting.  Like
+  // set(), this method is a function so that it can be called from
+  // other functions, such as build().
 
   static function void set_anonymous(input string scope,
                                      T val, input uvm_object accessor = null);
@@ -158,15 +159,15 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   // function: set_override
   //
-  // Create a new resource, write ~val~ to it, and set it into the
-  // database.  Set it at the beginning of the queue in the type map and
-  // the name map so that it will be (currently) the highest priority
-  // resource with the specified name and type.  Like set(), this method
-  // is a function so that it can be called from other functions, such
-  // as build().
+  // Create a new resource and loker, write ~val~ to the locker, and set
+  // it into the database.  Set it at the beginning of the queue in the
+  // type map and the name map so that it will be (currently) the
+  // highest priority resource with the specified name and type.  Like
+  // set(), this method is a function so that it can be called from
+  // other functions, such as build().
 
-  function void set_override(input string scope, input string name,
-                             T val, uvm_object accessor = null);
+  static function void set_override(input string scope, input string name,
+                                    T val, uvm_object accessor = null);
 
     rsrc_t rsrc = new(name, scope);
     locker_t lck = new();
@@ -180,15 +181,17 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   // function: set_override_type
   //
-  // Create a new resource, write ~val~ to it, and set it into the
-  // database.  Set it at the beginning of the queue in the type map so
-  // that it will be (currently) the highest priority resource with the
-  // specified type. It will be normal priority (i.e. at the end of the
-  // queue) in the name map. Like set(), this method is a function so
-  // that it can be called from other functions, such as build().
+  // Create a new resource and locker, write ~val~ to the locker, and
+  // set it into the database.  Set it at the beginning of the queue in
+  // the type map so that it will be (currently) the highest priority
+  // resource with the specified type. It will be normal priority
+  // (i.e. at the end of the queue) in the name map. Like set(), this
+  // method is a function so that it can be called from other functions,
+  // such as build().
 
-  function void set_override_type(input string scope, input string name,
-                                  T val, uvm_object accessor = null);
+  static function void set_override_type(input string scope,
+                                         input string name,
+                                         T val, uvm_object accessor = null);
 
     rsrc_t rsrc = new(name, scope);
     locker_t lck = new();
@@ -202,17 +205,18 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   // function: set_override_name
   //
-  // Create a new resource, write ~val~ to it, and set it into the
-  // database.  Set it at the beginning of the queue in the name map so
-  // that it will be (currently) the highest priority resource with the
-  // specified name. It will be normal priority (i.e. at the end of the
-  // queue) in the type map. Like set(), this method is a function so
-  // that it can be called from other functions, such as build().
+  // Create a new resource and locker, write ~val~ to the locker, and
+  // set it into the database.  Set it at the beginning of the queue in
+  // the name map so that it will be (currently) the highest priority
+  // resource with the specified name. It will be normal priority
+  // (i.e. at the end of the queue) in the type map. Like set(), this
+  // method is a function so that it can be called from other functions,
+  // such as build().
 
-  function void set_override_name(input string scope,
-                                  input string name,
-                                  T val,
-                                  uvm_object accessor = null);
+  static function void set_override_name(input string scope,
+                                         input string name,
+                                         T val,
+                                         uvm_object accessor = null);
 
     rsrc_t rsrc = new(name, scope);
     locker_t lck = new();
@@ -226,9 +230,9 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   // function: read_by_name
   //
-  // locate a resource by ~name~ and ~scope~ and read its value. The
-  // value is returned through the ref argument ~val~.  The return value
-  // is a bit that indicates whether or not the read was successful. The
+  // locate a locker by ~name~ and ~scope~ and read its value. The value
+  // is returned through the ref argument ~val~.  The return value is a
+  // bit that indicates whether or not the read was successful. The
   // ~accessor~ is used for auditting.  The locking API is used to
   // ensure mutually exclusive access to the data during the
   // operation. Read() will block until the lock is acquired.
@@ -255,12 +259,12 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   // function: read_by_type
   //
-  // Read a value by type.  The value is returned through the ref
-  // argument ~val~.  The ~scope~ is used for the lookup. The return
-  // value is a bit that indicates whether or not the read is
-  // successful.  The ~accessor~ is used for auditting.  The locking API
-  // is used to ensure mutually exclusive access to the data during the
-  // operation. Read() will block until the lock is acquired.
+  // Locate a locker by type and read its value.  The value is returned
+  // through the ref argument ~val~.  The ~scope~ is used for the
+  // lookup. The return value is a bit that indicates whether or not the
+  // read is successful.  The ~accessor~ is used for auditting.  The
+  // locking API is used to ensure mutually exclusive access to the data
+  // during the operation. Read() will block until the lock is acquired.
 
   static task read_by_type(input string scope,
                            ref T val,
@@ -283,11 +287,10 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   // function: write_by_name
   //
-  // Write a ~val~ into the resources database.  First, look up the
-  // resource by ~name~ and ~scope~.  If it is not located then add a
-  // new resource to the database and then write its value.  The locking
-  // API is used to ensure mutually exclusive access to the data during
-  // the operation. Write() will block until the lock is acquired.
+  // Locate a locker by name and update its value with ~val~.  Look up
+  // the resource by ~name~ and ~scope~.  The locker API is used to
+  // ensure mutually exclusive access to the data during the
+  // operation. Write() will block until the lock is acquired.
 
   static task write_by_name(input string scope,
                             input string name,
@@ -312,9 +315,8 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   // function: write_by_type
   //
-  // write a ~val~ into the resources database.  First, look up the
-  // resource by type.  If it is not located then add a new resource to
-  // the database and then write its value.  The locking API is used to
+  // Locate a locker in the resource data and update its value with
+  // ~val~. Look up the resource by type. The locking API is used to
   // ensure mutually exclusive access to the data during the
   // operation. Write() will block until the lock is acquired.
 
@@ -342,7 +344,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
   // function: lock
   //
   // Lock the resource supplied as an argument.  Lock() will block until
-  // the lock is acquired.  The resource must be a "locker resourfce",
+  // the lock is acquired.  The resource must be a "locker resource",
   // one whose type is uvm_resource#(uvm_mutext_locker#(T)).
 
   static task lock(rsrc_t rsrc);

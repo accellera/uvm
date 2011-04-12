@@ -864,10 +864,13 @@ class uvm_resource_pool;
 
   // Function: lookup_name
   //
-  // Lookup resources by ~name~.  Returns a queue of resources that match
-  // the ~name~ and ~scope~.  If no resources match the queue is returned
-  // empty. If ~rpterr~ is set then a warning is issued if no matches
-  // are found, and the spell checker is invoked on ~name~.
+  // Lookup resources by ~name~.  Returns a queue of resources that
+  // match the ~name~, ~scope~, and ~type_handle~.  If no resources
+  // match the queue is returned empty. If ~rpterr~ is set then a
+  // warning is issued if no matches are found, and the spell checker is
+  // invoked on ~name~.  If ~type_handle~ is null then a type check is
+  // not made and resources are returned that match only ~name~ and
+  // ~scope~.
 
   function uvm_resource_types::rsrc_q_t lookup_name(string scope = "",
                                                     string name,
@@ -939,11 +942,12 @@ class uvm_resource_pool;
 
   // Function: get_by_name
   //
-  // Lookup a resource by ~name~ and ~scope~.  Whether the get succeeds
-  // or fails, save a record of the get attempt.  The ~rpterr~ flag
-  // indicates whether to report errors or not.  Essentially, it
-  // serves as a verbose flag.  If set then the spell checker will be
-  // invoked and warnings about multiple resources will be produced.
+  // Lookup a resource by ~name~, ~scope~, and ~type_handle~.  Whether
+  // the get succeeds or fails, save a record of the get attempt.  The
+  // ~rpterr~ flag indicates whether to report errors or not.
+  // Essentially, it serves as a verbose flag.  If set then the spell
+  // checker will be invoked and warnings about multiple resources will
+  // be produced.
 
   function uvm_resource_base get_by_name(string scope = "",
                                          string name,
@@ -1022,11 +1026,12 @@ class uvm_resource_pool;
 
   // Function: lookup_regex_names
   //
-  // This utility function answers the question, for a given ~name~ and
-  // ~scope~, what are all of the resources with a matching name (where the
-  // resource name may be a regular expression) and a matching scope
-  // (where the resoucre scope may be a regular expression). ~name~ and
-  // ~scope~ are explicit values.
+  // This utility function answers the question, for a given ~name~,
+  // ~scope~,and ~type_handle~, what are all of the resources with a
+  // matching name (where the resource name may be a regular
+  // expression), a matching scope (where the resoucre scope may be a
+  // regular expression), and a matching type? ~name~ and ~scope~ are
+  // explicit values.
 
   function uvm_resource_types::rsrc_q_t lookup_regex_names(string scope,
                                                            string name,
@@ -1134,7 +1139,6 @@ class uvm_resource_pool;
   // particular resource, you can set its priority to UVM_HIGH, in which
   // case the resource is moved to the front of the queue, or to UVM_LOW in
   // which case the resource is moved to the back of the queue.
-
 
   // function- set_priority_queue
   //
@@ -1434,12 +1438,13 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // Function: get_by_name
   //
   // looks up a resource by ~name~ in the name map. The first resource
-  // with the specified name that is visible in the specified ~scope~ is
-  // returned, if one exists.  The ~rpterr~ flag indicates whether or not
-  // an error should be reported if the search fails.  If ~rpterr~ is set
-  // to one then a failure message is issued, including suggested
-  // spelling alternatives, based on resource names that exist in the
-  // database, gathered by the spell checker.
+  // with the specified nam, whose type is the current type, and is
+  // visible in the specified ~scope~ is returned, if one exists.  The
+  // ~rpterr~ flag indicates whether or not an error should be reported
+  // if the search fails.  If ~rpterr~ is set to one then a failure
+  // message is issued, including suggested spelling alternatives, based
+  // on resource names that exist in the database, gathered by the spell
+  // checker.
 
   static function this_type get_by_name(string scope,
                                         string name,
@@ -1465,7 +1470,6 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     return rsrc;
     
   endfunction
-
 
   // Function: get_by_type
   //
@@ -1520,7 +1524,6 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
     record_read_access(accessor);
     return val;
   endfunction
-
 
   // Function: write
   //
