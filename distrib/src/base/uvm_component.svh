@@ -151,10 +151,10 @@ virtual class uvm_component extends uvm_report_object;
   extern function int has_child (string name);
 
 
-  // Function: set_name
+  // Function - set_name
   //
   // Renames this component to ~name~ and recalculates all descendants'
-  // full names.
+  // full names. This is an internal function for now.
 
   extern virtual function void set_name (string name);
 
@@ -1909,7 +1909,10 @@ endfunction
 // --------
 
 function void uvm_component::set_name (string name);
-  
+  if(m_name != "") begin
+    `uvm_error("INVSTNM", $sformatf("It is illegal to change the name of a component. The component name will not be changed to \"%s\"", name))
+    return;
+  end
   super.set_name(name);
   m_set_full_name();
 
