@@ -70,10 +70,10 @@
   // Resources/configuration facility
   `include "base/uvm_spell_chkr.svh"
   `include "base/uvm_resource.svh"
-  `include "base/uvm_resource_locker.svh"
+  `include "base/uvm_mutex_locker.svh"
   `include "base/uvm_resource_specializations.svh"
   `include "base/uvm_resource_db.svh"
-  `include "base/uvm_resource_locking_db.svh"
+  `include "base/uvm_resource_mutex_db.svh"
   `include "base/uvm_config_db.svh"
 
   `include "base/uvm_component.svh"

@@ -18,29 +18,34 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// class: uvm_resource_locking_db
+// class: uvm_resource_mutex_db
 //
-// The uvm_resource_locking_db#(T) class provides a convenience
+// The uvm_resource_mutex_db#(T) class provides a convenience
 // interface for the resources facility for locking resource.  In many
 // cases basic operations such as creating and setting a resource or
 // getting a resource could take multiple lines of code using the
 // interfaces in <uvm_resource_base> or <uvm_resource#(T)>.  The
-// convenience layer in uvm_resource_locking_db#(T) reduces many of
+// convenience layer in uvm_resource_mutex_db#(T) reduces many of
 // those operations to a single line of code.
+
+// This convenience interface provides a wrapper around resources whose
+// type is uvm_mutex_locker#(T).  This layer provides static tasks for
+// accessing data in the locker using the locking protocol in
+// uvm_mutex_locker#(T).
 //
-// All of the functions in uvm_resource_locking_db#(T) are static, so
+// All of the functions in uvm_resource_mutex_db#(T) are static, so
 // they must be called using the :: operator.  For example:
 //
-//|  uvm_resource_locking_db#(int)::set("A", "*", 17, this);
+//|  uvm_resource_mutex_db#(int)::set("A", "*", 17, this);
 //
 // The parameter value "int" identifies the resource type as
 // uvm_resource#(int).  Thus, the type of the object in the resource
 // container is int. This maintains the type-safety characteristics of
 // resource operations.
 //----------------------------------------------------------------------
-class uvm_resource_locking_db #(type T=uvm_object);
+class uvm_resource_mutex_db #(type T=uvm_object);
 
-  typedef uvm_locker #(T) locker_t;
+  typedef uvm_mutex_locker #(T) locker_t;
   typedef uvm_resource #(locker_t) rsrc_t;
 
   // All of the functions in this class are static, so there is no need
@@ -103,7 +108,15 @@ class uvm_resource_locking_db #(type T=uvm_object);
   //
   // Create a new resource, write a ~val~ to it, and set it into the
   // database using ~name~ and ~scope~ as the lookup parameters. The
-  // ~accessor~ is used for auditting.
+  // ~accessor~ is used for auditting.  This method is a function so it
+  // will never block.  It uses try_lock() instead of lock() to ensure
+  // that nothing changes during the write operation.  That odds that
+  // anything will change, or that even any other thread will have
+  // access to the resource is negligible since the resource is created
+  // immediately before it is used.  The reason that this method is a
+  // function and not a task, is so we can call set() in functions, most
+  // notably build().
+
   static function void set(input string scope,
                            input string name,
                            T val,
@@ -113,7 +126,7 @@ class uvm_resource_locking_db #(type T=uvm_object);
     locker_t lck = new();
 
     if(!lck.try_write(val)) begin
-      uvm_report_error("uvm_resource_locking_db", "try_write failed in set()");
+      uvm_report_error("uvm_resource_mutex_db", "try_write failed in set()");
     end
     rsrc.write(lck, accessor);
     rsrc.set();
@@ -125,7 +138,10 @@ class uvm_resource_locking_db #(type T=uvm_object);
   // Create a new resource, write a ~val~ to it, and set it into the
   // database.  The resource has no name and therefore will not be
   // entered into the name map. But is does have a ~scope~ for lookup
-  // purposes. The ~accessor~ is used for auditting.
+  // purposes. The ~accessor~ is used for auditting.  Like set(), this
+  // method is a function so that it can be called from other functions,
+  // such as build().
+
   static function void set_anonymous(input string scope,
                                      T val, input uvm_object accessor = null);
 
@@ -133,19 +149,21 @@ class uvm_resource_locking_db #(type T=uvm_object);
     locker_t lck = new();
 
     if(!lck.try_write(val)) begin
-      uvm_report_error("uvm_resource_locking_db", "try_write failed in set_anonymous()");
+      uvm_report_error("uvm_resource_mutex_db", "try_write failed in set_anonymous()");
     end
     rsrc.write(lck, accessor);
     rsrc.set();
 
   endfunction
 
-  // function set_override
+  // function: set_override
   //
   // Create a new resource, write ~val~ to it, and set it into the
   // database.  Set it at the beginning of the queue in the type map and
   // the name map so that it will be (currently) the highest priority
-  // resource with the specified name and type.
+  // resource with the specified name and type.  Like set(), this method
+  // is a function so that it can be called from other functions, such
+  // as build().
 
   function void set_override(input string scope, input string name,
                              T val, uvm_object accessor = null);
@@ -154,19 +172,20 @@ class uvm_resource_locking_db #(type T=uvm_object);
     locker_t lck = new();
 
     if(!lck.try_write(val)) begin
-      uvm_report_error("uvm_resource_locking_db", "try_write failed in set_override()");
+      uvm_report_error("uvm_resource_mutex_db", "try_write failed in set_override()");
     end
     rsrc.write(lck, accessor);
     rsrc.set_override();
   endfunction
 
-  // function set_override_type
+  // function: set_override_type
   //
   // Create a new resource, write ~val~ to it, and set it into the
   // database.  Set it at the beginning of the queue in the type map so
   // that it will be (currently) the highest priority resource with the
   // specified type. It will be normal priority (i.e. at the end of the
-  // queue) in the name map.
+  // queue) in the name map. Like set(), this method is a function so
+  // that it can be called from other functions, such as build().
 
   function void set_override_type(input string scope, input string name,
                                   T val, uvm_object accessor = null);
@@ -175,19 +194,20 @@ class uvm_resource_locking_db #(type T=uvm_object);
     locker_t lck = new();
 
     if(!lck.try_write(val)) begin
-      uvm_report_error("uvm_resource_locking_db", "try_write failed in set_override_type()");
+      uvm_report_error("uvm_resource_mutex_db", "try_write failed in set_override_type()");
     end
     rsrc.write(lck, accessor);
     rsrc.set_override(uvm_resource_types::TYPE_OVERRIDE);
   endfunction
 
-  // function set_override_name
+  // function: set_override_name
   //
   // Create a new resource, write ~val~ to it, and set it into the
   // database.  Set it at the beginning of the queue in the name map so
   // that it will be (currently) the highest priority resource with the
   // specified name. It will be normal priority (i.e. at the end of the
-  // queue) in the type map.
+  // queue) in the type map. Like set(), this method is a function so
+  // that it can be called from other functions, such as build().
 
   function void set_override_name(input string scope,
                                   input string name,
@@ -198,7 +218,7 @@ class uvm_resource_locking_db #(type T=uvm_object);
     locker_t lck = new();
 
     if(!lck.try_write(val)) begin
-      uvm_report_error("uvm_resource_locking_db", "try_write failed in set_override_name()");
+      uvm_report_error("uvm_resource_mutex_db", "try_write failed in set_override_name()");
     end
     rsrc.write(lck, accessor);
     rsrc.set_override(uvm_resource_types::NAME_OVERRIDE);
@@ -206,10 +226,12 @@ class uvm_resource_locking_db #(type T=uvm_object);
 
   // function: read_by_name
   //
-  // locate a resource by ~name~ and ~scope~ and read its value. The value 
-  // is returned through the ref argument ~val~.  The return value is a bit 
-  // that indicates whether or not the read was successful. The ~accessor~
-  // is used for auditting.
+  // locate a resource by ~name~ and ~scope~ and read its value. The
+  // value is returned through the ref argument ~val~.  The return value
+  // is a bit that indicates whether or not the read was successful. The
+  // ~accessor~ is used for auditting.  The locking API is used to
+  // ensure mutually exclusive access to the data during the
+  // operation. Read() will block until the lock is acquired.
 
   static task read_by_name(input string scope,
                            input string name,
@@ -235,8 +257,11 @@ class uvm_resource_locking_db #(type T=uvm_object);
   //
   // Read a value by type.  The value is returned through the ref
   // argument ~val~.  The ~scope~ is used for the lookup. The return
-  // value is a bit that indicates whether or not the read is successful.
-  // The ~accessor~ is used for auditting.
+  // value is a bit that indicates whether or not the read is
+  // successful.  The ~accessor~ is used for auditting.  The locking API
+  // is used to ensure mutually exclusive access to the data during the
+  // operation. Read() will block until the lock is acquired.
+
   static task read_by_type(input string scope,
                            ref T val,
                            inout bit ok,
@@ -258,16 +283,11 @@ class uvm_resource_locking_db #(type T=uvm_object);
 
   // function: write_by_name
   //
-  // write a ~val~ into the resources database.  First, look up the
-  // resource by ~name~ and ~scope~.  If it is not located then add a new 
-  // resource to the database and then write its value.
-  //
-  // Because the ~scope~ is matched to a resource which may be a
-  // regular expression, and consequently may target other scopes beyond
-  // the ~scope~ argument. Care must be taken with this function. If
-  // a <get_by_name> match is found for ~name~ and ~scope~ then ~val~
-  // will be written to that matching resource and thus may impact
-  // other scopes which also match the resource.
+  // Write a ~val~ into the resources database.  First, look up the
+  // resource by ~name~ and ~scope~.  If it is not located then add a
+  // new resource to the database and then write its value.  The locking
+  // API is used to ensure mutually exclusive access to the data during
+  // the operation. Write() will block until the lock is acquired.
 
   static task write_by_name(input string scope,
                             input string name,
@@ -294,14 +314,9 @@ class uvm_resource_locking_db #(type T=uvm_object);
   //
   // write a ~val~ into the resources database.  First, look up the
   // resource by type.  If it is not located then add a new resource to
-  // the database and then write its value.
-  //
-  // Because the ~scope~ is matched to a resource which may be a
-  // regular expression, and consequently may target other scopes beyond
-  // the ~scope~ argument. Care must be taken with this function. If
-  // a <get_by_name> match is found for ~name~ and ~scope~ then ~val~
-  // will be written to that matching resource and thus may impact
-  // other scopes which also match the resource.
+  // the database and then write its value.  The locking API is used to
+  // ensure mutually exclusive access to the data during the
+  // operation. Write() will block until the lock is acquired.
 
   static task write_by_type(input string scope,
                             input T val,
@@ -325,6 +340,10 @@ class uvm_resource_locking_db #(type T=uvm_object);
   endtask
 
   // function: lock
+  //
+  // Lock the resource supplied as an argument.  Lock() will block until
+  // the lock is acquired.  The resource must be a "locker resourfce",
+  // one whose type is uvm_resource#(uvm_mutext_locker#(T)).
 
   static task lock(rsrc_t rsrc);
 
@@ -338,6 +357,12 @@ class uvm_resource_locking_db #(type T=uvm_object);
   endtask
 
   // function: try_lock
+  //
+  // Try_lock() requests the lock of the resource supplied as an
+  // argument, and returns immediatly whether or not the lock was
+  // acquired.  A status value is returned to indicate whether or not
+  // the lock was acquired.  1 means the lock was successfully required,
+  // 0 means it was not.
 
   static function bit try_lock(rsrc_t rsrc);
 
@@ -351,6 +376,10 @@ class uvm_resource_locking_db #(type T=uvm_object);
   endfunction
 
   // function: unlock
+  //
+  // Release the lock for the resource supplied as an argument.  The
+  // lock can be released only by the process that acquired it.  This is
+  // enforced in the locker policy.
 
   static function void unlock(rsrc_t rsrc);
 
@@ -364,6 +393,12 @@ class uvm_resource_locking_db #(type T=uvm_object);
   endfunction
 
   // function: read
+  //
+  // Read the value from a resource supplied as an argument.  The
+  // resource must be a locker resource, one whose type is
+  // uvm_resource#(uvm_mutex_locker#(T)).  The read() task may block
+  // until the lock is acquired.  The lock is released after the
+  // operation is complete.
 
   static task read(rsrc_t rsrc, output T t, input uvm_object accessor = null);
 
@@ -377,8 +412,17 @@ class uvm_resource_locking_db #(type T=uvm_object);
   endtask
 
   // function: try_read
+  //
+  // Nonblocking form of read.  It will return immeditaly, whether or
+  // not the operation completed successfully.  If the read is
+  // successfull, that is the lock is acquired and the data accessed,
+  // then the output T argument will contain the value held in the
+  // locker and a 1 will be returned.  If the operation is not
+  // successful 0 is returned.
 
-  static function bit try_read(rsrc_t rsrc, T t, input uvm_object accessor = null);
+  static function bit try_read(rsrc_t rsrc,
+                               output T t,
+                               input uvm_object accessor = null);
 
     locker_t lckr;
 
@@ -391,9 +435,16 @@ class uvm_resource_locking_db #(type T=uvm_object);
 
     rsrc.record_read_access(accessor);
     return 1;
+
   endfunction
 
   // function: write
+  //
+  // Write a new value to the resource supplied as an argument.  The
+  // resource must be a locker resource, one whose type is
+  // uvm_resource#(uvm_mutex_locker#(T)).  The write() task may block
+  // until the lock is acquired.  The lock is released after the
+  // operation is complete.
 
   static task write(rsrc_t rsrc, input T t, input uvm_object accessor = null);
 
@@ -408,6 +459,12 @@ class uvm_resource_locking_db #(type T=uvm_object);
   endtask
 
   // function: try_write
+  //
+  // Nonblocking form of write.  It will return immeditaly, whether or
+  // not the operation completed successfully.  If the write is
+  // successfull, that is the lock is acquired and the data in the
+  // locker is udated, then a 1 will be returned.  If the operation is
+  // not successful 0 is returned.
 
   static function bit try_write(rsrc_t rsrc, T t, input uvm_object accessor = null);
 

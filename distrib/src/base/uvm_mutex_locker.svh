@@ -18,9 +18,69 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// class: uvm_locker#(T)
+// class: uvm_mutex_locker#(T)
+//
+// The uvm_mutex_locker#(T) class provides a means for locking objects.
+// Uvm_mutex_locker #(T), or the locker, as we'll refer to it, is a data
+// container.  It holds a data object of type T.  Access to that data
+// object is contolled via a muxtex (i.e. binary semaphore) locking
+// mechanism.
+//
+// The typical use model is to use the locker as a resource.  The
+// resource contains the locker, which in turn holds the data.  The
+// locker provides an API for mutually exclusive access to the data.
+//
+// |  uvm_resource#(uvm_mutex_locker#(T))
+//
+// The locker provides a locking access policy for resources.  Other
+// locking policies can be implemented by creating a different locker
+// that supports a different policy, and possibly with a different API.
+//
+// The locker itself is access through normal resource operations.  The
+// data is then accessed through the locker. E.g
+//
+// | uvm_resource#(uvm_mutex_locker#(T)) r;
+// | uvm_mutex_locker#(T) lckr;
+// | T t;
+// |
+// | lckr = r.read();
+// | lckr.read(t);
+// |
+// | lckr = r.read();
+// | lckr.write(t);
+//
+// The main locking API contains three methods
+//
+// |  task lock();
+// |  function bit try_lock();
+// |  function void unlock();
+//
+// ~Lock()~ is a task and may potentionally block.  It will block if
+// some other process holds the lock to this locker.  ~Try_lock()~ and
+// ~unlock()~ are functions and will return immediately.  ~Try_lock()~
+// will attempt to obtain the lock.  It will return a value indicating
+// its success or failure.  ~Unlock()~ releases the lock.
+//
+// Data access is done with four methods:
+//
+// |  task read(output T t);
+// |  function bit try_read(output T t);
+// |  task write (input T t);
+// |  function bit try_write(input T t);
+//
+// The ~read()~ and ~write()~ methods are blocking -- they each call
+// ~lock()~ and ~unlock()~.  The ~try_*()~ methods are nonblocking.
+// They will return a value indicating whether or not they succeeded.
+//
+// An important aspect to the locker is ownership.  Each lock is owned
+// by the process that acquired it.  Only the owning process can release
+// the lock.  If a process is killed before it has been unlocked, the
+// locker can be recovered by explicitly calling set_process to identify
+// a different owner, or the next time lock() is called the situation
+// will be detected and the locker will change ownership to the process
+// requesting the lock.
 //----------------------------------------------------------------------
-class uvm_locker #(type T=int);
+class uvm_mutex_locker #(type T=int);
 
   local process pid;
   local T val;
@@ -50,6 +110,7 @@ class uvm_locker #(type T=int);
   // is obtained.
 
   task lock();
+    check_pid();
     sm.get();
     set_process(process::self);
   endtask
@@ -61,6 +122,7 @@ class uvm_locker #(type T=int);
   // the lock then a one is returned, otherwise a zero is returned.
 
   function bit try_lock();
+    check_pid();
     if(sm.try_get()) begin
       set_process(process::self);
       return 1;
@@ -74,16 +136,15 @@ class uvm_locker #(type T=int);
   // Releases the lock held by this semaphore.
 
   function void unlock();
-    // is the lock already unlocked?  If so,
-    // don't unlock it again.
-    if(sm.try_get()) begin
-      sm.put();
-      $display("warning: lock is already unlocked.  Ignoring unlock request");
-    end
-    else begin
-      sm.put();
-      pid = null;
-    end
+    if(pid == null)
+      uvm_report_error("uvm_mutex_locker::unlock", "Uh oh, attempt to release a lock with no process owner.  The lock is likely not currently held.  In any case the state is inconsistent and so the request to release the lock has been ignored.");
+    else
+    if(pid != process::self())
+      uvm_report_error("uvm_mutex_locker::unlock", "Oh no, an attempt has been made to release the lock by a process other than the owner.  Lock state not changed.");
+      else begin
+        sm.put();
+        pid = null;
+      end
   endfunction
 
   function void set_process(process p = null);
@@ -93,6 +154,15 @@ class uvm_locker #(type T=int);
   function process get_process();
     return pid;
   endfunction
+
+  function void check_pid();
+    if(pid != null &&(pid.status() == process::FINISHED ||
+                      pid.status() == process::KILLED)) begin
+      uvm_report_error("uvm_mutex_locker::lock", "lock is held by dead process! resetting ownership to current process");
+      sm.put();
+    end
+  endfunction
+
 
   //-------------------------
   // Group: Read/Write Interface
