@@ -763,6 +763,8 @@ function void uvm_factory::register (uvm_object_wrapper obj);
     m_types[obj] = 1;
     // If a named override happens before the type is registered, need to copy
     // the override queue.
+    // Note:Registration occurs via static initialization, which occurs ahead of
+    // procedural (e.g. initial) blocks. There should not be any preexisting overrides.
     if(m_inst_override_name_queues.exists(obj.get_type_name())) begin
        m_inst_override_queues[obj] = new;
        m_inst_override_queues[obj].queue = m_inst_override_name_queues[obj.get_type_name()].queue;
@@ -772,7 +774,7 @@ function void uvm_factory::register (uvm_object_wrapper obj);
        if(! m_inst_override_queues.exists(obj)) 
             m_inst_override_queues[obj] = new;
        foreach (m_wildcard_inst_overrides[i]) begin
-         if(uvm_is_match(m_wildcard_inst_overrides[i].orig_type_name,obj.get_type_name()))
+         if(uvm_is_match( m_wildcard_inst_overrides[i].orig_type_name, obj.get_type_name()))
             m_inst_override_queues[obj].queue.push_back(m_wildcard_inst_overrides[i]);
        end
     end
