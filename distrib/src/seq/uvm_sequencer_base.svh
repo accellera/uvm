@@ -104,8 +104,13 @@ class uvm_sequencer_base extends uvm_component;
   // Function: start_phase_sequence
   //
   // Start the default sequence for this phase, if any.
-  // The default sequence is configured using resources using
-  // either a sequence instance or sequence object wrapper.
+  // The default sequence is configured via resources using
+  // either a sequence instance or sequence type (object wrapper).
+  // If both are used,
+  // the sequence instance takes precedence. When attempting to override
+  // a previous default sequence setting, you must override both
+  // the instance and type (wrapper) reources, else your override may not
+  // take effect.
   //
   // When setting the resource using ~set~, the 1st argument specifies the
   // context pointer, usually "this" for components or "null" when executed from
@@ -145,6 +150,8 @@ class uvm_sequencer_base extends uvm_component;
   //|                                            "default_sequence",
   //|                                            myseq_t::type_id::get(),
   //|                                            this );
+  //
+  // 
      
      
 
