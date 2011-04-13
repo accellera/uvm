@@ -2990,7 +2990,8 @@ function void uvm_component::apply_config_settings (bit verbose=0);
     else
       search_name = name;
 
-    if(!__m_uvm_status_container.field_array.exists(search_name))
+    if(!uvm_resource_pool::m_has_wildcard_names && 
+       !__m_uvm_status_container.field_array.exists(search_name))
       continue;
 
     if(verbose)
