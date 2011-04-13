@@ -65,7 +65,7 @@ class uvm_objection extends uvm_report_object;
   protected int     m_source_count[uvm_object];
   protected int     m_total_count [uvm_object];
   protected time    m_drain_time  [uvm_object];
-  protected bit     m_draining    [uvm_object];
+  protected int     m_draining    [uvm_object];
   protected uvm_objection_events m_events [uvm_object];
   /*protected*/ bit     m_top_all_dropped;
   protected process m_background_proc;
@@ -472,7 +472,9 @@ class uvm_objection extends uvm_report_object;
       // need to make sure we are safe from the dropping thread terminating
       // while the drain time is being honored. Can call immediatiately if
       // we are in the top thread, otherwise we have to schedule it.
-      m_draining[obj] = 1;
+      if(!m_draining.exists(obj)) m_draining[obj] = 1;
+      else m_draining[obj] = m_draining[obj]+1;
+
       if(in_top_thread) begin
         m_forked_drop(obj, source_obj, description, count, in_top_thread);
       end
@@ -564,6 +566,10 @@ class uvm_objection extends uvm_report_object;
       join_any
       disable fork;
 
+      m_draining[obj] = m_draining[obj] - 1;
+
+      if(m_draining[obj] == 0) begin
+
       m_draining.delete(obj);
 
       if(!m_total_count.exists(obj))
@@ -602,6 +608,7 @@ class uvm_objection extends uvm_report_object;
         end
       end
 
+      end //m_draining == 0
     end
     join_none
  
