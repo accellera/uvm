@@ -1336,10 +1336,10 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
 
     // default sequence instance?
     if (!uvm_config_db #(uvm_sequence_base)::get(
-          this, {phase.get_name(),"_phase"}, "default_sequence", seq) ) begin
+          this, {phase.get_name(),"_phase"}, "default_sequence", seq) || seq == null) begin
       // default sequence object wrapper?
       if (uvm_config_db #(uvm_object_wrapper)::get(
-               this, {phase.get_name(),"_phase"}, "default_sequence", wrapper) ) begin
+               this, {phase.get_name(),"_phase"}, "default_sequence", wrapper) && wrapper != null) begin
         // use wrapper is a sequence type        
         if(!$cast(seq , f.create_object_by_type(
               wrapper, get_full_name(), wrapper.get_type_name()))) begin
