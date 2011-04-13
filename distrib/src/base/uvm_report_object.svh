@@ -222,10 +222,9 @@ class uvm_report_object extends uvm_object;
   // implementations return 1, which allows the report to be processed. If an
   // override returns 0, then the report is not processed.
   //
-  // First, the hook method associated with the report's severity is called with
-  // the same arguments as the given the report. If it returns 1, the catch-all
-  // method, report_hook, is then called. If the severity-specific hook returns
-  // 0, the catch-all hook is not called.
+  // First, the report_hook method is called, followed by the severity 
+  // severity specific hook (report_info_hook, etc.). If either hook method
+  // returns 0 then the report is not processed further.
 
   virtual function bit report_hook(
            string id, string message, int verbosity, string filename, int line);

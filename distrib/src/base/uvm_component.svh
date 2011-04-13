@@ -253,11 +253,7 @@ virtual class uvm_component extends uvm_report_object;
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
-  // Unlike other task phases, it is not necessary to raise
-  // an objection to cause it to persist: it will persists
-  // until <global_stop_request()> is called.
-  // However, if a single phase objection is raised using
-  // ~phase.raise_objection()~, then the phase will automatically
+  // Thn the phase will automatically
   // ends once all objections are dropped using ~phase.drop_objection()~.
   // 
   // Any processes forked by this task continue to run
@@ -681,7 +677,8 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual task resume ();
 
 
-  // Function: status
+`ifndef UVM_NO_DEPRECATED
+  // Function- status  - DEPRECATED
   //
   // Returns the status of this component.
   //
@@ -701,21 +698,16 @@ virtual class uvm_component extends uvm_report_object;
 
   extern function string status ();
 
- 
-  // Function: kill
+
+  // Function- kill  - DEPRECATED
   //
   // Kills the process tree associated with this component's currently running
   // task-based phase, e.g., run.
-  //
-  // An alternative mechanism for stopping the run phase is the stop request.
-  // Calling <global_stop_request> causes all components' run_phase processes to be
-  // killed, but only after all components have had the opportunity to complete
-  // in progress transactions and shutdown cleanly via their <stop> tasks.
 
   extern virtual function void kill ();
 
 
-  // Function: do_kill_all
+  // Function- do_kill_all  - DEPRECATED
   //
   // Recursively calls <kill> on this component and all its descendants,
   // which abruptly ends the currently running task-based phase, e.g., run.
@@ -724,7 +716,7 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual  function void  do_kill_all ();
 
 
-  // Task: stop_phase
+  // Task- stop_phase  -- DEPRECATED
   //
   // The stop_phase task is called when this component's <enable_stop_interrupt>
   // bit is set and <global_stop_request> is called during a task-based phase,
@@ -748,7 +740,7 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual task stop (string ph_name);
 
 
-  // Variable: enable_stop_interrupt
+  // Variable- enable_stop_interrupt  - DEPRECATED
   //
   // This bit allows a component to raise an objection to the stopping of the
   // current phase. It affects only time consuming phases (such as the run
@@ -760,6 +752,7 @@ virtual class uvm_component extends uvm_report_object;
   // implement the stop task to prepare for shutdown.
 
   int enable_stop_interrupt = 0;
+`endif
 
 
   // Function: resolve_bindings
@@ -1658,8 +1651,6 @@ virtual class uvm_component extends uvm_report_object;
 
   protected uvm_event_pool event_pool;
 
-  extern virtual task restart ();
-
   int unsigned recording_detail = UVM_NONE;
   extern         function void   do_print(uvm_printer printer);
 
@@ -2445,6 +2436,7 @@ endfunction
 // phase runtime control API
 //--------------------------
 
+`ifndef UVM_NO_DEPRECATED
 // do_kill_all
 // -----------
 
@@ -2464,18 +2456,13 @@ function void uvm_component::kill();
       m_phase_process = null;
     end
 endfunction
-
+`endif
 
 // suspend
 // -------
 
 task uvm_component::suspend();
-  `ifdef UVM_USE_SUSPEND_RESUME
-    if(m_phase_process != null)
-      m_phase_process.suspend;
-  `else
-    `uvm_error("UNIMP", "suspend() not implemented")
-  `endif
+   `uvm_warning("COMP/SPND/UNIMP", "suspend() not implemented")
 endtask
 
 
@@ -2483,27 +2470,14 @@ endtask
 // ------
 
 task uvm_component::resume();
-  `ifdef UVM_USE_SUSPEND_RESUME
-    if(m_phase_process!=null) 
-      m_phase_process.resume;
-  `else
-     `uvm_error("UNIMP", "resume() not implemented")
-  `endif
-endtask
-
-
-// restart
-// -------
-
-task uvm_component::restart();
-  `uvm_warning("UNIMP",
-      $sformatf("%0s: restart not implemented",this.get_name()))
+   `uvm_warning("COMP/RSUM/UNIMP", "resume() not implemented")
 endtask
 
 
 // status
 //-------
 
+`ifndef UVM_NO_DEPRECATED
 function string uvm_component::status();
 
   `ifdef UVM_USE_SUSPEND_RESUME
@@ -2535,7 +2509,6 @@ function string uvm_component::status();
    
 endfunction
 
-
 // stop
 // ----
 
@@ -2551,6 +2524,7 @@ task uvm_component::stop_phase(uvm_phase phase);
   stop(phase.get_name());
   return;
 endtask
+`endif
 
 
 // resolve_bindings
@@ -3113,11 +3087,12 @@ function void uvm_component::do_print(uvm_printer printer);
         $bits(recording_detail), UVM_DEC, , "integral");
     endcase
 
+`ifndef UVM_NO_DEPRECATED
   if (enable_stop_interrupt != 0) begin
     printer.print_int("enable_stop_interrupt", enable_stop_interrupt,
                         $bits(enable_stop_interrupt), UVM_BIN, ".", "bit");
   end
-
+ `endif
 endfunction
 
 
