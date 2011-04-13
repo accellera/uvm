@@ -1066,7 +1066,7 @@ class uvm_phase extends uvm_object;
   //
   // To wait for the phase to be at the started state or after
   //
-  //| wait_for_state(UVM_PHASE_STARTED, UVM_GT);
+  //| wait_for_state(UVM_PHASE_STARTED, UVM_GTE);
   //
   // To wait for the phase to be either started or executing
   //
@@ -1942,13 +1942,9 @@ task uvm_phase::execute_phase();
   begin
     bit pred_of_succ[uvm_phase];
 
-    foreach (m_successors[succ]) begin
-      foreach(succ.m_predecessors[pred]) begin
-        uvm_phase p;
-        p = uvm_phase'(pred);
-        pred_of_succ[ p ] = 1;
-      end
-    end
+    foreach (m_successors[succ])
+      foreach(succ.m_predecessors[pred])
+        pred_of_succ[ pred ] = 1;
     pred_of_succ.delete(this);
 
     foreach (pred_of_succ[sibling]) begin
