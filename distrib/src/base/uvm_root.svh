@@ -190,6 +190,7 @@ class uvm_root extends uvm_component;
   bit m_phase_all_done;
 
 
+`ifndef UVM_NO_DEPRECATED
   // stop_request
   // ------------
 
@@ -200,7 +201,7 @@ class uvm_root extends uvm_component;
     tdo = uvm_test_done_objection::get();
     tdo.stop_request();
   endfunction
-
+`endif
 
 
 endclass

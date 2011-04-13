@@ -40,22 +40,27 @@ if (!open(L, ">$testdir/post.log")) {
   return 1;
 }
 $logfile=qx{cat "$log"};
-$logfile =~ s/\@\d+\s*\n/\@X\n/sg;
-$logfile =~ s/\n# /\n/sg;
-# strip header
-$logfile =~ s/.*(UVM_INFO.*UVM\s+testbench\s+topology)/\1/sx;
-# strip tail
-$logfile =~ s/\n\n.*/\n/sx;
-# write back
 
+# strip possible '# ' at beginning of every line
+$logfile =~ s/\n# /\n/sg;
+
+# strip irrelevant text
+$logfile =~ s/.*(=== resource pool ===.*?=== end of resource pool ===\n).*/$1/sg;
+
+# write back
 print L $logfile;
 
 close(LOG);
 close(L);
 
-if (system("diff -q $testdir/post.log $testdir/log.au > /dev/null")) {
-  $post_test = "$log and log.au differ";
-  return 1;
+system("diff $testdir/log.au $testdir/post.log > $testdir/output.df");
+if($? == 0) {
+  $post_test = "gold file matched";
+  system("rm -f $testdir/output.df");
+  system("rm -f $testdir/post.log") unless $opt_d;
+  return 0;
 }
 
-return 0;
+$post_test = "gold file mismatched";
+system("rm -f $testdir/post.log") unless $opt_d;
+return 1;

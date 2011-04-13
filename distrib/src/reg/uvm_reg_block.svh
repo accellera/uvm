@@ -119,7 +119,7 @@ virtual class uvm_reg_block extends uvm_object;
                                                   uvm_reg_addr_t base_addr,
                                                   int unsigned n_bytes,
                                                   uvm_endianness_e endian,
-                                                  bit byte_addressing = 0);
+                                                  bit byte_addressing = 1);
 
 
    // Function: check_data_width
@@ -1788,7 +1788,7 @@ function uvm_reg_map uvm_reg_block::create_map(string name,
                                                uvm_reg_addr_t base_addr,
                                                int unsigned n_bytes,
                                                uvm_endianness_e endian,
-                                               bit byte_addressing=0);
+                                               bit byte_addressing=1);
 
    uvm_reg_map  map;
 

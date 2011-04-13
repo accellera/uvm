@@ -143,8 +143,8 @@
 //
 // This <uvm_task_phase> calls the
 // <uvm_component::run_phase> virtual method. This phase runs in
-// parallel to the runtime phases, <uvm_pre_reset_ph> through
-// <uvm_post_shutdown_ph>. All components in the testbench
+// parallel to the runtime phases, <uvm_pre_reset_phase> through
+// <uvm_post_shutdown_phase>. All components in the testbench
 // are synchronized with respect to the run phase regardles of
 // the phase domain they belong to.
 //
@@ -164,66 +164,25 @@
 // - The DUT no longer needs to be simulated, and 
 // - The <uvm_post_shutdown_ph> is ready to end
 //
-// The run phase terminates in one of four ways.
+// The run phase terminates in one of two ways.
 //
-// 1. Explicit call to <global_stop_request>:
+// 1. All run_phase objections are dropped:
 //
-//   When <global_stop_request> is called, an ordered shut-down for the
-//   run phase begins.
-//   First, all enabled components' <uvm_component::stop> tasks 
-//   are called bottom-up, i.e., childrens' <uvm_component::stop> tasks
-//   are called before the parent's.
-//
-//   Stopping a component is enabled by its
-//   <uvm_component::enable_stop_interrupt> bit.
-//   Each component can implement <uvm_component::stop>
-//   to allow completion of in-progress transactions, flush queues,
-//   and other shut-down activities.
-//   Upon return from <uvm_component::stop> by all enabled components,
-//   the run phase becomes ready to end pending completion of the
-//   runtime phases (i.e. the <uvm_post_shutdown_ph> being ready to
-//   end.
-//
-//   If any component raised a phase objection in <uvm_component::run_phase()>,
-//   this stopping procedure is deferred until all outstanding objections
-//   have been dropped.
-//
-// 2. All run phase objections have been dropped after having been raised:
-//
-//   When all objections on the run phase objection have been dropped
-//   by the <uvm_component::run_phase()> methods,
-//   <global_stop_request> is called automatically, thus kicking off the
-//   stopping procedure described above.
-//
-//   If no component ever raises a phase objection, this termination
-//   mechanism never happens.
+//   When all objections on the run_phase objection have been dropped,
+//   the phase ends and all of its threads are killed.
+//   If no component raises a run_phase objection immediately upon
+//   entering the phase, the phase ends immediately.
 //   
 //
-// 3. Explicit call to <uvm_component::kill> or <uvm_component::do_kill_all>:
+// 2. Timeout:
 //
-//   When <uvm_component::kill> is called,
-//   that component's <uvm_component::run_phase> processes are killed
-//   immediately.
-//   The <uvm_component::do_kill_all> methods applies to the component
-//   and all its descendants.
-//
-//   Use of this method is not recommended.
-//   It is better to use the stopping mechanism, which affords a more ordered,
-//   safer shut-down. If an immediate termination is desired, a 
-//   <uvm_component::jump> to the <uvm_extract_ph> phase is recommended as
-//   this will cause both the run phase and the parallel runtime phases to
-//   immediately end and go to extract.
-//
-// 4. Timeout:
-//
-//   The phase ends if the timeout expires before an explicit call to
-//   <global_stop_request> or <uvm_component::kill>.
-//   By default, the timeout is set to 0, which is no timeout.
+//   The phase ends if the timeout expires before all objections are dropped.
+//   By default, the timeout is set to 9200 seconds.
 //   You may override this via <set_global_timeout>.
 //
 //   If a timeout occurs in your simulation, or if simulation never
 //   ends despite completion of your test stimulus, then it usually indicates
-//   a missing call to <global_stop_request>.
+//   that a component continues to object to the end of a phase.
 //
 //
 //
@@ -1066,7 +1025,7 @@ class uvm_phase extends uvm_object;
   //
   // To wait for the phase to be at the started state or after
   //
-  //| wait_for_state(UVM_PHASE_STARTED, UVM_GT);
+  //| wait_for_state(UVM_PHASE_STARTED, UVM_GTE);
   //
   // To wait for the phase to be either started or executing
   //
@@ -1942,13 +1901,9 @@ task uvm_phase::execute_phase();
   begin
     bit pred_of_succ[uvm_phase];
 
-    foreach (m_successors[succ]) begin
-      foreach(succ.m_predecessors[pred]) begin
-        uvm_phase p;
-        p = uvm_phase'(pred);
-        pred_of_succ[ p ] = 1;
-      end
-    end
+    foreach (m_successors[succ])
+      foreach(succ.m_predecessors[pred])
+        pred_of_succ[ pred ] = 1;
     pred_of_succ.delete(this);
 
     foreach (pred_of_succ[sibling]) begin
