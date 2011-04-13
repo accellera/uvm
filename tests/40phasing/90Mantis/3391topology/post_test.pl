@@ -41,6 +41,7 @@ if (!open(L, ">$testdir/post.log")) {
 }
 $logfile=qx{cat "$log"};
 $logfile =~ s/\@\d+\s*\n/\@X\n/sg;
+$logfile =~ s/\n# /\n/sg;
 # strip header
 $logfile =~ s/.*(UVM_INFO.*UVM\s+testbench\s+topology)/\1/sx;
 # strip tail
