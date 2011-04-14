@@ -591,7 +591,7 @@ class reg_block_oc_ethernet extends uvm_reg_block;
     endfunction: new
 
     virtual function void build();
-        this.default_map = create_map("", 0, 4, UVM_LITTLE_ENDIAN);
+        this.default_map = create_map("", 0, 4, UVM_LITTLE_ENDIAN, 0);
         this.MODER = reg_reg_MODER::type_id::create("MODER",,get_full_name());
         this.MODER.configure(this, null, "");
 
