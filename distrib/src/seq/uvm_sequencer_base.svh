@@ -1363,7 +1363,7 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
     end
 
     `uvm_info("PHASESEQ", {"Starting default sequence '",
-       seq.get_type_name(),"' for phase '", phase.get_name()}, UVM_FULL)
+       seq.get_type_name(),"' for phase '", phase.get_name(),"'"}, UVM_FULL)
 
     seq.print_sequence_info = 1;
     seq.set_sequencer(this);
@@ -1372,7 +1372,7 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
 
     if (!seq.is_randomized && !seq.randomize()) begin
       `uvm_warning("STRDEFSEQ", {"Randomization failed for default sequence '",
-       seq.get_type_name(),"' for phase ", phase.get_name()})
+       seq.get_type_name(),"' for phase '", phase.get_name(),"'"})
        return;
     end
 
