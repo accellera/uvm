@@ -227,70 +227,6 @@ class uvm_sequence_item extends uvm_transaction;
   endfunction
 
 
-  // Function- m_start_item
-  //
-  // Internal method. Called when starting an item.
-  
-  virtual task m_start_item(uvm_sequencer_base sequencer,
-                            uvm_sequence_item parent_seq,
-                            int set_priority);
-    uvm_sequence_base parent_seq_;
-    
-    if (!$cast(parent_seq_, parent_seq))
-      uvm_report_fatal ("CASTFL",
-        "start_item failed: parent_seq is not a sequence", UVM_NONE);
-
-    if (sequencer == null)
-      sequencer = get_sequencer();
-    
-    if (sequencer == null) begin
-        uvm_report_fatal("STRITM", "sequence_item has null sequencer", UVM_NONE);
-    end
-
-    set_use_sequence_info(1);
-    set_sequencer(sequencer);
-    set_parent_sequence(parent_seq_);
-    reseed();
-
-    if (set_priority < 0) set_priority = parent_seq_.get_priority();
-    
-    sequencer.wait_for_grant(parent_seq_, set_priority);
-    `ifndef UVM_DISABLE_AUTO_ITEM_RECORDING
-    if (parent_seq_ == null)
-      void'(sequencer.begin_tr(this, "aggregate_items"));
-    else
-      void'(sequencer.begin_child_tr(this, parent_seq_.m_tr_handle, get_root_sequence_name()));
-    `endif
-    parent_seq_.pre_do(1);
-  endtask  
-
-
-  // Function- m_finish_item
-  //
-  // Internal method. This method is called when <finish_item>
-  //  is called with a sequence_item argument.
-  
-  virtual task m_finish_item (uvm_sequencer_base sequencer,
-                              uvm_sequence_base seq,
-                              int set_priority = -1);
-
-    if (sequencer == null) begin
-        uvm_report_fatal("STRITM", "sequence_item has null sequencer", UVM_NONE);
-    end
-
-    if (seq == null)
-       uvm_report_fatal ("ITEMNOSEQ", "finish_item failed: parent seq is null", UVM_NONE);
-
-    seq.mid_do(this);
-    sequencer.send_request(seq, this);
-    sequencer.wait_for_item_done(seq, -1);
-    `ifndef UVM_DISABLE_AUTO_ITEM_RECORDING
-    sequencer.end_tr(this);
-    `endif
-    seq.post_do(this);
-  endtask
-
-
   // Function- get_full_name
   //
   // Internal method; overrides must follow same naming convention
@@ -377,8 +313,9 @@ class uvm_sequence_item extends uvm_transaction;
   //
   // Sequence items and sequences will use the sequencer which they are
   // associated with for reporting messages. If no sequencer has been set
-  // for the item/sequence using <set_sequencer> (or <start_item>), then the global 
-  // reporter will be used.
+  // for the item/sequence using <set_sequencer> or indirectly via 
+  // <uvm_sequence_base::start_item> or <uvm_sequence_base::start>),
+  // then the global reporter will be used.
 
   // The sequence path string is an on-demand string. To avoid building this name
   // information continuously, we save the info here. The m_get_client_info function
@@ -524,7 +461,6 @@ class uvm_sequence_item extends uvm_transaction;
   virtual function void post_do(uvm_sequence_item this_item);
     return;
   endfunction
-  */
 
   virtual task wait_for_grant(int item_priority = -1, bit  lock_request = 0);
     return;
@@ -537,5 +473,6 @@ class uvm_sequence_item extends uvm_transaction;
   virtual task wait_for_item_done(int transaction_id = -1);
     return;
   endtask
+  */
 
 endclass

@@ -464,6 +464,14 @@ class uvm_sequence_base extends uvm_sequence_item;
   // started as the default sequence. See 
   // <uvm_sequencer_base::start_phase_sequence>.
   //
+  //| virtual task user_sequence::body();
+  //|    if (starting_phase != null)
+  //|       starting_phase.raise_objection(this,"user_seq not finished");
+  //|    ...
+  //|    if (starting_phase != null)
+  //|       starting_phase.drop_objection(this,"user_seq finished");
+  //| endtask
+  //
   uvm_phase starting_phase;
 
   //------------------------
@@ -756,7 +764,29 @@ class uvm_sequence_base extends uvm_sequence_item;
        return;
     end
       
-    item.m_start_item(sequencer, this, set_priority);
+    if (sequencer == null)
+      sequencer = item.get_sequencer();
+    
+    if (sequencer == null) begin
+        uvm_report_fatal("STRITM", "sequence_item has null sequencer", UVM_NONE);
+    end
+
+    item.set_use_sequence_info(1);
+    item.set_sequencer(sequencer);
+    item.set_parent_sequence(this);
+    item.reseed();
+
+    if (set_priority < 0)
+      set_priority = get_priority();
+    
+    sequencer.wait_for_grant(this, set_priority);
+
+    `ifndef UVM_DISABLE_AUTO_ITEM_RECORDING
+      void'(sequencer.begin_child_tr(item, m_tr_handle, item.get_root_sequence_name()));
+    `endif
+
+    pre_do(1);
+
   endtask  
 
 
@@ -770,7 +800,23 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   virtual task finish_item (uvm_sequence_item item,
                             int set_priority = -1);
-    item.m_finish_item(item.get_sequencer(), this, set_priority);
+
+    uvm_sequencer_base sequencer;
+    
+    sequencer = item.get_sequencer();
+
+    if (sequencer == null) begin
+        uvm_report_fatal("STRITM", "sequence_item has null sequencer", UVM_NONE);
+    end
+
+    mid_do(item);
+    sequencer.send_request(this, item);
+    sequencer.wait_for_item_done(this, -1);
+    `ifndef UVM_DISABLE_AUTO_ITEM_RECORDING
+    sequencer.end_tr(item);
+    `endif
+    post_do(item);
+
   endtask
 
   

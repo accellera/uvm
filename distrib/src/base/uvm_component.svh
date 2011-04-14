@@ -21,6 +21,8 @@
 //------------------------------------------------------------------------------
 
 typedef class uvm_objection;
+typedef class uvm_sequence_base;
+typedef class uvm_sequence_item;
 
 //------------------------------------------------------------------------------
 //
@@ -2611,6 +2613,18 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
     return 0;
 
   recordr = (recorder == null) ? uvm_default_recorder : recorder;
+
+  if (!has_parent) begin
+    uvm_sequence_item seq;
+    if ($cast(seq,tr)) begin
+      uvm_sequence_base parent_seq = seq.get_parent_sequence();
+      if (parent_seq != null) begin
+        parent_handle = parent_seq.m_tr_handle;
+        if (parent_handle!=0)
+          has_parent = 1;
+      end
+    end
+  end
 
   tr_h = 0;
   if(has_parent)
