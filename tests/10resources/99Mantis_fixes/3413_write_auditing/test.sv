@@ -27,7 +27,7 @@ import uvm_pkg::*;
 
 // Test the simple setting of default sequences for a couple of
 // different phases, configure and main.
-string def_seqs[string] = '{default: ""};
+string def_seqs[string];
 
 class myseq extends uvm_sequence #(uvm_sequence_item);
   `uvm_object_utils(myseq)
@@ -128,10 +128,13 @@ endclass
 
 class test extends uvm_test;
    myenv env;
-   string exp_def_seqs[string] = '{ "reset":"rst_seq", "main":"myseq2", "shutdown":"shut_seq" };
+   string exp_def_seqs[string];
    function new(string name = "my_comp", uvm_component parent = null);
       super.new(name, parent);
       uvm_resource_options::turn_on_auditing();
+      exp_def_seqs["reset"]="rst_seq";
+      exp_def_seqs["main"]="myseq2";
+      exp_def_seqs["shutdown"]="shut_seq";
    endfunction
 
    `uvm_component_utils(test)
