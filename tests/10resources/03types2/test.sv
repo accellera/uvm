@@ -43,7 +43,7 @@ class config_A extends config_base;
   rand int unsigned doodad;
 
   constraint c { thingy < 100 &&
-                 doodad > 1000 && doodad < 5000; };
+                 doodad > 1000 && doodad < 5000; }
 
   function string sprint();
     string s;
@@ -62,7 +62,7 @@ class config_B extends config_base;
 
   rand int unsigned whatchit;
 
-  constraint c { whatchit < 87; };
+  constraint c { whatchit < 87; }
 
   function string sprint();
     string s;
@@ -189,7 +189,7 @@ endclass
 //----------------------------------------------------------------------
 class env extends uvm_component;
 
-  `uvm_component_utils(env);
+  `uvm_component_utils(env)
 
   shell s1, s2;
   config_A cA;
@@ -228,6 +228,17 @@ class env extends uvm_component;
 
 endclass
 
+    class fatal_error_catcher extends uvm_report_catcher;
+        int unsigned count=0;
+        virtual function action_e catch();
+            if("BUILDERR" != get_id()) return THROW;
+            if(get_severity() != UVM_FATAL) return THROW;
+            uvm_report_info("FATAL CATCHER", "From fatal_error_catcher catch()", UVM_MEDIUM , `uvm_file, `uvm_line );
+            count++; 
+            return CAUGHT;
+        endfunction
+    endclass
+
 //----------------------------------------------------------------------
 // test
 //
@@ -245,6 +256,12 @@ class test extends uvm_component;
 
   function void build();
     e = new("env", this);
+    
+    begin
+       fatal_error_catcher fec;
+       fec = new;
+       uvm_report_cb::add(null,fec);
+    end
   endfunction
 
   task run();
