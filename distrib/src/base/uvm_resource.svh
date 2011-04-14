@@ -941,6 +941,33 @@ class uvm_resource_pool;
 
   endfunction
 
+  // Function: sort_by_precedence
+  //
+  // Given a list of resources, obtained for example from <lookup_scope>,
+  // sort the resources in  precedence order. The highest precedence
+  // resource will be first in the list and the lowest precedence will
+  // be last. Resources that have the same precedence and the same name
+  // will be ordered by most recently set first.
+
+  static function void sort_by_precedence(ref uvm_resource_types::rsrc_q_t q);
+    uvm_resource_types::rsrc_q_t all[int];
+    uvm_resource_base r;
+    for(int i=0; i<q.size(); ++i) begin
+      r = q.get(i);
+      if(!all.exists(r.precedence))
+         all[r.precedence] = new;
+      all[r.precedence].push_front(r); //since we will push_front in the final
+    end
+    q.delete();
+    foreach(all[i]) begin
+      for(int j=0; j<all[i].size(); ++j) begin
+        r = all[i].get(j);
+        q.push_front(r);
+      end
+    end
+  endfunction
+
+
   // Function: get_by_name
   //
   // Lookup a resource by ~name~, ~scope~, and ~type_handle~.  Whether
@@ -1114,13 +1141,20 @@ class uvm_resource_pool;
     int unsigned err;
     uvm_resource_types::rsrc_q_t q = new();
 
-    foreach (rtab[name]) begin
+    //iterate in reverse order for the special case of autoconfig
+    //of arrays. The array name with no [] needs to be higher priority.
+    //This has no effect an manual accesses.
+    string name;
+    if(rtab.last(name)) begin
+    do begin
       rq = rtab[name];
       for(int i = 0; i < rq.size(); ++i) begin
         r = rq.get(i);
-        if(r.match_scope(scope))
+        if(r.match_scope(scope)) begin
           q.push_back(r);
+        end
       end
+    end while(rtab.prev(name));
     end
 
     return q;

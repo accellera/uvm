@@ -2969,8 +2969,11 @@ function void uvm_component::apply_config_settings (bit verbose=0);
     $display("applying configuration settings for %s", get_full_name());
 
   rq = rp.lookup_scope(get_full_name());
+  rp.sort_by_precedence(rq);
 
-  for(int i=0; i<rq.size(); ++i) begin
+  // rq is in precedence order now, so we have to go through in reverse
+  // order to do the settings.
+  for(int i=rq.size()-1; i>=0; --i) begin
 
     r = rq.get(i);
     name = r.get_name();
@@ -2987,7 +2990,8 @@ function void uvm_component::apply_config_settings (bit verbose=0);
     else
       search_name = name;
 
-    if(!__m_uvm_status_container.field_array.exists(search_name))
+    if(!uvm_resource_pool::m_has_wildcard_names && 
+       !__m_uvm_status_container.field_array.exists(search_name))
       continue;
 
     if(verbose)
