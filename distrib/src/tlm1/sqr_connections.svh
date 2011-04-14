@@ -21,7 +21,7 @@
 //-----------------------------------------------------------------------------
 
 
-`define SEQ_ITEM_PULL_IMP(imp, REQ, RSP, req_arg, rsp_arg) \
+`define UVM_SEQ_ITEM_PULL_IMP(imp, REQ, RSP, req_arg, rsp_arg) \
   task get_next_item(output REQ req_arg); imp.get_next_item(req_arg); endtask \
   task try_next_item(output REQ req_arg); imp.try_next_item(req_arg); endtask \
   function void item_done(input RSP rsp_arg = null); imp.item_done(rsp_arg); endfunction \
@@ -53,8 +53,8 @@
 
 class uvm_seq_item_pull_port #(type REQ=int, type RSP=REQ)
   extends uvm_port_base #(uvm_sqr_if_base #(REQ, RSP));
-  `UVM_SEQ_PORT(`SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_port")
-  `SEQ_ITEM_PULL_IMP(this.m_if, REQ, RSP, t, t)
+  `UVM_SEQ_PORT(`UVM_SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_port")
+  `UVM_SEQ_ITEM_PULL_IMP(this.m_if, REQ, RSP, t, t)
 
   bit print_enabled = 0;
     
@@ -72,8 +72,8 @@ endclass
 
 class uvm_seq_item_pull_export #(type REQ=int, type RSP=REQ)
   extends uvm_port_base #(uvm_sqr_if_base #(REQ, RSP));
-  `UVM_EXPORT_COMMON(`SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_export")
-  `SEQ_ITEM_PULL_IMP(this.m_if, REQ, RSP, t, t)
+  `UVM_EXPORT_COMMON(`UVM_SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_export")
+  `UVM_SEQ_ITEM_PULL_IMP(this.m_if, REQ, RSP, t, t)
 endclass
 
 
@@ -89,7 +89,7 @@ endclass
 class uvm_seq_item_pull_imp #(type REQ=int, type RSP=REQ, type IMP=int)
   extends uvm_port_base #(uvm_sqr_if_base #(REQ, RSP));
    // Function: new
-  `UVM_IMP_COMMON(`SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_imp",IMP)
-  `SEQ_ITEM_PULL_IMP(m_imp, REQ, RSP, t, t)
+  `UVM_IMP_COMMON(`UVM_SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_imp",IMP)
+  `UVM_SEQ_ITEM_PULL_IMP(m_imp, REQ, RSP, t, t)
 
 endclass

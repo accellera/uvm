@@ -1209,7 +1209,7 @@ endclass
 
 typedef class uvm_cmdline_processor;
 
-`define PH_TRACE(ID,MSG,PH,VERB) \
+`define UVM_PH_TRACE(ID,MSG,PH,VERB) \
    `uvm_info(ID, {MSG, $sformatf(" %0s (in schedule %0s, domain %s) id=%0d", \
        PH.get_name(), PH.get_schedule_name(), PH.get_domain_name(), PH.get_inst_id())}, VERB);
 
@@ -1723,7 +1723,7 @@ task uvm_phase::execute_phase();
 
 
   if (m_phase_trace) begin
-    `PH_TRACE("PH/TRC/STRT","Starting phase",this,UVM_LOW)
+    `UVM_PH_TRACE("PH/TRC/STRT","Starting phase",this,UVM_LOW)
   end
 
 
@@ -1792,11 +1792,11 @@ task uvm_phase::execute_phase();
                if (phase_done.get_objection_total(top) ||
                    m_use_ovm_run_semantic && m_imp.get_name() == "run") begin
                  phase_done.wait_for(UVM_ALL_DROPPED, top);
-                 `PH_TRACE("PH/TRC/EXE/ALLDROP","PHASE EXIT ALL_DROPPED",this,UVM_DEBUG)
+                 `UVM_PH_TRACE("PH/TRC/EXE/ALLDROP","PHASE EXIT ALL_DROPPED",this,UVM_DEBUG)
                end
                else begin
                   if (m_phase_trace)
-                    `PH_TRACE("PH/TRC/SKIP","No objections raised, skipping phase",this,UVM_LOW)
+                    `UVM_PH_TRACE("PH/TRC/SKIP","No objections raised, skipping phase",this,UVM_LOW)
                end
              end
   
@@ -1816,7 +1816,7 @@ task uvm_phase::execute_phase();
                              top.phase_timeout, get_name()))
                end
                phase_done.clear(this);
-               `PH_TRACE("PH/TRC/EXE/3","PHASE EXIT TIMEOUT",this,UVM_DEBUG)
+               `UVM_PH_TRACE("PH/TRC/EXE/3","PHASE EXIT TIMEOUT",this,UVM_DEBUG)
              end
   
            join_any
@@ -1826,7 +1826,7 @@ task uvm_phase::execute_phase();
            m_ready_to_end_count++;
            if (m_ready_to_end_count < max_ready_to_end_iter) begin
              if (m_phase_trace)
-               `PH_TRACE("PH_READY_TO_END_CB","CALLING READY_TO_END CB",this,UVM_HIGH)
+               `UVM_PH_TRACE("PH_READY_TO_END_CB","CALLING READY_TO_END CB",this,UVM_HIGH)
              if (m_imp != null)
                m_imp.traverse(top,this,UVM_PHASE_READY_TO_END);
              #0; // LET ANY WAITERS WAKE UP
@@ -1846,7 +1846,7 @@ task uvm_phase::execute_phase();
   // READY_TO_END:
   //--------------
 
-  `PH_TRACE("PH_READY_TO_END","PHASE READY TO END",this,UVM_DEBUG)
+  `UVM_PH_TRACE("PH_READY_TO_END","PHASE READY TO END",this,UVM_DEBUG)
   m_state = UVM_PHASE_READY_TO_END;
 
 
@@ -1870,7 +1870,7 @@ task uvm_phase::execute_phase();
 
     // execute 'phase_ended' callbacks
     if (m_phase_trace)
-      `PH_TRACE("PH_END","JUMPING OUT OF PHASE",this,UVM_HIGH)
+      `UVM_PH_TRACE("PH_END","JUMPING OUT OF PHASE",this,UVM_HIGH)
     m_state = UVM_PHASE_ENDED;
     if (m_imp != null)
        m_imp.traverse(top,this,UVM_PHASE_ENDED);
@@ -1925,7 +1925,7 @@ task uvm_phase::execute_phase();
   //-------
   // execute 'phase_ended' callbacks
   if (m_phase_trace)
-    `PH_TRACE("PH_END","ENDING PHASE",this,UVM_HIGH)
+    `UVM_PH_TRACE("PH_END","ENDING PHASE",this,UVM_HIGH)
   m_state = UVM_PHASE_ENDED;
   if (m_imp != null)
     m_imp.traverse(top,this,UVM_PHASE_ENDED);
@@ -1949,7 +1949,7 @@ task uvm_phase::execute_phase();
   // DONE:
   //------
   if (m_phase_trace)
-    `PH_TRACE("PH/TRC/DONE","Completed phase",this,UVM_LOW)
+    `UVM_PH_TRACE("PH/TRC/DONE","Completed phase",this,UVM_LOW)
   m_state = UVM_PHASE_DONE;
   m_phase_proc = null;
   #0; // LET ANY WAITERS WAKE UP
@@ -1971,7 +1971,7 @@ task uvm_phase::execute_phase();
         succ.m_state = UVM_PHASE_SCHEDULED;
           #0; // LET ANY WAITERS WAKE UP
         if (m_phase_trace)
-          `PH_TRACE("PH/TRC/SCHEDULED","Scheduling phase",succ,UVM_LOW)
+          `UVM_PH_TRACE("PH/TRC/SCHEDULED","Scheduling phase",succ,UVM_LOW)
         void'(m_phase_hopper.try_put(succ));
       end
     end
