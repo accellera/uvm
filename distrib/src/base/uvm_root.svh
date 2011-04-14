@@ -55,6 +55,12 @@
 // See <uvm_report_error>, <uvm_report_warning>, and other global
 // methods.
 //
+//
+// The ~uvm_top~ instance checks during the end_of_elaboration phase if any errors have 
+// been generated so far. If errors are found an UVM_FATAL error is being generated as result 
+// so that the simulation will not continue to the start_of_simulation_phase.
+// 
+
 //------------------------------------------------------------------------------
 
 typedef class uvm_test_done_objection;
