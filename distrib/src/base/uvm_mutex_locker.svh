@@ -18,7 +18,7 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// class: uvm_mutex_locker#(T)
+// class- uvm_mutex_locker#(T)
 //
 // The uvm_mutex_locker#(T) class provides a policy for locking objects.
 // Uvm_mutex_locker #(T), or the locker, as we'll refer to it, is a data
@@ -92,7 +92,7 @@ class uvm_mutex_locker #(type T=int);
   endfunction
 
   //-------------------------
-  // Group: Locking Interface
+  // Group- Locking Interface
   //-------------------------
   //
   // The task <lock> and the functions <try_lock> and <unlock> form a
@@ -104,7 +104,7 @@ class uvm_mutex_locker #(type T=int);
   // for more information on put/get.  The lock interface is a wrapper
   // around a local semaphore.
 
-  // Task: lock
+  // Task- lock
   //
   // Retrieves a lock for this resource.  The task blocks until the lock
   // is obtained.
@@ -115,7 +115,7 @@ class uvm_mutex_locker #(type T=int);
     set_process(process::self);
   endtask
 
-  // Function: try_lock
+  // Function- try_lock
   //
   // Retrives the lock for this resource.  The function is nonblocking,
   // so it will return immediately.  If it was successfull in retrieving
@@ -131,7 +131,7 @@ class uvm_mutex_locker #(type T=int);
       return 0;
   endfunction
 
-  // Function: unlock
+  // Function- unlock
   //
   // Releases the lock held by this semaphore.
 
@@ -147,7 +147,7 @@ class uvm_mutex_locker #(type T=int);
       end
   endfunction
 
-  // function: set_process
+  // function- set_process
   //
   // Set the process owner of this locker to the process passed in as an
   // argument.  Pass in null to clear the locker of any ownership.
@@ -156,7 +156,7 @@ class uvm_mutex_locker #(type T=int);
     pid = p;
   endfunction
 
-  // function: get_process
+  // function- get_process
   //
   // Return the process id of the process that currently the owner of
   // this locker.  The return value may be null if no one owns it.
@@ -183,7 +183,7 @@ class uvm_mutex_locker #(type T=int);
 
 
   //-------------------------
-  // Group: Read/Write Interface
+  // Group- Read/Write Interface
   //-------------------------
   //
   // This interface is optional, you can choose to lock a resource or
@@ -191,7 +191,7 @@ class uvm_mutex_locker #(type T=int);
   // The difference between read/write interface and the locking
   // interface is the use of a semaphore to guarantee exclusive access.
 
-  // Task: read
+  // Task- read
   //
   // Locking read(). Returns the contents of the locker.  This task will
   // block until the lock is obtained.  If the request comes from the
@@ -209,7 +209,7 @@ class uvm_mutex_locker #(type T=int);
     end
   endtask
 
-  // Function: try_read
+  // Function- try_read
   //
   // Nonblocking form of read().  If the lock is availble it grabs the
   // lock and returns 1.  If the lock is not available then it returns a
@@ -231,7 +231,7 @@ class uvm_mutex_locker #(type T=int);
     return 1;
   endfunction
 
-  // Task: write
+  // Task- write
   //
   // Modifies the data in the locker.  May block if the lock is held by
   // another process.  If the process that owns the lock calls this
@@ -249,7 +249,7 @@ class uvm_mutex_locker #(type T=int);
     end
   endtask
 
-  // Function: try_write
+  // Function- try_write
   //
   // Nonblocking form of write(). If the lock is available then val is
   // updated immediately and a 1 is returned.  If the lock is not
