@@ -18,7 +18,7 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// class: uvm_resource_mutex_db
+// class- uvm_resource_mutex_db
 //
 // The uvm_resource_mutex_db#(T) class provides a convenience
 // interface for the resources facility for locking resource.  In many
@@ -59,7 +59,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
   //  protected function new();
   //  endfunction
 
-  // function: get_by_type
+  // funciton- get_by_type
   //
   // Get a resource by type.  The type is specified in the db
   // class parameter so the only argument to this function is the
@@ -69,7 +69,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
     return rsrc_t::get_by_type(scope, rsrc_t::get_type());
   endfunction
 
-  // function: get_by_name
+  // funciton- get_by_name
   //
   // looks up a resource by ~name~.  The first argument is the ~name~ of
   // the resource to be retrieved and the second argument is the current
@@ -85,7 +85,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
     return rsrc_t::get_by_name(scope, name, rpterr);
   endfunction
 
-  // function: set_default
+  // funciton- set_default
   //
   // add a new item into the resources database.  The item will not be
   // written to so it will have its default value. The resource is
@@ -105,7 +105,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   endfunction
 
-  // function: set
+  // funciton- set
   //
   // Create a new locker and a new resource, write ~val~ to the locker,
   // and set it into the database using ~name~ and ~scope~ as the lookup
@@ -134,7 +134,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   endfunction
 
-  // function: set_anonymous
+  // funciton- set_anonymous
   //
   // Create a new resource and a locker, write ~val~ to the locker, and
   // set it into the database.  The resource has no name and therefore
@@ -157,7 +157,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   endfunction
 
-  // function: set_override
+  // funciton- set_override
   //
   // Create a new resource and loker, write ~val~ to the locker, and set
   // it into the database.  Set it at the beginning of the queue in the
@@ -179,7 +179,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
     rsrc.set_override();
   endfunction
 
-  // function: set_override_type
+  // funciton- set_override_type
   //
   // Create a new resource and locker, write ~val~ to the locker, and
   // set it into the database.  Set it at the beginning of the queue in
@@ -203,7 +203,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
     rsrc.set_override(uvm_resource_types::TYPE_OVERRIDE);
   endfunction
 
-  // function: set_override_name
+  // funciton- set_override_name
   //
   // Create a new resource and locker, write ~val~ to the locker, and
   // set it into the database.  Set it at the beginning of the queue in
@@ -228,7 +228,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
     rsrc.set_override(uvm_resource_types::NAME_OVERRIDE);
   endfunction
 
-  // function: read_by_name
+  // funciton- read_by_name
   //
   // locate a locker by ~name~ and ~scope~ and read its value. The value
   // is returned through the ref argument ~val~.  The return value is a
@@ -257,7 +257,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
   
   endtask
 
-  // function: read_by_type
+  // funciton- read_by_type
   //
   // Locate a locker by type and read its value.  The value is returned
   // through the ref argument ~val~.  The ~scope~ is used for the
@@ -285,7 +285,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   endtask
 
-  // function: write_by_name
+  // funciton- write_by_name
   //
   // Locate a locker by name and update its value with ~val~.  Look up
   // the resource by ~name~ and ~scope~.  The locker API is used to
@@ -313,7 +313,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   endtask
 
-  // function: write_by_type
+  // funciton- write_by_type
   //
   // Locate a locker in the resource data and update its value with
   // ~val~. Look up the resource by type. The locking API is used to
@@ -341,7 +341,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   endtask
 
-  // function: lock
+  // funciton- lock
   //
   // Lock the resource supplied as an argument.  Lock() will block until
   // the lock is acquired.  The resource must be a "locker resource",
@@ -358,7 +358,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
     lckr.lock();
   endtask
 
-  // function: try_lock
+  // funciton- try_lock
   //
   // Try_lock() requests the lock of the resource supplied as an
   // argument, and returns immediatly whether or not the lock was
@@ -377,7 +377,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
     return lckr.try_lock();
   endfunction
 
-  // function: unlock
+  // funciton- unlock
   //
   // Release the lock for the resource supplied as an argument.  The
   // lock can be released only by the process that acquired it.  This is
@@ -394,7 +394,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
     lckr.unlock();
   endfunction
 
-  // function: read
+  // funciton- read
   //
   // Read the value from a resource supplied as an argument.  The
   // resource must be a locker resource, one whose type is
@@ -413,7 +413,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
     lckr.read(t);
   endtask
 
-  // function: try_read
+  // funciton- try_read
   //
   // Nonblocking form of read.  It will return immeditaly, whether or
   // not the operation completed successfully.  If the read is
@@ -440,7 +440,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
 
   endfunction
 
-  // function: write
+  // funciton- write
   //
   // Write a new value to the resource supplied as an argument.  The
   // resource must be a locker resource, one whose type is
@@ -460,7 +460,7 @@ class uvm_resource_mutex_db #(type T=uvm_object);
     rsrc.record_write_access(accessor);
   endtask
 
-  // function: try_write
+  // funciton- try_write
   //
   // Nonblocking form of write.  It will return immeditaly, whether or
   // not the operation completed successfully.  If the write is
