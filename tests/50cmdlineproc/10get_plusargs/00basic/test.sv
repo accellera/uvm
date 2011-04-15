@@ -64,7 +64,10 @@ class test extends uvm_test;
            $display("  Correct number of arguments found");
        end
        "ModelSim for Questa ",
-       "ModelSim for Questa-64" : begin
+       "ModelSim for Questa",
+       "ModelSim for Questa-64",
+       "ModelSim SE",
+       "ModelSim SE-64" : begin
          $display("Doing Questa checks");
          if(plus_args.size() != 9) begin
            $display("  Incorrect number of arguments %0d found (expected 9)", plus_args.size());
