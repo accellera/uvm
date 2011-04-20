@@ -237,7 +237,7 @@ class uvm_recorder extends uvm_object;
   // Opens the file in the <filename> property and assigns to the
   // file descriptor <file>.
   //
-  function bit open_file();
+  virtual function bit open_file();
     if (file == 0)
       file = $fopen(filename);
     return (file > 0);
@@ -247,7 +247,7 @@ class uvm_recorder extends uvm_object;
   // Function- create_stream
   //
   //
-  function integer create_stream (string name,
+  virtual function integer create_stream (string name,
                                  string t,
                                  string scope);
     return 0;
@@ -257,7 +257,7 @@ class uvm_recorder extends uvm_object;
   // Function- m_set_attribute
   //
   //
-  function void m_set_attribute (integer txh,
+  virtual function void m_set_attribute (integer txh,
                                  string nm,
                                  string value);
     if (open_file())
@@ -268,7 +268,7 @@ class uvm_recorder extends uvm_object;
   // Function- set_attribute
   //
   //
-  function void set_attribute (integer txh,
+  virtual function void set_attribute (integer txh,
                                string nm,
                                logic [1023:0] value,
                                uvm_radix_enum radix,
@@ -283,7 +283,7 @@ class uvm_recorder extends uvm_object;
   // Function- check_handle_kind
   //
   //
-  function integer check_handle_kind (string htype, integer handle);
+  virtual function integer check_handle_kind (string htype, integer handle);
     return 1;
   endfunction
   
@@ -291,7 +291,7 @@ class uvm_recorder extends uvm_object;
   // Function- begin_tr
   //
   //
-  function integer begin_tr(string txtype,
+  virtual function integer begin_tr(string txtype,
                                      integer stream,
                                      string nm,
                                      string label="",
@@ -311,7 +311,7 @@ class uvm_recorder extends uvm_object;
   // Function- end_tr
   //
   //
-  function void end_tr (integer handle, time end_time=0);
+  virtual function void end_tr (integer handle, time end_time=0);
     if (open_file())
       $fdisplay(file,"END: {TXH:%-5d TIME=%0t}",handle,end_time);
   endfunction
@@ -320,7 +320,7 @@ class uvm_recorder extends uvm_object;
   // Function- link_tr
   //
   //
-  function void link_tr(integer h1,
+  virtual function void link_tr(integer h1,
                                  integer h2,
                                  string relation="");
     if (open_file())
@@ -332,7 +332,7 @@ class uvm_recorder extends uvm_object;
   // Function- free_tr
   //
   //
-  function void free_tr(integer handle);
+  virtual function void free_tr(integer handle);
     if (open_file())
       $fdisplay(file,"  FREE: {TXH:%-5d}", handle);
   endfunction
