@@ -2440,6 +2440,8 @@ class uvm_domain extends uvm_phase;
   // Create a new instance of a phase domain.
   function new(string name);
     super.new(name,UVM_PHASE_DOMAIN);
+    if (m_domains.exists(name))
+      `uvm_error("UNIQDOMNAM", $psprintf("Domain created with non-unique name '%s'", name))
     m_domains[name] = this;
   endfunction
 
