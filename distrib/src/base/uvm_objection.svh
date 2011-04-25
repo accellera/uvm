@@ -713,15 +713,12 @@ class uvm_objection extends uvm_report_object;
   //
   // Waits for the raised, dropped, or all_dropped ~event~ to occur in
   // the given ~obj~. The task returns after all corresponding callbacks
-  // have been executed.
+  // for that event have been executed.
   //
   task wait_for(uvm_objection_event objt_event, uvm_object obj=null);
 
      if (obj==null)
        obj = m_top;
-
-     if (obj == m_top && m_top_all_dropped)
-       return;
 
      if (!m_events.exists(obj)) begin
        m_events[obj] = new;

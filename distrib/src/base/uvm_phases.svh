@@ -1791,7 +1791,8 @@ task uvm_phase::execute_phase();
                // OVM semantic: don't end until objection raised or stop request
                if (phase_done.get_objection_total(top) ||
                    m_use_ovm_run_semantic && m_imp.get_name() == "run") begin
-                 phase_done.wait_for(UVM_ALL_DROPPED, top);
+                 if (!phase_done.m_top_all_dropped)
+                   phase_done.wait_for(UVM_ALL_DROPPED, top);
                  `UVM_PH_TRACE("PH/TRC/EXE/ALLDROP","PHASE EXIT ALL_DROPPED",this,UVM_DEBUG)
                end
                else begin
