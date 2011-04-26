@@ -28,7 +28,7 @@ and the phase implementation which specifies required component behavior
 
 (see uvm_ref_phases_uml.gif)
 
-The following classes related to phasing are defined herein:
+*The following classes related to phasing are defined herein*
 
 <uvm_phase> : The base class for defining a phase's behavior, state, context
 
@@ -40,6 +40,11 @@ The following classes related to phasing are defined herein:
 
 <uvm_task_phase> : A phase implemenation for task phases.
 
+*Common, Run-Time and User-Defined Phases*
 
+The common phases to all <uvm_component>s are described in <UVM Common
+Phases>.
 
+The run-time phases are described in <UVM Run-Time Phases>.
 
+The ability to create user-defined phases is described <User-Defined Phases>.
