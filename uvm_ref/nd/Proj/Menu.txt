@@ -79,13 +79,13 @@ Group: Factory  {
 Group: Phasing  {
 
    File: Overview  (no auto-title, /home/jofowler/git/uvm/uvm_ref/phasing.txt)
-   File: uvm_phase  (/home/jofowler/git/uvm/distrib/src/base/phasing/uvm_phase.svh)
-   File: uvm_domain  (/home/jofowler/git/uvm/distrib/src/base/phasing/uvm_domain.svh)
-   File: uvm_bottomup_phase  (/home/jofowler/git/uvm/distrib/src/base/phasing/uvm_bottomup_phase.svh)
-   File: uvm_topdown_phase  (/home/jofowler/git/uvm/distrib/src/base/phasing/uvm_topdown_phase.svh)
-   File: uvm_task_phase  (/home/jofowler/git/uvm/distrib/src/base/phasing/uvm_task_phase.svh)
-   File: UVM Common Phases  (no auto-title, /home/jofowler/git/uvm/distrib/src/base/phasing/uvm_common_phases.svh)
-   File: UVM Run-Time Phases  (no auto-title, /home/jofowler/git/uvm/distrib/src/base/phasing/uvm_runtime_phases.svh)
+   File: uvm_phase  (/home/jofowler/git/uvm/distrib/src/base/uvm_phase.svh)
+   File: uvm_domain  (/home/jofowler/git/uvm/distrib/src/base/uvm_domain.svh)
+   File: uvm_bottomup_phase  (/home/jofowler/git/uvm/distrib/src/base/uvm_bottomup_phase.svh)
+   File: uvm_task_phase  (/home/jofowler/git/uvm/distrib/src/base/uvm_task_phase.svh)
+   File: uvm_topdown_phase  (/home/jofowler/git/uvm/distrib/src/base/uvm_topdown_phase.svh)
+   File: UVM Common Phases  (/home/jofowler/git/uvm/distrib/src/base/uvm_common_phases.svh)
+   File: UVM Run-Time Phases  (/home/jofowler/git/uvm/distrib/src/base/uvm_runtime_phases.svh)
    File: User-Defined Phases  (no auto-title, /home/jofowler/git/uvm/uvm_ref/test-phasing.txt)
    }  # Group: Phasing
 
