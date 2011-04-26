@@ -21,6 +21,8 @@
 //----------------------------------------------------------------------
 // Title: UVM Configuration Database
 //
+// Topic: Intro
+//
 // The <uvm_config_db> class provides a convenience interface 
 // on top of the <uvm_resource_db> to simplify the basic interface
 // that is used for configuring <uvm_component> instances.
