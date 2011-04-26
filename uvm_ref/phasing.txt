@@ -1,4 +1,4 @@
-TITLE: Phasing
+TITLE: Phasing Overview
 
 UVM implements an automated mechanism for phasing the execution of
 the various components in a testbench.

@@ -39,7 +39,7 @@ without having to modify their code and without breaking encapsulation.
 See <Factory Classes> for details.
 
 Phasing - This sections describes the phasing capability providing by UVM.
-The details can be found in <Phasing>.
+The details can be found in <Phasing Overview>.
 
 Configuration and Resources - The <Configuration and Resource Classes> are
 a set of classes which provide a configuration database. The configuration
