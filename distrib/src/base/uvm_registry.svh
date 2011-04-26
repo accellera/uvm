@@ -26,6 +26,8 @@
 //------------------------------------------------------------------------------
 // Title: Factory Component and Object Wrappers
 //
+// Topic: Intro
+//
 // This section defines the proxy component and object classes used by the
 // factory. To avoid the overhead of creating an instance of every component
 // and object that get registered, the factory holds lightweight wrappers,
