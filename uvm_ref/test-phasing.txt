@@ -1,56 +1,6 @@
+Title: User-Defined Phases
 
-Title: Test Phases
-
-This section describes the set of pre-defined phases
-provided as a standard part of the UVM library.
-
-Group: Common Phases
-
-The common phases are the set of function and task phases that all
-<uvm_component>s execute together.
-All <uvm_component>s are always synchronized
-with respect to the common phases.
-
-The common phases are executed in the sequence they are specified below:
-
--  <uvm_build_phase> 
--  <uvm_connect_phase> 
--  <uvm_end_of_elaboration_phase> 
--  <uvm_start_of_simulation_phase> 
--  <uvm_run_phase> 
--  <uvm_extract_phase> 
--  <uvm_check_phase> 
--  <uvm_report_phase> 
--  <uvm_final_phase> 
-
-
-Group: Run-Time Phases
-
-The run-time schedule is the pre-defined phase schedule
-which runs concurrently to the <uvm_run_phase> global run phase.
-By default, all <uvm_component>s using the run-time schedule
-are synchronized with respect to the pre-defined phases in the schedule.
-It is possible for components to belong to different domains
-in which case their schedules can be unsynchronized.
-
-The run-time phases are executed in the sequence they are specified below:
-
--  <uvm_pre_reset_phase> 
--  <uvm_reset_phase> 
--  <uvm_post_reset_phase> 
--  <uvm_pre_configure_phase> 
--  <uvm_configure_phase> 
--  <uvm_post_configure_phase> 
--  <uvm_pre_main_phase> 
--  <uvm_main_phase> 
--  <uvm_post_main_phase> 
--  <uvm_pre_shutdown_phase> 
--  <uvm_shutdown_phase> 
--  <uvm_post_shutdown_phase> 
-
-Group: User-Defined Phases
-
-To define your own custom phase, use the following pattern
+To define your own custom phase, use the following pattern.
 
  1. Extend the appropriate base class for your phase type.
 |       class my_PHASE_phase extends uvm_task_phase;
@@ -79,7 +29,7 @@ To define your own custom phase, use the following pattern
 |          Optionally implement exec_func/exec_task
 |       endclass : my_PHASE_phase
 
- 4. insert the phase in a phase schedule or domain using the
+ 4. Insert the phase in a phase schedule or domain using the
     <uvm_phase::add> method:
 |       my_schedule.add(my_PHASE_class::get());
 
