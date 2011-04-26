@@ -22,10 +22,56 @@
 
 typedef class uvm_test_done_objection;
 typedef class uvm_sequencer_base;
-typedef class uvm_process;
 
 typedef class uvm_domain;
 typedef class uvm_task_phase;
+
+//------------------------------------------------------------------------------
+//
+// Class - uvm_process
+//
+//------------------------------------------------------------------------------
+// Workaround container for process construct.
+
+class uvm_process;
+
+  protected process m_process_id;  
+
+  function new(process pid);
+    m_process_id = pid;
+  endfunction
+
+  function process self();
+    return m_process_id;
+  endfunction
+
+  virtual function void kill();
+    m_process_id.kill();
+  endfunction
+
+`ifdef UVM_USE_FPC
+  virtual function process::state status();
+    return m_process_id.status();
+  endfunction
+
+  task await();
+    m_process_id.await();
+  endtask
+
+  task suspend();
+   m_process_id.suspend();
+  endtask
+
+  function void resume();
+   m_process_id.resume();
+  endfunction
+`else
+  virtual function int status();
+    return m_process_id.status();
+  endfunction
+`endif
+
+endclass
    
 //------------------------------------------------------------------------------
 //
@@ -33,7 +79,7 @@ typedef class uvm_task_phase;
 //
 //------------------------------------------------------------------------------
 //
-// This base class defines everything about a phase: behavior, state, and context
+// This base class defines everything about a phase: behavior, state, and context.
 //
 // To define behavior, it is extended by UVM or the user to create singleton
 // objects which capture the definition of what the phase does and how it does it.
@@ -44,7 +90,7 @@ typedef class uvm_task_phase;
 // VIP Providers can likewise extend this class to define the phase functor for a
 // particular component context as required.
 //
-// Phase Definition
+// *Phase Definition*
 //
 // Singleton instances of those extensions are provided as package variables.
 // These instances define the attributes of the phase (not what state it is in)
@@ -70,7 +116,7 @@ typedef class uvm_task_phase;
 // This scheme ensures compile-safety for your extended component classes while
 // providing homogeneous base types for APIs and underlying data structures.
 //
-// Phase Context
+// *Phase Context*
 //
 // A schedule is a coherent group of one or mode phase/state nodes linked
 // together by a graph structure, allowing arbitrary linear/parallel
@@ -79,7 +125,7 @@ typedef class uvm_task_phase;
 // Each schedule node points to a phase and holds the execution state of that
 // phase, and has optional links to other nodes for synchronization.
 //
-// The main build operations are: construct, add phases, and instantiate
+// The main operations are: construct, add phases, and instantiate
 // hierarchically within another schedule.
 //
 // Structure is a DAG (Directed Acyclic Graph). Each instance is a node
@@ -91,14 +137,14 @@ typedef class uvm_task_phase;
 // arrows you will never end up back where you started but you will eventually
 // reach a node that has no successors.
 //
-// Phase State
+// *Phase State*
 //
 // A given phase may appear multiple times in the complete phase graph, due
 // to the multiple independent domain feature, and the ability for different
 // VIP to customize their own phase schedules perhaps reusing existing phases.
 // Each node instance in the graph maintains its own state of execution.
 //
-// Phase Handle
+// *Phase Handle*
 //
 // Handles of this type uvm_phase are used frequently in the API, both by
 // the user, to access phasing-specific API, and also as a parameter to some
