@@ -164,8 +164,8 @@
 //| `uvm_info_context(ID,MSG,VERBOSITY,CNTXT)
 //
 // Operates identically to `uvm_info but requires that the
-// context in which the message is printed be explicitly supplied as a
-// macro argument.
+// context, or <uvm_report_object>, in which the message is printed be 
+// explicitly supplied as a macro argument.
 
 `define uvm_info_context(ID, MSG, VERBOSITY, CNTXT) \
    begin \
@@ -178,8 +178,8 @@
 //| `uvm_warning_context(ID,MSG,CNTXT)
 //
 // Operates identically to `uvm_warning but requires that the
-// context in which the message is printed be explicitly supplied as a
-// macro argument.
+// context, or <uvm_report_object>, in which the message is printed be
+// explicitly supplied as a macro argument.
 
 `define uvm_warning_context(ID, MSG, CNTXT) \
    begin \
@@ -192,8 +192,8 @@
 //| `uvm_error_context(ID,MSG,CNTXT)
 //
 // Operates identically to `uvm_error but requires that the
-// context in which the message is printed be explicitly supplied as a
-// macro argument.
+// context, or <uvm_report_object> in which the message is printed be 
+// explicitly supplied as a macro argument.
 
 `define uvm_error_context(ID, MSG, CNTXT) \
    begin \
@@ -206,8 +206,8 @@
 //| `uvm_fatal_context(ID,MSG,CNTXT)
 //
 // Operates identically to `uvm_fatal but requires that the
-// context in which the message is printed be explicitly supplied as a
-// macro argument.
+// context, or <uvm_report_object>, in which the message is printed be 
+// explicitly supplied as a macro argument.
 
 `define uvm_fatal_context(ID, MSG, CNTXT) \
    begin \
