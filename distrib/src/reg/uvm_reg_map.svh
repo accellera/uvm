@@ -341,6 +341,17 @@ class uvm_reg_map extends uvm_object;
    extern virtual function int unsigned get_n_bytes (uvm_hier_e hier=UVM_HIER);
 
 
+   // Function: get_n_bytes_in_lau
+   //
+   // Get the number of bytes in the smallest addressable unit in the map.
+   // Returns 1 if the address map was configured using byte-level addressing.
+   // Returns <get_n_bytes()> otherwise.
+   // The least addressable unit is the number of bytes
+   // that separates two consecutive address values.
+   //
+   extern virtual function int unsigned get_n_bytes_in_lau();
+
+
    // Function: get_base_addr
    //
    // Gets the endianness of the bus associated with this map. If ~hier~ is
@@ -1048,6 +1059,13 @@ function int unsigned uvm_reg_map::get_n_bytes(uvm_hier_e hier=UVM_HIER);
   if (hier == UVM_NO_HIER)
     return m_n_bytes;
   return m_system_n_bytes;
+endfunction
+
+
+// get_n_bytes_in_lau
+
+function int unsigned uvm_reg_map::get_n_bytes_in_lau();
+   return (m_byte_addressing) ? 1 : m_n_bytes;
 endfunction
 
 
