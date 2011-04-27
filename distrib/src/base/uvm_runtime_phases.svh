@@ -39,7 +39,7 @@
 //
 // <uvm_task_phase> that calls the
 // <uvm_component::pre_reset_phase> method. This phase starts at the
-// same time as the <uvm_run_ph> unless a user defined phase is inserted
+// same time as the <uvm_run_phase> unless a user defined phase is inserted
 // in front of this phase.
 //
 // Upon Entry:
@@ -508,7 +508,7 @@ endclass : uvm_shutdown_phase
 //
 // <uvm_task_phase> that calls the
 // <uvm_component::post_shutdown_phase> method.  The end of this phase is
-// synchronized to the end of the <uvm_run_ph> phase unless a user defined
+// synchronized to the end of the <uvm_run_phase> phase unless a user defined
 // phase is added after this phase.
 //
 // Upon Entry:
