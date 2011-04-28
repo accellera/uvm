@@ -97,23 +97,6 @@ Group: Configuration and Resources  {
    File: uvm_config_db  (no auto-title, /home/jofowler/git/uvm/distrib/src/base/uvm_config_db.svh)
    }  # Group: Configuration and Resources
 
-Group: Sequencers  {
-
-   File: Overview  (no auto-title, /home/jofowler/git/uvm/uvm_ref/sequencers.txt)
-   File: uvm_sequencer_base  (/home/jofowler/git/uvm/distrib/src/seq/uvm_sequencer_base.svh)
-   File: uvm_sequencer_param_base  (no auto-title, /home/jofowler/git/uvm/distrib/src/seq/uvm_sequencer_param_base.svh)
-   File: uvm_sequencer  (no auto-title, /home/jofowler/git/uvm/distrib/src/seq/uvm_sequencer.svh)
-   File: uvm_push_sequencer  (no auto-title, /home/jofowler/git/uvm/distrib/src/seq/uvm_push_sequencer.svh)
-   }  # Group: Sequencers
-
-Group: Sequences  {
-
-   File: Overview  (no auto-title, /home/jofowler/git/uvm/uvm_ref/sequences.txt)
-   File: uvm_sequence_item  (no auto-title, /home/jofowler/git/uvm/distrib/src/seq/uvm_sequence_item.svh)
-   File: uvm_sequence_base  (no auto-title, /home/jofowler/git/uvm/distrib/src/seq/uvm_sequence_base.svh)
-   File: uvm_sequence  (no auto-title, /home/jofowler/git/uvm/distrib/src/seq/uvm_sequence.svh)
-   }  # Group: Sequences
-
 Group: Synchronization  {
 
    File: Overview  (no auto-title, /home/jofowler/git/uvm/uvm_ref/synchro.txt)
@@ -195,6 +178,23 @@ Group: Components  {
       }  # Group: Comparators
 
    }  # Group: Components
+
+Group: Sequencers  {
+
+   File: Overview  (no auto-title, /home/jofowler/git/uvm/uvm_ref/sequencers.txt)
+   File: uvm_sequencer_base  (/home/jofowler/git/uvm/distrib/src/seq/uvm_sequencer_base.svh)
+   File: uvm_sequencer_param_base  (no auto-title, /home/jofowler/git/uvm/distrib/src/seq/uvm_sequencer_param_base.svh)
+   File: uvm_sequencer  (no auto-title, /home/jofowler/git/uvm/distrib/src/seq/uvm_sequencer.svh)
+   File: uvm_push_sequencer  (no auto-title, /home/jofowler/git/uvm/distrib/src/seq/uvm_push_sequencer.svh)
+   }  # Group: Sequencers
+
+Group: Sequences  {
+
+   File: Overview  (no auto-title, /home/jofowler/git/uvm/uvm_ref/sequences.txt)
+   File: uvm_sequence_item  (no auto-title, /home/jofowler/git/uvm/distrib/src/seq/uvm_sequence_item.svh)
+   File: uvm_sequence_base  (no auto-title, /home/jofowler/git/uvm/distrib/src/seq/uvm_sequence_base.svh)
+   File: uvm_sequence  (no auto-title, /home/jofowler/git/uvm/distrib/src/seq/uvm_sequence.svh)
+   }  # Group: Sequences
 
 Group: Macros  {
 
