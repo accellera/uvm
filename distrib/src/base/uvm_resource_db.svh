@@ -104,7 +104,7 @@ class uvm_resource_db #(type T=uvm_object);
     return r;
   endfunction
 
-  // function: show_msg
+  // function- show_msg
 
   // internal helper function to print resource accesses
 
@@ -117,7 +117,6 @@ class uvm_resource_db #(type T=uvm_object);
           input uvm_object accessor,
           input rsrc_t rsrc);
 
-      if(uvm_resource_db_options::is_tracing()) begin
 `ifdef UVM_USE_TYPENAME 
           string msg=$typename(T);
 `else
@@ -126,10 +125,9 @@ class uvm_resource_db #(type T=uvm_object);
           $sformat(msg, "%s '%s%s' (type %s) %s by %s = %s",
               rtype,scope, name=="" ? "" : {".",name}, msg,action,
               (accessor != null) ? accessor.get_full_name() : "<unknown>",
-              rsrc.convert2string());
+              rsrc==null?"null (failed lookup)":rsrc.convert2string());
 
           `uvm_info(id, msg, UVM_LOW)
-      end
   endfunction
 
   // function: set
@@ -144,7 +142,8 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set();
 
-    m_show_msg("RSRCDB/SET", "Resource","set", scope, name, accessor, rsrc);
+    if(uvm_resource_db_options::is_tracing())
+      m_show_msg("RSRCDB/SET", "Resource","set", scope, name, accessor, rsrc);
   endfunction
 
   // function: set_anonymous
@@ -160,7 +159,8 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set();
 
-    m_show_msg("RSRCDB/SETANON","Resource", "set", scope, "", accessor, rsrc);
+    if(uvm_resource_db_options::is_tracing())
+      m_show_msg("RSRCDB/SETANON","Resource", "set", scope, "", accessor, rsrc);
   endfunction
 
   // function set_override
@@ -176,7 +176,8 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set_override();
 
-    m_show_msg("RSRCDB/SETOVRD", "Resource","set", scope, name, accessor, rsrc);
+    if(uvm_resource_db_options::is_tracing())
+      m_show_msg("RSRCDB/SETOVRD", "Resource","set", scope, name, accessor, rsrc);
   endfunction
 
 
@@ -195,7 +196,8 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set_override(uvm_resource_types::TYPE_OVERRIDE);
 
-    m_show_msg("RSRCDB/SETOVRDTYP","Resource", "set", scope, name, accessor, rsrc);
+    if(uvm_resource_db_options::is_tracing())
+      m_show_msg("RSRCDB/SETOVRDTYP","Resource", "set", scope, name, accessor, rsrc);
   endfunction
 
   // function set_override_name
@@ -212,7 +214,8 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set_override(uvm_resource_types::NAME_OVERRIDE);
 
-    m_show_msg("RSRCDB/SETOVRDNAM","Resource", "set", scope, name, accessor, rsrc);
+    if(uvm_resource_db_options::is_tracing())
+      m_show_msg("RSRCDB/SETOVRDNAM","Resource", "set", scope, name, accessor, rsrc);
   endfunction
 
   // function: read_by_name
@@ -227,12 +230,14 @@ class uvm_resource_db #(type T=uvm_object);
 
     rsrc_t rsrc = get_by_name(scope, name);
 
+    if(uvm_resource_db_options::is_tracing())
+      m_show_msg("RSRCDB/RDBYNAM","Resource", "read", scope, name, accessor, rsrc);
+
     if(rsrc == null)
       return 0;
 
     val = rsrc.read(accessor);
 
-    m_show_msg("RSRCDB/RDBYNAM","Resource", "read", scope, name, accessor, rsrc);
     return 1;
   
   endfunction
@@ -249,12 +254,14 @@ class uvm_resource_db #(type T=uvm_object);
     
     rsrc_t rsrc = get_by_type(scope);
 
+    if(uvm_resource_db_options::is_tracing())
+      m_show_msg("RSRCDB/RDBYTYP", "Resource","read", scope, "", accessor, rsrc);
+
     if(rsrc == null)
       return 0;
 
     val = rsrc.read(accessor);
 
-    m_show_msg("RSRCDB/RDBYTYP", "Resource","read", scope, "", accessor, rsrc);
     return 1;
 
   endfunction
@@ -276,12 +283,14 @@ class uvm_resource_db #(type T=uvm_object);
 
     rsrc_t rsrc = get_by_name(scope, name);
 
+    if(uvm_resource_db_options::is_tracing())
+      m_show_msg("RSRCDB/WR","Resource", "written", scope, name, accessor, rsrc);
+
     if(rsrc == null)
       return 0;
 
     rsrc.write(val, accessor);
 
-    m_show_msg("RSRCDB/WR","Resource", "written", scope, name, accessor, rsrc);
     return 1;
 
   endfunction
@@ -303,13 +312,14 @@ class uvm_resource_db #(type T=uvm_object);
 
     rsrc_t rsrc = get_by_type(scope);
 
-    // resrouce was not found in the database, so let's add one
+    if(uvm_resource_db_options::is_tracing())
+      m_show_msg("RSRCDB/WRTYP", "Resource","written", scope, "", accessor, rsrc);
+
     if(rsrc == null)
       return 0;
 
     rsrc.write(val, accessor);
 
-    m_show_msg("RSRCDB/WRTYP", "Resource","written", scope, "", accessor, rsrc);
     return 1;
   endfunction
 

@@ -77,8 +77,13 @@ endclass
 
 class my_catcher extends uvm_report_catcher;
    static int seen = 0;
+   static int failed = 0;
    virtual function action_e catch();
+      string msg = get_message();
+      int len = msg.len();
       seen++;
+      if (len>14 && (msg.substr(len-15,len-1) == "(failed lookup)"))
+        failed++;
       return THROW;
    endfunction
 endclass
@@ -118,9 +123,14 @@ class test extends uvm_component;
      uvm_report_server svr;
      svr = _global_reporter.get_report_server();
 
-     if (my_catcher::seen != 10) begin
-        `uvm_error("TEST", $sformatf("Saw %0d trace messages instead of 10",
+     if (my_catcher::seen != 14) begin
+        `uvm_error("TEST", $sformatf("Saw %0d trace messages instead of 14",
                                      my_catcher::seen))
+     end
+
+     if (my_catcher::failed != 4) begin
+        `uvm_error("TEST", $sformatf("Saw %0d failed trace messages instead of 4",
+                                     my_catcher::failed))
      end
 
      if (svr.get_severity_count(UVM_FATAL) +
