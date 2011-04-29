@@ -21,11 +21,13 @@
 //----------------------------------------------------------------------
 // Title: UVM Resource Database
 //
+// Topic: Intro
+//
 // The <uvm_resource_db> class provides a convenience interface for
 // the resources facility.  In many cases basic operations such as
 // creating and setting a resource or getting a resource could take
 // multiple lines of code using the interfaces in <uvm_resource_base> or
-// <uvm_resource#(T)>.  The convenience layer in uvm_resource_db#(T)
+// <uvm_resource#(T)>.  The convenience layer in <uvm_resource_db>
 // reduces many of those operations to a single line of code.
 //
 // If the run-time ~+UVM_RESOURCE_DB_TRACE~ command line option is

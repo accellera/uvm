@@ -630,8 +630,7 @@ virtual class uvm_component extends uvm_report_object;
   // with the default ~uvm~ domain (see <uvm_domain::get_uvm_domain>) on
   // a component with no ~define_domain~ override effectively reverts the
   // that component to using the default ~uvm~ domain. This may be useful
-  //
-  // If a branch of the testbench hierarchy defines a custom domain, but
+  // if a branch of the testbench hierarchy defines a custom domain, but
   // some child sub-branch should remain in the default ~uvm~ domain,
   // call <set_domain> with a new domain instance handle with ~hier~ set.
   // Then, in the sub-branch, call <set_domain> with the default ~uvm~ domain handle,

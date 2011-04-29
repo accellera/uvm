@@ -21,7 +21,7 @@
 //------------------------------------------------------------------------------
 
 // Title: Pool Classes
-// This section defines the <uvm_pool #(T)> class and derivative.
+// This section defines the <uvm_pool #(KEY, T)> class and derivative.
 
 //------------------------------------------------------------------------------
 //
