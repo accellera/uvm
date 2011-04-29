@@ -1141,6 +1141,8 @@ class uvm_phase extends uvm_object;
      return m_ready_to_end_count;
   endfunction
 
+  extern local task m_wait_for_pred();
+
   // Implementation - Jumping
   //-------------------------
   local bit                m_jump_bkwd;
@@ -1690,6 +1692,7 @@ endfunction
 
 task uvm_phase::execute_phase();
 
+  uvm_task_phase task_phase;
   uvm_root top;
   top = uvm_root::get();
 
@@ -1737,14 +1740,13 @@ task uvm_phase::execute_phase();
 
 
   else begin // PHASE NODE
-    uvm_task_phase task_phase;
 
     //---------
     // STARTED:
     //---------
     m_state = UVM_PHASE_STARTED;
-    #0; // LET ANY WAITERS WAKE UP
     m_imp.traverse(top,this,UVM_PHASE_STARTED);
+    #0; // LET ANY WAITERS WAKE UP
 
 
     //if (m_imp.get_phase_type() != UVM_PHASE_TASK) begin
@@ -1783,6 +1785,10 @@ task uvm_phase::execute_phase();
         begin // guard
           
           do begin
+
+           // if looped back from READY_TO_END, change state
+           m_state = UVM_PHASE_EXECUTING;
+           #0;
 
            fork
   
@@ -1824,15 +1830,31 @@ task uvm_phase::execute_phase();
            disable fork;
         
            phase_done.clear();
-           m_ready_to_end_count++;
-           if (m_ready_to_end_count < max_ready_to_end_iter) begin
-             if (m_phase_trace)
-               `UVM_PH_TRACE("PH_READY_TO_END_CB","CALLING READY_TO_END CB",this,UVM_HIGH)
-             if (m_imp != null)
-               m_imp.traverse(top,this,UVM_PHASE_READY_TO_END);
+
+           // If jump is pending, do not allow prolonging of phase
+           if(!m_jump_fwd && !m_jump_bkwd) begin
+
+             //--------------
+             // READY_TO_END:
+             //--------------
+ 
+             `UVM_PH_TRACE("PH_READY_TO_END","PHASE READY TO END",this,UVM_DEBUG)
+             m_state = UVM_PHASE_READY_TO_END;
+             m_ready_to_end_count++;
+             if (m_ready_to_end_count < max_ready_to_end_iter) begin
+               if (m_phase_trace)
+                 `UVM_PH_TRACE("PH_READY_TO_END_CB","CALLING READY_TO_END CB",this,UVM_HIGH)
+               if (m_imp != null)
+                 m_imp.traverse(top,this,UVM_PHASE_READY_TO_END);
+             end
              #0; // LET ANY WAITERS WAKE UP
+
+             // WAIT FOR PREDECESSORS
+             if (!phase_done.get_objection_total(top))
+               m_wait_for_pred();
+
            end
-    
+
           end
           while (phase_done.get_objection_total(top));
   
@@ -1842,13 +1864,6 @@ task uvm_phase::execute_phase();
     end
 
   end
-
-  //--------------
-  // READY_TO_END:
-  //--------------
-
-  `UVM_PH_TRACE("PH_READY_TO_END","PHASE READY TO END",this,UVM_DEBUG)
-  m_state = UVM_PHASE_READY_TO_END;
 
 
   //---------
@@ -1864,6 +1879,8 @@ task uvm_phase::execute_phase();
   // were executed and completed.  Thus any dependencies will be
   // satisfied preventing deadlocks.
   // GSA TBD insert new jump support
+
+  if (m_phase_type == UVM_PHASE_NODE) begin
 
   if(m_jump_fwd || m_jump_bkwd) begin
 
@@ -1896,29 +1913,10 @@ task uvm_phase::execute_phase();
     return;
   end
 
-  //-----------------------
   // WAIT FOR PREDECESSORS:
-  //-----------------------
-  begin
-    bit pred_of_succ[uvm_phase];
-
-    foreach (m_successors[succ])
-      foreach(succ.m_predecessors[pred])
-        pred_of_succ[ pred ] = 1;
-    pred_of_succ.delete(this);
-
-    foreach (pred_of_succ[sibling]) begin
-      //$display("  ** ", get_name(), " (",get_inst_id(),")",
-      //         "Waiting for phase '",sibling.get_name(),"' (",sibling.get_inst_id(),
-      //         ") to be ready to end that phase's current state is ",sibling.m_state.name());
-      sibling.wait_for_state(UVM_PHASE_READY_TO_END, UVM_GTE);
-      //$display("  ** ", get_name(), " (",get_inst_id(),")",
-      //         "Released: Phase '", sibling.get_name(),"' is now ready to end");
-    end
-    //$display("  ** ", get_name(), " (",get_inst_id(),")",
-    //         "All pred to succ ready to end, so ending this phase");
-  end
-  #0; // LET ANY WAITERS WAKE UP
+  // function phases only
+  if (task_phase == null)
+    m_wait_for_pred();
 
 
   //-------
@@ -1932,7 +1930,6 @@ task uvm_phase::execute_phase();
     m_imp.traverse(top,this,UVM_PHASE_ENDED);
   #0; // LET ANY WAITERS WAKE UP
 
-
   //---------
   // CLEANUP:
   //---------
@@ -1943,6 +1940,8 @@ task uvm_phase::execute_phase();
     m_phase_proc = null;
   end
   #0; // LET ANY WAITERS WAKE UP
+
+end
 
 
 
@@ -1968,7 +1967,7 @@ task uvm_phase::execute_phase();
   else begin
     // execute all the successors
     foreach (m_successors[succ]) begin
-      if(succ.m_state != UVM_PHASE_SCHEDULED) begin
+      if(succ.m_state < UVM_PHASE_SCHEDULED) begin
         succ.m_state = UVM_PHASE_SCHEDULED;
           #0; // LET ANY WAITERS WAKE UP
         if (m_phase_trace)
@@ -1979,6 +1978,73 @@ task uvm_phase::execute_phase();
   end
 
 endtask
+
+
+// m_wait_for_pred
+// ---------------
+
+task uvm_phase::m_wait_for_pred();
+
+  if(!(m_jump_fwd || m_jump_bkwd)) begin
+
+    bit done;
+    bit pred_of_succ[uvm_phase];
+    bit terminal_preds[uvm_phase];
+
+    // Get raw list of predecessors to my successors
+    foreach (m_successors[succ])
+      foreach(succ.m_predecessors[pred])
+        pred_of_succ[ pred ] = 1;
+    pred_of_succ.delete(this);
+
+    // replace terminal nodes' with their predecessors (recursively).
+    // store replaced terminal nodes in separate list.
+    do begin
+      done=1;
+      foreach (pred_of_succ[sibling]) begin
+        if (sibling.get_phase_type() == UVM_PHASE_TERMINAL) begin
+          pred_of_succ.delete(sibling);
+          terminal_preds[sibling] = 1;
+          foreach (sibling.m_predecessors[pred])
+            pred_of_succ[pred] = 1;
+          done =0;
+        end
+      end
+    end while (!done);
+
+    // wait for predecessors to successors (real phase nodes, not terminals)
+    foreach (pred_of_succ[sibling]) begin
+      if (m_phase_trace) begin
+        string s;
+        s = $sformatf("Waiting for phase '%s' (%0d) to be READY_TO_END. That phase's current state is %s. This phase is",
+            sibling.get_name(),sibling.get_inst_id(),sibling.m_state.name());
+        `UVM_PH_TRACE("PH/TRC/WAIT_PRED_OF_SUCC",s,this,UVM_HIGH)
+      end
+      sibling.wait_for_state(UVM_PHASE_READY_TO_END, UVM_GTE);
+      if (m_phase_trace) begin
+        string s;
+        s = $sformatf("Sibling phase '%s' (%0d) is now READY_TO_END. Releasing phase",
+            sibling.get_name(),sibling.m_state.name());
+        `UVM_PH_TRACE("PH/TRC/WAIT_PRED_OF_SUCC",s,this,UVM_HIGH)
+      end
+    end
+
+    // now, for cleanliness, wait for the terminal nodes to complete, so phase tracing
+    // doesn't show extract phase executed before the terminal nodes of the run-time phase
+    // schedule and domain.
+    foreach (terminal_preds[sibling]) begin
+      sibling.wait_for_state(UVM_PHASE_DONE, UVM_GTE);
+    end
+
+    if (m_phase_trace) begin
+      `UVM_PH_TRACE("PH/TRC/WAIT_PRED_OF_SUCC",
+                    "All pred to succ in READY_TO_END state, so ending phase",this,UVM_HIGH)
+    end
+  end
+  #0; // LET ANY WAITERS WAKE UP
+
+endtask
+
 
 
 //---------------------------------
