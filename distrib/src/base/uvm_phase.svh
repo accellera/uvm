@@ -1246,7 +1246,7 @@ task uvm_phase::execute_phase();
            join_any
            disable fork;
         
-           phase_done.clear();
+           phase_done.clear(this);
 
            // If jump is pending, do not allow prolonging of phase
            if(!m_jump_fwd && !m_jump_bkwd) begin
@@ -1712,7 +1712,7 @@ endfunction
 function void uvm_phase::clear(uvm_phase_state state = UVM_PHASE_DORMANT);
   m_state = state;
   m_phase_proc = null;
-  phase_done.clear();
+  phase_done.clear(this);
 endfunction
 
 
@@ -1805,7 +1805,7 @@ endtask
 // ---------------
 
 function void uvm_phase::m_terminate_phase();
-  phase_done.clear();
+  phase_done.clear(this);
 endfunction
 
 
