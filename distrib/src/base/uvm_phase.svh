@@ -629,8 +629,8 @@ endclass
 typedef class uvm_cmdline_processor;
 
 `define UVM_PH_TRACE(ID,MSG,PH,VERB) \
-   `uvm_info(ID, {MSG, $sformatf(" %0s (in schedule %0s, domain %s) id=%0d", \
-       PH.get_name(), PH.get_schedule_name(), PH.get_domain_name(), PH.get_inst_id())}, VERB);
+   `uvm_info(ID, {$sformatf("Phase '%0s' (id=%0d) ", \
+       PH.get_full_name(), PH.get_inst_id()),MSG}, VERB);
 
 //-----------------------------
 // Implementation - Construction
@@ -904,7 +904,7 @@ function string uvm_phase::get_full_name();
   sch = get_schedule_name();
   if (sch != "")
     get_full_name = {get_full_name, ".", sch};
-  if (m_phase_type == UVM_PHASE_NODE)
+  if (m_phase_type != UVM_PHASE_DOMAIN && m_phase_type != UVM_PHASE_SCHEDULE)
     get_full_name = {get_full_name, ".", get_name()};
 endfunction
 
@@ -1116,9 +1116,9 @@ task uvm_phase::execute_phase();
   // If we got here by jumping forward, we must wait for
   // all its predecessor nodes to be marked DONE.
   // (the next conditional speeds this up)
-  foreach (m_predecessors[pred]) begin
+  // Also, this helps us fast-forward through terminal (end) nodes
+  foreach (m_predecessors[pred])
     wait (pred.m_state == UVM_PHASE_DONE);
-  end
 
 
   // If DONE (by, say, a forward jump), return immed
@@ -1386,9 +1386,9 @@ task uvm_phase::execute_phase();
       if(succ.m_state < UVM_PHASE_SCHEDULED) begin
         succ.m_state = UVM_PHASE_SCHEDULED;
           #0; // LET ANY WAITERS WAKE UP
-        if (m_phase_trace)
-          `UVM_PH_TRACE("PH/TRC/SCHEDULED","Scheduling phase",succ,UVM_LOW)
         void'(m_phase_hopper.try_put(succ));
+        if (m_phase_trace)
+          `UVM_PH_TRACE("PH/TRC/SCHEDULED",{"Scheduled from phase ",get_full_name()},succ,UVM_LOW)
       end
     end
   end
@@ -1404,58 +1404,86 @@ task uvm_phase::m_wait_for_pred();
   if(!(m_jump_fwd || m_jump_bkwd)) begin
 
     bit done;
+    bit successors[uvm_phase];
     bit pred_of_succ[uvm_phase];
-    bit terminal_preds[uvm_phase];
 
-    // Get raw list of predecessors to my successors
+    // get all successors
     foreach (m_successors[succ])
-      foreach(succ.m_predecessors[pred])
-        pred_of_succ[ pred ] = 1;
-    pred_of_succ.delete(this);
+      successors[succ] = 1;
 
-    // replace terminal nodes' with their predecessors (recursively).
-    // store replaced terminal nodes in separate list.
+    // replace TERMINAL or SCHEDULE nodes with their successors
     do begin
       done=1;
-      foreach (pred_of_succ[sibling]) begin
-        if (sibling.get_phase_type() == UVM_PHASE_TERMINAL) begin
-          pred_of_succ.delete(sibling);
-          terminal_preds[sibling] = 1;
-          foreach (sibling.m_predecessors[pred])
-            pred_of_succ[pred] = 1;
+      foreach (successors[succ]) begin
+        if (succ.get_phase_type() != UVM_PHASE_NODE) begin
+          successors.delete(succ);
+          foreach (succ.m_successors[next_succ])
+            successors[next_succ] = 1;
+          done = 0;
+        end
+      end
+    end while(!done);
+          
+    // get all predecessors to these successors
+    foreach (successors[succ])
+      foreach (succ.m_predecessors[pred])
+        pred_of_succ[pred] = 1;
+    
+    // replace any terminal nodes with their predecessors, recursively.
+    // we are only interested in "real" phase nodes
+    do begin
+      done=1;
+      foreach (pred_of_succ[pred]) begin
+        if (pred.get_phase_type() != UVM_PHASE_NODE) begin
+          pred_of_succ.delete(pred);
+          foreach (pred.m_predecessors[next_pred])
+            pred_of_succ[next_pred] = 1;
           done =0;
         end
       end
     end while (!done);
 
+
+    // remove ourselves from the list
+    pred_of_succ.delete(this);
+
     // wait for predecessors to successors (real phase nodes, not terminals)
+    // mostly debug msgs
     foreach (pred_of_succ[sibling]) begin
+
       if (m_phase_trace) begin
         string s;
-        s = $sformatf("Waiting for phase '%s' (%0d) to be READY_TO_END. That phase's current state is %s. This phase is",
+        s = $sformatf("Waiting for phase '%s' (%0d) to be READY_TO_END. Current state is %s",
             sibling.get_name(),sibling.get_inst_id(),sibling.m_state.name());
         `UVM_PH_TRACE("PH/TRC/WAIT_PRED_OF_SUCC",s,this,UVM_HIGH)
       end
+
       sibling.wait_for_state(UVM_PHASE_READY_TO_END, UVM_GTE);
+
       if (m_phase_trace) begin
         string s;
-        s = $sformatf("Sibling phase '%s' (%0d) is now READY_TO_END. Releasing phase",
-            sibling.get_name(),sibling.m_state.name());
+        s = $sformatf("Phase '%s' (%0d) is now READY_TO_END. Releasing phase",
+            sibling.get_name(),sibling.get_inst_id());
         `UVM_PH_TRACE("PH/TRC/WAIT_PRED_OF_SUCC",s,this,UVM_HIGH)
       end
-    end
 
-    // now, for cleanliness, wait for the terminal nodes to complete, so phase tracing
-    // doesn't show extract phase executed before the terminal nodes of the run-time phase
-    // schedule and domain.
-    foreach (terminal_preds[sibling]) begin
-      sibling.wait_for_state(UVM_PHASE_DONE, UVM_GTE);
     end
 
     if (m_phase_trace) begin
-      `UVM_PH_TRACE("PH/TRC/WAIT_PRED_OF_SUCC",
-                    "All pred to succ in READY_TO_END state, so ending phase",this,UVM_HIGH)
+      if (pred_of_succ.num()) begin
+        string s = "( ";
+        foreach (pred_of_succ[pred])
+          s = {s, pred.get_full_name()," "};
+        s = {s, ")"};
+        `UVM_PH_TRACE("PH/TRC/WAIT_PRED_OF_SUCC",
+              {"*** All pred to succ ",s," in READY_TO_END state, so ending phase ***"},this,UVM_HIGH)
+      end
+      else begin
+        `UVM_PH_TRACE("PH/TRC/WAIT_PRED_OF_SUCC",
+                    "*** No pred to succ other than myself, so ending phase ***",this,UVM_HIGH)
+      end
     end
+
   end
   #0; // LET ANY WAITERS WAKE UP
 
