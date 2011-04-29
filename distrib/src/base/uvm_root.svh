@@ -39,7 +39,6 @@
 // Thus, all UVM components in simulation are descendants of ~uvm_top~.
 //
 // Phase control - ~uvm_top~ manages the phasing for all components.
-// TBD
 //
 // Search - Use ~uvm_top~ to search for components based on their
 // hierarchical name. See <find> and <find_all>.

@@ -11,16 +11,16 @@ The UVM TLM library specifies the required behavior (semantic) of each
 interface method. Classes (components) that implement a TLM interface
 must meet the specified semantic.
 
-Topic: TLM2
-
-The TLM2 sockets provide blocking and nonblocking transaction-level interfaces
-with well-defined completion semantics.
-
 Topic: TLM1
 
 The TLM1 ports provide blocking and nonblocking pass-by-value
 transaction-level interfaces.
 The semantics of these interfaces are limited to message passing.
+
+Topic: TLM2
+
+The TLM2 sockets provide blocking and nonblocking transaction-level interfaces
+with well-defined completion semantics.
 
 Topic: Sequencer Port
 

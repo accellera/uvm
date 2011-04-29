@@ -22,6 +22,7 @@
 //----------------------------------------------------------------------
 // Title: Resources
 //
+// Topic: Intro
 //
 // A resource is a parameterized container that holds arbitrary data.
 // Resources can be used to configure components, supply data to

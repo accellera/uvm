@@ -970,12 +970,24 @@ class uvm_sequence_base extends uvm_sequence_item;
   endfunction
 
 
+  virtual function void put_base_response(input uvm_sequence_item response);
+    if ((response_queue_depth == -1) ||
+        (response_queue.size() < response_queue_depth)) begin
+      response_queue.push_back(response);
+      return;
+    end
+    if (response_queue_error_report_disabled == 0) begin
+      uvm_report_error(get_full_name(), "Response queue overflow, response was dropped", UVM_NONE);
+    end
+  endfunction
+
+
   // Function- put_response
   //
   // Internal method.
 
   virtual function void put_response (uvm_sequence_item response_item);
-    return;
+    put_base_response(response_item); // no error-checking
   endfunction
 
 
