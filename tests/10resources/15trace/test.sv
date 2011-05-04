@@ -82,8 +82,9 @@ class my_catcher extends uvm_report_catcher;
       string msg = get_message();
       int len = msg.len();
       seen++;
-      if (len>14 && (msg.substr(len-15,len-1) == "(failed lookup)"))
+      if (len>14 && (msg.substr(len-15,len-1) == "(failed lookup)")) begin
         failed++;
+      end
       return THROW;
    endfunction
 endclass
@@ -104,8 +105,6 @@ class test extends uvm_component;
   endfunction
 
   function void build_phase(uvm_phase phase);
-    my_catcher ctch = new();
-    uvm_report_cb::add(null,ctch);
     e = new("env", this);
   endfunction
 
@@ -123,13 +122,13 @@ class test extends uvm_component;
      uvm_report_server svr;
      svr = _global_reporter.get_report_server();
 
-     if (my_catcher::seen != 14) begin
-        `uvm_error("TEST", $sformatf("Saw %0d trace messages instead of 14",
+     if (my_catcher::seen != 20) begin
+        `uvm_error("TEST", $sformatf("Saw %0d messages instead of 20",
                                      my_catcher::seen))
      end
 
-     if (my_catcher::failed != 4) begin
-        `uvm_error("TEST", $sformatf("Saw %0d failed trace messages instead of 4",
+     if (my_catcher::failed != 9) begin
+        `uvm_error("TEST", $sformatf("Saw %0d failed trace messages instead of 9",
                                      my_catcher::failed))
      end
 
@@ -147,7 +146,11 @@ endclass
 //----------------------------------------------------------------------
 module top;
 
-  initial run_test();
+  initial begin
+    my_catcher ctch = new();
+    uvm_report_cb::add(null,ctch);
+    run_test();
+  end
 
 endmodule
 
