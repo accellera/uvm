@@ -15,6 +15,7 @@ irun.key
 
 # created by flow
 *.fails
+qa
 
 # vcs results are not for the vc
 csrc
@@ -26,12 +27,24 @@ ucli.key
 # editor tmp / save files
 *.orig
 *.swp
+*.swo
 
 # questa results are not for the vc
 vsim.wlf
+wlf*
 questa.tops
+questa.fails*
 work
 *.vstf
 *.log
 transcript
 *.out
+
+# ND proj files
+uvm_ref/nd/Proj/Data/
+uvm_ref/nd/Proj/Languages.txt
+uvm_ref/nd/Proj/LastCrash.txt
+uvm_ref/nd/Proj/Menu_Backup.txt
+uvm_ref/nd/Proj/Menu_save.txt
+uvm_ref/nd/Proj/Topics.txt
+
