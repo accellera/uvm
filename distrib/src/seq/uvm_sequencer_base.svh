@@ -1192,6 +1192,8 @@ function void uvm_sequencer_base::remove_sequence_from_queues(
       if (arb_sequence_q.size() > i) begin
         if ((arb_sequence_q[i].sequence_id == seq_id) ||
             (is_child(sequence_ptr, arb_sequence_q[i].sequence_ptr))) begin
+          if (sequence_ptr.get_sequence_state() == FINISHED)
+            `uvm_error("SEQFINERR", $psprintf("Parent sequence should not finish before all children"))
           arb_sequence_q.delete(i);
           m_update_lists();
         end
@@ -1209,6 +1211,8 @@ function void uvm_sequencer_base::remove_sequence_from_queues(
       if (lock_list.size() > i) begin
         if ((lock_list[i].get_inst_id() == sequence_ptr.get_inst_id()) ||
             (is_child(sequence_ptr, lock_list[i]))) begin
+          if (sequence_ptr.get_sequence_state() == FINISHED)
+            `uvm_error("SEQFINERR", $psprintf("Parent sequence should not finish before all children"))
           lock_list.delete(i);
           m_update_lists();
         end
