@@ -3197,6 +3197,8 @@ function void uvm_component::m_set_cl_verb;
       end
       else begin
         if(phase == "time") begin
+          process p = process::self();
+          string p_rand = p.get_randstate();
           fork begin
             uvm_verbosity lverb = verb;
             string lid = args[1];
@@ -3208,7 +3210,8 @@ function void uvm_component::m_set_cl_verb;
             else begin
               set_report_id_verbosity(lid, lverb);
             end
-          end join_none
+          end join_none // fork begin
+          p.set_randstate(p_rand);
         end
         else begin
           m_verbosity_setting setting;
@@ -3352,6 +3355,8 @@ function void uvm_component::m_apply_verbosity_settings(uvm_phase phase);
             set_report_id_verbosity(m_verbosity_settings[i].id, m_verbosity_settings[i].verbosity);
       end
       else begin
+        process p = process::self();
+        string p_rand = p.get_randstate();
         fork begin
           m_verbosity_setting setting = m_verbosity_settings[i];
           #setting.offset;
@@ -3360,6 +3365,7 @@ function void uvm_component::m_apply_verbosity_settings(uvm_phase phase);
           else 
             set_report_id_verbosity(setting.id, setting.verbosity);
         end join_none;
+        p.set_randstate(p_rand);
       end
       // Remove after use
       m_verbosity_settings.delete(i);
