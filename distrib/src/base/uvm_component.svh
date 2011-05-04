@@ -1773,7 +1773,8 @@ function uvm_component::new (string name, uvm_component parent);
   reseed();
 
   // Do local configuration settings
-  void'(get_config_int("recording_detail", recording_detail)); // *** VIRTUAL
+  if (!uvm_config_db #(uvm_bitstream_t)::get(this, "", "recording_detail", recording_detail))
+        void'(uvm_config_db #(int)::get(this, "", "recording_detail", recording_detail));
 
   set_report_verbosity_level(parent.get_report_verbosity_level());
 
@@ -3044,24 +3045,8 @@ function void uvm_component::apply_config_settings (bit verbose=0);
 endfunction
 
 
-// print_config_settings
-// ---------------------
-
-function void uvm_component::print_config_settings (string field="",
-                                                    uvm_component comp=null,
-                                                    bit recurse=0);
-  static bit have_been_warned = 0;
-  if(!have_been_warned) begin
-    uvm_report_warning("deprecated", "uvm_component::print_config_settings has been deprecated.  Use print_config() instead");
-    have_been_warned = 1;
-  end
-
-  print_config(1, recurse);
-endfunction
-
-function void uvm_component::print_config_with_audit(bit recurse = 0);
-  print_config(recurse, 1);
-endfunction
+// print_config
+// ------------
 
 function void uvm_component::print_config(bit recurse = 0, audit = 0);
 
@@ -3079,6 +3064,30 @@ function void uvm_component::print_config(bit recurse = 0, audit = 0);
     end
   end
 
+endfunction
+
+
+// print_config_settings
+// ---------------------
+
+function void uvm_component::print_config_settings (string field="",
+                                                    uvm_component comp=null,
+                                                    bit recurse=0);
+  static bit have_been_warned = 0;
+  if(!have_been_warned) begin
+    uvm_report_warning("deprecated", "uvm_component::print_config_settings has been deprecated.  Use print_config() instead");
+    have_been_warned = 1;
+  end
+
+  print_config(recurse, 1);
+endfunction
+
+
+// print_config_with_audit
+// -----------------------
+
+function void uvm_component::print_config_with_audit(bit recurse = 0);
+  print_config(recurse, 1);
 endfunction
 
 

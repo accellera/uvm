@@ -221,12 +221,12 @@ class uvm_resource_db #(type T=uvm_object);
   // function: read_by_name
   //
   // locate a resource by ~name~ and ~scope~ and read its value. The value 
-  // is returned through the ref argument ~val~.  The return value is a bit 
+  // is returned through the output argument ~val~.  The return value is a bit 
   // that indicates whether or not the read was successful. The ~accessor~
   // is used for auditting.
   static function bit read_by_name(input string scope,
                                    input string name,
-                                   ref T val, input uvm_object accessor = null);
+                                   inout T val, input uvm_object accessor = null);
 
     rsrc_t rsrc = get_by_name(scope, name);
 
@@ -244,12 +244,12 @@ class uvm_resource_db #(type T=uvm_object);
 
   // function: read_by_type
   //
-  // Read a value by type.  The value is returned through the ref
+  // Read a value by type.  The value is returned through the output
   // argument ~val~.  The ~scope~ is used for the lookup. The return
   // value is a bit that indicates whether or not the read is successful.
   // The ~accessor~ is used for auditting.
   static function bit read_by_type(input string scope,
-                                   ref T val,
+                                   inout T val,
                                    input uvm_object accessor = null);
     
     rsrc_t rsrc = get_by_type(scope);

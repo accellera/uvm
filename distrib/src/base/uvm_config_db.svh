@@ -69,7 +69,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
 
   // function: get
   //
-  // Get the value ~field_name~ in ~inst_name~, using component ~cntxt~ as 
+  // Get the value for ~field_name~ in ~inst_name~, using component ~cntxt~ as 
   // the starting search point. ~inst_name~ is an explicit instance name 
   // relative to ~cntxt~ and may be an empty string if the ~cntxt~ is the
   // instance that the configuration object applies to. ~field_name~
@@ -82,8 +82,10 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   //| get_config_string(...) => uvm_config_db#(string)::get(cntxt,...)
   //| get_config_object(...) => uvm_config_db#(uvm_object)::get(cntxt,...)
 
-  static function bit get(uvm_component cntxt, string inst_name,
-      string field_name, ref T value);
+  static function bit get(uvm_component cntxt,
+                          string inst_name,
+                          string field_name,
+                          inout T value);
 //TBD: add file/line
     int unsigned p=0;
     uvm_resource#(T) r, rt;
