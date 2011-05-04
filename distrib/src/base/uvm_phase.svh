@@ -639,9 +639,6 @@ typedef class uvm_cmdline_processor;
 function uvm_phase::new(string name="uvm_phase",
                         uvm_phase_type phase_type=UVM_PHASE_SCHEDULE,
                         uvm_phase parent=null);
-  string trace_args[$];
-  uvm_cmdline_processor clp;
-
   super.new(name);
   m_phase_type = phase_type;
 
@@ -655,6 +652,20 @@ function uvm_phase::new(string name="uvm_phase",
   m_run_count = 0;
   m_parent = parent;
 
+  begin
+    uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
+    string val;
+    if (clp.get_arg_value("+UVM_PHASE_TRACE", val))
+      m_phase_trace = 1;
+    else
+      m_phase_trace = 0;
+    if (clp.get_arg_value("+UVM_USE_OVM_RUN_SEMANTIC", val))
+      m_use_ovm_run_semantic = 1;
+    else
+      m_use_ovm_run_semantic = 0;
+  end
+
+   
   if (parent == null && (phase_type == UVM_PHASE_SCHEDULE ||
                          phase_type == UVM_PHASE_DOMAIN )) begin
     //m_parent = this;
@@ -1675,17 +1686,6 @@ endfunction
 task uvm_phase::m_run_phases();
   uvm_root top = uvm_root::get();
 
-  m_phase_trace = 0;
-  m_use_ovm_run_semantic = 0;
-  begin
-    uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
-    string val;
-    if (clp.get_arg_value("+UVM_PHASE_TRACE", val))
-      m_phase_trace = 1;
-    if (clp.get_arg_value("+UVM_USE_OVM_RUN_SEMANTIC", val))
-      m_use_ovm_run_semantic = 1;
-  end
-  
   // initiate by starting first phase in common domain
   begin
     uvm_phase ph = uvm_domain::get_common_domain();
