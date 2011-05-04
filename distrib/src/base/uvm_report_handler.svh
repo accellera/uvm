@@ -137,6 +137,7 @@ class uvm_report_handler;
     srvr.f_display(file, uvm_mgc_copyright);
     srvr.f_display(file, uvm_cdn_copyright);
     srvr.f_display(file, uvm_snps_copyright);
+    srvr.f_display(file, uvm_cy_copyright);
     srvr.f_display(file,
       "----------------------------------------------------------------");
   endfunction

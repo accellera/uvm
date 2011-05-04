@@ -88,8 +88,12 @@ class uvm_objection extends uvm_report_object;
   // Function: clear
   //
   // Immediately clears the objection state. All counts are cleared and the
-  // <all_dropped> callback for <uvm_root> is called. 
-  // Any drain_times set by the user are not effected.
+  // any processes waiting on a call to wait_for(UVM_ALL_DROPPED, uvm_top)
+  // are released.
+  //
+  // The caller, if a uvm_object-based object, should pass its 'this' handle
+  // to the ~obj~ argument to document who cleared the objection.
+  // Any drain_times set by the user are not effected. 
   //
   virtual function void clear(uvm_object obj=null);
     string name;
@@ -109,8 +113,8 @@ class uvm_objection extends uvm_report_object;
     m_draining.delete();
     m_top_all_dropped = 0;
     m_cleared = 1;
-    if (m_events.exists(obj))
-      ->m_events[obj].all_dropped;
+    if (m_events.exists(m_top))
+      ->m_events[m_top].all_dropped;
     m_background_proc.kill();
 
     fork

@@ -99,7 +99,7 @@ module test;
         "pre_reset": 
            begin 
               last = "start_of_simulation";
-              last2 = "run";
+              last2 = "run"; // account for race: if 'run' starts before 'pre_reset', it will be the last phase
            end
         "reset": begin
               last = "pre_reset";
