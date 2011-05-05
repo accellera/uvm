@@ -8,7 +8,7 @@ module test();
      virtual function action_e catch();
         if("SEQFINERR" != get_id()) return THROW;
         if(get_severity() != UVM_ERROR) return THROW;
-        uvm_report_info("ERROR CATCHER", "From error_catcher catch()", UVM_MEDIUM , `uvm_file, `uvm_line );
+        uvm_report_info("ERROR CATCHER", $psprintf("Error Catched caught: '%s'", get_message()), UVM_MEDIUM , `uvm_file, `uvm_line );
         count++; 
         return CAUGHT;
      endfunction
