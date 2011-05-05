@@ -110,9 +110,10 @@ class uvm_mutex_locker #(type T=int);
   // is obtained.
 
   task lock();
+    process pid = process::self();
     check_pid();
     sm.get();
-    set_process(process::self);
+    set_process(pid);
   endtask
 
   // Function- try_lock
@@ -124,7 +125,8 @@ class uvm_mutex_locker #(type T=int);
   function bit try_lock();
     check_pid();
     if(sm.try_get()) begin
-      set_process(process::self);
+      process pid = process::self();
+      set_process(pid);
       return 1;
     end
     else
@@ -199,7 +201,8 @@ class uvm_mutex_locker #(type T=int);
   // granted.
 
   task read(output T t);
-    if(pid != null && pid == process::self) begin
+    process this_pid = process::self();
+    if(pid != null && pid == this_pid) begin
       t = val;
     end
     else begin
@@ -219,7 +222,8 @@ class uvm_mutex_locker #(type T=int);
   // lock is done.
 
   function bit try_read(output T t);
-    if(pid != null && pid == process::self) begin
+    process this_pid = process::self();
+    if(pid != null && pid == this_pid) begin
       t = val;
     end
     else begin
@@ -239,7 +243,8 @@ class uvm_mutex_locker #(type T=int);
   // maniuplating the lock.
 
   task write (input T t);
-    if(pid != null && pid == process::self) begin
+    process this_pid = process::self();
+    if(pid != null && pid == this_pid) begin
       val = t;
     end
     else begin
@@ -260,7 +265,8 @@ class uvm_mutex_locker #(type T=int);
   // of the lock.
 
   function bit try_write(input T t);
-    if(pid != null && pid == process::self) begin
+    process this_pid = process::self();
+    if(pid != null && pid == this_pid) begin
       val = t;
     end
     else begin
