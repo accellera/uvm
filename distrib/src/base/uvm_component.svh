@@ -3197,8 +3197,8 @@ function void uvm_component::m_set_cl_verb;
       end
       else begin
         if(phase == "time") begin
-          process p = process::self();
-          string p_rand = p.get_randstate();
+          //process p = process::self();
+          //string p_rand = p.get_randstate();
           fork begin
             uvm_verbosity lverb = verb;
             string lid = args[1];
@@ -3211,7 +3211,7 @@ function void uvm_component::m_set_cl_verb;
               set_report_id_verbosity(lid, lverb);
             end
           end join_none // fork begin
-          p.set_randstate(p_rand);
+          //p.set_randstate(p_rand);
         end
         else begin
           m_verbosity_setting setting;
