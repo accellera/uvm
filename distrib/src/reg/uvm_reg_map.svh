@@ -1613,6 +1613,11 @@ function void uvm_reg_map::Xinit_address_mapX();
        end
      end
    end
+
+   // If the block has no registers or memories,
+   // bus_width won't be set
+   if (bus_width == 0) bus_width = m_n_bytes;
+
    m_system_n_bytes = bus_width;
 endfunction
 
