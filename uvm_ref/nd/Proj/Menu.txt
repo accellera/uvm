@@ -126,7 +126,6 @@ Group: TLM  {
       File: Ports  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_ports.svh)
       File: Exports  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_exports.svh)
       File: Imps  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_imps.svh)
-      File: Analysis Ports  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_analysis_port.svh)
       File: FIFO  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_tlm_fifos.svh)
       File: FIFO Base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_tlm_fifo_base.svh)
       File: Request-Response Channel  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_tlm_req_rsp.svh)
@@ -145,6 +144,8 @@ Group: TLM  {
       File: Socket Base  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_sockets_base.svh)
       File: Temporal Decoupling  (no auto-title, /remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_time.svh)
       }  # Group: TLM2
+
+   File: Analysis Ports  (/remote/vtghome7/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_analysis_port.svh)
 
    Group: Sequencer Ports  {
 
