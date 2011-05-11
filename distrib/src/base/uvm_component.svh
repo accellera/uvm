@@ -1666,15 +1666,18 @@ virtual class uvm_component extends uvm_report_object;
   // We will do this work in the phase_started callback. 
 
   typedef struct {
+    string comp;
     string phase;
     time   offset;
     uvm_verbosity verbosity;
     string id;
   } m_verbosity_setting;
   m_verbosity_setting m_verbosity_settings[$];
+  static local m_verbosity_setting m_time_settings[$];
 
   // does the pre abort callback hierarchically
   extern /*local*/ function void m_do_pre_abort;
+
 endclass : uvm_component
 
 
@@ -3156,7 +3159,6 @@ endfunction
 
 // m_set_cl_verb
 // -------------
-
 function void uvm_component::m_set_cl_verb;
   // _ALL_ can be used for ids
   // +uvm_set_verbosity=<comp>,<id>,<verbosity>,<phase|time>,<offset>
@@ -3166,64 +3168,74 @@ function void uvm_component::m_set_cl_verb;
   static bit first = 1;
   string args[$];
   uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
+  uvm_root top = uvm_root::get();
 
   if(!values.size())
     void'(uvm_cmdline_proc.get_arg_values("+uvm_set_verbosity=",values));
 
   foreach(values[i]) begin
-    uvm_verbosity verb;
-    string phase="";
-    time   offset= 0;
+    m_verbosity_setting setting;
     args.delete();
     uvm_split_string(values[i], ",", args);
 
     // Warning is already issued in uvm_root, so just don't keep it
     if(first && ( ((args.size() != 4) && (args.size() != 5)) || 
-                  (clp.m_convert_verb(args[2], verb) == 0))  )
+                  (clp.m_convert_verb(args[2], setting.verbosity) == 0))  )
     begin
       values.delete(i);
     end
-    else if (uvm_is_match(args[0], get_full_name()) ) begin
-      void'(clp.m_convert_verb(args[2], verb));
-      phase = args[3];
-      if(args.size() == 5) begin
-        offset = args[4].atoi();
+    else begin
+      setting.comp = args[0];
+      setting.id = args[1];
+      void'(clp.m_convert_verb(args[2],setting.verbosity));
+      setting.phase = args[3];
+      setting.offset = 0;
+      if(args.size() == 5) setting.offset = args[4].atoi();
+      if((setting.phase == "time") && (this == top)) begin
+        m_time_settings.push_back(setting);
       end
-      if((phase == "" || phase == "build" || phase == "time") && (offset == 0) ) begin
-        if(args[1] == "_ALL_") 
-          set_report_verbosity_level(verb);
-        else
-          set_report_id_verbosity(args[1], verb);
-      end
-      else begin
-        if(phase == "time") begin
-          //process p = process::self();
-          //string p_rand = p.get_randstate();
-          fork begin
-            uvm_verbosity lverb = verb;
-            string lid = args[1];
-            time t = offset;
-            #t;
-            if(lid == "_ALL_") begin
-              set_report_verbosity_level(lverb);
-            end
-            else begin
-              set_report_id_verbosity(lid, lverb);
-            end
-          end join_none // fork begin
-          //p.set_randstate(p_rand);
+  
+      if (uvm_is_match(setting.comp, get_full_name()) ) begin
+        if((setting.phase == "" || setting.phase == "build" || setting.phase == "time") && 
+           (setting.offset == 0) ) 
+        begin
+          if(setting.id == "_ALL_") 
+            set_report_verbosity_level(setting.verbosity);
+          else
+            set_report_id_verbosity(setting.id, setting.verbosity);
         end
         else begin
-          m_verbosity_setting setting;
-          setting.phase = phase;
-          setting.offset = offset;
-          setting.verbosity = verb;
-          setting.id = args[1];
-          m_verbosity_settings.push_back(setting);
+          if(setting.phase != "time") begin
+            m_verbosity_settings.push_back(setting);
+          end
         end
       end
     end
   end
+  // do time based settings
+  if(this == top) begin
+    fork begin
+      time last_time = 0;
+      m_time_settings.sort() with ( item.offset );
+      foreach(m_time_settings[i]) begin
+        uvm_component comps[$];
+        top.find_all(m_time_settings[i].comp,comps);
+        #(m_time_settings[i].offset - last_time);
+        last_time = m_time_settings[i].offset;
+        if(m_time_settings[i].id == "_ALL_") begin
+           foreach(comps[j]) begin
+             comps[j].set_report_verbosity_level(m_time_settings[i].verbosity);
+           end
+        end
+        else begin
+          foreach(comps[j]) begin
+            comps[j].set_report_id_verbosity(m_time_settings[i].id, m_time_settings[i].verbosity);
+          end
+        end
+      end
+    end join_none // fork begin
+  end
+
   first = 0;
 endfunction
 
