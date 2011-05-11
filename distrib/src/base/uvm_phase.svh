@@ -1751,7 +1751,7 @@ function void uvm_phase::clear_successors(uvm_phase_state state = UVM_PHASE_DORM
     return;
   clear(state);
   foreach(m_successors[succ]) begin
-    succ.clear_successors(state);
+    succ.clear_successors(state, end_state);
   end
 endfunction
 
