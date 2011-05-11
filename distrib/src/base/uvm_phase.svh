@@ -1311,6 +1311,11 @@ task uvm_phase::execute_phase();
   if (m_phase_type == UVM_PHASE_NODE) begin
 
   if(m_jump_fwd || m_jump_bkwd) begin
+    `uvm_info("PH_JUMP",
+            $sformatf("phase %s (schedule %s, domain %s) is jumping to phase %s",
+             get_name(), get_schedule_name(), get_domain_name(), m_jump_phase.get_name()),
+            UVM_MEDIUM);
+
 
     #0; // LET ANY WAITERS ON READY_TO_END TO WAKE UP
 
@@ -1656,10 +1661,16 @@ function void uvm_phase::jump(uvm_phase phase);
   uvm_phase d;
   // TBD refactor
 
-  `uvm_info("PH_JUMP",
-            $sformatf("phase %s (schedule %s, domain %s) is jumping to phase %s",
-             get_name(), get_schedule_name(), get_domain_name(), phase.get_name()),
-            UVM_MEDIUM);
+  if ((m_state <  UVM_PHASE_STARTED) ||
+      (m_state >  UVM_PHASE_READY_TO_END) )
+  begin
+   `uvm_warning("JMPPHIDL", { "Attempting to jump from phase \"",
+      get_name(), "\" which is not currently active (current state is ",
+      m_state.name(), "). The jump will not happen until the phase becomes ",
+      "active."})
+  end
+
+
 
   // A jump can be either forward or backwards in the phase graph.
   // If the specified phase (name) is found in the set of predecessors
