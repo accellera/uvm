@@ -567,7 +567,8 @@ class uvm_phase extends uvm_object;
   local uvm_phase          m_jump_phase;
   extern function void clear(uvm_phase_state state = UVM_PHASE_DORMANT);
   extern function void clear_successors(
-                             uvm_phase_state state = UVM_PHASE_DORMANT);
+                             uvm_phase_state state = UVM_PHASE_DORMANT,
+                             uvm_phase end_state=null);
 
   // Implementation - Overall Control
   //---------------------------------
@@ -1335,7 +1336,7 @@ task uvm_phase::execute_phase();
     #0; // LET ANY WAITERS WAKE UP
 
     if(m_jump_fwd) begin
-      clear_successors(UVM_PHASE_DONE);
+      clear_successors(UVM_PHASE_DONE,m_jump_phase);
     end
     m_jump_phase.clear_successors();
     m_jump_fwd = 0;
@@ -1743,10 +1744,15 @@ endfunction
 // for internal graph maintenance after a forward jump
 // - called only by execute_phase()
 // - depth-first traversal of the DAG, calliing clear() on each node
-function void uvm_phase::clear_successors(uvm_phase_state state = UVM_PHASE_DORMANT);
+// - do not clear the end phase or beyond 
+function void uvm_phase::clear_successors(uvm_phase_state state = UVM_PHASE_DORMANT, 
+    uvm_phase end_state=null);
+  if(this == end_state) 
+    return;
   clear(state);
-  foreach(m_successors[succ])
+  foreach(m_successors[succ]) begin
     succ.clear_successors(state);
+  end
 endfunction
 
 
