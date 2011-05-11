@@ -25,7 +25,7 @@ module test;
   `include "uvm_macros.svh"
 
   time warn_time, info_time;
-  class my_catcher extends uvm_report_catcher;
+  class catcher extends uvm_report_catcher;
      virtual function action_e catch();
         if(get_id() == "JMPPHIDL" && get_severity() == UVM_WARNING)
           warn_time = $time;
@@ -37,7 +37,9 @@ module test;
 
   class comp extends uvm_component;
     function new(string name, uvm_component parent);
+      catcher ctchr = new;
       super.new(name,parent);
+      uvm_report_cb::add(null,ctchr);
     endfunction
 
     task reset_phase(uvm_phase phase);
@@ -88,6 +90,7 @@ module test;
     function void report_phase(uvm_phase phase);
       bit failed = 0;
       `uvm_info("REPORT", "In report phase!!!!", UVM_NONE)
+
       if(warn_time != 15) begin
         $display("*** UVM TEST FAILED : Expected warning at time 15, warn time is: %0t", warn_time);
         failed = 1;
