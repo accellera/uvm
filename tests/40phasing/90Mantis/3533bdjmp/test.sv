@@ -27,8 +27,10 @@ module test;
   time warn_time, info_time;
   class catcher extends uvm_report_catcher;
      virtual function action_e catch();
-        if(get_id() == "JMPPHIDL" && get_severity() == UVM_WARNING)
+        if(get_id() == "JMPPHIDL" && get_severity() == UVM_ERROR) begin
           warn_time = $time;
+          set_severity(UVM_WARNING);
+        end
         if(get_id() == "PH_JUMP" && get_severity() == UVM_INFO)
           info_time = $time;
         return THROW;
