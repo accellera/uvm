@@ -1665,7 +1665,7 @@ function void uvm_phase::jump(uvm_phase phase);
   if ((m_state <  UVM_PHASE_STARTED) ||
       (m_state >  UVM_PHASE_READY_TO_END) )
   begin
-   `uvm_warning("JMPPHIDL", { "Attempting to jump from phase \"",
+   `uvm_error("JMPPHIDL", { "Attempting to jump from phase \"",
       get_name(), "\" which is not currently active (current state is ",
       m_state.name(), "). The jump will not happen until the phase becomes ",
       "active."})
