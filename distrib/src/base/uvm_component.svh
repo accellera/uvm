@@ -1665,20 +1665,6 @@ virtual class uvm_component extends uvm_report_object;
   // The verbosity settings may have a specific phase to start at. 
   // We will do this work in the phase_started callback. 
 
-  /*typedef struct {
-    string comp;
-    string phase;
-    time   offset;
-    uvm_verbosity verbosity;
-    string id;
-  } m_verbosity_setting;
-  */
-
-  // does the pre abort callback hierarchically
-  extern /*local*/ function void m_do_pre_abort;
-
-endclass : uvm_component
-
   typedef struct {
     string comp;
     string phase;
@@ -1688,7 +1674,12 @@ endclass : uvm_component
   } m_verbosity_setting;
 
   m_verbosity_setting m_verbosity_settings[$];
-  m_verbosity_setting m_time_settings[$];
+  static m_verbosity_setting m_time_settings[$];
+
+  // does the pre abort callback hierarchically
+  extern /*local*/ function void m_do_pre_abort;
+
+endclass : uvm_component
 
 `include "base/uvm_root.svh"
 
