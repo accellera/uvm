@@ -1597,7 +1597,7 @@ function void uvm_phase::unsync(uvm_domain target,
     `uvm_fatal("PH_BADSYNC","unsync() called with a null target domain");
   end else if (!target.is_domain()) begin
     `uvm_fatal("PH_BADSYNC","unsync() called with a non-domain phase schedule node as target");
-  end else if (phase == null && with_phase) begin
+  end else if (phase == null && with_phase != null) begin
     `uvm_fatal("PH_BADSYNC","unsync() called with null phase and non-null with phase");
   end else if (phase == null) begin
     // whole domain unsync - traverse this domain schedule from begin to end node and unsync each node
@@ -1608,7 +1608,7 @@ function void uvm_phase::unsync(uvm_domain target,
     while (queue.size()) begin
       uvm_phase node;
       node = queue.pop_front();
-      if (node.m_imp) unsync(target,node.m_imp);
+      if (node.m_imp != null) unsync(target,node.m_imp);
       foreach (node.m_successors[succ]) begin
         if (!visited.exists(succ)) begin
           queue.push_back(succ);

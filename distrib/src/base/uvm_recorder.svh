@@ -244,7 +244,7 @@ class uvm_recorder extends uvm_object;
   endfunction
 
 
-  static bit m_handles[integer];
+  static bit m_handles[int];
   static int handle;
 
 
