@@ -1665,6 +1665,20 @@ virtual class uvm_component extends uvm_report_object;
   // The verbosity settings may have a specific phase to start at. 
   // We will do this work in the phase_started callback. 
 
+  /*typedef struct {
+    string comp;
+    string phase;
+    time   offset;
+    uvm_verbosity verbosity;
+    string id;
+  } m_verbosity_setting;
+  */
+
+  // does the pre abort callback hierarchically
+  extern /*local*/ function void m_do_pre_abort;
+
+endclass : uvm_component
+
   typedef struct {
     string comp;
     string phase;
@@ -1672,15 +1686,9 @@ virtual class uvm_component extends uvm_report_object;
     uvm_verbosity verbosity;
     string id;
   } m_verbosity_setting;
+
   m_verbosity_setting m_verbosity_settings[$];
-  static local m_verbosity_setting m_time_settings[$];
-
-  // does the pre abort callback hierarchically
-  extern /*local*/ function void m_do_pre_abort;
-
-endclass : uvm_component
-
-
+  m_verbosity_setting m_time_settings[$];
 
 `include "base/uvm_root.svh"
 
@@ -3216,7 +3224,8 @@ function void uvm_component::m_set_cl_verb;
   if(this == top) begin
     fork begin
       time last_time = 0;
-      m_time_settings.sort() with ( item.offset );
+      if (m_time_settings.size() > 0)
+        m_time_settings.sort() with ( item.offset );
       foreach(m_time_settings[i]) begin
         uvm_component comps[$];
         top.find_all(m_time_settings[i].comp,comps);
