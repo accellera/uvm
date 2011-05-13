@@ -57,13 +57,11 @@ module test;
       `uvm_field_int(value, UVM_DEFAULT)
     `uvm_object_utils_end
     function new;
-      for(int i=0;i<3; ++i) begin
+      for(int i=0;i<1; ++i) begin
          object.push_back(null);
          object[i] = new;
       end
       object[0].color = ORANGE; object[0].i = 'haa; object[0].str = "zero";
-      object[1].color = GREEN; object[1].i = 'hbb; object[1].str = "one";
-      object[2].color = VIOLET; object[2].i = 'hcc; object[2].str = "two";
     endfunction
   endclass
 
@@ -119,6 +117,10 @@ module test;
 
       $cast(cp, obj.clone());
       cp.set_name("obj_copy");
+
+      if(cp.object.size() != 3) begin
+        uvm_report_info("FAILED", $sformatf("*** UVM TEST FAILED copy failed, expected queue size 3, got %0d ***",cp.object.size()), UVM_NONE);
+      end
 
       // This tests the copy and the compare
       if(!cp.compare(obj))

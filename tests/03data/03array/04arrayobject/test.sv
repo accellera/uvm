@@ -57,11 +57,9 @@ module test;
       `uvm_field_int(value, UVM_DEFAULT)
     `uvm_object_utils_end
     function new;
-      object=new[3];
+      object=new[1];
       foreach(object[i]) object[i] = new;
       object[0].color = ORANGE; object[0].i = 'haa; object[0].str = "zero";
-      object[1].color = GREEN; object[1].i = 'hbb; object[1].str = "one";
-      object[2].color = VIOLET; object[2].i = 'hcc; object[2].str = "two";
     endfunction
   endclass
 

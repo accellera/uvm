@@ -57,7 +57,7 @@
 //-----------------------------------------------------------------------------
 
 `define uvm_register_cb(T,CB) \
-  static local bit m_register_cb_``CB = uvm_callbacks#(T,CB)::register_pair(`"T`",`"CB`");
+  static local bit m_register_cb_``CB = uvm_callbacks#(T,CB)::m_register_pair(`"T`",`"CB`");
 
 
 //-----------------------------------------------------------------------------

@@ -52,7 +52,7 @@ package uvc_pkg;
       while(1) begin
         seq_item_port.get_next_item(req);
         vif.drive_tr(req);
-        #1 `uvm_info("USRDRV", $psprintf("Received following transaction :\n%0s",
+        #1 `uvm_info("USRDRV", $sformatf("Received following transaction :\n%0s",
           req.sprint()), UVM_LOW)
         seq_item_port.item_done();
       end

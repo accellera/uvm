@@ -40,7 +40,7 @@ class simple_response_seq extends uvm_sequence #(xbus_transfer);
 
   virtual task body();
     p_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("%s starting...",
+      $sformatf("%s starting...",
       get_sequence_path()), UVM_MEDIUM);
     forever begin
       p_sequencer.addr_ph_port.peek(util_transfer);
@@ -110,7 +110,7 @@ class slave_memory_seq extends uvm_sequence #(xbus_transfer);
 
   virtual task body();
     p_sequencer.uvm_report_info(get_type_name(),
-      $psprintf("%s starting...",
+      $sformatf("%s starting...",
       get_sequence_path()), UVM_MEDIUM);
 
     $cast(req, create_item(xbus_transfer::get_type(), p_sequencer, "req"));

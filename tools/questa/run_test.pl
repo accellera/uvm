@@ -88,7 +88,7 @@ sub run_the_test($$$) {
     # compile commands
     my $vlib = ("vlib work");
     # +acc=rmb needed for DPI backdoor access
-    my $vlog = ("vlog -suppress 2218,2181 -mfcu +acc=rmb $compile_opts -timescale 1ns/1ns $uvm_opts test.sv");
+    my $vlog = ("vlog -lint -suppress 2218,2181 -mfcu +acc=rmb $compile_opts -timescale 1ns/1ns $uvm_opts test.sv");
     &questa_run("cd ./$testdir && ($vlib && $vlog && touch qa) $redirect ".&comptime_log_fname()." 2>&1");
 
     # only run if the compile succeeded in reaching QA
@@ -108,7 +108,7 @@ sub run_the_test($$$) {
         }
         my $clib = "";
         if ($compile_opts !~ /UVM_NO_DPI/) {
-          system("cd ./$testdir/$uvm_home/examples; make -f Makefile.questa $opt_M --quiet dpi_lib") && die "DPI Library Compilation Problem" ;
+          system("cd $uvm_home/examples; make -f Makefile.questa $opt_M --quiet dpi_lib") && die "DPI Library Compilation Problem" ;
           $clib = "-sv_lib $uvm_home/lib/uvm_dpi";
         }
 
@@ -176,8 +176,13 @@ sub get_runtime_errors($) {
     my @errs;
     while (my $line = <LOG>) {
         if ($line =~ m/^\#?\s*\**\s*Error:/) {
+            # ** Error: test.sv(62): message
             if ($line =~ m/^\#?\s*\**\s*Error:\s*([^\(]+)\(([^\)]+)\):\s(.*)/) {
                 my ($fname,$lineno,$err) = ($1,$2,$3);
+                push(@errs, "$fname#$lineno");
+            # ** Error: (vsim-XXXX) test.sv(62): message
+            } elsif ($line =~ m/^\#?\s*\**\s*Error:\s*\(([^\)]+)\)\s*([^\(]+)\(([^\)]+)\):\s(.*)/) {
+                my ($fname,$lineno,$err) = ($2,$3,$4);
                 push(@errs, "$fname#$lineno");
             } elsif ($line =~ m/^\#?\s*\**\s*Error:\s*(.*) in file (.*) at line\s*([0-9]+)\./) {
                 my ($fname,$lineno,$err) = ($2,$3,$1);

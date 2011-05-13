@@ -93,16 +93,16 @@ endclass
 global_stop_request();
 
 
-          `uvm_info("FIXME",$psprintf("%s to existing address...Updating address : %0h with data : %0h", 
+          `uvm_info("FIXME",$sformatf("%s to existing address...Updating address : %0h with data : %0h", 
             trans.read_write.name(), trans.addr + i, data),UVM_LOW);
 
           `uvm_error("DUT",
-            ($psprintf("Read data mismatch.  Expected : %0h. Actual : %0h", exp, data)));
+            ($sformatf("Read data mismatch.  Expected : %0h. Actual : %0h", exp, data)));
 
-        `uvm_info("FIXME",$psprintf("%s to empty address...Updating address : %0h with data : %0h", 
+        `uvm_info("FIXME",$sformatf("%s to empty address...Updating address : %0h with data : %0h", 
           trans.read_write.name(), trans.addr + i, data),UVM_LOW);
 
-      `uvm_info("FIXME",$psprintf("Reporting scoreboard information...\n%s", this.sprint(),UVM_LOW));
+      `uvm_info("FIXME",$sformatf("Reporting scoreboard information...\n%s", this.sprint(),UVM_LOW));
 
 
   task put (T p);
@@ -119,3 +119,8 @@ global_stop_request();
       p.print();
     lock.put();
   endtask 
+
+
+factory.set_type_override_by_name("some","other");
+factory.set_type_override_by_name("some","other");
+factory.set_type_override_by_type(some,other);

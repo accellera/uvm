@@ -1,78 +1,52 @@
-//---------------------------------------------------------------------- 
-//   Copyright 2011 Cadence Design Systems, Inc.
-//   All Rights Reserved Worldwide 
-// 
-//   Licensed under the Apache License, Version 2.0 (the 
-//   "License"); you may not use this file except in 
-//   compliance with the License.  You may obtain a copy of 
-//   the License at 
-// 
-//       http://www.apache.org/licenses/LICENSE-2.0 
-// 
-//   Unless required by applicable law or agreed to in 
-//   writing, software distributed under the License is 
-//   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
-//   CONDITIONS OF ANY KIND, either express or implied.  See 
-//   the License for the specific language governing 
-//   permissions and limitations under the License. 
-//----------------------------------------------------------------------
+//
+//------------------------------------------------------------------------------
+//   Copyright 2011 Cadence
+//   All Rights Reserved Worldwide
+//
+//   Licensed under the Apache License, Version 2.0 (the
+//   "License"); you may not use this file except in
+//   compliance with the License.  You may obtain a copy of
+//   the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in
+//   writing, software distributed under the License is
+//   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+//   CONDITIONS OF ANY KIND, either express or implied.  See
+//   the License for the specific language governing
+//   permissions and limitations under the License.
+//------------------------------------------------------------------------------
 
 module test;
-
   import uvm_pkg::*;
+  `include "uvm_macros.svh"
+ 
+  int value;
+  int failed=0;
+  byte bvalue;
 
-  class test extends uvm_test;
+  class test extends uvm_component;
     `uvm_new_func
     `uvm_component_utils(test)
 
-    task run_phase(uvm_phase phase);
-      int v;
-      byte v2;
-      bit v3;
-      bit failed = 0;
-
-      phase.raise_objection(this);
-
-      uvm_resource_db#(int)::set("","value",31);
-      uvm_resource_db#(byte)::set("","value",'hff);
-      uvm_resource_db#(bit)::set("","value",0);
-
-      if(!uvm_resource_db#(int)::read_by_name("","value",v)) begin
-        $display("*** UVM TEST FAILED didn't get int value ***");
-        failed = 1;
-      end
-      if(v != 31) begin
-        $display("*** UVM TEST FAILED expected int value 10, got %0d ***", v);
-        failed = 1;
+    task run;
+       uvm_resource_db#(int)::set("","value",31);
+       uvm_resource_db#(byte)::set("","value",'hfe);
+       uvm_resource_db#(int)::set("","value",0);
+        
+       if(!uvm_resource_db#(byte)::read_by_name("","value",bvalue))
+            `uvm_fatal("FAIL","*** UVM TEST FAILED : no value found for byte value  ***")
+            
+       if(bvalue != 'hfe) begin
+        `uvm_fatal("FAIL","*** bad value found ***")
       end
 
-      if(!uvm_resource_db#(byte)::read_by_name("","value",v2)) begin
-        $display("*** UVM TEST FAILED didn't get byte value ***");
-        failed = 1;
-      end
-      if(v2 != 'hff) begin
-        $display("*** UVM TEST FAILED expected byte value 'hff, got %0d ***", v2);
-        failed = 1;
-      end
-
-      if(!uvm_resource_db#(bit)::read_by_name("","value",v3)) begin
-        $display("*** UVM TEST FAILED didn't get bit value ***");
-        failed = 1;
-      end
-      if(v3 != 0) begin
-        $display("*** UVM TEST FAILED expected bit value 0, got %0d ***", v3);
-        failed = 1;
-      end
-
-      if(!failed)
-        $display("*** UVM TEST PASSED ***");
-
-      phase.drop_objection(this);
+      $display("*** UVM TEST PASSED ***");
     endtask
+  endclass
 
-endclass
-
-initial
-  run_test("test");
-
+  initial begin
+    run_test();
+  end
 endmodule

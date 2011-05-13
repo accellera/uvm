@@ -41,13 +41,13 @@ module top();
       super.new(name);
     endfunction
     task pre_body();
-      `uvm_info(get_type_name(), $psprintf("pre_body starting"), UVM_HIGH)
+      `uvm_info(get_type_name(), $sformatf("pre_body starting"), UVM_HIGH)
     endtask
     task body();
-      `uvm_info(get_type_name(), $psprintf("body starting"), UVM_HIGH)
+      `uvm_info(get_type_name(), $sformatf("body starting"), UVM_HIGH)
       #100;
       `uvm_do(req)
-      `uvm_info(get_type_name(), $psprintf("item done, sequence is finishing"), UVM_HIGH)
+      `uvm_info(get_type_name(), $sformatf("item done, sequence is finishing"), UVM_HIGH)
     endtask
   endclass
 
@@ -82,7 +82,7 @@ module top();
     task run();
       forever begin
         //seq_item_port.get_next_item(req);
-        //`uvm_info(get_type_name(), $psprintf("Request is:\n%s", req.sprint()), UVM_HIGH)
+        //`uvm_info(get_type_name(), $sformatf("Request is:\n%s", req.sprint()), UVM_HIGH)
         #100;
         seq_item_port.item_done();
       end
@@ -126,7 +126,7 @@ module top();
     endfunction
 
     function void end_of_elaboration();
-      `uvm_info(get_type_name(), $psprintf("The topology:\n%s", this.sprint()), UVM_HIGH)
+      `uvm_info(get_type_name(), $sformatf("The topology:\n%s", this.sprint()), UVM_HIGH)
     endfunction
 
     task run();

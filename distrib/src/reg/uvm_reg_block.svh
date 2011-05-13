@@ -104,20 +104,28 @@ virtual class uvm_reg_block extends uvm_object;
    //
    // Create an address map in this block
    //
-   // Create an address map with the specified ~name~.
-   // The base address is usually 0.
-   // ~n_bytes~ specifies the number of bytes in the datapath that accesses
-   // this address map.
-   // ~endian~ specifies the endianness, should a register or sub-map with
-   // a greater number of bytes be accessed.
+   // Create an address map with the specified ~name~, then
+   // configures it with the following properties.
    //
-   //| APB = create_map("APB", 0, 1, UVM_LITTLE_ENDIAN);
+   // base_addr - the base address for the map. All registers, memories,
+   //             and sub-blocks within the map will be at offsets to this
+   //             address
+   //
+   // n_bytes   - the byte-width of the bus on which this map is used 
+   //
+   // endian    - the endian format. See <uvm_endianness_e> for possible
+   //             values
+   //
+   // byte_addressing - specifies whether consecutive addresses refer are 1 byte
+   //             apart (TRUE) or ~n_bytes~ apart (FALSE). Default is TRUE. 
+   //
+   //| APB = create_map("APB", 0, 1, UVM_LITTLE_ENDIAN, 1);
    //
    extern virtual function uvm_reg_map create_map(string name,
                                                   uvm_reg_addr_t base_addr,
                                                   int unsigned n_bytes,
                                                   uvm_endianness_e endian,
-                                                  bit byte_addressing=0);
+                                                  bit byte_addressing = 1);
 
 
    // Function: check_data_width
@@ -935,7 +943,7 @@ endclass: uvm_reg_block
 function bit uvm_reg_block::check_data_width(int unsigned width);
    if (width <= $bits(uvm_reg_data_t)) return 1;
 
-   `uvm_fatal("RegModel", $psprintf("Register model requires that UVM_REG_DATA_WIDTH be defined as %0d or greater. Currently defined as %0d", width, `UVM_REG_DATA_WIDTH))
+   `uvm_fatal("RegModel", $sformatf("Register model requires that UVM_REG_DATA_WIDTH be defined as %0d or greater. Currently defined as %0d", width, `UVM_REG_DATA_WIDTH))
 
    return 0;
 endfunction
@@ -1083,7 +1091,7 @@ function void uvm_reg_block::lock_model();
          max_size = uvm_mem::get_max_size();
 
       if (max_size > `UVM_REG_DATA_WIDTH) begin
-         `uvm_fatal("RegModel", $psprintf("Register model requires that UVM_REG_DATA_WIDTH be defined as %0d or greater. Currently defined as %0d", max_size, `UVM_REG_DATA_WIDTH))
+         `uvm_fatal("RegModel", $sformatf("Register model requires that UVM_REG_DATA_WIDTH be defined as %0d or greater. Currently defined as %0d", max_size, `UVM_REG_DATA_WIDTH))
       end
 
       Xinit_address_mapsX();
@@ -1786,7 +1794,7 @@ function uvm_reg_map uvm_reg_block::create_map(string name,
                                                uvm_reg_addr_t base_addr,
                                                int unsigned n_bytes,
                                                uvm_endianness_e endian,
-                                               bit byte_addressing=0);
+                                               bit byte_addressing=1);
 
    uvm_reg_map  map;
 

@@ -40,13 +40,13 @@ class test extends test_base;
     phase.raise_objection(this);
     #20;
     if( jump_reset_num ) begin
-      `uvm_info( "JUMP_RESET", $psprintf("Jump backward to reset phase from : main"), UVM_NONE);
+      `uvm_info( "JUMP_RESET", $sformatf("Jump backward to reset phase from : main"), UVM_NONE);
       jump_reset_num --;
       phase.jump( uvm_reset_phase::get() );
     end
     #10;
     //now jump to shutdown (skip post_main and pre_shutdown)
-    `uvm_info( "JUMP_SHUTDOWN", $psprintf("Jump forward to shutdown phase from : main"), UVM_NONE);
+    `uvm_info( "JUMP_SHUTDOWN", $sformatf("Jump forward to shutdown phase from : main"), UVM_NONE);
     phase.jump( uvm_shutdown_phase::get() );
     phase.drop_objection(this);
   endtask : main_phase
@@ -80,32 +80,32 @@ class test extends test_base;
     int prs_c  = svr.get_id_count( "pre_shutdown" );
 
     if( jr_c != e_jr_c ) begin
-      `uvm_error( "ID_COUNT", $psprintf( "Expected %1d %s message(s).  Got %1d",
+      `uvm_error( "ID_COUNT", $sformatf( "Expected %1d %s message(s).  Got %1d",
                                          e_jr_c, "JUMP_RESET", jr_c));
     end
 
     if( js_c != e_js_c ) begin
-      `uvm_error( "ID_COUNT", $psprintf( "Expected %1d %s message(s).  Got %1d",
+      `uvm_error( "ID_COUNT", $sformatf( "Expected %1d %s message(s).  Got %1d",
                                          e_js_c, "JUMP_SHUTDOWN", js_c));
     end
 
     if( trs_c != e_trs_c ) begin
-      `uvm_error( "ID_COUNT", $psprintf( "Expected %1d [%s] message(s).  Got %1d",
+      `uvm_error( "ID_COUNT", $sformatf( "Expected %1d [%s] message(s).  Got %1d",
                                          e_trs_c, "top_random_seq", trs_c));
     end
 
     if( brs_c != e_brs_c) begin
-      `uvm_error( "ID_COUNT", $psprintf( "Expected %1d [%s] message(s).  Got %1d",
+      `uvm_error( "ID_COUNT", $sformatf( "Expected %1d [%s] message(s).  Got %1d",
                                          e_brs_c, "bottom_random_seq", brs_c));
     end
 
     if( pm_c != e_pm_c) begin
-      `uvm_error( "ID_COUNT", $psprintf( "Expected %1d [%s] message(s).  Got %1d",
+      `uvm_error( "ID_COUNT", $sformatf( "Expected %1d [%s] message(s).  Got %1d",
                                          e_pm_c, "post_main", pm_c));
     end
 
     if( prs_c != e_prs_c) begin
-      `uvm_error( "ID_COUNT", $psprintf( "Expected %1d [%s] message(s).  Got %1d",
+      `uvm_error( "ID_COUNT", $sformatf( "Expected %1d [%s] message(s).  Got %1d",
                                          e_prs_c, "pre_shutdown", prs_c));
     end
   endfunction : check_phase

@@ -496,7 +496,7 @@ function automatic string uvm_hdl_concat2string(uvm_hdl_path_concat concat);
 
       image = { image, (i == 0) ? "" : ", ", slice.path };
       if (slice.offset >= 0)
-         image = { image, "@", $psprintf("[%0d +: %0d]", slice.offset, slice.size) };
+         image = { image, "@", $sformatf("[%0d +: %0d]", slice.offset, slice.size) };
    end
 
    image = { image, "}" };

@@ -105,7 +105,7 @@ class test extends uvm_test;
     if( component.object.field != object_field ) begin
       failed = 1;
       `uvm_error(get_type_name(),
-                 $psprintf("expected component.object.field == %0h, but saw %0h",
+                 $sformatf("expected component.object.field == %0h, but saw %0h",
                            object_field, component.object.field) )
     end
 
@@ -113,7 +113,7 @@ class test extends uvm_test;
     if( component.object.msg != object_msg ) begin
       failed = 1;
       `uvm_error(get_type_name(),
-                 $psprintf("expected component.object.msg == %s, but saw %s",
+                 $sformatf("expected component.object.msg == %s, but saw %s",
                            object_msg, component.object.msg) )
     end
 
@@ -121,14 +121,14 @@ class test extends uvm_test;
     if( component.array[0].field != array_field ) begin
       failed = 1;
       `uvm_error(get_type_name(),
-                 $psprintf("expected component.array[0].field == %0h, but saw %0h",
+                 $sformatf("expected component.array[0].field == %0h, but saw %0h",
                            array_field, component.array[0].field) )
     end
 
     if( component.array[1].msg != array_msg ) begin
       failed = 1;
       `uvm_error(get_type_name(),
-                 $psprintf("expected component.array[1].msg == %s, but saw %s",
+                 $sformatf("expected component.array[1].msg == %s, but saw %s",
                            array_msg, component.array[1].msg) )
     end
 

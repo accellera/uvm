@@ -38,8 +38,8 @@ typedef class uvm_reg_indirect_ftdr_seq;
 
 class uvm_reg_indirect_data extends uvm_reg;
 
-   local uvm_reg m_idx;
-   local uvm_reg m_tbl[];
+   protected uvm_reg m_idx;
+   protected uvm_reg m_tbl[];
 
    // Function: new
    // Create an instance of this class
@@ -100,7 +100,7 @@ class uvm_reg_indirect_data extends uvm_reg;
          uvm_reg_indirect_ftdr_seq fd;
          if (m_tbl[i] == null) begin
             `uvm_error(get_full_name(),
-                       $psprintf("Indirect register #%0d is NULL", i));
+                       $sformatf("Indirect register #%0d is NULL", i));
             continue;
          end
          fd = new(m_idx, i, this);
@@ -115,7 +115,7 @@ class uvm_reg_indirect_data extends uvm_reg;
                                      uvm_predict_e     kind = UVM_PREDICT_DIRECT,
                                      uvm_reg_byte_en_t be = -1);
       if (m_idx.get() >= m_tbl.size()) begin
-         `uvm_error(get_full_name(), $psprintf("Address register %s has a value (%0d) greater than the maximum indirect register array size (%0d)", m_idx.get_full_name(), m_idx.get(), m_tbl.size()));
+         `uvm_error(get_full_name(), $sformatf("Address register %s has a value (%0d) greater than the maximum indirect register array size (%0d)", m_idx.get_full_name(), m_idx.get(), m_tbl.size()));
          rw.status = UVM_NOT_OK;
          return;
       end

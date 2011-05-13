@@ -137,6 +137,7 @@ class uvm_report_handler;
     srvr.f_display(file, uvm_mgc_copyright);
     srvr.f_display(file, uvm_cdn_copyright);
     srvr.f_display(file, uvm_snps_copyright);
+    srvr.f_display(file, uvm_cy_copyright);
     srvr.f_display(file,
       "----------------------------------------------------------------");
   endfunction
@@ -475,7 +476,6 @@ class uvm_report_handler;
   function void dump_state();
 
     string s;
-    uvm_severity_type severity;
     uvm_action a;
     string idx;
     UVM_FILE file;
@@ -507,7 +507,8 @@ class uvm_report_handler;
 
     if(id_verbosities.first(idx))
     do begin
-      $sformat(s, "[%s] --> %s", idx, uvm_verbosity'(id_verbosities.get(idx)));
+      uvm_verbosity v = uvm_verbosity'(id_verbosities.get(idx));
+      $sformat(s, "[%s] --> %s", idx, v.name());
       srvr.f_display(0, s);
     end while(id_verbosities.next(idx));
 
@@ -517,11 +518,13 @@ class uvm_report_handler;
     srvr.f_display(0, "*** verbosities by id and severity");
 
     foreach( severity_id_verbosities[severity] ) begin
+      uvm_severity_type sev = uvm_severity_type'(severity);
       id_v_ary = severity_id_verbosities[severity];
       if(id_v_ary.first(idx))
       do begin
+        uvm_verbosity v = uvm_verbosity'(id_v_ary.get(idx));
         $sformat(s, "%s:%s --> %s",
-           uvm_severity_type'(severity), idx, uvm_verbosity'(id_v_ary.get(idx)));
+           sev.name(), idx, v.name());
         srvr.f_display(0, s);        
       end while(id_v_ary.next(idx));
     end
@@ -536,8 +539,9 @@ class uvm_report_handler;
 
     srvr.f_display(0, "*** actions by severity");
     foreach( severity_actions[severity] ) begin
+      uvm_severity_type sev = uvm_severity_type'(severity);
       $sformat(s, "%s = %s",
-       uvm_severity_type'(severity), format_action(severity_actions[severity]));
+       sev.name(), format_action(severity_actions[severity]));
       srvr.f_display(0, s);
     end
 
@@ -556,11 +560,12 @@ class uvm_report_handler;
     srvr.f_display(0, "*** actions by id and severity");
 
     foreach( severity_id_actions[severity] ) begin
+      uvm_severity_type sev = uvm_severity_type'(severity);
       id_a_ary = severity_id_actions[severity];
       if(id_a_ary.first(idx))
       do begin
         $sformat(s, "%s:%s --> %s",
-           uvm_severity_type'(severity), idx, format_action(id_a_ary.get(idx)));
+           sev.name(), idx, format_action(id_a_ary.get(idx)));
         srvr.f_display(0, s);        
       end while(id_a_ary.next(idx));
     end
@@ -579,8 +584,9 @@ class uvm_report_handler;
     srvr.f_display(0, "");
     srvr.f_display(0, "*** files by severity");
     foreach( severity_file_handles[severity] ) begin
+      uvm_severity_type sev = uvm_severity_type'(severity);
       file = severity_file_handles[severity];
-      $sformat(s, "%s = %d", uvm_severity_type'(severity), file);
+      $sformat(s, "%s = %d", sev.name(), file);
       srvr.f_display(0, s);
     end
 
@@ -598,10 +604,11 @@ class uvm_report_handler;
     srvr.f_display(0, "*** files by id and severity");
 
     foreach( severity_id_file_handles[severity] ) begin
+      uvm_severity_type sev = uvm_severity_type'(severity);
       id_f_ary = severity_id_file_handles[severity];
       if(id_f_ary.first(idx))
       do begin
-        $sformat(s, "%s:%s --> %d", uvm_severity_type'(severity), idx, id_f_ary.get(idx));
+        $sformat(s, "%s:%s --> %d", sev.name(), idx, id_f_ary.get(idx));
         srvr.f_display(0, s);
       end while(id_f_ary.next(idx));
     end

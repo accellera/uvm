@@ -47,21 +47,21 @@ module test;
     task reset_phase(uvm_phase phase);
       phase.raise_objection(this, "start reset");
       if(dodelay) #thedelay;
-      `uvm_info("RESET",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
+      `uvm_info("RESET",$sformatf("Finished waiting %d",thedelay),UVM_NONE);
       phase.drop_objection(this, "start reset");
     endtask
 
     task main_phase(uvm_phase phase);
       phase.raise_objection(this, "start main");
       if(dodelay) #thedelay;
-      `uvm_info("MAIN",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
+      `uvm_info("MAIN",$sformatf("Finished waiting %d",thedelay),UVM_NONE);
       phase.drop_objection(this, "start main");
     endtask
 
     task shutdown_phase(uvm_phase phase);
       phase.raise_objection(this, "start shutdown");
       if(dodelay) #thedelay;
-      `uvm_info("SHUTDOWN",$psprintf("Finished waiting %d",thedelay),UVM_NONE);
+      `uvm_info("SHUTDOWN",$sformatf("Finished waiting %d",thedelay),UVM_NONE);
       phase.drop_objection(this, "start shutdown");
     endtask
 
@@ -99,7 +99,7 @@ module test;
     function void phase_started (uvm_phase phase);
       string pre_phase = "NONE", pre_phase2 = "NONE";
       time pre_phase_end_time=-1; 
-      `uvm_info("PHASE",$psprintf("Starting %s",phase.get_name()),UVM_NONE);
+      `uvm_info("PHASE",$sformatf("Starting %s",phase.get_name()),UVM_NONE);
       phase_started_called[phase.get_name()] = $time;
       case(phase.get_name())
         // Common phases
@@ -144,7 +144,7 @@ module test;
 
     function void phase_ended (uvm_phase phase);
       phase_ended_called[phase.get_name()] = $time;
-      `uvm_info("PHASE",$psprintf("Ending %s",phase.get_name()),UVM_NONE);
+      `uvm_info("PHASE",$sformatf("Ending %s",phase.get_name()),UVM_NONE);
     endfunction
   endclass
 

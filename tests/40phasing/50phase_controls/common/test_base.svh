@@ -106,14 +106,14 @@ class top_configure_seq extends top_sequence;
   `uvm_object_utils(top_configure_seq)
   task body;
     starting_phase.raise_objection(this);
-    `uvm_info( "CONFIG", $psprintf("Random traffic from %s.",
+    `uvm_info( "CONFIG", $sformatf("Random traffic from %s.",
                                  m_sequencer.get_name()), UVM_NONE);
     for( int i = 1; i< 5; i++) begin
       delay  = $urandom_range( 1, 4); #(delay);
-      `uvm_info(get_name(), $psprintf("Doing req #(%1d out of 4) ...", i),UVM_NONE);
+      `uvm_info(get_name(), $sformatf("Doing req #(%1d out of 4) ...", i),UVM_NONE);
       `uvm_do( req );
     end
-    `uvm_info( "CONFIG", $psprintf("Done random traffic from %s.",
+    `uvm_info( "CONFIG", $sformatf("Done random traffic from %s.",
                                  m_sequencer.get_name()), UVM_NONE);
     starting_phase.drop_objection(this);
   endtask : body
@@ -129,14 +129,14 @@ class top_random_seq extends top_sequence;
   `uvm_object_utils(top_random_seq)
   task body;
     starting_phase.raise_objection(this);
-    `uvm_info( "MAIN", $psprintf("Random traffic from %s.",
+    `uvm_info( "MAIN", $sformatf("Random traffic from %s.",
                                  m_sequencer.get_name()), UVM_NONE);
     for( int i = 1; i< 6; i++) begin
       #(4);
-      `uvm_info(get_name(), $psprintf("Doing req #(%1d out of 5) ...", i),UVM_NONE);
+      `uvm_info(get_name(), $sformatf("Doing req #(%1d out of 5) ...", i),UVM_NONE);
       `uvm_do( req );
     end
-    `uvm_info( "MAIN", $psprintf("Done random traffic from %s.",
+    `uvm_info( "MAIN", $sformatf("Done random traffic from %s.",
                                  m_sequencer.get_name()), UVM_NONE);
     starting_phase.drop_objection(this);
   endtask : body
@@ -151,14 +151,14 @@ class bot_random_seq extends bot_sequence;
   `uvm_object_utils(bot_random_seq)
   task body;
     starting_phase.raise_objection(this);
-    `uvm_info( "MAIN", $psprintf("Random traffic from %s.",
+    `uvm_info( "MAIN", $sformatf("Random traffic from %s.",
                                  m_sequencer.get_name()), UVM_NONE);
     for( int i = 1; i< 7; i++) begin
       #(3);
-      `uvm_info(get_name(), $psprintf("Doing req #(%1d out of 6) ...", i),UVM_NONE);
+      `uvm_info(get_name(), $sformatf("Doing req #(%1d out of 6) ...", i),UVM_NONE);
       `uvm_do( req );
     end
-    `uvm_info( "MAIN", $psprintf("Done random traffic from %s.",
+    `uvm_info( "MAIN", $sformatf("Done random traffic from %s.",
                                  m_sequencer.get_name()), UVM_NONE);
     starting_phase.drop_objection(this);
   endtask : body
@@ -176,7 +176,7 @@ class test_base_post_main_phase_imp extends uvm_task_phase;
   endfunction : new
 
   task exec_task(uvm_component comp, uvm_phase phase);
-    `uvm_info( "POST_MAIN", $psprintf("Component %s executing phase %s", comp.get_name(), phase.get_name()), UVM_NONE);
+    `uvm_info( "POST_MAIN", $sformatf("Component %s executing phase %s", comp.get_name(), phase.get_name()), UVM_NONE);
   endtask
 endclass : test_base_post_main_phase_imp
 

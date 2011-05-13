@@ -37,7 +37,7 @@ class simple_seq_do extends uvm_sequence #(simple_item);
   `uvm_sequence_utils(simple_seq_do, simple_sequencer)    
 
   virtual task body();
-    `uvm_info(get_name(), $psprintf("In body() of %s", get_name()),1000)
+    `uvm_info(get_name(), $sformatf("In body() of %s", get_name()),1000)
     `uvm_do(req)
   endtask
   
@@ -59,7 +59,7 @@ class simple_seq_do_with extends uvm_sequence #(simple_item);
   `uvm_sequence_utils(simple_seq_do_with, simple_sequencer)
 
   virtual task body();
-    `uvm_info(get_name(), $psprintf("In body() of %s", get_name()),1000)
+    `uvm_info(get_name(), $sformatf("In body() of %s", get_name()),1000)
     `uvm_do_with(req, { req.addr == 16'h0123; req.data == 16'h0456; } )
   endtask
   
@@ -86,7 +86,7 @@ class simple_seq_do_with_vars extends uvm_sequence #(simple_item);
     constraint c2 { start_data < 16'h0100; }
 
   virtual task body();
-    `uvm_info(get_name(), $psprintf("In body() of %s", get_name()),1000)
+    `uvm_info(get_name(), $sformatf("In body() of %s", get_name()),1000)
     `uvm_do_with(req, { req.addr == start_addr; req.data == start_data; } )
   endtask
   
@@ -112,7 +112,7 @@ class simple_seq_sub_seqs extends uvm_sequence #(simple_item);
   simple_seq_do_with_vars seq_do_with_vars;
 
   virtual task body();
-    `uvm_info(get_name(), $psprintf("In body() of %s", get_name()),1000)
+    `uvm_info(get_name(), $sformatf("In body() of %s", get_name()),1000)
     #100;
     `uvm_do(seq_do)
     #100;

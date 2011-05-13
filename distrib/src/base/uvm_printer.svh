@@ -94,7 +94,7 @@ virtual class uvm_printer;
   // name  - The name of the field. 
   // value - The value of the field.
   // size  - The number of bits of the field (maximum is 4096). 
-  // radix - The radix to use for printingthe printer knob for radix is used
+  // radix - The radix to use for printing. The printer knob for radix is used
   //           if no radix is specified. 
   // scope_separator - is used to find the leaf name since many printers only
   //           print the leaf name of a field.  Typical values for the separator

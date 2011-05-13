@@ -1151,7 +1151,7 @@ endclass: uvm_reg
 function uvm_reg::new(string name="", int unsigned n_bits, int has_coverage);
    super.new(name);
    if (n_bits == 0) begin
-      `uvm_error("RegModel", $psprintf("Register \"%s\" cannot have 0 bits", get_name()));
+      `uvm_error("RegModel", $sformatf("Register \"%s\" cannot have 0 bits", get_name()));
       n_bits = 1;
    end
    m_n_bits      = n_bits;
@@ -1217,7 +1217,7 @@ function void uvm_reg::add_field(uvm_reg_field field);
    // Check if there are too many fields in the register
    if (m_n_used_bits > m_n_bits) begin
       `uvm_error("RegModel",
-         $psprintf("Fields use more bits (%0d) than available in register \"%s\" (%0d)",
+         $sformatf("Fields use more bits (%0d) than available in register \"%s\" (%0d)",
             m_n_used_bits, get_name(), m_n_bits));
    end
 
@@ -1225,7 +1225,7 @@ function void uvm_reg::add_field(uvm_reg_field field);
    if (idx > 0) begin
       if (m_fields[idx-1].get_lsb_pos() +
           m_fields[idx-1].get_n_bits() > offset) begin
-         `uvm_error("RegModel", $psprintf("Field %s overlaps field %s in register \"%s\"",
+         `uvm_error("RegModel", $sformatf("Field %s overlaps field %s in register \"%s\"",
                                         m_fields[idx-1].get_name(),
                                         field.get_name(), get_name()));
       end
@@ -1233,7 +1233,7 @@ function void uvm_reg::add_field(uvm_reg_field field);
    if (idx < m_fields.size()-1) begin
       if (offset + field.get_n_bits() >
           m_fields[idx+1].get_lsb_pos()) begin
-         `uvm_error("RegModel", $psprintf("Field %s overlaps field %s in register \"%s\"",
+         `uvm_error("RegModel", $sformatf("Field %s overlaps field %s in register \"%s\"",
                                         field.get_name(),
                                         m_fields[idx+1].get_name(),
                                       get_name()));
@@ -2060,6 +2060,8 @@ task uvm_reg::update(output uvm_status_e      status,
 
    status = UVM_IS_OK;
 
+   if (!needs_update()) return;
+      
    if (m_update_in_progress) begin
      @(negedge m_update_in_progress);
      return;
@@ -2681,14 +2683,14 @@ function uvm_status_e uvm_reg::backdoor_read_func(uvm_reg_item rw);
         rw.value[0] = val;
 
      if (val != rw.value[0]) begin
-        `uvm_error("RegModel", $psprintf("Backdoor read of register %s with multiple HDL copies: values are not the same: %0h at path '%s', and %0h at path '%s'. Returning first value.",
+        `uvm_error("RegModel", $sformatf("Backdoor read of register %s with multiple HDL copies: values are not the same: %0h at path '%s', and %0h at path '%s'. Returning first value.",
                get_full_name(),
                rw.value[0], uvm_hdl_concat2string(paths[0]),
                val, uvm_hdl_concat2string(paths[i]))); 
         return UVM_NOT_OK;
       end
       `uvm_info("RegMem", 
-         $psprintf("returned backdoor value 0x%0x",rw.value[0]),UVM_DEBUG);
+         $sformatf("returned backdoor value 0x%0x",rw.value[0]),UVM_DEBUG);
       
   end
 
@@ -2744,7 +2746,7 @@ task uvm_reg::poke(output uvm_status_e      status,
 
    status = rw.status;
 
-   `uvm_info("RegModel", $psprintf("Poked register \"%s\": 'h%h",
+   `uvm_info("RegModel", $sformatf("Poked register \"%s\": 'h%h",
                               get_full_name(), value),UVM_HIGH);
 
    do_predict(rw, UVM_PREDICT_WRITE);
@@ -2772,7 +2774,7 @@ task uvm_reg::peek(output uvm_status_e      status,
 
    if (bkdr == null && !has_hdl_path(kind)) begin
       `uvm_error("RegModel",
-        $psprintf("No backdoor access available to peek register \"%s\"",
+        $sformatf("No backdoor access available to peek register \"%s\"",
                   get_full_name()));
       status = UVM_NOT_OK;
       return;
@@ -2801,7 +2803,7 @@ task uvm_reg::peek(output uvm_status_e      status,
    status = rw.status;
    value = rw.value[0];
 
-   `uvm_info("RegModel", $psprintf("Peeked register \"%s\": 'h%h",
+   `uvm_info("RegModel", $sformatf("Peeked register \"%s\": 'h%h",
                           get_full_name(), value),UVM_HIGH);
 
    do_predict(rw, UVM_PREDICT_READ);
@@ -2888,8 +2890,8 @@ task uvm_reg::mirror(output uvm_status_e       status,
       end
 
       if ((v|dc) !== (exp|dc)) begin
-         `uvm_error("RegModel", $psprintf("Register \"%s\" value read from DUT (0x%h) does not match mirrored value (0x%h)",
-                                     get_name(), v, (exp ^ ('x & dc))));
+         `uvm_error("RegModel", $sformatf("Register \"%s\" value read from DUT (0x%h) does not match mirrored value (0x%h)",
+                                     get_full_name(), v, (exp ^ ('x & dc))));
                                      
           foreach(m_fields[i]) begin
              if(m_fields[i].get_compare() == UVM_CHECK) begin
@@ -2897,7 +2899,7 @@ task uvm_reg::mirror(output uvm_status_e       status,
                  uvm_reg_data_t field = mask << m_fields[i].get_lsb_pos();
                  uvm_reg_data_t diff = ((v ^ exp) >> m_fields[i].get_lsb_pos()) & mask;
                  if(diff)
-                    `uvm_info("RegMem",$psprintf("field %s mismatch read=%0d'h%0h mirrored=%0d'h%0h slice [%0d:%0d]",m_fields[i].get_name(),
+                    `uvm_info("RegMem",$sformatf("field %s mismatch read=%0d'h%0h mirrored=%0d'h%0h slice [%0d:%0d]",m_fields[i].get_name(),
                         m_fields[i].get_n_bits(),(v >> m_fields[i].get_lsb_pos()) & mask, m_fields[i].get_n_bits(),(exp >> m_fields[i].get_lsb_pos())&mask,
                         m_fields[i].get_lsb_pos()+m_fields[i].get_n_bits()-1,m_fields[i].get_lsb_pos()),UVM_NONE)
              end

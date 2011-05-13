@@ -69,9 +69,10 @@ virtual class uvm_reg_adapter extends uvm_object;
   // <uvm_reg_item> to the <uvm_sequence_item> subtype that defines the bus
   // transaction.
   //
-  // The method must allocate a new bus item, assign its members from
-  // the corresponding members from the given ~bus_rw~ item, then
-  // return it. The bus item gets returned in a <uvm_sequence_item> base handle.
+  // The method must allocate a new bus-specific <uvm_sequence_item>,
+  // assign its members from
+  // the corresponding members from the given generic ~rw~ bus operation, then
+  // return it.
 
   pure virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
 
@@ -79,7 +80,7 @@ virtual class uvm_reg_adapter extends uvm_object;
   // Function: bus2reg
   //
   // Extensions of this class ~must~ implement this method to copy members
-  // of the given ~bus_item~ to corresponding members of the provided
+  // of the given bus-specific ~bus_item~ to corresponding members of the provided
   // ~bus_rw~ instance. Unlike <reg2bus>, the resulting transaction
   // is not allocated from scratch. This is to accommodate applications
   // where the bus response must be returned in the original request.
@@ -88,6 +89,24 @@ virtual class uvm_reg_adapter extends uvm_object;
                                      ref uvm_reg_bus_op rw);
 
 
+  // function: get_item
+  //
+  // Returns the bus-independent read/write information that corresponds to
+  // the generic bus transaction currently translated to a bus-specific
+  // transaction.
+  // This function returns a value reference only when called in the
+  // <uvm_reg_adapter::reg2bus()> method.
+  // It returns null at all other times.
+  // The content of the return <uvm_reg_item> instance must not be modified
+  // and used strictly to obtain additional information about the operation.  
+  local uvm_reg_item m_item;
+  virtual function uvm_reg_item get_item();
+    return m_item;
+  endfunction
+  
+  virtual function void m_set_item(uvm_reg_item item);
+    m_item = item;
+  endfunction
 endclass
 
 
@@ -186,7 +205,8 @@ class uvm_reg_tlm_adapter extends uvm_reg_adapter;
     uvm_tlm_gp gp;
     int nbytes;
 
-    assert(bus_item!=null);
+    if (bus_item == null)
+     `uvm_fatal("REG/NULL_ITEM","bus2reg: bus_item argument is null") 
 
     if (!$cast(gp,bus_item)) begin
       `uvm_error("WRONG_TYPE","Provided bus_item is not of type uvm_tlm_gp")

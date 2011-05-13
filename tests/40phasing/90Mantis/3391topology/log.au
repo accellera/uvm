@@ -1,0 +1,19 @@
+UVM_INFO @ 0: reporter [UVMTOP] UVM testbench topology:
+---------------------------------
+Name          Type    Size  Value
+---------------------------------
+t1            trunk   -     @X
+  b1          branch  -     @X
+    l1        leaf    -     @X
+    l2        leaf    -     @X
+  b2          branch  -     @X
+    l1        leaf    -     @X
+    l2        leaf    -     @X
+uvm_test_top  test    -     @X
+  b1          branch  -     @X
+    l1        leaf    -     @X
+    l2        leaf    -     @X
+  b2          branch  -     @X
+    l1        leaf    -     @X
+    l2        leaf    -     @X
+---------------------------------

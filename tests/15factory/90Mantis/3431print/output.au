@@ -1,0 +1,33 @@
+
+#### Factory Configuration (*)
+
+Instance Overrides:
+
+  Requested Type  Override Path                Override Type
+  --------------  ---------------------------  -------------
+  gen             uvm_test_top.env.gen1        mygen
+  gen             uvm_test_top.env.generator2  mygen
+
+Type Overrides:
+
+  Requested Type  Override Type              
+  --------------  ---------------------------
+  packet          mypacket
+  mypacket        myreallybigtypenamepacket
+
+All types registered with the factory: 43 total
+(types without type names will not be printed)
+
+  Type Name
+  ---------
+  env
+  gen
+  mygen
+  mypacket
+  myreallybigtypenamepacket
+  packet
+  test
+(*) Types with no associated type name will be printed as <unknown>
+
+####
+

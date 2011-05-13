@@ -72,7 +72,7 @@ class my_uvc_driver extends uvm_driver #(packet);
         #10;
         seq_item_port.get_next_item(req);
 	uvm_report_info("DRIVER_ITEM", 
-                        $psprintf("my_uvc_driver recieved item: \n%s", req.sprint(uvm_default_tree_printer)),
+                        $sformatf("my_uvc_driver recieved item: \n%s", req.sprint(uvm_default_tree_printer)),
                         UVM_HIGH, `uvm_file, `uvm_line);
 	#0;
         packet_array[i] = req;
@@ -167,7 +167,7 @@ $display("!!!!! KILLING SHORT PACKET SEQ !!!!!");
                 end
              else 
                 begin 
-                   uvm_report_info("SIMPLESEQ", $psprintf("short_packet_seq body()... data_in = %0d", data_in),UVM_HIGH, `uvm_file, `uvm_line);
+                   uvm_report_info("SIMPLESEQ", $sformatf("short_packet_seq body()... data_in = %0d", data_in),UVM_HIGH, `uvm_file, `uvm_line);
                    `uvm_do_with(req,{data == 99;})
                    if(i>51) `uvm_fatal("KILLFAIL", "Kill failed on short_packet_seq, i>51")
                 end
@@ -210,7 +210,7 @@ $display("!!!!! KILLING LONG PACKET SEQ !!!!!");
                 end
              else  
                 begin   
-                   uvm_report_info("SIMPLESEQ", $psprintf("long_packet_seq body()... data_in = %0d", data_in),UVM_HIGH, `uvm_file, `uvm_line);
+                   uvm_report_info("SIMPLESEQ", $sformatf("long_packet_seq body()... data_in = %0d", data_in),UVM_HIGH, `uvm_file, `uvm_line);
                    `uvm_do_with(req,{data == 999;})
                    if(i>76) `uvm_fatal("KILLFAIL", "Kill failed on short_packet_seq, i>51")
                 end

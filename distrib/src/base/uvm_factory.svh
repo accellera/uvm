@@ -763,6 +763,8 @@ function void uvm_factory::register (uvm_object_wrapper obj);
     m_types[obj] = 1;
     // If a named override happens before the type is registered, need to copy
     // the override queue.
+    // Note:Registration occurs via static initialization, which occurs ahead of
+    // procedural (e.g. initial) blocks. There should not be any preexisting overrides.
     if(m_inst_override_name_queues.exists(obj.get_type_name())) begin
        m_inst_override_queues[obj] = new;
        m_inst_override_queues[obj].queue = m_inst_override_name_queues[obj.get_type_name()].queue;
@@ -772,7 +774,7 @@ function void uvm_factory::register (uvm_object_wrapper obj);
        if(! m_inst_override_queues.exists(obj)) 
             m_inst_override_queues[obj] = new;
        foreach (m_wildcard_inst_overrides[i]) begin
-         if(uvm_is_match(obj.get_type_name(), m_wildcard_inst_overrides[i].orig_type_name))
+         if(uvm_is_match( m_wildcard_inst_overrides[i].orig_type_name, obj.get_type_name()))
             m_inst_override_queues[obj].queue.push_back(m_wildcard_inst_overrides[i]);
        end
     end
@@ -1434,10 +1436,15 @@ function void uvm_factory::print (int all_types=1);
     if (!m_type_overrides.size())
       $display("\nNo type overrides are registered with this factory");
     else begin
+      // Resize for type overrides
+      if (max1 < 14) max1 = 14;
+      if (max2 < 13) max2 = 13;
+      if (max3 < 13) max3 = 13;
+
       foreach (m_type_overrides[i]) begin
         if (m_type_overrides[i].orig_type_name.len() > max1)
           max1=m_type_overrides[i].orig_type_name.len();
-        if (m_type_overrides[i].ovrd_type_name.len() > max3)
+        if (m_type_overrides[i].ovrd_type_name.len() > max2)
           max2=m_type_overrides[i].ovrd_type_name.len();
       end
       if (max1 < 14) max1 = 14;

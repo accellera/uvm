@@ -25,7 +25,6 @@
 `include "apb.sv"
 `include "vip.sv"
 
-import uvm_pkg::*;
 import apb_pkg::*;
 import vip_pkg::*;
 

@@ -18,9 +18,9 @@
 //----------------------------------------------------------------------
 
 //----------------------------------------------------------------------
-// class: uvm_mutex_locker#(T)
+// class- uvm_mutex_locker#(T)
 //
-// The uvm_mutex_locker#(T) class provides a means for locking objects.
+// The uvm_mutex_locker#(T) class provides a policy for locking objects.
 // Uvm_mutex_locker #(T), or the locker, as we'll refer to it, is a data
 // container.  It holds a data object of type T.  Access to that data
 // object is contolled via a muxtex (i.e. binary semaphore) locking
@@ -55,11 +55,11 @@
 // |  function bit try_lock();
 // |  function void unlock();
 //
-// ~Lock()~ is a task and may potentionally block.  It will block if
-// some other process holds the lock to this locker.  ~Try_lock()~ and
-// ~unlock()~ are functions and will return immediately.  ~Try_lock()~
-// will attempt to obtain the lock.  It will return a value indicating
-// its success or failure.  ~Unlock()~ releases the lock.
+// ~Lock()~ is a task and may block.  It will block if some other
+// process holds the lock to this locker.  ~Try_lock()~ and ~unlock()~
+// are functions and will return immediately.  ~Try_lock()~ will attempt
+// to obtain the lock.  It will return a value indicating its success or
+// failure.  ~Unlock()~ releases the lock.
 //
 // Data access is done with four methods:
 //
@@ -92,7 +92,7 @@ class uvm_mutex_locker #(type T=int);
   endfunction
 
   //-------------------------
-  // Group: Locking Interface
+  // Group- Locking Interface
   //-------------------------
   //
   // The task <lock> and the functions <try_lock> and <unlock> form a
@@ -104,18 +104,19 @@ class uvm_mutex_locker #(type T=int);
   // for more information on put/get.  The lock interface is a wrapper
   // around a local semaphore.
 
-  // Task: lock
+  // Task- lock
   //
   // Retrieves a lock for this resource.  The task blocks until the lock
   // is obtained.
 
   task lock();
+    process pid = process::self();
     check_pid();
     sm.get();
-    set_process(process::self);
+    set_process(pid);
   endtask
 
-  // Function: try_lock
+  // Function- try_lock
   //
   // Retrives the lock for this resource.  The function is nonblocking,
   // so it will return immediately.  If it was successfull in retrieving
@@ -124,14 +125,15 @@ class uvm_mutex_locker #(type T=int);
   function bit try_lock();
     check_pid();
     if(sm.try_get()) begin
-      set_process(process::self);
+      process pid = process::self();
+      set_process(pid);
       return 1;
     end
     else
       return 0;
   endfunction
 
-  // Function: unlock
+  // Function- unlock
   //
   // Releases the lock held by this semaphore.
 
@@ -147,15 +149,33 @@ class uvm_mutex_locker #(type T=int);
       end
   endfunction
 
+  // function- set_process
+  //
+  // Set the process owner of this locker to the process passed in as an
+  // argument.  Pass in null to clear the locker of any ownership.
+
   function void set_process(process p = null);
     pid = p;
   endfunction
+
+  // function- get_process
+  //
+  // Return the process id of the process that currently the owner of
+  // this locker.  The return value may be null if no one owns it.
 
   function process get_process();
     return pid;
   endfunction
 
-  function void check_pid();
+  // function- check_pid
+  //
+  // Is the lock owned by a dead process? If so then we'll rescue it
+  // from the abyss by changing ownership to the current process.  We do
+  // this by releasing the lock and letting the current process lock it.
+  // This is called internally and should NOT be called directly by
+  // users.
+
+  local function void check_pid();
     if(pid != null &&(pid.status() == process::FINISHED ||
                       pid.status() == process::KILLED)) begin
       uvm_report_error("uvm_mutex_locker::lock", "lock is held by dead process! resetting ownership to current process");
@@ -165,7 +185,7 @@ class uvm_mutex_locker #(type T=int);
 
 
   //-------------------------
-  // Group: Read/Write Interface
+  // Group- Read/Write Interface
   //-------------------------
   //
   // This interface is optional, you can choose to lock a resource or
@@ -173,13 +193,16 @@ class uvm_mutex_locker #(type T=int);
   // The difference between read/write interface and the locking
   // interface is the use of a semaphore to guarantee exclusive access.
 
-  // Task: read
+  // Task- read
   //
-  // Locking version of read().  Like read(), this returns the contents
-  // of the resource container.  In addtion it obeys the lock.
+  // Locking read(). Returns the contents of the locker.  This task will
+  // block until the lock is obtained.  If the request comes from the
+  // process that currently owns the lock then access is immediately
+  // granted.
 
   task read(output T t);
-    if(pid != null && pid == process::self) begin
+    process this_pid = process::self();
+    if(pid != null && pid == this_pid) begin
       t = val;
     end
     else begin
@@ -189,15 +212,18 @@ class uvm_mutex_locker #(type T=int);
     end
   endtask
 
-  // Function: try_read
+  // Function- try_read
   //
-  // Nonblocking form of read().  If the lock is availble it
-  // grabs the lock and returns one.  If the lock is not available then
-  // it returns a 0.  In either case the return is immediate with no
-  // blocking.
+  // Nonblocking form of read().  If the lock is availble it grabs the
+  // lock and returns 1.  If the lock is not available then it returns a
+  // 0.  In either case the return is immediate with no blocking.  If
+  // this is called by the process that currently holds the lock then
+  // access is granted immediatly; no checking or manipulation of the
+  // lock is done.
 
   function bit try_read(output T t);
-    if(pid != null && pid == process::self) begin
+    process this_pid = process::self();
+    if(pid != null && pid == this_pid) begin
       t = val;
     end
     else begin
@@ -209,16 +235,16 @@ class uvm_mutex_locker #(type T=int);
     return 1;
   endfunction
 
-  // Task: write
+  // Task- write
   //
-  // Locking form of write().  Like write(), write() sets the
-  // contents of the resource container.  In addition it locks the
-  // resource before doing the write and unlocks it when the write is
-  // complete.  If the lock is currently not available write()
-  // will block until it is.
+  // Modifies the data in the locker.  May block if the lock is held by
+  // another process.  If the process that owns the lock calls this
+  // function then access is granted immediatlely without checking or
+  // maniuplating the lock.
 
   task write (input T t);
-    if(pid != null && pid == process::self) begin
+    process this_pid = process::self();
+    if(pid != null && pid == this_pid) begin
       val = t;
     end
     else begin
@@ -228,15 +254,19 @@ class uvm_mutex_locker #(type T=int);
     end
   endtask
 
-  // Function: try_write
+  // Function- try_write
   //
   // Nonblocking form of write(). If the lock is available then val is
-  // updated immediately and a one is returned.  If the lock is not
-  // available then val is not updated and a zero is returned.  In
-  // either case try_write() returns immediately with no blocking.
+  // updated immediately and a 1 is returned.  If the lock is not
+  // available then val is not updated and a 0 is returned.  In either
+  // case try_write() returns immediately with no blocking.  If the
+  // process that currently holds the lock calls this function then
+  // access is granted immediatly without any checking or manipulation
+  // of the lock.
 
   function bit try_write(input T t);
-    if(pid != null && pid == process::self) begin
+    process this_pid = process::self();
+    if(pid != null && pid == this_pid) begin
       val = t;
     end
     else begin

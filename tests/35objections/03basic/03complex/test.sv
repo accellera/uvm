@@ -97,7 +97,7 @@ module test;
     task run();
       while(1) begin
         seq_item_port.get_next_item(req);
-        uvm_report_info("DRV_RUN", $psprintf("driver item %0d...", i), UVM_LOW);
+        uvm_report_info("DRV_RUN", $sformatf("driver item %0d...", i), UVM_LOW);
         i++;
         #10;
         seq_item_port.item_done();

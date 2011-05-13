@@ -110,11 +110,11 @@ class test extends uvm_test;
 
       gp1.set_extension(x1);
       if (gp1.get_num_extensions() != 1) begin
-         `uvm_error("TEST", $psprintf("Number of GP1 extensions reported as %0d instead of 1", 
+         `uvm_error("TEST", $sformatf("Number of GP1 extensions reported as %0d instead of 1", 
 				      gp1.get_num_extensions()));
       end
       if (gp2.get_num_extensions() != 0) begin
-         `uvm_error("TEST", $psprintf("Number of GP2 extensions reported as %0d instead of 0", 
+         `uvm_error("TEST", $sformatf("Number of GP2 extensions reported as %0d instead of 0", 
 				      gp2.get_num_extensions()));
       end
       gp2.set_extension(x3);
@@ -186,7 +186,7 @@ class test extends uvm_test;
 
      gp1.clear_extensions();
       if (gp1.get_num_extensions() != 0) begin
-         `uvm_error("TEST", $psprintf("Number of GP1 extensions reported as %0d instead of 0", 
+         `uvm_error("TEST", $sformatf("Number of GP1 extensions reported as %0d instead of 0", 
 				      gp1.get_num_extensions()));
       end
 

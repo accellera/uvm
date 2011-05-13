@@ -50,10 +50,11 @@ class test extends uvm_component;
   endfunction
   task run;
     // Use errors so the post processing can verify we have the correct number
+    $display("*** START OF GOLD FILE ***");
     `uvm_error("MCD", "Message for MCD");
     `uvm_error("STDOUT", "Message for STDOUT");
     `uvm_error("FP", "Message for FP");
-    $display("*** UVM TEST EXPECT 3 UVM_ERROR ***");
+    $display("*** END OF GOLD FILE ***");
   endtask
 
   function void report();
@@ -62,26 +63,6 @@ class test extends uvm_component;
 
     $fclose(mcd1|mcd2);
     $fclose(fp1);
-
-    fp1 = $fopen("mcd1","r");
-    eof = $fscanf(fp1,"%s%s%s%s%s%s%s%s%s",s1,s2,s3,s4,s5,s6,s7,s8,s9);
-    if(s9 != "MCD") $display("*** UVM TEST FAILED ***");
-    eof = $fscanf(fp1,"%s",s1);
-    if(eof != -1) $display("*** UVM TEST FAILED ***");
-    
-    fp1 = $fopen("mcd2","r");
-    eof = $fscanf(fp1,"%s%s%s%s%s%s%s%s%s",s1,s2,s3,s4,s5,s6,s7,s8,s9);
-    if(s9 != "MCD") $display("*** UVM TEST FAILED ***");
-    eof = $fscanf(fp1,"%s",s1);
-    if(eof != -1) $display("*** UVM TEST FAILED ***");
-    
-    fp1 = $fopen("fp1","r");
-    eof = $fscanf(fp1,"%s%s%s%s%s%s%s%s%s",s1,s2,s3,s4,s5,s6,s7,s8,s9);
-    if(s9 != "FP") $display("*** UVM TEST FAILED ***");
-    eof = $fscanf(fp1,"%s",s1);
-    if(eof != -1) $display("*** UVM TEST FAILED ***");
-    
-    $display("*** UVM TEST PASSED ***");
   endfunction
 endclass
 

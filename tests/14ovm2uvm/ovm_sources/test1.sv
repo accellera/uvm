@@ -90,18 +90,18 @@ my_component.global_stop_request();
 
 
           `message(OVM_LOW,
-            ($psprintf("%s to existing address...Updating address : %0h with data : %0h", 
+            ($sformatf("%s to existing address...Updating address : %0h with data : %0h", 
             trans.read_write.name(), trans.addr + i, data)));
 
           `dut_error(
-            ($psprintf("Read data mismatch.  Expected : %0h. Actual : %0h", exp, data)));
+            ($sformatf("Read data mismatch.  Expected : %0h. Actual : %0h", exp, data)));
 
         `message(OVM_LOW,
-          ($psprintf("%s to empty address...Updating address : %0h with data : %0h", 
+          ($sformatf("%s to empty address...Updating address : %0h with data : %0h", 
           trans.read_write.name(), trans.addr + i, data)));
 
       `message(OVM_LOW,
-        ($psprintf("Reporting scoreboard information...\n%s", this.sprint())));
+        ($sformatf("Reporting scoreboard information...\n%s", this.sprint())));
 
 
   task put (T p);
@@ -118,3 +118,8 @@ my_component.global_stop_request();
       p.print();
     lock.put();
   endtask 
+
+
+ovm_factory::set_type_override("some","other");
+ovm_factory::set_type_override_by_name("some","other");
+ovm_factory::set_type_override_by_type(some,other);

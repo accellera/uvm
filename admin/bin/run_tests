@@ -52,7 +52,8 @@ USAGE
    exit(1);
 }
 
-require "getopts.pl"
+require "getopts.pl";
+use Cwd 'abs_path'; 
 &Getopts("cC:df:F:PhR:Su:M:v");
 &usage if $opt_h || $#ARGV < 0;
 
@@ -74,7 +75,7 @@ if (! -e "$opt_u/src/uvm_pkg.sv") {
   print STDERR "ERROR: \"$opt_u\" does not appear to contain a valid UVM distribution.\n";
   exit(1);
 }
-$uvm_home = $opt_u;
+$uvm_home = abs_path($opt_u);
 
 $libdir = $0;
 $libdir =~ s#bin/run_tests#../tools#;
@@ -204,15 +205,6 @@ sub run_one_test {
      return 1;
    }
 
-   # If UVM path is absolute, no need to correct it
-   if ($opt_u !~ m|^[/\$]|) {
-     $uvm_home = $opt_u;
-     $_ = $testdir;
-     while ($_ =~ s|/?[^/]+$||) {
-       $uvm_home = "../" . $uvm_home;
-     }
-   }
-
    if (!$opt_S && !$opt_c && -e "$testdir/$tool.skip") {
      undef @skippers;
      foreach $skipper (<$testdir/*.skip>) {
@@ -226,6 +218,9 @@ sub run_one_test {
      $skipped++;
      return 1;
    }
+   
+   #
+   $ENV{'UVM_HOME'}=$uvm_home;
 
    local($sv) = ("$testdir/test.sv");
    if (! -e $sv) {
@@ -574,7 +569,7 @@ sub make_example {
 
   $result = 0;
   if (!$opt_c) {
-    $cmd = "cd $dir && make -f Makefile.$tool $opts $opt_M OPT_C=\"$opt_C\" OPT_R=\"$opt_R\" all";
+    $cmd = "cd $dir && make -f Makefile.$tool $opts $opt_M OPT_C=\"$opt_C\" OPT_R=\"$opt_R\" UVM_HOME=\"$uvm_home\" all";
     $cmd .= " > /dev/null 2>&1" unless $opt_v;
     $result = system($cmd);
   }

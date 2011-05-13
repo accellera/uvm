@@ -961,7 +961,8 @@ endfunction: new
 function void uvm_mem::configure(uvm_reg_block  parent,
                                  string         hdl_path="");
 
-   assert(parent!=null);
+   if (parent == null)
+     `uvm_fatal("REG/NULL_PARENT","configure: parent argument is null") 
 
    m_parent = parent;
 
@@ -1833,14 +1834,14 @@ function bit uvm_mem::Xcheck_accessX(input uvm_reg_item rw,
         if ((rw.value.size() > 1)) begin
            if (get_n_bits() > rw.local_map.get_n_bytes()*8) begin
               `uvm_error("RegModel",
-                    $psprintf("Cannot burst a %0d-bit memory through a narrower data path (%0d bytes)",
+                    $sformatf("Cannot burst a %0d-bit memory through a narrower data path (%0d bytes)",
                     get_n_bits(), rw.local_map.get_n_bytes()*8));
               rw.status = UVM_NOT_OK;
               return 0;
            end
            if (rw.offset + rw.value.size() > m_size) begin
               `uvm_error("RegModel",
-                  $psprintf("Burst of size 'd%0d starting at offset 'd%0d exceeds size of memory, 'd%0d",
+                  $sformatf("Burst of size 'd%0d starting at offset 'd%0d exceeds size of memory, 'd%0d",
                       rw.value.size(), rw.offset, m_size))
               return 0;
            end
@@ -1903,7 +1904,7 @@ task uvm_mem::poke(output uvm_status_e      status,
 
    status = rw.status;
 
-   `uvm_info("RegModel", $psprintf("Poked memory '%s[%0d]' with value 'h%h",
+   `uvm_info("RegModel", $sformatf("Poked memory '%s[%0d]' with value 'h%h",
                               get_full_name(), offset, value),UVM_HIGH);
 
 endtask: poke
@@ -1953,7 +1954,7 @@ task uvm_mem::peek(output uvm_status_e      status,
    status = rw.status;
    value  = rw.value[0];
 
-   `uvm_info("RegModel", $psprintf("Peeked memory '%s[%0d]' has value 'h%h",
+   `uvm_info("RegModel", $sformatf("Peeked memory '%s[%0d]' has value 'h%h",
                          get_full_name(), offset, value),UVM_HIGH);
 endtask: peek
 
@@ -2083,7 +2084,7 @@ function uvm_status_e uvm_mem::backdoor_read_func(uvm_reg_item rw);
            rw.value[mem_idx] = val;
 
         if (val != rw.value[mem_idx]) begin
-           `uvm_error("RegModel", $psprintf("Backdoor read of register %s with multiple HDL copies: values are not the same: %0h at path '%s', and %0h at path '%s'. Returning first value.",
+           `uvm_error("RegModel", $sformatf("Backdoor read of register %s with multiple HDL copies: values are not the same: %0h at path '%s', and %0h at path '%s'. Returning first value.",
                get_full_name(), rw.value[mem_idx], uvm_hdl_concat2string(paths[0]),
                val, uvm_hdl_concat2string(paths[i]))); 
            return UVM_NOT_OK;
@@ -2120,7 +2121,7 @@ task uvm_mem::backdoor_write(uvm_reg_item rw);
      foreach (paths[i]) begin
        uvm_hdl_path_concat hdl_concat = paths[i];
        foreach (hdl_concat.slices[j]) begin
-          `uvm_info("RegModel", $psprintf("backdoor_write to %s ",hdl_concat.slices[j].path),UVM_DEBUG);
+          `uvm_info("RegModel", $sformatf("backdoor_write to %s ",hdl_concat.slices[j].path),UVM_DEBUG);
  
           if (hdl_concat.slices[j].offset < 0) begin
              ok &= uvm_hdl_deposit({hdl_concat.slices[j].path,"[", idx, "]"},rw.value[mem_idx]);
