@@ -1084,7 +1084,6 @@ class uvm_resource_pool;
       rq = rtab[re];
       for(i = 0; i < rq.size(); i++) begin
         r = rq.get(i);
-        // does the scope match?
         if(uvm_re_match(uvm_glob_to_re(re),name) == 0)
           // does the scope match?
           if(r.match_scope(scope) &&
@@ -1198,7 +1197,7 @@ class uvm_resource_pool;
     end
 
     if(r != rsrc) begin
-      $sformat(msg, "Handle for resource named %s cannot be located; cannot change its priority", name);
+      $sformat(msg, "Handle for resource named %s is not in the name name; cannot change its priority", name);
       uvm_report_error("NORSRC", msg);
       return;
     end
