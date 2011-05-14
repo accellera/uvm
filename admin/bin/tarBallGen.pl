@@ -7,12 +7,16 @@ use strict;
 # Until it is made more "sophisticated", please uncomment the following lines
 # to appropriate values, comment the die message below and go ahead.
 
-# my $tag = "UVM_1_1_TESTING_1";
-# my $rc = "RC_TESTING_1";
-# my $prefix = "uvm-1.1/";
-# my $user = "ambarsarkar";
+my $tag = undef;
+my $rc = undef;
+my $prefix = undef;
+my $username = undef;
 
-die 'Please check the file for instructions\n";
+#$tag       =           "UVM_1_1_TESTING_1";
+#$rc        =           "RC_TESTING_1";
+#$prefix    =           "uvm-1.1/";
+#$username      =           "ambarsarkar";
+die "Please check the file for instructions\n";
 
 
 ##################################
@@ -20,7 +24,7 @@ die 'Please check the file for instructions\n";
 
 die "uvm already exists" if (-e "uvm");
 
-my $cmd = "git clone ssh://$user\@uvm.git.sourceforge.net/gitroot/uvm/uvm";
+my $cmd = "git clone ssh://$username\@uvm.git.sourceforge.net/gitroot/uvm/uvm";
 system ("echo $cmd"); system ("$cmd");
 
 chdir "uvm" or die "Failed to cd to uvm\n";
