@@ -54,6 +54,8 @@ USAGE
 
 require "getopts.pl";
 use Cwd 'abs_path'; 
+use File::Spec::Functions qw(catfile path);
+
 &Getopts("cC:df:F:PhR:Su:M:v");
 &usage if $opt_h || $#ARGV < 0;
 
@@ -557,24 +559,39 @@ sub check_runtime_error {
   return 1;
 }
 
+sub maketool {
+    local($make)=which("gmake");
+    if($make eq "") {
+        $make="make";
+    }  
+    $make;
+}
 
+sub which {
+my $name = shift;
+
+grep { -e } map { my $file = $_; 
+map { catfile $_, $file } path
+} map { $name . lc $_ } (q{}, split /;/);
+}
 
 #
 # Execute a Makefile-based example
 #
 sub make_example {
   local($dir, $opts, $result, $_) = @_;
-
+  local($make) = maketool();
+  
   return 0 if ($tool eq "clean");
 
   $result = 0;
   if (!$opt_c) {
-    $cmd = "cd $dir && make -f Makefile.$tool $opts $opt_M OPT_C=\"$opt_C\" OPT_R=\"$opt_R\" UVM_HOME=\"$uvm_home\" all";
+    $cmd = "cd $dir && $make -f Makefile.$tool $opts $opt_M OPT_C=\"$opt_C\" OPT_R=\"$opt_R\" UVM_HOME=\"$uvm_home\" all";
     $cmd .= " > /dev/null 2>&1" unless $opt_v;
     $result = system($cmd);
   }
   if (!$opt_d || $opt_c) {
-    $cmd = "cd $dir && make -f Makefile.$tool $opts clean";
+    $cmd = "cd $dir && $make -f Makefile.$tool $opts clean";
     $cmd .= " > /dev/null 2>&1" unless $opt_v;
     system($cmd);
   }
