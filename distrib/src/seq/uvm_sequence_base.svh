@@ -1114,12 +1114,14 @@ class uvm_sequence_base extends uvm_sequence_item;
     m_seq.set_sequencer(m_sequencer);
     m_seq.set_depth(get_depth() + 1);
     m_seq.reseed();
-    
-    start_item(m_seq);
+
+	
+//    start_item(m_seq);
     if(!m_seq.randomize()) begin
       uvm_report_warning("RNDFLD", "Randomization failed in do_sequence_kind()");
     end
-    finish_item(m_seq);
+    m_seq.start(m_sequencer,this,get_priority(),0);
+//    finish_item(m_seq);
   endtask
 
 
