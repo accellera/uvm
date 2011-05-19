@@ -62,7 +62,7 @@ typedef class uvm_sequence_library_cfg;
 //
 //------------------------------------------------------------------------------
 
-class uvm_sequence_library #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RSP);
+class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_sequence #(REQ,RSP);
 
    // Function- new
    //
