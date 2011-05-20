@@ -11,13 +11,6 @@ General Overview
     examples and User Guide provide guidance to users of the library. For 
     additional information on the Accellera standard, see the URL above.
 
-  - In addition to the UVM Standard, a list of errata fixes were also documented 
-    by this committee.  This can also be found at the URL above.  The errata fixes
-    and the UVM Standard represent the implementation found in this release. For end
-    users this committee encourages the use of the HTML API documentation found in the 
-    release at distrib/docs/html.  Just click on index.html located in this folder.
-    This is identical to the UVM Standard but also includes the errata.
-
   - The UVM is built on the code base of OVM-2.1.1 but there are changes
     to UVM 1.0 that create incompatibilities for certain OVM environments.
     Backward compatibility issues are listed in the Compatibility section
