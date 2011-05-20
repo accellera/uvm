@@ -29,6 +29,10 @@ General Overview
   - For detailed information on a specific issue, refer to the Mantis database
     at http://www.eda.org/svdb/view.php?id=<id>, where <id> is the Mantis id.
 
+  - A good source for information, answers, and resources is
+    http://www.uvmworld.org.  It contains forums on methodology, tool specific
+    issues, and commercial announcements.  It also has links to additional
+    resources, Accellera sponsored events, and other UVM events. 
 
 -----------------------------------------------------------------------------
 Release Notes for UVM-1.1
