@@ -12,8 +12,8 @@ my $rc = undef;
 my $prefix = undef;
 my $username = undef;
 
-#$tag       =           "UVM_1_1_TESTING_1";
-#$rc        =           "RC_TESTING_1";
+#$tag       =           "UVM_1_1";
+#$rc        =           "RC3";
 #$prefix    =           "uvm-1.1/";
 #$username      =           "ambarsarkar";
 die "Please check the file for instructions\n";
@@ -39,7 +39,7 @@ system ("echo $cmd"); system ("$cmd");
 # Now generate the docs in a separate branch
 
 # Create the branch
-$cmd = "git checkout -b $tag\_WITHHTMLDOC $tag";
+$cmd = "git checkout -b $tag\_".$rc."_WITHHTMLDOC $tag";
 system ("echo $cmd"); system ("$cmd");
 
 $ENV{ND} = "$ENV{'PWD'}/uvm/natural_docs";
@@ -54,12 +54,12 @@ chdir "../../distrib/docs" or die "Failed to cd to ../../distrib/docs";
 $cmd = "git add html;  git commit -m \"commited docs for $tag\"";
 system ("echo $cmd"); system ("$cmd");
 
-$cmd = "git push origin $tag\_WITHHTMLDOC";
+$cmd = "git push origin $tag\_".$rc."_WITHHTMLDOC";
 system ("echo $cmd"); system ("$cmd");
 
 # Tag the release with doc
 $commit_id = `git describe`; chomp $commit_id;
-$cmd = "git tag -f -a -m \"Release candidate with tag $tag\" $tag\_WITHHTMLDOC $commit_id;";
+$cmd = "git tag -f -a -m \"Release candidate with tag $tag\" $tag\_".$rc."_WITHHTMLDOC $commit_id;";
 $cmd .= "git push --tags;";
 system ("echo $cmd"); system ("$cmd");
 
