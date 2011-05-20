@@ -180,7 +180,7 @@
 //
 // Calls the given ~METHOD~ of all callbacks of type ~CB~ registered with
 // the calling object (i.e. ~this~ object), which is or is based on type ~T~,
-// returning upon the first callback returning the bit value given by ~VAL~.
+// stopping whener a callback returns the bit value given by ~VAL~.
 //
 // This macro executes all of the callbacks associated with the calling
 // object (i.e. ~this~ object). The macro takes three arguments:
@@ -194,9 +194,8 @@
 // - METHOD is the method call to invoke, with all required arguments as
 //   if they were invoked directly.
 //
-// - VAL, if 1, says return upon the first callback invocation that
-//   returns 1. If 0, says return upon the first callback invocation that
-//   returns 0.
+// - VAL, if 1, says stop iterating whenever a callback invocation
+//   returns 1. If 0, says stop whenever a callback returns 0.
 //
 // For example, given the following callback class definition:
 //
@@ -233,14 +232,14 @@
 //| `uvm_do_obj_callbacks_exit_on(T,CB,OBJ,METHOD,VAL)
 //
 // Calls the given ~METHOD~ of all callbacks of type ~CB~ registered with
-// the given object ~OBJ~, which must be or be based on type ~T~, and returns
-// upon the first callback that returns the bit value given by ~VAL~. It is
+// the given object ~OBJ~, which must be or be based on type ~T~, and stops
+// iterating when a callback returns the bit value given by ~VAL~. It is
 // exactly the same as the <`uvm_do_callbacks_exit_on> but has a specific
 // object instance (instead of the implicit this instance) as the third
 // argument.
 //
 //| ...
-//|  // Exit with 0 if a callback returns a 1
+//|  // Exit if a callback returns a 1
 //|  `uvm_do_callbacks_exit_on(mycomp, mycb, seqr, drop_trans(seqr,trans), 1)
 //| ...
 //-----------------------------------------------------------------------------
@@ -248,16 +247,18 @@
 `define uvm_do_obj_callbacks_exit_on(T,CB,OBJ,METHOD,VAL) \
    begin \
      uvm_callback_iter#(T,CB) iter = new(OBJ); \
+     bit done; \
      CB cb = iter.first(); \
-     while(cb != null) begin \
+     while(!done && cb != null) begin \
        if (cb.METHOD == VAL) begin \
          `uvm_cb_trace_noobj(cb,$sformatf(`"Executed callback method 'METHOD' for callback %s (CB) from %s (T) : returned value VAL (other callbacks will be ignored)`",cb.get_name(), OBJ.get_full_name())) \
-         return VAL; \
+         done = 1; \
        end \
-       `uvm_cb_trace_noobj(cb,$sformatf(`"Executed callback method 'METHOD' for callback %s (CB) from %s (T) : did not return value VAL`",cb.get_name(), OBJ.get_full_name())) \
-       cb = iter.next(); \
+       else begin \
+         `uvm_cb_trace_noobj(cb,$sformatf(`"Executed callback method 'METHOD' for callback %s (CB) from %s (T) : did not return value VAL`",cb.get_name(), OBJ.get_full_name())) \
+         cb = iter.next(); \
+       end \
      end \
-     return 1-VAL; \
    end
 
 
