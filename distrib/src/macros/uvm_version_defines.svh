@@ -26,16 +26,16 @@
 // or programmatic tesing against version numbers
 `define UVM_NAME UVM
 `define UVM_MAJOR_REV 1
-`define UVM_MINOR_REV 0
-`define UVM_FIX_REV p2-dev
+`define UVM_MINOR_REV 1
+`define UVM_FIX_REV 
 
 
 // Whole version identifiers that can be used in `ifdefs and `ifndefs
 // to do conditional compilation
-`define UVM_VERSION_1_0
-`define UVM_MAJOR_VERSION_1_0
+`define UVM_VERSION_1_1
+`define UVM_MAJOR_VERSION_1_1
 `define UVM_MAJOR_REV_1
-`define UVM_MINOR_REV_0
+`define UVM_MINOR_REV_1
 
 // When there is a FIX_REV, print as "M.mf"
 // When there is NO FIX_REV, print as "M.m".
