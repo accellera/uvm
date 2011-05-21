@@ -110,6 +110,7 @@ May 25, 2011
   3532  Fix jump forward to not artificially mark phases as 'DONE'.
   3533  Added error for phase jumps from non-active phases.
   3535  Fix ASCII recording of uvm_recorder.
+  3568  Fix `uvm_do_callbacks_exit_on macro (contained return statements)
   3572  Phase state should not be READY_TO_END until all ready_to_end()
         callbacks return without having re-raised an objection
 
