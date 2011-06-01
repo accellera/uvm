@@ -58,9 +58,9 @@ module testm();
         else dut.swr=req.data;
         #1;
         if(req.r_wn==0)
-          `uvm_info("USRDRV", $psprintf("Write addr=0x%0x Data=0x%0x", req.addr, req.data), UVM_HIGH)
+          `uvm_info("USRDRV", $sformatf("Write addr=0x%0x Data=0x%0x", req.addr, req.data), UVM_HIGH)
         else
-          `uvm_info("USRDRV", $psprintf("Read addr=0x%0x Data=0x%0x", req.addr, req.data), UVM_HIGH)
+          `uvm_info("USRDRV", $sformatf("Read addr=0x%0x Data=0x%0x", req.addr, req.data), UVM_HIGH)
           
         item_collected_port.write(req);
         
@@ -107,11 +107,11 @@ module testm();
      function void check_regs();
        bit error;
       if(dut.swr!==model.swr_reg.get() || dut.srd!==model.srd_reg.get())
-         `uvm_error("TEST_SEQ", $psprintf(
+         `uvm_error("TEST_SEQ", $sformatf(
            "Registers mismatched. [SWR] DUT=0x%0x, Shadow=0x%0x : [SRD] DUT=0x%0x, Shadow=0x%0x\n", 
              dut.swr, model.swr_reg.get(), dut.srd, model.srd_reg.get()))
        else
-         `uvm_info("TEST_SEQ", $psprintf("Register Matched. SWR=0x%0x SRD=0x%0x\n", dut.swr, dut.srd), UVM_LOW)
+         `uvm_info("TEST_SEQ", $sformatf("Register Matched. SWR=0x%0x SRD=0x%0x\n", dut.swr, dut.srd), UVM_LOW)
      endfunction
 
      virtual task body();

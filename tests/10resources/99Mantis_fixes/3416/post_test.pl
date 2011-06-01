@@ -45,6 +45,7 @@ while ($_ = <LOG>) {
 
   if ($do) {
     s/ : \([^)]*\)/ : (\$typename)/;
+    s/\@\d+/\@.../;
     print L $_;
   }
 

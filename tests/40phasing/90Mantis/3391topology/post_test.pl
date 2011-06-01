@@ -36,25 +36,24 @@ if (!open(LOG, "<$log")) {
 }
 if (!open(L, ">$testdir/post.log")) {
   $post_test = "Cannot open \"$testdir/post.log\" for writing: $!";
-  close(LOG);
+  close(L);
   return 1;
 }
+$logfile=qx{cat "$log"};
+$logfile =~ s/\@\d+\s*\n/\@X\n/sg;
+$logfile =~ s/\n# /\n/sg;
+# strip header
+$logfile =~ s/.*(UVM_INFO.*UVM\s+testbench\s+topology)/\1/sx;
+# strip tail
+$logfile =~ s/\n\n.*/\n/sx;
+# write back
 
-while ($_ = <LOG>) {
-  $do = 1 if (m/UVM testbench topology:/);
-
-  next unless ($do);
-  last if (m/^\s*$/);
-
-  s/\@\d+/\@X/;
-
-  print L $_;
-}
+print L $logfile;
 
 close(LOG);
 close(L);
 
-if (system("diff -q $testdir/post.log $testdir/log.au")) {
+if (system("diff -q $testdir/post.log $testdir/log.au > /dev/null")) {
   $post_test = "$log and log.au differ";
   return 1;
 }

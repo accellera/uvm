@@ -104,8 +104,13 @@ class uvm_sequencer_base extends uvm_component;
   // Function: start_phase_sequence
   //
   // Start the default sequence for this phase, if any.
-  // The default sequence is configured using resources using
-  // either a sequence instance or sequence object wrapper.
+  // The default sequence is configured via resources using
+  // either a sequence instance or sequence type (object wrapper).
+  // If both are used,
+  // the sequence instance takes precedence. When attempting to override
+  // a previous default sequence setting, you must override both
+  // the instance and type (wrapper) reources, else your override may not
+  // take effect.
   //
   // When setting the resource using ~set~, the 1st argument specifies the
   // context pointer, usually "this" for components or "null" when executed from
@@ -145,6 +150,8 @@ class uvm_sequencer_base extends uvm_component;
   //|                                            "default_sequence",
   //|                                            myseq_t::type_id::get(),
   //|                                            this );
+  //
+  // 
      
      
 
@@ -499,13 +506,13 @@ function void uvm_sequencer_base::do_print (uvm_printer printer);
   super.do_print(printer);
   printer.print_array_header("arbitration_queue", arb_sequence_q.size());
   foreach (arb_sequence_q[i])
-    printer.print_string($psprintf("[%0d]", i),
+    printer.print_string($sformatf("[%0d]", i),
        $sformatf("%s@seqid%0d",arb_sequence_q[i].request.name(),arb_sequence_q[i].sequence_id), "[");
   printer.print_array_footer(arb_sequence_q.size());
 
   printer.print_array_header("lock_queue", lock_list.size());
   foreach(lock_list[i])
-    printer.print_string($psprintf("[%0d]", i),
+    printer.print_string($sformatf("[%0d]", i),
        $sformatf("%s@seqid%0d",lock_list[i].get_full_name(),lock_list[i].get_sequence_id()), "[");
   printer.print_array_footer(lock_list.size());
 endfunction
@@ -786,7 +793,7 @@ function int uvm_sequencer_base::m_choose_next_request();
     highest_sequences = avail_sequences.find with (item == i);
     if (highest_sequences.size() == 0) begin
       uvm_report_fatal("Sequencer",
-          $psprintf("Error in User arbitration, sequence %0d not available\n%s",
+          $sformatf("Error in User arbitration, sequence %0d not available\n%s",
                     i, convert2string()), UVM_NONE);
     end
     return(i);
@@ -876,7 +883,7 @@ function int uvm_sequencer_base::m_get_seq_item_priority(uvm_sequence_request se
   if (seq_q_entry.item_priority != -1) begin
     if (seq_q_entry.item_priority <= 0) begin
       uvm_report_fatal("SEQITEMPRI",
-                    $psprintf("Sequence item from %s has illegal priority: %0d",
+                    $sformatf("Sequence item from %s has illegal priority: %0d",
                             seq_q_entry.sequence_ptr.get_full_name(),
                             seq_q_entry.item_priority), UVM_NONE);
     end
@@ -885,7 +892,7 @@ function int uvm_sequencer_base::m_get_seq_item_priority(uvm_sequence_request se
   // Otherwise, use the priority of the calling sequence
   if (seq_q_entry.sequence_ptr.get_priority() < 0) begin
     uvm_report_fatal("SEQDEFPRI",
-                    $psprintf("Sequence %s has illegal priority: %0d",
+                    $sformatf("Sequence %s has illegal priority: %0d",
                             seq_q_entry.sequence_ptr.get_full_name(),
                             seq_q_entry.sequence_ptr.get_priority()), UVM_NONE);
   end
@@ -1185,6 +1192,8 @@ function void uvm_sequencer_base::remove_sequence_from_queues(
       if (arb_sequence_q.size() > i) begin
         if ((arb_sequence_q[i].sequence_id == seq_id) ||
             (is_child(sequence_ptr, arb_sequence_q[i].sequence_ptr))) begin
+          if (sequence_ptr.get_sequence_state() == FINISHED)
+            `uvm_error("SEQFINERR", $psprintf("Parent sequence '%s' should not finish before all items from itself and items from descendent sequences are processed.  The item request from the sequence '%s' is being removed.", sequence_ptr.get_full_name(), arb_sequence_q[i].sequence_ptr.get_full_name()))
           arb_sequence_q.delete(i);
           m_update_lists();
         end
@@ -1195,13 +1204,15 @@ function void uvm_sequencer_base::remove_sequence_from_queues(
     end
   while (i < arb_sequence_q.size());
   
-  // remove locks for this sequence, and any child sequences
+  // remove locks for this sequence, and any child sequences 
   i = 0;
   do
     begin
       if (lock_list.size() > i) begin
         if ((lock_list[i].get_inst_id() == sequence_ptr.get_inst_id()) ||
             (is_child(sequence_ptr, lock_list[i]))) begin
+          if (sequence_ptr.get_sequence_state() == FINISHED)
+            `uvm_error("SEQFINERR", $psprintf("Parent sequence '%s' should not finish before locks from itself and descedent sequences are removed.  The lock held by the child sequence '%s' is being removed.",sequence_ptr.get_full_name(), lock_list[i].get_full_name()))
           lock_list.delete(i);
           m_update_lists();
         end
@@ -1336,10 +1347,10 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
 
     // default sequence instance?
     if (!uvm_config_db #(uvm_sequence_base)::get(
-          this, {phase.get_name(),"_phase"}, "default_sequence", seq) ) begin
+          this, {phase.get_name(),"_phase"}, "default_sequence", seq) || seq == null) begin
       // default sequence object wrapper?
       if (uvm_config_db #(uvm_object_wrapper)::get(
-               this, {phase.get_name(),"_phase"}, "default_sequence", wrapper) ) begin
+               this, {phase.get_name(),"_phase"}, "default_sequence", wrapper) && wrapper != null) begin
         // use wrapper is a sequence type        
         if(!$cast(seq , f.create_object_by_type(
               wrapper, get_full_name(), wrapper.get_type_name()))) begin
@@ -1356,7 +1367,7 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
     end
 
     `uvm_info("PHASESEQ", {"Starting default sequence '",
-       seq.get_type_name(),"' for phase '", phase.get_name()}, UVM_FULL)
+       seq.get_type_name(),"' for phase '", phase.get_name(),"'"}, UVM_FULL)
 
     seq.print_sequence_info = 1;
     seq.set_sequencer(this);
@@ -1365,7 +1376,7 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
 
     if (!seq.is_randomized && !seq.randomize()) begin
       `uvm_warning("STRDEFSEQ", {"Randomization failed for default sequence '",
-       seq.get_type_name(),"' for phase ", phase.get_name()})
+       seq.get_type_name(),"' for phase '", phase.get_name(),"'"})
        return;
     end
 
@@ -1540,7 +1551,7 @@ function uvm_sequence_base uvm_sequencer_base::get_sequence(int req_kind);
 
   if (req_kind < 0 || req_kind >= sequences.size()) begin
     uvm_report_error("SEQRNG", 
-      $psprintf("Kind arg '%0d' out of range. Need 0-%0d", 
+      $sformatf("Kind arg '%0d' out of range. Need 0-%0d", 
       req_kind, sequences.size()-1));
   end
 
@@ -1550,7 +1561,7 @@ function uvm_sequence_base uvm_sequencer_base::get_sequence(int req_kind);
                                           m_seq_type))) 
   begin
       uvm_report_fatal("FCTSEQ", 
-        $psprintf("Factory can not produce a sequence of type %0s.",
+        $sformatf("Factory can not produce a sequence of type %0s.",
         m_seq_type), UVM_NONE);
   end
 

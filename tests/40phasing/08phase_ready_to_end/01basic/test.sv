@@ -85,7 +85,7 @@ class active_comp extends uvm_component;
    virtual function void extract_phase(uvm_phase phase);
       `uvm_info("EXTRACT START", "extract phase started...", UVM_LOW);
       if ($time() != 14) begin
-         `uvm_error("test", $psprintf("extract() phase started at %0d instead of 14.", $time));
+         `uvm_error("test", $sformatf("extract() phase started at %0d instead of 14.", $time));
       end
    endfunction
 

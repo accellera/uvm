@@ -95,10 +95,10 @@ begin
 
       if (blks.size() != 3) begin
          `uvm_error("Test",
-                    $psprintf("%0d root blocks were found instead of 3",
+                    $sformatf("%0d root blocks were found instead of 3",
                               blks.size()))
          foreach (blks[i]) begin
-            `uvm_info("Test", $psprintf("Root block: \"%s\"",
+            `uvm_info("Test", $sformatf("Root block: \"%s\"",
                                         blks[i].get_full_name()), UVM_NONE)
                                         
          end

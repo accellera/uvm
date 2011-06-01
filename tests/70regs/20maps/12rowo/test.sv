@@ -80,7 +80,7 @@ class test extends uvm_test;
          env.regmodel.R.peek(status, data, .parent(seq));
          val = env.regmodel.R.get();
          if (data !== val) begin
-            `uvm_error("Test", $psprintf("%s (via BD) is 'h%h !== mirror 'h%h",
+            `uvm_error("Test", $sformatf("%s (via BD) is 'h%h !== mirror 'h%h",
                                          env.regmodel.R.get_full_name(),
                                          data, val));
          end
@@ -92,14 +92,14 @@ class test extends uvm_test;
          env.regmodel.W.peek(status, data, .parent(seq));
          val = env.regmodel.W.get();
          if (data !== val) begin
-            `uvm_error("Test", $psprintf("%s (via BD) is 'h%h !== mirror 'h%h",
+            `uvm_error("Test", $sformatf("%s (via BD) is 'h%h !== mirror 'h%h",
                                          env.regmodel.W.get_full_name(),
                                          data, val));
          end
          // Make sure writing W did not affect R
          env.regmodel.R.peek(status, data, .parent(seq));
          if (data !== exp) begin
-            `uvm_error("Test", $psprintf("Accessing W affected R: 'h%h !== 'h%h",
+            `uvm_error("Test", $sformatf("Accessing W affected R: 'h%h !== 'h%h",
                                          data, exp));
          end
          
@@ -132,14 +132,14 @@ class test extends uvm_test;
          // Make sure W and R were not affected
          env.regmodel.W.peek(status, data, .parent(seq));
          if (data !== val) begin
-            `uvm_error("Test", $psprintf("W was affected 'h%h !== 'h%h",
+            `uvm_error("Test", $sformatf("W was affected 'h%h !== 'h%h",
                                          data, val));
          end
          
          env.regmodel.R.peek(status, data, .parent(seq));
          if (data !== exp) begin
 
-            `uvm_error("Test", $psprintf("R was affected 'h%h !== 'h%h",
+            `uvm_error("Test", $sformatf("R was affected 'h%h !== 'h%h",
                                          data, exp));
          end
       end

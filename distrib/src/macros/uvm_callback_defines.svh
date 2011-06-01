@@ -57,7 +57,7 @@
 //-----------------------------------------------------------------------------
 
 `define uvm_register_cb(T,CB) \
-  static local bit m_register_cb_``CB = uvm_callbacks#(T,CB)::register_pair(`"T`",`"CB`");
+  static local bit m_register_cb_``CB = uvm_callbacks#(T,CB)::m_register_pair(`"T`",`"CB`");
 
 
 //-----------------------------------------------------------------------------
@@ -240,7 +240,7 @@
 // argument.
 //
 //| ...
-//|  // Exit with 0 if a callback returns a 1
+//|  // Exit if a callback returns a 1
 //|  `uvm_do_callbacks_exit_on(mycomp, mycb, seqr, drop_trans(seqr,trans), 1)
 //| ...
 //-----------------------------------------------------------------------------

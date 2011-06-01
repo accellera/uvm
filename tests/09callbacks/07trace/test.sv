@@ -53,7 +53,7 @@ module test;
 
     virtual function bit count_match();
       if (this.expected_count != count) begin
-         $display($psprintf("ERROR: Expected %1d callback trace messages, but saw %1d during the test.", expected_count, count));
+         $display($sformatf("ERROR: Expected %1d callback trace messages, but saw %1d during the test.", expected_count, count));
          return 0;
       end
 

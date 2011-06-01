@@ -361,6 +361,16 @@ class uvm_cmdline_processor extends uvm_report_object;
     // ~+UVM_OBJECTION_TRACE~ turns on tracing of objection activity.  Users simply need to put the
     // argument on the command line.
 
+    // Variable: +UVM_RESOURCE_DB_TRACE
+    //
+    // ~+UVM_RESOURCE_DB_TRACE~ turns on tracing of resource DB access.
+    // Users simply need to put the argument on the command line.
+
+    // Variable: +UVM_CONFIG_DB_TRACE
+    //
+    // ~+UVM_CONFIG_DB_TRACE~ turns on tracing of configuration DB access.
+    // Users simply need to put the argument on the command line.
+
     // Variable: +uvm_set_inst_override, +uvm_set_type_override
     //
     // ~+uvm_set_inst_override=<req_type>,<override_type>,<full_inst_path>~ and

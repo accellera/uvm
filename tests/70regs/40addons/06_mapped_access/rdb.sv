@@ -50,9 +50,9 @@ class uart_rf_type extends uvm_reg_block;
     for(int x=1; x<=10; x++)
     begin
       ureg[x] = ureg_type::type_id::create(
-        $psprintf("ureg[%0d]", x), , get_full_name());
+        $sformatf("ureg[%0d]", x), , get_full_name());
       ireg[x] = ireg_type::type_id::create(
-        $psprintf("ireg[%0d]", x), , get_full_name());
+        $sformatf("ireg[%0d]", x), , get_full_name());
     end
 
     // Now build the registers. Set parent and hdl_paths
@@ -61,9 +61,9 @@ class uart_rf_type extends uvm_reg_block;
     begin
       uvm_reg_addr_t laddr=4*x;
       ureg[x].build();
-      ureg[x].configure(this, null, $psprintf("ureg[%0d]",x));
+      ureg[x].configure(this, null, $sformatf("ureg[%0d]",x));
       ireg[x].build();
-      ireg[x].configure(this, null, $psprintf("ireg[%0d]",x));
+      ireg[x].configure(this, null, $sformatf("ireg[%0d]",x));
     end
 
     // Now define address mappings

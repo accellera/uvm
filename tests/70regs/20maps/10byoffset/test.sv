@@ -131,45 +131,45 @@ begin
    blk.lock_model();
 
    rg = blk.bus8.get_reg_by_offset(0);   
-   if (rg != blk.r0) `uvm_error("Test", $psprintf("Register at bus8/0 is %s instead of r0", (rg == null)? "(null)" : rg.get_full_name()));
+   if (rg != blk.r0) `uvm_error("Test", $sformatf("Register at bus8/0 is %s instead of r0", (rg == null)? "(null)" : rg.get_full_name()));
 
    rg = blk.bus8.get_reg_by_offset(3);   
-   if (rg != blk.r0) `uvm_error("Test", $psprintf("Register at bus8/3 is %s instead of r0", (rg == null)? "(null)" : rg.get_full_name()));
+   if (rg != blk.r0) `uvm_error("Test", $sformatf("Register at bus8/3 is %s instead of r0", (rg == null)? "(null)" : rg.get_full_name()));
    
    rg = blk.bus8.get_reg_by_offset(4);   
-   if (rg != blk.r1) `uvm_error("Test", $psprintf("Register at bus8/4 is %s instead of r1", (rg == null)? "(null)" : rg.get_full_name()));
+   if (rg != blk.r1) `uvm_error("Test", $sformatf("Register at bus8/4 is %s instead of r1", (rg == null)? "(null)" : rg.get_full_name()));
 
    rg = blk.bus8.get_reg_by_offset(5);   
-   if (rg != blk.r2) `uvm_error("Test", $psprintf("Register at bus8/8 is %s instead of r2", (rg == null)? "(null)" : rg.get_full_name()));
+   if (rg != blk.r2) `uvm_error("Test", $sformatf("Register at bus8/8 is %s instead of r2", (rg == null)? "(null)" : rg.get_full_name()));
 
    rg = blk.bus8.get_reg_by_offset(8);   
-   if (rg != blk.r2) `uvm_error("Test", $psprintf("Register at bus8/8 is %s instead of r2", (rg == null)? "(null)" : rg.get_full_name()));
+   if (rg != blk.r2) `uvm_error("Test", $sformatf("Register at bus8/8 is %s instead of r2", (rg == null)? "(null)" : rg.get_full_name()));
 
    rg = blk.bus8.get_reg_by_offset(9);   
-   if (rg != null) `uvm_error("Test", $psprintf("Register at bus8/9 is %s instead of (null)", rg.get_full_name()));
+   if (rg != null) `uvm_error("Test", $sformatf("Register at bus8/9 is %s instead of (null)", rg.get_full_name()));
 
    $write("Checking via a 32-bit bus...\n");
    
    rg = blk.bus32.get_reg_by_offset(0);   
-   if (rg != blk.r0) `uvm_error("Test", $psprintf("Register at bus32/0 is %s instead of r0", (rg == null)? "(null)" : rg.get_full_name()));
+   if (rg != blk.r0) `uvm_error("Test", $sformatf("Register at bus32/0 is %s instead of r0", (rg == null)? "(null)" : rg.get_full_name()));
 
    rg = blk.bus32.get_reg_by_offset(1);   
-   if (rg != null) `uvm_error("Test", $psprintf("Register at bus32/1 is %s instead of (null)", rg.get_full_name()));
+   if (rg != null) `uvm_error("Test", $sformatf("Register at bus32/1 is %s instead of (null)", rg.get_full_name()));
 
    rg = blk.bus32.get_reg_by_offset(4);   
-   if (rg != blk.r1) `uvm_error("Test", $psprintf("Register at bus32/4 is %s instead of r1", (rg == null)? "(null)" : rg.get_full_name()));
+   if (rg != blk.r1) `uvm_error("Test", $sformatf("Register at bus32/4 is %s instead of r1", (rg == null)? "(null)" : rg.get_full_name()));
 
    rg = blk.bus32.get_reg_by_offset(5);   
-   if (rg != null) `uvm_error("Test", $psprintf("Register at bus32/5 is %s instead of (null)", rg.get_full_name()));
+   if (rg != null) `uvm_error("Test", $sformatf("Register at bus32/5 is %s instead of (null)", rg.get_full_name()));
 
    rg = blk.bus32.get_reg_by_offset(7);   
-   if (rg != null) `uvm_error("Test", $psprintf("Register at bus32/7 is %s instead of (null)", rg.get_full_name()));
+   if (rg != null) `uvm_error("Test", $sformatf("Register at bus32/7 is %s instead of (null)", rg.get_full_name()));
 
    rg = blk.bus32.get_reg_by_offset(8);   
-   if (rg != blk.r2) `uvm_error("Test", $psprintf("Register at bus32/8 is %s instead of r2", (rg == null)? "(null)" : rg.get_full_name()));
+   if (rg != blk.r2) `uvm_error("Test", $sformatf("Register at bus32/8 is %s instead of r2", (rg == null)? "(null)" : rg.get_full_name()));
 
    rg = blk.bus32.get_reg_by_offset(9);   
-   if (rg != null) `uvm_error("Test", $psprintf("Register at bus32/9 is %s instead of (null)", rg.get_full_name()));
+   if (rg != null) `uvm_error("Test", $sformatf("Register at bus32/9 is %s instead of (null)", rg.get_full_name()));
 
    begin
       uvm_report_server svr;

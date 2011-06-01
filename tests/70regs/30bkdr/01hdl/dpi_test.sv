@@ -69,10 +69,10 @@ task  op(op_e oper, string hdl, bit [7:0] wr_val=0, bit [7:0] exp_val, int linen
 
   if (rd_val !== exp_val) begin
     if (oper == DEPOSIT || oper == FORCE)
-      uvm_report_error(hdl, $psprintf("(line %0d): %s of 'h%h - read back got 'h%h instead of 'h%h",
+      uvm_report_error(hdl, $sformatf("(line %0d): %s of 'h%h - read back got 'h%h instead of 'h%h",
        lineno, oper.name(), wr_val, rd_val, exp_val));
     else
-      uvm_report_error(hdl, $psprintf("(line %0d): %s - read back got 'h%h instead of 'h%h",
+      uvm_report_error(hdl, $sformatf("(line %0d): %s - read back got 'h%h instead of 'h%h",
        lineno, oper.name(), rd_val, exp_val));
   end
 

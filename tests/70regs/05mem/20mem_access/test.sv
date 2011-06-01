@@ -123,7 +123,7 @@ module tbtest();
     task run();
       while(1) begin
         seq_item_port.get_next_item(req);
-        #1 `uvm_info("USRDRV", $psprintf("Received following transaction :\n%0s",
+        #1 `uvm_info("USRDRV", $sformatf("Received following transaction :\n%0s",
           req.sprint()), UVM_LOW)
         if(!req.r_wn)
           tbtest.top.dut.mem[(req.addr-'h100)/8]=req.data;

@@ -783,7 +783,7 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    m_parent = parent;
    if (size == 0) begin
       `uvm_error("RegModel",
-         $psprintf("Field \"%s\" cannot have 0 bits", get_full_name()));
+         $sformatf("Field \"%s\" cannot have 0 bits", get_full_name()));
       size = 1;
    end
 
@@ -913,7 +913,7 @@ function string uvm_reg_field::get_access(uvm_reg_map map = null);
         
          "WO", "WOC", "WOS", "WO1": begin
             `uvm_error("RegModel",
-                       $psprintf("%s field \"%s\" restricted to RO in map \"%s\"",
+                       $sformatf("%s field \"%s\" restricted to RO in map \"%s\"",
                                  get_access(), get_name(), map.get_full_name()))
          end
 
@@ -1219,7 +1219,7 @@ function void uvm_reg_field::set(uvm_reg_data_t  value,
    m_lineno = lineno;
    if (value >> m_size) begin
       `uvm_warning("RegModel",
-         $psprintf("Specified value (0x%h) greater than field \"%s\" size (%0d bits)",
+         $sformatf("Specified value (0x%h) greater than field \"%s\" size (%0d bits)",
              value, get_name(), m_size));
       value &= mask;
    end
@@ -1483,7 +1483,7 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
       m_parent.do_write(rw);
 
       if (bad_side_effect) begin
-         `uvm_warning("RegModel", $psprintf("Writing field \"%s\" will cause unintended side effects in adjoining Write-to-Clear or Write-to-Set fields in the same register", this.get_full_name()));
+         `uvm_warning("RegModel", $sformatf("Writing field \"%s\" will cause unintended side effects in adjoining Write-to-Clear or Write-to-Set fields in the same register", this.get_full_name()));
       end
    end
    else begin
@@ -1911,7 +1911,7 @@ function string uvm_reg_field::convert2string();
             reg_.get_name(),
             get_lsb_pos() + get_n_bits() - 1,
             get_lsb_pos(), m_desired,
-            (m_desired != m_mirrored) ? $psprintf({" (Mirror: ",fmt,")"},
+            (m_desired != m_mirrored) ? $sformatf({" (Mirror: ",fmt,")"},
                m_mirrored) : ""); 
 
    if (m_read_in_progress == 1'b1) begin

@@ -21,6 +21,8 @@
 //------------------------------------------------------------------------------
 
 typedef class uvm_objection;
+typedef class uvm_sequence_base;
+typedef class uvm_sequence_item;
 
 //------------------------------------------------------------------------------
 //
@@ -151,10 +153,10 @@ virtual class uvm_component extends uvm_report_object;
   extern function int has_child (string name);
 
 
-  // Function: set_name
+  // Function - set_name
   //
   // Renames this component to ~name~ and recalculates all descendants'
-  // full names.
+  // full names. This is an internal function for now.
 
   extern virtual function void set_name (string name);
 
@@ -198,7 +200,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: build_phase
   //
-  // The <Pre-Defined Phases::uvm_build_phase> phase implementation method.
+  // The <uvm_build_phase> phase implementation method.
   //
   // Any override should call super.build_phase(phase) to execute the automatic
   // configuration of fields registed in the component by calling 
@@ -216,7 +218,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: connect_phase
   //
-  // The <Pre-Defined Phases::uvm_connect_phase> phase implementation method.
+  // The <uvm_connect_phase> phase implementation method.
   //
   // This method should never be called directly. 
 
@@ -227,7 +229,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: end_of_elaboration_phase
   //
-  // The <Pre-Defined Phases::uvm_end_of_elaboration_phase> phase implementation method.
+  // The <uvm_end_of_elaboration_phase> phase implementation method.
   //
   // This method should never be called directly.
 
@@ -238,7 +240,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: start_of_simulation_phase
   //
-  // The <Pre-Defined Phases::uvm_start_of_simulation_phase> phase implementation method.
+  // The <uvm_start_of_simulation_phase> phase implementation method.
   //
   // This method should never be called directly.
 
@@ -249,15 +251,11 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: run_phase
   //
-  // The <Pre-Defined Phases::uvm_run_phase> phase implementation method.
+  // The <uvm_run_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
-  // Unlike other task phases, it is not necessary to raise
-  // an objection to cause it to persist: it will persists
-  // until <global_stop_request()> is called.
-  // However, if a single phase objection is raised using
-  // ~phase.raise_objection()~, then the phase will automatically
+  // Thn the phase will automatically
   // ends once all objections are dropped using ~phase.drop_objection()~.
   // 
   // Any processes forked by this task continue to run
@@ -273,7 +271,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: pre_reset_phase
   //
-  // The <Pre-Defined Phases::uvm_pre_reset_phase> phase implementation method.
+  // The <uvm_pre_reset_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -293,7 +291,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: reset_phase
   //
-  // The <Pre-Defined Phases::uvm_reset_phase> phase implementation method.
+  // The <uvm_reset_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -313,7 +311,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: post_reset_phase
   //
-  // The <Pre-Defined Phases::uvm_post_reset_phase> phase implementation method.
+  // The <uvm_post_reset_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -333,7 +331,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: pre_configure_phase
   //
-  // The <Pre-Defined Phases::uvm_pre_configure_phase> phase implementation method.
+  // The <uvm_pre_configure_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -353,7 +351,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: configure_phase
   //
-  // The <Pre-Defined Phases::uvm_configure_phase> phase implementation method.
+  // The <uvm_configure_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -373,7 +371,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: post_configure_phase
   //
-  // The <Pre-Defined Phases::uvm_post_configure_phase> phase implementation method.
+  // The <uvm_post_configure_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -393,7 +391,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: pre_main_phase
   //
-  // The <Pre-Defined Phases::uvm_pre_main_phase> phase implementation method.
+  // The <uvm_pre_main_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -413,7 +411,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: main_phase
   //
-  // The <Pre-Defined Phases::uvm_main_phase> phase implementation method.
+  // The <uvm_main_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -433,7 +431,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: post_main_phase
   //
-  // The <Pre-Defined Phases::uvm_post_main_phase> phase implementation method.
+  // The <uvm_post_main_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -453,7 +451,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: pre_shutdown_phase
   //
-  // The <Pre-Defined Phases::uvm_pre_shutdown_phase> phase implementation method.
+  // The <uvm_pre_shutdown_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -473,7 +471,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: shutdown_phase
   //
-  // The <Pre-Defined Phases::uvm_shutdown_phase> phase implementation method.
+  // The <uvm_shutdown_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -493,7 +491,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Task: post_shutdown_phase
   //
-  // The <Pre-Defined Phases::uvm_post_shutdown_phase> phase implementation method.
+  // The <uvm_post_shutdown_phase> phase implementation method.
   //
   // This task returning or not does not indicate the end
   // or persistence of this phase.
@@ -513,7 +511,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: extract_phase
   //
-  // The <Pre-Defined Phases::uvm_extract_phase> phase implementation method.
+  // The <uvm_extract_phase> phase implementation method.
   //
   // This method should never be called directly.
 
@@ -524,7 +522,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: check_phase
   //
-  // The <Pre-Defined Phases::uvm_check_phase> phase implementation method.
+  // The <uvm_check_phase> phase implementation method.
   //
   // This method should never be called directly.
 
@@ -535,7 +533,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: report_phase
   //
-  // The <Pre-Defined Phases::uvm_report_phase> phase implementation method.
+  // The <uvm_report_phase> phase implementation method.
   //
   // This method should never be called directly.
 
@@ -546,7 +544,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: final_phase
   //
-  // The <Pre-Defined Phases::uvm_final_phase> phase implementation method.
+  // The <uvm_final_phase> phase implementation method.
   //
   // This method should never be called directly.
   
@@ -632,8 +630,7 @@ virtual class uvm_component extends uvm_report_object;
   // with the default ~uvm~ domain (see <uvm_domain::get_uvm_domain>) on
   // a component with no ~define_domain~ override effectively reverts the
   // that component to using the default ~uvm~ domain. This may be useful
-  //
-  // If a branch of the testbench hierarchy defines a custom domain, but
+  // if a branch of the testbench hierarchy defines a custom domain, but
   // some child sub-branch should remain in the default ~uvm~ domain,
   // call <set_domain> with a new domain instance handle with ~hier~ set.
   // Then, in the sub-branch, call <set_domain> with the default ~uvm~ domain handle,
@@ -681,7 +678,8 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual task resume ();
 
 
-  // Function: status
+`ifndef UVM_NO_DEPRECATED
+  // Function- status  - DEPRECATED
   //
   // Returns the status of this component.
   //
@@ -701,21 +699,16 @@ virtual class uvm_component extends uvm_report_object;
 
   extern function string status ();
 
- 
-  // Function: kill
+
+  // Function- kill  - DEPRECATED
   //
   // Kills the process tree associated with this component's currently running
   // task-based phase, e.g., run.
-  //
-  // An alternative mechanism for stopping the run phase is the stop request.
-  // Calling <global_stop_request> causes all components' run_phase processes to be
-  // killed, but only after all components have had the opportunity to complete
-  // in progress transactions and shutdown cleanly via their <stop> tasks.
 
   extern virtual function void kill ();
 
 
-  // Function: do_kill_all
+  // Function- do_kill_all  - DEPRECATED
   //
   // Recursively calls <kill> on this component and all its descendants,
   // which abruptly ends the currently running task-based phase, e.g., run.
@@ -724,7 +717,7 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual  function void  do_kill_all ();
 
 
-  // Task: stop_phase
+  // Task- stop_phase  -- DEPRECATED
   //
   // The stop_phase task is called when this component's <enable_stop_interrupt>
   // bit is set and <global_stop_request> is called during a task-based phase,
@@ -748,7 +741,7 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual task stop (string ph_name);
 
 
-  // Variable: enable_stop_interrupt
+  // Variable- enable_stop_interrupt  - DEPRECATED
   //
   // This bit allows a component to raise an objection to the stopping of the
   // current phase. It affects only time consuming phases (such as the run
@@ -760,6 +753,7 @@ virtual class uvm_component extends uvm_report_object;
   // implement the stop task to prepare for shutdown.
 
   int enable_stop_interrupt = 0;
+`endif
 
 
   // Function: resolve_bindings
@@ -1658,8 +1652,6 @@ virtual class uvm_component extends uvm_report_object;
 
   protected uvm_event_pool event_pool;
 
-  extern virtual task restart ();
-
   int unsigned recording_detail = UVM_NONE;
   extern         function void   do_print(uvm_printer printer);
 
@@ -1674,18 +1666,20 @@ virtual class uvm_component extends uvm_report_object;
   // We will do this work in the phase_started callback. 
 
   typedef struct {
+    string comp;
     string phase;
     time   offset;
     uvm_verbosity verbosity;
     string id;
   } m_verbosity_setting;
+
   m_verbosity_setting m_verbosity_settings[$];
+  static m_verbosity_setting m_time_settings[$];
 
   // does the pre abort callback hierarchically
   extern /*local*/ function void m_do_pre_abort;
+
 endclass : uvm_component
-
-
 
 `include "base/uvm_root.svh"
 
@@ -1730,7 +1724,7 @@ function uvm_component::new (string name, uvm_component parent);
       uvm_report_fatal("ILLCRT", {"It is illegal to create a component ('",
                 name,"' under '",
                 (parent == null ? top.get_full_name() : parent.get_full_name()),
-               "') after the build() phase has ended."},
+               "') after the build phase has ended."},
                        UVM_NONE);
     end
   end
@@ -1755,12 +1749,12 @@ function uvm_component::new (string name, uvm_component parent);
     if (parent == top) begin
       error_str = {"Name '",name,"' is not unique to other top-level ",
       "instances. If parent is a module, build a unique name by combining the ",
-      "the module name and component name: $psprintf(\"\%m.\%s\",\"",name,"\")."};
+      "the module name and component name: $sformatf(\"\%m.\%s\",\"",name,"\")."};
       `uvm_fatal("CLDEXT",error_str)
     end
     else
       `uvm_fatal("CLDEXT",
-        $psprintf("Cannot set '%s' as a child of '%s', %s",
+        $sformatf("Cannot set '%s' as a child of '%s', %s",
                   name, parent.get_full_name(),
                   "which already has a child by that name."))
     return;
@@ -1781,7 +1775,8 @@ function uvm_component::new (string name, uvm_component parent);
   reseed();
 
   // Do local configuration settings
-  void'(get_config_int("recording_detail", recording_detail)); // *** VIRTUAL
+  if (!uvm_config_db #(uvm_bitstream_t)::get(this, "", "recording_detail", recording_detail))
+        void'(uvm_config_db #(int)::get(this, "", "recording_detail", recording_detail));
 
   set_report_verbosity_level(parent.get_report_verbosity_level());
 
@@ -1803,14 +1798,14 @@ function bit uvm_component::m_add_child(uvm_component child);
   if (m_children.exists(child.get_name()) &&
       m_children[child.get_name()] != child) begin
       `uvm_warning("BDCLD",
-        $psprintf("A child with the name '%0s' (type=%0s) already exists.",
+        $sformatf("A child with the name '%0s' (type=%0s) already exists.",
            child.get_name(), m_children[child.get_name()].get_type_name()))
       return 0;
   end
 
   if (m_children_by_handle.exists(child)) begin
       `uvm_warning("BDCHLD",
-        $psprintf("A child with the name '%0s' %0s %0s'",
+        $sformatf("A child with the name '%0s' %0s %0s'",
                   child.get_name(),
                   "already exists in parent under name '",
                   m_children_by_handle[child].get_name()))
@@ -1909,7 +1904,10 @@ endfunction
 // --------
 
 function void uvm_component::set_name (string name);
-  
+  if(m_name != "") begin
+    `uvm_error("INVSTNM", $sformatf("It is illegal to change the name of a component. The component name will not be changed to \"%s\"", name))
+    return;
+  end
   super.set_name(name);
   m_set_full_name();
 
@@ -1957,7 +1955,7 @@ function uvm_component uvm_component::lookup( string name );
   
   if (!comp.has_child(leaf)) begin
     `uvm_warning("Lookup Error", 
-       $psprintf("Cannot find child %0s",leaf))
+       $sformatf("Cannot find child %0s",leaf))
     return null;
   end
 
@@ -2442,6 +2440,7 @@ endfunction
 // phase runtime control API
 //--------------------------
 
+`ifndef UVM_NO_DEPRECATED
 // do_kill_all
 // -----------
 
@@ -2461,18 +2460,13 @@ function void uvm_component::kill();
       m_phase_process = null;
     end
 endfunction
-
+`endif
 
 // suspend
 // -------
 
 task uvm_component::suspend();
-  `ifdef UVM_USE_SUSPEND_RESUME
-    if(m_phase_process != null)
-      m_phase_process.suspend;
-  `else
-    `uvm_error("UNIMP", "suspend() not implemented")
-  `endif
+   `uvm_warning("COMP/SPND/UNIMP", "suspend() not implemented")
 endtask
 
 
@@ -2480,27 +2474,14 @@ endtask
 // ------
 
 task uvm_component::resume();
-  `ifdef UVM_USE_SUSPEND_RESUME
-    if(m_phase_process!=null) 
-      m_phase_process.resume;
-  `else
-     `uvm_error("UNIMP", "resume() not implemented")
-  `endif
-endtask
-
-
-// restart
-// -------
-
-task uvm_component::restart();
-  `uvm_warning("UNIMP",
-      $psprintf("%0s: restart not implemented",this.get_name()))
+   `uvm_warning("COMP/RSUM/UNIMP", "resume() not implemented")
 endtask
 
 
 // status
 //-------
 
+`ifndef UVM_NO_DEPRECATED
 function string uvm_component::status();
 
   `ifdef UVM_USE_SUSPEND_RESUME
@@ -2532,7 +2513,6 @@ function string uvm_component::status();
    
 endfunction
 
-
 // stop
 // ----
 
@@ -2548,6 +2528,7 @@ task uvm_component::stop_phase(uvm_phase phase);
   stop(phase.get_name());
   return;
 endtask
+`endif
 
 
 // resolve_bindings
@@ -2634,6 +2615,18 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
     return 0;
 
   recordr = (recorder == null) ? uvm_default_recorder : recorder;
+
+  if (!has_parent) begin
+    uvm_sequence_item seq;
+    if ($cast(seq,tr)) begin
+      uvm_sequence_base parent_seq = seq.get_parent_sequence();
+      if (parent_seq != null) begin
+        parent_handle = parent_seq.m_tr_handle;
+        if (parent_handle!=0)
+          has_parent = 1;
+      end
+    end
+  end
 
   tr_h = 0;
   if(has_parent)
@@ -2992,8 +2985,11 @@ function void uvm_component::apply_config_settings (bit verbose=0);
     $display("applying configuration settings for %s", get_full_name());
 
   rq = rp.lookup_scope(get_full_name());
+  rp.sort_by_precedence(rq);
 
-  for(int i=0; i<rq.size(); ++i) begin
+  // rq is in precedence order now, so we have to go through in reverse
+  // order to do the settings.
+  for(int i=rq.size()-1; i>=0; --i) begin
 
     r = rq.get(i);
     name = r.get_name();
@@ -3010,7 +3006,8 @@ function void uvm_component::apply_config_settings (bit verbose=0);
     else
       search_name = name;
 
-    if(!__m_uvm_status_container.field_array.exists(search_name))
+    if(!uvm_resource_pool::m_has_wildcard_names && 
+       !__m_uvm_status_container.field_array.exists(search_name))
       continue;
 
     if(verbose)
@@ -3050,24 +3047,8 @@ function void uvm_component::apply_config_settings (bit verbose=0);
 endfunction
 
 
-// print_config_settings
-// ---------------------
-
-function void uvm_component::print_config_settings (string field="",
-                                                    uvm_component comp=null,
-                                                    bit recurse=0);
-  static bit have_been_warned = 0;
-  if(!have_been_warned) begin
-    uvm_report_warning("deprecated", "uvm_component::print_config_settings has been deprecated.  Use print_config() instead");
-    have_been_warned = 1;
-  end
-
-  print_config(1, recurse);
-endfunction
-
-function void uvm_component::print_config_with_audit(bit recurse = 0);
-  print_config(recurse, 1);
-endfunction
+// print_config
+// ------------
 
 function void uvm_component::print_config(bit recurse = 0, audit = 0);
 
@@ -3085,6 +3066,30 @@ function void uvm_component::print_config(bit recurse = 0, audit = 0);
     end
   end
 
+endfunction
+
+
+// print_config_settings
+// ---------------------
+
+function void uvm_component::print_config_settings (string field="",
+                                                    uvm_component comp=null,
+                                                    bit recurse=0);
+  static bit have_been_warned = 0;
+  if(!have_been_warned) begin
+    uvm_report_warning("deprecated", "uvm_component::print_config_settings has been deprecated.  Use print_config() instead");
+    have_been_warned = 1;
+  end
+
+  print_config(recurse, 1);
+endfunction
+
+
+// print_config_with_audit
+// -----------------------
+
+function void uvm_component::print_config_with_audit(bit recurse = 0);
+  print_config(recurse, 1);
 endfunction
 
 
@@ -3110,11 +3115,12 @@ function void uvm_component::do_print(uvm_printer printer);
         $bits(recording_detail), UVM_DEC, , "integral");
     endcase
 
+`ifndef UVM_NO_DEPRECATED
   if (enable_stop_interrupt != 0) begin
     printer.print_int("enable_stop_interrupt", enable_stop_interrupt,
                         $bits(enable_stop_interrupt), UVM_BIN, ".", "bit");
   end
-
+ `endif
 endfunction
 
 
@@ -3152,7 +3158,6 @@ endfunction
 
 // m_set_cl_verb
 // -------------
-
 function void uvm_component::m_set_cl_verb;
   // _ALL_ can be used for ids
   // +uvm_set_verbosity=<comp>,<id>,<verbosity>,<phase|time>,<offset>
@@ -3162,61 +3167,75 @@ function void uvm_component::m_set_cl_verb;
   static bit first = 1;
   string args[$];
   uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
+  uvm_root top = uvm_root::get();
 
   if(!values.size())
     void'(uvm_cmdline_proc.get_arg_values("+uvm_set_verbosity=",values));
 
   foreach(values[i]) begin
-    uvm_verbosity verb;
-    string phase="";
-    time   offset= 0;
+    m_verbosity_setting setting;
     args.delete();
     uvm_split_string(values[i], ",", args);
 
     // Warning is already issued in uvm_root, so just don't keep it
     if(first && ( ((args.size() != 4) && (args.size() != 5)) || 
-                  (clp.m_convert_verb(args[2], verb) == 0))  )
+                  (clp.m_convert_verb(args[2], setting.verbosity) == 0))  )
     begin
       values.delete(i);
     end
-    else if (uvm_is_match(args[0], get_full_name()) ) begin
-      void'(clp.m_convert_verb(args[2], verb));
-      phase = args[3];
-      if(args.size() == 5) begin
-        offset = args[4].atoi();
+    else begin
+      setting.comp = args[0];
+      setting.id = args[1];
+      void'(clp.m_convert_verb(args[2],setting.verbosity));
+      setting.phase = args[3];
+      setting.offset = 0;
+      if(args.size() == 5) setting.offset = args[4].atoi();
+      if((setting.phase == "time") && (this == top)) begin
+        m_time_settings.push_back(setting);
       end
-      if((phase == "" || phase == "build" || phase == "time") && (offset == 0) ) begin
-        if(args[1] == "_ALL_") 
-          set_report_verbosity_level(verb);
-        else
-          set_report_id_verbosity(args[1], verb);
-      end
-      else begin
-        if(phase == "time") begin
-          fork begin
-            uvm_verbosity lverb = verb;
-            string lid = args[1];
-            time t = offset;
-            #t;
-            if(lid == "_ALL_") begin
-              set_report_verbosity_level(lverb);
-            end
-            else begin
-              set_report_id_verbosity(lid, lverb);
-            end
-          end join_none
+  
+      if (uvm_is_match(setting.comp, get_full_name()) ) begin
+        if((setting.phase == "" || setting.phase == "build" || setting.phase == "time") && 
+           (setting.offset == 0) ) 
+        begin
+          if(setting.id == "_ALL_") 
+            set_report_verbosity_level(setting.verbosity);
+          else
+            set_report_id_verbosity(setting.id, setting.verbosity);
         end
         else begin
-          m_verbosity_setting setting;
-          setting.phase = phase;
-          setting.offset = offset;
-          setting.verbosity = verb;
-          setting.id = args[1];
-          m_verbosity_settings.push_back(setting);
+          if(setting.phase != "time") begin
+            m_verbosity_settings.push_back(setting);
+          end
         end
       end
     end
   end
+  // do time based settings
+  if(this == top) begin
+    fork begin
+      time last_time = 0;
+      if (m_time_settings.size() > 0)
+        m_time_settings.sort() with ( item.offset );
+      foreach(m_time_settings[i]) begin
+        uvm_component comps[$];
+        top.find_all(m_time_settings[i].comp,comps);
+        #(m_time_settings[i].offset - last_time);
+        last_time = m_time_settings[i].offset;
+        if(m_time_settings[i].id == "_ALL_") begin
+           foreach(comps[j]) begin
+             comps[j].set_report_verbosity_level(m_time_settings[i].verbosity);
+           end
+        end
+        else begin
+          foreach(comps[j]) begin
+            comps[j].set_report_id_verbosity(m_time_settings[i].id, m_time_settings[i].verbosity);
+          end
+        end
+      end
+    end join_none // fork begin
+  end
+
   first = 0;
 endfunction
 
@@ -3348,6 +3367,8 @@ function void uvm_component::m_apply_verbosity_settings(uvm_phase phase);
             set_report_id_verbosity(m_verbosity_settings[i].id, m_verbosity_settings[i].verbosity);
       end
       else begin
+        process p = process::self();
+        string p_rand = p.get_randstate();
         fork begin
           m_verbosity_setting setting = m_verbosity_settings[i];
           #setting.offset;
@@ -3356,6 +3377,7 @@ function void uvm_component::m_apply_verbosity_settings(uvm_phase phase);
           else 
             set_report_id_verbosity(setting.id, setting.verbosity);
         end join_none;
+        p.set_randstate(p_rand);
       end
       // Remove after use
       m_verbosity_settings.delete(i);

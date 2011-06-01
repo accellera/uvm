@@ -151,7 +151,7 @@ class xbus_slave_monitor extends uvm_monitor;
         void'(this.begin_tr(trans_collected));
         -> address_phase_grabbed;
         collect_data_phase();
-        `uvm_info(get_type_name(), $psprintf("Transfer collected :\n%s",
+        `uvm_info(get_type_name(), $sformatf("Transfer collected :\n%s",
           trans_collected.sprint()), UVM_FULL)
         if (checks_enable)
           perform_transfer_checks();

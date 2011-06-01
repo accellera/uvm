@@ -71,12 +71,12 @@ class xbus_demo_scoreboard extends uvm_scoreboard;
         if (trans.read_write == READ) begin
           data = trans.data[i];
           uvm_report_info(get_type_name(),
-            $psprintf("%s to existing address...Checking address : %0h with data : %0h", 
+            $sformatf("%s to existing address...Checking address : %0h with data : %0h", 
             trans.read_write.name(), trans.addr, data), UVM_LOW);
           assert(m_mem_expected[trans.addr + i] == trans.data[i]) else begin
             exp = m_mem_expected[trans.addr + i];
             uvm_report_error(get_type_name(),
-              $psprintf("Read data mismatch.  Expected : %0h.  Actual : %0h", 
+              $sformatf("Read data mismatch.  Expected : %0h.  Actual : %0h", 
               exp, data), UVM_NONE);
           end
           num_init_reads++;
@@ -84,7 +84,7 @@ class xbus_demo_scoreboard extends uvm_scoreboard;
         if (trans.read_write == WRITE) begin
           data = trans.data[i];
           uvm_report_info(get_type_name(),
-            $psprintf("%s to existing address...Updating address : %0h with data : %0h", 
+            $sformatf("%s to existing address...Updating address : %0h with data : %0h", 
             trans.read_write.name(), trans.addr + i, data), UVM_LOW);
           m_mem_expected[trans.addr + i] = trans.data[i];
           num_writes++;
@@ -95,7 +95,7 @@ class xbus_demo_scoreboard extends uvm_scoreboard;
       else begin
         data = trans.data[i];
         uvm_report_info(get_type_name(),
-          $psprintf("%s to empty address...Updating address : %0h with data : %0h", 
+          $sformatf("%s to empty address...Updating address : %0h with data : %0h", 
           trans.read_write.name(), trans.addr + i, data), UVM_LOW);
         m_mem_expected[trans.addr + i] = trans.data[i];
         if(trans.read_write == READ)
@@ -110,7 +110,7 @@ class xbus_demo_scoreboard extends uvm_scoreboard;
   virtual function void report();
     if(!disable_scoreboard) begin
       uvm_report_info(get_type_name(),
-        $psprintf("Reporting scoreboard information...\n%s", this.sprint()), UVM_LOW);
+        $sformatf("Reporting scoreboard information...\n%s", this.sprint()), UVM_LOW);
     end
   endfunction : report
 

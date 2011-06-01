@@ -48,7 +48,7 @@ class xbus_demo_base_test extends uvm_test;
     // Set verbosity for the bus monitor for this demo
     xbus_demo_tb0.xbus0.bus_monitor.set_report_verbosity_level(UVM_FULL);
     uvm_report_info(get_type_name(),
-      $psprintf("Printing the test topology :\n%s", this.sprint()), UVM_LOW);
+      $sformatf("Printing the test topology :\n%s", this.sprint()), UVM_LOW);
   endfunction : end_of_elaboration
 
 endclass : xbus_demo_base_test

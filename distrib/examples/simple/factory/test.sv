@@ -52,7 +52,7 @@ module top;
     endfunction
 
     function packet get_packet();
-      `uvm_info("PKTGEN", $psprintf("Getting a packet from %s (%s)", get_full_name(), get_type_name()),UVM_MEDIUM)
+      `uvm_info("PKTGEN", $sformatf("Getting a packet from %s (%s)", get_full_name(), get_type_name()),UVM_MEDIUM)
       return super.get_packet();
     endfunction
 

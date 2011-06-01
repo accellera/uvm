@@ -72,9 +72,6 @@ begin
    uvm_resource_db#(your_obj)::set("yr_obj", "*", null);
    uvm_resource_db#(your_obj)::set("yr_obj", "*", yo);
 
-   uvm_resource_db#(bit)::dump();
-
-   uvm_resource_default_converter#(uvm_bitstream_t)::register();
    uvm_config_db#(uvm_bitstream_t)::set(null,"*","para1",3);
    uvm_config_db#(int)::set(null,"*","para2",4);
 

@@ -44,14 +44,14 @@ module test();
       super.new(name);
     endfunction
     task body();
-      `uvm_info(get_type_name(), $psprintf("body starting, raising my objection"), UVM_HIGH)
+      `uvm_info(get_type_name(), $sformatf("body starting, raising my objection"), UVM_HIGH)
       uvm_test_done.raise_objection(this);
       #1000;
       //`uvm_do(req)
-      `uvm_info(get_type_name(), $psprintf("item done, sequence is finishing"), UVM_HIGH)
+      `uvm_info(get_type_name(), $sformatf("item done, sequence is finishing"), UVM_HIGH)
     endtask
     function void do_kill();
-      `uvm_info(get_type_name(), $psprintf("kill done, dropping my objection"), UVM_HIGH)
+      `uvm_info(get_type_name(), $sformatf("kill done, dropping my objection"), UVM_HIGH)
       uvm_test_done.drop_objection(this);
       kill_test_bit = 1;
     endfunction
@@ -73,7 +73,7 @@ module test();
     task run();
       forever begin
         seq_item_port.get_next_item(req);
-        `uvm_info(get_type_name(), $psprintf("Request is:\n%s", req.sprint()), UVM_HIGH)
+        `uvm_info(get_type_name(), $sformatf("Request is:\n%s", req.sprint()), UVM_HIGH)
         #100;
         seq_item_port.item_done();
       end
@@ -109,7 +109,7 @@ module test();
       ma0 = my_agent::type_id::create("ma0", this);
     endfunction
     function void end_of_elaboration();
-      `uvm_info(get_type_name(), $psprintf("The topology:\n%s", this.sprint()), UVM_HIGH)
+      `uvm_info(get_type_name(), $sformatf("The topology:\n%s", this.sprint()), UVM_HIGH)
     endfunction
     task run();
       my_sequence the_0seq;

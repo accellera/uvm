@@ -23,9 +23,13 @@
 ---------------------------
 Name  Type      Size  Value
 ---------------------------
-yo    an_obj    -     @470 
+yo    an_obj    -     @... 
   i   integral  32    'h0  
 ---------------------------
 
+-  
+para1 [/^.*$/] : ($typename) 11
+-  
+para2 [/^.*$/] : ($typename) 4
 -  
 === end of resource pool ===

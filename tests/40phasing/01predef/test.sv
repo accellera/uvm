@@ -34,9 +34,9 @@ class test extends uvm_test;
    string last_phase = "";
 
    function void check_the_phase(string prev, string curr);
-      `uvm_info("Test", $psprintf("Executing phase \"%s\"...", curr), UVM_LOW)
+      `uvm_info("Test", $sformatf("Executing phase \"%s\"...", curr), UVM_LOW)
       if (prev != last_phase) begin
-`uvm_error("Test", $psprintf("Phase before \"%s\" was \"%s\" instead of \"%s\".",
+`uvm_error("Test", $sformatf("Phase before \"%s\" was \"%s\" instead of \"%s\".",
                              curr, last_phase, prev));
       end
       last_phase = curr;
@@ -45,15 +45,15 @@ class test extends uvm_test;
    
    task check_the_phase_t(string prev, string curr, uvm_phase phase);
       phase.raise_objection(this);
-      `uvm_info("Test", $psprintf("Starting phase \"%s\"...", curr), UVM_LOW)
+      `uvm_info("Test", $sformatf("Starting phase \"%s\"...", curr), UVM_LOW)
       #10;
       if (prev != last_phase) begin
-`uvm_error("Test", $psprintf("Previous phase was \"%s\" instead of \"%s\".",
+`uvm_error("Test", $sformatf("Previous phase was \"%s\" instead of \"%s\".",
                              last_phase, prev));
       end
       #10;
       last_phase = curr;
-      `uvm_info("Test", $psprintf("Ending phase \"%s\"...", curr), UVM_LOW)
+      `uvm_info("Test", $sformatf("Ending phase \"%s\"...", curr), UVM_LOW)
       n_ph++;
       phase.drop_objection(this);
    endtask
@@ -164,13 +164,13 @@ begin
       test t;
       $cast(t, uvm_top.find("uvm_test_top"));
       if (t.last_phase != "final") begin
-         `uvm_error("Test", $psprintf("Last phase was \"%s\" instead of \"final\".",
+         `uvm_error("Test", $sformatf("Last phase was \"%s\" instead of \"final\".",
                                       t.last_phase));
       end
    end
    
    if (test::n_ph != 21) begin
-      `uvm_error("Test", $psprintf("A total of %0d phase methods were executed instead of 21.",
+      `uvm_error("Test", $sformatf("A total of %0d phase methods were executed instead of 21.",
                                    test::n_ph));
    end
    

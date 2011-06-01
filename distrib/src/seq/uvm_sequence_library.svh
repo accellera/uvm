@@ -785,10 +785,7 @@ task uvm_sequence_library::execute(uvm_object_wrapper wrap);
   `uvm_info("SEQLIB/EXEC",{"Executing ",(seq_or_item.is_item() ? "item " : "sequence "),seq_or_item.get_name(),
                            " (",seq_or_item.get_type_name(),")"},UVM_FULL)
   seq_or_item.print_sequence_info = 1;
-  start_item(seq_or_item);
-  if (!seq_or_item.randomize())
-     `uvm_error("SEQLIB/SEQ_RAND_FAIL", "Failed to randomize sequence")
-  finish_item(seq_or_item);
+  `uvm_rand_send(seq_or_item)
   seqs_distrib[seq_or_item.get_type_name()] = seqs_distrib[seq_or_item.get_type_name()]+1;
 
   sequences_executed++;

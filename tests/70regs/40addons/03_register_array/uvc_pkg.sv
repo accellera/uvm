@@ -55,9 +55,9 @@ package uvc_pkg;
         vif.drive_tr(req);
         #1;
         if(req.dir==UVM_WRITE)
-          `uvm_info("USRDRV", $psprintf("Write addr=0x%0x Data=0x%0x", req.addr, req.data), UVM_LOW)
+          `uvm_info("USRDRV", $sformatf("Write addr=0x%0x Data=0x%0x", req.addr, req.data), UVM_LOW)
         else
-          `uvm_info("USRDRV", $psprintf("Read addr=0x%0x Data=0x%0x", req.addr, req.data), UVM_LOW)
+          `uvm_info("USRDRV", $sformatf("Read addr=0x%0x Data=0x%0x", req.addr, req.data), UVM_LOW)
         item_collected_port.write(req);
         seq_item_port.item_done();
       end

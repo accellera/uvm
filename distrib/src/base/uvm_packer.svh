@@ -329,7 +329,7 @@ endclass
 
 function void uvm_packer::index_error(int index, string id, int sz);
     uvm_report_error("PCKIDX", 
-        $psprintf("index %0d for get_%0s too large; valid index range is 0-%0d.",
+        $sformatf("index %0d for get_%0s too large; valid index range is 0-%0d.",
                   index,id,((m_packed_size+sz-1)/sz)-1), UVM_NONE);
 endfunction
 
@@ -340,7 +340,7 @@ endfunction
 function bit uvm_packer::enough_bits(int needed, string id);
   if ((m_packed_size - count) < needed) begin
     uvm_report_error("PCKSZ",
-        $psprintf("%0d bits needed to unpack %0s, yet only %0d available.",
+        $sformatf("%0d bits needed to unpack %0s, yet only %0d available.",
                   needed, id, (m_packed_size - count)), UVM_NONE);
     return 0;
   end
@@ -552,7 +552,7 @@ endfunction
 function void uvm_packer::pack_object(uvm_object value);
 
   if(value.__m_uvm_status_container.cycle_check.exists(value)) begin
-    uvm_report_warning("CYCFND", $psprintf("Cycle detected for object @%0d during pack", value.get_inst_id()), UVM_NONE);
+    uvm_report_warning("CYCFND", $sformatf("Cycle detected for object @%0d during pack", value.get_inst_id()), UVM_NONE);
     return;
   end
   value.__m_uvm_status_container.cycle_check[value] = 1;
@@ -662,7 +662,7 @@ function void uvm_packer::unpack_object(uvm_object value);
   byte is_non_null; is_non_null = 1;
 
   if(value.__m_uvm_status_container.cycle_check.exists(value)) begin
-    uvm_report_warning("CYCFND", $psprintf("Cycle detected for object @%0d during unpack", value.get_inst_id()), UVM_NONE);
+    uvm_report_warning("CYCFND", $sformatf("Cycle detected for object @%0d during unpack", value.get_inst_id()), UVM_NONE);
     return;
   end
   value.__m_uvm_status_container.cycle_check[value] = 1;

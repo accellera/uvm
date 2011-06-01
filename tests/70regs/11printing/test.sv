@@ -123,7 +123,7 @@ endclass
       r.get_maps(m);
       foreach(m[idx]) begin
          uvm_reg_map map = m[idx];
-         `uvm_info("REG",$psprintf("addr of %s within map %s is %x",r.get_full_name(),map.get_full_name(),r.get_offset(map)),UVM_NONE)
+         `uvm_info("REG",$sformatf("addr of %s within map %s is %x",r.get_full_name(),map.get_full_name(),r.get_offset(map)),UVM_NONE)
       end
    endfunction
 
@@ -146,7 +146,7 @@ endclass
       end
       
       
-      assert(r.size() ==3) else `uvm_error("REG",$psprintf("expected 3 regs but got %0d in map",r.size()))
+      assert(r.size() ==3) else `uvm_error("REG",$sformatf("expected 3 regs but got %0d in map",r.size()))
       foreach (r[idx]) begin
          print_adresses(r[idx]);
       end
