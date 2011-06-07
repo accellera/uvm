@@ -1268,7 +1268,7 @@ task uvm_phase::execute_phase();
              //--------------
  
              `UVM_PH_TRACE("PH_READY_TO_END","PHASE READY TO END",this,UVM_DEBUG)
-             m_state = UVM_PHASE_READY_TO_END;
+             //m_state = UVM_PHASE_READY_TO_END;
              m_ready_to_end_count++;
              if (m_ready_to_end_count < max_ready_to_end_iter) begin
                if (m_phase_trace)
@@ -1279,8 +1279,10 @@ task uvm_phase::execute_phase();
              #0; // LET ANY WAITERS WAKE UP
 
              // WAIT FOR PREDECESSORS
-             if (!phase_done.get_objection_total(top))
+             if (!phase_done.get_objection_total(top)) begin
+               m_state = UVM_PHASE_READY_TO_END;
                m_wait_for_pred();
+             end
 
            end
 
