@@ -121,7 +121,7 @@ class test_r8_w8_r4_w4 extends ubus_example_base_test;
 			       "default_sequence",
 				r8_w8_r4_w4_seq::type_id::get());
     uvm_config_db#(uvm_object_wrapper)::set(this,
-		      ".ubus_example_tb0.ubus0.slaves[0].sequencer.run_phase", 
+		      "ubus_example_tb0.ubus0.slaves[0].sequencer.run_phase", 
 			       "default_sequence",
 				slave_memory_seq::type_id::get());
   end
