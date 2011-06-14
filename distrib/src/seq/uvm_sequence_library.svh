@@ -785,6 +785,11 @@ task uvm_sequence_library::execute(uvm_object_wrapper wrap);
   `uvm_info("SEQLIB/EXEC",{"Executing ",(seq_or_item.is_item() ? "item " : "sequence "),seq_or_item.get_name(),
                            " (",seq_or_item.get_type_name(),")"},UVM_FULL)
   seq_or_item.print_sequence_info = 1;
+  seq_or_item.set_use_sequence_info(1);
+  seq_or_item.set_parent_sequence(this);
+  seq_or_item.set_sequencer(get_sequencer());
+  seq_or_item.set_depth(get_depth() + 1);
+  seq_or_item.reseed();
   `uvm_rand_send(seq_or_item)
   seqs_distrib[seq_or_item.get_type_name()] = seqs_distrib[seq_or_item.get_type_name()]+1;
 

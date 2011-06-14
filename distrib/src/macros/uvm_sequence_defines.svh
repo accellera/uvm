@@ -294,10 +294,12 @@
 `define uvm_rand_send_pri_with(SEQ_OR_ITEM, PRIORITY, CONSTRAINTS) \
   begin \
   uvm_sequence_base __seq; \
+   $write(">> Sending sub-sequence %s...\n", SEQ_OR_ITEM.get_type_name()); \
   if (!$cast(__seq,SEQ_OR_ITEM)) start_item(SEQ_OR_ITEM, PRIORITY);\
   if (!SEQ_OR_ITEM.randomize() with CONSTRAINTS ) begin \
     `uvm_warning("RNDFLD", "Randomization failed in uvm_rand_send_with action") \
   end\
+   $write("Sending sub-sequence %s on %s...\n", __seq.get_type_name(), m_sequencer.get_full_name()); \
   if (!$cast(__seq,SEQ_OR_ITEM)) finish_item(SEQ_OR_ITEM, PRIORITY);\
   else __seq.start(get_sequencer(), this, PRIORITY, 0);\
   end
