@@ -2604,7 +2604,7 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
                                           string desc="",
                                           time begin_time=0);
   uvm_event e;
-  integer stream_h;
+  integer stream_h=0;
   integer tr_h;
   integer link_tr_h;
   string name;
