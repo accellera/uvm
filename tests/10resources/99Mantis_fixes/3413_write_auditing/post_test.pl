@@ -47,9 +47,6 @@ $logfile =~ s/\n# /\n/sg;
 # strip irrelevant text
 $logfile =~ s/.*(=== resource pool ===.*?=== end of resource pool ===\n).*/$1/sg;
 
-# Replace implementation-dependent output with generic text
-$logfile =~ s/: \(class .*\) /: \(class \$typename\) /g;
-
 # write back
 print L $logfile;
 
