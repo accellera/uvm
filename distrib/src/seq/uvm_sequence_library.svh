@@ -779,7 +779,7 @@ task uvm_sequence_library::execute(uvm_object_wrapper wrap);
   factory = uvm_factory::get();
 
   obj = factory.create_object_by_type(wrap,get_full_name(),
-           $sformatf("%0d",sequences_executed+1));
+           $sformatf("%s:%0d",wrap.get_type_name(),sequences_executed+1));
   void'($cast(seq_or_item,obj)); // already qualified, 
 
   `uvm_info("SEQLIB/EXEC",{"Executing ",(seq_or_item.is_item() ? "item " : "sequence "),seq_or_item.get_name(),
