@@ -74,6 +74,7 @@
   `include "base/uvm_runtime_phases.svh"
 
   // Resources/configuration facility
+  `include "base/uvm_db_options.svh"
   `include "base/uvm_spell_chkr.svh"
   `include "base/uvm_resource.svh"
   `include "base/uvm_mutex_locker.svh"

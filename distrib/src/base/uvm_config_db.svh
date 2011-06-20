@@ -42,8 +42,6 @@ class m_uvm_waiter;
   endfunction
 endclass
 
-typedef class uvm_config_db_options;
-
 //----------------------------------------------------------------------
 // class: uvm_config_db
 //
@@ -102,7 +100,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     rq = rp.lookup_regex_names(inst_name, field_name, uvm_resource#(T)::get_type());
     r = uvm_resource#(T)::get_highest_precedence(rq);
     
-    if(uvm_resource_db_options::is_tracing())
+    if(uvm_db_options#("CONFIG")::is_tracing())
       m_show_msg("CFGDB/GET", "Configuration","read", inst_name, field_name, cntxt, r);
 
     if(r == null)
@@ -206,7 +204,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
 
     p.set_randstate(rstate);
 
-    if(uvm_resource_db_options::is_tracing())
+    if(uvm_db_options#("CONFIG")::is_tracing())
       m_show_msg("CFGDB/SET", "Configuration","set", inst_name, field_name, cntxt, r);
   endfunction
 
@@ -300,71 +298,3 @@ endclass
 typedef uvm_config_db#(uvm_object_wrapper) uvm_config_wrapper;
 
 
-//----------------------------------------------------------------------
-// Class: uvm_config_db_options
-//
-// Provides a namespace for managing options for the
-// configuration DB facility.  The only thing allowed in this class is static
-// local data members and static functions for manipulating and
-// retrieving the value of the data members.  The static local data
-// members represent options and settings that control the behavior of
-// the configuration DB facility.
-
-// Options include:
-//
-//  * tracing:  on/off
-//
-//    The default for tracing is off.
-//
-//----------------------------------------------------------------------
-class uvm_config_db_options;
-   
-  static local bit ready;
-  static local bit tracing;
-
-  // Function: turn_on_tracing
-  //
-  // Turn tracing on for the configuration database. This causes all
-  // reads and writes to the database to display information about
-  // the accesses. Tracing is off by default.
-  //
-  // This method is implicitly called by the ~+UVM_CONFIG_DB_TRACE~.
-
-  static function void turn_on_tracing();
-     if (!ready) init();
-    tracing = 1;
-  endfunction
-
-  // Function: turn_off_tracing
-  //
-  // Turn tracing off for the configuration database.
-
-  static function void turn_off_tracing();
-     if (!ready) init();
-    tracing = 0;
-  endfunction
-
-  // Function: is_tracing
-  //
-  // Returns 1 if the tracing facility is on and 0 if it is off.
-
-  static function bit is_tracing();
-    if (!ready) init();
-    return tracing;
-  endfunction
-
-
-  static local function void init();
-     uvm_cmdline_processor clp;
-     string trace_args[$];
-     
-     clp = uvm_cmdline_processor::get_inst();
-
-     if (clp.get_arg_matches("+UVM_CONFIG_DB_TRACE", trace_args)) begin
-        tracing = 1;
-     end
-
-     ready = 1;
-  endfunction
-
-endclass

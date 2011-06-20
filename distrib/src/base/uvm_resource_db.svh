@@ -34,7 +34,6 @@
 // specified, all resource DB accesses (read and write) are displayed.
 //----------------------------------------------------------------------
 
-typedef class uvm_resource_db_options;
 
 //----------------------------------------------------------------------
 // class: uvm_resource_db
@@ -142,7 +141,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set();
 
-    if(uvm_resource_db_options::is_tracing())
+    if(uvm_db_options#("RESOURCE")::is_tracing())
       m_show_msg("RSRCDB/SET", "Resource","set", scope, name, accessor, rsrc);
   endfunction
 
@@ -159,7 +158,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set();
 
-    if(uvm_resource_db_options::is_tracing())
+    if(uvm_db_options#("RESOURCE")::is_tracing())
       m_show_msg("RSRCDB/SETANON","Resource", "set", scope, "", accessor, rsrc);
   endfunction
 
@@ -176,7 +175,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set_override();
 
-    if(uvm_resource_db_options::is_tracing())
+    if(uvm_db_options#("RESOURCE")::is_tracing())
       m_show_msg("RSRCDB/SETOVRD", "Resource","set", scope, name, accessor, rsrc);
   endfunction
 
@@ -196,7 +195,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set_override(uvm_resource_types::TYPE_OVERRIDE);
 
-    if(uvm_resource_db_options::is_tracing())
+    if(uvm_db_options#("RESOURCE")::is_tracing())
       m_show_msg("RSRCDB/SETOVRDTYP","Resource", "set", scope, name, accessor, rsrc);
   endfunction
 
@@ -214,7 +213,7 @@ class uvm_resource_db #(type T=uvm_object);
     rsrc.write(val, accessor);
     rsrc.set_override(uvm_resource_types::NAME_OVERRIDE);
 
-    if(uvm_resource_db_options::is_tracing())
+    if(uvm_db_options#("RESOURCE")::is_tracing())
       m_show_msg("RSRCDB/SETOVRDNAM","Resource", "set", scope, name, accessor, rsrc);
   endfunction
 
@@ -230,7 +229,7 @@ class uvm_resource_db #(type T=uvm_object);
 
     rsrc_t rsrc = get_by_name(scope, name);
 
-    if(uvm_resource_db_options::is_tracing())
+    if(uvm_db_options#("RESOURCE")::is_tracing())
       m_show_msg("RSRCDB/RDBYNAM","Resource", "read", scope, name, accessor, rsrc);
 
     if(rsrc == null)
@@ -254,7 +253,7 @@ class uvm_resource_db #(type T=uvm_object);
     
     rsrc_t rsrc = get_by_type(scope);
 
-    if(uvm_resource_db_options::is_tracing())
+    if(uvm_db_options#("RESOURCE")::is_tracing())
       m_show_msg("RSRCDB/RDBYTYP", "Resource","read", scope, "", accessor, rsrc);
 
     if(rsrc == null)
@@ -283,7 +282,7 @@ class uvm_resource_db #(type T=uvm_object);
 
     rsrc_t rsrc = get_by_name(scope, name);
 
-    if(uvm_resource_db_options::is_tracing())
+    if(uvm_db_options#("RESOURCE")::is_tracing())
       m_show_msg("RSRCDB/WR","Resource", "written", scope, name, accessor, rsrc);
 
     if(rsrc == null)
@@ -312,7 +311,7 @@ class uvm_resource_db #(type T=uvm_object);
 
     rsrc_t rsrc = get_by_type(scope);
 
-    if(uvm_resource_db_options::is_tracing())
+    if(uvm_db_options#("RESOURCE")::is_tracing())
       m_show_msg("RSRCDB/WRTYP", "Resource","written", scope, "", accessor, rsrc);
 
     if(rsrc == null)
@@ -333,76 +332,6 @@ class uvm_resource_db #(type T=uvm_object);
   static function void dump();
     uvm_resource_pool rp = uvm_resource_pool::get();
     rp.dump();
-  endfunction
-
-endclass
-
-
-//----------------------------------------------------------------------
-// Class: uvm_resource_db_options
-//
-// Provides a namespace for managing options for the
-// resources DB facility.  The only thing allowed in this class is static
-// local data members and static functions for manipulating and
-// retrieving the value of the data members.  The static local data
-// members represent options and settings that control the behavior of
-// the resources DB facility.
-
-// Options include:
-//
-//  * tracing:  on/off
-//
-//    The default for tracing is off.
-//
-//----------------------------------------------------------------------
-class uvm_resource_db_options;
-   
-  static local bit ready;
-  static local bit tracing;
-
-  // Function: turn_on_tracing
-  //
-  // Turn tracing on for the resource database. This causes all
-  // reads and writes to the database to display information about
-  // the accesses. Tracing is off by default.
-  //
-  // This method is implicitly called by the ~+UVM_RESOURCE_DB_TRACE~.
-
-  static function void turn_on_tracing();
-     if (!ready) init();
-    tracing = 1;
-  endfunction
-
-  // Function: turn_off_tracing
-  //
-  // Turn tracing off for the resource database.
-
-  static function void turn_off_tracing();
-     if (!ready) init();
-    tracing = 0;
-  endfunction
-
-  // Function: is_tracing
-  //
-  // Returns 1 if the tracing facility is on and 0 if it is off.
-
-  static function bit is_tracing();
-    if (!ready) init();
-    return tracing;
-  endfunction
-
-
-  static local function void init();
-     uvm_cmdline_processor clp;
-     string trace_args[$];
-     
-     clp = uvm_cmdline_processor::get_inst();
-
-     if (clp.get_arg_matches("+UVM_RESOURCE_DB_TRACE", trace_args)) begin
-        tracing = 1;
-     end
-
-     ready = 1;
   endfunction
 
 endclass
