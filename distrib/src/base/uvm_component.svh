@@ -1453,12 +1453,12 @@ virtual class uvm_component extends uvm_report_object;
   // well as the interpretation of the arguments ~stream_name~, ~label~, and
   // ~desc~ are vendor specific.
 
-  extern function integer begin_tr (uvm_transaction tr,
+  extern function int unsigned begin_tr (uvm_transaction tr,
                                     string stream_name="main",
                                     string label="",
                                     string desc="",
                                     time begin_time=0,
-                                    integer parent_handle=0);
+                                    int unsigned parent_handle=0);
 
 
   // Function: begin_child_tr
@@ -1468,8 +1468,8 @@ virtual class uvm_component extends uvm_report_object;
   // an association is made between this transaction and the provided parent
   // transaction. This association is vendor-specific.
 
-  extern function integer begin_child_tr (uvm_transaction tr,
-                                          integer parent_handle=0,
+  extern function int unsigned begin_child_tr (uvm_transaction tr,
+                                          int unsigned parent_handle=0,
                                           string stream_name="main",
                                           string label="",
                                           string desc="",
@@ -1485,7 +1485,7 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual protected 
                  function void do_begin_tr (uvm_transaction tr,
                                             string stream_name,
-                                            integer tr_handle);
+                                            int unsigned tr_handle);
 
 
   // Function: end_tr
@@ -1524,7 +1524,7 @@ virtual class uvm_component extends uvm_report_object;
   // correct operation.
 
   extern virtual protected function void do_end_tr (uvm_transaction tr,
-                                                    integer tr_handle);
+                                                    int unsigned tr_handle);
 
 
   // Function: record_error_tr
@@ -1541,7 +1541,7 @@ virtual class uvm_component extends uvm_report_object;
   // Interpretation of this handle, as well as the strings ~stream_name~,
   // ~label~, and ~desc~, are vendor-specific.
 
-  extern function integer record_error_tr (string stream_name="main",
+  extern function int unsigned record_error_tr (string stream_name="main",
                                            uvm_object info=null,
                                            string label="error_tr",
                                            string desc="",
@@ -1561,7 +1561,7 @@ virtual class uvm_component extends uvm_report_object;
   // The strings for ~stream_name~, ~label~, and ~desc~ are vendor-specific
   // identifiers for the transaction.
 
-  extern function integer record_event_tr (string stream_name="main",
+  extern function int unsigned record_event_tr (string stream_name="main",
                                            uvm_object info=null,
                                            string label="event_tr",
                                            string desc="",
@@ -1636,10 +1636,10 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual function uvm_object create (string name=""); 
   extern virtual function uvm_object clone  ();
 
-  local integer m_stream_handle[string];
-  local integer m_tr_h[uvm_transaction];
-  extern protected function integer m_begin_tr (uvm_transaction tr,
-              integer parent_handle=0, bit has_parent=0,
+  local int unsigned m_stream_handle[string];
+  local int unsigned m_tr_h[uvm_transaction];
+  extern protected function int unsigned m_begin_tr (uvm_transaction tr,
+              int unsigned parent_handle=0, bit has_parent=0,
               string stream_name="main", string label="",
               string desc="", time begin_time=0);
 
@@ -2572,20 +2572,20 @@ endfunction
 // begin_tr
 // --------
 
-function integer uvm_component::begin_tr (uvm_transaction tr,
+function int unsigned uvm_component::begin_tr (uvm_transaction tr,
                                           string stream_name ="main",
                                           string label="",
                                           string desc="",
                                           time begin_time=0,
-                                          integer parent_handle=0);
+                                          int unsigned parent_handle=0);
   return m_begin_tr(tr, parent_handle, (parent_handle!=0), stream_name, label, desc, begin_time);
 endfunction
 
 // begin_child_tr
 // --------------
 
-function integer uvm_component::begin_child_tr (uvm_transaction tr,
-                                          integer parent_handle=0,
+function int unsigned uvm_component::begin_child_tr (uvm_transaction tr,
+                                          int unsigned parent_handle=0,
                                           string stream_name="main",
                                           string label="",
                                           string desc="",
@@ -2596,17 +2596,17 @@ endfunction
 // m_begin_tr
 // ----------
 
-function integer uvm_component::m_begin_tr (uvm_transaction tr,
-                                          integer parent_handle=0,
+function int unsigned uvm_component::m_begin_tr (uvm_transaction tr,
+                                          int unsigned parent_handle=0,
                                           bit    has_parent=0,
                                           string stream_name="main",
                                           string label="",
                                           string desc="",
                                           time begin_time=0);
   uvm_event e;
-  integer stream_h;
-  integer tr_h;
-  integer link_tr_h;
+  int unsigned stream_h;
+  int unsigned tr_h;
+  int unsigned link_tr_h;
   string name;
   string kind;
   uvm_recorder recordr;
@@ -2683,7 +2683,7 @@ function void uvm_component::end_tr (uvm_transaction tr,
                                      time end_time=0,
                                      bit free_handle=1);
   uvm_event e;
-  integer tr_h;
+  int unsigned tr_h;
   uvm_recorder recordr;
 
   if (tr == null)
@@ -2732,14 +2732,14 @@ endfunction
 // record_error_tr
 // ---------------
 
-function integer uvm_component::record_error_tr (string stream_name="main",
+function int unsigned uvm_component::record_error_tr (string stream_name="main",
                                               uvm_object info=null,
                                               string label="error_tr",
                                               string desc="",
                                               time   error_time=0,
                                               bit    keep_active=0);
   string etype;
-  integer stream_h;
+  int unsigned stream_h;
   uvm_recorder recordr;
   recordr = (recorder == null) ? uvm_default_recorder : recorder;
 
@@ -2768,14 +2768,14 @@ endfunction
 // record_event_tr
 // ---------------
 
-function integer uvm_component::record_event_tr (string stream_name="main",
+function int unsigned uvm_component::record_event_tr (string stream_name="main",
                                               uvm_object info=null,
                                               string label="event_tr",
                                               string desc="",
                                               time   event_time=0,
                                               bit    keep_active=0);
   string etype;
-  integer stream_h;
+  int unsigned stream_h;
   uvm_recorder recordr;
   recordr = (recorder == null) ? uvm_default_recorder : recorder;
 
@@ -2813,7 +2813,7 @@ endfunction
 
 function void uvm_component::do_begin_tr (uvm_transaction tr,
                                           string stream_name,
-                                          integer tr_handle);
+                                          int unsigned tr_handle);
   return;
 endfunction
 
@@ -2822,7 +2822,7 @@ endfunction
 // ---------
 
 function void uvm_component::do_end_tr (uvm_transaction tr,
-                                        integer tr_handle);
+                                        int unsigned tr_handle);
   return;
 endfunction
 

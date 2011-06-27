@@ -49,7 +49,7 @@ class uvm_recorder extends uvm_object;
   //
   // A handle of 0 indicates there is no active transaction object. 
 
-  integer tr_handle = 0;
+  int unsigned tr_handle = 0;
 
 
   // Variable: default_radix
@@ -244,14 +244,14 @@ class uvm_recorder extends uvm_object;
   endfunction
 
 
-  static bit m_handles[int];
-  static int handle;
+  static bit m_handles[int unsigned];
+  static int unsigned handle;
 
 
   // Function- create_stream
   //
   //
-  virtual function integer create_stream (string name,
+  virtual function int unsigned create_stream (string name,
                                           string t,
                                           string scope);
     if (open_file()) begin
@@ -266,7 +266,7 @@ class uvm_recorder extends uvm_object;
   // Function- m_set_attribute
   //
   //
-  virtual function void m_set_attribute (integer txh,
+  virtual function void m_set_attribute (int unsigned txh,
                                  string nm,
                                  string value);
     if (open_file())
@@ -277,7 +277,7 @@ class uvm_recorder extends uvm_object;
   // Function- set_attribute
   //
   //
-  virtual function void set_attribute (integer txh,
+  virtual function void set_attribute (int unsigned txh,
                                string nm,
                                logic [1023:0] value,
                                uvm_radix_enum radix,
@@ -292,7 +292,7 @@ class uvm_recorder extends uvm_object;
   // Function- check_handle_kind
   //
   //
-  virtual function integer check_handle_kind (string htype, integer handle);
+  virtual function integer check_handle_kind (string htype, int unsigned handle);
     check_handle_kind = m_handles.exists(handle);
   endfunction
   
@@ -301,7 +301,7 @@ class uvm_recorder extends uvm_object;
   //
   //
   virtual function integer begin_tr(string txtype,
-                                     integer stream,
+                                     int unsigned stream,
                                      string nm,
                                      string label="",
                                      string desc="",
@@ -319,7 +319,7 @@ class uvm_recorder extends uvm_object;
   // Function- end_tr
   //
   //
-  virtual function void end_tr (integer handle, time end_time=0);
+  virtual function void end_tr (int unsigned handle, time end_time=0);
     if (open_file())
       $fdisplay(file,"END @%0t {TXH:%0d TIME=%0t}",$time,handle,end_time);
   endfunction
@@ -328,8 +328,8 @@ class uvm_recorder extends uvm_object;
   // Function- link_tr
   //
   //
-  virtual function void link_tr(integer h1,
-                                 integer h2,
+  virtual function void link_tr(int unsigned h1,
+                                 int unsigned h2,
                                  string relation="");
     if (open_file())
       $fdisplay(file,"  LINK @%0t {TXH1:%0d TXH2:%0d RELATION=%0s}", $time,h1,h2,relation);
@@ -340,7 +340,7 @@ class uvm_recorder extends uvm_object;
   // Function- free_tr
   //
   //
-  virtual function void free_tr(integer handle);
+  virtual function void free_tr(int unsigned handle);
     if (open_file()) begin
       $fdisplay(file,"FREE @%%0t {TXH:%0d}", $time,handle);
       if (m_handles.exists(handle))
