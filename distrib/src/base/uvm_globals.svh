@@ -198,7 +198,7 @@ endfunction
   uvm_string_to_action = 1;
   action = 0;
   foreach(actions[i]) begin
-    case (action_str)
+    case (actions[i])
       "UVM_NO_ACTION": action |= UVM_NO_ACTION;
       "UVM_DISPLAY":   action |= UVM_DISPLAY;
       "UVM_LOG":       action |= UVM_LOG;
