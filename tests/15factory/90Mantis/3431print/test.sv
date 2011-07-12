@@ -35,7 +35,7 @@ To get more details about the factory related methods, check the file:
 
 */
 
-
+`include "uvm_macros.svh"
 `include "packet_pkg.sv"
 `include "gen_pkg.sv"
 `include "env_pkg.sv"

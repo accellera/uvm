@@ -22,7 +22,7 @@
 //Test: jump phases
 //  - During main phase, jump back to reset phase 3 time
 //     then jump forward to shutdown phase
-
+`include "uvm_macros.svh"
 module top;
   import uvm_pkg::*;
 `include "../common/common.svh"

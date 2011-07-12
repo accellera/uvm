@@ -22,6 +22,8 @@
 // This test exercises all error conditions checked for in
 // the sequence library.
 
+
+`include "uvm_macros.svh"
 import uvm_pkg::*;
 
 module top;
