@@ -619,6 +619,13 @@ class uvm_phase extends uvm_object;
     return (m_phase_type == UVM_PHASE_DOMAIN);
   endfunction
 
+  virtual function void m_get_transient_children(ref uvm_phase phases[$]);
+    foreach (m_successors[succ])
+    begin
+        phases.push_back(succ);
+        succ.m_get_transient_children(phases);
+    end
+  endfunction
 endclass
 
 
@@ -1717,9 +1724,21 @@ endfunction
 
 // jump_all
 // --------
-
 function void uvm_phase::jump_all(uvm_phase phase);
-  // TBD integration task ongoing
+    uvm_phase phases[$];
+    uvm_domain domains[string];
+    
+    uvm_domain::get_domains(domains);
+           
+     foreach(domains[idx])      
+        domains[idx].m_get_transient_children(phases);
+    
+    phases = phases.find(item) with (item.get_state() inside {[UVM_PHASE_STARTED:UVM_PHASE_CLEANUP]}); 
+    
+    foreach(phases[idx]) 
+        if(phases[idx].is_before(phase) || phases[idx].is_after(phase))
+            phases[idx].jump(phase);        
+    
 endfunction
 
 
