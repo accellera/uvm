@@ -619,6 +619,13 @@ class uvm_phase extends uvm_object;
     return (m_phase_type == UVM_PHASE_DOMAIN);
   endfunction
 
+  virtual function void m_get_transitive_children(ref uvm_phase phases[$]);
+    foreach (m_successors[succ])
+    begin
+        phases.push_back(succ);
+        succ.m_get_transitive_children(phases);
+    end
+  endfunction
 endclass
 
 
@@ -1717,9 +1724,8 @@ endfunction
 
 // jump_all
 // --------
-
 function void uvm_phase::jump_all(uvm_phase phase);
-  // TBD integration task ongoing
+    `uvm_warning("NOTIMPL","uvm_phase::jump_all is not implemented and has been replaced by uvm_domain::jump_all")
 endfunction
 
 
