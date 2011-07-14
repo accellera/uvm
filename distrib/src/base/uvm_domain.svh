@@ -187,4 +187,20 @@ class uvm_domain extends uvm_phase;
     m_domains[name] = this;
   endfunction
 
+  // Function: jump
+  //
+  // jumps all active phases of this domain to to-phase if
+  // there is a path between active-phase and to-phase
+  function void jump(uvm_phase phase);
+    uvm_phase phases[$];
+
+    m_get_transitive_children(phases);
+    
+    phases = phases.find(item) with (item.get_state() inside {[UVM_PHASE_STARTED:UVM_PHASE_CLEANUP]}); 
+    
+    foreach(phases[idx]) 
+        if(phases[idx].is_before(phase) || phases[idx].is_after(phase))
+            phases[idx].jump(phase);        
+    
+endfunction
 endclass
