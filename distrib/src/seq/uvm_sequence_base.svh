@@ -248,9 +248,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     end
     set_sequencer(sequencer);
 
-    if (!(m_sequence_state != CREATED ||
-          m_sequence_state != STOPPED ||
-          m_sequence_state != FINISHED)) begin
+    if (!(m_sequence_state inside {CREATED,STOPPED,FINISHED})) begin
       uvm_report_fatal("SEQ_NOT_DONE", 
          {"Sequence ", get_full_name(), " already started"},UVM_NONE);
     end
