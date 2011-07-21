@@ -698,6 +698,13 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
               // We've captured the entire abstract register transaction.
               uvm_predict_e predict_kind = 
                   (reg_item.kind == UVM_WRITE) ? UVM_PREDICT_WRITE : UVM_PREDICT_READ;
+
+              if (reg_item.kind == UVM_READ &&
+                  local_map.get_check_on_read() &&
+                  reg_item.status != UVM_NOT_OK) begin
+                 void'(rg.do_check(rg.get(), reg_item.value[0], local_map));
+              end
+              
               pre_predict(reg_item);
 
               rg.XsampleX(reg_item.value[0], rw.byte_en,

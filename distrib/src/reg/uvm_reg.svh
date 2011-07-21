@@ -653,6 +653,10 @@ virtual class uvm_reg extends uvm_object;
    /*local*/ extern function bit Xis_locked_by_fieldX();
 
 
+   extern virtual function bit do_check(uvm_reg_data_t expected,
+                                        uvm_reg_data_t actual,
+                                        uvm_reg_map    map);
+
    extern virtual task do_write(uvm_reg_item rw);
 
    extern virtual task do_read(uvm_reg_item rw);
@@ -2366,6 +2370,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
    uvm_reg_cb_iter  cbs = new(this);
    uvm_reg_map_info map_info;
    uvm_reg_addr_t   value;
+   uvm_reg_data_t   exp;
 
    m_fname   = rw.fname;
    m_lineno  = rw.lineno;
@@ -2409,6 +2414,9 @@ task uvm_reg::do_read(uvm_reg_item rw);
       UVM_BACKDOOR: begin
          uvm_reg_backdoor bkdr = get_backdoor();
 
+         uvm_reg_map map = uvm_reg_map::backdoor();
+         if (map.get_check_on_read()) exp = get();
+   
          if (bkdr != null)
            bkdr.read(rw);
          else
@@ -2454,6 +2462,12 @@ task uvm_reg::do_read(uvm_reg_item rw);
             end
 
             rw.value[0] &= ~wo_mask;
+
+            if (map.get_check_on_read() &&
+               rw.status != UVM_NOT_OK) begin
+               void'(do_check(exp, rw.value[0], map));
+            end
+       
             do_predict(rw, UVM_PREDICT_READ);
          end
       end
@@ -2465,6 +2479,8 @@ task uvm_reg::do_read(uvm_reg_item rw);
 
          m_is_busy = 1;
 
+         if (rw.local_map.get_check_on_read()) exp = get();
+   
          // ...VIA USER FRONTDOOR
          if (map_info.frontdoor != null) begin
             uvm_reg_frontdoor fd = map_info.frontdoor;
@@ -2482,6 +2498,11 @@ task uvm_reg::do_read(uvm_reg_item rw);
          m_is_busy = 0;
 
          if (system_map.get_auto_predict()) begin
+            if (rw.local_map.get_check_on_read() &&
+                rw.status != UVM_NOT_OK) begin
+               void'(do_check(exp, rw.value[0], system_map));
+            end
+
             if (rw.status != UVM_NOT_OK) begin
                sample(rw.value[0], -1, 1, rw.map);
                m_parent.XsampleX(map_info.offset, 1, rw.map);
@@ -2813,6 +2834,54 @@ task uvm_reg::peek(output uvm_status_e      status,
 endtask: peek
 
 
+// do_check
+function bit uvm_reg::do_check(input uvm_reg_data_t expected,
+                               input uvm_reg_data_t actual,
+                               uvm_reg_map          map);
+
+   uvm_reg_data_t  dc = 0;
+
+   foreach(m_fields[i]) begin
+      string acc = m_fields[i].get_access(map);
+      acc = acc.substr(0, 1);
+      if (m_fields[i].get_compare() == UVM_NO_CHECK ||
+          acc == "WO") begin
+         dc |= ((1 << m_fields[i].get_n_bits())-1)
+            << m_fields[i].get_lsb_pos();
+      end
+   end
+
+   if ((actual|dc) === (expected|dc)) return 1;
+   
+   `uvm_error("RegModel", $sformatf("Register \"%s\" value read from DUT (0x%h) does not match mirrored value (0x%h)",
+                                    get_full_name(), actual, (expected ^ ('x & dc))));
+                                     
+   foreach(m_fields[i]) begin
+      string acc = m_fields[i].get_access(map);
+      acc = acc.substr(0, 1);
+      if (m_fields[i].get_compare() == UVM_NO_CHECK ||
+          m_fields[i].get_access() == "WO") begin
+         uvm_reg_data_t mask  = ((1 << m_fields[i].get_n_bits())-1);
+         uvm_reg_data_t val   = actual   >> m_fields[i].get_lsb_pos() & mask;
+         uvm_reg_data_t exp   = expected >> m_fields[i].get_lsb_pos() & mask;
+
+         if (val !== exp) begin
+            `uvm_info("RegModel",
+                      $sformatf("Field %s (%s[%0d:%0d]) mismatch read=%0d'h%0h mirrored=%0d'h%0h ",
+                                m_fields[i].get_name(), get_full_name(),
+                                m_fields[i].get_lsb_pos() + m_fields[i].get_n_bits() - 1,
+                                m_fields[i].get_lsb_pos(),
+                                m_fields[i].get_n_bits(), val,
+                                m_fields[i].get_n_bits(), exp),
+                      UVM_NONE)
+         end
+      end
+   end
+
+   return 0;
+endfunction
+       
+
 // mirror
 
 task uvm_reg::mirror(output uvm_status_e       status,
@@ -2845,21 +2914,7 @@ task uvm_reg::mirror(output uvm_status_e       status,
      return;
    
    // Remember what we think the value is before it gets updated
-   if (check == UVM_CHECK) begin
-      exp = get();
-      // Assume that WO* field will readback as 0's
-      foreach(m_fields[i]) begin
-         string mode;
-         mode = m_fields[i].get_access(map);
-         if (mode == "WO" ||
-             mode == "WOC" ||
-             mode == "WOS" ||
-             mode == "WO1") begin
-            exp &= ~(((1 << m_fields[i].get_n_bits())-1)
-                     << m_fields[i].get_lsb_pos());
-         end
-      end
-   end
+   if (check == UVM_CHECK) exp = get();
 
    XreadX(status, v, path, map, parent, prior, extension, fname, lineno);
 
@@ -2868,44 +2923,7 @@ task uvm_reg::mirror(output uvm_status_e       status,
       return;
    end
 
-   if (check == UVM_CHECK) begin
-      // Check that our idea of the register value matches
-      // what we just read from the DUT, minus the don't care fields
-      uvm_reg_data_t  dc = 0;
-
-      foreach(m_fields[i]) begin
-         string acc = m_fields[i].get_access(map);
-         if (m_fields[i].get_compare() == UVM_NO_CHECK) begin
-            dc |= ((1 << m_fields[i].get_n_bits())-1)
-                  << m_fields[i].get_lsb_pos();
-         end
-         else if (acc == "WO" ||
-                  acc == "WOC" ||
-                  acc == "WOS" ||
-                  acc == "WO1") begin
-            // Assume WO fields will always read-back as 0
-            exp &= ~(((1 << m_fields[i].get_n_bits())-1)
-                     << m_fields[i].get_lsb_pos());
-         end
-      end
-
-      if ((v|dc) !== (exp|dc)) begin
-         `uvm_error("RegModel", $sformatf("Register \"%s\" value read from DUT (0x%h) does not match mirrored value (0x%h)",
-                                     get_full_name(), v, (exp ^ ('x & dc))));
-                                     
-          foreach(m_fields[i]) begin
-             if(m_fields[i].get_compare() == UVM_CHECK) begin
-                 uvm_reg_data_t mask=((1 << m_fields[i].get_n_bits())-1);
-                 uvm_reg_data_t field = mask << m_fields[i].get_lsb_pos();
-                 uvm_reg_data_t diff = ((v ^ exp) >> m_fields[i].get_lsb_pos()) & mask;
-                 if(diff)
-                    `uvm_info("RegMem",$sformatf("field %s mismatch read=%0d'h%0h mirrored=%0d'h%0h slice [%0d:%0d]",m_fields[i].get_name(),
-                        m_fields[i].get_n_bits(),(v >> m_fields[i].get_lsb_pos()) & mask, m_fields[i].get_n_bits(),(exp >> m_fields[i].get_lsb_pos())&mask,
-                        m_fields[i].get_lsb_pos()+m_fields[i].get_n_bits()-1,m_fields[i].get_lsb_pos()),UVM_NONE)
-             end
-          end
-      end
-   end
+   if (check == UVM_CHECK) void'(do_check(exp, v, map));
 
    XatomicX(0);
 endtask: mirror
