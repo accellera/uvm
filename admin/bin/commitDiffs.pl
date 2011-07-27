@@ -9,7 +9,7 @@ use File::Basename;
 sub Usage {
     print "\n\nScript usage is as follows:\n";
     print "\n\t".basename($0 )." [--help] <list_of_commit_ids> \n\n";
-    print "\tThis will generate teh following:\n";
+    print "\t".basename($0)." will generate the following:\n";
     print "\t\tlist of DIFF-<commit_id> files\n";
     print "\t\tDIFF.<branchname> file that lists all the diffs since this branch was created\n";
     print "\n\n";
