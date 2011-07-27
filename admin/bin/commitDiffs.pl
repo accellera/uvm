@@ -31,24 +31,19 @@ if ($help != 0)
 }
 
 foreach my $commitId (@ARGV) {
-    print "===========================================\n";
-    print "DIFF for commit id: $commitId is as follows\n";
-
     my $cmd = "git diff $commitId^..$commitId";
     $cmd .= " > DIFF-$commitId";
-    print $cmd,"\n";
-
     system($cmd);
-    print "===========================================\n";
-    
+    print "DIFF-$commitId created";
 }
 
 
 my $branchName = `git rev-parse --abbrev-ref HEAD`;
+chomp($branchName);
 
 my $cmd = "echo FOLLOWING COMMITS ARE IN THIS BRANCH: > DIFF.$branchName";
 system($cmd);
-my $pre = `git merge-base HEAD master`;
+my $pre = `git merge-base HEAD origin/master`;
 chomp($pre);
 $cmd = "git log --oneline $pre..HEAD";
 $cmd .= " >> DIFF.$branchName";
@@ -58,4 +53,5 @@ $cmd = "git diff $pre..HEAD";
 $cmd .= " >> DIFF.$branchName";
 
 system($cmd);
+print "DIFF.$branchName created\n";
 
