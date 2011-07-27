@@ -34,7 +34,7 @@ foreach my $commitId (@ARGV) {
     my $cmd = "git diff $commitId^..$commitId";
     $cmd .= " > DIFF-$commitId";
     system($cmd);
-    print "DIFF-$commitId created";
+    print "DIFF-$commitId created\n";
 }
 
 
