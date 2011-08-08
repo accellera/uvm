@@ -67,4 +67,13 @@ and/or specify the location of the resulting UVM DPI shared library to
 your simulator. This is a simulator-specific process.  Please refer to
 your simulator documentation.
 
+
+
+Prerequisites
+-------------
+
+- IEEE1800 compliant SV simulator
+- gmake-compliant make to execute Makefile based examples
+- C compiler to compile the DPI code (if not otherwise provided by tool vendor)
+
 ------------------------------------------------------------------------

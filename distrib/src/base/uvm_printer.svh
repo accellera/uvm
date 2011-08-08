@@ -714,7 +714,12 @@ function void uvm_printer::print_object_header (string name,
   m_scope.set_arg(name);
 
   row_info.level = m_scope.depth();
-  row_info.name = adjust_name(m_scope.get(),scope_separator);
+
+  if(row_info.level == 0 && knobs.show_root==1)
+	row_info.name = value.get_full_name();
+  else
+	row_info.name = adjust_name(m_scope.get(),scope_separator);
+
   row_info.type_name = (value != null) ?  value.get_type_name() : "object";
   row_info.size = "-";
   row_info.val = knobs.reference ? uvm_object_value_str(value) : "-";

@@ -2416,7 +2416,7 @@
     if(!((FLAG)&UVM_NORECORD)) begin \
       int sz__ = SZ; \
       if(sz__ == 0) begin \
-        __m_uvm_status_container.recorder.record_field(`"ARG_size`", 0, 32, UVM_DEC); \
+        __m_uvm_status_container.recorder.record_field(`"ARG`", 0, 32, UVM_DEC); \
       end \
       else if(sz__ < 10) begin \
         foreach(ARG[i]) begin \

@@ -1,5 +1,5 @@
 ##---------------------------------------------------------------------- 
-##   Copyright 2010 Synopsys, Inc. 
+##   Copyright 2010 Cadence
 ##   All Rights Reserved Worldwide 
 ## 
 ##   Licensed under the Apache License, Version 2.0 (the 
@@ -34,26 +34,34 @@ if (!open(LOG, "<$log")) {
   $post_test = "Cannot open \"$log\" for reading: $!";
   return 1;
 }
+
+$logfile=qx{cat "$log"};
+close(LOG);
+
+$logfile =~ s/\@\d+/\@X/sg;
+# strip header
+$logfile =~ s/.*\nGOLD-FILE-START\n//sx;
+$logfile =~ s/\nGOLD-FILE-ENDS.*//sx;
+$logfile =~ s/^ncsim>.*$//mg;
+$logfile =~ s/^.*\.svh.*$//mg;
+$logfile =~ s/\n+\n/\n/sxg;
+$logfile =~ s/^UVM-\S+\s+\(\S+\)$/UVM-VERSION/mg;
+$logfile =~ s/^\(C\).*$/COPYRIGHT/mg;
+$logfile =~ s/COPYRIGHT(.COPYRIGHT)+/COPYRIGHT/sg;
+
+
+
+# write back
+
 if (!open(L, ">$testdir/post.log")) {
   $post_test = "Cannot open \"$testdir/post.log\" for writing: $!";
   close(L);
   return 1;
 }
-$logfile=qx{cat "$log"};
-$logfile =~ s/\@\d+\s*\n/\@X\n/sg;
-$logfile =~ s/\n# /\n/sg;
-# strip header
-$logfile =~ s/.*(UVM_INFO.*UVM\s+testbench\s+topology)/\1/sx;
-# strip tail
-$logfile =~ s/\n\n.*/\n/sx;
-# write back
-
 print L $logfile;
-
-close(LOG);
 close(L);
 
-if (system("diff $testdir/post.log $testdir/log.au > /dev/null")) {
+if (system("diff $testdir/post.log $testdir/log.au > $testdir/log.df")) {
   $post_test = "$log and log.au differ";
   return 1;
 }

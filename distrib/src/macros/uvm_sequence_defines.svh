@@ -244,7 +244,7 @@
      start_item(SEQ_OR_ITEM, PRIORITY);\
      finish_item(SEQ_OR_ITEM, PRIORITY);\
   end \
-  else __seq.start(get_sequencer(), this, PRIORITY, 0);\
+  else __seq.start(__seq.get_sequencer(), this, PRIORITY, 0);\
   end
   
 
@@ -299,7 +299,7 @@
     `uvm_warning("RNDFLD", "Randomization failed in uvm_rand_send_with action") \
   end\
   if (!$cast(__seq,SEQ_OR_ITEM)) finish_item(SEQ_OR_ITEM, PRIORITY);\
-  else __seq.start(get_sequencer(), this, PRIORITY, 0);\
+  else __seq.start(__seq.get_sequencer(), this, PRIORITY, 0);\
   end
 
 

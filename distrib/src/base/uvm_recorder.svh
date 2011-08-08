@@ -342,7 +342,7 @@ class uvm_recorder extends uvm_object;
   //
   virtual function void free_tr(integer handle);
     if (open_file()) begin
-      $fdisplay(file,"FREE @%%0t {TXH:%0d}", $time,handle);
+      $fdisplay(file,"FREE @%0t {TXH:%0d}", $time,handle);
       if (m_handles.exists(handle))
         m_handles.delete(handle);
     end
