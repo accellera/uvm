@@ -332,7 +332,7 @@ class uvm_resource_db #(type T=uvm_object);
 
   static function void dump();
     uvm_resource_pool rp = uvm_resource_pool::get();
-    uvm_resource_default_converters::register();
+    void'(m_uvm_resource_default_converters::register());
     rp.dump();
   endfunction
 

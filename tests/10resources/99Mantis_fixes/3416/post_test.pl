@@ -55,8 +55,8 @@ while ($_ = <LOG>) {
 close(LOG);
 close(L);
 
-if (system("diff -q $testdir/post.log $testdir/log.au")) {
-  $post_test = "$log and log.au differ";
+if (system("diff -q $testdir/post.log $testdir/log.au.$tool")) {
+  $post_test = "$log and log.au.$tool differ";
   return 1;
 }
 

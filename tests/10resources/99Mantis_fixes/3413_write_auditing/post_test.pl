@@ -56,7 +56,7 @@ print L $logfile;
 close(LOG);
 close(L);
 
-system("diff $testdir/log.au $testdir/post.log > $testdir/output.df");
+system("diff $testdir/log.au.$tool $testdir/post.log > $testdir/output.df");
 if($? == 0) {
   $post_test = "gold file matched";
   system("rm -f $testdir/output.df");
