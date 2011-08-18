@@ -655,7 +655,7 @@ function uvm_phase::new(string name="uvm_phase",
   if (name == "run")
     phase_done = uvm_test_done_objection::get();
   else begin
-    phase_done = new(name);
+    phase_done = new({name,"_phase_done_objection"});
   end
 
   m_state = UVM_PHASE_DORMANT;
