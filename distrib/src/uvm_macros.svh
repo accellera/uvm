@@ -28,7 +28,7 @@
 `define _protected protected   
 `define UVM_USE_FPC
 `define UVM_USE_P_FORMAT
-`define UVM_USE_FILE_LINE
+//`define UVM_USE_FILE_LINE
 `define UVM_DA_TO_QUEUE(Q,DA) Q=DA;
 `define _local local
 `define uvm_delay(TIME) #(TIME);
@@ -62,9 +62,9 @@
   `ifndef INCA_UVM_USE_P_FORMAT
     `undef  UVM_USE_P_FORMAT
   `endif
-  `ifndef INCA_UVM_USE_FILE_LINE
-    `undef  UVM_USE_FILE_LINE
-  `endif
+//  `ifndef INCA_UVM_USE_FILE_LINE
+//    `undef  UVM_USE_FILE_LINE
+//  `endif
   `ifndef INCA_UVM_USE_FPC
     `undef UVM_USE_FPC
   `endif
