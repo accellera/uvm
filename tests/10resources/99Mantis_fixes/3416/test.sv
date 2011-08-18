@@ -53,11 +53,11 @@ endclass
 
 initial
 begin
-   my_obj mo = new("mo");
-   your_obj yo = new("yo");
+   static my_obj mo = new("mo");
+   static your_obj yo = new("yo");
    
-   uvm_resource_default_converter#(bit [7:0])::register();
-   uvm_resource_class_converter#(my_obj)::register();
+   uvm_resource_default_converter#(bit [7:0])::register("bit-7:0");
+   uvm_resource_convert2string_converter#(my_obj)::register();
    uvm_resource_sprint_converter#(your_obj)::register();
 
    uvm_resource_db#(int)::set("int", "*", 0);
