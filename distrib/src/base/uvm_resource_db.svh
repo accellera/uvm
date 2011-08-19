@@ -117,11 +117,9 @@ class uvm_resource_db #(type T=uvm_object);
           input uvm_object accessor,
           input rsrc_t rsrc);
 
-`ifdef UVM_USE_TYPENAME 
-          string msg=$typename(T);
-`else
-          string msg ="unknown";
-`endif 
+          T foo;
+          string msg=m_uvm_typename_wrapper#(T)::typename(foo);
+
           $sformat(msg, "%s '%s%s' (type %s) %s by %s = %s",
               rtype,scope, name=="" ? "" : {".",name}, msg,action,
               (accessor != null) ? accessor.get_full_name() : "<unknown>",
