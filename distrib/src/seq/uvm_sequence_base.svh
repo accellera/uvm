@@ -147,11 +147,13 @@ class uvm_sequence_base extends uvm_sequence_item;
   protected int               response_queue_depth = 8;
   protected bit               response_queue_error_report_disabled = 0;
 
-  rand bit is_randomized = 0;
-  constraint c_randomized {
-    is_randomized == 1;
-  }
-
+  // Variable: do_not_randomize
+  //
+  // If set, prevents the sequence from being randomized before being executed
+  // by the `uvm_do*() and `uvm_rand_send*() macros,
+  // or as a default sequence.
+  //
+  bit do_not_randomize;
 
   protected process  m_sequence_process;
   local bit m_use_response_handler = 0;

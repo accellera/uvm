@@ -674,7 +674,7 @@ task uvm_sequence_library::body();
      return;
   end
 
-  if (!is_randomized)
+  if (do_not_randomize)
     m_get_config();
 
   if (starting_phase != null)
