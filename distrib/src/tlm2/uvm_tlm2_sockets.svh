@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-//   Copyright 2010 Mentor Graphics Corporation
+//   Copyright 2011 Mentor Graphics Corporation
 //   Copyright 2010 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -45,54 +45,45 @@
 // If you say object A HAS-A B that means that B is a member of A.
 //----------------------------------------------------------------------
 
+//------------------------
+// Group: Blocking Sockets
+//------------------------
 
 //----------------------------------------------------------------------
 // Class: uvm_tlm_b_initiator_socket
 //
 // IS-A forward port; has no backward path except via the payload
-// contents
+// contents. The blocking transport socket is equivalent to a
+// <uvm_tlm_b_transport_port>. 
 //----------------------------------------------------------------------
 
 class uvm_tlm_b_initiator_socket #(type T=uvm_tlm_generic_payload)
-                           extends uvm_tlm_b_initiator_socket_base #(T);
+                           extends uvm_tlm_b_transport_port #(T);
 
   // Function: new
+  //
   // Construct a new instance of this socket
-  function new(string name, uvm_component parent);
-    super.new(name, parent);
-  endfunction 
-   
-   // Function: Connect
-   //
-   // Connect this socket to the specified <uvm_tlm_b_target_socket>
-  function void connect(this_type provider);
-
-    uvm_tlm_b_passthrough_initiator_socket_base #(T) initiator_pt_socket;
-    uvm_tlm_b_passthrough_target_socket_base #(T) target_pt_socket;
-    uvm_tlm_b_target_socket_base #(T) target_socket;
-
-    uvm_component c;
-
-    super.connect(provider);
-
-    if($cast(initiator_pt_socket, provider)  ||
-       $cast(target_pt_socket, provider)     ||
-       $cast(target_socket, provider))
-      return;
-
-    c = get_comp();
-    `uvm_error_context(get_type_name(),
-       "type mismatch in connect -- connection cannot be completed", c)
-
+  //
+  function new (string name, uvm_component parent,
+                int min_size=1, int max_size=1);
+    super.new (name, parent, min_size, max_size);
   endfunction
 
+  const static string type_name = "uvm_tlm_b_initiator_socket";
+
+  virtual function string get_type_name();
+    return type_name;
+  endfunction
+   
 endclass
+
 
 //----------------------------------------------------------------------
 // Class: uvm_tlm_b_target_socket
 //
 // IS-A forward imp; has no backward path except via the payload
-// contents.
+// contents. The blocking transport socket is equivalent to a
+// <uvm_tlm_b_transport_imp>.
 //
 // The component instantiating this socket must implement
 // a b_transport() method with the following signature
@@ -103,41 +94,93 @@ endclass
 
 class uvm_tlm_b_target_socket #(type IMP=int,
                                 type T=uvm_tlm_generic_payload)
-  extends uvm_tlm_b_target_socket_base #(T);
-
-  local IMP m_imp;
+                    extends uvm_tlm_b_transport_imp #(T,IMP);
 
   // Function: new
-  // Construct a new instance of this socket
-  // ~imp~ is a reference to the class implementing the
-  // b_transport() method.
-  // If not specified, it is assume to be the same as ~parent~.
-  function new (string name, uvm_component parent, IMP imp = null);
-    super.new (name, parent);
-    if (imp == null) $cast(m_imp, parent);
-    else m_imp = imp;
-    if (m_imp == null)
-       `uvm_error("UVM/TLM2/NOIMP", {"b_target socket ", name,
-                                     " has no implementation"});
+  //
+  // Construct a new instance of this socket ~imp~ is a reference to the
+  // class implementing the b_transport() method. If not specified, it
+  // is assumed to be the same as ~parent~. The ~imp~ is not required
+  // to be a component.
+  //
+  function new (string name, uvm_component parent, IMP imp=null);
+    super.new (name, parent, imp);
   endfunction
 
-   // Function: Connect
-   //
-   // Connect this socket to the specified <uvm_tlm_b_initiator_socket>
-  function void connect(this_type provider);
+  const static string type_name = "uvm_tlm_b_target_socket";
 
-    uvm_component c;
-
-    super.connect(provider);
-
-    c = get_comp();
-    `uvm_error_context(get_type_name(),
-       "You cannot call connect() on a target termination socket", c)
+  virtual function string get_type_name();
+    return type_name;
   endfunction
-
-  `UVM_TLM_B_TRANSPORT_IMP(m_imp, T, t, delay)
-
+   
 endclass
+
+
+//----------------------------------------------------------------------
+// Class: uvm_tlm_b_passthrough_initiator_socket
+//
+// IS-A forward port. Equivalent to a <uvm_tlm_b_transport_port>.
+//----------------------------------------------------------------------
+
+class uvm_tlm_b_passthrough_initiator_socket #(type T=uvm_tlm_generic_payload)
+  extends uvm_tlm_b_transport_port #(T);
+
+  function new (string name, uvm_component parent,
+                int min_size=1, int max_size=1);
+    super.new (name, parent, min_size, max_size);
+  endfunction
+
+  const static string type_name = "uvm_tlm_b_passthrough_initiator_socket";
+
+  virtual function string get_type_name();
+    return type_name;
+  endfunction
+   
+endclass
+
+
+//----------------------------------------------------------------------
+// Class: uvm_tlm_b_passthrough_target_socket
+//
+// IS-A forward export. Equivalent to a <uvm_tlm_b_transport_export>.
+//----------------------------------------------------------------------
+class uvm_tlm_b_passthrough_target_socket #(type T=uvm_tlm_generic_payload)
+  extends uvm_tlm_b_transport_export #(T);
+
+  function new (string name, uvm_component parent,
+                int min_size=1, int max_size=1);
+    super.new (name, parent, min_size, max_size);
+  endfunction
+
+  const static string type_name = "uvm_tlm_b_passthrough_target_socket";
+
+  virtual function string get_type_name();
+    return type_name;
+  endfunction
+   
+endclass
+
+
+
+//---------------------------
+// Group: Nonblocking Sockets
+//---------------------------
+
+`define UVM_TLM_NB_SOCKET_COMMON(TYPE) \
+  task b_transport(T t, uvm_tlm_time delay);  \
+    uvm_component comp = get_comp(); \
+    `uvm_error_context("UVM/TLM/NOTIMPL", \
+                  {get_full_name(), \
+                   ".b_transport() called. The ",get_type_name(), \
+                   " supports only the non-blocking interfaces"},comp) \
+  endtask \
+  \
+  const static string type_name = `"TYPE`"; \
+  \
+  virtual function string get_type_name(); \
+    return this.type_name; \
+  endfunction
+
 
 //----------------------------------------------------------------------
 // Class: uvm_tlm_nb_initiator_socket
@@ -154,57 +197,20 @@ endclass
 class uvm_tlm_nb_initiator_socket #(type IMP=int,
                                     type T=uvm_tlm_generic_payload,
                                     type P=uvm_tlm_phase_e)
-  extends uvm_tlm_nb_initiator_socket_base #(T,P);
-
-  uvm_tlm_nb_transport_bw_imp #(T,P,IMP) bw_imp;
+                extends uvm_tlm_initiator_socket #(T,P,IMP);
 
   // Function: new
+  //
   // Construct a new instance of this socket
   // ~imp~ is a reference to the class implementing the
   // nb_transport_bw() method.
   // If not specified, it is assume to be the same as ~parent~.
-  function new(string name, uvm_component parent, IMP imp = null);
-    super.new (name, parent);
-    if (imp == null) $cast(imp, parent);
-    if (imp == null)
-       `uvm_error("UVM/TLM2/NOIMP", {"nb_initiator socket ", name,
-                                     " has no implementation"});
-    bw_imp = new("bw_imp", imp);
+
+  function new (string name, uvm_component parent, IMP imp = null);
+    super.new (name, parent, imp);
+    m_if_mask = `UVM_TLM_NB_FW_MASK + `UVM_TLM_NB_BW_MASK;
   endfunction
-
-   // Function: Connect
-   //
-   // Connect this socket to the specified <uvm_tlm_nb_target_socket>
-   function void connect(this_type provider);
-
-    uvm_tlm_nb_passthrough_initiator_socket_base #(T,P) initiator_pt_socket;
-    uvm_tlm_nb_passthrough_target_socket_base #(T,P) target_pt_socket;
-    uvm_tlm_nb_target_socket_base #(T,P) target_socket;
-
-    uvm_component c;
-
-    super.connect(provider);
-
-    if($cast(initiator_pt_socket, provider)) begin
-      initiator_pt_socket.bw_export.connect(bw_imp);
-      return;
-    end
-    if($cast(target_pt_socket, provider)) begin
-      target_pt_socket.bw_port.connect(bw_imp);
-      return;
-    end
-
-    if($cast(target_socket, provider)) begin
-      target_socket.bw_port.connect(bw_imp);
-      return;
-    end
-    
-    c = get_comp();
-    `uvm_error_context(get_type_name(),
-        "type mismatch in connect -- connection cannot be completed", c)
-
-  endfunction
-
+  `UVM_TLM_NB_SOCKET_COMMON(uvm_tlm_nb_initiator_socket)
 endclass
 
 
@@ -223,117 +229,14 @@ endclass
 class uvm_tlm_nb_target_socket #(type IMP=int,
                                  type T=uvm_tlm_generic_payload,
                                  type P=uvm_tlm_phase_e)
-  extends uvm_tlm_nb_target_socket_base #(T,P);
+         extends uvm_tlm_target_socket #(T,P,IMP,uvm_tlm_nb_target_socket #(IMP,T,P));
 
-  local IMP m_imp;
-
-  // Function: new
-  // Construct a new instance of this socket
-  // ~imp~ is a reference to the class implementing the
-  // nb_transport_fw() method.
-  // If not specified, it is assume to be the same as ~parent~.
-  function new (string name, uvm_component parent, IMP imp = null);
-    super.new (name, parent);
-    if (imp == null) $cast(m_imp, parent);
-    else m_imp = imp;
-    bw_port = new("bw_port", get_comp());
-    if (m_imp == null)
-       `uvm_error("UVM/TLM2/NOIMP", {"nb_target socket ", name,
-                                     " has no implementation"});
+  function new (string name, uvm_component parent, IMP imp_nb=null);
+    super.new (name, parent, imp_nb, this);
+    m_if_mask = `UVM_TLM_NB_FW_MASK + `UVM_TLM_NB_BW_MASK;
   endfunction
-
-   // Function: connect
-   //
-   // Connect this socket to the specified <uvm_tlm_nb_initiator_socket>
-  function void connect(this_type provider);
-
-    uvm_component c;
-
-    super.connect(provider);
-
-    c = get_comp();
-    `uvm_error_context(get_type_name(),
-       "You cannot call connect() on a target termination socket", c)
-  endfunction
-
-  `UVM_TLM_NB_TRANSPORT_FW_IMP(m_imp, T, P, t, p, delay)
-
+  `UVM_TLM_NB_SOCKET_COMMON(uvm_tlm_nb_target_socket)
 endclass
-
-
-//----------------------------------------------------------------------
-// Class: uvm_tlm_b_passthrough_initiator_socket
-//
-// IS-A forward port;
-//----------------------------------------------------------------------
-
-class uvm_tlm_b_passthrough_initiator_socket #(type T=uvm_tlm_generic_payload)
-  extends uvm_tlm_b_passthrough_initiator_socket_base #(T);
-
-  function new(string name, uvm_component parent);
-    super.new(name, parent);
-  endfunction
-
-   // Function : connect
-   //
-   // Connect this socket to the specified <uvm_tlm_b_target_socket>
-  function void connect(this_type provider);
-
-    uvm_tlm_b_passthrough_initiator_socket_base #(T) initiator_pt_socket;
-    uvm_tlm_b_passthrough_target_socket_base #(T) target_pt_socket;
-    uvm_tlm_b_target_socket_base #(T) target_socket;
-
-    uvm_component c;
-
-    super.connect(provider);
-
-    if($cast(initiator_pt_socket, provider) ||
-       $cast(target_pt_socket, provider)    ||
-       $cast(target_socket, provider))
-      return;
-
-    c = get_comp();
-    `uvm_error_context(get_type_name(), "type mismatch in connect -- connection cannot be completed", c)
-
-  endfunction
-
-endclass
-
-//----------------------------------------------------------------------
-// Class: uvm_tlm_b_passthrough_target_socket
-//
-// IS-A forward export;
-//----------------------------------------------------------------------
-class uvm_tlm_b_passthrough_target_socket #(type T=uvm_tlm_generic_payload)
-  extends uvm_tlm_b_passthrough_target_socket_base #(T);
-
-  function new(string name, uvm_component parent);
-    super.new(name, parent);
-  endfunction 
-   
-   // Function : connect
-   //
-   // Connect this socket to the specified <uvm_tlm_b_initiator_socket>
-  function void connect(this_type provider);
-
-    uvm_tlm_b_passthrough_target_socket_base #(T) target_pt_socket;
-    uvm_tlm_b_target_socket_base #(T) target_socket;
-
-    uvm_component c;
-
-    super.connect(provider);
-
-    if($cast(target_pt_socket, provider)    ||
-       $cast(target_socket, provider))
-      return;
-
-    c = get_comp();
-    `uvm_error_context(get_type_name(),
-       "type mismatch in connect -- connection cannot be completed", c)
-  endfunction
-
-endclass
-
 
 
 //----------------------------------------------------------------------
@@ -343,47 +246,14 @@ endclass
 //----------------------------------------------------------------------
 
 class uvm_tlm_nb_passthrough_initiator_socket #(type T=uvm_tlm_generic_payload,
-                                             type P=uvm_tlm_phase_e)
-  extends uvm_tlm_nb_passthrough_initiator_socket_base #(T,P);
+                                                type P=uvm_tlm_phase_e)
+                        extends uvm_tlm_passthrough_initiator_socket #(T,P);
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
+    m_if_mask = `UVM_TLM_NB_FW_MASK + `UVM_TLM_NB_BW_MASK;
   endfunction
-
-   // Function : connect
-   //
-   // Connect this socket to the specified <uvm_tlm_nb_target_socket>
-  function void connect(this_type provider);
-
-    uvm_tlm_nb_passthrough_initiator_socket_base #(T,P) initiator_pt_socket;
-    uvm_tlm_nb_passthrough_target_socket_base #(T,P) target_pt_socket;
-    uvm_tlm_nb_target_socket_base #(T,P) target_socket;
-
-    uvm_component c;
-
-    super.connect(provider);
-
-    if($cast(initiator_pt_socket, provider)) begin
-      bw_export.connect(initiator_pt_socket.bw_export);
-      return;
-    end
-
-    if($cast(target_pt_socket, provider)) begin
-      target_pt_socket.bw_port.connect(bw_export);
-      return;
-    end
-
-    if($cast(target_socket, provider)) begin
-      target_socket.bw_port.connect(bw_export);
-      return;
-    end
-
-    c = get_comp();
-    `uvm_error_context(get_type_name(),
-       "type mismatch in connect -- connection cannot be completed", c)
-
-  endfunction
-
+  `UVM_TLM_NB_SOCKET_COMMON(uvm_tlm_nb_passthrough_initiator_socket)
 endclass
 
 //----------------------------------------------------------------------
@@ -393,41 +263,13 @@ endclass
 //----------------------------------------------------------------------
 
 class uvm_tlm_nb_passthrough_target_socket #(type T=uvm_tlm_generic_payload,
-                                          type P=uvm_tlm_phase_e)
-  extends uvm_tlm_nb_passthrough_target_socket_base #(T,P);
+                                             type P=uvm_tlm_phase_e)
+                           extends uvm_tlm_passthrough_target_socket #(T,P);
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
+    m_if_mask = `UVM_TLM_NB_FW_MASK + `UVM_TLM_NB_BW_MASK;
   endfunction
-
-   // Function: connect
-   //
-   // Connect this socket to the specified <uvm_tlm_nb_initiator_socket>
-  function void connect(this_type provider);
-
-    uvm_tlm_nb_passthrough_target_socket_base #(T,P) target_pt_socket;
-    uvm_tlm_nb_target_socket_base #(T,P) target_socket;
-
-    uvm_component c;
-
-    super.connect(provider);
-
-    if($cast(target_pt_socket, provider)) begin
-      target_pt_socket.bw_port.connect(bw_port);
-      return;
-    end
-
-    if($cast(target_socket, provider)) begin
-      target_socket.bw_port.connect(bw_port);
-      return;
-    end
-
-    c = get_comp();
-    `uvm_error_context(get_type_name(),
-       "type mismatch in connect -- connection cannot be completed", c)
-
-  endfunction
-
+  `UVM_TLM_NB_SOCKET_COMMON(uvm_tlm_nb_passthrough_target_socket)
 endclass
 
-//----------------------------------------------------------------------

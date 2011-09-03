@@ -204,9 +204,17 @@
   
 `define UVM_IMP_COMMON(MASK,TYPE_NAME,IMP) \
   local IMP m_imp; \
-  function new (string name, IMP imp); \
-    super.new (name, imp, UVM_IMPLEMENTATION, 1, 1); \
-    m_imp = imp; \
+  function new (string name, uvm_component parent=null, IMP imp=null); \
+    super.new (name, parent, UVM_IMPLEMENTATION, 1, 1); \
+    if (imp==null) begin \
+      if (parent == null) \
+        `uvm_error("UVM/TLM/CAST",{`"Both the parent and imp ctor args are null in imp '`",get_full_name(),"'"}) \
+      else if (!$cast(m_imp,parent)) begin \
+        `uvm_error("UVM/TLM/CAST",{"Parent ",parent.get_full_name()," of type ",parent.get_type_name()," must be of type ",$typename(IMP,47)}) \
+      end \
+    end \
+    else \
+      m_imp = imp; \
     m_if_mask = MASK; \
   endfunction \
   `UVM_TLM_GET_TYPE_NAME(TYPE_NAME)

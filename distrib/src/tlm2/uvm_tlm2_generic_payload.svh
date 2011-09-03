@@ -380,6 +380,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
 
 
    function void do_print(uvm_printer printer);
+     super.do_print(printer);
       foreach (m_extensions[ext_]) begin
       	 uvm_tlm_extension_base ext = ext_;
          printer.print_object(ext.get_type_handle_name(), m_extensions[ext]);
@@ -686,7 +687,10 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    
   function uvm_tlm_extension_base set_extension(uvm_tlm_extension_base ext);
     uvm_tlm_extension_base ext_handle = ext.get_type_handle();
-    set_extension = m_extensions[ext_handle];
+    if (m_extensions.exists(ext_handle))
+      set_extension = m_extensions[ext_handle];
+    else
+      set_extension = null;
     m_extensions[ext_handle] = ext;
   endfunction
 
@@ -853,7 +857,20 @@ class uvm_tlm_extension #(type T=int) extends uvm_tlm_extension_base;
 `ifndef UVM_USE_TYPENAME
      return "";
 `else
+`ifdef QUESTA
+     return $typename(T,(1<<0)+
+                        (1<<1)+
+                        (1<<2)+
+                        (1<<3)+
+                        (1<<5)+
+                        (1<<6)+
+                        (1<<7)+
+                        (1<<8)+
+                        (1<<9)
+     );
+ `else
      return $typename(T);
+ `endif
 `endif
   endfunction
 
