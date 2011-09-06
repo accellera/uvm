@@ -674,12 +674,19 @@ task uvm_sequence_library::body();
      return;
   end
 
+  if (sequences.size() == 0) begin
+    `uvm_error("SEQLIB/NOSEQS", "Sequence library does not contain any sequences. Did you forget to call init_sequence_library() in the constructor?")
+    return;
+  end
+
   if (!is_randomized)
     m_get_config();
 
   if (starting_phase != null)
     starting_phase.raise_objection(this,
        {"starting sequence library ",get_full_name()," (", get_type_name(),")"});
+
+
 
   `uvm_info("SEQLIB/START",
      $sformatf("Starting sequence library %s in %s phase: %0d iterations in mode %s",
