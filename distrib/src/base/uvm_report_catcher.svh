@@ -119,6 +119,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   local static int m_line_number;
   local static uvm_report_object m_client;
   local static uvm_action m_modified_action;
+  local static bit m_set_action_called;
   local static uvm_report_server m_server;
   local static string m_name;
   
@@ -279,6 +280,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   
   protected function void set_action(uvm_action action);
     this.m_modified_action = action;
+    this.m_set_action_called = 1;
   endfunction
   
   // Group: Debug
@@ -512,8 +514,22 @@ virtual class uvm_report_catcher extends uvm_callback;
 
     catcher = iter.first();
     while(catcher != null) begin
+      uvm_severity prev_sev;
+       
       if (!catcher.callback_mode()) continue;
-      thrown = catcher.process_report_catcher(); 
+
+      prev_sev = m_modified_severity;
+      m_set_action_called = 0;
+      thrown = catcher.process_report_catcher();
+
+      // Set the action to the default action for the new severity
+      // if it is still at the default for the previous severity,
+      // unless it was explicitly set.
+      if (!m_set_action_called &&
+          m_modified_severity != prev_sev &&
+          m_modified_action == m_client.get_report_action(prev_sev, "*@&*^*^*#")) begin
+         m_modified_action = m_client.get_report_action(m_modified_severity, "*@&*^*^*#");
+      end
 
       if(thrown == 0) begin 
         case(orig_severity)
