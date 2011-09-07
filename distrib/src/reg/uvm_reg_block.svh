@@ -322,7 +322,7 @@ virtual class uvm_reg_block extends uvm_object;
                                             input uvm_hier_e hier=UVM_HIER);
 
 
-   // Function get_memories
+   // Function: get_memories
    //
    // Get the memories
    //
