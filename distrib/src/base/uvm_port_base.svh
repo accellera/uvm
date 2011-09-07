@@ -371,6 +371,10 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
       m_def_index = index;
   endfunction
 
+  function int m_get_if_mask();
+    return m_if_mask;
+  endfunction
+
 
   // Function: set_default_index
   // 
