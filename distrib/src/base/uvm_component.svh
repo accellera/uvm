@@ -836,14 +836,6 @@ virtual class uvm_component extends uvm_report_object;
   //   matched to the same setting (by way of wildcards) do not end up sharing
   //   the same object.
   //
-  //   The following message tags are used for configuration setting. You can
-  //   use the standard uvm report messaging interface to control these
-  //   messages.
-  //     CFGNTS    -- The configuration setting was not used by any component.
-  //                  This is a warning.
-  //     CFGOVR    -- The configuration setting was overridden by a setting above.
-  //     CFGSET    -- The configuration setting was used at least once.
-  //
   //
   // See <get_config_int>, <get_config_string>, and <get_config_object> for
   // information on getting the configurations set by these methods.
@@ -927,16 +919,9 @@ virtual class uvm_component extends uvm_report_object;
   // components are recursively checked. This function is automatically
   // called in the check phase, but can be manually called at any time.
   //
-  // Additional detail is provided by the following message tags:
-  // * CFGOVR -- lists all configuration settings that have been overridden
-  // from above.  
-  // * CFGSET -- lists all configuration settings that have been set.
-  //
   // To get all configuration information prior to the run phase, do something 
   // like this in your top object:
   //|  function void start_of_simulation_phase(uvm_phase phase);
-  //|    set_report_id_action_hier("CFGOVR", UVM_DISPLAY);
-  //|    set_report_id_action_hier("CFGSET", UVM_DISPLAY);
   //|    check_config_usage();
   //|  endfunction
 
@@ -1780,13 +1765,8 @@ function uvm_component::new (string name, uvm_component parent);
 
   set_report_verbosity_level(parent.get_report_verbosity_level());
 
-  set_report_id_action("CFGOVR", UVM_NO_ACTION);
-  set_report_id_action("CFGSET", UVM_NO_ACTION);
-
   m_set_cl_msg_args();
 
-  top.set_report_id_action("CFGOVR", UVM_NO_ACTION);
-  top.set_report_id_action("CFGSET", UVM_NO_ACTION);
 endfunction
 
 
