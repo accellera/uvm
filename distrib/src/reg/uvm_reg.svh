@@ -83,7 +83,7 @@ virtual class uvm_reg extends uvm_object;
    //
    extern function new (string name="",
                         int unsigned n_bits,
-                        int has_coverage);
+                        int has_coverage = UVM_NO_COVERAGE);
 
 
    // Function: configure
@@ -943,6 +943,9 @@ virtual class uvm_reg extends uvm_object;
    // Returns the sum of all coverage models to be built in the
    // register model.
    //
+   // This method shall be called only in the build() method of
+   // subsequently derived classes.
+   //
    extern protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
 
 
@@ -954,9 +957,6 @@ virtual class uvm_reg extends uvm_object;
    // available in this class.
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
-   //
-   // This method shall be called only in the constructor of
-   // subsequently derived classes.
    //
    extern virtual protected function void add_coverage(uvm_reg_cvr_t models);
 
@@ -1148,7 +1148,7 @@ endclass: uvm_reg
 
 // new
 
-function uvm_reg::new(string name="", int unsigned n_bits, int has_coverage);
+function uvm_reg::new(string name="", int unsigned n_bits, int has_coverage = UVM_NO_COVERAGE);
    super.new(name);
    if (n_bits == 0) begin
       `uvm_error("RegModel", $sformatf("Register \"%s\" cannot have 0 bits", get_name()));
@@ -1841,9 +1841,11 @@ endfunction
 function void uvm_reg::include_coverage(string scope,
                                         uvm_reg_cvr_t models,
                                         uvm_object accessor = null);
-   uvm_reg_cvr_rsrc_db::set({"uvm_reg::", scope},
-                            "include_coverage",
-                            models, accessor);
+   uvm_resource#(uvm_reg_cvr_t) rsrc = new("include_coverage",
+                                           {"uvm_reg::", scope});
+   rsrc.write(models);
+   rsrc.set_override();
+   if (accessor != null) rsrc.record_write_access(accessor);
 endfunction
 
 

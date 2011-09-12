@@ -815,6 +815,9 @@ class uvm_mem extends uvm_object;
    // Returns the sum of all coverage models to be built in the
    // memory model.
    //
+   // This method shall be called only in the build() method of
+   // subsequently derived classes.
+   //
    extern protected function uvm_reg_cvr_t build_coverage(uvm_reg_cvr_t models);
 
 
@@ -826,9 +829,6 @@ class uvm_mem extends uvm_object;
    // available in this class.
    // Models are specified by adding the symbolic value of individual
    // coverage model as defined in <uvm_coverage_model_e>.
-   //
-   // This method shall be called only in the constructor of
-   // subsequently derived classes.
    //
    extern virtual protected function void add_coverage(uvm_reg_cvr_t models);
 
