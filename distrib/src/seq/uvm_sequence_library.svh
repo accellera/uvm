@@ -162,7 +162,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    // library is started. If in <UVM_SEQ_LIB_ITEM> mode, specifies the
    // number of sequence items that will be generated.
    //
-   rand  int unsigned sequence_count;
+   rand  int unsigned sequence_count = 10;
 
 
    // Variable- select_rand
@@ -693,6 +693,8 @@ task uvm_sequence_library::body();
 
       UVM_SEQ_LIB_RAND: begin
         valid_rand_selection.constraint_mode(1);
+        valid_sequence_count.constraint_mode(0);
+        c_randomized.constraint_mode(0);
         for (int i=1; i<=sequence_count; i++) begin
           if (!randomize(select_rand)) begin
             `uvm_error("SEQLIB/RAND_FAIL", "Random sequence selection failed")
@@ -703,11 +705,16 @@ task uvm_sequence_library::body();
           end
           execute(wrap);
         end
+        valid_rand_selection.constraint_mode(0);
+        valid_sequence_count.constraint_mode(1);
+        c_randomized.constraint_mode(1);
       end
 
       UVM_SEQ_LIB_RANDC: begin
         uvm_object_wrapper q[$];
         valid_randc_selection.constraint_mode(1);
+        valid_sequence_count.constraint_mode(0);
+        c_randomized.constraint_mode(0);
         for (int i=1; i<=sequence_count; i++) begin
           if (!randomize(select_randc)) begin
             `uvm_error("SEQLIB/RANDC_FAIL", "Random sequence selection failed")
@@ -720,6 +727,9 @@ task uvm_sequence_library::body();
         end
         foreach(q[i])
           execute(q[i]);
+        valid_randc_selection.constraint_mode(0);
+        valid_sequence_count.constraint_mode(1);
+        c_randomized.constraint_mode(1);
       end
 
       UVM_SEQ_LIB_ITEM: begin
