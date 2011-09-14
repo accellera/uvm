@@ -1796,7 +1796,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
       bus_req.set_sequencer(sequencer);
       rw.parent.start_item(bus_req,rw.prior);
 
-      if (rw.parent != null && rw_access.addr == addrs[0])
+      if (rw.parent != null && i == 0)
         rw.parent.mid_do(rw);
 
       rw.parent.finish_item(bus_req);
@@ -1813,7 +1813,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
         adapter.bus2reg(bus_req,rw_access);
       end
 
-      if (rw.parent != null && rw_access.addr == addrs[addrs.size()-1])
+      if (rw.parent != null && i == addrs.size()-1)
         rw.parent.post_do(rw);
 
       rw.status = rw_access.status;
@@ -1918,7 +1918,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       bus_req.set_sequencer(sequencer);
       rw.parent.start_item(bus_req,rw.prior);
 
-      if (rw.parent != null && rw_access.addr == addrs[0]) begin
+      if (rw.parent != null && i == 0) begin
         rw.parent.pre_do(1);
         rw.parent.mid_do(rw);
       end
@@ -1953,7 +1953,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
 
       rw.value[val_idx] |= data << curr_byte*8;
 
-      if (rw.parent != null && rw_access.addr == addrs[addrs.size()])
+      if (rw.parent != null && i == addrs.size()-1)
         rw.parent.post_do(rw);
 
       curr_byte += bus_width;
