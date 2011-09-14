@@ -47,7 +47,9 @@
 `endif
 
 `ifdef QUESTA
-//`define UVM_USE_BITSTREAM_OPS
+`define UVM_QUESTA_TYPENAME_ARG ,39
+`else
+`define UVM_QUESTA_TYPENAME_ARG 
 `endif
 
 `ifdef INCA

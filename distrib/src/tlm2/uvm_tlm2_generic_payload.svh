@@ -853,7 +853,7 @@ class uvm_tlm_extension #(type T=int) extends uvm_tlm_extension_base;
 `ifndef UVM_USE_TYPENAME
      return "";
 `else
-     return $typename(T);
+     return $typename(T `UVM_QUESTA_TYPENAME_ARG);
 `endif
   endfunction
 

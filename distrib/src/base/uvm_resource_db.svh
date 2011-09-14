@@ -118,7 +118,7 @@ class uvm_resource_db #(type T=uvm_object);
           input rsrc_t rsrc);
 
 `ifdef UVM_USE_TYPENAME 
-          string msg=$typename(T);
+          string msg=$typename(T `UVM_QUESTA_TYPENAME_ARG);
 `else
           string msg ="unknown";
 `endif 
