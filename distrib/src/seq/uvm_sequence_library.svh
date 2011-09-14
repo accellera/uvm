@@ -363,7 +363,7 @@ endclass
 //| uvm_sequence_library_cfg cfg;
 //| cfg = new("seqlib_cfg", UVM_SEQ_LIB_RANDC, 1000, 2000);
 //|
-//| uvm_config_db #(uvm_sequence_base)::set(null,
+//| uvm_config_db #(uvm_sequence_library_cfg)::set(null,
 //|                                    "env.agent.sequencer.main_ph",
 //|                                    "default_sequence.config",
 //|                                    cfg);
