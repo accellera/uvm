@@ -1111,7 +1111,7 @@ class uvm_resource_pool;
     result_q = new();
 
     foreach (rtab[name]) begin
-      if(!uvm_re_match(re, name))
+      if(uvm_re_match(re, name))
         continue;
       rq = rtab[name];
       for(i = 0; i < rq.size(); i++) begin
