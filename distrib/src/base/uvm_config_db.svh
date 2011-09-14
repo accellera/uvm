@@ -102,7 +102,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     rq = rp.lookup_regex_names(inst_name, field_name, uvm_resource#(T)::get_type());
     r = uvm_resource#(T)::get_highest_precedence(rq);
     
-    if(uvm_resource_db_options::is_tracing())
+    if(uvm_config_db_options::is_tracing())
       m_show_msg("CFGDB/GET", "Configuration","read", inst_name, field_name, cntxt, r);
 
     if(r == null)
@@ -206,7 +206,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
 
     p.set_randstate(rstate);
 
-    if(uvm_resource_db_options::is_tracing())
+    if(uvm_config_db_options::is_tracing())
       m_show_msg("CFGDB/SET", "Configuration","set", inst_name, field_name, cntxt, r);
   endfunction
 
