@@ -1919,7 +1919,6 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       rw.parent.start_item(bus_req,rw.prior);
 
       if (rw.parent != null && rw_access.addr == addrs[0]) begin
-        rw.parent.pre_do(1);
         rw.parent.mid_do(rw);
       end
 
