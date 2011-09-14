@@ -94,7 +94,7 @@ virtual class uvm_reg_cbs extends uvm_callback;
 
    // Task: post_write
    //
-   // Called after user-defined backdoor register write.
+   // Called after a write operation.
    //
    // All registered ~post_write~ callback methods are invoked before the
    // invocation of the ~post_write~ method of the associated object (<uvm_reg>,
