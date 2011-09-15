@@ -705,6 +705,7 @@ task uvm_sequence_library::body();
           end
           execute(wrap);
         end
+        valid_rand_selection.constraint_mode(0);
         valid_sequence_count.constraint_mode(1);
         c_randomized.constraint_mode(1);
       end
@@ -724,6 +725,7 @@ task uvm_sequence_library::body();
           end
           q.push_back(wrap);
         end
+        valid_randc_selection.constraint_mode(0);
         valid_sequence_count.constraint_mode(1);
         c_randomized.constraint_mode(1);
         foreach(q[i])
