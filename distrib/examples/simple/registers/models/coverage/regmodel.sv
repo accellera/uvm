@@ -33,48 +33,50 @@
 // are generator-specific and outside the scope of UVM.
 //
 
+typedef class reg_R;
+class reg_R_cvr_reg_bits;
+   uvm_reg_data_t m_current;
+   uvm_reg_data_t m_data;
+   uvm_reg_data_t m_be;
+   bit            m_is_read;
+   
+   covergroup cg_bits;
+      wF1_0: coverpoint {m_current[0],m_data[0]} iff (!m_is_read && m_be[0]);
+      wF1_1: coverpoint {m_current[1],m_data[1]} iff (!m_is_read && m_be[0]);
+      wF1_2: coverpoint {m_current[2],m_data[2]} iff (!m_is_read && m_be[0]);
+      wF1_3: coverpoint {m_current[3],m_data[3]} iff (!m_is_read && m_be[0]);
+      wF2_0: coverpoint {m_current[4],m_data[4]} iff (!m_is_read && m_be[0]);
+      wF2_1: coverpoint {m_current[5],m_data[5]} iff (!m_is_read && m_be[0]);
+      wF2_2: coverpoint {m_current[6],m_data[6]} iff (!m_is_read && m_be[0]);
+      wF2_3: coverpoint {m_current[7],m_data[7]} iff (!m_is_read && m_be[0]);
+   endgroup
+   
+   function new();
+      cg_bits = new();
+   endfunction
+endclass
+
+class reg_R_cvr_field_vals;
+   reg_R m_rg;
+   
+   covergroup cg_vals;
+      F1: coverpoint m_rg.F1.value[3:0];
+      F2: coverpoint m_rg.F2.value[3:0];
+      F1F2: cross F1, F2;
+   endgroup
+   
+   function new(reg_R rg);
+      m_rg = rg;
+      cg_vals = new();
+   endfunction
+endclass
+
 class reg_R extends uvm_reg;
    rand uvm_reg_field F1;
    rand uvm_reg_field F2;
 
-   class cvr_reg_bits;
-      uvm_reg_data_t m_current;
-      uvm_reg_data_t m_data;
-      uvm_reg_data_t m_be;
-      bit            m_is_read;
-      
-      covergroup cg_bits;
-         wF1_0: coverpoint {m_current[0],m_data[0]} iff (!m_is_read && m_be[0]);
-         wF1_1: coverpoint {m_current[1],m_data[1]} iff (!m_is_read && m_be[0]);
-         wF1_2: coverpoint {m_current[2],m_data[2]} iff (!m_is_read && m_be[0]);
-         wF1_3: coverpoint {m_current[3],m_data[3]} iff (!m_is_read && m_be[0]);
-         wF2_0: coverpoint {m_current[4],m_data[4]} iff (!m_is_read && m_be[0]);
-         wF2_1: coverpoint {m_current[5],m_data[5]} iff (!m_is_read && m_be[0]);
-         wF2_2: coverpoint {m_current[6],m_data[6]} iff (!m_is_read && m_be[0]);
-         wF2_3: coverpoint {m_current[7],m_data[7]} iff (!m_is_read && m_be[0]);
-      endgroup
-
-      function new();
-         cg_bits = new();
-      endfunction
-   endclass
-   local cvr_reg_bits m_cvr_reg_bits;
-   
-   class cvr_field_vals;
-      reg_R m_rg;
-      
-      covergroup cg_vals;
-         F1: coverpoint m_rg.F1.value[3:0];
-         F2: coverpoint m_rg.F2.value[3:0];
-         F1F2: cross F1, F2;
-      endgroup
-      
-      function new(reg_R rg);
-         m_rg = rg;
-         cg_vals = new();
-      endfunction
-   endclass
-   local cvr_field_vals m_cvr_field_vals;
+   local reg_R_cvr_reg_bits m_cvr_reg_bits;
+   local reg_R_cvr_field_vals m_cvr_field_vals;
    
    function new(string name = "reg_R");
       super.new(name, 8);
@@ -120,25 +122,26 @@ endclass : reg_R
 
 
 
+class mem_M_cvr_addr_map;
+   uvm_reg_addr_t m_offset;
+   
+   covergroup cg_addr;
+      MIN_MID_MAX: coverpoint m_offset
+         {
+         bins MIN = {0};
+         bins MID = {[1:1022]};
+         bins MAX = {1023};
+      }
+   endgroup
+   
+   function new();
+      cg_addr = new();
+   endfunction
+endclass
+
 class mem_M extends uvm_mem;
 
-   class cvr_addr_map;
-      uvm_reg_addr_t m_offset;
-      
-      covergroup cg_addr;
-         MIN_MID_MAX: coverpoint m_offset
-            {
-            bins MIN = {0};
-            bins MID = {[1:1022]};
-            bins MAX = {1023};
-         }
-      endgroup
-
-      function new();
-         cg_addr = new();
-      endfunction
-   endclass
-   local cvr_addr_map m_cvr_addr_map;
+   local mem_M_cvr_addr_map m_cvr_addr_map;
    
    function new(string name = "mem_M");
       super.new(name, 1024, 8, "RW");
@@ -164,6 +167,38 @@ class mem_M extends uvm_mem;
 endclass : mem_M
 
 
+typedef class block_B;
+class block_B_cvr_addr_map;
+   uvm_reg_addr_t m_offset;
+   
+   covergroup cg_addr;
+      MIN_MID_MAX: coverpoint m_offset
+         {
+         bins MIN = {0};
+         bins MID = {[1:1022]};
+         bins MAX = {1023};
+      }
+   endgroup
+   
+   function new();
+      cg_addr = new();
+   endfunction
+endclass
+
+class block_B_cvr_field_vals;
+   block_B m_blk;
+   
+   covergroup cg_vals;
+      Ra: coverpoint m_blk.Ra.F1.value[3:0];
+      Rb: coverpoint m_blk.Rb.F1.value[3:0];
+      RaRb: cross Ra, Rb;
+   endgroup
+   
+   function new(block_B blk);
+      m_blk = blk;
+      cg_vals = new();
+   endfunction
+endclass
 
 class block_B extends uvm_reg_block;
    rand reg_R Ra;
@@ -171,46 +206,8 @@ class block_B extends uvm_reg_block;
 
    mem_M M;
 
-   class cvr_addr_map;
-      uvm_reg_addr_t m_offset;
-
-      covergroup cg_addr;
-         Ra: coverpoint m_offset
-            {
-            bins hit = {'h0000};
-         }
-         Rb: coverpoint m_offset
-            {
-            bins hit = {'h0100};
-         }
-         M: coverpoint m_offset
-            {
-            bins MIN = {'h2000};
-            bins MAX = {'h23FF};
-         }
-      endgroup
-
-      function new();
-         cg_addr = new();
-      endfunction
-   endclass
-   local cvr_addr_map m_cvr_addr_map;
-
-   class cvr_field_vals;
-      block_B m_blk;
-      
-      covergroup cg_vals;
-         Ra: coverpoint m_blk.Ra.F1.value[3:0];
-         Rb: coverpoint m_blk.Rb.F1.value[3:0];
-         RaRb: cross Ra, Rb;
-      endgroup
-
-      function new(block_B blk);
-         m_blk = blk;
-         cg_vals = new();
-      endfunction
-   endclass
-   local cvr_field_vals m_cvr_field_vals;
+   local block_B_cvr_addr_map m_cvr_addr_map;
+   local block_B_cvr_field_vals m_cvr_field_vals;
    
    function new(string name = "B");
       super.new(name);
