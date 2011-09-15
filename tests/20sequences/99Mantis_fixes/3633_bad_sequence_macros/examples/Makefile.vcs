@@ -19,17 +19,9 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../../..
+include  $(UVM_HOME)/examples/Makefile.vcs
 
-include ../../../Makefile.vcs
-
-
-all: comp run
-
-comp:
-	$(VCS) +incdir+../sv \
-		ubus_tb_top.sv
-
-run:
-	$(SIMV) +UVM_TESTNAME=test_2m_4s
+all:
+	$(VCS) +incdir+../sv ubus_tb_top.sv +UVM_TESTNAME=test_2m_4s_azhang
+	$(SIMV)
 	$(CHECK)
