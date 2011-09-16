@@ -161,6 +161,10 @@ class uvm_reg_tlm_adapter extends uvm_reg_adapter;
 
   `uvm_object_utils(uvm_reg_tlm_adapter)
 
+  function new(string name = "uvm_reg_tlm_adapter");
+    super.new(name);
+  endfunction
+
   // Function: reg2bus
   //
   // Converts a <uvm_reg_bus_op> struct to a <uvm_tlm_gp> item.

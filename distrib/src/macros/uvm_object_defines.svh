@@ -382,9 +382,8 @@
 `define m_uvm_object_create_func(T) \
    function uvm_object create (string name=""); \
      T tmp; \
-     tmp = new(); \
-     if (name!="") \
-       tmp.set_name(name); \
+     if (name=="") tmp = new(); \
+     else tmp = new(name); \
      return tmp; \
    endfunction
 
