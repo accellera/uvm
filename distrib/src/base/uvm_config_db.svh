@@ -87,7 +87,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
                           string field_name,
                           inout T value);
 //TBD: add file/line
-    int unsigned p=0;
+    int unsigned p;
     uvm_resource#(T) r, rt;
     uvm_resource_pool rp = uvm_resource_pool::get();
     uvm_resource_types::rsrc_q_t rq;
@@ -152,7 +152,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     uvm_root top;
     uvm_phase curr_phase;
     uvm_resource#(T) r;
-    bit exists = 0;
+    bit exists;
     
     //take care of random stability during allocation
     process p = process::self();

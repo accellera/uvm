@@ -51,7 +51,7 @@ class uvm_sequencer_base extends uvm_component;
                                 m_wait_for_item_transaction_id;
 
   local uvm_sequencer_arb_mode  m_arbitration = SEQ_ARB_FIFO;
-  local static int              g_request_id = 0;
+  local static int              g_request_id;
   local static int              g_sequence_id = 1;
   local static int              g_sequencer_id = 1;
 
@@ -409,9 +409,9 @@ class uvm_sequencer_base extends uvm_component;
 
   int count = -1;
 
-  int m_random_count = 0;
-  int m_exhaustive_count = 0;
-  int m_simple_count = 0;
+  int m_random_count;
+  int m_exhaustive_count;
+  int m_simple_count;
 
   int unsigned max_random_count = 10;
   int unsigned max_random_depth = 4;

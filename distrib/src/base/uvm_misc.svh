@@ -50,7 +50,7 @@ typedef class uvm_object;
 //----------------------------------------------------------------------------
 
 class uvm_scope_stack;
-  local string m_arg = "";
+  local string m_arg;
   local string m_stack[$];
 
   // depth
@@ -137,7 +137,7 @@ class uvm_scope_stack;
   // --
   
   function void up (byte separator =".");
-    bit found=0;
+    bit found;
     string s;
     while(m_stack.size() && !found ) begin
       s = m_stack.pop_back();
@@ -197,17 +197,17 @@ class uvm_status_container;
   bit             clone = 1;
 
   //Information variables used by the macro functions for storage.
-  bit          warning    = 0;
-  bit          status     = 0;
-  uvm_bitstream_t  bitstream  = 0;
-  int          intv       = 0;
-  int          element    = 0;
-  string       stringv    = "";
-  string       scratch1   = "";
-  string       scratch2   = "";
-  string       key        = "";
-  uvm_object   object     = null;
-  bit          array_warning_done = 0;
+  bit          warning;
+  bit          status;
+  uvm_bitstream_t  bitstream;
+  int          intv;
+  int          element;
+  string       stringv;
+  string       scratch1;
+  string       scratch2;
+  string       key;
+  uvm_object   object;
+  bit          array_warning_done;
 
   static bit field_array[string];
 

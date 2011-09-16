@@ -260,7 +260,7 @@ virtual class uvm_printer;
 
   protected bit m_array_stack[$];
   uvm_scope_stack m_scope = new;
-  string m_string = "";
+  string m_string;
 
   // holds each cell entry
   protected uvm_printer_row_info m_rows[$];
@@ -973,7 +973,7 @@ endfunction
 
 function string uvm_table_printer::emit();
 
-  string s = "";
+  string s;
   string user_format;
   string dash = "---------------------------------------------------------------------------------------------------";
   string space= "                                                                                                   ";

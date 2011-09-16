@@ -65,17 +65,17 @@ class uvm_vreg extends uvm_object;
 
    local uvm_vreg_field fields[$];   // Fields in LSB to MSB order
 
-   local uvm_mem                   mem;     // Where is it implemented?
-   local uvm_reg_addr_t                offset;  // Start of vreg[0]
-   local int unsigned                  incr;    // From start to start of next
-   local longint unsigned              size;    //number of vregs
-   local bit                           is_static;
+   local uvm_mem          mem;     // Where is it implemented?
+   local uvm_reg_addr_t   offset;  // Start of vreg[0]
+   local int unsigned     incr;    // From start to start of next
+   local longint unsigned size;    //number of vregs
+   local bit              is_static;
 
    local uvm_mem_region   region;    // Not NULL if implemented via MAM
   
    local semaphore atomic;   // Field RMW operations must be atomic
-   local string fname = "";
-   local int lineno = 0;
+   local string fname;
+   local int lineno;
    local bit read_in_progress;
    local bit write_in_progress;
 
@@ -613,8 +613,8 @@ endclass: uvm_vreg
 
 class uvm_vreg_cbs extends uvm_callback;
 
-   string fname = "";
-   int    lineno = 0;
+   string fname;
+   int    lineno;
 
    function new(string name = "uvm_reg_cbs");
       super.new(name);
@@ -1497,9 +1497,9 @@ function void uvm_vreg::do_print (uvm_printer printer);
 endfunction
 
 function string uvm_vreg::convert2string();
-   string res_str = "";
-   string t_str = "";
-   bit with_debug_info = 1'b0;
+   string res_str;
+   string t_str;
+   bit with_debug_info;
    $sformat(convert2string, "Virtual register %s -- ", 
             this.get_full_name());
 

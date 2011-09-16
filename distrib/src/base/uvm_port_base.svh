@@ -245,6 +245,10 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
 
   endfunction
 
+function int unsigned m_get_if_mask();
+return m_if_mask;
+endfunction
+
 
   // Function: get_name
   //

@@ -204,7 +204,7 @@ virtual class uvm_resource_base extends uvm_object;
 
   // IUS currently does not support the protected keyword.  When
   // it does, comments delimiters can be removed.
-  /*protected*/ bit m_is_regex_name=0;
+  /*protected*/ bit m_is_regex_name;
 
   uvm_resource_types::access_t access[string];
 
@@ -655,7 +655,7 @@ endclass
 
 class uvm_resource_pool;
 
-  static bit m_has_wildcard_names = 0;
+  static bit m_has_wildcard_names;
   static local uvm_resource_pool rp = get();
 
   uvm_resource_types::rsrc_q_t rtab [string];

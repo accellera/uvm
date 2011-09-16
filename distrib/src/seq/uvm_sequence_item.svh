@@ -37,12 +37,12 @@ typedef class uvm_sequencer_base;
 class uvm_sequence_item extends uvm_transaction;
 
   local      int                m_sequence_id = -1;
-  protected  bit                m_use_sequence_info = 0;
+  protected  bit                m_use_sequence_info;
   protected  int                m_depth = -1;
-  protected  uvm_sequencer_base m_sequencer = null;
-  protected  uvm_sequence_base  m_parent_sequence = null;
-  static     bit issued1=0,issued2=0;
-  bit        print_sequence_info = 0;
+  protected  uvm_sequencer_base m_sequencer;
+  protected  uvm_sequence_base  m_parent_sequence;
+  static     bit issued1,issued2;
+  bit        print_sequence_info;
 
 
   // Function: new

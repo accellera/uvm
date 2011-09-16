@@ -214,7 +214,7 @@ class uvm_pool #(type KEY=int, T=uvm_void) extends uvm_object;
 
   virtual function void do_print (uvm_printer printer);
     string v;
-    int cnt=0;
+    int cnt;
     string item;
     KEY key;
     printer.print_array_header("pool",pool.num(),"aa_object_string");

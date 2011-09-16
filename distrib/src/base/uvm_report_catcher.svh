@@ -122,16 +122,16 @@ virtual class uvm_report_catcher extends uvm_callback;
   local static uvm_report_server m_server;
   local static string m_name;
   
-  local static int m_demoted_fatal   = 0;
-  local static int m_demoted_error   = 0; 
-  local static int m_demoted_warning = 0; 
-  local static int m_caught_fatal    = 0;
-  local static int m_caught_error    = 0;
-  local static int m_caught_warning  = 0;
+  local static int m_demoted_fatal;
+  local static int m_demoted_error;
+  local static int m_demoted_warning;
+  local static int m_caught_fatal;
+  local static int m_caught_error;
+  local static int m_caught_warning;
 
   const static int DO_NOT_CATCH      = 1; 
   const static int DO_NOT_MODIFY     = 2; 
-  local static int m_debug_flags     = 0;
+  local static int m_debug_flags;
 
   local static  uvm_severity  m_orig_severity;
   local static  uvm_action    m_orig_action;
@@ -139,7 +139,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   local static  int           m_orig_verbosity;
   local static  string        m_orig_message;
 
-  local static  bit do_report = 0;
+  local static  bit do_report;
   
   // Function: new
   //

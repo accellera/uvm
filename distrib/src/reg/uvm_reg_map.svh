@@ -1254,7 +1254,7 @@ endfunction
 
 function int unsigned uvm_reg_map::get_size();
 
-  int unsigned max_addr = 0;
+  int unsigned max_addr;
   int unsigned addr;
 
   // get max offset from registers
@@ -1743,7 +1743,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
     /* calculate byte_enables */
     if (rw.element_kind == UVM_FIELD) begin
       int temp_be;
-      int idx=0;
+      int idx;
       n_access_extra = lsb%(bus_width*8);                
       n_access = n_access_extra + n_bits;
       temp_be = n_access_extra;
@@ -1869,7 +1869,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
     /* calculate byte_enables */
     if (rw.element_kind == UVM_FIELD) begin
       int temp_be;
-      int idx=0;
+      int idx;
       n_access_extra = lsb%(bus_width*8);                
       n_access = n_access_extra + n_bits;
       temp_be = n_access_extra;
@@ -1980,7 +1980,7 @@ function void uvm_reg_map::do_print (uvm_printer printer);
    uvm_mem  mems[$];
    uvm_endianness_e endian;
    uvm_reg_map maps[$];
-   string prefix = "";
+   string prefix;
    uvm_sequencer_base sqr=get_sequencer();
   
    super.do_print(printer);
@@ -2019,7 +2019,7 @@ function string uvm_reg_map::convert2string();
    uvm_vreg vregs[$];
    uvm_mem  mems[$];
    uvm_endianness_e endian;
-   string prefix = "";
+   string prefix;
 
    $sformat(convert2string, "%sMap %s", prefix, get_full_name());
    endian = get_endian(UVM_NO_HIER);

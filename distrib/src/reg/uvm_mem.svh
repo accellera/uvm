@@ -53,13 +53,13 @@ class uvm_mem extends uvm_object;
    local bit               m_is_powered_down;
    local int               m_has_cover;
    local int               m_cover_on;
-   local string            m_fname = "";
-   local int               m_lineno = 0;
+   local string            m_fname;
+   local int               m_lineno;
    local bit               m_vregs[uvm_vreg];
    local uvm_object_string_pool
                #(uvm_queue #(uvm_hdl_path_concat)) m_hdl_paths_pool;
 
-   local static int unsigned  m_max_size = 0;
+   local static int unsigned  m_max_size;
 
    //----------------------
    // Group: Initialization
@@ -2302,8 +2302,8 @@ endfunction
 
 function string uvm_mem::convert2string();
 
-   string res_str = "";
-   string prefix = "";
+   string res_str;
+   string prefix;
 
    $sformat(convert2string, "%sMemory %s -- %0dx%0d bits", prefix,
             get_full_name(), get_size(), get_n_bits());

@@ -106,8 +106,8 @@ class uvm_mem_mam;
    local uvm_mem_mam_cfg cfg;
    local uvm_mem_region in_use[$];
    local int for_each_idx = -1;
-   local string fname = "";
-   local int lineno = 0;
+   local string fname;
+   local int lineno;
 
 
    // Function: new
@@ -282,9 +282,9 @@ class uvm_mem_region;
 
    local int unsigned len;
    local int unsigned n_bytes;
-   local uvm_mem_mam      parent;
-   local string       fname = "";
-   local int          lineno = 0;
+   local uvm_mem_mam  parent;
+   local string       fname;
+   local int          lineno;
 
    /*local*/ uvm_vreg XvregX;
 
