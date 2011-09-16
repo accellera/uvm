@@ -1193,11 +1193,13 @@ function string uvm_reg_map::get_full_name();
 
    get_full_name = get_name();
 
-   if (m_parent == null)
-     return get_full_name;
+   if (uvm_object_context != "")
+      return {uvm_object_context, ".", get_full_name};
+   
+   if (m_parent != null)
+      return {m_parent.get_full_name(), ".", get_full_name};
 
-   return {m_parent.get_full_name(), ".", get_full_name};
-
+   return get_full_name;
 endfunction: get_full_name
 
 

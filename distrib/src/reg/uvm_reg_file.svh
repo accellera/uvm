@@ -425,6 +425,9 @@ function string uvm_reg_file::get_full_name();
 
    get_full_name = this.get_name();
 
+   if (uvm_object_context != "")
+      return {uvm_object_context, ".", get_full_name};
+   
    // Do not include top-level name in full name
    if (m_rf != null)
       return {m_rf.get_full_name(), ".", get_full_name};
@@ -433,8 +436,10 @@ function string uvm_reg_file::get_full_name();
    blk = this.get_block();
    if (blk == null)
       return get_full_name;
+
    if (blk.get_parent() == null)
       return get_full_name;
+
    get_full_name = {this.parent.get_full_name(), ".", get_full_name};
 endfunction: get_full_name
 

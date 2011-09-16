@@ -61,8 +61,11 @@ class reg_R extends uvm_reg;
    
    
    function new(string name = "reg_R");
-      super.new(name, 8, build_coverage(UVM_CVR_REG_BITS +
-                                        UVM_CVR_FIELD_VALS));
+      super.new(name, 8);
+
+      add_coverage(build_coverage(UVM_CVR_REG_BITS +
+                                  UVM_CVR_FIELD_VALS));
+      
       if (has_coverage(UVM_CVR_REG_BITS))
          cg_bits = new();
       if (has_coverage(UVM_CVR_FIELD_VALS))
@@ -115,7 +118,10 @@ class mem_M extends uvm_mem;
    endgroup
 
    function new(string name = "mem_M");
-      super.new(name, 1024, 8, "RW", build_coverage(UVM_CVR_ADDR_MAP));
+      super.new(name, 1024, 8, "RW");
+
+      add_coverage(build_coverage(UVM_CVR_ADDR_MAP));
+      
       if (has_coverage(UVM_CVR_ADDR_MAP))
          cg_addr = new();
    endfunction: new
@@ -167,7 +173,10 @@ class block_B extends uvm_reg_block;
    
    
    function new(string name = "B");
-      super.new(name, build_coverage(UVM_CVR_ADDR_MAP+UVM_CVR_FIELD_VALS));
+      super.new(name);
+
+      add_coverage(build_coverage(UVM_CVR_ADDR_MAP+UVM_CVR_FIELD_VALS));
+      
       if (has_coverage(UVM_CVR_ADDR_MAP))
          cg_addr = new();
       if (has_coverage(UVM_CVR_FIELD_VALS))

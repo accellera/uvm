@@ -1128,11 +1128,13 @@ endfunction: lock_model
 //--------------------------
 
 function string uvm_reg_block::get_full_name();
-   if (parent == null)
-     return get_name();
+   if (uvm_object_context != "")
+      return {uvm_object_context, ".", get_name()};
+   
+   if (parent != null)
+      return {parent.get_full_name(), ".", get_name()};
 
-   return {parent.get_full_name(), ".", get_name()};
-
+   return get_name();
 endfunction: get_full_name
 
 

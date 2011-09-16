@@ -513,7 +513,13 @@ endfunction: configure
 
 
 function string uvm_vreg_field::get_full_name();
-   get_full_name = {this.parent.get_full_name(), ".", this.get_name()};
+   if (uvm_object_context != "")
+      return {uvm_object_context, ".", get_name()};
+   
+   if (this.parent != null)
+      return {this.parent.get_full_name(), ".", get_name()};
+
+   return get_name();
 endfunction: get_full_name
 
 

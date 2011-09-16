@@ -1077,7 +1077,9 @@ function uvm_object uvm_factory::create_object_by_name (string requested_type_na
     wrapper = m_type_names[requested_type_name];
   end
 
-  return wrapper.create_object(name);
+  uvm_object::uvm_object_context = parent_inst_path;
+  create_object_by_name = wrapper.create_object(name);
+  uvm_object::uvm_object_context = "";
 
 endfunction
 
@@ -1102,7 +1104,9 @@ function uvm_object uvm_factory::create_object_by_type (uvm_object_wrapper reque
 
   requested_type = find_override_by_type(requested_type, full_inst_path);
 
-  return requested_type.create_object(name);
+  uvm_object::uvm_object_context = parent_inst_path;
+  create_object_by_type = requested_type.create_object(name);
+  uvm_object::uvm_object_context = "";
 
 endfunction
 
@@ -1138,7 +1142,9 @@ function uvm_component uvm_factory::create_component_by_name (string requested_t
     wrapper = m_type_names[requested_type_name];
   end
 
-  return wrapper.create_component(name, parent);
+  uvm_object::uvm_object_context = parent_inst_path;
+  create_component_by_name = wrapper.create_component(name, parent);
+  uvm_object::uvm_object_context = "";
 
 endfunction
 
@@ -1163,7 +1169,9 @@ function uvm_component uvm_factory::create_component_by_type (uvm_object_wrapper
 
   requested_type = find_override_by_type(requested_type, full_inst_path);
 
-  return requested_type.create_component(name, parent);
+  uvm_object::uvm_object_context = parent_inst_path;
+  create_component_by_type = requested_type.create_component(name, parent);
+  uvm_object::uvm_object_context = "";
 
 endfunction
 

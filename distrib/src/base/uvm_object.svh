@@ -758,6 +758,15 @@ virtual class uvm_object extends uvm_void;
 
 
 
+  // Variable: uvm_object_context
+  // Context used to create the object via the factory.
+  //
+  // This variable is only valid during the creation of a new uvm_object instance
+  // via the <uvm_factory>. It contains the hierarchical name of the parent component
+  // or the context string specified when calling the type_id::create() method.
+  //
+  static string uvm_object_context;
+     
   //---------------------------------------------------------------------------
   //                 **** Internal Methods and Properties ***
   //                           Do not use directly

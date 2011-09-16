@@ -867,9 +867,14 @@ function string uvm_vreg::get_full_name();
 
    get_full_name = this.get_name();
 
+   if (uvm_object_context != "")
+      return {uvm_object_context, ".", get_full_name};
+   
    // Do not include top-level name in full name
    blk = this.get_block();
-   if (blk == null) return get_full_name;
+   if (blk == null)
+      return get_full_name;
+   
    if (blk.get_parent() == null) return get_full_name;
 
    get_full_name = {this.parent.get_full_name(), ".", get_full_name};

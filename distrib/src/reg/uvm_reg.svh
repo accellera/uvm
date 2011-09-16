@@ -83,7 +83,7 @@ virtual class uvm_reg extends uvm_object;
    //
    extern function new (string name="",
                         int unsigned n_bits,
-                        int has_coverage);
+                        int has_coverage = UVM_NO_COVERAGE);
 
 
    // Function: configure
@@ -1148,10 +1148,10 @@ endclass: uvm_reg
 
 // new
 
-function uvm_reg::new(string name="", int unsigned n_bits, int has_coverage);
+function uvm_reg::new(string name="", int unsigned n_bits, int has_coverage = UVM_NO_COVERAGE);
    super.new(name);
    if (n_bits == 0) begin
-      `uvm_error("RegModel", $sformatf("Register \"%s\" cannot have 0 bits", get_name()));
+      `uvm_error("RegModel", $sformatf("Register \"%s\" cannot have 0 bits", get_full_name()));
       n_bits = 1;
    end
    m_n_bits      = n_bits;
@@ -1538,13 +1538,15 @@ endfunction
 // get_full_name
 
 function string uvm_reg::get_full_name();
-
+   if (uvm_object_context != "")
+      return {uvm_object_context, ".", get_name()};
+   
    if (m_regfile_parent != null)
       return {m_regfile_parent.get_full_name(), ".", get_name()};
 
    if (m_parent != null)
       return {m_parent.get_full_name(), ".", get_name()};
-   
+
    return get_name();
 endfunction: get_full_name
 
@@ -1841,9 +1843,11 @@ endfunction
 function void uvm_reg::include_coverage(string scope,
                                         uvm_reg_cvr_t models,
                                         uvm_object accessor = null);
-   uvm_reg_cvr_rsrc_db::set({"uvm_reg::", scope},
-                            "include_coverage",
-                            models, accessor);
+   uvm_resource#(uvm_reg_cvr_t) rsrc = new("include_coverage",
+                                           {"uvm_reg::", scope});
+   rsrc.write(models);
+   rsrc.set_override();
+   if (accessor != null) rsrc.record_write_access(accessor);
 endfunction
 
 
