@@ -11,6 +11,11 @@ module top;
       exec++;
       `uvm_info("SEQ", "Ending seq...", UVM_NONE)
     endtask 
+
+  function new(string name="seq");
+     super.new(name);
+  endfunction
+
   endclass
 
   class seqr extends uvm_sequencer;

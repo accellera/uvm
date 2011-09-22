@@ -26,6 +26,11 @@ class my_blk extends uvm_reg_block;
    local static bit m_data_size1 = check_data_width(64);
    local static bit m_data_size2 = check_data_width(32);
    `uvm_object_utils(my_blk)
+
+  function new(string name="my_blk");
+     super.new(name);
+  endfunction
+
 endclass
 
 

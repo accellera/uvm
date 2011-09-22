@@ -215,6 +215,11 @@ module test;
       `uvm_field_int(i, UVM_DEFAULT)
       `uvm_field_string(str, UVM_DEFAULT)
     `uvm_object_utils_end
+
+  function new(string name="subobject");
+     super.new(name);
+  endfunction
+
   endclass
 
   class myobject extends uvm_sequence_item;

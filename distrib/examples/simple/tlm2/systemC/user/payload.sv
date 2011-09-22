@@ -62,6 +62,11 @@ class payload extends uvm_sequence_item;
       data[31:24] = BA[7];
       response    = BA[8];
    endfunction
+
+  function new(string name="payload");
+     super.new(name);
+  endfunction
+
 endclass
 
 

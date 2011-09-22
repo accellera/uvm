@@ -31,4 +31,9 @@ endclass : my_seqr
 
 class my_seq extends uvm_sequence;
   `uvm_object_utils(my_seq)
+
+  function new(string name="my_seq");
+     super.new(name);
+  endfunction
+
 endclass : my_seq

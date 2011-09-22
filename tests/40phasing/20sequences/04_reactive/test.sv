@@ -78,6 +78,11 @@ class myseq extends uvm_sequence #(uvm_sequence_item);
     if (starting_phase!=null) starting_phase.drop_objection(this);
 
   endtask
+
+  function new(string name="myseq");
+     super.new(name);
+  endfunction
+
 endclass
 
 // Reactive Sequences
@@ -86,6 +91,11 @@ class my_reactive extends uvm_sequence;
   static int configure_cnt = 0;
   static int main_cnt = 0;
   static int shutdown_cnt = 0;
+
+  function new(string name="my_reactive");
+     super.new(name);
+  endfunction
+
 endclass
 class my_reactive_configure extends my_reactive;
   `uvm_object_utils(my_reactive_configure)
@@ -97,6 +107,11 @@ class my_reactive_configure extends my_reactive;
       #10;
     end
   endtask
+
+  function new(string name="my_reactive_configure");
+     super.new(name);
+  endfunction
+
 endclass
 class my_reactive_main extends my_reactive;
   `uvm_object_utils(my_reactive_main)
@@ -108,6 +123,11 @@ class my_reactive_main extends my_reactive;
       #10;
     end
   endtask
+
+  function new(string name="my_reactive_main");
+     super.new(name);
+  endfunction
+
 endclass
 class my_reactive_shutdown extends my_reactive;
   `uvm_object_utils(my_reactive_shutdown)
@@ -119,6 +139,11 @@ class my_reactive_shutdown extends my_reactive;
       #10;
     end
   endtask
+
+  function new(string name="my_reactive_shutdown");
+     super.new(name);
+  endfunction
+
 endclass
 
 // Active Sequences
@@ -131,6 +156,11 @@ class my_config_seq extends myseq;
     super.body();
     end_cnt++;
   endtask
+
+  function new(string name="my_config_seq");
+     super.new(name);
+  endfunction
+
 endclass
 class my_main_seq extends myseq;
   static int start_cnt = 0, end_cnt = 0;
@@ -141,6 +171,11 @@ class my_main_seq extends myseq;
     super.body();
     end_cnt++;
   endtask
+
+  function new(string name="my_main_seq");
+     super.new(name);
+  endfunction
+
 endclass
 class my_shutdown_seq extends myseq;
   static int start_cnt = 0, end_cnt = 0;
@@ -151,6 +186,11 @@ class my_shutdown_seq extends myseq;
     super.body();
     end_cnt++;
   endtask
+
+  function new(string name="my_shutdown_seq");
+     super.new(name);
+  endfunction
+
 endclass
 
 class myseqr extends uvm_sequencer;

@@ -47,6 +47,11 @@ module test;
       `uvm_field_int(i, UVM_DEFAULT)
       `uvm_field_string(str, UVM_DEFAULT)
     `uvm_object_utils_end
+
+  function new(string name="myobject");
+     super.new(name);
+  endfunction
+
   endclass
 
   class container extends uvm_sequence_item;
@@ -56,7 +61,8 @@ module test;
       `uvm_field_array_object(object, UVM_DEFAULT)
       `uvm_field_int(value, UVM_DEFAULT)
     `uvm_object_utils_end
-    function new;
+    function new(string name = "container");
+      super.new(name);
       object=new[1];
       foreach(object[i]) object[i] = new;
       object[0].color = ORANGE; object[0].i = 'haa; object[0].str = "zero";

@@ -56,6 +56,11 @@ class my_blk extends uvm_reg_block;
    endfunction
    
    `uvm_object_utils(my_blk)
+
+  function new(string name="my_blk");
+     super.new(name);
+  endfunction
+
 endclass
 
 

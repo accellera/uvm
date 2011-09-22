@@ -51,4 +51,9 @@ class mem_seq_item #(int unsigned ADDR_SIZE=16, int unsigned DATA_SIZE=8)
     return s;
   endfunction
 
+
+  function new(string name="mem_seq_item");
+     super.new(name);
+  endfunction
+
 endclass

@@ -66,6 +66,11 @@ class ext1 extends uvm_tlm_extension#(ext1_ext);
    `uvm_object_utils_begin(ext1)      
      `uvm_field_int(a, UVM_DEFAULT)
    `uvm_object_utils_end
+
+  function new(string name="ext1");
+     super.new(name);
+  endfunction
+
 endclass
 
 `else
@@ -75,6 +80,11 @@ class ext1 extends uvm_tlm_extension#(ext1);
    `uvm_object_utils_begin(ext1)      
      `uvm_field_int(a, UVM_DEFAULT)
    `uvm_object_utils_end
+
+
+  function new(string name="ext1");
+     super.new(name);
+  endfunction
 
 endclass
 
