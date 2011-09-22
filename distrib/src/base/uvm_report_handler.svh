@@ -140,6 +140,19 @@ class uvm_report_handler;
     srvr.f_display(file, uvm_cy_copyright);
     srvr.f_display(file,
       "----------------------------------------------------------------");
+
+`ifndef UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
+    srvr.f_display(file,
+                   "\n     ***********       IMPORTANT NOTICE         ************\n");
+    srvr.f_display(file, "You are using a version of the UVM library that has been compiled");
+    srvr.f_display(file, "with `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR undefined.\n");
+    srvr.f_display(file, "As soon as convenient, you should define that symbol");
+    srvr.f_display(file, "and add any missing constructors reported by the compile-time");
+    srvr.f_display(file, "errors, as this will become the default behavior in UVM-1.2");
+    srvr.f_display(file, "\nSee http://www.accellera.org/... for more details.");
+    srvr.f_display(file,
+                   "\n     ***********       IMPORTANT NOTICE         ************\n");
+`endif
   endfunction
 
 
