@@ -2100,6 +2100,8 @@ task uvm_reg::write(output uvm_status_e      status,
 
    XatomicX(1);
 
+   set(value);
+
    rw = uvm_reg_item::type_id::create("write_item",,get_full_name());
    rw.element      = this;
    rw.element_kind = UVM_REG;
