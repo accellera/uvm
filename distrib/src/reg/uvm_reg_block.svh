@@ -1617,7 +1617,7 @@ task uvm_reg_block::update(output uvm_status_e  status,
    if (!needs_update()) begin
      `uvm_info("RegModel", $sformatf("%s:%0d - RegModel block %s does not need updating",
                     fname, lineno, this.get_name()), UVM_HIGH);
-
+      return;
    end
    
    `uvm_info("RegModel", $sformatf("%s:%0d - Updating model block %s with %s path",
