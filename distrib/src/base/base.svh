@@ -62,7 +62,7 @@
   `include "base/uvm_report_object.svh"
 
   // Base transaction object
-  `include "base/uvm_transaction.svh"
+  `include "base/uvm_transaction.svh"   
 
   // The phase declarations
   `include "base/uvm_phase.svh"
@@ -90,5 +90,12 @@
 
   // Command Line Processor
   `include "base/uvm_cmdline_processor.svh"
+
+  // Command line parser
+  `include "base/uvm_ctypes.svh"
+  `include "base/uvm_cl_if.svh"
+  `include "base/uvm_cl_lexer.svh"
+  `include "base/uvm_cl_parser.svh"
+
 
 `endif // UVM_BASE_SVH

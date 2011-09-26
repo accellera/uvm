@@ -24,6 +24,8 @@
 
 `include "uvm_macros.svh"
 
+`include "base/uvm_ctypes_pkg.svh"
+
 package uvm_pkg;
 
   `include "dpi/uvm_dpi.svh"
@@ -35,6 +37,7 @@ package uvm_pkg;
   `include "reg/uvm_reg_model.svh"
 
 endpackage
+
 
 `endif
 
