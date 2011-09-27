@@ -2287,7 +2287,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
    rw.element_kind = UVM_REG;
 
    // REPORT
-   if (uvm_report_enabled(UVM_HIGH)) begin
+   if (uvm_report_enabled(UVM_HIGH, UVM_INFO, "RegModel")) begin
      string path_s,value_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -2519,7 +2519,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
    rw.element_kind = UVM_REG;
 
    // REPORT
-   if (uvm_report_enabled(UVM_HIGH)) begin
+   if (uvm_report_enabled(UVM_HIGH, UVM_INFO, "RegModel")) begin
      string path_s,value_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
