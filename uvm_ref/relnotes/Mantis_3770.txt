@@ -1,6 +1,14 @@
 Section: Mandatory uvm_object Constructors
 
-This page describe important actions users need to take before the next UVM release.
+This page describes important actions users need to take before the next UVM release.
+
+The factory is being updated so that it passes the instance name into
+the object's constructor.
+This update allows the instance name specified by the user to the
+factory to be used in the constructor as in the examples shown below.
+However, if an object has no constructor defined, it will use a
+default constructor with no argument, resulting in a compile-time
+error for mismatching arguments.
 
 
 Topic: Why uvm_object constructors are now mandatory
@@ -138,6 +146,8 @@ See the ~--help~ command-line option for more details.
 The script may not be able to automatically identify all classes
 with missing constructors,
 or users may prefer to manually modify their source files.
+The script is also unable to fix unsuitable constructors;
+those will need to be fixed manually.
 Because the error is a compile-time error, it will be easy to identify
 any remaining changes that are required.
 However, because much of the factory code is hidden in the utility macros,
@@ -165,10 +175,10 @@ Questa:
 
 IUS:
 
-|file: test114.sv
+|file: test.sv
 |`uvm_object_utils(my_obj)
 |                        |
-|ncvlog: *E,TOOMAC (/home/uwes/src/example-store/test114.sv,8|24): too many actual arguments [10.2.2][10.3(IEEE)].
+|ncvlog: *E,TOOMAC (test.sv,8|24): too many actual arguments [10.2.2][10.3(IEEE)].
 
 
 VCS:
