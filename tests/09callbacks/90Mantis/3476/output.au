@@ -1,0 +1,38 @@
+---------------------------------------
+Name            Type       Size  Value 
+---------------------------------------
+ev              uvm_event  -     @459  
+  num_waiters   int        32    'd0   
+  on            bit        1     'b0   
+  trigger_time  time       64    0     
+  trigger_data  object     -     <null>
+    [0]         <unknown>  -     @460  
+    [1]         <unknown>  -     @461  
+    [2]         <unknown>  -     @462  
+    [3]         <unknown>  -     @463  
+    [4]         <unknown>  -     @464  
+    [5]         <unknown>  -     @465  
+    [6]         <unknown>  -     @466  
+    [7]         <unknown>  -     @467  
+    [8]         <unknown>  -     @468  
+    [9]         <unknown>  -     @469  
+---------------------------------------
+---------------------------------------
+Name            Type       Size  Value 
+---------------------------------------
+new_ev          uvm_event  -     @470  
+  num_waiters   int        32    'd0   
+  on            bit        1     'b0   
+  trigger_time  time       64    0     
+  trigger_data  object     -     <null>
+    [0]         <unknown>  -     @460  
+    [1]         <unknown>  -     @461  
+    [2]         <unknown>  -     @462  
+    [3]         <unknown>  -     @463  
+    [4]         <unknown>  -     @464  
+    [5]         <unknown>  -     @465  
+    [6]         <unknown>  -     @466  
+    [7]         <unknown>  -     @467  
+    [8]         <unknown>  -     @468  
+    [9]         <unknown>  -     @469  
+---------------------------------------

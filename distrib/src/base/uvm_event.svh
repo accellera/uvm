@@ -352,8 +352,8 @@ class uvm_event extends uvm_object;
     on = e.on;
     trigger_time = e.trigger_time;
     trigger_data = e.trigger_data;
-    for(int i=0; i<callbacks.size(); ++i) void'(callbacks.pop_front());
-    for(int i=0; i<e.callbacks.size(); ++i) callbacks.push_back(e.callbacks[i]);
+    callbacks.delete();
+    for(int i=0; i<e.callbacks.size(); ++i) callbacks.push_back(e.callbacks[i]); 
   endfunction
 
 endclass : uvm_event
