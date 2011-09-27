@@ -39,6 +39,7 @@ module test;
         if(get_id()=="OBJTN_ZERO") begin
           $display("** UVM TEST PASSED **");
           set_severity(UVM_WARNING);
+          set_action(UVM_EXIT);
         end
         return THROW;
      endfunction
