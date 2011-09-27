@@ -2191,6 +2191,8 @@ task uvm_reg::do_write (uvm_reg_item rw);
          uvm_reg_data_t final_val;
          uvm_reg_backdoor bkdr = get_backdoor();
 
+         value = rw.value[0];
+
          // Mimick the final value after a physical read
          rw.kind = UVM_READ;
          if (bkdr != null)
