@@ -145,6 +145,7 @@ the syntax error may not point to the ultimate cause of the problem
 and may be confusing the diagnose.
 For example, this simple file
 
+| `include "uvm_macros.svh"
 | program test;
 | 
 | import uvm_pkg::*;
@@ -164,7 +165,11 @@ Questa:
 
 IUS:
 
-| TBD
+|file: test114.sv
+|`uvm_object_utils(my_obj)
+|                        |
+|ncvlog: *E,TOOMAC (/home/uwes/src/example-store/test114.sv,8|24): too many actual arguments [10.2.2][10.3(IEEE)].
+
 
 VCS:
 
