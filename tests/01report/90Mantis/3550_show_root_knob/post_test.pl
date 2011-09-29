@@ -61,7 +61,7 @@ if (!open(L, ">$testdir/post.log")) {
 print L $logfile;
 close(L);
 
-if (system("diff $testdir/post.log $testdir/log.au > $testdir/log.df")) {
+if (system("diff -b $testdir/post.log $testdir/log.au > $testdir/log.df")) {
   $post_test = "$log and log.au differ";
   return 1;
 }

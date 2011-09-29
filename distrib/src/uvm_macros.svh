@@ -33,6 +33,7 @@
 `define _local local
 `define uvm_delay(TIME) #(TIME);
 `define UVM_USE_TYPENAME
+`define UVM_EXTRA_TYPENAME_ARG
 //
 // Any vendor specific defines go here.
 //
@@ -47,7 +48,8 @@
 `endif
 
 `ifdef QUESTA
-//`define UVM_USE_BITSTREAM_OPS
+`undef UVM_EXTRA_TYPENAME_ARG
+`define UVM_EXTRA_TYPENAME_ARG ,39
 `endif
 
 `ifdef INCA

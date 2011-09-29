@@ -102,7 +102,7 @@
 //-----------------------------------------------------------------------------
 // MACRO: `uvm_do_callbacks
 //
-//| `uvm_do_callbacks(T,CB,METHOD,CALL)
+//| `uvm_do_callbacks(T,CB,METHOD)
 //
 // Calls the given ~METHOD~ of all callbacks of type ~CB~ registered with
 // the calling object (i.e. ~this~ object), which is or is based on type ~T~.
