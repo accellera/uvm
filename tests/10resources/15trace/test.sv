@@ -21,6 +21,10 @@
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 
+class cfg;
+  int a;
+endclass
+
 //----------------------------------------------------------------------
 // leaf
 //----------------------------------------------------------------------
@@ -28,6 +32,7 @@ class leaf extends uvm_component;
 
   int A;
   int B;
+  cfg C;
 
   `uvm_component_utils_begin(leaf)
       `uvm_field_int(B, UVM_ALL_ON)
@@ -41,6 +46,9 @@ class leaf extends uvm_component;
      super.build_phase(phase);
      if(!get_config_int("A", A)) begin
         `uvm_error("TESTERROR", "Did not get setting for A");
+     end
+     if(!uvm_resource_db#(cfg)::read_by_name(get_full_name(), "C", C, this)) begin
+        `uvm_error("TESTERROR", "Did not get setting for C");
      end
   endfunction
 endclass
@@ -105,7 +113,9 @@ class test extends uvm_component;
   endfunction
 
   function void build_phase(uvm_phase phase);
+    cfg c = new;
     e = new("env", this);
+    uvm_resource_db#(cfg)::set("*", "C", c, this);
   endfunction
 
   task run_phase(uvm_phase phase);
@@ -122,7 +132,7 @@ class test extends uvm_component;
      uvm_report_server svr;
      svr = _global_reporter.get_report_server();
 
-     if (my_catcher::seen != 20) begin
+     if (my_catcher::seen != 23) begin
         `uvm_error("TEST", $sformatf("Saw %0d messages instead of 20",
                                      my_catcher::seen))
      end
