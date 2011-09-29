@@ -19,7 +19,7 @@ class test extends uvm_test;
     bar #(xyz) b = f;
     super.new(name,parent);
 
-    typename = $typename(f `UVM_QUESTA_TYPENAME_ARG);
+    typename = $typename(f `UVM_EXTRA_TYPENAME_ARG);
 
     // filter out spaces?
 
