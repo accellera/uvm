@@ -186,7 +186,7 @@ class uvm_reg_item extends uvm_sequence_item;
          " ele_kind=",element_kind.name(),
          " ele_name=",element==null?"null":element.get_full_name() };
 
-    if (value.size() > 1 && uvm_report_enabled(UVM_HIGH, UVM_INFO, "RegModel")) begin
+    if (value.size() > 1 && uvm_report_enabled(UVM_HIGH)) begin
       value_s = "'{";
       foreach (value[i])
          value_s = {value_s,$sformatf("%0h,",value[i])};

@@ -1647,7 +1647,7 @@ task uvm_mem::do_write(uvm_reg_item rw);
       cb.post_write(rw);
 
    // REPORT
-   if (uvm_report_enabled(UVM_HIGH, UVM_INFO, "RegModel")) begin
+   if (uvm_report_enabled(UVM_HIGH)) begin
      string path_s,value_s,pre_s,range_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -1655,7 +1655,7 @@ task uvm_mem::do_write(uvm_reg_item rw);
      else
        path_s = (get_backdoor() != null) ? "user backdoor" : "DPI backdoor";
 
-     if (rw.value.size() > 1 && uvm_report_enabled(UVM_HIGH, UVM_INFO, "RegModel")) begin
+     if (rw.value.size() > 1 && uvm_report_enabled(UVM_HIGH)) begin
        value_s = "='{";
        pre_s = "Burst ";
        foreach (rw.value[i])
@@ -1749,7 +1749,7 @@ task uvm_mem::do_read(uvm_reg_item rw);
       cb.post_read(rw);
 
    // REPORT
-   if (uvm_report_enabled(UVM_HIGH, UVM_INFO, "RegModel")) begin
+   if (uvm_report_enabled(UVM_HIGH)) begin
      string path_s,value_s,pre_s,range_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -1757,7 +1757,7 @@ task uvm_mem::do_read(uvm_reg_item rw);
      else
        path_s = (get_backdoor() != null) ? "user backdoor" : "DPI backdoor";
 
-     if (rw.value.size() > 1 && uvm_report_enabled(UVM_HIGH, UVM_INFO, "RegModel")) begin
+     if (rw.value.size() > 1 && uvm_report_enabled(UVM_HIGH)) begin
        value_s = "='{";
        pre_s = "Burst ";
        foreach (rw.value[i])
