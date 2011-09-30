@@ -122,6 +122,25 @@ class uvm_report_handler;
   endfunction
 
 
+  // Function- report_relnotes_banner
+  //
+  // Internal method called by <uvm_report_object::report_header>.
+
+  static local bit m_relnotes_done;
+  function void report_relnotes_banner(UVM_FILE file = 0);
+     uvm_report_server srvr;
+
+     if (m_relnotes_done) return;
+     
+     srvr = uvm_report_server::get_server();
+     
+     srvr.f_display(file,
+                    "\n  ***********       IMPORTANT RELEASE NOTES         ************");
+     
+     m_relnotes_done = 1;
+  endfunction
+
+   
   // Function- report_header
   //
   // Internal method called by <uvm_report_object::report_header>
@@ -141,18 +160,32 @@ class uvm_report_handler;
     srvr.f_display(file,
       "----------------------------------------------------------------");
 
-`ifndef UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
-    srvr.f_display(file,
-                   "\n     ***********       IMPORTANT NOTICE         ************\n");
-    srvr.f_display(file, "You are using a version of the UVM library that has been compiled");
-    srvr.f_display(file, "with `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR undefined.\n");
-    srvr.f_display(file, "As soon as convenient, you should define that symbol");
-    srvr.f_display(file, "and add any missing constructors reported by the compile-time");
-    srvr.f_display(file, "errors, as this will become the default behavior in UVM-1.2");
-    srvr.f_display(file, "\nSee http://www.accellera.org/... for more details.");
-    srvr.f_display(file,
-                   "\n     ***********       IMPORTANT NOTICE         ************\n");
+    begin
+       uvm_cmdline_processor clp;
+       string args[$];
+     
+       clp = uvm_cmdline_processor::get_inst();
+
+       if (clp.get_arg_matches("+UVM_NO_RELNOTES", args)) return;
+
+`ifndef UVM_NO_DEPRECATED
+       report_relnotes_banner(file);
+       srvr.f_display(file, "\n  You are using a version of the UVM library that has been compiled");
+       srvr.f_display(file, "  with `UVM_NO_DEPRECATED undefined.");
+       srvr.f_display(file, "  See http://www.accellera.org/... for more details.");
 `endif
+
+`ifndef UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
+       report_relnotes_banner(file);
+       srvr.f_display(file, "\n  You are using a version of the UVM library that has been compiled");
+       srvr.f_display(file, "  with `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR undefined.");
+       srvr.f_display(file, "  See http://www.accellera.org/... for more details.");
+`endif
+
+       if (m_relnotes_done)
+          srvr.f_display(file, "\n      (Specify +UVM_NO_RELNOTES to turn off this notice)\n");
+
+    end
   endfunction
 
 

@@ -34,9 +34,11 @@ Usage: $0 [options] tool {dir}
    dir      Name of the directories containing the UVM testcases
 
 Options:
+   -0       Do not define UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
    -c       Do not run. Only clean-up tool-generated files.
    -C opts  Add the specified options to the compilation command
    -d       Do not remove tool-generated files
+   -D       Define UVM_NO_DEPRECATED
    -f fname Execute tests listed in specified file (one per line)
    -F fname Write list of failing tests in specfied file instead of
                "tool.fails" (can later be used with -f)
@@ -54,7 +56,7 @@ USAGE
 
 require "getopts.pl";
 use Cwd 'abs_path'; 
-&Getopts("cC:df:F:PhR:Su:M:v");
+&Getopts("0cC:dDf:F:PhR:Su:M:v");
 &usage if $opt_h || $#ARGV < 0;
 
 $tool = shift(@ARGV);
@@ -260,7 +262,8 @@ sub run_one_test {
    if (!$opt_c) {
      print "<running>\n" if ($opt_v || $opt_P);
 
-     $comp_args = "+define+UVM_OBJECT_MUST_HAVE_CONSTRUCTOR";
+     $comp_args = "+define+UVM_OBJECT_MUST_HAVE_CONSTRUCTOR" unless $opt_0;
+     $comp_args = "+define+UVM_NO_DEPRECATED" if $opt_D;
      if (-e "$testdir/$tool.comp.args") {
        if (!open(ARGS, "< $testdir/$tool.comp.args")) {
 	 print "**FAIL** (Cannot read $tool.comp.args)\n";

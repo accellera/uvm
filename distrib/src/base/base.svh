@@ -23,6 +23,8 @@
 `ifndef UVM_BASE_SVH
 `define UVM_BASE_SVH
 
+  typedef class uvm_cmdline_processor;
+
   // Miscellaneous classes and functions. uvm_void is defined in uvm_misc,
   // along with some auxillary functions that UVM needs but are not really
   // part of UVM.
