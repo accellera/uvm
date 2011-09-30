@@ -480,7 +480,7 @@ virtual class uvm_report_catcher extends uvm_callback;
     input string filename,
     input int line 
   );
-    uvm_report_cb_iter iter = new(client);
+    int iter;
     uvm_report_catcher catcher;
     int thrown = 1;
     uvm_severity orig_severity;
@@ -510,7 +510,7 @@ virtual class uvm_report_catcher extends uvm_callback;
     m_orig_action    = action;
     m_orig_message   = message;      
 
-    catcher = iter.first();
+    catcher = uvm_report_cb::get_first(iter,client);
     while(catcher != null) begin
       if (!catcher.callback_mode()) continue;
       thrown = catcher.process_report_catcher(); 
@@ -523,7 +523,7 @@ virtual class uvm_report_catcher extends uvm_callback;
          endcase   
          break;
       end 
-      catcher = iter.next();
+      catcher = uvm_report_cb::get_next(iter,client);
     end //while
 
     //update counters if message was returned with demoted severity
