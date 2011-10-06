@@ -103,7 +103,7 @@ class uvm_sequence_item extends uvm_transaction;
   endfunction
 
 
-  // Function- set_item_context
+  // Function: set_item_context
   //
   // Set the sequence and sequencer execution context for a sequence item
 
