@@ -1760,6 +1760,8 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
       byte_en &= (1<<idx)-1;
       for (int i=0; i<skip; i++)
         void'(addrs.pop_front());
+      while (addrs.size() > (n_bits/(bus_width*8) + 1))
+        void'(addrs.pop_back());
     end
               
     foreach(addrs[i]) begin: foreach_addr
@@ -1885,6 +1887,8 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       byte_en &= (1<<idx)-1;
       for (int i=0; i<skip; i++)
         void'(addrs.pop_front());
+      while (addrs.size() > (n_bits/(bus_width*8) + 1))
+        void'(addrs.pop_back());
     end
     rw.value[val_idx] = 0;
               
