@@ -1,6 +1,7 @@
 //----------------------------------------------------------------------
 //   Copyright 2010 Mentor Graphics Corporation
 //   Copyright 2011 Cadence Design Systems, Inc. 
+//   Copyright 2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -18,42 +19,41 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-class m_uvm_typename_wrapper #(type T=int);
-    static function string typename(T val);
-`ifdef UVM_USE_TYPENAME     
-    return $typename(T);
-`else
-    string r;
-    $uvm_type_name(r,val);
-    return r;
-`endif    
-    endfunction
-endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_resource_converter
+// CLASS: uvm_resource_converter#(T)
 //
 // The uvm_resource_converter class provides a policy object for doing
 // convertion from resource value to string.
 //
 //------------------------------------------------------------------------------
 class uvm_resource_converter #(type T=int);
-   local static uvm_resource_converter #(T) singleton;
-   static function uvm_resource_converter #(T) get();
-      if (singleton==null) 
-         singleton = new();
 
-      return singleton;
-   endfunction
-    
    // Function: convert2string
    // Convert a value of type ~T~ to a string that can be displayed.
    //
    // By default, returns the name of the type
    //
    virtual function string convert2string(T val);
-        return {"(", m_uvm_typename_wrapper#(T)::typename(val), ") ?"};
+        return {"(", typename(val), ") ?"};
+   endfunction
+
+   // Function: typename
+   // Return the name of the type as a string
+   //
+   static function string typename(T val);
+`ifdef UVM_USE_TYPENAME     
+      return $typename(T);
+`else
+ `ifdef INCA
+      string r;
+      $uvm_type_name(r,val);
+      return r;
+ `else
+      return "<unknown typename>";
+ `endif
+`endif    
    endfunction
 endclass
 
@@ -70,43 +70,31 @@ endclass
 //----------------------------------------------------------------------
 
 class uvm_resource_default_converter#(type T=int) extends uvm_resource_converter#(T);
-   local static uvm_resource_default_converter #(T) singleton;
-   static function uvm_resource_default_converter #(T) get();
-      if (singleton==null) 
-         singleton = new();
-
-      return singleton;
-   endfunction
-   
-   local string name;
+   local static uvm_resource_default_converter#(T) m_singleton;
+   local string m_name;
    
    virtual function string convert2string(T val);
-      return $sformatf("(%s) %0p", name, val);
-   endfunction
-   
-   `_local function new();
+      return $sformatf("(%s) %0p", (m_name=="")?typename(val):m_name, val);
    endfunction
 
-   // Function: register
-   // Register the default resource value conversion function
-   // for this resource type.
-   //
-   //| void'(uvm_resource_default_converter#(bit[7:0])::register());
-   //
-   static function void register(string name=
-`ifdef UVM_USE_TYPENAME
-   $typename(T)
-`else
-    "<unknown-r>"
-`endif   
-   );
-         void'(uvm_resource_default_converter#(T)::get());
-         singleton.m_set_name(name);
-         uvm_resource#(T)::set_converter(singleton);
+   `_local function new();
    endfunction
    
-   virtual function void m_set_name(string name);
-    this.name=name;
+   // Function: register
+   // Register this policy class as the resource value conversion function
+   // for this resource type.
+   //
+   //| uvm_resource_default_converter#(bit[7:0])::register();
+   //
+   // If a ~typename~ is specified, it will be used as the name of the type
+   // instead of the name returned by the <uvm_resource_converter#(T)::typename()> method.
+   //
+   static function void register(string typename = "");
+      if (m_singleton == null) begin
+         m_singleton = new();
+         m_singleton.m_name = typename;
+      end
+      uvm_resource#(T)::set_converter(m_singleton);
    endfunction
 endclass
 
@@ -122,18 +110,10 @@ endclass
 //----------------------------------------------------------------------
 
 class uvm_resource_convert2string_converter#(type T=int) extends uvm_resource_converter#(T);
-   local static uvm_resource_convert2string_converter #(T) singleton;
-   static function uvm_resource_convert2string_converter #(T) get();
-      if (singleton==null) 
-         singleton = new();
-
-      return singleton;
-   endfunction
-   
-   local string name;
+   local static uvm_resource_convert2string_converter #(T) m_singleton;
  
    virtual function string convert2string(T val);   
-      return $sformatf("(%s) %0s", m_uvm_typename_wrapper#(T)::typename(val),
+      return $sformatf("(%s) %0s", typename(val),
                        (val == null) ? "(null)" : val.convert2string());
    endfunction
 
@@ -141,14 +121,14 @@ class uvm_resource_convert2string_converter#(type T=int) extends uvm_resource_co
    endfunction
 
    // Function: register
-   // Register the default resource value conversion function
+   // Register this policy class as the resource value conversion function
    // for this resource type.
    //
-   //| void'(uvm_resource_class_converter#(my_obj)::register());
+   //| uvm_resource_convert2string_converter#(my_obj)::register();
    //
    static function void register();
-        void'(uvm_resource_convert2string_converter#(T)::get());
-        uvm_resource#(T)::set_converter(singleton);
+      if (m_singleton == null) m_singleton = new();
+      uvm_resource#(T)::set_converter(m_singleton);
    endfunction
 endclass
     
@@ -163,16 +143,10 @@ endclass
 //----------------------------------------------------------------------
 
 class uvm_resource_sprint_converter#(type T=int) extends uvm_resource_converter#(T);
-   local static uvm_resource_sprint_converter #(T) singleton;
-   static function uvm_resource_sprint_converter #(T) get();
-      if (singleton==null) 
-         singleton = new();
-
-      return singleton;
-   endfunction
+   local static uvm_resource_sprint_converter #(T) m_singleton;
 
    virtual function string convert2string(T val);
-      return $sformatf("(%s) %0s", m_uvm_typename_wrapper#(T)::typename(val),
+      return $sformatf("(%s) %0s", typename(val),
                        (val == null) ? "(null)" : {"\n",val.sprint()});
    endfunction
    
@@ -180,20 +154,20 @@ class uvm_resource_sprint_converter#(type T=int) extends uvm_resource_converter#
    endfunction
 
    // Function: register
-   // Register the default resource value conversion function
+   // Register this policy class as the resource value conversion function
    // for this resource type.
    //
    //| void'(uvm_resource_sprint_converter#(my_obj)::register());
    //
    static function void register();
-         void'(uvm_resource_sprint_converter#(T)::get());
-         uvm_resource#(T)::set_converter(singleton);
+      if (m_singleton == null) m_singleton = new();
+      uvm_resource#(T)::set_converter(m_singleton);
    endfunction
 endclass
 
 
 //
-// CLASS: m_uvm_resource_default_converters
+// CLASS- m_uvm_resource_default_converters
 // Singleton used to register default resource value converters
 // for the built-in singular types.
 //
@@ -203,7 +177,7 @@ class m_uvm_resource_default_converters;
    `_local function new();
    endfunction
 
-   // Function: register
+   // Function- register
    // Explicitly initialize the singleton to eliminate race conditions
    //
    static function bit register();
@@ -221,10 +195,12 @@ class m_uvm_resource_default_converters;
          `__built_in(integer);
          `__built_in(time);
          `__built_in(real);
-//         `__built_in(shortreal);
          `__built_in(realtime);
          `__built_in(string);
          `__built_in(uvm_bitstream_t);
+         `__built_in(bit[7:0]);
+         `__built_in(bit[15:0]);
+         `__built_in(bit[31:0]);
 
          `undef __built_in
 
