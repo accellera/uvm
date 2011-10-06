@@ -84,6 +84,11 @@ class myseq extends uvm_sequence;
 
   endtask
 
+
+  function new(string name="myseq");
+     super.new(name);
+  endfunction
+
 endclass
 
 class myseqr extends uvm_sequencer;

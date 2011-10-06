@@ -78,6 +78,14 @@
   `endif
 `endif
 
+//
+// Deprecation Control Macros
+//
+`ifdef UVM_NO_DEPRECATED
+  `define UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
+`endif
+
+
 `include "macros/uvm_version_defines.svh"
 `include "macros/uvm_message_defines.svh"
 `include "macros/uvm_phase_defines.svh"

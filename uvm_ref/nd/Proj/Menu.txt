@@ -48,7 +48,12 @@ Don't Index: Typedefs
 # --------------------------------------------------------------------------
 
 
-File: Classes and Utilities  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/uvm_ref/intro.txt)
+File: Introduction  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/uvm_ref/intro.txt)
+
+Group: Release Notes  {
+
+   File: Mandatory uvm_object Constructors  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/uvm_ref/relnotes/Mantis_3770.txt)
+   }  # Group: Release Notes
 
 Group: Base  {
 

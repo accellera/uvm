@@ -52,6 +52,11 @@ class bot_sequence extends uvm_sequence #(bot_item);
     `uvm_field_object ( req, UVM_ALL_ON )
   `uvm_object_utils_end
 
+
+  function new(string name="bot_sequence");
+     super.new(name);
+  endfunction
+
 endclass : bot_sequence
 
 class bot_driver extends uvm_driver#(bot_item);

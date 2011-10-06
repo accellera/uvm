@@ -41,6 +41,11 @@ class myseq extends uvm_sequence;
     end_cnt++;
     if (starting_phase!=null) starting_phase.drop_objection(this);
   endtask
+
+  function new(string name="myseq");
+     super.new(name);
+  endfunction
+
 endclass
 
 class myseqr extends uvm_sequencer;

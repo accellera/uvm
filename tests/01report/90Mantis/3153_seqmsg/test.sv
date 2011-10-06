@@ -53,6 +53,11 @@ module top;
     function void doit();
       `uvm_info("ITEM", "This is a message from an item", UVM_NONE)
     endfunction
+
+  function new(string name="myitem");
+     super.new(name);
+  endfunction
+
   endclass
 
   class myseq extends uvm_sequence#(myitem);
@@ -65,6 +70,11 @@ module top;
       req.doit();
       global_item.doit(); //not attached to this sequencer, so should use root
     endtask
+
+  function new(string name="myseq");
+     super.new(name);
+  endfunction
+
   endclass
 
   class mysequencer extends uvm_sequencer#(myitem);

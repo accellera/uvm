@@ -36,6 +36,11 @@ class obj extends uvm_object;
     `uvm_field_string(xt, UVM_DEFAULT)
   `uvm_field_utils_end
 
+
+  function new(string name="obj");
+     super.new(name);
+  endfunction
+
 endclass
 
 //----------------------------------------------------------------------

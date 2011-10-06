@@ -45,6 +45,11 @@ module test;
       `uvm_field_array_enum(numbers, num, UVM_DEFAULT)
       `uvm_field_array_enum(colors, col, UVM_DEFAULT)
     `uvm_object_utils_end
+
+  function new(string name="myobject");
+     super.new(name);
+  endfunction
+
   endclass
 
   class test extends uvm_test;

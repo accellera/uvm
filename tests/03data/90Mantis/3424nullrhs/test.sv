@@ -28,6 +28,11 @@ module test;
     `uvm_object_utils_begin(data)
       `uvm_field_int(a, UVM_ALL_ON)
     `uvm_object_utils_end
+
+  function new(string name="data");
+     super.new(name);
+  endfunction
+
   endclass
 
   class contain extends uvm_sequence_item;
@@ -36,6 +41,11 @@ module test;
     `uvm_object_utils_begin(contain)
       `uvm_field_object(d, UVM_ALL_ON)
     `uvm_object_utils_end
+
+  function new(string name="contain");
+     super.new(name);
+  endfunction
+
   endclass
 
   class test extends uvm_test;

@@ -103,6 +103,11 @@ class uvm_recorder extends uvm_object;
   uvm_recursion_policy_enum policy = UVM_DEFAULT_POLICY;
 
 
+  function new(string name = "uvm_recorder");
+    super.new(name);
+  endfunction
+
+
   // Function: get_type_name
   //
   // Returns type name of the recorder. Subtypes must override this method

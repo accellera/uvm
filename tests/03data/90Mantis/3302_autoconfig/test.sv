@@ -37,6 +37,11 @@ class my_object extends uvm_object;
   `uvm_field_int(field,UVM_PRINT)
   `uvm_field_string(msg,UVM_PRINT)
   `uvm_object_utils_end
+
+  function new(string name="my_object");
+     super.new(name);
+  endfunction
+
 endclass
   
 class my_component extends uvm_component;

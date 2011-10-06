@@ -169,6 +169,11 @@ module test();
       rw.status = UVM_IS_OK;
     endfunction
     `uvm_object_utils(reg2uvc_adapter)
+
+  function new(string name="reg2uvc_adapter");
+     super.new(name);
+  endfunction
+
   endclass
 
   class test extends uvm_test;
