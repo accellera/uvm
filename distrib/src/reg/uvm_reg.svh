@@ -2367,7 +2367,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
 
    uvm_reg_cb_iter  cbs = new(this);
    uvm_reg_map_info map_info;
-   uvm_reg_addr_t   value;
+   uvm_reg_data_t   value;
 
    m_fname   = rw.fname;
    m_lineno  = rw.lineno;
@@ -2427,6 +2427,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
                string acc = m_fields[i].get_access(uvm_reg_map::backdoor());
                if (acc == "RC" ||
                    acc == "WRC" ||
+                   acc == "WSRC" ||
                    acc == "W1SRC" ||
                    acc == "W0SRC") begin
                   value &= ~(((1<<m_fields[i].get_n_bits())-1)
@@ -2434,6 +2435,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
                end
                else if (acc == "RS" ||
                         acc == "WRS" ||
+                        acc == "WCRS" ||
                         acc == "W1CRS" ||
                         acc == "W0CRS") begin
                   value |= (((1<<m_fields[i].get_n_bits())-1)
@@ -2449,10 +2451,14 @@ task uvm_reg::do_read(uvm_reg_item rw);
             end
 
             if (value != rw.value[0]) begin
+              uvm_reg_data_t saved;
+              saved = rw.value[0];
+              rw.value[0] = value;
               if (bkdr != null)
-                 bkdr.read(rw);
+                 bkdr.write(rw);
               else
-                 backdoor_read(rw);
+                 backdoor_write(rw);
+              rw.value[0] = saved;
             end
 
             rw.value[0] &= ~wo_mask;
