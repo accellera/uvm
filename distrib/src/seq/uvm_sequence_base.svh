@@ -260,12 +260,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     // Check that the response queue is empty from earlier runs
     clear_response_queue();
 
-    if (parent_sequence != null)
-      m_parent_sequence  = parent_sequence;
-    m_sequencer          = sequencer;
     m_priority           = this_priority;
-
-    m_set_p_sequencer();
 
     if (m_sequencer != null) begin
         if (m_parent_sequence == null) begin

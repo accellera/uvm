@@ -46,7 +46,7 @@ class subseq extends uvm_sequence;
          `uvm_error("NOPSEQ", "Parent sequence not set before start()")
       end
       if (get_sequencer() == null) begin
-         `uvm_error("NOPSEQR", "Parent sequencer not set before randomize()")
+         `uvm_error("NOPSEQR", "Parent sequencer not set before start()")
       end
    endtask
 

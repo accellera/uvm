@@ -109,9 +109,6 @@ class uvm_sequence_item extends uvm_transaction;
 
   function void set_item_context(uvm_sequence_base  parent_seq,
                                  uvm_sequencer_base sequencer = null);
-     if (parent_seq == get_parent_sequence() &&
-         sequencer == get_sequencer()) return;
-        
      set_use_sequence_info(1);
      set_parent_sequence(parent_seq);
      if (sequencer == null && parent_seq != null) sequencer = parent_seq.get_sequencer();
