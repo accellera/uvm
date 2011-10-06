@@ -135,7 +135,7 @@ Group: TLM  {
       File: FIFO Base  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_tlm_fifo_base.svh)
       File: Request-Response Channel  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_tlm_req_rsp.svh)
       File: Sequence Item Pull Ports  (/remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_sqr_connections.svh)
-      File: uvm_sqr_if_base #&lparen;REQ,RSP&rparen;  (/remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_sqr_ifs.svh)
+      File: Sequencer Base  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_sqr_ifs.svh)
       }  # Group: TLM1
 
    Group: TLM2  {
