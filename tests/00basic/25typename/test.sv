@@ -15,9 +15,13 @@ class test extends uvm_test;
 
   function new(string name, uvm_component parent=null);
     string typename,exp_typename;
-    foo #(bar#(xyz),88) f = new;
-    bar #(xyz) b = f;
+    foo #(bar#(xyz),88) f;
+    bar #(xyz) b;
+     
     super.new(name,parent);
+
+    f = new;
+    b = f;
 
     typename = $typename(f `UVM_EXTRA_TYPENAME_ARG);
 
@@ -28,7 +32,7 @@ class test extends uvm_test;
     `endif
 
     `ifdef VCS
-    exp_typename = "foo #(bar #(xyz), 88)";
+    exp_typename = "class $unit::foo#(class $unit::bar#(class $unit::xyz),88)";
     `endif
 
     `ifdef INCA
