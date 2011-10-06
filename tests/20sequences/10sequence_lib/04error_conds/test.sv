@@ -174,7 +174,7 @@ module top;
 
        phase.raise_objection(this);
 
-       // ERROR: SEQLIB/BASE_ITEM
+       // ERROR: SEQLIB/NOSEQS
        begin
          base_seq_lib = new("base_seq_lib");
          base_seq_lib.starting_phase = phase;
@@ -258,6 +258,7 @@ module top;
        uvm_root top = uvm_root::get();
        uvm_report_server svr = top.get_report_server();
        $display("Checking report counts");
+       if (!reports.exists("SEQLIB/NOSEQS")       || reports["SEQLIB/NOSEQS"]       != 1) failed = 1;
        if (!reports.exists("SEQLIB/BAD_SEQ_TYPE") || reports["SEQLIB/BAD_SEQ_TYPE"] != 2) failed = 1;
        if (!reports.exists("SEQLIB/BAD_REQ_TYPE") || reports["SEQLIB/BAD_REQ_TYPE"] != 2) failed = 1;
        if (!reports.exists("SEQLIB/BAD_RSP_TYPE") || reports["SEQLIB/BAD_RSP_TYPE"] != 2) failed = 1;
@@ -274,6 +275,7 @@ module top;
      virtual function action_e catch();
         bit ok = 0;
         if(get_severity() == UVM_INFO) ok = 1;
+        if(get_severity() == UVM_ERROR   && get_id() == "SEQLIB/NOSEQS") ok = 1; 
         if(get_severity() == UVM_ERROR   && get_id() == "SEQLIB/MIN_GT_MAX") ok = 1; 
         if(get_severity() == UVM_ERROR   && get_id() == "SEQLIB/BASE_ITEM") ok = 1; 
         if(get_severity() == UVM_ERROR   && get_id() == "SEQLIB/VIRT_SEQ") ok = 1; 

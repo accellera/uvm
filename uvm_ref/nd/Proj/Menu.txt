@@ -134,30 +134,25 @@ Group: TLM  {
       File: FIFO  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_tlm_fifos.svh)
       File: FIFO Base  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_tlm_fifo_base.svh)
       File: Request-Response Channel  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_tlm_req_rsp.svh)
+      File: Sequence Item Pull Ports  (/remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_sqr_connections.svh)
+      File: uvm_sqr_if_base #&lparen;REQ,RSP&rparen;  (/remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_sqr_ifs.svh)
       }  # Group: TLM1
 
    Group: TLM2  {
 
+      File: Interface Masks  (/remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/uvm_tlm2_defines.svh)
       File: Overview  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/uvm_ref/tlm2.txt)
-      File: Generic Payload  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_generic_payload.svh)
-      File: Interfaces  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_ifs.svh)
-      File: Sockets  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_sockets.svh)
-      File: Ports  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_ports.svh)
-      File: Exports  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_exports.svh)
-      File: Imps  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_imps.svh)
-      File: Macros  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_defines.svh)
-      File: Socket Base  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_sockets_base.svh)
-      File: Temporal Decoupling  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/tlm2_time.svh)
+      File: TLM Generic Payload &amp; Extensions  (/remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/uvm_tlm2_generic_payload.svh)
+      File: tlm interfaces  (/remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/uvm_tlm2_ifs.svh)
+      File: TLM Socket Base Classes  (/remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/uvm_tlm2_sockets_base.svh)
+      File: TLM Sockets  (/remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/uvm_tlm2_sockets.svh)
+      File: TLM2 Export Classes  (/remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/uvm_tlm2_exports.svh)
+      File: TLM2 imps &lparen;interface implementations&rparen;  (/remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/uvm_tlm2_imps.svh)
+      File: TLM2 ports  (/remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/uvm_tlm2_ports.svh)
+      File: uvm_tlm_time  (/remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm2/uvm_tlm2_time.svh)
       }  # Group: TLM2
 
    File: Analysis Ports  (/remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm1/uvm_analysis_port.svh)
-
-   Group: Sequencer Ports  {
-
-      File: uvm_seq_item_pull_port  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm1/sqr_connections.svh)
-      File: uvm_sqr_if_base  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/tlm1/sqr_ifs.svh)
-      }  # Group: Sequencer Ports
-
    }  # Group: TLM
 
 Group: Components  {

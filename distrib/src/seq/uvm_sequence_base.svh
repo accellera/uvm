@@ -240,13 +240,7 @@ class uvm_sequence_base extends uvm_sequence_item;
                       int this_priority = -1,
                       bit call_pre_post = 1);
 
-    if (parent_sequence != null) begin
-       set_parent_sequence(parent_sequence);
-       set_use_sequence_info(1);
-       if (sequencer == null) sequencer = parent_sequence.get_sequencer();
-       reseed();
-    end
-    set_sequencer(sequencer);
+    set_item_context(parent_sequence, sequencer);
 
     if (!(m_sequence_state inside {CREATED,STOPPED,FINISHED})) begin
       uvm_report_fatal("SEQ_NOT_DONE", 
@@ -714,12 +708,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     uvm_factory f_ = uvm_factory::get();
     $cast(create_item,  f_.create_object_by_type( type_var, this.get_full_name(), name ));
 
-    create_item.set_use_sequence_info(1);
-    create_item.set_parent_sequence(this);
-    create_item.set_sequencer(l_sequencer);
-    create_item.set_depth(get_depth() + 1);
-    create_item.reseed();
-
+    create_item.set_item_context(this, l_sequencer);
   endfunction
 
 
@@ -769,10 +758,7 @@ class uvm_sequence_base extends uvm_sequence_item;
         uvm_report_fatal("STRITM", "sequence_item has null sequencer", UVM_NONE);
     end
 
-    item.set_use_sequence_info(1);
-    item.set_sequencer(sequencer);
-    item.set_parent_sequence(this);
-    item.reseed();
+    item.set_item_context(this, sequencer);
 
     if (set_priority < 0)
       set_priority = get_priority();
@@ -1107,19 +1093,13 @@ class uvm_sequence_base extends uvm_sequence_item;
       uvm_report_fatal("FCTSEQ", 
         $sformatf("Factory can not produce a sequence of type %0s.", m_seq_type), UVM_NONE);
     end
-    m_seq.set_use_sequence_info(1);
-    m_seq.set_parent_sequence(this);
-    m_seq.set_sequencer(m_sequencer);
-    m_seq.set_depth(get_depth() + 1);
-    m_seq.reseed();
 
-	
-//    start_item(m_seq);
+    m_seq.set_item_context(this, m_sequencer);
+    
     if(!m_seq.randomize()) begin
       uvm_report_warning("RNDFLD", "Randomization failed in do_sequence_kind()");
     end
     m_seq.start(m_sequencer,this,get_priority(),0);
-//    finish_item(m_seq);
   endtask
 
 
