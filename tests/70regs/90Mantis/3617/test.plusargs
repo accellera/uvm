@@ -1,0 +1,3 @@
++uvm_set_verbosity=*,RegModel,UVM_HIGH,build
+
+

@@ -2287,7 +2287,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
    rw.element_kind = UVM_REG;
 
    // REPORT
-   if (uvm_report_enabled(UVM_HIGH)) begin
+   if (uvm_report_enabled(UVM_HIGH, UVM_INFO, "RegModel")) begin
      string path_s,value_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -2297,8 +2297,8 @@ task uvm_reg::do_write (uvm_reg_item rw);
 
      value_s = $sformatf("=0x%0h",rw.value[0]);
 
-     `uvm_info("RegModel", {"Wrote register via ",path_s,": ",
-                            get_full_name(),value_s},UVM_HIGH)
+      uvm_report_info("RegModel", {"Wrote register via ",path_s,": ",
+                                   get_full_name(),value_s}, UVM_HIGH);
    end
 
    m_write_in_progress = 1'b0;
@@ -2519,7 +2519,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
    rw.element_kind = UVM_REG;
 
    // REPORT
-   if (uvm_report_enabled(UVM_HIGH)) begin
+   if (uvm_report_enabled(UVM_HIGH, UVM_INFO, "RegModel")) begin
      string path_s,value_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -2529,8 +2529,8 @@ task uvm_reg::do_read(uvm_reg_item rw);
 
      value_s = $sformatf("=%0h",rw.value[0]);
 
-     `uvm_info("RegModel", {"Read  register via ",path_s,": ",
-                            get_full_name(),value_s},UVM_HIGH)
+      uvm_report_info("RegModel", {"Read  register via ",path_s,": ",
+                                   get_full_name(),value_s}, UVM_HIGH);
    end
 
    m_read_in_progress = 1'b0;
