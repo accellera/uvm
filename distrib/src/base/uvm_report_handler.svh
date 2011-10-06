@@ -172,14 +172,14 @@ class uvm_report_handler;
        report_relnotes_banner(file);
        srvr.f_display(file, "\n  You are using a version of the UVM library that has been compiled");
        srvr.f_display(file, "  with `UVM_NO_DEPRECATED undefined.");
-       srvr.f_display(file, "  See http://www.accellera.org/... for more details.");
+       srvr.f_display(file, "  See http://www.accellera.org/activities/vip/release_notes_11a for more details.");
 `endif
 
 `ifndef UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
        report_relnotes_banner(file);
        srvr.f_display(file, "\n  You are using a version of the UVM library that has been compiled");
        srvr.f_display(file, "  with `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR undefined.");
-       srvr.f_display(file, "  See http://www.accellera.org/... for more details.");
+       srvr.f_display(file, "  See http://www.accellera.org/activities/vip/mantis3770 for more details.");
 `endif
 
        if (m_relnotes_done)
