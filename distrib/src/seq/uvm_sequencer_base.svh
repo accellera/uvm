@@ -1374,7 +1374,7 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
     seq.reseed();
     seq.starting_phase = phase;
 
-    if (!seq.is_randomized && !seq.randomize()) begin
+    if (!seq.do_not_randomize && !seq.randomize()) begin
       `uvm_warning("STRDEFSEQ", {"Randomization failed for default sequence '",
        seq.get_type_name(),"' for phase '", phase.get_name(),"'"})
        return;
