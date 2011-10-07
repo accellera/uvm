@@ -655,7 +655,7 @@ endclass
 
 class uvm_resource_pool;
 
-  static bit m_has_wildcard_names = 0;
+  static bit m_has_wildcard_names = m_get_regex_state(); 
   static local uvm_resource_pool rp = get();
 
   uvm_resource_types::rsrc_q_t rtab [string];
@@ -1381,6 +1381,23 @@ class uvm_resource_pool;
     $display("=== end of resource pool ===");
 
   endfunction
+  
+   local static function bit m_get_regex_state();
+       uvm_resource_types::rsrc_q_t rq;
+       uvm_resource_base b;
+       uvm_resource_pool rp = uvm_resource_pool::get();
+       string name;
+
+       foreach (rp.rtab[name]) begin
+           rq = rp.rtab[name];
+           for(int i=0; i<rq.size(); ++i) begin
+               b = rq.get(i);
+               if(b.m_is_regex_name == 1)
+                   return 1;
+           end
+       end
+       return 0;
+   endfunction 
 
 endclass
 
