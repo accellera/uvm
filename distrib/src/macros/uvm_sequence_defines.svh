@@ -373,7 +373,7 @@
 //|
 //| class simple_seq_lib_RST extends simple_seq_lib;
 //|
-//|   `uvm_object_utils(this_type)
+//|   `uvm_object_utils(simple_seq_lib_RST)
 //|
 //|   `uvm_sequence_library_utils(simple_seq_lib_RST)
 //|

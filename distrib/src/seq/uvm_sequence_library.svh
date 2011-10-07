@@ -51,7 +51,7 @@ typedef class uvm_sequence_library_cfg;
 // classes.
 //
 //| class my_seq_lib extends uvm_sequence_library #(my_item);
-//|   `uvm_object_utils(my_item)
+//|   `uvm_object_utils(my_seq_lib)
 //|   `uvm_sequence_library_utils(my_seq_lib)
 //|    function new(string name="");
 //|      super.new(name);
@@ -318,7 +318,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    // macro.
    //
    //| class my_seq_lib extends uvm_sequence_library #(my_item);
-   //|   `uvm_object_utils(my_item)
+   //|   `uvm_object_utils(my_seq_lib)
    //|   `uvm_sequence_library_utils(my_seq_lib)
    //|    function new(string name="");
    //|      super.new(name);
