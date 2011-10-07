@@ -2962,7 +2962,7 @@ function void uvm_component::check_config_usage ( bit recurse=1 );
   if(rq.size() == 0)
     return;
 
-  $display("\n ::: The following resources have at least one write and no reads :::");
+  uvm_report_info("CFGNRD"," ::: The following resources have at least one write and no reads :::",UVM_INFO);
   rp.print_resources(rq, 1);
 endfunction
 
@@ -2982,7 +2982,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
   __m_uvm_field_automation (null, UVM_CHECK_FIELDS, "");
 
   if(verbose)
-    $display("applying configuration settings for %s", get_full_name());
+    uvm_report_info("CFGAPL","applying configuration settings", UVM_NONE);
 
   rq = rp.lookup_scope(get_full_name());
   rp.sort_by_precedence(rq);
@@ -3011,8 +3011,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
       continue;
 
     if(verbose)
-      $display("applying %s [%s] in %s", name, __m_uvm_status_container.field_array[search_name],
-                                         get_full_name());
+      uvm_report_info("CFGAPL",$sformatf("applying %s [%s]", name, __m_uvm_status_container.field_array[search_name]),UVM_NONE);
 
     begin
     uvm_resource#(uvm_bitstream_t) rbs;
@@ -3054,8 +3053,7 @@ function void uvm_component::print_config(bit recurse = 0, audit = 0);
 
   uvm_resource_pool rp = uvm_resource_pool::get();
 
-  $display();
-  $display("resources that are visible in %s", get_full_name());
+  uvm_report_info("CFGPRT","visible resources:",UVM_INFO);
   rp.print_resources(rp.lookup_scope(get_full_name()), audit);
 
   if(recurse) begin
