@@ -20,7 +20,10 @@
 //----------------------------------------------------------------------
 
 
-program top;
+// NOTE: this testcase appears to be very sensitive to module/program semantic
+//       or a particular LRM revision level. the original TC was based upon a program block
+//       but it seems to break cause different behaviour (TO_BE_REVIEWED)
+module top;
 
 import uvm_pkg::*;
 `include "uvm_macros.svh" 
@@ -287,4 +290,4 @@ endclass
 
 initial run_test("test");
 
-endprogram
+endmodule
