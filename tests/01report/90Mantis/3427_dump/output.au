@@ -27,8 +27,6 @@ UVM_FATAL = DISPLAY EXIT
 *** actions by id
 [ACT_ID] --> DISPLAY LOG COUNT 
 [ACT_ID2] --> DISPLAY 
-[CFGOVR] --> NO ACTION
-[CFGSET] --> NO ACTION
 
 *** actions by id and severity
 UVM_INFO:ID1 --> DISPLAY COUNT 
