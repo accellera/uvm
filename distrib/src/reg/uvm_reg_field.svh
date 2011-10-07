@@ -1203,8 +1203,10 @@ function uvm_reg_data_t  uvm_reg_field::XupdateX();
       "WOS":   XupdateX = m_desired;  // Warn if != 1
       "W1":    XupdateX = m_desired;
       "WO1":   XupdateX = m_desired;
-      default: XupdateX = m_desired;
+      default: XupdateX = m_desired;      
    endcase
+   XupdateX &= (1 << m_size) - 1;
+   
 endfunction: XupdateX
 
 
