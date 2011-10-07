@@ -23,6 +23,7 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh" 
 
 class a_blk extends uvm_reg_block;
    function new(string name = "a_blk");

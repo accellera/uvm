@@ -21,6 +21,7 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 class demote extends uvm_report_catcher;
    virtual function action_e catch();

@@ -21,6 +21,7 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 class obj extends uvm_object;
    `uvm_object_utils(obj)

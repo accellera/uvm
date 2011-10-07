@@ -21,6 +21,7 @@
 program top;
 
 import uvm_pkg::*;
+`include "uvm_macros.svh"
 
 class subseq extends uvm_sequence;
    `uvm_object_utils(subseq)
