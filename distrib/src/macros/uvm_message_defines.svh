@@ -30,9 +30,9 @@
   `define UVM_NUM_LINES 120
 `endif
 
-`ifndef UVM_USE_FILE_LINE
-`define UVM_REPORT_DISABLE_FILE_LINE
-`endif
+//`ifndef UVM_USE_FILE_LINE
+//`define UVM_REPORT_DISABLE_FILE_LINE
+//`endif
 
 `ifdef UVM_REPORT_DISABLE_FILE_LINE
 `define UVM_REPORT_DISABLE_FILE
