@@ -242,13 +242,14 @@ class test extends uvm_test;
    endfunction
 
    task reset_phase(uvm_phase phase);
+      super.reset_phase(phase);
       blk.reset();
    endtask
    
    task main_phase(uvm_phase phase);
       super.main_phase(phase);
       
-      phase.raise_objection(phase);
+      phase.raise_objection(this);
 
       #10;
       begin
@@ -258,7 +259,7 @@ class test extends uvm_test;
          seq.start(null);
       end
       
-      phase.drop_objection(phase);
+      phase.drop_objection(this);
    endtask
    
    function void final_phase(uvm_phase phase);
