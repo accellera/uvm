@@ -53,6 +53,7 @@ class uvm_sequencer #(type REQ=uvm_sequence_item, RSP=REQ)
   //| Sync Control:
   //|  virtual task          wait_for_sequences ();
   //|  virtual function bit  has_do_available   ();
+  //|  virtual function void item_reset         ();
   //
   // See <uvm_sqr_if_base #(REQ,RSP)> for information about this interface.
 
@@ -90,6 +91,7 @@ class uvm_sequencer #(type REQ=uvm_sequence_item, RSP=REQ)
   extern virtual task          get_next_item (output REQ t);
   extern virtual task          try_next_item (output REQ t);
   extern virtual function void item_done     (RSP item = null);
+  extern virtual function void item_reset    ();
   extern virtual task          put           (RSP t);
   extern task                  get           (output REQ t);
   extern task                  peek          (output REQ t);
@@ -257,6 +259,18 @@ function void uvm_sequencer::item_done(RSP item = null);
     seq_item_export.put_response(item);
   end
 
+  // Grant any locks as soon as possible
+  grant_queued_locks();
+endfunction
+
+// item_reset
+// ---------
+
+function void uvm_sequencer::item_reset();
+  // Set flag to allow next get_next_item or peek to get a new sequence_item
+  sequence_item_requested = 0;
+  get_next_item_called = 0;
+  
   // Grant any locks as soon as possible
   grant_queued_locks();
 endfunction
