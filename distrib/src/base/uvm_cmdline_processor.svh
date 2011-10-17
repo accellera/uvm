@@ -335,7 +335,7 @@ class uvm_cmdline_processor extends uvm_report_object;
     // change this value.  If set to 'NO' and the user code tries to change the global timeout value, an
     // warning message will be generated.
     //
-    //| <sim command> +uvm_timeout=200000,NO
+    //| <sim command> +UVM_TIMEOUT=200000,NO
     //
 
     // The implementation of this is in uvm_root.
