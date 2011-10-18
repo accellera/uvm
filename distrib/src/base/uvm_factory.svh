@@ -2,7 +2,7 @@
 //------------------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -70,6 +70,9 @@ class uvm_factory;
 
   extern `_protected function new ();
 
+  // Function: get()
+  // Get the factory singleton
+  //
   extern static function uvm_factory get();
 
   // Group: Registering Types
