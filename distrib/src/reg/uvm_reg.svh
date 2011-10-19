@@ -1664,11 +1664,6 @@ function string uvm_reg::get_rights(uvm_reg_map map = null);
 
    uvm_reg_map_info info;
 
-   // No right restrictions if not shared
-   if (m_maps.num() <= 1) begin
-      return "RW";
-   end
-
    map = get_local_map(map,"get_rights()");
 
    if (map == null)
