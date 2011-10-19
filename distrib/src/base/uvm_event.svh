@@ -353,7 +353,8 @@ class uvm_event extends uvm_object;
     trigger_time = e.trigger_time;
     trigger_data = e.trigger_data;
     callbacks.delete();
-    for(int i=0; i<e.callbacks.size(); ++i) callbacks.push_back(e.callbacks[i]); 
+    callbacks = e.callbacks;   
+
   endfunction
 
 endclass : uvm_event
