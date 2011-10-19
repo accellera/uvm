@@ -1380,8 +1380,12 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
        return;
     end
 
-    fork
+    fork begin
+      // reseed this process for random stability
+      process proc = process::self();
+      proc.srandom(uvm_create_random_seed(seq.get_type_name(), this.get_full_name()));
       seq.start(this);
+    end
     join_none
 
 endfunction
