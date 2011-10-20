@@ -29,10 +29,11 @@ module test;
     static int count;
     function new(string name=""); 
       super.new(name); 
-      count++;
+      count=0;
     endfunction
     virtual function bit pre_trigger (uvm_event e, uvm_object data=null);
        `uvm_info("pre_trigger", $sformatf("Callback Count::%0d",count), UVM_NONE)
+	count++;
     endfunction
   endclass
 
@@ -46,32 +47,36 @@ module test;
       for(int i = 0; i < 10; i++) cb[i] = new("cb");
     endfunction
     task run;
-        for(int i =0; i < 10; i++) ev.add_callback(cb[i]);
+        foreach(cb[i]) ev.add_callback(cb[i]);
     endtask
   endclass
 
   class test extends uvm_component;
     ip_comp comp;
     uvm_event new_ev;
-    cb_base cbb[10];
+    cb_base cbb[15];
     `uvm_component_utils(test)
     function new(string name,uvm_component parent);
       super.new(name,parent);
       comp = new("comp",this);
       new_ev = new("new_ev");
-      for(int i = 0; i < 10; i++) cbb[i] = new("cbb");
+      foreach(cbb[i]) cbb[i] = new("cbb");
     endfunction
 
     task run;
-        for(int i =0; i < 10; i++) new_ev.add_callback(cbb[i]);
+        for(int i =0; i < 15; i++) new_ev.add_callback(cbb[i]);
     endtask
 
     function void report();
-        $display("START OF GOLD FILE");
-        comp.ev.print();
-        new_ev.copy(comp.ev);
-        new_ev.print();
-        $display("END OF GOLD FILE");
+	comp.ev.print();
+	new_ev.copy(comp.ev);
+	new_ev.print();
+	new_ev.trigger();
+ 	
+	if(cb_base::count==10)
+		$display("UVM TEST PASSED");
+	else
+		$display("UVM TEST FAILED");
     endfunction
   endclass
 
