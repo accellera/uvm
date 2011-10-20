@@ -1384,7 +1384,7 @@ class uvm_resource_pool;
 
 endclass
 
-typedef class uvm_resource_converter;
+typedef class m_uvm_resource_converter;
 
 //----------------------------------------------------------------------
 // Class: uvm_resource #(T)
@@ -1404,7 +1404,7 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   protected T val;
 
   // Singleton used to convert this resource to a string
-  local static uvm_resource_converter#(T) m_r2s;
+  local static m_uvm_resource_converter#(T) m_r2s;
 
   function new(string name="", scope="");
     super.new(name, scope);
@@ -1415,20 +1415,20 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // Get the conversion policy class that specifies how to convert the value
   // of a resource of this type to a string
   //
-  static function uvm_resource_converter#(T) get_converter();
+  static function m_uvm_resource_converter#(T) get_converter();
     if (m_r2s==null) m_r2s = new();
     return m_r2s;
   endfunction
     
 
-  // Function: set_converter
+  // Function: m_set_converter
   // Specify how to convert the value of a resource of this type to a string
   //
   // If not specified (or set to ~null~),
   // a default converter that display the name of the resource type is used.
   // Default conversion policies are specified for the built-in type.
   //
-  static function void set_converter(uvm_resource_converter#(T) r2s);
+  static function void m_set_converter(m_uvm_resource_converter#(T) r2s);
     m_r2s = r2s;
     void'(get_converter());
   endfunction

@@ -28,7 +28,7 @@
 // convertion from resource value to string.
 //
 //------------------------------------------------------------------------------
-class uvm_resource_converter #(type T=int);
+class m_uvm_resource_converter #(type T=int);
 
    // Function: convert2string
    // Convert a value of type ~T~ to a string that can be displayed.
@@ -36,24 +36,7 @@ class uvm_resource_converter #(type T=int);
    // By default, returns the name of the type
    //
    virtual function string convert2string(T val);
-        return {"(", typename(val), ") ?"};
-   endfunction
-
-   // Function: typename
-   // Return the name of the type as a string
-   //
-   static function string typename(T val);
-`ifdef UVM_USE_TYPENAME     
-      return $typename(T);
-`else
- `ifdef INCA
-      string r;
-      $uvm_type_name(r,val);
-      return r;
- `else
-      return "<unknown typename>";
- `endif
-`endif    
+        return {"(", uvm_type_utils#(T)::typename(val), ") ?"};
    endfunction
 endclass
 
@@ -69,12 +52,12 @@ endclass
 //
 //----------------------------------------------------------------------
 
-class uvm_resource_default_converter#(type T=int) extends uvm_resource_converter#(T);
-   local static uvm_resource_default_converter#(T) m_singleton;
+class m_uvm_resource_default_converter#(type T=int) extends m_uvm_resource_converter#(T);
+   local static m_uvm_resource_default_converter#(T) m_singleton;
    local string m_name;
    
    virtual function string convert2string(T val);
-      return $sformatf("(%s) %0p", (m_name=="")?typename(val):m_name, val);
+      return $sformatf("(%s) %0p", (m_name=="")? uvm_type_utils#(T)::typename(val):m_name, val);
    endfunction
 
    `_local function new();
@@ -89,12 +72,13 @@ class uvm_resource_default_converter#(type T=int) extends uvm_resource_converter
    // If a ~typename~ is specified, it will be used as the name of the type
    // instead of the name returned by the <uvm_resource_converter#(T)::typename()> method.
    //
-   static function void register(string typename = "");
+   static function bit register(string typename = "");
       if (m_singleton == null) begin
          m_singleton = new();
          m_singleton.m_name = typename;
       end
-      uvm_resource#(T)::set_converter(m_singleton);
+      uvm_resource#(T)::m_set_converter(m_singleton);
+      return 1;
    endfunction
 endclass
 
@@ -109,11 +93,11 @@ endclass
 //
 //----------------------------------------------------------------------
 
-class uvm_resource_convert2string_converter#(type T=int) extends uvm_resource_converter#(T);
-   local static uvm_resource_convert2string_converter #(T) m_singleton;
+class m_uvm_resource_convert2string_converter#(type T=int) extends m_uvm_resource_converter#(T);
+   local static m_uvm_resource_convert2string_converter #(T) m_singleton;
  
    virtual function string convert2string(T val);   
-      return $sformatf("(%s) %0s", typename(val),
+      return $sformatf("(%s) %0s", uvm_type_utils#(T)::typename(val),
                        (val == null) ? "(null)" : val.convert2string());
    endfunction
 
@@ -126,9 +110,10 @@ class uvm_resource_convert2string_converter#(type T=int) extends uvm_resource_co
    //
    //| uvm_resource_convert2string_converter#(my_obj)::register();
    //
-   static function void register();
+   static function bit register();
       if (m_singleton == null) m_singleton = new();
-      uvm_resource#(T)::set_converter(m_singleton);
+      uvm_resource#(T)::m_set_converter(m_singleton);
+      return 1;
    endfunction
 endclass
     
@@ -142,11 +127,11 @@ endclass
 //
 //----------------------------------------------------------------------
 
-class uvm_resource_sprint_converter#(type T=int) extends uvm_resource_converter#(T);
-   local static uvm_resource_sprint_converter #(T) m_singleton;
+class m_uvm_resource_sprint_converter#(type T=int) extends m_uvm_resource_converter#(T);
+   local static m_uvm_resource_sprint_converter #(T) m_singleton;
 
    virtual function string convert2string(T val);
-      return $sformatf("(%s) %0s", typename(val),
+      return $sformatf("(%s) %0s", uvm_type_utils#(T)::typename(val),
                        (val == null) ? "(null)" : {"\n",val.sprint()});
    endfunction
    
@@ -159,9 +144,10 @@ class uvm_resource_sprint_converter#(type T=int) extends uvm_resource_converter#
    //
    //| void'(uvm_resource_sprint_converter#(my_obj)::register());
    //
-   static function void register();
+   static function bit register();
       if (m_singleton == null) m_singleton = new();
-      uvm_resource#(T)::set_converter(m_singleton);
+      uvm_resource#(T)::m_set_converter(m_singleton);
+      return 1;
    endfunction
 endclass
 
@@ -183,7 +169,7 @@ class m_uvm_resource_default_converters;
    static function bit register();
       if (!m_singleton) begin
 
-         `define __built_in(T) void'(uvm_resource_default_converter#(T)::register(`"T`"))
+         `define __built_in(T) void'(m_uvm_resource_default_converter#(T)::register(`"T`"))
             
          `__built_in(shortint);
          `__built_in(int);

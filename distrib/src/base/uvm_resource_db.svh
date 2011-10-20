@@ -118,7 +118,7 @@ class uvm_resource_db #(type T=uvm_object);
           input rsrc_t rsrc);
 
           T foo;
-          string msg=uvm_resource_converter#(T)::typename(foo);
+          string msg=uvm_type_utils#(T)::typename(foo);
 
           $sformat(msg, "%s '%s%s' (type %s) %s by %s = %s",
               rtype,scope, name=="" ? "" : {".",name}, msg,action,

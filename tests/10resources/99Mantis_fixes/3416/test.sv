@@ -39,27 +39,38 @@ class an_obj extends uvm_object;
 endclass
 
 class my_obj extends an_obj;
+   `uvm_object_utils(my_obj)
    function new(string name = "");
       super.new(name);
    endfunction
 endclass
 
 class your_obj extends an_obj;
+   `uvm_object_utils(your_obj)
    function new(string name = "");
       super.new(name);
    endfunction
 endclass
 
 
+class some_none_uvm_object;
+   int i='hdeadbeef;
+   function string convert2string();
+      return $sformatf("i=%0x", i);
+   endfunction
+endclass
+
 initial
 begin
    static my_obj mo = new("mo");
    static your_obj yo = new("yo");
-   
-   uvm_resource_default_converter#(bit [7:0])::register("bit-7:0");
-   uvm_resource_convert2string_converter#(my_obj)::register();
-   uvm_resource_sprint_converter#(your_obj)::register();
+   static some_none_uvm_object some_nuvm_object = new;
 
+   uvm_default_printer=uvm_default_line_printer;
+   
+   void'(m_uvm_resource_convert2string_converter#(some_none_uvm_object)::register());
+
+   $display("GOLD-FILE-START");
    uvm_resource_db#(int)::set("int", "*", 0);
    uvm_resource_db#(string)::set("string", "*", "foo!");
    uvm_resource_db#(bit [7:0])::set("bit[7:0]", "*", 'hA5);
@@ -75,7 +86,10 @@ begin
    uvm_config_db#(uvm_bitstream_t)::set(null,"*","para1",3);
    uvm_config_db#(int)::set(null,"*","para2",4);
 
+   uvm_config_db#(some_none_uvm_object)::set(null,"*","no-uvm-object",some_nuvm_object);
+
    uvm_config_db#()::dump();
+   $display("GOLD-FILE-END");
 end
 
 endprogram
