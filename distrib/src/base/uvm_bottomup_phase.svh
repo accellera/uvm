@@ -101,7 +101,7 @@ virtual class uvm_bottomup_phase extends uvm_phase;
   protected virtual function void execute(uvm_component comp,
                                           uvm_phase phase);
     // reseed this process for random stability
-    process proc = process::self;
+    process proc = process::self();
     proc.srandom(uvm_create_random_seed(phase.get_type_name(), comp.get_full_name()));
 
     comp.m_current_phase = phase;
