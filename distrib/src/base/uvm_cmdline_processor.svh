@@ -343,11 +343,11 @@ class uvm_cmdline_processor extends uvm_report_object;
     // Variable: +UVM_MAX_QUIT_COUNT
     //
     // ~+UVM_MAX_QUIT_COUNT=<count>,<overridable>~ allows users to change max quit count for the report
-    // server.  The <overridable> argument ('0' or '1') specifies whether user code can subsequently
-    // change this value.  If set to '0' and the user code tries to change the max quit count value, an
+    // server.  The <overridable> argument ('YES' or 'NO') specifies whether user code can subsequently
+    // change this value.  If set to 'NO' and the user code tries to change the max quit count value, an
     // warning message will be generated.
     //
-    //| <sim command> +UVM_MAX_QUIT_COUNT=5,0
+    //| <sim command> +UVM_MAX_QUIT_COUNT=5,NO
     //
 
 
