@@ -49,7 +49,6 @@ endclass
  
 bit func;
 bit destable;
-string first_comp = "c2";
 int FILE;
 
 class base extends uvm_component;
@@ -70,6 +69,7 @@ class base extends uvm_component;
 
    task randomize_task(uvm_phase phase);
       data d;
+        
 
       if (get_name() == "c2")
         return;
@@ -79,12 +79,14 @@ class base extends uvm_component;
       if (func)
         return;
 
-      phase.raise_objection(this);
+      phase.raise_objection(this); 
       d = new;
-      d.randomize();
+      void'(d.randomize());
       $fdisplay(FILE,"%8h %s",d.a,{get_full_name(),".",phase.get_name()});
       #1;
+ 
       phase.drop_objection(this);
+  
    endtask
 
    // for function phases, component c1's will always get called before c2
@@ -98,7 +100,7 @@ class base extends uvm_component;
       if (!func)
         return;
       d = new;
-      d.randomize();
+      assert(d.randomize());
       if (get_name() == "c2")
         $fdisplay(FILE,"%8h %s",/*d.a*/$urandom(),{get_full_name(),".",phname});
       if (destable) begin
@@ -108,8 +110,7 @@ class base extends uvm_component;
           2: fork #0; join_none
         endcase
       end
-      toggle++;
-      if (toggle == 2) toggle=0;
+      toggle = (toggle+1) % 3;
    endfunction
 
    //function void phase_started            (uvm_phase phase); randomize_func({phase.get_name(),".started"}); endfunction 
@@ -124,19 +125,19 @@ class base extends uvm_component;
    function void report_phase             (uvm_phase phase); randomize_func(phase.get_name()); endfunction
    function void final_phase              (uvm_phase phase); randomize_func(phase.get_name()); endfunction
    
-   task run_phase           (uvm_phase phase); randomize_task(phase); #50; endtask 
-   task pre_reset_phase     (uvm_phase phase); randomize_task(phase); #50; endtask 
-   task reset_phase         (uvm_phase phase); randomize_task(phase); #50; endtask 
-   task post_reset_phase    (uvm_phase phase); randomize_task(phase); #50; endtask 
-   task pre_configure_phase (uvm_phase phase); randomize_task(phase); #50; endtask 
-   task configure_phase     (uvm_phase phase); randomize_task(phase); #50; endtask 
-   task post_configure_phase(uvm_phase phase); randomize_task(phase); #50; endtask 
-   task pre_main_phase      (uvm_phase phase); randomize_task(phase); #50; endtask 
-   task main_phase          (uvm_phase phase); randomize_task(phase); #50; endtask 
-   task post_main_phase     (uvm_phase phase); randomize_task(phase); #50; endtask 
-   task pre_shutdown_phase  (uvm_phase phase); randomize_task(phase); #50; endtask 
-   task shutdown_phase      (uvm_phase phase); randomize_task(phase); #50; endtask 
-   task post_shutdown_phase (uvm_phase phase); randomize_task(phase); #50; endtask 
+   task run_phase           (uvm_phase phase);       randomize_task(phase);   #50; endtask 
+   task pre_reset_phase     (uvm_phase phase);       randomize_task(phase);   #50; endtask 
+   task reset_phase         (uvm_phase phase);       randomize_task(phase);   #50; endtask 
+   task post_reset_phase    (uvm_phase phase);       randomize_task(phase);   #50; endtask 
+   task pre_configure_phase (uvm_phase phase);       randomize_task(phase);   #50; endtask 
+   task configure_phase     (uvm_phase phase);       randomize_task(phase);   #50; endtask 
+   task post_configure_phase(uvm_phase phase);       randomize_task(phase);   #50; endtask 
+   task pre_main_phase      (uvm_phase phase);       randomize_task(phase);   #50; endtask 
+   task main_phase          (uvm_phase phase);       randomize_task(phase);   #50; endtask 
+   task post_main_phase     (uvm_phase phase);       randomize_task(phase);   #50; endtask 
+   task pre_shutdown_phase  (uvm_phase phase);       randomize_task(phase);   #50; endtask 
+   task shutdown_phase      (uvm_phase phase);       randomize_task(phase);   #50; endtask 
+   task post_shutdown_phase (uvm_phase phase);       randomize_task(phase);   #50; endtask 
 
 endclass 
    
@@ -178,7 +179,7 @@ begin
    process p;
    string file,first;
    uvm_top.finish_on_completion = 0;
-   p = process::self;
+   p = process::self();
    p.srandom(1000);
 
    if (!$value$plusargs("FILE=%s",file)) begin
@@ -187,11 +188,6 @@ begin
    end
    $display("Writing output to log ",file);
    FILE = $fopen(file,"w");
-
-   if (!$value$plusargs("FIRST_COMP=%s",first)) begin
-     $display("Using %s as the first component in line for task phase callbacks",first);
-     first_comp = first;
-   end
 
    run_test("test");
 
