@@ -21,7 +21,7 @@
 //------------------------------------------------------------------------------
 
 // Title: Pool Classes
-// This section defines the <uvm_pool #(KEY, T)> class and derivative.
+// This section defines the <uvm_pool #(KEY, T)> class and derivatives.
 
 //------------------------------------------------------------------------------
 //
@@ -80,8 +80,9 @@ class uvm_pool #(type KEY=int, T=uvm_void) extends uvm_object;
   //
   // Returns the item with the given ~key~.
   //
-  // If no item exists by that key, a new item is created with that key
-  // and returned.
+  // If no item exists by that key, a new item with a default value
+  // is created for that key and returned. Works only for non-objects. Use
+  // <uvm_object_pool #(KEY,T)> to populate an object pool.
 
   virtual function T get (KEY key);
     if (!pool.exists(key)) begin
@@ -234,17 +235,96 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_object_string_pool #(T)
+// CLASS: uvm_object_pool #(KEY,T)
 //
 //------------------------------------------------------------------------------
 // This provides a specialization of the generic <uvm_pool #(KEY,T)> class for
-// an associative array of <uvm_object>-based objects indexed by string. 
-// Specializations of this class include the ~uvm_event_pool~ (a
-// uvm_object_string_pool storing <uvm_event>s) and
-// ~uvm_barrier_pool~ (a uvm_obejct_string_pool storing <uvm_barrier>s).
+// an associative array of <uvm_object>-based objects. In this specialization,
+// the <get> method will allocate (new) an object of type T if that object
+// does not exist at the given key.
 //------------------------------------------------------------------------------
 
-class uvm_object_string_pool #(type T=uvm_object) extends uvm_pool #(string,T);
+class uvm_object_pool #(type KEY=string, T=uvm_object) extends uvm_pool #(KEY,T);
+
+  typedef uvm_object_pool #(T) this_type;
+  static protected this_type m_global_pool;
+
+
+  // Function: new
+  //
+  // Creates a new pool with the given ~name~.
+
+  function new (string name="");
+    super.new(name);
+  endfunction
+
+
+  const static string type_name = "uvm_object_pool";
+
+  // Function: get_type_name
+  //
+  // Returns the type name of this object.
+
+  virtual function string get_type_name();
+    return type_name;
+  endfunction
+
+
+  // Function: get_global_pool
+  //
+  // Returns the singleton global pool for the item type, T. 
+  //
+  // This allows items to be shared amongst components throughout the
+  // verification environment.
+
+  static function this_type get_global_pool ();
+    if (m_global_pool==null)
+      m_global_pool = new("global_pool");
+    return m_global_pool;
+  endfunction
+
+
+  // Function: get_global
+  //
+  // Returns the specified item instance from the global item pool. 
+
+  static function T get_global (KEY key);
+    this_type gpool;
+    gpool = get_global_pool(); 
+    return gpool.get(key);
+  endfunction
+
+
+  // Function: get
+  //
+  // Returns the object item at the given ~key~.
+  //
+  // If no object exists by the given ~key~, a new object is allocated
+  // for that key and returned.
+
+  virtual function T get (KEY key);
+    if (!pool.exists(key))
+      pool[key] = new (key);
+    return pool[key];
+  endfunction
+  
+
+endclass
+
+
+//------------------------------------------------------------------------------
+//
+// CLASS: uvm_object_string_pool #(T)
+//
+//------------------------------------------------------------------------------
+// A class-based associative array of uvm_object-based objects indexed by string.
+//
+// Specializations of this class include the ~uvm_event_pool~, which stores
+// <uvm_event> objects, and the ~uvm_barrier_pool~, which stores <uvm_barrier>
+// objects.
+//------------------------------------------------------------------------------
+
+class uvm_object_string_pool #(type T=uvm_object) extends uvm_object_pool #(string,T);
 
   typedef uvm_object_string_pool #(T) this_type;
   static protected this_type m_global_pool;
@@ -259,7 +339,7 @@ class uvm_object_string_pool #(type T=uvm_object) extends uvm_pool #(string,T);
   endfunction
 
 
-  const static string type_name = {"uvm_obj_str_pool"};
+  const static string type_name = "uvm_obj_str_pool";
 
   // Function: get_type_name
   //
@@ -309,7 +389,7 @@ class uvm_object_string_pool #(type T=uvm_object) extends uvm_pool #(string,T);
   endfunction
   
 
-  // Function: delete
+  // Function- delete
   //
   // Removes the item with the given string ~key~ from the pool.
 
