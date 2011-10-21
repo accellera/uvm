@@ -685,7 +685,7 @@ endfunction
 // ----------------
 
 function void uvm_root::m_process_config(string cfg, bit is_int);
-  uvm_bitstream_t v=0;
+  uvm_bitstream_t v;
   string split_val[$];
   uvm_root m_uvm_top = uvm_root::get();
 

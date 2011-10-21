@@ -54,13 +54,13 @@ class uvm_reg_field extends uvm_object;
    local bit             m_written;
    local bit             m_read_in_progress;
    local bit             m_write_in_progress;
-   local string          m_fname = "";
-   local int             m_lineno = 0;
+   local string          m_fname;
+   local int             m_lineno;
    local int             m_cover_on;
-   local bit             m_individually_accessible = 0;
+   local bit             m_individually_accessible;
    local uvm_check_e     m_check;
 
-   local static int m_max_size = 0;
+   local static int m_max_size;
    local static bit m_policy_names[string];
 
    constraint uvm_reg_field_valid {
@@ -1699,10 +1699,10 @@ function bit uvm_reg_field::is_indv_accessible(uvm_path_e  path,
    end
 
    begin
-     int fld_idx = 0;
+     int fld_idx;
      int bus_width = local_map.get_n_bytes();
      uvm_reg_field fields[$];
-     bit sole_field = 0;
+     bit sole_field;
 
      m_parent.get_fields(fields);
 
@@ -1900,10 +1900,10 @@ endfunction
 
 function string uvm_reg_field::convert2string();
    string fmt;
-   string res_str = "";
-   string t_str = "";
-   bit with_debug_info = 0;
-   string prefix = "";
+   string res_str;
+   string t_str;
+   bit with_debug_info;
+   string prefix;
    uvm_reg reg_=get_register();
 
    $sformat(fmt, "%0d'h%%%0dh", get_n_bits(),

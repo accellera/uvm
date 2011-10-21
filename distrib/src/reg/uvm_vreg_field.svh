@@ -54,8 +54,8 @@ class uvm_vreg_field extends uvm_object;
    local uvm_vreg parent;
    local int unsigned lsb;
    local int unsigned size;
-   local string fname = "";
-   local int lineno = 0;
+   local string fname;
+   local int lineno;
    local bit read_in_progress;
    local bit write_in_progress;
 
@@ -376,8 +376,8 @@ endclass: uvm_vreg_field
 //------------------------------------------------------------------------------
 
 class uvm_vreg_field_cbs extends uvm_callback;
-   string fname = "";
-   int    lineno = 0;
+   string fname;
+   int    lineno;
 
    function new(string name = "uvm_vreg_field_cbs");
       super.new(name);
@@ -961,8 +961,8 @@ function void uvm_vreg_field::do_print (uvm_printer printer);
 endfunction
 
 function string uvm_vreg_field::convert2string();
-   string res_str = "";
-   string t_str = "";
+   string res_str;
+   string t_str;
    bit with_debug_info = 1'b0;
    $sformat(convert2string, {"%s[%0d-%0d]"},
             this.get_name(),

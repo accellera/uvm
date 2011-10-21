@@ -752,7 +752,7 @@ virtual class uvm_component extends uvm_report_object;
   // immediate killing of its run-time processes should set this bit and
   // implement the stop task to prepare for shutdown.
 
-  int enable_stop_interrupt = 0;
+  int enable_stop_interrupt;
 `endif
 
 
@@ -1011,7 +1011,7 @@ virtual class uvm_component extends uvm_report_object;
   // Setting this static variable causes get_config_* to print info about
   // matching configuration settings as they are being applied.
 
-  static bit print_config_matches = 0; 
+  static bit print_config_matches;
 
 
   //----------------------------------------------------------------------------
@@ -1595,8 +1595,8 @@ virtual class uvm_component extends uvm_report_object;
   uvm_phase            m_current_phase;            // the most recently executed phase
   protected process    m_phase_process;
 
-  /*protected*/ bit  m_build_done=0;
-  /*protected*/ int  m_phasing_active=0;
+  /*protected*/ bit  m_build_done;
+  /*protected*/ int  m_phasing_active;
 
   extern                   function void set_int_local(string field_name, 
                                                        uvm_bitstream_t value,
@@ -3053,7 +3053,7 @@ endfunction
 function void uvm_component::print_config_settings (string field="",
                                                     uvm_component comp=null,
                                                     bit recurse=0);
-  static bit have_been_warned = 0;
+  static bit have_been_warned;
   if(!have_been_warned) begin
     uvm_report_warning("deprecated", "uvm_component::print_config_settings has been deprecated.  Use print_config() instead");
     have_been_warned = 1;

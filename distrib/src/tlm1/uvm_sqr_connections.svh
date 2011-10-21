@@ -56,7 +56,7 @@ class uvm_seq_item_pull_port #(type REQ=int, type RSP=REQ)
   `UVM_SEQ_PORT(`UVM_SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_port")
   `UVM_SEQ_ITEM_PULL_IMP(this.m_if, REQ, RSP, t, t)
 
-  bit print_enabled = 0;
+  bit print_enabled;
     
 endclass
 

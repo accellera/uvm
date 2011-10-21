@@ -961,7 +961,7 @@ endfunction
 function void uvm_phase::m_print_successors();
   uvm_phase found;
   static string spaces = "                                                 ";
-  static int level = 0;
+  static int level;
   if (m_phase_type == UVM_PHASE_DOMAIN)
     level = 0;
   $display(spaces.substr(0,level*2),get_name(), " (",m_phase_type.name(),") id=%0d",get_inst_id());

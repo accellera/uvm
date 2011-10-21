@@ -267,7 +267,7 @@ endclass
 //| 
 //| import a_pkg::*;
 //|
-//| time t = 0; 
+//| time t;
 //| 
 //| initial
 //| begin 

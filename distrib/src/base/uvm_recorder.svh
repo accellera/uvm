@@ -37,7 +37,7 @@ class uvm_recorder extends uvm_object;
 
   `uvm_object_utils(uvm_recorder)
 
-  int recording_depth = 0; 
+  int recording_depth;
   UVM_FILE file;
   string filename = "tr_db.log";
 

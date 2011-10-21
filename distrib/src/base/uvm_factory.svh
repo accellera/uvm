@@ -863,8 +863,8 @@ function void uvm_factory::set_type_override_by_name (string original_type_name,
                                                       bit replace=1);
   bit replaced;
   
-  uvm_object_wrapper original_type=null;
-  uvm_object_wrapper override_type=null;
+  uvm_object_wrapper original_type;
+  uvm_object_wrapper override_type;
 
   if(m_type_names.exists(original_type_name))
     original_type = m_type_names[original_type_name];
@@ -992,8 +992,8 @@ function void uvm_factory::set_inst_override_by_name (string original_type_name,
                                                       string full_inst_path);
   
   uvm_factory_override override;
-  uvm_object_wrapper original_type=null;
-  uvm_object_wrapper override_type=null;
+  uvm_object_wrapper original_type;
+  uvm_object_wrapper override_type;
 
   if(m_type_names.exists(original_type_name))
     original_type = m_type_names[original_type_name];
@@ -1191,7 +1191,7 @@ endfunction
 
 function uvm_object_wrapper uvm_factory::find_override_by_name (string requested_type_name,
                                                                 string full_inst_path);
-  uvm_object_wrapper rtype = null;
+  uvm_object_wrapper rtype;
   uvm_factory_queue_class qc;
 
   uvm_object_wrapper override;
@@ -1371,7 +1371,7 @@ function void uvm_factory::print (int all_types=1);
   uvm_factory_queue_class sorted_override_queues[string];
 
   string tmp;
-  int id=0;
+  int id;
   uvm_object_wrapper obj;
 
   //sort the override queues

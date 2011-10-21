@@ -31,8 +31,8 @@ class uvm_sequencer #(type REQ=uvm_sequence_item, RSP=REQ)
 
   typedef uvm_sequencer #( REQ , RSP) this_type;
 
-  bit sequence_item_requested = 0;
-  bit get_next_item_called    = 0;
+  bit sequence_item_requested;
+  bit get_next_item_called;
 
   `uvm_component_param_utils(this_type)
 

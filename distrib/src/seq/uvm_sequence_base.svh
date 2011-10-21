@@ -145,7 +145,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   protected uvm_sequence_item response_queue[$];
   protected int               response_queue_depth = 8;
-  protected bit               response_queue_error_report_disabled = 0;
+  protected bit               response_queue_error_report_disabled;
 
   // Variable: do_not_randomize
   //
@@ -156,7 +156,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   bit do_not_randomize;
 
   protected process  m_sequence_process;
-  local bit m_use_response_handler = 0;
+  local bit m_use_response_handler;
 
   static string type_name = "uvm_sequence_base";
 
