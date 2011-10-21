@@ -744,11 +744,7 @@ function void uvm_factory::register (uvm_object_wrapper obj);
   if (obj == null) begin
     uvm_report_fatal ("NULLWR", "Attempting to register a null object with the factory", UVM_NONE);
   end
-  if (obj.get_type_name() == "" || obj.get_type_name() == "<unknown>") begin
-    //uvm_report_warning("EMPTNM", {"Factory registration with ",
-    //  "unknown type name prevents name-based operations. "});
-  end
-  else begin
+  if (obj.get_type_name() != "" && obj.get_type_name() != "<unknown>") begin
     if (m_type_names.exists(obj.get_type_name()))
       uvm_report_warning("TPRGED", {"Type name '",obj.get_type_name(),
         "' already registered with factory. No string-based lookup ",
