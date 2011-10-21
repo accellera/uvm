@@ -1490,7 +1490,9 @@ task uvm_sequencer_base::start_default_sequence();
   end
   
   `uvm_warning("UVM_DEPRECATED",{"Starting (deprecated) default sequence '",default_sequence,
-     "' on sequencer '",get_full_name(),"'"})
+     "' on sequencer '",get_full_name(),
+     "'. See documentation for uvm_sequencer_base::start_phase_sequence() for information on ",
+     "starting default sequences in UVM."})
 
   if(sequences.size() != 0) begin
     //create the sequence object
@@ -1504,6 +1506,7 @@ task uvm_sequencer_base::start_default_sequence();
     if (m_seq == null) begin
       uvm_report_fatal("STRDEFSEQ", "Null m_sequencer reference", UVM_NONE);
     end
+    m_seq.starting_phase = run_ph;
     m_seq.print_sequence_info = 1;
     m_seq.set_parent_sequence(null);
     m_seq.set_sequencer(this);
