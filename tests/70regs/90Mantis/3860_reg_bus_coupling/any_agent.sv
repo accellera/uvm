@@ -51,10 +51,8 @@ class any_sequence #(type REQ=int,RSP=REQ) extends uvm_sequence #(REQ,RSP);
     any_item t;
     super.finish_item(item,set_priority);
     // wait for driver to indicate actual done-ness
-    $display("%m BACK FROM SUPER.FINISH_ITEM. WAITING FOR EXECUTED");
     if ($cast(t,item))
       @t.executed;
-    $display("%m EXECUTED");
   endtask
 endclass
 
@@ -122,6 +120,8 @@ endclass
 //   read - bit 1=read operation, 0=write operation
 //------------------------------------------------------------------------------
 
+typedef class apb_item; // facilitate our hack of the address map for APB
+
 class any_driver #(type REQ=int,RSP=REQ) extends uvm_component;
 
   `uvm_component_param_utils(any_driver #(REQ,RSP))
@@ -142,6 +142,25 @@ class any_driver #(type REQ=int,RSP=REQ) extends uvm_component;
 
   virtual task do_req(REQ req);
     uvm_reg_addr_t addr = req.addr - base_addr;
+
+    // *** just implement the fake "DUT" here rather than drive signals **
+
+    // Address Map:
+    //
+    //         A   X   W
+    // APB    10   0   -
+    // WSH     -  10   0
+
+    // remap APB so for APB: regA is at addr 1, regX is at addr 0
+    // for WSH: shared regX is also at addr 0, regW is at addr 'h10
+    apb_item item;
+    if ($cast(item,req)) begin
+       if (req.addr == 'h10)  // regX bus addr => mem[0]
+         req.addr = 'h0;
+       else if (req.addr == 'h0) // regA bus addr => mem[1]
+         req.addr = 'h1;
+    end
+
     if (!req.read) begin
       mem[req.addr] = req.data;
     end

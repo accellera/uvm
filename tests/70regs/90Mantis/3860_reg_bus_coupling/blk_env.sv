@@ -88,7 +88,10 @@ class reg2apb_adapter extends uvm_reg_adapter;
 
 
   function new(string name="reg2apb_adapter");
+     any_sequence #(apb_item) apbseq;
      super.new(name);
+     apbseq = new;
+     parent_sequence = apbseq;
   endfunction
 
 endclass
@@ -119,7 +122,10 @@ class reg2wsh_adapter extends uvm_reg_adapter;
 
 
   function new(string name="reg2wsh_adapter");
+     any_sequence #(wsh_item) wshseq;
      super.new(name);
+     wshseq = new;
+     parent_sequence = wshseq;
   endfunction
 
 endclass
@@ -173,10 +179,6 @@ class blk_env extends uvm_env;
    virtual function void connect_phase(uvm_phase phase);
       reg2apb_adapter reg2apb = new;
       reg2wsh_adapter reg2wsh = new;
-      any_sequence #(apb_item) apbseq = new;
-      any_sequence #(wsh_item) wshseq = new;
-      reg2apb.parent_sequence = apbseq;
-      reg2wsh.parent_sequence = wshseq;
       model.APB.set_sequencer(apb.sqr, reg2apb);
       model.APB.set_auto_predict();
       model.WSH.set_sequencer(wsh.sqr, reg2wsh);

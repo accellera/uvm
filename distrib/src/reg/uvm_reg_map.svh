@@ -1673,8 +1673,11 @@ task uvm_reg_map::do_write(uvm_reg_item rw);
 
   if (adapter != null && adapter.parent_sequence != null) begin
     uvm_object o;
+    uvm_sequence_base seq;
     o = adapter.parent_sequence.clone();
-    assert($cast(rw.parent,o));
+    assert($cast(seq,o));
+    seq.set_parent_sequence(rw.parent);
+    rw.parent = seq;
   end
   if (rw.parent == null)
      rw.parent = new("default_parent_seq");
@@ -1702,8 +1705,11 @@ task uvm_reg_map::do_read(uvm_reg_item rw);
 
   if (adapter != null && adapter.parent_sequence != null) begin
     uvm_object o;
+    uvm_sequence_base seq;
     o = adapter.parent_sequence.clone();
-    assert($cast(rw.parent,o));
+    assert($cast(seq,o));
+    seq.set_parent_sequence(rw.parent);
+    rw.parent = seq;
   end
   if (rw.parent == null)
     rw.parent = new("default_parent_seq");

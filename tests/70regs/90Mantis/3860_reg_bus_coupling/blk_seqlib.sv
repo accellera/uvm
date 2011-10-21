@@ -46,6 +46,10 @@ class blk_AXW_test_seq extends uvm_reg_sequence;
       model.W.write(status, 'hcc, .parent(this));
       join
 
+      model.A.mirror(status, UVM_CHECK, .parent(this));
+      model.X.mirror(status, UVM_CHECK, .parent(this));
+      model.W.mirror(status, UVM_CHECK, .parent(this));
+
       // Write A to random value via default map (APB), then check against mirror
       data[7:0] = $urandom();
       model.A.write(status, data, .parent(this));
@@ -60,7 +64,7 @@ class blk_AXW_test_seq extends uvm_reg_sequence;
       model.W.mirror(status, UVM_CHECK, .parent(this));
 
       // W should now be equal to A
-      if (model.W.get() !== data) begin
+      if (model.W.get() != data) begin
          `uvm_error("test", $sformatf("W == 'h%h != 'h%h", model.X.get(), data));
       end
    endtask
