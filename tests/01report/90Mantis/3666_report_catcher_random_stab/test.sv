@@ -25,7 +25,7 @@ class test extends uvm_test;
 
     set_report_verbosity_level(UVM_DEBUG);
 
-    p = process::self;
+    p = process::self();
     p.srandom(100);
     d = new;
     void'(d.randomize());
