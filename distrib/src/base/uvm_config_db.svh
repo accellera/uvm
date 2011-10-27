@@ -199,7 +199,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
       m_uvm_waiter w;
       for(int i=0; i<m_waiters[field_name].size(); ++i) begin
         w = m_waiters[field_name].get(i);
-        if(uvm_re_match(inst_name,w.inst_name) == 0)
+        if(uvm_re_match(uvm_glob_to_re(inst_name),w.inst_name) == 0)
            ->w.trigger;  
       end
     end
