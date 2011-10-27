@@ -194,17 +194,16 @@ virtual class uvm_reg extends uvm_object;
 
    // Function: get_rights
    //
-   // Returns the access rights of this register.
-   //
-   // Returns "RW", "RO" or "WO".
-   // The access rights of a register is always "RW",
-   // unless it is a shared register
-   // with access restriction in a particular address map.
+   // Returns the accessibility ("RW, "RO", or "WO") of this register in the given ~map~.
    //
    // If no address map is specified and the register is mapped in only one
    // address map, that address map is used. If the register is mapped
    // in more than one address map, the default address map of the
    // parent block is used.
+   //
+   // Whether a register field can be read or written depends on both the field's
+   // configured access policy (see <uvm_reg_field::configure>) and the register's
+   // accessibility rights in the map being used to access the field. 
    //
    // If an address map is specified and
    // the register is not mapped in the specified
@@ -1663,11 +1662,6 @@ endfunction
 function string uvm_reg::get_rights(uvm_reg_map map = null);
 
    uvm_reg_map_info info;
-
-   // No right restrictions if not shared
-   if (m_maps.num() <= 1) begin
-      return "RW";
-   end
 
    map = get_local_map(map,"get_rights()");
 

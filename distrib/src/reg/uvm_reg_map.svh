@@ -134,9 +134,17 @@ class uvm_reg_map extends uvm_object;
    //
    // Add a register
    //
-   // Add the specified register instance to this address map.
-   // The register is located at the specified base address and has the
-   // specified access rights ("RW", "RO" or "WO").
+   // Add the specified register instance ~rg~ to this address map.
+   //
+   // The register is located at the specified address ~offset~ from
+   // this maps configured base address.
+   //
+   // The ~rights~ specify the register's accessibility via this map.
+   // Valid values are "RW", "RO", and "WO". Whether a register field
+   // can be read or written depends on both the field's configured access
+   // policy (see <uvm_reg_field::configure> and the register's rights in
+   // the map being used to access the field. 
+   //
    // The number of consecutive physical addresses occupied by the register
    // depends on the width of the register and the number of bytes in the
    // physical interface corresponding to this address map.
