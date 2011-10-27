@@ -60,7 +60,7 @@ module test;
     endfunction
     `uvm_sequence_utils(simple_seq, simple_sequencer)    
     virtual task body();
-      starting_phase.raise_objection(this);
+      uvm_test_done.raise_objection(this);
       p_sequencer.uvm_report_info("SEQ_BODY", "simple_seq body() is starting...", UVM_LOW);
       #50;
       // Raising one uvm_test_done objection
@@ -68,7 +68,7 @@ module test;
         `uvm_do(req)
         #10;
       end
-      starting_phase.drop_objection(this);
+      uvm_test_done.drop_objection(this);
       p_sequencer.uvm_report_info("SEQ_BODY", "simple_seq body() is ending...", UVM_LOW);
     endtask
   endclass : simple_seq
