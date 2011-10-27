@@ -45,6 +45,7 @@ typedef class uvm_reg_map;
 typedef class uvm_reg_map_info;
 typedef class uvm_reg_sequence;
 typedef class uvm_reg_adapter;
+typedef class uvm_reg_indirect_data;
 
 
 //-------------
@@ -514,6 +515,7 @@ typedef struct packed {
 
 `include "reg/uvm_reg_item.svh"
 `include "reg/uvm_reg_adapter.svh"
+`include "reg/uvm_reg_predictor.svh"
 `include "reg/uvm_reg_sequence.svh"
 `include "reg/uvm_reg_cbs.svh"
 `include "reg/uvm_reg_backdoor.svh"

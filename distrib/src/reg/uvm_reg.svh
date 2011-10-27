@@ -380,6 +380,22 @@ virtual class uvm_reg extends uvm_object;
    extern virtual function uvm_reg_data_t  get(string  fname = "",
                                                int     lineno = 0);
 
+   // Function: get_mirrored_value
+   //
+   // Return the mirrored value of the fields in the register.
+   //
+   // Does not actually read the value
+   // of the register in the design
+   //
+   // If the register contains write-only fields, the desired/mirrored
+   // value for those fields are the value last written and assumed
+   // to reside in the bits implementing these fields.
+   // Although a physical read operation would something different
+   // for these fields, the returned value is the actual content.
+   //
+   extern virtual function uvm_reg_data_t  get_mirrored_value(string  fname = "",
+                                               int     lineno = 0);
+
 
    // Function: needs_update
    //
@@ -1984,6 +2000,22 @@ function uvm_reg_data_t  uvm_reg::get(string  fname = "",
    foreach (m_fields[i])
       get |= m_fields[i].get() << m_fields[i].get_lsb_pos();
 endfunction: get
+
+
+// get_mirrored_value
+
+function uvm_reg_data_t  uvm_reg::get_mirrored_value(string  fname = "",
+                                      int     lineno = 0);
+   // Concatenate the value of the individual fields
+   // to form the register value
+   m_fname = fname;
+   m_lineno = lineno;
+
+   get_mirrored_value = 0;
+   
+   foreach (m_fields[i])
+      get_mirrored_value |= m_fields[i].get_mirrored_value() << m_fields[i].get_lsb_pos();
+endfunction: get_mirrored_value
 
 
 // reset

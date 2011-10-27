@@ -1,1 +1,1 @@
-+incdir+../common+../../../common/apb
++incdir+../common+../../../common/apb +access+rw +UVM_VERBOSITY=HIGH

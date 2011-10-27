@@ -74,9 +74,10 @@ class test extends uvm_test;
       $write("Checking normal read()...should not issue a mismatch error...\n");
       env.regmodel.DATA.predict(32'hDEADBEEF);
       env.regmodel.DATA.read(status, rdat);
-      if (env.regmodel.DATA.get() != rdat) begin
+      void'(env.regmodel.DATA.randomize()); // Change 'desired value'
+      if (env.regmodel.DATA.get_mirrored_value() != rdat) begin
          `uvm_error("Test", $sformatf("Mirror was not updated with readback value by read(): 'h%h instead of 'h%h",
-                                      env.regmodel.DATA.get(), rdat))
+                                      env.regmodel.DATA.get_mirrored_value(), rdat))
       end
 
       $write("Checking mirror()...should issue a mismatch error...\n");

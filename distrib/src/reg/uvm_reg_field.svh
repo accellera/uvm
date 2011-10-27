@@ -351,6 +351,22 @@ class uvm_reg_field extends uvm_object;
                                               int    lineno = 0);
 
 
+   // Function: get_mirrored_value
+   //
+   // Return the mirrored value of the field
+   //
+   // Does not actually read the value of the field in the design, only the mirrored value
+   // in the abstraction class. 
+   //
+   // If the field is write-only, the desired/mirrored
+   // value is the value last written and assumed
+   // to reside in the bits implementing it.
+   // Although a physical read operation would something different,
+   // the returned value is the actual content.
+   //
+   extern virtual function uvm_reg_data_t get_mirrored_value(string fname = "",
+                                              int    lineno = 0);
+
    // Function: reset
    //
    // Reset the desired/mirrored value for this field.
@@ -1264,6 +1280,16 @@ function uvm_reg_data_t  uvm_reg_field::get(string  fname = "",
    m_lineno = lineno;
    get = m_desired;
 endfunction: get
+
+ 
+// get_mirrored_value
+
+function uvm_reg_data_t  uvm_reg_field::get_mirrored_value(string  fname = "",
+                                            int     lineno = 0);
+   m_fname = fname;
+   m_lineno = lineno;
+   get_mirrored_value = m_mirrored;
+endfunction: get_mirrored_value
 
 
 // reset
