@@ -175,6 +175,7 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
 
        local_map = rg.get_local_map(map,"predictor::write()");
        map_info = local_map.get_reg_map_info(rg);
+       ir=($cast(ireg, rg))?ireg.get_indirect_reg():rg;
 
        foreach (map_info.addr[i]) begin
          if (rw.addr == map_info.addr[i]) begin
@@ -189,12 +190,12 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
               if (reg_item.kind == UVM_READ &&
                   local_map.get_check_on_read() &&
                   reg_item.status != UVM_NOT_OK) begin
-                 void'(rg.do_check(rg.get_mirrored_value(), reg_item.value[0], local_map));
+                 void'(rg.do_check(ir.get_mirrored_value(), reg_item.value[0], local_map));
               end
               
               pre_predict(reg_item);
 
-              rg.XsampleX(reg_item.value[0], rw.byte_en,
+              ir.XsampleX(reg_item.value[0], rw.byte_en,
                           reg_item.kind == UVM_READ, local_map);
               begin
                  uvm_reg_block blk = rg.get_parent();
@@ -204,7 +205,6 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
               end
 
               rg.do_predict(reg_item, predict_kind, rw.byte_en);
-              ir=($cast(ireg, rg))?ireg.get_indirect_reg():rg;
               if(reg_item.kind == UVM_WRITE)
                 `uvm_info("REG_PREDICT", {"Observed WRITE transaction to register ",
                          ir.get_full_name(), ": value='h",
