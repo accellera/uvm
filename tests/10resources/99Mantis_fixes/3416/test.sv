@@ -17,6 +17,17 @@
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
 
+interface intf;
+    int i='hdeadbeef;
+    function string id();
+        return $sformatf("%m");
+    endfunction
+endinterface
+
+module testm;
+intf myif();
+endmodule
+
 program p;
 
 import uvm_pkg::*;
@@ -60,6 +71,17 @@ class some_none_uvm_object;
    endfunction
 endclass
 
+class m_uvm_resource_vif_converter#(type T=int) extends m_uvm_resource_convert2string_converter#(T);
+   virtual function string convert2string(T val);   
+      return $sformatf("(%s) %0s", val.id(),
+                       (val == null) ? "(null)" : val.i);
+   endfunction
+
+   `_local function new();
+   endfunction
+endclass
+    
+
 initial
 begin
    static my_obj mo = new("mo");
@@ -69,6 +91,8 @@ begin
    uvm_default_printer=uvm_default_line_printer;
    
    void'(m_uvm_resource_convert2string_converter#(some_none_uvm_object)::register());
+   void'(m_uvm_resource_vif_converter#(virtual intf)::register());
+   
 
    $display("GOLD-FILE-START");
    uvm_resource_db#(int)::set("int", "*", 0);
@@ -90,6 +114,12 @@ begin
 
    uvm_config_db#()::dump();
    $display("GOLD-FILE-END");
+   
+   begin
+    uvm_resource_db#(virtual intf)::set("vif","entry",testm.myif);
+    uvm_config_db#()::dump();
+    $display(testm.myif.id());
+   end
 end
 
 endprogram
