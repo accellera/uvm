@@ -63,6 +63,15 @@ virtual class uvm_reg_adapter extends uvm_object;
   bit provides_responses; 
 
 
+  // Variable: parent_sequence
+  //
+  // Set this member in extensions of this class if the bus driver requires
+  // bus items be executed via a particular sequence base type. The sequence
+  // assigned to this member must implement do_clone().
+
+  uvm_sequence_base parent_sequence; 
+
+
   // Function: reg2bus
   //
   // Extensions of this class ~must~ implement this method to convert the specified
