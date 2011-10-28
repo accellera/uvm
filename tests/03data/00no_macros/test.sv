@@ -66,7 +66,7 @@ module top;
 
     man1=new("man1");man2=new("man2");
     mac1=new("mac1");mac2=new("mac2");
-    mac1=new("mac1");
+
     uvm_default_packer.use_metadata = 1;
     uvm_default_packer.big_endian = 0;
 
