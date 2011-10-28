@@ -19,8 +19,8 @@
 
 interface intf;
     int i='hdeadbeef;
-    function string id();
-        return $sformatf("%m");
+    function string convert2string();
+      return $sformatf("%m 'h%x", i);
     endfunction
 endinterface
 
@@ -63,25 +63,13 @@ class your_obj extends an_obj;
    endfunction
 endclass
 
-
 class some_none_uvm_object;
    int i='hdeadbeef;
    function string convert2string();
       return $sformatf("i=%0x", i);
    endfunction
 endclass
-
-class m_uvm_resource_vif_converter#(type T=int) extends m_uvm_resource_convert2string_converter#(T);
-   virtual function string convert2string(T val);   
-      return $sformatf("(%s) %0s", val.id(),
-                       (val == null) ? "(null)" : val.i);
-   endfunction
-
-   `_local function new();
-   endfunction
-endclass
     
-
 initial
 begin
    static my_obj mo = new("mo");
@@ -91,7 +79,7 @@ begin
    uvm_default_printer=uvm_default_line_printer;
    
    void'(m_uvm_resource_convert2string_converter#(some_none_uvm_object)::register());
-   void'(m_uvm_resource_vif_converter#(virtual intf)::register());
+   void'(m_uvm_resource_convert2string_converter#(virtual intf)::register());
    
 
    $display("GOLD-FILE-START");
@@ -111,15 +99,12 @@ begin
    uvm_config_db#(int)::set(null,"*","para2",4);
 
    uvm_config_db#(some_none_uvm_object)::set(null,"*","no-uvm-object",some_nuvm_object);
-
+ 
+   uvm_resource_db#(virtual intf)::set("vif","entry",testm.myif);
+   
    uvm_config_db#()::dump();
    $display("GOLD-FILE-END");
-   
-   begin
-    uvm_resource_db#(virtual intf)::set("vif","entry",testm.myif);
-    uvm_config_db#()::dump();
-    $display(testm.myif.id());
-   end
+  
 end
 
 endprogram

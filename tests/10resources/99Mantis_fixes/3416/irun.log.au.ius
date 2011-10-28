@@ -26,6 +26,8 @@ mo: (my_obj@X) { i: 'h0  }
 * [/^yr_obj$/] : (your_obj) 
 yo: (your_obj@X) { i: 'h0  } 
 -  
+entry [/^vif$/] : (<not a class type>) testm.myif.convert2string 'hdeadbeef
+-  
 no-uvm-object [/^.*$/] : (some_none_uvm_object) i=deadbeef
 -  
 para1 [/^.*$/] : (uvm_bitstream_t) 3
