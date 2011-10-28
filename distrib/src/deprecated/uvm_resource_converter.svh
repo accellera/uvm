@@ -22,7 +22,7 @@
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_resource_converter#(T)
+// CLASS- uvm_resource_converter#(T)
 //
 // The uvm_resource_converter class provides a policy object for doing
 // convertion from resource value to string.
@@ -30,7 +30,7 @@
 //------------------------------------------------------------------------------
 class m_uvm_resource_converter #(type T=int);
 
-   // Function: convert2string
+   // Function- convert2string
    // Convert a value of type ~T~ to a string that can be displayed.
    //
    // By default, returns the name of the type
@@ -42,7 +42,7 @@ endclass
 
 //----------------------------------------------------------------------
 //
-// CLASS: uvm_resource_default_converter
+// CLASS- uvm_resource_default_converter
 // Define a default resource value converter using '%p'.
 //
 // May be used for almost all types, except virtual interfaces.
@@ -63,7 +63,7 @@ class m_uvm_resource_default_converter#(type T=int) extends m_uvm_resource_conve
    `_local function new();
    endfunction
    
-   // Function: register
+   // Function- register
    // Register this policy class as the resource value conversion function
    // for this resource type.
    //
@@ -86,7 +86,7 @@ endclass
 
 //----------------------------------------------------------------------
 //
-// CLASS: uvm_resource_convert2string_converter
+// CLASS- uvm_resource_convert2string_converter
 // Define a default resource value converter using convert2string() method
 //
 // May be used for all class types that contain a ~convert2string()~ method,
@@ -105,7 +105,7 @@ class m_uvm_resource_convert2string_converter#(type T=int) extends m_uvm_resourc
    `_local function new();
    endfunction
 
-   // Function: register
+   // Function- register
    // Register this policy class as the resource value conversion function
    // for this resource type.
    //
@@ -120,7 +120,7 @@ endclass
     
 //----------------------------------------------------------------------
 //
-// CLASS: uvm_resource_sprint_converter
+// CLASS- uvm_resource_sprint_converter
 // Define a default resource value converter using sprint() method
 //
 // May be used for all class types that contain a ~sprint()~ method,
@@ -139,7 +139,7 @@ class m_uvm_resource_sprint_converter#(type T=int) extends m_uvm_resource_conver
    `_local function new();
    endfunction
 
-   // Function: register
+   // Function- register
    // Register this policy class as the resource value conversion function
    // for this resource type.
    //

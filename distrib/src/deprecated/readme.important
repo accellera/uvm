@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-//   Copyright 2010 Mentor Graphics Corporation
+//   Copyright 2011 Mentor Graphics Corporation
 //   Copyright 2011 Cadence Design Systems, Inc. 
 //   Copyright 2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
@@ -30,6 +30,6 @@ Files and Types, Classes, Functions etc within this directory are considered as
 - they might be changed without any further notice in future versions of UVM
 - they might be removed in future versions of UVM
 - the functionality is completely undocumented  
-- not part of the UVM11 standard
+- not part of the UVM standard
 
 

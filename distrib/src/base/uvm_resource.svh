@@ -1408,20 +1408,19 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
 
   function new(string name="", scope="");
     super.new(name, scope);
-    void'(get_converter());
   endfunction
 
-  // Function: get_converter
+  // Function- m_get_converter
   // Get the conversion policy class that specifies how to convert the value
   // of a resource of this type to a string
   //
-  static function m_uvm_resource_converter#(T) get_converter();
+  static function m_uvm_resource_converter#(T) m_get_converter();
     if (m_r2s==null) m_r2s = new();
     return m_r2s;
   endfunction
     
 
-  // Function: m_set_converter
+  // Function- m_set_converter
   // Specify how to convert the value of a resource of this type to a string
   //
   // If not specified (or set to ~null~),
@@ -1430,10 +1429,10 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   //
   static function void m_set_converter(m_uvm_resource_converter#(T) r2s);
     m_r2s = r2s;
-    void'(get_converter());
   endfunction
   
   function string convert2string();
+    void'(m_get_converter());
     return m_r2s.convert2string(val);
   endfunction
 
