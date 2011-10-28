@@ -23,11 +23,12 @@
 
 
 //------------------------------------------------------------------------------
-// TITLE: Register Predictor Classes
+// TITLE: Explicit Register Predictor
 //------------------------------------------------------------------------------
 //
-// It also defines a predictor component, which is used to update the register
-// model's mirror values based on transactions observed on a physical bus. 
+// The <uvm_reg_predictor> class defines a predictor component,
+// which is used to update the register model's mirror values
+// based on transactions explicitly observed on a physical bus. 
 //------------------------------------------------------------------------------
 
 class uvm_predict_s;
@@ -46,15 +47,13 @@ endclass
 // bus address, then updates the register's mirror value with the observed bus
 // data, subject to the register's access mode. See <uvm_reg::predict> for details.
 //
-// Memories can be large, so their accesses are not predicted. Users can
-// periodically use backdoor peek/poke to update the memory mirror.
+// Memories can be large, so their accesses are not predicted.
 //
 //------------------------------------------------------------------------------
 
 class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
 
   `uvm_component_param_utils(uvm_reg_predictor#(BUSTYPE))
-  //`uvm_register_cb(uvm_reg_predictor #(BUSTYPE), uvm_reg_cbs)
 
   // Variable: bus_in
   //
@@ -97,7 +96,7 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
   //
   // The adapter used to convey the parameters of a bus operation in 
   // terms of a canonical <uvm_reg_bus_op> datum.
-  // The ~adapter~ must be configured before the run phase.
+  // The <uvm_reg_adapter> must be configured before the run phase.
   //
   uvm_reg_adapter adapter;
 
