@@ -35,6 +35,7 @@
 //----------------------------------------------------------------------
 
 typedef class uvm_resource_db_options;
+typedef class uvm_cmdline_processor;
 
 //----------------------------------------------------------------------
 // class: uvm_resource_db

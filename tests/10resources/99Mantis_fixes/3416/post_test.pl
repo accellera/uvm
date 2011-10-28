@@ -58,7 +58,7 @@ sub scrub {
 $$logfile =~ s/\@\d+/\@X/sg;
 # strip header
 $$logfile =~ s/.*\nGOLD-FILE-START\n//sx;
-$$logfile =~ s/\nGOLD-FILE-END.*//sx;
+$$logfile =~ s/\nGOLD-FILE-END.*/\n/sx;
 $$logfile =~ s/^ncsim>.*$//mg;
 $$logfile =~ s/^.*\.svh.*$//mg;
 $$logfile =~ s/\n+\n/\n/sxg;
@@ -73,7 +73,7 @@ $$logfile =~ s/^# //mg;
 sub diffLogs {
   my($gold,$post)=@_;
 
-  if (system("diff $post.post $gold > $post.df")) {
+  if (system("diff -b $post.post $gold > $post.df")) {
     return "$post.df";
   } else {
     return ();
@@ -86,7 +86,7 @@ sub ReadFileAsText {
   local(*INFILE);
 
   $TEXT="";
-  open(INFILE,$FILENAME) || push @diffs,"can't open file [$FILE][$!]";
+  open(INFILE,$FILENAME) || push @diffs,"can't open file [$FILENAME][$!]";
   undef $/;
   $TEXT .= <INFILE>;
   $/ = "\n";

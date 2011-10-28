@@ -72,6 +72,7 @@ class m_uvm_resource_default_converter#(type T=int) extends m_uvm_resource_conve
    // If a ~typename~ is specified, it will be used as the name of the type
    // instead of the name returned by the <uvm_resource_converter#(T)::typename()> method.
    //
+
    static function bit register(string typename = "");
       if (m_singleton == null) begin
          m_singleton = new();
