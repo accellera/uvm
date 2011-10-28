@@ -110,10 +110,10 @@ class uvm_sequence_item extends uvm_transaction;
   function void set_item_context(uvm_sequence_base  parent_seq,
                                  uvm_sequencer_base sequencer = null);
      set_use_sequence_info(1);
-     set_parent_sequence(parent_seq);
-     if (sequencer == null && parent_seq != null) sequencer = parent_seq.get_sequencer();
+     if (parent_seq != null) set_parent_sequence(parent_seq);
+     if (sequencer == null && m_parent_sequence != null) sequencer = m_parent_sequence.get_sequencer();
      set_sequencer(sequencer); 
-     if (parent_seq != null) set_depth(parent_seq.get_depth() + 1); 
+     if (m_parent_sequence != null) set_depth(m_parent_sequence.get_depth() + 1); 
      reseed();      
   endfunction
 
