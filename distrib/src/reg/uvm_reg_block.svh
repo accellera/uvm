@@ -59,10 +59,10 @@ virtual class uvm_reg_block extends uvm_object;
 
    local int            has_cover;
    local int            cover_on;
-   local string         fname = "";
-   local int            lineno = 0;
+   local string         fname;
+   local int            lineno;
 
-   local static int id = 0;
+   local static int id;
 
    //----------------------
    // Group: Initialization
@@ -1099,7 +1099,7 @@ function void uvm_reg_block::lock_model();
 
       // Has this name has been checked before?
       if (m_roots[this] != 1) begin
-         int n = 0;
+         int n;
 
          foreach (m_roots[_blk]) begin
             uvm_reg_block blk = _blk;

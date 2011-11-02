@@ -134,9 +134,17 @@ class uvm_reg_map extends uvm_object;
    //
    // Add a register
    //
-   // Add the specified register instance to this address map.
-   // The register is located at the specified base address and has the
-   // specified access rights ("RW", "RO" or "WO").
+   // Add the specified register instance ~rg~ to this address map.
+   //
+   // The register is located at the specified address ~offset~ from
+   // this maps configured base address.
+   //
+   // The ~rights~ specify the register's accessibility via this map.
+   // Valid values are "RW", "RO", and "WO". Whether a register field
+   // can be read or written depends on both the field's configured access
+   // policy (see <uvm_reg_field::configure> and the register's rights in
+   // the map being used to access the field. 
+   //
    // The number of consecutive physical addresses occupied by the register
    // depends on the width of the register and the number of bytes in the
    // physical interface corresponding to this address map.
@@ -1254,7 +1262,7 @@ endfunction
 
 function int unsigned uvm_reg_map::get_size();
 
-  int unsigned max_addr = 0;
+  int unsigned max_addr;
   int unsigned addr;
 
   // get max offset from registers
@@ -1671,8 +1679,16 @@ task uvm_reg_map::do_write(uvm_reg_item rw);
   uvm_reg_adapter adapter = system_map.get_adapter();
   uvm_sequencer_base sequencer = system_map.get_sequencer();
 
+  if (adapter != null && adapter.parent_sequence != null) begin
+    uvm_object o;
+    uvm_sequence_base seq;
+    o = adapter.parent_sequence.clone();
+    assert($cast(seq,o));
+    seq.set_parent_sequence(rw.parent);
+    rw.parent = seq;
+  end
   if (rw.parent == null)
-    rw.parent = new("default_parent_seq");
+     rw.parent = new("default_parent_seq");
 
   if (adapter == null) begin
     rw.set_sequencer(sequencer);
@@ -1695,6 +1711,14 @@ task uvm_reg_map::do_read(uvm_reg_item rw);
   uvm_reg_adapter adapter = system_map.get_adapter();
   uvm_sequencer_base sequencer = system_map.get_sequencer();
 
+  if (adapter != null && adapter.parent_sequence != null) begin
+    uvm_object o;
+    uvm_sequence_base seq;
+    o = adapter.parent_sequence.clone();
+    assert($cast(seq,o));
+    seq.set_parent_sequence(rw.parent);
+    rw.parent = seq;
+  end
   if (rw.parent == null)
     rw.parent = new("default_parent_seq");
 
@@ -1743,7 +1767,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
     /* calculate byte_enables */
     if (rw.element_kind == UVM_FIELD) begin
       int temp_be;
-      int idx=0;
+      int idx;
       n_access_extra = lsb%(bus_width*8);                
       n_access = n_access_extra + n_bits;
       temp_be = n_access_extra;
@@ -1871,7 +1895,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
     /* calculate byte_enables */
     if (rw.element_kind == UVM_FIELD) begin
       int temp_be;
-      int idx=0;
+      int idx;
       n_access_extra = lsb%(bus_width*8);                
       n_access = n_access_extra + n_bits;
       temp_be = n_access_extra;
@@ -1983,7 +2007,7 @@ function void uvm_reg_map::do_print (uvm_printer printer);
    uvm_mem  mems[$];
    uvm_endianness_e endian;
    uvm_reg_map maps[$];
-   string prefix = "";
+   string prefix;
    uvm_sequencer_base sqr=get_sequencer();
   
    super.do_print(printer);
@@ -2022,7 +2046,7 @@ function string uvm_reg_map::convert2string();
    uvm_vreg vregs[$];
    uvm_mem  mems[$];
    uvm_endianness_e endian;
-   string prefix = "";
+   string prefix;
 
    $sformat(convert2string, "%sMap %s", prefix, get_full_name());
    endian = get_endian(UVM_NO_HIER);

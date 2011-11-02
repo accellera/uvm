@@ -56,7 +56,7 @@ class test extends uvm_test;
          else
            $display("  Correct number of arguments found");
        end
-       "ncsim" : begin
+       "ncsim(64)","ncsim" : begin
          $display($sformatf("Doing IUS checks found=%0d plusargs",plus_args.size()));
          if(plus_args.size() != 10)
            pass_the_test = pass_the_test & 0;

@@ -147,7 +147,7 @@ class uvm_reg_item extends uvm_sequence_item;
   // If path is UVM_BACKDOOR, this member specifies the abstraction 
   // kind for the backdoor access, e.g. "RTL" or "GATES".
   //
-  string bd_kind = "";
+  string bd_kind;
 
 
   // Variable: fname
@@ -155,7 +155,7 @@ class uvm_reg_item extends uvm_sequence_item;
   // The file name from where this transaction originated, if provided
   // at the call site.
   //
-  string fname = "";
+  string fname;
 
 
   // Variable: lineno
@@ -163,7 +163,7 @@ class uvm_reg_item extends uvm_sequence_item;
   // The file name from where this transaction originated, if provided 
   // at the call site.
   //
-  int lineno = 0;
+  int lineno;
 
 
   // Function: new

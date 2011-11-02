@@ -47,16 +47,16 @@ virtual class uvm_reg extends uvm_object;
    local int               m_cover_on;
    local semaphore         m_atomic;
    local process           m_process;
-   local string            m_fname = "";
-   local int               m_lineno = 0;
-   local bit               m_read_in_progress = 0;
-   local bit               m_write_in_progress = 0;
-   protected bit           m_update_in_progress = 0;
+   local string            m_fname;
+   local int               m_lineno;
+   local bit               m_read_in_progress;
+   local bit               m_write_in_progress; 
+   protected bit           m_update_in_progress;
    /*local*/ bit           m_is_busy;
    /*local*/ bit           m_is_locked_by_field;
    local uvm_reg_backdoor  m_backdoor;
 
-   local static int unsigned m_max_size = 0;
+   local static int unsigned m_max_size;
 
    local uvm_object_string_pool
        #(uvm_queue #(uvm_hdl_path_concat)) m_hdl_paths_pool;
@@ -194,17 +194,16 @@ virtual class uvm_reg extends uvm_object;
 
    // Function: get_rights
    //
-   // Returns the access rights of this register.
-   //
-   // Returns "RW", "RO" or "WO".
-   // The access rights of a register is always "RW",
-   // unless it is a shared register
-   // with access restriction in a particular address map.
+   // Returns the accessibility ("RW, "RO", or "WO") of this register in the given ~map~.
    //
    // If no address map is specified and the register is mapped in only one
    // address map, that address map is used. If the register is mapped
    // in more than one address map, the default address map of the
    // parent block is used.
+   //
+   // Whether a register field can be read or written depends on both the field's
+   // configured access policy (see <uvm_reg_field::configure>) and the register's
+   // accessibility rights in the map being used to access the field. 
    //
    // If an address map is specified and
    // the register is not mapped in the specified
@@ -1664,11 +1663,6 @@ function string uvm_reg::get_rights(uvm_reg_map map = null);
 
    uvm_reg_map_info info;
 
-   // No right restrictions if not shared
-   if (m_maps.num() <= 1) begin
-      return "RW";
-   end
-
    map = get_local_map(map,"get_rights()");
 
    if (map == null)
@@ -1800,8 +1794,8 @@ endfunction
 // Returns "RW" otherwise.
 
 function string uvm_reg::Xget_fields_accessX(uvm_reg_map map);
-   bit is_R = 0;
-   bit is_W = 0;
+   bit is_R;
+   bit is_W;
    
    foreach(m_fields[i]) begin
       case (m_fields[i].get_access(map))
@@ -2423,7 +2417,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
          // Need to clear RC fields, set RS fields and mask WO fields
          if (rw.status != UVM_NOT_OK) begin
 
-            uvm_reg_data_t wo_mask = 0;
+            uvm_reg_data_t wo_mask;
 
             foreach (m_fields[i]) begin
                string acc = m_fields[i].get_access(uvm_reg_map::backdoor());
@@ -2881,7 +2875,7 @@ task uvm_reg::mirror(output uvm_status_e       status,
    if (check == UVM_CHECK) begin
       // Check that our idea of the register value matches
       // what we just read from the DUT, minus the don't care fields
-      uvm_reg_data_t  dc = 0;
+      uvm_reg_data_t  dc;;
 
       foreach(m_fields[i]) begin
          string acc = m_fields[i].get_access(map);
@@ -2949,11 +2943,11 @@ endtask: XatomicX
 // convert2string
 
 function string uvm_reg::convert2string();
-   string res_str = "";
-   string t_str = "";
-   bit with_debug_info = 1'b0;
+   string res_str;
+   string t_str;
+   bit with_debug_info;
 
-   string prefix = "";
+   string prefix;
 
    $sformat(convert2string, "Register %s -- %0d bytes, mirror value:'h%h",
             get_full_name(), get_n_bytes(),get());

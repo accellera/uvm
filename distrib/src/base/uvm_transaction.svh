@@ -468,9 +468,9 @@ virtual class uvm_transaction extends uvm_object;
   local time    accept_time=-1;
 
   local uvm_component initiator;
-  local integer       stream_handle;
+  local integer       stream_handle=0;
   local integer       tr_handle=0;
-  local bit           record_enable = 0;
+  local bit           record_enable;
   local uvm_recorder  m_recorder;
 
 endclass

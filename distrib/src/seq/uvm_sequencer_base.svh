@@ -51,7 +51,7 @@ class uvm_sequencer_base extends uvm_component;
                                 m_wait_for_item_transaction_id;
 
   local uvm_sequencer_arb_mode  m_arbitration = SEQ_ARB_FIFO;
-  local static int              g_request_id = 0;
+  local static int              g_request_id;
   local static int              g_sequence_id = 1;
   local static int              g_sequencer_id = 1;
 
@@ -409,9 +409,9 @@ class uvm_sequencer_base extends uvm_component;
 
   int count = -1;
 
-  int m_random_count = 0;
-  int m_exhaustive_count = 0;
-  int m_simple_count = 0;
+  int m_random_count;
+  int m_exhaustive_count;
+  int m_simple_count;
 
   int unsigned max_random_count = 10;
   int unsigned max_random_depth = 4;
@@ -1554,7 +1554,9 @@ task uvm_sequencer_base::start_default_sequence();
   end
   
   `uvm_warning("UVM_DEPRECATED",{"Starting (deprecated) default sequence '",default_sequence,
-     "' on sequencer '",get_full_name(),"'"})
+     "' on sequencer '",get_full_name(),
+     "'. See documentation for uvm_sequencer_base::start_phase_sequence() for information on ",
+     "starting default sequences in UVM."})
 
   if(sequences.size() != 0) begin
     //create the sequence object
@@ -1568,6 +1570,7 @@ task uvm_sequencer_base::start_default_sequence();
     if (m_seq == null) begin
       uvm_report_fatal("STRDEFSEQ", "Null m_sequencer reference", UVM_NONE);
     end
+    m_seq.starting_phase = run_ph;
     m_seq.print_sequence_info = 1;
     m_seq.set_parent_sequence(null);
     m_seq.set_sequencer(this);

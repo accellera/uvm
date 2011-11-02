@@ -19,35 +19,17 @@
 ## -------------------------------------------------------------
 ## 
 
-UVM_HOME	= ../../../..
 USES_DPI = 1
 
-include ../../../Makefile.questa
+include $(UVM_HOME)/examples/Makefile.questa
 
 
 all: run
 
 comp: vlib
-	$(VLOG) +incdir+../sv \
-		ubus_tb_top.sv
+	$(VLOG) +incdir+../sv ubus_tb_top.sv
 
 run: comp
-	$(VSIM) +UVM_TESTNAME=test_2m_4s
+	$(VSIM) +UVM_TESTNAME=test_2m_4s_azhang
 	$(CHECK)
 
-alt:
-	qverilog \
-        -timescale "1ns/1ns" \
-        +acc=rmb \
-        +incdir+$(UVM_HOME)/src+../sv \
-        $(UVM_HOME)/src/uvm.sv \
-        ubus_tb_top.sv \
-        $(UVM_HOME)/src/dpi/uvm_dpi.cc \
-        -R \
-        +UVM_TESTNAME=test_2m_4s \
-        -c \
-        -do "run -all; q" \
-        -l questa.log 
-
-
-        #-mfcu \

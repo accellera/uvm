@@ -26,52 +26,6 @@ typedef class uvm_sequencer_base;
 typedef class uvm_domain;
 typedef class uvm_task_phase;
 
-//------------------------------------------------------------------------------
-//
-// Class - uvm_process
-//
-//------------------------------------------------------------------------------
-// Workaround container for process construct.
-
-class uvm_process;
-
-  protected process m_process_id;  
-
-  function new(process pid);
-    m_process_id = pid;
-  endfunction
-
-  function process self();
-    return m_process_id;
-  endfunction
-
-  virtual function void kill();
-    m_process_id.kill();
-  endfunction
-
-`ifdef UVM_USE_FPC
-  virtual function process::state status();
-    return m_process_id.status();
-  endfunction
-
-  task await();
-    m_process_id.await();
-  endtask
-
-  task suspend();
-   m_process_id.suspend();
-  endtask
-
-  function void resume();
-   m_process_id.resume();
-  endfunction
-`else
-  virtual function int status();
-    return m_process_id.status();
-  endfunction
-`endif
-
-endclass
    
 //------------------------------------------------------------------------------
 //
@@ -543,7 +497,6 @@ class uvm_phase extends uvm_object;
   //--------------------------
   protected bit  m_predecessors[uvm_phase];
   protected bit  m_successors[uvm_phase];
-  //protected uvm_phase m_begin_node;
   protected uvm_phase m_end_node;
   function uvm_phase get_begin_node(); if (m_imp != null) return this; return null; endfunction
   function uvm_phase get_end_node();   return m_end_node; endfunction
@@ -573,8 +526,6 @@ class uvm_phase extends uvm_object;
   // Implementation - Overall Control
   //---------------------------------
   local static mailbox #(uvm_phase) m_phase_hopper = new();
-  local static uvm_process m_phase_top_procs[uvm_phase];
-  //static bit m_has_rt_phases; //TBD access?
 
   extern static task m_run_phases();
   extern local task  execute_phase();
@@ -596,8 +547,6 @@ class uvm_phase extends uvm_object;
                      (m_parent==null) ? "null" : get_schedule_name(),
                      m_aa2string(m_predecessors),
                      m_aa2string(m_successors));
-      //if (m_begin_node != null) 
-      //  s = {s, "\n  m_begin_node=",m_begin_node.convert2string()};
     return s;
   endfunction
 
@@ -655,7 +604,7 @@ function uvm_phase::new(string name="uvm_phase",
   if (name == "run")
     phase_done = uvm_test_done_objection::get();
   else begin
-    phase_done = new({name,"_objection"});
+    phase_done = new(name);
   end
 
   m_state = UVM_PHASE_DORMANT;
@@ -961,7 +910,7 @@ endfunction
 function void uvm_phase::m_print_successors();
   uvm_phase found;
   static string spaces = "                                                 ";
-  static int level = 0;
+  static int level;
   if (m_phase_type == UVM_PHASE_DOMAIN)
     level = 0;
   $display(spaces.substr(0,level*2),get_name(), " (",m_phase_type.name(),") id=%0d",get_inst_id());
@@ -1352,7 +1301,6 @@ task uvm_phase::execute_phase();
     m_jump_bkwd = 0;
     void'(m_phase_hopper.try_put(m_jump_phase));
     m_jump_phase = null;
-    m_phase_top_procs.delete(this);
     return;
   end
 
@@ -1402,7 +1350,6 @@ task uvm_phase::execute_phase();
   // SCHEDULED:
   //-----------
   // If more successors, schedule them to run now
-  m_phase_top_procs.delete(this);
   if (m_successors.size() == 0) begin
     top.m_phase_all_done=1;
   end 
@@ -1812,15 +1759,12 @@ task uvm_phase::m_run_phases();
 
   forever begin
     uvm_phase phase;
-    uvm_process proc;
     m_phase_hopper.get(phase);
     fork
       begin
-        proc = new(process::self());
         phase.execute_phase();
       end
     join_none
-    m_phase_top_procs[phase] = proc;
     #0;  // let the process start running
   end
 endtask

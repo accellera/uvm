@@ -19,7 +19,7 @@
 ## -------------------------------------------------------------
 ## 
 
-IRUN=irun -uvmhome $(UVM_HOME)  -incdir $(UVM_HOME)/src/dpi $(UVM_HOME)/src/dpi/uvm_dpi.cc testfile.sv
+IRUN=irun -uvmhome $(UVM_HOME) testfile.sv
 
 include $(UVM_HOME)/examples/Makefile.ius
 
