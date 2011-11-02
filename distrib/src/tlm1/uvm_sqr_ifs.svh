@@ -123,8 +123,14 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // <uvm_driver::seq_item_port>, and the sequence which was responsible
   // for generating the item must be killed.
   //
-  // Once the sequence item port has been reset, the user can continue
-  // the <get_next_item>/<item_done> handshake.
+  // Once the sequence item port has been reset, the driver can safely
+  // continue the <get_next_item>/<item_done> handshake.
+  //
+  // NOTE: This method is a general work-around due to race conditions
+  // conditions which can not currently be handled by the Sequence/Driver
+  // handshake, and as such is only intended for short-term use.  In the
+  // future, a more capable handshake will replace the current mechanism,
+  // eliminating the need for this work-around.
 
   virtual function void item_reset();
     uvm_report_error("item_reset", `UVM_SEQ_ITEM_FUNCTION_ERROR, UVM_NONE);
