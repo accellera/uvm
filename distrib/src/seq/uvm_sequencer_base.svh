@@ -654,35 +654,6 @@ function void uvm_sequencer_base::grant_queued_locks();
     i++;
   end
 
-  // JAR - Removing for zombie detection
-  // for (i = 0; i < arb_sequence_q.size(); i++) begin
-    
-  //   // Check for lock requests.  Any lock request at the head
-  //   // of the queue that is not blocked will be granted immediately.
-  //   temp = 0;
-  //   if (i < arb_sequence_q.size()) begin
-  //     if (arb_sequence_q[i].request == SEQ_TYPE_LOCK) begin
-  //       temp = (is_blocked(arb_sequence_q[i].sequence_ptr) == 0);
-  //     end
-  //   end
-
-  //   // Grant the lock request and remove it from the queue.
-  //   // This is a loop to handle multiple back-to-back locks.
-  //   // Since each entry is deleted, i remains constant
-  //   while (temp) begin
-  //     lock_list.push_back(arb_sequence_q[i].sequence_ptr);
-  //     m_set_arbitration_completed(arb_sequence_q[i].request_id);
-  //     arb_sequence_q.delete(i);
-  //     m_update_lists();
-
-  //     temp = 0;
-  //     if (i < arb_sequence_q.size()) begin
-  //       if (arb_sequence_q[i].request == SEQ_TYPE_LOCK) begin
-  //         temp = is_blocked(arb_sequence_q[i].sequence_ptr) == 0;
-  //       end
-  //     end
-  //   end
-  // end
 endfunction
 
   
@@ -750,22 +721,6 @@ function int uvm_sequencer_base::m_choose_next_request();
 
     i++;
   end
-
-  // JAR - Removing for zombie detection
-  // for (i = 0; i < arb_sequence_q.size(); i++) begin
-  //   // Search for available sequences.  If in SEQ_ARB_FIFO arbitration,
-  //   // then just return the first available sequence.  Otherwise,
-  //   // create a list for arbitration purposes.
-  //   if (i < arb_sequence_q.size())
-  //     if (arb_sequence_q[i].request == SEQ_TYPE_REQ)
-  //       if (is_blocked(arb_sequence_q[i].sequence_ptr) == 0)
-  //         if (arb_sequence_q[i].sequence_ptr.is_relevant() == 1) begin
-  //           if (m_arbitration == SEQ_ARB_FIFO) begin
-  //             return i;
-  //           end
-  //           else avail_sequences.push_back(i);
-  //         end
-  // end
 
   // Return immediately if there are 0 or 1 available sequences
   if (m_arbitration == SEQ_ARB_FIFO) begin
