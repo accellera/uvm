@@ -267,10 +267,16 @@ endfunction
 // ---------
 
 function void uvm_sequencer::item_reset();
+  REQ t;
+
   // Set flag to allow next get_next_item or peek to get a new sequence_item
   sequence_item_requested = 0;
   get_next_item_called = 0;
   
+  if (m_req_fifo.try_get(t) == 0)
+    uvm_report_fatal(get_full_name(), {"item_reset() called with no outstanding requests.",
+                                       " Each call to item_reset() must be paired with a previous call to get_next_item()."});
+
   // Grant any locks as soon as possible
   grant_queued_locks();
 endfunction
