@@ -21,7 +21,6 @@
 
 UVM_HOME	= ../../../..
 USES_DPI = 1
-UVM_TESTNAME ?=test_2m_4s
 
 include ../../../Makefile.questa
 
@@ -33,7 +32,7 @@ comp: vlib
 		ubus_tb_top.sv
 
 run: comp
-	$(VSIM) +UVM_TESTNAME=$(UVM_TESTNAME)
+	$(VSIM) +UVM_TESTNAME=test_2m_4s
 	$(CHECK)
 
 alt:
