@@ -549,6 +549,7 @@ endclass
   task get_next_item(output REQ req_arg); imp.get_next_item(req_arg); endtask \
   task try_next_item(output REQ req_arg); imp.try_next_item(req_arg); endtask \
   function void item_done(input RSP rsp_arg = null); imp.item_done(rsp_arg); endfunction \
+  function void item_reset(); imp.item_reset(); endfunction \
   task wait_for_sequences(); imp.wait_for_sequences(); endtask \
   function bit has_do_available(); return imp.has_do_available(); endfunction \
   function void put_response(input RSP rsp_arg); imp.put_response(rsp_arg); endfunction \

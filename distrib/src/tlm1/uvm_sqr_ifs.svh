@@ -51,9 +51,9 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // 5 - The chosen sequence <uvm_sequence_base::post_do> is called
   // 6 - Return with a reference to the item
   //
-  // Once <get_next_item> is called, <item_done> must be called to indicate the
-  // completion of the request to the sequencer.  This will remove the request
-  // item from the sequencer fifo.
+  // Once <get_next_item> is called, either <item_done> or <item_reset> must be called 
+  // to indicate the completion of the request to the sequencer.  This will remove the 
+  // request item from the sequencer fifo.
 
   virtual task get_next_item(output T1 t);
     uvm_report_error("get_next_item", `UVM_SEQ_ITEM_TASK_ERROR, UVM_NONE);
@@ -75,9 +75,9 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   // 5 - The chosen sequence <uvm_sequence_base::post_do> is called
   // 6 - Return with a reference to the item
   //
-  // Once <try_next_item> is called, <item_done> must be called to indicate the
-  // completion of the request to the sequencer.  This will remove the request
-  // item from the sequencer fifo.
+  // Once <try_next_item> is called, either <item_done> or <item_reset> must be called 
+  // to indicate the completion of the request to the sequencer.  This will remove the 
+  // request item from the sequencer fifo.
 
   virtual task try_next_item(output T1 t);
     uvm_report_error("try_next_item", `UVM_SEQ_ITEM_TASK_ERROR, UVM_NONE);
@@ -104,6 +104,36 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
 
   virtual function void item_done(input T2 t = null);
     uvm_report_error("item_done", `UVM_SEQ_ITEM_FUNCTION_ERROR, UVM_NONE);
+  endfunction
+
+  // Function: item_reset
+  //
+  // Indicates that the request could not be handled, and that the
+  // sequencer should take whatever steps are necessary to avoid a
+  // deadlock or errors in the <get_next_item>/<item_done> handshake.
+  //
+  // Under certain situations, including the <UVM Run-Time Phases>, 
+  // it is possible that a user's task responsible for the 
+  // <get_next_item>/<item_done> handshake may be terminated after
+  // calling <get_next_item>, but before calling <item_done>.  When
+  // the task starts again, the subsequent call to <get_next_item> 
+  // will result in a "get_next_item called twice..." error.
+  //
+  // Whenever this scenario occurs, the user needs to reset the
+  // <uvm_driver::seq_item_port>, and the sequence which was responsible
+  // for generating the item must be killed.
+  //
+  // Once the sequence item port has been reset, the driver can safely
+  // continue the <get_next_item>/<item_done> handshake.
+  //
+  // NOTE: This method is a general work-around due to race conditions
+  // conditions which can not currently be handled by the Sequence/Driver
+  // handshake, and as such is only intended for short-term use.  In the
+  // future, a more capable handshake will replace the current mechanism,
+  // eliminating the need for this work-around.
+
+  virtual function void item_reset();
+    uvm_report_error("item_reset", `UVM_SEQ_ITEM_FUNCTION_ERROR, UVM_NONE);
   endfunction
 
   
