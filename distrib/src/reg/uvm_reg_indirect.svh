@@ -153,7 +153,7 @@ class uvm_reg_indirect_data extends uvm_reg;
    
    virtual function uvm_reg get_indirect_reg(string  fname = "",
                                         int     lineno = 0);
-      int unsigned idx = m_idx.get();
+      int unsigned idx = m_idx.get_mirrored_value();
       return(m_tbl[idx]);
    endfunction
 
