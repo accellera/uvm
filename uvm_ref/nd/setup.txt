@@ -1,4 +1,0 @@
-setenv ND <absolute-path>/UVM/uvm/natural_docs
-cd UVM/uvm/uvm_ref/nd
-chmod +w Proj/Menu.txt
-./gen_nd
