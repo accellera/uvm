@@ -113,6 +113,20 @@
 //
 //------------------------------------------------------------------------------
 
+// Define- UVM_NO_REGISTERED_CONVERTER
+//
+// if this symbol is defined all auto registration of the proxies to print resources
+// are disabled and you only get the typename printed (printing the objects contents 
+// either requires fill %p support or an appropriate proxy registered)
+// 
+`ifndef UVM_NO_REGISTERED_CONVERTER
+// MACRO- m_uvm_register_converter
+//
+// this is a shorthand macro to register a given TYPE with a resource converter
+// providing an automatic print capability for the resource facility
+`define m_uvm_register_converter(T) static bit m_registered_converter__ = m_uvm_resource_sprint_converter#(T)::register();
+`endif 
+
 // Definitions for the user to use inside their derived data class declarations.
 
 // MACRO: `uvm_field_utils_begin
@@ -148,7 +162,7 @@
 
 `define uvm_field_utils_end \
      end \
-   endfunction \
+endfunction \
 
 `define uvm_field_utils
 
@@ -223,6 +237,23 @@
   `uvm_object_param_utils_begin(T) \
   `uvm_object_utils_end
 
+`ifndef UVM_NO_REGISTERED_CONVERTER
+
+`define uvm_object_utils_begin(T) \
+   `m_uvm_register_converter(T) \
+   `m_uvm_object_registry_internal(T,T)  \
+   `m_uvm_object_create_func(T) \
+   `m_uvm_get_type_name_func(T) \
+   `uvm_field_utils_begin(T) 
+
+`define uvm_object_param_utils_begin(T) \
+   `m_uvm_register_converter(T) \
+   `m_uvm_object_registry_param(T)  \
+   `m_uvm_object_create_func(T) \
+   `uvm_field_utils_begin(T) 
+
+`else
+
 `define uvm_object_utils_begin(T) \
    `m_uvm_object_registry_internal(T,T)  \
    `m_uvm_object_create_func(T) \
@@ -233,6 +264,8 @@
    `m_uvm_object_registry_param(T)  \
    `m_uvm_object_create_func(T) \
    `uvm_field_utils_begin(T) 
+       
+`endif
 
 `define uvm_object_utils_end \
      end \
@@ -300,6 +333,19 @@
 // placed. The block must be terminated by `uvm_component_utils_end.
 //
 
+`ifndef UVM_NO_REGISTERED_CONVERTER
+
+`define uvm_component_utils(T) \
+   `m_uvm_register_converter(T) \
+   `m_uvm_component_registry_internal(T,T) \
+   `m_uvm_get_type_name_func(T) \
+
+`define uvm_component_param_utils(T) \
+   `m_uvm_register_converter(T) \
+   `m_uvm_component_registry_param(T) \
+
+`else
+
 `define uvm_component_utils(T) \
    `m_uvm_component_registry_internal(T,T) \
    `m_uvm_get_type_name_func(T) \
@@ -307,13 +353,14 @@
 `define uvm_component_param_utils(T) \
    `m_uvm_component_registry_param(T) \
 
+`endif
+   
 `define uvm_component_utils_begin(T) \
-   `m_uvm_component_registry_internal(T,T) \
-   `m_uvm_get_type_name_func(T) \
+   `uvm_component_utils(T) \
    `uvm_field_utils_begin(T) 
 
 `define uvm_component_param_utils_begin(T) \
-   `m_uvm_component_registry_param(T) \
+   `uvm_component_param_utils(T) \
    `uvm_field_utils_begin(T) 
 
 `define uvm_component_utils_end \

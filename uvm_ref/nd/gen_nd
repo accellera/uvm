@@ -4,12 +4,6 @@
 # This script runs Naturals Docs to generate the UVM Reference Documentation
 # from comments embedded in the UVM source.
 #
-# Before running, you must define the ND environment variable to point to the
-# NaturalDocs source tree. 
-#
-# > setenv ND /prod/3p/natural_docs
-# > ./gen_nd
-#
 # Before running NaturalDocs, this script will remove any existing html output
 # directory, which is fixed at $UVM_HOME/distrib/docs/html. It then copies the UVM logo,
 # banner, other gifs from the $ND source dir to the outdir. NaturalDocs will not
@@ -55,7 +49,7 @@
 #
 #-------------------------------------------------------------------------------
 
-set nd_dir = $ND;
+set nd_dir = ../../natural_docs
 set outdir = ../../distrib/docs/html
 
 echo "Output dir is $outdir"

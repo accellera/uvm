@@ -31,6 +31,7 @@
   `include "base/uvm_version.svh"
   `include "base/uvm_object_globals.svh"
   `include "base/uvm_misc.svh"
+  `include "deprecated/uvm_type_utils.svh"
 
   // The base object element. Contains data methods (copy/compare etc) and
   // factory creation methods (create). Also includes control classes.
@@ -41,6 +42,15 @@
 
   `include "base/uvm_factory.svh"
   `include "base/uvm_registry.svh"
+
+
+  // Resources/configuration facility
+  `include "base/uvm_spell_chkr.svh"
+  `include "base/uvm_resource.svh"
+  `include "deprecated/uvm_resource_converter.svh"
+  `include "base/uvm_resource_specializations.svh"
+  `include "base/uvm_resource_db.svh"
+  `include "base/uvm_config_db.svh"
 
 
   // Policies
@@ -74,13 +84,6 @@
   `include "base/uvm_task_phase.svh"
   `include "base/uvm_common_phases.svh"
   `include "base/uvm_runtime_phases.svh"
-
-  // Resources/configuration facility
-  `include "base/uvm_spell_chkr.svh"
-  `include "base/uvm_resource.svh"
-  `include "base/uvm_resource_specializations.svh"
-  `include "base/uvm_resource_db.svh"
-  `include "base/uvm_config_db.svh"
 
   `include "base/uvm_component.svh"
 

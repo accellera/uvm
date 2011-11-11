@@ -35,6 +35,7 @@
 //----------------------------------------------------------------------
 
 typedef class uvm_resource_db_options;
+typedef class uvm_cmdline_processor;
 
 //----------------------------------------------------------------------
 // class: uvm_resource_db
@@ -117,11 +118,9 @@ class uvm_resource_db #(type T=uvm_object);
           input uvm_object accessor,
           input rsrc_t rsrc);
 
-`ifdef UVM_USE_TYPENAME 
-          string msg=$typename(T `UVM_EXTRA_TYPENAME_ARG);
-`else
-          string msg ="unknown";
-`endif 
+          T foo;
+          string msg=uvm_type_utils#(T)::typename(foo);
+
           $sformat(msg, "%s '%s%s' (type %s) %s by %s = %s",
               rtype,scope, name=="" ? "" : {".",name}, msg,action,
               (accessor != null) ? accessor.get_full_name() : "<unknown>",
@@ -332,6 +331,7 @@ class uvm_resource_db #(type T=uvm_object);
 
   static function void dump();
     uvm_resource_pool rp = uvm_resource_pool::get();
+    void'(m_uvm_resource_default_converters::register());
     rp.dump();
   endfunction
 

@@ -47,13 +47,16 @@ $logfile =~ s/\n# /\n/sg;
 # strip irrelevant text
 $logfile =~ s/.*(=== resource pool ===.*?=== end of resource pool ===\n).*/$1/sg;
 
+# Replace implementation-dependent output with generic text
+$logfile =~ s/: \(class .*\) /: \(class \$typename\) /g;
+
 # write back
 print L $logfile;
 
 close(LOG);
 close(L);
 
-system("diff $testdir/log.au $testdir/post.log > $testdir/output.df");
+system("diff $testdir/log.au.$tool $testdir/post.log > $testdir/output.df");
 if($? == 0) {
   $post_test = "gold file matched";
   system("rm -f $testdir/output.df");

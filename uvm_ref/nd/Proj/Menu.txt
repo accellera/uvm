@@ -100,6 +100,7 @@ Group: Configuration and Resources  {
    File: uvm_resource  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_resource.svh)
    File: uvm_resource_db  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_resource_db.svh)
    File: uvm_config_db  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_config_db.svh)
+   File: Resource Conversion Policies  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_resource_converter.svh)
    }  # Group: Configuration and Resources
 
 Group: Synchronization  {
@@ -210,6 +211,7 @@ Group: Macros  {
 Group: Policies  {
 
    File: Overview  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/uvm_ref/policies.txt)
+   File: uvm_converter  (/remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_converter.svh)
    File: uvm_printer  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_printer.svh)
    File: uvm_comparer  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_comparer.svh)
    File: uvm_recorder  (no auto-title, /remote/vtghome12/janick/UVM/SourceForge/uvm/distrib/src/base/uvm_recorder.svh)

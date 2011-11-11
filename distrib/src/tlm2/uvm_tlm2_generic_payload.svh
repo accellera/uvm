@@ -850,11 +850,8 @@ class uvm_tlm_extension #(type T=int) extends uvm_tlm_extension_base;
   endfunction
 
   virtual function string get_type_handle_name();
-`ifndef UVM_USE_TYPENAME
-     return "";
-`else
-     return $typename(T `UVM_EXTRA_TYPENAME_ARG);
-`endif
+    T i;
+    return uvm_type_utils#(T)::typename(i);
   endfunction
 
   virtual function void do_copy(uvm_object rhs);

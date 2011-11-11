@@ -18,6 +18,8 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+typedef class uvm_phase;
+
 //----------------------------------------------------------------------
 // Title: UVM Configuration Database
 //
