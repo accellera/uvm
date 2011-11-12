@@ -88,7 +88,7 @@ sub run_the_test($$$) {
     # compile commands
     my $vlib = ("vlib work");
     # +acc=rmb needed for DPI backdoor access
-    my $vlog = ("vlog -lint -suppress 2218,2181 +acc=rmb $compile_opts -timescale 1ns/1ns $uvm_opts test.sv");
+    my $vlog = ("vlog -lint -suppress 2218,2181 -mfcu +acc=rmb $compile_opts -timescale 1ns/1ns $uvm_opts test.sv");
     &questa_run("cd ./$testdir && ($vlib && $vlog && touch qa) $redirect ".&comptime_log_fname()." 2>&1");
 
     # only run if the compile succeeded in reaching QA
@@ -108,7 +108,7 @@ sub run_the_test($$$) {
         }
         my $clib = "";
         if ($compile_opts !~ /UVM_NO_DPI/) {
-          #system("cd $uvm_home/examples; make -f Makefile.questa $opt_M --quiet dpi_lib") && die "DPI Library Compilation Problem" ;
+          system("cd $uvm_home/examples; make -f Makefile.questa $opt_M --quiet dpi_lib") && die "DPI Library Compilation Problem" ;
           $clib = "-sv_lib $uvm_home/lib/uvm_dpi";
         }
 
