@@ -57,6 +57,7 @@ sub scrub {
 
 $$logfile =~ s/\@\d+/\@X/sg;
 # strip header
+$$logfile =~ s/^# //mg;
 $$logfile =~ s/.*\nGOLD-FILE-START\n//sx;
 $$logfile =~ s/\nGOLD-FILE-END.*/\n/sx;
 $$logfile =~ s/^ncsim>.*$//mg;
@@ -66,7 +67,6 @@ $$logfile =~ s/^UVM-\S+\s+\(\S+\)$/UVM-VERSION/mg;
 $$logfile =~ s/^\(C\).*$/COPYRIGHT/mg;
 $$logfile =~ s/COPYRIGHT(.COPYRIGHT)+/COPYRIGHT/sg;
 $$logfile =~ s/^SVSEED.*\n//sg;
-$$logfile =~ s/^# //mg;
 
 }
 
