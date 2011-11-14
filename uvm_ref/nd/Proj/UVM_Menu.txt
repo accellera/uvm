@@ -241,6 +241,7 @@ Group: Register Layer  {
 
       File: Generic Register Operation Descriptors  (UVM_ROOT/distrib/src/reg/uvm_reg_item.svh)
       File: Register Model Adaptor  (no auto-title, UVM_ROOT/distrib/src/reg/uvm_reg_adapter.svh)
+      File: Explicit Register Predictor  (UVM_ROOT/distrib/src/reg/uvm_reg_predictor.svh)
       File: Register Sequences  (no auto-title, UVM_ROOT/distrib/src/reg/uvm_reg_sequence.svh)
       File: Backdoors  (no auto-title, UVM_ROOT/distrib/src/reg/uvm_reg_backdoor.svh)
       File: HDL access  (no auto-title, UVM_ROOT/distrib/src/dpi/uvm_hdl.svh)

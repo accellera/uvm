@@ -150,6 +150,12 @@ class uvm_reg_indirect_data extends uvm_reg;
       `uvm_error(get_full_name(), "Cannot get() an indirect data access register");
       return 0;
    endfunction
+   
+   virtual function uvm_reg get_indirect_reg(string  fname = "",
+                                        int     lineno = 0);
+      int unsigned idx = m_idx.get_mirrored_value();
+      return(m_tbl[idx]);
+   endfunction
 
    virtual function bit needs_update();
       return 0;

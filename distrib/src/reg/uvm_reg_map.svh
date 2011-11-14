@@ -62,6 +62,7 @@ class uvm_reg_map extends uvm_object;
    local uvm_reg_adapter    m_adapter;
    local uvm_sequencer_base m_sequencer;
    local bit                m_auto_predict;
+   local bit                m_check_on_read;
 
    local uvm_reg_block      m_parent;
 
@@ -84,6 +85,13 @@ class uvm_reg_map extends uvm_object;
    extern /*local*/ function void Xinit_address_mapX();
 
    static local uvm_reg_map   m_backdoor;
+
+   // Function: backdoor
+   // Return the backdoor pseudo-map singleton
+   //
+   // This pseudo-map is used to specify or configure the backdoor
+   // instead of a real address map.
+   //
    static function uvm_reg_map backdoor();
       if (m_backdoor == null)
         m_backdoor = new("Backdoor");
@@ -550,6 +558,42 @@ class uvm_reg_map extends uvm_object;
    // 
    function bit  get_auto_predict(); return m_auto_predict; endfunction
 
+
+   // Function: set_check_on_read
+   // 
+   // Sets the check-on-read mode for his map
+   // and all of its submaps.
+   //
+   // When ~on~ is ~TRUE~, 
+   // the register model will automatically check any value read back from
+   // a register or field against the current value in its mirror
+   // and report any discrepancy.
+   // This effectively combines the functionality of the
+   // <uvm_reg::read()> and <uvm_reg::mirror(UVM_CHECK)> method.
+   // This mode is useful when the register model is used passively.
+   //
+   // When ~on~ is ~FALSE~, no check is made against the mirrored value.
+   //
+   // At the end of the read operation, the mirror value is updated based
+   // on the value that was read reguardless of this mode setting.
+   //
+   // By default, auto-prediction is turned off.
+   // 
+   function void set_check_on_read(bit on=1);
+      m_check_on_read = on;
+      foreach (m_submaps[submap]) begin
+         submap.set_check_on_read(on);
+      end
+   endfunction
+
+
+   // Function: get_check_on_read
+   //
+   // Gets the check-on-read mode setting for this map.
+   // 
+   function bit  get_check_on_read(); return m_check_on_read; endfunction
+
+
    
    // Task: do_bus_write
    //
@@ -609,6 +653,7 @@ endclass: uvm_reg_map
 function uvm_reg_map::new(string name = "uvm_reg_map");
    super.new((name == "") ? "default_map" : name);
    m_auto_predict = 0;
+   m_check_on_read = 0;
 endfunction
 
 
