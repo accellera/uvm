@@ -60,7 +60,67 @@ typedef class uvm_sequence_item;
 //------------------------------------------------------------------------------
 
 virtual class uvm_component extends uvm_report_object;
-
+`ifndef RERUN_STANDALONE
+//    `include "../../../../tests/trials/rerun_component.sv"
+            // the pid of the main process
+        local process pid;
+            
+        // template function 
+        virtual function void rerun();
+            // FIXME question is if there needs to be a notification BEFORE killing the threads?
+            // FIXME hierarchical propagation? granularity (kill(), do_rerun(), ...)
+            // FIXME top down/bottom up?
+            // FIXME how does the domain concept is honoured here (propagation crosses domain boundary) 
+            // FIXME rerun member of object or component (optional?)
+//            $display("%t started rerun for %s",$time,get_full_name());
+            if(pid) begin
+                uvm_report_info("RERUN",$sformatf("killed local thread %s",get_full_name()),UVM_HIGH);
+                pid.kill();
+            end
+            
+            // NOTE: rerun all children before making local cleanup
+            begin
+                uvm_component c[$];
+                get_children(c);
+                foreach(c[idx])
+                    c[idx].rerun(); 
+            end
+                    
+            // notify for cleanup
+            do_rerun();
+                
+            // restart run action
+            do_run_wrapper(); 
+        endfunction
+            
+        // custom cleanup
+        virtual function void do_rerun(); 
+        endfunction
+            
+        // startup threads
+        virtual task do_run();
+        endtask
+            
+        // save thread ids
+        local uvm_phase this_phase;
+        virtual task run_phase(uvm_phase phase);
+            run(); 
+            this_phase=phase;
+            do_run_wrapper();
+        endtask
+            
+        virtual local function void do_run_wrapper();
+            fork begin
+                    pid=process::self(); 
+                    uvm_report_info("RERUN",$sformatf("(re)starting do_run() %s",get_full_name()),UVM_HIGH);
+                    
+                    fork do_run(); join_none
+                    wait fork;
+                end
+            join_none
+        endfunction
+`endif
+   
   // Function: new
   //
   // Creates a new component with the given leaf instance ~name~ and handle to
@@ -263,8 +323,9 @@ virtual class uvm_component extends uvm_report_object;
   // but they will be killed once the phase ends.
   //
   // The run_phase task should never be called directly.
-
+`ifdef RERUN_STANDALONE
   extern virtual task run_phase(uvm_phase phase);
+`endif
 
   // For backward compatibility the base run_phase method calls run.
   extern virtual task run();
@@ -752,7 +813,7 @@ virtual class uvm_component extends uvm_report_object;
   // immediate killing of its run-time processes should set this bit and
   // implement the stop task to prepare for shutdown.
 
-  int enable_stop_interrupt;
+  int enable_stop_interrupt = 0;
 `endif
 
 
@@ -835,6 +896,14 @@ virtual class uvm_component extends uvm_report_object;
   //   and coming out of the table (during the get), so that multiple components
   //   matched to the same setting (by way of wildcards) do not end up sharing
   //   the same object.
+  //
+  //   The following message tags are used for configuration setting. You can
+  //   use the standard uvm report messaging interface to control these
+  //   messages.
+  //     CFGNTS    -- The configuration setting was not used by any component.
+  //                  This is a warning.
+  //     CFGOVR    -- The configuration setting was overridden by a setting above.
+  //     CFGSET    -- The configuration setting was used at least once.
   //
   //
   // See <get_config_int>, <get_config_string>, and <get_config_object> for
@@ -919,9 +988,16 @@ virtual class uvm_component extends uvm_report_object;
   // components are recursively checked. This function is automatically
   // called in the check phase, but can be manually called at any time.
   //
+  // Additional detail is provided by the following message tags:
+  // * CFGOVR -- lists all configuration settings that have been overridden
+  // from above.  
+  // * CFGSET -- lists all configuration settings that have been set.
+  //
   // To get all configuration information prior to the run phase, do something 
   // like this in your top object:
   //|  function void start_of_simulation_phase(uvm_phase phase);
+  //|    set_report_id_action_hier("CFGOVR", UVM_DISPLAY);
+  //|    set_report_id_action_hier("CFGSET", UVM_DISPLAY);
   //|    check_config_usage();
   //|  endfunction
 
@@ -1011,7 +1087,7 @@ virtual class uvm_component extends uvm_report_object;
   // Setting this static variable causes get_config_* to print info about
   // matching configuration settings as they are being applied.
 
-  static bit print_config_matches;
+  static bit print_config_matches = 0; 
 
 
   //----------------------------------------------------------------------------
@@ -1595,8 +1671,8 @@ virtual class uvm_component extends uvm_report_object;
   uvm_phase            m_current_phase;            // the most recently executed phase
   protected process    m_phase_process;
 
-  /*protected*/ bit  m_build_done;
-  /*protected*/ int  m_phasing_active;
+  /*protected*/ bit  m_build_done=0;
+  /*protected*/ int  m_phasing_active=0;
 
   extern                   function void set_int_local(string field_name, 
                                                        uvm_bitstream_t value,
@@ -1765,8 +1841,13 @@ function uvm_component::new (string name, uvm_component parent);
 
   set_report_verbosity_level(parent.get_report_verbosity_level());
 
+  set_report_id_action("CFGOVR", UVM_NO_ACTION);
+  set_report_id_action("CFGSET", UVM_NO_ACTION);
+
   m_set_cl_msg_args();
 
+  top.set_report_id_action("CFGOVR", UVM_NO_ACTION);
+  top.set_report_id_action("CFGSET", UVM_NO_ACTION);
 endfunction
 
 
@@ -2278,10 +2359,12 @@ function void uvm_component::end_of_elaboration_phase(uvm_phase phase);
   end_of_elaboration();
   return; 
 endfunction
+`ifdef RERUN_STANDALONE
 task          uvm_component::run_phase(uvm_phase phase);
   run();
   return; 
 endtask
+`endif
 function void uvm_component::extract_phase(uvm_phase phase);
   extract();
   return; 
@@ -2942,7 +3025,7 @@ function void uvm_component::check_config_usage ( bit recurse=1 );
   if(rq.size() == 0)
     return;
 
-  uvm_report_info("CFGNRD"," ::: The following resources have at least one write and no reads :::",UVM_INFO);
+  $display("\n ::: The following resources have at least one write and no reads :::");
   rp.print_resources(rq, 1);
 endfunction
 
@@ -2962,7 +3045,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
   __m_uvm_field_automation (null, UVM_CHECK_FIELDS, "");
 
   if(verbose)
-    uvm_report_info("CFGAPL","applying configuration settings", UVM_NONE);
+    $display("applying configuration settings for %s", get_full_name());
 
   rq = rp.lookup_scope(get_full_name());
   rp.sort_by_precedence(rq);
@@ -2991,7 +3074,8 @@ function void uvm_component::apply_config_settings (bit verbose=0);
       continue;
 
     if(verbose)
-      uvm_report_info("CFGAPL",$sformatf("applying %s [%s]", name, __m_uvm_status_container.field_array[search_name]),UVM_NONE);
+      $display("applying %s [%s] in %s", name, __m_uvm_status_container.field_array[search_name],
+                                         get_full_name());
 
     begin
     uvm_resource#(uvm_bitstream_t) rbs;
@@ -3033,7 +3117,8 @@ function void uvm_component::print_config(bit recurse = 0, audit = 0);
 
   uvm_resource_pool rp = uvm_resource_pool::get();
 
-  uvm_report_info("CFGPRT","visible resources:",UVM_INFO);
+  $display();
+  $display("resources that are visible in %s", get_full_name());
   rp.print_resources(rp.lookup_scope(get_full_name()), audit);
 
   if(recurse) begin
@@ -3053,7 +3138,7 @@ endfunction
 function void uvm_component::print_config_settings (string field="",
                                                     uvm_component comp=null,
                                                     bit recurse=0);
-  static bit have_been_warned;
+  static bit have_been_warned = 0;
   if(!have_been_warned) begin
     uvm_report_warning("deprecated", "uvm_component::print_config_settings has been deprecated.  Use print_config() instead");
     have_been_warned = 1;
