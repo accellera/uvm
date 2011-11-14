@@ -26,7 +26,7 @@ mo: (my_obj@X) { i: 'h0  }
 * [/^yr_obj$/] : (class p.your_obj) 
 yo: (your_obj@X) { i: 'h0  } 
 -  
-entry [/^vif$/] : (virtual interface intf) testm.myif.convert2string 'hdeadbeef
+entry [/^vif$/] : (interface intf) testm.myif.convert2string 'hdeadbeef
 -  
 no-uvm-object [/^.*$/] : (class p.some_none_uvm_object) i=deadbeef
 -  
