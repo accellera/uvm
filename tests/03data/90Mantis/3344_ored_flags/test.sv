@@ -18,9 +18,9 @@
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
 
+`include "uvm_macros.svh"
 module test;
 
-`include "uvm_pkg.sv"
 import uvm_pkg::*;
 
 class my_class extends uvm_sequence_item;

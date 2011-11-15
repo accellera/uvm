@@ -18,7 +18,7 @@
 //----------------------------------------------------------------------
 
 parameter NUM_REGS=`NUM_REGS;
-
+`include "uvm_macros.svh"
 module test();
 
   import uvm_pkg::*;
@@ -142,6 +142,11 @@ module test();
       rw.status = UVM_IS_OK;
     endfunction
     `uvm_object_utils(reg2ahb_adapter)
+
+  function new(string name="reg2ahb_adapter");
+     super.new(name);
+  endfunction
+
   endclass : reg2ahb_adapter
 
   class reg2apb_adapter extends uvm_reg_adapter;
@@ -166,6 +171,11 @@ module test();
       rw.status = UVM_IS_OK;
     endfunction
     `uvm_object_utils(reg2apb_adapter)
+
+  function new(string name="reg2apb_adapter");
+     super.new(name);
+  endfunction
+
   endclass : reg2apb_adapter
 
   class test extends uvm_test;

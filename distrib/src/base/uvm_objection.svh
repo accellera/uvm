@@ -61,7 +61,7 @@ endclass
 
 class uvm_objection extends uvm_report_object;
 
-  protected bit     m_trace_mode=0;
+  protected bit     m_trace_mode;
   protected int     m_source_count[uvm_object];
   protected int     m_total_count [uvm_object];
   protected time    m_drain_time  [uvm_object];
@@ -82,7 +82,7 @@ class uvm_objection extends uvm_report_object;
   uvm_root top = uvm_root::get();
 
 
-  protected bit m_cleared = 0; /* for checking obj count<0 */
+  protected bit m_cleared; /* for checking obj count<0 */
 
 
   // Function: clear

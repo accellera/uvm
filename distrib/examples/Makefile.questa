@@ -29,7 +29,6 @@ endif
 #---------------------------------------------------------------
 
 UVM_HOME ?= ..
-UVM_VERBOSITY =	UVM_MEDIUM
 
 
 LIBDIR  = $(UVM_HOME)/lib
@@ -84,7 +83,6 @@ VLOG =  vlog \
 
 
 VSIM =  vsim \
-        +UVM_VERBOSITY=$(UVM_VERBOSITY) \
         $(DPILIB_VSIM_OPT) \
         $(VSIM_OPT) \
         $(OPT_R) \

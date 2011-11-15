@@ -34,9 +34,11 @@ Usage: $0 [options] tool {dir}
    dir      Name of the directories containing the UVM testcases
 
 Options:
+   -0       Do not define UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
    -c       Do not run. Only clean-up tool-generated files.
    -C opts  Add the specified options to the compilation command
    -d       Do not remove tool-generated files
+   -D       Define UVM_NO_DEPRECATED
    -f fname Execute tests listed in specified file (one per line)
    -F fname Write list of failing tests in specfied file instead of
                "tool.fails" (can later be used with -f)
@@ -54,7 +56,9 @@ USAGE
 
 require "getopts.pl";
 use Cwd 'abs_path'; 
-&Getopts("cC:df:F:PhR:Su:M:v");
+use File::Spec::Functions qw(catfile path);
+
+&Getopts("0cC:dDf:F:PhR:Su:M:v");
 &usage if $opt_h || $#ARGV < 0;
 
 $tool = shift(@ARGV);
@@ -260,12 +264,12 @@ sub run_one_test {
    if (!$opt_c) {
      print "<running>\n" if ($opt_v || $opt_P);
 
-     $comp_args = "";
+     $comp_args = "+define+UVM_OBJECT_MUST_HAVE_CONSTRUCTOR" unless $opt_0;
+     $comp_args = "+define+UVM_NO_DEPRECATED" if $opt_D;
      if (-e "$testdir/$tool.comp.args") {
        if (!open(ARGS, "< $testdir/$tool.comp.args")) {
 	 print "**FAIL** (Cannot read $tool.comp.args)\n";
        }
-       $comp_args = "";
        while ($_ = <ARGS>) {
          chomp;
          $comp_args .= " $_";
@@ -557,24 +561,39 @@ sub check_runtime_error {
   return 1;
 }
 
+sub maketool {
+    local($make)=which("gmake");
+    if($make eq "") {
+        $make="make";
+    }  
+    $make;
+}
 
+sub which {
+my $name = shift;
+
+grep { -e } map { my $file = $_; 
+map { catfile $_, $file } path
+} map { $name . lc $_ } (q{}, split /;/);
+}
 
 #
 # Execute a Makefile-based example
 #
 sub make_example {
   local($dir, $opts, $result, $_) = @_;
-
+  local($make) = maketool();
+  
   return 0 if ($tool eq "clean");
 
   $result = 0;
   if (!$opt_c) {
-    $cmd = "cd $dir && make -f Makefile.$tool $opts $opt_M OPT_C=\"$opt_C\" OPT_R=\"$opt_R\" UVM_HOME=\"$uvm_home\" all";
+    $cmd = "cd $dir && $make -f Makefile.$tool $opts $opt_M OPT_C=\"$opt_C\" OPT_R=\"$opt_R\" UVM_HOME=\"$uvm_home\" all";
     $cmd .= " > /dev/null 2>&1" unless $opt_v;
     $result = system($cmd);
   }
   if (!$opt_d || $opt_c) {
-    $cmd = "cd $dir && make -f Makefile.$tool $opts clean";
+    $cmd = "cd $dir && $make -f Makefile.$tool $opts clean";
     $cmd .= " > /dev/null 2>&1" unless $opt_v;
     system($cmd);
   }

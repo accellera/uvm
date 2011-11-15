@@ -46,6 +46,11 @@ module test;
       `uvm_field_int(i, UVM_DEFAULT)
       `uvm_field_string(str, UVM_DEFAULT)
     `uvm_object_utils_end
+
+  function new(string name="myobject");
+     super.new(name);
+  endfunction
+
   endclass
 
   class container extends uvm_sequence_item;
@@ -55,6 +60,11 @@ module test;
       `uvm_field_object(object, UVM_DEFAULT)
       `uvm_field_int(value, UVM_DEFAULT)
     `uvm_object_utils_end
+
+  function new(string name="container");
+     super.new(name);
+  endfunction
+
   endclass
 
   container cfg_container = new;

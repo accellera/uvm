@@ -1,0 +1,37 @@
+
+=== resource pool ===
+* [/^int$/] : (int) 0
+-  
+* [/^string$/] : (string) "foo!"
+-  
+* [/^bit\[7:0\]$/] : (bit[7:0]) 165
+-  
+* [/^reg\[7:0\]$/] : (<not a class type>) ?
+-  
+* [/^an_obj$/] : (an_obj) (null)
+-  
+* [/^an_obj-m$/] : (my_obj) 
+mo: (my_obj@X) { i: 'h0  } 
+-  
+* [/^an_obj-y$/] : (your_obj) 
+yo: (your_obj@X) { i: 'h0  } 
+-  
+* [/^my_obj-0$/] : (my_obj) (null)
+-  
+* [/^my_obj$/] : (my_obj) 
+mo: (my_obj@X) { i: 'h0  } 
+-  
+* [/^yr_obj$/] : (your_obj) (null)
+-  
+* [/^yr_obj$/] : (your_obj) 
+yo: (your_obj@X) { i: 'h0  } 
+-  
+entry [/^vif$/] : (<not a class type>) testm.myif.convert2string 'hdeadbeef
+-  
+no-uvm-object [/^.*$/] : (some_none_uvm_object) i=deadbeef
+-  
+para1 [/^.*$/] : (uvm_bitstream_t) 3
+-  
+para2 [/^.*$/] : (int) 4
+-  
+=== end of resource pool ===

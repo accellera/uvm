@@ -47,16 +47,16 @@ virtual class uvm_reg extends uvm_object;
    local int               m_cover_on;
    local semaphore         m_atomic;
    local process           m_process;
-   local string            m_fname = "";
-   local int               m_lineno = 0;
-   local bit               m_read_in_progress = 0;
-   local bit               m_write_in_progress = 0;
-   protected bit           m_update_in_progress = 0;
+   local string            m_fname;
+   local int               m_lineno;
+   local bit               m_read_in_progress;
+   local bit               m_write_in_progress; 
+   protected bit           m_update_in_progress;
    /*local*/ bit           m_is_busy;
    /*local*/ bit           m_is_locked_by_field;
    local uvm_reg_backdoor  m_backdoor;
 
-   local static int unsigned m_max_size = 0;
+   local static int unsigned m_max_size;
 
    local uvm_object_string_pool
        #(uvm_queue #(uvm_hdl_path_concat)) m_hdl_paths_pool;
@@ -194,17 +194,16 @@ virtual class uvm_reg extends uvm_object;
 
    // Function: get_rights
    //
-   // Returns the access rights of this register.
-   //
-   // Returns "RW", "RO" or "WO".
-   // The access rights of a register is always "RW",
-   // unless it is a shared register
-   // with access restriction in a particular address map.
+   // Returns the accessibility ("RW, "RO", or "WO") of this register in the given ~map~.
    //
    // If no address map is specified and the register is mapped in only one
    // address map, that address map is used. If the register is mapped
    // in more than one address map, the default address map of the
    // parent block is used.
+   //
+   // Whether a register field can be read or written depends on both the field's
+   // configured access policy (see <uvm_reg_field::configure>) and the register's
+   // accessibility rights in the map being used to access the field. 
    //
    // If an address map is specified and
    // the register is not mapped in the specified
@@ -378,6 +377,22 @@ virtual class uvm_reg extends uvm_object;
    // the returned value is the actual content.
    //
    extern virtual function uvm_reg_data_t  get(string  fname = "",
+                                               int     lineno = 0);
+
+   // Function: get_mirrored_value
+   //
+   // Return the mirrored value of the fields in the register.
+   //
+   // Does not actually read the value
+   // of the register in the design
+   //
+   // If the register contains write-only fields, the desired/mirrored
+   // value for those fields are the value last written and assumed
+   // to reside in the bits implementing these fields.
+   // Although a physical read operation would something different
+   // for these fields, the returned value is the actual content.
+   //
+   extern virtual function uvm_reg_data_t  get_mirrored_value(string  fname = "",
                                                int     lineno = 0);
 
 
@@ -652,6 +667,10 @@ virtual class uvm_reg extends uvm_object;
 
    /*local*/ extern function bit Xis_locked_by_fieldX();
 
+
+   extern virtual function bit do_check(uvm_reg_data_t expected,
+                                        uvm_reg_data_t actual,
+                                        uvm_reg_map    map);
 
    extern virtual task do_write(uvm_reg_item rw);
 
@@ -1664,11 +1683,6 @@ function string uvm_reg::get_rights(uvm_reg_map map = null);
 
    uvm_reg_map_info info;
 
-   // No right restrictions if not shared
-   if (m_maps.num() <= 1) begin
-      return "RW";
-   end
-
    map = get_local_map(map,"get_rights()");
 
    if (map == null)
@@ -1800,8 +1814,8 @@ endfunction
 // Returns "RW" otherwise.
 
 function string uvm_reg::Xget_fields_accessX(uvm_reg_map map);
-   bit is_R = 0;
-   bit is_W = 0;
+   bit is_R;
+   bit is_W;
    
    foreach(m_fields[i]) begin
       case (m_fields[i].get_access(map))
@@ -1982,6 +1996,22 @@ function uvm_reg_data_t  uvm_reg::get(string  fname = "",
 endfunction: get
 
 
+// get_mirrored_value
+
+function uvm_reg_data_t  uvm_reg::get_mirrored_value(string  fname = "",
+                                      int     lineno = 0);
+   // Concatenate the value of the individual fields
+   // to form the register value
+   m_fname = fname;
+   m_lineno = lineno;
+
+   get_mirrored_value = 0;
+   
+   foreach (m_fields[i])
+      get_mirrored_value |= m_fields[i].get_mirrored_value() << m_fields[i].get_lsb_pos();
+endfunction: get_mirrored_value
+
+
 // reset
 
 function void uvm_reg::reset(string kind = "HARD");
@@ -2100,6 +2130,8 @@ task uvm_reg::write(output uvm_status_e      status,
 
    XatomicX(1);
 
+   set(value);
+
    rw = uvm_reg_item::type_id::create("write_item",,get_full_name());
    rw.element      = this;
    rw.element_kind = UVM_REG;
@@ -2190,6 +2222,8 @@ task uvm_reg::do_write (uvm_reg_item rw);
       UVM_BACKDOOR: begin
          uvm_reg_data_t final_val;
          uvm_reg_backdoor bkdr = get_backdoor();
+
+         value = rw.value[0];
 
          // Mimick the final value after a physical read
          rw.kind = UVM_READ;
@@ -2287,7 +2321,7 @@ task uvm_reg::do_write (uvm_reg_item rw);
    rw.element_kind = UVM_REG;
 
    // REPORT
-   if (uvm_report_enabled(UVM_HIGH)) begin
+   if (uvm_report_enabled(UVM_HIGH, UVM_INFO, "RegModel")) begin
      string path_s,value_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -2297,8 +2331,8 @@ task uvm_reg::do_write (uvm_reg_item rw);
 
      value_s = $sformatf("=0x%0h",rw.value[0]);
 
-     `uvm_info("RegModel", {"Wrote register via ",path_s,": ",
-                            get_full_name(),value_s},UVM_HIGH)
+      uvm_report_info("RegModel", {"Wrote register via ",path_s,": ",
+                                   get_full_name(),value_s}, UVM_HIGH);
    end
 
    m_write_in_progress = 1'b0;
@@ -2365,7 +2399,8 @@ task uvm_reg::do_read(uvm_reg_item rw);
 
    uvm_reg_cb_iter  cbs = new(this);
    uvm_reg_map_info map_info;
-   uvm_reg_addr_t   value;
+   uvm_reg_data_t   value;
+   uvm_reg_data_t   exp;
 
    m_fname   = rw.fname;
    m_lineno  = rw.lineno;
@@ -2409,6 +2444,9 @@ task uvm_reg::do_read(uvm_reg_item rw);
       UVM_BACKDOOR: begin
          uvm_reg_backdoor bkdr = get_backdoor();
 
+         uvm_reg_map map = uvm_reg_map::backdoor();
+         if (map.get_check_on_read()) exp = get();
+   
          if (bkdr != null)
            bkdr.read(rw);
          else
@@ -2419,12 +2457,13 @@ task uvm_reg::do_read(uvm_reg_item rw);
          // Need to clear RC fields, set RS fields and mask WO fields
          if (rw.status != UVM_NOT_OK) begin
 
-            uvm_reg_data_t wo_mask = 0;
+            uvm_reg_data_t wo_mask;
 
             foreach (m_fields[i]) begin
                string acc = m_fields[i].get_access(uvm_reg_map::backdoor());
                if (acc == "RC" ||
                    acc == "WRC" ||
+                   acc == "WSRC" ||
                    acc == "W1SRC" ||
                    acc == "W0SRC") begin
                   value &= ~(((1<<m_fields[i].get_n_bits())-1)
@@ -2432,6 +2471,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
                end
                else if (acc == "RS" ||
                         acc == "WRS" ||
+                        acc == "WCRS" ||
                         acc == "W1CRS" ||
                         acc == "W0CRS") begin
                   value |= (((1<<m_fields[i].get_n_bits())-1)
@@ -2447,13 +2487,23 @@ task uvm_reg::do_read(uvm_reg_item rw);
             end
 
             if (value != rw.value[0]) begin
+              uvm_reg_data_t saved;
+              saved = rw.value[0];
+              rw.value[0] = value;
               if (bkdr != null)
-                 bkdr.read(rw);
+                 bkdr.write(rw);
               else
-                 backdoor_read(rw);
+                 backdoor_write(rw);
+              rw.value[0] = saved;
             end
 
             rw.value[0] &= ~wo_mask;
+
+            if (map.get_check_on_read() &&
+               rw.status != UVM_NOT_OK) begin
+               void'(do_check(exp, rw.value[0], map));
+            end
+       
             do_predict(rw, UVM_PREDICT_READ);
          end
       end
@@ -2465,6 +2515,8 @@ task uvm_reg::do_read(uvm_reg_item rw);
 
          m_is_busy = 1;
 
+         if (rw.local_map.get_check_on_read()) exp = get();
+   
          // ...VIA USER FRONTDOOR
          if (map_info.frontdoor != null) begin
             uvm_reg_frontdoor fd = map_info.frontdoor;
@@ -2482,6 +2534,11 @@ task uvm_reg::do_read(uvm_reg_item rw);
          m_is_busy = 0;
 
          if (system_map.get_auto_predict()) begin
+            if (rw.local_map.get_check_on_read() &&
+                rw.status != UVM_NOT_OK) begin
+               void'(do_check(exp, rw.value[0], system_map));
+            end
+
             if (rw.status != UVM_NOT_OK) begin
                sample(rw.value[0], -1, 1, rw.map);
                m_parent.XsampleX(map_info.offset, 1, rw.map);
@@ -2519,7 +2576,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
    rw.element_kind = UVM_REG;
 
    // REPORT
-   if (uvm_report_enabled(UVM_HIGH)) begin
+   if (uvm_report_enabled(UVM_HIGH, UVM_INFO, "RegModel")) begin
      string path_s,value_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -2529,8 +2586,8 @@ task uvm_reg::do_read(uvm_reg_item rw);
 
      value_s = $sformatf("=%0h",rw.value[0]);
 
-     `uvm_info("RegModel", {"Read  register via ",path_s,": ",
-                            get_full_name(),value_s},UVM_HIGH)
+      uvm_report_info("RegModel", {"Read  register via ",path_s,": ",
+                                   get_full_name(),value_s}, UVM_HIGH);
    end
 
    m_read_in_progress = 1'b0;
@@ -2813,6 +2870,54 @@ task uvm_reg::peek(output uvm_status_e      status,
 endtask: peek
 
 
+// do_check
+function bit uvm_reg::do_check(input uvm_reg_data_t expected,
+                               input uvm_reg_data_t actual,
+                               uvm_reg_map          map);
+
+   uvm_reg_data_t  dc = 0;
+
+   foreach(m_fields[i]) begin
+      string acc = m_fields[i].get_access(map);
+      acc = acc.substr(0, 1);
+      if (m_fields[i].get_compare() == UVM_NO_CHECK ||
+          acc == "WO") begin
+         dc |= ((1 << m_fields[i].get_n_bits())-1)
+            << m_fields[i].get_lsb_pos();
+      end
+   end
+
+   if ((actual|dc) === (expected|dc)) return 1;
+   
+   `uvm_error("RegModel", $sformatf("Register \"%s\" value read from DUT (0x%h) does not match mirrored value (0x%h)",
+                                    get_full_name(), actual, (expected ^ ('x & dc))));
+                                     
+   foreach(m_fields[i]) begin
+      string acc = m_fields[i].get_access(map);
+      acc = acc.substr(0, 1);
+      if (m_fields[i].get_compare() == UVM_NO_CHECK ||
+          m_fields[i].get_access() == "WO") begin
+         uvm_reg_data_t mask  = ((1 << m_fields[i].get_n_bits())-1);
+         uvm_reg_data_t val   = actual   >> m_fields[i].get_lsb_pos() & mask;
+         uvm_reg_data_t exp   = expected >> m_fields[i].get_lsb_pos() & mask;
+
+         if (val !== exp) begin
+            `uvm_info("RegModel",
+                      $sformatf("Field %s (%s[%0d:%0d]) mismatch read=%0d'h%0h mirrored=%0d'h%0h ",
+                                m_fields[i].get_name(), get_full_name(),
+                                m_fields[i].get_lsb_pos() + m_fields[i].get_n_bits() - 1,
+                                m_fields[i].get_lsb_pos(),
+                                m_fields[i].get_n_bits(), val,
+                                m_fields[i].get_n_bits(), exp),
+                      UVM_NONE)
+         end
+      end
+   end
+
+   return 0;
+endfunction
+       
+
 // mirror
 
 task uvm_reg::mirror(output uvm_status_e       status,
@@ -2845,21 +2950,7 @@ task uvm_reg::mirror(output uvm_status_e       status,
      return;
    
    // Remember what we think the value is before it gets updated
-   if (check == UVM_CHECK) begin
-      exp = get();
-      // Assume that WO* field will readback as 0's
-      foreach(m_fields[i]) begin
-         string mode;
-         mode = m_fields[i].get_access(map);
-         if (mode == "WO" ||
-             mode == "WOC" ||
-             mode == "WOS" ||
-             mode == "WO1") begin
-            exp &= ~(((1 << m_fields[i].get_n_bits())-1)
-                     << m_fields[i].get_lsb_pos());
-         end
-      end
-   end
+   if (check == UVM_CHECK) exp = get();
 
    XreadX(status, v, path, map, parent, prior, extension, fname, lineno);
 
@@ -2868,44 +2959,7 @@ task uvm_reg::mirror(output uvm_status_e       status,
       return;
    end
 
-   if (check == UVM_CHECK) begin
-      // Check that our idea of the register value matches
-      // what we just read from the DUT, minus the don't care fields
-      uvm_reg_data_t  dc = 0;
-
-      foreach(m_fields[i]) begin
-         string acc = m_fields[i].get_access(map);
-         if (m_fields[i].get_compare() == UVM_NO_CHECK) begin
-            dc |= ((1 << m_fields[i].get_n_bits())-1)
-                  << m_fields[i].get_lsb_pos();
-         end
-         else if (acc == "WO" ||
-                  acc == "WOC" ||
-                  acc == "WOS" ||
-                  acc == "WO1") begin
-            // Assume WO fields will always read-back as 0
-            exp &= ~(((1 << m_fields[i].get_n_bits())-1)
-                     << m_fields[i].get_lsb_pos());
-         end
-      end
-
-      if ((v|dc) !== (exp|dc)) begin
-         `uvm_error("RegModel", $sformatf("Register \"%s\" value read from DUT (0x%h) does not match mirrored value (0x%h)",
-                                     get_full_name(), v, (exp ^ ('x & dc))));
-                                     
-          foreach(m_fields[i]) begin
-             if(m_fields[i].get_compare() == UVM_CHECK) begin
-                 uvm_reg_data_t mask=((1 << m_fields[i].get_n_bits())-1);
-                 uvm_reg_data_t field = mask << m_fields[i].get_lsb_pos();
-                 uvm_reg_data_t diff = ((v ^ exp) >> m_fields[i].get_lsb_pos()) & mask;
-                 if(diff)
-                    `uvm_info("RegMem",$sformatf("field %s mismatch read=%0d'h%0h mirrored=%0d'h%0h slice [%0d:%0d]",m_fields[i].get_name(),
-                        m_fields[i].get_n_bits(),(v >> m_fields[i].get_lsb_pos()) & mask, m_fields[i].get_n_bits(),(exp >> m_fields[i].get_lsb_pos())&mask,
-                        m_fields[i].get_lsb_pos()+m_fields[i].get_n_bits()-1,m_fields[i].get_lsb_pos()),UVM_NONE)
-             end
-          end
-      end
-   end
+   if (check == UVM_CHECK) void'(do_check(exp, v, map));
 
    XatomicX(0);
 endtask: mirror
@@ -2939,11 +2993,11 @@ endtask: XatomicX
 // convert2string
 
 function string uvm_reg::convert2string();
-   string res_str = "";
-   string t_str = "";
-   bit with_debug_info = 1'b0;
+   string res_str;
+   string t_str;
+   bit with_debug_info;
 
-   string prefix = "";
+   string prefix;
 
    $sformat(convert2string, "Register %s -- %0d bytes, mirror value:'h%h",
             get_full_name(), get_n_bytes(),get());

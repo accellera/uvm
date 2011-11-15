@@ -25,10 +25,20 @@ import uvm_pkg::*;
 
 class base_type extends uvm_object;
   `uvm_object_utils(base_type)
+
+  function new(string name="base_type");
+     super.new(name);
+  endfunction
+
 endclass
 
 class derived_type extends base_type;
   `uvm_object_utils(derived_type)
+
+  function new(string name="derived_type");
+     super.new(name);
+  endfunction
+
 endclass
 
 class my_component extends uvm_component;

@@ -752,7 +752,7 @@ virtual class uvm_component extends uvm_report_object;
   // immediate killing of its run-time processes should set this bit and
   // implement the stop task to prepare for shutdown.
 
-  int enable_stop_interrupt = 0;
+  int enable_stop_interrupt;
 `endif
 
 
@@ -835,14 +835,6 @@ virtual class uvm_component extends uvm_report_object;
   //   and coming out of the table (during the get), so that multiple components
   //   matched to the same setting (by way of wildcards) do not end up sharing
   //   the same object.
-  //
-  //   The following message tags are used for configuration setting. You can
-  //   use the standard uvm report messaging interface to control these
-  //   messages.
-  //     CFGNTS    -- The configuration setting was not used by any component.
-  //                  This is a warning.
-  //     CFGOVR    -- The configuration setting was overridden by a setting above.
-  //     CFGSET    -- The configuration setting was used at least once.
   //
   //
   // See <get_config_int>, <get_config_string>, and <get_config_object> for
@@ -927,16 +919,9 @@ virtual class uvm_component extends uvm_report_object;
   // components are recursively checked. This function is automatically
   // called in the check phase, but can be manually called at any time.
   //
-  // Additional detail is provided by the following message tags:
-  // * CFGOVR -- lists all configuration settings that have been overridden
-  // from above.  
-  // * CFGSET -- lists all configuration settings that have been set.
-  //
   // To get all configuration information prior to the run phase, do something 
   // like this in your top object:
   //|  function void start_of_simulation_phase(uvm_phase phase);
-  //|    set_report_id_action_hier("CFGOVR", UVM_DISPLAY);
-  //|    set_report_id_action_hier("CFGSET", UVM_DISPLAY);
   //|    check_config_usage();
   //|  endfunction
 
@@ -1026,7 +1011,7 @@ virtual class uvm_component extends uvm_report_object;
   // Setting this static variable causes get_config_* to print info about
   // matching configuration settings as they are being applied.
 
-  static bit print_config_matches = 0; 
+  static bit print_config_matches;
 
 
   //----------------------------------------------------------------------------
@@ -1610,8 +1595,8 @@ virtual class uvm_component extends uvm_report_object;
   uvm_phase            m_current_phase;            // the most recently executed phase
   protected process    m_phase_process;
 
-  /*protected*/ bit  m_build_done=0;
-  /*protected*/ int  m_phasing_active=0;
+  /*protected*/ bit  m_build_done;
+  /*protected*/ int  m_phasing_active;
 
   extern                   function void set_int_local(string field_name, 
                                                        uvm_bitstream_t value,
@@ -1780,13 +1765,8 @@ function uvm_component::new (string name, uvm_component parent);
 
   set_report_verbosity_level(parent.get_report_verbosity_level());
 
-  set_report_id_action("CFGOVR", UVM_NO_ACTION);
-  set_report_id_action("CFGSET", UVM_NO_ACTION);
-
   m_set_cl_msg_args();
 
-  top.set_report_id_action("CFGOVR", UVM_NO_ACTION);
-  top.set_report_id_action("CFGSET", UVM_NO_ACTION);
 endfunction
 
 
@@ -2604,7 +2584,7 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
                                           string desc="",
                                           time begin_time=0);
   uvm_event e;
-  integer stream_h;
+  integer stream_h=0;
   integer tr_h;
   integer link_tr_h;
   string name;
@@ -2962,7 +2942,7 @@ function void uvm_component::check_config_usage ( bit recurse=1 );
   if(rq.size() == 0)
     return;
 
-  $display("\n ::: The following resources have at least one write and no reads :::");
+  uvm_report_info("CFGNRD"," ::: The following resources have at least one write and no reads :::",UVM_INFO);
   rp.print_resources(rq, 1);
 endfunction
 
@@ -2982,7 +2962,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
   __m_uvm_field_automation (null, UVM_CHECK_FIELDS, "");
 
   if(verbose)
-    $display("applying configuration settings for %s", get_full_name());
+    uvm_report_info("CFGAPL","applying configuration settings", UVM_NONE);
 
   rq = rp.lookup_scope(get_full_name());
   rp.sort_by_precedence(rq);
@@ -3011,8 +2991,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
       continue;
 
     if(verbose)
-      $display("applying %s [%s] in %s", name, __m_uvm_status_container.field_array[search_name],
-                                         get_full_name());
+      uvm_report_info("CFGAPL",$sformatf("applying %s [%s]", name, __m_uvm_status_container.field_array[search_name]),UVM_NONE);
 
     begin
     uvm_resource#(uvm_bitstream_t) rbs;
@@ -3054,8 +3033,7 @@ function void uvm_component::print_config(bit recurse = 0, audit = 0);
 
   uvm_resource_pool rp = uvm_resource_pool::get();
 
-  $display();
-  $display("resources that are visible in %s", get_full_name());
+  uvm_report_info("CFGPRT","visible resources:",UVM_INFO);
   rp.print_resources(rp.lookup_scope(get_full_name()), audit);
 
   if(recurse) begin
@@ -3075,7 +3053,7 @@ endfunction
 function void uvm_component::print_config_settings (string field="",
                                                     uvm_component comp=null,
                                                     bit recurse=0);
-  static bit have_been_warned = 0;
+  static bit have_been_warned;
   if(!have_been_warned) begin
     uvm_report_warning("deprecated", "uvm_component::print_config_settings has been deprecated.  Use print_config() instead");
     have_been_warned = 1;

@@ -51,6 +51,11 @@ class top_sequence extends uvm_sequence #(top_item);
     `uvm_field_object ( req, UVM_ALL_ON )
   `uvm_object_utils_end
 
+
+  function new(string name="top_sequence");
+     super.new(name);
+  endfunction
+
 endclass : top_sequence
 
 class top_driver extends uvm_driver#(top_item);

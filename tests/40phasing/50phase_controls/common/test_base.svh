@@ -49,6 +49,11 @@ class test_pre_reset_seq extends my_seq;
     if(starting_phase.phase_done.get_objection_count(this))
       starting_phase.drop_objection(this);
   endfunction
+
+  function new(string name="test_pre_reset_seq");
+     super.new(name);
+  endfunction
+
 endclass : test_pre_reset_seq
 
 // PRE_RESET_PH sequence
@@ -65,6 +70,11 @@ class test_reset_seq extends my_seq;
     if(starting_phase.phase_done.get_objection_count(this))
       starting_phase.drop_objection(this);
   endfunction
+
+  function new(string name="test_reset_seq");
+     super.new(name);
+  endfunction
+
 endclass : test_reset_seq
 
 // TRAINING sequences
@@ -82,6 +92,11 @@ class top_training_seq extends top_sequence;
     if(starting_phase.phase_done.get_objection_count(this))
       starting_phase.drop_objection(this);
   endfunction
+
+  function new(string name="top_training_seq");
+     super.new(name);
+  endfunction
+
 endclass : top_training_seq
 
 class bot_training_seq extends bot_sequence;
@@ -98,6 +113,11 @@ class bot_training_seq extends bot_sequence;
     if(starting_phase.phase_done.get_objection_count(this))
       starting_phase.drop_objection(this);
   endfunction
+
+  function new(string name="bot_training_seq");
+     super.new(name);
+  endfunction
+
 endclass : bot_training_seq
 
 // CONFIG sequences
@@ -121,6 +141,11 @@ class top_configure_seq extends top_sequence;
     if(starting_phase.phase_done.get_objection_count(this))
       starting_phase.drop_objection(this);
   endfunction
+
+  function new(string name="top_configure_seq");
+     super.new(name);
+  endfunction
+
 endclass : top_configure_seq
 
 // MAIN sequences
@@ -144,6 +169,11 @@ class top_random_seq extends top_sequence;
     if(starting_phase.phase_done.get_objection_count(this))
       starting_phase.drop_objection(this);
   endfunction
+
+  function new(string name="top_random_seq");
+     super.new(name);
+  endfunction
+
 endclass : top_random_seq
 
 class bot_random_seq extends bot_sequence;
@@ -166,6 +196,11 @@ class bot_random_seq extends bot_sequence;
     if(starting_phase.phase_done.get_objection_count(this))
       starting_phase.drop_objection(this);
   endfunction
+
+  function new(string name="bot_random_seq");
+     super.new(name);
+  endfunction
+
 endclass : bot_random_seq
 
 // MAIN phase imp

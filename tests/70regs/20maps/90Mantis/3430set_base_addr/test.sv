@@ -19,7 +19,7 @@
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
 
-
+`include "uvm_macros.svh"
 program top;
 
 import uvm_pkg::*;

@@ -28,11 +28,12 @@
 `define _protected protected   
 `define UVM_USE_FPC
 `define UVM_USE_P_FORMAT
-`define UVM_USE_FILE_LINE
+//`define UVM_USE_FILE_LINE
 `define UVM_DA_TO_QUEUE(Q,DA) Q=DA;
 `define _local local
 `define uvm_delay(TIME) #(TIME);
 `define UVM_USE_TYPENAME
+`define UVM_EXTRA_TYPENAME_ARG
 //
 // Any vendor specific defines go here.
 //
@@ -47,7 +48,8 @@
 `endif
 
 `ifdef QUESTA
-//`define UVM_USE_BITSTREAM_OPS
+`undef UVM_EXTRA_TYPENAME_ARG
+`define UVM_EXTRA_TYPENAME_ARG ,39
 `endif
 
 `ifdef INCA
@@ -62,9 +64,9 @@
   `ifndef INCA_UVM_USE_P_FORMAT
     `undef  UVM_USE_P_FORMAT
   `endif
-  `ifndef INCA_UVM_USE_FILE_LINE
-    `undef  UVM_USE_FILE_LINE
-  `endif
+//  `ifndef INCA_UVM_USE_FILE_LINE
+//    `undef  UVM_USE_FILE_LINE
+//  `endif
   `ifndef INCA_UVM_USE_FPC
     `undef UVM_USE_FPC
   `endif
@@ -75,6 +77,14 @@
     `undef UVM_USE_TYPENAME
   `endif
 `endif
+
+//
+// Deprecation Control Macros
+//
+`ifdef UVM_NO_DEPRECATED
+  `define UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
+`endif
+
 
 `include "macros/uvm_version_defines.svh"
 `include "macros/uvm_message_defines.svh"

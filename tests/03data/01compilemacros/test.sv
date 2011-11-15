@@ -119,6 +119,11 @@ module test;
       `uvm_field_aa_int_int_unsigned(aa_iiu, UVM_DEFAULT)
       `uvm_field_aa_int_enumkey(numbers, aa_inum, UVM_DEFAULT)
     `uvm_object_utils_end
+
+  function new(string name="myobject");
+     super.new(name);
+  endfunction
+
   endclass
   class test extends uvm_test;
     `uvm_new_func

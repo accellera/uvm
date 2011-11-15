@@ -63,10 +63,19 @@ virtual class uvm_reg_adapter extends uvm_object;
   bit provides_responses; 
 
 
+  // Variable: parent_sequence
+  //
+  // Set this member in extensions of this class if the bus driver requires
+  // bus items be executed via a particular sequence base type. The sequence
+  // assigned to this member must implement do_clone().
+
+  uvm_sequence_base parent_sequence; 
+
+
   // Function: reg2bus
   //
-  // Extensions of this class ~must~ implement this method to convert a
-  // <uvm_reg_item> to the <uvm_sequence_item> subtype that defines the bus
+  // Extensions of this class ~must~ implement this method to convert the specified
+  // <uvm_reg_bus_op> to a corresponding <uvm_sequence_item> subtype that defines the bus
   // transaction.
   //
   // The method must allocate a new bus-specific <uvm_sequence_item>,
@@ -89,6 +98,8 @@ virtual class uvm_reg_adapter extends uvm_object;
                                      ref uvm_reg_bus_op rw);
 
 
+  local uvm_reg_item m_item;
+
   // function: get_item
   //
   // Returns the bus-independent read/write information that corresponds to
@@ -99,7 +110,6 @@ virtual class uvm_reg_adapter extends uvm_object;
   // It returns null at all other times.
   // The content of the return <uvm_reg_item> instance must not be modified
   // and used strictly to obtain additional information about the operation.  
-  local uvm_reg_item m_item;
   virtual function uvm_reg_item get_item();
     return m_item;
   endfunction
@@ -160,6 +170,10 @@ endclass
 class uvm_reg_tlm_adapter extends uvm_reg_adapter;
 
   `uvm_object_utils(uvm_reg_tlm_adapter)
+
+  function new(string name = "uvm_reg_tlm_adapter");
+    super.new(name);
+  endfunction
 
   // Function: reg2bus
   //

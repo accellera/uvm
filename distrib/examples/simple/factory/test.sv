@@ -69,6 +69,11 @@ module top;
     //Use the macro in a class to implement factory registration along with other
     //utilities (create, get_type_name).
     `uvm_object_utils(mypacket)
+
+  function new(string name="mypacket");
+     super.new(name);
+  endfunction
+
   endclass
 
   initial begin

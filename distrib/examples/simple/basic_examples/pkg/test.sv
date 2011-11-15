@@ -151,6 +151,11 @@ module test;
 `ifdef USE_MACROS
   class mydata extends uvm_object;
     `uvm_object_utils(mydata)
+
+  function new(string name="mydata");
+     super.new(name);
+  endfunction
+
   endclass
 `else
   class mydata extends uvm_object;

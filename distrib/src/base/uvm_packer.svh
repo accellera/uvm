@@ -216,7 +216,7 @@ class uvm_packer;
   // <uvm_object::do_pack> and <uvm_object::do_unpack> routines, to test the
   // setting of this field if you want to use it as a filter.
 
-  bit abstract = 0;
+  bit abstract;
 
 
   // Variable: use_metadata
@@ -235,7 +235,7 @@ class uvm_packer;
   // - For queues, dynamic arrays, and associative arrays, pack 32 bits
   //   indicating the size of the array prior to to packing individual elements.
 
-  bit use_metadata = 0;
+  bit use_metadata;
 
 
   // Variable: big_endian
@@ -278,18 +278,18 @@ class uvm_packer;
 
   static bit bitstream[];   // local bits for (un)pack_bytes
   static bit fabitstream[]; // field automation bits for (un)pack_bytes
-  int count = 0;            // used to count the number of packed bits
+  int count;                // used to count the number of packed bits
   uvm_scope_stack scope= new;
 
-  bit   reverse_order = 0;  //flip the bit order around
+  bit   reverse_order;      //flip the bit order around
   byte  byte_size     = 8;  //set up bytesize for endianess
   int   word_size     = 16; //set up worksize for endianess
-  bit   nopack        = 0;  //only count packable bits
+  bit   nopack;             //only count packable bits
 
   uvm_recursion_policy_enum policy = UVM_DEFAULT_POLICY;
 
-  uvm_pack_bitstream_t m_bits = 0;
-  int m_packed_size  = 0;
+  uvm_pack_bitstream_t m_bits;
+  int m_packed_size;
 
   extern virtual function void unpack_object_ext  (inout uvm_object value);
 

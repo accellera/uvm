@@ -729,7 +729,7 @@ class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
   static function void delete(T obj, uvm_callback cb);
     uvm_object b_obj = obj;
     uvm_queue#(uvm_callback) q;
-    bit found = 0;
+    bit found;
     int pos;
     void'(get());
 

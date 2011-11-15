@@ -115,6 +115,9 @@ class mydata extends uvm_object;
   virtual function string get_type_name();
     return "mydata";
   endfunction
+  function new(string name="");
+        super.new(name);
+  endfunction
 endclass
 
 endpackage:user_pkg

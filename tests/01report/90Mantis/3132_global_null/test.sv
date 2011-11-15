@@ -29,6 +29,11 @@ import uvm_pkg::*;
 class  packet extends uvm_object;
    `uvm_object_utils_begin(packet)
    `uvm_object_utils_end
+
+  function new(string name="packet");
+     super.new(name);
+  endfunction
+
 endclass
 endpackage
 import P::*;
@@ -38,6 +43,11 @@ module top;
 class  packet extends uvm_object;
    `uvm_object_utils_begin(packet)
    `uvm_object_utils_end
+
+  function new(string name="packet");
+     super.new(name);
+  endfunction
+
 endclass
 
 packet p1;

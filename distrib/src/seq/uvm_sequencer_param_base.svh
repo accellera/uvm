@@ -41,8 +41,8 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   protected int m_num_last_reqs = 1;
   protected int num_last_items = m_num_last_reqs;
   protected int m_num_last_rsps = 1;
-  protected int m_num_reqs_sent = 0;
-  protected int m_num_rsps_received = 0;
+  protected int m_num_reqs_sent;
+  protected int m_num_rsps_received;
   uvm_sequencer_analysis_fifo #(RSP) sqr_rsp_analysis_fifo;
 
 
@@ -116,7 +116,7 @@ class uvm_sequencer_param_base #(type REQ = uvm_sequence_item,
   // Function: last_req
   //
   // Returns the last request item by default.  If n is not 0, then it will get
-  // the n¿th before last request item.  If n is greater than the last request
+  // the nï¿½th before last request item.  If n is greater than the last request
   // buffer size, the function will return null.
   //
   function REQ last_req(int unsigned n = 0);
@@ -247,6 +247,7 @@ endfunction
 // -------------
 
 function void uvm_sequencer_param_base::connect_phase(uvm_phase phase);
+  super.connect_phase(phase);
   rsp_export.connect(sqr_rsp_analysis_fifo.analysis_export);
 endfunction
 

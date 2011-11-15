@@ -18,6 +18,7 @@
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
 
+`include "uvm_macros.svh"
 module test;
 
 import uvm_pkg::*;

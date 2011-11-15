@@ -147,7 +147,7 @@ class uvm_reg_item extends uvm_sequence_item;
   // If path is UVM_BACKDOOR, this member specifies the abstraction 
   // kind for the backdoor access, e.g. "RTL" or "GATES".
   //
-  string bd_kind = "";
+  string bd_kind;
 
 
   // Variable: fname
@@ -155,7 +155,7 @@ class uvm_reg_item extends uvm_sequence_item;
   // The file name from where this transaction originated, if provided
   // at the call site.
   //
-  string fname = "";
+  string fname;
 
 
   // Variable: lineno
@@ -163,7 +163,7 @@ class uvm_reg_item extends uvm_sequence_item;
   // The file name from where this transaction originated, if provided 
   // at the call site.
   //
-  int lineno = 0;
+  int lineno;
 
 
   // Function: new
@@ -186,7 +186,7 @@ class uvm_reg_item extends uvm_sequence_item;
          " ele_kind=",element_kind.name(),
          " ele_name=",element==null?"null":element.get_full_name() };
 
-    if (value.size() > 1 && uvm_report_enabled(UVM_HIGH)) begin
+    if (value.size() > 1 && uvm_report_enabled(UVM_HIGH, UVM_INFO, "RegModel")) begin
       value_s = "'{";
       foreach (value[i])
          value_s = {value_s,$sformatf("%0h,",value[i])};

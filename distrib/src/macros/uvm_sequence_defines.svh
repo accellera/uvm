@@ -201,7 +201,7 @@
   uvm_sequence_base __seq; \
   `uvm_create_on(SEQ_OR_ITEM, SEQR) \
   if (!$cast(__seq,SEQ_OR_ITEM)) start_item(SEQ_OR_ITEM, PRIORITY);\
-  if (!SEQ_OR_ITEM.randomize() with CONSTRAINTS ) begin \
+  if ((__seq == null || !__seq.do_not_randomize) && !SEQ_OR_ITEM.randomize() with CONSTRAINTS ) begin \
     `uvm_warning("RNDFLD", "Randomization failed in uvm_do_with action") \
   end\
   if (!$cast(__seq,SEQ_OR_ITEM)) finish_item(SEQ_OR_ITEM, PRIORITY); \
@@ -244,7 +244,7 @@
      start_item(SEQ_OR_ITEM, PRIORITY);\
      finish_item(SEQ_OR_ITEM, PRIORITY);\
   end \
-  else __seq.start(get_sequencer(), this, PRIORITY, 0);\
+  else __seq.start(__seq.get_sequencer(), this, PRIORITY, 0);\
   end
   
 
@@ -295,11 +295,12 @@
   begin \
   uvm_sequence_base __seq; \
   if (!$cast(__seq,SEQ_OR_ITEM)) start_item(SEQ_OR_ITEM, PRIORITY);\
-  if (!SEQ_OR_ITEM.randomize() with CONSTRAINTS ) begin \
+  else __seq.set_item_context(this); \
+  if ((__seq == null || !__seq.do_not_randomize) && !SEQ_OR_ITEM.randomize() with CONSTRAINTS ) begin \
     `uvm_warning("RNDFLD", "Randomization failed in uvm_rand_send_with action") \
   end\
   if (!$cast(__seq,SEQ_OR_ITEM)) finish_item(SEQ_OR_ITEM, PRIORITY);\
-  else __seq.start(get_sequencer(), this, PRIORITY, 0);\
+  else __seq.start(__seq.get_sequencer(), this, PRIORITY, 0);\
   end
 
 
@@ -372,7 +373,7 @@
 //|
 //| class simple_seq_lib_RST extends simple_seq_lib;
 //|
-//|   `uvm_object_utils(this_type)
+//|   `uvm_object_utils(simple_seq_lib_RST)
 //|
 //|   `uvm_sequence_library_utils(simple_seq_lib_RST)
 //|

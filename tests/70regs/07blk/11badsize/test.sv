@@ -17,7 +17,7 @@
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
 
-
+`include "uvm_macros.svh"
 program top;
 
 import uvm_pkg::*;
@@ -56,6 +56,11 @@ class my_blk extends uvm_reg_block;
    endfunction
    
    `uvm_object_utils(my_blk)
+
+  function new(string name="my_blk");
+     super.new(name);
+  endfunction
+
 endclass
 
 

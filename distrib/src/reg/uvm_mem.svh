@@ -53,13 +53,13 @@ class uvm_mem extends uvm_object;
    local bit               m_is_powered_down;
    local int               m_has_cover;
    local int               m_cover_on;
-   local string            m_fname = "";
-   local int               m_lineno = 0;
+   local string            m_fname;
+   local int               m_lineno;
    local bit               m_vregs[uvm_vreg];
    local uvm_object_string_pool
                #(uvm_queue #(uvm_hdl_path_concat)) m_hdl_paths_pool;
 
-   local static int unsigned  m_max_size = 0;
+   local static int unsigned  m_max_size;
 
    //----------------------
    // Group: Initialization
@@ -1647,7 +1647,7 @@ task uvm_mem::do_write(uvm_reg_item rw);
       cb.post_write(rw);
 
    // REPORT
-   if (uvm_report_enabled(UVM_HIGH)) begin
+   if (uvm_report_enabled(UVM_HIGH, UVM_INFO, "RegModel")) begin
      string path_s,value_s,pre_s,range_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -1655,7 +1655,7 @@ task uvm_mem::do_write(uvm_reg_item rw);
      else
        path_s = (get_backdoor() != null) ? "user backdoor" : "DPI backdoor";
 
-     if (rw.value.size() > 1 && uvm_report_enabled(UVM_HIGH)) begin
+     if (rw.value.size() > 1) begin
        value_s = "='{";
        pre_s = "Burst ";
        foreach (rw.value[i])
@@ -1668,8 +1668,8 @@ task uvm_mem::do_write(uvm_reg_item rw);
        range_s = $sformatf("[%0d]",rw.offset);
      end
 
-     `uvm_info("RegModel", {pre_s,"Wrote memory via ",path_s,": ",
-                            get_full_name(),range_s,value_s},UVM_HIGH)
+     uvm_report_info("RegModel", {pre_s,"Wrote memory via ",path_s,": ",
+                                  get_full_name(),range_s,value_s}, UVM_HIGH);
    end
 
    m_write_in_progress = 1'b0;
@@ -1749,7 +1749,7 @@ task uvm_mem::do_read(uvm_reg_item rw);
       cb.post_read(rw);
 
    // REPORT
-   if (uvm_report_enabled(UVM_HIGH)) begin
+   if (uvm_report_enabled(UVM_HIGH, UVM_INFO, "RegModel")) begin
      string path_s,value_s,pre_s,range_s;
      if (rw.path == UVM_FRONTDOOR)
        path_s = (map_info.frontdoor != null) ? "user frontdoor" :
@@ -1757,7 +1757,7 @@ task uvm_mem::do_read(uvm_reg_item rw);
      else
        path_s = (get_backdoor() != null) ? "user backdoor" : "DPI backdoor";
 
-     if (rw.value.size() > 1 && uvm_report_enabled(UVM_HIGH)) begin
+     if (rw.value.size() > 1) begin
        value_s = "='{";
        pre_s = "Burst ";
        foreach (rw.value[i])
@@ -1770,8 +1770,8 @@ task uvm_mem::do_read(uvm_reg_item rw);
        range_s = $sformatf("[%0d]",rw.offset);
      end
 
-     `uvm_info("RegModel", {pre_s,"Read memory via ",path_s,": ",
-                            get_full_name(),range_s,value_s},UVM_HIGH)
+      uvm_report_info("RegModel", {pre_s,"Read memory via ",path_s,": ",
+                                   get_full_name(),range_s,value_s}, UVM_HIGH);
    end
 
    m_read_in_progress = 1'b0;
@@ -2302,8 +2302,8 @@ endfunction
 
 function string uvm_mem::convert2string();
 
-   string res_str = "";
-   string prefix = "";
+   string res_str;
+   string prefix;
 
    $sformat(convert2string, "%sMemory %s -- %0dx%0d bits", prefix,
             get_full_name(), get_size(), get_n_bits());

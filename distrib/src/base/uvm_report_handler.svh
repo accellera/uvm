@@ -122,6 +122,25 @@ class uvm_report_handler;
   endfunction
 
 
+  // Function- report_relnotes_banner
+  //
+  // Internal method called by <uvm_report_object::report_header>.
+
+  static local bit m_relnotes_done;
+  function void report_relnotes_banner(UVM_FILE file = 0);
+     uvm_report_server srvr;
+
+     if (m_relnotes_done) return;
+     
+     srvr = uvm_report_server::get_server();
+     
+     srvr.f_display(file,
+                    "\n  ***********       IMPORTANT RELEASE NOTES         ************");
+     
+     m_relnotes_done = 1;
+  endfunction
+
+   
   // Function- report_header
   //
   // Internal method called by <uvm_report_object::report_header>
@@ -140,6 +159,33 @@ class uvm_report_handler;
     srvr.f_display(file, uvm_cy_copyright);
     srvr.f_display(file,
       "----------------------------------------------------------------");
+
+    begin
+       uvm_cmdline_processor clp;
+       string args[$];
+     
+       clp = uvm_cmdline_processor::get_inst();
+
+       if (clp.get_arg_matches("+UVM_NO_RELNOTES", args)) return;
+
+`ifndef UVM_NO_DEPRECATED
+       report_relnotes_banner(file);
+       srvr.f_display(file, "\n  You are using a version of the UVM library that has been compiled");
+       srvr.f_display(file, "  with `UVM_NO_DEPRECATED undefined.");
+       srvr.f_display(file, "  See http://www.accellera.org/activities/vip/release_notes_11a for more details.");
+`endif
+
+`ifndef UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
+       report_relnotes_banner(file);
+       srvr.f_display(file, "\n  You are using a version of the UVM library that has been compiled");
+       srvr.f_display(file, "  with `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR undefined.");
+       srvr.f_display(file, "  See http://www.accellera.org/activities/vip/mantis3770 for more details.");
+`endif
+
+       if (m_relnotes_done)
+          srvr.f_display(file, "\n      (Specify +UVM_NO_RELNOTES to turn off this notice)\n");
+
+    end
   endfunction
 
 

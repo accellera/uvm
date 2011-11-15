@@ -79,7 +79,7 @@ class uvm_reg_indirect_data extends uvm_reg;
       m_tbl = reg_a;
 
       // Not testable using pre-defined sequences
-      uvm_resource_db#(int)::set({"REG::", get_full_name()},
+      uvm_resource_db#(bit)::set({"REG::", get_full_name()},
                                  "NO_REG_TESTS", 1);
 
       // Add a frontdoor to each indirectly-accessed register
@@ -149,6 +149,12 @@ class uvm_reg_indirect_data extends uvm_reg;
                                         int     lineno = 0);
       `uvm_error(get_full_name(), "Cannot get() an indirect data access register");
       return 0;
+   endfunction
+   
+   virtual function uvm_reg get_indirect_reg(string  fname = "",
+                                        int     lineno = 0);
+      int unsigned idx = m_idx.get_mirrored_value();
+      return(m_tbl[idx]);
    endfunction
 
    virtual function bit needs_update();

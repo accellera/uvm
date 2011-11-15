@@ -18,6 +18,7 @@
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
 
+`include "uvm_macros.svh"
 `include "transaction.sv"
 
 module top;

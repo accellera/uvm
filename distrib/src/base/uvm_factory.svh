@@ -2,7 +2,7 @@
 //------------------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -70,6 +70,9 @@ class uvm_factory;
 
   extern `_protected function new ();
 
+  // Function: get()
+  // Get the factory singleton
+  //
   extern static function uvm_factory get();
 
   // Group: Registering Types
@@ -741,11 +744,7 @@ function void uvm_factory::register (uvm_object_wrapper obj);
   if (obj == null) begin
     uvm_report_fatal ("NULLWR", "Attempting to register a null object with the factory", UVM_NONE);
   end
-  if (obj.get_type_name() == "" || obj.get_type_name() == "<unknown>") begin
-    //uvm_report_warning("EMPTNM", {"Factory registration with ",
-    //  "unknown type name prevents name-based operations. "});
-  end
-  else begin
+  if (obj.get_type_name() != "" && obj.get_type_name() != "<unknown>") begin
     if (m_type_names.exists(obj.get_type_name()))
       uvm_report_warning("TPRGED", {"Type name '",obj.get_type_name(),
         "' already registered with factory. No string-based lookup ",
@@ -860,8 +859,8 @@ function void uvm_factory::set_type_override_by_name (string original_type_name,
                                                       bit replace=1);
   bit replaced;
   
-  uvm_object_wrapper original_type=null;
-  uvm_object_wrapper override_type=null;
+  uvm_object_wrapper original_type;
+  uvm_object_wrapper override_type;
 
   if(m_type_names.exists(original_type_name))
     original_type = m_type_names[original_type_name];
@@ -989,8 +988,8 @@ function void uvm_factory::set_inst_override_by_name (string original_type_name,
                                                       string full_inst_path);
   
   uvm_factory_override override;
-  uvm_object_wrapper original_type=null;
-  uvm_object_wrapper override_type=null;
+  uvm_object_wrapper original_type;
+  uvm_object_wrapper override_type;
 
   if(m_type_names.exists(original_type_name))
     original_type = m_type_names[original_type_name];
@@ -1188,7 +1187,7 @@ endfunction
 
 function uvm_object_wrapper uvm_factory::find_override_by_name (string requested_type_name,
                                                                 string full_inst_path);
-  uvm_object_wrapper rtype = null;
+  uvm_object_wrapper rtype;
   uvm_factory_queue_class qc;
 
   uvm_object_wrapper override;
@@ -1368,7 +1367,7 @@ function void uvm_factory::print (int all_types=1);
   uvm_factory_queue_class sorted_override_queues[string];
 
   string tmp;
-  int id=0;
+  int id;
   uvm_object_wrapper obj;
 
   //sort the override queues

@@ -773,7 +773,7 @@ virtual class uvm_object extends uvm_void;
   local string m_leaf_name;
 
   local int m_inst_id;
-  static protected int m_inst_count = 0;
+  static protected int m_inst_count;
 
   static /*protected*/ uvm_status_container __m_uvm_status_container = new;
 

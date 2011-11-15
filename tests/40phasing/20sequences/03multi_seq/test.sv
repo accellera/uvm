@@ -79,6 +79,11 @@ class myseq extends uvm_sequence;
     if (starting_phase!=null) starting_phase.drop_objection(this);
 
   endtask
+
+  function new(string name="myseq");
+     super.new(name);
+  endfunction
+
 endclass
 
 `define SEQ(NAME) \
@@ -90,6 +95,11 @@ class my_``NAME``_seq extends myseq; \
     super.body(); \
     end_cnt++; \
   endtask \
+  \
+  function new(string name="my_``NAME``_seq"); \
+     super.new(name); \
+  endfunction \
+ \
 endclass
 
 `SEQ(preconfig)

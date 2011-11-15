@@ -145,16 +145,18 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   protected uvm_sequence_item response_queue[$];
   protected int               response_queue_depth = 8;
-  protected bit               response_queue_error_report_disabled = 0;
+  protected bit               response_queue_error_report_disabled;
 
-  rand bit is_randomized = 0;
-  constraint c_randomized {
-    is_randomized == 1;
-  }
-
+  // Variable: do_not_randomize
+  //
+  // If set, prevents the sequence from being randomized before being executed
+  // by the `uvm_do*() and `uvm_rand_send*() macros,
+  // or as a default sequence.
+  //
+  bit do_not_randomize;
 
   protected process  m_sequence_process;
-  local bit m_use_response_handler = 0;
+  local bit m_use_response_handler;
 
   static string type_name = "uvm_sequence_base";
 
@@ -240,17 +242,9 @@ class uvm_sequence_base extends uvm_sequence_item;
                       int this_priority = -1,
                       bit call_pre_post = 1);
 
-    if (parent_sequence != null) begin
-       set_parent_sequence(parent_sequence);
-       set_use_sequence_info(1);
-       if (sequencer == null) sequencer = parent_sequence.get_sequencer();
-       reseed();
-    end
-    set_sequencer(sequencer);
+    set_item_context(parent_sequence, sequencer);
 
-    if (!(m_sequence_state != CREATED ||
-          m_sequence_state != STOPPED ||
-          m_sequence_state != FINISHED)) begin
+    if (!(m_sequence_state inside {CREATED,STOPPED,FINISHED})) begin
       uvm_report_fatal("SEQ_NOT_DONE", 
          {"Sequence ", get_full_name(), " already started"},UVM_NONE);
     end
@@ -268,12 +262,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     // Check that the response queue is empty from earlier runs
     clear_response_queue();
 
-    if (parent_sequence != null)
-      m_parent_sequence  = parent_sequence;
-    m_sequencer          = sequencer;
     m_priority           = this_priority;
-
-    m_set_p_sequencer();
 
     if (m_sequencer != null) begin
         if (m_parent_sequence == null) begin
@@ -716,12 +705,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     uvm_factory f_ = uvm_factory::get();
     $cast(create_item,  f_.create_object_by_type( type_var, this.get_full_name(), name ));
 
-    create_item.set_use_sequence_info(1);
-    create_item.set_parent_sequence(this);
-    create_item.set_sequencer(l_sequencer);
-    create_item.set_depth(get_depth() + 1);
-    create_item.reseed();
-
+    create_item.set_item_context(this, l_sequencer);
   endfunction
 
 
@@ -771,10 +755,7 @@ class uvm_sequence_base extends uvm_sequence_item;
         uvm_report_fatal("STRITM", "sequence_item has null sequencer", UVM_NONE);
     end
 
-    item.set_use_sequence_info(1);
-    item.set_sequencer(sequencer);
-    item.set_parent_sequence(this);
-    item.reseed();
+    item.set_item_context(this, sequencer);
 
     if (set_priority < 0)
       set_priority = get_priority();
@@ -1109,17 +1090,13 @@ class uvm_sequence_base extends uvm_sequence_item;
       uvm_report_fatal("FCTSEQ", 
         $sformatf("Factory can not produce a sequence of type %0s.", m_seq_type), UVM_NONE);
     end
-    m_seq.set_use_sequence_info(1);
-    m_seq.set_parent_sequence(this);
-    m_seq.set_sequencer(m_sequencer);
-    m_seq.set_depth(get_depth() + 1);
-    m_seq.reseed();
+
+    m_seq.set_item_context(this, m_sequencer);
     
-    start_item(m_seq);
     if(!m_seq.randomize()) begin
       uvm_report_warning("RNDFLD", "Randomization failed in do_sequence_kind()");
     end
-    finish_item(m_seq);
+    m_seq.start(m_sequencer,this,get_priority(),0);
   endtask
 
 

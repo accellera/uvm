@@ -468,9 +468,9 @@ virtual class uvm_transaction extends uvm_object;
   local time    accept_time=-1;
 
   local uvm_component initiator;
-  local integer       stream_handle;
-  local integer       tr_handle;
-  local bit           record_enable = 0;
+  local integer       stream_handle=0;
+  local integer       tr_handle=0;
+  local bit           record_enable;
   local uvm_recorder  m_recorder;
 
 endclass
@@ -735,10 +735,10 @@ function integer uvm_transaction::m_begin_tr (time begin_time=0,
 
     if(!has_parent)
       tr_handle = m_recorder.begin_tr("Begin_No_Parent, Link", 
-                    stream_handle, get_type_name(),"","",begin_time);
+                    stream_handle, get_type_name(),"","",this.begin_time);
     else begin
       tr_handle = m_recorder.begin_tr("Begin_End, Link", 
-                    stream_handle, get_type_name(),"","",begin_time);
+                    stream_handle, get_type_name(),"","",this.begin_time);
       if(parent_handle)
         m_recorder.link_tr(parent_handle, tr_handle, "child");
     end
@@ -776,7 +776,7 @@ function void uvm_transaction::end_tr (time end_time=0, bit free_handle=1);
     m_recorder.tr_handle = tr_handle;
     record(m_recorder);
   
-    m_recorder.end_tr(tr_handle,end_time);
+  m_recorder.end_tr(tr_handle,this.end_time);
 
     if(free_handle && m_recorder.check_handle_kind("Transaction", tr_handle)==1) 
     begin  

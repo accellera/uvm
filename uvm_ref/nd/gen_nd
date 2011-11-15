@@ -4,12 +4,6 @@
 # This script runs Naturals Docs to generate the UVM Reference Documentation
 # from comments embedded in the UVM source.
 #
-# Before running, you must define the ND environment variable to point to the
-# NaturalDocs source tree. 
-#
-# > setenv ND /prod/3p/natural_docs
-# > ./gen_nd
-#
 # Before running NaturalDocs, this script will remove any existing html output
 # directory, which is fixed at $UVM_HOME/distrib/docs/html. It then copies the UVM logo,
 # banner, other gifs from the $ND source dir to the outdir. NaturalDocs will not
@@ -55,16 +49,26 @@
 #
 #-------------------------------------------------------------------------------
 
-set nd_dir = $ND;
+set nd_dir = ../../natural_docs
 set outdir = ../../distrib/docs/html
+set uvm_root = `pwd | sed "s?/uvm_ref/nd??"`
 
+echo "Uvm_root dir is $uvm_root"
 echo "Output dir is $outdir"
-
 
 rm -rf $outdir
 
 mkdir -p $outdir/images
 
+# replace UVM_ROOT in UVM_Menu.txt with current working dir to satisfy ND
+# without requiring the source-controlled Menu file to be overwritten
+# can get generated where ever checkedout
+sed "s?UVM_ROOT?$uvm_root?g" $uvm_root/uvm_ref/nd/Proj/UVM_Menu.txt > $uvm_root/uvm_ref/nd/Proj/Menu.txt
+cp        $uvm_root/uvm_ref/nd/Proj/UVM_Topics.txt    $uvm_root/uvm_ref/nd/Proj/Topics.txt
+cp        $uvm_root/uvm_ref/nd/Proj/UVM_Languages.txt $uvm_root/uvm_ref/nd/Proj/Languages.txt
+chmod 666 $uvm_root/uvm_ref/nd/Proj/Languages.txt
+chmod 666 $uvm_root/uvm_ref/nd/Proj/Menu.txt
+chmod 666 $uvm_root/uvm_ref/nd/Proj/Topics.txt
 
 cp -r $nd_dir/images/b* $outdir/images
 cp    $nd_dir/logo.html $outdir

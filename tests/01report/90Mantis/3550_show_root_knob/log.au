@@ -1,0 +1,32 @@
+UVM_INFO @ 0: reporter [UVMTOP] UVM testbench topology:
+---------------------------------
+Name            Type  Size  Value
+---------------------------------
+test.mod1.aaa1  B     -     @X
+  bb1           B     -     @X
+    cc1         C     -     @X
+    cc2         C     -     @X
+  bb2           B     -     @X
+    cc1         C     -     @X
+    cc2         C     -     @X
+  cc1           C     -     @X
+  cc2           C     -     @X
+test.mod2.aaa1  B     -     @X
+  bb1           B     -     @X
+    cc1         C     -     @X
+    cc2         C     -     @X
+  bb2           B     -     @X
+    cc1         C     -     @X
+    cc2         C     -     @X
+  cc1           C     -     @X
+  cc2           C     -     @X
+uvm_test_top    test  -     @X
+  bb1           B     -     @X
+    cc1         C     -     @X
+    cc2         C     -     @X
+  bb2           B     -     @X
+    cc1         C     -     @X
+    cc2         C     -     @X
+  cc1           C     -     @X
+  cc2           C     -     @X
+---------------------------------

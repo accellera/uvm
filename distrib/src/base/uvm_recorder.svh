@@ -37,7 +37,7 @@ class uvm_recorder extends uvm_object;
 
   `uvm_object_utils(uvm_recorder)
 
-  int recording_depth = 0; 
+  int recording_depth;
   UVM_FILE file;
   string filename = "tr_db.log";
 
@@ -101,6 +101,11 @@ class uvm_recorder extends uvm_object;
   // The default policy is deep (which means to recurse an object).
 
   uvm_recursion_policy_enum policy = UVM_DEFAULT_POLICY;
+
+
+  function new(string name = "uvm_recorder");
+    super.new(name);
+  endfunction
 
 
   // Function: get_type_name
@@ -342,7 +347,7 @@ class uvm_recorder extends uvm_object;
   //
   virtual function void free_tr(integer handle);
     if (open_file()) begin
-      $fdisplay(file,"FREE @%%0t {TXH:%0d}", $time,handle);
+      $fdisplay(file,"FREE @%0t {TXH:%0d}", $time,handle);
       if (m_handles.exists(handle))
         m_handles.delete(handle);
     end

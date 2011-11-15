@@ -29,6 +29,11 @@ module top;
        `uvm_field_int(data, UVM_DEFAULT)
        `uvm_field_int(size, UVM_DEFAULT)
     `uvm_object_utils_end
+
+  function new(string name="header");
+     super.new(name);
+  endfunction
+
   endclass
 
   class data extends uvm_object;
@@ -38,6 +43,11 @@ module top;
        `uvm_field_object(hdr, UVM_DEFAULT)
        `uvm_field_array_int(payload, UVM_DEFAULT)
     `uvm_object_utils_end
+
+  function new(string name="data");
+     super.new(name);
+  endfunction
+
   endclass
 
   class test extends uvm_component;

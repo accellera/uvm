@@ -35,7 +35,7 @@ To get more details about the factory related methods, check the file:
 
 */
 
-
+`include "uvm_macros.svh"
 `include "packet_pkg.sv"
 `include "gen_pkg.sv"
 `include "env_pkg.sv"
@@ -69,6 +69,11 @@ module top;
   class myreallybigtypenamepacket extends packet;
     constraint ct10 { addr >= 11 && addr <= 20; }
     `uvm_object_utils(myreallybigtypenamepacket)
+
+  function new(string name="myreallybigtypenamepacket");
+     super.new(name);
+  endfunction
+
   endclass
 
   class mypacket extends packet;
@@ -77,6 +82,11 @@ module top;
     //Use the macro in a class to implement factory registration along with other
     //utilities (create, get_type_name).
     `uvm_object_utils(mypacket)
+
+  function new(string name="mypacket");
+     super.new(name);
+  endfunction
+
   endclass
 
   class test extends uvm_test;

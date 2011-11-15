@@ -18,6 +18,8 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
+typedef class uvm_phase;
+
 //----------------------------------------------------------------------
 // Title: UVM Configuration Database
 //
@@ -87,7 +89,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
                           string field_name,
                           inout T value);
 //TBD: add file/line
-    int unsigned p=0;
+    int unsigned p;
     uvm_resource#(T) r, rt;
     uvm_resource_pool rp = uvm_resource_pool::get();
     uvm_resource_types::rsrc_q_t rq;
@@ -102,7 +104,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     rq = rp.lookup_regex_names(inst_name, field_name, uvm_resource#(T)::get_type());
     r = uvm_resource#(T)::get_highest_precedence(rq);
     
-    if(uvm_resource_db_options::is_tracing())
+    if(uvm_config_db_options::is_tracing())
       m_show_msg("CFGDB/GET", "Configuration","read", inst_name, field_name, cntxt, r);
 
     if(r == null)
@@ -152,7 +154,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     uvm_root top;
     uvm_phase curr_phase;
     uvm_resource#(T) r;
-    bit exists = 0;
+    bit exists;
     
     //take care of random stability during allocation
     process p = process::self();
@@ -199,14 +201,14 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
       m_uvm_waiter w;
       for(int i=0; i<m_waiters[field_name].size(); ++i) begin
         w = m_waiters[field_name].get(i);
-        if(uvm_re_match(inst_name,w.inst_name) == 0)
+        if(uvm_re_match(uvm_glob_to_re(inst_name),w.inst_name) == 0)
            ->w.trigger;  
       end
     end
 
     p.set_randstate(rstate);
 
-    if(uvm_resource_db_options::is_tracing())
+    if(uvm_config_db_options::is_tracing())
       m_show_msg("CFGDB/SET", "Configuration","set", inst_name, field_name, cntxt, r);
   endfunction
 

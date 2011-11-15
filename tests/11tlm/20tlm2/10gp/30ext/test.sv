@@ -37,6 +37,11 @@ class ext1 extends uvm_tlm_extension#(ext1_ext);
    `uvm_object_utils_begin(ext1)      
      `uvm_field_int(a, UVM_DEFAULT)
    `uvm_object_utils_end
+
+  function new(string name="ext1");
+     super.new(name);
+  endfunction
+
 endclass
 
 class ext2 extends uvm_tlm_extension#(ext2_ext);
@@ -44,6 +49,11 @@ class ext2 extends uvm_tlm_extension#(ext2_ext);
    `uvm_object_utils_begin(ext2)      
      `uvm_field_int(b, UVM_DEFAULT)
    `uvm_object_utils_end
+
+  function new(string name="ext2");
+     super.new(name);
+  endfunction
+
 endclass
 
 class ext3 extends uvm_tlm_extension#(ext3_ext);
@@ -51,10 +61,20 @@ class ext3 extends uvm_tlm_extension#(ext3_ext);
    `uvm_object_utils_begin(ext3)      
      `uvm_field_int(c, UVM_DEFAULT)
    `uvm_object_utils_end
+
+  function new(string name="ext3");
+     super.new(name);
+  endfunction
+
 endclass
 
 class ext3x extends ext3;
    `uvm_object_utils(ext3x)
+
+  function new(string name="ext3x");
+     super.new(name);
+  endfunction
+
 endclass
 
 `else
@@ -65,6 +85,11 @@ class ext1 extends uvm_tlm_extension#(ext1);
      `uvm_field_int(a, UVM_DEFAULT)
    `uvm_object_utils_end
 
+
+  function new(string name="ext1");
+     super.new(name);
+  endfunction
+
 endclass
 
 class ext2 extends uvm_tlm_extension#(ext2);
@@ -72,6 +97,11 @@ class ext2 extends uvm_tlm_extension#(ext2);
    `uvm_object_utils_begin(ext2)      
      `uvm_field_int(b, UVM_DEFAULT)
    `uvm_object_utils_end
+
+  function new(string name="ext2");
+     super.new(name);
+  endfunction
+
 endclass
 
 class ext3 extends uvm_tlm_extension#(ext3);
@@ -79,10 +109,20 @@ class ext3 extends uvm_tlm_extension#(ext3);
    `uvm_object_utils_begin(ext3)      
      `uvm_field_int(c, UVM_DEFAULT)
    `uvm_object_utils_end
+
+  function new(string name="ext3");
+     super.new(name);
+  endfunction
+
 endclass
 
 class ext3x extends ext3;
    `uvm_object_utils(ext3x)
+
+  function new(string name="ext3x");
+     super.new(name);
+  endfunction
+
 endclass
 
 `endif

@@ -37,12 +37,12 @@ typedef class uvm_sequencer_base;
 class uvm_sequence_item extends uvm_transaction;
 
   local      int                m_sequence_id = -1;
-  protected  bit                m_use_sequence_info = 0;
+  protected  bit                m_use_sequence_info;
   protected  int                m_depth = -1;
-  protected  uvm_sequencer_base m_sequencer = null;
-  protected  uvm_sequence_base  m_parent_sequence = null;
-  static     bit issued1=0,issued2=0;
-  bit        print_sequence_info = 0;
+  protected  uvm_sequencer_base m_sequencer;
+  protected  uvm_sequence_base  m_parent_sequence;
+  static     bit issued1,issued2;
+  bit        print_sequence_info;
 
 
   // Function: new
@@ -100,6 +100,21 @@ class uvm_sequence_item extends uvm_transaction;
 
   function int get_sequence_id();
     return (m_sequence_id);
+  endfunction
+
+
+  // Function: set_item_context
+  //
+  // Set the sequence and sequencer execution context for a sequence item
+
+  function void set_item_context(uvm_sequence_base  parent_seq,
+                                 uvm_sequencer_base sequencer = null);
+     set_use_sequence_info(1);
+     if (parent_seq != null) set_parent_sequence(parent_seq);
+     if (sequencer == null && m_parent_sequence != null) sequencer = m_parent_sequence.get_sequencer();
+     set_sequencer(sequencer); 
+     if (m_parent_sequence != null) set_depth(m_parent_sequence.get_depth() + 1); 
+     reseed();      
   endfunction
 
 
