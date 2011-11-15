@@ -33,9 +33,11 @@ class ubus_master_sequencer extends uvm_sequencer #(ubus_transfer);
     super.new(name, parent);
   endfunction : new
   
+  int rerun_count;
   virtual function void do_rerun();
     super.do_rerun();
-    `uvm_warning("RESET","FIXME clean/restart seqr")
+    rerun_count++;
+    `uvm_warning("RESET",$sformatf("FIXME clean/restart seqr, count=%d",rerun_count))
   endfunction
 
 endclass : ubus_master_sequencer

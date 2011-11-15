@@ -188,6 +188,12 @@ class read_modify_write_seq extends ubus_base_sequence;
   bit [7:0] m_data0_check;
 
   virtual task body();
+    ubus_master_sequencer p;
+    int cnt_1,cnt_2;
+    
+    $display(get_sequencer()," ");
+    assert($cast(p,get_sequencer()));
+    
     `uvm_info(get_type_name(),
       $sformatf("%s starting...",
       get_sequence_path()), UVM_MEDIUM);
@@ -195,6 +201,10 @@ class read_modify_write_seq extends ubus_base_sequence;
     `uvm_do_with(read_byte_seq0, {read_byte_seq0.transmit_del == 0; })
     addr_check = read_byte_seq0.rsp.addr;
     m_data0_check = read_byte_seq0.rsp.data[0] + 1;
+    
+    // guard against rerun/reset
+    cnt_1 = p.rerun_count;
+    
     // WRITE MODIFIED READ DATA
     `uvm_do_with(write_byte_seq0,
       { write_byte_seq0.start_addr == addr_check;
@@ -202,10 +212,19 @@ class read_modify_write_seq extends ubus_base_sequence;
     // READ MODIFIED WRITE DATA
     `uvm_do_with(read_byte_seq0,
       { read_byte_seq0.start_addr == addr_check; } )
-    assert(m_data0_check == read_byte_seq0.rsp.data[0]) else
-      `uvm_error(get_type_name(),
-        $sformatf("%s Read Modify Write Read error!\n\tADDR: %h, EXP: %h, ACT: %h", 
-        get_sequence_path(),addr_check,m_data0_check,read_byte_seq0.rsp.data[0]));
+      
+    cnt_2 = p.rerun_count; 
+    
+    // make sure W followed by R is undisturbed by RESET
+    if(cnt_1 == cnt_2) begin
+        assert(m_data0_check == read_byte_seq0.rsp.data[0]) else
+            `uvm_error(get_type_name(),
+            $sformatf("%s Read Modify Write Read error!\n\tADDR: %h, EXP: %h, ACT: %h", 
+            get_sequence_path(),addr_check,m_data0_check,read_byte_seq0.rsp.data[0]))
+    end
+    else
+        `uvm_info("RERUN","skipping check due to rerun",UVM_NONE)
+        
   endtask : body
 
 endclass : read_modify_write_seq

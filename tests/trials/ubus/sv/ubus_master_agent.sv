@@ -30,7 +30,7 @@ class ubus_master_agent extends uvm_agent;
   protected int master_id;
 
   ubus_master_driver driver;
-  uvm_sequencer#(ubus_transfer) sequencer;
+  ubus_master_sequencer sequencer;
   ubus_master_monitor monitor;
 
   // Provide implementations of virtual methods such as get_type_name and create
@@ -49,7 +49,7 @@ class ubus_master_agent extends uvm_agent;
     monitor = ubus_master_monitor::type_id::create("monitor", this);
 
     if(get_is_active() == UVM_ACTIVE) begin
-      sequencer = uvm_sequencer#(ubus_transfer)::type_id::create("sequencer", this);
+      sequencer = ubus_master_sequencer::type_id::create("sequencer", this);
       driver = ubus_master_driver::type_id::create("driver", this);
     end
   endfunction : build_phase
