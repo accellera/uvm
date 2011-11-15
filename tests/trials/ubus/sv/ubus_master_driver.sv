@@ -56,6 +56,7 @@ class ubus_master_driver extends uvm_driver #(ubus_transfer);
 
   local bit have_handshake;
   virtual function void do_rerun();
+    super.do_rerun();
     // cleanup drv/sqr handshake (there is a mantis for this)
     if(have_handshake) begin
        have_handshake=0;

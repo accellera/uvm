@@ -61,8 +61,7 @@ endclass : slave_address_map_info
 
 // Enumerated for ubus bus state
 
-typedef enum {RST_START, RST_STOP, NO_OP, ARBI, ADDR_PH, ADDR_PH_ERROR, 
-  DATA_PH} ubus_bus_state;
+typedef enum {RST_START, RST_STOP, NO_OP, ARBI, ADDR_PH, ADDR_PH_ERROR, DATA_PH} ubus_bus_state;
 
 
 //------------------------------------------------------------------------------

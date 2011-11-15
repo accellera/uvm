@@ -116,6 +116,7 @@ class ubus_example_scoreboard extends uvm_scoreboard;
   endfunction : report_phase
 
   virtual function void do_rerun();
+    super.do_rerun();
     uvm_report_info("RERUN","cleaning memory",UVM_NONE);
     m_mem_expected.delete();
   endfunction

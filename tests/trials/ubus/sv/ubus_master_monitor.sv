@@ -109,6 +109,7 @@ class ubus_master_monitor extends uvm_component;
   endtask
 
   virtual function void do_rerun();
+    super.do_rerun();
     `uvm_warning("RESET","FIXME cleanup monitor")
   endfunction
 

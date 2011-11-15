@@ -34,6 +34,7 @@ class ubus_master_sequencer extends uvm_sequencer #(ubus_transfer);
   endfunction : new
   
   virtual function void do_rerun();
+    super.do_rerun();
     `uvm_warning("RESET","FIXME clean/restart seqr")
   endfunction
 

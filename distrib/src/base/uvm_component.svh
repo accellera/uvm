@@ -77,15 +77,7 @@ virtual class uvm_component extends uvm_report_object;
                 uvm_report_info("RERUN",$sformatf("killed local thread %s",get_full_name()),UVM_HIGH);
                 pid.kill();
             end
-            
-            // NOTE: rerun all children before making local cleanup
-            begin
-                uvm_component c[$];
-                get_children(c);
-                foreach(c[idx])
-                    c[idx].rerun(); 
-            end
-                    
+    
             // notify for cleanup
             do_rerun();
                 
@@ -95,6 +87,10 @@ virtual class uvm_component extends uvm_report_object;
             
         // custom cleanup
         virtual function void do_rerun(); 
+            uvm_component c[$];
+            get_children(c);
+            foreach(c[idx])
+                c[idx].rerun(); 
         endfunction
             
         // startup threads

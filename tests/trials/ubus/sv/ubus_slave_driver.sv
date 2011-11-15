@@ -50,6 +50,7 @@ class ubus_slave_driver extends uvm_driver #(ubus_transfer);
 
   local bit have_handshake;  
   virtual function void do_rerun();
+    super.do_rerun();
      if(have_handshake) begin
        have_handshake=0;
        seq_item_port.item_done(); 

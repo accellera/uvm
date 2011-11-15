@@ -57,6 +57,16 @@ class ubus_slave_agent extends uvm_agent;
       sequencer.addr_ph_port.connect(monitor.addr_ph_imp);
     end
   endfunction : connect_phase
+  
+  // rerun manual propagation
+  function void do_rerun();
+    monitor.rerun();
+    if(get_is_active() == UVM_ACTIVE) begin
+        driver.rerun();
+        sequencer.rerun();
+    end
+  endfunction
+    
 
 endclass : ubus_slave_agent
 
