@@ -114,7 +114,7 @@ virtual class uvm_component extends uvm_report_object;
                     pid=process::self(); 
                     uvm_report_info("RERUN",$sformatf("(re)starting do_run() %s",get_full_name()),UVM_HIGH);
                     
-                    fork do_run(); join_none
+                    do_run();
                     wait fork;
                 end
             join_none
