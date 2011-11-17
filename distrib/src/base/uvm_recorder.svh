@@ -313,7 +313,7 @@ class uvm_recorder extends uvm_object;
                                      time begin_time=0);
     if (open_file()) begin
       m_handles[++handle] = 1;
-      $fdisplay(file,"BEGIN @%0t {TXH:%0d STREAM:%0d NAME:%s TIME=%0t  TYPE=\"%0s\" LABEL:\"%0s\" DESC=\"%0s\"",
+      $fdisplay(file,"BEGIN @%0t {TXH:%0d STREAM:%0d NAME:%s TIME=%0t  TYPE=\"%0s\" LABEL:\"%0s\" DESC=\"%0s\"}",
         $time,handle,stream,nm,begin_time,txtype,label,desc);
       return handle;
     end
