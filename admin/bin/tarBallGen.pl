@@ -12,12 +12,11 @@ my $rc = undef;
 my $prefix = undef;
 my $username = undef;
 
-#$tag       =           "UVM_1_1";
-#$rc        =           "RC3";
-#$prefix    =           "uvm-1.1/";
+#$tag       =           "UVM_1_1_a";
+#$rc        =           "RC2";
+#$prefix    =           "uvm-1.1.a";
 #$username      =           "ambarsarkar";
-die "Please check the file for instructions\n";
-
+die "Please set params above\n";
 
 ##################################
 
@@ -65,5 +64,5 @@ system ("echo $cmd"); system ("$cmd");
 
 # Generate the tarball
 chdir  ".." or die "Failed to cd ..\n";
-$cmd = "git archive --prefix=$prefix  $commit_id > ../../uvm-1.1_"."$rc.tar";
+$cmd = "git archive --prefix=$prefix/  $commit_id > ../../$prefix"."_"."$rc.tar";
 system ("echo $cmd"); system ("$cmd");
