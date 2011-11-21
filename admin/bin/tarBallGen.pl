@@ -14,7 +14,7 @@ my $username = undef;
 
 #$tag       =           "UVM_1_1_a";
 #$rc        =           "RC2";
-#$prefix    =           "uvm-1.1.a";
+#$prefix    =           "uvm-1.1a";
 #$username      =           "ambarsarkar";
 die "Please set params above\n";
 
@@ -51,6 +51,14 @@ system ("echo $cmd"); system ("$cmd");
 chdir "../../distrib/docs" or die "Failed to cd to ../../distrib/docs";
 
 $cmd = "git add html;  git commit -m \"commited docs for $tag\"";
+system ("echo $cmd"); system ("$cmd");
+
+chdir ".." or die "Failed to cd to .. (distrib)";
+
+$cmd = "cp ../uvm_ref/relnotes/Mantis_3770.txt .";
+system ("echo $cmd"); system ("$cmd");
+
+$cmd = "git add Mantis_3770.txt;  git commit -m \"Added Mantis 3770 release note to ditribution\"";
 system ("echo $cmd"); system ("$cmd");
 
 $cmd = "git push origin $tag\_".$rc."_WITHHTMLDOC";
