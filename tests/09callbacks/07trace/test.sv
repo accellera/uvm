@@ -138,7 +138,7 @@ module test;
       uvm_callbacks#(ip_comp,cb_base)::add(comp,cb); // TRACE 2
 
       // Disable callback cb1
-      cb.callback_mode(0); // TRACE 3
+      void'(cb.callback_mode(0)); // TRACE 3
   
       cb = new("cb2");
       rcb = cb;

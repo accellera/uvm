@@ -92,9 +92,11 @@ endclass
 
 initial
 begin
-   trunk t1 = new("t1");
+   trunk t1;
+   uvm_root top;
 
-   uvm_root top = uvm_root::get();
+   t1 = new("t1");
+   top = uvm_root::get();
    top.enable_print_topology = 1;
 
    run_test();

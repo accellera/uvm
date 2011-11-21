@@ -36,7 +36,8 @@ endclass
 
 initial
 begin
-   my_blk blk = new;
+   my_blk blk;
+   blk = new;
    
    begin
       uvm_report_server svr;

@@ -81,7 +81,8 @@ endclass
 
 initial
 begin
-   comp1 c = new("c", null);
+   comp1 c;
+   c = new("c", null);
    fork
       run_test;
    join_none

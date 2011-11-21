@@ -110,7 +110,8 @@ begin
    model.set_hdl_path_root("dut");
 
    begin
-      uvm_reg_mem_hdl_paths_seq seq = new;
+      uvm_reg_mem_hdl_paths_seq seq;
+      seq = new;
       seq.model = model;
       seq.start(null);
    end

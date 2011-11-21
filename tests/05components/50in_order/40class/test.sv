@@ -46,8 +46,9 @@ begin
 
    uvm_analysis_port#(c) exp;
    uvm_analysis_port#(c) obs;
+   int v[10];
 
-   int v[10] = '{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+   v = '{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
    exp = new("exp", null);
    obs = new("obs", null);

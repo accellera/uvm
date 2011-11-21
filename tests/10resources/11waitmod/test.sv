@@ -85,7 +85,7 @@ class mycomp extends uvm_component;
       cfg_settings++;
 
       prev = field2;
-      uvm_config_db#(cfgobj)::get(this,"","field2",field2);
+      void'(uvm_config_db#(cfgobj)::get(this,"","field2",field2));
 
       if(!f2_init) begin
         exp = f2_start;

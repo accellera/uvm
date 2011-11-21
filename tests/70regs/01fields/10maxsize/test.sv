@@ -88,9 +88,10 @@ endclass
 
 initial
 begin
-   blk b = new;
+   blk b; my_catcher c;
+   b = new;
 
-   my_catcher c = new;
+   c = new;
    uvm_report_cb::add(null, c);
 
    b.build();

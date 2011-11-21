@@ -81,7 +81,7 @@ module test;
 
       cb = new("disabled_cb1");
       uvm_callbacks#(ip_comp,cb_base)::add(comp,cb);
-      cb.callback_mode(0);
+      void'(cb.callback_mode(0));
       uvm_callbacks#(ip_comp,cb_base)::add(comp1,cb);
   
       cb = new("cb2");

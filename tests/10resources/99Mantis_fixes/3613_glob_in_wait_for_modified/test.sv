@@ -40,7 +40,7 @@ class test extends uvm_component;
       int act;
       `uvm_info("WildField1", "Waiting for c1.field1 to change",UVM_NONE)
       uvm_config_db#(uvm_bitstream_t)::wait_modified(null, "test.c1", "field1");
-      uvm_config_db#(uvm_bitstream_t)::get(null,"test.c1","field1",act);
+      void'(uvm_config_db#(uvm_bitstream_t)::get(null,"test.c1","field1",act));
       if(act != exp) begin
         failed = 1;
         $display("*** UVM TEST FAILED for wait_modified field1 set via wildcard, expected value %0d, got %0d", exp, act);
