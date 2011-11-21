@@ -130,9 +130,9 @@ class phasing_test extends uvm_test;
       predicted = (i >= predicted_phasing.size()) ? "" : predicted_phasing[i];
       audited = (i >= audited_phasing.size()) ? "" : audited_phasing[i];
       if (predicted == audited)
-        $display("  | %-27s | %-27s |     match", predicted, audited);
+        $display("  | %s | %s |     match", predicted, audited);
       else begin
-        $display("  | %-27s | %-27s | <<< MISMATCH", predicted, audited);
+        $display("  | %s | %s | <<< MISMATCH", predicted, audited);
         pass = 0;
       end
     end
@@ -151,9 +151,9 @@ class phasing_test extends uvm_test;
       predicted = (i >= predicted_jumps.size()) ? "" : predicted_jumps[i];
       audited = (i >= audited_jumps.size()) ? "" : audited_jumps[i];
       if (predicted == audited)
-        $display("  | %-27s | %-27s |     match", predicted, audited);
+        $display("  | %s | %s |     match", predicted, audited);
       else begin
-        $display("  | %-27s | %-27s | <<< MISMATCH", predicted, audited);
+        $display("  | %s | %s | <<< MISMATCH", predicted, audited);
          pass = 0;
       end
     end

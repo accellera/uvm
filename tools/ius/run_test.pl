@@ -94,7 +94,7 @@ sub ius_version_string {
 sub run_the_test {
   local($testdir, $ius_comp_opts, $ius_sim_opts, $_) = @_;
 
-	$ius = "irun -uvmhome $uvm_home -nocopyright test.sv +UVM_TESTNAME=test $ius_comp_opts $ius_sim_opts";
+	$ius = "irun -uvmhome $uvm_home -nocopyright `pwd`/test.sv +UVM_TESTNAME=test $ius_comp_opts $ius_sim_opts";
         $ius .= " -nostdout" unless $opt_v;
 
   print "$ius\n" if $opt_v;
@@ -134,7 +134,7 @@ sub get_compiletime_errors {
   local(@errs)=();
   
   while ($_ = <LOG>) {
-    if (/^(ncvlog|ncelab): \*[EF],\w+ \(([^,]+),(\d+)\|(\d+)\):/,){ 
+    if (/^(ncvlog|ncelab|irun): \*[EF],\w+ \(([^,]+),(\d+)\|(\d+)\):/,){ 
 	  push(@errs, "$2#$3");
     }
   }

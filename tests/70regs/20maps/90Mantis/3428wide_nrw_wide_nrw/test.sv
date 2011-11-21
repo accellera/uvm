@@ -120,7 +120,7 @@ endclass
 function void check_map(uvm_reg rg, uvm_reg_map map, uvm_reg_addr_t exp[]);
    uvm_reg_addr_t addr[];
    
-   rg.get_addresses(map, addr);
+   void'(rg.get_addresses(map, addr));
    if (addr != exp) begin
       `uvm_error("Test", $sformatf("Register %s is at addresses %p in map %s instead of %p",
                                    rg.get_full_name(), addr,
@@ -135,6 +135,7 @@ begin
    uvm_reg_addr_t addr[];
    uvm_reg_addr_t exp[];
    trunk dut;
+
    dut = new("dut");
 
    dut.build();
@@ -146,7 +147,8 @@ begin
 
 `ifndef POSSIBLE_OPTIMIZATION
     begin
-      static uvm_reg_addr_t t[8]='{'h40, 'h41, 'h42, 'h43,
+            uvm_reg_addr_t t[8];
+ 	    t='{'h40, 'h41, 'h42, 'h43,
                                'h44, 'h45, 'h46, 'h47};
 
    check_map(rg, dut.bus8_0, t);
