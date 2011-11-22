@@ -55,6 +55,8 @@ Nov 30, 2011
         You are encouraged to define this symbol as it will be the default
         behavior in UVM 1.2 and subsequent releases.
 
+        See Mantis_3770.txt for more details.
+
 
 ** Registers
 
@@ -70,7 +72,7 @@ Nov 30, 2011
   3558  Fixed issue where reference outside of queue bounds in file
         uvm_reg_map.svh, was possible.
 
-  3587  Fixed issue where UVM_REG_BLOCK prints redundant message
+  3587  Fixed issue where uvm_reg_block prints redundant message
         during an update.
 
   3617  Fixed issue where register package was not sensitive to 
