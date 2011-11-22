@@ -1,31 +1,300 @@
 General Overview
 
-  - This is release 1.1 of the Universal Verification Methodology (UVM) 
-    reference implementation from Accellera.  This distribution includes a 
-    SystemVerilog based class library, examples, and User's Guide. 
+  - This is release 1.1a of the Universal Verification Methodology (UVM)
+    reference implementation from Accellera.  This distribution includes a
+    SystemVerilog based class library, examples, User's Guide, and an
+    updated Refererence in HTML form. The UVM Standard Reference
+    PDF is not included in this release. It will not be updated until the 
+    next major release, i.e. UVM 1.2.
 
-    The UVM Standard is available at
-    http://www.accellera.org/activities/vip; 
+    The class library is a reference implementation of the standard. It, the
+    examples, and User Guide provide guidance to users of the standard. For
+    additional information on the Accellera standard, see
 
-    The class library is a reference implementation of the standard; the 
-    examples and User Guide provide guidance to users of the library. For 
-    additional information on the Accellera standard, see the URL above.
-
-  - The UVM is built on the code base of OVM-2.1.1 but there are changes
-    to UVM 1.0 that create incompatibilities for certain OVM environments.
-    Backward compatibility issues are listed in the Compatibility section
-    of these notes. The key issue is that ALL environments which use the
-    global_stop_request() mechanism from OVM to stop the run phase must
-    add the switch +UVM_USE_OVM_RUN_SEMANTIC to keep the run phase
-    from ending immediately.
-
-  - For detailed information on a specific issue, refer to the Mantis database
-    at http://www.eda.org/svdb/view.php?id=<id>, where <id> is the Mantis id.
+          http://www.accellera.org/activities/vip
 
   - A good source for information, answers, and resources is
     http://www.uvmworld.org.  It contains forums on methodology, tool specific
     issues, and commercial announcements.  It also has links to additional
-    resources, Accellera sponsored events, and other UVM events. 
+    resources, Accellera sponsored events, and other UVM events.
+
+
+-----------------------------------------------------------------------------
+Release Notes for UVM-1.1a
+Nov 30, 2011
+
+** Release Overview
+
+  - Release 1.1a contains mostly fixes to errata with limited API changes. 
+    There were several backward-compatible API changes that were approved
+    on a case by case by basis. However, documentation updates were only
+    done to the HTML. There were no updates in the Standard Reference PDF
+    and User Guide PDF. These will be done in UVM 1.2.
+
+  - UVM 1.1a fixes the following issues reported under the Mantis bug-tracking
+    system.
+
+  - For detailed information on a specific issue, refer to the Mantis database
+    at http://www.eda.org/svdb/view.php?id=<id>, where <id> is the Mantis id.
+
+
+** uvm_object constructor
+
+  3770  Fixed issue where uvm_object instance name was not passed to the
+        constructor by the factory. The "name" argument of any uvm_object
+        constructor ALWAYS had the default value and could not be relied
+        upon within the constructor to have the actual object instance name.
+        Calling super.new(name) was thus pointless.
+
+        However, this now requires that every class uvm_object define a
+        constructor having a name argument with a default value. Because a
+        constructor for uvm_object was originally optional and thus constitutes
+        a non-backward-compatible change, the modifications for this Mantis
+        are turned off by default in UVM 1.1a. To turn on this fix, you must
+        define the `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR symbol at compile time.
+        You are encouraged to define this symbol as it will be the default
+        behavior in UVM 1.2 and subsequent releases.
+
+
+** Registers
+
+  3219  Fixed code that had a warning commented out for a check on the
+        correctness of a register type.
+
+  3492  Fixed issue where write() was not setting the written value in the
+        mirrored register model.
+
+  3540  Added support for explicit checking in uvm_reg by adding a compare
+        API that accepts a raw value and checks for correctness.
+
+  3558  Fixed issue where reference outside of queue bounds in file
+        uvm_reg_map.svh, was possible.
+
+  3587  Fixed issue where UVM_REG_BLOCK prints redundant message
+        during an update.
+
+  3617  Fixed issue where register package was not sensitive to 
+        verbosity changes. For example
+           +uvm_set_verbosity=*,RegModel,UVM_MEDIUM,build
+        didn't work.
+
+  3628  Fixed problems observed with explicit predictor and
+        pre_write. When updating the register with the front door write, the
+        post_predict callback was not called.
+
+  3631  Fixed issue where backdoor reads do not emulate side-effects.
+        Reading a *RC (read clear) or a *RS (read set) field via the backdoor
+        did not respectively clear/set it. The mirrored value was similarly
+        not cleared/set.
+
+  3641  Fixed issue where doing byte aligned writes with byte enables to
+        registers, did not work in all cases.
+
+  3685  Fixed issue where uvm_reg_cbs::post_write() description was wrong.
+        It erroneously stated that it is called only for user-defined backdoor
+        writes.
+
+  3688  Fixed issue where too many "Unable to locate block" messages in
+        uvm_reg_block::get_block_by_name() where produced, when recursively
+        navigating the register model hierarchy.
+
+  3712  Fixed error in uvm_reg_adaptor reg2bus documentation.
+
+  3734  Fixed issue where register blocks was put in the resource DB under
+        the wrong scope/name.
+
+  3743  Added documentation to HTML for uvm_reg_block::get_memories().
+
+  3748  Fixed incorrect type of 'value' variable in do_read() in uvm_regs.svh.
+        Type changed to uvm_reg_data_t instead of uvm_reg_addr_t.
+
+  3749  Fixed issue where uvm_reg::update() corrupted register write data
+        with W1C, W0S, W0T, W1CRS, W0SRC field access policies.
+
+  3860  Fixed issue with undesirable coupling of abstract register
+        sequences to VIP that uses sequence base class.
+
+  3762  Fixed issue where the NO_REG_TESTS register attribute was being set
+        using uvm_resource_db #(bit) but retrieved using uvm_resource_db #(int).
+        The mismatch in type meant that the NO_REG_TESTS resource setting was
+        effectively being ignored.
+
+  3768  Fixed issue where register read bus accesses were not calling
+        the parent sequence's pre_do() method.
+
+  3886  Fixed issue where uvm_reg::get_rights did not return the configured
+        rights for a given map, which affected certain built-in register test
+        sequences. The get_rights method returned "RW" if the register belonged
+        only to a single map, even if the register was configured to be "RO"
+        for that map. Now, a register's configured rights for a given map are
+        honored.
+
+** Resources
+
+  3416  Fixed issue where uvm_resource_db::dump() was always printing "?"
+        due to an issue where the method uvm_resource_base::convert2string()
+        was not overridden in the uvm_resource#(T) class,
+
+  3594  Fixed issue where UVM_CONFIG_DB_TRACE option had no effect. The
+        code was using the UVM_RESOURCE_DB_TRACE instead.
+
+  3613  Fixed issue where uvm_config_db::wait_modified didn't work if set
+        contained a glob expression.
+
+  3698  Fixed race condition between internal initialization of the resource db
+        and calls to set_config prior to simulation starting. Set_config calls
+        that had wildcards in the resource names would effectively be ignored.
+
+
+** Events
+
+  3476  Fixed issue where the callback queue was not being copied correctly.
+
+
+** Sequences
+
+  3490  Fixed issue where the sequence state check condition in
+        uvm_sequence_base::start method is always false at the beginning of
+        the method body of uvm_sequence_base::start().
+
+  3566  Fixed issue where uvm_sequencer_param_base:.connect_phase method was
+        not invoking super.*. This caused connect functionallity to be ignored.
+
+  3567  Fixed issue where sequence_library always needed explicit item
+        specialization, because using the default would result in compile error.
+        This was an issue for virtual sequences that needed the default type.
+
+  3574  Fixed issue where uvm_sequence_library_cfg documentation
+        had incorrect example code.
+
+  3598  Fixed issue where do_sequence_kind always led to SEQNOTITM
+        error. Replaced call to start_item with call to m_seq.start.
+
+  3620  Fixed issue in sequence library where sequences were not
+        being initialized properly.
+
+  3623  Fixed issue with UVM_SEQ_LIB_RAND(C) that could cause a constraint
+        failure. UVM_SEQ_LIB_RAND(C) is sensitive to constraints on members
+        other than uvm_sequence_library::select_rand(c). These modes operate
+        by calling randomize(select_rand) or randomize(select_randc).
+        This turns off the rand_mode of the other properties, but does not
+        turn off any constraint blocks on these other properties (see 18.11 of
+        SV-2009 LRM). Should they hold a value that violates those constraints,
+        a failure would occur.
+
+  3624  The uvm_sequence_base::is_randomized constraint was replaced with a
+        do_not_randomize property to prevent inadvertent randomization failures
+        in user sequences.
+
+  3626  Fixed issue where messages from within sequences started via the
+        sequence library did not report their names correctly.
+
+  3633  Fixed issue where uvm_send_pri, uvm_rand_send* did not honor the
+        sequencer set in the item and always execute on the current sequencer.
+        With the split of start_item into start_item() and seq.start() UVM-1.1
+        introduced an issue that the sequencer set in an item using
+        uvm_create_on() was not honored in the uvm_send_pri and
+        uvm_rand_send_pri* familiy of calls.
+
+  3702  Changed sequence_library::sequence_count default to 10, to be
+        consistent with constraints on min and max_random_count state variables.
+
+  3739  Fixed minor documentation issue for uvm_sequence_lib.
+
+  3897  Fixed issue with when starting a sequence without a 2nd argument.
+        Implemented so the item context would be fully set should it only be
+        partially set beforehand.
+
+
+** Phasing
+
+  3513  Implemented the uvm_phase::jump_all() that was in the standard.
+
+  3680  The name given the uvm_phase::phase_done objections was improved to
+        be "<phase_name>_objection" instead of just <phase_name>, which would
+        be confused with the name given the phase proper.
+
+  3690  Fixed issue where task phase threads broke random stability. The same
+        technique used to preserve random stability for uvm_objects was applied
+        to forked phase processes. The task process seed is now set according
+        to the phase type name and component hierarchical name.
+
+
+** Command Line
+
+  3516  Fixed typo in documentation for specifying timeouts on the command-line.
+
+
+** Printer
+
+  3550  Fixed issue with printer not honoring the show_root knob.
+
+
+** Messaging/Transaction Recording/Reporting
+
+  3597  Fixed issue where report catcher did not use default actions. This
+        caused a situation that when a message was demoted from FATAL to
+        WARNING, the consequence was that the simulation unexpectedly ended.
+
+  3630  Fixed Transaction Recording issue where strange attribute name
+        "ARG_size" was recorded. This happened when the attribute composite
+        type was empty.
+
+  3665  Fixed issue with bad scoping in uvm_transaction::m_begin_tr and
+        ::m_end_tr.
+
+  3666  Fixed issue where random stability was affected by the report
+        verbosity setting. Random seed generation would change between
+        simulations where only the report verbosity had changed.
+
+
+** Miscellaneous
+
+  3643  Fixed issue where uvm_string_to_actions was broken. The function
+        uvm_string_to_actions did not work for multiple actions.
+
+  3701  Fixed documentation issue with wrong prototype for `uvm_do_callbacks
+        macro.  Correct prototype is `uvm_do_callbacks(T, CB, METHOD).
+
+  3726  Removed all unnecessary initializations of variables at the point of
+        declaration. These caused race conditions that were very difficult to
+        debug.
+
+  3730  Removed the non-executable example at simple/tlm2/systemC. 
+
+  3732  Fixed incorrect documentation for +UVM_MAX_QUIT_COUNT. The overridable
+        arguments for +UVM_MAX_QUIT_COUNT actually are YES and NO, not 0 and 1
+        as documented. Specifying a 0 or a 1 resulted in the default value of
+        YES always being applied.
+
+  3733  Removed UVM_USE_FILE_LINE, a simulator-specific workaround that is no
+        longer needed. 
+
+  3735  Added Questa-specific workaround for UVM's usage of $typename.
+
+  3736  Added private accessor to interface mask in uvm_port_base,
+        m_get_if_mask().
+
+  3740  Enhanced deprecated use of non-phase "default_sequence" to help users
+        avoid common mistakes during transition to the new phase-based default 
+        sequence mechanism. The default sequence's starting_phase property is
+        now assigned the run phase handle for any sequence started via the
+        non-phase "default_sequence" configuration setting.
+
+  3755  Removed documentation for CFGSET and CFGOVR message code due to it
+        never actively being used.
+
+  3757  Fixed issue where uvm_component::check_config_usage did not use
+        uvm reporting facilities to report, but used $display.
+
+  3882  Removed the internal uvm_process class from the library. Its intended
+        use as a simulator-specific workaround was no longer needed.
+
+  3578  Fixed issuw where non-unique file names caused mis-compiles in user
+        code. The uvm_ prefix was prepended to the files base.svh, comps.svh,
+        seq.svh, and tlm2.svh to make them less likely to collide with
+        similarly named user files during compilation.
+
 
 -----------------------------------------------------------------------------
 Release Notes for UVM-1.1

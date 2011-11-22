@@ -67,6 +67,9 @@ $$logfile =~ s/^UVM-\S+\s+\(\S+\)$/UVM-VERSION/mg;
 $$logfile =~ s/^\(C\).*$/COPYRIGHT/mg;
 $$logfile =~ s/COPYRIGHT(.COPYRIGHT)+/COPYRIGHT/sg;
 $$logfile =~ s/^SVSEED.*\n//sg;
+if ($tool eq "questa") {
+  $$logfile =~ s/class p(::|\/)/class p::/sg;
+}
 
 }
 
