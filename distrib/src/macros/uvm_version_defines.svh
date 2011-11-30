@@ -27,7 +27,7 @@
 `define UVM_NAME UVM
 `define UVM_MAJOR_REV 1
 `define UVM_MINOR_REV 1
-`define UVM_FIX_REV a
+`define UVM_FIX_REV b-DEV
 
 
 // Whole version identifiers that can be used in `ifdefs and `ifndefs
