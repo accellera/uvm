@@ -1750,6 +1750,63 @@ endfunction \
               __m_uvm_status_container.status = 1; \
             end \
           end \
+          else if(!((FLAG)&UVM_READONLY)) begin \
+            foreach(ARG[i]) begin \
+              string s; \
+              $swrite(s,`"ARG[%0d]`",i); \
+              __m_uvm_status_container.scope.set_arg(s); \
+              if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \ 
+                  uvm_report_warning("STRMTC", {"set_int()", ": Match ignored for string ", str__, ". Cannot set object to int value."}); \
+              end \ 
+              else if(ARG[i]!=null && !((FLAG)&UVM_REFERENCE)) begin \
+                int cnt; \
+                //Only traverse if there is a possible match. \
+                for(cnt=0; cnt<str__.len(); ++cnt) begin \
+                  if(str__[cnt] == "." || str__[cnt] == "*") break; \
+                end \
+                if(cnt!=str__.len()) begin \
+                  __m_uvm_status_container.scope.down(s); \
+                  ARG[i].__m_uvm_field_automation(null, UVM_SETINT, str__); \
+                  __m_uvm_status_container.scope.up(); \
+                end \
+              end \
+            end \
+          end \
+        end \
+      UVM_SETSTR: \ 
+        begin \
+          __m_uvm_status_container.scope.set_arg(`"ARG`"); \
+          if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \
+            if((FLAG)&UVM_READONLY) begin \
+              uvm_report_warning("RDONLY", $sformatf("Readonly argument match %s is ignored",  \
+                 __m_uvm_status_container.get_full_scope_arg()), UVM_NONE); \
+            end \
+            else begin \
+                  uvm_report_warning("STRMTC", {"set_str()", ": Match ignored for string ", str__, ". Cannot set array of objects to string value."}); \
+            end \
+          end \
+          else if(!((FLAG)&UVM_READONLY)) begin \
+            foreach(ARG[i]) begin \
+              string s; \
+              $swrite(s,`"ARG[%0d]`",i); \
+              __m_uvm_status_container.scope.set_arg(s); \
+              if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \                  
+                  uvm_report_warning("STRMTC", {"set_str()", ": Match ignored for string ", str__, ". Cannot set object to string value."}); \
+              end \
+              else if(ARG[i]!=null && !((FLAG)&UVM_REFERENCE)) begin \
+                int cnt; \
+                //Only traverse if there is a possible match. \
+                for(cnt=0; cnt<str__.len(); ++cnt) begin \
+                  if(str__[cnt] == "." || str__[cnt] == "*") break; \
+                end \
+                if(cnt!=str__.len()) begin \
+                  __m_uvm_status_container.scope.down(s); \
+                  ARG[i].__m_uvm_field_automation(null, UVM_SETSTR, str__); \
+                  __m_uvm_status_container.scope.up(); \
+                end \
+              end \
+            end \
+          end \
         end \
       UVM_SETOBJ: \
         begin \
@@ -1784,6 +1841,9 @@ endfunction \
             else if(!((FLAG)&UVM_REFERENCE)) begin \
               int cnt; \
               foreach(ARG[i]) begin \
+                if (ARG[i]!=null) begin \
+                  string s; \
+                  $swrite(s,`"ARG[%0d]`",i); \
                 //Only traverse if there is a possible match. \
                 for(cnt=0; cnt<str__.len(); ++cnt) begin \
                   if(str__[cnt] == "." || str__[cnt] == "*") break; \
@@ -1796,6 +1856,7 @@ endfunction \
               end \
             end \
           end \
+        end \
         end \
     endcase \
   end 
