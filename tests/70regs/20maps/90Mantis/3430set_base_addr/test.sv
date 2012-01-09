@@ -87,7 +87,8 @@ endclass
 initial
 begin
    uvm_reg rg;
-   dut blk = new("blk");
+   dut blk;
+   blk = new("blk");
 
    blk.build();
    $write("Checking that set_base_addr() works before the model is locked...\n");

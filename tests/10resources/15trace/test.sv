@@ -157,7 +157,8 @@ endclass
 module top;
 
   initial begin
-    my_catcher ctch = new();
+    my_catcher ctch;
+    ctch = new();
     uvm_report_cb::add(null,ctch);
     run_test();
   end

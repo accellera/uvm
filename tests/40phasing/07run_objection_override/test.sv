@@ -87,7 +87,8 @@ endclass
 
 initial
 begin
-   comp1 c = new("c", null);
+   comp1 c;
+   c = new("c", null);
    run_test();
    #500 global_stop_request;
 end

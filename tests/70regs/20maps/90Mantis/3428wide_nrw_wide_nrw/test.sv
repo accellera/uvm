@@ -134,7 +134,8 @@ begin
    uvm_reg rg;
    uvm_reg_addr_t addr[];
    uvm_reg_addr_t exp[];
-   trunk dut = new("dut");
+   trunk dut;
+   dut = new("dut");
 
    dut.build();
    dut.lock_model();
@@ -145,7 +146,7 @@ begin
 
 `ifndef POSSIBLE_OPTIMIZATION
     begin
-            uvm_reg_addr_t t[8]='{'h40, 'h41, 'h42, 'h43,
+      static uvm_reg_addr_t t[8]='{'h40, 'h41, 'h42, 'h43,
                                'h44, 'h45, 'h46, 'h47};
 
    check_map(rg, dut.bus8_0, t);

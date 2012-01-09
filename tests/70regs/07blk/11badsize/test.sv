@@ -66,7 +66,8 @@ endclass
 
 initial
 begin
-   my_blk blk = new;
+   my_blk blk;
+   blk = new;
 
    if (my_catcher::seen != 1) begin
       `uvm_error("Test", "Fatal message about invalid UVM_REG_DATA_WIDTH value not seen");

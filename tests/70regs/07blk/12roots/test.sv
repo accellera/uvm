@@ -76,13 +76,17 @@ endclass
 
 initial
 begin
-   my_catcher c = new;
+   my_catcher c;
+   c = new;
    uvm_report_cb::add(null, c);
 
    begin
-      blk1 b1 = blk1::type_id::create("b1");
-      blk2 b2 = blk2::type_id::create("b2");
-      blk1 b3 = blk1::type_id::create("b1");
+      blk1 b1;
+      blk2 b2;
+      blk1 b3;
+      b1 = blk1::type_id::create("b1");
+      b2 = blk2::type_id::create("b2");
+      b3 = blk1::type_id::create("b1");
       
       b1.lock_model();
       b2.lock_model();

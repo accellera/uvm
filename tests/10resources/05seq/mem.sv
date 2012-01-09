@@ -91,12 +91,12 @@ module memory #(int unsigned ADDR_SIZE=16, int unsigned DATA_SIZE=8)
 
     // Set up the number of rows and columns to print.  Allow a maximum
     // of 16 bytes per line, adjust rows accordingly
-    int unsigned cols = (ADDR_SIZE < 5) ? (1 << ADDR_SIZE) : 16;
-    int unsigned rows = 1 << ((ADDR_SIZE < 5) ? 1 : (ADDR_SIZE - 4));
+    static int unsigned cols = (ADDR_SIZE < 5) ? (1 << ADDR_SIZE) : 16;
+    static int unsigned rows = 1 << ((ADDR_SIZE < 5) ? 1 : (ADDR_SIZE - 4));
 
     // Set up address and data print formats based on size
-    int unsigned data_chars = ((DATA_SIZE >> 2) + ((DATA_SIZE & 'h3) > 0));
-    int unsigned addr_chars = ((ADDR_SIZE >> 2) + ((ADDR_SIZE & 'h3) > 0));
+    static int unsigned data_chars = ((DATA_SIZE >> 2) + ((DATA_SIZE & 'h3) > 0));
+    static int unsigned addr_chars = ((ADDR_SIZE >> 2) + ((ADDR_SIZE & 'h3) > 0));
 
     $sformat(addr_fmt, " %%0%0dx:", addr_chars);
     $sformat(data_fmt, " %%0%0dx", data_chars);
