@@ -34,8 +34,10 @@
 // to do conditional compilation
 `define UVM_VERSION_1_1
 `define UVM_MAJOR_VERSION_1_1
+`define UVM_FIX_VERSION_1_1_b
 `define UVM_MAJOR_REV_1
 `define UVM_MINOR_REV_1
+`define UVM_FIX_REV_b
 
 // When there is a FIX_REV, print as "M.mf"
 // When there is NO FIX_REV, print as "M.m".
