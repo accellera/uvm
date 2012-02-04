@@ -26,7 +26,7 @@ import uvm_pkg::*;
 class cust_data extends uvm_sequence_item;
   int prop;
 
-  `uvm_object_utils_begin(cust_data);
+  `uvm_object_utils_begin(cust_data)
     `uvm_field_int(prop, UVM_ALL_ON)
   `uvm_object_utils_end
 
@@ -38,7 +38,7 @@ endclass
 
 //=======================================================================
 class cust_driver extends uvm_driver#(cust_data);
-  `uvm_component_utils(cust_driver);
+  `uvm_component_utils(cust_driver)
 
   function new(string name = "cust_driver", uvm_component parent = null);
     super.new(name, parent);
@@ -71,7 +71,7 @@ typedef uvm_sequencer#(cust_data) cust_sequencer;
 
 //=======================================================================
 class cust_agent extends uvm_agent;
-  `uvm_component_utils(cust_agent);
+  `uvm_component_utils(cust_agent)
 
   cust_driver driver;
 
@@ -96,7 +96,7 @@ endclass
 
 //=======================================================================
 class cust_data_sequence extends uvm_sequence#(cust_data);
-  `uvm_object_utils(cust_data_sequence);
+  `uvm_object_utils(cust_data_sequence)
 
   function new(string name = "cust_data_sequence");
      super.new(name);
@@ -117,18 +117,37 @@ class cust_data_sequence extends uvm_sequence#(cust_data);
 endclass
 
 //=======================================================================
+class fatal_catcher extends uvm_report_catcher;
+  int seen = 0;
+  virtual function action_e catch();
+    if (get_severity() == UVM_FATAL && get_id() == "uvm_test_top.agent.sequencer" &&
+        (get_message() == "Concurrent calls to send_request() not supported. Check your driver for concurrent calls to get_next_item()" || 
+         get_message() == "Item_done() called with no outstanding requests. Each call to item_done() must be paired with a previous call to get_next_item().")) begin
+      seen++;
+      return CAUGHT;
+    end else begin
+      return THROW;
+    end
+  endfunction
+endclass
+
+//=======================================================================
 class test extends uvm_test;
 
   `uvm_component_utils(test)
 
   cust_agent agent;
 
+  fatal_catcher catcher;
+  
   function new(string name = "cust_test", uvm_component parent=null);
     super.new(name,parent);
   endfunction : new
 
   virtual function void build_phase(uvm_phase phase);
     agent = cust_agent::type_id::create("agent", this);
+    catcher = new;
+    uvm_report_cb::add(null,catcher);
   endfunction
 
   virtual task main_phase(uvm_phase phase);
@@ -142,7 +161,7 @@ class test extends uvm_test;
     fork
       seq1.start(agent.sequencer);
       seq2.start(agent.sequencer);
-    join
+    join_none
     phase.drop_objection(this);
   endtask
 
@@ -151,7 +170,8 @@ class test extends uvm_test;
       svr = _global_reporter.get_report_server();
 
       if (svr.get_severity_count(UVM_FATAL) +
-          svr.get_severity_count(UVM_ERROR) == 0)
+          svr.get_severity_count(UVM_ERROR) == 0 && 
+          catcher.seen == 2)
          $write("** UVM TEST PASSED **\n");
       else
          $write("!! UVM TEST FAILED !!\n");
