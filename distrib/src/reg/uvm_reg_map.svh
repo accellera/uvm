@@ -1535,9 +1535,12 @@ function uvm_mem uvm_reg_map::get_mem_by_offset(uvm_reg_addr_t offset);
       return null;
    end
 
-   if (m_mems_by_offset.exists(offset))
-     return m_mems_by_offset[offset];
-
+   foreach (m_mems_by_offset[range]) begin
+      if (range.min <= offset && offset <= range.max) begin
+         return m_mems_by_offset[range];
+      end
+   end
+   
    return null;
 endfunction
 
