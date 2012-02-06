@@ -473,25 +473,25 @@ function void uvm_sequencer_base::build();
   `ifndef UVM_NO_DEPRECATED
   // deprecated parameters for sequencer. Use uvm_sequence_library class
   // for sequence library functionality.
-  if (get_config_string("default_sequence", default_sequence)) begin
+  if (uvm_config_string::get(this, "", "default_sequence", default_sequence)) begin
     `uvm_warning("UVM_DEPRECATED",{"default_sequence config parameter is deprecated and not ",
                  "part of the UVM standard. See documentation for uvm_sequencer_base::start_phase_sequence()."})
     this.m_default_seq_set = 1;
   end
-  if (get_config_int("count", count)) begin
+  if (uvm_config_int::get(this, "", "count", count)) begin
     `uvm_warning("UVM_DEPRECATED",{"count config parameter is deprecated and not ",
                  "part of the UVM standard"})
   end
-  if (get_config_int("max_random_count", max_random_count)) begin
+  if (uvm_config_int::get(this, "", "max_random_count", max_random_count)) begin
     `uvm_warning("UVM_DEPRECATED",{"count config parameter is deprecated and not ",
                  "part of the UVM standard"})
   end
-  if (get_config_int("max_random_depth", max_random_depth)) begin
+  if (uvm_config_int::get(this, "", "max_random_depth", max_random_depth)) begin
     `uvm_warning("UVM_DEPRECATED",{"max_random_depth config parameter is deprecated and not ",
                  "part of the UVM standard. Use 'uvm_sequence_library' class for ",
                  "sequence library functionality"})
   end
-  if (get_config_int("pound_zero_count", dummy))
+  if (uvm_config_int::get(this, "", "pound_zero_count", dummy))
     `uvm_warning("UVM_DEPRECATED",
       {"pound_zero_count was set but ignored. ",
        "Sequencer/driver synchronization now uses 'uvm_wait_for_nba_region'"})

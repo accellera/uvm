@@ -63,6 +63,7 @@ Group: Base  {
    File: uvm_transaction  (no auto-title, UVM_ROOT/distrib/src/base/uvm_transaction.svh)
    File: uvm_root  (no auto-title, UVM_ROOT/distrib/src/base/uvm_root.svh)
    File: uvm_port_base  (no auto-title, UVM_ROOT/distrib/src/base/uvm_port_base.svh)
+   File: uvm_utils  (no auto-title, UVM_ROOT/distrib/src/base/uvm_utils.svh)
    }  # Group: Base
 
 Group: Reporting  {

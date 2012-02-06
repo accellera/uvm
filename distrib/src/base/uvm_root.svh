@@ -728,11 +728,11 @@ function void uvm_root::m_process_config(string cfg, bit is_int);
       v = split_val[2].atoi();
     end
     uvm_report_info("UVM_CMDLINE_PROC", {"Applying config setting from the command line: +uvm_set_config_int=", cfg}, UVM_NONE);
-    m_uvm_top.set_config_int(split_val[0], split_val[1], v);
+    uvm_config_int::set(m_uvm_top, split_val[0], split_val[1], v);
   end
   else begin
     uvm_report_info("UVM_CMDLINE_PROC", {"Applying config setting from the command line: +uvm_set_config_string=", cfg}, UVM_NONE);
-    m_uvm_top.set_config_string(split_val[0], split_val[1], split_val[2]);
+    uvm_config_string::set(m_uvm_top, split_val[0], split_val[1], split_val[2]);
   end 
 
 endfunction

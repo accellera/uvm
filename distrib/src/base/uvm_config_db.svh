@@ -44,6 +44,7 @@ class m_uvm_waiter;
   endfunction
 endclass
 
+typedef class uvm_root;
 typedef class uvm_config_db_options;
 
 //----------------------------------------------------------------------
@@ -299,6 +300,32 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   endfunction
 endclass
 
+//----------------------------------------------------------------------
+// Type: uvm_config_int
+//
+// Convenience type for uvm_config_db#(uvm_bitstream_t)
+//
+typedef uvm_config_db#(uvm_bitstream_t) uvm_config_int;
+
+//----------------------------------------------------------------------
+// Type: uvm_config_string
+//
+// Convenience type for uvm_config_db#(string)
+//
+typedef uvm_config_db#(string) uvm_config_string;
+
+//----------------------------------------------------------------------
+// Type: uvm_config_object
+//
+// Convenience type for uvm_config_db#(uvm_object)
+//
+typedef uvm_config_db#(uvm_object) uvm_config_object;
+
+//----------------------------------------------------------------------
+// Type: uvm_config_wrapper
+//
+// Convenience type for uvm_config_db#(uvm_object_wrapper)
+//
 typedef uvm_config_db#(uvm_object_wrapper) uvm_config_wrapper;
 
 

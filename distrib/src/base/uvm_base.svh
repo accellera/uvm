@@ -91,6 +91,7 @@
   `include "base/uvm_objection.svh"
   `include "base/uvm_heartbeat.svh"
 
+  `include "base/uvm_utils.svh"
   `include "base/uvm_globals.svh"
 
   // Command Line Processor

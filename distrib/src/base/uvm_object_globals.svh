@@ -66,7 +66,7 @@ parameter UVM_STREAMBITS = `UVM_MAX_STREAMBITS;
 // Type: uvm_bitstream_t
 //
 // The bitstream type is used as a argument type for passing integral values
-// in such methods as set_int_local, get_int_local, get_config_int, report,
+// in such methods as set_int_local, get_int_local, uvm_config_int, report,
 // pack and unpack. 
 
 typedef logic signed [UVM_STREAMBITS-1:0] uvm_bitstream_t;
