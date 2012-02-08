@@ -55,9 +55,9 @@ initial begin
    uvm_report_cb::add(top, ct);
 
    `uvm_info("TEST", "Checking instance+global catchers with same name...warning expected", UVM_NONE)
-   ct = new("C");
+   ct = new("D");
    uvm_report_cb::add(top, ct);
-   ct = new("C");
+   ct = new("D");
    uvm_report_cb::add(null, ct);
 
    begin
