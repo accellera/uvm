@@ -70,6 +70,8 @@ initial begin
          $write("** UVM TEST PASSED! **\n");
       else
          $write("** UVM TEST FAILED! **\n");
+
+      svr.summarize();
    end
 end
 endmodule
