@@ -2,7 +2,7 @@
 //------------------------------------------------------------------------------
 //   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2012 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -78,7 +78,7 @@ typedef class uvm_root;
 //
 //------------------------------------------------------------------------------
 
-class uvm_report_object extends uvm_object;
+class uvm_report_object extends uvm_scoped_object;
 
   uvm_report_handler m_rh;
 
@@ -87,8 +87,8 @@ class uvm_report_object extends uvm_object;
   // Creates a new report object with the given name. This method also creates
   // a new <uvm_report_handler> object to which most tasks are delegated.
 
-  function new(string name = "");
-    super.new(name);
+  function new(string name = "", uvm_object parent=null);
+    super.new(name, parent);
     m_rh = new();
   endfunction
 

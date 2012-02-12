@@ -36,6 +36,7 @@
   // The base object element. Contains data methods (copy/compare etc) and
   // factory creation methods (create). Also includes control classes.
   `include "base/uvm_object.svh"
+  `include "base/uvm_scoped_object.svh"
 
   `include "base/uvm_pool.svh"
   `include "base/uvm_queue.svh"
@@ -72,6 +73,9 @@
   `include "base/uvm_report_server.svh"
   `include "base/uvm_report_handler.svh"
   `include "base/uvm_report_object.svh"
+
+  // Base strcutural object
+  `include "base/uvm_tree.svh"
 
   // Base transaction object
   `include "base/uvm_transaction.svh"

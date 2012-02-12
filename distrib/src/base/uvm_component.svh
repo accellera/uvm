@@ -1,4 +1,4 @@
-//
+\//
 //------------------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
@@ -59,7 +59,7 @@ typedef class uvm_sequence_item;
 //
 //------------------------------------------------------------------------------
 
-virtual class uvm_component extends uvm_report_object;
+virtual class uvm_component extends uvm_tree;
 
   // Function: new
   //
@@ -94,19 +94,10 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual function uvm_component get_parent ();
 
 
-  // Function: get_full_name
-  //
-  // Returns the full hierarchical name of this object. The default
-  // implementation concatenates the hierarchical name of the parent, if any,
-  // with the leaf name of this object, as given by <uvm_object::get_name>. 
-
-  extern virtual function string get_full_name ();
-
-
   // Function: get_children
   //
   // This function populates the end of the ~children~ array with the 
-  // list of this component's children. 
+  // list of this component's children components.
   //
   //|   uvm_component array[$];
   //|   my_comp.get_children(array);
@@ -117,16 +108,21 @@ virtual class uvm_component extends uvm_report_object;
 
 
   // Function: get_child
-  extern function uvm_component get_child (string name);
+  // Return the child component with the specified name, if any.
+  // Returns ~null~ otherwise.
+  // See also <uvm_tree::get_branches>.
 
-  // Function: get_next_child
-  extern function int get_next_child (ref string name);
+  extern function uvm_component get_child (string name);
 
   // Function: get_first_child
   //
-  // These methods are used to iterate through this component's children, if
+  // Find the name of the first child component and returns TRUE if one exists.
+  // Returns FALSE otherwise.
+  // See also <uvm_tree::get_first_branch>.
+  //
+  // Together with <get_next_child>, it is used to iterate through this component's children, if
   // any. For example, given a component with an object handle, ~comp~, the
-  // following code calls <uvm_object::print> for each child:
+  // following code calls <uvm_object::print> for each component child:
   //
   //|    string name;
   //|    uvm_component child;
@@ -138,10 +134,18 @@ virtual class uvm_component extends uvm_report_object;
 
   extern function int get_first_child (ref string name);
 
+  // Function: get_next_child
+  // Find the name of the next child component and returns TRUE if one exists.
+  // Returns FALSE otherwise.
+  // See also <uvm_tree::get_next_branch>.
+
+  extern function int get_next_child (ref string name);
+
 
   // Function: get_num_children
   //
-  // Returns the number of this component's children. 
+  // Returns the number of this component's children component.
+  // See also <uvm_tree::get_num_branches>.
 
   extern function int get_num_children ();
 
@@ -152,13 +156,6 @@ virtual class uvm_component extends uvm_report_object;
 
   extern function int has_child (string name);
 
-
-  // Function - set_name
-  //
-  // Renames this component to ~name~ and recalculates all descendants'
-  // full names. This is an internal function for now.
-
-  extern virtual function void set_name (string name);
 
   
   // Function: lookup
@@ -174,7 +171,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: get_depth
   //
-  // Returns the component's depth from the root level. uvm_top has a
+  // Returns the component's depth from the root level. <uvm_root> has a
   // depth of 0. The test and any other top level components have a depth
   // of 1, and so on.
 
@@ -1602,10 +1599,10 @@ virtual class uvm_component extends uvm_report_object;
                                                        uvm_bitstream_t value,
                                                        bit recurse=1);
 
-  /*protected*/ uvm_component m_parent;
-  protected     uvm_component m_children[string];
-  protected     uvm_component m_children_by_handle[uvm_component];
-  extern protected virtual function bit  m_add_child(uvm_component child);
+  local string m_full_name;
+  extern           virtual function void set_name(string name);
+  extern           virtual function bit  set_context(uvm_object context);
+  extern           virtual function get_full_name();
   extern local     virtual function void m_set_full_name();
 
   extern                   function void do_resolve_bindings();
@@ -1618,7 +1615,6 @@ virtual class uvm_component extends uvm_report_object;
                                                         output string remainder );
 
   // overridden to disable
-  extern virtual function uvm_object create (string name=""); 
   extern virtual function uvm_object clone  ();
 
   local integer m_stream_handle[string];
@@ -1627,8 +1623,6 @@ virtual class uvm_component extends uvm_report_object;
               integer parent_handle=0, bit has_parent=0,
               string stream_name="main", string label="",
               string desc="", time begin_time=0);
-
-  string m_name;
 
   const static string type_name = "uvm_component";
   virtual function string get_type_name();
@@ -1686,15 +1680,12 @@ function uvm_component::new (string name, uvm_component parent);
   string error_str;
   uvm_root top;
 
-  super.new(name);
+  // Will call set_name() then set_context()
+  super.new(name, parent);
 
-  // If uvm_top, reset name to "" so it doesn't show in full paths then return
-  if (parent==null && name == "__top__") begin
-    set_name(""); // *** VIRTUAL
-    return;
-  end
-
-  top = uvm_root::get();
+  // If uvm_top, we are done
+  if (parent==null && name == "__top__")
+     return;
 
   // Check that we're not in or past end_of_elaboration
   begin
@@ -1706,51 +1697,11 @@ function uvm_component::new (string name, uvm_component parent);
       uvm_report_fatal("COMP/INTERNAL",
                        "attempt to find build phase object failed",UVM_NONE);
     if (bld.get_state() == UVM_PHASE_DONE) begin
-      uvm_report_fatal("ILLCRT", {"It is illegal to create a component ('",
-                name,"' under '",
-                (parent == null ? top.get_full_name() : parent.get_full_name()),
-               "') after the build phase has ended."},
+      uvm_report_fatal("ILLCRT",
+                       "It is illegal to create component after the build phase.",
                        UVM_NONE);
     end
   end
-
-  if (name == "") begin
-    name.itoa(m_inst_count);
-    name = {"COMP_", name};
-  end
-
-  if(parent == this) begin
-    `uvm_fatal("THISPARENT", "cannot set the parent of a component to itself")
-  end
-
-  if (parent == null)
-    parent = top;
-
-  if(uvm_report_enabled(UVM_MEDIUM+1, UVM_INFO, "NEWCOMP"))
-    `uvm_info("NEWCOMP", {"Creating ",
-      (parent==top?"uvm_top":parent.get_full_name()),".",name},UVM_MEDIUM+1)
-
-  if (parent.has_child(name) && this != parent.get_child(name)) begin
-    if (parent == top) begin
-      error_str = {"Name '",name,"' is not unique to other top-level ",
-      "instances. If parent is a module, build a unique name by combining the ",
-      "the module name and component name: $sformatf(\"\%m.\%s\",\"",name,"\")."};
-      `uvm_fatal("CLDEXT",error_str)
-    end
-    else
-      `uvm_fatal("CLDEXT",
-        $sformatf("Cannot set '%s' as a child of '%s', %s",
-                  name, parent.get_full_name(),
-                  "which already has a child by that name."))
-    return;
-  end
-
-  m_parent = parent;
-
-  set_name(name); // *** VIRTUAL
-
-  if (!m_parent.m_add_child(this))
-    m_parent = null;
 
   event_pool = new("event_pool");
 
@@ -1766,37 +1717,73 @@ function uvm_component::new (string name, uvm_component parent);
   set_report_verbosity_level(parent.get_report_verbosity_level());
 
   m_set_cl_msg_args();
-
 endfunction
 
 
-// m_add_child
-// -----------
+// set_name
+// --------
 
-function bit uvm_component::m_add_child(uvm_component child);
-
-  if (m_children.exists(child.get_name()) &&
-      m_children[child.get_name()] != child) begin
-      `uvm_warning("BDCLD",
-        $sformatf("A child with the name '%0s' (type=%0s) already exists.",
-           child.get_name(), m_children[child.get_name()].get_type_name()))
-      return 0;
+function void uvm_component::set_name (string name);
+  if (m_full_name != "") begin
+    `uvm_error("INVSTNM", {"It is illegal to change the name of a uvm_component. The component name will not be changed to \"", name, "\""})
+    return;
   end
 
-  if (m_children_by_handle.exists(child)) begin
-      `uvm_warning("BDCHLD",
-        $sformatf("A child with the name '%0s' %0s %0s'",
-                  child.get_name(),
-                  "already exists in parent under name '",
-                  m_children_by_handle[child].get_name()))
-      return 0;
-    end
+  if (name == "") begin
+    name.itoa(get_inst_id());
+    name = {"COMP_", name};
+  end
 
-  m_children[child.get_name()] = child;
-  m_children_by_handle[child] = child;
-  return 1;
+  super.set_name(name);
 endfunction
 
+
+function bit uvm_component::set_context(uvm_object context);
+  // Nothing to do if this is uvm_root
+  if (get_name() == "__top__") return;
+
+  if (m_full_name != "") begin
+    `uvm_error("UVM/COMP/CTXT/CHG", "It is illegal to change the parent of a uvm_component.")
+    return;
+  end
+
+  if (context == null) context = uvm_root::get();
+   
+  if (!$cast(m_parent, context)) begin
+    `uvm_fatal("UVM/COMP/CTXT/BAD", "The parent of a uvm_component must be a uvm_component.")
+    return;
+  end
+
+  if (m_parent == this) begin
+     `uvm_fatal("THISPARENT", "Cannot set the parent of a component to itself")
+     return;
+  end
+
+  `uvm_info("NEWCOMP", {"Creating ",
+                        (m_parent==uvm_root::get()?"uvm_top":pm_arent.get_full_name()),".",name},
+            UVM_HIGH)
+
+  if (m_parent.has_child(get_name())) begin
+    if (m_parent == uvm_root::get()) begin
+       string err = {"Name '", get_name(), "' is not unique to other top-level instances. ",
+                     "If parent is a module, build a unique name by combining the ",
+                     "the module name and component name: $sformatf(\"\%m.", get_name(),"\")."};
+       `uvm_fatal("CLDEXT", err)
+    end
+    else
+      `uvm_fatal("CLDEXT", {"Cannot create component '", get_name(),
+                            "' as a child of '", m_parent.get_full_name(),
+                            ": one already exists."})
+     return;
+  end
+
+  if (super.set_context(m_parent)) begin
+     m_parent.m_children[this.get_name()] = this;
+     m_parent.m_children_by_handle[this] = this;
+  end
+
+  m_set_full_name();
+endfunction
 
 
 //------------------------------------------------------------------------------
@@ -1863,12 +1850,7 @@ endfunction
 // -------------
 
 function string uvm_component::get_full_name ();
-  // Note- Implementation choice to construct full name once since the
-  // full name may be used often for lookups.
-  if(m_name == "")
-    return get_name();
-  else
-    return m_name;
+   return m_full_name;
 endfunction
 
 
@@ -1880,36 +1862,16 @@ function uvm_component uvm_component::get_parent ();
 endfunction
 
 
-// set_name
-// --------
-
-function void uvm_component::set_name (string name);
-  if(m_name != "") begin
-    `uvm_error("INVSTNM", $sformatf("It is illegal to change the name of a component. The component name will not be changed to \"%s\"", name))
-    return;
-  end
-  super.set_name(name);
-  m_set_full_name();
-
-endfunction
-
-
 // m_set_full_name
 // ---------------
 
 function void uvm_component::m_set_full_name();
-  uvm_root top;
-  top = uvm_top;
+  uvm_root top = uvm_root::get();
+
   if (m_parent == top || m_parent==null)
     m_name = get_name();
   else 
     m_name = {m_parent.get_full_name(), ".", get_name()};
-
-  foreach (m_children[c]) begin
-    uvm_component tmp;
-    tmp = m_children[c];
-    tmp.m_set_full_name(); 
-  end
 
 endfunction
 
@@ -1951,10 +1913,8 @@ endfunction
 // ---------
 
 function int unsigned uvm_component::get_depth();
-  if(m_name == "") return 0;
-  get_depth = 1;
-  foreach(m_name[i]) 
-    if(m_name[i] == ".") ++get_depth;
+   if (m_parent == null) return 0;
+   return m_parent.get_depth() + 1;
 endfunction
 
 

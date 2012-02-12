@@ -99,19 +99,26 @@ virtual class uvm_object extends uvm_void;
   extern virtual function string get_name ();
 
 
+  // Function: get_context
+  //
+  // Returns the context of this object.
+  // The default implementation returns ~null~, as uvm_objects do not inherently
+  // have a context.
+  //
+  // Objects possessing hierarchy or context, such as <uvm_scoped_object> and <uvm_tree>,
+  // override the default implementation.
+
+  virtual function uvm_object get_context ();
+
+
   // Function: get_full_name
   //
-  // Returns the full hierarchical name of this object. The default
+  // Returns the fully scoped name of this object. The default
   // implementation is the same as <get_name>, as uvm_objects do not inherently
-  // possess hierarchy. 
+  // have a context.
   //
-  // Objects possessing hierarchy, such as <uvm_components>, override the default
-  // implementation. Other objects might be associated with component hierarchy
-  // but are not themselves components. For example, <uvm_sequence #(REQ,RSP)>
-  // classes are typically associated with a <uvm_sequencer #(REQ,RSP)>. In this
-  // case, it is useful to override get_full_name to return the sequencer's
-  // full name concatenated with the sequence's name. This provides the sequence
-  // a full context, which is useful when debugging.
+  // Objects possessing hierarchy or context, such as <uvm_scoped_object> and <uvm_tree>,
+  // override the default implementation.
 
   extern virtual function string get_full_name ();
 
@@ -674,6 +681,52 @@ virtual class uvm_object extends uvm_void;
   extern virtual function void do_unpack (uvm_packer packer);
 
 
+  //----------------------------------------------------------------------------
+  // Group- Reporting
+  // Documented in uvm_report_object
+  //----------------------------------------------------------------------------
+
+  virtual function void uvm_report_info( string id,
+                                         string message,
+                                         int verbosity = UVM_MEDIUM,
+                                         string filename = "",
+                                         int line = 0);
+     uvm_report_object rpt = m_get_report_object();
+     rpt.report(UVM_INFO, get_full_name(), id, message, verbosity,
+                filename, line, this);
+  endfunction
+
+  virtual function void uvm_report_warning( string id,
+                                            string message,
+                                            int verbosity = UVM_MEDIUM,
+                                            string filename = "",
+                                            int line = 0);
+     uvm_report_object rpt = m_get_report_object();
+     rpt.report(UVM_WARNING, get_full_name(), id, message, verbosity, 
+                filename, line, this);
+  endfunction
+
+  virtual function void uvm_report_error( string id,
+                                          string message,
+                                          int verbosity = UVM_LOW,
+                                          string filename = "",
+                                          int line = 0);
+     uvm_report_object rpt = m_get_report_object();
+     rpt.report(UVM_ERROR, get_full_name(), id, message, verbosity, 
+                filename, line, this);
+  endfunction
+
+  virtual function void uvm_report_fatal( string id,
+                                          string message,
+                                          int verbosity = UVM_NONE,
+                                          string filename = "",
+                                          int line = 0);
+     uvm_report_object rpt = m_get_report_object();
+     rpt.report(UVM_FATAL, get_full_name(), id, message, verbosity, 
+                filename, line, this);
+  endfunction
+
+
   // Group: Configuration
 
   // Function: set_int_local
@@ -798,7 +851,7 @@ uvm_copy_map uvm_global_copy_map = new;
 function uvm_object::new (string name="");
 
   m_inst_id = m_inst_count++;
-  m_leaf_name = name;
+  set_name(name);
 endfunction
 
 
@@ -853,6 +906,14 @@ function string uvm_object::get_name ();
 endfunction
 
 
+// get_scope
+// --------
+
+function uvm_object uvm_object::get_scope ();
+  return null;
+endfunction
+
+
 // get_full_name
 // -------------
 
@@ -865,6 +926,11 @@ endfunction
 // --------
 
 function void uvm_object::set_name (string name);
+  if (name == "") begin
+    name.itoa(m_inst_id);
+    name = {"OBJ_", name};
+  end
+
   m_leaf_name = name;
 endfunction
 
@@ -1323,6 +1389,6 @@ endfunction
 // -------------------
 
 function uvm_report_object uvm_object::m_get_report_object();
-  return null;
+   return uvm_root::get();
 endfunction
 
