@@ -118,6 +118,14 @@ virtual class uvm_tree extends uvm_report_object;
   extern function int get_num_branches ();
 
 
+  // Function: is_branch
+  //
+  // Return TRUE is the specified object is a branch of this object
+  // i.e. this object is a context for the specified object
+
+  extern function bit is_branch(uvm_tree branch, int max_lvl = -1);
+
+     
   // Function: find_branch
   //
   // Looks for a branch with the given hierarchical ~name~ relative to this tree.
@@ -241,6 +249,11 @@ endfunction
 
 function int uvm_tree::get_num_branches ();
   return m_branches_by_name.num();
+endfunction
+
+
+function bit uvm_tree::is_branch(uvm_tree branch, int max_lvl = -1);
+   return branch.is_context(this, max_lvl);
 endfunction
 
 

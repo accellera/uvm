@@ -74,6 +74,15 @@ virtual class uvm_scoped_object extends uvm_object;
   extern virtual function string get_full_name ();
 
 
+  // Function: is_context
+  //
+  // Returns TRUE if the specified object is a context for this object,
+  // within the specified maximum number of levels
+  // (e.g. 0 means an immediate context).
+
+  extern function bit is_context(uvm_object obj, int max_lvl = -1);
+
+
   //----------------------------------------------------------------------------
   // Group- Reporting
   // Documented in uvm_report_object
@@ -165,6 +174,17 @@ endfunction
 // --------
 
 function bit uvm_scoped_object::set_context (uvm_object ctxt);
+   uvm_object c = ctxt;
+   while (c != null) begin
+      if (c == this) begin
+         `uvm_error("UVM/CTXT/CYC", {"Cannot set context of ", get_full_name(), " to ",
+                                     ctxt.get_full_name(), " because it creates a context cycle"})
+         return 0;
+      end
+
+      c = c.get_context();
+   end
+          
    m_context = ctxt;
    return 1;
 endfunction
@@ -186,6 +206,24 @@ function string uvm_scoped_object::get_full_name ();
       return {m_context.get_full_name(), ".", get_name()};
 
   return get_name();
+endfunction
+
+
+// is_context
+// ----------
+function bit uvm_scoped_object::is_context(uvm_object obj, int max_lvl = -1);
+   uvm_object o;
+   
+   if (obj == this) return 0;
+
+   o = this;
+   while (max_lvl-- >= 0) begin
+      o = o.get_context();
+      if (o == null) return 0;
+      if (obj == o) return 1;
+   end
+
+   return 0;
 endfunction
 
 
