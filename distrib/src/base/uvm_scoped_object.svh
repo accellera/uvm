@@ -39,25 +39,25 @@ virtual class uvm_scoped_object extends uvm_object;
 
   // Function: new
   //
-  // Creates a new uvm_scoped_object with the given instance ~name~ and ~context~.
-  // If ~context~ is not supplied, the object does not have a context.
+  // Creates a new uvm_scoped_object with the given instance ~name~ and ~ctxt~.
+  // If ~ctxt~ is not supplied, the object does not have a context.
   // All classes extended from this base class must have a similar constructor.
 
-  extern function new (string name, uvm_object context = null);
+  extern function new (string name, uvm_object ctxt = null);
 
   // Function: set_context
   //
   // Sets the context instance of this object, overwriting any previously
   // given context.
-  // If ~context~ is specified as ~null~, the object no longer has a context.
+  // If ~ctxt~ is specified as ~null~, the object no longer has a context.
   // Returns TRUE if the settign was succesful, FALSE otherwise.
 
-  extern virtual function bit set_context (uvm_object context);
+  extern virtual function bit set_context (uvm_object ctxt);
 
 
   // Function: get_context
   //
-  // Returns the context of the object, as provided by the ~context~ argument in the
+  // Returns the context of the object, as provided by the ~ctxt~ argument in the
   // <new> constructor or <set_context> method.
 
   extern virtual function uvm_object get_context ();
@@ -74,6 +74,48 @@ virtual class uvm_scoped_object extends uvm_object;
   extern virtual function string get_full_name ();
 
 
+  //----------------------------------------------------------------------------
+  // Group- Reporting
+  // Documented in uvm_report_object
+  //----------------------------------------------------------------------------
+
+  virtual function void uvm_report_info( string id,
+                                         string message,
+                                         int verbosity = UVM_MEDIUM,
+                                         string filename = "",
+                                         int line = 0);
+     uvm_report_object rpt = m_get_report_object();
+     rpt.uvm_report_info(id, message, verbosity, filename, line);
+  endfunction
+
+  virtual function void uvm_report_warning( string id,
+                                            string message,
+                                            int verbosity = UVM_NONE,
+                                            string filename = "",
+                                            int line = 0);
+     uvm_report_object rpt = m_get_report_object();
+     rpt.uvm_report_warning(id, message, verbosity, filename, line);
+  endfunction
+
+  virtual function void uvm_report_error( string id,
+                                          string message,
+                                          int verbosity = UVM_NONE,
+                                          string filename = "",
+                                          int line = 0);
+     uvm_report_object rpt = m_get_report_object();
+     rpt.uvm_report_error(id, message, verbosity, filename, line);
+  endfunction
+
+  virtual function void uvm_report_fatal( string id,
+                                          string message,
+                                          int verbosity = UVM_NONE,
+                                          string filename = "",
+                                          int line = 0);
+     uvm_report_object rpt = m_get_report_object();
+     rpt.uvm_report_fatal(id, message, verbosity, filename, line);
+  endfunction
+
+
   // Function: create_scoped_object
   //
   // The create_scoped_object method allocates a new object of the same type as this object
@@ -85,12 +127,12 @@ virtual class uvm_scoped_object extends uvm_object;
   //
   //|  class mytype extends uvm_scoped_object;
   //|    ...
-  //|    virtual function uvm_scoped_object create_scoped_object(string name="", uvm_object context=null);
-  //|      mytype t = new(name, context);
+  //|    virtual function uvm_scoped_object create_scoped_object(string name="", uvm_object ctxt=null);
+  //|      mytype t = new(name, ctxt);
   //|      return t;
   //|    endfunction 
 
-  virtual function uvm_object create_scoped_object (string name="", uvm_object context=null);
+  virtual function uvm_object create_scoped_object (string name="", uvm_object ctxt=null);
      return null;
   endfunction
 
@@ -113,22 +155,22 @@ endclass
 // new
 // ---
 
-function uvm_scoped_object::new (string name, uvm_object context=null);
+function uvm_scoped_object::new (string name, uvm_object ctxt=null);
    super.new(name);
-   void'(set_context(context));
+   void'(set_context(ctxt));
 endfunction
 
 
 // set_context
 // --------
 
-function bit uvm_scoped_object::set_context (uvm_object context);
-   m_context = context;
+function bit uvm_scoped_object::set_context (uvm_object ctxt);
+   m_context = ctxt;
    return 1;
 endfunction
 
 
-// get_context_object
+// get_context
 // --------
 
 function uvm_object uvm_scoped_object::get_context ();
@@ -140,7 +182,7 @@ endfunction
 // -------------
 
 function string uvm_scoped_object::get_full_name ();
-   if (m_context != null && m_context != uvm_root()::get())
+   if (m_context != null && m_context != uvm_root::get())
       return {m_context.get_full_name(), ".", get_name()};
 
   return get_name();
@@ -154,5 +196,5 @@ function uvm_report_object uvm_scoped_object::m_get_report_object();
    if (m_context != null)
       return m_context.m_get_report_object();
    
-   return super.uvm_scoped_object::m_get_report_object();
+   return super.m_get_report_object();
 endfunction

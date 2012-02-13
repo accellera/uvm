@@ -1,4 +1,4 @@
-\//
+//
 //------------------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
@@ -1094,7 +1094,6 @@ virtual class uvm_component extends uvm_tree;
   extern function uvm_component create_component (string requested_type_name, 
                                                   string name);
 
-
   // Function: create_object
   //
   // A convenience function for <uvm_factory::create_object_by_name>,
@@ -1600,9 +1599,12 @@ virtual class uvm_component extends uvm_tree;
                                                        bit recurse=1);
 
   local string m_full_name;
+  local uvm_component m_parent;
+  local uvm_component m_children[string];
+
   extern           virtual function void set_name(string name);
-  extern           virtual function bit  set_context(uvm_object context);
-  extern           virtual function get_full_name();
+  extern           virtual function bit  set_context(uvm_object ctxt);
+  extern           virtual function string get_full_name();
   extern local     virtual function void m_set_full_name();
 
   extern                   function void do_resolve_bindings();
@@ -1615,6 +1617,7 @@ virtual class uvm_component extends uvm_tree;
                                                         output string remainder );
 
   // overridden to disable
+  extern function uvm_object create (string name =""); 
   extern virtual function uvm_object clone  ();
 
   local integer m_stream_handle[string];
@@ -1687,6 +1690,10 @@ function uvm_component::new (string name, uvm_component parent);
   if (parent==null && name == "__top__")
      return;
 
+  `uvm_info("NEWCOMP", {"Creating ",
+                        (m_parent==uvm_root::get()?"uvm_top":m_parent.get_full_name()),".",get_name()},
+            UVM_HIGH)
+
   // Check that we're not in or past end_of_elaboration
   begin
     uvm_phase bld;
@@ -1705,7 +1712,7 @@ function uvm_component::new (string name, uvm_component parent);
 
   event_pool = new("event_pool");
 
-  m_domain = parent.m_domain;     // by default, inherit domains from parents
+  m_domain = m_parent.m_domain;     // by default, inherit domains from parents
   
   // Now that inst name is established, reseed (if use_uvm_seeding is set)
   reseed();
@@ -1714,7 +1721,7 @@ function uvm_component::new (string name, uvm_component parent);
   if (!uvm_config_db #(uvm_bitstream_t)::get(this, "", "recording_detail", recording_detail))
         void'(uvm_config_db #(int)::get(this, "", "recording_detail", recording_detail));
 
-  set_report_verbosity_level(parent.get_report_verbosity_level());
+  set_report_verbosity_level(m_parent.get_report_verbosity_level());
 
   m_set_cl_msg_args();
 endfunction
@@ -1738,30 +1745,26 @@ function void uvm_component::set_name (string name);
 endfunction
 
 
-function bit uvm_component::set_context(uvm_object context);
+function bit uvm_component::set_context(uvm_object ctxt);
   // Nothing to do if this is uvm_root
-  if (get_name() == "__top__") return;
+  if (get_name() == "__top__") return 1;
 
   if (m_full_name != "") begin
     `uvm_error("UVM/COMP/CTXT/CHG", "It is illegal to change the parent of a uvm_component.")
-    return;
+    return 0;
   end
 
-  if (context == null) context = uvm_root::get();
+  if (ctxt == null) ctxt = uvm_root::get();
    
-  if (!$cast(m_parent, context)) begin
+  if (!$cast(m_parent, ctxt)) begin
     `uvm_fatal("UVM/COMP/CTXT/BAD", "The parent of a uvm_component must be a uvm_component.")
-    return;
+    return 0;
   end
 
   if (m_parent == this) begin
      `uvm_fatal("THISPARENT", "Cannot set the parent of a component to itself")
-     return;
+     return 0;
   end
-
-  `uvm_info("NEWCOMP", {"Creating ",
-                        (m_parent==uvm_root::get()?"uvm_top":pm_arent.get_full_name()),".",name},
-            UVM_HIGH)
 
   if (m_parent.has_child(get_name())) begin
     if (m_parent == uvm_root::get()) begin
@@ -1774,15 +1777,16 @@ function bit uvm_component::set_context(uvm_object context);
       `uvm_fatal("CLDEXT", {"Cannot create component '", get_name(),
                             "' as a child of '", m_parent.get_full_name(),
                             ": one already exists."})
-     return;
+     return 0;
   end
 
   if (super.set_context(m_parent)) begin
      m_parent.m_children[this.get_name()] = this;
-     m_parent.m_children_by_handle[this] = this;
   end
 
   m_set_full_name();
+
+   return 1;
 endfunction
 
 
@@ -1824,8 +1828,9 @@ endfunction
 function uvm_component uvm_component::get_child(string name);
   if (m_children.exists(name))
     return m_children[name];
+
   `uvm_warning("NOCHILD",{"Component with name '",name,
-       "' is not a child of component '",get_full_name(),"'"})
+                          "' is not a child of component '",get_full_name(),"'"})
   return null;
 endfunction
 
@@ -1869,9 +1874,9 @@ function void uvm_component::m_set_full_name();
   uvm_root top = uvm_root::get();
 
   if (m_parent == top || m_parent==null)
-    m_name = get_name();
+    m_full_name = get_name();
   else 
-    m_name = {m_parent.get_full_name(), ".", get_name()};
+    m_full_name = {m_parent.get_full_name(), ".", get_name()};
 
 endfunction
 

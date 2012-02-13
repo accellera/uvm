@@ -108,7 +108,7 @@ virtual class uvm_object extends uvm_void;
   // Objects possessing hierarchy or context, such as <uvm_scoped_object> and <uvm_tree>,
   // override the default implementation.
 
-  virtual function uvm_object get_context ();
+  extern virtual function uvm_object get_context ();
 
 
   // Function: get_full_name
@@ -681,52 +681,6 @@ virtual class uvm_object extends uvm_void;
   extern virtual function void do_unpack (uvm_packer packer);
 
 
-  //----------------------------------------------------------------------------
-  // Group- Reporting
-  // Documented in uvm_report_object
-  //----------------------------------------------------------------------------
-
-  virtual function void uvm_report_info( string id,
-                                         string message,
-                                         int verbosity = UVM_MEDIUM,
-                                         string filename = "",
-                                         int line = 0);
-     uvm_report_object rpt = m_get_report_object();
-     rpt.report(UVM_INFO, get_full_name(), id, message, verbosity,
-                filename, line, this);
-  endfunction
-
-  virtual function void uvm_report_warning( string id,
-                                            string message,
-                                            int verbosity = UVM_MEDIUM,
-                                            string filename = "",
-                                            int line = 0);
-     uvm_report_object rpt = m_get_report_object();
-     rpt.report(UVM_WARNING, get_full_name(), id, message, verbosity, 
-                filename, line, this);
-  endfunction
-
-  virtual function void uvm_report_error( string id,
-                                          string message,
-                                          int verbosity = UVM_LOW,
-                                          string filename = "",
-                                          int line = 0);
-     uvm_report_object rpt = m_get_report_object();
-     rpt.report(UVM_ERROR, get_full_name(), id, message, verbosity, 
-                filename, line, this);
-  endfunction
-
-  virtual function void uvm_report_fatal( string id,
-                                          string message,
-                                          int verbosity = UVM_NONE,
-                                          string filename = "",
-                                          int line = 0);
-     uvm_report_object rpt = m_get_report_object();
-     rpt.report(UVM_FATAL, get_full_name(), id, message, verbosity, 
-                filename, line, this);
-  endfunction
-
-
   // Group: Configuration
 
   // Function: set_int_local
@@ -906,10 +860,10 @@ function string uvm_object::get_name ();
 endfunction
 
 
-// get_scope
+// get_context
 // --------
 
-function uvm_object uvm_object::get_scope ();
+function uvm_object uvm_object::get_context ();
   return null;
 endfunction
 

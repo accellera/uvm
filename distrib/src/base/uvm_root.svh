@@ -163,7 +163,7 @@ class uvm_root extends uvm_component;
                                           input uvm_component comp=null); 
   
   extern `_protected function new ();
-  extern protected virtual function bit m_add_child (uvm_component child);
+  extern protected virtual function bit m_add_branch (uvm_tree branch);
   extern function void build_phase(uvm_phase phase);
   extern local function void m_do_verbosity_settings();
   extern local function void m_do_timeout_settings();
@@ -191,7 +191,7 @@ class uvm_root extends uvm_component;
       if (enable_print_topology) print_topology();
       
       begin
-           uvm_report_server srvr;           
+          uvm_report_server srvr;           
           srvr = get_report_server();
           if(srvr.get_severity_count(UVM_ERROR) > 0) begin
             uvm_report_fatal("BUILDERR", "stopping due to build errors", UVM_NONE);
@@ -360,7 +360,7 @@ task uvm_root::run_test(string test_name="");
 
   // if test now defined, create it using common factory
   if (test_name != "") begin
-    if(m_children.exists("uvm_test_top")) begin
+    if(has_child("uvm_test_top")) begin
       uvm_report_fatal("TTINST",
           "An uvm_test_top already exists via a previous call to run_test", UVM_NONE);
       #0; // forces shutdown because $finish is forked
@@ -376,7 +376,7 @@ task uvm_root::run_test(string test_name="");
     end
   end
 
-  if (m_children.num() == 0) begin
+  if (get_num_children() == 0) begin
     uvm_report_fatal("NOCOMP",
           {"No components instantiated. You must either instantiate",
            " at least one component before calling run_test or use",
@@ -453,10 +453,11 @@ endfunction
 function void uvm_root::print_topology(uvm_printer printer=null);
 
   string s;
+  bit ok;
 
   uvm_report_info("UVMTOP", "UVM testbench topology:", UVM_LOW);
 
-  if (m_children.num()==0) begin
+  if (get_num_children()==0) begin
     uvm_report_warning("EMTCOMP", "print_topology - No UVM components to print.", UVM_NONE);
     return;
   end
@@ -464,9 +465,10 @@ function void uvm_root::print_topology(uvm_printer printer=null);
   if (printer==null)
     printer = uvm_default_printer;
 
-  foreach (m_children[c]) begin
-    if(m_children[c].print_enabled) begin
-      printer.print_object("", m_children[c]);  
+  for(ok = get_first_child(s); ok; ok = get_next_child(s)) begin
+    uvm_component child = get_child(s);
+    if(child.print_enabled) begin
+      printer.print_object("", child);  
     end
   end
   $display(printer.emit());
@@ -514,16 +516,19 @@ endfunction
 // -----------
 
 // Add to the top levels array
-function bit uvm_root::m_add_child (uvm_component child);
-  if(super.m_add_child(child)) begin
-    if(child.get_name() == "uvm_test_top")
-      top_levels.push_front(child);
-    else
-      top_levels.push_back(child);
-    return 1;
-  end
+function bit uvm_root::m_add_branch(uvm_tree branch);
+  uvm_component comp;
+
+  if(!super.m_add_branch(branch)) return 0;
+
+  if (!$cast(comp, branch)) return 1;
+   
+  if(comp.get_name() == "uvm_test_top")
+     top_levels.push_front(comp);
   else
-    return 0;
+     top_levels.push_back(comp);
+
+  return 1;
 endfunction
 
 

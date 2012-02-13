@@ -38,25 +38,31 @@
 //
 //------------------------------------------------------------------------------
 
-virtual class uvm_tree extends uvm_scoped_object;
+virtual class uvm_tree extends uvm_report_object;
 
 
   // Function: new
   //
-  // Creates a new uvm_tree with the given instance ~name~ and ~context~.
-  // If ~context~ is not supplied, the tree does not have a context.
+  // Creates a new uvm_tree with the given instance ~name~ and ~ctxt~.
+  // If ~ctxt~ is not supplied, the tree does not have a context.
   // All classes extended from this base class must have a similar constructor.
 
-  extern function new (string name, uvm_tree context = null);
+  extern function new (string name, uvm_tree ctxt = null);
+
+  // Function: set_name
+  //
+  // Set or rename this uvm_tree instance.
+
+  extern function void set_name (string name);
 
   // Function: set_context
   //
   // Sets the context instance of this tree, overwriting any previously
   // given context.
-  // If ~context~ is specified as ~null~, the tree no longer has a context.
+  // If ~ctxt~ is specified as ~null~, the tree no longer has a context.
   // Returns TRUE if the setting was successful, FALSE otherwise.
 
-  extern virtual function bit set_context (uvm_tree context);
+  extern virtual function bit set_context (uvm_object ctxt);
 
 
   // Function: get_branches
@@ -144,8 +150,8 @@ endclass
 // new
 // ---
 
-function uvm_tree::new (string name, uvm_tree context=null);
-   super.new(name, context);
+function uvm_tree::new (string name, uvm_tree ctxt=null);
+   super.new(name, ctxt);
 endfunction
 
 
@@ -153,12 +159,6 @@ function void uvm_tree::set_name (string name);
    uvm_tree trunk;
 
    if (name == "") begin
-      if (get_name() != "") begin
-         `uvm_error("UVM/TREE/REN/NONE", {"Cannot rename uvm_tree instance from \"",
-                                          get_full_name(), "\" to \"\"."})
-         return;
-      end
-
       name.itoa(get_inst_id());
       name = {"TREE_", name};
    end
@@ -176,16 +176,16 @@ endfunction
 // set_context
 // --------
 
-function bit uvm_tree::set_context (uvm_object context);
+function bit uvm_tree::set_context (uvm_object ctxt);
    uvm_tree trunk;
 
    void'($cast(trunk, get_context()));
    if (trunk != null)
       trunk.m_del_branch(this);
 
-   super.set_context(context);
+   super.set_context(ctxt);
 
-   if ($cast(trunk, context) && trunk != null)
+   if ($cast(trunk, ctxt) && trunk != null)
       return trunk.m_add_branch(this);
 
    return 1;
@@ -222,7 +222,7 @@ endfunction
 
 
 function uvm_tree uvm_tree::get_branch (string name);
-   if (m_branches_by_name.exists(branch.get_name()))
+   if (m_branches_by_name.exists(name))
       return m_branches_by_name[name];
 
    return null;
@@ -257,7 +257,7 @@ function uvm_tree uvm_tree::find_branch (string name);
    for(i = j; i < name.len(); i++) begin  
       if (name[i] == "." ) break;
    end
-   br_name = name.subtr(j, i-1);
+   br_name = name.substr(j, i-1);
 
    // Is this part of the hierarchical name found here?
    br = get_branch(name);
