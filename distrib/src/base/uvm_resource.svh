@@ -1611,6 +1611,11 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
       return;
     end
 
+    // Set the modified bit and record the transaction only if the value
+    // has actually changed.
+    if(val == t)
+      return;
+
     record_write_access(accessor);
 
     // set the value and set the dirty bit
