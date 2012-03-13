@@ -92,11 +92,11 @@ class uvm_sequencer_base extends uvm_component;
 
   // Task: execute_item
   //
-  // This task allows the user to supply an item or sequence to the sequencer
-  // and have it be executed procedurally. The parent sequence for the item or
-  // sequence is a temporary sequence that is automatically created.  There is
-  // no capability to retrieve responses.  The sequencer will drop responses to
-  // items done using this interface.
+  // Executes the given transaction ~item~ directly on this sequencer. A temporary
+  // parent sequence is automatically created for the ~item~.  There is no capability to
+  // retrieve responses. If the driver returns responses, they will accumulate in the
+  // sequencer, eventually causing response overflow unless
+  // <set_response_queue_error_report_disabled> is called.
 
   extern virtual task execute_item(uvm_sequence_item item);
 
