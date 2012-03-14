@@ -624,8 +624,9 @@ function void uvm_sequencer_base::grant_queued_locks();
     temp = 0;
     if (i < arb_sequence_q.size()) begin
       if (arb_sequence_q[i].request == SEQ_TYPE_LOCK) begin
-         if (arb_sequence_q[i].process_id.status == process::KILLED) begin
-            `uvm_error("SEQLCKZMB", $psprintf("The task responsible for requesting a lock on sequencer '%s' for sequence '%s' has been killed, to avoid a deadlock the sequence will be removed from the arbitration queues", this.get_full_name(), arb_sequence_q[i].sequence_ptr.get_full_name()))
+         if ((arb_sequence_q[i].process_id.status == process::KILLED) ||
+             (arb_sequence_q[i].process_id.status == process::FINISHED)) begin
+            `uvm_error("SEQLCKZMB", $sformatf("The task responsible for requesting a lock on sequencer '%s' for sequence '%s' has been killed, to avoid a deadlock the sequence will be removed from the arbitration queues", this.get_full_name(), arb_sequence_q[i].sequence_ptr.get_full_name()))
             remove_sequence_from_queues(arb_sequence_q[i].sequence_ptr);
             continue;
          end
@@ -703,8 +704,9 @@ function int uvm_sequencer_base::m_choose_next_request();
 
   i = 0;
   while (i < arb_sequence_q.size()) begin
-     if (arb_sequence_q[i].process_id.status == process::KILLED) begin
-        `uvm_error("SEQREQZMB", $psprintf("The task responsible for requesting a wait_for_grant on sequencer '%s' for sequence '%s' has been killed, to avoid a deadlock the sequence will be removed from the arbitration queues", this.get_full_name(), arb_sequence_q[i].sequence_ptr.get_full_name()))
+     if ((arb_sequence_q[i].process_id.status == process::KILLED) ||
+         (arb_sequence_q[i].process_id.status == process::FINISHED)) begin
+        `uvm_error("SEQREQZMB", $sformatf("The task responsible for requesting a wait_for_grant on sequencer '%s' for sequence '%s' has been killed, to avoid a deadlock the sequence will be removed from the arbitration queues", this.get_full_name(), arb_sequence_q[i].sequence_ptr.get_full_name()))
          remove_sequence_from_queues(arb_sequence_q[i].sequence_ptr);
          continue;
      end
@@ -1212,7 +1214,7 @@ function void uvm_sequencer_base::remove_sequence_from_queues(
         if ((arb_sequence_q[i].sequence_id == seq_id) ||
             (is_child(sequence_ptr, arb_sequence_q[i].sequence_ptr))) begin
           if (sequence_ptr.get_sequence_state() == FINISHED)
-            `uvm_error("SEQFINERR", $psprintf("Parent sequence '%s' should not finish before all items from itself and items from descendent sequences are processed.  The item request from the sequence '%s' is being removed.", sequence_ptr.get_full_name(), arb_sequence_q[i].sequence_ptr.get_full_name()))
+            `uvm_error("SEQFINERR", $sformatf("Parent sequence '%s' should not finish before all items from itself and items from descendent sequences are processed.  The item request from the sequence '%s' is being removed.", sequence_ptr.get_full_name(), arb_sequence_q[i].sequence_ptr.get_full_name()))
           arb_sequence_q.delete(i);
           m_update_lists();
         end
@@ -1231,7 +1233,7 @@ function void uvm_sequencer_base::remove_sequence_from_queues(
         if ((lock_list[i].get_inst_id() == sequence_ptr.get_inst_id()) ||
             (is_child(sequence_ptr, lock_list[i]))) begin
           if (sequence_ptr.get_sequence_state() == FINISHED)
-            `uvm_error("SEQFINERR", $psprintf("Parent sequence '%s' should not finish before locks from itself and descedent sequences are removed.  The lock held by the child sequence '%s' is being removed.",sequence_ptr.get_full_name(), lock_list[i].get_full_name()))
+            `uvm_error("SEQFINERR", $sformatf("Parent sequence '%s' should not finish before locks from itself and descedent sequences are removed.  The lock held by the child sequence '%s' is being removed.",sequence_ptr.get_full_name(), lock_list[i].get_full_name()))
           lock_list.delete(i);
           m_update_lists();
         end

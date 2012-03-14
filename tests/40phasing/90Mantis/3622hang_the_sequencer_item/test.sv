@@ -9,7 +9,7 @@ class error_catcher extends uvm_report_catcher;
    virtual function action_e catch();
       if("SEQREQZMB" != get_id()) return THROW;
       if(get_severity() != UVM_ERROR) return THROW;
-      uvm_report_info("ERROR CATCHER", {"From error_catcher catch(): ", get_message()}, UVM_MEDIUM , `uvm_file, `uvm_line );
+      uvm_report_info("ERROR CATCHER", {"From error_catcher catch(): ", get_message()}, UVM_NONE , `uvm_file, `uvm_line );
       count++; 
       return CAUGHT;
    endfunction
@@ -35,9 +35,9 @@ class item_driver extends uvm_driver #( item );
       item t;
       forever begin
          seq_item_port.get_next_item( t );
-         `uvm_info("Got" , t.get_full_name() , UVM_MEDIUM );
+         `uvm_info("Got" , t.get_full_name() , UVM_NONE );
          #10;
-         `uvm_info("Done" , t.get_full_name() , UVM_MEDIUM );
+         `uvm_info("Done" , t.get_full_name() , UVM_NONE );
          seq_item_port.item_done();
       end
    endtask
@@ -55,18 +55,18 @@ class item_seq extends uvm_sequence #( item );
       item t;
       
       for( int i = 0; i < 30; i++ ) begin
-         t = new($psprintf("item %0d" , i ) );
-         
+         t = new($sformatf("item %0d" , i ) );
+
+         `uvm_info("start_item", $sformatf("calling start_item(%0d)", i), UVM_NONE)
          start_item( t );
          finish_item( t );
       end
    endtask
    
    function void do_kill();
-      `uvm_info("Just Killed" , get_full_name() , UVM_MEDIUM )
-        endfunction
+      `uvm_info("Just Killed" , get_full_name() , UVM_NONE )
+   endfunction
 endclass
-   
    
 class test extends uvm_test;
    `uvm_component_utils( test );
@@ -94,8 +94,10 @@ class test extends uvm_test;
    task reset_phase( uvm_phase phase );
       phase.raise_objection( this , "start reset" );
       fork
-         item_seq seq = item_seq::type_id::create("item_seq");
-         seq.start( sequencer );
+         begin
+            item_seq seq = item_seq::type_id::create("item_seq");
+            seq.start( sequencer );
+         end
       join_none
       #50;
       phase.drop_objection( this , "finished reset" ); 
@@ -114,11 +116,11 @@ class test extends uvm_test;
    endtask
    
    function void phase_started( uvm_phase phase );
-      `uvm_info("Phase Started" , phase.get_full_name() , UVM_MEDIUM )
+      `uvm_info("Phase Started" , phase.get_full_name() , UVM_NONE )
    endfunction
    
    function void phase_ended( uvm_phase phase );
-     `uvm_info("Phase Ended" , phase.get_full_name() , UVM_MEDIUM )
+     `uvm_info("Phase Ended" , phase.get_full_name() , UVM_NONE )
    endfunction
    
    function void report();
