@@ -386,7 +386,7 @@ task uvm_root::run_test(string test_name="");
     return;
   end
 
-  uvm_report_info("RNTST", {"Running test ",test_name, "..."}, UVM_LOW);
+  uvm_report_info("RNTST", {"Running test ",uvm_test_top.get_type_name(), "..."}, UVM_LOW);
 
   // phase runner, isolated from calling process
   fork begin
