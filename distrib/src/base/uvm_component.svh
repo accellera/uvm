@@ -2842,6 +2842,13 @@ typedef uvm_config_db#(uvm_bitstream_t) uvm_config_int;
 typedef uvm_config_db#(string) uvm_config_string;
 typedef uvm_config_db#(uvm_object) uvm_config_object;
 
+// Undocumented struct for storing clone bit along w/
+// object on set_config_object(...) calls
+class uvm_config_object_wrapper;
+   uvm_object obj;
+   bit clone;
+endclass : uvm_config_object_wrapper
+
 function void uvm_component::set_config_int(string inst_name,
                                            string field_name,
                                            uvm_bitstream_t value);
@@ -2867,6 +2874,7 @@ function void uvm_component::set_config_object(string inst_name,
                                                uvm_object value,
                                                bit clone = 1);
   uvm_object tmp;
+  uvm_config_object_wrapper wrapper;
 
   if(value == null)
     `uvm_warning("NULLCFG", {"A null object was provided as a ",
@@ -2892,8 +2900,12 @@ function void uvm_component::set_config_object(string inst_name,
       value = tmp;
   end
 
+  wrapper = new;
+  wrapper.obj = value;
+  wrapper.clone = clone;
+
   uvm_config_object::set(this, inst_name, field_name, value);
-  uvm_config_db#(bit)::set(this, inst_name, {"m_uvm_set_config_clone_bit__", field_name}, clone);
+  uvm_config_db#(uvm_config_object_wrapper)::set(this, inst_name, field_name, wrapper);
 endfunction
 
 //
@@ -2920,18 +2932,65 @@ endfunction
 function bit uvm_component::get_config_object (string field_name,
                                                inout uvm_object value,
                                                input bit clone=1);
-  bit set_clone;
-  if(!uvm_config_object::get(this, "", field_name, value)) begin
-    return 0;
-  end
+   int unsigned ctr;
+   uvm_resource#(uvm_object) ro;
+   uvm_resource#(uvm_config_object_wrapper) rcow;
+   uvm_config_object_wrapper cow;
+   uvm_resource_base rb, rb2;
+   uvm_resource_pool rp = uvm_resource_pool::get();
+   uvm_resource_types::rsrc_q_t rq;
+   bit set_clone = 1; // Default to the default value for set_config_object
 
-  if(!uvm_config_db#(bit)::get(this, "", {"m_uvm_set_config_clone_bit__", field_name}, set_clone)) begin
-    set_clone = clone;
-  end
+   // Need to get all resources, so we get both uvm_object and uvm_config_object_wrappers
+   // This gives similar functionality to the lookup_regex_names used in uvm_config_db::get()
+   rq = rp.lookup_regex_names(this.get_full_name(), field_name);
    
-  if((set_clone && clone) && value != null) begin
-    value = value.clone();
-  end
+   while (ctr < rq.size()) begin
+      rb = rq.get(ctr);
+      if ((rb.get_type_handle() != uvm_resource#(uvm_object)::get_type()) &&
+          (rb.get_type_handle() != uvm_resource#(uvm_config_object_wrapper)::get_type()))
+        rq.delete(ctr);
+      else
+        ctr++;
+   end
+
+   // Since we're dealing w/ two types of resources, we have to figure out precedence ourselves
+   // This gives similar functionality to the get_highest_precedence used in uvm_config_db::get()
+   if (rq.size() == 0) begin
+      return 0;
+   end
+   else if (rq.size() == 1) begin
+      rb = rq.get(0);
+   end
+   else if (rq.size() > 1) begin
+      rb = rq.get(0); // Grab the first resource in the queue
+
+      for(int i = 1; i < rq.size(); ++i) begin
+         rb2 = rq.get(i);
+         if (rb2.precedence > rb.precedence) begin
+            rb = rb2;
+         end
+      end
+   end
+
+   // Determine what our match wound up being, a resource/config_db set, or a 
+   // uvm_component::set_config_object.  If set_config_object, grab the clone bit
+   if (rb.get_type_handle() == uvm_resource#(uvm_config_object_wrapper)::get_type()) begin
+      $cast(rcow, rb);
+      cow = rcow.read(this);
+      value = cow.obj;
+      set_clone = cow.clone;
+   end
+   else begin
+      $cast(ro, rb);
+      value = ro.read(this);
+   end
+
+   // Honor the clone bit from the set (which defaults to 1 if the users didn't
+   // use set_config_object, since set_config_object would have defaulted to 1)
+   if((set_clone && clone) && value != null) begin
+      value = value.clone();
+   end
 
   return 1;
 endfunction
