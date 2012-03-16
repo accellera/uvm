@@ -2893,6 +2893,7 @@ function void uvm_component::set_config_object(string inst_name,
   end
 
   uvm_config_object::set(this, inst_name, field_name, value);
+  uvm_config_db#(bit)::set(this, inst_name, {"m_uvm_set_config_clone_bit__", field_name}, clone);
 endfunction
 
 //
@@ -2919,11 +2920,16 @@ endfunction
 function bit uvm_component::get_config_object (string field_name,
                                                inout uvm_object value,
                                                input bit clone=1);
+  bit set_clone;
   if(!uvm_config_object::get(this, "", field_name, value)) begin
     return 0;
   end
 
-  if(clone && value != null) begin
+  if(!uvm_config_db#(bit)::get(this, "", {"m_uvm_set_config_clone_bit__", field_name}, set_clone)) begin
+    set_clone = clone;
+  end
+   
+  if((set_clone && clone) && value != null) begin
     value = value.clone();
   end
 
