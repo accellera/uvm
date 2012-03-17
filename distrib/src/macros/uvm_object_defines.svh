@@ -1167,12 +1167,12 @@ endfunction \
       UVM_PACK: \
         if(!((FLAG)&UVM_NOPACK)) begin \
           foreach(ARG[i])  \
-            void'(__m_uvm_status_container.packer.pack_object(ARG[i])); \
+            __m_uvm_status_container.packer.pack_object(ARG[i]); \
         end \
       UVM_UNPACK: \
         if(!((FLAG)&UVM_NOPACK)) begin \
           foreach(ARG[i]) \
-            void'(__m_uvm_status_container.packer.unpack_object(ARG[i])); \
+            __m_uvm_status_container.packer.unpack_object(ARG[i]); \
         end \
       UVM_RECORD: \
         `m_uvm_record_qda_object(ARG,FLAG,$size(ARG)) \
@@ -1712,7 +1712,7 @@ endfunction \
         if(!((FLAG)&UVM_NOPACK)) begin \
           if(__m_uvm_status_container.packer.use_metadata) __m_uvm_status_container.packer.pack_field_int(ARG.size(), 32); \
           foreach(ARG[i])  \
-            void'(__m_uvm_status_container.packer.pack_object(ARG[i])); \
+            __m_uvm_status_container.packer.pack_object(ARG[i]); \
         end \
       UVM_UNPACK: \
         if(!((FLAG)&UVM_NOPACK)) begin \
@@ -1722,7 +1722,7 @@ endfunction \
             `M_UVM_``TYPE``_RESIZE(ARG,null) \
           end \
           foreach(ARG[i]) \
-            void'(__m_uvm_status_container.packer.unpack_object(ARG[i])); \
+            __m_uvm_status_container.packer.unpack_object(ARG[i]); \
         end \
       UVM_RECORD: \
         `m_uvm_record_qda_object(ARG,FLAG,ARG.size()) \

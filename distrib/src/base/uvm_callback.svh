@@ -700,7 +700,7 @@ class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
     end
     `uvm_cb_trace_noobj(cb,$sformatf("Add (%s) callback %0s by name to object(s) %0s ",
                     ordering.name(), cb.get_name(), name))
-    void'(top.find_all(name,cq,root));
+    top.find_all(name,cq,root);
     if(cq.size() == 0) begin
       uvm_report_warning("CBNOMTC", { "add_by_name failed to find any components matching the name ",
         name, ", callback ", cb.get_name(), " will not be registered." }, UVM_NONE);
@@ -775,7 +775,7 @@ class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
 
     `uvm_cb_trace_noobj(cb,$sformatf("Delete callback %0s by name from object(s) %0s ",
                     cb.get_name(), name))
-    void'(top.find_all(name,cq,root));
+    top.find_all(name,cq,root);
     if(cq.size() == 0) begin
       uvm_report_warning("CBNOMTC", { "delete_by_name failed to find any components matching the name ",
         name, ", callback ", cb.get_name(), " will not be unregistered." }, UVM_NONE);
