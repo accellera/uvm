@@ -1595,15 +1595,15 @@ endfunction \
             if(uvm_is_array(str__)  && (index__ != -1)) begin\
               if(wildcard_index__) begin \
                 for(index__=0; index__<ARG.size(); ++index__) begin \
-                  if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$psprintf("[%0d]", index__)})) begin \
+                  if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$sformatf("[%0d]", index__)})) begin \
                     if (__m_uvm_status_container.print_matches) \
-                      uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg(), $psprintf("[%0d]",index__)}, UVM_LOW); \
+                      uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg(), $sformatf("[%0d]",index__)}, UVM_LOW); \
                     ARG[index__] = uvm_object::__m_uvm_status_container.bitstream; \
                     __m_uvm_status_container.status = 1; \
                   end \
                 end \
               end \
-              else if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$psprintf("[%0d]", index__)})) begin \
+              else if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$sformatf("[%0d]", index__)})) begin \
                 if(index__+1 > ARG.size()) begin \
                   int sz = index__; \
                   int tmp__; \
@@ -1762,15 +1762,15 @@ endfunction \
             if(uvm_is_array(str__)  && (index__ != -1)) begin\
               if(wildcard_index__) begin \
                 for(index__=0; index__<ARG.size(); ++index__) begin \
-                  if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$psprintf("[%0d]", index__)})) begin \
+                  if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$sformatf("[%0d]", index__)})) begin \
                     if (__m_uvm_status_container.print_matches) \
-                      uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg(), $psprintf("[%0d]",index__)}, UVM_LOW); \
+                      uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg(), $sformatf("[%0d]",index__)}, UVM_LOW); \
                     $cast(ARG[index__], uvm_object::__m_uvm_status_container.object); \
                     __m_uvm_status_container.status = 1; \
                   end \
                 end \
               end \
-              else if(uvm_is_match(str__, {__m_uvm_status_container.get_full_scope_arg(),$psprintf("[%0d]", index__)})) begin \
+              else if(uvm_is_match(str__, {__m_uvm_status_container.get_full_scope_arg(),$sformatf("[%0d]", index__)})) begin \
                 if(index__+1 > ARG.size()) begin \
                   int sz = index__+1; \
                   `M_UVM_``TYPE``_RESIZE(ARG,null) \
@@ -1907,15 +1907,15 @@ endfunction \
             if(uvm_is_array(str__)  && (index__ != -1)) begin\
               if(wildcard_index__) begin \
                 for(index__=0; index__<ARG.size(); ++index__) begin \
-                  if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$psprintf("[%0d]", index__)})) begin \
+                  if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$sformatf("[%0d]", index__)})) begin \
                     if (__m_uvm_status_container.print_matches) \
-                      uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg(), $psprintf("[%0d]",index__)}, UVM_LOW); \
+                      uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg(), $sformatf("[%0d]",index__)}, UVM_LOW); \
                     ARG[index__] = uvm_object::__m_uvm_status_container.stringv; \
                     __m_uvm_status_container.status = 1; \
                   end \
                 end \
               end \
-              else if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$psprintf("[%0d]", index__)})) begin \
+              else if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$sformatf("[%0d]", index__)})) begin \
                 if(index__+1 > ARG.size()) begin \
                   int sz = index__; \
                   string tmp__; \
@@ -2040,15 +2040,15 @@ endfunction \
             if(uvm_is_array(str__)  && (index__ != -1)) begin\
               if(wildcard_index__) begin \
                 for(index__=0; index__<ARG.size(); ++index__) begin \
-                  if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$psprintf("[%0d]", index__)})) begin \
+                  if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$sformatf("[%0d]", index__)})) begin \
                     if (__m_uvm_status_container.print_matches) \
-                      uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg(), $psprintf("[%0d]",index__)}, UVM_LOW); \
+                      uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg(), $sformatf("[%0d]",index__)}, UVM_LOW); \
                     ARG[index__] = T'(uvm_object::__m_uvm_status_container.bitstream); \
                     __m_uvm_status_container.status = 1; \
                   end \
                 end \
               end \
-              else if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$psprintf("[%0d]", index__)})) begin \
+              else if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$sformatf("[%0d]", index__)})) begin \
                 if(index__+1 > ARG.size()) begin \
                   int sz = index__; \
                   T tmp__; \

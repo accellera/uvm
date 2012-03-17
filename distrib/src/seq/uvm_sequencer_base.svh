@@ -1193,7 +1193,7 @@ function void uvm_sequencer_base::remove_sequence_from_queues(
         if ((arb_sequence_q[i].sequence_id == seq_id) ||
             (is_child(sequence_ptr, arb_sequence_q[i].sequence_ptr))) begin
           if (sequence_ptr.get_sequence_state() == FINISHED)
-            `uvm_error("SEQFINERR", $psprintf("Parent sequence '%s' should not finish before all items from itself and items from descendent sequences are processed.  The item request from the sequence '%s' is being removed.", sequence_ptr.get_full_name(), arb_sequence_q[i].sequence_ptr.get_full_name()))
+            `uvm_error("SEQFINERR", $sformatf("Parent sequence '%s' should not finish before all items from itself and items from descendent sequences are processed.  The item request from the sequence '%s' is being removed.", sequence_ptr.get_full_name(), arb_sequence_q[i].sequence_ptr.get_full_name()))
           arb_sequence_q.delete(i);
           m_update_lists();
         end
@@ -1212,7 +1212,7 @@ function void uvm_sequencer_base::remove_sequence_from_queues(
         if ((lock_list[i].get_inst_id() == sequence_ptr.get_inst_id()) ||
             (is_child(sequence_ptr, lock_list[i]))) begin
           if (sequence_ptr.get_sequence_state() == FINISHED)
-            `uvm_error("SEQFINERR", $psprintf("Parent sequence '%s' should not finish before locks from itself and descedent sequences are removed.  The lock held by the child sequence '%s' is being removed.",sequence_ptr.get_full_name(), lock_list[i].get_full_name()))
+            `uvm_error("SEQFINERR", $sformatf("Parent sequence '%s' should not finish before locks from itself and descedent sequences are removed.  The lock held by the child sequence '%s' is being removed.",sequence_ptr.get_full_name(), lock_list[i].get_full_name()))
           lock_list.delete(i);
           m_update_lists();
         end
