@@ -287,7 +287,6 @@ class uvm_recorder extends uvm_object;
                                logic [1023:0] value,
                                uvm_radix_enum radix,
                                integer numbits=1024);
-    string rdx=uvm_radix_to_string(radix);
     if (open_file())
       $fdisplay(file,"  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%0d   RADIX:%s BITS=%0d}",
                  $time,txh, nm, (value & ((1<<numbits)-1)),radix.name(),numbits);
