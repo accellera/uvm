@@ -733,15 +733,10 @@ function integer uvm_transaction::m_begin_tr (time begin_time=0,
     if(m_recorder.check_handle_kind("Transaction", tr_handle)==1)
       end_tr(); 
 
-    if(!has_parent)
-      tr_handle = m_recorder.begin_tr("Begin_No_Parent, Link", 
-                    stream_handle, get_type_name(),"","",this.begin_time);
-    else begin
-      tr_handle = m_recorder.begin_tr("Begin_End, Link", 
-                    stream_handle, get_type_name(),"","",this.begin_time);
-      if(parent_handle)
+      tr_handle = m_recorder.begin_tr(stream_handle, get_type_name(),"","",this.begin_time);
+
+    if(has_parent && parent_handle)
         m_recorder.link_tr(parent_handle, tr_handle, "child");
-    end
 
     m_recorder.tr_handle = tr_handle;
 

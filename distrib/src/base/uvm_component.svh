@@ -2588,7 +2588,6 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
   integer tr_h;
   integer link_tr_h;
   string name;
-  string kind;
   uvm_recorder recordr;
 
   if (tr == null)
@@ -2631,9 +2630,7 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
         m_stream_handle[stream_name] = stream_h;
     end
 
-    kind = (has_parent == 0) ? "Begin_No_Parent, Link" : "Begin_End, Link";
-
-    tr_h = recordr.begin_tr(kind, stream_h, name, label, desc, begin_time);
+    tr_h = recordr.begin_tr(stream_h, name, label, desc, begin_time);
 
     if (has_parent && parent_handle != 0)
         recordr.link_tr(parent_handle, tr_h, "child");
@@ -2718,30 +2715,7 @@ function integer uvm_component::record_error_tr (string stream_name="main",
                                               string desc="",
                                               time   error_time=0,
                                               bit    keep_active=0);
-  string etype;
-  integer stream_h;
-  uvm_recorder recordr;
-  recordr = (recorder == null) ? uvm_default_recorder : recorder;
-
-  if(keep_active) etype = "Error, Link";
-  else etype = "Error";
-
-  if(error_time == 0) error_time = $realtime;
-
-  stream_h = m_stream_handle[stream_name];
-  if (recordr.check_handle_kind("Fiber", stream_h) != 1) begin  
-    stream_h = recordr.create_stream(stream_name, "TVM", get_full_name());
-    m_stream_handle[stream_name] = stream_h;
-  end
-
-  record_error_tr = recordr.begin_tr(etype, stream_h, label,
-                         label, desc, error_time);
-  if(info!=null) begin
-    recordr.tr_handle = record_error_tr;
-    info.record(recordr);
-  end
-
-  recordr.end_tr(record_error_tr,error_time);
+    return record_event_tr(stream_name,info,label,desc,error_time,keep_active);
 endfunction
 
 
@@ -2754,13 +2728,9 @@ function integer uvm_component::record_event_tr (string stream_name="main",
                                               string desc="",
                                               time   event_time=0,
                                               bit    keep_active=0);
-  string etype;
   integer stream_h;
   uvm_recorder recordr;
   recordr = (recorder == null) ? uvm_default_recorder : recorder;
-
-  if(keep_active) etype = "Event, Link";
-  else etype = "Event";
 
   if(event_time == 0) event_time = $realtime;
 
@@ -2770,7 +2740,7 @@ function integer uvm_component::record_event_tr (string stream_name="main",
     m_stream_handle[stream_name] = stream_h;
   end
 
-  record_event_tr = recordr.begin_tr(etype, stream_h, label,
+  record_event_tr = recordr.begin_tr(stream_h, label,
                          label, desc, event_time);
   if(info!=null) begin
     recordr.tr_handle = record_event_tr;
