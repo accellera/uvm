@@ -223,10 +223,9 @@ begin
       `uvm_error("Persistence","Persistance test failed for test component using set_default_thead_mode()")
 
    begin
-      uvm_report_server svr;
-      svr = _global_reporter.get_report_server();
+      uvm_report_server svr = uvm_report_server::get_server();
 
-      svr.summarize();
+      svr.report_summarize();
 
       if (svr.get_severity_count(UVM_FATAL) +
           svr.get_severity_count(UVM_ERROR) == 0)

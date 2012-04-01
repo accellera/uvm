@@ -157,11 +157,13 @@ module test;
     endfunction
 
     // Begin the test.
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       uvm_report_info(get_name(), "In run(): About to start test");
 
       // Next, run the test.
-      #100 uvm_top.stop_request();
+      #100;
+      phase.drop_objection(this);
 
       // Check to see if the catcher saw both kinds of debug messages.
       // If not, stop simulation with an error.

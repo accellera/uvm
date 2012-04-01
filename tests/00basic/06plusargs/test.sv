@@ -31,11 +31,10 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
-      uvm_top.stop_request();
+   virtual task run_phase(uvm_phase phase);
    endtask
 
-   virtual function void report();
+   virtual function void report_phase(uvm_phase phase);
 `ifdef BAR
       if ($test$plusargs("OK")) $write("** UVM TEST PASSED **\n");
       else

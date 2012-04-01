@@ -189,10 +189,9 @@ class uvm_root extends uvm_component;
     if (phase == end_of_elaboration_ph) begin
       do_resolve_bindings(); 
       if (enable_print_topology) print_topology();
-      
       begin
-           uvm_report_server srvr;           
-          srvr = get_report_server();
+          uvm_report_server srvr;
+          srvr = uvm_report_server::get_server();
           if(srvr.get_severity_count(UVM_ERROR) > 0) begin
             uvm_report_fatal("BUILDERR", "stopping due to build errors", UVM_NONE);
           end
@@ -201,6 +200,27 @@ class uvm_root extends uvm_component;
   endfunction
 
   bit m_phase_all_done;
+
+  // Function: die
+  //
+  // This method is called by the report server if a report reaches the maximum
+  // quit count or has an UVM_EXIT action associated with it, e.g., as with
+  // fatal errors.
+  //
+  // Calls the <uvm_component::pre_abort()> method
+  // on the entire <uvm_component> hierarchy in a bottom-up fashion.
+  // It then call calls <report_summarize> and terminates the simulation
+  // with ~$finish~.
+
+  virtual function void die();
+    // make the pre_abort callbacks
+    uvm_report_server l_rs = uvm_report_server::get_server();
+    m_do_pre_abort();
+
+    l_rs.report_summarize();
+    $finish;
+  endfunction
+
 
 
 `ifndef UVM_NO_DEPRECATED
@@ -236,30 +256,6 @@ const uvm_root _global_reporter = uvm_root::get();
 
 
 //-----------------------------------------------------------------------------
-//
-// Class- uvm_root_report_handler
-//
-//-----------------------------------------------------------------------------
-// Root report has name "reporter"
-
-class uvm_root_report_handler extends uvm_report_handler;
-  virtual function void report(uvm_severity severity,
-                               string name,
-                               string id,
-                               string message,
-                               int verbosity_level,
-                               string filename,
-                               int line,
-                               uvm_report_object client);
-    if(name == "")
-      name = "reporter";
-    super.report(severity, name, id, message, verbosity_level, filename, line, client);
-  endfunction 
-endclass
-
-
-
-//-----------------------------------------------------------------------------
 // IMPLEMENTATION
 //-----------------------------------------------------------------------------
 
@@ -281,16 +277,16 @@ endfunction
 
 function uvm_root::new();
 
-  uvm_root_report_handler rh;
+  uvm_report_server l_rs;
 
   super.new("__top__", null);
 
-  rh = new;
-  set_report_handler(rh);
+  m_rh.set_name("reporter");
 
   clp = uvm_cmdline_processor::get_inst();
 
-  report_header();
+  l_rs = uvm_report_server::get_server();
+  l_rs.report_header();
 
   // This sets up the global verbosity. Other command line args may
   // change individual component verbosity.
@@ -303,6 +299,7 @@ endfunction
 
 task uvm_root::run_test(string test_name="");
 
+  uvm_report_server l_rs = uvm_report_server::get_server();
   uvm_factory factory= uvm_factory::get();
   bit testname_plusarg;
   int test_name_count;
@@ -402,7 +399,7 @@ task uvm_root::run_test(string test_name="");
   // clean up after ourselves
   phase_runner_proc.kill();
 
-  report_summarize();
+  l_rs.report_summarize();
 
   if (finish_on_completion)
     $finish;
@@ -765,7 +762,7 @@ function void uvm_root::m_do_max_quit_settings();
   string max_quit;
   string split_max_quit[$];
   int max_quit_int;
-  srvr = get_report_server();
+  srvr = uvm_report_server::get_server();
   max_quit_count = clp.get_arg_values("+UVM_MAX_QUIT_COUNT=", max_quit_settings);
   if (max_quit_count ==  0)
     return;

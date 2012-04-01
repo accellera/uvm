@@ -46,18 +46,16 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
-      
- 
-  begin
-    $write("UVM TEST - ERROR expected since registering a default catcher with NULL handle\n");
+   virtual task run_phase(uvm_phase phase);
+     phase.raise_objection(this);
+     $write("UVM TEST - ERROR expected since registering a default catcher with NULL handle\n");
         
-    //add_report_default_catcher(uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
-    uvm_report_cb::add(null,ctchr);
+     //add_report_default_catcher(uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
+     uvm_report_cb::add(null,ctchr);
     
-      end
-      $write("UVM TEST EXPECT 1 UVM_ERROR\n");
-      uvm_top.stop_request();
+     $write("UVM TEST EXPECT 1 UVM_ERROR\n");
+     phase.drop_objection(this);
+
    endtask
 
    virtual function void report();

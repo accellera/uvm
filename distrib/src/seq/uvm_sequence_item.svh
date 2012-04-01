@@ -332,74 +332,97 @@ class uvm_sequence_item extends uvm_transaction;
   // <uvm_sequence_base::start_item> or <uvm_sequence_base::start>),
   // then the global reporter will be used.
 
-  // The sequence path string is an on-demand string. To avoid building this name
-  // information continuously, we save the info here. The m_get_client_info function
-  // should only be called for a message that has passed the is_enabled check, 
-  // e.g. from the `uvm_info macro.
-  protected string m_client_str;
-  protected uvm_report_object m_client;
-  protected uvm_report_handler m_rh;
-
-  virtual function string m_get_client_info (output uvm_report_object client);
-    if(m_client_str != "") begin
-      client = m_client;
-      return m_client_str;
-    end
-    if(m_sequencer != null)
-      m_client = m_sequencer;
+  virtual function uvm_report_object m_get_report_object();
+    uvm_report_object l_ro;
+    if(m_sequencer == null)
+      l_ro = uvm_root::get();
     else 
-      m_client = uvm_root::get();
-    m_rh = m_client.get_report_handler();
-    client = m_client;
-  
-    m_client_str = client.get_full_name();
-    if(m_client_str == "")
-      m_client_str = {"reporter@@", get_sequence_path()};
-    else
-      m_client_str = {m_client_str,"@@", get_sequence_path()};
-    return m_client_str;
+      l_ro = m_sequencer;
+    return l_ro;
   endfunction
 
   // Function: uvm_report_info
 
-  virtual function void uvm_report_info( string id,
-                                         string message,
-                                         int verbosity = UVM_MEDIUM,
-                                         string filename = "",
-                                         int line = 0);
-    uvm_report_object client;
-    string str = m_get_client_info(client);
+  virtual function void uvm_report_info( string id, string message,
+    int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
+    string context_name = "", uvm_action action = UVM_UNASSGND);
+    uvm_report_object l_ro = m_get_report_object();
 
-    m_rh.report(UVM_INFO, str, id, message, verbosity, filename,
-      line, client);
+    if (action == UVM_UNASSGND)
+      action = l_ro.uvm_report_enabled(verbosity,UVM_INFO,id);
+    if(action) begin
+      l_ro.m_rm.ro = l_ro;
+      // l_ro.m_rm.rh is filled in by report handler
+      // l_ro.m_rm.rs is filled in by report server 
+      if (context_name == "")
+        l_ro.m_rm.context_name = get_sequence_path();
+      // l_ro.m_rm.file is filled in by report handler
+      l_ro.m_rm.filename = filename;
+      l_ro.m_rm.line = line;
+      l_ro.m_rm.action = action;
+      l_ro.m_rm.severity = UVM_INFO;
+      l_ro.m_rm.id = id;
+      l_ro.m_rm.message = message;
+      l_ro.m_rm.verbosity = verbosity;
+      l_ro.m_rh.process(l_ro.m_rm);
+    end
+
   endfunction
 
   // Function: uvm_report_warning
 
-  virtual function void uvm_report_warning( string id,
-                                            string message,
-                                            int verbosity = UVM_MEDIUM,
-                                            string filename = "",
-                                            int line = 0);
-    uvm_report_object client;
-    string str = m_get_client_info(client);
+  virtual function void uvm_report_warning( string id, string message,
+    int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
+    string context_name = "", uvm_action action = UVM_UNASSGND);
+    uvm_report_object l_ro = m_get_report_object();
 
-    m_rh.report(UVM_WARNING, str, id, message, verbosity, filename,
-      line, client);
+    if (action == UVM_UNASSGND)
+      action = l_ro.uvm_report_enabled(verbosity,UVM_WARNING,id);
+    if(action) begin
+      l_ro.m_rm.ro = l_ro;
+      // l_ro.m_rm.rh is filled in by report handler
+      // l_ro.m_rm.rs is filled in by report server 
+      if (context_name == "")
+        l_ro.m_rm.context_name = get_sequence_path();
+      // l_ro.m_rm.file is filled in by report handler
+      l_ro.m_rm.filename = filename;
+      l_ro.m_rm.line = line;
+      l_ro.m_rm.action = action;
+      l_ro.m_rm.severity = UVM_WARNING;
+      l_ro.m_rm.id = id;
+      l_ro.m_rm.message = message;
+      l_ro.m_rm.verbosity = UVM_NONE;
+      l_ro.m_rh.process(l_ro.m_rm);
+    end
+
   endfunction
 
   // Function: uvm_report_error
 
-  virtual function void uvm_report_error( string id,
-                                          string message,
-                                          int verbosity = UVM_LOW,
-                                          string filename = "",
-                                          int line = 0);
-    uvm_report_object client;
-    string str = m_get_client_info(client);
+  virtual function void uvm_report_error( string id, string message,
+    int verbosity = UVM_LOW, string filename = "", int line = 0,
+    string context_name = "", uvm_action action = UVM_UNASSGND);
+    uvm_report_object l_ro = m_get_report_object();
 
-    m_rh.report(UVM_ERROR, str, id, message, verbosity, filename,
-      line, client);
+    if (action == UVM_UNASSGND)
+      action = l_ro.uvm_report_enabled(verbosity,UVM_ERROR,id);
+    if(action) begin
+      l_ro.m_rm.ro = l_ro;
+      // l_ro.m_rm.rh is filled in by report handler
+      // l_ro.m_rm.rs is filled in by report server 
+      if (context_name == "")
+        l_ro.m_rm.context_name = get_sequence_path();
+      // l_ro.m_rm.file is filled in by report handler
+      l_ro.m_rm.filename = filename;
+      l_ro.m_rm.line = line;
+      l_ro.m_rm.action = action;
+      l_ro.m_rm.severity = UVM_ERROR;
+      l_ro.m_rm.id = id;
+      l_ro.m_rm.message = message;
+      l_ro.m_rm.verbosity = UVM_NONE;
+      l_ro.m_rh.process(l_ro.m_rm);
+    end
+
   endfunction
 
   // Function: uvm_report_fatal
@@ -409,30 +432,40 @@ class uvm_sequence_item extends uvm_transaction;
   // if they have one, or to the global reporter. See <uvm_report_object::Reporting>
   // for details on the messaging functions.
 
-  virtual function void uvm_report_fatal( string id,
-                                          string message,
-                                          int verbosity = UVM_NONE,
-                                          string filename = "",
-                                          int line = 0);
-    uvm_report_object client;
-    string str = m_get_client_info(client);
+  virtual function void uvm_report_fatal( string id, string message,
+    int verbosity = UVM_NONE, string filename = "", int line = 0,
+    string context_name = "", uvm_action action = UVM_UNASSGND);
+    uvm_report_object l_ro = m_get_report_object();
 
-    m_rh.report(UVM_FATAL, str, id, message, verbosity, filename,
-      line, client);
+    if (action == UVM_UNASSGND)
+      action = l_ro.uvm_report_enabled(verbosity,UVM_FATAL,id);
+    if(action) begin
+      l_ro.m_rm.ro = l_ro;
+      // l_ro.m_rm.rh is filled in by report handler
+      // l_ro.m_rm.rs is filled in by report server 
+      if (context_name == "")
+        l_ro.m_rm.context_name = get_sequence_path();
+      // l_ro.m_rm.file is filled in by report handler
+      l_ro.m_rm.filename = filename;
+      l_ro.m_rm.line = line;
+      l_ro.m_rm.action = action;
+      l_ro.m_rm.severity = UVM_FATAL;
+      l_ro.m_rm.id = id;
+      l_ro.m_rm.message = message;
+      l_ro.m_rm.verbosity = UVM_NONE;
+      l_ro.m_rh.process(l_ro.m_rm);
+    end
+
   endfunction
 
 
   function int uvm_report_enabled(int verbosity, 
-                          uvm_severity severity=UVM_INFO, string id="");
-    if(m_client == null) begin
-      if(m_sequencer != null) m_client = m_sequencer;
-      else m_client = uvm_root::get();
-    end
-    if (m_client.get_report_verbosity_level(severity, id) < verbosity ||
-        m_client.get_report_action(severity,id) == uvm_action'(UVM_NO_ACTION))
+    uvm_severity severity=UVM_INFO, string id="");
+    uvm_report_object l_ro = m_get_report_object();
+    // Check the verbosity first.  By far most important check.
+    if (l_ro.get_report_verbosity_level(severity, id) < verbosity)
       return 0;
-    else
-      return 1;
+    return l_ro.get_report_action(severity, id);
   endfunction
 
 

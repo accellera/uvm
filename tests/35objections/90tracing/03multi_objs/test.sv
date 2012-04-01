@@ -49,13 +49,13 @@ module top;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
-      uvm_test_done.raise_objection(this);
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       fork 
         repeat(3) #40 from_bottom.raise_objection(this);
         repeat(3) #50 from_bottom.drop_objection(this);
       join
-      uvm_test_done.drop_objection(this);
+      phase.drop_objection(this);
     endtask
   endclass
   class middle_comp extends uvm_component;
@@ -65,13 +65,13 @@ module top;
       super.new(name,parent);
       lc = new("lc", this);
     endfunction
-    task run;
-      uvm_test_done.raise_objection(this);
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       fork 
         repeat(3) #40 from_middle.raise_objection(this);
         repeat(3) #50 from_middle.drop_objection(this);
       join
-      uvm_test_done.drop_objection(this);
+      phase.drop_objection(this);
     endtask
   endclass
   class top_comp extends uvm_component;
@@ -81,13 +81,13 @@ module top;
       super.new(name,parent);
       mc = new("mc", this);
     endfunction
-    task run;
-      uvm_test_done.raise_objection(this);
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       fork 
         repeat(3) #40 from_top.raise_objection(this);
         repeat(3) #50 from_top.drop_objection(this);
       join
-      uvm_test_done.drop_objection(this);
+      phase.drop_objection(this);
     endtask
   endclass
   class test extends uvm_component;

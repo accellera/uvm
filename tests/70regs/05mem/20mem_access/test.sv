@@ -113,7 +113,7 @@ module tbtest();
   `uvm_blocking_put_imp_decl(_reg)
   
   class user_ovc_sequencer extends uvm_sequencer#(user_transaction);
-    `uvm_sequencer_utils(user_ovc_sequencer)
+    `uvm_component_utils(user_ovc_sequencer)
     function new (string name, uvm_component parent);
       super.new(name, parent);
     endfunction : new
@@ -216,7 +216,7 @@ module tbtest();
     endfunction
 
    virtual function void report();
-	uvm_report_server svr =  _global_reporter.get_report_server();
+	uvm_report_server svr =  uvm_report_server::get_server();
    if (svr.get_severity_count(UVM_FATAL) +
        svr.get_severity_count(UVM_ERROR) +
        svr.get_severity_count(UVM_WARNING) == 1)

@@ -47,16 +47,16 @@ module test;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       repeat(5) begin
       $display;
-        uvm_test_done.raise_objection(this);
+        phase.raise_objection(this);
       $display;
-        #del uvm_test_done.raise_objection(this);
+        #del phase.raise_objection(this);
       $display;
-        #del uvm_test_done.raise_objection(this);
+        #del phase.raise_objection(this);
       $display;
-        #del uvm_test_done.drop_objection(this,"drop multi",3);
+        #del phase.drop_objection(this,"drop multi",3);
       end
     endtask
   endclass
@@ -83,9 +83,9 @@ module test;
       super.new(name,parent);
       b1 = new("b1", this);
     endfunction
-    task run;
-        uvm_test_done.raise_objection(this);
-        #50 uvm_test_done.drop_objection(this);
+    task run_phase(uvm_phase phase);
+        phase.raise_objection(this);
+        #50 phase.drop_objection(this);
     endtask
 
     virtual function void raised (uvm_objection objection, uvm_object source_obj, string description, int count);

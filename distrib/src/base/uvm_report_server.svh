@@ -37,26 +37,22 @@ typedef class uvm_report_object;
 //
 //------------------------------------------------------------------------------
 
-typedef class uvm_report_catcher;
 class uvm_report_server extends uvm_object;
 
-  local int max_quit_count; 
-  local int quit_count;
-  local int severity_count[uvm_severity];
-
-  // Needed for callbacks
-  function string get_type_name();
-    return "uvm_report_server";
-  endfunction
- 
-  // Variable: id_count
-  //
-  // An associative array holding the number of occurences
-  // for each unique report ID.
-
-  protected int id_count[string];
-
+  local int m_quit_count;
+  local int m_max_quit_count; 
+  bit max_quit_overridable = 1;
+  local int m_severity_count[uvm_severity_type];
+  protected int m_id_count[string];
+  // Probably needs documented.
   bit enable_report_id_count_summary=1;
+
+// Reconsider show_verbosity bit and possibly show_terminator
+
+  static protected uvm_report_server m_global_report_server = get_server();
+
+
+  `uvm_object_utils(uvm_report_server)
 
 
   // Function: new
@@ -64,15 +60,87 @@ class uvm_report_server extends uvm_object;
   // Creates the central report server, if not already created. Else, does
   // nothing. The constructor is protected to enforce a singleton.
 
-  function new();
-    set_name("uvm_report_server");
+  function new(string name = "uvm_report_server");
+    super.new(name);
     set_max_quit_count(0);
     reset_quit_count();
     reset_severity_counts();
   endfunction
 
+  // Copy to support the set_server() method
+  virtual function void do_copy (uvm_object rhs);
 
-  static protected uvm_report_server m_global_report_server = get_server();
+    uvm_report_server rs;
+    uvm_severity_type l_severity_count_index;
+    string l_id_count_index;
+
+    super.do_copy(rhs);
+    if(!$cast(rs, rhs) || (rs==null)) return;
+
+    m_quit_count = rs.m_quit_count;
+    m_max_quit_count = rs.m_max_quit_count;
+    max_quit_overridable = rs.max_quit_overridable;
+
+    // Copy the severity counts
+    if (rs.m_severity_count.first(l_severity_count_index))
+      do
+        m_severity_count[l_severity_count_index] 
+          = rs.m_severity_count[l_severity_count_index];
+      while (rs.m_severity_count.next(l_severity_count_index));
+  
+    // Copy the id counts
+    if (rs.m_id_count.first(l_id_count_index))
+      do
+        m_id_count[l_id_count_index] 
+          = rs.m_id_count[l_id_count_index];
+      while (rs.m_id_count.next(l_id_count_index));
+  
+    enable_report_id_count_summary = rs.enable_report_id_count_summary;
+
+  endfunction
+
+
+  // Print to show report server state
+  virtual function void do_print (uvm_printer printer);
+
+    uvm_severity_type l_severity_count_index;
+    string l_id_count_index;
+
+    printer.print_int("quit_count", m_quit_count, $bits(m_quit_count), UVM_DEC,
+      ".", "int");
+    printer.print_int("max_quit_count", m_max_quit_count,
+      $bits(m_max_quit_count), UVM_DEC, ".", "int");
+    printer.print_int("max_quit_overridable", max_quit_overridable,
+      $bits(max_quit_overridable), UVM_BIN, ".", "bit");
+
+    if (m_severity_count.first(l_severity_count_index)) begin
+      printer.print_array_header("severity_count",m_severity_count.size(),"severity counts");
+      do
+        printer.print_int($sformatf("[%s]",l_severity_count_index.name()),
+          m_severity_count[l_severity_count_index], 32, UVM_DEC);
+      while (m_severity_count.next(l_severity_count_index));
+      printer.print_array_footer();
+    end
+
+    if (m_id_count.first(l_id_count_index)) begin
+      printer.print_array_header("id_count",m_id_count.size(),"id counts");
+      do
+        printer.print_int($sformatf("[%s]",l_id_count_index),
+          m_id_count[l_id_count_index], 32, UVM_DEC);
+      while (m_id_count.next(l_id_count_index));
+      printer.print_array_footer();
+    end
+
+    printer.print_int("enable_report_id_count_summary", enable_report_id_count_summary,
+      $bits(enable_report_id_count_summary), UVM_BIN, ".", "bit");
+
+  endfunction
+
+
+  //----------------------------------------------------------------------------
+  // Group: Report Server Configuration
+  //----------------------------------------------------------------------------
+
 
   // Function: set_server
   //
@@ -81,12 +149,8 @@ class uvm_report_server extends uvm_object;
 
   static function void set_server(uvm_report_server server);
     if(m_global_report_server != null) begin
-      server.set_max_quit_count(m_global_report_server.get_max_quit_count());
-      server.set_quit_count(m_global_report_server.get_quit_count());
-      m_global_report_server.copy_severity_counts(server);
-      m_global_report_server.copy_id_counts(server);
+      server.copy(m_global_report_server);
     end
-
     m_global_report_server = server;
   endfunction
 
@@ -98,21 +162,27 @@ class uvm_report_server extends uvm_object;
 
   static function uvm_report_server get_server();
     if (m_global_report_server == null)
-      m_global_report_server = new;
+      m_global_report_server = new();
     return m_global_report_server;
   endfunction
 
-  local bit m_max_quit_overridable = 1;
+
+  //----------------------------------------------------------------------------
+  // Group: Quit Count
+  //----------------------------------------------------------------------------
+
 
   // Function: set_max_quit_count
 
   function void set_max_quit_count(int count, bit overridable = 1);
-    if (m_max_quit_overridable == 0) begin
-      uvm_report_info("NOMAXQUITOVR", $sformatf("The max quit count setting of %0d is not overridable to %0d due to a previous setting.", max_quit_count, count), UVM_NONE);
+    if (max_quit_overridable == 0) begin
+      uvm_report_info("NOMAXQUITOVR", 
+        $sformatf("The max quit count setting of %0d is not overridable to %0d due to a previous setting.", 
+        m_max_quit_count, count), UVM_NONE);
       return;
     end
-    m_max_quit_overridable = overridable;
-    max_quit_count = count < 0 ? 0 : count;
+    max_quit_overridable = overridable;
+    m_max_quit_count = count < 0 ? 0 : count;
   endfunction
 
   // Function: get_max_quit_count
@@ -122,26 +192,26 @@ class uvm_report_server extends uvm_object;
   // no maximum.
 
   function int get_max_quit_count();
-    return max_quit_count;
+    return m_max_quit_count;
   endfunction
 
 
   // Function: set_quit_count
 
   function void set_quit_count(int quit_count);
-    quit_count = quit_count < 0 ? 0 : quit_count;
+    m_quit_count = quit_count < 0 ? 0 : quit_count;
   endfunction
 
   // Function: get_quit_count
 
   function int get_quit_count();
-    return quit_count;
+    return m_quit_count;
   endfunction
 
   // Function: incr_quit_count
 
   function void incr_quit_count();
-    quit_count++;
+    m_quit_count++;
   endfunction
 
   // Function: reset_quit_count
@@ -150,7 +220,7 @@ class uvm_report_server extends uvm_object;
   // COUNT actions issued.
 
   function void reset_quit_count();
-    quit_count = 0;
+    m_quit_count = 0;
   endfunction
 
   // Function: is_quit_count_reached
@@ -159,26 +229,31 @@ class uvm_report_server extends uvm_object;
   // the maximum.
 
   function bit is_quit_count_reached();
-    return (quit_count >= max_quit_count);
+    return (m_quit_count >= m_max_quit_count);
   endfunction
 
+
+  //----------------------------------------------------------------------------
+  // Group: Severity Count
+  //----------------------------------------------------------------------------
+ 
 
   // Function: set_severity_count
 
   function void set_severity_count(uvm_severity severity, int count);
-    severity_count[severity] = count < 0 ? 0 : count;
+    m_severity_count[severity] = count < 0 ? 0 : count;
   endfunction
 
   // Function: get_severity_count
 
   function int get_severity_count(uvm_severity severity);
-    return severity_count[severity];
+    return m_severity_count[severity];
   endfunction
 
   // Function: incr_severity_count
 
   function void incr_severity_count(uvm_severity severity);
-    severity_count[severity]++;
+    m_severity_count[severity]++;
   endfunction
 
   // Function: reset_severity_counts
@@ -190,24 +265,29 @@ class uvm_report_server extends uvm_object;
     uvm_severity_type s;
     s = s.first();
     forever begin
-      severity_count[s] = 0;
+      m_severity_count[s] = 0;
       if(s == s.last()) break;
       s = s.next();
     end
   endfunction
 
 
+  //----------------------------------------------------------------------------
+  // Group: Severity Count
+  //----------------------------------------------------------------------------
+
+
   // Function: set_id_count
 
   function void set_id_count(string id, int count);
-    id_count[id] = count < 0 ? 0 : count;
+    m_id_count[id] = count < 0 ? 0 : count;
   endfunction
 
   // Function: get_id_count
 
   function int get_id_count(string id);
-    if(id_count.exists(id))
-      return id_count[id];
+    if(m_id_count.exists(id))
+      return m_id_count[id];
     return 0;
   endfunction
 
@@ -216,14 +296,14 @@ class uvm_report_server extends uvm_object;
   // Set, get, or increment the counter for reports with the given id.
 
   function void incr_id_count(string id);
-    if(id_count.exists(id))
-      id_count[id]++;
+    if(m_id_count.exists(id))
+      m_id_count[id]++;
     else
-      id_count[id] = 1;
+      m_id_count[id] = 1;
   endfunction
 
 
-  // f_display
+  // Function- f_display
   //
   // This method sends string severity to the command line if file is 0 and to
   // the file(s) specified by file if it is not 0.
@@ -236,68 +316,268 @@ class uvm_report_server extends uvm_object;
   endfunction
 
 
-  // Function- report
+  // Function- m_process
   //
   //
 
-  virtual function void report(
-      uvm_severity severity,
-      string name,
-      string id,
-      string message,
-      int verbosity_level,
-      string filename,
-      int line,
-      uvm_report_object client
-      );
-    string m;
-    uvm_action a;
-    UVM_FILE f;
-    bit report_ok;
-    uvm_report_handler rh;
+  virtual function void m_process(uvm_report_message urm);
 
-    rh = client.get_report_handler();
-  
-    // filter based on verbosity level
- 
-    if(!client.uvm_report_enabled(verbosity_level, severity, id)) begin
-       return;
-    end
+    bit report_ok = 1;
 
-    // determine file to send report and actions to execute
+    // Set the report server for this message
+    urm.rs = this;
 
-    a = rh.get_action(severity, id); 
-    if( uvm_action_type'(a) == UVM_NO_ACTION )
-      return;
+`ifndef UVM_NO_DEPRECATED 
 
-    f = rh.get_file_handle(severity, id);
 
     // The hooks can do additional filtering.  If the hook function
     // return 1 then continue processing the report.  If the hook
     // returns 0 then skip processing the report.
 
-    if(a & UVM_CALL_HOOK)
-      report_ok = rh.run_hooks(client, severity, id,
-                              message, verbosity_level, filename, line);
-    else
-      report_ok = 1;
+    if(urm.action & UVM_CALL_HOOK)
+      report_ok = urm.rh.run_hooks(urm.ro, urm.severity, urm.id,
+        urm.message, urm.verbosity, urm.filename, urm.line);
+
+
+`endif
+
 
     if(report_ok)
-      report_ok = uvm_report_catcher::process_all_report_catchers(
-                     this, client, severity, name, id, message,
-                     verbosity_level, a, filename, line);
+      report_ok = uvm_report_catcher::process_all_report_catchers(urm);
 
     if(report_ok) begin	
-      m = compose_message(severity, name, id, message, filename, line); 
-      process_report(severity, name, id, message, a, f, filename,
-                     line, m, verbosity_level, client);
+
+
+`ifdef UVM_DEPRECATED_REPORTING
+
+
+      // Make these rm.xxx
+      string m;
+      m = compose_message(urm.severity, urm.rh.get_full_name(), urm.id, 
+        urm.message, urm.filename, urm.line); 
+      process_report(urm.severity, urm.rh.get_full_name(), urm.id, 
+        urm.message, urm.action, urm.file, urm.filename, urm.line, m, 
+        urm.verbosity, urm.ro);
+
+`else
+
+      execute(urm);
+
+`endif
+
+
     end
   
   endfunction
 
 
+  // Function: execute 
+  //
+  // Processes the message's actions.
+ 
+  virtual function void execute(uvm_report_message urm);
+    // Update counts 
+    incr_severity_count(urm.severity);
+    incr_id_count(urm.id);
+    // Process UVM_RM_RECORD action (send to recorder)
+    if(urm.action & UVM_RM_RECORD) 
+      uvm_default_recorder.record_message(urm);
+    // Process UVM_DISPLAY and UVM_LOG action (send to logger)
+    if((urm.action & UVM_DISPLAY) || (urm.action & UVM_LOG)) begin
+      string out_str;
+      out_str = compose(urm);
+      // DISPLAY action
+      if(urm.action & UVM_DISPLAY)
+        $display("%s", out_str);
+      // if log is set we need to send to the file but not resend to the
+      // display. So, we need to mask off stdout for an mcd or we need
+      // to ignore the stdout file handle for a file handle.
+      if(urm.action & UVM_LOG)
+        if( (urm.file == 0) || (urm.file != 32'h8000_0001) ) begin //ignore stdout handle
+          UVM_FILE tmp_file = urm.file;
+          if((urm.file & 32'h8000_0000) == 0) begin //is an mcd so mask off stdout
+            tmp_file = urm.file & 32'hffff_fffe;
+          end
+        f_display(tmp_file, out_str);
+      end    
+    end
+    // Process the UVM_COUNT action
+    if(urm.action & UVM_COUNT) begin
+      if(get_max_quit_count() != 0) begin
+        incr_quit_count();
+        // If quit count is reached, add the UVM_EXIT action.
+        if(is_quit_count_reached()) begin
+          urm.action |= UVM_EXIT;
+        end
+      end  
+    end
+    // Process the UVM_EXIT action
+    if(urm.action & UVM_EXIT) begin
+      uvm_root l_root = uvm_root::get();
+      l_root.die();
+    end
+    // Process the UVM_STOP action
+    if (urm.action & UVM_STOP) 
+      $stop;
+  endfunction
 
-  // Function: process_report
+
+  // Function: compose
+  //
+  // Constructs the actual string sent to the file or command line
+  // from the severity, component name, report id, and the message itself. 
+  //
+  // Expert users can overload this method to customize report formatting.
+  virtual function string compose(uvm_report_message urm);
+
+    string sev_string;
+    uvm_verbosity l_verbosity;
+    string filename_line_string;
+    string time_str;
+    string line_str;
+    string context_str;
+
+    sev_string = urm.severity.name();
+
+    if (urm.filename != "") begin
+      $swrite(line_str, "%0d", urm.line);
+      filename_line_string = {urm.filename, "(", line_str, ") "};
+    end
+
+    // Make definable in terms of units.
+    $swrite(time_str, "%0t", $time);
+ 
+    if (urm.context_name != "")
+      context_str = {"@@", urm.context_name};
+
+    compose = {sev_string, " ", filename_line_string, "@ ", time_str, ": ",
+      urm.rh.get_full_name(), context_str, " [", urm.id, "] ", 
+      urm.convert2string()};
+
+  endfunction 
+
+
+  // Function- report_relnotes_banner
+  //
+
+  static local bit m_relnotes_done;
+  function void report_relnotes_banner(UVM_FILE file = 0);
+    uvm_report_server srvr;
+
+    if (m_relnotes_done) return;
+     
+    f_display(file,
+      "\n  ***********       IMPORTANT RELEASE NOTES         ************");
+       f_display(file, "\n  You are using a version of the UVM library that has been compiled");
+       f_display(file, "  with `UVM_NO_DEPRECATED undefined.");
+       f_display(file, "  See http://www.eda.org/svdb/view.php?id=3313 for more details.");
+     
+    m_relnotes_done = 1;
+  endfunction
+
+
+  // Function: report_header
+  //
+  // Prints version and copyright information. This information is sent to the
+  // command line if ~file~ is 0, or to the file descriptor ~file~ if it is not 0. 
+  // The <uvm_root::run_test> task calls this method just before it component
+  // phasing begins.
+
+  function void report_header(UVM_FILE file = 0);
+
+    f_display(file,
+      "----------------------------------------------------------------");
+    f_display(file, uvm_revision_string());
+    f_display(file, uvm_mgc_copyright);
+    f_display(file, uvm_cdn_copyright);
+    f_display(file, uvm_snps_copyright);
+    f_display(file, uvm_cy_copyright);
+    f_display(file,
+      "----------------------------------------------------------------");
+
+    begin
+       uvm_cmdline_processor clp;
+       string args[$];
+     
+       clp = uvm_cmdline_processor::get_inst();
+
+       if (clp.get_arg_matches("+UVM_NO_RELNOTES", args)) return;
+
+`ifndef UVM_NO_DEPRECATED
+       report_relnotes_banner(file);
+`endif
+
+`ifndef UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
+       report_relnotes_banner(file);
+       f_display(file, "\n  You are using a version of the UVM library that has been compiled");
+       f_display(file, "  with `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR undefined.");
+       f_display(file, "  See http://www.eda.org/svdb/view.php?id=3770 for more details.");
+`endif
+
+       if (m_relnotes_done)
+          f_display(file, "\n      (Specify +UVM_NO_RELNOTES to turn off this notice)\n");
+
+    end
+  endfunction
+
+
+  // Function: report_summarize
+  //
+  // Outputs statistical information on the reports issued by this central report
+  // server. This information will be sent to the command line if ~file~ is 0, or
+  // to the file descriptor ~file~ if it is not 0.
+  //
+  // The run_test method in uvm_top calls this method.
+
+  virtual function void report_summarize(UVM_FILE file=0);
+    string id;
+    string name;
+    string output_str;
+    uvm_report_catcher::summarize_report_catcher(file);
+    f_display(file, "");
+    f_display(file, "--- UVM Report Summary ---");
+    f_display(file, "");
+
+    if(m_max_quit_count != 0) begin
+      if ( m_quit_count >= m_max_quit_count ) f_display(file, "Quit count reached!");
+      $sformat(output_str, "Quit count : %5d of %5d",
+                             m_quit_count, m_max_quit_count);
+      f_display(file, output_str);
+    end
+
+    f_display(file, "** Report counts by severity");
+    for(uvm_severity_type s = s.first(); 1; s = s.next()) begin
+      if(m_severity_count.exists(s)) begin
+        int cnt;
+        cnt = m_severity_count[s];
+        name = s.name();
+        $sformat(output_str, "%s :%5d", name, cnt);
+        f_display(file, output_str);
+      end
+      if(s == s.last()) break;
+    end
+
+    if (enable_report_id_count_summary) begin
+
+      f_display(file, "** Report counts by id");
+      for(int found = m_id_count.first(id);
+           found;
+           found = m_id_count.next(id)) begin
+        int cnt;
+        cnt = m_id_count[id];
+        $sformat(output_str, "[%s] %5d", id, cnt);
+        f_display(file, output_str);
+      end
+
+    end
+
+  endfunction
+
+
+`ifndef UVM_NO_DEPRECATED
+
+
+  // Function- process_report
   //
   // Calls <compose_message> to construct the actual message to be
   // output. It then takes the appropriate action according to the value of
@@ -340,13 +620,17 @@ class uvm_report_server extends uvm_object;
         f_display(tmp_file,composed_message);
       end    
 
-    if(action & UVM_EXIT) client.die();
+    if(action & UVM_EXIT) begin
+      uvm_root l_root = uvm_root::get();
+      l_root.die();
+    end
 
     if(action & UVM_COUNT) begin
       if(get_max_quit_count() != 0) begin
           incr_quit_count();
         if(is_quit_count_reached()) begin
-          client.die();
+          uvm_root l_root = uvm_root::get();
+          l_root.die();
         end
       end  
     end
@@ -355,9 +639,8 @@ class uvm_report_server extends uvm_object;
 
   endfunction
 
-
-
-  // Function: compose_message
+  
+  // Function- compose_message
   //
   // Constructs the actual string sent to the file or command line
   // from the severity, component name, report id, and the message itself. 
@@ -398,54 +681,11 @@ class uvm_report_server extends uvm_object;
   endfunction 
 
 
-
-
-  // Function: summarize
+  // Function- summarize
   //
-  // See <uvm_report_object::report_summarize> method.
 
   virtual function void summarize(UVM_FILE file=0);
-    string id;
-    string name;
-    string output_str;
-    uvm_report_catcher::summarize_report_catcher(file);
-    f_display(file, "");
-    f_display(file, "--- UVM Report Summary ---");
-    f_display(file, "");
-
-    if(max_quit_count != 0) begin
-      if ( quit_count >= max_quit_count ) f_display(file, "Quit count reached!");
-      $sformat(output_str, "Quit count : %5d of %5d",
-                             quit_count, max_quit_count);
-      f_display(file, output_str);
-    end
-
-    f_display(file, "** Report counts by severity");
-    for(uvm_severity_type s = s.first(); 1; s = s.next()) begin
-      if(severity_count.exists(s)) begin
-        int cnt;
-        cnt = severity_count[s];
-        name = s.name();
-        $sformat(output_str, "%s :%5d", name, cnt);
-        f_display(file, output_str);
-      end
-      if(s == s.last()) break;
-    end
-
-    if (enable_report_id_count_summary) begin
-
-      f_display(file, "** Report counts by id");
-      for(int found = id_count.first(id);
-           found;
-           found = id_count.next(id)) begin
-        int cnt;
-        cnt = id_count[id];
-        $sformat(output_str, "[%s] %5d", id, cnt);
-        f_display(file, output_str);
-      end
-
-    end
-
+    report_summarize(file);
   endfunction
 
 
@@ -466,15 +706,15 @@ class uvm_report_server extends uvm_object;
     f_display(0, "+-------------+");
     f_display(0, "");
 
-    $sformat(s, "max quit count = %5d", max_quit_count);
+    $sformat(s, "max quit count = %5d", m_max_quit_count);
     f_display(0, s);
-    $sformat(s, "quit count = %5d", quit_count);
+    $sformat(s, "quit count = %5d", m_quit_count);
     f_display(0, s);
 
     sev = sev.first();
     forever begin
       int cnt;
-      cnt = severity_count[sev];
+      cnt = m_severity_count[sev];
       s = sev.name();
       $sformat(s, "%s :%5d", s, cnt);
       f_display(0, s);
@@ -483,42 +723,26 @@ class uvm_report_server extends uvm_object;
       sev = sev.next();
     end
 
-    if(id_count.first(id))
+    if(m_id_count.first(id))
     do begin
       int cnt;
-      cnt = id_count[id];
+      cnt = m_id_count[id];
       $sformat(s, "%s :%5d", id, cnt);
       f_display(0, s);
     end
-    while (id_count.next(id));
+    while (m_id_count.next(id));
 
   endfunction
 
 
-  // Function- copy_severity_counts
-  //
-  // Internal method.
-
-  function void copy_severity_counts(uvm_report_server dst);
-    foreach(severity_count[s]) begin
-      dst.set_severity_count(s,severity_count[s]);
-    end
-  endfunction
-
-
-  // Function- copy_severity_counts
-  //
-  // Internal method.
-
-  function void copy_id_counts(uvm_report_server dst);
-    foreach(id_count[s]) begin
-      dst.set_id_count(s,id_count[s]);
-    end
-  endfunction
+`endif
 
 
 endclass
 
+
+
+`ifndef UVM_NO_DEPRECATED
 
 
 //----------------------------------------------------------------------
@@ -533,7 +757,7 @@ class uvm_report_global_server;
   endfunction
 
 
-  // Function: get_server
+  // Function- get_server
   //
   // Returns a handle to the central report server.
 
@@ -551,6 +775,9 @@ class uvm_report_global_server;
   endfunction
 
 endclass
+
+
+`endif
 
 
 `endif // UVM_REPORT_SERVER_SVH

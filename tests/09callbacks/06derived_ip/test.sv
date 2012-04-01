@@ -45,7 +45,7 @@ module test;
     function new(string name,uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       int i;
       $display("executing callbacks from ip_base");
       `uvm_do_callbacks(ip_base,cb_base,doit(q))
@@ -59,14 +59,15 @@ module test;
     function new(string name,uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       int i;
 //Since we are executing the same callbacks, they should happen
 //in both places.
+      phase.raise_objection(this);
       $display("executing callbacks from derived class");
       `uvm_do_callbacks(ip_ext,cb_base,doit(q))
       super.run();
-      uvm_top.stop_request();
+      phase.drop_objection(this);
 
     endtask
   endclass 

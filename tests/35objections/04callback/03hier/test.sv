@@ -28,14 +28,14 @@ module test;
       super.new(name,parent);
       del = ($random % 20) + 25;
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       repeat(20) begin
         // The #1 is to make sure nothing gets cancelled. Normally
         // cancelling is okay, but for this test I want all drops
         // propagated.
-        uvm_test_done.raise_objection(this);
+        phase.raise_objection(this);
         #del;
-        uvm_test_done.drop_objection(this);
+        phase.drop_objection(this);
         #1;
       end
     endtask
@@ -51,11 +51,11 @@ module test;
       f2 = new("f2", this);
       del = ($random % 20) + 25;
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       repeat(20) begin
-        uvm_test_done.raise_objection(this);
+        phase.raise_objection(this);
         #del;
-        uvm_test_done.drop_objection(this);
+        phase.drop_objection(this);
         #1;
       end
     endtask
@@ -71,11 +71,11 @@ module test;
       e2 = new("e2", this);
       del = ($random % 20) + 25;
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       repeat(20) begin
-        uvm_test_done.raise_objection(this);
+        phase.raise_objection(this);
         #del;
-        uvm_test_done.drop_objection(this);
+        phase.drop_objection(this);
         #1;
       end
     endtask
@@ -91,11 +91,11 @@ module test;
       d2 = new("d2", this);
       del = ($random % 20) + 25;
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       repeat(20) begin
-        uvm_test_done.raise_objection(this);
+        phase.raise_objection(this);
         #del;
-        uvm_test_done.drop_objection(this);
+        phase.drop_objection(this);
         #1;
       end
     endtask
@@ -111,11 +111,11 @@ module test;
       c2 = new("c2", this);
       del = ($random % 20) + 25;
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       repeat(20) begin
-        uvm_test_done.raise_objection(this);
+        phase.raise_objection(this);
         #del;
-        uvm_test_done.drop_objection(this);
+        phase.drop_objection(this);
         #1;
       end
     endtask
@@ -135,11 +135,11 @@ module test;
       b2 = new("b2", this);
       del = ($random % 20) + 25;
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       repeat(20) begin
-        uvm_test_done.raise_objection(this);
+        phase.raise_objection(this);
         #del;
-        uvm_test_done.drop_objection(this);
+        phase.drop_objection(this);
         #1;
       end
     endtask
@@ -190,8 +190,11 @@ module test;
     run_test();
   end
   initial begin
+    uvm_domain _common_domain = uvm_domain::get_common_domain();
+    uvm_phase run_phase = _common_domain.find_by_name("run");
+    uvm_objection run_phase_objection = run_phase.get_objection();
     #400 $display("______");
-    uvm_test_done.display_objections();
+    run_phase_objection.display_objections();
     $display("______");
   end
 endmodule

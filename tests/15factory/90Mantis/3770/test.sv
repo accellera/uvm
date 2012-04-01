@@ -64,7 +64,7 @@ begin
    comp c;
    comp p;
    
-   svr = _global_reporter.get_report_server();
+   svr = uvm_report_server::get_server();
 
    $write("Testing raw object constructor...\n");
    obj::exp_name = "X";
@@ -94,7 +94,7 @@ begin
    else
       $write("!! UVM TEST FAILED !!\n");
 
-   svr.summarize();
+   svr.report_summarize();
 end
 
 endprogram

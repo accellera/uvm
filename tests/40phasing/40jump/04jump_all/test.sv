@@ -40,16 +40,16 @@ class test extends uvm_component;
        uvm_domain::jump_all(uvm_extract_phase::get());
    endfunction : start_of_simulation_phase 
       
-   virtual task run();
-      uvm_test_done.raise_objection(this);
+   virtual task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       `uvm_error(get_type_name(), "Should not be in run() we jumped to extract")
       #1;
          
-      uvm_test_done.drop_objection(this);
-   endtask : run
+      phase.drop_objection(this);
+   endtask : run_phase
 
    virtual function void extract_phase(uvm_phase phase);
-      uvm_report_server svr = _global_reporter.get_report_server();
+      uvm_report_server svr = uvm_report_server::get_server();
       if (svr.get_severity_count(UVM_ERROR) == 0)
         $write("** UVM TEST PASSED **");
       else

@@ -51,6 +51,8 @@
 `define uvm_line `__LINE__
 `endif
 
+// FIXME to use the message pool
+// unsafe to rely on single instance
 
 //------------------------------------------------------------------------------
 //
@@ -98,22 +100,23 @@
 
 // MACRO: `uvm_info
 //
-//| `uvm_info(ID,MSG,VERBOSITY)
+//| `uvm_info(ID, MSG, VERBOSITY)
 //
 // Calls uvm_report_info if ~VERBOSITY~ is lower than the configured verbosity of
 // the associated reporter. ~ID~ is given as the message tag and ~MSG~ is given as
 // the message text. The file and line are also sent to the uvm_report_info call.
 //
 
-`define uvm_info(ID,MSG,VERBOSITY) \
+`define uvm_info(ID, MSG, VERBOSITY) \
    begin \
-     if (uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) \
-       uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line); \
+     uvm_action action = uvm_report_enabled(VERBOSITY,UVM_INFO,ID); \
+     if(action) \
+       uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line, "", action); \
    end
 
 // MACRO: `uvm_warning
 //
-//| `uvm_warning(ID,MSG)
+//| `uvm_warning(ID, MSG)
 //
 // Calls uvm_report_warning with a verbosity of UVM_NONE. The message can not
 // be turned off using the reporter's verbosity setting, but can be turned off
@@ -121,15 +124,16 @@
 // ~MSG~ is given as the message text. The file and line are also sent to the 
 // uvm_report_warning call.
 
-`define uvm_warning(ID,MSG) \
+`define uvm_warning(ID, MSG) \
    begin \
-     if (uvm_report_enabled(UVM_NONE,UVM_WARNING,ID)) \
-       uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
+     uvm_action action = uvm_report_enabled(UVM_NONE,UVM_WARNING,ID); \
+     if(action) \
+       uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", action); \
    end
 
 // MACRO: `uvm_error
 //
-//| `uvm_error(ID,MSG)
+//| `uvm_error(ID, MSG)
 //
 // Calls uvm_report_error with a verbosity of UVM_NONE. The message can not
 // be turned off using the reporter's verbosity setting, but can be turned off
@@ -137,15 +141,16 @@
 // ~MSG~ is given as the message text. The file and line are also sent to the 
 // uvm_report_error call.
 
-`define uvm_error(ID,MSG) \
+`define uvm_error(ID, MSG) \
    begin \
-     if (uvm_report_enabled(UVM_NONE,UVM_ERROR,ID)) \
-       uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
+     uvm_action action = uvm_report_enabled(UVM_NONE,UVM_ERROR,ID); \
+     if(action) \
+       uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", action); \
    end
 
 // MACRO: `uvm_fatal
 //
-//| `uvm_fatal(ID,MSG)
+//| `uvm_fatal(ID, MSG)
 //
 // Calls uvm_report_fatal with a verbosity of UVM_NONE. The message can not
 // be turned off using the reporter's verbosity setting, but can be turned off
@@ -153,66 +158,77 @@
 // ~MSG~ is given as the message text. The file and line are also sent to the 
 // uvm_report_fatal call.
 
-`define uvm_fatal(ID,MSG) \
+`define uvm_fatal(ID, MSG) \
    begin \
-     if (uvm_report_enabled(UVM_NONE,UVM_FATAL,ID)) \
-       uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
+     uvm_action action = uvm_report_enabled(UVM_NONE,UVM_FATAL,ID); \
+     if(action) \
+       uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", action); \
    end
 
 // MACRO: `uvm_info_context
 //
-//| `uvm_info_context(ID,MSG,VERBOSITY,CNTXT)
+//| `uvm_info_context(ID, MSG, VERBOSITY, RO, CNTXT_NAME)
 //
 // Operates identically to `uvm_info but requires that the
 // context, or <uvm_report_object>, in which the message is printed be 
 // explicitly supplied as a macro argument.
 
-`define uvm_info_context(ID, MSG, VERBOSITY, CNTXT) \
+//`define uvm_info_context(ID, MSG, VERBOSITY, RO, CNTXT_NAME = "") \
+`define uvm_info_context(ID, MSG, VERBOSITY, RO) \
    begin \
-     if (CNTXT.uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) \
-       CNTXT.uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line); \
+     uvm_action action = RO.uvm_report_enabled(VERBOSITY,UVM_INFO,ID); \
+     if(action) \
+       RO.uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line, "", action); \
    end
 
 // MACRO: `uvm_warning_context
 //
-//| `uvm_warning_context(ID,MSG,CNTXT)
+//| `uvm_warning_context(ID, MSG, RO, CNTXT_NAME = "")
 //
 // Operates identically to `uvm_warning but requires that the
 // context, or <uvm_report_object>, in which the message is printed be
 // explicitly supplied as a macro argument.
 
-`define uvm_warning_context(ID, MSG, CNTXT) \
+//`define uvm_warning_context(ID, MSG, RO, CNTXT_NAME = "") \
+`define uvm_warning_context(ID, MSG, RO) \
    begin \
-     if (CNTXT.uvm_report_enabled(UVM_NONE,UVM_WARNING,ID)) \
-       CNTXT.uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
+     uvm_action action = RO.uvm_report_enabled(UVM_NONE,UVM_WARNING,ID); \
+     if(action) \
+       RO.uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", action); \
    end
 
 // MACRO: `uvm_error_context
 //
-//| `uvm_error_context(ID,MSG,CNTXT)
+//| `uvm_error_context(ID, MSG, RO, CNTXT_NAME = "")
 //
 // Operates identically to `uvm_error but requires that the
 // context, or <uvm_report_object> in which the message is printed be 
 // explicitly supplied as a macro argument.
 
-`define uvm_error_context(ID, MSG, CNTXT) \
+//`define uvm_error_context(ID, MSG, RO, CNTXT_NAME = "") \
+`define uvm_error_context(ID, MSG, RO) \
    begin \
-     if (CNTXT.uvm_report_enabled(UVM_NONE,UVM_ERROR,ID)) \
-       CNTXT.uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
+     uvm_action action = RO.uvm_report_enabled(UVM_NONE,UVM_ERROR,ID); \
+     if(action) \
+       RO.uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", action); \
    end
 
 // MACRO: `uvm_fatal_context
 //
-//| `uvm_fatal_context(ID,MSG,CNTXT)
+//| `uvm_fatal_context(ID, MSG, RO, CNTXT_NAME = "")
 //
 // Operates identically to `uvm_fatal but requires that the
 // context, or <uvm_report_object>, in which the message is printed be 
 // explicitly supplied as a macro argument.
 
-`define uvm_fatal_context(ID, MSG, CNTXT) \
+//`define uvm_fatal_context(ID, MSG, RO, CNTXT_NAME = "") \
+`define uvm_fatal_context(ID, MSG, RO) \
    begin \
-     if (CNTXT.uvm_report_enabled(UVM_NONE,UVM_FATAL,ID)) \
-       CNTXT.uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line); \
+     uvm_action action = RO.uvm_report_enabled(UVM_NONE,UVM_FATAL,ID); \
+     if(action) \
+       RO.uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", action); \
    end
+
+// FIXME add message linking macros (GO GO DEFAULTS?)
 
 `endif //UVM_MESSAGE_DEFINES_SVH

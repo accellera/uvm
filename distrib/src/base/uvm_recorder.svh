@@ -20,6 +20,7 @@
 //   permissions and limitations under the License.
 //-----------------------------------------------------------------------------
 
+typedef class uvm_report_message;
 
 //------------------------------------------------------------------------------
 //
@@ -223,8 +224,42 @@ class uvm_recorder extends uvm_object;
   endfunction
 
 
-  uvm_scope_stack scope = new;
+  int m_rh_stream_handles[string];
 
+  // Function: record_message
+  //
+  // Records the message.  Used by the message server.
+  
+  virtual function void record_message(uvm_report_message umo);
+    integer l_tr_handle;
+/*
+    uvm_report_trace_message utmo;
+    uvm_report_link_message ulmo;
+
+    if($cast(ulmo, umo))
+      link_tr(ulmo.tr_id0, ulmo.tr_id1, ulmo.link);
+    else begin
+      // If a stream handle does not exists for the context name, 
+      // create a stream handle.
+      if(!m_rh_stream_handles.exists(umo.context_name)) begin
+        int l_sh = create_stream(umo.context_name, "message_stream", "UVM");
+        m_rh_stream_handles[umo.context_name] = l_sh;
+      end
+      tr_handle = begin_tr("message", m_rh_stream_handles[umo.context_name],
+        umo.get_name(), "", "", $time);
+      l_tr_handle = tr_handle; // calling record() resets tr_handle at the end
+      umo.record();
+      end_tr(l_tr_handle, $time);
+      if($cast(utmo, umo)) begin
+        utmo.tr_id = l_tr_handle;
+      end
+    end
+*/
+
+  endfunction
+
+
+  uvm_scope_stack scope = new;
 
 
   //------------------------------

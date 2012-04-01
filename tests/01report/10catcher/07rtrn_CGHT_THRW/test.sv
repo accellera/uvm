@@ -121,7 +121,10 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
+
+      phase.raise_objection(this);
+
       $write("UVM TEST - Catchers which return CAUGHT/THROW and call issue() \n");
       
       begin
@@ -160,7 +163,9 @@ class test extends uvm_test;
         end // begin
 
       $write("UVM TEST EXPECT 1 UVM_ERROR\n");
-      uvm_top.stop_request();
+
+      phase.drop_objection(this);
+
    endtask
 
    virtual function void report();

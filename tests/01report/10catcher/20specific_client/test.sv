@@ -76,8 +76,10 @@ class test extends uvm_test;
       mid1 = new("mid1", this);
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
       my_catcher ctchr = new;
+
+      phase.raise_objection(this);
 
       $write("UVM TEST EXPECT 3 UVM_INFO\n");
       #11;
@@ -107,7 +109,9 @@ class test extends uvm_test;
          $write("ERROR: Message was caught after all catcher removed!\n");
          pass = 0;
       end
-      uvm_top.stop_request();
+
+      phase.drop_objection(this);
+
    endtask
 
    virtual function void report();

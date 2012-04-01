@@ -148,6 +148,8 @@ class test extends uvm_test;
       ext2 y2;
       ext3 y3;
 
+      phase.raise_objection(this);
+
       gp1.set_extension(x1);
       if (gp1.get_num_extensions() != 1) begin
          `uvm_error("TEST", $sformatf("Number of GP1 extensions reported as %0d instead of 1", 
@@ -232,7 +234,7 @@ class test extends uvm_test;
 
       gp3.print();
 
-      uvm_top.stop_request();
+      phase.drop_objection(this);
    endtask
 
    virtual function void report();

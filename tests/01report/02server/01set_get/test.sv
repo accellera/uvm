@@ -24,17 +24,10 @@ import uvm_pkg::*;
 `include "uvm_macros.svh"
 
 
-class my_server extends uvm_report_server;
-  int cnt = 0;
-  virtual function string compose_message( uvm_severity severity, string name,
-      string id, string message, string filename, int    line);
-    cnt++;
-    compose_message = {"MY_SERVER: ",
-      super.compose_message(severity, name, id, message, filename, line) };
-  endfunction
-endclass
-
 class test extends uvm_test;
+
+   uvm_report_server old_serv;
+
    `uvm_component_utils(test)
 
    function new(string name, uvm_component parent = null);
@@ -42,14 +35,17 @@ class test extends uvm_test;
    endfunction
 
    virtual task run_phase(uvm_phase phase);
-     my_server serv = new;
+     uvm_report_server new_serv = new("new_serv");
      // Emit a message before setting the server to make sure counts are
      // properly copied over.
      `uvm_info("MSG1", "Some message", UVM_LOW)
      `uvm_info("MSG2", "Another message", UVM_LOW)
 
-     // Set the global server
-     uvm_report_server::set_server(serv);
+     // Save off the current report server
+     old_serv = uvm_report_server::get_server();
+
+     // Set the report server
+     uvm_report_server::set_server(new_serv);
 
      //Emit some messages to the new server
      `uvm_info("MSG1", "Some message again", UVM_LOW)
@@ -59,7 +55,8 @@ class test extends uvm_test;
 
    virtual function void report();
      uvm_report_server serv = uvm_report_server::get_server();
-     if(serv.get_id_count("MSG1") == 2 && serv.get_id_count("MSG2") == 2)
+     if(old_serv.get_id_count("MSG1") == 1 && old_serv.get_id_count("MSG2") == 1 &&
+       serv.get_id_count("MSG1") == 2 && serv.get_id_count("MSG2") == 2)
        $display("**** UVM TEST PASSED ****");
      else
        $display("**** UVM TEST FAILED ****");

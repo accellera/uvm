@@ -31,8 +31,10 @@ module top();
       super.new(name);
     endfunction
     task body;
-      uvm_test_done.raise_objection(this);
-      #10 uvm_test_done.drop_objection(this);
+      uvm_domain _common_domain = uvm_domain::get_common_domain();
+      uvm_phase run_phase = _common_domain.find_by_name("run");
+      run_phase.raise_objection(this);
+      #10 run_phase.drop_objection(this);
     endtask
   endclass
 
@@ -49,8 +51,11 @@ module top();
     endtask
     `uvm_component_utils(test)
 
-    function void report();
-      uvm_test_done.get_objectors(objs);
+    function void report_phase(uvm_phase phase);
+      uvm_domain _common_domain = uvm_domain::get_common_domain();
+      uvm_phase run_phase = _common_domain.find_by_name("run");
+      uvm_objection run_phase_objection = run_phase.get_objection();
+      run_phase_objection.get_objectors(objs);
       foreach(objs[i]) $display(": objector: %s", objs[i].get_full_name());
       if(objs.size() == 0 && $time == 1000) $display("*** UVM TEST PASSED ***");
       else $display("*** UVM TEST FAILED ***");

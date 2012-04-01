@@ -84,7 +84,7 @@ begin
    uvm_report_server svr;
    blk3 blk;
    
-   svr = _global_reporter.get_report_server();
+   svr = uvm_report_server::get_server();
    
    blk = new("top");
    blk.build();
@@ -210,7 +210,7 @@ begin
    else
       $write("!! UVM TEST FAILED !!\n");
 
-   svr.summarize();
+   svr.report_summarize();
 end
 
 endprogram

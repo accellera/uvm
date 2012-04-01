@@ -25,29 +25,32 @@ import uvm_pkg::*;
 
 
 class my_server extends uvm_report_server;
-  int cnt = 0;
-  virtual function string compose_message( uvm_severity severity, string name,
-      string id, string message, string filename, int    line);
-    cnt++;
-    compose_message = {"MY_SERVER: ",
-      super.compose_message(severity, name, id, message, filename, line) };
+  function new(string name = "my_server"); 
+    super.new(name);
   endfunction
 endclass
 
+
 class test extends uvm_test;
+
+   uvm_report_server old_glob;
+   uvm_report_global_server glob = new();
+   my_server serv = new();
+
    `uvm_component_utils(test)
 
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
    endfunction
 
-   virtual task run();
-     uvm_report_global_server glob = new;
-     my_server serv = new;
+   virtual task run_phase(uvm_phase phase);
      // Emit a message before setting the server to make sure counts are
      // properly copied over.
      `uvm_info("MSG1", "Some message", UVM_LOW)
      `uvm_info("MSG2", "Another message", UVM_LOW)
+
+     // Save the old global report server
+     old_glob = glob.get_server();
 
      // Set the global server
      glob.set_server(serv);
@@ -58,11 +61,12 @@ class test extends uvm_test;
 
    endtask
 
-   virtual function void report();
+   virtual function void report_phase(uvm_phase phase);
      uvm_report_global_server glob = new;
      uvm_report_server serv;
      serv = glob.get_server();
-     if(serv.get_id_count("MSG1") == 2 && serv.get_id_count("MSG2") == 2)
+     if(old_glob.get_id_count("MSG1") == 1 && old_glob.get_id_count("MSG2") == 1 &&
+       serv.get_id_count("MSG1") == 2 && serv.get_id_count("MSG2") == 2)
        $display("**** UVM TEST PASSED ****");
      else
        $display("**** UVM TEST FAILED ****");

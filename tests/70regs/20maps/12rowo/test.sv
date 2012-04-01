@@ -147,7 +147,7 @@ class test extends uvm_test;
    endtask
 
    virtual function void report();
-	uvm_report_server svr =  _global_reporter.get_report_server();
+	uvm_report_server svr = uvm_report_server::get_server();
    if (svr.get_severity_count(UVM_FATAL) +
        svr.get_severity_count(UVM_ERROR) +
        svr.get_severity_count(UVM_WARNING) == 0)
@@ -160,11 +160,10 @@ endclass
 
 initial begin
    tb_env env;
-   uvm_report_server svr;
+   uvm_report_server svr = uvm_report_server::get_server();
    
    env = new("env");
 
-   svr = _global_reporter.get_report_server();
    svr.set_max_quit_count(10);
    
    run_test();
