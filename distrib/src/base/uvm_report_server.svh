@@ -75,7 +75,7 @@ class uvm_report_server extends uvm_object;
     string l_id_count_index;
 
     super.do_copy(rhs);
-    if(!$cast(rs, rhs) || (rs==null)) return;
+    if(!$cast(rs, rhs) || (rhs==null)) return;
 
     m_quit_count = rs.m_quit_count;
     m_max_quit_count = rs.m_max_quit_count;
@@ -241,19 +241,22 @@ class uvm_report_server extends uvm_object;
   // Function: set_severity_count
 
   function void set_severity_count(uvm_severity severity, int count);
-    m_severity_count[severity] = count < 0 ? 0 : count;
+    uvm_severity_type l_severity_type = uvm_severity_type'(severity);
+    m_severity_count[l_severity_type] = count < 0 ? 0 : count;
   endfunction
 
   // Function: get_severity_count
 
   function int get_severity_count(uvm_severity severity);
-    return m_severity_count[severity];
+    uvm_severity_type l_severity_type = uvm_severity_type'(severity);
+    return m_severity_count[l_severity_type];
   endfunction
 
   // Function: incr_severity_count
 
   function void incr_severity_count(uvm_severity severity);
-    m_severity_count[severity]++;
+    uvm_severity_type l_severity_type = uvm_severity_type'(severity);
+    m_severity_count[l_severity_type]++;
   endfunction
 
   // Function: reset_severity_counts
@@ -316,119 +319,127 @@ class uvm_report_server extends uvm_object;
   endfunction
 
 
-  // Function- m_process
+  // Function- m_process_report_message
   //
   //
 
-  virtual function void m_process(uvm_report_message urm);
+  virtual function void m_process_report_message(uvm_report_message report_message);
 
     bit report_ok = 1;
 
     // Set the report server for this message
-    urm.rs = this;
+    report_message.report_server = this;
 
 `ifndef UVM_NO_DEPRECATED 
-
 
     // The hooks can do additional filtering.  If the hook function
     // return 1 then continue processing the report.  If the hook
     // returns 0 then skip processing the report.
 
-    if(urm.action & UVM_CALL_HOOK)
-      report_ok = urm.rh.run_hooks(urm.ro, urm.severity, urm.id,
-        urm.message, urm.verbosity, urm.filename, urm.line);
-
+    if(report_message.action & UVM_CALL_HOOK)
+      report_ok = report_message.report_handler.run_hooks(report_message.report_object,
+        report_message.severity, report_message.id, report_message.message, 
+        report_message.verbosity, report_message.filename, report_message.line);
 
 `endif
 
-
     if(report_ok)
-      report_ok = uvm_report_catcher::process_all_report_catchers(urm);
+      report_ok = uvm_report_catcher::process_all_report_catchers(report_message);
 
     if(report_ok) begin	
 
-
 `ifdef UVM_DEPRECATED_REPORTING
 
-
-      // Make these rm.xxx
       string m;
-      m = compose_message(urm.severity, urm.rh.get_full_name(), urm.id, 
-        urm.message, urm.filename, urm.line); 
-      process_report(urm.severity, urm.rh.get_full_name(), urm.id, 
-        urm.message, urm.action, urm.file, urm.filename, urm.line, m, 
-        urm.verbosity, urm.ro);
+      m = compose_message(report_message.severity, 
+        report_message.report_handler.get_full_name(), report_message.id, 
+        report_message.message, report_message.filename, report_message.line); 
+      process_report(report_message.severity, report_message.report_handler.get_full_name(),
+        report_message.id, report_message.message, report_message.action, report_message.file,
+        report_message.filename, report_message.line, m, report_message.verbosity, 
+        report_message.report_object);
 
 `else
 
-      execute(urm);
+      execute_report_message(report_message);
 
 `endif
 
-
     end
-  
+
   endfunction
 
 
-  // Function: execute 
+  // Function: execute_report_message
   //
   // Processes the message's actions.
  
-  virtual function void execute(uvm_report_message urm);
+  virtual function void execute_report_message(uvm_report_message report_message);
+
+    if(uvm_action_type'(report_message.action) == UVM_NO_ACTION) 
+      return;
+
     // Update counts 
-    incr_severity_count(urm.severity);
-    incr_id_count(urm.id);
+    incr_severity_count(report_message.severity);
+    incr_id_count(report_message.id);
+
     // Process UVM_RM_RECORD action (send to recorder)
-    if(urm.action & UVM_RM_RECORD) 
-      uvm_default_recorder.record_message(urm);
+    if(report_message.action & UVM_RM_RECORD) 
+      uvm_default_recorder.record_report_message(report_message);
+
     // Process UVM_DISPLAY and UVM_LOG action (send to logger)
-    if((urm.action & UVM_DISPLAY) || (urm.action & UVM_LOG)) begin
+    if((report_message.action & UVM_DISPLAY) || (report_message.action & UVM_LOG)) begin
       string out_str;
-      out_str = compose(urm);
+      out_str = compose_report_message(report_message);
       // DISPLAY action
-      if(urm.action & UVM_DISPLAY)
+      if(report_message.action & UVM_DISPLAY)
         $display("%s", out_str);
+      // LOG action
       // if log is set we need to send to the file but not resend to the
       // display. So, we need to mask off stdout for an mcd or we need
       // to ignore the stdout file handle for a file handle.
-      if(urm.action & UVM_LOG)
-        if( (urm.file == 0) || (urm.file != 32'h8000_0001) ) begin //ignore stdout handle
-          UVM_FILE tmp_file = urm.file;
-          if((urm.file & 32'h8000_0000) == 0) begin //is an mcd so mask off stdout
-            tmp_file = urm.file & 32'hffff_fffe;
+      if(report_message.action & UVM_LOG)
+        if( (report_message.file == 0) || 
+          (report_message.file != 32'h8000_0001) ) begin //ignore stdout handle
+          UVM_FILE tmp_file = report_message.file;
+          if((report_message.file & 32'h8000_0000) == 0) begin //is an mcd so mask off stdout
+            tmp_file = report_message.file & 32'hffff_fffe;
           end
         f_display(tmp_file, out_str);
       end    
     end
+
     // Process the UVM_COUNT action
-    if(urm.action & UVM_COUNT) begin
+    if(report_message.action & UVM_COUNT) begin
       if(get_max_quit_count() != 0) begin
         incr_quit_count();
         // If quit count is reached, add the UVM_EXIT action.
         if(is_quit_count_reached()) begin
-          urm.action |= UVM_EXIT;
+          report_message.action |= UVM_EXIT;
         end
       end  
     end
+
     // Process the UVM_EXIT action
-    if(urm.action & UVM_EXIT) begin
+    if(report_message.action & UVM_EXIT) begin
       uvm_root l_root = uvm_root::get();
       l_root.die();
     end
+
     // Process the UVM_STOP action
-    if (urm.action & UVM_STOP) 
+    if (report_message.action & UVM_STOP) 
       $stop;
+
   endfunction
 
 
-  // Function: compose
+  // Function: compose_report_message
   //
   // Constructs the actual string sent to the file or command line
   // from the severity, component name, report id, and the message itself. 
   //
   // Expert users can overload this method to customize report formatting.
-  virtual function string compose(uvm_report_message urm);
+  virtual function string compose_report_message(uvm_report_message report_message);
 
     string sev_string;
     uvm_verbosity l_verbosity;
@@ -437,22 +448,22 @@ class uvm_report_server extends uvm_object;
     string line_str;
     string context_str;
 
-    sev_string = urm.severity.name();
+    sev_string = report_message.severity.name();
 
-    if (urm.filename != "") begin
-      $swrite(line_str, "%0d", urm.line);
-      filename_line_string = {urm.filename, "(", line_str, ") "};
+    if (report_message.filename != "") begin
+      line_str.itoa(report_message.line);
+      filename_line_string = {report_message.filename, "(", line_str, ") "};
     end
 
     // Make definable in terms of units.
     $swrite(time_str, "%0t", $time);
  
-    if (urm.context_name != "")
-      context_str = {"@@", urm.context_name};
+    if (report_message.context_name != "")
+      context_str = {"@@", report_message.context_name};
 
-    compose = {sev_string, " ", filename_line_string, "@ ", time_str, ": ",
-      urm.rh.get_full_name(), context_str, " [", urm.id, "] ", 
-      urm.convert2string()};
+    compose_report_message = {sev_string, " ", filename_line_string, "@ ", 
+      time_str, ": ", report_message.report_handler.get_full_name(), context_str,
+      " [", report_message.id, "] ", report_message.convert2string()};
 
   endfunction 
 

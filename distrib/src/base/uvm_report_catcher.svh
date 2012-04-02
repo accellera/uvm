@@ -102,8 +102,8 @@ virtual class uvm_report_catcher extends uvm_callback;
 
   typedef enum { UNKNOWN_ACTION, THROW, CAUGHT} action_e;
 
-  local static uvm_report_message m_modified_rm;
-  local static uvm_report_message m_orig_rm;
+  local static uvm_report_message m_modified_report_message;
+  local static uvm_report_message m_orig_report_message;
 
   local static bit m_set_action_called;
 
@@ -120,7 +120,6 @@ virtual class uvm_report_catcher extends uvm_callback;
   const static int DO_NOT_MODIFY     = 2; 
   local static int m_debug_flags;
 
-  // Some bit?  Seems unneeded.  Ask Janick.
   local static  bit do_report;
 
   // Local report message for the uvm_report_* methods herein.
@@ -133,7 +132,7 @@ virtual class uvm_report_catcher extends uvm_callback;
 
   function new(string name = "uvm_report_catcher");
     super.new(name);
-
+    l_rm = new("uvm_report_message");
     do_report = 1;
   endfunction    
 
@@ -145,7 +144,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // is currently being processes.  This field is not modifiable.
 
   function uvm_report_object get_client();
-    return m_modified_rm.ro; 
+    return m_modified_report_message.report_object; 
   endfunction
 
   // Function: get_severity
@@ -156,7 +155,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // severity is the modified value.
 
   function uvm_severity get_severity();
-    return this.m_modified_rm.severity;
+    return this.m_modified_report_message.severity;
   endfunction
   
   // Function: get_verbosity
@@ -167,7 +166,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // verbosity is the modified value.
   
   function int get_verbosity();
-    return this.m_modified_rm.verbosity;
+    return this.m_modified_report_message.verbosity;
   endfunction
   
   // Function: get_id
@@ -178,7 +177,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // id is the modified value.
   
   function string get_id();
-    return this.m_modified_rm.id;
+    return this.m_modified_report_message.id;
   endfunction
   
   // Function: get_message
@@ -189,7 +188,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // message is the modified value.
   
   function string get_message();
-     return this.m_modified_rm.message;
+     return this.m_modified_report_message.message;
   endfunction
   
   // Function: get_action
@@ -200,7 +199,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // action is the modified value.
   
   function uvm_action get_action();
-    return this.m_modified_rm.action;
+    return this.m_modified_report_message.action;
   endfunction
   
   // Function: get_fname
@@ -208,7 +207,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // Returns the file name of the message.
   
   function string get_fname();
-    return this.m_modified_rm.filename;
+    return this.m_modified_report_message.filename;
   endfunction             
 
   // Function: get_line
@@ -216,7 +215,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // Returns the line number of the message.
 
   function int get_line();
-    return this.m_modified_rm.line;
+    return this.m_modified_report_message.line;
   endfunction
   
   // Group: Change Message State
@@ -227,7 +226,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // report catchers will see the modified value.
   
   protected function void set_severity(uvm_severity severity);
-    this.m_modified_rm.severity = uvm_severity_type'(severity);
+    this.m_modified_report_message.severity = uvm_severity_type'(severity);
   endfunction
   
   // Function: set_verbosity
@@ -236,7 +235,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // report catchers will see the modified value.
 
   protected function void set_verbosity(int verbosity);
-    this.m_modified_rm.verbosity = verbosity;
+    this.m_modified_report_message.verbosity = verbosity;
   endfunction      
 
   // Function: set_id
@@ -245,7 +244,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // report catchers will see the modified value.
 
   protected function void set_id(string id);
-    this.m_modified_rm.id = id;
+    this.m_modified_report_message.id = id;
   endfunction
   
   // Function: set_message
@@ -254,7 +253,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // report catchers will see the modified value.
 
   protected function void set_message(string message);
-    this.m_modified_rm.message = message;
+    this.m_modified_report_message.message = message;
   endfunction
   
   // Function: set_action
@@ -263,7 +262,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // report catchers will see the modified value.
   
   protected function void set_action(uvm_action action);
-    this.m_modified_rm.action = action;
+    this.m_modified_report_message.action = action;
     this.m_set_action_called = 1;
   endfunction
   
@@ -346,14 +345,20 @@ virtual class uvm_report_catcher extends uvm_callback;
    
    protected function void uvm_report_fatal(string id, string message, 
      int verbosity, string fname = "", int line = 0,
-     string context_name = "", uvm_action action = UVM_UNASSGND);
+     string context_name = "", bit report_enabled_checked = 0);
      uvm_action a;
-     // Have not cloned yet, use the report object in m_modified_rm
-     a = m_modified_rm.ro.uvm_report_enabled(UVM_NONE, UVM_FATAL, id);
+     if (report_enabled_checked == 0) begin
+       if (!uvm_report_enabled(UVM_NONE, UVM_FATAL, id))
+         return;
+     end
+     // Have to assume the report object in m_modified_report_message
+     a = m_modified_report_message.report_object.get_report_action(UVM_FATAL, id);
      if(a) begin
-       $cast(l_rm, m_modified_rm.clone());
+       l_rm.report_object = m_modified_report_message.report_object;
+       l_rm.report_handler = m_modified_report_message.report_handler;
+       l_rm.report_server = m_modified_report_message.report_server;
        l_rm.context_name = context_name;
-       l_rm.file = l_rm.ro.get_report_file_handle(UVM_FATAL, id);
+       l_rm.file = l_rm.report_object.get_report_file_handle(UVM_FATAL, id);
        l_rm.filename = fname;
        l_rm.line = line;
        l_rm.action = a;
@@ -361,7 +366,8 @@ virtual class uvm_report_catcher extends uvm_callback;
        l_rm.id = id;
        l_rm.message = message;
        l_rm.verbosity = UVM_NONE;
-       l_rm.rs.execute(l_rm);
+       l_rm.tr_handle = -1;
+       l_rm.report_server.execute_report_message(l_rm);
      end
    endfunction  
 
@@ -373,14 +379,20 @@ virtual class uvm_report_catcher extends uvm_callback;
    
    protected function void uvm_report_error(string id, string message, 
      int verbosity, string fname = "", int line = 0,
-     string context_name = "", uvm_action action = UVM_UNASSGND);
+     string context_name = "", bit report_enabled_checked = 0);
      uvm_action a;
-     // Have not cloned yet, use the report object in m_modified_rm
-     a = m_modified_rm.ro.uvm_report_enabled(UVM_NONE, UVM_ERROR, id);
+     if (report_enabled_checked == 0) begin
+       if (!uvm_report_enabled(UVM_NONE, UVM_ERROR, id))
+         return;
+     end
+     // Have to assume the report object in m_modified_report_message
+     a = m_modified_report_message.report_object.get_report_action(UVM_ERROR, id);
      if(a) begin
-       $cast(l_rm, m_modified_rm.clone());
+       l_rm.report_object = m_modified_report_message.report_object;
+       l_rm.report_handler = m_modified_report_message.report_handler;
+       l_rm.report_server = m_modified_report_message.report_server;
        l_rm.context_name = context_name;
-       l_rm.file = l_rm.ro.get_report_file_handle(UVM_ERROR, id);
+       l_rm.file = l_rm.report_object.get_report_file_handle(UVM_ERROR, id);
        l_rm.filename = fname;
        l_rm.line = line;
        l_rm.action = a;
@@ -388,7 +400,8 @@ virtual class uvm_report_catcher extends uvm_callback;
        l_rm.id = id;
        l_rm.message = message;
        l_rm.verbosity = UVM_NONE;
-       l_rm.rs.execute(l_rm);
+       l_rm.tr_handle = -1;
+       l_rm.report_server.execute_report_message(l_rm);
      end
    endfunction  
      
@@ -400,14 +413,20 @@ virtual class uvm_report_catcher extends uvm_callback;
    
    protected function void uvm_report_warning(string id, string message,
      int verbosity, string fname = "", int line = 0, 
-     string context_name = "", uvm_action action = UVM_UNASSGND);
+     string context_name = "", bit report_enabled_checked = 0);
      uvm_action a;
-     // Have not cloned yet, use the report object in m_modified_rm
-     a = m_modified_rm.ro.uvm_report_enabled(UVM_NONE, UVM_WARNING, id);
+     if (report_enabled_checked == 0) begin
+       if (!uvm_report_enabled(UVM_NONE, UVM_ERROR, id))
+         return;
+     end
+     // Have to assume the report object in m_modified_report_message
+     a = m_modified_report_message.report_object.get_report_action(UVM_ERROR, id);
      if(a) begin
-       $cast(l_rm, m_modified_rm.clone());
+       l_rm.report_object = m_modified_report_message.report_object;
+       l_rm.report_handler = m_modified_report_message.report_handler;
+       l_rm.report_server = m_modified_report_message.report_server;
        l_rm.context_name = context_name;
-       l_rm.file = l_rm.ro.get_report_file_handle(UVM_WARNING, id);
+       l_rm.file = l_rm.report_object.get_report_file_handle(UVM_WARNING, id);
        l_rm.filename = fname;
        l_rm.line = line;
        l_rm.action = a;
@@ -415,7 +434,8 @@ virtual class uvm_report_catcher extends uvm_callback;
        l_rm.id = id;
        l_rm.message = message;
        l_rm.verbosity = UVM_NONE;
-       l_rm.rs.execute(l_rm);
+       l_rm.tr_handle = -1;
+       l_rm.report_server.execute_report_message(l_rm);
      end
    endfunction  
 
@@ -427,14 +447,20 @@ virtual class uvm_report_catcher extends uvm_callback;
    
    protected function void uvm_report_info(string id, string message, 
      int verbosity, string fname = "", int line = 0,
-     string context_name = "", uvm_action action = UVM_UNASSGND);
+     string context_name = "", bit report_enabled_checked = 0);
      uvm_action a;
-     // Have not cloned yet, use the report object in m_modified_rm
-     a = m_modified_rm.ro.uvm_report_enabled(verbosity, UVM_INFO, id);
+     if (report_enabled_checked == 0) begin
+       if (!uvm_report_enabled(UVM_NONE, UVM_ERROR, id))
+         return;
+     end
+     // Have to assume the report object in m_modified_report_message
+     a = m_modified_report_message.report_object.get_report_action(UVM_ERROR, id);
      if(a) begin
-       $cast(l_rm, m_modified_rm.clone());
+       l_rm.report_object = m_modified_report_message.report_object;
+       l_rm.report_handler = m_modified_report_message.report_handler;
+       l_rm.report_server = m_modified_report_message.report_server;
        l_rm.context_name = context_name;
-       l_rm.file = l_rm.ro.get_report_file_handle(UVM_INFO, id);
+       l_rm.file = l_rm.report_object.get_report_file_handle(UVM_INFO, id);
        l_rm.filename = fname;
        l_rm.line = line;
        l_rm.action = a;
@@ -442,7 +468,8 @@ virtual class uvm_report_catcher extends uvm_callback;
        l_rm.id = id;
        l_rm.message = message;
        l_rm.verbosity = verbosity;
-       l_rm.rs.execute(l_rm);
+       l_rm.tr_handle = -1;
+       l_rm.report_server.execute_report_message(l_rm);
      end
    endfunction  
 
@@ -455,7 +482,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // times if the message is not ~CAUGHT~.
 
   protected function void issue();
-     m_modified_rm.rs.execute(m_modified_rm);
+     m_modified_report_message.report_server.execute_report_message(m_modified_report_message);
   endfunction
 
 
@@ -478,9 +505,10 @@ virtual class uvm_report_catcher extends uvm_callback;
     // Opto here possible...
     // Only do this is catchers to execute.
     // Can be just a copy?
-    $cast(m_modified_rm, rm.clone());
+    m_orig_report_message = rm;
+    $cast(m_modified_report_message, rm.clone());
 
-    catcher = uvm_report_cb::get_first(iter,rm.ro);
+    catcher = uvm_report_cb::get_first(iter,rm.report_object);
     while(catcher != null) begin
        
       if (!catcher.callback_mode()) continue;
@@ -492,9 +520,11 @@ virtual class uvm_report_catcher extends uvm_callback;
       // if it is still at the default for the previous severity,
       // unless it was explicitly set.
       if (!m_set_action_called && 
-          m_modified_rm.severity != rm.severity && 
-          m_modified_rm.action == rm.ro.get_report_action(rm.severity, "*@&*^*^*#")) begin
-         m_modified_rm.action = rm.ro.get_report_action(m_modified_rm.severity, "*@&*^*^*#");
+          m_modified_report_message.severity != rm.severity && 
+          m_modified_report_message.action == 
+            rm.report_object.get_report_action(rm.severity, "*@&*^*^*#")) begin
+         m_modified_report_message.action =
+           rm.report_object.get_report_action(m_modified_report_message.severity, "*@&*^*^*#");
       end
 
       if(thrown == 0) begin 
@@ -505,19 +535,19 @@ virtual class uvm_report_catcher extends uvm_callback;
          endcase   
          break;
       end 
-      catcher = uvm_report_cb::get_next(iter,rm.ro);
+      catcher = uvm_report_cb::get_next(iter,rm.report_object);
     end //while
 
     //update counters if message was returned with demoted severity
     case(rm.severity)
       UVM_FATAL:    
-        if(m_modified_rm.severity < rm.severity)
+        if(m_modified_report_message.severity < rm.severity)
           m_demoted_fatal++;
       UVM_ERROR:
-        if(m_modified_rm.severity < rm.severity)
+        if(m_modified_report_message.severity < rm.severity)
           m_demoted_error++;
       UVM_WARNING:
-        if(m_modified_rm.severity < rm.severity)
+        if(m_modified_report_message.severity < rm.severity)
           m_demoted_warning++;
     endcase
    
@@ -526,7 +556,7 @@ virtual class uvm_report_catcher extends uvm_callback;
 
     // Opto here possible...
     // Yeah, just give back the processed one
-    rm.copy(m_modified_rm);
+    rm.copy(m_modified_report_message);
 
     return thrown; 
   endfunction
@@ -543,14 +573,15 @@ virtual class uvm_report_catcher extends uvm_callback;
     act = this.catch();
 
     if(act == UNKNOWN_ACTION)
-      this.uvm_report_error("RPTCTHR", {"uvm_report_this.catch() in catcher instance ", this.get_name(), " must return THROW or CAUGHT"}, UVM_NONE, `uvm_file, `uvm_line);
+      this.uvm_report_error("RPTCTHR", {"uvm_report_this.catch() in catcher instance ",
+        this.get_name(), " must return THROW or CAUGHT"}, UVM_NONE, `uvm_file, `uvm_line);
 
     if(m_debug_flags & DO_NOT_MODIFY) begin
-      m_modified_rm.severity    = m_orig_rm.severity;
-      m_modified_rm.id          = m_orig_rm.id;
-      m_modified_rm.verbosity   = m_orig_rm.verbosity;
-      m_modified_rm.action      = m_orig_rm.action;
-      m_modified_rm.message     = m_orig_rm.message;
+      m_modified_report_message.severity    = m_orig_report_message.severity;
+      m_modified_report_message.id          = m_orig_report_message.id;
+      m_modified_report_message.verbosity   = m_orig_report_message.verbosity;
+      m_modified_report_message.action      = m_orig_report_message.action;
+      m_modified_report_message.message     = m_orig_report_message.message;
     end     
 
     if(act == CAUGHT  && !(m_debug_flags & DO_NOT_CATCH)) begin

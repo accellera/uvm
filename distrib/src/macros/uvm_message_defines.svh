@@ -51,9 +51,6 @@
 `define uvm_line `__LINE__
 `endif
 
-// FIXME to use the message pool
-// unsafe to rely on single instance
-
 //------------------------------------------------------------------------------
 //
 // Title: Report Macros 
@@ -109,9 +106,8 @@
 
 `define uvm_info(ID, MSG, VERBOSITY) \
    begin \
-     uvm_action action = uvm_report_enabled(VERBOSITY,UVM_INFO,ID); \
-     if(action) \
-       uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line, "", action); \
+     if (uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) \
+       uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line, "", 1); \
    end
 
 // MACRO: `uvm_warning
@@ -126,9 +122,8 @@
 
 `define uvm_warning(ID, MSG) \
    begin \
-     uvm_action action = uvm_report_enabled(UVM_NONE,UVM_WARNING,ID); \
-     if(action) \
-       uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", action); \
+     if (uvm_report_enabled(UVM_NONE,UVM_WARNING,ID)) \
+       uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", 1); \
    end
 
 // MACRO: `uvm_error
@@ -143,9 +138,8 @@
 
 `define uvm_error(ID, MSG) \
    begin \
-     uvm_action action = uvm_report_enabled(UVM_NONE,UVM_ERROR,ID); \
-     if(action) \
-       uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", action); \
+     if (uvm_report_enabled(UVM_NONE,UVM_ERROR,ID)) \
+       uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", 1); \
    end
 
 // MACRO: `uvm_fatal
@@ -160,9 +154,8 @@
 
 `define uvm_fatal(ID, MSG) \
    begin \
-     uvm_action action = uvm_report_enabled(UVM_NONE,UVM_FATAL,ID); \
-     if(action) \
-       uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", action); \
+     if (uvm_report_enabled(UVM_NONE,UVM_FATAL,ID)) \
+       uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", 1); \
    end
 
 // MACRO: `uvm_info_context
@@ -176,9 +169,8 @@
 //`define uvm_info_context(ID, MSG, VERBOSITY, RO, CNTXT_NAME = "") \
 `define uvm_info_context(ID, MSG, VERBOSITY, RO) \
    begin \
-     uvm_action action = RO.uvm_report_enabled(VERBOSITY,UVM_INFO,ID); \
-     if(action) \
-       RO.uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line, "", action); \
+     if (RO.uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) \
+       RO.uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line, "", 1); \
    end
 
 // MACRO: `uvm_warning_context
@@ -192,9 +184,8 @@
 //`define uvm_warning_context(ID, MSG, RO, CNTXT_NAME = "") \
 `define uvm_warning_context(ID, MSG, RO) \
    begin \
-     uvm_action action = RO.uvm_report_enabled(UVM_NONE,UVM_WARNING,ID); \
-     if(action) \
-       RO.uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", action); \
+     if (RO.uvm_report_enabled(UVM_NONE,UVM_WARNING,ID)) \
+       RO.uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", 1); \
    end
 
 // MACRO: `uvm_error_context
@@ -208,9 +199,8 @@
 //`define uvm_error_context(ID, MSG, RO, CNTXT_NAME = "") \
 `define uvm_error_context(ID, MSG, RO) \
    begin \
-     uvm_action action = RO.uvm_report_enabled(UVM_NONE,UVM_ERROR,ID); \
-     if(action) \
-       RO.uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", action); \
+     if (RO.uvm_report_enabled(UVM_NONE,UVM_ERROR,ID)) \
+       RO.uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", 1); \
    end
 
 // MACRO: `uvm_fatal_context
@@ -224,11 +214,99 @@
 //`define uvm_fatal_context(ID, MSG, RO, CNTXT_NAME = "") \
 `define uvm_fatal_context(ID, MSG, RO) \
    begin \
-     uvm_action action = RO.uvm_report_enabled(UVM_NONE,UVM_FATAL,ID); \
-     if(action) \
-       RO.uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", action); \
+     if (RO.uvm_report_enabled(UVM_NONE,UVM_FATAL,ID)) \
+       RO.uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", 1); \
    end
 
+/*
+
+`define __uvm_trace_message_opener(SEVERITY, ID, MSG, VERBOSITY, RO, CNTXT_NAME) \
+  begin \
+    if (RO.uvm_report_enabled(VERBOSITY, SEVERITY, ID) begin \
+      uvm_report_object l_report_object = RO; \
+      uvm_trace_message l_trace_message = uvm_trace_message::get_trace_message(); \
+      l_trace_message.context_name = CNTXT_NAME; \
+      l_trace_message.filename = `uvm_file; \
+      l_trace_message.line = `uvm_line; \
+      l_trace_message.severity = SEVERITY; \
+      l_trace_message.id = ID; \
+      l_trace_message.message = MSG; \
+      l_trace_message.verbosity = VERBOSITY; \
+
+`define __uvm_trace_message_closer \
+      l_report_object.process_report_message(l_trace_message); \
+      l_trace_message.free_report_message(l_trace_message); \
+    end \
+  end
+   
+`define __uvm_trace_message_closer_tr(TR_HANDLE) \
+      l_report_object.process_report_message(l_trace_message); \
+      TR_HANDLE = l_trace_message.tr_handle; \
+      l_trace_message.free_report_message(l_trace_message); \
+    end \
+  end
+   
+// INFO
+
+`define uvm_info_trace_open(ID, MSG, VERBOSITY, RO, CNTXT_NAME = "") \
+  `__uvm_trace_message_populate(UVM_INFO, ID, MSG, VERBOSITY, RO, CNTXT_NAME) \
+
+`define uvm_info_trace_close \
+  `__uvm_trace_message_closer
+
+`define uvm_info_trace_close_tr(TR_HANDLE) \
+  `__uvm_trace_message_closer_tr(TR_HANDLE)
+
+// WARNING
+
+`define uvm_warning_trace_open(ID, MSG, RO, CNTXT_NAME = "") \
+  `__uvm_trace_message_populate(UVM_WARNING, ID, MSG, UVM_NONE, RO, CNTXT_NAME) \
+
+`define uvm_warning_trace_close \
+  `__uvm_trace_message_closer
+
+`define uvm_warning_trace_close_tr(TR_HANDLE) \
+  `__uvm_trace_message_closer_tr(TR_HANDLE)
+
+// ERROR
+
+`define uvm_error_trace_open(ID, MSG, RO, CNTXT_NAME = "") \
+  `__uvm_trace_message_populate(UVM_ERROR, ID, MSG, UVM_NONE, RO, CNTXT_NAME) \
+
+`define uvm_error_trace_close \
+  `__uvm_trace_message_closer
+
+`define uvm_error_trace_close_tr(TR_HANDLE) \
+  `__uvm_trace_message_closer_tr(TR_HANDLE)
+
+// FATAL
+
+`define uvm_fatal_trace_open(ID, MSG, RO, CNTXT_NAME = "") \
+  `__uvm_trace_message_populate(UVM_FATAL, ID, MSG, UVM_NONE, RO, CNTXT_NAME) \
+
+`define uvm_fatal_trace_close \
+  `__uvm_trace_message_closer
+
+`define uvm_fatal_trace_close_tr(TR_HANDLE) \
+  `__uvm_trace_message_closer_tr(TR_HANDLE)
+
+// ADD METHODS
+
+`define uvm_trace_add_tag(NAME, VALUE) \
+      l_trace_message.add_tag(NAME, VALUE); \
+
+`define uvm_trace_add_int(NAME, RADIX) \
+      l_trace_message.add_int(`"NAME`", NAME, RADIX); \
+
+`define uvm_trace_add_string(NAME) \
+      l_trace_message.add_string(`"NAME`", NAME); \
+
+`define uvm_trace_add_object(OBJ) \
+      l_trace_message.add_object(`"OBJ`", OBJ); \
+
+
 // FIXME add message linking macros (GO GO DEFAULTS?)
+
+*/
 
 `endif //UVM_MESSAGE_DEFINES_SVH

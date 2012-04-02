@@ -82,10 +82,6 @@ class uvm_report_object extends uvm_object;
 
   uvm_report_handler m_rh;
 
-  // FIXME to use a pool of free message objects
-  // unsafe to rely on single instance
-  uvm_report_message m_rm;
-
 
   // Function: new
   //
@@ -95,7 +91,6 @@ class uvm_report_object extends uvm_object;
   function new(string name = "");
     super.new(name);
     m_rh = uvm_report_handler::type_id::create(name);
-    m_rm = uvm_report_message::type_id::create("uvm_report_message");
   endfunction
 
 
@@ -104,98 +99,89 @@ class uvm_report_object extends uvm_object;
   //----------------------------------------------------------------------------
 
 
-  // Function: uvm_report_enabled
-  //
-  // Returns the action if the configured verbosity for this severity/id is 
-  // greater than ~verbosity~ else returns 0.
-  // 
-  // See also <get_report_verbosity_level> and <get_report_action>, and the
-  // global version of <uvm_report_enabled>.
-
-// Don't get action here action.  Enabled only.
- 
-  function int uvm_report_enabled(int verbosity, 
-    uvm_severity severity = UVM_INFO, string id = "");
-    // Check the verbosity first.  By far most important check.
-    if (get_report_verbosity_level(severity, id) < verbosity)
-      return 0;
-    return get_report_action(severity, id);
+  function uvm_report_object uvm_get_report_object();
+    return this;
   endfunction
 
-// FIXME what happens with an assigned ACTION and a direct call.  
-// Verbosity must be checked. :(
-// With the above, get action if enabled inside uvm_report_*
+  // Function: uvm_report_enabled
+  //
+  // Returns 1 if the configured verbosity for this severity/id is greater than 
+  // ~verbosity~ else returns 0.
+  // 
+  // See also <get_report_verbosity_level> and the global version of 
+  // <uvm_report_enabled>.
+
+  function int uvm_report_enabled(int verbosity, 
+    uvm_severity severity = UVM_INFO, string id = "");
+    if (get_report_verbosity_level(severity, id) < verbosity)
+      return 0;
+    return 1;
+  endfunction
 
   // Function: uvm_report_info
 
   virtual function void uvm_report_info(string id, string message,
     int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
-    string context_name = "", uvm_action action = UVM_UNASSGND);
-    if (action == UVM_UNASSGND)
-      action = uvm_report_enabled(verbosity,UVM_INFO,id);
-    if(action) begin
-      m_rm.ro = this;
-      // m_rm.rh is filled in by report handler
-      // m_rm.rs is filled in by report server 
-      m_rm.context_name = context_name;
-      // m_rm.file is filled in by report handler
-      m_rm.filename = filename;
-      m_rm.line = line;
-      m_rm.action = action;
-      m_rm.severity = UVM_INFO;
-      m_rm.id = id;
-      m_rm.message = message;
-      m_rm.verbosity = verbosity;
-      m_rh.process(m_rm);
+    string context_name = "", bit report_enabled_checked = 0);
+    uvm_report_message l_report_message;
+    if (report_enabled_checked == 0) begin
+      if (!uvm_report_enabled(verbosity, UVM_INFO, id))
+        return;
     end
+    l_report_message = uvm_report_message::get_report_message();
+    l_report_message.context_name = context_name;
+    l_report_message.filename = filename;
+    l_report_message.line = line;
+    l_report_message.severity = UVM_INFO;
+    l_report_message.id = id;
+    l_report_message.message = message;
+    l_report_message.verbosity = verbosity;
+    process_report_message(l_report_message);
+    l_report_message.free_report_message(l_report_message);
   endfunction
 
   // Function: uvm_report_warning
 
   virtual function void uvm_report_warning( string id, string message,
     int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
-    string context_name = "", uvm_action action = UVM_UNASSGND);
-    if (action == UVM_UNASSGND)
-      action = uvm_report_enabled(verbosity,UVM_WARNING,id);
-    if(action) begin
-      m_rm.ro = this;
-      // m_rm.rh is filled in by report handler
-      // m_rm.rs is filled in by report server 
-      m_rm.context_name = context_name;
-      // m_rm.file is filled in by report handler
-      m_rm.filename = filename;
-      m_rm.line = line;
-      m_rm.action = action;
-      m_rm.severity = UVM_WARNING;
-      m_rm.id = id;
-      m_rm.message = message;
-      m_rm.verbosity = verbosity;
-      m_rh.process(m_rm);
+    string context_name = "", bit report_enabled_checked = 0);
+    uvm_report_message l_report_message;
+    if (report_enabled_checked == 0) begin
+      if (!uvm_report_enabled(verbosity, UVM_WARNING, id))
+        return;
     end
+    l_report_message = uvm_report_message::get_report_message();
+    l_report_message.context_name = context_name;
+    l_report_message.filename = filename;
+    l_report_message.line = line;
+    l_report_message.severity = UVM_WARNING;
+    l_report_message.id = id;
+    l_report_message.message = message;
+    l_report_message.verbosity = verbosity;
+    process_report_message(l_report_message);
+    l_report_message.free_report_message(l_report_message);
   endfunction
 
   // Function: uvm_report_error
 
   virtual function void uvm_report_error ( string id, string message,
     int verbosity = UVM_LOW, string filename = "", int line = 0,
-    string context_name = "", uvm_action action = UVM_UNASSGND);
-    if (action == UVM_UNASSGND)
-      action = uvm_report_enabled(verbosity,UVM_ERROR,id);
-    if(action) begin
-      m_rm.ro = this;
-      // m_rm.rh is filled in by report handler
-      // m_rm.rs is filled in by report server 
-      m_rm.context_name = context_name;
-      // m_rm.file is filled in by report handler
-      m_rm.filename = filename;
-      m_rm.line = line;
-      m_rm.action = action;
-      m_rm.severity = UVM_ERROR;
-      m_rm.id = id;
-      m_rm.message = message;
-      m_rm.verbosity = verbosity;
-      m_rh.process(m_rm);
+    string context_name = "", bit report_enabled_checked = 0);
+    uvm_report_message l_report_message;
+    if (report_enabled_checked == 0) begin
+      if (!uvm_report_enabled(verbosity, UVM_ERROR, id))
+        return;
     end
+    l_report_message = uvm_report_message::get_report_message();
+    l_report_message.context_name = context_name;
+    l_report_message.filename = filename;
+    l_report_message.line = line;
+    l_report_message.severity = UVM_ERROR;
+    l_report_message.id = id;
+    l_report_message.message = message;
+    l_report_message.verbosity = verbosity;
+    process_report_message(l_report_message);
+    l_report_message.free_report_message(l_report_message);
   endfunction
 
   // Function: uvm_report_fatal
@@ -230,24 +216,34 @@ class uvm_report_object extends uvm_object;
 
   virtual function void uvm_report_fatal ( string id, string message,
     int verbosity = UVM_NONE, string filename = "", int line = 0,
-    string context_name = "", uvm_action action = UVM_UNASSGND);
-    if (action == UVM_UNASSGND)
-      action = uvm_report_enabled(verbosity,UVM_FATAL,id);
-    if(action) begin
-      m_rm.ro = this;
-      // m_rm.rh is filled in by report handler
-      // m_rm.rs is filled in by report server 
-      m_rm.context_name = context_name;
-      // m_rm.file is filled in by report handler
-      m_rm.filename = filename;
-      m_rm.line = line;
-      m_rm.action = action;
-      m_rm.severity = UVM_FATAL;
-      m_rm.id = id;
-      m_rm.message = message;
-      m_rm.verbosity = verbosity;
-      m_rh.process(m_rm);
+    string context_name = "", bit report_enabled_checked = 0);
+    uvm_report_message l_report_message;
+    if (report_enabled_checked == 0) begin
+      if (!uvm_report_enabled(verbosity, UVM_FATAL, id))
+        return;
     end
+    l_report_message = uvm_report_message::get_report_message();
+    l_report_message.context_name = context_name;
+    l_report_message.filename = filename;
+    l_report_message.line = line;
+    l_report_message.severity = UVM_FATAL;
+    l_report_message.id = id;
+    l_report_message.message = message;
+    l_report_message.verbosity = verbosity;
+    process_report_message(l_report_message);
+    l_report_message.free_report_message(l_report_message);
+  endfunction
+
+  // Function: process_report_message
+  //
+  // This method takes a preformed uvm_report_message, populates it with 
+  // the report object and passes it to the report handler for processing.
+  // It is expected to be checked for verbosity and populated.
+
+  virtual function void process_report_message (
+    uvm_report_message report_message);
+    report_message.report_object = this;
+    m_rh.process_report_message(report_message);
   endfunction
 
 
