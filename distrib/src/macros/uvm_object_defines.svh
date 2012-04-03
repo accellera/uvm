@@ -154,7 +154,8 @@
      T local_data__; /* Used for copy and compare */ \
      typedef T ___local_type____; \
      string string_aa_key; /* Used for associative array lookups */ \
-     if(__m_uvm_status_container.cycle_check.exists(this)) return; else __m_uvm_status_container.cycle_check[this]=1; \
+     if(what__ inside {UVM_SETINT,UVM_SETSTR,UVM_SETOBJ}) \
+      begin if (__m_uvm_status_container.cycle_check.exists(this)) return; else __m_uvm_status_container.cycle_check[this]=1; end \
      /* Type is verified by uvm_object::compare() */ \
      super.__m_uvm_field_automation(tmp_data__, what__, str__); \
      if(tmp_data__ != null) \
