@@ -1,5 +1,6 @@
 //---------------------------------------------------------------------- 
 //   Copyright 2011 Cadence
+//   Copyright 2012 Synopsys, Inc.
 //   All Rights Reserved Worldwide 
 // 
 //   Licensed under the Apache License, Version 2.0 (the 
@@ -49,16 +50,17 @@ class my_class extends uvm_component;
 endclass
 
 class test extends uvm_test;  
-   agent_config cfg= new("cfg");
+   agent_config cfg;   
 
    `uvm_component_utils_begin(test) 
         `uvm_field_object(cfg,UVM_ALL_ON)
    `uvm_component_utils_end    
-   my_class c=new("class_a",this);
+   my_class c;
         
    virtual function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-            
+    c   = new("class_a",this);      
+    cfg = new("cfg");  
     cfg.parent_component=this;
     set_config_int("class_a","tp",EB);        
     set_config_object("class_a","parent_config",cfg,0);
