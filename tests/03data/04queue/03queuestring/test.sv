@@ -37,10 +37,12 @@ module test;
   class myobject extends uvm_sequence_item;
     string str1[$];
     string str2[$];
+    string str3[$];
 
     `uvm_object_utils_begin(myobject)
       `uvm_field_queue_string(str1, UVM_DEFAULT)
       `uvm_field_queue_string(str2, UVM_DEFAULT)
+      `uvm_field_queue_string(str3, UVM_DEFAULT)
     `uvm_object_utils_end
 
   function new(string name="myobject");
@@ -63,25 +65,6 @@ module test;
     task run;
       byte unsigned bytes[];
       myobject cp;
-      string exp = {
-        "----------------------------------------------------------------------\n",
-        "Name                     Type                Size                Value\n",
-        "----------------------------------------------------------------------\n",
-        "obj                      myobject            -                       -\n",
-        "  str1                   da(string)          5                       -\n",
-        "    [0]                  string              7                 hello_0\n",
-        "    [1]                  string              7                 hello_1\n",
-        "    [2]                  string              7                 hello_2\n",
-        "    [3]                  string              7                 hello_3\n",
-        "    [4]                  string              7                 hello_4\n",
-        "  str2                   da(string)          5                       -\n",
-        "    [0]                  string              7                 howdy_0\n",
-        "    [1]                  string              7                 howdy_1\n",
-        "    [2]                  string              7                 howdy_2\n",
-        "    [3]                  string              7                 goodbye\n",
-        "    [4]                  string              7                 howdy_4\n",
-        "----------------------------------------------------------------------\n"
-      };
 
       obj.set_name("obj");
 
@@ -103,7 +86,7 @@ module test;
 
       uvm_default_packer.use_metadata = 1;
       void'(cp.pack_bytes(bytes));
-      if(bytes.size() != 88)
+      if(bytes.size() != 92)
         uvm_report_info("FAILED", "*** UVM TEST FAILED compare passed, packed incorrectly ***", UVM_NONE);
 
       void'(obj.unpack_bytes(bytes));
