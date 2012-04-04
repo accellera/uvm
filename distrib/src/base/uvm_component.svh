@@ -2900,11 +2900,28 @@ function void uvm_component::set_config_object(string inst_name,
       value = tmp;
   end
 
+
+  uvm_config_object::set(this, inst_name, field_name, value);
+
+  begin
+     static bit m_plusarg_checked;
+     static int m_plusarg_cnt;
+     if (!m_plusarg_checked) begin
+        uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
+        string throw_away;
+        m_plusarg_cnt = clp.get_arg_value("+UVM_IGNORE_SET_CONFIG_CLONE", throw_away);
+        if (m_plusarg_cnt > 0) begin
+           `uvm_info("SETCFGOBJ_IGN", "Detected the use of +UVM_IGNORE_SET_CONFIG_CLONE, the library will ignore clone bits passed to set_config_object() when calling get_config_object().  This is a violation of the UVM Reference Specification.", UVM_NONE)
+        end
+        m_plusarg_checked = 1;
+     end
+     if (m_plusarg_cnt > 0)
+       return;
+  end
+   
   wrapper = new;
   wrapper.obj = value;
   wrapper.clone = clone;
-
-  uvm_config_object::set(this, inst_name, field_name, value);
   uvm_config_db#(uvm_config_object_wrapper)::set(this, inst_name, field_name, wrapper);
 endfunction
 
@@ -2986,6 +3003,15 @@ function bit uvm_component::get_config_object (string field_name,
       value = ro.read(this);
    end
 
+   begin
+      static bit m_semantic_change_msg_printed = 0;
+      if (!m_semantic_change_msg_printed && !set_clone && clone) begin
+         `uvm_info("GETCFGOBJ_CHG", "The semantic of uvm_component::get_config_object() changed between UVM 1.1a and 1.1b.  The implementations in the library prior to 1.1b did not obey the uvm_component::set_config_object()'s clone bit per API as specified in the standard.  To produce the faulty clone-bit semantic that was implemented in 1.1a and earlier, re-run the test with +UVM_IGNORE_SET_CONFIG_CLONE", UVM_NONE)
+         m_semantic_change_msg_printed = 1;
+      end
+   end
+      
+   
    // Honor the clone bit from the set (which defaults to 1 if the users didn't
    // use set_config_object, since set_config_object would have defaulted to 1)
    if((set_clone && clone) && value != null) begin
