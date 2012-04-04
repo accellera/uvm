@@ -250,7 +250,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     end
 
     if (this_priority < -1) begin
-      uvm_report_fatal("SEQPRI", $psprintf("Sequence %s start has illegal priority: %0d",
+      uvm_report_fatal("SEQPRI", $sformatf("Sequence %s start has illegal priority: %0d",
                                            get_full_name(),
                                            this_priority), UVM_NONE);
     end
