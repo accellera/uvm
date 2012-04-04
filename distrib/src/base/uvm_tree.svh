@@ -47,7 +47,7 @@ virtual class uvm_tree extends uvm_report_object;
   // If ~ctxt~ is not supplied, the tree does not have a context.
   // All classes extended from this base class must have a similar constructor.
 
-  extern function new (string name, uvm_tree ctxt = null);
+  extern function new (string name, uvm_object ctxt = null);
 
   // Function: set_name
   //
@@ -158,7 +158,7 @@ endclass
 // new
 // ---
 
-function uvm_tree::new (string name, uvm_tree ctxt=null);
+function uvm_tree::new (string name, uvm_object ctxt=null);
    super.new(name, ctxt);
 endfunction
 
@@ -253,7 +253,19 @@ endfunction
 
 
 function bit uvm_tree::is_branch(uvm_tree branch, int max_lvl = -1);
-   return branch.is_context(this, max_lvl);
+   // It is a branch of 'this' only if 'this' is a uvm_tree-only context of branch
+   uvm_tree o;
+   
+   if (branch == this) return 0;
+
+   o = branch;
+   forever begin
+      if (!$cast(o, o.get_context()) || o == null) return 0;
+      if (this == o) return 1;
+      if (max_lvl-- == 0) return 0;
+   end
+
+   return 0;
 endfunction
 
 
@@ -281,4 +293,10 @@ function uvm_tree uvm_tree::find_branch (string name);
 
    // Keep searching
    return br.find_branch(name.substr(i, name.len()-1));
+endfunction
+
+
+function uvm_object uvm_tree::create (string name="");
+   `uvm_fatal("UVM/TREE/CREAT", "Do not call create() on uvm_tree extension. Use create_scoped_object() instead.")
+   return null;
 endfunction

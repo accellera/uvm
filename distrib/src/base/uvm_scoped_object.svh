@@ -217,10 +217,11 @@ function bit uvm_scoped_object::is_context(uvm_object obj, int max_lvl = -1);
    if (obj == this) return 0;
 
    o = this;
-   while (max_lvl-- >= 0) begin
+   forever begin
       o = o.get_context();
       if (o == null) return 0;
       if (obj == o) return 1;
+      if (max_lvl-- == 0) return 0;
    end
 
    return 0;
