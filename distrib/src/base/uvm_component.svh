@@ -1221,7 +1221,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: set_inst_override
   //
-  // A convenience function for <uvm_factory::set_inst_override_by_type>, this
+  // A convenience function for <uvm_factory::set_inst_override_by_name>, this
   // method registers a factory override for components created at this level
   // of hierarchy or below. In typical usage, this method is equivalent to:
   //
