@@ -804,7 +804,7 @@ function void uvm_root::m_do_dump_args();
   string all_args[$];
   string out_string;
   if(clp.get_arg_matches("+UVM_DUMP_CMDLINE_ARGS", dump_args)) begin
-    void'(clp.get_args(all_args));
+    clp.get_args(all_args);
     for (int i = 0; i < all_args.size(); i++) begin
       if (all_args[i] == "__-f__")
         continue;
