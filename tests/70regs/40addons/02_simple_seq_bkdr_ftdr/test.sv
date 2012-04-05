@@ -237,7 +237,8 @@ module test_top();
   initial run_test("test");
   final
   begin
-    uvm_report_server svr = uvm_report_server::get_server();
+    uvm_report_server svr;
+    svr = uvm_report_server::get_server();
     svr.report_summarize();
     if (svr.get_severity_count(UVM_FATAL) + svr.get_severity_count(UVM_ERROR) == 0)
       $write("** UVM TEST PASSED **\n");

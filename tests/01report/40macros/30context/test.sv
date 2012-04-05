@@ -30,16 +30,18 @@ initial
   begin
     `uvm_info("ID0", "Message 0", UVM_NONE)
     `uvm_info("ID1", "Message 1", UVM_NONE)
-    `uvm_info_context("ID2", "Message 2", UVM_NONE, uvm_root::get())
+    //`uvm_info_context("ID2", "Message 2", UVM_NONE, uvm_root::get())
+    `uvm_info_context("ID2", "Message 2", UVM_NONE, uvm_top)
     `uvm_info_context("ID3", "Message 3", UVM_NONE, urm0)
     `uvm_info_context("ID4", "Message 4", UVM_NONE, urm1)
-    `uvm_info_context("ID5", "Message 5", UVM_NONE, urm0, "contextA")
-    `uvm_info_context("ID6", "Message 6", UVM_NONE, urm1, "contextA")
-    `uvm_info_context("ID7", "Message 7", UVM_NONE, urm0, "contextB")
-    `uvm_info_context("ID8", "Message 8", UVM_NONE, urm1, "contextB")
-    `uvm_info_context("ID9", "Message 9", UVM_NONE, urm0, $psprintf("%m"))
-    `uvm_info_context("IDA", "Message A", UVM_NONE, urm1, $psprintf("%m"))
-    `uvm_info_context("IDB", "Message B", UVM_NONE, uvm_root::get(), $psprintf("%m"))
+    `uvm_info_context("ID5", "Message 5", UVM_NONE, urm0) //, "contextA")
+    `uvm_info_context("ID6", "Message 6", UVM_NONE, urm1) //, "contextA")
+    `uvm_info_context("ID7", "Message 7", UVM_NONE, urm0) //, "contextB")
+    `uvm_info_context("ID8", "Message 8", UVM_NONE, urm1) //, "contextB")
+    `uvm_info_context("ID9", "Message 9", UVM_NONE, urm0) //, $psprintf("%m"))
+    `uvm_info_context("IDA", "Message A", UVM_NONE, urm1) //, $psprintf("%m"))
+    //`uvm_info_context("IDB", "Message B", UVM_NONE, uvm_root::get())
+    `uvm_info_context("IDB", "Message B", UVM_NONE, uvm_top)
   end
 
 endmodule

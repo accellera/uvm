@@ -236,6 +236,9 @@ class uvm_recorder extends uvm_object;
     string stream_name;
 
 /*
+
+    Not needed.  Implement the report message do_records specifically
+
     if (report_message.context_name == "")
       stream_name = report_message.report_object.get_full_name();
     else

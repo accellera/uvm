@@ -102,12 +102,15 @@
 // Calls uvm_report_info if ~VERBOSITY~ is lower than the configured verbosity of
 // the associated reporter. ~ID~ is given as the message tag and ~MSG~ is given as
 // the message text. The file and line are also sent to the uvm_report_info call.
-//
 
-`define uvm_info(ID, MSG, VERBOSITY) \
+//`define uvm_info(ID, MSG, VERBOSITY) \
+`define uvm_info(ID, MSG, VERBOSITY, RO = uvm_get_report_object(), CNTXT_NAME = "") \
    begin \
-     if (uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) \
-       uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line, "", 1); \
+     uvm_report_object l_report_object; \
+     l_report_object = RO; \
+     if (l_report_object.uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) \
+       l_report_object.uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line, \
+         CNTXT_NAME, 1); \
    end
 
 // MACRO: `uvm_warning
@@ -120,10 +123,14 @@
 // ~MSG~ is given as the message text. The file and line are also sent to the 
 // uvm_report_warning call.
 
-`define uvm_warning(ID, MSG) \
+//`define uvm_warning(ID, MSG) \
+`define uvm_warning(ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "") \
    begin \
-     if (uvm_report_enabled(UVM_NONE,UVM_WARNING,ID)) \
-       uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", 1); \
+     uvm_report_object l_report_object; \
+     l_report_object = RO; \
+     if (l_report_object.uvm_report_enabled(UVM_NONE,UVM_WARNING,ID)) \
+       l_report_object.uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, \
+         CNTXT_NAME, 1); \
    end
 
 // MACRO: `uvm_error
@@ -136,10 +143,14 @@
 // ~MSG~ is given as the message text. The file and line are also sent to the 
 // uvm_report_error call.
 
-`define uvm_error(ID, MSG) \
+//`define uvm_error(ID, MSG) \
+`define uvm_error(ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "") \
    begin \
-     if (uvm_report_enabled(UVM_NONE,UVM_ERROR,ID)) \
-       uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", 1); \
+     uvm_report_object l_report_object; \
+     l_report_object = RO; \
+     if (l_report_object.uvm_report_enabled(UVM_NONE,UVM_ERROR,ID)) \
+       l_report_object.uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, \
+         CNTXT_NAME, 1); \
    end
 
 // MACRO: `uvm_fatal
@@ -152,11 +163,19 @@
 // ~MSG~ is given as the message text. The file and line are also sent to the 
 // uvm_report_fatal call.
 
-`define uvm_fatal(ID, MSG) \
+//`define uvm_fatal(ID, MSG) \
+`define uvm_fatal(ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "") \
    begin \
-     if (uvm_report_enabled(UVM_NONE,UVM_FATAL,ID)) \
-       uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", 1); \
+     uvm_report_object l_report_object; \
+     l_report_object = RO; \
+     if (l_report_object.uvm_report_enabled(UVM_NONE,UVM_FATAL,ID)) \
+       l_report_object.uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, \
+         CNTXT_NAME, 1); \
    end
+
+
+`ifndef UVM_NO_DEPRECATED
+
 
 // MACRO: `uvm_info_context
 //
@@ -166,7 +185,6 @@
 // context, or <uvm_report_object>, in which the message is printed be 
 // explicitly supplied as a macro argument.
 
-//`define uvm_info_context(ID, MSG, VERBOSITY, RO, CNTXT_NAME = "") \
 `define uvm_info_context(ID, MSG, VERBOSITY, RO) \
    begin \
      if (RO.uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) \
@@ -181,7 +199,6 @@
 // context, or <uvm_report_object>, in which the message is printed be
 // explicitly supplied as a macro argument.
 
-//`define uvm_warning_context(ID, MSG, RO, CNTXT_NAME = "") \
 `define uvm_warning_context(ID, MSG, RO) \
    begin \
      if (RO.uvm_report_enabled(UVM_NONE,UVM_WARNING,ID)) \
@@ -196,7 +213,6 @@
 // context, or <uvm_report_object> in which the message is printed be 
 // explicitly supplied as a macro argument.
 
-//`define uvm_error_context(ID, MSG, RO, CNTXT_NAME = "") \
 `define uvm_error_context(ID, MSG, RO) \
    begin \
      if (RO.uvm_report_enabled(UVM_NONE,UVM_ERROR,ID)) \
@@ -211,14 +227,34 @@
 // context, or <uvm_report_object>, in which the message is printed be 
 // explicitly supplied as a macro argument.
 
-//`define uvm_fatal_context(ID, MSG, RO, CNTXT_NAME = "") \
 `define uvm_fatal_context(ID, MSG, RO) \
    begin \
      if (RO.uvm_report_enabled(UVM_NONE,UVM_FATAL,ID)) \
        RO.uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", 1); \
    end
 
+
+`endif
+
+
 /*
+
+begin macro issues message info (processing message), begin_tr is called,
+  record state updated, returns the trace_message if criteria met, otherwise 
+  null
+
+users can call trace_message, adds information is trace_message is not null,
+  no message for these adds
+
+end macro issues message info (processing message), end_tr is called,
+  record state updated, returns the trace_message (reference is passed in so 
+  means nothing),
+
+link macro checks nulls and tr_handle for -1, does the free_message
+
+TOUGH QUESTION: Who does the free?  link can but what if not linking...
+  otherwise, end macro has true flavors--one that frees (preventing linking)
+  and one that does not free (allowing linking)
 
 `define __uvm_trace_message_opener(SEVERITY, ID, MSG, VERBOSITY, RO, CNTXT_NAME) \
   begin \

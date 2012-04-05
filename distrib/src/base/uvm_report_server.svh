@@ -385,7 +385,7 @@ class uvm_report_server extends uvm_object;
 
     // Process UVM_RM_RECORD action (send to recorder)
     if(report_message.action & UVM_RM_RECORD) 
-      uvm_default_recorder.record_report_message(report_message);
+      report_message.record(uvm_default_recorder);
 
     // Process UVM_DISPLAY and UVM_LOG action (send to logger)
     if((report_message.action & UVM_DISPLAY) || (report_message.action & UVM_LOG)) begin

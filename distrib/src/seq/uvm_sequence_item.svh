@@ -353,21 +353,18 @@ class uvm_sequence_item extends uvm_transaction;
     int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
     string context_name = "", bit report_enabled_checked = 0);
     uvm_report_message l_report_message;
+    string l_string;
     if (report_enabled_checked == 0) begin
       if (!uvm_report_enabled(verbosity, UVM_INFO, id))
         return;
     end
-    l_report_message = uvm_report_message::get_report_message();
     if (context_name == "")
-      l_report_message.context_name = get_sequence_path();
+      l_string = get_sequence_path();
     else
-      l_report_message.context_name = context_name;
-    l_report_message.filename = filename;
-    l_report_message.line = line;
-    l_report_message.severity = UVM_INFO;
-    l_report_message.id = id;
-    l_report_message.message = message;
-    l_report_message.verbosity = verbosity;
+      l_string = context_name;
+    l_report_message = uvm_report_message::get_report_message();
+    l_report_message.m_set_report_message(l_string, filename,
+      line, UVM_INFO, id, message, verbosity);
     process_report_message(l_report_message);
     l_report_message.free_report_message(l_report_message);
 
@@ -379,21 +376,18 @@ class uvm_sequence_item extends uvm_transaction;
     int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
     string context_name = "", bit report_enabled_checked = 0);
     uvm_report_message l_report_message;
+    string l_string;
     if (report_enabled_checked == 0) begin
       if (!uvm_report_enabled(verbosity, UVM_WARNING, id))
         return;
     end
-    l_report_message = uvm_report_message::get_report_message();
     if (context_name == "")
-      l_report_message.context_name = get_sequence_path();
+      l_string = get_sequence_path();
     else
-      l_report_message.context_name = context_name;
-    l_report_message.filename = filename;
-    l_report_message.line = line;
-    l_report_message.severity = UVM_WARNING;
-    l_report_message.id = id;
-    l_report_message.message = message;
-    l_report_message.verbosity = verbosity;
+      l_string = context_name;
+    l_report_message = uvm_report_message::get_report_message();
+    l_report_message.m_set_report_message(l_string, filename,
+      line, UVM_WARNING, id, message, verbosity);
     process_report_message(l_report_message);
     l_report_message.free_report_message(l_report_message);
 
@@ -405,21 +399,18 @@ class uvm_sequence_item extends uvm_transaction;
     int verbosity = UVM_LOW, string filename = "", int line = 0,
     string context_name = "", bit report_enabled_checked = 0);
     uvm_report_message l_report_message;
+    string l_string;
     if (report_enabled_checked == 0) begin
       if (!uvm_report_enabled(verbosity, UVM_ERROR, id))
         return;
     end
-    l_report_message = uvm_report_message::get_report_message();
     if (context_name == "")
-      l_report_message.context_name = get_sequence_path();
+      l_string = get_sequence_path();
     else
-      l_report_message.context_name = context_name;
-    l_report_message.filename = filename;
-    l_report_message.line = line;
-    l_report_message.severity = UVM_ERROR;
-    l_report_message.id = id;
-    l_report_message.message = message;
-    l_report_message.verbosity = verbosity;
+      l_string = context_name;
+    l_report_message = uvm_report_message::get_report_message();
+    l_report_message.m_set_report_message(l_string, filename,
+      line, UVM_ERROR, id, message, verbosity);
     process_report_message(l_report_message);
     l_report_message.free_report_message(l_report_message);
 
@@ -436,21 +427,18 @@ class uvm_sequence_item extends uvm_transaction;
     int verbosity = UVM_NONE, string filename = "", int line = 0,
     string context_name = "", bit report_enabled_checked = 0);
     uvm_report_message l_report_message;
+    string l_string;
     if (report_enabled_checked == 0) begin
       if (!uvm_report_enabled(verbosity, UVM_FATAL, id))
         return;
     end
-    l_report_message = uvm_report_message::get_report_message();
     if (context_name == "")
-      l_report_message.context_name = get_sequence_path();
+      l_string = get_sequence_path();
     else
-      l_report_message.context_name = context_name;
-    l_report_message.filename = filename;
-    l_report_message.line = line;
-    l_report_message.severity = UVM_FATAL;
-    l_report_message.id = id;
-    l_report_message.message = message;
-    l_report_message.verbosity = verbosity;
+      l_string = context_name;
+    l_report_message = uvm_report_message::get_report_message();
+    l_report_message.m_set_report_message(l_string, filename,
+      line, UVM_FATAL, id, message, verbosity);
     process_report_message(l_report_message);
     l_report_message.free_report_message(l_report_message);
 

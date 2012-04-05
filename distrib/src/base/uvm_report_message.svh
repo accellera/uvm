@@ -15,12 +15,11 @@ class uvm_report_message extends uvm_object;
   UVM_FILE file;
   string filename;
   int line;
-  // fix this to be uvm_action_type?
-  uvm_action action; 
   uvm_severity_type severity; 
   string id;
   string message;
   int verbosity;
+  uvm_action action; 
   int tr_handle;
 
   `uvm_object_utils(uvm_report_message)
@@ -41,7 +40,19 @@ class uvm_report_message extends uvm_object;
       return l_report_message;
     end
   endfunction
- 
+
+  function void m_set_report_message(string context_name, string filename,
+    int line, uvm_severity_type severity, string id,
+    string message, int verbosity);
+    this.context_name = context_name;
+    this.filename = filename;
+    this.line = line;
+    this.severity = severity;
+    this.id = id;
+    this.message = message;
+    this.verbosity = verbosity;
+  endfunction
+
   virtual function void free_report_message(uvm_report_message report_message);
     report_message.clear();
     report_messages.push_back(report_message);
@@ -218,6 +229,8 @@ endclass
 // to a uvm_report_message.
 
 class uvm_trace_message extends uvm_report_message;
+
+  // Needs enum to say it BEGIN_TR, END_TR, or UNKNOWN?
 
   `uvm_object_utils(uvm_trace_message)
 
