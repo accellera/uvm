@@ -22,6 +22,8 @@ class uvm_report_message extends uvm_object;
   uvm_action action; 
   int tr_handle;
 
+  int m_rh_stream_handles[string];
+
   `uvm_object_utils(uvm_report_message)
 
   function new(string name = "uvm_report_message");
@@ -91,12 +93,44 @@ class uvm_report_message extends uvm_object;
 
   endfunction
 
-  function void do_record(uvm_recorder recorder);
+  function int m_get_stream_id(uvm_recorder recorder);
+
+    string l_string;
+
+    if (context_name == "")
+      l_string = report_object.get_full_name();
+    else
+      l_string = {report_object.get_full_name(), "@@", context_name};
+    if(!m_rh_stream_handles.exists(l_string)) begin
+      int l_sh = recorder.create_stream(l_string, "uvm_report_message stream", "UVM");
+      m_rh_stream_handles[l_string] = l_sh;
+    end
+    return m_rh_stream_handles[l_string];
+
+  endfunction
+
+  virtual function void record_message(uvm_recorder recorder);
+  
+    int l_stream_id;
+
+    if(recorder == null) 
+      recorder = uvm_default_recorder;
+
+    l_stream_id = m_get_stream_id(recorder);
+
+    tr_handle = recorder.begin_tr("uvm_report_message", l_stream_id,
+      get_name(), "", "", $time);
+
+    recorder.tr_handle = tr_handle;
+    this.record(recorder);
+    recorder.end_tr(tr_handle, $time);
+
+  endfunction
+
+  function void m_record_core_properties(uvm_recorder recorder);
 
     string l_string;
     uvm_verbosity l_verbosity;
-
-    super.do_record(recorder);
 
     // Replace these with recording macros when vendor supported.
     if (context_name != "")
@@ -115,6 +149,14 @@ class uvm_report_message extends uvm_object;
       l_string.itoa(verbosity);
       recorder.record_string("verbosity", l_string);
     end
+
+  endfunction
+
+  function void do_record(uvm_recorder recorder);
+
+    super.do_record(recorder);
+
+    m_record_core_properties(recorder);
 
   endfunction
 

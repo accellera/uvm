@@ -224,44 +224,6 @@ class uvm_recorder extends uvm_object;
   endfunction
 
 
-  int m_rh_stream_handles[string];
-
-  // Function: record_report_message
-  //
-  // Records the message.  Used by the report server.
-  
-  virtual function void record_report_message(uvm_report_message report_message);
-
-    integer l_tr_handle;
-    string stream_name;
-
-/*
-
-    Not needed.  Implement the report message do_records specifically
-
-    if (report_message.context_name == "")
-      stream_name = report_message.report_object.get_full_name();
-    else
-      stream_name = {report_message.report_object.get_full_name(), "@@", 
-        report_message.context_name};
-
-    if(!m_rh_stream_handles.exists(stream_name)) begin
-      int l_sh = create_stream(stream_name, "message_stream", "UVM");
-      m_rh_stream_handles[stream_name] = l_sh;
-    end
-
-    // Move this into report message?
-    tr_handle = begin_tr("message", m_rh_stream_handles[stream_name],
-      report_message.get_name(), "", "", $time);
-    l_tr_handle = tr_handle;  // calling record() resets tr_handle at the end
-    report_message.record();
-    end_tr(l_tr_handle, $time);
-    report_message.tr_handle = l_tr_handle;
-*/
-
-  endfunction
-
-
   uvm_scope_stack scope = new;
 
 
@@ -299,7 +261,8 @@ class uvm_recorder extends uvm_object;
                                           string scope);
     if (open_file()) begin
       m_handles[++handle] = 1;
-      $fdisplay(file,"  CREATE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",$time,name,t,scope,handle);
+      //$fdisplay(file,"  CREATE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",$time,name,t,scope,handle);
+      $display("  CREATE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",$time,name,t,scope,handle);
       return handle;
     end
     return 0;
@@ -327,8 +290,14 @@ class uvm_recorder extends uvm_object;
                                integer numbits=1024);
     string rdx=uvm_radix_to_string(radix);
     if (open_file())
-      $fdisplay(file,"  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%0d   RADIX:%s BITS=%0d}",
-                 $time,txh, nm, (value & ((1<<numbits)-1)),radix.name(),numbits);
+      //$fdisplay(file,"  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%0d   RADIX:%s BITS=%0d}",
+      //           $time,txh, nm, (value & ((1<<numbits)-1)),radix.name(),numbits);
+      case (radix)
+        UVM_STRING:  $display("      SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%0s   RADIX:%s BITS=%0d}",
+          $time,txh, nm, (value & ((1<<numbits)-1)),radix.name(),numbits);
+        default:  $display("      SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%0d   RADIX:%s BITS=%0d}",
+          $time,txh, nm, (value & ((1<<numbits)-1)),radix.name(),numbits);
+      endcase
   endfunction
   
   
@@ -351,7 +320,9 @@ class uvm_recorder extends uvm_object;
                                      time begin_time=0);
     if (open_file()) begin
       m_handles[++handle] = 1;
-      $fdisplay(file,"BEGIN @%0t {TXH:%0d STREAM:%0d NAME:%s TIME=%0t  TYPE=\"%0s\" LABEL:\"%0s\" DESC=\"%0s\"",
+      //$fdisplay(file,"BEGIN @%0t {TXH:%0d STREAM:%0d NAME:%s TIME=%0t  TYPE=\"%0s\" LABEL:\"%0s\" DESC=\"%0s\"",
+      //  $time,handle,stream,nm,begin_time,txtype,label,desc);
+      $display("    BEGIN @%0t {TXH:%0d STREAM:%0d NAME:%s TIME=%0t  TYPE=\"%0s\" LABEL:\"%0s\" DESC=\"%0s\"",
         $time,handle,stream,nm,begin_time,txtype,label,desc);
       return handle;
     end
@@ -364,7 +335,8 @@ class uvm_recorder extends uvm_object;
   //
   virtual function void end_tr (integer handle, time end_time=0);
     if (open_file())
-      $fdisplay(file,"END @%0t {TXH:%0d TIME=%0t}",$time,handle,end_time);
+      //$fdisplay(file,"END @%0t {TXH:%0d TIME=%0t}",$time,handle,end_time);
+      $display("    END @%0t {TXH:%0d TIME=%0t}",$time,handle,end_time);
   endfunction
   
   

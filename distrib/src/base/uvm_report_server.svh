@@ -384,8 +384,9 @@ class uvm_report_server extends uvm_object;
     incr_id_count(report_message.id);
 
     // Process UVM_RM_RECORD action (send to recorder)
-    if(report_message.action & UVM_RM_RECORD) 
-      report_message.record(uvm_default_recorder);
+    if(report_message.action & UVM_RM_RECORD) begin
+      report_message.record_message(uvm_default_recorder);
+    end
 
     // Process UVM_DISPLAY and UVM_LOG action (send to logger)
     if((report_message.action & UVM_DISPLAY) || (report_message.action & UVM_LOG)) begin
