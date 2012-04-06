@@ -60,27 +60,30 @@ module test;
     endfunction
 
     function void set_up_index();
-        build_ph               = uvm_build_phase::get();
-        connect_ph             = uvm_connect_phase::get();
-        end_of_elaboration_ph  = uvm_end_of_elaboration_phase::get();
-        start_of_simulation_ph = uvm_start_of_simulation_phase::get();
-        run_ph                 = uvm_run_phase::get();
-        extract_ph             = uvm_extract_phase::get();
-        check_ph               = uvm_check_phase::get();
-        report_ph              = uvm_report_phase::get();
-        final_ph               = uvm_final_phase::get();
-        pre_reset_ph           = uvm_pre_reset_phase::get();
-        reset_ph               = uvm_reset_phase::get();
-        post_reset_ph          = uvm_post_reset_phase::get();
-        pre_configure_ph       = uvm_pre_configure_phase::get();
-        configure_ph           = uvm_configure_phase::get();
-        post_configure_ph      = uvm_post_configure_phase::get();
-        pre_main_ph            = uvm_pre_main_phase::get();
-        main_ph                = uvm_main_phase::get();
-        post_main_ph           = uvm_post_main_phase::get();
-        pre_shutdown_ph        = uvm_pre_shutdown_phase::get();
-        shutdown_ph            = uvm_shutdown_phase::get();
-        post_shutdown_ph       = uvm_post_shutdown_phase::get();
+        uvm_domain l_uvm_domain = uvm_domain::get_uvm_domain() ;
+        uvm_domain l_common_domain = uvm_domain::get_common_domain() ;
+        
+        build_ph               = l_common_domain.find_by_name("build");
+        connect_ph             = l_common_domain.find_by_name("connect");
+        end_of_elaboration_ph  = l_common_domain.find_by_name("end_of_elaboration");
+        start_of_simulation_ph = l_common_domain.find_by_name("start_of_simulation");
+        run_ph                 = l_common_domain.find_by_name("run");
+        extract_ph             = l_common_domain.find_by_name("extract");
+        check_ph               = l_common_domain.find_by_name("check");
+        report_ph              = l_common_domain.find_by_name("report");
+        final_ph               = l_common_domain.find_by_name("final");
+        pre_reset_ph           = l_uvm_domain.find_by_name("pre_reset");
+        reset_ph               = l_uvm_domain.find_by_name("reset");
+        post_reset_ph          = l_uvm_domain.find_by_name("post_reset");
+        pre_configure_ph       = l_uvm_domain.find_by_name("pre_configure");
+        configure_ph           = l_uvm_domain.find_by_name("configure");
+        post_configure_ph      = l_uvm_domain.find_by_name("post_configure");
+        pre_main_ph            = l_uvm_domain.find_by_name("pre_main");
+        main_ph                = l_uvm_domain.find_by_name("main");
+        post_main_ph           = l_uvm_domain.find_by_name("post_main");
+        pre_shutdown_ph        = l_uvm_domain.find_by_name("pre_shutdown");
+        shutdown_ph            = l_uvm_domain.find_by_name("shutdown");
+        post_shutdown_ph       = l_uvm_domain.find_by_name("post_shutdown");
 
         $display("uvm_build_ph id is %0d type=%s",build_ph.get_inst_id(),build_ph.get_phase_type());
       //index[uvm_build_ph]               = 1;
@@ -111,7 +114,7 @@ module test;
     endfunction
 
     function void phase_started(uvm_phase phase);
-      uvm_phase imp = phase.get_imp();
+      uvm_phase imp = phase;
       int spread;
       bit is, isb, isa;
       static bit done;
@@ -131,6 +134,11 @@ module test;
         `uvm_error("UNKNOWN_PHASE", {"Phase '", imp.get_name(), "' (id=",$sformatf("%0d",imp.get_inst_id()),") not expected. "})
         //$display("uvm_build_ph id is %0d",build_ph.get_inst_id());
       end
+
+      if (phase.is_before(null)) `uvm_error("EXP_NOT_BEFORE",   {"Expected ",phase.get_name(),".is_before(null) to be FALSE"});
+      if (phase.is(null)) `uvm_error("EXP_NOT_IS",   {"Expected ",phase.get_name(),".is(null) to be FALSE"});
+      if (phase.is_after(null)) `uvm_error("EXP_NOT_AFTER",   {"Expected ",phase.get_name(),".is_after(null) to be FALSE"});
+      
       foreach (index[ph]) begin
 
         is = phase.is(ph);
