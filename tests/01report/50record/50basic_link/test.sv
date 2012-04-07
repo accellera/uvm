@@ -56,6 +56,12 @@ initial begin
     #25;
     `uvm_info_end(l_trace_messageB, "Ending B...", l_tr_handle1)
 
+    #30;
+    `uvm_link(l_tr_handle0, l_tr_handle1, "child", "TEST_L", UVM_LOW, urm1)
+
+    #100;
+    `uvm_link(-1 , l_tr_handle1, "BAD", "TEST_L", UVM_LOW, urm1)
+
 end
 
 endmodule

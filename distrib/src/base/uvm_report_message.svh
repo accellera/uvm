@@ -2,6 +2,7 @@ typedef class uvm_report_server;
 typedef class uvm_report_handler;
 typedef class uvm_root;
  
+// FIXME fix the m_ on methods usage!!!
 
 // uvm_report_message.  Base message class.  Holds the basics of a message.
 
@@ -284,8 +285,8 @@ class uvm_trace_message extends uvm_report_message;
   typedef enum { TRC_INIT, TRC_BGN, TRC_END } state_e;
 
   uvm_table_printer l_printer;
-
   state_e state;
+  string end_message;
 
   `uvm_object_utils(uvm_trace_message)
 
@@ -317,23 +318,22 @@ class uvm_trace_message extends uvm_report_message;
     trace_messages.push_back(trace_message);
   endfunction
 
-  // Possibly not necessary...
-  function void m_set_trace_message(string context_name, string filename,
-    int line, uvm_severity_type severity, string id,
-    string message, int verbosity);
-    m_set_report_message(context_name, filename, line, severity, id, message,
-      verbosity);
-  endfunction
-
   function string convert2string();
-    convert2string = {$sformatf("%s : ", state.name()), message};
-    if (trace_element_container.elements.size() != 0)
-      convert2string = 
-        {convert2string, "\n", trace_element_container.sprint(l_printer)};
+    if (state == TRC_BGN)
+      convert2string = {$sformatf("%s(id:%0d) : ", state.name(), tr_handle),
+        message};
+    if (state == TRC_END) begin
+      convert2string = {$sformatf("%s(id:%0d) : ", state.name(), tr_handle),
+        end_message};
+      if (trace_element_container.elements.size() != 0)
+        convert2string = {convert2string, "\n", 
+          trace_element_container.sprint(l_printer)};
+    end
   endfunction
 
   virtual function void clear();
     super.clear();
+    end_message = "";
     delete_elements();
   endfunction
 
@@ -342,13 +342,18 @@ class uvm_trace_message extends uvm_report_message;
   // do_unpack() not needed
   // do_compare() not needed
 
-  // Need to implement the do_copy()
+  // FIXME Need to implement the do_copy()
   //virtual function void do_copy (uvm_object rhs);
 
   function void do_print(uvm_printer printer);
     super.do_print(printer);
     if (state == TRC_END)
       trace_element_container.print(printer);
+  endfunction
+
+  virtual function void m_record_message(uvm_recorder recorder);
+    recorder.record_string("begin message", message);
+    recorder.record_string("end message", end_message);
   endfunction
 
   virtual function void record_message(uvm_recorder recorder);
@@ -400,4 +405,75 @@ class uvm_trace_message extends uvm_report_message;
 endclass
 
 
-// FIXME add report message linking class
+// Link message class.  Adds the ability to provide two tr_ids and a
+// relationship between them.
+class uvm_link_message extends uvm_report_message;
+
+  int tr_id0;
+  int tr_id1;
+  string relationship;
+
+  function new(string name = "uvm_link_message");
+    super.new(name);
+  endfunction
+
+  static local uvm_link_message link_messages[$];
+ 
+  static function uvm_link_message get_link_message();
+    if (link_messages.size() != 0)
+      return link_messages.pop_front();
+    else begin
+      uvm_link_message l_link_message = new("uvm_link_message");
+      return l_link_message;
+    end
+  endfunction
+ 
+  virtual function void free_link_message(uvm_link_message link_message);
+    link_message.clear();
+    link_messages.push_back(link_message);
+  endfunction
+
+  virtual function void clear();
+    super.clear();
+    tr_id0 = -1;
+    tr_id1 = -1;
+    relationship = "";
+  endfunction
+
+  function string convert2string();
+    if(action & UVM_RM_RECORD)
+      if ( (tr_id0 == -1) || (tr_id1 == -1) )
+        convert2string = 
+          $sformatf("Invalid link attempted. id0: %0d, id1: %0d", tr_id0, 
+          tr_id1);
+      else
+        convert2string = 
+          $sformatf("Link of '%s' created between id0: %0d and id1: %0d", 
+          relationship, tr_id0, tr_id1);
+    else
+      convert2string = "Link attempted but the UVM_RM_RECORD action is not set.";
+  endfunction
+
+  // do_print() not needed
+  // do_pack() not needed
+  // do_unpack() not needed
+  // do_compare() not needed
+
+  // FIXME Need to implement the do_copy()
+  //virtual function void do_copy (uvm_object rhs);
+
+  virtual function void record_message(uvm_recorder recorder);
+  
+    int l_stream_id;
+
+    if(recorder == null) 
+      recorder = uvm_default_recorder;
+
+    if ( (tr_id0 != -1) && (tr_id1 != -1) ) begin
+      recorder.link_tr(tr_id0, tr_id1, relationship);
+    end
+
+  endfunction
+
+endclass
+

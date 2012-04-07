@@ -47,7 +47,9 @@ class uvm_report_server extends uvm_object;
   // Probably needs documented.
   bit enable_report_id_count_summary=1;
 
-// Reconsider show_verbosity bit and possibly show_terminator
+  // Reconsider show_verbosity bit and possibly show_terminator
+  // Consider a global record enable here (gives all messages the UVM_RM_RECORD
+  // action.
 
   static protected uvm_report_server m_global_report_server = get_server();
 

@@ -237,15 +237,15 @@
 `endif
 
 
-// Need warnings, error, fatal begin/end maros
+// Decide on whether to provide _begin_end convenience macros
 
-`define uvm_info_begin(TRC_MESS, ID, MSG, VERBOSITY, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+`define __m_uvm_report_trace_begin(TRC_MESS, ID, MSG, SEVERITY, VERBOSITY, RO, CNTXT_NAME) \
   begin \
     uvm_report_object l_report_object; \
     l_report_object = RO; \
-    if (l_report_object.uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) begin \
+    if (l_report_object.uvm_report_enabled(VERBOSITY,SEVERITY,ID)) begin \
       TRC_MESS = uvm_trace_message::get_trace_message(); \
-      TRC_MESS.m_set_report_message(CNTXT_NAME, `uvm_file, `uvm_line, UVM_INFO, ID, \
+      TRC_MESS.m_set_report_message(CNTXT_NAME, `uvm_file, `uvm_line, SEVERITY, ID, \
         MSG, VERBOSITY); \
       TRC_MESS.state = uvm_trace_message::TRC_BGN; \
       l_report_object.process_report_message(TRC_MESS); \
@@ -254,17 +254,51 @@
       TRC_MESS = null; \
   end
 
-
-`define uvm_info_end(TRC_MSG, MSG, TR_ID) \
-  begin \
+`define __m_uvm_report_trace_end(TRC_MSG, MSG, TR_ID) \
+  if (TRC_MSG != null) begin \
     TRC_MSG.state = uvm_trace_message::TRC_END; \
-    TRC_MSG.message = MSG; \
+    TRC_MSG.end_message = MSG; \
     TRC_MSG.report_object.process_report_message(TRC_MSG); \
     TR_ID = TRC_MSG.tr_handle; \
     TRC_MSG.free_report_message(TRC_MSG); \
     TRC_MSG = null; \
   end
 
+
+// INFO
+
+`define uvm_info_begin(TRC_MESS, ID, MSG, VERBOSITY, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+  `__m_uvm_report_trace_begin(TRC_MESS, ID, MSG, UVM_INFO, VERBOSITY, RO, CNTXT_NAME)
+
+`define uvm_info_end(TRC_MSG, MSG, TR_ID) \
+  `__m_uvm_report_trace_end(TRC_MSG, MSG, TR_ID) \
+
+
+// WARNING
+
+`define uvm_warning_begin(TRC_MESS, ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+  `__m_uvm_report_trace_begin(TRC_MESS, ID, MSG, UVM_WARNING, UVM_NONE, RO, CNTXT_NAME)
+
+`define uvm_warning_end(TRC_MSG, MSG, TR_ID) \
+  `__m_uvm_report_trace_end(TRC_MSG, MSG, TR_ID) \
+
+
+// ERROR
+
+`define uvm_error_begin(TRC_MESS, ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+  `__m_uvm_report_trace_begin(TRC_MESS, ID, MSG, UVM_ERROR, UVM_NONE, RO, CNTXT_NAME)
+
+`define uvm_error_end(TRC_MSG, MSG, TR_ID) \
+  `__m_uvm_report_trace_end(TRC_MSG, MSG, TR_ID) \
+
+
+// FATAL
+
+`define uvm_fatal_begin(TRC_MESS, ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+  `__m_uvm_report_trace_begin(TRC_MESS, ID, MSG, UVM_FATAL, UVM_NONE, RO, CNTXT_NAME)
+
+`define uvm_fatal_end(TRC_MSG, MSG, TR_ID) \
+  `__m_uvm_report_trace_end(TRC_MSG, MSG, TR_ID) \
 
 
 // ADD METHODS
@@ -286,99 +320,56 @@
     TRC_MESS.add_object(`"OBJ`", OBJ); \
 
 
-/*
+// LINK
 
-begin macro issues message info (processing message), begin_tr is called,
-  record state updated, returns the trace_message if criteria met, otherwise 
-  null
-
-users can call trace_message, adds information is trace_message is not null,
-  no message for these adds
-
-end macro issues message info (processing message), end_tr is called,
-  record state updated, returns the trace_message (reference is passed in so 
-  means nothing),
-
-link macro checks nulls and tr_handle for -1, does the free_message
-
-TOUGH QUESTION: Who does the free?  link can but what if not linking...
-  otherwise, end macro has two flavors--one that frees (preventing linking)
-  and one that does not free (allowing linking)
-  Answer?:  Maybe not so tough, just deal in tr_handles?
-
-`define __uvm_trace_message_opener(SEVERITY, ID, MSG, VERBOSITY, RO, CNTXT_NAME) \
+`define uvm_link(TR_ID0, TR_ID1, REL, ID, VERBOSITY, RO = uvm_get_report_object(), CNTXT_NAME = "") \
   begin \
-    if (RO.uvm_report_enabled(VERBOSITY, SEVERITY, ID) begin \
-      uvm_report_object l_report_object = RO; \
-      uvm_trace_message l_trace_message = uvm_trace_message::get_trace_message(); \
-      l_trace_message.context_name = CNTXT_NAME; \
-      l_trace_message.filename = `uvm_file; \
-      l_trace_message.line = `uvm_line; \
-      l_trace_message.severity = SEVERITY; \
-      l_trace_message.id = ID; \
-      l_trace_message.message = MSG; \
-      l_trace_message.verbosity = VERBOSITY; \
-
-`define __uvm_trace_message_closer \
-      l_report_object.process_report_message(l_trace_message); \
-      l_trace_message.free_report_message(l_trace_message); \
+    uvm_report_object l_report_object; \
+    uvm_link_message l_link_message; \
+    l_report_object = RO; \
+    if (l_report_object.uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) begin \
+      l_link_message = uvm_link_message::get_link_message(); \
+      l_link_message.m_set_report_message(CNTXT_NAME, `uvm_file, `uvm_line, UVM_INFO, ID, \
+        "", VERBOSITY); \
+      l_link_message.tr_id0 = TR_ID0; \
+      l_link_message.tr_id1 = TR_ID1; \
+      l_link_message.relationship = REL; \
+      l_report_object.process_report_message(l_link_message); \
+      l_link_message.free_report_message(l_link_message); \
     end \
   end
-   
-`define __uvm_trace_message_closer_tr(TR_HANDLE) \
-      l_report_object.process_report_message(l_trace_message); \
-      TR_HANDLE = l_trace_message.tr_handle; \
-      l_trace_message.free_report_message(l_trace_message); \
+
+
+/* IGNORE 
+
+Old long form for info
+
+`define uvm_info_begin(TRC_MESS, ID, MSG, VERBOSITY, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+  begin \
+    uvm_report_object l_report_object; \
+    l_report_object = RO; \
+    if (l_report_object.uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) begin \
+      TRC_MESS = uvm_trace_message::get_trace_message(); \
+      TRC_MESS.m_set_report_message(CNTXT_NAME, `uvm_file, `uvm_line, UVM_INFO, ID, \
+        MSG, VERBOSITY); \
+      TRC_MESS.state = uvm_trace_message::TRC_BGN; \
+      l_report_object.process_report_message(TRC_MESS); \
     end \
+    else \
+      TRC_MESS = null; \
   end
-   
-// INFO
 
-`define uvm_info_trace_open(ID, MSG, VERBOSITY, RO, CNTXT_NAME = "") \
-  `__uvm_trace_message_populate(UVM_INFO, ID, MSG, VERBOSITY, RO, CNTXT_NAME) \
-
-`define uvm_info_trace_close \
-  `__uvm_trace_message_closer
-
-`define uvm_info_trace_close_tr(TR_HANDLE) \
-  `__uvm_trace_message_closer_tr(TR_HANDLE)
-
-// WARNING
-
-`define uvm_warning_trace_open(ID, MSG, RO, CNTXT_NAME = "") \
-  `__uvm_trace_message_populate(UVM_WARNING, ID, MSG, UVM_NONE, RO, CNTXT_NAME) \
-
-`define uvm_warning_trace_close \
-  `__uvm_trace_message_closer
-
-`define uvm_warning_trace_close_tr(TR_HANDLE) \
-  `__uvm_trace_message_closer_tr(TR_HANDLE)
-
-// ERROR
-
-`define uvm_error_trace_open(ID, MSG, RO, CNTXT_NAME = "") \
-  `__uvm_trace_message_populate(UVM_ERROR, ID, MSG, UVM_NONE, RO, CNTXT_NAME) \
-
-`define uvm_error_trace_close \
-  `__uvm_trace_message_closer
-
-`define uvm_error_trace_close_tr(TR_HANDLE) \
-  `__uvm_trace_message_closer_tr(TR_HANDLE)
-
-// FATAL
-
-`define uvm_fatal_trace_open(ID, MSG, RO, CNTXT_NAME = "") \
-  `__uvm_trace_message_populate(UVM_FATAL, ID, MSG, UVM_NONE, RO, CNTXT_NAME) \
-
-`define uvm_fatal_trace_close \
-  `__uvm_trace_message_closer
-
-`define uvm_fatal_trace_close_tr(TR_HANDLE) \
-  `__uvm_trace_message_closer_tr(TR_HANDLE)
-
-
-// FIXME add message linking macros (GO GO DEFAULTS?)
+`define uvm_info_end(TRC_MSG, MSG, TR_ID) \
+  begin \
+    TRC_MSG.state = uvm_trace_message::TRC_END; \
+    TRC_MSG.end_message = MSG; \
+    TRC_MSG.report_object.process_report_message(TRC_MSG); \
+    TR_ID = TRC_MSG.tr_handle; \
+    TRC_MSG.free_report_message(TRC_MSG); \
+    TRC_MSG = null; \
+  end
 
 */
+
 
 `endif //UVM_MESSAGE_DEFINES_SVH
