@@ -1,5 +1,6 @@
 typedef class uvm_report_server;
 typedef class uvm_report_handler;
+typedef class uvm_root;
  
 
 // uvm_report_message.  Base message class.  Holds the basics of a message.
@@ -22,16 +23,13 @@ class uvm_report_message extends uvm_object;
   uvm_action action; 
   int tr_handle;
 
-  int m_rh_stream_handles[string];
+  static int m_ro_stream_handles[uvm_report_object];
 
   `uvm_object_utils(uvm_report_message)
 
   function new(string name = "uvm_report_message");
     super.new(name);
-  endfunction
-
-  function string convert2string();
-    return message;
+    tr_handle = -1;
   endfunction
 
   static function uvm_report_message get_report_message();
@@ -61,7 +59,11 @@ class uvm_report_message extends uvm_object;
   endfunction
 
   virtual function void clear();
-    // Nothing to do for this class since all fields populated in call chain
+    tr_handle = -1;
+  endfunction
+
+  function string convert2string();
+    return message;
   endfunction
 
   // do_print() not needed
@@ -93,19 +95,21 @@ class uvm_report_message extends uvm_object;
 
   endfunction
 
-  function int m_get_stream_id(uvm_recorder recorder);
+  virtual function int m_get_stream_id(uvm_recorder recorder);
 
-    string l_string;
+    uvm_report_object l_ro;
 
-    if (context_name == "")
-      l_string = report_object.get_full_name();
-    else
-      l_string = {report_object.get_full_name(), "@@", context_name};
-    if(!m_rh_stream_handles.exists(l_string)) begin
-      int l_sh = recorder.create_stream(l_string, "uvm_report_message stream", "UVM");
-      m_rh_stream_handles[l_string] = l_sh;
+    if(!m_ro_stream_handles.exists(report_object)) begin
+      string l_string;
+      if (report_object != uvm_root::get())
+        l_string = report_object.get_full_name();
+      else
+        l_string = "reporter";
+      m_ro_stream_handles[report_object] = 
+        recorder.create_stream(l_string, "uvm_report_message stream", "UVM");
     end
-    return m_rh_stream_handles[l_string];
+
+    return m_ro_stream_handles[report_object];
 
   endfunction
 
@@ -127,7 +131,11 @@ class uvm_report_message extends uvm_object;
 
   endfunction
 
-  function void m_record_core_properties(uvm_recorder recorder);
+  virtual function void m_record_message(uvm_recorder recorder);
+    recorder.record_string("message", message);
+  endfunction
+
+  virtual function void m_record_core_properties(uvm_recorder recorder);
 
     string l_string;
     uvm_verbosity l_verbosity;
@@ -138,10 +146,11 @@ class uvm_report_message extends uvm_object;
     recorder.record_string("filename", filename);
     l_string.itoa(line);
     recorder.record_string("line", l_string);
-    recorder.record_string("action", uvm_report_handler::format_action(action));
+    //recorder.record_string("action", uvm_report_handler::format_action(action));
     recorder.record_string("severity", severity.name());
     recorder.record_string("id", id);
-    recorder.record_string("message", message);
+    //recorder.record_string("message", message);
+    m_record_message(recorder);
     if ($cast(l_verbosity, verbosity))
       recorder.record_string("verbosity", l_verbosity.name());
     else begin
@@ -165,7 +174,7 @@ endclass
 
 // Implementation detail -- not documented.
 
-class uvm_trace_message_element;
+class uvm_trace_element;
 
   typedef enum {INT, STRING, OBJECT, MESS_TAG} element_type_e;
 
@@ -181,27 +190,27 @@ endclass
 
 // Implementation detail -- not documented.
 
-class uvm_trace_message_element_container extends uvm_object;
+class uvm_trace_element_container extends uvm_object;
 
-  uvm_trace_message_element elements[$];
+  uvm_trace_element elements[$];
 
-  `uvm_object_utils(uvm_trace_message_element_container)
+  `uvm_object_utils(uvm_trace_element_container)
 
-  function new(string name = "Trace Message Elements");
+  function new(string name = "trace_element_container");
     super.new(name);
   endfunction
 
   function void add_tag(string name, string value);
-    uvm_trace_message_element ume = new();
-    ume.m_element_type = uvm_trace_message_element::MESS_TAG;
+    uvm_trace_element ume = new();
+    ume.m_element_type = uvm_trace_element::MESS_TAG;
     ume.m_element_name = name;
     ume.m_string_value = value;
     elements.push_back(ume);
   endfunction
 
   function void add_int(string name, int value, uvm_radix_enum radix);
-    uvm_trace_message_element ume = new();
-    ume.m_element_type = uvm_trace_message_element::INT;
+    uvm_trace_element ume = new();
+    ume.m_element_type = uvm_trace_element::INT;
     ume.m_element_name = name;
     ume.m_int_value = value;
     ume.m_int_radix = radix;
@@ -209,16 +218,16 @@ class uvm_trace_message_element_container extends uvm_object;
   endfunction
 
   function void add_string(string name, string value);
-    uvm_trace_message_element ume = new();
-    ume.m_element_type = uvm_trace_message_element::STRING;
+    uvm_trace_element ume = new();
+    ume.m_element_type = uvm_trace_element::STRING;
     ume.m_element_name = name;
     ume.m_string_value = value;
     elements.push_back(ume);
   endfunction
 
   function void add_object(string name, uvm_object obj);
-    uvm_trace_message_element ume = new();
-    ume.m_element_type = uvm_trace_message_element::OBJECT;
+    uvm_trace_element ume = new();
+    ume.m_element_type = uvm_trace_element::OBJECT;
     ume.m_element_name = name;
     ume.m_object = obj;
     elements.push_back(ume);
@@ -227,17 +236,17 @@ class uvm_trace_message_element_container extends uvm_object;
   function void do_print(uvm_printer printer);
     super.do_print(printer);
     for(int i = 0; i < elements.size(); i++) begin
-      if (elements[i].m_element_type == uvm_trace_message_element::MESS_TAG) begin
+      if (elements[i].m_element_type == uvm_trace_element::MESS_TAG) begin
         printer.print_string(elements[i].m_element_name, elements[i].m_string_value);
       end
-      if (elements[i].m_element_type == uvm_trace_message_element::INT) begin
+      if (elements[i].m_element_type == uvm_trace_element::INT) begin
         printer.print_int(elements[i].m_element_name, elements[i].m_int_value, 
           $bits(elements[i].m_int_value), elements[i].m_int_radix);
       end
-      if (elements[i].m_element_type == uvm_trace_message_element::STRING) begin
+      if (elements[i].m_element_type == uvm_trace_element::STRING) begin
         printer.print_string(elements[i].m_element_name, elements[i].m_string_value);
       end
-      if (elements[i].m_element_type == uvm_trace_message_element::OBJECT) begin
+      if (elements[i].m_element_type == uvm_trace_element::OBJECT) begin
         printer.print_object(elements[i].m_element_name, elements[i].m_object);
       end
     end 
@@ -246,17 +255,17 @@ class uvm_trace_message_element_container extends uvm_object;
   function void do_record(uvm_recorder recorder);
     super.do_record(recorder);
     for(int i = 0; i < elements.size(); i++) begin
-      if (elements[i].m_element_type == uvm_trace_message_element::MESS_TAG) begin
+      if (elements[i].m_element_type == uvm_trace_element::MESS_TAG) begin
         recorder.record_string(elements[i].m_element_name, elements[i].m_string_value);
       end
-      if (elements[i].m_element_type == uvm_trace_message_element::INT) begin
+      if (elements[i].m_element_type == uvm_trace_element::INT) begin
         recorder.record_field(elements[i].m_element_name, elements[i].m_int_value, 
           $bits(elements[i].m_int_value), elements[i].m_int_radix);
       end
-      if (elements[i].m_element_type == uvm_trace_message_element::STRING) begin
+      if (elements[i].m_element_type == uvm_trace_element::STRING) begin
         recorder.record_string(elements[i].m_element_name, elements[i].m_string_value);
       end
-      if (elements[i].m_element_type == uvm_trace_message_element::OBJECT) begin
+      if (elements[i].m_element_type == uvm_trace_element::OBJECT) begin
         recorder.record_object(elements[i].m_element_name, elements[i].m_object);
       end
     end
@@ -272,15 +281,24 @@ endclass
 
 class uvm_trace_message extends uvm_report_message;
 
-  // Needs enum to say it BEGIN_TR, END_TR, or UNKNOWN?
+  typedef enum { TRC_INIT, TRC_BGN, TRC_END } state_e;
+
+  uvm_table_printer l_printer;
+
+  state_e state;
 
   `uvm_object_utils(uvm_trace_message)
 
-  uvm_trace_message_element_container trace_message_element_container;
+  uvm_trace_element_container trace_element_container;
 
   function new(string name = "uvm_trace_message");
     super.new(name);
-    trace_message_element_container = new();
+    state = TRC_INIT;
+    trace_element_container = new();
+    l_printer = new();
+    //l_printer.knobs.header = 0;
+    //l_printer.knobs.footer = 0;
+    l_printer.knobs.prefix = "  ";
   endfunction
 
   static local uvm_trace_message trace_messages[$];
@@ -299,42 +317,84 @@ class uvm_trace_message extends uvm_report_message;
     trace_messages.push_back(trace_message);
   endfunction
 
+  // Possibly not necessary...
+  function void m_set_trace_message(string context_name, string filename,
+    int line, uvm_severity_type severity, string id,
+    string message, int verbosity);
+    m_set_report_message(context_name, filename, line, severity, id, message,
+      verbosity);
+  endfunction
+
   function string convert2string();
-    return {message, "\n", trace_message_element_container.sprint()};
+    convert2string = {$sformatf("%s : ", state.name()), message};
+    if (trace_element_container.elements.size() != 0)
+      convert2string = 
+        {convert2string, "\n", trace_element_container.sprint(l_printer)};
   endfunction
 
   virtual function void clear();
+    super.clear();
     delete_elements();
   endfunction
 
+  // do_print() not needed
+  // do_pack() not needed
+  // do_unpack() not needed
+  // do_compare() not needed
+
+  // Need to implement the do_copy()
+  //virtual function void do_copy (uvm_object rhs);
+
   function void do_print(uvm_printer printer);
     super.do_print(printer);
-    trace_message_element_container.print(printer);
+    if (state == TRC_END)
+      trace_element_container.print(printer);
+  endfunction
+
+  virtual function void record_message(uvm_recorder recorder);
+  
+    int l_stream_id;
+
+    if(recorder == null) 
+      recorder = uvm_default_recorder;
+
+    l_stream_id = m_get_stream_id(recorder);
+
+    if (state == TRC_BGN)
+      tr_handle = recorder.begin_tr("uvm_trace_message", l_stream_id,
+        get_name(), "", "", $time);
+
+    if (state == TRC_END) begin
+      recorder.tr_handle = tr_handle;
+      this.record(recorder);
+      recorder.end_tr(tr_handle, $time);
+    end
+
   endfunction
 
   function void do_record(uvm_recorder recorder);
     super.do_record(recorder);
-    trace_message_element_container.record(recorder);
+    trace_element_container.record(recorder);
   endfunction
 
   function void delete_elements();
-    trace_message_element_container.elements.delete();
+    trace_element_container.elements.delete();
   endfunction
 
   function void add_tag(string name, string value);
-    trace_message_element_container.add_tag(name, value);
+    trace_element_container.add_tag(name, value);
   endfunction
 
   function void add_int(string name, int value, uvm_radix_enum radix);
-    trace_message_element_container.add_int(name, value, radix);
+    trace_element_container.add_int(name, value, radix);
   endfunction
 
   function void add_string(string name, string value);
-    trace_message_element_container.add_string(name, value);
+    trace_element_container.add_string(name, value);
   endfunction
 
   function void add_object(string name, uvm_object obj);
-    trace_message_element_container.add_object(name, obj);
+    trace_element_container.add_object(name, obj);
   endfunction
 
 endclass

@@ -23,32 +23,39 @@ module top;
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 
-uvm_report_object urm0 = new("urm0");
+//uvm_report_object urm0 = new("urm0");
 uvm_report_object urm1 = new("urm1");
 
-initial
-  begin
+
+initial begin
+
+    // User variables  
+    uvm_trace_message l_trace_messageA, l_trace_messageB;
+    int l_tr_handle0, l_tr_handle1;
 
     // Adjust action on urm1
     urm1.set_report_severity_action(UVM_INFO, UVM_RM_RECORD | UVM_DISPLAY);
 
-    // Old skool macros
-    // These get recorded in as 0 time (begin_tr/end_tr with time between)
-    // No ability to add tags, strings, ints, objects
-    #5 `uvm_info("ID0", "Message 0", UVM_NONE)
-    #5 `uvm_info("ID1", "Message 1", UVM_NONE)
-    #5 `uvm_info("ID2", "Message 2", UVM_NONE, uvm_top)
-    #5 `uvm_info("ID3", "Message 3", UVM_NONE, urm0)
-    #5 `uvm_info("ID4", "Message 4", UVM_NONE, urm1)
-    #5 `uvm_info("ID5", "Message 5", UVM_NONE, urm0, "contextA")
-    #5 `uvm_info("ID6", "Message 6", UVM_NONE, urm1, "contextA")
-    #5 `uvm_info("ID7", "Message 7", UVM_NONE, urm0, "contextB")
-    #5 `uvm_info("ID8", "Message 8", UVM_NONE, urm1, "contextB")
-    #5 `uvm_info("ID9", "Message 9", UVM_NONE, urm0, $psprintf("%m"))
-    #5 `uvm_info("IDA", "Message A", UVM_NONE, urm1, $psprintf("%m"))
-    #5 `uvm_info("ID5", "Message B (a repeat context)", UVM_NONE, urm0, "contextA")
-    #5 `uvm_info("ID6", "Message C (a repeat context)", UVM_NONE, urm1, "contextA")
+    #5;
 
-  end
+    // Message A starts at 5, Message B starts at 15.
+    // Message A finishes at 35 (Message B is still going)
+    // Message B finishes at 60
+
+    // Spans #30 time
+    `uvm_info_begin(l_trace_messageA, "TEST_A", "Beginning A...", UVM_LOW, urm1)
+
+    #10;
+
+    // Spans #45 time
+    `uvm_info_begin(l_trace_messageB, "TEST_B", "Beginning B...", UVM_LOW, urm1)
+
+    #20
+    `uvm_info_end(l_trace_messageA, "Ending...", l_tr_handle0)
+
+    #25;
+    `uvm_info_end(l_trace_messageB, "Ending...", l_tr_handle1)
+
+end
 
 endmodule

@@ -237,6 +237,55 @@
 `endif
 
 
+// Need warnings, error, fatal begin/end maros
+
+`define uvm_info_begin(TRC_MESS, ID, MSG, VERBOSITY, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+  begin \
+    uvm_report_object l_report_object; \
+    l_report_object = RO; \
+    if (l_report_object.uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) begin \
+      TRC_MESS = uvm_trace_message::get_trace_message(); \
+      TRC_MESS.m_set_report_message(CNTXT_NAME, `uvm_file, `uvm_line, UVM_INFO, ID, \
+        MSG, VERBOSITY); \
+      TRC_MESS.state = uvm_trace_message::TRC_BGN; \
+      l_report_object.process_report_message(TRC_MESS); \
+    end \
+    else \
+      TRC_MESS = null; \
+  end
+
+
+`define uvm_info_end(TRC_MSG, MSG, TR_ID) \
+  begin \
+    TRC_MSG.state = uvm_trace_message::TRC_END; \
+    TRC_MSG.message = MSG; \
+    TRC_MSG.report_object.process_report_message(TRC_MSG); \
+    TR_ID = TRC_MSG.tr_handle; \
+    TRC_MSG.free_report_message(TRC_MSG); \
+    TRC_MSG = null; \
+  end
+
+
+
+// ADD METHODS
+
+`define uvm_trace_add_tag(TRC_MESS, NAME, VALUE) \
+  if (TRC_MESS != null) \
+    TRC_MESS.add_tag(NAME, VALUE); \
+
+`define uvm_trace_add_int(TRC_MESS, NAME, RADIX) \
+  if (TRC_MESS != null) \
+    TRC_MESS.add_int(`"NAME`", NAME, RADIX); \
+
+`define uvm_trace_add_string(TRC_MESS, NAME) \
+  if (TRC_MESS != null) \
+    TRC_MESS.add_string(`"NAME`", NAME); \
+
+`define uvm_trace_add_object(TRC_MESS, OBJ) \
+  if (TRC_MESS != null) \
+    TRC_MESS.add_object(`"OBJ`", OBJ); \
+
+
 /*
 
 begin macro issues message info (processing message), begin_tr is called,
@@ -253,8 +302,9 @@ end macro issues message info (processing message), end_tr is called,
 link macro checks nulls and tr_handle for -1, does the free_message
 
 TOUGH QUESTION: Who does the free?  link can but what if not linking...
-  otherwise, end macro has true flavors--one that frees (preventing linking)
+  otherwise, end macro has two flavors--one that frees (preventing linking)
   and one that does not free (allowing linking)
+  Answer?:  Maybe not so tough, just deal in tr_handles?
 
 `define __uvm_trace_message_opener(SEVERITY, ID, MSG, VERBOSITY, RO, CNTXT_NAME) \
   begin \
@@ -325,20 +375,6 @@ TOUGH QUESTION: Who does the free?  link can but what if not linking...
 
 `define uvm_fatal_trace_close_tr(TR_HANDLE) \
   `__uvm_trace_message_closer_tr(TR_HANDLE)
-
-// ADD METHODS
-
-`define uvm_trace_add_tag(NAME, VALUE) \
-      l_trace_message.add_tag(NAME, VALUE); \
-
-`define uvm_trace_add_int(NAME, RADIX) \
-      l_trace_message.add_int(`"NAME`", NAME, RADIX); \
-
-`define uvm_trace_add_string(NAME) \
-      l_trace_message.add_string(`"NAME`", NAME); \
-
-`define uvm_trace_add_object(OBJ) \
-      l_trace_message.add_object(`"OBJ`", OBJ); \
 
 
 // FIXME add message linking macros (GO GO DEFAULTS?)

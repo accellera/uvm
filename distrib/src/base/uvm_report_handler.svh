@@ -308,7 +308,6 @@ class uvm_report_handler extends uvm_object;
     report_message.file = get_file_handle(report_message.severity, report_message.id);
     report_message.report_handler = this;
     report_message.action = get_action(report_message.severity, report_message.id);
-    report_message.tr_handle = -1;
     srvr.m_process_report_message(report_message);
     
   endfunction

@@ -1037,7 +1037,7 @@ function string uvm_table_printer::emit();
       s = {s, user_format, linefeed};
   end
 
-  emit = s;
+  emit = {knobs.prefix, s};
   m_rows.delete();
 endfunction
 
