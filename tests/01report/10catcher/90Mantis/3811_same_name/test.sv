@@ -34,7 +34,8 @@ endclass
 
 initial begin
    my_catcher ct;
-   uvm_root top = uvm_root::get();
+   uvm_root top;
+   top = uvm_root::get();
    
    `uvm_info("TEST", "Checking global catchers with same name...warning expected", UVM_NONE)
    ct = new("A");
