@@ -2992,7 +2992,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
       continue;
 
     if(verbose)
-      uvm_report_info("CFGAPL",$sformatf("applying %s [%d]", name, __m_uvm_status_container.field_array[search_name]),UVM_NONE);
+      uvm_report_info("CFGAPL",$sformatf("applying configuration to field %s", name),UVM_NONE);
 
     begin
     uvm_resource#(uvm_bitstream_t) rbs;
