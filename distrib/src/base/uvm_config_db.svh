@@ -77,6 +77,10 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   // instance that the configuration object applies to. ~field_name~
   // is the specific field in the scope that is being searched for.
   //
+  // Using ~null~ as context is equivalent to ~uvm_root::get()~ or 
+  // ~uvm_top~ as context. If ~cntxt~ is null then ~inst_name~
+  // provides the complete scope information of the setting.
+  //
   // The basic get_config_* methods from <uvm_component> are mapped to 
   // this function as:
   //
@@ -124,6 +128,9 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   // provides the complete scope information of the setting.
   // ~field_name~ is the target field. Both ~inst_name~ and ~field_name~
   // may be glob style or regular expression style expressions.
+  //
+  // Using ~null~ as context is equivalent to ~uvm_root::get()~ or 
+  // ~uvm_top~ as context. 
   //
   // If a setting is made at build time, the ~cntxt~ hierarchy is
   // used to determine the setting's precedence in the database.
@@ -224,6 +231,9 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   // is expected that the field should exist in the database. The function
   // returns 1 if a config parameter exists and 0 if it doesn't exist.
   //
+  // Using ~null~ as context is equivalent to ~uvm_root::get()~ or 
+  // ~uvm_top~ as context. If ~cntxt~ is null then ~inst_name~
+  // provides the complete scope information of the setting.
 
   static function bit exists(uvm_component cntxt, string inst_name,
       string field_name, bit spell_chk=0);
@@ -244,7 +254,11 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   // Wait for a configuration setting to be set for ~field_name~
   // in ~cntxt~ and ~inst_name~. The task blocks until a new configuration
   // setting is applied that effects the specified field.
-
+  //
+  // Using ~null~ as context is equivalent to ~uvm_root::get()~ or 
+  // ~uvm_top~ as context. If ~cntxt~ is null then ~inst_name~
+  // provides the complete scope information of the setting.
+  
   static task wait_modified(uvm_component cntxt, string inst_name,
       string field_name);
     process p = process::self();
