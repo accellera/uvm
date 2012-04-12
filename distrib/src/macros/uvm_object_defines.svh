@@ -2588,7 +2588,7 @@ endfunction \
 
 `define M_UVM_FIELD_DATA_AA_generic(TYPE, KEY, ARG, FLAG) \
   begin \
-    if((what__ & (FLAG)) || (what__ >= UVM_MACRO_EXTRAS)) begin \
+    begin \
       case (what__) \
         UVM_COMPARE: \
            begin \
@@ -2649,7 +2649,7 @@ endfunction \
 
 `define M_UVM_FIELD_DATA_AA_int_key(KEY, ARG, FLAG) \
   begin \
-    if((what__ & (FLAG)) || (what__ >= UVM_MACRO_EXTRAS)) begin \
+    begin \
       KEY aa_key; \
       case (what__) \
         UVM_COMPARE: \
@@ -2706,7 +2706,7 @@ endfunction \
 
 `define M_UVM_FIELD_DATA_AA_enum_key(KEY, ARG, FLAG) \
   begin \
-    if((what__ & (FLAG)) || (what__ >= UVM_MACRO_EXTRAS)) begin \
+    begin \
       KEY aa_key; \
       case (what__) \
         UVM_COMPARE: \
@@ -2768,7 +2768,7 @@ endfunction \
 
 `define M_UVM_FIELD_DATA_AA_object_string(ARG, FLAG) \
   begin \
-    if((what__ & (FLAG)) || (what__ >= UVM_MACRO_EXTRAS)) begin \
+    begin \
       case (what__) \
         UVM_COMPARE: \
            begin \
@@ -2846,7 +2846,7 @@ endfunction \
 `define M_UVM_FIELD_DATA_AA_object_int(ARG, FLAG) \
   begin \
     int key__; \
-    if((what__ & (FLAG)) || (what__ >= UVM_MACRO_EXTRAS)) begin \
+    begin \
       case (what__) \
         UVM_COMPARE: \
            begin \
@@ -2927,7 +2927,7 @@ endfunction \
 
 `define M_UVM_FIELD_DATA_AA_string_string(ARG, FLAG) \
   begin \
-    if((what__ & (FLAG)) || (what__ >= UVM_MACRO_EXTRAS)) begin \
+    begin \
       case (what__) \
         UVM_COPY: \
           begin \
