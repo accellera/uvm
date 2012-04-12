@@ -69,9 +69,9 @@ endclass
 
 initial
 begin
-   blk b;
-   my_catcher c;
+   blk b;my_catcher c;
    b = new;
+
    c = new;
    uvm_report_cb::add(null, c);
 

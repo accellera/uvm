@@ -102,9 +102,9 @@ class phasing_test extends uvm_test;
       predicted = (i >= predicted_phasing.size()) ? "" : predicted_phasing[i];
       audited = (i >= audited_phasing.size()) ? "" : audited_phasing[i];
       if (predicted == audited)
-        $display("  | %-27s | %-27s |     match", predicted, audited);
+        $display("  | %s | %s |     match", predicted, audited);
       else
-        $display("  | %-27s | %-27s | <<< MISMATCH", predicted, audited);
+        $display("  | %s | %s | <<< MISMATCH", predicted, audited);
     end
     $display("  +-----------------------------+-----------------------------+");
   endfunction

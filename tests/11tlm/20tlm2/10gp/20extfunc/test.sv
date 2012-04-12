@@ -107,8 +107,8 @@ class test extends uvm_test;
       assert(x1.randomize());
       assert(x2.randomize() with {a != x1.a;});
    
-      obj1.set_extension(x1);
-      obj2.set_extension(x2);
+      void'(obj1.set_extension(x1));
+      void'(obj2.set_extension(x2));
 
     uvm_default_packer.use_metadata = 1;
     uvm_default_packer.big_endian = 0;
