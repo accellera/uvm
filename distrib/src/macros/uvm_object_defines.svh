@@ -1757,9 +1757,9 @@ endfunction \
               string s; \
               $swrite(s,`"ARG[%0d]`",i); \
               __m_uvm_status_container.scope.set_arg(s); \
-              if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \ 
-                  uvm_report_warning("STRMTC", {"set_int()", ": Match ignored for string ", str__, ". Cannot set object to int value."}); \
-              end \ 
+              if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \
+		 uvm_report_warning("STRMTC", {"set_int()", ": Match ignored for string ", str__, ". Cannot set object to int value."}); \
+              end \
               else if(ARG[i]!=null && !((FLAG)&UVM_REFERENCE)) begin \
                 int cnt; \
                 //Only traverse if there is a possible match. \
@@ -1775,7 +1775,7 @@ endfunction \
             end \
           end \
         end \
-      UVM_SETSTR: \ 
+      UVM_SETSTR: \
         begin \
           __m_uvm_status_container.scope.set_arg(`"ARG`"); \
           if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \
@@ -1792,7 +1792,7 @@ endfunction \
               string s; \
               $swrite(s,`"ARG[%0d]`",i); \
               __m_uvm_status_container.scope.set_arg(s); \
-              if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \                  
+              if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \
                   uvm_report_warning("STRMTC", {"set_str()", ": Match ignored for string ", str__, ". Cannot set object to string value."}); \
               end \
               else if(ARG[i]!=null && !((FLAG)&UVM_REFERENCE)) begin \
@@ -3274,9 +3274,10 @@ endfunction \
 //| `uvm_pack_intN(VAR,SIZE)
 //
 `define uvm_pack_intN(VAR,SIZE) \
+   begin \
    packer.m_bits[packer.count +: SIZE] = VAR; \
-   packer.count += SIZE;
-
+   packer.count += SIZE; \
+   end
 
 // Macro: `uvm_pack_enumN
 //
@@ -3451,9 +3452,11 @@ endfunction \
 // `uvm_unpack_enumN(VAR,SIZE,TYPE)
 //
 `define uvm_unpack_enumN(VAR,SIZE,TYPE) \
+   begin \
    VAR = TYPE'(packer.m_bits[packer.count +: \
                                      SIZE]); \
-   packer.count += SIZE;
+   packer.count += SIZE; \
+   end
 
 
 // Macro: `uvm_unpack_sarrayN
