@@ -485,25 +485,28 @@ virtual class uvm_resource_base extends uvm_object;
   function void record_read_access(uvm_object accessor = null);
 
     string str;
+    uvm_resource_types::access_t access_record;
 
     // If an accessor object is supplied then get the accessor record.
     // Otherwise create a new access record.  In either case populate
     // the access record with information about this access.  Check
     // first to make sure that auditing is turned on.
 
-    if(uvm_resource_options::is_auditing()) begin
-      if(accessor != null) begin
-        uvm_resource_types::access_t access_record;
-        str = accessor.get_full_name();
-        if(access.exists(str))
-          access_record = access[str];
-        else
-          init_access_record(access_record);
-        access_record.read_count++;
-        access_record.read_time = $realtime;
-        access[str] = access_record;
-      end
+    if(!uvm_resource_options::is_auditing())
+      return;
+
+    if(accessor != null) begin
+      str = accessor.get_full_name();
+      if(access.exists(str))
+        access_record = access[str];
+      else
+        init_access_record(access_record);
     end
+
+    access_record.read_count++;
+    access_record.read_time = $realtime;
+    access[str] = access_record;
+
   endfunction
 
   // function: record_write_access
