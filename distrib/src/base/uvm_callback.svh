@@ -464,7 +464,7 @@ endclass
 // provided in an example included in the kit.
 //------------------------------------------------------------------------------
 
-class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
+class uvm_callbacks #(type T=int, type CB=int)
     extends uvm_typed_callbacks#(T);
 
   // Parameter: T
