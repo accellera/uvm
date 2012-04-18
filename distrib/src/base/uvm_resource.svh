@@ -1595,14 +1595,17 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   endfunction
 
   // Function: write
-  //
   // Modify the object stored in this resource container.  If the
   // resource is read-only then issue an error message and return
   // without modifying the object in the container.  If the resource is
   // not read-only and an ~accessor~ object has been supplied then also
-  // update the accessor record.  Lastly, replace the object value in the
-  // container with the value supplied as the  argument, ~t~, and 
-  // release any processes blocked on <uvm_resource_base::wait_modified>.
+  // update the accessor record.  Lastly, replace the object value in
+  // the container with the value supplied as the argument, ~t~, and
+  // release any processes blocked on
+  // <uvm_resource_base::wait_modified>.  If the value to be written is
+  // the same as the value already present in the resource then the
+  // write is not done.  That also means that the accessor record is not
+  // updated and the modified bit is not set.
 
   function void write(T t, uvm_object accessor = null);
 
