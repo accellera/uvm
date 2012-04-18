@@ -1344,7 +1344,7 @@ class uvm_resource_pool;
     printer.knobs.type_name=0;
     printer.knobs.reference=0;
 
-    if(rq == null && rq.size() == 0) begin
+    if(rq == null || rq.size() == 0) begin
       $display("<none>");
       return;
     end

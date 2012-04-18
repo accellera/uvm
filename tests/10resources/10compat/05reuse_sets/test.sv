@@ -60,7 +60,7 @@ class test extends uvm_component;
     for(int i=0; i<5; ++i) begin
       // Test a write to the config db goes to the head of the queue
       uvm_config_db#(uvm_bitstream_t)::set(this, "", "val", i); 
-      uvm_config_db#(uvm_bitstream_t)::get(this,"","val",val);
+      void'(uvm_config_db#(uvm_bitstream_t)::get(this,"","val",val));
       if(val != i) begin
         $display("Got wrong config value: expected %0d, got %0d", i, val);
         failed=1;
@@ -77,8 +77,8 @@ class test extends uvm_component;
       // Test a write to the resource_db goes to the head of the queue.
       rsrc.write(i*i, this);
       rp.set_priority_name(rsrc, uvm_resource_types::PRI_HIGH);
-      uvm_resource_db#(uvm_bitstream_t)::read_by_name(get_full_name(), "val",
-                                                      val, this);
+      void'(uvm_resource_db#(uvm_bitstream_t)::read_by_name(get_full_name(), "val",
+                                                      val, this));
       if(val != i*i) begin
         $display("Got wrong resource value: expected %0d, got %0d", i*i, val);
         failed=1;

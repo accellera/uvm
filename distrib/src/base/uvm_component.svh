@@ -2987,11 +2987,12 @@ function void uvm_component::apply_config_settings (bit verbose=0);
       search_name = name;
 
     if(!uvm_resource_pool::m_has_wildcard_names && 
-       !__m_uvm_status_container.field_array.exists(search_name))
+       !__m_uvm_status_container.field_array.exists(search_name) && 
+       search_name != "recording_detail")
       continue;
 
     if(verbose)
-      uvm_report_info("CFGAPL",$sformatf("applying %s [%s]", name, __m_uvm_status_container.field_array[search_name]),UVM_NONE);
+      uvm_report_info("CFGAPL",$sformatf("applying configuration to field %s", name),UVM_NONE);
 
     begin
     uvm_resource#(uvm_bitstream_t) rbs;

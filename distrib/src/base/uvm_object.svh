@@ -923,8 +923,7 @@ endfunction
 function void  uvm_object::set_int_local (string      field_name,
                                           uvm_bitstream_t value,
                                           bit         recurse=1);
-  if(__m_uvm_status_container.cycle_check.exists(this)) return;
-  __m_uvm_status_container.cycle_check[this] = 1;
+  __m_uvm_status_container.cycle_check.delete();
 
   this.__m_uvm_status_container.status = 0;
   this.__m_uvm_status_container.bitstream = value;
@@ -934,7 +933,6 @@ function void  uvm_object::set_int_local (string      field_name,
   if(__m_uvm_status_container.warning && !this.__m_uvm_status_container.status) begin
     uvm_report_error("NOMTC", $sformatf("did not find a match for field %s", field_name),UVM_NONE);
   end
-  __m_uvm_status_container.cycle_check.delete(this);
 
 endfunction
 
@@ -947,8 +945,7 @@ function void  uvm_object::set_object_local (string     field_name,
                                              bit        clone=1,
                                              bit        recurse=1);
   uvm_object cc;
-  if(__m_uvm_status_container.cycle_check.exists(this)) return;
-  __m_uvm_status_container.cycle_check[this] = 1;
+  __m_uvm_status_container.cycle_check.delete();
 
   if(clone && (value!=null)) begin 
     cc = value.clone();
@@ -966,7 +963,6 @@ function void  uvm_object::set_object_local (string     field_name,
     uvm_report_error("NOMTC", $sformatf("did not find a match for field %s", field_name), UVM_NONE);
   end
 
-  __m_uvm_status_container.cycle_check.delete(this);
 endfunction
 
 
@@ -975,8 +971,8 @@ endfunction
 function void  uvm_object::set_string_local (string field_name,
                                              string value,
                                              bit    recurse=1);
-  if(__m_uvm_status_container.cycle_check.exists(this)) return;
-  __m_uvm_status_container.cycle_check[this] = 1;
+                                             
+  __m_uvm_status_container.cycle_check.delete();
 
   this.__m_uvm_status_container.status = 0;
   this.__m_uvm_status_container.stringv = value;
@@ -986,7 +982,6 @@ function void  uvm_object::set_string_local (string field_name,
   if(__m_uvm_status_container.warning && !this.__m_uvm_status_container.status) begin
     uvm_report_error("NOMTC", $sformatf("did not find a match for field %s (@%0d)", field_name, this.get_inst_id()), UVM_NONE);
   end
-  __m_uvm_status_container.cycle_check.delete(this);
 endfunction
 
 
