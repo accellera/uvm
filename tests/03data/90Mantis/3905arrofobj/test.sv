@@ -10,6 +10,11 @@ class C extends uvm_object;
   `uvm_object_utils_begin(C);
     `uvm_field_int(i,UVM_PRINT)
   `uvm_object_utils_end
+
+   function new(string name= "C");
+      super.new(name);
+   endfunction
+      
 endclass
 
 class my_catcher extends uvm_report_catcher;
@@ -35,6 +40,10 @@ class my_object extends uvm_object;
     `uvm_field_string(msg,UVM_PRINT)
     `uvm_field_object( c,UVM_ALL_ON)
   `uvm_object_utils_end
+   
+   function new(string name= "my_object");
+      super.new(name);
+   endfunction
 endclass
   
 class my_component extends uvm_component;
@@ -184,14 +193,14 @@ class test extends uvm_test;
     if( component.array[3].msg != "test ok" ) begin
       failed = 1;
       `uvm_error(get_type_name(),
-                 $sformatf("expected component.array[3].msg == test ok, but saw %s",
+                 $sformatf("expected component.array[3].msg == %s, but saw %s",
                            array_msg, component.array[3].msg) )
     end
     
     if( component.array[4].msg != "test ok" ) begin
       failed = 1;
       `uvm_error(get_type_name(),
-                 $sformatf("expected component.array[4].msg == test ok, but saw %s",
+                 $sformatf("expected component.array[4].msg == %s, but saw %s",
                            array_msg, component.array[4].msg) )
     end
     
