@@ -616,14 +616,22 @@ endfunction
 function void uvm_sequencer_base::grant_queued_locks();
   int i, temp;
 
-  for (i = 0; i < arb_sequence_q.size(); i++) begin
-    
+  i = 0;
+  while (i < arb_sequence_q.size()) begin
+
     // Check for lock requests.  Any lock request at the head
     // of the queue that is not blocked will be granted immediately.
     temp = 0;
     if (i < arb_sequence_q.size()) begin
       if (arb_sequence_q[i].request == SEQ_TYPE_LOCK) begin
-        temp = (is_blocked(arb_sequence_q[i].sequence_ptr) == 0);
+         if ((arb_sequence_q[i].process_id.status == process::KILLED) ||
+             (arb_sequence_q[i].process_id.status == process::FINISHED)) begin
+            `uvm_error("SEQLCKZMB", $sformatf("The task responsible for requesting a lock on sequencer '%s' for sequence '%s' has been killed, to avoid a deadlock the sequence will be removed from the arbitration queues", this.get_full_name(), arb_sequence_q[i].sequence_ptr.get_full_name()))
+            remove_sequence_from_queues(arb_sequence_q[i].sequence_ptr);
+            continue;
+         end
+         
+         temp = (is_blocked(arb_sequence_q[i].sequence_ptr) == 0);
       end
     end
 
@@ -643,7 +651,10 @@ function void uvm_sequencer_base::grant_queued_locks();
         end
       end
     end
+
+    i++;
   end
+
 endfunction
 
   
@@ -691,10 +702,15 @@ function int uvm_sequencer_base::m_choose_next_request();
 
   grant_queued_locks();
 
-  for (i = 0; i < arb_sequence_q.size(); i++) begin
-    // Search for available sequences.  If in SEQ_ARB_FIFO arbitration,
-    // then just return the first available sequence.  Otherwise,
-    // create a list for arbitration purposes.
+  i = 0;
+  while (i < arb_sequence_q.size()) begin
+     if ((arb_sequence_q[i].process_id.status == process::KILLED) ||
+         (arb_sequence_q[i].process_id.status == process::FINISHED)) begin
+        `uvm_error("SEQREQZMB", $sformatf("The task responsible for requesting a wait_for_grant on sequencer '%s' for sequence '%s' has been killed, to avoid a deadlock the sequence will be removed from the arbitration queues", this.get_full_name(), arb_sequence_q[i].sequence_ptr.get_full_name()))
+         remove_sequence_from_queues(arb_sequence_q[i].sequence_ptr);
+         continue;
+     end
+
     if (i < arb_sequence_q.size())
       if (arb_sequence_q[i].request == SEQ_TYPE_REQ)
         if (is_blocked(arb_sequence_q[i].sequence_ptr) == 0)
@@ -704,6 +720,8 @@ function int uvm_sequencer_base::m_choose_next_request();
             end
             else avail_sequences.push_back(i);
           end
+
+    i++;
   end
 
   // Return immediately if there are 0 or 1 available sequences
@@ -993,6 +1011,7 @@ task uvm_sequencer_base::wait_for_grant(uvm_sequence_base sequence_ptr,
     req_s.request = SEQ_TYPE_LOCK;
     req_s.sequence_ptr = sequence_ptr;
     req_s.request_id = g_request_id++;
+    req_s.process_id = process::self();
     arb_sequence_q.push_back(req_s);
   end
       
@@ -1004,6 +1023,7 @@ task uvm_sequencer_base::wait_for_grant(uvm_sequence_base sequence_ptr,
   req_s.item_priority = item_priority;
   req_s.sequence_ptr = sequence_ptr;
   req_s.request_id = g_request_id++;
+  req_s.process_id = process::self();
   arb_sequence_q.push_back(req_s);
   m_update_lists();
 
@@ -1097,6 +1117,7 @@ task uvm_sequencer_base::m_lock_req(uvm_sequence_base sequence_ptr, bit lock);
   new_req.request = SEQ_TYPE_LOCK;
   new_req.sequence_ptr = sequence_ptr;
   new_req.request_id = g_request_id++;
+  new_req.process_id = process::self();
   
   if (lock == 1) begin
     // Locks are arbitrated just like all other requests
@@ -1624,6 +1645,7 @@ class uvm_sequence_request;
   int        sequence_id;
   int        request_id;
   int        item_priority;
+  process    process_id;
   uvm_sequencer_base::seq_req_t  request;
   uvm_sequence_base sequence_ptr;
 endclass
