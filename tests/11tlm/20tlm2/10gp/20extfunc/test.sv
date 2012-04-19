@@ -219,13 +219,13 @@ class test extends uvm_test;
      s2 = obj2.sprint(uvm_default_tree_printer);
      filter(s1,s2); 
      if (s1 != s2)
-       `uvm_fatal("MISCOMPARE",{"Sprint tree:\nobj1=\n%s\nobj2=\n%s",s1,s2})
+       `uvm_fatal("MISCOMPARE",{"Sprint tree:\nobj1=\n",s1,"\nobj2=\n",s2})
 
      s1 = obj1.sprint(uvm_default_line_printer);
      s2 = obj2.sprint(uvm_default_line_printer);
      filter(s1,s2); 
      if (s1 != s2)
-       `uvm_fatal("MISCOMPARE",{"Sprint line:\nobj1=\n%s\nobj2=\n%s",s1,s2})
+       `uvm_fatal("MISCOMPARE",{"Sprint line:\nobj1=\n",s1,"\nobj2=\n",s2})
 
      end
 
