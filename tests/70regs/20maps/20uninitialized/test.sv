@@ -157,9 +157,8 @@ program two_sequencers_with_same_map;
                 uvm_reg_data_t data;
                 uvm_reg_map m;
                 
-begin    // 839607
-                uvm_config_db#(uvm_reg_map)::get(get_sequencer(),"","target_map",m);
-end
+                void'(uvm_config_db#(uvm_reg_map)::get(get_sequencer(),"","target_map",m));
+
                 repeat(10) begin
                     data = $urandom;
                     model.ID.write(status,data,.parent(this),.map(m));

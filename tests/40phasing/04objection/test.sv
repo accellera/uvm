@@ -54,7 +54,7 @@ module test;
       `uvm_info("RESET", "Starting Reset", UVM_NONE)
       if($time != 0)  begin
         failed = 1;
-        `uvm_error("RESET", $sformatf("Expected Reset start time of 0, got %0t", phase_transition_time, $time))
+        `uvm_error("RESET", $sformatf("Expected Reset start time of 0, got %0t its now %0t", phase_transition_time, $time))
       end
       #100;
       `uvm_info("RESET", "Ending Reset", UVM_NONE)

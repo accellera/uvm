@@ -1137,6 +1137,7 @@ task uvm_phase::execute_phase();
     //---------
     m_state = UVM_PHASE_STARTED;
     m_imp.traverse(top,this,UVM_PHASE_STARTED);
+    m_ready_to_end_count = 0 ; // reset the ready_to_end count when phase starts
     #0; // LET ANY WAITERS WAKE UP
 
 

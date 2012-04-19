@@ -2959,11 +2959,25 @@ function void uvm_component::apply_config_settings (bit verbose=0);
   int unsigned i;
   int unsigned j;
 
+  // populate an internal 'field_array' with list of
+  // fields declared with `uvm_field macros (checking
+  // that there aren't any duplicates along the way)
   __m_uvm_field_automation (null, UVM_CHECK_FIELDS, "");
+
+  // if no declared fields, nothing to do. 
+  if (__m_uvm_status_container.field_array.size() == 0)
+    return;
 
   if(verbose)
     uvm_report_info("CFGAPL","applying configuration settings", UVM_NONE);
 
+  // Note: the following is VERY expensive. Needs refactoring. Should
+  // get config only for the specific field names in 'field_array'.
+  // That's because the resource pool is organized first by field name.
+  // Can further optimize by encoding the value for each 'field_array' 
+  // entry to indicate string, uvm_bitstream_t, or object. That way,
+  // we call 'get' for specific fields of specific types rather than
+  // the search-and-cast approach here.
   rq = rp.lookup_scope(get_full_name());
   rp.sort_by_precedence(rq);
 
@@ -2992,7 +3006,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
       continue;
 
     if(verbose)
-      uvm_report_info("CFGAPL",$sformatf("applying %s [%s]", name, __m_uvm_status_container.field_array[search_name]),UVM_NONE);
+      uvm_report_info("CFGAPL",$sformatf("applying configuration to field %s", name),UVM_NONE);
 
     begin
     uvm_resource#(uvm_bitstream_t) rbs;

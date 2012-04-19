@@ -93,7 +93,7 @@ module top;
     env e;
 
     `uvm_new_func
-    `uvm_component_utils(test);
+    `uvm_component_utils(test)
     
     function void build_phase(uvm_phase phase);
       gen::type_id::set_inst_override(mygen::get_type(), "uvm_test_top.env.gen1");

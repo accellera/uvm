@@ -123,7 +123,7 @@ begin
       svr.summarize();
       
       if (svr.get_severity_count(UVM_FATAL) +
-          svr.get_severity_count(UVM_NOT_OK) == 0)
+          svr.get_severity_count(UVM_ERROR) == 0)
          $write("** UVM TEST PASSED **\n");
       else
          $write("!! UVM TEST FAILED !!\n");
