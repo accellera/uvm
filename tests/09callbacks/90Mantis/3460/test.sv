@@ -76,15 +76,15 @@ class phase_aware_object extends uvm_object;
       super.new(_name);
    endfunction : new
 
-   virtual function my_phase_started(uvm_phase phase);
+   virtual function void my_phase_started(uvm_phase phase);
       uvm_phase_state l_state = phase.get_state();
    endfunction : my_phase_started
 
-   virtual function my_phase_ended(uvm_phase phase);
+   virtual function void my_phase_ended(uvm_phase phase);
       uvm_phase_state l_state = phase.get_state();
    endfunction : my_phase_ended
 
-   virtual function my_phase_ready_to_end(uvm_phase phase);
+   virtual function void my_phase_ready_to_end(uvm_phase phase);
       uvm_phase_state l_state = phase.get_state();
    endfunction : my_phase_ready_to_end
 
@@ -152,7 +152,7 @@ class test extends uvm_component;
 
    phase_aware_object pao;
 
-   `uvm_component_utils(test);
+   `uvm_component_utils(test)
 
    function new(string _name, uvm_component _parent);
       super.new(_name, _parent);

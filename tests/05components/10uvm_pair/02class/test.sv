@@ -33,7 +33,7 @@ class test extends uvm_test;
   uvm_class_pair #(transaction, transaction) pair, pair2;
 
 
-  `uvm_component_utils(test);
+  `uvm_component_utils(test)
 
   function new(string name, uvm_component parent=null);
     super.new(name,parent);

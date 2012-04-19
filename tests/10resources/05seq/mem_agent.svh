@@ -54,7 +54,7 @@ class mem_driver #(int unsigned ADDR_SIZE=16, int unsigned DATA_SIZE=8)
 
   typedef mem_driver #(ADDR_SIZE, DATA_SIZE) this_type;
   typedef virtual mem_if #(ADDR_SIZE, DATA_SIZE) if_t;
-  `uvm_component_param_utils(this_type);
+  `uvm_component_param_utils(this_type)
 
   local if_t m_if;
 
@@ -129,7 +129,7 @@ class mem_monitor #(int unsigned ADDR_SIZE=16, int unsigned DATA_SIZE=8)
 
   typedef mem_monitor #(ADDR_SIZE, DATA_SIZE) this_type;
   typedef virtual mem_if #(ADDR_SIZE, DATA_SIZE) if_t;
-  `uvm_component_param_utils(this_type);
+  `uvm_component_param_utils(this_type)
 
   uvm_analysis_port #(mem_seq_item #(ADDR_SIZE, DATA_SIZE)) ap;
 
@@ -178,7 +178,7 @@ class mem_talker #(int unsigned ADDR_SIZE=16, int unsigned DATA_SIZE=8)
   extends uvm_subscriber #(mem_seq_item #(ADDR_SIZE, DATA_SIZE));
 
   typedef mem_talker #(ADDR_SIZE, DATA_SIZE) this_type;
-  `uvm_component_param_utils(this_type);
+  `uvm_component_param_utils(this_type)
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -199,7 +199,7 @@ class mem_agent #(type CONFIG=int,
   extends uvm_component;
 
   typedef mem_agent#(CONFIG) this_type;
-  `uvm_component_param_utils(this_type);
+  `uvm_component_param_utils(this_type)
 
   local mem_driver #(ADDR_SIZE, DATA_SIZE) drv;
   local mem_monitor #(ADDR_SIZE, DATA_SIZE) mon;

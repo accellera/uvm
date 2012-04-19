@@ -100,7 +100,7 @@ begin
    begin
       uvm_reg_block blks[$];
 
-      uvm_reg_block::find_blocks("*.b*", blks);
+      void'(uvm_reg_block::find_blocks("*.b*", blks));
       if (blks.size() != 2) begin
          `uvm_error("TEST", $sformatf("Found %0d blocks matching \"*.b*\" instead of 2.",
                                       blks.size()))
@@ -111,7 +111,7 @@ begin
 
       blks.delete();
       
-      uvm_reg_block::find_blocks("*1", blks, blk);
+      void'(uvm_reg_block::find_blocks("*1", blks, blk));
       if (blks.size() != 2) begin
          `uvm_error("TEST", $sformatf("Found %0d sub-blocks matching \"*1\" instead of 2.",
                                       blks.size()))

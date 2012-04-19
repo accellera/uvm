@@ -229,13 +229,28 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
     return -1;
   endfunction
 
+  static function int m_cb_find_name(uvm_queue#(uvm_callback) q, string name, string where);
+    uvm_callback cb;
+    for(int i=0; i<q.size(); ++i) begin
+      cb = q.get(i);
+      if(cb.get_name() == name) begin
+         `uvm_warning("UVM/CB/NAM/SAM", {"A callback named \"", name,
+                                         "\" is already registered with ", where})
+         return 1;
+      end
+    end
+    return 0;
+  endfunction
+
   //For a typewide callback, need to add to derivative types as well.
   virtual function void m_add_tw_cbs(uvm_callback cb, uvm_apprepend ordering);
     super_type cb_pair;
     uvm_object obj;
     T me;
+    bit warned;
     uvm_queue#(uvm_callback) q;
     if(m_cb_find(m_t_inst.m_tw_cb_q,cb) == -1) begin
+       warned = m_cb_find_name(m_t_inst.m_tw_cb_q, cb.get_name(), "type");
        if(ordering == UVM_APPEND)
           m_t_inst.m_tw_cb_q.push_back(cb);
        else
@@ -250,6 +265,9 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
             m_t_inst.m_pool.add(obj,q);
           end
           if(m_cb_find(q,cb) == -1) begin
+            if (!warned) begin
+               void'(m_cb_find_name(q, cb.get_name(), {"object instance ", me.get_full_name()}));
+            end
             if(ordering == UVM_APPEND)
               q.push_back(cb);
             else
@@ -618,8 +636,6 @@ class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
 
         if (m_base_inst.m_typename!="")
           tnm = m_base_inst.m_typename;
-        else if (obj != null)
-          tnm = obj.get_type_name();
         else tnm = "uvm_object";
 
         uvm_report_warning("CBPREG",
@@ -667,6 +683,7 @@ class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
                            " with object ", obj.get_full_name() }, UVM_NONE);
       end
       else begin
+        void'(m_cb_find_name(q, cb.get_name(), {"object instance ", obj.get_full_name()}));
         if(ordering == UVM_APPEND)
           q.push_back(cb);
         else

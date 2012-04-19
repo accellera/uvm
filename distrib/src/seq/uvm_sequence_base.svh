@@ -747,13 +747,6 @@ class uvm_sequence_base extends uvm_sequence_item;
         uvm_report_fatal("SEQ",{"neither the item's sequencer nor dedicated sequencer has been supplied to start item in ",get_full_name()},UVM_NONE);
        return;
     end
-      
-    if (sequencer == null)
-      sequencer = item.get_sequencer();
-    
-    if (sequencer == null) begin
-        uvm_report_fatal("STRITM", "sequence_item has null sequencer", UVM_NONE);
-    end
 
     item.set_item_context(this, sequencer);
 
