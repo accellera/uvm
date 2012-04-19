@@ -360,12 +360,6 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    rand uvm_tlm_extension_base m_extensions [uvm_tlm_extension_base];
 
 
-   `ifdef UVM_CONSTRAIN_TLM_GP_ARRAYS
-   constraint c_data_length_default_size { m_length < 2000; }
-   constraint c_byte_enable_length_default_size { m_byte_enable_length < 2000; }
-   `endif
-
-
    `uvm_object_utils(uvm_tlm_generic_payload)
 
 
@@ -578,8 +572,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
       msg = { msg , s };
     end
 
-    //if(m_response_status != UVM_TLM_INCOMPLETE_RESPONSE)
-      msg = { msg, " (status=", get_response_string(), ")" };
+    msg = { msg, " (status=", get_response_string(), ")" };
 
     return msg;
 
