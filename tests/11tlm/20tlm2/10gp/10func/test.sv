@@ -32,28 +32,6 @@ import uvm_pkg::*;
 
 module top;
 
-`ifdef UVM_USE_P_FORMAT
-`define DO_CMP(STYLE,OP,OP1,OP2) \
-    for (int i=0; i< `NUM_TRANS; i++) \
-      if(!OP1.OP(OP2)) \
-        `uvm_fatal("MISCOMPARE",$sformatf("op1=%p op2=%p",OP1,OP2)) \
-        
-`else
-`define DO_CMP(STYLE,OP,OP1,OP2) \
-    for (int i=0; i< `NUM_TRANS; i++) \
-      if(!OP1.OP(OP2)) \
-        `uvm_fatal("MISCOMPARE",$sformatf("MISCOMPARE! op1=%s op2=%s",OP1.convert2string(),OP2.convert2string())) \
-
-`endif        
-        
-
-`define DO_IT(STYLE,OP,OP1,OP2) \
-    for (int i=0; i< `NUM_TRANS; i++) \
-      OP1.OP(OP2); \
-
-`define DO_PRT(STYLE,OP,OP1,OP2) \
-    for (int i=0; i< `NUM_TRANS; i++) \
-      void'(OP1.sprint(OP2)); \
 
 initial run_test();
    
@@ -64,121 +42,147 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
+   function void filter(ref string s1, ref string s2);
+     int i;
+     string tmp;
+     tmp = s1.substr(i,i+6);
+     while (tmp != "address") begin
+       i++;
+       tmp = s1.substr(i,i+6);
+     end
+     s1 = s1.substr(i,s1.len()-1);
+     s2 = s2.substr(i,s2.len()-1);
+   endfunction
+
    task run_phase(uvm_phase phase);
-      uvm_tlm_gp  obj1=new,obj2=new;
+     uvm_tlm_gp  obj1=new("obj1"),obj2=new("obj2");
+     bit bits[];
+    
+     phase.raise_objection(this);
 
-    phase.raise_objection(this);
+     uvm_default_packer.use_metadata = 1;
+     uvm_default_packer.big_endian = 0;
 
-    uvm_default_packer.use_metadata = 1;
-    uvm_default_packer.big_endian = 0;
+     uvm_top.set_report_id_action("ILLEGALNAME",UVM_NO_ACTION);
 
-    uvm_top.set_report_id_action("ILLEGALNAME",UVM_NO_ACTION);
+     //obj1.enable_recording("obj1");
 
-    //obj1.enable_recording("obj1");
+     $display("\NUM_TRANS=%0d",`NUM_TRANS);
 
-    $display("\NUM_TRANS=%0d",`NUM_TRANS);
+     for (int i=0; i<`NUM_TRANS; i++) begin
 
-     assert( obj1.randomize() with { 
-          m_address >= 0 && m_address < 256; 
-          m_length == `NUM_TRANS; 
-          m_data.size == m_length;
-          m_byte_enable_length <= m_length;
-          (m_byte_enable_length % 4) == 0;
-          m_byte_enable.size == m_byte_enable_length;
-          m_streaming_width == m_length; 
-          m_response_status == UVM_TLM_INCOMPLETE_RESPONSE;
+       $display("*** TRANS %0d ***",i);
+
+        assert( obj1.randomize() with { 
+         m_address >= 0 && m_address < 256; 
+         m_length == `NUM_TRANS; 
+         m_data.size == m_length;
+         m_byte_enable_length <= m_length;
+         (m_byte_enable_length % 4) == 0;
+         m_byte_enable.size == m_byte_enable_length;
+         foreach (m_byte_enable[i])
+           m_byte_enable[i] inside { 0, 255 };
+         m_streaming_width == m_length; 
 				     } );
+       assert( obj2.randomize() with { 
+         m_address != obj1.m_address; 
+         m_length == obj1.m_length-1; //ensure different sizes
+         m_data.size == m_length;
+         m_byte_enable_length <= m_length;
+         (m_byte_enable_length % 4) == 0;
+         m_byte_enable.size == m_byte_enable_length;
+         foreach (m_byte_enable[i])
+           m_byte_enable[i] inside { 0, 255 };
+         m_streaming_width == m_length; 
+			     } );
 
-    obj1.print();
-   assert( obj2.randomize() with { 
-          m_address != obj1.m_address; 
-          m_length == obj1.m_length-1; //ensure different sizes
-          m_data.size == m_length;
-          m_byte_enable_length <= m_length;
-          (m_byte_enable_length % 4) == 0;
-          m_byte_enable.size == m_byte_enable_length;
-          m_streaming_width == m_length; 
-          m_response_status == UVM_TLM_INCOMPLETE_RESPONSE;
-				     } );
-        obj2.print();
+     //---------------------------------
+     // COPY
+     //---------------------------------
 
+     obj2.copy(obj1);
 
-    //---------------------------------
-    // COPY
-    //---------------------------------
+     //---------------------------------
+     // COMPARE
+     //---------------------------------
 
-    `DO_IT("COPY: ",copy,obj2,obj1);
+     if(!obj1.compare(obj2))
+       `uvm_fatal("MISCOMPARE",$sformatf("MISCOMPARE detected on generic payload!"));
+        
+     //---------------------------------
+     // CONVERT2STRING
+     //---------------------------------
 
-    //---------------------------------
-    // COMPARE
-    //---------------------------------
+     begin
+     string s1,s2;
 
-    `DO_CMP("COMPARE: ",compare,obj1,obj2);
+     s1 = obj1.convert2string();
+     s2 = obj2.convert2string();
+     if (s1 != s2)
+       `uvm_fatal("MISCOMPARE",$sformatf("convert2string different!\nobj1=%s\nobj2=%s",s1,s2))
+     end
 
-    $display("obj1:",obj1.convert2string());
-    $display("obj2:",obj2.convert2string());
+     //---------------------------------
+     // PRINT/SPRINT
+     //---------------------------------
 
-    //---------------------------------
-    // PACK/UNPACK
-    //---------------------------------
+     begin
+     string s1,s2;
 
-    begin : pack
-    bit bits[];
+     s1 = obj1.sprint(uvm_default_table_printer);
+     s2 = obj2.sprint(uvm_default_table_printer);
+     filter(s1,s2); 
+     if (s1 != s2)
+       `uvm_fatal("MISCOMPARE",{"Sprint table:\nobj1=\n",s1,"\nobj2=\n",s2})
+
+     s1 = obj1.sprint(uvm_default_tree_printer);
+     s2 = obj2.sprint(uvm_default_tree_printer);
+     filter(s1,s2); 
+     if (s1 != s2)
+       `uvm_fatal("MISCOMPARE",{"Sprint tree:\nobj1=\n%s\nobj2=\n%s",s1,s2})
+
+     s1 = obj1.sprint(uvm_default_line_printer);
+     s2 = obj2.sprint(uvm_default_line_printer);
+     filter(s1,s2); 
+     if (s1 != s2)
+       `uvm_fatal("MISCOMPARE",{"Sprint line:\nobj1=\n%s\nobj2=\n%s",s1,s2})
+
+     end
+
+     //---------------------------------
+     // PACK/UNPACK
+     //---------------------------------
+
+     void'(obj1.pack(bits));
+     void'(obj2.unpack(bits));
+     if (!obj1.compare(obj2)) begin
+                  `uvm_error("TEST", "MISCOMPARE");
+       obj1.print();
+       obj2.print();
+     end
     
-    for (int i=0; i< `NUM_TRANS; i++) begin
-      void'(obj1.pack(bits));
-      void'(obj2.unpack(bits));
-      if (!obj1.compare(obj2)) begin
-                 `uvm_error("TEST", "MISCOMPARE");
-        obj1.print();
-        obj2.print();
-      end
-    end
-    
-    end : pack
-     
+     //---------------------------------
+     // RECORD
+     //---------------------------------
+
+     void'(obj1.begin_tr());
+     #10;
+     obj1.m_data[i] = i;
+     obj1.end_tr();
 
 
-    //---------------------------------
-    // RECORD
-    //---------------------------------
+   end // for (..NUM_TRANS..)
 
-    begin :record
-    for (int i=0; i< `NUM_TRANS; i++) begin
-      void'(obj1.begin_tr());
-      #10;
-      obj1.m_data[i] = i;
-      obj1.end_tr();
-    end
-
-    
-    end : record
-
-    //---------------------------------
-    // PRINT/SPRINT
-    //---------------------------------
-
-    begin
-    int NUM = `NUM_TRANS/5;
-    if (NUM==0) NUM=1;
-
-    `DO_PRT("obj1: ",compare,obj1,uvm_default_table_printer);
-
-    `DO_PRT("obj1: ",compare,obj1,uvm_default_tree_printer);
-
-    `DO_PRT("obj1: ",compare,obj1,uvm_default_line_printer);
-
-    end
-
-//    $display("*** UVM TEST PASSED ***");
-    phase.drop_objection(this);
+   phase.drop_objection(this);
 
 endtask // run_phase
    
-   virtual function void report_phase(uvm_phase phase);
-      uvm_report_server svr = uvm_report_server::get_server();
-      if (svr.get_severity_count(UVM_ERROR) > 0) pass = 0;
-       $write("** UVM TEST %sED **\n", (pass) ? "PASS" : "FAIL");
+virtual function void report_phase(uvm_phase phase);
+   uvm_report_server svr = uvm_report_server::get_server();
+   if (svr.get_severity_count(UVM_ERROR) > 0) pass = 0;
+     $write("** UVM TEST %sED **\n", (pass) ? "PASS" : "FAIL");
 endfunction
+
 endclass
+
 endmodule

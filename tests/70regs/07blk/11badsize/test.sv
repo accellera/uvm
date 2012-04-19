@@ -52,7 +52,7 @@ class my_blk extends uvm_reg_block;
    local static function bit m_check_data_width(int unsigned width);
       my_catcher c = new;
       uvm_report_cb::add(null, c);
-      check_data_width(width);
+      void'(check_data_width(width));
    endfunction
    
    `uvm_object_utils(my_blk)

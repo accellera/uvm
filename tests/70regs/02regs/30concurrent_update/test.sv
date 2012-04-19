@@ -36,7 +36,7 @@ class test extends uvm_test;
 
    tb_env env;
 
-   `uvm_component_utils(test);
+   `uvm_component_utils(test)
 
    function new(string name = "tb_test", uvm_component parent = null);
       super.new(name, parent);

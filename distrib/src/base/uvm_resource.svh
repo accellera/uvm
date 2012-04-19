@@ -897,10 +897,9 @@ class uvm_resource_pool;
     rq = rtab[name];
     for(int i=0; i<rq.size(); ++i) begin 
       r = rq.get(i);
-      // does the scope match?
-      if(r.match_scope(scope) &&
-         // does the type match?
-         ((type_handle == null) || (r.get_type_handle() == type_handle)))
+      // does the type and scope match?
+      if(((type_handle == null) || (r.get_type_handle() == type_handle)) &&
+          r.match_scope(scope))
         q.push_back(r);
     end
 
@@ -1085,10 +1084,9 @@ class uvm_resource_pool;
       for(i = 0; i < rq.size(); i++) begin
         r = rq.get(i);
         if(uvm_re_match(uvm_glob_to_re(re),name) == 0)
-          // does the scope match?
-          if(r.match_scope(scope) &&
-            // does the type match?
-            ((type_handle == null) || (r.get_type_handle() == type_handle)))
+          // does the type and scope match?
+          if(((type_handle == null) || (r.get_type_handle() == type_handle)) &&
+             r.match_scope(scope))
             result_q.push_back(r);
       end
     end
@@ -1344,7 +1342,7 @@ class uvm_resource_pool;
     printer.knobs.type_name=0;
     printer.knobs.reference=0;
 
-    if(rq == null && rq.size() == 0) begin
+    if(rq == null || rq.size() == 0) begin
       $display("<none>");
       return;
     end
