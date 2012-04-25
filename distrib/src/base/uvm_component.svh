@@ -2903,22 +2903,6 @@ function void uvm_component::set_config_object(string inst_name,
 
   uvm_config_object::set(this, inst_name, field_name, value);
 
-  begin
-     static bit m_plusarg_checked;
-     static int m_plusarg_cnt;
-     if (!m_plusarg_checked) begin
-        uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
-        string throw_away;
-        m_plusarg_cnt = clp.get_arg_value("+UVM_IGNORE_SET_CONFIG_CLONE", throw_away);
-        if (m_plusarg_cnt > 0) begin
-           `uvm_info("SETCFGOBJ_IGN", "Detected the use of +UVM_IGNORE_SET_CONFIG_CLONE, the library will ignore clone bits passed to set_config_object() when calling get_config_object().  This is a violation of the UVM Reference Specification.", UVM_NONE)
-        end
-        m_plusarg_checked = 1;
-     end
-     if (m_plusarg_cnt > 0)
-       return;
-  end
-   
   wrapper = new;
   wrapper.obj = value;
   wrapper.clone = clone;
@@ -2946,77 +2930,19 @@ endfunction
 //
 // get_config_object
 //
+//
+// Note that this does not honor the set_config_object clone bit
 function bit uvm_component::get_config_object (string field_name,
                                                inout uvm_object value,
                                                input bit clone=1);
-   int unsigned ctr;
-   uvm_resource#(uvm_object) ro;
-   uvm_resource#(uvm_config_object_wrapper) rcow;
-   uvm_config_object_wrapper cow;
-   uvm_resource_base rb, rb2;
-   uvm_resource_pool rp = uvm_resource_pool::get();
-   uvm_resource_types::rsrc_q_t rq;
-   bit set_clone = 1; // Default to the default value for set_config_object
 
-   // Need to get all resources, so we get both uvm_object and uvm_config_object_wrappers
-   // This gives similar functionality to the lookup_regex_names used in uvm_config_db::get()
-   rq = rp.lookup_regex_names(this.get_full_name(), field_name);
-   
-   while (ctr < rq.size()) begin
-      rb = rq.get(ctr);
-      if ((rb.get_type_handle() != uvm_resource#(uvm_object)::get_type()) &&
-          (rb.get_type_handle() != uvm_resource#(uvm_config_object_wrapper)::get_type()))
-        rq.delete(ctr);
-      else
-        ctr++;
-   end
+  if(!uvm_config_object::get(this, "", field_name, value)) begin
+    return 0;
+  end
 
-   // Since we're dealing w/ two types of resources, we have to figure out precedence ourselves
-   // This gives similar functionality to the get_highest_precedence used in uvm_config_db::get()
-   if (rq.size() == 0) begin
-      return 0;
-   end
-   else if (rq.size() == 1) begin
-      rb = rq.get(0);
-   end
-   else if (rq.size() > 1) begin
-      rb = rq.get(0); // Grab the first resource in the queue
-
-      for(int i = 1; i < rq.size(); ++i) begin
-         rb2 = rq.get(i);
-         if (rb2.precedence > rb.precedence) begin
-            rb = rb2;
-         end
-      end
-   end
-
-   // Determine what our match wound up being, a resource/config_db set, or a 
-   // uvm_component::set_config_object.  If set_config_object, grab the clone bit
-   if (rb.get_type_handle() == uvm_resource#(uvm_config_object_wrapper)::get_type()) begin
-      $cast(rcow, rb);
-      cow = rcow.read(this);
-      value = cow.obj;
-      set_clone = cow.clone;
-   end
-   else begin
-      $cast(ro, rb);
-      value = ro.read(this);
-   end
-
-   begin
-      static bit m_semantic_change_msg_printed = 0;
-      if (!m_semantic_change_msg_printed && !set_clone && clone) begin
-         `uvm_info("GETCFGOBJ_CHG", "The semantic of uvm_component::get_config_object() changed between UVM 1.1a and 1.1b.  The implementations in the library prior to 1.1b did not obey the uvm_component::set_config_object()'s clone bit per API as specified in the standard.  To produce the faulty clone-bit semantic that was implemented in 1.1a and earlier, re-run the test with +UVM_IGNORE_SET_CONFIG_CLONE", UVM_NONE)
-         m_semantic_change_msg_printed = 1;
-      end
-   end
-      
-   
-   // Honor the clone bit from the set (which defaults to 1 if the users didn't
-   // use set_config_object, since set_config_object would have defaulted to 1)
-   if((set_clone && clone) && value != null) begin
-      value = value.clone();
-   end
+  if(clone && value != null) begin
+    value = value.clone();
+  end
 
   return 1;
 endfunction
@@ -3116,9 +3042,16 @@ function void uvm_component::apply_config_settings (bit verbose=0);
           if($cast(rs, r))
             set_string_local(name, rs.read(this));
           else begin
-            uvm_resource#(uvm_object) ro;
-            if($cast(ro, r))
-              set_object_local(name, ro.read(this), 0);
+             uvm_resource#(uvm_config_object_wrapper) rcow;
+             if ($cast(rcow, r)) begin
+                uvm_config_object_wrapper cow = rcow.read();
+                set_object_local(name, cow.obj, cow.clone);
+             end
+             else begin
+                uvm_resource#(uvm_object) ro;
+                if($cast(ro, r))
+                  set_object_local(name, ro.read(this), 0);
+             end
           end
         end
       end

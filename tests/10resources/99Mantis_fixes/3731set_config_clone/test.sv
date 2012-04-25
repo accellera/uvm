@@ -14,12 +14,17 @@ module test;
    
   class mycomp extends uvm_component;
 
-    uvm_object sngn;
-    uvm_object sngy;
-    uvm_object sygn;
-    uvm_object sygy;
+    uvm_object sy_acs;
+    uvm_object sn_acs;
+    uvm_object sy_gn;
+    uvm_object sy_gy;
+    uvm_object sn_gn;
+    uvm_object sn_gy;
      
-    `uvm_component_utils(mycomp)
+    `uvm_component_utils_begin(mycomp)
+      `uvm_field_object(sy_acs, UVM_ALL_ON)
+      `uvm_field_object(sn_acs, UVM_ALL_ON)
+    `uvm_component_utils_end
 
     function new(string name, uvm_component parent);
        super.new(name, parent);
@@ -28,10 +33,10 @@ module test;
     function void build();
       super.build();
 
-       void'(get_config_object("set_without_clone", sngn, 0));
-       void'(get_config_object("set_without_clone", sngy, 1));
-       void'(get_config_object("set_with_clone", sygn, 0));
-       void'(get_config_object("set_with_clone", sygy, 1));
+      void'(get_config_object("set_with_clone", sy_gn, 0));
+      void'(get_config_object("set_with_clone", sy_gy, 1));
+      void'(get_config_object("set_without_clone", sn_gn, 0));
+      void'(get_config_object("set_without_clone", sn_gy, 1));
     endfunction // build
      
   endclass
@@ -47,32 +52,44 @@ module test;
     function void build();
       super.build();
        mo = myobj::type_id::create("mo");
-       set_config_object("mc", "set_without_clone", mo, 0);
+       set_config_object("mc", "sn_acs", mo, 0);
+       set_config_object("mc", "sy_acs", mo, 1);
        set_config_object("mc", "set_with_clone", mo, 1);
-      mc = new("mc", this);
+       set_config_object("mc", "set_without_clone", mo, 0);
+       mc = new("mc", this);
     endfunction
 
     task run_phase(uvm_phase phase);
       bit failed = 0;
       phase.raise_objection(this);
-      if (mc.sngn != mo) begin
+      if (mc.sn_acs != mo) begin
+         $display("*** UVM TEST FAILED, Set Clone (0) resulted in different reference");
+         failed = 1;
+      end
+      if (mc.sy_acs == mo) begin
+         $display("*** UVM TEST FAILED, Set Clone (1) resulted in same reference");
+         failed = 1;
+      end
+      if (mc.sn_gn != mo) begin
          $display("*** UVM TEST FAILED, Set Clone (0) & Get Clone (0) resulted in different reference");
          failed = 1;
       end
-      if (mc.sngy != mo) begin
-         $display("*** UVM TEST FAILED, Set Clone (0) & Get Clone (1) resulted in different reference");
+      if (mc.sn_gy == mo) begin
+         $display("*** UVM TEST FAILED, Set Clone (0) & Get Clone (1) resulted in same reference");
          failed = 1;
+      end else begin
+         $display("*** UVM TEST NOTE: Set Clone(0) & Get Clone (1) resulted in a different behavior than in OVM");
       end
-      if (mc.sygn == mo) begin
+      if (mc.sy_gn == mo) begin
          $display("*** UVM TEST FAILED, Set Clone (1) & Get Clone (0) resulted in same reference");
          failed = 1;
       end
-      if (mc.sygy == mo) begin
+      if (mc.sy_gy == mo) begin
          $display("*** UVM TEST FAILED, Set Clone (1) & Get Clone (1) resulted in same reference");
          failed = 1;
       end
-      if (mc.sygy == mc.sygn) begin
-         $display("*** UVM TEST FAILED, Set Clone (1) & Get Clone (1) produced same output as Set Clone (1) & Get Clone (0)");
+      if (mc.sy_gy == mc.sy_gn) begin
+         $display("*** UVM TEST FAILED, Set Clone (1) & Get Clone (1) resulted in same reference as Set Clone (1) & Get Clone (0)");
          failed = 1;
       end
 
