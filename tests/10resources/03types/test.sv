@@ -42,7 +42,7 @@ class config_A extends config_base;
   rand int unsigned doodad;
 
   constraint c { thingy < 100 &&
-                 doodad > 1000 && doodad < 5000; };
+                 doodad > 1000 && doodad < 5000; }
 
   function string sprint();
     string s;
@@ -61,7 +61,7 @@ class config_B extends config_base;
 
   rand int unsigned whatchit;
 
-  constraint c { whatchit < 87; };
+  constraint c { whatchit < 87; }
 
   function string sprint();
     string s;
@@ -188,7 +188,7 @@ endclass
 //----------------------------------------------------------------------
 class env extends uvm_component;
 
-  `uvm_component_utils(env);
+  `uvm_component_utils(env)
 
   shell s1, s2;
   config_A cA;

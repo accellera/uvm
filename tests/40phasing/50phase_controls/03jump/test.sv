@@ -34,7 +34,7 @@ class test extends test_base;
     super.new(name, parent);
   endfunction : new
 
-  `uvm_component_utils(test);
+  `uvm_component_utils(test)
 
   task main_phase(uvm_phase phase);
     phase.raise_objection(this);

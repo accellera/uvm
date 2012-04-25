@@ -376,8 +376,8 @@ sub check_test {
      foreach $err (@errs) {
        $err =~ m/^(.*)#(\d+)$/;
        if (&check_comptime_error($testdir, $1, $2)) {
-	 print "**FAIL** (Compile-time error)\n";
-	 return 1;
+	       print "**FAIL** (Compile-time error)\n";
+	       return 1;
        }
      }
 

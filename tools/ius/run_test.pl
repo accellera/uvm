@@ -134,12 +134,14 @@ sub get_compiletime_errors {
   local(@errs)=();
   
   while ($_ = <LOG>) {
-    if (/^(ncvlog|ncelab): \*[EF],\w+ \(([^,]+),(\d+)\|(\d+)\):/,){ 
+    if (/^(ncvlog|ncelab|irun): \*[EF],\w+ \(([^,]+),(\d+)\|(\d+)\):/,){ 
 	  push(@errs, "$2#$3");
     }
   }
 
   close(LOG);
+
+#  print join(":",@errs),"\n";
 
   return @errs;
 }

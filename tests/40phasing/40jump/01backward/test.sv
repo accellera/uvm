@@ -29,7 +29,10 @@ typedef class phasing_test;
 
 class test extends phasing_test;
   `uvm_component_utils(test)
-  static int first_time_around;
+
+  int number_of_jumps_requested = 25 ;
+  int number_of_jumps_completed = 0 ;
+  
   function new(string name="anon", uvm_component parent=null);
     super.new(name,parent);
     uvm_report_info("Test", "Testing correct phase order...");
@@ -48,16 +51,18 @@ class test extends phasing_test;
     predicted_phasing.push_back("uvm/pre_main");
     predicted_phasing.push_back("uvm/main");
 
-                          // jump(reset_ph)
-    predicted_jumps.push_back("main->reset");
+    for (int i = 0; i < number_of_jumps_requested; i++) begin
+      // jump(reset_ph)
+      predicted_jumps.push_back("main->reset");
 
-    predicted_phasing.push_back("uvm/reset");
-    predicted_phasing.push_back("uvm/post_reset");
-    predicted_phasing.push_back("uvm/pre_configure");
-    predicted_phasing.push_back("uvm/configure");
-    predicted_phasing.push_back("uvm/post_configure");
-    predicted_phasing.push_back("uvm/pre_main");
-    predicted_phasing.push_back("uvm/main");
+      predicted_phasing.push_back("uvm/reset");
+      predicted_phasing.push_back("uvm/post_reset");
+      predicted_phasing.push_back("uvm/pre_configure");
+      predicted_phasing.push_back("uvm/configure");
+      predicted_phasing.push_back("uvm/post_configure");
+      predicted_phasing.push_back("uvm/pre_main");
+      predicted_phasing.push_back("uvm/main");
+    end
 
     predicted_phasing.push_back("uvm/post_main");
     predicted_phasing.push_back("uvm/pre_shutdown"); 
@@ -67,17 +72,16 @@ class test extends phasing_test;
     predicted_phasing.push_back("common/check");
     predicted_phasing.push_back("common/report");
     predicted_phasing.push_back("common/final");
-    first_time_around=1;
   endfunction
 
   task main_phase(uvm_phase phase);
     super.main_phase(phase);
-    //phase.raise_objection(this);
-    if (first_time_around) begin
-      first_time_around = 0;
-      phase.jump(uvm_reset_phase::get());
+    phase.raise_objection(this);
+    if (number_of_jumps_completed < number_of_jumps_requested) begin
+      number_of_jumps_completed++ ;
+      phase.jump(phase.find_by_name("reset"));
     end
-    //phase.drop_objection(this);
+    phase.drop_objection(this);
   endtask
 
 endclass
@@ -94,8 +98,16 @@ class phasing_test extends uvm_test;
 
   static bit pass = 1;
 
+  static int delta_ready_to_end_vs_ended = 0 ;
+
+  // there should be 1 phase_ready_to_end per phase_ended in this test
+  function void phase_ready_to_end(uvm_phase phase);
+    if (phase.get_name()=="reset") delta_ready_to_end_vs_ended++ ;
+  endfunction
+  
   function void phase_ended(uvm_phase phase);
      uvm_phase goto = phase.get_jump_target();
+     if (phase.get_name()=="reset") delta_ready_to_end_vs_ended-- ;
      if (goto != null) begin
         audited_jumps.push_back({phase.get_name(),"->",goto.get_name()});
      end
@@ -130,9 +142,9 @@ class phasing_test extends uvm_test;
       predicted = (i >= predicted_phasing.size()) ? "" : predicted_phasing[i];
       audited = (i >= audited_phasing.size()) ? "" : audited_phasing[i];
       if (predicted == audited)
-        $display("  | %-27s | %-27s |     match", predicted, audited);
+        $display("  | %s | %s |     match", predicted, audited);
       else begin
-        $display("  | %-27s | %-27s | <<< MISMATCH", predicted, audited);
+        $display("  | %s | %s | <<< MISMATCH", predicted, audited);
         pass = 0;
       end
     end
@@ -151,13 +163,18 @@ class phasing_test extends uvm_test;
       predicted = (i >= predicted_jumps.size()) ? "" : predicted_jumps[i];
       audited = (i >= audited_jumps.size()) ? "" : audited_jumps[i];
       if (predicted == audited)
-        $display("  | %-27s | %-27s |     match", predicted, audited);
+        $display("  | %s | %s |     match", predicted, audited);
       else begin
-        $display("  | %-27s | %-27s | <<< MISMATCH", predicted, audited);
+        $display("  | %s | %s | <<< MISMATCH", predicted, audited);
          pass = 0;
       end
     end
     $display("  +-----------------------------+-----------------------------+");
+
+    if (delta_ready_to_end_vs_ended !=0) begin
+      $display("MISMATCH: phase_ready_to_end and phase_ended did not execute same number of times for reset phase");
+      pass = 0 ;
+    end
   endfunction
 
   function new(string name, uvm_component parent); super.new(name,parent); audit("new"); endfunction
