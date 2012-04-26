@@ -886,6 +886,13 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
       m_rand_exts[i++] = m_extensions[ext];
     end
   endfunction
+
+  // Function: post_randomize()
+  // Clean-up this class instance after randomization
+  //
+  function void post_randomize();
+     m_rand_exts.delete();
+  endfunction
 endclass
 
 //----------------------------------------------------------------------
