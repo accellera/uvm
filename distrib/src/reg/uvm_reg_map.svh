@@ -1723,6 +1723,7 @@ endfunction
 
 task uvm_reg_map::do_write(uvm_reg_item rw);
 
+  uvm_sequence_base tmp_parent_seq;
   uvm_reg_map system_map = get_root_map();
   uvm_reg_adapter adapter = system_map.get_adapter();
   uvm_sequencer_base sequencer = system_map.get_sequencer();
@@ -1734,9 +1735,13 @@ task uvm_reg_map::do_write(uvm_reg_item rw);
     assert($cast(seq,o));
     seq.set_parent_sequence(rw.parent);
     rw.parent = seq;
+    tmp_parent_seq = seq;
   end
-  if (rw.parent == null)
+
+  if (rw.parent == null) begin
      rw.parent = new("default_parent_seq");
+     tmp_parent_seq = rw.parent;
+  end
 
   if (adapter == null) begin
     rw.set_sequencer(sequencer);
@@ -1748,6 +1753,9 @@ task uvm_reg_map::do_write(uvm_reg_item rw);
     do_bus_write(rw, sequencer, adapter);
   end
 
+  if (tmp_parent_seq != null)
+    sequencer.m_sequence_exiting(tmp_parent_seq);
+
 endtask
 
 
@@ -1755,6 +1763,7 @@ endtask
 
 task uvm_reg_map::do_read(uvm_reg_item rw);
 
+  uvm_sequence_base tmp_parent_seq;
   uvm_reg_map system_map = get_root_map();
   uvm_reg_adapter adapter = system_map.get_adapter();
   uvm_sequencer_base sequencer = system_map.get_sequencer();
@@ -1766,9 +1775,13 @@ task uvm_reg_map::do_read(uvm_reg_item rw);
     assert($cast(seq,o));
     seq.set_parent_sequence(rw.parent);
     rw.parent = seq;
+    tmp_parent_seq = seq;
   end
-  if (rw.parent == null)
+
+  if (rw.parent == null) begin
     rw.parent = new("default_parent_seq");
+    tmp_parent_seq = rw.parent;
+  end
 
   if (adapter == null) begin
     rw.set_sequencer(sequencer);
@@ -1779,6 +1792,9 @@ task uvm_reg_map::do_read(uvm_reg_item rw);
   else begin
     do_bus_read(rw, sequencer, adapter);
   end
+
+  if (tmp_parent_seq != null)
+    sequencer.m_sequence_exiting(tmp_parent_seq);
 
 endtask
 
