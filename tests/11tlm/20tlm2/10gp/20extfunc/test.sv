@@ -31,30 +31,7 @@ import uvm_pkg::*;
 //------------------------------------------------------------------------------
 
 module top;
-
-`ifdef UVM_USE_P_FORMAT
-`define DO_CMP(STYLE,OP,OP1,OP2) \
-    for (int i=0; i< `NUM_TRANS; i++) \
-      if(!OP1.OP(OP2)) \
-        `uvm_fatal("MISCOMPARE",$sformatf("op1=%p op2=%p",OP1,OP2)) \
-        
-`else
-`define DO_CMP(STYLE,OP,OP1,OP2) \
-    for (int i=0; i< `NUM_TRANS; i++) \
-      if(!OP1.OP(OP2)) \
-        `uvm_fatal("MISCOMPARE",$sformatf("MISCOMPARE! op1=%s op2=%s",OP1.convert2string(),OP2.convert2string())) \
-
-`endif        
-        
-
-`define DO_IT(STYLE,OP,OP1,OP2) \
-    for (int i=0; i< `NUM_TRANS; i++) \
-      OP1.OP(OP2); \
-
-`define DO_PRT(STYLE,OP,OP1,OP2) \
-    for (int i=0; i< `NUM_TRANS; i++) \
-      void'(OP1.sprint(OP2)); \
-
+     
 initial run_test();
    
  `ifdef INCA
@@ -101,6 +78,8 @@ class test extends uvm_test;
    function void filter(ref string s1, ref string s2);
      int i,j;
      string tmp;
+     
+ /*    
      tmp = s1.substr(i,i+6);
      while (tmp != "address") begin
        i++;
@@ -119,8 +98,32 @@ class test extends uvm_test;
        j++;
      s1 = {s1.substr(0,i+8),s1.substr(j,s1.len()-1)};
      s2 = {s2.substr(0,i+8),s2.substr(j,s2.len()-1)};
-   endfunction
+     */
+     strip_id(s1);
+     strip_id(s2);
+     
+    endfunction
 
+    function void strip_id(ref string s);
+        bit in_id=0;
+        int i=0;
+        bit p;
+        while(i<s.len()) begin
+            if(in_id && s[i] inside {["0":"9"]," "})
+                if(p==0)
+                    begin s[i]="X"; p=1; end
+                else begin
+                    s={s.substr(0,i-1),s.substr(i+1,s.len()-1)}; 
+                    i--;
+                end
+            else
+                in_id=0;
+                    
+            if(s[i]=="@") begin in_id=1; p=0; end
+           
+           i++;   
+        end
+    endfunction
 
    task run_phase(uvm_phase phase);
       uvm_tlm_gp  obj1=new,obj2=new;
@@ -219,7 +222,7 @@ class test extends uvm_test;
      s2 = obj2.sprint(uvm_default_tree_printer);
      filter(s1,s2); 
      if (s1 != s2)
-       `uvm_fatal("MISCOMPARE",{"Sprint tree:\nobj1=\n",s1,"\nobj2=\n",s2})
+       `uvm_fatal("MISCOMPARE",{"Sprint tree:\nobj1=\n|",s1," \nobj2=\n|",s2,"|"})
 
      s1 = obj1.sprint(uvm_default_line_printer);
      s2 = obj2.sprint(uvm_default_line_printer);
