@@ -2842,6 +2842,13 @@ typedef uvm_config_db#(uvm_bitstream_t) uvm_config_int;
 typedef uvm_config_db#(string) uvm_config_string;
 typedef uvm_config_db#(uvm_object) uvm_config_object;
 
+// Undocumented struct for storing clone bit along w/
+// object on set_config_object(...) calls
+class uvm_config_object_wrapper;
+   uvm_object obj;
+   bit clone;
+endclass : uvm_config_object_wrapper
+
 function void uvm_component::set_config_int(string inst_name,
                                            string field_name,
                                            uvm_bitstream_t value);
@@ -2867,6 +2874,7 @@ function void uvm_component::set_config_object(string inst_name,
                                                uvm_object value,
                                                bit clone = 1);
   uvm_object tmp;
+  uvm_config_object_wrapper wrapper;
 
   if(value == null)
     `uvm_warning("NULLCFG", {"A null object was provided as a ",
@@ -2892,7 +2900,13 @@ function void uvm_component::set_config_object(string inst_name,
       value = tmp;
   end
 
+
   uvm_config_object::set(this, inst_name, field_name, value);
+
+  wrapper = new;
+  wrapper.obj = value;
+  wrapper.clone = clone;
+  uvm_config_db#(uvm_config_object_wrapper)::set(this, inst_name, field_name, wrapper);
 endfunction
 
 //
@@ -2916,9 +2930,12 @@ endfunction
 //
 // get_config_object
 //
+//
+// Note that this does not honor the set_config_object clone bit
 function bit uvm_component::get_config_object (string field_name,
                                                inout uvm_object value,
                                                input bit clone=1);
+
   if(!uvm_config_object::get(this, "", field_name, value)) begin
     return 0;
   end
@@ -3025,9 +3042,16 @@ function void uvm_component::apply_config_settings (bit verbose=0);
           if($cast(rs, r))
             set_string_local(name, rs.read(this));
           else begin
-            uvm_resource#(uvm_object) ro;
-            if($cast(ro, r))
-              set_object_local(name, ro.read(this), 0);
+             uvm_resource#(uvm_config_object_wrapper) rcow;
+             if ($cast(rcow, r)) begin
+                uvm_config_object_wrapper cow = rcow.read();
+                set_object_local(name, cow.obj, cow.clone);
+             end
+             else begin
+                uvm_resource#(uvm_object) ro;
+                if($cast(ro, r))
+                  set_object_local(name, ro.read(this), 0);
+             end
           end
         end
       end
