@@ -357,7 +357,8 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
    //
    rand int unsigned m_streaming_width;
 
-   rand uvm_tlm_extension_base m_extensions [uvm_tlm_extension_base];
+   protected uvm_tlm_extension_base m_extensions [uvm_tlm_extension_base];
+   local rand uvm_tlm_extension_base m_rand_exts[];
 
 
    `uvm_object_utils(uvm_tlm_generic_payload)
@@ -872,7 +873,26 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
   function void clear_extensions();
     m_extensions.delete();
   endfunction
-    
+
+
+  // Function: pre_randomize()
+  // Prepare this class instance for randomization
+  //
+  function void pre_randomize();
+    int i;
+    m_rand_exts = new [m_extensions.num()];
+    foreach (m_extensions[ext_]) begin
+      uvm_tlm_extension_base ext = ext_;
+      m_rand_exts[i++] = m_extensions[ext];
+    end
+  endfunction
+
+  // Function: post_randomize()
+  // Clean-up this class instance after randomization
+  //
+  function void post_randomize();
+     m_rand_exts.delete();
+  endfunction
 endclass
 
 //----------------------------------------------------------------------
