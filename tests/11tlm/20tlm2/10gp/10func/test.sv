@@ -42,20 +42,34 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
+ function void strip_id(ref string s);
+        bit in_id=0;
+        int i=0;
+        bit p;
+        while(i<s.len()) begin
+            if(in_id && s[i] inside {["0":"9"]," "})
+                if(p==0)
+                    begin s[i]="X"; p=1; end
+                else begin
+                    s={s.substr(0,i-1),s.substr(i+1,s.len()-1)}; 
+                    i--;
+                end
+            else
+                in_id=0;
+                    
+            if(s[i]=="@") begin in_id=1; p=0; end
+           
+           i++;   
+        end
+    endfunction
+
    function void filter(ref string s1, ref string s2);
-     int i;
-     string tmp;
-     tmp = s1.substr(i,i+6);
-     while (tmp != "address") begin
-       i++;
-       tmp = s1.substr(i,i+6);
-     end
-     s1 = s1.substr(i,s1.len()-1);
-     s2 = s2.substr(i,s2.len()-1);
+        strip_id(s1);
+        strip_id(s2);
    endfunction
 
    task run_phase(uvm_phase phase);
-     uvm_tlm_gp  obj1=new("obj1"),obj2=new("obj2");
+     uvm_tlm_gp  obj1=new("obj1"),obj2=new("obj1");
      bit bits[];
     
      phase.raise_objection(this);
