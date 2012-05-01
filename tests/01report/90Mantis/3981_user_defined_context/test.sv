@@ -80,9 +80,9 @@ endclass
 
 initial begin
 
-  uvm_report_handler msg = new();
+  automatic uvm_report_handler msg = new();
 
-  catcher rc = new;
+  automatic catcher rc = new;
   uvm_report_cb::add(null,rc);
 
   $display("UVM TEST EXPECT 1 UVM_ERROR");

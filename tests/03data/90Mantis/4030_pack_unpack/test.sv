@@ -646,8 +646,8 @@ endclass
 
 
   initial begin
-    item       man1=new("man1"),man2=new("man2");
-    item_macro mac1=new("mac1"),mac2=new("mac2");
+    static item       man1=new("man1"),man2=new("man2");
+    static item_macro mac1=new("mac1"),mac2=new("mac2");
 
     uvm_default_packer.use_metadata = 1;
     uvm_default_packer.big_endian = 0;
@@ -767,7 +767,7 @@ endclass
     //---------------------------------
 
     begin
-    int NUM = `NUM_TRANS/5;
+    static int NUM = `NUM_TRANS/5;
     if (NUM==0) NUM=1;
 
     `DO_PRT("Manual: ",compare,man1,uvm_default_table_printer);
