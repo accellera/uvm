@@ -260,7 +260,7 @@
     TRC_MSG.end_message = MSG; \
     TRC_MSG.report_object.process_report_message(TRC_MSG); \
     TR_ID = TRC_MSG.tr_handle; \
-    TRC_MSG.free_report_message(TRC_MSG); \
+    TRC_MSG.free_trace_message(TRC_MSG); \
     TRC_MSG = null; \
   end
 
@@ -335,7 +335,7 @@
       l_link_message.tr_id1 = TR_ID1; \
       l_link_message.relationship = REL; \
       l_report_object.process_report_message(l_link_message); \
-      l_link_message.free_report_message(l_link_message); \
+      l_link_message.free_link_message(l_link_message); \
     end \
   end
 
