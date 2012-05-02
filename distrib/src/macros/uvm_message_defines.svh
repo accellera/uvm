@@ -305,31 +305,28 @@
 
 `define uvm_trace_add_tag(TRC_MESS, NAME, VALUE) \
   if (TRC_MESS != null) \
-    TRC_MESS.add_tag(NAME, VALUE); \
+    TRC_MESS.add_tag(NAME, VALUE);
 
-`define uvm_trace_add_int(TRC_MESS, NAME, RADIX) \
+`define uvm_trace_add_int(TRC_MESS, VAR, RADIX, LABEL = "") \
   if (TRC_MESS != null) \
-    TRC_MESS.add_int(`"NAME`", NAME, RADIX); \
+    if (LABEL == "") \
+      TRC_MESS.add_int(`"VAR`", VAR, RADIX); \
+    else \
+      TRC_MESS.add_int(LABEL, VAR, RADIX);
 
-`define uvm_trace_add_labeled_int(TRC_MESS, LABEL, NAME, RADIX) \
+`define uvm_trace_add_string(TRC_MESS, VAR, LABEL = "") \
   if (TRC_MESS != null) \
-    TRC_MESS.add_int(LABEL, NAME, RADIX); \
+    if (LABEL == "") \
+      TRC_MESS.add_string(`"VAR`", VAR); \
+    else \
+      TRC_MESS.add_string(LABEL, VAR);
 
-`define uvm_trace_add_string(TRC_MESS, NAME) \
+`define uvm_trace_add_object(TRC_MESS, VAR, LABEL = "") \
   if (TRC_MESS != null) \
-    TRC_MESS.add_string(`"NAME`", NAME); \
-
-`define uvm_trace_add_labeled_string(TRC_MESS, LABEL, NAME) \
-  if (TRC_MESS != null) \
-    TRC_MESS.add_string(LABEL, NAME); \
-
-`define uvm_trace_add_object(TRC_MESS, OBJ) \
-  if (TRC_MESS != null) \
-    TRC_MESS.add_object(`"OBJ`", OBJ); \
-
-`define uvm_trace_add_labeled_object(TRC_MESS, LABEL, OBJ) \
-  if (TRC_MESS != null) \
-    TRC_MESS.add_object(LABEL, OBJ); \
+    if (LABEL == "") \
+      TRC_MESS.add_object(`"VAR`", VAR); \
+    else \
+      TRC_MESS.add_object(LABEL, VAR);
 
 
 // LINK
