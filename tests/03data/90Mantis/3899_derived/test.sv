@@ -66,8 +66,6 @@ class my_class_ext extends my_class;
     task  run_phase(uvm_phase phase);
        if (parent_config == null)
 	 `uvm_error("parent class has null config", "")
-       $cast(ext_config, parent_config);       
-       ext_config.parent_component.print();       
     endtask 
 endclass // my_class_ext
    
