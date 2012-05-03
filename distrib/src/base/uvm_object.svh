@@ -933,7 +933,7 @@ function void  uvm_object::set_int_local (string      field_name,
   if(__m_uvm_status_container.warning && !this.__m_uvm_status_container.status) begin
     uvm_report_error("NOMTC", $sformatf("did not find a match for field %s", field_name),UVM_NONE);
   end
-
+  __m_uvm_status_container.cycle_check.delete();
 endfunction
 
 
@@ -962,6 +962,7 @@ function void  uvm_object::set_object_local (string     field_name,
   if(__m_uvm_status_container.warning && !this.__m_uvm_status_container.status) begin
     uvm_report_error("NOMTC", $sformatf("did not find a match for field %s", field_name), UVM_NONE);
   end
+  __m_uvm_status_container.cycle_check.delete();  
 
 endfunction
 
@@ -982,6 +983,7 @@ function void  uvm_object::set_string_local (string field_name,
   if(__m_uvm_status_container.warning && !this.__m_uvm_status_container.status) begin
     uvm_report_error("NOMTC", $sformatf("did not find a match for field %s (@%0d)", field_name, this.get_inst_id()), UVM_NONE);
   end
+  __m_uvm_status_container.cycle_check.delete();
 endfunction
 
 
