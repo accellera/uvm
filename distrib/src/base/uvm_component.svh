@@ -2985,6 +2985,8 @@ function void uvm_component::apply_config_settings (bit verbose=0);
   if (__m_uvm_status_container.field_array.size() == 0)
     return;
 
+  $display($sformatf("UWE: %p ",__m_uvm_status_container.field_array));
+  
   if(verbose)
     uvm_report_info("CFGAPL","applying configuration settings", UVM_NONE);
 
@@ -2997,6 +2999,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
   // the search-and-cast approach here.
   rq = rp.lookup_scope(get_full_name());
   rp.sort_by_precedence(rq);
+  
 
   // rq is in precedence order now, so we have to go through in reverse
   // order to do the settings.
@@ -3004,6 +3007,9 @@ function void uvm_component::apply_config_settings (bit verbose=0);
 
     r = rq.get(i);
     name = r.get_name();
+    
+  $display($sformatf("UWE2: %p %p",r,name));
+
 
     // does name have brackets [] in it?
     for(j = 0; j < name.len(); j++)
