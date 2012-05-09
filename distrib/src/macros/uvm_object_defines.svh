@@ -3445,7 +3445,6 @@ endfunction \
 //
 `define uvm_unpack_intN(VAR,SIZE) \
    begin \
-   $display(`"packer.count=%0d VAR sz=%0d`",packer.count,SIZE); \
    if (packer.big_endian) begin \
      int cnt = packer.count + SIZE; \
      uvm_bitstream_t tmp = VAR; \
