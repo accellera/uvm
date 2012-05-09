@@ -86,6 +86,8 @@ class item_macro extends uvm_sequence_item;
      `uvm_field_int(uint16,UVM_ALL_ON)
      `uvm_field_int(uint8,UVM_ALL_ON)
      `uvm_field_int(uint1,UVM_ALL_ON)
+     `uvm_field_int(bits,UVM_ALL_ON)
+     `uvm_field_int(logics,UVM_ALL_ON)
 `ifndef INCA
      `uvm_field_real(real32,UVM_ALL_ON)
 `endif     
@@ -100,8 +102,6 @@ class item_macro extends uvm_sequence_item;
      `uvm_field_queue_int(q,UVM_ALL_ON)
      `uvm_field_aa_int_shortint(aa,UVM_ALL_ON)
 
-     `uvm_field_int(bits,UVM_ALL_ON)
-     `uvm_field_int(logics,UVM_ALL_ON)
 
   `uvm_object_utils_end
 
