@@ -21,17 +21,17 @@ May 2, 2012
 UVM 1.1b fixes the following issues reported under the Mantis bug-tracking system.
  
 For detailed information on a specific issue, refer to the Mantis database at http://www.eda.org/svdb/view.php?id=<id>, where <id> is the Mantis id.
-Mantis 3606, fixed issue with configuring “recording_detail”.
-Mantis 3609, fixed dpi functions which use VPI/PLI to be imported as “context” functions.
+Mantis 3606, fixed issue with configuring "recording_detail".
+Mantis 3609, fixed dpi functions which use VPI/PLI to be imported as "context" functions.
 Mantis 3622, fixed sequencer hangs issue that occurred when there is a delay between get_next_item and item_done with no objection from the sequencer to end the current phase.
 Mantis 3627, fixed wait_modified so it will not wake up if value did not change when a write occurred.
 Mantis 3731, the auto-configuration method, apply_config_settings(), has been fixed to honor the clone bit provided with the set_config_object() method per the Accellera standard specification.  The get_config_object() has intentionally been left as implemented (not following the Accellera standard specification) in order to preserve current library implementation semantics.
 
 
 Mantis 3764, fixed documentation for uvm_sequencer_base::execute_item.
-Mantis 3777, fixed issue with inconsistent recorder output, added a “}” to the “BEGIN” lines.
-Mantis 3805, fixed issue with wrong “format specifier” used in sfrormatf - %s for printing  a bit type variable, in the apply_config_setting function.
-Mantis 3806, fixed an issue with usage of non-standard “enum printing” with a “%s” modifier.
+Mantis 3777, fixed issue with inconsistent recorder output, added a "}" to the "BEGIN" lines.
+Mantis 3805, fixed issue with wrong "format specifier" used in sfrormatf - %s for printing  a bit type variable, in the apply_config_setting function.
+Mantis 3806, fixed an issue with usage of non-standard "enum printing" with a "%s" modifier.
 Mantis 3807, removed redundant casting from void to void function.
 Mantis 3811, fixed issue where uvm_report_catcher::add does not check names and the same name can be used more than once, causing registered callbacks with the same name not be called.
 Mantis 3819, fixed issue where calling read()/write() on the data register for an indirect register array causes infinite recursion and crashes.
@@ -50,10 +50,10 @@ Mantis 3963, fixed Infinite loop when using memory in upper half of a 64-bit add
 Mantis 3967, provided better fatal error message when multiple threads invoke get_next_item() simultaneously in a pipelined driver.
 Mantis 3981, added a set/get accessor in the report catcher to access the m_name local variable in the report catcher.
 Mantis 3983, fixed several issues with uvm_tlm_generic_payload, field macros where removed, for data and byte_enable array fixed copy/compare, added byte_enable_len field, added user extensions to the implementation of do_pack/do_unpack/do_record  and extended convert2string function to include additional fields.  
-Mantis 3985, fixed issue where get_mem_by_offset didn’t work because address ranges was not checked for all ranges.
+Mantis 3985, fixed issue where get_mem_by_offset didn't work because address ranges was not checked for all ranges.
 Mantis 4004, provided macros to distinguish bug fix versions.
 Mantis 4030, fixed issue where uvm_*pack_* macros lack begin/end.
-Mantis 4039, fixed issue where phase.is_after(phase.find_by_name(“reset”)) returned TRUE in run phase.
+Mantis 4039, fixed issue where phase.is_after(phase.find_by_name("reset")) returned TRUE in run phase.
 Mantis 4040, replaced usages of $psprintf which is not a standard SystemVerilog construct with $sformatf.
 Mantis 4046, fixed issue where memory bursts and request for user-control of burst size were not working.
 Mantis 4052, fixed issue where phase.get_ready_to_end_count() was not reset when a phase jump occurred.
@@ -63,5 +63,5 @@ Mantis 4078, removed unnecessary call to uvm_radix_to_string in uvm_recorder:.se
 Mantis 4087, fixed issue with unconditional usage of %p format, added an `ifdef qualifier.
 Mantis 4092, removed redundant code in uvm_sequence_base:.start_item.
 Mantis 4093, fixed bad comparison in uvm_resource_pool::print_resources().
-Mantis 4113, fixed memory leak issue for register accesses that omit the “parent” sequence argument.
+Mantis 4113, fixed memory leak issue for register accesses that omit the "parent" sequence argument.
 
