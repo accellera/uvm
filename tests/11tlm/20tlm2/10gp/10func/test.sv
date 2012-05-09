@@ -71,6 +71,8 @@ class test extends uvm_test;
    task run_phase(uvm_phase phase);
      uvm_tlm_gp  obj1=new("obj1"),obj2=new("obj1");
      bit bits[];
+     byte unsigned bytes[];
+     int np, nu;
     
      phase.raise_objection(this);
 
@@ -167,12 +169,26 @@ class test extends uvm_test;
      // PACK/UNPACK
      //---------------------------------
 
-     void'(obj1.pack(bits));
-     void'(obj2.unpack(bits));
+     np = obj1.pack(bits);
+     nu = obj2.unpack(bits);
      if (!obj1.compare(obj2)) begin
-                  `uvm_error("TEST", "MISCOMPARE");
+                  `uvm_error("TEST", "pack/unpack MISCOMPARE");
        obj1.print();
        obj2.print();
+     end
+     if (np != nu) begin
+        `uvm_error("TEST", $sformatf("Packed %0d bits but unpacked %0d bits", np, nu))
+     end
+    
+     nu = obj1.pack_bytes(bytes);
+     np = obj2.unpack_bytes(bytes);
+     if (!obj1.compare(obj2)) begin
+                  `uvm_error("TEST", "pack_bytes/unpack_bytes MISCOMPARE");
+       obj1.print();
+       obj2.print();
+     end
+     if (np != nu) begin
+        `uvm_error("TEST", $sformatf("pack_bytes() packed %0d bits but unpacked %0d bits", np, nu))
      end
     
      //---------------------------------
@@ -187,6 +203,44 @@ class test extends uvm_test;
 
    end // for (..NUM_TRANS..)
 
+
+   // Check the actual byte stream of the packing operation
+      `uvm_info("TEST", "Checking content of packed byte stream...", UVM_LOW)
+      
+      bytes = '{'h00, 'h11, 'h22, 'h33, 'h44, 'h55, 'h66, 'h77,
+                'h88, 'h99, 'hAA, 'hBB, 'hCC, 'hDD, 'hEE, 'hFF};
+      obj1.set_address(64'h0011_2233_4455_6677);
+      obj1.set_write();
+      obj1.set_data(bytes);
+      obj1.set_data_length(16);
+      obj1.set_streaming_width(1);
+      obj1.set_byte_enable(bytes);
+      obj1.set_byte_enable_length(16);
+      obj1.set_dmi_allowed(1);
+      obj1.set_response_status(UVM_TLM_BYTE_ENABLE_ERROR_RESPONSE);
+
+      begin
+         byte unsigned exp[64]
+            = '{'h77, 'h66, 'h55, 'h44, 'h33, 'h22, 'h11, 'h00, 'h01, 'h00, 'h00, 'h00,
+                'h10, 'h00, 'h00, 'h00, 'h00, 'h11, 'h22, 'h33, 'h44, 'h55, 'h66, 'h77,
+                'h88, 'h99, 'haa, 'hbb, 'hcc, 'hdd, 'hee, 'hff, 'h10, 'h00, 'h00, 'h00,
+                'hfb, 'hff, 'hff, 'hff, 'h10, 'h00, 'h00, 'h00, 'h00, 'h11, 'h22, 'h33,
+                'h44, 'h55, 'h66, 'h77, 'h88, 'h99, 'haa, 'hbb, 'hcc, 'hdd, 'hee, 'hff,
+                'h01, 'h00, 'h00, 'h00};
+         
+         np = obj1.pack_bytes(bytes);
+         np = (np-1) / 8 + 1;
+         if (np != 64) begin
+            `uvm_error("TEST", $sformatf("GP packed into %0d bytes instead of 64", np))
+         end
+         foreach (bytes[i]) begin
+            if (i > 63) break;
+            if (bytes[i] != exp[i]) begin
+               `uvm_error("TEST", $sformatf("GP byte #%0d is 'h%h instead of 'h%h", i,
+                                            bytes[i], exp[i]))
+            end
+         end
+      end
    phase.drop_objection(this);
 
 endtask // run_phase
