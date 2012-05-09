@@ -3275,7 +3275,14 @@ endfunction \
 //
 `define uvm_pack_intN(VAR,SIZE) \
    begin \
-   packer.m_bits[packer.count +: SIZE] = VAR; \
+   if (packer.big_endian) begin \
+     longint tmp = VAR; \
+     for (int i=0; i<SIZE; i++) \
+       packer.m_bits[packer.count + i] = tmp[SIZE-1-i]; \
+   end \
+   else begin \
+     packer.m_bits[packer.count +: SIZE] = VAR; \
+   end \
    packer.count += SIZE; \
    end
 
@@ -3297,10 +3304,8 @@ endfunction \
 //
 `define uvm_pack_sarrayN(VAR,SIZE) \
     begin \
-    foreach (VAR `` [index]) begin \
-      packer.m_bits[packer.count+:SIZE] = VAR[index]; \
-      packer.count += SIZE; \
-    end \
+    foreach (VAR `` [index]) \
+      `uvm_pack_intN(VAR[index],SIZE) \
     end
 
 
@@ -3360,7 +3365,8 @@ endfunction \
 `define uvm_pack_string(VAR) \
     begin \
     `uvm_pack_sarrayN(VAR,8) \
-    `uvm_pack_intN(0,8) \
+    if (packer.use_metadata) \
+      `uvm_pack_intN(0,8) \
     end
 
 
@@ -3372,9 +3378,8 @@ endfunction \
 //
 `define uvm_pack_real(VAR) \
    begin \
-   longint unsigned real_bits64 = $realtobits(VAR); \
-   packer.m_bits[packer.count +: 64] = real_bits64; \
-   packer.count += 64; \
+   longint unsigned tmp; \
+   `uvm_pack_intN($realtobits(VAR),64) \
    end
 
 
@@ -3440,7 +3445,16 @@ endfunction \
 //
 `define uvm_unpack_intN(VAR,SIZE) \
    begin \
-   VAR = packer.m_bits[packer.count +: SIZE]; \
+   if (packer.big_endian) begin \
+     int cnt = packer.count + SIZE; \
+     uvm_bitstream_t tmp = VAR; \
+     for (int i=0; i<SIZE; i++) \
+       tmp[i] = packer.m_bits[cnt - i - 1]; \
+     VAR = tmp; \
+   end \
+   else begin \
+     VAR = packer.m_bits[packer.count +: SIZE]; \
+   end \
    packer.count += SIZE; \
    end
 
@@ -3453,9 +3467,9 @@ endfunction \
 //
 `define uvm_unpack_enumN(VAR,SIZE,TYPE) \
    begin \
-   VAR = TYPE'(packer.m_bits[packer.count +: \
-                                     SIZE]); \
-   packer.count += SIZE; \
+   longint tmp; \
+   `uvm_unpack_intN(tmp,SIZE) \
+   VAR = TYPE'(tmp); \
    end
 
 
@@ -3467,10 +3481,8 @@ endfunction \
 //
 `define uvm_unpack_sarrayN(VAR,SIZE) \
     begin \
-    foreach (VAR `` [i]) begin \
-      VAR[i]=packer.m_bits[packer.count+:SIZE];\
-      packer.count += SIZE; \
-    end \
+    foreach (VAR `` [i]) \
+      `uvm_unpack_intN(VAR``[i], SIZE) \
     end
 
 
@@ -3501,10 +3513,8 @@ endfunction \
     `uvm_unpack_intN(sz,32) \
     while (VAR.size() > sz) \
       void'(VAR.pop_back()); \
-    for (int i=0; i<sz; i++) begin \
-      VAR[i]=packer.m_bits[packer.count+:SIZE]; \
-      packer.count += SIZE; \
-    end \
+    for (int i=0; i<sz; i++) \
+      `uvm_unpack_intN(VAR[i],SIZE) \
     end
 
 
@@ -3574,9 +3584,8 @@ endfunction \
 `define uvm_unpack_real(VAR) \
    begin \
    longint unsigned real_bits64; \
-   real_bits64 = packer.m_bits[packer.count +: 64]; \
+   `uvm_unpack_intN(real_bits64,64) \
    VAR = $bitstoreal(real_bits64); \
-   packer.count += 64; \
    end
 
 
