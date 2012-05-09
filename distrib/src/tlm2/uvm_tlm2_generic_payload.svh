@@ -507,6 +507,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
     `uvm_pack_int  (m_length)
     `uvm_pack_enum (m_response_status)
     `uvm_pack_array(m_byte_enable)
+    `uvm_pack_int  (m_byte_enable_length)
     `uvm_pack_int  (m_streaming_width)
 
     foreach (m_extensions[ext])
@@ -524,6 +525,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
     `uvm_unpack_int  (m_length)
     `uvm_unpack_enum (m_response_status, uvm_tlm_response_status_e)
     `uvm_unpack_array(m_byte_enable)
+    `uvm_unpack_int  (m_byte_enable_length)
     `uvm_unpack_int  (m_streaming_width)
 
     foreach (m_extensions[ext])

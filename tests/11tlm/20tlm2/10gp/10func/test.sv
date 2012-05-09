@@ -239,7 +239,7 @@ class test extends uvm_test;
       $write("};\n");
       
       begin
-         byte unsigned exp[64]
+         byte unsigned exp[68]
             = {'h88, 'h77, 'h55, 'h44, 'h33, 'h22, 'h11, 'h00,
                'h01, 'h00, 'h00, 'h00, 'h10, 'h00, 'h00, 'h00,
                'h00, 'h11, 'h22, 'h33, 'h44, 'h55, 'h66, 'h77,
@@ -247,7 +247,8 @@ class test extends uvm_test;
                'h10, 'h00, 'h00, 'h00, 'hfb, 'hff, 'hff, 'hff,
                'h10, 'h00, 'h00, 'h00, 'h00, 'h11, 'h22, 'h33,
                'h44, 'h55, 'h66, 'h77, 'h88, 'h99, 'haa, 'hbb,
-               'hcc, 'hdd, 'hee, 'hff, 'h01, 'h00, 'h00, 'h00};
+               'hcc, 'hdd, 'hee, 'hff, 'h10, 'h00, 'h00, 'h00,
+               'h01, 'h00, 'h00, 'h00};
 
          np = gp.pack_bytes(bytes);
          np = (np-1) / 8 + 1;
@@ -275,7 +276,7 @@ class test extends uvm_test;
       $write("};\n");
       
       begin
-         byte unsigned exp[64]
+         byte unsigned exp[68]
          = {'h00, 'h11, 'h22, 'h33, 'h44, 'h55, 'h77, 'h88,
             'h00, 'h00, 'h00, 'h01, 'h00, 'h00, 'h00, 'h10,
             'h00, 'h11, 'h22, 'h33, 'h44, 'h55, 'h66, 'h77,
@@ -283,7 +284,8 @@ class test extends uvm_test;
             'h00, 'h00, 'h00, 'h10, 'hff, 'hff, 'hff, 'hfb,
             'h00, 'h00, 'h00, 'h10, 'h00, 'h11, 'h22, 'h33,
             'h44, 'h55, 'h66, 'h77, 'h88, 'h99, 'haa, 'hbb,
-            'hcc, 'hdd, 'hee, 'hff, 'h00, 'h00, 'h00, 'h01};
+            'hcc, 'hdd, 'hee, 'hff, 'h00, 'h00, 'h00, 'h10,
+            'h00, 'h00, 'h00, 'h01};
 
          np = gp.pack_bytes(bytes);
          np = (np-1) / 8 + 1;

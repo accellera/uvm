@@ -3467,9 +3467,9 @@ endfunction \
 //
 `define uvm_unpack_enumN(VAR,SIZE,TYPE) \
    begin \
-   longint tmp; \
-   `uvm_unpack_intN(tmp,SIZE) \
-   VAR = TYPE'(tmp); \
+   longint e; \
+   `uvm_unpack_intN(e,SIZE) \
+   VAR = TYPE'(e); \
    end
 
 
