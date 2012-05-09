@@ -69,15 +69,12 @@ class test extends uvm_test;
    endfunction
 
    task run_phase(uvm_phase phase);
-     uvm_tlm_gp  obj1=new("obj1"),obj2=new("obj1");
+     uvm_tlm_gp  obj1=new("obj1"),obj2=new("obj2");
      bit bits[];
      byte unsigned bytes[];
      int np, nu;
     
      phase.raise_objection(this);
-
-     uvm_default_packer.use_metadata = 1;
-     uvm_default_packer.big_endian = 0;
 
      uvm_top.set_report_id_action("ILLEGALNAME",UVM_NO_ACTION);
 
@@ -145,6 +142,8 @@ class test extends uvm_test;
      begin
      string s1,s2;
 
+     obj2.set_name(obj1.get_name());
+
      s1 = obj1.sprint(uvm_default_table_printer);
      s2 = obj2.sprint(uvm_default_table_printer);
      filter(s1,s2); 
@@ -169,6 +168,13 @@ class test extends uvm_test;
      // PACK/UNPACK
      //---------------------------------
 
+     uvm_default_packer.use_metadata = 1;
+     uvm_default_packer.big_endian   = i % 2;
+
+     `uvm_info("TEST", $sformatf("Testing pack/unpack using %0s endian...",
+                                 (uvm_default_packer.big_endian) ? "big" : "little"), UVM_NONE)
+
+     obj2 = new("obj2");
      np = obj1.pack(bits);
      nu = obj2.unpack(bits);
      if (!obj1.compare(obj2)) begin
@@ -180,6 +186,7 @@ class test extends uvm_test;
         `uvm_error("TEST", $sformatf("Packed %0d bits but unpacked %0d bits", np, nu))
      end
     
+     obj2 = new("obj2");
      nu = obj1.pack_bytes(bytes);
      np = obj2.unpack_bytes(bytes);
      if (!obj1.compare(obj2)) begin
@@ -205,42 +212,97 @@ class test extends uvm_test;
 
 
    // Check the actual byte stream of the packing operation
-      `uvm_info("TEST", "Checking content of packed byte stream...", UVM_LOW)
+   `uvm_info("TEST", "Checking content of packed byte stream...", UVM_LOW)
       
+   begin
+      uvm_tlm_gp gp = new();
+   
       bytes = '{'h00, 'h11, 'h22, 'h33, 'h44, 'h55, 'h66, 'h77,
                 'h88, 'h99, 'hAA, 'hBB, 'hCC, 'hDD, 'hEE, 'hFF};
-      obj1.set_address(64'h0011_2233_4455_6677);
-      obj1.set_write();
-      obj1.set_data(bytes);
-      obj1.set_data_length(16);
-      obj1.set_streaming_width(1);
-      obj1.set_byte_enable(bytes);
-      obj1.set_byte_enable_length(16);
-      obj1.set_dmi_allowed(1);
-      obj1.set_response_status(UVM_TLM_BYTE_ENABLE_ERROR_RESPONSE);
+      
+      gp.set_address(64'h0011_2233_4455_7788);
+      gp.set_write();
+      gp.set_data(bytes);
+      gp.set_data_length(16);
+      gp.set_streaming_width(1);
+      gp.set_byte_enable(bytes);
+      gp.set_byte_enable_length(16);
+      gp.set_dmi_allowed(1);
+      gp.set_response_status(UVM_TLM_BYTE_ENABLE_ERROR_RESPONSE);
+      
+      uvm_default_packer.big_endian   = 0;
+      gp.pack_bytes(bytes);
 
+      $write("Little Endian...\n");
+      foreach (bytes[i])
+         $write(",%s'h%h", (i%8) ? " ": "\n", bytes[i]);
+      $write("};\n");
+      
       begin
          byte unsigned exp[64]
-            = '{'h77, 'h66, 'h55, 'h44, 'h33, 'h22, 'h11, 'h00, 'h01, 'h00, 'h00, 'h00,
-                'h10, 'h00, 'h00, 'h00, 'h00, 'h11, 'h22, 'h33, 'h44, 'h55, 'h66, 'h77,
-                'h88, 'h99, 'haa, 'hbb, 'hcc, 'hdd, 'hee, 'hff, 'h10, 'h00, 'h00, 'h00,
-                'hfb, 'hff, 'hff, 'hff, 'h10, 'h00, 'h00, 'h00, 'h00, 'h11, 'h22, 'h33,
-                'h44, 'h55, 'h66, 'h77, 'h88, 'h99, 'haa, 'hbb, 'hcc, 'hdd, 'hee, 'hff,
-                'h01, 'h00, 'h00, 'h00};
-         
-         np = obj1.pack_bytes(bytes);
+            = {'h88, 'h77, 'h55, 'h44, 'h33, 'h22, 'h11, 'h00,
+               'h01, 'h00, 'h00, 'h00, 'h10, 'h00, 'h00, 'h00,
+               'h00, 'h11, 'h22, 'h33, 'h44, 'h55, 'h66, 'h77,
+               'h88, 'h99, 'haa, 'hbb, 'hcc, 'hdd, 'hee, 'hff,
+               'h10, 'h00, 'h00, 'h00, 'hfb, 'hff, 'hff, 'hff,
+               'h10, 'h00, 'h00, 'h00, 'h00, 'h11, 'h22, 'h33,
+               'h44, 'h55, 'h66, 'h77, 'h88, 'h99, 'haa, 'hbb,
+               'hcc, 'hdd, 'hee, 'hff, 'h01, 'h00, 'h00, 'h00};
+
+         np = gp.pack_bytes(bytes);
          np = (np-1) / 8 + 1;
-         if (np != 64) begin
-            `uvm_error("TEST", $sformatf("GP packed into %0d bytes instead of 64", np))
+         if (np != $size(exp)) begin
+            `uvm_error("TEST", $sformatf("GP packed into %0d bytes instead of %0d", np, $size(exp)))
+         end
+         if (np != bytes.size()) begin
+            `uvm_error("TEST", $sformatf("GP said it packed %0d bytes instead of %0d", np, bytes.size()))
          end
          foreach (bytes[i]) begin
-            if (i > 63) break;
+            if (i >= $size(exp)) break;
             if (bytes[i] != exp[i]) begin
                `uvm_error("TEST", $sformatf("GP byte #%0d is 'h%h instead of 'h%h", i,
                                             bytes[i], exp[i]))
             end
          end
       end
+
+      uvm_default_packer.big_endian   = 1;
+      gp.pack_bytes(bytes);
+
+      $write("Big Endian...\n");
+      foreach (bytes[i])
+         $write(",%s'h%h", (i%8) ? " ": "\n", bytes[i]);
+      $write("};\n");
+      
+      begin
+         byte unsigned exp[64]
+         = {'h00, 'h11, 'h22, 'h33, 'h44, 'h55, 'h77, 'h88,
+            'h00, 'h00, 'h00, 'h01, 'h00, 'h00, 'h00, 'h10,
+            'h00, 'h11, 'h22, 'h33, 'h44, 'h55, 'h66, 'h77,
+            'h88, 'h99, 'haa, 'hbb, 'hcc, 'hdd, 'hee, 'hff,
+            'h00, 'h00, 'h00, 'h10, 'hff, 'hff, 'hff, 'hfb,
+            'h00, 'h00, 'h00, 'h10, 'h00, 'h11, 'h22, 'h33,
+            'h44, 'h55, 'h66, 'h77, 'h88, 'h99, 'haa, 'hbb,
+            'hcc, 'hdd, 'hee, 'hff, 'h00, 'h00, 'h00, 'h01};
+
+         np = gp.pack_bytes(bytes);
+         np = (np-1) / 8 + 1;
+         if (np != $size(exp)) begin
+            `uvm_error("TEST", $sformatf("GP packed into %0d bytes instead of %0d", np, $size(exp)))
+         end
+         if (np != bytes.size()) begin
+            `uvm_error("TEST", $sformatf("GP said it packed %0d bytes instead of %0d", np, bytes.size()))
+         end
+         foreach (bytes[i]) begin
+            if (i >= $size(exp)) break;
+            if (bytes[i] != exp[i]) begin
+               `uvm_error("TEST", $sformatf("GP byte #%0d is 'h%h instead of 'h%h", i,
+                                            bytes[i], exp[i]))
+            end
+         end
+      end
+   end
+
    phase.drop_objection(this);
 
 endtask // run_phase
