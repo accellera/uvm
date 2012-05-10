@@ -218,18 +218,41 @@ class test extends uvm_test;
       uvm_tlm_gp gp = new();
    
       bytes = '{'h00, 'h11, 'h22, 'h33, 'h44, 'h55, 'h66, 'h77,
-                'h88, 'h99, 'hAA, 'hBB, 'hCC, 'hDD, 'hEE, 'hFF};
+                'h88, 'h99, 'hAA, 'hBB, 'hCC, 'hDD, 'hEE, 'hFF,
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae,
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae,
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae,
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 
+                'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae, 'hae
+               };
       
       gp.set_address(64'h0011_2233_4455_7788);
       gp.set_write();
       gp.set_data(bytes);
       gp.set_data_length(16);
       gp.set_streaming_width(1);
-      gp.set_byte_enable(bytes);
+      gp.set_byte_enable(bytes); // TECHNICALLY, byte_enables elements should be 00 or FF, nothing else
       gp.set_byte_enable_length(16);
       gp.set_dmi_allowed(1);
       gp.set_response_status(UVM_TLM_BYTE_ENABLE_ERROR_RESPONSE);
       
+      //$display("gp=%p",gp); // prints everything in gp
+      //gp.print();   // does not print m_data buffer, only m_length entries
+     
+
       uvm_default_packer.big_endian   = 0;
       gp.pack_bytes(bytes);
 
@@ -239,15 +262,15 @@ class test extends uvm_test;
       $write("};\n");
       
       begin
-         byte unsigned exp[68]
+         byte unsigned exp[60]
             = {'h88, 'h77, 'h55, 'h44, 'h33, 'h22, 'h11, 'h00,
                'h01, 'h00, 'h00, 'h00, 'h10, 'h00, 'h00, 'h00,
                'h00, 'h11, 'h22, 'h33, 'h44, 'h55, 'h66, 'h77,
                'h88, 'h99, 'haa, 'hbb, 'hcc, 'hdd, 'hee, 'hff,
-               'h10, 'h00, 'h00, 'h00, 'hfb, 'hff, 'hff, 'hff,
+                                       'hfb, 'hff, 'hff, 'hff,
                'h10, 'h00, 'h00, 'h00, 'h00, 'h11, 'h22, 'h33,
                'h44, 'h55, 'h66, 'h77, 'h88, 'h99, 'haa, 'hbb,
-               'hcc, 'hdd, 'hee, 'hff, 'h10, 'h00, 'h00, 'h00,
+               'hcc, 'hdd, 'hee, 'hff, 
                'h01, 'h00, 'h00, 'h00};
 
          np = gp.pack_bytes(bytes);
@@ -276,15 +299,15 @@ class test extends uvm_test;
       $write("};\n");
       
       begin
-         byte unsigned exp[68]
+         byte unsigned exp[60]
          = {'h00, 'h11, 'h22, 'h33, 'h44, 'h55, 'h77, 'h88,
             'h00, 'h00, 'h00, 'h01, 'h00, 'h00, 'h00, 'h10,
             'h00, 'h11, 'h22, 'h33, 'h44, 'h55, 'h66, 'h77,
             'h88, 'h99, 'haa, 'hbb, 'hcc, 'hdd, 'hee, 'hff,
-            'h00, 'h00, 'h00, 'h10, 'hff, 'hff, 'hff, 'hfb,
+                                    'hff, 'hff, 'hff, 'hfb,
             'h00, 'h00, 'h00, 'h10, 'h00, 'h11, 'h22, 'h33,
             'h44, 'h55, 'h66, 'h77, 'h88, 'h99, 'haa, 'hbb,
-            'hcc, 'hdd, 'hee, 'hff, 'h00, 'h00, 'h00, 'h10,
+            'hcc, 'hdd, 'hee, 'hff, 
             'h00, 'h00, 'h00, 'h01};
 
          np = gp.pack_bytes(bytes);

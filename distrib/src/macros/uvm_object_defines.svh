@@ -3317,7 +3317,8 @@ endfunction \
 //
 `define uvm_pack_arrayN(VAR,SIZE) \
     begin \
-    `uvm_pack_intN(VAR.size(),32) \
+    if (packer.use_metadata) \
+      `uvm_pack_intN(VAR.size(),32) \
     `uvm_pack_sarrayN(VAR,SIZE) \
     end
 
@@ -3495,7 +3496,8 @@ endfunction \
 `define uvm_unpack_arrayN(VAR,SIZE) \
     begin \
     int sz; \
-    `uvm_unpack_intN(sz,32) \
+    if (packer.use_metadata) \
+      `uvm_unpack_intN(sz,32) \
     VAR = new[sz]; \
     `uvm_unpack_sarrayN(VAR,SIZE) \
     end
@@ -3510,7 +3512,8 @@ endfunction \
 `define uvm_unpack_queueN(VAR,SIZE) \
     begin \
     int sz; \
-    `uvm_unpack_intN(sz,32) \
+    if (packer.use_metadata) \
+      `uvm_unpack_intN(sz,32) \
     while (VAR.size() > sz) \
       void'(VAR.pop_back()); \
     for (int i=0; i<sz; i++) \
