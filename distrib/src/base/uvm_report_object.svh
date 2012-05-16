@@ -98,6 +98,12 @@ class uvm_report_object extends uvm_object;
   // Group: Reporting
   //----------------------------------------------------------------------------
 
+  // Function: uvm_get_report_object
+  //
+  // Returns the nearest uvm_report_object when called.  From inside an 
+  // uvm_component, the method simply returns 'this'.  
+  // 
+  // See also the global version of <uvm_get_report_object>.
 
   function uvm_report_object uvm_get_report_object();
     return this;
@@ -198,6 +204,14 @@ class uvm_report_object extends uvm_object;
   //   filename/line - (Optional) The location from which the report was issued.
   //               Use the predefined macros, `__FILE__ and `__LINE__.
   //               If specified, it is displayed in the output.
+  //
+  //   context_name - (Optional) The string context from where the message is
+  //               originating.  This can be the %m of a module, a specific
+  //               method, etc.
+  //
+  //   report_enabled_checked - (Optional) This bit indicates whether the
+  //               currently provided message has been check as to whether
+  //               the message should be processed.
 
   virtual function void uvm_report_fatal ( string id, string message,
     int verbosity = UVM_NONE, string filename = "", int line = 0,
@@ -449,7 +463,7 @@ class uvm_report_object extends uvm_object;
 
 
   //----------------------------------------------------------------------------
-  // Group: Callbacks
+  // Group- Callbacks
   //----------------------------------------------------------------------------
 
 

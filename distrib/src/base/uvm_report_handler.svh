@@ -90,7 +90,27 @@ class uvm_report_handler extends uvm_object;
   endfunction
 
 
-  // Print to show report server state
+  // Function: print
+  //
+  // The uvm_report_handler implements the uvm_object::do_print() such that
+  // uvm_report_handler::print() method provides UVM printer formatted output
+  // of the current configuration.  A snippet of example output is shown here:
+  //
+  // |uvm_test_top                uvm_report_handler  -     @555                    
+  // |  max_verbosity_level       uvm_verbosity       32    UVM_FULL                
+  // |  id_verbosities            uvm_pool            3     -                       
+  // |    [ID1]                   uvm_verbosity       32    UVM_LOW                 
+  // |  severity_id_verbosities   array               4     -                       
+  // |    [UVM_INFO:ID4]          int                 32    501                     
+  // |  id_actions                uvm_pool            2     -                       
+  // |    [ACT_ID]                uvm_action          32    DISPLAY LOG COUNT       
+  // |  severity_actions          array               4     -                       
+  // |    [UVM_INFO]              uvm_action          32    DISPLAY                 
+  // |    [UVM_WARNING]           uvm_action          32    DISPLAY RM_RECORD COUNT 
+  // |    [UVM_ERROR]             uvm_action          32    DISPLAY COUNT           
+  // |    [UVM_FATAL]             uvm_action          32    DISPLAY EXIT            
+  // |  default_file_handle       int                 32    'h1                     
+
   virtual function void do_print (uvm_printer printer);
 
     uvm_verbosity l_verbosity;
@@ -283,6 +303,11 @@ class uvm_report_handler extends uvm_object;
   endfunction
 
   
+  //----------------------------------------------------------------------------
+  // Group: Message Processing
+  //----------------------------------------------------------------------------
+
+
   // Function: process_report_message
   //
   // This is the common handler method used by the four core reporting methods
@@ -311,6 +336,11 @@ class uvm_report_handler extends uvm_object;
     srvr.m_process_report_message(report_message);
     
   endfunction
+
+
+  //----------------------------------------------------------------------------
+  // Group: Convenience Methods
+  //----------------------------------------------------------------------------
 
 
   // Function: format_action

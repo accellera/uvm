@@ -56,10 +56,10 @@ initial begin
 
     // Zero time consuming
     `uvm_info_begin(l_trace_message, "TEST_BEGIN", "Beginning...", UVM_LOW, urm1)
-    `uvm_trace_add_tag(l_trace_message, "color", "red")
-    `uvm_trace_add_int(l_trace_message, my_int, UVM_DEC)
-    `uvm_trace_add_string(l_trace_message, my_string)
-    `uvm_trace_add_object(l_trace_message, my_obj)
+    `uvm_add_trace_tag(l_trace_message, "color", "red")
+    `uvm_add_trace_int(l_trace_message, my_int, UVM_DEC)
+    `uvm_add_trace_string(l_trace_message, my_string)
+    `uvm_add_trace_object(l_trace_message, my_obj)
     `uvm_info_end(l_trace_message, "Ending...", l_tr_handle0)
 
     #5;
@@ -70,9 +70,9 @@ initial begin
 
     // Zero time consuming
     `uvm_info_begin(l_trace_message, "TEST_BEGIN", "Beginning...", UVM_LOW, urm1)
-    `uvm_trace_add_tag(l_trace_message, "color", "white")
-    `uvm_trace_add_string(l_trace_message, my_string)
-    `uvm_trace_add_object(l_trace_message, my_obj)
+    `uvm_add_trace_tag(l_trace_message, "color", "white")
+    `uvm_add_trace_string(l_trace_message, my_string)
+    `uvm_add_trace_object(l_trace_message, my_obj)
     `uvm_info_end(l_trace_message, "Ending...", l_tr_handle1)
 
 end

@@ -102,6 +102,28 @@ class uvm_report_server extends uvm_object;
   endfunction
 
 
+  // Function: print
+  //
+  // The uvm_report_server implements the uvm_object::do_print() such that
+  // uvm_server_handler::print() method provides UVM printer formatted output
+  // of the current configuration.  A snippet of example output is shown here:
+  //
+  // |uvm_report_server                 uvm_report_server  -     @13  
+  // |  quit_count                      int                32    'd0  
+  // |  max_quit_count                  int                32    'd5  
+  // |  max_quit_overridable            bit                1     'b1  
+  // |  severity_count                  severity counts    4     -    
+  // |    [UVM_INFO]                    integral           32    'd4  
+  // |    [UVM_WARNING]                 integral           32    'd2  
+  // |    [UVM_ERROR]                   integral           32    'd50 
+  // |    [UVM_FATAL]                   integral           32    'd10 
+  // |  id_count                        id counts          4     -    
+  // |    [ID1]                         integral           32    'd1  
+  // |    [ID2]                         integral           32    'd2  
+  // |    [RNTST]                       integral           32    'd1  
+  // |  enable_report_id_count_summary  bit                1     'b1  
+
+
   // Print to show report server state
   virtual function void do_print (uvm_printer printer);
 
@@ -144,6 +166,17 @@ class uvm_report_server extends uvm_object;
   //----------------------------------------------------------------------------
 
 
+  // Function: get_server
+  //
+  // Gets the global report server. The method will always return 
+  // a valid handle to a report server.
+
+  static function uvm_report_server get_server();
+    if (m_global_report_server == null)
+      m_global_report_server = new();
+    return m_global_report_server;
+  endfunction
+
   // Function: set_server
   //
   // Sets the global report server to use for reporting. The report
@@ -157,24 +190,22 @@ class uvm_report_server extends uvm_object;
   endfunction
 
 
-  // Function: get_server
-  //
-  // Gets the global report server. The method will always return 
-  // a valid handle to a report server.
-
-  static function uvm_report_server get_server();
-    if (m_global_report_server == null)
-      m_global_report_server = new();
-    return m_global_report_server;
-  endfunction
-
-
   //----------------------------------------------------------------------------
   // Group: Quit Count
   //----------------------------------------------------------------------------
 
 
+  // Function: get_max_quit_count
+
+  function int get_max_quit_count();
+    return m_max_quit_count;
+  endfunction
+
   // Function: set_max_quit_count
+  //
+  // Get or set the maximum number of COUNT actions that can be tolerated
+  // before an UVM_EXIT action is taken. The default is 0, which specifies
+  // no maximum.
 
   function void set_max_quit_count(int count, bit overridable = 1);
     if (max_quit_overridable == 0) begin
@@ -187,27 +218,17 @@ class uvm_report_server extends uvm_object;
     m_max_quit_count = count < 0 ? 0 : count;
   endfunction
 
-  // Function: get_max_quit_count
-  //
-  // Get or set the maximum number of COUNT actions that can be tolerated
-  // before an UVM_EXIT action is taken. The default is 0, which specifies
-  // no maximum.
-
-  function int get_max_quit_count();
-    return m_max_quit_count;
-  endfunction
-
-
-  // Function: set_quit_count
-
-  function void set_quit_count(int quit_count);
-    m_quit_count = quit_count < 0 ? 0 : quit_count;
-  endfunction
 
   // Function: get_quit_count
 
   function int get_quit_count();
     return m_quit_count;
+  endfunction
+
+  // Function: set_quit_count
+
+  function void set_quit_count(int quit_count);
+    m_quit_count = quit_count < 0 ? 0 : quit_count;
   endfunction
 
   // Function: incr_quit_count
@@ -240,18 +261,18 @@ class uvm_report_server extends uvm_object;
   //----------------------------------------------------------------------------
  
 
-  // Function: set_severity_count
-
-  function void set_severity_count(uvm_severity severity, int count);
-    uvm_severity_type l_severity_type = uvm_severity_type'(severity);
-    m_severity_count[l_severity_type] = count < 0 ? 0 : count;
-  endfunction
-
   // Function: get_severity_count
 
   function int get_severity_count(uvm_severity severity);
     uvm_severity_type l_severity_type = uvm_severity_type'(severity);
     return m_severity_count[l_severity_type];
+  endfunction
+
+  // Function: set_severity_count
+
+  function void set_severity_count(uvm_severity severity, int count);
+    uvm_severity_type l_severity_type = uvm_severity_type'(severity);
+    m_severity_count[l_severity_type] = count < 0 ? 0 : count;
   endfunction
 
   // Function: incr_severity_count
@@ -278,15 +299,9 @@ class uvm_report_server extends uvm_object;
 
 
   //----------------------------------------------------------------------------
-  // Group: Severity Count
+  // Group: id Count
   //----------------------------------------------------------------------------
 
-
-  // Function: set_id_count
-
-  function void set_id_count(string id, int count);
-    m_id_count[id] = count < 0 ? 0 : count;
-  endfunction
 
   // Function: get_id_count
 
@@ -294,6 +309,12 @@ class uvm_report_server extends uvm_object;
     if(m_id_count.exists(id))
       return m_id_count[id];
     return 0;
+  endfunction
+
+  // Function: set_id_count
+
+  function void set_id_count(string id, int count);
+    m_id_count[id] = count < 0 ? 0 : count;
   endfunction
 
   // Function: incr_id_count
@@ -372,9 +393,16 @@ class uvm_report_server extends uvm_object;
   endfunction
 
 
+  //----------------------------------------------------------------------------
+  // Group: Message Processing
+  //----------------------------------------------------------------------------
+
+
   // Function: execute_report_message
   //
-  // Processes the message's actions.
+  // Processes the provided message per the actions contained within.
+  //
+  // Expert users can overload this method to customize action processing.
  
   virtual function void execute_report_message(uvm_report_message report_message);
 
@@ -442,6 +470,7 @@ class uvm_report_server extends uvm_object;
   // from the severity, component name, report id, and the message itself. 
   //
   // Expert users can overload this method to customize report formatting.
+
   virtual function string compose_report_message(uvm_report_message report_message);
 
     string sev_string;
@@ -488,6 +517,11 @@ class uvm_report_server extends uvm_object;
      
     m_relnotes_done = 1;
   endfunction
+
+
+  //----------------------------------------------------------------------------
+  // Group: Library Output
+  //----------------------------------------------------------------------------
 
 
   // Function: report_header
@@ -703,7 +737,7 @@ class uvm_report_server extends uvm_object;
   endfunction
 
 
-  // Function: dump_server_state
+  // Function- dump_server_state
   //
   // Dumps server state information.
 

@@ -71,6 +71,16 @@ class uvm_root extends uvm_component;
 
   uvm_cmdline_processor clp;
 
+  virtual function string get_type_name();
+    return "uvm_root";
+  endfunction
+
+
+  //----------------------------------------------------------------------------
+  // Group: Simulation Control
+  //----------------------------------------------------------------------------
+
+
   // Task: run_test
   //
   // Phases all components through all registered phases. If the optional
@@ -83,6 +93,46 @@ class uvm_root extends uvm_component;
   // phasing completes.
 
   extern virtual task run_test (string test_name="");
+
+
+  // Function: die
+  //
+  // This method is called by the report server if a report reaches the maximum
+  // quit count or has an UVM_EXIT action associated with it, e.g., as with
+  // fatal errors.
+  //
+  // Calls the <uvm_component::pre_abort()> method
+  // on the entire <uvm_component> hierarchy in a bottom-up fashion.
+  // It then call calls <report_summarize> and terminates the simulation
+  // with ~$finish~.
+
+  virtual function void die();
+    uvm_report_server l_rs = uvm_report_server::get_server();
+    // do the pre_abort callbacks
+    m_do_pre_abort();
+
+    l_rs.report_summarize();
+    $finish;
+  endfunction
+
+
+  // Function: set_timeout
+  //
+  // Specifies the timeout for task-based phases. Default is 0, i.e. no timeout.
+
+  extern function void set_timeout(time timeout, bit overridable=1);
+
+
+  // Variable: finish_on_completion
+  //
+  // If set, then run_test will call $finish after all phases are executed. 
+
+  bit  finish_on_completion = 1;
+
+
+  //----------------------------------------------------------------------------
+  // Group: Topology
+  //----------------------------------------------------------------------------
 
 
   // Variable: top_levels
@@ -112,11 +162,6 @@ class uvm_root extends uvm_component;
                                  input uvm_component comp=null);
 
 
-  virtual function string get_type_name();
-    return "uvm_root";
-  endfunction
-
-
   // Function: print_topology
   //
   // Print the verification environment's component topology. The
@@ -135,26 +180,11 @@ class uvm_root extends uvm_component;
   bit  enable_print_topology = 0;
 
 
-  // Variable: finish_on_completion
-  //
-  // If set, then run_test will call $finish after all phases are executed. 
-
-
-  bit  finish_on_completion = 1;
-
-
   // Variable- phase_timeout
   //
   // Specifies the timeout for task-based phases. Default is 0, or no timeout.
 
   time phase_timeout = `UVM_DEFAULT_TIMEOUT;
-
-
-  // Function: set_timeout
-  //
-  // Specifies the timeout for task-based phases. Default is 0, i.e. no timeout.
-
-  extern function void set_timeout(time timeout, bit overridable=1);
 
 
   // PRIVATE members
@@ -201,27 +231,6 @@ class uvm_root extends uvm_component;
 
   bit m_phase_all_done;
 
-  // Function: die
-  //
-  // This method is called by the report server if a report reaches the maximum
-  // quit count or has an UVM_EXIT action associated with it, e.g., as with
-  // fatal errors.
-  //
-  // Calls the <uvm_component::pre_abort()> method
-  // on the entire <uvm_component> hierarchy in a bottom-up fashion.
-  // It then call calls <report_summarize> and terminates the simulation
-  // with ~$finish~.
-
-  virtual function void die();
-    // make the pre_abort callbacks
-    uvm_report_server l_rs = uvm_report_server::get_server();
-    m_do_pre_abort();
-
-    l_rs.report_summarize();
-    $finish;
-  endfunction
-
-
 
 `ifndef UVM_NO_DEPRECATED
   // stop_request
@@ -240,6 +249,10 @@ class uvm_root extends uvm_component;
 endclass
 
 
+//----------------------------------------------------------------------------
+// Group: Global Variables
+//----------------------------------------------------------------------------
+
 
 //------------------------------------------------------------------------------
 // Variable: uvm_top
@@ -250,8 +263,13 @@ endclass
 
 const uvm_root uvm_top = uvm_root::get();
 
+
+`ifndef UVM_NO_DEPRECATED
+
 // for backward compatibility
 const uvm_root _global_reporter = uvm_root::get();
+
+`endif
 
 
 

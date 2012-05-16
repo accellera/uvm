@@ -68,6 +68,7 @@ Group: Base  {
 Group: Reporting  {
 
    File: Overview  (no auto-title, UVM_ROOT/uvm_ref/reporting.txt)
+   File: uvm_report_message  (no auto-title, UVM_ROOT/distrib/src/base/uvm_report_message.svh)
    File: uvm_report_object  (no auto-title, UVM_ROOT/distrib/src/base/uvm_report_object.svh)
    File: uvm_report_handler  (no auto-title, UVM_ROOT/distrib/src/base/uvm_report_handler.svh)
    File: uvm_report_server  (no auto-title, UVM_ROOT/distrib/src/base/uvm_report_server.svh)
