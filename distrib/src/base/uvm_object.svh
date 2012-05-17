@@ -924,6 +924,7 @@ function void  uvm_object::set_int_local (string      field_name,
                                           uvm_bitstream_t value,
                                           bit         recurse=1);
   __m_uvm_status_container.cycle_check.delete();
+  __m_uvm_status_container.m_uvm_cycle_scopes.delete();
 
   this.__m_uvm_status_container.status = 0;
   this.__m_uvm_status_container.bitstream = value;
@@ -946,6 +947,7 @@ function void  uvm_object::set_object_local (string     field_name,
                                              bit        recurse=1);
   uvm_object cc;
   __m_uvm_status_container.cycle_check.delete();
+  __m_uvm_status_container.m_uvm_cycle_scopes.delete();
 
   if(clone && (value!=null)) begin 
     cc = value.clone();
@@ -974,6 +976,7 @@ function void  uvm_object::set_string_local (string field_name,
                                              bit    recurse=1);
                                              
   __m_uvm_status_container.cycle_check.delete();
+  __m_uvm_status_container.m_uvm_cycle_scopes.delete();
 
   this.__m_uvm_status_container.status = 0;
   this.__m_uvm_status_container.stringv = value;

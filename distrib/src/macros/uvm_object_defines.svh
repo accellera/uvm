@@ -154,15 +154,26 @@
      T local_data__; /* Used for copy and compare */ \
      typedef T ___local_type____; \
      string string_aa_key; /* Used for associative array lookups */ \
+     uvm_object __current_scopes[$]; \
+     if(what__ inside {UVM_SETINT,UVM_SETSTR,UVM_SETOBJ}) begin \
+        if(__m_uvm_status_container.m_do_cycle_check(this)) begin \
+            return; \
+        end \
+        else \
+            __current_scopes=__m_uvm_status_container.m_uvm_cycle_scopes; \
+     end \
      super.__m_uvm_field_automation(tmp_data__, what__, str__); \
-     if(what__ inside {UVM_SETINT,UVM_SETSTR,UVM_SETOBJ}) \
-      begin if (__m_uvm_status_container.cycle_check.exists(this)) return; else __m_uvm_status_container.cycle_check[this]=1; end \
      /* Type is verified by uvm_object::compare() */ \
      if(tmp_data__ != null) \
        /* Allow objects in same hierarchy to be copied/compared */ \
        if(!$cast(local_data__, tmp_data__)) return;
 
 `define uvm_field_utils_end \
+     if(what__ inside {UVM_SETINT,UVM_SETSTR,UVM_SETOBJ}) begin \
+        // remove all scopes recorded (through super and other objects visited before) \
+        void'(__current_scopes.pop_back()); \
+        __m_uvm_status_container.m_uvm_cycle_scopes = __current_scopes; \
+     end \
      end \
 endfunction \
 
