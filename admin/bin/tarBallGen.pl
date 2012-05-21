@@ -15,13 +15,14 @@ my $branch = undef;
 my $localBranch = undef;
 
 
-$tag       =           "UVM_1_1_b";
-$branch       =           "UVM_1_1_b";
-$localBranch     =           $branch."_local";
-$rc        =           "RC1";
+$tag       =           "UVM_1_1_b_RELEASE";
+$branch       =        "UVM_1_1_b";
+$localBranch     =     $branch."_local";
+$rc        =           "RC3";
 $prefix    =           "uvm-1.1b";
 $username  =           "ambarsarkar";
-my $debug  =           1; # Do everything except push if TRUE
+#my $debug  =           1; # Do everything except push if TRUE
+my $debug  =           0; # Do everything except push if TRUE
 die "Please set params above\n";
 
 ##################################
@@ -36,7 +37,7 @@ system ("echo $cmd"); system ("$cmd");
 
 chdir "uvm" or die "Failed to cd to uvm\n";
 
-$cmd = "git checkout -b $localBranch origin/$tag";
+$cmd = "git checkout -b $localBranch origin/$branch";
 system ("echo $cmd"); system ("$cmd");
 
 my $commit_id = `git describe`; chomp $commit_id;
