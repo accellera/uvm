@@ -499,15 +499,28 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
 
   // Function- do_pack
   //
+  // We only pack m_length bytes of the m_data array, even if m_data is larger
+  // than m_length. Same treatment for the byte-enable array.
   function void do_pack(uvm_packer packer);
     super.do_pack(packer);
-    `uvm_pack_int  (m_address)
-    `uvm_pack_enum (m_command)
-    `uvm_pack_array(m_data)
-    `uvm_pack_int  (m_length)
-    `uvm_pack_enum (m_response_status)
-    `uvm_pack_array(m_byte_enable)
-    `uvm_pack_int  (m_streaming_width)
+    if (m_length > m_data.size())
+       `uvm_fatal("PACK_DATA_ARR",
+         $sformatf("Data array m_length property (%0d) greater than m_data.size (%0d)",
+         m_length,m_data.size()))
+    if (m_byte_enable_length > m_byte_enable.size())
+       `uvm_fatal("PACK_DATA_ARR",
+         $sformatf("Data array m_byte_enable_length property (%0d) greater than m_byte_enable.size (%0d)",
+         m_byte_enable_length,m_byte_enable.size()))
+    `uvm_pack_intN  (m_address,64)
+    `uvm_pack_enumN (m_command,32)
+    `uvm_pack_intN  (m_length,32)
+    for (int i=0; i<m_length; i++)
+      `uvm_pack_intN(m_data[i],8)
+    `uvm_pack_enumN (m_response_status,32)
+    `uvm_pack_intN  (m_byte_enable_length,32)
+    for (int i=0; i<m_byte_enable_length; i++)
+      `uvm_pack_intN(m_byte_enable[i],8)
+    `uvm_pack_intN  (m_streaming_width,32)
 
     foreach (m_extensions[ext])
       m_extensions[ext].do_pack(packer);
@@ -516,15 +529,24 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
 
   // Function- do_unpack
   //
+  // We only reallocate m_data/m_byte_enable if the new size
+  // is greater than their current size
   function void do_unpack(uvm_packer packer);
     super.do_unpack(packer);
-    `uvm_unpack_int  (m_address)
-    `uvm_unpack_enum (m_command, uvm_tlm_command_e)
-    `uvm_unpack_array(m_data)
-    `uvm_unpack_int  (m_length)
-    `uvm_unpack_enum (m_response_status, uvm_tlm_response_status_e)
-    `uvm_unpack_array(m_byte_enable)
-    `uvm_unpack_int  (m_streaming_width)
+    `uvm_unpack_intN  (m_address,64)
+    `uvm_unpack_enumN (m_command, 32, uvm_tlm_command_e)
+    `uvm_unpack_intN  (m_length,32)
+    if (m_data.size() < m_length)
+      m_data = new[m_length];
+    foreach (m_data[i])
+      `uvm_unpack_intN(m_data[i],8)
+    `uvm_unpack_enumN (m_response_status, 32, uvm_tlm_response_status_e)
+    `uvm_unpack_intN  (m_byte_enable_length,32)
+    if (m_byte_enable.size() < m_byte_enable_length)
+      m_byte_enable = new[m_byte_enable_length];
+    foreach (m_byte_enable[i])
+      `uvm_unpack_intN(m_byte_enable[i],8)
+    `uvm_unpack_intN  (m_streaming_width,32)
 
     foreach (m_extensions[ext])
       m_extensions[ext].do_unpack(packer);
