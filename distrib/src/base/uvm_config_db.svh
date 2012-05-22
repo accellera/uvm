@@ -170,13 +170,20 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
       inst_name = {cntxt.get_full_name(), ".", inst_name};
 
     r = m_get_resource_match(cntxt, field_name, inst_name);
-   
+
     if(r == null) begin 
-      uvm_pool#(string, uvm_resource#(T)) pool = new;
-      string key = {inst_name,field_name};
-      m_rsc[cntxt] = pool;
-      r = new(field_name, inst_name);
-      pool.add(key, r);
+        uvm_pool#(string, uvm_resource#(T)) pool;
+        string key = {inst_name,field_name};
+        
+        if(m_rsc.exists(cntxt)) 
+            pool = m_rsc[cntxt];
+        else begin
+            pool = new;
+            m_rsc[cntxt] = pool;
+        end
+            
+        r = new(field_name, inst_name);
+        pool.add(key, r);
     end
     else begin
       exists = 1;
