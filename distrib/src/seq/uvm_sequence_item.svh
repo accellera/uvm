@@ -392,7 +392,7 @@ class uvm_sequence_item extends uvm_transaction;
 
   virtual function void uvm_report_error( string id,
                                           string message,
-                                          int verbosity = UVM_LOW,
+                                          int verbosity = UVM_NONE,
                                           string filename = "",
                                           int line = 0);
     uvm_report_object client;
