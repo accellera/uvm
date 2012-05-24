@@ -24,7 +24,7 @@ class test extends uvm_test;
     b = f;
 
      
-    typename = uvm_type_utils#(foo#(bar#(xyz),88))::typename(f);
+    typename = `uvm_typename(f);
 
     // filter out spaces?
 

@@ -57,17 +57,9 @@ endclass
 //----------------------------------------------------------------------
 
 class uvm_built_in_converter #(type T=int);
-
   static function string convert2string(input T t);
-    string s;
-`ifndef UVM_USE_P_FORMAT
-    $swrite(s, t);
-`else
-    $sformat( s , "%p" , t );
-`endif
-    return s; 
+    return $sformatf("%p" , t );
   endfunction
-
 endclass
 
 

@@ -172,59 +172,7 @@ class item extends uvm_sequence_item;
   //---------------
 
   virtual function string convert2string();
-
-   `ifdef UVM_USE_P_FORMAT
      return $sformatf("%p",this);
-   `else
-     string s;
-     s = {s, $sformatf("enum2:%s ",enum2.name())};
-
-     s = {s, $sformatf("int64:%0h ",int64)};
-     s = {s, $sformatf("int32:%0h ",int32)};
-     s = {s, $sformatf("int16:%0h ",int16)};
-     s = {s, $sformatf("int8:%0h ", int8)};
-     s = {s, $sformatf("int1:%0h ", int1)};
-      
-     s = {s, $sformatf("uint64:%0h ",uint64)};
-     s = {s, $sformatf("uint32:%0h ",uint32)};
-     s = {s, $sformatf("uint16:%0h ",uint16)};
-     s = {s, $sformatf("uint8:%0h ", uint8)};
-     s = {s, $sformatf("uint1:%0h ", uint1)};
-      
-     s = {s, $sformatf("real64:%0f ", real64)};
-`ifndef INCA     
-     s = {s, $sformatf("real32:%0f ", real32)};
-`endif      
-     s = {s, $sformatf("time64:%0t ", time64)};
-      
-     s = {s, $sformatf("str:%0s ", str)};
-
-     s = {s, "sa:'{"};
-     foreach (sa[i])
-       s = {s, $sformatf("%s%0h", i==0?"":" ",sa[i])};
-     s = {s, "} "};
-
-     s = {s, "da:'{"};
-     foreach (da[i])
-       s = {s, $sformatf("%s%0h", i==0?"":" ",da[i])};
-     s = {s, "} "};
-
-     s = {s, "q:'{"};
-     foreach (q[i])
-       s = {s, $sformatf("%s%0h", i==0?"":" ",q[i])};
-     s = {s, "} "};
-
-     begin bit first=0;
-     s = {s, "aa:'{"};
-     foreach (aa[key])
-       s = {s, $sformatf("%s%0h:%0h", first?"":" ",key, aa[key])};
-     s = {s, "} "};
-     end
-
-     s = {s, $sformatf("bits:%0h", bits)};
-     s = {s, $sformatf("logics:%0b", logics)};
-
-    `endif
   endfunction
 
 
@@ -559,81 +507,19 @@ class item_macro extends uvm_sequence_item;
   //---------------
 
   virtual function string convert2string();
-
-   `ifdef UVM_USE_P_FORMAT
      return $sformatf("%p",this);
-   `else
-     string s;
-     s = {s, $sformatf("enum2:%s ",enum2.name())};
-
-     s = {s, $sformatf("int64:%0h ",int64)};
-     s = {s, $sformatf("int32:%0h ",int32)};
-     s = {s, $sformatf("int16:%0h ",int16)};
-     s = {s, $sformatf("int8:%0h ", int8)};
-     s = {s, $sformatf("int1:%0h ", int1)};
-      
-     s = {s, $sformatf("uint64:%0h ",uint64)};
-     s = {s, $sformatf("uint32:%0h ",uint32)};
-     s = {s, $sformatf("uint16:%0h ",uint16)};
-     s = {s, $sformatf("uint8:%0h ", uint8)};
-     s = {s, $sformatf("uint1:%0h ", uint1)};
-      
-     s = {s, $sformatf("real64:%0f ", real64)};
-`ifndef INCA     
-     s = {s, $sformatf("real32:%0f ", real32)};
-`endif      
-     s = {s, $sformatf("time64:%0t ", time64)};
-      
-     s = {s, $sformatf("str:%0s ", str)};
-
-     s = {s, "sa:'{"};
-     foreach (sa[i])
-       s = {s, $sformatf("%s%0h", i==0?"":" ",sa[i])};
-     s = {s, "} "};
-
-     s = {s, "da:'{"};
-     foreach (da[i])
-       s = {s, $sformatf("%s%0h", i==0?"":" ",da[i])};
-     s = {s, "} "};
-
-     s = {s, "q:'{"};
-     foreach (q[i])
-       s = {s, $sformatf("%s%0h", i==0?"":" ",q[i])};
-     s = {s, "} "};
-
-     begin bit first=0;
-     s = {s, "aa:'{"};
-     foreach (aa[key])
-       s = {s, $sformatf("%s%0h:%0h", first?"":" ",key, aa[key])};
-     s = {s, "} "};
-     end
-
-     s = {s, $sformatf("bits:%0h", bits)};
-     s = {s, $sformatf("logics:%0b", logics)};
-
-    `endif
   endfunction
-
-
 endclass
 
 `ifndef NUM_TRANS
 `define NUM_TRANS 1
 `endif
 
-`ifdef UVM_USE_P_FORMAT
 `define DO_CMP(STYLE,OP,OP1,OP2) \
     for (int i=0; i< `NUM_TRANS; i++) \
       if(!OP1.OP(OP2)) \
         `uvm_fatal("MISCOMPARE",$sformatf("op1=%p op2=%p",OP1,OP2)) \
-        
-`else
-`define DO_CMP(STYLE,OP,OP1,OP2) \
-    for (int i=0; i< `NUM_TRANS; i++) \
-      if(!OP1.OP(OP2)) \
-        `uvm_fatal("MISCOMPARE",$sformatf("MISCOMPARE! op1=%s op2=%s",OP1.convert2string(),OP2.convert2string())) \
-
-`endif        
+           
         
 
 `define DO_IT(STYLE,OP,OP1,OP2) \

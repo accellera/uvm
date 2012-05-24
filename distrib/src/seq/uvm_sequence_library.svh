@@ -740,13 +740,8 @@ task uvm_sequence_library::body();
 
   `uvm_info("SEQLIB/END",{"Ending sequence library in phase ",
             (starting_phase != null ? starting_phase.get_name() : "unknown")},UVM_LOW)
-
-`ifdef UVM_USE_P_FORMAT            
+ 
   `uvm_info("SEQLIB/DSTRB",$sformatf("%p",seqs_distrib),UVM_HIGH)
-`else
-    foreach(seqs_distrib[idx])
-        `uvm_info("SEQLIB/DSTRB",$sformatf("%s -> %d",idx,seqs_distrib[idx]),UVM_HIGH)  
-`endif
 
   if (starting_phase != null)
     starting_phase.drop_objection(this,

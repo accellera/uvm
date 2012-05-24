@@ -36,19 +36,10 @@ module top;
 `include "item.sv"
 `include "item_macro.sv"
 
-`ifdef UVM_USE_P_FORMAT
 `define DO_CMP(STYLE,OP,OP1,OP2) \
     for (int i=0; i< `NUM_TRANS; i++) \
       if(!OP1.OP(OP2)) \
-        `uvm_fatal("MISCOMPARE",$sformatf("op1=%p op2=%p",OP1,OP2)) \
-        
-`else
-`define DO_CMP(STYLE,OP,OP1,OP2) \
-    for (int i=0; i< `NUM_TRANS; i++) \
-      if(!OP1.OP(OP2)) \
-        `uvm_fatal("MISCOMPARE",$sformatf("MISCOMPARE! op1=%s op2=%s",OP1.convert2string(),OP2.convert2string())) \
-
-`endif        
+        `uvm_fatal("MISCOMPARE",$sformatf("op1=%p op2=%p",OP1,OP2)) \    
         
 
 `define DO_IT(STYLE,OP,OP1,OP2) \

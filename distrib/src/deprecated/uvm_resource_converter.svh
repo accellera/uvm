@@ -36,7 +36,7 @@ class m_uvm_resource_converter #(type T=int);
    // By default, returns the name of the type
    //
    virtual function string convert2string(T val);
-        return {"(", uvm_type_utils#(T)::typename(val), ") ?"};
+        return {"(", `uvm_typename(val), ") ?"};
    endfunction
 endclass
 
@@ -57,7 +57,7 @@ class m_uvm_resource_default_converter#(type T=int) extends m_uvm_resource_conve
    local string m_name;
    
    virtual function string convert2string(T val);
-      return $sformatf("(%s) %0p", (m_name=="")? uvm_type_utils#(T)::typename(val):m_name, val);
+      return $sformatf("(%s) %0p", (m_name=="")? `uvm_typename(val):m_name, val);
    endfunction
 
    `_local function new();
@@ -98,7 +98,7 @@ class m_uvm_resource_convert2string_converter#(type T=int) extends m_uvm_resourc
    local static m_uvm_resource_convert2string_converter #(T) m_singleton;
  
    virtual function string convert2string(T val);   
-      return $sformatf("(%s) %0s", uvm_type_utils#(T)::typename(val),
+      return $sformatf("(%s) %0s", `uvm_typename(val),
                        (val == null) ? "(null)" : val.convert2string());
    endfunction
 
@@ -132,7 +132,7 @@ class m_uvm_resource_sprint_converter#(type T=int) extends m_uvm_resource_conver
    local static m_uvm_resource_sprint_converter #(T) m_singleton;
 
    virtual function string convert2string(T val);
-      return $sformatf("(%s) %0s", uvm_type_utils#(T)::typename(val),
+      return $sformatf("(%s) %0s", `uvm_typename(val),
                        (val == null) ? "(null)" : {"\n",val.sprint()});
    endfunction
    

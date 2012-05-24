@@ -1041,12 +1041,7 @@ class uvm_tlm_extension #(type T=int) extends uvm_tlm_extension_base;
   endfunction
 
   virtual function string get_type_handle_name();
-    T i;
-    return uvm_type_utils#(T)::typename(i);
-  endfunction
-
-  virtual function void do_copy(uvm_object rhs);
-    super.do_copy(rhs);
+    return `uvm_typename(T);
   endfunction
 
   virtual function uvm_object create (string name="");
