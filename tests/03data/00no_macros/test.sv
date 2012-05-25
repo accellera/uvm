@@ -39,8 +39,7 @@ module top;
 `define DO_CMP(STYLE,OP,OP1,OP2) \
     for (int i=0; i< `NUM_TRANS; i++) \
       if(!OP1.OP(OP2)) \
-        `uvm_fatal("MISCOMPARE",$sformatf("op1=%p op2=%p",OP1,OP2)) \    
-        
+        `uvm_fatal("MISCOMPARE",$sformatf("op1=%p op2=%p",OP1,OP2))
 
 `define DO_IT(STYLE,OP,OP1,OP2) \
     for (int i=0; i< `NUM_TRANS; i++) \
