@@ -174,7 +174,7 @@ class uvm_root extends uvm_component;
                                           ref uvm_component comps[$],
                                           input uvm_component comp=null); 
   
-  extern `_protected function new ();
+  extern protected function new ();
   extern protected virtual function bit m_add_child (uvm_component child);
   extern function void build_phase(uvm_phase phase);
   extern local function void m_do_verbosity_settings();

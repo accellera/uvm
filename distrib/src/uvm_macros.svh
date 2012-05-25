@@ -29,7 +29,6 @@
 `define UVM_USE_FPC
 //`define UVM_USE_FILE_LINE
 `define UVM_DA_TO_QUEUE(Q,DA) Q=DA;
-`define _local local
 `define uvm_delay(TIME) #(TIME);
 `define uvm_typename(X) $typename(X)
 //
@@ -50,17 +49,6 @@
 `endif
 
 `ifdef INCA
-  `ifndef INCA_PROTECTED_CTOR
-    `undef _protected
-    `define _protected 
-  `endif
-  `ifndef INCA_LOCAL_CTOR
-    `undef _local
-    `define _local 
-  `endif
-//  `ifndef INCA_UVM_USE_FILE_LINE
-//    `undef  UVM_USE_FILE_LINE
-//  `endif
   `ifndef INCA_UVM_USE_FPC
     `undef UVM_USE_FPC
   `endif

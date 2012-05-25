@@ -60,7 +60,7 @@ class m_uvm_resource_default_converter#(type T=int) extends m_uvm_resource_conve
       return $sformatf("(%s) %0p", (m_name=="")? `uvm_typename(val):m_name, val);
    endfunction
 
-   `_local function new();
+   local function new();
    endfunction
    
    // Function- register
@@ -102,7 +102,7 @@ class m_uvm_resource_convert2string_converter#(type T=int) extends m_uvm_resourc
                        (val == null) ? "(null)" : val.convert2string());
    endfunction
 
-   `_local function new();
+   local function new();
    endfunction
 
    // Function- register
@@ -136,7 +136,7 @@ class m_uvm_resource_sprint_converter#(type T=int) extends m_uvm_resource_conver
                        (val == null) ? "(null)" : {"\n",val.sprint()});
    endfunction
    
-   `_local function new();
+   local function new();
    endfunction
 
    // Function- register
@@ -161,7 +161,7 @@ endclass
 class m_uvm_resource_default_converters;
    
    local static bit m_singleton = register();
-   `_local function new();
+   local function new();
    endfunction
 
    // Function- register
