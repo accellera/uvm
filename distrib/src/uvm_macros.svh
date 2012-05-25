@@ -25,8 +25,6 @@
 
 
 // Default settings
-`define _protected protected   
-`define UVM_USE_FPC
 //`define UVM_USE_FILE_LINE
 `define UVM_DA_TO_QUEUE(Q,DA) Q=DA;
 `define uvm_delay(TIME) #(TIME);
@@ -49,9 +47,6 @@
 `endif
 
 `ifdef INCA
-  `ifndef INCA_UVM_USE_FPC
-    `undef UVM_USE_FPC
-  `endif
   `define UVM_USE_PROCESS_CONTAINER
   `undef  UVM_DA_TO_QUEUE
   `define UVM_DA_TO_QUEUE(Q,DA)  foreach (DA[idx]) Q.push_back(DA[idx]);
