@@ -1818,7 +1818,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
   int               n_bits_init;
 
   Xget_bus_infoX(rw, map_info, n_bits_init, lsb, skip);
-  `UVM_DA_TO_QUEUE(addrs,map_info.addr)
+  addrs=map_info.addr;
 
   // if a memory, adjust addresses based on offset
   if (rw.element_kind == UVM_MEM)
@@ -1949,7 +1949,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
   int n_access_extra, n_access;
 
   Xget_bus_infoX(rw, map_info, n_bits, lsb, skip);
-  `UVM_DA_TO_QUEUE(addrs,map_info.addr)
+  addrs=map_info.addr;
   size = n_bits;
 
   // if a memory, adjust addresses based on offset

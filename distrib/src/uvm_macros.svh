@@ -25,8 +25,6 @@
 
 
 // Default settings
-//`define UVM_USE_FILE_LINE
-`define UVM_DA_TO_QUEUE(Q,DA) Q=DA;
 `define uvm_delay(TIME) #(TIME);
 `define uvm_typename(X) $typename(X)
 //
@@ -48,8 +46,6 @@
 
 `ifdef INCA
   `define UVM_USE_PROCESS_CONTAINER
-  `undef  UVM_DA_TO_QUEUE
-  `define UVM_DA_TO_QUEUE(Q,DA)  foreach (DA[idx]) Q.push_back(DA[idx]);
 `endif
 
 //
