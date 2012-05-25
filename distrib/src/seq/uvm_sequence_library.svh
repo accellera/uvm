@@ -190,11 +190,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    //
    //
    //
-   protected int seqs_distrib[string]
-   `ifndef INCA
-   = '{default:0}
-   `endif
-   ;
+   protected int seqs_distrib[string]  = '{default:0};
 
 
    // Variable- sequences
