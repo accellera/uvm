@@ -103,7 +103,7 @@ class uvm_vreg extends uvm_object;
    // Instance-specific configuration
    //
    // Specify the ~parent~ block of this virtual register array.
-   // If one of the other parameters are specified, the virtual register
+   // If none of the other parameters are specified, the virtual register
    // is assumed to be dynamic and can be later (re-)implemented using
    // the <uvm_vreg::implement()> method.
    //
