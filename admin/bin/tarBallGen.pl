@@ -11,13 +11,18 @@ my $tag = undef;
 my $rc = undef;
 my $prefix = undef;
 my $username = undef;
+my $branch = undef;
+my $localBranch = undef;
 
 
-$tag       =           "UVM_1_1_a";
-$rc        =           "RC4";
-$prefix    =           "uvm-1.1a";
+$tag       =           "UVM_1_1_b_RELEASE";
+$branch       =        "UVM_1_1_b";
+$localBranch     =     $branch."_local";
+$rc        =           "RC3";
+$prefix    =           "uvm-1.1b";
 $username  =           "ambarsarkar";
-my $debug  =           1; # Do everything except push if TRUE
+#my $debug  =           1; # Do everything except push if TRUE
+my $debug  =           0; # Do everything except push if TRUE
 die "Please set params above\n";
 
 ##################################
@@ -32,12 +37,16 @@ system ("echo $cmd"); system ("$cmd");
 
 chdir "uvm" or die "Failed to cd to uvm\n";
 
+$cmd = "git checkout -b $localBranch origin/$branch";
+system ("echo $cmd"); system ("$cmd");
+
 my $commit_id = `git describe`; chomp $commit_id;
 
 # Tag the release
 $cmd = "git tag -f -a -m \"Release candidate with tag $tag\" $tag $commit_id;";
 $cmd .= "git push --tags;";
 system ("echo $cmd"); system ("$cmd") unless $debug;
+
 
 # Now generate the docs in a separate branch
 
@@ -48,21 +57,15 @@ system ("echo $cmd"); system ("$cmd");
 $ENV{ND} = "$ENV{'PWD'}/uvm/natural_docs";
 chdir  "uvm_ref/nd" or die "Failed to cd to uvm_ref/nd";
 
-$cmd .= "./gen_nd;";
+$cmd = "./gen_nd";
 system ("echo $cmd"); system ("$cmd");
 
-chdir "../../distrib/docs" or die "Failed to cd to ../../distrib/docs";
+chdir "$ENV{'PWD'}/uvm/distrib/docs" or die "Failed to cd to ../../distrib/docs";
 
 $cmd = "git add html;  git commit -m \"commited docs for $tag\"";
 system ("echo $cmd"); system ("$cmd");
 
 chdir ".." or die "Failed to cd to .. (distrib)";
-
-$cmd = "cp ../uvm_ref/relnotes/Mantis_3770.txt .";
-system ("echo $cmd"); system ("$cmd");
-
-$cmd = "git add Mantis_3770.txt;  git commit -m \"Added Mantis 3770 release note to distribution\"";
-system ("echo $cmd"); system ("$cmd");
 
 $cmd = "git push origin $tag\_".$rc."_WITHHTMLDOC";
 system ("echo $cmd"); system ("$cmd") unless $debug;

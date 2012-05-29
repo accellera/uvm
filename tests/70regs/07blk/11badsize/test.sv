@@ -52,7 +52,7 @@ class my_blk extends uvm_reg_block;
    local static function bit m_check_data_width(int unsigned width);
       my_catcher c = new;
       uvm_report_cb::add(null, c);
-      check_data_width(width);
+      void'(check_data_width(width));
    endfunction
    
    `uvm_object_utils(my_blk)
@@ -66,7 +66,8 @@ endclass
 
 initial
 begin
-   my_blk blk = new;
+   my_blk blk;
+   blk = new;
 
    if (my_catcher::seen != 1) begin
       `uvm_error("Test", "Fatal message about invalid UVM_REG_DATA_WIDTH value not seen");

@@ -114,7 +114,8 @@ endfunction
 
 initial
 begin
-   blk2 blk = blk2::type_id::create("blk");
+   blk2 blk;
+   blk = blk2::type_id::create("blk");
    blk.build();
    blk.lock_model();
 

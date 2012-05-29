@@ -1,0 +1,13 @@
+UVM_INFO @ 0: reporter [UVMTOP] UVM testbench topology:
+--------------------------------------------
+Name               Type          Size  Value
+--------------------------------------------
+uvm_test_top       test          -     @X
+  class_a0         my_class      -     @X
+    tp             E_t           32    EB   
+    parent_config  agent_config  -     @X
+  class_a1         my_class      -     @X
+    tp             E_t           32    EB   
+    parent_config  agent_config  -     @X
+  cfg              agent_config  -     @X
+--------------------------------------------

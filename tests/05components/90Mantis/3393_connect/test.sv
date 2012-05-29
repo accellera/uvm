@@ -104,7 +104,8 @@ endclass
 
 initial
 begin
-   cb_demote cth = new;
+   cb_demote cth;
+   cth = new;
    uvm_report_cb::add(null,cth);
       
    run_test("test");

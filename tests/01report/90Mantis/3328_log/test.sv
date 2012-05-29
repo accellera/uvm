@@ -50,11 +50,11 @@ class test extends uvm_component;
   endfunction
   task run;
     // Use errors so the post processing can verify we have the correct number
-    $display("*** START OF GOLD FILE ***");
+    $display("GOLD-FILE-START");
     `uvm_error("MCD", "Message for MCD");
     `uvm_error("STDOUT", "Message for STDOUT");
     `uvm_error("FP", "Message for FP");
-    $display("*** END OF GOLD FILE ***");
+    $display("GOLD-FILE-END");
   endtask
 
   function void report();

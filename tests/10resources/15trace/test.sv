@@ -122,10 +122,10 @@ class test extends uvm_component;
      int a;
      uvm_resource_db#(int)::set("a", "b", 0, this);
      uvm_resource_db#(int)::set_anonymous("a", 0, this);
-     uvm_resource_db#(int)::read_by_name("a", "b", a, this);
-     uvm_resource_db#(int)::read_by_type("a", a, this);
-     uvm_resource_db#(int)::write_by_name("a", "b", a, this);
-     uvm_resource_db#(int)::write_by_type("a", a, this);
+     void'(uvm_resource_db#(int)::read_by_name("a", "b", a, this));
+     void'(uvm_resource_db#(int)::read_by_type("a", a, this));
+     void'(uvm_resource_db#(int)::write_by_name("a", "b", a, this));
+     void'(uvm_resource_db#(int)::write_by_type("a", a, this));
   endtask
 
   function void report();
@@ -157,7 +157,8 @@ endclass
 module top;
 
   initial begin
-    my_catcher ctch = new();
+    my_catcher ctch;
+    ctch = new();
     uvm_report_cb::add(null,ctch);
     run_test();
   end

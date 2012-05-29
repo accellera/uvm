@@ -109,8 +109,8 @@ endclass
 initial
 begin
    uvm_reg rg;
-   dut blk = new("blk");
-   catcher ctchr = new;
+   dut blk; catcher ctchr;
+   blk = new("blk"); ctchr = new;
 
    blk.build();
    blk.print();
