@@ -24,6 +24,10 @@ import uvm_pkg::*;
 `include "uvm_macros.svh"
 
 class demote extends uvm_report_catcher;
+   function new();
+      super.new("demote");
+   endfunction
+   
    virtual function action_e catch();
       if (get_severity() == UVM_INFO) set_severity(UVM_ERROR);
       else if (get_severity() == UVM_WARNING) set_severity(UVM_FATAL);
@@ -34,6 +38,10 @@ endclass
 
 
 class demote_react extends uvm_report_catcher;
+   function new();
+      super.new("demote_react");
+   endfunction
+
    virtual function action_e catch();
       if (get_severity() == UVM_INFO) set_severity(UVM_ERROR);
       else if (get_severity() == UVM_WARNING) set_severity(UVM_FATAL);
@@ -45,6 +53,10 @@ endclass
 
 
 class react_demote extends uvm_report_catcher;
+   function new();
+      super.new("react_demote");
+   endfunction
+
    virtual function action_e catch();
       set_action(UVM_NO_ACTION);
       if (get_severity() == UVM_INFO) set_severity(UVM_ERROR);
@@ -58,6 +70,10 @@ endclass
 class do_check extends uvm_report_catcher;
    static uvm_severity sev;
    static bit react;
+
+   function new();
+      super.new("do_check");
+   endfunction
 
    virtual function action_e catch();
 

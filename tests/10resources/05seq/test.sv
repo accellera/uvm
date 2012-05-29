@@ -83,7 +83,7 @@ class env #(int unsigned ADDR_SIZE=16, int unsigned DATA_SIZE=8)
 
   typedef env #(ADDR_SIZE, DATA_SIZE) this_type;
 
-  `uvm_component_param_utils(this_type);
+  `uvm_component_param_utils(this_type)
 
   mem_agent #(mem_agent_config, ADDR_SIZE, DATA_SIZE) agnt1;
   mem_agent #(mem_agent_config, ADDR_SIZE, DATA_SIZE) agnt2;
@@ -131,7 +131,7 @@ endclass
 //----------------------------------------------------------------------
 class test extends uvm_component;
 
-  `uvm_component_utils(test);
+  `uvm_component_utils(test)
 
   env #(8,8) e;
  

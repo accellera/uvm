@@ -247,10 +247,10 @@ class uvm_root_report_handler extends uvm_report_handler;
                                string name,
                                string id,
                                string message,
-                               int verbosity_level,
-                               string filename,
-                               int line,
-                               uvm_report_object client);
+                               int verbosity_level=UVM_MEDIUM,
+                               string filename="",
+                               int line=0,
+                               uvm_report_object client=null);
     if(name == "")
       name = "reporter";
     super.report(severity, name, id, message, verbosity_level, filename, line, client);

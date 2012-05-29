@@ -88,15 +88,19 @@ module memory #(int unsigned ADDR_SIZE=16, int unsigned DATA_SIZE=8)
     string data_fmt;
     string addr_fmt;
     string str;
+    int unsigned cols;
+    int unsigned rows;
+    int unsigned data_chars;
+    int unsigned addr_chars;
 
     // Set up the number of rows and columns to print.  Allow a maximum
     // of 16 bytes per line, adjust rows accordingly
-    static int unsigned cols = (ADDR_SIZE < 5) ? (1 << ADDR_SIZE) : 16;
-    static int unsigned rows = 1 << ((ADDR_SIZE < 5) ? 1 : (ADDR_SIZE - 4));
+    cols = (ADDR_SIZE < 5) ? (1 << ADDR_SIZE) : 16;
+    rows = 1 << ((ADDR_SIZE < 5) ? 1 : (ADDR_SIZE - 4));
 
     // Set up address and data print formats based on size
-    static int unsigned data_chars = ((DATA_SIZE >> 2) + ((DATA_SIZE & 'h3) > 0));
-    static int unsigned addr_chars = ((ADDR_SIZE >> 2) + ((ADDR_SIZE & 'h3) > 0));
+    data_chars = ((DATA_SIZE >> 2) + ((DATA_SIZE & 'h3) > 0));
+    addr_chars = ((ADDR_SIZE >> 2) + ((ADDR_SIZE & 'h3) > 0));
 
     $sformat(addr_fmt, " %%0%0dx:", addr_chars);
     $sformat(data_fmt, " %%0%0dx", data_chars);
@@ -123,7 +127,7 @@ module memory #(int unsigned ADDR_SIZE=16, int unsigned DATA_SIZE=8)
       // print the row in ascii
       $write("  ");
       for(c = 0; c < cols; c++) begin
-        $write("%1s", (`isprint(mem[a+c])) ? (mem[a+c] & 'h7f) : ".");
+        $write("%s", (`isprint(mem[a+c])) ? (mem[a+c] & 'h7f) : ".");
       end
 
       a += cols;

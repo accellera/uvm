@@ -81,9 +81,7 @@ begin
    uvm_report_cb::add(null, c);
 
    begin
-      blk1 b1;
-      blk2 b2;
-      blk1 b3;
+      blk1 b1,b3; blk2 b2;
       b1 = blk1::type_id::create("b1");
       b2 = blk2::type_id::create("b2");
       b3 = blk1::type_id::create("b1");

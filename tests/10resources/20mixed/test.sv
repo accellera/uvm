@@ -78,7 +78,7 @@ endclass
 
 class test extends uvm_component;
 
-  `uvm_component_utils(test);
+  `uvm_component_utils(test)
 
   env e;
 
