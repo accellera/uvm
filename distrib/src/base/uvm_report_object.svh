@@ -123,10 +123,10 @@ class uvm_report_object extends uvm_object;
 
   virtual function void uvm_report_error( string id,
                                           string message,
-                                          int verbosity = UVM_NONE,
+                                          int verbosity = UVM_LOW,
                                           string filename = "",
                                           int line = 0);
-    m_rh.report(UVM_ERROR, get_full_name(), id, message, verbosity, 
+    m_rh.report(UVM_ERROR, get_full_name(), id, message, UVM_NONE, 
                filename, line, this);
   endfunction
 

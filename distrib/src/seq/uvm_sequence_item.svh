@@ -392,13 +392,13 @@ class uvm_sequence_item extends uvm_transaction;
 
   virtual function void uvm_report_error( string id,
                                           string message,
-                                          int verbosity = UVM_NONE,
+                                          int verbosity = UVM_LOW,
                                           string filename = "",
                                           int line = 0);
     uvm_report_object client;
     string str = m_get_client_info(client);
 
-    m_rh.report(UVM_ERROR, str, id, message, verbosity, filename,
+    m_rh.report(UVM_ERROR, str, id, message, UVM_NONE, filename,
       line, client);
   endfunction
 
