@@ -1,37 +1,33 @@
 
 === resource pool ===
-* [/^int$/] : (int) 0
+* [/^int$/] : 0
 -  
-* [/^string$/] : (string) "foo!"
+* [/^string$/] : "foo!"
 -  
-* [/^bit\[7:0\]$/] : (bit[7:0]) 165
+* [/^bit\[7:0\]$/] : 165
 -  
-* [/^reg\[7:0\]$/] : (<not a class type>) ?
+* [/^reg\[7:0\]$/] : 240
 -  
-* [/^an_obj$/] : (an_obj) (null)
+* [/^an_obj$/] : '{null}
 -  
-* [/^an_obj-m$/] : (my_obj) 
-mo: (my_obj@X) { i: 'h0  } 
+* [/^an_obj-m$/] : '{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"mo", m_inst_id:4784, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X_1}, i:0, type_name:"an_obj"}
 -  
-* [/^an_obj-y$/] : (your_obj) 
-yo: (your_obj@X) { i: 'h0  } 
+* [/^an_obj-y$/] : '{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"yo", m_inst_id:4786, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X_1}, i:0, type_name:"an_obj"}
 -  
-* [/^my_obj-0$/] : (my_obj) (null)
+* [/^my_obj-0$/] : '{null}
 -  
-* [/^my_obj$/] : (my_obj) 
-mo: (my_obj@X) { i: 'h0  } 
+* [/^my_obj$/] : '{super:'{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"mo", m_inst_id:4784, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X_1}, i:0, type_name:"an_obj"}, type_name:"my_obj"}
 -  
-* [/^yr_obj$/] : (your_obj) (null)
+* [/^yr_obj$/] : '{null}
 -  
-* [/^yr_obj$/] : (your_obj) 
-yo: (your_obj@X) { i: 'h0  } 
+* [/^yr_obj$/] : '{super:'{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"yo", m_inst_id:4786, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X_1}, i:0, type_name:"an_obj"}, type_name:"your_obj"}
 -  
-entry [/^vif$/] : (<not a class type>) testm.myif.convert2string 'hdeadbeef
+entry [/^vif$/] : virtual interface intf@X_1
 -  
-no-uvm-object [/^.*$/] : (some_none_uvm_object) i=deadbeef
+no-uvm-object [/^.*$/] : '{i:-559038737}
 -  
-para1 [/^.*$/] : (uvm_bitstream_t) 3
+para1 [/^.*$/] : 3
 -  
-para2 [/^.*$/] : (int) 4
+para2 [/^.*$/] : 4
 -  
 === end of resource pool ===
