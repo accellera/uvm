@@ -1,6 +1,5 @@
 //---------------------------------------------------------------------- 
-//   Copyright 2010-2011 Synopsys, Inc. 
-//   Copyright 2010 Mentor Graphics Corporation
+//   Copyright 2012 Accellera Systems Initiative
 //   All Rights Reserved Worldwide 
 // 
 //   Licensed under the Apache License, Version 2.0 (the 
