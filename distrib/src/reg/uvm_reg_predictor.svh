@@ -112,7 +112,12 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
     reg_ap = new("reg_ap", this);
   endfunction
 
-
+  // This method is documented in uvm_object
+  const static string type_name = "uvm_reg_predictor #(BUSTYPE)";
+  virtual function string get_type_name();
+    return type_name;
+  endfunction
+  
   // Function: pre_predict
   //
   // Override this method to change the value or re-direct the
