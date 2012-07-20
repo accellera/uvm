@@ -24,7 +24,6 @@
 
 `ifdef UVM_EMPTY_MACROS
 
-`define uvm_field_utils
 `define uvm_field_utils_begin(T) 
 `define uvm_field_utils_end 
 `define uvm_object_utils(T) 
@@ -176,8 +175,6 @@
      end \
      end \
 endfunction \
-
-`define uvm_field_utils
 
 // MACRO: `uvm_object_utils
 
