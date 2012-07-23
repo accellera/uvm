@@ -419,7 +419,7 @@ endclass : uvm_objection_prop_notification
 //
 // Tracing of objection activity can be turned on to follow the activity of
 // the objection mechanism. It may be turned on for a specific objection
-// instance with <uvm_objection::trace_mode>, or it can be set for all 
+// instance with <uvm_notification_objection::set_trace_mode>, or it can be set for all 
 // objections from the command line using the option +UVM_OBJECTION_TRACE.
 //------------------------------------------------------------------------------
 
@@ -461,20 +461,6 @@ class uvm_notification_objection extends uvm_report_object;
       end
    endfunction : new
 
-   // Function: set_trace_mode
-   // Sets the tracing mode for this notification objection
-   //
-   function void set_trace_mode(bit mode);
-      m_trace_mode = mode;
-   endfunction : set_trace_mode
-
-   // Function: get_trace_mode
-   // Returns the current value of the tracing mode bit
-   //
-   function bit get_trace_mode();
-      return m_trace_mode;
-   endfunction : get_trace_mode
-
    // Group: Objection Status
    //
    // Provides simple inspection on the internal
@@ -497,31 +483,6 @@ class uvm_notification_objection extends uvm_report_object;
       return m_source_count[source_obj];
    endfunction : get_objection_count
 
-   // Function: wait_for_objection_count
-   // Waits for the objection count for ~source_obj~ to reach
-   // ~count~ as qualified by ~op~
-   //
-   // If no ~op~ is passed, the wait will be for
-   // the counts to be equal.
-   //
-   task wait_for_objection_count(uvm_object source_obj,
-                                 int count,
-                                 uvm_wait_op op=UVM_EQ);
-
-      if (!m_source_count.exists(source_obj))
-        m_source_count[source_obj] = 0;
-
-      case (op)
-        UVM_EQ: @(m_source_count[source_obj] == count);
-        UVM_NE: @(m_source_count[source_obj] != count);
-        UVM_LT: @(m_source_count[source_obj] < count);
-        UVM_LTE: @(m_source_count[source_obj] <= count);
-        UVM_GT: @(m_source_count[source_obj] > count);
-        UVM_GTE: @(m_source_count[source_obj] >= count);
-      endcase // case (op)
-
-   endtask : wait_for_objection_count
-
    // Function: get_sum
    // Returns the sum of all counts for all objecting objects (
    // objects which have had an objection raised on their behalf,
@@ -540,48 +501,6 @@ class uvm_notification_objection extends uvm_report_object;
       get_sum = m_source_count.sum();
    endfunction : get_sum
    
-   // Function: wait_for_sum
-   // Waits for the sum of all objection counts to reach
-   // ~count~ as qualified by ~op~
-   //
-   // If no ~op~ is passed, the wait will be for the count
-   // to be equal to the sum.
-   //
-   task wait_for_sum(int count,
-                     uvm_wait_op op=UVM_EQ);
-
-      case (op)
-        UVM_EQ: @(m_source_count.sum() == count);
-        UVM_NE: @(m_source_count.sum() != count);
-        UVM_LT: @(m_source_count.sum() < count);
-        UVM_LTE: @(m_source_count.sum() <= count);
-        UVM_GT: @(m_source_count.sum() > count);
-        UVM_GTE: @(m_source_count.sum() >= count);
-      endcase // case (op)
-
-   endtask : wait_for_sum
-
-   // Function: wait_for
-   // Waits for the events described by <uvm_objection_action_e>
-   //
-   // If a waiter passes in a specific source to wait on, then the
-   // task will unblock when that source sees the specific action.
-   //
-   // If no source is passed in, then the task will unblock when ~any~
-   // source produces the specified ~action~.
-   //
-   // Supported Actions:
-   // UVM_OBJECTION_RAISED
-   // UVM_OBJECTION_DROPPED
-   // UVM_OBJECTION_RAISE_REQUESTED
-   // UVM_OBJECTION_DROP_REQUESTED
-   // UVM_OBJECTION_CLEARED
-   //
-   task wait_for(int action,
-                 uvm_object source_obj=null);
-      m_wait_for(uvm_objection_action_e'(action), source_obj);
-   endtask : wait_for
-
    // Function- m_wait_for
    // Implementation artifact.  Allows uvm_objection to extend
    // wait_for, providing UVM_OBJECTION_ALL_DROPPED support.
@@ -644,20 +563,6 @@ class uvm_notification_objection extends uvm_report_object;
         list.push_back(source_obj);
    endfunction : get_objectors
 
-   // Function: display_objections
-   // Displays the current objection information about the given ~source_obj~.
-   //
-   // If the ~source_obj~ is not specified, or is null, then all of the objection's
-   // sources will be displayed.  The ~show_header~ argument allows control
-   // of whether a header is output
-   //
-   // Note that this will call $display, and will bypass the UVM reporting
-   // system
-   function void display_objections(uvm_object source_obj=null,
-                                    bit show_header = 1);
-      $display(m_display_objections(source_obj, show_header));
-   endfunction : display_objections
-
    // Function- m_display_objections
    // converts the objection to a string
    protected virtual function string m_display_objections(uvm_object source_obj=null,
@@ -715,7 +620,7 @@ class uvm_notification_objection extends uvm_report_object;
       return m_display_objections(, 1);
    endfunction : convert2string
    
-   // Group: Notification Subscriber API
+   // Group: Notification API
    //
    // The 'Subscriber' API is build out of various callbacks and
    // wait_for... tasks.  An object can listen to the notification
@@ -747,6 +652,73 @@ class uvm_notification_objection extends uvm_report_object;
                         m_notified(action))
 
    endfunction : notified
+
+   // Function: wait_for_objection_count
+   // Waits for the objection count for ~source_obj~ to reach
+   // ~count~ as qualified by ~op~
+   //
+   // If no ~op~ is passed, the wait will be for
+   // the counts to be equal.
+   //
+   task wait_for_objection_count(uvm_object source_obj,
+                                 int count,
+                                 uvm_wait_op op=UVM_EQ);
+
+      if (!m_source_count.exists(source_obj))
+        m_source_count[source_obj] = 0;
+
+      case (op)
+        UVM_EQ: @(m_source_count[source_obj] == count);
+        UVM_NE: @(m_source_count[source_obj] != count);
+        UVM_LT: @(m_source_count[source_obj] < count);
+        UVM_LTE: @(m_source_count[source_obj] <= count);
+        UVM_GT: @(m_source_count[source_obj] > count);
+        UVM_GTE: @(m_source_count[source_obj] >= count);
+      endcase // case (op)
+
+   endtask : wait_for_objection_count
+
+   // Function: wait_for_sum
+   // Waits for the sum of all objection counts to reach
+   // ~count~ as qualified by ~op~
+   //
+   // If no ~op~ is passed, the wait will be for the count
+   // to be equal to the sum.
+   //
+   task wait_for_sum(int count,
+                     uvm_wait_op op=UVM_EQ);
+
+      case (op)
+        UVM_EQ: @(m_source_count.sum() == count);
+        UVM_NE: @(m_source_count.sum() != count);
+        UVM_LT: @(m_source_count.sum() < count);
+        UVM_LTE: @(m_source_count.sum() <= count);
+        UVM_GT: @(m_source_count.sum() > count);
+        UVM_GTE: @(m_source_count.sum() >= count);
+      endcase // case (op)
+
+   endtask : wait_for_sum
+
+   // Function: wait_for
+   // Waits for the events described by <uvm_objection_action_e>
+   //
+   // If a waiter passes in a specific source to wait on, then the
+   // task will unblock when that source sees the specific action.
+   //
+   // If no source is passed in, then the task will unblock when ~any~
+   // source produces the specified ~action~.
+   //
+   // Supported Actions:
+   // UVM_OBJECTION_RAISED
+   // UVM_OBJECTION_DROPPED
+   // UVM_OBJECTION_RAISE_REQUESTED
+   // UVM_OBJECTION_DROP_REQUESTED
+   // UVM_OBJECTION_CLEARED
+   //
+   task wait_for(int action,
+                 uvm_object source_obj=null);
+      m_wait_for(uvm_objection_action_e'(action), source_obj);
+   endtask : wait_for
 
    // Group: Controller API
    //
@@ -1040,11 +1012,11 @@ class uvm_notification_objection extends uvm_report_object;
    endfunction : drop_objection
 
    // Function: request_to_raise
-   // Sends a ~UVM_OBJECTION_RAISE_REQUESTED~ action to the listener API
+   // Sends a <UVM_OBJECTION_RAISE_REQUESTED> action to the notification API
    //
    // This method does not have any effect on the internal state
    // of the objection, instead it is simply a communication
-   // from the Control API to the Listener API.
+   // from the controller API to the notification API.
    //
    // Parameters:
    // source_obj - The source object on behalf of which the request is occuring.
@@ -1074,11 +1046,11 @@ class uvm_notification_objection extends uvm_report_object;
    endfunction : request_to_raise
 
    // Function: request_to_drop
-   // Sends a ~UVM_OBJECTION_DROP_REQUESTED~ action to the listener API
+   // Sends a <UVM_OBJECTION_DROP_REQUESTED> action to the notification API
    //
    // This method does not have any effect on the internal state
    // of the objection, instead it is simply a communication
-   // from the Control API to the Listener API.
+   // from the controller API to the notification API.
    //
    // Parameters:
    // source_obj - The source object on behalf of which the request is occuring.
@@ -1108,6 +1080,39 @@ class uvm_notification_objection extends uvm_report_object;
       m_notification_pool.push_back(action);
    endfunction : request_to_drop
 
+   // Group: Display / Reporting
+   //
+   
+   // Function: set_trace_mode
+   // Sets the tracing mode for this notification objection
+   //
+   function void set_trace_mode(bit mode);
+      m_trace_mode = mode;
+   endfunction : set_trace_mode
+
+   // Function: get_trace_mode
+   // Returns the current value of the tracing mode bit
+   //
+   function bit get_trace_mode();
+      return m_trace_mode;
+   endfunction : get_trace_mode
+   
+   // Function: display_objections
+   // Displays the current objection information about the given ~source_obj~.
+   //
+   // If the ~source_obj~ is not specified, or is null, then all of the objection's
+   // sources will be displayed.  The ~show_header~ argument allows control
+   // of whether a header is output
+   //
+   // Note that this will call $display, and will bypass the UVM reporting
+   // system
+   function void display_objections(uvm_object source_obj=null,
+                                    bit show_header = 1);
+      $display(m_display_objections(source_obj, show_header));
+   endfunction : display_objections
+
+
+   
    // Below is all the basic data introspection stuff that is needed for
    // a uvm_object for factory registration, printing, comparing, etc.
 
@@ -1189,7 +1194,7 @@ class uvm_notification_objection_callback extends uvm_callback;
    // Filters raised/dropped callbacks to only occur when
    // coming from a particular ~obj~
    //
-   // Note: The callback will still trigger on 'broadcast' notifications,
+   // ~Note:~ The callback will still trigger on 'broadcast' notifications,
    // ie. ~UVM_OBJECTION_RAISE_REQUESTED~ and ~UVM_OBJECTION_DROP_REQUESTED~.
    //
    // Default: ~null~ (disabled)
@@ -1265,7 +1270,7 @@ class uvm_notification_objection_callback extends uvm_callback;
    
 endclass : uvm_notification_objection_callback
 
-// Class: uvm_notification_objection_callback_impl
+// Class: uvm_notification_objection_callback_impl#(T)
 // Parameterized extension of <uvm_notification_objection_callback>
 //
 // While the user can create their own extension of the
