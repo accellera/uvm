@@ -90,14 +90,17 @@ module top;
 
     virtual function void raised (uvm_objection objection, uvm_object source_obj, 
       string description, int count);
+       $display("saw raise '%s'", description);
       raised_counter[description] += count;
     endfunction
     virtual function void dropped (uvm_objection objection, uvm_object source_obj, 
       string description, int count);
+       $display("saw drop '%s'", description);
       dropped_counter[description] += count;
     endfunction
     virtual task all_dropped (uvm_objection objection, uvm_object source_obj, 
       string description, int count);
+       $display("saw all_dropped '%s'", description);
       all_dropped_counter[description] += count;
     endtask
 

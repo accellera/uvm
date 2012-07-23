@@ -109,24 +109,24 @@ module top;
         $display("OBJ: %0s : %0d", obj.get_full_name(), ctchr.client_cnt[idx]);
         cli_cnt += ctchr.client_cnt[idx];
       end
-      if(ctchr.id_cnt["OBJTN_TRC"] != 75) begin
-        $display("** UVM TEST FAILED 1 **");
+      if(ctchr.id_cnt["OBJTN_TRC"] != 76) begin
+        $display("** UVM TEST FAILED - id_cnt == %0d (!76)**", ctchr.id_cnt["OBJTN_TRC"]);
         //return;
       end
-      if(msg_cnt != 75 || cli_cnt != 75) begin
-        $display("** UVM TEST FAILED 2 **");
+      if(msg_cnt != 76 || cli_cnt != 76) begin
+        $display("** UVM TEST FAILED - msg_cnt == %0d (!76), cli_cnt == %0d (!76)**", msg_cnt, cli_cnt);
         //return;
       end
       //pick an arbitrary message to look at
       obj=uvm_test_done;
-      if(ctchr.client_cnt[obj] != 75) 
+      if(ctchr.client_cnt[obj] != 76) 
       begin
-        $display("** UVM TEST FAILED 3 **");
+        $display("** UVM TEST FAILED - client_cnt[uvm_test_done] == %0d (!76) **", ctchr.client_cnt[obj]);
         //return;
       end
       if(ctchr.client_cnt.exists(foo)) 
       begin
-        $display("** UVM TEST FAILED 4 **");
+        $display("** UVM TEST FAILED - client_cnt[foo] exists **");
         //return;
       end
       $display("** UVM TEST PASSED **");

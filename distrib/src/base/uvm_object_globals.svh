@@ -574,7 +574,11 @@ typedef enum { UVM_LT,
 // Group: Objections
 //------------------
 
-// Enum: uvm_objection_event
+// Deprecated - use uvm_objection_notification_e
+
+`ifndef UVM_NO_DEPRECATED
+
+// Enum- uvm_objection_event
 //
 // Enumerated the possible objection events one could wait on. See
 // <uvm_objection::wait_for>.
@@ -588,7 +592,27 @@ typedef enum { UVM_RAISED      = 'h01,
                UVM_ALL_DROPPED = 'h04
 } uvm_objection_event;
 
+`endif //  `ifndef UVM_NO_DEPRECATED
 
+// Enum: uvm_objection_action_e
+//
+// Enumeration of the possible objection notifications one could
+// wait on (or be notified of).  See <uvm_notification_objection>.
+//
+// UVM_OBJECTION_RAISED - An objection was raised
+// UVM_OBJECTION_DROPPED - An objection was dropped
+// UVM_OBJECTION_ALL_DROPPED - All objections have been dropped, and drain times are complete (only valid for <uvm_objection>)
+// UVM_OBJECTION_RAISE_REQUESTED - Someone requested participants raise an objection
+// UVM_OBJECTION_DROP_REQUESTED - Someone requested objectors drop their objection(s)
+// UVM_OBJECTION_CLEARED - The objection was cleared
+
+typedef enum { UVM_OBJECTION_RAISED = (1 << 0),
+               UVM_OBJECTION_DROPPED = (1 << 1),
+               UVM_OBJECTION_ALL_DROPPED = (1 << 2),
+               UVM_OBJECTION_RAISE_REQUESTED = (1 << 3),
+               UVM_OBJECTION_DROP_REQUESTED = (1 << 4),
+               UVM_OBJECTION_CLEARED = (1 << 5)
+} uvm_objection_action_e;
 
 //------------------------------
 // Group: Default Policy Classes

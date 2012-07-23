@@ -124,25 +124,25 @@ module top;
         $display("OBJ: %0s : %0d", obj.get_full_name(), ctchr.client_cnt[idx]);
         cli_cnt += ctchr.client_cnt[idx];
       end
-      if(ctchr.id_cnt["OBJTN_TRC"] != 101) begin
+      if(ctchr.id_cnt["OBJTN_TRC"] != 102) begin
         $display("** UVM TEST FAILED **");
         return;
       end
-      if(msg_cnt != 101 || cli_cnt != 101) begin
+      if(msg_cnt != 102 || cli_cnt != 102) begin
         $display("** UVM TEST FAILED **");
         return;
       end
       //pick an arbitrary message to look at
       obj=uvm_test_done;
-      if(ctchr.client_cnt[obj] != 29) 
+      if(ctchr.client_cnt[obj] != 30) 
       begin
-        $display("** UVM TEST FAILED **");
+        $display("** UVM TEST FAILED - clien_cnt[uvm_test_done] == %0d (!30) **", ctchr.client_cnt[obj]);
         return;
       end
       obj=tc.mc.lc.from_bottom;
       if(ctchr.client_cnt[obj] != 45) 
       begin
-        $display("** UVM TEST FAILED **");
+        $display("** UVM TEST FAILED - client_cnt[tc.mc.lc.from_bottom] == %0d (!45) **", ctchr.client_cnt[obj] );
         return;
       end
       obj=tc.mc.from_middle;
