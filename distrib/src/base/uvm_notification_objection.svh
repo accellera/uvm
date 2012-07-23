@@ -124,7 +124,7 @@ class uvm_objection_notification extends uvm_object;
    //
    function void set_action_type(uvm_objection_action_e action_type);
       if (m_locked) begin
-        `uvm_error("UVM/BASE/NTFCN_OBJCTN/ACT/LOCKED/SET_TYPE",
+        `uvm_error("UVM/BASE/OBJTN/NTFCN/LOCKED/SET_TYPE",
                    "attempt to set action on locked action")
       end
       else begin
@@ -144,7 +144,7 @@ class uvm_objection_notification extends uvm_object;
    //
    function void set_source_obj(uvm_object source_obj);
       if (m_locked) begin
-         `uvm_error("UVM/BASE/NTFCN_OBJCTN/ACT/LOCKED/SET_SRC_OBJ",
+         `uvm_error("UVM/BASE/OBJTN/NTFCN/LOCKED/SET_SRC_OBJ",
                     "attempt to set source object on a locked action")
       end
       else begin
@@ -346,7 +346,7 @@ class uvm_objection_prop_notification extends uvm_objection_notification;
    //
    function void set_target_obj(uvm_object target_obj);
       if (m_locked) begin
-         `uvm_error("UVM/BASE/NTFCN_OBJCTN/ACT/LOCKED/SET_TGT_OBJ",
+         `uvm_error("UVM/BASE/OBJTN/NTFCN/LOCKED/SET_TGT_OBJ",
                     "attempt to set target object on a locked action")
       end
       else begin
@@ -791,7 +791,7 @@ class uvm_notification_objection extends uvm_report_object;
 
       if (action.get_count() < 1) begin
          if (action.get_count() < 0) begin
-            `uvm_fatal("UVM/BASE/NTFCN_OBJCTN/NEGATIVE_DROP",
+            `uvm_fatal("UVM/BASE/OBJTN/NEGATIVE_DROP",
                        "attempt to drop an objection with a negative count")
               end
          return;
