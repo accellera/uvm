@@ -472,6 +472,7 @@ class uvm_phase extends uvm_object;
   // Implementation - State
   //-----------------------
   local uvm_phase_state    m_state;
+  local bit                m_timed_out;
   local int                m_run_count; // num times this phase has executed
   local process            m_phase_proc;
   int                      m_num_procs_not_yet_returned;
@@ -1177,12 +1178,17 @@ task uvm_phase::execute_phase();
         begin // guard
           
           do begin
-
+           m_timed_out = 0;
            // if looped back from READY_TO_END, change state
            m_state = UVM_PHASE_EXECUTING;
            #0;
 
            fork
+             // JUMP
+             begin
+                wait (m_jump_fwd || m_jump_bkwd);
+                `UVM_PH_TRACE("PH/TRC/EXE/JUMP","PHASE EXIT ON JUMP REQUEST",this,UVM_DEBUG)
+             end
   
              // WAIT_FOR_ALL_DROPPED
              begin
@@ -1214,14 +1220,12 @@ task uvm_phase::execute_phase();
                      $sformatf("Phase timeout of %0t hit, phase '%0s' ready to end",
                              top.phase_timeout, get_name()))
                end
-               phase_done.clear(this);
+               m_timed_out = 1; 
                `UVM_PH_TRACE("PH/TRC/EXE/3","PHASE EXIT TIMEOUT",this,UVM_DEBUG)
              end
   
            join_any
            disable fork;
-        
-           phase_done.clear(this);
 
            // If jump is pending, do not allow prolonging of phase
            if(!m_jump_fwd && !m_jump_bkwd) begin
@@ -1250,7 +1254,7 @@ task uvm_phase::execute_phase();
            end
 
           end
-          while (phase_done.get_objection_total(top));
+          while (!m_jump_fwd && !m_jump_bkwd && phase_done.get_objection_total(top));
   
         end
         join // guard
@@ -1292,13 +1296,13 @@ task uvm_phase::execute_phase();
     if (m_imp != null)
        m_imp.traverse(top,this,UVM_PHASE_ENDED);
     #0; // LET ANY WAITERS WAKE UP
-
     m_state = UVM_PHASE_JUMPING;
     if (m_phase_proc != null) begin
       m_phase_proc.kill();
       m_phase_proc = null;
     end
     #0; // LET ANY WAITERS WAKE UP
+    phase_done.clear();
 
     if(m_jump_fwd) begin
       clear_successors(UVM_PHASE_DONE,m_jump_phase);
@@ -1338,6 +1342,7 @@ task uvm_phase::execute_phase();
     m_phase_proc = null;
   end
   #0; // LET ANY WAITERS WAKE UP
+  phase_done.clear();
 
   end
 
@@ -1415,7 +1420,7 @@ task uvm_phase::m_wait_for_pred();
       done=1;
       foreach (pred_of_succ[pred]) begin
         if (pred.get_phase_type() != UVM_PHASE_NODE) begin
-          pred_of_succ.delete(pred);
+          pred_of_succ.delete(pred); 
           foreach (pred.m_predecessors[next_pred])
             pred_of_succ[next_pred] = 1;
           done =0;
@@ -1672,7 +1677,7 @@ function void uvm_phase::jump(uvm_phase phase);
   end
   
   m_jump_phase = d;
-  m_terminate_phase();
+  //m_terminate_phase(); // JAR - not needed
 endfunction
 
 
