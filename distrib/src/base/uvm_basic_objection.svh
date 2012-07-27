@@ -19,9 +19,9 @@ endclass : uvm_basic_objection_events
 
    
 //------------------------------------------------------------------------------
-// Title: Base Objection Mechanism
+// Title: Basic Objection Mechanism
 //------------------------------------------------------------------------------
-// The following classes define the base objection mechanism.  This
+// The following classes define the basic objection mechanism.  This
 // non-hierarchical objection provides a more efficient mechanism for
 // coordinating status information between multiple threads than the classic
 // <uvm_objection>.
@@ -29,7 +29,7 @@ endclass : uvm_basic_objection_events
 
 //------------------------------------------------------------------------------
 // Class: uvm_objection_action
-// Base Objection Action Descriptor
+// Basic Objection Action Descriptor
 //------------------------------------------------------------------------------
 // The Objection Action class provides an encapsulation
 // around all possible actions which can be sent to (or received from)
@@ -319,7 +319,7 @@ class uvm_objection_action extends uvm_object;
 endclass : uvm_objection_action
 
 //------------------------------------------------------------------------------
-// Class: uvm_objection_prop_action
+// Class- uvm_objection_prop_action
 // Extended action used for propagation
 //------------------------------------------------------------------------------
 // The 'Propagation' action is a special extended version of
@@ -342,7 +342,7 @@ class uvm_objection_prop_action extends uvm_objection_action;
       super.new(name);
    endfunction : new
 
-   // Function: set_source_obj
+   // Function- set_source_obj
    // Sets the source object on behalf of which this action is occuring
    //
    function void set_source_obj(uvm_object source_obj);
@@ -355,7 +355,7 @@ class uvm_objection_prop_action extends uvm_objection_action;
       end
    endfunction : set_source_obj
 
-   // Function: get_source_obj
+   // Function- get_source_obj
    // Returns the source object on behalf of which this action is occurring
    //
    function uvm_object get_source_obj();
@@ -442,7 +442,7 @@ class uvm_basic_objection extends uvm_report_object;
    static local uvm_objection_action m_action_pool[$];
    
    // Function: new
-   // Creates a new base objection instance.
+   // Creates a new basic objection instance.
    //
    // Accesses the command line argument +UVM_OBJECTION_TRACE to
    // turn on tracing for all objection objects.
@@ -513,7 +513,7 @@ class uvm_basic_objection extends uvm_report_object;
 
       if (action == UVM_OBJECTION_ALL_DROPPED) begin
         `uvm_error("UVM/BASE/NTFCN_OBJCTN/NO_ALL_DROPPED",
-                   $sformatf("attempt to wait for 'UVM_OBJECTION_ALL_DROPPED' on base objection '%s' will never unblock", get_full_name()))
+                   $sformatf("attempt to wait for 'UVM_OBJECTION_ALL_DROPPED' on basic objection '%s' will never unblock", get_full_name()))
       end
       
       if (obj == null)  begin // broadcast
@@ -1316,7 +1316,7 @@ class uvm_basic_objection extends uvm_report_object;
    //
    
    // Function: set_trace_mode
-   // Sets the tracing mode for this base objection
+   // Sets the tracing mode for this basic objection
    //
    function void set_trace_mode(bit mode);
       m_trace_mode = mode;
@@ -1372,7 +1372,7 @@ endclass : uvm_basic_objection
    
 // Class: uvm_basic_objection_cb_base
 // The callback type that defines the callback implementations 
-// for a base objection callback.  A user uses the callback
+// for a basic objection callback.  A user uses the callback
 // type ~uvm_basic_objection_cbs_t~ to add callbacks to
 // specific objections.
 //
@@ -1397,12 +1397,12 @@ endclass : uvm_basic_objection
 class uvm_basic_objection_cb_base extends uvm_callback;
    // Group: Filters
    //
-   // While the base objection is designed to provide
+   // While the basic objection is designed to provide
    // the user with the maximum amount of information possible through
    // its callback system, it is entirely likely that the use will only
    // care about a few important events in the objection timeline.
    //
-   // The base objection callback provides built-in filters,
+   // The basic objection callback provides built-in filters,
    // so that the user does not need to filter out the unnecessary information,
    // and their callbacks will only be triggered when the events
    // fall through the filters.

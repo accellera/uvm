@@ -52,7 +52,7 @@ typedef class uvm_callbacks_objection;
 //
 // Tracing of objection activity can be turned on to follow the activity of
 // the objection mechanism. It may be turned on for a specific objection
-// instance with <uvm_objection::trace_mode>, or it can be set for all 
+// instance with <uvm_basic_objection::set_trace_mode>, or it can be set for all 
 // objections from the command line using the option +UVM_OBJECTION_TRACE.
 //------------------------------------------------------------------------------
 
