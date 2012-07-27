@@ -108,7 +108,7 @@ Group: Synchronization  {
    File: uvm_event  (no auto-title, UVM_ROOT/distrib/src/base/uvm_event.svh)
    File: uvm_event_callback  (no auto-title, UVM_ROOT/distrib/src/base/uvm_event_callback.svh)
    File: uvm_barrier  (no auto-title, UVM_ROOT/distrib/src/base/uvm_barrier.svh)
-   File: uvm_notification_objection  (no auto-title, UVM_ROOT/distrib/src/base/uvm_notification_objection.svh)
+   File: uvm_basic_objection  (no auto-title, UVM_ROOT/distrib/src/base/uvm_basic_objection.svh)
    File: uvm_objection  (no auto-title, UVM_ROOT/distrib/src/base/uvm_objection.svh)
    File: uvm_heartbeat  (no auto-title, UVM_ROOT/distrib/src/base/uvm_heartbeat.svh)
    File: uvm_callback  (no auto-title, UVM_ROOT/distrib/src/base/uvm_callback.svh)

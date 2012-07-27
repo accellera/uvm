@@ -88,7 +88,7 @@
   `include "base/uvm_component.svh"
 
   // Objection interface
-  `include "base/uvm_notification_objection.svh"
+  `include "base/uvm_basic_objection.svh"
   `include "base/uvm_objection.svh"
   `include "base/uvm_heartbeat.svh"
 
