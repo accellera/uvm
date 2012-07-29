@@ -113,8 +113,13 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
   endfunction
 
   // This method is documented in uvm_object
-  const static string type_name = "uvm_reg_predictor #(BUSTYPE)";
+  static string type_name = "";
   virtual function string get_type_name();
+    if (type_name == "") begin
+      BUSTYPE t;
+      t = BUSTYPE::type_id::create("t");
+      type_name = {"uvm_reg_predictor #(", t.get_type_name(), ")"};
+    end
     return type_name;
   endfunction
   

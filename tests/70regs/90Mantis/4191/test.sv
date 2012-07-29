@@ -37,8 +37,8 @@ class test extends uvm_test;
    endfunction
 
    task run_phase(uvm_phase phase);
-     if (predictor.get_type_name() != "uvm_reg_predictor #(BUSTYPE)")
-       `uvm_error(get_type_name(), {"Expected 'uvm_reg_predictor #(BUSTYPE)' when calling get_type_name(), but saw: ", predictor.get_type_name()})
+     if (predictor.get_type_name() != "uvm_reg_predictor #(uvm_sequence_item)")
+       `uvm_error(get_type_name(), {"Expected 'uvm_reg_predictor #(uvm_sequence_item)' when calling get_type_name(), but saw: ", predictor.get_type_name()})
    endtask
   
    function void report_phase(uvm_phase phase);
