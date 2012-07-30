@@ -1,4 +1,4 @@
-typedef class uvm_objection_action;
+typedef class uvm_objection_message;
 typedef class uvm_basic_objection_cb_base;
 typedef class uvm_basic_objection;
 typedef class uvm_objection;
@@ -28,17 +28,17 @@ endclass : uvm_basic_objection_events
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// Class: uvm_objection_action
-// Basic Objection Action Descriptor
+// Class: uvm_objection_message
+// Basic Objection Message Descriptor
 //------------------------------------------------------------------------------
-// The Objection Action class provides an encapsulation
+// The Objection Message class provides an encapsulation
 // around all possible actions which can be sent to (or received from)
 // a <uvm_basic_objection>.
 //------------------------------------------------------------------------------
 
-class uvm_objection_action extends uvm_object;
+class uvm_objection_message extends uvm_object;
 
-   `uvm_object_utils(uvm_objection_action)
+   `uvm_object_utils(uvm_objection_message)
    
    /// Undocumented protected member variables
    ///
@@ -69,64 +69,64 @@ class uvm_objection_action extends uvm_object;
    protected int m_count;
 
    // Variable- m_locked
-   // Once locked, an action can no longer be modified
+   // Once locked, an message can no longer be modified
    // This prevents the end user from changing the details
-   // of the action during/after the callback execution
+   // of the message during/after the callback execution
    protected bit m_locked;
 
    // Function: new
    // Constructor
    //
-   // Creates a new instance of a uvm_objection_action.
+   // Creates a new instance of a uvm_objection_message.
    //
    // Parameters:
    // name - Instance name
-   function new(string name="unnamed-uvm_objection_action");
+   function new(string name="unnamed-uvm_objection_message");
       super.new(name);
    endfunction : new
 
    // Function- m_lock
-   // Locks the action, preventing further modification
+   // Locks the message, preventing further modification
    //
    function void m_lock();
       m_locked = 1;
    endfunction : m_lock
 
    // Function- m_unlock
-   // Unlocks the action, allowing modification
+   // Unlocks the message, allowing modification
    //
    function void m_unlock();
       m_locked = 0;
    endfunction : m_unlock
 
    // Function: is_locked
-   // Returns the current ~lock~ state of the action descriptor
+   // Returns the current ~lock~ state of the message descriptor
    //
-   // During the internal processing of the action, and during
+   // During the internal processing of the message, and during
    // the execution of the callback chain within the objection, the
-   // library needs to ensure that the action object remains
+   // library needs to ensure that the message object remains
    // unmodified, so that all subscribers are guaranteed to see the same
-   // action.  As such, the library will place the action into 
+   // message.  As such, the library will place the message into 
    // a 'locked' state.  Any attempts to modify the internal values during 
    // that time will result in an error being asserted.
    //
-   // After the objection has finished processing an action, then
-   // the action will be unlocked, allowing the original creator
-   // of the action to manipulate the fields again.  If the user
-   // wishes to save off a 'safe' copy of the action, then they
-   // need to either copy or clone the locked action when it is
+   // After the objection has finished processing an message, then
+   // the message will be unlocked, allowing the original creator
+   // of the message to manipulate the fields again.  If the user
+   // wishes to save off a 'safe' copy of the message, then they
+   // need to either copy or clone the locked message when it is
    // provided to them.
    function bit is_locked();
       return m_locked;
    endfunction : is_locked
 
    // Function: set_action
-   // Sets the type for this action
+   // Sets the type for this message
    //
    function void set_action_type(uvm_objection_action_e action_type);
       if (m_locked) begin
         `uvm_error("UVM/BASE/OBJTN/NTFCN/LOCKED/SET_TYPE",
-                   "attempt to set action on locked action")
+                   "attempt to set action on locked message")
       end
       else begin
          m_action_type = action_type;
@@ -141,12 +141,12 @@ class uvm_objection_action extends uvm_object;
    endfunction : get_action_type
 
    // Function: set_obj
-   // Sets the source object on behalf of which this action is occuring
+   // Sets the source object on behalf of which this message is occuring
    //
    function void set_obj(uvm_object obj);
       if (m_locked) begin
          `uvm_error("UVM/BASE/OBJTN/NTFCN/LOCKED/SET_SRC_OBJ",
-                    "attempt to set source object on a locked action")
+                    "attempt to set object on a locked message")
       end
       else begin
          m_obj = obj;
@@ -154,7 +154,7 @@ class uvm_objection_action extends uvm_object;
    endfunction : set_obj
 
    // Function: get_obj
-   // Returns the source object on behalf of which this action is occurring
+   // Returns the source object on behalf of which this message is occurring
    //
    function uvm_object get_obj();
       return m_obj;
@@ -169,12 +169,12 @@ class uvm_objection_action extends uvm_object;
    endfunction : m_get_source_name
 
    // Function: set_objection
-   // Sets the objection on which the action is occuring
+   // Sets the objection on which the message is occuring
    //
    function void set_objection(uvm_basic_objection objection);
       if (m_locked) begin
          `uvm_error("UVM/BASE/NTFC_OBJCTN/ACT/LOCKED/SET_OBJCTN",
-                    "attempt to set objection on a locked action")
+                    "attempt to set objection on a locked message")
       end
       else begin
          m_objection = objection;
@@ -182,19 +182,19 @@ class uvm_objection_action extends uvm_object;
    endfunction : set_objection
 
    // Function: get_objection
-   // Returns the objection on which this action is occuring
+   // Returns the objection on which this message is occuring
    //
    function uvm_basic_objection get_objection();
       return m_objection;
    endfunction : get_objection
 
    // Function: set_description
-   // Sets the description string for the action
+   // Sets the description string for the message
    //
    function void set_description(string description);
       if (m_locked) begin
          `uvm_error("UVM/BASE/NTFC_OBJCTN/ACT/LOCKED/SET_DESC",
-                    "attempt to set description on a locked action")
+                    "attempt to set description on a locked message")
       end
       else begin
          m_description = description;
@@ -202,7 +202,7 @@ class uvm_objection_action extends uvm_object;
    endfunction : set_description
 
    // Function: get_description
-   // Returns the description string for the action
+   // Returns the description string for the message
    //
    function string get_description();
       return m_description;
@@ -218,7 +218,7 @@ class uvm_objection_action extends uvm_object;
    function void set_count(int count);
       if (m_locked) begin
          `uvm_error("UVM/BASE/NTFC_OBJTCTN/ACT/LOCKED/SET_CNT",
-                    "attempt to set count on a locked action")
+                    "attempt to set count on a locked message")
       end
       else begin
          m_count = count;
@@ -240,12 +240,12 @@ class uvm_objection_action extends uvm_object;
 
    // Function- do_copy
    function void do_copy (uvm_object rhs);
-      uvm_objection_action rhs_;
+      uvm_objection_message rhs_;
       super.do_copy(rhs);
       $cast(rhs_,rhs);
       if (is_locked()) begin
         `uvm_error("UVM/BASE/NTFC_OBJTCTN/ACT/LOCKED/COPY",
-                   "attempt to copy into a locked action")
+                   "attempt to copy into a locked message")
       end
       else begin
          this.m_action_type = rhs_.m_action_type;
@@ -258,7 +258,7 @@ class uvm_objection_action extends uvm_object;
 
    // Function- do_compare
    virtual function bit do_compare (uvm_object rhs,uvm_comparer comparer);
-      uvm_objection_action rhs_;
+      uvm_objection_message rhs_;
       do_compare = super.do_compare(rhs,comparer);
       $cast(rhs_,rhs);
       if (this.m_action_type != rhs_.m_action_type) begin
@@ -316,39 +316,39 @@ class uvm_objection_action extends uvm_object;
         recorder.record_field("count", this.m_count, $bits(this.m_count), UVM_DEC);
    endfunction : do_record
    
-endclass : uvm_objection_action
+endclass : uvm_objection_message
 
 //------------------------------------------------------------------------------
-// Class- uvm_objection_prop_action
-// Extended action used for propagation
+// Class- uvm_objection_prop_message
+// Extended message used for propagation
 //------------------------------------------------------------------------------
-// The 'Propagation' action is a special extended version of
-// the standard <uvm_objection_action>, which is used exclusively
+// The 'Propagation' message is a special extended version of
+// the standard <uvm_objection_message>, which is used exclusively
 // by the <uvm_objection> and its derivatives.  In addition to all of
-// the fields and functionality provided by the <uvm_objection_action>,
+// the fields and functionality provided by the <uvm_objection_message>,
 // this extended version provides a concept of a propagation ~source~.
 //------------------------------------------------------------------------------
 
-class uvm_objection_prop_action extends uvm_objection_action;
+class uvm_objection_prop_message extends uvm_objection_message;
 
    protected uvm_object m_source_obj;
 
    // Undocumented, used inside of uvm_objection
    bit     m_is_top_thread;
    
-   `uvm_object_utils(uvm_objection_prop_action)
+   `uvm_object_utils(uvm_objection_prop_message)
 
-   function new(string name="unnamed-uvm_objection_prop_action");
+   function new(string name="unnamed-uvm_objection_prop_message");
       super.new(name);
    endfunction : new
 
    // Function- set_source_obj
-   // Sets the source object on behalf of which this action is occuring
+   // Sets the source object on behalf of which this message is occuring
    //
    function void set_source_obj(uvm_object source_obj);
       if (m_locked) begin
          `uvm_error("UVM/BASE/OBJTN/NTFCN/LOCKED/SET_TGT_OBJ",
-                    "attempt to set source object on a locked action")
+                    "attempt to set source object on a locked message")
       end
       else begin
          m_source_obj = source_obj;
@@ -356,7 +356,7 @@ class uvm_objection_prop_action extends uvm_objection_action;
    endfunction : set_source_obj
 
    // Function- get_source_obj
-   // Returns the source object on behalf of which this action is occurring
+   // Returns the source object on behalf of which this message is occurring
    //
    function uvm_object get_source_obj();
       return m_source_obj;
@@ -375,7 +375,7 @@ class uvm_objection_prop_action extends uvm_objection_action;
 
    // Function- do_copy
    function void do_copy (uvm_object rhs);
-      uvm_objection_prop_action rhs_;
+      uvm_objection_prop_message rhs_;
       super.do_copy(rhs);
       $cast(rhs_,rhs);
       if (!is_locked()) begin
@@ -385,7 +385,7 @@ class uvm_objection_prop_action extends uvm_objection_action;
 
    // Function- do_compare
    virtual function bit do_compare (uvm_object rhs,uvm_comparer comparer);
-      uvm_objection_prop_action rhs_;
+      uvm_objection_prop_message rhs_;
       do_compare = super.do_compare(rhs,comparer);
       $cast(rhs_,rhs);
       if (this.m_source_obj != rhs_.m_source_obj) begin
@@ -406,7 +406,7 @@ class uvm_objection_prop_action extends uvm_objection_action;
       recorder.record_string("source_obj name", this.m_get_source_name());
    endfunction : do_record
    
-endclass : uvm_objection_prop_action
+endclass : uvm_objection_prop_message
 
 
 
@@ -439,7 +439,7 @@ class uvm_basic_objection extends uvm_report_object;
    protected uvm_root m_top = uvm_root::get();
 
    // Used for memory efficiency
-   static local uvm_objection_action m_action_pool[$];
+   static local uvm_objection_message m_message_pool[$];
    
    // Function: new
    // Creates a new basic objection instance.
@@ -632,50 +632,50 @@ class uvm_basic_objection extends uvm_report_object;
    // objection.
    //
 
-   virtual function void m_lock_pre_notified(uvm_objection_action action);
-      action.m_lock();
-      pre_notified(action);
-      action.m_unlock();
+   virtual function void m_lock_pre_notified(uvm_objection_message message);
+      message.m_lock();
+      pre_notified(message);
+      message.m_unlock();
    endfunction : m_lock_pre_notified
    
    // Function- m_lock_notified
    // Locks the transaction before notifying, unlocks afterwards
-   virtual function void m_lock_notified(uvm_objection_action action);
-      m_report(action);
-      m_process_links(action);
-      action.m_lock();
-      notified(action);
-      action.m_unlock();
+   virtual function void m_lock_notified(uvm_objection_message message);
+      m_report(message);
+      m_process_links(message);
+      message.m_lock();
+      notified(message);
+      message.m_unlock();
    endfunction : m_lock_notified
 
    // Function: pre_notified
-   // Objection callback that is called prior to the internal processing of actions
+   // Objection callback that is called prior to the internal processing of messages
    //
-   // During the execution of the pre_notified callback, the action descriptor
+   // During the execution of the pre_notified callback, the message descriptor
    // should be considered 'locked', ie. unchangable.
    //
    // The default implementation triggers all of the <uvm_basic_objection_cb_base>'s
    // which have been registered with this objection
-   virtual function void pre_notified(uvm_objection_action action);
+   virtual function void pre_notified(uvm_objection_message message);
       `uvm_do_callbacks(uvm_basic_objection,
                         uvm_basic_objection_cb_base,
-                        m_pre_notified(action))
+                        m_pre_notified(message))
    endfunction : pre_notified
    
    // Function: notified
    // Objection callback that is called whenever the activation API is triggered
    //
-   // By the time the notified callback is triggered, the action descriptor should
+   // By the time the notified callback is triggered, the message descriptor should
    // be considered 'locked', ie. unchangable.
    //
    // The default implementation triggers all of the
    // <uvm_basic_objection_cb_base>'s which have been registered
    // with this objection.
    //
-   virtual function void notified(uvm_objection_action action);
+   virtual function void notified(uvm_objection_message message);
       `uvm_do_callbacks(uvm_basic_objection, 
                         uvm_basic_objection_cb_base,
-                        m_notified(action))
+                        m_notified(message))
 
    endfunction : notified
 
@@ -759,79 +759,79 @@ class uvm_basic_objection extends uvm_report_object;
    //
    // Since the ~action~ is going to be locked by the objection prior
    // to executing the callback chain, it is cloned before processing.
-   virtual       function void notify(uvm_objection_action action);
-      m_process(action, 0);
+   virtual       function void notify(uvm_objection_message message);
+      m_process(message, 0);
    endfunction : notify
 
    // Function- m_raise
-   virtual function void m_raise(uvm_objection_action action);
-      if (action.get_count() < 1) begin
-         if (action.get_count() < 0) begin
+   virtual function void m_raise(uvm_objection_message message);
+      if (message.get_count() < 1) begin
+         if (message.get_count() < 0) begin
             `uvm_fatal("UVM/BASE/NTFCN_OBJCTN/NEGATIVE_RAISE",
                        "attempt to raise an objection with a negative count")
               end
          return;
       end  
       
-      if (m_source_count.exists(action.get_obj()))
-        m_source_count[action.get_obj()] += action.get_count();
+      if (m_source_count.exists(message.get_obj()))
+        m_source_count[message.get_obj()] += message.get_count();
       else
-        m_source_count[action.get_obj()] = action.get_count();
+        m_source_count[message.get_obj()] = message.get_count();
       
-      if (m_events.exists(action.get_obj()))
-        ->m_events[action.get_obj()].raised;
+      if (m_events.exists(message.get_obj()))
+        ->m_events[message.get_obj()].raised;
       ->m_broadcast_event.raised;
       
-      m_lock_notified(action);
+      m_lock_notified(message);
    endfunction : m_raise
 
    // Function- m_drop
-   virtual function void m_drop(uvm_objection_action action);
+   virtual function void m_drop(uvm_objection_message message);
 
-      if (action.get_count() < 1) begin
-         if (action.get_count() < 0) begin
+      if (message.get_count() < 1) begin
+         if (message.get_count() < 0) begin
             `uvm_fatal("UVM/BASE/OBJTN/NEGATIVE_DROP",
                        "attempt to drop an objection with a negative count")
               end
          return;
       end  
       
-      if (m_source_count.exists(action.get_obj())) begin
-         if (m_source_count[action.get_obj()] < action.get_count()) begin
-            uvm_object l_obj = action.get_obj();
+      if (m_source_count.exists(message.get_obj())) begin
+         if (m_source_count[message.get_obj()] < message.get_count()) begin
+            uvm_object l_obj = message.get_obj();
             string name = l_obj.get_full_name();
             `uvm_fatal("OBJTN_ZERO",
                        {"attempt to drop objection count for source '",name,"' below zero on '", this.get_name(), "'"})
               return;
          end
          
-         m_source_count[action.get_obj()] -= action.get_count();
+         m_source_count[message.get_obj()] -= message.get_count();
          
          // Prevent memory leaks by clearing out the source list
-         if (m_source_count[action.get_obj()] == 0)
-           m_source_count.delete(action.get_obj());
+         if (m_source_count[message.get_obj()] == 0)
+           m_source_count.delete(message.get_obj());
          
-         if (m_events.exists(action.get_obj()))
-           ->m_events[action.get_obj()].dropped;
+         if (m_events.exists(message.get_obj()))
+           ->m_events[message.get_obj()].dropped;
          ->m_broadcast_event.dropped;
       end
       else begin
-         uvm_object l_obj = action.get_obj();
+         uvm_object l_obj = message.get_obj();
          string name = l_obj.get_full_name();
          `uvm_fatal("OBJTN_ZERO",
                     {"attempt to drop objection count for source '",name,"' below zero"})
            return;
-      end // else: !if(m_source_count.exists[action.get_obj()])
+      end // else: !if(m_source_count.exists[message.get_obj()])
       
-      m_lock_notified(action);
+      m_lock_notified(message);
 
    endfunction : m_drop      
 
    // Function- m_clear_check
    // Performs the check to determine if a clear should be 'warned'
-   protected virtual function void m_clear_check(uvm_objection_action action);
+   protected virtual function void m_clear_check(uvm_objection_message message);
       string         name;
-      uvm_object obj = action.get_obj();
+      uvm_object obj = message.get_obj();
       name = (obj == null) ? "<null>" : obj.get_full_name();
       if (name == "")
            name = "uvm_top";
@@ -845,51 +845,51 @@ class uvm_basic_objection extends uvm_report_object;
    
    // Function- m_process
    // Processes the various action types
-   protected virtual function void m_process(uvm_objection_action action, bit pre_notified);
+   protected virtual function void m_process(uvm_objection_message message, bit pre_notified);
 
       // Do some basic tidying of the descriptor    
-      if (action.get_obj() == null)
-        action.set_obj(m_top);
+      if (message.get_obj() == null)
+        message.set_obj(m_top);
 
-      action.set_objection(this);
+      message.set_objection(this);
 
       if (!pre_notified)
-        m_lock_pre_notified(action);
+        m_lock_pre_notified(message);
       
-      if (action.get_action_type() == UVM_OBJECTION_CLEARED) begin
-         m_clear_check(action);
+      if (message.get_action_type() == UVM_OBJECTION_CLEARED) begin
+         m_clear_check(message);
          
          m_source_count_backup = m_source_count; // Save for links
          m_source_count.delete();
-         if (m_events.exists(action.get_obj()))
-           ->m_events[action.get_obj()].cleared;
+         if (m_events.exists(message.get_obj()))
+           ->m_events[message.get_obj()].cleared;
          ->m_broadcast_event.cleared;
 
-         m_lock_notified(action);
+         m_lock_notified(message);
       end
       
-      if (action.get_action_type() == UVM_OBJECTION_RAISED) begin
-         m_raise(action);
+      if (message.get_action_type() == UVM_OBJECTION_RAISED) begin
+         m_raise(message);
       end
 
-      if (action.get_action_type() == UVM_OBJECTION_DROPPED) begin
-         m_drop(action);
+      if (message.get_action_type() == UVM_OBJECTION_DROPPED) begin
+         m_drop(message);
       end
 
-      if (action.get_action_type() == UVM_OBJECTION_RAISE_REQUESTED) begin
-         if (m_events.exists(action.get_obj()))
-           ->m_events[action.get_obj()].raise_requested;
+      if (message.get_action_type() == UVM_OBJECTION_RAISE_REQUESTED) begin
+         if (m_events.exists(message.get_obj()))
+           ->m_events[message.get_obj()].raise_requested;
          ->m_broadcast_event.raise_requested;
 
-         m_lock_notified(action);
+         m_lock_notified(message);
       end
 
-      if (action.get_action_type() == UVM_OBJECTION_DROP_REQUESTED) begin
-         if (m_events.exists(action.get_obj()))
-           ->m_events[action.get_obj()].drop_requested;
+      if (message.get_action_type() == UVM_OBJECTION_DROP_REQUESTED) begin
+         if (m_events.exists(message.get_obj()))
+           ->m_events[message.get_obj()].drop_requested;
          ->m_broadcast_event.drop_requested;
 
-         m_lock_notified(action);
+         m_lock_notified(message);
       end
 
 
@@ -911,27 +911,27 @@ class uvm_basic_objection extends uvm_report_object;
    //
    virtual function void clear(uvm_object obj=null, string description = "");
       string     name;
-      uvm_objection_action action;
+      uvm_objection_message message;
 
-      if (m_action_pool.size())
-        action = m_action_pool.pop_front();
+      if (m_message_pool.size())
+        message = m_message_pool.pop_front();
       else
-        action = new("action");
-      action.set_action_type(UVM_OBJECTION_CLEARED);
-      action.set_obj(obj);
-      action.set_objection(this);
-      action.set_description(description);
+        message = new("message");
+      message.set_action_type(UVM_OBJECTION_CLEARED);
+      message.set_obj(obj);
+      message.set_objection(this);
+      message.set_description(description);
       
-      m_process(action, 0);
+      m_process(message, 0);
 
-      m_action_pool.push_back(action);
+      m_message_pool.push_back(message);
       
    endfunction : clear
 
    // Function- m_report
    //
    // Internal method for reporting actions
-   virtual function void m_report(uvm_objection_action action);
+   virtual function void m_report(uvm_objection_message message);
       string id = "OBJTN_TRC";
       if (!m_trace_mode ||
           !uvm_report_enabled(UVM_NONE, UVM_INFO, id))
@@ -939,8 +939,8 @@ class uvm_basic_objection extends uvm_report_object;
 
       begin
          string msg;
-         uvm_objection_action_e l_action = action.get_action_type();
-         uvm_object l_obj = action.get_obj();
+         uvm_objection_action_e l_action = message.get_action_type();
+         uvm_object l_obj = message.get_obj();
          string l_source_name = (l_obj == null) ? "<null>" :
                 (l_obj.get_full_name() == "") ? "uvm_top" : l_obj.get_full_name();
          
@@ -951,10 +951,10 @@ class uvm_basic_objection extends uvm_report_object;
                          this.get_full_name());
 
          if ((l_action == UVM_OBJECTION_RAISED) || (l_action == UVM_OBJECTION_DROPPED))
-           msg = {msg, $sformatf(" with count of %0d", action.get_count())};
+           msg = {msg, $sformatf(" with count of %0d", message.get_count())};
 
-         if (action.get_description() != "")
-           msg = {msg, $sformatf(" - '%s'", action.get_description())};
+         if (message.get_description() != "")
+           msg = {msg, $sformatf(" - '%s'", message.get_description())};
 
          uvm_report_info(id, msg, UVM_NONE);
       end
@@ -967,7 +967,7 @@ class uvm_basic_objection extends uvm_report_object;
    // Raising an objection causes the following.
    // - The source objection count for ~obj~ is increased by ~count~.  
    // -	The objection's <notified> virtual method is called, and passed an 
-   //   appropriate action descriptor
+   //   appropriate message descriptor
    //
    // Parameters:
    // obj - The source object on behalf of which the raise is occuring.
@@ -983,22 +983,22 @@ class uvm_basic_objection extends uvm_report_object;
                                          string description="",
                                          int count = 1);
 
-      uvm_objection_action action;
+      uvm_objection_message message;
 
-      if (m_action_pool.size())
-        action = m_action_pool.pop_front();
+      if (m_message_pool.size())
+        message = m_message_pool.pop_front();
       else 
-        action = new("action");
+        message = new("message");
       
-      action.set_action_type(UVM_OBJECTION_RAISED);
-      action.set_obj(obj);
-      action.set_objection(this);
-      action.set_description(description);
-      action.set_count(count);
+      message.set_action_type(UVM_OBJECTION_RAISED);
+      message.set_obj(obj);
+      message.set_objection(this);
+      message.set_description(description);
+      message.set_count(count);
       
-      m_process(action, 0);
+      m_process(message, 0);
 
-      m_action_pool.push_back(action);
+      m_message_pool.push_back(message);
       
    endfunction : raise_objection
 
@@ -1008,7 +1008,7 @@ class uvm_basic_objection extends uvm_report_object;
    // Raising an objection causes the following.
    // - The source objection count for ~obj~ is increased by ~count~.  
    // -	The objection's <notified> virtual method is called, and passed an 
-   //   appropriate action descriptor
+   //   appropriate message descriptor
    //
    // Parameters:
    // obj - The source object on behalf of which the drop is occuring.
@@ -1024,21 +1024,21 @@ class uvm_basic_objection extends uvm_report_object;
                                          string description="",
                                          int count = 1);
 
-      uvm_objection_action action;
+      uvm_objection_message message;
 
-      if (m_action_pool.size())
-        action = m_action_pool.pop_front();
+      if (m_message_pool.size())
+        message = m_message_pool.pop_front();
       else 
-        action = new("action");
-      action.set_action_type(UVM_OBJECTION_DROPPED);
-      action.set_obj(obj);
-      action.set_objection(this);
-      action.set_description(description);
-      action.set_count(count);
+        message = new("message");
+      message.set_action_type(UVM_OBJECTION_DROPPED);
+      message.set_obj(obj);
+      message.set_objection(this);
+      message.set_description(description);
+      message.set_count(count);
       
-      m_process(action, 0);
+      m_process(message, 0);
 
-      m_action_pool.push_back(action);
+      m_message_pool.push_back(message);
    endfunction : drop_objection
 
    // Function: request_to_raise
@@ -1059,20 +1059,20 @@ class uvm_basic_objection extends uvm_report_object;
    virtual function void request_to_raise(uvm_object obj=null,
                                          string description="");
 
-      uvm_objection_action action;
+      uvm_objection_message message;
 
-      if (m_action_pool.size())
-        action = m_action_pool.pop_front();
+      if (m_message_pool.size())
+        message = m_message_pool.pop_front();
       else
-        action = new("action");
-      action.set_action_type(UVM_OBJECTION_RAISE_REQUESTED);
-      action.set_obj(obj);
-      action.set_objection(this);
-      action.set_description(description);
+        message = new("message");
+      message.set_action_type(UVM_OBJECTION_RAISE_REQUESTED);
+      message.set_obj(obj);
+      message.set_objection(this);
+      message.set_description(description);
       
-      m_process(action, 0);
+      m_process(message, 0);
 
-      m_action_pool.push_back(action);
+      m_message_pool.push_back(message);
    endfunction : request_to_raise
 
    // Function: request_to_drop
@@ -1093,21 +1093,21 @@ class uvm_basic_objection extends uvm_report_object;
    virtual function void request_to_drop(uvm_object obj=null,
                                          string description="");
 
-      uvm_objection_action action;
+      uvm_objection_message message;
 
-      if (m_action_pool.size()) 
-        action = m_action_pool.pop_front();
+      if (m_message_pool.size()) 
+        message = m_message_pool.pop_front();
       else
-        action = new("action");
+        message = new("message");
       
-      action.set_action_type(UVM_OBJECTION_DROP_REQUESTED);
-      action.set_obj(obj);
-      action.set_objection(this);
-      action.set_description(description);
+      message.set_action_type(UVM_OBJECTION_DROP_REQUESTED);
+      message.set_obj(obj);
+      message.set_objection(this);
+      message.set_description(description);
       
-      m_process(action, 0);
+      m_process(message, 0);
 
-      m_action_pool.push_back(action);
+      m_message_pool.push_back(message);
    endfunction : request_to_drop
 
    // Group: Linking
@@ -1156,16 +1156,16 @@ class uvm_basic_objection extends uvm_report_object;
    
 
    // Function- m_process_links
-   protected virtual function void m_process_links(uvm_objection_action action);
-      if (action.get_action_type() == UVM_OBJECTION_RAISED) begin
+   protected virtual function void m_process_links(uvm_objection_message message);
+      if (message.get_action_type() == UVM_OBJECTION_RAISED) begin
          foreach (m_ds_links[i]) begin
-            if ((action.get_count() == this.get_sum())) begin
+            if ((message.get_count() == this.get_sum())) begin
                i.raise_objection(this, "objection link", 1);
             end
          end // foreach (m_ds_links[i])
-      end // if (action.get_action_type() == UVM_OBJECTION_RAISED)
+      end // if (message.get_action_type() == UVM_OBJECTION_RAISED)
 
-      if (action.get_action_type() == UVM_OBJECTION_DROPPED) begin
+      if (message.get_action_type() == UVM_OBJECTION_DROPPED) begin
          if (this.get_sum() == 0) begin 
             foreach (m_ds_links[i]) begin
                i.drop_objection(this, "objection link", 1);
@@ -1173,12 +1173,12 @@ class uvm_basic_objection extends uvm_report_object;
          end
       end
       
-      if (action.get_action_type() == UVM_OBJECTION_CLEARED) begin
+      if (message.get_action_type() == UVM_OBJECTION_CLEARED) begin
          foreach (m_us_links[i])
-           i.clear(action.get_obj(),
+           i.clear(message.get_obj(),
                    $sformatf("objection link from '%s': %s",
                              this.get_full_name(),
-                             action.get_description()));
+                             message.get_description()));
 
          if (m_source_count_backup.sum() > 0) begin
             foreach (m_ds_links[i]) begin
@@ -1188,19 +1188,19 @@ class uvm_basic_objection extends uvm_report_object;
          end
       end
 
-      if (action.get_action_type() == UVM_OBJECTION_RAISE_REQUESTED)
+      if (message.get_action_type() == UVM_OBJECTION_RAISE_REQUESTED)
         foreach (m_us_links[i])
-          i.request_to_raise(action.get_obj(),
+          i.request_to_raise(message.get_obj(),
                              $sformatf("objection link from '%s': %s",
                                        this.get_full_name(),
-                                       action.get_description()));
+                                       message.get_description()));
       
-      if (action.get_action_type() == UVM_OBJECTION_DROP_REQUESTED)
+      if (message.get_action_type() == UVM_OBJECTION_DROP_REQUESTED)
         foreach (m_us_links[i])
-          i.request_to_drop(action.get_obj(),
+          i.request_to_drop(message.get_obj(),
                             $sformatf("objection link from '%s': %s",
                                       this.get_full_name(),
-                                      action.get_description()));
+                                      message.get_description()));
       
    endfunction : m_process_links
 
@@ -1383,8 +1383,8 @@ endclass : uvm_basic_objection
 //|   super.new(name);
 //|  endfunction : new
 //|
-//|  virtual function void notified(uvm_objection_action action);
-//|    `uvm_info("DEMO", $sformatf("Saw notification:\n%s", action.sprint()), UVM_LOW)
+//|  virtual function void notified(uvm_objection_message message);
+//|    `uvm_info("DEMO", $sformatf("Saw notification:\n%s", message.sprint()), UVM_LOW)
 //|  endfunction : notified
 //| endclass : my_note_objection_cb
 //| ...
@@ -1413,10 +1413,10 @@ class uvm_basic_objection_cb_base extends uvm_callback;
    // and drops to 0.
    //
    // While it is possible that a callback implementation may wish to
-   // be triggered on all actions that flow thru an objection, it is
+   // be triggered on all messages that flow thru an objection, it is
    // far more common that the implementations simply wish to know when
    // the objection sum goes from 0->N, and from N->0.  If the shallow filter
-   // is enabled, then the implementation will only see the actions that
+   // is enabled, then the implementation will only see the messages that
    // produce those two scenarios.
    //
    // Default: '1' (enabled)
@@ -1436,18 +1436,18 @@ class uvm_basic_objection_cb_base extends uvm_callback;
 
    // Function- m_pre_notified
    // Implementation artifact, allows for filters
-   virtual function void m_pre_notified(uvm_objection_action action);
+   virtual function void m_pre_notified(uvm_objection_message message);
       uvm_basic_objection objection;
       uvm_objection prop_objection;
-      uvm_objection_prop_action prop_action;
+      uvm_objection_prop_message prop_message;
       
-      int  action_count;
+      int  message_count;
       int  filter_total;
-      if ((obj_filter != null) && (obj_filter != action.get_obj())) begin
+      if ((obj_filter != null) && (obj_filter != message.get_obj())) begin
               return;
       end
 
-      objection = action.get_objection();
+      objection = message.get_objection();
       if ($cast(prop_objection, objection)) begin
          filter_total = (obj_filter == null) ? prop_objection.get_sum() : prop_objection.get_objection_total(obj_filter);
       end
@@ -1455,37 +1455,37 @@ class uvm_basic_objection_cb_base extends uvm_callback;
          filter_total = (obj_filter == null) ? objection.get_sum() : objection.get_objection_count(obj_filter);
       end
 
-      action_count = action.get_count();
+      message_count = message.get_count();
       
       if (shallow_filter) begin
-         if (action.get_action_type() == UVM_OBJECTION_RAISED) begin
+         if (message.get_action_type() == UVM_OBJECTION_RAISED) begin
             if (filter_total != 0)
               return;
          end
 
-         if (action.get_action_type() == UVM_OBJECTION_DROPPED) begin
-            if (filter_total != action_count)
+         if (message.get_action_type() == UVM_OBJECTION_DROPPED) begin
+            if (filter_total != message_count)
               return;
          end
       end
 
-      pre_notified(action);
+      pre_notified(message);
    endfunction : m_pre_notified
    
    // Function- m_notified
    // Implementation artifact, allows for filters
-   virtual function void m_notified(uvm_objection_action action);
+   virtual function void m_notified(uvm_objection_message message);
       uvm_basic_objection objection;
       uvm_objection prop_objection;
-      uvm_objection_prop_action prop_action;
+      uvm_objection_prop_message prop_message;
       
-      int  action_count;
+      int  message_count;
       int  filter_total;
-      if ((obj_filter != null) && (obj_filter != action.get_obj())) begin
+      if ((obj_filter != null) && (obj_filter != message.get_obj())) begin
               return;
       end
 
-      objection = action.get_objection();
+      objection = message.get_objection();
       if ($cast(prop_objection, objection)) begin
          filter_total = (obj_filter == null) ? prop_objection.get_sum() : prop_objection.get_objection_total(obj_filter);
       end
@@ -1493,21 +1493,21 @@ class uvm_basic_objection_cb_base extends uvm_callback;
          filter_total = (obj_filter == null) ? objection.get_sum() : objection.get_objection_count(obj_filter);
       end
 
-      action_count = action.get_count();
+      message_count = message.get_count();
       
       if (shallow_filter) begin
-         if (action.get_action_type() == UVM_OBJECTION_RAISED) begin
-            if (filter_total != action_count)
+         if (message.get_action_type() == UVM_OBJECTION_RAISED) begin
+            if (filter_total != message_count)
               return;
          end
 
-         if (action.get_action_type() == UVM_OBJECTION_DROPPED) begin
+         if (message.get_action_type() == UVM_OBJECTION_DROPPED) begin
             if (filter_total != 0)
               return;
          end
       end
 
-      notified(action);
+      notified(message);
    endfunction : m_notified
    
    // Function: pre_notified
@@ -1516,9 +1516,9 @@ class uvm_basic_objection_cb_base extends uvm_callback;
    // Called by <uvm_basic_objection::pre_notified>
    //
    // Parameters:
-   // action - The <uvm_objection_action> describing this
+   // message - The <uvm_objection_message> describing this
    //          notification.
-   virtual function void pre_notified (uvm_objection_action action);
+   virtual function void pre_notified (uvm_objection_message message);
    endfunction : pre_notified
    
    // Function: notified
@@ -1527,9 +1527,9 @@ class uvm_basic_objection_cb_base extends uvm_callback;
    // Called by <uvm_basic_objection::notified>
    //
    // Parameters:
-   // action - The <uvm_objection_action> describing this
+   // message - The <uvm_objection_message> describing this
    //          notification.
-   virtual function void notified (uvm_objection_action action);
+   virtual function void notified (uvm_objection_message message);
    endfunction : notified
    
 endclass : uvm_basic_objection_cb_base
@@ -1552,7 +1552,7 @@ endclass : uvm_basic_objection_cb_base
 // For example:
 //
 //| class my_listener;
-//|  virtual function void objection_notified(uvm_objection_action action);
+//|  virtual function void objection_notified(uvm_objection_message message);
 //|    //... do something with the notification
 //|  endfunction : objection_notified
 //| endclass : my_listener
@@ -1582,26 +1582,26 @@ class uvm_basic_objection_cb#(type T=int) extends uvm_basic_objection_cb_base;
 
    // Function: pre_notified
    // Objection pre_notified callback function
-   virtual function void pre_notified (uvm_objection_action action);
+   virtual function void pre_notified (uvm_objection_message message);
       if (m_imp == null) begin
         `uvm_error("UVM/BASE/NTFCN_OBJCTN/CB/NULL_IMP",
                    "callback triggered w/ null implementation")
         return;
       end
 
-      m_imp.objection_pre_notified(action);
+      m_imp.objection_pre_notified(message);
    endfunction : pre_notified
 
    // Function: notified
    // Objection notified callback function
-   virtual function void notified (uvm_objection_action action);
+   virtual function void notified (uvm_objection_message message);
       if (m_imp == null) begin
         `uvm_error("UVM/BASE/NTFCN_OBJCTN/CB/NULL_IMP",
                    "callback triggered w/ null implementation")
         return;
       end
 
-      m_imp.objection_notified(action);
+      m_imp.objection_notified(message);
    endfunction : notified
 
 endclass : uvm_basic_objection_cb

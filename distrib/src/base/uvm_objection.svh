@@ -23,7 +23,7 @@
 `ifndef UVM_OBJECTION_SVH
 `define UVM_OBJECTION_SVH
 
-typedef class uvm_objection_prop_action;
+typedef class uvm_objection_prop_message;
 typedef class uvm_objection;
 typedef class uvm_sequence_base;
 typedef class uvm_objection_callback;
@@ -67,8 +67,8 @@ class uvm_objection extends uvm_basic_objection;
   static uvm_objection m_objections[$];
 
   // Used for memory efficiency
-  static local uvm_objection_prop_action m_prop_action_pool[$];
-  local uvm_objection_prop_action m_scheduled_list[$];
+  static local uvm_objection_prop_message m_prop_message_pool[$];
+  local uvm_objection_prop_message m_scheduled_list[$];
 
   /*protected*/ bit m_hier_mode = 1;
 
@@ -107,13 +107,13 @@ class uvm_objection extends uvm_basic_objection;
 
    // Function- m_report
    //
-   // Internal method for reporting actions
-   virtual function void m_report(uvm_objection_action action);
+   // Internal method for reporting messages
+   virtual function void m_report(uvm_objection_message message);
       string id = "OBJTN_TRC";
-      uvm_objection_prop_action prop_action;
+      uvm_objection_prop_message prop_message;
 
-      if (!$cast(prop_action, action))
-        super.m_report(action);
+      if (!$cast(prop_message, message))
+        super.m_report(message);
       else begin
       
          if (!m_trace_mode ||
@@ -126,11 +126,9 @@ class uvm_objection extends uvm_basic_objection;
             uvm_object l_obj, l_source_obj;
             string l_obj_name, l_source_name;
             
-            $cast(prop_action, action);
-            
-            l_action = prop_action.get_action_type();
-            l_obj = prop_action.get_obj();
-            l_source_obj = prop_action.get_source_obj();
+            l_action = prop_message.get_action_type();
+            l_obj = prop_message.get_obj();
+            l_source_obj = prop_message.get_source_obj();
             
             l_obj_name = (l_obj == null) ? "<null>" :
                          (l_obj.get_full_name() == "") ? "uvm_top" : l_obj.get_full_name();
@@ -160,14 +158,14 @@ class uvm_objection extends uvm_basic_objection;
                             this.get_full_name());
             
             if ((l_action == UVM_OBJECTION_RAISED) || (l_action == UVM_OBJECTION_DROPPED))
-              msg = {msg, $sformatf(" with count of %0d", action.get_count())};
+              msg = {msg, $sformatf(" with count of %0d", message.get_count())};
             
-            if (action.get_description() != "")
-              msg = {msg, $sformatf(" - '%s'", action.get_description())};
+            if (message.get_description() != "")
+              msg = {msg, $sformatf(" - '%s'", message.get_description())};
             
             uvm_report_info(id, msg, UVM_NONE);
          end
-      end // else: !if(!$cast(prop_action, action))
+      end // else: !if(!$cast(prop_message, message))
       
    endfunction : m_report
    
@@ -206,11 +204,11 @@ class uvm_objection extends uvm_basic_objection;
   // count : the number of objections associated with the action.
   // raise : indicator of whether the objection is being raised or lowered. A
   //   1 indicates the objection is being raised.
-  function void m_propagate (uvm_objection_prop_action action);
-     uvm_object l_target = action.get_obj();
+  function void m_propagate (uvm_objection_prop_message message);
+     uvm_object l_target = message.get_obj();
      if (l_target != null && l_target != m_top) begin
-        action.set_obj(m_get_parent(l_target));
-        m_process(action, 0);
+        message.set_obj(m_get_parent(l_target));
+        m_process(message, 0);
      end
   endfunction
 
@@ -236,24 +234,24 @@ class uvm_objection extends uvm_basic_objection;
   endfunction
 
    // Function- m_process
-   // Processes the various action types
-   protected virtual function void m_process(uvm_objection_action action, bit pre_notified);
-      uvm_objection_prop_action prop_action;
+   // Processes the various message types
+   protected virtual function void m_process(uvm_objection_message message, bit pre_notified);
+      uvm_objection_prop_message prop_message;
       
       // Do some basic tidying of the descriptor
-      if (action.get_obj() == null)
-        action.set_obj(m_top);
+      if (message.get_obj() == null)
+        message.set_obj(m_top);
 
-      if ($cast(prop_action, action))
-        if (prop_action.get_source_obj() == null)
-          prop_action.set_source_obj(m_top);
+      if ($cast(prop_message, message))
+        if (prop_message.get_source_obj() == null)
+          prop_message.set_source_obj(m_top);
       
-      action.set_objection(this);
+      message.set_objection(this);
 
       if (!pre_notified)
-        m_lock_pre_notified(action);
+        m_lock_pre_notified(message);
       
-      if (action.get_action_type() == UVM_OBJECTION_CLEARED) begin
+      if (message.get_action_type() == UVM_OBJECTION_CLEARED) begin
          m_total_count.delete();
          m_draining.delete();
          m_top_all_dropped = 0;
@@ -270,11 +268,11 @@ class uvm_objection extends uvm_basic_objection;
          join_none
       end
 
-      if (action.get_action_type() == UVM_OBJECTION_RAISED) begin
+      if (message.get_action_type() == UVM_OBJECTION_RAISED) begin
          m_cleared = 0;
       end
       
-      super.m_process(action, 1);
+      super.m_process(message, 1);
    endfunction : m_process
 
   // Group: Objection Control
@@ -341,45 +339,45 @@ class uvm_objection extends uvm_basic_objection;
   virtual function void raise_objection (uvm_object obj=null,
                                          string description="",
                                          int count=1);
-     uvm_objection_prop_action prop_action;
+     uvm_objection_prop_message prop_message;
 
-     if (m_prop_action_pool.size())
-       prop_action = m_prop_action_pool.pop_front();
+     if (m_prop_message_pool.size())
+       prop_message = m_prop_message_pool.pop_front();
      else
-       prop_action = new("action");
+       prop_message = new("message");
      
-     prop_action.set_action_type(UVM_OBJECTION_RAISED);
-     prop_action.set_obj(obj);
-     prop_action.set_source_obj(obj);
-     prop_action.set_objection(this);
-     prop_action.set_description(description);
-     prop_action.set_count(count);
-     prop_action.m_is_top_thread = 0;
+     prop_message.set_action_type(UVM_OBJECTION_RAISED);
+     prop_message.set_obj(obj);
+     prop_message.set_source_obj(obj);
+     prop_message.set_objection(this);
+     prop_message.set_description(description);
+     prop_message.set_count(count);
+     prop_message.m_is_top_thread = 0;
 
-     m_process(prop_action, 0);
+     m_process(prop_message, 0);
 
-     m_prop_action_pool.push_back(prop_action);
+     m_prop_message_pool.push_back(prop_message);
   endfunction
 
   // Function- m_raise
 
-  function void m_raise(uvm_objection_action action);
-    uvm_objection_prop_action prop_action;
+  function void m_raise(uvm_objection_message message);
+    uvm_objection_prop_message prop_message;
     uvm_object l_target;
-    $cast(prop_action, action); 
+    $cast(prop_message, message); 
 
-    l_target = prop_action.get_obj();
+    l_target = prop_message.get_obj();
 
     if (m_total_count.exists(l_target))
-      m_total_count[l_target] += prop_action.get_count();
+      m_total_count[l_target] += prop_message.get_count();
     else 
-      m_total_count[l_target] = prop_action.get_count();
+      m_total_count[l_target] = prop_message.get_count();
 
-    if (l_target == prop_action.get_source_obj()) begin
-       super.m_raise(prop_action);
+    if (l_target == prop_message.get_source_obj()) begin
+       super.m_raise(prop_message);
     end
     else begin
-       m_lock_notified(prop_action);
+       m_lock_notified(prop_message);
     end
 
     // If this object is still draining from a previous drop, then
@@ -390,12 +388,12 @@ class uvm_objection extends uvm_basic_objection;
     end
     else begin
        if (!m_hier_mode && (l_target != m_top)) begin
-          prop_action.set_obj(m_top);
-          m_process(prop_action, 0);
+          prop_message.set_obj(m_top);
+          m_process(prop_message, 0);
        end
        else if (l_target != m_top) begin
-         prop_action.m_is_top_thread = 0;
-         m_propagate(prop_action);
+         prop_message.m_is_top_thread = 0;
+         m_propagate(prop_message);
        end
     end // else: !if(m_draining.exists(obj))
   
@@ -464,35 +462,35 @@ class uvm_objection extends uvm_basic_objection;
   virtual function void drop_objection (uvm_object obj=null,
                                         string description="",
                                         int count=1);
-     uvm_objection_prop_action prop_action;
-     if (m_prop_action_pool.size())
-       prop_action = m_prop_action_pool.pop_front();
+     uvm_objection_prop_message prop_message;
+     if (m_prop_message_pool.size())
+       prop_message = m_prop_message_pool.pop_front();
      else
-       prop_action = new("action");
-     prop_action.set_action_type(UVM_OBJECTION_DROPPED);
-     prop_action.set_obj(obj);
-     prop_action.set_source_obj(obj);
-     prop_action.set_objection(this);
-     prop_action.set_description(description);
-     prop_action.set_count(count);
-     prop_action.m_is_top_thread = 0;
+       prop_message = new("message");
+     prop_message.set_action_type(UVM_OBJECTION_DROPPED);
+     prop_message.set_obj(obj);
+     prop_message.set_source_obj(obj);
+     prop_message.set_objection(this);
+     prop_message.set_description(description);
+     prop_message.set_count(count);
+     prop_message.m_is_top_thread = 0;
 
-     m_process(prop_action, 0);
+     m_process(prop_message, 0);
 
-     m_prop_action_pool.push_back(prop_action);
+     m_prop_message_pool.push_back(prop_message);
   endfunction
 
 
   // Function- m_drop
 
-  function void m_drop (uvm_objection_action action);
-    uvm_objection_prop_action prop_action;
+  function void m_drop (uvm_objection_message message);
+    uvm_objection_prop_message prop_message;
     uvm_object l_target;
-    $cast(prop_action, action);
+    $cast(prop_message, message);
 
-    l_target = prop_action.get_obj();
+    l_target = prop_message.get_obj();
 
-    if (!m_total_count.exists(l_target) || (action.get_count() > m_total_count[l_target])) begin
+    if (!m_total_count.exists(l_target) || (message.get_count() > m_total_count[l_target])) begin
       if(m_cleared)
         return;
 
@@ -501,24 +499,24 @@ class uvm_objection extends uvm_basic_objection;
       return;
     end
     else begin
-       m_total_count[l_target] -= action.get_count();
+       m_total_count[l_target] -= message.get_count();
     end
 
-    if (l_target == prop_action.get_source_obj()) begin
-       super.m_drop(prop_action);
+    if (l_target == prop_message.get_source_obj()) begin
+       super.m_drop(prop_message);
     end
     else begin
-       m_lock_notified(prop_action);
+       m_lock_notified(prop_message);
     end
   
     // if count != 0, no reason to fork
     if (m_total_count[l_target] != 0) begin
       if (!m_hier_mode && l_target != m_top) begin
-         prop_action.set_obj(m_top);
-         m_process(prop_action, 0);
+         prop_message.set_obj(m_top);
+         m_process(prop_message, 0);
       end
       else if (l_target != m_top) begin
-        m_propagate(prop_action);
+        m_propagate(prop_message);
       end
 
     end
@@ -529,17 +527,17 @@ class uvm_objection extends uvm_basic_objection;
       if(!m_draining.exists(l_target)) m_draining[l_target] = 1;
       else m_draining[l_target] = m_draining[l_target]+1;
 
-      if(prop_action.m_is_top_thread) begin
-        m_forked_drop(prop_action);
+      if(prop_message.m_is_top_thread) begin
+        m_forked_drop(prop_message);
       end
       else
       begin
-        uvm_objection_prop_action ctxt;
-         if (m_prop_action_pool.size())
-           ctxt = m_prop_action_pool.pop_front();
+        uvm_objection_prop_message ctxt;
+         if (m_prop_message_pool.size())
+           ctxt = m_prop_message_pool.pop_front();
          else
-           ctxt = new("action");
-        ctxt.copy(prop_action);
+           ctxt = new("message");
+        ctxt.copy(prop_message);
         m_scheduled_list.push_back(ctxt); 
       end
     end
@@ -574,14 +572,14 @@ class uvm_objection extends uvm_basic_objection;
 
   // background process; when non
   task m_execute_scheduled_forks;
-    uvm_objection_prop_action ctxt;
+    uvm_objection_prop_message ctxt;
     while(1) begin
       wait(m_scheduled_list.size() != 0);
       if(m_scheduled_list.size() != 0) begin
 	 ctxt = m_scheduled_list.pop_front();
          ctxt.m_is_top_thread = 1;
 	 m_forked_drop(ctxt);
-         m_prop_action_pool.push_back(ctxt);
+         m_prop_message_pool.push_back(ctxt);
       end
     end
   endtask
@@ -590,10 +588,10 @@ class uvm_objection extends uvm_basic_objection;
   // m_forked_drop
   // -------------
 
-  function void m_forked_drop (uvm_objection_prop_action action);
+  function void m_forked_drop (uvm_objection_prop_message message);
 
     int diff_count;
-    uvm_object l_target = action.get_obj();
+    uvm_object l_target = message.get_obj();
 
     fork   // join_none, so this can be a function
        begin  //  also serves as guard proc to embedded disable fork
@@ -603,13 +601,13 @@ class uvm_objection extends uvm_basic_objection;
                 if (m_drain_time.exists(l_target))
                   `uvm_delay(m_drain_time[l_target])
 
-                action.set_action_type(UVM_OBJECTION_ALL_DROPPED);
-                all_dropped(action.get_obj(),
-                            action.get_source_obj(),
-                            action.get_description(), 
-                            action.get_count());
+                message.set_action_type(UVM_OBJECTION_ALL_DROPPED);
+                all_dropped(message.get_obj(),
+                            message.get_source_obj(),
+                            message.get_description(), 
+                            message.get_count());
                 
-                m_lock_notified(action);
+                m_lock_notified(message);
  
                 // wait for all_dropped cbs to complete
                 wait fork;
@@ -625,9 +623,9 @@ class uvm_objection extends uvm_basic_objection;
              m_draining.delete(l_target);
 
              if(!m_total_count.exists(l_target))
-               diff_count = (0 - action.get_count());
+               diff_count = (0 - message.get_count());
              else
-               diff_count = m_total_count[l_target] - action.get_count();
+               diff_count = m_total_count[l_target] - message.get_count();
 
              // no propagation if a re-raise cancels the drop
              if (diff_count != 0) begin
@@ -647,27 +645,27 @@ class uvm_objection extends uvm_basic_objection;
                   m_total_count.delete(l_target);
 
                 if (!m_hier_mode && l_target != m_top) begin
-                   action.set_obj(m_top);
-                   action.set_count(diff_count);
+                   message.set_obj(m_top);
+                   message.set_count(diff_count);
                    if (reraise) begin
-                      action.set_action_type(UVM_OBJECTION_RAISED);
-                      m_process(action, 0);
+                      message.set_action_type(UVM_OBJECTION_RAISED);
+                      m_process(message, 0);
                    end
                    else begin
-                      action.set_action_type(UVM_OBJECTION_DROPPED);
-                      action.m_is_top_thread = 1;
-                      m_process(action, 0);
+                      message.set_action_type(UVM_OBJECTION_DROPPED);
+                      message.m_is_top_thread = 1;
+                      m_process(message, 0);
                    end
                 end
                 else begin
                    if (l_target != m_top) begin
                       if (reraise)
-                        action.set_action_type(UVM_OBJECTION_RAISED);
+                        message.set_action_type(UVM_OBJECTION_RAISED);
                       else
-                        action.set_action_type(UVM_OBJECTION_DROPPED);
-                      action.set_count(diff_count);
-                      action.m_is_top_thread = 1;
-                      m_propagate(action);
+                        message.set_action_type(UVM_OBJECTION_DROPPED);
+                      message.set_count(diff_count);
+                      message.m_is_top_thread = 1;
+                      m_propagate(message);
                    end
                 end // else: !if(!m_hier_mode && l_target != m_top)
              end // if (diff_count != 0)
@@ -764,23 +762,23 @@ class uvm_objection extends uvm_basic_objection;
       end
    endfunction : m_unlink
 
-  protected virtual function void m_process_links(uvm_objection_action action);
-     uvm_objection_prop_action prop_action;
+  protected virtual function void m_process_links(uvm_objection_message message);
+     uvm_objection_prop_message prop_message;
 
-     if ($cast(prop_action, action)) begin
-        if (prop_action.get_action_type() == UVM_OBJECTION_DROPPED) begin
+     if ($cast(prop_message, message)) begin
+        if (prop_message.get_action_type() == UVM_OBJECTION_DROPPED) begin
            return; // Only all_dropped matters...
         end
 
-        if ((prop_action.get_action_type() == UVM_OBJECTION_ALL_DROPPED) &&
-            (prop_action.get_obj() == m_top)) begin
+        if ((prop_message.get_action_type() == UVM_OBJECTION_ALL_DROPPED) &&
+            (prop_message.get_obj() == m_top)) begin
            foreach (m_ds_links[i]) begin
               i.drop_objection(this, "objection link", 1);
            end
         end
      end
      else begin
-        super.m_process_links(action);
+        super.m_process_links(message);
      end
   endfunction : m_process_links
   
@@ -1063,7 +1061,7 @@ class uvm_objection extends uvm_basic_objection;
    // Function: notified
    // Objection callback that is called whenever the objection triggered
    //
-   // By the time the notified callback is triggered, the action descriptor should
+   // By the time the notified callback is triggered, the message descriptor should
    // be considered 'locked', ie. unchangable.
    //
    // In addition to the default implementation of <uvm_basic_objection::notified>,
@@ -1072,25 +1070,25 @@ class uvm_objection extends uvm_basic_objection;
    // - <dropped>
    // - <all_dropped>
    
-   virtual function void notified(uvm_objection_action action);
-      uvm_objection_prop_action prop_action;
-      super.notified(prop_action);
+   virtual function void notified(uvm_objection_message message);
+      uvm_objection_prop_message prop_message;
+      super.notified(prop_message);
 
-      if ($cast(prop_action, action)) begin
+      if ($cast(prop_message, message)) begin
       
-         if (prop_action.get_action_type() == UVM_OBJECTION_RAISED)
-           raised(prop_action.get_obj(),
-                  prop_action.get_source_obj(),
-                  prop_action.get_description(),
-                  prop_action.get_count());
+         if (prop_message.get_action_type() == UVM_OBJECTION_RAISED)
+           raised(prop_message.get_obj(),
+                  prop_message.get_source_obj(),
+                  prop_message.get_description(),
+                  prop_message.get_count());
          
-         if (prop_action.get_action_type() == UVM_OBJECTION_DROPPED)
-           dropped(prop_action.get_obj(),
-                   prop_action.get_source_obj(),
-                   prop_action.get_description(),
-                   prop_action.get_count());
+         if (prop_message.get_action_type() == UVM_OBJECTION_DROPPED)
+           dropped(prop_message.get_obj(),
+                   prop_message.get_source_obj(),
+                   prop_message.get_description(),
+                   prop_message.get_count());
          
-      end // if ($cast(prop_action, action))
+      end // if ($cast(prop_message, message))
       
    endfunction : notified
 
