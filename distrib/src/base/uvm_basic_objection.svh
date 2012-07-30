@@ -303,6 +303,23 @@ class uvm_objection_message extends uvm_object;
         printer.print_int("count", this.m_count, $bits(this.m_count), UVM_DEC);
    endfunction : do_print
 
+   virtual function string convert2string();
+      string l_obj_name = (m_obj == null) ? "<null>" :
+                          (m_obj.get_full_name() == "") ? "uvm_top" :
+                           m_obj.get_full_name();
+
+      convert2string = $sformatf("'%s' on '%s' by '%s'",
+                                 m_action_type.name(),
+                                 m_objection.get_full_name(),
+                                 l_obj_name);
+
+      if ((m_action_type == UVM_OBJECTION_RAISED) || (m_action_type == UVM_OBJECTION_DROPPED))
+        convert2string = {convert2string, $sformatf(", with count %0d", m_count)};
+
+      if (m_description != "")
+        convert2string = {convert2string, " - \"", m_description, "\""};
+   endfunction : convert2string
+
    // function- do_record
    function void do_record (uvm_recorder recorder);
       super.do_record(recorder);
@@ -755,10 +772,9 @@ class uvm_basic_objection extends uvm_report_object;
    // 
    
    // Function: notify
-   // Causes the notification described by ~action~ to occur
+   // Causes the action described by ~message~ to occur
    //
-   // Since the ~action~ is going to be locked by the objection prior
-   // to executing the callback chain, it is cloned before processing.
+   // The ~message~ will be locked by the objection prior to processing.
    virtual       function void notify(uvm_objection_message message);
       m_process(message, 0);
    endfunction : notify
@@ -938,25 +954,7 @@ class uvm_basic_objection extends uvm_report_object;
         return;
 
       begin
-         string msg;
-         uvm_objection_action_e l_action = message.get_action_type();
-         uvm_object l_obj = message.get_obj();
-         string l_source_name = (l_obj == null) ? "<null>" :
-                (l_obj.get_full_name() == "") ? "uvm_top" : l_obj.get_full_name();
-         
-         
-         msg = $sformatf("'%s' sent on behalf of '%s' to '%s'",
-                         l_action.name(),
-                         l_source_name,
-                         this.get_full_name());
-
-         if ((l_action == UVM_OBJECTION_RAISED) || (l_action == UVM_OBJECTION_DROPPED))
-           msg = {msg, $sformatf(" with count of %0d", message.get_count())};
-
-         if (message.get_description() != "")
-           msg = {msg, $sformatf(" - '%s'", message.get_description())};
-
-         uvm_report_info(id, msg, UVM_NONE);
+         uvm_report_info(id, message.convert2string(), UVM_NONE);
       end
       
    endfunction : m_report

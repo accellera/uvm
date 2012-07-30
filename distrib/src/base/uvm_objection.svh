@@ -115,7 +115,12 @@ class uvm_objection extends uvm_basic_objection;
       if (!$cast(prop_message, message))
         super.m_report(message);
       else begin
-      
+
+         if (prop_message.get_obj() == prop_message.get_source_obj()) begin
+            super.m_report(message);
+            return;
+         end
+         
          if (!m_trace_mode ||
              !uvm_report_enabled(UVM_NONE, UVM_INFO, id))
            return;
@@ -129,7 +134,7 @@ class uvm_objection extends uvm_basic_objection;
             l_action = prop_message.get_action_type();
             l_obj = prop_message.get_obj();
             l_source_obj = prop_message.get_source_obj();
-            
+
             l_obj_name = (l_obj == null) ? "<null>" :
                          (l_obj.get_full_name() == "") ? "uvm_top" : l_obj.get_full_name();
             l_source_name = (l_source_obj == null) ? "<null>" :
@@ -145,23 +150,23 @@ class uvm_objection extends uvm_basic_objection;
                   if (l_source_name[cpath] == ".") last_dot = cpath;
                   cpath++;
                end
-               
+
                if (last_dot)
-                 l_source_name = l_source_name.substr(last_dot+1, l_source_name.len());
+                 l_source_name = l_source_name.substr(last_dot+1, l_source_name.len()-1);
             end
             
-            msg = $sformatf("'%s' total updated to %0d after '%s' sent on behalf of '%s' to '%s'",
+            msg = $sformatf("'%s' total is %0d after '%s' on '%s' by '%s'",
                             l_obj_name,
                             m_total_count.exists(l_obj) ? m_total_count[l_obj] : 0,
                             l_action.name(),
-                            l_source_name,
-                            this.get_full_name());
+                            this.get_full_name(),
+                            l_source_name);
             
             if ((l_action == UVM_OBJECTION_RAISED) || (l_action == UVM_OBJECTION_DROPPED))
-              msg = {msg, $sformatf(" with count of %0d", message.get_count())};
+              msg = {msg, $sformatf(", with count %0d", message.get_count())};
             
             if (message.get_description() != "")
-              msg = {msg, $sformatf(" - '%s'", message.get_description())};
+              msg = {msg, $sformatf(" - \"%s\"", message.get_description())};
             
             uvm_report_info(id, msg, UVM_NONE);
          end
