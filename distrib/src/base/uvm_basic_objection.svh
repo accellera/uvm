@@ -665,7 +665,8 @@ class uvm_basic_objection extends uvm_report_object;
       message.m_unlock();
    endfunction : m_lock_notified
 
-   // Function: pre_notified
+   // Function- pre_notified
+   // JAR- Maybe not needed?
    // Objection callback that is called prior to the internal processing of messages
    //
    // During the execution of the pre_notified callback, the message descriptor
@@ -753,11 +754,11 @@ class uvm_basic_objection extends uvm_report_object;
    // source produces the specified ~action~.
    //
    // Supported Actions:
-   // UVM_OBJECTION_RAISED
-   // UVM_OBJECTION_DROPPED
-   // UVM_OBJECTION_RAISE_REQUESTED
-   // UVM_OBJECTION_DROP_REQUESTED
-   // UVM_OBJECTION_CLEARED
+   // - <UVM_OBJECTION_RAISED>
+   // - <UVM_OBJECTION_DROPPED>
+   // - <UVM_OBJECTION_RAISE_REQUESTED>
+   // - <UVM_OBJECTION_DROP_REQUESTED>
+   // - <UVM_OBJECTION_CLEARED>
    //
    task wait_for(int action,
                  uvm_object obj=null);
@@ -1108,7 +1109,8 @@ class uvm_basic_objection extends uvm_report_object;
       m_message_pool.push_back(message);
    endfunction : request_to_drop
 
-   // Group: Linking
+   // Group- Linking
+   // JAR- Not approved, needs to be voted on
    //
    // By linking objection 'A' to objection 'B', the user is
    // essentially saying "So long as anyone is objecting to ~A~,
@@ -1231,7 +1233,7 @@ class uvm_basic_objection extends uvm_report_object;
       end
    endfunction : m_link
    
-   // Function: link
+   // Function- link
    // Links this objection to a downstream objection
    //
    // The user is allowed to daisy-chain objections together if
@@ -1281,7 +1283,7 @@ class uvm_basic_objection extends uvm_report_object;
       end
    endfunction : m_unlink
 
-   // Function: unlink
+   // Function- unlink
    // Removes a downstream objection from the processing chain.
    //
    // While it is possible to daisy-chain objections together,
@@ -1508,7 +1510,8 @@ class uvm_basic_objection_cb_base extends uvm_callback;
       notified(message);
    endfunction : m_notified
    
-   // Function: pre_notified
+   // Function- pre_notified
+   // JAR- Maybe not needed?
    // Objection pre_notified callback function
    //
    // Called by <uvm_basic_objection::pre_notified>
@@ -1578,7 +1581,8 @@ class uvm_basic_objection_cb#(type T=int) extends uvm_basic_objection_cb_base;
       m_imp = imp;
    endfunction : set_imp
 
-   // Function: pre_notified
+   // Function- pre_notified
+   // JAR- Maybe not needed?
    // Objection pre_notified callback function
    virtual function void pre_notified (uvm_objection_message message);
       if (m_imp == null) begin
