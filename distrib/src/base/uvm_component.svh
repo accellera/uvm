@@ -2027,7 +2027,7 @@ endfunction
 // ------
 
 function uvm_object  uvm_component::clone ();
-  `uvm_error("ILLCLN","clone cannot be called on a uvm_component. ")
+  `uvm_error("ILLCLN", $sformatf("Attempting to clone '%s'.  Clone cannot be called on a uvm_component.  The clone target variable will be set to null.", get_full_name()))
   return null;
 endfunction
 
