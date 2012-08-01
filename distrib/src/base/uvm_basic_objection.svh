@@ -125,7 +125,7 @@ class uvm_objection_message extends uvm_object;
    //
    function void set_action_type(uvm_objection_action_e action_type);
       if (m_locked) begin
-        `uvm_error("UVM/BASE/OBJTN/NTFCN/LOCKED/SET_TYPE",
+        `uvm_error("UVM/BASE/OBJTN/BASIC/LOCKED/SET_TYPE",
                    "attempt to set action on locked message")
       end
       else begin
@@ -145,7 +145,7 @@ class uvm_objection_message extends uvm_object;
    //
    function void set_obj(uvm_object obj);
       if (m_locked) begin
-         `uvm_error("UVM/BASE/OBJTN/NTFCN/LOCKED/SET_SRC_OBJ",
+         `uvm_error("UVM/BASE/OBJTN/BASIC/LOCKED/SET_SRC_OBJ",
                     "attempt to set object on a locked message")
       end
       else begin
@@ -364,7 +364,7 @@ class uvm_objection_prop_message extends uvm_objection_message;
    //
    function void set_source_obj(uvm_object source_obj);
       if (m_locked) begin
-         `uvm_error("UVM/BASE/OBJTN/NTFCN/LOCKED/SET_TGT_OBJ",
+         `uvm_error("UVM/BASE/OBJTN/BASIC/LOCKED/SET_TGT_OBJ",
                     "attempt to set source object on a locked message")
       end
       else begin
@@ -447,6 +447,10 @@ class uvm_basic_objection extends uvm_report_object;
    protected bit m_trace_mode;
    protected int m_source_count[uvm_object];
    protected int m_source_count_backup[uvm_object]; // used when clearing links
+   // History information
+   protected bit m_raise_requested;
+   protected bit m_drop_requested;
+   protected int m_cycle_count;
 
    protected uvm_basic_objection_events m_broadcast_event;
    protected uvm_basic_objection_events m_events [uvm_object];
@@ -529,7 +533,7 @@ class uvm_basic_objection extends uvm_report_object;
                            uvm_object obj=null);
 
       if (action == UVM_OBJECTION_ALL_DROPPED) begin
-        `uvm_error("UVM/BASE/NTFCN_OBJCTN/NO_ALL_DROPPED",
+        `uvm_error("UVM/BASE/BASIC_OBJCTN/NO_ALL_DROPPED",
                    $sformatf("attempt to wait for 'UVM_OBJECTION_ALL_DROPPED' on basic objection '%s' will never unblock", get_full_name()))
       end
       
@@ -640,10 +644,67 @@ class uvm_basic_objection extends uvm_report_object;
    function string convert2string();
       return m_display_objections(, 1);
    endfunction : convert2string
+
+   // Group: Objection History
+   //
+   // The objection history api provides the user a form of introspection
+   // to see what has happened to this objection.
+   //
+
+   // Function: get_cycle_count
+   // Returns the number of times the objection has transition from 0->N->0
+   //
+   function int get_cycle_count();
+      return m_cycle_count;
+   endfunction : get_cycle_count
+
+   // Function: wait_for_cycle
+   // Blocking task which waits for the completion of ~count~ cycles
+   //
+   // The completion can come from either a natural drop from
+   // N->0, or from a clear
+   //
+   // The default ~count~ is 1
+   task wait_for_cycle(int count = 1);
+      m_wait_for_cycle(count);
+   endtask : wait_for_cycle
+
+   // Function- m_wait_for_cycle
+   // virtual implementation
+   virtual task m_wait_for_cycle(int count = 1);
+      repeat (count) begin
+         wait_for_sum(0, UVM_GT);
+         wait_for_sum(0);
+      end
+   endtask : m_wait_for_cycle
+
+   // Function: raise_requested
+   // Returns true if <request_to_raise> has been called
+   //
+   // Once an object has called <request_to_raise>, this method will return true.
+   //
+   // The value is reset to 0 by the objection sum moving from N->0 (either via
+   // a drop or a clear).
+   //
+   function bit raise_requested();
+      return m_raise_requested;
+   endfunction : raise_requested
+
+   // Function: drop_requested
+   // Returns true if <request_to_drop> has been called
+   //
+   // Once an object has called <request_to_drop>, this method will return true.
+   //
+   // The value is reset to 0 by the objection sum moving from N->0 (either via
+   // a drop or a clear).
+   //
+   function bit drop_requested();
+      return m_drop_requested;
+   endfunction : drop_requested
    
    // Group: Notification API
    //
-   // The 'Subscriber' API is build out of various callbacks and
+   // The 'Notification' API is build out of various callbacks and
    // ~wait_for~ tasks.  An object can listen to the notification
    // of an objection to be alerted to all impulses for that
    // objection.
@@ -784,7 +845,7 @@ class uvm_basic_objection extends uvm_report_object;
    virtual function void m_raise(uvm_objection_message message);
       if (message.get_count() < 1) begin
          if (message.get_count() < 0) begin
-            `uvm_fatal("UVM/BASE/NTFCN_OBJCTN/NEGATIVE_RAISE",
+            `uvm_fatal("UVM/BASE/BASIC_OBJCTN/NEGATIVE_RAISE",
                        "attempt to raise an objection with a negative count")
               end
          return;
@@ -839,11 +900,23 @@ class uvm_basic_objection extends uvm_report_object;
                     {"attempt to drop objection count for source '",name,"' below zero"})
            return;
       end // else: !if(m_source_count.exists[message.get_obj()])
-      
+
       m_lock_notified(message);
+
+      if (get_sum() == 0) begin
+         m_complete_cycle();
+      end
 
    endfunction : m_drop      
 
+   // Function- m_complete_cycle
+   // Clears history after a cycle is completed
+   virtual function void m_complete_cycle();
+      m_cycle_count++;
+      m_drop_requested = 0;
+      m_raise_requested = 0;
+   endfunction : m_complete_cycle
+   
    // Function- m_clear_check
    // Performs the check to determine if a clear should be 'warned'
    protected virtual function void m_clear_check(uvm_objection_message message);
@@ -870,6 +943,15 @@ class uvm_basic_objection extends uvm_report_object;
 
       message.set_objection(this);
 
+      if ((message.get_action_type() == UVM_OBJECTION_RAISED) ||
+          (message.get_action_type() == UVM_OBJECTION_DROPPED)) begin
+         if (message.get_count() == 0) begin
+            if (m_trace_mode)
+              `uvm_info("UVM/BASE/OBJTN/BASIC/IGNR", $sformatf("ignoring %s, because count is 0", message.convert2string()), UVM_NONE)
+            return;
+         end
+      end
+
       if (!pre_notified)
         m_lock_pre_notified(message);
       
@@ -878,6 +960,7 @@ class uvm_basic_objection extends uvm_report_object;
          
          m_source_count_backup = m_source_count; // Save for links
          m_source_count.delete();
+         m_complete_cycle();
          if (m_events.exists(message.get_obj()))
            ->m_events[message.get_obj()].cleared;
          ->m_broadcast_event.cleared;
@@ -894,6 +977,8 @@ class uvm_basic_objection extends uvm_report_object;
       end
 
       if (message.get_action_type() == UVM_OBJECTION_RAISE_REQUESTED) begin
+         m_raise_requested = 1;
+         
          if (m_events.exists(message.get_obj()))
            ->m_events[message.get_obj()].raise_requested;
          ->m_broadcast_event.raise_requested;
@@ -902,6 +987,8 @@ class uvm_basic_objection extends uvm_report_object;
       end
 
       if (message.get_action_type() == UVM_OBJECTION_DROP_REQUESTED) begin
+         m_drop_requested = 1;
+         
          if (m_events.exists(message.get_obj()))
            ->m_events[message.get_obj()].drop_requested;
          ->m_broadcast_event.drop_requested;
@@ -1208,7 +1295,7 @@ class uvm_basic_objection extends uvm_report_object;
    // virtual function uvm_objection can extend
    virtual function void m_link(uvm_basic_objection ds);
       if (ds.m_find_link(this)) begin
-         `uvm_error("UVM/BASE/OBJTN/NTFCN/LINK/INFINITE_LOOP",
+         `uvm_error("UVM/BASE/OBJTN/BASIC/LINK/INFINITE_LOOP",
                     $sformatf("Objection '%s' can not be linked to '%s', because '%s' is already a downstream link of '%s'",
                               ds.get_full_name(),
                               this.get_full_name(),
@@ -1218,7 +1305,7 @@ class uvm_basic_objection extends uvm_report_object;
       end
       else begin
          if (m_ds_links.exists(ds)) begin
-            `uvm_warning("UVM/BASE/OBJTN/NTFCN/LINK/DUPLICATE",
+            `uvm_warning("UVM/BASE/OBJTN/BASIC/LINK/DUPLICATE",
                          $sformatf("Attempt to link '%s' into '%s' multiple times will be ignored",
                                   ds.get_full_name(),
                                   this.get_full_name()))
@@ -1276,7 +1363,7 @@ class uvm_basic_objection extends uvm_report_object;
          end
       end
       else begin
-         `uvm_warning("UVM/BASE/OBJTN/NTFCN/LINK/DUPLICATE",
+         `uvm_warning("UVM/BASE/OBJTN/BASIC/LINK/DUPLICATE",
                       $sformatf("Attempt to unlink '%s' from '%s' will be ignored, because it was not linked",
                                ds.get_full_name(),
                                this.get_full_name()))
@@ -1575,30 +1662,30 @@ class uvm_basic_objection_cb#(type T=int) extends uvm_basic_objection_cb_base;
       super.new(name);
    endfunction : new
 
-   // Function: set_imp
+   // Function: set_impl
    // Sets the implementation reference for the callback
-   function void set_imp(T imp);
+   function void set_impl(T imp);
       m_imp = imp;
-   endfunction : set_imp
+   endfunction : set_impl
 
    // Function- pre_notified
    // JAR- Maybe not needed?
    // Objection pre_notified callback function
    virtual function void pre_notified (uvm_objection_message message);
       if (m_imp == null) begin
-        `uvm_error("UVM/BASE/NTFCN_OBJCTN/CB/NULL_IMP",
+        `uvm_error("UVM/BASE/OBJTN/BASIC/CB/NULL_IMP",
                    "callback triggered w/ null implementation")
         return;
       end
 
-      m_imp.objection_pre_notified(message);
+//      m_imp.objection_pre_notified(message);
    endfunction : pre_notified
 
    // Function: notified
    // Objection notified callback function
    virtual function void notified (uvm_objection_message message);
       if (m_imp == null) begin
-        `uvm_error("UVM/BASE/NTFCN_OBJCTN/CB/NULL_IMP",
+        `uvm_error("UVM/BASE/OBJTN/BASIC/CB/NULL_IMP",
                    "callback triggered w/ null implementation")
         return;
       end

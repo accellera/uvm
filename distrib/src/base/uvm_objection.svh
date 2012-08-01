@@ -253,6 +253,15 @@ class uvm_objection extends uvm_basic_objection;
       
       message.set_objection(this);
 
+      if ((message.get_action_type() == UVM_OBJECTION_RAISED) ||
+          (message.get_action_type() == UVM_OBJECTION_DROPPED)) begin
+         if (message.get_count() == 0) begin
+            if (m_trace_mode)
+              `uvm_info("UVM/BASE/OBJTN/BASIC/IGNR", $sformatf("ignoring %s, because count is 0", message.convert2string()), UVM_NONE)
+            return;
+         end
+      end
+
       if (!pre_notified)
         m_lock_pre_notified(message);
       
