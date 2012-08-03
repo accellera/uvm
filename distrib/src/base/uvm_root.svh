@@ -386,8 +386,15 @@ task uvm_root::run_test(string test_name="");
     return;
   end
 
-  uvm_report_info("RNTST", {"Running test ",test_name, "..."}, UVM_LOW);
-
+  begin
+  	if(test_name=="") 
+  		uvm_report_info("RNTST", "Running test ...", UVM_LOW); 
+  	else if (test_name == uvm_test_top.get_type_name())
+  		uvm_report_info("RNTST", {"Running test ",test_name,"..."}, UVM_LOW); 
+  	else
+  		uvm_report_info("RNTST", {"Running test ",uvm_test_top.get_type_name()," (via factory override for test \"",test_name,"\")..."}, UVM_LOW);
+  end
+  
   // phase runner, isolated from calling process
   fork begin
     // spawn the phase runner task
