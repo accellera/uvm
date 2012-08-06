@@ -679,9 +679,7 @@ class uvm_basic_objection extends uvm_report_object;
    endtask : m_wait_for_cycle
 
    // Function: get_raise_requested_count
-   // Returns true if <request_to_raise> has been called
-   //
-   // Once an object has called <request_to_raise>, this method will return true.
+   // Returns the number of times <request_to_raise> has been called.
    //
    // The value is reset to 0 by the objection sum moving from N->0 (either via
    // a drop or a clear).
@@ -691,9 +689,7 @@ class uvm_basic_objection extends uvm_report_object;
    endfunction : get_raise_requested_count
 
    // Function: get_drop_requested_count
-   // Returns true if <request_to_drop> has been called
-   //
-   // Once an object has called <request_to_drop>, this method will return true.
+   // Returns the number of times <request_to_drop> has been called.
    //
    // The value is reset to 0 by the objection sum moving from N->0 (either via
    // a drop or a clear).
