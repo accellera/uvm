@@ -448,8 +448,8 @@ class uvm_basic_objection extends uvm_report_object;
    protected int m_source_count[uvm_object];
    protected int m_source_count_backup[uvm_object]; // used when clearing links
    // History information
-   protected bit m_raise_requested;
-   protected bit m_drop_requested;
+   protected int m_raise_requested_count;
+   protected int m_drop_requested_count;
    protected int m_cycle_count;
 
    protected uvm_basic_objection_events m_broadcast_event;
@@ -575,7 +575,7 @@ class uvm_basic_objection extends uvm_report_object;
    // which have had an objection raised on their behalf, but
    // have not had it dropped).
    //
-   // Note that the objection does not have any form of 'history'.
+   // Note that the objection counts do not have any form of 'history'.
    // If all of the objections which are raised on behalf of an
    // object are subsequently dropped, than that object will not
    // appear in this list.
@@ -678,7 +678,7 @@ class uvm_basic_objection extends uvm_report_object;
       end
    endtask : m_wait_for_cycle
 
-   // Function: raise_requested
+   // Function: get_raise_requested_count
    // Returns true if <request_to_raise> has been called
    //
    // Once an object has called <request_to_raise>, this method will return true.
@@ -686,11 +686,11 @@ class uvm_basic_objection extends uvm_report_object;
    // The value is reset to 0 by the objection sum moving from N->0 (either via
    // a drop or a clear).
    //
-   function bit raise_requested();
-      return m_raise_requested;
-   endfunction : raise_requested
+   function int get_raise_requested_count();
+      return m_raise_requested_count;
+   endfunction : get_raise_requested_count
 
-   // Function: drop_requested
+   // Function: get_drop_requested_count
    // Returns true if <request_to_drop> has been called
    //
    // Once an object has called <request_to_drop>, this method will return true.
@@ -698,9 +698,9 @@ class uvm_basic_objection extends uvm_report_object;
    // The value is reset to 0 by the objection sum moving from N->0 (either via
    // a drop or a clear).
    //
-   function bit drop_requested();
-      return m_drop_requested;
-   endfunction : drop_requested
+   function int get_drop_requested_count();
+      return m_drop_requested_count;
+   endfunction : get_drop_requested_count
    
    // Group: Notification API
    //
@@ -913,8 +913,8 @@ class uvm_basic_objection extends uvm_report_object;
    // Clears history after a cycle is completed
    virtual function void m_complete_cycle();
       m_cycle_count++;
-      m_drop_requested = 0;
-      m_raise_requested = 0;
+      m_drop_requested_count = 0;
+      m_raise_requested_count = 0;
    endfunction : m_complete_cycle
    
    // Function- m_clear_check
@@ -977,7 +977,7 @@ class uvm_basic_objection extends uvm_report_object;
       end
 
       if (message.get_action_type() == UVM_OBJECTION_RAISE_REQUESTED) begin
-         m_raise_requested = 1;
+         m_raise_requested_count++;
          
          if (m_events.exists(message.get_obj()))
            ->m_events[message.get_obj()].raise_requested;
@@ -987,7 +987,7 @@ class uvm_basic_objection extends uvm_report_object;
       end
 
       if (message.get_action_type() == UVM_OBJECTION_DROP_REQUESTED) begin
-         m_drop_requested = 1;
+         m_drop_requested_count++;
          
          if (m_events.exists(message.get_obj()))
            ->m_events[message.get_obj()].drop_requested;

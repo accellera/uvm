@@ -72,7 +72,7 @@ class cb_sequence extends uvm_sequence;
    function void objection_notified(uvm_objection_message message);
       // We're using the shallow filter, the only drop we ever see is the
       // 0->N drop, but we need to make sure the phase was active
-      if (ending_phase_objection.raise_requested) begin
+      if (ending_phase_objection.get_raise_requested_count() > 0) begin
          if (message.get_action_type() == UVM_OBJECTION_DROPPED) begin
             `uvm_info("CB_END_PH", "saw end of phase", UVM_NONE)
             stop_stim = 1;
