@@ -511,6 +511,7 @@ class uvm_phase extends uvm_object;
      return m_ready_to_end_count;
   endfunction
 
+  extern local function get_predecessors_for_successors(output bit pred_of_succ[uvm_phase]);
   extern local task m_wait_for_pred();
 
   // Implementation - Jumping
@@ -531,6 +532,7 @@ class uvm_phase extends uvm_object;
   extern local task  execute_phase();
   extern local function void m_terminate_phase();
   extern local function void m_print_termination_state();
+  extern local task wait_for_all_siblings_to_drop();
   extern function void kill();
   extern function void kill_successors();
 
@@ -1197,6 +1199,7 @@ task uvm_phase::execute_phase();
                   if (m_phase_trace)
                     `UVM_PH_TRACE("PH/TRC/SKIP","No objections raised, skipping phase",this,UVM_LOW)
                end
+             wait_for_all_siblings_to_drop() ;
              end
   
              // TIMEOUT
@@ -1375,17 +1378,9 @@ task uvm_phase::execute_phase();
 
 endtask
 
-
-// m_wait_for_pred
-// ---------------
-
-task uvm_phase::m_wait_for_pred();
-
-  if(!(m_jump_fwd || m_jump_bkwd)) begin
-
+function uvm_phase::get_predecessors_for_successors(output bit pred_of_succ[uvm_phase]);
     bit done;
     bit successors[uvm_phase];
-    bit pred_of_succ[uvm_phase];
 
     // get all successors
     foreach (m_successors[succ])
@@ -1426,6 +1421,19 @@ task uvm_phase::m_wait_for_pred();
 
     // remove ourselves from the list
     pred_of_succ.delete(this);
+endfunction
+
+// m_wait_for_pred
+// ---------------
+
+task uvm_phase::m_wait_for_pred();
+
+  
+  
+  if(!(m_jump_fwd || m_jump_bkwd)) begin
+
+    bit pred_of_succ[uvm_phase];
+    get_predecessors_for_successors(pred_of_succ);
 
     // wait for predecessors to successors (real phase nodes, not terminals)
     // mostly debug msgs
@@ -1748,6 +1756,35 @@ function void uvm_phase::kill_successors();
   kill();
 endfunction
 
+
+// wait_for_all_siblings_to_drop
+// -----------------------------
+// This task loops until this phase instance and all its siblings, either
+// sync'd or sharing a common successor, have all objections dropped.
+task uvm_phase::wait_for_all_siblings_to_drop() ;
+  bit need_to_check_all = 1 ;
+  uvm_root top;
+  top = uvm_root::get();
+   while (need_to_check_all) begin
+      bit siblings[uvm_phase];
+      get_predecessors_for_successors(siblings);
+      foreach (m_sync[i]) begin
+         siblings[m_sync[i]] = 1;
+      end
+      need_to_check_all = 0 ; //if all are dropped, we won't need to do this again
+      foreach(siblings[sib]) begin
+         if (sib.phase_done.get_objection_total(top) != 0) begin
+            sib.phase_done.wait_for(UVM_ALL_DROPPED, top);
+            need_to_check_all = 1 ;
+            continue ;
+         end
+      end
+      if (phase_done.get_objection_total(top) != 0) begin
+         phase_done.wait_for(UVM_ALL_DROPPED, top);
+         need_to_check_all = 1 ;
+      end
+   end
+endtask
 
 // m_run_phases
 // ------------
