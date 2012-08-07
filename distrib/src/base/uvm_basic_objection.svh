@@ -647,8 +647,13 @@ class uvm_basic_objection extends uvm_report_object;
 
    // Group: Objection History
    //
-   // The objection history api provides the user a form of introspection
-   // to see what has happened to this objection.
+   // The basic objection tracks history using a concept of ~cycles~.  A
+   // ~cycle~ is defined as the objection sum transitioning from 0, to
+   // non-zero, and then back to 0.
+   //
+   // Using the History API, the user can track how many cycles have occurred,
+   // wait for cycles to complete, and also track how many <request_to_raise>
+   // and <request_to_drop> messages have been sent within a given cycle.
    //
 
    // Function: get_cycle_count
@@ -756,47 +761,143 @@ class uvm_basic_objection extends uvm_report_object;
 
    // Function: wait_for_objection_count
    // Waits for the objection count for ~obj~ to reach
-   // ~count~ as qualified by ~op~
+   // ~count~ as qualified by ~op~ and ~persistent_wait~.
    //
    // If no ~op~ is passed, the wait will be for
    // the counts to be equal.
    //
+   // The ~persistent_wait~ field is used to determine whether
+   // this method should consider the current value of the 
+   // objection count while blocking.  By
+   // default, if the objection count is currently
+   // ~count~ qualified by ~op~, then it will unblock immediately.  If
+   // ~persistent_wait~ is set to '0', then the method
+   // will only unblock when the objection count "changes" to
+   // ~count~ qualified by ~op~.
+   //
+   // For example, the below code would unblock immediately,
+   // because the objection count is '0' when the method
+   // is called.
+   //| uvm_basic_objection objctn = new();
+   //| objctn.wait_for_objection_count(uvm_top, 0);
+   //
+   // If we set ~persistent_wait~ to '0', then the code will
+   // now block until it sees someone raise an objection,
+   // and then drop it back down to zero.
+   //| uvm_basic_objection objctn = new();
+   //| fork
+   //|  begin
+   //|    objctn.wait_for_objection_count(uvm_top, 0, UVM_EQ, 0);
+   //|    `uvm_info("DEMO", "Done waiting!", UVM_NONE)
+   //|  end
+   //| join_none
+   //|
+   //| objctn.raise_objection(this, 1);
+   //| #5;
+   //| objctn.drop_objection(this, 0);
+   // Now our thread which is forked off doesn't return until
+   // the ~drop_objection~ on the last line has completed.
+   //
    task wait_for_objection_count(uvm_object obj,
                                  int count,
-                                 uvm_wait_op op=UVM_EQ);
+                                 uvm_wait_op op=UVM_EQ,
+                                 bit persistent_wait=1);
 
       if (!m_source_count.exists(obj))
         m_source_count[obj] = 0;
 
-      case (op)
-        UVM_EQ: @(m_source_count[obj] == count);
-        UVM_NE: @(m_source_count[obj] != count);
-        UVM_LT: @(m_source_count[obj] < count);
-        UVM_LTE: @(m_source_count[obj] <= count);
-        UVM_GT: @(m_source_count[obj] > count);
-        UVM_GTE: @(m_source_count[obj] >= count);
-      endcase // case (op)
-
+      if (persistent_wait == 1) begin
+         case (op)
+           UVM_EQ: @(m_source_count[obj] == count);
+           UVM_NE: @(m_source_count[obj] != count);
+           UVM_LT: @(m_source_count[obj] < count);
+           UVM_LTE: @(m_source_count[obj] <= count);
+           UVM_GT: @(m_source_count[obj] > count);
+           UVM_GTE: @(m_source_count[obj] >= count);
+         endcase // case (op)
+      end
+      else begin
+         case (op)
+           UVM_EQ: begin
+              @(m_source_count[obj] != count);
+              @(m_source_count[obj] == count);
+           end
+           UVM_NE: begin
+              @(m_source_count[obj] == count);
+              @(m_source_count[obj] != count);
+           end
+           UVM_LT: begin
+              @(m_source_count[obj] >= count);
+              @(m_source_count[obj] < count);
+           end
+           UVM_LTE: begin
+              @(m_source_count[obj] > count);
+              @(m_source_count[obj] <= count);
+           end
+           UVM_GT: begin
+              @(m_source_count[obj] <= count);
+              @(m_source_count[obj] > count);
+           end
+           UVM_GTE: begin
+              @(m_source_count[obj] < count);
+              @(m_source_count[obj] >= count);
+           end
+         endcase // case (op)
+      end
    endtask : wait_for_objection_count
 
    // Function: wait_for_sum
    // Waits for the sum of all objection counts to reach
-   // ~count~ as qualified by ~op~
+   // ~count~ as qualified by ~op~ and ~persistent_wait~.
    //
    // If no ~op~ is passed, the wait will be for the count
    // to be equal to the sum.
    //
+   // The functionality of ~persistent_wait~ is identical to
+   // the same field in <wait_for_objection_count>.
+   //
    task wait_for_sum(int count,
-                     uvm_wait_op op=UVM_EQ);
+                     uvm_wait_op op=UVM_EQ,
+                     bit persistent_wait = 1);
 
-      case (op)
-        UVM_EQ: @(m_source_count.sum() == count);
-        UVM_NE: @(m_source_count.sum() != count);
-        UVM_LT: @(m_source_count.sum() < count);
-        UVM_LTE: @(m_source_count.sum() <= count);
-        UVM_GT: @(m_source_count.sum() > count);
-        UVM_GTE: @(m_source_count.sum() >= count);
-      endcase // case (op)
+      if (persistent_wait == 1) begin
+         case (op)
+           UVM_EQ: @(m_source_count.sum() == count);
+           UVM_NE: @(m_source_count.sum() != count);
+           UVM_LT: @(m_source_count.sum() < count);
+           UVM_LTE: @(m_source_count.sum() <= count);
+           UVM_GT: @(m_source_count.sum() > count);
+           UVM_GTE: @(m_source_count.sum() >= count);
+         endcase // case (op)
+      end
+      else begin
+         case (op)
+           UVM_EQ: begin
+              @(m_source_count.sum() != count);
+              @(m_source_count.sum() == count);
+           end
+           UVM_NE: begin
+              @(m_source_count.sum() == count);
+              @(m_source_count.sum() != count);
+           end
+           UVM_LT: begin
+              @(m_source_count.sum() >= count);
+              @(m_source_count.sum() < count);
+           end
+           UVM_LTE: begin
+              @(m_source_count.sum() > count);
+              @(m_source_count.sum() <= count);
+           end
+           UVM_GT: begin
+              @(m_source_count.sum() <= count);
+              @(m_source_count.sum() > count);
+           end
+           UVM_GTE: begin
+              @(m_source_count.sum() < count);
+              @(m_source_count.sum() >= count);
+           end
+         endcase // case (op)
+      end
 
    endtask : wait_for_sum
 

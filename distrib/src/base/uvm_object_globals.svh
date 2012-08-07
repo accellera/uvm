@@ -596,8 +596,8 @@ typedef enum { UVM_RAISED      = 'h01,
 
 // Enum: uvm_objection_action_e
 //
-// Enumeration of the possible objection notifications one could
-// wait on (or be notified of).  See <uvm_notification_objection>.
+// Enumeration of the possible objection message action types one could
+// wait on (or be notified of).  See <uvm_basic_objection>.
 //
 // UVM_OBJECTION_RAISED - An objection was raised
 // UVM_OBJECTION_DROPPED - An objection was dropped
