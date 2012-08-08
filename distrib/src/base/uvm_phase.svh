@@ -1207,15 +1207,17 @@ task uvm_phase::execute_phase();
                if (top.phase_timeout == 0)
                  wait(top.phase_timeout != 0);
                `uvm_delay(top.phase_timeout)
-               if ($time == `UVM_DEFAULT_TIMEOUT) begin
-                 `uvm_error("PH_TIMEOUT",
+               if (phase_done.get_objection_total(top) > 0) begin //give the errors only for phases have outstanding objections (not waiting on siblings)
+                 if ($time == `UVM_DEFAULT_TIMEOUT) begin
+                   `uvm_error("PH_TIMEOUT",
                      $sformatf("Default phase timeout of %0t hit. All processes are waiting, indicating a probable testbench issue. Phase '%0s' ready to end",
                              top.phase_timeout, get_name()))
-               end
-               else begin
-                 `uvm_error("PH_TIMEOUT",
-                     $sformatf("Phase timeout of %0t hit, phase '%0s' ready to end",
+                 end
+                 else begin
+                   `uvm_error("PH_TIMEOUT",
+                      $sformatf("Phase timeout of %0t hit, phase '%0s' ready to end",
                              top.phase_timeout, get_name()))
+                 end
                end
                phase_done.clear(this);
                `UVM_PH_TRACE("PH/TRC/EXE/3","PHASE EXIT TIMEOUT",this,UVM_DEBUG)
@@ -1768,8 +1770,12 @@ task uvm_phase::wait_for_all_siblings_to_drop() ;
    while (need_to_check_all) begin
       bit siblings[uvm_phase];
       get_predecessors_for_successors(siblings);
-      foreach (m_sync[i]) begin
-         siblings[m_sync[i]] = 1;
+      if (!m_jump_fwd && !m_jump_bkwd) begin
+         `uvm_info("MDS",{"this phase ",get_name()},UVM_NONE)
+         foreach (m_sync[i]) begin
+            siblings[m_sync[i]] = 1;
+            `uvm_info("MDS",{"sibling phase ",m_sync[i].get_name()},UVM_NONE)
+         end
       end
       need_to_check_all = 0 ; //if all are dropped, we won't need to do this again
       foreach(siblings[sib]) begin
