@@ -1243,6 +1243,12 @@ function void uvm_reg_field::set(uvm_reg_data_t  value,
       value &= mask;
    end
 
+   if (m_parent.is_busy()) begin
+      `uvm_warning("UVM/FLD/SET/BSY",
+                   $sformatf("Setting the value of field \"%s\" while containing register \"%s\" is being accessed may result in loss of desired field value.",
+                             get_name(), m_parent.get_full_name()))
+   end
+
    case (m_access)
       "RO":    m_desired = m_desired;
       "RW":    m_desired = value;
