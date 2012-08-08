@@ -1771,10 +1771,8 @@ task uvm_phase::wait_for_all_siblings_to_drop() ;
       bit siblings[uvm_phase];
       get_predecessors_for_successors(siblings);
       if (!m_jump_fwd && !m_jump_bkwd) begin
-         `uvm_info("MDS",{"this phase ",get_name()},UVM_NONE)
          foreach (m_sync[i]) begin
             siblings[m_sync[i]] = 1;
-            `uvm_info("MDS",{"sibling phase ",m_sync[i].get_name()},UVM_NONE)
          end
       end
       need_to_check_all = 0 ; //if all are dropped, we won't need to do this again
