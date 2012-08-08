@@ -288,12 +288,15 @@ class uvm_sequence_base extends uvm_sequence_item;
     if (m_sequencer != null) begin
       void'(m_sequencer.m_register_sequence(this));
     end
-    
+
+    // Change the state to PRE_START, do this before the fork so that
+    // the "if (!(m_sequence_state inside {...}" works
+    m_sequence_state = PRE_START;
     fork
       begin
         m_sequence_process = process::self();
 
-        m_sequence_state = PRE_START;
+        // absorb delta to ensure PRE_START was seen
         #0;
         pre_start();
 
