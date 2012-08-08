@@ -1228,7 +1228,7 @@ task uvm_phase::execute_phase();
            disable fork;
 
            // If jump is pending, do not allow prolonging of phase
-           if(!m_jump_fwd && !m_jump_bkwd) begin
+           if(!m_timed_out && !m_jump_fwd && !m_jump_bkwd) begin
 
              //--------------
              // READY_TO_END:
@@ -1254,7 +1254,7 @@ task uvm_phase::execute_phase();
            end
 
           end
-          while (!m_jump_fwd && !m_jump_bkwd && phase_done.get_objection_total(top));
+          while (!m_timed_out && !m_jump_fwd && !m_jump_bkwd && phase_done.get_objection_total(top));
   
         end
         join // guard
