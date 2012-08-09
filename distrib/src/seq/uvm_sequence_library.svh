@@ -552,34 +552,6 @@ function bit uvm_sequence_library::m_check(uvm_object_wrapper seq_type, this_typ
         "'"},top)
      return 0;
   end
-  begin
-    uvm_sequence_item req_to_add;
-    REQ req;
-    req = new("req");
-    req_to_add = seq.create_request();
-    if (!( $cast(req, req_to_add))) begin
-      `uvm_error_context("SEQLIB/BAD_REQ_TYPE",
-        {"Can not add sequence '",seq.get_type_name(),"' ",
-        "to sequence library of type '",typ,"' (instance ",name,") ",
-        "as the request type '", req_to_add.get_type_name(), "' is not type-compatible with ",
-        "the request type of the sequence library '",req.get_type_name(),"'"},top)
-       return 0;
-    end 
-  end
-  begin
-    uvm_sequence_item rsp_to_add;
-    RSP rsp;
-    rsp = new("rsp");
-    rsp_to_add = seq.create_response();
-    if (!( $cast(rsp, rsp_to_add))) begin
-      `uvm_error_context("SEQLIB/BAD_RSP_TYPE",
-        {"Can not add sequence '",seq.get_type_name(),"' ",
-        "to sequence library of type '",typ,"' (instance ",name,") ",
-        "as the response type '", rsp_to_add.get_type_name(), "' is not type-compatible with ",
-        "the response type of the sequence library '",rsp.get_type_name(),"'"},top)
-       return 0;
-    end 
-  end
   return 1;
 endfunction
 
