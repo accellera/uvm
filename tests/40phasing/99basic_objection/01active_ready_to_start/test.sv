@@ -21,21 +21,11 @@ class wait_sequence extends uvm_sequence;
    endfunction : new
 
    task body();
-      `uvm_info("PULL_BODY", "inside pull body", UVM_NONE)
-
-     if (prolong_phase_objection.get_raise_requested_count() == 1)
-       // prolong_phase has already started
-       begin
-	 prolong_phase_objection.raise_objection(this, "Prolonging phase");
-	 `uvm_info("PULL_START_PH", "raising objection", UVM_NONE)
-       end
-     else begin
-       `uvm_info("PULL_WAIT_PH", "waiting for start of phase", UVM_NONE)
-       prolong_phase_objection.wait_for(UVM_OBJECTION_RAISE_REQUESTED,
-					null);
-       `uvm_info("PULL_START_PH", "saw start of phase request", UVM_NONE)
+     `uvm_info("PULL_BODY", "inside pull body", UVM_NONE)
+     `uvm_info("PULL_WAIT_PH", "waiting for start of phase", UVM_NONE)
+     prolong_phase_objection.wait_for_raise_requested_count(1, UVM_EQ);
+     `uvm_info("PULL_START_PH", "saw start of phase request", UVM_NONE)
        prolong_phase_objection.raise_objection(this, "Prolonging phase");
-     end
      `uvm_info("PULL_WAIT_ST", "waiting to stop stimulus", UVM_NONE)
      #100;
       `uvm_info("PULL_END_ST", "ending stimulus", UVM_NONE)
@@ -78,7 +68,7 @@ class cb_sequence extends uvm_sequence;
        `uvm_info("PUSH_WAIT_ST", "waiting to prolong stimulus", UVM_NONE)
        wait(prolong_stim);
      end
-     #100;
+     #110;
      `uvm_info("PUSH_END_ST", "ending stimulus", UVM_NONE)
      prolong_phase_objection.drop_objection(this, "Done prolonging phase");
    endtask : body
@@ -129,7 +119,7 @@ class test extends uvm_test;
          ws.start(sqr);
          cs.start(sqr);
       join_none
-     #10;
+//     #10;
       `uvm_info("TEST", "sending request to start our_phase", UVM_NONE)
       our_phase.request_to_raise(this, "request to start the phase");
       `uvm_info("TEST", "prolonging our_phase...", UVM_NONE)
