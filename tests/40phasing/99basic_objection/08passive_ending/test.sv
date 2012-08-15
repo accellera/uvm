@@ -21,21 +21,21 @@ class wait_sequence extends uvm_sequence;
    endfunction : new
 
    task body();
-      `uvm_info("PULL_BODY", "inside pull body", UVM_NONE)
+      `uvm_info("WAIT_SEQ/BODY", "inside wait body", UVM_NONE)
 
       fork : body_fork
          begin
-            `uvm_info("PULL_WAIT_PH", "waiting for end of phase", UVM_NONE)
-            ending_phase_objection.wait_for_cycle();
-            `uvm_info("PULL_END_PH", "saw end of phase", UVM_NONE)
+            `uvm_info("WAIT_SEQ/WAIT_PH", "waiting for end of phase", UVM_NONE)
+            ending_phase_objection.wait_for_raise_requested_count(0,UVM_EQ,1);
+            `uvm_info("WAIT_SEQ/END_PH", "saw end of phase", UVM_NONE)
             stop_stim = 1;
          end
       join_none : body_fork
 
       
-      `uvm_info("PULL_WAIT_ST", "waiting to stop stimulus", UVM_NONE)
+      `uvm_info("WAIT_SEQ/WAIT_ST", "waiting to stop stimulus", UVM_NONE)
       wait(stop_stim);
-      `uvm_info("PULL_END_ST", "ending stimulus", UVM_NONE)
+      `uvm_info("WAIT_SEQ/END_ST", "ending stimulus", UVM_NONE)
    endtask : body
 
 endclass : wait_sequence
@@ -59,14 +59,15 @@ class cb_sequence extends uvm_sequence;
    endfunction : new
 
    task body();
+      `uvm_info("CB_SEQ/BODY", "inside wait body", UVM_NONE)
       // Create our callback and register it
       cb = new({get_full_name(), ".cb"});
       cb.set_impl(this);
       uvm_basic_objection_cbs_t::add(ending_phase_objection, cb);
 
-      `uvm_info("PUSH_WAIT_ST", "waiting to stop stimulus", UVM_NONE)
+      `uvm_info("CB_SEQ/WAIT_ST", "waiting to stop stimulus", UVM_NONE)
       wait(stop_stim);
-      `uvm_info("PUSH_END_ST", "ending stimulus", UVM_NONE)
+      `uvm_info("CB_SEQ/END_ST", "ending stimulus", UVM_NONE)
    endtask : body
 
    function void objection_notified(uvm_objection_message message);
@@ -74,7 +75,7 @@ class cb_sequence extends uvm_sequence;
       // 0->N drop, but we need to make sure the phase was active
       if (ending_phase_objection.get_raise_requested_count() > 0) begin
          if (message.get_action_type() == UVM_OBJECTION_DROPPED) begin
-            `uvm_info("CB_END_PH", "saw end of phase", UVM_NONE)
+            `uvm_info("CB_SEQ/END_PH", "saw end of phase", UVM_NONE)
             stop_stim = 1;
             uvm_basic_objection_cbs_t::delete(ending_phase_objection, cb);
          end

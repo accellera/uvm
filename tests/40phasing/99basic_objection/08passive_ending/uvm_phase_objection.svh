@@ -33,22 +33,6 @@ class uvm_phase_objection extends uvm_basic_objection;
       end
    endfunction : m_process
 
-   // Make wait_for_cycle block on request_to_raise
-   virtual task m_wait_for_cycle(int count = 1);
-      repeat (count) begin
-         wait(m_raise_requested == 1);
-         wait(m_raise_requested == 0);
-      end // while (m_count < count)
-   endtask : m_wait_for_cycle
-
-   // Only count cycles which were reqest_to_raise'd
-   virtual function void m_complete_cycle();
-      if (m_raise_requested)
-        m_cycle_count++;
-      m_drop_requested = 0;
-      m_raise_requested = 0;
-   endfunction : m_complete_cycle
-
 endclass : uvm_phase_objection
 
 

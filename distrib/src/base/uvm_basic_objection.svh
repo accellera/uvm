@@ -526,6 +526,26 @@ class uvm_basic_objection extends uvm_report_object;
       get_sum = m_source_count.sum();
    endfunction : get_sum
    
+   // Function: get_raise_requested_count
+   // Returns the number of times <request_to_raise> has been called.
+   //
+   // The value is reset to 0 by the objection sum moving from N->0 (either via
+   // a drop or a clear).
+   //
+   function int get_raise_requested_count();
+      return m_raise_requested_count;
+   endfunction : get_raise_requested_count
+
+   // Function: get_drop_requested_count
+   // Returns the number of times <request_to_drop> has been called.
+   //
+   // The value is reset to 0 by the objection sum moving from N->0 (either via
+   // a drop or a clear).
+   //
+   function int get_drop_requested_count();
+      return m_drop_requested_count;
+   endfunction : get_drop_requested_count
+   
    // Function- m_wait_for
    // Implementation artifact.  Allows uvm_objection to extend
    // wait_for, providing UVM_OBJECTION_ALL_DROPPED support.
@@ -595,7 +615,7 @@ class uvm_basic_objection extends uvm_report_object;
       static string blank="                                                                                   ";
 
       string        s;
-      int           total;
+      int           count;
       uvm_object list[string];
       uvm_object curr_obj;
       int           depth;
@@ -616,11 +636,12 @@ class uvm_basic_objection extends uvm_report_object;
          list[obj.get_full_name()] = obj;
       end
 
-      total = get_sum();
+      count = get_sum();
 
-      s = $sformatf("The total objection count is %0d\n", total);
+      s = $sformatf("The objection has completed %0d cycles\n", m_cycle_count);
+      s = $sformatf("%sThe current objection sum is %0d\n", s, count);
 
-      if (total == 0)
+      if (count == 0)
         return s;
 
       s = {s, "---------------------------------------------------------\n"};
@@ -652,8 +673,7 @@ class uvm_basic_objection extends uvm_report_object;
    // non-zero, and then back to 0.
    //
    // Using the History API, the user can track how many cycles have occurred,
-   // wait for cycles to complete, and also track how many <request_to_raise>
-   // and <request_to_drop> messages have been sent within a given cycle.
+   // wait for cycles to complete.
    //
 
    // Function: get_cycle_count
@@ -683,26 +703,6 @@ class uvm_basic_objection extends uvm_report_object;
       end
    endtask : m_wait_for_cycle
 
-   // Function: get_raise_requested_count
-   // Returns the number of times <request_to_raise> has been called.
-   //
-   // The value is reset to 0 by the objection sum moving from N->0 (either via
-   // a drop or a clear).
-   //
-   function int get_raise_requested_count();
-      return m_raise_requested_count;
-   endfunction : get_raise_requested_count
-
-   // Function: get_drop_requested_count
-   // Returns the number of times <request_to_drop> has been called.
-   //
-   // The value is reset to 0 by the objection sum moving from N->0 (either via
-   // a drop or a clear).
-   //
-   function int get_drop_requested_count();
-      return m_drop_requested_count;
-   endfunction : get_drop_requested_count
-   
    // Group: Notification API
    //
    // The 'Notification' API is build out of various callbacks and
@@ -761,18 +761,18 @@ class uvm_basic_objection extends uvm_report_object;
 
    // Function: wait_for_objection_count
    // Waits for the objection count for ~obj~ to reach
-   // ~count~ as qualified by ~op~ and ~persistent_wait~.
+   // ~count~ as qualified by ~op~ and ~transition_only~.
    //
    // If no ~op~ is passed, the wait will be for
    // the counts to be equal.
    //
-   // The ~persistent_wait~ field is used to determine whether
+   // The ~transition_only~ field is used to determine whether
    // this method should consider the current value of the 
    // objection count while blocking.  By
    // default, if the objection count is currently
    // ~count~ qualified by ~op~, then it will unblock immediately.  If
-   // ~persistent_wait~ is set to '0', then the method
-   // will only unblock when the objection count "changes" to
+   // ~transition_only~ is set to '1', then the method
+   // will only unblock when the objection count "transitions" to
    // ~count~ qualified by ~op~.
    //
    // For example, the below code would unblock immediately,
@@ -781,13 +781,13 @@ class uvm_basic_objection extends uvm_report_object;
    //| uvm_basic_objection objctn = new();
    //| objctn.wait_for_objection_count(uvm_top, 0);
    //
-   // If we set ~persistent_wait~ to '0', then the code will
+   // If we set ~transition_only~ to '1', then the code will
    // now block until it sees someone raise an objection,
    // and then drop it back down to zero.
    //| uvm_basic_objection objctn = new();
    //| fork
    //|  begin
-   //|    objctn.wait_for_objection_count(uvm_top, 0, UVM_EQ, 0);
+   //|    objctn.wait_for_objection_count(uvm_top, 0, UVM_EQ, 1);
    //|    `uvm_info("DEMO", "Done waiting!", UVM_NONE)
    //|  end
    //| join_none
@@ -801,46 +801,46 @@ class uvm_basic_objection extends uvm_report_object;
    task wait_for_objection_count(uvm_object obj,
                                  int count,
                                  uvm_wait_op op=UVM_EQ,
-                                 bit persistent_wait=1);
+                                 bit transition_only=0);
 
       if (!m_source_count.exists(obj))
         m_source_count[obj] = 0;
 
-      if (persistent_wait == 1) begin
+      if (transition_only == 0) begin
          case (op)
-           UVM_EQ: @(m_source_count[obj] == count);
-           UVM_NE: @(m_source_count[obj] != count);
-           UVM_LT: @(m_source_count[obj] < count);
-           UVM_LTE: @(m_source_count[obj] <= count);
-           UVM_GT: @(m_source_count[obj] > count);
-           UVM_GTE: @(m_source_count[obj] >= count);
+           UVM_EQ: wait(m_source_count[obj] == count);
+           UVM_NE: wait(m_source_count[obj] != count);
+           UVM_LT: wait(m_source_count[obj] < count);
+           UVM_LTE: wait(m_source_count[obj] <= count);
+           UVM_GT: wait(m_source_count[obj] > count);
+           UVM_GTE: wait(m_source_count[obj] >= count);
          endcase // case (op)
       end
       else begin
          case (op)
            UVM_EQ: begin
-              @(m_source_count[obj] != count);
-              @(m_source_count[obj] == count);
+              wait(m_source_count[obj] != count);
+              wait(m_source_count[obj] == count);
            end
            UVM_NE: begin
-              @(m_source_count[obj] == count);
-              @(m_source_count[obj] != count);
+              wait(m_source_count[obj] == count);
+              wait(m_source_count[obj] != count);
            end
            UVM_LT: begin
-              @(m_source_count[obj] >= count);
-              @(m_source_count[obj] < count);
+              wait(m_source_count[obj] >= count);
+              wait(m_source_count[obj] < count);
            end
            UVM_LTE: begin
-              @(m_source_count[obj] > count);
-              @(m_source_count[obj] <= count);
+              wait(m_source_count[obj] > count);
+              wait(m_source_count[obj] <= count);
            end
            UVM_GT: begin
-              @(m_source_count[obj] <= count);
-              @(m_source_count[obj] > count);
+              wait(m_source_count[obj] <= count);
+              wait(m_source_count[obj] > count);
            end
            UVM_GTE: begin
-              @(m_source_count[obj] < count);
-              @(m_source_count[obj] >= count);
+              wait(m_source_count[obj] < count);
+              wait(m_source_count[obj] >= count);
            end
          endcase // case (op)
       end
@@ -848,59 +848,169 @@ class uvm_basic_objection extends uvm_report_object;
 
    // Function: wait_for_sum
    // Waits for the sum of all objection counts to reach
-   // ~count~ as qualified by ~op~ and ~persistent_wait~.
+   // ~count~ as qualified by ~op~ and ~transition_only~.
    //
    // If no ~op~ is passed, the wait will be for the count
    // to be equal to the sum.
    //
-   // The functionality of ~persistent_wait~ is identical to
+   // The functionality of ~transition_only~ is identical to
    // the same field in <wait_for_objection_count>.
    //
    task wait_for_sum(int count,
                      uvm_wait_op op=UVM_EQ,
-                     bit persistent_wait = 1);
+                     bit transition_only = 0);
 
-      if (persistent_wait == 1) begin
+      if (transition_only == 0) begin
          case (op)
-           UVM_EQ: @(m_source_count.sum() == count);
-           UVM_NE: @(m_source_count.sum() != count);
-           UVM_LT: @(m_source_count.sum() < count);
-           UVM_LTE: @(m_source_count.sum() <= count);
-           UVM_GT: @(m_source_count.sum() > count);
-           UVM_GTE: @(m_source_count.sum() >= count);
+           UVM_EQ: wait(m_source_count.sum() == count);
+           UVM_NE: wait(m_source_count.sum() != count);
+           UVM_LT: wait(m_source_count.sum() < count);
+           UVM_LTE: wait(m_source_count.sum() <= count);
+           UVM_GT: wait(m_source_count.sum() > count);
+           UVM_GTE: wait(m_source_count.sum() >= count);
          endcase // case (op)
       end
       else begin
          case (op)
            UVM_EQ: begin
-              @(m_source_count.sum() != count);
-              @(m_source_count.sum() == count);
+              wait(m_source_count.sum() != count);
+              wait(m_source_count.sum() == count);
            end
            UVM_NE: begin
-              @(m_source_count.sum() == count);
-              @(m_source_count.sum() != count);
+              wait(m_source_count.sum() == count);
+              wait(m_source_count.sum() != count);
            end
            UVM_LT: begin
-              @(m_source_count.sum() >= count);
-              @(m_source_count.sum() < count);
+              wait(m_source_count.sum() >= count);
+              wait(m_source_count.sum() < count);
            end
            UVM_LTE: begin
-              @(m_source_count.sum() > count);
-              @(m_source_count.sum() <= count);
+              wait(m_source_count.sum() > count);
+              wait(m_source_count.sum() <= count);
            end
            UVM_GT: begin
-              @(m_source_count.sum() <= count);
-              @(m_source_count.sum() > count);
+              wait(m_source_count.sum() <= count);
+              wait(m_source_count.sum() > count);
            end
            UVM_GTE: begin
-              @(m_source_count.sum() < count);
-              @(m_source_count.sum() >= count);
+              wait(m_source_count.sum() < count);
+              wait(m_source_count.sum() >= count);
            end
          endcase // case (op)
       end
 
    endtask : wait_for_sum
 
+   // Function: wait_for_raise_requested_count
+   // Waits for the count of <request_to_raise> calls to reach
+   // ~count~ as qualified by ~op~ and ~transition_only~.
+   //
+   // If no ~op~ is passed, the wait will be for the count
+   // to be equal to the raise requested count.
+   //
+   // The functionality of ~transition_only~ is identical to
+   // the same field in <wait_for_objection_count>.
+   //
+   task wait_for_raise_requested_count(int count,
+                     uvm_wait_op op=UVM_EQ,
+                     bit transition_only = 0);
+
+      if (transition_only == 0) begin
+         case (op)
+           UVM_EQ: wait(m_raise_requested_count == count);
+           UVM_NE: wait(m_raise_requested_count != count);
+           UVM_LT: wait(m_raise_requested_count < count);
+           UVM_LTE: wait(m_raise_requested_count <= count);
+           UVM_GT: wait(m_raise_requested_count > count);
+           UVM_GTE: wait(m_raise_requested_count >= count);
+         endcase // case (op)
+      end
+      else begin
+         case (op)
+           UVM_EQ: begin
+              wait(m_raise_requested_count != count);
+              wait(m_raise_requested_count == count);
+           end
+           UVM_NE: begin
+              wait(m_raise_requested_count == count);
+              wait(m_raise_requested_count != count);
+           end
+           UVM_LT: begin
+              wait(m_raise_requested_count >= count);
+              wait(m_raise_requested_count < count);
+           end
+           UVM_LTE: begin
+              wait(m_raise_requested_count > count);
+              wait(m_raise_requested_count <= count);
+           end
+           UVM_GT: begin
+              wait(m_raise_requested_count <= count);
+              wait(m_raise_requested_count > count);
+           end
+           UVM_GTE: begin
+              wait(m_raise_requested_count < count);
+              wait(m_raise_requested_count >= count);
+           end
+         endcase // case (op)
+      end
+
+   endtask : wait_for_raise_requested_count
+
+   // Function: wait_for_drop_requested_count
+   // Waits for the count of <request_to_drop> calls to reach
+   // ~count~ as qualified by ~op~ and ~transition_only~.
+   //
+   // If no ~op~ is passed, the wait will be for the count
+   // to be equal to the drop requested count.
+   //
+   // The functionality of ~transition_only~ is identical to
+   // the same field in <wait_for_objection_count>.
+   //
+   task wait_for_drop_requested_count(int count,
+                     uvm_wait_op op=UVM_EQ,
+                     bit transition_only = 0);
+
+      if (transition_only == 0) begin
+         case (op)
+           UVM_EQ: wait(m_drop_requested_count == count);
+           UVM_NE: wait(m_drop_requested_count != count);
+           UVM_LT: wait(m_drop_requested_count < count);
+           UVM_LTE: wait(m_drop_requested_count <= count);
+           UVM_GT: wait(m_drop_requested_count > count);
+           UVM_GTE: wait(m_drop_requested_count >= count);
+         endcase // case (op)
+      end
+      else begin
+         case (op)
+           UVM_EQ: begin
+              wait(m_drop_requested_count != count);
+              wait(m_drop_requested_count == count);
+           end
+           UVM_NE: begin
+              wait(m_drop_requested_count == count);
+              wait(m_drop_requested_count != count);
+           end
+           UVM_LT: begin
+              wait(m_drop_requested_count >= count);
+              wait(m_drop_requested_count < count);
+           end
+           UVM_LTE: begin
+              wait(m_drop_requested_count > count);
+              wait(m_drop_requested_count <= count);
+           end
+           UVM_GT: begin
+              wait(m_drop_requested_count <= count);
+              wait(m_drop_requested_count > count);
+           end
+           UVM_GTE: begin
+              wait(m_drop_requested_count < count);
+              wait(m_drop_requested_count >= count);
+           end
+         endcase // case (op)
+      end
+
+   endtask : wait_for_drop_requested_count
+   
    // Function: wait_for
    // Waits for the events described by <uvm_objection_action_e>
    //
