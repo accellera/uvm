@@ -2895,8 +2895,8 @@ function bit uvm_reg::do_check(input uvm_reg_data_t expected,
    foreach(m_fields[i]) begin
       string acc = m_fields[i].get_access(map);
       acc = acc.substr(0, 1);
-      if (m_fields[i].get_compare() == UVM_NO_CHECK ||
-          m_fields[i].get_access() == "WO") begin
+      if (!(m_fields[i].get_compare() == UVM_NO_CHECK ||
+            acc == "WO")) begin
          uvm_reg_data_t mask  = ((1 << m_fields[i].get_n_bits())-1);
          uvm_reg_data_t val   = actual   >> m_fields[i].get_lsb_pos() & mask;
          uvm_reg_data_t exp   = expected >> m_fields[i].get_lsb_pos() & mask;
