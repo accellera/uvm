@@ -23,7 +23,7 @@ class wait_sequence extends uvm_sequence;
    task body();
      `uvm_info("PULL_BODY", "inside pull body", UVM_NONE)
      `uvm_info("PULL_WAIT_PH", "waiting for start of phase", UVM_NONE)
-     prolong_phase_objection.wait_for_raise_requested_count(1, UVM_EQ);
+     prolong_phase_objection.wait_for_raise_requested_count(0, UVM_GT);
      `uvm_info("PULL_START_PH", "saw start of phase request", UVM_NONE)
        prolong_phase_objection.raise_objection(this, "Prolonging phase");
      `uvm_info("PULL_WAIT_ST", "waiting to stop stimulus", UVM_NONE)
@@ -122,12 +122,10 @@ class test extends uvm_test;
 //     #10;
       `uvm_info("TEST", "sending request to start our_phase", UVM_NONE)
       our_phase.request_to_raise(this, "request to start the phase");
-      `uvm_info("TEST", "prolonging our_phase...", UVM_NONE)
-      our_phase.raise_objection(this, "prolonging");
-      #5;
-      `uvm_info("TEST", "letting the phase end...", UVM_NONE)
-      our_phase.drop_objection(this, "done prolonging");
-      #1;
+//      our_phase.raise_objection(this, "prolonging");
+     uvm_wait_for_nba_region();
+      `uvm_info("TEST", "Waiting for our_phase to end", UVM_NONE)
+     our_phase.wait_for_sum(0); // our_phase has ended
 
       phase.drop_objection(this);
    endtask : run_phase

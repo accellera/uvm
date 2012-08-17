@@ -169,7 +169,8 @@ class test extends uvm_test;
          our_phase.clear(this, "skipping phase");
       end // else: !if(our_phase.get_sum() > 0)
       
-      phase.drop_objection(this);
+     uvm_wait_for_nba_region();
+     phase.drop_objection(this);
    endtask : run_phase
 
    function void report();
