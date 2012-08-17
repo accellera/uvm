@@ -532,7 +532,7 @@ class uvm_phase extends uvm_object;
   extern local task  execute_phase();
   extern local function void m_terminate_phase();
   extern local function void m_print_termination_state();
-  extern local task wait_for_all_siblings_to_drop();
+  extern local task wait_for_self_and_siblings_to_drop(output bit waited);
   extern function void kill();
   extern function void kill_successors();
 
@@ -1156,109 +1156,108 @@ task uvm_phase::execute_phase();
     end
     else begin
 
-        fork : master_phase_process
-          begin
+      fork : master_phase_process
+        begin
   
-            m_phase_proc = process::self();
+          m_phase_proc = process::self();
   
-            //-----------
-            // EXECUTING: (task phases)
-            //-----------
-            m_state = UVM_PHASE_EXECUTING;
-            task_phase.traverse(top,this,UVM_PHASE_EXECUTING);
+          //-----------
+          // EXECUTING: (task phases)
+          //-----------
+          m_state = UVM_PHASE_EXECUTING;
+          task_phase.traverse(top,this,UVM_PHASE_EXECUTING);
   
-            wait(0); // stay alive for later kill
-  
-          end
-        join_none
-  
-        uvm_wait_for_nba_region(); //Give sequences, etc. a chance to object
-  
-        // Now wait for one of three criterion for end-of-phase.
-        fork
-        begin // guard
-          
-          do begin
-
-           // if looped back from READY_TO_END, change state
-           m_state = UVM_PHASE_EXECUTING;
-           #0;
-
-           fork
-  
-             // WAIT_FOR_ALL_DROPPED
-             begin
-               // OVM semantic: don't end until objection raised or stop request
-               if (phase_done.get_objection_total(top) ||
-                   m_use_ovm_run_semantic && m_imp.get_name() == "run") begin
-                 if (!phase_done.m_top_all_dropped)
-                   phase_done.wait_for(UVM_ALL_DROPPED, top);
-                 `UVM_PH_TRACE("PH/TRC/EXE/ALLDROP","PHASE EXIT ALL_DROPPED",this,UVM_DEBUG)
-               end
-               else begin
-                  if (m_phase_trace)
-                    `UVM_PH_TRACE("PH/TRC/SKIP","No objections raised, skipping phase",this,UVM_LOW)
-               end
-             wait_for_all_siblings_to_drop() ;
-             end
-  
-             // TIMEOUT
-             begin
-               if (top.phase_timeout == 0)
-                 wait(top.phase_timeout != 0);
-               `uvm_delay(top.phase_timeout)
-               if (phase_done.get_objection_total(top) > 0) begin //give the errors only for phases have outstanding objections (not waiting on siblings)
-                 if ($time == `UVM_DEFAULT_TIMEOUT) begin
-                   `uvm_error("PH_TIMEOUT",
-                     $sformatf("Default phase timeout of %0t hit. All processes are waiting, indicating a probable testbench issue. Phase '%0s' ready to end",
-                             top.phase_timeout, get_name()))
-                 end
-                 else begin
-                   `uvm_error("PH_TIMEOUT",
-                      $sformatf("Phase timeout of %0t hit, phase '%0s' ready to end",
-                             top.phase_timeout, get_name()))
-                 end
-               end
-               phase_done.clear(this);
-               `UVM_PH_TRACE("PH/TRC/EXE/3","PHASE EXIT TIMEOUT",this,UVM_DEBUG)
-             end
-  
-           join_any
-           disable fork;
-        
-           phase_done.clear(this);
-
-           // If jump is pending, do not allow prolonging of phase
-           if(!m_jump_fwd && !m_jump_bkwd) begin
-
-             //--------------
-             // READY_TO_END:
-             //--------------
- 
-             `UVM_PH_TRACE("PH_READY_TO_END","PHASE READY TO END",this,UVM_DEBUG)
-             //m_state = UVM_PHASE_READY_TO_END;
-             m_ready_to_end_count++;
-             if (m_ready_to_end_count < max_ready_to_end_iter) begin
-               if (m_phase_trace)
-                 `UVM_PH_TRACE("PH_READY_TO_END_CB","CALLING READY_TO_END CB",this,UVM_HIGH)
-               if (m_imp != null)
-                 m_imp.traverse(top,this,UVM_PHASE_READY_TO_END);
-             end
-             #0; // LET ANY WAITERS WAKE UP
-
-             // WAIT FOR PREDECESSORS
-             if (!phase_done.get_objection_total(top)) begin
-               m_state = UVM_PHASE_READY_TO_END;
-               m_wait_for_pred();
-             end
-
-           end
-
-          end
-          while (phase_done.get_objection_total(top));
+          wait(0); // stay alive for later kill
   
         end
-        join // guard
+      join_none
+  
+      uvm_wait_for_nba_region(); //Give sequences, etc. a chance to object
+      
+      // Now wait for "all objections dropped" (could be due to jump) or timeout.
+      fork
+        begin // guard
+          
+          m_state = UVM_PHASE_EXECUTING;
+          #0;
+
+          fork
+  
+            // WAIT_FOR_ALL_DROPPED
+            begin
+              bit waited ; // store the return from wait_for_self_and_siblings_to_drop
+              // OVM semantic: don't end until objection raised or stop request
+              if (phase_done.get_objection_total(top) ||
+                  m_use_ovm_run_semantic && m_imp.get_name() == "run") begin
+                if (!phase_done.m_top_all_dropped)
+                  phase_done.wait_for(UVM_ALL_DROPPED, top);
+                `UVM_PH_TRACE("PH/TRC/EXE/ALLDROP","PHASE EXIT ALL_DROPPED",this,UVM_DEBUG)
+              end
+              else begin
+                if (m_phase_trace)
+                  `UVM_PH_TRACE("PH/TRC/SKIP","No objections raised, skipping phase",this,UVM_LOW)
+              end
+
+              phase_done.clear(); // for run phase
+               
+              // If jump is pending, do not allow prolonging of phase
+              if (!m_jump_fwd && !m_jump_bkwd) begin
+                bit do_ready_to_end  ;
+                wait_for_self_and_siblings_to_drop(waited) ;
+                do_ready_to_end = !(m_jump_fwd || m_jump_bkwd);
+                  
+                //--------------
+                // READY_TO_END:
+                //--------------
+ 
+                while (do_ready_to_end) begin
+                  `UVM_PH_TRACE("PH_READY_TO_END","PHASE READY TO END",this,UVM_DEBUG)
+                  m_ready_to_end_count++;
+                  if (m_ready_to_end_count < max_ready_to_end_iter) begin
+                    if (m_phase_trace)
+                      `UVM_PH_TRACE("PH_READY_TO_END_CB","CALLING READY_TO_END CB",this,UVM_HIGH)
+                    if (m_imp != null)
+                      m_imp.traverse(top,this,UVM_PHASE_READY_TO_END);
+                  end
+                  #0; // LET ANY WAITERS WAKE UP 
+                  if (!phase_done.get_objection_total(top)) begin
+                    m_state = UVM_PHASE_READY_TO_END; //defined as indicating waiting for others to finish
+                  end
+                  else begin
+                    m_state = UVM_PHASE_EXECUTING ;
+                  end
+                  wait_for_self_and_siblings_to_drop(waited);
+                  do_ready_to_end = waited && !(m_jump_fwd || m_jump_bkwd) ; //when we don't wait in task above, we drop out of while loop
+                end
+              end
+            end
+  
+            // TIMEOUT
+            begin
+              if (top.phase_timeout == 0)
+                wait(top.phase_timeout != 0);
+              `uvm_delay(top.phase_timeout)
+              if (phase_done.get_objection_total(top) > 0) begin //give the errors only for phases have outstanding objections (not waiting on siblings)
+                if ($time == `UVM_DEFAULT_TIMEOUT) begin
+                  `uvm_error("PH_TIMEOUT",
+                             $sformatf("Default phase timeout of %0t hit. All processes are waiting, indicating a probable testbench issue. Phase '%0s' ready to end",
+                             top.phase_timeout, get_name()))
+                end
+                else begin
+                  `uvm_error("PH_TIMEOUT",
+                             $sformatf("Phase timeout of %0t hit, phase '%0s' ready to end",
+                             top.phase_timeout, get_name()))
+                end
+              end
+              phase_done.clear(this);
+              `UVM_PH_TRACE("PH/TRC/EXE/3","PHASE EXIT TIMEOUT",this,UVM_DEBUG)
+            end
+  
+          join_any
+          disable fork;
+        
+        end
+      join // guard
 
     end
 
@@ -1759,35 +1758,53 @@ function void uvm_phase::kill_successors();
 endfunction
 
 
-// wait_for_all_siblings_to_drop
+// wait_for_self_and_siblings_to_drop
 // -----------------------------
 // This task loops until this phase instance and all its siblings, either
 // sync'd or sharing a common successor, have all objections dropped.
-task uvm_phase::wait_for_all_siblings_to_drop() ;
+task uvm_phase::wait_for_self_and_siblings_to_drop(output bit waited) ;
   bit need_to_check_all = 1 ;
   uvm_root top;
+  bit siblings[uvm_phase];
+  
+  waited = 0 ; // no waiting yet
   top = uvm_root::get();
-   while (need_to_check_all) begin
-      bit siblings[uvm_phase];
-      get_predecessors_for_successors(siblings);
-      if (!m_jump_fwd && !m_jump_bkwd) begin
-         foreach (m_sync[i]) begin
-            siblings[m_sync[i]] = 1;
-         end
-      end
-      need_to_check_all = 0 ; //if all are dropped, we won't need to do this again
-      foreach(siblings[sib]) begin
-         if (sib.phase_done.get_objection_total(top) != 0) begin
-            sib.phase_done.wait_for(UVM_ALL_DROPPED, top);
+  
+  get_predecessors_for_successors(siblings);
+  foreach (m_sync[i]) begin
+    siblings[m_sync[i]] = 1;
+  end
+ 
+  fork
+    begin
+      while (need_to_check_all) begin
+        need_to_check_all = 0 ; //if all are dropped, we won't need to do this again
+
+        // wait for own objections to drop
+        if (phase_done.get_objection_total(top) != 0) begin 
+          waited = 1 ;
+          phase_done.wait_for(UVM_ALL_DROPPED, top);
+          need_to_check_all = 1 ;
+        end
+
+        // now wait for siblings to drop
+        foreach(siblings[sib]) begin
+          sib.wait_for_state(UVM_PHASE_EXECUTING, UVM_GTE); // sibling must be at least executing 
+          if (sib.phase_done.get_objection_total(top) != 0) begin
+            waited = 1 ;
+            sib.phase_done.wait_for(UVM_ALL_DROPPED, top); // sibling must drop any objection
             need_to_check_all = 1 ;
-            continue ;
-         end
+          end
+        end
       end
-      if (phase_done.get_objection_total(top) != 0) begin
-         phase_done.wait_for(UVM_ALL_DROPPED, top);
-         need_to_check_all = 1 ;
-      end
-   end
+    end
+
+    // in a jump, own objections will drop and state of siblings is irrelevant
+    begin
+       wait (m_jump_fwd || m_jump_bkwd) ;
+    end
+ join_any
+ disable fork ;
 endtask
 
 // m_run_phases

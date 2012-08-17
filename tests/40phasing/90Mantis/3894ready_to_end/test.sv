@@ -48,8 +48,11 @@ module test;
 
     time delay;
     time maxdelay;
-    time domaindelay ;
+    time main_start_time ;
+    time shutdown_start_time ;
+    time r2e_delay;
     time ended[uvm_phase] ;
+    uvm_phase prev_phase ;
 
     function new(string name, uvm_component parent);
       super.new(name,parent);
@@ -57,26 +60,39 @@ module test;
 
     function void phase_started(uvm_phase phase) ;
        `uvm_info("STARTED", {"-------------- Starting phase ",phase.get_name()," --------------"},UVM_NONE)
-       if ($time != ended[phase]) begin
+       if (prev_phase != null && $time != ended[prev_phase]) begin
           failed = 1 ;
           `uvm_error("DEAD_TIME","Phase not starting concurrent with previous phase ending");
        end
     endfunction
     function void phase_ready_to_end(uvm_phase phase) ;
        `uvm_info("READY2END", {"-------------- Ready to end phase ",phase.get_name()," --------------"},UVM_NONE)
-       ended[phase] = $time ;
+       if (phase.get_name() == "main" && phase.get_ready_to_end_count() == 1 && r2e_delay != 0) begin
+          fork 
+             begin
+                phase.raise_objection(this);
+                #r2e_delay;
+                ended[phase] = $time ;
+                phase.drop_objection(this);
+             end
+          join_none
+       end
+       else begin
+          ended[phase] = $time ;
+       end
+       prev_phase = phase ;
     endfunction
     function void phase_ended(uvm_phase phase) ;
        `uvm_info("ENDED", {"-------------- Ending phase ",phase.get_name()," --------------"},UVM_NONE)
-       if ($time != ended[phase]) begin
-          failed = 1 ;
-          `uvm_error("DEAD_TIME","This test does not extend phase_ready_to_end, so phase_ended should happen at the same timestamp");
+       if (phase.get_name() == "main") begin 
+          //reset the ended time because we have an extra delay in main ready_to_end
+          ended[phase] = $time;
        end
     endfunction
 
     `TASK(reset,delay,0)
-    `TASK(main,delay,domaindelay)
-    `TASK(shutdown,delay,2*domaindelay)
+    `TASK(main,delay,main_start_time)
+    `TASK(shutdown,delay,shutdown_start_time)
     `TASK(run,maxdelay,0)
 
     function void extract_phase(uvm_phase phase);
@@ -101,8 +117,12 @@ module test;
       l2 = new("l2", this);
       l1.delay = 150;
       l2.delay = 300; 
-      l1.domaindelay = 300;
-      l2.domaindelay = 300 ;
+      l1.main_start_time = 300;
+      l2.main_start_time = 300 ;
+      l1.shutdown_start_time = 700 ; // 300 (reset) + 300 (main) + 100 (main r2e)
+      l2.shutdown_start_time = 700 ; // 300 (reset) + 300 (main) + 100 (main r2e)
+      l1.r2e_delay = 0;
+      l2.r2e_delay = 100 ;
       // maxdelay = max(5*l1.delay,5*l2.delay)
       // l1 won't check maxdelay in extract phase;
       // make it different so 'run' ends at different times
