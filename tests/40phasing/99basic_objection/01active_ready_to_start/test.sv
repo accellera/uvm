@@ -104,30 +104,40 @@ class test extends uvm_test;
       sqr = new("sqr");
    endfunction : build
 
-   task run_phase(uvm_phase phase);
-      phase.raise_objection(this);
-
-      our_phase = new("our_phase");
-      our_phase.m_controller = this;
-      
-      ws = new("ws");
-      ws.prolong_phase_objection = our_phase;
-      cs = new("cs");
-      cs.prolong_phase_objection = our_phase;
-
-      fork 
-         ws.start(sqr);
-         cs.start(sqr);
-      join_none
-//     #10;
-      `uvm_info("TEST", "sending request to start our_phase", UVM_NONE)
-      our_phase.request_to_raise(this, "request to start the phase");
+  task run_phase(uvm_phase phase);
+    phase.raise_objection(this);
+    
+    our_phase = new("our_phase");
+    our_phase.m_controller = this;
+    
+    ws = new("ws");
+    ws.prolong_phase_objection = our_phase;
+    cs = new("cs");
+    cs.prolong_phase_objection = our_phase;
+    
+    fork 
+      ws.start(sqr);
+      cs.start(sqr);
+      for(int i = 0; i < 15; i++) begin
+	#10 `uvm_info("TEST", $sformatf("get_sum = %0d",our_phase.get_sum()), UVM_NONE)
+      end
+    join_none
+    
+    #1;
+    `uvm_info("TEST", "sending request to start our_phase", UVM_NONE)
+    our_phase.request_to_raise(this, "request to start the phase");
 //      our_phase.raise_objection(this, "prolonging");
-     uvm_wait_for_nba_region();
-      `uvm_info("TEST", "Waiting for our_phase to end", UVM_NONE)
-     our_phase.wait_for_sum(0); // our_phase has ended
-
-      phase.drop_objection(this);
+    uvm_wait_for_nba_region();
+    if (our_phase.get_sum() > 0) begin
+      `uvm_info("TEST", "saw requests to prolong phase. Waiting for objections to drop", UVM_NONE)
+      our_phase.wait_for_sum(0, UVM_EQ);
+    end
+    else begin
+      `uvm_info("TEST", "no one responded to our request, skipping the phase", UVM_NONE)
+    end 
+      
+    uvm_wait_for_nba_region();
+    phase.drop_objection(this);
    endtask : run_phase
 
    function void report();
