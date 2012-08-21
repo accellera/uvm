@@ -445,6 +445,7 @@ class uvm_basic_objection extends uvm_report_object;
    `uvm_register_cb(uvm_basic_objection, uvm_basic_objection_cb_base)
    
    protected bit m_trace_mode;
+   protected int m_source_sum; // Required for compatibility
    protected int m_source_count[uvm_object];
    protected int m_source_count_backup[uvm_object]; // used when clearing links
    // History information
@@ -523,14 +524,11 @@ class uvm_basic_objection extends uvm_report_object;
    // |   count += my_objection.get_objection_count(list[i]);
    //
    function int get_sum();
-      get_sum = m_source_count.sum();
+      get_sum = m_source_sum;
    endfunction : get_sum
    
    // Function: get_raise_requested_count
    // Returns the number of times <request_to_raise> has been called.
-   //
-   // The value is reset to 0 by the objection sum moving from N->0 (either via
-   // a drop or a clear).
    //
    function int get_raise_requested_count();
       return m_raise_requested_count;
@@ -538,9 +536,6 @@ class uvm_basic_objection extends uvm_report_object;
 
    // Function: get_drop_requested_count
    // Returns the number of times <request_to_drop> has been called.
-   //
-   // The value is reset to 0 by the objection sum moving from N->0 (either via
-   // a drop or a clear).
    //
    function int get_drop_requested_count();
       return m_drop_requested_count;
@@ -761,18 +756,18 @@ class uvm_basic_objection extends uvm_report_object;
 
    // Function: wait_for_objection_count
    // Waits for the objection count for ~obj~ to reach
-   // ~count~ as qualified by ~op~ and ~transition_only~.
+   // ~count~ as qualified by ~op~ and ~sensitivity~.
    //
    // If no ~op~ is passed, the wait will be for
    // the counts to be equal.
    //
-   // The ~transition_only~ field is used to determine whether
+   // The ~sensitivity~ field is used to determine whether
    // this method should consider the current value of the 
    // objection count while blocking.  By
    // default, if the objection count is currently
    // ~count~ qualified by ~op~, then it will unblock immediately.  If
-   // ~transition_only~ is set to '1', then the method
-   // will only unblock when the objection count "transitions" to
+   // ~sensitivity~ is set to <UVM_EDGE>, then the method
+   // will only unblock when the objection count transitions to
    // ~count~ qualified by ~op~.
    //
    // For example, the below code would unblock immediately,
@@ -781,13 +776,13 @@ class uvm_basic_objection extends uvm_report_object;
    //| uvm_basic_objection objctn = new();
    //| objctn.wait_for_objection_count(uvm_top, 0);
    //
-   // If we set ~transition_only~ to '1', then the code will
+   // If we set ~sensitivity~ to <UVM_EDGE>, then the code will
    // now block until it sees someone raise an objection,
    // and then drop it back down to zero.
    //| uvm_basic_objection objctn = new();
    //| fork
    //|  begin
-   //|    objctn.wait_for_objection_count(uvm_top, 0, UVM_EQ, 1);
+   //|    objctn.wait_for_objection_count(uvm_top, 0, UVM_EQ, UVM_EDGE);
    //|    `uvm_info("DEMO", "Done waiting!", UVM_NONE)
    //|  end
    //| join_none
@@ -801,12 +796,12 @@ class uvm_basic_objection extends uvm_report_object;
    task wait_for_objection_count(uvm_object obj,
                                  int count,
                                  uvm_wait_op op=UVM_EQ,
-                                 bit transition_only=0);
+                                 uvm_edge_level_e sensitivity=UVM_LEVEL);
 
       if (!m_source_count.exists(obj))
         m_source_count[obj] = 0;
 
-      if (transition_only == 0) begin
+      if (sensitivity == UVM_LEVEL) begin
          case (op)
            UVM_EQ: wait(m_source_count[obj] == count);
            UVM_NE: wait(m_source_count[obj] != count);
@@ -848,53 +843,53 @@ class uvm_basic_objection extends uvm_report_object;
 
    // Function: wait_for_sum
    // Waits for the sum of all objection counts to reach
-   // ~count~ as qualified by ~op~ and ~transition_only~.
+   // ~count~ as qualified by ~op~ and ~sensitivity~.
    //
    // If no ~op~ is passed, the wait will be for the count
    // to be equal to the sum.
    //
-   // The functionality of ~transition_only~ is identical to
+   // The functionality of ~sensitivity~ is identical to
    // the same field in <wait_for_objection_count>.
    //
    task wait_for_sum(int count,
                      uvm_wait_op op=UVM_EQ,
-                     bit transition_only = 0);
+                     uvm_edge_level_e sensitivity=UVM_LEVEL);
 
-      if (transition_only == 0) begin
+      if (sensitivity == UVM_LEVEL) begin
          case (op)
-           UVM_EQ: wait(m_source_count.sum() == count);
-           UVM_NE: wait(m_source_count.sum() != count);
-           UVM_LT: wait(m_source_count.sum() < count);
-           UVM_LTE: wait(m_source_count.sum() <= count);
-           UVM_GT: wait(m_source_count.sum() > count);
-           UVM_GTE: wait(m_source_count.sum() >= count);
+           UVM_EQ: wait(m_source_sum == count);
+           UVM_NE: wait(m_source_sum != count);
+           UVM_LT: wait(m_source_sum < count);
+           UVM_LTE: wait(m_source_sum <= count);
+           UVM_GT: wait(m_source_sum > count);
+           UVM_GTE: wait(m_source_sum >= count);
          endcase // case (op)
       end
       else begin
          case (op)
            UVM_EQ: begin
-              wait(m_source_count.sum() != count);
-              wait(m_source_count.sum() == count);
+              wait(m_source_sum != count);
+              wait(m_source_sum == count);
            end
            UVM_NE: begin
-              wait(m_source_count.sum() == count);
-              wait(m_source_count.sum() != count);
+              wait(m_source_sum == count);
+              wait(m_source_sum != count);
            end
            UVM_LT: begin
-              wait(m_source_count.sum() >= count);
-              wait(m_source_count.sum() < count);
+              wait(m_source_sum >= count);
+              wait(m_source_sum < count);
            end
            UVM_LTE: begin
-              wait(m_source_count.sum() > count);
-              wait(m_source_count.sum() <= count);
+              wait(m_source_sum > count);
+              wait(m_source_sum <= count);
            end
            UVM_GT: begin
-              wait(m_source_count.sum() <= count);
-              wait(m_source_count.sum() > count);
+              wait(m_source_sum <= count);
+              wait(m_source_sum > count);
            end
            UVM_GTE: begin
-              wait(m_source_count.sum() < count);
-              wait(m_source_count.sum() >= count);
+              wait(m_source_sum < count);
+              wait(m_source_sum >= count);
            end
          endcase // case (op)
       end
@@ -903,19 +898,19 @@ class uvm_basic_objection extends uvm_report_object;
 
    // Function: wait_for_raise_requested_count
    // Waits for the count of <request_to_raise> calls to reach
-   // ~count~ as qualified by ~op~ and ~transition_only~.
+   // ~count~ as qualified by ~op~ and ~sensitivity~.
    //
    // If no ~op~ is passed, the wait will be for the count
    // to be equal to the raise requested count.
    //
-   // The functionality of ~transition_only~ is identical to
+   // The functionality of ~sensitivity~ is identical to
    // the same field in <wait_for_objection_count>.
    //
    task wait_for_raise_requested_count(int count,
                      uvm_wait_op op=UVM_EQ,
-                     bit transition_only = 0);
+                     uvm_edge_level_e sensitivity=UVM_LEVEL);
 
-      if (transition_only == 0) begin
+      if (sensitivity == UVM_LEVEL) begin
          case (op)
            UVM_EQ: wait(m_raise_requested_count == count);
            UVM_NE: wait(m_raise_requested_count != count);
@@ -958,19 +953,19 @@ class uvm_basic_objection extends uvm_report_object;
 
    // Function: wait_for_drop_requested_count
    // Waits for the count of <request_to_drop> calls to reach
-   // ~count~ as qualified by ~op~ and ~transition_only~.
+   // ~count~ as qualified by ~op~ and ~sensitivity~.
    //
    // If no ~op~ is passed, the wait will be for the count
    // to be equal to the drop requested count.
    //
-   // The functionality of ~transition_only~ is identical to
+   // The functionality of ~sensitivity~ is identical to
    // the same field in <wait_for_objection_count>.
    //
    task wait_for_drop_requested_count(int count,
                      uvm_wait_op op=UVM_EQ,
-                     bit transition_only = 0);
+                     uvm_edge_level_e sensitivity=UVM_LEVEL);
 
-      if (transition_only == 0) begin
+      if (sensitivity == UVM_LEVEL) begin
          case (op)
            UVM_EQ: wait(m_drop_requested_count == count);
            UVM_NE: wait(m_drop_requested_count != count);
@@ -1062,6 +1057,7 @@ class uvm_basic_objection extends uvm_report_object;
         m_source_count[message.get_obj()] += message.get_count();
       else
         m_source_count[message.get_obj()] = message.get_count();
+      m_source_sum += message.get_count();
       
       if (m_events.exists(message.get_obj()))
         ->m_events[message.get_obj()].raised;
@@ -1091,6 +1087,7 @@ class uvm_basic_objection extends uvm_report_object;
          end
          
          m_source_count[message.get_obj()] -= message.get_count();
+         m_source_sum -= message.get_count();
          
          // Prevent memory leaks by clearing out the source list
          if (m_source_count[message.get_obj()] == 0)
@@ -1120,8 +1117,6 @@ class uvm_basic_objection extends uvm_report_object;
    // Clears history after a cycle is completed
    virtual function void m_complete_cycle();
       m_cycle_count++;
-      m_drop_requested_count = 0;
-      m_raise_requested_count = 0;
    endfunction : m_complete_cycle
    
    // Function- m_clear_check
@@ -1167,6 +1162,9 @@ class uvm_basic_objection extends uvm_report_object;
          
          m_source_count_backup = m_source_count; // Save for links
          m_source_count.delete();
+         m_source_sum = 0;
+         m_raise_requested_count = 0;
+         m_drop_requested_count = 0;
          m_complete_cycle();
          if (m_events.exists(message.get_obj()))
            ->m_events[message.get_obj()].cleared;

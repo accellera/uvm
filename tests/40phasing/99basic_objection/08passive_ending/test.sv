@@ -48,7 +48,9 @@ class wait_sequence extends uvm_sequence;
       fork : body_fork
          begin
             `uvm_info("WAIT_SEQ/WAIT_PH", "waiting for end of phase", UVM_NONE)
-            ending_phase_objection.wait_for_raise_requested_count(0,UVM_EQ,1);
+            
+            ending_phase_objection.wait_for_raise_requested_count(0,UVM_EQ,UVM_EDGE); // A
+            
             `uvm_info("WAIT_SEQ/END_PH", "saw end of phase", UVM_NONE)
             stop_stim = 1;
          end
@@ -95,12 +97,10 @@ class cb_sequence extends uvm_sequence;
    function void objection_notified(uvm_objection_message message);
       // We're using the shallow filter, the only drop we ever see is the
       // 0->N drop, but we need to make sure the phase was active
-      if (ending_phase_objection.get_raise_requested_count() > 0) begin
-         if (message.get_action_type() == UVM_OBJECTION_DROPPED) begin
-            `uvm_info("CB_SEQ/END_PH", "saw end of phase", UVM_NONE)
-            stop_stim = 1;
-            uvm_basic_objection_cbs_t::delete(ending_phase_objection, cb);
-         end
+      if (message.get_action_type() == UVM_OBJECTION_CLEARED) begin
+         `uvm_info("CB_SEQ/END_PH", "saw end of phase", UVM_NONE)
+         stop_stim = 1;
+         uvm_basic_objection_cbs_t::delete(ending_phase_objection, cb);
       end
    endfunction : objection_notified
       
@@ -146,30 +146,30 @@ class test extends uvm_test;
 
       #1;
       
-      `uvm_info("TEST", "sending request to raise our_phase (phase starting)", UVM_NONE)
+      `uvm_info("TEST", "sending request for raises of our_phase (phase starting)", UVM_NONE)
       our_phase.request_to_raise(this, "request to start the phase");
       uvm_wait_for_nba_region();
       if (our_phase.get_sum() > 0) begin
-        `uvm_info("TEST", "saw requests to prolong phase, raising our own objection", UVM_NONE)
-        our_phase.raise_objection(this, "phase is really happening");
+        `uvm_info("TEST", "saw requests to prolong phase", UVM_NONE)
         do 
           begin
            `uvm_info("TEST", "waiting for everyone to drop their objections", UVM_NONE)
-           our_phase.wait_for_sum(1);
-           `uvm_info("TEST", "calling request to raise our_phase (phase ready_to_end)", UVM_NONE)
+           our_phase.wait_for_sum(0);
+           `uvm_info("TEST", "sending request for raises of our_phase (phase ready_to_end)", UVM_NONE)
+           our_phase.request_to_raise(this, "request to continue the phase");
            uvm_wait_for_nba_region();
           end
-         while (our_phase.get_sum() > 1);
-         `uvm_info("TEST", "our_phase is done, dropping our objection", UVM_NONE)
-         our_phase.drop_objection(this, "phase is done");
+         while (our_phase.get_sum() > 0);
+         `uvm_info("TEST", "our_phase is done, proceeding", UVM_NONE)
       end
       else begin
          `uvm_info("TEST", "no one responded to our request, skipping the phase", UVM_NONE)
-         // Clear the objection to get rid of our request_to_raise
-         our_phase.clear(this, "skipping phase");
       end // else: !if(our_phase.get_sum() > 0)
       
+     // Clear the objection to get rid of our request_to_raise
+     our_phase.clear(this, "clearing out requests to raise");
      uvm_wait_for_nba_region();
+      
      phase.drop_objection(this);
    endtask : run_phase
 

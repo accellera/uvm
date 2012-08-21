@@ -25,7 +25,14 @@ class uvm_phase_objection extends uvm_basic_objection;
           (message.get_obj() != m_controller)) begin
          uvm_object l_obj = message.get_obj();
          
-        `uvm_warning("BAD_REQ_TO_RAISE", $sformatf("ignoring %s, only '%s' can send a request_to_raise on this objection", message.convert2string(), m_controller.get_full_name()))
+        `uvm_warning("BAD_REQ_TO_RAISE", $sformatf("ignoring %s, only '%s' can call request_to_raise() on this objection", message.convert2string(), m_controller.get_full_name()))
+
+      end
+      else if ((message.get_action_type() == UVM_OBJECTION_CLEARED) &&
+          (message.get_obj() != m_controller)) begin
+         uvm_object l_obj = message.get_obj();
+         
+        `uvm_warning("BAD_CLEAR", $sformatf("ignoring %s, only '%s' can call clear() on this objection", message.convert2string(), m_controller.get_full_name()))
 
       end
       else begin

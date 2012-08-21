@@ -614,6 +614,21 @@ typedef enum { UVM_OBJECTION_RAISED = (1 << 0),
                UVM_OBJECTION_CLEARED = (1 << 5)
 } uvm_objection_action_e;
 
+// Enum: uvm_edge_level_e
+//
+// Enumeration of the possible sensitivities to use when waiting for
+// a value.
+//
+// UVM_EDGE - Waits to see the actual value transition to the expected value.  If the
+//            actual value is currently at the expected value, then the library will wait
+//            to see the actual value transition off of the expected value, and then back
+//            on.
+// UVM_LEVEL - Waits to see the actual value match the expected value.  If the actual value 
+//             is currently at the expected value, then the library unblocks immediately.
+typedef enum { UVM_EDGE = 0,
+               UVM_LEVEL = 1 } uvm_edge_level_e;
+
+
 //------------------------------
 // Group: Default Policy Classes
 //------------------------------
