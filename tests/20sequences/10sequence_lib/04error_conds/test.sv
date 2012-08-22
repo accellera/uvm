@@ -260,8 +260,8 @@ module top;
        $display("Checking report counts");
        if (!reports.exists("SEQLIB/NOSEQS")       || reports["SEQLIB/NOSEQS"]       != 1) failed = 1;
        if (!reports.exists("SEQLIB/BAD_SEQ_TYPE") || reports["SEQLIB/BAD_SEQ_TYPE"] != 2) failed = 1;
-       if (!reports.exists("SEQLIB/BAD_REQ_TYPE") || reports["SEQLIB/BAD_REQ_TYPE"] != 2) failed = 1;
-       if (!reports.exists("SEQLIB/BAD_RSP_TYPE") || reports["SEQLIB/BAD_RSP_TYPE"] != 2) failed = 1;
+//       if (!reports.exists("SEQLIB/BAD_REQ_TYPE") || reports["SEQLIB/BAD_REQ_TYPE"] != 2) failed = 1;
+//       if (!reports.exists("SEQLIB/BAD_RSP_TYPE") || reports["SEQLIB/BAD_RSP_TYPE"] != 2) failed = 1;
        if (!reports.exists("SEQLIB/VIRT_SEQ")     || reports["SEQLIB/VIRT_SEQ"]     != 2) failed = 1;
        if (failed)
          $write("** UVM TEST FAILED **\n");

@@ -26,6 +26,10 @@ module test;
 
   time warn_time, info_time;
   class catcher extends uvm_report_catcher;
+     `uvm_object_utils(catcher)
+     function new(string name="unnamed-catcher");
+        super.new(name);
+     endfunction : new
      virtual function action_e catch();
         if(get_id() == "JMPPHIDL" && get_severity() == UVM_ERROR) begin
           warn_time = $time;
@@ -38,9 +42,11 @@ module test;
   endclass
 
   class comp extends uvm_component;
+    `uvm_component_utils(comp)
     function new(string name, uvm_component parent);
-      catcher ctchr = new;
-      super.new(name,parent);
+       catcher ctchr;
+       super.new(name,parent);
+       ctchr = new;
       uvm_report_cb::add(null,ctchr);
     endfunction
 
@@ -97,8 +103,8 @@ module test;
         $display("*** UVM TEST FAILED : Expected warning at time 15, warn time is: %0t", warn_time);
         failed = 1;
       end
-      if(info_time != 30) begin
-        $display("*** UVM TEST FAILED : Expected jump message at time 30, info time is: %0t", info_time);
+      if(info_time != 20) begin
+        $display("*** UVM TEST FAILED : Expected jump message at time 20, info time is: %0t", info_time);
         failed = 1;
       end
       if(!failed)
