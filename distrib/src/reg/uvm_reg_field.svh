@@ -1507,8 +1507,8 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
 `ifdef UVM_REG_NO_INDIVIDUAL_FIELD_ACCESS
    rw.element_kind = UVM_REG;
    rw.element = m_parent;
-   rw.value = value_adjust;
-   m_parent.do_write(rw)
+   rw.value[0] = value_adjust;
+   m_parent.do_write(rw);   
 `else        
 
    if (!is_indv_accessible(rw.path,rw.local_map)) begin
@@ -1617,7 +1617,7 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
    rw.element_kind = UVM_REG;
    rw.element = m_parent;
    m_parent.do_read(rw);
-   rw.value = (rw.value >> m_lsb) & ((1<<m_size))-1;
+   rw.value[0] = (rw.value[0] >> m_lsb) & ((1<<m_size))-1;
    bad_side_effect = 1;
 `else
 
