@@ -1245,7 +1245,7 @@ function void uvm_reg_field::set(uvm_reg_data_t  value,
 
    if (m_parent.is_busy()) begin
       `uvm_warning("UVM/FLD/SET/BSY",
-                   $sformatf("Setting the value of field \"%s\" while containing register \"%s\" is being accessed may result in loss of desired field value.",
+                   $sformatf("Setting the value of field \"%s\" while containing register \"%s\" is being accessed may result in loss of desired field value. A race condition between threads concurrently accessing the register model is the likely cause of the problem.",
                              get_name(), m_parent.get_full_name()))
    end
 
