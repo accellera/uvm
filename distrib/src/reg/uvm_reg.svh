@@ -2021,6 +2021,7 @@ function void uvm_reg::reset(string kind = "HARD");
    // in case a thread was killed during an operation
    void'(m_atomic.try_get(1));
    m_atomic.put(1);
+   m_process = null;
 endfunction: reset
 
 
@@ -2091,13 +2092,6 @@ task uvm_reg::update(output uvm_status_e      status,
    status = UVM_IS_OK;
 
    if (!needs_update()) return;
-      
-   if (m_update_in_progress) begin
-     @(negedge m_update_in_progress);
-     return;
-   end
-
-   m_update_in_progress = 1;
 
    // Concatenate the write-to-update values from each field
    // Fields are stored in LSB or MSB order
@@ -2106,9 +2100,6 @@ task uvm_reg::update(output uvm_status_e      status,
       upd |= m_fields[i].XupdateX() << m_fields[i].get_lsb_pos();
 
    write(status, upd, path, map, parent, prior, extension, fname, lineno);
-
-   m_update_in_progress = 0;
-
 endtask: update
 
 
