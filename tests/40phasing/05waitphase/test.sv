@@ -147,14 +147,14 @@ module test;
     int start_cnt = 0;
     int end_cnt = 0;
 
-    //By the time this runs, the run phase is done, but it should still be
-    //executing because parallel phases are not complete
+    //By the time this runs, the run phase is done, so make sure
+    //that run is ready to end
     task main_phase(uvm_phase phase);
-      if(run_ph.get_state() != UVM_PHASE_EXECUTING) begin
+      if(run_ph.get_state() != UVM_PHASE_READY_TO_END) begin
         uvm_phase_state state = run_ph.get_state();
         $display("Extract schedule name = %s",run_ph.get_schedule_name());
         failed = 1;
-        `uvm_error("EXECUTING", $sformatf("Expected run phase be EXECUTING, but it is %s", state.name()))
+        `uvm_error("READY_TO_END", $sformatf("Expected run phase be READY_TO_END, but it is %s", state.name()))
       end
     endtask
 

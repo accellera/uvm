@@ -1222,30 +1222,26 @@ task uvm_phase::execute_phase();
                   
                   #0; // LET ANY WAITERS WAKE UP 
 
-                  fork // guard
-                     fork
-                        begin // main function: wait for everyone to drop objections
-                           wait_for_self_and_siblings_to_drop(waited);
-                        end
-                        begin // meanwhile, keep m_state correct with respect to local objections
-                           forever begin
-                              if (phase_done.get_objection_total(top) > 0) begin
-                                 m_state = UVM_PHASE_EXECUTING ;
-                                 phase_done.wait_for(UVM_ALL_DROPPED, top);
-                              end
-                              else begin
-                                 m_state = UVM_PHASE_READY_TO_END; //defined as indicating waiting for others to finish
-                                 phase_done.wait_for(UVM_RAISED, top);
-                              end
-                           end
-                        end
-                     join_any
-                     disable fork;
-                  join
+                  wait_for_self_and_siblings_to_drop(waited);
                   do_ready_to_end = waited && !(m_jump_fwd || m_jump_bkwd) ; //when we don't wait in task above, we drop out of while loop
                 end
               end
             end
+
+
+            begin // meanwhile, keep m_state correct with respect to local objections
+               forever begin
+                  if (phase_done.get_objection_total(top) > 0) begin
+                     m_state = UVM_PHASE_EXECUTING ;
+                     phase_done.wait_for(UVM_ALL_DROPPED, top);
+                  end
+                  else begin
+                     m_state = UVM_PHASE_READY_TO_END; //defined as indicating waiting for others to finish
+                     phase_done.wait_for(UVM_RAISED, top);
+                  end
+               end
+            end
+
   
             // TIMEOUT
             begin
