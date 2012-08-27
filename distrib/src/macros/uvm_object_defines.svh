@@ -682,9 +682,16 @@ endfunction \
           if(!((FLAG)&UVM_NOCOPY)) begin \
             if((FLAG)&UVM_REFERENCE || local_data__.ARG == null) ARG = local_data__.ARG; \
             else begin \
+              uvm_object l_obj; \
               if(local_data__.ARG.get_name() == "") local_data__.ARG.set_name(`"ARG`"); \
-              $cast(ARG, local_data__.ARG.clone()); \
-              ARG.set_name(local_data__.ARG.get_name()); \
+              l_obj = local_data__.ARG.clone(); \
+              if(l_obj == null) begin \
+                `uvm_fatal("FAILCLN", $sformatf("Failure to clone %s.ARG, thus the variable will remain null.", local_data__.get_name())); \
+              end \
+              else begin \
+                $cast(ARG, l_obj); \
+                ARG.set_name(local_data__.ARG.get_name()); \
+              end \
             end \
           end \
         end \
