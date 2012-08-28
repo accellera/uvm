@@ -96,7 +96,7 @@ class uvm_reg_hw_reset_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_reg_ite
         // Note: if map were in inner loop, could test simulataneous
         // access to same reg via different bus interfaces 
 
-        regs = {};
+        regs.delete();
         maps[d].get_registers(regs);
 
         foreach (regs[i]) begin
