@@ -48,13 +48,12 @@ class test extends uvm_test;
 
    virtual task run_phase(uvm_phase phase);
       uvm_status_e  status1,status2,status3;
-      uvm_reg_data_t exp,act;
+      uvm_reg_data_t act;
 
       phase.raise_objection(this);
 
       env.regmodel.reset();
 
-      exp = 1;
       env.regmodel.user_acp.set(10);
 
       fork
@@ -71,9 +70,9 @@ class test extends uvm_test;
       if (status3 == UVM_NOT_OK)
         $display("read from user_acp returned status UVM_NOT_OK");
 
-      $display("expected: %0h  actual: %0h",exp,act);
+      $display("Number of write transactions: %0d. Expected 1 or 2.\n", act);
       
-      if (act !== exp) begin
+      if (act !== 1 && act != 2) begin
         $display("!! UVM TEST FAILED !!\n");
       end
       else begin
