@@ -68,7 +68,7 @@ function int uvm_re_match(string re, string str);
       s = ss++;
     end
   end
-  while (re.getc(e) == "*")
+  while (e < re.len() && re.getc(e) == "*")
     e++;
   if(e == re.len()) begin
     return 0;
