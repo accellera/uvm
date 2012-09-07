@@ -48,7 +48,7 @@ initial
 final
   begin
     if ($time == 20) begin
-      $write("UVM TEST EXPECT 2 UVM_ERROR\n");
+      $write("UVM TEST EXPECT 1 UVM_FATAL\n");
       $write("** UVM TEST PASSED **\n");
     end
   end

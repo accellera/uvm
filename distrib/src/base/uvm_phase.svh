@@ -498,6 +498,8 @@ class uvm_phase extends uvm_object;
   protected bit  m_predecessors[uvm_phase];
   protected bit  m_successors[uvm_phase];
   protected uvm_phase m_end_node;
+  // Track the currently executing real task phases (used for debug)
+  static protected bit m_executing_phases[uvm_phase];
   function uvm_phase get_begin_node(); if (m_imp != null) return this; return null; endfunction
   function uvm_phase get_end_node();   return m_end_node; endfunction
 
@@ -1155,6 +1157,7 @@ task uvm_phase::execute_phase();
 
     end
     else begin
+        m_executing_phases[this] = 1;
 
         fork : master_phase_process
           begin
@@ -1179,6 +1182,11 @@ task uvm_phase::execute_phase();
           begin // guard
           
            fork
+             // JUMP
+             begin
+                wait (m_jump_fwd || m_jump_bkwd);
+                `UVM_PH_TRACE("PH/TRC/EXE/JUMP","PHASE EXIT ON JUMP REQUEST",this,UVM_DEBUG)
+             end
   
              // WAIT_FOR_ALL_DROPPED
              begin
@@ -1194,7 +1202,6 @@ task uvm_phase::execute_phase();
                   if (m_phase_trace)
                     `UVM_PH_TRACE("PH/TRC/SKIP","No objections raised, skipping phase",this,UVM_LOW)
                end
-               phase_done.clear(); // for run phase
                
                wait_for_self_and_siblings_to_drop() ;
                do_ready_to_end = 1;
@@ -1222,34 +1229,54 @@ task uvm_phase::execute_phase();
   
              // TIMEOUT
              begin
-               string extra_message;
-               if (top.phase_timeout == 0)
-                 wait(top.phase_timeout != 0);
-               `uvm_delay(top.phase_timeout)
-               if (phase_done.get_objection_total(top) == 0) begin
-                  extra_message = "due to objections to other phase(s), either sync'd or sharing a successor to this phase";
-               end
+               if (this.get_name() == "run") begin
+                  if (top.phase_timeout == 0)
+                    wait(top.phase_timeout != 0);
+                  if (m_phase_trace)
+                    `UVM_PH_TRACE("PH/TRC/TO_WAIT", $sformatf("STARTING PHASE TIMEOUT WATCHDOG (timeout == %t)", top.phase_timeout), this, UVM_HIGH)
+                  `uvm_delay(top.phase_timeout)
+                  if ($time == `UVM_DEFAULT_TIMEOUT) begin
+                     if (m_phase_trace)
+                       `UVM_PH_TRACE("PH/TRC/TIMEOUT", "PHASE TIMEOUT WATCHDOG EXPIRED", this, UVM_LOW)
+                     foreach (m_executing_phases[p]) begin
+                        if (p.phase_done.get_objection_total() > 0) begin
+                           if (m_phase_trace)
+                             `UVM_PH_TRACE("PH/TRC/TIMEOUT/OBJCTN", 
+                                           $sformatf("Phase '%s' has outstanding objections:\n%s", p.get_full_name(), p.phase_done.convert2string()),
+                                           this,
+                                           UVM_LOW)
+                        end
+                     end
+                        
+                     `uvm_fatal("PH_TIMEOUT",
+                                $sformatf("Default timeout of %0t hit, indicating a probable testbench issue",
+                                          `UVM_DEFAULT_TIMEOUT))
+                  end
+                  else begin
+                     if (m_phase_trace)
+                       `UVM_PH_TRACE("PH/TRC/TIMEOUT", "PHASE TIMEOUT WATCHDOG EXPIRED", this, UVM_LOW)
+                     foreach (m_executing_phases[p]) begin
+                        if (p.phase_done.get_objection_total() > 0) begin
+                           if (m_phase_trace)
+                             `UVM_PH_TRACE("PH/TRC/TIMEOUT/OBJCTN", 
+                                           $sformatf("Phase '%s' has outstanding objections:\n%s", p.get_full_name(), p.phase_done.convert2string()),
+                                           this,
+                                           UVM_LOW)
+                        end
+                     end
+                        
+                     `uvm_fatal("PH_TIMEOUT",
+                                $sformatf("Explicit timeout of %0t hit, indicating a probable testbench issue",
+                                          top.phase_timeout))
+                  end
+                  if (m_phase_trace)
+                    `UVM_PH_TRACE("PH/TRC/EXE/3","PHASE EXIT TIMEOUT",this,UVM_DEBUG)
+               end // if (this.get_name() == "run")
                else begin
-                  extra_message = $sformatf("due to %0d outstanding objections to %s phase",phase_done.get_objection_total(top),get_name());
+                  wait(0); // never unblock for non-run phase
                end
-               if ($time == `UVM_DEFAULT_TIMEOUT) begin
-                 `uvm_error("PH_TIMEOUT",
-                     $sformatf("Default phase timeout of %0t hit %s. All processes are waiting, indicating a probable testbench issue. Phase '%0s' ready to end",
-                             top.phase_timeout, extra_message, get_name()))
-               end
-               else begin
-                 `uvm_error("PH_TIMEOUT",
-                     $sformatf("Phase timeout of %0t hit %s, phase '%0s' ready to end",
-                             top.phase_timeout, extra_message, get_name()))
-               end
-               phase_done.clear(this);
-               `UVM_PH_TRACE("PH/TRC/EXE/3","PHASE EXIT TIMEOUT",this,UVM_DEBUG)
-             end
+             end // if (m_phase_trace)
 
-             //JUMP
-             begin
-                wait (m_jump_fwd || m_jump_bkwd);
-             end
   
            join_any
            disable fork;
@@ -1264,6 +1291,7 @@ task uvm_phase::execute_phase();
 
   end
 
+  m_executing_phases.delete(this);
 
   //---------
   // JUMPING:
@@ -1304,6 +1332,7 @@ task uvm_phase::execute_phase();
       m_phase_proc = null;
     end
     #0; // LET ANY WAITERS WAKE UP
+    phase_done.clear();
 
     if(m_jump_fwd) begin
       clear_successors(UVM_PHASE_DONE,m_jump_phase);
@@ -1343,6 +1372,7 @@ task uvm_phase::execute_phase();
     m_phase_proc = null;
   end
   #0; // LET ANY WAITERS WAKE UP
+  phase_done.clear();
 
   end
 
@@ -1682,7 +1712,8 @@ function void uvm_phase::jump(uvm_phase phase);
   end
   
   m_jump_phase = d;
-  m_terminate_phase();
+  //m_terminate_phase(); // JAR - not needed
+
 endfunction
 
 

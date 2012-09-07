@@ -51,7 +51,7 @@ initial run_test();
 final
   begin
     if ($time == 123 && pass_the_test == 1) begin
-      $write("UVM TEST EXPECT 2 UVM_ERROR\n");
+      $write("UVM TEST EXPECT 1 UVM_FATAL\n");
       $write("** UVM TEST PASSED **\n");
     end
   end
