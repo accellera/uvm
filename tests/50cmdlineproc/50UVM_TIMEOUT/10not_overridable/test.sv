@@ -55,7 +55,7 @@ final
     if(rs.get_id_count("NOTIMOUTOVR") != 1)
       pass_the_test = pass_the_test & 0;
     if ($time == 100 && pass_the_test == 1) begin
-      $write("UVM TEST EXPECT 1 UVM_ERROR\n");
+      $write("UVM TEST EXPECT 2 UVM_ERROR\n");
       $write("** UVM TEST PASSED **\n");
     end
   end
