@@ -1281,8 +1281,6 @@ task uvm_phase::execute_phase();
            join_any
            disable fork;
         
-           phase_done.clear(this);
-
           end
   
         join // guard
