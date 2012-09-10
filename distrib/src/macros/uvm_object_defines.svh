@@ -534,9 +534,10 @@ endfunction \
 // `uvm_*_utils_end macro blocks to form "automatic" implementations of the
 // core data methods: copy, compare, pack, unpack, record, print, and sprint.
 //
-// By using the macros, you do not have to implement any of the data methods 
+// By using the macros, you do not have to implement any of the do_* methods 
 // inherited from <uvm_object>. However, be aware that the field macros expand
-// into lots of inline code and can affect run-time performance. 
+// into general inline code that is not as run-time efficient nor as flexible
+// as direct implementions of the do_* methods. 
 //
 // Below is an example usage of the field macros for a sequence item. 
 //
@@ -631,11 +632,11 @@ endfunction \
 //   Radix settings for integral types. Hex is the default radix if none is
 //   specified.
 //
-// UVM components should ~not~ be specified using the `uvm_field_object macros
+// A UVM component should ~not~ be specified using the `uvm_field_object macro
 // unless its flag includes UVM_REFERENCE.  Otherwise, the field macro will 
 // implement deep copy, which is an illegal operation for uvm_components.
-// You will get a FATAL error if you tried to copy an object containing a 
-// component handle that was registered with a field macro without the
+// You will get a FATAL error if you tried to copy or clone an object containing
+// a component handle that was registered with a field macro without the
 // UVM_REFERENCE flag. You will also get duplicate entries when printing
 // component topology, as this functionality is already provided by UVM. 
 //------------------------------------------------------------------------------
