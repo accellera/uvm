@@ -10,7 +10,7 @@ module test();
   virtual class my_v_sequence_item extends uvm_sequence_item;
     `uvm_field_utils_begin(my_v_sequence_item)
     `uvm_field_utils_end
-    function new(name = "unnamed-my_v_sequence_item");
+    function new(string name = "unnamed-my_v_sequence_item");
       super.new(name);
     endfunction
   endclass
@@ -19,21 +19,21 @@ module test();
     uvm_sequence #(T);
     `uvm_field_utils_begin(my_v_sequence)
     `uvm_field_utils_end
-    function new(name = "unnamed-my_v_sequence");
+    function new(string name = "unnamed-my_v_sequence");
       super.new(name);
     endfunction
   endclass
 
   class my_sequence_item extends my_v_sequence_item;
     `uvm_object_utils(my_sequence_item)
-    function new(name = "unnamed-my_sequence_item");
+    function new(string name = "unnamed-my_sequence_item");
       super.new(name);
     endfunction
   endclass
 
   class my_sequence extends my_v_sequence #(my_sequence_item);
     `uvm_object_utils(my_sequence)
-    function new(name = "unnamed-my_sequence");
+    function new(string name = "unnamed-my_sequence");
       super.new(name);
     endfunction
   endclass
