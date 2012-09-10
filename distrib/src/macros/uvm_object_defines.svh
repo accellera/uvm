@@ -84,13 +84,13 @@
 // object/component for correct factory operation. See <`uvm_object_utils> and
 // <`uvm_component_utils> for details.
 //
-// A ~utils~ macro should be used inside ~every~ user-defined class extending
-// <uvm_object>, including <uvm_sequence_item> and <uvm_component>.
+// A ~utils~ macro should be used inside ~every~ user-defined class that extends
+// <uvm_object> directly or indirectly, including <uvm_sequence_item> and
+// <uvm_component>.
 //
-// Below is an example usage of the ~utils~ macro for a user-defined sequence
-// item.
+// Below is an example usage of the ~utils~ macro for a user-defined object.
 //
-//|  class mydata extends uvm_sequence_item;
+//|  class mydata extends uvm_object;
 //| 
 //|     `uvm_object_utils(mydata)
 //|
@@ -568,11 +568,9 @@ endfunction \
 //|  class my_comp extends uvm_component;
 //| 
 //|    my_comp_cfg  cfg;
-//|    my_reg_model reg_model;
 //|
 //|    `uvm_component_utils_begin(my_comp)
 //|      `uvm_field_object   (cfg,  UVM_ALL_ON)
-//|      `uvm_field_object   (cfg,  UVM_ALL_ON|UVM_REFERENCE)
 //|    `uvm_object_utils_end
 //|
 //|    function new(string name="my_comp_inst", uvm_component parent=null);
