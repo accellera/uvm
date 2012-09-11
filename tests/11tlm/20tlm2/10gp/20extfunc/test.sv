@@ -339,7 +339,7 @@ class test extends uvm_test;
        obj2.set_data(data);
        obj2.set_byte_enable_length(0);
        obj2.set_data_length(4);
-       obj2.set_address('h1234567890abcdef);
+       obj2.set_address(64'h1234567890abcdef);
        obj2.set_command(UVM_TLM_WRITE_COMMAND);
        obj2.set_response_status(UVM_TLM_OK_RESPONSE);
        obj2.set_streaming_width('h87654321);
