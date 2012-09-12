@@ -145,14 +145,23 @@ class uvm_root extends uvm_component;
 
   // Variable- phase_timeout
   //
-  // Specifies the timeout for task-based phases. Default is 0, or no timeout.
+  // Specifies the timeout for task-based phases. Default is `UVM_DEFAULT_TIMEOUT
+
 
   time phase_timeout = `UVM_DEFAULT_TIMEOUT;
 
 
   // Function: set_timeout
   //
-  // Specifies the timeout for task-based phases. Default is 0, i.e. no timeout.
+  // Specifies the timeout for the run phase. Default is is <`UVM_DEFAULT_TIMEOUT>
+  //
+  // If the timeout is defined as non-zero and that time value subsequently
+  // elapses before the run_phase reaches phase_ended (which requires all 
+  // parallel runtime phases to also complete), then the library will assert
+  // a ~UVM_FATAL~ message and stop the simulation.  This feature is
+  // intended to prevent the simulation from potentially consuming too many
+  // resources (Disk, Memory, CPU, etc) when the testbench is essentially hung.
+
 
   extern function void set_timeout(time timeout, bit overridable=1);
 
