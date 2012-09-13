@@ -1229,10 +1229,7 @@ task uvm_phase::execute_phase();
   
              // TIMEOUT
              begin
-               if ((get_name() == "run") && (phase_done.get_objection_total(top) == 0) && (!m_use_ovm_run_semantic)) begin
-                  phase_done.wait_for(UVM_RAISED); // do not timeout if run never has objections; allow runtime phases to respond to timeout
-               end
-               else begin
+               if (this.get_name() == "run") begin
                   if (top.phase_timeout == 0)
                     wait(top.phase_timeout != 0);
                   if (m_phase_trace)
@@ -1275,6 +1272,9 @@ task uvm_phase::execute_phase();
                   if (m_phase_trace)
                     `UVM_PH_TRACE("PH/TRC/EXE/3","PHASE EXIT TIMEOUT",this,UVM_DEBUG)
                end // if (this.get_name() == "run")
+               else begin
+                  wait (0); // never unblock for non-run phase
+               end
              end // if (m_phase_trace)
 
   

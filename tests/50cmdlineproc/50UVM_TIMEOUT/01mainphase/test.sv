@@ -65,7 +65,7 @@ initial
 
 final
   begin
-    if ($time == 40) begin // expect the test to complete the 10 + 10 + timeout(20)
+    if ($time == 20) begin // expect the test to complete at the timeout value of 20
       $write("UVM TEST EXPECT 1 UVM_FATAL\n");
       $write("** UVM TEST PASSED **\n");
     end
