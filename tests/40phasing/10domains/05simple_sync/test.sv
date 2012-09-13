@@ -87,15 +87,10 @@ module test;
       l1.set_domain(domain1);
       l2.set_domain(domain2);
 
-      //Sync domain2 start of main with domain1 start of post_reset_ph
+      //Sync domain1 main_phase with domain2 post_reset_phase
       domain1.sync(domain2, uvm_main_phase::get(), uvm_post_reset_phase::get());
     endfunction
 
-    // This needs to be fixed. Right now it is needed.
-    task run_phase(uvm_phase phase);
-      phase.raise_objection(this);
-      phase.drop_objection(this);
-    endtask
 
     function void report_phase(uvm_phase phase);
       $display("l1  reset: %0t  -- %0t", l1.start_reset, l1.end_reset);
@@ -109,7 +104,7 @@ module test;
         $display("*** UVM TEST FAILED, l1 reset %0t-%0t, expected 0-200 ***", l1.start_reset, l1.end_reset);
         failed = 1;
       end
-      // Since synced with l2, the mains start at the same time
+      // Since l1 main is synced with l2 post_reset, it does not start until l2 post_reset starts at 250
       if( l1.start_main != 250  || l1.end_main != 450) begin
         $display("*** UVM TEST FAILED, l1 main %0t-%0t, expected 250-450 ***", l1.start_main, l1.end_main);
         failed = 1;
@@ -122,13 +117,13 @@ module test;
         $display("*** UVM TEST FAILED, l2 reset %0t-%0t, expected 0-250 ***", l2.start_reset, l2.end_reset);
         failed = 1;
       end
-      // Since synced with l2, the mains start at the same time
-      if( l2.start_main != 250  || l2.end_main != 500) begin
-        $display("*** UVM TEST FAILED, l2 main %0t-%0t, expected 250-500 ***", l2.start_main, l2.end_main);
+      // Since l2 post_reset is synced with l1 main, post_reset does not end until 450
+      if( l2.start_main != 450  || l2.end_main != 700) begin
+        $display("*** UVM TEST FAILED, l2 main %0t-%0t, expected 450-700 ***", l2.start_main, l2.end_main);
         failed = 1;
       end
-      if( l2.start_shutdown != 500  || l2.end_shutdown != 750) begin
-        $display("*** UVM TEST FAILED, l2 shutdown %0t-%0t, expected 500-750 ***", l2.start_shutdown, l2.end_shutdown);
+      if( l2.start_shutdown != 700  || l2.end_shutdown != 950) begin
+        $display("*** UVM TEST FAILED, l2 shutdown %0t-%0t, expected 700-950 ***", l2.start_shutdown, l2.end_shutdown);
         failed = 1;
       end
  

@@ -71,16 +71,25 @@ class active_comp extends uvm_component;
    // normally wouldn't raise/drop each iter, but want to cause iter on read_to_end
    task main_phase(uvm_phase phase);
       `uvm_info("active_comp", "main thread started...", UVM_LOW);
-      for (int i=0; i<10; i++) begin
         $display("%t %m raising",$time);
         phase.raise_objection(this);
         #7;
         $display("%t %m dropping",$time);
         phase.drop_objection(this);
-        uvm_wait_for_nba_region();
-      end
       `uvm_info("active_comp", "main thread completed...", UVM_LOW);
    endtask
+
+   virtual function void phase_ready_to_end(uvm_phase phase);
+   if (phase.get_name() == "main" && phase.get_ready_to_end_count() == 1) begin
+         fork begin
+            $display("%t %m raising",$time);
+            phase.raise_objection(this);
+            #7;
+            $display("%t %m dropping",$time);
+            phase.drop_objection(this);
+         end join_none
+      end
+   endfunction
 
    virtual function void extract_phase(uvm_phase phase);
       `uvm_info("EXTRACT START", "extract phase started...", UVM_LOW);
