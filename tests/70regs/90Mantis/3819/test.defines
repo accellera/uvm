@@ -1,1 +1,1 @@
-+incdir+../../../../distrib/examples/simple/registers/primer+../../../../distrib/examples/integrated/apb
++incdir+$UVM_HOME/examples/simple/registers/primer+$UVM_HOME/examples/integrated/apb
