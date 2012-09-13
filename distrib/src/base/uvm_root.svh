@@ -154,12 +154,16 @@ class uvm_root extends uvm_component;
   //
   // Specifies the timeout for the run phase. Default is is <`UVM_DEFAULT_TIMEOUT>
   //
-  // If the timeout is defined as non-zero, and reached by the run_phase, then
-  // the library will assert a ~UVM_FATAL~ message, and stop the simulation.
-  // This is intended to prevent the simulation from potentially consuming
-  // too many resources (Disk, Memory, CPU, etc) when the testbench is
+  // The timeout is simply the maximum absolute simulation time allowed before a
+  // ~FATAL~ occurs.  If the timeout is set to 20ns, then the simulation must end
+  // before 20ns, or a ~FATAL~ timeout will occur.
+  //
+  // This is provided so that the user can prevent the simulation from potentially 
+  // consuming too many resources (Disk, Memory, CPU, etc) when the testbench is
   // essentially hung.
-
+  //
+   
+   
   extern function void set_timeout(time timeout, bit overridable=1);
 
 
