@@ -23,8 +23,6 @@ program top;
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 
-bit pass_the_test = 1;
-
 class test extends uvm_test;
 
    `uvm_component_utils(test)
@@ -33,28 +31,41 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   function void start_of_simulation();
-     set_global_timeout(500);
-   endfunction
-
-   task run_phase(uvm_phase phase);
+   task reset_phase(uvm_phase phase);
       phase.raise_objection(this);
-      #1000;
+      #10;
+      phase.drop_objection(this);
+   endtask
+
+   task configure_phase(uvm_phase phase);
+      phase.raise_objection(this);
+      #10;
+      phase.drop_objection(this);
+   endtask
+
+   task main_phase(uvm_phase phase);
+      phase.raise_objection(this);
+      #30; // we expect a fail during this due to command line setting of timeout to 20
+      phase.drop_objection(this);
+   endtask
+
+   task shutdown_phase(uvm_phase phase);
+      phase.raise_objection(this);
+      #10;
       phase.drop_objection(this);
    endtask
 
 endclass
 
 
-initial run_test();
-
-uvm_report_server rs = uvm_report_server::get_server();
+initial
+  begin
+     run_test();
+  end
 
 final
   begin
-    if(rs.get_id_count("NOTIMOUTOVR") != 1)
-      pass_the_test = pass_the_test & 0;
-    if ($time == 100 && pass_the_test == 1) begin
+    if ($time == 20) begin // expect the test to complete at the timeout value of 20
       $write("UVM TEST EXPECT 1 UVM_FATAL\n");
       $write("** UVM TEST PASSED **\n");
     end

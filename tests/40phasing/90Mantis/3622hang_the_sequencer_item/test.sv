@@ -44,29 +44,42 @@ class item_driver extends uvm_driver #( item );
    
 endclass
    
-class item_seq extends uvm_sequence #( item );
-   `uvm_object_utils( item_seq );
+class grant_seq extends uvm_sequence #( item );
+   `uvm_object_utils( grant_seq );
    
    function new( string name = "" );
       super.new( name );
    endfunction
    
    task body();
-      item t;
-      
-      for( int i = 0; i < 30; i++ ) begin
-         t = new($sformatf("item %0d" , i ) );
-
-         `uvm_info("start_item", $sformatf("calling start_item(%0d)", i), UVM_NONE)
-         start_item( t );
-         finish_item( t );
-      end
+      bit granted = 0;
+      process pid;
+      item my_item = new("item");
+      `uvm_info("lock","calling lock", UVM_NONE)
+      fork : foo
+         begin
+           pid = process::self();
+           start_item(my_item);
+           `uvm_info("got_grant","got grant", UVM_NONE)
+           granted = 1;
+           finish_item(my_item);
+         end
+         begin
+            #1;
+            if (!granted) begin
+               `uvm_info("kill_grant", "killing grant", UVM_NONE)
+               pid.kill();
+            end
+         end
+      join : foo
+      wait(0); // Block to keep the sequence alive
    endtask
    
    function void do_kill();
       `uvm_info("Just Killed" , get_full_name() , UVM_NONE )
    endfunction
 endclass
+   
    
 class test extends uvm_test;
    `uvm_component_utils( test );
@@ -95,24 +108,16 @@ class test extends uvm_test;
       phase.raise_objection( this , "start reset" );
       fork
          begin
-            item_seq seq = item_seq::type_id::create("item_seq");
+            grant_seq seq = grant_seq::type_id::create("grant_seq_a");
+            seq.start( sequencer );
+         end
+         begin
+            grant_seq seq = grant_seq::type_id::create("grant_seq_b");
             seq.start( sequencer );
          end
       join_none
       #50;
       phase.drop_objection( this , "finished reset" ); 
-   endtask
-   
-   task main_phase( uvm_phase phase );
-      item_seq seq;
-      
-      phase.raise_objection( this , "started main" );
-      
-      seq = item_seq::type_id::create("item_seq");
-      seq.start( sequencer );
-      
-      #50;
-      phase.drop_objection( this , "finished main" );
    endtask
    
    function void phase_started( uvm_phase phase );
