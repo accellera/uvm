@@ -44,24 +44,16 @@ class cust_driver extends uvm_driver#(cust_data);
     super.new(name, parent);
   endfunction
 
-  task get_and_display(int thread_id);
-    REQ item;
-    forever begin
-      `uvm_info("get_and_display", $sformatf("thread_id=%0d top of loop", thread_id), UVM_LOW);
-      seq_item_port.get_next_item(item);
-      seq_item_port.item_done();
-      item.print();
-    end
-  endtask
-
   virtual protected task run_phase(uvm_phase phase);
-    super.run_phase(phase);
+    REQ item1, item2;
 
-    // Starting two threads to manage the seq_item_port
+    seq_item_port.item_done();
+
     fork
-      get_and_display(1);
-      get_and_display(2);
-    join_none
+      seq_item_port.get_next_item(item1);
+      seq_item_port.get_next_item(item2);
+    join
+
   endtask
 
 endclass
