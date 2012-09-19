@@ -124,6 +124,10 @@
 // are disabled and you only get the typename printed (printing the objects contents 
 // either requires fill %p support or an appropriate proxy registered)
 // 
+`ifdef UVM_NO_DEPRECATED 
+  `define UVM_NO_REGISTERED_CONVERTER
+`endif
+
 `ifndef UVM_NO_REGISTERED_CONVERTER
 // MACRO- m_uvm_register_converter
 //
