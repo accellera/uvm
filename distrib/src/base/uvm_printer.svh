@@ -313,6 +313,14 @@ class uvm_table_printer extends uvm_printer;
   protected int m_max_size;
   protected int m_max_value;
 
+
+  local function int unsigned imax(int unsigned a, int unsigned b);
+		if(a>b)
+			return a;
+		else
+			return b;
+	endfunction
+
   extern function void calculate_max_widths();
 
 endclass
@@ -967,7 +975,6 @@ function void uvm_table_printer::calculate_max_widths();
    if (m_max_value< 5) m_max_value= 5;
 endfunction
 
-
 // emit
 // ----
 
@@ -975,14 +982,22 @@ function string uvm_table_printer::emit();
 
   string s;
   string user_format;
-  string dash = "---------------------------------------------------------------------------------------------------";
-  string space= "                                                                                                   ";
+  static string dash; // = "---------------------------------------------------------------------------------------------------";
+  static string space; //= "                                                                                                   ";
   string dashes;
 
   string linefeed = {"\n", knobs.prefix};
 
   calculate_max_widths(); 
 
+  begin
+  	int unsigned m = imax(m_max_name,imax(m_max_type,imax(m_max_size,m_max_value)));
+  	if(dash.len()<m) begin
+  		dash = {m{"-"}};
+  		space = {m{" "}};
+  	end
+  end
+  
   if (knobs.header) begin
     string header;
     user_format = format_header();
