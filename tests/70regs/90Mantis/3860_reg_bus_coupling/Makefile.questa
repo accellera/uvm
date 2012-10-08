@@ -21,7 +21,7 @@
 
 USES_DPI = 1
 
-UVM_HOME	= ../../../..
+UVM_HOME	= ../../../../distrib
 
 include $(UVM_HOME)/examples/Makefile.questa
 

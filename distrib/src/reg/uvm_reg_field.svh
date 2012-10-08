@@ -302,9 +302,10 @@ class uvm_reg_field extends uvm_object;
    //
    // Set the desired value for this field
    //
-   // Sets the desired value of the field to the specified value.
-   // Does not actually set the value of the field in the design,
-   // only the desired value in the abstrcation class.
+   // It sets the desired value of the field to the specified ~value~
+   // modified by the field access policy.
+   // It does not actually set the value of the field in the design,
+   // only the desired value in the abstraction class.
    // Use the <uvm_reg::update()> method to update the actual register
    // with the desired value or the <uvm_reg_field::write()> method
    // to actually write the field and update its mirrored value.
@@ -332,7 +333,7 @@ class uvm_reg_field extends uvm_object;
    //
    // Return the desired value of the field
    //
-   // Does not actually read the value
+   // It does not actually read the value
    // of the field in the design, only the desired value
    // in the abstraction class. Unless set to a different value
    // using the <uvm_reg_field::set()>, the desired value
@@ -355,7 +356,7 @@ class uvm_reg_field extends uvm_object;
    //
    // Return the mirrored value of the field
    //
-   // Does not actually read the value of the field in the design, only the mirrored value
+   // It does not actually read the value of the field in the design, only the mirrored value
    // in the abstraction class. 
    //
    // If the field is write-only, the desired/mirrored
@@ -371,12 +372,12 @@ class uvm_reg_field extends uvm_object;
    //
    // Reset the desired/mirrored value for this field.
    //
-   // Sets the desired and mirror value of the field
+   // It sets the desired and mirror value of the field
    // to the reset event specified by ~kind~.
    // If the field does not have a reset value specified for the
    // specified reset ~kind~ the field is unchanged.
    //
-   // Does not actually reset the value of the field in the design,
+   // It does not actually reset the value of the field in the design,
    // only the value mirrored in the field abstraction class.
    //
    // Write-once fields can be modified after
@@ -809,7 +810,7 @@ function void uvm_reg_field::configure(uvm_reg        parent,
    m_lsb       = lsb_pos;
    m_cover_on  = UVM_NO_COVERAGE;
    m_written   = 0;
-   m_check     = UVM_CHECK;
+   m_check     = volatile ? UVM_NO_CHECK : UVM_CHECK;
    m_individually_accessible = individually_accessible;
 
    if (has_reset)
@@ -1242,6 +1243,12 @@ function void uvm_reg_field::set(uvm_reg_data_t  value,
       value &= mask;
    end
 
+   if (m_parent.is_busy()) begin
+      `uvm_warning("UVM/FLD/SET/BSY",
+                   $sformatf("Setting the value of field \"%s\" while containing register \"%s\" is being accessed may result in loss of desired field value. A race condition between threads concurrently accessing the register model is the likely cause of the problem.",
+                             get_name(), m_parent.get_full_name()))
+   end
+
    case (m_access)
       "RO":    m_desired = m_desired;
       "RW":    m_desired = value;
@@ -1500,8 +1507,8 @@ task uvm_reg_field::do_write(uvm_reg_item rw);
 `ifdef UVM_REG_NO_INDIVIDUAL_FIELD_ACCESS
    rw.element_kind = UVM_REG;
    rw.element = m_parent;
-   rw.value = value_adjust;
-   m_parent.do_write(rw)
+   rw.value[0] = value_adjust;
+   m_parent.do_write(rw);   
 `else        
 
    if (!is_indv_accessible(rw.path,rw.local_map)) begin
@@ -1610,7 +1617,7 @@ task uvm_reg_field::do_read(uvm_reg_item rw);
    rw.element_kind = UVM_REG;
    rw.element = m_parent;
    m_parent.do_read(rw);
-   rw.value = (rw.value >> m_lsb) & ((1<<m_size))-1;
+   rw.value[0] = (rw.value[0] >> m_lsb) & ((1<<m_size))-1;
    bad_side_effect = 1;
 `else
 

@@ -31,15 +31,19 @@ module top;
      int msg_cnt[string];
      int client_cnt[uvm_report_object];
      virtual function action_e catch();
-        if(get_id()!="OBJTN_TRC") return THROW;
-        if(!id_cnt.exists(get_id())) id_cnt[get_id()] = 0;
-        id_cnt[get_id()]++;
+	string id=get_id();
+        string msg = get_message();
+        uvm_report_object client = get_client();
+	
+        if(id!="OBJTN_TRC") return THROW;
+        if(!id_cnt.exists(get_id())) id_cnt[id] = 0;
+        id_cnt[id]++;
 
-        if(!msg_cnt.exists(get_message())) msg_cnt[get_message()] = 0;
-        msg_cnt[get_message()]++;
+        if(!msg_cnt.exists(msg)) msg_cnt[msg] = 0;
+        msg_cnt[msg]++;
 
-        if(!client_cnt.exists(get_client())) client_cnt[get_client()] = 0;
-        client_cnt[get_client()]++;
+        if(!client_cnt.exists(client)) client_cnt[client] = 0;
+        client_cnt[client]++;
         return CAUGHT;
      endfunction
   endclass
