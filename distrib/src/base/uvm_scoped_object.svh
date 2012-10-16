@@ -45,22 +45,22 @@ virtual class uvm_scoped_object extends uvm_object;
 
   extern function new (string name, uvm_object ctxt = null);
 
-  // Function: set_context
+  // Function: set_context_object
   //
   // Sets the context instance of this object, overwriting any previously
   // given context.
   // If ~ctxt~ is specified as ~null~, the object no longer has a context.
   // Returns TRUE if the settign was succesful, FALSE otherwise.
 
-  extern virtual function bit set_context (uvm_object ctxt);
+  extern virtual function bit set_context_object (uvm_object ctxt);
 
 
-  // Function: get_context
+  // Function: get_context_object
   //
   // Returns the context of the object, as provided by the ~ctxt~ argument in the
-  // <new> constructor or <set_context> method.
+  // <new> constructor or <set_context_object> method.
 
-  extern virtual function uvm_object get_context ();
+  extern virtual function uvm_object get_context_object ();
 
 
   // Function: get_full_name
@@ -74,13 +74,13 @@ virtual class uvm_scoped_object extends uvm_object;
   extern virtual function string get_full_name ();
 
 
-  // Function: is_context
+  // Function: is_context_object
   //
   // Returns TRUE if the specified object is a context for this object,
   // within the specified maximum number of levels
   // (e.g. 0 means an immediate context).
 
-  extern function bit is_context(uvm_object obj, int max_lvl = -1);
+  extern function bit is_context_object(uvm_object obj, int max_lvl = -1);
 
 
   //----------------------------------------------------------------------------
@@ -166,14 +166,14 @@ endclass
 
 function uvm_scoped_object::new (string name, uvm_object ctxt=null);
    super.new(name);
-   void'(set_context(ctxt));
+   void'(set_context_object(ctxt));
 endfunction
 
 
-// set_context
+// set_context_object
 // --------
 
-function bit uvm_scoped_object::set_context (uvm_object ctxt);
+function bit uvm_scoped_object::set_context_object (uvm_object ctxt);
    uvm_object c = ctxt;
    while (c != null) begin
       if (c == this) begin
@@ -182,7 +182,7 @@ function bit uvm_scoped_object::set_context (uvm_object ctxt);
          return 0;
       end
 
-      c = c.get_context();
+      c = c.get_context_object();
    end
           
    m_context = ctxt;
@@ -190,10 +190,10 @@ function bit uvm_scoped_object::set_context (uvm_object ctxt);
 endfunction
 
 
-// get_context
+// get_context_object
 // --------
 
-function uvm_object uvm_scoped_object::get_context ();
+function uvm_object uvm_scoped_object::get_context_object ();
   return m_context;
 endfunction
 
@@ -209,16 +209,16 @@ function string uvm_scoped_object::get_full_name ();
 endfunction
 
 
-// is_context
+// is_context_object
 // ----------
-function bit uvm_scoped_object::is_context(uvm_object obj, int max_lvl = -1);
+function bit uvm_scoped_object::is_context_object(uvm_object obj, int max_lvl = -1);
    uvm_object o;
    
    if (obj == this) return 0;
 
    o = this;
    forever begin
-      o = o.get_context();
+      o = o.get_context_object();
       if (o == null) return 0;
       if (obj == o) return 1;
       if (max_lvl-- == 0) return 0;

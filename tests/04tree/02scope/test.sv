@@ -73,10 +73,10 @@ begin
       `uvm_error("TEST", {"Full name of t2a is \"", obj.get_full_name(), "\" instead of \"o11.s11.t1.t22a\"."})
    end
 
-   `uvm_info("TEST", "Checking set_context()...", UVM_NONE)
+   `uvm_info("TEST", "Checking set_context_object()...", UVM_NONE)
 
-   s2.set_context(t3);
-   t1.set_context(null);
+   s2.set_context_object(t3);
+   t1.set_context_object(null);
    if (s2.get_full_name() != "t1.t22b.t3.t22a") begin
       `uvm_error("TEST", {"Full name of s2 is \"", s2.get_full_name(), "\" instead of \"t1.t22b.t3.t22a\"."})
    end
@@ -88,8 +88,8 @@ begin
       uvm_report_cb::add(null, c);
    end
    
-   t1.set_context(s1);
-   s1.set_context(s2);
+   t1.set_context_object(s1);
+   s1.set_context_object(s2);
    if (my_catcher::seen != 1) begin
       `uvm_error("TEST", "Context cycle #1 was not detected")
    end

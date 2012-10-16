@@ -1609,7 +1609,7 @@ virtual class uvm_component extends uvm_tree;
   local uvm_component m_children[string];
 
   extern           virtual function void set_name(string name);
-  extern           virtual function bit  set_context(uvm_object ctxt);
+  extern           virtual function bit  set_context_object(uvm_object ctxt);
   extern           virtual function string get_full_name();
   extern local     virtual function void m_set_full_name();
 
@@ -1689,7 +1689,7 @@ function uvm_component::new (string name, uvm_component parent);
   string error_str;
   uvm_root top;
 
-  // Will call set_name() then set_context()
+  // Will call set_name() then set_context_object()
   super.new(name, parent);
 
   // If uvm_top, we are done
@@ -1751,7 +1751,7 @@ function void uvm_component::set_name (string name);
 endfunction
 
 
-function bit uvm_component::set_context(uvm_object ctxt);
+function bit uvm_component::set_context_object(uvm_object ctxt);
   // Nothing to do if this is uvm_root
   if (get_name() == "__top__") return 1;
 
@@ -1786,7 +1786,7 @@ function bit uvm_component::set_context(uvm_object ctxt);
      return 0;
   end
 
-  if (super.set_context(m_parent)) begin
+  if (super.set_context_object(m_parent)) begin
      m_parent.m_children[this.get_name()] = this;
   end
 

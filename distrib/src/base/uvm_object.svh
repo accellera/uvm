@@ -99,7 +99,7 @@ virtual class uvm_object extends uvm_void;
   extern virtual function string get_name ();
 
 
-  // Function: get_context
+  // Function: get_context_object
   //
   // Returns the context of this object.
   // The default implementation returns ~null~, as uvm_objects do not inherently
@@ -108,7 +108,7 @@ virtual class uvm_object extends uvm_void;
   // Objects possessing hierarchy or context, such as <uvm_scoped_object> and <uvm_tree>,
   // override the default implementation.
 
-  extern virtual function uvm_object get_context ();
+  extern virtual function uvm_object get_context_object ();
 
 
   // Function: get_full_name
@@ -860,10 +860,10 @@ function string uvm_object::get_name ();
 endfunction
 
 
-// get_context
+// get_context_object
 // --------
 
-function uvm_object uvm_object::get_context ();
+function uvm_object uvm_object::get_context_object ();
   return null;
 endfunction
 

@@ -55,14 +55,14 @@ virtual class uvm_tree extends uvm_report_object;
 
   extern function void set_name (string name);
 
-  // Function: set_context
+  // Function: set_context_object
   //
   // Sets the context instance of this tree, overwriting any previously
   // given context.
   // If ~ctxt~ is specified as ~null~, the tree no longer has a context.
   // Returns TRUE if the setting was successful, FALSE otherwise.
 
-  extern virtual function bit set_context (uvm_object ctxt);
+  extern virtual function bit set_context_object (uvm_object ctxt);
 
 
   // Function: get_branches
@@ -171,7 +171,7 @@ function void uvm_tree::set_name (string name);
       name = {"TREE_", name};
    end
 
-   void'($cast(trunk, get_context()));
+   void'($cast(trunk, get_context_object()));
    if (trunk != null) begin
       trunk.m_branches_by_name.delete(get_name());
       trunk.m_branches_by_name[name] = this;
@@ -181,17 +181,17 @@ function void uvm_tree::set_name (string name);
 endfunction
 
 
-// set_context
+// set_context_object
 // --------
 
-function bit uvm_tree::set_context (uvm_object ctxt);
+function bit uvm_tree::set_context_object (uvm_object ctxt);
    uvm_tree trunk;
 
-   void'($cast(trunk, get_context()));
+   void'($cast(trunk, get_context_object()));
    if (trunk != null)
       trunk.m_del_branch(this);
 
-   super.set_context(ctxt);
+   super.set_context_object(ctxt);
 
    if ($cast(trunk, ctxt) && trunk != null)
       return trunk.m_add_branch(this);
@@ -260,7 +260,7 @@ function bit uvm_tree::is_branch(uvm_tree branch, int max_lvl = -1);
 
    o = branch;
    forever begin
-      if (!$cast(o, o.get_context()) || o == null) return 0;
+      if (!$cast(o, o.get_context_object()) || o == null) return 0;
       if (this == o) return 1;
       if (max_lvl-- == 0) return 0;
    end

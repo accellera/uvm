@@ -67,10 +67,10 @@ begin
       `uvm_error("TEST", {"Full name of s3 is \"", obj.get_full_name(), "\" instead of \"o11.s33\"."})
    end
 
-   `uvm_info("TEST", "Checking set_context()...", UVM_NONE)
+   `uvm_info("TEST", "Checking set_context_object()...", UVM_NONE)
 
-   s2.set_context(o1);
-   s3.set_context(null);
+   s2.set_context_object(o1);
+   s3.set_context_object(null);
    if (s2.get_full_name() != "o11.s22") begin
       `uvm_error("TEST", {"Full name of s2 is \"", s2.get_full_name(), "\" instead of \"o11.s22\"."})
    end
@@ -85,19 +85,19 @@ begin
       uvm_report_cb::add(null, c);
    end
    
-   s2.set_context(s1);
-   s1.set_context(s3);
+   s2.set_context_object(s1);
+   s1.set_context_object(s3);
    if (s2.get_full_name() != "s33.s1.s22") begin
       `uvm_error("TEST", {"Full name of s2 is \"", s2.get_full_name(), "\" instead of \"s33.s1.s22\"."})
    end
 
-   s3.set_context(s3);
+   s3.set_context_object(s3);
    if (my_catcher::seen != 1) begin
       `uvm_error("TEST", "Context cycle #1 was not detected")
    end
    my_catcher::seen = 0;
 
-   s3.set_context(s1);
+   s3.set_context_object(s1);
    if (s2.get_full_name() != "s33.s1.s22") begin
       `uvm_error("TEST", {"Full name of s2 is \"", s2.get_full_name(), "\" instead of \"s33.s1.s22\"."})
    end
