@@ -202,9 +202,7 @@ virtual class uvm_resource_base extends uvm_object;
   protected bit modified;
   protected bit read_only;
 
-  // IUS currently does not support the protected keyword.  When
-  // it does, comments delimiters can be removed.
-  /*protected*/ bit m_is_regex_name;
+  local bit m_is_regex_name;
 
   uvm_resource_types::access_t access[string];
 
@@ -585,6 +583,9 @@ virtual class uvm_resource_base extends uvm_object;
     access_record.write_count = 0;
   endfunction
 
+  virtual function bit has_regex_name();
+  	return m_is_regex_name;
+  endfunction
 endclass
 
 
@@ -673,14 +674,8 @@ class uvm_resource_pool;
 
   get_t get_record [$];  // history of gets
 
-  // To make a proper singleton the constructor should be protected.
-  // However, IUS doesn't support protected constructors so we'll just
-  // the default constructor instead.  If support for protected
-  // constructors ever becomes available then this comment can be
-  // deleted and the protected constructor uncommented.
-
-  //  protected function new();
-  //  endfunction
+  local function new();
+  endfunction
 
 
   // Function: get
@@ -777,7 +772,7 @@ class uvm_resource_pool;
     //optimization for name lookups. Since most environments never
     //use wildcarded names, don't want to incurr a search penalty
     //unless a wildcarded name has been used.
-    if(rsrc.m_is_regex_name)
+    if(rsrc.has_regex_name())
       m_has_wildcard_names = 1;
   endfunction
 

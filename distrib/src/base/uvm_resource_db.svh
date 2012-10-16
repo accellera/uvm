@@ -55,16 +55,8 @@ class uvm_resource_db #(type T=uvm_object);
 
   typedef uvm_resource #(T) rsrc_t;
 
-  // All of the functions in this class are static, so there is no need
-  // to instantiate this class ever.  To make sure that the constructor
-  // is never called it's good practice to make it local or at leat
-  // protected. However, IUS doesn't support protected constructors so
-  // we'll just the default constructor instead.  If support for
-  // protected constructors ever becomes available then this comment can
-  // be deleted and the protected constructor uncommented.
-
-  //  protected function new();
-  //  endfunction
+  protected function new();
+  endfunction
 
   // function: get_by_type
   //
