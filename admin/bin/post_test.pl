@@ -38,8 +38,8 @@ my @sources = bsd_glob("$dir/*.{au,au.$tool}",GLOB_CSH);
 my @diffs=();
 my %lookup=();
 
-if(!@sources) {
-  push @diffs;"no gold files";
+if(! scalar(@sources)) {
+  push @diffs,"no gold files present";
 }
 
 sub cleanFileAndWrite {
@@ -55,7 +55,7 @@ sub cleanFileAndWrite {
 sub scrub {
   my($logfile)=@_;
 
-$$logfile =~ s/\@\d+/\@X/sg;
+$$logfile =~ s/\@[\d_]+/\@X/sg;
 # strip header
 $$logfile =~ s/.*\nGOLD-FILE-START\n//sx;
 $$logfile =~ s/\nGOLD-FILE-END.*//sx;
@@ -67,6 +67,7 @@ $$logfile =~ s/^\(C\).*$/COPYRIGHT/mg;
 $$logfile =~ s/COPYRIGHT(.COPYRIGHT)+/COPYRIGHT/sg;
 $$logfile =~ s/^SVSEED.*\n//sg;
 $$logfile =~ s/^# //mg;
+$$logfile =~ s/\$unit_0x[0-9a-f]+::/SCOPE::/mg;
 
 }
 

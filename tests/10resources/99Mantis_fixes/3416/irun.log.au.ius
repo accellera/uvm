@@ -10,19 +10,19 @@
 -  
 * [/^an_obj$/] : '{null}
 -  
-* [/^an_obj-m$/] : '{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"mo", m_inst_id:4784, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X_1}, i:0, type_name:"an_obj"}
+* [/^an_obj-m$/] : '{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"mo", m_inst_id:4792, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X}, i:0, type_name:"an_obj"}
 -  
-* [/^an_obj-y$/] : '{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"yo", m_inst_id:4786, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X_1}, i:0, type_name:"an_obj"}
+* [/^an_obj-y$/] : '{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"yo", m_inst_id:4794, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X}, i:0, type_name:"an_obj"}
 -  
 * [/^my_obj-0$/] : '{null}
 -  
-* [/^my_obj$/] : '{super:'{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"mo", m_inst_id:4784, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X_1}, i:0, type_name:"an_obj"}, type_name:"my_obj"}
+* [/^my_obj$/] : '{super:'{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"mo", m_inst_id:4792, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X}, i:0, type_name:"an_obj"}, type_name:"my_obj"}
 -  
 * [/^yr_obj$/] : '{null}
 -  
-* [/^yr_obj$/] : '{super:'{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"yo", m_inst_id:4786, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X_1}, i:0, type_name:"an_obj"}, type_name:"your_obj"}
+* [/^yr_obj$/] : '{super:'{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"yo", m_inst_id:4794, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X}, i:0, type_name:"an_obj"}, type_name:"your_obj"}
 -  
-entry [/^vif$/] : virtual interface intf@X_1
+entry [/^vif$/] : virtual interface intf@X
 -  
 no-uvm-object [/^.*$/] : '{i:-559038737}
 -  

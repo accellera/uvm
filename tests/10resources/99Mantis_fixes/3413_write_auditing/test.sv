@@ -160,8 +160,11 @@ class test extends uvm_test;
      bit err;
 
 uvm_resource_pool rp = uvm_resource_pool::get();
+      
+      $display("\nGOLD-FILE-START\n");
 rp.dump(1);
-
+    $display("\nGOLD-FILE-END\n");
+      
      if ($time != 30) begin
        `uvm_error("SIMTIME",$sformatf("Expected sim to end at 30, not %0t",$time))
        err = 1;
