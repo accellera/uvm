@@ -2275,12 +2275,15 @@ task uvm_reg::do_write (uvm_reg_item rw);
          m_is_busy = 0;
 
          if (system_map.get_auto_predict()) begin
+            uvm_status_e status;
             if (rw.status != UVM_NOT_OK) begin
                sample(value, -1, 0, rw.map);
                m_parent.XsampleX(map_info.offset, 0, rw.map);
             end
 
-           do_predict(rw, UVM_PREDICT_WRITE);
+            status = rw.status; // do_predict will override rw.status, so we save it here
+            do_predict(rw, UVM_PREDICT_WRITE);
+            rw.status = status;
          end
       end
       
@@ -2525,6 +2528,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
          m_is_busy = 0;
 
          if (system_map.get_auto_predict()) begin
+            uvm_status_e status;
             if (rw.local_map.get_check_on_read() &&
                 rw.status != UVM_NOT_OK) begin
                void'(do_check(exp, rw.value[0], system_map));
@@ -2535,7 +2539,9 @@ task uvm_reg::do_read(uvm_reg_item rw);
                m_parent.XsampleX(map_info.offset, 1, rw.map);
             end
 
-          do_predict(rw, UVM_PREDICT_READ);
+            status = rw.status; // do_predict will override rw.status, so we save it here
+            do_predict(rw, UVM_PREDICT_READ);
+            rw.status = status;
          end
       end
       
