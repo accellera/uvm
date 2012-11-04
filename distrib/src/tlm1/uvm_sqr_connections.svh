@@ -20,18 +20,6 @@
 //   permissions and limitations under the License.
 //-----------------------------------------------------------------------------
 
-
-`define UVM_SEQ_ITEM_PULL_IMP(imp, REQ, RSP, req_arg, rsp_arg) \
-  task get_next_item(output REQ req_arg); imp.get_next_item(req_arg); endtask \
-  task try_next_item(output REQ req_arg); imp.try_next_item(req_arg); endtask \
-  function void item_done(input RSP rsp_arg = null); imp.item_done(rsp_arg); endfunction \
-  task wait_for_sequences(); imp.wait_for_sequences(); endtask \
-  function bit has_do_available(); return imp.has_do_available(); endfunction \
-  function void put_response(input RSP rsp_arg); imp.put_response(rsp_arg); endfunction \
-  task get(output REQ req_arg); imp.get(req_arg); endtask \
-  task peek(output REQ req_arg); imp.peek(req_arg); endtask \
-  task put(input RSP rsp_arg); imp.put(rsp_arg); endtask
-
 //-----------------------------------------------------------------------------
 // Title: Sequence Item Pull Ports
 //
