@@ -1143,12 +1143,14 @@ function void uvm_reg_field::do_predict(uvm_reg_item      rw,
 
             if (acc == "RC" ||
                 acc == "WRC" ||
+                acc == "WSRC" ||
                 acc == "W1SRC" ||
                 acc == "W0SRC")
               field_val = 0;  // (clear)
 
             else if (acc == "RS" ||
                      acc == "WRS" ||
+                     acc == "WCRS" ||
                      acc == "W1CRS" ||
                      acc == "W0CRS")
               field_val = ('b1 << m_size)-1; // all 1's (set)
