@@ -243,16 +243,9 @@ begin
    end
 
    begin
-     uvm_reg_data_t exp;
      uvm_status_e status;
-     exp = rg.get();
-     rg.read(status, data);
-     if (exp[19:16] !== data[19:16]) `uvm_error("Error1", $sformatf("expected %b, but saw %b", exp[19:16], data[19:16]));
-     exp = rg.get();
-     rg.read(status, data);
-     if (exp[19:16] !== data[19:16]) `uvm_error("Error2", $sformatf("expected %b, but saw %b", exp[19:16], data[19:16]));
-
-     //TODO: Why doesn't mirror do what I want?
+     rg.mirror(status, UVM_CHECK);
+     rg.mirror(status, UVM_CHECK);
    end
    
    begin
