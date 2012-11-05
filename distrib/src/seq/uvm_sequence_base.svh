@@ -722,7 +722,13 @@ class uvm_sequence_base extends uvm_sequence_item;
     uvm_factory f_ = uvm_factory::get();
     $cast(create_item,  f_.create_object_by_type( type_var, this.get_full_name(), name ));
 
-    create_item.set_item_context(this, l_sequencer);
+    create_item.set_use_sequence_info(1);
+    create_item.set_parent_sequence(this);
+    if (l_sequencer == null)
+      create_item.set_sequencer(get_sequencer());
+    else
+      create_item.set_sequencer(l_sequencer);
+    
   endfunction
 
 
