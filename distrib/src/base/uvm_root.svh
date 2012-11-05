@@ -67,6 +67,9 @@ typedef class uvm_cmdline_processor;
 
 class uvm_root extends uvm_component;
 
+  // Function: get()
+  // Get the factory singleton
+  //
   extern static function uvm_root get();
 
   uvm_cmdline_processor clp;
