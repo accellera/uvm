@@ -191,10 +191,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   // Function: get_sequence_state
   //
-  // Returns the sequence state as an enumerated value. Can use to wait on
-  // the sequence reaching or changing from one or more states.
-  //
-  //| wait(get_sequence_state() & (STOPPED|FINISHED));
+  // Returns the sequence state as an enumerated value.
 
   function uvm_sequence_state_enum get_sequence_state();
     return m_sequence_state;
@@ -203,12 +200,13 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   // Task: wait_for_sequence_state
   // 
-  // Waits until the sequence reaches the given ~state~. If the sequence
-  // is already in this state, this method returns immediately. Convenience
-  // for wait ( get_sequence_state == ~state~ );
+  // Waits until the sequence reaches one of the given ~state~. If the sequence
+  // is already in one of the state, this method returns immediately.
+  //
+  //| wait_for_sequence_state(STOPPED|FINISHED);
 
-  task wait_for_sequence_state(uvm_sequence_state_enum state);
-    wait (m_sequence_state == state);
+  task wait_for_sequence_state(int unsigned state_mask);
+    wait (m_sequence_state & state_mask);
   endtask
 
 
