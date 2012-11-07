@@ -906,7 +906,7 @@ endfunction
 function string uvm_reg_field::get_access(uvm_reg_map map = null);
    get_access = m_access;
 
-   if (m_parent.get_n_maps() == 1 || map == uvm_reg_map::backdoor())
+   if (map == uvm_reg_map::backdoor())
      return get_access;
 
    // Is the register restricted in this map?
