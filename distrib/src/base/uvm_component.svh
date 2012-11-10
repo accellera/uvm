@@ -3055,8 +3055,12 @@ function void uvm_component::apply_config_settings (bit verbose=0);
              end
              else begin
                 uvm_resource#(uvm_object) ro;
-                if($cast(ro, r))
+                if($cast(ro, r)) begin
                   set_object_local(name, ro.read(this), 0);
+                end 
+                else if (verbose) begin
+                  uvm_report_info("CFGAPL", $sformatf("field %s has an unsupported type", name), UVM_NONE);
+                end
              end
           end
         end
