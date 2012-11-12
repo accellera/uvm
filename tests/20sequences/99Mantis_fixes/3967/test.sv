@@ -113,7 +113,7 @@ class fatal_catcher extends uvm_report_catcher;
   int seen = 0;
   virtual function action_e catch();
     if (get_severity() == UVM_FATAL && get_id() == "uvm_test_top.agent.sequencer" &&
-        (get_message() == "Concurrent calls to send_request() not supported. Check your driver for concurrent calls to get_next_item()" || 
+        (get_message() == "Concurrent calls to get_next_item() not supported. Consider using a semaphore to ensure that concurrent processes take turns in the driver" || 
          get_message() == "Item_done() called with no outstanding requests. Each call to item_done() must be paired with a previous call to get_next_item().")) begin
       seen++;
       return CAUGHT;
