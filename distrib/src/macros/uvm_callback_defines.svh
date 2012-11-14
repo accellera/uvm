@@ -261,7 +261,9 @@
    end
 
 
-// callback trace macros can be turned on via +define+UVM_CB_TRACE_ON
+// The +define+UVM_CB_TRACE_ON setting will instrument the uvm library to emit 
+// messages with message id UVMCB_TRC and UVM_NONE verbosity 
+// notifing add,delete and execution of uvm callbacks. The instrumentation is off by default.
 
 `ifdef UVM_CB_TRACE_ON
 
