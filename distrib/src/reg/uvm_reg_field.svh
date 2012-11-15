@@ -950,9 +950,9 @@ function string uvm_reg_field::get_access(uvm_reg_map map = null);
        endcase
 
      default:
-       `uvm_error("RegModel", {"Shared register '",m_parent.get_full_name(),
-                  "' containing field '",get_name(),"' is not shared in map '",
-                  map.get_full_name(),"'"})
+       `uvm_error("RegModel", {"Register '",m_parent.get_full_name(),
+                  "' containing field '",get_name(),"' is mapped in map '",
+                  map.get_full_name(),"' with unknown access right '", m_parent.get_rights(map), "'"})
    endcase
 endfunction: get_access
 
