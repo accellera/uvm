@@ -313,14 +313,6 @@ class uvm_table_printer extends uvm_printer;
   protected int m_max_size;
   protected int m_max_value;
 
-
-  local function int unsigned imax(int unsigned a, int unsigned b);
-		if(a>b)
-			return a;
-		else
-			return b;
-	endfunction
-
   extern function void calculate_max_widths();
 
 endclass
@@ -990,8 +982,14 @@ function string uvm_table_printer::emit();
 
   calculate_max_widths(); 
 
-  begin
-  	int unsigned m = imax(m_max_name,imax(m_max_type,imax(m_max_size,m_max_value)));
+   begin
+      int q[5];
+      int m;
+      int qq[$];
+      
+      q = '{m_max_name,m_max_type,m_max_size,m_max_value,100};
+      qq = q.max;
+      m = qq[0];
   	if(dash.len()<m) begin
   		dash = {m{"-"}};
   		space = {m{" "}};
