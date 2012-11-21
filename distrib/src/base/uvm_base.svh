@@ -46,6 +46,9 @@
   // Resources/configuration facility
   `include "base/uvm_spell_chkr.svh"
   `include "base/uvm_resource.svh"
+`ifdef UVM_USE_RESOURCE_CONVERTER
+  `include "deprecated/uvm_resource_converter.svh"
+`endif
   `include "base/uvm_resource_specializations.svh"
   `include "base/uvm_resource_db.svh"
   `include "base/uvm_config_db.svh"

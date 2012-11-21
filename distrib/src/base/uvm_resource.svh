@@ -1387,6 +1387,10 @@ class uvm_resource_pool;
   
 endclass
 
+`ifdef UVM_USE_RESOURCE_CONVERTER
+typedef class m_uvm_resource_converter;
+`endif
+
 //----------------------------------------------------------------------
 // Class: uvm_resource #(T)
 //
@@ -1404,12 +1408,45 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // Can't be rand since things like rand strings are not legal.
   protected T val;
 
+`ifdef UVM_USE_RESOURCE_CONVERTER
+
+  // Singleton used to convert this resource to a string
+  local static m_uvm_resource_converter#(T) m_r2s;
+
+  // Function- m_get_converter
+  // Get the conversion policy class that specifies how to convert the value
+  // of a resource of this type to a string
+  //
+  static function m_uvm_resource_converter#(T) m_get_converter();
+    if (m_r2s==null) m_r2s = new();
+    return m_r2s;
+  endfunction
+    
+
+  // Function- m_set_converter
+  // Specify how to convert the value of a resource of this type to a string
+  //
+  // If not specified (or set to ~null~),
+  // a default converter that display the name of the resource type is used.
+  // Default conversion policies are specified for the built-in type.
+  //
+  static function void m_set_converter(m_uvm_resource_converter#(T) r2s);
+    m_r2s = r2s;
+  endfunction
+   
+`endif
+
   function new(string name="", scope="");
     super.new(name, scope);
   endfunction
 
   function string convert2string();
-  	return $sformatf("%p",val);
+`ifdef UVM_USE_RESOURCE_CONVERTER
+    void'(m_get_converter());
+    return m_r2s.convert2string(val);
+`else
+  	return $sformatf("(%s) %0p", `uvm_typename(val), val);
+`endif
   endfunction
 
 

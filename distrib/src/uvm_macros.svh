@@ -31,6 +31,7 @@
 // Any vendor specific defines go here.
 //
 `ifdef VCS
+`define UVM_USE_RESOURCE_CONVERTER
 `endif
 
 
