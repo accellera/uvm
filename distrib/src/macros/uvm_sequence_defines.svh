@@ -295,7 +295,7 @@
   begin \
   uvm_sequence_base __seq; \
   if (!$cast(__seq,SEQ_OR_ITEM)) start_item(SEQ_OR_ITEM, PRIORITY);\
-  else __seq.set_item_context(this); \
+  else __seq.set_item_context(this,SEQ_OR_ITEM.get_sequencer()); \
   if ((__seq == null || !__seq.do_not_randomize) && !SEQ_OR_ITEM.randomize() with CONSTRAINTS ) begin \
     `uvm_warning("RNDFLD", "Randomization failed in uvm_rand_send_with action") \
   end\

@@ -1110,7 +1110,7 @@ function string uvm_tree_printer::emit();
 
       if (i < m_rows.size()-1) begin
         if (m_rows[i+1].level > row.level) begin
-          s = {s, "{", linefeed};
+          s = {s, knobs.separator[0], linefeed};
           continue;
         end
       end
@@ -1129,7 +1129,7 @@ function string uvm_tree_printer::emit();
           string indent_str;
           for (int l=row.level-1; l >= end_level; l--) begin
             indent_str = space.substr(1,l * knobs.indent); 
-            s = {s, indent_str, "}", linefeed};
+            s = {s, indent_str, knobs.separator[1], linefeed};
           end
         end
       end

@@ -1,0 +1,1 @@
+../../../../admin/bin/post_test.pl
