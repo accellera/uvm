@@ -1106,36 +1106,31 @@ endfunction
 // get_default_map
 
 function uvm_reg_map uvm_mem::get_default_map(string caller="");
-
-   // if mem is not associated with any may, return null
-   if (m_maps.num() == 0) begin
-      `uvm_warning("RegModel", 
-        {"Memory '",get_full_name(),"' is not registered with any map",
-         (caller == "" ? "": {" (called from ",caller,")"})})
-      return null;
-   end
-
-   // if only one map, choose that
-   if (m_maps.num() == 1) begin
-     void'(m_maps.first(get_default_map));
-   end
-
-   // try to choose one based on default_map in parent blocks.
-   foreach (m_maps[l]) begin
-     uvm_reg_map map = l;
-     uvm_reg_block blk = map.get_parent();
-     uvm_reg_map default_map = blk.get_default_map();
-     if (default_map != null) begin
-       uvm_reg_map local_map = get_local_map(default_map);
-       if (local_map != null)
-         return local_map;
+   case (m_maps.num())
+     0: begin    // if mem is not associated with any may, return null
+	`uvm_warning("RegModel", 
+		     {"Memory '",get_full_name(),"' is not registered with any map",
+		      (caller == "" ? "": {" (called from ",caller,")"})})
+	return null;
      end
-   end
-
+     
+     1: begin    // if only one map, choose that
+	void'(m_maps.first(get_default_map));
+	return get_default_map(); 
+     end
+     
+     default begin    // try to choose one based on default_map in parent blocks.
+	foreach (m_maps[l]) 
+	   if (l.get_parent().get_default_map() != null) 
+	     if (get_local_map(l.get_parent().get_default_map()) != null)
+	       return get_local_map(l.get_parent().get_default_map());
+	end 
+     endcase
+   
    // if that fails, choose the first in this mem's maps
-
    void'(m_maps.first(get_default_map));
-
+   return get_default_map();
+   
 endfunction
 
 
