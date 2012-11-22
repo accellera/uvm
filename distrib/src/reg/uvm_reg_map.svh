@@ -996,8 +996,8 @@ function void uvm_reg_map::add_submap (uvm_reg_map child_map,
       if (m_n_bytes > child_map.get_n_bytes(UVM_NO_HIER)) begin
          `uvm_warning("RegModel",
              $sformatf("Adding %0d-byte submap '%s' to %0d-byte parent map '%s'",
-                       m_n_bytes, child_map.get_full_name(),
-                       child_map.get_n_bytes(UVM_NO_HIER), get_full_name()));
+                       child_map.get_n_bytes(UVM_NO_HIER), child_map.get_full_name(),
+                       m_n_bytes, get_full_name()));
       end
    end
 
