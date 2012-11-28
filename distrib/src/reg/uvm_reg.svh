@@ -2947,7 +2947,8 @@ task uvm_reg::mirror(output uvm_status_e       status,
      return;
    
    // Remember what we think the value is before it gets updated
-   if (check == UVM_CHECK) exp = get();
+   if (check == UVM_CHECK)
+     exp = get_mirrored_value();
 
    XreadX(status, v, path, map, parent, prior, extension, fname, lineno);
 
