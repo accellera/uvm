@@ -3262,21 +3262,26 @@ endfunction \
 
 // Macro: `uvm_record_attribute
 //
-// Vendor-independent macro for recording attributes (fields)
-// to a vendor-specific transaction database.
+// Vendor-independent macro to hide vendor-specific interface for
+// recording attributes (fields) to a transaction database.
 
-`ifdef QUESTA
-  `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
-     $add_attribute(TR_HANDLE,VALUE,NAME);
+`ifndef uvm_record_attribute
+  `ifdef QUESTA
+    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
+      $add_attribute(TR_HANDLE,VALUE,NAME);
+  `elsif VCS
+    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
+      // need VCS call here
+  `elsif INCA
+    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
+      // need IUS call here
+  `else
+    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
+      // empty definition
+  `endif
 `endif
 
-`ifdef VCS
-  `define uvm_record_attribute(TR_HANDLE,NAME,VALUE)
-`endif
-
-`ifdef INCA
-  `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) 
-`endif
+  
 
 // Macro: `uvm_record_field
 //
