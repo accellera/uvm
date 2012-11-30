@@ -526,8 +526,11 @@ virtual class uvm_report_catcher extends uvm_callback;
     catcher = uvm_report_cb::get_first(iter,client);
     while(catcher != null) begin
       uvm_severity prev_sev;
-       
-      if (!catcher.callback_mode()) continue;
+
+      if (!catcher.callback_mode()) begin
+        catcher = uvm_report_cb::get_next(iter,client);
+        continue;
+      end
 
       prev_sev = m_modified_severity;
       m_set_action_called = 0;
