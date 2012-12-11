@@ -1981,6 +1981,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       while (addrs.size() > (n_bits/(bus_width*8) + 1))
         void'(addrs.pop_back());
     end
+    curr_byte=0;
     rw.value[val_idx] = 0;
               
     foreach (addrs[i]) begin
@@ -2053,6 +2054,9 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       curr_byte += bus_width;
       n_bits -= bus_width * 8;
     end
+
+    foreach (addrs[i])
+      addrs[i] = addrs[i] + map_info.mem_range.stride;
 
     if (rw.element_kind == UVM_FIELD)
        rw.value[val_idx] = (rw.value[val_idx] >> (n_access_extra)) & ((1<<size)-1);
