@@ -717,8 +717,8 @@ class uvm_sequence_base extends uvm_sequence_item;
   protected function uvm_sequence_item create_item(uvm_object_wrapper type_var, 
                                                    uvm_sequencer_base l_sequencer, string name);
 
-    uvm_factory f_ = uvm_factory::get();
-    $cast(create_item,  f_.create_object_by_type( type_var, this.get_full_name(), name ));
+    uvm_factory f = uvm_factory::get();
+    $cast(create_item,  f.create_object_by_type( type_var, this.get_full_name(), name ));
 
     create_item.set_item_context(this, l_sequencer);
   endfunction
@@ -1065,7 +1065,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   function uvm_sequence_base get_sequence(int unsigned req_kind);
     uvm_sequence_base m_seq;
     string m_seq_type;
-    uvm_factory factory = uvm_factory::get();
+    uvm_factory f = uvm_factory::get();
     `uvm_warning("UVM_DEPRECATED",$sformatf("%m deprecated."))
     if (req_kind < 0 || req_kind >= m_sequencer.sequences.size()) begin
       uvm_report_error("SEQRNG", 
@@ -1073,7 +1073,7 @@ class uvm_sequence_base extends uvm_sequence_item;
         req_kind, m_sequencer.sequences.size()-1), UVM_NONE);
     end
     m_seq_type = m_sequencer.sequences[req_kind];
-    if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
+    if (!$cast(m_seq, f.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
       uvm_report_fatal("FCTSEQ", 
         $sformatf("Factory can not produce a sequence of type %0s.",
         m_seq_type), UVM_NONE);
@@ -1091,10 +1091,10 @@ class uvm_sequence_base extends uvm_sequence_item;
   task do_sequence_kind(int unsigned req_kind);
     string m_seq_type;
     uvm_sequence_base m_seq;
-    uvm_factory factory = uvm_factory::get();
+    uvm_factory f = uvm_factory::get();
     `uvm_warning("UVM_DEPRECATED",$sformatf("%m deprecated."))
     m_seq_type = m_sequencer.sequences[req_kind];
-    if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
+    if (!$cast(m_seq, f.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
       uvm_report_fatal("FCTSEQ", 
         $sformatf("Factory can not produce a sequence of type %0s.", m_seq_type), UVM_NONE);
     end
@@ -1114,8 +1114,9 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   function uvm_sequence_base get_sequence_by_name(string seq_name);
     uvm_sequence_base m_seq;
+    uvm_factory f = uvm_factory::get();
     `uvm_warning("UVM_DEPRECATED",$sformatf("%m deprecated."))
-    if (!$cast(m_seq, factory.create_object_by_name(seq_name, get_full_name(), seq_name))) begin
+    if (!$cast(m_seq, f.create_object_by_name(seq_name, get_full_name(), seq_name))) begin
       uvm_report_fatal("FCTSEQ", 
         $sformatf("Factory can not produce a sequence of type %0s.", seq_name), UVM_NONE);
     end

@@ -136,11 +136,14 @@
 // The macro should be invoked inside the sequencer's constructor.
 
 `define uvm_update_sequence_lib_and_item(USER_ITEM) \
-  factory.set_inst_override_by_type( \
-    uvm_sequence_item::get_type(), USER_ITEM::get_type(), \
-    {get_full_name(), "*.item"}); \
-  m_add_builtin_seqs(1); \
-  uvm_update_sequence_lib();
+  begin \
+    uvm_factory f = uvm_factory::get(); \
+    f.set_inst_override_by_type( \
+      uvm_sequence_item::get_type(), USER_ITEM::get_type(), \
+      {get_full_name(), "*.item"}); \
+    m_add_builtin_seqs(1); \
+    uvm_update_sequence_lib(); \
+  end
 
 
 // MACRO- `uvm_sequencer_utils

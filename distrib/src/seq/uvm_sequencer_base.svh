@@ -1520,9 +1520,10 @@ task uvm_sequencer_base::start_default_sequence();
      "starting default sequences in UVM."})
 
   if(sequences.size() != 0) begin
+    uvm_factory f = uvm_factory::get();
     //create the sequence object
-    if (!$cast(m_seq, factory.create_object_by_name(default_sequence, 
-                                            get_full_name(), default_sequence))) 
+    if (!$cast(m_seq, f.create_object_by_name(default_sequence, 
+                                              get_full_name(), default_sequence))) 
       begin
         uvm_report_fatal("FCTSEQ",{"Default sequence set to invalid value : ",
                                    default_sequence}, UVM_NONE);
@@ -1571,7 +1572,7 @@ endfunction
 
 function uvm_sequence_base uvm_sequencer_base::get_sequence(int req_kind);
 
-  uvm_factory factory = uvm_factory::get();
+  uvm_factory f = uvm_factory::get();
   uvm_sequence_base m_seq ;
   string m_seq_type;
 
@@ -1584,9 +1585,9 @@ function uvm_sequence_base uvm_sequencer_base::get_sequence(int req_kind);
   end
 
   m_seq_type = sequences[req_kind];
-  if (!$cast(m_seq, factory.create_object_by_name(m_seq_type,
-                                          get_full_name(),
-                                          m_seq_type))) 
+  if (!$cast(m_seq, f.create_object_by_name(m_seq_type,
+                                            get_full_name(),
+                                            m_seq_type))) 
   begin
       uvm_report_fatal("FCTSEQ", 
         $sformatf("Factory can not produce a sequence of type %0s.",

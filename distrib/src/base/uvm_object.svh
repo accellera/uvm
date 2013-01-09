@@ -155,7 +155,8 @@ virtual class uvm_object extends uvm_void;
   //
   // Then, to use:
   //
-  //|  factory.set_type_override(cmd::get_type(),subcmd::get_type());
+  //|  uvm_factory f = uvm_factory::get();
+  //|  f.set_type_override(cmd::get_type(),subcmd::get_type());
   //
   // This function is implemented by the `uvm_*_utils macros, if employed.
 
@@ -832,8 +833,9 @@ endfunction
 // ---------------
 
 function uvm_object_wrapper uvm_object::get_object_type();
+  uvm_factory f = uvm_factory::get();
   if(get_type_name() == "<unknown>") return null;
-  return factory.find_by_name(get_type_name());
+  return f.find_by_name(get_type_name());
 endfunction
 
 

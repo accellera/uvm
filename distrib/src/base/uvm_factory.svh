@@ -527,6 +527,8 @@ endclass
 //|    endfunction
 //|
 //|    virtual function void build_phase(uvm_phase phase);
+//|      // Grab the singleton reference
+//|      uvm_factory f = uvm_factory::get();
 //|
 //|      // three methods to set an instance override for agent1.driver1
 //|      // - via component convenience method...
@@ -539,9 +541,9 @@ endclass
 //|                                           "agent1.driver1",this);
 //|
 //|      // - via a direct call to a factory method...
-//|      factory.set_inst_override_by_type(B_driver::get_type(),
-//|                                        D2_driver::get_type(),
-//|                                        {get_full_name(),".agent1.driver1"});
+//|      f.set_inst_override_by_type(B_driver::get_type(),
+//|                                  D2_driver::get_type(),
+//|                                  {get_full_name(),".agent1.driver1"});
 //|
 //|      // create agents using the factory; actual agent types may be different
 //|      agent0 = agent::type_id::create("agent0",this);
@@ -573,6 +575,8 @@ endclass
 //|    env env0;
 //|
 //|    initial begin
+//|      // Grab the singleton instance
+//|      uvm_factory f = uvm_factory::get();
 //|
 //|      // Being registered first, the following overrides take precedence
 //|      // over any overrides made within env0's construction & build.
@@ -588,9 +592,9 @@ endclass
 //|                                           "env0.agent0.driver0");
 //|
 //|      // - via a direct call to a factory method
-//|      factory.set_inst_override_by_type(B_driver::get_type(),
-//|                                        B_driver::get_type(),
-//|                                    {get_full_name(),"env0.agent0.driver0"});
+//|      f.set_inst_override_by_type(B_driver::get_type(),
+//|                                  B_driver::get_type(),
+//|                                  {get_full_name(),"env0.agent0.driver0"});
 //|
 //|      // now, create the environment; our factory configuration will
 //|      // govern what topology gets created
@@ -707,14 +711,35 @@ class uvm_factory_override;
 endclass
 
 
-//-----------------------------------------------------------------------------
-// our singleton factory; it is statically initialized
-//-----------------------------------------------------------------------------
+`ifndef UVM_NO_DEPRECATED
+    
+// Providing a factory singleton reference via uvm_pkg::factory is not
+// actually safe from a static-initialization perspective.  As such
+// all user code should instead use uvm_factory::get() to retrieve the
+// factory instance.
 
-const uvm_factory factory = uvm_factory::get();
+// This method is provided as a backwards-compatibility helper for the
+// user.  If they attempt to access uvm_pkg::factory, a single run-time
+// warning will be provided, indicating the deprecation of the old
+// variable, and the recommended usage.
+    
+function uvm_factory factory();
+    static bit warning_reported;
+    if (!warning_reported) begin
+        string msg = {"As of UVM 1.1d, the uvm_pkg::factory variable is ",
+                      "deprecated in the UVM standard, due to concerns ",
+                      "with stability at initialization time, as well as ",
+                      "the fact that it was not properly name-protected. ",
+                      "please update your code to use uvm_factory::get() ",
+                      "instead."};
+        `uvm_warning("UVM/BASE/PKG_FACTORY", msg)
+        warning_reported = 1;
+    end
+    return uvm_factory::get();
+endfunction : factory
 
-
-
+`endif
+    
 //-----------------------------------------------------------------------------
 // IMPLEMENTATION
 //-----------------------------------------------------------------------------

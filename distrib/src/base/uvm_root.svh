@@ -315,7 +315,7 @@ endfunction
 
 task uvm_root::run_test(string test_name="");
 
-  uvm_factory factory= uvm_factory::get();
+  uvm_factory f= uvm_factory::get();
   bit testname_plusarg;
   int test_name_count;
   string test_names[$];
@@ -377,7 +377,7 @@ task uvm_root::run_test(string test_name="");
           "An uvm_test_top already exists via a previous call to run_test", UVM_NONE);
       #0; // forces shutdown because $finish is forked
     end
-    $cast(uvm_test_top, factory.create_component_by_name(test_name,
+    $cast(uvm_test_top, f.create_component_by_name(test_name,
           "", "uvm_test_top", null));
 
     if (uvm_test_top == null) begin
@@ -654,7 +654,7 @@ endfunction
 
 function void uvm_root::m_process_inst_override(string ovr);
   string split_val[$];
-  uvm_factory fact = uvm_factory::get();
+  uvm_factory f = uvm_factory::get();
 
   uvm_split_string(ovr, ",", split_val);
 
@@ -665,7 +665,7 @@ function void uvm_root::m_process_inst_override(string ovr);
   end
 
   uvm_report_info("INSTOVR", {"Applying instance override from the command line: +uvm_set_inst_override=", ovr}, UVM_NONE);
-  fact.set_inst_override_by_name(split_val[0], split_val[1], split_val[2]);
+  f.set_inst_override_by_name(split_val[0], split_val[1], split_val[2]);
 endfunction
 
 
@@ -675,7 +675,7 @@ endfunction
 function void uvm_root::m_process_type_override(string ovr);
   string split_val[$];
   int replace=1;
-  uvm_factory fact = uvm_factory::get();
+  uvm_factory f = uvm_factory::get();
 
   uvm_split_string(ovr, ",", split_val);
 
@@ -696,7 +696,7 @@ function void uvm_root::m_process_type_override(string ovr);
   end
 
   uvm_report_info("UVM_CMDLINE_PROC", {"Applying type override from the command line: +uvm_set_type_override=", ovr}, UVM_NONE);
-  fact.set_type_override_by_name(split_val[0], split_val[1], replace);
+  f.set_type_override_by_name(split_val[0], split_val[1], replace);
 endfunction
 
 

@@ -761,14 +761,14 @@ endtask
 task uvm_sequence_library::execute(uvm_object_wrapper wrap);
 
   uvm_object obj;
-  uvm_factory factory;
+  uvm_factory f;
   uvm_sequence_item seq_or_item;
   uvm_sequence_base seq_base;
   REQ req_item;
   
-  factory = uvm_factory::get();
+  f = uvm_factory::get();
 
-  obj = factory.create_object_by_type(wrap,get_full_name(),
+  obj = f.create_object_by_type(wrap,get_full_name(),
            $sformatf("%s:%0d",wrap.get_type_name(),sequences_executed+1));
 
   if (!$cast(seq_base, obj)) begin

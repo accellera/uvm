@@ -375,8 +375,8 @@ class uvm_cmdline_processor extends uvm_report_object;
     //
     // ~+uvm_set_inst_override=<req_type>,<override_type>,<full_inst_path>~ and
     // ~+uvm_set_type_override=<req_type>,<override_type>[,<replace>]~ work
-    // like the name based overrides in the factory--factory.set_inst_override_by_name()
-    //  and factory.set_type_override_by_name().
+    // like the name based overrides in the factory--<uvm_factory::set_inst_override_by_name>
+    //  and <uvm_factory::set_type_override_by_name>.
     // For uvm_set_type_override, the third argument is 0 or 1 (the default is
     // 1 if this argument is left off); this argument specifies whether previous
     // type overrides for the type should be replaced.  For example:

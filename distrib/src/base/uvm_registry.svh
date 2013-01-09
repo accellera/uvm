@@ -131,7 +131,8 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
 
   static function void set_type_override (uvm_object_wrapper override_type,
                                           bit replace=1);
-    factory.set_type_override_by_type(get(),override_type,replace);
+    uvm_factory f = uvm_factory::get();
+    f.set_type_override_by_type(get(),override_type,replace);
   endfunction
 
 
@@ -154,13 +155,14 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
                                          string inst_path,
                                          uvm_component parent=null);
     string full_inst_path;
+    uvm_factory f = uvm_factory::get();
     if (parent != null) begin
       if (inst_path == "")
         inst_path = parent.get_full_name();
       else
         inst_path = {parent.get_full_name(),".",inst_path};
     end
-    factory.set_inst_override_by_type(get(),override_type,inst_path);
+    f.set_inst_override_by_type(get(),override_type,inst_path);
   endfunction
 
 endclass
@@ -266,7 +268,8 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
 
   static function void set_type_override (uvm_object_wrapper override_type,
                                           bit replace=1);
-    factory.set_type_override_by_type(get(),override_type,replace);
+    uvm_factory f = uvm_factory::get();
+    f.set_type_override_by_type(get(),override_type,replace);
   endfunction
 
 
@@ -289,13 +292,14 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
                                          string inst_path,
                                          uvm_component parent=null);
     string full_inst_path;
+    uvm_factory f = uvm_factory::get();
     if (parent != null) begin
       if (inst_path == "")
         inst_path = parent.get_full_name();
       else
         inst_path = {parent.get_full_name(),".",inst_path};
     end
-    factory.set_inst_override_by_type(get(),override_type,inst_path);
+    f.set_inst_override_by_type(get(),override_type,inst_path);
   endfunction
 
 endclass

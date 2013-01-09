@@ -1092,8 +1092,9 @@ virtual class uvm_component extends uvm_report_object;
   // whose type corresponds to the preregistered type name, ~requested_type_name~,
   // and instance name, ~name~. This method is equivalent to:
   //
-  //|  factory.create_component_by_name(requested_type_name,
-  //|                                   get_full_name(), name, this);
+  //|  uvm_factory f = uvm_factory::get();
+  //|  f.create_component_by_name(requested_type_name,
+  //|                             get_full_name(), name, this);
   //
   // If the factory determines that a type or instance override exists, the type
   // of the component created may be different than the requested type. See
@@ -1112,8 +1113,9 @@ virtual class uvm_component extends uvm_report_object;
   // ~requested_type_name~, and instance name, ~name~. This method is
   // equivalent to:
   //
-  //|  factory.create_object_by_name(requested_type_name,
-  //|                                get_full_name(), name);
+  //|  uvm_factory f = uvm_factory::get();
+  //|  f.create_object_by_name(requested_type_name,
+  //|                          get_full_name(), name);
   //
   // If the factory determines that a type or instance override exists, the
   // type of the object created may be different than the requested type.  See
@@ -1129,7 +1131,8 @@ virtual class uvm_component extends uvm_report_object;
   // method registers a factory override for components and objects created at
   // this level of hierarchy or below. This method is equivalent to:
   //
-  //|  factory.set_type_override_by_type(original_type, override_type,replace);
+  //|  uvm_factory f = uvm_factory::get();
+  //|  f.set_type_override_by_type(original_type, override_type,replace);
   //
   // The ~relative_inst_path~ is relative to this component and may include
   // wildcards. The ~original_type~ represents the type that is being overridden.
@@ -1155,10 +1158,11 @@ virtual class uvm_component extends uvm_report_object;
   // this level of hierarchy or below. In typical usage, this method is
   // equivalent to:
   //
-  //|  factory.set_inst_override_by_type({get_full_name(),".",
-  //|                                     relative_inst_path},
-  //|                                     original_type,
-  //|                                     override_type);
+  //|  uvm_factory f = uvm_factory::get();
+  //|  f.set_inst_override_by_type(original_type,
+  //|                              override_type,
+  //|                              {get_full_name(), ".",
+  //|                               relative_inst_path});
   //
   // The ~relative_inst_path~ is relative to this component and may include
   // wildcards. The ~original_type~ represents the type that is being overridden.
@@ -1211,8 +1215,9 @@ virtual class uvm_component extends uvm_report_object;
   // ~override_type_name~ whenever the factory is asked to produce a type
   // represented by ~original_type_name~.  This method is equivalent to:
   //
-  //|  factory.set_type_override_by_name(original_type_name,
-  //|                                    override_type_name, replace);
+  //|  uvm_factory f = uvm_factory::get();
+  //|  f.set_type_override_by_name(original_type_name,
+  //|                              override_type_name, replace);
   //
   // The ~original_type_name~ typically refers to a preregistered type in the
   // factory. It may, however, be any arbitrary string. Subsequent calls to
@@ -1231,10 +1236,11 @@ virtual class uvm_component extends uvm_report_object;
   // method registers a factory override for components created at this level
   // of hierarchy or below. In typical usage, this method is equivalent to:
   //
-  //|  factory.set_inst_override_by_name({get_full_name(),".",
-  //|                                     relative_inst_path},
-  //|                                      original_type_name,
-  //|                                     override_type_name);
+  //|  uvm_factory f = uvm_factory::get();
+  //|  f.set_inst_override_by_name(original_type_name,
+  //|                              override_type_name,
+  //|                              {get_full_name(), ".",
+  //|                               relative_inst_path});
   //
   // The ~relative_inst_path~ is relative to this component and may include
   // wildcards. The ~original_type_name~ typically refers to a preregistered type
@@ -2043,7 +2049,8 @@ endfunction
 
 function void  uvm_component::print_override_info (string requested_type_name, 
                                                    string name="");
-  factory.debug_create_by_name(requested_type_name, get_full_name(), name);
+  uvm_factory f = uvm_factory::get();
+  f.debug_create_by_name(requested_type_name, get_full_name(), name);
 endfunction
 
 
@@ -2052,8 +2059,9 @@ endfunction
 
 function uvm_component uvm_component::create_component (string requested_type_name,
                                                         string name);
-  return factory.create_component_by_name(requested_type_name, get_full_name(),
-                                          name, this);
+  uvm_factory f = uvm_factory::get();
+  return f.create_component_by_name(requested_type_name, get_full_name(),
+                                    name, this);
 endfunction
 
 
@@ -2062,8 +2070,9 @@ endfunction
 
 function uvm_object uvm_component::create_object (string requested_type_name,
                                                   string name="");
-  return factory.create_object_by_name(requested_type_name,
-                                       get_full_name(), name);
+  uvm_factory f = uvm_factory::get();
+  return f.create_object_by_name(requested_type_name,
+                                 get_full_name(), name);
 endfunction
 
 
@@ -2073,8 +2082,9 @@ endfunction
 function void uvm_component::set_type_override (string original_type_name,
                                                 string override_type_name,
                                                 bit    replace=1);
-   factory.set_type_override_by_name(original_type_name,
-                                     override_type_name, replace);
+   uvm_factory f = uvm_factory::get();
+   f.set_type_override_by_name(original_type_name,
+                               override_type_name, replace);
 endfunction 
 
 
@@ -2084,7 +2094,8 @@ endfunction
 function void uvm_component::set_type_override_by_type (uvm_object_wrapper original_type,
                                                         uvm_object_wrapper override_type,
                                                         bit    replace=1);
-   factory.set_type_override_by_type(original_type, override_type, replace);
+   uvm_factory f = uvm_factory::get();
+   f.set_type_override_by_type(original_type, override_type, replace);
 endfunction 
 
 
@@ -2095,16 +2106,17 @@ function void  uvm_component::set_inst_override (string relative_inst_path,
                                                  string original_type_name,
                                                  string override_type_name);
   string full_inst_path;
+  uvm_factory f = uvm_factory::get();
 
   if (relative_inst_path == "")
     full_inst_path = get_full_name();
   else
     full_inst_path = {get_full_name(), ".", relative_inst_path};
 
-  factory.set_inst_override_by_name(
-                            original_type_name,
-                            override_type_name,
-                            full_inst_path);
+  f.set_inst_override_by_name(
+                              original_type_name,
+                              override_type_name,
+                              full_inst_path);
 endfunction 
 
 
@@ -2115,13 +2127,14 @@ function void uvm_component::set_inst_override_by_type (string relative_inst_pat
                                                         uvm_object_wrapper original_type,
                                                         uvm_object_wrapper override_type);
   string full_inst_path;
+  uvm_factory f = uvm_factory::get();
 
   if (relative_inst_path == "")
     full_inst_path = get_full_name();
   else
     full_inst_path = {get_full_name(), ".", relative_inst_path};
 
-  factory.set_inst_override_by_type(original_type, override_type, full_inst_path);
+  f.set_inst_override_by_type(original_type, override_type, full_inst_path);
 
 endfunction
 
