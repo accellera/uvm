@@ -289,6 +289,68 @@ class uvm_factory;
 
   extern function void print (int all_types=1);
 
+  //----------------------------------------------------------------------------
+  // Hidden Virtual Methods
+  //
+  // All of the above methods have a virtual counterpart, which is undocumented.
+  // The intention of these methods is to allow for a "fake factory" to be placed
+  // at uvm_pkg::factory, which can throw a warning if it's ever used.  This is
+  // in to Mantis 4379
+
+  extern virtual function void m_register (uvm_object_wrapper obj);
+  extern virtual function
+      void m_set_inst_override_by_type (uvm_object_wrapper original_type,
+                                      uvm_object_wrapper override_type,
+                                      string full_inst_path);
+  extern virtual function
+      void m_set_inst_override_by_name (string original_type_name,
+                                      string override_type_name,
+                                      string full_inst_path);
+  extern virtual function
+      void m_set_type_override_by_type (uvm_object_wrapper original_type,
+                                      uvm_object_wrapper override_type,
+                                      bit replace=1);
+  extern virtual function
+      void m_set_type_override_by_name (string original_type_name,
+                                      string override_type_name,
+                                      bit replace=1);
+  extern virtual function
+      uvm_object    m_create_object_by_type    (uvm_object_wrapper requested_type,  
+                                              string parent_inst_path="",
+                                              string name=""); 
+  extern virtual function
+      uvm_component m_create_component_by_type (uvm_object_wrapper requested_type,  
+                                              string parent_inst_path="",
+                                              string name, 
+                                              uvm_component parent);
+  extern virtual function
+      uvm_object    m_create_object_by_name    (string requested_type_name,  
+                                              string parent_inst_path="",
+                                              string name=""); 
+  extern virtual function
+      uvm_component m_create_component_by_name (string requested_type_name,  
+                                              string parent_inst_path="",
+                                              string name, 
+                                              uvm_component parent);
+  extern virtual function
+      void m_debug_create_by_type (uvm_object_wrapper requested_type,
+                                 string parent_inst_path="",
+                                 string name="");
+  extern virtual function
+      void m_debug_create_by_name (string requested_type_name,
+                                 string parent_inst_path="",
+                                 string name="");
+  extern virtual function
+      uvm_object_wrapper m_find_override_by_type (uvm_object_wrapper requested_type,
+                                                string full_inst_path);
+  extern virtual function
+      uvm_object_wrapper m_find_override_by_name (string requested_type_name,
+                                                string full_inst_path);
+  extern virtual
+    function uvm_object_wrapper m_find_by_name            (string type_name);
+  extern virtual function void m_print (int all_types=1);
+
+    
 
   //----------------------------------------------------------------------------
   // PRIVATE MEMBERS
@@ -718,26 +780,150 @@ endclass
 // all user code should instead use uvm_factory::get() to retrieve the
 // factory instance.
 
-// This method is provided as a backwards-compatibility helper for the
+// This class is provded as a backwards-compatibility helper for the
 // user.  If they attempt to access uvm_pkg::factory, a single run-time
 // warning will be provided, indicating the deprecation of the old
 // variable, and the recommended usage.
-    
-function uvm_factory factory();
-    static bit warning_reported;
-    if (!warning_reported) begin
-        string msg = {"As of UVM 1.1d, the uvm_pkg::factory variable is ",
-                      "deprecated in the UVM standard, due to concerns ",
-                      "with stability at initialization time, as well as ",
-                      "the fact that it was not properly name-protected. ",
-                      "please update your code to use uvm_factory::get() ",
-                      "instead."};
-        `uvm_warning("UVM/BASE/PKG_FACTORY", msg)
-        warning_reported = 1;
-    end
-    return uvm_factory::get();
-endfunction : factory
 
+class uvm_deprecated_factory extends uvm_factory;
+
+    local bit warning_reported[string];
+    static local uvm_deprecated_factory m_factory;
+    
+    function new();
+        super.new();
+    endfunction : new
+
+    function void throw_warning(string method);
+        if (!warning_reported.exists(method)) begin
+            string msg = {"factory.", method, " has been called. ",
+                          "As of UVM 1.1d, the uvm_pkg::factory variable is ",
+                          "deprecated in the UVM standard, due to concerns ",
+                          "with stability at initialization time, as well as ",
+                          "the fact that it was not properly name-protected. ",
+                          "please update your code to use uvm_factory::get() ",
+                          "instead."};
+            `uvm_warning({"UVM/PKG/DEPR_FACTORY_VAR/",method.toupper()}, msg)
+            warning_reported[method] = 1;
+        end
+    endfunction : throw_warning
+
+    static function uvm_factory m_get();
+        if (m_factory == null)
+          m_factory = new();
+        return m_factory;
+    endfunction
+    // Who knows why the user would do factory.get instead of
+    // uvm_factory::get(), but this will catch that...
+    function uvm_factory get();
+        throw_warning("get");
+        return super.get();
+    endfunction 
+        
+    virtual function void m_register (uvm_object_wrapper obj);
+        uvm_factory f = uvm_factory::get();
+        throw_warning("register");
+        f.register(obj);
+    endfunction 
+    virtual function void m_set_inst_override_by_type (uvm_object_wrapper original_type,
+                                                       uvm_object_wrapper override_type,
+                                                       string full_inst_path);
+        uvm_factory f = uvm_factory::get();
+        throw_warning("set_inst_override_by_type");
+        f.set_inst_override_by_type (original_type, override_type, full_inst_path);
+    endfunction 
+    virtual function void m_set_inst_override_by_name (string original_type_name,
+                                                       string override_type_name,
+                                                       string full_inst_path);
+        uvm_factory f = uvm_factory::get();
+        throw_warning("set_inst_override_by_name");
+        f.set_inst_override_by_name (original_type_name, override_type_name, full_inst_path);
+    endfunction 
+    virtual function void m_set_type_override_by_type (uvm_object_wrapper original_type,
+                                                       uvm_object_wrapper override_type,
+                                                       bit replace=1);
+        uvm_factory f = uvm_factory::get();
+        throw_warning("set_type_override_by_type");
+        f.set_type_override_by_type(original_type, override_type, replace);
+    endfunction 
+    virtual function void m_set_type_override_by_name (string original_type_name,
+                                                       string override_type_name,
+                                                       bit    replace=1);
+        uvm_factory f = uvm_factory::get();
+        throw_warning("set_type_override_by_name");
+        f.set_type_override_by_name(original_type_name, override_type_name, replace);
+    endfunction 
+    virtual function uvm_object m_create_object_by_type (uvm_object_wrapper requested_type,  
+                                                         string parent_inst_path="",
+                                                         string name="");
+        uvm_factory f = uvm_factory::get();
+        throw_warning("create_object_by_type");
+        return f.create_object_by_type(requested_type, parent_inst_path, name);
+    endfunction 
+    virtual function uvm_component m_create_component_by_type (uvm_object_wrapper requested_type,  
+                                                               string parent_inst_path="",
+                                                               string name, 
+                                                               uvm_component parent);
+        uvm_factory f = uvm_factory::get();
+        throw_warning("create_component_by_type");
+        return f.create_component_by_type(requested_type, parent_inst_path, name, parent);
+    endfunction 
+    virtual function uvm_object m_create_object_by_name (string requested_type_name,  
+                                                         string parent_inst_path="",
+                                                         string name="");
+        uvm_factory f = uvm_factory::get();
+        throw_warning("create_object_by_name");
+        return f.create_object_by_name(requested_type_name, parent_inst_path, name);
+    endfunction
+    virtual function uvm_component m_create_component_by_name (string requested_type_name,  
+                                                               string parent_inst_path="",
+                                                               string name, 
+                                                               uvm_component parent);
+        uvm_factory f = uvm_factory::get();
+        throw_warning("create_component_by_name");
+        return f.create_component_by_name(requested_type_name, parent_inst_path, name, parent);
+    endfunction
+    virtual function void m_debug_create_by_type (uvm_object_wrapper requested_type,
+                                                  string parent_inst_path="",
+                                                  string name="");
+        uvm_factory f = uvm_factory::get();
+        throw_warning("debug_create_by_type");
+        f.debug_create_by_type(requested_type, parent_inst_path, name);
+    endfunction 
+    virtual function void m_debug_create_by_name (string requested_type_name,
+                                                  string parent_inst_path="",
+                                                  string name="");
+        uvm_factory f = uvm_factory::get();
+        throw_warning("debug_create_by_name");
+        f.debug_create_by_name(requested_type_name, parent_inst_path, name);
+    endfunction 
+    virtual function uvm_object_wrapper m_find_override_by_type (uvm_object_wrapper requested_type,
+                                                                 string full_inst_path);
+        uvm_factory f = uvm_factory::get();
+        throw_warning("find_override_by_type");
+        return f.find_override_by_type(requested_type, full_inst_path);
+    endfunction 
+    virtual function uvm_object_wrapper m_find_override_by_name (string requested_type_name,
+                                                                 string full_inst_path);
+        uvm_factory f = uvm_factory::get();
+        throw_warning("find_override_by_name");
+        return f.find_override_by_name(requested_type_name, full_inst_path);
+    endfunction virtual
+    function uvm_object_wrapper m_find_by_name (string type_name);
+        uvm_factory f = uvm_factory::get();
+        throw_warning("find_by_name");
+        return f.find_by_name(type_name);
+    endfunction 
+    virtual function void m_print (int all_types=1); // m_print
+        uvm_factory f = uvm_factory::get();
+        throw_warning("print");
+        f.print(all_types);
+    endfunction
+
+endclass // uvm_deprecated_factory
+
+const uvm_factory factory = uvm_deprecated_factory::m_get();
+    
 `endif
     
 //-----------------------------------------------------------------------------
@@ -764,7 +950,7 @@ endfunction
 // register
 // --------
 
-function void uvm_factory::register (uvm_object_wrapper obj);
+function void uvm_factory::m_register (uvm_object_wrapper obj);
 
   if (obj == null) begin
     uvm_report_fatal ("NULLWR", "Attempting to register a null object with the factory", UVM_NONE);
@@ -811,9 +997,9 @@ endfunction
 // set_type_override_by_type
 // -------------------------
 
-function void uvm_factory::set_type_override_by_type (uvm_object_wrapper original_type,
-                                                      uvm_object_wrapper override_type,
-                                                      bit replace=1);
+function void uvm_factory::m_set_type_override_by_type (uvm_object_wrapper original_type,
+                                                                uvm_object_wrapper override_type,
+                                                                bit replace=1);
   bit replaced;
 
   // check that old and new are not the same
@@ -879,9 +1065,9 @@ endfunction
 // set_type_override_by_name
 // -------------------------
 
-function void uvm_factory::set_type_override_by_name (string original_type_name,
-                                                      string override_type_name,
-                                                      bit replace=1);
+function void uvm_factory::m_set_type_override_by_name (string original_type_name,
+                                                                string override_type_name,
+                                                                bit    replace=1);
   bit replaced;
   
   uvm_object_wrapper original_type;
@@ -945,8 +1131,8 @@ endfunction
 // check_inst_override_exists
 // --------------------------
 function bit uvm_factory::check_inst_override_exists (uvm_object_wrapper original_type,
-                                      uvm_object_wrapper override_type,
-                                      string full_inst_path);
+                                                      uvm_object_wrapper override_type,
+                                                      string full_inst_path);
   uvm_factory_override override;
   uvm_factory_queue_class qc;
 
@@ -975,9 +1161,9 @@ endfunction
 // set_inst_override_by_type
 // -------------------------
 
-function void uvm_factory::set_inst_override_by_type (uvm_object_wrapper original_type,
-                                                      uvm_object_wrapper override_type,
-                                                      string full_inst_path);
+function void uvm_factory::m_set_inst_override_by_type (uvm_object_wrapper original_type,
+                                                                uvm_object_wrapper override_type,
+                                                                string full_inst_path);
   
   uvm_factory_override override;
 
@@ -1008,9 +1194,9 @@ endfunction
 // set_inst_override_by_name
 // -------------------------
 
-function void uvm_factory::set_inst_override_by_name (string original_type_name,
-                                                      string override_type_name,
-                                                      string full_inst_path);
+function void uvm_factory::m_set_inst_override_by_name (string original_type_name,
+                                                                string override_type_name,
+                                                                string full_inst_path);
   
   uvm_factory_override override;
   uvm_object_wrapper original_type;
@@ -1073,9 +1259,9 @@ endfunction
 // create_object_by_name
 // ---------------------
 
-function uvm_object uvm_factory::create_object_by_name (string requested_type_name,  
-                                                        string parent_inst_path="",  
-                                                        string name=""); 
+function uvm_object uvm_factory::m_create_object_by_name (string requested_type_name,  
+                                                                  string parent_inst_path="", 
+                                                                  string name=""); 
 
   uvm_object_wrapper wrapper;
   string inst_path;
@@ -1109,9 +1295,9 @@ endfunction
 // create_object_by_type
 // ---------------------
 
-function uvm_object uvm_factory::create_object_by_type (uvm_object_wrapper requested_type,  
-                                                        string parent_inst_path="",  
-                                                        string name=""); 
+function uvm_object uvm_factory::m_create_object_by_type (uvm_object_wrapper requested_type,  
+                                                          string parent_inst_path="",  
+                                                          string name=""); 
 
   string full_inst_path;
 
@@ -1134,10 +1320,10 @@ endfunction
 // create_component_by_name
 // ------------------------
 
-function uvm_component uvm_factory::create_component_by_name (string requested_type_name,  
-                                                              string parent_inst_path="",  
-                                                              string name, 
-                                                              uvm_component parent);
+function uvm_component uvm_factory::m_create_component_by_name (string requested_type_name,  
+                                                                        string parent_inst_path="", 
+                                                                        string name, 
+                                                                        uvm_component parent);
   uvm_object_wrapper wrapper;
   string inst_path;
 
@@ -1170,10 +1356,10 @@ endfunction
 // create_component_by_type
 // ------------------------
 
-function uvm_component uvm_factory::create_component_by_type (uvm_object_wrapper requested_type,  
-                                                            string parent_inst_path="",  
-                                                            string name, 
-                                                            uvm_component parent);
+function uvm_component uvm_factory::m_create_component_by_type (uvm_object_wrapper requested_type,  
+                                                                        string parent_inst_path="",  
+                                                                        string name, 
+                                                                        uvm_component parent);
   string full_inst_path;
 
   if (parent_inst_path == "")
@@ -1196,7 +1382,7 @@ endfunction
 // find_by_name
 // ------------
 
-function uvm_object_wrapper uvm_factory::find_by_name(string type_name);
+function uvm_object_wrapper uvm_factory::m_find_by_name(string type_name);
 
   if (m_type_names.exists(type_name))
     return m_type_names[type_name];
@@ -1210,8 +1396,8 @@ endfunction
 // find_override_by_name
 // ---------------------
 
-function uvm_object_wrapper uvm_factory::find_override_by_name (string requested_type_name,
-                                                                string full_inst_path);
+function uvm_object_wrapper uvm_factory::m_find_override_by_name (string requested_type_name,
+                                                                          string full_inst_path);
   uvm_object_wrapper rtype;
   uvm_factory_queue_class qc;
 
@@ -1219,18 +1405,6 @@ function uvm_object_wrapper uvm_factory::find_override_by_name (string requested
 
   if (m_type_names.exists(requested_type_name))
     rtype = m_type_names[requested_type_name];
-
-/***
-  if(rtype == null) begin
-    if(requested_type_name != "") begin
-      uvm_report_warning("TYPNTF", {"Requested type name ",
-         requested_type_name, " is not registered with the factory. The instance override to ",
-         full_inst_path, " is ignored"}, UVM_NONE);
-    end
-    m_lookup_strs[requested_type_name] = 1;
-    return null;
-  end
-***/
 
   if (full_inst_path != "") begin
     if(rtype == null) begin
@@ -1299,8 +1473,8 @@ endfunction
 // find_override_by_type
 // ---------------------
 
-function uvm_object_wrapper uvm_factory::find_override_by_type(uvm_object_wrapper requested_type,
-                                                               string full_inst_path);
+function uvm_object_wrapper uvm_factory::m_find_override_by_type(uvm_object_wrapper requested_type,
+                                                                         string full_inst_path);
 
   uvm_object_wrapper override;
   uvm_factory_queue_class qc = null;
@@ -1386,7 +1560,7 @@ endfunction
 // print
 // -----
 
-function void uvm_factory::print (int all_types=1);
+function void uvm_factory::m_print (int all_types=1);
 
   string key;
   uvm_factory_queue_class sorted_override_queues[string];
@@ -1516,9 +1690,9 @@ endfunction
 // debug_create_by_name
 // --------------------
 
-function void  uvm_factory::debug_create_by_name (string requested_type_name,
-                                                  string parent_inst_path="",
-                                                  string name="");
+function void  uvm_factory::m_debug_create_by_name (string requested_type_name,
+                                                            string parent_inst_path="",
+                                                            string name="");
   m_debug_create(requested_type_name, null, parent_inst_path, name);
 endfunction
 
@@ -1526,9 +1700,9 @@ endfunction
 // debug_create_by_type
 // --------------------
 
-function void  uvm_factory::debug_create_by_type (uvm_object_wrapper requested_type,
-                                                  string parent_inst_path="",
-                                                  string name="");
+function void  uvm_factory::m_debug_create_by_type (uvm_object_wrapper requested_type,
+                                                            string parent_inst_path="",
+                                                            string name="");
   m_debug_create("", requested_type, parent_inst_path, name);
 endfunction
 
@@ -1655,3 +1829,75 @@ function void  uvm_factory::m_debug_display (string requested_type_name,
 endfunction
 
 
+// Non-Virtual Implementations
+
+function void uvm_factory::register (uvm_object_wrapper obj);
+    m_register(obj);
+endfunction 
+function void uvm_factory::set_inst_override_by_type (uvm_object_wrapper original_type,
+                                                      uvm_object_wrapper override_type,
+                                                      string full_inst_path);
+    m_set_inst_override_by_type(original_type, override_type, full_inst_path);
+endfunction 
+function void uvm_factory::set_inst_override_by_name (string original_type_name,
+                                                      string override_type_name,
+                                                      string full_inst_path);
+    m_set_inst_override_by_name(original_type_name, override_type_name, full_inst_path);
+endfunction 
+function void uvm_factory::set_type_override_by_type (uvm_object_wrapper original_type,
+                                                      uvm_object_wrapper override_type,
+                                                      bit replace=1);
+    m_set_type_override_by_type(original_type, override_type, replace);
+endfunction 
+function void uvm_factory::set_type_override_by_name (string original_type_name,
+                                                      string override_type_name,
+                                                      bit    replace=1);
+    m_set_type_override_by_name(original_type_name, override_type_name, replace);
+endfunction 
+function uvm_object uvm_factory::create_object_by_type (uvm_object_wrapper requested_type,  
+                                                        string parent_inst_path="",
+                                                        string name="");
+    return m_create_object_by_type(requested_type, parent_inst_path, name);
+endfunction 
+function uvm_component uvm_factory::create_component_by_type (uvm_object_wrapper requested_type,  
+                                                              string parent_inst_path="",
+                                                              string name, 
+                                                              uvm_component parent);
+    return m_create_component_by_type(requested_type, parent_inst_path, name, parent);
+endfunction 
+function uvm_object uvm_factory::create_object_by_name (string requested_type_name,  
+                                                        string parent_inst_path="",
+                                                        string name="");
+    return m_create_object_by_name(requested_type_name, parent_inst_path, name);
+endfunction 
+function uvm_component uvm_factory::create_component_by_name (string requested_type_name,  
+                                                              string parent_inst_path="",
+                                                              string name, 
+                                                              uvm_component parent);
+    return m_create_component_by_name(requested_type_name, parent_inst_path, name, parent);
+endfunction 
+function void uvm_factory::debug_create_by_type (uvm_object_wrapper requested_type,
+                                                 string parent_inst_path="",
+                                                 string name="");
+    m_debug_create_by_type(requested_type, parent_inst_path, name);
+endfunction 
+function void uvm_factory::debug_create_by_name (string requested_type_name,
+                                                 string parent_inst_path="",
+                                                 string name="");
+    m_debug_create_by_name(requested_type_name, parent_inst_path, name);
+endfunction 
+function uvm_object_wrapper uvm_factory::find_override_by_type (uvm_object_wrapper requested_type,
+                                                                string full_inst_path);
+    return m_find_override_by_type(requested_type, full_inst_path);
+endfunction 
+function uvm_object_wrapper uvm_factory::find_override_by_name (string requested_type_name,
+                                                   string full_inst_path);
+    return m_find_override_by_name(requested_type_name, full_inst_path);
+endfunction
+function uvm_object_wrapper uvm_factory::find_by_name            (string type_name);
+    return m_find_by_name(type_name);
+endfunction 
+function void uvm_factory::print (int all_types=1);
+    m_print(all_types);
+endfunction
+    
