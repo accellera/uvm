@@ -1,0 +1,2 @@
+UVM_WARNING @ 0: reporter [RegModel] Adding 1-byte submap 'br.l.bus8_0' to 4-byte parent map 'br.bus32x32'
+UVM_WARNING @ 0: reporter [RegModel] Adding 1-byte submap 'br.l.bus8_1' to 4-byte parent map 'br.bus32x8'
