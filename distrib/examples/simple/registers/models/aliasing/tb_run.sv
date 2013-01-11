@@ -56,7 +56,7 @@ class tb_test extends uvm_test;
          seq = uvm_reg_bit_bash_seq::type_id::create("seq");
          seq.model = env.regmodel;
          seq.start(env.bus.sqr);
-         seq.wait_for_sequence_state(FINISHED);
+         seq.wait_for_sequence_state(UVM_FINISHED);
 
          `uvm_info("Test", "Verifying aliasing...", UVM_NONE);
          env.regmodel.Ra.write(status, 32'hDEADBEEF, .parent(seq));

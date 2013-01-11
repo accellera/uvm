@@ -58,7 +58,7 @@ class tb_test extends uvm_test;
          seq = uvm_reg_hw_reset_seq::type_id::create("seq");
          seq.model = env.regmodel;
          seq.start(null);
-         seq.wait_for_sequence_state(FINISHED);
+         seq.wait_for_sequence_state(UVM_FINISHED);
       end
 
       `uvm_info("Test", "Performing 257 writes...", UVM_LOW)

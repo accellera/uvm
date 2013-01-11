@@ -172,7 +172,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   function new (string name = "uvm_sequence");
 
     super.new(name);
-    m_sequence_state = CREATED;
+    m_sequence_state = UVM_CREATED;
     m_wait_for_grant_semaphore = 0;
   endfunction
 
@@ -192,7 +192,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Returns the sequence state as an enumerated value. Can use to wait on
   // the sequence reaching or changing from one or more states.
   //
-  //| wait(get_sequence_state() & (STOPPED|FINISHED));
+  //| wait(get_sequence_state() & (UVM_STOPPED|UVM_FINISHED));
 
   function uvm_sequence_state_enum get_sequence_state();
     return m_sequence_state;
@@ -244,7 +244,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
     set_item_context(parent_sequence, sequencer);
 
-    if (!(m_sequence_state inside {CREATED,STOPPED,FINISHED})) begin
+    if (!(m_sequence_state inside {UVM_CREATED,UVM_STOPPED,UVM_FINISHED})) begin
       uvm_report_fatal("SEQ_NOT_DONE", 
          {"Sequence ", get_full_name(), " already started"},UVM_NONE);
     end
@@ -287,12 +287,12 @@ class uvm_sequence_base extends uvm_sequence_item;
       begin
         m_sequence_process = process::self();
 
-        m_sequence_state = PRE_START;
+        m_sequence_state = UVM_PRE_START;
         #0;
         pre_start();
 
         if (call_pre_post == 1) begin
-          m_sequence_state = PRE_BODY;
+          m_sequence_state = UVM_PRE_BODY;
           #0;
           pre_body();
         end
@@ -302,11 +302,11 @@ class uvm_sequence_base extends uvm_sequence_item;
           parent_sequence.mid_do(this); // function
         end
 
-        m_sequence_state = BODY;
+        m_sequence_state = UVM_BODY;
         #0;
         body();
 
-        m_sequence_state = ENDED;
+        m_sequence_state = UVM_ENDED;
         #0;
 
         if (parent_sequence != null) begin
@@ -314,16 +314,16 @@ class uvm_sequence_base extends uvm_sequence_item;
         end
 
         if (call_pre_post == 1) begin
-          m_sequence_state = POST_BODY;
+          m_sequence_state = UVM_POST_BODY;
           #0;
           post_body();
         end
 
-        m_sequence_state = POST_START;
+        m_sequence_state = UVM_POST_START;
         #0;
         post_start();
 
-        m_sequence_state = FINISHED;
+        m_sequence_state = UVM_FINISHED;
         #0;
 
       end
@@ -335,7 +335,7 @@ class uvm_sequence_base extends uvm_sequence_item;
         
     // Clean up any sequencer queues after exiting; if we
     // were forcibly stoped, this step has already taken place
-    if (m_sequence_state != STOPPED) begin
+    if (m_sequence_state != UVM_STOPPED) begin
       if (m_sequencer != null)
         m_sequencer.m_sequence_exiting(this);
     end
@@ -646,7 +646,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   //
   // This function will kill the sequence, and cause all current locks and
   // requests in the sequence's default sequencer to be removed. The sequence
-  // state will change to STOPPED, and its post_body() method, if  will not b
+  // state will change to UVM_STOPPED, and its post_body() method, if  will not b
   //
   // If a sequence has issued locks, grabs, or requests on sequencers other than
   // the default sequencer, then care must be taken to unregister the sequence
@@ -685,7 +685,7 @@ class uvm_sequence_base extends uvm_sequence_item;
       m_sequence_process.kill;
       m_sequence_process = null;
     end
-    m_sequence_state = STOPPED;
+    m_sequence_state = UVM_STOPPED;
   endfunction
 
 

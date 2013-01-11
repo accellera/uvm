@@ -348,67 +348,67 @@ typedef enum
 //
 // Specifies a sequencer's arbitration mode
 //
-// SEQ_ARB_FIFO          - Requests are granted in FIFO order (default)
-// SEQ_ARB_WEIGHTED      - Requests are granted randomly by weight
-// SEQ_ARB_RANDOM        - Requests are granted randomly
-// SEQ_ARB_STRICT_FIFO   - Requests at highest priority granted in fifo order
-// SEQ_ARB_STRICT_RANDOM - Requests at highest priority granted in randomly
-// SEQ_ARB_USER          - Arbitration is delegated to the user-defined 
-//                         function, user_priority_arbitration. That function
-//                         will specify the next sequence to grant.
+// UVM_SEQ_ARB_FIFO          - Requests are granted in FIFO order (default)
+// UVM_SEQ_ARB_WEIGHTED      - Requests are granted randomly by weight
+// UVM_SEQ_ARB_RANDOM        - Requests are granted randomly
+// UVM_SEQ_ARB_STRICT_FIFO   - Requests at highest priority granted in fifo order
+// UVM_SEQ_ARB_STRICT_RANDOM - Requests at highest priority granted in randomly
+// UVM_SEQ_ARB_USER          - Arbitration is delegated to the user-defined 
+//                             function, user_priority_arbitration. That function
+//                             will specify the next sequence to grant.
 
 
 typedef enum
 {
-  SEQ_ARB_FIFO,
-  SEQ_ARB_WEIGHTED,
-  SEQ_ARB_RANDOM,
-  SEQ_ARB_STRICT_FIFO,
-  SEQ_ARB_STRICT_RANDOM,
-  SEQ_ARB_USER
+  UVM_SEQ_ARB_FIFO,
+  UVM_SEQ_ARB_WEIGHTED,
+  UVM_SEQ_ARB_RANDOM,
+  UVM_SEQ_ARB_STRICT_FIFO,
+  UVM_SEQ_ARB_STRICT_RANDOM,
+  UVM_SEQ_ARB_USER
 } uvm_sequencer_arb_mode;
 
 
-typedef uvm_sequencer_arb_mode SEQ_ARB_TYPE; // backward compat
+typedef uvm_sequencer_arb_mode UVM_SEQ_ARB_TYPE; // backward compat
 
 
 // Enum: uvm_sequence_state_enum
 //
 // Defines current sequence state
 //
-// CREATED            - The sequence has been allocated.
-// PRE_START          - The sequence is started and the
-//                      <uvm_sequence_base::pre_start()> task is
-//                      being executed.
-// PRE_BODY           - The sequence is started and the
-//                      <uvm_sequence_base::pre_body()> task is
-//                      being executed.
-// BODY               - The sequence is started and the
-//                      <uvm_sequence_base::body()> task is
-//                      being executed.
-// ENDED              - The sequence has completed the execution of the 
-//                      <uvm_sequence_base::body()> task.
-// POST_BODY          - The sequence is started and the
-//                      <uvm_sequence_base::post_body()> task is
-//                      being executed.
-// POST_START         - The sequence is started and the
-//                      <uvm_sequence_base::post_start()> task is
-//                      being executed.
-// STOPPED            - The sequence has been forcibly ended by issuing a
-//                      <uvm_sequence_base::kill()> on the sequence.
-// FINISHED           - The sequence is completely finished executing.
+// UVM_CREATED            - The sequence has been allocated.
+// UVM_PRE_START          - The sequence is started and the
+//                          <uvm_sequence_base::pre_start()> task is
+//                          being executed.
+// UVM_PRE_BODY           - The sequence is started and the
+//                          <uvm_sequence_base::pre_body()> task is
+//                           being executed.
+// UVM_BODY               - The sequence is started and the
+//                          <uvm_sequence_base::body()> task is
+//                          being executed.
+// UVM_ENDED              - The sequence has completed the execution of the 
+//                          <uvm_sequence_base::body()> task.
+// UVM_POST_BODY          - The sequence is started and the
+//                          <uvm_sequence_base::post_body()> task is
+//                           being executed.
+// UVM_POST_START         - The sequence is started and the
+//                          <uvm_sequence_base::post_start()> task is
+//                          being executed.
+// UVM_STOPPED            - The sequence has been forcibly ended by issuing a
+//                          <uvm_sequence_base::kill()> on the sequence.
+// UVM_FINISHED           - The sequence is completely finished executing.
 
 typedef enum
 {
-  CREATED   = 1,
-  PRE_START = 2,
-  PRE_BODY  = 4,
-  BODY      = 8,
-  POST_BODY = 16,
-  POST_START= 32,
-  ENDED     = 64,
-  STOPPED   = 128,
-  FINISHED  = 256
+  UVM_CREATED   = 1,
+  UVM_PRE_START = 2,
+  UVM_PRE_BODY  = 4,
+  UVM_BODY      = 8,
+  UVM_POST_BODY = 16,
+  UVM_POST_START= 32,
+  UVM_ENDED     = 64,
+  UVM_STOPPED   = 128,
+  UVM_FINISHED  = 256
 } uvm_sequence_state;
 
 typedef uvm_sequence_state uvm_sequence_state_enum; // backward compat
