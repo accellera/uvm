@@ -447,7 +447,26 @@ virtual class uvm_report_catcher extends uvm_callback;
      m     = this.m_server.compose_message(UVM_INFO,this.m_name, id, message, fname, line);
      this.m_server.process_report(UVM_INFO, this.m_name, id, message, a, f, fname, line,
                                   m, verbosity, this.m_client);
-  endfunction  
+   endfunction // uvm_report_info
+
+    // Function: uvm_report
+    //
+    // Issues a message using the current message's report object.
+    // This message will bypass any message catching callbacks.
+
+    protected function void uvm_report(uvm_severity severity, string id, string message, int verbosity, string fname="", int line = 0);
+        string m;
+        uvm_action a;
+        UVM_FILE f;
+        uvm_report_handler rh;
+        rh = this.m_client.get_report_handler();
+        a = rh.get_action(severity, id);
+        f = rh.get_file_handle(severity, id);
+
+        m = this.m_server.compose_message(severity, this.m_name, id, message, fname, line);
+        this.m_server.process_report(severity, this.m_name, id, message, a , f, fname, line,
+                                     m, verbosity, this.m_client);
+    endfunction // uvm_report
 
   // Function: issue
   // Immediately issues the message which is currently being processed. This

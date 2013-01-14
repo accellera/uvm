@@ -360,6 +360,20 @@ class uvm_sequence_item extends uvm_transaction;
     return m_client_str;
   endfunction
 
+  // Function: uvm_report
+  virtual function void uvm_report( uvm_severity severity,
+                                    string id,
+                                    string message,
+                                    int verbosity = UVM_MEDIUM,
+                                    string filename = "",
+                                    int line = 0);
+      uvm_report_object client;
+      string str = m_get_client_info(client);
+
+      m_rh.report(severity, str, id, message, verbosity, filename,
+                  line, client);
+  endfunction
+    
   // Function: uvm_report_info
 
   virtual function void uvm_report_info( string id,

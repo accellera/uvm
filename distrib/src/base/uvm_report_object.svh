@@ -97,6 +97,20 @@ class uvm_report_object extends uvm_object;
   // Group: Reporting
   //----------------------------------------------------------------------------
 
+  // Function: uvm_report
+
+  virtual function void uvm_report( uvm_severity severity,
+                                    string id,
+                                    string message,
+                                    int verbosity = UVM_MEDIUM,
+                                    string filename = "",
+                                    int line = 0);
+    m_rh.report(severity, get_full_name(), id, message, verbosity,
+                filename, line, this);
+  endfunction 
+
+      
+
   // Function: uvm_report_info
 
   virtual function void uvm_report_info( string id,
