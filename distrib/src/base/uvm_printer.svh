@@ -948,6 +948,10 @@ endfunction
 // --------------------
 
 function void uvm_table_printer::calculate_max_widths();
+   m_max_name=4;
+   m_max_type=4;
+   m_max_size = 4;
+   m_max_value= 5;
    foreach(m_rows[j]) begin
       int name_len;
       uvm_printer_row_info row = m_rows[j];
@@ -961,10 +965,6 @@ function void uvm_table_printer::calculate_max_widths();
       if (row.val.len() > m_max_value)
         m_max_value = row.val.len();
    end
-   if (m_max_name < 4) m_max_name = 4;
-   if (m_max_type < 4) m_max_type = 4;
-   if (m_max_size < 4) m_max_size = 4;
-   if (m_max_value< 5) m_max_value= 5;
 endfunction
 
 // emit
