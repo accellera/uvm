@@ -25,7 +25,7 @@ module top;
     class my_catcher extends uvm_report_catcher;
         int count;
         virtual function action_e catch();
-            if(get_id()=="UVM/PKG/DEPR_FACTORY_VAR/SET_INST_OVERRIDE_BY_NAME") begin
+            if(get_id()=="UVM/PKG/DEPR_FACTORY_VAR") begin
                 $display("Caught a message...");
                 count++;
                 set_severity(UVM_INFO);

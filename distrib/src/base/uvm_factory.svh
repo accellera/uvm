@@ -773,7 +773,7 @@ class uvm_factory_override;
 endclass
 
 
-`ifndef UVM_NO_DEPRECATED
+// Not Until 1.2 -- `ifndef UVM_NO_DEPRECATED
     
 // Providing a factory singleton reference via uvm_pkg::factory is not
 // actually safe from a static-initialization perspective.  As such
@@ -797,13 +797,15 @@ class uvm_deprecated_factory extends uvm_factory;
     function void throw_warning(string method);
         if (!warning_reported.exists(method)) begin
             string msg = {"factory.", method, " has been called. ",
-                          "As of UVM 1.1d, the uvm_pkg::factory variable is ",
-                          "deprecated in the UVM standard, due to concerns ",
+                          "The uvm_pkg::factory variable will be deprecated in a ",
+                          "future revision of the UVM Library, due to concerns ",
                           "with stability at initialization time, as well as ",
                           "the fact that it was not properly name-protected. ",
-                          "please update your code to use uvm_factory::get() ",
+                          "More information can be found at: ",
+                          "http://www.eda.org/mantis/view.php?id=4379. ",
+                          "Please update your code to use uvm_factory::get() ",
                           "instead."};
-            `uvm_warning({"UVM/PKG/DEPR_FACTORY_VAR/",method.toupper()}, msg)
+            `uvm_warning("UVM/PKG/DEPR_FACTORY_VAR", msg)
             warning_reported[method] = 1;
         end
     endfunction : throw_warning
@@ -924,7 +926,7 @@ endclass // uvm_deprecated_factory
 
 const uvm_factory factory = uvm_deprecated_factory::m_get();
     
-`endif
+// Not until 1.2 -- `endif
     
 //-----------------------------------------------------------------------------
 // IMPLEMENTATION
