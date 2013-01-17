@@ -364,7 +364,8 @@ class uvm_sequence_item extends uvm_transaction;
   virtual function void uvm_report( uvm_severity severity,
                                     string id,
                                     string message,
-                                    int verbosity = UVM_MEDIUM,
+                                    int verbosity = (severity == UVM_ERROR) ? UVM_LOW :
+                                                    (severity == UVM_FATAL) ? UVM_NONE : UVM_MEDIUM,
                                     string filename = "",
                                     int line = 0);
       uvm_report_object client;
