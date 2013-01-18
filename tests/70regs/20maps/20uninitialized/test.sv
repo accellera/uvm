@@ -202,8 +202,9 @@ program two_sequencers_with_same_map;
                
                 end 
 `endif 
- 
-// not locking produces the WARNING                model.lock_model(); 
+
+                // Objective of the test is to count the warnings issued by using an improperly unlocked model
+                // model.lock_model(); 
                
             end 
         endfunction
@@ -216,7 +217,10 @@ program two_sequencers_with_same_map;
             end 
         endfunction
     
-        task run(); 
+        task run_phase(uvm_phase phase);
+            phase.raise_objection(this);
+
+            `uvm_info("TEST", "Checking that an unlocked model issues warnings...", UVM_NONE)
             begin
                 write_some seq0=new("seq0");
                 seq0.model=model;
@@ -229,6 +233,7 @@ program two_sequencers_with_same_map;
                 seq1.start(null); // NOTE can start on ANY sequencer    
             end
 `endif 
+            phase.drop_objection(this);
         endtask
  
         virtual function void report();
@@ -237,7 +242,7 @@ program two_sequencers_with_same_map;
 
             if (svr.get_severity_count(UVM_FATAL) == 0 &&
                     svr.get_severity_count(UVM_ERROR) == 0 &&
-                    svr.get_severity_count(UVM_WARNING) == 20 )
+                    svr.get_severity_count(UVM_WARNING) == 50 )
                 $write("** UVM TEST PASSED **\n");
             else
                 $write("!! UVM TEST FAILED !!\n");

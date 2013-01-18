@@ -479,7 +479,7 @@ class uvm_mem extends uvm_object;
    //
    extern virtual task burst_read(output uvm_status_e      status,
                                   input  uvm_reg_addr_t    offset,
-                                  output uvm_reg_data_t    value[],
+                                  ref    uvm_reg_data_t    value[],
                                   input  uvm_path_e        path = UVM_DEFAULT_PATH,
                                   input  uvm_reg_map       map = null,
                                   input  uvm_sequence_base parent = null,
@@ -1539,7 +1539,7 @@ endtask: burst_write
 
 task uvm_mem::burst_read(output uvm_status_e       status,
                          input  uvm_reg_addr_t     offset,
-                         output uvm_reg_data_t     value[],
+                         ref    uvm_reg_data_t     value[],
                          input  uvm_path_e         path = UVM_DEFAULT_PATH,
                          input  uvm_reg_map        map = null,
                          input  uvm_sequence_base  parent = null,
@@ -1554,6 +1554,7 @@ task uvm_mem::burst_read(output uvm_status_e       status,
    rw.element_kind = UVM_MEM;
    rw.kind         = UVM_BURST_READ;
    rw.offset       = offset;
+   rw.value        = value;
    rw.path         = path;
    rw.map          = map;
    rw.parent       = parent;

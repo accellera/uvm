@@ -30,6 +30,7 @@
 extern "C" {
 #endif
 
+#include <stdlib.h>
 #include "uvm_regex.cc"
 #include "uvm_hdl.c"
 #include "uvm_svcmd_dpi.c"

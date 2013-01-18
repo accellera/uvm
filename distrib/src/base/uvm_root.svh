@@ -601,7 +601,8 @@ function void uvm_root::m_do_timeout_settings();
   string timeout;
   string split_timeout[$];
   int timeout_count;
-  int timeout_int;
+  time timeout_int;
+  string override_spec;
   timeout_count = clp.get_arg_values("+UVM_TIMEOUT=", timeout_settings);
   if (timeout_count ==  0)
     return;
@@ -621,9 +622,8 @@ function void uvm_root::m_do_timeout_settings();
     end
     uvm_report_info("TIMOUTSET",
       $sformatf("'+UVM_TIMEOUT=%s' provided on the command line is being applied.", timeout), UVM_NONE);
-    uvm_split_string(timeout, ",", split_timeout);
-    timeout_int = split_timeout[0].atoi();
-    case(split_timeout[1])
+      void'($sscanf(timeout,"%d,%s",timeout_int,override_spec));
+    case(override_spec)
       "YES"   : set_timeout(timeout_int, 1);
       "NO"    : set_timeout(timeout_int, 0);
       default : set_timeout(timeout_int, 1);
