@@ -438,6 +438,8 @@ class uvm_objection extends uvm_report_object;
                         int count=1,
                         int in_top_thread=0);
 
+    //$display("m_drop  obj=%s, source_obj=%s  count=%0d  in_top_thread=%0d",obj.get_name(),source_obj.get_name(),count,in_top_thread);
+
     if (!m_total_count.exists(obj) || (count > m_total_count[obj])) begin
       if(m_cleared)
         return;
@@ -464,14 +466,16 @@ class uvm_objection extends uvm_report_object;
     
     dropped(obj, source_obj, description, count);
   
-    // if count != 0, no reason to fork
+    // if count != 0, no reason to fork. However, if drain process is active,
+    // we need to let it do the propagation.
     if (m_total_count[obj] != 0) begin
-      if (!m_hier_mode && obj != m_top)
-        m_drop(m_top,source_obj,description, count, in_top_thread);
-      else if (obj != m_top) begin
-        this.m_propagate(obj, source_obj, description, count, 0, in_top_thread);
+      if (!m_draining.exists(obj)) begin
+        if (!m_hier_mode && obj != m_top)
+          m_drop(m_top,source_obj,description, count, in_top_thread);
+        else if (obj != m_top) begin
+          this.m_propagate(obj, source_obj, description, count, 0, in_top_thread);
+        end
       end
-
     end
     else begin
       // need to make sure we are safe from the dropping thread terminating
