@@ -42,8 +42,12 @@ module testm();
        `uvm_info("TEST_SEQ", "  Starting Test Sequence", UVM_LOW)
        `uvm_info("TEST_SEQ", "<><><><><><><><><><><><><><><><><><><><><><><>\n", UVM_LOW)
 
-       void'(model.randomize());
        `uvm_info("TEST_SEQ", "Backdoor mirror the shadow. Expect mismatch errors", UVM_LOW)
+       // Directly set the mirror value to 'habcd, which is different then the DUT value of 'h0
+       model.ureg0.predict('habcd);
+       // Call mirror() to update the mirror to reflect the DUT value of 0. But UVM_CHECK says
+       // to check the current mirror against the DUT value before we make that update.
+       // We expect a miscompare ('habcd != 0)
        model.ureg0.mirror(status, UVM_CHECK, UVM_BACKDOOR, .parent(this));
      endtask : body
      

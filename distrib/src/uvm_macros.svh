@@ -23,17 +23,9 @@
 `ifndef UVM_MACROS_SVH
 `define UVM_MACROS_SVH
 
-
-// Default settings
-`define uvm_delay(TIME) #(TIME);
-`define uvm_typename(X) $typename(X)
 //
 // Any vendor specific defines go here.
 //
-`ifdef VCS
-`define UVM_USE_RESOURCE_CONVERTER
-`endif
-
 
 `ifdef MODEL_TECH
 `ifndef QUESTA
@@ -41,8 +33,14 @@
 `endif
 `endif
 
-`ifdef QUESTA
+`ifndef QUESTA
+`define uvm_typename(X) $typename(X)
+`else
 `define uvm_typename(X) $typename(X,39)
+`endif
+
+`ifdef VCS
+`define UVM_USE_RESOURCE_CONVERTER
 `endif
 
 `ifdef INCA
@@ -55,6 +53,8 @@
 `ifdef UVM_NO_DEPRECATED
   `define UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
 `endif
+
+`define uvm_delay(TIME) #(TIME);
 
 
 `include "macros/uvm_version_defines.svh"
