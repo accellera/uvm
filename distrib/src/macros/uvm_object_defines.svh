@@ -4,6 +4,8 @@
 //   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
+//   Copyright 2013 Verilab, Inc.
+//
 //   Licensed under the Apache License, Version 2.0 (the
 //   "License"); you may not use this file except in
 //   compliance with the License.  You may obtain a copy of
@@ -3213,6 +3215,12 @@ endfunction \
 `endif
 
 `ifdef INCA
+  `define uvm_record_attribute(TR_HANDLE,NAME,VALUE)
+`endif
+
+// Defining the macro for use when none of the major simulators
+// are being used.
+`ifndef uvm_record_attribute
   `define uvm_record_attribute(TR_HANDLE,NAME,VALUE)
 `endif
 
