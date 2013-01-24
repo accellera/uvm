@@ -193,6 +193,8 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
       
     if(curr_phase != null && curr_phase.get_name() == "build")
       r.precedence = -(cntxt.get_depth());
+    else
+      r.precedence = uvm_resource_base::default_precedence;
 
     r.write(value, cntxt);
 
