@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010-2011 Synopsys, Inc.
+//   Copyright 2013 Verilab, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -800,7 +801,6 @@ function void uvm_factory::set_type_override_by_type (uvm_object_wrapper origina
       uvm_report_warning("TYPDUP", {"Original and override type ",
                                     "arguments are identical: ",
                                     original_type.get_type_name()}, UVM_NONE);
-    return;
   end
 
   // register the types if not already done so, for the benefit of string-based lookup
