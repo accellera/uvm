@@ -76,6 +76,7 @@ $$logfile =~ s/^\(C\).*$/COPYRIGHT/mg;
 $$logfile =~ s/COPYRIGHT(.COPYRIGHT)+/COPYRIGHT/sg;
 $$logfile =~ s/^SVSEED.*\n//sg;
 $$logfile =~ s/\$unit_0x[0-9a-f]+::/SCOPE::/mg;
+$$logfile =~ s/(\s+m_inst_(id|count)):\d+/\1:X/mg;
 
 }
 
