@@ -60,6 +60,9 @@ $$logfile =~ s/^# //mg;
 
 # Questa-specific?
 $$logfile =~ s/__\d+\@\d+/__X\@X/sg;
+if ($dir eq "00basic/25typename" && $tool eq "questa") {
+  $$logfile =~ s/,88 /, 88/mg;
+}
 
 $$logfile =~ s/\@[\d_]+/\@X/sg;
 
