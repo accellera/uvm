@@ -10,17 +10,17 @@
 -  
 * [/^an_obj$/] : (p.an_obj extends uvm_pkg::uvm_object extends uvm_pkg::uvm_void) '{null}
 -  
-* [/^an_obj-m$/] : (p.an_obj extends uvm_pkg::uvm_object extends uvm_pkg::uvm_void) '{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"mo", m_inst_id:4792, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X}, i:0, type_name:"an_obj"}
+* [/^an_obj-m$/] : (p.an_obj extends uvm_pkg::uvm_object extends uvm_pkg::uvm_void) '{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"mo", m_inst_id:X, m_inst_count:X, __m_uvm_status_container:uvm_pkg::uvm_status_container@X}, i:0, type_name:"an_obj"}
 -  
-* [/^an_obj-y$/] : (p.an_obj extends uvm_pkg::uvm_object extends uvm_pkg::uvm_void) '{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"yo", m_inst_id:4794, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X}, i:0, type_name:"an_obj"}
+* [/^an_obj-y$/] : (p.an_obj extends uvm_pkg::uvm_object extends uvm_pkg::uvm_void) '{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"yo", m_inst_id:X, m_inst_count:X, __m_uvm_status_container:uvm_pkg::uvm_status_container@X}, i:0, type_name:"an_obj"}
 -  
 * [/^my_obj-0$/] : (p.my_obj extends p.an_obj extends uvm_pkg::uvm_object extends uvm_pkg::uvm_void) '{null}
 -  
-* [/^my_obj$/] : (p.my_obj extends p.an_obj extends uvm_pkg::uvm_object extends uvm_pkg::uvm_void) '{super:'{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"mo", m_inst_id:4792, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X}, i:0, type_name:"an_obj"}, type_name:"my_obj"}
+* [/^my_obj$/] : (p.my_obj extends p.an_obj extends uvm_pkg::uvm_object extends uvm_pkg::uvm_void) '{super:'{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"mo", m_inst_id:X, m_inst_count:X, __m_uvm_status_container:uvm_pkg::uvm_status_container@X}, i:0, type_name:"an_obj"}, type_name:"my_obj"}
 -  
 * [/^yr_obj$/] : (p.your_obj extends p.an_obj extends uvm_pkg::uvm_object extends uvm_pkg::uvm_void) '{null}
 -  
-* [/^yr_obj$/] : (p.your_obj extends p.an_obj extends uvm_pkg::uvm_object extends uvm_pkg::uvm_void) '{super:'{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"yo", m_inst_id:4794, m_inst_count:485, __m_uvm_status_container:uvm_pkg::uvm_status_container@X}, i:0, type_name:"an_obj"}, type_name:"your_obj"}
+* [/^yr_obj$/] : (p.your_obj extends p.an_obj extends uvm_pkg::uvm_object extends uvm_pkg::uvm_void) '{super:'{super:'{super:'{}, use_uvm_seeding:'h1, m_leaf_name:"yo", m_inst_id:X, m_inst_count:X, __m_uvm_status_container:uvm_pkg::uvm_status_container@X}, i:0, type_name:"an_obj"}, type_name:"your_obj"}
 -  
 entry [/^vif$/] : (virtual interface intf) virtual interface intf@X
 -  

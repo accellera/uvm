@@ -563,8 +563,13 @@ endfunction \
 // as well, but care must be taken when using the + operator to ensure that the
 // same bit is not added more than once).
 //
-//   UVM_ALL_ON     - Set all operations on (default).
-//   UVM_DEFAULT    - Use the default flag settings.
+//   UVM_ALL_ON     - Set all operations on.
+//   UVM_DEFAULT    - This is the recommended set of flags to pass 
+//                      to the field macros.  Currently, it enables
+//                      all of the operations, making it functionally
+//                      identical to ~UVM_ALL_ON~.  In the future 
+//                      however, additional flags could be added with
+//                      a recommended default value of ~off~.
 //
 //   UVM_NOCOPY     - Do not copy this field.
 //   UVM_NOCOMPARE  - Do not compare this field.
@@ -579,6 +584,7 @@ endfunction \
 //                      in the policy class for this field.
 //   UVM_READONLY   - Do not allow setting of this field from the set_*_local
 //                      methods or during <apply_config_settings> operation.
+//
 //
 // A radix for printing and recording can be specified by OR'ing one of the
 // following constants in the ~FLAG~ argument

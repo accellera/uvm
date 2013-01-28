@@ -20,7 +20,7 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
-const int unsigned max = '1;
+
 
 //----------------------------------------------------------------------
 // class uvm_spell_chkr
@@ -28,7 +28,8 @@ const int unsigned max = '1;
 class uvm_spell_chkr #(type T=int);
 
   typedef T tab_t[string];
-
+  static const int unsigned max = '1;
+   
   //--------------------------------------------------------------------
   // check
   //

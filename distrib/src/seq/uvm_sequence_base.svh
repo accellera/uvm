@@ -656,7 +656,8 @@ class uvm_sequence_base extends uvm_sequence_item;
   //
   // This function will kill the sequence, and cause all current locks and
   // requests in the sequence's default sequencer to be removed. The sequence
-  // state will change to STOPPED, and its post_body() method, if  will not b
+  // state will change to STOPPED, and the post_body() and post_start() callback
+  // methods will not be executed.
   //
   // If a sequence has issued locks, grabs, or requests on sequencers other than
   // the default sequencer, then care must be taken to unregister the sequence

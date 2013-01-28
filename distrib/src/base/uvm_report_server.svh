@@ -61,8 +61,7 @@ class uvm_report_server extends uvm_object;
 
   // Function: new
   //
-  // Creates the central report server, if not already created. Else, does
-  // nothing. The constructor is protected to enforce a singleton.
+  // Creates an instance of the class.
 
   function new();
     set_name("uvm_report_server");
