@@ -16,7 +16,7 @@
 //   writing, software distributed under the License is
 //   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 //   CONDITIONS OF ANY KIND, either express or implied.  See
-//   the License for the specific language governing
+//   the License or the specific language governing
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
@@ -1123,7 +1123,7 @@ function string uvm_tree_printer::emit();
 
       if (i < m_rows.size()-1) begin
         if (m_rows[i+1].level > row.level) begin
-          s = {s, knobs.separator[0], linefeed};
+          s = {s, string'(knobs.separator[0]), linefeed};
           continue;
         end
       end
@@ -1142,7 +1142,7 @@ function string uvm_tree_printer::emit();
           string indent_str;
           for (int l=row.level-1; l >= end_level; l--) begin
             indent_str = space.substr(1,l * knobs.indent); 
-            s = {s, indent_str, knobs.separator[1], linefeed};
+            s = {s, indent_str, string'(knobs.separator[1]), linefeed};
           end
         end
       end
