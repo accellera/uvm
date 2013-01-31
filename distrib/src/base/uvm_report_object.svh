@@ -102,8 +102,8 @@ class uvm_report_object extends uvm_object;
   virtual function void uvm_report( uvm_severity severity,
                                     string id,
                                     string message,
-                                    int verbosity = (severity == UVM_ERROR) ? UVM_LOW :
-                                                    (severity == UVM_FATAL) ? UVM_NONE : UVM_MEDIUM,
+                                    int verbosity = (severity == uvm_severity'(UVM_ERROR)) ? UVM_LOW :
+                                                    (severity == uvm_severity'(UVM_FATAL)) ? UVM_NONE : UVM_MEDIUM,
                                     string filename = "",
                                     int line = 0);
     m_rh.report(severity, get_full_name(), id, message, verbosity,
