@@ -65,7 +65,6 @@ class uvm_objection extends uvm_report_object;
   protected int     m_source_count[uvm_object];
   protected int     m_total_count [uvm_object];
   protected time    m_drain_time  [uvm_object];
-  protected int     m_draining    [uvm_object];
   protected uvm_objection_events m_events [uvm_object];
   /*protected*/ bit     m_top_all_dropped;
   protected process m_background_proc;
@@ -74,8 +73,42 @@ class uvm_objection extends uvm_report_object;
 
   static uvm_objection m_objections[$];
 
-  local uvm_objection_context_object m_context_pool[$];
+  //// Drain Logic
+
+  // The context pool holds used context objects, so that
+  // they're not constantly be recreated.  The maximum
+  // number of contexts in the pool is equal to the maximum
+  // number of simultaneous drains you could have occuring,
+  // both pre and post forks.
+  //
+  // There's the potential for a programmability within the
+  // library to dictate the largest this pool should be allowed
+  // to grow, but that seems like overkill for the time being.
+  local static uvm_objection_context_object m_context_pool[$];
+
+  // These are the active drain processes, which have been
+  // forked off by the background process.  A raise can
+  // use this array to kill a drain.
+  local process m_drain_proc[uvm_object];
+
+  // These are the contexts which have been scheduled for
+  // retrieval by the background process, but which the
+  // background process hasn't seen yet.
   local uvm_objection_context_object m_scheduled_list[$];
+
+  // Once a context is seen by the background process, it is
+  // removed from the scheduled list, and placed in the forked
+  // list.  At the same time, it is placed in the scheduled
+  // contexts array.  A re-raise can use the scheduled contexts
+  // array to detect (and cancel) the drain.
+  local uvm_objection_context_object m_scheduled_contexts[uvm_object];
+  local uvm_objection_context_object m_forked_list[$];
+
+  // Once the forked drain has actually started (this occurs
+  // ~1 delta AFTER the background process schedules it), the
+  // context is removed from the above array and list, and placed
+  // in the forked_contexts list.  
+  local uvm_objection_context_object m_forked_contexts[uvm_object];
 
   /*protected*/ bit m_hier_mode = 1;
 
@@ -97,6 +130,8 @@ class uvm_objection extends uvm_report_object;
   //
   virtual function void clear(uvm_object obj=null);
     string name;
+    uvm_objection_context_object ctxt;
+    
     if (obj==null)
       obj=m_top;
     name = obj.get_full_name();
@@ -110,11 +145,19 @@ class uvm_objection extends uvm_report_object;
     //Should there be a warning if there are outstanding objections?
     m_source_count.delete();
     m_total_count.delete();
-    m_draining.delete();
+
+    // Clear out the drain logic (could save off the contexts)
+    m_scheduled_list.delete();
+    m_scheduled_contexts.delete();
+    m_forked_list.delete();
+    m_forked_contexts.delete();
+
     m_top_all_dropped = 0;
     m_cleared = 1;
     if (m_events.exists(m_top))
       ->m_events[m_top].all_dropped;
+
+
     m_background_proc.kill();
 
     fork
@@ -330,6 +373,8 @@ class uvm_objection extends uvm_report_object;
                          uvm_object source_obj,
                          string description="",
                          int count=1);
+    int idx;
+    uvm_objection_context_object ctxt;
 
     if (m_total_count.exists(obj))
       m_total_count[obj] += count;
@@ -348,17 +393,91 @@ class uvm_objection extends uvm_report_object;
 
     raised(obj, source_obj, description, count);
 
-    // If this object is still draining from a previous drop, then
-    // raise the count and return. Any propagation will be handled
-    // by the drain process.
-    if (m_draining.exists(obj))
-      return;
+      // Handle any outstaning drains...
 
-    if (!m_hier_mode && obj != m_top)
-      m_raise(m_top,source_obj,description,count);
-    else if (obj != m_top)
-      m_propagate(obj, source_obj, description, count, 1, 0);
-  
+    // First go through the scheduled list
+    idx = 0;
+    while (idx < m_scheduled_list.size()) begin
+        if (m_scheduled_list[idx].obj == obj) begin
+            // Caught it before the drain was forked
+            ctxt = m_scheduled_list[idx];
+            m_scheduled_list.delete(idx);
+            break;
+        end
+        idx++;
+    end
+
+    // If it's not there, go through the forked list
+    if (ctxt == null) begin
+        idx = 0;
+        while (idx < m_forked_list.size()) begin
+            if (m_forked_list[idx].obj == obj) begin
+                // Caught it after the drain was forked,
+                // but before the fork started
+                ctxt = m_forked_list[idx];
+                m_forked_list.delete(idx);
+                m_scheduled_contexts.delete(ctxt.obj);
+                break;
+            end
+            idx++;
+        end
+    end
+
+    // If it's not there, go through the forked contexts
+    if (ctxt == null) begin
+        if (m_forked_contexts.exists(obj)) begin
+            // Caught it with the forked drain running
+            ctxt = m_forked_contexts[obj];
+            m_forked_contexts.delete(obj);
+            // Kill the drain
+            m_drain_proc[obj].kill();
+            m_drain_proc.delete(obj);
+        end
+    end
+
+    if (ctxt == null) begin
+        // If there were no drains, just propagate as usual
+
+        if (!m_hier_mode && obj != m_top)
+          m_raise(m_top,source_obj,description,count);
+        else if (obj != m_top)
+          m_propagate(obj, source_obj, description, count, 1, 0);
+    end
+    else begin
+        // Otherwise we need to determine what exactly happened
+        int diff_count;
+
+        // Determine the diff count, if it's positive, then we're
+        // looking at a 'raise' total, if it's negative, then
+        // we're looking at a 'drop', but not down to 0.  If it's
+        // a '0', that means that there is no change in the total.
+        diff_count = count - ctxt.count;
+
+        if (diff_count != 0) begin
+            // Something changed
+            if (diff_count > 0) begin
+                // we're looking at an increase in the total
+                if (!m_hier_mode && obj != m_top)
+                  m_raise(m_top, source_obj, description, diff_count);
+                else if (obj != m_top)
+                  m_propagate(obj, source_obj, description, diff_count, 1, 0);
+            end
+            else begin
+                // we're looking at a decrease in the total
+                // The count field is always positive...
+                diff_count = -diff_count;
+                if (!m_hier_mode && obj != m_top)
+                  m_drop(m_top, source_obj, description, diff_count);
+                else if (obj != m_top)
+                  m_propagate(obj, source_obj, description, diff_count, 0, 0);
+            end
+        end
+
+        // Cleanup
+        ctxt.clear();
+        m_context_pool.push_back(ctxt);
+    end
+        
   endfunction
   
 
@@ -474,29 +593,30 @@ class uvm_objection extends uvm_report_object;
 
     end
     else begin
-      // need to make sure we are safe from the dropping thread terminating
-      // while the drain time is being honored. Can call immediatiately if
-      // we are in the top thread, otherwise we have to schedule it.
-      if(!m_draining.exists(obj)) m_draining[obj] = 1;
-      else m_draining[obj] = m_draining[obj]+1;
-
-      if(in_top_thread) begin
-        m_forked_drop(obj, source_obj, description, count, in_top_thread);
-      end
-      else
-      begin
         uvm_objection_context_object ctxt;
-        if(m_context_pool.size())
+        if (m_context_pool.size())
           ctxt = m_context_pool.pop_front();
         else
           ctxt = new;
+
         ctxt.obj = obj;
         ctxt.source_obj = source_obj;
         ctxt.description = description;
         ctxt.count = count;
-        m_scheduled_list.push_back(ctxt); 
-      end
-    end
+        // Need to be thread-safe, let the background
+        // process handle it.
+
+        // Why don't we look at in_top_thread here?  Because
+        // a re-raise will kill the drain at object that it's
+        // currently occuring at, and we need the leaf-level kills
+        // to not cause accidental kills at branch-levels in
+        // the propagation.
+
+        // Using the background process just allows us to
+        // seperate the links of the chain.
+        m_scheduled_list.push_back(ctxt);
+
+    end // else: !if(m_total_count[obj] != 0)
 
   endfunction
 
@@ -528,96 +648,91 @@ class uvm_objection extends uvm_report_object;
 
   // background process; when non
   task m_execute_scheduled_forks;
-    uvm_objection_context_object ctxt;
     while(1) begin
       wait(m_scheduled_list.size() != 0);
       if(m_scheduled_list.size() != 0) begin
-	 ctxt = m_scheduled_list.pop_front();
-	 m_forked_drop(ctxt.obj, ctxt.source_obj, ctxt.description, ctxt.count, 1);
-	 m_context_pool.push_back(ctxt);
+          uvm_objection_context_object c;
+          // Save off the context before the fork
+          c = m_scheduled_list.pop_front();
+          // A re-raise can use this to figure out props (if any)
+          m_scheduled_contexts[c.obj] = c;
+          // The fork below pulls out from the forked list
+          m_forked_list.push_back(c);
+          // The fork will guard the m_forked_drain call, but
+          // a re-raise can kill m_forked_list contexts in the delta
+          // before the fork executes.
+          fork : guard
+              begin
+                  uvm_objection_context_object ctxt;
+                  // Check to maike sure re-raise didn't empty the fifo
+                  if (m_forked_list.size() > 0) begin
+	              ctxt = m_forked_list.pop_front();
+                      // Clear it out of scheduled
+                      m_scheduled_contexts.delete(ctxt.obj);
+                      // Move it in to forked (so re-raise can figure out props)
+                      m_forked_contexts[ctxt.obj] = ctxt;
+                      // Save off our process handle, so a re-raise can kill it...
+                      m_drain_proc[ctxt.obj] = process::self();
+                      // Execute the forked drain
+                      m_forked_drain(ctxt.obj, ctxt.source_obj, ctxt.description, ctxt.count, 1);
+                      // Cleanup if we survived (no re-raises)
+                      m_drain_proc.delete(ctxt.obj);
+                      m_forked_contexts.delete(ctxt.obj);
+                      // Clear out the context object (prevent memory leaks)
+                      ctxt.clear();
+                      // Save the context in the pool for later reuse
+                      m_context_pool.push_back(ctxt);
+                  end
+              end
+          join_none : guard
       end
     end
   endtask
 
 
-  // m_forked_drop
+  // m_forked_drain
   // -------------
 
-  function void m_forked_drop (uvm_object obj,
-                               uvm_object source_obj,
-                               string description="",
-                               int count=1,
-                               int in_top_thread=0);
+  task m_forked_drain (uvm_object obj,
+                       uvm_object source_obj,
+                       string description="",
+                       int count=1,
+                       int in_top_thread=0);
 
-    int diff_count;
+      int diff_count;
 
-    fork   // join_none, so this can be a function
-    begin  //  also serves as guard proc to embedded disable fork
-
-      fork
-        begin
-          if (m_drain_time.exists(obj))
-            `uvm_delay(m_drain_time[obj])
- 
-           if (m_trace_mode)
-             m_report(obj,source_obj,description,count,"all_dropped");
-    
-          all_dropped(obj,source_obj,description, count);
- 
+      if (m_drain_time.exists(obj))
+        `uvm_delay(m_drain_time[obj])
+      
+      if (m_trace_mode)
+        m_report(obj,source_obj,description,count,"all_dropped");
+      
+      all_dropped(obj,source_obj,description, count);
+          
           // wait for all_dropped cbs to complete
-          wait fork;
-        end
-        wait (m_total_count.exists(obj) && m_total_count[obj] != 0);
-      join_any
-      disable fork;
+      wait fork;
 
-      m_draining[obj] = m_draining[obj] - 1;
-
-      if(m_draining[obj] == 0) begin
-
-      m_draining.delete(obj);
-
+      /* NOT NEEDED - Any raise would have killed us!
       if(!m_total_count.exists(obj))
         diff_count = -count;
       else
         diff_count = m_total_count[obj] - count;
+      */
 
-      // no propagation if a re-raise cancels the drop
-      if (diff_count != 0) begin
-        bit reraise;
+      // we are ready to delete the 0-count entries for the current
+      // object before propagating up the hierarchy. 
+      if (m_source_count.exists(obj) && m_source_count[obj] == 0)
+        m_source_count.delete(obj);
+          
+      if (m_total_count.exists(obj) && m_total_count[obj] == 0)
+        m_total_count.delete(obj);
 
-        if (diff_count > 0)
-          reraise = 1;
-        reraise = diff_count > 0 ? 1 : 0;
- 
-        if (diff_count < 0)
-          diff_count = -diff_count;
+      if (!m_hier_mode && obj != m_top)
+        m_drop(m_top,source_obj,description, count, 1);
+      else if (obj != m_top)
+        m_propagate(obj, source_obj, description, count, 0, 1);
 
-        // we are ready to delete the 0-count entries for the current
-        // object before propagating up the hierarchy. 
-        if (m_source_count.exists(obj) && m_source_count[obj] == 0)
-            m_source_count.delete(obj);
-
-        if (m_total_count.exists(obj) && m_total_count[obj] == 0)
-           m_total_count.delete(obj);
-
-        if (!m_hier_mode && obj != m_top) begin
-          if (reraise)
-            m_raise(m_top,source_obj,description,diff_count);
-          else
-            m_drop(m_top,source_obj,description, diff_count, 1);
-        end
-        else begin
-          if (obj != m_top)
-            this.m_propagate(obj, source_obj, description, diff_count, reraise, 1);
-        end
-      end
-
-      end //m_draining == 0
-    end
-    join_none
- 
-  endfunction
+  endtask
 
   // Function: set_drain_time
   //
@@ -937,7 +1052,6 @@ class uvm_objection extends uvm_report_object;
     m_source_count = _rhs.m_source_count;
     m_total_count  = _rhs.m_total_count;
     m_drain_time   = _rhs.m_drain_time;
-    m_draining     = _rhs.m_draining;
     m_hier_mode    = _rhs.m_hier_mode;
   endfunction
 
@@ -1218,10 +1332,21 @@ endclass
 
 // Have a pool of context objects to use
 class uvm_objection_context_object;
-  uvm_object obj;
-  uvm_object source_obj;
-  string description;
-  int count;
+    uvm_object obj;
+    uvm_object source_obj;
+    string description;
+    int    count;
+    bit    reraised;
+
+    // Clears the values stored within the object,
+    // preventing memory leaks from reused objects
+    function void clear();
+        obj = null;
+        source_obj = null;
+        description = "";
+        count = 0;
+        reraised = 0;
+    endfunction : clear
 endclass
 
 
