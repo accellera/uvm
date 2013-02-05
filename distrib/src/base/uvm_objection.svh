@@ -67,7 +67,6 @@ class uvm_objection extends uvm_report_object;
   protected time    m_drain_time  [uvm_object];
   protected uvm_objection_events m_events [uvm_object];
   /*protected*/ bit     m_top_all_dropped;
-  protected process m_background_proc;
 
   protected uvm_root m_top = uvm_root::get();
 
@@ -94,7 +93,7 @@ class uvm_objection extends uvm_report_object;
   // These are the contexts which have been scheduled for
   // retrieval by the background process, but which the
   // background process hasn't seen yet.
-  local uvm_objection_context_object m_scheduled_list[$];
+  local static uvm_objection_context_object m_scheduled_list[$];
 
   // Once a context is seen by the background process, it is
   // removed from the scheduled list, and placed in the forked
@@ -131,7 +130,8 @@ class uvm_objection extends uvm_report_object;
   virtual function void clear(uvm_object obj=null);
     string name;
     uvm_objection_context_object ctxt;
-    
+    int  idx;
+
     if (obj==null)
       obj=m_top;
     name = obj.get_full_name();
@@ -146,26 +146,42 @@ class uvm_objection extends uvm_report_object;
     m_source_count.delete();
     m_total_count.delete();
 
-    // Clear out the drain logic (could save off the contexts)
-    m_scheduled_list.delete();
+    // Remove any scheduled drains from the static queue
+    idx = 0;
+    while (idx < m_scheduled_list.size()) begin
+        if (m_scheduled_list[idx].objection == this) begin
+            m_scheduled_list[idx].clear();
+            m_context_pool.push_back(m_scheduled_list[idx]);
+            m_scheduled_list.delete(idx);
+        end
+        else begin
+            idx++;
+        end
+    end
+
+    // Scheduled contexts and m_forked_lists have duplicate
+    // entries... clear out one, free the other.
     m_scheduled_contexts.delete();
-    m_forked_list.delete();
-    m_forked_contexts.delete();
+    while (m_forked_list.size()) begin
+        m_forked_list[0].clear();
+        m_context_pool.push_back(m_forked_list[0]);
+        void'(m_forked_list.pop_front());
+    end
+
+    // running drains have a context and a process
+    foreach (m_forked_contexts[o]) begin
+        m_drain_proc[o].kill();
+        m_drain_proc.delete(o);
+        m_forked_contexts[o].clear();
+        m_context_pool.push_back(m_forked_contexts[o]);
+        m_forked_contexts.delete(o);
+    end
 
     m_top_all_dropped = 0;
     m_cleared = 1;
     if (m_events.exists(m_top))
       ->m_events[m_top].all_dropped;
 
-
-    m_background_proc.kill();
-
-    fork
-      begin
-        m_background_proc = process::self();
-        m_execute_scheduled_forks();
-      end
-    join_none
   endfunction
 
 
@@ -398,7 +414,8 @@ class uvm_objection extends uvm_report_object;
     // First go through the scheduled list
     idx = 0;
     while (idx < m_scheduled_list.size()) begin
-        if (m_scheduled_list[idx].obj == obj) begin
+        if ((m_scheduled_list[idx].obj == obj) &&
+            (m_scheduled_list[idx].objection == this)) begin
             // Caught it before the drain was forked
             ctxt = m_scheduled_list[idx];
             m_scheduled_list.delete(idx);
@@ -603,6 +620,7 @@ class uvm_objection extends uvm_report_object;
         ctxt.source_obj = source_obj;
         ctxt.description = description;
         ctxt.count = count;
+        ctxt.objection = this;
         // Need to be thread-safe, let the background
         // process handle it.
 
@@ -624,22 +642,13 @@ class uvm_objection extends uvm_report_object;
   // m_init_objections
   // -----------------
 
+  // Forks off the single background process
   static function void m_init_objections();
-    fork begin
-      while(1) begin
-        wait(m_objections.size() != 0);
-        foreach(m_objections[i]) begin
-          automatic uvm_objection obj = m_objections[i];
-          fork
-            begin
-              obj.m_background_proc = process::self();
-              obj.m_execute_scheduled_forks();
-            end
-          join_none
-        end
-        m_objections.delete();
-      end
-    end join_none
+    fork 
+        begin
+            uvm_objection::m_execute_scheduled_forks();
+        end 
+    join_none
   endfunction
 
 
@@ -647,37 +656,39 @@ class uvm_objection extends uvm_report_object;
   // -------------------------
 
   // background process; when non
-  task m_execute_scheduled_forks;
+  static task m_execute_scheduled_forks;
     while(1) begin
       wait(m_scheduled_list.size() != 0);
       if(m_scheduled_list.size() != 0) begin
           uvm_objection_context_object c;
+          uvm_objection o;
           // Save off the context before the fork
           c = m_scheduled_list.pop_front();
           // A re-raise can use this to figure out props (if any)
-          m_scheduled_contexts[c.obj] = c;
+          c.objection.m_scheduled_contexts[c.obj] = c;
           // The fork below pulls out from the forked list
-          m_forked_list.push_back(c);
+          c.objection.m_forked_list.push_back(c);
           // The fork will guard the m_forked_drain call, but
           // a re-raise can kill m_forked_list contexts in the delta
           // before the fork executes.
           fork : guard
+              automatic uvm_objection objection = c.objection;
               begin
-                  uvm_objection_context_object ctxt;
                   // Check to maike sure re-raise didn't empty the fifo
-                  if (m_forked_list.size() > 0) begin
-	              ctxt = m_forked_list.pop_front();
+                  if (objection.m_forked_list.size() > 0) begin
+                      uvm_objection_context_object ctxt;
+	              ctxt = objection.m_forked_list.pop_front();
                       // Clear it out of scheduled
-                      m_scheduled_contexts.delete(ctxt.obj);
+                      objection.m_scheduled_contexts.delete(ctxt.obj);
                       // Move it in to forked (so re-raise can figure out props)
-                      m_forked_contexts[ctxt.obj] = ctxt;
+                      objection.m_forked_contexts[ctxt.obj] = ctxt;
                       // Save off our process handle, so a re-raise can kill it...
-                      m_drain_proc[ctxt.obj] = process::self();
+                      objection.m_drain_proc[ctxt.obj] = process::self();
                       // Execute the forked drain
-                      m_forked_drain(ctxt.obj, ctxt.source_obj, ctxt.description, ctxt.count, 1);
+                      objection.m_forked_drain(ctxt.obj, ctxt.source_obj, ctxt.description, ctxt.count, 1);
                       // Cleanup if we survived (no re-raises)
-                      m_drain_proc.delete(ctxt.obj);
-                      m_forked_contexts.delete(ctxt.obj);
+                      objection.m_drain_proc.delete(ctxt.obj);
+                      objection.m_forked_contexts.delete(ctxt.obj);
                       // Clear out the context object (prevent memory leaks)
                       ctxt.clear();
                       // Save the context in the pool for later reuse
@@ -1336,7 +1347,7 @@ class uvm_objection_context_object;
     uvm_object source_obj;
     string description;
     int    count;
-    bit    reraised;
+    uvm_objection objection;
 
     // Clears the values stored within the object,
     // preventing memory leaks from reused objects
@@ -1345,7 +1356,7 @@ class uvm_objection_context_object;
         source_obj = null;
         description = "";
         count = 0;
-        reraised = 0;
+        objection = null;
     endfunction : clear
 endclass
 
