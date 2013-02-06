@@ -75,7 +75,7 @@ class uvm_objection extends uvm_report_object;
   //// Drain Logic
 
   // The context pool holds used context objects, so that
-  // they're not constantly be recreated.  The maximum
+  // they're not constantly being recreated.  The maximum
   // number of contexts in the pool is equal to the maximum
   // number of simultaneous drains you could have occuring,
   // both pre and post forks.
@@ -409,7 +409,7 @@ class uvm_objection extends uvm_report_object;
 
     raised(obj, source_obj, description, count);
 
-      // Handle any outstaning drains...
+      // Handle any outstanding drains...
 
     // First go through the scheduled list
     idx = 0;
