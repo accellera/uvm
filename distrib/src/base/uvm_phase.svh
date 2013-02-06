@@ -437,6 +437,18 @@ class uvm_phase extends uvm_object;
   // outside of the current schedule then the jump affects other schedules which
   // share the phase.
   //
+  // A jump can be either forward or backwards in the phase graph.
+  // If the specified phase (name) is found in the set of predecessors
+  // then we are jumping backwards.  If, on the other hand, the phase is in the set
+  // of successors then we are jumping forwards.  If neither, then we
+  // have an error.
+  //
+  // If the phase is non-existant and thus we don't know where to jump
+  // we have a situation where the only thing to do is to uvm_report_fatal
+  // and terminate_phase.  By calling this function the intent was to
+  // jump to some other phase. So, continuing in the current phase doesn't
+  // make any sense.  And we don't have a valid phase to jump to.  So we're done. 
+  //
   extern function void jump(uvm_phase phase);
 
 
@@ -1633,20 +1645,6 @@ function void uvm_phase::jump(uvm_phase phase);
       m_state.name(), "). The jump will not happen until the phase becomes ",
       "active."})
   end
-
-
-
-  // A jump can be either forward or backwards in the phase graph.
-  // If the specified phase (name) is found in the set of predecessors
-  // then we are jumping backwards.  If, on the other hand, the phase is in the set
-  // of successors then we are jumping forwards.  If neither, then we
-  // have an error.
-  //
-  // If the phase is non-existant and thus we don't know where to jump
-  // we have a situation where the only thing to do is to uvm_report_fatal
-  // and terminate_phase.  By calling this function the intent was to
-  // jump to some other phase. So, continuing in the current phase doesn't
-  // make any sense.  And we don't have a valid phase to jump to.  So we're done.
 
   d = m_find_predecessor(phase,0);
   if (d == null) begin
