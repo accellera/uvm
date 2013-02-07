@@ -639,24 +639,12 @@ class uvm_objection extends uvm_report_object;
   endfunction
 
 
-  // m_init_objections
-  // -----------------
-
-  // Forks off the single background process
-  static function void m_init_objections();
-    fork 
-        begin
-            uvm_objection::m_execute_scheduled_forks();
-        end 
-    join_none
-  endfunction
-
 
   // m_execute_scheduled_forks
   // -------------------------
 
   // background process; when non
-  static task m_execute_scheduled_forks;
+  static task m_execute_scheduled_forks();
     while(1) begin
       wait(m_scheduled_list.size() != 0);
       if(m_scheduled_list.size() != 0) begin
@@ -744,6 +732,17 @@ class uvm_objection extends uvm_report_object;
         m_propagate(obj, source_obj, description, count, 0, 1);
 
   endtask
+
+
+  // m_init_objections
+  // -----------------
+
+  // Forks off the single background process
+  static function void m_init_objections();
+    fork 
+      uvm_objection::m_execute_scheduled_forks();
+    join_none
+  endfunction
 
   // Function: set_drain_time
   //
