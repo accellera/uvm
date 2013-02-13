@@ -2022,6 +2022,7 @@ function void uvm_reg::reset(string kind = "HARD");
    void'(m_atomic.try_get(1));
    m_atomic.put(1);
    m_process = null;
+   Xset_busyX(0);
 endfunction: reset
 
 
