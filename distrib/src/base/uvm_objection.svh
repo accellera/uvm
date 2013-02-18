@@ -88,8 +88,12 @@ class uvm_objection extends uvm_report_object;
   // These are the active drain processes, which have been
   // forked off by the background process.  A raise can
   // use this array to kill a drain.
+`ifndef UVM_USE_PROCESS_CONTAINER   
   local process m_drain_proc[uvm_object];
-
+`else
+  local process_container_c m_drain_proc[uvm_object];
+`endif
+   
   // These are the contexts which have been scheduled for
   // retrieval by the background process, but which the
   // background process hasn't seen yet.
@@ -170,8 +174,14 @@ class uvm_objection extends uvm_report_object;
 
     // running drains have a context and a process
     foreach (m_forked_contexts[o]) begin
+`ifndef UVM_USE_PROCESS_CONTAINER       
         m_drain_proc[o].kill();
         m_drain_proc.delete(o);
+`else
+        m_drain_proc[o].p.kill();
+        m_drain_proc.delete(o);
+`endif
+       
         m_forked_contexts[o].clear();
         m_context_pool.push_back(m_forked_contexts[o]);
         m_forked_contexts.delete(o);
@@ -447,8 +457,14 @@ class uvm_objection extends uvm_report_object;
             ctxt = m_forked_contexts[obj];
             m_forked_contexts.delete(obj);
             // Kill the drain
+`ifndef UVM_USE_PROCESS_CONTAINER	   
             m_drain_proc[obj].kill();
             m_drain_proc.delete(obj);
+`else
+            m_drain_proc[obj].p.kill();
+            m_drain_proc.delete(obj);
+`endif
+	   
         end
     end
 
@@ -671,7 +687,14 @@ class uvm_objection extends uvm_report_object;
                       // Move it in to forked (so re-raise can figure out props)
                       objection.m_forked_contexts[ctxt.obj] = ctxt;
                       // Save off our process handle, so a re-raise can kill it...
+`ifndef UVM_USE_PROCESS_CONTAINER		     
                       objection.m_drain_proc[ctxt.obj] = process::self();
+`else
+		     begin
+			process_container_c c = new(process::self());
+			objection.m_drain_proc[ctxt.obj]=c;
+		     end
+`endif		     
                       // Execute the forked drain
                       objection.m_forked_drain(ctxt.obj, ctxt.source_obj, ctxt.description, ctxt.count, 1);
                       // Cleanup if we survived (no re-raises)
