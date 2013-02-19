@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
+//   Copyright 2013 Verilab, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -230,8 +231,8 @@ class uvm_phase extends uvm_object;
   //   with_phase       - specify to add the new phase in parallel with this one
   //   after_phase      - specify to add the new phase as successor to this one
   //   before_phase     - specify to add the new phase as predecessor to this one
-  //   start_with_phase - specify to start the new phase in parallel to this one
-  //   end_with_phase   - specify to end the new phase at the same time as this one
+  //   start_with_phase - specify to add the new phase as starting in parallel with this one
+  //   end_with_phase   - specify to add the new phase as ending in parallel with this one
   //
   extern function void add(uvm_phase phase,
                            uvm_phase with_phase=null,
@@ -648,6 +649,7 @@ endfunction
 // ---
 // TBD error checks if param nodes are actually in this schedule or not
 
+
 function void uvm_phase::add(uvm_phase phase,
                              uvm_phase with_phase=null,
                              uvm_phase after_phase=null,
@@ -683,13 +685,57 @@ function void uvm_phase::add(uvm_phase phase,
          {"cannot find after_phase '",nm,"' within node '",get_name(),"'"})
   end
 
-  if (with_phase != null && (after_phase != null || before_phase != null))
+  if (start_with_phase != null && start_with_phase.get_phase_type() == UVM_PHASE_IMP) begin
+    string nm = start_with_phase.get_name();
+    start_with_phase = find(start_with_phase);
+    if (start_with_phase == null)
+      `uvm_fatal("PH_BAD_ADD",
+         {"cannot find start_with_phase '",nm,"' within node '",get_name(),"'"})
+  end
+
+  if (end_with_phase != null && end_with_phase.get_phase_type() == UVM_PHASE_IMP) begin
+    string nm = end_with_phase.get_name();
+    end_with_phase = find(end_with_phase);
+    if (end_with_phase == null)
+      `uvm_fatal("PH_BAD_ADD",
+         {"cannot find end_with_phase '",nm,"' within node '",get_name(),"'"})
+  end
+
+// check valid permutations
+// .with
+// .after, .before, .after & .before
+// .after & .end_with
+// .start_with & .before
+// .start_with & .end_with
+  if (with_phase != null && (after_phase != null || before_phase != null)) begin
     `uvm_fatal("PH_BAD_ADD",
        "cannot specify both 'with' and 'before/after' phase relationships")
+  end
 
-  if (before_phase == this || after_phase == m_end_node || with_phase == m_end_node)
+  if (before_phase == this || after_phase == m_end_node || with_phase == m_end_node) begin
     `uvm_fatal("PH_BAD_ADD",
        "cannot add before begin node, after end node, or with end nodes")
+  end
+
+  if (with_phase != null && (start_with_phase != null || end_with_phase != null)) begin
+    `uvm_fatal("PH_BAD_ADD",
+       "cannot specify both 'with' and 'start_with/end_with' phase relationships")
+  end
+
+  if (start_with_phase != null && after_phase != null) begin
+    `uvm_fatal("PH_BAD_ADD",
+       "cannot specify both 'start_with' and 'after' phase relationships")
+  end
+
+  if (end_with_phase != null && before_phase != null) begin
+    `uvm_fatal("PH_BAD_ADD",
+       "cannot specify both 'end_with' and 'before' phase relationships")
+  end
+
+  if (start_with_phase == this || end_with_phase == m_end_node) begin
+    `uvm_fatal("PH_BAD_ADD",
+       "cannot start_with begin node, or end_with end node")
+  end
 
   // If we are inserting a new "leaf node"
   if (phase.get_phase_type() == UVM_PHASE_IMP) begin
@@ -713,9 +759,17 @@ function void uvm_phase::add(uvm_phase phase,
   end
   */
 
-  // If no before/after/with specified, insert at end of this schedule
-  if (with_phase == null && after_phase == null && before_phase == null) begin
+  // If no before/after/with/start_with/end_with specified, insert at end of this schedule
+  if (with_phase == null && after_phase == null && before_phase == null && start_with_phase == null && end_with_phase == null) begin
     before_phase = m_end_node;
+  end
+
+  if (start_with_phase != null && end_with_phase == null && before_phase == null) begin
+    before_phase = m_end_node;
+  end
+
+  if (end_with_phase != null && start_with_phase == null && after_phase == null) begin
+    after_phase = this;
   end
 
 
@@ -727,6 +781,8 @@ function void uvm_phase::add(uvm_phase phase,
       " with_phase=",   (with_phase == null)   ? "null" : with_phase.get_name(),
       " after_phase=",  (after_phase == null)  ? "null" : after_phase.get_name(),
       " before_phase=", (before_phase == null) ? "null" : before_phase.get_name(),
+      " start_with_phase=", (start_with_phase == null) ? "null" : start_with_phase.get_name(),
+      " end_with_phase=", (end_with_phase == null) ? "null" : end_with_phase.get_name(),
       " new_node=",     (new_node == null)     ? "null" : {new_node.get_name(),
                                                            " inst_id=",
                                                            $sformatf("%0d",new_node.get_inst_id())},
@@ -747,7 +803,7 @@ function void uvm_phase::add(uvm_phase phase,
 
 
   // INSERT BEFORE PHASE
-  else if (before_phase != null && after_phase == null) begin
+  else if (before_phase != null && after_phase == null && start_with_phase == null) begin
     begin_node.m_predecessors = before_phase.m_predecessors;
     end_node.m_successors[before_phase] = 1;
     foreach (before_phase.m_predecessors[pred]) begin
@@ -760,7 +816,7 @@ function void uvm_phase::add(uvm_phase phase,
 
 
   // INSERT AFTER PHASE
-  else if (before_phase == null && after_phase != null) begin
+  else if (before_phase == null && after_phase != null && end_with_phase == null) begin
     end_node.m_successors = after_phase.m_successors;
     begin_node.m_predecessors[after_phase] = 1;
     foreach (after_phase.m_successors[succ]) begin
@@ -786,6 +842,53 @@ function void uvm_phase::add(uvm_phase phase,
     if (after_phase.m_successors.exists(before_phase)) begin
       after_phase.m_successors.delete(before_phase);
       before_phase.m_successors.delete(after_phase);
+    end
+  end
+
+
+  // START EXECUTING .AFTER & .END_WITH PHASES
+  else if (after_phase != null && end_with_phase != null) begin
+    if(!after_phase.is_before(end_with_phase)) begin
+      `uvm_fatal("PH_ADD_PHASE",{"Phase '",after_phase.get_name(),
+             "' is not before phase '",end_with_phase.get_name(),"'"})
+    end
+    begin_node.m_predecessors[after_phase] = 1;
+    after_phase.m_successors[begin_node] = 1;
+    end_node.m_successors = end_with_phase.m_successors;
+    foreach(end_with_phase.m_successors[succ]) begin
+      succ.m_predecessors[end_node] = 1;
+    end
+  end
+
+
+  // .START_WITH & .BEFORE PHASES
+  else if (start_with_phase != null && before_phase != null) begin
+    if(!start_with_phase.is_before(before_phase)) begin
+      `uvm_fatal("PH_ADD_PHASE",{"Phase '",start_with_phase.get_name(),
+             "' is not before phase '",before_phase.get_name(),"'"})
+    end
+    begin_node.m_predecessors = start_with_phase.m_predecessors;
+    foreach(start_with_phase.m_predecessors[pred]) begin
+      pred.m_successors[begin_node] = 1;
+    end
+    end_node.m_successors[before_phase] = 1;
+    before_phase.m_predecessors[end_node] = 1;
+  end
+
+
+  // .START_WITH & .END_WITH PHASES
+  else if (start_with_phase != null && end_with_phase != null) begin
+    if(end_with_phase.is_before(start_with_phase)) begin
+      `uvm_fatal("PH_ADD_PHASE",{"Phase '",end_with_phase.get_name(),
+             "' is before phase '",start_with_phase.get_name(),"'"})
+    end
+    begin_node.m_predecessors = start_with_phase.m_predecessors;
+    foreach(start_with_phase.m_predecessors[pred]) begin
+      pred.m_successors[begin_node] = 1;
+    end
+    end_node.m_successors = end_with_phase.m_successors;
+    foreach(end_with_phase.m_successors[succ]) begin
+      succ.m_predecessors[end_node] = 1;
     end
   end
 
