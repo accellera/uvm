@@ -1511,6 +1511,7 @@ endfunction
 
 task uvm_sequencer_base::start_default_sequence();
   uvm_sequence_base m_seq ;
+  uvm_factory factory=uvm_coreservice.getFactory();
 
   // Default sequence was cleared, or the count is zero
   if (default_sequence == "" || count == 0 ||
