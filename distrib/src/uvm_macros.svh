@@ -40,7 +40,10 @@
 `endif
 
 `ifdef VCS
+`ifndef UVM_DISABLE_RESOURCE_CONVERTER
+//UVM_USE_RESOURCE_CONVERTER enables UVM-1.1d to print resources output to match uvm-1.1c. VCS2012.09-SP1 or later does not need resource_converter object, disbale by using +define+UVM_DISABLE_RESOURCE_CONVERTER
 `define UVM_USE_RESOURCE_CONVERTER
+`endif
 `endif
 
 `ifdef INCA
