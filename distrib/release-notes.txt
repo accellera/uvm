@@ -102,3 +102,6 @@ Mantis 4388, fixed issue where the objection mechanism was not robust against in
 
 Mantis 4423, fixed issue with broken HTML source links.
 
+Mantis 4465, added support to disable resource converter and use VCS native conversion
+
+
