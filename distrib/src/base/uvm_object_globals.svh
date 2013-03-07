@@ -63,6 +63,13 @@ parameter UVM_STREAMBITS = `UVM_MAX_STREAMBITS;
 
 `define UVM_DEFAULT_TIMEOUT 9200s
 
+// Macro: `UVM_DEFAULT_PRECEDENCE
+//
+// The default precedence used for simulation.  This value
+// must be larger than the depth of the component hierarchy.
+`ifndef UVM_DEFAULT_PRECEDENCE
+  `define UVM_DEFAULT_PRECEDENCE 1000
+`endif
 
 // Type: uvm_bitstream_t
 //
