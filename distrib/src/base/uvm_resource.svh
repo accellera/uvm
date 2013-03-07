@@ -223,9 +223,8 @@ virtual class uvm_resource_base extends uvm_object;
   // When two resources have the same precedence, the first resource
   // found has precedence.
   //
-  // The value initializes to <`UVM_DEFAULT_PRECEDENCE>
 
-  static int unsigned default_precedence = `UVM_DEFAULT_PRECEDENCE;
+  static int unsigned default_precedence = 1000;
 
   // Function: new
   //
