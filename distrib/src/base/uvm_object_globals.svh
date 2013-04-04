@@ -63,7 +63,6 @@ parameter UVM_STREAMBITS = `UVM_MAX_STREAMBITS;
 
 `define UVM_DEFAULT_TIMEOUT 9200s
 
-
 // Type: uvm_bitstream_t
 //
 // The bitstream type is used as a argument type for passing integral values

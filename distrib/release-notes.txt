@@ -1,4 +1,3 @@
-
 Accellera UVM 1.1d Release Notes
 ================================
 
@@ -12,7 +11,7 @@ This is release 1.1d of the Universal Verification Methodology (UVM) reference i
 
 The class library is a reference implementation of the standard. It, the examples, and User Guide provide guidance to users of the standard. For additional information on the Accellera standard, see
 
-    http://www.accellera.org/activities/vip
+     http://www.accellera.org/activities/vip
 
 A good source for information, answers, and resources is http://www.uvmworld.org.  It contains forums on methodology, tool specific issues, and commercial announcements.  It also has links to additional resources, Accellera sponsored events, and other UVM events.
 
@@ -31,7 +30,7 @@ For detailed information on a specific issue, refer to the Mantis database at ht
 
 Mantis 3477, fixed issue where a uvm_heartbeat object being started twice, where first start was provided an event and second start was not provided an event, caused simulation to crash.
 
-Mantis 3568, fixed issue with `uvm_do_obj_callbacks_exit_on macro having a System Verilog function "return" statement where the macro does not need to be called from a function. The fixed macro now just exits the loop without calling "return".
+Mantis 3568, fixed issue with `uvm_do_obj_callbacks_exit_on macro having a System Verilog function “return” statement where the macro does not need to be called from a function. The fixed macro now just exits the loop without calling “return”.
 
 Mantis 3786, fixed potential race issue between two static initializations and usage. The issue is with the uvm_callbacks#(uvm_report_object,uvm_callback)::m_t_inst.m_tw_cb_q variable that is static initialized in the library and could be used by a user statically initialized object.
 
@@ -87,7 +86,7 @@ Mantis 4341, fixed issue where uvm_printer_knobs::separator variable was not use
 
 Mantis 4342, fixed issue where dpi compile on AIX resulted in warning messages.
 
-Mantis 4344, fixed documentation, showed how to use "uvm_sequence_base::wait_for_sequence_state()" for waiting on a sequence state, previously an incorrect/bad way was used.
+Mantis 4344, fixed documentation, showed how to use “uvm_sequence_base::wait_for_sequence_state()“ for waiting on a sequence state, previously an incorrect/bad way was used.
 
 (*) Mantis 4345, fixed issue where uvm_sequence_base::wait_for_sequence_state() did not support waiting for more than one state.
 
@@ -98,3 +97,11 @@ Mantis 4351, added documentation to use uvm_root::get() instead of uvm_top when 
 Mantis 4380, fixed issue with incorrect formatting sizes in uvm_table_printer. The table sizes where not cleared between two calculations.
 
 (*) Mantis 4383, added a generic report method in the uvm_report_object class. This simplifies writing user code that overrides the behavior of the different report methods.
+
+Mantis 4388, fixed issue where the objection mechanism was not robust against in-determinant process order.
+
+Mantis 4423, fixed issue with broken HTML source links.
+
+Mantis 4465, added support to disable resource converter and use VCS native conversion
+
+

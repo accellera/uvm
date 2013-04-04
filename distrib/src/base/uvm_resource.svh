@@ -220,7 +220,8 @@ virtual class uvm_resource_base extends uvm_object;
   // The default precedence for an resource that has been created.
   // When two resources have the same precedence, the first resource
   // found has precedence.
-  
+  //
+
   static int unsigned default_precedence = 1000;
 
   // Function: new
