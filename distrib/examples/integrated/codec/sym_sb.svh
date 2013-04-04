@@ -29,7 +29,7 @@ class sym_sb extends uvm_component;
    uvm_analysis_imp_sym_sb_observed#(vip_tr, sym_sb) observed;
 
    int n_obs_thresh = 10;
-   local int m_n_obs, x;
+   local int m_n_obs;
 
    local bit [7:0] m_sb[$];
 
@@ -66,7 +66,6 @@ class sym_sb extends uvm_component;
 
 
    task reset_phase(uvm_phase phase);
-     x = m_n_obs;
       m_n_obs = 0;
       m_sb.delete();
    endtask
@@ -76,9 +75,4 @@ class sym_sb extends uvm_component;
       wait (m_n_obs > n_obs_thresh);
       phase.drop_objection(this, "Enough data has been observed");
    endtask
-
-  function void report_phase(uvm_phase phase);
-    super.report_phase(phase);
-    $write("SB %s saw %0d + %0d symbols...\n", get_full_name(), x, m_n_obs);
-  endfunction
 endclass
