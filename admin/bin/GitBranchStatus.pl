@@ -34,6 +34,8 @@ Usage: $0 [options] csv
 
 Options:
    -h       Print this message
+   -m       Only consider the branches that have not
+            yet been merged into the current branch
 
 USAGE
    exit(1);
@@ -41,7 +43,7 @@ USAGE
 
 require "getopts.pl";
 
-&Getopts("h");
+&Getopts("hm");
 &usage if $opt_h || $#ARGV < 0;
 
 $csv = shift(@ARGV);
@@ -70,7 +72,10 @@ close(CSV);
 #
 # Now see which mantis branches we have
 #
-if (!open(GIT, "git branch -a |")) {
+$cmd = "git branch -a";
+$cmd .= " --no-merged" if $opt_m;
+
+if (!open(GIT, "$cmd |")) {
     print STDERR "ERROR: Cannot check git repository: $!\n";
     exit(-1);
 }
