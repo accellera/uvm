@@ -49,7 +49,7 @@ require "getopts.pl";
 $csv = shift(@ARGV);
 
 #
-# Parse the CSV file, recording the status of each Mantis is contains
+# Parse the CSV file, recording the status of each Mantis it contains
 #
 if (!open(CSV, "< $csv")) {
     print STDERR "ERROR: Cannot open CSV file \"$csv\" for reading: $!\n";
@@ -58,7 +58,7 @@ if (!open(CSV, "< $csv")) {
 
 while ($_ = <CSV>) {
     # Only valid data lines
-    next unless m/^0*(\d+),.*,([^,]+),[^,]*,[^.]*,\d+$/;
+    next unless m/^0*(\d+),.*,([^,]+),[^,]*,[^,]*,\d+$/;
 
     $id     = $1;
     $status = $2;
@@ -86,6 +86,8 @@ while ($_ = <GIT>) {
     push(@branches, $_);
 }
 
+close(GIT);
+
 #
 # Now display the branches and their corresponding Mantis status
 #
@@ -99,7 +101,5 @@ foreach $_ (@branches) {
 
     print "$_    $status\n";
 }
-
-close(GIT);
 
 exit(0);
