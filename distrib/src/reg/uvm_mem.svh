@@ -114,7 +114,7 @@ class uvm_mem extends uvm_object;
    // <uvm_reg_map::add_mem()> method.
    // This method is used to modify that offset dynamically.
    //
-   // Note: Modifying the offset of a memory will make the abstract model
+   // Modifying the offset of a memory will make the abstract model
    // diverge from the specification that was used to create it.
    //
    extern virtual function void set_offset (uvm_reg_map    map,
