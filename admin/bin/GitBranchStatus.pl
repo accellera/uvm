@@ -58,12 +58,15 @@ if (!open(CSV, "< $csv")) {
 
 while ($_ = <CSV>) {
     # Only valid data lines
-    next unless m/^0*(\d+),.*,([^,]+),[^,]*,[^,]*,\d+$/;
+    next unless m/^0*(\d+),[^,]*,([^,]*),([^,]*),.*,([^,]+),[^,]*,[^,]*,\d+$/;
 
     $id     = $1;
-    $status = $2;
 
-    $Mantis{$id} = $status;
+    $author{$id} = $2;
+    $owner {$id} = $3;
+    $status{$id} = $4;
+
+    print "$1 $2 $3 $4\n";
 }
     
 close(CSV);
@@ -96,10 +99,13 @@ foreach $_ (@branches) {
     m/mantis_?(\d+)/i;
     $id = $1;
 
-    $status = $Mantis{$id};
+    $status = $status{$id};
     $status = "UNKNOWN" unless $status;
 
-    print "$_    $status\n";
+    $owner = $owner{$id};
+    $owner = "UNKNOWN" unless $owner;
+
+    print "$_    Status: $status    Owner: $owner\n";
 }
 
 exit(0);
