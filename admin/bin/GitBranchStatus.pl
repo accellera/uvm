@@ -65,8 +65,6 @@ while ($_ = <CSV>) {
     $author{$id} = $2;
     $owner {$id} = $3;
     $status{$id} = $4;
-
-    print "$1 $2 $3 $4\n";
 }
     
 close(CSV);
