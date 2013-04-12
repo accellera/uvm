@@ -29,66 +29,70 @@
 
 #define ARGV_STACK_PTR_SIZE 32
 
-extern const char *uvm_dpi_get_next_arg_c ()
+extern const char *uvm_dpi_get_next_arg_c (int init=0)
 {
-  s_vpi_vlog_info info;
-  static char*** argv_stack = NULL;
-  static int argv_stack_ptr = 0; // stack ptr
+	s_vpi_vlog_info info;
+	static char*** argv_stack=NULL;
+	static int argv_stack_ptr = 0; // stack ptr
 
-  if(argv_stack == NULL)
-  {
-    argv_stack = (char***) malloc (sizeof(char**)*ARGV_STACK_PTR_SIZE);
-    vpi_get_vlog_info(&info);
-    argv_stack[0] = info.argv;
-  }
+	if(init==1)
+	{
+		// free if necessary
+		free(argv_stack);
 
-  // until we have returned a value
-  while (1)
-  {
-    // at end of current array?, pop stack
-    if (*argv_stack[argv_stack_ptr]  == NULL)
-    {
-      // stack empty?
-      if (argv_stack_ptr == 0)
-      {
-	// reset stack for next time
-	argv_stack = NULL;
-        argv_stack_ptr = 0;
-	// return completion
-        return NULL;
-      }
-      // pop stack
-      --argv_stack_ptr;
-      // return indicator that we are popping stack
-      return "__-f__";
-    }
-    else
-    {
-      // check for -f indicating pointer to new array
-      if(0==strcmp(*argv_stack[argv_stack_ptr], "-f") ||
-         0==strcmp(*argv_stack[argv_stack_ptr], "-F") )
-      {
-	char *r = *argv_stack[argv_stack_ptr];
-	// bump past -f at current level
-	++argv_stack[argv_stack_ptr]; 
-	// push -f array argument onto stack
-	argv_stack[argv_stack_ptr+1] = (char **)*argv_stack[argv_stack_ptr];
-	// bump past -f argument at current level
-	++argv_stack[argv_stack_ptr]; 
-	// update stack pointer
-	++argv_stack_ptr;
-	assert(argv_stack_ptr < ARGV_STACK_PTR_SIZE);
-	return r;
-      }
-      else
-      {      
-	// return current and move to next
-	char *r = *argv_stack[argv_stack_ptr];
-	++argv_stack[argv_stack_ptr];
-	return r;
-      }
-    }
-  }
+		argv_stack = (char***) malloc (sizeof(char**)*ARGV_STACK_PTR_SIZE);
+		vpi_get_vlog_info(&info);
+		argv_stack[0] = info.argv;
+		argv_stack_ptr=0;
+	}
+
+	// until we have returned a value
+	while (1)
+	{
+		// at end of current array?, pop stack
+		if (*argv_stack[argv_stack_ptr]  == NULL)
+		{
+			// stack empty?
+			if (argv_stack_ptr == 0)
+			{
+				// reset stack for next time
+				argv_stack = NULL;
+				argv_stack_ptr = 0;
+				// return completion
+				return NULL;
+			}
+			// pop stack
+			--argv_stack_ptr;
+			// return indicator that we are popping stack
+			return "__-f__";
+		}
+		else
+		{
+			// check for -f indicating pointer to new array
+			if(0==strcmp(*argv_stack[argv_stack_ptr], "-f") ||
+					0==strcmp(*argv_stack[argv_stack_ptr], "-F") )
+			{
+				char *r = *argv_stack[argv_stack_ptr];
+				// bump past -f at current level
+				++argv_stack[argv_stack_ptr];
+				// push -f array argument onto stack
+				argv_stack[argv_stack_ptr+1] = (char **)*argv_stack[argv_stack_ptr];
+				// bump past -f argument at current level
+				++argv_stack[argv_stack_ptr];
+				// update stack pointer
+				++argv_stack_ptr;
+				assert(argv_stack_ptr < ARGV_STACK_PTR_SIZE);
+				return r;
+			}
+			else
+			{
+				// return current and move to next
+				char *r = *argv_stack[argv_stack_ptr];
+				++argv_stack[argv_stack_ptr];
+				return r;
+			}
+		}
+	}
 
 }
 

@@ -240,9 +240,11 @@ class uvm_cmdline_processor extends uvm_report_object;
   function new(string name = "");
     string s;
     string sub;
+    int doInit=1;
     super.new(name);
     do begin
-      s = uvm_dpi_get_next_arg();
+      s = uvm_dpi_get_next_arg(doInit);
+      doInit=0;
       if(s!="") begin
         m_argv.push_back(s);
         if(s[0] == "+") begin
