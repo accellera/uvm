@@ -679,7 +679,7 @@ class uvm_phase_cb extends uvm_callback;
   // Function: phase_state_change
   //
   // Called whenever a ~phase~ changes state.
-  // The ~transition~ descriptor describes the transition that was just completed.
+  // The ~change~ descriptor describes the transition that was just completed.
   // The callback method is invoked immediately after the phase state has changed,
   // but before the phase implementation is executed.
   //
