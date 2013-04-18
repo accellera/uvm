@@ -1,5 +1,5 @@
 
-Title: UVM Class Reference
+Title: UVM 1.2 Class Reference
 
 The UVM Class Library provides the building blocks needed to quickly develop
 well-constructed and reusable verification components and test environments in
