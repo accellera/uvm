@@ -1357,7 +1357,7 @@ endfunction: set_reset
 // needs_update
 
 function bit uvm_reg_field::needs_update();
-   needs_update = (m_mirrored != m_desired);
+   needs_update = (m_mirrored != m_desired) | m_volatile;
 endfunction: needs_update
 
 
