@@ -3315,14 +3315,11 @@ endfunction \
 //
 `define uvm_pack_intN(VAR,SIZE) \
    begin \
-   if (packer.big_endian) begin \
-     longint tmp__ = VAR; \
-     for (int i=0; i<SIZE; i++) \
-       packer.m_bits[packer.count + i] = tmp__[SIZE-1-i]; \
-   end \
-   else begin \
-     packer.m_bits[packer.count +: SIZE] = VAR; \
-   end \
+   if (packer.big_endian) \
+       packer.m_bits[packer.count +: SIZE] = { << {VAR} }; \
+   else \
+       packer.m_bits[packer.count +: SIZE] = VAR; \
+   \
    packer.count += SIZE; \
    end
 
@@ -3483,16 +3480,11 @@ endfunction \
 //
 `define uvm_unpack_intN(VAR,SIZE) \
    begin \
-   if (packer.big_endian) begin \
-     int cnt__ = packer.count + SIZE; \
-     uvm_bitstream_t tmp__ = VAR; \
-     for (int i=0; i<SIZE; i++) \
-       tmp__[i] = packer.m_bits[cnt__ - i - 1]; \
-     VAR = tmp__; \
-   end \
-   else begin \
+   if (packer.big_endian) \
+     { << { VAR }} = packer.m_bits[packer.count +: SIZE];  \
+   else \
      VAR = packer.m_bits[packer.count +: SIZE]; \
-   end \
+   \
    packer.count += SIZE; \
    end
 
@@ -3533,9 +3525,10 @@ endfunction \
 `define uvm_unpack_arrayN(VAR,SIZE) \
     begin \
     int sz__; \
-    if (packer.use_metadata) \
+    if (packer.use_metadata) begin \
       `uvm_unpack_intN(sz__,32) \
-    VAR = new[sz__]; \
+      VAR = new[sz__]; \
+    end \
     `uvm_unpack_sarrayN(VAR,SIZE) \
     end
 
