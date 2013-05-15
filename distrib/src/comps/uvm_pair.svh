@@ -63,15 +63,8 @@ class uvm_class_pair #(type T1=int, T2=T1) extends uvm_object;
 
     super.new(name);
 
-    if (f == null)
-      first = new;
-    else
-      first = f;
-
-    if (s == null)
-      second = new;
-    else
-      second = s;
+	first = f;
+    second = s;
 
   endfunction  
   
@@ -99,8 +92,8 @@ class uvm_class_pair #(type T1=int, T2=T1) extends uvm_object;
     this_type rhs_;
     if(!$cast(rhs_,rhs))
       `uvm_fatal("WRONG_TYPE", {"do_copy: rhs argument is not of type '",get_type_name(),"'"})
-    first.copy(rhs_.first);
-    second.copy(rhs_.second);
+    $cast(first,rhs_.first.clone());
+    $cast(second,rhs_.second.clone());
   endfunction
 
 endclass

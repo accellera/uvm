@@ -178,8 +178,8 @@ class uvm_in_order_comparator
       // Hence, it is safe not to clone a and b.
       
       pair = new("after/before");
-      pair.first = a;
-      pair.second = b;
+      pair.first=a;
+      pair.second=b;
       pair_ap.write(pair);
     end
   

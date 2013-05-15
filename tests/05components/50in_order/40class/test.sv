@@ -35,8 +35,10 @@ class c;
       return i == rhs.i;
    endfunction
 
-   function void copy(c  rhs);
-      rhs.i = i;
+   function c clone();
+      c mc = new;
+      mc.i = i;
+      return mc;
    endfunction
 endclass
 
