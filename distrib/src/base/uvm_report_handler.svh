@@ -175,10 +175,10 @@ class uvm_report_handler;
        srvr.f_display(file, "  See http://www.eda.org/svdb/view.php?id=3313 for more details.");
 `endif
 
-`ifndef UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
+`ifdef UVM_OBJECT_NEED_NOT_CONSTRUCTOR
        report_relnotes_banner(file);
        srvr.f_display(file, "\n  You are using a version of the UVM library that has been compiled");
-       srvr.f_display(file, "  with `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR undefined.");
+       srvr.f_display(file, "  with `UVM_OBJECT_NEED_NOT_CONSTRUCTOR defined.");
        srvr.f_display(file, "  See http://www.eda.org/svdb/view.php?id=3770 for more details.");
 `endif
 

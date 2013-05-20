@@ -409,13 +409,13 @@ endfunction \
 `define m_uvm_object_create_func(T) \
    function uvm_object create (string name=""); \
      T tmp; \
-`ifdef UVM_OBJECT_MUST_HAVE_CONSTRUCTOR \
-     if (name=="") tmp = new(); \
-     else tmp = new(name); \
-`else \
+`ifdef UVM_OBJECT_NEED_NOT_CONSTRUCTOR \
      tmp = new(); \
      if (name!="") \
        tmp.set_name(name); \
+`else \
+     if (name=="") tmp = new(); \
+     else tmp = new(name); \
 `endif \
      return tmp; \
    endfunction
