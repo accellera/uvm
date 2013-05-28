@@ -38,7 +38,101 @@ typedef class uvm_report_object;
 //------------------------------------------------------------------------------
 
 typedef class uvm_report_catcher;
-class uvm_report_server extends uvm_object;
+
+typedef class uvm_default_report_server;
+virtual class uvm_report_server extends uvm_object;
+  function string get_type_name();
+    return "uvm_report_server";
+  endfunction
+    function new(string name="base");
+	    super.new();
+    endfunction	
+
+  pure virtual  function void set_max_quit_count(int count, bit overridable = 1);
+  pure virtual  function int get_max_quit_count();
+  pure virtual  function void set_quit_count(int quit_count);
+  pure virtual  function int get_quit_count();
+  pure virtual  function void incr_quit_count();
+  pure virtual  function void reset_quit_count();
+  pure virtual  function bit is_quit_count_reached();
+  pure virtual  function void set_severity_count(uvm_severity severity, int count);
+  pure virtual  function int get_severity_count(uvm_severity severity);
+  pure virtual  function void incr_severity_count(uvm_severity severity);
+  pure virtual  function void reset_severity_counts();
+  pure virtual  function void set_id_count(string id, int count);
+  pure virtual  function int get_id_count(string id);
+  pure virtual  function void incr_id_count(string id);
+  pure virtual  function void f_display(UVM_FILE file, string str);
+  pure virtual  function void dump_server_state();
+  pure virtual  function void copy_severity_counts(uvm_report_server dst);
+  pure virtual  function void copy_id_counts(uvm_report_server dst);
+	 pure virtual function void report(
+      uvm_severity severity,
+      string name,
+      string id,
+      string message,
+      int verbosity_level,
+      string filename,
+      int line,
+      uvm_report_object client
+      );
+    pure virtual function void process_report(
+      uvm_severity severity,
+      string name,
+      string id,
+      string message,
+      uvm_action action,
+      UVM_FILE file,
+      string filename,
+      int line,
+      string composed_message,
+      int verbosity_level,
+      uvm_report_object client
+      );
+           pure virtual function string compose_message(
+      uvm_severity severity,
+      string name,
+      string id,
+      string message,
+      string filename,
+      int    line
+      );
+       pure virtual function void summarize(UVM_FILE file=0);
+	       
+  static local uvm_report_server m_global_report_server = get_server();
+	
+  // Function: set_server
+  //
+  // Sets the global report server to use for reporting. The report
+  // server is responsible for formatting messages.
+
+  static function void set_server(uvm_report_server server);
+    if(m_global_report_server != null) begin
+      server.set_max_quit_count(m_global_report_server.get_max_quit_count());
+      server.set_quit_count(m_global_report_server.get_quit_count());
+      m_global_report_server.copy_severity_counts(server);
+      m_global_report_server.copy_id_counts(server);
+    end
+
+    m_global_report_server = server;
+  endfunction
+
+
+  // Function: get_server
+  //
+  // Gets the global report server. The method will always return 
+  // a valid handle to a report server.
+
+  static function uvm_report_server get_server();
+    if (m_global_report_server == null) begin
+      uvm_default_report_server s = new;
+      return s;
+    end	else
+    	return m_global_report_server;
+  endfunction
+endclass
+
+class uvm_default_report_server extends uvm_report_server;
 
   local int max_quit_count; 
   local int quit_count;
@@ -46,7 +140,7 @@ class uvm_report_server extends uvm_object;
 
   // Needed for callbacks
   function string get_type_name();
-    return "uvm_report_server";
+    return "uvm_default_report_server";
   endfunction
  
   // Variable: id_count
@@ -71,35 +165,6 @@ class uvm_report_server extends uvm_object;
   endfunction
 
 
-  static protected uvm_report_server m_global_report_server = get_server();
-
-  // Function: set_server
-  //
-  // Sets the global report server to use for reporting. The report
-  // server is responsible for formatting messages.
-
-  static function void set_server(uvm_report_server server);
-    if(m_global_report_server != null) begin
-      server.set_max_quit_count(m_global_report_server.get_max_quit_count());
-      server.set_quit_count(m_global_report_server.get_quit_count());
-      m_global_report_server.copy_severity_counts(server);
-      m_global_report_server.copy_id_counts(server);
-    end
-
-    m_global_report_server = server;
-  endfunction
-
-
-  // Function: get_server
-  //
-  // Gets the global report server. The method will always return 
-  // a valid handle to a report server.
-
-  static function uvm_report_server get_server();
-    if (m_global_report_server == null)
-      m_global_report_server = new;
-    return m_global_report_server;
-  endfunction
 
   local bit m_max_quit_overridable = 1;
 
