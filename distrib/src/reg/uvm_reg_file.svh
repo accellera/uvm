@@ -234,6 +234,11 @@ endfunction: new
 // configure
 
 function void uvm_reg_file::configure(uvm_reg_block blk_parent, uvm_reg_file regfile_parent, string hdl_path = "");
+   if (blk_parent == null) begin
+     `uvm_error("UVM/RFILE/CFG/NOBLK", {"uvm_reg_file::configure() called without a parent block for instance \"", get_name(), "\" of register file type \"", get_type_name(), "\"."})
+     return;
+   end
+
    this.parent = blk_parent;
    this.m_rf = regfile_parent;
    this.add_hdl_path(hdl_path);
@@ -425,15 +430,12 @@ function string uvm_reg_file::get_full_name();
 
    get_full_name = this.get_name();
 
-   // Do not include top-level name in full name
+   // Is there a parent register file?
    if (m_rf != null)
       return {m_rf.get_full_name(), ".", get_full_name};
 
-   // Do not include top-level name in full name
-   blk = this.get_block();
-   if (blk == null)
-      return get_full_name;
-   if (blk.get_parent() == null)
+   // No: then prepend the full name of the parent block (if any)
+   if (this.parent == null)
       return get_full_name;
    get_full_name = {this.parent.get_full_name(), ".", get_full_name};
 endfunction: get_full_name
