@@ -134,8 +134,6 @@ module top;
             super.new(name, parent);
             uvm_resource_options::turn_on_auditing();
       
-            exp_def_seqs["reset"]="rst_seq";
-            exp_def_seqs["main"]="myseq2";
             exp_def_seqs["shutdown"]="shut_seq";
       
         endfunction
@@ -145,15 +143,15 @@ module top;
         function void build_phase(uvm_phase phase);
             env = new("env", this);
 
-            // RESET: disable type-based setting for reset-> no affect, instance setting takes precedence
-            uvm_config_db #(uvm_object_wrapper)::set(this, "env.seqr.reset_phase", "default_sequence", null); // Expect rst_seq
+            // RESET: disable type-based setting for reset
+            uvm_config_db #(uvm_object_wrapper)::set(this, "env.seqr.reset_phase", "default_sequence", null); // Expect no seq
 
             // CONFIGURE: disable both default seq settings for configure phase
             uvm_config_db #(uvm_object_wrapper)::set(this, "env.seqr.configure_phase", "default_sequence", null); // Expect no seq
             uvm_config_db #(uvm_sequence_base)::set(this, "env.seqr.configure_phase", "default_sequence", null);
 
-            // MAIN:  disable only the instance, so type-based "bubbles" to the top
-            uvm_config_db #(uvm_sequence_base)::set(this, "env.seqr.main_phase", "default_sequence", null); // Expect myseq2
+            // MAIN:  disable only the instance
+            uvm_config_db #(uvm_sequence_base)::set(this, "env.seqr.main_phase", "default_sequence", null); // Expect no seq
 
             // SHUTDOWN: leave both settings in place->instance setting should run                               // Expect shut_seq
 
@@ -165,13 +163,13 @@ module top;
             uvm_resource_pool rp = uvm_resource_pool::get();
             rp.dump(1);
 
-            if ($time != 30) begin
-                `uvm_error("SIMTIME",$sformatf("Expected sim to end at 30, not %0t",$time))
+            if ($time != 10) begin
+                `uvm_error("SIMTIME",$sformatf("Expected sim to end at 10, not %0t",$time))
                 err = 1;
             end
 
-            if (def_seqs.num() != 3) begin
-                `uvm_error("NUMSEQS",$sformatf("Expected number of default sequences to be 3, not %0d",def_seqs.num()))
+            if (def_seqs.num() != 1) begin
+                `uvm_error("NUMSEQS",$sformatf("Expected number of default sequences to be 1, not %0d",def_seqs.num()))
                 err = 1;
             end
 
