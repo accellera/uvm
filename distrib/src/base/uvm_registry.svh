@@ -192,7 +192,7 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
 
   virtual function uvm_object create_object(string name="");
     T obj;
-`ifdef UVM_OBJECT_NEED_NOT_CONSTRUCTOR
+`ifdef UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR
     obj = new();
     if (name!="")
       obj.set_name(name);

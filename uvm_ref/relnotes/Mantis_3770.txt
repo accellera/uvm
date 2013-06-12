@@ -177,9 +177,9 @@ Topic: Migrating code using UVM 1.2
 To ease the process of migrating code to UVM 1.2,
 the old (incorrect) behavior remain available.
 To restore the old behavior, it is necessary to define
-the `UVM_OBJECT_NEED_NOT_CONSTRUCTOR symbol when compiling the UVM library:
+the `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR symbol when compiling the UVM library:
 
-| % ... +define+UVM_OBJECT_NEED_NOT_CONSTRUCTOR uvm_pkg.sv
+| % ... +define+UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR uvm_pkg.sv
 
 Users must be aware that this may result in difference in behavior in code that
 now relies on the correct implementation of the UVM object factory.

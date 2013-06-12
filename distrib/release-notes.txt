@@ -47,5 +47,5 @@ explicit constructor with a string-type name argument.  This
 functionality was optionally enabled in prior versions by defining the
 `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR symbol (Mantis 3770).  This
 functionality is now the default. Should the obsolete functionality be
-required, define the `UVM_OBJECT_NEED_NOT_CONSTRUCTOR symbol.
+required, define the `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR symbol.
 

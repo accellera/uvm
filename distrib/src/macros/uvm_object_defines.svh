@@ -409,7 +409,7 @@ endfunction \
 `define m_uvm_object_create_func(T) \
    function uvm_object create (string name=""); \
      T tmp; \
-`ifdef UVM_OBJECT_NEED_NOT_CONSTRUCTOR \
+`ifdef UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR \
      tmp = new(); \
      if (name!="") \
        tmp.set_name(name); \
