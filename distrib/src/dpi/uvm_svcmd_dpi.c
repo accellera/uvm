@@ -29,71 +29,59 @@
 
 #define ARGV_STACK_PTR_SIZE 32
 
-extern const char *uvm_dpi_get_next_arg_c (int init=0)
-{
+// the total number of arguments (minus the -f/-F minus associated filenames) 
+int argc_total;
+// the ptr to the array of ptrs to the args
+char** argv_stack=NULL;
+
+char ** argv_ptr=NULL;
+
+
+void push_data(int lvl,char *entry, int cmd) {
+  if(cmd==0)
+    argc_total++;
+  else
+    *argv_ptr++=entry;
+}
+
+// walk one level (potentially recursive)
+void walk_level(int lvl, int argc, char**argv,int cmd) {
+    for(int idx=0; ((lvl==0) && idx<argc) || ((lvl>0) && (*argv));idx++,argv++) {
+      if(strcmp(*argv, "-f") && strcmp(*argv, "-F")) {
+	push_data(lvl,*argv,cmd);	
+      } else {
+	argv++;
+	idx++;
+	char **n=(char**) *argv;
+	walk_level(lvl+1,argc,++n,cmd);
+      }
+    }
+}
+
+const char *uvm_dpi_get_next_arg_c (int init=0) {
 	s_vpi_vlog_info info;
-	static char*** argv_stack=NULL;
-	static int argv_stack_ptr = 0; // stack ptr
+	static int idx=0;
 
 	if(init==1)
 	{
 		// free if necessary
 		free(argv_stack);
+		argc_total=0;
 
-		argv_stack = (char***) malloc (sizeof(char**)*ARGV_STACK_PTR_SIZE);
 		vpi_get_vlog_info(&info);
-		argv_stack[0] = info.argv;
-		argv_stack_ptr=0;
+		walk_level(0,info.argc,info.argv,0);
+
+		argv_stack = (char**) malloc (sizeof(char*)*argc_total);
+		argv_ptr=argv_stack;
+		walk_level(0,info.argc,info.argv,1);	
+		idx=0;	
+		argv_ptr=argv_stack;
 	}
 
-	// until we have returned a value
-	while (1)
-	{
-		// at end of current array?, pop stack
-		if (*argv_stack[argv_stack_ptr]  == NULL)
-		{
-			// stack empty?
-			if (argv_stack_ptr == 0)
-			{
-				// reset stack for next time
-				argv_stack = NULL;
-				argv_stack_ptr = 0;
-				// return completion
-				return NULL;
-			}
-			// pop stack
-			--argv_stack_ptr;
-			// return indicator that we are popping stack
-			return "__-f__";
-		}
-		else
-		{
-			// check for -f indicating pointer to new array
-			if(0==strcmp(*argv_stack[argv_stack_ptr], "-f") ||
-					0==strcmp(*argv_stack[argv_stack_ptr], "-F") )
-			{
-				char *r = *argv_stack[argv_stack_ptr];
-				// bump past -f at current level
-				++argv_stack[argv_stack_ptr];
-				// push -f array argument onto stack
-				argv_stack[argv_stack_ptr+1] = (char **)*argv_stack[argv_stack_ptr];
-				// bump past -f argument at current level
-				++argv_stack[argv_stack_ptr];
-				// update stack pointer
-				++argv_stack_ptr;
-				assert(argv_stack_ptr < ARGV_STACK_PTR_SIZE);
-				return r;
-			}
-			else
-			{
-				// return current and move to next
-				char *r = *argv_stack[argv_stack_ptr];
-				++argv_stack[argv_stack_ptr];
-				return r;
-			}
-		}
-	}
-
+	if(idx++>=argc_total)
+	  return NULL;
+	
+	return *argv_ptr++;
 }
 
 extern char* uvm_dpi_get_tool_name_c ()
