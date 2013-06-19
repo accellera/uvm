@@ -106,12 +106,14 @@ module test;
 
     endfunction
 
-    task run;
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       #5 void'(dis_cb.callback_mode(1));
-      #100 uvm_top.stop_request();
+      #100;
+      phase.drop_objection(this);
     endtask
 
-    function void report();
+    function void report_phase(uvm_phase phase);
       int failed = 0;
       string exp[$];
       //cb2 was deleted and cb1 was disabled

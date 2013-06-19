@@ -229,8 +229,7 @@ class test extends uvm_test;
 
 
    function void final_phase(uvm_phase phase);
-      uvm_report_server svr;
-      svr = _global_reporter.get_report_server();
+      uvm_report_server svr = uvm_report_server::get_server();
 
       if (svr.get_severity_count(UVM_FATAL) +
           svr.get_severity_count(UVM_ERROR) == 0)

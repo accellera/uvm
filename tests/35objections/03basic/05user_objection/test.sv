@@ -28,13 +28,13 @@ module test;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
-      uvm_test_done.raise_objection(this);
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       repeat(10) begin
         #1 myobjection.raise_objection(this);
         #19 myobjection.drop_objection(this);
       end
-      uvm_test_done.drop_objection(this);
+      phase.drop_objection(this);
     endtask
   endclass
 
@@ -52,22 +52,28 @@ module test;
     endfunction
     virtual function void raised (uvm_objection objection, 
       uvm_object source_obj, string description, int count);
+      uvm_domain l_common_domain = uvm_domain::get_common_domain();
+      uvm_phase l_run_phase = l_common_domain.find_by_name("run");
+      uvm_objection l_run_phase_objection = l_run_phase.get_objection();
       uvm_report_info("Raised", $sformatf("Raised objection %s from object %s", objection.get_name(), source_obj.get_full_name()), UVM_NONE);
       if(source_obj == mc1 && objection == myobjection)
         mc1_user_cnt++;
       if(source_obj == mc2 && objection == myobjection)
         mc2_user_cnt++;
-      if(objection == uvm_test_done)
+      if(objection == l_run_phase_objection)
         test_done_cnt++;
     endfunction
     virtual function void dropped (uvm_objection objection,
       uvm_object source_obj, string description, int count);
+      uvm_domain l_common_domain = uvm_domain::get_common_domain();
+      uvm_phase l_run_phase = l_common_domain.find_by_name("run");
+      uvm_objection l_run_phase_objection = l_run_phase.get_objection();
       uvm_report_info("Dropped", $sformatf("Dropped objection %s from object %s", objection.get_name(), source_obj.get_full_name()), UVM_NONE);
       if(source_obj == mc1 && objection == myobjection)
         mc1_user_cnt++;
       if(source_obj == mc2 && objection == myobjection)
         mc2_user_cnt++;
-      if(objection == uvm_test_done)
+      if(objection == l_run_phase_objection)
         test_done_cnt++;
     endfunction
     function void report();

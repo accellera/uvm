@@ -48,10 +48,9 @@ module test;
   endclass : simple_item
 
   class simple_sequencer extends uvm_sequencer #(simple_item);
-    `uvm_sequencer_utils(simple_sequencer)
+    `uvm_component_utils(simple_sequencer)
     function new (string name, uvm_component parent);
       super.new(name, parent);
-      `uvm_update_sequence_lib_and_item(simple_item)
     endfunction : new
   endclass : simple_sequencer
 
@@ -59,18 +58,21 @@ module test;
     function new(string name="simple_seq");
       super.new(name);
     endfunction
-    `uvm_sequence_utils(simple_seq, simple_sequencer)    
+    `uvm_object_utils(simple_seq)
+    `uvm_declare_p_sequencer(simple_sequencer)    
     virtual task body();
+      uvm_domain l_common_domain = uvm_domain::get_common_domain();
+      uvm_phase l_run_phase = l_common_domain.find_by_name("run");
       p_sequencer.uvm_report_info("SEQ_BODY", "simple_seq body() is starting...", UVM_LOW);
-      #50;
       // Raising one uvm_test_done objection
-      uvm_test_done.raise_objection(this, "foo",3);
+      l_run_phase.raise_objection(this, "foo",3);
+      #50;
       for (int i = 0; i < 10; i++) begin
         `uvm_do(req)
         #10;
       end
-      uvm_test_done.drop_objection(this,"bar",3);
       p_sequencer.uvm_report_info("SEQ_BODY", "simple_seq body() is ending...", UVM_LOW);
+      l_run_phase.drop_objection(this,"bar",3);
     endtask
   endclass : simple_seq
 
@@ -118,16 +120,21 @@ module test;
     `uvm_component_utils(test)
     function void build();
       super.build();
-      set_config_string("agent?.sequencer", "default_sequence", "simple_seq");
       agent1 = simple_agent::type_id::create("agent1", this);
       agent2 = simple_agent::type_id::create("agent2", this);
     endfunction
     function void start_of_simulation();
       this.print();
     endfunction
-    task run();
-      uvm_test_done.raise_objection(this);
-      #200 uvm_test_done.drop_objection(this);  
+    task run_phase(uvm_phase phase);
+      simple_seq l_ss1 = simple_seq::type_id::create("l_ss1", this);
+      simple_seq l_ss2 = simple_seq::type_id::create("l_ss2", this);
+      phase.raise_objection(this);
+      fork
+        l_ss1.start(agent1.sequencer);
+        l_ss2.start(agent2.sequencer);
+      join_none
+      #200 phase.drop_objection(this);  
     endtask
     virtual function void raised (uvm_objection objection, 
       uvm_object source_obj, string description, int count);

@@ -51,6 +51,9 @@ module top;
 
 
   initial begin
+
+    uvm_report_server l_rs;
+
     item       man1,man2;
     item_macro mac1,mac2;
 
@@ -347,7 +350,8 @@ module top;
     end
 
     $display("*** UVM TEST PASSED ***");
-    uvm_top.report_summarize();
+    l_rs = uvm_report_server::get_server();
+    l_rs.report_summarize();
   end
 
 endmodule

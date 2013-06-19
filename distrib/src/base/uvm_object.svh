@@ -786,7 +786,12 @@ virtual class uvm_object extends uvm_void;
 endclass
 
 
-uvm_copy_map uvm_global_copy_map = new;
+uvm_copy_map __uvm_global_copy_map;
+function uvm_copy_map uvm_get_global_copy_map();
+  if(__uvm_global_copy_map == null)
+    __uvm_global_copy_map = new;
+  return __uvm_global_copy_map;
+endfunction
 
 //------------------------------------------------------------------------------
 // IMPLEMENTATION
@@ -1010,7 +1015,8 @@ endfunction
 function void uvm_object::copy (uvm_object rhs);
   //For cycle checking
   static int depth;
-  if((rhs !=null)  && (uvm_global_copy_map.get(rhs) != null)) begin
+  uvm_copy_map l_copy_map = uvm_get_global_copy_map();
+  if((rhs !=null)  && (l_copy_map.get(rhs) != null)) begin
     return;
   end
 
@@ -1019,7 +1025,7 @@ function void uvm_object::copy (uvm_object rhs);
     return;
   end
 
-  uvm_global_copy_map.set(rhs, this); 
+  l_copy_map.set(rhs, this); 
   ++depth;
 
   __m_uvm_field_automation(rhs, UVM_COPY, "");
@@ -1027,7 +1033,7 @@ function void uvm_object::copy (uvm_object rhs);
 
   --depth;
   if(depth==0) begin
-    uvm_global_copy_map.clear();
+    l_copy_map.clear();
   end
 endfunction
 

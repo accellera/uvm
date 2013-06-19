@@ -61,10 +61,10 @@ module top;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       repeat(5) begin
-        uvm_test_done.raise_objection(this);
-        #del uvm_test_done.drop_objection(this);
+        phase.raise_objection(this);
+        #del phase.drop_objection(this);
       end
     endtask
   endclass
@@ -79,10 +79,10 @@ module top;
       c2 = new("c2", this);
       c1.del = 5; c2.del = 7;
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       repeat(5) begin
-        uvm_test_done.raise_objection(this);
-        #del uvm_test_done.drop_objection(this);
+        phase.raise_objection(this);
+        #del phase.drop_objection(this);
       end
     endtask
   endclass
@@ -99,10 +99,10 @@ module top;
       b2 = new("b2", this);
       b1.del = 5; b2.del = 7;
     endfunction
-    task run;
+    task run_phase(uvm_phase phase);
       repeat(5) begin
-        uvm_test_done.raise_objection(this);
-        #5 uvm_test_done.drop_objection(this);
+        phase.raise_objection(this);
+        #5 phase.drop_objection(this);
       end
     endtask
 

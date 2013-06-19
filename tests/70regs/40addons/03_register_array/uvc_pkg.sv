@@ -40,7 +40,7 @@ package uvc_pkg;
   `uvm_blocking_put_imp_decl(_reg)
   
   class uvc_sequencer extends uvm_sequencer#(transaction);
-    `uvm_sequencer_utils(uvc_sequencer)
+    `uvm_component_utils(uvc_sequencer)
     function new (string name, uvm_component parent);
       super.new(name, parent);
     endfunction : new

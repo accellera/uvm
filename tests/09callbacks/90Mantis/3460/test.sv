@@ -174,7 +174,7 @@ class test extends uvm_component;
    endfunction : build_phase
 
    virtual function void start_of_simulation_phase(uvm_phase phase);
-      uvm_report_server report_server = get_report_server();
+      uvm_report_server report_server = uvm_report_server::get_server();
       int  warning_count = report_server.get_severity_count(UVM_WARNING);
       super.start_of_simulation_phase(phase);
 
@@ -192,16 +192,15 @@ class test extends uvm_component;
 
    endfunction : start_of_simulation_phase
 
-   virtual task run();
-      uvm_test_done.raise_objection(this);
+   virtual task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       #10;
 
-      uvm_test_done.drop_objection(this);
-   endtask : run
+      phase.drop_objection(this);
+   endtask : run_phase
 
    function void report_phase(uvm_phase phase);
-      uvm_report_server svr;
-      svr = _global_reporter.get_report_server();
+      uvm_report_server svr = uvm_report_server::get_server();
 
       if (svr.get_severity_count(UVM_FATAL) +
           svr.get_severity_count(UVM_ERROR) == 0)

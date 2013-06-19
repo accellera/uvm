@@ -195,7 +195,6 @@ class test extends uvm_test;
    endfunction
 
    virtual task run();
-      uvm_top.stop_request();
    endtask
 
    virtual function void check();

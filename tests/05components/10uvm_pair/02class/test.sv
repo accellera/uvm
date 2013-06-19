@@ -39,7 +39,9 @@ class test extends uvm_test;
     super.new(name,parent);
   endfunction
 
-  task run();
+  task run_phase(uvm_phase phase);
+ 
+   phase.raise_objection(this);
 
   for (int i=0;i<5;i++) begin
 
@@ -69,7 +71,7 @@ class test extends uvm_test;
    else
       $write("** UVM TEST FAILED **\n");
 
-    uvm_top.stop_request();
+   phase.drop_objection(this);
   endtask
 
 endclass

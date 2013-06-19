@@ -261,8 +261,7 @@ module test;
 
     function void report_phase(uvm_phase phase);
       int failed;
-      uvm_report_server svr;
-      svr = _global_reporter.get_report_server();
+      uvm_report_server svr = uvm_report_server::get_server();
       if (svr.get_id_count("EXP_AFTER")      > 0) failed = 1;
       if (svr.get_id_count("EXP_BEFORE")     > 0) failed = 1;
       if (svr.get_id_count("EXP_IS")         > 0) failed = 1;

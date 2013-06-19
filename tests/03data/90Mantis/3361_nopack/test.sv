@@ -121,7 +121,7 @@ class test extends uvm_test;
   `uvm_new_func
   `uvm_component_utils(test)
 
-  task run;
+  task run_phase(uvm_phase phase);
     my_class a, b;
     byte unsigned bytes_for_pack_copy [];
 
@@ -152,9 +152,8 @@ class test extends uvm_test;
 
   endtask
 
-   function void report();
-      uvm_report_server svr;
-      svr = _global_reporter.get_report_server();
+   function void report_phase(uvm_phase phase);
+      uvm_report_server svr = uvm_report_server::get_server();
 
       if (svr.get_severity_count(UVM_FATAL) +
           svr.get_severity_count(UVM_ERROR) == 0)

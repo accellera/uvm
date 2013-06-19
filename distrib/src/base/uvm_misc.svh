@@ -609,6 +609,7 @@ endfunction
 typedef class uvm_component;
 typedef class uvm_root;
 typedef class uvm_object;
+typedef class uvm_report_object;
         
 class uvm_utils #(type TYPE=int, string FIELD="config");
 

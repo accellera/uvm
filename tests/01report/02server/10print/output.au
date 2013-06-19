@@ -1,0 +1,19 @@
+----------------------------------------------------------------
+Name                              Type               Size  Value
+----------------------------------------------------------------
+uvm_report_server                 uvm_report_server  -     @15  
+  quit_count                      int                32    'd0  
+  max_quit_count                  int                32    'd5  
+  max_quit_overridable            bit                1     'b1  
+  severity_count                  severity counts    4     -    
+    [UVM_INFO]                    integral           32    'd4  
+    [UVM_WARNING]                 integral           32    'd2  
+    [UVM_ERROR]                   integral           32    'd50 
+    [UVM_FATAL]                   integral           32    'd10 
+  id_count                        id counts          4     -    
+    [ID1]                         integral           32    'd1  
+    [ID2]                         integral           32    'd2  
+    [ID3]                         integral           32    'd2  
+    [RNTST]                       integral           32    'd1  
+  enable_report_id_count_summary  bit                1     'b1  
+----------------------------------------------------------------

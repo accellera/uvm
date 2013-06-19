@@ -35,16 +35,24 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       `uvm_warning("A", "A Warning but downgrading to an Info!!!")
       `uvm_error("B", "B Error but downgrading to an Info!!!")
       `uvm_fatal("C", "C Fatal but downgrading to an Info!!!")
       #1000;
-      uvm_top.stop_request();
+      phase.drop_objection(this);
    endtask
 
    virtual function void report();
      uvm_report_server rs = uvm_report_server::get_server();
+     $write("ID A count = %0d\n", rs.get_id_count("A"));
+     $write("ID B count = %0d\n", rs.get_id_count("B"));
+     $write("ID C count = %0d\n", rs.get_id_count("C"));
+     $write("UVM_INFO count = %0d\n", rs.get_severity_count(UVM_INFO));
+     $write("UVM_WARNING count = %0d\n", rs.get_severity_count(UVM_WARNING));
+     $write("UVM_ERROR count = %0d\n", rs.get_severity_count(UVM_ERROR));
+     $write("UVM_FATAL count = %0d\n", rs.get_severity_count(UVM_FATAL));
      if((rs.get_id_count("A") == 1) &&
         (rs.get_id_count("B") == 1) &&
         (rs.get_id_count("C") == 1) &&

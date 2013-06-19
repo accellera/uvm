@@ -63,7 +63,7 @@ class test extends uvm_component;
   endfunction
 
   function void report();
-    uvm_report_server rs = get_report_server();
+    uvm_report_server rs = uvm_report_server::get_server();
     if(rs.get_severity_count(UVM_ERROR) > 0)
       $display("** UVM TEST FAIL **");
     else

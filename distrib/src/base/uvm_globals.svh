@@ -98,22 +98,26 @@ endfunction
 //
 //----------------------------------------------------------------------------
 
+
+function uvm_report_object uvm_get_report_object();
+  return uvm_root::get();
+endfunction
+
+
 // Function: uvm_report_enabled
 //
-// Returns 1 if the configured verbosity in ~uvm_top~ is greater than 
-// ~verbosity~ and the action associated with the given ~severity~ and ~id~
-// is not UVM_NO_ACTION, else returns 0.
+// Returns the action if the configured verbosity in ~uvm_top~ for this 
+// severity/id is greater than ~verbosity~ else returns 0.
 // 
 // See also <uvm_report_object::uvm_report_enabled>.
-//
 //
 // Static methods of an extension of uvm_report_object, e.g. uvm_compoent-based
 // objects, can not call ~uvm_report_enabled~ because the call will resolve to
 // the <uvm_report_object::uvm_report_enabled>, which is non-static.
 // Static methods can not call non-static methods of the same class. 
 
-function bit uvm_report_enabled (int verbosity,
-                                 uvm_severity severity=UVM_INFO, string id="");
+function int uvm_report_enabled (int verbosity,
+  uvm_severity severity=UVM_INFO, string id="");
   uvm_root top;
   top = uvm_root::get();
   return top.uvm_report_enabled(verbosity,severity,id);
@@ -127,48 +131,48 @@ function void uvm_report( uvm_severity severity,
                           int verbosity = (severity == uvm_severity'(UVM_ERROR)) ? UVM_LOW :
                                           (severity == uvm_severity'(UVM_FATAL)) ? UVM_NONE : UVM_MEDIUM,
                           string filename = "",
-                          int line = 0);
+                          int line = 0,
+                          string context_name = "",
+                          bit report_enabled_checked = 0);
   uvm_root top;
   top = uvm_root::get();
-  top.uvm_report(severity, id, message, verbosity, filename, line);
+  top.uvm_report(severity, id, message, verbosity, filename, line, context_name, report_enabled_checked);
 endfunction 
+
 
 // Function: uvm_report_info
 
-function void uvm_report_info(string id,
-			      string message,
-                              int verbosity = UVM_MEDIUM,
-			      string filename = "",
-			      int line = 0);
+function void uvm_report_info(string id, string message,
+  int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
+  string context_name = "", bit report_enabled_checked = 0);
   uvm_root top;
   top = uvm_root::get();
-  top.uvm_report_info(id, message, verbosity, filename, line);
+  top.uvm_report_info(id, message, verbosity, filename, line, context_name,
+    report_enabled_checked);
 endfunction
 
 
 // Function: uvm_report_warning
 
-function void uvm_report_warning(string id,
-                                 string message,
-                                 int verbosity = UVM_MEDIUM,
-				 string filename = "",
-				 int line = 0);
+function void uvm_report_warning(string id, string message,
+  int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
+  string context_name = "", bit report_enabled_checked = 0);
   uvm_root top;
   top = uvm_root::get();
-  top.uvm_report_warning(id, message, verbosity, filename, line);
+  top.uvm_report_warning(id, message, verbosity, filename, line, context_name,
+    report_enabled_checked);
 endfunction
 
 
 // Function: uvm_report_error
 
-function void uvm_report_error(string id,
-                               string message,
-                               int verbosity = UVM_LOW,
-			       string filename = "",
-			       int line = 0);
+function void uvm_report_error(string id, string message,
+  int verbosity = UVM_LOW, string filename = "", int line = 0,
+  string context_name = "", bit report_enabled_checked = 0);
   uvm_root top;
   top = uvm_root::get();
-  top.uvm_report_error(id, message, verbosity, filename, line);
+  top.uvm_report_error(id, message, verbosity, filename, line, context_name,
+    report_enabled_checked);
 endfunction
 
 
@@ -183,14 +187,13 @@ endfunction
 // do not inadvertently filter them out. It remains in the methods for backward
 // compatibility.
 
-function void uvm_report_fatal(string id,
-	                       string message,
-                               int verbosity = UVM_NONE,
-			       string filename = "",
-			       int line = 0);
+function void uvm_report_fatal(string id, string message,
+  int verbosity = UVM_NONE, string filename = "", int line = 0,
+  string context_name = "", bit report_enabled_checked = 0);
   uvm_root top;
   top = uvm_root::get();
-  top.uvm_report_fatal(id, message, verbosity, filename, line);
+  top.uvm_report_fatal(id, message, verbosity, filename, line, context_name,
+    report_enabled_checked);
 endfunction
 
 
@@ -205,7 +208,8 @@ function bit uvm_string_to_severity (string sev_str, output uvm_severity sev);
   return 1;
 endfunction
 
- function automatic bit uvm_string_to_action (string action_str, output uvm_action action);
+
+function automatic bit uvm_string_to_action (string action_str, output uvm_action action);
   string actions[$];
   uvm_split_string(action_str,"|",actions);
   uvm_string_to_action = 1;
@@ -219,12 +223,14 @@ endfunction
       "UVM_EXIT":      action |= UVM_EXIT;
       "UVM_CALL_HOOK": action |= UVM_CALL_HOOK;
       "UVM_STOP":      action |= UVM_STOP;
+      "UVM_RM_RECORD": action |= UVM_RM_RECORD;
+      "UVM_UNASSGND":  action = UVM_UNASSGND;
       default: uvm_string_to_action = 0;
     endcase
   end
 endfunction
 
-  
+
 //------------------------------------------------------------------------------
 //
 // Group: Configuration
@@ -403,4 +409,5 @@ function automatic void uvm_split_string (string str, byte sep, ref string value
     e++;
   end
 endfunction
+
 

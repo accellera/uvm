@@ -115,8 +115,10 @@ module top;
 
       uvm_callbacks#(ip_comp,cb_base)::display();
     endfunction
-    task run;
-      #10 uvm_top.stop_request();
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
+      #10;
+      phase.drop_objection(this);
     endtask
     function void report();
       bit failed = 0;

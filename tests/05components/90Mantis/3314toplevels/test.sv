@@ -88,9 +88,10 @@ module test;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
-    uvm_top.print_topology();
-      uvm_top.stop_request();
+    task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
+      uvm_top.print_topology();
+      phase.drop_objection(this);
     endtask
     function void report_phase(uvm_phase phase);
       super.report_phase(phase);

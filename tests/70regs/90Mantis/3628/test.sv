@@ -142,7 +142,7 @@ class test extends uvm_test;
    endtask
 
    virtual function void report();
-      uvm_report_server svr =  _global_reporter.get_report_server();
+      uvm_report_server svr = uvm_report_server::get_server();
       if (svr.get_severity_count(UVM_FATAL) +
           svr.get_severity_count(UVM_ERROR) +
           svr.get_severity_count(UVM_WARNING) == 0)
