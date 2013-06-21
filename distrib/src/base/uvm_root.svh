@@ -283,6 +283,7 @@ const uvm_root uvm_top = uvm_root::get();
 // for backward compatibility
 const uvm_root _global_reporter = uvm_root::get();
 
+`endif
 
 
 //-----------------------------------------------------------------------------

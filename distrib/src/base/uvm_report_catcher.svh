@@ -176,7 +176,13 @@ virtual class uvm_report_catcher extends uvm_callback;
   // user-defined.
 
   function string get_context();
-    return this.m_name;
+    string context_str;
+    
+    context_str = this.m_modified_report_message.report_handler.get_full_name();
+    if (this.m_modified_report_message.context_name != "")
+      context_str = {context_str, "@@", this.m_modified_report_message.context_name};  
+
+    return context_str;
   endfunction
   
   // Function: get_verbosity
@@ -565,7 +571,7 @@ virtual class uvm_report_catcher extends uvm_callback;
     catcher = uvm_report_cb::get_first(iter,rm.report_object);
     while(catcher != null) begin
       if (!catcher.callback_mode()) begin
-        catcher = uvm_report_cb::get_next(iter,client);
+        catcher = uvm_report_cb::get_next(iter,rm.report_object);
         continue;
       end
 

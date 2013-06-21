@@ -354,12 +354,25 @@ class uvm_sequence_item extends uvm_transaction;
                                     int verbosity = (severity == uvm_severity'(UVM_ERROR)) ? UVM_LOW :
                                                     (severity == uvm_severity'(UVM_FATAL)) ? UVM_NONE : UVM_MEDIUM,
                                     string filename = "",
-                                    int line = 0);
-      uvm_report_object client;
-      string str = m_get_client_info(client);
+                                    int line = 0,
+                                    string context_name = "",
+                                    bit report_enabled_checked = 0);
+    uvm_report_message l_report_message;
+    string l_string;
+    if (report_enabled_checked == 0) begin
+      if (!uvm_report_enabled(verbosity, severity, id))
+        return;
+    end
+    if (context_name == "")
+      l_string = get_sequence_path();
+    else
+      l_string = context_name;
+    l_report_message = uvm_report_message::get_report_message();
+    l_report_message.m_set_report_message(l_string, filename,
+      line, severity, id, message, verbosity);
+    process_report_message(l_report_message);
+    l_report_message.free_report_message(l_report_message);
 
-      m_rh.report(severity, str, id, message, verbosity, filename,
-                  line, client);
   endfunction
     
   // Function: uvm_report_info
