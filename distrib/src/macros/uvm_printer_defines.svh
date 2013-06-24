@@ -48,7 +48,12 @@
    end while(0);
 
 `define uvm_print_int4(F, R, NM, P) \
-    P.print_int(NM, F, $bits(F), R, "[");
+  do begin \
+    int __m_uvm_bits = $bits(F); \
+    if (__m_uvm_bits <= `UVM_MAX_INTBITS) begin \
+      P.print_integral(NM, F, $bits(F), R, "["); \
+    else \
+      P.print_int(NM, F, $bits(F), R, "[");
 
 
 // uvm_print_enum

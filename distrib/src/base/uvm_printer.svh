@@ -89,11 +89,11 @@ virtual class uvm_printer;
 
   // Function: print_int
   //
-  // Prints an integral field.
+  // Prints an integral field of <`UVM_MAX_STREAMBITS> bits or less (default is 4096).
   //
   // name  - The name of the field. 
   // value - The value of the field.
-  // size  - The number of bits of the field (maximum is 4096). 
+  // size  - The number of bits of the field (maximum is <`UVM_MAX_STREAMBITS>). 
   // radix - The radix to use for printing. The printer knob for radix is used
   //           if no radix is specified. 
   // scope_separator - is used to find the leaf name since many printers only
@@ -106,6 +106,27 @@ virtual class uvm_printer;
                                           uvm_radix_enum  radix=UVM_NORADIX,
                                           byte            scope_separator=".",
                                           string          type_name="");
+
+  // Function: print_integral
+  //
+  // Prints an integral field of <`UVM_MAX_INTBITS> bits or less (default is 64).
+  //
+  // name  - The name of the field. 
+  // value - The value of the field.
+  // size  - The number of bits of the field (maximum is <`UVM_MAX_INTBITS>). 
+  // radix - The radix to use for printing. The printer knob for radix is used
+  //           if no radix is specified. 
+  // scope_separator - is used to find the leaf name since many printers only
+  //           print the leaf name of a field.  Typical values for the separator
+  //           are . (dot) or [ (open bracket).
+
+  extern virtual function void print_integral (string          name, 
+                                               uvm_integral_t  value, 
+                                               int    size, 
+                                                      uvm_radix_enum radix=UVM_NORADIX,
+                                               byte   scope_separator=".",
+                                               string type_name="");
+
 
   // backward compatibility
   virtual function void print_field (string          name, 
@@ -529,7 +550,7 @@ class uvm_printer_knobs;
   // Variable: default_radix
   //
   // This knob sets the default radix to use for integral values when no radix
-  // enum is explicitly supplied to the print_int() method.
+  // enum is explicitly supplied to the print_int() or print_integral() methods.
 
   uvm_radix_enum default_radix = UVM_HEX;
 
@@ -850,8 +871,53 @@ function void uvm_printer::print_int (string name,
   if(radix == UVM_NORADIX)
     radix = knobs.default_radix;
 
-  val_str = uvm_vector_to_string (value, size, radix,
-                                  knobs.get_radix_str(radix));
+  val_str = uvm_bitstream_to_string (value, size, radix,
+                                     knobs.get_radix_str(radix));
+
+  row_info.level = m_scope.depth();
+  row_info.name = adjust_name(name,scope_separator);
+  row_info.type_name = type_name;
+  row_info.size = sz_str;
+  row_info.val = val_str;
+
+  m_rows.push_back(row_info);
+
+endfunction
+  
+// print_int
+// ---------
+
+function void uvm_printer::print_integral (string name,
+                                           uvm_integral_t value, 
+                                           int    size, 
+                                           uvm_radix_enum radix=UVM_NORADIX,
+                                           byte   scope_separator=".",
+                                           string type_name="");
+  
+  uvm_printer_row_info row_info;
+  string sz_str, val_str;
+
+  if(name != "") begin
+    m_scope.set_arg(name);
+    name = m_scope.get();
+  end
+
+  if(type_name == "") begin
+    if(radix == UVM_TIME)
+      type_name ="time";
+    else if(radix == UVM_STRING)
+      type_name ="string";
+    else
+      type_name ="integral";
+  end
+
+  sz_str.itoa(size);
+
+  if(radix == UVM_NORADIX)
+    radix = knobs.default_radix;
+
+  val_str = uvm_integral_to_string (value, size, radix,
+                                    knobs.get_radix_str(radix));
 
   row_info.level = m_scope.depth();
   row_info.name = adjust_name(name,scope_separator);
@@ -870,7 +936,7 @@ endfunction
 function void uvm_printer::print_time (string name,
                                        time value,
                                        byte scope_separator=".");
-  print_int(name, value, 64, UVM_TIME, scope_separator);
+  print_integral(name, value, 64, UVM_TIME, scope_separator);
 endfunction
 
 

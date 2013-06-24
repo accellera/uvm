@@ -43,13 +43,15 @@ class uvm_packer;
   
   // Function: pack_field
   //
-  // Packs an integral value (less than or equal to 4096 bits) into the
+  // Packs an integral value (less than or equal to <`UVM_MAX_STREAMBITS> bits) into the
   // packed array. ~size~ is the number of bits of ~value~ to pack.
 
   extern virtual function void pack_field (uvm_bitstream_t value, int size);
 
 
-  // Function: pack_field_int
+`ifndef UVM_NO_DEPRECATED
+
+  // Function- pack_field_int
   //
   // Packs the integral value (less than or equal to 64 bits) into the
   // pack array.  The ~size~ is the number of bits to pack, usually obtained by
@@ -58,6 +60,16 @@ class uvm_packer;
 
   extern virtual function void pack_field_int (logic[63:0] value, int size);
 
+`endif
+
+  // Function: pack_field_integral
+  //
+  // Packs the integral value (less than or equal to <`UVM_MAX_INTBITS> bits) into
+  // the packed array.  The ~size~ is the number of bits to pack, usually obtained
+  // by ~$bits~.  This optimized version of <pack_field> is useful for sizes
+  // up to <`UVM_MAX_INTBITS> bits.
+
+  extern virtual function void pack_field_integral(uvm_integral_t value, int size);
 
   // Function: pack_string
   //
@@ -120,8 +132,9 @@ class uvm_packer;
 
   extern virtual function bit is_null ();
 
+`ifndef UVM_NO_DEPRECATED
 
-  // Function: unpack_field_int
+  // Function- unpack_field_int
   //
   // Unpacks bits from the pack array and returns the bit-stream that was
   // unpacked. 
@@ -132,11 +145,23 @@ class uvm_packer;
 
   extern virtual function logic[63:0] unpack_field_int (int size);
 
+`endif
+
+  // Function: unpack_field_integral
+  //
+  // Unpacks bits from the pack array and returns the bit-stream that was
+  // unpacked.
+  //
+  // ~size~ is the number of bits to unpack; the maximum is <`UVM_MAX_INTBITS> bits.
+  // This is a more efficient variant than unpack_field when unpacking into
+  // smaller vectors.
+
+  extern virtual function uvm_integral_t unpack_field_integral (int size);
 
   // Function: unpack_field
   //
   // Unpacks bits from the pack array and returns the bit-stream that was
-  // unpacked. ~size~ is the number of bits to unpack; the maximum is 4096 bits.
+  // unpacked. ~size~ is the number of bits to unpack; the maximum is <`UVM_MAX_STREAMBITS> bits.
 
   extern virtual function uvm_bitstream_t unpack_field (int size);
 
@@ -579,7 +604,7 @@ endfunction
 // ---------
 
 function void uvm_packer::pack_real(real value);
-  pack_field_int($realtobits(value), 64);
+  pack_field_integral($realtobits(value), 64);
 endfunction
   
 
@@ -587,7 +612,7 @@ endfunction
 // ---------
 
 function void uvm_packer::pack_time(time value);
-  pack_field_int(value, 64);
+  pack_field_integral(value, 64);
   //m_bits[count +: 64] = value; this overwrites endian adjustments
 endfunction
   
@@ -605,10 +630,26 @@ function void uvm_packer::pack_field(uvm_bitstream_t value, int size);
 endfunction
   
 
+`ifndef UVM_NO_DEPRECATED
+
 // pack_field_int
 // --------------
 
 function void uvm_packer::pack_field_int(logic [63:0] value, int size);
+  for (int i=0; i<size; i++)
+    if(big_endian == 1)
+      m_bits[count+i] = value[size-1-i];
+    else
+      m_bits[count+i] = value[i];
+  count += size;
+endfunction
+  
+`endif
+
+// pack_field_integral
+// --------------
+
+function void uvm_packer::pack_field_integral(uvm_integral_t value, int size);
   for (int i=0; i<size; i++)
     if(big_endian == 1)
       m_bits[count+i] = value[size-1-i];
@@ -700,7 +741,7 @@ endfunction
 
 function real uvm_packer::unpack_real();
   if (enough_bits(64,"real")) begin
-    return $bitstoreal(unpack_field_int(64));
+    return $bitstoreal(unpack_field_integral(64));
   end
 endfunction
   
@@ -710,7 +751,7 @@ endfunction
 
 function time uvm_packer::unpack_time();
   if (enough_bits(64,"time")) begin
-    return unpack_field_int(64);
+    return unpack_field_integral(64);
   end
 endfunction
   
@@ -731,6 +772,8 @@ function uvm_bitstream_t uvm_packer::unpack_field(int size);
 endfunction
   
 
+`ifndef UVM_NO_DEPRECATED
+
 // unpack_field_int
 // ----------------
 
@@ -745,7 +788,23 @@ function logic[63:0] uvm_packer::unpack_field_int(int size);
         unpack_field_int[i] = m_bits[count-size+i];
   end
 endfunction
-  
+
+`endif
+
+// unpack_field_integral
+// ----------------
+
+function uvm_integral_t uvm_packer::unpack_field_integral(int size);
+  unpack_field_integral = 'b0;
+  if (enough_bits(size,"integral")) begin
+    count += size;
+    for (int i=0; i<size; i++)
+      if(big_endian == 1)
+        unpack_field_integral[i] = m_bits[count-i-1];
+      else
+        unpack_field_integral[i] = m_bits[count-size+i];
+  end
+endfunction
 
 // unpack_string
 // -------------

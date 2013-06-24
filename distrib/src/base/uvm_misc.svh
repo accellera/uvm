@@ -497,12 +497,36 @@ function string uvm_leaf_scope (string full_name, byte scope_separator = ".");
 endfunction
 
 
-// Function- uvm_vector_to_string
+// Function- uvm_bitstream_to_string
 //
 //
-function string uvm_vector_to_string (uvm_bitstream_t value, int size,
-                                      uvm_radix_enum radix=UVM_NORADIX,
-                                      string radix_str="");
+function string uvm_bitstream_to_string (uvm_bitstream_t value, int size,
+                                         uvm_radix_enum radix=UVM_NORADIX,
+                                         string radix_str="");
+
+  // sign extend & don't show radix for negative values
+  if (radix == UVM_DEC && value[size-1] === 1)
+    return $sformatf("%0d", value);
+
+  value &= (1 << size)-1;
+
+  case(radix)
+    UVM_BIN:      return $sformatf("%0s%0b", radix_str, value);
+    UVM_OCT:      return $sformatf("%0s%0o", radix_str, value);
+    UVM_UNSIGNED: return $sformatf("%0s%0d", radix_str, value);
+    UVM_STRING:   return $sformatf("%0s%0s", radix_str, value);
+    UVM_TIME:     return $sformatf("%0s%0t", radix_str, value);
+    UVM_DEC:      return $sformatf("%0s%0d", radix_str, value);
+    default:      return $sformatf("%0s%0x", radix_str, value);
+  endcase
+endfunction
+
+// Function- uvm_integral_to_string
+//
+//
+function string uvm_integral_to_string (uvm_integral_t value, int size,
+                                        uvm_radix_enum radix=UVM_NORADIX,
+                                        string radix_str="");
 
   // sign extend & don't show radix for negative values
   if (radix == UVM_DEC && value[size-1] === 1)

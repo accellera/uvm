@@ -119,7 +119,7 @@ class uvm_recorder extends uvm_object;
 
   // Function: record_field
   //
-  // Records an integral field (less than or equal to 4096 bits). ~name~ is the
+  // Records an integral field less than or equal to <`UVM_MAX_STREAMBITS> bits long (default is 4096). ~name~ is the
   // name of the field. 
   //
   // ~value~ is the value of the field to record. ~size~ is the number of bits
@@ -135,7 +135,29 @@ class uvm_recorder extends uvm_object;
     if(!radix)
       radix = default_radix;
 
-    set_attribute(tr_handle, scope.get(), value, radix, size);
+    set_stream_attribute(tr_handle, scope.get(), value, radix, size);
+
+  endfunction
+
+  // Function: record_field_integral
+  //
+  // Records an integral field less than or equal to <`UVM_MAX_INTBITS> bits long (default is 64). ~name~ is the
+  // name of the field. 
+  //
+  // ~value~ is the value of the field to record. ~size~ is the number of bits
+  // of the field which apply. ~radix~ is the <uvm_radix_enum> to use.
+
+  virtual function void record_field_integral (string name, 
+                                               uvm_integral_t value, 
+                                               int size, 
+                                               uvm_radix_enum radix=UVM_NORADIX);
+    if(tr_handle==0) return;
+    scope.set_arg(name);
+
+    if(!radix)
+      radix = default_radix;
+
+    set_integral_attribute(tr_handle, scope.get(), value, radix, size);
 
   endfunction
 
@@ -149,7 +171,7 @@ class uvm_recorder extends uvm_object;
     bit[63:0] ival = $realtobits(value);
     if(tr_handle==0) return;
     scope.set_arg(name);
-    set_attribute(tr_handle, scope.get(), ival, UVM_REAL, 64);
+    set_integral_attribute(tr_handle, scope.get(), ival, UVM_REAL, 64);
   endfunction
 
 
@@ -170,7 +192,7 @@ class uvm_recorder extends uvm_object;
         v = str.atoi(); 
       end
       scope.set_arg(name);
-      set_attribute(tr_handle, scope.get(), v, UVM_DEC, 32);
+      set_integral_attribute(tr_handle, scope.get(), v, UVM_DEC, 32);
     end
  
     if(policy != UVM_REFERENCE) begin
@@ -193,8 +215,8 @@ class uvm_recorder extends uvm_object;
   
   virtual function void record_string (string name, string value);
     scope.set_arg(name);
-    set_attribute(tr_handle, scope.get(), uvm_string_to_bits(value),
-                   UVM_STRING, 8*value.len());
+    set_stream_attribute(tr_handle, scope.get(), uvm_string_to_bits(value),
+                         UVM_STRING, 8*value.len());
   endfunction
 
 
@@ -205,7 +227,7 @@ class uvm_recorder extends uvm_object;
   
   virtual function void record_time (string name, time value); 
     scope.set_arg(name);
-    set_attribute(tr_handle, scope.get(), value, UVM_TIME, 64);
+    set_integral_attribute(tr_handle, scope.get(), value, UVM_TIME, 64);
   endfunction
 
 
@@ -218,8 +240,8 @@ class uvm_recorder extends uvm_object;
   
   virtual function void record_generic (string name, string value);
     scope.set_arg(name);
-    set_attribute(tr_handle, scope.get(), uvm_string_to_bits(value),
-                   UVM_STRING, 8*value.len());
+    set_stream_attribute(tr_handle, scope.get(), uvm_string_to_bits(value),
+                         UVM_STRING, 8*value.len());
   endfunction
 
 
@@ -278,7 +300,8 @@ class uvm_recorder extends uvm_object;
       $fdisplay(file,"  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%s}", $time,txh,nm,value);
   endfunction
   
-  
+`ifndef UVM_NO_DEPRECATED
+
   // Function- set_attribute
   //
   //
@@ -287,11 +310,36 @@ class uvm_recorder extends uvm_object;
                                logic [1023:0] value,
                                uvm_radix_enum radix,
                                integer numbits=1024);
+      set_stream_attribute(txh,nm,value,radix,numbits);
+  endfunction
+
+`endif
+
+  // Function- set_stream_attribute
+  //
+  //
+  virtual function void set_stream_attribute (integer txh,
+                                              string  nm,
+                                              uvm_bitstream_t value,
+                                              uvm_radix_enum radix,
+                                              integer numbits=`UVM_MAX_STREAMBITS);
     if (open_file())
       $fdisplay(file,"  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%0d   RADIX:%s BITS=%0d}",
                  $time,txh, nm, (value & ((1<<numbits)-1)),radix.name(),numbits);
   endfunction
-  
+
+  // Function- set_integral_attribute
+  //
+  //
+  virtual function void set_integral_attribute (integer txh,
+                                                string  nm,
+                                                uvm_integral_t value,
+                                                uvm_radix_enum radix,
+                                                integer numbits=`UVM_MAX_INTBITS);
+    if (open_file())
+      $fdisplay(file,"  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%0d   RADIX:%s BITS=%0d}",
+                 $time,txh, nm, (value & ((1<<numbits)-1)),radix.name(),numbits);
+  endfunction
   
   // Function- check_handle_kind
   //

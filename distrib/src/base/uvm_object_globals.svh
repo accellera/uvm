@@ -36,10 +36,18 @@ bit uvm_start_uvm_declarations = 1;
 
 // Macro: `UVM_MAX_STREAMBITS
 //
-// Defines the maximum bit vector size for integral types.
+// Defines the maximum bit vector size for stream types.
 
 `ifndef UVM_MAX_STREAMBITS
 `define UVM_MAX_STREAMBITS 4096
+`endif
+
+// Macro: `UVM_MAX_INTBITS
+//
+// Defines the maximum bit vector size for integral types.
+
+`ifndef UVM_MAX_INTBITS
+`define UVM_MAX_INTBITS 64
 `endif
 
 
@@ -52,7 +60,8 @@ bit uvm_start_uvm_declarations = 1;
   `define UVM_PACKER_MAX_BYTES UVM_STREAMBITS
 `endif
 
-parameter UVM_STREAMBITS = `UVM_MAX_STREAMBITS; 
+parameter UVM_STREAMBITS = `UVM_MAX_STREAMBITS;
+parameter UVM_INTBITS = `UVM_MAX_INTBITS;
 
 
 // Macro: `UVM_DEFAULT_TIMEOUT
@@ -65,13 +74,21 @@ parameter UVM_STREAMBITS = `UVM_MAX_STREAMBITS;
 
 // Type: uvm_bitstream_t
 //
-// The bitstream type is used as a argument type for passing integral values
+// The bitstream type is used as an argument type for passing stream values
 // in such methods as set_int_local, get_int_local, get_config_int, report,
 // pack and unpack. 
 
 typedef logic signed [UVM_STREAMBITS-1:0] uvm_bitstream_t;
 
+// Type: uvm_integral_t
+//
+// The integral type is used as an argument type for passing integral values
+// in such methods as ~print_integral~, ~record_integral~ and ~pack_field_integral~.
+//
+// By default, the integral type is significantly smaller than the bitstream
+// type, which allows for enhanced memory performance during simulation.
 
+typedef logic signed [UVM_INTBITS-1:0] uvm_integral_t;
 
 // Enum: uvm_radix_enum
 //

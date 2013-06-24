@@ -661,7 +661,11 @@ endfunction \
         `m_uvm_record_int(ARG, FLAG) \
       UVM_PRINT: \
         if(!((FLAG)&UVM_NOPRINT)) begin \
-          __m_uvm_status_container.printer.print_int(`"ARG`", ARG, $bits(ARG), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+          int __m_uvm_bits = $bits(ARG); \
+          if (__m_uvm_bits <= `UVM_MAX_INTBITS) \
+            __m_uvm_status_container.printer.print_integral(`"ARG`", ARG, __m_uvm_bits, uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+          else \
+            __m_uvm_status_container.printer.print_int(`"ARG`", ARG, __m_uvm_bits, uvm_radix_enum'((FLAG)&UVM_RADIX)); \
         end \
       UVM_SETINT: \
         begin \
@@ -2525,7 +2529,11 @@ endfunction \
 
 `define m_uvm_record_int(ARG,FLAG) \
   if(!((FLAG)&UVM_NORECORD)) begin \
-    __m_uvm_status_container.recorder.record_field(`"ARG`", ARG,  $bits(ARG), uvm_radix_enum'((FLAG)&(UVM_RADIX))); \
+    int __m_uvm_bits = $bits(ARG); \
+    if (__m_uvm_bits <= `UVM_MAX_INTBITS) \
+      __m_uvm_status_container.recorder.record_field_integral(`"ARG`", ARG,  __m_uvm_bits, uvm_radix_enum'((FLAG)&(UVM_RADIX))); \
+    else \
+      __m_uvm_status_container.recorder.record_field(`"ARG`", ARG,  __m_uvm_bits, uvm_radix_enum'((FLAG)&(UVM_RADIX))); \
   end
 
 

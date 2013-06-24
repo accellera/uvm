@@ -386,11 +386,11 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
   function void do_print(uvm_printer printer);
     byte unsigned be;
     super.do_print(printer);
-    printer.print_int     ("address", m_address, 64, UVM_HEX);
+    printer.print_integral("address", m_address, 64, UVM_HEX);
     printer.print_generic ("command", "uvm_tlm_command_e", 32, m_command.name());
     printer.print_generic ("response_status", "uvm_tlm_response_status_e",
                              32, m_response_status.name());
-    printer.print_int     ("streaming_width", m_streaming_width, 32, UVM_HEX);
+    printer.print_integral("streaming_width", m_streaming_width, 32, UVM_HEX);
 
     printer.print_array_header("data", m_length, "darray(byte)");
     for (int i=0; i < m_length && i < m_data.size(); i++) begin
