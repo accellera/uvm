@@ -40,7 +40,17 @@ database at http://www.eda.org/svdb/view.php?id=<id>, where <id> is
 the Mantis id.
 
 
+In increasing Mantis numerical order:
 
+Mantis 4091: Added missing top-level block name to uvm_reg_file::get_fullname()
+
+Mantis 4425: BUSY flag now cleared when register model is reset.
+
+Mantis 4513: Added user-defined memory allocation policy to uvm_vreg::allocat()
+
+Mantis 4516: Proper prioritization of default sequences
+
+Mantis 4517: Added phase transition callbacks
 
 (*) Mantis 4518: Classes extended from uvm_object now require an
 explicit constructor with a string-type name argument.  This
@@ -48,4 +58,5 @@ functionality was optionally enabled in prior versions by defining the
 `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR symbol (Mantis 3770).  This
 functionality is now the default. Should the obsolete functionality be
 required, define the `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR symbol.
+
 
