@@ -42,6 +42,9 @@ the Mantis id.
 
 In increasing Mantis numerical order:
 
+Mantis 3901: Feature request to prevent objection from throwing 
+decrement-below-zero error if the count is 0
+
 Mantis 4091: Added missing top-level block name to uvm_reg_file::get_fullname()
 
 Mantis 4425: BUSY flag now cleared when register model is reset.
