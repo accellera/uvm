@@ -1,16 +1,5 @@
 Section: Mandatory uvm_object Constructors
 
-This page describes important actions users need to take before the next UVM release.
-
-The factory is being updated so that it passes the instance name into
-the object's constructor.
-This update allows the instance name specified by the user to the
-factory to be used in the constructor as in the examples shown below.
-However, if an object has no constructor defined, it will use a
-default constructor with no argument, resulting in a compile-time
-error for mismatching arguments.
-
-
 Topic: Why uvm_object constructors are now mandatory
 
 The UVM recommends that the following constructor be specified for any class
@@ -27,9 +16,9 @@ extended from <uvm_object>:
 |     ...
 | endclass
 
-However, in UVM 1.0 and UVM 1.1, the presence of such a constructor is not enforced
-by the library and they are technically optional.
-If no constructor is specified, a default constructor is provided by SystemVerilog:
+However, in UVM 1.0 and UVM 1.1, the presence of such a constructor were not enforced
+by the library and they were technically optional.
+If no constructor was specified, a default constructor was provided by SystemVerilog:
 
 | class my_obj extends uvm_object;
 |     ...
@@ -48,7 +37,7 @@ and subsequently setting the object instance name using <uvm_object::set_name>.
 | obj = new();
 | if (name != "") obj.set_name(name);
 
-In most cases, this difference is not significant.
+In most cases, this difference was not significant.
 However, for any class that makes use of the value of the ~name~ argument
 in the constructor,
 
@@ -64,7 +53,7 @@ in the constructor,
 |     ...
 | endclass
 
-a difference in behavior will be observed between
+a difference in behavior was observed between
 instantiating an object directly:
 
 | my_obj o = new("o");
@@ -74,16 +63,16 @@ factory:
 
 | my_obj o = my_obj::type_id::create("o");
 
-The difference may often be worked around by
+The difference could have been worked around by
 overriding the <uvm_object::set_name()> method to
 percolate the effect of the name change.
-However, that work-around may often be impossible or too late.
-In the examples above, the former will create an instance of ~your_obj~ named "o.sub"
-whereas the latter will create an instance named "my_obj.sub".
-This will make it impossible to control the sub-object factory based on the
+However, that work-around was often impossible or too late.
+In the examples above, the former creates an instance of ~your_obj~ named "o.sub"
+whereas the latter creates an instance named "my_obj.sub".
+It made it impossible to control the sub-object factory based on the
 parent object name.
 
-Instantiating coverage group is another example where the work-around would not work.
+Instantiating coverage group is another example where the work-around did not work.
 Coverage groups cannot be renamed and
 must be instantiated in the encapsulating object's constructor.
 The following example would create coverage groups that are always named "my_obj"
@@ -109,50 +98,13 @@ it is important that it be able to rely on the presence of a ~name~ argument
 in object constructors.
 
 
-Topic: What users should do as soon as possible
-
-In UVM 1.1a, the behavior of the UVM object factory
-retains its previous (if incorrect) behavior by default.
-No changes are required at this time.
-However, the default behavior of the UVM object factory will change
-in the next release.
-It is thus important that users update their code as soon as possible
-to be ready to moved to UVM 1.2 when it becomes available.
-
-The correct factory behavior can be turned on by defining
-the `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR symbol when compiling the UVM library.
-
-| % ... +define+UVM_OBJECT_MUST_HAVE_CONSTRUCTOR uvm_pkg.sv
-
-Enabling the corrected behavior now requires that every class extended from <uvm_object>
-have a constructor with a ~name~ argument.
-*This requirement is not backward-compatible*
-and will cause a compile-time error if a class does not contains such a constructor
-and instead relies on the default constructor provided by SystemVerilog.
-Fortunately, once a constructor is provided, the updated classes remain
-backward-compible with the old (incorrect) UVM object factory behavior.
-Users can thus migrate code forward as soon as practically possible
-without affecting on-going work using the default behavior of the UVM library.
-
-Suitable constructors may be automatically added to classes that are missing them
-by using the ~add_uvm_object_new.pl~ script.
-The following command will update all SystemVerilog source files
-located in the current working directory and any sub-directory:
-
-| % add_uvm_object_new.pl --write
-
-See the ~--help~ command-line option for more details.
-
-The script may not be able to automatically identify all classes
-with missing constructors,
-or users may prefer to manually modify their source files.
-The script is also unable to fix unsuitable constructors;
-those will need to be fixed manually.
-Because the error is a compile-time error, it will be easy to identify
-any remaining changes that are required.
+In UVM 1.2, the UVM object factory now requires that uvm_object have a
+constructor with a name argument.  Should this constructor be missing,
+a syntax error will be issued. 
 However, because much of the factory code is hidden in the utility macros,
 the syntax error may not point to the ultimate cause of the problem
 and may be confusing the diagnose.
+
 For example, this simple file
 
 | `include "uvm_macros.svh"
@@ -200,17 +152,47 @@ The reported line number will be on the ~endclass~ token of the class
 that is missing the required constructor.
 
 
-Topic: What will happen in UVM 1.2?
+Topic: Code migration script
 
-In UVM 1.2, the UVM object factory will have the corrected behavior enabled by default.
-The old (incorrect) behavior will remain available however.
-To restore the old behavior, it will be necessary to define
-the `UVM_OBJECT_OPTIONAL_CONSTRUCTOR symbol when compiling the UVM library:
+Suitable constructors may be automatically added to classes that are missing them
+by using the ~add_uvm_object_new.pl~ script.
+The following command will update all SystemVerilog source files
+located in the current working directory and any sub-directory:
 
-| % ... +define+UVM_OBJECT_OPTIONAL_CONSTRUCTOR uvm_pkg.sv
+| % add_uvm_object_new.pl --write
+
+See the ~--help~ command-line option for more details.
+
+The script may not be able to automatically identify all classes
+with missing constructors,
+or users may prefer to manually modify their source files.
+The script is also unable to fix unsuitable constructors;
+those will need to be fixed manually.
+Because the error is a compile-time error, it will be easy to identify
+any remaining changes that are required.
+
+
+Topic: Migrating code using UVM 1.2
+
+To ease the process of migrating code to UVM 1.2,
+the old (incorrect) behavior remain available.
+To restore the old behavior, it is necessary to define
+the `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR symbol when compiling the UVM library:
+
+| % ... +define+UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR uvm_pkg.sv
 
 Users must be aware that this may result in difference in behavior in code that
 now relies on the correct implementation of the UVM object factory.
+
+
+Topic: Migrating code using UVM 1.1
+
+In UVM 1.1a-d, the behavior of the UVM object factory
+has its previous (if incorrect) behavior by default.
+The correct factory behavior can be turned on by defining
+the `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR symbol when compiling the UVM library.
+
+| % ... +define+UVM_OBJECT_MUST_HAVE_CONSTRUCTOR uvm_pkg.sv
 
 
 Topic: What will happen in UVM 1.3?
