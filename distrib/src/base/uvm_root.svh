@@ -67,6 +67,9 @@ typedef class uvm_cmdline_processor;
 
 class uvm_root extends uvm_component;
 
+  // Function: get()
+  // Get the factory singleton
+  //
   extern static function uvm_root get();
 
   uvm_cmdline_processor clp;
@@ -145,15 +148,27 @@ class uvm_root extends uvm_component;
 
   // Variable- phase_timeout
   //
-  // Specifies the timeout for task-based phases. Default is 0, or no timeout.
+  // Specifies the timeout for the run phase. Default is `UVM_DEFAULT_TIMEOUT
+
 
   time phase_timeout = `UVM_DEFAULT_TIMEOUT;
 
 
   // Function: set_timeout
   //
-  // Specifies the timeout for task-based phases. Default is 0, i.e. no timeout.
-
+  // Specifies the timeout for the simulation. Default is <`UVM_DEFAULT_TIMEOUT>
+  //
+  // The timeout is simply the maximum absolute simulation time allowed before a
+  // ~FATAL~ occurs.  If the timeout is set to 20ns, then the simulation must end
+  // before 20ns, or a ~FATAL~ timeout will occur.
+  //
+  // This is provided so that the user can prevent the simulation from potentially 
+  // consuming too many resources (Disk, Memory, CPU, etc) when the testbench is
+  // essentially hung.
+  //
+  //
+   
+   
   extern function void set_timeout(time timeout, bit overridable=1);
 
 
@@ -162,7 +177,7 @@ class uvm_root extends uvm_component;
                                           ref uvm_component comps[$],
                                           input uvm_component comp=null); 
   
-  extern `_protected function new ();
+  extern protected function new ();
   extern protected virtual function bit m_add_child (uvm_component child);
   extern function void build_phase(uvm_phase phase);
   extern local function void m_do_verbosity_settings();
@@ -247,10 +262,10 @@ class uvm_root_report_handler extends uvm_report_handler;
                                string name,
                                string id,
                                string message,
-                               int verbosity_level,
-                               string filename,
-                               int line,
-                               uvm_report_object client);
+                               int verbosity_level=UVM_MEDIUM,
+                               string filename="",
+                               int line=0,
+                               uvm_report_object client=null);
     if(name == "")
       name = "reporter";
     super.report(severity, name, id, message, verbosity_level, filename, line, client);
@@ -386,8 +401,15 @@ task uvm_root::run_test(string test_name="");
     return;
   end
 
-  uvm_report_info("RNTST", {"Running test ",test_name, "..."}, UVM_LOW);
-
+  begin
+  	if(test_name=="") 
+  		uvm_report_info("RNTST", "Running test ...", UVM_LOW); 
+  	else if (test_name == uvm_test_top.get_type_name())
+  		uvm_report_info("RNTST", {"Running test ",test_name,"..."}, UVM_LOW); 
+  	else
+  		uvm_report_info("RNTST", {"Running test ",uvm_test_top.get_type_name()," (via factory override for test \"",test_name,"\")..."}, UVM_LOW);
+  end
+  
   // phase runner, isolated from calling process
   fork begin
     // spawn the phase runner task
@@ -582,7 +604,8 @@ function void uvm_root::m_do_timeout_settings();
   string timeout;
   string split_timeout[$];
   int timeout_count;
-  int timeout_int;
+  time timeout_int;
+  string override_spec;
   timeout_count = clp.get_arg_values("+UVM_TIMEOUT=", timeout_settings);
   if (timeout_count ==  0)
     return;
@@ -602,9 +625,8 @@ function void uvm_root::m_do_timeout_settings();
     end
     uvm_report_info("TIMOUTSET",
       $sformatf("'+UVM_TIMEOUT=%s' provided on the command line is being applied.", timeout), UVM_NONE);
-    uvm_split_string(timeout, ",", split_timeout);
-    timeout_int = split_timeout[0].atoi();
-    case(split_timeout[1])
+      void'($sscanf(timeout,"%d,%s",timeout_int,override_spec));
+    case(override_spec)
       "YES"   : set_timeout(timeout_int, 1);
       "NO"    : set_timeout(timeout_int, 0);
       default : set_timeout(timeout_int, 1);
@@ -804,7 +826,7 @@ function void uvm_root::m_do_dump_args();
   string all_args[$];
   string out_string;
   if(clp.get_arg_matches("+UVM_DUMP_CMDLINE_ARGS", dump_args)) begin
-    void'(clp.get_args(all_args));
+    clp.get_args(all_args);
     for (int i = 0; i < all_args.size(); i++) begin
       if (all_args[i] == "__-f__")
         continue;

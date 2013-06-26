@@ -557,19 +557,25 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: phase_ready_to_end
   //
-  // Invoked when all objections to ending the given ~phase~ have been
-  // dropped, thus indicating that ~phase~ is ready to end. All this
-  // component's processes forked for the given phase will be killed
-  // upon return from this method. Components needing to consume delta
+  // Invoked when all objections to ending the given ~phase~ and all
+  // sibling phases have been dropped, thus indicating that ~phase~ is 
+  // ready to begin a clean exit. Sibling phases are any phases that 
+  // have a common successor phase in the schedule plus any phases that
+  // sync'd to the current phase. Components needing to consume delta
   // cycles or advance time to perform a clean exit from the phase
   // may raise the phase's objection. 
   //
   // |phase.raise_objection(this,"Reason");
   //
-  // This effectively resets the
-  // wait-for-all-objections-dropped loop for ~phase~. It is the
-  // responsibility of this component to drop the objection once
-  // it is ready for this phase to end (and processes killed).
+  // It is the responsibility of this component to drop the objection 
+  // once it is ready for this phase to end (and processes killed).
+  // If no objection to the given ~phase~ or sibling phases are raised,
+  // then phase_ended() is called after a delta cycle.  If any objection
+  // is raised, then when all objections to ending the given ~phase~
+  // and siblings are dropped, another iteration of phase_ready_to_end
+  // is called.  To prevent endless iterations due to coding error,
+  // after 20 iterations, phase_ended() is called regardless of whether
+  // previous iteration had any objections raised.
   
   extern virtual function void phase_ready_to_end (uvm_phase phase);
 
@@ -1221,7 +1227,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Function: set_inst_override
   //
-  // A convenience function for <uvm_factory::set_inst_override_by_type>, this
+  // A convenience function for <uvm_factory::set_inst_override_by_name>, this
   // method registers a factory override for components created at this level
   // of hierarchy or below. In typical usage, this method is equivalent to:
   //
@@ -2027,7 +2033,7 @@ endfunction
 // ------
 
 function uvm_object  uvm_component::clone ();
-  `uvm_error("ILLCLN","clone cannot be called on a uvm_component. ")
+  `uvm_error("ILLCLN", $sformatf("Attempting to clone '%s'.  Clone cannot be called on a uvm_component.  The clone target variable will be set to null.", get_full_name()))
   return null;
 endfunction
 
@@ -2836,6 +2842,14 @@ function string uvm_component::massage_scope(string scope);
 endfunction
 
 
+// Undocumented struct for storing clone bit along w/
+// object on set_config_object(...) calls
+class uvm_config_object_wrapper;
+   uvm_object obj;
+   bit clone;
+endclass : uvm_config_object_wrapper
+
+
 `ifndef UVM_NO_DEPRECATED
 //
 // set_config_int
@@ -2873,6 +2887,7 @@ function void uvm_component::set_config_object(string inst_name,
                                                uvm_object value,
                                                bit clone = 1);
   uvm_object tmp;
+  uvm_config_object_wrapper wrapper;
 
   if (!m_config_deprecated_warned) begin
      `uvm_warning("UVM/CFG/SET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
@@ -2903,7 +2918,13 @@ function void uvm_component::set_config_object(string inst_name,
       value = tmp;
   end
 
+
   uvm_config_object::set(this, inst_name, field_name, value);
+
+  wrapper = new;
+  wrapper.obj = value;
+  wrapper.clone = clone;
+  uvm_config_db#(uvm_config_object_wrapper)::set(this, inst_name, field_name, wrapper);
 endfunction
 
 //
@@ -2935,6 +2956,8 @@ endfunction
 //
 // get_config_object
 //
+//
+// Note that this does not honor the set_config_object clone bit
 function bit uvm_component::get_config_object (string field_name,
                                                inout uvm_object value,
                                                input bit clone=1);
@@ -2942,6 +2965,7 @@ function bit uvm_component::get_config_object (string field_name,
      `uvm_warning("UVM/CFG/GET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
      m_config_deprecated_warned = 1;
   end
+
   if(!uvm_config_object::get(this, "", field_name, value)) begin
     return 0;
   end
@@ -2984,11 +3008,25 @@ function void uvm_component::apply_config_settings (bit verbose=0);
   int unsigned i;
   int unsigned j;
 
+  // populate an internal 'field_array' with list of
+  // fields declared with `uvm_field macros (checking
+  // that there aren't any duplicates along the way)
   __m_uvm_field_automation (null, UVM_CHECK_FIELDS, "");
+
+  // if no declared fields, nothing to do. 
+  if (__m_uvm_status_container.field_array.size() == 0)
+    return;
 
   if(verbose)
     uvm_report_info("CFGAPL","applying configuration settings", UVM_NONE);
 
+  // Note: the following is VERY expensive. Needs refactoring. Should
+  // get config only for the specific field names in 'field_array'.
+  // That's because the resource pool is organized first by field name.
+  // Can further optimize by encoding the value for each 'field_array' 
+  // entry to indicate string, uvm_bitstream_t, or object. That way,
+  // we call 'get' for specific fields of specific types rather than
+  // the search-and-cast approach here.
   rq = rp.lookup_scope(get_full_name());
   rp.sort_by_precedence(rq);
 
@@ -3012,11 +3050,12 @@ function void uvm_component::apply_config_settings (bit verbose=0);
       search_name = name;
 
     if(!uvm_resource_pool::m_has_wildcard_names && 
-       !__m_uvm_status_container.field_array.exists(search_name))
+       !__m_uvm_status_container.field_array.exists(search_name) && 
+       search_name != "recording_detail")
       continue;
 
     if(verbose)
-      uvm_report_info("CFGAPL",$sformatf("applying %s [%s]", name, __m_uvm_status_container.field_array[search_name]),UVM_NONE);
+      uvm_report_info("CFGAPL",$sformatf("applying configuration to field %s", name),UVM_NONE);
 
     begin
     uvm_resource#(uvm_bitstream_t) rbs;
@@ -3035,9 +3074,20 @@ function void uvm_component::apply_config_settings (bit verbose=0);
           if($cast(rs, r))
             set_string_local(name, rs.read(this));
           else begin
-            uvm_resource#(uvm_object) ro;
-            if($cast(ro, r))
-              set_object_local(name, ro.read(this), 0);
+             uvm_resource#(uvm_config_object_wrapper) rcow;
+             if ($cast(rcow, r)) begin
+                uvm_config_object_wrapper cow = rcow.read();
+                set_object_local(name, cow.obj, cow.clone);
+             end
+             else begin
+                uvm_resource#(uvm_object) ro;
+                if($cast(ro, r)) begin
+                  set_object_local(name, ro.read(this), 0);
+                end 
+                else if (verbose) begin
+                  uvm_report_info("CFGAPL", $sformatf("field %s has an unsupported type", name), UVM_NONE);
+                end
+             end
           end
         end
       end

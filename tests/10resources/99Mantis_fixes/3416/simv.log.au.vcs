@@ -8,27 +8,23 @@
 -  
 * [/^reg\[7:0\]$/] : (reg[7:0]) ?
 -  
-* [/^an_obj$/] : (class p.an_obj) (null)
+* [/^an_obj$/] : (class p.an_obj) ?
 -  
-* [/^an_obj-m$/] : (class p.an_obj) 
-mo: (my_obj@X) { i: 'h0  } 
+* [/^an_obj-m$/] : (class p.an_obj) ?
 -  
-* [/^an_obj-y$/] : (class p.an_obj) 
-yo: (your_obj@X) { i: 'h0  } 
+* [/^an_obj-y$/] : (class p.an_obj) ?
 -  
-* [/^my_obj-0$/] : (class p.my_obj) (null)
+* [/^my_obj-0$/] : (class p.my_obj) ?
 -  
-* [/^my_obj$/] : (class p.my_obj) 
-mo: (my_obj@X) { i: 'h0  } 
+* [/^my_obj$/] : (class p.my_obj) ?
 -  
-* [/^yr_obj$/] : (class p.your_obj) (null)
+* [/^yr_obj$/] : (class p.your_obj) ?
 -  
-* [/^yr_obj$/] : (class p.your_obj) 
-yo: (your_obj@X) { i: 'h0  } 
+* [/^yr_obj$/] : (class p.your_obj) ?
 -  
-entry [/^vif$/] : (virtual interface intf) testm.myif.convert2string 'hdeadbeef
+entry [/^vif$/] : (virtual interface intf) ?
 -  
-no-uvm-object [/^.*$/] : (class p.some_none_uvm_object) i=deadbeef
+no-uvm-object [/^.*$/] : (class p.some_none_uvm_object) ?
 -  
 para1 [/^.*$/] : (uvm_bitstream_t) 11
 -  

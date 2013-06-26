@@ -41,8 +41,10 @@ module test();
        `uvm_info("TEST_SEQ", $sformatf("  Number of Registers = %0d", r.size()), UVM_LOW)
        `uvm_info("TEST_SEQ", "<><><><><><><><><><><><><><><><><><><><><><><>\n", UVM_LOW)
        // Drive all register frontdoor
-       foreach(r[i])
+       foreach(r[i]) begin
+	 r[i].print();
          r[i].write(status, i*2+1, .map(map), .parent(this));
+	end
 
      endtask : body
      

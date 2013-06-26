@@ -125,9 +125,12 @@ class test extends uvm_component;
 
     // create and export a resource that is available only in the "dad"
     // sub-hierarchy.  Here we use a regex to represent the set of
-    // scopes over which this resource is visible.  Note the % as the
-    // lead character
+    // scopes over which this resource is visible.  Note that the
+    // regular expressio is enclosed in forward slashes (/) indicating
+    // it is a proper regular expression and not a glob.
+
     uvm_resource_db#(int)::set("/.*\\.dad\\..*/", "size", 32, this);
+
     
     // create and export a resource that is available only in leaves
     // named child1.

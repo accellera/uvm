@@ -177,7 +177,7 @@ class uvm_heartbeat extends uvm_object;
         "from the original trigger ", m_event.get_name() }, UVM_NONE);
       return;
     end  
-    m_event = e;
+    if(e != null) m_event = e;
     m_enable_cb();
     m_start_hb_process();
   endfunction

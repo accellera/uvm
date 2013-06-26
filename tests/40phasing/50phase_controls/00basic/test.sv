@@ -149,7 +149,7 @@ class test extends uvm_test;
   basic_driver    driver;
 
   `uvm_component_utils_begin( test );
-  `uvm_component_utils_end;
+  `uvm_component_utils_end
 
   function new( string n, uvm_component p = null);
     super.new( n, p);
@@ -171,7 +171,7 @@ class test extends uvm_test;
   function void connect_phase(uvm_phase phase);
     basic_seq seq = new;
     super.connect();
-    seq.randomize();
+    void'(seq.randomize());
     driver.seq_item_port.connect(sequencer.seq_item_export);
     sequence_rsrc::set(this, "seqr1.main_phase", "default_sequence", seq);
   endfunction : connect_phase

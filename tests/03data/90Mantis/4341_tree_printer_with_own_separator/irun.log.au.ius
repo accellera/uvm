@@ -1,0 +1,184 @@
+uvm_sequence_item: (myobject@X) <
+  i: 'hf 
+  b: -86 
+  bigint: 'h1aaaa5555aaaa5555aaaa5555 
+  num: TWO 
+  s: ABCDEFG 
+  ob: (subobject@X) <
+    color: RED 
+    i: 'h0 
+    str: default 
+  >
+  r: 123.456000 
+  ia: <
+    [0]: 'h0 
+    [1]: 'h1 
+    [2]: 'h2 
+    [3]: 'h3 
+  >
+  ba: <
+    [0]: 'd0 
+    [1]: -1 
+    [2]: -2 
+    [3]: -3 
+  >
+  biginta: <
+    [0]: 'h1aaaa5555aaaa5555aaaa5555 
+    [1]: 'h1aaaa5555aaaa5555aaaa5556 
+    [2]: 'h1aaaa5555aaaa5555aaaa5557 
+    [3]: 'h1aaaa5555aaaa5555aaaa5558 
+  >
+  numa: <
+    [0]: ONE 
+    [1]: TWO 
+    [2]: THREE 
+    [3]: FOUR 
+  >
+  sa: <
+    [0]: "" 
+    [1]: "" 
+    [2]: "" 
+    [3]: "" 
+  >
+  ca: <
+    [0]: (subobject@X) <
+      color: YELLOW 
+      i: 'h64 
+      str: "" 
+    >
+    [1]: (subobject@X) <
+      color: GREEN 
+      i: 'h65 
+      str: "" 
+    >
+    [2]: (subobject@X) <
+      color: BLUE 
+      i: 'h66 
+      str: "" 
+    >
+    [3]: (subobject@X) <
+      color: INDIGO 
+      i: 'h67 
+      str: "" 
+    >
+  >
+  iq: <
+    [0]: 'h1000 
+    [1]: 'h2000 
+    [2]: 'h3000 
+    [3]: 'h4000 
+    [4]: 'h5000 
+    ...... 
+    [10]: 'hb000 
+    [11]: 'hc000 
+    [12]: 'hd000 
+    [13]: 'he000 
+    [14]: 'hf000 
+  >
+  bq: <
+    [0]: 'd0 
+    [1]: -1 
+    [2]: -2 
+    [3]: -3 
+  >
+  bigintq: <
+    [0]: 'h1aaaa5555aaaa5555aaaa5555 
+    [1]: 'h1aaaa5555aaaa5555aaaa5556 
+    [2]: 'h1aaaa5555aaaa5555aaaa5557 
+    [3]: 'h1aaaa5555aaaa5555aaaa5558 
+  >
+  numq: <
+    [0]: TWO 
+    [1]: THREE 
+    [2]: FOUR 
+    [3]: ONE 
+  >
+  sq: <
+    [0]: "" 
+    [1]: "" 
+    [2]: "" 
+    [3]: "" 
+  >
+  cq: <
+    [0]: (subobject@X) <
+      color: RED 
+      i: 'ha 
+      str: "" 
+    >
+    [1]: (subobject@X) <
+      color: ORANGE 
+      i: 'hb 
+      str: "" 
+    >
+    [2]: (subobject@X) <
+      color: YELLOW 
+      i: 'hc 
+      str: "" 
+    >
+    [3]: (subobject@X) <
+      color: GREEN 
+      i: 'hd 
+      str: "" 
+    >
+  >
+  isa: <
+    [0]: 'h0 
+    [1]: 'h1 
+    [2]: 'h2 
+    [3]: 'h3 
+  >
+  bsa: <
+    [0]: 'd0 
+    [1]: -1 
+    [2]: -2 
+    [3]: -3 
+  >
+  bigintsa: <
+    [0]: 'h1aaaa5555aaaa5555aaaa5555 
+    [1]: 'h1aaaa5555aaaa5555aaaa5556 
+    [2]: 'h1aaaa5555aaaa5555aaaa5557 
+    [3]: 'h1aaaa5555aaaa5555aaaa5558 
+  >
+  numsa: <
+    [0]: ONE 
+    [1]: TWO 
+    [2]: THREE 
+    [3]: FOUR 
+  >
+  ssa: <
+    [0]: "" 
+    [1]: "" 
+    [2]: "" 
+    [3]: "" 
+  >
+  csa: <
+    [0]: (subobject@X) <
+      color: GREEN 
+      i: 'h12c 
+      str: "" 
+    >
+    [1]: (subobject@X) <
+      color: BLUE 
+      i: 'h12d 
+      str: "" 
+    >
+    [2]: (subobject@X) <
+      color: INDIGO 
+      i: 'h12e 
+      str: "" 
+    >
+    [3]: (subobject@X) <
+      color: VIOLET 
+      i: 'h12f 
+      str: "" 
+    >
+  >
+  aa_is: - 
+  aa_ii: - 
+  aa_ss: - 
+  aa_os: - 
+  aa_oi: - 
+  aa_ibu: - 
+  aa_iiu: - 
+  aa_inum: - 
+>

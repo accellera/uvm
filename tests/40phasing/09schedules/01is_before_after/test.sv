@@ -26,7 +26,12 @@ module test;
   `include "uvm_macros.svh"
 
   bit failed = 0;
-  int index[uvm_phase];
+
+  // is/is_before/is_after should work with the argument being either
+  // a phase instance or a phase imp; we'll use an array of instances and
+  // another array of imps
+  int imp_index[uvm_phase];
+  int inst_index[uvm_phase];
   int phases;
 
   class test extends uvm_component;
@@ -59,7 +64,10 @@ module test;
       super.new(name,parent);
     endfunction
 
-    function void set_up_index();
+    function void set_up_imp_index();
+        uvm_domain l_uvm_domain = uvm_domain::get_uvm_domain() ;
+        uvm_domain l_common_domain = uvm_domain::get_common_domain() ;
+        
         build_ph               = uvm_build_phase::get();
         connect_ph             = uvm_connect_phase::get();
         end_of_elaboration_ph  = uvm_end_of_elaboration_phase::get();
@@ -83,41 +91,93 @@ module test;
         post_shutdown_ph       = uvm_post_shutdown_phase::get();
 
         $display("uvm_build_ph id is %0d type=%s",build_ph.get_inst_id(),build_ph.get_phase_type());
-      //index[uvm_build_ph]               = 1;
-      index[build_ph]               = 1;
-      index[connect_ph]             = 2;
-      index[end_of_elaboration_ph]  = 3;
-      index[start_of_simulation_ph] = 4;
+      imp_index[build_ph]               = 1;
+      imp_index[connect_ph]             = 2;
+      imp_index[end_of_elaboration_ph]  = 3;
+      imp_index[start_of_simulation_ph] = 4;
 
-      index[run_ph]                 = 5;
+      imp_index[run_ph]                 = 5;
 
-      index[pre_reset_ph]           = 6;
-      index[reset_ph]               = 7;
-      index[post_reset_ph]          = 8;
-      index[pre_configure_ph]       = 9;
-      index[configure_ph]           = 10;
-      index[post_configure_ph]      = 11;
-      index[pre_main_ph]            = 12;
-      index[main_ph]                = 13;
-      index[post_main_ph]           = 14;
-      index[pre_shutdown_ph]        = 15;
-      index[shutdown_ph]            = 16;
-      index[post_shutdown_ph]       = 17;
+      imp_index[pre_reset_ph]           = 6;
+      imp_index[reset_ph]               = 7;
+      imp_index[post_reset_ph]          = 8;
+      imp_index[pre_configure_ph]       = 9;
+      imp_index[configure_ph]           = 10;
+      imp_index[post_configure_ph]      = 11;
+      imp_index[pre_main_ph]            = 12;
+      imp_index[main_ph]                = 13;
+      imp_index[post_main_ph]           = 14;
+      imp_index[pre_shutdown_ph]        = 15;
+      imp_index[shutdown_ph]            = 16;
+      imp_index[post_shutdown_ph]       = 17;
 
-      index[extract_ph]             = 18;
-      index[check_ph]               = 19;
-      index[report_ph]              = 20;
-      index[final_ph]               = 21;
+      imp_index[extract_ph]             = 18;
+      imp_index[check_ph]               = 19;
+      imp_index[report_ph]              = 20;
+      imp_index[final_ph]               = 21;
+    endfunction
+
+    
+    function void set_up_inst_index();
+        uvm_domain l_uvm_domain = uvm_domain::get_uvm_domain() ;
+        uvm_domain l_common_domain = uvm_domain::get_common_domain() ;
+        
+        build_ph               = l_common_domain.find_by_name("build");
+        connect_ph             = l_common_domain.find_by_name("connect");
+        end_of_elaboration_ph  = l_common_domain.find_by_name("end_of_elaboration");
+        start_of_simulation_ph = l_common_domain.find_by_name("start_of_simulation");
+        run_ph                 = l_common_domain.find_by_name("run");
+        extract_ph             = l_common_domain.find_by_name("extract");
+        check_ph               = l_common_domain.find_by_name("check");
+        report_ph              = l_common_domain.find_by_name("report");
+        final_ph               = l_common_domain.find_by_name("final");
+        pre_reset_ph           = l_uvm_domain.find_by_name("pre_reset");
+        reset_ph               = l_uvm_domain.find_by_name("reset");
+        post_reset_ph          = l_uvm_domain.find_by_name("post_reset");
+        pre_configure_ph       = l_uvm_domain.find_by_name("pre_configure");
+        configure_ph           = l_uvm_domain.find_by_name("configure");
+        post_configure_ph      = l_uvm_domain.find_by_name("post_configure");
+        pre_main_ph            = l_uvm_domain.find_by_name("pre_main");
+        main_ph                = l_uvm_domain.find_by_name("main");
+        post_main_ph           = l_uvm_domain.find_by_name("post_main");
+        pre_shutdown_ph        = l_uvm_domain.find_by_name("pre_shutdown");
+        shutdown_ph            = l_uvm_domain.find_by_name("shutdown");
+        post_shutdown_ph       = l_uvm_domain.find_by_name("post_shutdown");
+
+        $display("uvm_build_ph id is %0d type=%s",build_ph.get_inst_id(),build_ph.get_phase_type());
+      inst_index[build_ph]               = 1;
+      inst_index[connect_ph]             = 2;
+      inst_index[end_of_elaboration_ph]  = 3;
+      inst_index[start_of_simulation_ph] = 4;
+
+      inst_index[run_ph]                 = 5;
+
+      inst_index[pre_reset_ph]           = 6;
+      inst_index[reset_ph]               = 7;
+      inst_index[post_reset_ph]          = 8;
+      inst_index[pre_configure_ph]       = 9;
+      inst_index[configure_ph]           = 10;
+      inst_index[post_configure_ph]      = 11;
+      inst_index[pre_main_ph]            = 12;
+      inst_index[main_ph]                = 13;
+      inst_index[post_main_ph]           = 14;
+      inst_index[pre_shutdown_ph]        = 15;
+      inst_index[shutdown_ph]            = 16;
+      inst_index[post_shutdown_ph]       = 17;
+
+      inst_index[extract_ph]             = 18;
+      inst_index[check_ph]               = 19;
+      inst_index[report_ph]              = 20;
+      inst_index[final_ph]               = 21;
     endfunction
 
     function void phase_started(uvm_phase phase);
-      uvm_phase imp = phase.get_imp();
-      int spread;
-      bit is, isb, isa;
+
+      bit use_imp ; 
       static bit done;
-      $write ("phase_started: imp=%s (%0d)\n",imp.get_name(),imp.get_inst_id());
       if (!done) begin
-        set_up_index();
+        set_up_inst_index();
+        set_up_imp_index();
         done = 1;
         /*
         foreach (index[ph])
@@ -127,47 +187,67 @@ module test;
         */
       end
 
-      if (!index.exists(imp)) begin
+
+      if (phase.is_before(null)) `uvm_error("EXP_NOT_BEFORE",   {"Expected ",phase.get_name(),".is_before(null) to be FALSE"});
+      if (phase.is(null)) `uvm_error("EXP_NOT_IS",   {"Expected ",phase.get_name(),".is(null) to be FALSE"});
+      if (phase.is_after(null)) `uvm_error("EXP_NOT_AFTER",   {"Expected ",phase.get_name(),".is_after(null) to be FALSE"});
+
+      use_imp = 0 ;
+      test_is_functions(phase,inst_index,use_imp);
+      use_imp = 1 ;
+      test_is_functions(phase,imp_index,use_imp);
+      
+      phases++;
+    endfunction
+
+    function void test_is_functions(uvm_phase a_phase, int a_index[uvm_phase], bit use_imp);
+      int spread;
+      bit is, isb, isa;
+      uvm_phase imp;
+      if (use_imp) imp = a_phase.get_imp();
+      else imp = a_phase ;
+      
+      $write ("phase_started: %s=%s (%0d)\n",imp.get_phase_type(),imp.get_name(),imp.get_inst_id());
+      
+      if (!a_index.exists(imp)) begin
         `uvm_error("UNKNOWN_PHASE", {"Phase '", imp.get_name(), "' (id=",$sformatf("%0d",imp.get_inst_id()),") not expected. "})
-        //$display("uvm_build_ph id is %0d",build_ph.get_inst_id());
       end
-      foreach (index[ph]) begin
+      foreach (a_index[ph]) begin
 
-        is = phase.is(ph);
-        isb = phase.is_before(ph);
-        isa = phase.is_after(ph);
+        is = a_phase.is(ph);
+        isb = a_phase.is_before(ph);
+        isa = a_phase.is_after(ph);
 
-        spread = (index[imp] - index[ph]);
+        spread = (a_index[imp] - a_index[ph]);
 
-        if ((imp.get_name() == "run" || ph.get_name() == "run") && (index[ph] >= 6 && index[ph] <= 17 || index[imp] >=6 && index[imp] <= 17)) begin
-          if ( isa) `uvm_error("EXP_NOT_AFTER",   {"Expected ",phase.get_name(),".is_after(",ph.get_name(),") to be FALSE"})
-          if ( isb) `uvm_error("EXP_NOT_BEFORE",  {"Expected ",phase.get_name(),".is_before(",ph.get_name(),") to be FALSE"})
-          if ( is)  `uvm_error("EXP_NOT_IS",      {"Expected ",phase.get_name(),".is(",ph.get_name(),") to be FALSE"})
+        if ((imp.get_name() == "run" || ph.get_name() == "run") && (a_index[ph] >= 6 && a_index[ph] <= 17 || a_index[imp] >=6 && a_index[imp] <= 17)) begin
+          if ( isa) `uvm_error("EXP_NOT_AFTER",   {"Expected ",a_phase.get_name(),".is_after(",ph.get_name(),") to be FALSE"})
+          if ( isb) `uvm_error("EXP_NOT_BEFORE",  {"Expected ",a_phase.get_name(),".is_before(",ph.get_name(),") to be FALSE"})
+          if ( is)  `uvm_error("EXP_NOT_IS",      {"Expected ",a_phase.get_name(),".is(",ph.get_name(),") to be FALSE"})
           continue;
         end
 
         if (spread > 0) begin
-          if (!isa) `uvm_error("EXP_AFTER",      {"Expected ",phase.get_name(),".is_after(",ph.get_name(),") to be TRUE"})
-          if ( isb) `uvm_error("EXP_NOT_BEFORE", {"Expected ",phase.get_name(),".is_before(",ph.get_name(),") to be FALSE"})
-          if ( is)  `uvm_error("EXP_NOT_IS",     {"Expected ",phase.get_name(),".is(",ph.get_name(),") to be FALSE"})
+          if (!isa) `uvm_error("EXP_AFTER",      {"Expected ",a_phase.get_name(),".is_after(",ph.get_name(),") to be TRUE"})
+          if ( isb) `uvm_error("EXP_NOT_BEFORE", {"Expected ",a_phase.get_name(),".is_before(",ph.get_name(),") to be FALSE"})
+          if ( is)  `uvm_error("EXP_NOT_IS",     {"Expected ",a_phase.get_name(),".is(",ph.get_name(),") to be FALSE"})
         end
         if (spread > 0) begin
-          if (!isa) `uvm_error("EXP_AFTER",      {"Expected ",phase.get_name(),".is_after(",ph.get_name(),") to be TRUE"})
-          if ( isb) `uvm_error("EXP_NOT_BEFORE", {"Expected ",phase.get_name(),".is_before(",ph.get_name(),") to be FALSE"})
-          if ( is)  `uvm_error("EXP_NOT_IS",     {"Expected ",phase.get_name(),".is(",ph.get_name(),") to be FALSE"})
+          if (!isa) `uvm_error("EXP_AFTER",      {"Expected ",a_phase.get_name(),".is_after(",ph.get_name(),") to be TRUE"})
+          if ( isb) `uvm_error("EXP_NOT_BEFORE", {"Expected ",a_phase.get_name(),".is_before(",ph.get_name(),") to be FALSE"})
+          if ( is)  `uvm_error("EXP_NOT_IS",     {"Expected ",a_phase.get_name(),".is(",ph.get_name(),") to be FALSE"})
         end
         else if (spread == 0) begin
-          if ( isa) `uvm_error("EXP_NOT_AFTER",  {"Expected ",phase.get_name(),".is_after(",ph.get_name(),") to be FALSE"})
-          if (!is)  `uvm_error("EXP_IS",         {"Expected ",phase.get_name(),".is(",ph.get_name(),") to be TRUE"})
-          if ( isb) `uvm_error("EXP_NOT_BEFORE", {"Expected ",phase.get_name(),".is_before(",ph.get_name(),") to be FALSE"})
+          if ( isa) `uvm_error("EXP_NOT_AFTER",  {"Expected ",a_phase.get_name(),".is_after(",ph.get_name(),") to be FALSE"})
+          if (!is)  `uvm_error("EXP_IS",         {"Expected ",a_phase.get_name(),".is(",ph.get_name(),") to be TRUE"})
+          if ( isb) `uvm_error("EXP_NOT_BEFORE", {"Expected ",a_phase.get_name(),".is_before(",ph.get_name(),") to be FALSE"})
         end
         else begin
-          if ( isa) `uvm_error("EXP_NOT_AFTER",  {"Expected ",phase.get_name(),".is_after(",ph.get_name(),") to be FALSE"})
-          if ( is)  `uvm_error("EXP_NOT_IS",     {"Expected ",phase.get_name(),".is(",ph.get_name(),") to be FALSE"})
-          if (!isb) `uvm_error("EXP_BEFORE",     {"Expected ",phase.get_name(),".is_before(",ph.get_name(),") to be TRUE"})
+          if ( isa) `uvm_error("EXP_NOT_AFTER",  {"Expected ",a_phase.get_name(),".is_after(",ph.get_name(),") to be FALSE"})
+          if ( is)  `uvm_error("EXP_NOT_IS",     {"Expected ",a_phase.get_name(),".is(",ph.get_name(),") to be FALSE"})
+          if (!isb) `uvm_error("EXP_BEFORE",     {"Expected ",a_phase.get_name(),".is_before(",ph.get_name(),") to be TRUE"})
         end
       end
-      phases++;
     endfunction
 
     function void phase_ended(uvm_phase phase);

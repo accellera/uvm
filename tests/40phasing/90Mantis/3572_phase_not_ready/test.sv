@@ -4,7 +4,7 @@
 import uvm_pkg::*;
 
 class test extends uvm_test;
-  `uvm_component_utils( test );
+  `uvm_component_utils( test )
   bit been_here = 0;
 
   function new( string name , uvm_component parent = null );

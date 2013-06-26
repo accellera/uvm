@@ -20,6 +20,7 @@
 ## -------------------------------------------------------------
 ## 
 
+UVM_HOME=../../../../distrib
 include $(UVM_HOME)/examples/Makefile.ius
 
 all: run

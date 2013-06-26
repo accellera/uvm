@@ -148,7 +148,7 @@ class test extends uvm_test;
       ext2 y2;
       ext3 y3;
 
-      gp1.set_extension(x1);
+      void'(gp1.set_extension(x1));
       if (gp1.get_num_extensions() != 1) begin
          `uvm_error("TEST", $sformatf("Number of GP1 extensions reported as %0d instead of 1", 
 				      gp1.get_num_extensions()));
@@ -157,7 +157,7 @@ class test extends uvm_test;
          `uvm_error("TEST", $sformatf("Number of GP2 extensions reported as %0d instead of 0", 
 				      gp2.get_num_extensions()));
       end
-      gp2.set_extension(x3);
+      void'(gp2.set_extension(x3));
 
       if (!$cast(y1, gp1.get_extension(ext1::ID()))) begin
          `uvm_error("TEST", "GP1 did not return the correct EXT1 extension");

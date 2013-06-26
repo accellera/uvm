@@ -36,20 +36,10 @@ module top;
 `include "item.sv"
 `include "item_macro.sv"
 
-`ifdef UVM_USE_P_FORMAT
 `define DO_CMP(STYLE,OP,OP1,OP2) \
     for (int i=0; i< `NUM_TRANS; i++) \
       if(!OP1.OP(OP2)) \
-        `uvm_fatal("MISCOMPARE",$sformatf("op1=%p op2=%p",OP1,OP2)) \
-        
-`else
-`define DO_CMP(STYLE,OP,OP1,OP2) \
-    for (int i=0; i< `NUM_TRANS; i++) \
-      if(!OP1.OP(OP2)) \
-        `uvm_fatal("MISCOMPARE",$sformatf("MISCOMPARE! op1=%s op2=%s",OP1.convert2string(),OP2.convert2string())) \
-
-`endif        
-        
+        `uvm_fatal("MISCOMPARE",$sformatf("op1=%p op2=%p",OP1,OP2))
 
 `define DO_IT(STYLE,OP,OP1,OP2) \
     for (int i=0; i< `NUM_TRANS; i++) \
@@ -61,17 +51,11 @@ module top;
 
 
   initial begin
+    item       man1,man2;
+    item_macro mac1,mac2;
 
-   item man1, man2;
-   item_macro mac1, mac2;
-
-    man1=new("man1");
-    man2=new("man2");
-    mac1=new("mac1");
-    mac2=new("mac2");
-
-    uvm_default_packer.use_metadata = 1;
-    uvm_default_packer.big_endian = 0;
+    man1=new("man1");man2=new("man2");
+    mac1=new("mac1");mac2=new("mac2");
 
     uvm_top.set_report_id_action("ILLEGALNAME",UVM_NO_ACTION);
 
@@ -156,8 +140,16 @@ module top;
 
     begin
     bit bits[];
+    bit bits2[];
+    byte unsigned bytes[];
+    byte unsigned bytes2[];
+    int unsigned ints[];
+    int unsigned ints2[];
+
+    uvm_default_packer.use_metadata = 1;
+
+    uvm_default_packer.big_endian = 0;
     
-    for (int i=0; i< `NUM_TRANS; i++) begin
       void'(man1.pack(bits));
       void'(man2.unpack(bits));
       if (!man1.compare(man2)) begin
@@ -165,20 +157,150 @@ module top;
         man1.print();
         man2.print();
       end
-    end
 
 
-    for (int i=0; i< `NUM_TRANS; i++) begin
-      void'(mac1.pack(bits));
-      void'(mac2.unpack(bits));
+      void'(mac1.pack(bits2));
+      void'(mac2.unpack(bits2));
       if (!mac1.compare(mac2)) begin
         mac1.print();
         mac2.print();
         `uvm_fatal("MISCOMPARE","mismatch in pack/unpack")
         
       end
+
+      if (bits != bits2) begin
+        $display("\nSize bits=%0d\nSize bits2=%0d",bits.size(),bits2.size());
+        foreach (bits[i]) begin
+          if (bits[i] != bits2[i])
+            $display("index %0d bits=%b bits2=%b",i,bits[i],bits2[i]);
+        end
+        `uvm_fatal("MACRO/NON-MACRO DIFF",$sformatf("packed bits via field macros not the same as packed bits via `uvm_pack_* macros big_endian=0"))
+
+      end
+
+
+
+    uvm_default_packer.big_endian = 1;
+    
+      void'(man1.pack(bits));
+      void'(man2.unpack(bits));
+      if (!man1.compare(man2)) begin
+        $display("MISCOMPARE!");
+        man1.print();
+        man2.print();
+      end
+
+
+      void'(mac1.pack(bits2));
+      void'(mac2.unpack(bits2));
+      if (!mac1.compare(mac2)) begin
+        mac1.print();
+        mac2.print();
+        `uvm_fatal("MISCOMPARE","mismatch in pack/unpack")
+        
+      end
+
+      if (bits != bits2)
+        `uvm_fatal("MACRO/NON-MACRO DIFF","packed bits via field macros not the same as packed bits via `uvm_pack_* macros big_endian=1")
+
+
+
+    uvm_default_packer.big_endian = 0;
+    
+      void'(man1.pack_bytes(bytes));
+      void'(man2.unpack_bytes(bytes));
+      if (!man1.compare(man2)) begin
+        $display("MISCOMPARE!");
+        man1.print();
+        man2.print();
+      end
+
+
+      void'(mac1.pack_bytes(bytes2));
+      void'(mac2.unpack_bytes(bytes2));
+      if (!mac1.compare(mac2)) begin
+        mac1.print();
+        mac2.print();
+        `uvm_fatal("MISCOMPARE","mismatch in pack/unpack")
+        
+      end
+
+      if (bytes != bytes2)
+        `uvm_fatal("MACRO/NON-MACRO DIFF","packed bytes via field macros not the same as packed bytes via `uvm_pack_* macros big_endian=0")
+
+    uvm_default_packer.big_endian = 1;
+    
+      void'(man1.pack_bytes(bytes));
+      void'(man2.unpack_bytes(bytes));
+      if (!man1.compare(man2)) begin
+        $display("MISCOMPARE!");
+        man1.print();
+        man2.print();
+      end
+
+
+      void'(mac1.pack_bytes(bytes2));
+      void'(mac2.unpack_bytes(bytes2));
+      if (!mac1.compare(mac2)) begin
+        mac1.print();
+        mac2.print();
+        `uvm_fatal("MISCOMPARE","mismatch in pack/unpack")
+        
+      end
+
+      if (bytes != bytes2)
+        `uvm_fatal("MACRO/NON-MACRO DIFF","packed bytes via field macros not the same as packed bytes via `uvm_pack_* macros big_endian=1")
+
+
+
+    uvm_default_packer.big_endian = 0;
+    
+      void'(man1.pack_ints(ints));
+      void'(man2.unpack_ints(ints));
+      if (!man1.compare(man2)) begin
+        $display("MISCOMPARE!");
+        man1.print();
+        man2.print();
+      end
+
+
+      void'(mac1.pack_ints(ints2));
+      void'(mac2.unpack_ints(ints2));
+      if (!mac1.compare(mac2)) begin
+        mac1.print();
+        mac2.print();
+        `uvm_fatal("MISCOMPARE","mismatch in pack/unpack")
+        
+      end
+
+      if (ints != ints2)
+        `uvm_fatal("MACRO/NON-MACRO DIFF","packed ints via field macros not the same as packed ints via `uvm_pack_* macros big_endian=0")
+
+    uvm_default_packer.big_endian = 1;
+    
+      void'(man1.pack_ints(ints));
+      void'(man2.unpack_ints(ints));
+      if (!man1.compare(man2)) begin
+        $display("MISCOMPARE!");
+        man1.print();
+        man2.print();
+      end
+
+
+      void'(mac1.pack_ints(ints2));
+      void'(mac2.unpack_ints(ints2));
+      if (!mac1.compare(mac2)) begin
+        mac1.print();
+        mac2.print();
+        `uvm_fatal("MISCOMPARE","mismatch in pack/unpack")
+        
+      end
+
+      if (ints != ints2)
+        `uvm_fatal("MACRO/NON-MACRO DIFF","packed ints via field macros not the same as packed ints via `uvm_pack_* macros big_endian=1")
+
     end
-    end
+
 
 
     //---------------------------------

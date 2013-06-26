@@ -56,7 +56,7 @@ class dut_DATA extends uvm_reg;
 
    virtual function void build();
       this.value = uvm_reg_field::type_id::create("value");
-      this.value.configure(this, 32, 0, "RW", 1, 32'h0, 1, 0, 1);
+      this.value.configure(this, 32, 0, "RW", 0, 32'h0, 1, 0, 1);
    endfunction
 
    `uvm_object_utils(dut_DATA)

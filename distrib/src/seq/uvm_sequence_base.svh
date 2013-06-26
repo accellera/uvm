@@ -143,6 +143,8 @@ class uvm_sequence_base extends uvm_sequence_item;
   // sequencers, each sequence_id is managed seperately
   protected int m_sqr_seq_ids[int];
 
+  protected bit children_array[uvm_sequence_base];
+   
   protected uvm_sequence_item response_queue[$];
   protected int               response_queue_depth = 8;
   protected bit               response_queue_error_report_disabled;
@@ -189,10 +191,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   // Function: get_sequence_state
   //
-  // Returns the sequence state as an enumerated value. Can use to wait on
-  // the sequence reaching or changing from one or more states.
-  //
-  //| wait(get_sequence_state() & (STOPPED|FINISHED));
+  // Returns the sequence state as an enumerated value.
 
   function uvm_sequence_state_enum get_sequence_state();
     return m_sequence_state;
@@ -201,12 +200,13 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   // Task: wait_for_sequence_state
   // 
-  // Waits until the sequence reaches the given ~state~. If the sequence
-  // is already in this state, this method returns immediately. Convenience
-  // for wait ( get_sequence_state == ~state~ );
+  // Waits until the sequence reaches one of the given ~state~. If the sequence
+  // is already in one of the state, this method returns immediately.
+  //
+  //| wait_for_sequence_state(STOPPED|FINISHED);
 
-  task wait_for_sequence_state(uvm_sequence_state_enum state);
-    wait (m_sequence_state == state);
+  task wait_for_sequence_state(int unsigned state_mask);
+    wait (m_sequence_state & state_mask);
   endtask
 
 
@@ -249,8 +249,12 @@ class uvm_sequence_base extends uvm_sequence_item;
          {"Sequence ", get_full_name(), " already started"},UVM_NONE);
     end
 
+    if (m_parent_sequence != null) begin
+       m_parent_sequence.children_array[this] = 1;
+    end
+
     if (this_priority < -1) begin
-      uvm_report_fatal("SEQPRI", $psprintf("Sequence %s start has illegal priority: %0d",
+      uvm_report_fatal("SEQPRI", $sformatf("Sequence %s start has illegal priority: %0d",
                                            get_full_name(),
                                            this_priority), UVM_NONE);
     end
@@ -282,12 +286,15 @@ class uvm_sequence_base extends uvm_sequence_item;
     if (m_sequencer != null) begin
       void'(m_sequencer.m_register_sequence(this));
     end
-    
+
+    // Change the state to PRE_START, do this before the fork so that
+    // the "if (!(m_sequence_state inside {...}" works
+    m_sequence_state = PRE_START;
     fork
       begin
         m_sequence_process = process::self();
 
-        m_sequence_state = PRE_START;
+        // absorb delta to ensure PRE_START was seen
         #0;
         pre_start();
 
@@ -342,6 +349,9 @@ class uvm_sequence_base extends uvm_sequence_item;
 
     #0; // allow stopped and finish waiters to resume
 
+    if ((m_parent_sequence != null) && (m_parent_sequence.children_array.exists(this))) begin
+       m_parent_sequence.children_array.delete(this);
+    end
   endtask
 
 
@@ -646,7 +656,8 @@ class uvm_sequence_base extends uvm_sequence_item;
   //
   // This function will kill the sequence, and cause all current locks and
   // requests in the sequence's default sequencer to be removed. The sequence
-  // state will change to STOPPED, and its post_body() method, if  will not b
+  // state will change to STOPPED, and the post_body() and post_start() callback
+  // methods will not be executed.
   //
   // If a sequence has issued locks, grabs, or requests on sequencers other than
   // the default sequencer, then care must be taken to unregister the sequence
@@ -681,11 +692,16 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   function void m_kill();
     do_kill();
+    foreach(children_array[i]) begin
+       i.kill();
+    end
     if (m_sequence_process != null) begin
       m_sequence_process.kill;
       m_sequence_process = null;
     end
     m_sequence_state = STOPPED;
+    if ((m_parent_sequence != null) && (m_parent_sequence.children_array.exists(this)))
+      m_parent_sequence.children_array.delete(this);
   endfunction
 
 
@@ -746,13 +762,6 @@ class uvm_sequence_base extends uvm_sequence_item;
     if(sequencer == null) begin
         uvm_report_fatal("SEQ",{"neither the item's sequencer nor dedicated sequencer has been supplied to start item in ",get_full_name()},UVM_NONE);
        return;
-    end
-      
-    if (sequencer == null)
-      sequencer = item.get_sequencer();
-    
-    if (sequencer == null) begin
-        uvm_report_fatal("STRITM", "sequence_item has null sequencer", UVM_NONE);
     end
 
     item.set_item_context(this, sequencer);
@@ -1160,22 +1169,6 @@ class uvm_sequence_base extends uvm_sequence_item;
     m_sqr_seq_ids[sequencer_id] = sequence_id;
     set_sequence_id(sequence_id);
   endfunction
-
-
-  // Function- create_request
-  //
-  // Returns an instance of teh ~REQ~ type in a <uvm_sequence_item> base handle
-  virtual function uvm_sequence_item create_request ();
-    return null;
-  endfunction
-
-  // Function- create_response
-  //
-  // Returns an instance of teh ~RSP~ type in a <uvm_sequence_item> base handle
-  virtual function uvm_sequence_item create_response ();
-    return null;
-  endfunction
-
 
 endclass                
 

@@ -119,6 +119,19 @@ function bit uvm_report_enabled (int verbosity,
   return top.uvm_report_enabled(verbosity,severity,id);
 endfunction
 
+// Function: uvm_report
+
+function void uvm_report( uvm_severity severity,
+                          string id,
+                          string message,
+                          int verbosity = (severity == uvm_severity'(UVM_ERROR)) ? UVM_LOW :
+                                          (severity == uvm_severity'(UVM_FATAL)) ? UVM_NONE : UVM_MEDIUM,
+                          string filename = "",
+                          int line = 0);
+  uvm_root top;
+  top = uvm_root::get();
+  top.uvm_report(severity, id, message, verbosity, filename, line);
+endfunction 
 
 // Function: uvm_report_info
 

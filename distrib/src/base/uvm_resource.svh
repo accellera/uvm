@@ -202,9 +202,7 @@ virtual class uvm_resource_base extends uvm_object;
   protected bit modified;
   protected bit read_only;
 
-  // IUS currently does not support the protected keyword.  When
-  // it does, comments delimiters can be removed.
-  /*protected*/ bit m_is_regex_name;
+  local bit m_is_regex_name;
 
   uvm_resource_types::access_t access[string];
 
@@ -222,7 +220,8 @@ virtual class uvm_resource_base extends uvm_object;
   // The default precedence for an resource that has been created.
   // When two resources have the same precedence, the first resource
   // found has precedence.
-  
+  //
+
   static int unsigned default_precedence = 1000;
 
   // Function: new
@@ -485,25 +484,35 @@ virtual class uvm_resource_base extends uvm_object;
   function void record_read_access(uvm_object accessor = null);
 
     string str;
+    uvm_resource_types::access_t access_record;
 
     // If an accessor object is supplied then get the accessor record.
     // Otherwise create a new access record.  In either case populate
     // the access record with information about this access.  Check
     // first to make sure that auditing is turned on.
 
-    if(uvm_resource_options::is_auditing()) begin
-      if(accessor != null) begin
-        uvm_resource_types::access_t access_record;
-        str = accessor.get_full_name();
-        if(access.exists(str))
-          access_record = access[str];
-        else
-          init_access_record(access_record);
-        access_record.read_count++;
-        access_record.read_time = $realtime;
-        access[str] = access_record;
-      end
-    end
+    if(!uvm_resource_options::is_auditing())
+      return;
+
+    // If an accessor is supplied, then use its name
+	// as the database entry for the accessor record.
+	// Otherwise, use "<empty>" as the database entry.
+    if(accessor != null)
+      str = accessor.get_full_name();
+    else
+      str = "<empty>";
+
+    // Create a new accessor record if one does not exist
+    if(access.exists(str))
+      access_record = access[str];
+    else
+      init_access_record(access_record);
+
+    // Update the accessor record
+    access_record.read_count++;
+    access_record.read_time = $realtime;
+    access[str] = access_record;
+
   endfunction
 
   // function: record_write_access
@@ -575,6 +584,9 @@ virtual class uvm_resource_base extends uvm_object;
     access_record.write_count = 0;
   endfunction
 
+  virtual function bit has_regex_name();
+  	return m_is_regex_name;
+  endfunction
 endclass
 
 
@@ -663,14 +675,8 @@ class uvm_resource_pool;
 
   get_t get_record [$];  // history of gets
 
-  // To make a proper singleton the constructor should be protected.
-  // However, IUS doesn't support protected constructors so we'll just
-  // the default constructor instead.  If support for protected
-  // constructors ever becomes available then this comment can be
-  // deleted and the protected constructor uncommented.
-
-  //  protected function new();
-  //  endfunction
+  local function new();
+  endfunction
 
 
   // Function: get
@@ -767,7 +773,7 @@ class uvm_resource_pool;
     //optimization for name lookups. Since most environments never
     //use wildcarded names, don't want to incurr a search penalty
     //unless a wildcarded name has been used.
-    if(rsrc.m_is_regex_name)
+    if(rsrc.has_regex_name())
       m_has_wildcard_names = 1;
   endfunction
 
@@ -897,10 +903,9 @@ class uvm_resource_pool;
     rq = rtab[name];
     for(int i=0; i<rq.size(); ++i) begin 
       r = rq.get(i);
-      // does the scope match?
-      if(r.match_scope(scope) &&
-         // does the type match?
-         ((type_handle == null) || (r.get_type_handle() == type_handle)))
+      // does the type and scope match?
+      if(((type_handle == null) || (r.get_type_handle() == type_handle)) &&
+          r.match_scope(scope))
         q.push_back(r);
     end
 
@@ -1085,10 +1090,9 @@ class uvm_resource_pool;
       for(i = 0; i < rq.size(); i++) begin
         r = rq.get(i);
         if(uvm_re_match(uvm_glob_to_re(re),name) == 0)
-          // does the scope match?
-          if(r.match_scope(scope) &&
-            // does the type match?
-            ((type_handle == null) || (r.get_type_handle() == type_handle)))
+          // does the type and scope match?
+          if(((type_handle == null) || (r.get_type_handle() == type_handle)) &&
+             r.match_scope(scope))
             result_q.push_back(r);
       end
     end
@@ -1344,7 +1348,7 @@ class uvm_resource_pool;
     printer.knobs.type_name=0;
     printer.knobs.reference=0;
 
-    if(rq == null && rq.size() == 0) begin
+    if(rq == null || rq.size() == 0) begin
       $display("<none>");
       return;
     end
@@ -1384,7 +1388,9 @@ class uvm_resource_pool;
   
 endclass
 
+`ifdef UVM_USE_RESOURCE_CONVERTER
 typedef class m_uvm_resource_converter;
+`endif
 
 //----------------------------------------------------------------------
 // Class: uvm_resource #(T)
@@ -1403,12 +1409,10 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // Can't be rand since things like rand strings are not legal.
   protected T val;
 
+`ifdef UVM_USE_RESOURCE_CONVERTER
+
   // Singleton used to convert this resource to a string
   local static m_uvm_resource_converter#(T) m_r2s;
-
-  function new(string name="", scope="");
-    super.new(name, scope);
-  endfunction
 
   // Function- m_get_converter
   // Get the conversion policy class that specifies how to convert the value
@@ -1430,10 +1434,20 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   static function void m_set_converter(m_uvm_resource_converter#(T) r2s);
     m_r2s = r2s;
   endfunction
-  
+   
+`endif
+
+  function new(string name="", scope="");
+    super.new(name, scope);
+  endfunction
+
   function string convert2string();
+`ifdef UVM_USE_RESOURCE_CONVERTER
     void'(m_get_converter());
     return m_r2s.convert2string(val);
+`else
+  	return $sformatf("(%s) %0p", `uvm_typename(val), val);
+`endif
   endfunction
 
 
@@ -1595,14 +1609,17 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   endfunction
 
   // Function: write
-  //
   // Modify the object stored in this resource container.  If the
   // resource is read-only then issue an error message and return
   // without modifying the object in the container.  If the resource is
   // not read-only and an ~accessor~ object has been supplied then also
-  // update the accessor record.  Lastly, replace the object value in the
-  // container with the value supplied as the  argument, ~t~, and 
-  // release any processes blocked on <uvm_resource_base::wait_modified>.
+  // update the accessor record.  Lastly, replace the object value in
+  // the container with the value supplied as the argument, ~t~, and
+  // release any processes blocked on
+  // <uvm_resource_base::wait_modified>.  If the value to be written is
+  // the same as the value already present in the resource then the
+  // write is not done.  That also means that the accessor record is not
+  // updated and the modified bit is not set.
 
   function void write(T t, uvm_object accessor = null);
 
@@ -1610,6 +1627,11 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
       uvm_report_error("resource", $sformatf("resource %s is read only -- cannot modify", get_name()));
       return;
     end
+
+    // Set the modified bit and record the transaction only if the value
+    // has actually changed.
+    if(val == t)
+      return;
 
     record_write_access(accessor);
 

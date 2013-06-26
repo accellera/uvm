@@ -146,13 +146,7 @@ class uvm_built_in_pair #(type T1=int, T2=T1) extends uvm_object;
   endfunction
 
   virtual function string convert2string;
-    string s;
-    `ifdef UVM_USE_P_FORMAT
-      $sformat(s, "built-in pair : %p, %p", first, second);
-    `else
-      $swrite( s, "built-in pair : ", first, ", ", second);
-    `endif
-    return s;
+    return $sformatf("built-in pair : %p, %p", first, second);
   endfunction
 
   virtual function bit do_compare(uvm_object rhs, uvm_comparer comparer);

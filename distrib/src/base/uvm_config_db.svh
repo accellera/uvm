@@ -120,8 +120,8 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   //
   // Create a new or update an existing configuration setting for
   // ~field_name~ in ~inst_name~ from ~cntxt~.
-  // The setting is made at ~cntxt~, with the full name of ~cntxt~ 
-  // added to the ~inst_name~. If ~cntxt~ is null then ~inst_name~
+  // The setting is made at ~cntxt~, with the full scope of the set 
+  // being {~cntxt~,".",~inst_name~}. If ~cntxt~ is null then ~inst_name~
   // provides the complete scope information of the setting.
   // ~field_name~ is the target field. Both ~inst_name~ and ~field_name~
   // may be glob style or regular expression style expressions.
@@ -156,7 +156,9 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     uvm_phase curr_phase;
     uvm_resource#(T) r;
     bit exists;
-    
+    string lookup;
+    uvm_pool#(string,uvm_resource#(T)) pool;
+     
     //take care of random stability during allocation
     process p = process::self();
     string rstate = p.get_randstate();
@@ -170,21 +172,30 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     else if(cntxt.get_full_name() != "") 
       inst_name = {cntxt.get_full_name(), ".", inst_name};
 
-    r = m_get_resource_match(cntxt, field_name, inst_name);
-   
-    if(r == null) begin 
-      uvm_pool#(string, uvm_resource#(T)) pool = new;
-      string key = {inst_name,field_name};
-      m_rsc[cntxt] = pool;
-      r = new(field_name, inst_name);
-      pool.add(key, r);
+    if(!m_rsc.exists(cntxt)) begin
+      m_rsc[cntxt] = new;
+    end
+    pool = m_rsc[cntxt];
+
+    // Insert the token in the middle to prevent cache
+    // oddities like i=foobar,f=xyz and i=foo,f=barxyz.
+    // Can't just use '.', because '.' isn't illegal
+    // in field names
+    lookup = {inst_name, "__M_UVM__", field_name};
+
+    if(!pool.exists(lookup)) begin
+       r = new(field_name, inst_name);
+       pool.add(lookup, r);
     end
     else begin
+      r = pool.get(lookup);
       exists = 1;
     end
-
+      
     if(curr_phase != null && curr_phase.get_name() == "build")
-      r.precedence -= cntxt.get_depth();
+      r.precedence = uvm_resource_base::default_precedence - (cntxt.get_depth());
+    else
+      r.precedence = uvm_resource_base::default_precedence;
 
     r.write(value, cntxt);
 
@@ -282,22 +293,6 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
   endtask
 
 
-  static function uvm_resource#(T) m_get_resource_match(uvm_component cntxt, 
-        string field_name, string inst_name);
-    uvm_pool#(string,uvm_resource#(T)) pool;
-    string lookup;
-
-    if(!m_rsc.exists(cntxt)) begin
-      return null;
-    end
-
-    lookup = {inst_name,field_name};
-    pool = m_rsc[cntxt];
-
-    if(!pool.exists(lookup)) return null;
-      
-    return pool.get(lookup);
-  endfunction
 endclass
 
 //----------------------------------------------------------------------

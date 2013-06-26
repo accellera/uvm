@@ -221,6 +221,7 @@ module top;
 initial
 begin
    uvm_root top;
+   
    top = uvm_root::get();
 
    top.finish_on_completion = 0;

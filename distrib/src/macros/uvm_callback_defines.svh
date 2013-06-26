@@ -220,6 +220,10 @@
 //|   // Returns 0 if drop happens and 1 otherwise
 //|   `uvm_do_callbacks_exit_on(mycomp, mycb, extobj, drop_trans(this,trans), 1)
 //| endfunction
+//
+// Because this macro calls ~return~, its use is restricted to implementations
+// of functions that return a ~bit~ value, as in the above example.
+//
 //-----------------------------------------------------------------------------
 
 
@@ -243,6 +247,9 @@
 //|  // Exit if a callback returns a 1
 //|  `uvm_do_callbacks_exit_on(mycomp, mycb, seqr, drop_trans(seqr,trans), 1)
 //| ...
+//
+// Because this macro calls ~return~, its use is restricted to implementations
+// of functions that return a ~bit~ value, as in the above example.
 //-----------------------------------------------------------------------------
 
 `define uvm_do_obj_callbacks_exit_on(T,CB,OBJ,METHOD,VAL) \
@@ -261,7 +268,9 @@
    end
 
 
-// callback trace macros can be turned on via +define+UVM_CB_TRACE_ON
+// The +define+UVM_CB_TRACE_ON setting will instrument the uvm library to emit 
+// messages with message id UVMCB_TRC and UVM_NONE verbosity 
+// notifing add,delete and execution of uvm callbacks. The instrumentation is off by default.
 
 `ifdef UVM_CB_TRACE_ON
 

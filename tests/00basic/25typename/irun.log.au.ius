@@ -1,0 +1,1 @@
+SCOPE::foo#(SCOPE::bar#(SCOPE::xyz),88) extends SCOPE::bar#(SCOPE::xyz)

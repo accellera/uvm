@@ -23,22 +23,9 @@
 `ifndef UVM_MACROS_SVH
 `define UVM_MACROS_SVH
 
-
-// Default settings
-`define _protected protected   
-`define UVM_USE_FPC
-`define UVM_USE_P_FORMAT
-//`define UVM_USE_FILE_LINE
-`define UVM_DA_TO_QUEUE(Q,DA) Q=DA;
-`define _local local
-`define uvm_delay(TIME) #(TIME);
-`define UVM_USE_TYPENAME
 //
 // Any vendor specific defines go here.
 //
-`ifdef VCS
-`endif
-
 
 `ifdef MODEL_TECH
 `ifndef QUESTA
@@ -46,42 +33,30 @@
 `endif
 `endif
 
-`ifdef QUESTA
-`define UVM_EXTRA_TYPENAME_ARG
+`ifndef QUESTA
+`define uvm_typename(X) $typename(X)
+`else
+`define uvm_typename(X) $typename(X,39)
+`endif
+
+`ifdef VCS
+`ifndef UVM_DISABLE_RESOURCE_CONVERTER
+//UVM_USE_RESOURCE_CONVERTER enables UVM-1.1d to print resources output to match uvm-1.1c. VCS2012.09-SP1 or later does not need resource_converter object, disbale by using +define+UVM_DISABLE_RESOURCE_CONVERTER
+`define UVM_USE_RESOURCE_CONVERTER
+`endif
 `endif
 
 `ifdef INCA
-  `ifndef INCA_PROTECTED_CTOR
-    `undef _protected
-    `define _protected 
-  `endif
-  `ifndef INCA_LOCAL_CTOR
-    `undef _local
-    `define _local 
-  `endif
-  `ifndef INCA_UVM_USE_P_FORMAT
-    `undef  UVM_USE_P_FORMAT
-  `endif
-//  `ifndef INCA_UVM_USE_FILE_LINE
-//    `undef  UVM_USE_FILE_LINE
-//  `endif
-  `ifndef INCA_UVM_USE_FPC
-    `undef UVM_USE_FPC
-  `endif
   `define UVM_USE_PROCESS_CONTAINER
-  `undef  UVM_DA_TO_QUEUE
-  `define UVM_DA_TO_QUEUE(Q,DA)  foreach (DA[idx]) Q.push_back(DA[idx]);
-  `ifndef INCA_USE_TYPENAME
-    `undef UVM_USE_TYPENAME
-  `endif
 `endif
 
 //
 // Deprecation Control Macros
 //
 `ifdef UVM_NO_DEPRECATED
-  `define UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
 `endif
+
+`define uvm_delay(TIME) #(TIME);
 
 
 `include "macros/uvm_version_defines.svh"

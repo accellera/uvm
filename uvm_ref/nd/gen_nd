@@ -60,6 +60,13 @@ rm -rf $outdir
 
 mkdir -p $outdir/images
 
+# copy source tree into html dir so links to the source resolve
+cp        -r ../../distrib/src $outdir/src
+mkdir     $outdir/src/overviews
+cp        ../*.txt $outdir/src/overviews
+mkdir     $outdir/src/overviews/relnotes
+cp        ../relnotes/*.txt $outdir/src/overviews/relnotes
+
 # replace UVM_ROOT in UVM_Menu.txt with current working dir to satisfy ND
 # without requiring the source-controlled Menu file to be overwritten
 # can get generated where ever checkedout
@@ -78,8 +85,7 @@ cp    $nd_dir/logo.html $outdir
 perl $nd_dir/NaturalDocs \
   -do \
   -ro \
-  -i ../../distrib/src \
-  -i .. \
+  -i $outdir/src \
   -img ./Images \
   -p ./Proj \
   -o FramedHTML $outdir
