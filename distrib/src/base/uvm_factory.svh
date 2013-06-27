@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010-2011 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -273,8 +274,12 @@ class uvm_factory;
       uvm_object_wrapper find_override_by_name (string requested_type_name,
                                                 string full_inst_path);
 
+  // Function: find_wrapper_by_name
+  //
+  // This method returns the <uvm_object_wrapper> associated with a given
+  // ~type_name~.  
   extern
-    function uvm_object_wrapper find_by_name            (string type_name);
+    function uvm_object_wrapper find_wrapper_by_name            (string type_name);
 
   // Function: print
   //
@@ -1044,7 +1049,6 @@ function bit uvm_factory::m_has_wildcard(string nm);
   return 0;
 endfunction
 
-
 // create_object_by_name
 // ---------------------
 
@@ -1168,15 +1172,15 @@ endfunction
 
 
 
-// find_by_name
+// find_wrapper_by_name
 // ------------
 
-function uvm_object_wrapper uvm_factory::find_by_name(string type_name);
+function uvm_object_wrapper uvm_factory::find_wrapper_by_name(string type_name);
 
   if (m_type_names.exists(type_name))
     return m_type_names[type_name];
 
-  uvm_report_warning("UnknownTypeName", {"find_by_name: Type name '",type_name,
+  uvm_report_warning("UnknownTypeName", {"find_wrapper_by_name: Type name '",type_name,
       "' not registered with the factory."}, UVM_NONE);
   
 endfunction
