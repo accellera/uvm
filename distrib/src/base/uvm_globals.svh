@@ -404,3 +404,73 @@ function automatic void uvm_split_string (string str, byte sep, ref string value
   end
 endfunction
 
+// Class: uvm_enum_wrapper
+
+// The ~uvm_enum_wrapper#(T)~ class is a utility mechanism provided
+// as a convenience to the end user.  It provides a ~from_name~
+// method which is the logical inverse of the System Verilog ~name~ 
+// method which is built into all enumerations.
+
+class uvm_enum_wrapper#(type T=uvm_active_passive_enum);
+
+    protected static T map[string];
+
+    // Function: from_name
+    // Attempts to convert a string ~name~ to an enumerated value.
+    //
+    // If the conversion is successful, the method will return
+    // '1', otherwise '0'.
+    //
+    // Note that the ~name~ passed in to the method must exactly
+    // match the value which would be produced by ~enum::name~, and
+    // is case sensitive.
+    //
+    // For example:
+    //| typedef uvm_enum_wrapper#(uvm_radix_enum) radix_wrapper;
+    //| uvm_radix_enum r_v;
+    //|
+    //| // The following would return '0', as "foo" isn't a value
+    //| // in uvm_radix_enum:
+    //| radix_wrapper::from_name("foo", r_v);
+    //|
+    //| // The following would return '0', as "uvm_bin" isn't a value
+    //| // in uvm_radix_enum (although the upper case "UVM_BIN" is):
+    //| radix_wrapper::from_name("uvm_bin", r_v);
+    //|
+    //| // The following would return '1', and r_v would be set to
+    //| // the value of UVM_BIN
+    //| radix_wrapper::from_name("UVM_BIN", r_v);
+    //
+    static function bit from_name(string name, ref T value);
+        if (map.size() == 0)
+          m_init_map();
+
+        if (map.exists(name)) begin
+            value = map[name];
+            return 1;
+        end
+        else begin
+            return 0;
+        end
+    endfunction : from_name
+
+    // Function- m_init_map
+    // Initializes the name map, only needs to be performed once
+    protected static function void m_init_map();
+        T e = e.first();
+        do 
+          begin
+            map[e.name()] = e;
+            e = e.next();
+          end
+        while (e != e.first());
+    endfunction : m_init_map
+
+    // Function- new
+    // Prevents accidental instantiations
+    protected function new();
+    endfunction : new
+
+endclass : uvm_enum_wrapper
+
+

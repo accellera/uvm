@@ -2,6 +2,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010-2011 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -921,6 +922,22 @@ endfunction \
               __m_uvm_status_container.status = 1; \
             end \
           end \
+        end \
+      UVM_SETSTR: \
+        begin \
+          __m_uvm_status_container.scope.set_arg(`"ARG`"); \
+          if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \
+            if((FLAG)&UVM_READONLY) begin \
+              uvm_report_warning("RDONLY", $sformatf("Readonly argument match %s is ignored",  \
+                 __m_uvm_status_container.get_full_scope_arg()), UVM_NONE); \
+            end \
+            else begin \
+              if (__m_uvm_status_container.print_matches) \
+                  uvm_report_info("STRMTC", {"set_str()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg()}, UVM_LOW); \
+              void'(uvm_enum_wrapper#(T)::from_name(uvm_object::__m_uvm_status_container.stringv, ARG)); \
+              __m_uvm_status_container.status = 1; \
+            end \
+          end \
       end \
     endcase \
   end
@@ -1494,6 +1511,31 @@ endfunction \
                 if (__m_uvm_status_container.print_matches) \
                   uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg()}, UVM_LOW); \
                 ARG[i] =  T'(uvm_object::__m_uvm_status_container.bitstream); \
+                __m_uvm_status_container.status = 1; \
+              end \
+            end \
+          end \
+        end \
+      UVM_SETSTR: \
+        begin \
+          __m_uvm_status_container.scope.set_arg(`"ARG`"); \
+          if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \
+            if((FLAG)&UVM_READONLY) begin \
+              uvm_report_warning("RDONLY", $sformatf("Readonly argument match %s is ignored",  \
+                 __m_uvm_status_container.get_full_scope_arg()), UVM_NONE); \
+            end \
+            else begin \
+              uvm_report_warning("RDONLY", {__m_uvm_status_container.get_full_scope_arg(), \
+              ": static arrays cannot be resized via configuraton."}, UVM_NONE); \
+            end \
+          end \
+          else if(!((FLAG)&UVM_READONLY)) begin \
+            foreach(ARG[i]) begin \
+              __m_uvm_status_container.scope.set_arg_element(`"ARG`",i); \
+              if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \
+                if (__m_uvm_status_container.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg()}, UVM_LOW); \
+                void'(uvm_enum_wrapper#(T)::from_name(uvm_object::__m_uvm_status_container.stringv, ARG[i])); \
                 __m_uvm_status_container.status = 1; \
               end \
             end \
@@ -2159,6 +2201,38 @@ endfunction \
                 if (__m_uvm_status_container.print_matches) \
                   uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg()}, UVM_LOW); \
                 ARG[index__] =  T'(uvm_object::__m_uvm_status_container.bitstream); \
+                __m_uvm_status_container.status = 1; \
+              end \
+            end \
+          end \
+        end \
+      UVM_SETSTR: \
+        begin \
+          if(!((FLAG)&UVM_READONLY)) begin \
+            bit wildcard_index__; \
+            int index__; \
+            __m_uvm_status_container.scope.set_arg(`"ARG`"); \
+            index__ = uvm_get_array_index_int(str__, wildcard_index__); \
+            if(uvm_is_array(str__)  && (index__ != -1)) begin\
+              if(wildcard_index__) begin \
+                for(index__=0; index__<ARG.size(); ++index__) begin \
+                  if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$sformatf("[%0d]", index__)})) begin \
+                    if (__m_uvm_status_container.print_matches) \
+                      uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg(), $sformatf("[%0d]",index__)}, UVM_LOW); \
+                    void'(uvm_enum_wrapper#(T)::from_name(uvm_object::__m_uvm_status_container.stringv, ARG[index__])); \
+                    __m_uvm_status_container.status = 1; \
+                  end \
+                end \
+              end \
+              else if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$sformatf("[%0d]", index__)})) begin \
+                if(index__+1 > ARG.size()) begin \
+                  int sz = index__; \
+                  string tmp__; \
+                  `M_UVM_``TYPE``_RESIZE(ARG,tmp__) \
+                end \
+                if (__m_uvm_status_container.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg()}, UVM_LOW); \
+                void'(uvm_enum_wrapper#(T)::from_name(uvm_object::__m_uvm_status_container.stringv, ARG[index__])); \
                 __m_uvm_status_container.status = 1; \
               end \
             end \
