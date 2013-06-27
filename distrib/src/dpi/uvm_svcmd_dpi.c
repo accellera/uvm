@@ -34,6 +34,8 @@ extern const char *uvm_dpi_get_next_arg_c (int init=0)
 	s_vpi_vlog_info info;
 	static char*** argv_stack=NULL;
 	static int argv_stack_ptr = 0; // stack ptr
+	static int argc_idx;
+	static int argc_length;
 
 	if(init==1)
 	{
@@ -44,13 +46,18 @@ extern const char *uvm_dpi_get_next_arg_c (int init=0)
 		vpi_get_vlog_info(&info);
 		argv_stack[0] = info.argv;
 		argv_stack_ptr=0;
+		argc_length=info.argc;
+		argc_idx=0;
 	}
 
 	// until we have returned a value
 	while (1)
 	{
 		// at end of current array?, pop stack
-		if (*argv_stack[argv_stack_ptr]  == NULL)
+		if (
+				((argv_stack_ptr!=0) && (*argv_stack[argv_stack_ptr]  == NULL)) // args from argument files are in an array terminated with a NULL entry
+				|| ((argv_stack_ptr==0) && (argc_idx>=argc_length)) // args from the cmdline have a length of info.argc
+				)
 		{
 			// stack empty?
 			if (argv_stack_ptr == 0)
@@ -58,6 +65,7 @@ extern const char *uvm_dpi_get_next_arg_c (int init=0)
 				// reset stack for next time
 				argv_stack = NULL;
 				argv_stack_ptr = 0;
+				argc_idx=0;
 				// return completion
 				return NULL;
 			}
@@ -73,6 +81,11 @@ extern const char *uvm_dpi_get_next_arg_c (int init=0)
 					0==strcmp(*argv_stack[argv_stack_ptr], "-F") )
 			{
 				char *r = *argv_stack[argv_stack_ptr];
+
+				if(argv_stack_ptr==0) {
+					argc_idx+=2; // skip over "-f" + "arg"
+				}
+
 				// bump past -f at current level
 				++argv_stack[argv_stack_ptr];
 				// push -f array argument onto stack
@@ -81,11 +94,15 @@ extern const char *uvm_dpi_get_next_arg_c (int init=0)
 				++argv_stack[argv_stack_ptr];
 				// update stack pointer
 				++argv_stack_ptr;
+
 				assert(argv_stack_ptr < ARGV_STACK_PTR_SIZE);
 				return r;
 			}
 			else
 			{
+				if(argv_stack_ptr==0) {
+					argc_idx++;
+				}
 				// return current and move to next
 				char *r = *argv_stack[argv_stack_ptr];
 				++argv_stack[argv_stack_ptr];
