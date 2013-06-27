@@ -1155,10 +1155,10 @@ virtual class uvm_component extends uvm_report_object;
   // this level of hierarchy or below. In typical usage, this method is
   // equivalent to:
   //
-  //|  factory.set_inst_override_by_type({get_full_name(),".",
-  //|                                     relative_inst_path},
-  //|                                     original_type,
-  //|                                     override_type);
+  //|  factory.set_inst_override_by_type( original_type,
+  //|                                     override_type,
+  //|                                     {get_full_name(),".",
+  //|                                      relative_inst_path});
   //
   // The ~relative_inst_path~ is relative to this component and may include
   // wildcards. The ~original_type~ represents the type that is being overridden.
@@ -1231,10 +1231,11 @@ virtual class uvm_component extends uvm_report_object;
   // method registers a factory override for components created at this level
   // of hierarchy or below. In typical usage, this method is equivalent to:
   //
-  //|  factory.set_inst_override_by_name({get_full_name(),".",
-  //|                                     relative_inst_path},
-  //|                                      original_type_name,
-  //|                                     override_type_name);
+  //|  factory.set_inst_override_by_name(original_type_name,
+  //|                                    override_type_name,
+  //|                                    {get_full_name(),".",
+  //|                                     relative_inst_path}
+  //|                                     );
   //
   // The ~relative_inst_path~ is relative to this component and may include
   // wildcards. The ~original_type_name~ typically refers to a preregistered type
