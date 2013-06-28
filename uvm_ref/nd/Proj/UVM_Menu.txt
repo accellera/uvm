@@ -271,6 +271,10 @@ Group: Globals  {
 
    File: Types, Enums, Policies       (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_object_globals.svh)
    File: Globals                      (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_globals.svh)
+   Group: Data Access {
+          File: Overview              (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/dap.txt)
+          File: Read To Lock          (no auto-title, UVM_ROOT/distrib/docs/html/src/dap/uvm_r2l_dap.svh)
+          }  Group: Data Access
    }  # Group: Globals
 
 Group: Index  {

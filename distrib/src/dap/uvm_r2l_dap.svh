@@ -21,25 +21,14 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
-// Title: Data Access Policies
-//
-// The UVM provides the following objects as utility classes for applying
-// common policies to data access (such as 'locking' data, or ensuring
-// that it remains constant after being read).
-//
-// This is not intended to be a comprehensive use of all Data Access policies,
-// and the user is encouraged to write there own, and potentially contribute them
-// to the community.
-//
+// Title: Read-To-Lock Policy
 
-// Group: Read-To-Lock
+// The 'Read-To-Lock' Data Access Policy allows for any number of writes,
+// until the value is eventually read.  Once read, it is illegal to write
+// the value without resetting the policy.
 
 // Class: uvm_r2l_dap
-// Provides a "lock-on-read" Data Access Policy.
-//
-// The ~uvm_r2l_dap#(T)~ class allows for any number of writes
-// to the internally stored ~T~, up until the first read.  After
-// the first read, it becomes illegal to write a new value.
+// Provides a 'Read-To-Lock' Data Access Policy.
 //
 // If ~uvm_r2l_dap~ is parameterized with ~string~ or ~uvm_object~,
 // then enhanced reporting/recording are available.  For all other
