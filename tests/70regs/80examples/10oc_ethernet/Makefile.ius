@@ -23,7 +23,7 @@ OC_DIR = ../../common/oc_ethernet_rtl
 
 include $(UVM_HOME)/examples/Makefile.ius
 
-all: uvm_reg_mem_built_in_seq uvm_reg_mem_hdl_paths_seq
+all: uvm_reg_mem_built_in_seq uvm_reg_mem_hdl_paths_seq uvm_reg_access_seq uvm_mem_access_seq
 
 
 IRUN=$(IUS) -define SINGLE_RAM_VARIABLE -define RAM128x64 -define USE_SLICE_API \
