@@ -97,49 +97,13 @@ class test extends uvm_component;
                     $sformatf("Expected error on 'set(4)'!"))
       end
 
-      // No errors expected...
+      // Should error...
       $cast(idap2, idap.clone());
 
-      // Shouldn't work...
-      if (idap2.try_set(5)) begin
-         failed = 1;
-         `uvm_error("ERR_E",
-                    $sformatf("set(5) shouldn't work on idap2!"))
-      end
-
-      // Would error, so we're catching it...
-      idap2.copy(idap);
       if (ctchr.seen != 2) begin
          failed = 1;
-         `uvm_error("ERR_F",
-                    $sformatf("Expected error on 'copy(idap)'"))
-      end
-
-      idap = uvm_g2l_dap#(int)::type_id::create("idap", this);
-      idap2 = uvm_g2l_dap#(int)::type_id::create("idap2", this);
-      idap.set(6);
-      idap2.copy(idap);
-      
-      // The copy should have locked the idap...
-      if (idap.try_set(7)) begin
-         failed = 1;
-         `uvm_error("ERR_G",
-                    $sformatf("try_set(7) shouldn't work on idap!"))
-      end
-
-      // But idap2 should be unlocked...
-      if (!idap2.try_set(8)) begin
-         failed = 1;
-         `uvm_error("ERR_H",
-                    $sformatf("try_set(8) should have worked on idap2!"))
-      end
-
-      // copy it again (no error)
-      idap2.copy(idap);
-      if (idap2.get() != 6) begin
-         failed = 1;
-         `uvm_error("ERR_I",
-                    $sformatf("get() should have been '6', not'%0d'!", idap2.get()))
+         `uvm_error("ERR_E",
+                    $sformatf("Expected error on 'clone'!"))
       end
           
       if (failed)
