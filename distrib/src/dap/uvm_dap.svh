@@ -1,9 +1,9 @@
-//
-//----------------------------------------------------------------------
+// 
+//------------------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
-//   Copyright 2007-2010 Cadence Design Systems, Inc. 
+//   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010-2011 Synopsys, Inc.
-//   Copyright 2013      NVIDIA, Corporation
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -19,24 +19,14 @@
 //   CONDITIONS OF ANY KIND, either express or implied.  See
 //   the License for the specific language governing
 //   permissions and limitations under the License.
-//----------------------------------------------------------------------
-`ifndef UVM_PKG_SV
-`define UVM_PKG_SV
+//------------------------------------------------------------------------------
 
-`include "uvm_macros.svh"
+`ifndef UVM_DAP_SVH
+ `define UVM_DAP_SVH
 
-package uvm_pkg;
+// Set/Get DAPS
+ `include "dap/uvm_set_get_dap_base.svh"
+ `include "dap/uvm_g2l_dap.svh"
 
-  `include "dpi/uvm_dpi.svh"
-  `include "base/uvm_base.svh"
-  `include "dap/uvm_dap.svh"
-  `include "tlm1/uvm_tlm.svh"
-  `include "comps/uvm_comps.svh"
-  `include "seq/uvm_seq.svh"
-  `include "tlm2/uvm_tlm2.svh"
-  `include "reg/uvm_reg_model.svh"
-
-endpackage
-
-`endif
+`endif // UVM_DAP_SVH
 
