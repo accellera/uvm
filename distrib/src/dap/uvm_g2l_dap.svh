@@ -62,7 +62,7 @@ class uvm_g2l_dap#(type T=int) extends uvm_set_get_dap_base#(T);
    // already been retrieved via a call to ~get~.
    virtual function void set(T value);
       if (m_locked)
-        `uvm_error("UVM/G2L_DAP/GAS",
+        `uvm_error("UVM/G2L_DAP/SAG",
                    $sformatf("Attempt to set new value on '%s', but the data access policy forbids setting after a get!",
                              get_full_name()))
       else begin
@@ -104,48 +104,33 @@ class uvm_g2l_dap#(type T=int) extends uvm_set_get_dap_base#(T);
       value = get();
       return 1;
    endfunction : try_get
-   
-   // Group: Copy and Clone
-   //
-   // While the ~uvm_g2l_dap~ implements the standard
-   // UVM ~copy~ and ~clone~ methods for <uvm_object>s, 
-   // these methods are ~not~ allowed to violate the access 
-   // policy.  
-   //
-   // The rules for each method are:
-   // COPY - ~copy~ is treated as a 'set' on the ~destination~
-   //        DAP, and a 'get' on the ~source~ DAP.  If the 
-   //        ~destination~ is 'locked' prior to the ~copy~, then
-   //        ~copy~ will report an error.  If 'set' is called
-   //        on the ~source~ after it has been copied, then
-   //        the 'set' will report an error.
-   //
-   // CLONE - Like ~copy~, ~clone~ is treated as a 'set' on the
-   //         ~destination~, and a 'get' on the ~source~ DAP.
-   //         Since the ~clone~ is creating a new DAP, there is
-   //         no chance of the 'set' producing an error, however
-   //         the ~source~ is still considered 'locked'.
-   //
 
-   // Function- do_copy
-   // Copies values from ~rhs~ into ~this~
+   // Group: Introspection
    //
+   // The ~uvm_g2l_dap~ can not support the standard UVM
+   // instrumentation methods (~copy~, ~clone~, ~pack~ and
+   // ~unpack~), due to the fact that they would potentially 
+   // violate the access policy.
+   //  
+   // A call to any of these methods will result in an error.
+
    virtual function void do_copy(uvm_object rhs);
-      this_type _rhs;
-      $cast(_rhs, rhs);
-      if (m_locked)
-        `uvm_error("UVM/G2L_DAP/CAS",
-                   $sformatf("Attempt to copy new value to '%s', but the data access policy forbids setting after a get!",
-                             get_full_name()))
-
-      // Copy the locked state before we (potentially) change it
-      if (_rhs.m_locked)
-        m_locked = 1;
-
-      // Calling get will lock the source
-      m_value = _rhs.get();
+      `uvm_error("UVM/G2L_DAP/CPY",
+                 "'copy()' is not supported for 'uvm_g2l_dap#(T)'")
    endfunction : do_copy
 
+   virtual function void do_pack(uvm_packer packer);
+      `uvm_error("UVM/G2L_DAP/PCK",
+                 "'pack()' is not supported for 'uvm_g2l_dap#(T)'")
+   endfunction : do_pack
+
+   virtual function void do_unpack(uvm_packer packer);
+      `uvm_error("UVM/G2L_DAP/UPK",
+                 "'unpack()' is not supported for 'uvm_g2l_dap#(T)'")
+   endfunction : do_unpack
+
+   // Group- Reporting
+   
    // Function- convert2string
    virtual function string convert2string();
       if (m_locked)
