@@ -61,7 +61,7 @@ class myseq extends uvm_sequence;
     int c;
     myseqr seqr;
 
-    if (starting_phase!=null) starting_phase.raise_objection(this);
+    if ((get_starting_phase())!=null) (get_starting_phase()).raise_objection(this);
 
     start_cnt++;
 
@@ -76,11 +76,11 @@ class myseq extends uvm_sequence;
     c = w.array[$time];
     w.array[$time] = c+1;
    
-    `uvm_info("INBODY", {seqr.get_name()," Starting myseq in phase ",starting_phase.get_name()}, UVM_NONE)
+    `uvm_info("INBODY", {seqr.get_name()," Starting myseq in phase ",(get_starting_phase()).get_name()}, UVM_NONE)
     #10;
     `uvm_info("INBODY", {seqr.get_name()," Ending myseq!!!"}, UVM_NONE)
     end_cnt++;
-    if (starting_phase!=null) starting_phase.drop_objection(this);
+    if ((get_starting_phase())!=null) (get_starting_phase()).drop_objection(this);
 
   endtask
 

@@ -132,7 +132,7 @@ program top;
    
         task pre_start();
             called.push_back("top.pre_start()");
-            if (starting_phase != null) starting_phase.raise_objection(this);
+            if ((get_starting_phase()) != null) (get_starting_phase()).raise_objection(this);
         endtask
    
         task pre_body();
@@ -163,7 +163,7 @@ program top;
    
         task post_start();
             called.push_back("top.post_start()");
-            if (starting_phase != null) starting_phase.drop_objection(this);
+            if ((get_starting_phase()) != null) (get_starting_phase()).drop_objection(this);
         endtask
    
     endclass

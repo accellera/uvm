@@ -567,7 +567,8 @@ function void uvm_sequence_library::m_get_config();
 
   uvm_sequence_library_cfg cfg;
   string phase_name;
-
+  uvm_phase starting_phase = get_starting_phase();
+   
   if (starting_phase != null) begin
     phase_name = {starting_phase.get_name(),"_phase"};
   end
@@ -634,8 +635,8 @@ endfunction
 // ----
 
 task uvm_sequence_library::body();
-
   uvm_object_wrapper wrap;
+  uvm_phase starting_phase = get_starting_phase();
 
   if (m_sequencer == null) begin
     `uvm_fatal("SEQLIB/VIRT_SEQ", {"Sequence library 'm_sequencer' handle is null; ",

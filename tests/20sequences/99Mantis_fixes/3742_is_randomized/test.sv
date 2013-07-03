@@ -38,9 +38,9 @@ class subseq extends uvm_sequence;
    endfunction
 
    task body();
-      if (starting_phase != null) begin
+      if ((get_starting_phase()) != null) begin
          $write("Checking default phase...\n");
-         starting_phase.raise_objection(this);
+         (get_starting_phase()).raise_objection(this);
       end
 
       $write("Executing subseq...\n");
@@ -50,9 +50,9 @@ class subseq extends uvm_sequence;
 
       #10;
 
-      if (starting_phase != null) begin
+      if ((get_starting_phase()) != null) begin
          $write("Checking default phase...\n");
-         starting_phase.drop_objection(this);
+         (get_starting_phase()).drop_objection(this);
       end
    endtask
 endclass

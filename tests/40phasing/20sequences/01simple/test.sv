@@ -34,12 +34,12 @@ class myseq extends uvm_sequence;
   
   task body;
     start_cnt++;
-    if (starting_phase!=null) starting_phase.raise_objection(this);
+    if ((get_starting_phase())!=null) (get_starting_phase()).raise_objection(this);
     `uvm_info("INBODY", "Starting myseq!!!", UVM_NONE)
     #10;
     `uvm_info("INBODY", "Ending myseq!!!", UVM_NONE)
     end_cnt++;
-    if (starting_phase!=null) starting_phase.drop_objection(this);
+    if ((get_starting_phase())!=null) (get_starting_phase()).drop_objection(this);
   endtask
 
   function new(string name="myseq");

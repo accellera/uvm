@@ -176,6 +176,8 @@ class uvm_sequence_base extends uvm_sequence_item;
     super.new(name);
     m_sequence_state = CREATED;
     m_wait_for_grant_semaphore = 0;
+    m_init_starting_phase(1);
+     
   endfunction
 
 
@@ -241,7 +243,8 @@ class uvm_sequence_base extends uvm_sequence_item;
                       uvm_sequence_base parent_sequence = null,
                       int this_priority = -1,
                       bit call_pre_post = 1);
-
+    uvm_phase old_starting_phase;
+     
     set_item_context(parent_sequence, sequencer);
 
     if (!(m_sequence_state inside {CREATED,STOPPED,FINISHED})) begin
@@ -287,6 +290,9 @@ class uvm_sequence_base extends uvm_sequence_item;
       void'(m_sequencer.m_register_sequence(this));
     end
 
+    // Rename the starting_phase_dap...
+    m_init_starting_phase(0);
+     
     // Change the state to PRE_START, do this before the fork so that
     // the "if (!(m_sequence_state inside {...}" works
     m_sequence_state = PRE_START;
@@ -352,6 +358,13 @@ class uvm_sequence_base extends uvm_sequence_item;
     if ((m_parent_sequence != null) && (m_parent_sequence.children_array.exists(this))) begin
        m_parent_sequence.children_array.delete(this);
     end
+
+    // Re-create the starting_phase DAP, allowing new starting_phase
+    // values, but keep the current value.
+    old_starting_phase = get_starting_phase();
+    m_init_starting_phase(1);
+    set_starting_phase(old_starting_phase);
+     
   endtask
 
 
@@ -455,8 +468,42 @@ class uvm_sequence_base extends uvm_sequence_item;
     return;
   endtask
 
+  // Group: Run-Time Phasing
 
-  // Variable: starting_phase
+  // Starting Phase DAP
+  local uvm_g2l_dap#(uvm_phase) m_starting_phase_dap; 
+
+  // Function- m_init_starting_phase
+  function void m_init_starting_phase(bit create);
+     string name = {get_full_name(), ".starting_phase_dap"};
+     
+     if (create) 
+       m_starting_phase_dap = uvm_g2l_dap#(uvm_phase)::type_id::create(name,
+                                                                       get_sequencer());
+     else
+       m_starting_phase_dap.set_name(name);
+  endfunction : m_init_starting_phase
+   
+  // Function: set_starting_phase
+  // Sets the phase in which this sequence was started.
+  //
+  // The ~starting_phase~ is set automatically when the sequence is
+  // started as the ~default_sequence~ on a sequencer.  For more
+  // information about ~default_sequence~,
+  // see <uvm_sequencer_base::start_phase_sequence>.
+  //
+  // Internally, the <uvm_sequence_base> uses a <uvm_g2l_dap> to 
+  // protect the ~starting_phase~ reference from being modified after
+  // after the reference has been read.  Once the sequence has ended 
+  // its execution (either via natural termination, or being killed),
+  // then the ~starting_phase~ reference can be modified again.
+  //
+  function void set_starting_phase(uvm_phase phase);
+     m_starting_phase_dap.set(phase);
+  endfunction : set_starting_phase
+
+  // Function: get_starting_phase
+  // Returns the 'starting' phase.
   //
   // If non-null, specifies the phase in which this sequence was started.
   // The ~starting_phase~ is set automatically when this sequence is 
@@ -464,6 +511,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // <uvm_sequencer_base::start_phase_sequence>.
   //
   //| virtual task user_sequence::body();
+  //|    uvm_phase starting_phase = get_starting_phase();
   //|    if (starting_phase != null)
   //|       starting_phase.raise_objection(this,"user_seq not finished");
   //|    ...
@@ -471,7 +519,9 @@ class uvm_sequence_base extends uvm_sequence_item;
   //|       starting_phase.drop_objection(this,"user_seq finished");
   //| endtask
   //
-  uvm_phase starting_phase;
+  function uvm_phase get_starting_phase();
+     return m_starting_phase_dap.get();
+  endfunction : get_starting_phase
 
   //------------------------
   // Group: Sequence Control

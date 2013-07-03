@@ -60,7 +60,7 @@ class myseq extends uvm_sequence #(uvm_sequence_item);
     int c;
     myseqr seqr;
 
-    if (starting_phase!=null) starting_phase.raise_objection(this);
+    if ((get_starting_phase())!=null) (get_starting_phase()).raise_objection(this);
     $cast(seqr, m_sequencer);
     if(seqr_seqs.exists(seqr))
       w = seqr_seqs[seqr];
@@ -75,7 +75,7 @@ class myseq extends uvm_sequence #(uvm_sequence_item);
     `uvm_info("INBODY", $sformatf("Starting %s !!!",get_name()), UVM_NONE)
     #(t);
     `uvm_info("INBODY", $sformatf("Ending %s !!!",get_name()), UVM_NONE)
-    if (starting_phase!=null) starting_phase.drop_objection(this);
+    if ((get_starting_phase())!=null) (get_starting_phase()).drop_objection(this);
 
   endtask
 

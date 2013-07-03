@@ -38,16 +38,16 @@ class test_pre_reset_seq extends my_seq;
   `uvm_object_utils(test_pre_reset_seq)
 
   task body;
-    starting_phase.raise_objection(this);
+    (get_starting_phase()).raise_objection(this);
     `uvm_info( "POWER_GOOD", "Waiting for power_good signal.", UVM_NONE);
     #10;
     `uvm_info( "POWER_GOOD", "Done power_good.", UVM_NONE);
-    starting_phase.drop_objection(this);
+    (get_starting_phase()).drop_objection(this);
   endtask : body
 
   function void do_kill();
-    if(starting_phase.phase_done.get_objection_count(this))
-      starting_phase.drop_objection(this);
+    if((get_starting_phase()).phase_done.get_objection_count(this))
+      (get_starting_phase()).drop_objection(this);
   endfunction
 
   function new(string name="test_pre_reset_seq");
@@ -60,15 +60,15 @@ endclass : test_pre_reset_seq
 class test_reset_seq extends my_seq;
   `uvm_object_utils(test_reset_seq)
   task body;
-    starting_phase.raise_objection(this);
+    (get_starting_phase()).raise_objection(this);
     `uvm_info( "HARD_RESET", "Wait for hard reset signal come and go", UVM_NONE);
     #15;
     `uvm_info( "HARD_RESET", "Done hard reset", UVM_NONE);
-    starting_phase.drop_objection(this);
+    (get_starting_phase()).drop_objection(this);
   endtask : body
   function void do_kill();
-    if(starting_phase.phase_done.get_objection_count(this))
-      starting_phase.drop_objection(this);
+    if((get_starting_phase()).phase_done.get_objection_count(this))
+      (get_starting_phase()).drop_objection(this);
   endfunction
 
   function new(string name="test_reset_seq");
@@ -82,15 +82,15 @@ class top_training_seq extends top_sequence;
   int unsigned delay  = $urandom_range( 20, 30);
   `uvm_object_utils(top_training_seq)
   task body;
-    starting_phase.raise_objection(this);
+    (get_starting_phase()).raise_objection(this);
     `uvm_info( "TRAINING", "Doing TOP interface training.", UVM_NONE);
     #(delay);
     `uvm_info( "TRAINING", "Done TOP training.", UVM_NONE);
-    starting_phase.drop_objection(this);
+    (get_starting_phase()).drop_objection(this);
   endtask : body
   function void do_kill();
-    if(starting_phase.phase_done.get_objection_count(this))
-      starting_phase.drop_objection(this);
+    if((get_starting_phase()).phase_done.get_objection_count(this))
+      (get_starting_phase()).drop_objection(this);
   endfunction
 
   function new(string name="top_training_seq");
@@ -103,15 +103,15 @@ class bot_training_seq extends bot_sequence;
   int unsigned delay  = $urandom_range( 20, 30);
   `uvm_object_utils(bot_training_seq)
   task body;
-    starting_phase.raise_objection(this);
+    (get_starting_phase()).raise_objection(this);
     `uvm_info( "TRAINING", "Doing BOTTOM interface training.", UVM_NONE);
     #(delay);
     `uvm_info( "TRAINING", "Done BOTTOM training.", UVM_NONE);
-    starting_phase.drop_objection(this);
+    (get_starting_phase()).drop_objection(this);
   endtask : body
   function void do_kill();
-    if(starting_phase.phase_done.get_objection_count(this))
-      starting_phase.drop_objection(this);
+    if((get_starting_phase()).phase_done.get_objection_count(this))
+      (get_starting_phase()).drop_objection(this);
   endfunction
 
   function new(string name="bot_training_seq");
@@ -125,7 +125,7 @@ class top_configure_seq extends top_sequence;
   int unsigned delay  = $urandom_range( 20, 30);
   `uvm_object_utils(top_configure_seq)
   task body;
-    starting_phase.raise_objection(this);
+    (get_starting_phase()).raise_objection(this);
     `uvm_info( "CONFIG", $sformatf("Random traffic from %s.",
                                  m_sequencer.get_name()), UVM_NONE);
     for( int i = 1; i< 5; i++) begin
@@ -135,11 +135,11 @@ class top_configure_seq extends top_sequence;
     end
     `uvm_info( "CONFIG", $sformatf("Done random traffic from %s.",
                                  m_sequencer.get_name()), UVM_NONE);
-    starting_phase.drop_objection(this);
+    (get_starting_phase()).drop_objection(this);
   endtask : body
   function void do_kill();
-    if(starting_phase.phase_done.get_objection_count(this))
-      starting_phase.drop_objection(this);
+    if((get_starting_phase()).phase_done.get_objection_count(this))
+      (get_starting_phase()).drop_objection(this);
   endfunction
 
   function new(string name="top_configure_seq");
@@ -153,7 +153,7 @@ class top_random_seq extends top_sequence;
   int unsigned delay = $urandom_range( 20, 30);
   `uvm_object_utils(top_random_seq)
   task body;
-    starting_phase.raise_objection(this);
+    (get_starting_phase()).raise_objection(this);
     `uvm_info( "MAIN", $sformatf("Random traffic from %s.",
                                  m_sequencer.get_name()), UVM_NONE);
     for( int i = 1; i< 6; i++) begin
@@ -163,11 +163,11 @@ class top_random_seq extends top_sequence;
     end
     `uvm_info( "MAIN", $sformatf("Done random traffic from %s.",
                                  m_sequencer.get_name()), UVM_NONE);
-    starting_phase.drop_objection(this);
+    (get_starting_phase()).drop_objection(this);
   endtask : body
   function void do_kill();
-    if(starting_phase.phase_done.get_objection_count(this))
-      starting_phase.drop_objection(this);
+    if((get_starting_phase()).phase_done.get_objection_count(this))
+      (get_starting_phase()).drop_objection(this);
   endfunction
 
   function new(string name="top_random_seq");
@@ -180,7 +180,7 @@ class bot_random_seq extends bot_sequence;
   int unsigned delay = $urandom_range( 20, 30);
   `uvm_object_utils(bot_random_seq)
   task body;
-    starting_phase.raise_objection(this);
+    (get_starting_phase()).raise_objection(this);
     `uvm_info( "MAIN", $sformatf("Random traffic from %s.",
                                  m_sequencer.get_name()), UVM_NONE);
     for( int i = 1; i< 7; i++) begin
@@ -190,11 +190,11 @@ class bot_random_seq extends bot_sequence;
     end
     `uvm_info( "MAIN", $sformatf("Done random traffic from %s.",
                                  m_sequencer.get_name()), UVM_NONE);
-    starting_phase.drop_objection(this);
+    (get_starting_phase()).drop_objection(this);
   endtask : body
   function void do_kill();
-    if(starting_phase.phase_done.get_objection_count(this))
-      starting_phase.drop_objection(this);
+    if((get_starting_phase()).phase_done.get_objection_count(this))
+      (get_starting_phase()).drop_objection(this);
   endfunction
 
   function new(string name="bot_random_seq");

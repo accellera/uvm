@@ -242,11 +242,11 @@ class test_2m_4s_azhang_vseq extends uvm_sequence;
   endtask : body
 
   task pre_body();
-    starting_phase.raise_objection(this, "read_modify_write_seq");
+    (get_starting_phase()).raise_objection(this, "read_modify_write_seq");
   endtask: pre_body
 
   task post_body();
-    starting_phase.drop_objection(this, "read_modify_write_seq");
+    (get_starting_phase()).drop_objection(this, "read_modify_write_seq");
   endtask: post_body  
 
 

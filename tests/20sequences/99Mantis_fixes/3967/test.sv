@@ -95,7 +95,7 @@ class cust_data_sequence extends uvm_sequence#(cust_data);
   endfunction
 
   virtual task pre_body();
-    if (starting_phase!=null) starting_phase.raise_objection(this);
+    if ((get_starting_phase())!=null) (get_starting_phase()).raise_objection(this);
   endtask : pre_body
 
   virtual task body();
@@ -103,7 +103,7 @@ class cust_data_sequence extends uvm_sequence#(cust_data);
   endtask
 
   virtual task post_body();
-    if (starting_phase!=null) starting_phase.drop_objection(this);
+    if ((get_starting_phase())!=null) (get_starting_phase()).drop_objection(this);
   endtask : post_body
 
 endclass
