@@ -1887,6 +1887,7 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
     curr_byte=0;
     n_bits= n_bits_init;     
               
+    accesses.delete();         
     foreach(addrs[i]) begin: foreach_addr
       uvm_reg_bus_op rw_access;
       uvm_reg_data_t data;
@@ -2027,6 +2028,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
     curr_byte=0;
     rw.value[val_idx] = 0;
               
+    accesses.delete();
     foreach (addrs[i]) begin
       uvm_reg_bus_op rw_access;
        
