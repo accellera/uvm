@@ -34,15 +34,11 @@ class subseq extends uvm_sequence;
 
    function new(string name = "subseq");
       super.new(name);
+      set_automatic_objection(1);
       do_not_randomize = 1;
    endfunction
 
    task body();
-      if ((get_starting_phase()) != null) begin
-         $write("Checking default phase...\n");
-         (get_starting_phase()).raise_objection(this);
-      end
-
       $write("Executing subseq...\n");
       if (foo !== 0) begin
          `uvm_error("BadFoo", "subseq was randomized")
@@ -50,10 +46,6 @@ class subseq extends uvm_sequence;
 
       #10;
 
-      if ((get_starting_phase()) != null) begin
-         $write("Checking default phase...\n");
-         (get_starting_phase()).drop_objection(this);
-      end
    endtask
 endclass
 

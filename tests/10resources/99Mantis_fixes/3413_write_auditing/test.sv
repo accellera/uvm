@@ -34,21 +34,20 @@ class myseq extends uvm_sequence #(uvm_sequence_item);
 
    function new(string name="myseq");
       super.new(name);
+      set_automatic_objection(1);
    endfunction
   
   task body();
     string name;
     if ((get_starting_phase())==null)
-      `uvm_fatal("(GET_STARTING_PHASE())_NULL", "Internal error. Sequence's (get_starting_phase()) member is not defined")
+      `uvm_fatal("STARTING_PHASE_NULL", "Internal error. Sequence's (get_starting_phase()) member is not defined")
 
     name = (get_starting_phase()).get_name();
 
-    (get_starting_phase()).raise_objection(this);
     def_seqs[name] = get_name();
     `uvm_info((get_starting_phase()).get_name(), "Starting myseq!!!", UVM_NONE)
     #10;
     `uvm_info((get_starting_phase()).get_name(), "Ending myseq!!!", UVM_NONE)
-    (get_starting_phase()).drop_objection(this);
   endtask
 endclass
 
@@ -57,21 +56,20 @@ class myseq2 extends uvm_sequence #(uvm_sequence_item);
 
    function new(string name="myseq");
       super.new(name);
+      set_automatic_objection(1);
    endfunction
   
   task body();
     string name;
     if ((get_starting_phase())==null)
-      `uvm_fatal("(GET_STARTING_PHASE())_NULL", "Internal error. Sequence's (get_starting_phase()) member is not defined")
+      `uvm_fatal("STARTING_PHASE_NULL", "Internal error. Sequence's (get_starting_phase()) member is not defined")
 
     name = (get_starting_phase()).get_name();
 
-    (get_starting_phase()).raise_objection(this);
     def_seqs[name] = get_name();
     `uvm_info((get_starting_phase()).get_name(), "Starting myseq2!!!", UVM_NONE)
     #10;
     `uvm_info((get_starting_phase()).get_name(), "Ending myseq2!!!", UVM_NONE)
-    (get_starting_phase()).drop_objection(this);
   endtask
 endclass
 

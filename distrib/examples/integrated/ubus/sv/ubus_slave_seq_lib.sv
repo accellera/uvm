@@ -122,16 +122,19 @@ class slave_memory_seq extends uvm_sequence #(ubus_transfer);
 
     forever
     begin
+      uvm_phase starting_phase = get_starting_phase();
       p_sequencer.addr_ph_port.peek(util_transfer);
 
       // Need to raise/drop objection before each item because we don't want
       // to be stopped in the middle of a transfer.
-      starting_phase.raise_objection(this);
+      if (starting_phase != null)
+        starting_phase.raise_objection(this);
 
       start_item(req);
       finish_item(req);
 
-      starting_phase.drop_objection(this);
+      if (starting_phase != null)
+        starting_phase.drop_objection(this);
     end
   endtask : body
 

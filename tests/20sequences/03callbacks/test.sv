@@ -128,11 +128,11 @@ program top;
    
         function new(string name = "");
             super.new(name);
+           set_automatic_objection(1);
         endfunction
    
         task pre_start();
             called.push_back("top.pre_start()");
-            if ((get_starting_phase()) != null) (get_starting_phase()).raise_objection(this);
         endtask
    
         task pre_body();
@@ -163,7 +163,6 @@ program top;
    
         task post_start();
             called.push_back("top.post_start()");
-            if ((get_starting_phase()) != null) (get_starting_phase()).drop_objection(this);
         endtask
    
     endclass

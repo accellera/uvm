@@ -208,14 +208,6 @@ class read_modify_write_seq extends ubus_base_sequence;
         get_sequence_path(),addr_check,m_data0_check,read_byte_seq0.rsp.data[0]));
   endtask : body
 
-  task pre_body();
-    (get_starting_phase()).raise_objection(this, "read_modify_write_seq");
-  endtask: pre_body
-
-  task post_body();
-    (get_starting_phase()).drop_objection(this, "read_modify_write_seq");
-  endtask: post_body  
-
 endclass : read_modify_write_seq
 
 
