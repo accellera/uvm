@@ -23,5 +23,5 @@ include  $(UVM_HOME)/examples/Makefile.vcs
 
 all:
 	$(VCS) +incdir+../sv ubus_tb_top.sv
-	$(SIMV) +UVM_TESTNAME=test_2m_4s_azhang +UVM_OBJECTION_TRACE
+	$(SIMV) +UVM_TESTNAME=test_2m_4s_azhang
 	$(CHECK)
