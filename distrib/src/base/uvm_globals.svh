@@ -51,7 +51,7 @@ endtask
 // raised objections, an implicit call to <global_stop_request> is issued
 // to end the run phase (or any other task-based phase).
 
-uvm_test_done_objection uvm_test_done = uvm_test_done_objection::get();
+const uvm_test_done_objection uvm_test_done = uvm_test_done_objection::get();
 
 
 // Method- global_stop_request  - DEPRECATED
