@@ -42,6 +42,9 @@ the Mantis id.
 
 In increasing Mantis numerical order:
 
+Mantis 3693: Added uvm_enum_wrapper#(T) type, and functionality to set
+enumerations by string name.
+
 Mantis 4091: Added missing top-level block name to uvm_reg_file::get_fullname()
 
 Mantis 4425: BUSY flag now cleared when register model is reset.
