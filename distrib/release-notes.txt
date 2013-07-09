@@ -42,7 +42,8 @@ the Mantis id.
 
 In increasing Mantis numerical order:
 
-Mantis 3741: Added command-line functionality to setting default_sequence
+Mantis 3741: Added command-line functionality to setting
+default_sequence (+uvm_set_default_sequence)
 
 Mantis 4091: Added missing top-level block name to uvm_reg_file::get_fullname()
 
