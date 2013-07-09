@@ -312,6 +312,25 @@ class uvm_phase extends uvm_object;
   //
   extern function string get_domain_name();
 
+  // Function: get_predecessor_nodes
+  //
+  // Provides an array of nodes which are predecessors to
+  // ~this~ phase node.  A 'predecessor node' is defined
+  // as any phase node which lies prior to ~this~ node in
+  // the phase graph, with no nodes between ~this~ node and
+  // the predecessor node.
+  //
+  extern function void get_predecessor_nodes(ref uvm_phase pred[]);
+
+  // Function: get_successor_nodes
+  //
+  // Provides an array of nodes which are successors to
+  // ~this~ phase node.  A 'successors node' is defined
+  // as any phase node which liest after ~this~ node in
+  // the phase graph, with no nodes between ~this~ node
+  // and the successor node.
+  //
+  extern function void get_successor_nodes(ref uvm_phase succ[]);
 
   //-----------------------
   // Group: Synchronization
@@ -1572,31 +1591,75 @@ task uvm_phase::execute_phase();
 
 endtask
 
+function void uvm_phase::get_predecessor_nodes(ref uvm_phase pred[]);
+   bit done;
+   bit predecessors[uvm_phase];
+   int idx;
 
+   // Get all predecessors (including TERMINALS, SCHEDULES, etc.)
+   foreach (m_predecessors[p])
+     predecessors[p] = 1;
+
+   // Replace any terminal / schedule nodes with their predecessors,
+   // recursively.
+   do begin
+      done = 1;
+      foreach (predecessors[p]) begin
+         if (p.get_phase_type() != UVM_PHASE_NODE) begin
+            predecessors.delete(p);
+            foreach (p.m_predecessors[next_p])
+              predecessors[next_p] = 1;
+            done = 0;
+         end
+      end
+   end while (!done); 
+
+   pred = new [predecessors.size()];
+   foreach (predecessors[p]) begin
+      pred[idx++] = p;
+   end
+endfunction : get_predecessor_nodes
+
+function void uvm_phase::get_successor_nodes(ref uvm_phase succ[]);
+   bit done;
+   bit successors[uvm_phase];
+   int idx;
+
+   // Get all successors (including TERMINALS, SCHEDULES, etc.)
+   foreach (m_successors[s])
+     successors[s] = 1;
+
+   // Replace any terminal / schedule nodes with their successors,
+   // recursively.
+   do begin
+      done = 1;
+      foreach (successors[s]) begin
+         if (s.get_phase_type() != UVM_PHASE_NODE) begin
+            successors.delete(s);
+            foreach (s.m_successors[next_s])
+              successors[next_s] = 1;
+            done = 0;
+         end
+      end
+   end while (!done); 
+
+   succ = new [successors.size()];
+   foreach (successors[s]) begin
+      succ[idx++] = s;
+   end
+endfunction : get_successor_nodes
+
+// Internal implementation, more efficient than calling get_predessor_nodes on all
+// of the successors returned by get_successor_nodes
 function void uvm_phase::get_predecessors_for_successors(output bit pred_of_succ[uvm_phase]);
     bit done;
-    bit successors[uvm_phase];
+    uvm_phase successors[];
 
-    // get all successors
-    foreach (m_successors[succ])
-      successors[succ] = 1;
-
-    // replace TERMINAL or SCHEDULE nodes with their successors
-    do begin
-      done=1;
-      foreach (successors[succ]) begin
-        if (succ.get_phase_type() != UVM_PHASE_NODE) begin
-          successors.delete(succ);
-          foreach (succ.m_successors[next_succ])
-            successors[next_succ] = 1;
-          done = 0;
-        end
-      end
-    end while(!done);
+    get_successor_nodes(successors);
           
     // get all predecessors to these successors
-    foreach (successors[succ])
-      foreach (succ.m_predecessors[pred])
+    foreach (successors[s])
+      foreach (successors[s].m_predecessors[pred])
         pred_of_succ[pred] = 1;
     
     // replace any terminal nodes with their predecessors, recursively.
