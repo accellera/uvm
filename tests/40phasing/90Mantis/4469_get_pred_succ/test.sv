@@ -3,6 +3,12 @@ module test_mod;
    import uvm_pkg::*;
 `include "uvm_macros.svh"
 
+// Tests the key points in the schedule:
+// First Phase (0 Pred, 1 Succ)
+// Fork Phase (1 Pred, 2 Succ)
+// Join Phase (2 Pred, 1 Succ)
+// Last Phase (1 Pred, 0 Succ)
+   
 class test extends uvm_component;
 
    `uvm_component_utils(test);
