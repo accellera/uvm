@@ -81,8 +81,10 @@ cp -r $nd_dir/images/b* $outdir/images
 cp    $nd_dir/logo.html $outdir
 
 # Run ND
+cp ./Proj/Menu.txt log
 
 perl $nd_dir/NaturalDocs \
+  -q \
   -do \
   -ro \
   -i $outdir/src \
