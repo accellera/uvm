@@ -28,7 +28,8 @@
 
 
 const char uvm_re_bracket_char = '/';
-static char uvm_re[2048];
+#define UVM_REGEX_MAX_LENGTH 2048
+static char uvm_re[UVM_REGEX_MAX_LENGTH+4];
 
 
 //--------------------------------------------------------------------
@@ -44,8 +45,6 @@ int uvm_re_match(const char * re, const char *str)
 {
   regex_t *rexp;
   int err;
-  int len = strlen(re);
-  char * rex = &uvm_re[0];
 
   // safety check.  Args should never be null since this is called
   // from DPI.  But we'll check anyway.
@@ -54,19 +53,16 @@ int uvm_re_match(const char * re, const char *str)
   if(str == NULL)
     return 1;
 
-  /*
-  if (len == 0) {
-    vpi_printf((PLI_BYTE8*)  "UVM_ERROR: uvm_re_match : regular expression empty\n");
-    return 1;
-  }
-  */
-  if (len > 2040) {
-    vpi_printf((PLI_BYTE8*)  "UVM_ERROR: uvm_re_match : regular expression greater than max 2040: |%s|\n",re);
+  int len = strlen(re);
+  char * rex = &uvm_re[0];
+
+  if (len > UVM_REGEX_MAX_LENGTH) {
+    vpi_printf((PLI_BYTE8*)  "UVM_ERROR: uvm_re_match : regular expression greater than max %0d: |%s|\n",UVM_REGEX_MAX_LENGTH,re);
     return 1;
   }
 
   // we copy the regexp because we need to remove any brackets around it
-  strcpy(&uvm_re[0],re);
+  strncpy(&uvm_re[0],re,UVM_REGEX_MAX_LENGTH);
   if (len>1 && (re[0] == uvm_re_bracket_char) && re[len-1] == uvm_re_bracket_char) {
     uvm_re[len-1] = '\0';
     rex++;
@@ -82,7 +78,8 @@ int uvm_re_match(const char * re, const char *str)
   err = regcomp(rexp, rex, REG_EXTENDED);
 
   if (err != 0) {
-    vpi_printf((PLI_BYTE8*)  "UVM_ERROR: uvm_re_match: invalid glob or regular expression: |%s|\n",re);
+	regerror(err,rexp,uvm_re,UVM_REGEX_MAX_LENGTH-1);
+    vpi_printf((PLI_BYTE8*)  "UVM_ERROR: uvm_re_match: invalid glob or regular expression: |%s||%s|\n",re,uvm_re);
     regfree(rexp);
     free(rexp);
     return err;
@@ -91,7 +88,6 @@ int uvm_re_match(const char * re, const char *str)
   err = regexec(rexp, str, 0, NULL, 0);
 
   //vpi_printf((PLI_BYTE8*)  "UVM_INFO: uvm_re_match: re=%s str=%s ERR=%0d\n",rex,str,err);
-
   regfree(rexp);
   free(rexp);
 
