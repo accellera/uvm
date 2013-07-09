@@ -189,12 +189,13 @@ Group: Sequencers  {
    File: uvm_push_sequencer           (no auto-title, UVM_ROOT/distrib/docs/html/src/seq/uvm_push_sequencer.svh)
    }  # Group: Sequencers
 
-Group: Sequences  {
+Group: Sequences  { 
 
    File: Overview                     (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/sequences.txt)
    File: uvm_sequence_item            (no auto-title, UVM_ROOT/distrib/docs/html/src/seq/uvm_sequence_item.svh)
    File: uvm_sequence_base            (no auto-title, UVM_ROOT/distrib/docs/html/src/seq/uvm_sequence_base.svh)
    File: uvm_sequence                 (no auto-title, UVM_ROOT/distrib/docs/html/src/seq/uvm_sequence.svh)
+   File: uvm_sequence_library         (no auto-title, UVM_ROOT/distrib/docs/html/src/seq/uvm_sequence_library.svh)
    }  # Group: Sequences
 
 Group: Macros  {

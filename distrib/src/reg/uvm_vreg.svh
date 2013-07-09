@@ -967,7 +967,7 @@ endfunction: implement
 
 function uvm_mem_region uvm_vreg::allocate(longint unsigned   n,
                                            uvm_mem_mam        mam,
-                                           uvm_mem_mam_policy alloc);
+                                           uvm_mem_mam_policy alloc=null);
 
    uvm_mem mem;
 
