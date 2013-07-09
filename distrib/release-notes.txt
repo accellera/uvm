@@ -42,7 +42,15 @@ the Mantis id.
 
 In increasing Mantis numerical order:
 
+Mantis 3407: uvm_event should be a param class
+
 Mantis 4091: Added missing top-level block name to uvm_reg_file::get_fullname()
+
+Mantis 4160: uvm_comparer not using verbosity setting for print_msg
+
+Mantis 4181: transaction order unclear and cant be changed when bus/reg size differ
+
+Mantis 4366: uvm_sequence_library documentation missing from generate html
 
 Mantis 4378: Proper documentation of set_inst_override_by_name and 
              set_type_override_by_name in uvm_component.
@@ -62,4 +70,9 @@ functionality was optionally enabled in prior versions by defining the
 functionality is now the default. Should the obsolete functionality be
 required, define the `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR symbol.
 
+Mantis 4532: uvm_reg_access_seq ignoring regs with one RO field
+
+Mantis 4542: uvm_test_done is now const to prevent changes
+
+Mantis 4548: cleanup dpi coding issues
 
