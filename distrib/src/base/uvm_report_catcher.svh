@@ -178,9 +178,9 @@ virtual class uvm_report_catcher extends uvm_callback;
   function string get_context();
     string context_str;
     
-    context_str = this.m_modified_report_message.report_handler.get_full_name();
-    if (this.m_modified_report_message.context_name != "")
-      context_str = {context_str, "@@", this.m_modified_report_message.context_name};  
+    context_str = this.m_modified_report_message.context_name;
+    if (context_str == "")
+      context_str = this.m_modified_report_message.report_handler.get_full_name();
 
     return context_str;
   endfunction

@@ -1,7 +1,7 @@
 ----------------------------------------------------------------
 Name                              Type               Size  Value
 ----------------------------------------------------------------
-uvm_report_server                 uvm_report_server  -     @15  
+uvm_report_server                 uvm_report_server  -     
   quit_count                      int                32    'd0  
   max_quit_count                  int                32    'd5  
   max_quit_overridable            bit                1     'b1  

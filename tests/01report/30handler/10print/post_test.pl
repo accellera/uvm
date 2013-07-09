@@ -64,6 +64,8 @@ while($log_line = <LOG>) {
     else {
       # remove '# ' from logs (Questa)
       $log_line =~ s/^# //;
+      # remove object ref '@12' from logs
+      $log_line =~ s/@[0-9]+.*$//;
       print NEWLOG "$log_line";
     }
   }

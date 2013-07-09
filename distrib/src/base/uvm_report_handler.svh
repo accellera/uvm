@@ -625,7 +625,7 @@ class uvm_report_handler extends uvm_object;
 
     l_report_message = uvm_report_message::get_report_message();
     l_report_message.report_object = client;
-    l_report_message.context_name = "";
+    l_report_message.context_name = name;
     l_report_message.filename = filename;
     l_report_message.line = line;
     l_report_message.action = get_action(severity,id);

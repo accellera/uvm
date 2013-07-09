@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 Name                        Type                Size  Value                   
 ------------------------------------------------------------------------------
-uvm_test_top                uvm_report_handler  -     @622                    
+uvm_test_top                uvm_report_handler  -     
   max_verbosity_level       uvm_verbosity       32    UVM_FULL                
   id_verbosities            uvm_pool            3     -                       
     [ID1]                   uvm_verbosity       32    UVM_LOW                 
