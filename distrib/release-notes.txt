@@ -46,6 +46,8 @@ Mantis 4091: Added missing top-level block name to uvm_reg_file::get_fullname()
 
 Mantis 4425: BUSY flag now cleared when register model is reset.
 
+Mantis 4434: Added get_objection_count to uvm_phase
+
 Mantis 4513: Added user-defined memory allocation policy to uvm_vreg::allocat()
 
 Mantis 4516: Proper prioritization of default sequences
