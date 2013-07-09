@@ -1401,7 +1401,7 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
     // and thus more specific than one that is dynamically created via the
     // factory and the object wrapper.
     if ($cast(sbr, rsrc) && sbr != null) begin
-      seq = sbr.read();
+      seq = sbr.read(this);
       if (seq == null) begin
         `uvm_info("UVM/SQR/PH/DEF/SB/NULL", {"Default phase sequence for phase '",
                                              phase.get_name(),"' explicitly disabled"}, UVM_FULL)
@@ -1413,7 +1413,7 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
     else if ($cast(owr, rsrc) && owr != null) begin
       uvm_object_wrapper wrapper;
 
-      wrapper = owr.read();
+      wrapper = owr.read(this);
       if (wrapper == null) begin
         `uvm_info("UVM/SQR/PH/DEF/OW/NULL", {"Default phase sequence for phase '",
                                              phase.get_name(),"' explicitly disabled"}, UVM_FULL)
@@ -1617,7 +1617,7 @@ endtask
 // get_seq_kind
 // ------------
 // Returns an int seq_kind correlating to the sequence of type type_name
-// in the sequencer¿s sequence library. If the named sequence is not
+// in the sequencerï¿½s sequence library. If the named sequence is not
 // registered a SEQNF warning is issued and -1 is returned.
 
 function int uvm_sequencer_base::get_seq_kind(string type_name);
