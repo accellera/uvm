@@ -98,8 +98,9 @@ endclass
 //|  // To affect some specific object use the specific reporter
 //|  uvm_report_cb::add(mytest.myenv.myagent.mydriver, demoter);
 //|
-//|  // To affect some set of components using the component name
-//|  uvm_report_cb::add_by_name("*.*driver", demoter);
+//|  // To affect some set of components (any "*driver" under mytest.myenv)
+//|  // using the component name
+//|  uvm_report_cb::add_by_name("*driver", demoter, mytest.myenv);
 //| end
 //
 //
