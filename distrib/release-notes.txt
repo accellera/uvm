@@ -54,7 +54,7 @@ Mantis 4366: uvm_sequence_library documentation missing from generate html
 
 Mantis 4425: BUSY flag now cleared when register model is reset.
 
-Mantis 4469: Added get_predecessor_nodes and get_successor_nodes to uvm_phase
+Mantis 4469: Added get_adjacent_predecessor_nodes and get_adjacent_successor_nodes to uvm_phase
 
 Mantis 4513: Added user-defined memory allocation policy to uvm_vreg::allocat()
 

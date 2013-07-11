@@ -22,7 +22,7 @@ class test extends uvm_component;
 
    virtual function void build_phase(uvm_phase phase);
       super.build_phase(phase);
-      phase.get_predecessor_nodes(phase_array);
+      phase.get_adjacent_predecessor_nodes(phase_array);
       if (phase_array.size() != 0) begin
          fail = 1;
          `uvm_fatal("FAIL",
@@ -30,7 +30,7 @@ class test extends uvm_component;
                               phase_array.size()))
       end
 
-      phase.get_successor_nodes(phase_array);
+      phase.get_adjacent_successor_nodes(phase_array);
       if (phase_array.size() != 1) begin
          fail = 1;
          `uvm_fatal("FAIL",
@@ -47,7 +47,7 @@ class test extends uvm_component;
 
    virtual function void start_of_simulation_phase(uvm_phase phase);
       super.start_of_simulation_phase(phase);
-      phase.get_predecessor_nodes(phase_array);
+      phase.get_adjacent_predecessor_nodes(phase_array);
       if (phase_array.size() != 1) begin
          fail = 1;
          `uvm_fatal("FAIL",
@@ -61,7 +61,7 @@ class test extends uvm_component;
          end
       end // else: !if(phase_array.size() != 1)
 
-      phase.get_successor_nodes(phase_array);
+      phase.get_adjacent_successor_nodes(phase_array);
       if (phase_array.size() != 2) begin
          fail = 1;
          `uvm_fatal("FAIL",
@@ -82,7 +82,7 @@ class test extends uvm_component;
       
    virtual function void extract_phase(uvm_phase phase);
       super.extract_phase(phase);
-      phase.get_predecessor_nodes(phase_array);
+      phase.get_adjacent_predecessor_nodes(phase_array);
       if (phase_array.size() != 2) begin
          fail = 1;
          `uvm_fatal("FAIL",
@@ -100,7 +100,7 @@ class test extends uvm_component;
          end
       end // else: !if(phase_array.size() != 1)
 
-      phase.get_successor_nodes(phase_array);
+      phase.get_adjacent_successor_nodes(phase_array);
       if (phase_array.size() != 1) begin
          fail = 1;
          `uvm_fatal("FAIL",
@@ -117,7 +117,7 @@ class test extends uvm_component;
       
    virtual function void final_phase(uvm_phase phase);
       super.final_phase(phase);
-      phase.get_predecessor_nodes(phase_array);
+      phase.get_adjacent_predecessor_nodes(phase_array);
       if (phase_array.size() != 1) begin
          fail = 1;
          `uvm_fatal("FAIL",
@@ -131,7 +131,7 @@ class test extends uvm_component;
          end
       end // else: !if(phase_array.size() != 1)
 
-      phase.get_successor_nodes(phase_array);
+      phase.get_adjacent_successor_nodes(phase_array);
       if (phase_array.size() != 0) begin
          fail = 1;
          `uvm_fatal("FAIL",
@@ -140,9 +140,9 @@ class test extends uvm_component;
       end
 
       if (fail == 0)
-        $display("*** UVM TEST PASS ***");
+        $display("*** UVM TEST PASSED ***");
       else
-        $display("*** UVM TEST FAIL ***");
+        $display("*** UVM TEST FAILED ***");
    endfunction // 
 
 endclass // test

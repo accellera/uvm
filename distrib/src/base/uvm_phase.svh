@@ -313,7 +313,7 @@ class uvm_phase extends uvm_object;
   //
   extern function string get_domain_name();
 
-  // Function: get_predecessor_nodes
+  // Function: get_adjacent_predecessor_nodes
   //
   // Provides an array of nodes which are predecessors to
   // ~this~ phase node.  A 'predecessor node' is defined
@@ -321,9 +321,9 @@ class uvm_phase extends uvm_object;
   // the phase graph, with no nodes between ~this~ node and
   // the predecessor node.
   //
-  extern function void get_predecessor_nodes(ref uvm_phase pred[]);
+  extern function void get_adjacent_predecessor_nodes(ref uvm_phase pred[]);
 
-  // Function: get_successor_nodes
+  // Function: get_adjacent_successor_nodes
   //
   // Provides an array of nodes which are successors to
   // ~this~ phase node.  A 'successors node' is defined
@@ -331,7 +331,7 @@ class uvm_phase extends uvm_object;
   // the phase graph, with no nodes between ~this~ node
   // and the successor node.
   //
-  extern function void get_successor_nodes(ref uvm_phase succ[]);
+  extern function void get_adjacent_successor_nodes(ref uvm_phase succ[]);
 
   //-----------------------
   // Group: Synchronization
@@ -1592,7 +1592,7 @@ task uvm_phase::execute_phase();
 
 endtask
 
-function void uvm_phase::get_predecessor_nodes(ref uvm_phase pred[]);
+function void uvm_phase::get_adjacent_predecessor_nodes(ref uvm_phase pred[]);
    bit done;
    bit predecessors[uvm_phase];
    int idx;
@@ -1619,9 +1619,9 @@ function void uvm_phase::get_predecessor_nodes(ref uvm_phase pred[]);
    foreach (predecessors[p]) begin
       pred[idx++] = p;
    end
-endfunction : get_predecessor_nodes
+endfunction : get_adjacent_predecessor_nodes
 
-function void uvm_phase::get_successor_nodes(ref uvm_phase succ[]);
+function void uvm_phase::get_adjacent_successor_nodes(ref uvm_phase succ[]);
    bit done;
    bit successors[uvm_phase];
    int idx;
@@ -1648,15 +1648,15 @@ function void uvm_phase::get_successor_nodes(ref uvm_phase succ[]);
    foreach (successors[s]) begin
       succ[idx++] = s;
    end
-endfunction : get_successor_nodes
+endfunction : get_adjacent_successor_nodes
 
 // Internal implementation, more efficient than calling get_predessor_nodes on all
-// of the successors returned by get_successor_nodes
+// of the successors returned by get_adjacent_successor_nodes
 function void uvm_phase::get_predecessors_for_successors(output bit pred_of_succ[uvm_phase]);
     bit done;
     uvm_phase successors[];
 
-    get_successor_nodes(successors);
+    get_adjacent_successor_nodes(successors);
           
     // get all predecessors to these successors
     foreach (successors[s])
