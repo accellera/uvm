@@ -293,37 +293,6 @@ class uvm_status_container;
   endfunction
 endclass
 
-
-
-//------------------------------------------------------------------------------
-//
-// CLASS- uvm_copy_map
-//
-//
-// Internal class used to map rhs to lhs so when a cycle is found in the rhs,
-// the correct lhs object can be bound to it.
-//------------------------------------------------------------------------------
-
-class uvm_copy_map;
-  local uvm_object m_map[uvm_object];
-  function void set(uvm_object key, uvm_object obj);
-    m_map[key] = obj;
-  endfunction
-  function uvm_object get(uvm_object key);
-    if (m_map.exists(key))
-       return m_map[key];
-    return null;
-  endfunction
-  function void clear();
-    m_map.delete();
-  endfunction 
-  function void delete(uvm_object v);
-    m_map.delete(v);
-  endfunction 
-endclass
-
-
-
 // Variable- uvm_global_random_seed
 //
 // Create a seed which is based off of the global seed which can be used to seed

@@ -411,7 +411,7 @@ class uvm_comparer;
 
  
   int depth;                      //current depth of objects
-  uvm_copy_map compare_map = new; //mapping of rhs to lhs objects
+  uvm_object compare_map[uvm_object];
   uvm_scope_stack scope    = new;
 
 endclass
