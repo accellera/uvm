@@ -291,6 +291,35 @@ class uvm_status_container;
         end
     end
   endfunction
+  
+  
+  // this lookup holds reference to already copied objects
+  // clean_copy_history_table.exists(some_obj)!=null means that some_obj has been already copied 
+  // and the copy is clean_copy_history_table[some_obj)
+  
+  local static uvm_object copy_history_table[uvm_object];
+  
+  // makes a deep copy via src.copy() and assigns it to dst; if the
+  // object has already been copied (= is present in the copy_history_table)
+  // then no new copy of src is created. in this case the already present copy of src
+  // is being reused. 
+  static function uvm_object copy_object(uvm_object src);
+	  uvm_object o = copy_history_table[src];
+	  if(o==null) begin
+		  // copy to new object 
+		  copy_object = src.clone();
+		  // store object in copy_history_table
+		  copy_history_table[src]=copy_object;
+	  end else begin
+		// copy already present, so just assign
+		copy_object=o;	
+	  end			  
+  endfunction
+  
+  // internal function to clean the history_table of copied objects
+  static function void clean_copy_history_table();
+	  copy_history_table.delete();
+  endfunction
 endclass
 
 
