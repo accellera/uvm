@@ -54,6 +54,8 @@ Mantis 4366: uvm_sequence_library documentation missing from generate html
 
 Mantis 4425: BUSY flag now cleared when register model is reset.
 
+Mantis 4476: uvm_sequence::req and uvm_sequence::rsp now documented.
+
 Mantis 4513: Added user-defined memory allocation policy to uvm_vreg::allocat()
 
 Mantis 4516: Proper prioritization of default sequences
