@@ -16,6 +16,18 @@
 //   the License for the specific language governing 
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
+
+// this test by purpose does the following:
+// 1. it sets up a graph (not a dag) of objects
+// 2. the references are contained in a DA and two independent variables
+// 3. while the network is randomly routed it does include "null" and refs to the top object
+// 4. the objects in addition contain 2 layers of inheritance with fields of the same name (and eventually the same ref)
+//
+// then .copy/.clone is performed
+// and the result is checked for value equality (via compare)
+// and then for structural equivalence (by checking the refs in the tree)
+//
+
 module test;
 	import uvm_pkg::*;
     `include "uvm_macros.svh"
@@ -77,7 +89,12 @@ module test;
 			id0.sort();
 			id1.sort();
 
-			assert(id0.size() == id1.size());   
+			assert(id0.size() == id1.size()) else `uvm_error("TEST","structure different (unique refs differ)");   
+			
+			for(int i=0;i<id0.size();i++) begin
+				assert(id0[i]==id1[i]) else `uvm_error("TEST",$sformatf("number of refs differ @%0d has%0d while @%0d has %0d",
+					id0,id0[i],id1,id1[i]))
+			end	
 
 		endfunction 
 
