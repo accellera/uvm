@@ -82,6 +82,8 @@ Mantis 4331, fixed documentation, added a description for the UVM_CB_TRACE_ON fl
 
 Mantis 4333, fixed issue with register library where, set, followed by mirror with CHECK caused false errors.
 
+Mantis 4391, removed redundant code in uvm_port_base
+
 Mantis 4341, fixed issue where uvm_printer_knobs::separator variable was not used. The variable was removed.
 
 Mantis 4342, fixed issue where dpi compile on AIX resulted in warning messages.
