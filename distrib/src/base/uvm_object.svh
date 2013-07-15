@@ -1028,6 +1028,7 @@ function void uvm_object::copy (uvm_object rhs);
   --depth;
   if(depth==0) begin
     uvm_global_copy_map.clear();
+    uvm_status_container::clean_copy_history_table();
   end
 endfunction
 
