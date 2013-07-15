@@ -303,7 +303,7 @@ class uvm_status_container;
   // object has already been copied (= is present in the copy_history_table)
   // then no new copy of src is created. in this case the already present copy of src
   // is being reused. 
-  static function uvm_object copy_object(uvm_object src);
+  static function uvm_object clone_object(uvm_object src);
 	  uvm_object o = copy_history_table[src];
 	  if(o==null) begin
 		  // copy to new object 
