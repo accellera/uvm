@@ -307,12 +307,12 @@ class uvm_status_container;
 	  uvm_object o = copy_history_table[src];
 	  if(o==null) begin
 		  // copy to new object 
-		  copy_object = src.clone();
+		  clone_object = src.clone();
 		  // store object in copy_history_table
-		  copy_history_table[src]=copy_object;
+		  copy_history_table[src]=clone_object;
 	  end else begin
 		// copy already present, so just assign
-		copy_object=o;	
+		clone_object=o;	
 	  end			  
   endfunction
   
