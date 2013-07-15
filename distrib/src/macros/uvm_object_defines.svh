@@ -708,7 +708,7 @@ endfunction \
             else begin \
               uvm_object l_obj; \
               if(local_data__.ARG.get_name() == "") local_data__.ARG.set_name(`"ARG`"); \
-              l_obj=uvm_status_container::copy_object(local_data__.ARG); \
+              l_obj=uvm_status_container::clone_object(local_data__.ARG); \
               if(l_obj == null) begin \
                 `uvm_fatal("FAILCLN", $sformatf("Failure to clone %s.ARG, thus the variable will remain null.", local_data__.get_name())); \
               end \
@@ -1170,9 +1170,9 @@ endfunction \
             else \
               foreach(ARG[i]) begin \
                 if(ARG[i] != null && local_data__.ARG[i] != null) \
-                  ARG[i]=uvm_status_container::copy_object(local_data__.ARG[i]); \
+                  ARG[i].copy(local_data__.ARG[i]); \
                 else if(ARG[i] == null && local_data__.ARG[i] != null) \
-                  $cast(ARG[i],uvm_status_container::copy_object(local_data__.ARG[i])); \
+                  $cast(ARG[i],uvm_status_container::clone_object(local_data__.ARG[i])); \
                 else \
                   ARG[i] = null; \
               end \
@@ -1707,9 +1707,9 @@ endfunction \
               `M_UVM_``TYPE``_RESIZE(ARG,null) \
               foreach(ARG[i]) begin \
                 if(ARG[i] != null && local_data__.ARG[i] != null) \
-                  $cast(ARG[i],uvm_status_container::copy_object(local_data__.ARG[i])); \
+                  ARG[i].copy(local_data__.ARG[i]); \
                 else if(ARG[i] == null && local_data__.ARG[i] != null) \
-                  $cast(ARG[i],uvm_status_container::copy_object(local_data__.ARG[i])); \
+                  $cast(ARG[i],uvm_status_container::clone_object(local_data__.ARG[i])); \
                 else \
                   ARG[i] = null; \
               end \
@@ -2925,7 +2925,7 @@ endfunction \
              /*else if((FLAG)&UVM_SHALLOW)*/ \
              /* ARG[string_aa_key] = new local_data__.ARG[string_aa_key];*/ \
                else begin\
-                $cast(ARG[string_aa_key],uvm_status_container::copy_object(local_data__.ARG[string_aa_key])); \
+                $cast(ARG[string_aa_key],uvm_status_container::clone_object(local_data__.ARG[string_aa_key])); \
                 ARG[string_aa_key].set_name({`"ARG`","[",string_aa_key, "]"});\
                end \
              while(local_data__.ARG.next(string_aa_key)); \
@@ -3004,7 +3004,7 @@ endfunction \
              /* ARG[key__] = new local_data__.ARG[key__];*/ \
                else begin\
                  uvm_object tmp_obj; \
-                 tmp_obj=uvm_status_container::copy_object(local_data__.ARG[key__]); \
+                 tmp_obj=uvm_status_container::clone_object(local_data__.ARG[key__]); \
                  if(tmp_obj != null) \
                    $cast(ARG[key__], tmp_obj); \
                  else \
