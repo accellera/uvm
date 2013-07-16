@@ -2,6 +2,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2009 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
+//   Copyright 2013 NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -30,7 +31,7 @@ typedef enum {
 } uvm_heartbeat_modes;
 
 typedef class uvm_heartbeat_callback;
-typedef uvm_callbacks #(uvm_callbacks_objection,uvm_heartbeat_callback) uvm_heartbeat_cbs_t;
+typedef uvm_callbacks #(uvm_objection,uvm_heartbeat_callback) uvm_heartbeat_cbs_t;
 
 
 //------------------------------------------------------------------------------
@@ -42,8 +43,7 @@ typedef uvm_callbacks #(uvm_callbacks_objection,uvm_heartbeat_callback) uvm_hear
 // descendants are alive. A uvm_heartbeat is associated with a specific
 // objection object. A component that is being tracked by the heartbeat
 // object must raise (or drop) the synchronizing objection during
-// the heartbeat window. The synchronizing objection must be a
-// <uvm_callbacks_objection> type.
+// the heartbeat window. 
 //
 // The uvm_heartbeat object has a list of participating objects. The heartbeat
 // can be configured so that all components (UVM_ALL_ACTIVE), exactly one
@@ -54,7 +54,7 @@ typedef uvm_callbacks #(uvm_callbacks_objection,uvm_heartbeat_callback) uvm_hear
 typedef class uvm_objection_callback;
 class uvm_heartbeat extends uvm_object;
 
-  protected uvm_callbacks_objection m_objection;
+  protected uvm_objection m_objection;
   protected uvm_heartbeat_callback m_cb;
   protected uvm_component   m_cntxt;
   protected uvm_heartbeat_modes   m_mode;
@@ -71,13 +71,13 @@ class uvm_heartbeat extends uvm_object;
   // is optional, if it is left null but it must be set before the heartbeat
   // monitor will activate.
   //
-  //| uvm_callbacks_objection myobjection = new("myobjection"); //some shared objection
+  //| uvm_objection myobjection = new("myobjection"); //some shared objection
   //| class myenv extends uvm_env;
   //|    uvm_heartbeat hb = new("hb", this, myobjection);
   //|    ...
   //| endclass
 
-  function new(string name, uvm_component cntxt, uvm_callbacks_objection objection=null);
+  function new(string name, uvm_component cntxt, uvm_objection objection=null);
     super.new(name);
     m_objection = objection;
     

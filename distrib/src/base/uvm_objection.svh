@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc. 
 //   Copyright 2010-2011 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -29,7 +30,6 @@ typedef class uvm_sequence_base;
 typedef class uvm_objection_callback;
 typedef uvm_callbacks #(uvm_objection,uvm_objection_callback) uvm_objection_cbs_t;
 typedef class uvm_cmdline_processor;
-typedef class uvm_callbacks_objection;
 
 class uvm_objection_events;
   int waiters;
@@ -60,6 +60,7 @@ endclass
 //------------------------------------------------------------------------------
 
 class uvm_objection extends uvm_report_object;
+  `uvm_register_cb(uvm_objection, uvm_objection_callback)
 
   protected bit     m_trace_mode;
   protected int     m_source_count[uvm_object];
@@ -113,86 +114,12 @@ class uvm_objection extends uvm_report_object;
   // in the forked_contexts list.  
   local uvm_objection_context_object m_forked_contexts[uvm_object];
 
-  /*protected*/ bit m_hier_mode = 1;
+  protected bit m_prop_mode = 1;
 
   uvm_root top = uvm_root::get();
 
 
   protected bit m_cleared; /* for checking obj count<0 */
-
-
-  // Function: clear
-  //
-  // Immediately clears the objection state. All counts are cleared and the
-  // any processes waiting on a call to wait_for(UVM_ALL_DROPPED, uvm_top)
-  // are released.
-  //
-  // The caller, if a uvm_object-based object, should pass its 'this' handle
-  // to the ~obj~ argument to document who cleared the objection.
-  // Any drain_times set by the user are not effected. 
-  //
-  virtual function void clear(uvm_object obj=null);
-    string name;
-    uvm_objection_context_object ctxt;
-    int  idx;
-
-    if (obj==null)
-      obj=m_top;
-    name = obj.get_full_name();
-    if (name == "")
-      name = "uvm_top";
-    else
-      name = obj.get_full_name();
-    if (!m_top_all_dropped && get_objection_total(m_top))
-      uvm_report_warning("OBJTN_CLEAR",{"Object '",name,
-            "' cleared objection counts for ",get_name()});
-    //Should there be a warning if there are outstanding objections?
-    m_source_count.delete();
-    m_total_count.delete();
-
-    // Remove any scheduled drains from the static queue
-    idx = 0;
-    while (idx < m_scheduled_list.size()) begin
-        if (m_scheduled_list[idx].objection == this) begin
-            m_scheduled_list[idx].clear();
-            m_context_pool.push_back(m_scheduled_list[idx]);
-            m_scheduled_list.delete(idx);
-        end
-        else begin
-            idx++;
-        end
-    end
-
-    // Scheduled contexts and m_forked_lists have duplicate
-    // entries... clear out one, free the other.
-    m_scheduled_contexts.delete();
-    while (m_forked_list.size()) begin
-        m_forked_list[0].clear();
-        m_context_pool.push_back(m_forked_list[0]);
-        void'(m_forked_list.pop_front());
-    end
-
-    // running drains have a context and a process
-    foreach (m_forked_contexts[o]) begin
-`ifndef UVM_USE_PROCESS_CONTAINER       
-        m_drain_proc[o].kill();
-        m_drain_proc.delete(o);
-`else
-        m_drain_proc[o].p.kill();
-        m_drain_proc.delete(o);
-`endif
-       
-        m_forked_contexts[o].clear();
-        m_context_pool.push_back(m_forked_contexts[o]);
-        m_forked_contexts.delete(o);
-    end
-
-    m_top_all_dropped = 0;
-    m_cleared = 1;
-    if (m_events.exists(m_top))
-      ->m_events[m_top].all_dropped;
-
-  endfunction
 
 
   // Function: new
@@ -322,48 +249,65 @@ class uvm_objection extends uvm_report_object;
 
 
   // Group: Objection Control
-  
-  // Function: m_set_hier_mode
+
+  // Function: set_propagate_mode
+  // Sets the propagation mode for this objection.
   //
-  // Hierarchical mode only needs to be set for intermediate components, not
-  // for uvm_root or a leaf component.
-
-  function void m_set_hier_mode (uvm_object obj);
-    uvm_component c;
-    if((m_hier_mode == 1) || (obj == m_top)) begin
-      // Don't set if already set or the object is uvm_top.
-      return;
-    end
-    if($cast(c,obj)) begin
-      // Don't set if object is a leaf.
-      if(c.get_num_children() == 0) begin
+  // By default, objections support hierarchical propagation for
+  // components.  For example, if we have the following basic
+  // component tree:
+  //
+  //| uvm_top.parent.child
+  //
+  // Any objections raised by 'child' would get propagated
+  // down to parent, and then to uvm_test_top.  Resulting in the
+  // following counts and totals:
+  //
+  //|                      | count | total |
+  //| uvm_top.parent.child |     1 |    1  |
+  //| uvm_top.parent       |     0 |    1  |
+  //| uvm_top              |     0 |    1  |
+  //|
+  // 
+  // While propagations such as these can be useful, if they are
+  // unused by the testbench then they are simply an unnecessary
+  // performance hit.  If the testbench is not going to use this
+  // functionality, then the performance can be improved by setting
+  // the propagation mode to '0'.
+  //
+  // When propagation mode is set to '0', all intermediate callbacks
+  // between the ~source~ and ~top~ will be skipped.  This would
+  // result in the following counts and totals for the above objection:
+  //  
+  //|                      | count | total |
+  //| uvm_top.parent.child |     1 |    1  |
+  //| uvm_top.parent       |     0 |    0  |
+  //| uvm_top              |     0 |    1  |
+  //|
+  //
+  // Since the propagation mode changes the behavior of the objection,
+  // it can only be safely changed if there are no objections ~raised~ 
+  // or ~draining~.  Any attempts to change the mode while objections
+  // are ~raised~ or ~draining~ will result in an error.
+  //
+  function void set_propagate_mode (bit prop_mode);
+     if (!m_top_all_dropped && (get_objection_total() != 0)) begin
+        `uvm_error("UVM/BASE/OBJTN/PROP_MODE",
+                   {"The propagation mode of '", this.get_full_name(),
+                    "' can not be changed while the objection is raised ",
+                    "or draining!"})
         return;
-      end
-    end
-    else begin
-      // Don't set if object is a non-component.
-      return;
-    end
+     end
 
-    // restore counts on non-source nodes
-    m_total_count.delete();
-    foreach (m_source_count[obj]) begin
-      uvm_object theobj = obj;
-      int count = m_source_count[obj];
-      do begin
-        if (m_total_count.exists(theobj))
-          m_total_count[theobj] += count;
-        else
-          m_total_count[theobj] = count;
-        theobj = m_get_parent(theobj);
-      end
-      while (theobj != null);
-    end
-    
-    m_hier_mode = 1;
-  endfunction
+     m_prop_mode = prop_mode;
+  endfunction : set_propagate_mode
 
-
+  // Function: get_propagate_mode
+  // Returns the propagation mode for this objection.
+  function bit get_propagate_mode();
+     return m_prop_mode;
+  endfunction : get_propagate_mode
+   
   // Function: raise_objection
   //
   // Raises the number of objections for the source ~object~ by ~count~, which
@@ -471,7 +415,7 @@ class uvm_objection extends uvm_report_object;
     if (ctxt == null) begin
         // If there were no drains, just propagate as usual
 
-        if (!m_hier_mode && obj != m_top)
+        if (!m_prop_mode && obj != m_top)
           m_raise(m_top,source_obj,description,count);
         else if (obj != m_top)
           m_propagate(obj, source_obj, description, count, 1, 0);
@@ -490,7 +434,7 @@ class uvm_objection extends uvm_report_object;
             // Something changed
             if (diff_count > 0) begin
                 // we're looking at an increase in the total
-                if (!m_hier_mode && obj != m_top)
+                if (!m_prop_mode && obj != m_top)
                   m_raise(m_top, source_obj, description, diff_count);
                 else if (obj != m_top)
                   m_propagate(obj, source_obj, description, diff_count, 1, 0);
@@ -499,7 +443,7 @@ class uvm_objection extends uvm_report_object;
                 // we're looking at a decrease in the total
                 // The count field is always positive...
                 diff_count = -diff_count;
-                if (!m_hier_mode && obj != m_top)
+                if (!m_prop_mode && obj != m_top)
                   m_drop(m_top, source_obj, description, diff_count);
                 else if (obj != m_top)
                   m_propagate(obj, source_obj, description, diff_count, 0, 0);
@@ -618,7 +562,7 @@ class uvm_objection extends uvm_report_object;
   
     // if count != 0, no reason to fork
     if (m_total_count[obj] != 0) begin
-      if (!m_hier_mode && obj != m_top)
+      if (!m_prop_mode && obj != m_top)
         m_drop(m_top,source_obj,description, count, in_top_thread);
       else if (obj != m_top) begin
         this.m_propagate(obj, source_obj, description, count, 0, in_top_thread);
@@ -655,6 +599,78 @@ class uvm_objection extends uvm_report_object;
   endfunction
 
 
+  // Function: clear
+  //
+  // Immediately clears the objection state. All counts are cleared and the
+  // any processes waiting on a call to wait_for(UVM_ALL_DROPPED, uvm_top)
+  // are released.
+  //
+  // The caller, if a uvm_object-based object, should pass its 'this' handle
+  // to the ~obj~ argument to document who cleared the objection.
+  // Any drain_times set by the user are not effected. 
+  //
+  virtual function void clear(uvm_object obj=null);
+    string name;
+    uvm_objection_context_object ctxt;
+    int  idx;
+
+    if (obj==null)
+      obj=m_top;
+    name = obj.get_full_name();
+    if (name == "")
+      name = "uvm_top";
+    else
+      name = obj.get_full_name();
+    if (!m_top_all_dropped && get_objection_total(m_top))
+      uvm_report_warning("OBJTN_CLEAR",{"Object '",name,
+            "' cleared objection counts for ",get_name()});
+    //Should there be a warning if there are outstanding objections?
+    m_source_count.delete();
+    m_total_count.delete();
+
+    // Remove any scheduled drains from the static queue
+    idx = 0;
+    while (idx < m_scheduled_list.size()) begin
+        if (m_scheduled_list[idx].objection == this) begin
+            m_scheduled_list[idx].clear();
+            m_context_pool.push_back(m_scheduled_list[idx]);
+            m_scheduled_list.delete(idx);
+        end
+        else begin
+            idx++;
+        end
+    end
+
+    // Scheduled contexts and m_forked_lists have duplicate
+    // entries... clear out one, free the other.
+    m_scheduled_contexts.delete();
+    while (m_forked_list.size()) begin
+        m_forked_list[0].clear();
+        m_context_pool.push_back(m_forked_list[0]);
+        void'(m_forked_list.pop_front());
+    end
+
+    // running drains have a context and a process
+    foreach (m_forked_contexts[o]) begin
+`ifndef UVM_USE_PROCESS_CONTAINER       
+        m_drain_proc[o].kill();
+        m_drain_proc.delete(o);
+`else
+        m_drain_proc[o].p.kill();
+        m_drain_proc.delete(o);
+`endif
+       
+        m_forked_contexts[o].clear();
+        m_context_pool.push_back(m_forked_contexts[o]);
+        m_forked_contexts.delete(o);
+    end
+
+    m_top_all_dropped = 0;
+    m_cleared = 1;
+    if (m_events.exists(m_top))
+      ->m_events[m_top].all_dropped;
+
+  endfunction
 
   // m_execute_scheduled_forks
   // -------------------------
@@ -749,7 +765,7 @@ class uvm_objection extends uvm_report_object;
       if (m_total_count.exists(obj) && m_total_count[obj] == 0)
         m_total_count.delete(obj);
 
-      if (!m_hier_mode && obj != m_top)
+      if (!m_prop_mode && obj != m_top)
         m_drop(m_top,source_obj,description, count, 1);
       else if (obj != m_top)
         m_propagate(obj, source_obj, description, count, 0, 1);
@@ -784,7 +800,6 @@ class uvm_objection extends uvm_report_object;
     if (obj==null)
       obj = m_top;
     m_drain_time[obj] = drain;
-    m_set_hier_mode(obj);
   endfunction
   
 
@@ -804,6 +819,7 @@ class uvm_objection extends uvm_report_object;
     uvm_component comp;
     if ($cast(comp,obj))    
       comp.raised(this, source_obj, description, count);
+    `uvm_do_callbacks(uvm_objection,uvm_objection_callback,raised(this,obj,source_obj,description,count))
     if (m_events.exists(obj))
        ->m_events[obj].raised;
   endfunction
@@ -821,6 +837,7 @@ class uvm_objection extends uvm_report_object;
     uvm_component comp;
     if($cast(comp,obj))    
       comp.dropped(this, source_obj, description, count);
+    `uvm_do_callbacks(uvm_objection,uvm_objection_callback,dropped(this,obj,source_obj,description,count))
     if (m_events.exists(obj))
        ->m_events[obj].dropped;
   endfunction
@@ -840,6 +857,7 @@ class uvm_objection extends uvm_report_object;
     uvm_component comp;
     if($cast(comp,obj))    
       comp.all_dropped(this, source_obj, description, count);
+    `uvm_do_callbacks(uvm_objection,uvm_objection_callback,all_dropped(this,obj,source_obj,description,count))
     if (m_events.exists(obj))
        ->m_events[obj].all_dropped;
     if (obj == m_top)
@@ -933,7 +951,7 @@ class uvm_objection extends uvm_report_object;
 
     if (!m_total_count.exists(obj))
       return 0;
-    if (m_hier_mode) 
+    if (m_prop_mode) 
       return m_total_count[obj];
     else begin
       if ($cast(c,obj)) begin
@@ -1085,18 +1103,10 @@ class uvm_objection extends uvm_report_object;
     m_source_count = _rhs.m_source_count;
     m_total_count  = _rhs.m_total_count;
     m_drain_time   = _rhs.m_drain_time;
-    m_hier_mode    = _rhs.m_hier_mode;
+    m_prop_mode    = _rhs.m_prop_mode;
   endfunction
 
 endclass
-
-
-`ifdef UVM_USE_CALLBACKS_OBJECTION_FOR_TEST_DONE
-  typedef uvm_callbacks_objection m_uvm_test_done_objection_base;
-`else
-  typedef uvm_objection m_uvm_test_done_objection_base;
-`endif
-
 
 // TODO: change to plusarg
 `define UVM_DEFAULT_TIMEOUT 9200s
@@ -1112,7 +1122,7 @@ typedef class uvm_cmdline_processor;
 // Provides built-in end-of-test coordination
 //------------------------------------------------------------------------------
 
-class uvm_test_done_objection extends m_uvm_test_done_objection_base;
+class uvm_test_done_objection extends uvm_objection;
 
    protected static uvm_test_done_objection m_inst;
   protected bit m_forced;
@@ -1382,61 +1392,9 @@ class uvm_objection_context_object;
     endfunction : clear
 endclass
 
-
-//------------------------------------------------------------------------------
-//
-// Class: uvm_callbacks_objection
-//
-//------------------------------------------------------------------------------
-// The uvm_callbacks_objection is a specialized <uvm_objection> which contains
-// callbacks for the raised and dropped events. Callbacks happend for the three
-// standard callback activities, <raised>, <dropped>, and <all_dropped>.
-//
-// The <uvm_heartbeat> mechanism use objections of this type for creating
-// heartbeat conditions.  Whenever the objection is raised or dropped, the component 
-// which did the raise/drop is considered to be alive.
-//
-
-
-class uvm_callbacks_objection extends uvm_objection;
-  `uvm_register_cb(uvm_callbacks_objection, uvm_objection_callback)
-  function new(string name="");
-    super.new(name);
-  endfunction
-
-  // Function: raised
-  //
-  // Executes the <uvm_objection_callback::raised> method in the user callback
-  // class whenever this objection is raised at the object ~obj~.
-
-  virtual function void raised (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
-    `uvm_do_callbacks(uvm_callbacks_objection,uvm_objection_callback,raised(this,obj,source_obj,description,count))
-  endfunction
-
-  // Function: dropped
-  //
-  // Executes the <uvm_objection_callback::dropped> method in the user callback
-  // class whenever this objection is dropped at the object ~obj~.
-
-  virtual function void dropped (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
-    `uvm_do_callbacks(uvm_callbacks_objection,uvm_objection_callback,dropped(this,obj,source_obj,description,count))
-  endfunction
-
-  // Function: all_dropped
-  //
-  // Executes the <uvm_objection_callback::all_dropped> task in the user callback
-  // class whenever the objection count for this objection in reference to ~obj~
-  // goes to zero.
-
-  virtual task all_dropped (uvm_object obj, uvm_object source_obj, 
-      string description, int count);
-    `uvm_do_callbacks(uvm_callbacks_objection,uvm_objection_callback,all_dropped(this,obj,source_obj,description,count))
-  endtask
-endclass
-
-
+// Typedef - Exists for backwards compat
+typedef uvm_objection uvm_callbacks_objection;
+   
 //------------------------------------------------------------------------------
 //
 // Class: uvm_objection_callback
@@ -1473,7 +1431,7 @@ class uvm_objection_callback extends uvm_callback;
 
   // Function: raised
   //
-  // Objection raised callback function. Called by <uvm_callbacks_objection::raised>.
+  // Objection raised callback function. Called by <uvm_objection::raised>.
 
   virtual function void raised (uvm_objection objection, uvm_object obj, 
       uvm_object source_obj, string description, int count);
@@ -1481,7 +1439,7 @@ class uvm_objection_callback extends uvm_callback;
 
   // Function: dropped
   //
-  // Objection dropped callback function. Called by <uvm_callbacks_objection::dropped>.
+  // Objection dropped callback function. Called by <uvm_objection::dropped>.
 
   virtual function void dropped (uvm_objection objection, uvm_object obj, 
       uvm_object source_obj, string description, int count);
@@ -1489,7 +1447,7 @@ class uvm_objection_callback extends uvm_callback;
 
   // Function: all_dropped
   //
-  // Objection all_dropped callback function. Called by <uvm_callbacks_objection::all_dropped>.
+  // Objection all_dropped callback function. Called by <uvm_objection::all_dropped>.
 
   virtual task all_dropped (uvm_objection objection, uvm_object obj, 
       uvm_object source_obj, string description, int count);
