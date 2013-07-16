@@ -26,6 +26,9 @@ import uvm_pkg::*;
 `include "upperB_item.sv"
 `include "upperB_drv.sv"
 `include "upperB_mon.sv"
+
+typedef uvm_sequencer#(upperB_item) upperB_sqr;
+
 `include "upperB_agt.sv"
 
 endpackage

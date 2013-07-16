@@ -19,7 +19,7 @@
 
 class upperB_agt extends uvm_agent;
 
-  uvm_sequencer#(upperB_item) sqr;
+  upperB_sqr sqr;
   upperB_drv drv;
   upperB_mon mon;
 
@@ -33,7 +33,7 @@ class upperB_agt extends uvm_agent;
   endfunction
 
   virtual function void build_phase(uvm_phase phase);
-    sqr = new("sqr", this);
+    sqr = upperB_sqr::type_id::create("sqr", this);
     drv = upperB_drv::type_id::create("drv", this);
     mon = upperB_mon::type_id::create("mon", this);
 

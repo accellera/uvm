@@ -26,6 +26,9 @@ import uvm_pkg::*;
 `include "lower_item.sv"
 `include "lower_drv.sv"
 `include "lower_mon.sv"
+
+typedef uvm_sequencer#(lower_item) lower_sqr;
+
 `include "lower_agt.sv"
 
 endpackage

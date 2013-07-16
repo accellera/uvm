@@ -19,7 +19,7 @@
 
 class lower_agt extends uvm_agent;
 
-  uvm_sequencer#(lower_item) sqr;
+  lower_sqr sqr;
   lower_drv drv;
   lower_mon mon;
 
@@ -33,7 +33,7 @@ class lower_agt extends uvm_agent;
   endfunction
 
   virtual function void build_phase(uvm_phase phase);
-    sqr = new("sqr", this);
+    sqr = lower_sqr::type_id::create("sqr", this);
     drv = lower_drv::type_id::create("drv", this);
     mon = lower_mon::type_id::create("mon", this);
 

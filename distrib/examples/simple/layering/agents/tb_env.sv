@@ -46,21 +46,22 @@ class tb_env extends uvm_env;
 
     upA = upperA_agt::type_id::create("upA", this);
     uvm_config_db#(virtual upperA_if)::set(this, "upA", "vif", null);
+    uvm_config_db#(lower_sqr)::set(this, "upA.drv", "lower_sqr", low.sqr);
     set_inst_override_by_type("upA.drv", upperA_drv::get_type(), layerA_drv::get_type());
     set_inst_override_by_type("upA.mon", upperA_mon::get_type(), layerA_mon::get_type());
-    seqA = lower_passthru_seq::type_id::create("seqA", this);
-    uvm_config_db#(lower_passthru_seq)::set(this, "upA.drv", "passthru_seq", seqA);
 
     upB = upperB_agt::type_id::create("upB", this);
     uvm_config_db#(virtual upperB_if)::set(this, "upB", "vif", null);
     set_inst_override_by_type("upB.drv", upperB_drv::get_type(), layerB_drv::get_type());
     set_inst_override_by_type("upB.mon", upperB_mon::get_type(), layerB_mon::get_type());
-    seqB = lower_passthru_seq::type_id::create("seqB", this);
-    uvm_config_db#(lower_passthru_seq)::set(this, "upB.drv", "passthru_seq", seqB);
   endfunction
 
   virtual function void connect_phase(uvm_phase phase);
     super.connect_phase(phase);
+
+    uvm_config_db#(lower_sqr)::set(this, "upA.drv", "lower_sqr", low.sqr);
+    uvm_config_db#(lower_sqr)::set(this, "upB.drv", "lower_sqr", low.sqr);
+
     upA.ap.connect(axp_A);
     upB.ap.connect(axp_B);
 
@@ -85,11 +86,4 @@ class tb_env extends uvm_env;
     $write("Observer upperB item:\n");
     item.print();
   endfunction
-
-  virtual task run_phase(uvm_phase phase);
-    fork
-      seqA.start(low.sqr);
-      seqB.start(low.sqr);
-    join_none
-  endtask
 endclass

@@ -20,7 +20,7 @@
 
 class layerB_drv extends upperB_drv;
 
-  lower_passthru_seq seq;
+  local lower_sqr sqr;
   
   `uvm_component_utils(layerB_drv)
 
@@ -28,13 +28,18 @@ class layerB_drv extends upperB_drv;
     super.new(name, parent);
   endfunction
 
-  virtual function void connect_phase(uvm_phase phase);
-    if (!uvm_config_db#(lower_passthru_seq)::get(this, "", "passthru_seq", seq)) begin
-      `uvm_fatal("UPPERB/DRV/NOPASS", "No passthru sequence specified")
-    end
-  endfunction
-
   virtual task run_phase(uvm_phase phase);
+    lower_passthru_seq seq = new("seq");
+    lower_sqr sqr;
+
+    if (!uvm_config_db#(lower_sqr)::get(this, "", "lower_sqr", sqr) || sqr == null) begin
+      `uvm_fatal("UPPERB/DRV/NOPASS", "No lower_sqr sequencer specified")
+    end
+
+    fork
+      seq.start(sqr);
+    join_none
+    
     forever begin
       upperB_item tr;
 
