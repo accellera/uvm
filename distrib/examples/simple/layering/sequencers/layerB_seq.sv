@@ -31,11 +31,10 @@ class layerB_seq extends uvm_sequence#(lower_item);
     upperB_item u_item;
 
     forever begin
-      `uvm_create(l_item)
-      start_item(l_item);
       p_sequencer.upperB_item_port.get_next_item(u_item);
+      `uvm_create(l_item)
       l_item.encapsulate(u_item);
-      finish_item(l_item);
+      `uvm_send(l_item)
       p_sequencer.upperB_item_port.item_done();
     end
   endtask

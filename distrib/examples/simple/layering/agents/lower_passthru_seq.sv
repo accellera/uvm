@@ -20,23 +20,10 @@
 
 class lower_passthru_seq extends uvm_sequence#(lower_item);
 
-  lower_item req;
-  
   `uvm_object_utils(lower_passthru_seq)
 
   function new(string name = "lower_passthru_seq");
     super.new(name);
   endfunction
 
-  virtual task body();
-    lower_item m_item;
-    
-    forever begin
-      `uvm_create(m_item);
-      start_item(m_item);
-      req = m_item;
-      wait (req == null);
-      finish_item(m_item);
-    end
-  endtask
 endclass

@@ -46,7 +46,6 @@ class tb_env extends uvm_env;
 
     upA = upperA_agt::type_id::create("upA", this);
     uvm_config_db#(virtual upperA_if)::set(this, "upA", "vif", null);
-    uvm_config_db#(lower_sqr)::set(this, "upA.drv", "lower_sqr", low.sqr);
     set_inst_override_by_type("upA.drv", upperA_drv::get_type(), layerA_drv::get_type());
     set_inst_override_by_type("upA.mon", upperA_mon::get_type(), layerA_mon::get_type());
 

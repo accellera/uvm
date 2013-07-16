@@ -29,24 +29,26 @@ class layerB_drv extends upperB_drv;
   endfunction
 
   virtual task run_phase(uvm_phase phase);
-    lower_passthru_seq seq = new("seq");
-    lower_sqr sqr;
+    lower_passthru_seq l_seq;
+    lower_sqr          l_sqr;
+    int                pri = -1;
 
-    if (!uvm_config_db#(lower_sqr)::get(this, "", "lower_sqr", sqr) || sqr == null) begin
+    if (!uvm_config_db#(lower_sqr)::get(this, "", "lower_sqr", l_sqr) || l_sqr == null) begin
       `uvm_fatal("UPPERB/DRV/NOPASS", "No lower_sqr sequencer specified")
     end
+    uvm_config_db#(int)::get(this, "", "pri", pri);
 
-    fork
-      seq.start(sqr);
-    join_none
+    l_seq = lower_passthru_seq::type_id::create("l_seq", this);
     
     forever begin
-      upperB_item tr;
+      upperB_item u_item;
+      lower_item  l_item;
 
-      wait (seq.req != null);
-      seq_item_port.get_next_item(tr);
-      seq.req.encapsulate(tr);
-      seq.req = null;
+      seq_item_port.get_next_item(u_item);
+      l_item = lower_item::type_id::create("l_item", this);
+      l_item.encapsulate(u_item);
+      l_seq.start_item(l_item, pri, l_sqr);
+      l_seq.finish_item(l_item, pri);
       seq_item_port.item_done();
     end
   endtask
