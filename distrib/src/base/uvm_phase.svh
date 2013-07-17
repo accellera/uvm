@@ -464,6 +464,8 @@ class uvm_phase extends uvm_object;
   //
   extern function void jump(uvm_phase phase);
 
+  extern function void set_jump_phase(uvm_phase phase) ;
+  extern function void end_prematurely() ;
 
   // Function: jump_all
   //
@@ -546,6 +548,7 @@ class uvm_phase extends uvm_object;
   local bit                m_jump_bkwd;
   local bit                m_jump_fwd;
   local uvm_phase          m_jump_phase;
+  local bit                m_premature_end;
   extern function void clear(uvm_phase_state state = UVM_PHASE_DORMANT);
   extern function void clear_successors(
                              uvm_phase_state state = UVM_PHASE_DORMANT,
@@ -1334,7 +1337,7 @@ task uvm_phase::execute_phase();
            fork
              // JUMP
              begin
-                wait (m_jump_fwd || m_jump_bkwd);
+                wait (m_premature_end);
                 `UVM_PH_TRACE("PH/TRC/EXE/JUMP","PHASE EXIT ON JUMP REQUEST",this,UVM_DEBUG)
              end
   
@@ -1458,28 +1461,47 @@ task uvm_phase::execute_phase();
 
   if (m_phase_type == UVM_PHASE_NODE) begin
 
-  if(m_jump_fwd || m_jump_bkwd) begin
-    state_chg.m_jump_to = m_jump_phase;
-    
-    `uvm_info("PH_JUMP",
-            $sformatf("phase %s (schedule %s, domain %s) is jumping to phase %s",
-             get_name(), get_schedule_name(), get_domain_name(), m_jump_phase.get_name()),
-            UVM_MEDIUM);
-
-
-    #0; // LET ANY WAITERS ON READY_TO_END TO WAKE UP
-
+    if(m_premature_end) begin
+      state_chg.m_jump_to = m_jump_phase;
+      
+      `uvm_info("PH_JUMP",
+              $sformatf("phase %s (schedule %s, domain %s) is jumping to phase %s",
+               get_name(), get_schedule_name(), get_domain_name(), m_jump_phase.get_name()),
+              UVM_MEDIUM);
+  
+  
+      #0; // LET ANY WAITERS ON READY_TO_END TO WAKE UP
+      if (m_phase_trace)
+        `UVM_PH_TRACE("PH_END","JUMPING OUT OF PHASE",this,UVM_HIGH)
+    end
+    else begin
+      // WAIT FOR PREDECESSORS:  // WAIT FOR PREDECESSORS:
+      // function phases only
+      if (task_phase == null)
+        m_wait_for_pred();
+    end
+  
+    //-------
+    // ENDED:
+    //-------
     // execute 'phase_ended' callbacks
     if (m_phase_trace)
-      `UVM_PH_TRACE("PH_END","JUMPING OUT OF PHASE",this,UVM_HIGH)
+      `UVM_PH_TRACE("PH_END","ENDING PHASE",this,UVM_HIGH)
     state_chg.m_prev_state = m_state;
     m_state = UVM_PHASE_ENDED;
     `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
     if (m_imp != null)
-       m_imp.traverse(top,this,UVM_PHASE_ENDED);
+      m_imp.traverse(top,this,UVM_PHASE_ENDED);
     #0; // LET ANY WAITERS WAKE UP
+  
+  
+    //---------
+    // CLEANUP:
+    //---------
+    // kill this phase's threads
     state_chg.m_prev_state = m_state;
-    m_state = UVM_PHASE_JUMPING;
+    if(m_premature_end) m_state = UVM_PHASE_JUMPING;
+    else m_state = UVM_PHASE_CLEANUP ;
     `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
     if (m_phase_proc != null) begin
       m_phase_proc.kill();
@@ -1487,72 +1509,40 @@ task uvm_phase::execute_phase();
     end
     #0; // LET ANY WAITERS WAKE UP
     phase_done.clear();
+  end
 
+  //------
+  // DONE:
+  //------
+  m_premature_end = 0 ;
+  if(m_jump_fwd || m_jump_bkwd) begin
     if(m_jump_fwd) begin
       clear_successors(UVM_PHASE_DONE,m_jump_phase);
     end
     m_jump_phase.clear_successors();
     m_jump_fwd = 0;
     m_jump_bkwd = 0;
+  end
+  else begin
+
+    if (m_phase_trace)
+      `UVM_PH_TRACE("PH/TRC/DONE","Completed phase",this,UVM_LOW)
+    state_chg.m_prev_state = m_state;
+    m_state = UVM_PHASE_DONE;
+    `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
+    m_phase_proc = null;
+    #0; // LET ANY WAITERS WAKE UP
+  end
+
+//-----------
+// SCHEDULED:
+//-----------
+  if(m_jump_fwd || m_jump_bkwd) begin
     void'(m_phase_hopper.try_put(m_jump_phase));
     m_jump_phase = null;
-    return;
   end
-
-  // WAIT FOR PREDECESSORS:  // WAIT FOR PREDECESSORS:
-  // function phases only
-  if (task_phase == null)
-    m_wait_for_pred();
-
-
-  //-------
-  // ENDED:
-  //-------
-  // execute 'phase_ended' callbacks
-  if (m_phase_trace)
-    `UVM_PH_TRACE("PH_END","ENDING PHASE",this,UVM_HIGH)
-  state_chg.m_prev_state = m_state;
-  m_state = UVM_PHASE_ENDED;
-  `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
-  if (m_imp != null)
-    m_imp.traverse(top,this,UVM_PHASE_ENDED);
-  #0; // LET ANY WAITERS WAKE UP
-
-  //---------
-  // CLEANUP:
-  //---------
-  // kill this phase's threads
-  state_chg.m_prev_state = m_state;
-  m_state = UVM_PHASE_CLEANUP;
-  `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
-  if (m_phase_proc != null) begin
-    m_phase_proc.kill();
-    m_phase_proc = null;
-  end
-  #0; // LET ANY WAITERS WAKE UP
-  phase_done.clear();
-
-  end
-
-
-  //------
-  // DONE:
-  //------
-  if (m_phase_trace)
-    `UVM_PH_TRACE("PH/TRC/DONE","Completed phase",this,UVM_LOW)
-  state_chg.m_prev_state = m_state;
-  m_state = UVM_PHASE_DONE;
-  `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
-  m_phase_proc = null;
-  #0; // LET ANY WAITERS WAKE UP
-
-
-
-  //-----------
-  // SCHEDULED:
-  //-----------
   // If more successors, schedule them to run now
-  if (m_successors.size() == 0) begin
+  else if (m_successors.size() == 0) begin
     top.m_phase_all_done=1;
   end 
   else begin
@@ -1815,17 +1805,8 @@ endtask
 // Implementation - Jumping
 //-------------------------
 
-// jump
-// ----
-//
-// Note that this function does not directly alter flow of control.
-// That is, the new phase is not initiated in this function.
-// Rather, flags are set which execute_phase() uses to determine
-// that a jump has been requested and performs the jump.
-
-function void uvm_phase::jump(uvm_phase phase);
+function void uvm_phase::set_jump_phase(uvm_phase phase) ;
   uvm_phase d;
-  // TBD refactor
 
   if ((m_state <  UVM_PHASE_STARTED) ||
       (m_state >  UVM_PHASE_READY_TO_END) )
@@ -1874,8 +1855,23 @@ function void uvm_phase::jump(uvm_phase phase);
   end
   
   m_jump_phase = d;
-  //m_terminate_phase(); // JAR - not needed
+endfunction
 
+function void uvm_phase::end_prematurely() ;
+   m_premature_end = 1 ;
+endfunction
+
+// jump
+// ----
+//
+// Note that this function does not directly alter flow of control.
+// That is, the new phase is not initiated in this function.
+// Rather, flags are set which execute_phase() uses to determine
+// that a jump has been requested and performs the jump.
+
+function void uvm_phase::jump(uvm_phase phase);
+   set_jump_phase(phase) ;
+   end_prematurely() ;
 endfunction
 
 
