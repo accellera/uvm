@@ -47,7 +47,7 @@ module test;
 
 	class blob extends blob0;
 		typedef int int_a[$];
-		typedef bit int_aa[blob];
+		typedef int int_aa[blob];
 
 		rand blob b0,b1;
 		rand blob arr[];
@@ -61,7 +61,7 @@ module test;
 			super.new(name);
 		endfunction
 
-
+		// collect all refs
 		function void idset(ref int_aa seen);
 			blob q[$];
 			q = arr;
@@ -69,7 +69,10 @@ module test;
 			q.push_back(b1);
 
 			foreach(q[idx]) begin
-				seen[q[idx]]++;
+				if(seen.exists(q[idx]))
+					seen[q[idx]]++;
+				else	
+					seen[q[idx]]=1;	
 
 				if(seen[q[idx]]==1)  
 					if(q[idx]!=null)       
@@ -77,6 +80,7 @@ module test;
 			end
 		endfunction
 
+		// compare the refs statistics
 		static function void compare_idset(int_aa left, int_aa right);
 			int unsigned id0[$],id1[$];
 
@@ -89,21 +93,20 @@ module test;
 			id0.sort();
 			id1.sort();
 
-			assert(id0.size() == id1.size()) else `uvm_error("TEST","structure different (unique refs differ)");   
+			assert(id0.size() == id1.size()) else `uvm_error("TEST","structure different (number of unique refs differ)");   
 			
 			for(int i=0;i<id0.size();i++) begin
-				assert(id0[i]==id1[i]) else `uvm_error("TEST",$sformatf("number of refs differ @%0d has%0d while @%0d has %0d",
-					id0,id0[i],id1,id1[i]))
+				assert(id0[i]==id1[i]) else `uvm_error("TEST",$sformatf("left %0d  right %0d",id0[i],id1[i]))
 			end	
 
 		endfunction 
 
-		static function void compare_deep(blob a, blob b);
+		static function void compare_deep(blob orig, blob transformed);
 			int_aa a0,a1;
-			a.idset(a0);
-			b.idset(a1);
-			`uvm_info("TES-LEFT",a.sprint(),UVM_NONE)
-			`uvm_info("TEST-RIGHT",a.sprint(),UVM_NONE)  
+			orig.idset(a0);
+			transformed.idset(a1);
+			`uvm_info("TEST-ORIG",orig.sprint(),UVM_NONE)
+			`uvm_info("TEST-TRANS",transformed.sprint(),UVM_NONE)  
 			compare_idset(a0,a1);
 		endfunction 
 
@@ -124,6 +127,7 @@ module test;
 	initial begin
 		blob inst;
 		blob clone;
+		blob old_scratch;
 
 		repeat(1) begin
 			int unsigned y;
@@ -171,15 +175,22 @@ module test;
 				$display($sformatf("%p",inst));
 				$display(inst.sprint());
 
+				// test clone() for value-equal and structure-equal
 				assert($cast(clone,inst.clone()));
 				assert(inst.compare(clone)) else `uvm_error("TEST","clone doesnt preserve value")
-					blob::compare_deep(clone,inst);
+				blob::compare_deep(inst,clone);
 
+				// test copy() for value-equal and structure-equal on new()d object
 				clone=new;
 				clone.copy(inst);
-				assert(inst.compare(clone)) else `uvm_error("TEST","clone doesnt preserve value")
-					blob::compare_deep(clone,inst);
-
+				assert(inst.compare(clone)) else `uvm_error("TEST","copy doesnt preserve value")
+				blob::compare_deep(inst,clone);
+				
+				// test copy() for value-equal and structure-equal on existing object				
+				old_scratch.copy(inst);
+				assert(clone.compare(old_scratch)) else `uvm_error("TEST","copy doesnt preserve value (while copy() to existing obj)")
+				blob::compare_deep(clone,old_scratch);
+				
 			end 
 			begin
 				uvm_report_server svr;
