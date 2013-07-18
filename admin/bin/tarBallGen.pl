@@ -15,11 +15,11 @@ my $branch = undef;
 my $localBranch = undef;
 
 
-$tag       =           "UVM_1_1_b_RELEASE";
-$branch       =        "UVM_1_1_b";
+$tag       =           "UVM_1_1_d_RELEASE";
+$branch       =        "UVM_1_1_d";
 $localBranch     =     $branch."_local";
-$rc        =           "RC3";
-$prefix    =           "uvm-1.1b";
+$rc        =           "RC7";
+$prefix    =           "uvm-1.1d";
 $username  =           "ambarsarkar";
 #my $debug  =           1; # Do everything except push if TRUE
 my $debug  =           0; # Do everything except push if TRUE

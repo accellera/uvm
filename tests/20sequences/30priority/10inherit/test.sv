@@ -72,11 +72,10 @@ class top_seq extends uvm_sequence;
    
    function new(string name = "");
       super.new(name);
+      set_automatic_phase_objection(1);
    endfunction
    
    task body();
-      if (starting_phase != null) starting_phase.raise_objection(this);
-
       `uvm_info("SEQPRI", $sformatf("Executing sequence with pri=%0d.", get_priority()), UVM_LOW)
 
       if (get_priority() != pri) begin
@@ -86,8 +85,6 @@ class top_seq extends uvm_sequence;
 
       seq = new("seq");
       seq.start(get_sequencer(), this);
-
-      if (starting_phase != null) starting_phase.drop_objection(this);
    endtask
 endclass
 

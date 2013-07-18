@@ -176,6 +176,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     super.new(name);
     m_sequence_state = CREATED;
     m_wait_for_grant_semaphore = 0;
+    m_init_phase_daps(1);
   endfunction
 
 
@@ -241,7 +242,8 @@ class uvm_sequence_base extends uvm_sequence_item;
                       uvm_sequence_base parent_sequence = null,
                       int this_priority = -1,
                       bit call_pre_post = 1);
-
+    bit                  old_automatic_phase_objection;
+     
     set_item_context(parent_sequence, sequencer);
 
     if (!(m_sequence_state inside {CREATED,STOPPED,FINISHED})) begin
@@ -296,6 +298,13 @@ class uvm_sequence_base extends uvm_sequence_item;
 
         // absorb delta to ensure PRE_START was seen
         #0;
+
+        // Raise the objection if enabled
+        // (This will lock the uvm_get_to_lock_dap)
+        if (get_automatic_phase_objection()) begin
+           m_safe_raise_starting_phase("automatic phase objection");
+        end
+         
         pre_start();
 
         if (call_pre_post == 1) begin
@@ -330,6 +339,11 @@ class uvm_sequence_base extends uvm_sequence_item;
         #0;
         post_start();
 
+        // Drop the objection if enabled
+        if (get_automatic_phase_objection()) begin
+           m_safe_drop_starting_phase("automatic phase objection");
+        end
+         
         m_sequence_state = FINISHED;
         #0;
 
@@ -352,6 +366,10 @@ class uvm_sequence_base extends uvm_sequence_item;
     if ((m_parent_sequence != null) && (m_parent_sequence.children_array.exists(this))) begin
        m_parent_sequence.children_array.delete(this);
     end
+
+    old_automatic_phase_objection = get_automatic_phase_objection();
+    m_init_phase_daps(1);
+    set_automatic_phase_objection(old_automatic_phase_objection);
   endtask
 
 
@@ -456,6 +474,26 @@ class uvm_sequence_base extends uvm_sequence_item;
   endtask
 
 
+  // Group: Run-Time Phasing
+  //
+
+  // Automatic Phase Objection DAP
+  local uvm_get_to_lock_dap#(bit) m_automatic_phase_objection_dap;
+
+  // Function- m_init_phase_daps
+  // Either creates or renames DAPS
+  function void m_init_phase_daps(bit create);
+     string apo_name = $sformatf("%s.automatic_phase_objection", get_full_name());
+
+     if (create) begin
+        m_automatic_phase_objection_dap = uvm_get_to_lock_dap#(bit)::type_id::create(apo_name, get_sequencer());
+     end
+     else begin
+        m_automatic_phase_objection_dap.set_name(apo_name);
+     end
+  endfunction : m_init_phase_daps
+   
+
   // Variable: starting_phase
   //
   // If non-null, specifies the phase in which this sequence was started.
@@ -473,6 +511,82 @@ class uvm_sequence_base extends uvm_sequence_item;
   //
   uvm_phase starting_phase;
 
+  // Function: set_automatic_phase_objection
+  // Sets the 'automatically object to starting phase' bit.
+  //
+  // The most common interaction with the starting phase
+  // within a sequence is to simply ~raise~ the phase's objection
+  // prior to executing the sequence, and ~drop~ the objection
+  // after ending the sequence (either naturally, or
+  // via a call to <kill>). In order to 
+  // simplify this interaction for the user, the UVM
+  // provides the ability to perform this functionality
+  // automatically.
+  //
+  // For example:
+  //| function my_sequence::new(string name="unnamed");
+  //|   super.new(name);
+  //|   set_automatic_phase_objection(1);
+  //| endfunction : new
+  //
+  // From a timeline point of view, the automatic phase objection
+  // looks like:
+  //| start() is executed
+  //|   --! Objection is raised !--
+  //|   pre_start() is executed
+  //|   pre_body() is optionally executed
+  //|   body() is executed
+  //|   post_body() is optionally executed
+  //|   post_start() is executed
+  //|   --! Objection is dropped !--
+  //| start() unblocks
+  //
+  // This functionality can also be enabled in sequences
+  // which were not written with UVM Run-Time Phasing in mind:
+  //| my_legacy_seq_type seq = new("seq");
+  //| seq.set_automatic_phase_objection(1);
+  //| seq.start(my_sequencer);
+  //
+  // Internally, the <uvm_sequence_base> uses a <uvm_get_to_lock_dap> to 
+  // protect the ~automatic_phase_objection~ value from being modified after
+  // after the reference has been read.  Once the sequence has ended 
+  // its execution (either via natural termination, or being killed),
+  // then the ~automatic_phase_objection~ value can be modified again.
+  //
+  // NOTE: Never set the automatic phase objection bit to '1' if your sequence
+  // runs with a forever loop inside of the body, as the objection will
+  // never get dropped!
+  function void set_automatic_phase_objection(bit value);
+     m_automatic_phase_objection_dap.set(value);
+  endfunction : set_automatic_phase_objection
+
+  // Function: get_automatic_phase_objection
+  // Returns (and locks) the value of the 'automatically object to 
+  // starting phase' bit.
+  //
+  // If '1', then the sequence will automatically raise an objection
+  // to the starting phase (if the starting phase is not-null) immediately
+  // prior to <pre_start> being called.  The objection will be dropped
+  // after <post_start> has executed, or <kill> has been called.
+  //
+  function bit get_automatic_phase_objection();
+     return m_automatic_phase_objection_dap.get();
+  endfunction : get_automatic_phase_objection
+
+  // m_safe_raise_starting_phase
+  function void m_safe_raise_starting_phase(string description = "",
+                                            int count = 1);
+     if (starting_phase != null)
+       starting_phase.raise_objection(this, description, count);
+  endfunction : m_safe_raise_starting_phase
+
+  // m_safe_drop_starting_phase
+  function void m_safe_drop_starting_phase(string description = "",
+                                           int count = 1);
+     if (starting_phase != null)
+       starting_phase.drop_objection(this, description, count);
+  endfunction : m_safe_drop_starting_phase
+   
   //------------------------
   // Group: Sequence Control
   //------------------------
@@ -670,11 +784,19 @@ class uvm_sequence_base extends uvm_sequence_item;
       // kill locally.
       if (m_sequencer == null) begin
         m_kill();
+        // We need to drop the objection if we raised it...
+        if (get_automatic_phase_objection()) begin
+           m_safe_drop_starting_phase("automatic phase objection");
+        end
         return;
       end
       // If we are attached to a sequencer, then the sequencer
       // will clear out queues, and then kill this sequence
       m_sequencer.kill_sequence(this);
+      // We need to drop the objection if we raised it...
+      if (get_automatic_phase_objection()) begin
+         m_safe_drop_starting_phase("automatic phase objection");
+      end
       return;
     end
   endfunction
