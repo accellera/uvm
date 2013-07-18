@@ -45,7 +45,7 @@ class test_pre_reset_seq extends my_seq;
 
   function new(string name="test_pre_reset_seq");
      super.new(name);
-     set_automatic_objection(1);
+     set_automatic_phase_objection(1);
   endfunction
 
 endclass : test_pre_reset_seq
@@ -61,7 +61,7 @@ class test_reset_seq extends my_seq;
 
   function new(string name="test_reset_seq");
      super.new(name);
-     set_automatic_objection(1);
+     set_automatic_phase_objection(1);
   endfunction
 
 endclass : test_reset_seq
@@ -78,7 +78,7 @@ class top_training_seq extends top_sequence;
 
   function new(string name="top_training_seq");
      super.new(name);
-     set_automatic_objection(1);
+     set_automatic_phase_objection(1);
   endfunction
 
 endclass : top_training_seq
@@ -94,7 +94,7 @@ class bot_training_seq extends bot_sequence;
 
   function new(string name="bot_training_seq");
      super.new(name);
-     set_automatic_objection(1);
+     set_automatic_phase_objection(1);
   endfunction
 
 endclass : bot_training_seq
@@ -117,7 +117,7 @@ class top_configure_seq extends top_sequence;
 
   function new(string name="top_configure_seq");
      super.new(name);
-     set_automatic_objection(1);
+     set_automatic_phase_objection(1);
   endfunction
 
 endclass : top_configure_seq
@@ -140,7 +140,7 @@ class top_random_seq extends top_sequence;
 
   function new(string name="top_random_seq");
      super.new(name);
-     set_automatic_objection(1);
+     set_automatic_phase_objection(1);
   endfunction
 
 endclass : top_random_seq
@@ -162,7 +162,7 @@ class bot_random_seq extends bot_sequence;
 
   function new(string name="bot_random_seq");
      super.new(name);
-     set_automatic_objection(1);
+     set_automatic_phase_objection(1);
   endfunction
 
 endclass : bot_random_seq

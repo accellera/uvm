@@ -48,7 +48,7 @@ class myseq extends uvm_sequence;
 
   function new(string name="myseq");
      super.new(name);
-     set_automatic_objection(1);
+     set_automatic_phase_objection(1);
   endfunction
 
 endclass

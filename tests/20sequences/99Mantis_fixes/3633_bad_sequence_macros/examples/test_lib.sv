@@ -241,15 +241,12 @@ class test_2m_4s_azhang_vseq extends uvm_sequence;
     `uvm_info(get_type_name(),$sformatf("%s end of body...", get_sequence_path()), UVM_MEDIUM);
   endtask : body
 
-  task pre_body();
-    set_automatic_objection(1);
-  endtask: pre_body
-
   `uvm_object_utils(test_2m_4s_azhang_vseq)
   `uvm_declare_p_sequencer(test_2m_4s_azhang_vseqr)
 
   function new (string name = "test_2m_4s_azhang_vseq");
     super.new(name);
+    set_automatic_phase_objection(1);
   endfunction : new
 
 endclass : test_2m_4s_azhang_vseq

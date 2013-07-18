@@ -57,7 +57,7 @@ module test;
   class simple_seq extends uvm_sequence #(simple_item);
     function new(string name="simple_seq");
       super.new(name);
-      set_automatic_objection(1);
+      set_automatic_phase_objection(1);
     endfunction
     `uvm_sequence_utils(simple_seq, simple_sequencer)    
     virtual task body();

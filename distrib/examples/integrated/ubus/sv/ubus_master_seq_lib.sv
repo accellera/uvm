@@ -32,16 +32,9 @@ virtual class ubus_base_sequence extends uvm_sequence #(ubus_transfer);
 
   function new(string name="ubus_base_seq");
     super.new(name);
+    set_automatic_phase_objection(1);
   endfunction
 
-  // Only automatically raise the objection if we have no parent sequence.
-  // There is no need to raise for sub-sequences in this example, since the 
-  // root sequence will encapsulate the sub-sequence. 
-  virtual task pre_start();
-     if (get_parent_sequence() == null)
-       set_automatic_objection(1);
-  endtask : pre_start
-   
 endclass : ubus_base_sequence
 
 //------------------------------------------------------------------------------

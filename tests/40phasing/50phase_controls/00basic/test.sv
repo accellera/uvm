@@ -79,7 +79,7 @@ endclass : basic_sequencer
 class basic_default_seq extends uvm_sequence #(basic_item);
   function new(string name="basic_default_seq");
     super.new(name);
-    set_automatic_objection(1);
+    set_automatic_phase_objection(1);
   endfunction
 
   `uvm_object_utils(basic_default_seq)
@@ -96,7 +96,7 @@ endclass : basic_default_seq
 class basic_seq extends uvm_sequence #(basic_item);
   function new(string name="basic_seq");
     super.new(name);
-    set_automatic_objection(1);
+    set_automatic_phase_objection(1);
   endfunction
 
   `uvm_object_utils(basic_seq)
@@ -114,7 +114,7 @@ endclass : basic_seq
 class basic_main_phase_seq extends uvm_sequence #(basic_item);
   function new(string name="basic_main_phase_seq");
     super.new(name);
-    set_automatic_objection(1);
+    set_automatic_phase_objection(1);
   endfunction
 
   `uvm_object_utils(basic_main_phase_seq)

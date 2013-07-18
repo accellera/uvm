@@ -34,7 +34,7 @@ class subseq extends uvm_sequence;
 
    function new(string name = "subseq");
       super.new(name);
-      set_automatic_objection(1);
+      set_automatic_phase_objection(1);
       do_not_randomize = 1;
    endfunction
 

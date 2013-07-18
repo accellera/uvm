@@ -24,11 +24,8 @@ virtual class vip_sequence extends uvm_sequence#(vip_tr);
 
   function new(string name);
     super.new(name);
+    set_automatic_phase_objection(1);
   endfunction
-  
-  virtual task pre_body();
-     set_automatic_objection(1);
-  endtask
   
 endclass
 

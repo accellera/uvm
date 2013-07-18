@@ -72,7 +72,7 @@ class top_seq extends uvm_sequence;
    
    function new(string name = "");
       super.new(name);
-      set_automatic_objection(1);
+      set_automatic_phase_objection(1);
    endfunction
    
    task body();

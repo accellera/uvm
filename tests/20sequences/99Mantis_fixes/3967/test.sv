@@ -92,7 +92,7 @@ class cust_data_sequence extends uvm_sequence#(cust_data);
 
   function new(string name = "cust_data_sequence");
      super.new(name);
-     set_automatic_objection(1);
+     set_automatic_phase_objection(1);
   endfunction
 
   virtual task body();
