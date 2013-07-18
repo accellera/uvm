@@ -2,6 +2,7 @@
 //   Copyright 2010-2011 Cadence Design Systems, Inc. 
 //   Copyright 2010-2011 Mentor Graphics Corporation
 //   Copyright 2011 Synopsys, Inc.
+//   Copyright 2013 NVIDIA Corporation
 //   All Rights Reserved Worldwide 
 // 
 //   Licensed under the Apache License, Version 2.0 (the 
@@ -26,9 +27,7 @@ import uvm_pkg::*;
 `include "uvm_macros.svh"
 
 // Test the simple setting of default sequences for a couple of
-// different phases, configure and main. This is the same as
-// test 01simple except it uses the config mechanism to 
-// test the configurations.
+// different phases, configure and main.
 
 class myseq extends uvm_sequence;
   static int start_cnt = 0, end_cnt = 0;
@@ -36,19 +35,14 @@ class myseq extends uvm_sequence;
   
   task body;
     start_cnt++;
-    `uvm_info("INBODY", 
-	      {starting_phase.get_name()," Starting myseq!!!"}, 
-	      UVM_NONE)
+    `uvm_info("INBODY", "Starting myseq!!!", UVM_NONE)
     #10;
-    `uvm_info("INBODY", 
-	      {starting_phase.get_name()," Ending myseq!!!"}, 
-	      UVM_NONE)
+    `uvm_info("INBODY", "Ending myseq!!!", UVM_NONE)
     end_cnt++;
   endtask
 
   function new(string name="myseq");
      super.new(name);
-     set_automatic_phase_objection(1);
   endfunction
 
 endclass
@@ -59,10 +53,19 @@ class myseqr extends uvm_sequencer;
   endfunction
   `uvm_component_utils(myseqr)
 
-  task run_phase(uvm_phase phase);
+  task configure_phase(uvm_phase phase);
     phase.raise_objection(this);
-    `uvm_info("RUN","In run!!", UVM_NONE)
-    #100;
+    `uvm_info("CONFIG", "In configure!!!", UVM_NONE)
+    #20;
+    `uvm_info("CONFIG", "Exiting configure!!!", UVM_NONE)
+    phase.drop_objection(this);
+  endtask
+    
+  task main_phase(uvm_phase phase);
+    phase.raise_objection(this);
+    `uvm_info("MAIN","In main!!!", UVM_NONE)
+    #1;
+    `uvm_info("MAIN","Exiting main!!!", UVM_NONE)
     phase.drop_objection(this);
   endtask
 
@@ -70,6 +73,9 @@ endclass
 
 
 class test extends uvm_test;
+
+   myseq seq_ran, seq_killed;
+
    myseqr seqr;
    function new(string name = "my_comp", uvm_component parent = null);
       super.new(name, parent);
@@ -78,21 +84,29 @@ class test extends uvm_test;
    `uvm_component_utils(test)
 
    function void build_phase(uvm_phase phase);
-      myseq mseq;
-
       seqr = new("seqr", this);
+      seq_ran = myseq::type_id::create("seq_ran", this);
+      seq_killed = myseq::type_id::create("seq_killed", this);
 
-      uvm_config_wrapper::set(this, "seqr.configure_phase", 
-			      "default_sequence",  myseq::type_id::get());
-      mseq = myseq::type_id::create("myseq1",,get_full_name());
-      void'(mseq.randomize());
-      uvm_config_seq::set(this, "seqr.main_phase", "default_sequence",  mseq);
+      uvm_config_db #(uvm_sequence_base)::set(this, "seqr.configure_phase", "default_sequence", seq_ran);
+      uvm_config_db #(uvm_sequence_base)::set(this, "seqr.main_phase", "default_sequence", seq_killed);
    endfunction
    
    function void report_phase(uvm_phase phase);
-     if(myseq::start_cnt != 2 && myseq::end_cnt != 2)
+     bit pass = 1;
+     if (seq_ran.get_sequence_state() != FINISHED) begin
+         pass = 0;
+         `uvm_error("NOT_FINISHED", "'seq_ran' not in the 'FINISHED' state!")
+     end
+
+     if (seq_killed.get_sequence_state() != STOPPED) begin
+         pass = 0;
+         `uvm_error("NOT_STOPPED", "'seq_killed' not in the 'STOPPED' state!")
+     end
+
+     if (!pass) 
        $display("*** UVM TEST FAILED ***");
-      else
+     else
        $display("*** UVM TEST PASSED ***");
    endfunction
    

@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc. 
 //   Copyright 2010-2011 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -402,6 +403,10 @@ class uvm_objection extends uvm_report_object;
     int idx;
     uvm_objection_context_object ctxt;
 
+    // Ignore raise if count is 0
+    if (count == 0)
+      return;
+
     if (m_total_count.exists(obj))
       m_total_count[obj] += count;
     else 
@@ -589,6 +594,10 @@ class uvm_objection extends uvm_report_object;
                         string description="",
                         int count=1,
                         int in_top_thread=0);
+
+    // Ignore drops if the count is 0
+    if (count == 0)
+      return;
 
     if (!m_total_count.exists(obj) || (count > m_total_count[obj])) begin
       if(m_cleared)
