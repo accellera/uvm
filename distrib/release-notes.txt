@@ -47,6 +47,9 @@ Mantis 3407: uvm_event should be a param class
 Mantis 3741: Added command-line functionality to setting
 default_sequence (+uvm_set_default_sequence)
 
+Mantis 3901: Feature request to prevent objection from throwing 
+decrement-below-zero error if the count is 0
+
 Mantis 4091: Added missing top-level block name to uvm_reg_file::get_fullname()
 
 Mantis 4160: uvm_comparer not using verbosity setting for print_msg
@@ -55,7 +58,14 @@ Mantis 4181: transaction order unclear and cant be changed when bus/reg size dif
 
 Mantis 4366: uvm_sequence_library documentation missing from generate html
 
+Mantis 4378: Proper documentation of set_inst_override_by_name and 
+             set_type_override_by_name in uvm_component.
+
 Mantis 4425: BUSY flag now cleared when register model is reset.
+
+Mantis 4430: default sequences are now killed during PHASE_ENDED
+
+Mantis 4434: Added get_objection_count to uvm_phase
 
 Mantis 4513: Added user-defined memory allocation policy to uvm_vreg::allocat()
 

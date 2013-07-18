@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010-2013 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -352,6 +353,12 @@ class uvm_phase extends uvm_object;
                                                int count=1);
 
 
+  // Function: get_objection_count
+  //
+  // Returns the current number of objections to ending this phase raised by the given ~object~.
+  //
+  extern virtual function int get_objection_count( uvm_object obj=null );
+   
   // Functions: sync and unsync
   //
   // Add soft sync relationships between nodes
@@ -1695,6 +1702,12 @@ function void uvm_phase::drop_objection (uvm_object obj,
   phase_done.drop_objection(obj,description,count);
 endfunction
 
+// get_objection_count
+// -------------------
+
+function void uvm_phase::get_objection_count (uvm_object obj);
+   return phase_done.get_objection_count(obj);
+endfunction : get_objection_count
 
 // sync
 // ----
