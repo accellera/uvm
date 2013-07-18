@@ -274,8 +274,9 @@ Group: Globals  {
    File: Globals                      (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_globals.svh)
    Group: Data Access {
           File: Overview              (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/dap.txt)
-          File: Set/Get Basae         (no auto-title, UVM_ROOT/distrib/docs/html/src/dap/uvm_set_get_dap_base.svh)
-          File: Get-To-Lock          (no auto-title, UVM_ROOT/distrib/docs/html/src/dap/uvm_g2l_dap.svh)
+          File: Set/Get Base          (no auto-title, UVM_ROOT/distrib/docs/html/src/dap/uvm_set_get_dap_base.svh)
+          File: Get-To-Lock           (no auto-title, UVM_ROOT/distrib/docs/html/src/dap/uvm_get_to_lock_dap.svh)
+          File: Set-Before-Get        (no auto-title, UVM_ROOT/distrib/docs/html/src/dap/uvm_set_before_get_dap.svh)
           }  Group: Data Access
    }  # Group: Globals
 
