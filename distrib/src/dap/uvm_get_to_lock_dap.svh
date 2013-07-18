@@ -21,7 +21,7 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
-// Class: uvm_g2l_dap
+// Class: uvm_get_to_lock_dap
 // Provides a 'Get-To-Lock' Data Access Policy.
 //
 // The 'Get-To-Lock' Data Access Policy allows for any number of 'sets',
@@ -32,13 +32,13 @@
 // values in <uvm_sequence_base>.
 //
 
-class uvm_g2l_dap#(type T=int) extends uvm_set_get_dap_base#(T);
+class uvm_get_to_lock_dap#(type T=int) extends uvm_set_get_dap_base#(T);
 
    // Used for self-references
-   typedef uvm_g2l_dap#(T) this_type;
+   typedef uvm_get_to_lock_dap#(T) this_type;
    
    // Parameterized Utils
-   `uvm_object_param_utils(uvm_g2l_dap#(T))
+   `uvm_object_param_utils(uvm_get_to_lock_dap#(T))
    
    // Stored data
    local T m_value;
@@ -48,7 +48,7 @@ class uvm_g2l_dap#(type T=int) extends uvm_set_get_dap_base#(T);
 
    // Function: new
    // Constructor
-   function new(string name="unnamed-uvm_g2l_dap#(T)");
+   function new(string name="unnamed-uvm_get_to_lock_dap#(T)");
       super.new(name);
       m_locked = 0;
    endfunction : new
@@ -62,7 +62,7 @@ class uvm_g2l_dap#(type T=int) extends uvm_set_get_dap_base#(T);
    // already been retrieved via a call to ~get~.
    virtual function void set(T value);
       if (m_locked)
-        `uvm_error("UVM/G2L_DAP/SAG",
+        `uvm_error("UVM/GET_TO_LOCK_DAP/SAG",
                    $sformatf("Attempt to set new value on '%s', but the data access policy forbids setting after a get!",
                              get_full_name()))
       else begin
@@ -107,7 +107,7 @@ class uvm_g2l_dap#(type T=int) extends uvm_set_get_dap_base#(T);
 
    // Group: Introspection
    //
-   // The ~uvm_g2l_dap~ can not support the standard UVM
+   // The ~uvm_get_to_lock_dap~ can not support the standard UVM
    // instrumentation methods (~copy~, ~clone~, ~pack~ and
    // ~unpack~), due to the fact that they would potentially 
    // violate the access policy.
@@ -115,18 +115,18 @@ class uvm_g2l_dap#(type T=int) extends uvm_set_get_dap_base#(T);
    // A call to any of these methods will result in an error.
 
    virtual function void do_copy(uvm_object rhs);
-      `uvm_error("UVM/G2L_DAP/CPY",
-                 "'copy()' is not supported for 'uvm_g2l_dap#(T)'")
+      `uvm_error("UVM/GET_TO_LOCK_DAP/CPY",
+                 "'copy()' is not supported for 'uvm_get_to_lock_dap#(T)'")
    endfunction : do_copy
 
    virtual function void do_pack(uvm_packer packer);
-      `uvm_error("UVM/G2L_DAP/PCK",
-                 "'pack()' is not supported for 'uvm_g2l_dap#(T)'")
+      `uvm_error("UVM/GET_TO_LOCK_DAP/PCK",
+                 "'pack()' is not supported for 'uvm_get_to_lock_dap#(T)'")
    endfunction : do_pack
 
    virtual function void do_unpack(uvm_packer packer);
-      `uvm_error("UVM/G2L_DAP/UPK",
-                 "'unpack()' is not supported for 'uvm_g2l_dap#(T)'")
+      `uvm_error("UVM/GET_TO_LOCK_DAP/UPK",
+                 "'unpack()' is not supported for 'uvm_get_to_lock_dap#(T)'")
    endfunction : do_unpack
 
    // Group- Reporting
@@ -150,5 +150,5 @@ class uvm_g2l_dap#(type T=int) extends uvm_set_get_dap_base#(T);
       
    endfunction : do_print
 
-endclass // uvm_g2l_dap
+endclass // uvm_get_to_lock_dap
 

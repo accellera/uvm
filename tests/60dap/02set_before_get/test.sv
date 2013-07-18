@@ -1,8 +1,5 @@
 // 
 //------------------------------------------------------------------------------
-//   Copyright 2007-2011 Mentor Graphics Corporation
-//   Copyright 2007-2011 Cadence Design Systems, Inc.
-//   Copyright 2010-2011 Synopsys, Inc.
 //   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
@@ -46,13 +43,11 @@ endclass // catcher
    
 class test extends uvm_component;
 
-   uvm_get_to_lock_dap#(int) idap;
-   uvm_get_to_lock_dap#(uvm_object) odap;
+   uvm_set_before_get_dap#(int) idap;
    catcher ctchr;
    
    `uvm_component_utils_begin(test)
       `uvm_field_object(idap, UVM_DEFAULT)
-      `uvm_field_object(odap, UVM_DEFAULT)
    `uvm_component_utils_end
 
    function new(string name, uvm_component parent);
@@ -62,10 +57,11 @@ class test extends uvm_component;
 
    virtual task run_phase(uvm_phase phase);
       bit failed;
-      uvm_get_to_lock_dap#(int) idap2;
+      int value;
+      uvm_set_before_get_dap#(int) idap2;
       
       // Basics 
-      idap = uvm_get_to_lock_dap#(int)::type_id::create("idap", this);
+      idap = uvm_set_before_get_dap#(int)::type_id::create("idap", this);
       idap.set(1);
       idap.set(2);
       if (idap.get() != 2) begin
@@ -74,27 +70,22 @@ class test extends uvm_component;
                     $sformatf("Expected '2', got '%0d'", idap.get()))
       end
 
-      if (idap.try_set(3)) begin
-         failed = 1;
-         `uvm_error("ERR_B",
-                    $sformatf("'try_set(3)' should fail after a get!"))
-      end
-      
-      if (idap.get() != 2) begin
-         failed = 1;
-         `uvm_error("ERR_C", 
-                    $sformatf("Expected '0', got '%0d'", idap.get()))
-      end
-
       idap.print();
 
+      idap2 = uvm_set_before_get_dap#(int)::type_id::create("idap2", this);
       // Would error, so we're catching it...
       uvm_report_cb::add(null, ctchr);
-      idap.set(4);
+      value = idap2.get();
       if (ctchr.seen != 1) begin
          failed = 1;
-         `uvm_error("ERR_D",
-                    $sformatf("Expected error on 'set(4)'!"))
+         `uvm_error("ERR_B",
+                    $sformatf("Expected error on 'get()'!"))
+      end
+      // Won't error...
+      if (idap2.try_get(value)) begin
+         failed = 1;
+         `uvm_error("ERR_C",
+                    $sformatf("Expected 'try_get()' to fail!"))
       end
 
       // Should error...
@@ -102,7 +93,7 @@ class test extends uvm_component;
 
       if (ctchr.seen != 2) begin
          failed = 1;
-         `uvm_error("ERR_E",
+         `uvm_error("ERR_D",
                     $sformatf("Expected error on 'clone'!"))
       end
           
