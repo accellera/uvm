@@ -34,6 +34,22 @@ class uvm_reg_map_info;
 endclass
 
 
+// Class: uvm_reg_transaction_order_policy
+virtual class uvm_reg_transaction_order_policy extends uvm_object;
+    function new(string name = "policy");
+        super.new(name);
+    endfunction
+    
+    // Function: order
+    // the order() function may reorder the sequence of bus transactions
+    // produced by a single uvm_reg transaction (read/write).
+    // This can be used in scenarios when the register width differs from 
+    // the bus width and one register access results in a series of bus transactions.
+    // the first item (0) of the queue will be the first bus transaction (the last($) 
+    // will be the final transaction
+    pure virtual function void order(ref uvm_reg_bus_op q[$]);
+endclass
+
 //------------------------------------------------------------------------------
 //
 // Class: uvm_reg_map
@@ -81,6 +97,8 @@ class uvm_reg_map extends uvm_object;
                             // register share the same address.
    local uvm_reg            m_regs_by_offset_wo[uvm_reg_addr_t]; 
    local uvm_mem            m_mems_by_offset[uvm_reg_map_addr_range];
+
+   local uvm_reg_transaction_order_policy policy;
 
    extern /*local*/ function void Xinit_address_mapX();
 
@@ -640,6 +658,19 @@ class uvm_reg_map extends uvm_object;
    //extern virtual function void      do_pack (uvm_packer packer);
    //extern virtual function void      do_unpack (uvm_packer packer);
 
+
+    // Function: set_transaction_order_policy
+    // set the transacton order policy
+    function void set_transaction_order_policy(uvm_reg_transaction_order_policy pol);
+        policy = pol;
+    endfunction
+    
+    // Function: get_transaction_order_policy
+    // set the transacton order policy
+    function uvm_reg_transaction_order_policy get_transaction_order_policy();
+        return policy;
+    endfunction    
+   
 endclass: uvm_reg_map
    
 
@@ -996,8 +1027,8 @@ function void uvm_reg_map::add_submap (uvm_reg_map child_map,
       if (m_n_bytes > child_map.get_n_bytes(UVM_NO_HIER)) begin
          `uvm_warning("RegModel",
              $sformatf("Adding %0d-byte submap '%s' to %0d-byte parent map '%s'",
-                       m_n_bytes, child_map.get_full_name(),
-                       child_map.get_n_bytes(UVM_NO_HIER), get_full_name()));
+                       child_map.get_n_bytes(UVM_NO_HIER), child_map.get_full_name(),
+                       m_n_bytes, get_full_name()));
       end
    end
 
@@ -1816,9 +1847,10 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
   int unsigned       curr_byte;
   int                n_access_extra, n_access;
   int               n_bits_init;
+  uvm_reg_bus_op    accesses[$];
 
   Xget_bus_infoX(rw, map_info, n_bits_init, lsb, skip);
-  `UVM_DA_TO_QUEUE(addrs,map_info.addr)
+  addrs=map_info.addr;
 
   // if a memory, adjust addresses based on offset
   if (rw.element_kind == UVM_MEM)
@@ -1855,12 +1887,10 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
     curr_byte=0;
     n_bits= n_bits_init;     
               
+    accesses.delete();         
     foreach(addrs[i]) begin: foreach_addr
-
-      uvm_sequence_item bus_req;
       uvm_reg_bus_op rw_access;
       uvm_reg_data_t data;
-
 
       data = (value >> (curr_byte*8)) & ((1'b1 << (bus_width * 8))-1);
        
@@ -1879,6 +1909,22 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
       rw_access.n_bits  = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
       rw_access.byte_en = byte_en;
 
+      accesses.push_back(rw_access); 
+
+      curr_byte += bus_width;
+      n_bits -= bus_width * 8;
+
+    end: foreach_addr
+    
+    // if set utilizy the order policy
+    if(policy!=null)
+        policy.order(accesses);
+    
+    // perform accesses
+    foreach(accesses[i]) begin     
+      uvm_reg_bus_op rw_access=accesses[i];  
+      uvm_sequence_item bus_req;
+        
       adapter.m_set_item(rw);
       bus_req = adapter.reg2bus(rw_access);
       adapter.m_set_item(null);
@@ -1913,15 +1959,12 @@ task uvm_reg_map::do_bus_write (uvm_reg_item rw,
 
       `uvm_info(get_type_name(),
          $sformatf("Wrote 'h%0h at 'h%0h via map \"%s\": %s...",
-            data, addrs[i], rw.map.get_full_name(), rw.status.name()), UVM_FULL)
+            rw_access.data, addrs[i], rw.map.get_full_name(), rw.status.name()), UVM_FULL)
 
       if (rw.status == UVM_NOT_OK)
          break;
-
-      curr_byte += bus_width;
-      n_bits -= bus_width * 8;
-
-    end: foreach_addr
+        
+    end
 
     foreach (addrs[i])
       addrs[i] = addrs[i] + map_info.mem_range.stride;
@@ -1947,9 +1990,10 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
   int                lsb;
   int unsigned       curr_byte;
   int n_access_extra, n_access;
+  uvm_reg_bus_op accesses[$];
 
   Xget_bus_infoX(rw, map_info, n_bits, lsb, skip);
-  `UVM_DA_TO_QUEUE(addrs,map_info.addr)
+  addrs=map_info.addr;
   size = n_bits;
 
   // if a memory, adjust addresses based on offset
@@ -1981,15 +2025,13 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       while (addrs.size() > (n_bits/(bus_width*8) + 1))
         void'(addrs.pop_back());
     end
+    curr_byte=0;
     rw.value[val_idx] = 0;
               
+    accesses.delete();
     foreach (addrs[i]) begin
-
-      uvm_sequence_item bus_req;
       uvm_reg_bus_op rw_access;
-      uvm_reg_data_logic_t data;
        
-
       `uvm_info(get_type_name(),
          $sformatf("Reading address 'h%0h via map \"%s\"...",
                    addrs[i], get_full_name()), UVM_FULL);
@@ -2000,10 +2042,29 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
 
       rw_access.kind = rw.kind;
       rw_access.addr = addrs[i];
-      rw_access.data = 'h0;
+      rw_access.data = curr_byte;
       rw_access.byte_en = byte_en;
       rw_access.n_bits = (n_bits > bus_width*8) ? bus_width*8 : n_bits;
                           
+       accesses.push_back(rw_access);
+
+      curr_byte += bus_width;
+      n_bits -= bus_width * 8;
+    end
+    
+    // if set utilizy the order policy
+    if(policy!=null)
+        policy.order(accesses);
+        
+    // perform accesses
+    foreach(accesses[i]) begin     
+      uvm_reg_bus_op rw_access=accesses[i];  
+      uvm_sequence_item bus_req;
+      uvm_reg_data_logic_t data;   
+      int unsigned curr_byte_;   
+            
+      curr_byte_=rw_access.data;
+      rw_access.data='0;
       adapter.m_set_item(rw);
       bus_req = adapter.reg2bus(rw_access);
       adapter.m_set_item(null);
@@ -2031,7 +2092,7 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
         adapter.bus2reg(bus_req,rw_access);
       end
 
-      data = rw_access.data & ((1<<bus_width*8)-1);
+      data = rw_access.data & ((1<<bus_width*8)-1); // mask the upper bits
 
       rw.status = rw_access.status;
 
@@ -2045,14 +2106,15 @@ task uvm_reg_map::do_bus_read (uvm_reg_item rw,
       if (rw.status == UVM_NOT_OK)
          break;
 
-      rw.value[val_idx] |= data << curr_byte*8;
+      rw.value[val_idx] |= data << curr_byte_*8;
 
       if (rw.parent != null && i == addrs.size()-1)
         rw.parent.post_do(rw);
-
-      curr_byte += bus_width;
-      n_bits -= bus_width * 8;
     end
+    
+
+    foreach (addrs[i])
+      addrs[i] = addrs[i] + map_info.mem_range.stride;
 
     if (rw.element_kind == UVM_FIELD)
        rw.value[val_idx] = (rw.value[val_idx] >> (n_access_extra)) & ((1<<size)-1);

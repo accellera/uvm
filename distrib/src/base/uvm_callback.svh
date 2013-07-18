@@ -668,6 +668,7 @@ class uvm_callbacks #(type T=uvm_object, type CB=uvm_callback)
 
         if($cast(o,obj)) begin
           uvm_queue#(uvm_callback) qr;
+	  void'(uvm_callbacks#(uvm_report_object, uvm_callback)::get());
           qr = uvm_callbacks#(uvm_report_object,uvm_callback)::m_t_inst.m_tw_cb_q;
           for(int i=0; i<qr.size(); ++i)
               q.push_back(qr.get(i)); 

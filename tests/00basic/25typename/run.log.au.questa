@@ -1,0 +1,1 @@
+class foo #(class bar #(class xyz), 88)

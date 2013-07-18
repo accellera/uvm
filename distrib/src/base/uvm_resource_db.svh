@@ -55,16 +55,8 @@ class uvm_resource_db #(type T=uvm_object);
 
   typedef uvm_resource #(T) rsrc_t;
 
-  // All of the functions in this class are static, so there is no need
-  // to instantiate this class ever.  To make sure that the constructor
-  // is never called it's good practice to make it local or at leat
-  // protected. However, IUS doesn't support protected constructors so
-  // we'll just the default constructor instead.  If support for
-  // protected constructors ever becomes available then this comment can
-  // be deleted and the protected constructor uncommented.
-
-  //  protected function new();
-  //  endfunction
+  protected function new();
+  endfunction
 
   // function: get_by_type
   //
@@ -119,7 +111,7 @@ class uvm_resource_db #(type T=uvm_object);
           input rsrc_t rsrc);
 
           T foo;
-          string msg=uvm_type_utils#(T)::typename(foo);
+          string msg=`uvm_typename(foo);
 
           $sformat(msg, "%s '%s%s' (type %s) %s by %s = %s",
               rtype,scope, name=="" ? "" : {".",name}, msg,action,
@@ -331,7 +323,6 @@ class uvm_resource_db #(type T=uvm_object);
 
   static function void dump();
     uvm_resource_pool rp = uvm_resource_pool::get();
-    void'(m_uvm_resource_default_converters::register());
     rp.dump();
   endfunction
 

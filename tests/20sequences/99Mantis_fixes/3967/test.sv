@@ -44,24 +44,16 @@ class cust_driver extends uvm_driver#(cust_data);
     super.new(name, parent);
   endfunction
 
-  task get_and_display(int thread_id);
-    REQ item;
-    forever begin
-      `uvm_info("get_and_display", $sformatf("thread_id=%0d top of loop", thread_id), UVM_LOW);
-      seq_item_port.get_next_item(item);
-      seq_item_port.item_done();
-      item.print();
-    end
-  endtask
-
   virtual protected task run_phase(uvm_phase phase);
-    super.run_phase(phase);
+    REQ item1, item2;
 
-    // Starting two threads to manage the seq_item_port
+    seq_item_port.item_done();
+
     fork
-      get_and_display(1);
-      get_and_display(2);
-    join_none
+      seq_item_port.get_next_item(item1);
+      seq_item_port.get_next_item(item2);
+    join
+
   endtask
 
 endclass
@@ -100,19 +92,12 @@ class cust_data_sequence extends uvm_sequence#(cust_data);
 
   function new(string name = "cust_data_sequence");
      super.new(name);
+     set_automatic_phase_objection(1);
   endfunction
-
-  virtual task pre_body();
-    if (starting_phase!=null) starting_phase.raise_objection(this);
-  endtask : pre_body
 
   virtual task body();
     `uvm_do(req);
   endtask
-
-  virtual task post_body();
-    if (starting_phase!=null) starting_phase.drop_objection(this);
-  endtask : post_body
 
 endclass
 
@@ -121,7 +106,7 @@ class fatal_catcher extends uvm_report_catcher;
   int seen = 0;
   virtual function action_e catch();
     if (get_severity() == UVM_FATAL && get_id() == "uvm_test_top.agent.sequencer" &&
-        (get_message() == "Concurrent calls to send_request() not supported. Check your driver for concurrent calls to get_next_item()" || 
+        (get_message() == "Concurrent calls to get_next_item() not supported. Consider using a semaphore to ensure that concurrent processes take turns in the driver" || 
          get_message() == "Item_done() called with no outstanding requests. Each call to item_done() must be paired with a previous call to get_next_item().")) begin
       seen++;
       return CAUGHT;

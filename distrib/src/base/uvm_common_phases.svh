@@ -60,7 +60,7 @@ class uvm_build_phase extends uvm_topdown_phase;
          m_inst = new();
       return m_inst; 
    endfunction
-   `_protected function new(string name="build");
+   protected function new(string name="build");
       super.new(name); 
    endfunction
    virtual function string get_type_name();
@@ -102,7 +102,7 @@ class uvm_connect_phase extends uvm_bottomup_phase;
          m_inst = new();
       return m_inst; 
    endfunction
-   `_protected function new(string name="connect");
+   protected function new(string name="connect");
       super.new(name); 
    endfunction
    virtual function string get_type_name();
@@ -142,7 +142,7 @@ class uvm_end_of_elaboration_phase extends uvm_bottomup_phase;
       end
       return m_inst; 
    endfunction
-   `_protected function new(string name="end_of_elaboration");
+   protected function new(string name="end_of_elaboration");
       super.new(name); 
    endfunction
    virtual function string get_type_name();
@@ -185,7 +185,7 @@ class uvm_start_of_simulation_phase extends uvm_bottomup_phase;
          m_inst = new();
       return m_inst; 
    endfunction
-   `_protected function new(string name="start_of_simulation");
+   protected function new(string name="start_of_simulation");
       super.new(name); 
    endfunction
    virtual function string get_type_name();
@@ -234,7 +234,7 @@ endclass
 //
 //   The phase ends if the timeout expires before all objections are dropped.
 //   By default, the timeout is set to 9200 seconds.
-//   You may override this via <set_global_timeout>.
+//   You may override this via <uvm_root::set_timeout>.
 //
 //   If a timeout occurs in your simulation, or if simulation never
 //   ends despite completion of your test stimulus, then it usually indicates
@@ -251,7 +251,7 @@ class uvm_run_phase extends uvm_task_phase;
          m_inst = new; 
       return m_inst; 
    endfunction
-   `_protected function new(string name="run"); 
+   protected function new(string name="run"); 
       super.new(name); 
    endfunction
    virtual function string get_type_name(); 
@@ -294,7 +294,7 @@ class uvm_extract_phase extends uvm_bottomup_phase;
          m_inst = new();
       return m_inst; 
    endfunction
-   `_protected function new(string name="extract");
+   protected function new(string name="extract");
       super.new(name); 
    endfunction
    virtual function string get_type_name();
@@ -329,7 +329,7 @@ class uvm_check_phase extends uvm_bottomup_phase;
          m_inst = new();
       return m_inst; 
    endfunction
-   `_protected function new(string name="check");
+   protected function new(string name="check");
       super.new(name); 
    endfunction
    virtual function string get_type_name();
@@ -365,7 +365,7 @@ class uvm_report_phase extends uvm_bottomup_phase;
          m_inst = new();
       return m_inst; 
    endfunction
-   `_protected function new(string name="report");
+   protected function new(string name="report");
       super.new(name); 
    endfunction
    virtual function string get_type_name();
@@ -403,7 +403,7 @@ class uvm_final_phase extends uvm_topdown_phase;
          m_inst = new();
       return m_inst; 
    endfunction
-   `_protected function new(string name="final");
+   protected function new(string name="final");
       super.new(name); 
    endfunction
    virtual function string get_type_name();

@@ -137,7 +137,7 @@ class reg2rw_adapter extends uvm_reg_adapter;
 
    virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
       reg_rw bus = reg_rw::type_id::create("rw");
-      bus.read    = (rw.kind == UVM_READ);
+      bus.read    = (rw.kind == UVM_READ || rw.kind == UVM_BURST_READ);
       bus.addr    = rw.addr;
       bus.data    = rw.data;
       bus.byte_en = rw.byte_en;

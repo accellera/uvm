@@ -1362,53 +1362,85 @@ endfunction
 // --------------------
 
 function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
-    uvm_object_wrapper wrapper;
-    uvm_sequence_base  seq;
-    uvm_factory f = uvm_factory::get();
+  uvm_resource_pool            rp = uvm_resource_pool::get();
+  uvm_resource_types::rsrc_q_t rq;
+  uvm_sequence_base            seq;
+  uvm_factory                  f = uvm_factory::get();
+  
+  // Has a default sequence been specified?
+  rq = rp.lookup_name({get_full_name(), ".", phase.get_name(), "_phase"},
+                      "default_sequence", null, 0);
+  uvm_resource_pool::sort_by_precedence(rq);
+  
+  // Look for the first one if the appropriate type
+  for (int i = 0; seq == null && i < rq.size(); i++) begin
+    uvm_resource_base rsrc = rq.get(i);
+    
+    uvm_resource#(uvm_sequence_base)  sbr;
+    uvm_resource#(uvm_object_wrapper) owr;
 
-    // default sequence instance?
-    if (!uvm_config_db #(uvm_sequence_base)::get(
-          this, {phase.get_name(),"_phase"}, "default_sequence", seq) || seq == null) begin
-      // default sequence object wrapper?
-      if (uvm_config_db #(uvm_object_wrapper)::get(
-               this, {phase.get_name(),"_phase"}, "default_sequence", wrapper) && wrapper != null) begin
-        // use wrapper is a sequence type        
-        if(!$cast(seq , f.create_object_by_type(
-              wrapper, get_full_name(), wrapper.get_type_name()))) begin
-          `uvm_warning("PHASESEQ", {"Default sequence for phase '",
-                       phase.get_name(),"' %s is not a sequence type"})
-          return;
-        end
-      end
-      else begin
-        `uvm_info("PHASESEQ", {"No default phase sequence for phase '",
-                               phase.get_name(),"'"}, UVM_FULL)
+    // uvm_config_db#(uvm_sequence_base)?
+    // Priority is given to uvm_sequence_base because it is a specific sequence instance
+    // and thus more specific than one that is dynamically created via the
+    // factory and the object wrapper.
+    if ($cast(sbr, rsrc) && sbr != null) begin
+      seq = sbr.read(this);
+      if (seq == null) begin
+        `uvm_info("UVM/SQR/PH/DEF/SB/NULL", {"Default phase sequence for phase '",
+                                             phase.get_name(),"' explicitly disabled"}, UVM_FULL)
         return;
       end
     end
+    
+    // uvm_config_db#(uvm_object_wrapper)?
+    else if ($cast(owr, rsrc) && owr != null) begin
+      uvm_object_wrapper wrapper;
 
-    `uvm_info("PHASESEQ", {"Starting default sequence '",
-       seq.get_type_name(),"' for phase '", phase.get_name(),"'"}, UVM_FULL)
+      wrapper = owr.read(this);
+      if (wrapper == null) begin
+        `uvm_info("UVM/SQR/PH/DEF/OW/NULL", {"Default phase sequence for phase '",
+                                             phase.get_name(),"' explicitly disabled"}, UVM_FULL)
+        return;
+      end
 
-    seq.print_sequence_info = 1;
-    seq.set_sequencer(this);
-    seq.reseed();
-    seq.starting_phase = phase;
-
-    if (!seq.do_not_randomize && !seq.randomize()) begin
-      `uvm_warning("STRDEFSEQ", {"Randomization failed for default sequence '",
-       seq.get_type_name(),"' for phase '", phase.get_name(),"'"})
-       return;
+      if (!$cast(seq, f.create_object_by_type(wrapper, get_full_name(),
+                                              wrapper.get_type_name()))
+          || seq == null) begin
+        `uvm_warning("PHASESEQ", {"Default sequence for phase '",
+                                  phase.get_name(),"' %s is not a sequence type"})
+        return;
+      end
     end
-
-    fork begin
-      // reseed this process for random stability
-      process proc = process::self();
-      proc.srandom(uvm_create_random_seed(seq.get_type_name(), this.get_full_name()));
-      seq.start(this);
-    end
-    join_none
-
+  end
+  
+  if (seq == null) begin
+    `uvm_info("PHASESEQ", {"No default phase sequence for phase '",
+                           phase.get_name(),"'"}, UVM_FULL)
+    return;
+  end
+  
+  `uvm_info("PHASESEQ", {"Starting default sequence '",
+                         seq.get_type_name(),"' for phase '", phase.get_name(),"'"}, UVM_FULL)
+  
+  seq.print_sequence_info = 1;
+  seq.set_sequencer(this);
+  seq.reseed();
+  seq.starting_phase = phase;
+  
+  if (!seq.do_not_randomize && !seq.randomize()) begin
+    `uvm_warning("STRDEFSEQ", {"Randomization failed for default sequence '",
+                               seq.get_type_name(),"' for phase '", phase.get_name(),"'"})
+    return;
+  end
+  
+  fork begin
+    // reseed this process for random stability
+    process proc = process::self();
+    proc.srandom(uvm_create_random_seed(seq.get_type_name(), this.get_full_name()));
+    seq.start(this);
+  end
+  join_none
+  
 endfunction
 
 
@@ -1547,7 +1579,7 @@ endtask
 // get_seq_kind
 // ------------
 // Returns an int seq_kind correlating to the sequence of type type_name
-// in the sequencer¿s sequence library. If the named sequence is not
+// in the sequencerï¿½s sequence library. If the named sequence is not
 // registered a SEQNF warning is issued and -1 is returned.
 
 function int uvm_sequencer_base::get_seq_kind(string type_name);

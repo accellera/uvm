@@ -112,7 +112,17 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
     reg_ap = new("reg_ap", this);
   endfunction
 
-
+  // This method is documented in uvm_object
+  static string type_name = "";
+  virtual function string get_type_name();
+    if (type_name == "") begin
+      BUSTYPE t;
+      t = BUSTYPE::type_id::create("t");
+      type_name = {"uvm_reg_predictor #(", t.get_type_name(), ")"};
+    end
+    return type_name;
+  endfunction
+  
   // Function: pre_predict
   //
   // Override this method to change the value or re-direct the
@@ -224,14 +234,9 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
                   rg.get_full_name(),"'"})
      end
      else begin
-`ifdef UVM_USE_P_FORMAT
        `uvm_info("REG_PREDICT_NOT_FOR_ME",
           {"Observed transaction does not target a register: ",
             $sformatf("%p",tr)},UVM_FULL)
-`else 
-       `uvm_info("REG_PREDICT_NOT_FOR_ME",
-          "Observed transaction does not target a register: ",UVM_FULL)
-`endif
      end
   endfunction
 

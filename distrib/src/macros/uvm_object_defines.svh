@@ -24,7 +24,6 @@
 
 `ifdef UVM_EMPTY_MACROS
 
-`define uvm_field_utils
 `define uvm_field_utils_begin(T) 
 `define uvm_field_utils_end 
 `define uvm_object_utils(T) 
@@ -81,33 +80,39 @@
 //
 // Group: Utility Macros 
 //
-// The utility macros provide implementations of the <uvm_object::create> method,
-// which is needed for cloning, and the <uvm_object::get_type_name> method, which
-// is needed for a number of debugging features. They also register the type with
-// the <uvm_factory>, and they implement a ~get_type~ method, which is used when
-// configuring the factory. And they implement the virtual 
-// <uvm_object::get_object_type> method for accessing the factory proxy of an
-// allocated object.
+// The ~utils~ macros define the infrastructure needed to enable the
+// object/component for correct factory operation. See <`uvm_object_utils> and
+// <`uvm_component_utils> for details.
 //
-// Below is an example usage of the utility and field macros. By using the
-// macros, you do not have to implement any of the data methods to get all of
-// the capabilities of an <uvm_object>.
+// A ~utils~ macro should be used inside ~every~ user-defined class that extends
+// <uvm_object> directly or indirectly, including <uvm_sequence_item> and
+// <uvm_component>.
+//
+// Below is an example usage of the ~utils~ macro for a user-defined object.
 //
 //|  class mydata extends uvm_object;
 //| 
-//|    string str;
-//|    mydata subdata;
-//|    int field;
-//|    myenum e1;
-//|    int queue[$];
+//|     `uvm_object_utils(mydata)
 //|
-//|    `uvm_object_utils_begin(mydata) //requires ctor with default args
-//|      `uvm_field_string(str, UVM_DEFAULT)
-//|      `uvm_field_object(subdata, UVM_DEFAULT)
-//|      `uvm_field_int(field, UVM_DEC) //use decimal radix
-//|      `uvm_field_enum(myenum, e1, UVM_DEFAULT)
-//|      `uvm_field_queue_int(queue, UVM_DEFAULT)
-//|    `uvm_object_utils_end
+//|     // declare data properties
+//|
+//|    function new(string name="mydata_inst");
+//|      super.new(name);
+//|    endfunction
+//|
+//|  endclass
+//
+// Below is an example usage of a ~utils~ macro for a user-defined component. 
+//
+//|  class my_comp extends uvm_component;
+//| 
+//|     `uvm_component_utils(my_comp)
+//|
+//|     // declare data properties
+//|
+//|    function new(string name, uvm_component parent=null);
+//|      super.new(name,parent);
+//|    endfunction
 //|
 //|  endclass
 //
@@ -119,13 +124,10 @@
 // are disabled and you only get the typename printed (printing the objects contents 
 // either requires fill %p support or an appropriate proxy registered)
 // 
-`ifndef UVM_NO_REGISTERED_CONVERTER
-// MACRO- m_uvm_register_converter
-//
-// this is a shorthand macro to register a given TYPE with a resource converter
-// providing an automatic print capability for the resource facility
-`define m_uvm_register_converter(T) static bit m_registered_converter__ = m_uvm_resource_sprint_converter#(T)::register();
-`endif 
+`ifdef UVM_NO_DEPRECATED 
+  `define UVM_NO_REGISTERED_CONVERTER
+`endif
+
 
 // Definitions for the user to use inside their derived data class declarations.
 
@@ -141,8 +143,8 @@
 //|  `uvm_field_utils_end
 //
 // 
-// These macros do NOT perform factory registration, implement get_type_name,
-// nor implement the create method. Use this form when you need custom
+// These macros do ~not~ perform factory registration nor implement the
+// ~get_type_name~ and ~create~ methods. Use this form when you need custom
 // implementations of these two methods, or when you are setting up field macros
 // for an abstract class (i.e. virtual class).
 
@@ -176,8 +178,6 @@
      end \
      end \
 endfunction \
-
-`define uvm_field_utils
 
 // MACRO: `uvm_object_utils
 
@@ -250,23 +250,6 @@ endfunction \
   `uvm_object_param_utils_begin(T) \
   `uvm_object_utils_end
 
-`ifndef UVM_NO_REGISTERED_CONVERTER
-
-`define uvm_object_utils_begin(T) \
-   `m_uvm_register_converter(T) \
-   `m_uvm_object_registry_internal(T,T)  \
-   `m_uvm_object_create_func(T) \
-   `m_uvm_get_type_name_func(T) \
-   `uvm_field_utils_begin(T) 
-
-`define uvm_object_param_utils_begin(T) \
-   `m_uvm_register_converter(T) \
-   `m_uvm_object_registry_param(T)  \
-   `m_uvm_object_create_func(T) \
-   `uvm_field_utils_begin(T) 
-
-`else
-
 `define uvm_object_utils_begin(T) \
    `m_uvm_object_registry_internal(T,T)  \
    `m_uvm_object_create_func(T) \
@@ -278,8 +261,6 @@ endfunction \
    `m_uvm_object_create_func(T) \
    `uvm_field_utils_begin(T) 
        
-`endif
-
 `define uvm_object_utils_end \
      end \
    endfunction \
@@ -346,19 +327,6 @@ endfunction \
 // placed. The block must be terminated by `uvm_component_utils_end.
 //
 
-`ifndef UVM_NO_REGISTERED_CONVERTER
-
-`define uvm_component_utils(T) \
-   `m_uvm_register_converter(T) \
-   `m_uvm_component_registry_internal(T,T) \
-   `m_uvm_get_type_name_func(T) \
-
-`define uvm_component_param_utils(T) \
-   `m_uvm_register_converter(T) \
-   `m_uvm_component_registry_param(T) \
-
-`else
-
 `define uvm_component_utils(T) \
    `m_uvm_component_registry_internal(T,T) \
    `m_uvm_get_type_name_func(T) \
@@ -366,7 +334,6 @@ endfunction \
 `define uvm_component_param_utils(T) \
    `m_uvm_component_registry_param(T) \
 
-`endif
    
 `define uvm_component_utils_begin(T) \
    `uvm_component_utils(T) \
@@ -442,13 +409,13 @@ endfunction \
 `define m_uvm_object_create_func(T) \
    function uvm_object create (string name=""); \
      T tmp; \
-`ifdef UVM_OBJECT_MUST_HAVE_CONSTRUCTOR \
-     if (name=="") tmp = new(); \
-     else tmp = new(name); \
-`else \
+`ifdef UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR \
      tmp = new(); \
      if (name!="") \
        tmp.set_name(name); \
+`else \
+     if (name=="") tmp = new(); \
+     else tmp = new(name); \
 `endif \
      return tmp; \
    endfunction
@@ -530,27 +497,64 @@ endfunction \
 // The `uvm_field_*  macros are invoked inside of the `uvm_*_utils_begin and
 // `uvm_*_utils_end macro blocks to form "automatic" implementations of the
 // core data methods: copy, compare, pack, unpack, record, print, and sprint.
-// For example:
 //
-//|  class my_trans extends uvm_transaction;
-//|    string my_string;
+// By using the macros, you do not have to implement any of the do_* methods 
+// inherited from <uvm_object>. However, be aware that the field macros expand
+// into general inline code that is not as run-time efficient nor as flexible
+// as direct implementions of the do_* methods. 
+//
+// Below is an example usage of the field macros for a sequence item. 
+//
+//|  class my_trans extends uvm_sequence_item;
+//| 
+//|    cmd_t  cmd;
+//|    int    addr;
+//|    int    data[$];
+//|    my_ext ext;
+//|    string str;
+//|
 //|    `uvm_object_utils_begin(my_trans)
-//|      `uvm_field_string(my_string, UVM_ALL_ON)
+//|      `uvm_field_enum     (cmd_t, cmd, UVM_ALL_ON)
+//|      `uvm_field_int      (addr, UVM_ALL_ON)
+//|      `uvm_field_queue_int(data, UVM_ALL_ON)
+//|      `uvm_field_object   (ext,  UVM_ALL_ON)
+//|      `uvm_field_string   (str,  UVM_ALL_ON)
 //|    `uvm_object_utils_end
+//|
+//|    function new(string name="mydata_inst");
+//|      super.new(name);
+//|    endfunction
+//|
 //|  endclass
 //
-// Each `uvm_field_* macro is named to correspond to a particular data
-// type: integrals, strings, objects, queues, etc., and each has at least two
+// Below is an example usage of the field macros for a component.
+//
+//|  class my_comp extends uvm_component;
+//| 
+//|    my_comp_cfg  cfg;
+//|
+//|    `uvm_component_utils_begin(my_comp)
+//|      `uvm_field_object   (cfg,  UVM_ALL_ON)
+//|    `uvm_object_utils_end
+//|
+//|    function new(string name="my_comp_inst", uvm_component parent=null);
+//|      super.new(name);
+//|    endfunction
+//|
+//|  endclass
+//
+// Each `uvm_field_* macro is named according to the particular data type it
+// handles: integrals, strings, objects, queues, etc., and each has at least two
 // arguments: ~ARG~ and ~FLAG~.
 //
-// ~ARG~ is the instance name of the variable, whose type must be compatible with
-// the macro being invoked. In the example, class variable my_string is of type
-// string, so we use the `uvm_field_string macro.
+// ARG -  is the instance name of the variable, whose type must be compatible with
+// the macro being invoked. In the example, class variable ~addr~ is an integral type,
+// so we use the ~`uvm_field_int~ macro.
 //
-// If ~FLAG~ is set to ~UVM_ALL_ON~, as in the example, the ARG variable will be
-// included in all data methods. The FLAG, if set to something other than
-// ~UVM_ALL_ON~ or ~UVM_DEFAULT~, specifies which data method implementations will
-// NOT include the given variable. Thus, if ~FLAG~ is specified as ~NO_COMPARE~,
+// FLAG - if set to ~UVM_ALL_ON~, as in the example, the ARG variable will be
+// included in all data methods. If FLAG is set to something other than
+// ~UVM_ALL_ON~ or ~UVM_DEFAULT~, it specifies which data method implementations will
+// ~not~ include the given variable. Thus, if ~FLAG~ is specified as ~NO_COMPARE~,
 // the ARG variable will not affect comparison operations, but it will be
 // included in everything else.
 //
@@ -559,19 +563,28 @@ endfunction \
 // as well, but care must be taken when using the + operator to ensure that the
 // same bit is not added more than once).
 //
-//   UVM_ALL_ON     - Set all operations on (default).
-//   UVM_DEFAULT    - Use the default flag settings.
+//   UVM_ALL_ON     - Set all operations on.
+//   UVM_DEFAULT    - This is the recommended set of flags to pass 
+//                      to the field macros.  Currently, it enables
+//                      all of the operations, making it functionally
+//                      identical to ~UVM_ALL_ON~.  In the future 
+//                      however, additional flags could be added with
+//                      a recommended default value of ~off~.
+//
 //   UVM_NOCOPY     - Do not copy this field.
 //   UVM_NOCOMPARE  - Do not compare this field.
 //   UVM_NOPRINT    - Do not print this field.
-//   UVM_NODEFPRINT - Do not print the field if it is the same as its
 //   UVM_NOPACK     - Do not pack or unpack this field.
+//
+//   UVM_REFERENCE  - For object types, operate only on the handle (e.g. no deep copy)
+//
 //   UVM_PHYSICAL   - Treat as a physical field. Use physical setting in
 //                      policy class for this field.
 //   UVM_ABSTRACT   - Treat as an abstract field. Use the abstract setting
 //                      in the policy class for this field.
 //   UVM_READONLY   - Do not allow setting of this field from the set_*_local
-//                      methods.
+//                      methods or during <apply_config_settings> operation.
+//
 //
 // A radix for printing and recording can be specified by OR'ing one of the
 // following constants in the ~FLAG~ argument
@@ -586,6 +599,14 @@ endfunction \
 //
 //   Radix settings for integral types. Hex is the default radix if none is
 //   specified.
+//
+// A UVM component should ~not~ be specified using the `uvm_field_object macro
+// unless its flag includes UVM_REFERENCE.  Otherwise, the field macro will 
+// implement deep copy, which is an illegal operation for uvm_components.
+// You will get a FATAL error if you tried to copy or clone an object containing
+// a component handle that was registered with a field macro without the
+// UVM_REFERENCE flag. You will also get duplicate entries when printing
+// component topology, as this functionality is already provided by UVM. 
 //------------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
@@ -685,9 +706,16 @@ endfunction \
           if(!((FLAG)&UVM_NOCOPY)) begin \
             if((FLAG)&UVM_REFERENCE || local_data__.ARG == null) ARG = local_data__.ARG; \
             else begin \
+              uvm_object l_obj; \
               if(local_data__.ARG.get_name() == "") local_data__.ARG.set_name(`"ARG`"); \
-              $cast(ARG, local_data__.ARG.clone()); \
-              ARG.set_name(local_data__.ARG.get_name()); \
+              l_obj = local_data__.ARG.clone(); \
+              if(l_obj == null) begin \
+                `uvm_fatal("FAILCLN", $sformatf("Failure to clone %s.ARG, thus the variable will remain null.", local_data__.get_name())); \
+              end \
+              else begin \
+                $cast(ARG, l_obj); \
+                ARG.set_name(local_data__.ARG.get_name()); \
+              end \
             end \
           end \
         end \
@@ -3200,21 +3228,26 @@ endfunction \
 
 // Macro: `uvm_record_attribute
 //
-// Vendor-independent macro for recording attributes (fields)
-// to a vendor-specific transaction database.
+// Vendor-independent macro to hide vendor-specific interface for
+// recording attributes (fields) to a transaction database.
 
-`ifdef QUESTA
-  `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
-     $add_attribute(TR_HANDLE,VALUE,NAME);
+`ifndef uvm_record_attribute
+  `ifdef QUESTA
+    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
+      $add_attribute(TR_HANDLE,VALUE,NAME);
+  `elsif VCS
+    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
+      // need VCS call here
+  `elsif INCA
+    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
+      // need IUS call here
+  `else
+    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
+      // empty definition
+  `endif
 `endif
 
-`ifdef VCS
-  `define uvm_record_attribute(TR_HANDLE,NAME,VALUE)
-`endif
-
-`ifdef INCA
-  `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) 
-`endif
+  
 
 // Macro: `uvm_record_field
 //
@@ -3228,11 +3261,7 @@ endfunction \
        `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
      end \
      else \
-       `ifdef UVM_USE_P_FORMAT \
        recorder.m_set_attribute(recorder.tr_handle,NAME,$sformatf("%p",VALUE)); \
-       `else \
-       recorder.m_set_attribute(recorder.tr_handle,NAME,`"value of VALUE`"); \
-       `endif \
    end
 
 

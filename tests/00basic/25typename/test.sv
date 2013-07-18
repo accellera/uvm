@@ -24,30 +24,9 @@ class test extends uvm_test;
     b = f;
 
      
-    typename = uvm_type_utils#(foo#(bar#(xyz),88))::typename(f);
+    typename = `uvm_typename(f);
 
-    // filter out spaces?
-
-    `ifdef QUESTA
-    exp_typename = "class foo #(class bar #(class xyz), 88)";
-    `endif
-
-    `ifdef VCS
-    exp_typename = "class $unit::foo#(class $unit::bar#(class $unit::xyz),88)";
-    `endif
-
-    `ifdef INCA
-    exp_typename = "class foo #(class bar #(class xyz), 88)";
-    `endif
-
-    $display("$typename output is '%s'", typename);
-    if (typename == exp_typename)
-      $display("** UVM TEST PASSED **");
-    else begin
-      `uvm_error("BAD_TYPENAME",{"Expected '",exp_typename,"', got '",typename,"'"})
-      $display("** UVM TEST FAILED **");
-    end
-
+    $display("\nGOLD-FILE-START\n",typename,"\nGOLD-FILE-END\n");
   endfunction
 endclass
 

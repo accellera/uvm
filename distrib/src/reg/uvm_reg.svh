@@ -1193,6 +1193,11 @@ endfunction: new
 function void uvm_reg::configure (uvm_reg_block blk_parent,
                                   uvm_reg_file regfile_parent=null,
                                   string hdl_path = "");
+   if (blk_parent == null) begin
+     `uvm_error("UVM/REG/CFG/NOBLK", {"uvm_reg::configure() called without a parent block for instance \"", get_name(), "\" of register type \"", get_type_name(), "\"."})
+     return;
+   end
+
    m_parent = blk_parent;
    m_parent.add_reg(this);
    m_regfile_parent = regfile_parent;
@@ -2021,6 +2026,8 @@ function void uvm_reg::reset(string kind = "HARD");
    // in case a thread was killed during an operation
    void'(m_atomic.try_get(1));
    m_atomic.put(1);
+   m_process = null;
+   Xset_busyX(0);
 endfunction: reset
 
 
@@ -2091,13 +2098,6 @@ task uvm_reg::update(output uvm_status_e      status,
    status = UVM_IS_OK;
 
    if (!needs_update()) return;
-      
-   if (m_update_in_progress) begin
-     @(negedge m_update_in_progress);
-     return;
-   end
-
-   m_update_in_progress = 1;
 
    // Concatenate the write-to-update values from each field
    // Fields are stored in LSB or MSB order
@@ -2106,9 +2106,6 @@ task uvm_reg::update(output uvm_status_e      status,
       upd |= m_fields[i].XupdateX() << m_fields[i].get_lsb_pos();
 
    write(status, upd, path, map, parent, prior, extension, fname, lineno);
-
-   m_update_in_progress = 0;
-
 endtask: update
 
 
@@ -2284,12 +2281,15 @@ task uvm_reg::do_write (uvm_reg_item rw);
          m_is_busy = 0;
 
          if (system_map.get_auto_predict()) begin
+            uvm_status_e status;
             if (rw.status != UVM_NOT_OK) begin
                sample(value, -1, 0, rw.map);
                m_parent.XsampleX(map_info.offset, 0, rw.map);
             end
 
-           do_predict(rw, UVM_PREDICT_WRITE);
+            status = rw.status; // do_predict will override rw.status, so we save it here
+            do_predict(rw, UVM_PREDICT_WRITE);
+            rw.status = status;
          end
       end
       
@@ -2534,6 +2534,7 @@ task uvm_reg::do_read(uvm_reg_item rw);
          m_is_busy = 0;
 
          if (system_map.get_auto_predict()) begin
+            uvm_status_e status;
             if (rw.local_map.get_check_on_read() &&
                 rw.status != UVM_NOT_OK) begin
                void'(do_check(exp, rw.value[0], system_map));
@@ -2544,7 +2545,9 @@ task uvm_reg::do_read(uvm_reg_item rw);
                m_parent.XsampleX(map_info.offset, 1, rw.map);
             end
 
-          do_predict(rw, UVM_PREDICT_READ);
+            status = rw.status; // do_predict will override rw.status, so we save it here
+            do_predict(rw, UVM_PREDICT_READ);
+            rw.status = status;
          end
       end
       
@@ -2895,8 +2898,8 @@ function bit uvm_reg::do_check(input uvm_reg_data_t expected,
    foreach(m_fields[i]) begin
       string acc = m_fields[i].get_access(map);
       acc = acc.substr(0, 1);
-      if (m_fields[i].get_compare() == UVM_NO_CHECK ||
-          m_fields[i].get_access() == "WO") begin
+      if (!(m_fields[i].get_compare() == UVM_NO_CHECK ||
+            acc == "WO")) begin
          uvm_reg_data_t mask  = ((1 << m_fields[i].get_n_bits())-1);
          uvm_reg_data_t val   = actual   >> m_fields[i].get_lsb_pos() & mask;
          uvm_reg_data_t exp   = expected >> m_fields[i].get_lsb_pos() & mask;
@@ -2950,7 +2953,8 @@ task uvm_reg::mirror(output uvm_status_e       status,
      return;
    
    // Remember what we think the value is before it gets updated
-   if (check == UVM_CHECK) exp = get();
+   if (check == UVM_CHECK)
+     exp = get_mirrored_value();
 
    XreadX(status, v, path, map, parent, prior, extension, fname, lineno);
 

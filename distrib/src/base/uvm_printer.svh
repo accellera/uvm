@@ -16,7 +16,7 @@
 //   writing, software distributed under the License is
 //   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 //   CONDITIONS OF ANY KIND, either express or implied.  See
-//   the License for the specific language governing
+//   the License or the specific language governing
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
@@ -948,6 +948,10 @@ endfunction
 // --------------------
 
 function void uvm_table_printer::calculate_max_widths();
+   m_max_name=4;
+   m_max_type=4;
+   m_max_size = 4;
+   m_max_value= 5;
    foreach(m_rows[j]) begin
       int name_len;
       uvm_printer_row_info row = m_rows[j];
@@ -961,12 +965,7 @@ function void uvm_table_printer::calculate_max_widths();
       if (row.val.len() > m_max_value)
         m_max_value = row.val.len();
    end
-   if (m_max_name < 4) m_max_name = 4;
-   if (m_max_type < 4) m_max_type = 4;
-   if (m_max_size < 4) m_max_size = 4;
-   if (m_max_value< 5) m_max_value= 5;
 endfunction
-
 
 // emit
 // ----
@@ -975,14 +974,28 @@ function string uvm_table_printer::emit();
 
   string s;
   string user_format;
-  string dash = "---------------------------------------------------------------------------------------------------";
-  string space= "                                                                                                   ";
+  static string dash; // = "---------------------------------------------------------------------------------------------------";
+  static string space; //= "                                                                                                   ";
   string dashes;
 
   string linefeed = {"\n", knobs.prefix};
 
   calculate_max_widths(); 
 
+   begin
+      int q[5];
+      int m;
+      int qq[$];
+      
+      q = '{m_max_name,m_max_type,m_max_size,m_max_value,100};
+      qq = q.max;
+      m = qq[0];
+  	if(dash.len()<m) begin
+  		dash = {m{"-"}};
+  		space = {m{" "}};
+  	end
+  end
+  
   if (knobs.header) begin
     string header;
     user_format = format_header();
@@ -1110,7 +1123,7 @@ function string uvm_tree_printer::emit();
 
       if (i < m_rows.size()-1) begin
         if (m_rows[i+1].level > row.level) begin
-          s = {s, "{", linefeed};
+          s = {s, string'(knobs.separator[0]), linefeed};
           continue;
         end
       end
@@ -1129,7 +1142,7 @@ function string uvm_tree_printer::emit();
           string indent_str;
           for (int l=row.level-1; l >= end_level; l--) begin
             indent_str = space.substr(1,l * knobs.indent); 
-            s = {s, indent_str, "}", linefeed};
+            s = {s, indent_str, string'(knobs.separator[1]), linefeed};
           end
         end
       end

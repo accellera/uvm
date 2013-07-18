@@ -1,6 +1,7 @@
 //----------------------------------------------------------------------
 //   Copyright 2010-2011 Mentor Graphics Corporation
 //   Copyright 2011 Synopsys, Inc.
+//   Copyright 2013 Cadence Design Inc
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -21,11 +22,8 @@
 
 typedef class uvm_sequence_library_cfg;
 
-//------------------------------------------------------------------------------
-//               PROTOTYPE CODE - NOT PART OF UVM 1.0 STANDARD
-//------------------------------------------------------------------------------
 //
-// CLASS- uvm_sequence_library
+// CLASS: uvm_sequence_library
 //
 // The ~uvm_sequence_library~ is a sequence that contains a list of registered
 // sequence types. It can be configured to create and execute these sequences
@@ -64,14 +62,14 @@ typedef class uvm_sequence_library_cfg;
 
 class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_sequence #(REQ,RSP);
 
-   // Function- new
+   // Function: new
    //
    // Create a new instance of this class
    //
    extern function new(string name="");
 
 
-   // Function- get_type_name
+   // Function: get_type_name
    //
    // Get the type name of this class
    //
@@ -80,10 +78,10 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
 
 
    //--------------------------
-   // Group- Sequence selection
+   // Group: Sequence selection
    //--------------------------
 
-   // Variable- selection_mode
+   // Variable: selection_mode
    //
    // Specifies the mode used to select sequences for execution
    //
@@ -130,7 +128,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    uvm_sequence_lib_mode selection_mode;
 
 
-   // Variable- min_random_count
+   // Variable: min_random_count
    //
    // Sets the minimum number of items to execute. Use the configuration
    // mechanism to set. See <selection_mode> for an example.
@@ -138,7 +136,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    int unsigned min_random_count=10;
 
 
-   // Variable- max_random_count
+   // Variable: max_random_count
    //
    // Sets the maximum number of items to execute. Use the configuration
    // mechanism to set. See <selection_mode> for an example.
@@ -148,7 +146,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
 
 
 
-   // Variable- sequences_executed
+   // Variable: sequences_executed
    //
    // Indicates the number of sequences executed, not including the
    // currently executing sequence, if any.
@@ -156,7 +154,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    protected int unsigned sequences_executed;
 
 
-   // Variable- sequence_count
+   // Variable: sequence_count
    //
    // Specifies the number of sequences to execute when this sequence
    // library is started. If in <UVM_SEQ_LIB_ITEM> mode, specifies the
@@ -165,7 +163,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    rand  int unsigned sequence_count = 10;
 
 
-   // Variable- select_rand
+   // Variable: select_rand
    //
    // The index variable that is randomized to select the next sequence
    // to execute when in UVM_SEQ_LIB_RAND mode
@@ -175,7 +173,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    rand  int unsigned select_rand;
 
 
-   // Variable- select_randc
+   // Variable: select_randc
    //
    // The index variable that is randomized to select the next sequence
    // to execute when in UVM_SEQ_LIB_RANDC mode
@@ -186,18 +184,14 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
 
 
 
-   // Variable- seqs_distrib
+   // Variable: seqs_distrib
    //
    //
    //
-   protected int seqs_distrib[string]
-   `ifndef INCA
-   = '{default:0}
-   `endif
-   ;
+   protected int seqs_distrib[string]  = '{default:0};
 
 
-   // Variable- sequences
+   // Variable: sequences
    //
    // The container of all registered sequence types. For <sequence_count>
    // times, this sequence library will randomly select and execute a
@@ -207,7 +201,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
 
 
 
-   // Constraint- valid_rand_selection
+   // Constraint: valid_rand_selection
    //
    // Constrains <select_rand> to be a valid index into the ~sequences~ array
    //
@@ -217,7 +211,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
 
 
 
-   // Constraint- valid_randc_selection
+   // Constraint: valid_randc_selection
    //
    // Constrains <select_randc> to be a valid index into the ~sequences~ array
    //
@@ -226,7 +220,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    }
 
 
-   // Constraint- valid_sequence_count
+   // Constraint: valid_sequence_count
    //
    // Constrains <sequence_count> to lie within the range defined by
    // <min_random_count> and <max_random_count>.
@@ -237,7 +231,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
 
 
 
-   // Function- select_sequence
+   // Function: select_sequence
    //
    // Generates an index used to select the next sequence to execute. 
    // Overrides must return a value between 0 and ~max~, inclusive.
@@ -250,10 +244,10 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
 
 
    //-----------------------------
-   // Group- Sequence registration
+   // Group: Sequence registration
    //-----------------------------
 
-   // Function- add_typewide_sequence
+   // Function: add_typewide_sequence
    //
    // Registers the provided sequence type with this sequence library
    // type. The sequence type will be available for selection by all instances
@@ -263,7 +257,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
 
 
 
-   // Function- add_typewide_sequences
+   // Function: add_typewide_sequences
    //
    // Registers the provided sequence types with this sequence library
    // type. The sequence types will be available for selection by all instances
@@ -272,7 +266,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    extern static function void add_typewide_sequences(uvm_object_wrapper seq_types[$]);
 
 
-   // Function- add_sequence
+   // Function: add_sequence
    //
    // Registers the provided sequence type with this sequence library
    // instance. Sequence types already registered are silently ignored.
@@ -280,7 +274,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    extern function void add_sequence(uvm_object_wrapper seq_type);
 
 
-   // Function- add_sequences
+   // Function: add_sequences
    //
    // Registers the provided sequence types with this sequence library
    // instance. Sequence types already registered are silently ignored.
@@ -288,7 +282,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    extern virtual function void add_sequences(uvm_object_wrapper seq_types[$]);
 
 
-   // Function- remove_sequence
+   // Function: remove_sequence
    //
    // Removes the given sequence type from this sequence library
    // instance. If the type was registered statically, the sequence queues of
@@ -298,7 +292,7 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    extern virtual function void remove_sequence(uvm_object_wrapper seq_type);
 
 
-   // Function- get_sequences
+   // Function: get_sequences
    //
    // 
    // Append to the provided ~seq_types~ array the list of registered <sequences>.
@@ -306,13 +300,13 @@ class uvm_sequence_library #(type REQ=uvm_sequence_item,RSP=REQ) extends uvm_seq
    extern virtual function void get_sequences(ref uvm_object_wrapper seq_types[$]);
 
 
-   // Function- init_sequence_library
+   // Function: init_sequence_library
    //
    // All subtypes of this class must call init_sequence_library in its
    // constructor.
    extern function void init_sequence_library();
 
-   // Macro- uvm_sequence_library_utils
+   // Macro: uvm_sequence_library_utils
    //
    // All subtypes of this class must invoke the `uvm_sequence_library_utils
    // macro.
@@ -355,7 +349,7 @@ endclass
 
 //------------------------------------------------------------------------------
 //
-// CLASS- uvm_sequence_library_cfg
+// Class: uvm_sequence_library_cfg
 //
 // A convenient container class for configuring all the sequence library
 // parameters using a single ~set~ command.
@@ -552,34 +546,6 @@ function bit uvm_sequence_library::m_check(uvm_object_wrapper seq_type, this_typ
         "'"},top)
      return 0;
   end
-  begin
-    uvm_sequence_item req_to_add;
-    REQ req;
-    req = new("req");
-    req_to_add = seq.create_request();
-    if (!( $cast(req, req_to_add))) begin
-      `uvm_error_context("SEQLIB/BAD_REQ_TYPE",
-        {"Can not add sequence '",seq.get_type_name(),"' ",
-        "to sequence library of type '",typ,"' (instance ",name,") ",
-        "as the request type '", req_to_add.get_type_name(), "' is not type-compatible with ",
-        "the request type of the sequence library '",req.get_type_name(),"'"},top)
-       return 0;
-    end 
-  end
-  begin
-    uvm_sequence_item rsp_to_add;
-    RSP rsp;
-    rsp = new("rsp");
-    rsp_to_add = seq.create_response();
-    if (!( $cast(rsp, rsp_to_add))) begin
-      `uvm_error_context("SEQLIB/BAD_RSP_TYPE",
-        {"Can not add sequence '",seq.get_type_name(),"' ",
-        "to sequence library of type '",typ,"' (instance ",name,") ",
-        "as the response type '", rsp_to_add.get_type_name(), "' is not type-compatible with ",
-        "the response type of the sequence library '",rsp.get_type_name(),"'"},top)
-       return 0;
-    end 
-  end
   return 1;
 endfunction
 
@@ -644,8 +610,9 @@ function void uvm_sequence_library::m_get_config();
   else begin
     if (selection_mode == UVM_SEQ_LIB_ITEM) begin
       uvm_sequencer #(REQ,RSP) seqr;
-      REQ req = new();
-      if (req.get_type_name() == "uvm_sequence_item") begin
+      uvm_object_wrapper lhs = REQ::get_type();
+      uvm_object_wrapper rhs = uvm_sequence_item::get_type();
+      if (lhs == rhs) begin
         `uvm_error("SEQLIB/BASE_ITEM", {"selection_mode cannot be UVM_SEQ_LIB_ITEM when ",
           "the REQ type is the base uvm_sequence_item. Using UVM_SEQ_LIB_RAND mode"})
         selection_mode = UVM_SEQ_LIB_RAND;
@@ -767,13 +734,8 @@ task uvm_sequence_library::body();
 
   `uvm_info("SEQLIB/END",{"Ending sequence library in phase ",
             (starting_phase != null ? starting_phase.get_name() : "unknown")},UVM_LOW)
-
-`ifdef UVM_USE_P_FORMAT            
+ 
   `uvm_info("SEQLIB/DSTRB",$sformatf("%p",seqs_distrib),UVM_HIGH)
-`else
-    foreach(seqs_distrib[idx])
-        `uvm_info("SEQLIB/DSTRB",$sformatf("%s -> %d",idx,seqs_distrib[idx]),UVM_HIGH)  
-`endif
 
   if (starting_phase != null)
     starting_phase.drop_objection(this,
@@ -790,13 +752,26 @@ task uvm_sequence_library::execute(uvm_object_wrapper wrap);
   uvm_object obj;
   uvm_factory factory;
   uvm_sequence_item seq_or_item;
-
+  uvm_sequence_base seq_base;
+  REQ req_item;
+  
   factory = uvm_factory::get();
 
   obj = factory.create_object_by_type(wrap,get_full_name(),
            $sformatf("%s:%0d",wrap.get_type_name(),sequences_executed+1));
-  void'($cast(seq_or_item,obj)); // already qualified, 
 
+  if (!$cast(seq_base, obj)) begin
+     // If we're executing an item (not a sequence)
+     if (!$cast(req_item, obj)) begin
+        // But it's not our item type (This can happen if we were parameterized with
+        // a pure virtual type, because we're getting get_type() from the base class)
+        `uvm_error("SEQLIB/WRONG_ITEM_TYPE", {"The item created by '", get_full_name(), "' when in 'UVM_SEQ_LIB_ITEM' mode doesn't match the REQ type which  was passed in to the uvm_sequence_library#(REQ[,RSP]), this can happen if the REQ type which was passed in was a pure-virtual type.  Either configure the factory overrides to properly generate items for this sequence library, or do not execute this sequence library in UVM_SEQ_LIB_ITEM mode."})
+         return;
+     end
+  end
+   
+  void'($cast(seq_or_item,obj)); // already qualified, 
+   
   `uvm_info("SEQLIB/EXEC",{"Executing ",(seq_or_item.is_item() ? "item " : "sequence "),seq_or_item.get_name(),
                            " (",seq_or_item.get_type_name(),")"},UVM_FULL)
   seq_or_item.print_sequence_info = 1;

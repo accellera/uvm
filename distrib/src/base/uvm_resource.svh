@@ -202,9 +202,7 @@ virtual class uvm_resource_base extends uvm_object;
   protected bit modified;
   protected bit read_only;
 
-  // IUS currently does not support the protected keyword.  When
-  // it does, comments delimiters can be removed.
-  /*protected*/ bit m_is_regex_name;
+  local bit m_is_regex_name;
 
   uvm_resource_types::access_t access[string];
 
@@ -222,7 +220,8 @@ virtual class uvm_resource_base extends uvm_object;
   // The default precedence for an resource that has been created.
   // When two resources have the same precedence, the first resource
   // found has precedence.
-  
+  //
+
   static int unsigned default_precedence = 1000;
 
   // Function: new
@@ -585,6 +584,9 @@ virtual class uvm_resource_base extends uvm_object;
     access_record.write_count = 0;
   endfunction
 
+  virtual function bit has_regex_name();
+  	return m_is_regex_name;
+  endfunction
 endclass
 
 
@@ -673,14 +675,8 @@ class uvm_resource_pool;
 
   get_t get_record [$];  // history of gets
 
-  // To make a proper singleton the constructor should be protected.
-  // However, IUS doesn't support protected constructors so we'll just
-  // the default constructor instead.  If support for protected
-  // constructors ever becomes available then this comment can be
-  // deleted and the protected constructor uncommented.
-
-  //  protected function new();
-  //  endfunction
+  local function new();
+  endfunction
 
 
   // Function: get
@@ -777,7 +773,7 @@ class uvm_resource_pool;
     //optimization for name lookups. Since most environments never
     //use wildcarded names, don't want to incurr a search penalty
     //unless a wildcarded name has been used.
-    if(rsrc.m_is_regex_name)
+    if(rsrc.has_regex_name())
       m_has_wildcard_names = 1;
   endfunction
 
@@ -1392,7 +1388,9 @@ class uvm_resource_pool;
   
 endclass
 
+`ifdef UVM_USE_RESOURCE_CONVERTER
 typedef class m_uvm_resource_converter;
+`endif
 
 //----------------------------------------------------------------------
 // Class: uvm_resource #(T)
@@ -1411,12 +1409,10 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   // Can't be rand since things like rand strings are not legal.
   protected T val;
 
+`ifdef UVM_USE_RESOURCE_CONVERTER
+
   // Singleton used to convert this resource to a string
   local static m_uvm_resource_converter#(T) m_r2s;
-
-  function new(string name="", scope="");
-    super.new(name, scope);
-  endfunction
 
   // Function- m_get_converter
   // Get the conversion policy class that specifies how to convert the value
@@ -1438,10 +1434,20 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
   static function void m_set_converter(m_uvm_resource_converter#(T) r2s);
     m_r2s = r2s;
   endfunction
-  
+   
+`endif
+
+  function new(string name="", scope="");
+    super.new(name, scope);
+  endfunction
+
   function string convert2string();
+`ifdef UVM_USE_RESOURCE_CONVERTER
     void'(m_get_converter());
     return m_r2s.convert2string(val);
+`else
+  	return $sformatf("(%s) %0p", `uvm_typename(val), val);
+`endif
   endfunction
 
 

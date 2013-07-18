@@ -192,17 +192,7 @@ class uvm_queue #(type T=int) extends uvm_object;
   endfunction
   
   virtual function string convert2string();
-    `ifdef UVM_USE_P_FORMAT
       return $sformatf("%p",queue);
-    `else
-      if(queue.size() == 0) convert2string = "{}";
-      else if(queue.size() == 1) $swrite(convert2string, "{", queue[0], "}");
-      else begin
-        $swrite(convert2string, "{", queue[0]);
-        for(int i=1; i<queue.size(); ++i) $swrite(convert2string, "%s, ", convert2string, queue[i]);
-        $swrite(convert2string, "%s}", convert2string);
-      end
-    `endif
   endfunction
 
 

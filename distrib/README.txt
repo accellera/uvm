@@ -1,5 +1,5 @@
 Accellera Universal Verification Methodology
-version 1.1b
+version 1.1c
 
 (C) Copyright 2007-2012 Mentor Graphics Corporation
 (C) Copyright 2007-2012 Cadence Design Systems, Incorporated
@@ -76,5 +76,29 @@ Prerequisites
 - IEEE1800 compliant SV simulator
 - gmake-compliant make to execute Makefile based examples
 - C compiler to compile the DPI code (if not otherwise provided by tool vendor)
+
+
+Running the examples
+--------------------
+
+The examples assume the following steps to be completed:
+
+- The Compiler/Simulator environment has been setup according to the vendors 
+  instruction and you can execute compile/simulation on the commandline.
+
+To run any of the examples:
+
+1. change to the example dir (ex: cd examples/trivial)
+2. execute "make -f Makefile.{ius|vcs|questa}" depending upon your simulator vendor to run the example. 
+The makefiles assume a gmake compiliant make tool.
+
+optional:
+- to see the commands and steps executed use "make -f Makefile.{ius|vcs|questa} -n"
+
+- to run against an uvm installation in a different location override the makefile variable UVM_HOME
+  make -f Makefile.ius UVM_HOME=`ncroot`/tools/uvm
+  
+ 
+
 
 ------------------------------------------------------------------------

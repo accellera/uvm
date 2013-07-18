@@ -2,7 +2,7 @@
 //------------------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc. 
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2013 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -57,11 +57,11 @@ parameter UVM_STREAMBITS = `UVM_MAX_STREAMBITS;
 
 // Macro: `UVM_DEFAULT_TIMEOUT
 //
-// The default timeout for all phases, if not overridden by
+// The default timeout for simulation, if not overridden by
 // <uvm_root::set_timeout> or <+UVM_TIMEOUT>
+//
 
 `define UVM_DEFAULT_TIMEOUT 9200s
-
 
 // Type: uvm_bitstream_t
 //
@@ -498,13 +498,21 @@ typedef enum { UVM_PHASE_IMP,
 //   UVM_PHASE_EXECUTING - An executing phase is one where the phase callbacks are
 //              being executed. It's process is tracked by the phaser.
 //
-//   UVM_PHASE_READY_TO_END - no objections remain, awaiting completion of
-//              predecessors of its successors. For example, when phase 'run'
-//              is ready to end, its successor will be 'extract', whose
-//              predecessors are 'run' and 'post_shutdown'. Therefore, 'run'
-//              will be waiting for 'post_shutdown' to be ready to end.
+//   UVM_PHASE_READY_TO_END - no objections remain in this phase or in any
+//              predecessors of its successors or in any sync'd phases. This 
+//              state indicates an opportunity for any phase that needs extra  
+//              time for a clean exit to raise an objection, thereby causing a 
+//              return to UVM_PHASE_EXECUTING.  If no objection is raised, state
+//              will transition to UVM_PHASE_ENDED after a delta cycle.
+//              (An example of predecessors of successors: The successor to
+//              phase 'run' is 'extract', whose predecessors are 'run' and 
+//              'post_shutdown'. Therefore, 'run' will go to this state when
+//              both its objections and those of 'post_shutdown' are all dropped.
 //
 //   UVM_PHASE_ENDED - phase completed execution, now running phase_ended() callback
+//
+//   UVM_PHASE_JUMPING - all processes related to phase are being killed and all
+//                       predecessors are forced into the DONE state.
 //
 //   UVM_PHASE_CLEANUP - all processes related to phase are being killed
 //
@@ -513,10 +521,10 @@ typedef enum { UVM_PHASE_IMP,
 //
 //    The state transitions occur as follows:
 //
-//|   DORMANT -> SCHED -> SYNC -> START -> EXEC -> READY -> END -> CLEAN -> DONE
-//|      ^                                                            |
-//|      |                      <-- jump_to                           v
-//|      +------------------------------------------------------------+
+//|   DORMANT -> SCHED -> SYNC -> START -> EXEC -> READY -> END -+-> CLEAN -> DONE
+//|      ^                                                       |
+//|      |                      <-- jump_to                      |
+//|      +-------------------------------------------- JUMPING< -+
 
    typedef enum { UVM_PHASE_DORMANT      = 1,
                   UVM_PHASE_SCHEDULED    = 2,
@@ -529,24 +537,6 @@ typedef enum { UVM_PHASE_IMP,
                   UVM_PHASE_DONE         = 256,
                   UVM_PHASE_JUMPING      = 512
                   } uvm_phase_state;
-
-
-
-// Enum: uvm_phase_transition
-//
-// These are the phase state transition for callbacks which provide
-// additional information that may be useful during callbacks
-//
-// UVM_COMPLETED   - the phase completed normally
-// UVM_FORCED_STOP - the phase was forced to terminate prematurely
-// UVM_SKIPPED     - the phase was in the path of a forward jump
-// UVM_RERUN       - the phase was in the path of a backwards jump
-//
-typedef enum { UVM_COMPLETED   = 'h01, 
-               UVM_FORCED_STOP = 'h02,
-               UVM_SKIPPED     = 'h04, 
-               UVM_RERUN       = 'h08   
-} uvm_phase_transition;
 
 
 

@@ -68,7 +68,7 @@ endclass
 
 class uvm_factory;
 
-  extern `_protected function new ();
+  extern protected function new ();
 
   // Function: get()
   // Get the factory singleton

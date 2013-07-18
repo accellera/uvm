@@ -2,7 +2,7 @@
 //----------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2013 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -26,12 +26,35 @@ typedef class uvm_sequencer_base;
 typedef class uvm_domain;
 typedef class uvm_task_phase;
 
+typedef class uvm_phase_cb;
+
+
    
+//------------------------------------------------------------------------------
+//
+// Section: Phasing Definition classes
+//
+//------------------------------------------------------------------------------
+//
+// The following class are used to specify a phase and its implied functionality.
+//
+  
 //------------------------------------------------------------------------------
 //
 // Class: uvm_phase
 //
 //------------------------------------------------------------------------------
+//
+// This base class defines everything about a phase: behavior, state, and context.
+//
+// To define behavior, it is extended by UVM or the user to create singleton
+// objects which capture the definition of what the phase does and how it does it.
+// These are then cloned to produce multiple nodes which are hooked up in a graph
+// structure to provide context: which phases follow which, and to hold the state
+// of the phase throughout its lifetime.
+// UVM provides default extensions of this class for the standard runtime phases.
+// VIP Providers can likewise extend this class to define the phase functor for a
+// particular component context as required.
 //
 // This base class defines everything about a phase: behavior, state, and context.
 //
@@ -109,6 +132,8 @@ typedef class uvm_task_phase;
 class uvm_phase extends uvm_object;
 
   //`uvm_object_utils(uvm_phase)
+
+  `uvm_register_cb(uvm_phase, uvm_phase_cb)
 
 
   //--------------------
@@ -498,6 +523,8 @@ class uvm_phase extends uvm_object;
   protected bit  m_predecessors[uvm_phase];
   protected bit  m_successors[uvm_phase];
   protected uvm_phase m_end_node;
+  // Track the currently executing real task phases (used for debug)
+  static protected bit m_executing_phases[uvm_phase];
   function uvm_phase get_begin_node(); if (m_imp != null) return this; return null; endfunction
   function uvm_phase get_end_node();   return m_end_node; endfunction
 
@@ -511,6 +538,7 @@ class uvm_phase extends uvm_object;
      return m_ready_to_end_count;
   endfunction
 
+  extern local function void get_predecessors_for_successors(output bit pred_of_succ[uvm_phase]);
   extern local task m_wait_for_pred();
 
   // Implementation - Jumping
@@ -531,6 +559,7 @@ class uvm_phase extends uvm_object;
   extern local task  execute_phase();
   extern local function void m_terminate_phase();
   extern local function void m_print_termination_state();
+  extern local task wait_for_self_and_siblings_to_drop();
   extern function void kill();
   extern function void kill_successors();
 
@@ -577,6 +606,107 @@ class uvm_phase extends uvm_object;
   endfunction
 endclass
 
+
+//------------------------------------------------------------------------------
+//
+// Class: uvm_phase_state_change
+//
+//------------------------------------------------------------------------------
+//
+// Phase state transition descriptor.
+// Used to describe the phase transition that caused a
+// uvm_phase_cb::state_changed() callback to be invoked.
+//
+
+class uvm_phase_state_change extends uvm_object;
+
+  `uvm_object_utils(uvm_phase_state_change)
+
+  // Implementation -- do not use directly
+  /* local */ uvm_phase       m_phase;
+  /* local */ uvm_phase_state m_prev_state;
+  /* local */ uvm_phase       m_jump_to;
+  
+  function new(string name = "uvm_phase_state_change");
+    super.new(name);
+  endfunction
+
+
+  // Function: get_state()
+  //
+  // Returns the state the phase just transitioned to.
+  // Functionally equivalent to uvm_phase::get_state().
+  //
+  virtual function uvm_phase_state get_state();
+    return m_phase.get_state();
+  endfunction
+  
+  // Function: get_prev_state()
+  //
+  // Returns the state the phase just transitioned from.
+  //
+  virtual function uvm_phase_state get_prev_state();
+    return m_prev_state;
+  endfunction
+
+  // Function: jump_to()
+  //
+  // If the current state is ~UVM_PHASE_ENDED~ or ~UVM_PHASE_JUMPING~ because of
+  // a phase jump, returns the phase that is the target of jump.
+  // Returns ~null~ otherwise.
+  //
+  function uvm_phase jump_to();
+    return m_jump_to;
+  endfunction
+
+endclass
+
+
+//------------------------------------------------------------------------------
+//
+// Class: uvm_phase_cb
+//
+//------------------------------------------------------------------------------
+//
+// This class define a callback method that is invoked by the phaser
+// during the execution of a specific node in the phase graph or all phase node.
+// User-defined callback extensions can be used to integrate data types that
+// are not natively phase-aware with the UVM phasing.
+//
+
+class uvm_phase_cb extends uvm_callback;
+
+  // Function: phase_state_change
+  //
+  // Called whenever a ~phase~ changes state.
+  // The ~change~ descriptor describes the transition that was just completed.
+  // The callback method is invoked immediately after the phase state has changed,
+  // but before the phase implementation is executed.
+  //
+  // An extension may interact with the phase,
+  // such as raising the phase objection to prolong the phase,
+  // in a manner that is consistent with the current phase state.
+  // Except when in the ~READY_TO_END~ state,
+  // any thread forked in the callback will not be killed when the phase ends.
+  //
+  // By default, the callback method does nothing.
+  // Unless otherwise specified, modifying the  phase transition descriptor has
+  // no effect on the phasing schedule or execution.
+  //
+  virtual function void phase_state_change(uvm_phase phase,
+                                           uvm_phase_state_change change);
+  endfunction
+endclass
+
+//------------------------------------------------------------------------------
+//
+// Class: uvm_phase_cb_pool
+//
+//------------------------------------------------------------------------------
+//
+// Convenience type for the uvm_callbacks#(uvm_phase, uvm_callback) class.
+//
+typedef uvm_callbacks#(uvm_phase, uvm_phase_cb) uvm_phase_cb_pool;
 
 
 //------------------------------------------------------------------------------
@@ -1085,6 +1215,8 @@ task uvm_phase::execute_phase();
 
   uvm_task_phase task_phase;
   uvm_root top;
+  uvm_phase_state_change state_chg;
+
   top = uvm_root::get();
 
   // If we got here by jumping forward, we must wait for
@@ -1098,7 +1230,10 @@ task uvm_phase::execute_phase();
   // If DONE (by, say, a forward jump), return immed
   if (m_state == UVM_PHASE_DONE)
     return;
-  
+
+  state_chg = uvm_phase_state_change::type_id::create(get_name());
+  state_chg.m_phase      = this;
+  state_chg.m_jump_to    = null;
 
   //---------
   // SYNCING:
@@ -1107,7 +1242,10 @@ task uvm_phase::execute_phase();
   // relationship to be ready. Sync can be 2-way -
   // this additional state avoids deadlock.
   if (m_sync.size()) begin
+    state_chg.m_prev_state = m_state;
     m_state = UVM_PHASE_SYNCING;
+    `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
+    
     foreach (m_sync[i]) begin
       wait (m_sync[i].m_state >= UVM_PHASE_SYNCING);
     end
@@ -1123,9 +1261,16 @@ task uvm_phase::execute_phase();
 
   // If we're a schedule or domain, then "fake" execution
   if (m_phase_type != UVM_PHASE_NODE) begin
+    state_chg.m_prev_state = m_state;
     m_state = UVM_PHASE_STARTED;
+    `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
+
     #0;
+
+    state_chg.m_prev_state = m_state;
     m_state = UVM_PHASE_EXECUTING;
+    `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
+
     #0;
   end
 
@@ -1135,7 +1280,10 @@ task uvm_phase::execute_phase();
     //---------
     // STARTED:
     //---------
+    state_chg.m_prev_state = m_state;
     m_state = UVM_PHASE_STARTED;
+    `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
+
     m_imp.traverse(top,this,UVM_PHASE_STARTED);
     m_ready_to_end_count = 0 ; // reset the ready_to_end count when phase starts
     #0; // LET ANY WAITERS WAKE UP
@@ -1147,12 +1295,20 @@ task uvm_phase::execute_phase();
       //-----------
       // EXECUTING: (function phases)
       //-----------
+      state_chg.m_prev_state = m_state;
       m_state = UVM_PHASE_EXECUTING;
+      `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
+
       #0; // LET ANY WAITERS WAKE UP
       m_imp.traverse(top,this,UVM_PHASE_EXECUTING);
 
     end
     else begin
+        m_executing_phases[this] = 1;
+
+        state_chg.m_prev_state = m_state;
+        m_state = UVM_PHASE_EXECUTING;
+        `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
 
         fork : master_phase_process
           begin
@@ -1162,7 +1318,6 @@ task uvm_phase::execute_phase();
             //-----------
             // EXECUTING: (task phases)
             //-----------
-            m_state = UVM_PHASE_EXECUTING;
             task_phase.traverse(top,this,UVM_PHASE_EXECUTING);
   
             wait(0); // stay alive for later kill
@@ -1174,18 +1329,18 @@ task uvm_phase::execute_phase();
   
         // Now wait for one of three criterion for end-of-phase.
         fork
-        begin // guard
+          begin // guard
           
-          do begin
-
-           // if looped back from READY_TO_END, change state
-           m_state = UVM_PHASE_EXECUTING;
-           #0;
-
            fork
+             // JUMP
+             begin
+                wait (m_jump_fwd || m_jump_bkwd);
+                `UVM_PH_TRACE("PH/TRC/EXE/JUMP","PHASE EXIT ON JUMP REQUEST",this,UVM_DEBUG)
+             end
   
              // WAIT_FOR_ALL_DROPPED
              begin
+               bit do_ready_to_end  ; // bit used for ready_to_end iterations
                // OVM semantic: don't end until objection raised or stop request
                if (phase_done.get_objection_total(top) ||
                    m_use_ovm_run_semantic && m_imp.get_name() == "run") begin
@@ -1194,71 +1349,98 @@ task uvm_phase::execute_phase();
                  `UVM_PH_TRACE("PH/TRC/EXE/ALLDROP","PHASE EXIT ALL_DROPPED",this,UVM_DEBUG)
                end
                else begin
-                  if (m_phase_trace)
-                    `UVM_PH_TRACE("PH/TRC/SKIP","No objections raised, skipping phase",this,UVM_LOW)
+                  if (m_phase_trace) `UVM_PH_TRACE("PH/TRC/SKIP","No objections raised, skipping phase",this,UVM_LOW)
+               end
+               
+               wait_for_self_and_siblings_to_drop() ;
+               do_ready_to_end = 1;
+                  
+               //--------------
+               // READY_TO_END:
+               //--------------
+ 
+               while (do_ready_to_end) begin
+                 uvm_wait_for_nba_region(); // Let all siblings see no objections before traverse might raise another 
+                 `UVM_PH_TRACE("PH_READY_TO_END","PHASE READY TO END",this,UVM_DEBUG)
+                 m_ready_to_end_count++;
+                 if (m_phase_trace)
+                   `UVM_PH_TRACE("PH_READY_TO_END_CB","CALLING READY_TO_END CB",this,UVM_HIGH)
+                 state_chg.m_prev_state = m_state;
+                 m_state = UVM_PHASE_READY_TO_END;
+                 `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
+                 if (m_imp != null)
+                   m_imp.traverse(top,this,UVM_PHASE_READY_TO_END);
+                  
+                 uvm_wait_for_nba_region(); // Give traverse targets a chance to object 
+
+                 wait_for_self_and_siblings_to_drop();
+                 do_ready_to_end = (m_state == UVM_PHASE_EXECUTING) && (m_ready_to_end_count < max_ready_to_end_iter) ; //when we don't wait in task above, we drop out of while loop
                end
              end
   
              // TIMEOUT
              begin
-               if (top.phase_timeout == 0)
-                 wait(top.phase_timeout != 0);
-               `uvm_delay(top.phase_timeout)
-               if ($time == `UVM_DEFAULT_TIMEOUT) begin
-                 `uvm_error("PH_TIMEOUT",
-                     $sformatf("Default phase timeout of %0t hit. All processes are waiting, indicating a probable testbench issue. Phase '%0s' ready to end",
-                             top.phase_timeout, get_name()))
-               end
+               if (this.get_name() == "run") begin
+                  if (top.phase_timeout == 0)
+                    wait(top.phase_timeout != 0);
+                  if (m_phase_trace)
+                    `UVM_PH_TRACE("PH/TRC/TO_WAIT", $sformatf("STARTING PHASE TIMEOUT WATCHDOG (timeout == %t)", top.phase_timeout), this, UVM_HIGH)
+                  `uvm_delay(top.phase_timeout)
+                  if ($time == `UVM_DEFAULT_TIMEOUT) begin
+                     if (m_phase_trace)
+                       `UVM_PH_TRACE("PH/TRC/TIMEOUT", "PHASE TIMEOUT WATCHDOG EXPIRED", this, UVM_LOW)
+                     foreach (m_executing_phases[p]) begin
+                        if (p.phase_done.get_objection_total() > 0) begin
+                           if (m_phase_trace)
+                             `UVM_PH_TRACE("PH/TRC/TIMEOUT/OBJCTN", 
+                                           $sformatf("Phase '%s' has outstanding objections:\n%s", p.get_full_name(), p.phase_done.convert2string()),
+                                           this,
+                                           UVM_LOW)
+                        end
+                     end
+                        
+                     `uvm_fatal("PH_TIMEOUT",
+                                $sformatf("Default timeout of %0t hit, indicating a probable testbench issue",
+                                          `UVM_DEFAULT_TIMEOUT))
+                  end
+                  else begin
+                     if (m_phase_trace)
+                       `UVM_PH_TRACE("PH/TRC/TIMEOUT", "PHASE TIMEOUT WATCHDOG EXPIRED", this, UVM_LOW)
+                     foreach (m_executing_phases[p]) begin
+                        if (p.phase_done.get_objection_total() > 0) begin
+                           if (m_phase_trace)
+                             `UVM_PH_TRACE("PH/TRC/TIMEOUT/OBJCTN", 
+                                           $sformatf("Phase '%s' has outstanding objections:\n%s", p.get_full_name(), p.phase_done.convert2string()),
+                                           this,
+                                           UVM_LOW)
+                        end
+                     end
+                        
+                     `uvm_fatal("PH_TIMEOUT",
+                                $sformatf("Explicit timeout of %0t hit, indicating a probable testbench issue",
+                                          top.phase_timeout))
+                  end
+                  if (m_phase_trace)
+                    `UVM_PH_TRACE("PH/TRC/EXE/3","PHASE EXIT TIMEOUT",this,UVM_DEBUG)
+               end // if (this.get_name() == "run")
                else begin
-                 `uvm_error("PH_TIMEOUT",
-                     $sformatf("Phase timeout of %0t hit, phase '%0s' ready to end",
-                             top.phase_timeout, get_name()))
+                  wait (0); // never unblock for non-run phase
                end
-               phase_done.clear(this);
-               `UVM_PH_TRACE("PH/TRC/EXE/3","PHASE EXIT TIMEOUT",this,UVM_DEBUG)
-             end
+             end // if (m_phase_trace)
+
   
            join_any
            disable fork;
         
-           phase_done.clear(this);
-
-           // If jump is pending, do not allow prolonging of phase
-           if(!m_jump_fwd && !m_jump_bkwd) begin
-
-             //--------------
-             // READY_TO_END:
-             //--------------
- 
-             `UVM_PH_TRACE("PH_READY_TO_END","PHASE READY TO END",this,UVM_DEBUG)
-             //m_state = UVM_PHASE_READY_TO_END;
-             m_ready_to_end_count++;
-             if (m_ready_to_end_count < max_ready_to_end_iter) begin
-               if (m_phase_trace)
-                 `UVM_PH_TRACE("PH_READY_TO_END_CB","CALLING READY_TO_END CB",this,UVM_HIGH)
-               if (m_imp != null)
-                 m_imp.traverse(top,this,UVM_PHASE_READY_TO_END);
-             end
-             #0; // LET ANY WAITERS WAKE UP
-
-             // WAIT FOR PREDECESSORS
-             if (!phase_done.get_objection_total(top)) begin
-               m_state = UVM_PHASE_READY_TO_END;
-               m_wait_for_pred();
-             end
-
-           end
-
           end
-          while (phase_done.get_objection_total(top));
   
-        end
         join // guard
 
     end
 
   end
 
+  m_executing_phases.delete(this);
 
   //---------
   // JUMPING:
@@ -1277,6 +1459,8 @@ task uvm_phase::execute_phase();
   if (m_phase_type == UVM_PHASE_NODE) begin
 
   if(m_jump_fwd || m_jump_bkwd) begin
+    state_chg.m_jump_to = m_jump_phase;
+    
     `uvm_info("PH_JUMP",
             $sformatf("phase %s (schedule %s, domain %s) is jumping to phase %s",
              get_name(), get_schedule_name(), get_domain_name(), m_jump_phase.get_name()),
@@ -1288,17 +1472,21 @@ task uvm_phase::execute_phase();
     // execute 'phase_ended' callbacks
     if (m_phase_trace)
       `UVM_PH_TRACE("PH_END","JUMPING OUT OF PHASE",this,UVM_HIGH)
+    state_chg.m_prev_state = m_state;
     m_state = UVM_PHASE_ENDED;
+    `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
     if (m_imp != null)
        m_imp.traverse(top,this,UVM_PHASE_ENDED);
     #0; // LET ANY WAITERS WAKE UP
-
+    state_chg.m_prev_state = m_state;
     m_state = UVM_PHASE_JUMPING;
+    `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
     if (m_phase_proc != null) begin
       m_phase_proc.kill();
       m_phase_proc = null;
     end
     #0; // LET ANY WAITERS WAKE UP
+    phase_done.clear();
 
     if(m_jump_fwd) begin
       clear_successors(UVM_PHASE_DONE,m_jump_phase);
@@ -1323,7 +1511,9 @@ task uvm_phase::execute_phase();
   // execute 'phase_ended' callbacks
   if (m_phase_trace)
     `UVM_PH_TRACE("PH_END","ENDING PHASE",this,UVM_HIGH)
+  state_chg.m_prev_state = m_state;
   m_state = UVM_PHASE_ENDED;
+  `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
   if (m_imp != null)
     m_imp.traverse(top,this,UVM_PHASE_ENDED);
   #0; // LET ANY WAITERS WAKE UP
@@ -1332,12 +1522,15 @@ task uvm_phase::execute_phase();
   // CLEANUP:
   //---------
   // kill this phase's threads
+  state_chg.m_prev_state = m_state;
   m_state = UVM_PHASE_CLEANUP;
+  `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
   if (m_phase_proc != null) begin
     m_phase_proc.kill();
     m_phase_proc = null;
   end
   #0; // LET ANY WAITERS WAKE UP
+  phase_done.clear();
 
   end
 
@@ -1347,7 +1540,9 @@ task uvm_phase::execute_phase();
   //------
   if (m_phase_trace)
     `UVM_PH_TRACE("PH/TRC/DONE","Completed phase",this,UVM_LOW)
+  state_chg.m_prev_state = m_state;
   m_state = UVM_PHASE_DONE;
+  `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
   m_phase_proc = null;
   #0; // LET ANY WAITERS WAKE UP
 
@@ -1364,8 +1559,10 @@ task uvm_phase::execute_phase();
     // execute all the successors
     foreach (m_successors[succ]) begin
       if(succ.m_state < UVM_PHASE_SCHEDULED) begin
+        state_chg.m_prev_state = m_state;
         succ.m_state = UVM_PHASE_SCHEDULED;
-          #0; // LET ANY WAITERS WAKE UP
+        `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
+        #0; // LET ANY WAITERS WAKE UP
         void'(m_phase_hopper.try_put(succ));
         if (m_phase_trace)
           `UVM_PH_TRACE("PH/TRC/SCHEDULED",{"Scheduled from phase ",get_full_name()},succ,UVM_LOW)
@@ -1376,16 +1573,9 @@ task uvm_phase::execute_phase();
 endtask
 
 
-// m_wait_for_pred
-// ---------------
-
-task uvm_phase::m_wait_for_pred();
-
-  if(!(m_jump_fwd || m_jump_bkwd)) begin
-
+function void uvm_phase::get_predecessors_for_successors(output bit pred_of_succ[uvm_phase]);
     bit done;
     bit successors[uvm_phase];
-    bit pred_of_succ[uvm_phase];
 
     // get all successors
     foreach (m_successors[succ])
@@ -1415,7 +1605,7 @@ task uvm_phase::m_wait_for_pred();
       done=1;
       foreach (pred_of_succ[pred]) begin
         if (pred.get_phase_type() != UVM_PHASE_NODE) begin
-          pred_of_succ.delete(pred);
+          pred_of_succ.delete(pred); 
           foreach (pred.m_predecessors[next_pred])
             pred_of_succ[next_pred] = 1;
           done =0;
@@ -1426,6 +1616,18 @@ task uvm_phase::m_wait_for_pred();
 
     // remove ourselves from the list
     pred_of_succ.delete(this);
+endfunction
+
+
+// m_wait_for_pred
+// ---------------
+
+task uvm_phase::m_wait_for_pred();
+
+  if(!(m_jump_fwd || m_jump_bkwd)) begin
+
+    bit pred_of_succ[uvm_phase];
+    get_predecessors_for_successors(pred_of_succ);
 
     // wait for predecessors to successors (real phase nodes, not terminals)
     // mostly debug msgs
@@ -1672,7 +1874,8 @@ function void uvm_phase::jump(uvm_phase phase);
   end
   
   m_jump_phase = d;
-  m_terminate_phase();
+  //m_terminate_phase(); // JAR - not needed
+
 endfunction
 
 
@@ -1721,6 +1924,43 @@ endfunction
 //---------------------------------
 // Implementation - Overall Control
 //---------------------------------
+// wait_for_self_and_siblings_to_drop
+// -----------------------------
+// This task loops until this phase instance and all its siblings, either
+// sync'd or sharing a common successor, have all objections dropped.
+task uvm_phase::wait_for_self_and_siblings_to_drop() ;
+  bit need_to_check_all = 1 ;
+  uvm_root top;
+  bit siblings[uvm_phase];
+  
+  top = uvm_root::get();
+  
+  get_predecessors_for_successors(siblings);
+  foreach (m_sync[i]) begin
+    siblings[m_sync[i]] = 1;
+  end
+
+  while (need_to_check_all) begin
+    need_to_check_all = 0 ; //if all are dropped, we won't need to do this again
+
+    // wait for own objections to drop
+    if (phase_done.get_objection_total(top) != 0) begin 
+      m_state = UVM_PHASE_EXECUTING ;
+      phase_done.wait_for(UVM_ALL_DROPPED, top);
+      need_to_check_all = 1 ;
+    end
+
+    // now wait for siblings to drop
+    foreach(siblings[sib]) begin
+      sib.wait_for_state(UVM_PHASE_EXECUTING, UVM_GTE); // sibling must be at least executing 
+      if (sib.phase_done.get_objection_total(top) != 0) begin
+        m_state = UVM_PHASE_EXECUTING ;
+        sib.phase_done.wait_for(UVM_ALL_DROPPED, top); // sibling must drop any objection
+        need_to_check_all = 1 ;
+      end
+    end
+  end
+endtask
 
 // kill
 // ----

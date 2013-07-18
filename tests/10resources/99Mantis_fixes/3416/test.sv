@@ -77,10 +77,6 @@ begin
    static some_none_uvm_object some_nuvm_object = new;
 
    uvm_default_printer=uvm_default_line_printer;
-   
-   void'(m_uvm_resource_convert2string_converter#(some_none_uvm_object)::register());
-   void'(m_uvm_resource_convert2string_converter#(virtual intf)::register());
-   
 
    $display("GOLD-FILE-START");
    uvm_resource_db#(int)::set("int", "*", 0);
