@@ -176,6 +176,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     super.new(name);
     m_sequence_state = CREATED;
     m_wait_for_grant_semaphore = 0;
+    m_init_phase_daps(1);
   endfunction
 
 
@@ -556,7 +557,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // runs with a forever loop inside of the body, as the objection will
   // never get dropped!
   function void set_automatic_phase_objection(bit value);
-     m_automatic_objection_dap.set(value);
+     m_automatic_phase_objection_dap.set(value);
   endfunction : set_automatic_phase_objection
 
   // Function: get_automatic_phase_objection
@@ -569,7 +570,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // after <post_start> has executed, or <kill> has been called.
   //
   function bit get_automatic_phase_objection();
-     return m_automatic_objection_dap.get();
+     return m_automatic_phase_objection_dap.get();
   endfunction : get_automatic_phase_objection
 
   // m_safe_raise_starting_phase
