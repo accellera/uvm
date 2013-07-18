@@ -46,8 +46,8 @@ endclass // catcher
    
 class test extends uvm_component;
 
-   uvm_g2l_dap#(int) idap;
-   uvm_g2l_dap#(uvm_object) odap;
+   uvm_get_to_lock_dap#(int) idap;
+   uvm_get_to_lock_dap#(uvm_object) odap;
    catcher ctchr;
    
    `uvm_component_utils_begin(test)
@@ -62,10 +62,10 @@ class test extends uvm_component;
 
    virtual task run_phase(uvm_phase phase);
       bit failed;
-      uvm_g2l_dap#(int) idap2;
+      uvm_get_to_lock_dap#(int) idap2;
       
       // Basics 
-      idap = uvm_g2l_dap#(int)::type_id::create("idap", this);
+      idap = uvm_get_to_lock_dap#(int)::type_id::create("idap", this);
       idap.set(1);
       idap.set(2);
       if (idap.get() != 2) begin
