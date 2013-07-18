@@ -58,9 +58,6 @@ class myseq extends uvm_sequence;
     int c;
     myseqr seqr;
 
-    if (starting_phase!=null) starting_phase.raise_objection(this);
-    else $display("starting_phase is NULL!");
-
     $cast(seqr, m_sequencer);
     if(seqr_seqs.exists(seqr))
       w = seqr_seqs[seqr];
@@ -76,12 +73,11 @@ class myseq extends uvm_sequence;
     #10;
     `uvm_info("INBODY", $sformatf("Ending %s !!!",get_name()), UVM_NONE)
 
-    if (starting_phase!=null) starting_phase.drop_objection(this);
-
   endtask
 
   function new(string name="myseq");
      super.new(name);
+     set_automatic_phase_objection(1);
   endfunction
 
 endclass

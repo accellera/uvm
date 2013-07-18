@@ -23,13 +23,8 @@ default_sequence [/^uvm_test_top\.env\.seqr\.reset_phase$/] : (class uvm_pkg::uv
 default_sequence [/^uvm_test_top\.env\.seqr\.shutdown_phase$/] : (class uvm_pkg::uvm_sequence_base) ?
 -  
   --------
-  <empty> reads: 1 @ 0  writes: 0 @ 0
   uvm_test_top.env reads: 0 @ 0  writes: 1 @ 0
- 
-default_sequence [/^uvm_test_top\.env\.seqr\.main_phase$/] : (class uvm_pkg::uvm_sequence_base) ?
--  
-  --------
-  uvm_test_top.env reads: 0 @ 0  writes: 1 @ 0
+  uvm_test_top.env.seqr reads: 1 @ 20  writes: 0 @ 0
  
 default_sequence [/^uvm_test_top\.env\.seqr\.configure_phase$/] : (class uvm_pkg::uvm_sequence_base) ?
 -  
@@ -40,6 +35,7 @@ default_sequence [/^uvm_test_top\.env\.seqr\.reset_phase$/] : (class uvm_pkg::uv
 -  
   --------
   uvm_test_top.env reads: 0 @ 0  writes: 1 @ 0
+  uvm_test_top.env.seqr reads: 1 @ 0  writes: 0 @ 0
  
 default_sequence [/^uvm_test_top\.env\.seqr\.shutdown_phase$/] : (class uvm_pkg::uvm_object_wrapper) ?
 -  
@@ -50,6 +46,7 @@ default_sequence [/^uvm_test_top\.env\.seqr\.main_phase$/] : (class uvm_pkg::uvm
 -  
   --------
   uvm_test_top.env reads: 0 @ 0  writes: 1 @ 0
+  uvm_test_top.env.seqr reads: 1 @ 10  writes: 0 @ 0
  
 default_sequence [/^uvm_test_top\.env\.seqr\.configure_phase$/] : (class uvm_pkg::uvm_object_wrapper) ?
 -  
@@ -61,21 +58,9 @@ default_sequence [/^uvm_test_top\.env\.seqr\.reset_phase$/] : (class uvm_pkg::uv
   --------
   uvm_test_top.env reads: 0 @ 0  writes: 1 @ 0
  
-default_sequence [/^uvm_test_top\.env\.seqr\.main_phase$/] : (class uvm_pkg::uvm_sequence_base) ?
--  
-  --------
-  <empty> reads: 1 @ 0  writes: 0 @ 0
- 
-default_sequence [/^uvm_test_top\.env\.seqr\.configure_phase$/] : (class uvm_pkg::uvm_sequence_base) ?
--  
-  --------
-  <empty> reads: 1 @ 0  writes: 0 @ 0
- 
 default_sequence [/^uvm_test_top\.env\.seqr\.configure_phase$/] : (class uvm_pkg::uvm_object_wrapper) ?
 -  
-default_sequence [/^uvm_test_top\.env\.seqr\.reset_phase$/] : (class uvm_pkg::uvm_object_wrapper) ?
--  
   --------
-  <empty> reads: 1 @ 0  writes: 0 @ 0
+  uvm_test_top.env.seqr reads: 1 @ 10  writes: 0 @ 0
  
 === end of resource pool ===
