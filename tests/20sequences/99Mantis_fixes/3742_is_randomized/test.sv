@@ -35,13 +35,10 @@ class subseq extends uvm_sequence;
    function new(string name = "subseq");
       super.new(name);
       do_not_randomize = 1;
+      set_automatic_phase_objection(1);
    endfunction
 
    task body();
-      if (starting_phase != null) begin
-         $write("Checking default phase...\n");
-         starting_phase.raise_objection(this);
-      end
 
       $write("Executing subseq...\n");
       if (foo !== 0) begin
@@ -50,10 +47,6 @@ class subseq extends uvm_sequence;
 
       #10;
 
-      if (starting_phase != null) begin
-         $write("Checking default phase...\n");
-         starting_phase.drop_objection(this);
-      end
    endtask
 endclass
 

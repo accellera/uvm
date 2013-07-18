@@ -177,6 +177,7 @@ class read_modify_write_seq extends ubus_base_sequence;
 
   function new(string name="read_modify_write_seq");
     super.new(name);
+    set_automatic_phase_objection(1);
   endfunction : new
 
   `uvm_object_utils(read_modify_write_seq)
@@ -207,14 +208,6 @@ class read_modify_write_seq extends ubus_base_sequence;
         $sformatf("%s Read Modify Write Read error!\n\tADDR: %h, EXP: %h, ACT: %h", 
         get_sequence_path(),addr_check,m_data0_check,read_byte_seq0.rsp.data[0]));
   endtask : body
-
-  task pre_body();
-    starting_phase.raise_objection(this, "read_modify_write_seq");
-  endtask: pre_body
-
-  task post_body();
-    starting_phase.drop_objection(this, "read_modify_write_seq");
-  endtask: post_body  
 
 endclass : read_modify_write_seq
 

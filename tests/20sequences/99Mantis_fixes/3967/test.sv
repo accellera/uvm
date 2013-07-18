@@ -92,19 +92,12 @@ class cust_data_sequence extends uvm_sequence#(cust_data);
 
   function new(string name = "cust_data_sequence");
      super.new(name);
+     set_automatic_phase_objection(1);
   endfunction
-
-  virtual task pre_body();
-    if (starting_phase!=null) starting_phase.raise_objection(this);
-  endtask : pre_body
 
   virtual task body();
     `uvm_do(req);
   endtask
-
-  virtual task post_body();
-    if (starting_phase!=null) starting_phase.drop_objection(this);
-  endtask : post_body
 
 endclass
 

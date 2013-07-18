@@ -57,6 +57,8 @@ Mantis 4378: Proper documentation of set_inst_override_by_name and
 
 Mantis 4425: BUSY flag now cleared when register model is reset.
 
+Mantis 4430: default sequences are now killed during PHASE_ENDED
+
 Mantis 4513: Added user-defined memory allocation policy to uvm_vreg::allocat()
 
 Mantis 4516: Proper prioritization of default sequences
