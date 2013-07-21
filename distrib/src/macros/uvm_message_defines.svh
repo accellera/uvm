@@ -244,8 +244,6 @@
 `endif
 
 
-// Decide on whether to provide _begin_end convenience macros
-
 // Not implemented.  Used to collapse macros defined below.
 `define __m_uvm_report_trace_begin(TRC_MESS, ID, MSG, SEVERITY, VERBOSITY, RO, CNTXT_NAME) \
   begin \
@@ -253,7 +251,7 @@
     l_report_object = RO; \
     if (l_report_object.uvm_report_enabled(VERBOSITY,SEVERITY,ID)) begin \
       TRC_MESS = uvm_trace_message::get_trace_message(); \
-      TRC_MESS.m_set_report_message(CNTXT_NAME, `uvm_file, `uvm_line, SEVERITY, ID, \
+      TRC_MESS.set_report_message(CNTXT_NAME, `uvm_file, `uvm_line, SEVERITY, ID, \
         MSG, VERBOSITY); \
       TRC_MESS.state = uvm_trace_message::TRC_BGN; \
       l_report_object.process_report_message(TRC_MESS); \
@@ -413,9 +411,9 @@
 `define uvm_add_trace_int(TRC_MESS, VAR, RADIX, LABEL = "") \
   if (TRC_MESS != null) \
     if (LABEL == "") \
-      TRC_MESS.add_int(`"VAR`", VAR, RADIX); \
+      TRC_MESS.add_int(`"VAR`", VAR, $bits(VAR), RADIX); \
     else \
-      TRC_MESS.add_int(LABEL, VAR, RADIX);
+      TRC_MESS.add_int(LABEL, VAR, $bits(VAR), RADIX);
 
 
 // MACRO: `uvm_add_trace_string
@@ -452,6 +450,16 @@
     else \
       TRC_MESS.add_object(LABEL, VAR);
 
+// `uvm_add_trace_meta
+//
+
+`define uvm_add_trace_meta(TRC_MESS, VAR, LABEL = "") \
+  if (TRC_MESS != null) \
+    if (LABEL == "") \
+      TRC_MESS.add_meta(`"VAR'", VAR); \
+    else \
+      TRC_MESS.add_meta(LABEL, VAR);
+
 
 //----------------------------------------------------------------------------
 // Group:  Messge Linking Macros
@@ -487,7 +495,7 @@
     l_report_object = RO; \
     if (l_report_object.uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) begin \
       l_link_message = uvm_link_message::get_link_message(); \
-      l_link_message.m_set_report_message(CNTXT_NAME, `uvm_file, `uvm_line, UVM_INFO, ID, \
+      l_link_message.set_report_message(CNTXT_NAME, `uvm_file, `uvm_line, UVM_INFO, ID, \
         "", VERBOSITY); \
       l_link_message.tr_id0 = TR_ID0; \
       l_link_message.tr_id1 = TR_ID1; \

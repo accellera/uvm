@@ -106,7 +106,7 @@ endfunction
 
 // Function: uvm_report_enabled
 //
-// Returns the action if the configured verbosity in ~uvm_top~ for this 
+// Returns 1 if the configured verbosity in ~uvm_top~ for this 
 // severity/id is greater than ~verbosity~ else returns 0.
 // 
 // See also <uvm_report_object::uvm_report_enabled>.

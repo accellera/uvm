@@ -368,8 +368,8 @@ class uvm_sequence_item extends uvm_transaction;
     else
       l_string = context_name;
     l_report_message = uvm_report_message::get_report_message();
-    l_report_message.m_set_report_message(l_string, filename,
-      line, severity, id, message, verbosity);
+    l_report_message.set_report_message(l_string, filename,
+      line, uvm_severity_type'(severity), id, message, verbosity);
     process_report_message(l_report_message);
     l_report_message.free_report_message(l_report_message);
 
@@ -380,22 +380,9 @@ class uvm_sequence_item extends uvm_transaction;
   virtual function void uvm_report_info( string id, string message,
     int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
     string context_name = "", bit report_enabled_checked = 0);
-    uvm_report_message l_report_message;
-    string l_string;
-    if (report_enabled_checked == 0) begin
-      if (!uvm_report_enabled(verbosity, UVM_INFO, id))
-        return;
-    end
-    if (context_name == "")
-      l_string = get_sequence_path();
-    else
-      l_string = context_name;
-    l_report_message = uvm_report_message::get_report_message();
-    l_report_message.m_set_report_message(l_string, filename,
-      line, UVM_INFO, id, message, verbosity);
-    process_report_message(l_report_message);
-    l_report_message.free_report_message(l_report_message);
 
+    this.uvm_report(UVM_INFO, id, message, verbosity, filename, line,
+                    context_name, report_enabled_checked);
   endfunction
 
   // Function: uvm_report_warning
@@ -403,22 +390,9 @@ class uvm_sequence_item extends uvm_transaction;
   virtual function void uvm_report_warning( string id, string message,
     int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
     string context_name = "", bit report_enabled_checked = 0);
-    uvm_report_message l_report_message;
-    string l_string;
-    if (report_enabled_checked == 0) begin
-      if (!uvm_report_enabled(verbosity, UVM_WARNING, id))
-        return;
-    end
-    if (context_name == "")
-      l_string = get_sequence_path();
-    else
-      l_string = context_name;
-    l_report_message = uvm_report_message::get_report_message();
-    l_report_message.m_set_report_message(l_string, filename,
-      line, UVM_WARNING, id, message, verbosity);
-    process_report_message(l_report_message);
-    l_report_message.free_report_message(l_report_message);
 
+    this.uvm_report(UVM_WARNING, id, message, verbosity, filename, line,
+                    context_name, report_enabled_checked);
   endfunction
 
   // Function: uvm_report_error
@@ -426,22 +400,9 @@ class uvm_sequence_item extends uvm_transaction;
   virtual function void uvm_report_error( string id, string message,
     int verbosity = UVM_LOW, string filename = "", int line = 0,
     string context_name = "", bit report_enabled_checked = 0);
-    uvm_report_message l_report_message;
-    string l_string;
-    if (report_enabled_checked == 0) begin
-      if (!uvm_report_enabled(verbosity, UVM_ERROR, id))
-        return;
-    end
-    if (context_name == "")
-      l_string = get_sequence_path();
-    else
-      l_string = context_name;
-    l_report_message = uvm_report_message::get_report_message();
-    l_report_message.m_set_report_message(l_string, filename,
-      line, UVM_ERROR, id, message, verbosity);
-    process_report_message(l_report_message);
-    l_report_message.free_report_message(l_report_message);
 
+    this.uvm_report(UVM_ERROR, id, message, verbosity, filename, line,
+                    context_name, report_enabled_checked);
   endfunction
 
   // Function: uvm_report_fatal
@@ -454,22 +415,9 @@ class uvm_sequence_item extends uvm_transaction;
   virtual function void uvm_report_fatal( string id, string message,
     int verbosity = UVM_NONE, string filename = "", int line = 0,
     string context_name = "", bit report_enabled_checked = 0);
-    uvm_report_message l_report_message;
-    string l_string;
-    if (report_enabled_checked == 0) begin
-      if (!uvm_report_enabled(verbosity, UVM_FATAL, id))
-        return;
-    end
-    if (context_name == "")
-      l_string = get_sequence_path();
-    else
-      l_string = context_name;
-    l_report_message = uvm_report_message::get_report_message();
-    l_report_message.m_set_report_message(l_string, filename,
-      line, UVM_FATAL, id, message, verbosity);
-    process_report_message(l_report_message);
-    l_report_message.free_report_message(l_report_message);
 
+    this.uvm_report(UVM_FATAL, id, message, verbosity, filename, line,
+                    context_name, report_enabled_checked);
   endfunction
 
   virtual function void process_report_message (

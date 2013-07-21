@@ -46,6 +46,9 @@ class uvm_report_server extends uvm_object;
   protected int m_id_count[string];
   // Probably needs documented.
   bit enable_report_id_count_summary=1;
+  bit record_all_messages = 0; // consider runtime option
+  bit show_verbosity = 0;
+  bit show_terminator = 0;
 
   // Reconsider show_verbosity bit and possibly show_terminator
   // Consider a global record enable here (gives all messages the UVM_RM_RECORD
@@ -97,6 +100,9 @@ class uvm_report_server extends uvm_object;
       while (rs.m_id_count.next(l_id_count_index));
   
     enable_report_id_count_summary = rs.enable_report_id_count_summary;
+    record_all_messages = rs.record_all_messages;
+    show_verbosity = rs.show_verbosity;
+    show_terminator = rs.show_terminator;
 
   endfunction
 
@@ -121,6 +127,9 @@ class uvm_report_server extends uvm_object;
   // |    [ID2]                         integral           32    'd2  
   // |    [RNTST]                       integral           32    'd1  
   // |  enable_report_id_count_summary  bit                1     'b1  
+  // |  record_all_messages             bit                1     `b0
+  // |  show_verbosity                  bit                1     `b0
+  // |  show_terminator                 bit                1     `b0
 
 
   // Print to show report server state
@@ -156,6 +165,12 @@ class uvm_report_server extends uvm_object;
 
     printer.print_int("enable_report_id_count_summary", enable_report_id_count_summary,
       $bits(enable_report_id_count_summary), UVM_BIN, ".", "bit");
+    printer.print_int("record_all_messages", record_all_messages,
+      $bits(record_all_messages), UVM_BIN, ".", "bit");
+    printer.print_int("show_verbosity", show_verbosity,
+      $bits(show_verbosity), UVM_BIN, ".", "bit");
+    printer.print_int("show_terminator", show_terminator,
+      $bits(show_terminator), UVM_BIN, ".", "bit");
 
   endfunction
 
@@ -412,6 +427,9 @@ class uvm_report_server extends uvm_object;
     incr_severity_count(report_message.severity);
     incr_id_count(report_message.id);
 
+    if (record_all_messages)
+      report_message.action |= UVM_RM_RECORD;
+
     // Process UVM_RM_RECORD action (send to recorder)
     if(report_message.action & UVM_RM_RECORD) begin
       report_message.record_message(uvm_default_recorder);
@@ -478,6 +496,8 @@ class uvm_report_server extends uvm_object;
     string time_str;
     string line_str;
     string context_str;
+    string verbosity_str;
+    string terminator_str;
 
     sev_string = report_message.severity.name();
 
@@ -492,9 +512,19 @@ class uvm_report_server extends uvm_object;
     if (report_message.context_name != "")
       context_str = {"@@", report_message.context_name};
 
-    compose_report_message = {sev_string, " ", filename_line_string, "@ ", 
+    if (show_verbosity) begin
+      if ($cast(l_verbosity, report_message.verbosity))
+        verbosity_str = l_verbosity.name();
+      else
+        verbosity_str.itoa(report_message.verbosity);
+    end
+
+    if (show_terminator)
+      terminator_str = {"-",sev_string};
+
+    compose_report_message = {sev_string, verbosity_str, " ", filename_line_string, "@ ", 
       time_str, ": ", report_message.report_handler.get_full_name(), context_str,
-      " [", report_message.id, "] ", report_message.convert2string()};
+      " [", report_message.id, "] ", report_message.convert2string(), terminator_str};
 
   endfunction 
 

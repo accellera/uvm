@@ -141,8 +141,8 @@ class uvm_report_object extends uvm_object;
         return;
     end
     l_report_message = uvm_report_message::get_report_message();
-    l_report_message.m_set_report_message(context_name, filename,
-      line, severity, id, message, verbosity);
+    l_report_message.set_report_message(context_name, filename,
+      line, uvm_severity_type'(severity), id, message, verbosity);
     process_report_message(l_report_message);
     l_report_message.free_report_message(l_report_message);
   endfunction 

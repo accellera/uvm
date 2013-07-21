@@ -1,6 +1,5 @@
 //
 //------------------------------------------------------------------------------
-//   FIXME Copyright
 //   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
@@ -39,22 +38,21 @@ typedef class uvm_root;
 //------------------------------------------------------------------------------
 
 class uvm_report_message_element;
-
-  typedef enum {INT, STRING, OBJECT, MESS_TAG} element_type_e;
+  typedef enum {INT, STRING, OBJECT, MESS_TAG, META} element_type_e;
 
   element_type_e m_element_type;
   string m_element_name;
-  int m_int_value;
+  uvm_bitstream_t  m_int_value;
+  int m_int_size;
   uvm_radix_enum m_int_radix;
   string m_string_value;
   uvm_object m_object;
-
+  uvm_object m_meta;
 endclass
-
 
 //------------------------------------------------------------------------------
 //
-// CLASS- uvm_report_message_element
+// CLASS- uvm_report_message_element_container
 //
 // Implementation detail -- not documented.
 //
@@ -78,11 +76,13 @@ class uvm_report_message_element_container extends uvm_object;
     elements.push_back(urme);
   endfunction
 
-  function void add_int(string name, int value, uvm_radix_enum radix);
+  function void add_int(string name, uvm_bitstream_t value, 
+                        int size, uvm_radix_enum radix);
     uvm_report_message_element urme = new();
     urme.m_element_type = uvm_report_message_element::INT;
     urme.m_element_name = name;
     urme.m_int_value = value;
+    urme.m_int_size = size;
     urme.m_int_radix = radix;
     elements.push_back(urme);
   endfunction
@@ -103,6 +103,14 @@ class uvm_report_message_element_container extends uvm_object;
     elements.push_back(urme);
   endfunction
 
+  function void add_meta(string name, uvm_object meta);
+    uvm_report_message_element urme = new();
+    urme.m_element_type = uvm_report_message_element::META;
+    urme.m_element_name = name;
+    urme.m_meta = meta;
+    elements.push_back(urme);
+  endfunction
+
   function void do_print(uvm_printer printer);
     super.do_print(printer);
     for(int i = 0; i < elements.size(); i++) begin
@@ -111,7 +119,7 @@ class uvm_report_message_element_container extends uvm_object;
       end
       if (elements[i].m_element_type == uvm_report_message_element::INT) begin
         printer.print_int(elements[i].m_element_name, elements[i].m_int_value, 
-          $bits(elements[i].m_int_value), elements[i].m_int_radix);
+          elements[i].m_int_size, elements[i].m_int_radix);
       end
       if (elements[i].m_element_type == uvm_report_message_element::STRING) begin
         printer.print_string(elements[i].m_element_name, elements[i].m_string_value);
@@ -130,7 +138,7 @@ class uvm_report_message_element_container extends uvm_object;
       end
       if (elements[i].m_element_type == uvm_report_message_element::INT) begin
         recorder.record_field(elements[i].m_element_name, elements[i].m_int_value, 
-          $bits(elements[i].m_int_value), elements[i].m_int_radix);
+          elements[i].m_int_size, elements[i].m_int_radix);
       end
       if (elements[i].m_element_type == uvm_report_message_element::STRING) begin
         recorder.record_string(elements[i].m_element_name, elements[i].m_string_value);
@@ -138,7 +146,24 @@ class uvm_report_message_element_container extends uvm_object;
       if (elements[i].m_element_type == uvm_report_message_element::OBJECT) begin
         recorder.record_object(elements[i].m_element_name, elements[i].m_object);
       end
+      if (elements[i].m_element_type == uvm_report_message_element::META) begin
+        recorder.record_meta(elements[i].m_element_name, elements[i].m_meta);
+      end
     end
+  endfunction
+
+  function void do_copy(uvm_object rhs);
+    uvm_report_message_element_container urme_container;
+
+    super.do_copy(rhs);
+
+    if(!$cast(urme_container, rhs) || (rhs==null))
+      return;
+
+    elements.delete();
+
+    for(int i = 0; i < urme_container.elements.size(); i++)
+      elements.push_back(urme_container.elements[i]);
   endfunction
 
 endclass
@@ -171,9 +196,6 @@ endclass
 
 class uvm_report_message extends uvm_object;
 
-  // FIXME fix the m_ on methods usage!!!
-
-
   // Function: new
   // 
   // Creates a new uvm_report_message object.
@@ -196,11 +218,43 @@ class uvm_report_message extends uvm_object;
   // uvm_report_message::print() method provides UVM printer formatted output
   // of the message.  A snippet of example output is shown here:
   //
-  // |Need to add the output from a log.
+  // --------------------------------------------------------
+  // Name               Type               Size  Value
+  // --------------------------------------------------------
+  // uvm_trace_message  uvm_trace_message  -     @532
+  //   severity         uvm_severity_type  2     UVM_INFO
+  //   id               string             10    TEST_ID
+  //   message          string             12    A message...
+  //   verbosity        uvm_verbosity      32    UVM_LOW
+  //   filename         string             7     test.sv
+  //   line             integral           32    'd58
+  //   context_name     string             0     ""
+  //   color            string             3     red
+  //   my_int           integral           32    'd5
+  //   my_string        string             3     foo
+  //   my_obj           my_class           -     @531
+  //     foo            integral           32    'd3
+  //     bar            string             8     hi there
+
 
   function void do_print(uvm_printer printer);
+    uvm_verbosity l_verbosity;
+
     super.do_print(printer);
-    // Fix to include all the properties!!!
+
+    printer.print_generic("severity", "uvm_severity_type", 
+                          $bits(severity), severity.name());
+    printer.print_string("id", id);
+    printer.print_string("message",message);
+    if ($cast(l_verbosity, verbosity))
+      printer.print_generic("verbosity", "uvm_verbosity", 
+                            $bits(l_verbosity), l_verbosity.name());
+    else
+      printer.print_int("verbosity", l_verbosity, $bits(l_verbosity), UVM_HEX);
+    printer.print_string("filename", filename);
+    printer.print_int("line", line, $bits(line), UVM_UNSIGNED);
+    printer.print_string("context_name", context_name);
+
     if (report_message_element_container.elements.size() != 0)
       report_message_element_container.print(printer);
   endfunction
@@ -346,14 +400,22 @@ class uvm_report_message extends uvm_object;
     if (report_messages.size() != 0)
       return report_messages.pop_front();
     else begin
-      uvm_report_message l_report_message = new("uvm_report_message");
+      process p;
+      string randstate;
+      uvm_report_message l_report_message;
+
+      p = process::self();
+      randstate = p.get_randstate();
+      l_report_message = new("uvm_report_message");
+      p.set_randstate(randstate);
+
       return l_report_message;
     end
   endfunction
 
 
   // Not documented.
-  function void m_set_report_message(string context_name, string filename,
+  function void set_report_message(string context_name, string filename,
     int line, uvm_severity_type severity, string id,
     string message, int verbosity);
     this.context_name = context_name;
@@ -377,7 +439,7 @@ class uvm_report_message extends uvm_object;
   virtual function void m_clear();
     tr_handle = -1;
     if (report_message_element_container.elements.size() != 0)
-      delete_elements();
+      m_delete_elements();
   endfunction
 
 
@@ -395,7 +457,7 @@ class uvm_report_message extends uvm_object;
   // do_compare() not needed
 
 
-  // Not documented.  Should messages really support copying???
+  // Not documented.
   virtual function void do_copy (uvm_object rhs);
     uvm_report_message report_message;
 
@@ -418,8 +480,7 @@ class uvm_report_message extends uvm_object;
     verbosity = report_message.verbosity;
     tr_handle = report_message.tr_handle;
 
-    // FIXME Need to implement copy of the element container
-
+    report_message_element_container.copy(report_message.report_message_element_container);
   endfunction
 
 
@@ -466,7 +527,7 @@ class uvm_report_message extends uvm_object;
 
     // Use uvm_report_message-ID-#
     tr_handle = recorder.begin_tr("uvm_report_message", l_stream_id,
-      get_name(), "", "", $time);
+      get_name(), id, message, $time);
 
     recorder.tr_handle = tr_handle;
     this.record(recorder);
@@ -487,25 +548,20 @@ class uvm_report_message extends uvm_object;
     string l_string;
     uvm_verbosity l_verbosity;
 
-    // Replace these with recording macros when vendor supported.
-    // Should everything really be a string?  Reconsider.
     if (context_name != "")
       recorder.record_string("context_name", context_name);
     recorder.record_string("filename", filename);
-    l_string.itoa(line);
-    recorder.record_string("line", l_string);
-    //recorder.record_string("action", uvm_report_handler::format_action(action));
+    recorder.record_field("line", line, $bits(line), UVM_UNSIGNED);
     recorder.record_string("severity", severity.name());
-    recorder.record_string("id", id);
-    m_record_message(recorder);
     if ($cast(l_verbosity, verbosity))
       recorder.record_string("verbosity", l_verbosity.name());
     else begin
-      string l_str;
       l_string.itoa(verbosity);
       recorder.record_string("verbosity", l_string);
     end
 
+    recorder.record_string("id", id);
+    m_record_message(recorder);
   endfunction
 
   // Not documented.
@@ -537,21 +593,21 @@ class uvm_report_message extends uvm_object;
   // Function: add_int
   // 
   // This method adds an integral type of the name ~name~ and value ~value~ to
-  // the message.  The required ~radix~ field determines how to display and 
+  // the message.  The required ~size~ field indicates the size of ~value~. 
+  // The required ~radix~ field determines how to display and 
   // record the field.
   //
 
-  // Fix argument size.
-  function void add_int(string name, int value, uvm_radix_enum radix);
-    report_message_element_container.add_int(name, value, radix);
+  function void add_int(string name, uvm_bitstream_t value, 
+                        int size, uvm_radix_enum radix);
+    report_message_element_container.add_int(name, value, size, radix);
   endfunction
 
 
   // Function: add_string
   // 
   // This method adds a string of the name ~name~ and value ~value~ to the 
-  // message.  The required ~radix~ field determines how to display and record
-  // the field.
+  // message. 
   //
 
   function void add_string(string name, string value);
@@ -559,24 +615,30 @@ class uvm_report_message extends uvm_object;
   endfunction
 
 
-  // Function: add_string
+  // Function: add_object
   // 
   // This method adds a uvm_object of the name ~name~ and reference ~obj~ to
-  // the message.  The required ~radix~ field determines how to display and 
-  // record the field.
+  // the message.  
   //
 
   function void add_object(string name, uvm_object obj);
     report_message_element_container.add_object(name, obj);
   endfunction
 
-
-  // Function: delete_elements
-  // 
-  // This method deletes all elements currently associated with the message.
+   
+  // Function: add_meta
   //
+  // This method adds meta data of the name ~name~ and reference ~meta~ to
+  // the message.
+  //
+  
+  function void add_meta(string name, uvm_object meta);
+    report_message_element_container.add_meta(name, meta);
+  endfunction
 
-  function void delete_elements();
+
+  // Not documented
+  function void m_delete_elements();
     report_message_element_container.elements.delete();
   endfunction
 
@@ -676,8 +738,8 @@ class uvm_trace_message extends uvm_report_message;
 
   // Not documented.
   virtual function void m_record_message(uvm_recorder recorder);
-    recorder.record_string("begin message", message);
-    recorder.record_string("end message", end_message);
+    recorder.record_string("begin_message", message);
+//    recorder.record_string("end message", end_message);
   endfunction
 
   // Not documented.
@@ -690,9 +752,12 @@ class uvm_trace_message extends uvm_report_message;
 
     l_stream_id = m_get_stream_id(recorder);
 
-    if (state == TRC_BGN)
+    if (state == TRC_BGN) begin
       tr_handle = recorder.begin_tr("uvm_trace_message", l_stream_id,
-        get_name(), "", "", $time);
+        get_name(), id, message, $time);
+      recorder.tr_handle = tr_handle;
+      this.record(recorder);
+    end
 
     if (state == TRC_END) begin
       recorder.tr_handle = tr_handle;
@@ -702,6 +767,18 @@ class uvm_trace_message extends uvm_report_message;
 
   endfunction
 
+  // Not documented.
+  function void do_record(uvm_recorder recorder);
+
+    if (state == TRC_BGN) 
+      m_record_core_properties(recorder);
+
+    if (state == TRC_END) begin
+      recorder.record_string("end_message", end_message);
+      report_message_element_container.record(recorder);
+    end
+
+  endfunction
 endclass
 
 

@@ -16,4 +16,7 @@ uvm_report_server                 uvm_report_server  -
     [ID3]                         integral           32    'd2  
     [RNTST]                       integral           32    'd1  
   enable_report_id_count_summary  bit                1     'b1  
+  record_all_messages             bit                1     'b0  
+  show_verbosity                  bit                1     'b0  
+  show_terminator                 bit                1     'b0  
 ----------------------------------------------------------------
