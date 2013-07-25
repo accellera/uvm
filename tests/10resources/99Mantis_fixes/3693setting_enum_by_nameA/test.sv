@@ -1,4 +1,5 @@
 module testmod;
+		import uvm_pkg::*;
 
     typedef enum {ALPHA, BETA, GAMMA, DELTA} e_t;
     typedef uvm_pkg::uvm_enum_wrapper#(e_t) w_t;
@@ -8,7 +9,7 @@ module testmod;
         e_t val;
         bit fail;
 
-        val.first();
+        void'(val.first());
         do begin
             val_map[val.name()] = val;
             val = val.next();
@@ -43,6 +44,11 @@ module testmod;
         else
           $display("*** UVM TEST FAILED ***");
 
+          begin
+	          uvm_report_server svr;
+	          svr=uvm_report_server::get_server();
+	          svr.summarize();
+          end	
     end
 
 endmodule

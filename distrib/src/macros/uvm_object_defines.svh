@@ -1533,9 +1533,10 @@ endfunction \
             foreach(ARG[i]) begin \
               __m_uvm_status_container.scope.set_arg_element(`"ARG`",i); \
               if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \
+	              T t__;  \
                 if (__m_uvm_status_container.print_matches) \
                   uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg()}, UVM_LOW); \
-                void'(uvm_enum_wrapper#(T)::from_name(uvm_object::__m_uvm_status_container.stringv, ARG[i])); \
+                void'(uvm_enum_wrapper#(T)::from_name(uvm_object::__m_uvm_status_container.stringv, t__)); ARG[i]=t__;\
                 __m_uvm_status_container.status = 1; \
               end \
             end \
@@ -2217,22 +2218,24 @@ endfunction \
               if(wildcard_index__) begin \
                 for(index__=0; index__<ARG.size(); ++index__) begin \
                   if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$sformatf("[%0d]", index__)})) begin \
+	                  T t__; \
                     if (__m_uvm_status_container.print_matches) \
                       uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg(), $sformatf("[%0d]",index__)}, UVM_LOW); \
-                    void'(uvm_enum_wrapper#(T)::from_name(uvm_object::__m_uvm_status_container.stringv, ARG[index__])); \
+                    void'(uvm_enum_wrapper#(T)::from_name(uvm_object::__m_uvm_status_container.stringv, t__)); ARG[index__]=t__; \
                     __m_uvm_status_container.status = 1; \
                   end \
                 end \
               end \
               else if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$sformatf("[%0d]", index__)})) begin \
+	            T t__; \
                 if(index__+1 > ARG.size()) begin \
                   int sz = index__; \
-                  string tmp__; \
+                  T tmp__; \
                   `M_UVM_``TYPE``_RESIZE(ARG,tmp__) \
                 end \
                 if (__m_uvm_status_container.print_matches) \
                   uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg()}, UVM_LOW); \
-                void'(uvm_enum_wrapper#(T)::from_name(uvm_object::__m_uvm_status_container.stringv, ARG[index__])); \
+                void'(uvm_enum_wrapper#(T)::from_name(uvm_object::__m_uvm_status_container.stringv, t__)); ARG[index__]=t__; \
                 __m_uvm_status_container.status = 1; \
               end \
             end \
