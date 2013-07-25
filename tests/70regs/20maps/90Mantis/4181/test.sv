@@ -118,7 +118,7 @@ program top;
             super.new(name,parent);
         endfunction
 
-        virtual protected task run_phase(uvm_phase phase);
+        virtual task run_phase(uvm_phase phase);
             T tr;
             super.run_phase(phase);
             forever begin

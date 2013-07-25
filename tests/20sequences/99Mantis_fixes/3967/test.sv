@@ -44,7 +44,7 @@ class cust_driver extends uvm_driver#(cust_data);
     super.new(name, parent);
   endfunction
 
-  virtual protected task run_phase(uvm_phase phase);
+  virtual task run_phase(uvm_phase phase);
     REQ item1, item2;
 
     seq_item_port.item_done();

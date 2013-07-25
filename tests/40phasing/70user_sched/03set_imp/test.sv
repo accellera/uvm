@@ -57,7 +57,7 @@ package mypkg;
   
     static uvm_phase my_sched;
 
-    function void define_domain(uvm_domain domain);
+    protected function void define_domain(uvm_domain domain);
   
       uvm_phase cfg_phase;
       uvm_phase sched;
