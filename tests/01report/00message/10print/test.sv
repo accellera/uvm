@@ -19,50 +19,51 @@
 //----------------------------------------------------------------------
 
 module top;
+
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 
-uvm_report_object urm1 = new("urm1");
-
+class my_class extends uvm_object;
+  int foo = 3;
+  string bar = "hi there";
+  `uvm_object_utils_begin(my_class)
+    `uvm_field_int(foo, UVM_ALL_ON | UVM_DEC)
+    `uvm_field_string(bar, UVM_ALL_ON)
+  `uvm_object_utils_end
+  function new (string name = "unnamed-my_class");
+    super.new(name);
+  endfunction
+endclass
 
 initial begin
 
     // User variables  
-    uvm_trace_message l_trace_messageA, l_trace_messageB;
-    int l_tr_handle0, l_tr_handle1;
+    uvm_trace_message l_trace_message;
+    int l_tr_handle;
+    int my_int;
+    string my_string;
+    my_class my_obj;
 
-    // Adjust action on urm1
-    urm1.set_report_severity_action(UVM_INFO, UVM_RM_RECORD | UVM_DISPLAY);
-
-    $display("START OF GOLD FILE");
 
     #5;
 
-    // Message A starts at 5, Message B starts at 15.
-    // Message A finishes at 35 (Message B is still going)
-    // Message B finishes at 60
+    my_int = 5;
+    my_string = "foo";
+    my_obj = new("my_obj");
 
-    // Spans #30 time
-    `uvm_info_begin(l_trace_messageA, "TEST_A", "Beginning A...", UVM_LOW, urm1)
+    // Zero time consuming
+    `uvm_info_begin(l_trace_message, "TEST_BEGIN", "Beginning...", UVM_LOW)
+    `uvm_add_trace_tag(l_trace_message, "color", "red")
+    `uvm_add_trace_int(l_trace_message, my_int, UVM_DEC)
+    `uvm_add_trace_string(l_trace_message, my_string)
+    `uvm_add_trace_object(l_trace_message, my_obj)
 
-    #10;
-
-    // Spans #45 time
-    `uvm_info_begin(l_trace_messageB, "TEST_B", "Beginning B...", UVM_LOW, urm1)
-
-    #20
-    `uvm_info_end(l_trace_messageA, "Ending A...", l_tr_handle0)
-
-    #25;
-    `uvm_info_end(l_trace_messageB, "Ending B...", l_tr_handle1)
-
-    #30;
-    `uvm_link(l_tr_handle0, l_tr_handle1, "child", "TEST_L", UVM_LOW, urm1)
-
-    #100;
-    `uvm_link(-1 , l_tr_handle1, "BAD", "TEST_L", UVM_LOW, urm1)
-
+    $display("START OF GOLD FILE");
+    l_trace_message.print();
     $display("END OF GOLD FILE");
+
+    `uvm_info_end(l_trace_message, "Ending...", l_tr_handle)
+
 end
 
 endmodule

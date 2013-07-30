@@ -45,11 +45,10 @@ class uvm_report_message_element;
   uvm_bitstream_t  m_int_value;
   int m_int_size;
   uvm_radix_enum m_int_radix;
-  string m_string_value;
-  uvm_object m_object;
-  uvm_object m_meta;
+  string m_string_value;   // share the STRING and MESS_TAG type
+  uvm_object m_object;     // share the OBJECT and META type
 endclass
-
+ 
 //------------------------------------------------------------------------------
 //
 // CLASS- uvm_report_message_element_container
@@ -60,6 +59,8 @@ endclass
 
 class uvm_report_message_element_container extends uvm_object;
 
+  static local uvm_report_message_element message_element_pool[$];
+
   uvm_report_message_element elements[$];
 
   `uvm_object_utils(uvm_report_message_element_container)
@@ -68,8 +69,30 @@ class uvm_report_message_element_container extends uvm_object;
     super.new(name);
   endfunction
 
+  static function uvm_report_message_element m_get_report_message_element();
+    if (message_element_pool.size() != 0)
+      return message_element_pool.pop_front();
+    else begin
+      process p;
+      string randstate;
+      uvm_report_message_element l_urme;
+
+      p = process::self();
+      randstate = p.get_randstate();
+      l_urme = new();
+      p.set_randstate(randstate);
+
+      return l_urme;
+    end
+  endfunction
+
+  function void delete_elements();
+    message_element_pool = {message_element_pool, elements};
+    elements = {};
+  endfunction
+
   function void add_tag(string name, string value);
-    uvm_report_message_element urme = new();
+    uvm_report_message_element urme = m_get_report_message_element();
     urme.m_element_type = uvm_report_message_element::MESS_TAG;
     urme.m_element_name = name;
     urme.m_string_value = value;
@@ -78,7 +101,7 @@ class uvm_report_message_element_container extends uvm_object;
 
   function void add_int(string name, uvm_bitstream_t value, 
                         int size, uvm_radix_enum radix);
-    uvm_report_message_element urme = new();
+    uvm_report_message_element urme = m_get_report_message_element();
     urme.m_element_type = uvm_report_message_element::INT;
     urme.m_element_name = name;
     urme.m_int_value = value;
@@ -88,7 +111,7 @@ class uvm_report_message_element_container extends uvm_object;
   endfunction
 
   function void add_string(string name, string value);
-    uvm_report_message_element urme = new();
+    uvm_report_message_element urme = m_get_report_message_element();
     urme.m_element_type = uvm_report_message_element::STRING;
     urme.m_element_name = name;
     urme.m_string_value = value;
@@ -96,7 +119,7 @@ class uvm_report_message_element_container extends uvm_object;
   endfunction
 
   function void add_object(string name, uvm_object obj);
-    uvm_report_message_element urme = new();
+    uvm_report_message_element urme = m_get_report_message_element();
     urme.m_element_type = uvm_report_message_element::OBJECT;
     urme.m_element_name = name;
     urme.m_object = obj;
@@ -104,10 +127,10 @@ class uvm_report_message_element_container extends uvm_object;
   endfunction
 
   function void add_meta(string name, uvm_object meta);
-    uvm_report_message_element urme = new();
+    uvm_report_message_element urme = m_get_report_message_element();
     urme.m_element_type = uvm_report_message_element::META;
     urme.m_element_name = name;
-    urme.m_meta = meta;
+    urme.m_object = meta;
     elements.push_back(urme);
   endfunction
 
@@ -147,7 +170,7 @@ class uvm_report_message_element_container extends uvm_object;
         recorder.record_object(elements[i].m_element_name, elements[i].m_object);
       end
       if (elements[i].m_element_type == uvm_report_message_element::META) begin
-        recorder.record_meta(elements[i].m_element_name, elements[i].m_meta);
+        recorder.record_meta(elements[i].m_element_name, elements[i].m_object);
       end
     end
   endfunction
@@ -160,10 +183,10 @@ class uvm_report_message_element_container extends uvm_object;
     if(!$cast(urme_container, rhs) || (rhs==null))
       return;
 
-    elements.delete();
+    if (elements.size() != 0)
+      delete_elements();
 
-    for(int i = 0; i < urme_container.elements.size(); i++)
-      elements.push_back(urme_container.elements[i]);
+    elements = urme_container.elements;
   endfunction
 
 endclass
@@ -195,70 +218,6 @@ endclass
 //------------------------------------------------------------------------------
 
 class uvm_report_message extends uvm_object;
-
-  // Function: new
-  // 
-  // Creates a new uvm_report_message object.
-  //
-
-  function new(string name = "uvm_report_message");
-    super.new(name);
-    tr_handle = -1;
-    report_message_element_container = new();
-    l_printer = new();
-    //l_printer.knobs.header = 0;
-    //l_printer.knobs.footer = 0;
-    l_printer.knobs.prefix = " +";
-  endfunction
-
-
-  // Function: print
-  //
-  // The uvm_report_messge implements the uvm_object::do_print() such that
-  // uvm_report_message::print() method provides UVM printer formatted output
-  // of the message.  A snippet of example output is shown here:
-  //
-  // --------------------------------------------------------
-  // Name               Type               Size  Value
-  // --------------------------------------------------------
-  // uvm_trace_message  uvm_trace_message  -     @532
-  //   severity         uvm_severity_type  2     UVM_INFO
-  //   id               string             10    TEST_ID
-  //   message          string             12    A message...
-  //   verbosity        uvm_verbosity      32    UVM_LOW
-  //   filename         string             7     test.sv
-  //   line             integral           32    'd58
-  //   context_name     string             0     ""
-  //   color            string             3     red
-  //   my_int           integral           32    'd5
-  //   my_string        string             3     foo
-  //   my_obj           my_class           -     @531
-  //     foo            integral           32    'd3
-  //     bar            string             8     hi there
-
-
-  function void do_print(uvm_printer printer);
-    uvm_verbosity l_verbosity;
-
-    super.do_print(printer);
-
-    printer.print_generic("severity", "uvm_severity_type", 
-                          $bits(severity), severity.name());
-    printer.print_string("id", id);
-    printer.print_string("message",message);
-    if ($cast(l_verbosity, verbosity))
-      printer.print_generic("verbosity", "uvm_verbosity", 
-                            $bits(l_verbosity), l_verbosity.name());
-    else
-      printer.print_int("verbosity", l_verbosity, $bits(l_verbosity), UVM_HEX);
-    printer.print_string("filename", filename);
-    printer.print_int("line", line, $bits(line), UVM_UNSIGNED);
-    printer.print_string("context_name", context_name);
-
-    if (report_message_element_container.elements.size() != 0)
-      report_message_element_container.print(printer);
-  endfunction
-
 
   //----------------------------------------------------------------------------
   // Group:  Infrastructure References
@@ -392,6 +351,70 @@ class uvm_report_message extends uvm_object;
   uvm_table_printer l_printer;
 
 
+  // Function: new
+  // 
+  // Creates a new uvm_report_message object.
+  //
+
+  function new(string name = "uvm_report_message");
+    super.new(name);
+    tr_handle = -1;
+    report_message_element_container = new();
+    l_printer = new();
+    //l_printer.knobs.header = 0;
+    //l_printer.knobs.footer = 0;
+    l_printer.knobs.prefix = " +";
+  endfunction
+
+
+  // Function: print
+  //
+  // The uvm_report_messge implements the uvm_object::do_print() such that
+  // uvm_report_message::print() method provides UVM printer formatted output
+  // of the message.  A snippet of example output is shown here:
+  //
+  // --------------------------------------------------------
+  // Name               Type               Size  Value
+  // --------------------------------------------------------
+  // uvm_trace_message  uvm_trace_message  -     @532
+  //   severity         uvm_severity_type  2     UVM_INFO
+  //   id               string             10    TEST_ID
+  //   message          string             12    A message...
+  //   verbosity        uvm_verbosity      32    UVM_LOW
+  //   filename         string             7     test.sv
+  //   line             integral           32    'd58
+  //   context_name     string             0     ""
+  //   color            string             3     red
+  //   my_int           integral           32    'd5
+  //   my_string        string             3     foo
+  //   my_obj           my_class           -     @531
+  //     foo            integral           32    'd3
+  //     bar            string             8     hi there
+
+
+  function void do_print(uvm_printer printer);
+    uvm_verbosity l_verbosity;
+
+    super.do_print(printer);
+
+    printer.print_generic("severity", "uvm_severity_type", 
+                          $bits(severity), severity.name());
+    printer.print_string("id", id);
+    printer.print_string("message",message);
+    if ($cast(l_verbosity, verbosity))
+      printer.print_generic("verbosity", "uvm_verbosity", 
+                            $bits(l_verbosity), l_verbosity.name());
+    else
+      printer.print_int("verbosity", l_verbosity, $bits(l_verbosity), UVM_HEX);
+    printer.print_string("filename", filename);
+    printer.print_int("line", line, $bits(line), UVM_UNSIGNED);
+    printer.print_string("context_name", context_name);
+
+    if (report_message_element_container.elements.size() != 0)
+      report_message_element_container.print(printer);
+  endfunction
+
+
   `uvm_object_utils(uvm_report_message)
 
 
@@ -415,9 +438,9 @@ class uvm_report_message extends uvm_object;
 
 
   // Not documented.
-  function void set_report_message(string context_name, string filename,
+  function void set_report_message(string filename,
     int line, uvm_severity_type severity, string id,
-    string message, int verbosity);
+    string message, int verbosity, string context_name);
     this.context_name = context_name;
     this.filename = filename;
     this.line = line;
@@ -439,7 +462,7 @@ class uvm_report_message extends uvm_object;
   virtual function void m_clear();
     tr_handle = -1;
     if (report_message_element_container.elements.size() != 0)
-      m_delete_elements();
+      report_message_element_container.delete_elements();
   endfunction
 
 
@@ -636,12 +659,6 @@ class uvm_report_message extends uvm_object;
     report_message_element_container.add_meta(name, meta);
   endfunction
 
-
-  // Not documented
-  function void m_delete_elements();
-    report_message_element_container.elements.delete();
-  endfunction
-
 endclass
 
 
@@ -657,19 +674,6 @@ endclass
 //------------------------------------------------------------------------------
 
 class uvm_trace_message extends uvm_report_message;
-
-
-  // Function: new
-  // 
-  // Creates a new uvm_report_message object.
-  //
-
-  function new(string name = "uvm_trace_message");
-    super.new(name);
-    state = TRC_INIT;
-  endfunction
-
-  `uvm_object_utils(uvm_trace_message)
 
 
   //----------------------------------------------------------------------------
@@ -695,12 +699,33 @@ class uvm_trace_message extends uvm_report_message;
   // Not documented.
   static local uvm_trace_message trace_messages[$];
  
+  // Function: new
+  // 
+  // Creates a new uvm_report_message object.
+  //
+
+  function new(string name = "uvm_trace_message");
+    super.new(name);
+    state = TRC_INIT;
+  endfunction
+
+  `uvm_object_utils(uvm_trace_message)
+
+
   // Not documented.
   static function uvm_trace_message get_trace_message();
     if (trace_messages.size() != 0)
       return trace_messages.pop_front();
     else begin
-      uvm_trace_message l_trace_message = new("uvm_trace_message");
+      process p;
+      string randstate;
+      uvm_trace_message l_trace_message;
+
+      p = process::self();
+      randstate = p.get_randstate();
+      l_trace_message = new("uvm_trace_message");
+      p.set_randstate(randstate);
+
       return l_trace_message;
     end
   endfunction
@@ -842,12 +867,21 @@ class uvm_link_message extends uvm_report_message;
   static local uvm_link_message link_messages[$];
  
 
+
   // Not documented.
   static function uvm_link_message get_link_message();
     if (link_messages.size() != 0)
       return link_messages.pop_front();
     else begin
-      uvm_link_message l_link_message = new("uvm_link_message");
+      process p;
+      string randstate;
+      uvm_link_message l_link_message;
+
+      p = process::self();
+      randstate = p.get_randstate();
+      l_link_message = new("uvm_link_message");
+      p.set_randstate(randstate);
+
       return l_link_message;
     end
   endfunction

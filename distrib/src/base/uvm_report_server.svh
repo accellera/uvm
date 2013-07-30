@@ -50,9 +50,6 @@ class uvm_report_server extends uvm_object;
   bit show_verbosity = 0;
   bit show_terminator = 0;
 
-  // Reconsider show_verbosity bit and possibly show_terminator
-  // Consider a global record enable here (gives all messages the UVM_RM_RECORD
-  // action.
 
   static protected uvm_report_server m_global_report_server = get_server();
 
@@ -517,10 +514,11 @@ class uvm_report_server extends uvm_object;
         verbosity_str = l_verbosity.name();
       else
         verbosity_str.itoa(report_message.verbosity);
+      verbosity_str = {"(", verbosity_str, ")"};
     end
 
     if (show_terminator)
-      terminator_str = {"-",sev_string};
+      terminator_str = {" -",sev_string};
 
     compose_report_message = {sev_string, verbosity_str, " ", filename_line_string, "@ ", 
       time_str, ": ", report_message.report_handler.get_full_name(), context_str,

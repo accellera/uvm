@@ -108,10 +108,12 @@
 //
 // |`uvm_info(ID, MSG, VERBOSITY, RO = uvm_get_report_object(), CNTXT_NAME = "")
 
-`define uvm_info(ID, MSG, VERBOSITY, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+`define uvm_info(ID, MSG, VERBOSITY, RO=null, CNTXT_NAME="") \
    begin \
      uvm_report_object l_report_object; \
      l_report_object = RO; \
+     if (RO == null) \
+       l_report_object = uvm_get_report_object(); \
      if (l_report_object.uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) \
        l_report_object.uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line, \
          CNTXT_NAME, 1); \
@@ -128,10 +130,12 @@
 //
 // |`uvm_warning(ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "")
 
-`define uvm_warning(ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+`define uvm_warning(ID, MSG, RO=null, CNTXT_NAME="") \
    begin \
      uvm_report_object l_report_object; \
      l_report_object = RO; \
+     if (RO == null) \
+       l_report_object = uvm_get_report_object(); \
      if (l_report_object.uvm_report_enabled(UVM_NONE,UVM_WARNING,ID)) \
        l_report_object.uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, \
          CNTXT_NAME, 1); \
@@ -148,10 +152,12 @@
 //
 // |`uvm_error(ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "")
 
-`define uvm_error(ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+`define uvm_error(ID, MSG, RO=null, CNTXT_NAME="") \
    begin \
      uvm_report_object l_report_object; \
      l_report_object = RO; \
+     if (RO == null) \
+       l_report_object = uvm_get_report_object(); \
      if (l_report_object.uvm_report_enabled(UVM_NONE,UVM_ERROR,ID)) \
        l_report_object.uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, \
          CNTXT_NAME, 1); \
@@ -168,10 +174,12 @@
 //
 // |`uvm_fatal(ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "")
 
-`define uvm_fatal(ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+`define uvm_fatal(ID, MSG, RO=null, CNTXT_NAME="") \
    begin \
      uvm_report_object l_report_object; \
      l_report_object = RO; \
+     if (RO == null) \
+       l_report_object = uvm_get_report_object(); \
      if (l_report_object.uvm_report_enabled(UVM_NONE,UVM_FATAL,ID)) \
        l_report_object.uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, \
          CNTXT_NAME, 1); \
@@ -249,10 +257,12 @@
   begin \
     uvm_report_object l_report_object; \
     l_report_object = RO; \
+    if (RO == null) \
+      l_report_object = uvm_get_report_object(); \
     if (l_report_object.uvm_report_enabled(VERBOSITY,SEVERITY,ID)) begin \
       TRC_MESS = uvm_trace_message::get_trace_message(); \
-      TRC_MESS.set_report_message(CNTXT_NAME, `uvm_file, `uvm_line, SEVERITY, ID, \
-        MSG, VERBOSITY); \
+      TRC_MESS.set_report_message(`uvm_file, `uvm_line, SEVERITY, ID, \
+        MSG, VERBOSITY, CNTXT_NAME); \
       TRC_MESS.state = uvm_trace_message::TRC_BGN; \
       l_report_object.process_report_message(TRC_MESS); \
     end \
@@ -282,7 +292,7 @@
 // |`uvm_info_begin(TRC_MESS, ID, MSG, VERBOSITY, RO = uvm_get_report_object(),
 // |    CNTXT_NAME = "")
 
-`define uvm_info_begin(TRC_MESS, ID, MSG, VERBOSITY, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+`define uvm_info_begin(TRC_MESS, ID, MSG, VERBOSITY, RO=null, CNTXT_NAME="") \
   `__m_uvm_report_trace_begin(TRC_MESS, ID, MSG, UVM_INFO, VERBOSITY, RO, CNTXT_NAME)
 
 
@@ -327,7 +337,7 @@
 //
 // |`uvm_warning_begin(TRC_MESS, ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "")
 
-`define uvm_warning_begin(TRC_MESS, ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+`define uvm_warning_begin(TRC_MESS, ID, MSG, RO=null, CNTXT_NAME="") \
   `__m_uvm_report_trace_begin(TRC_MESS, ID, MSG, UVM_WARNING, UVM_NONE, RO, CNTXT_NAME)
 
 
@@ -349,7 +359,7 @@
 //
 // |`uvm_error_begin(TRC_MESS, ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "")
 
-`define uvm_error_begin(TRC_MESS, ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+`define uvm_error_begin(TRC_MESS, ID, MSG, RO=null, CNTXT_NAME="") \
   `__m_uvm_report_trace_begin(TRC_MESS, ID, MSG, UVM_ERROR, UVM_NONE, RO, CNTXT_NAME)
 
 
@@ -371,7 +381,7 @@
 //
 // |`uvm_fatal_begin(TRC_MESS, ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "")
 
-`define uvm_fatal_begin(TRC_MESS, ID, MSG, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+`define uvm_fatal_begin(TRC_MESS, ID, MSG, RO=null, CNTXT_NAME="") \
   `__m_uvm_report_trace_begin(TRC_MESS, ID, MSG, UVM_FATAL, UVM_NONE, RO, CNTXT_NAME)
 
 // MACRO: `uvm_fatal_end
@@ -408,12 +418,13 @@
 // |`uvm_add_trace_int(TRC_MSG, VAR, RADIX, LABEL = "")
 //
 
-`define uvm_add_trace_int(TRC_MESS, VAR, RADIX, LABEL = "") \
-  if (TRC_MESS != null) \
+`define uvm_add_trace_int(TRC_MESS, VAR, RADIX, LABEL="") \
+  if (TRC_MESS != null) begin\
     if (LABEL == "") \
       TRC_MESS.add_int(`"VAR`", VAR, $bits(VAR), RADIX); \
     else \
-      TRC_MESS.add_int(LABEL, VAR, $bits(VAR), RADIX);
+      TRC_MESS.add_int(LABEL, VAR, $bits(VAR), RADIX); \
+  end
 
 
 // MACRO: `uvm_add_trace_string
@@ -421,12 +432,13 @@
 // |`uvm_add_trace_string(TRC_MSG, VAR, LABEL = "")
 //
 
-`define uvm_add_trace_string(TRC_MESS, VAR, LABEL = "") \
-  if (TRC_MESS != null) \
+`define uvm_add_trace_string(TRC_MESS, VAR, LABEL="") \
+  if (TRC_MESS != null) begin \
     if (LABEL == "") \
       TRC_MESS.add_string(`"VAR`", VAR); \
     else \
-      TRC_MESS.add_string(LABEL, VAR);
+      TRC_MESS.add_string(LABEL, VAR); \
+  end
 
 
 // MACRO: `uvm_add_trace_object
@@ -443,22 +455,24 @@
 // Example usage is shown in <`uvm_info_end>.
 //
 
-`define uvm_add_trace_object(TRC_MESS, VAR, LABEL = "") \
-  if (TRC_MESS != null) \
+`define uvm_add_trace_object(TRC_MESS, VAR, LABEL="") \
+  if (TRC_MESS != null) begin \
     if (LABEL == "") \
       TRC_MESS.add_object(`"VAR`", VAR); \
     else \
-      TRC_MESS.add_object(LABEL, VAR);
+      TRC_MESS.add_object(LABEL, VAR); \
+  end
 
 // `uvm_add_trace_meta
 //
 
-`define uvm_add_trace_meta(TRC_MESS, VAR, LABEL = "") \
-  if (TRC_MESS != null) \
+`define uvm_add_trace_meta(TRC_MESS, VAR, LABEL="") \
+  if (TRC_MESS != null) begin \
     if (LABEL == "") \
       TRC_MESS.add_meta(`"VAR'", VAR); \
     else \
-      TRC_MESS.add_meta(LABEL, VAR);
+      TRC_MESS.add_meta(LABEL, VAR); \
+  end
 
 
 //----------------------------------------------------------------------------
@@ -488,15 +502,17 @@
 // |    #25 `uvm_info_end(l_trace_messageB, "Ending B...", l_tr_handle1)
 //
 
-`define uvm_link(TR_ID0, TR_ID1, REL, ID, VERBOSITY, RO = uvm_get_report_object(), CNTXT_NAME = "") \
+`define uvm_link(TR_ID0, TR_ID1, REL, ID, VERBOSITY, RO=null, CNTXT_NAME="") \
   begin \
     uvm_report_object l_report_object; \
     uvm_link_message l_link_message; \
     l_report_object = RO; \
+    if (RO == null) \
+      l_report_object = uvm_get_report_object(); \
     if (l_report_object.uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) begin \
       l_link_message = uvm_link_message::get_link_message(); \
-      l_link_message.set_report_message(CNTXT_NAME, `uvm_file, `uvm_line, UVM_INFO, ID, \
-        "", VERBOSITY); \
+      l_link_message.set_report_message(`uvm_file, `uvm_line, UVM_INFO, ID, \
+        "", VERBOSITY, CNTXT_NAME); \
       l_link_message.tr_id0 = TR_ID0; \
       l_link_message.tr_id1 = TR_ID1; \
       l_link_message.relationship = REL; \

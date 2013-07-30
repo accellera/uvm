@@ -1,0 +1,26 @@
+UVM_INFO test.sv(41) @ 5: reporter [ID0] Message 0
+UVM_INFO test.sv(42) @ 10: reporter [ID1] Message 1
+UVM_INFO test.sv(43) @ 15: reporter [ID2] Message 2
+UVM_INFO test.sv(44) @ 20: urm0 [ID3] Message 3
+UVM_INFO test.sv(45) @ 25: urm1 [ID4] Message 4
+UVM_INFO test.sv(46) @ 30: urm0@@contextA [ID5] Message 5
+UVM_INFO test.sv(47) @ 35: urm1@@contextA [ID6] Message 6
+UVM_INFO test.sv(48) @ 40: urm0@@contextB [ID7] Message 7
+UVM_INFO test.sv(49) @ 45: urm1@@contextB [ID8] Message 8
+UVM_INFO test.sv(50) @ 50: urm0@@top [ID9] Message 9
+UVM_INFO test.sv(51) @ 55: urm1@@top [IDA] Message A
+UVM_INFO test.sv(52) @ 60: urm0@@contextA [IDB] Message B (a repeat context)
+UVM_INFO test.sv(53) @ 65: urm1@@contextA [IDC] Message C (a repeat context)
+UVM_INFO(UVM_NONE) test.sv(60) @ 70: reporter [ID0] Message 0 -UVM_INFO
+UVM_INFO(UVM_NONE) test.sv(61) @ 75: reporter [ID1] Message 1 -UVM_INFO
+UVM_INFO(UVM_NONE) test.sv(62) @ 80: reporter [ID2] Message 2 -UVM_INFO
+UVM_INFO(UVM_NONE) test.sv(63) @ 85: urm0 [ID3] Message 3 -UVM_INFO
+UVM_INFO(UVM_NONE) test.sv(64) @ 90: urm1 [ID4] Message 4 -UVM_INFO
+UVM_INFO(UVM_NONE) test.sv(65) @ 95: urm0@@contextA [ID5] Message 5 -UVM_INFO
+UVM_INFO(UVM_NONE) test.sv(66) @ 100: urm1@@contextA [ID6] Message 6 -UVM_INFO
+UVM_INFO(UVM_NONE) test.sv(67) @ 105: urm0@@contextB [ID7] Message 7 -UVM_INFO
+UVM_INFO(UVM_NONE) test.sv(68) @ 110: urm1@@contextB [ID8] Message 8 -UVM_INFO
+UVM_INFO(UVM_NONE) test.sv(69) @ 115: urm0@@top [ID9] Message 9 -UVM_INFO
+UVM_INFO(UVM_NONE) test.sv(70) @ 120: urm1@@top [IDA] Message A -UVM_INFO
+UVM_INFO(UVM_NONE) test.sv(71) @ 125: urm0@@contextA [IDB] Message B (a repeat context) -UVM_INFO
+UVM_INFO(UVM_NONE) test.sv(72) @ 130: urm1@@contextA [IDC] Message C (a repeat context) -UVM_INFO

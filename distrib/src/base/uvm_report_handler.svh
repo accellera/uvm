@@ -160,12 +160,12 @@ class uvm_report_handler extends uvm_object;
           do begin
             l_int = id_v_ary.get(idx);
             if ($cast(l_verbosity, l_int))
-              printer.print_generic($sformatf("[%s:%s]", sev, idx), "uvm_verbosity", 32, 
+              printer.print_generic($sformatf("[%s:%s]", sev.name(), idx), "uvm_verbosity", 32, 
                 l_verbosity.name());
             else begin
               string l_str;
               l_str.itoa(l_int);
-              printer.print_generic($sformatf("[%s:%s]", sev, idx), "int", 32, l_str);
+              printer.print_generic($sformatf("[%s:%s]", sev.name(), idx), "int", 32, l_str);
             end
           end while(id_v_ary.next(idx));
         end while(severity_id_verbosities.next(l_severity));
@@ -190,7 +190,7 @@ class uvm_report_handler extends uvm_object;
       printer.print_array_header("severity_actions",4,"array");
       do begin
         uvm_severity_type sev = uvm_severity_type'(l_severity);
-        printer.print_generic($sformatf("[%s]", sev), "uvm_action", 32, 
+        printer.print_generic($sformatf("[%s]", sev.name()), "uvm_action", 32, 
           format_action(severity_actions[l_severity]));
       end while(severity_actions.next(l_severity));
       printer.print_array_footer();
@@ -209,7 +209,7 @@ class uvm_report_handler extends uvm_object;
           uvm_id_actions_array id_a_ary = severity_id_actions[l_severity];
           if(id_a_ary.first(idx))
           do begin
-            printer.print_generic($sformatf("[%s:%s]", sev, idx), "uvm_action", 32, 
+            printer.print_generic($sformatf("[%s:%s]", sev.name(), idx), "uvm_action", 32, 
               format_action(id_a_ary.get(idx)));
           end while(id_a_ary.next(idx));
         end while(severity_id_actions.next(l_severity));

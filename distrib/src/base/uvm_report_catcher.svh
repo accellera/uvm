@@ -488,6 +488,7 @@ virtual class uvm_report_catcher extends uvm_callback;
     uvm_report_catcher catcher;
     int thrown = 1;
     static bit in_catcher;
+    bit has_catcher;
 
     if(in_catcher == 1) begin
         return 1;
@@ -496,9 +497,17 @@ virtual class uvm_report_catcher extends uvm_callback;
     uvm_callbacks_base::m_tracing = 0;  //turn off cb tracing so catcher stuff doesn't print
 
     m_orig_report_message = rm;
-    $cast(m_modified_report_message, rm.clone()); //have to clone, rm can be extended type
+    has_catcher = 0;
 
     catcher = uvm_report_cb::get_first(iter,rm.report_object);
+    if (catcher != null) begin
+      process p = process::self(); // Keep random stability
+      string randstate = p.get_randstate();
+      $cast(m_modified_report_message, rm.clone()); //have to clone, rm can be extended type
+      p.set_randstate(randstate);
+
+      has_catcher = 1;
+    end
     while(catcher != null) begin
       uvm_severity prev_sev;
 
@@ -533,24 +542,26 @@ virtual class uvm_report_catcher extends uvm_callback;
       catcher = uvm_report_cb::get_next(iter,rm.report_object);
     end //while
 
-    //update counters if message was returned with demoted severity
-    case(rm.severity)
-      UVM_FATAL:    
-        if(m_modified_report_message.severity < rm.severity)
-          m_demoted_fatal++;
-      UVM_ERROR:
-        if(m_modified_report_message.severity < rm.severity)
-          m_demoted_error++;
-      UVM_WARNING:
-        if(m_modified_report_message.severity < rm.severity)
-          m_demoted_warning++;
-    endcase
+    if (has_catcher) begin
+      //update counters if message was returned with demoted severity
+      case(rm.severity)
+        UVM_FATAL:    
+          if(m_modified_report_message.severity < rm.severity)
+            m_demoted_fatal++;
+        UVM_ERROR:
+          if(m_modified_report_message.severity < rm.severity)
+            m_demoted_error++;
+        UVM_WARNING:
+          if(m_modified_report_message.severity < rm.severity)
+            m_demoted_warning++;
+      endcase
    
+      // Yeah, just give back the processed one
+      rm.copy(m_modified_report_message);
+    end
+
     in_catcher = 0;
     uvm_callbacks_base::m_tracing = 1;  //turn tracing stuff back on
-
-    // Yeah, just give back the processed one
-    rm.copy(m_modified_report_message);
 
     return thrown; 
   endfunction

@@ -19,11 +19,9 @@
 //----------------------------------------------------------------------
 
 module top;
-
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 
-//uvm_report_object urm0 = new("urm0");
 uvm_report_object urm1 = new("urm1");
 
 
@@ -35,6 +33,8 @@ initial begin
 
     // Adjust action on urm1
     urm1.set_report_severity_action(UVM_INFO, UVM_RM_RECORD | UVM_DISPLAY);
+
+    $display("START OF GOLD FILE");
 
     #5;
 
@@ -56,6 +56,7 @@ initial begin
     #25;
     `uvm_info_end(l_trace_messageB, "Ending B...", l_tr_handle1)
 
+    $display("END OF GOLD FILE");
 end
 
 endmodule

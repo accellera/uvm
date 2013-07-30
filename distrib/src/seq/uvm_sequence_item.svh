@@ -368,8 +368,8 @@ class uvm_sequence_item extends uvm_transaction;
     else
       l_string = context_name;
     l_report_message = uvm_report_message::get_report_message();
-    l_report_message.set_report_message(l_string, filename,
-      line, uvm_severity_type'(severity), id, message, verbosity);
+    l_report_message.set_report_message(filename, line,
+      uvm_severity_type'(severity), id, message, verbosity, l_string);
     process_report_message(l_report_message);
     l_report_message.free_report_message(l_report_message);
 
