@@ -190,6 +190,7 @@ class uvm_root extends uvm_component;
   extern local function void m_do_dump_args();
   extern local function void m_process_config(string cfg, bit is_int);
   extern function void m_check_verbosity();
+  extern virtual function void report_header(UVM_FILE file = 0);
   // singleton handle
   static local uvm_root m_inst;
 
@@ -231,7 +232,7 @@ class uvm_root extends uvm_component;
   endfunction
 `endif
 
-
+	static local bit m_relnotes_done=0;
 endclass
 
 
@@ -311,6 +312,57 @@ function uvm_root::new();
   // change individual component verbosity.
   m_check_verbosity();
 endfunction
+
+function void uvm_root::report_header(UVM_FILE file = 0);
+	string q[$];
+	uvm_report_server srvr;
+	uvm_cmdline_processor clp;
+	string args[$];
+
+	srvr = uvm_report_server::get_server();
+	clp = uvm_cmdline_processor::get_inst();
+
+	if (clp.get_arg_matches("+UVM_NO_RELNOTES", args)) return;
+
+
+	q.push_back("\n----------------------------------------------------------------\n");
+	q.push_back({uvm_revision_string(),"\n"});
+	q.push_back({uvm_mgc_copyright,"\n"});
+	q.push_back({uvm_cdn_copyright,"\n"});
+	q.push_back({uvm_snps_copyright,"\n"});
+	q.push_back({uvm_cy_copyright,"\n"});
+	q.push_back("----------------------------------------------------------------\n");
+
+
+`ifndef UVM_NO_DEPRECATED
+	if(!m_relnotes_done)      
+		q.push_back("\n  ***********       IMPORTANT RELEASE NOTES         ************\n");
+	q.push_back("\n  You are using a version of the UVM library that has been compiled\n");
+	q.push_back("  with `UVM_NO_DEPRECATED undefined.\n");
+	q.push_back("  See http://www.eda.org/svdb/view.php?id=3313 for more details.\n");
+	m_relnotes_done=1;
+`endif
+
+`ifndef UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
+	if(!m_relnotes_done)      
+		q.push_back("\n  ***********       IMPORTANT RELEASE NOTES         ************\n");
+		
+	q.push_back("\n  You are using a version of the UVM library that has been compiled\n");
+	q.push_back("  with `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR undefined.\n");
+	q.push_back("  See http://www.eda.org/svdb/view.php?id=3770 for more details.\n");
+	m_relnotes_done=1;
+`endif
+
+	if(m_relnotes_done)
+		q.push_back("\n      (Specify +UVM_NO_RELNOTES to turn off this notice)\n");
+
+		begin
+			string msg;
+			msg={>>{q}};
+			`uvm_info("UVMRELNOTES",msg,UVM_LOW)
+		end
+endfunction
+
 
 
 // run_test
