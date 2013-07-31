@@ -359,7 +359,7 @@ function void uvm_root::report_header(UVM_FILE file = 0);
 		begin
 			string msg;
 			msg={>>{q}};
-			`uvm_info("UVMRELNOTES",msg,UVM_LOW)
+			`uvm_info("UVM/RELNOTES",msg,UVM_LOW)
 		end
 endfunction
 
