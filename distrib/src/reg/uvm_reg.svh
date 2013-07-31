@@ -1193,6 +1193,11 @@ endfunction: new
 function void uvm_reg::configure (uvm_reg_block blk_parent,
                                   uvm_reg_file regfile_parent=null,
                                   string hdl_path = "");
+   if (blk_parent == null) begin
+     `uvm_error("UVM/REG/CFG/NOBLK", {"uvm_reg::configure() called without a parent block for instance \"", get_name(), "\" of register type \"", get_type_name(), "\"."})
+     return;
+   end
+
    m_parent = blk_parent;
    m_parent.add_reg(this);
    m_regfile_parent = regfile_parent;
@@ -2022,6 +2027,7 @@ function void uvm_reg::reset(string kind = "HARD");
    void'(m_atomic.try_get(1));
    m_atomic.put(1);
    m_process = null;
+   Xset_busyX(0);
 endfunction: reset
 
 

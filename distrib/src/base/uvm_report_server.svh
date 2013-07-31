@@ -170,18 +170,16 @@ virtual class uvm_report_server extends uvm_object;
 
 	pure virtual function void summarize();
 
-	static local uvm_report_server m_global_report_server = get_server();
-
 	// Function: set_server
 	//
 	// Sets the global report server to use for reporting. The report
 	// server is responsible for formatting messages.
+	// in addition to setting the server this also copies the severity/id counts
+	// from the current report_server to the new one
 
 	static function void set_server(uvm_report_server server);
-		if(m_global_report_server != null)
-			server.copy(m_global_report_server);
-
-		m_global_report_server = server;
+		server.copy(uvm_coreservice.getReportServer());
+		uvm_coreservice.setReportServer(server);
 	endfunction
 
 
@@ -191,11 +189,7 @@ virtual class uvm_report_server extends uvm_object;
 	// a valid handle to a report server.
 
 	static function uvm_report_server get_server();
-		if (m_global_report_server == null) begin
-			uvm_default_report_server s = new;
-			return s;
-		end else
-			return m_global_report_server;
+		return uvm_coreservice.getReportServer();
 	endfunction
 endclass
 

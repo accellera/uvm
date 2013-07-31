@@ -104,6 +104,7 @@ module top;
     endfunction
 
     task run_phase(uvm_phase phase);
+	  uvm_factory factory = uvm_coreservice.getFactory();
       $display("START OF GOLD FILE");
       factory.print(1);
       $display("END OF GOLD FILE");

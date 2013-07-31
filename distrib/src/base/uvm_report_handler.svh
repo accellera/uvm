@@ -20,9 +20,6 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
-`ifndef UVM_REPORT_HANDLER_SVH
-`define UVM_REPORT_HANDLER_SVH
-
 typedef class uvm_report_object;
 typedef class uvm_report_server;
 
@@ -581,6 +578,3 @@ class uvm_report_handler;
   endfunction
 
 endclass : uvm_report_handler
-
-`endif // UVM_REPORT_HANDLER_SVH
-

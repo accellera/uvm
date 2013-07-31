@@ -54,7 +54,6 @@
 // Deprecation Control Macros
 //
 `ifdef UVM_NO_DEPRECATED
-  `define UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
 `endif
 
 `define uvm_delay(TIME) #(TIME);

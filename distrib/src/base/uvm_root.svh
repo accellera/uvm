@@ -343,12 +343,12 @@ function void uvm_root::report_header(UVM_FILE file = 0);
 	m_relnotes_done=1;
 `endif
 
-`ifndef UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
+`ifndef UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR
 	if(!m_relnotes_done)      
 		q.push_back("\n  ***********       IMPORTANT RELEASE NOTES         ************\n");
 		
 	q.push_back("\n  You are using a version of the UVM library that has been compiled\n");
-	q.push_back("  with `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR undefined.\n");
+	q.push_back("  with `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR undefined.\n");
 	q.push_back("  See http://www.eda.org/svdb/view.php?id=3770 for more details.\n");
 	m_relnotes_done=1;
 `endif
@@ -370,7 +370,7 @@ endfunction
 
 task uvm_root::run_test(string test_name="");
 
-  uvm_factory factory= uvm_factory::get();
+  uvm_factory factory= uvm_coreservice.getFactory();
   bit testname_plusarg;
   int test_name_count;
   string test_names[$];
@@ -427,6 +427,8 @@ task uvm_root::run_test(string test_name="");
 
   // if test now defined, create it using common factory
   if (test_name != "") begin
+  	uvm_factory factory=uvm_coreservice.getFactory();
+	  
     if(m_children.exists("uvm_test_top")) begin
       uvm_report_fatal("TTINST",
           "An uvm_test_top already exists via a previous call to run_test", UVM_NONE);
@@ -709,7 +711,7 @@ endfunction
 
 function void uvm_root::m_process_inst_override(string ovr);
   string split_val[$];
-  uvm_factory fact = uvm_factory::get();
+  uvm_factory fact = uvm_coreservice.getFactory();
 
   uvm_split_string(ovr, ",", split_val);
 
@@ -730,7 +732,7 @@ endfunction
 function void uvm_root::m_process_type_override(string ovr);
   string split_val[$];
   int replace=1;
-  uvm_factory fact = uvm_factory::get();
+  uvm_factory fact = uvm_coreservice.getFactory();
 
   uvm_split_string(ovr, ",", split_val);
 
