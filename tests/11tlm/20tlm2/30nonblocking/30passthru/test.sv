@@ -222,7 +222,7 @@ initial
 begin
    uvm_root top;
    
-   top = uvm_root::get();
+   top = uvm_coreservice.getRoot();
 
    top.finish_on_completion = 0;
    run_test("test");

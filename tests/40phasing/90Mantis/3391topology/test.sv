@@ -96,7 +96,7 @@ begin
    uvm_root top;
 
    t1 = new("t1");
-   top = uvm_root::get();
+   top = uvm_coreservice.getRoot();
    top.enable_print_topology = 1;
 
    run_test();

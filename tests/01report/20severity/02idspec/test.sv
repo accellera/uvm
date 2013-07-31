@@ -47,7 +47,7 @@ class my_catcher extends uvm_report_catcher;
       string exp_sev;
 
       // Ignore messages from root
-      if(get_client() == uvm_root::get())
+      if(get_client() == uvm_coreservice.getRoot())
         return THROW;
 
       p = new(uvm_severity'(get_severity()), get_id());

@@ -44,7 +44,7 @@ class test extends uvm_test;
    endfunction
 
    function void start_of_simulation_phase(uvm_phase phase);
-      uvm_root top = uvm_root::get();
+      uvm_root top = uvm_coreservice.getRoot();
       $cast(env, top.find("env"));
    endfunction
 

@@ -20,6 +20,7 @@ typedef class uvm_factory;
 typedef class uvm_default_factory;
 typedef class uvm_report_server;
 typedef class uvm_default_report_server;
+typedef class uvm_root;
 
 
 `ifndef UVM_CORESERVICE_TYPE
@@ -81,6 +82,15 @@ class uvm_coreserviceT;
 	virtual function void setReportServer(uvm_report_server server);
 		report_server=server;
 	endfunction 
+	
+	
+	// Function: getRoot
+	//
+	// returns the uvm_root instance
+	virtual function uvm_root getRoot();
+		return uvm_root::get();
+	endfunction
+	
 
 	// Function: get
 	//
@@ -96,9 +106,8 @@ class uvm_coreserviceT;
 	//|
 	local static `UVM_CORESERVICE_TYPE inst;
 	static function uvm_coreserviceT get();
-		if(inst==null) begin
+		if(inst==null)
 			inst=new;
-		end 
 
 		return inst;
 	endfunction

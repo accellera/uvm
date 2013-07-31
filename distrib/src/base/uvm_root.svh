@@ -244,11 +244,7 @@ endclass
 // search interface. See <uvm_root> for more information.
 //------------------------------------------------------------------------------
 
-const uvm_root uvm_top = uvm_root::get();
-
-// for backward compatibility
-const uvm_root _global_reporter = uvm_root::get();
-
+const uvm_root uvm_top = uvm_coreservice.getRoot();
 
 
 //-----------------------------------------------------------------------------
@@ -763,7 +759,7 @@ endfunction
 function void uvm_root::m_process_config(string cfg, bit is_int);
   uvm_bitstream_t v;
   string split_val[$];
-  uvm_root m_uvm_top = uvm_root::get();
+  uvm_root m_uvm_top = uvm_coreservice.getRoot();
 
   uvm_split_string(cfg, ",", split_val);
   if(split_val.size() == 1) begin

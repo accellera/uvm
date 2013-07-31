@@ -348,7 +348,7 @@ class uvm_sequence_item extends uvm_transaction;
     if(m_sequencer != null)
       m_client = m_sequencer;
     else 
-      m_client = uvm_root::get();
+      m_client = uvm_coreservice.getRoot();
     m_rh = m_client.get_report_handler();
     client = m_client;
   
@@ -441,7 +441,7 @@ class uvm_sequence_item extends uvm_transaction;
                           uvm_severity severity=UVM_INFO, string id="");
     if(m_client == null) begin
       if(m_sequencer != null) m_client = m_sequencer;
-      else m_client = uvm_root::get();
+      else m_client = uvm_coreservice.getRoot();
     end
     if (m_client.get_report_verbosity_level(severity, id) < verbosity ||
         m_client.get_report_action(severity,id) == uvm_action'(UVM_NO_ACTION))

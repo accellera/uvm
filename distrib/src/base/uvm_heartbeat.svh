@@ -83,7 +83,7 @@ class uvm_heartbeat extends uvm_object;
     
     //if a cntxt is given it will be used for reporting.
     if(cntxt != null) m_cntxt = cntxt;
-    else m_cntxt = uvm_root::get();
+    else m_cntxt = uvm_coreservice.getRoot();
 
     m_cb = new({name,"_cb"},m_cntxt);
 
@@ -297,7 +297,7 @@ class uvm_heartbeat_callback extends uvm_objection_callback;
     if (target != null)
        this.target = target;
     else
-       this.target = uvm_root::get();
+       this.target = uvm_coreservice.getRoot();
   endfunction
 
   virtual function void raised (uvm_objection objection,
