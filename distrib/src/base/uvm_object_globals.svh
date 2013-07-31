@@ -244,16 +244,13 @@ string uvm_aa_string_key;
 //   UVM_FATAL   - Indicates a problem from which simulation can not
 //                 recover. Simulation exits via $finish after a #0 delay.
 
-typedef bit [1:0] uvm_severity;
-
-typedef enum uvm_severity
+typedef enum bit [1:0]
 {
   UVM_INFO,
   UVM_WARNING,
   UVM_ERROR,
   UVM_FATAL
-} uvm_severity_type;
-
+} uvm_severity;
 
 // Enum: uvm_action
 //

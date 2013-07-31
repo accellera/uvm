@@ -39,9 +39,9 @@ import uvm_pkg::*;
 bit pass = 1;
 
 class sev_id_pair;
-  uvm_severity_type sev;
+  uvm_severity sev;
   string id;
-  function new(uvm_severity_type sev, string id);
+  function new(uvm_severity sev, string id);
     this.sev = sev;
     this.id = id;
   endfunction
@@ -59,7 +59,7 @@ class my_catcher extends uvm_report_catcher;
       if(get_client() == uvm_root::get())
         return THROW;
 
-      p = new(uvm_severity_type'(get_severity()), get_id());
+      p = new(uvm_severity'(get_severity()), get_id());
       
       sev[p] ++;
 
@@ -126,7 +126,7 @@ class test extends uvm_test;
       if (pass) $write("** UVM TEST PASSED **\n");
    endfunction
 
-   function void set_id_severities(string id, uvm_severity_type sev);
+   function void set_id_severities(string id, uvm_severity sev);
      set_report_severity_id_override(UVM_INFO, {"INFO_",id}, sev);
      set_report_severity_id_override(UVM_WARNING, {"WARNING_",id}, sev);
      set_report_severity_id_override(UVM_ERROR, {"ERROR_",id}, sev);

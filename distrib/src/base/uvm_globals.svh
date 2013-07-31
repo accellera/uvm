@@ -193,7 +193,7 @@ function void uvm_report_fatal(string id,
   top.uvm_report_fatal(id, message, verbosity, filename, line);
 endfunction
 
-
+// TODO merge with uvm_enum_wrapper#(uvm_severity)
 function bit uvm_string_to_severity (string sev_str, output uvm_severity sev);
   case (sev_str)
     "UVM_INFO": sev = UVM_INFO;

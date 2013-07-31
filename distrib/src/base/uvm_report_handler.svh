@@ -492,7 +492,7 @@ class uvm_report_handler;
     q.push_back("*** verbosities by id and severity\n");
 
     foreach( severity_id_verbosities[severity] ) begin
-      uvm_severity_type sev = uvm_severity_type'(severity);
+      uvm_severity sev = uvm_severity'(severity);
       id_v_ary = severity_id_verbosities[severity];
       if(id_v_ary.first(idx))
       do begin
@@ -509,7 +509,7 @@ class uvm_report_handler;
     
     q.push_back("*** actions by severity\n");
     foreach( severity_actions[severity] ) begin
-      uvm_severity_type sev = uvm_severity_type'(severity);
+      uvm_severity sev = uvm_severity'(severity);
       q.push_back($sformatf("%s = %s\n",sev.name(), format_action(severity_actions[severity])));
     end
 
@@ -524,7 +524,7 @@ class uvm_report_handler;
     q.push_back("\n*** actions by id and severity\n");
 
     foreach( severity_id_actions[severity] ) begin
-      uvm_severity_type sev = uvm_severity_type'(severity);
+      uvm_severity sev = uvm_severity'(severity);
       id_a_ary = severity_id_actions[severity];
       if(id_a_ary.first(idx))
       do begin
@@ -542,7 +542,7 @@ class uvm_report_handler;
 
     q.push_back("*** files by severity\n");
     foreach( severity_file_handles[severity] ) begin
-      uvm_severity_type sev = uvm_severity_type'(severity);
+      uvm_severity sev = uvm_severity'(severity);
       file = severity_file_handles[severity];
       q.push_back($sformatf("%s = %d\n", sev.name(), file));
     end
@@ -558,7 +558,7 @@ class uvm_report_handler;
     q.push_back("\n*** files by id and severity\n");
 
     foreach( severity_id_file_handles[severity] ) begin
-      uvm_severity_type sev = uvm_severity_type'(severity);
+      uvm_severity sev = uvm_severity'(severity);
       id_f_ary = severity_id_file_handles[severity];
       if(id_f_ary.first(idx))
       do begin

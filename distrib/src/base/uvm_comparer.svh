@@ -359,7 +359,7 @@ class uvm_comparer;
   function void print_rollup(uvm_object rhs, uvm_object lhs);
     string msg;
     if(uvm_object::__m_uvm_status_container.scope.depth() == 0) begin
-      if(result && (show_max || (uvm_severity_type'(sev) != UVM_INFO))) begin
+      if(result && (show_max || (uvm_severity'(sev) != UVM_INFO))) begin
         if(show_max < result) 
            $swrite(msg, "%0d Miscompare(s) (%0d shown) for object ",
              result, show_max);

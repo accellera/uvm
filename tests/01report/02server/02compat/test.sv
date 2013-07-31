@@ -42,7 +42,6 @@ class test extends uvm_test;
    endfunction
 
    virtual task run();
-     uvm_report_global_server glob = new;
      my_server serv = new;
      // Emit a message before setting the server to make sure counts are
      // properly copied over.
@@ -50,7 +49,7 @@ class test extends uvm_test;
      `uvm_info("MSG2", "Another message", UVM_LOW)
 
      // Set the global server
-     glob.set_server(serv);
+     uvm_report_server::set_server(serv);
 
      //Emit some messages to the new server
      `uvm_info("MSG1", "Some message again", UVM_LOW)
@@ -59,9 +58,8 @@ class test extends uvm_test;
    endtask
 
    virtual function void report();
-     uvm_report_global_server glob = new;
      uvm_report_server serv;
-     serv = glob.get_server();
+     serv = uvm_report_server::get_server();
      if(serv.get_id_count("MSG1") == 2 && serv.get_id_count("MSG2") == 2)
        $display("**** UVM TEST PASSED ****");
      else
