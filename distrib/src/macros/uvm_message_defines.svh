@@ -469,7 +469,7 @@
 `define uvm_add_trace_meta(TRC_MESS, VAR, LABEL="") \
   if (TRC_MESS != null) begin \
     if (LABEL == "") \
-      TRC_MESS.add_meta(`"VAR'", VAR); \
+      TRC_MESS.add_meta(`"VAR`", VAR); \
     else \
       TRC_MESS.add_meta(LABEL, VAR); \
   end
