@@ -3497,9 +3497,12 @@ endfunction \
 //
 `define uvm_unpack_enumN(VAR,SIZE,TYPE) \
    begin \
-   longint e__; \
-   `uvm_unpack_intN(e__,SIZE) \
-   VAR = TYPE'(e__); \
+   if (packer.big_endian) \
+     { << { VAR }} = packer.m_bits[packer.count +: SIZE];  \
+   else \
+     VAR = TYPE'(packer.m_bits[packer.count +: SIZE]); \
+   \
+   packer.count += SIZE; \
    end
 
 
