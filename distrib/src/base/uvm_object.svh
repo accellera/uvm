@@ -784,10 +784,9 @@ virtual class uvm_object extends uvm_void;
 
   extern protected virtual function uvm_report_object m_get_report_object();
 
+  // the lookup table
+  local static uvm_object uvm_global_copy_map[uvm_object];
 endclass
-
-
-uvm_copy_map uvm_global_copy_map = new;
 
 //------------------------------------------------------------------------------
 // IMPLEMENTATION
@@ -1011,7 +1010,7 @@ endfunction
 function void uvm_object::copy (uvm_object rhs);
   //For cycle checking
   static int depth;
-  if((rhs !=null)  && (uvm_global_copy_map.get(rhs) != null)) begin
+  if((rhs !=null)  && uvm_global_copy_map.exists(rhs)) begin
     return;
   end
 
@@ -1020,7 +1019,7 @@ function void uvm_object::copy (uvm_object rhs);
     return;
   end
 
-  uvm_global_copy_map.set(rhs, this); 
+  uvm_global_copy_map[rhs]= this; 
   ++depth;
 
   __m_uvm_field_automation(rhs, UVM_COPY, "");
@@ -1028,7 +1027,7 @@ function void uvm_object::copy (uvm_object rhs);
 
   --depth;
   if(depth==0) begin
-    uvm_global_copy_map.clear();
+    uvm_global_copy_map.delete();
   end
 endfunction
 
@@ -1057,7 +1056,7 @@ function bit  uvm_object::compare (uvm_object rhs,
   comparer = __m_uvm_status_container.comparer;
 
   if(!__m_uvm_status_container.scope.depth()) begin
-    comparer.compare_map.clear();
+    comparer.compare_map.delete();
     comparer.result = 0;
     comparer.miscompares = "";
     comparer.scope = __m_uvm_status_container.scope;
@@ -1082,9 +1081,9 @@ function bit  uvm_object::compare (uvm_object rhs,
     end
   end
 
-  if(!done && (comparer.compare_map.get(rhs) != null)) begin
-    if(comparer.compare_map.get(rhs) != this) begin
-      comparer.print_msg_object(this, comparer.compare_map.get(rhs));
+  if(!done && comparer.compare_map.exists(rhs)) begin
+    if(comparer.compare_map[rhs] != this) begin
+      comparer.print_msg_object(this, comparer.compare_map[rhs]);
     end 
     done = 1;  //don't do any more work after this case, but do cleanup
   end
@@ -1096,7 +1095,7 @@ function bit  uvm_object::compare (uvm_object rhs,
   end
 
   if(!done) begin
-    comparer.compare_map.set(rhs, this);
+    comparer.compare_map[rhs]= this;
     __m_uvm_field_automation(rhs, UVM_COMPARE, "");
     dc = do_compare(rhs, comparer);
   end
