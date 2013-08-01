@@ -157,10 +157,13 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     bit exists;
     string lookup;
     uvm_pool#(string,uvm_resource#(T)) pool;
+    string rstate;
      
     //take care of random stability during allocation
     process p = process::self();
-    string rstate = p.get_randstate();
+    if(p) 
+  		rstate = p.get_randstate();
+  		
     top = uvm_root::get();
     curr_phase = top.m_current_phase;
 
@@ -217,7 +220,8 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
       end
     end
 
-    p.set_randstate(rstate);
+    if(p)
+    	p.set_randstate(rstate);
 
     if(uvm_config_db_options::is_tracing())
       m_show_msg("CFGDB/SET", "Configuration","set", inst_name, field_name, cntxt, r);
