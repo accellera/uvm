@@ -124,9 +124,9 @@ class env extends uvm_component;
     o = new();
     o.t = 19;
     o.xt = "yo!";
-    set_config_object("*", "o*", o, 0); // no clone
-    set_config_int("*", "i*", 7);
-    set_config_string("*", "s*", "fortitude");
+    set_config_object("*", "o", o, 0); // no clone
+    set_config_int("*", "i", 7);
+    set_config_string("*", "s", "fortitude");
   endfunction
 
 endclass
