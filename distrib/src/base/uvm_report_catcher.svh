@@ -320,26 +320,31 @@ virtual class uvm_report_catcher extends uvm_callback;
   // method can be used by calling uvm_report_cb::display(<uvm_report_object>).
 
   static function void print_catcher(UVM_FILE file=0);
-    string msg;
-    string enabled;
-    uvm_report_catcher catcher;
-    static uvm_report_cb_iter iter = new(null);
+	  string msg;
+	  string enabled;
+	  uvm_report_catcher catcher;
+	  static uvm_report_cb_iter iter = new(null);
+	  string q[$];
 
-    f_display(file, "-------------UVM REPORT CATCHERS----------------------------");
+	  q.push_back("-------------UVM REPORT CATCHERS----------------------------\n");
 
-    catcher = iter.first();
-    while(catcher != null) begin
-       if(catcher.callback_mode())
-        enabled = "ON";        
-       else
-        enabled = "OFF";        
-      
-      $swrite(msg, "%20s : %s", catcher.get_name(),
-              enabled);
-      f_display(file, msg);
-      catcher = iter.next();
-    end
-    f_display(file, "--------------------------------------------------------------");
+	  catcher = iter.first();
+	  while(catcher != null) begin
+		  if(catcher.callback_mode())
+			  enabled = "ON";        
+		  else
+			  enabled = "OFF";        
+
+		  q.push_back($sformatf("%20s : %s\n", catcher.get_name(),enabled));
+		  catcher = iter.next();
+	  end
+	  q.push_back("--------------------------------------------------------------\n");
+	  begin
+		  string msg;
+		  msg={>>{q}};
+		  `uvm_info_context("UVM/REPORT/CATCHER",msg,UVM_LOW,uvm_top)
+	  end
+
   endfunction
   
   // Funciton: debug_report_catcher
@@ -631,47 +636,34 @@ virtual class uvm_report_catcher extends uvm_callback;
 
   endfunction
 
-  //f_display
-  //internal method to check if file is open
-  //
-  
-  local static function void f_display(UVM_FILE file, string str);
-    if (file == 0)
-      $display("%s", str);
-    else
-      $fdisplay(file, "%s", str);
-  endfunction
 
-  // Function: summarize_report_catcher
+  // Function: summarize
   //
   // This function is called automatically by <uvm_report_server::summarize()>.
   // It prints the statistics for the active catchers.
 
-  static function void summarize_report_catcher(UVM_FILE file);
-    string s;
-    if(do_report) begin
-      f_display(file, "");   
-      f_display(file, "--- UVM Report catcher Summary ---");
-      f_display(file, "");   
-      f_display(file, "");
-  
-      $sformat(s, "Number of demoted UVM_FATAL reports  :%5d", m_demoted_fatal);
-      f_display(file,s);
-  
-      $sformat(s, "Number of demoted UVM_ERROR reports  :%5d", m_demoted_error);
-      f_display(file,s);
-  
-      $sformat(s, "Number of demoted UVM_WARNING reports:%5d", m_demoted_warning);
-      f_display(file,s);
 
-      $sformat(s, "Number of caught UVM_FATAL reports   :%5d", m_caught_fatal);
-      f_display(file,s);
+  static function void summarize();
+    string s;
+    string q[$];
+    if(do_report) begin
+      q.push_back("\n");   
+      q.push_back("--- UVM Report catcher Summary ---");
+      q.push_back("");   
+      q.push_back("");
   
-      $sformat(s, "Number of caught UVM_ERROR reports   :%5d", m_caught_error);
-      f_display(file,s);
-  
-      $sformat(s, "Number of caught UVM_WARNING reports :%5d", m_caught_warning);
-      f_display(file,s);
+      q.push_back($sformatf("Number of demoted UVM_FATAL reports  :%5d\n", m_demoted_fatal));
+      q.push_back($sformatf("Number of demoted UVM_ERROR reports  :%5d\n", m_demoted_error));
+      q.push_back($sformatf("Number of demoted UVM_WARNING reports:%5d\n", m_demoted_warning));
+      q.push_back($sformatf("Number of caught UVM_FATAL reports   :%5d\n", m_caught_fatal));
+      q.push_back($sformatf("Number of caught UVM_ERROR reports   :%5d\n", m_caught_error));
+      q.push_back($sformatf("Number of caught UVM_WARNING reports :%5d\n", m_caught_warning));
+
+		begin
+			string msg;
+			msg={>>{q}};
+			`uvm_info_context("UVM/REPORT/CATCHER",msg,UVM_LOW,uvm_top)
+		end
     end
   endfunction
 

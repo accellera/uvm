@@ -37,7 +37,7 @@
 
 task run_test (string test_name="");
   uvm_root top;
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
   top.run_test(test_name);
 endtask
 
@@ -75,7 +75,7 @@ endfunction
 
 function void set_global_timeout(time timeout, bit overridable = 1);
   uvm_root top;
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
   top.set_timeout(timeout,overridable);
 endfunction
 
@@ -116,7 +116,7 @@ endfunction
 function bit uvm_report_enabled (int verbosity,
                                  uvm_severity severity=UVM_INFO, string id="");
   uvm_root top;
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
   return top.uvm_report_enabled(verbosity,severity,id);
 endfunction
 
@@ -130,7 +130,7 @@ function void uvm_report( uvm_severity severity,
                           string filename = "",
                           int line = 0);
   uvm_root top;
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
   top.uvm_report(severity, id, message, verbosity, filename, line);
 endfunction 
 
@@ -142,7 +142,7 @@ function void uvm_report_info(string id,
 			      string filename = "",
 			      int line = 0);
   uvm_root top;
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
   top.uvm_report_info(id, message, verbosity, filename, line);
 endfunction
 
@@ -155,7 +155,7 @@ function void uvm_report_warning(string id,
 				 string filename = "",
 				 int line = 0);
   uvm_root top;
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
   top.uvm_report_warning(id, message, verbosity, filename, line);
 endfunction
 
@@ -168,7 +168,7 @@ function void uvm_report_error(string id,
 			       string filename = "",
 			       int line = 0);
   uvm_root top;
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
   top.uvm_report_error(id, message, verbosity, filename, line);
 endfunction
 
@@ -190,11 +190,11 @@ function void uvm_report_fatal(string id,
 			       string filename = "",
 			       int line = 0);
   uvm_root top;
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
   top.uvm_report_fatal(id, message, verbosity, filename, line);
 endfunction
 
-
+// TODO merge with uvm_enum_wrapper#(uvm_severity)
 function bit uvm_string_to_severity (string sev_str, output uvm_severity sev);
   case (sev_str)
     "UVM_INFO": sev = UVM_INFO;
@@ -244,7 +244,7 @@ function void  set_config_int  (string inst_name,
                                 string field_name,
                                 uvm_bitstream_t value);
   uvm_root top;
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
   top.set_config_int(inst_name, field_name, value);
 endfunction
 
@@ -262,7 +262,7 @@ function void set_config_object (string inst_name,
                                  uvm_object value,
                                  bit clone=1);
   uvm_root top;
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
   top.set_config_object(inst_name, field_name, value, clone);
 endfunction
 
@@ -279,7 +279,7 @@ function void set_config_string (string inst_name,
                                  string field_name,
                                  string value);
   uvm_root top;
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
   top.set_config_string(inst_name, field_name, value);
 endfunction
 

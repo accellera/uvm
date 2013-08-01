@@ -17,7 +17,7 @@ module test184;
             uvm_config_db#(int)::set(null,"env.driver", "value1", 8);
 
             assert(uvm_config_db#(int)::m_rsc.size() == 1); //same context used
-            m = uvm_config_db#(int)::m_rsc[uvm_root::get()];
+            m = uvm_config_db#(int)::m_rsc[uvm_coreservice.get_root()];
             
             assert(uvm_config_db#(int)::get(null,"env.driver", "value", f));
             assert(f==4);

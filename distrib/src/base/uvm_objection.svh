@@ -69,7 +69,7 @@ class uvm_objection extends uvm_report_object;
   protected uvm_objection_events m_events [uvm_object];
   /*protected*/ bit     m_top_all_dropped;
 
-  protected uvm_root m_top = uvm_root::get();
+  protected uvm_root m_top = uvm_coreservice.get_root();
 
   static uvm_objection m_objections[$];
 
@@ -116,7 +116,7 @@ class uvm_objection extends uvm_report_object;
 
   /*protected*/ bit m_hier_mode = 1;
 
-  uvm_root top = uvm_root::get();
+  uvm_root top = uvm_coreservice.get_root();
 
 
   protected bit m_cleared; /* for checking obj count<0 */

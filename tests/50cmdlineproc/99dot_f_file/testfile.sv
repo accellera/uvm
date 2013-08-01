@@ -26,7 +26,7 @@ import uvm_pkg::*;
 `include "uvm_macros.svh"
 
 
-class my_server extends uvm_report_server;
+class my_server extends uvm_default_report_server;
   int cnt = 0;
   virtual function string compose_message( uvm_severity severity, string name,
       string id, string message, string filename, int    line);

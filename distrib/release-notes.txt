@@ -8,7 +8,7 @@ General Overview
 ----------------
 
 This is release 1.2 of the Universal Verification Methodology (UVM)
-reference implementation from Accellera.  This distribution includes a
+reference implementation from Accellera.ï¿½ This distribution includes a
 SystemVerilog based class library, examples, UVM Stardard Reference
 (PDF and HTML), and a User's Guide.
 
@@ -19,8 +19,8 @@ standard. For additional information on the Accellera standard, see
      http://www.accellera.org/activities/vip
 
 A good source for information, answers, and resources is
-http://www.accellera.org/community/uvm.  It contains forums on
-methodology, tool specific issues, and commercial announcements.  It
+http://www.accellera.org/community/uvm.ï¿½ It contains forums on
+methodology, tool specific issues, and commercial announcements.ï¿½ It
 also has links to additional resources, Accellera sponsored events,
 and other UVM events.
 
@@ -91,7 +91,26 @@ required, define the `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR symbol.
 
 Mantis 4532: uvm_reg_access_seq ignoring regs with one RO field
 
+Mantis 4533: static data in DPI may survive reset
+
 Mantis 4542: uvm_test_done is now const to prevent changes
 
 Mantis 4548: cleanup dpi coding issues
 
+Mantis 4572: packing of ints with 64+bits and array unpack broken
+
+Mantis 4606: uvm_report server is not chainable/extendable. uvm_report_server can now be extended, chained 
+using delegate pattern
+
+Mantis 4617: bad example in documentation uvm_report_cb::add_by_name
+
+Mantis 4618: resource lookup broken when fieldname has wildcards. meta characters in the fieldname are not 
+interpreted anymore as glob/regex.
+
+Mantis 4621: printing of int will mask Z values with X
+
+Mantis 4643: uvm_dpi_get_next_arg_c doesnt fully adhere to 1800lrm
+
+Mantis 4666: uvm_config_db::set expects to be invoked in process context
+
+Mantis 4677: uvm_global_copy_map removed

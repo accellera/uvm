@@ -192,6 +192,7 @@ class uvm_root extends uvm_component;
   extern local function void m_process_config(string cfg, bit is_int);
   extern local function void m_process_default_sequence(string cfg);
   extern function void m_check_verbosity();
+  extern virtual function void report_header(UVM_FILE file = 0);
   // singleton handle
   static local uvm_root m_inst;
 
@@ -233,7 +234,7 @@ class uvm_root extends uvm_component;
   endfunction
 `endif
 
-
+	static local bit m_relnotes_done=0;
 endclass
 
 
@@ -245,11 +246,7 @@ endclass
 // search interface. See <uvm_root> for more information.
 //------------------------------------------------------------------------------
 
-const uvm_root uvm_top = uvm_root::get();
-
-// for backward compatibility
-const uvm_root _global_reporter = uvm_root::get();
-
+const uvm_root uvm_top = uvm_coreservice.get_root();
 
 
 //-----------------------------------------------------------------------------
@@ -314,13 +311,65 @@ function uvm_root::new();
   m_check_verbosity();
 endfunction
 
+function void uvm_root::report_header(UVM_FILE file = 0);
+	string q[$];
+	uvm_report_server srvr;
+	uvm_cmdline_processor clp;
+	string args[$];
+
+	srvr = uvm_report_server::get_server();
+	clp = uvm_cmdline_processor::get_inst();
+
+	if (clp.get_arg_matches("+UVM_NO_RELNOTES", args)) return;
+
+
+	q.push_back("\n----------------------------------------------------------------\n");
+	q.push_back({uvm_revision_string(),"\n"});
+	q.push_back({uvm_mgc_copyright,"\n"});
+	q.push_back({uvm_cdn_copyright,"\n"});
+	q.push_back({uvm_snps_copyright,"\n"});
+	q.push_back({uvm_cy_copyright,"\n"});
+	q.push_back({uvm_nv_copyright,"\n"});
+	q.push_back("----------------------------------------------------------------\n");
+
+
+`ifndef UVM_NO_DEPRECATED
+	if(!m_relnotes_done)      
+		q.push_back("\n  ***********       IMPORTANT RELEASE NOTES         ************\n");
+	q.push_back("\n  You are using a version of the UVM library that has been compiled\n");
+	q.push_back("  with `UVM_NO_DEPRECATED undefined.\n");
+	q.push_back("  See http://www.eda.org/svdb/view.php?id=3313 for more details.\n");
+	m_relnotes_done=1;
+`endif
+
+`ifndef UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR
+	if(!m_relnotes_done)      
+		q.push_back("\n  ***********       IMPORTANT RELEASE NOTES         ************\n");
+		
+	q.push_back("\n  You are using a version of the UVM library that has been compiled\n");
+	q.push_back("  with `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR undefined.\n");
+	q.push_back("  See http://www.eda.org/svdb/view.php?id=3770 for more details.\n");
+	m_relnotes_done=1;
+`endif
+
+	if(m_relnotes_done)
+		q.push_back("\n      (Specify +UVM_NO_RELNOTES to turn off this notice)\n");
+
+		begin
+			string msg;
+			msg={>>{q}};
+			`uvm_info("UVM/RELNOTES",msg,UVM_LOW)
+		end
+endfunction
+
+
 
 // run_test
 // --------
 
 task uvm_root::run_test(string test_name="");
 
-  uvm_factory factory= uvm_factory::get();
+  uvm_factory factory= uvm_coreservice.get_factory();
   bit testname_plusarg;
   int test_name_count;
   string test_names[$];
@@ -377,6 +426,8 @@ task uvm_root::run_test(string test_name="");
 
   // if test now defined, create it using common factory
   if (test_name != "") begin
+  	uvm_factory factory=uvm_coreservice.get_factory();
+	  
     if(m_children.exists("uvm_test_top")) begin
       uvm_report_fatal("TTINST",
           "An uvm_test_top already exists via a previous call to run_test", UVM_NONE);
@@ -659,7 +710,7 @@ endfunction
 
 function void uvm_root::m_process_inst_override(string ovr);
   string split_val[$];
-  uvm_factory fact = uvm_factory::get();
+  uvm_factory fact = uvm_coreservice.get_factory();
 
   uvm_split_string(ovr, ",", split_val);
 
@@ -680,7 +731,7 @@ endfunction
 function void uvm_root::m_process_type_override(string ovr);
   string split_val[$];
   int replace=1;
-  uvm_factory fact = uvm_factory::get();
+  uvm_factory fact = uvm_coreservice.get_factory();
 
   uvm_split_string(ovr, ",", split_val);
 
@@ -711,7 +762,7 @@ endfunction
 function void uvm_root::m_process_config(string cfg, bit is_int);
   uvm_bitstream_t v;
   string split_val[$];
-  uvm_root m_uvm_top = uvm_root::get();
+  uvm_root m_uvm_top = uvm_coreservice.get_root();
 
   uvm_split_string(cfg, ",", split_val);
   if(split_val.size() == 1) begin

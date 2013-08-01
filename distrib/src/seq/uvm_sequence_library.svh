@@ -537,7 +537,7 @@ function bit uvm_sequence_library::m_check(uvm_object_wrapper seq_type, this_typ
   obj = seq_type.create_object();
   name = (lib == null) ? type_name : lib.get_full_name();
   typ = (lib == null) ? type_name : lib.get_type_name();
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
 
   if (!$cast(seq, obj)) begin
     `uvm_error_context("SEQLIB/BAD_SEQ_TYPE",
@@ -755,7 +755,7 @@ task uvm_sequence_library::execute(uvm_object_wrapper wrap);
   uvm_sequence_base seq_base;
   REQ req_item;
   
-  factory = uvm_factory::get();
+  factory = uvm_coreservice.get_factory();
 
   obj = factory.create_object_by_type(wrap,get_full_name(),
            $sformatf("%s:%0d",wrap.get_type_name(),sequences_executed+1));

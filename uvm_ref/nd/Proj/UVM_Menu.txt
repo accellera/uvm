@@ -272,6 +272,7 @@ Group: Globals  {
 
    File: Types, Enums, Policies       (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_object_globals.svh)
    File: Globals                      (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_globals.svh)
+   File: UVM Core Service             (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_coreservice.svh)
    Group: Data Access {
           File: Overview              (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/dap.txt)
           File: Set/Get Base          (no auto-title, UVM_ROOT/distrib/docs/html/src/dap/uvm_set_get_dap_base.svh)

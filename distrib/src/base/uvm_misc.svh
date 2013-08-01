@@ -43,6 +43,9 @@ typedef enum {UVM_APPEND, UVM_PREPEND} uvm_apprepend;
 // Forward declaration since scope stack uses uvm_objects now
 typedef class uvm_object;
 
+typedef class uvm_coreservice_t;
+typedef class uvm_factory;
+
 //----------------------------------------------------------------------------
 //
 // CLASS- uvm_scope_stack
@@ -601,7 +604,7 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
     uvm_component list[$];
     types_t types;
     uvm_root top;
-    top = uvm_root::get();
+    top = uvm_coreservice.get_root();
     top.find_all("*",list,start);
     foreach (list[i]) begin
       TYPE typ;
@@ -630,6 +633,8 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
   static function TYPE create_type_by_name(string type_name, string contxt);
     uvm_object obj;
     TYPE  typ;
+    uvm_factory factory=uvm_coreservice.get_factory();
+    
     obj = factory.create_object_by_name(type_name,contxt,type_name);
        if (!$cast(typ,obj))
          uvm_report_error("WRONG_TYPE",{"The type_name given '",type_name,

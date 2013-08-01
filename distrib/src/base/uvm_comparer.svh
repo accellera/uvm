@@ -342,7 +342,7 @@ class uvm_comparer;
   // settings. See the <verbosity> and <sev> variables for more information.
 
   function void print_msg (string msg);
-     uvm_root root = uvm_root::get();
+     uvm_root root = uvm_coreservice.get_root();
      uvm_report_handler m_rh = root.get_report_handler();
      
     result++;
@@ -362,12 +362,12 @@ class uvm_comparer;
 
   //Need this function because sformat doesn't support objects
   function void print_rollup(uvm_object rhs, uvm_object lhs);
-     uvm_root root = uvm_root::get();
+     uvm_root root = uvm_coreservice.get_root();
      uvm_report_handler m_rh = root.get_report_handler();
 
     string msg;
     if(uvm_object::__m_uvm_status_container.scope.depth() == 0) begin
-      if(result && (show_max || (uvm_severity_type'(sev) != UVM_INFO))) begin
+      if(result && (show_max || (uvm_severity'(sev) != UVM_INFO))) begin
         if(show_max < result) 
            $swrite(msg, "%0d Miscompare(s) (%0d shown) for object ",
              result, show_max);
@@ -387,7 +387,7 @@ class uvm_comparer;
   // ----------------
 
   function void print_msg_object(uvm_object lhs, uvm_object rhs);
-     uvm_root root = uvm_root::get();
+     uvm_root root = uvm_coreservice.get_root();
      uvm_report_handler m_rh = root.get_report_handler();
 
     result++;
