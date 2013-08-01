@@ -168,9 +168,9 @@ module test;
 		// create new factory
 		f = new();
 		// set the delegate
-		f.delegate=uvm_coreservice.getFactory();
+		f.delegate=uvm_coreservice.get_factory();
 		// enable new factory
-		uvm_coreservice.setFactory(f);
+		uvm_coreservice.set_factory(f);
 
 		// do an override
 		a::type_id::set_type_override(b::get_type());

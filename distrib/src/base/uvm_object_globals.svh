@@ -252,6 +252,10 @@ typedef enum bit [1:0]
   UVM_FATAL
 } uvm_severity;
 
+`ifndef UVM_NO_DEPRECATED
+typedef uvm_severity uvm_severity_type;
+`endif
+
 // Enum: uvm_action
 //
 // Defines all possible values for report actions. Each report is configured

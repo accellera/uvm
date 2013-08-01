@@ -222,14 +222,14 @@ initial
 begin
    uvm_root top;
    
-   top = uvm_coreservice.getRoot();
+   top = uvm_coreservice.get_root();
 
    top.finish_on_completion = 0;
    run_test("test");
 
    begin
       uvm_report_server svr;
-      svr = _global_reporter.get_report_server();
+      svr = uvm_coreservice.get_report_server();
 
       if (svr.get_severity_count(UVM_FATAL) +
           svr.get_severity_count(UVM_ERROR) == 0)

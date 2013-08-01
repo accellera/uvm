@@ -244,7 +244,7 @@ endclass
 // search interface. See <uvm_root> for more information.
 //------------------------------------------------------------------------------
 
-const uvm_root uvm_top = uvm_coreservice.getRoot();
+const uvm_root uvm_top = uvm_coreservice.get_root();
 
 
 //-----------------------------------------------------------------------------
@@ -366,7 +366,7 @@ endfunction
 
 task uvm_root::run_test(string test_name="");
 
-  uvm_factory factory= uvm_coreservice.getFactory();
+  uvm_factory factory= uvm_coreservice.get_factory();
   bit testname_plusarg;
   int test_name_count;
   string test_names[$];
@@ -423,7 +423,7 @@ task uvm_root::run_test(string test_name="");
 
   // if test now defined, create it using common factory
   if (test_name != "") begin
-  	uvm_factory factory=uvm_coreservice.getFactory();
+  	uvm_factory factory=uvm_coreservice.get_factory();
 	  
     if(m_children.exists("uvm_test_top")) begin
       uvm_report_fatal("TTINST",
@@ -707,7 +707,7 @@ endfunction
 
 function void uvm_root::m_process_inst_override(string ovr);
   string split_val[$];
-  uvm_factory fact = uvm_coreservice.getFactory();
+  uvm_factory fact = uvm_coreservice.get_factory();
 
   uvm_split_string(ovr, ",", split_val);
 
@@ -728,7 +728,7 @@ endfunction
 function void uvm_root::m_process_type_override(string ovr);
   string split_val[$];
   int replace=1;
-  uvm_factory fact = uvm_coreservice.getFactory();
+  uvm_factory fact = uvm_coreservice.get_factory();
 
   uvm_split_string(ovr, ",", split_val);
 
@@ -759,7 +759,7 @@ endfunction
 function void uvm_root::m_process_config(string cfg, bit is_int);
   uvm_bitstream_t v;
   string split_val[$];
-  uvm_root m_uvm_top = uvm_coreservice.getRoot();
+  uvm_root m_uvm_top = uvm_coreservice.get_root();
 
   uvm_split_string(cfg, ",", split_val);
   if(split_val.size() == 1) begin

@@ -314,7 +314,7 @@ class uvm_report_handler;
     srvr = uvm_report_server::get_server();
 
     if (client==null)
-      client = uvm_coreservice.getRoot();
+      client = uvm_coreservice.get_root();
 
     // Check for severity overrides and apply them before calling the server.
     // An id specific override has precedence over a generic severity override.

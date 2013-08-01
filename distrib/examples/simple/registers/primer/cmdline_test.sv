@@ -52,7 +52,7 @@ class cmdline_test extends uvm_test;
          string            seq_name;
 	 uvm_factory factory;
 
-	 factory = uvm_coreservice.getFactory();
+	 factory = uvm_coreservice.get_factory();
          void'(opts.get_arg_value("+UVM_REG_SEQ=", seq_name));
          
          if (!$cast(seq, factory.create_object_by_name(seq_name,

@@ -270,7 +270,7 @@ class test extends uvm_test;
       
       super.final_phase(phase);
 
-      svr = _global_reporter.get_report_server();
+      svr = uvm_coreservice.get_report_server();
 
       svr.summarize();
 

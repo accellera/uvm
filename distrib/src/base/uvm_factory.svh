@@ -68,8 +68,8 @@ endclass
 
 virtual class uvm_factory;
   static function uvm_factory get();
-	  	uvm_coreserviceT s = uvm_coreserviceT::get();
-	  	return s.getFactory();
+	  	uvm_coreservice_t s = uvm_coreservice_t::get();
+	  	return s.get_factory();
   endfunction	
   
   // Group: Registering Types
@@ -926,7 +926,7 @@ endclass
 // our singleton factory; it is statically initialized
 //-----------------------------------------------------------------------------
 
-// const uvm_factory factory = uvm_coreservice.getFactory();
+// const uvm_factory factory = uvm_coreservice.get_factory();
 
 
 

@@ -40,7 +40,7 @@ class my_catcher extends uvm_report_catcher;
       s = uvm_severity'(get_severity());
 
       // Ignore messages from root component
-      if(get_client() == uvm_coreservice.getRoot())
+      if(get_client() == uvm_coreservice.get_root())
         return THROW;
  
       sev[s] ++;

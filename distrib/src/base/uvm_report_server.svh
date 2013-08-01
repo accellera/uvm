@@ -178,8 +178,8 @@ virtual class uvm_report_server extends uvm_object;
 	// from the current report_server to the new one
 
 	static function void set_server(uvm_report_server server);
-		server.copy(uvm_coreservice.getReportServer());
-		uvm_coreservice.setReportServer(server);
+		server.copy(uvm_coreservice.get_report_server());
+		uvm_coreservice.set_report_server(server);
 	endfunction
 
 
@@ -189,7 +189,7 @@ virtual class uvm_report_server extends uvm_object;
 	// a valid handle to a report server.
 
 	static function uvm_report_server get_server();
-		return uvm_coreservice.getReportServer();
+		return uvm_coreservice.get_report_server();
 	endfunction
 endclass
 
@@ -416,17 +416,16 @@ class uvm_default_report_server extends uvm_report_server;
 			verbosity_level, a, filename, line);
 
 		if(report_ok) begin 
+			// give the global server a chance to intercept the calls
+			uvm_report_server svr = uvm_coreservice.get_report_server();
 			// no need to compose when neither UVM_DISPLAY nor UVM_LOG is set
 			if(a & (UVM_LOG|UVM_DISPLAY))
-				m = compose_message(severity, name, id, message, filename, line); 
-			process_report(severity, name, id, message, a, f, filename,
+				m = svr.compose_message(severity, name, id, message, filename, line); 
+			svr.process_report(severity, name, id, message, a, f, filename,
 				line, m, verbosity_level, client);
 		end
 
 	endfunction
-
-
-
 
 	virtual function void process_report(
 			uvm_severity severity,

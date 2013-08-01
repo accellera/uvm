@@ -284,7 +284,7 @@ class uvm_report_object extends uvm_object;
 
   virtual function void die();
     // make the pre_abort callbacks
-    uvm_root top = uvm_coreservice.getRoot();
+    uvm_root top = uvm_coreservice.get_root();
     top.m_do_pre_abort();
 
     report_summarize();

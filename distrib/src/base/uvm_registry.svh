@@ -89,7 +89,7 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
 
   static function this_type get();
     if (me == null) begin
-      uvm_factory f = uvm_coreservice.getFactory();
+      uvm_factory f = uvm_coreservice.get_factory();
       me = new;
       f.register(me);
     end
@@ -107,7 +107,7 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
 
   static function T create(string name, uvm_component parent, string contxt="");
     uvm_object obj;
-    uvm_factory f = uvm_coreservice.getFactory();
+    uvm_factory f = uvm_coreservice.get_factory();
     if (contxt == "" && parent != null)
       contxt = parent.get_full_name();
     obj = f.create_component_by_type(get(),contxt,name,parent);
@@ -131,7 +131,7 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
 
   static function void set_type_override (uvm_object_wrapper override_type,
                                           bit replace=1);
-                                            uvm_factory factory=uvm_coreservice.getFactory();
+                                            uvm_factory factory=uvm_coreservice.get_factory();
                                           
     factory.set_type_override_by_type(get(),override_type,replace);
   endfunction
@@ -156,7 +156,7 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
                                          string inst_path,
                                          uvm_component parent=null);
     string full_inst_path;
-      uvm_factory factory=uvm_coreservice.getFactory();
+      uvm_factory factory=uvm_coreservice.get_factory();
     
     if (parent != null) begin
       if (inst_path == "")
@@ -227,7 +227,7 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
 
   static function this_type get();
     if (me == null) begin
-      uvm_factory f = uvm_coreservice.getFactory();
+      uvm_factory f = uvm_coreservice.get_factory();
       me = new;
       f.register(me);
     end
@@ -246,7 +246,7 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
   static function T create (string name="", uvm_component parent=null,
                             string contxt="");
     uvm_object obj;
-    uvm_factory f = uvm_coreservice.getFactory();
+    uvm_factory f = uvm_coreservice.get_factory();
     if (contxt == "" && parent != null)
       contxt = parent.get_full_name();
     obj = f.create_object_by_type(get(),contxt,name);
@@ -270,7 +270,7 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
 
   static function void set_type_override (uvm_object_wrapper override_type,
                                           bit replace=1);
-                                            uvm_factory factory=uvm_coreservice.getFactory();
+                                            uvm_factory factory=uvm_coreservice.get_factory();
                                           
     factory.set_type_override_by_type(get(),override_type,replace);
   endfunction
@@ -295,7 +295,7 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
                                          string inst_path,
                                          uvm_component parent=null);
     string full_inst_path;
-      uvm_factory factory=uvm_coreservice.getFactory();
+      uvm_factory factory=uvm_coreservice.get_factory();
     
     if (parent != null) begin
       if (inst_path == "")

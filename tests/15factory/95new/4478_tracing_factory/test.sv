@@ -101,15 +101,15 @@ module test;
 		// create new factory
 		f = new();
 		// set the delegate
-		f.delegate=uvm_coreservice.getFactory();
+		f.delegate=uvm_coreservice.get_factory();
 		// enable new factory
-		uvm_coreservice.setFactory(f);
+		uvm_coreservice.set_factory(f);
 
 		// now see the trace
 		a::type_id::set_type_override(b::get_type());
 
 		// switch the factory proxy off
-		uvm_coreservice.setFactory(f.delegate);
+		uvm_coreservice.set_factory(f.delegate);
 
 		// no message
 		a::type_id::set_type_override(c::get_type(),1);
