@@ -346,16 +346,12 @@ class uvm_default_report_server extends uvm_report_server;
 	virtual function void get_severity_set(output uvm_severity q[$]); 
 		foreach(severity_count[idx])
 			q.push_back(idx);
-
-		$display("N=%0d sev",severity_count.size());
 	endfunction
 
 
 	virtual function void get_id_set(output string q[$]);
 		foreach(id_count[idx])
 			q.push_back(idx);
-
-		$display("N=%0d id",id_count.size());
 	endfunction 
 
 	// f_display

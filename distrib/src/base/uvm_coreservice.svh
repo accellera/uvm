@@ -23,9 +23,12 @@ typedef class uvm_default_report_server;
 typedef class uvm_root;
 
 
+
 `ifndef UVM_CORESERVICE_TYPE
-`define UVM_CORESERVICE_TYPE uvm_coreserviceT
+`define UVM_CORESERVICE_TYPE uvm_default_coreserviceT
 `endif
+
+typedef class `UVM_CORESERVICE_TYPE;
 
 //----------------------------------------------------------------------
 // Class: uvm_coreserviceT
@@ -36,65 +39,37 @@ typedef class uvm_root;
 // the rest of the set<facility> get<facility> pairs provide access to the internal uvm services
 //----------------------------------------------------------------------
 
-class uvm_coreserviceT;
-	//returns the global uvm factory
-	local uvm_factory factory;
-
+virtual class uvm_coreserviceT;
 	// Function: getFactory
 	//
 	// returns the currently enabled uvm factory, 
 	// when no factory has been set before instantiates a uvm_default_factory
-	virtual function uvm_factory getFactory();
-		if(factory==null) begin
-			uvm_default_factory f;
-			f=new;
-			factory=f;
-		end 
-
-		return factory;
-	endfunction
-
+	pure virtual function uvm_factory getFactory();
+	
 	// Function: setFactory
 	//
 	// sets the current uvm factory
-	// please note: its upto the user to preserve the contents of the original factory or delegate calls to to the original factory
-	virtual function void setFactory(uvm_factory f);
-		factory = f;
-	endfunction 
-
-
-	local uvm_report_server report_server;
+	// please note: its upto the user to preserve the contents of the original factory or delegate calls to to the original factory	
+	pure virtual function void setFactory(uvm_factory f);
 
 	// Function: getReportServer
 	// returns the current global report_server
 	// if no report server has been set before returns an instance of
 	// uvm_default_report_server
-	virtual function uvm_report_server getReportServer();
-		if(report_server==null) begin
-			uvm_default_report_server f;
-			f=new;
-			report_server=f;
-		end 
-
-		return report_server;
-	endfunction 
-
-	virtual function void setReportServer(uvm_report_server server);
-		report_server=server;
-	endfunction 
+	pure virtual function uvm_report_server getReportServer();
 	
+	// Function: setReportServer
+	// sets the central report server to ~server~
+	pure virtual function void setReportServer(uvm_report_server server);
 	
 	// Function: getRoot
 	//
 	// returns the uvm_root instance
-	virtual function uvm_root getRoot();
-		return uvm_root::get();
-	endfunction
-	
-
+	pure virtual function uvm_root getRoot();
+						
 	// Function: get
 	//
-	// returns an instance providing the    uvm_coreserviceT interface
+	// returns an instance providing the uvm_coreserviceT interface
 	// the actual type of the instance is determined by the define `UVM_CORESERVICE_TYPE
 	//
 	//| `define UVM_CORESERVICE_TYPE uvm_blocking_coreservice
@@ -110,6 +85,44 @@ class uvm_coreserviceT;
 			inst=new;
 
 		return inst;
+	endfunction
+endclass
+
+
+class uvm_default_coreserviceT extends uvm_coreserviceT;
+	local uvm_factory factory;
+
+	virtual function uvm_factory getFactory();
+		if(factory==null) begin
+			uvm_default_factory f;
+			f=new;
+			factory=f;
+		end 
+
+		return factory;
+	endfunction
+
+	virtual function void setFactory(uvm_factory f);
+		factory = f;
+	endfunction 
+
+	local uvm_report_server report_server;
+	virtual function uvm_report_server getReportServer();
+		if(report_server==null) begin
+			uvm_default_report_server f;
+			f=new;
+			report_server=f;
+		end 
+
+		return report_server;
+	endfunction 
+
+	virtual function void setReportServer(uvm_report_server server);
+		report_server=server;
+	endfunction 
+	
+	virtual function uvm_root getRoot();
+		return uvm_root::get();
 	endfunction
 endclass
 
