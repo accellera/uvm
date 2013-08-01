@@ -62,6 +62,9 @@ module top();
 				uvm_report_server svr;
 				svr = uvm_report_server::get_server();
 
+				if(svr.get_id_count("UVM/RSRC/NOREGEX") != 4)
+					$write("*** UVM TEST FAILED ***");
+
 				if (svr.get_id_count("TEST")==0 && svr.get_severity_count(UVM_ERROR)==0)
 					$write("** UVM TEST PASSED **\n");
 				else

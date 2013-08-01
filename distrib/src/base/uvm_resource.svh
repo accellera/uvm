@@ -1398,6 +1398,18 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
 
   function new(string name="", scope="");
     super.new(name, scope);
+    
+`ifndef UVM_NO_DEPRECATED
+begin
+	for(int i=0;i<name.len();i++) begin
+		if(name.getc(i) inside {".","/","[","*","{"}) begin
+			`uvm_warning("UVM/RSRC/NOREGEX", $sformatf("a resource with meta characters in the field name has been created \"%s\"",name))
+			break;
+		end	
+	end	
+end
+
+`endif    
   endfunction
 
   function string convert2string();
