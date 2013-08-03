@@ -38,14 +38,14 @@ typedef class uvm_root;
 //------------------------------------------------------------------------------
 
 class uvm_report_message_element;
-  typedef enum {INT, STRING, OBJECT, MESS_TAG, META} element_type_e;
+  typedef enum {INT, STRING, OBJECT, META} element_type_e;
 
   element_type_e m_element_type;
   string m_element_name;
   uvm_bitstream_t  m_int_value;
   int m_int_size;
   uvm_radix_enum m_int_radix;
-  string m_string_value;   // share the STRING and MESS_TAG type
+  string m_string_value;
   uvm_object m_object;     // share the OBJECT and META type
 endclass
  
@@ -91,14 +91,6 @@ class uvm_report_message_element_container extends uvm_object;
     elements = {};
   endfunction
 
-  function void add_tag(string name, string value);
-    uvm_report_message_element urme = m_get_report_message_element();
-    urme.m_element_type = uvm_report_message_element::MESS_TAG;
-    urme.m_element_name = name;
-    urme.m_string_value = value;
-    elements.push_back(urme);
-  endfunction
-
   function void add_int(string name, uvm_bitstream_t value, 
                         int size, uvm_radix_enum radix);
     uvm_report_message_element urme = m_get_report_message_element();
@@ -137,9 +129,6 @@ class uvm_report_message_element_container extends uvm_object;
   function void do_print(uvm_printer printer);
     super.do_print(printer);
     for(int i = 0; i < elements.size(); i++) begin
-      if (elements[i].m_element_type == uvm_report_message_element::MESS_TAG) begin
-        printer.print_string(elements[i].m_element_name, elements[i].m_string_value);
-      end
       if (elements[i].m_element_type == uvm_report_message_element::INT) begin
         printer.print_int(elements[i].m_element_name, elements[i].m_int_value, 
           elements[i].m_int_size, elements[i].m_int_radix);
@@ -156,9 +145,6 @@ class uvm_report_message_element_container extends uvm_object;
   function void do_record(uvm_recorder recorder);
     super.do_record(recorder);
     for(int i = 0; i < elements.size(); i++) begin
-      if (elements[i].m_element_type == uvm_report_message_element::MESS_TAG) begin
-        recorder.record_string(elements[i].m_element_name, elements[i].m_string_value);
-      end
       if (elements[i].m_element_type == uvm_report_message_element::INT) begin
         recorder.record_field(elements[i].m_element_name, elements[i].m_int_value, 
           elements[i].m_int_size, elements[i].m_int_radix);
@@ -213,7 +199,7 @@ endclass
 //
 // The uvm_report_message is the basic UVM object message class.  It provides 
 // the fields that are common to all messages.  It also provides the APIs 
-// necessary to add tags, integral types, strings and uvm_objects to a message.
+// necessary to add integral types, strings and uvm_objects to a message.
 //
 //------------------------------------------------------------------------------
 
@@ -513,13 +499,14 @@ class uvm_report_message extends uvm_object;
     uvm_report_object l_ro;
 
     if(!m_ro_stream_handles.exists(report_object)) begin
-      string l_string;
+      string l_scope, l_name;
       if (report_object != uvm_root::get())
-        l_string = report_object.get_full_name();
+        l_scope = report_object.get_full_name();
       else
-        l_string = "reporter";
+        l_scope = "reporter";
+      l_name = report_object.get_name();
       m_ro_stream_handles[report_object] = 
-        recorder.create_stream(l_string, "uvm_report_message stream", "UVM");
+        recorder.create_stream(l_name, "URM", l_scope);
     end
 
     return m_ro_stream_handles[report_object];
@@ -603,16 +590,6 @@ class uvm_report_message extends uvm_object;
   //----------------------------------------------------------------------------
 
 
-  // Function: add_tag
-  // 
-  // This method adds a tag of the name ~name~ and value ~value~ to the message.
-  //
-
-  function void add_tag(string name, string value);
-    report_message_element_container.add_tag(name, value);
-  endfunction
-
-
   // Function: add_int
   // 
   // This method adds an integral type of the name ~name~ and value ~value~ to
@@ -652,7 +629,8 @@ class uvm_report_message extends uvm_object;
   // Function: add_meta
   //
   // This method adds meta data of the name ~name~ and reference ~meta~ to
-  // the message.
+  // the message. Meata data will not be printed out, and by default, will
+  // be recorded, but extended recorder can use it for extensibility.
   //
   
   function void add_meta(string name, uvm_object meta);

@@ -410,7 +410,7 @@
 
 `define uvm_add_trace_tag(TRC_MESS, NAME, VALUE) \
   if (TRC_MESS != null) \
-    TRC_MESS.add_tag(NAME, VALUE);
+    TRC_MESS.add_string(NAME, VALUE);
 
 
 // MACRO: `uvm_add_trace_int
@@ -463,7 +463,11 @@
       TRC_MESS.add_object(LABEL, VAR); \
   end
 
-// `uvm_add_trace_meta
+// MACRO: `uvm_add_trace_meta
+//
+// This macro is similar to `uvm_add_trace_object, but the element won't
+// be printed and, by default, won't be recorded. However, extended
+// recorder can use it for extensibility.
 //
 
 `define uvm_add_trace_meta(TRC_MESS, VAR, LABEL="") \
