@@ -155,7 +155,7 @@ class test extends uvm_test;
   
    virtual task run_phase(uvm_phase phase);
      phase.raise_objection(this, "Waiting for sequence to finish");
-     seq.starting_phase = phase;
+     seq.set_starting_phase(phase);
      seq.start(env.bus.sqr);
      `uvm_info(get_type_name(), "End of main phase", UVM_HIGH)
      phase.drop_objection(this);

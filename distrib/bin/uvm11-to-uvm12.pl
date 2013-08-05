@@ -187,6 +187,15 @@ sub replace_trivial{
   
   	# FIX extending uvm_report_server
     $t =~ s/extends\s+uvm_report_server/extends uvm_default_report_server/g;
+
+    # FIX Mantis 4431 (starting_phase ==)
+    $t =~ s/starting_phase(\s*)==/get_starting_phase()$1==/g;
+    # FIX Mantis 4431 (starting_phase !=)
+    $t =~ s/starting_phase(\s*)!=/get_starting_phase()$1!=/g;
+    # FIX Mantis 4431 (starting_phase =)
+    $t =~ s/starting_phase\s*=\s*(\w+)/set_starting_phase($1)/g;
+    # FIX Mantis 4431 (starting_phase.)
+    $t =~ s/starting_phase\./get_starting_phase()./g;
      
     $t;
 

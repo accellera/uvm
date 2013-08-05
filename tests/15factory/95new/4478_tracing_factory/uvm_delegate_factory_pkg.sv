@@ -97,8 +97,8 @@ package uvm_delegate_factory_pkg;
 			return delegate.find_override_by_name(requested_type_name, full_inst_path);
 		endfunction
 
-		virtual function uvm_object_wrapper find_by_name            (string type_name);
-			return delegate.find_by_name(type_name);
+		virtual function uvm_object_wrapper find_wrapper_by_name            (string type_name);
+			return delegate.find_wrapper_by_name(type_name);
 		endfunction
 		virtual function void print (int all_types=1);
 			delegate.print(all_types);

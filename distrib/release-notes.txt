@@ -70,6 +70,17 @@ Mantis 4425: BUSY flag now cleared when register model is reset.
 
 Mantis 4430: default sequences are now killed during PHASE_ENDED
 
+(*) Mantis 4431: Enhance uvm_sequence::starting_phase
+The "starting_phase" variable is now data access protected within
+uvm_sequence_base, and the user must use the "get_starting_phase" and
+"set_starting_phase" accesors.  This prevents possible fatal errors
+and deadlocks caused when a starting_phase is changed after it has
+already been evaluated.  The bin/uvm11-to-uvm12.pl helper script can
+be used to perform a simple search-and-replace within the user code, 
+updating it to the new methods.
+
+Mantis 4432: Provide auto-object-to-phase in uvm_sequence_base
+
 Mantis 4434: Added get_objection_count to uvm_phase
 
 Mantis 4469: The ability to programatically traverse the phase graph

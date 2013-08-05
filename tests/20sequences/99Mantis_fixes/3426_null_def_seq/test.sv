@@ -39,15 +39,15 @@ module top;
   
         task body();
             string name;
-            if (starting_phase==null)
+            if (get_starting_phase()==null)
                 `uvm_fatal("STARTING_PHASE_NULL", "Internal error. Sequence's starting_phase member is not defined")
 
-                name = starting_phase.get_name();
+                name = get_starting_phase().get_name();
 
             def_seqs[name] = get_name();
-            `uvm_info(starting_phase.get_name(), "Starting myseq!!!", UVM_NONE)
+            `uvm_info(get_starting_phase().get_name(), "Starting myseq!!!", UVM_NONE)
             #10;
-            `uvm_info(starting_phase.get_name(), "Ending myseq!!!", UVM_NONE)
+            `uvm_info(get_starting_phase().get_name(), "Ending myseq!!!", UVM_NONE)
         endtask
     endclass
 
@@ -61,15 +61,15 @@ module top;
   
         task body();
             string name;
-            if (starting_phase==null)
+            if (get_starting_phase()==null)
                 `uvm_fatal("STARTING_PHASE_NULL", "Internal error. Sequence's starting_phase member is not defined")
 
-                name = starting_phase.get_name();
+                name = get_starting_phase().get_name();
 
             def_seqs[name] = get_name();
-            `uvm_info(starting_phase.get_name(), "Starting myseq2!!!", UVM_NONE)
+            `uvm_info(get_starting_phase().get_name(), "Starting myseq2!!!", UVM_NONE)
             #10;
-            `uvm_info(starting_phase.get_name(), "Ending myseq2!!!", UVM_NONE)
+            `uvm_info(get_starting_phase().get_name(), "Ending myseq2!!!", UVM_NONE)
         endtask
     endclass
 
