@@ -28,7 +28,7 @@
 // until the value is retrieved via a 'get'.  Once 'get' has been called, 
 // it is illegal to 'set' a new value.
 //
-// The UVM uses this policy to protect the ~starting_phase~ and ~automatic_objection~
+// The UVM uses this policy to protect the ~starting phase~ and ~automatic objection~
 // values in <uvm_sequence_base>.
 //
 

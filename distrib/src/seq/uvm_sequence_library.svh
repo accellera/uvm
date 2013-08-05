@@ -565,7 +565,8 @@ function void uvm_sequence_library::m_get_config();
 
   uvm_sequence_library_cfg cfg;
   string phase_name;
-
+  uvm_phase starting_phase = get_starting_phase();
+   
   if (starting_phase != null) begin
     phase_name = {starting_phase.get_name(),"_phase"};
   end
@@ -634,7 +635,8 @@ endfunction
 task uvm_sequence_library::body();
 
   uvm_object_wrapper wrap;
-
+  uvm_phase starting_phase = get_starting_phase();
+   
   if (m_sequencer == null) begin
     `uvm_fatal("SEQLIB/VIRT_SEQ", {"Sequence library 'm_sequencer' handle is null; ",
       " no current support for running as a virtual sequence."})
@@ -649,11 +651,7 @@ task uvm_sequence_library::body();
   if (do_not_randomize)
     m_get_config();
 
-  if (starting_phase != null)
-    starting_phase.raise_objection(this,
-       {"starting sequence library ",get_full_name()," (", get_type_name(),")"});
-
-
+  m_safe_raise_starting_phase({"starting sequence library ",get_full_name()," (", get_type_name(),")"});
 
   `uvm_info("SEQLIB/START",
      $sformatf("Starting sequence library %s in %s phase: %0d iterations in mode %s",
@@ -737,9 +735,7 @@ task uvm_sequence_library::body();
  
   `uvm_info("SEQLIB/DSTRB",$sformatf("%p",seqs_distrib),UVM_HIGH)
 
-  if (starting_phase != null)
-    starting_phase.drop_objection(this,
-       {"starting sequence library ",get_full_name()," (", get_type_name(),")"});
+  m_safe_drop_starting_phase({"starting sequence library ",get_full_name()," (", get_type_name(),")"});
 
 endtask
 

@@ -1442,7 +1442,7 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
   seq.print_sequence_info = 1;
   seq.set_sequencer(this);
   seq.reseed();
-  seq.starting_phase = phase;
+  seq.set_starting_phase(phase);
   
   if (!seq.do_not_randomize && !seq.randomize()) begin
     `uvm_warning("STRDEFSEQ", {"Randomization failed for default sequence '",
@@ -1602,7 +1602,7 @@ task uvm_sequencer_base::start_default_sequence();
     if (m_seq == null) begin
       uvm_report_fatal("STRDEFSEQ", "Null m_sequencer reference", UVM_NONE);
     end
-    m_seq.starting_phase = run_ph;
+    m_seq.set_starting_phase(run_ph);
     m_seq.print_sequence_info = 1;
     m_seq.set_parent_sequence(null);
     m_seq.set_sequencer(this);

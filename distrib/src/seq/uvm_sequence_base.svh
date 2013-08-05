@@ -479,38 +479,56 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   // Automatic Phase Objection DAP
   local uvm_get_to_lock_dap#(bit) m_automatic_phase_objection_dap;
+  // Starting Phase DAP
+  local uvm_get_to_lock_dap#(uvm_phase) m_starting_phase_dap;
 
   // Function- m_init_phase_daps
   // Either creates or renames DAPS
   function void m_init_phase_daps(bit create);
      string apo_name = $sformatf("%s.automatic_phase_objection", get_full_name());
+     string sp_name = $sformatf("%s.starting_phase", get_full_name());
 
      if (create) begin
         m_automatic_phase_objection_dap = uvm_get_to_lock_dap#(bit)::type_id::create(apo_name, get_sequencer());
+        m_starting_phase_dap = uvm_get_to_lock_dap#(uvm_phase)::type_id::create(sp_name, get_sequencer());
      end
      else begin
         m_automatic_phase_objection_dap.set_name(apo_name);
+        m_starting_phase_dap.set_name(sp_name);
      end
   endfunction : m_init_phase_daps
    
+  // Function: get_starting_phase
+  // Returns the 'starting phase'.
+  //
+  // If non-null, the starting phase specifies the phase in which this
+  // sequence was started.  The starting phase is set automatically when
+  // this sequence is started as the default sequence on a sequencer.
+  // See <uvm_sequencer_base::start_phase_sequence> for more information.
+  //
+  // Internally, the <uvm_sequence_base> uses a <uvm_get_to_lock_dap> to 
+  // protect the starting phase value from being modified after
+  // after the reference has been read.  Once the sequence has ended 
+  // its execution (either via natural termination, or being killed),
+  // then the starting phase value can be modified again.
+  //
+  function uvm_phase get_starting_phase();
+     return m_starting_phase_dap.get();
+  endfunction : get_starting_phase
 
-  // Variable: starting_phase
+  // Function: set_starting_phase
+  // Sets the 'starting phase'.
   //
-  // If non-null, specifies the phase in which this sequence was started.
-  // The ~starting_phase~ is set automatically when this sequence is 
-  // started as the default sequence. See 
-  // <uvm_sequencer_base::start_phase_sequence>.
+  // Internally, the <uvm_sequence_base> uses a <uvm_get_to_lock_dap> to 
+  // protect the starting phase value from being modified after
+  // after the reference has been read.  Once the sequence has ended 
+  // its execution (either via natural termination, or being killed),
+  // then the starting phase value can be modified again.
   //
-  //| virtual task user_sequence::body();
-  //|    if (starting_phase != null)
-  //|       starting_phase.raise_objection(this,"user_seq not finished");
-  //|    ...
-  //|    if (starting_phase != null)
-  //|       starting_phase.drop_objection(this,"user_seq finished");
-  //| endtask
-  //
-  uvm_phase starting_phase;
-
+  function void set_starting_phase(uvm_phase phase);
+     m_starting_phase_dap.set(phase);
+  endfunction : set_starting_phase
+   
   // Function: set_automatic_phase_objection
   // Sets the 'automatically object to starting phase' bit.
   //
@@ -576,6 +594,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // m_safe_raise_starting_phase
   function void m_safe_raise_starting_phase(string description = "",
                                             int count = 1);
+     uvm_phase starting_phase = get_starting_phase();
      if (starting_phase != null)
        starting_phase.raise_objection(this, description, count);
   endfunction : m_safe_raise_starting_phase
@@ -583,6 +602,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // m_safe_drop_starting_phase
   function void m_safe_drop_starting_phase(string description = "",
                                            int count = 1);
+     uvm_phase starting_phase = get_starting_phase();
      if (starting_phase != null)
        starting_phase.drop_objection(this, description, count);
   endfunction : m_safe_drop_starting_phase
