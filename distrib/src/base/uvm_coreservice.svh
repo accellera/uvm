@@ -35,7 +35,10 @@ typedef class `UVM_CORESERVICE_TYPE;
 // The singleton instance of uvm_coreservice_t provides a common point for all central 
 // uvm services such as factory, uvm_report_server, ...
 // The service class provides a static ::get which return an instance adhering to uvm_coreservice_t
-// the rest of the set<facility> get<facility> pairs provide access to the internal uvm services
+// the rest of the set_<facility> get_<facility> pairs provide access to the internal uvm services
+//
+// custom implementations of uvm_coreservice_t can be included in uvm_pkg::*. they cant reside in another package
+// and can selected via the define UVM_CORESERVICE_TYPE
 //----------------------------------------------------------------------
 
 virtual class uvm_coreservice_t;
@@ -87,7 +90,13 @@ virtual class uvm_coreservice_t;
 	endfunction
 endclass
 
-
+//----------------------------------------------------------------------
+// Class: uvm_default_coreservice_t
+//
+// uvm_default_coreservice_t provides a default implementation of the 
+// uvm_coreservice_t api. it instantiates uvm_default_factory, uvm_default_report_server, 
+// uvm_root
+//----------------------------------------------------------------------
 class uvm_default_coreservice_t extends uvm_coreservice_t;
 	local uvm_factory factory;
 
