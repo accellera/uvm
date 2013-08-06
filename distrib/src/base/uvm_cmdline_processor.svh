@@ -424,7 +424,7 @@ class uvm_cmdline_processor extends uvm_report_object;
     //| uvm_factory f = uvm_factory::get();
     //| uvm_config_db#(uvm_object_wrapper)::set(this,
     //|                                         "path.to.sequencer.main_phase",
-    //|                                         "main_phase",
+    //|                                         "default_sequence",
     //|                                         f.find_wrapper_by_name("seq_type"));
     //
      

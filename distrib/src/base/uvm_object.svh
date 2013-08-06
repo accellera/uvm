@@ -304,7 +304,7 @@ virtual class uvm_object extends uvm_void;
   //|   int f1;
   //|   virtual function void do_print (uvm_printer printer);
   //|     super.do_print(printer);
-  //|     printer.print_int("f1", f1, $bits(f1), DEC);
+  //|     printer.print_int("f1", f1, $bits(f1), UVM_DEC);
   //|     printer.print_object("data", data);
   //|   endfunction
   //
@@ -413,7 +413,7 @@ virtual class uvm_object extends uvm_void;
   //|   data_obj data;
   //|   int f1;
   //|   function void do_record (uvm_recorder recorder);
-  //|     recorder.record_field_int("f1", f1, $bits(f1), DEC);
+  //|     recorder.record_field("f1", f1, $bits(f1), UVM_DEC);
   //|     recorder.record_object("data", data);
   //|   endfunction
 
