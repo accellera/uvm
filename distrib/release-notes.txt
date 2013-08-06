@@ -61,6 +61,11 @@ Mantis 4160: uvm_comparer not using verbosity setting for print_msg
 
 Mantis 4181: transaction order unclear and cant be changed when bus/reg size differ
 
+Mantis 4306: Correction of documentation record_field_int ->
+record_field
+
+Mantis 4307: Correction of documentation DEC -> UVM_DEC
+
 Mantis 4366: uvm_sequence_library documentation missing from generate html
 
 Mantis 4378: Proper documentation of set_inst_override_by_name and 
