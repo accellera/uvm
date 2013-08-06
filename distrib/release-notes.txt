@@ -83,6 +83,8 @@ Mantis 4432: Provide auto-object-to-phase in uvm_sequence_base
 
 Mantis 4434: Added get_objection_count to uvm_phase
 
+Mantis 4439: Documented put_response() on the uvm_seq_pull_port
+
 Mantis 4469: The ability to programatically traverse the phase graph
 was added via get_adjacent_predecessor_nodes and
 get_adjacent_successor_nodes inside of uvm_phase
