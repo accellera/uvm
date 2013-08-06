@@ -1830,8 +1830,10 @@ endfunction
 function int uvm_phase::get_objection_count (uvm_object obj=null);
    if (phase_done != null)
      return phase_done.get_objection_count(obj);
-   else
-     m_report_null_objection(obj, "" , 0, "get_objection_count");
+   else begin
+      m_report_null_objection(obj, "" , 0, "get_objection_count");
+      return 0;
+   end
 endfunction : get_objection_count
 
 // sync
