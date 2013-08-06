@@ -1772,22 +1772,30 @@ function void uvm_phase::m_report_null_objection(uvm_object obj,
                                                int count,
                                                string action);
    string m_action;
+   string m_addon;
+   string m_obj_name = (obj == null) ? "uvm_top" : obj.get_full_name();
+   
    if ((action == "raise") || (action == "drop")) begin
       if (count != 1)
         m_action = $sformatf("%s %0d objections", action, count);
       else
-        m_action = $sformatf("%s 1 objection", action); 
+        m_action = $sformatf("%s an objection", action); 
    end
    else if (action == "get_objection_count") begin
-      m_action = "call get_objcetion_count";
+      m_action = "call get_objection_count";
+   end
+
+   if (this.get_phase_type() == UVM_PHASE_IMP) begin
+      m_addon = " (This is a UVM_PHASE_IMP, you have to query the schedule to find the UVM_PHASE_NODE)";
    end
    
    `uvm_fatal("UVM/PH/NULL_OBJECTION",
-              $sformatf("'%s' attempted to %s on '%s', however '%s' is not a task-based phase node!",
-                        obj.get_full_name(),
+              $sformatf("'%s' attempted to %s on '%s', however '%s' is not a task-based phase node! %s",
+                        m_obj_name,
                         m_action,
                         get_name(),
-                        get_name()))
+                        get_name(),
+                        m_addon))
 endfunction : m_report_null_objection
                         
    

@@ -3481,7 +3481,7 @@ endfunction \
     begin \
     `uvm_pack_sarrayN(VAR,8) \
     if (packer.use_metadata) \
-      `uvm_pack_intN(0,8) \
+      `uvm_pack_intN(8'b0,8) \
     end
 
 
