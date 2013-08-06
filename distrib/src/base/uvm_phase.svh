@@ -1462,12 +1462,20 @@ task uvm_phase::execute_phase();
   if (m_phase_type == UVM_PHASE_NODE) begin
 
     if(m_premature_end) begin
-      state_chg.m_jump_to = m_jump_phase;
+      if(m_jump_phase != null) begin 
+        state_chg.m_jump_to = m_jump_phase;
       
-      `uvm_info("PH_JUMP",
+        `uvm_info("PH_JUMP",
               $sformatf("phase %s (schedule %s, domain %s) is jumping to phase %s",
                get_name(), get_schedule_name(), get_domain_name(), m_jump_phase.get_name()),
               UVM_MEDIUM);
+      end
+      else begin
+        `uvm_info("PH_JUMP",
+              $sformatf("phase %s (schedule %s, domain %s) is ending prematurely",
+               get_name(), get_schedule_name(), get_domain_name()),
+              UVM_MEDIUM);
+      end
   
   
       #0; // LET ANY WAITERS ON READY_TO_END TO WAKE UP
@@ -1520,8 +1528,6 @@ task uvm_phase::execute_phase();
       clear_successors(UVM_PHASE_DONE,m_jump_phase);
     end
     m_jump_phase.clear_successors();
-    m_jump_fwd = 0;
-    m_jump_bkwd = 0;
   end
   else begin
 
@@ -1540,6 +1546,8 @@ task uvm_phase::execute_phase();
   if(m_jump_fwd || m_jump_bkwd) begin
     void'(m_phase_hopper.try_put(m_jump_phase));
     m_jump_phase = null;
+    m_jump_fwd = 0;
+    m_jump_bkwd = 0;
   end
   // If more successors, schedule them to run now
   else if (m_successors.size() == 0) begin
@@ -1809,7 +1817,7 @@ function void uvm_phase::set_jump_phase(uvm_phase phase) ;
   uvm_phase d;
 
   if ((m_state <  UVM_PHASE_STARTED) ||
-      (m_state >  UVM_PHASE_READY_TO_END) )
+      (m_state >  UVM_PHASE_ENDED) )
   begin
    `uvm_error("JMPPHIDL", { "Attempting to jump from phase \"",
       get_name(), "\" which is not currently active (current state is ",
