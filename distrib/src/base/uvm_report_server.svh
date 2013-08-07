@@ -44,10 +44,37 @@ class uvm_report_server extends uvm_object;
   bit max_quit_overridable = 1;
   local int m_severity_count[uvm_severity_type];
   protected int m_id_count[string];
-  // Probably needs documented.
+
+
+  // Variable: enable_report_id_count_summary
+  //
+  // A flag to enable report count summary for each ID
+  //
   bit enable_report_id_count_summary=1;
-  bit record_all_messages = 0; // consider runtime option
+
+
+  // Variable: record_all_messages
+  //
+  // A flag to force recording of all messages (add UVM_RM_RECORD action)
+  //
+  bit record_all_messages = 0;
+
+  
+  // Variable: show_verbosity
+  //
+  // A flag to include verbosity in the messages, e.g.
+  // 
+  // "UVM_INFO(UVM_MEDIUM) file.v(3) @ 60: reporter [ID0] Message 0"
+  //
   bit show_verbosity = 0;
+
+
+  // Variable: show_terminator
+  //
+  // A flag to add a terminator in the messages, e.g.
+  // 
+  // "UVM_INFO file.v(3) @ 60: reporter [ID0] Message 0 -UVM_INFO"
+  //
   bit show_terminator = 0;
 
 
@@ -538,9 +565,6 @@ class uvm_report_server extends uvm_object;
      
     f_display(file,
       "\n  ***********       IMPORTANT RELEASE NOTES         ************");
-       f_display(file, "\n  You are using a version of the UVM library that has been compiled");
-       f_display(file, "  with `UVM_NO_DEPRECATED undefined.");
-       f_display(file, "  See http://www.eda.org/svdb/view.php?id=3313 for more details.");
      
     m_relnotes_done = 1;
   endfunction
@@ -580,6 +604,9 @@ class uvm_report_server extends uvm_object;
 
 `ifndef UVM_NO_DEPRECATED
        report_relnotes_banner(file);
+       f_display(file, "\n  You are using a version of the UVM library that has been compiled");
+       f_display(file, "  with `UVM_NO_DEPRECATED undefined.");
+       f_display(file, "  See http://www.eda.org/svdb/view.php?id=3313 for more details.");
 `endif
 
 `ifndef UVM_OBJECT_MUST_HAVE_CONSTRUCTOR

@@ -501,7 +501,7 @@
 // |    ...
 // |    #20 `uvm_info_end(l_trace_messageA, "Ending A...", l_tr_handle0)
 // |    ...
-// |    #30 `uvm_link(l_tr_handle0, l_trace_messageB.tr_handle, "child", "TEST_L", UVM_LOW)
+// |    #30 `uvm_link(l_tr_handle0, l_trace_messageB.tr_handle, "parent_child", "TEST_L", UVM_LOW)
 // |    ...
 // |    #25 `uvm_info_end(l_trace_messageB, "Ending B...", l_tr_handle1)
 //
@@ -517,9 +517,7 @@
       l_link_message = uvm_link_message::get_link_message(); \
       l_link_message.set_report_message(`uvm_file, `uvm_line, UVM_INFO, ID, \
         "", VERBOSITY, CNTXT_NAME); \
-      l_link_message.tr_id0 = TR_ID0; \
-      l_link_message.tr_id1 = TR_ID1; \
-      l_link_message.relationship = REL; \
+      l_link_message.link(TR_ID0,TR_ID1,REL); \
       l_report_object.process_report_message(l_link_message); \
       l_link_message.free_link_message(l_link_message); \
     end \

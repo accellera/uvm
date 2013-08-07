@@ -217,7 +217,7 @@ class uvm_report_message extends uvm_object;
   uvm_report_object report_object;
  
 
-  // Variable: report_object
+  // Variable: report_handler
   //
   // This variable is the uvm_report_handler that is responsible for checking
   // whether the message is enabled, should be upgraded/downgraded, etc.
@@ -328,7 +328,7 @@ class uvm_report_message extends uvm_object;
   static local uvm_report_message report_messages[$];
 
   // Not documented.
-  static int m_ro_stream_handles[uvm_report_object];
+  static int m_ro_stream_handles[uvm_report_handler];
 
   // Not documented.
   uvm_report_message_element_container report_message_element_container;
@@ -347,8 +347,6 @@ class uvm_report_message extends uvm_object;
     tr_handle = -1;
     report_message_element_container = new();
     l_printer = new();
-    //l_printer.knobs.header = 0;
-    //l_printer.knobs.footer = 0;
     l_printer.knobs.prefix = " +";
   endfunction
 
@@ -496,20 +494,15 @@ class uvm_report_message extends uvm_object;
   // Not documented.
   virtual function int m_get_stream_id(uvm_recorder recorder);
 
-    uvm_report_object l_ro;
-
-    if(!m_ro_stream_handles.exists(report_object)) begin
+    if(!m_ro_stream_handles.exists(report_handler)) begin
       string l_scope, l_name;
-      if (report_object != uvm_root::get())
-        l_scope = report_object.get_full_name();
-      else
-        l_scope = "reporter";
+      l_scope = report_handler.get_name();
       l_name = report_object.get_name();
-      m_ro_stream_handles[report_object] = 
+      m_ro_stream_handles[report_handler] = 
         recorder.create_stream(l_name, "URM", l_scope);
     end
 
-    return m_ro_stream_handles[report_object];
+    return m_ro_stream_handles[report_handler];
 
   endfunction
 
@@ -833,13 +826,26 @@ class uvm_link_message extends uvm_report_message;
   // Variable: relationship
   //
   // This variable specifies the relationship between ~tr_id0~ and ~tr_id1~.
-  // The relationship is expressed:
+  // The relationship is expressed, e.g.:
   //
-  // |Add final real output, TBD due to feedback.
+  // "Linking id0: 12 and id1: 25 with relationship of parent_child."
   //
 
   string relationship;
 
+
+  // Function: link
+  //
+  // Link tr_handles (or transaction ids) ~id0~ and ~id1~ with relationship
+  // of ~rel~.
+  //
+
+  function void link(int id0, int id1, string rel);
+    tr_id0 = id0;
+    tr_id1 = id1;
+    relationship = rel;
+  endfunction
+    
 
   // Not documented.
   static local uvm_link_message link_messages[$];
@@ -890,8 +896,8 @@ class uvm_link_message extends uvm_report_message;
           tr_id1);
       else
         convert2string = 
-          $sformatf("Linking 'id0: %0d' as a '%s' of 'id1: %0d'", 
-          tr_id0, relationship, tr_id1);
+          $sformatf("Linking 'id0: %0d' and 'id1: %0d' with relationship of '%s'.", 
+          tr_id0, tr_id1, relationship);
     else
       convert2string = "Link attempted but the UVM_RM_RECORD action is not set.";
   endfunction
@@ -906,8 +912,6 @@ class uvm_link_message extends uvm_report_message;
   // Not documented.
   virtual function void record_message(uvm_recorder recorder);
   
-    int l_stream_id;
-
     if(recorder == null) 
       recorder = uvm_default_recorder;
 
