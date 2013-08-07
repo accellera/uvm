@@ -1813,6 +1813,13 @@ endtask
 // Implementation - Jumping
 //-------------------------
 
+// set_jump_phase
+// ----
+//
+// Specify a phase to transition to when phase is complete.
+// Note that this function is part of what jump() does; unlike jump()
+// it does not set the flag to terminate the phase prematurely.
+
 function void uvm_phase::set_jump_phase(uvm_phase phase) ;
   uvm_phase d;
 
@@ -1864,6 +1871,13 @@ function void uvm_phase::set_jump_phase(uvm_phase phase) ;
   
   m_jump_phase = d;
 endfunction
+
+// end_prematurely
+// ----
+//
+// Set a flag to cause the phase to end prematurely.  
+// Note that this function is part of what jump() does; unlike jump()
+// it does not set a jump_phase to go to after the phase ends.
 
 function void uvm_phase::end_prematurely() ;
    m_premature_end = 1 ;

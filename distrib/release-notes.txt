@@ -60,6 +60,9 @@ Mantis 4516: Proper prioritization of default sequences
 
 Mantis 4517: Added phase transition callbacks
 
+Mantis 4519: Added uvm_phase::set_jump_phase() and uvm_phase::end_prematurely(),
+which together implement uvm_phase::jump().
+
 (*) Mantis 4518: Classes extended from uvm_object now require an
 explicit constructor with a string-type name argument.  This
 functionality was optionally enabled in prior versions by defining the
