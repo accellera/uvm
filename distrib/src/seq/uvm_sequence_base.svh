@@ -418,7 +418,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   //
   // This function is a user-definable callback function that is called after
   // the sequence item has been randomized, and just before the item is sent
-  // to the driver.  This mehod should not be called directly by the user.
+  // to the driver.  This method should not be called directly by the user.
 
   virtual function void mid_do(uvm_sequence_item this_item);
     return;

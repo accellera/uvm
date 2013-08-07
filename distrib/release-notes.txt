@@ -132,3 +132,5 @@ Mantis 4643: uvm_dpi_get_next_arg_c doesnt fully adhere to 1800lrm
 Mantis 4666: uvm_config_db::set expects to be invoked in process context
 
 Mantis 4677: uvm_global_copy_map removed
+
+Mantis 4690: mehod -> method in uvm_sequence_base documentation
