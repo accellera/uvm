@@ -334,15 +334,26 @@ class uvm_phase extends uvm_object;
   extern function void get_adjacent_successor_nodes(ref uvm_phase succ[]);
 
   //-----------------------
-  // Group: Synchronization
+  // Group: Phase Done Objection
   //-----------------------
-
+  //
+  // Task-based phase nodes within the phasing graph provide a <uvm_objection>
+  // based interface for prolonging the execution of the phase.  All other
+  // phase types do not contain an objection, and will report a fatal error
+  // if the user attempts to ~raise~, ~drop~, or ~get_objection_count~.
+   
+  // Function- m_report_null_objection
+  // Simplifies the reporting of null objection errors
+  extern function void m_report_null_objection(uvm_object obj,
+                                               string description,
+                                               int count,
+                                               string action);
+   
   // Function: get_objection
   //
   // Return the <uvm_objection> that gates the termination of the phase.
   //
   function uvm_objection get_objection(); return this.phase_done; endfunction
-
 
   // Function: raise_objection
   //
@@ -378,9 +389,10 @@ class uvm_phase extends uvm_object;
   //
   extern virtual function int get_objection_count( uvm_object obj=null );
    
-  // Functions: sync and unsync
-  //
-  // Add soft sync relationships between nodes
+  //-----------------------
+  // Group: Synchronization
+  //-----------------------
+  // The functions 'sync' and 'unsync' add soft sync relationships between nodes
   //
   // Summary of usage:
   //| my_phase.sync(.target(domain)
@@ -757,12 +769,6 @@ function uvm_phase::new(string name="uvm_phase",
   super.new(name);
   m_phase_type = phase_type;
 
-  if (name == "run")
-    phase_done = uvm_test_done_objection::get();
-  else begin
-    phase_done = new({name,"_objection"});
-  end
-
   m_state = UVM_PHASE_DORMANT;
   m_run_count = 0;
   m_parent = parent;
@@ -838,10 +844,23 @@ function void uvm_phase::add(uvm_phase phase,
 
   // If we are inserting a new "leaf node"
   if (phase.get_phase_type() == UVM_PHASE_IMP) begin
+    uvm_task_phase tp;
     new_node = new(phase.get_name(),UVM_PHASE_NODE,this);
     new_node.m_imp = phase;
     begin_node = new_node;
     end_node = new_node;
+
+    // The phase_done objection is only required
+    // for task-based nodes
+    if ($cast(tp, phase)) begin
+       if (new_node.get_name() == "run") begin
+         new_node.phase_done = uvm_test_done_objection::get();
+       end
+       else begin
+         new_node.phase_done = uvm_objection::type_id::create({get_name(), "_objection"});
+       end
+    end
+
   end
   // We are inserting an existing schedule
   else begin
@@ -1416,7 +1435,7 @@ task uvm_phase::execute_phase();
                      if (m_phase_trace)
                        `UVM_PH_TRACE("PH/TRC/TIMEOUT", "PHASE TIMEOUT WATCHDOG EXPIRED", this, UVM_LOW)
                      foreach (m_executing_phases[p]) begin
-                        if (p.phase_done.get_objection_total() > 0) begin
+                        if ((p.phase_done != null) && (p.phase_done.get_objection_total() > 0)) begin
                            if (m_phase_trace)
                              `UVM_PH_TRACE("PH/TRC/TIMEOUT/OBJCTN", 
                                            $sformatf("Phase '%s' has outstanding objections:\n%s", p.get_full_name(), p.phase_done.convert2string()),
@@ -1433,7 +1452,7 @@ task uvm_phase::execute_phase();
                      if (m_phase_trace)
                        `UVM_PH_TRACE("PH/TRC/TIMEOUT", "PHASE TIMEOUT WATCHDOG EXPIRED", this, UVM_LOW)
                      foreach (m_executing_phases[p]) begin
-                        if (p.phase_done.get_objection_total() > 0) begin
+                        if ((p.phase_done != null) && (p.phase_done.get_objection_total() > 0)) begin
                            if (m_phase_trace)
                              `UVM_PH_TRACE("PH/TRC/TIMEOUT/OBJCTN", 
                                            $sformatf("Phase '%s' has outstanding objections:\n%s", p.get_full_name(), p.phase_done.convert2string()),
@@ -1512,7 +1531,8 @@ task uvm_phase::execute_phase();
       m_phase_proc = null;
     end
     #0; // LET ANY WAITERS WAKE UP
-    phase_done.clear();
+    if (phase_done != null)
+      phase_done.clear();
 
     if(m_jump_fwd) begin
       clear_successors(UVM_PHASE_DONE,m_jump_phase);
@@ -1556,7 +1576,8 @@ task uvm_phase::execute_phase();
     m_phase_proc = null;
   end
   #0; // LET ANY WAITERS WAKE UP
-  phase_done.clear();
+  if (phase_done != null)
+    phase_done.clear();
 
   end
 
@@ -1746,13 +1767,48 @@ endtask
 // Implementation - Synchronization
 //---------------------------------
 
+function void uvm_phase::m_report_null_objection(uvm_object obj,
+                                               string description,
+                                               int count,
+                                               string action);
+   string m_action;
+   string m_addon;
+   string m_obj_name = (obj == null) ? "uvm_top" : obj.get_full_name();
+   
+   if ((action == "raise") || (action == "drop")) begin
+      if (count != 1)
+        m_action = $sformatf("%s %0d objections", action, count);
+      else
+        m_action = $sformatf("%s an objection", action); 
+   end
+   else if (action == "get_objection_count") begin
+      m_action = "call get_objection_count";
+   end
+
+   if (this.get_phase_type() == UVM_PHASE_IMP) begin
+      m_addon = " (This is a UVM_PHASE_IMP, you have to query the schedule to find the UVM_PHASE_NODE)";
+   end
+   
+   `uvm_fatal("UVM/PH/NULL_OBJECTION",
+              $sformatf("'%s' attempted to %s on '%s', however '%s' is not a task-based phase node! %s",
+                        m_obj_name,
+                        m_action,
+                        get_name(),
+                        get_name(),
+                        m_addon))
+endfunction : m_report_null_objection
+                        
+   
 // raise_objection
 // ---------------
 
 function void uvm_phase::raise_objection (uvm_object obj, 
                                                    string description="",
                                                    int count=1);
-  phase_done.raise_objection(obj,description,count);
+  if (phase_done != null)
+    phase_done.raise_objection(obj,description,count);
+  else
+    m_report_null_objection(obj, description, count, "raise");
 endfunction
 
 
@@ -1762,14 +1818,22 @@ endfunction
 function void uvm_phase::drop_objection (uvm_object obj, 
                                                   string description="",
                                                   int count=1);
-  phase_done.drop_objection(obj,description,count);
+  if (phase_done != null)
+    phase_done.drop_objection(obj,description,count);
+  else
+    m_report_null_objection(obj, description, count, "drop");
 endfunction
 
 // get_objection_count
 // -------------------
 
 function int uvm_phase::get_objection_count (uvm_object obj=null);
-   return phase_done.get_objection_count(obj);
+   if (phase_done != null)
+     return phase_done.get_objection_count(obj);
+   else begin
+      m_report_null_objection(obj, "" , 0, "get_objection_count");
+      return 0;
+   end
 endfunction : get_objection_count
 
 // sync
@@ -1976,7 +2040,8 @@ endfunction
 function void uvm_phase::clear(uvm_phase_state state = UVM_PHASE_DORMANT);
   m_state = state;
   m_phase_proc = null;
-  phase_done.clear(this);
+  if (phase_done != null)
+    phase_done.clear(this);
 endfunction
 
 
@@ -2020,7 +2085,7 @@ task uvm_phase::wait_for_self_and_siblings_to_drop() ;
     need_to_check_all = 0 ; //if all are dropped, we won't need to do this again
 
     // wait for own objections to drop
-    if (phase_done.get_objection_total(top) != 0) begin 
+    if ((phase_done != null) && (phase_done.get_objection_total(top) != 0)) begin 
       m_state = UVM_PHASE_EXECUTING ;
       phase_done.wait_for(UVM_ALL_DROPPED, top);
       need_to_check_all = 1 ;
@@ -2029,7 +2094,7 @@ task uvm_phase::wait_for_self_and_siblings_to_drop() ;
     // now wait for siblings to drop
     foreach(siblings[sib]) begin
       sib.wait_for_state(UVM_PHASE_EXECUTING, UVM_GTE); // sibling must be at least executing 
-      if (sib.phase_done.get_objection_total(top) != 0) begin
+      if ((sib.phase_done != null) && (sib.phase_done.get_objection_total(top) != 0)) begin
         m_state = UVM_PHASE_EXECUTING ;
         sib.phase_done.wait_for(UVM_ALL_DROPPED, top); // sibling must drop any objection
         need_to_check_all = 1 ;
@@ -2097,7 +2162,8 @@ endtask
 // ---------------
 
 function void uvm_phase::m_terminate_phase();
-  phase_done.clear(this);
+  if (phase_done != null)
+    phase_done.clear(this);
 endfunction
 
 
@@ -2105,10 +2171,18 @@ endfunction
 // -----------------------
 
 function void uvm_phase::m_print_termination_state();
-  `uvm_info("PH_TERMSTATE",
-            $sformatf("phase %s outstanding objections = %0d",
-            get_name(), phase_done.get_objection_total(uvm_coreservice.get_root())),
-            UVM_DEBUG);
+  if (phase_done != null) begin
+    `uvm_info("PH_TERMSTATE",
+              $sformatf("phase %s outstanding objections = %0d",
+                        get_name(), phase_done.get_objection_total(uvm_coreservice.get_root())),
+              UVM_DEBUG)
+  end
+  else begin
+    `uvm_info("PH_TERMSTATE",
+              $sformatf("phase %s has no outstanding objections",
+                        get_name()),
+              UVM_DEBUG)
+  end
 endfunction
 
 
