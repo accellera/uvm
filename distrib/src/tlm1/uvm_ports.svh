@@ -57,7 +57,8 @@
 //
 // Type parameters
 //
-// T - The type of transaction to be communicated by the export
+// T - The type of transaction to be communicated by the export. The type T is not restricted
+// to class handles and may be a value type such as int,enum,struct or similar.
 //
 // Ports are connected to interface implementations directly via 
 // <uvm_*_imp #(T,IMP)> ports or indirectly via hierarchical connections
