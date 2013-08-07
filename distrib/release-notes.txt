@@ -73,3 +73,5 @@ Mantis 4542: uvm_test_done is now const to prevent changes
 
 Mantis 4548: cleanup dpi coding issues
 
+Mantis 4566: uvm_comparer now detects any queue size mismatch when comparer.show_max != 1
+
