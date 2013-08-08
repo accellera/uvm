@@ -35,13 +35,15 @@ class myseq extends uvm_sequence;
   `uvm_object_utils(myseq)
   
   task body;
+    uvm_phase p;
+    p = get_starting_phase();
     start_cnt++;
     `uvm_info("INBODY", 
-	      {get_starting_phase().get_name()," Starting myseq!!!"}, 
+	      {p.get_name()," Starting myseq!!!"}, 
 	      UVM_NONE)
     #10;
     `uvm_info("INBODY", 
-	      {get_starting_phase().get_name()," Ending myseq!!!"}, 
+	      {p.get_name()," Ending myseq!!!"}, 
 	      UVM_NONE)
     end_cnt++;
   endtask
