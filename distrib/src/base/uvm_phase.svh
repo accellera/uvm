@@ -4,6 +4,7 @@
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010-2013 Synopsys, Inc.
 //   Copyright 2013      NVIDIA Corporation
+//   Copyright 2013      Intel Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -838,9 +839,17 @@ function void uvm_phase::add(uvm_phase phase,
     `uvm_fatal("PH_BAD_ADD",
        "cannot specify both 'with' and 'before/after' phase relationships")
 
-  if (before_phase == this || after_phase == m_end_node || with_phase == m_end_node)
+  if (before_phase == this)
     `uvm_fatal("PH_BAD_ADD",
-       "cannot add before begin node, after end node, or with end nodes")
+               "cannot add before begin node")
+
+  if ((after_phase != null) && (after_phase == m_end_node))
+    `uvm_fatal("PH_BAD_ADD",
+               "cannot add after end node")
+
+  if (with_phase == m_end_node)
+    `uvm_fatal("PH_BAD_ADD",
+               "cannot add with end nodes")
 
   // If we are inserting a new "leaf node"
   if (phase.get_phase_type() == UVM_PHASE_IMP) begin
@@ -953,6 +962,21 @@ function void uvm_phase::add(uvm_phase phase,
     end
   end
 
+  // if any of my predecessors' successors
+  // have begun to execute, consider me skipped
+  // (ie. mark as 'DONE')
+  begin
+     uvm_phase sch_or_node = (new_node == null) ? phase : new_node;
+     foreach (sch_or_node.m_predecessors[pred]) begin
+        foreach (pred.m_successors[succ]) begin
+           if (succ.m_state != UVM_PHASE_DORMANT) begin
+              sch_or_node.m_state = UVM_PHASE_DONE;
+              break;
+           end
+        end
+     end
+  end
+   
 endfunction
 
 
