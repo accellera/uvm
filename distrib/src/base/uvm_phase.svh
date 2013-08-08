@@ -1789,7 +1789,7 @@ function void uvm_phase::m_report_null_objection(uvm_object obj,
       m_addon = " (This is a UVM_PHASE_IMP, you have to query the schedule to find the UVM_PHASE_NODE)";
    end
    
-   `uvm_fatal("UVM/PH/NULL_OBJECTION",
+   `uvm_error("UVM/PH/NULL_OBJECTION",
               $sformatf("'%s' attempted to %s on '%s', however '%s' is not a task-based phase node! %s",
                         m_obj_name,
                         m_action,
