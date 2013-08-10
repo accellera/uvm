@@ -186,8 +186,6 @@
    end
 
 
-`ifndef UVM_NO_DEPRECATED
-
 
 // MACRO- `uvm_info_context
 //
@@ -248,8 +246,6 @@
        RO.uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", 1); \
    end
 
-
-`endif
 
 
 // Not implemented.  Used to collapse macros defined below.
