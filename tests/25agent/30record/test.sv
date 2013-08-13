@@ -41,12 +41,9 @@ module test;
 
       agent[0] = simple_agent::type_id::create("agent[0]", this);
       agent[1] = simple_agent::type_id::create("agent[1]", this);
-      agent[2] = simple_agent::type_id::create("agent[2]", this);
 
       uvm_config_db#(uvm_bitstream_t)::set(this, "agent*", "recording_detail", 1);
-      uvm_config_db#(uvm_bitstream_t)::set(this, "agent[1].*", "auto_item_recording", 0);
-      uvm_config_db#(uvm_bitstream_t)::set(this, "agent[2].*", "auto_item_recording", 0);
-      set_inst_override_by_type("agent[2].driver", simple_driver::type_id::get(),
+      set_inst_override_by_type("agent[1].driver", simple_driver::type_id::get(),
                                 piped_driver::type_id::get());
 
       // Stagger the sequences to avoid race conditions in the DB
@@ -54,10 +51,16 @@ module test;
                                               simple_triple_do::type_id::get());
       uvm_config_db#(uvm_object_wrapper)::set(this, "agent[1].sequencer.main_phase", "default_sequence",
                                               simple_triple_do::type_id::get());
-      uvm_config_db#(uvm_object_wrapper)::set(this, "agent[2].sequencer.post_main_phase", "default_sequence",
-                                              simple_triple_do::type_id::get());
 
     endfunction
+
+    // Make sure all pipelined transactions complete
+    task shutdown_phase(uvm_phase phase);
+      super.shutdown_phase(phase);
+      phase.raise_objection(this);
+      #100;
+      phase.drop_objection(this);
+    endtask
 
     function void report_phase(uvm_phase phase);
       uvm_report_server svr;

@@ -2697,7 +2697,6 @@ function void uvm_component::end_tr (uvm_transaction tr,
       do_end_tr(tr, tr_h); // callback
 
       m_tr_h.delete(tr);
-
       if (recordr.check_handle_kind("Transaction", tr_h) == 1) begin  
 
         recordr.tr_handle = tr_h;

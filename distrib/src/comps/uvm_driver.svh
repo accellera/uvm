@@ -2,7 +2,7 @@
 //------------------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc. 
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2013 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -24,6 +24,68 @@ typedef class uvm_sequence_item;
 
 //------------------------------------------------------------------------------
 //
+// CLASS: uvm_driver_base
+//
+// The base class for drivers components.
+//
+//------------------------------------------------------------------------------
+
+class uvm_driver_base extends uvm_component;
+
+
+  local bit m_auto_item_recording;
+
+  // Function: new
+  //
+  // Creates and initializes an instance of this class using the normal
+  // constructor arguments for <uvm_component>: ~name~ is the name of the
+  // instance, and ~parent~ is the handle to the hierarchical parent, if any.
+
+  function new (string name, uvm_component parent);
+    super.new(name, parent);
+    `ifdef UVM_DISABLE_AUTO_ITEM_RECORDING
+    m_auto_item_recording = 0;
+    `else
+    m_auto_item_recording = 1;
+    `endif
+  endfunction // new
+
+  virtual function string get_type_name ();
+    return type_name;
+  endfunction
+
+  // Function: disable_auto_item_recording
+  //
+  // By default, item recording is performed automatically when
+  // seq_item_port.get_next_item() and seq_item_port.finish_item() are called.
+  // However, this works only for simple, in-order, blocking transaction
+  // execution. For pipelined and out-of-order transaction execution, the
+  // driver must turn off this automatic recording and call
+  // uvm_transaction::accept_tr, uvm_transaction::begin_tr
+  // and uvm_transaction::end_tr explicitly at appropriate points in time.
+  //
+  // Should be called in the constructor.
+  // Once disabled, automatic recording cannot be re-enabled.
+  //
+  // For backward-compatibility, automatic item recording can be globally
+  // turned off at compile time by defining UVM_DISABLE_AUTO_ITEM_RECORDING
+
+  virtual function void disable_auto_item_recording();
+    m_auto_item_recording = 0;
+  endfunction
+
+  // Function: is_auto_item_recording_enabled
+  //
+  // Return TRUE if automatic item recording is enabled for this instance.
+
+  virtual function bit is_auto_item_recording_enabled();
+    return m_auto_item_recording;
+  endfunction
+
+endclass
+
+//------------------------------------------------------------------------------
+//
 // CLASS: uvm_driver #(REQ,RSP)
 //
 // The base class for drivers that initiate requests for new transactions via
@@ -42,7 +104,7 @@ typedef class uvm_sequence_item;
 //------------------------------------------------------------------------------
 
 class uvm_driver #(type REQ=uvm_sequence_item,
-                   type RSP=REQ) extends uvm_component;
+                   type RSP=REQ) extends uvm_driver_base;
 
 
   // Port: seq_item_port
@@ -79,10 +141,6 @@ class uvm_driver #(type REQ=uvm_sequence_item,
   endfunction // new
 
   const static string type_name = "uvm_driver #(REQ,RSP)";
-
-  virtual function string get_type_name ();
-    return type_name;
-  endfunction
 
 endclass
 

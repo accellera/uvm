@@ -913,10 +913,6 @@ class uvm_sequence_base extends uvm_sequence_item;
     
     sequencer.wait_for_grant(this, set_priority);
 
-    `ifndef UVM_DISABLE_AUTO_ITEM_RECORDING
-      void'(sequencer.begin_child_tr(item, m_tr_handle, item.get_root_sequence_name()));
-    `endif
-
     pre_do(1);
 
   endtask  
@@ -944,9 +940,6 @@ class uvm_sequence_base extends uvm_sequence_item;
     mid_do(item);
     sequencer.send_request(this, item);
     sequencer.wait_for_item_done(this, -1);
-    `ifndef UVM_DISABLE_AUTO_ITEM_RECORDING
-    sequencer.end_tr(item);
-    `endif
     post_do(item);
 
   endtask

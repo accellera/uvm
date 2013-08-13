@@ -546,14 +546,53 @@ endclass
 // imp definitions
 //----------------------------------------------------------------------
 `define UVM_SEQ_ITEM_PULL_IMP(imp, REQ, RSP, req_arg, rsp_arg) \
-  task get_next_item(output REQ req_arg); imp.get_next_item(req_arg); endtask \
-  task try_next_item(output REQ req_arg); imp.try_next_item(req_arg); endtask \
-  function void item_done(input RSP rsp_arg = null); imp.item_done(rsp_arg); endfunction \
+  local uvm_sequence_item m_prev_req; \
+  local function void m_begin_tr(uvm_sequence_item req_arg); \
+    uvm_driver_base drv; \
+    if ($cast(drv, get_parent()) && drv != null) begin \
+      uvm_sequencer_base sqr = req_arg.get_sequencer(); \
+      if (drv.is_auto_item_recording_enabled() && sqr != null) begin \
+        uvm_sequence_base pseq = req_arg.get_parent_sequence(); \
+        sqr.begin_child_tr(req_arg, \
+                           (pseq == null) ? 0 : pseq.m_tr_handle, \
+                           req_arg.get_root_sequence_name()); \
+        m_prev_req = req_arg; \
+      end \
+    end \
+  endfunction \
+  local function void m_end_tr(); \
+    uvm_driver_base drv; \
+    if (m_prev_req != null && $cast(drv, get_parent()) && drv != null) begin \
+      uvm_sequencer_base sqr = m_prev_req.get_sequencer(); \
+      if (drv.is_auto_item_recording_enabled() && sqr != null) begin \
+        sqr.end_tr(m_prev_req); \
+      end \
+    end \
+  endfunction \
+  task get_next_item(output REQ req_arg); \
+    imp.get_next_item(req_arg); \
+    m_begin_tr(req_arg); \
+  endtask \
+  task try_next_item(output REQ req_arg); \
+    imp.try_next_item(req_arg); \
+    if (req_arg != null) m_begin_tr(req_arg); \
+  endtask \
+  function void item_done(input RSP rsp_arg = null); \
+    imp.item_done(rsp_arg); \
+    m_end_tr(); \
+  endfunction \
   task wait_for_sequences(); imp.wait_for_sequences(); endtask \
   function bit has_do_available(); return imp.has_do_available(); endfunction \
   function void put_response(input RSP rsp_arg); imp.put_response(rsp_arg); endfunction \
-  task get(output REQ req_arg); imp.get(req_arg); endtask \
-  task peek(output REQ req_arg); imp.peek(req_arg); endtask \
+  task get(output REQ req_arg); \
+    imp.get(req_arg); \
+    m_begin_tr(req_arg); \
+    m_end_tr(); \
+  endtask \
+  task peek(output REQ req_arg); \
+    imp.peek(req_arg); \
+    m_begin_tr(req_arg); \
+  endtask \
   task put(input RSP rsp_arg); imp.put(rsp_arg); endtask
 
 // primitive interfaces
