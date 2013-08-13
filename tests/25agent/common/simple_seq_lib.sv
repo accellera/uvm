@@ -32,12 +32,13 @@ class simple_seq_do extends uvm_sequence #(simple_item);
 
   function new(string name="simple_seq_do");
     super.new(name);
+    set_automatic_phase_objection(1);
   endfunction
   
-  `uvm_object_utils(simple_seq_do)    
+  `uvm_object_utils(simple_seq_do)
 
   virtual task body();
-    `uvm_info(get_name(), $sformatf("In body() of %s", get_name()),1000)
+    `uvm_info(get_name(), $sformatf("In body() of %s", get_name()),UVM_MEDIUM)
     `uvm_do(req)
   endtask
   
@@ -54,12 +55,13 @@ class simple_seq_do_with extends uvm_sequence #(simple_item);
 
   function new(string name="simple_seq_do_with");
     super.new(name);
+    set_automatic_phase_objection(1);
   endfunction
   
   `uvm_object_utils(simple_seq_do_with)
 
   virtual task body();
-    `uvm_info(get_name(), $sformatf("In body() of %s", get_name()),1000)
+    `uvm_info(get_name(), $sformatf("In body() of %s", get_name()),UVM_MEDIUM)
     `uvm_do_with(req, { req.addr == 16'h0123; req.data == 16'h0456; } )
   endtask
   
@@ -76,6 +78,7 @@ class simple_seq_do_with_vars extends uvm_sequence #(simple_item);
 
   function new(string name="simple_seq_do_with_vars");
     super.new(name);
+    set_automatic_phase_objection(1);
   endfunction
   
   `uvm_object_utils(simple_seq_do_with_vars)    
@@ -86,7 +89,7 @@ class simple_seq_do_with_vars extends uvm_sequence #(simple_item);
     constraint c2 { start_data < 16'h0100; }
 
   virtual task body();
-    `uvm_info(get_name(), $sformatf("In body() of %s", get_name()),1000)
+    `uvm_info(get_name(), $sformatf("In body() of %s", get_name()),UVM_MEDIUM)
     `uvm_do_with(req, { req.addr == start_addr; req.data == start_data; } )
   endtask
   
@@ -103,6 +106,7 @@ class simple_seq_sub_seqs extends uvm_sequence #(simple_item);
 
   function new(string name="simple_seq_sub_seqs");
     super.new(name);
+    set_automatic_phase_objection(1);
   endfunction
   
   `uvm_object_utils(simple_seq_sub_seqs)    
@@ -112,7 +116,7 @@ class simple_seq_sub_seqs extends uvm_sequence #(simple_item);
   simple_seq_do_with_vars seq_do_with_vars;
 
   virtual task body();
-    `uvm_info(get_name(), $sformatf("In body() of %s", get_name()),1000)
+    `uvm_info(get_name(), $sformatf("In body() of %s", get_name()),UVM_MEDIUM)
     #100;
     `uvm_do(seq_do)
     #100;
@@ -122,6 +126,31 @@ class simple_seq_sub_seqs extends uvm_sequence #(simple_item);
   endtask
   
 endclass : simple_seq_sub_seqs
+
+
+//------------------------------------------------------------------------------
+//
+// SEQUENCE: simple_triple_do
+//
+//------------------------------------------------------------------------------
+
+class simple_triple_do extends uvm_sequence #(simple_item);
+
+  function new(string name="simple_triple_do");
+    super.new(name);
+    set_automatic_phase_objection(1);
+  endfunction
+  
+  `uvm_object_utils(simple_triple_do)
+
+  virtual task body();
+    `uvm_info(get_name(), $sformatf("In body() of %s", get_name()),UVM_MEDIUM)
+    repeat (3) begin
+      `uvm_do(req)
+    end
+  endtask
+  
+endclass : simple_triple_do
 
 
 `endif // SIMPLE_SEQ_LIB_SV

@@ -51,9 +51,9 @@ class simple_agent extends uvm_agent;
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
 
-    sequencer = simple_sequencer::type_id::create("sequencer", null);
-    driver    = simple_driver::type_id::create("driver", null);
-    // monitor    = simple_monitor::type_id::create("monitor", null);
+    sequencer = simple_sequencer::type_id::create("sequencer", this);
+    driver    = simple_driver::type_id::create("driver", this);
+    // monitor    = simple_monitor::type_id::create("monitor", this);
   endfunction
   
   function void connect_phase(uvm_phase phase);

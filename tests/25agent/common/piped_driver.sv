@@ -1,7 +1,5 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2010 Mentor Graphics Corporation
-//   Copyright 2007-2011 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2013 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -19,22 +17,22 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef SIMPLE_DRIVER_SV
-`define SIMPLE_DRIVER_SV
+`ifndef PIPED_DRIVER_SV
+`define PIPED_DRIVER_SV
 
 
 //------------------------------------------------------------------------------
 //
-// CLASS: simple_driver
+// CLASS: piped_driver
 //
 // declaration
 //------------------------------------------------------------------------------
 
 
-class simple_driver extends uvm_driver #(simple_item);
+class piped_driver extends simple_driver;
 
   // Provide implementations of virtual methods such as get_type_name and create
-  `uvm_component_utils(simple_driver)
+  `uvm_component_utils(piped_driver)
 
   // Constructor
   function new (string name, uvm_component parent);
@@ -44,14 +42,21 @@ class simple_driver extends uvm_driver #(simple_item);
   task run_phase(uvm_phase phase);
     while(1) begin
       seq_item_port.get_next_item(req);
-      `uvm_info("Driver", "Printing received item :", UVM_MEDIUM)
+      `uvm_info("Driver", "Received item :", UVM_MEDIUM)
       req.print();
-      #10;
+      #5;
+      fork
+        begin
+          #2;
+          `uvm_info("Driver", "Completed item :", UVM_MEDIUM)
+          req.print();
+        end
+      join_none
       seq_item_port.item_done();
     end
   endtask: run_phase
 
-endclass : simple_driver
+endclass : piped_driver
 
 
-`endif // SIMPLE_DRIVER_SV
+`endif // PIPED_DRIVER_SV
