@@ -34,7 +34,7 @@ class simple_seq_do extends uvm_sequence #(simple_item);
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(simple_seq_do, simple_sequencer)    
+  `uvm_object_utils(simple_seq_do)    
 
   virtual task body();
     `uvm_info(get_name(), $sformatf("In body() of %s", get_name()),1000)
@@ -56,7 +56,7 @@ class simple_seq_do_with extends uvm_sequence #(simple_item);
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(simple_seq_do_with, simple_sequencer)
+  `uvm_object_utils(simple_seq_do_with)
 
   virtual task body();
     `uvm_info(get_name(), $sformatf("In body() of %s", get_name()),1000)
@@ -78,7 +78,7 @@ class simple_seq_do_with_vars extends uvm_sequence #(simple_item);
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(simple_seq_do_with_vars, simple_sequencer)    
+  `uvm_object_utils(simple_seq_do_with_vars)    
 
   rand int unsigned start_addr;
     constraint c1 { start_addr < 16'h0200; }
@@ -105,7 +105,7 @@ class simple_seq_sub_seqs extends uvm_sequence #(simple_item);
     super.new(name);
   endfunction
   
-  `uvm_sequence_utils(simple_seq_sub_seqs, simple_sequencer)    
+  `uvm_object_utils(simple_seq_sub_seqs)    
 
   simple_seq_do seq_do;
   simple_seq_do_with seq_do_with;
