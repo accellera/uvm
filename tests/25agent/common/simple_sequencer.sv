@@ -32,14 +32,12 @@
 
 class simple_sequencer extends uvm_sequencer #(simple_item);
 
+  `uvm_component_utils(simple_sequencer)
+
   // Constructor
   function new (string name, uvm_component parent);
     super.new(name, parent);
-    `uvm_update_sequence_lib_and_item(simple_item)
   endfunction : new
-
-  // Provide implementations of virtual methods such as get_type_name and create
-  `uvm_sequencer_utils(simple_sequencer)
 
 endclass : simple_sequencer
 

@@ -43,10 +43,10 @@ class simple_driver extends uvm_driver #(simple_item);
 
   task run_phase(uvm_phase phase);
     while(1) begin
-      #10;
       seq_item_port.get_next_item(req);
       `uvm_info("Driver", "Printing received item :", UVM_MEDIUM)
       req.print();
+      #10;
       seq_item_port.item_done();
     end
   endtask: run_phase

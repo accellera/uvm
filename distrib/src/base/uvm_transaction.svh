@@ -47,14 +47,15 @@ typedef class uvm_component;
 // corresponding event (<begin_event> and <end_event>, and, if enabled,
 // record the transaction contents to a vendor-specific transaction database.
 //
-// Note that start_item/finish_item (or `uvm_do* macro) executed from a
-// <uvm_sequence #(REQ,RSP)> will automatically trigger
-// the begin_event and end_events via calls to begin_tr and end_tr. While
-// convenient, it is generally the responsibility of drivers to mark a
-// transaction's progress during execution.  To allow the driver to control
-// sequence item timestamps, events, and recording, you must add
-// +define+UVM_DISABLE_AUTO_ITEM_RECORDING when compiling the UVM package. 
-// Alternatively, users may use the transaction's event pool, <events>,
+// Note that get_next_item/item_done when called on a uvm_seq_item_pull_port
+// will automatically trigger the begin_event and end_events via calls to begin_tr and end_tr.
+// While convenient, it is generally the responsibility of drivers to mark a
+// transaction's progress during execution.  To allow the driver or layering sequence
+// to control sequence item timestamps, events, and recording, you must call
+// <uvm_seq_item_pull_port #(REQ,RSP)::disable_auto_item_recording> at the begining
+// of the run_phase() method.
+//
+// Users may also use the transaction's event pool, <events>,
 // to define custom events for the driver to trigger and the sequences to wait on. Any
 // in-between events such as marking the begining of the address and data
 // phases of transaction execution could be implemented via the

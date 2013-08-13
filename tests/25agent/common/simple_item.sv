@@ -29,6 +29,8 @@
 // declaration
 //------------------------------------------------------------------------------
 
+typedef class simple_sequencer;
+
 class simple_item extends uvm_sequence_item;
 
   rand int unsigned addr;
@@ -40,6 +42,7 @@ class simple_item extends uvm_sequence_item;
     `uvm_field_int(addr, UVM_ALL_ON)
     `uvm_field_int(data, UVM_ALL_ON)
   `uvm_object_utils_end
+  `uvm_declare_p_sequencer(simple_sequencer)
 
   // new - constructor
   function new (string name = "simple_item");
