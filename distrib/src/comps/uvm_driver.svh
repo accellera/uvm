@@ -70,7 +70,7 @@ class uvm_driver_base extends uvm_component;
   // For backward-compatibility, automatic item recording can be globally
   // turned off at compile time by defining UVM_DISABLE_AUTO_ITEM_RECORDING
 
-  virtual function void disable_auto_item_recording();
+  protected virtual function void disable_auto_item_recording();
     m_auto_item_recording = 0;
   endfunction
 
