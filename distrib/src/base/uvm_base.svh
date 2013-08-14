@@ -25,7 +25,6 @@
 `define UVM_BASE_SVH
 
   typedef class uvm_cmdline_processor;
-  typedef class uvm_driver_base;
 
 
   `include "base/uvm_coreservice.svh"

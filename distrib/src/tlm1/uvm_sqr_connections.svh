@@ -41,6 +41,63 @@
 
 class uvm_seq_item_pull_port #(type REQ=int, type RSP=REQ)
   extends uvm_port_base #(uvm_sqr_if_base #(REQ, RSP));
+
+`ifdef UVM_DISABLE_AUTO_ITEM_RECORDING
+  local bit m_auto_item_recording = 0;
+`else
+  local bit m_auto_item_recording = 1;
+`endif
+  local uvm_sequence_item m_prev_req = null;
+
+
+  // Function: disable_auto_item_recording
+  //
+  // By default, item recording is performed automatically when
+  // get_next_item() and finish_item() are called.
+  // However, this works only for simple, in-order, blocking transaction
+  // execution. For pipelined and out-of-order transaction execution, the
+  // consumer must turn off this automatic recording and call
+  // uvm_transaction::accept_tr, uvm_transaction::begin_tr
+  // and uvm_transaction::end_tr explicitly at appropriate points in time.
+  //
+  // Should be called in the consumer's constructor, after the sequencer port has been instantiated.
+  // Once disabled, automatic recording cannot be re-enabled.
+  //
+  // For backward-compatibility, automatic item recording can be globally
+  // turned off at compile time by defining UVM_DISABLE_AUTO_ITEM_RECORDING
+
+  virtual function void disable_auto_item_recording();
+    m_auto_item_recording = 0;
+  endfunction
+
+  // Function: is_auto_item_recording_enabled
+  //
+  // Return TRUE if automatic item recording is enabled for this port instance.
+
+  virtual function bit is_auto_item_recording_enabled();
+    return m_auto_item_recording;
+  endfunction
+
+  local function void m_begin_tr(uvm_sequence_item req);
+    uvm_sequencer_base sqr = req.get_sequencer();
+    if (m_auto_item_recording && sqr != null) begin
+      uvm_sequence_base pseq = req.get_parent_sequence();
+      sqr.begin_child_tr(req, (pseq == null) ? 0 : pseq.get_tr_handle(),
+                         req.get_root_sequence_name());
+      m_prev_req = req;
+    end
+  endfunction
+  
+  local function void m_end_tr();
+    if (m_prev_req != null) begin
+      uvm_sequencer_base sqr = m_prev_req.get_sequencer();
+      if (m_auto_item_recording && sqr != null && m_prev_req != null) begin
+        sqr.end_tr(m_prev_req);
+        m_prev_req = null;
+      end
+    end
+  endfunction
+
   `UVM_SEQ_PORT(`UVM_SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_port")
   `UVM_SEQ_ITEM_PULL_IMP(this.m_if, REQ, RSP, t, t)
 
@@ -76,6 +133,13 @@ endclass
 
 class uvm_seq_item_pull_imp #(type REQ=int, type RSP=REQ, type IMP=int)
   extends uvm_port_base #(uvm_sqr_if_base #(REQ, RSP));
+
+  local function void m_begin_tr(uvm_sequence_item req);
+  endfunction
+  
+  local function void m_end_tr();
+  endfunction
+
    // Function: new
   `UVM_IMP_COMMON(`UVM_SEQ_ITEM_PULL_MASK, "uvm_seq_item_pull_imp",IMP)
   `UVM_SEQ_ITEM_PULL_IMP(m_imp, REQ, RSP, t, t)

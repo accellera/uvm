@@ -546,29 +546,6 @@ endclass
 // imp definitions
 //----------------------------------------------------------------------
 `define UVM_SEQ_ITEM_PULL_IMP(imp, REQ, RSP, req_arg, rsp_arg) \
-  local uvm_sequence_item m_prev_req; \
-  local function void m_begin_tr(uvm_sequence_item req_arg); \
-    uvm_driver_base drv; \
-    if ($cast(drv, get_parent()) && drv != null) begin \
-      uvm_sequencer_base sqr = req_arg.get_sequencer(); \
-      if (drv.is_auto_item_recording_enabled() && sqr != null) begin \
-        uvm_sequence_base pseq = req_arg.get_parent_sequence(); \
-        sqr.begin_child_tr(req_arg, \
-                           (pseq == null) ? 0 : pseq.m_tr_handle, \
-                           req_arg.get_root_sequence_name()); \
-        m_prev_req = req_arg; \
-      end \
-    end \
-  endfunction \
-  local function void m_end_tr(); \
-    uvm_driver_base drv; \
-    if (m_prev_req != null && $cast(drv, get_parent()) && drv != null) begin \
-      uvm_sequencer_base sqr = m_prev_req.get_sequencer(); \
-      if (drv.is_auto_item_recording_enabled() && sqr != null) begin \
-        sqr.end_tr(m_prev_req); \
-      end \
-    end \
-  endfunction \
   task get_next_item(output REQ req_arg); \
     imp.get_next_item(req_arg); \
     m_begin_tr(req_arg); \

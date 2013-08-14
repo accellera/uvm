@@ -211,6 +211,17 @@ class uvm_sequence_base extends uvm_sequence_item;
   endtask
 
 
+  // Function: get_tr_handle
+  //
+  // Returns the integral recording transaction handle for this sequence.
+  // Can be used to associate sub-sequences and sequence items as
+  // child transactions when calling <uvm_component::begin_child_tr>.
+
+  function int get_tr_handle();
+    return m_tr_handle;
+  endfunction
+
+
   //--------------------------
   // Group: Sequence Execution
   //--------------------------

@@ -37,7 +37,7 @@ class piped_driver extends simple_driver;
   // Constructor
   function new (string name, uvm_component parent);
     super.new(name, parent);
-    disable_auto_item_recording();
+    seq_item_port.disable_auto_item_recording();
   endfunction : new
 
   task run_phase(uvm_phase phase);
