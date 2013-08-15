@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010-2013 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -312,17 +313,47 @@ class uvm_phase extends uvm_object;
   //
   extern function string get_domain_name();
 
+  // Function: get_adjacent_predecessor_nodes
+  //
+  // Provides an array of nodes which are predecessors to
+  // ~this~ phase node.  A 'predecessor node' is defined
+  // as any phase node which lies prior to ~this~ node in
+  // the phase graph, with no nodes between ~this~ node and
+  // the predecessor node.
+  //
+  extern function void get_adjacent_predecessor_nodes(ref uvm_phase pred[]);
+
+  // Function: get_adjacent_successor_nodes
+  //
+  // Provides an array of nodes which are successors to
+  // ~this~ phase node.  A 'successors node' is defined
+  // as any phase node which liest after ~this~ node in
+  // the phase graph, with no nodes between ~this~ node
+  // and the successor node.
+  //
+  extern function void get_adjacent_successor_nodes(ref uvm_phase succ[]);
 
   //-----------------------
-  // Group: Synchronization
+  // Group: Phase Done Objection
   //-----------------------
-
+  //
+  // Task-based phase nodes within the phasing graph provide a <uvm_objection>
+  // based interface for prolonging the execution of the phase.  All other
+  // phase types do not contain an objection, and will report a fatal error
+  // if the user attempts to ~raise~, ~drop~, or ~get_objection_count~.
+   
+  // Function- m_report_null_objection
+  // Simplifies the reporting of null objection errors
+  extern function void m_report_null_objection(uvm_object obj,
+                                               string description,
+                                               int count,
+                                               string action);
+   
   // Function: get_objection
   //
   // Return the <uvm_objection> that gates the termination of the phase.
   //
   function uvm_objection get_objection(); return this.phase_done; endfunction
-
 
   // Function: raise_objection
   //
@@ -352,9 +383,16 @@ class uvm_phase extends uvm_object;
                                                int count=1);
 
 
-  // Functions: sync and unsync
+  // Function: get_objection_count
   //
-  // Add soft sync relationships between nodes
+  // Returns the current number of objections to ending this phase raised by the given ~object~.
+  //
+  extern virtual function int get_objection_count( uvm_object obj=null );
+   
+  //-----------------------
+  // Group: Synchronization
+  //-----------------------
+  // The functions 'sync' and 'unsync' add soft sync relationships between nodes
   //
   // Summary of usage:
   //| my_phase.sync(.target(domain)
@@ -731,12 +769,6 @@ function uvm_phase::new(string name="uvm_phase",
   super.new(name);
   m_phase_type = phase_type;
 
-  if (name == "run")
-    phase_done = uvm_test_done_objection::get();
-  else begin
-    phase_done = new({name,"_objection"});
-  end
-
   m_state = UVM_PHASE_DORMANT;
   m_run_count = 0;
   m_parent = parent;
@@ -812,10 +844,23 @@ function void uvm_phase::add(uvm_phase phase,
 
   // If we are inserting a new "leaf node"
   if (phase.get_phase_type() == UVM_PHASE_IMP) begin
+    uvm_task_phase tp;
     new_node = new(phase.get_name(),UVM_PHASE_NODE,this);
     new_node.m_imp = phase;
     begin_node = new_node;
     end_node = new_node;
+
+    // The phase_done objection is only required
+    // for task-based nodes
+    if ($cast(tp, phase)) begin
+       if (new_node.get_name() == "run") begin
+         new_node.phase_done = uvm_test_done_objection::get();
+       end
+       else begin
+         new_node.phase_done = uvm_objection::type_id::create({get_name(), "_objection"});
+       end
+    end
+
   end
   // We are inserting an existing schedule
   else begin
@@ -1217,7 +1262,7 @@ task uvm_phase::execute_phase();
   uvm_root top;
   uvm_phase_state_change state_chg;
 
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
 
   // If we got here by jumping forward, we must wait for
   // all its predecessor nodes to be marked DONE.
@@ -1390,7 +1435,7 @@ task uvm_phase::execute_phase();
                      if (m_phase_trace)
                        `UVM_PH_TRACE("PH/TRC/TIMEOUT", "PHASE TIMEOUT WATCHDOG EXPIRED", this, UVM_LOW)
                      foreach (m_executing_phases[p]) begin
-                        if (p.phase_done.get_objection_total() > 0) begin
+                        if ((p.phase_done != null) && (p.phase_done.get_objection_total() > 0)) begin
                            if (m_phase_trace)
                              `UVM_PH_TRACE("PH/TRC/TIMEOUT/OBJCTN", 
                                            $sformatf("Phase '%s' has outstanding objections:\n%s", p.get_full_name(), p.phase_done.convert2string()),
@@ -1407,7 +1452,7 @@ task uvm_phase::execute_phase();
                      if (m_phase_trace)
                        `UVM_PH_TRACE("PH/TRC/TIMEOUT", "PHASE TIMEOUT WATCHDOG EXPIRED", this, UVM_LOW)
                      foreach (m_executing_phases[p]) begin
-                        if (p.phase_done.get_objection_total() > 0) begin
+                        if ((p.phase_done != null) && (p.phase_done.get_objection_total() > 0)) begin
                            if (m_phase_trace)
                              `UVM_PH_TRACE("PH/TRC/TIMEOUT/OBJCTN", 
                                            $sformatf("Phase '%s' has outstanding objections:\n%s", p.get_full_name(), p.phase_done.convert2string()),
@@ -1486,7 +1531,8 @@ task uvm_phase::execute_phase();
       m_phase_proc = null;
     end
     #0; // LET ANY WAITERS WAKE UP
-    phase_done.clear();
+    if (phase_done != null)
+      phase_done.clear();
 
     if(m_jump_fwd) begin
       clear_successors(UVM_PHASE_DONE,m_jump_phase);
@@ -1530,7 +1576,8 @@ task uvm_phase::execute_phase();
     m_phase_proc = null;
   end
   #0; // LET ANY WAITERS WAKE UP
-  phase_done.clear();
+  if (phase_done != null)
+    phase_done.clear();
 
   end
 
@@ -1572,31 +1619,75 @@ task uvm_phase::execute_phase();
 
 endtask
 
+function void uvm_phase::get_adjacent_predecessor_nodes(ref uvm_phase pred[]);
+   bit done;
+   bit predecessors[uvm_phase];
+   int idx;
 
+   // Get all predecessors (including TERMINALS, SCHEDULES, etc.)
+   foreach (m_predecessors[p])
+     predecessors[p] = 1;
+
+   // Replace any terminal / schedule nodes with their predecessors,
+   // recursively.
+   do begin
+      done = 1;
+      foreach (predecessors[p]) begin
+         if (p.get_phase_type() != UVM_PHASE_NODE) begin
+            predecessors.delete(p);
+            foreach (p.m_predecessors[next_p])
+              predecessors[next_p] = 1;
+            done = 0;
+         end
+      end
+   end while (!done); 
+
+   pred = new [predecessors.size()];
+   foreach (predecessors[p]) begin
+      pred[idx++] = p;
+   end
+endfunction : get_adjacent_predecessor_nodes
+
+function void uvm_phase::get_adjacent_successor_nodes(ref uvm_phase succ[]);
+   bit done;
+   bit successors[uvm_phase];
+   int idx;
+
+   // Get all successors (including TERMINALS, SCHEDULES, etc.)
+   foreach (m_successors[s])
+     successors[s] = 1;
+
+   // Replace any terminal / schedule nodes with their successors,
+   // recursively.
+   do begin
+      done = 1;
+      foreach (successors[s]) begin
+         if (s.get_phase_type() != UVM_PHASE_NODE) begin
+            successors.delete(s);
+            foreach (s.m_successors[next_s])
+              successors[next_s] = 1;
+            done = 0;
+         end
+      end
+   end while (!done); 
+
+   succ = new [successors.size()];
+   foreach (successors[s]) begin
+      succ[idx++] = s;
+   end
+endfunction : get_adjacent_successor_nodes
+
+// Internal implementation, more efficient than calling get_predessor_nodes on all
+// of the successors returned by get_adjacent_successor_nodes
 function void uvm_phase::get_predecessors_for_successors(output bit pred_of_succ[uvm_phase]);
     bit done;
-    bit successors[uvm_phase];
+    uvm_phase successors[];
 
-    // get all successors
-    foreach (m_successors[succ])
-      successors[succ] = 1;
-
-    // replace TERMINAL or SCHEDULE nodes with their successors
-    do begin
-      done=1;
-      foreach (successors[succ]) begin
-        if (succ.get_phase_type() != UVM_PHASE_NODE) begin
-          successors.delete(succ);
-          foreach (succ.m_successors[next_succ])
-            successors[next_succ] = 1;
-          done = 0;
-        end
-      end
-    end while(!done);
+    get_adjacent_successor_nodes(successors);
           
     // get all predecessors to these successors
-    foreach (successors[succ])
-      foreach (succ.m_predecessors[pred])
+    foreach (successors[s])
+      foreach (successors[s].m_predecessors[pred])
         pred_of_succ[pred] = 1;
     
     // replace any terminal nodes with their predecessors, recursively.
@@ -1676,13 +1767,48 @@ endtask
 // Implementation - Synchronization
 //---------------------------------
 
+function void uvm_phase::m_report_null_objection(uvm_object obj,
+                                               string description,
+                                               int count,
+                                               string action);
+   string m_action;
+   string m_addon;
+   string m_obj_name = (obj == null) ? "uvm_top" : obj.get_full_name();
+   
+   if ((action == "raise") || (action == "drop")) begin
+      if (count != 1)
+        m_action = $sformatf("%s %0d objections", action, count);
+      else
+        m_action = $sformatf("%s an objection", action); 
+   end
+   else if (action == "get_objection_count") begin
+      m_action = "call get_objection_count";
+   end
+
+   if (this.get_phase_type() == UVM_PHASE_IMP) begin
+      m_addon = " (This is a UVM_PHASE_IMP, you have to query the schedule to find the UVM_PHASE_NODE)";
+   end
+   
+   `uvm_error("UVM/PH/NULL_OBJECTION",
+              $sformatf("'%s' attempted to %s on '%s', however '%s' is not a task-based phase node! %s",
+                        m_obj_name,
+                        m_action,
+                        get_name(),
+                        get_name(),
+                        m_addon))
+endfunction : m_report_null_objection
+                        
+   
 // raise_objection
 // ---------------
 
 function void uvm_phase::raise_objection (uvm_object obj, 
                                                    string description="",
                                                    int count=1);
-  phase_done.raise_objection(obj,description,count);
+  if (phase_done != null)
+    phase_done.raise_objection(obj,description,count);
+  else
+    m_report_null_objection(obj, description, count, "raise");
 endfunction
 
 
@@ -1692,9 +1818,23 @@ endfunction
 function void uvm_phase::drop_objection (uvm_object obj, 
                                                   string description="",
                                                   int count=1);
-  phase_done.drop_objection(obj,description,count);
+  if (phase_done != null)
+    phase_done.drop_objection(obj,description,count);
+  else
+    m_report_null_objection(obj, description, count, "drop");
 endfunction
 
+// get_objection_count
+// -------------------
+
+function int uvm_phase::get_objection_count (uvm_object obj=null);
+   if (phase_done != null)
+     return phase_done.get_objection_count(obj);
+   else begin
+      m_report_null_objection(obj, "" , 0, "get_objection_count");
+      return 0;
+   end
+endfunction : get_objection_count
 
 // sync
 // ----
@@ -1900,7 +2040,8 @@ endfunction
 function void uvm_phase::clear(uvm_phase_state state = UVM_PHASE_DORMANT);
   m_state = state;
   m_phase_proc = null;
-  phase_done.clear(this);
+  if (phase_done != null)
+    phase_done.clear(this);
 endfunction
 
 
@@ -1933,7 +2074,7 @@ task uvm_phase::wait_for_self_and_siblings_to_drop() ;
   uvm_root top;
   bit siblings[uvm_phase];
   
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
   
   get_predecessors_for_successors(siblings);
   foreach (m_sync[i]) begin
@@ -1944,7 +2085,7 @@ task uvm_phase::wait_for_self_and_siblings_to_drop() ;
     need_to_check_all = 0 ; //if all are dropped, we won't need to do this again
 
     // wait for own objections to drop
-    if (phase_done.get_objection_total(top) != 0) begin 
+    if ((phase_done != null) && (phase_done.get_objection_total(top) != 0)) begin 
       m_state = UVM_PHASE_EXECUTING ;
       phase_done.wait_for(UVM_ALL_DROPPED, top);
       need_to_check_all = 1 ;
@@ -1953,7 +2094,7 @@ task uvm_phase::wait_for_self_and_siblings_to_drop() ;
     // now wait for siblings to drop
     foreach(siblings[sib]) begin
       sib.wait_for_state(UVM_PHASE_EXECUTING, UVM_GTE); // sibling must be at least executing 
-      if (sib.phase_done.get_objection_total(top) != 0) begin
+      if ((sib.phase_done != null) && (sib.phase_done.get_objection_total(top) != 0)) begin
         m_state = UVM_PHASE_EXECUTING ;
         sib.phase_done.wait_for(UVM_ALL_DROPPED, top); // sibling must drop any objection
         need_to_check_all = 1 ;
@@ -1996,7 +2137,7 @@ endfunction
 // processes.  By hosting the phase processes here we avoid problems
 // associated with phase processes related as parents/children
 task uvm_phase::m_run_phases();
-  uvm_root top = uvm_root::get();
+  uvm_root top = uvm_coreservice.get_root();
 
   // initiate by starting first phase in common domain
   begin
@@ -2021,7 +2162,8 @@ endtask
 // ---------------
 
 function void uvm_phase::m_terminate_phase();
-  phase_done.clear(this);
+  if (phase_done != null)
+    phase_done.clear(this);
 endfunction
 
 
@@ -2029,10 +2171,18 @@ endfunction
 // -----------------------
 
 function void uvm_phase::m_print_termination_state();
-  `uvm_info("PH_TERMSTATE",
-            $sformatf("phase %s outstanding objections = %0d",
-            get_name(), phase_done.get_objection_total(uvm_root::get())),
-            UVM_DEBUG);
+  if (phase_done != null) begin
+    `uvm_info("PH_TERMSTATE",
+              $sformatf("phase %s outstanding objections = %0d",
+                        get_name(), phase_done.get_objection_total(uvm_coreservice.get_root())),
+              UVM_DEBUG)
+  end
+  else begin
+    `uvm_info("PH_TERMSTATE",
+              $sformatf("phase %s has no outstanding objections",
+                        get_name()),
+              UVM_DEBUG)
+  end
 endfunction
 
 

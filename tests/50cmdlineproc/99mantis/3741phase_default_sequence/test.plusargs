@@ -1,0 +1,2 @@
++UVM_DUMP_CMDLINE_ARGS
++uvm_set_default_sequence=uvm_test_top.seqr,main_phase,my_seq

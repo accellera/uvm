@@ -2,6 +2,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc. 
 //   Copyright 2010-2011 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -22,6 +23,11 @@
 typedef uvm_config_db#(uvm_sequence_base) uvm_config_seq;
 typedef class uvm_sequence_request;
 
+// Utility class for tracking default_sequences
+class uvm_sequence_process_wrapper;
+    process pid;
+    uvm_sequence_base seq;
+endclass : uvm_sequence_process_wrapper
 
 //------------------------------------------------------------------------------
 //
@@ -100,6 +106,8 @@ class uvm_sequencer_base extends uvm_component;
 
   extern virtual task execute_item(uvm_sequence_item item);
 
+  // Hidden array, keeps track of running default sequences
+  protected uvm_sequence_process_wrapper m_default_sequences[uvm_phase];
 
   // Function: start_phase_sequence
   //
@@ -156,6 +164,15 @@ class uvm_sequencer_base extends uvm_component;
      
 
   extern virtual function void start_phase_sequence(uvm_phase phase);
+
+  // Function: stop_phase_sequence(uvm_phase phase)
+  //
+  // Stop the default sequence for this phase, if any exists, and it
+  // is still executing.
+
+  extern virtual function void stop_phase_sequence(uvm_phase phase);
+
+  
 
   // Task: wait_for_grant
   //
@@ -1384,7 +1401,7 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
     // and thus more specific than one that is dynamically created via the
     // factory and the object wrapper.
     if ($cast(sbr, rsrc) && sbr != null) begin
-      seq = sbr.read();
+      seq = sbr.read(this);
       if (seq == null) begin
         `uvm_info("UVM/SQR/PH/DEF/SB/NULL", {"Default phase sequence for phase '",
                                              phase.get_name(),"' explicitly disabled"}, UVM_FULL)
@@ -1396,7 +1413,7 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
     else if ($cast(owr, rsrc) && owr != null) begin
       uvm_object_wrapper wrapper;
 
-      wrapper = owr.read();
+      wrapper = owr.read(this);
       if (wrapper == null) begin
         `uvm_info("UVM/SQR/PH/DEF/OW/NULL", {"Default phase sequence for phase '",
                                              phase.get_name(),"' explicitly disabled"}, UVM_FULL)
@@ -1425,7 +1442,7 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
   seq.print_sequence_info = 1;
   seq.set_sequencer(this);
   seq.reseed();
-  seq.starting_phase = phase;
+  seq.set_starting_phase(phase);
   
   if (!seq.do_not_randomize && !seq.randomize()) begin
     `uvm_warning("STRDEFSEQ", {"Randomization failed for default sequence '",
@@ -1434,15 +1451,36 @@ function void uvm_sequencer_base::start_phase_sequence(uvm_phase phase);
   end
   
   fork begin
+    uvm_sequence_process_wrapper w = new();
     // reseed this process for random stability
-    process proc = process::self();
-    proc.srandom(uvm_create_random_seed(seq.get_type_name(), this.get_full_name()));
+    w.pid = process::self();
+    w.seq = seq;
+    w.pid.srandom(uvm_create_random_seed(seq.get_type_name(), this.get_full_name()));
+    m_default_sequences[phase] = w;
+    // this will either complete naturally, or be killed later
     seq.start(this);
+    m_default_sequences.delete(phase);
   end
   join_none
   
 endfunction
 
+// stop_phase_sequence
+// --------------------
+
+function void uvm_sequencer_base::stop_phase_sequence(uvm_phase phase);
+    if (m_default_sequences.exists(phase)) begin
+        `uvm_info("PHASESEQ",
+                  {"Killing default sequence '", m_default_sequences[phase].seq.get_type_name(),
+                   "' for phase '", phase.get_name(), "'"}, UVM_FULL)
+        m_default_sequences[phase].seq.kill();
+    end
+    else begin
+        `uvm_info("PHASESEQ",
+                  {"No default sequence to kill for phase '", phase.get_name(), "'"},
+                  UVM_FULL)
+    end
+endfunction : stop_phase_sequence
 
 
 //----------------------------------------------------------------------------
@@ -1511,6 +1549,7 @@ endfunction
 
 task uvm_sequencer_base::start_default_sequence();
   uvm_sequence_base m_seq ;
+  uvm_factory factory=uvm_coreservice.get_factory();
 
   // Default sequence was cleared, or the count is zero
   if (default_sequence == "" || count == 0 ||
@@ -1563,7 +1602,7 @@ task uvm_sequencer_base::start_default_sequence();
     if (m_seq == null) begin
       uvm_report_fatal("STRDEFSEQ", "Null m_sequencer reference", UVM_NONE);
     end
-    m_seq.starting_phase = run_ph;
+    m_seq.set_starting_phase(run_ph);
     m_seq.print_sequence_info = 1;
     m_seq.set_parent_sequence(null);
     m_seq.set_sequencer(this);
@@ -1579,7 +1618,7 @@ endtask
 // get_seq_kind
 // ------------
 // Returns an int seq_kind correlating to the sequence of type type_name
-// in the sequencer¿s sequence library. If the named sequence is not
+// in the sequencerï¿½ï¿½ï¿½s sequence library. If the named sequence is not
 // registered a SEQNF warning is issued and -1 is returned.
 
 function int uvm_sequencer_base::get_seq_kind(string type_name);

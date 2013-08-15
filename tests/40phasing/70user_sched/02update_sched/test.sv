@@ -102,7 +102,7 @@ module test;
 
     // The component needs to override teh set_phase_schedule to add
     // the new schedule.
-    function void define_domain(uvm_domain domain);
+    protected function void define_domain(uvm_domain domain);
       uvm_phase sched;
       sched = domain.find_by_name("uvm_sched");
 

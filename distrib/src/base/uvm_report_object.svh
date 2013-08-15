@@ -262,13 +262,12 @@ class uvm_report_object extends uvm_object;
   // Function: report_summarize
   //
   // Outputs statistical information on the reports issued by the central report
-  // server. This information will be sent to the command line if ~file~ is 0, or
-  // to the file descriptor ~file~ if it is not 0.
+  // server.
   //
   // The run_test method in uvm_top calls this method.
 
-  virtual function void report_summarize(UVM_FILE file = 0);
-    m_rh.summarize(file);
+  virtual function void report_summarize();
+    m_rh.summarize();
   endfunction
 
 
@@ -285,7 +284,7 @@ class uvm_report_object extends uvm_object;
 
   virtual function void die();
     // make the pre_abort callbacks
-    uvm_root top = uvm_root::get();
+    uvm_root top = uvm_coreservice.get_root();
     top.m_do_pre_abort();
 
     report_summarize();

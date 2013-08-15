@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010-2013 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -148,7 +149,9 @@ typedef enum {
 //
 // Convenience value to define whether a component, usually an agent,
 // is in "active" mode or "passive" mode.
-
+//
+// UVM_PASSIVE - "Passive" mode
+// UVM_ACTIVE  - "Active" mode
 typedef enum bit { UVM_PASSIVE=0, UVM_ACTIVE=1 } uvm_active_passive_enum;
 
 
@@ -244,16 +247,17 @@ string uvm_aa_string_key;
 //   UVM_FATAL   - Indicates a problem from which simulation can not
 //                 recover. Simulation exits via $finish after a #0 delay.
 
-typedef bit [1:0] uvm_severity;
-
-typedef enum uvm_severity
+typedef enum bit [1:0]
 {
   UVM_INFO,
   UVM_WARNING,
   UVM_ERROR,
   UVM_FATAL
-} uvm_severity_type;
+} uvm_severity;
 
+`ifndef UVM_NO_DEPRECATED
+typedef uvm_severity uvm_severity_type;
+`endif
 
 // Enum: uvm_action
 //

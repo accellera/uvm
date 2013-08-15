@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
+//   Copyright 2013 NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -19,9 +20,6 @@
 //   the License for the specific language governing
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
-
-`ifndef UVM_REPORT_HANDLER_SVH
-`define UVM_REPORT_HANDLER_SVH
 
 typedef class uvm_report_object;
 typedef class uvm_report_server;
@@ -118,26 +116,7 @@ class uvm_report_handler;
   function void summarize(UVM_FILE file = 0);
     uvm_report_server srvr;
     srvr = uvm_report_server::get_server();
-    srvr.summarize(file);
-  endfunction
-
-
-  // Function- report_relnotes_banner
-  //
-  // Internal method called by <uvm_report_object::report_header>.
-
-  static local bit m_relnotes_done;
-  function void report_relnotes_banner(UVM_FILE file = 0);
-     uvm_report_server srvr;
-
-     if (m_relnotes_done) return;
-     
-     srvr = uvm_report_server::get_server();
-     
-     srvr.f_display(file,
-                    "\n  ***********       IMPORTANT RELEASE NOTES         ************");
-     
-     m_relnotes_done = 1;
+    srvr.summarize();
   endfunction
 
    
@@ -146,46 +125,6 @@ class uvm_report_handler;
   // Internal method called by <uvm_report_object::report_header>
 
   function void report_header(UVM_FILE file = 0);
-
-    uvm_report_server srvr;
-
-    srvr = uvm_report_server::get_server();
-    srvr.f_display(file,
-      "----------------------------------------------------------------");
-    srvr.f_display(file, uvm_revision_string());
-    srvr.f_display(file, uvm_mgc_copyright);
-    srvr.f_display(file, uvm_cdn_copyright);
-    srvr.f_display(file, uvm_snps_copyright);
-    srvr.f_display(file, uvm_cy_copyright);
-    srvr.f_display(file,
-      "----------------------------------------------------------------");
-
-    begin
-       uvm_cmdline_processor clp;
-       string args[$];
-     
-       clp = uvm_cmdline_processor::get_inst();
-
-       if (clp.get_arg_matches("+UVM_NO_RELNOTES", args)) return;
-
-`ifndef UVM_NO_DEPRECATED
-       report_relnotes_banner(file);
-       srvr.f_display(file, "\n  You are using a version of the UVM library that has been compiled");
-       srvr.f_display(file, "  with `UVM_NO_DEPRECATED undefined.");
-       srvr.f_display(file, "  See http://www.eda.org/svdb/view.php?id=3313 for more details.");
-`endif
-
-`ifdef UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR
-       report_relnotes_banner(file);
-       srvr.f_display(file, "\n  You are using a version of the UVM library that has been compiled");
-       srvr.f_display(file, "  with `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR defined.");
-       srvr.f_display(file, "  See http://www.eda.org/svdb/view.php?id=3770 for more details.");
-`endif
-
-       if (m_relnotes_done)
-          srvr.f_display(file, "\n      (Specify +UVM_NO_RELNOTES to turn off this notice)\n");
-
-    end
   endfunction
 
 
@@ -376,7 +315,7 @@ class uvm_report_handler;
     srvr = uvm_report_server::get_server();
 
     if (client==null)
-      client = uvm_root::get();
+      client = uvm_coreservice.get_root();
 
     // Check for severity overrides and apply them before calling the server.
     // An id specific override has precedence over a generic severity override.
@@ -517,158 +456,126 @@ class uvm_report_handler;
     sev_id_overrides[id].add(cur_severity, new_severity);
   endfunction
 
-  
-  // Function- dump_state
-  //
-  // Internal method for debug.
-
-  function void dump_state();
-
+	virtual function void dump_state();
     string s;
+    UVM_FILE file;
     uvm_action a;
     string idx;
-    UVM_FILE file;
-    uvm_report_server srvr;
+    string q[$];
  
     uvm_id_actions_array id_a_ary;
     uvm_id_verbosities_array id_v_ary;
     uvm_id_file_array id_f_ary;
 
-    srvr = uvm_report_server::get_server();
-
-    srvr.f_display(0,
-      "----------------------------------------------------------------------");
-    srvr.f_display(0, "report handler state dump");
-    srvr.f_display(0, "");
+    q.push_back("\n----------------------------------------------------------------------\n");
+    q.push_back("report handler state dump \n\n");
 
     // verbosities
 
-    srvr.f_display(0, "");   
-    srvr.f_display(0, "+-----------------+");
-    srvr.f_display(0, "|   Verbosities   |");
-    srvr.f_display(0, "+-----------------+");
-    srvr.f_display(0, "");   
+    q.push_back("\n+-----------------+\n");
+    q.push_back("|   Verbosities   |\n");
+    q.push_back("+-----------------+\n\n"); 
 
-    $sformat(s, "max verbosity level = %d", m_max_verbosity_level);
-    srvr.f_display(0, s);
-
-    srvr.f_display(0, "*** verbosities by id");
+    q.push_back($sformatf("max verbosity level = %d\n", m_max_verbosity_level));
+    q.push_back("*** verbosities by id\n");
 
     if(id_verbosities.first(idx))
     do begin
       uvm_verbosity v = uvm_verbosity'(id_verbosities.get(idx));
-      $sformat(s, "[%s] --> %s", idx, v.name());
-      srvr.f_display(0, s);
+      q.push_back($sformatf("[%s] --> %s\n", idx, v.name()));
     end while(id_verbosities.next(idx));
 
     // verbosities by id
 
-    srvr.f_display(0, "");
-    srvr.f_display(0, "*** verbosities by id and severity");
+    q.push_back("*** verbosities by id and severity\n");
 
     foreach( severity_id_verbosities[severity] ) begin
-      uvm_severity_type sev = uvm_severity_type'(severity);
+      uvm_severity sev = uvm_severity'(severity);
       id_v_ary = severity_id_verbosities[severity];
       if(id_v_ary.first(idx))
       do begin
         uvm_verbosity v = uvm_verbosity'(id_v_ary.get(idx));
-        $sformat(s, "%s:%s --> %s",
-           sev.name(), idx, v.name());
-        srvr.f_display(0, s);        
+        q.push_back($sformatf("%s:%s --> %s\n",sev.name(), idx, v.name()));    
       end while(id_v_ary.next(idx));
     end
 
     // actions
 
-    srvr.f_display(0, "");   
-    srvr.f_display(0, "+-------------+");
-    srvr.f_display(0, "|   actions   |");
-    srvr.f_display(0, "+-------------+");
-    srvr.f_display(0, "");   
-
-    srvr.f_display(0, "*** actions by severity");
+    q.push_back("\n+-------------+\n");
+    q.push_back("|   actions   |\n");
+    q.push_back("+-------------+\n\n");
+    
+    q.push_back("*** actions by severity\n");
     foreach( severity_actions[severity] ) begin
-      uvm_severity_type sev = uvm_severity_type'(severity);
-      $sformat(s, "%s = %s",
-       sev.name(), format_action(severity_actions[severity]));
-      srvr.f_display(0, s);
+      uvm_severity sev = uvm_severity'(severity);
+      q.push_back($sformatf("%s = %s\n",sev.name(), format_action(severity_actions[severity])));
     end
 
-    srvr.f_display(0, "");
-    srvr.f_display(0, "*** actions by id");
+    q.push_back("\n*** actions by id\n");
 
     if(id_actions.first(idx))
     do begin
-      $sformat(s, "[%s] --> %s", idx, format_action(id_actions.get(idx)));
-      srvr.f_display(0, s);
+      q.push_back($sformatf("[%s] --> %s\n", idx, format_action(id_actions.get(idx))));
     end while(id_actions.next(idx));
 
     // actions by id
-
-    srvr.f_display(0, "");
-    srvr.f_display(0, "*** actions by id and severity");
+    q.push_back("\n*** actions by id and severity\n");
 
     foreach( severity_id_actions[severity] ) begin
-      uvm_severity_type sev = uvm_severity_type'(severity);
+      uvm_severity sev = uvm_severity'(severity);
       id_a_ary = severity_id_actions[severity];
       if(id_a_ary.first(idx))
       do begin
-        $sformat(s, "%s:%s --> %s",
-           sev.name(), idx, format_action(id_a_ary.get(idx)));
-        srvr.f_display(0, s);        
+        q.push_back($sformatf("%s:%s --> %s\n",sev.name(), idx, format_action(id_a_ary.get(idx))));   
       end while(id_a_ary.next(idx));
     end
 
     // Files
 
-    srvr.f_display(0, "");
-    srvr.f_display(0, "+-------------+");
-    srvr.f_display(0, "|    files    |");
-    srvr.f_display(0, "+-------------+");
-    srvr.f_display(0, "");   
+    q.push_back("\n+-------------+\n");
+    q.push_back("|    files    |\n");
+    q.push_back("+-------------+\n\n");
 
-    $sformat(s, "default file handle = %d", default_file_handle);
-    srvr.f_display(0, s);
+    q.push_back($sformatf("default file handle = %d\n\n", default_file_handle));
 
-    srvr.f_display(0, "");
-    srvr.f_display(0, "*** files by severity");
+    q.push_back("*** files by severity\n");
     foreach( severity_file_handles[severity] ) begin
-      uvm_severity_type sev = uvm_severity_type'(severity);
+      uvm_severity sev = uvm_severity'(severity);
       file = severity_file_handles[severity];
-      $sformat(s, "%s = %d", sev.name(), file);
-      srvr.f_display(0, s);
+      q.push_back($sformatf("%s = %d\n", sev.name(), file));
     end
 
-    srvr.f_display(0, "");
-    srvr.f_display(0, "*** files by id");
+    q.push_back("\n*** files by id\n");
 
     if(id_file_handles.first(idx))
     do begin
       file = id_file_handles.get(idx);
-      $sformat(s, "id %s --> %d", idx, file);
-      srvr.f_display(0, s);
+      q.push_back($sformatf("id %s --> %d\n", idx, file));
     end while (id_file_handles.next(idx));
 
-    srvr.f_display(0, "");
-    srvr.f_display(0, "*** files by id and severity");
+    q.push_back("\n*** files by id and severity\n");
 
     foreach( severity_id_file_handles[severity] ) begin
-      uvm_severity_type sev = uvm_severity_type'(severity);
+      uvm_severity sev = uvm_severity'(severity);
       id_f_ary = severity_id_file_handles[severity];
       if(id_f_ary.first(idx))
       do begin
-        $sformat(s, "%s:%s --> %d", sev.name(), idx, id_f_ary.get(idx));
-        srvr.f_display(0, s);
+        q.push_back($sformatf("%s:%s --> %d\n", sev.name(), idx, id_f_ary.get(idx)));
       end while(id_f_ary.next(idx));
     end
 
-    srvr.dump_server_state();
+    begin
+		uvm_report_server srvr;
+	    srvr=uvm_report_server::get_server();        
+    	srvr.summarize();
+    end
     
-    srvr.f_display(0,
-      "----------------------------------------------------------------------");
+    q.push_back("----------------------------------------------------------------------\n");
+    begin
+			string msg;
+			msg={>>{q}};
+			`uvm_info("UVM/REPORT/HANDLER",msg,UVM_LOW)
+		end
   endfunction
 
 endclass : uvm_report_handler
-
-`endif // UVM_REPORT_HANDLER_SVH
-

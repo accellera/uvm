@@ -8,7 +8,7 @@ General Overview
 ----------------
 
 This is release 1.2 of the Universal Verification Methodology (UVM)
-reference implementation from Accellera.  This distribution includes a
+reference implementation from Accellera.ï¿½ This distribution includes a
 SystemVerilog based class library, examples, UVM Stardard Reference
 (PDF and HTML), and a User's Guide.
 
@@ -19,8 +19,8 @@ standard. For additional information on the Accellera standard, see
      http://www.accellera.org/activities/vip
 
 A good source for information, answers, and resources is
-http://www.accellera.org/community/uvm.  It contains forums on
-methodology, tool specific issues, and commercial announcements.  It
+http://www.accellera.org/community/uvm.ï¿½ It contains forums on
+methodology, tool specific issues, and commercial announcements.ï¿½ It
 also has links to additional resources, Accellera sponsored events,
 and other UVM events.
 
@@ -42,15 +42,66 @@ the Mantis id.
 
 In increasing Mantis numerical order:
 
+(*) Mantis 3407: uvm_event should be a param class
+
+(*) Mantis 3693: Added uvm_enum_wrapper#(T) type, and functionality to set
+enumerations by string name.  This allows for enum fields to be
+configured using uvm_config_db#(string)::set, as well as from the 
+command line using +uvm_set_config_string.
+
+(*) Mantis 3741: Added command-line functionality to setting
+default_sequence (+uvm_set_default_sequence)
+
+Mantis 3901: Feature request to prevent objection from throwing 
+decrement-below-zero error if the count is 0
+
 Mantis 4091: Added missing top-level block name to uvm_reg_file::get_fullname()
+
+Mantis 4160: uvm_comparer not using verbosity setting for print_msg
+
+Mantis 4181: transaction order unclear and cant be changed when bus/reg size differ
+
+Mantis 4306: Correction of documentation record_field_int ->
+record_field
+
+Mantis 4307: Correction of documentation DEC -> UVM_DEC
+
+(*) Mantis 4366: uvm_sequence_library documentation missing from generate html
+
+Mantis 4378: Proper documentation of set_inst_override_by_name and 
+             set_type_override_by_name in uvm_component.
 
 Mantis 4425: BUSY flag now cleared when register model is reset.
 
-Mantis 4513: Added user-defined memory allocation policy to uvm_vreg::allocat()
+(*) Mantis 4430: default sequences are now killed during PHASE_ENDED
 
-Mantis 4516: Proper prioritization of default sequences
+(*) Mantis 4431: Enhance uvm_sequence::starting_phase
+The "starting_phase" variable is now data access protected within
+uvm_sequence_base, and the user must use the "get_starting_phase" and
+"set_starting_phase" accesors.  This prevents possible fatal errors
+and deadlocks caused when a starting_phase is changed after it has
+already been evaluated.  The bin/uvm11-to-uvm12.pl helper script can
+be used to perform a simple search-and-replace within the user code, 
+updating it to the new methods.
 
-Mantis 4517: Added phase transition callbacks
+(*) Mantis 4432: Provide auto-object-to-phase in uvm_sequence_base
+
+(*) Mantis 4433: Remove unnecessary uvm_objection instances within
+non-uvm_task_phase nodes
+
+(*) Mantis 4434: Added get_objection_count to uvm_phase
+
+(*) Mantis 4439: Documented put_response() on the uvm_seq_pull_port
+
+(*) Mantis 4469: The ability to programatically traverse the phase graph
+was added via get_adjacent_predecessor_nodes and
+get_adjacent_successor_nodes inside of uvm_phase
+
+(*) Mantis 4513: Added user-defined memory allocation policy to uvm_vreg::allocat()
+
+(*) Mantis 4516: Proper prioritization of default sequences
+
+(*) Mantis 4517: Added phase transition callbacks
 
 (*) Mantis 4518: Classes extended from uvm_object now require an
 explicit constructor with a string-type name argument.  This
@@ -59,4 +110,30 @@ functionality was optionally enabled in prior versions by defining the
 functionality is now the default. Should the obsolete functionality be
 required, define the `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR symbol.
 
+Mantis 4532: uvm_reg_access_seq ignoring regs with one RO field
 
+Mantis 4533: static data in DPI may survive reset
+
+Mantis 4542: uvm_test_done is now const to prevent changes
+
+Mantis 4548: cleanup dpi coding issues
+
+Mantis 4572: packing of ints with 64+bits and array unpack broken
+
+(*) Mantis 4606: uvm_report server is not chainable/extendable. uvm_report_server can now be extended, chained 
+using delegate pattern
+
+Mantis 4617: bad example in documentation uvm_report_cb::add_by_name
+
+(*) Mantis 4618: resource lookup broken when fieldname has wildcards. meta characters in the fieldname are not 
+interpreted anymore as glob/regex.
+
+Mantis 4621: printing of int will mask Z values with X
+
+Mantis 4643: uvm_dpi_get_next_arg_c doesnt fully adhere to 1800lrm
+
+Mantis 4666: uvm_config_db::set expects to be invoked in process context
+
+Mantis 4677: uvm_global_copy_map removed
+
+Mantis 4690: mehod -> method in uvm_sequence_base documentation
