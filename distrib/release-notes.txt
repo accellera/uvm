@@ -155,4 +155,7 @@ Mantis 4666: uvm_config_db::set expects to be invoked in process context
 
 Mantis 4677: uvm_global_copy_map removed
 
+(*) Mantis 4686: uvm_reg::predict updates "mirrored" and "desired" values
+
 Mantis 4690: mehod -> method in uvm_sequence_base documentation
+

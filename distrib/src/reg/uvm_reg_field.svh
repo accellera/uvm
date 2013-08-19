@@ -1183,7 +1183,6 @@ function void uvm_reg_field::do_predict(uvm_reg_item      rw,
 
    // update the mirror with predicted value
    m_mirrored = field_val;
-   m_desired  = field_val;
    this.value = field_val;
 
 endfunction: do_predict
