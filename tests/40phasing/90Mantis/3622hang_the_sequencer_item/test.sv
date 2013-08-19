@@ -16,7 +16,7 @@ class error_catcher extends uvm_report_catcher;
 endclass
 
 class item extends uvm_sequence_item;
-   `uvm_object_utils( item );
+   `uvm_object_utils( item )
    
    function new( string name = "" );
       super.new( name );
@@ -25,7 +25,7 @@ class item extends uvm_sequence_item;
 endclass
    
 class item_driver extends uvm_driver #( item );
-   `uvm_component_utils( item_driver );
+   `uvm_component_utils( item_driver )
    
    function new( string name , uvm_component parent );
       super.new( name , parent );
@@ -45,7 +45,7 @@ class item_driver extends uvm_driver #( item );
 endclass
    
 class grant_seq extends uvm_sequence #( item );
-   `uvm_object_utils( grant_seq );
+   `uvm_object_utils( grant_seq )
    
    function new( string name = "" );
       super.new( name );
@@ -82,7 +82,7 @@ endclass
    
    
 class test extends uvm_test;
-   `uvm_component_utils( test );
+   `uvm_component_utils( test )
 
    error_catcher ec;
    uvm_sequencer #( item ) sequencer;

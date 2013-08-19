@@ -177,9 +177,9 @@ module top;
        // ERROR: SEQLIB/NOSEQS
        begin
          base_seq_lib = new("base_seq_lib");
-         base_seq_lib.starting_phase = phase;
+         base_seq_lib.set_starting_phase(phase);
          base_seq_lib.selection_mode = UVM_SEQ_LIB_ITEM;
-         base_seq_lib.starting_phase = phase;
+         base_seq_lib.set_starting_phase(phase);
          base_seq_lib.start(base_seqr);
        end
 
@@ -219,7 +219,7 @@ module top;
          lib.add_sequence(seqXX::get_type());
          lib.min_random_count = 5;
          lib.max_random_count = 4;
-         lib.starting_phase = phase;
+         lib.set_starting_phase(phase);
          void'(lib.randomize());
          lib.set_sequencer(sequencer);
          lib.start(sequencer);
@@ -233,7 +233,7 @@ module top;
          lib.add_sequence(seqC1::get_type());
          lib.min_random_count = 0;
          lib.max_random_count = 0;
-         lib.starting_phase = phase;
+         lib.set_starting_phase(phase);
          void'(lib.randomize());
          lib.start(sequencer);
        end
@@ -244,7 +244,7 @@ module top;
          lib = new("VIRT_SEQ");
          lib.add_sequence(seqS1::get_type());
          lib.selection_mode = UVM_SEQ_LIB_ITEM;
-         lib.starting_phase = phase;
+         lib.set_starting_phase(phase);
          void'(lib.randomize());
          lib.start(null);
        end

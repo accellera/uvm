@@ -127,12 +127,12 @@ program top;
         mid_seq seq;
    
         function new(string name = "");
-            super.new(name);
+           super.new(name);
+           set_automatic_phase_objection(1);
         endfunction
    
         task pre_start();
             called.push_back("top.pre_start()");
-            if (starting_phase != null) starting_phase.raise_objection(this);
         endtask
    
         task pre_body();
@@ -163,7 +163,6 @@ program top;
    
         task post_start();
             called.push_back("top.post_start()");
-            if (starting_phase != null) starting_phase.drop_objection(this);
         endtask
    
     endclass
@@ -278,7 +277,8 @@ program top;
         endtask
    
         function void report_phase(uvm_phase phase);
-            uvm_report_server svr = uvm_report_server::get_server();
+            uvm_report_server svr;
+            svr = uvm_coreservice.get_report_server();
 
             if (svr.get_severity_count(UVM_FATAL) +
                     svr.get_severity_count(UVM_ERROR) == 0)

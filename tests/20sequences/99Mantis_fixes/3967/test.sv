@@ -44,7 +44,7 @@ class cust_driver extends uvm_driver#(cust_data);
     super.new(name, parent);
   endfunction
 
-  virtual protected task run_phase(uvm_phase phase);
+  virtual task run_phase(uvm_phase phase);
     REQ item1, item2;
 
     seq_item_port.item_done();
@@ -73,13 +73,13 @@ class cust_agent extends uvm_agent;
     super.new(name, parent);
   endfunction
 
-  protected function void build_phase(uvm_phase phase);
+  function void build_phase(uvm_phase phase);
     super.build_phase(phase);
     driver = cust_driver::type_id::create("driver", this);
     sequencer = cust_sequencer::type_id::create("sequencer", this);
   endfunction
 
-  protected function void connect_phase(uvm_phase phase);
+  function void connect_phase(uvm_phase phase);
     super.connect_phase(phase);
     driver.seq_item_port.connect(sequencer.seq_item_export);
   endfunction
@@ -92,19 +92,12 @@ class cust_data_sequence extends uvm_sequence#(cust_data);
 
   function new(string name = "cust_data_sequence");
      super.new(name);
+     set_automatic_phase_objection(1);
   endfunction
-
-  virtual task pre_body();
-    if (starting_phase!=null) starting_phase.raise_objection(this);
-  endtask : pre_body
 
   virtual task body();
     `uvm_do(req);
   endtask
-
-  virtual task post_body();
-    if (starting_phase!=null) starting_phase.drop_objection(this);
-  endtask : post_body
 
 endclass
 
@@ -158,7 +151,8 @@ class test extends uvm_test;
   endtask
 
    function void report_phase(uvm_phase phase);
-      uvm_report_server svr = uvm_report_server::get_server();
+      uvm_report_server svr;
+      svr = uvm_coreservice.get_report_server();
 
       if (svr.get_severity_count(UVM_FATAL) +
           svr.get_severity_count(UVM_ERROR) == 0 && 

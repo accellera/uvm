@@ -24,7 +24,7 @@ import uvm_pkg::*;
 `include "uvm_macros.svh"
 
 
-class my_server extends uvm_report_server;
+class my_server extends uvm_default_report_server;
   function new(string name = "my_server"); 
     super.new(name);
   endfunction
@@ -32,28 +32,21 @@ endclass
 
 
 class test extends uvm_test;
-
-   uvm_report_server old_glob;
-   uvm_report_global_server glob = new();
-   my_server serv = new();
-
    `uvm_component_utils(test)
 
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
    endfunction
 
-   virtual task run_phase(uvm_phase phase);
+   virtual task run();
+     my_server serv = new;
      // Emit a message before setting the server to make sure counts are
      // properly copied over.
      `uvm_info("MSG1", "Some message", UVM_LOW)
      `uvm_info("MSG2", "Another message", UVM_LOW)
 
-     // Save the old global report server
-     old_glob = glob.get_server();
-
      // Set the global server
-     glob.set_server(serv);
+     uvm_report_server::set_server(serv);
 
      //Emit some messages to the new server
      `uvm_info("MSG1", "Some message again", UVM_LOW)
@@ -61,12 +54,10 @@ class test extends uvm_test;
 
    endtask
 
-   virtual function void report_phase(uvm_phase phase);
-     uvm_report_global_server glob = new;
+   virtual function void report();
      uvm_report_server serv;
-     serv = glob.get_server();
-     if(old_glob.get_id_count("MSG1") == 1 && old_glob.get_id_count("MSG2") == 1 &&
-       serv.get_id_count("MSG1") == 2 && serv.get_id_count("MSG2") == 2)
+     serv = uvm_report_server::get_server();
+     if(serv.get_id_count("MSG1") == 2 && serv.get_id_count("MSG2") == 2)
        $display("**** UVM TEST PASSED ****");
      else
        $display("**** UVM TEST FAILED ****");

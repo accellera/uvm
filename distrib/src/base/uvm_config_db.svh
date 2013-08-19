@@ -95,7 +95,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     uvm_resource_types::rsrc_q_t rq;
 
     if(cntxt == null) 
-      cntxt = uvm_root::get();
+      cntxt = uvm_coreservice.get_root();
     if(inst_name == "") 
       inst_name = cntxt.get_full_name();
     else if(cntxt.get_full_name() != "") 
@@ -157,11 +157,15 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     bit exists;
     string lookup;
     uvm_pool#(string,uvm_resource#(T)) pool;
+    string rstate;
      
     //take care of random stability during allocation
     process p = process::self();
-    string rstate = p.get_randstate();
+    if(p) 
+  		rstate = p.get_randstate();
+  		
     top = uvm_root::get();
+
     curr_phase = top.m_current_phase;
 
     if(cntxt == null) 
@@ -217,7 +221,8 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
       end
     end
 
-    p.set_randstate(rstate);
+    if(p)
+    	p.set_randstate(rstate);
 
     if(uvm_config_db_options::is_tracing())
       m_show_msg("CFGDB/SET", "Configuration","set", inst_name, field_name, cntxt, r);
@@ -240,7 +245,7 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
       string field_name, bit spell_chk=0);
 
     if(cntxt == null)
-      cntxt = uvm_root::get();
+      cntxt = uvm_coreservice.get_root();
     if(inst_name == "")
       inst_name = cntxt.get_full_name();
     else if(cntxt.get_full_name() != "")
@@ -263,8 +268,8 @@ class uvm_config_db#(type T=int) extends uvm_resource_db#(T);
     m_uvm_waiter waiter;
 
     if(cntxt == null)
-      cntxt = uvm_root::get();
-    if(cntxt != uvm_root::get()) begin
+      cntxt = uvm_coreservice.get_root();
+    if(cntxt != uvm_coreservice.get_root()) begin
       if(inst_name != "")
         inst_name = {cntxt.get_full_name(),".",inst_name};
       else

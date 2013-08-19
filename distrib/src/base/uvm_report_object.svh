@@ -90,7 +90,8 @@ class uvm_report_object extends uvm_object;
 
   function new(string name = "");
     super.new(name);
-    m_rh = uvm_report_handler::type_id::create(name);
+    //m_rh = uvm_report_handler::type_id::create(name);
+    m_rh = new(name);
   endfunction
 
 
@@ -524,11 +525,11 @@ class uvm_report_object extends uvm_object;
   // The <uvm_root::run_test> task calls this method just before it component
   // phasing begins.
   //
-  // Use uvm_report_server::get_server().report_header()
+  // Use uvm_root::report_header()
 
   virtual function void report_header(UVM_FILE file = 0);
-    uvm_report_server l_rs = uvm_report_server::get_server();
-    l_rs.report_header(file);
+    uvm_root l_root = uvm_coreservice.get_root();
+    l_root.report_header(file);
   endfunction
 
 
@@ -562,7 +563,7 @@ class uvm_report_object extends uvm_object;
   // Use uvm_report_server::get_server().die()
 
   virtual function void die();
-    uvm_root l_root = uvm_root::get();
+    uvm_root l_root = uvm_coreservice.get_root();
     l_root.die();
   endfunction
 

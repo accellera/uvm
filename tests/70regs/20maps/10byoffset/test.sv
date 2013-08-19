@@ -172,7 +172,8 @@ begin
    if (rg != null) `uvm_error("Test", $sformatf("Register at bus32/9 is %s instead of (null)", rg.get_full_name()));
 
    begin
-      uvm_report_server svr = uvm_report_server::get_server();
+      uvm_report_server svr;
+      svr = uvm_coreservice.get_report_server();
 
       svr.report_summarize();
 

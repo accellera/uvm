@@ -2,7 +2,8 @@
 //------------------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc. 
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2013 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -148,7 +149,9 @@ typedef enum {
 //
 // Convenience value to define whether a component, usually an agent,
 // is in "active" mode or "passive" mode.
-
+//
+// UVM_PASSIVE - "Passive" mode
+// UVM_ACTIVE  - "Active" mode
 typedef enum bit { UVM_PASSIVE=0, UVM_ACTIVE=1 } uvm_active_passive_enum;
 
 
@@ -244,16 +247,17 @@ string uvm_aa_string_key;
 //   UVM_FATAL   - Indicates a problem from which simulation can not
 //                 recover. Simulation exits via $finish after a #0 delay.
 
-typedef bit [1:0] uvm_severity;
-
-typedef enum uvm_severity
+typedef enum bit [1:0]
 {
   UVM_INFO,
   UVM_WARNING,
   UVM_ERROR,
   UVM_FATAL
-} uvm_severity_type;
+} uvm_severity;
 
+`ifndef UVM_NO_DEPRECATED
+typedef uvm_severity uvm_severity_type;
+`endif
 
 // Enum: uvm_action
 //
@@ -513,6 +517,9 @@ typedef enum { UVM_PHASE_IMP,
 //
 //   UVM_PHASE_ENDED - phase completed execution, now running phase_ended() callback
 //
+//   UVM_PHASE_JUMPING - all processes related to phase are being killed and all
+//                       predecessors are forced into the DONE state.
+//
 //   UVM_PHASE_CLEANUP - all processes related to phase are being killed
 //
 //   UVM_PHASE_DONE - A phase is done after it terminated execution.  Becoming
@@ -520,10 +527,10 @@ typedef enum { UVM_PHASE_IMP,
 //
 //    The state transitions occur as follows:
 //
-//|   DORMANT -> SCHED -> SYNC -> START -> EXEC -> READY -> END -> CLEAN -> DONE
-//|      ^                                                            |
-//|      |                      <-- jump_to                           v
-//|      +------------------------------------------------------------+
+//|   DORMANT -> SCHED -> SYNC -> START -> EXEC -> READY -> END -+-> CLEAN -> DONE
+//|      ^                                                       |
+//|      |                      <-- jump_to                      |
+//|      +-------------------------------------------- JUMPING< -+
 
    typedef enum { UVM_PHASE_DORMANT      = 1,
                   UVM_PHASE_SCHEDULED    = 2,
@@ -536,24 +543,6 @@ typedef enum { UVM_PHASE_IMP,
                   UVM_PHASE_DONE         = 256,
                   UVM_PHASE_JUMPING      = 512
                   } uvm_phase_state;
-
-
-
-// Enum: uvm_phase_transition
-//
-// These are the phase state transition for callbacks which provide
-// additional information that may be useful during callbacks
-//
-// UVM_COMPLETED   - the phase completed normally
-// UVM_FORCED_STOP - the phase was forced to terminate prematurely
-// UVM_SKIPPED     - the phase was in the path of a forward jump
-// UVM_RERUN       - the phase was in the path of a backwards jump
-//
-typedef enum { UVM_COMPLETED   = 'h01, 
-               UVM_FORCED_STOP = 'h02,
-               UVM_SKIPPED     = 'h04, 
-               UVM_RERUN       = 'h08   
-} uvm_phase_transition;
 
 
 

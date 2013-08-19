@@ -125,7 +125,8 @@ begin
    check_address(blk.b2.r2, 'h0010, 'h10240);
           
    begin
-      uvm_report_server svr = uvm_report_server::get_server();
+      uvm_report_server svr;
+      svr = uvm_coreservice.get_report_server();
 
       svr.report_summarize();
 

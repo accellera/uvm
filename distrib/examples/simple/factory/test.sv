@@ -77,8 +77,8 @@ module top;
   endclass
 
   initial begin
-//    uvm_factory::set_inst_override_by_type("uvm_test_top.gen1", gen::get_type(), mygen::get_type());
-//    uvm_factory::set_type_override_by_type(packet::get_type(), mypacket::get_type());
+    uvm_factory factory;
+    factory = uvm_coreservice.get_factory();
     gen::type_id::set_inst_override(mygen::get_type(), "uvm_test_top.gen1");
     packet::type_id::set_type_override(mypacket::get_type());
 

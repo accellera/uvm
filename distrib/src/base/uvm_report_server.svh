@@ -37,7 +37,190 @@ typedef class uvm_report_object;
 //
 //------------------------------------------------------------------------------
 
-class uvm_report_server extends uvm_object;
+typedef class uvm_default_report_server;
+virtual class uvm_report_server extends uvm_object;
+        function string get_type_name();
+                return "uvm_report_server";
+        endfunction
+        function new(string name="base");
+                super.new();
+        endfunction
+
+        // Function: set_max_quit_count
+        // ~count~ is the maximum number of ~UVM_QUIT~ actions the uvm_report_server
+        // will tolerate before before invoking client.die().
+        // when ~overridable~=0 is passed the set quit count cannot be changed again
+        pure virtual  function void set_max_quit_count(int count, bit overridable = 1);
+
+        // Function: get_max_quit_count
+        // returns the currently configured max quit count
+        pure virtual  function int get_max_quit_count();
+
+        // Function: set_quit_count
+        // sets the current number of ~UVM_QUIT~ actions already passed through this uvm_report_server
+        pure virtual  function void set_quit_count(int quit_count);
+
+        // Function: get_quit_count
+        // returns the current number of ~UVM_QUIT~ actions already passed through this server
+        pure virtual  function int get_quit_count();
+
+        // Function: set_severity_count
+        // sets the count of already passed messages with severity ~severity~ to ~count~
+        pure virtual  function void set_severity_count(uvm_severity severity, int count);
+        // Function: get_severity_count
+        // returns the count of already passed messages with severity ~severity~
+        pure virtual  function int get_severity_count(uvm_severity severity);
+
+        // Function: set_id_count
+        // sets the count of already passed messages with ~id~ to ~count~
+        pure virtual  function void set_id_count(string id, int count);
+
+        // Function: get_id_count
+        // returns the count of already passed messages with ~id~
+        pure virtual  function int get_id_count(string id);
+
+
+        // Function: get_id_set
+        // returns the set of id's already used by this uvm_report_server
+        pure virtual function void get_id_set(output string q[$]);
+
+        // Function: get_severity_set
+        // returns the set of severities's already used by this uvm_report_server
+        pure virtual function void get_severity_set(output uvm_severity q[$]);
+
+        // Function: do_copy
+        // copies all message statistic severity,id counts to the dest uvm_report_server
+        // the copy is cummulative (only items from the source are transfered, already existing entries are not deleted,
+        // existing entries/counts are overridden when they exist in the source set)
+        function void do_copy (uvm_object rhs);
+                uvm_report_server rhs_;
+
+                super.do_copy(rhs);
+                assert($cast(rhs_,rhs)) else `uvm_error("UVM/REPORT/SERVER/RPTCOPY","cannot copy to report_server from the given datatype")
+
+                begin
+                        uvm_severity q[$];
+                        rhs_.get_severity_set(q);
+                        foreach(q[s])
+                                set_severity_count(q[s],rhs_.get_severity_count(q[s]));
+                end
+
+                begin
+                        string q[$];
+                        rhs_.get_id_set(q);
+                        foreach(q[s])
+                                set_id_count(q[s],rhs_.get_id_count(q[s]));
+                end
+
+                set_max_quit_count(rhs_.get_max_quit_count());
+                set_quit_count(rhs_.get_quit_count());
+        endfunction
+
+
+        // Function- process_report_message
+        //
+        // Main entry for uvm_report_server, combines execute_report_message and compose_report_message
+
+        pure virtual function void process_report_message(uvm_report_message report_message);
+
+
+        // Function: execute_report_message
+        //
+        // Processes the provided message per the actions contained within.
+        //
+        // Expert users can overload this method to customize action processing.
+
+        pure virtual function void execute_report_message(uvm_report_message report_message);
+
+
+        // Function: compose_report_message
+        //
+        // Constructs the actual string sent to the file or command line
+        // from the severity, component name, report id, and the message itself.
+        //
+        // Expert users can overload this method to customize report formatting.
+
+        pure virtual function string compose_report_message(uvm_report_message report_message);
+
+
+        // Function: report_summarize
+        //
+        // Outputs statistical information on the reports issued by this central report
+        // server. This information will be sent to the command line if ~file~ is 0, or
+        // to the file descriptor ~file~ if it is not 0.
+        //
+        // The run_test method in uvm_top calls this method.
+
+        pure virtual function void report_summarize(UVM_FILE file=0);
+
+
+`ifndef UVM_NO_DEPRECATED
+
+        // *US* revisit after msg revamp merge
+
+
+        // Function: process_report
+        //
+        // Processes a composed message and performs the remaining actions
+        // such as logging to the target channel, incrementing ids, counts
+
+        pure virtual function void process_report(
+                uvm_severity severity,
+                string name,
+                string id,
+                string message,
+                uvm_action action,
+                UVM_FILE file,
+                string filename,
+                int line,
+                string composed_message,
+                int verbosity_level,
+                uvm_report_object client
+        );
+
+        // Function: compose_message
+        //
+        // Constructs the actual string sent to the file or command line
+        // from the severity, component name, report id, and the message itself.
+        //
+        // Expert users can overload this method to customize report formatting.
+        pure virtual function string compose_message(
+                uvm_severity severity,
+                string name,
+                string id,
+                string message,
+                string filename,
+                int    line
+        );
+
+        pure virtual function void summarize();
+
+`endif
+
+        // Function: set_server
+        //
+        // Sets the global report server to use for reporting. The report
+        // server is responsible for formatting messages.
+        // in addition to setting the server this also copies the severity/id counts
+        // from the current report_server to the new one
+
+        static function void set_server(uvm_report_server server);
+                server.copy(uvm_coreservice.get_report_server());
+                uvm_coreservice.set_report_server(server);
+        endfunction
+
+
+        // Function: get_server
+        //
+        // Gets the global report server. The method will always return
+        // a valid handle to a report server.
+
+        static function uvm_report_server get_server();
+                return uvm_coreservice.get_report_server();
+        endfunction
+endclass
+
+class uvm_default_report_server extends uvm_report_server;
 
   local int m_quit_count;
   local int m_max_quit_count; 
@@ -77,11 +260,10 @@ class uvm_report_server extends uvm_object;
   //
   bit show_terminator = 0;
 
-
-  static protected uvm_report_server m_global_report_server = get_server();
-
-
-  `uvm_object_utils(uvm_report_server)
+  // Needed for callbacks
+  function string get_type_name();
+    return "uvm_default_report_server";
+  endfunction
 
 
   // Function: new
@@ -93,41 +275,6 @@ class uvm_report_server extends uvm_object;
     set_max_quit_count(0);
     reset_quit_count();
     reset_severity_counts();
-  endfunction
-
-  // Copy to support the set_server() method
-  virtual function void do_copy (uvm_object rhs);
-
-    uvm_report_server rs;
-    uvm_severity_type l_severity_count_index;
-    string l_id_count_index;
-
-    super.do_copy(rhs);
-    if(!$cast(rs, rhs) || (rhs==null)) return;
-
-    m_quit_count = rs.m_quit_count;
-    m_max_quit_count = rs.m_max_quit_count;
-    max_quit_overridable = rs.max_quit_overridable;
-
-    // Copy the severity counts
-    if (rs.m_severity_count.first(l_severity_count_index))
-      do
-        m_severity_count[l_severity_count_index] 
-          = rs.m_severity_count[l_severity_count_index];
-      while (rs.m_severity_count.next(l_severity_count_index));
-  
-    // Copy the id counts
-    if (rs.m_id_count.first(l_id_count_index))
-      do
-        m_id_count[l_id_count_index] 
-          = rs.m_id_count[l_id_count_index];
-      while (rs.m_id_count.next(l_id_count_index));
-  
-    enable_report_id_count_summary = rs.enable_report_id_count_summary;
-    record_all_messages = rs.record_all_messages;
-    show_verbosity = rs.show_verbosity;
-    show_terminator = rs.show_terminator;
-
   endfunction
 
 
@@ -196,35 +343,6 @@ class uvm_report_server extends uvm_object;
     printer.print_int("show_terminator", show_terminator,
       $bits(show_terminator), UVM_BIN, ".", "bit");
 
-  endfunction
-
-
-  //----------------------------------------------------------------------------
-  // Group: Report Server Configuration
-  //----------------------------------------------------------------------------
-
-
-  // Function: get_server
-  //
-  // Gets the global report server. The method will always return 
-  // a valid handle to a report server.
-
-  static function uvm_report_server get_server();
-    if (m_global_report_server == null)
-      m_global_report_server = new();
-    return m_global_report_server;
-  endfunction
-
-  // Function: set_server
-  //
-  // Sets the global report server to use for reporting. The report
-  // server is responsible for formatting messages.
-
-  static function void set_server(uvm_report_server server);
-    if(m_global_report_server != null) begin
-      server.copy(m_global_report_server);
-    end
-    m_global_report_server = server;
   endfunction
 
 
@@ -367,6 +485,18 @@ class uvm_report_server extends uvm_object;
   endfunction
 
 
+  virtual function void get_severity_set(output uvm_severity q[$]);
+    foreach(m_severity_count[idx])
+      q.push_back(idx);
+  endfunction
+
+
+  virtual function void get_id_set(output string q[$]);
+    foreach(m_id_count[idx])
+      q.push_back(idx);
+  endfunction
+
+
   // Function- f_display
   //
   // This method sends string severity to the command line if file is 0 and to
@@ -380,11 +510,11 @@ class uvm_report_server extends uvm_object;
   endfunction
 
 
-  // Function- m_process_report_message
+  // Function- process_report_message
   //
   //
 
-  virtual function void m_process_report_message(uvm_report_message report_message);
+  virtual function void process_report_message(uvm_report_message report_message);
 
     bit report_ok = 1;
 
@@ -408,21 +538,26 @@ class uvm_report_server extends uvm_object;
       report_ok = uvm_report_catcher::process_all_report_catchers(report_message);
 
     if(report_ok) begin	
+      string m;
+
+      // give the global server a chance to intercept the calls
+      uvm_report_server svr = uvm_coreservice.get_report_server();
 
 `ifdef UVM_DEPRECATED_REPORTING
 
-      string m;
-      m = compose_message(report_message.severity, 
-        report_message.report_handler.get_full_name(), report_message.id, 
-        report_message.message, report_message.filename, report_message.line); 
-      process_report(report_message.severity, report_message.report_handler.get_full_name(),
+      // no need to compose when neither UVM_DISPLAY nor UVM_LOG is set
+      if(report_message.action & (UVM_LOG|UVM_DISPLAY))
+        m = svr.compose_message(report_message.severity, 
+          report_message.report_handler.get_full_name(), report_message.id, 
+          report_message.message, report_message.filename, report_message.line); 
+      svr.process_report(report_message.severity, report_message.report_handler.get_full_name(),
         report_message.id, report_message.message, report_message.action, report_message.file,
         report_message.filename, report_message.line, m, report_message.verbosity, 
         report_message.report_object);
 
 `else
 
-      execute_report_message(report_message);
+      svr.execute_report_message(report_message);
 
 `endif
 
@@ -494,7 +629,7 @@ class uvm_report_server extends uvm_object;
 
     // Process the UVM_EXIT action
     if(report_message.action & UVM_EXIT) begin
-      uvm_root l_root = uvm_root::get();
+      uvm_root l_root = uvm_coreservice.get_root();
       l_root.die();
     end
 
@@ -554,73 +689,6 @@ class uvm_report_server extends uvm_object;
   endfunction 
 
 
-  // Function- report_relnotes_banner
-  //
-
-  static local bit m_relnotes_done;
-  function void report_relnotes_banner(UVM_FILE file = 0);
-    uvm_report_server srvr;
-
-    if (m_relnotes_done) return;
-     
-    f_display(file,
-      "\n  ***********       IMPORTANT RELEASE NOTES         ************");
-     
-    m_relnotes_done = 1;
-  endfunction
-
-
-  //----------------------------------------------------------------------------
-  // Group: Library Output
-  //----------------------------------------------------------------------------
-
-
-  // Function: report_header
-  //
-  // Prints version and copyright information. This information is sent to the
-  // command line if ~file~ is 0, or to the file descriptor ~file~ if it is not 0. 
-  // The <uvm_root::run_test> task calls this method just before it component
-  // phasing begins.
-
-  function void report_header(UVM_FILE file = 0);
-
-    f_display(file,
-      "----------------------------------------------------------------");
-    f_display(file, uvm_revision_string());
-    f_display(file, uvm_mgc_copyright);
-    f_display(file, uvm_cdn_copyright);
-    f_display(file, uvm_snps_copyright);
-    f_display(file, uvm_cy_copyright);
-    f_display(file,
-      "----------------------------------------------------------------");
-
-    begin
-       uvm_cmdline_processor clp;
-       string args[$];
-     
-       clp = uvm_cmdline_processor::get_inst();
-
-       if (clp.get_arg_matches("+UVM_NO_RELNOTES", args)) return;
-
-`ifndef UVM_NO_DEPRECATED
-       report_relnotes_banner(file);
-       f_display(file, "\n  You are using a version of the UVM library that has been compiled");
-       f_display(file, "  with `UVM_NO_DEPRECATED undefined.");
-       f_display(file, "  See http://www.eda.org/svdb/view.php?id=3313 for more details.");
-`endif
-
-`ifndef UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
-       report_relnotes_banner(file);
-       f_display(file, "\n  You are using a version of the UVM library that has been compiled");
-       f_display(file, "  with `UVM_OBJECT_MUST_HAVE_CONSTRUCTOR undefined.");
-       f_display(file, "  See http://www.eda.org/svdb/view.php?id=3770 for more details.");
-`endif
-
-       if (m_relnotes_done)
-          f_display(file, "\n      (Specify +UVM_NO_RELNOTES to turn off this notice)\n");
-
-    end
-  endfunction
 
 
   // Function: report_summarize
@@ -635,7 +703,7 @@ class uvm_report_server extends uvm_object;
     string id;
     string name;
     string output_str;
-    uvm_report_catcher::summarize_report_catcher(file);
+    uvm_report_catcher::summarize();
     f_display(file, "");
     f_display(file, "--- UVM Report Summary ---");
     f_display(file, "");
@@ -723,7 +791,7 @@ class uvm_report_server extends uvm_object;
       end    
 
     if(action & UVM_EXIT) begin
-      uvm_root l_root = uvm_root::get();
+      uvm_root l_root = uvm_coreservice.get_root();
       l_root.die();
     end
 
@@ -731,7 +799,7 @@ class uvm_report_server extends uvm_object;
       if(get_max_quit_count() != 0) begin
           incr_quit_count();
         if(is_quit_count_reached()) begin
-          uvm_root l_root = uvm_root::get();
+          uvm_root l_root = uvm_coreservice.get_root();
           l_root.die();
         end
       end  
@@ -786,8 +854,8 @@ class uvm_report_server extends uvm_object;
   // Function- summarize
   //
 
-  virtual function void summarize(UVM_FILE file=0);
-    report_summarize(file);
+  virtual function void summarize();
+    report_summarize();
   endfunction
 
 

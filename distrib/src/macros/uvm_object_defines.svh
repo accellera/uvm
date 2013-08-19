@@ -2,6 +2,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010-2011 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -409,13 +410,13 @@ endfunction \
 `define m_uvm_object_create_func(T) \
    function uvm_object create (string name=""); \
      T tmp; \
-`ifdef UVM_OBJECT_MUST_HAVE_CONSTRUCTOR \
-     if (name=="") tmp = new(); \
-     else tmp = new(name); \
-`else \
+`ifdef UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR \
      tmp = new(); \
      if (name!="") \
        tmp.set_name(name); \
+`else \
+     if (name=="") tmp = new(); \
+     else tmp = new(name); \
 `endif \
      return tmp; \
    endfunction
@@ -918,6 +919,22 @@ endfunction \
               if (__m_uvm_status_container.print_matches) \
                   uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg()}, UVM_LOW); \
               ARG = T'(uvm_object::__m_uvm_status_container.bitstream); \
+              __m_uvm_status_container.status = 1; \
+            end \
+          end \
+        end \
+      UVM_SETSTR: \
+        begin \
+          __m_uvm_status_container.scope.set_arg(`"ARG`"); \
+          if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \
+            if((FLAG)&UVM_READONLY) begin \
+              uvm_report_warning("RDONLY", $sformatf("Readonly argument match %s is ignored",  \
+                 __m_uvm_status_container.get_full_scope_arg()), UVM_NONE); \
+            end \
+            else begin \
+              if (__m_uvm_status_container.print_matches) \
+                  uvm_report_info("STRMTC", {"set_str()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg()}, UVM_LOW); \
+              void'(uvm_enum_wrapper#(T)::from_name(uvm_object::__m_uvm_status_container.stringv, ARG)); \
               __m_uvm_status_container.status = 1; \
             end \
           end \
@@ -1494,6 +1511,32 @@ endfunction \
                 if (__m_uvm_status_container.print_matches) \
                   uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg()}, UVM_LOW); \
                 ARG[i] =  T'(uvm_object::__m_uvm_status_container.bitstream); \
+                __m_uvm_status_container.status = 1; \
+              end \
+            end \
+          end \
+        end \
+      UVM_SETSTR: \
+        begin \
+          __m_uvm_status_container.scope.set_arg(`"ARG`"); \
+          if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \
+            if((FLAG)&UVM_READONLY) begin \
+              uvm_report_warning("RDONLY", $sformatf("Readonly argument match %s is ignored",  \
+                 __m_uvm_status_container.get_full_scope_arg()), UVM_NONE); \
+            end \
+            else begin \
+              uvm_report_warning("RDONLY", {__m_uvm_status_container.get_full_scope_arg(), \
+              ": static arrays cannot be resized via configuraton."}, UVM_NONE); \
+            end \
+          end \
+          else if(!((FLAG)&UVM_READONLY)) begin \
+            foreach(ARG[i]) begin \
+              __m_uvm_status_container.scope.set_arg_element(`"ARG`",i); \
+              if(uvm_is_match(str__, __m_uvm_status_container.scope.get())) begin \
+	              T t__;  \
+                if (__m_uvm_status_container.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg()}, UVM_LOW); \
+                void'(uvm_enum_wrapper#(T)::from_name(uvm_object::__m_uvm_status_container.stringv, t__)); ARG[i]=t__;\
                 __m_uvm_status_container.status = 1; \
               end \
             end \
@@ -2159,6 +2202,40 @@ endfunction \
                 if (__m_uvm_status_container.print_matches) \
                   uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg()}, UVM_LOW); \
                 ARG[index__] =  T'(uvm_object::__m_uvm_status_container.bitstream); \
+                __m_uvm_status_container.status = 1; \
+              end \
+            end \
+          end \
+        end \
+      UVM_SETSTR: \
+        begin \
+          if(!((FLAG)&UVM_READONLY)) begin \
+            bit wildcard_index__; \
+            int index__; \
+            __m_uvm_status_container.scope.set_arg(`"ARG`"); \
+            index__ = uvm_get_array_index_int(str__, wildcard_index__); \
+            if(uvm_is_array(str__)  && (index__ != -1)) begin\
+              if(wildcard_index__) begin \
+                for(index__=0; index__<ARG.size(); ++index__) begin \
+                  if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$sformatf("[%0d]", index__)})) begin \
+	                  T t__; \
+                    if (__m_uvm_status_container.print_matches) \
+                      uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg(), $sformatf("[%0d]",index__)}, UVM_LOW); \
+                    void'(uvm_enum_wrapper#(T)::from_name(uvm_object::__m_uvm_status_container.stringv, t__)); ARG[index__]=t__; \
+                    __m_uvm_status_container.status = 1; \
+                  end \
+                end \
+              end \
+              else if(uvm_is_match(str__, {__m_uvm_status_container.scope.get_arg(),$sformatf("[%0d]", index__)})) begin \
+	            T t__; \
+                if(index__+1 > ARG.size()) begin \
+                  int sz = index__; \
+                  T tmp__; \
+                  `M_UVM_``TYPE``_RESIZE(ARG,tmp__) \
+                end \
+                if (__m_uvm_status_container.print_matches) \
+                  uvm_report_info("STRMTC", {"set_int()", ": Matched string ", str__, " to field ", __m_uvm_status_container.get_full_scope_arg()}, UVM_LOW); \
+                void'(uvm_enum_wrapper#(T)::from_name(uvm_object::__m_uvm_status_container.stringv, t__)); ARG[index__]=t__; \
                 __m_uvm_status_container.status = 1; \
               end \
             end \
@@ -3315,14 +3392,11 @@ endfunction \
 //
 `define uvm_pack_intN(VAR,SIZE) \
    begin \
-   if (packer.big_endian) begin \
-     longint tmp__ = VAR; \
-     for (int i=0; i<SIZE; i++) \
-       packer.m_bits[packer.count + i] = tmp__[SIZE-1-i]; \
-   end \
-   else begin \
-     packer.m_bits[packer.count +: SIZE] = VAR; \
-   end \
+   if (packer.big_endian) \
+       packer.m_bits[packer.count +: SIZE] = { << {VAR} }; \
+   else \
+       packer.m_bits[packer.count +: SIZE] = VAR; \
+   \
    packer.count += SIZE; \
    end
 
@@ -3407,7 +3481,7 @@ endfunction \
     begin \
     `uvm_pack_sarrayN(VAR,8) \
     if (packer.use_metadata) \
-      `uvm_pack_intN(0,8) \
+      `uvm_pack_intN(8'b0,8) \
     end
 
 
@@ -3483,16 +3557,11 @@ endfunction \
 //
 `define uvm_unpack_intN(VAR,SIZE) \
    begin \
-   if (packer.big_endian) begin \
-     int cnt__ = packer.count + SIZE; \
-     uvm_bitstream_t tmp__ = VAR; \
-     for (int i=0; i<SIZE; i++) \
-       tmp__[i] = packer.m_bits[cnt__ - i - 1]; \
-     VAR = tmp__; \
-   end \
-   else begin \
+   if (packer.big_endian) \
+     { << { VAR }} = packer.m_bits[packer.count +: SIZE];  \
+   else \
      VAR = packer.m_bits[packer.count +: SIZE]; \
-   end \
+   \
    packer.count += SIZE; \
    end
 
@@ -3505,9 +3574,12 @@ endfunction \
 //
 `define uvm_unpack_enumN(VAR,SIZE,TYPE) \
    begin \
-   longint e__; \
-   `uvm_unpack_intN(e__,SIZE) \
-   VAR = TYPE'(e__); \
+   if (packer.big_endian) \
+     { << { VAR }} = packer.m_bits[packer.count +: SIZE];  \
+   else \
+     VAR = TYPE'(packer.m_bits[packer.count +: SIZE]); \
+   \
+   packer.count += SIZE; \
    end
 
 
@@ -3533,9 +3605,10 @@ endfunction \
 `define uvm_unpack_arrayN(VAR,SIZE) \
     begin \
     int sz__; \
-    if (packer.use_metadata) \
+    if (packer.use_metadata) begin \
       `uvm_unpack_intN(sz__,32) \
-    VAR = new[sz__]; \
+      VAR = new[sz__]; \
+    end \
     `uvm_unpack_sarrayN(VAR,SIZE) \
     end
 

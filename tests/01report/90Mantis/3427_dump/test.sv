@@ -60,9 +60,9 @@ module top;
     endfunction : build_phase
 
     task run_phase(uvm_phase phase);
-      $display("START OF GOLD FILE");
+      $display("GOLD-FILE-START");
       dump_report_state();
-      $display("END OF GOLD FILE");
+      $display("GOLD-FILE-END");
     endtask : run_phase
   endclass : test
 

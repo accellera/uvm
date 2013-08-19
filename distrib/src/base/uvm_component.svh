@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010-2011 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -1155,10 +1156,10 @@ virtual class uvm_component extends uvm_report_object;
   // this level of hierarchy or below. In typical usage, this method is
   // equivalent to:
   //
-  //|  factory.set_inst_override_by_type({get_full_name(),".",
-  //|                                     relative_inst_path},
-  //|                                     original_type,
-  //|                                     override_type);
+  //|  factory.set_inst_override_by_type( original_type,
+  //|                                     override_type,
+  //|                                     {get_full_name(),".",
+  //|                                      relative_inst_path});
   //
   // The ~relative_inst_path~ is relative to this component and may include
   // wildcards. The ~original_type~ represents the type that is being overridden.
@@ -1231,10 +1232,11 @@ virtual class uvm_component extends uvm_report_object;
   // method registers a factory override for components created at this level
   // of hierarchy or below. In typical usage, this method is equivalent to:
   //
-  //|  factory.set_inst_override_by_name({get_full_name(),".",
-  //|                                     relative_inst_path},
-  //|                                      original_type_name,
-  //|                                     override_type_name);
+  //|  factory.set_inst_override_by_name(original_type_name,
+  //|                                    override_type_name,
+  //|                                    {get_full_name(),".",
+  //|                                     relative_inst_path}
+  //|                                     );
   //
   // The ~relative_inst_path~ is relative to this component and may include
   // wildcards. The ~original_type_name~ typically refers to a preregistered type
@@ -1700,7 +1702,7 @@ function uvm_component::new (string name, uvm_component parent);
     return;
   end
 
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
 
   // Check that we're not in or past end_of_elaboration
   begin
@@ -1929,7 +1931,7 @@ function uvm_component uvm_component::lookup( string name );
   string leaf , remainder;
   uvm_component comp;
   uvm_root top;
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
 
   comp = this;
   
@@ -2044,6 +2046,7 @@ endfunction
 
 function void  uvm_component::print_override_info (string requested_type_name, 
                                                    string name="");
+                                                  uvm_factory factory=uvm_coreservice.get_factory();
   factory.debug_create_by_name(requested_type_name, get_full_name(), name);
 endfunction
 
@@ -2053,6 +2056,7 @@ endfunction
 
 function uvm_component uvm_component::create_component (string requested_type_name,
                                                         string name);
+  uvm_factory factory=uvm_coreservice.get_factory();
   return factory.create_component_by_name(requested_type_name, get_full_name(),
                                           name, this);
 endfunction
@@ -2063,6 +2067,7 @@ endfunction
 
 function uvm_object uvm_component::create_object (string requested_type_name,
                                                   string name="");
+  uvm_factory factory=uvm_coreservice.get_factory();
   return factory.create_object_by_name(requested_type_name,
                                        get_full_name(), name);
 endfunction
@@ -2074,7 +2079,7 @@ endfunction
 function void uvm_component::set_type_override (string original_type_name,
                                                 string override_type_name,
                                                 bit    replace=1);
-   factory.set_type_override_by_name(original_type_name,
+   uvm_factory factory=uvm_coreservice.get_factory();factory.set_type_override_by_name(original_type_name,
                                      override_type_name, replace);
 endfunction 
 
@@ -2085,6 +2090,7 @@ endfunction
 function void uvm_component::set_type_override_by_type (uvm_object_wrapper original_type,
                                                         uvm_object_wrapper override_type,
                                                         bit    replace=1);
+   uvm_factory factory=uvm_coreservice.get_factory();
    factory.set_type_override_by_type(original_type, override_type, replace);
 endfunction 
 
@@ -2096,6 +2102,7 @@ function void  uvm_component::set_inst_override (string relative_inst_path,
                                                  string original_type_name,
                                                  string override_type_name);
   string full_inst_path;
+  uvm_factory factory=uvm_coreservice.get_factory();
 
   if (relative_inst_path == "")
     full_inst_path = get_full_name();
@@ -2116,6 +2123,7 @@ function void uvm_component::set_inst_override_by_type (string relative_inst_pat
                                                         uvm_object_wrapper original_type,
                                                         uvm_object_wrapper override_type);
   string full_inst_path;
+  uvm_factory factory=uvm_coreservice.get_factory();
 
   if (relative_inst_path == "")
     full_inst_path = get_full_name();
@@ -3024,8 +3032,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
     else
       search_name = name;
 
-    if(!uvm_resource_pool::m_has_wildcard_names && 
-       !__m_uvm_status_container.field_array.exists(search_name) && 
+    if(!__m_uvm_status_container.field_array.exists(search_name) && 
        search_name != "recording_detail")
       continue;
 
@@ -3195,7 +3202,7 @@ function void uvm_component::m_set_cl_verb;
   static bit first = 1;
   string args[$];
   uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
-  uvm_root top = uvm_root::get();
+  uvm_root top = uvm_coreservice.get_root();
 
   if(!values.size())
     void'(uvm_cmdline_proc.get_arg_values("+uvm_set_verbosity=",values));

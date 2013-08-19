@@ -26,7 +26,7 @@ import uvm_pkg::*;
 
 class test extends uvm_test;
 
-   uvm_report_server old_serv;
+   uvm_default_report_server old_serv;
 
    `uvm_component_utils(test)
 
@@ -35,7 +35,7 @@ class test extends uvm_test;
    endfunction
 
    virtual task run_phase(uvm_phase phase);
-     uvm_report_server new_serv = new("new_serv");
+     uvm_default_report_server new_serv = new("new_serv");
      // Emit a message before setting the server to make sure counts are
      // properly copied over.
      `uvm_info("MSG1", "Some message", UVM_LOW)

@@ -56,6 +56,7 @@ module test;
   class simple_seq extends uvm_sequence #(simple_item);
     function new(string name="simple_seq");
       super.new(name);
+      set_automatic_phase_objection(1);
     endfunction
     `uvm_object_utils(simple_seq)    
     `uvm_declare_p_sequencer(simple_sequencer)

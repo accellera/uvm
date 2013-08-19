@@ -64,7 +64,7 @@ begin
    comp c;
    comp p;
    
-   svr = uvm_report_server::get_server();
+   svr = uvm_coreservice.get_report_server();
 
    $write("Testing raw object constructor...\n");
    obj::exp_name = "X";

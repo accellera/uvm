@@ -26,9 +26,9 @@ include $(UVM_HOME)/examples/Makefile.ius
 all: run
 
 run:
-	$(IUS) +incdir+. top.sv +FILE=./run_func_A.log +FUNC >& fa
-	$(IUS) +incdir+. top.sv +FILE=./run_func_B.log +FUNC +DESTABLE >& fb
-	$(IUS) +incdir+. top.sv +FILE=./run_task_A.log  >& ta
-	$(IUS) +incdir+. top.sv +FILE=./run_task_B.log +DESTABLE >& tb
+	$(IUS) +incdir+. top.sv +FILE=./run_func_A.log +FUNC
+	$(IUS) +incdir+. top.sv +FILE=./run_func_B.log +FUNC +DESTABLE
+	$(IUS) +incdir+. top.sv +FILE=./run_task_A.log
+	$(IUS) +incdir+. top.sv +FILE=./run_task_B.log +DESTABLE
 	diff ./run_func_A.log ./run_func_B.log
 	diff ./run_task_A.log ./run_task_B.log 

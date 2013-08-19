@@ -43,6 +43,9 @@ typedef enum {UVM_APPEND, UVM_PREPEND} uvm_apprepend;
 // Forward declaration since scope stack uses uvm_objects now
 typedef class uvm_object;
 
+typedef class uvm_coreservice_t;
+typedef class uvm_factory;
+
 //----------------------------------------------------------------------------
 //
 // CLASS- uvm_scope_stack
@@ -293,37 +296,6 @@ class uvm_status_container;
   endfunction
 endclass
 
-
-
-//------------------------------------------------------------------------------
-//
-// CLASS- uvm_copy_map
-//
-//
-// Internal class used to map rhs to lhs so when a cycle is found in the rhs,
-// the correct lhs object can be bound to it.
-//------------------------------------------------------------------------------
-
-class uvm_copy_map;
-  local uvm_object m_map[uvm_object];
-  function void set(uvm_object key, uvm_object obj);
-    m_map[key] = obj;
-  endfunction
-  function uvm_object get(uvm_object key);
-    if (m_map.exists(key))
-       return m_map[key];
-    return null;
-  endfunction
-  function void clear();
-    m_map.delete();
-  endfunction 
-  function void delete(uvm_object v);
-    m_map.delete(v);
-  endfunction 
-endclass
-
-
-
 // Variable- uvm_global_random_seed
 //
 // Create a seed which is based off of the global seed which can be used to seed
@@ -503,12 +475,21 @@ endfunction
 function string uvm_vector_to_string (uvm_bitstream_t value, int size,
                                       uvm_radix_enum radix=UVM_NORADIX,
                                       string radix_str="");
+                                      
+                                      uvm_bitstream_t v;
+                                      logic q[];
 
   // sign extend & don't show radix for negative values
   if (radix == UVM_DEC && value[size-1] === 1)
     return $sformatf("%0d", value);
 
-  value &= (1 << size)-1;
+  if($isunknown(value)) begin
+  	q = new[size];
+  	{>>{q}} = value;
+  	value = {>>{q}};
+  	end
+  else 
+  	value &= (1 << size)-1;
 
   case(radix)
     UVM_BIN:      return $sformatf("%0s%0b", radix_str, value);
@@ -624,7 +605,7 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
     uvm_component list[$];
     types_t types;
     uvm_root top;
-    top = uvm_root::get();
+    top = uvm_coreservice.get_root();
     top.find_all("*",list,start);
     foreach (list[i]) begin
       TYPE typ;
@@ -653,6 +634,8 @@ class uvm_utils #(type TYPE=int, string FIELD="config");
   static function TYPE create_type_by_name(string type_name, string contxt);
     uvm_object obj;
     TYPE  typ;
+    uvm_factory factory=uvm_coreservice.get_factory();
+    
     obj = factory.create_object_by_name(type_name,contxt,type_name);
        if (!$cast(typ,obj))
          uvm_report_error("WRONG_TYPE",{"The type_name given '",type_name,

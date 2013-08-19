@@ -110,8 +110,9 @@ class test extends uvm_test;
 
   endtask
 
-   function void report_phase(uvm_phase phase);
-      uvm_report_server svr = uvm_report_server::get_server();
+   function void report();
+      uvm_report_server svr;
+      svr = uvm_coreservice.get_report_server();
 
       if (svr.get_severity_count(UVM_FATAL) +
           svr.get_severity_count(UVM_ERROR) == 0)
