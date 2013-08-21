@@ -32,20 +32,20 @@
   `include "base/uvm_object_globals.svh"
   `include "base/uvm_misc.svh"
   
+  `include "base/uvm_pool.svh"
+  `include "base/uvm_queue.svh"
+
   // The base object element. Contains data methods (copy/compare etc) and
   // factory creation methods (create). Also includes control classes.
   `include "base/uvm_object.svh"
 
-  `include "base/uvm_pool.svh"
-  `include "base/uvm_queue.svh"
-
   `include "base/uvm_factory.svh"
   `include "base/uvm_registry.svh"
-
 
   // Resources/configuration facility
   `include "base/uvm_spell_chkr.svh"
   `include "base/uvm_resource.svh"
+
 `ifdef UVM_USE_RESOURCE_CONVERTER
   `include "deprecated/uvm_resource_converter.svh"
 `endif
