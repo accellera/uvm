@@ -361,7 +361,8 @@ class uvm_sequence_base extends uvm_sequence_item;
   // optional execution of <pre_body>.
   // This method should not be called directly by the user.
 
-  virtual task pre_start();  
+  virtual task pre_start();
+    apply_config_settings(print_config_matches);
     return;
   endtask
 
@@ -769,6 +770,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     if (set_priority < 0)
       set_priority = get_priority();
     
+    item.apply_config_settings(print_config_matches);
     sequencer.wait_for_grant(this, set_priority);
 
     `ifndef UVM_DISABLE_AUTO_ITEM_RECORDING
