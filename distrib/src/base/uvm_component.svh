@@ -983,13 +983,6 @@ virtual class uvm_component extends uvm_report_object;
 
   extern function void print_config_with_audit(bit recurse = 0);
 
-  // Variable: print_config_matches
-  //
-  // Setting this static variable causes get_config_* to print info about
-  // matching configuration settings as they are being applied.
-
-  static bit print_config_matches;
-
 
   //----------------------------------------------------------------------------
   // Group: Objection Interface

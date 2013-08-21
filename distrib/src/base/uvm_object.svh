@@ -797,9 +797,6 @@ virtual class uvm_object extends uvm_void;
   // method is implemented, the object property associated with the
   // field_name is assigned the given value. 
   //
-  // This function is called by <uvm_component::build_phase>.
-  // For other objects, user can call this function to apply config settings.
-  //
   // The apply_config_settings method determines all the configuration
   // settings targeting this object and calls the appropriate set_*_local
   // method to set each one. To work, you must override one or more set_*_local
@@ -808,16 +805,27 @@ virtual class uvm_object extends uvm_void;
   // require special handling by the set_*_local methods; the macros provide
   // the set_*_local functionality for you. 
   //
+  // This function is called by <uvm_component::build_phase>.
+  // For other objects, you can call this function expicitly 
+  // to apply config settings.
+  //
   // If you do not want apply_config_settings to be called for a component,
   // then the build_phase() method should be overloaded and you should not call
   // super.build_phase(phase). Likewise, apply_config_settings can be overloaded to
   // customize automated configuration.
   //
   // When the ~verbose~ bit is set, all overrides are printed as they are
-  // applied. If the component's <print_config_matches> property is set, then
-  // apply_config_settings is automatically called with ~verbose~ = 1.
+  // applied. If uvm_object <print_config_matches> property is set, then
+  // automatic calls to apply_config_settings are done with ~verbose~ = 1.
 
   extern virtual function void apply_config_settings (bit verbose=0);
+
+  // Variable: print_config_matches
+  //
+  // Setting this static variable causes get_config_* to print info about
+  // matching configuration settings as they are being applied.
+
+  static bit print_config_matches;
 
   
 endclass
