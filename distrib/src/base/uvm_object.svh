@@ -805,14 +805,20 @@ virtual class uvm_object extends uvm_void;
   // require special handling by the set_*_local methods; the macros provide
   // the set_*_local functionality for you. 
   //
-  // This function is called by <uvm_component::build_phase>.
+  // For components, this function is called by <uvm_component::build_phase>.
+  // For sequences, this function is called by <uvm_sequence_base::pre_start>.
+  // For sequence items, this function is called by <uvm_sequence_base::start_item>.
   // For other objects, you can call this function expicitly 
   // to apply config settings.
   //
   // If you do not want apply_config_settings to be called for a component,
   // then the build_phase() method should be overloaded and you should not call
-  // super.build_phase(phase). Likewise, apply_config_settings can be overloaded to
-  // customize automated configuration.
+  // super.build_phase(phase). 
+  // If you do not want apply_config_settings to be called for a sequence, 
+  // then pre_start() method should be overloaded and you should not call
+  // super.pre_start().
+  // Likewise, apply_config_settings can be overloaded to
+  // customize or cancel automated configuration.
   //
   // When the ~verbose~ bit is set, all overrides are printed as they are
   // applied. If uvm_object <print_config_matches> property is set, then
