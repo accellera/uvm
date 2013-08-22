@@ -2,6 +2,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc. 
 //   Copyright 2010-2011 Synopsys, Inc.
+//   Copyright 2013      Freescale Semiconductor, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -360,6 +361,10 @@ class uvm_sequence_base extends uvm_sequence_item;
   // This task is a user-definable callback that is called before the
   // optional execution of <pre_body>.
   // This method should not be called directly by the user.
+  //
+  // If you do not want apply_config_settings to be called for a sequence,
+  // then the pre_start() method should be overloaded and you should not call
+  // super.pre_start().
 
   virtual task pre_start();
     apply_config_settings(print_config_matches);
@@ -734,6 +739,9 @@ class uvm_sequence_base extends uvm_sequence_item;
   // the default sequencer specified by m_sequencer.  Randomization
   // may be done between start_item and finish_item to ensure late generation
   //
+  // If you do not want apply_config_settings to be called for a sequence_item,
+  // overload apply_config_settings to do nothing.
+
 
   virtual task start_item (uvm_sequence_item item,
                            int set_priority = -1,

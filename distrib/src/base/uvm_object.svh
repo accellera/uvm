@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
+//   Copyright 2013 Freescale Semiconductor, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -815,8 +816,10 @@ virtual class uvm_object extends uvm_void;
   // then the build_phase() method should be overloaded and you should not call
   // super.build_phase(phase). 
   // If you do not want apply_config_settings to be called for a sequence, 
-  // then pre_start() method should be overloaded and you should not call
+  // then the pre_start() method should be overloaded and you should not call
   // super.pre_start().
+  // If you do not want apply_config_settings to be called for a sequence_item, 
+  // overload apply_config_settings to do nothing.
   // Likewise, apply_config_settings can be overloaded to
   // customize or cancel automated configuration.
   //
