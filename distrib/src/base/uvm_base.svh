@@ -96,5 +96,6 @@
 
   // Command Line Processor
   `include "base/uvm_cmdline_processor.svh"
+  `include "base/uvm_dynamic_range_constraint.svh"
 
 `endif // UVM_BASE_SVH
