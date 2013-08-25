@@ -1,3 +1,23 @@
+//
+//----------------------------------------------------------------------
+//   Copyright 2013 Freescale Semiconductor, Inc.
+//   All Rights Reserved Worldwide
+//
+//   Licensed under the Apache License, Version 2.0 (the
+//   "License"); you may not use this file except in
+//   compliance with the License.  You may obtain a copy of
+//   the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in
+//   writing, software distributed under the License is
+//   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+//   CONDITIONS OF ANY KIND, either express or implied.  See
+//   the License for the specific language governing
+//   permissions and limitations under the License.
+//----------------------------------------------------------------------
+
 `ifndef UVM_DYNAMIC_RANGE_CONSTRAINT_SV
 `define UVM_DYNAMIC_RANGE_CONSTRAINT_SV
 
@@ -12,23 +32,25 @@ class range_limits;
 endclass: range_limits
 
 class uvm_dynamic_range_constraint_parser;
-  //split the string parm to integers with delimiter ":"
+  // Split the string parm to integers with delimiter ":"
   static function void split_param_to_integer(string param, output int unsigned values[$]);
     string str_values[$];
-    //fisrt split the param into strings
+
+    // First split the param into strings
     split_param_to_string(param, str_values);
-    //then convert the string into integers
-    foreach(str_values[i])
-      str_2_uint(str_values[i], values[i]);
+
+    // Then convert the string into integers
+    foreach(str_values[index])
+      str_2_uint(str_values[index], values[index]);
   endfunction: split_param_to_integer
   
-  //split the string parm to sub strings with delimiter ":"
+  // Split the string parm to sub strings with delimiter ":"
   static function void split_param_to_string(string param, output string single_values[$]);
     byte c;
     string value = "";
-    for(int i = 0; i < param.len(); i ++ )
+    for (int unsigned index = 0; index < param.len(); ++index)
     begin
-      c = param.getc(i);
+      c = param.getc(index);
       if(c != ":")
         value = {value, string'(c)};
       else
@@ -38,13 +60,13 @@ class uvm_dynamic_range_constraint_parser;
       end
     end
     single_values.push_back(value);
-  endfunction : split_param_to_string
+  endfunction: split_param_to_string
 
-  //change the str into integer
+  // Change the str into integer
   static function void str_2_uint(string str, output int unsigned data);
     string str_format;
     str = str.tolower();
-    if(str.getc(0) == "0")
+    if (str.getc(0) == "0")
     case(str.getc(1))
       "h":      
         str_format = "0h%h";
@@ -58,18 +80,19 @@ class uvm_dynamic_range_constraint_parser;
         str_format = "0b%b";
       default:  
        // The second character was not a str_radix specifier, so
-       //   default to interpreting the entire string as decimal.
+       // default to interpreting the entire string as decimal.
        str_format = "%d";
     endcase
     else
-      // There was no leading zero character, so default to interpreting the
-      //   entire string as decimal.
+      // There was no leading zero character, so default to interpreting
+      // the entire string as decimal.
       str_format = "%d";
-    if(!$sscanf(str, str_format, data))
+    if (!$sscanf(str, str_format, data))
        uvm_report_warning("DYNAMICRANDOM",{str, " could not be interped into integer"}); 
   endfunction: str_2_uint
   
 endclass: uvm_dynamic_range_constraint_parser
+
 
 class uvm_dynamic_range_constraint #(string NAME="") extends uvm_object;
   typedef uvm_dynamic_range_constraint #(NAME) this_type;
@@ -78,10 +101,10 @@ class uvm_dynamic_range_constraint #(string NAME="") extends uvm_object;
   static local this_type m_inst;
 
   static function this_type get_inst();
-    if(m_inst == null)
-      m_inst = new();
+    if (m_inst == null)
+       m_inst = new();
     return m_inst;
-  endfunction
+  endfunction: get_inst
 
   static function int unsigned get_rand_value();
     this_type inst = this_type::get_inst();
@@ -99,23 +122,25 @@ class uvm_dynamic_range_constraint #(string NAME="") extends uvm_object;
     string params[$];
     string constraint_param;
     int unsigned values[$];
-    int index = 0;
+    int unsigned index = 0;
     int unsigned low;
     int arg_count = clp.get_arg_values({"+",NAME}, params);
-    if(arg_count == 0)
-      return;
+
+    if (arg_count == 0)
+       return;
     
-    if(!$sscanf(params[0], "=%s", constraint_param))
+    if (!$sscanf(params[0], "=%s", constraint_param))
     begin
       uvm_report_warning("DYNAMICRANDOM", 
                           $sformatf("the format of the %s parameter is wrong", NAME));
       return;
     end
-    if(arg_count > 1)
+
+    if (arg_count > 1)
     begin
       string max_constraint_param = params[0];
-      for(int i = 1; i < params.size(); i ++)
-        max_constraint_param = {max_constraint_param, ", ", params[i]};
+      for(int unsigned lindex = 1; lindex < params.size(); ++lindex)
+        max_constraint_param = {max_constraint_param, ", ", params[lindex]};
       uvm_report_warning("DYNAMICRANDOM", 
                          $sformatf("Multiple (%0d) %s arguments provided on the command line.  '%s' will be used.  Provided list: %s.", 
                                     arg_count, NAME, params[0], max_constraint_param), UVM_NONE);
@@ -125,19 +150,21 @@ class uvm_dynamic_range_constraint #(string NAME="") extends uvm_object;
                       $sformatf("'%s=%s' provided on the command line is being applied.", NAME, params[0]), UVM_NONE);
     
     uvm_dynamic_range_constraint_parser::split_param_to_integer(constraint_param, values);
-    if(values.size()!= 1 && values.size() != 2 && (values.size() % 3) != 0)
+
+    if ((values.size() != 1) && (values.size() != 2) && ((values.size() % 3) != 0))
        uvm_report_warning("DYNAMICRANDOM", 
                           $sformatf("the size of the %s parameter is %0d", NAME, values.size()));
    
     //after parse the parameter add the constraint
+
     while(index + 3 <= values.size())
     begin
       add(values[index], values[index+1], values[index+2]);
       index += 3;
     end
-    if(index + 2 == values.size())
-      add(values[index], values[index+1], 1);
-    else if(index + 1 == values.size())
+    if (index + 2 == values.size())
+       add(values[index], values[index+1], 1);
+    else if (index + 1 == values.size())
       add(values[index], values[index], 1);
  endfunction: get_cmdline_param
 
@@ -186,4 +213,5 @@ class uvm_dynamic_range_constraint #(string NAME="") extends uvm_object;
     max_weight += weight*(max-min+1);
   endfunction: add
 endclass: uvm_dynamic_range_constraint
+
 `endif //UVM_DYNAMIC_RANGE_CONSTRAINT_SV
