@@ -740,7 +740,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // may be done between start_item and finish_item to ensure late generation
   //
   // If you do not want apply_config_settings to be called for a sequence_item,
-  // overload apply_config_settings to do nothing.
+  // overload apply_config_settings of that sequence_item to do nothing.
 
 
   virtual task start_item (uvm_sequence_item item,
