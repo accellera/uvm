@@ -26,49 +26,38 @@ import uvm_pkg::*;
 class test extends uvm_test;
 
    `uvm_component_utils(test)
-   
-//   rand int unsigned value;
-//   constraint value_range
-//   {
-//     value dist {[1:2] := 2, [2:3] :=1};
-//   };
 
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
-   endfunction
+   endfunction: new
 
    virtual task run();
       uvm_top.stop_request();
-   endtask
+   endtask: run
 
    virtual function void report();
      int weight[20];
      int temp;
-     uvm_dynamic_range_constraint#("RANDINT1") drc = uvm_dynamic_range_constraint#("RANDINT1")::get_inst() ;
+     uvm_dynamic_range_constraint#("RANDINT1") drc  = uvm_dynamic_range_constraint#("RANDINT1")::get_inst() ;
      uvm_dynamic_range_constraint#("RANDINT2") drc2 = uvm_dynamic_range_constraint#("RANDINT2")::get_inst() ;
      uvm_dynamic_range_constraint#("RANDINT3") drc3 = uvm_dynamic_range_constraint#("RANDINT3")::get_inst() ;
-     for(int index =0; index < 100; index ++)
+     uvm_dynamic_range_constraint#("RANDINT4") drc4 = uvm_dynamic_range_constraint#("RANDINT4")::get_inst() ;
+     for(int unsigned index = 0; index != 100; ++index)
      begin
-//       randomize();
-//       temp = value;
-//       drc.randomize();
-//       temp = drc.value;
        temp = uvm_dynamic_range_constraint#("RANDINT1")::get_rand_value();
        weight[temp]++;
      end
-     for(int index=1; index < 20; index ++)
+     $write("Statistics for 100 randomizations of constraint RANDINT1:\n");
+     for (int unsigned index=1; index != 20; ++index)
      begin
-       $write("weight of %0d is %0d\n", index, weight[index]);
+       $write("  %0d was chosen %0d times\n", index, weight[index]);
      end  
      
-     $write("** UVM TEST PASSED **\n");
-   endfunction
-endclass
+     $write("\n** UVM TEST PASSED **\n");
+   endfunction: report
 
+endclass: test
 
-initial
-  begin
-     run_test();
-  end
+initial run_test();
 
-endprogram
+endprogram: top
