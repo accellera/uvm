@@ -52,7 +52,8 @@ typedef class uvm_component;
 // While convenient, it is generally the responsibility of drivers to mark a
 // transaction's progress during execution.  To allow the driver or layering sequence
 // to control sequence item timestamps, events, and recording, you must call
-// <uvm_seq_item_pull_port #(REQ,RSP)::disable_auto_item_recording> in the constructor.
+// <uvm_seq_item_pull_port #(REQ,RSP)::disable_auto_item_recording> at the begining
+// of the run_phase() method.
 //
 // Users may also use the transaction's event pool, <events>,
 // to define custom events for the driver to trigger and the sequences to wait on. Any

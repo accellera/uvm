@@ -37,22 +37,21 @@ class piped_driver extends simple_driver;
   // Constructor
   function new (string name, uvm_component parent);
     super.new(name, parent);
-    seq_item_port.disable_auto_item_recording();
   endfunction : new
 
   task run_phase(uvm_phase phase);
+    seq_item_port.disable_auto_item_recording();
+
     while(1) begin
-      uvm_sequencer_base sqr;
       uvm_sequence_base pseq;
       seq_item_port.get_next_item(req);
       `uvm_info("Driver", "Received item :", UVM_MEDIUM)
       req.print();
-      sqr = req.get_sequencer();
       pseq = req.get_parent_sequence();
-      sqr.accept_tr(req);
+      accept_tr(req);
       #2;
-      sqr.begin_child_tr(req, (pseq == null) ? 0 : pseq.m_tr_handle,
-                         req.get_root_sequence_name());
+      begin_child_tr(req, (pseq == null) ? 0 : pseq.get_tr_handle(),
+                     req.get_root_sequence_name());
 
       #3;
       fork
@@ -61,7 +60,7 @@ class piped_driver extends simple_driver;
           #12;
           `uvm_info("Driver", "Completed item :", UVM_MEDIUM)
           tr.print();
-          sqr.end_tr(tr);
+          end_tr(tr);
         end
       join_none
       seq_item_port.item_done();
