@@ -364,7 +364,8 @@ class uvm_sequence_base extends uvm_sequence_item;
   //
   // If you do not want apply_config_settings to be called for a sequence,
   // then the pre_start() method should be overloaded and you should not call
-  // super.pre_start().
+  // super.pre_start().  Alternatively, apply_config_settings can be overloaded
+  // to do nothing
 
   virtual task pre_start();
     apply_config_settings(print_config_matches);
