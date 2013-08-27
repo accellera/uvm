@@ -33,10 +33,12 @@
   `define UVM_HDL_NO_DPI
   `define UVM_REGEX_NO_DPI
   `define UVM_CMDLINE_NO_DPI
+  `define UVM_ALLOC_NO_DPI
 `endif
 
 `include "dpi/uvm_hdl.svh"
 `include "dpi/uvm_svcmd_dpi.svh"
 `include "dpi/uvm_regex.svh"
+`include "dpi/uvm_allocator_dpi.svh"
 
 `endif // UVM_DPI_SVH

@@ -26,6 +26,8 @@
 // or by compiling individual files then linking them together.
 //
 
+
+#include "list_db.cc"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -37,5 +39,7 @@ extern "C" {
 
 #ifdef __cplusplus
 }
+#include "uvm_allocator_dpi.cc"
+
 #endif
 

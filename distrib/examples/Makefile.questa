@@ -33,7 +33,7 @@ UVM_HOME ?= ..
 
 LIBDIR  = $(UVM_HOME)/lib
 #GCC     = $(MTI_HOME)/gcc-4.1.2-linux/bin/g++
-GCC     = gcc
+GCC     = g++
 TEST    = /usr/bin/test
 BITS    ?= 32
 LIBNAME = uvm_dpi
@@ -47,7 +47,6 @@ GCCCMD =  $(GCC) \
         -g \
         -W \
         -shared \
-        -x c \
         -I$(MTI_HOME)/include \
         $(DPI_SRC) \
         -o $(LIBDIR)/$(LIBNAME).so
@@ -59,7 +58,6 @@ GCC_WINCMD = \
         -W \
         -shared \
         -Bsymbolic \
-        -x c \
         -I$(MTI_HOME)/include \
         $(DPI_SRC) \
         -o $(LIBDIR)/$(LIBNAME).dll \

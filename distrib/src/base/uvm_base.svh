@@ -53,6 +53,7 @@
   `include "base/uvm_resource_db.svh"
   `include "base/uvm_config_db.svh"
 
+  `include "base/uvm_item_allocator.svh"
 
   // Policies
   `include "base/uvm_printer.svh"
