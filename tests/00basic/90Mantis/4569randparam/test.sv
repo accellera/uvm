@@ -36,24 +36,44 @@ class test extends uvm_test;
    endtask: run
 
    virtual function void report();
-     int weight[20];
+     int weight[int];
+     int check_weight[int];
      int temp;
+     int index;
+     int error = 0;
      uvm_dynamic_range_constraint#("RANDINT1") drc  = uvm_dynamic_range_constraint#("RANDINT1")::get_inst() ;
      uvm_dynamic_range_constraint#("RANDINT2") drc2 = uvm_dynamic_range_constraint#("RANDINT2")::get_inst() ;
      uvm_dynamic_range_constraint#("RANDINT3") drc3 = uvm_dynamic_range_constraint#("RANDINT3")::get_inst() ;
      uvm_dynamic_range_constraint#("RANDINT4") drc4 = uvm_dynamic_range_constraint#("RANDINT4")::get_inst() ;
+     //set the hardcoded check weight for "0xF:0x10:1; 2:3:2"
+     check_weight['hF] = 17;
+     check_weight['h10] = 17;
+     check_weight[2] = 33;
+     check_weight[3] = 33;
      for(int unsigned index = 0; index != 100; ++index)
      begin
        temp = uvm_dynamic_range_constraint#("RANDINT1")::get_rand_value();
        weight[temp]++;
      end
      $write("Statistics for 100 randomizations of constraint RANDINT1:\n");
-     for (int unsigned index=1; index != 20; ++index)
-     begin
-       $write("  %0d was chosen %0d times\n", index, weight[index]);
-     end  
+     if(weight.first(index))
+       do
+       begin
+         $write("  %0d was chosen %0d times\n", index, weight[index]);
+         if(weight[index] < check_weight[index] - 5 || weight[index] > check_weight[index] + 5)
+         begin
+           $write("  %0d was out of the expecting times, [%0d, %0d]", index, check_weight[index]-5, check_weight[index]+5 );
+           error = 1;
+         end
+       end
+       while(weight.next(index));
+
+     //check the correctness
      
-     $write("\n** UVM TEST PASSED **\n");
+     if(error)
+       $write("\n** UVM TEST FAILED **\n");
+     else
+       $write("\n** UVM TEST PASSED **\n");
    endfunction: report
 
 endclass: test

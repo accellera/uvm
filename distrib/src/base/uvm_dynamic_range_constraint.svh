@@ -147,7 +147,6 @@ class uvm_dynamic_range_constraint #(string NAME="") extends uvm_object;
     string constraint_param;
     int unsigned values[$];
     int unsigned index = 0;
-    int unsigned low;
     int arg_count = clp.get_arg_values({"+",NAME}, params);
 
     if (arg_count == 0)
