@@ -79,7 +79,6 @@ module top();
     endtask
     task body();
       `uvm_info(get_type_name(), $sformatf("body starting"), UVM_HIGH)
-        apply_config_settings();
       `uvm_info("SEQ", {"param = ", param}, UVM_LOW)
         if (param != "FOO")
           `uvm_error("SEQ", {"param is ", param, " expected FOO"})
