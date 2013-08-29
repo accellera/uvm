@@ -412,6 +412,23 @@ class uvm_sequencer_base extends uvm_component;
   int m_is_relevant_completed;
 
 
+`ifdef UVM_DISABLE_AUTO_ITEM_RECORDING
+  local bit m_auto_item_recording = 0;
+`else
+  local bit m_auto_item_recording = 1;
+`endif
+
+
+  // Access to following internal methods provided via seq_item_export
+
+  virtual function void disable_auto_item_recording();
+    m_auto_item_recording = 0;
+  endfunction
+
+  virtual function bit is_auto_item_recording_enabled();
+    return m_auto_item_recording;
+  endfunction
+
   //----------------------------------------------------------------------------
   // DEPRECATED - DO NOT USE IN NEW DESIGNS - NOT PART OF UVM STANDARD
   //----------------------------------------------------------------------------

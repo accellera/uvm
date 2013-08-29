@@ -221,4 +221,31 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
     uvm_report_error("put_response", `UVM_SEQ_ITEM_FUNCTION_ERROR, UVM_NONE);
   endfunction
 
+  // Function: disable_auto_item_recording
+  //
+  // By default, item recording is performed automatically when
+  // get_next_item() and item_done() are called.
+  // However, this works only for simple, in-order, blocking transaction
+  // execution. For pipelined and out-of-order transaction execution, the
+  // driver must turn off this automatic recording and call
+  // uvm_transaction::accept_tr, uvm_transaction::begin_tr
+  // and uvm_transaction::end_tr explicitly at appropriate points in time.
+  //
+  // This methods be called at the beginning of the driver's run_phase() method.
+  // Once disabled, automatic recording cannot be re-enabled.
+  //
+  // For backward-compatibility, automatic item recording can be globally
+  // turned off at compile time by defining UVM_DISABLE_AUTO_ITEM_RECORDING
+
+  virtual function void disable_auto_item_recording();
+    uvm_report_error("disable_auto_item_recording", `UVM_SEQ_ITEM_FUNCTION_ERROR, UVM_NONE);
+  endfunction
+  
+  // Function: is_auto_item_recording_enabled
+  //
+  // Return TRUE if automatic item recording is enabled for this port instance.
+
+  virtual function bit is_auto_item_recording_enabled();
+    uvm_report_error("is_auto_item_recording_enabled", `UVM_SEQ_ITEM_FUNCTION_ERROR, UVM_NONE);
+  endfunction
 endclass
