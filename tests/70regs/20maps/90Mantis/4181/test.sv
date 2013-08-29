@@ -137,15 +137,18 @@ program top;
             super.new(name,parent);
         endfunction
 
-        uvm_sequencer#(bus_item) rseqr=new("bus-sqr",this); 
-        dummy_driver#(bus_item) driver=new("dummy-driver",this);
+        uvm_sequencer#(bus_item) rseqr;
+        dummy_driver#(bus_item) driver;
 
         dut blk=new("blk");
 
         virtual function void build_phase(uvm_phase phase);
             super.build_phase(phase);               
-            driver.seq_item_port.connect(rseqr.seq_item_export);
             blk.build();
+
+            rseqr=new("bus-sqr",this); 
+            driver=new("dummy-driver",this);
+            driver.seq_item_port.connect(rseqr.seq_item_export);
 
             blk.lock_model();
         endfunction
@@ -167,7 +170,10 @@ program top;
             blk.bus8.set_transaction_order_policy(down);
             blk.r0.read(status,val);
             `uvm_info("TEST",$sformatf("%p",queue),UVM_NONE)
-            assert(queue == '{0,1,2,3,3,2,1,0}) else `uvm_error("TEST","test failed");
+            begin
+                int unsigned exp_q[$] = '{0,1,2,3,3,2,1,0};
+                assert(queue == exp_q) else `uvm_error("TEST","test failed");
+            end
             
             begin
                 uvm_report_server svr;
