@@ -46,6 +46,8 @@ In increasing Mantis numerical order:
 
 (*) Mantis 3472: Deprecated set/get_config_int/string/object
 
+(*) Mantis 3586: Added support for run-time disabling of auto item recording
+
 (*) Mantis 3693: Added uvm_enum_wrapper#(T) type, and functionality to set
 enumerations by string name.  This allows for enum fields to be
 configured using uvm_config_db#(string)::set, as well as from the 
