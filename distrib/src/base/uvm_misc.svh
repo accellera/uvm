@@ -580,6 +580,7 @@ function automatic bit uvm_has_wildcard (string arg);
 
 endfunction
 
+
 //------------------------------------------------------------------------------
 // CLASS: uvm_utils
 //
@@ -691,4 +692,3 @@ class process_container_c;
    endfunction
 endclass
 `endif
-

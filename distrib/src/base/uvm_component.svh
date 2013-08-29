@@ -40,9 +40,6 @@ typedef class uvm_sequence_item;
 //     group of standard phase methods and an API for custom phases and
 //     multiple independent phasing domains to mirror DUT behavior e.g. power
 //
-// Configuration - provides methods for configuring component topology and other
-//     parameters ahead of and during component construction.
-//
 // Reporting - provides a convenience interface to the <uvm_report_handler>. All
 //     messages, warnings, and errors are processed through this interface.
 //
@@ -774,9 +771,12 @@ virtual class uvm_component extends uvm_report_object;
 
   extern virtual function void resolve_bindings ();
 
+  extern function string massage_scope(string scope);
 
+
+`ifndef UVM_NO_DEPRECATED
   //----------------------------------------------------------------------------
-  // Group: Configuration Interface
+  // Group- Configuration Interface
   //----------------------------------------------------------------------------
   //
   // Components can be designed to be user-configurable in terms of its
@@ -788,25 +788,24 @@ virtual class uvm_component extends uvm_report_object;
   //
   //----------------------------------------------------------------------------
 
+  static bit m_config_deprecated_warned;
 
   // Used for caching config settings
   static bit m_config_set = 1;
 
-  extern function string massage_scope(string scope);
-
-  // Function: set_config_int
+  // Function- set_config_int
 
   extern virtual function void set_config_int (string inst_name,  
                                                string field_name,
                                                uvm_bitstream_t value);
 
-  // Function: set_config_string
+  // Function- set_config_string
 
   extern virtual function void set_config_string (string inst_name,  
                                                   string field_name,
                                                   string value);
 
-  // Function: set_config_object
+  // Function- set_config_object
   //
   // Calling set_config_* causes configuration settings to be created and
   // placed in a table internal to this component. There are similar global
@@ -854,17 +853,17 @@ virtual class uvm_component extends uvm_report_object;
                                                   bit clone=1);
 
 
-  // Function: get_config_int
+  // Function- get_config_int
 
   extern virtual function bit get_config_int (string field_name,
                                               inout uvm_bitstream_t value);
 
-  // Function: get_config_string
+  // Function- get_config_string
 
   extern virtual function bit get_config_string (string field_name,
                                                  inout string value);
 
-  // Function: get_config_object
+  // Function- get_config_object
   //
   // These methods retrieve configuration settings made by previous calls to
   // their set_config_* counterparts. As the methods' names suggest, there is
@@ -916,6 +915,7 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual function bit get_config_object (string field_name,
                                                  inout uvm_object value,  
                                                  input bit clone=1);
+`endif
 
 
   // Function: check_config_usage
@@ -968,7 +968,7 @@ virtual class uvm_component extends uvm_report_object;
   // Function: print_config_settings
   //
   // Called without arguments, print_config_settings prints all configuration
-  // information for this component, as set by previous calls to set_config_*.
+  // information for this component, as set by previous calls to uvm_config_db#(T)::set().
   // The settings are printing in the order of their precedence.
   // 
   // If ~field~ is specified and non-empty, then only configuration settings
@@ -990,7 +990,7 @@ virtual class uvm_component extends uvm_report_object;
   // Function: print_config
   //
   // Print_config_settings prints all configuration information for this
-  // component, as set by previous calls to set_config_* and exports to
+  // component, as set by previous calls to uvm_config_db#(T)::set() and exports to
   // the resources pool.  The settings are printing in the order of
   // their precedence.
   //
@@ -1015,7 +1015,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Variable: print_config_matches
   //
-  // Setting this static variable causes get_config_* to print info about
+  // Setting this static variable causes uvm_config_db#(T)::get() to print info about
   // matching configuration settings as they are being applied.
 
   static bit print_config_matches;
@@ -2849,12 +2849,6 @@ function string uvm_component::massage_scope(string scope);
 
 endfunction
 
-//
-// set_config_int
-//
-typedef uvm_config_db#(uvm_bitstream_t) uvm_config_int;
-typedef uvm_config_db#(string) uvm_config_string;
-typedef uvm_config_db#(uvm_object) uvm_config_object;
 
 // Undocumented struct for storing clone bit along w/
 // object on set_config_object(...) calls
@@ -2863,10 +2857,19 @@ class uvm_config_object_wrapper;
    bit clone;
 endclass : uvm_config_object_wrapper
 
+
+`ifndef UVM_NO_DEPRECATED
+//
+// set_config_int
+//
 function void uvm_component::set_config_int(string inst_name,
                                            string field_name,
                                            uvm_bitstream_t value);
 
+  if (!m_config_deprecated_warned) begin
+     `uvm_warning("UVM/CFG/SET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
+     m_config_deprecated_warned = 1;
+  end
   uvm_config_int::set(this, inst_name, field_name, value);
 endfunction
 
@@ -2877,6 +2880,10 @@ function void uvm_component::set_config_string(string inst_name,
                                                string field_name,
                                                string value);
 
+  if (!m_config_deprecated_warned) begin
+     `uvm_warning("UVM/CFG/SET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
+     m_config_deprecated_warned = 1;
+  end
   uvm_config_string::set(this, inst_name, field_name, value);
 endfunction
 
@@ -2889,6 +2896,11 @@ function void uvm_component::set_config_object(string inst_name,
                                                bit clone = 1);
   uvm_object tmp;
   uvm_config_object_wrapper wrapper;
+
+  if (!m_config_deprecated_warned) begin
+     `uvm_warning("UVM/CFG/SET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
+     m_config_deprecated_warned = 1;
+  end
 
   if(value == null)
     `uvm_warning("NULLCFG", {"A null object was provided as a ",
@@ -2929,6 +2941,10 @@ endfunction
 function bit uvm_component::get_config_int (string field_name,
                                             inout uvm_bitstream_t value);
 
+  if (!m_config_deprecated_warned) begin
+     `uvm_warning("UVM/CFG/GET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
+     m_config_deprecated_warned = 1;
+  end
   return uvm_config_int::get(this, "", field_name, value);
 endfunction
 
@@ -2938,6 +2954,10 @@ endfunction
 function bit uvm_component::get_config_string(string field_name,
                                               inout string value);
 
+  if (!m_config_deprecated_warned) begin
+     `uvm_warning("UVM/CFG/GET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
+     m_config_deprecated_warned = 1;
+  end
   return uvm_config_string::get(this, "", field_name, value);
 endfunction
 
@@ -2949,6 +2969,10 @@ endfunction
 function bit uvm_component::get_config_object (string field_name,
                                                inout uvm_object value,
                                                input bit clone=1);
+  if (!m_config_deprecated_warned) begin
+     `uvm_warning("UVM/CFG/GET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
+     m_config_deprecated_warned = 1;
+  end
 
   if(!uvm_config_object::get(this, "", field_name, value)) begin
     return 0;
@@ -2960,6 +2984,7 @@ function bit uvm_component::get_config_object (string field_name,
 
   return 1;
 endfunction
+`endif
 
 // check_config_usage
 // ------------------
@@ -2976,6 +3001,7 @@ function void uvm_component::check_config_usage ( bit recurse=1 );
   uvm_report_info("CFGNRD"," ::: The following resources have at least one write and no reads :::",UVM_INFO);
   rp.print_resources(rq, 1);
 endfunction
+
 
 // apply_config_settings
 // ---------------------
