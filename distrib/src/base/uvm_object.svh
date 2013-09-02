@@ -763,33 +763,6 @@ virtual class uvm_object extends uvm_void;
                                                   bit         clone=1,
                                                   bit         recurse=1);
 
-
-
-  //---------------------------------------------------------------------------
-  //                 **** Internal Methods and Properties ***
-  //                           Do not use directly
-  //---------------------------------------------------------------------------
-
-  extern local function void m_pack        (inout uvm_packer packer);
-  extern local function void m_unpack_pre  (inout uvm_packer packer);
-  extern local function void m_unpack_post (uvm_packer packer);
-
-  // The print_matches bit causes an informative message to be printed
-  // when a field is set using one of the set methods.
-
-  local string m_leaf_name;
-
-  local int m_inst_id;
-  static protected int m_inst_count;
-
-  static /*protected*/ uvm_status_container __m_uvm_status_container = new;
-
-  extern virtual function void __m_uvm_field_automation (uvm_object tmp_data__,  
-                                                   int        what__, 
-                                                   string     str__);
-
-  extern protected virtual function uvm_report_object m_get_report_object();
-
   // Function: apply_config_settings
   //
   // Searches for all config settings matching this object's instance path.
@@ -829,12 +802,44 @@ virtual class uvm_object extends uvm_void;
 
   extern virtual function void apply_config_settings (bit verbose=0);
 
+  // Function: do_apply_config_settings
+  //
+  // contains the actual implementation of the apply_config_settings.
+  extern  function void do_apply_config_settings (bit verbose=0);
+  
   // Variable: print_config_matches
   //
   // Setting this static variable causes get_config_* to print info about
   // matching configuration settings as they are being applied.
 
   static bit print_config_matches;
+
+
+
+  //---------------------------------------------------------------------------
+  //                 **** Internal Methods and Properties ***
+  //                           Do not use directly
+  //---------------------------------------------------------------------------
+
+  extern local function void m_pack        (inout uvm_packer packer);
+  extern local function void m_unpack_pre  (inout uvm_packer packer);
+  extern local function void m_unpack_post (uvm_packer packer);
+
+  // The print_matches bit causes an informative message to be printed
+  // when a field is set using one of the set methods.
+
+  local string m_leaf_name;
+
+  local int m_inst_id;
+  static protected int m_inst_count;
+
+  static /*protected*/ uvm_status_container __m_uvm_status_container = new;
+
+  extern virtual function void __m_uvm_field_automation (uvm_object tmp_data__,  
+                                                   int        what__, 
+                                                   string     str__);
+
+  extern protected virtual function uvm_report_object m_get_report_object();
 
   
 endclass
@@ -1378,7 +1383,10 @@ endfunction
   typedef class uvm_resource_base;
   typedef class uvm_resource;
 function void uvm_object::apply_config_settings (bit verbose=0);
-
+  do_apply_config_settings(verbose);
+endfunction
+  
+function void uvm_object::do_apply_config_settings (bit verbose=0);
   uvm_resource_pool rp = uvm_resource_pool::get();
   uvm_queue#(uvm_resource_base) rq;
   uvm_resource_base r;
