@@ -31,24 +31,153 @@ typedef class uvm_root;
 
 //------------------------------------------------------------------------------
 //
-// CLASS- uvm_report_message_element
+// CLASS- uvm_report_message_element_*
 //
 // Implementation detail -- not documented.
 //
 //------------------------------------------------------------------------------
 
-class uvm_report_message_element;
-  typedef enum {INT, STRING, OBJECT, META} element_type_e;
+virtual class uvm_report_message_element_base;
+   typedef enum {NONE = 0, 
+                 PRINT = 1, 
+                 RECORD = 2, 
+                 BOTH = 3} action_e;
+   action_e _action;
 
-  element_type_e m_element_type;
-  string m_element_name;
-  uvm_bitstream_t  m_int_value;
-  int m_int_size;
-  uvm_radix_enum m_int_radix;
-  string m_string_value;
-  uvm_object m_object;     // share the OBJECT and META type
-endclass
- 
+   // Name
+   //
+   string       _name;
+     
+   function void print(uvm_printer printer);
+      if (_action & PRINT)
+        do_print(printer);
+   endfunction : print
+   function void record(uvm_recorder recorder);
+      if (_action & RECORD)
+        do_record(recorder);
+   endfunction : record
+   function void copy(uvm_report_message_element_base rhs);
+      do_copy(rhs);
+   endfunction : copy
+   function uvm_report_message_element_base clone();
+      return do_clone();
+   endfunction : clone
+
+   pure virtual function void do_print(uvm_printer printer);
+   pure virtual function void do_record(uvm_recorder recorder);
+   pure virtual function void do_copy(uvm_report_message_element_base rhs);
+   pure virtual function uvm_report_message_element_base do_clone();
+   
+   // This can be used for testing performance of the queue structures
+   // By default, value = 0, no reuse
+   // Experiment by simply changing the value.
+   static int   max_reused_elements;
+   pure virtual function void free();
+      
+endclass : uvm_report_message_element_base
+
+`define m_uvm_report_message_element_utils(TYPE) \
+   static local TYPE m_q[$]; \
+   static function TYPE get(); \
+      if (m_q.size() > 0) begin \
+         get = m_q.pop_front(); \
+      end \
+      else begin \
+         process p = process::self(); \
+         string s; \
+         if (p != null) \
+           s = p.get_randstate(); \
+         get = new(); \
+         if (p != null) \
+           p.set_randstate(s); \
+      end \
+   endfunction : get \
+   virtual function void free(); \
+      if (m_q.size() < uvm_report_message_element_base::max_reused_elements) \
+        m_q.push_back(this); \
+   endfunction : free \
+   virtual function uvm_report_message_element_base do_clone(); \
+     TYPE tmp = TYPE::get(); \
+     tmp.copy(this); \
+     return tmp; \
+   endfunction : do_clone
+   
+class uvm_report_message_int_element extends uvm_report_message_element_base;
+   typedef uvm_report_message_int_element this_type;
+   
+   uvm_bitstream_t _val;
+   int             _size;
+   uvm_radix_enum  _radix;
+   
+   virtual function void do_print(uvm_printer printer);
+      printer.print_int(_name, _val, _size, _radix);
+   endfunction : do_print
+
+   virtual function void do_record(uvm_recorder recorder);
+      recorder.record_field(_name, _val, _size, _radix);
+   endfunction : do_record
+
+   virtual function void do_copy(uvm_report_message_element_base rhs);
+      this_type _rhs;
+      $cast(_rhs, rhs);
+      _name = _rhs._name;
+      _val = _rhs._val;
+      _size = _rhs._size;
+      _radix = _rhs._radix;
+      _action = rhs._action;
+   endfunction : do_copy
+
+   `m_uvm_report_message_element_utils(this_type)
+endclass : uvm_report_message_int_element
+
+class uvm_report_message_string_element extends uvm_report_message_element_base;
+   typedef uvm_report_message_string_element this_type;
+   string  _val;
+
+   virtual function void do_print(uvm_printer printer);
+      printer.print_string(_name, _val);
+   endfunction : do_print
+
+   virtual function void do_record(uvm_recorder recorder);
+      recorder.record_string(_name, _val);
+   endfunction : do_record
+
+   virtual function void do_copy(uvm_report_message_element_base rhs);
+      this_type _rhs;
+      $cast(_rhs, rhs);
+      _name = _rhs._name;
+      _val = _rhs._val;
+      _action = rhs._action;
+   endfunction : do_copy
+   
+   `m_uvm_report_message_element_utils(this_type)
+endclass : uvm_report_message_string_element
+
+class uvm_report_message_object_element extends uvm_report_message_element_base;
+   typedef uvm_report_message_object_element this_type;
+   uvm_object _val;
+
+   virtual function void do_print(uvm_printer printer);
+      printer.print_object(_name, _val);
+   endfunction : do_print
+
+   virtual function void do_record(uvm_recorder recorder);
+      recorder.record_object(_name, _val);
+   endfunction : do_record
+
+   virtual function void do_copy(uvm_report_message_element_base rhs);
+      this_type _rhs;
+      $cast(_rhs, rhs);
+      _name = _rhs._name;
+      _val = _rhs._val;
+      _action = rhs._action;
+   endfunction : do_copy
+   
+   `m_uvm_report_message_element_utils(this_type)
+endclass : uvm_report_message_object_element
+
+`undef m_uvm_report_message_element_utils
+
 //------------------------------------------------------------------------------
 //
 // CLASS- uvm_report_message_element_container
@@ -59,9 +188,7 @@ endclass
 
 class uvm_report_message_element_container extends uvm_object;
 
-  static local uvm_report_message_element message_element_pool[$];
-
-  uvm_report_message_element elements[$];
+  uvm_report_message_element_base elements[$];
 
   `uvm_object_utils(uvm_report_message_element_container)
 
@@ -69,95 +196,51 @@ class uvm_report_message_element_container extends uvm_object;
     super.new(name);
   endfunction
 
-  static function uvm_report_message_element m_get_report_message_element();
-    if (message_element_pool.size() != 0)
-      return message_element_pool.pop_front();
-    else begin
-      process p;
-      string randstate;
-      uvm_report_message_element l_urme;
-
-      p = process::self();
-      randstate = p.get_randstate();
-      l_urme = new();
-      p.set_randstate(randstate);
-
-      return l_urme;
+  function void delete_elements();
+    while (elements.size() > 0) begin
+       elements[0].free();
+       void'(elements.pop_front());
     end
   endfunction
 
-  function void delete_elements();
-    message_element_pool = {message_element_pool, elements};
-    elements = {};
-  endfunction
-
   function void add_int(string name, uvm_bitstream_t value, 
-                        int size, uvm_radix_enum radix);
-    uvm_report_message_element urme = m_get_report_message_element();
-    urme.m_element_type = uvm_report_message_element::INT;
-    urme.m_element_name = name;
-    urme.m_int_value = value;
-    urme.m_int_size = size;
-    urme.m_int_radix = radix;
-    elements.push_back(urme);
+                        int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
+     uvm_report_message_int_element urme = uvm_report_message_int_element::get();
+     urme._name = name;
+     urme._val = value;
+     urme._size = size;
+     urme._radix = radix;
+     urme._action = uvm_report_message_element_base::action_e'({record,print});
+     elements.push_back(urme);
   endfunction
 
-  function void add_string(string name, string value);
-    uvm_report_message_element urme = m_get_report_message_element();
-    urme.m_element_type = uvm_report_message_element::STRING;
-    urme.m_element_name = name;
-    urme.m_string_value = value;
-    elements.push_back(urme);
+  function void add_string(string name, string value, bit print = 1, bit record = 1);
+     uvm_report_message_string_element urme = uvm_report_message_string_element::get();
+     urme._name = name;
+     urme._val = value;
+     urme._action = uvm_report_message_element_base::action_e'({record,print});
+     elements.push_back(urme);
   endfunction
 
-  function void add_object(string name, uvm_object obj);
-    uvm_report_message_element urme = m_get_report_message_element();
-    urme.m_element_type = uvm_report_message_element::OBJECT;
-    urme.m_element_name = name;
-    urme.m_object = obj;
-    elements.push_back(urme);
-  endfunction
-
-  function void add_meta(string name, uvm_object meta);
-    uvm_report_message_element urme = m_get_report_message_element();
-    urme.m_element_type = uvm_report_message_element::META;
-    urme.m_element_name = name;
-    urme.m_object = meta;
-    elements.push_back(urme);
+  function void add_object(string name, uvm_object obj, bit print = 1, bit record = 1);
+     uvm_report_message_object_element urme = uvm_report_message_object_element::get();
+     urme._name = name;
+     urme._val = obj;
+     urme._action = uvm_report_message_element_base::action_e'({record,print});
+     elements.push_back(urme);
   endfunction
 
   function void do_print(uvm_printer printer);
     super.do_print(printer);
     for(int i = 0; i < elements.size(); i++) begin
-      if (elements[i].m_element_type == uvm_report_message_element::INT) begin
-        printer.print_int(elements[i].m_element_name, elements[i].m_int_value, 
-          elements[i].m_int_size, elements[i].m_int_radix);
-      end
-      if (elements[i].m_element_type == uvm_report_message_element::STRING) begin
-        printer.print_string(elements[i].m_element_name, elements[i].m_string_value);
-      end
-      if (elements[i].m_element_type == uvm_report_message_element::OBJECT) begin
-        printer.print_object(elements[i].m_element_name, elements[i].m_object);
-      end
+       elements[i].print(printer);
     end 
   endfunction
 
   function void do_record(uvm_recorder recorder);
     super.do_record(recorder);
     for(int i = 0; i < elements.size(); i++) begin
-      if (elements[i].m_element_type == uvm_report_message_element::INT) begin
-        recorder.record_field(elements[i].m_element_name, elements[i].m_int_value, 
-          elements[i].m_int_size, elements[i].m_int_radix);
-      end
-      if (elements[i].m_element_type == uvm_report_message_element::STRING) begin
-        recorder.record_string(elements[i].m_element_name, elements[i].m_string_value);
-      end
-      if (elements[i].m_element_type == uvm_report_message_element::OBJECT) begin
-        recorder.record_object(elements[i].m_element_name, elements[i].m_object);
-      end
-      if (elements[i].m_element_type == uvm_report_message_element::META) begin
-        recorder.record_meta(elements[i].m_element_name, elements[i].m_object);
-      end
+       elements[i].record(recorder);
     end
   endfunction
 
@@ -169,10 +252,10 @@ class uvm_report_message_element_container extends uvm_object;
     if(!$cast(urme_container, rhs) || (rhs==null))
       return;
 
-    if (elements.size() != 0)
-      delete_elements();
+    delete_elements();
+    foreach (urme_container.elements[i])
+      elements.push_back(urme_container.elements[i].clone());
 
-    elements = urme_container.elements;
   endfunction
 
 endclass
@@ -327,6 +410,11 @@ class uvm_report_message extends uvm_object;
   // Not documented.
   static local uvm_report_message report_messages[$];
 
+  // This can be used for testing performance of the queue structures
+  // By default, value = 0, no reuse
+  // Experiment by simply changing the value.
+  static int max_reused_messages;
+
   // Not documented.
   static int m_ro_stream_handles[uvm_report_handler];
 
@@ -438,7 +526,8 @@ class uvm_report_message extends uvm_object;
   // Not documented.
   virtual function void free_report_message(uvm_report_message report_message);
     report_message.m_clear();
-    report_messages.push_back(report_message);
+    if (report_messages.size() < uvm_report_message::max_reused_messages)
+      report_messages.push_back(report_message);
   endfunction
 
 
@@ -454,8 +543,12 @@ class uvm_report_message extends uvm_object;
   function string convert2string();
     if (report_message_element_container.elements.size() == 0)
       return message;
-    else
-      convert2string = {message, "\n", report_message_element_container.sprint(l_printer)};
+    else begin
+      string prefix = uvm_default_printer.knobs.prefix;
+      uvm_default_printer.knobs.prefix = " +";
+      convert2string = {message, "\n", report_message_element_container.sprint()};
+      uvm_default_printer.knobs.prefix = prefix;
+    end
   endfunction
 
 
@@ -623,11 +716,11 @@ class uvm_report_message extends uvm_object;
   //
   // This method adds meta data of the name ~name~ and reference ~meta~ to
   // the message. Meata data will not be printed out, and by default, will
-  // be recorded, but extended recorder can use it for extensibility.
+  // not be recorded, but extended recorder can use it for extensibility.
   //
   
   function void add_meta(string name, uvm_object meta);
-    report_message_element_container.add_meta(name, meta);
+    report_message_element_container.add_object(name, meta, 0, 0);
   endfunction
 
 endclass
@@ -704,7 +797,8 @@ class uvm_trace_message extends uvm_report_message;
   // Not documented.
   virtual function void free_trace_message(uvm_trace_message trace_message);
     trace_message.m_clear();
-    trace_messages.push_back(trace_message);
+    if (trace_messages.size() < uvm_report_message::max_reused_messages)
+      trace_messages.push_back(trace_message);
   endfunction
 
   // Not documented.
@@ -715,9 +809,12 @@ class uvm_trace_message extends uvm_report_message;
     if (state == TRC_END) begin
       convert2string = {$sformatf("%s(id:%0d) : ", state.name(), tr_handle),
         end_message};
-      if (report_message_element_container.elements.size() != 0)
-        convert2string = {convert2string, "\n", 
-          report_message_element_container.sprint(l_printer)};
+      if (report_message_element_container.elements.size() != 0) begin
+        string prefix = uvm_default_printer.knobs.prefix;
+        uvm_default_printer.knobs.prefix = " +";
+        convert2string = {convert2string, "\n", report_message_element_container.sprint()};
+        uvm_default_printer.knobs.prefix = prefix;
+      end
     end
   endfunction
 
@@ -874,7 +971,8 @@ class uvm_link_message extends uvm_report_message;
   // Not documented.
   virtual function void free_link_message(uvm_link_message link_message);
     link_message.m_clear();
-    link_messages.push_back(link_message);
+    if (link_messages.size() < uvm_report_message::max_reused_messages)
+      link_messages.push_back(link_message);
   endfunction
 
 
