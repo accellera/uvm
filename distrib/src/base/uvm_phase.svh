@@ -769,7 +769,12 @@ function uvm_phase::new(string name="uvm_phase",
   super.new(name);
   m_phase_type = phase_type;
 
-  m_state = UVM_PHASE_DORMANT;
+  // The common domain is the only thing that initializes m_state.  All
+  // other states are initialized by being 'added' to a schedule.
+  if ((name == "common") &&
+      (phase_type == UVM_PHASE_DOMAIN))
+    m_state = UVM_PHASE_DORMANT;
+   
   m_run_count = 0;
   m_parent = parent;
 
@@ -806,7 +811,9 @@ function void uvm_phase::add(uvm_phase phase,
                              uvm_phase with_phase=null,
                              uvm_phase after_phase=null,
                              uvm_phase before_phase=null);
-  uvm_phase new_node, begin_node, end_node;
+  uvm_phase new_node, begin_node, end_node, tmp_node;
+  uvm_phase_state_change state_chg;
+
   if (phase == null)
       `uvm_fatal("PH/NULL", "add: phase argument is null")
 
@@ -951,8 +958,20 @@ function void uvm_phase::add(uvm_phase phase,
       after_phase.m_successors.delete(before_phase);
       before_phase.m_successors.delete(after_phase);
     end
-  end
+  end // if (before_phase != null && after_phase != null)
 
+  // Transition nodes to DORMANT state
+  if (new_node == null)
+    tmp_node = phase;
+  else
+    tmp_node = new_node;
+
+  state_chg = uvm_phase_state_change::type_id::create(tmp_node.get_name());
+  state_chg.m_phase = tmp_node;
+  state_chg.m_jump_to = null;
+  state_chg.m_prev_state = tmp_node.m_state;
+  tmp_node.m_state = UVM_PHASE_DORMANT;
+  `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(tmp_node, state_chg)) 
 endfunction
 
 
