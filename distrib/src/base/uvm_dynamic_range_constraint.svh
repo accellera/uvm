@@ -31,18 +31,29 @@ class range_limits;
   endfunction: new
 endclass: range_limits
 
-class uvm_dynamic_range_constraint_parser;
+virtual class uvm_dynamic_range_constraint_parser extends uvm_object;
+
+  function new(string name = "");
+    super.new(name);
+  endfunction: new
+
+  //parse the range constraint with the provided name from command line
+  //split the constraint into triplet
+  pure virtual function void get_range_constraint(string param_name, output int unsigned values[]);
+
   // Split the string parm to integers.  ";" is used as a delimiter to seperate triplets
   // And then ":" is used to deliminate the actual triplet values.
   // Example: "1:2:3;4:5:6"
   //  Becomes: "1:2:3", "4:5:6"
   //  Which then becomes 1,2,3,4,5,6
-  static function void split_param_to_integer(string param, output int unsigned values[$]);
+  static function void split_param_to_integer(string param, output int unsigned values[]);
     string str_values_triplet[$];
-    string str_values[$];
+    string str_values[];
 
     // First split the param into strings using ";" as a delimiter
     uvm_split_string(param, ";", str_values_triplet);
+    str_values = new [str_values_triplet.size()*3];
+    values = new[str_values.size()];
 
     foreach(str_values_triplet[index])
     begin
@@ -51,19 +62,19 @@ class uvm_dynamic_range_constraint_parser;
       case(str_values_tmp.size())
         3: begin
              foreach(str_values_tmp[index_tmp])
-               str_values.push_back(str_values_tmp[index_tmp]);
+               str_values[index*3+index_tmp] = str_values_tmp[index_tmp];
            end
         2: begin
-               str_values.push_back(str_values_tmp[0]);
-               str_values.push_back(str_values_tmp[1]);
-               str_values.push_back("1");
+               str_values[index*3+0] = str_values_tmp[0];
+               str_values[index*3+1] = str_values_tmp[1];
+               str_values[index*3+2] = "1";
            end
         1: begin
-               str_values.push_back(str_values_tmp[0]);
-               str_values.push_back(str_values_tmp[0]);
-               str_values.push_back("1");
+               str_values[index*3+0] = str_values_tmp[0];
+               str_values[index*3+1] = str_values_tmp[0];
+               str_values[index*3+2] = "1";
            end
-        default: uvm_report_fatal("DYNAMICRANDOM",{str_values_triplet[index], " is not a valid dynamic constraint"}); 
+        default: `uvm_fatal("DYNAMICRANDOM",{str_values_triplet[index], " is not a valid dynamic constraint"}) 
       endcase
     end
 
@@ -87,7 +98,7 @@ class uvm_dynamic_range_constraint_parser;
           str = str.substr(1, str.len()-1);
 
     if (str.len() == 0)  // If passed an empty string or a string only consisting of spaces
-       uvm_report_fatal("DYNAMICRANDOM",{"\"", str_orig, "\" is not a valid dynamic constraint"}); 
+       `uvm_fatal("DYNAMICRANDOM",{"\"", str_orig, "\" is not a valid dynamic constraint"}) 
 
     if (str.getc(0) == "0")
     case(str.getc(1))
@@ -112,10 +123,50 @@ class uvm_dynamic_range_constraint_parser;
       str_format = "%d";
 
     if (!$sscanf(str, str_format, data))
-       uvm_report_fatal("DYNAMICRANDOM",{str, " could not be interpreted into an integer"});
+       `uvm_fatal("DYNAMICRANDOM",{str, " could not be interpreted into an integer"})
   endfunction: str_2_uint
   
 endclass: uvm_dynamic_range_constraint_parser
+
+class uvm_cmdline_dynamic_range_constraint_parser extends uvm_dynamic_range_constraint_parser;
+
+  function new(string name = "");
+    super.new(name);
+  endfunction: new
+
+  //parse the range constraint with the provided name from command line
+  //split the constraint into triplet
+  virtual function void get_range_constraint(string param_name, output int unsigned values[]);
+    uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
+    string params[$];
+    string constraint_param;
+    int arg_count = clp.get_arg_values({"+",param_name}, params);
+
+    if (arg_count == 0)
+       return;
+    
+    if (params[0].getc(0) != "=")
+    begin
+      `uvm_fatal("DYNAMICRANDOM", 
+                          $sformatf("the format of the %s parameter is wrong", param_name));
+      return;
+    end
+    else
+       constraint_param = params[0].substr(1, params[0].len()-1);
+
+    if (arg_count > 1)
+    begin
+      string max_constraint_param = params[0];
+      for(int unsigned lindex = 1; lindex < params.size(); ++lindex)
+        max_constraint_param = {max_constraint_param, ", ", params[lindex]};
+      `uvm_warning("DYNAMICRANDOM", 
+                         $sformatf("Multiple (%0d) %s arguments provided on the command line.  '%s' will be used.  Provided list: %s.", 
+                                    arg_count, param_name, params[0], max_constraint_param))
+    end
+    
+    uvm_dynamic_range_constraint_parser::split_param_to_integer(constraint_param, values);
+  endfunction: get_range_constraint
+endclass: uvm_cmdline_dynamic_range_constraint_parser
 
 
 class uvm_dynamic_range_constraint #(string NAME="") extends uvm_object;
@@ -123,6 +174,15 @@ class uvm_dynamic_range_constraint #(string NAME="") extends uvm_object;
 
   //Singleton
   static local this_type m_inst;
+
+  local range_limits ranges[];
+  local range_limits weights[];
+  local int unsigned max_weight = 0;
+  local int unsigned range_index = 0;
+  rand int unsigned weight_value;
+  rand int unsigned value;
+  rand int unsigned index;
+
 
   static function this_type get_inst();
     if (m_inst == null)
@@ -137,60 +197,24 @@ class uvm_dynamic_range_constraint #(string NAME="") extends uvm_object;
   endfunction: get_rand_value
 
   local function new();
-    super.new(NAME);
-    get_cmdline_param(); 
-  endfunction: new
-
-  local function void get_cmdline_param();
-    uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
-    string params[$];
-    string constraint_param;
-    int unsigned values[$];
+    int unsigned values[];
     int unsigned index = 0;
-    int arg_count = clp.get_arg_values({"+",NAME}, params);
+    uvm_cmdline_dynamic_range_constraint_parser parser = new();
 
-    if (arg_count == 0)
-       return;
+    super.new(NAME);
     
-    if (params[0].getc(0) != "=")
-    begin
-      uvm_report_warning("DYNAMICRANDOM", 
-                          $sformatf("the format of the %s parameter is wrong", NAME));
-      return;
-    end
-    else
-       constraint_param = params[0].substr(1, params[0].len()-1);
-
-    if (arg_count > 1)
-    begin
-      string max_constraint_param = params[0];
-      for(int unsigned lindex = 1; lindex < params.size(); ++lindex)
-        max_constraint_param = {max_constraint_param, ", ", params[lindex]};
-      uvm_report_warning("DYNAMICRANDOM", 
-                         $sformatf("Multiple (%0d) %s arguments provided on the command line.  '%s' will be used.  Provided list: %s.", 
-                                    arg_count, NAME, params[0], max_constraint_param), UVM_NONE);
-    end
-    else
-      uvm_report_info("DYNAMICRANDOM",
-                      $sformatf("'%s=%s' provided on the command line is being applied.", NAME, params[0]), UVM_NONE);
-    
-    uvm_dynamic_range_constraint_parser::split_param_to_integer(constraint_param, values);
+    parser.get_range_constraint(NAME, values);
 
     //after parse the parameter add the constraint
-
+    ranges = new[values.size()/3];
+    weights = new[values.size()/3];
+    range_index = 0;
     while(index + 3 <= values.size())
     begin
       add(values[index], values[index+1], values[index+2]);
       index += 3;
     end
- endfunction: get_cmdline_param
-
-  local range_limits ranges[$];
-  local range_limits weights[$];
-  local int unsigned max_weight = 0;
-  rand int unsigned weight_value;
-  rand int unsigned value;
-  rand int unsigned index;
+  endfunction: new
 
   constraint valid_weight
   {
@@ -219,14 +243,13 @@ class uvm_dynamic_range_constraint #(string NAME="") extends uvm_object;
   local function void add(int unsigned min, int unsigned max, int unsigned weight);
     range_limits range;
     range_limits weight_range;
-    int unsigned range_index;
 
     range = new(min, max);
-    ranges.push_back(range);
-    range_index = ranges.size()-1;
+    ranges[range_index] = range;
 
     weight_range = new(max_weight, max_weight+weight*(max-min+1)-1);
-    weights.push_back(weight_range);
+    weights[range_index] = weight_range;
+    range_index ++;
     max_weight += weight*(max-min+1);
   endfunction: add
 
