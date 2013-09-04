@@ -22,6 +22,17 @@ program top;
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 
+class rnd_class extends uvm_object;
+  rand uvm_dynamic_range_constraint drc1;
+  rand uvm_dynamic_range_constraint drc2;
+
+  `uvm_object_utils(rnd_class)
+
+  function new(string name="");
+    drc1 = uvm_dynamic_range_constraint::type_id::create("RANDINT1");
+    drc2 = uvm_dynamic_range_constraint::type_id::create("RANDINT2");
+  endfunction: new
+endclass: rnd_class
 
 class test extends uvm_test;
 
@@ -36,37 +47,58 @@ class test extends uvm_test;
    endtask: run
 
    virtual function void report();
-     int weight[int];
-     int check_weight[int];
+     int weight[string][int];
+     int check_weight[string][int];
+     string check_param[2];
      int temp;
      int index;
      int error = 0;
-     uvm_dynamic_range_constraint#("RANDINT1") drc  = uvm_dynamic_range_constraint#("RANDINT1")::get_inst() ;
-     uvm_dynamic_range_constraint#("RANDINT2") drc2 = uvm_dynamic_range_constraint#("RANDINT2")::get_inst() ;
-     uvm_dynamic_range_constraint#("RANDINT3") drc3 = uvm_dynamic_range_constraint#("RANDINT3")::get_inst() ;
-     uvm_dynamic_range_constraint#("RANDINT4") drc4 = uvm_dynamic_range_constraint#("RANDINT4")::get_inst() ;
+     rnd_class rnd = new("rnd");
+     uvm_config_db#(string)::set(null, "*RANDINT2", "param_name", "RANDINT3");
+     
      //set the hardcoded check weight for "0xF:0x10:1; 2:3:2"
-     check_weight['hF] = 17;
-     check_weight['h10] = 17;
-     check_weight[2] = 33;
-     check_weight[3] = 33;
+     check_param[0] = "RANDINT1";
+     check_weight["RANDINT1"]['hF] = 17;
+     check_weight["RANDINT1"]['h10] = 17;
+     check_weight["RANDINT1"][2] = 33;
+     check_weight["RANDINT1"][3] = 33;
+     //set the hardcoded check weight for "1:4"
+     check_param[1] = "RANDINT3";
+     check_weight["RANDINT3"][1] = 25;
+     check_weight["RANDINT3"][2] = 25;
+     check_weight["RANDINT3"][3] = 25;
+     check_weight["RANDINT3"][4] = 25;
+
      for(int unsigned index = 0; index != 100; ++index)
      begin
-       temp = uvm_dynamic_range_constraint#("RANDINT1")::get_rand_value();
-       weight[temp]++;
+       //temp = uvm_dynamic_range_constraint#("RANDINT1")::get_rand_value();
+       void'(rnd.randomize());
+//       temp = rnd.drc1.value;
+       weight["RANDINT1"][rnd.drc1.value]++;
+       weight["RANDINT3"][rnd.drc2.value]++;
      end
-     $write("Statistics for 100 randomizations of constraint RANDINT1:\n");
-     if(weight.first(index))
-       do
-       begin
-         $write("  %0d was chosen %0d times\n", index, weight[index]);
-         if(weight[index] < check_weight[index] - 5 || weight[index] > check_weight[index] + 5)
+     
+     foreach(check_param[param_index])
+     begin
+       string param = check_param[param_index];
+       $write("\n\nStatistics for 100 randomizations of constraint %s:", param);
+       if(weight[param].first(index))
+         do
          begin
-           $write("  %0d was out of the expecting times, [%0d, %0d]", index, check_weight[index]-5, check_weight[index]+5 );
-           error = 1;
+           $write("\n  %0d was chosen %0d times", index, weight[param][index]);
+           if(!check_weight[param].exists(index))
+           begin
+             $write(",out of the expecting times, [0,0]");
+             error = 1;
+           end
+           else if(weight[param][index] < check_weight[param][index] - 8 || weight[param][index] > check_weight[param][index] + 8)
+           begin
+             $write(",out of the expecting times, [%0d, %0d]", check_weight[param][index]-8, check_weight[param][index]+8 );
+             error = 1;
+           end
          end
-       end
-       while(weight.next(index));
+         while(weight[param].next(index));
+      end
 
      //check the correctness
      

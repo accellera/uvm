@@ -169,12 +169,18 @@ class uvm_cmdline_dynamic_range_constraint_parser extends uvm_dynamic_range_cons
 endclass: uvm_cmdline_dynamic_range_constraint_parser
 
 
-class uvm_dynamic_range_constraint #(string NAME="") extends uvm_object;
-  typedef uvm_dynamic_range_constraint #(NAME) this_type;
+//class uvm_dynamic_range_constraint #(string NAME="") extends uvm_object;
+class uvm_dynamic_range_constraint extends uvm_object;
+
+//  typedef uvm_dynamic_range_constraint #(NAME) this_type;
 
   //Singleton
-  static local this_type m_inst;
+//  static local this_type m_inst;
 
+  static local int unsigned m_values[string][];
+  
+  local string param_name;
+  local int unsigned constraint_set = 0;
   local range_limits ranges[];
   local range_limits weights[];
   local int unsigned max_weight = 0;
@@ -183,38 +189,63 @@ class uvm_dynamic_range_constraint #(string NAME="") extends uvm_object;
   rand int unsigned value;
   rand int unsigned index;
 
+  `uvm_object_utils_begin(uvm_dynamic_range_constraint)
+    `uvm_field_string(param_name, UVM_DEFAULT)
+  `uvm_object_utils_end
 
-  static function this_type get_inst();
-    if (m_inst == null)
-       m_inst = new();
-    return m_inst;
-  endfunction: get_inst
 
-  static function int unsigned get_rand_value();
-    this_type inst = this_type::get_inst();
-    void'(inst.randomize());
-    return inst.value;
-  endfunction: get_rand_value
+//  static function this_type get_inst();
+//    if (m_inst == null)
+//       m_inst = new();
+//    return m_inst;
+//  endfunction: get_inst
+//
+//  static function int unsigned get_rand_value();
+//    this_type inst = this_type::get_inst();
+//    void'(inst.randomize());
+//    return inst.value;
+//  endfunction: get_rand_value
 
-  local function new();
+  function new(string name = "");
+
+    super.new(name);
+    
+//    parser.get_range_constraint(NAME, values);
+  endfunction: new
+
+  function void pre_randomize();
     int unsigned values[];
     int unsigned index = 0;
-    uvm_cmdline_dynamic_range_constraint_parser parser = new();
 
-    super.new(NAME);
-    
-    parser.get_range_constraint(NAME, values);
+    super.pre_randomize();
 
-    //after parse the parameter add the constraint
-    ranges = new[values.size()/3];
-    weights = new[values.size()/3];
-    range_index = 0;
-    while(index + 3 <= values.size())
+    if( constraint_set == 0)
     begin
-      add(values[index], values[index+1], values[index+2]);
-      index += 3;
+      uvm_cmdline_dynamic_range_constraint_parser parser = new();
+      constraint_set = 1; //set only once
+      //check configuration first
+      if (!uvm_config_db#(string)::get(null, get_full_name(), 
+                                       "param_name", param_name)
+        || param_name == "")
+        param_name = get_name(); //using the object name by default
+
+      if(param_name == "")
+        `uvm_fatal("DYNAMICRANDOM", "The parameter cannot be empty");
+
+      if(!m_values.exists(param_name))
+        parser.get_range_constraint(param_name, m_values[param_name]);
+  
+      //after parse the parameter add the constraint
+      ranges = new[m_values[param_name].size()/3];
+      weights = new[m_values[param_name].size()/3];
+      range_index = 0;
+      while(index + 3 <= m_values[param_name].size())
+      begin
+        add(m_values[param_name][index], m_values[param_name][index+1], m_values[param_name][index+2]);
+        index += 3;
+      end
     end
-  endfunction: new
+  endfunction: pre_randomize
 
   constraint valid_weight
   {
