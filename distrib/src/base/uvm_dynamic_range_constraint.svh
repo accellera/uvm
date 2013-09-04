@@ -168,14 +168,7 @@ class uvm_cmdline_dynamic_range_constraint_parser extends uvm_dynamic_range_cons
   endfunction: get_range_constraint
 endclass: uvm_cmdline_dynamic_range_constraint_parser
 
-
-//class uvm_dynamic_range_constraint #(string NAME="") extends uvm_object;
 class uvm_dynamic_range_constraint extends uvm_object;
-
-//  typedef uvm_dynamic_range_constraint #(NAME) this_type;
-
-  //Singleton
-//  static local this_type m_inst;
 
   static local int unsigned m_values[string][];
   
@@ -194,23 +187,8 @@ class uvm_dynamic_range_constraint extends uvm_object;
   `uvm_object_utils_end
 
 
-//  static function this_type get_inst();
-//    if (m_inst == null)
-//       m_inst = new();
-//    return m_inst;
-//  endfunction: get_inst
-//
-//  static function int unsigned get_rand_value();
-//    this_type inst = this_type::get_inst();
-//    void'(inst.randomize());
-//    return inst.value;
-//  endfunction: get_rand_value
-
   function new(string name = "");
-
     super.new(name);
-    
-//    parser.get_range_constraint(NAME, values);
   endfunction: new
 
   function void pre_randomize();
