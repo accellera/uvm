@@ -1964,7 +1964,8 @@ function void uvm_reg::do_predict(uvm_reg_item      rw,
    uvm_reg_data_t reg_value = rw.value[0];
    m_fname = rw.fname;
    m_lineno = rw.lineno;
-
+   
+if ((rw.status != UVM_HAS_X) && (rw.status != UVM_NOT_OK))
    rw.status = UVM_IS_OK;
 
    if (m_is_busy && kind == UVM_PREDICT_DIRECT) begin

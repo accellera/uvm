@@ -1768,7 +1768,7 @@ endfunction
 // get_objection_count
 // -------------------
 
-function void uvm_phase::get_objection_count (uvm_object obj);
+function int uvm_phase::get_objection_count (uvm_object obj);
    return phase_done.get_objection_count(obj);
 endfunction : get_objection_count
 
