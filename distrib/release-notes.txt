@@ -133,6 +133,8 @@ interpreted anymore as glob/regex.
 
 Mantis 4621: printing of int will mask Z values with X
 
+Mantis 4622: uvm_phase::unsync() now actually removes the sync relationship
+
 Mantis 4643: uvm_dpi_get_next_arg_c doesnt fully adhere to 1800lrm
 
 Mantis 4666: uvm_config_db::set expects to be invoked in process context
