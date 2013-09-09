@@ -464,7 +464,18 @@ class uvm_phase extends uvm_object;
   //
   extern function void jump(uvm_phase phase);
 
+  // Function: set_jump_phase
+  //
+  // Specify a phase to transition to when phase is complete.
+  // Note that this function is part of what jump() does; unlike jump()
+  // it does not set the flag to terminate the phase prematurely.
   extern function void set_jump_phase(uvm_phase phase) ;
+  
+  // Function: end_prematurely
+  //
+  // Set a flag to cause the phase to end prematurely.  
+  // Note that this function is part of what jump() does; unlike jump()
+  // it does not set a jump_phase to go to after the phase ends.
   extern function void end_prematurely() ;
 
   // Function: jump_all
@@ -1480,7 +1491,7 @@ task uvm_phase::execute_phase();
   
       #0; // LET ANY WAITERS ON READY_TO_END TO WAKE UP
       if (m_phase_trace)
-        `UVM_PH_TRACE("PH_END","JUMPING OUT OF PHASE",this,UVM_HIGH)
+        `UVM_PH_TRACE("PH_END","ENDING PHASE PREMATURELY",this,UVM_HIGH)
     end
     else begin
       // WAIT FOR PREDECESSORS:  // WAIT FOR PREDECESSORS:
@@ -1622,8 +1633,6 @@ endfunction
 
 task uvm_phase::m_wait_for_pred();
 
-  if(!(m_jump_fwd || m_jump_bkwd)) begin
-
     bit pred_of_succ[uvm_phase];
     get_predecessors_for_successors(pred_of_succ);
 
@@ -1664,7 +1673,6 @@ task uvm_phase::m_wait_for_pred();
       end
     end
 
-  end
   #0; // LET ANY WAITERS WAKE UP
 
 endtask
@@ -1817,8 +1825,6 @@ endtask
 // ----
 //
 // Specify a phase to transition to when phase is complete.
-// Note that this function is part of what jump() does; unlike jump()
-// it does not set the flag to terminate the phase prematurely.
 
 function void uvm_phase::set_jump_phase(uvm_phase phase) ;
   uvm_phase d;
@@ -1876,8 +1882,6 @@ endfunction
 // ----
 //
 // Set a flag to cause the phase to end prematurely.  
-// Note that this function is part of what jump() does; unlike jump()
-// it does not set a jump_phase to go to after the phase ends.
 
 function void uvm_phase::end_prematurely() ;
    m_premature_end = 1 ;
