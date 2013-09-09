@@ -75,6 +75,8 @@ Mantis 4307: Correction of documentation DEC -> UVM_DEC
 Mantis 4378: Proper documentation of set_inst_override_by_name and 
              set_type_override_by_name in uvm_component.
 
+Mantis 4391, removed redundant code in uvm_port_base
+
 Mantis 4425: BUSY flag now cleared when register model is reset.
 
 (*) Mantis 4430: default sequences are now killed during PHASE_ENDED
@@ -106,8 +108,6 @@ get_adjacent_successor_nodes inside of uvm_phase
 (*) Mantis 4516: Proper prioritization of default sequences
 
 (*) Mantis 4517: Added phase transition callbacks
-
-Mantis 4391, removed redundant code in uvm_port_base
 
 Mantis 4532: uvm_reg_access_seq ignoring regs with one RO field
 
