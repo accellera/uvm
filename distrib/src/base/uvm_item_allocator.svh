@@ -1,22 +1,44 @@
+//
+//----------------------------------------------------------------------
+//   Copyright 2013 Freescale Semiconductor, Inc.
+//   All Rights Reserved Worldwide
+//
+//   Licensed under the Apache License, Version 2.0 (the
+//   "License"); you may not use this file except in
+//   compliance with the License.  You may obtain a copy of
+//   the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in
+//   writing, software distributed under the License is
+//   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+//   CONDITIONS OF ANY KIND, either express or implied.  See
+//   the License for the specific language governing
+//   permissions and limitations under the License.
+//----------------------------------------------------------------------
+
+`ifndef UVM_ITEM_ALLOCATOR__SVH
+`define UVM_ITEM_ALLOCATOR__SVH
 
 
 virtual class uvm_converter#(type T = int, type I = int);
   virtual  function I serialize(T object);
   endfunction: serialize
+
   virtual function T deserialize(I item);
   endfunction: deserialize
-  
-endclass 
+endclass: uvm_converter
 
 class uvm_simple_converter#(type I = int) extends uvm_converter#(I,I);
   virtual function I serialize(I object);
     return object;
   endfunction: serialize
+
   virtual function I deserialize(I item);
     return item;
   endfunction: deserialize
-  
-endclass 
+endclass: uvm_simple_converter
 
 
 //------------------------------------------------------------------------------
@@ -47,7 +69,7 @@ class uvm_item_alloc_policy #(type T=longint unsigned, type I=longint unsigned);
   uvm_converter#(T,I) converter;
 
   function new();  
-  endfunction
+  endfunction: new
 
   // Variable: item
   //
@@ -92,7 +114,7 @@ class uvm_item_alloc_policy #(type T=longint unsigned, type I=longint unsigned);
     end
     
     object = converter.deserialize(item);
-  endfunction // post_randomize
+  endfunction: post_randomize
      
 endclass: uvm_item_alloc_policy
 
@@ -112,10 +134,11 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
 
   // what should be the default ??
   bit     is_local;
+
   function new(string name, string key = "" );
     this.key = key;
     this.is_local = (key == "");
-  endfunction
+  endfunction: new
   
   protected I in_use[$];
 
@@ -139,7 +162,7 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
       else
         in_use = {};
     end
-  endfunction
+  endfunction: import_in_use
 
   protected function void export_in_use(); 
     // check that size of I is <= 64 bits
@@ -150,7 +173,6 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
         db[i] = in_use[i];
       svdpi_set_taken_list(key,in_use.size(),db);
     end
-
   endfunction : export_in_use
   
 
@@ -218,7 +240,6 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
       `uvm_error("ITEM-ALLOCATOR", "Can not request item" )
 
     return success;
-
   endfunction: request_item
   
   function void release_item(T object);
@@ -255,5 +276,7 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
     convert2string = {convert2string, "\n"};
     
   endfunction: convert2string
+
 endclass: uvm_item_allocator
-  
+
+`endif // ifndef UVM_ITEM_ALLOCATOR__SVH
