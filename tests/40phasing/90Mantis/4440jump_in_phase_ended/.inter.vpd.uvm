@@ -1,0 +1,152 @@
+#0 in \uvm_component::new  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_component.svh:1769
+@ 0: [CFGDB/GET] Configuration 'uvm_test_top.recording_detail' (type logic signed[4095:0]) read by uvm_test_top = null (failed lookup)
+#0 in \uvm_component::new  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_component.svh:1770
+@ 0: [CFGDB/GET] Configuration 'uvm_test_top.recording_detail' (type int) read by uvm_test_top = null (failed lookup)
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/STRT] Phase 'common' (id=59) Starting phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/DONE] Phase 'common' (id=59) Completed phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/SCHEDULED] Phase 'common.build' (id=77) Scheduled from phase common
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/STRT] Phase 'common.build' (id=77) Starting phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/DONE] Phase 'common.build' (id=77) Completed phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/SCHEDULED] Phase 'common.connect' (id=89) Scheduled from phase common.build
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/STRT] Phase 'common.connect' (id=89) Starting phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/DONE] Phase 'common.connect' (id=89) Completed phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/SCHEDULED] Phase 'common.end_of_elaboration' (id=101) Scheduled from phase common.connect
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/STRT] Phase 'common.end_of_elaboration' (id=101) Starting phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/DONE] Phase 'common.end_of_elaboration' (id=101) Completed phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/SCHEDULED] Phase 'common.start_of_simulation' (id=113) Scheduled from phase common.end_of_elaboration
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/STRT] Phase 'common.start_of_simulation' (id=113) Starting phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/DONE] Phase 'common.start_of_simulation' (id=113) Completed phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/SCHEDULED] Phase 'common.run' (id=125) Scheduled from phase common.start_of_simulation
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/SCHEDULED] Phase 'uvm' (id=174) Scheduled from phase common.start_of_simulation
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/STRT] Phase 'common.run' (id=125) Starting phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/STRT] Phase 'uvm' (id=174) Starting phase
+#0 in \phasing_test::audit_task  at test.sv:124
+@ 0: [OBJTN_TRC] common.run Object uvm_test_top raised 1 objection(s): count=1  total=1
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/DONE] Phase 'uvm' (id=174) Completed phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/SCHEDULED] Phase 'uvm.uvm_sched' (id=186) Scheduled from phase uvm
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/STRT] Phase 'uvm.uvm_sched' (id=186) Starting phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/DONE] Phase 'uvm.uvm_sched' (id=186) Completed phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/SCHEDULED] Phase 'uvm.uvm_sched.pre_reset' (id=204) Scheduled from phase uvm.uvm_sched
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 0: [PH/TRC/STRT] Phase 'uvm.uvm_sched.pre_reset' (id=204) Starting phase
+#0 in \phasing_test::audit_task  at test.sv:124
+@ 0: [OBJTN_TRC] uvm.uvm_sched.pre_reset Object uvm_test_top raised 1 objection(s): count=1  total=1
+#0 in \phasing_test::audit_task  at test.sv:128
+@ 20: [OBJTN_TRC] common.run Object uvm_test_top dropped 1 objection(s): count=0  total=0
+#0 in \phasing_test::audit_task  at test.sv:128
+@ 20: [OBJTN_TRC] uvm.uvm_sched.pre_reset Object uvm_test_top dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:338
+@ 20: [OBJTN_TRC] common.run Object uvm_test_top all_dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:338
+@ 20: [OBJTN_TRC] uvm.uvm_sched.pre_reset Object uvm_test_top all_dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 20: [PH/TRC/DONE] Phase 'uvm.uvm_sched.pre_reset' (id=204) Completed phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 20: [PH/TRC/SCHEDULED] Phase 'uvm.uvm_sched.reset' (id=216) Scheduled from phase uvm.uvm_sched.pre_reset
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 20: [PH/TRC/STRT] Phase 'uvm.uvm_sched.reset' (id=216) Starting phase
+#0 in \phasing_test::audit_task  at test.sv:124
+@ 20: [OBJTN_TRC] uvm.uvm_sched.reset Object uvm_test_top raised 1 objection(s): count=1  total=1
+#0 in \phasing_test::audit_task  at test.sv:128
+@ 40: [OBJTN_TRC] uvm.uvm_sched.reset Object uvm_test_top dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:338
+@ 40: [OBJTN_TRC] uvm.uvm_sched.reset Object uvm_test_top all_dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 40: [PH/TRC/DONE] Phase 'uvm.uvm_sched.reset' (id=216) Completed phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 40: [PH/TRC/SCHEDULED] Phase 'uvm.uvm_sched.post_reset' (id=228) Scheduled from phase uvm.uvm_sched.reset
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 40: [PH/TRC/STRT] Phase 'uvm.uvm_sched.post_reset' (id=228) Starting phase
+#0 in \phasing_test::audit_task  at test.sv:124
+@ 40: [OBJTN_TRC] uvm.uvm_sched.post_reset Object uvm_test_top raised 1 objection(s): count=1  total=1
+#0 in \phasing_test::audit_task  at test.sv:128
+@ 60: [OBJTN_TRC] uvm.uvm_sched.post_reset Object uvm_test_top dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:338
+@ 60: [OBJTN_TRC] uvm.uvm_sched.post_reset Object uvm_test_top all_dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 60: [PH/TRC/DONE] Phase 'uvm.uvm_sched.post_reset' (id=228) Completed phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 60: [PH/TRC/SCHEDULED] Phase 'uvm.uvm_sched.pre_configure' (id=240) Scheduled from phase uvm.uvm_sched.post_reset
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 60: [PH/TRC/STRT] Phase 'uvm.uvm_sched.pre_configure' (id=240) Starting phase
+#0 in \phasing_test::audit_task  at test.sv:124
+@ 60: [OBJTN_TRC] uvm.uvm_sched.pre_configure Object uvm_test_top raised 1 objection(s): count=1  total=1
+#0 in \phasing_test::audit_task  at test.sv:128
+@ 80: [OBJTN_TRC] uvm.uvm_sched.pre_configure Object uvm_test_top dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:338
+@ 80: [OBJTN_TRC] uvm.uvm_sched.pre_configure Object uvm_test_top all_dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 80: [PH/TRC/DONE] Phase 'uvm.uvm_sched.pre_configure' (id=240) Completed phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 80: [PH/TRC/SCHEDULED] Phase 'uvm.uvm_sched.configure' (id=252) Scheduled from phase uvm.uvm_sched.pre_configure
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 80: [PH/TRC/STRT] Phase 'uvm.uvm_sched.configure' (id=252) Starting phase
+#0 in \phasing_test::audit_task  at test.sv:124
+@ 80: [OBJTN_TRC] uvm.uvm_sched.configure Object uvm_test_top raised 1 objection(s): count=1  total=1
+#0 in \phasing_test::audit_task  at test.sv:128
+@ 100: [OBJTN_TRC] uvm.uvm_sched.configure Object uvm_test_top dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:338
+@ 100: [OBJTN_TRC] uvm.uvm_sched.configure Object uvm_test_top all_dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 100: [PH/TRC/DONE] Phase 'uvm.uvm_sched.configure' (id=252) Completed phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 100: [PH/TRC/SCHEDULED] Phase 'uvm.uvm_sched.post_configure' (id=264) Scheduled from phase uvm.uvm_sched.configure
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 100: [PH/TRC/STRT] Phase 'uvm.uvm_sched.post_configure' (id=264) Starting phase
+#0 in \phasing_test::audit_task  at test.sv:124
+@ 100: [OBJTN_TRC] uvm.uvm_sched.post_configure Object uvm_test_top raised 1 objection(s): count=1  total=1
+#0 in \phasing_test::audit_task  at test.sv:128
+@ 120: [OBJTN_TRC] uvm.uvm_sched.post_configure Object uvm_test_top dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:338
+@ 120: [OBJTN_TRC] uvm.uvm_sched.post_configure Object uvm_test_top all_dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 120: [PH/TRC/DONE] Phase 'uvm.uvm_sched.post_configure' (id=264) Completed phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 120: [PH/TRC/SCHEDULED] Phase 'uvm.uvm_sched.pre_main' (id=276) Scheduled from phase uvm.uvm_sched.post_configure
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 120: [PH/TRC/STRT] Phase 'uvm.uvm_sched.pre_main' (id=276) Starting phase
+#0 in \phasing_test::audit_task  at test.sv:124
+@ 120: [OBJTN_TRC] uvm.uvm_sched.pre_main Object uvm_test_top raised 1 objection(s): count=1  total=1
+#0 in \phasing_test::audit_task  at test.sv:128
+@ 140: [OBJTN_TRC] uvm.uvm_sched.pre_main Object uvm_test_top dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:338
+@ 140: [OBJTN_TRC] uvm.uvm_sched.pre_main Object uvm_test_top all_dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 140: [PH/TRC/DONE] Phase 'uvm.uvm_sched.pre_main' (id=276) Completed phase
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 140: [PH/TRC/SCHEDULED] Phase 'uvm.uvm_sched.main' (id=288) Scheduled from phase uvm.uvm_sched.pre_main
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:417
+@ 140: [PH/TRC/STRT] Phase 'uvm.uvm_sched.main' (id=288) Starting phase
+#0 in \phasing_test::audit_task  at test.sv:124
+@ 140: [OBJTN_TRC] uvm.uvm_sched.main Object uvm_test_top raised 1 objection(s): count=1  total=1
+#0 in \phasing_test::audit_task  at test.sv:128
+@ 160: [OBJTN_TRC] uvm.uvm_sched.main Object uvm_test_top dropped 1 objection(s): count=0  total=0
+#0 in \test::main_phase  at test.sv:79
+@ 160: [OBJTN_TRC] uvm.uvm_sched.main Object uvm_test_top raised 1 objection(s): count=1  total=1
+#0 in \test::main_phase  at test.sv:84
+@ 160: [OBJTN_TRC] uvm.uvm_sched.main Object uvm_test_top dropped 1 objection(s): count=0  total=0
+#0 in \uvm_root::run_test  at /auto/luke_user3/mastrick/uvm1.1d_dev/uvm/distrib/src/base/uvm_root.svh:338
+@ 160: [OBJTN_TRC] uvm.uvm_sched.main Object uvm_test_top all_dropped 1 objection(s): count=0  total=0
