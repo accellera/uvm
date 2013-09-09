@@ -107,12 +107,7 @@ get_adjacent_successor_nodes inside of uvm_phase
 
 (*) Mantis 4517: Added phase transition callbacks
 
-(*) Mantis 4518: Classes extended from uvm_object now require an
-explicit constructor with a string-type name argument.  This
-functionality was optionally enabled in prior versions by defining the
-`UVM_OBJECT_MUST_HAVE_CONSTRUCTOR symbol (Mantis 3770).  This
-functionality is now the default. Should the obsolete functionality be
-required, define the `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR symbol.
+Mantis 4391, removed redundant code in uvm_port_base
 
 Mantis 4532: uvm_reg_access_seq ignoring regs with one RO field
 
