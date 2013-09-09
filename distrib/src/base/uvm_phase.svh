@@ -1926,8 +1926,10 @@ function void uvm_phase::unsync(uvm_domain target,
     // this is a 2-way ('with') sync and we check first in case it is already there
     uvm_phase from_node, to_node;
     int found_to[$], found_from[$];
-    from_node = target.find(phase);
-    to_node = target.find(phase);
+    if(with_phase == null) with_phase = phase;
+    from_node = find(phase);
+    to_node = target.find(with_phase);
+    if(from_node == null || to_node == null) return;
     found_to = from_node.m_sync.find_index(node) with (node == to_node);
     found_from = to_node.m_sync.find_index(node) with (node == from_node);
     if (found_to.size()) from_node.m_sync.delete(found_to[0]);
