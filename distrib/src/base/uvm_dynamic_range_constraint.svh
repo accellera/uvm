@@ -31,15 +31,11 @@ class range_limits;
   endfunction: new
 endclass: range_limits
 
-virtual class uvm_dynamic_range_constraint_parser extends uvm_object;
+class uvm_dynamic_range_constraint_parser extends uvm_object;
 
   function new(string name = "");
     super.new(name);
   endfunction: new
-
-  //parse the range constraint with the provided name from command line
-  //split the constraint into triplet
-  pure virtual function void get_range_constraint(string param_name, output int unsigned values[]);
 
   // Split the string parm to integers.  ";" is used as a delimiter to seperate triplets
   // And then ":" is used to deliminate the actual triplet values.
@@ -83,6 +79,10 @@ virtual class uvm_dynamic_range_constraint_parser extends uvm_object;
       str_2_uint(str_values[index], values[index]);
   endfunction: split_param_to_integer
 
+  //split the constraint into triplet
+  static function void get_range_constraint(string constraint_param, output int unsigned values[]);
+    uvm_dynamic_range_constraint_parser::split_param_to_integer(constraint_param, values);
+  endfunction: get_range_constraint
 
   // Once Mantis 4399 is implemented, this str_2_uint() will no longer
   // be needed.  Instead, radix processing will be integrated into the
@@ -128,51 +128,12 @@ virtual class uvm_dynamic_range_constraint_parser extends uvm_object;
   
 endclass: uvm_dynamic_range_constraint_parser
 
-class uvm_cmdline_dynamic_range_constraint_parser extends uvm_dynamic_range_constraint_parser;
-
-  function new(string name = "");
-    super.new(name);
-  endfunction: new
-
-  //parse the range constraint with the provided name from command line
-  //split the constraint into triplet
-  virtual function void get_range_constraint(string param_name, output int unsigned values[]);
-    uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
-    string params[$];
-    string constraint_param;
-    int arg_count = clp.get_arg_values({"+",param_name}, params);
-
-    if (arg_count == 0)
-       return;
-    
-    if (params[0].getc(0) != "=")
-    begin
-      `uvm_fatal("DYNAMICRANDOM", 
-                          $sformatf("the format of the %s parameter is wrong", param_name));
-      return;
-    end
-    else
-       constraint_param = params[0].substr(1, params[0].len()-1);
-
-    if (arg_count > 1)
-    begin
-      string max_constraint_param = params[0];
-      for(int unsigned lindex = 1; lindex < params.size(); ++lindex)
-        max_constraint_param = {max_constraint_param, ", ", params[lindex]};
-      `uvm_warning("DYNAMICRANDOM", 
-                         $sformatf("Multiple (%0d) %s arguments provided on the command line.  '%s' will be used.  Provided list: %s.", 
-                                    arg_count, param_name, params[0], max_constraint_param))
-    end
-    
-    uvm_dynamic_range_constraint_parser::split_param_to_integer(constraint_param, values);
-  endfunction: get_range_constraint
-endclass: uvm_cmdline_dynamic_range_constraint_parser
-
 class uvm_dynamic_range_constraint extends uvm_object;
 
   static local int unsigned m_values[string][];
   
-  local string param_name;
+//  local string param_name;
+  local string constraint_param;
   local int unsigned constraint_set = 0;
   local range_limits ranges[];
   local range_limits weights[];
@@ -183,46 +144,68 @@ class uvm_dynamic_range_constraint extends uvm_object;
   rand int unsigned index;
 
   `uvm_object_utils_begin(uvm_dynamic_range_constraint)
-    `uvm_field_string(param_name, UVM_DEFAULT)
+    `uvm_field_string(constraint_param, UVM_DEFAULT)
   `uvm_object_utils_end
-
 
   function new(string name = "");
     super.new(name);
   endfunction: new
 
-  function void pre_randomize();
+  virtual function void set_default_range_constraint(string range);
+    add_range_constraint(range, 1);
+  endfunction: set_default_range_constraint
+
+  local function void add_range_constraint(string range, int override);
     int unsigned values[];
-    int unsigned index = 0;
+    int unsigned i = 0;
+
+    uvm_dynamic_range_constraint_parser::get_range_constraint(range, values);
+
+    if( override )
+    begin
+      ranges.delete();
+      weights.delete();
+      ranges = new[values.size()/3];
+      weights = new[values.size()/3];
+      range_index = 0;
+      max_weight = 0;
+    end
+    else
+    begin
+      ranges = new[ranges.size()+values.size()/3](ranges);
+      weights = new[weights.size()+values.size()/3](weights);
+    end
+
+    //after parse the parameter add the constraint
+    while(i + 3 <= values.size())
+    begin
+      add(values[i], values[i+1], values[i+2]);
+      i += 3;
+    end
+
+  endfunction: add_range_constraint
+
+  function void pre_randomize();
+    int override = 1;
 
     super.pre_randomize();
 
-    if( constraint_set == 0)
+    if(constraint_set == 0)
     begin
-      uvm_cmdline_dynamic_range_constraint_parser parser = new();
       constraint_set = 1; //set only once
       //check configuration first
       if (!uvm_config_db#(string)::get(null, get_full_name(), 
-                                       "param_name", param_name)
-        || param_name == "")
-        param_name = get_name(); //using the object name by default
-
-      if(param_name == "")
-        `uvm_fatal("DYNAMICRANDOM", "The parameter cannot be empty");
-
-      if(!m_values.exists(param_name))
-        parser.get_range_constraint(param_name, m_values[param_name]);
-  
-      //after parse the parameter add the constraint
-      ranges = new[m_values[param_name].size()/3];
-      weights = new[m_values[param_name].size()/3];
-      range_index = 0;
-      while(index + 3 <= m_values[param_name].size())
+                                       "constraint_param", constraint_param)
+        || constraint_param == "")
       begin
-        add(m_values[param_name][index], m_values[param_name][index+1], m_values[param_name][index+2]);
-        index += 3;
+        `uvm_info("DYNAMICRANDOM", $sformatf("The parameter is not correctly set for %s, using the default [0:0xFFFFFFFF]", get_full_name()), UVM_FULL);
+        constraint_param = "0:0xFFFFFFFF";
+        override = 0;
       end
+
+      add_range_constraint(constraint_param, override);
     end
+
   endfunction: pre_randomize
 
   constraint valid_weight
@@ -252,7 +235,6 @@ class uvm_dynamic_range_constraint extends uvm_object;
   local function void add(int unsigned min, int unsigned max, int unsigned weight);
     range_limits range;
     range_limits weight_range;
-
     range = new(min, max);
     ranges[range_index] = range;
 

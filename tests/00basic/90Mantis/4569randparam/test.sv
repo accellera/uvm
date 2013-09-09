@@ -24,13 +24,19 @@ import uvm_pkg::*;
 
 class rnd_class extends uvm_object;
   rand uvm_dynamic_range_constraint drc1;
-  rand uvm_dynamic_range_constraint drc2;
-
+  rand uvm_dynamic_range_constraint drc3;
+  rand uvm_dynamic_range_constraint drc5;
+  rand uvm_dynamic_range_constraint drc7;
   `uvm_object_utils(rnd_class)
 
   function new(string name="");
-    drc1 = uvm_dynamic_range_constraint::type_id::create("RANDINT1");
-    drc2 = uvm_dynamic_range_constraint::type_id::create("RANDINT2");
+    super.new(name);
+    drc1 = uvm_dynamic_range_constraint::type_id::create({get_full_name(),".RANDINT1"});
+    drc3 = uvm_dynamic_range_constraint::type_id::create({get_full_name(),".RANDINT3"});
+    drc5 = uvm_dynamic_range_constraint::type_id::create({get_full_name(),".RANDINT5"});
+    drc7 = uvm_dynamic_range_constraint::type_id::create({get_full_name(),".RANDINT7"});
+    drc3.set_default_range_constraint("3");
+		drc5.set_default_range_constraint("3");
   endfunction: new
 endclass: rnd_class
 
@@ -49,12 +55,12 @@ class test extends uvm_test;
    virtual function void report();
      int weight[string][int];
      int check_weight[string][int];
-     string check_param[2];
+     string check_param[3];
      int temp;
      int index;
      int error = 0;
-     rnd_class rnd = new("rnd");
-     uvm_config_db#(string)::set(null, "*RANDINT2", "param_name", "RANDINT3");
+     rnd_class rnd = new("@us");
+//     uvm_config_db#(string)::set(null, "*RANDINT2", "param_name", "RANDINT3");
      
      //set the hardcoded check weight for "0xF:0x10:1; 2:3:2"
      check_param[0] = "RANDINT1";
@@ -68,6 +74,9 @@ class test extends uvm_test;
      check_weight["RANDINT3"][2] = 25;
      check_weight["RANDINT3"][3] = 25;
      check_weight["RANDINT3"][4] = 25;
+     //set the hardcoded check weight for "3"
+     check_param[2] = "RANDINT5";
+     check_weight["RANDINT5"][3] = 100;
 
      for(int unsigned index = 0; index != 100; ++index)
      begin
@@ -75,17 +84,20 @@ class test extends uvm_test;
        void'(rnd.randomize());
 //       temp = rnd.drc1.value;
        weight["RANDINT1"][rnd.drc1.value]++;
-       weight["RANDINT3"][rnd.drc2.value]++;
+       weight["RANDINT3"][rnd.drc3.value]++;
+       weight["RANDINT5"][rnd.drc5.value]++;
      end
      
      foreach(check_param[param_index])
      begin
        string param = check_param[param_index];
+       int unsigned u_index;
        $write("\n\nStatistics for 100 randomizations of constraint %s:", param);
        if(weight[param].first(index))
          do
          begin
-           $write("\n  %0d was chosen %0d times", index, weight[param][index]);
+           $cast(u_index, index);
+           $write("\n  %0d was chosen %0d times", u_index, weight[param][index]);
            if(!check_weight[param].exists(index))
            begin
              $write(",out of the expecting times, [0,0]");

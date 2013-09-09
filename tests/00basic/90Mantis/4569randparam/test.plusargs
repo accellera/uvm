@@ -1,4 +1,4 @@
-+RANDINT1="0xF:0x10:1; 2:3:2"
-+RANDINT2="5"
-+RANDINT3="1:4"
-+RANDINT4="1;4:10:3;11:20;21:30:5"
++uvm_set_config_string=*@us.RANDINT1,constraint_param,"0xF:0x10:1; 2:3:2"
++uvm_set_config_string=*@us.RANDINT2,constraint_param,"5"
++uvm_set_config_string=*@us.RANDINT3,constraint_param,"1:4"
++uvm_set_config_string=*@us.RANDINT4,constraint_param,"1;4:10:3;11:20;21:30:5"
