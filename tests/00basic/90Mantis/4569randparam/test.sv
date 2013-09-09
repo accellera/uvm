@@ -22,21 +22,22 @@ program top;
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 
+class my_dynamic_range_constraint extends uvm_dynamic_range_constraint;
+  constraint my_constraint
+  { value inside {[1:5]};}
+endclass: my_dynamic_range_constraint
+
 class rnd_class extends uvm_object;
   rand uvm_dynamic_range_constraint drc1;
+  rand uvm_dynamic_range_constraint drc2;
   rand uvm_dynamic_range_constraint drc3;
-  rand uvm_dynamic_range_constraint drc5;
-  rand uvm_dynamic_range_constraint drc7;
   `uvm_object_utils(rnd_class)
 
   function new(string name="");
     super.new(name);
     drc1 = uvm_dynamic_range_constraint::type_id::create({get_full_name(),".RANDINT1"});
+    drc2 = my_dynamic_range_constraint::type_id::create({get_full_name(),".RANDINT2"});
     drc3 = uvm_dynamic_range_constraint::type_id::create({get_full_name(),".RANDINT3"});
-    drc5 = uvm_dynamic_range_constraint::type_id::create({get_full_name(),".RANDINT5"});
-    drc7 = uvm_dynamic_range_constraint::type_id::create({get_full_name(),".RANDINT7"});
-    drc3.set_default_range_constraint("3");
-		drc5.set_default_range_constraint("3");
   endfunction: new
 endclass: rnd_class
 
@@ -68,15 +69,15 @@ class test extends uvm_test;
      check_weight["RANDINT1"]['h10] = 17;
      check_weight["RANDINT1"][2] = 33;
      check_weight["RANDINT1"][3] = 33;
+     //set the hardcoded check weight for "1:5"
+     check_param[1] = "RANDINT2";
+     check_weight["RANDINT2"][5] = 100;
      //set the hardcoded check weight for "1:4"
-     check_param[1] = "RANDINT3";
+     check_param[2] = "RANDINT3";
      check_weight["RANDINT3"][1] = 25;
      check_weight["RANDINT3"][2] = 25;
      check_weight["RANDINT3"][3] = 25;
      check_weight["RANDINT3"][4] = 25;
-     //set the hardcoded check weight for "3"
-     check_param[2] = "RANDINT5";
-     check_weight["RANDINT5"][3] = 100;
 
      for(int unsigned index = 0; index != 100; ++index)
      begin
@@ -84,8 +85,8 @@ class test extends uvm_test;
        void'(rnd.randomize());
 //       temp = rnd.drc1.value;
        weight["RANDINT1"][rnd.drc1.value]++;
+       weight["RANDINT2"][rnd.drc2.value]++;
        weight["RANDINT3"][rnd.drc3.value]++;
-       weight["RANDINT5"][rnd.drc5.value]++;
      end
      
      foreach(check_param[param_index])

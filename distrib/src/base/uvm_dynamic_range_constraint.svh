@@ -134,7 +134,6 @@ class uvm_dynamic_range_constraint extends uvm_object;
   
 //  local string param_name;
   local string constraint_param;
-  local int unsigned constraint_set = 0;
   local range_limits ranges[];
   local range_limits weights[];
   local int unsigned max_weight = 0;
@@ -151,35 +150,27 @@ class uvm_dynamic_range_constraint extends uvm_object;
     super.new(name);
   endfunction: new
 
-  virtual function void set_default_range_constraint(string range);
-    add_range_constraint(range, 1);
-  endfunction: set_default_range_constraint
-
-  local function void add_range_constraint(string range, int override);
-    int unsigned values[];
+  function void add_range_constraint(string range);
     int unsigned i = 0;
 
-    uvm_dynamic_range_constraint_parser::get_range_constraint(range, values);
+    if(!m_values.exists(range))
+      uvm_dynamic_range_constraint_parser::get_range_constraint(range, m_values[range]);
 
-    if( override )
+    if( ranges.size() == 0 )
     begin
-      ranges.delete();
-      weights.delete();
-      ranges = new[values.size()/3];
-      weights = new[values.size()/3];
-      range_index = 0;
-      max_weight = 0;
+      ranges = new[m_values[range].size()/3];
+      weights = new[m_values[range].size()/3];
     end
     else
     begin
-      ranges = new[ranges.size()+values.size()/3](ranges);
-      weights = new[weights.size()+values.size()/3](weights);
+      ranges = new[ranges.size()+m_values[range].size()/3](ranges);
+      weights = new[weights.size()+m_values[range].size()/3](weights);
     end
 
     //after parse the parameter add the constraint
-    while(i + 3 <= values.size())
+    while(i + 3 <= m_values[range].size())
     begin
-      add(values[i], values[i+1], values[i+2]);
+      add(m_values[range][i], m_values[range][i+1], m_values[range][i+2]);
       i += 3;
     end
 
@@ -190,9 +181,8 @@ class uvm_dynamic_range_constraint extends uvm_object;
 
     super.pre_randomize();
 
-    if(constraint_set == 0)
+    if(constraint_param == "")
     begin
-      constraint_set = 1; //set only once
       //check configuration first
       if (!uvm_config_db#(string)::get(null, get_full_name(), 
                                        "constraint_param", constraint_param)
@@ -200,10 +190,9 @@ class uvm_dynamic_range_constraint extends uvm_object;
       begin
         `uvm_info("DYNAMICRANDOM", $sformatf("The parameter is not correctly set for %s, using the default [0:0xFFFFFFFF]", get_full_name()), UVM_FULL);
         constraint_param = "0:0xFFFFFFFF";
-        override = 0;
       end
 
-      add_range_constraint(constraint_param, override);
+      add_range_constraint(constraint_param);
     end
 
   endfunction: pre_randomize
