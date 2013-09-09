@@ -121,6 +121,8 @@ Mantis 4542: uvm_test_done is now const to prevent changes
 
 Mantis 4548: cleanup dpi coding issues
 
+Mantis 4566: uvm_comparer now detects any queue size mismatch when comparer.show_max != 1
+
 Mantis 4572: packing of ints with 64+bits and array unpack broken
 
 (*) Mantis 4606: uvm_report server is not chainable/extendable. uvm_report_server can now be extended, chained 
