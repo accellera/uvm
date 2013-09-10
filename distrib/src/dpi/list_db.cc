@@ -10,6 +10,8 @@
 #include <string>
 #include <assert.h>
 
+#include <pthread.h>
+
 /*
 class AllocationList
 {
@@ -30,13 +32,20 @@ public:
   int getNumberOfItems() const;
   void getList(unsigned int numOfItems, T* theList) const;
   void setList(unsigned int numOfItems, const T* theList);
+  void lockList();
+  bool tryLockList();
+  void unlockList();
 
 protected:
   std::vector<T> m_content;
   std::string m_name; // it is not neccesary to have it here
+  pthread_mutex_t m_mutex;
 
   friend class ListDb<T>;
-  ListHolder(std::string name) : m_name(name) {}
+  ListHolder(std::string name) : m_name(name) 
+  {
+    pthread_mutex_init(&m_mutex, NULL);
+  }
   ~ListHolder();
 };
 
@@ -48,6 +57,9 @@ public:
   int getNumberOfItems(const char* name);
   void getList(const char* name, unsigned int numOfItems, T* theList);
   void setList(const char* name, unsigned int numOfItems, const T* theList);
+  void lockList(const char* name);
+  bool tryLockList(const char* name);
+  void unlockList(const char* name);
 
   static ListDb* inst() { 
     static ListDb* instance = new ListDb;
@@ -88,6 +100,24 @@ void ListHolder<T>::setList(unsigned int numOfItems, const T* theList)
 
 }
 
+template <typename T>
+void ListHolder<T>::lockList()
+{
+  pthread_mutex_lock(&m_mutex);
+}
+
+template <typename T>
+bool ListHolder<T>::tryLockList()
+{
+  return pthread_mutex_trylock(&m_mutex);
+}
+
+template <typename T>
+void ListHolder<T>::unlockList()
+{
+  pthread_mutex_unlock(&m_mutex);
+}
+
 // how should we notify about error ???
 template <typename T>
 int ListDb<T>::getNumberOfItems(const char* name)
@@ -105,6 +135,24 @@ template <typename T>
 void ListDb<T>::setList(const char* name, unsigned int numOfItems, const T* theList)
 {
   getHolder(name)->setList(numOfItems, theList);
+}
+
+template <typename T>
+void ListDb<T>::lockList(const char* name)
+{
+  getHolder(name)->lockList();
+}
+
+template <typename T>
+bool ListDb<T>::tryLockList(const char* name)
+{
+  return getHolder(name)->tryLockList();
+}
+
+template <typename T>
+void ListDb<T>::unlockList(const char* name)
+{
+  getHolder(name)->unlockList();
 }
 
 
