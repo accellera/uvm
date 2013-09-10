@@ -73,30 +73,37 @@ class test extends uvm_test;
    endfunction
 
    virtual function void report();
-     int weight[string][int];
-     int check_weight[string][int];
+     int unsigned weight[string][int unsigned];
+     int unsigned check_weight[string][int unsigned];
      string check_param[3];
-     int temp;
-     int index;
-     int error = 0;
-     
-     //set the hardcoded check weight for "0xF:0x10:1; 2:3:2"
-     check_param[0] = "RANDINT1";
-     check_weight["RANDINT1"]['hF] = 17;
-     check_weight["RANDINT1"]['h10] = 17;
-     check_weight["RANDINT1"][2] = 33;
-     check_weight["RANDINT1"][3] = 33;
-     //set the hardcoded check weight for "1:5"
-     check_param[1] = "RANDINT2";
-     check_weight["RANDINT2"][5] = 100;
-     //set the hardcoded check weight for "1:4"
-     check_param[2] = "RANDINT3";
-     check_weight["RANDINT3"][1] = 25;
-     check_weight["RANDINT3"][2] = 25;
-     check_weight["RANDINT3"][3] = 25;
-     check_weight["RANDINT3"][4] = 25;
 
-     for(int unsigned index = 0; index != 100; ++index)
+     int unsigned temp;
+     int unsigned index;
+     int unsigned error = 0;
+     const int unsigned NUM_ITERATIONS = 100000;
+     // Weights are not exact promises of statistical balance,
+     // so give a little (1%) slack
+     const int unsigned WEIGHT_MARGIN  = NUM_ITERATIONS * 0.01;
+
+     // Set the hardcoded check weight for "0xF:0x10:1; 2:3:2"
+     check_param[0] = "RANDINT1";
+     check_weight["RANDINT1"]['hF]  = (NUM_ITERATIONS / 6);  // i.e. ((1/6) * NUM_ITERATIONS)
+     check_weight["RANDINT1"]['h10] = (NUM_ITERATIONS / 6);
+     check_weight["RANDINT1"][2]    = (NUM_ITERATIONS / 3);  // i.e. (2/6) * NUM_ITERATIONS)
+     check_weight["RANDINT1"][3]    = (NUM_ITERATIONS / 3);
+
+     // Set the hardcoded check weight for "5"
+     check_param[1] = "RANDINT2";
+     check_weight["RANDINT2"][5] = NUM_ITERATIONS;
+
+     // Set the hardcoded check weight for "1:4"
+     check_param[2] = "RANDINT3";
+     check_weight["RANDINT3"][1] = NUM_ITERATIONS / 4;
+     check_weight["RANDINT3"][2] = NUM_ITERATIONS / 4;
+     check_weight["RANDINT3"][3] = NUM_ITERATIONS / 4;
+     check_weight["RANDINT3"][4] = NUM_ITERATIONS / 4;
+
+     for(int unsigned index = 0; index != NUM_ITERATIONS; ++index)
      begin
        void'(rnd.randomize());
        weight["RANDINT1"][rnd.drc1.value]++;
@@ -108,32 +115,33 @@ class test extends uvm_test;
      begin
        string param = check_param[param_index];
        int unsigned u_index;
-       $write("\n\nStatistics for 100 randomizations of constraint %s:", param);
-       if(weight[param].first(index))
+
+       $write("\n\nStatistics for %0d randomizations of constraint %s:", NUM_ITERATIONS, param);
+       if (weight[param].first(index))
          do
          begin
            $cast(u_index, index);
            $write("\n  %0d was chosen %0d times", u_index, weight[param][index]);
-           if(!check_weight[param].exists(index))
+           if (!check_weight[param].exists(index))
            begin
-             $write(",out of the expecting times, [0,0]");
+             $write(", outside the range of expected times: [0,0]");
              error = 1;
            end
-           else if(weight[param][index] < check_weight[param][index] - 15 || weight[param][index] > check_weight[param][index] + 15)
+
+           else if (weight[param][index] < check_weight[param][index] - WEIGHT_MARGIN || weight[param][index] > check_weight[param][index] + WEIGHT_MARGIN)
            begin
-             $write(",out of the expecting times, [%0d, %0d]", check_weight[param][index]-15, check_weight[param][index]+15 );
+             $write(", outside the range of expected times: [%0d, %0d]", check_weight[param][index] - WEIGHT_MARGIN, check_weight[param][index] + WEIGHT_MARGIN );
              error = 1;
            end
          end
          while(weight[param].next(index));
       end
 
-     //check the correctness
-     
-     if(error)
-       $write("\n** UVM TEST FAILED **\n");
+     // Check the correctness
+     if (error)
+        $write("\n** UVM TEST FAILED **\n");
      else
-       $write("\n** UVM TEST PASSED **\n");
+        $write("\n** UVM TEST PASSED **\n");
    endfunction: report
 
 endclass: test

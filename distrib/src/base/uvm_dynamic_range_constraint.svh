@@ -37,11 +37,12 @@ class uvm_dynamic_range_constraint_parser extends uvm_object;
     super.new(name);
   endfunction: new
 
-  // Split the string parm to integers.  ";" is used as a delimiter to seperate triplets
-  // And then ":" is used to deliminate the actual triplet values.
+  // Split the string parm to integers.
+  // ";" is used as a delimiter to seperate triplets.
+  // ":" is used to deliminate the actual triplet values.
   // Example: "1:2:3;4:5:6"
-  //  Becomes: "1:2:3", "4:5:6"
-  //  Which then becomes 1,2,3,4,5,6
+  //   Becomes: "1:2:3", "4:5:6"
+  //   Which then becomes 1,2,3,4,5,6
   static function void split_param_to_integer(string param, output int unsigned values[]);
     string str_values_triplet[$];
     string str_values[];
@@ -56,16 +57,17 @@ class uvm_dynamic_range_constraint_parser extends uvm_object;
       string str_values_tmp[$];
       uvm_split_string(str_values_triplet[index], ":", str_values_tmp);
       case(str_values_tmp.size())
-        3: begin
+        3: begin  // Min, Max, & Weight Provided
              foreach(str_values_tmp[index_tmp])
                str_values[index*3+index_tmp] = str_values_tmp[index_tmp];
            end
-        2: begin
+        2: begin  // Min, Max Provided; Weight defaulted to "1"
                str_values[index*3+0] = str_values_tmp[0];
                str_values[index*3+1] = str_values_tmp[1];
                str_values[index*3+2] = "1";
            end
-        1: begin
+        1: begin // Single constraint provided; Use it as both Min & Max
+                 // and set Weight to "1"
                str_values[index*3+0] = str_values_tmp[0];
                str_values[index*3+1] = str_values_tmp[0];
                str_values[index*3+2] = "1";
@@ -79,12 +81,14 @@ class uvm_dynamic_range_constraint_parser extends uvm_object;
       str_2_uint(str_values[index], values[index]);
   endfunction: split_param_to_integer
 
-  //split the constraint into triplet
+
+  // Split the constraint into triplet
   static function void get_range_constraint(string constraint_param, output int unsigned values[]);
     uvm_dynamic_range_constraint_parser::split_param_to_integer(constraint_param, values);
   endfunction: get_range_constraint
 
-  // Once Mantis 4399 is implemented, this str_2_uint() will no longer
+
+  // Once Mantis 4399 is implemented, str_2_uint() will no longer
   // be needed.  Instead, radix processing will be integrated into the
   // CmdLineParser and we will be able to use that
 
@@ -97,7 +101,8 @@ class uvm_dynamic_range_constraint_parser extends uvm_object;
     while (str.getc(0) == " ")  // Remove leading spaces
           str = str.substr(1, str.len()-1);
 
-    if (str.len() == 0)  // If passed an empty string or a string only consisting of spaces
+    if (str.len() == 0)  // If passed an empty string or a string
+                         // consisting only of spaces
        `uvm_fatal("DYNAMICRANDOM",{"\"", str_orig, "\" is not a valid dynamic constraint"}) 
 
     if (str.getc(0) == "0")
@@ -132,7 +137,6 @@ class uvm_dynamic_range_constraint extends uvm_object;
 
   static local int unsigned m_values[string][];
   
-//  local string param_name;
   local string constraint_param;
   local int constraint_set = 0;
   local range_limits ranges[];
@@ -168,7 +172,7 @@ class uvm_dynamic_range_constraint extends uvm_object;
       weights = new[weights.size()+m_values[range].size()/3](weights);
     end
 
-    //after parse the parameter add the constraint
+    // After parsing the parameter, add the constraint
     while(i + 3 <= m_values[range].size())
     begin
       add(m_values[range][i], m_values[range][i+1], m_values[range][i+2]);
@@ -176,6 +180,7 @@ class uvm_dynamic_range_constraint extends uvm_object;
     end
 
   endfunction: add_range_constraint
+
 
   function void pre_randomize();
     int override = 1;
@@ -195,6 +200,7 @@ class uvm_dynamic_range_constraint extends uvm_object;
     end
 
   endfunction: pre_randomize
+
 
   constraint valid_weight
   {
