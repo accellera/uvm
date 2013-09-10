@@ -224,9 +224,9 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
   //
   // Request and reserve an item accirding to specified ~alloc~ policy
   //
-  // output ~result~ is set to 1 if the item was successfully resereved
+  // output ~result~ is set to 1 if the item was successfully reserved
   // and to 0 otherwise.
-  // output ~item~ is set to the allocted item, if allocation was successfull
+  // output ~item~ is set to the allocated item, if allocation was successfull
 
   task request_item_t(uvm_item_alloc_policy#(T, I) alloc, 
                     output T item, output bit result);
@@ -236,12 +236,20 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
 
   endtask
  
+  // Task: release_item_t
+  //
+  // Release specified object.
+  //
   task release_item_t(T object);
     lock();
     release_item(object,1);
     unlock();
-  endtask // release_item_t
+  endtask: release_item_t
   
+  // Task: release_all_items_t
+  //
+  // Release all currenly allocated items
+  //
   task release_all_items_t();
     lock();
     release_all_items(1);
@@ -249,6 +257,8 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
   endtask // release_all_items
 
   // function API
+
+  
   protected function void import_in_use(bit external_lock = 0);
     // check that size of I is <= 64 bits
     if (!is_local) begin
@@ -304,6 +314,11 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
   endfunction: start_in_use
     
   
+  // Function: can_reserve
+  //
+  // Check if the specified item can be reserved.
+  // Return 1 if the item can be reserved and 0 otherwise.
+  // 
   function bit can_reserve(T item_to_reserve, bit external_lock = 0);
     I int_item;
     bit result;
@@ -319,6 +334,12 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
     return result;
   endfunction: can_reserve
   
+  // Function: reserve_item
+  //
+  // Reserve specified item.
+  //
+  // Return 1 if the item was successfully reserved
+  // and 0 otherwise.
   function bit reserve_item(T item_to_reserve, bit external_lock = 0);
     I int_item;
     bit result;
@@ -345,6 +366,11 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
     return result;
   endfunction: reserve_item
   
+  // Function: can_request
+  //
+  // Check if an item can be requsted according to specified policy
+  // Return 1 if the item can be requested and 0 otherwise.
+  // 
   function bit can_request(input uvm_item_alloc_policy#(T, I) alloc = null, 
                            bit external_lock = 0);
     bit result;
@@ -360,6 +386,14 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
     return result;
   endfunction: can_request
   
+  // Function: request_item
+  //
+  // Request and reserve an item accirding to specified ~alloc~ policy
+  //
+  // Return 1 if the item was successfully reserved
+  // and to 0 otherwise.
+  // output ~item~ is set to the allocated item, if allocation was successfull
+
   function bit request_item(uvm_item_alloc_policy#(T, I) alloc, 
                             output T item, input bit external_lock=0);
     bit result;
@@ -384,6 +418,10 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
     return result;
   endfunction: request_item
   
+  // Function: release_item
+  //
+  // Release specified object.
+  //
   function void release_item(T object, bit external_lock = 0);
     I item;
     if (alloc_policy.converter == null) begin
@@ -403,6 +441,10 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
    `uvm_error("ITEM-ALLOCATOR", $sformatf("can not release item %0d. it is not currently allocated", item))
   endfunction: release_item
   
+  // Function: release_all_items
+  //
+  // Release all currenly allocated items
+  //
   function void release_all_items(bit external_lock = 0);
     start_in_use(external_lock);
     in_use.delete();
@@ -410,6 +452,10 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
   endfunction: release_all_items
   
   
+   // Function: convert2string
+   //
+   // Create a human-readable description the currently allocated items.
+   // 
   function string convert2string();
     string result;
     import_in_use(1); // do we need a task version of this function, which actually waits for lock?
