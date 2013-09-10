@@ -183,9 +183,15 @@ class uvm_dynamic_range_constraint extends uvm_object;
 
     if(constraint_param == "")
     begin
+      string full_name = get_full_name();
+      string names[$];
+      string name;
+      uvm_split_string(full_name, ".", names);
+      name = names[names.size()-1];
+      full_name = full_name.substr(0, full_name.len()-name.len()-2);
       //check configuration first
-      if (!uvm_config_db#(string)::get(null, get_full_name(), 
-                                       "constraint_param", constraint_param)
+      if (!uvm_config_db#(string)::get(null, full_name, 
+                                       name, constraint_param)
         || constraint_param == "")
       begin
         `uvm_info("DYNAMICRANDOM", $sformatf("The parameter is not correctly set for %s, using the default [0:0xFFFFFFFF]", get_full_name()), UVM_FULL);

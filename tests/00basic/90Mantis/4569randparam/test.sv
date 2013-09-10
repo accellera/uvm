@@ -60,7 +60,7 @@ class test extends uvm_test;
      int temp;
      int index;
      int error = 0;
-     rnd_class rnd = new("@us");
+     rnd_class rnd = new("top.@us");
 //     uvm_config_db#(string)::set(null, "*RANDINT2", "param_name", "RANDINT3");
      
      //set the hardcoded check weight for "0xF:0x10:1; 2:3:2"
@@ -104,7 +104,7 @@ class test extends uvm_test;
              $write(",out of the expecting times, [0,0]");
              error = 1;
            end
-           else if(weight[param][index] < check_weight[param][index] - 8 || weight[param][index] > check_weight[param][index] + 8)
+           else if(weight[param][index] < check_weight[param][index] - 10 || weight[param][index] > check_weight[param][index] + 10)
            begin
              $write(",out of the expecting times, [%0d, %0d]", check_weight[param][index]-8, check_weight[param][index]+8 );
              error = 1;
