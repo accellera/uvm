@@ -134,6 +134,7 @@ class uvm_dynamic_range_constraint extends uvm_object;
   
 //  local string param_name;
   local string constraint_param;
+  local int constraint_set = 0;
   local range_limits ranges[];
   local range_limits weights[];
   local int unsigned max_weight = 0;
@@ -181,18 +182,10 @@ class uvm_dynamic_range_constraint extends uvm_object;
 
     super.pre_randomize();
 
-    if(constraint_param == "")
+    if(constraint_set == 0)
     begin
-      string full_name = get_full_name();
-      string names[$];
-      string name;
-      uvm_split_string(full_name, ".", names);
-      name = names[names.size()-1];
-      full_name = full_name.substr(0, full_name.len()-name.len()-2);
-      //check configuration first
-      if (!uvm_config_db#(string)::get(null, full_name, 
-                                       name, constraint_param)
-        || constraint_param == "")
+      constraint_set = 1;
+      if(constraint_param == "")
       begin
         `uvm_info("DYNAMICRANDOM", $sformatf("The parameter is not correctly set for %s, using the default [0:0xFFFFFFFF]", get_full_name()), UVM_FULL);
         constraint_param = "0:0xFFFFFFFF";
