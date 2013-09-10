@@ -158,30 +158,58 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
 
   uvm_item_alloc_policy#(T, I) alloc_policy;
 
-  string  key;  // used to access global (C) DB; 
+  string  key;  // used to access global (C side) DB; 
   // if key is empty, global DB is not used and allocator works in local mode
 
-  // what should be the default ??
+  // Variable: in_local
+  //
+  // is_local == 0 means that the allocation data base is stored on Verilog side
+  // is_local == 1 means that the allocation data base is stored on C side
   bit     is_local;
 
+  // Function: new
+  //
+  // Creates a new allocator object with the given  ~name~.
+  // ~key~ is used to access external allocation database.
+  // If ~key~ is empty, the allocation database is stored locally on Verilog side.
   function new(string name, string key = "" );
     this.key = key;
     this.is_local = (key == "");
   endfunction: new
   
+  // Variable: in_use
+  //
+  // Stores  all items previously allocated and not released (integral representation)
+  //
   protected I in_use[$];
 
 
   //task API
+
+  // Task: lock
+  //
+  // locks the external database
+  // waits if the database is currently locked.
   task lock();
     svdpi_lock_taken_list(key);
-  endtask // lock
+  endtask: lock
  
+  // Function: unlock
+  //
+  // removed lock from the external database
   function void unlock();
     svdpi_unlock_taken_list(key);
-  endfunction // unlock
+  endfunction: unlock
   
   //can_reserve(T item_to_reserve, bit external_lock = 0);
+
+  // Task: reserve_item_t
+  //
+  // Reserve specified item.
+  //
+  // output ~result~ is set to 1 if the item was successfully reserved
+  // and to 0 otherwise.
+
   task reserve_item_t(T item_to_reserve, output bit result);
     lock();
     result = reserve_item(item_to_reserve, 1);
@@ -190,6 +218,16 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
 
   // function bit can_request(input uvm_item_alloc_policy#(T, I) alloc = null, 
   //                         bit external_lock = 0);
+
+
+  // Task: request_item_t
+  //
+  // Request and reserve an item accirding to specified ~alloc~ policy
+  //
+  // output ~result~ is set to 1 if the item was successfully resereved
+  // and to 0 otherwise.
+  // output ~item~ is set to the allocted item, if allocation was successfull
+
   task request_item_t(uvm_item_alloc_policy#(T, I) alloc, 
                     output T item, output bit result);
     lock();
