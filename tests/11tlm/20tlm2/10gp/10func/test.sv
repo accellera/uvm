@@ -254,7 +254,7 @@ class test extends uvm_test;
      
 
       uvm_default_packer.big_endian   = 0;
-      gp.pack_bytes(bytes);
+      void'(gp.pack_bytes(bytes));
 
       $write("Little Endian...\n");
       foreach (bytes[i])
@@ -291,7 +291,7 @@ class test extends uvm_test;
       end
 
       uvm_default_packer.big_endian   = 1;
-      gp.pack_bytes(bytes);
+      void'(gp.pack_bytes(bytes));
 
       $write("Big Endian...\n");
       foreach (bytes[i])

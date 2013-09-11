@@ -1,0 +1,4 @@
++UVM_DUMP_CMDLINE_ARGS
++UVM_CONFIG_DB_TRACE
++uvm_set_config_string=uvm_test_top.c,var2,GAMMA
++uvm_set_config_string=uvm_test_top.c,var3,OMEGA

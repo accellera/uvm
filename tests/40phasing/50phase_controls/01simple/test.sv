@@ -35,7 +35,7 @@ class test extends test_base;
     //normal test
     //  [top_random_seq]    10
     //  [bot_random_seq]    24
-    uvm_report_server svr = _global_reporter.get_report_server();
+    uvm_report_server svr = uvm_coreservice.get_report_server();
     int e_trs_c=10;
     int trs_c  = svr.get_id_count( "top_random_seq" );
 
