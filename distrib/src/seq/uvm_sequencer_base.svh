@@ -55,6 +55,9 @@ class uvm_sequencer_base extends uvm_component;
   protected int                 m_arb_size;       // used for waiting processes
   protected int                 m_wait_for_item_sequence_id,
                                 m_wait_for_item_transaction_id;
+  protected int                 m_wait_relevant_count = 0 ;
+  protected int                 m_max_zero_time_wait_relevant_count = 10;
+  protected time                m_last_wait_relevant_time = 0 ;
 
   local uvm_sequencer_arb_mode  m_arbitration = SEQ_ARB_FIFO;
   local static int              g_request_id;
@@ -357,6 +360,12 @@ class uvm_sequencer_base extends uvm_component;
                                             uvm_sequence_item t,
                                             bit rerandomize = 0);
 
+  // Function set_max_zero_time_wait_relevant_count
+  //
+  // Can be called at any time to change the maximum number of times 
+  // wait_for_relevant() can be called by the sequencer in zero time before
+  // an error is declared.  The default maximum is 10.
+  extern virtual function void set_max_zero_time_wait_relevant_count(int new_val) ;
 
 
   //----------------------------------------------------------------------------
@@ -906,7 +915,17 @@ task uvm_sequencer_base::m_wait_for_available_sequence();
                     
                   begin
                     arb_sequence_q[is_relevant_entries[k]].sequence_ptr.wait_for_relevant();
-                      m_is_relevant_completed = 1;
+                    if ($realtime != m_last_wait_relevant_time) begin
+                       m_last_wait_relevant_time = $realtime ;
+                       m_wait_relevant_count = 0 ;
+                    end
+                    else begin
+                       m_wait_relevant_count++ ;
+                       if (m_wait_relevant_count > m_max_zero_time_wait_relevant_count) begin
+                          `uvm_error("SEQRELEVANTLOOP",$sformatf("Zero time loop detected, passed wait_for_relevant %0d times without time advancing",m_wait_relevant_count))
+                       end
+                    end
+                    m_is_relevant_completed = 1;
                   end
                 join_none
                   
@@ -1389,6 +1408,14 @@ function void uvm_sequencer_base::send_request(uvm_sequence_base sequence_ptr,
                                                uvm_sequence_item t,
                                                bit rerandomize = 0);
   return;
+endfunction
+
+
+// set_max_zero_time_wait_relevant_count
+// ------------
+
+function void uvm_sequencer_base::set_max_zero_time_wait_relevant_count(int new_val) ;
+   m_max_zero_time_wait_relevant_count = new_val ;
 endfunction
 
 

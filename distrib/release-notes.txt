@@ -101,7 +101,7 @@ non-uvm_task_phase nodes
 
 (*) Mantis 4439: Documented put_response() on the uvm_seq_pull_port
 
-Mantis 4440: Now possible to jump during phase_ended().cd 
+Mantis 4440: Now possible to jump during phase_ended()
 
 (*) Mantis 4469: The ability to programatically traverse the phase graph
 was added via get_adjacent_predecessor_nodes and
