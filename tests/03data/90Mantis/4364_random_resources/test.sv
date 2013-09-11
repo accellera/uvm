@@ -83,6 +83,8 @@ class top_seq extends uvm_sequence;
      uvm_item_allocator#(dma_channel, bit[4:0]) dma_allocator;
      even_odd_policy eo_policy;
      longint db[];
+
+     uvm_phase starting_phase = get_starting_phase();
      eo_policy = new;
      
      if (starting_phase != null) starting_phase.raise_objection(this);
@@ -177,11 +179,11 @@ class test extends uvm_test;
   endfunction: start_of_simulation_phase
 
   function void report_phase(uvm_phase phase);
-    uvm_report_server svr;
-    svr = _global_reporter.get_report_server();
+    uvm_report_server srvr;
+    srvr = get_report_server();
     
-    if (svr.get_severity_count(UVM_FATAL) +
-        svr.get_severity_count(UVM_ERROR) == 0)
+    if (srvr.get_severity_count(UVM_FATAL) +
+        srvr.get_severity_count(UVM_ERROR) == 0)
       $write("** UVM TEST PASSED **\n");
     else
       $write("!! UVM TEST FAILED !!\n");
