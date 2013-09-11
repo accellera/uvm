@@ -1,0 +1,48 @@
+UVM_INFO @ 0: reporter [UVM/REPORT/SERVER] 
+--- UVM Report Summary ---
+Quit count :     0 of     5
+** Report counts by severity
+UVM_INFO :    2
+UVM_WARNING :    0
+UVM_ERROR :    0
+UVM_FATAL :    0
+** Report counts by id
+[RNTST]     1
+[UVM/RELNOTES]     1
+UVM_INFO @ 0: reporter [UVM/REPORT/HANDLER] 
+----------------------------------------------------------------------
+report handler state dump 
++-----------------+
+|   Verbosities   |
++-----------------+
+max verbosity level =         200
+*** verbosities by id
+[ID2] --> UVM_MEDIUM
+[ID3] --> UVM_HIGH
+*** verbosities by id and severity
+UVM_WARNING:WARN1 --> UVM_NONE
++-------------+
+|   actions   |
++-------------+
+*** actions by severity
+UVM_INFO = DISPLAY 
+UVM_WARNING = DISPLAY 
+UVM_ERROR = DISPLAY COUNT 
+UVM_FATAL = DISPLAY EXIT 
+*** actions by id
+[ACT_ID] --> DISPLAY LOG COUNT 
+[ACT_ID2] --> DISPLAY 
+*** actions by id and severity
+UVM_INFO:ID1 --> DISPLAY COUNT 
++-------------+
+|    files    |
++-------------+
+default file handle =           1
+*** files by severity
+UVM_INFO =           0
+UVM_WARNING =           0
+UVM_ERROR =           0
+UVM_FATAL =           0
+*** files by id
+*** files by id and severity
+----------------------------------------------------------------------

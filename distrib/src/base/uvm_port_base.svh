@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
+//   Copyright 2013 Cisco Systems, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -225,7 +226,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   //
   // By default, the parent/child relationship of any port being connected to
   // this port is not checked. This can be overridden by configuring the
-  // port's ~check_connection_relationships~ bit via <set_config_int>. See
+  // port's ~check_connection_relationships~ bit via <uvm_config_int::set()>. See
   // <connect> for more information.
 
   function new (string name,
@@ -240,7 +241,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
     m_max_size  = max_size;
     m_comp = new(name, parent, this);
 
-    if (!m_comp.get_config_int("check_connection_relationships",tmp))
+    if (!uvm_config_int::get(m_comp, "", "check_connection_relationships",tmp))
       m_comp.set_report_id_action(s_connection_warning_id, UVM_NO_ACTION);
 
   endfunction
@@ -429,7 +430,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
   // port's connect method calls are made.
 
   virtual function void connect (this_type provider);
-    uvm_root top = uvm_root::get();
+    uvm_root top = uvm_coreservice.get_root();
     if (end_of_elaboration_ph.get_state() == UVM_PHASE_EXECUTING || // TBD tidy
         end_of_elaboration_ph.get_state() == UVM_PHASE_DONE ) begin
        m_comp.uvm_report_warning("Late Connection", 
@@ -444,12 +445,6 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
       return;
     end
     
-    if (provider == this) begin
-      m_comp.uvm_report_error(s_connection_error_id,
-                       "Cannot connect a port instance to itself", UVM_NONE);
-      return;
-    end
-
     if (provider == this) begin
       m_comp.uvm_report_error(s_connection_error_id,
                        "Cannot connect a port instance to itself", UVM_NONE);
@@ -529,7 +524,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
         save = {"This port's fanout network:\n\n  ",
                get_full_name()," (",get_type_name(),")\n",save,"\n"};
       if (m_imp_list.num() == 0) begin
-        uvm_root top = uvm_root::get();
+        uvm_root top = uvm_coreservice.get_root();
         if (end_of_elaboration_ph.get_state() == UVM_PHASE_EXECUTING ||
             end_of_elaboration_ph.get_state() == UVM_PHASE_DONE )  // TBD tidy
            save = {save,"  Connected implementations: none\n"};

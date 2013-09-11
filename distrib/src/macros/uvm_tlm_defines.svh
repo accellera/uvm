@@ -546,6 +546,8 @@ endclass
 // imp definitions
 //----------------------------------------------------------------------
 `define UVM_SEQ_ITEM_PULL_IMP(imp, REQ, RSP, req_arg, rsp_arg) \
+  function void disable_auto_item_recording(); imp.disable_auto_item_recording(); endfunction \
+  function bit is_auto_item_recording_enabled(); imp.is_auto_item_recording_enabled(); endfunction \
   task get_next_item(output REQ req_arg); imp.get_next_item(req_arg); endtask \
   task try_next_item(output REQ req_arg); imp.try_next_item(req_arg); endtask \
   function void item_done(input RSP rsp_arg = null); imp.item_done(rsp_arg); endfunction \

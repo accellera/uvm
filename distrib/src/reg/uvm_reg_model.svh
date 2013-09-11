@@ -405,7 +405,6 @@ function automatic string uvm_hdl_concat2string(uvm_hdl_path_concat concat);
    return image;
 endfunction
 
-
 typedef struct packed {
   uvm_reg_addr_t min;
   uvm_reg_addr_t max;

@@ -2,6 +2,7 @@
 //   Copyright 2007-2010 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc. 
 //   Copyright 2010-2011 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   Copyright 2013      Freescale Semiconductor, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -27,6 +28,7 @@ parameter string uvm_mgc_copyright  = "(C) 2007-2013 Mentor Graphics Corporation
 parameter string uvm_cdn_copyright  = "(C) 2007-2013 Cadence Design Systems, Inc.";
 parameter string uvm_snps_copyright = "(C) 2006-2013 Synopsys, Inc.";
 parameter string uvm_cy_copyright   = "(C) 2011-2013 Cypress Semiconductor Corp.";
+parameter string uvm_nv_copyright   = "(C) 2013      NVIDIA Corporation";
 parameter string uvm_fsl_copyright  = "(C) 2013      Freescale Semiconductor, Inc.";
 parameter string uvm_revision = `UVM_VERSION_STRING;
 

@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
+//   Copyright 2013 NVIDIA Corporation
 //   Copyright 2013 Freescale Semiconductor, Inc.
 //   All Rights Reserved Worldwide
 //
@@ -26,13 +27,16 @@
 
   typedef class uvm_cmdline_processor;
 
+
+  `include "base/uvm_coreservice.svh"
+  
   // Miscellaneous classes and functions. uvm_void is defined in uvm_misc,
   // along with some auxillary functions that UVM needs but are not really
   // part of UVM.
   `include "base/uvm_version.svh"
   `include "base/uvm_object_globals.svh"
   `include "base/uvm_misc.svh"
-  
+
   `include "base/uvm_pool.svh"
   `include "base/uvm_queue.svh"
 

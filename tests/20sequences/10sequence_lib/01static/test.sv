@@ -142,7 +142,7 @@ module top;
      endtask
 
      virtual function void report();
-       uvm_root top = uvm_root::get();
+       uvm_root top = uvm_coreservice.get_root();
        uvm_report_server svr = top.get_report_server();
        if (svr.get_severity_count(UVM_FATAL) +
            svr.get_severity_count(UVM_ERROR) == 0)
