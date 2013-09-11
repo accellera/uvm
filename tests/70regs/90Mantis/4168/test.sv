@@ -155,7 +155,7 @@ class test extends uvm_test;
   
    virtual task run_phase(uvm_phase phase);
      phase.raise_objection(this, "Waiting for sequence to finish");
-     seq.starting_phase = phase;
+     seq.set_starting_phase(phase);
      seq.start(env.bus.sqr);
      `uvm_info(get_type_name(), "End of main phase", UVM_HIGH)
      phase.drop_objection(this);
@@ -163,7 +163,7 @@ class test extends uvm_test;
 
    function void final_phase(uvm_phase phase);
       uvm_report_server svr;
-      svr = _global_reporter.get_report_server();
+      svr = uvm_coreservice.get_report_server();
 
       if (svr.get_severity_count(UVM_FATAL) +
           svr.get_severity_count(UVM_ERROR) == 0)

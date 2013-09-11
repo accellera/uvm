@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
+//   Copyright 2013 NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -303,7 +304,7 @@ virtual class uvm_object extends uvm_void;
   //|   int f1;
   //|   virtual function void do_print (uvm_printer printer);
   //|     super.do_print(printer);
-  //|     printer.print_int("f1", f1, $bits(f1), DEC);
+  //|     printer.print_int("f1", f1, $bits(f1), UVM_DEC);
   //|     printer.print_object("data", data);
   //|   endfunction
   //
@@ -412,7 +413,7 @@ virtual class uvm_object extends uvm_void;
   //|   data_obj data;
   //|   int f1;
   //|   function void do_record (uvm_recorder recorder);
-  //|     recorder.record_field_int("f1", f1, $bits(f1), DEC);
+  //|     recorder.record_field("f1", f1, $bits(f1), UVM_DEC);
   //|     recorder.record_object("data", data);
   //|   endfunction
 
@@ -783,10 +784,9 @@ virtual class uvm_object extends uvm_void;
 
   extern protected virtual function uvm_report_object m_get_report_object();
 
+  // the lookup table
+  local static uvm_object uvm_global_copy_map[uvm_object];
 endclass
-
-
-uvm_copy_map uvm_global_copy_map = new;
 
 //------------------------------------------------------------------------------
 // IMPLEMENTATION
@@ -832,8 +832,9 @@ endfunction
 // ---------------
 
 function uvm_object_wrapper uvm_object::get_object_type();
+  uvm_factory factory=uvm_coreservice.get_factory();	
   if(get_type_name() == "<unknown>") return null;
-  return factory.find_by_name(get_type_name());
+  return factory.find_wrapper_by_name(get_type_name());
 endfunction
 
 
@@ -1010,7 +1011,7 @@ endfunction
 function void uvm_object::copy (uvm_object rhs);
   //For cycle checking
   static int depth;
-  if((rhs !=null)  && (uvm_global_copy_map.get(rhs) != null)) begin
+  if((rhs !=null)  && uvm_global_copy_map.exists(rhs)) begin
     return;
   end
 
@@ -1019,7 +1020,7 @@ function void uvm_object::copy (uvm_object rhs);
     return;
   end
 
-  uvm_global_copy_map.set(rhs, this); 
+  uvm_global_copy_map[rhs]= this; 
   ++depth;
 
   __m_uvm_field_automation(rhs, UVM_COPY, "");
@@ -1027,7 +1028,7 @@ function void uvm_object::copy (uvm_object rhs);
 
   --depth;
   if(depth==0) begin
-    uvm_global_copy_map.clear();
+    uvm_global_copy_map.delete();
   end
 endfunction
 
@@ -1056,7 +1057,7 @@ function bit  uvm_object::compare (uvm_object rhs,
   comparer = __m_uvm_status_container.comparer;
 
   if(!__m_uvm_status_container.scope.depth()) begin
-    comparer.compare_map.clear();
+    comparer.compare_map.delete();
     comparer.result = 0;
     comparer.miscompares = "";
     comparer.scope = __m_uvm_status_container.scope;
@@ -1081,9 +1082,9 @@ function bit  uvm_object::compare (uvm_object rhs,
     end
   end
 
-  if(!done && (comparer.compare_map.get(rhs) != null)) begin
-    if(comparer.compare_map.get(rhs) != this) begin
-      comparer.print_msg_object(this, comparer.compare_map.get(rhs));
+  if(!done && comparer.compare_map.exists(rhs)) begin
+    if(comparer.compare_map[rhs] != this) begin
+      comparer.print_msg_object(this, comparer.compare_map[rhs]);
     end 
     done = 1;  //don't do any more work after this case, but do cleanup
   end
@@ -1095,7 +1096,7 @@ function bit  uvm_object::compare (uvm_object rhs,
   end
 
   if(!done) begin
-    comparer.compare_map.set(rhs, this);
+    comparer.compare_map[rhs]= this;
     __m_uvm_field_automation(rhs, UVM_COMPARE, "");
     dc = do_compare(rhs, comparer);
   end

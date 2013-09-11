@@ -130,7 +130,7 @@ initial begin
    uvm_report_server svr;
 
    test = new("test");
-   svr = _global_reporter.get_report_server();
+   svr = uvm_coreservice.get_report_server();
    svr.set_max_quit_count(10);
    
    uvm_config_db#(apb_vif)::set(test, "apb", "vif", $root.dut_top.apb0);

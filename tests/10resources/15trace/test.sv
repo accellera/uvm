@@ -44,7 +44,7 @@ class leaf extends uvm_component;
   
   function void build_phase(uvm_phase phase);
      super.build_phase(phase);
-     if(!get_config_int("A", A)) begin
+     if(!uvm_config_int::get(this, "", "A", A)) begin
         `uvm_error("TESTERROR", "Did not get setting for A");
      end
      if(!uvm_resource_db#(cfg)::read_by_name(get_full_name(), "C", C, this)) begin
@@ -74,11 +74,11 @@ class env extends uvm_component;
     l2 = new("leaf2", this);
 
     // This is the default value of A for all the leaves (*.leaf*)
-    set_config_int("*", "A", 11);
-    set_config_int("*", "B", -11);
+    uvm_config_int::set(this, "*", "A", 11);
+    uvm_config_int::set(this, "*", "B", -11);
 
     // What's the value in THIS component?
-    void'(get_config_int("A", A));
+    void'(uvm_config_int::get(this, "", "A", A));
   endfunction
 
 endclass
@@ -130,10 +130,10 @@ class test extends uvm_component;
 
   function void report();
      uvm_report_server svr;
-     svr = _global_reporter.get_report_server();
+     svr = uvm_coreservice.get_report_server();
 
      if (my_catcher::seen != 23) begin
-        `uvm_error("TEST", $sformatf("Saw %0d messages instead of 20",
+        `uvm_error("TEST", $sformatf("Saw %0d messages instead of 23",
                                      my_catcher::seen))
      end
 

@@ -3,6 +3,7 @@
 //   Copyright 2011 Mentor Graphics Corporation
 //   Copyright 2011 Cadence Design Systems, Inc. 
 //   Copyright 2011 Synopsys, Inc.
+//   Copyright 2013 NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -240,9 +241,11 @@ class uvm_cmdline_processor extends uvm_report_object;
   function new(string name = "");
     string s;
     string sub;
+    int doInit=1;
     super.new(name);
     do begin
-      s = uvm_dpi_get_next_arg();
+      s = uvm_dpi_get_next_arg(doInit);
+      doInit=0;
       if(s!="") begin
         m_argv.push_back(s);
         if(s[0] == "+") begin
@@ -386,7 +389,9 @@ class uvm_cmdline_processor extends uvm_report_object;
 
     // The implementation of this is in uvm_root.
 
-    // Variable: +uvm_set_config_int, +uvm_set_config_string
+    // Variable: +uvm_set_config_int
+      
+    // Variable: +uvm_set_config_string
     //
     // ~+uvm_set_config_int=<comp>,<field>,<value>~ and
     // ~+uvm_set_config_string=<comp>,<field>,<value>~ work like their
@@ -405,6 +410,26 @@ class uvm_cmdline_processor extends uvm_report_object;
 
     // The implementation of this is in uvm_root.
 
+    // Variable: +uvm_set_default_sequence
+    //
+    // The ~+uvm_set_default_sequence=<seqr>,<phase>,<type>~ plusarg allows
+    // the user to define a default sequence from the command line, using the
+    // ~typename~ of that sequence.  For example:
+    //
+    //| <sim command> +uvm_set_default_sequence=path.to.sequencer,main_phase,seq_type
+    //  
+    // This is functionally equivilent to calling the following in your 
+    // test:
+    //
+    //| uvm_factory f = uvm_factory::get();
+    //| uvm_config_db#(uvm_object_wrapper)::set(this,
+    //|                                         "path.to.sequencer.main_phase",
+    //|                                         "default_sequence",
+    //|                                         f.find_wrapper_by_name("seq_type"));
+    //
+     
+
+    // The implementation of this is in uvm_root.
   endfunction
 
   function bit m_convert_verb(string verb_str, output uvm_verbosity verb_enum);
