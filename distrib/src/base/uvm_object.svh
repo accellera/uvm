@@ -1027,7 +1027,6 @@ function void uvm_object::copy (uvm_object rhs);
   do_copy(rhs);
 
   --depth;
-  uvm_global_copy_map.delete(rhs);
   if(depth==0) begin
     uvm_global_copy_map.delete();
   end

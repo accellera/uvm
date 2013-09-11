@@ -227,7 +227,8 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
 
   static function this_type get();
     if (me == null) begin
-      uvm_factory f = uvm_coreservice.get_factory();
+      uvm_coreservice_t c = uvm_coreservice_t::get();
+      uvm_factory f = c.get_factory();
       me = new;
       f.register(me);
     end
@@ -246,7 +247,8 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
   static function T create (string name="", uvm_component parent=null,
                             string contxt="");
     uvm_object obj;
-    uvm_factory f = uvm_coreservice.get_factory();
+    uvm_coreservice_t c = uvm_coreservice_t::get();
+    uvm_factory f = c.get_factory();
     if (contxt == "" && parent != null)
       contxt = parent.get_full_name();
     obj = f.create_object_by_type(get(),contxt,name);

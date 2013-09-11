@@ -26,7 +26,7 @@ import uvm_pkg::*;
 
 class test extends uvm_test;
 
-   uvm_default_report_server old_serv;
+   uvm_report_server old_serv;
 
    `uvm_component_utils(test)
 
