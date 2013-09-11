@@ -30,8 +30,8 @@ class dma_channel;
    function new(bit [1:0] controller, bit [2:0] channel);
       channel_num=channel;
       controller_num = controller;
-   endfunction
-endclass
+   endfunction: new
+endclass: dma_channel
 
 class dma_converter extends uvm_converter#(dma_channel, bit[4:0]);
   virtual function bit[4:0] serialize(dma_channel object);
@@ -44,30 +44,32 @@ class dma_converter extends uvm_converter#(dma_channel, bit[4:0]);
     return object;
   endfunction: deserialize
   
-endclass // uvm_serializer
+endclass: dma_converter
    
 class dma_policy extends uvm_item_alloc_policy#(dma_channel, bit[4:0]);
 
-   constraint is_valid {
+   constraint is_valid
+   {
       item >= 0 && item <= 4'hf;
    }
 
   function new();
     dma_converter conv = new;
     converter = conv;
-  endfunction
-   // item[4:3] => controller number
-   // item[2:0] => channel number
-endclass // dma_policy
+  endfunction: new
+
+endclass:dma_policy
+
 
 class even_odd_policy extends dma_policy;
 
-   constraint even_odd {
+   constraint even_odd
+   {
       item[3] == 0 -> item[0] == 0;
       item[3] == 1 -> item[0] == 1;
-      
    }
-endclass
+
+endclass: even_odd_policy
 
 
 class top_seq extends uvm_sequence;
@@ -75,7 +77,7 @@ class top_seq extends uvm_sequence;
 
    function new(string name = "");
       super.new(name);
-   endfunction
+   endfunction: new
    
    task body();
      uvm_item_allocator#(dma_channel, bit[4:0]) dma_allocator;
@@ -91,31 +93,32 @@ class top_seq extends uvm_sequence;
          get( null, get_full_name(),"dma_allocator", dma_allocator) == 0)
        `uvm_error("DMA_ERROR", "can not locate DMA allocator")
 
-     dma_allocator.is_local = 1;
-         
-     for (int i = 0; i < 4; i++) begin
+     dma_allocator.is_local = 1;  // Maintain the allocation database
+                                  // on the SystemVerilog side only
+
+     for (int unsigned index = 0; index != 4; ++index)
+     begin
        dma_channel my_dma_channel;
 
        bit[4:0] item;
        bit      allocated;
-       if(dma_allocator.request_item(eo_policy, my_dma_channel)) begin
+
+       if (dma_allocator.request_item(eo_policy, my_dma_channel))
+       begin
          `uvm_info("DMA alloc", $sformatf("allocated item %0d", eo_policy.item), UVM_MEDIUM)
          allocated_channels.push_back(my_dma_channel);
        end
        else
-         `uvm_error("DMA_ERROR", "can not allocate channel")
+         `uvm_error("DMA_ERROR", "Cannot allocate channel")
      end
 
      dma_allocator.release_all_items();
      allocated_channels.delete();
-     /*foreach (allocated_channels[j]) begin
-       `uvm_info("II", "going to release item", UVM_LOW)
-       dma_allocator.release_item(allocated_channels[j]);
-     end
-     */
+
      if (starting_phase != null) starting_phase.drop_objection(this);
-   endtask
-endclass
+
+   endtask: body
+endclass: top_seq
 
 
 class test extends uvm_test;
@@ -127,7 +130,7 @@ class test extends uvm_test;
   
    function new(string name, uvm_component parent = null);
       super.new(name, parent);
-   endfunction
+   endfunction: new
 
    virtual function void build_phase(uvm_phase phase);
       sqr = new("sqr", this);
@@ -137,11 +140,11 @@ class test extends uvm_test;
                                               "default_sequence",
                                               top_seq::get_type());
 
-   endfunction
+   endfunction: build_phase
    
    function void connect_phase(uvm_phase phase);
       seq_item_port.connect(sqr.seq_item_export);
-   endfunction
+   endfunction: connect_phase
 
   function void start_of_simulation_phase(uvm_phase phase);
     uvm_item_allocator#(dma_channel, bit[4:0]) dma_allocator;
@@ -154,7 +157,7 @@ class test extends uvm_test;
     uvm_config_db#(uvm_item_allocator#(dma_channel, bit[4:0]))::
       set(null, "*", "dma_allocator", 
           dma_allocator);
-  endfunction
+  endfunction: start_of_simulation_phase
 
   function void report_phase(uvm_phase phase);
     uvm_report_server svr;
@@ -165,9 +168,9 @@ class test extends uvm_test;
       $write("** UVM TEST PASSED **\n");
     else
       $write("!! UVM TEST FAILED !!\n");
-  endfunction
-endclass
+  endfunction: report_phase
+endclass: test
 
   initial run_test("test");
 
-endprogram
+endprogram: top

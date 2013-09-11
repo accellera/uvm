@@ -27,7 +27,8 @@
 // CLASS: uvm_converter #(T,I)
 //
 //------------------------------------------------------------------------------
-// A base class for conversion between object representation and integral representation.
+// A base class for conversion between object representation and integral
+// representation.
 // This class is virtual and its virtual functions are not implemented.
 // They need to be implemented by derived classes.
 //------------------------------------------------------------------------------
@@ -50,8 +51,8 @@ endclass: uvm_converter
 // CLASS: uvm_simple_converter #(I)
 //
 //------------------------------------------------------------------------------
-// A sample implementation of uvm_converter when object representation is equal to
-// integral representation.
+// A simple implementation of uvm_converter when object representation is
+// equal to integral representation.
 //------------------------------------------------------------------------------
 class uvm_simple_converter#(type I = int) extends uvm_converter#(I,I);
   // Function: serialize
@@ -76,9 +77,11 @@ endclass: uvm_simple_converter
 //
 //------------------------------------------------------------------------------
 // A base class for allocation policy.
+//
 // An instance of this class is randomized to obtain an allocated item.
 // Constraint which does not allow to allocate taken items it provided
 // in this class.
+//
 // This class can be extended to provide additional constraints
 // on the allocated item, as validy constraint, since the range of valid items
 // is unknown in the generic base class.
@@ -102,7 +105,7 @@ class uvm_item_alloc_policy #(type T=longint unsigned, type I=longint unsigned);
 
   // Variable: item
   //
-  // item is the random member of this class
+  // ~item~ is the random member of this class
   // random allocation is done by providing a value to this member.
   // 
   rand I item;
@@ -117,21 +120,24 @@ class uvm_item_alloc_policy #(type T=longint unsigned, type I=longint unsigned);
   
   // Variable: in_use
   //
-  // Stores  all items previously allocated and not released (integral representation)
+  // Stores all items previously allocated and not released
+  // (integral representation)
   //
   I in_use[$];
 
   // Constraint: not_taken
   //
-  // makes sure previously allocated items can not be selected in new allocation
+  // Ensures that sure previously allocated items cannot be selected
+  // in the new allocation
   constraint not_taken
   {
     foreach (in_use[i])
     item != in_use[i];
   }
 
-  // A validity constraint (if needed) should be added in the derived
-  // classes as we do not know the list/range of valid items
+  // A validity constraint (if needed) should be added in any derived
+  // classes, as we do not know the list/range of valid items
+
 
   // Function: post_randomize
   //
@@ -151,17 +157,16 @@ endclass: uvm_item_alloc_policy
 //------------------------------------------------------------------------------
 // Class: uvm_item_allocator
 //------------------------------------------------------------------------------
-// main allocator for specific item type
-//
+// Main allocator for specific item type
 //------------------------------------------------------------------------------
 class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
 
   uvm_item_alloc_policy#(T, I) alloc_policy;
 
-  string  key;  // used to access global (C side) DB; 
-  // if key is empty, global DB is not used and allocator works in local mode
+  string  key;  // Used to access global (C side) DB; 
+  // If key is empty, global DB is not used and allocator works in local mode
 
-  // Variable: in_local
+  // Variable: is_local
   //
   // is_local == 0 means that the allocation data base is stored on Verilog side
   // is_local == 1 means that the allocation data base is stored on C side
@@ -171,7 +176,8 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
   //
   // Creates a new allocator object with the given  ~name~.
   // ~key~ is used to access external allocation database.
-  // If ~key~ is empty, the allocation database is stored locally on Verilog side.
+  // If ~key~ is empty, the allocation database is stored locally
+  // on Verilog side.
   function new(string name, string key = "" );
     this.key = key;
     this.is_local = (key == "");
@@ -179,17 +185,18 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
   
   // Variable: in_use
   //
-  // Stores  all items previously allocated and not released (integral representation)
+  // Stores all items previously allocated and not released
+  // (integral representation)
   //
   protected I in_use[$];
 
 
-  //task API
+  // Task API
 
   // Task: lock
   //
-  // locks the external database
-  // waits if the database is currently locked.
+  // Locks the external database.
+  // Waits if the database is currently locked.
   task lock();
     svdpi_lock_taken_list(key);
   endtask: lock
@@ -201,11 +208,10 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
     svdpi_unlock_taken_list(key);
   endfunction: unlock
   
-  //can_reserve(T item_to_reserve, bit external_lock = 0);
 
   // Task: reserve_item_t
   //
-  // Reserve specified item.
+  // Reserve specified item -- ~item_to_reserve~.
   //
   // output ~result~ is set to 1 if the item was successfully reserved
   // and to 0 otherwise.
@@ -214,18 +220,15 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
     lock();
     result = reserve_item(item_to_reserve, 1);
     unlock();
-  endtask
-
-  // function bit can_request(input uvm_item_alloc_policy#(T, I) alloc = null, 
-  //                         bit external_lock = 0);
+  endtask: reserve_item_t
 
 
   // Task: request_item_t
   //
-  // Request and reserve an item accirding to specified ~alloc~ policy
+  // Request and reserve an ~item~ according to the specified ~alloc~ policy
   //
-  // output ~result~ is set to 1 if the item was successfully reserved
-  // and to 0 otherwise.
+  // Output ~result~ is set to 1 if the item was successfully reserved
+  // and 0 if otherwise.
   // output ~item~ is set to the allocated item, if allocation was successfull
 
   task request_item_t(uvm_item_alloc_policy#(T, I) alloc, 
@@ -233,12 +236,11 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
     lock();
     result = request_item(alloc,item,1);
     unlock();
-
-  endtask
+  endtask: request_item_t
  
   // Task: release_item_t
   //
-  // Release specified object.
+  // Release specified ~object~.
   //
   task release_item_t(T object);
     lock();
@@ -254,18 +256,19 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
     lock();
     release_all_items(1);
     unlock();
-  endtask // release_all_items
+  endtask: release_all_items_t
 
-  // function API
 
-  
+  // Function API
+
+
   protected function void import_in_use(bit external_lock = 0);
     // check that size of I is <= 64 bits
     if (!is_local) begin
-      int size;
+      int unsigned size;
       longint db[];
       if (!external_lock) begin
-        if (svdpi_try_lock_taken_list(key) != 0) // unsuccessful lock
+        if (svdpi_try_lock_taken_list(key) != 0) // Unsuccessful lock
           `uvm_fatal("ITEM_ALLOCATOR", "lock is not available and function version is called")
       end
       size = svdpi_get_num_taken(key);
@@ -273,9 +276,11 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
         db = new[size];
         svdpi_get_taken_list(key,size,db);
         in_use = {};
-        for (int i = 0; i < size; i++) begin
+
+        for (int unsigned index = 0; index != size; ++index)
+        begin
           I value;
-          value = db[i];
+          value = db[index];
           in_use.push_back(value);
         end
       end
@@ -290,34 +295,34 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
       longint db[];
       if (in_use.size() > 0) begin
         db = new[in_use.size()];
-        for (int i = 0; i < in_use.size(); i++)
-          db[i] = in_use[i];
+        for (int unsigned index = 0; index != in_use.size(); ++index)
+          db[index] = in_use[index];
       end
       svdpi_set_taken_list(key,in_use.size(),db);
       if (!external_lock)
         svdpi_unlock_taken_list(key);
     end
-  endfunction : export_in_use
+  endfunction: export_in_use
   
 
   protected function void done_in_use(bit external_lock = 0);
-    if (!is_local && !external_lock) begin
-      svdpi_unlock_taken_list(key);
-    end
+    if (!is_local && !external_lock)
+       svdpi_unlock_taken_list(key);
   endfunction: done_in_use
-  
+
   protected function void start_in_use(bit external_lock = 0);
-    if (!is_local && !external_lock) begin
-        if (svdpi_try_lock_taken_list(key) != 0) // unsuccessful lock
-          `uvm_fatal("ITEM_ALLOCATOR", "lock is not available and function version is called")
-      end
+    if (!is_local && !external_lock)
+       begin
+         if (svdpi_try_lock_taken_list(key) != 0) // Unsuccessful lock
+          `uvm_fatal("ITEM_ALLOCATOR", "Lock is not available and function version of DB access has been called.  Cannot wait for lock")
+       end
   endfunction: start_in_use
-    
-  
+
+
   // Function: can_reserve
   //
-  // Check if the specified item can be reserved.
-  // Return 1 if the item can be reserved and 0 otherwise.
+  // Check if the specified ~item_to_reserve~ can be reserved.
+  // Returns 1 if the item can be reserved and 0 otherwise.
   // 
   function bit can_reserve(T item_to_reserve, bit external_lock = 0);
     I int_item;
@@ -333,10 +338,10 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
     done_in_use(external_lock);
     return result;
   endfunction: can_reserve
-  
+
   // Function: reserve_item
   //
-  // Reserve specified item.
+  // Reserve the specified ~item_to_reserve~.
   //
   // Return 1 if the item was successfully reserved
   // and 0 otherwise.
@@ -359,7 +364,8 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
         this.in_use.push_back(alloc_policy.item);
         export_in_use(external_lock);
       end
-    else begin
+    else
+    begin
       done_in_use(external_lock);
       `uvm_error("ITEM-ALLOCATOR", $sformatf("Can not reserve item %d",item_to_reserve) )
     end
@@ -368,7 +374,7 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
   
   // Function: can_request
   //
-  // Check if an item can be requsted according to specified policy
+  // Check if an item can be requsted according to specified ~alloc~ policy
   // Return 1 if the item can be requested and 0 otherwise.
   // 
   function bit can_request(input uvm_item_alloc_policy#(T, I) alloc = null, 
@@ -377,7 +383,7 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
     result = 0;
     
     if (alloc == null)
-      alloc = alloc_policy;
+       alloc = alloc_policy;
 
     import_in_use(external_lock);
     alloc.in_use = this.in_use;
@@ -420,7 +426,7 @@ class uvm_item_allocator #(type T=longint unsigned, type I=longint unsigned);
   
   // Function: release_item
   //
-  // Release specified object.
+  // Release specified ~object~.
   //
   function void release_item(T object, bit external_lock = 0);
     I item;
