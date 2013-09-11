@@ -78,9 +78,13 @@ class test extends uvm_test;
      int unsigned temp;
      int unsigned index;
      int unsigned error = 0;
+
      const int unsigned NUM_ITERATIONS = 100000;
+
      // Weights are not exact promises of statistical balance,
-     // so give a little (1%) slack
+     // so give a little (7%) slack.
+     // 7% is the smallest amount of slack we can tolerate and still
+     // pass on all 3 simulators
      const int unsigned WEIGHT_MARGIN  = NUM_ITERATIONS * 0.07;
 
      // Set the hardcoded check weight for "0xF:0x10:1; 2:3:2"
