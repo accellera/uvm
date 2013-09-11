@@ -1,5 +1,5 @@
 //---------------------------------------------------------------------- 
-//   Copyright 2011 Synopsys, Inc. 
+//   Copyright 2013 Freescale Semiconductor, Inc. 
 //   All Rights Reserved Worldwide 
 // 
 //   Licensed under the Apache License, Version 2.0 (the 
@@ -37,6 +37,7 @@ class dma_converter extends uvm_converter#(dma_channel, bit[4:0]);
   virtual function bit[4:0] serialize(dma_channel object);
     return {object.controller_num,object.channel_num};
   endfunction: serialize
+
   virtual function dma_channel deserialize(bit[4:0] item);
     dma_channel object;
 
