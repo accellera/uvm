@@ -137,13 +137,14 @@ class uvm_dynamic_range_constraint extends uvm_object;
 
   static local int unsigned m_values[string][];
   
-  local string constraint_param;
+  local string constraint_param="";
   local int constraint_set = 0;
   local range_limits ranges[];
-  local range_limits weights[];
-  local int unsigned max_weight = 0;
+  local longint weights[];
+  local longint max_weight = 0;
   local int unsigned range_index = 0;
-  rand int unsigned weight_value;
+  rand int unsigned dist_choose[];
+  rand int unsigned sum_dist_choose[];
   rand int unsigned value;
   rand int unsigned index;
 
@@ -165,11 +166,15 @@ class uvm_dynamic_range_constraint extends uvm_object;
     begin
       ranges = new[m_values[range].size()/3];
       weights = new[m_values[range].size()/3];
+      dist_choose = new[m_values[range].size()/3];
+      sum_dist_choose = new[m_values[range].size()/3];
     end
     else
     begin
       ranges = new[ranges.size()+m_values[range].size()/3](ranges);
       weights = new[weights.size()+m_values[range].size()/3](weights);
+      dist_choose = new[dist_choose.size()+m_values[range].size()/3](dist_choose);
+      sum_dist_choose = new[dist_choose.size()+m_values[range].size()/3](sum_dist_choose);
     end
 
     // After parsing the parameter, add the constraint
@@ -201,17 +206,24 @@ class uvm_dynamic_range_constraint extends uvm_object;
 
   endfunction: pre_randomize
 
-
-  constraint valid_weight
+  constraint range_weight
   {
-    weight_value inside {[0:max_weight-1]};
+    foreach(dist_choose[i])
+      dist_choose[i] dist { 0:= max_weight-weights[i], 1:=weights[i]};
   }
 
-  constraint weight_to_index
+  constraint one_active
   {
-    foreach (weights[current_index])
-      if(weight_value inside {[weights[current_index].low:weights[current_index].high]})
-        index == current_index;
+    sum_dist_choose[0] == dist_choose[0];
+    foreach(dist_choose[current_index])
+      current_index > 0 -> sum_dist_choose[current_index] == (sum_dist_choose[current_index-1]+dist_choose[current_index]);
+    sum_dist_choose[range_index-1] == 1;
+  }
+
+  constraint choose_index
+  {
+    foreach(dist_choose[current_index])
+      dist_choose[current_index] == 0 || index == current_index;
   }
 
   constraint in_range
@@ -220,22 +232,14 @@ class uvm_dynamic_range_constraint extends uvm_object;
       index != current_index || value inside {[ranges[current_index].low:ranges[current_index].high]};
   }
 
-  constraint order 
-  {
-    solve weight_value before index;
-    solve index before value;
-  }
-
   local function void add(int unsigned min, int unsigned max, int unsigned weight);
     range_limits range;
-    range_limits weight_range;
     range = new(min, max);
     ranges[range_index] = range;
 
-    weight_range = new(max_weight, max_weight+weight*(max-min+1)-1);
-    weights[range_index] = weight_range;
+    weights[range_index] = weight*(max-min+1);
+    max_weight += weights[range_index];
     range_index ++;
-    max_weight += weight*(max-min+1);
   endfunction: add
 
 endclass: uvm_dynamic_range_constraint

@@ -31,27 +31,25 @@ class rnd_class extends uvm_component;
   rand uvm_dynamic_range_constraint drc1;
   rand uvm_dynamic_range_constraint drc2;
   rand uvm_dynamic_range_constraint drc3;
+  rand uvm_dynamic_range_constraint drc5;
   `uvm_component_utils_begin(rnd_class)
-    `uvm_field_object(drc1, UVM_DEFAULT|UVM_SETSTR|UVM_SETOBJ)
-    `uvm_field_object(drc2, UVM_DEFAULT|UVM_SETSTR|UVM_SETOBJ)
-    `uvm_field_object(drc3, UVM_DEFAULT|UVM_SETSTR|UVM_SETOBJ)
+    `uvm_field_object(drc1, UVM_DEFAULT)
+    `uvm_field_object(drc2, UVM_DEFAULT)
+    `uvm_field_object(drc3, UVM_DEFAULT)
+    `uvm_field_object(drc5, UVM_DEFAULT)
   `uvm_component_utils_end
 
-//  function new(string name="");
-//    super.new(name);
-//    drc1 = uvm_dynamic_range_constraint::type_id::create({get_full_name(),".RANDINT1"});
-//    drc2 = my_dynamic_range_constraint::type_id::create({get_full_name(),".RANDINT2"});
-//    drc3 = uvm_dynamic_range_constraint::type_id::create({get_full_name(),".RANDINT3"});
-//  endfunction: new
   function new(string name, uvm_component parent);
     super.new(name, parent);
   endfunction: new
 
   function void build_phase(uvm_phase phase);
+    super.build_phase(phase);
     drc1 = uvm_dynamic_range_constraint::type_id::create("RANDINT1");
     drc2 = uvm_dynamic_range_constraint::type_id::create("RANDINT2");
     drc3 = uvm_dynamic_range_constraint::type_id::create("RANDINT3");
-    super.build_phase(phase);
+    drc5 = uvm_dynamic_range_constraint::type_id::create("RANDINT5");
+    apply_config_settings();
   endfunction
 endclass: rnd_class
 
@@ -83,7 +81,7 @@ class test extends uvm_test;
      const int unsigned NUM_ITERATIONS = 100000;
      // Weights are not exact promises of statistical balance,
      // so give a little (1%) slack
-     const int unsigned WEIGHT_MARGIN  = NUM_ITERATIONS * 0.01;
+     const int unsigned WEIGHT_MARGIN  = NUM_ITERATIONS * 0.07;
 
      // Set the hardcoded check weight for "0xF:0x10:1; 2:3:2"
      check_param[0] = "RANDINT1";
