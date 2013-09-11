@@ -369,7 +369,8 @@ endfunction
 
 task uvm_root::run_test(string test_name="");
 
-  uvm_factory factory= uvm_coreservice.get_factory();
+  uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  uvm_factory factory=cs.get_factory();
   bit testname_plusarg;
   int test_name_count;
   string test_names[$];
@@ -426,7 +427,8 @@ task uvm_root::run_test(string test_name="");
 
   // if test now defined, create it using common factory
   if (test_name != "") begin
-  	uvm_factory factory=uvm_coreservice.get_factory();
+  	uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  	uvm_factory factory=cs.get_factory();
 	  
     if(m_children.exists("uvm_test_top")) begin
       uvm_report_fatal("TTINST",
@@ -710,7 +712,8 @@ endfunction
 
 function void uvm_root::m_process_inst_override(string ovr);
   string split_val[$];
-  uvm_factory fact = uvm_coreservice.get_factory();
+  uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  uvm_factory factory=cs.get_factory();
 
   uvm_split_string(ovr, ",", split_val);
 
@@ -721,7 +724,7 @@ function void uvm_root::m_process_inst_override(string ovr);
   end
 
   uvm_report_info("INSTOVR", {"Applying instance override from the command line: +uvm_set_inst_override=", ovr}, UVM_NONE);
-  fact.set_inst_override_by_name(split_val[0], split_val[1], split_val[2]);
+  factory.set_inst_override_by_name(split_val[0], split_val[1], split_val[2]);
 endfunction
 
 
@@ -731,7 +734,8 @@ endfunction
 function void uvm_root::m_process_type_override(string ovr);
   string split_val[$];
   int replace=1;
-  uvm_factory fact = uvm_coreservice.get_factory();
+  uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  uvm_factory factory=cs.get_factory();
 
   uvm_split_string(ovr, ",", split_val);
 
@@ -752,7 +756,7 @@ function void uvm_root::m_process_type_override(string ovr);
   end
 
   uvm_report_info("UVM_CMDLINE_PROC", {"Applying type override from the command line: +uvm_set_type_override=", ovr}, UVM_NONE);
-  fact.set_type_override_by_name(split_val[0], split_val[1], replace);
+  factory.set_type_override_by_name(split_val[0], split_val[1], replace);
 endfunction
 
 

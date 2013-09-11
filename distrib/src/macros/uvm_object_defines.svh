@@ -1780,8 +1780,7 @@ endfunction \
               if(ARG.size() != local_data__.ARG.size()) begin \
                 __m_uvm_status_container.scope.set_arg(`"ARG`"); \
                 __m_uvm_status_container.comparer.print_msg($sformatf("size mismatch: lhs: %0d  rhs: %0d", ARG.size(), local_data__.ARG.size())); \
-                if(__m_uvm_status_container.comparer.show_max == 1) return; \
-                end \
+              	if(__m_uvm_status_container.comparer.show_max == 1) return; \
               end \
               for(int i=0; i<ARG.size() && i<local_data__.ARG.size(); ++i) begin \
                 if(ARG[i] != null && local_data__.ARG[i] != null) begin \

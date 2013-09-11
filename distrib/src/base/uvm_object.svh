@@ -832,7 +832,8 @@ endfunction
 // ---------------
 
 function uvm_object_wrapper uvm_object::get_object_type();
-  uvm_factory factory=uvm_coreservice.get_factory();	
+  uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  uvm_factory factory=cs.get_factory();
   if(get_type_name() == "<unknown>") return null;
   return factory.find_wrapper_by_name(get_type_name());
 endfunction
