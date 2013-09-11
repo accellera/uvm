@@ -43,7 +43,7 @@ virtual class uvm_report_server extends uvm_object;
                 return "uvm_report_server";
         endfunction
         function new(string name="base");
-                super.new();
+                super.new(name);
         endfunction
 
         // Function: set_max_quit_count
@@ -155,9 +155,6 @@ virtual class uvm_report_server extends uvm_object;
 
 
 `ifndef UVM_NO_DEPRECATED
-
-        // *US* revisit after msg revamp merge
-
 
         // Function: process_report
         //
@@ -703,42 +700,33 @@ class uvm_default_report_server extends uvm_report_server;
     string id;
     string name;
     string output_str;
+    string q[$];
+
     uvm_report_catcher::summarize();
-    f_display(file, "");
-    f_display(file, "--- UVM Report Summary ---");
-    f_display(file, "");
+    q.push_back("\n--- UVM Report Summary ---\n\n");
 
     if(m_max_quit_count != 0) begin
-      if ( m_quit_count >= m_max_quit_count ) f_display(file, "Quit count reached!");
-      $sformat(output_str, "Quit count : %5d of %5d",
-                             m_quit_count, m_max_quit_count);
-      f_display(file, output_str);
+      if ( m_quit_count >= m_max_quit_count )
+        q.push_back("Quit count reached!\n");
+      q.push_back($sformatf("Quit count : %5d of %5d\n",m_quit_count, m_max_quit_count));
     end
 
-    f_display(file, "** Report counts by severity");
-    for(uvm_severity_type s = s.first(); 1; s = s.next()) begin
-      if(m_severity_count.exists(s)) begin
-        int cnt;
-        cnt = m_severity_count[s];
-        name = s.name();
-        $sformat(output_str, "%s :%5d", name, cnt);
-        f_display(file, output_str);
-      end
-      if(s == s.last()) break;
+    q.push_back("** Report counts by severity\n");
+    foreach(m_severity_count[s]) begin
+      q.push_back($sformatf("%s :%5d\n", s.name(), m_severity_count[s]));
     end
 
     if (enable_report_id_count_summary) begin
+      q.push_back("** Report counts by id\n");
+      foreach(m_id_count[id])
+        q.push_back($sformatf("[%s] %5d\n", id, m_id_count[id]));
+    end
 
-      f_display(file, "** Report counts by id");
-      for(int found = m_id_count.first(id);
-           found;
-           found = m_id_count.next(id)) begin
-        int cnt;
-        cnt = m_id_count[id];
-        $sformat(output_str, "[%s] %5d", id, cnt);
-        f_display(file, output_str);
-      end
-
+    // now output
+    begin
+      string msg;
+      msg={>>{q}};
+      `uvm_info("UVM/REPORT/SERVER",msg,UVM_LOW)
     end
 
   endfunction
@@ -858,96 +846,10 @@ class uvm_default_report_server extends uvm_report_server;
     report_summarize();
   endfunction
 
-
-  // Function- dump_server_state
-  //
-  // Dumps server state information.
-
-  function void dump_server_state();
-
-    string s;
-    uvm_severity_type sev;
-    string id;
-
-    f_display(0, "report server state");
-    f_display(0, "");   
-    f_display(0, "+-------------+");
-    f_display(0, "|   counts    |");
-    f_display(0, "+-------------+");
-    f_display(0, "");
-
-    $sformat(s, "max quit count = %5d", m_max_quit_count);
-    f_display(0, s);
-    $sformat(s, "quit count = %5d", m_quit_count);
-    f_display(0, s);
-
-    sev = sev.first();
-    forever begin
-      int cnt;
-      cnt = m_severity_count[sev];
-      s = sev.name();
-      $sformat(s, "%s :%5d", s, cnt);
-      f_display(0, s);
-      if(sev == sev.last())
-        break;
-      sev = sev.next();
-    end
-
-    if(m_id_count.first(id))
-    do begin
-      int cnt;
-      cnt = m_id_count[id];
-      $sformat(s, "%s :%5d", id, cnt);
-      f_display(0, s);
-    end
-    while (m_id_count.next(id));
-
-  endfunction
-
-
 `endif
 
 
 endclass
-
-
-
-`ifndef UVM_NO_DEPRECATED
-
-
-//----------------------------------------------------------------------
-// CLASS- uvm_report_global_server
-//
-// Singleton object that maintains a single global report server
-//----------------------------------------------------------------------
-class uvm_report_global_server;
-
-  function new();
-    void'(get_server());
-  endfunction
-
-
-  // Function- get_server
-  //
-  // Returns a handle to the central report server.
-
-  function uvm_report_server get_server();
-    return uvm_report_server::get_server();
-  endfunction
-
-
-  // Function- set_server (deprecated)
-  //
-  //
-
-  function void set_server(uvm_report_server server);
-    uvm_report_server::set_server(server);
-  endfunction
-
-endclass
-
-
-`endif
 
 
 `endif // UVM_REPORT_SERVER_SVH

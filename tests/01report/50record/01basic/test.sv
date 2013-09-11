@@ -25,7 +25,7 @@ import uvm_pkg::*;
 
 uvm_report_object urm0 = new("urm0");
 uvm_report_object urm1 = new("urm1");
-uvm_report_server r_server = uvm_report_server::get_server();
+uvm_default_report_server r_server = uvm_default_report_server'(uvm_report_server::get_server());
 string module_name = $sformatf("%m");
 
 initial begin : block_I

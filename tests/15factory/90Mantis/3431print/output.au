@@ -15,7 +15,7 @@ Type Overrides:
   packet          mypacket
   mypacket        myreallybigtypenamepacket
 
-All types registered with the factory: 48 total
+All types registered with the factory: 50 total
 (types without type names will not be printed)
 
   Type Name

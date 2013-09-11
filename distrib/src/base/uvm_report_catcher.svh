@@ -246,18 +246,6 @@ virtual class uvm_report_catcher extends uvm_callback;
     return this.m_modified_report_message.line;
   endfunction
 
-  // Function: get_report_message
-  //
-  // Returns the report message object that is currently being
-  // processed. If the message was modified by a previously executed
-  // catcher (which re-threw the message), then the returned
-  // message is the modified value.
-  // The content of the returned message object can be modified by
-  // the catcher.
-
-  function uvm_report_message get_report_message();
-    return this.m_modified_report_message;
-  endfunction
   
   // Group: Change Message State
 
@@ -306,6 +294,54 @@ virtual class uvm_report_catcher extends uvm_callback;
     this.m_modified_report_message.action = action;
     this.m_set_action_called = 1;
   endfunction
+
+  // Function: set_context
+  //
+  // Change the context of the message to ~context~. Any other
+  // report catchers will see the modified value.
+
+  protected function void set_context(string context);
+    this.m_modified_report_message.context_name = context;
+  endfunction
+
+  // Function: add_int
+  //
+  // Add an integral type of the name ~name~ and value ~value~ to
+  // the message.  The required ~size~ field indicates the size of ~value~.
+  // The required ~radix~ field determines how to display and
+  // record the field. Any other report catchers will see the newly
+  // added element.
+  //
+
+  protected function void add_int(string name, uvm_bitstream_t value,
+                        int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
+    this.m_modified_report_message.add_int(name, value, size, radix, print, record);
+  endfunction
+
+
+  // Function: add_string
+  //
+  // Adds a string of the name ~name~ and value ~value~ to the
+  // message. Any other report catchers will see the newly
+  // added element.
+  //
+
+  protected function void add_string(string name, string value, bit print = 1, bit record = 1);
+    this.m_modified_report_message.add_string(name, value, print, record);
+  endfunction
+
+
+  // Function: add_object
+  //
+  // Adds a uvm_object of the name ~name~ and reference ~obj~ to
+  // the message. Any other report catchers will see the newly
+  // added element.
+  //
+
+  protected function void add_object(string name, uvm_object obj, bit print = 1, bit record = 1);
+    this.m_modified_report_message.add_object(name, obj, print, record);
+  endfunction
+
   
   // Group: Debug
      
@@ -493,8 +529,8 @@ virtual class uvm_report_catcher extends uvm_callback;
     int iter;
     uvm_report_catcher catcher;
     int thrown = 1;
+    uvm_severity orig_severity;
     static bit in_catcher;
-    bit has_catcher;
 
     if(in_catcher == 1) begin
         return 1;
@@ -502,17 +538,17 @@ virtual class uvm_report_catcher extends uvm_callback;
     in_catcher = 1;    
     uvm_callbacks_base::m_tracing = 0;  //turn off cb tracing so catcher stuff doesn't print
 
-    m_orig_report_message = rm;
-    has_catcher = 0;
+    orig_severity = uvm_severity'(rm.severity);
+    m_modified_report_message = rm;
 
     catcher = uvm_report_cb::get_first(iter,rm.report_object);
     if (catcher != null) begin
-      process p = process::self(); // Keep random stability
-      string randstate = p.get_randstate();
-      $cast(m_modified_report_message, rm.clone()); //have to clone, rm can be extended type
-      p.set_randstate(randstate);
-
-      has_catcher = 1;
+      if(m_debug_flags & DO_NOT_MODIFY) begin
+        process p = process::self(); // Keep random stability
+        string randstate = p.get_randstate();
+        $cast(m_orig_report_message, rm.clone()); //have to clone, rm can be extended type
+        p.set_randstate(randstate);
+      end
     end
     while(catcher != null) begin
       uvm_severity prev_sev;
@@ -538,7 +574,7 @@ virtual class uvm_report_catcher extends uvm_callback;
       end
 
       if(thrown == 0) begin 
-        case(rm.severity)
+        case(orig_severity)
           UVM_FATAL:   m_caught_fatal++;
           UVM_ERROR:   m_caught_error++;
           UVM_WARNING: m_caught_warning++;
@@ -548,23 +584,18 @@ virtual class uvm_report_catcher extends uvm_callback;
       catcher = uvm_report_cb::get_next(iter,rm.report_object);
     end //while
 
-    if (has_catcher) begin
-      //update counters if message was returned with demoted severity
-      case(rm.severity)
-        UVM_FATAL:    
-          if(m_modified_report_message.severity < rm.severity)
-            m_demoted_fatal++;
-        UVM_ERROR:
-          if(m_modified_report_message.severity < rm.severity)
-            m_demoted_error++;
-        UVM_WARNING:
-          if(m_modified_report_message.severity < rm.severity)
-            m_demoted_warning++;
-      endcase
-   
-      // Yeah, just give back the processed one
-      rm.copy(m_modified_report_message);
-    end
+    //update counters if message was returned with demoted severity
+    case(orig_severity)
+      UVM_FATAL:    
+        if(m_modified_report_message.severity < orig_severity)
+          m_demoted_fatal++;
+      UVM_ERROR:
+        if(m_modified_report_message.severity < orig_severity)
+          m_demoted_error++;
+      UVM_WARNING:
+        if(m_modified_report_message.severity < orig_severity)
+          m_demoted_warning++;
+    endcase
 
     in_catcher = 0;
     uvm_callbacks_base::m_tracing = 1;  //turn tracing stuff back on

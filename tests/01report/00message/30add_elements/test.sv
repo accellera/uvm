@@ -27,8 +27,8 @@ class my_catcher extends uvm_report_catcher;
   virtual function action_e catch();
     uvm_report_message l_msg;
 
-    l_msg = get_report_message();
-    l_msg.add_string ("catcher_name", get_name());
+
+    add_string ("catcher_name", get_name());
 
     return THROW;
   endfunction

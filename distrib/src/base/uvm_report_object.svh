@@ -90,8 +90,7 @@ class uvm_report_object extends uvm_object;
 
   function new(string name = "");
     super.new(name);
-    //m_rh = uvm_report_handler::type_id::create(name);
-    m_rh = new(name);
+    m_rh = uvm_report_handler::type_id::create(name);
   endfunction
 
 

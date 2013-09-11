@@ -156,13 +156,18 @@ endclass : uvm_report_message_string_element
 class uvm_report_message_object_element extends uvm_report_message_element_base;
    typedef uvm_report_message_object_element this_type;
    uvm_object _val;
+   bit _is_meta;
 
    virtual function void do_print(uvm_printer printer);
-      printer.print_object(_name, _val);
+      if (!_is_meta)
+         printer.print_object(_name, _val);
    endfunction : do_print
 
    virtual function void do_record(uvm_recorder recorder);
-      recorder.record_object(_name, _val);
+      if (!_is_meta)
+         recorder.record_object(_name, _val);
+      else
+         recorder.record_meta(_name, _val);
    endfunction : do_record
 
    virtual function void do_copy(uvm_report_message_element_base rhs);
@@ -170,6 +175,7 @@ class uvm_report_message_object_element extends uvm_report_message_element_base;
       $cast(_rhs, rhs);
       _name = _rhs._name;
       _val = _rhs._val;
+      _is_meta = _rhs._is_meta;
       _action = rhs._action;
    endfunction : do_copy
    
@@ -222,10 +228,11 @@ class uvm_report_message_element_container extends uvm_object;
      elements.push_back(urme);
   endfunction
 
-  function void add_object(string name, uvm_object obj, bit print = 1, bit record = 1);
+  function void add_object(string name, uvm_object obj, bit meta, bit print = 1, bit record = 1);
      uvm_report_message_object_element urme = uvm_report_message_object_element::get();
      urme._name = name;
      urme._val = obj;
+     urme._is_meta = meta;
      urme._action = uvm_report_message_element_base::action_e'({record,print});
      elements.push_back(urme);
   endfunction
@@ -421,9 +428,6 @@ class uvm_report_message extends uvm_object;
   // Not documented.
   uvm_report_message_element_container report_message_element_container;
 
-  // Not documented.
-  uvm_table_printer l_printer;
-
 
   // Function: new
   // 
@@ -434,8 +438,6 @@ class uvm_report_message extends uvm_object;
     super.new(name);
     tr_handle = -1;
     report_message_element_container = new();
-    l_printer = new();
-    l_printer.knobs.prefix = " +";
   endfunction
 
 
@@ -592,7 +594,7 @@ class uvm_report_message extends uvm_object;
       l_scope = report_handler.get_name();
       l_name = report_object.get_name();
       m_ro_stream_handles[report_handler] = 
-        recorder.create_stream(l_name, "URM", l_scope);
+        recorder.create_stream(l_name, "MESSAGES", l_scope);
     end
 
     return m_ro_stream_handles[report_handler];
@@ -622,7 +624,7 @@ class uvm_report_message extends uvm_object;
     l_stream_id = m_get_stream_id(recorder);
 
     // Use uvm_report_message-ID-#
-    tr_handle = recorder.begin_tr("uvm_report_message", l_stream_id,
+    tr_handle = recorder.begin_tr(get_type_name(), l_stream_id,
       get_name(), id, message, $time);
 
     recorder.tr_handle = tr_handle;
@@ -685,8 +687,8 @@ class uvm_report_message extends uvm_object;
   //
 
   function void add_int(string name, uvm_bitstream_t value, 
-                        int size, uvm_radix_enum radix);
-    report_message_element_container.add_int(name, value, size, radix);
+                        int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
+    report_message_element_container.add_int(name, value, size, radix, print, record);
   endfunction
 
 
@@ -696,8 +698,8 @@ class uvm_report_message extends uvm_object;
   // message. 
   //
 
-  function void add_string(string name, string value);
-    report_message_element_container.add_string(name, value);
+  function void add_string(string name, string value, bit print = 1, bit record = 1);
+    report_message_element_container.add_string(name, value, print, record);
   endfunction
 
 
@@ -707,8 +709,8 @@ class uvm_report_message extends uvm_object;
   // the message.  
   //
 
-  function void add_object(string name, uvm_object obj);
-    report_message_element_container.add_object(name, obj);
+  function void add_object(string name, uvm_object obj, bit print = 1, bit record = 1);
+    report_message_element_container.add_object(name, obj, 0, print, record);
   endfunction
 
    
@@ -720,7 +722,7 @@ class uvm_report_message extends uvm_object;
   //
   
   function void add_meta(string name, uvm_object meta);
-    report_message_element_container.add_object(name, meta, 0, 0);
+    report_message_element_container.add_object(name, meta, 1, 0, 1);
   endfunction
 
 endclass
@@ -846,7 +848,7 @@ class uvm_trace_message extends uvm_report_message;
     l_stream_id = m_get_stream_id(recorder);
 
     if (state == TRC_BGN) begin
-      tr_handle = recorder.begin_tr("uvm_trace_message", l_stream_id,
+      tr_handle = recorder.begin_tr(get_type_name(), l_stream_id,
         get_name(), id, message, $time);
       recorder.tr_handle = tr_handle;
       this.record(recorder);
