@@ -31,24 +31,35 @@ class range_limits;
   endfunction: new
 endclass: range_limits
 
+//------------------------------------------------------------------------------
+//
+// CLASS: uvm_dynamic_range_constraint_parser
+//
+// The uvm_dynamic_range_constraint_parser class used to parse 
+// the string with the range constraint into triplet.
+// ";" is used as delimiter to seperate distributions.
+// ":" is used as delimiter to seperate the range and weight.
+// The format of the distribution is range_low:range_high:weight.
+// If the weight is not specified, it is set to 1 by default.
+// If the range_high is not specified, it is set to range_low by default
+// Example: "1:2:3;4:5:6" => 1,2,3,4,5,6
+//          "1:2;4" => 1,2,1,4,4,1
+// 
+//------------------------------------------------------------------------------
+
 class uvm_dynamic_range_constraint_parser extends uvm_object;
 
-  function new(string name = "");
-    super.new(name);
-  endfunction: new
+  // Function: get_range_constraint
+  //
+  // Parses the constraint_param with the format of range constraint
+  // into the integer array.
 
-  // Split the string parm to integers.
-  // ";" is used as a delimiter to seperate triplets.
-  // ":" is used to deliminate the actual triplet values.
-  // Example: "1:2:3;4:5:6"
-  //   Becomes: "1:2:3", "4:5:6"
-  //   Which then becomes 1,2,3,4,5,6
-  static function void split_param_to_integer(string param, output int unsigned values[]);
+  static function void get_range_constraint(string constraint_param, output int unsigned values[]);
     string str_values_triplet[$];
     string str_values[];
 
-    // First split the param into strings using ";" as a delimiter
-    uvm_split_string(param, ";", str_values_triplet);
+    // First split the constraint_param into strings using ";" as a delimiter
+    uvm_split_string(constraint_param, ";", str_values_triplet);
     str_values = new [str_values_triplet.size()*3];
     values = new[str_values.size()];
 
@@ -79,20 +90,15 @@ class uvm_dynamic_range_constraint_parser extends uvm_object;
     // Then convert the string into integers
     foreach(str_values[index])
       str_2_uint(str_values[index], values[index]);
-  endfunction: split_param_to_integer
-
-
-  // Split the constraint into triplet
-  static function void get_range_constraint(string constraint_param, output int unsigned values[]);
-    uvm_dynamic_range_constraint_parser::split_param_to_integer(constraint_param, values);
   endfunction: get_range_constraint
 
-
+  // Function: str_2_uint
+  //
+  // Changes the string into integer
+  //
   // Once Mantis 4399 is implemented, str_2_uint() will no longer
   // be needed.  Instead, radix processing will be integrated into the
   // CmdLineParser and we will be able to use that
-
-  // Change the str into integer
   static function void str_2_uint(string str, output int unsigned data);
     string str_format;
     string str_orig = str;
@@ -133,28 +139,59 @@ class uvm_dynamic_range_constraint_parser extends uvm_object;
   
 endclass: uvm_dynamic_range_constraint_parser
 
+//------------------------------------------------------------------------------
+//
+// CLASS: uvm_dynamic_range_constraint
+//
+// The uvm_dynamic_range_constraint class is the random class 
+// to randomize the value based on the range constraint on the command line
+//
+// If other constraint for value are specified in the derived class,
+// it will intersect with the range constraint
+// 
+//------------------------------------------------------------------------------
+
 class uvm_dynamic_range_constraint extends uvm_object;
 
   static local int unsigned m_values[string][];
   
-  local string constraint_param="";
+  // Variable: constraint_param
+  //
+  // This string is in the format of range constraint.
+  // It is set by the commandline using +uvm_set_config_string.
+
+  string constraint_param="";
   local int constraint_set = 0;
   local range_limits ranges[];
   local longint weights[];
   local longint max_weight = 0;
   local int unsigned range_index = 0;
-  rand int unsigned dist_choose[];
-  rand int unsigned sum_dist_choose[];
+  local rand int unsigned dist_choose[];
+  local rand int unsigned sum_dist_choose[];
+  local rand int unsigned index;
+
+  // Variable: value
+  //
+  // The random value obey the range constraint.
+
   rand int unsigned value;
-  rand int unsigned index;
 
   `uvm_object_utils_begin(uvm_dynamic_range_constraint)
     `uvm_field_string(constraint_param, UVM_DEFAULT)
   `uvm_object_utils_end
 
+  // Function: new
+  //
+  // Creates a new object with the given ~name~.
+
   function new(string name = "");
     super.new(name);
   endfunction: new
+
+  // Function: add_range_constraint
+  //
+  // Adds the range constraint.
+  // the ~range~ is in the format of range constraint.
 
   function void add_range_constraint(string range);
     int unsigned i = 0;
@@ -186,6 +223,10 @@ class uvm_dynamic_range_constraint extends uvm_object;
 
   endfunction: add_range_constraint
 
+  // Function: pre_randomize
+  //
+  // Adds the command line range constraint.
+  // Uses the [0:0xFFFFFFFF] as the default if constraint_param is not set yet.
 
   function void pre_randomize();
     int override = 1;
