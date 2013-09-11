@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
+//   Copyright 2013 Cisco Systems, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -444,12 +445,6 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
       return;
     end
     
-    if (provider == this) begin
-      m_comp.uvm_report_error(s_connection_error_id,
-                       "Cannot connect a port instance to itself", UVM_NONE);
-      return;
-    end
-
     if (provider == this) begin
       m_comp.uvm_report_error(s_connection_error_id,
                        "Cannot connect a port instance to itself", UVM_NONE);

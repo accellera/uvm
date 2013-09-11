@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010-2011 Synopsys, Inc.
 //   Copyright 2013      NVIDIA Corporation
+//   Copyright 2013      Cisco Systems, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -1777,9 +1778,9 @@ endfunction \
             else begin \
               string s; \
               if(ARG.size() != local_data__.ARG.size()) begin \
-                if(__m_uvm_status_container.comparer.show_max == 1) begin \
-                  __m_uvm_status_container.scope.set_arg(`"ARG`"); \
-                  __m_uvm_status_container.comparer.print_msg($sformatf("size mismatch: lhs: %0d  rhs: %0d", ARG.size(), local_data__.ARG.size())); \
+                __m_uvm_status_container.scope.set_arg(`"ARG`"); \
+                __m_uvm_status_container.comparer.print_msg($sformatf("size mismatch: lhs: %0d  rhs: %0d", ARG.size(), local_data__.ARG.size())); \
+                if(__m_uvm_status_container.comparer.show_max == 1) return; \
                 end \
               end \
               for(int i=0; i<ARG.size() && i<local_data__.ARG.size(); ++i) begin \
