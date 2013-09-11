@@ -5,6 +5,7 @@
 //   Copyright 2010 Synopsys, Inc.
 //   Copyright 2013 Freescale Semiconductor, Inc.
 //   Copyright 2013 NVIDIA Corporation
+//   Copyright 2013 Freescale Semiconductor, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the

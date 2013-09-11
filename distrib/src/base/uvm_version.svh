@@ -4,6 +4,7 @@
 //   Copyright 2010-2011 Synopsys, Inc.
 //   Copyright 2013      Freescale Semiconductor, Inc.
 //   Copyright 2013      NVIDIA Corporation
+//   Copyright 2013      Freescale Semiconductor, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -30,6 +31,7 @@ parameter string uvm_snps_copyright = "(C) 2006-2013 Synopsys, Inc.";
 parameter string uvm_cy_copyright   = "(C) 2011-2013 Cypress Semiconductor Corp.";
 parameter string uvm_fsl_copyright  = "(C) 2013      Freescale Semiconductor, Inc.";
 parameter string uvm_nv_copyright   = "(C) 2013      NVIDIA Corporation";
+parameter string uvm_fsl_copyright  = "(C) 2013      Freescale Semiconductor, Inc.";
 parameter string uvm_revision = `UVM_VERSION_STRING;
 
 function string uvm_revision_string();

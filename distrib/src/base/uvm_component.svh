@@ -4,6 +4,7 @@
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010-2011 Synopsys, Inc.
 //   Copyright 2013      NVIDIA Corporation
+//   Copyright 2013      Freescale Semiconductor, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -935,35 +936,6 @@ virtual class uvm_component extends uvm_report_object;
   extern function void check_config_usage (bit recurse=1);
 
 
-  // Function: apply_config_settings
-  //
-  // Searches for all config settings matching this component's instance path.
-  // For each match, the appropriate set_*_local method is called using the
-  // matching config setting's field_name and value. Provided the set_*_local
-  // method is implemented, the component property associated with the
-  // field_name is assigned the given value. 
-  //
-  // This function is called by <uvm_component::build_phase>.
-  //
-  // The apply_config_settings method determines all the configuration
-  // settings targeting this component and calls the appropriate set_*_local
-  // method to set each one. To work, you must override one or more set_*_local
-  // methods to accommodate setting of your component's specific properties.
-  // Any properties registered with the optional `uvm_*_field macros do not
-  // require special handling by the set_*_local methods; the macros provide
-  // the set_*_local functionality for you. 
-  //
-  // If you do not want apply_config_settings to be called for a component,
-  // then the build_phase() method should be overloaded and you should not call
-  // super.build_phase(phase). Likewise, apply_config_settings can be overloaded to
-  // customize automated configuration.
-  //
-  // When the ~verbose~ bit is set, all overrides are printed as they are
-  // applied. If the component's <print_config_matches> property is set, then
-  // apply_config_settings is automatically called with ~verbose~ = 1.
-
-  extern virtual function void apply_config_settings (bit verbose=0);
-
 
   // Function: print_config_settings
   //
@@ -1012,13 +984,6 @@ virtual class uvm_component extends uvm_report_object;
   // children and below are printed as well.
 
   extern function void print_config_with_audit(bit recurse = 0);
-
-  // Variable: print_config_matches
-  //
-  // Setting this static variable causes uvm_config_db#(T)::get() to print info about
-  // matching configuration settings as they are being applied.
-
-  static bit print_config_matches;
 
 
   //----------------------------------------------------------------------------
@@ -2850,12 +2815,6 @@ function string uvm_component::massage_scope(string scope);
 endfunction
 
 
-// Undocumented struct for storing clone bit along w/
-// object on set_config_object(...) calls
-class uvm_config_object_wrapper;
-   uvm_object obj;
-   bit clone;
-endclass : uvm_config_object_wrapper
 
 
 `ifndef UVM_NO_DEPRECATED
@@ -3001,112 +2960,6 @@ function void uvm_component::check_config_usage ( bit recurse=1 );
   uvm_report_info("CFGNRD"," ::: The following resources have at least one write and no reads :::",UVM_INFO);
   rp.print_resources(rq, 1);
 endfunction
-
-
-// apply_config_settings
-// ---------------------
-
-function void uvm_component::apply_config_settings (bit verbose=0);
-
-  uvm_resource_pool rp = uvm_resource_pool::get();
-  uvm_queue#(uvm_resource_base) rq;
-  uvm_resource_base r;
-  string name;
-  string search_name;
-  int unsigned i;
-  int unsigned j;
-
-  // populate an internal 'field_array' with list of
-  // fields declared with `uvm_field macros (checking
-  // that there aren't any duplicates along the way)
-  __m_uvm_field_automation (null, UVM_CHECK_FIELDS, "");
-
-  // if no declared fields, nothing to do. 
-  if (__m_uvm_status_container.field_array.size() == 0)
-    return;
-
-  if(verbose)
-    uvm_report_info("CFGAPL","applying configuration settings", UVM_NONE);
-
-  // Note: the following is VERY expensive. Needs refactoring. Should
-  // get config only for the specific field names in 'field_array'.
-  // That's because the resource pool is organized first by field name.
-  // Can further optimize by encoding the value for each 'field_array' 
-  // entry to indicate string, uvm_bitstream_t, or object. That way,
-  // we call 'get' for specific fields of specific types rather than
-  // the search-and-cast approach here.
-  rq = rp.lookup_scope(get_full_name());
-  rp.sort_by_precedence(rq);
-
-  // rq is in precedence order now, so we have to go through in reverse
-  // order to do the settings.
-  for(int i=rq.size()-1; i>=0; --i) begin
-
-    r = rq.get(i);
-    name = r.get_name();
-
-    // does name have brackets [] in it?
-    for(j = 0; j < name.len(); j++)
-      if(name[j] == "[" || name[j] == ".")
-        break;
-
-    // If it does have brackets then we'll use the name
-    // up to the brackets to search __m_uvm_status_container.field_array
-    if(j < name.len())
-      search_name = name.substr(0, j-1);
-    else
-      search_name = name;
-
-    if(!__m_uvm_status_container.field_array.exists(search_name) && 
-       search_name != "recording_detail")
-      continue;
-
-    if(verbose)
-      uvm_report_info("CFGAPL",$sformatf("applying configuration to field %s", name),UVM_NONE);
-
-    begin
-    uvm_resource#(uvm_bitstream_t) rbs;
-    if($cast(rbs, r))
-      set_int_local(name, rbs.read(this));
-    else begin
-      uvm_resource#(int) ri;
-      if($cast(ri, r))
-        set_int_local(name, ri.read(this));
-      else begin
-        uvm_resource#(int unsigned) riu;
-        if($cast(riu, r))
-          set_int_local(name, riu.read(this));
-        else begin
-          uvm_resource#(string) rs;
-          if($cast(rs, r))
-            set_string_local(name, rs.read(this));
-          else begin
-             uvm_resource#(uvm_config_object_wrapper) rcow;
-             if ($cast(rcow, r)) begin
-                uvm_config_object_wrapper cow = rcow.read();
-                set_object_local(name, cow.obj, cow.clone);
-             end
-             else begin
-                uvm_resource#(uvm_object) ro;
-                if($cast(ro, r)) begin
-                  set_object_local(name, ro.read(this), 0);
-                end 
-                else if (verbose) begin
-                  uvm_report_info("CFGAPL", $sformatf("field %s has an unsupported type", name), UVM_NONE);
-                end
-             end
-          end
-        end
-      end
-    end
-    end
-
-  end
-
-  __m_uvm_status_container.field_array.delete();
-  
-endfunction
-
 
 // print_config
 // ------------
