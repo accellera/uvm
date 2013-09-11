@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
+//   Copyright 2013 Freescale Semiconductor, Inc.
 //   Copyright 2013 NVIDIA Corporation
 //   Copyright 2013 Freescale Semiconductor, Inc.
 //   All Rights Reserved Worldwide
@@ -102,5 +103,6 @@
 
   // Command Line Processor
   `include "base/uvm_cmdline_processor.svh"
+  `include "base/uvm_dynamic_range_constraint.svh"
 
 `endif // UVM_BASE_SVH
