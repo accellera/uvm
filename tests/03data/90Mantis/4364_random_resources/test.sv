@@ -82,7 +82,6 @@ class top_seq extends uvm_sequence;
    task body();
      uvm_item_allocator#(dma_channel, bit[4:0]) dma_allocator;
      even_odd_policy eo_policy;
-     dma_channel allocated_channels[$];
      longint db[];
      eo_policy = new;
      
@@ -106,15 +105,33 @@ class top_seq extends uvm_sequence;
        if (dma_allocator.request_item(eo_policy, my_dma_channel))
        begin
          `uvm_info("DMA alloc", $sformatf("allocated item %0d", eo_policy.item), UVM_MEDIUM)
-         allocated_channels.push_back(my_dma_channel);
        end
        else
          `uvm_error("DMA_ERROR", "Cannot allocate channel")
      end
 
      dma_allocator.release_all_items();
-     allocated_channels.delete();
 
+     dma_allocator.is_local = 0;  // Maintain the allocation database
+                                  // on the C side 
+
+     for (int unsigned index = 0; index != 4; ++index)
+     begin
+       dma_channel my_dma_channel;
+
+       bit[4:0] item;
+       bit      allocated;
+
+       dma_allocator.request_item_t(eo_policy, my_dma_channel, allocated);
+       if (allocated)
+       begin
+         `uvm_info("DMA alloc", $sformatf("allocated item %0d", eo_policy.item), UVM_MEDIUM)
+       end
+       else
+         `uvm_error("DMA_ERROR", "Cannot allocate channel")
+     end
+
+     dma_allocator.release_all_items_t();
      if (starting_phase != null) starting_phase.drop_objection(this);
 
    endtask: body
