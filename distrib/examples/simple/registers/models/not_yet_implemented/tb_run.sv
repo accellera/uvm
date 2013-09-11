@@ -68,7 +68,7 @@ initial begin
    static tb_test test = new("test");
    
    uvm_report_server svr;
-   svr = _global_reporter.get_report_server();
+   svr = uvm_coreservice.get_report_server();
    svr.set_max_quit_count(10);
    run_test();
 end

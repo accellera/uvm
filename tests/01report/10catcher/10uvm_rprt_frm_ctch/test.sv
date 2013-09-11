@@ -26,7 +26,7 @@
 ///////  UVM_WARNING,
 ///////  UVM_ERROR,
 ///////  UVM_FATAL
-/////////} uvm_severity_type;
+/////////} uvm_severity;
 //////////////////////////
 
 

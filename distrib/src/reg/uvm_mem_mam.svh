@@ -665,7 +665,7 @@ function uvm_mem_mam_cfg uvm_mem_mam::reconfigure(uvm_mem_mam_cfg cfg = null);
    if (cfg == null)
      return this.cfg;
 
-   top = uvm_root::get();
+   top = uvm_coreservice.get_root();
 
    // Cannot reconfigure n_bytes
    if (cfg.n_bytes !== this.cfg.n_bytes) begin

@@ -59,7 +59,7 @@ class test extends test_base;
 //  [top_random_seq]    26
 //  [bot_random_seq]    56
 
-    uvm_report_server svr = _global_reporter.get_report_server();
+    uvm_report_server svr = uvm_coreservice.get_report_server();
 
     int e_jr_c =3;
     int jr_c   = svr.get_id_count( "JUMP_RESET" );

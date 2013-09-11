@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010-2011 Synopsys, Inc.
+//   Copyright 2013      NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -38,9 +39,6 @@ typedef class uvm_sequence_item;
 // Phasing - defines a phased test flow that all components follow, with a
 //     group of standard phase methods and an API for custom phases and
 //     multiple independent phasing domains to mirror DUT behavior e.g. power
-//
-// Configuration - provides methods for configuring component topology and other
-//     parameters ahead of and during component construction.
 //
 // Reporting - provides a convenience interface to the <uvm_report_handler>. All
 //     messages, warnings, and errors are processed through this interface.
@@ -773,9 +771,12 @@ virtual class uvm_component extends uvm_report_object;
 
   extern virtual function void resolve_bindings ();
 
+  extern function string massage_scope(string scope);
 
+
+`ifndef UVM_NO_DEPRECATED
   //----------------------------------------------------------------------------
-  // Group: Configuration Interface
+  // Group- Configuration Interface
   //----------------------------------------------------------------------------
   //
   // Components can be designed to be user-configurable in terms of its
@@ -787,25 +788,24 @@ virtual class uvm_component extends uvm_report_object;
   //
   //----------------------------------------------------------------------------
 
+  static bit m_config_deprecated_warned;
 
   // Used for caching config settings
   static bit m_config_set = 1;
 
-  extern function string massage_scope(string scope);
-
-  // Function: set_config_int
+  // Function- set_config_int
 
   extern virtual function void set_config_int (string inst_name,  
                                                string field_name,
                                                uvm_bitstream_t value);
 
-  // Function: set_config_string
+  // Function- set_config_string
 
   extern virtual function void set_config_string (string inst_name,  
                                                   string field_name,
                                                   string value);
 
-  // Function: set_config_object
+  // Function- set_config_object
   //
   // Calling set_config_* causes configuration settings to be created and
   // placed in a table internal to this component. There are similar global
@@ -853,17 +853,17 @@ virtual class uvm_component extends uvm_report_object;
                                                   bit clone=1);
 
 
-  // Function: get_config_int
+  // Function- get_config_int
 
   extern virtual function bit get_config_int (string field_name,
                                               inout uvm_bitstream_t value);
 
-  // Function: get_config_string
+  // Function- get_config_string
 
   extern virtual function bit get_config_string (string field_name,
                                                  inout string value);
 
-  // Function: get_config_object
+  // Function- get_config_object
   //
   // These methods retrieve configuration settings made by previous calls to
   // their set_config_* counterparts. As the methods' names suggest, there is
@@ -915,6 +915,7 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual function bit get_config_object (string field_name,
                                                  inout uvm_object value,  
                                                  input bit clone=1);
+`endif
 
 
   // Function: check_config_usage
@@ -967,7 +968,7 @@ virtual class uvm_component extends uvm_report_object;
   // Function: print_config_settings
   //
   // Called without arguments, print_config_settings prints all configuration
-  // information for this component, as set by previous calls to set_config_*.
+  // information for this component, as set by previous calls to uvm_config_db#(T)::set().
   // The settings are printing in the order of their precedence.
   // 
   // If ~field~ is specified and non-empty, then only configuration settings
@@ -989,7 +990,7 @@ virtual class uvm_component extends uvm_report_object;
   // Function: print_config
   //
   // Print_config_settings prints all configuration information for this
-  // component, as set by previous calls to set_config_* and exports to
+  // component, as set by previous calls to uvm_config_db#(T)::set() and exports to
   // the resources pool.  The settings are printing in the order of
   // their precedence.
   //
@@ -1014,7 +1015,7 @@ virtual class uvm_component extends uvm_report_object;
 
   // Variable: print_config_matches
   //
-  // Setting this static variable causes get_config_* to print info about
+  // Setting this static variable causes uvm_config_db#(T)::get() to print info about
   // matching configuration settings as they are being applied.
 
   static bit print_config_matches;
@@ -1155,10 +1156,10 @@ virtual class uvm_component extends uvm_report_object;
   // this level of hierarchy or below. In typical usage, this method is
   // equivalent to:
   //
-  //|  factory.set_inst_override_by_type({get_full_name(),".",
-  //|                                     relative_inst_path},
-  //|                                     original_type,
-  //|                                     override_type);
+  //|  factory.set_inst_override_by_type( original_type,
+  //|                                     override_type,
+  //|                                     {get_full_name(),".",
+  //|                                      relative_inst_path});
   //
   // The ~relative_inst_path~ is relative to this component and may include
   // wildcards. The ~original_type~ represents the type that is being overridden.
@@ -1231,10 +1232,11 @@ virtual class uvm_component extends uvm_report_object;
   // method registers a factory override for components created at this level
   // of hierarchy or below. In typical usage, this method is equivalent to:
   //
-  //|  factory.set_inst_override_by_name({get_full_name(),".",
-  //|                                     relative_inst_path},
-  //|                                      original_type_name,
-  //|                                     override_type_name);
+  //|  factory.set_inst_override_by_name(original_type_name,
+  //|                                    override_type_name,
+  //|                                    {get_full_name(),".",
+  //|                                     relative_inst_path}
+  //|                                     );
   //
   // The ~relative_inst_path~ is relative to this component and may include
   // wildcards. The ~original_type_name~ typically refers to a preregistered type
@@ -1700,7 +1702,7 @@ function uvm_component::new (string name, uvm_component parent);
     return;
   end
 
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
 
   // Check that we're not in or past end_of_elaboration
   begin
@@ -1928,7 +1930,7 @@ function uvm_component uvm_component::lookup( string name );
   string leaf , remainder;
   uvm_component comp;
   uvm_root top;
-  top = uvm_root::get();
+  top = uvm_coreservice.get_root();
 
   comp = this;
   
@@ -2043,6 +2045,7 @@ endfunction
 
 function void  uvm_component::print_override_info (string requested_type_name, 
                                                    string name="");
+                                                  uvm_factory factory=uvm_coreservice.get_factory();
   factory.debug_create_by_name(requested_type_name, get_full_name(), name);
 endfunction
 
@@ -2052,6 +2055,7 @@ endfunction
 
 function uvm_component uvm_component::create_component (string requested_type_name,
                                                         string name);
+  uvm_factory factory=uvm_coreservice.get_factory();
   return factory.create_component_by_name(requested_type_name, get_full_name(),
                                           name, this);
 endfunction
@@ -2062,6 +2066,7 @@ endfunction
 
 function uvm_object uvm_component::create_object (string requested_type_name,
                                                   string name="");
+  uvm_factory factory=uvm_coreservice.get_factory();
   return factory.create_object_by_name(requested_type_name,
                                        get_full_name(), name);
 endfunction
@@ -2073,7 +2078,7 @@ endfunction
 function void uvm_component::set_type_override (string original_type_name,
                                                 string override_type_name,
                                                 bit    replace=1);
-   factory.set_type_override_by_name(original_type_name,
+   uvm_factory factory=uvm_coreservice.get_factory();factory.set_type_override_by_name(original_type_name,
                                      override_type_name, replace);
 endfunction 
 
@@ -2084,6 +2089,7 @@ endfunction
 function void uvm_component::set_type_override_by_type (uvm_object_wrapper original_type,
                                                         uvm_object_wrapper override_type,
                                                         bit    replace=1);
+   uvm_factory factory=uvm_coreservice.get_factory();
    factory.set_type_override_by_type(original_type, override_type, replace);
 endfunction 
 
@@ -2095,6 +2101,7 @@ function void  uvm_component::set_inst_override (string relative_inst_path,
                                                  string original_type_name,
                                                  string override_type_name);
   string full_inst_path;
+  uvm_factory factory=uvm_coreservice.get_factory();
 
   if (relative_inst_path == "")
     full_inst_path = get_full_name();
@@ -2115,6 +2122,7 @@ function void uvm_component::set_inst_override_by_type (string relative_inst_pat
                                                         uvm_object_wrapper original_type,
                                                         uvm_object_wrapper override_type);
   string full_inst_path;
+  uvm_factory factory=uvm_coreservice.get_factory();
 
   if (relative_inst_path == "")
     full_inst_path = get_full_name();
@@ -2841,12 +2849,6 @@ function string uvm_component::massage_scope(string scope);
 
 endfunction
 
-//
-// set_config_int
-//
-typedef uvm_config_db#(uvm_bitstream_t) uvm_config_int;
-typedef uvm_config_db#(string) uvm_config_string;
-typedef uvm_config_db#(uvm_object) uvm_config_object;
 
 // Undocumented struct for storing clone bit along w/
 // object on set_config_object(...) calls
@@ -2855,10 +2857,19 @@ class uvm_config_object_wrapper;
    bit clone;
 endclass : uvm_config_object_wrapper
 
+
+`ifndef UVM_NO_DEPRECATED
+//
+// set_config_int
+//
 function void uvm_component::set_config_int(string inst_name,
                                            string field_name,
                                            uvm_bitstream_t value);
 
+  if (!m_config_deprecated_warned) begin
+     `uvm_warning("UVM/CFG/SET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
+     m_config_deprecated_warned = 1;
+  end
   uvm_config_int::set(this, inst_name, field_name, value);
 endfunction
 
@@ -2869,6 +2880,10 @@ function void uvm_component::set_config_string(string inst_name,
                                                string field_name,
                                                string value);
 
+  if (!m_config_deprecated_warned) begin
+     `uvm_warning("UVM/CFG/SET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
+     m_config_deprecated_warned = 1;
+  end
   uvm_config_string::set(this, inst_name, field_name, value);
 endfunction
 
@@ -2881,6 +2896,11 @@ function void uvm_component::set_config_object(string inst_name,
                                                bit clone = 1);
   uvm_object tmp;
   uvm_config_object_wrapper wrapper;
+
+  if (!m_config_deprecated_warned) begin
+     `uvm_warning("UVM/CFG/SET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
+     m_config_deprecated_warned = 1;
+  end
 
   if(value == null)
     `uvm_warning("NULLCFG", {"A null object was provided as a ",
@@ -2921,6 +2941,10 @@ endfunction
 function bit uvm_component::get_config_int (string field_name,
                                             inout uvm_bitstream_t value);
 
+  if (!m_config_deprecated_warned) begin
+     `uvm_warning("UVM/CFG/GET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
+     m_config_deprecated_warned = 1;
+  end
   return uvm_config_int::get(this, "", field_name, value);
 endfunction
 
@@ -2930,6 +2954,10 @@ endfunction
 function bit uvm_component::get_config_string(string field_name,
                                               inout string value);
 
+  if (!m_config_deprecated_warned) begin
+     `uvm_warning("UVM/CFG/GET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
+     m_config_deprecated_warned = 1;
+  end
   return uvm_config_string::get(this, "", field_name, value);
 endfunction
 
@@ -2941,6 +2969,10 @@ endfunction
 function bit uvm_component::get_config_object (string field_name,
                                                inout uvm_object value,
                                                input bit clone=1);
+  if (!m_config_deprecated_warned) begin
+     `uvm_warning("UVM/CFG/GET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
+     m_config_deprecated_warned = 1;
+  end
 
   if(!uvm_config_object::get(this, "", field_name, value)) begin
     return 0;
@@ -2952,6 +2984,7 @@ function bit uvm_component::get_config_object (string field_name,
 
   return 1;
 endfunction
+`endif
 
 // check_config_usage
 // ------------------
@@ -2968,6 +3001,7 @@ function void uvm_component::check_config_usage ( bit recurse=1 );
   uvm_report_info("CFGNRD"," ::: The following resources have at least one write and no reads :::",UVM_INFO);
   rp.print_resources(rq, 1);
 endfunction
+
 
 // apply_config_settings
 // ---------------------
@@ -3023,8 +3057,7 @@ function void uvm_component::apply_config_settings (bit verbose=0);
     else
       search_name = name;
 
-    if(!uvm_resource_pool::m_has_wildcard_names && 
-       !__m_uvm_status_container.field_array.exists(search_name) && 
+    if(!__m_uvm_status_container.field_array.exists(search_name) && 
        search_name != "recording_detail")
       continue;
 
@@ -3194,7 +3227,7 @@ function void uvm_component::m_set_cl_verb;
   static bit first = 1;
   string args[$];
   uvm_cmdline_processor clp = uvm_cmdline_processor::get_inst();
-  uvm_root top = uvm_root::get();
+  uvm_root top = uvm_coreservice.get_root();
 
   if(!values.size())
     void'(uvm_cmdline_proc.get_arg_values("+uvm_set_verbosity=",values));

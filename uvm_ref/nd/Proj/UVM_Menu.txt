@@ -57,12 +57,12 @@ Group: Release Notes  {
 
 Group: Base  {
 
-   File: Overview                     (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/base.txt)
-   File: uvm_void                     (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_misc.svh)
-   File: uvm_object                   (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_object.svh)
-   File: uvm_transaction              (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_transaction.svh)
-   File: uvm_root                     (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_root.svh)
-   File: uvm_port_base                (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_port_base.svh)
+   File: Overview                     (no auto-title, UVM_ROOT/uvm_ref/base.txt)
+   File: uvm_void                     (no auto-title, UVM_ROOT/distrib/src/base/uvm_misc.svh)
+   File: uvm_object                   (no auto-title, UVM_ROOT/distrib/src/base/uvm_object.svh)
+   File: uvm_transaction              (no auto-title, UVM_ROOT/distrib/src/base/uvm_transaction.svh)
+   File: uvm_root                     (no auto-title, UVM_ROOT/distrib/src/base/uvm_root.svh)
+   File: uvm_port_base                (no auto-title, UVM_ROOT/distrib/src/base/uvm_port_base.svh)
    }  # Group: Base
 
 Group: Reporting  {
@@ -189,12 +189,13 @@ Group: Sequencers  {
    File: uvm_push_sequencer           (no auto-title, UVM_ROOT/distrib/docs/html/src/seq/uvm_push_sequencer.svh)
    }  # Group: Sequencers
 
-Group: Sequences  {
+Group: Sequences  { 
 
    File: Overview                     (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/sequences.txt)
    File: uvm_sequence_item            (no auto-title, UVM_ROOT/distrib/docs/html/src/seq/uvm_sequence_item.svh)
    File: uvm_sequence_base            (no auto-title, UVM_ROOT/distrib/docs/html/src/seq/uvm_sequence_base.svh)
    File: uvm_sequence                 (no auto-title, UVM_ROOT/distrib/docs/html/src/seq/uvm_sequence.svh)
+   File: uvm_sequence_library         (no auto-title, UVM_ROOT/distrib/docs/html/src/seq/uvm_sequence_library.svh)
    }  # Group: Sequences
 
 Group: Macros  {
@@ -271,6 +272,13 @@ Group: Globals  {
 
    File: Types, Enums, Policies       (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_object_globals.svh)
    File: Globals                      (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_globals.svh)
+   File: UVM Core Service             (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_coreservice.svh)
+   Group: Data Access {
+          File: Overview              (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/dap.txt)
+          File: Set/Get Base          (no auto-title, UVM_ROOT/distrib/docs/html/src/dap/uvm_set_get_dap_base.svh)
+          File: Get-To-Lock           (no auto-title, UVM_ROOT/distrib/docs/html/src/dap/uvm_get_to_lock_dap.svh)
+          File: Set-Before-Get        (no auto-title, UVM_ROOT/distrib/docs/html/src/dap/uvm_set_before_get_dap.svh)
+          }  Group: Data Access
    }  # Group: Globals
 
 Group: Index  {

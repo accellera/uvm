@@ -29,7 +29,7 @@ module test;
     `uvm_component_utils(test)
 
     task run;
-      uvm_top.set_config_int("*","a*",10);
+      uvm_top.set_config_int("*","achoo",10);
       void'(get_config_int("achoo", achoo));
       $display("achoo: %0d", achoo);
       if(achoo != 10) $display("*** UVM TEST FAILED ***");
