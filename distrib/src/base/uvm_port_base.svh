@@ -243,6 +243,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
     if (!m_comp.get_config_int("check_connection_relationships",tmp))
       m_comp.set_report_id_action(s_connection_warning_id, UVM_NO_ACTION);
 
+    uvm_default_notifier.uvm_notify_port_creation(m_comp, get_type_name());
   endfunction
 
 
@@ -486,6 +487,7 @@ virtual class uvm_port_base #(type IF=uvm_void) extends IF;
     m_provided_by[provider.get_full_name()] = provider;
     provider.m_provided_to[get_full_name()] = this;
     
+    uvm_default_notifier.uvm_notify_port_connection(m_comp, provider.m_comp);
   endfunction
 
 

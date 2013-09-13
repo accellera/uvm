@@ -1775,6 +1775,8 @@ function uvm_component::new (string name, uvm_component parent);
 
   m_set_cl_msg_args();
 
+  uvm_default_notifier.uvm_notify_component_creation(this);
+
 endfunction
 
 

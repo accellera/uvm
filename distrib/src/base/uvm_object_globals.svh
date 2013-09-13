@@ -599,6 +599,7 @@ typedef class uvm_line_printer;
 typedef class uvm_comparer;
 typedef class uvm_packer;
 typedef class uvm_recorder;
+typedef class uvm_notifier;
 
 // Variable: uvm_default_table_printer
 //
@@ -660,6 +661,12 @@ uvm_comparer uvm_default_comparer = new(); // uvm_comparer::init();
 uvm_recorder uvm_default_recorder = new();
 
 
+
+// Variable: uvm_default_notifier
+//
+// The default notifier.
+
+uvm_notifier uvm_default_notifier = new();
 
 
 

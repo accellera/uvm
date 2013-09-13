@@ -63,6 +63,8 @@
   `include "base/uvm_comparer.svh"
   `include "base/uvm_packer.svh"
   `include "base/uvm_recorder.svh"
+ 
+  `include "base/uvm_notifier.svh"
 
   // Event interface
   `include "base/uvm_event_callback.svh"
