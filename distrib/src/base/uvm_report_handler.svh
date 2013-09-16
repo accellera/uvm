@@ -624,7 +624,7 @@ class uvm_report_handler extends uvm_object;
     if (client==null)
       client = uvm_coreservice.get_root();
 
-    l_report_message = uvm_report_message::get_report_message();
+    l_report_message = new();
     l_report_message.report_object = client;
     l_report_message.context_name = name;
     l_report_message.filename = filename;
@@ -635,7 +635,6 @@ class uvm_report_handler extends uvm_object;
     l_report_message.message = message;
     l_report_message.verbosity = verbosity_level;
     process_report_message(l_report_message);
-    l_report_message.free_report_message(l_report_message);
 
   endfunction
 

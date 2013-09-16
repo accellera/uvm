@@ -68,40 +68,8 @@ virtual class uvm_report_message_element_base;
    pure virtual function void do_copy(uvm_report_message_element_base rhs);
    pure virtual function uvm_report_message_element_base do_clone();
    
-   // This can be used for testing performance of the queue structures
-   // By default, value = 0, no reuse
-   // Experiment by simply changing the value.
-   static int   max_reused_elements;
-   pure virtual function void free();
-      
 endclass : uvm_report_message_element_base
 
-`define m_uvm_report_message_element_utils(TYPE) \
-   static local TYPE m_q[$]; \
-   static function TYPE get(); \
-      if (m_q.size() > 0) begin \
-         get = m_q.pop_front(); \
-      end \
-      else begin \
-         process p = process::self(); \
-         string s; \
-         if (p != null) \
-           s = p.get_randstate(); \
-         get = new(); \
-         if (p != null) \
-           p.set_randstate(s); \
-      end \
-   endfunction : get \
-   virtual function void free(); \
-      if (m_q.size() < uvm_report_message_element_base::max_reused_elements) \
-        m_q.push_back(this); \
-   endfunction : free \
-   virtual function uvm_report_message_element_base do_clone(); \
-     TYPE tmp = TYPE::get(); \
-     tmp.copy(this); \
-     return tmp; \
-   endfunction : do_clone
-   
 class uvm_report_message_int_element extends uvm_report_message_element_base;
    typedef uvm_report_message_int_element this_type;
    
@@ -127,7 +95,11 @@ class uvm_report_message_int_element extends uvm_report_message_element_base;
       _action = rhs._action;
    endfunction : do_copy
 
-   `m_uvm_report_message_element_utils(this_type)
+   virtual function uvm_report_message_element_base do_clone(); 
+     this_type tmp = new; 
+     tmp.copy(this); 
+     return tmp; 
+   endfunction : do_clone
 endclass : uvm_report_message_int_element
 
 class uvm_report_message_string_element extends uvm_report_message_element_base;
@@ -150,7 +122,11 @@ class uvm_report_message_string_element extends uvm_report_message_element_base;
       _action = rhs._action;
    endfunction : do_copy
    
-   `m_uvm_report_message_element_utils(this_type)
+   virtual function uvm_report_message_element_base do_clone(); 
+     this_type tmp = new; 
+     tmp.copy(this); 
+     return tmp; 
+   endfunction : do_clone
 endclass : uvm_report_message_string_element
 
 class uvm_report_message_object_element extends uvm_report_message_element_base;
@@ -179,10 +155,12 @@ class uvm_report_message_object_element extends uvm_report_message_element_base;
       _action = rhs._action;
    endfunction : do_copy
    
-   `m_uvm_report_message_element_utils(this_type)
+   virtual function uvm_report_message_element_base do_clone(); 
+     this_type tmp = new; 
+     tmp.copy(this); 
+     return tmp; 
+   endfunction : do_clone
 endclass : uvm_report_message_object_element
-
-`undef m_uvm_report_message_element_utils
 
 //------------------------------------------------------------------------------
 //
@@ -203,15 +181,12 @@ class uvm_report_message_element_container extends uvm_object;
   endfunction
 
   function void delete_elements();
-    while (elements.size() > 0) begin
-       elements[0].free();
-       void'(elements.pop_front());
-    end
+     elements.delete();
   endfunction
 
   function void add_int(string name, uvm_bitstream_t value, 
                         int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
-     uvm_report_message_int_element urme = uvm_report_message_int_element::get();
+     uvm_report_message_int_element urme = new();
      urme._name = name;
      urme._val = value;
      urme._size = size;
@@ -221,7 +196,7 @@ class uvm_report_message_element_container extends uvm_object;
   endfunction
 
   function void add_string(string name, string value, bit print = 1, bit record = 1);
-     uvm_report_message_string_element urme = uvm_report_message_string_element::get();
+     uvm_report_message_string_element urme = new();
      urme._name = name;
      urme._val = value;
      urme._action = uvm_report_message_element_base::action_e'({record,print});
@@ -229,7 +204,7 @@ class uvm_report_message_element_container extends uvm_object;
   endfunction
 
   function void add_object(string name, uvm_object obj, bit meta, bit print = 1, bit record = 1);
-     uvm_report_message_object_element urme = uvm_report_message_object_element::get();
+     uvm_report_message_object_element urme = new();
      urme._name = name;
      urme._val = obj;
      urme._is_meta = meta;
@@ -491,26 +466,6 @@ class uvm_report_message extends uvm_object;
 
   `uvm_object_utils(uvm_report_message)
 
-
-  // Not documented.
-  static function uvm_report_message get_report_message();
-    if (report_messages.size() != 0)
-      return report_messages.pop_front();
-    else begin
-      process p;
-      string randstate;
-      uvm_report_message l_report_message;
-
-      p = process::self();
-      randstate = p.get_randstate();
-      l_report_message = new("uvm_report_message");
-      p.set_randstate(randstate);
-
-      return l_report_message;
-    end
-  endfunction
-
-
   // Not documented.
   function void set_report_message(string filename,
     int line, uvm_severity_type severity, string id,
@@ -523,23 +478,6 @@ class uvm_report_message extends uvm_object;
     this.message = message;
     this.verbosity = verbosity;
   endfunction
-
-
-  // Not documented.
-  virtual function void free_report_message(uvm_report_message report_message);
-    report_message.m_clear();
-    if (report_messages.size() < uvm_report_message::max_reused_messages)
-      report_messages.push_back(report_message);
-  endfunction
-
-
-  // Not documented.
-  virtual function void m_clear();
-    tr_handle = -1;
-    if (report_message_element_container.elements.size() != 0)
-      report_message_element_container.delete_elements();
-  endfunction
-
 
   // Not documented.
   function string convert2string();
@@ -777,32 +715,6 @@ class uvm_trace_message extends uvm_report_message;
 
   `uvm_object_utils(uvm_trace_message)
 
-
-  // Not documented.
-  static function uvm_trace_message get_trace_message();
-    if (trace_messages.size() != 0)
-      return trace_messages.pop_front();
-    else begin
-      process p;
-      string randstate;
-      uvm_trace_message l_trace_message;
-
-      p = process::self();
-      randstate = p.get_randstate();
-      l_trace_message = new("uvm_trace_message");
-      p.set_randstate(randstate);
-
-      return l_trace_message;
-    end
-  endfunction
- 
-  // Not documented.
-  virtual function void free_trace_message(uvm_trace_message trace_message);
-    trace_message.m_clear();
-    if (trace_messages.size() < uvm_report_message::max_reused_messages)
-      trace_messages.push_back(trace_message);
-  endfunction
-
   // Not documented.
   function string convert2string();
     if (state == TRC_BGN)
@@ -818,12 +730,6 @@ class uvm_trace_message extends uvm_report_message;
         uvm_default_printer.knobs.prefix = prefix;
       end
     end
-  endfunction
-
-  // Not documented.
-  virtual function void m_clear();
-    super.m_clear();
-    end_message = "";
   endfunction
 
   // do_print() not needed
@@ -969,23 +875,6 @@ class uvm_link_message extends uvm_report_message;
     end
   endfunction
  
-
-  // Not documented.
-  virtual function void free_link_message(uvm_link_message link_message);
-    link_message.m_clear();
-    if (link_messages.size() < uvm_report_message::max_reused_messages)
-      link_messages.push_back(link_message);
-  endfunction
-
-
-  // Not documented.
-  virtual function void m_clear();
-    super.m_clear();
-    tr_id0 = -1;
-    tr_id1 = -1;
-    relationship = "";
-  endfunction
-
 
   // Not documented.
   function string convert2string();
