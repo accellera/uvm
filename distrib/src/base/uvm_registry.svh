@@ -89,9 +89,10 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
 
   static function this_type get();
     if (me == null) begin
-      uvm_factory f = uvm_coreservice.get_factory();
+  	  uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  	  uvm_factory factory=cs.get_factory();
       me = new;
-      f.register(me);
+      factory.register(me);
     end
     return me;
   endfunction
@@ -107,10 +108,11 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
 
   static function T create(string name, uvm_component parent, string contxt="");
     uvm_object obj;
-    uvm_factory f = uvm_coreservice.get_factory();
+    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_factory factory=cs.get_factory();
     if (contxt == "" && parent != null)
       contxt = parent.get_full_name();
-    obj = f.create_component_by_type(get(),contxt,name,parent);
+    obj = factory.create_component_by_type(get(),contxt,name,parent);
     if (!$cast(create, obj)) begin
       string msg;
       msg = {"Factory did not return a component of type '",type_name,
@@ -156,7 +158,8 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
                                          string inst_path,
                                          uvm_component parent=null);
     string full_inst_path;
-      uvm_factory factory=uvm_coreservice.get_factory();
+    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_factory factory=cs.get_factory();
     
     if (parent != null) begin
       if (inst_path == "")
@@ -227,9 +230,10 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
 
   static function this_type get();
     if (me == null) begin
-      uvm_factory f = uvm_coreservice.get_factory();
+      uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+      uvm_factory factory=cs.get_factory();
       me = new;
-      f.register(me);
+      factory.register(me);
     end
     return me;
   endfunction
@@ -246,10 +250,12 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
   static function T create (string name="", uvm_component parent=null,
                             string contxt="");
     uvm_object obj;
-    uvm_factory f = uvm_coreservice.get_factory();
+    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_factory factory=cs.get_factory();
+  
     if (contxt == "" && parent != null)
       contxt = parent.get_full_name();
-    obj = f.create_object_by_type(get(),contxt,name);
+    obj = factory.create_object_by_type(get(),contxt,name);
     if (!$cast(create, obj)) begin
       string msg;
       msg = {"Factory did not return an object of type '",type_name,
@@ -295,7 +301,8 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
                                          string inst_path,
                                          uvm_component parent=null);
     string full_inst_path;
-      uvm_factory factory=uvm_coreservice.get_factory();
+    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_factory factory=cs.get_factory();
     
     if (parent != null) begin
       if (inst_path == "")

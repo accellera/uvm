@@ -97,11 +97,13 @@ module test;
 
 	initial begin
 		uvm_trace_override_factory f;
-
+  		uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  		uvm_factory factory=cs.get_factory();
+  		
 		// create new factory
 		f = new();
 		// set the delegate
-		f.delegate=uvm_coreservice.get_factory();
+		f.delegate=factory;
 		// enable new factory
 		uvm_coreservice.set_factory(f);
 
