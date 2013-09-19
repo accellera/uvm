@@ -60,11 +60,15 @@ default_sequence (+uvm_set_default_sequence)
 Mantis 3901: Feature request to prevent objection from throwing 
 decrement-below-zero error if the count is 0
 
+Mantis 4032: Added the ability to undo a factory override.
+
 Mantis 4091: Added missing top-level block name to uvm_reg_file::get_fullname()
 
 Mantis 4160: uvm_comparer not using verbosity setting for print_msg
 
 Mantis 4181: transaction order unclear and cant be changed when bus/reg size differ
+
+(*) Mantis 4269: Added UVM_ prefix to enumerated values
 
 Mantis 4306: Correction of documentation record_field_int ->
 record_field
@@ -109,6 +113,8 @@ was added via get_adjacent_predecessor_nodes and
 get_adjacent_successor_nodes inside of uvm_phase
 
 Mantis 4476: uvm_sequence::req and uvm_sequence::rsp now documented.
+
+Mantis 4488: Detect error in user implementation of uvm_sequence::wait_for_relevant()
 
 (+) Mantis 4513: Added user-defined memory allocation policy to uvm_vreg::allocate()
 
@@ -157,5 +163,7 @@ Mantis 4677: uvm_global_copy_map removed
 Mantis 4690: mehod -> method in uvm_sequence_base documentation
 
 Mantis 4711: Fixed LRM violation
+
+Mantis 4731: Fixed initialization race introduced by Mantis 4606.
 
 Mantis 4734: Fixed bug in uvm_reg_map::get_size()
