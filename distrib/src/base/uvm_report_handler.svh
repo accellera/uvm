@@ -791,7 +791,7 @@ class uvm_report_handler extends uvm_object;
     begin
 		uvm_report_server srvr;
 	    srvr=uvm_report_server::get_server();        
-    	srvr.summarize();
+    	srvr.report_summarize();
     end
     
     q.push_back("----------------------------------------------------------------------\n");

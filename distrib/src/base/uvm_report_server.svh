@@ -116,6 +116,7 @@ virtual class uvm_report_server extends uvm_object;
                 set_quit_count(rhs_.get_quit_count());
         endfunction
 
+`ifndef UVM_DEPRECATED_REPORTING
 
         // Function- process_report_message
         //
@@ -154,7 +155,7 @@ virtual class uvm_report_server extends uvm_object;
         pure virtual function void report_summarize(UVM_FILE file=0);
 
 
-`ifndef UVM_NO_DEPRECATED
+`else
 
         // Function: process_report
         //
@@ -732,7 +733,7 @@ class uvm_default_report_server extends uvm_report_server;
   endfunction
 
 
-`ifndef UVM_NO_DEPRECATED
+`ifdef UVM_DEPRECATED_REPORTING
 
 
   // Function- process_report
