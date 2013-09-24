@@ -74,6 +74,12 @@ Group: Reporting  {
    File: uvm_report_catcher           (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_report_catcher.svh)
    }  # Group: Reporting
 
+Group: Recording {
+   File: uvm_record_database          (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_record_database.svh)
+   File: uvm_record_stream            (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_record_stream.svh)
+}  # Group: Recording
+
+
 Group: Factory  {
 
    File: Overview                     (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/factory.txt)
@@ -213,13 +219,8 @@ Group: Policies  {
    File: Overview                     (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/policies.txt)
    File: uvm_printer                  (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_printer.svh)
    File: uvm_comparer                 (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_comparer.svh)
-   File: uvm_packer                   (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_packer.svh)
-
-Group: Recording {
-   File: uvm_record_database          (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_record_database.svh)
-   File: uvm_record_stream            (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_record_stream.svh)
    File: uvm_recorder                 (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_recorder.svh)
-}  # Group: Recording
+   File: uvm_packer                   (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_packer.svh)
 
    }  # Group: Policies
 

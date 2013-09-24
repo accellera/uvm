@@ -21,16 +21,20 @@
 //   permissions and limitations under the License.
 //-----------------------------------------------------------------------------
 
+// File: UVM Recorders
+//
+// The uvm_recorder class serves two purposes:
+//  - Firstly, it is an abstract representation of a record within a
+//    <uvm_record_stream>.
+//  - Secondly, it is a policy object for recording fields ~into~ that
+//    record within the ~stream~.
+//
 
 //------------------------------------------------------------------------------
 //
 // CLASS: uvm_recorder
 //
-// The uvm_recorder class provides a policy object for recording <uvm_objects>.
-// The policies determine how recording should be done. 
-//
-// A default recorder instance, <uvm_default_recorder>, is used when the
-// <uvm_object::record> is called without specifying a recorder.
+// Abstract class which defines the ~recorder~ API.
 //
 //------------------------------------------------------------------------------
 
@@ -38,7 +42,11 @@ virtual class uvm_recorder extends uvm_object;
 
   // Variable- m_stream_dap
   // Data access protected reference to the stream
-   uvm_set_before_get_dap#(uvm_record_stream) m_stream_dap;
+  local uvm_set_before_get_dap#(uvm_record_stream) m_stream_dap;
+
+  // Variable- m_warn_null_stream
+  // Used to limit the number of warnings 
+  local bit m_warn_null_stream;
    
   // Variable- recording_depth
   int recording_depth;
@@ -98,12 +106,22 @@ virtual class uvm_recorder extends uvm_object;
      m_stream_dap = new("stream_dap");
   endfunction
 
-  // Function: get_type_name
-  //
-  // Returns type name of the recorder. Subtypes must override this method
-  // to enable the <`uvm_record_field> macro.
-  //
-  //| virtual function string get_type_name()
+   // Function: get_stream
+   // Returns a reference to the stream which created
+   // this record.
+   //
+   // A warning will be asserted if get_stream is called prior
+   // to the record being initialized via <initialize_recorder>.
+   //
+   function uvm_record_stream get_stream();
+      if (!m_stream_dap.try_get(get_stream)) begin
+         if (m_warn_null_stream == 1) 
+           `uvm_warning("UVM/REC/NO_INIT",
+                        $sformatf("attempt to retrieve STREAM from '%s' before it was set!",
+                                  get_name()))
+         m_warn_null_stream = 0;
+      end
+   endfunction : get_stream
 
   // Group: Implementation Agnostic API
 
@@ -116,7 +134,8 @@ virtual class uvm_recorder extends uvm_object;
   // This method will trigger a <do_initialize_recorder> call.
   //
   // An error will be asserted if:
-  // - ~initialized_recorder~ is called more than once
+  // - ~initialized_recorder~ is called more than once without the
+  //  recorder being ~freed~ in between.
   // - ~stream~ is ~null~
   function void initialize_recorder(uvm_record_stream stream);
      uvm_record_stream m_stream;
@@ -139,21 +158,15 @@ virtual class uvm_recorder extends uvm_object;
      do_initialize_recorder(stream);
   endfunction : initialize_recorder
 
-   // Function: get_stream
-   // Returns a reference to the stream which created
-   // this record.
-   //
-   // An error will be asserted if get_stream is called prior
-   // to the record being initialized via <initialize_recorder>.
-   //
-   function uvm_record_stream get_stream();
-      if (!m_stream_dap.try_get(get_stream)) begin
-         `uvm_error("UVM/REC/NO_INIT",
-                    $sformatf("Illegal attempt to retrieve STREAM from '%s' before it was set!",
-                              get_name()))
-         
-      end
-   endfunction : get_stream
+  // Function: free_recorder
+  // Releases the internal state of the recorder.
+  //
+  // This method will trigger a <do_free_recorder> call.
+  function void free_recorder();
+     m_stream_dap = new("stream_dap");
+     m_warn_null_stream = 1;
+     do_free_recorder();
+  endfunction : free_recorder
    
    // Function: record_field
    // Records an integral field (less than or equal to 4096 bits).
@@ -262,18 +275,26 @@ virtual class uvm_recorder extends uvm_object;
       do_record_generic(name, value);
    endfunction : record_generic
 
-   // Group: Vendor Specific Implementation
+   // Group: Implementation Specific API
 
    // Function: do_intiialize_recorder
    // Initializes the state of the recorder
    //
-   // Backend implementation of <initialize_recorder>
-   protected pure virtual function void do_initialize_recorder(uvm_record_stream stream);
+   // ~Optional~ Backend implementation of <initialize_recorder>
+   protected virtual function void do_initialize_recorder(uvm_record_stream stream);
+   endfunction : do_initialize_recorder
 
+   // Function: do_free_recorder
+   // Frees the internal state of the recorder
+   //
+   // ~Optional~ Backend implementation of <free_recorder>
+   protected virtual function void do_free_recorder();
+   endfunction : do_free_recorder
+   
    // Function: do_record_field
    // Records an integral field (less than or equal to 4096 bits).
    //
-   // Backend implementation of <record_field>
+   // ~Mandatory~ Backend implementation of <record_field>
    protected pure virtual function void do_record_field(string name,
                                                         uvm_bitstream_t value,
                                                         int size,
@@ -282,35 +303,35 @@ virtual class uvm_recorder extends uvm_object;
    // Function: do_record_field_real
    // Records a real field.
    //
-   // Backend implementation of <record_field_real>
+   // ~Mandatory~ Backend implementation of <record_field_real>
    protected pure virtual function void do_record_field_real(string name,
                                                              real value);
 
    // Function: do_record_object
    // Records an object field.
    //
-   // Backend implementation of <record_object>
+   // ~Mandatory~ Backend implementation of <record_object>
    protected pure virtual function void do_record_object(string name,
                                                          uvm_object value);
 
    // Function: do_record_string
    // Records a string field.
    //
-   // Backend implementation of <record_string>
+   // ~Mandatory~ Backend implementation of <record_string>
    protected pure virtual function void do_record_string(string name,
                                                          string value);
 
    // Function: do_record_time
    // Records a time field.
    //
-   // Backend implementation of <record_time>
+   // ~Mandatory~ Backend implementation of <record_time>
    protected pure virtual function void do_record_time(string name,
                                                        time value);
 
    // Function: do_record_generic
    // Records a name/value pair, where ~value~ has been converted to a string.
    //
-   // Backend implementation of <record_generic>
+   // ~Mandatory~ Backend implementation of <record_generic>
    protected pure virtual function void do_record_generic(string name,
                                                           string value);
 
@@ -459,6 +480,14 @@ class uvm_text_recorder extends uvm_recorder;
    protected virtual function void do_initialize_recorder(uvm_record_stream stream);
       $cast(m_text_db, stream.get_db());
    endfunction : do_initialize_recorder
+
+   // Function: do_free_recorder
+   // Clears the state of the recorder
+   //
+   // Text-backend specific implementation.
+   protected virtual function void do_free_recorder();
+      m_text_db = null;
+   endfunction : do_free_recorder
    
    // Function: do_record_field
    // Records an integral field (less than or equal to 4096 bits).
