@@ -100,7 +100,7 @@ class uvm_get_to_lock_dap#(type T=int) extends uvm_set_get_dap_base#(T);
    // Retrieves the current value stored within the DAP, and 'locks' the DAP.
    //
    // ~try_get~ will always return 1.
-   virtual function bit try_get(T value);
+   virtual function bit try_get(output T value);
       value = get();
       return 1;
    endfunction : try_get

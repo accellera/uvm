@@ -1295,10 +1295,11 @@ endfunction
 
 function void uvm_object::record (uvm_recorder recorder=null);
 
-  if(recorder == null) 
-    recorder = uvm_default_recorder;
+  if(recorder == null)
+    return;
+//    recorder = uvm_default_recorder;
 
-  if(!recorder.tr_handle) return;
+  //if(!recorder.tr_handle) return;
 
   __m_uvm_status_container.recorder = recorder;
   recorder.recording_depth++;
@@ -1307,9 +1308,9 @@ function void uvm_object::record (uvm_recorder recorder=null);
 
   recorder.recording_depth--;
 
-  if(recorder.recording_depth==0) begin
-    recorder.tr_handle = 0;
-  end
+  //if(recorder.recording_depth==0) begin
+  //  recorder.tr_handle = 0;
+  //end
 endfunction
 
 

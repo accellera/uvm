@@ -308,22 +308,24 @@ module top;
     //---------------------------------
 
     begin
-    man1.enable_recording("man1");
-    mac1.enable_recording("mac1");
+       uvm_root top = uvm_root::get();
+       
+       man1.enable_recording(top.get_record_stream("man1"));
+       mac1.enable_recording(top.get_record_stream("mac1"));
 
-    for (int i=0; i< `NUM_TRANS; i++) begin
-      void'(man1.begin_tr());
-      #10;
-      man1.int32 = i;
-      man1.end_tr();
-    end
-
-    for (int i=0; i< `NUM_TRANS; i++) begin
-      void'(mac1.begin_tr());
-      #10;
-      mac1.int32 = i;
-      mac1.end_tr();
-    end
+       for (int i=0; i< `NUM_TRANS; i++) begin
+          void'(man1.begin_tr());
+          #10;
+          man1.int32 = i;
+          man1.end_tr();
+       end
+       
+       for (int i=0; i< `NUM_TRANS; i++) begin
+          void'(mac1.begin_tr());
+          #10;
+          mac1.int32 = i;
+          mac1.end_tr();
+       end
     end
 
     //---------------------------------

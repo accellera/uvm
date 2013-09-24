@@ -22,7 +22,9 @@ typedef class uvm_report_server;
 typedef class uvm_default_report_server;
 typedef class uvm_root;
 
-
+typedef class uvm_record_database;
+typedef class uvm_text_record_database;
+   
 `ifndef UVM_CORESERVICE_TYPE
 `define UVM_CORESERVICE_TYPE uvm_default_coreservice_t
 `endif
@@ -64,6 +66,18 @@ virtual class uvm_coreservice_t;
 	// sets the central report server to ~server~
 	pure virtual function void set_report_server(uvm_report_server server);
 	
+        // Function: get_default_record_database
+        // returns the current default record database
+        //
+        // If no default record database has been set before this method is
+        // is called, returns an instance of <uvm_text_record_database>
+        pure virtual function uvm_record_database get_default_record_database();
+
+        // Function: set_default_record_database
+        // Sets the current default record database
+        //
+        pure virtual function void set_default_record_database(uvm_record_database db);
+   
 	// Function: get_root
 	//
 	// returns the uvm_root instance
@@ -87,7 +101,8 @@ virtual class uvm_coreservice_t;
 			inst=new;
 
 		return inst;
-	endfunction
+	endfunction // get
+
 endclass
 
 //----------------------------------------------------------------------
@@ -114,6 +129,19 @@ class uvm_default_coreservice_t extends uvm_coreservice_t;
 		factory = f;
 	endfunction 
 
+        local uvm_record_database record_database;
+        virtual function uvm_record_database get_default_record_database();
+           if (record_database == null) begin
+              uvm_text_record_database tx_db = new("default_record_database");
+              record_database = tx_db;
+           end
+           return record_database;
+        endfunction : get_default_record_database
+
+        virtual function void set_default_record_database(uvm_record_database db);
+           record_database = db;
+        endfunction : set_default_record_database
+   
 	local uvm_report_server report_server;
 	virtual function uvm_report_server get_report_server();
 		if(report_server==null) begin

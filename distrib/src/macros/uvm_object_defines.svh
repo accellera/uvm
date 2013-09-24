@@ -2674,7 +2674,7 @@ endfunction \
 
 `define m_uvm_record_qda_enum(ARG, FLAG, SZ) \
   begin \
-    if(!((FLAG)&UVM_NORECORD) && (__m_uvm_status_container.recorder.tr_handle != 0)) begin \
+    if(!((FLAG)&UVM_NORECORD) && (__m_uvm_status_container.recorder != null)) begin \
       int sz__ = SZ; \
       if(sz__ == 0) begin \
         __m_uvm_status_container.recorder.record_field(`"ARG``.size`", 0, 32, UVM_DEC); \
@@ -3313,20 +3313,30 @@ endfunction \
 
   
 
-// Macro: `uvm_record_field
+// Macro- `uvm_record_field
 //
 // Macro for recording name-value pairs into a transaction recording database.
 // Requires a valid transaction handle, as provided by the
 // <uvm_transaction::begin_tr> and <uvm_component::begin_tr> methods. 
 
 `define uvm_record_field(NAME,VALUE) \
-   if (recorder != null && recorder.tr_handle != 0) begin \
-     if (recorder.get_type_name() != "uvm_recorder") begin \
-       `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+  if (recorder != null) begin \
+     if (recorder.get_type_name() != "uvm_text_recorder") begin \
+        `uvm_record_attribute(uvm_record_database::m_get_record_handle(recorder), VALUE, NAME) \
      end \
-     else \
-       recorder.m_set_attribute(recorder.tr_handle,NAME,$sformatf("%p",VALUE)); \
-   end
+     else begin \
+        recorder.record_generic(NAME,$sformatf("%p", VALUE)); \
+     end \
+  end
+
+//`define uvm_record_field(NAME,VALUE) \
+   // if (recorder != null && recorder.tr_handle != 0) begin \
+   //   if (recorder.get_type_name() != "uvm_recorder") begin \
+   //     `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+   //   end \
+   //   else \
+   //     recorder.m_set_attribute(recorder.tr_handle,NAME,$sformatf("%p",VALUE)); \
+   // end
 
 
 
@@ -3334,21 +3344,20 @@ endfunction \
 // distinguish types.
 
 `define uvm_record_int(NAME,VALUE,SIZE,RADIX) \
-  recorder.m_set_attribute(recorder.tr_handle,NAME, \
-     $sformatf({"%0",uvm_radix_to_string(RADIX)},VALUE)); \
+  if (recorder != null) \
+    recorder.record_field(NAME,VALUE,SIZE,RADIX);
 
 `define uvm_record_string(NAME,VALUE) \
-  recorder.m_set_attribute(recorder.tr_handle,NAME,VALUE);
+  if (recorder != null) \
+    recorder.record_string(NAME,VALUE);
 
 `define uvm_record_time(NAME,VALUE) \
-  recorder.m_set_attribute(recorder.tr_handle,NAME, \
-     $sformatf("%0u",VALUE&((1<<64)-1))); \
+  if (recorder != null) \
+    recorder.record_time(NAME,VALUE);
 
 `define uvm_record_real(NAME,VALUE) \
-  begin \
-  bit[63:0] ival = $realtobits(VALUE); \
-  recorder.m_set_attribute(recorder.tr_handle,NAME,ival); \
-  end
+  if (recorder != null) \
+    recorder.record_field_real(NAME,VALUE);
 
   
 //------------------------------------------------------------------------------
