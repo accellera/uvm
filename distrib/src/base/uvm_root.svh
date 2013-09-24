@@ -65,6 +65,8 @@
 
 typedef class uvm_test_done_objection;
 typedef class uvm_cmdline_processor;
+typedef class uvm_component_proxy;
+typedef class uvm_top_down_visitor_adapter;
 
 class uvm_root extends uvm_component;
 
@@ -234,41 +236,17 @@ class uvm_root extends uvm_component;
   endfunction
 `endif
 
-	static local bit m_relnotes_done=0;
-	
-	
-  // local function to check the name constraints on component names
-  // a legal name
-  // - allowed charset "A-z:_0-9[](){}-: "
-  // - whitespace-as-is, no-balacing delimiter semantic, no escape sequences
-  // - path delimiter not allowed anywhere in the name
-  //   
-  // the check is coded here as a function to complete it in a single function call
-  // otherwise save/restore issues with the used dpi could occur
-  function void m_check_component_names(chandle regex, uvm_component c);
-	  uvm_component cq[$];
-	  
-	  if(uvm_dpi_regexec(regex, c.get_name())) 
-	  	`uvm_warning("UVM/COMP/NAME",$sformatf("the name \"%s\" of the component \"%s\" violates the uvm component name constraints",c.get_name(),c.get_full_name()))
-	  
-	  c.get_children(cq);
-	  foreach(cq[idx])
-	  	m_check_component_names(regex,cq[idx]);
-	 
-  endfunction
-  
-  function void end_of_elaboration_phase(uvm_phase phase);  
-		chandle h;
-		uvm_component cq[$];
-			  
-		h = uvm_dpi_regcomp("^[][[:alnum:](){}_:-]([][[:alnum:](){} _:-]*[][[:alnum:](){}_:-])?$");
-		get_children(cq);
-	  	foreach(cq[idx])
-	  		m_check_component_names(h,cq[idx]);
-		uvm_dpi_regfree(h);  
-  endfunction
-  
-  
+ static local bit m_relnotes_done=0;
+
+ function void end_of_elaboration_phase(uvm_phase phase);  
+	 uvm_component_proxy p = new("proxy");
+	 uvm_top_down_visitor_adapter#(uvm_component) adapter = new("adapter");
+	 uvm_coreservice_t cs = uvm_coreservice_t::get();
+	 uvm_visitor#(uvm_component) v = cs.get_component_visitor();
+	 adapter.accept(this, v, p);
+ endfunction
+
+
 endclass
 
 
