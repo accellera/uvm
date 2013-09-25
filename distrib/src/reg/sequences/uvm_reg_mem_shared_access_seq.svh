@@ -134,7 +134,7 @@ class uvm_reg_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
          uvm_reg_data_t  prev, v;
          
          // The mirror should contain the initial value
-         prev = rg.get();
+         prev = rg.get_mirrored_value();
          
          // Write a random value, except in those "don't touch" fields
          v = ({$random, $random} & ~other_mask) | (prev & other_mask);
@@ -157,7 +157,7 @@ class uvm_reg_shared_access_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_re
                                        rg.get_full_name(), maps[k].get_full_name()), UVM_LOW);
             
             // Was it what we expected?
-            exp = rg.get() & ~wo_mask[k];
+            exp = rg.get_mirrored_value() & ~wo_mask[k];
             
             rg.read(status, actual, UVM_FRONTDOOR, maps[k], this);
             if (status != UVM_IS_OK) begin

@@ -150,7 +150,7 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
       `uvm_info("uvm_reg_bit_bash_seq", $sformatf("...Bashing %s bit #%0d", mode, k),UVM_HIGH);
       
       repeat (2) begin
-         val = rg.get();
+         val = rg.get_mirrored_value();
          v   = val;
          exp = val;
          val[k] = ~val[k];
@@ -162,7 +162,7 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
                                         status.name(), rg.get_full_name(), map.get_full_name()));
          end
          
-         exp = rg.get() & ~dc_mask;
+         exp = rg.get_mirrored_value() & ~dc_mask;
          rg.read(status, val, UVM_FRONTDOOR, map, this);
          if (status != UVM_IS_OK) begin
             `uvm_error("uvm_reg_bit_bash_seq", $sformatf("Status was %s when reading register \"%s\" through map \"%s\".",

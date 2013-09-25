@@ -62,7 +62,7 @@ class test extends uvm_test;
       env = tb_env::type_id::create("env", this);
       catch = new();
       uvm_report_cb::add(null, catch);
-      catch.callback_mode(0);
+      void'(catch.callback_mode(0));
    endfunction
 
    virtual task main_phase(uvm_phase phase);
@@ -72,7 +72,7 @@ class test extends uvm_test;
       phase.raise_objection(this);
 
       $write("Checking normal read()...should not issue a mismatch error...\n");
-      env.regmodel.DATA.predict(32'hDEADBEEF);
+      void'(env.regmodel.DATA.predict(32'hDEADBEEF));
       env.regmodel.DATA.read(status, rdat);
       void'(env.regmodel.DATA.randomize()); // Change 'desired value'
       if (env.regmodel.DATA.get_mirrored_value() != rdat) begin
@@ -81,22 +81,22 @@ class test extends uvm_test;
       end
 
       $write("Checking mirror()...should issue a mismatch error...\n");
-      env.regmodel.DATA.predict(32'hDEADBEEF);
-      catch.callback_mode(1);
+      void'(env.regmodel.DATA.predict(32'hDEADBEEF));
+      void'(catch.callback_mode(1));
       env.regmodel.DATA.mirror(status, UVM_CHECK);
       if (my_catcher::seen != 1) begin
          `uvm_error("Test", "The expected mismatch error message was not seen")
       end
       my_catcher::seen = 0;
-      catch.callback_mode(0);
+      void'(catch.callback_mode(0));
       if (env.regmodel.DATA.get_mirrored_value() != rdat) begin
          `uvm_error("Test", $sformatf("Mirror was not updated with readback value by mirror(): 'h%h instead of 'h%h",
                                       env.regmodel.DATA.get_mirrored_value(), rdat))
       end
 
       $write("Checking check-on-read() mode()...should issue a mismatch error...\n");
-      env.regmodel.DATA.predict(32'hDEADBEEF);
-      catch.callback_mode(1);
+      void'(env.regmodel.DATA.predict(32'hDEADBEEF));
+      void'(catch.callback_mode(1));
       env.regmodel.default_map.set_check_on_read(1);
       env.regmodel.DATA.read(status, rdat);
       env.regmodel.default_map.set_check_on_read(0);
@@ -104,39 +104,39 @@ class test extends uvm_test;
          `uvm_error("Test", "The expected mismatch error message was not seen")
       end
       my_catcher::seen = 0;
-      catch.callback_mode(0);
+      void'(catch.callback_mode(0));
       if (env.regmodel.DATA.get_mirrored_value() != rdat) begin
          `uvm_error("Test", $sformatf("Mirror was not updated with readback value by read(): 'h%h instead of 'h%h",
                                       env.regmodel.DATA.get_mirrored_value(), rdat))
       end
 
       $write("Checking mirror(BACKDOOR)...should issue a mismatch error...\n");
-      env.regmodel.DATA.predict(32'hDEADBEEF);
-      catch.callback_mode(1);
+      void'(env.regmodel.DATA.predict(32'hDEADBEEF));
+      void'(catch.callback_mode(1));
       env.regmodel.DATA.mirror(status, UVM_CHECK, UVM_BACKDOOR);
       if (my_catcher::seen != 1) begin
          `uvm_error("Test", "The expected mismatch error message was not seen")
       end
       my_catcher::seen = 0;
-      catch.callback_mode(0);
+      void'(catch.callback_mode(0));
       if (env.regmodel.DATA.get_mirrored_value() != rdat) begin
          `uvm_error("Test", $sformatf("Mirror was not updated with readback value by mirror(): 'h%h instead of 'h%h",
                                       env.regmodel.DATA.get_mirrored_value(), rdat))
       end
 
       $write("Checking normal read(BACKDOOR)...should not issue a mismatch error...\n");
-      env.regmodel.DATA.predict(32'hDEADBEEF);
+      void'(env.regmodel.DATA.predict(32'hDEADBEEF));
       env.regmodel.DATA.read(status, rdat, UVM_BACKDOOR);
-      if (env.regmodel.DATA.get_mirrored_value != rdat) begin
+      if (env.regmodel.DATA.get_mirrored_value() != rdat) begin
          `uvm_error("Test", $sformatf("Mirror was not updated with readback value by read(): 'h%h instead of 'h%h",
                                       env.regmodel.DATA.get_mirrored_value(), rdat))
       end
 
       $write("Checking check-on-read(BACKDOOR) mode()...should issue a mismatch error...\n");
-      env.regmodel.DATA.predict(32'hDEADBEEF);
+      void'(env.regmodel.DATA.predict(32'hDEADBEEF));
       begin
          uvm_reg_map bkdr = uvm_reg_map::backdoor();
-         catch.callback_mode(1);
+         void'(catch.callback_mode(1));
          bkdr.set_check_on_read(1);
          env.regmodel.DATA.read(status, rdat, UVM_BACKDOOR);
          bkdr.set_check_on_read(0);
@@ -145,7 +145,7 @@ class test extends uvm_test;
          `uvm_error("Test", "The expected mismatch error message was not seen")
       end
       my_catcher::seen = 0;
-      catch.callback_mode(0);
+      void'(catch.callback_mode(0));
       if (env.regmodel.DATA.get_mirrored_value() != rdat) begin
          `uvm_error("Test", $sformatf("Mirror was not updated with readback value by read(): 'h%h instead of 'h%h",
                                       env.regmodel.DATA.get_mirrored_value(), rdat))
