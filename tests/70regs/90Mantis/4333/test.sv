@@ -168,9 +168,9 @@ class test extends uvm_test;
          `uvm_error("TEST", "Status not OK after mirror!")
       end
 
-      if (env.regmodel.r1.get() != 32'h0) begin
+      if (env.regmodel.r1.get_mirrored_value() != 32'h0) begin
          `uvm_error("TEST", $sformatf("After mirror, reg value should be 0, not our set value. reg value is 'h%h",
-                                      env.regmodel.r1.get()))
+                                      env.regmodel.r1.get_mirrored_value()))
       end
 
       $display("Testing set-update. Reg value should be AAAA_AAAA (the set value)");
@@ -185,9 +185,9 @@ class test extends uvm_test;
 
       env.regmodel.r1.mirror(status,UVM_CHECK);
 
-      if (env.regmodel.r1.get() != 32'hAAAA_AAAA) begin
+      if (env.regmodel.r1.get_mirrored_value() != 32'hAAAA_AAAA) begin
          `uvm_error("TEST", $sformatf("After update, reg value should be AAAA_AAAA. reg value is 'h%h",
-                                      env.regmodel.r1.get()))
+                                      env.regmodel.r1.get_mirrored_value()))
       end
       phase.drop_objection(this);
    endtask

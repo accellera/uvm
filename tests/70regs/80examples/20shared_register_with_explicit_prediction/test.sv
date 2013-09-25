@@ -111,7 +111,7 @@ module testm();
 
      function void check_regs();
        bit error;
-      if(dut.swr!==model.swr_reg.get() || dut.srd!==model.srd_reg.get())
+      if(dut.swr!==model.swr_reg.get_mirrored_value() || dut.srd!==model.srd_reg.get_mirrored_value())
          `uvm_error("TEST_SEQ", $sformatf(
            "Registers mismatched. [SWR] DUT=0x%0x, Shadow=0x%0x : [SRD] DUT=0x%0x, Shadow=0x%0x\n", 
              dut.swr, model.swr_reg.get(), dut.srd, model.srd_reg.get()))

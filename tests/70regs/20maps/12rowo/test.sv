@@ -78,7 +78,7 @@ class test extends uvm_test;
          `uvm_info("test", "Testing normal operations...", UVM_LOW)
          env.regmodel.R.mirror(status, UVM_CHECK, .parent(seq));
          env.regmodel.R.peek(status, data, .parent(seq));
-         val = env.regmodel.R.get();
+         val = env.regmodel.R.get_mirrored_value();
          if (data !== val) begin
             `uvm_error("Test", $sformatf("%s (via BD) is 'h%h !== mirror 'h%h",
                                          env.regmodel.R.get_full_name(),
@@ -90,7 +90,7 @@ class test extends uvm_test;
          
          env.regmodel.W.write(status, 32'hDEADBEEF, .parent(seq));
          env.regmodel.W.peek(status, data, .parent(seq));
-         val = env.regmodel.W.get();
+         val = env.regmodel.W.get_mirrored_value();
          if (data !== val) begin
             `uvm_error("Test", $sformatf("%s (via BD) is 'h%h !== mirror 'h%h",
                                          env.regmodel.W.get_full_name(),

@@ -538,7 +538,7 @@ virtual class uvm_reg extends uvm_object;
    // Read the current value from this register
    //
    // Sample the value in the DUT register corresponding to this
-   // absraction class instance using a back-door access.
+   // abstraction class instance using a back-door access.
    // The register value is sampled, not modified.
    //
    // Uses the HDL path for the design abstraction specified by ~kind~.

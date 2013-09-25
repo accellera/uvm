@@ -158,7 +158,7 @@ begin
 
    model.reset();
    `uvm_info("Test", "Checking initial values...", UVM_NONE)
-   data = model.r1.get();
+   data = model.r1.get_mirrored_value();
    check(data, `UVM_REG_DATA_WIDTH'h1555555555555, "Mirrored");
    data = '0;
    model.r1.peek(status, data);
@@ -173,14 +173,14 @@ begin
    data = '0;
    model.r1.peek(status, data);
    check(data, `UVM_REG_DATA_WIDTH'h155CC555C5CC5, "Peeked");
-   data = model.r1.get();
+   data = model.r1.get_mirrored_value();
    check(data, `UVM_REG_DATA_WIDTH'h155CC555C5CC5, "Mirrored");
    
    model.reset();
    r1 = `UVM_REG_DATA_WIDTH'h1555555555555;
    
    `uvm_info("Test", "Checking reset values...", UVM_NONE)
-   data = model.r1.get();
+   data = model.r1.get_mirrored_value();
    check(data, `UVM_REG_DATA_WIDTH'h1555555555555, "Mirrored");
    data = '0;
    model.r1.peek(status, data);
@@ -193,14 +193,14 @@ begin
    model.r1.write(status, `UVM_REG_DATA_WIDTH'h2AAAAAAAAAAAA, .path(UVM_BACKDOOR));
    model.r1.peek(status, data);
    check(data, `UVM_REG_DATA_WIDTH'h2B21713D3CA59, "Peeked");
-   data = model.r1.get();
+   data = model.r1.get_mirrored_value();
    check(data, `UVM_REG_DATA_WIDTH'h2B21713D3CA59, "Mirrored");
 
    `uvm_info("Test", "Checking emulation of 2nd write side effects...", UVM_NONE)
    model.r1.write(status, `UVM_REG_DATA_WIDTH'h16AAAAAAAAAAA, .path(UVM_BACKDOOR));
    model.r1.peek(status, data);
    check(data, `UVM_REG_DATA_WIDTH'h2B21751D3CA59, "Peeked");
-   data = model.r1.get();
+   data = model.r1.get_mirrored_value();
    check(data, `UVM_REG_DATA_WIDTH'h2B21751D3CA59, "Mirrored");
 
    begin

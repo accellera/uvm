@@ -128,13 +128,13 @@ module test();
        foreach(r[i])
        begin
          r[i].peek(status, data);
-         if(r[i].get()!==data)
+         if(r[i].get_mirrored_value()!==data)
            `uvm_error("TEST_SEQ", $sformatf(
              "Registers mismatched. [%s] Shadow=0x%0x, DUT=0x%0x\n", 
-               r[i].get_name(), r[i].get(), data))
+               r[i].get_name(), r[i].get_mirrored_value(), data))
          else
            `uvm_info("TEST_SEQ", $sformatf("Registers matched. [%s] Shaodow=0x%0x DUT=0x%0x", 
-             r[i].get_name(), r[i].get(), data), UVM_LOW)
+             r[i].get_name(), r[i].get_mirrored_value(), data), UVM_LOW)
        end
        $display();
        $display();

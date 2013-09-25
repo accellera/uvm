@@ -1431,7 +1431,7 @@ virtual class uvm_component extends uvm_report_object;
   //   to the accept time. By default, when ~begin_time~ = 0, the current
   //   simulation time is used.
   //
-  //   If recording is enabled (recording_detail != UVM_OFF), then a new
+  //   If recording is enabled (recording_detail != UVM_NONE), then a new
   //   database-transaction is started on the component's transaction stream
   //   given by the stream argument. No transaction properties are recorded at
   //   this time.
