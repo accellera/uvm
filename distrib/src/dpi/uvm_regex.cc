@@ -19,12 +19,8 @@
 //----------------------------------------------------------------------
 
 
-#include <malloc.h>
-#include <string.h>
+#include "uvm_dpi.h"
 #include <sys/types.h>
-#include <regex.h>
-#include "vpi_user.h"
-//#include <stdio.h>
 
 
 const char uvm_re_bracket_char = '/';
@@ -57,7 +53,14 @@ int uvm_re_match(const char * re, const char *str)
   char * rex = &uvm_re[0];
 
   if (len > UVM_REGEX_MAX_LENGTH) {
-    vpi_printf((PLI_BYTE8*)  "UVM_ERROR: uvm_re_match : regular expression greater than max %0d: |%s|\n",UVM_REGEX_MAX_LENGTH,re);
+      char buffer[1024];
+      sprintf(buffer, "uvm_re_match : regular expression greater than max %0d: |%s|", UVM_REGEX_MAX_LENGTH, re);
+      m_uvm_report_dpi(2, /* UVM_ERROR */
+                       "UVM/DPI/REGEX_MAX",
+                       &buffer[0],
+                       0, /* UVM_NONE */
+                       __FILE__,
+                       __LINE__);
     return 1;
   }
 
@@ -71,7 +74,12 @@ int uvm_re_match(const char * re, const char *str)
   rexp = (regex_t*)malloc(sizeof(regex_t));
 
   if (rexp == NULL) {
-    vpi_printf((PLI_BYTE8*)  "UVM_ERROR: uvm_re_match: internal memory allocation error");
+      m_uvm_report_dpi(2, /* UVM_ERROR */
+                       "UVM/DPI/REGEX_ALLOC",
+                       "uvm_re_match: internal memory allocation error",
+                       0, /* UVM_NONE */
+                       __FILE__,
+                       __LINE__);
     return 1;
   }
 
@@ -79,7 +87,14 @@ int uvm_re_match(const char * re, const char *str)
 
   if (err != 0) {
 	regerror(err,rexp,uvm_re,UVM_REGEX_MAX_LENGTH-1);
-    vpi_printf((PLI_BYTE8*)  "UVM_ERROR: uvm_re_match: invalid glob or regular expression: |%s||%s|\n",re,uvm_re);
+      char buffer[1024];
+      sprintf(buffer, "uvm_re_match : invalid glob or regular expression: |%s||%s|", re, uvm_re);
+      m_uvm_report_dpi(2, /* UVM_ERROR */
+                       "UVM/DPI/REGEX_INV",
+                       &buffer[0],
+                       0, /* UVM_NONE */
+                       __FILE__,
+                       __LINE__);
     regfree(rexp);
     free(rexp);
     return err;
@@ -114,7 +129,14 @@ const char * uvm_glob_to_re(const char *glob)
   len = strlen(glob);
 
   if (len > 2040) {
-    vpi_printf((PLI_BYTE8*)  "UVM_ERROR: uvm_glob_to_re : glob expression greater than max 2040: |%s|\n",glob);
+      char buffer[1024];
+      sprintf(buffer, "uvm_re_match : glob expression greater than max 2040: |%s|", glob);
+      m_uvm_report_dpi(2, /* UVM_ERROR */
+                       "UVM/DPI/REGEX_MAX",
+                       &buffer[0],
+                       0, /* UVM_NONE */
+                       __FILE__,
+                       __LINE__);
     return glob;
   }
 
@@ -221,6 +243,11 @@ const char * uvm_glob_to_re(const char *glob)
 
 void uvm_dump_re_cache()
 {
-  vpi_printf((PLI_BYTE8*)  "uvm_dump_re_cache: cache not implemented");
+    m_uvm_report_dpi(0, /* UVM_INFO */
+                     "UVM/DPI/REGEX_MAX",
+                     "uvm_dump_re_cache: cache not implemented",
+                     100, /* UVM_LOW */
+                     __FILE__,
+                     __LINE__);
 }
 
