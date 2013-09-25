@@ -174,7 +174,7 @@ virtual class uvm_recorder extends uvm_object;
    // Parameters:
    // name - Name of the field
    // value - Value of the field to record.
-   // size - Number of bits of the field which apply.
+   // size - Number of bits of the field which apply (Usually obtained via $bits).
    // radix - The <uvm_radix_enum> to use.
    //
    // This method will trigger a <do_record_field> call.
@@ -188,6 +188,28 @@ virtual class uvm_recorder extends uvm_object;
       do_record_field(name, value, size, radix);
    endfunction : record_field
 
+   // Function: record_field_int
+   // Records an integral field (less than or equal to 64 bits).
+   //
+   // This optimized version of <record_field> is useful for sizes up
+   // to 64 bits.
+   //
+   // Parameters:
+   // name - Name of the field
+   // value - Value of the field to record
+   // size - Number of bits of the wfield which apply (Usually obtained via $bits).
+   // radix - The <uvm_radix_enum> to use.
+   //
+   // This method will trigger a <do_record_field_int> call.
+   function void record_field_int(string name,
+                                  uvm_integral_t value,
+                                  int size,
+                                  uvm_radix_enum radix=UVM_NORADIX);
+        if (get_stream() == null) begin
+         return;
+      end
+      do_record_field_int(name, value, size, radix);
+   endfunction : record_field_int
 
    // Function: record_field_real
    // Records a real field.
@@ -300,6 +322,15 @@ virtual class uvm_recorder extends uvm_object;
                                                         int size,
                                                         uvm_radix_enum radix);
 
+   // Function: do_record_field_int
+   // Records an integral field (less than or equal to 64 bits).
+   //
+   // ~Mandatory~ Backend implementation of <record_field_int>
+   protected pure virtual function void do_record_field_int(string name,
+                                                            uvm_integral_t value,
+                                                            int          size,
+                                                            uvm_radix_enum radix);
+   
    // Function: do_record_field_real
    // Records a real field.
    //
@@ -510,6 +541,27 @@ class uvm_text_recorder extends uvm_recorder;
    endfunction : do_record_field
   
    
+   // Function: do_record_field_int
+   // Records an integral field (less than or equal to 64 bits).
+   //
+   // Text-backend specific implementation.
+   protected virtual function void do_record_field_int(string name,
+                                                       uvm_integral_t value,
+                                                       int          size,
+                                                       uvm_radix_enum radix);
+      scope.set_arg(name);
+      if (!radix)
+        radix = default_radix;
+
+      m_text_db.set_attribute_int(uvm_record_database::m_get_record_handle(this),
+                                  scope.get(),
+                                  value,
+                                  radix,
+                                  size);
+
+   endfunction : do_record_field_int
+
+
    // Function: do_record_field_real
    // Record a real field.
    //

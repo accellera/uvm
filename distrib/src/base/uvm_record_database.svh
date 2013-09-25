@@ -409,17 +409,44 @@ class uvm_text_record_database extends uvm_record_database;
    // numbits - number of valid bits
    function void set_attribute(int tx_h,
                                string nm,
-                               logic[1023:0] value,
+                               uvm_bitstream_t value,
                                uvm_radix_enum radix,
-                               integer numbits=1024);
+                               integer numbits=$bits(uvm_bitstream_t));
+      if (open_db()) begin
+         $fdisplay(m_file, "  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%s   RADIX:%s BITS=%0d}",
+                   $time,
+                   tx_h,
+                   nm,
+                   uvm_bitstream_to_string(value, numbits, radix),
+                    radix.name(),
+                   numbits);
+      end
+   endfunction : set_attribute
+
+   // Function: set_attribute_int
+   // Outputs an integral attribute to the textual log
+   //
+   // Parameters:
+   // record - Record containing this attribute
+   // nm - Name of the attribute
+   // value - Value
+   // radix - Radix of the output
+   // numbits - number of valid bits
+   function void set_attribute_int(int tx_h,
+                                   string  nm,
+                                   uvm_integral_t value,
+                                   uvm_radix_enum radix,
+                                   integer numbits=$bits(uvm_bitstream_t));
       if (open_db()) begin
          $fdisplay(m_file, "  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%0d   RADIX:%s BITS=%0d}",
                    $time,
                    tx_h,
                    nm,
-                   (value & ((1<<numbits)-1)),
+                   uvm_integral_to_string(value, numbits, radix),
                     radix.name(),
                    numbits);
       end
-   endfunction : set_attribute
+   endfunction : set_attribute_int
+
+   
 endclass : uvm_text_record_database

@@ -662,9 +662,7 @@ endfunction \
       UVM_RECORD: \
         `m_uvm_record_int(ARG, FLAG) \
       UVM_PRINT: \
-        if(!((FLAG)&UVM_NOPRINT)) begin \
-          __m_uvm_status_container.printer.print_int(`"ARG`", ARG, $bits(ARG), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
-        end \
+        `m_uvm_print_int(ARG, FLAG) \
       UVM_SETINT: \
         begin \
           bit matched; \
@@ -2585,6 +2583,22 @@ endfunction \
   `M_UVM_FIELD_SET_AA_INT_ENUMTYPE(KEY, INT, ARG, __m_uvm_status_container.bitstream, FLAG)  \
   end
 
+// m_uvm_print_int
+
+// Purpose: provide print functionality for a specific integral field. This
+// macro is available for user access. If used externally, a record_options
+// object must be avaialble and must have the name opt.
+// 
+// Postcondition: ~ARG~ is printed using the format set by the FLAGS.
+
+`define m_uvm_print_int(ARG,FLAG) \
+  if(!((FLAG)&UVM_NOPRINT)) begin \
+     if ($bits(ARG) <= 63) \
+      __m_uvm_status_container.printer.print_field_int(`"ARG`", ARG,  $bits(ARG), uvm_radix_enum'((FLAG)&(UVM_RADIX))); \
+     else \
+      __m_uvm_status_container.printer.print_field(`"ARG`", ARG,  $bits(ARG), uvm_radix_enum'((FLAG)&(UVM_RADIX))); \
+  end
+
 //-----------------------------------------------------------------------------
 //
 // MACROS- recording
@@ -2602,7 +2616,10 @@ endfunction \
 
 `define m_uvm_record_int(ARG,FLAG) \
   if(!((FLAG)&UVM_NORECORD)) begin \
-    __m_uvm_status_container.recorder.record_field(`"ARG`", ARG,  $bits(ARG), uvm_radix_enum'((FLAG)&(UVM_RADIX))); \
+     if ($bits(ARG) <= 63) \
+      __m_uvm_status_container.recorder.record_field_int(`"ARG`", ARG,  $bits(ARG), uvm_radix_enum'((FLAG)&(UVM_RADIX))); \
+     else \
+      __m_uvm_status_container.recorder.record_field(`"ARG`", ARG,  $bits(ARG), uvm_radix_enum'((FLAG)&(UVM_RADIX))); \
   end
 
 
@@ -2647,22 +2664,31 @@ endfunction \
     if(!((FLAG)&UVM_NORECORD)) begin \
       int sz__ = SZ; \
       if(sz__ == 0) begin \
-        __m_uvm_status_container.recorder.record_field(`"ARG`", 0, 32, UVM_DEC); \
+        __m_uvm_status_container.recorder.record_field_int(`"ARG`", 0, 32, UVM_DEC); \
       end \
       else if(sz__ < 10) begin \
         foreach(ARG[i]) begin \
            __m_uvm_status_container.scope.set_arg_element(`"ARG`",i); \
-           __m_uvm_status_container.recorder.record_field(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+           if ($bits(ARG[i]) > 64) \
+             __m_uvm_status_container.recorder.record_field(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+           else \
+             __m_uvm_status_container.recorder.record_field_int(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
         end \
       end \
       else begin \
         for(int i=0; i<5; ++i) begin \
            __m_uvm_status_container.scope.set_arg_element(`"ARG`", i); \
-           __m_uvm_status_container.recorder.record_field(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+           if ($bits(ARG[i]) > 64) \
+             __m_uvm_status_container.recorder.record_field(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+           else \
+             __m_uvm_status_container.recorder.record_field_int(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
         end \
         for(int i=sz__-5; i<sz__; ++i) begin \
            __m_uvm_status_container.scope.set_arg_element(`"ARG`", i); \
-           __m_uvm_status_container.recorder.record_field(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+           if ($bits(ARG[i]) > 64) \
+             __m_uvm_status_container.recorder.record_field(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+           else \
+             __m_uvm_status_container.recorder.record_field_int(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
         end \
       end \
     end \
@@ -2677,7 +2703,7 @@ endfunction \
     if(!((FLAG)&UVM_NORECORD) && (__m_uvm_status_container.recorder != null)) begin \
       int sz__ = SZ; \
       if(sz__ == 0) begin \
-        __m_uvm_status_container.recorder.record_field(`"ARG``.size`", 0, 32, UVM_DEC); \
+        __m_uvm_status_container.recorder.record_field_int(`"ARG``.size`", 0, 32, UVM_DEC); \
       end \
       else if(sz__ < 10) begin \
         foreach(ARG[i]) begin \
@@ -2708,7 +2734,7 @@ endfunction \
       int sz__ = SZ; \
       string s; \
       if(sz__ == 0 ) begin \
-        __m_uvm_status_container.recorder.record_field(`"ARG``.size`", 0, 32, UVM_DEC); \
+        __m_uvm_status_container.recorder.record_field_int(`"ARG``.size`", 0, 32, UVM_DEC); \
       end \
       if(sz__ < 10) begin \
         foreach(ARG[i]) begin \
@@ -2738,7 +2764,7 @@ endfunction \
     int sz__ = SZ; \
     if(!((FLAG)&UVM_NORECORD)) begin \
       if(sz__ == 0) begin \
-        __m_uvm_status_container.recorder.record_field(`"ARG``.size`", 0, 32, UVM_DEC); \
+        __m_uvm_status_container.recorder.record_field_int(`"ARG``.size`", 0, 32, UVM_DEC); \
       end \
       else if(sz__ < 10) begin \
         foreach(ARG[i]) begin \
@@ -2920,10 +2946,15 @@ endfunction \
             if((p__.knobs.depth == -1) || (__m_uvm_status_container.printer.m_scope.depth() < p__.knobs.depth+1)) \
             begin \
               foreach(ARG[_aa_key]) \
-               begin \
-                  __m_uvm_status_container.printer.print_int( \
-                    {"[",_aa_key.name(),"]"}, ARG[_aa_key], $bits(ARG[_aa_key]), \
-                    uvm_radix_enum'((FLAG)&UVM_RADIX), "[" ); \
+                begin \
+                  if ($bits(ARG[_aa_key]) <= 63) \
+                    __m_uvm_status_container.printer.print_field_int( \
+                      {"[",_aa_key.name(),"]"}, ARG[_aa_key], $bits(ARG[_aa_key]), \
+                      uvm_radix_enum'((FLAG)&UVM_RADIX), "[" ); \
+                  else \
+                    __m_uvm_status_container.printer.print_field( \
+                      {"[",_aa_key.name(),"]"}, ARG[_aa_key], $bits(ARG[_aa_key]), \
+                      uvm_radix_enum'((FLAG)&UVM_RADIX), "[" ); \
                 end \
             end \
             p__.print_array_footer(ARG.num()); \
@@ -3345,7 +3376,10 @@ endfunction \
 
 `define uvm_record_int(NAME,VALUE,SIZE,RADIX) \
   if (recorder != null) \
-    recorder.record_field(NAME,VALUE,SIZE,RADIX);
+    if (size > 64) \
+      recorder.record_field(NAME,VALUE,SIZE,RADIX); \
+    else \
+      recorder.record_field_int(NAME,VALUE,SIZE,RADIX); 
 
 `define uvm_record_string(NAME,VALUE) \
   if (recorder != null) \
