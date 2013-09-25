@@ -95,3 +95,4 @@ Mantis 4542: uvm_test_done is now const to prevent changes
 
 Mantis 4548: cleanup dpi coding issues
 
+Mantis 4587: Added length, byte_enable, byte_length fixes for reg2bus to adhere to tlm_gp rules
