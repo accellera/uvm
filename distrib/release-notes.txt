@@ -104,4 +104,4 @@ Mantis 4423, fixed issue with broken HTML source links.
 
 Mantis 4465, added support to disable resource converter and use VCS native conversion
 
-
+Mantis 4588: changes in hw_reset_seq to ensure sub-blocks are excluded when relevant NO_REG_TEST attribute is set
