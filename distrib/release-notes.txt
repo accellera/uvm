@@ -167,3 +167,5 @@ Mantis 4711: Fixed LRM violation
 Mantis 4731: Fixed initialization race introduced by Mantis 4606.
 
 Mantis 4734: Fixed bug in uvm_reg_map::get_size()
+
+Mantis 4253: Volatile register fields will cause a write() even if mirrored and desired values are the same.
