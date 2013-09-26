@@ -25,7 +25,7 @@
 //
 // The <uvm_link_base> class, and its extensions, are provided as a mechanism
 // to allow for compile-time safety when trying to establish links between
-// records within a <uvm_record_database>.
+// records within a <uvm_tr_database>.
 //
 // 
 
@@ -36,7 +36,7 @@
 // The ~uvm_link_base~ class presents a simply API for defining a link between
 // any two objects.
 //
-// Using extensions of this class, a <uvm_record_database> can determine the
+// Using extensions of this class, a <uvm_tr_database> can determine the
 // type of links being passed, without relying on "magic string" names.
 //
 // For example:

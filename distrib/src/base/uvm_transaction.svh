@@ -201,7 +201,7 @@ virtual class uvm_transaction extends uvm_object;
   // recording is enabled. The meaning of the handle is implementation specific.
 
 
-  extern function uvm_recorder begin_tr (time begin_time=0);
+  extern function uvm_tr_recorder begin_tr (time begin_time=0);
 
   
   // Function: begin_child_tr
@@ -236,8 +236,8 @@ virtual class uvm_transaction extends uvm_object;
   // The return value is a transaction handle, which is valid (non-zero) only if
   // recording is enabled. The meaning of the handle is implementation specific.
 
-  extern function uvm_recorder begin_child_tr (time begin_time=0, 
-                                               uvm_recorder parent_handle=null);
+  extern function uvm_tr_recorder begin_child_tr (time begin_time=0, 
+                                               uvm_tr_recorder parent_handle=null);
 
 
   // Function: do_begin_tr
@@ -298,7 +298,7 @@ virtual class uvm_transaction extends uvm_object;
   // Returns the handle associated with the transaction, as set by a previous
   // call to <begin_child_tr> or <begin_tr> with transaction recording enabled.
 
-  extern function uvm_recorder get_tr_handle ();
+  extern function uvm_tr_recorder get_tr_handle ();
 
   
   // Function: disable_recording
@@ -313,7 +313,7 @@ virtual class uvm_transaction extends uvm_object;
   //
   // If transaction recording is on, then a call to ~record~ is made when the
   // transaction is ended.
-  extern function void enable_recording (uvm_record_stream stream);
+  extern function void enable_recording (uvm_tr_stream stream);
 
   // Function: is_recording_enabled
   //
@@ -450,12 +450,12 @@ virtual class uvm_transaction extends uvm_object;
 
   //Override data control methods for internal properties
   extern virtual function void do_print  (uvm_printer printer);
-  extern virtual function void do_record (uvm_recorder recorder);
+  extern virtual function void do_record (uvm_tr_recorder recorder);
   extern virtual function void do_copy   (uvm_object rhs);
 
 
-   extern protected function uvm_recorder m_begin_tr (time    begin_time=0, 
-                                                      uvm_recorder parent_handle=null);
+   extern protected function uvm_tr_recorder m_begin_tr (time    begin_time=0, 
+                                                      uvm_tr_recorder parent_handle=null);
 
   local integer m_transaction_id = -1;
 
@@ -464,8 +464,8 @@ virtual class uvm_transaction extends uvm_object;
   local time    accept_time=-1;
 
   local uvm_component initiator;
-  local uvm_record_stream stream_handle;
-  local uvm_recorder      tr_handle;
+  local uvm_tr_stream stream_handle;
+  local uvm_tr_recorder      tr_handle;
 
 endclass
 
@@ -614,7 +614,7 @@ endfunction
 // do_record
 // ---------
 
-function void uvm_transaction::do_record (uvm_recorder recorder);
+function void uvm_transaction::do_record (uvm_tr_recorder recorder);
   string s;
   super.do_record(recorder);
   if(accept_time != -1) 
@@ -630,7 +630,7 @@ endfunction
 // get_tr_handle
 // ---------
 
-function uvm_recorder uvm_transaction::get_tr_handle ();
+function uvm_tr_recorder uvm_transaction::get_tr_handle ();
   return tr_handle;
 endfunction
 
@@ -646,7 +646,7 @@ endfunction
 // enable_recording
 // ----------------
 
-function void uvm_transaction::enable_recording (uvm_record_stream stream);
+function void uvm_transaction::enable_recording (uvm_tr_stream stream);
    this.stream_handle = stream;
 endfunction : enable_recording
    
@@ -679,7 +679,7 @@ endfunction
 // begin_tr
 // -----------
 
-function uvm_recorder uvm_transaction::begin_tr (time begin_time=0); 
+function uvm_tr_recorder uvm_transaction::begin_tr (time begin_time=0); 
   return m_begin_tr(begin_time);
 endfunction
 
@@ -687,22 +687,22 @@ endfunction
 // --------------
 
 //Use a parent handle of zero to link to the parent after begin
-function uvm_recorder uvm_transaction::begin_child_tr (time begin_time=0,
-                                                       uvm_recorder parent_handle=null); 
+function uvm_tr_recorder uvm_transaction::begin_child_tr (time begin_time=0,
+                                                       uvm_tr_recorder parent_handle=null); 
   return m_begin_tr(begin_time, parent_handle);
 endfunction
 
 // m_begin_tr
 // -----------
 
-function uvm_recorder uvm_transaction::m_begin_tr (time begin_time=0, 
-                                                   uvm_recorder parent_handle=null);
+function uvm_tr_recorder uvm_transaction::m_begin_tr (time begin_time=0, 
+                                                   uvm_tr_recorder parent_handle=null);
    time tmp_time = (begin_time == 0) ? $realtime : begin_time;
    
    // May want to establish predecessor/successor relation 
    // (don't free handle until then)
    if(is_recording_enabled()) begin 
-      uvm_record_database db = stream_handle.get_db();
+      uvm_tr_database db = stream_handle.get_db();
       
       // If we haven't ended the previous record, end it.
       if (tr_handle != null)
@@ -713,11 +713,11 @@ function uvm_recorder uvm_transaction::m_begin_tr (time begin_time=0,
       this.begin_time = tmp_time;
       
       if(parent_handle == null)
-        tr_handle = stream_handle.begin_record(get_type_name(),
+        tr_handle = stream_handle.open_tr(get_type_name(),
                                                this.begin_time,
                                                "Begin_No_Parent, Link");
       else begin
-         tr_handle = stream_handle.begin_record(get_type_name(),
+         tr_handle = stream_handle.open_tr(get_type_name(),
                                                 this.begin_time,
                                                 "Begin_End, Link");
          
@@ -754,12 +754,12 @@ function void uvm_transaction::end_tr (time end_time=0, bit free_handle=1);
    if(is_recording_enabled()) begin
       record(tr_handle);
 
-      stream_handle.end_record(tr_handle, this.end_time);
+      stream_handle.close_tr(tr_handle, this.end_time);
 
       if(free_handle) 
         begin  
            // once freed, can no longer link to
-           stream_handle.free_record(tr_handle);
+           stream_handle.free_tr(tr_handle);
         end
       tr_handle = null;
    end // if (is_active())

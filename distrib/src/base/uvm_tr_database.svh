@@ -22,39 +22,39 @@
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// File: Recording Databases
+// File: Transaction Recording Databases
 //
 
-typedef class uvm_record_stream;
+typedef class uvm_tr_stream;
 typedef class uvm_link_base;
 typedef class uvm_simple_lock_dap;
-typedef class uvm_text_record_stream;
+typedef class uvm_text_tr_stream;
    
    
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_record_database
+// CLASS: uvm_tr_database
 //
-// The ~uvm_record_database~ base class is a representation of the backend database
+// The ~uvm_tr_database~ base class is a representation of the backend database
 // which is being used to store information.
 //
 // The record database is intended to hide the underlying database implementation
 // from the end user, as these details are often vendor or tool-specific.
 //
-// The ~uvm_record_database~ class is pure virtual, and must be extended with an
+// The ~uvm_tr_database~ class is pure virtual, and must be extended with an
 // implementation.  A default text-based implementation is provided via the
-// <uvm_text_record_database> class.
+// <uvm_text_tr_database> class.
 //
 
-virtual class uvm_record_database extends uvm_object;
+virtual class uvm_tr_database extends uvm_object;
 
    // Variable- m_recorders
    // Provided for backwards compat
-   local static uvm_recorder m_recorders[int];
+   local static uvm_tr_recorder m_recorders[int];
 
    // variable- m_streams
    // Provided for backwards compat
-   local static uvm_record_stream m_streams[int];
+   local static uvm_tr_stream m_streams[int];
 
    // variable- m_handles
    // Provided for backwards compat
@@ -69,7 +69,7 @@ virtual class uvm_record_database extends uvm_object;
    //
    // Parameters:
    // name - Instance name
-   function new(string name="unnamed-uvm_record_database");
+   function new(string name="unnamed-uvm_tr_database");
       super.new(name);
    endfunction : new
 
@@ -98,11 +98,11 @@ virtual class uvm_record_database extends uvm_object;
    //   stream_type_name - An optional name describing the type of records which
    //                      will be created in this stream.  
    //
-   // The method returns a reference to a <uvm_record_stream>
+   // The method returns a reference to a <uvm_tr_stream>
    // object if successful, ~null~ otherwise.
    //
    // This method will trigger a <do_get_stream> call.
-   function uvm_record_stream get_stream(string name,
+   function uvm_tr_stream get_stream(string name,
                                          uvm_component cntxt=null,
                                          string type_name="");
       return do_get_stream(name, cntxt, type_name);
@@ -116,27 +116,27 @@ virtual class uvm_record_database extends uvm_object;
    //
    // This method will trigger a <do_establish_link> call.
    function void establish_link(uvm_link_base link);
-      uvm_record_stream s_lhs, s_rhs;
-      uvm_recorder r_lhs, r_rhs;
+      uvm_tr_stream s_lhs, s_rhs;
+      uvm_tr_recorder r_lhs, r_rhs;
       uvm_object lhs = link.get_lhs();
       uvm_object rhs = link.get_rhs();
-      uvm_record_database db;
+      uvm_tr_database db;
 
       if (lhs == null) begin
          `uvm_warning("UVM/REC_DB/BAD_LINK",
-                      "left hand side '<null>' is not supported in links for 'uvm_record_database'")
+                      "left hand side '<null>' is not supported in links for 'uvm_tr_database'")
          return;
       end
       if (rhs == null) begin
          `uvm_warning("UVM/REC_DB/BAD_LINK",
-                      "right hand side '<null>' is not supported in links for 'uvm_record_database'")
+                      "right hand side '<null>' is not supported in links for 'uvm_tr_database'")
          return;
       end
       
       if (!$cast(s_lhs, lhs) && 
           !$cast(r_lhs, lhs)) begin
          `uvm_warning("UVM/REC_DB/BAD_LINK",
-                      $sformatf("left hand side of type '%s' not supported in links for 'uvm_record_database'",
+                      $sformatf("left hand side of type '%s' not supported in links for 'uvm_tr_database'",
                                 lhs.get_type_name()))
          return;
       end
@@ -182,7 +182,7 @@ virtual class uvm_record_database extends uvm_object;
 
    // Function: do_get_stream
    // Backend implementation of <get_stream>
-   protected pure virtual function uvm_record_stream do_get_stream(string name,
+   protected pure virtual function uvm_tr_stream do_get_stream(string name,
                                                                    uvm_component cntxt,
                                                                    string type_name);
 
@@ -193,7 +193,7 @@ virtual class uvm_record_database extends uvm_object;
    //------- Implementation Details Below, NOT DOCUMENTED --------
 
    // Provided for backwards compat
-   static function int m_get_record_handle(uvm_recorder record);
+   static function int m_get_tr_handle(uvm_tr_recorder record);
       if (record != null) begin
          if (m_handles.exists(record))
            return m_handles[record];
@@ -206,17 +206,17 @@ virtual class uvm_record_database extends uvm_object;
       else begin
          return 0;
       end
-   endfunction : m_get_record_handle
+   endfunction : m_get_tr_handle
 
    // Provided for backwards compat
-   static function uvm_recorder m_get_record_from_handle(int handle);
+   static function uvm_tr_recorder m_get_tr_from_handle(int handle);
       if (m_recorders.exists(handle))
         return m_recorders[handle];
       return null;
-   endfunction : m_get_record_from_handle
+   endfunction : m_get_tr_from_handle
 
    // Provided for backwards compat
-   static function void m_free_record_handle(uvm_recorder record);
+   static function void m_free_tr_handle(uvm_tr_recorder record);
       if (record == null)
         return;
 
@@ -224,10 +224,10 @@ virtual class uvm_record_database extends uvm_object;
          m_recorders.delete(m_handles[record]);
          m_handles.delete(record);
       end
-   endfunction : m_free_record_handle
+   endfunction : m_free_tr_handle
 
    // Provided for backwards compat
-   static function int m_get_stream_handle(uvm_record_stream stream);
+   static function int m_get_stream_handle(uvm_tr_stream stream);
       if (stream != null) begin
          if (m_handles.exists(stream))
            return m_handles[stream];
@@ -242,14 +242,14 @@ virtual class uvm_record_database extends uvm_object;
    endfunction : m_get_stream_handle
 
    // Provided for backwards compat
-   static function uvm_record_stream m_get_stream_from_handle(int handle);
+   static function uvm_tr_stream m_get_stream_from_handle(int handle);
       if (m_streams.exists(handle))
         return m_streams[handle];
       return null;
    endfunction : m_get_stream_from_handle
    
    // Provided for backwards compat
-   static function void m_free_stream_handle(uvm_record_stream stream);
+   static function void m_free_stream_handle(uvm_tr_stream stream);
       if (stream == null)
         return;
 
@@ -260,19 +260,19 @@ virtual class uvm_record_database extends uvm_object;
    endfunction : m_free_stream_handle
    
    
-endclass : uvm_record_database
+endclass : uvm_tr_database
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_text_record_database
+// CLASS: uvm_text_tr_database
 //
-// The ~uvm_text_record_database~ is the default implementation for the
-// <uvm_record_database>.  It provides the ability to store recording information
+// The ~uvm_text_tr_database~ is the default implementation for the
+// <uvm_tr_database>.  It provides the ability to store recording information
 // into a textual log file.
 //
 //
    
-class uvm_text_record_database extends uvm_record_database;
+class uvm_text_tr_database extends uvm_tr_database;
 
    // Variable- m_filename_dap
    // Data Access Protected Filename
@@ -281,7 +281,7 @@ class uvm_text_record_database extends uvm_record_database;
    // Variable- m_file
    UVM_FILE m_file;
 
-   `uvm_object_utils_begin(uvm_text_record_database)
+   `uvm_object_utils_begin(uvm_text_tr_database)
    `uvm_object_utils_end
 
    // Function: new
@@ -289,7 +289,7 @@ class uvm_text_record_database extends uvm_record_database;
    //
    // Parameters:
    // name - Instance name
-   function new(string name="unnamed-uvm_text_record_database");
+   function new(string name="unnamed-uvm_text_tr_database");
       super.new(name);
 
       m_filename_dap = new("filename_dap");
@@ -301,7 +301,7 @@ class uvm_text_record_database extends uvm_record_database;
    // Function: do_open_db
    // Open the backend connection to the database.
    //
-   // Text-Backend implementation of <uvm_record_database::open_db>.
+   // Text-Backend implementation of <uvm_tr_database::open_db>.
    //
    // The text-backend will open a text file to dump all records in to.  The name
    // of this text file is controlled via <set_file_name>.
@@ -318,19 +318,19 @@ class uvm_text_record_database extends uvm_record_database;
    // Provides a reference to a ~stream~ within the
    // database.
    //
-   // Text-Backend implementation of <uvm_record_database::get_stream>
-   protected virtual function uvm_record_stream do_get_stream(string name,
+   // Text-Backend implementation of <uvm_tr_database::get_stream>
+   protected virtual function uvm_tr_stream do_get_stream(string name,
                                                               uvm_component cntxt=null,
                                                               string type_name="");
       if (open_db()) begin
-         uvm_text_record_stream m_stream = uvm_text_record_stream::type_id::create(name, cntxt);
+         uvm_text_tr_stream m_stream = uvm_text_tr_stream::type_id::create(name, cntxt);
          m_stream.initialize_stream(this, cntxt, type_name);
          $fdisplay(m_file, "  CREATE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",
                    $time,
                    name,
                    type_name,
                    (cntxt == null) ? "" : cntxt.get_full_name(),
-                   uvm_record_database::m_get_stream_handle(m_stream));
+                   uvm_tr_database::m_get_stream_handle(m_stream));
          return m_stream;
       end // if (open_db())
       return null;
@@ -339,10 +339,10 @@ class uvm_text_record_database extends uvm_record_database;
    // Function: do_establish_link
    // Establishes a ~link~ between two elements in the database
    //
-   // Text-Backend implementation of <uvm_record_database::establish_link>.
+   // Text-Backend implementation of <uvm_tr_database::establish_link>.
    protected virtual function void do_establish_link(uvm_link_base link);
       if (open_db()) begin
-         uvm_recorder r_lhs, r_rhs;
+         uvm_tr_recorder r_lhs, r_rhs;
          uvm_object lhs = link.get_lhs();
          uvm_object rhs = link.get_rhs();
 
@@ -358,16 +358,16 @@ class uvm_text_record_database extends uvm_record_database;
             if ($cast(pc_link, link)) begin
                $fdisplay(m_file,"  LINK @%0t {TXH1:%0d TXH2:%0d RELATION=%0s}",
                          $time,
-                         uvm_record_database::m_get_record_handle(r_lhs),
-                         uvm_record_database::m_get_record_handle(r_rhs),
+                         uvm_tr_database::m_get_tr_handle(r_lhs),
+                         uvm_tr_database::m_get_tr_handle(r_rhs),
                          "child");
                          
             end
             else if ($cast(re_link, link)) begin
                $fdisplay(m_file,"  LINK @%0t {TXH1:%0d TXH2:%0d RELATION=%0s}",
                          $time,
-                         uvm_record_database::m_get_record_handle(r_lhs),
-                         uvm_record_database::m_get_record_handle(r_rhs),
+                         uvm_tr_database::m_get_tr_handle(r_lhs),
+                         uvm_tr_database::m_get_tr_handle(r_rhs),
                          "");
                
             end
@@ -449,4 +449,4 @@ class uvm_text_record_database extends uvm_record_database;
    endfunction : set_attribute_int
 
    
-endclass : uvm_text_record_database
+endclass : uvm_text_tr_database

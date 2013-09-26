@@ -22,71 +22,71 @@
 //-----------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-// File: Recording Streams
+// File: Transaction Recording Streams
 //
 
-// class- m_uvm_record_stream_init
+// class- m_uvm_tr_stream_init
 // Undocumented helper class for storing stream
 // initialization values.
-class m_uvm_record_stream_init;
-   uvm_record_database db;
+class m_uvm_tr_stream_init;
+   uvm_tr_database db;
    uvm_component cntxt;
    string stream_type_name;
-endclass : m_uvm_record_stream_init
+endclass : m_uvm_tr_stream_init
 
 typedef class uvm_set_before_get_dap;
 typedef class uvm_text_recorder;
    
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_record_stream
+// CLASS: uvm_tr_stream
 //
-// The ~uvm_record_stream~ base class is a representation of a stream of records
-// within a <uvm_record_database>.
+// The ~uvm_tr_stream~ base class is a representation of a stream of records
+// within a <uvm_tr_database>.
 //
 // The record stream is intended to hide the underlying database implementation
 // from the end user, as these details are often vendor or tool-specific.
 //
-// The ~uvm_record_stream~ class is pure virtual, and must be extended with an
+// The ~uvm_tr_stream~ class is pure virtual, and must be extended with an
 // implementation.  A default text-based implementation is provided via the
-// <uvm_text_record_stream> class.
+// <uvm_text_tr_stream> class.
 //
-virtual class uvm_record_stream extends uvm_object;
+virtual class uvm_tr_stream extends uvm_object;
 
    // Variable- m_init_dap
    // Data access protected reference to the DB
-   local uvm_set_before_get_dap#(m_uvm_record_stream_init) m_init_dap;
+   local uvm_set_before_get_dap#(m_uvm_tr_stream_init) m_init_dap;
 
    // Variable- m_open_records
-   // Used for tracking records between the begin..end state
-   time m_open_records[uvm_recorder];
+   // Used for tracking records between the open..closed state
+   time m_open_records[uvm_tr_recorder];
 
    // Variable- m_closed_records
-   // Used for tracking records between the end..free state
-   time m_closed_records[uvm_recorder];
+   // Used for tracking records between the closed..free state
+   time m_closed_records[uvm_tr_recorder];
 
    // Function: new
    // Constructor
    //
    // Parameters:
    // name - Stream instance name
-   function new(string name="unnamed-uvm_record_stream");
+   function new(string name="unnamed-uvm_tr_stream");
       super.new(name);
       m_init_dap = new("init_dap");
    endfunction : new
 
    // Group: Stream API
    //
-   // Records within a stream follow a protocol similar to <uvm_transaction>,
-   // in that the user can "Begin" and "End" a record.  
+   // Transactions within a ~uvm_tr_stream~ follow a protocol similar to a folder,
+   // in that the user can "Open" and "Close" a record.  
    //
    // Due to the fact that many database implementations will require crossing 
-   // a language boundary, an additional step of "Freeing" the record is required.
+   // a language boundary, an additional step of "Freeing" the transaction is required.
    //
-   // It is legal to add attributes to a record any time between "Begin" and "End",
-   // however it is illegal to add attributes after "End".
+   // It is legal to add attributes to a record any time between "Open" and "Close",
+   // however it is illegal to add attributes after "Close".
    //
-   // A ~link~ can be established within the database any time between "Begin" and
+   // A ~link~ can be established within the database any time between "Open" and
    // "Free", however it is illegal to establish a link after "Freeing" the record.
    //
    
@@ -96,8 +96,8 @@ virtual class uvm_record_stream extends uvm_object;
    //
    // An error will be asserted if get_db is called prior to
    // the stream being initialized via <initialize_stream>.
-   function uvm_record_database get_db();
-      m_uvm_record_stream_init m_init;
+   function uvm_tr_database get_db();
+      m_uvm_tr_stream_init m_init;
       if (!m_init_dap.try_get(m_init)) begin
          `uvm_error("UVM/REC_STR/NO_INIT",
                     $sformatf("Illegal attempt to retrieve DB from '%s' before it was set!",
@@ -114,7 +114,7 @@ virtual class uvm_record_stream extends uvm_object;
    // An error will be asserted if get_context is called prior to
    // the stream being initialized via <initialize_stream>.
    function uvm_component get_context();
-      m_uvm_record_stream_init m_init;
+      m_uvm_tr_stream_init m_init;
       if (!m_init_dap.try_get(m_init)) begin
          `uvm_error("UVM/REC_STR/NO_INIT",
                     $sformatf("Illegal attempt to retrieve CONTEXT from '%s' before it was set!",
@@ -131,7 +131,7 @@ virtual class uvm_record_stream extends uvm_object;
    // An error will be asserted if get_stream_type_name is called prior to
    // the stream being initialized via <initialize_stream>.
    function string get_stream_type_name();
-      m_uvm_record_stream_init m_init;
+      m_uvm_tr_stream_init m_init;
       if (!m_init_dap.try_get(m_init)) begin
          `uvm_error("UVM/REC_STR/NO_INIT",
                     $sformatf("Illegal attempt to retrieve STREAM_TYPE_NAME from '%s' before it was set!",
@@ -154,12 +154,12 @@ virtual class uvm_record_stream extends uvm_object;
    // An error will be asserted if:
    // - initialize_stream is called more than once
    // - initialize_stream is passed a ~null~ db
-   function void initialize_stream(uvm_record_database db,
+   function void initialize_stream(uvm_tr_database db,
                                    uvm_component cntxt=null,
                                    string stream_type_name="");
       
-      m_uvm_record_stream_init m_init;
-      uvm_record_database m_db;
+      m_uvm_tr_stream_init m_init;
+      uvm_tr_database m_db;
       if (db == null) begin
          `uvm_error("UVM/REC_STR/NULL_DB",
                     $sformatf("Illegal attempt to set DB for '%s' to '<null>'",
@@ -185,107 +185,107 @@ virtual class uvm_record_stream extends uvm_object;
       
    endfunction : initialize_stream
    
-   // Function: begin_record
-   // Marks the beginning of a new record in the stream.
+   // Function: open_tr
+   // Marks the opening of a new transaction in the stream.
    //
    // Parameters:
-   // name - A name for the new record
-   // begin_time - Optional time to record as the begining of this record
-   // type_name - Optional type name for the record
+   // name - A name for the new transaction
+   // open_time - Optional time to record as the opening of this transaction
+   // type_name - Optional type name for the transaction
    //
-   // If ~begin_time~ is omitted (or set to '0'), then the stream will use
+   // If ~open_time~ is omitted (or set to '0'), then the stream will use
    // the current time.
    //
-   // This method will trigger a <do_begin_record> call.
-   function uvm_recorder begin_record(string name,
-                                      time   begin_time = 0,
+   // This method will trigger a <do_open_tr> call.
+   function uvm_tr_recorder open_tr(string name,
+                                      time   open_time = 0,
                                       string type_name="");
-      time m_time = (begin_time == 0) ? $time : begin_time;
-      begin_record = do_begin_record(name,
+      time m_time = (open_time == 0) ? $time : open_time;
+      open_tr = do_open_tr(name,
                                      m_time,
                                      type_name);
-      m_open_records[begin_record] = m_time;
-   endfunction : begin_record
+      m_open_records[open_tr] = m_time;
+   endfunction : open_tr
 
-   // Function: end_record
-   // Marks the end of a record in the stream.
+   // Function: close_tr
+   // Marks the closing of a transaction in the stream.
    //
    // Parameters:
-   // record - The record which is ending
-   // end_time - Optional time to record as the ending of this record.
+   // tr - The transaction recorder which is closing
+   // close_time - Optional time to record as the closing of this transaction.
    //
-   // If ~end_time~ is omitted (or set to '0'), then the stream will use
+   // If ~close_time~ is omitted (or set to '0'), then the stream will use
    // the current time.
    //
    // An error will be asserted if:
-   // - ~record~ is ~null~
-   // - ~record~ has already ended
-   // - ~record~ was not generated by this stream
-   // - the ~end_time~ is prior to the ~begin_time~
+   // - ~tr~ is ~null~
+   // - ~tr~ has already ended
+   // - ~tr~ was not generated by this stream
+   // - the ~close_time~ is prior to the ~open_time~
    //
-   // This method will trigger a <do_end_record> call.
-   function void end_record(uvm_recorder record,
-                            time end_time = 0);
-      time m_time = (end_time == 0) ? $time : end_time;
-      if (record == null) begin
+   // This method will trigger a <do_close_tr> call.
+   function void close_tr(uvm_tr_recorder tr,
+                            time close_time = 0);
+      time m_time = (close_time == 0) ? $time : close_time;
+      if (tr == null) begin
          `uvm_error("UVM/REC_STR/END_NULL",
-                    $sformatf("illegal '<null>' recorder passed to end_record on '%s'",
+                    $sformatf("illegal '<null>' recorder passed to close_tr on '%s'",
                               get_name()))
          return;
       end
-      else if (m_closed_records.exists(record)) begin
+      else if (m_closed_records.exists(tr)) begin
          `uvm_error("UVM/REC_STR/END_AGAIN",
-                    $sformatf("illegal attempt to re-end record '%s' on '%s'",
-                              record.get_name(),
+                    $sformatf("illegal attempt to re-end tr '%s' on '%s'",
+                              tr.get_name(),
                               get_name()))
          return;
       end
-      else if (!m_open_records.exists(record)) begin
+      else if (!m_open_records.exists(tr)) begin
          `uvm_error("UVM/REC_STR/END_INV",
-                    $sformatf("illegal attempt to end invalid record '%s' on '%s'",
-                              record.get_name(),
+                    $sformatf("illegal attempt to end invalid tr '%s' on '%s'",
+                              tr.get_name(),
                               get_name()))
          return;
       end
-      else if (m_time < m_open_records[record]) begin
+      else if (m_time < m_open_records[tr]) begin
          `uvm_error("UVM/REC_STR/END_B4_BEGIN",
-                    $sformatf("illegal attempt to end record '%s' on '%s' at time %0t, which is before the begin time %0t",
-                              record.get_name(),
+                    $sformatf("illegal attempt to end tr '%s' on '%s' at time %0t, which is before the begin time %0t",
+                              tr.get_name(),
                               get_name(),
                               m_time,
-                              m_open_records[record]))
+                              m_open_records[tr]))
       end
-      m_open_records.delete(record);
-      m_closed_records[record] = m_time;
-      do_end_record(record, m_time);
-   endfunction : end_record
+      m_open_records.delete(tr);
+      m_closed_records[tr] = m_time;
+      do_close_tr(tr, m_time);
+   endfunction : close_tr
 
-   // Function: free_record
+   // Function: free_tr
    // Indicates the stream and database can free any references to the record.
    //
    // Parameters:
-   // record - The record which is being freed
-   // end_time - Optional time to record as the ending of this record
+   // tr - The transaction recorder which is being freed
+   // close_time - Optional time to record as the ending of this record
    //
-   // If a record has not yet ended (via a call to <end_record>), then the
-   // record will be explicitly ended via the call to ~free_record~.  If
-   // this is the case, <end_record> will be called automatically.
+   // If a record has not yet ended (via a call to <close_tr>), then the
+   // record will be explicitly ended via the call to ~free_tr~.  If
+   // this is the case, <close_tr> will be called automatically.
    //
-   // If the record has already ended, then the second parameter to ~free_record~
+   // If the record has already ended, then the second parameter to ~free_tr~
    // will be ignored.
    //
-   // This method will trigger a call to <uvm_recorder::free_record>, followed by
-   // a call to <do_free_record>.
+   // This method will trigger a call to <uvm_tr_recorder::free_tr>, followed by
+   // a call to <do_free_tr>.
    //
    // An error will be asserted if:
    // - ~record~ is null
    // - ~record~ has already been freed
    // - ~record~ was not generated by this stream
-   function void free_record(uvm_recorder record,
-                             time end_time = 0);
+   function void free_tr(uvm_tr_recorder record,
+                             time close_time = 0);
       if (record == null) begin
          `uvm_error("UVM/REC_STR/END_NULL",
-                    $sformatf("illegal '<null>' recorder passed to free_record on '%s'",
+                    $sformatf("illegal '<null>' recorder passed to free_tr on '%s'",
                               get_name()))
          return;
       end
@@ -299,18 +299,18 @@ virtual class uvm_record_stream extends uvm_object;
 
       if (m_open_records.exists(record)) begin
          // Need to end the record
-         end_record(record, end_time);
+         close_tr(record, close_time);
       end
 
       m_closed_records.delete(record);
 
       record.free_recorder();
       
-      do_free_record(record);
+      do_free_tr(record);
 
       // Required for backwards compat...
-      uvm_record_database::m_free_record_handle(record);
-   endfunction : free_record
+      uvm_tr_database::m_free_tr_handle(record);
+   endfunction : free_tr
 
    // Group: Implementation Agnostic API
    //
@@ -319,57 +319,57 @@ virtual class uvm_record_stream extends uvm_object;
    // Initializes the state of the stream
    //
    // Backend implementation of <initialize_stream>
-   protected pure virtual function void do_initialize_stream(uvm_record_database db,
+   protected pure virtual function void do_initialize_stream(uvm_tr_database db,
                                                              uvm_component cntxt,
                                                              string stream_type_name);
 
-   // Function: do_begin_record
+   // Function: do_open_tr
    // Marks the beginning of a new record in the stream.
    //
-   // Backend implementation of <begin_record>
-   protected pure virtual function uvm_recorder do_begin_record(string name,
-                                                                time   begin_time,
+   // Backend implementation of <open_tr>
+   protected pure virtual function uvm_tr_recorder do_open_tr(string name,
+                                                                time   open_time,
                                                                 string type_name);
 
-   // Function: do_end_record
+   // Function: do_close_tr
    // Marks the end of a record in the stream
    //
-   // Backend implementation of <end_record>
-   protected pure virtual function void do_end_record(uvm_recorder record,
-                                                      time end_time);
+   // Backend implementation of <close_tr>
+   protected pure virtual function void do_close_tr(uvm_tr_recorder record,
+                                                      time close_time);
 
-   // Function: do_free_record
+   // Function: do_free_tr
    // Indicates the stream and database can free any references to the record.
    //
-   // Backend implementation of <free_record>.
+   // Backend implementation of <free_tr>.
    //
-   // Note that unlike the <free_record> method, ~do_free_record~ does not
-   // have the optional ~end_time~ argument.  The argument will be processed
-   // by <free_record> prior to the ~do_free_record~ call.
-   protected pure virtual function void do_free_record(uvm_recorder record);
+   // Note that unlike the <free_tr> method, ~do_free_tr~ does not
+   // have the optional ~close_time~ argument.  The argument will be processed
+   // by <free_tr> prior to the ~do_free_tr~ call.
+   protected pure virtual function void do_free_tr(uvm_tr_recorder record);
 
-endclass : uvm_record_stream
+endclass : uvm_tr_stream
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_text_record_stream
+// CLASS: uvm_text_tr_stream
 //
-// The ~uvm_text_record_stream~ is the default stream implementation for the
-// <uvm_text_record_database>.  
+// The ~uvm_text_tr_stream~ is the default stream implementation for the
+// <uvm_text_tr_database>.  
 //
 //                     
 
-class uvm_text_record_stream extends uvm_record_stream;
+class uvm_text_tr_stream extends uvm_tr_stream;
 
    // Variable- m_text_db
    // Internal reference to the text-based backend
-   local uvm_text_record_database m_text_db;
+   local uvm_text_tr_database m_text_db;
    
-   // Variable- m_free_records
+   // Variable- m_free_trs
    // Used for memory savings
-   static uvm_text_recorder m_free_records[$];
+   static uvm_text_recorder m_free_trs[$];
 
-   `uvm_object_utils_begin(uvm_text_record_stream)
+   `uvm_object_utils_begin(uvm_text_tr_stream)
    `uvm_object_utils_end
 
    // Function: new
@@ -377,7 +377,7 @@ class uvm_text_record_stream extends uvm_record_stream;
    //
    // Parameters:
    // name - Instance name
-   function new(string name="unnamed-uvm_text_record_database");
+   function new(string name="unnamed-uvm_text_tr_database");
       super.new(name);
    endfunction : new
 
@@ -386,24 +386,24 @@ class uvm_text_record_stream extends uvm_record_stream;
    // Function: do_initialize_stream
    // Initiailizes the state of the stream
    //
-   protected virtual function void do_initialize_stream(uvm_record_database db,
+   protected virtual function void do_initialize_stream(uvm_tr_database db,
                                                         uvm_component cntxt,
                                                         string stream_type_name);
       $cast(m_text_db, db);
    endfunction : do_initialize_stream
 
-   // Function: do_begin_record
+   // Function: do_open_tr
    // Marks the beginning of a new record in the stream
    //
    // Text-backend specific implementation.
-   protected virtual function uvm_recorder do_begin_record(string name,
-                                                           time   begin_time,
+   protected virtual function uvm_tr_recorder do_open_tr(string name,
+                                                           time   open_time,
                                                            string type_name);
       if (m_text_db.open_db()) begin
          UVM_FILE file = m_text_db.m_file;
          uvm_text_recorder m_recorder;
-         if (m_free_records.size() > 0) begin
-            m_recorder = m_free_records.pop_front();
+         if (m_free_trs.size() > 0) begin
+            m_recorder = m_free_trs.pop_front();
             m_recorder.set_name(name);
          end
          else
@@ -412,50 +412,50 @@ class uvm_text_record_stream extends uvm_record_stream;
          m_recorder.initialize_recorder(this);
          $fdisplay(file, "BEGIN @%0t {TXH:%0d STREAM:%0d NAME:%s TIME:%0t TYPE=\"%0s\"}",
                    $time,
-                   uvm_record_database::m_get_record_handle(m_recorder),
-                   uvm_record_database::m_get_stream_handle(this),
+                   uvm_tr_database::m_get_tr_handle(m_recorder),
+                   uvm_tr_database::m_get_stream_handle(this),
                    name,
-                   begin_time,
+                   open_time,
                    type_name);
          return m_recorder;
       end
 
       return null;
-   endfunction : do_begin_record
+   endfunction : do_open_tr
 
-   // Function: do_end_record
+   // Function: do_close_tr
    // Marks the end of a record in the stream
    //
    // Text-backend specific implementation.
-   protected virtual function void do_end_record(uvm_recorder record,
-                                                 time end_time);
+   protected virtual function void do_close_tr(uvm_tr_recorder record,
+                                                 time close_time);
       if (m_text_db.open_db()) begin
          UVM_FILE file = m_text_db.m_file;
          $fdisplay(file, "END @%0t {TXH:%0d TIME=%0t}",
                    $time,
-                   uvm_record_database::m_get_record_handle(record),
-                   end_time);
+                   uvm_tr_database::m_get_tr_handle(record),
+                   close_time);
          
       end
-   endfunction : do_end_record
+   endfunction : do_close_tr
 
-   // Function: do_free_record
+   // Function: do_free_tr
    // Indicates the stream and database can free any references to the record.
    //
    // Text-backend specific implementation.
-   protected virtual function void do_free_record(uvm_recorder record);
+   protected virtual function void do_free_tr(uvm_tr_recorder record);
       if (m_text_db.open_db()) begin
          UVM_FILE file = m_text_db.m_file;
          $fdisplay(file, "FREE @%0t {TXH:%0d}",
                    $time,
-                   uvm_record_database::m_get_record_handle(record));
+                   uvm_tr_database::m_get_tr_handle(record));
       end
       // Arbitrary size, useful for example purposes
-      if (m_free_records.size() < 8) begin
+      if (m_free_trs.size() < 8) begin
          uvm_text_recorder m_record;
          $cast(m_record, record);
-         m_free_records.push_back(m_record);
+         m_free_trs.push_back(m_record);
       end
-   endfunction : do_free_record
+   endfunction : do_free_tr
 
-endclass : uvm_text_record_stream
+endclass : uvm_text_tr_stream

@@ -605,9 +605,9 @@ typedef class uvm_tree_printer;
 typedef class uvm_line_printer;
 typedef class uvm_comparer;
 typedef class uvm_packer;
-typedef class uvm_record_database;
-typedef class uvm_text_record_database;
-typedef class uvm_recorder;
+typedef class uvm_tr_database;
+typedef class uvm_text_tr_database;
+typedef class uvm_tr_recorder;
 
 // Variable: uvm_default_table_printer
 //
@@ -660,12 +660,6 @@ uvm_packer uvm_default_packer = new();
 
 uvm_comparer uvm_default_comparer = new(); // uvm_comparer::init();
 
-// Variable: uvm_default_recorder
-//
-// The default recording policy. Used when calls to <uvm_object::record>
-// do not specify a recorder policy.
-
-//uvm_recorder uvm_default_recorder = new();
 
 
 

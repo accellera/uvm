@@ -23,26 +23,26 @@
 
 // File: UVM Recorders
 //
-// The uvm_recorder class serves two purposes:
+// The uvm_tr_recorder class serves two purposes:
 //  - Firstly, it is an abstract representation of a record within a
-//    <uvm_record_stream>.
+//    <uvm_tr_stream>.
 //  - Secondly, it is a policy object for recording fields ~into~ that
 //    record within the ~stream~.
 //
 
 //------------------------------------------------------------------------------
 //
-// CLASS: uvm_recorder
+// CLASS: uvm_tr_recorder
 //
 // Abstract class which defines the ~recorder~ API.
 //
 //------------------------------------------------------------------------------
 
-virtual class uvm_recorder extends uvm_object;
+virtual class uvm_tr_recorder extends uvm_object;
 
   // Variable- m_stream_dap
   // Data access protected reference to the stream
-  local uvm_set_before_get_dap#(uvm_record_stream) m_stream_dap;
+  local uvm_set_before_get_dap#(uvm_tr_stream) m_stream_dap;
 
   // Variable- m_warn_null_stream
   // Used to limit the number of warnings 
@@ -101,7 +101,7 @@ virtual class uvm_recorder extends uvm_object;
   uvm_recursion_policy_enum policy = UVM_DEFAULT_POLICY;
 
 
-  function new(string name = "uvm_recorder");
+  function new(string name = "uvm_tr_recorder");
      super.new(name);
      m_stream_dap = new("stream_dap");
   endfunction
@@ -113,7 +113,7 @@ virtual class uvm_recorder extends uvm_object;
    // A warning will be asserted if get_stream is called prior
    // to the record being initialized via <initialize_recorder>.
    //
-   function uvm_record_stream get_stream();
+   function uvm_tr_stream get_stream();
       if (!m_stream_dap.try_get(get_stream)) begin
          if (m_warn_null_stream == 1) 
            `uvm_warning("UVM/REC/NO_INIT",
@@ -137,8 +137,8 @@ virtual class uvm_recorder extends uvm_object;
   // - ~initialized_recorder~ is called more than once without the
   //  recorder being ~freed~ in between.
   // - ~stream~ is ~null~
-  function void initialize_recorder(uvm_record_stream stream);
-     uvm_record_stream m_stream;
+  function void initialize_recorder(uvm_tr_stream stream);
+     uvm_tr_stream m_stream;
      if (stream == null) begin
         `uvm_error("UVM/REC/NULL_STREAM",
                    $sformatf("Illegal attempt to set STREAM for '%s' to '<null>'",
@@ -285,16 +285,16 @@ virtual class uvm_recorder extends uvm_object;
    //
    // Parameters:
    // name - Name of the field
-   // type_name - Type name of the field
    // value - Value of the field
-   // size - Size of the field
+   // type_name - ~optional~ Type name of the field
    function void record_generic(string name,
-                                string value);
+                                string value,
+                                string type_name="");
       if (get_stream() == null) begin
          return;
       end
 
-      do_record_generic(name, value);
+      do_record_generic(name, value, type_name);
    endfunction : record_generic
 
    // Group: Implementation Specific API
@@ -303,7 +303,7 @@ virtual class uvm_recorder extends uvm_object;
    // Initializes the state of the recorder
    //
    // ~Optional~ Backend implementation of <initialize_recorder>
-   protected virtual function void do_initialize_recorder(uvm_record_stream stream);
+   protected virtual function void do_initialize_recorder(uvm_tr_stream stream);
    endfunction : do_initialize_recorder
 
    // Function: do_free_recorder
@@ -364,7 +364,8 @@ virtual class uvm_recorder extends uvm_object;
    //
    // ~Mandatory~ Backend implementation of <record_generic>
    protected pure virtual function void do_record_generic(string name,
-                                                          string value);
+                                                          string value,
+                                                          string type_name);
 
    /// LEFT FOR BACKWARDS COMPAT ONLY!!!!!!
    
@@ -460,18 +461,20 @@ virtual class uvm_recorder extends uvm_object;
   virtual function void free_tr(integer handle);
   endfunction
   
-endclass // uvm_recorder
+endclass // uvm_tr_recorder
 
+// Provided for backwards compat
+typedef uvm_tr_recorder uvm_recorder;
   
 //------------------------------------------------------------------------------
 //
 // CLASS: uvm_text_recorder
 //
 // The ~uvm_text_recorder~ is the default recorder implementation for the
-// <uvm_text_record_database>.
+// <uvm_text_tr_database>.
 //
 
-class uvm_text_recorder extends uvm_recorder;
+class uvm_text_recorder extends uvm_tr_recorder;
 
    `uvm_object_utils(uvm_text_recorder)
 
@@ -487,7 +490,7 @@ class uvm_text_recorder extends uvm_recorder;
    // Variable- m_text_db
    //
    // Reference to the text database backend
-   uvm_text_record_database m_text_db;
+   uvm_text_tr_database m_text_db;
 
    // Variable- scope
    // Imeplementation detail
@@ -508,7 +511,7 @@ class uvm_text_recorder extends uvm_recorder;
    // Initializes the state of the recorder
    //
    // Text-backend specific implementation.
-   protected virtual function void do_initialize_recorder(uvm_record_stream stream);
+   protected virtual function void do_initialize_recorder(uvm_tr_stream stream);
       $cast(m_text_db, stream.get_db());
    endfunction : do_initialize_recorder
 
@@ -532,7 +535,7 @@ class uvm_text_recorder extends uvm_recorder;
       if (!radix)
         radix = default_radix;
 
-      m_text_db.set_attribute(uvm_record_database::m_get_record_handle(this),
+      m_text_db.set_attribute(uvm_tr_database::m_get_tr_handle(this),
                               scope.get(),
                               value,
                               radix,
@@ -553,7 +556,7 @@ class uvm_text_recorder extends uvm_recorder;
       if (!radix)
         radix = default_radix;
 
-      m_text_db.set_attribute_int(uvm_record_database::m_get_record_handle(this),
+      m_text_db.set_attribute_int(uvm_tr_database::m_get_tr_handle(this),
                                   scope.get(),
                                   value,
                                   radix,
@@ -571,7 +574,7 @@ class uvm_text_recorder extends uvm_recorder;
       bit [63:0] ival = $realtobits(value);
       scope.set_arg(name);
 
-      m_text_db.set_attribute(uvm_record_database::m_get_record_handle(this),
+      m_text_db.set_attribute(uvm_tr_database::m_get_tr_handle(this),
                               scope.get(),
                               ival,
                               UVM_REAL,
@@ -597,7 +600,7 @@ class uvm_text_recorder extends uvm_recorder;
             v = str.atoi(); 
          end
          scope.set_arg(name);
-         m_text_db.set_attribute(uvm_record_database::m_get_record_handle(this), 
+         m_text_db.set_attribute(uvm_tr_database::m_get_tr_handle(this), 
                                  scope.get(), 
                                  v, 
                                  UVM_DEC, 
@@ -623,7 +626,7 @@ class uvm_text_recorder extends uvm_recorder;
    protected virtual function void do_record_string(string name,
                                                     string value);
       scope.set_arg(name);
-      m_text_db.set_attribute(uvm_record_database::m_get_record_handle(this), 
+      m_text_db.set_attribute(uvm_tr_database::m_get_tr_handle(this), 
                               scope.get(), 
                               uvm_string_to_bits(value),
                               UVM_STRING, 
@@ -637,7 +640,7 @@ class uvm_text_recorder extends uvm_recorder;
    protected virtual function void do_record_time(string name,
                                                     time value);
       scope.set_arg(name);
-      m_text_db.set_attribute(uvm_record_database::m_get_record_handle(this), 
+      m_text_db.set_attribute(uvm_tr_database::m_get_tr_handle(this), 
                               scope.get(), 
                               value,
                               UVM_TIME, 
@@ -649,9 +652,10 @@ class uvm_text_recorder extends uvm_recorder;
    //
    // Text-backend specific implementation.
    protected virtual function void do_record_generic(string name,
-                                                     string value);
+                                                     string value,
+                                                     string type_name);
       scope.set_arg(name);
-      m_text_db.set_attribute(uvm_record_database::m_get_record_handle(this), 
+      m_text_db.set_attribute(uvm_tr_database::m_get_tr_handle(this), 
                               scope.get(), 
                               uvm_string_to_bits(value), 
                               UVM_STRING, 
@@ -691,10 +695,10 @@ class uvm_text_recorder extends uvm_recorder;
   virtual function integer create_stream (string name,
                                           string t,
                                           uvm_component cntxt);
-     uvm_text_record_stream stream;
+     uvm_text_tr_stream stream;
      if (open_file()) begin
         $cast(stream,m_text_db.get_stream(name, cntxt, t));
-        return uvm_record_database::m_get_stream_handle(stream);
+        return uvm_tr_database::m_get_stream_handle(stream);
      end
      return 0;
   endfunction
@@ -731,8 +735,8 @@ class uvm_text_recorder extends uvm_recorder;
   //
   //
   virtual function integer check_handle_kind (string htype, integer handle);
-     return ((uvm_record_database::m_get_record_from_handle(handle) != null) ||
-             (uvm_record_database::m_get_stream_from_handle(handle) != null));
+     return ((uvm_tr_database::m_get_tr_from_handle(handle) != null) ||
+             (uvm_tr_database::m_get_stream_from_handle(handle) != null));
   endfunction
   
   
@@ -746,14 +750,14 @@ class uvm_text_recorder extends uvm_recorder;
                                      string desc="",
                                      time begin_time=0);
      if (open_file()) begin
-        uvm_record_stream stream_obj = uvm_record_database::m_get_stream_from_handle(stream);
-        uvm_recorder recorder;
+        uvm_tr_stream stream_obj = uvm_tr_database::m_get_stream_from_handle(stream);
+        uvm_tr_recorder recorder;
         if (stream_obj == null)
           return -1;
 
-        recorder = stream_obj.begin_record(nm, begin_time, txtype);
+        recorder = stream_obj.open_tr(nm, begin_time, txtype);
 
-        return uvm_record_database::m_get_record_handle(recorder);
+        return uvm_tr_database::m_get_tr_handle(recorder);
      end
      return -1;
   endfunction
@@ -764,10 +768,10 @@ class uvm_text_recorder extends uvm_recorder;
   //
   virtual function void end_tr (integer handle, time end_time=0);
      if (open_file()) begin
-        uvm_recorder record = uvm_record_database::m_get_record_from_handle(handle);
+        uvm_tr_recorder record = uvm_tr_database::m_get_tr_from_handle(handle);
         if (record != null) begin
-           uvm_record_stream stream = record.get_stream();
-           stream.end_record(record, end_time);
+           uvm_tr_stream stream = record.get_stream();
+           stream.close_tr(record, end_time);
         end
      end
   endfunction
@@ -790,10 +794,10 @@ class uvm_text_recorder extends uvm_recorder;
   //
   virtual function void free_tr(integer handle);
      if (open_file()) begin
-        uvm_recorder record = uvm_record_database::m_get_record_from_handle(handle);
+        uvm_tr_recorder record = uvm_tr_database::m_get_tr_from_handle(handle);
         if (record != null) begin
-           uvm_record_stream stream = record.get_stream();
-           stream.free_record(record);
+           uvm_tr_stream stream = record.get_stream();
+           stream.free_tr(record);
         end
      end
   endfunction // free_tr

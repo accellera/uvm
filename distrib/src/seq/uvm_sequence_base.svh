@@ -136,7 +136,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   protected uvm_sequence_state m_sequence_state;
             int                m_next_transaction_id = 1;
   local     int                m_priority = -1;
-            uvm_recorder       m_tr_handle;
+            uvm_tr_recorder       m_tr_handle;
             int                m_wait_for_grant_semaphore;
 
   // Each sequencer will assign a sequence id.  When a sequence is talking to multiple
@@ -217,7 +217,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // Can be used to associate sub-sequences and sequence items as
   // child transactions when calling <uvm_component::begin_child_tr>.
 
-  function uvm_recorder get_tr_handle();
+  function uvm_tr_recorder get_tr_handle();
     return m_tr_handle;
   endfunction
 
@@ -282,12 +282,12 @@ class uvm_sequence_base extends uvm_sequence_item;
     m_priority           = this_priority;
 
     if (m_sequencer != null) begin
-       uvm_record_stream stream;
+       uvm_tr_stream stream;
        if (m_parent_sequence == null) begin
-          stream = m_sequencer.get_record_stream(get_name(), "Transactions");
+          stream = m_sequencer.get_tr_stream(get_name(), "Transactions");
           m_tr_handle = m_sequencer.begin_tr(this, stream);
        end else begin
-          stream = m_sequencer.get_record_stream(get_root_sequence_name(), "Transactions");
+          stream = m_sequencer.get_tr_stream(get_root_sequence_name(), "Transactions");
           m_tr_handle = m_sequencer.begin_child_tr(this, m_parent_sequence.m_tr_handle, 
                                                    stream);
        end
@@ -931,7 +931,7 @@ class uvm_sequence_base extends uvm_sequence_item;
     if (sequencer.is_auto_item_recording_enabled()) begin
       void'(sequencer.begin_child_tr(item, 
                                      m_tr_handle, 
-                                     sequencer.get_record_stream(item.get_root_sequence_name(), "Transactions")));
+                                     sequencer.get_tr_stream(item.get_root_sequence_name(), "Transactions")));
     end
     
     pre_do(1);

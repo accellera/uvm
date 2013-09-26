@@ -1446,12 +1446,12 @@ virtual class uvm_component extends uvm_report_object;
   // well as the interpretation of the arguments ~stream_name~, ~label~, and
   // ~desc~ are vendor specific.
 
-  extern function uvm_recorder begin_tr (uvm_transaction tr,
-                                         uvm_record_stream stream=null,
+  extern function uvm_tr_recorder begin_tr (uvm_transaction tr,
+                                         uvm_tr_stream stream=null,
                                          string label="",
                                          string desc="",
                                          time begin_time=0,
-                                         uvm_recorder parent_record = null);
+                                         uvm_tr_recorder parent_record = null);
 
 
   // Function: begin_child_tr
@@ -1461,9 +1461,9 @@ virtual class uvm_component extends uvm_report_object;
   // an association is made between this transaction and the provided parent
   // transaction. This association is vendor-specific.
 
-  extern function uvm_recorder begin_child_tr (uvm_transaction tr,
-                                               uvm_recorder parent_record=null,
-                                               uvm_record_stream stream=null,
+  extern function uvm_tr_recorder begin_child_tr (uvm_transaction tr,
+                                               uvm_tr_recorder parent_record=null,
+                                               uvm_tr_stream stream=null,
                                                string label="",
                                                string desc="",
                                                time begin_time=0);
@@ -1477,7 +1477,7 @@ virtual class uvm_component extends uvm_report_object;
 
   extern virtual protected 
                  function void do_begin_tr (uvm_transaction tr,
-                                            uvm_recorder tr_handle);
+                                            uvm_tr_recorder tr_handle);
 
 
   // Function: end_tr
@@ -1516,7 +1516,7 @@ virtual class uvm_component extends uvm_report_object;
   // correct operation.
 
   extern virtual protected function void do_end_tr (uvm_transaction tr,
-                                                    uvm_recorder tr_handle);
+                                                    uvm_tr_recorder tr_handle);
 
 
   // Function: record_error_tr
@@ -1533,7 +1533,7 @@ virtual class uvm_component extends uvm_report_object;
   // Interpretation of this handle, as well as the strings ~stream_name~,
   // ~label~, and ~desc~, are vendor-specific.
 
-  extern function uvm_recorder record_error_tr (uvm_record_stream stream=null,
+  extern function uvm_tr_recorder record_error_tr (uvm_tr_stream stream=null,
                                                 uvm_object info=null,
                                                 string label="error_tr",
                                                 string desc="",
@@ -1553,29 +1553,29 @@ virtual class uvm_component extends uvm_report_object;
   // The strings for ~stream_name~, ~label~, and ~desc~ are vendor-specific
   // identifiers for the transaction.
 
-  extern function uvm_recorder record_event_tr (uvm_record_stream stream=null,
+  extern function uvm_tr_recorder record_event_tr (uvm_tr_stream stream=null,
                                                 uvm_object info=null,
                                                 string label="event_tr",
                                                 string desc="",
                                                 time   event_time=0,
                                                 bit    keep_active=0);
 
-  // Function: get_record_stream
+  // Function: get_tr_stream
   //
   // This function returns a record stream with this component context.
   //
   // This is a helper method around the following code:
   // 
-  // | if (record_database == null)  begin
+  // | if (tr_database == null)  begin
   // |    uvm_coreservice_t cs = uvm_coreservice_t::get();
-  // |    record_database = cs.get_default_record_database();
+  // |    tr_database = cs.get_default_tr_database();
   // | end
-  // | stream = record_database.get_stream(name, stream_type_name);
+  // | stream = tr_database.get_stream(name, stream_type_name);
   //
   // Parameters:
   // name - Name for the stream
   // stream_type_name - Type name for the stream (Default = "")
-  extern virtual function uvm_record_stream get_record_stream(string name,
+  extern virtual function uvm_tr_stream get_tr_stream(string name,
                                                               string stream_type_name="");
 
   // Variable: print_enabled
@@ -1588,13 +1588,13 @@ virtual class uvm_component extends uvm_report_object;
 
   bit print_enabled = 1;
 
-  // Variable: record_database
+  // Variable: tr_database
   //
-  // Specifies the <uvm_record_database> object to use for <begin_record>
+  // Specifies the <uvm_tr_database> object to use for <begin_tr>
   // and other methods in the <Recording Interface>.  
-  // Default is <uvm_coreservice_t::get_default_record_database>.
-  uvm_record_database record_database;
-  extern virtual function uvm_record_database m_get_record_database();
+  // Default is <uvm_coreservice_t::get_default_tr_database>.
+  uvm_tr_database tr_database;
+  extern virtual function uvm_tr_database m_get_tr_database();
 
   //----------------------------------------------------------------------------
   //                     PRIVATE or PSUEDO-PRIVATE members
@@ -1645,12 +1645,12 @@ virtual class uvm_component extends uvm_report_object;
   extern virtual function uvm_object create (string name=""); 
   extern virtual function uvm_object clone  ();
 
-  local uvm_record_stream m_main_stream;
-  local uvm_record_stream m_streams[string][string];
-  local uvm_recorder m_tr_h[uvm_transaction];
-  extern protected function uvm_recorder m_begin_tr (uvm_transaction tr,
-                                                     uvm_recorder parent_record=null,
-                                                     uvm_record_stream stream=null, string label="",
+  local uvm_tr_stream m_main_stream;
+  local uvm_tr_stream m_streams[string][string];
+  local uvm_tr_recorder m_tr_h[uvm_transaction];
+  extern protected function uvm_tr_recorder m_begin_tr (uvm_transaction tr,
+                                                     uvm_tr_recorder parent_record=null,
+                                                     uvm_tr_stream stream=null, string label="",
                                                      string desc="", time begin_time=0);
 
   string m_name;
@@ -2589,66 +2589,66 @@ endfunction
 // begin_tr
 // --------
 
-function uvm_recorder uvm_component::begin_tr (uvm_transaction tr,
-                                               uvm_record_stream stream=null,
+function uvm_tr_recorder uvm_component::begin_tr (uvm_transaction tr,
+                                               uvm_tr_stream stream=null,
                                                string label="",
                                                string desc="",
                                                time begin_time=0,
-                                               uvm_recorder parent_record=null);
+                                               uvm_tr_recorder parent_record=null);
    return m_begin_tr(tr, parent_record, stream, label, desc, begin_time);
 endfunction
 
 // begin_child_tr
 // --------------
 
-function uvm_recorder uvm_component::begin_child_tr (uvm_transaction tr,
-                                                     uvm_recorder parent_record=null,
-                                                     uvm_record_stream stream=null,
+function uvm_tr_recorder uvm_component::begin_child_tr (uvm_transaction tr,
+                                                     uvm_tr_recorder parent_record=null,
+                                                     uvm_tr_stream stream=null,
                                                      string label="",
                                                      string desc="",
                                                      time begin_time=0);
   return m_begin_tr(tr, parent_record, stream, label, desc, begin_time);
 endfunction
 
-// m_get_record_database
+// m_get_tr_database
 // ---------------------
-   function uvm_record_database uvm_component::m_get_record_database();
-      if (record_database == null) begin
+   function uvm_tr_database uvm_component::m_get_tr_database();
+      if (tr_database == null) begin
          uvm_coreservice_t cs = uvm_coreservice_t::get();
-         record_database = cs.get_default_record_database();
+         tr_database = cs.get_default_tr_database();
       end
-      return record_database;
-   endfunction : m_get_record_database
+      return tr_database;
+   endfunction : m_get_tr_database
    
-// get_record_stream
+// get_tr_stream
 // ------------
-function uvm_record_stream uvm_component::get_record_stream( string name,
+function uvm_tr_stream uvm_component::get_tr_stream( string name,
                                                              string stream_type_name="" );
-   uvm_record_database db = m_get_record_database;
+   uvm_tr_database db = m_get_tr_database();
    if (!m_streams.exists(name) || !m_streams[name].exists(stream_type_name))
      m_streams[name][stream_type_name] = db.get_stream(name, this, stream_type_name);
    return m_streams[name][stream_type_name];
-endfunction : get_record_stream
+endfunction : get_tr_stream
    
 // m_begin_tr
 // ----------
 
-function uvm_recorder uvm_component::m_begin_tr (uvm_transaction tr,
-                                                 uvm_recorder parent_record=null,
-                                                 uvm_record_stream stream=null,
+function uvm_tr_recorder uvm_component::m_begin_tr (uvm_transaction tr,
+                                                 uvm_tr_recorder parent_record=null,
+                                                 uvm_tr_stream stream=null,
                                                  string label="",
                                                  string desc="",
                                                  time begin_time=0);
    uvm_event e;
    string    name;
    string    kind;
-   uvm_record_database db;
-   uvm_recorder record, link_record;
+   uvm_tr_database db;
+   uvm_tr_recorder record, link_record;
 
    if (tr == null)
      return null;
    
-   db = m_get_record_database;
+   db = m_get_tr_database();
 
    if (parent_record == null) begin
       uvm_sequence_item seq;
@@ -2676,13 +2676,13 @@ function uvm_recorder uvm_component::m_begin_tr (uvm_transaction tr,
 
       if (stream == null) begin
          if (m_main_stream == null)
-           m_main_stream = record_database.get_stream("main", this, "TVM");
+           m_main_stream = tr_database.get_stream("main", this, "TVM");
          stream = m_main_stream;
       end
 
       kind = (parent_record == null) ? "Begin_No_Parent, Link" : "Begin_End, Link";
       
-      record = stream.begin_record(name, begin_time, kind);
+      record = stream.open_tr(name, begin_time, kind);
       
       if (label != "")
         record.record_string("label", label);
@@ -2690,12 +2690,12 @@ function uvm_recorder uvm_component::m_begin_tr (uvm_transaction tr,
         record.record_string("desc", desc);
                                    
       if (parent_record != null) begin
-         record_database.establish_link(uvm_parent_child_link::get_link(parent_record,
+         tr_database.establish_link(uvm_parent_child_link::get_link(parent_record,
                                                                         record));
       end
       
       if (link_record != null) begin
-         record_database.establish_link(uvm_related_link::get_link(record,
+         tr_database.establish_link(uvm_related_link::get_link(record,
                                                                    link_record));
       end
                    
@@ -2721,9 +2721,9 @@ function void uvm_component::end_tr (uvm_transaction tr,
                                      time end_time=0,
                                      bit free_handle=1);
    uvm_event e;
-   uvm_recorder record;
-   uvm_record_stream stream;
-   uvm_record_database db = m_get_record_database;
+   uvm_tr_recorder record;
+   uvm_tr_stream stream;
+   uvm_tr_database db = m_get_tr_database();
 
    if (tr == null)
      return;
@@ -2744,10 +2744,10 @@ function void uvm_component::end_tr (uvm_transaction tr,
 
          stream = record.get_stream();
 
-         stream.end_record(record, end_time);
+         stream.close_tr(record, end_time);
          
          if (free_handle)
-           stream.free_record(record);
+           stream.free_tr(record);
             
       end
       else begin
@@ -2766,15 +2766,15 @@ endfunction
 // record_error_tr
 // ---------------
 
-function uvm_recorder uvm_component::record_error_tr (uvm_record_stream stream=null,
+function uvm_tr_recorder uvm_component::record_error_tr (uvm_tr_stream stream=null,
                                                       uvm_object info=null,
                                                       string label="error_tr",
                                                       string desc="",
                                                       time   error_time=0,
                                                       bit    keep_active=0);
-   uvm_recorder record;
+   uvm_tr_recorder record;
    string etype;
-   uvm_record_database db = m_get_record_database;
+   uvm_tr_database db = m_get_tr_database();
    
    if(keep_active) etype = "Error, Link";
    else etype = "Error";
@@ -2783,11 +2783,11 @@ function uvm_recorder uvm_component::record_error_tr (uvm_record_stream stream=n
    
    if (stream == null) begin
       if (m_main_stream == null)
-        m_main_stream = record_database.get_stream("main", this, "TVM");
+        m_main_stream = tr_database.get_stream("main", this, "TVM");
       stream = m_main_stream;
    end
 
-   record = stream.begin_record(label,
+   record = stream.open_tr(label,
                                 error_time,
                                 etype);
    if (label != "")
@@ -2797,10 +2797,10 @@ function uvm_recorder uvm_component::record_error_tr (uvm_record_stream stream=n
    if (info!=null)
      info.record(record);
                                          
-   stream.end_record(record, error_time);
+   stream.close_tr(record, error_time);
 
    if (keep_active == 0) begin
-      stream.free_record(record);
+      stream.free_tr(record);
       return null;
    end
    else begin
@@ -2812,15 +2812,15 @@ endfunction
 // record_event_tr
 // ---------------
 
-function uvm_recorder uvm_component::record_event_tr (uvm_record_stream stream=null,
+function uvm_tr_recorder uvm_component::record_event_tr (uvm_tr_stream stream=null,
                                                       uvm_object info=null,
                                                       string label="event_tr",
                                                       string desc="",
                                                       time   event_time=0,
                                                       bit    keep_active=0);
-   uvm_recorder record;
+   uvm_tr_recorder record;
    string etype;
-   uvm_record_database db = m_get_record_database;
+   uvm_tr_database db = m_get_tr_database();
    
   if(keep_active) etype = "Event, Link";
   else etype = "Event";
@@ -2829,11 +2829,11 @@ function uvm_recorder uvm_component::record_event_tr (uvm_record_stream stream=n
    
    if (stream == null) begin
       if (m_main_stream == null)
-        m_main_stream = record_database.get_stream("main", this, "TVM");
+        m_main_stream = tr_database.get_stream("main", this, "TVM");
       stream = m_main_stream;
    end
    
-   record = stream.begin_record(label,
+   record = stream.open_tr(label,
                                 event_time,
                                 etype);
    if (label != "")
@@ -2843,10 +2843,10 @@ function uvm_recorder uvm_component::record_event_tr (uvm_record_stream stream=n
    if (info!=null)
      info.record(record);
                                          
-   stream.end_record(record, event_time);
+   stream.close_tr(record, event_time);
 
    if (keep_active == 0) begin
-      stream.free_record(record);
+      stream.free_tr(record);
       return null;
    end
    else begin
@@ -2866,7 +2866,7 @@ endfunction
 // -----------
 
 function void uvm_component::do_begin_tr (uvm_transaction tr,
-                                          uvm_recorder tr_handle);
+                                          uvm_tr_recorder tr_handle);
   return;
 endfunction
 
@@ -2875,7 +2875,7 @@ endfunction
 // ---------
 
 function void uvm_component::do_end_tr (uvm_transaction tr,
-                                        uvm_recorder tr_handle);
+                                        uvm_tr_recorder tr_handle);
   return;
 endfunction
 

@@ -125,7 +125,7 @@ function void do_print (uvm_printer printer);
   printer.print_int("l_count", l_count, $bits(l_count));
 endfunction
 
-function void do_record (uvm_recorder recorder);
+function void do_record (uvm_tr_recorder recorder);
   recorder.record_field("l_count", l_count, $bits(l_count));
 endfunction // void
 
@@ -226,7 +226,7 @@ function void do_print (uvm_printer printer);
   printer.print_int("l_count", l_count, $bits(l_count));
 endfunction
 
-function void do_record (uvm_recorder recorder);
+function void do_record (uvm_tr_recorder recorder);
   recorder.record_field("l_count", l_count, $bits(l_count));
 endfunction // void
 

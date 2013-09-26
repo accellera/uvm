@@ -3313,7 +3313,7 @@ endfunction \
 //
 // The recording macros assist users who implement the <uvm_object::do_record>
 // method. They help ensure that the fields are recorded using a vendor-
-// independent API. Unlike the <uvm_recorder> policy, fields recorded using
+// independent API. Unlike the <uvm_tr_recorder> policy, fields recorded using
 // the <`uvm_record_field> macro do not lose type information--they are passed
 // directly to the vendor-specific API. This results in more efficient recording
 // and no artificial limit on bit-widths. See your simulator vendor's 
@@ -3347,29 +3347,17 @@ endfunction \
 // Macro- `uvm_record_field
 //
 // Macro for recording name-value pairs into a transaction recording database.
-// Requires a valid transaction handle, as provided by the
-// <uvm_transaction::begin_tr> and <uvm_component::begin_tr> methods. 
+// 
 
 `define uvm_record_field(NAME,VALUE) \
   if (recorder != null) begin \
      if (recorder.get_type_name() != "uvm_text_recorder") begin \
-        `uvm_record_attribute(uvm_record_database::m_get_record_handle(recorder), VALUE, NAME) \
+        `uvm_record_attribute(uvm_tr_database::m_get_record_handle(recorder), VALUE, NAME) \
      end \
      else begin \
         recorder.record_generic(NAME,$sformatf("%p", VALUE)); \
      end \
   end
-
-//`define uvm_record_field(NAME,VALUE) \
-   // if (recorder != null && recorder.tr_handle != 0) begin \
-   //   if (recorder.get_type_name() != "uvm_recorder") begin \
-   //     `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
-   //   end \
-   //   else \
-   //     recorder.m_set_attribute(recorder.tr_handle,NAME,$sformatf("%p",VALUE)); \
-   // end
-
-
 
 // Use the following if the simulator's recording API can not
 // distinguish types.

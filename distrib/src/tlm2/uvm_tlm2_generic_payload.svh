@@ -560,7 +560,7 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
 
   // Function- do_record
   //
-  function void do_record(uvm_recorder recorder);
+  function void do_record(uvm_tr_recorder recorder);
      if (!is_recording_enabled())
        return;
      super.do_record(recorder);
