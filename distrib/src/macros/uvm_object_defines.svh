@@ -3352,7 +3352,7 @@ endfunction \
 `define uvm_record_field(NAME,VALUE) \
   if (recorder != null) begin \
      if (recorder.get_type_name() != "uvm_text_recorder") begin \
-        `uvm_record_attribute(uvm_tr_database::m_get_record_handle(recorder), VALUE, NAME) \
+        `uvm_record_attribute(uvm_tr_recorder::m_get_id_from_recorder(recorder), VALUE, NAME) \
      end \
      else begin \
         recorder.record_generic(NAME,$sformatf("%p", VALUE)); \

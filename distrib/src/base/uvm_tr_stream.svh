@@ -308,8 +308,6 @@ virtual class uvm_tr_stream extends uvm_object;
       
       do_free_tr(record);
 
-      // Required for backwards compat...
-      uvm_tr_database::m_free_tr_handle(record);
    endfunction : free_tr
 
    // Group: Implementation Agnostic API
@@ -348,6 +346,61 @@ virtual class uvm_tr_stream extends uvm_object;
    // by <free_tr> prior to the ~do_free_tr~ call.
    protected pure virtual function void do_free_tr(uvm_tr_recorder record);
 
+
+   // THE FOLLOWING CODE IS PRESENT FOR BACKWARDS COMPATIBILITY PURPOSES
+   // ONLY.  IT IS NOT DOCUMENTED, AND SHOULD NOT BE USED BY END USERS
+
+   // Variable- m_ids_by_stream
+   // An associative array of integers, indexed by uvm_tr_streams.  This
+   // provides a unique 'id' or 'handle' for each stream, which can be
+   // used to identify the stream.
+   //
+   // By default, neither ~m_ids_by_stream~ or ~m_streams_by_id~ are
+   // used.  Streams are only placed in the arrays when the user
+   // attempts to determine the id for a stream.
+   local static integer m_ids_by_stream[uvm_tr_stream];
+
+   // Variable- m_streams_by_id
+   // A corollary to ~m_ids_by_stream~, this indexes the streams by their
+   // unique ids.
+   local static uvm_tr_stream m_streams_by_id[integer];
+
+   // Variable- m_id
+   // Static int marking the last assigned id.
+   local static integer m_id;
+
+   // Function- m_get_id_from_stream
+   // Returns a "unique id" for the given stream.
+   //
+   // 0 indicates "null" stream
+   static function integer m_get_id_from_stream(uvm_tr_stream stream);
+      if (stream == null)
+        return 0;
+
+      if (!m_ids_by_stream.exists(stream)) begin
+         m_streams_by_id[++m_id] = stream;
+         m_ids_by_stream[stream] = m_id;
+      end
+
+      return m_id;
+   endfunction : m_get_id_from_stream
+
+   // Function- m_get_stream_from_id
+   // Returns a stream reference for a given unique id.
+   //
+   // If no stream exists with a given id, then ~null~
+   // is returned.
+   static function uvm_tr_stream m_get_stream_from_id(integer id);
+      if (id == 0)
+        return null;
+
+      if (!m_streams_by_id.exists(id))
+        return null;
+
+      return m_streams_by_id[id];
+   endfunction : m_get_stream_from_id
+        
+   
 endclass : uvm_tr_stream
 
 //------------------------------------------------------------------------------
@@ -412,8 +465,8 @@ class uvm_text_tr_stream extends uvm_tr_stream;
          m_recorder.initialize_recorder(this);
          $fdisplay(file, "BEGIN @%0t {TXH:%0d STREAM:%0d NAME:%s TIME:%0t TYPE=\"%0s\"}",
                    $time,
-                   uvm_tr_database::m_get_tr_handle(m_recorder),
-                   uvm_tr_database::m_get_stream_handle(this),
+                   uvm_tr_recorder::m_get_id_from_recorder(m_recorder),
+                   uvm_tr_stream::m_get_id_from_stream(this),
                    name,
                    open_time,
                    type_name);
@@ -433,7 +486,7 @@ class uvm_text_tr_stream extends uvm_tr_stream;
          UVM_FILE file = m_text_db.m_file;
          $fdisplay(file, "END @%0t {TXH:%0d TIME=%0t}",
                    $time,
-                   uvm_tr_database::m_get_tr_handle(record),
+                   uvm_tr_recorder::m_get_id_from_recorder(record),
                    close_time);
          
       end
@@ -448,7 +501,7 @@ class uvm_text_tr_stream extends uvm_tr_stream;
          UVM_FILE file = m_text_db.m_file;
          $fdisplay(file, "FREE @%0t {TXH:%0d}",
                    $time,
-                   uvm_tr_database::m_get_tr_handle(record));
+                   uvm_tr_recorder::m_get_id_from_recorder(record));
       end
       // Arbitrary size, useful for example purposes
       if (m_free_trs.size() < 8) begin

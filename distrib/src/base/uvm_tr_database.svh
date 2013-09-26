@@ -24,6 +24,11 @@
 //------------------------------------------------------------------------------
 // File: Transaction Recording Databases
 //
+// The UVM "Transaction Recording Database" classes are an abstract representation
+// of the backend tool which is recording information for the user.  Usually this
+// tool would be dumping information such that it can be viewed with the ~waves~ 
+// of the DUT.
+//
 
 typedef class uvm_tr_stream;
 typedef class uvm_link_base;
@@ -35,10 +40,7 @@ typedef class uvm_text_tr_stream;
 //
 // CLASS: uvm_tr_database
 //
-// The ~uvm_tr_database~ base class is a representation of the backend database
-// which is being used to store information.
-//
-// The record database is intended to hide the underlying database implementation
+// The ~uvm_tr_database~ class is intended to hide the underlying database implementation
 // from the end user, as these details are often vendor or tool-specific.
 //
 // The ~uvm_tr_database~ class is pure virtual, and must be extended with an
@@ -48,22 +50,6 @@ typedef class uvm_text_tr_stream;
 
 virtual class uvm_tr_database extends uvm_object;
 
-   // Variable- m_recorders
-   // Provided for backwards compat
-   local static uvm_tr_recorder m_recorders[int];
-
-   // variable- m_streams
-   // Provided for backwards compat
-   local static uvm_tr_stream m_streams[int];
-
-   // variable- m_handles
-   // Provided for backwards compat
-   local static int m_handles[uvm_object];
-
-   // Variable- m_handle
-   // Provided for backwards compat
-   local static int m_handle;
-   
    // Function: new
    // Constructor
    //
@@ -190,76 +176,6 @@ virtual class uvm_tr_database extends uvm_object;
    // Backend implementation of <establish_link>
    protected pure virtual function void do_establish_link(uvm_link_base link);
 
-   //------- Implementation Details Below, NOT DOCUMENTED --------
-
-   // Provided for backwards compat
-   static function int m_get_tr_handle(uvm_tr_recorder record);
-      if (record != null) begin
-         if (m_handles.exists(record))
-           return m_handles[record];
-
-         m_handle++;
-         m_recorders[m_handle] = record;
-         m_handles[record] = m_handle;
-         return m_handle;
-      end
-      else begin
-         return 0;
-      end
-   endfunction : m_get_tr_handle
-
-   // Provided for backwards compat
-   static function uvm_tr_recorder m_get_tr_from_handle(int handle);
-      if (m_recorders.exists(handle))
-        return m_recorders[handle];
-      return null;
-   endfunction : m_get_tr_from_handle
-
-   // Provided for backwards compat
-   static function void m_free_tr_handle(uvm_tr_recorder record);
-      if (record == null)
-        return;
-
-      if (m_handles.exists(record)) begin
-         m_recorders.delete(m_handles[record]);
-         m_handles.delete(record);
-      end
-   endfunction : m_free_tr_handle
-
-   // Provided for backwards compat
-   static function int m_get_stream_handle(uvm_tr_stream stream);
-      if (stream != null) begin
-         if (m_handles.exists(stream))
-           return m_handles[stream];
-         
-         m_streams[++m_handle] = stream;
-         m_handles[stream] = m_handle;
-         return m_handle;
-      end
-      else begin
-         return 0;
-      end
-   endfunction : m_get_stream_handle
-
-   // Provided for backwards compat
-   static function uvm_tr_stream m_get_stream_from_handle(int handle);
-      if (m_streams.exists(handle))
-        return m_streams[handle];
-      return null;
-   endfunction : m_get_stream_from_handle
-   
-   // Provided for backwards compat
-   static function void m_free_stream_handle(uvm_tr_stream stream);
-      if (stream == null)
-        return;
-
-      if (m_handles.exists(stream)) begin
-         m_streams.delete(m_handles[stream]);
-         m_handles.delete(stream);
-      end
-   endfunction : m_free_stream_handle
-   
-   
 endclass : uvm_tr_database
 
 //------------------------------------------------------------------------------
@@ -330,7 +246,7 @@ class uvm_text_tr_database extends uvm_tr_database;
                    name,
                    type_name,
                    (cntxt == null) ? "" : cntxt.get_full_name(),
-                   uvm_tr_database::m_get_stream_handle(m_stream));
+                   uvm_tr_stream::m_get_id_from_stream(m_stream));
          return m_stream;
       end // if (open_db())
       return null;
@@ -358,16 +274,16 @@ class uvm_text_tr_database extends uvm_tr_database;
             if ($cast(pc_link, link)) begin
                $fdisplay(m_file,"  LINK @%0t {TXH1:%0d TXH2:%0d RELATION=%0s}",
                          $time,
-                         uvm_tr_database::m_get_tr_handle(r_lhs),
-                         uvm_tr_database::m_get_tr_handle(r_rhs),
+                         uvm_tr_recorder::m_get_id_from_recorder(r_lhs),
+                         uvm_tr_recorder::m_get_id_from_recorder(r_rhs),
                          "child");
                          
             end
             else if ($cast(re_link, link)) begin
                $fdisplay(m_file,"  LINK @%0t {TXH1:%0d TXH2:%0d RELATION=%0s}",
                          $time,
-                         uvm_tr_database::m_get_tr_handle(r_lhs),
-                         uvm_tr_database::m_get_tr_handle(r_rhs),
+                         uvm_tr_recorder::m_get_id_from_recorder(r_lhs),
+                         uvm_tr_recorder::m_get_id_from_recorder(r_rhs),
                          "");
                
             end

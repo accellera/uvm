@@ -75,6 +75,7 @@ Group: Reporting  {
    }  # Group: Reporting
 
 Group: Recording {
+   File: Overview                 (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/recording.txt)
    File: uvm_tr_database          (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_tr_database.svh)
    File: uvm_tr_stream            (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_tr_stream.svh)
 }  # Group: Recording
