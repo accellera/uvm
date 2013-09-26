@@ -202,8 +202,6 @@ virtual class uvm_resource_base extends uvm_object;
   protected bit modified;
   protected bit read_only;
 
-  local bit m_is_regex_name;
-
   uvm_resource_types::access_t access[string];
 
   // variable: precedence
@@ -236,8 +234,6 @@ virtual class uvm_resource_base extends uvm_object;
     modified = 0;
     read_only = 0;
     precedence = default_precedence;
-    if(uvm_has_wildcard(name))
-      m_is_regex_name = 1;
   endfunction
 
   // Function: get_type_handle
@@ -583,10 +579,6 @@ virtual class uvm_resource_base extends uvm_object;
     access_record.read_count = 0;
     access_record.write_count = 0;
   endfunction
-
-  virtual function bit has_regex_name();
-  	return m_is_regex_name;
-  endfunction
 endclass
 
 
@@ -667,7 +659,6 @@ endclass
 
 class uvm_resource_pool;
 
-  static bit m_has_wildcard_names;
   static local uvm_resource_pool rp = get();
 
   uvm_resource_types::rsrc_q_t rtab [string];
@@ -770,11 +761,6 @@ class uvm_resource_pool;
       rq.push_back(rsrc);
     ttab[type_handle] = rq;
 
-    //optimization for name lookups. Since most environments never
-    //use wildcarded names, don't want to incurr a search penalty
-    //unless a wildcarded name has been used.
-    if(rsrc.has_regex_name())
-      m_has_wildcard_names = 1;
   endfunction
 
   // Function: set_override
@@ -1061,42 +1047,15 @@ class uvm_resource_pool;
   // Function: lookup_regex_names
   //
   // This utility function answers the question, for a given ~name~,
-  // ~scope~,and ~type_handle~, what are all of the resources with a
-  // matching name (where the resource name may be a regular
-  // expression), a matching scope (where the resoucre scope may be a
-  // regular expression), and a matching type? ~name~ and ~scope~ are
-  // explicit values.
+  // ~scope~,and ~type_handle~, what are all of the resources with requested name,
+  // a matching scope (where the resoucre scope may be a
+  // regular expression), and a matching type? 
+  // ~name~ and ~scope~ are explicit values.
 
   function uvm_resource_types::rsrc_q_t lookup_regex_names(string scope,
                                                            string name,
                                                            uvm_resource_base type_handle = null);
-
-    uvm_resource_types::rsrc_q_t rq;
-    uvm_resource_types::rsrc_q_t result_q;
-    int unsigned i;
-    uvm_resource_base r;
-
-    //For the simple case where no wildcard names exist, then we can
-    //just return the queue associated with name.
-    if(!m_has_wildcard_names) begin
-      result_q = lookup_name(scope, name, type_handle, 0);
-      return result_q;
-    end
-
-    result_q = new();
-
-    foreach (rtab[re]) begin
-      rq = rtab[re];
-      for(i = 0; i < rq.size(); i++) begin
-        r = rq.get(i);
-        if(uvm_re_match(uvm_glob_to_re(re),name) == 0)
-          // does the type and scope match?
-          if(((type_handle == null) || (r.get_type_handle() == type_handle)) &&
-             r.match_scope(scope))
-            result_q.push_back(r);
-      end
-    end
-    return result_q;
+      return lookup_name(scope, name, type_handle, 0);
   endfunction
 
   // Function: lookup_regex
@@ -1439,6 +1398,18 @@ class uvm_resource #(type T=int) extends uvm_resource_base;
 
   function new(string name="", scope="");
     super.new(name, scope);
+    
+`ifndef UVM_NO_DEPRECATED
+begin
+	for(int i=0;i<name.len();i++) begin
+		if(name.getc(i) inside {".","/","[","*","{"}) begin
+			`uvm_warning("UVM/RSRC/NOREGEX", $sformatf("a resource with meta characters in the field name has been created \"%s\"",name))
+			break;
+		end	
+	end	
+end
+
+`endif    
   endfunction
 
   function string convert2string();

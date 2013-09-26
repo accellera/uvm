@@ -3,6 +3,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
+//   Copyright 2013 NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -194,21 +195,57 @@ virtual class uvm_sqr_if_base #(type T1=uvm_object, T2=T1);
   //
   //   rsp.set_id_info(req);
   //
-  // This task will not block. The response will be put into the
+  // While this is a task, it will not consume time (including delta cycles).
+  // The response will be put into the
   // sequence response queue or it will be sent to the
   // sequence response handler.
+  //
+   
 
   virtual task put(input T2 t);
     uvm_report_error("put", `UVM_SEQ_ITEM_TASK_ERROR, UVM_NONE);
   endtask
 
 
-  // Function- put_response
+  // Function: put_response
   //
-  // Internal method.
+  // Sends a response back to the sequence that issued the request. Before the
+  // response is put, it must have it's sequence ID and transaction ID set to
+  // match the request.  This can be done using the
+  // <uvm_sequence_item::set_id_info> call:
+  //
+  //   rsp.set_id_info(req);
+  //
 
   virtual function void put_response(input T2 t);
     uvm_report_error("put_response", `UVM_SEQ_ITEM_FUNCTION_ERROR, UVM_NONE);
   endfunction
 
+  // Function: disable_auto_item_recording
+  //
+  // By default, item recording is performed automatically when
+  // get_next_item() and item_done() are called.
+  // However, this works only for simple, in-order, blocking transaction
+  // execution. For pipelined and out-of-order transaction execution, the
+  // driver must turn off this automatic recording and call
+  // uvm_transaction::accept_tr, uvm_transaction::begin_tr
+  // and uvm_transaction::end_tr explicitly at appropriate points in time.
+  //
+  // This methods be called at the beginning of the driver's run_phase() method.
+  // Once disabled, automatic recording cannot be re-enabled.
+  //
+  // For backward-compatibility, automatic item recording can be globally
+  // turned off at compile time by defining UVM_DISABLE_AUTO_ITEM_RECORDING
+
+  virtual function void disable_auto_item_recording();
+    uvm_report_error("disable_auto_item_recording", `UVM_SEQ_ITEM_FUNCTION_ERROR, UVM_NONE);
+  endfunction
+  
+  // Function: is_auto_item_recording_enabled
+  //
+  // Return TRUE if automatic item recording is enabled for this port instance.
+
+  virtual function bit is_auto_item_recording_enabled();
+    uvm_report_error("is_auto_item_recording_enabled", `UVM_SEQ_ITEM_FUNCTION_ERROR, UVM_NONE);
+  endfunction
 endclass

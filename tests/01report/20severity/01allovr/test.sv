@@ -33,14 +33,14 @@ import uvm_pkg::*;
 
 bit pass = 1;
 class my_catcher extends uvm_report_catcher;
-   int sev[uvm_severity_type];
-   uvm_severity_type s;
+   int sev[uvm_severity];
+   uvm_severity s;
 
    virtual function action_e catch(); 
-      s = uvm_severity_type'(get_severity());
+      s = uvm_severity'(get_severity());
 
       // Ignore messages from root component
-      if(get_client() == uvm_root::get())
+      if(get_client() == uvm_coreservice.get_root())
         return THROW;
  
       sev[s] ++;
@@ -117,7 +117,7 @@ class test extends uvm_test;
       end
       foreach(ctchr.sev[i])
          if(ctchr.sev[i] != 8) begin
-            uvm_severity_type s = i;
+            uvm_severity s = i;
             $display("*** UVM TEST FAILED Expected to catch 8 messages of type %s, but got %0d instead ***", s.name(), ctchr.sev[i]);
             pass = 0;
          end
@@ -125,7 +125,7 @@ class test extends uvm_test;
       if (pass) $write("** UVM TEST PASSED **\n");
    endfunction
 
-   function void set_all_severities(uvm_severity_type sev);
+   function void set_all_severities(uvm_severity sev);
      set_report_severity_override(UVM_INFO, sev);
      set_report_severity_override(UVM_WARNING, sev);
      set_report_severity_override(UVM_ERROR, sev);

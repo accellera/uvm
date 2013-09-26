@@ -2,6 +2,7 @@
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc. 
 //   Copyright 2010 Synopsys, Inc.
+//   Copyright 2013 Cisco Systems, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -35,7 +36,19 @@ virtual class uvm_sequence #(type REQ = uvm_sequence_item,
   typedef uvm_sequencer_param_base #(REQ, RSP) sequencer_t;
 
   sequencer_t        param_sequencer;
+
+  // Variable: req
+  //
+  // The sequence contains a field of the request type called req.  The user
+  // can use this field, if desired, or create another field to use.  The
+  // default <do_print> will print this field.
   REQ                req;
+
+  // Variable: rsp
+  //
+  // The sequence contains a field of the response type called rsp.  The user
+  // can use this field, if desired, or create another field to use.   The
+  // default <do_print> will print this field.
   RSP                rsp;
 
   // Function: new

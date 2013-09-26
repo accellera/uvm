@@ -114,24 +114,25 @@ class slave_memory_seq extends uvm_sequence #(ubus_transfer);
   endfunction
 
   virtual task body();
+    uvm_phase p;
     `uvm_info(get_type_name(),
       $sformatf("%s starting...",
       get_sequence_path()), UVM_MEDIUM);
 
     $cast(req, create_item(ubus_transfer::get_type(), p_sequencer, "req"));
-
+    p=get_starting_phase();
     forever
     begin
       p_sequencer.addr_ph_port.peek(util_transfer);
 
       // Need to raise/drop objection before each item because we don't want
       // to be stopped in the middle of a transfer.
-      starting_phase.raise_objection(this);
+      p.raise_objection(this);
 
       start_item(req);
       finish_item(req);
 
-      starting_phase.drop_objection(this);
+      p.drop_objection(this);
     end
   endtask : body
 

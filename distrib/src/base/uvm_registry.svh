@@ -89,9 +89,10 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
 
   static function this_type get();
     if (me == null) begin
-      uvm_factory f = uvm_factory::get();
+  	  uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  	  uvm_factory factory=cs.get_factory();
       me = new;
-      f.register(me);
+      factory.register(me);
     end
     return me;
   endfunction
@@ -107,10 +108,11 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
 
   static function T create(string name, uvm_component parent, string contxt="");
     uvm_object obj;
-    uvm_factory f = uvm_factory::get();
+    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_factory factory=cs.get_factory();
     if (contxt == "" && parent != null)
       contxt = parent.get_full_name();
-    obj = f.create_component_by_type(get(),contxt,name,parent);
+    obj = factory.create_component_by_type(get(),contxt,name,parent);
     if (!$cast(create, obj)) begin
       string msg;
       msg = {"Factory did not return a component of type '",type_name,
@@ -131,6 +133,8 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
 
   static function void set_type_override (uvm_object_wrapper override_type,
                                           bit replace=1);
+                                            uvm_factory factory=uvm_coreservice.get_factory();
+                                          
     factory.set_type_override_by_type(get(),override_type,replace);
   endfunction
 
@@ -154,6 +158,9 @@ class uvm_component_registry #(type T=uvm_component, string Tname="<unknown>")
                                          string inst_path,
                                          uvm_component parent=null);
     string full_inst_path;
+    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_factory factory=cs.get_factory();
+    
     if (parent != null) begin
       if (inst_path == "")
         inst_path = parent.get_full_name();
@@ -192,13 +199,13 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
 
   virtual function uvm_object create_object(string name="");
     T obj;
-`ifdef UVM_OBJECT_MUST_HAVE_CONSTRUCTOR
-    if (name=="") obj = new();
-    else obj = new(name);
-`else
+`ifdef UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR
     obj = new();
     if (name!="")
       obj.set_name(name);
+`else
+    if (name=="") obj = new();
+    else obj = new(name);
 `endif
     return obj;
   endfunction
@@ -223,9 +230,10 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
 
   static function this_type get();
     if (me == null) begin
-      uvm_factory f = uvm_factory::get();
+      uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+      uvm_factory factory=cs.get_factory();
       me = new;
-      f.register(me);
+      factory.register(me);
     end
     return me;
   endfunction
@@ -242,10 +250,12 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
   static function T create (string name="", uvm_component parent=null,
                             string contxt="");
     uvm_object obj;
-    uvm_factory f = uvm_factory::get();
+    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_factory factory=cs.get_factory();
+  
     if (contxt == "" && parent != null)
       contxt = parent.get_full_name();
-    obj = f.create_object_by_type(get(),contxt,name);
+    obj = factory.create_object_by_type(get(),contxt,name);
     if (!$cast(create, obj)) begin
       string msg;
       msg = {"Factory did not return an object of type '",type_name,
@@ -266,6 +276,8 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
 
   static function void set_type_override (uvm_object_wrapper override_type,
                                           bit replace=1);
+                                            uvm_factory factory=uvm_coreservice.get_factory();
+                                          
     factory.set_type_override_by_type(get(),override_type,replace);
   endfunction
 
@@ -289,6 +301,9 @@ class uvm_object_registry #(type T=uvm_object, string Tname="<unknown>")
                                          string inst_path,
                                          uvm_component parent=null);
     string full_inst_path;
+    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_factory factory=cs.get_factory();
+    
     if (parent != null) begin
       if (inst_path == "")
         inst_path = parent.get_full_name();

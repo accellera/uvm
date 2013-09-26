@@ -262,13 +262,12 @@ class uvm_report_object extends uvm_object;
   // Function: report_summarize
   //
   // Outputs statistical information on the reports issued by the central report
-  // server. This information will be sent to the command line if ~file~ is 0, or
-  // to the file descriptor ~file~ if it is not 0.
+  // server.
   //
   // The run_test method in uvm_top calls this method.
 
-  virtual function void report_summarize(UVM_FILE file = 0);
-    m_rh.summarize(file);
+  virtual function void report_summarize();
+    m_rh.summarize();
   endfunction
 
 
@@ -285,7 +284,7 @@ class uvm_report_object extends uvm_object;
 
   virtual function void die();
     // make the pre_abort callbacks
-    uvm_root top = uvm_root::get();
+    uvm_root top = uvm_coreservice.get_root();
     top.m_do_pre_abort();
 
     report_summarize();
@@ -314,10 +313,12 @@ class uvm_report_object extends uvm_object;
 
   // Function: set_report_severity_id_verbosity
   //
-  // These methods associate the specified verbosity with reports of the
-  // given ~severity~, ~id~, or ~severity-id~ pair. An verbosity associated with a
-  // particular ~severity-id~ pair takes precedence over an verbosity associated with
-  // ~id~, which take precedence over an an verbosity associated with a ~severity~.
+  // These methods associate the specified verbosity threshold with reports of the
+  // given ~severity~, ~id~, or ~severity-id~ pair. This threshold is compared with
+  // the verbosity originally assigned to the report to decide whether it gets
+  // processed.  A verbosity threshold associated with a particular ~severity-id~ 
+  // pair takes precedence over an verbosity threshold associated with ~id~, which 
+  // takes precedence over an an verbosity threshold associated with a ~severity~.
   //
   // The ~verbosity~ argument can be any integer, but is most commonaly a
   // predefined <uvm_verbosity> value, <UVM_NONE>, <UVM_LOW>, <UVM_MEDIUM>,
