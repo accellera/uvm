@@ -1561,22 +1561,28 @@ virtual class uvm_component extends uvm_report_object;
                                                 bit    keep_active=0);
 
   // Function: get_tr_stream
+  // Returns a record stream with ~this~ component context.
   //
-  // This function returns a record stream with this component context.
+  // Streams which are retrieved via this method will be stored internally,
+  // such that later calls to ~get_tr_stream~ will return the same stream
+  // reference.
   //
-  // This is a helper method around the following code:
-  // 
-  // | if (tr_database == null)  begin
-  // |    uvm_coreservice_t cs = uvm_coreservice_t::get();
-  // |    tr_database = cs.get_default_tr_database();
-  // | end
-  // | stream = tr_database.get_stream(name, stream_type_name);
+  // The stream can be removed from the internal storage via a call
+  // to <free_tr_stream>.
   //
   // Parameters:
   // name - Name for the stream
   // stream_type_name - Type name for the stream (Default = "")
   extern virtual function uvm_tr_stream get_tr_stream(string name,
-                                                              string stream_type_name="");
+                                                       string stream_type_name="");
+
+  // Function: free_tr_stream
+  // Frees the internal references associated with ~stream~.
+  //
+  // The next call to <get_tr_stream> will result in a newly created
+  // <uvm_tr_stream>.  If the current stream is open (or closed),
+  // then it will be freed.
+  extern virtual function void free_tr_stream(uvm_tr_stream stream);
 
   // Variable: print_enabled
   //
@@ -2623,12 +2629,40 @@ endfunction
 // get_tr_stream
 // ------------
 function uvm_tr_stream uvm_component::get_tr_stream( string name,
-                                                             string stream_type_name="" );
+                                                      string stream_type_name="" );
    uvm_tr_database db = m_get_tr_database();
    if (!m_streams.exists(name) || !m_streams[name].exists(stream_type_name))
-     m_streams[name][stream_type_name] = db.get_stream(name, this, stream_type_name);
+     m_streams[name][stream_type_name] = db.open_stream(name, this, stream_type_name);
    return m_streams[name][stream_type_name];
 endfunction : get_tr_stream
+
+// free_tr_stream
+// --------------
+function void uvm_component::free_tr_stream(uvm_tr_stream stream);
+   // Check the null case...
+   if (stream == null)
+     return;
+
+   // Then make sure this name/type_name combo exists
+   if (!m_streams.exists(stream.get_name()) ||
+       !m_streams[stream.get_name()].exists(stream.get_stream_type_name()))
+     return;
+
+   // Then make sure this name/type_name combo is THIS stream
+   if (m_streams[stream.get_name()][stream.get_stream_type_name()] != stream)
+     return;
+
+   // Then delete it from the arrays
+   m_streams[stream.get_name()].delete(stream.get_type_name());
+   if (m_streams[stream.get_name()].size() == 0)
+     m_streams.delete(stream.get_name());
+
+   // Finally, free the stream if necessary
+   if (stream.is_open() || stream.is_closed()) begin
+      uvm_tr_database tr_db = stream.get_db();
+      tr_db.free_stream(stream);
+   end
+endfunction : free_tr_stream
    
 // m_begin_tr
 // ----------
@@ -2676,7 +2710,7 @@ function uvm_tr_recorder uvm_component::m_begin_tr (uvm_transaction tr,
 
       if (stream == null) begin
          if (m_main_stream == null)
-           m_main_stream = tr_database.get_stream("main", this, "TVM");
+           m_main_stream = tr_database.open_stream("main", this, "TVM");
          stream = m_main_stream;
       end
 
@@ -2783,7 +2817,7 @@ function uvm_tr_recorder uvm_component::record_error_tr (uvm_tr_stream stream=nu
    
    if (stream == null) begin
       if (m_main_stream == null)
-        m_main_stream = tr_database.get_stream("main", this, "TVM");
+        m_main_stream = tr_database.open_stream("main", this, "TVM");
       stream = m_main_stream;
    end
 
@@ -2829,7 +2863,7 @@ function uvm_tr_recorder uvm_component::record_event_tr (uvm_tr_stream stream=nu
    
    if (stream == null) begin
       if (m_main_stream == null)
-        m_main_stream = tr_database.get_stream("main", this, "TVM");
+        m_main_stream = tr_database.open_stream("main", this, "TVM");
       stream = m_main_stream;
    end
    

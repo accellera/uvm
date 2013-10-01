@@ -25,14 +25,14 @@
 // File: Transaction Recording Streams
 //
 
-// class- m_uvm_tr_stream_init
+// class- m_uvm_tr_stream_cfg
 // Undocumented helper class for storing stream
 // initialization values.
-class m_uvm_tr_stream_init;
+class m_uvm_tr_stream_cfg;
    uvm_tr_database db;
    uvm_component cntxt;
    string stream_type_name;
-endclass : m_uvm_tr_stream_init
+endclass : m_uvm_tr_stream_cfg
 
 typedef class uvm_set_before_get_dap;
 typedef class uvm_text_recorder;
@@ -53,9 +53,9 @@ typedef class uvm_text_recorder;
 //
 virtual class uvm_tr_stream extends uvm_object;
 
-   // Variable- m_init_dap
+   // Variable- m_cfg_dap
    // Data access protected reference to the DB
-   local uvm_set_before_get_dap#(m_uvm_tr_stream_init) m_init_dap;
+   local uvm_set_before_get_dap#(m_uvm_tr_stream_cfg) m_cfg_dap;
 
    // Variable- m_open_records
    // Used for tracking records between the open..closed state
@@ -65,6 +65,10 @@ virtual class uvm_tr_stream extends uvm_object;
    // Used for tracking records between the closed..free state
    time m_closed_records[uvm_tr_recorder];
 
+   // Variable- m_warn_null_cfg
+   // Used to limit the number of warnings
+   local bit m_warn_null_cfg;
+   
    // Function: new
    // Constructor
    //
@@ -72,7 +76,7 @@ virtual class uvm_tr_stream extends uvm_object;
    // name - Stream instance name
    function new(string name="unnamed-uvm_tr_stream");
       super.new(name);
-      m_init_dap = new("init_dap");
+      m_cfg_dap = new("cfg_dap");
    endfunction : new
 
    // Group: Stream API
@@ -94,54 +98,60 @@ virtual class uvm_tr_stream extends uvm_object;
    // Returns a reference to the database which contains this
    // stream.
    //
-   // An error will be asserted if get_db is called prior to
-   // the stream being initialized via <initialize_stream>.
+   // A warning will be asserted if get_db is called prior to
+   // the stream being initialized via <configure>.
    function uvm_tr_database get_db();
-      m_uvm_tr_stream_init m_init;
-      if (!m_init_dap.try_get(m_init)) begin
-         `uvm_error("UVM/REC_STR/NO_INIT",
-                    $sformatf("Illegal attempt to retrieve DB from '%s' before it was set!",
-                              get_name()))
+      m_uvm_tr_stream_cfg m_cfg;
+      if (!m_cfg_dap.try_get(m_cfg)) begin
+         if (m_warn_null_cfg == 1)
+           `uvm_warning("UVM/REC_STR/NO_CFG",
+                        $sformatf("attempt to retrieve DB from '%s' before it was set!",
+                                  get_name()))
+         m_warn_null_cfg = 0;
          return null;
       end
-      return m_init.db;
+      return m_cfg.db;
    endfunction : get_db
       
    // Function: get_context
    // Returns a reference to the database which contains this
    // stream.
    //
-   // An error will be asserted if get_context is called prior to
-   // the stream being initialized via <initialize_stream>.
+   // A warning will be asserted if get_context is called prior to
+   // the stream being initialized via <configure>.
    function uvm_component get_context();
-      m_uvm_tr_stream_init m_init;
-      if (!m_init_dap.try_get(m_init)) begin
-         `uvm_error("UVM/REC_STR/NO_INIT",
-                    $sformatf("Illegal attempt to retrieve CONTEXT from '%s' before it was set!",
-                              get_name()))
+      m_uvm_tr_stream_cfg m_cfg;
+      if (!m_cfg_dap.try_get(m_cfg)) begin
+         if (m_warn_null_cfg == 1)
+           `uvm_warning("UVM/REC_STR/NO_CFG",
+                        $sformatf("attempt to retrieve CONTEXT from '%s' before it was set!",
+                                  get_name()))
+         m_warn_null_cfg = 0;
          return null;
       end
-      return m_init.cntxt;
+      return m_cfg.cntxt;
    endfunction : get_context
       
    // Function: get_stream_type_name
    // Returns a reference to the database which contains this
    // stream.
    //
-   // An error will be asserted if get_stream_type_name is called prior to
-   // the stream being initialized via <initialize_stream>.
+   // A warning will be asserted if get_stream_type_name is called prior to
+   // the stream being initialized via <configure>.
    function string get_stream_type_name();
-      m_uvm_tr_stream_init m_init;
-      if (!m_init_dap.try_get(m_init)) begin
-         `uvm_error("UVM/REC_STR/NO_INIT",
-                    $sformatf("Illegal attempt to retrieve STREAM_TYPE_NAME from '%s' before it was set!",
-                              get_name()))
+      m_uvm_tr_stream_cfg m_cfg;
+      if (!m_cfg_dap.try_get(m_cfg)) begin
+         if (m_warn_null_cfg == 1)
+           `uvm_warning("UVM/REC_STR/NO_CFG",
+                        $sformatf("attempt to retrieve STREAM_TYPE_NAME from '%s' before it was set!",
+                                  get_name()))
+         m_warn_null_cfg = 0;
          return "";
       end
-      return m_init.stream_type_name;
+      return m_cfg.stream_type_name;
    endfunction : get_stream_type_name
 
-   // Function: initialize_stream
+   // Function: configure
    // Initializes the state of the stream
    //
    // Parameters:
@@ -149,16 +159,17 @@ virtual class uvm_tr_stream extends uvm_object;
    // context - Optional component context
    // stream_type_name - Optional type name for the stream
    //
-   // This method will trigger a <do_initialize_stream> call.
+   // This method will trigger a <do_configure> call.
    //
    // An error will be asserted if:
-   // - initialize_stream is called more than once
-   // - initialize_stream is passed a ~null~ db
-   function void initialize_stream(uvm_tr_database db,
-                                   uvm_component cntxt=null,
-                                   string stream_type_name="");
+   // - configure is called more than once without the stream
+   //   being ~freed~ between.
+   // - configure is passed a ~null~ db
+   function void configure(uvm_tr_database db,
+                           uvm_component cntxt=null,
+                           string stream_type_name="");
       
-      m_uvm_tr_stream_init m_init;
+      m_uvm_tr_stream_cfg m_cfg;
       uvm_tr_database m_db;
       if (db == null) begin
          `uvm_error("UVM/REC_STR/NULL_DB",
@@ -167,26 +178,68 @@ virtual class uvm_tr_stream extends uvm_object;
          return;
       end
 
-      if (m_init_dap.try_get(m_init)) begin
-         `uvm_error("UVM/REC_STR/RE_INIT",
-                    $sformatf("Illegal attempt to re-initialize '%s'",
+      if (m_cfg_dap.try_get(m_cfg)) begin
+         `uvm_error("UVM/REC_STR/RE_CFG",
+                    $sformatf("Illegal attempt to re-configure '%s'",
                               this.get_full_name()))
       end
       else begin
          // Never set before
-         m_init = new();
-         m_init.db = db;
-         m_init.cntxt = cntxt;
-         m_init.stream_type_name = stream_type_name;
-         m_init_dap.set(m_init);
+         m_cfg = new();
+         m_cfg.db = db;
+         m_cfg.cntxt = cntxt;
+         m_cfg.stream_type_name = stream_type_name;
+         m_cfg_dap.set(m_cfg);
 
-         do_initialize_stream(db, cntxt, stream_type_name);
+         do_configure(db, cntxt, stream_type_name);
       end
       
-   endfunction : initialize_stream
+   endfunction : configure
+
+   // Function: flush
+   // Flushes the internal state of the stream.
+   //
+   // This method will be called automatically when the
+   // stream is ~freed~ on the database.
+   //
+   // This method will trigger a <do_flush> call.
+   function void flush();
+      m_cfg_dap = new("cfg_dap");
+      m_warn_null_cfg = 1;
+      // Backwards compat
+      if (m_ids_by_stream.exists(this))
+        m_free_id(m_ids_by_stream[this]);
+      do_flush();
+   endfunction : flush
+   
+   // Function: is_open
+   // Returns true if this ~uvm_tr_stream~ was opened on the database,
+   // but has not yet been closed.
+   //
+   function bit is_open();
+      m_uvm_tr_stream_cfg m_cfg;
+      if (!m_cfg_dap.try_get(m_cfg))
+        return 0;
+
+      return m_cfg.db.is_stream_open(this);
+   endfunction : is_open
+
+   // Function: is_closed
+   // Returns true if this ~uvm_tr_stream~ was closed on the database,
+   // but has not yet been freed.
+   //
+   function bit is_closed();
+      m_uvm_tr_stream_cfg m_cfg;
+      if (!m_cfg_dap.try_get(m_cfg))
+        return 0;
+
+      return m_cfg.db.is_stream_closed(this);
+   endfunction : is_closed
+
+   // Group: Transaction Recorder API
    
    // Function: open_tr
-   // Marks the opening of a new transaction in the stream.
+   // Marks the opening of a new transaction recorder on the stream.
    //
    // Parameters:
    // name - A name for the new transaction
@@ -197,10 +250,19 @@ virtual class uvm_tr_stream extends uvm_object;
    // the current time.
    //
    // This method will trigger a <do_open_tr> call.
+   //
+   // Transaction recorders can only be opened if the stream is
+   // ~open~ on the database (per <is_open>).  Otherwise the
+   // request will be ignored, and ~null~ will be returned.
    function uvm_tr_recorder open_tr(string name,
                                       time   open_time = 0,
                                       string type_name="");
       time m_time = (open_time == 0) ? $time : open_time;
+
+      // Check to make sure we're open
+      if (!is_open())
+        return null;
+      
       open_tr = do_open_tr(name,
                                      m_time,
                                      type_name);
@@ -304,22 +366,85 @@ virtual class uvm_tr_stream extends uvm_object;
 
       m_closed_records.delete(record);
 
-      record.free_recorder();
+      record.flush();
       
       do_free_tr(record);
 
    endfunction : free_tr
 
+   // Function: get_open_trs
+   // Provides a queue of all open transactions within the stream.
+   //
+   // Parameters:
+   //  q - A reference to a queue of <uvm_tr_recorder>s
+   //
+   // The ~get_open_trs~ method returns the size of the queue,
+   // such that the user can conditionally process the elements.
+   //
+   // | uvm_tr_recorder tr_q[$];
+   // | if (my_stream.get_open_trs(tr_q)) begin
+   // |   // Process the queue...
+   // | end
+   function unsigned get_open_trs(ref uvm_tr_recorder q[$]);
+      // Clear out the queue first...
+      q.delete();
+      // Then fill in the values
+      foreach (m_open_records[idx])
+        q.push_back(idx);
+      // Finally, return the size of the queue
+      return q.size();
+   endfunction : get_open_trs
+
+   // Function: get_closed_trs
+   // Provides a queue of all closed transactions within the stream.
+   //
+   // Parameters:
+   //  q = A reference to a queue of <uvm_tr_recorder>s
+   //
+   // As with ~get_open_trs~, the ~get_closed_trs~ method returns 
+   // the size of the queue, such that the user can conditionally 
+   // process the elements.
+   //
+   function unsigned get_closed_trs(ref uvm_tr_recorder q[$]);
+      // Clear out the queue first...
+      q.delete();
+      // Then fill in the values
+      foreach (m_closed_records[idx])
+        q.push_back(idx);
+      // Finally, return the size of the queue
+      return q.size();
+   endfunction : get_closed_trs
+   
+   // Function: is_tr_open
+   // Returns true if the <uvm_tr_recorder> has been ~opened~, but not ~closed~.
+   //
+   function bit is_tr_open(uvm_tr_recorder tr);
+      return m_open_records.exists(tr);
+   endfunction : is_tr_open
+
+   // Function: is_tr_closed
+   // Returns true if the <uvm_tr_recorder> has been ~closed~, but not ~freed~.
+   //
+   function bit is_tr_closed(uvm_tr_recorder tr);
+      return m_closed_records.exists(tr);
+   endfunction : is_tr_closed
+   
    // Group: Implementation Agnostic API
    //
 
-   // Function: do_initialize_stream
+   // Function: do_configure
    // Initializes the state of the stream
    //
-   // Backend implementation of <initialize_stream>
-   protected pure virtual function void do_initialize_stream(uvm_tr_database db,
+   // Backend implementation of <configure>
+   protected pure virtual function void do_configure(uvm_tr_database db,
                                                              uvm_component cntxt,
                                                              string stream_type_name);
+
+   // Function: do_flush
+   // Flushes the internal state of the stream
+   //
+   // Backend implementation of <flush>
+   protected pure virtual function void do_flush();
 
    // Function: do_open_tr
    // Marks the beginning of a new record in the stream.
@@ -400,7 +525,19 @@ virtual class uvm_tr_stream extends uvm_object;
       return m_streams_by_id[id];
    endfunction : m_get_stream_from_id
         
-   
+   // Function- m_free_id
+   // Frees the id/stream link (memory cleanup)
+   //
+   static function void m_free_id(integer id);
+      uvm_tr_stream stream;
+      if (m_streams_by_id.exists(id))
+        stream = m_streams_by_id[id];
+
+      if (stream != null) begin
+         m_streams_by_id.delete(id);
+         m_ids_by_stream.delete(stream);
+      end
+   endfunction : m_free_id
 endclass : uvm_tr_stream
 
 //------------------------------------------------------------------------------
@@ -436,15 +573,23 @@ class uvm_text_tr_stream extends uvm_tr_stream;
 
    // Group: Implementation Agnostic API
 
-   // Function: do_initialize_stream
+   // Function: do_configure
    // Initiailizes the state of the stream
    //
-   protected virtual function void do_initialize_stream(uvm_tr_database db,
+   protected virtual function void do_configure(uvm_tr_database db,
                                                         uvm_component cntxt,
                                                         string stream_type_name);
       $cast(m_text_db, db);
-   endfunction : do_initialize_stream
+   endfunction : do_configure
 
+   // Function: do_flush
+   // Flushes the state of the stream
+   //
+   protected virtual function void do_flush();
+      m_text_db = null;
+      return;
+   endfunction : do_flush
+   
    // Function: do_open_tr
    // Marks the beginning of a new record in the stream
    //
@@ -462,7 +607,7 @@ class uvm_text_tr_stream extends uvm_tr_stream;
          else
            m_recorder = new(name);
          
-         m_recorder.initialize_recorder(this);
+         m_recorder.configure(this);
          $fdisplay(file, "BEGIN @%0t {TXH:%0d STREAM:%0d NAME:%s TIME:%0t TYPE=\"%0s\"}",
                    $time,
                    uvm_tr_recorder::m_get_id_from_recorder(m_recorder),

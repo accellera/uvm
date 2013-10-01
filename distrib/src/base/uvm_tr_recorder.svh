@@ -104,40 +104,66 @@ virtual class uvm_tr_recorder extends uvm_object;
   function new(string name = "uvm_tr_recorder");
      super.new(name);
      m_stream_dap = new("stream_dap");
+     m_warn_null_stream = 1;
   endfunction
 
+   // Group: Transaction Recorder API
+   
    // Function: get_stream
    // Returns a reference to the stream which created
    // this record.
    //
    // A warning will be asserted if get_stream is called prior
-   // to the record being initialized via <initialize_recorder>.
+   // to the record being initialized via <configure>.
    //
    function uvm_tr_stream get_stream();
       if (!m_stream_dap.try_get(get_stream)) begin
          if (m_warn_null_stream == 1) 
-           `uvm_warning("UVM/REC/NO_INIT",
+           `uvm_warning("UVM/REC/NO_CFG",
                         $sformatf("attempt to retrieve STREAM from '%s' before it was set!",
                                   get_name()))
          m_warn_null_stream = 0;
       end
    endfunction : get_stream
 
-  // Group: Implementation Agnostic API
+   // Function: is_open
+   // Returns true if this ~uvm_tr_recorder~ was opened on its stream,
+   // but has not yet been closed.
+   //
+   function bit is_open();
+      uvm_tr_stream stream;
+      if (!m_stream_dap.try_get(stream))
+        return 0;
 
-  // Function: initialize_recorder
+      return stream.is_tr_open(this);
+   endfunction : is_open
+
+   // Function: is_closed
+   // Returns true if this ~uvm_tr_recorder~ was closed on its stream,
+   // but has not yet been freed.
+   //
+   function bit is_closed();
+      uvm_tr_stream stream;
+      if (!m_stream_dap.try_get(stream))
+        return 0;
+
+      return stream.is_tr_closed(this);
+   endfunction : is_closed
+    
+
+  // Function: configure
   // Initializes the internal state of the recorder.
   //
   // Parameters:
   // stream - The stream which spawned this recorder
   //
-  // This method will trigger a <do_initialize_recorder> call.
+  // This method will trigger a <do_configure> call.
   //
   // An error will be asserted if:
-  // - ~initialized_recorder~ is called more than once without the
+  // - ~configure~ is called more than once without the
   //  recorder being ~freed~ in between.
   // - ~stream~ is ~null~
-  function void initialize_recorder(uvm_tr_stream stream);
+  function void configure(uvm_tr_stream stream);
      uvm_tr_stream m_stream;
      if (stream == null) begin
         `uvm_error("UVM/REC/NULL_STREAM",
@@ -155,21 +181,26 @@ virtual class uvm_tr_recorder extends uvm_object;
 
      m_stream_dap.set(stream);
 
-     do_initialize_recorder(stream);
-  endfunction : initialize_recorder
+     do_configure(stream);
+  endfunction : configure
 
-  // Function: free_recorder
-  // Releases the internal state of the recorder.
+  // Function: flush
+  // Flushes the internal state of the recorder.
   //
-  // This method will trigger a <do_free_recorder> call.
-  function void free_recorder();
+  // This method will be called automatically when the
+  // recorder is ~freed~ on the stream.
+  //
+  // This method will trigger a <do_flush> call.
+  function void flush();
      m_stream_dap = new("stream_dap");
      m_warn_null_stream = 1;
      // Backwards compat
      if (m_ids_by_recorder.exists(this))
        m_free_id(m_ids_by_recorder[this]);
-     do_free_recorder();
-  endfunction : free_recorder
+     do_flush();
+  endfunction : flush
+
+   // Group: Attribute Recording API
    
    // Function: record_field
    // Records an integral field (less than or equal to 4096 bits).
@@ -300,21 +331,21 @@ virtual class uvm_tr_recorder extends uvm_object;
       do_record_generic(name, value, type_name);
    endfunction : record_generic
 
-   // Group: Implementation Specific API
+   // Group: Implementation Agnostic API
 
    // Function: do_intiialize_recorder
    // Initializes the state of the recorder
    //
-   // ~Optional~ Backend implementation of <initialize_recorder>
-   protected virtual function void do_initialize_recorder(uvm_tr_stream stream);
-   endfunction : do_initialize_recorder
+   // ~Optional~ Backend implementation of <configure>
+   protected virtual function void do_configure(uvm_tr_stream stream);
+   endfunction : do_configure
 
-   // Function: do_free_recorder
+   // Function: do_flush
    // Frees the internal state of the recorder
    //
-   // ~Optional~ Backend implementation of <free_recorder>
-   protected virtual function void do_free_recorder();
-   endfunction : do_free_recorder
+   // ~Optional~ Backend implementation of <flush>
+   protected virtual function void do_flush();
+   endfunction : do_flush
    
    // Function: do_record_field
    // Records an integral field (less than or equal to 4096 bits).
@@ -578,21 +609,21 @@ class uvm_text_recorder extends uvm_tr_recorder;
 
    // Group: Implementation Specific API
 
-   // Function: do_initialize_recorder
+   // Function: do_configure
    // Initializes the state of the recorder
    //
    // Text-backend specific implementation.
-   protected virtual function void do_initialize_recorder(uvm_tr_stream stream);
+   protected virtual function void do_configure(uvm_tr_stream stream);
       $cast(m_text_db, stream.get_db());
-   endfunction : do_initialize_recorder
+   endfunction : do_configure
 
-   // Function: do_free_recorder
+   // Function: do_flush
    // Clears the state of the recorder
    //
    // Text-backend specific implementation.
-   protected virtual function void do_free_recorder();
+   protected virtual function void do_flush();
       m_text_db = null;
-   endfunction : do_free_recorder
+   endfunction : do_flush
    
    // Function: do_record_field
    // Records an integral field (less than or equal to 4096 bits).
@@ -768,7 +799,7 @@ class uvm_text_recorder extends uvm_tr_recorder;
                                           uvm_component cntxt);
      uvm_text_tr_stream stream;
      if (open_file()) begin
-        $cast(stream,m_text_db.get_stream(name, cntxt, t));
+        $cast(stream,m_text_db.open_stream(name, cntxt, t));
         return uvm_tr_stream::m_get_id_from_stream(stream);
      end
      return 0;
