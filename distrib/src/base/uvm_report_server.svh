@@ -116,7 +116,6 @@ virtual class uvm_report_server extends uvm_object;
                 set_quit_count(rhs_.get_quit_count());
         endfunction
 
-`ifndef UVM_DEPRECATED_REPORTING
 
         // Function- process_report_message
         //
@@ -155,43 +154,14 @@ virtual class uvm_report_server extends uvm_object;
         pure virtual function void report_summarize(UVM_FILE file=0);
 
 
-`else
+`ifndef UVM_NO_DEPRECATED 
 
-        // Function: process_report
+        // Function- summarize
         //
-        // Processes a composed message and performs the remaining actions
-        // such as logging to the target channel, incrementing ids, counts
 
-        pure virtual function void process_report(
-                uvm_severity severity,
-                string name,
-                string id,
-                string message,
-                uvm_action action,
-                UVM_FILE file,
-                string filename,
-                int line,
-                string composed_message,
-                int verbosity_level,
-                uvm_report_object client
-        );
-
-        // Function: compose_message
-        //
-        // Constructs the actual string sent to the file or command line
-        // from the severity, component name, report id, and the message itself.
-        //
-        // Expert users can overload this method to customize report formatting.
-        pure virtual function string compose_message(
-                uvm_severity severity,
-                string name,
-                string id,
-                string message,
-                string filename,
-                int    line
-        );
-
-        pure virtual function void summarize();
+        virtual function void summarize(UVM_FILE file=0);
+          report_summarize(file);
+        endfunction
 
 `endif
 
@@ -514,10 +484,11 @@ class uvm_default_report_server extends uvm_report_server;
 
   virtual function void process_report_message(uvm_report_message report_message);
 
+    uvm_report_handler l_report_handler = report_message.get_report_handler();
     bit report_ok = 1;
 
     // Set the report server for this message
-    report_message.report_server = this;
+    report_message.set_report_server(this);
 
 `ifndef UVM_NO_DEPRECATED 
 
@@ -525,10 +496,15 @@ class uvm_default_report_server extends uvm_report_server;
     // return 1 then continue processing the report.  If the hook
     // returns 0 then skip processing the report.
 
-    if(report_message.action & UVM_CALL_HOOK)
-      report_ok = report_message.report_handler.run_hooks(report_message.report_object,
-        report_message.severity, report_message.id, report_message.message, 
-        report_message.verbosity, report_message.filename, report_message.line);
+    if(report_message.get_action() & UVM_CALL_HOOK)
+      report_ok = l_report_handler.run_hooks(
+        report_message.get_report_object(),
+        report_message.get_severity(), 
+        report_message.get_id(), 
+        report_message.get_message(), 
+        report_message.get_verbosity(), 
+        report_message.get_filename(), 
+        report_message.get_line());
 
 `endif
 
@@ -544,14 +520,17 @@ class uvm_default_report_server extends uvm_report_server;
 `ifdef UVM_DEPRECATED_REPORTING
 
       // no need to compose when neither UVM_DISPLAY nor UVM_LOG is set
-      if(report_message.action & (UVM_LOG|UVM_DISPLAY))
-        m = svr.compose_message(report_message.severity, 
-          report_message.report_handler.get_full_name(), report_message.id, 
-          report_message.message, report_message.filename, report_message.line); 
-      svr.process_report(report_message.severity, report_message.report_handler.get_full_name(),
-        report_message.id, report_message.message, report_message.action, report_message.file,
-        report_message.filename, report_message.line, m, report_message.verbosity, 
-        report_message.report_object);
+      if(report_message.get_action() & (UVM_LOG|UVM_DISPLAY))
+        m = svr.compose_message(report_message.get_severity(), 
+          l_report_handler.get_full_name(), 
+          report_message.get_id(), report_message.get_message(), 
+          report_message.get_filename(), report_message.get_line()); 
+      svr.process_report(report_message.get_severity(), 
+        l_report_handler.get_full_name(),
+        report_message.get_id(), report_message.get_message(), 
+        report_message.get_action(), report_message.get_file(),
+        report_message.get_filename(), report_message.get_line(), m, 
+        report_message.get_verbosity(), report_message.get_report_object());
 
 `else
 
@@ -577,62 +556,63 @@ class uvm_default_report_server extends uvm_report_server;
  
   virtual function void execute_report_message(uvm_report_message report_message);
 
-    if(uvm_action_type'(report_message.action) == UVM_NO_ACTION) 
+    if(uvm_action_type'(report_message.get_action()) == UVM_NO_ACTION) 
       return;
 
     // Update counts 
-    incr_severity_count(report_message.severity);
-    incr_id_count(report_message.id);
+    incr_severity_count(report_message.get_severity());
+    incr_id_count(report_message.get_id());
 
     if (record_all_messages)
-      report_message.action |= UVM_RM_RECORD;
+      report_message.set_action(report_message.get_action() | UVM_RM_RECORD);
 
     // Process UVM_RM_RECORD action (send to recorder)
-    if(report_message.action & UVM_RM_RECORD) begin
+    if(report_message.get_action() & UVM_RM_RECORD) begin
       report_message.record_message(uvm_default_recorder);
     end
 
     // Process UVM_DISPLAY and UVM_LOG action (send to logger)
-    if((report_message.action & UVM_DISPLAY) || (report_message.action & UVM_LOG)) begin
+    if((report_message.get_action() & UVM_DISPLAY) || 
+       (report_message.get_action() & UVM_LOG)) begin
       string out_str;
       out_str = compose_report_message(report_message);
       // DISPLAY action
-      if(report_message.action & UVM_DISPLAY)
+      if(report_message.get_action() & UVM_DISPLAY)
         $display("%s", out_str);
       // LOG action
       // if log is set we need to send to the file but not resend to the
       // display. So, we need to mask off stdout for an mcd or we need
       // to ignore the stdout file handle for a file handle.
-      if(report_message.action & UVM_LOG)
-        if( (report_message.file == 0) || 
-          (report_message.file != 32'h8000_0001) ) begin //ignore stdout handle
-          UVM_FILE tmp_file = report_message.file;
-          if((report_message.file & 32'h8000_0000) == 0) begin //is an mcd so mask off stdout
-            tmp_file = report_message.file & 32'hffff_fffe;
+      if(report_message.get_action() & UVM_LOG)
+        if( (report_message.get_file() == 0) || 
+          (report_message.get_file() != 32'h8000_0001) ) begin //ignore stdout handle
+          UVM_FILE tmp_file = report_message.get_file();
+          if((report_message.get_file() & 32'h8000_0000) == 0) begin //is an mcd so mask off stdout
+            tmp_file = report_message.get_file() & 32'hffff_fffe;
           end
         f_display(tmp_file, out_str);
       end    
     end
 
     // Process the UVM_COUNT action
-    if(report_message.action & UVM_COUNT) begin
+    if(report_message.get_action() & UVM_COUNT) begin
       if(get_max_quit_count() != 0) begin
         incr_quit_count();
         // If quit count is reached, add the UVM_EXIT action.
         if(is_quit_count_reached()) begin
-          report_message.action |= UVM_EXIT;
+          report_message.set_action(report_message.get_action() | UVM_EXIT);
         end
       end  
     end
 
     // Process the UVM_EXIT action
-    if(report_message.action & UVM_EXIT) begin
+    if(report_message.get_action() & UVM_EXIT) begin
       uvm_root l_root = uvm_coreservice.get_root();
       l_root.die();
     end
 
     // Process the UVM_STOP action
-    if (report_message.action & UVM_STOP) 
+    if (report_message.get_action() & UVM_STOP) 
       $stop;
 
   endfunction
@@ -648,6 +628,7 @@ class uvm_default_report_server extends uvm_report_server;
   virtual function string compose_report_message(uvm_report_message report_message);
 
     string sev_string;
+    uvm_severity_type l_severity;
     uvm_verbosity l_verbosity;
     string filename_line_string;
     string time_str;
@@ -655,38 +636,51 @@ class uvm_default_report_server extends uvm_report_server;
     string context_str;
     string verbosity_str;
     string terminator_str;
+    string msg_body_str;
+    uvm_report_message_element_container el_container;
+    string prefix;
+    uvm_report_handler l_report_handler = report_message.get_report_handler();
 
-    sev_string = report_message.severity.name();
+    l_severity = report_message.get_severity();
+    sev_string = l_severity.name();
 
-    if (report_message.filename != "") begin
-      line_str.itoa(report_message.line);
-      filename_line_string = {report_message.filename, "(", line_str, ") "};
+    if (report_message.get_filename() != "") begin
+      line_str.itoa(report_message.get_line());
+      filename_line_string = {report_message.get_filename(), "(", line_str, ") "};
     end
 
     // Make definable in terms of units.
     $swrite(time_str, "%0t", $time);
  
-    if (report_message.context_name != "")
-      context_str = {"@@", report_message.context_name};
+    if (report_message.get_context() != "")
+      context_str = {"@@", report_message.get_context()};
 
     if (show_verbosity) begin
-      if ($cast(l_verbosity, report_message.verbosity))
+      if ($cast(l_verbosity, report_message.get_verbosity()))
         verbosity_str = l_verbosity.name();
       else
-        verbosity_str.itoa(report_message.verbosity);
+        verbosity_str.itoa(report_message.get_verbosity());
       verbosity_str = {"(", verbosity_str, ")"};
     end
 
     if (show_terminator)
       terminator_str = {" -",sev_string};
 
+    el_container = report_message.get_element_container();
+    if (el_container.size() == 0)
+      msg_body_str = report_message.get_message();
+    else begin
+      prefix = uvm_default_printer.knobs.prefix;
+      uvm_default_printer.knobs.prefix = " +";
+      msg_body_str = {report_message.get_message(), "\n", el_container.sprint()};
+      uvm_default_printer.knobs.prefix = prefix;
+    end
+
     compose_report_message = {sev_string, verbosity_str, " ", filename_line_string, "@ ", 
-      time_str, ": ", report_message.report_handler.get_full_name(), context_str,
-      " [", report_message.id, "] ", report_message.convert2string(), terminator_str};
+      time_str, ": ", l_report_handler.get_full_name(), context_str,
+      " [", report_message.get_id(), "] ", msg_body_str, terminator_str};
 
   endfunction 
-
-
 
 
   // Function: report_summarize
@@ -733,8 +727,7 @@ class uvm_default_report_server extends uvm_report_server;
   endfunction
 
 
-`ifdef UVM_DEPRECATED_REPORTING
-
+`ifndef UVM_NO_DEPRECATED
 
   // Function- process_report
   //
@@ -839,13 +832,6 @@ class uvm_default_report_server extends uvm_report_server;
     endcase
   endfunction 
 
-
-  // Function- summarize
-  //
-
-  virtual function void summarize();
-    report_summarize();
-  endfunction
 
 `endif
 

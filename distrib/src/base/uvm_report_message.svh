@@ -31,9 +31,9 @@ typedef class uvm_root;
 
 //------------------------------------------------------------------------------
 //
-// CLASS- uvm_report_message_element_*
+// CLASS: uvm_report_message_element_base
 //
-// Implementation detail -- not documented.
+// Base class for report message element. Defines common interface.
 //
 //------------------------------------------------------------------------------
 
@@ -42,11 +42,44 @@ virtual class uvm_report_message_element_base;
                  PRINT = 1, 
                  RECORD = 2, 
                  BOTH = 3} action_e;
-   action_e _action;
+   protected action_e _action;
+   protected string       _name;
 
-   // Name
+
+   // Function: get_name
+   // 
+
+   virtual function string get_name();
+     return _name;
+   endfunction
+
+   // Function: set_name
+   // 
+   // Get or set the name of the element
    //
-   string       _name;
+
+   virtual function void set_name(string name);
+     _name = name;
+   endfunction
+     
+
+   // Function: get_action
+   // 
+
+   virtual function void get_action(output bit print, output bit record);
+     print = _action & PRINT;
+     record = _action & RECORD;
+   endfunction
+
+   // Function: set_action
+   // 
+   // Get or set the authorized action for the element
+   //
+
+   virtual function void set_action(bit print, bit record);
+     _action = uvm_report_message_element_base::action_e'({record,print});
+   endfunction
+     
      
    function void print(uvm_printer printer);
       if (_action & PRINT)
@@ -70,13 +103,47 @@ virtual class uvm_report_message_element_base;
    
 endclass : uvm_report_message_element_base
 
+
+//------------------------------------------------------------------------------
+//
+// CLASS: uvm_report_message_int_element
+//
+// Message element class for integral type
+//
+//------------------------------------------------------------------------------
+
 class uvm_report_message_int_element extends uvm_report_message_element_base;
    typedef uvm_report_message_int_element this_type;
    
-   uvm_bitstream_t _val;
-   int             _size;
-   uvm_radix_enum  _radix;
-   
+   protected uvm_bitstream_t _val;
+   protected int             _size;
+   protected uvm_radix_enum  _radix;
+
+   // Function: get_value
+   //
+
+   virtual function uvm_bitstream_t get_value(output int size, 
+                                              output uvm_radix_enum radix);
+     size = _size;
+     radix = _radix;
+     return _val;
+   endfunction
+
+
+   // Function: set_value
+   //
+   // Get or set the value (integral type) of the element, with size and radix
+   //
+
+   virtual function set_value(uvm_bitstream_t value,
+                              int size, 
+                              uvm_radix_enum radix);
+     _size = size;
+     _radix = radix;
+     _val = value;
+   endfunction
+
+
    virtual function void do_print(uvm_printer printer);
       printer.print_int(_name, _val, _size, _radix);
    endfunction : do_print
@@ -102,9 +169,36 @@ class uvm_report_message_int_element extends uvm_report_message_element_base;
    endfunction : do_clone
 endclass : uvm_report_message_int_element
 
+
+//------------------------------------------------------------------------------
+//
+// CLASS: uvm_report_message_string_element
+//
+// Message element class for string type
+//
+//------------------------------------------------------------------------------
+
 class uvm_report_message_string_element extends uvm_report_message_element_base;
    typedef uvm_report_message_string_element this_type;
-   string  _val;
+   protected string  _val;
+
+
+   // Function: get_value
+   //
+
+   virtual function string get_value();
+     return _val;
+   endfunction
+
+   // Function: set_value
+   //
+   // Get or set the value (string type) of the element
+   //
+
+   virtual function string set_value(string value);
+     _val = value;
+   endfunction
+
 
    virtual function void do_print(uvm_printer printer);
       printer.print_string(_name, _val);
@@ -129,21 +223,45 @@ class uvm_report_message_string_element extends uvm_report_message_element_base;
    endfunction : do_clone
 endclass : uvm_report_message_string_element
 
+
+//------------------------------------------------------------------------------
+//
+// CLASS: uvm_report_message_object_element
+//
+// Message element class for object type
+//
+//------------------------------------------------------------------------------
+
 class uvm_report_message_object_element extends uvm_report_message_element_base;
    typedef uvm_report_message_object_element this_type;
-   uvm_object _val;
-   bit _is_meta;
+   protected uvm_object _val;
+
+
+   // Function: get_value
+   //
+   // Get the value (object reference) of the element
+   //
+
+   virtual function uvm_object get_value();
+     return _val;
+   endfunction;
+
+   // Function: set_value
+   //
+   // Get or set the value (object reference) of the element
+   //
+
+   virtual function set_value(uvm_object value);
+     _val = value;
+   endfunction;
+
 
    virtual function void do_print(uvm_printer printer);
-      if (!_is_meta)
-         printer.print_object(_name, _val);
+      printer.print_object(_name, _val);
    endfunction : do_print
 
    virtual function void do_record(uvm_recorder recorder);
-      if (!_is_meta)
-         recorder.record_object(_name, _val);
-      else
-         recorder.record_meta(_name, _val);
+      recorder.record_object(_name, _val);
    endfunction : do_record
 
    virtual function void do_copy(uvm_report_message_element_base rhs);
@@ -151,7 +269,6 @@ class uvm_report_message_object_element extends uvm_report_message_element_base;
       $cast(_rhs, rhs);
       _name = _rhs._name;
       _val = _rhs._val;
-      _is_meta = _rhs._is_meta;
       _action = rhs._action;
    endfunction : do_copy
    
@@ -164,51 +281,129 @@ endclass : uvm_report_message_object_element
 
 //------------------------------------------------------------------------------
 //
-// CLASS- uvm_report_message_element_container
+// CLASS: uvm_report_message_element_container
 //
-// Implementation detail -- not documented.
+// A container used by report message to contain the dynamically added elements,
+// with APIs to add and delete the elements.
 //
 //------------------------------------------------------------------------------
 
 class uvm_report_message_element_container extends uvm_object;
 
-  uvm_report_message_element_base elements[$];
+  protected uvm_report_message_element_base elements[$];
 
   `uvm_object_utils(uvm_report_message_element_container)
+
+  // Function: new
+  //
+  // Create a new uvm_report_message_element_container object
+  //
 
   function new(string name = "element_container");
     super.new(name);
   endfunction
 
-  function void delete_elements();
-     elements.delete();
+
+  // Function: size
+  //
+  // Returns the size of the container, ie. the number of elements
+  //
+
+  function int size();
+    return elements.size();
   endfunction
+
+
+  // Function: delete
+  //
+  // Delete the <index>-th element in the container
+  //
+
+  function void delete(int index);
+    elements.delete(index);
+  endfunction
+
+
+  // Function: delete_elements
+  //
+  // Delete all the elements in the container
+  //
+
+  function void delete_elements();
+    elements.delete();
+  endfunction
+
+
+  // Function: get_elements
+  //
+  // Get all the elements from the container and put them in a queue
+  //
+
+  function void get_elements(output uvm_report_message_element_base q[$]);
+    for(int i = 0; i < elements.size(); i++)
+      q.push_back(elements[i]);
+  endfunction
+
+
+  // Function: add_int
+  // 
+  // This method adds an integral type of the name ~name~ and value ~value~ to
+  // the container.  The required ~size~ field indicates the size of ~value~. 
+  // The required ~radix~ field determines how to display and 
+  // record the field. The optional print/record bit is to specify whether 
+  // the element will be printed/recorded.
+  //
 
   function void add_int(string name, uvm_bitstream_t value, 
                         int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
+     process p = process::self();
+     string rand_state = p.get_randstate();
      uvm_report_message_int_element urme = new();
-     urme._name = name;
-     urme._val = value;
-     urme._size = size;
-     urme._radix = radix;
-     urme._action = uvm_report_message_element_base::action_e'({record,print});
+     p.set_randstate(rand_state);
+
+     urme.set_name(name);
+     urme.set_value(value, size, radix);
+     urme.set_action(print, record);
      elements.push_back(urme);
   endfunction
+
+
+  // Function: add_string
+  // 
+  // This method adds a string of the name ~name~ and value ~value~ to the 
+  // message. The optional print/record bit is to specify whether 
+  // the element will be printed/recorded.
+  //
 
   function void add_string(string name, string value, bit print = 1, bit record = 1);
+     process p = process::self();
+     string rand_state = p.get_randstate();
      uvm_report_message_string_element urme = new();
-     urme._name = name;
-     urme._val = value;
-     urme._action = uvm_report_message_element_base::action_e'({record,print});
+     p.set_randstate(rand_state);
+
+     urme.set_name(name);
+     urme.set_value(value);
+     urme.set_action(print, record);
      elements.push_back(urme);
   endfunction
 
-  function void add_object(string name, uvm_object obj, bit meta, bit print = 1, bit record = 1);
+
+  // Function: add_object
+  // 
+  // This method adds a uvm_object of the name ~name~ and reference ~obj~ to
+  // the message. The optional print/record bit is to specify whether 
+  // the element will be printed/recorded. 
+  //
+
+  function void add_object(string name, uvm_object obj, bit print = 1, bit record = 1);
+     process p = process::self();
+     string rand_state = p.get_randstate();
      uvm_report_message_object_element urme = new();
-     urme._name = name;
-     urme._val = obj;
-     urme._is_meta = meta;
-     urme._action = uvm_report_message_element_base::action_e'({record,print});
+     p.set_randstate(rand_state);
+
+     urme.set_name(name);
+     urme.set_value(obj);
+     urme.set_action(print,record);
      elements.push_back(urme);
   endfunction
 
@@ -243,165 +438,52 @@ class uvm_report_message_element_container extends uvm_object;
 endclass
 
 
-//------------------------------------------------------------------------------
-//
-// Title: UVM Report Message Classes
-// 
-// The report message classes provide the ability to produce basic messages,
-// messages that emulate transation recording in terms of having a begin/end
-// time and containing additional propeties, and finally messages that create
-// links between two messaging events.
-//
-// Basic users need not be concerned with these classes when using the 
-// messaging macros.
-// 
-//------------------------------------------------------------------------------
-
 
 //------------------------------------------------------------------------------
 //
 // CLASS: uvm_report_message
 //
 // The uvm_report_message is the basic UVM object message class.  It provides 
-// the fields that are common to all messages.  It also provides the APIs 
-// necessary to add integral types, strings and uvm_objects to a message.
+// the fields that are common to all messages.  It also has a message element 
+// container and provides the APIs necessary to add integral types, strings and
+// uvm_objects to the container. The report message object can be initialized
+// with the common fields, and passes through the whole reporting system (i.e. 
+// report object, report handler, report server, report catcher, etc) as an
+// object. The additional elements can be added/deleted to/from the message 
+// object anywhere in the reporting system, and can be printed or recorded
+// along with the common fields.
 //
 //------------------------------------------------------------------------------
 
 class uvm_report_message extends uvm_object;
 
-  //----------------------------------------------------------------------------
-  // Group:  Infrastructure References
-  //----------------------------------------------------------------------------
+  protected uvm_report_object _report_object;
+  protected uvm_report_handler _report_handler;
+  protected uvm_report_server _report_server;
 
+  protected uvm_severity_type _severity; 
+  protected string _id;
+  protected string _message;
+  protected int _verbosity;
+  protected string _filename;
+  protected int _line;
+  protected string _context_name;
+  protected uvm_action _action; 
+  protected UVM_FILE _file;
 
-  // Variable: report_object
-  //
-  // This variable is the uvm_report_object that originated the message.
-
-  uvm_report_object report_object;
- 
-
-  // Variable: report_handler
-  //
-  // This variable is the uvm_report_handler that is responsible for checking
-  // whether the message is enabled, should be upgraded/downgraded, etc.
-
-  uvm_report_handler report_handler;
-
-  // Variable: report_server
-  //
-  // This variable is the uvm_report_server that is responsible for servicing
-  // the message's actions.  
-
-  uvm_report_server report_server;
-
-
-  //----------------------------------------------------------------------------
-  // Group:  Message Fields
-  //----------------------------------------------------------------------------
-
-
-  // Variable: severity
-  //
-  // This variable is the severity (UVM_INFO, UVM_WARNING, UVM_ERROR or 
-  // UVM_FATAL) of the message.  The value of this field is determined via
-  // the API used (`uvm_info(), `uvm_waring(), etc.) and populated for the user.
-
-  uvm_severity_type severity; 
-
-
-  // Variable: id
-  //
-  // This variable is the id of the message.  The value of this field is 
-  // completely under user discretion.  Users are recommended to follow a
-  // consistent convention.  Settings in the uvm_report_handler allow various
-  // messaging controls based on this field.  See <uvm_report_handler>.
-
-  string id;
-
-
-  // Variable: message 
-  //
-  // This variable is the user message content string.
-
-  string message;
-
-
-  // Variable: verbosity
-  //
-  // This variable is the message threshhold value.  This value is compared
-  // against settings in the <uvm_report_handler> to determine whether this
-  // message should be executed.
-
-  int verbosity;
-
-
-  // Variable: filename
-  //
-  // This variable is the file from which the message originates.  This value
-  // is automatically populated by the messaging macros.
-
-  string filename;
-
-
-  // Variable: line
-  //
-  // This variable is the line in the <file> from which the message originates.
-  // This value is automatically populate by the messaging macros.
-
-  int line;
-
-
-  // Variable: context_name
-  //
-  // This optional variable is the user-supplied string that is meant to convey
-  // the context of the message.  It can be useful in scopes that are not
-  // inherently UVM like modules, interfaces, etc.
-
-  string context_name;
-
- 
-  // Variable:  action
-  //
-  // This variable is the action(s) that the uvm_report_server should perform
-  // for this message.  This field is populated by the uvm_report_handler during
-  // message execution flow.
-
-  uvm_action action; 
-
-
-  // Variable: file
-  //
-  // This variable is the file that the message is to be written to when the 
-  // message's action is UVM_LOG.  This field is populated by the 
-  // uvm_report_handler during message execution flow.
-
-  UVM_FILE file;
-
-
-  // Variable: tr_handle
+  // Variable- tr_handle
   //
   // This variable is the tr_handle (or transaction id) for the message that is
   // assigned by the uvm_recorder when the message's action contains 
   // UVM_RM_RECORD.
 
-  int tr_handle;
-
-
-  // Not documented.
-  static local uvm_report_message report_messages[$];
-
-  // This can be used for testing performance of the queue structures
-  // By default, value = 0, no reuse
-  // Experiment by simply changing the value.
-  static int max_reused_messages;
+  protected int _tr_handle;
 
   // Not documented.
-  static int m_ro_stream_handles[uvm_report_handler];
+  static protected int _ro_stream_handles[uvm_report_handler];
 
   // Not documented.
-  uvm_report_message_element_container report_message_element_container;
+  protected uvm_report_message_element_container _report_message_element_container;
 
 
   // Function: new
@@ -411,8 +493,22 @@ class uvm_report_message extends uvm_object;
 
   function new(string name = "uvm_report_message");
     super.new(name);
-    tr_handle = -1;
-    report_message_element_container = new();
+    _tr_handle = -1;
+    _report_message_element_container = new();
+  endfunction
+
+
+  // Function: new_report_message
+  // 
+  // Creates a new uvm_report_message object.
+  // This function is the same as new(), but keeps the random stability.
+  //
+
+  static function uvm_report_message new_report_message(string name = "uvm_report_message");
+    process p = process::self();
+    string rand_state = p.get_randstate();
+    new_report_message = new(name);
+    p.set_randstate(rand_state);
   endfunction
 
 
@@ -425,7 +521,7 @@ class uvm_report_message extends uvm_object;
   // --------------------------------------------------------
   // Name               Type               Size  Value
   // --------------------------------------------------------
-  // uvm_trace_message  uvm_trace_message  -     @532
+  // uvm_report_message  uvm_report_message  -     @532
   //   severity         uvm_severity_type  2     UVM_INFO
   //   id               string             10    TEST_ID
   //   message          string             12    A message...
@@ -447,49 +543,25 @@ class uvm_report_message extends uvm_object;
     super.do_print(printer);
 
     printer.print_generic("severity", "uvm_severity_type", 
-                          $bits(severity), severity.name());
-    printer.print_string("id", id);
-    printer.print_string("message",message);
-    if ($cast(l_verbosity, verbosity))
+                          $bits(_severity), _severity.name());
+    printer.print_string("id", _id);
+    printer.print_string("message",_message);
+    if ($cast(l_verbosity, _verbosity))
       printer.print_generic("verbosity", "uvm_verbosity", 
                             $bits(l_verbosity), l_verbosity.name());
     else
-      printer.print_int("verbosity", l_verbosity, $bits(l_verbosity), UVM_HEX);
-    printer.print_string("filename", filename);
-    printer.print_int("line", line, $bits(line), UVM_UNSIGNED);
-    printer.print_string("context_name", context_name);
+      printer.print_int("verbosity", _verbosity, $bits(_verbosity), UVM_HEX);
+    printer.print_string("filename", _filename);
+    printer.print_int("line", _line, $bits(_line), UVM_UNSIGNED);
+    printer.print_string("context_name", _context_name);
 
-    if (report_message_element_container.elements.size() != 0)
-      report_message_element_container.print(printer);
+    if (_report_message_element_container.size() != 0)
+      _report_message_element_container.print(printer);
   endfunction
 
 
   `uvm_object_utils(uvm_report_message)
 
-  // Not documented.
-  function void set_report_message(string filename,
-    int line, uvm_severity_type severity, string id,
-    string message, int verbosity, string context_name);
-    this.context_name = context_name;
-    this.filename = filename;
-    this.line = line;
-    this.severity = severity;
-    this.id = id;
-    this.message = message;
-    this.verbosity = verbosity;
-  endfunction
-
-  // Not documented.
-  function string convert2string();
-    if (report_message_element_container.elements.size() == 0)
-      return message;
-    else begin
-      string prefix = uvm_default_printer.knobs.prefix;
-      uvm_default_printer.knobs.prefix = " +";
-      convert2string = {message, "\n", report_message_element_container.sprint()};
-      uvm_default_printer.knobs.prefix = prefix;
-    end
-  endfunction
 
 
   // do_pack() not needed
@@ -506,37 +578,271 @@ class uvm_report_message extends uvm_object;
     if(!$cast(report_message, rhs) || (rhs==null))
       return;
 
-    report_object = report_message.report_object;
-    report_handler = report_message.report_handler;
-    report_server = report_message.report_server;
-    context_name = report_message.context_name;
-    file = report_message.file;
-    filename = report_message.filename;
-    line = report_message.line;
-    action = report_message.action;
-    severity = report_message.severity;
-    id = report_message.id;
-    message = report_message.message;
-    verbosity = report_message.verbosity;
-    tr_handle = report_message.tr_handle;
+    _report_object = report_message.get_report_object();
+    _report_handler = report_message.get_report_handler();
+    _report_server = report_message.get_report_server();
+    _context_name = report_message.get_context();
+    _file = report_message.get_file();
+    _filename = report_message.get_filename();
+    _line = report_message.get_line();
+    _action = report_message.get_action();
+    _severity = report_message.get_severity();
+    _id = report_message.get_id();
+    _message = report_message.get_message();
+    _verbosity = report_message.get_verbosity();
+    _tr_handle = report_message._tr_handle;
 
-    report_message_element_container.copy(report_message.report_message_element_container);
+    _report_message_element_container.copy(report_message._report_message_element_container);
   endfunction
 
 
   // Not documented.
   virtual function int m_get_stream_id(uvm_recorder recorder);
 
-    if(!m_ro_stream_handles.exists(report_handler)) begin
+    if(!_ro_stream_handles.exists(_report_handler)) begin
       string l_scope, l_name;
-      l_scope = report_handler.get_name();
-      l_name = report_object.get_name();
-      m_ro_stream_handles[report_handler] = 
+      l_scope = _report_handler.get_name();
+      l_name = _report_object.get_name();
+      _ro_stream_handles[_report_handler] = 
         recorder.create_stream(l_name, "MESSAGES", l_scope);
     end
 
-    return m_ro_stream_handles[report_handler];
+    return _ro_stream_handles[_report_handler];
 
+  endfunction
+
+
+  //----------------------------------------------------------------------------
+  // Group:  Infrastructure References
+  //----------------------------------------------------------------------------
+
+
+  // Function: get_report_object
+
+  function uvm_report_object get_report_object();
+    return _report_object;
+  endfunction
+
+  // Function: set_report_object
+  //
+  // Get or set the uvm_report_object that originated the message.
+
+  function void set_report_object(uvm_report_object ro);
+    _report_object = ro;
+  endfunction
+
+
+  // Function: get_report_handler
+
+  function uvm_report_handler get_report_handler();
+    return _report_handler;
+  endfunction
+
+  // Function: set_report_handler
+  //
+  // Get or set the uvm_report_handler that is responsible for checking
+  // whether the message is enabled, should be upgraded/downgraded, etc.
+
+  function void set_report_handler(uvm_report_handler rh);
+    _report_handler = rh;
+  endfunction
+
+  
+  // Function: get_report_server
+
+  function uvm_report_server get_report_server();
+    return _report_server;
+  endfunction
+
+  // Function: set_report_server
+  //
+  // Get or set the uvm_report_server that is responsible for servicing
+  // the message's actions.  
+
+  function void set_report_server(uvm_report_server rs);
+    _report_server = rs;
+  endfunction
+
+
+  //----------------------------------------------------------------------------
+  // Group:  Message Fields
+  //----------------------------------------------------------------------------
+
+
+  // Function: get_severity
+
+  function uvm_severity_type get_severity();
+    return _severity;
+  endfunction
+
+  // Function: set_severity
+  //
+  // Get or set the severity (UVM_INFO, UVM_WARNING, UVM_ERROR or 
+  // UVM_FATAL) of the message.  The value of this field is determined via
+  // the API used (`uvm_info(), `uvm_waring(), etc.) and populated for the user.
+
+  function void set_severity(uvm_severity_type sev);
+    _severity = sev;
+  endfunction
+
+
+  // Function: get_id
+
+  function string get_id();
+    return _id;
+  endfunction
+
+  // Function: set_id
+  //
+  // Get or set the id of the message.  The value of this field is 
+  // completely under user discretion.  Users are recommended to follow a
+  // consistent convention.  Settings in the uvm_report_handler allow various
+  // messaging controls based on this field.  See <uvm_report_handler>.
+
+  function void set_id(string id);
+    _id = id;
+  endfunction
+
+
+  // Function: get_message
+
+  function string get_message();
+    return _message;
+  endfunction
+
+  // Function: set_message
+  //
+  // Get or set the user message content string.
+
+  function void set_message(string msg);
+    _message = msg;
+  endfunction
+
+
+  // Function: get_verbosity
+
+  function int get_verbosity();
+    return _verbosity;
+  endfunction
+
+  // Function: set_verbosity
+  //
+  // Get or set the message threshhold value.  This value is compared
+  // against settings in the <uvm_report_handler> to determine whether this
+  // message should be executed.
+
+  function void set_verbosity(int ver);
+    _verbosity = ver;
+  endfunction
+
+
+  // Function: get_filename
+
+  function string get_filename();
+    return _filename;
+  endfunction
+
+  // Function: set_filename
+  //
+  // Get or set the file from which the message originates.  This value
+  // is automatically populated by the messaging macros.
+
+  function void set_filename(string fname);
+    _filename = fname;
+  endfunction
+
+
+  // Function: get_line
+
+  function int get_line();
+    return _line;
+  endfunction
+
+  // Function: set_line
+  //
+  // Get or set the line in the <file> from which the message originates.
+  // This value is automatically populate by the messaging macros.
+
+  function void set_line(int ln);
+    _line = ln;
+  endfunction
+
+
+  // Function: get_context
+
+  function string get_context();
+    return _context_name;
+  endfunction
+
+  // Function: set_context
+  //
+  // Get or set the optional user-supplied string that is meant to convey
+  // the context of the message.  It can be useful in scopes that are not
+  // inherently UVM like modules, interfaces, etc.
+
+  function void set_context(string cn);
+    _context_name = cn;
+  endfunction
+ 
+
+  // Function: get_action
+
+  function uvm_action get_action();
+    return _action;
+  endfunction
+
+  // Function: set_action
+  //
+  // Get or set the action(s) that the uvm_report_server should perform
+  // for this message.  This field is populated by the uvm_report_handler during
+  // message execution flow.
+
+  function void set_action(uvm_action act);
+    _action = act;
+  endfunction
+
+
+  // Function: get_file
+
+  function UVM_FILE get_file();
+    return _file;
+  endfunction
+
+  // Function: set_file
+  //
+  // Get or set the file that the message is to be written to when the 
+  // message's action is UVM_LOG.  This field is populated by the 
+  // uvm_report_handler during message execution flow.
+
+  function void set_file(UVM_FILE fl);
+    _file = fl;
+  endfunction
+
+
+  // Function: get_element_container
+  //
+  // Get the element_container of the message
+
+  function uvm_report_message_element_container get_element_container();
+    return _report_message_element_container;
+  endfunction
+
+
+  // Function: set_report_message
+  //
+  // Set all the common fields of the report message in one shot.
+  //
+
+  function void set_report_message(uvm_severity_type severity, 
+    string id, string message, int verbosity, 
+    string filename, int line, string context_name);
+    this._context_name = context_name;
+    this._filename = filename;
+    this._line = line;
+    this._severity = severity;
+    this._id = id;
+    this._message = message;
+    this._verbosity = verbosity;
   endfunction
 
 
@@ -562,19 +868,19 @@ class uvm_report_message extends uvm_object;
     l_stream_id = m_get_stream_id(recorder);
 
     // Use uvm_report_message-ID-#
-    tr_handle = recorder.begin_tr(get_type_name(), l_stream_id,
-      get_name(), id, message, $time);
+    _tr_handle = recorder.begin_tr(get_type_name(), l_stream_id,
+      get_name(), _id, _message, $time);
 
-    recorder.tr_handle = tr_handle;
+    recorder.tr_handle = _tr_handle;
     this.record(recorder);
-    recorder.end_tr(tr_handle, $time);
+    recorder.end_tr(_tr_handle, $time);
 
   endfunction
 
 
   // Not documented.
   virtual function void m_record_message(uvm_recorder recorder);
-    recorder.record_string("message", message);
+    recorder.record_string("message", _message);
   endfunction
 
 
@@ -584,19 +890,19 @@ class uvm_report_message extends uvm_object;
     string l_string;
     uvm_verbosity l_verbosity;
 
-    if (context_name != "")
-      recorder.record_string("context_name", context_name);
-    recorder.record_string("filename", filename);
-    recorder.record_field("line", line, $bits(line), UVM_UNSIGNED);
-    recorder.record_string("severity", severity.name());
-    if ($cast(l_verbosity, verbosity))
+    if (_context_name != "")
+      recorder.record_string("context_name", _context_name);
+    recorder.record_string("filename", _filename);
+    recorder.record_field("line", _line, $bits(_line), UVM_UNSIGNED);
+    recorder.record_string("severity", _severity.name());
+    if ($cast(l_verbosity, _verbosity))
       recorder.record_string("verbosity", l_verbosity.name());
     else begin
-      l_string.itoa(verbosity);
+      l_string.itoa(_verbosity);
       recorder.record_string("verbosity", l_string);
     end
 
-    recorder.record_string("id", id);
+    recorder.record_string("id", _id);
     m_record_message(recorder);
   endfunction
 
@@ -606,7 +912,7 @@ class uvm_report_message extends uvm_object;
     super.do_record(recorder);
 
     m_record_core_properties(recorder);
-    report_message_element_container.record(recorder);
+    _report_message_element_container.record(recorder);
 
   endfunction
 
@@ -621,295 +927,38 @@ class uvm_report_message extends uvm_object;
   // This method adds an integral type of the name ~name~ and value ~value~ to
   // the message.  The required ~size~ field indicates the size of ~value~. 
   // The required ~radix~ field determines how to display and 
-  // record the field.
+  // record the field. The optional print/record bit is to specify whether 
+  // the element will be printed/recorded.
   //
 
   function void add_int(string name, uvm_bitstream_t value, 
                         int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
-    report_message_element_container.add_int(name, value, size, radix, print, record);
+    _report_message_element_container.add_int(name, value, size, radix, print, record);
   endfunction
 
 
   // Function: add_string
   // 
   // This method adds a string of the name ~name~ and value ~value~ to the 
-  // message. 
+  // message. The optional print/record bit is to specify whether 
+  // the element will be printed/recorded.
   //
 
   function void add_string(string name, string value, bit print = 1, bit record = 1);
-    report_message_element_container.add_string(name, value, print, record);
+    _report_message_element_container.add_string(name, value, print, record);
   endfunction
 
 
   // Function: add_object
   // 
   // This method adds a uvm_object of the name ~name~ and reference ~obj~ to
-  // the message.  
+  // the message. The optional print/record bit is to specify whether 
+  // the element will be printed/recorded. 
   //
 
   function void add_object(string name, uvm_object obj, bit print = 1, bit record = 1);
-    report_message_element_container.add_object(name, obj, 0, print, record);
+    _report_message_element_container.add_object(name, obj, print, record);
   endfunction
-
-   
-  // Function: add_meta
-  //
-  // This method adds meta data of the name ~name~ and reference ~meta~ to
-  // the message. Meata data will not be printed out, and by default, will
-  // not be recorded, but extended recorder can use it for extensibility.
-  //
-  
-  function void add_meta(string name, uvm_object meta);
-    report_message_element_container.add_object(name, meta, 1, 0, 1);
-  endfunction
-
-endclass
-
-
-//------------------------------------------------------------------------------
-//
-// Class: uvm_trace_message
-//
-// This class provides the ability for report message objects to be created that 
-// result in multiple message outputs and allow transaction recording of 
-// properties.  The resultant recording reflects the begin time of end time of
-// the action.  See the <`uvm_info_begin> and <`uvm_info_end> macros.
-//
-//------------------------------------------------------------------------------
-
-class uvm_trace_message extends uvm_report_message;
-
-
-  //----------------------------------------------------------------------------
-  // Group:  Message Fields
-  //----------------------------------------------------------------------------
-
-
-  // Variable: end_message 
-  //
-  // This variable is the user message content string for ending of the message.
-  // This is provided in addition to the <message> field such that both can be
-  // recorded.
-
-  string end_message;
-
-
-  // Not documtend.
-  typedef enum { TRC_INIT, TRC_BGN, TRC_END } state_e;
-
-  // Not documented.
-  state_e state;
-
-  // Not documented.
-  static local uvm_trace_message trace_messages[$];
- 
-  // Function: new
-  // 
-  // Creates a new uvm_report_message object.
-  //
-
-  function new(string name = "uvm_trace_message");
-    super.new(name);
-    state = TRC_INIT;
-  endfunction
-
-  `uvm_object_utils(uvm_trace_message)
-
-  // Not documented.
-  function string convert2string();
-    if (state == TRC_BGN)
-      convert2string = {$sformatf("%s(id:%0d) : ", state.name(), tr_handle),
-        message};
-    if (state == TRC_END) begin
-      convert2string = {$sformatf("%s(id:%0d) : ", state.name(), tr_handle),
-        end_message};
-      if (report_message_element_container.elements.size() != 0) begin
-        string prefix = uvm_default_printer.knobs.prefix;
-        uvm_default_printer.knobs.prefix = " +";
-        convert2string = {convert2string, "\n", report_message_element_container.sprint()};
-        uvm_default_printer.knobs.prefix = prefix;
-      end
-    end
-  endfunction
-
-  // do_print() not needed
-  // do_pack() not needed
-  // do_unpack() not needed
-  // do_compare() not needed
-
-  // Not documented.
-  virtual function void m_record_message(uvm_recorder recorder);
-    recorder.record_string("begin_message", message);
-//    recorder.record_string("end message", end_message);
-  endfunction
-
-  // Not documented.
-  virtual function void record_message(uvm_recorder recorder);
-  
-    int l_stream_id;
-
-    if(recorder == null) 
-      recorder = uvm_default_recorder;
-
-    l_stream_id = m_get_stream_id(recorder);
-
-    if (state == TRC_BGN) begin
-      tr_handle = recorder.begin_tr(get_type_name(), l_stream_id,
-        get_name(), id, message, $time);
-      recorder.tr_handle = tr_handle;
-      this.record(recorder);
-    end
-
-    if (state == TRC_END) begin
-      recorder.tr_handle = tr_handle;
-      this.record(recorder);
-      recorder.end_tr(tr_handle, $time);
-    end
-
-  endfunction
-
-  // Not documented.
-  function void do_record(uvm_recorder recorder);
-
-    if (state == TRC_BGN) 
-      m_record_core_properties(recorder);
-
-    if (state == TRC_END) begin
-      recorder.record_string("end_message", end_message);
-      report_message_element_container.record(recorder);
-    end
-
-  endfunction
-endclass
-
-
-//------------------------------------------------------------------------------
-//
-// Class: uvm_link_message
-//
-// This class provides the ability to create link relationships between the two 
-// provided tr_handles (or transaction ids).  The tr_handles (~tr_id0~ and
-// ~tr_id1~) are not user provided and should be retrieved from 
-// uvm_report_message objects.  The ~relationship~ is a user provided string.
-//
-//------------------------------------------------------------------------------
-
-class uvm_link_message extends uvm_report_message;
-
-
-  // Function: new
-  // 
-  // Creates a new uvm_report_message object.
-  //
-
-  function new(string name = "uvm_link_message");
-    super.new(name);
-  endfunction
-
-
-  //----------------------------------------------------------------------------
-  // Group:  Linking Fields
-  //----------------------------------------------------------------------------
-
-
-  // Variable: tr_id0
-  //
-  // This variable is one of the user supplied tr_handles (or transaction ids)
-  // that is retrieved from a uvm_report_message that has recorded.
-
-  int tr_id0;
-
-
-  // Variable: tr_id1
-  //
-  // This variable is one of the user supplied tr_handles (or transaction ids)
-  // that is retrieved from a uvm_report_message that has recorded.
-
-  int tr_id1;
-
-
-  // Variable: relationship
-  //
-  // This variable specifies the relationship between ~tr_id0~ and ~tr_id1~.
-  // The relationship is expressed, e.g.:
-  //
-  // "Linking id0: 12 and id1: 25 with relationship of parent_child."
-  //
-
-  string relationship;
-
-
-  // Function: link
-  //
-  // Link tr_handles (or transaction ids) ~id0~ and ~id1~ with relationship
-  // of ~rel~.
-  //
-
-  function void link(int id0, int id1, string rel);
-    tr_id0 = id0;
-    tr_id1 = id1;
-    relationship = rel;
-  endfunction
-    
-
-  // Not documented.
-  static local uvm_link_message link_messages[$];
- 
-
-
-  // Not documented.
-  static function uvm_link_message get_link_message();
-    if (link_messages.size() != 0)
-      return link_messages.pop_front();
-    else begin
-      process p;
-      string randstate;
-      uvm_link_message l_link_message;
-
-      p = process::self();
-      randstate = p.get_randstate();
-      l_link_message = new("uvm_link_message");
-      p.set_randstate(randstate);
-
-      return l_link_message;
-    end
-  endfunction
- 
-
-  // Not documented.
-  function string convert2string();
-    if(action & UVM_RM_RECORD)
-      if ( (tr_id0 == -1) || (tr_id1 == -1) )
-        convert2string = 
-          $sformatf("Invalid link attempted. id0: %0d, id1: %0d", tr_id0, 
-          tr_id1);
-      else
-        convert2string = 
-          $sformatf("Linking 'id0: %0d' and 'id1: %0d' with relationship of '%s'.", 
-          tr_id0, tr_id1, relationship);
-    else
-      convert2string = "Link attempted but the UVM_RM_RECORD action is not set.";
-  endfunction
-
-
-  // do_print() not needed
-  // do_pack() not needed
-  // do_unpack() not needed
-  // do_compare() not needed
-
-
-  // Not documented.
-  virtual function void record_message(uvm_recorder recorder);
-  
-    if(recorder == null) 
-      recorder = uvm_default_recorder;
-
-    if ( (tr_id0 != -1) && (tr_id1 != -1) ) begin
-      recorder.link_tr(tr_id0, tr_id1, relationship);
-    end
-
-  endfunction
-
 
 endclass
 

@@ -188,15 +188,6 @@ class uvm_recorder extends uvm_object;
   endfunction
  
 
-  // Function: record_meta
-  // 
-  // Pass meta data to recorder. How to interpret the meta data is up to 
-  // the recorder.
-
-  virtual function void record_meta (string name, uvm_object value);
-  endfunction
-
-
   // Function: record_string
   //
   // Records a string field. ~name~ is the name of the recorded field.

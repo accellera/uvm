@@ -140,10 +140,10 @@ class uvm_report_object extends uvm_object;
       if (!uvm_report_enabled(verbosity, severity, id))
         return;
     end
-    l_report_message = new();
-    l_report_message.set_report_message(filename, line,
-      uvm_severity_type'(severity), id, message, verbosity, context_name);
-    process_report_message(l_report_message);
+    l_report_message = uvm_report_message::new_report_message();
+    l_report_message.set_report_message(uvm_severity_type'(severity), 
+      id, message, verbosity, filename, line, context_name);
+    uvm_process_report_message(l_report_message);
   endfunction 
 
 
@@ -223,15 +223,15 @@ class uvm_report_object extends uvm_object;
                 filename, line, context_name, report_enabled_checked);
   endfunction
 
-  // Function: process_report_message
+  // Function: uvm_process_report_message
   //
   // This method takes a preformed uvm_report_message, populates it with 
   // the report object and passes it to the report handler for processing.
   // It is expected to be checked for verbosity and populated.
 
-  virtual function void process_report_message (
+  virtual function void uvm_process_report_message (
     uvm_report_message report_message);
-    report_message.report_object = this;
+    report_message.set_report_object(this);
     m_rh.process_report_message(report_message);
   endfunction
 

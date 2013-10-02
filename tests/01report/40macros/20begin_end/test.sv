@@ -35,6 +35,15 @@ class my_class extends uvm_object;
   endfunction
 endclass
 
+class my_catcher extends uvm_report_catcher;
+  virtual function action_e catch();
+
+    if(get_severity() == UVM_FATAL)
+      set_severity(UVM_ERROR);
+
+    return THROW;
+  endfunction
+endclass
 
 class test extends uvm_test;
 
@@ -56,15 +65,36 @@ class test extends uvm_test;
     my_string = "foo";
     my_obj = new("my_obj");
 
-    `uvm_info_begin("TEST", "Testing message...", UVM_LOW, msg)
+    $display("START OF GOLD FILE");
+
+    `uvm_info_begin("TEST", "Testing message...", UVM_LOW)
     `uvm_message_add_tag("my_color", "red")
     `uvm_message_add_int(my_int, UVM_DEC,"",UVM_PRINT)
     `uvm_message_add_string(my_string,UVM_PRINT|UVM_RM_RECORD)
     `uvm_message_add_object(my_obj)
     `uvm_info_end
 
-    $display("START OF GOLD FILE");
-    msg.print();
+    `uvm_warning_begin("TEST", "Testing message...")
+    `uvm_message_add_tag("my_color", "red")
+    `uvm_message_add_int(my_int, UVM_DEC,"",UVM_PRINT)
+    `uvm_message_add_string(my_string,UVM_PRINT|UVM_RM_RECORD)
+    `uvm_message_add_object(my_obj)
+    `uvm_warning_end
+
+    `uvm_error_begin("TEST", "Testing message...")
+    `uvm_message_add_tag("my_color", "red")
+    `uvm_message_add_int(my_int, UVM_DEC,"",UVM_PRINT)
+    `uvm_message_add_string(my_string,UVM_PRINT|UVM_RM_RECORD)
+    `uvm_message_add_object(my_obj)
+    `uvm_error_end
+
+    `uvm_fatal_begin("TEST", "Testing message...")
+    `uvm_message_add_tag("my_color", "red")
+    `uvm_message_add_int(my_int, UVM_DEC,"",UVM_PRINT)
+    `uvm_message_add_string(my_string,UVM_PRINT|UVM_RM_RECORD)
+    `uvm_message_add_object(my_obj)
+    `uvm_fatal_end
+
     $display("END OF GOLD FILE");
 
     phase.drop_objection(this);
@@ -74,6 +104,8 @@ endclass
 
 initial
   begin
+     static my_catcher catcher = new();
+     uvm_report_cb::add(null, catcher);
 
      run_test();
   end

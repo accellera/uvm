@@ -51,8 +51,6 @@ class test extends uvm_test;
     uvm_report_object urm1 = new("urm1");
 
     // User variables
-    uvm_trace_message l_trace_messageA, l_trace_messageB;
-    int l_tr_handle0, l_tr_handle1;
     int my_int;
     string my_string;
     my_class my_obj;
@@ -69,35 +67,22 @@ class test extends uvm_test;
     p.srandom(100);
 
 
-    // Message A starts at 5, Message B starts at 15.
-    // Message A finishes at 35 (Message B is still going)
-    // Message B finishes at 60
-
-    // Spans #30 time
-    `uvm_info_begin(l_trace_messageA, "TEST_A", "Beginning A...", UVM_LOW, urm1)
-    `uvm_add_trace_tag(l_trace_messageA, "color", "red")
-    `uvm_add_trace_int(l_trace_messageA, my_int, UVM_DEC, "attr_int")
-    `uvm_add_trace_string(l_trace_messageA, my_string, "attr_string")
-    `uvm_add_trace_object(l_trace_messageA, my_obj, "attr_obj")
+    `uvm_info_context_begin("TEST_A", "Message A...", UVM_LOW, urm1)
+      `uvm_message_add_tag("color", "red")
+      `uvm_message_add_int(my_int, UVM_DEC, "attr_int")
+      `uvm_message_add_string(my_string, "attr_string")
+      `uvm_message_add_object(my_obj, "attr_obj")
+    `uvm_info_context_end
 
     my_string = "hey buddy";
     my_obj.foo = 7;
     my_obj.bar = "bar";
 
-    // Spans #45 time
-    `uvm_info_begin(l_trace_messageB, "TEST_B", "Beginning B...", UVM_LOW, urm1)
-    `uvm_add_trace_tag(l_trace_messageB, "color", "white")
-    `uvm_add_trace_string(l_trace_messageB, my_string, "attr_string")
-    `uvm_add_trace_object(l_trace_messageB, my_obj, "attr_obj")
-
-
-    `uvm_info_end(l_trace_messageA, "Ending A...", l_tr_handle0)
-
-    `uvm_info_end(l_trace_messageB, "Ending B...", l_tr_handle1)
-
-    `uvm_link(l_tr_handle0, l_tr_handle1, "child", "TEST_L", UVM_LOW, urm1)
-
-    `uvm_link(-1 , l_tr_handle1, "BAD", "TEST_L", UVM_LOW, urm1)
+    `uvm_info_context_begin("TEST_B", "Message B...", UVM_LOW, urm1)
+      `uvm_message_add_tag("color", "white")
+      `uvm_message_add_string(my_string, "attr_string")
+      `uvm_message_add_object(my_obj, "attr_obj")
+    `uvm_info_context_end
 
     d = new;
     void'(d.randomize());

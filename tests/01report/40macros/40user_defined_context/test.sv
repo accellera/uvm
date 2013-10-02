@@ -82,7 +82,7 @@ endclass
 initial begin
 
   automatic uvm_report_handler msg = new();
-
+  uvm_report_message rm;
   automatic catcher rc = new;
   uvm_report_cb::add(null,rc);
 
@@ -91,8 +91,12 @@ initial begin
   #1;
   //msg.report(UVM_ERROR, "some_context",       "SOME_ID", "Issuing message that should be filtered");
   //msg.report(UVM_ERROR, "some_other_context", "SOME_ID", "Issuing message that should not be filtered", UVM_MEDIUM, `__FILE__, `__LINE__); // UVM TEST RUN-TIME FAILURE
-  `uvm_error("SOME_ID", "Issuing message that should be filtered", null, "some_context")
-  `uvm_error("SOME_ID", "Issuing message that should not be filtered", null, "some_other_context")
+  `uvm_error_begin("SOME_ID", "Issuing message that should be filtered", rm)
+    rm.set_context("some_context");
+  `uvm_error_end
+  `uvm_error_begin("SOME_ID", "Issuing message that should not be filtered", rm)
+    rm.set_context("some_other_context");
+  `uvm_error_end
 
 
 end

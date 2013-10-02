@@ -358,19 +358,14 @@ class uvm_sequence_item extends uvm_transaction;
                                     string context_name = "",
                                     bit report_enabled_checked = 0);
     uvm_report_message l_report_message;
-    string l_string;
     if (report_enabled_checked == 0) begin
       if (!uvm_report_enabled(verbosity, severity, id))
         return;
     end
-    if (context_name == "")
-      l_string = get_sequence_path();
-    else
-      l_string = context_name;
-    l_report_message = new();
-    l_report_message.set_report_message(filename, line,
-      uvm_severity_type'(severity), id, message, verbosity, l_string);
-    process_report_message(l_report_message);
+    l_report_message = uvm_report_message::new_report_message();
+    l_report_message.set_report_message(uvm_severity_type'(severity), 
+      id, message, verbosity, filename, line, context_name);
+    uvm_process_report_message(l_report_message);
 
   endfunction
     
@@ -419,10 +414,12 @@ class uvm_sequence_item extends uvm_transaction;
                     context_name, report_enabled_checked);
   endfunction
 
-  virtual function void process_report_message (
+  virtual function void uvm_process_report_message (
     uvm_report_message report_message);
     uvm_report_object l_report_object = uvm_get_report_object();
-    report_message.report_object = l_report_object;
+    report_message.set_report_object(l_report_object);
+    if (report_message.get_context() == "")
+      report_message.set_context(get_sequence_path());
     l_report_object.m_rh.process_report_message(report_message);
   endfunction
 

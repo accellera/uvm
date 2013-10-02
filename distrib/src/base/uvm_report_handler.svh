@@ -315,25 +315,29 @@ class uvm_report_handler extends uvm_object;
   // (e.g., uvm_report_error) in <uvm_report_object>.
 
   virtual function void process_report_message(uvm_report_message report_message);
-
+    
     uvm_report_server srvr = uvm_report_server::get_server();
+    string id = report_message.get_id();
+    uvm_severity_type severity = report_message.get_severity();
 
     // Check for severity overrides and apply them before calling the server.
     // An id specific override has precedence over a generic severity override.
-    if(sev_id_overrides.exists(report_message.id)) begin
-      if(sev_id_overrides[report_message.id].exists(uvm_severity'(report_message.severity)))
-        report_message.severity = 
-          uvm_severity_type'(sev_id_overrides[report_message.id].get(report_message.severity));
+    if(sev_id_overrides.exists(id)) begin
+      if(sev_id_overrides[id].exists(uvm_severity'(severity))) begin
+        severity = uvm_severity_type'(sev_id_overrides[id].get(severity));
+        report_message.set_severity(severity);
+      end
     end
     else begin
-      if(sev_overrides.exists(report_message.severity))
-        report_message.severity = 
-          uvm_severity_type'(sev_overrides.get(uvm_severity'(report_message.severity)));
+      if(sev_overrides.exists(severity)) begin
+        severity = uvm_severity_type'(sev_overrides.get(uvm_severity'(severity)));
+        report_message.set_severity(severity);
+      end
     end
 
-    report_message.file = get_file_handle(report_message.severity, report_message.id);
-    report_message.report_handler = this;
-    report_message.action = get_action(report_message.severity, report_message.id);
+    report_message.set_file(get_file_handle(severity, id));
+    report_message.set_report_handler(this);
+    report_message.set_action(get_action(severity, id));
     srvr.process_report_message(report_message);
     
   endfunction
@@ -624,16 +628,11 @@ class uvm_report_handler extends uvm_object;
     if (client==null)
       client = uvm_coreservice.get_root();
 
-    l_report_message = new();
-    l_report_message.report_object = client;
-    l_report_message.context_name = name;
-    l_report_message.filename = filename;
-    l_report_message.line = line;
-    l_report_message.action = get_action(severity,id);
-    l_report_message.severity = uvm_severity_type'(severity);
-    l_report_message.id = id;
-    l_report_message.message = message;
-    l_report_message.verbosity = verbosity_level;
+    l_report_message = uvm_report_message::new_report_message();
+    l_report_message.set_report_message(uvm_severity_type'(severity),
+      id, message, verbosity_level, filename, line, name);
+    l_report_message.set_report_object(client);
+    l_report_message.set_action(get_action(severity,id));
     process_report_message(l_report_message);
 
   endfunction

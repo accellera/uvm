@@ -25,8 +25,6 @@ import uvm_pkg::*;
 
 class my_catcher extends uvm_report_catcher;
   virtual function action_e catch();
-    uvm_report_message l_msg;
-
 
     add_string ("catcher_name", get_name());
 
@@ -34,6 +32,26 @@ class my_catcher extends uvm_report_catcher;
   endfunction
 endclass
 
+class my_server extends uvm_default_report_server;
+  virtual function string compose_report_message(uvm_report_message report_message);
+    report_message.add_string("server_name", get_name());
+
+    compose_report_message = super.compose_report_message(report_message);
+  endfunction
+endclass
+
+class my_handler extends uvm_report_handler;
+  `uvm_object_utils(my_handler);
+
+  function new(string name = "my_report_handler");
+    super.new(name);
+  endfunction
+
+  virtual function void process_report_message(uvm_report_message report_message);
+    report_message.add_string("handler_name", get_name());
+    super.process_report_message(report_message);
+  endfunction
+endclass
 
 class test extends uvm_test;
 
@@ -43,28 +61,9 @@ class test extends uvm_test;
      super.new(name, parent);
   endfunction
 
-  virtual function void uvm_report( uvm_severity severity,
-                                    string id,
-                                    string message,
-                                    int verbosity = (severity == uvm_severity'(UVM_ERROR)) ? UVM_LOW :
-                                                    (severity == uvm_severity'(UVM_FATAL)) ? UVM_NONE : UVM_MEDIUM,
-                                    string filename = "",
-                                    int line = 0,
-                                    string context_name = "",
-                                    bit report_enabled_checked =0);
-    uvm_report_message l_report_message;
-    if (report_enabled_checked == 0) begin
-      if (!uvm_report_enabled(verbosity, severity, id))
-        return;
-    end
-    l_report_message = uvm_report_message::get_report_message();
-    l_report_message.set_report_message(filename, line,
-      uvm_severity_type'(severity), id, message, verbosity, context_name);
-
-    l_report_message.add_string ("component_name", get_name());
-
-    process_report_message(l_report_message);
-    l_report_message.free_report_message(l_report_message);
+  virtual function void uvm_process_report_message(uvm_report_message msg);
+    msg.add_string ("component_name", get_name());
+    super.uvm_process_report_message(msg);
   endfunction
 
 
@@ -83,8 +82,13 @@ endclass
 
 initial
   begin
+     uvm_factory fact = uvm_coreservice.get_factory();
+     my_server server = new();
      static my_catcher catcher = new();
      uvm_report_cb::add(null, catcher);
+     uvm_report_server::set_server(server);
+     fact.set_type_override_by_type(uvm_report_handler::get_type(), my_handler::get_type());
+     fact.print();
 
      run_test();
   end

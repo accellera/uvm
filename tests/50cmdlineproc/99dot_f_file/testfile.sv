@@ -28,11 +28,9 @@ import uvm_pkg::*;
 
 class my_server extends uvm_default_report_server;
   int cnt = 0;
-  virtual function string compose_message( uvm_severity severity, string name,
-      string id, string message, string filename, int    line);
+  virtual function string compose_report_message(uvm_report_message report_message);
     cnt++;
-    compose_message = {"MY_SERVER: ",
-      super.compose_message(severity, name, id, message, filename, line) };
+    compose_report_message = {"MY_SERVER: ", super.compose_report_message(report_message)};
   endfunction
 endclass
 
