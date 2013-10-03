@@ -105,8 +105,6 @@ virtual class uvm_recorder extends uvm_object;
      super.new(name);
      m_stream_dap = new("stream_dap");
      m_warn_null_stream = 1;
-     m_recorders_by_id[++m_id] = this;
-     m_ids_by_recorder[this] = m_id;
   endfunction
 
    // Group: Transaction Recorder API
@@ -202,7 +200,93 @@ virtual class uvm_recorder extends uvm_object;
      do_flush();
   endfunction : flush
 
-   // Group: Attribute Recording API
+   // Group: Handles
+
+   // Variable- m_ids_by_recorder
+   // An associative array of integers, indexed by uvm_recorders.  This
+   // provides a unique 'id' or 'handle' for each recorder, which can be
+   // used to identify the recorder.
+   //
+   // By default, neither ~m_ids_by_recorder~ or ~m_recorders_by_id~ are
+   // used.  Recorders are only placed in the arrays when the user
+   // attempts to determine the id for a recorder.
+   local static integer m_ids_by_recorder[uvm_recorder];
+
+   // Variable- m_recorders_by_id
+   // A corollary to ~m_ids_by_recorder~, this indexes the recorders by their
+   // unique ids.
+   local static uvm_recorder m_recorders_by_id[integer];
+
+   // Variable- m_id
+   // Static int marking the last assigned id.
+   local static integer m_id;
+
+   // Function- m_free_id
+   // Frees the id/recorder link (memory cleanup)
+   //
+   static function void m_free_id(integer id);
+      uvm_recorder recorder;
+      if (m_recorders_by_id.exists(id))
+        recorder = m_recorders_by_id[id];
+
+      if (recorder != null) begin
+         m_recorders_by_id.delete(id);
+         m_ids_by_recorder.delete(recorder);
+      end
+   endfunction : m_free_id
+            
+   // Function: get_handle
+   // Returns a unique ID for this recorder.
+   //
+   // A value of ~0~ indicates that the recorder has been ~freed~,
+   // and no longer has a valid ID.
+   //
+   // The value returned by a call to ~get_handle~ is implementation
+   // specific, and is provided via the <do_get_handle> method.
+   function integer get_handle();
+      if (!is_open() && !is_closed())
+        return 0;
+      else begin
+         integer handle = do_get_handle();
+
+         // Check for the weird case where our handle changed.
+         if (m_ids_by_recorder.exists(this) && m_ids_by_recorder[this] != handle)
+           m_recorders_by_id.delete(m_ids_by_recorder[this]);
+           
+         m_recorders_by_id[handle] = this;
+         m_ids_by_recorder[this] = handle;
+
+         return handle;
+      end
+   endfunction : get_handle
+
+   // Function: get_recorder_from_handle
+   // Static accessor, returns a recorder reference for a given unique id.
+   //
+   // If no recorder exists with the given ~id~, or if the
+   // recorder with that ~id~ has been freed, then ~null~ is
+   // returned.
+   //
+   // This method can be used to access the recorder associated with a
+   // ~begin_tr~ call from <uvm_transaction> or <uvm_component>.
+   //
+   // | integer handle = tr.begin_tr();
+   // | uvm_recorder recorder = uvm_recorder::get_recorder_from_handle(handle);
+   // | if (recorder != null) begin
+   // |   recorder.record_string("begin_msg", "Started recording transaction!");
+   // | end
+   //
+   static function uvm_recorder get_recorder_from_handle(integer id);
+      if (id == 0)
+        return null;
+
+      if (!m_recorders_by_id.exists(id))
+        return null;
+
+      return m_recorders_by_id[id];
+   endfunction : get_recorder_from_handle
+
+   // Group: Attribute Recording
    
    // Function: record_field
    // Records an integral field (less than or equal to 4096 bits).
@@ -404,87 +488,22 @@ virtual class uvm_recorder extends uvm_object;
                                                           string type_name);
 
 
+   // Function: do_get_handle
+   // Returns a unique ID for this recorder.
+   //
+   // ~Optional~ Backend implementation for <get_handle>.
+   //
+   // By default, the unique <uvm_object::get_inst_id> will be
+   // used as a handle.
+   protected virtual function integer do_get_handle();
+      return this.get_inst_id();
+   endfunction : do_get_handle
+   
    // The following code is primarily for backwards compat. purposes.  "Transaction
    // Handles" are useful when connecting to a backend, but when passing the information
    // back and forth within simulation, it is safer to user the ~recorder~ itself
    // as a reference to the transaction within the database.
 
-   // Group: Transaction Handles
-
-   // Variable- m_ids_by_recorder
-   // An associative array of integers, indexed by uvm_recorders.  This
-   // provides a unique 'id' or 'handle' for each recorder, which can be
-   // used to identify the recorder.
-   //
-   // By default, neither ~m_ids_by_recorder~ or ~m_recorders_by_id~ are
-   // used.  Recorders are only placed in the arrays when the user
-   // attempts to determine the id for a recorder.
-   local static integer m_ids_by_recorder[uvm_recorder];
-
-   // Variable- m_recorders_by_id
-   // A corollary to ~m_ids_by_recorder~, this indexes the recorders by their
-   // unique ids.
-   local static uvm_recorder m_recorders_by_id[integer];
-
-   // Variable- m_id
-   // Static int marking the last assigned id.
-   local static integer m_id;
-
-   // Function- m_free_id
-   // Frees the id/recorder link (memory cleanup)
-   //
-   static function void m_free_id(integer id);
-      uvm_recorder recorder;
-      if (m_recorders_by_id.exists(id))
-        recorder = m_recorders_by_id[id];
-
-      if (recorder != null) begin
-         m_recorders_by_id.delete(id);
-         m_ids_by_recorder.delete(recorder);
-      end
-   endfunction : m_free_id
-            
-   // Function: get_tr_handle
-   // Returns a unique ID for this recorder.
-   //
-   // A value of ~0~ indicates that the recorder has been ~freed~,
-   // no longer has a valid ID.
-   //
-   function integer get_tr_handle();
-      if (m_ids_by_recorder.exists(this))
-        return m_ids_by_recorder[this];
-      else
-        return 0;
-   endfunction : get_tr_handle
-
-   // Function: get_recorder_from_handle
-   // Static accessor, returns a recorder reference for a given unique id.
-   //
-   // If no recorder exists with the given ~id~, or if the
-   // recorder with that ~id~ has been freed, then ~null~ is
-   // returned.
-   //
-   // This method can be used to access the recorder associated with a
-   // ~begin_tr~ call from <uvm_transaction> or <uvm_component>.
-   //
-   // | integer handle = tr.begin_tr();
-   // | uvm_recorder recorder = uvm_recorder::get_recorder_from_handle(handle);
-   // | if (recorder != null) begin
-   // |   recorder.record_string("begin_msg", "Started recording transaction!");
-   // | end
-   //
-   static function uvm_recorder get_recorder_from_handle(integer id);
-      if (id == 0)
-        return null;
-
-      if (!m_recorders_by_id.exists(id))
-        return null;
-
-      return m_recorders_by_id[id];
-   endfunction : get_recorder_from_handle
-
-   
-   
    //------------------------------
    // Group- Vendor-Independent API
    //------------------------------
@@ -639,7 +658,7 @@ class uvm_text_recorder extends uvm_recorder;
       if (!radix)
         radix = default_radix;
 
-      m_text_db.set_attribute(this.get_tr_handle(),
+      m_text_db.set_attribute(this.get_handle(),
                               scope.get(),
                               value,
                               radix,
@@ -660,7 +679,7 @@ class uvm_text_recorder extends uvm_recorder;
       if (!radix)
         radix = default_radix;
 
-      m_text_db.set_attribute_int(this.get_tr_handle(),
+      m_text_db.set_attribute_int(this.get_handle(),
                                   scope.get(),
                                   value,
                                   radix,
@@ -678,7 +697,7 @@ class uvm_text_recorder extends uvm_recorder;
       bit [63:0] ival = $realtobits(value);
       scope.set_arg(name);
 
-      m_text_db.set_attribute(this.get_tr_handle(),
+      m_text_db.set_attribute(this.get_handle(),
                               scope.get(),
                               ival,
                               UVM_REAL,
@@ -704,7 +723,7 @@ class uvm_text_recorder extends uvm_recorder;
             v = str.atoi(); 
          end
          scope.set_arg(name);
-         m_text_db.set_attribute(this.get_tr_handle(), 
+         m_text_db.set_attribute(this.get_handle(), 
                                  scope.get(), 
                                  v, 
                                  UVM_DEC, 
@@ -730,7 +749,7 @@ class uvm_text_recorder extends uvm_recorder;
    protected virtual function void do_record_string(string name,
                                                     string value);
       scope.set_arg(name);
-      m_text_db.set_attribute(this.get_tr_handle(), 
+      m_text_db.set_attribute(this.get_handle(), 
                               scope.get(), 
                               uvm_string_to_bits(value),
                               UVM_STRING, 
@@ -744,7 +763,7 @@ class uvm_text_recorder extends uvm_recorder;
    protected virtual function void do_record_time(string name,
                                                     time value);
       scope.set_arg(name);
-      m_text_db.set_attribute(this.get_tr_handle(), 
+      m_text_db.set_attribute(this.get_handle(), 
                               scope.get(), 
                               value,
                               UVM_TIME, 
@@ -759,7 +778,7 @@ class uvm_text_recorder extends uvm_recorder;
                                                      string value,
                                                      string type_name);
       scope.set_arg(name);
-      m_text_db.set_attribute(this.get_tr_handle(), 
+      m_text_db.set_attribute(this.get_handle(), 
                               scope.get(), 
                               uvm_string_to_bits(value), 
                               UVM_STRING, 
@@ -802,7 +821,7 @@ class uvm_text_recorder extends uvm_recorder;
      uvm_text_tr_stream stream;
      if (open_file()) begin
         $cast(stream,m_text_db.open_stream(name, cntxt, t));
-        return uvm_tr_stream::m_get_id_from_stream(stream);
+        return stream.get_handle();
      end
      return 0;
   endfunction
@@ -840,7 +859,7 @@ class uvm_text_recorder extends uvm_recorder;
   //
   virtual function integer check_handle_kind (string htype, integer handle);
      return ((uvm_recorder::get_recorder_from_handle(handle) != null) ||
-             (uvm_tr_stream::m_get_stream_from_id(handle) != null));
+             (uvm_tr_stream::get_stream_from_handle(handle) != null));
   endfunction
   
   
@@ -854,14 +873,14 @@ class uvm_text_recorder extends uvm_recorder;
                                      string desc="",
                                      time begin_time=0);
      if (open_file()) begin
-        uvm_tr_stream stream_obj = uvm_tr_stream::m_get_stream_from_id(stream);
+        uvm_tr_stream stream_obj = uvm_tr_stream::get_stream_from_handle(stream);
         uvm_recorder recorder;
         if (stream_obj == null)
           return -1;
 
         recorder = stream_obj.open_recorder(nm, begin_time, txtype);
 
-        return recorder.get_tr_handle();
+        return recorder.get_handle();
      end
      return -1;
   endfunction

@@ -2701,7 +2701,7 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
    end
    
    if(parent_recorder != null) begin
-      link_handle = tr.begin_child_tr(begin_time, parent_recorder.get_tr_handle());
+      link_handle = tr.begin_child_tr(begin_time, parent_recorder.get_handle());
    end
    else begin
       link_handle = tr.begin_tr(begin_time);
@@ -2750,7 +2750,7 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
          end
       end
 
-      handle = (recorder == null) ? 0 : recorder.get_tr_handle();
+      handle = (recorder == null) ? 0 : recorder.get_handle();
       do_begin_tr(tr, stream_name, handle); 
       
    end
@@ -2786,7 +2786,7 @@ function void uvm_component::end_tr (uvm_transaction tr,
 
          recorder = m_tr_h[tr];
 
-         do_end_tr(tr, recorder.get_tr_handle()); // callback
+         do_end_tr(tr, recorder.get_handle()); // callback
 
          m_tr_h.delete(tr);
 
@@ -2862,7 +2862,7 @@ function integer uvm_component::record_error_tr (string stream_name="main",
             stream.free_recorder(recorder);
          end
          else begin
-            handle = recorder.get_tr_handle();
+            handle = recorder.get_handle();
          end
       end // if (recorder != null)
    end // if (stream != null)
@@ -2919,7 +2919,7 @@ function integer uvm_component::record_event_tr (string stream_name="main",
             stream.free_recorder(recorder);
          end
          else begin
-            handle = recorder.get_tr_handle();
+            handle = recorder.get_handle();
          end
       end // if (recorder != null)
    end // if (stream != null)

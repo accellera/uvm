@@ -218,7 +218,7 @@ class uvm_sequence_base extends uvm_sequence_item;
   // child transactions when calling <uvm_component::begin_child_tr>.
 
   function integer get_tr_handle();
-    return m_tr_recorder.get_tr_handle();
+    return m_tr_recorder.get_handle();
   endfunction
 
 
@@ -291,7 +291,7 @@ class uvm_sequence_base extends uvm_sequence_item;
        end else begin
           stream = m_sequencer.get_tr_stream(get_root_sequence_name(), "Transactions");
           handle = m_sequencer.begin_child_tr(this, 
-                                              (m_parent_sequence.m_tr_recorder == null) ? 0 : m_parent_sequence.m_tr_recorder.get_tr_handle(), 
+                                              (m_parent_sequence.m_tr_recorder == null) ? 0 : m_parent_sequence.m_tr_recorder.get_handle(), 
                                               get_root_sequence_name());
           m_tr_recorder = uvm_recorder::get_recorder_from_handle(handle);
        end
@@ -934,7 +934,7 @@ class uvm_sequence_base extends uvm_sequence_item;
 
     if (sequencer.is_auto_item_recording_enabled()) begin
       void'(sequencer.begin_child_tr(item, 
-                                     (m_tr_recorder == null) ? 0 : m_tr_recorder.get_tr_handle(), 
+                                     (m_tr_recorder == null) ? 0 : m_tr_recorder.get_handle(), 
                                      item.get_root_sequence_name(), "Transactions"));
     end
     

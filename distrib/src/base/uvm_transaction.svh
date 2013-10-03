@@ -632,7 +632,7 @@ endfunction
 
 function integer uvm_transaction::get_tr_handle ();
    if (tr_recorder != null)
-     return tr_recorder.get_tr_handle();
+     return tr_recorder.get_handle();
    else 
      return 0;
 endfunction
@@ -732,7 +732,7 @@ function integer uvm_transaction::m_begin_tr (time begin_time=0,
            db.establish_link(uvm_parent_child_link::get_link(parent_recorder, tr_recorder));
       end
 
-      m_begin_tr = tr_recorder.get_tr_handle();
+      m_begin_tr = tr_recorder.get_handle();
    end
    else begin
       tr_recorder = null;

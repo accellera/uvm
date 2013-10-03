@@ -462,7 +462,7 @@ class uvm_text_tr_database extends uvm_tr_database;
                    name,
                    type_name,
                    (cntxt == null) ? "" : cntxt.get_full_name(),
-                   uvm_tr_stream::m_get_id_from_stream(m_stream));
+                   m_stream.get_handle());
          return m_stream;
       end // if (open_db())
       return null;
@@ -480,7 +480,7 @@ class uvm_text_tr_database extends uvm_tr_database;
                    stream.get_name(),
                    stream.get_stream_type_name(),
                    (cntxt == null) ? "" : cntxt.get_full_name(),
-                   uvm_tr_stream::m_get_id_from_stream(stream));
+                   stream.get_handle());
       end
    endfunction : do_close_stream
    
@@ -496,7 +496,7 @@ class uvm_text_tr_database extends uvm_tr_database;
                    stream.get_name(),
                    stream.get_stream_type_name(),
                    (cntxt == null) ? "" : cntxt.get_full_name(),
-                   uvm_tr_stream::m_get_id_from_stream(stream));
+                   stream.get_handle());
       end
    endfunction : do_free_stream
    
@@ -522,16 +522,16 @@ class uvm_text_tr_database extends uvm_tr_database;
             if ($cast(pc_link, link)) begin
                $fdisplay(m_file,"  LINK @%0t {TXH1:%0d TXH2:%0d RELATION=%0s}",
                          $time,
-                         r_lhs.get_tr_handle(),
-                         r_rhs.get_tr_handle(),
+                         r_lhs.get_handle(),
+                         r_rhs.get_handle(),
                          "child");
                          
             end
             else if ($cast(re_link, link)) begin
                $fdisplay(m_file,"  LINK @%0t {TXH1:%0d TXH2:%0d RELATION=%0s}",
                          $time,
-                         r_lhs.get_tr_handle(),
-                         r_rhs.get_tr_handle(),
+                         r_lhs.get_handle(),
+                         r_rhs.get_handle(),
                          "");
                
             end
