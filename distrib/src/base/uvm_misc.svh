@@ -262,7 +262,7 @@ class uvm_status_container;
   //when a function starts up. The macros use this.
   uvm_comparer    comparer;
   uvm_packer      packer;
-  uvm_tr_recorder recorder;
+  uvm_recorder    recorder;
   uvm_printer     printer;
   
   // utility function used to perform a cycle check when config setting are pushed

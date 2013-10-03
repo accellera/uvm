@@ -51,7 +51,7 @@ class piped_driver extends simple_driver;
       accept_tr(req);
       #2;
       begin_child_tr(req, (pseq == null) ? null : pseq.get_tr_handle(),
-                     get_record_stream(req.get_root_sequence_name(), "Transactions"));
+                     get_tr_stream(req.get_root_sequence_name(), "Transactions"));
 
       #3;
       fork

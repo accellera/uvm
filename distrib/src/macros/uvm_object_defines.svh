@@ -3313,7 +3313,7 @@ endfunction \
 //
 // The recording macros assist users who implement the <uvm_object::do_record>
 // method. They help ensure that the fields are recorded using a vendor-
-// independent API. Unlike the <uvm_tr_recorder> policy, fields recorded using
+// independent API. Unlike the <uvm_recorder> policy, fields recorded using
 // the <`uvm_record_field> macro do not lose type information--they are passed
 // directly to the vendor-specific API. This results in more efficient recording
 // and no artificial limit on bit-widths. See your simulator vendor's 
@@ -3352,7 +3352,7 @@ endfunction \
 `define uvm_record_field(NAME,VALUE) \
   if (recorder != null) begin \
      if (recorder.get_type_name() != "uvm_text_recorder") begin \
-        `uvm_record_attribute(uvm_tr_recorder::m_get_id_from_recorder(recorder), VALUE, NAME) \
+        `uvm_record_attribute(uvm_recorder::m_get_id_from_recorder(recorder), VALUE, NAME) \
      end \
      else begin \
         recorder.record_generic(NAME,$sformatf("%p", VALUE)); \

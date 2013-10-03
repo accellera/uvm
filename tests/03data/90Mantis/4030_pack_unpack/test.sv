@@ -237,7 +237,7 @@ class item extends uvm_sequence_item;
   // do_record
   // ---------
 
-  virtual function void do_record(uvm_tr_recorder recorder);
+  virtual function void do_record(uvm_recorder recorder);
     if (!is_recording_enabled())
       return;
     super.do_record(recorder);
@@ -631,8 +631,8 @@ endclass
 
      begin
         uvm_root top = uvm_root::get();
-        man1.enable_recording(top.get_record_stream("man1"));
-        mac1.enable_recording(top.get_record_stream("mac1"));
+        man1.enable_recording(top.get_tr_stream("man1"));
+        mac1.enable_recording(top.get_tr_stream("mac1"));
 
     for (int i=0; i< `NUM_TRANS; i++) begin
       void'(man1.begin_tr());

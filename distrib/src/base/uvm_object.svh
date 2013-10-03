@@ -386,13 +386,13 @@ virtual class uvm_object extends uvm_void;
   // The optional ~recorder~ argument specifies the recording policy, which
   // governs how recording takes place. If a recorder policy is not provided
   // explicitly, then the global <uvm_default_recorder> policy is used. See
-  // uvm_tr_recorder for information.
+  // uvm_recorder for information.
   //
   // A simulator's recording mechanism is vendor-specific. By providing access
-  // via a common interface, the uvm_tr_recorder policy provides vendor-independent
+  // via a common interface, the uvm_recorder policy provides vendor-independent
   // access to a simulator's recording capabilities.
 
-  extern function void record (uvm_tr_recorder recorder=null);
+  extern function void record (uvm_recorder recorder=null);
 
 
   // Function: do_record
@@ -405,19 +405,19 @@ virtual class uvm_object extends uvm_void;
   // do_record implementation should call the appropriate recorder methods for
   // each of its fields. Vendor-specific recording implementations are
   // encapsulated in the ~recorder~ policy, thereby insulating user-code from
-  // vendor-specific behavior. See <uvm_tr_recorder> for more information.
+  // vendor-specific behavior. See <uvm_recorder> for more information.
   //
   // A typical implementation is as follows:
   //
   //| class mytype extends uvm_object;
   //|   data_obj data;
   //|   int f1;
-  //|   function void do_record (uvm_tr_recorder recorder);
+  //|   function void do_record (uvm_recorder recorder);
   //|     recorder.record_field("f1", f1, $bits(f1), UVM_DEC);
   //|     recorder.record_object("data", data);
   //|   endfunction
 
-  extern virtual function void do_record (uvm_tr_recorder recorder);
+  extern virtual function void do_record (uvm_recorder recorder);
 
 
   // Group: Copying
@@ -1293,7 +1293,7 @@ endfunction
 // record
 // ------
 
-function void uvm_object::record (uvm_tr_recorder recorder=null);
+function void uvm_object::record (uvm_recorder recorder=null);
 
   if(recorder == null)
     return;
@@ -1317,7 +1317,7 @@ endfunction
 // do_record (virtual)
 // ---------
 
-function void uvm_object::do_record (uvm_tr_recorder recorder);
+function void uvm_object::do_record (uvm_recorder recorder);
   return;
 endfunction
 

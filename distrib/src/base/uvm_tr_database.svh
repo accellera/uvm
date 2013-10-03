@@ -30,6 +30,7 @@
 // of the DUT.
 //
 
+typedef class uvm_recorder;
 typedef class uvm_tr_stream;
 typedef class uvm_link_base;
 typedef class uvm_simple_lock_dap;
@@ -148,12 +149,12 @@ virtual class uvm_tr_database extends uvm_object;
    // Parameters:
    //   stream - The stream which is being closed.
    //
-   // Closing a stream implicitly closes all open <uvm_tr_recorders>
+   // Closing a stream implicitly closes all open <uvm_recorders>
    // on the stream.
    //
    // This method will trigger a <do_close_stream> call.
    function void close_stream (uvm_tr_stream stream);
-      uvm_tr_recorder tr_q[$];
+      uvm_recorder tr_q[$];
       if (stream == null)
         return;
 
@@ -164,9 +165,9 @@ virtual class uvm_tr_database extends uvm_object;
       
       do_close_stream(stream);
 
-      if (stream.get_open_trs(tr_q)) begin
+      if (stream.get_open_recorders(tr_q)) begin
          foreach (tr_q[idx])
-           stream.close_tr(tr_q[idx]);
+           stream.close_recorder(tr_q[idx]);
       end
 
       m_open_streams.delete(stream);
@@ -182,12 +183,12 @@ virtual class uvm_tr_database extends uvm_object;
    //   stream - The stream which is being freed.
    //
    // Freeing a stream implicitly closes the stream (if it has
-   // not already been closed), as well as closing/freeing any <uvm_tr_recorders>
+   // not already been closed), as well as closing/freeing any <uvm_recorders>
    // on the stream.
    //
    // This method will trigger a <do_free_stream> call.
    function void free_stream (uvm_tr_stream stream);
-      uvm_tr_recorder tr_q[$];
+      uvm_recorder tr_q[$];
       if (stream == null)
         return;
 
@@ -202,14 +203,14 @@ virtual class uvm_tr_database extends uvm_object;
       do_free_stream(stream);
 
       // Close and Free open recorders on the stream
-      if (stream.get_open_trs(tr_q)) begin
+      if (stream.get_open_recorders(tr_q)) begin
          foreach (tr_q[idx]) begin
-            stream.close_tr(tr_q[idx]);
+            stream.close_recorder(tr_q[idx]);
          end
       end
-      if (stream.get_closed_trs(tr_q)) begin
+      if (stream.get_closed_recorders(tr_q)) begin
          foreach (tr_q[idx]) begin
-            stream.free_tr(tr_q[idx]);
+            stream.free_recorder(tr_q[idx]);
          end
       end
 
@@ -284,7 +285,7 @@ virtual class uvm_tr_database extends uvm_object;
    // This method will trigger a <do_establish_link> call.
    function void establish_link(uvm_link_base link);
       uvm_tr_stream s_lhs, s_rhs;
-      uvm_tr_recorder r_lhs, r_rhs;
+      uvm_recorder r_lhs, r_rhs;
       uvm_object lhs = link.get_lhs();
       uvm_object rhs = link.get_rhs();
       uvm_tr_database db;
@@ -505,7 +506,7 @@ class uvm_text_tr_database extends uvm_tr_database;
    // Text-Backend implementation of <uvm_tr_database::establish_link>.
    protected virtual function void do_establish_link(uvm_link_base link);
       if (open_db()) begin
-         uvm_tr_recorder r_lhs, r_rhs;
+         uvm_recorder r_lhs, r_rhs;
          uvm_object lhs = link.get_lhs();
          uvm_object rhs = link.get_rhs();
 
@@ -521,16 +522,16 @@ class uvm_text_tr_database extends uvm_tr_database;
             if ($cast(pc_link, link)) begin
                $fdisplay(m_file,"  LINK @%0t {TXH1:%0d TXH2:%0d RELATION=%0s}",
                          $time,
-                         uvm_tr_recorder::m_get_id_from_recorder(r_lhs),
-                         uvm_tr_recorder::m_get_id_from_recorder(r_rhs),
+                         r_lhs.get_tr_handle(),
+                         r_rhs.get_tr_handle(),
                          "child");
                          
             end
             else if ($cast(re_link, link)) begin
                $fdisplay(m_file,"  LINK @%0t {TXH1:%0d TXH2:%0d RELATION=%0s}",
                          $time,
-                         uvm_tr_recorder::m_get_id_from_recorder(r_lhs),
-                         uvm_tr_recorder::m_get_id_from_recorder(r_rhs),
+                         r_lhs.get_tr_handle(),
+                         r_rhs.get_tr_handle(),
                          "");
                
             end

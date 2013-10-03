@@ -310,8 +310,8 @@ module top;
     begin
        uvm_root top = uvm_root::get();
        
-       man1.enable_recording(top.get_record_stream("man1"));
-       mac1.enable_recording(top.get_record_stream("mac1"));
+       man1.enable_recording(top.get_tr_stream("man1"));
+       mac1.enable_recording(top.get_tr_stream("mac1"));
 
        for (int i=0; i< `NUM_TRANS; i++) begin
           void'(man1.begin_tr());

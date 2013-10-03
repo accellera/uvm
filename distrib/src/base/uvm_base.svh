@@ -65,7 +65,7 @@
   `include "base/uvm_links.svh"
   `include "base/uvm_tr_database.svh"
   `include "base/uvm_tr_stream.svh"
-  `include "base/uvm_tr_recorder.svh"
+  `include "base/uvm_recorder.svh"
 
   // Event interface
   `include "base/uvm_event_callback.svh"

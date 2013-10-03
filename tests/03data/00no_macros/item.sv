@@ -229,7 +229,7 @@ class item extends uvm_sequence_item;
   // do_record
   // ---------
 
-  virtual function void do_record(uvm_tr_recorder recorder);
+  virtual function void do_record(uvm_recorder recorder);
     if (!is_recording_enabled())
       return;
     super.do_record(recorder);
