@@ -21,6 +21,8 @@
 
 // Implementation of common methods for DPI
 
+extern void m__uvm_report_dpi(int,char*,char*,int,char*,int);
+
 void m_uvm_report_dpi(int severity,
                       char* id,
                       char* message,
@@ -32,3 +34,11 @@ void m_uvm_report_dpi(int severity,
     svSetScope(old_scope);
 }
 
+
+int int_str_max ( int radix_bits ) {
+    int val = INT_MAX;
+    int ret = 1;
+    while (val = val /radix_bits)
+        ret++;
+    return ret;
+}

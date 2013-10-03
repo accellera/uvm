@@ -203,12 +203,13 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 
   if(r == 0)
   {
-      char buffer[1024];
-      sprintf(buffer, "set: unabled to locate hdle path (%s)\n Either the name is incorrect, or you may not have PLI/ACC visibility to that name", path);
-      m_uvm_report_dpi(2, /* UVM_ERROR */
+      const char * err_str = "set: unable to locate hdl path (%s)\n Either the name is incorrect, or you may not have PLI/ACC visibility to that name";
+      char buffer[strlen(err_str) + strlen(path)];
+      sprintf(buffer, err_str, path);
+      m_uvm_report_dpi(M_UVM_ERROR,
                        "UVM/DPI/HDL_SET",
                        &buffer[0],
-                       0, /* UVM_NONE */
+                       M_UVM_NONE,
                        __FILE__,
                        __LINE__);
     return 0;
@@ -274,12 +275,13 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 
   if(r == 0)
   {
-      char buffer[1024];
-      sprintf(buffer, "get: unabled to locate hdle path (%s)\n Either the name is incorrect, or you may not have PLI/ACC visibility to that name", path);
-      m_uvm_report_dpi(2, /* UVM_ERROR */
+      const char * err_str = "get: unable to locate hdl path (%s)\n Either the name is incorrect, or you may not have PLI/ACC visibility to that name";
+      char buffer[strlen(err_str) + strlen(path)];
+      sprintf(buffer, err_str, path);
+      m_uvm_report_dpi(M_UVM_ERROR,
                        "UVM/DPI/HDL_GET",
                        &buffer[0],
-                       0, /* UVM_NONE */
+                       M_UVM_NONE,
                        __FILE__,
                        __LINE__);
     // Exiting is too harsh. Just return instead.
@@ -294,12 +296,13 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
     size = vpi_get(vpiSize, r);
     if(size > maxsize)
     {
-      char buffer[1024];
-      sprintf(buffer, "uvm_reg : hdl path '%s' is %0d bits, but the maximum size is %0d.  You can increase the maximum via a compile-time flag: +define+UVM_HDL_MAX_WIDTH=<value>", path, size, maxsize);
-      m_uvm_report_dpi(2, /* UVM_ERROR */
+      const char * err_str = "uvm_reg : hdl path '%s' is %0d bits, but the maximum size is %0d.  You can increase the maximum via a compile-time flag: +define+UVM_HDL_MAX_WIDTH=<value>";
+      char buffer[strlen(err_str) + strlen(path) + (2*int_str_max(10))];
+      sprintf(buffer, err_str, path, size, maxsize);
+      m_uvm_report_dpi(M_UVM_ERROR,
                        "UVM/DPI/HDL_SET",
                        &buffer[0],
-                       0, /* UVM_NONE */
+                       M_UVM_NONE,
                        __FILE__,
                        __LINE__);
       //tf_dofinish();

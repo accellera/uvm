@@ -100,12 +100,13 @@ extern regex_t* uvm_dpi_regcomp (char* pattern)
   int status = regcomp(re, pattern, REG_NOSUB|REG_EXTENDED);
   if(status)
   {
-      char buffer[1024];
-      sprintf(buffer, "uvm_dpi_regcomp : Unable to compile regex: |%s|, Element 0 is: %c", pattern, pattern[0]);
-      m_uvm_report_dpi(2, /* UVM_ERROR */
+      const char * err_str = "uvm_dpi_regcomp : Unable to compile regex: |%s|, Element 0 is: %c";
+      char buffer[strlen(err_str) + strlen(pattern) + 1];
+      sprintf(buffer, err_str, pattern, pattern[0]);
+      m_uvm_report_dpi(M_UVM_ERROR,
                        "UVM/DPI/REGCOMP",
                        &buffer[0],
-                       0, /* UVM_NONE */
+                       M_UVM_NONE,
                        __FILE__,
                        __LINE__);
       regfree(re);

@@ -35,8 +35,22 @@
 #include <string.h>
 #include <stdio.h>
 #include <regex.h>
+#include <limits.h>
 
-extern void m__uvm_report_dpi(int,char*,char*,int,char*,int);
+// The following consts and method call are for
+// internal usage by the UVM DPI implementation,
+// and are not intended for public use.
+static const int M_UVM_INFO = 0;
+static const int M_UVM_WARNING = 1;
+static const int M_UVM_ERROR = 2;
+static const int M_UVM_FATAL = 3;
+
+static const int M_UVM_NONE = 0;
+static const int M_UVM_LOW = 100;
+static const int M_UVM_MEDIUM = 200;
+static const int M_UVM_HIGH = 300;
+static const int M_UVM_FULL = 400;
+static const int M_UVM_DEBUG = 500;
 
 void m_uvm_report_dpi(int severity,
                       char* id,
@@ -44,6 +58,8 @@ void m_uvm_report_dpi(int severity,
                       int verbosity,
                       char* file,
                       int linenum);
+
+int int_str_max( int );
 
 
 #endif
