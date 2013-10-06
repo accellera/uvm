@@ -1073,7 +1073,7 @@ function uvm_reg_data_t uvm_reg_field::XpredictX (uvm_reg_data_t cur_val,
      "WOS":   return mask;
      "W1":    return (m_written) ? cur_val : wr_val;
      "WO1":   return (m_written) ? cur_val : wr_val;
-     "NOACCESS": return curr_val;
+     "NOACCESS": return cur_val;
      default: return wr_val;
    endcase
 

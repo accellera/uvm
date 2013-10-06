@@ -167,3 +167,5 @@ Mantis 4711: Fixed LRM violation
 Mantis 4731: Fixed initialization race introduced by Mantis 4606.
 
 Mantis 4734: Fixed bug in uvm_reg_map::get_size()
+
+Mantis 4553: Introduces NOACCESS field access in uvm_reg_field.svh; removed error msgs from get_access(), and augmented by using NOACCESS when map and field have conflicting access values. 
