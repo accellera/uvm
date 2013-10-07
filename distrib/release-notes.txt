@@ -109,6 +109,8 @@ get_adjacent_successor_nodes inside of uvm_phase
 
 Mantis 4476: uvm_sequence::req and uvm_sequence::rsp now documented.
 
+Mantis 4488: Potential zero-time loop when user does not correctly implement wait_for_relevant() now throws an error
+
 (*) Mantis 4513: Added user-defined memory allocation policy to uvm_vreg::allocat()
 
 (*) Mantis 4516: Proper prioritization of default sequences

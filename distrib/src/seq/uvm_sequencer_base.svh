@@ -922,7 +922,7 @@ task uvm_sequencer_base::m_wait_for_available_sequence();
                     else begin
                        m_wait_relevant_count++ ;
                        if (m_wait_relevant_count > m_max_zero_time_wait_relevant_count) begin
-                          `uvm_error("SEQRELEVANTLOOP",$sformatf("Zero time loop detected, passed wait_for_relevant %0d times without time advancing",m_wait_relevant_count))
+                          `uvm_fatal("SEQRELEVANTLOOP",$sformatf("Zero time loop detected, passed wait_for_relevant %0d times without time advancing",m_wait_relevant_count))
                        end
                     end
                     m_is_relevant_completed = 1;
