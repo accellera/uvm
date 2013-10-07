@@ -106,15 +106,15 @@ non-uvm_task_phase nodes
 
 (+) Mantis 4439: Documented put_response() on the uvm_seq_pull_port
 
-Mantis 4440: Now possible to jump during phase_ended().cd 
+Mantis 4440: Now possible to jump during phase_ended()
 
 (+) Mantis 4469: The ability to programatically traverse the phase graph
 was added via get_adjacent_predecessor_nodes and
 get_adjacent_successor_nodes inside of uvm_phase
 
-Mantis 4476: uvm_sequence::req and uvm_sequence::rsp now documented.
+(+) Mantis 4476: uvm_sequence::req and uvm_sequence::rsp now documented.
 
-Mantis 4488: Detect error in user implementation of uvm_sequence::wait_for_relevant()
+Mantis 4488: Potential zero-time loop when user does not correctly implement uvm_sequence::wait_for_relevant() now throws an error
 
 (+) Mantis 4513: Added user-defined memory allocation policy to uvm_vreg::allocate()
 
@@ -129,7 +129,7 @@ functionality was optionally enabled in prior versions by defining the
 functionality is now the default. Should the obsolete functionality be
 required, define the `UVM_OBJECT_DO_NOT_NEED_CONSTRUCTOR symbol.
 
-Mantis 4519: Added uvm_phase::set_jump_phase() and uvm_phase::end_prematurely(),
+(+) Mantis 4519: Added uvm_phase::set_jump_phase() and uvm_phase::end_prematurely(),
 which together implement uvm_phase::jump().
 
 Mantis 4532: uvm_reg_access_seq ignoring regs with one RO field
