@@ -7,7 +7,7 @@ gets sent to the backend database, without knowing exactly how the
 connection to that database is established.
 
 The primary interface to the UVM recording facility is the
-<uvm_tr_recorder> class, which serves as a reference to the 
+<uvm_recorder> class, which serves as a reference to the 
 transaction in the database, as well as the policy which is used
 to record information into the database.
 

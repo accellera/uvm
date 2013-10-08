@@ -61,7 +61,7 @@ virtual class uvm_event_callback#(type T=uvm_object) extends uvm_object;
   // In the function, ~e~ is the <uvm_event> that is being triggered, and ~data~
   // is the optional data associated with the event trigger.
 
-  virtual function bit pre_trigger (uvm_event e, T data);
+  virtual function bit pre_trigger (uvm_event#(T) e, T data);
     return 0;
   endfunction
 
@@ -76,7 +76,7 @@ virtual class uvm_event_callback#(type T=uvm_object) extends uvm_object;
   // In the function, ~e~ is the <uvm_event> that is being triggered, and ~data~
   // is the optional data associated with the event trigger.
 
-  virtual function void post_trigger (uvm_event e, T data);
+  virtual function void post_trigger (uvm_event#(T) e, T data);
     return;
   endfunction
 

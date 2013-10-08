@@ -346,29 +346,29 @@ virtual class uvm_tr_database extends uvm_object;
 
    // Function: do_open_db
    // Backend implementation of <open_db>
-   protected pure virtual function bit do_open_db();
+   pure virtual protected function bit do_open_db();
 
    // Function: do_close_db
    // Backend implementation of <close_db>
-   protected pure virtual function void do_close_db();
+   pure virtual protected function void do_close_db();
 
    // Function: do_open_stream
    // Backend implementation of <open_stream>
-   protected pure virtual function uvm_tr_stream do_open_stream(string name,
+   pure virtual protected function uvm_tr_stream do_open_stream(string name,
                                                                    uvm_component cntxt,
                                                                    string type_name);
 
    // Function: do_close_stream
    // Backend implementation of <close_stream>
-   protected pure virtual function void do_close_stream(uvm_tr_stream stream);
+   pure virtual protected function void do_close_stream(uvm_tr_stream stream);
 
    // Function: do_free_stream
    // Backend implementation of <close_stream>
-   protected pure virtual function void do_free_stream(uvm_tr_stream stream);
+   pure virtual protected function void do_free_stream(uvm_tr_stream stream);
 
    // Function: do_establish_link
    // Backend implementation of <establish_link>
-   protected pure virtual function void do_establish_link(uvm_link_base link);
+   pure virtual protected function void do_establish_link(uvm_link_base link);
 
 endclass : uvm_tr_database
 

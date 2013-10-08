@@ -135,7 +135,7 @@ virtual class uvm_recorder extends uvm_object;
       if (!m_stream_dap.try_get(stream))
         return 0;
 
-      return stream.is_tr_open(this);
+      return stream.is_recorder_open(this);
    endfunction : is_open
 
    // Function: is_closed
@@ -147,7 +147,7 @@ virtual class uvm_recorder extends uvm_object;
       if (!m_stream_dap.try_get(stream))
         return 0;
 
-      return stream.is_tr_closed(this);
+      return stream.is_recorder_closed(this);
    endfunction : is_closed
     
 
@@ -419,7 +419,7 @@ virtual class uvm_recorder extends uvm_object;
 
    // Group: Implementation Agnostic API
 
-   // Function: do_intiialize_recorder
+   // Function: do_configure
    // Initializes the state of the recorder
    //
    // ~Optional~ Backend implementation of <configure>
@@ -437,7 +437,7 @@ virtual class uvm_recorder extends uvm_object;
    // Records an integral field (less than or equal to 4096 bits).
    //
    // ~Mandatory~ Backend implementation of <record_field>
-   protected pure virtual function void do_record_field(string name,
+   pure virtual protected function void do_record_field(string name,
                                                         uvm_bitstream_t value,
                                                         int size,
                                                         uvm_radix_enum radix);
@@ -446,7 +446,7 @@ virtual class uvm_recorder extends uvm_object;
    // Records an integral field (less than or equal to 64 bits).
    //
    // ~Mandatory~ Backend implementation of <record_field_int>
-   protected pure virtual function void do_record_field_int(string name,
+   pure virtual protected function void do_record_field_int(string name,
                                                             uvm_integral_t value,
                                                             int          size,
                                                             uvm_radix_enum radix);
@@ -455,35 +455,35 @@ virtual class uvm_recorder extends uvm_object;
    // Records a real field.
    //
    // ~Mandatory~ Backend implementation of <record_field_real>
-   protected pure virtual function void do_record_field_real(string name,
+   pure virtual protected function void do_record_field_real(string name,
                                                              real value);
 
    // Function: do_record_object
    // Records an object field.
    //
    // ~Mandatory~ Backend implementation of <record_object>
-   protected pure virtual function void do_record_object(string name,
+   pure virtual protected function void do_record_object(string name,
                                                          uvm_object value);
 
    // Function: do_record_string
    // Records a string field.
    //
    // ~Mandatory~ Backend implementation of <record_string>
-   protected pure virtual function void do_record_string(string name,
+   pure virtual protected function void do_record_string(string name,
                                                          string value);
 
    // Function: do_record_time
    // Records a time field.
    //
    // ~Mandatory~ Backend implementation of <record_time>
-   protected pure virtual function void do_record_time(string name,
+   pure virtual protected function void do_record_time(string name,
                                                        time value);
 
    // Function: do_record_generic
    // Records a name/value pair, where ~value~ has been converted to a string.
    //
    // ~Mandatory~ Backend implementation of <record_generic>
-   protected pure virtual function void do_record_generic(string name,
+   pure virtual protected function void do_record_generic(string name,
                                                           string value,
                                                           string type_name);
 

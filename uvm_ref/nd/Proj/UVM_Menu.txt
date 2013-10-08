@@ -220,7 +220,7 @@ Group: Policies  {
    File: Overview                     (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/policies.txt)
    File: uvm_printer                  (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_printer.svh)
    File: uvm_comparer                 (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_comparer.svh)
-   File: uvm_tr_recorder                 (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_tr_recorder.svh)
+   File: uvm_recorder                 (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_recorder.svh)
    File: uvm_packer                   (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_packer.svh)
    File: Links                        (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_links.svh)
 

@@ -415,19 +415,19 @@ virtual class uvm_tr_stream extends uvm_object;
       return q.size();
    endfunction : get_closed_recorders
    
-   // Function: is_tr_open
+   // Function: is_recorder_open
    // Returns true if the <uvm_recorder> has been ~opened~, but not ~closed~.
    //
-   function bit is_tr_open(uvm_recorder tr);
+   function bit is_recorder_open(uvm_recorder tr);
       return m_open_records.exists(tr);
-   endfunction : is_tr_open
+   endfunction : is_recorder_open
 
-   // Function: is_tr_closed
+   // Function: is_recorder_closed
    // Returns true if the <uvm_recorder> has been ~closed~, but not ~freed~.
    //
-   function bit is_tr_closed(uvm_recorder tr);
+   function bit is_recorder_closed(uvm_recorder tr);
       return m_closed_records.exists(tr);
-   endfunction : is_tr_closed
+   endfunction : is_recorder_closed
    
    // Group: Handles
 
@@ -509,7 +509,7 @@ virtual class uvm_tr_stream extends uvm_object;
    // Initializes the state of the stream
    //
    // Backend implementation of <configure>
-   protected pure virtual function void do_configure(uvm_tr_database db,
+   pure virtual protected function void do_configure(uvm_tr_database db,
                                                              uvm_component cntxt,
                                                              string stream_type_name);
 
@@ -517,13 +517,13 @@ virtual class uvm_tr_stream extends uvm_object;
    // Flushes the internal state of the stream
    //
    // Backend implementation of <flush>
-   protected pure virtual function void do_flush();
+   pure virtual protected function void do_flush();
 
    // Function: do_open_recorder
    // Marks the beginning of a new record in the stream.
    //
    // Backend implementation of <open_recorder>
-   protected pure virtual function uvm_recorder do_open_recorder(string name,
+   pure virtual protected function uvm_recorder do_open_recorder(string name,
                                                                 time   open_time,
                                                                 string type_name);
 
@@ -531,7 +531,7 @@ virtual class uvm_tr_stream extends uvm_object;
    // Marks the end of a record in the stream
    //
    // Backend implementation of <close_recorder>
-   protected pure virtual function void do_close_recorder(uvm_recorder record,
+   pure virtual protected function void do_close_recorder(uvm_recorder record,
                                                       time close_time);
 
    // Function: do_free_recorder
@@ -542,7 +542,7 @@ virtual class uvm_tr_stream extends uvm_object;
    // Note that unlike the <free_recorder> method, ~do_free_recorder~ does not
    // have the optional ~close_time~ argument.  The argument will be processed
    // by <free_recorder> prior to the ~do_free_recorder~ call.
-   protected pure virtual function void do_free_recorder(uvm_recorder record);
+   pure virtual protected function void do_free_recorder(uvm_recorder record);
 
 
    // Function: do_get_handle
