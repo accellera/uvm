@@ -2585,7 +2585,7 @@ endfunction
 
 function void uvm_component::accept_tr (uvm_transaction tr,
                                         time accept_time=0);
-  uvm_event e;
+  uvm_event#() e;
   tr.accept_tr(accept_time);
   do_accept_tr(tr);
   e = event_pool.get("accept_tr");
@@ -2674,7 +2674,7 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
                                             string label="",
                                             string desc="",
                                             time begin_time=0);
-   uvm_event e;
+   uvm_event#() e;
    string    name;
    string    kind;
    uvm_tr_database db;
@@ -2770,7 +2770,7 @@ endfunction
 function void uvm_component::end_tr (uvm_transaction tr,
                                      time end_time=0,
                                      bit free_handle=1);
-   uvm_event e;
+   uvm_event#() e;
    uvm_recorder recorder;
    uvm_tr_stream stream;
    uvm_tr_database db = m_get_tr_database();
