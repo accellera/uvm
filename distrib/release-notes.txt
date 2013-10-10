@@ -167,3 +167,6 @@ Mantis 4711: Fixed LRM violation
 Mantis 4731: Fixed initialization race introduced by Mantis 4606.
 
 Mantis 4734: Fixed bug in uvm_reg_map::get_size()
+
+Mantis 4738: Fixed bug wherein messages from built-in UVM dpi code
+were not being routed through standard UVM messaging.
