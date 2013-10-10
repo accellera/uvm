@@ -1,6 +1,6 @@
 //
 //------------------------------------------------------------------------------
-//   Copyright 2011 (Authors)
+//   Copyright 2013 Cisco Systems, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -45,23 +45,28 @@ module test();
       super.new(name);
     endfunction
     task body();
-      $display("%t %s body() starting", $time, get_type_name());
+      $display("%0t %s body() starting", $time, get_type_name());
       `uvm_do(req)
-      $display("%t %s body() ending", $time, get_type_name());
+      $display("%0t %s body() ending", $time, get_type_name());
+      $display("Did not see expected UVM_FATAL for loop!!");
+      $display("** UVM TEST FAILED **");
     endtask
+    int loop_counter = 0;
     function bit is_relevant();
-      $display("%t %s relevant check! %0b", $time, get_type_name(), p_sequencer.rel_var);
       return p_sequencer.rel_var;
     endfunction
     task wait_for_relevant();
-      //MDS@(p_sequencer.rel_var);
+      //@(p_sequencer.rel_var); //oops, forgot to wait for the relevant to change
+      //following just for debug info in test
+      $display("%0t %s wait_for_relevant() call iteration %0d", $time, get_type_name(), loop_counter);
+      loop_counter++ ;
     endtask
   endclass
 
 
 
   class my_sequencer extends uvm_sequencer #(my_item);
-    bit rel_var = 0;//MDS1;
+    bit rel_var = 0;// starting at relevant = 0
     `uvm_component_utils(my_sequencer)
     function new(string name, uvm_component parent);
       super.new(name, parent);
@@ -69,7 +74,6 @@ module test();
   endclass
 
   
-  time try_return_time;
 
 
   class my_driver extends uvm_driver #(my_item);
@@ -80,23 +84,33 @@ module test();
     task run_phase(uvm_phase phase);
       phase.raise_objection(this);
       #1;
-      $display("%t calling try_next_item...", $time);
-      seq_item_port.get_next_item(req);//MDStry_next_item(req);
-      $display("%t back from try_next_item...", $time);
+      $display("%t calling get_next_item...", $time);
+      seq_item_port.get_next_item(req);
+      $display("%t back from get_next_item...", $time);
       if (req != null) begin
         req.print();
-        $display("%t try_next_item completed", $time);
+        $display("%t get_next_item completed", $time);
         seq_item_port.item_done();
       end
       else begin
-        try_return_time = $time;
-        $display("%t try_next_item returned null", $time);
+        $display("%t get_next_item returned null", $time);
       end
       phase.drop_objection(this);
     endtask
   endclass
 
 
+  class fatal_error_catcher extends uvm_report_catcher;
+     virtual function action_e catch();
+     if(get_severity() == UVM_FATAL && get_id()=="SEQRELEVANTLOOP") begin
+        set_action(UVM_EXIT);
+        uvm_report_info("FATAL CATCHER", "Caught FATAL for SEQRELEVANTLOOP", UVM_MEDIUM , `uvm_file, `uvm_line );
+        $display("** UVM TEST PASSED **");
+     end
+        return THROW;
+     endfunction
+  endclass
+  
 
   
   class test extends uvm_test;
@@ -115,6 +129,11 @@ module test();
       super.build();
       ms0 = my_sequencer::type_id::create("ms0", this);
       md0 = my_driver::type_id::create("md0", this);
+      begin
+         fatal_error_catcher fec ;
+         fec = new ;
+         uvm_report_cb::add(null,fec);
+      end
     endfunction
 
     function void connect();
@@ -132,18 +151,10 @@ module test();
       for (int i = 0; i < 6; i++) begin
         #0;
       end
-      ms0.rel_var = 0;
       #300;
       ms0.rel_var = 1;
       phase.drop_objection(this);
     endtask
-
-    function void report_phase(uvm_phase phase);
-      if (try_return_time == 1)
-        $display("UVM TEST PASSED");
-      else
-        $display("UVM TEST FAILED");
-    endfunction
 
   endclass
 
