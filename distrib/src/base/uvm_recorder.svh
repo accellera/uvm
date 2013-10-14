@@ -163,7 +163,7 @@ virtual class uvm_recorder extends uvm_object;
   // - ~configure~ is called more than once without the
   //  recorder being ~freed~ in between.
   // - ~stream~ is ~null~
-  function void configure(uvm_tr_stream stream);
+  function void configure(uvm_tr_stream stream, time open_time, string type_name);
      uvm_tr_stream m_stream;
      if (stream == null) begin
         `uvm_error("UVM/REC/NULL_STREAM",
@@ -181,7 +181,7 @@ virtual class uvm_recorder extends uvm_object;
 
      m_stream_dap.set(stream);
 
-     do_configure(stream);
+     do_configure(stream, open_time, type_name);
   endfunction : configure
 
   // Function: flush
@@ -423,7 +423,9 @@ virtual class uvm_recorder extends uvm_object;
    // Initializes the state of the recorder
    //
    // ~Optional~ Backend implementation of <configure>
-   protected virtual function void do_configure(uvm_tr_stream stream);
+   protected virtual function void do_configure(uvm_tr_stream stream,
+                                                time open_time,
+                                                string type_name);
    endfunction : do_configure
 
    // Function: do_flush
@@ -634,8 +636,18 @@ class uvm_text_recorder extends uvm_recorder;
    // Initializes the state of the recorder
    //
    // Text-backend specific implementation.
-   protected virtual function void do_configure(uvm_tr_stream stream);
+   protected virtual function void do_configure(uvm_tr_stream stream,
+                                                time open_time,
+                                                string type_name);
       $cast(m_text_db, stream.get_db());
+      $fdisplay(m_text_db.m_file, 
+                "BEGIN @%0t {TXH:%0d STREAM:%0d NAME:%s TIME:%0t TYPE=\"%0s\"}",
+                $time,
+                this.get_handle(),
+                stream.get_handle(),
+                this.get_name(),
+                open_time,
+                type_name);
    endfunction : do_configure
 
    // Function: do_flush
@@ -658,11 +670,10 @@ class uvm_text_recorder extends uvm_recorder;
       if (!radix)
         radix = default_radix;
 
-      m_text_db.set_attribute(this.get_handle(),
-                              scope.get(),
-                              value,
-                              radix,
-                              size);
+      write_attribute(scope.get(),
+                      value,
+                      radix,
+                      size);
 
    endfunction : do_record_field
   
@@ -679,11 +690,10 @@ class uvm_text_recorder extends uvm_recorder;
       if (!radix)
         radix = default_radix;
 
-      m_text_db.set_attribute_int(this.get_handle(),
-                                  scope.get(),
-                                  value,
-                                  radix,
-                                  size);
+      write_attribute_int(scope.get(),
+                          value,
+                          radix,
+                          size);
 
    endfunction : do_record_field_int
 
@@ -697,11 +707,10 @@ class uvm_text_recorder extends uvm_recorder;
       bit [63:0] ival = $realtobits(value);
       scope.set_arg(name);
 
-      m_text_db.set_attribute(this.get_handle(),
-                              scope.get(),
-                              ival,
-                              UVM_REAL,
-                              64);
+      write_attribute(scope.get(),
+                      ival,
+                      UVM_REAL,
+                      64);
    endfunction : do_record_field_real
 
    // Function: do_record_object
@@ -723,11 +732,10 @@ class uvm_text_recorder extends uvm_recorder;
             v = str.atoi(); 
          end
          scope.set_arg(name);
-         m_text_db.set_attribute(this.get_handle(), 
-                                 scope.get(), 
-                                 v, 
-                                 UVM_DEC, 
-                                 32);
+         write_attribute(scope.get(), 
+                         v, 
+                         UVM_DEC, 
+                         32);
       end
  
       if(policy != UVM_REFERENCE) begin
@@ -749,11 +757,10 @@ class uvm_text_recorder extends uvm_recorder;
    protected virtual function void do_record_string(string name,
                                                     string value);
       scope.set_arg(name);
-      m_text_db.set_attribute(this.get_handle(), 
-                              scope.get(), 
-                              uvm_string_to_bits(value),
-                              UVM_STRING, 
-                              8+value.len());
+      write_attribute(scope.get(), 
+                      uvm_string_to_bits(value),
+                      UVM_STRING, 
+                      8+value.len());
    endfunction : do_record_string
 
    // Function: do_record_time
@@ -763,11 +770,10 @@ class uvm_text_recorder extends uvm_recorder;
    protected virtual function void do_record_time(string name,
                                                     time value);
       scope.set_arg(name);
-      m_text_db.set_attribute(this.get_handle(), 
-                              scope.get(), 
-                              value,
-                              UVM_TIME, 
-                              64);
+      write_attribute(scope.get(), 
+                      value,
+                      UVM_TIME, 
+                      64);
    endfunction : do_record_time
 
    // Function: do_record_generic
@@ -778,12 +784,59 @@ class uvm_text_recorder extends uvm_recorder;
                                                      string value,
                                                      string type_name);
       scope.set_arg(name);
-      m_text_db.set_attribute(this.get_handle(), 
-                              scope.get(), 
-                              uvm_string_to_bits(value), 
-                              UVM_STRING, 
-                              8+value.len());
+      write_attribute(scope.get(), 
+                      uvm_string_to_bits(value), 
+                      UVM_STRING, 
+                      8+value.len());
    endfunction : do_record_generic
+
+   // Function: write_attribute
+   // Outputs an integral attribute to the textual log
+   //
+   // Parameters:
+   // nm - Name of the attribute
+   // value - Value
+   // radix - Radix of the output
+   // numbits - number of valid bits
+   function void write_attribute(string nm,
+                                 uvm_bitstream_t value,
+                                 uvm_radix_enum radix,
+                                 integer numbits=$bits(uvm_bitstream_t));
+      if (m_text_db.open_db()) begin
+         $fdisplay(m_text_db.m_file, 
+                   "  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%s   RADIX:%s BITS=%0d}",
+                   $time,
+                   this.get_handle(),
+                   nm,
+                   uvm_bitstream_to_string(value, numbits, radix),
+                    radix.name(),
+                   numbits);
+      end
+   endfunction : write_attribute
+
+   // Function: write_attribute_int
+   // Outputs an integral attribute to the textual log
+   //
+   // Parameters:
+   // nm - Name of the attribute
+   // value - Value
+   // radix - Radix of the output
+   // numbits - number of valid bits
+   function void write_attribute_int(string  nm,
+                                     uvm_integral_t value,
+                                     uvm_radix_enum radix,
+                                     integer numbits=$bits(uvm_bitstream_t));
+      if (m_text_db.open_db()) begin
+         $fdisplay(m_text_db.m_file, 
+                   "  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%0d   RADIX:%s BITS=%0d}",
+                   $time,
+                   this.get_handle(),
+                   nm,
+                   uvm_integral_to_string(value, numbits, radix),
+                   radix.name(),
+                   numbits);
+      end
+   endfunction : write_attribute_int
 
    /// LEFT FOR BACKWARDS COMPAT ONLY!!!!!!!!
 
@@ -849,7 +902,16 @@ class uvm_text_recorder extends uvm_recorder;
                                uvm_radix_enum radix,
                                integer numbits=1024);
      if (open_file()) begin
-        m_text_db.set_attribute(txh, nm, value, radix, numbits);
+        UVM_FILE file = m_text_db.m_file;
+         $fdisplay(file, 
+                   "  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%s   RADIX:%s BITS=%0d}",
+                   $time,
+                   txh,
+                   nm,
+                   uvm_bitstream_to_string(value, numbits, radix),
+                   radix.name(),
+                   numbits);
+        
      end
   endfunction
   
