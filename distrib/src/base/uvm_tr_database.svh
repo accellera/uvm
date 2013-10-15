@@ -97,7 +97,8 @@ virtual class uvm_tr_database extends uvm_object;
    // This method will trigger a <do_close_db>
    // call.
    function void close_db();
-      do_close_db();
+      if (m_is_opened)
+        do_close_db();
    endfunction : close_db
 
    // Function: is_open
@@ -126,20 +127,24 @@ virtual class uvm_tr_database extends uvm_object;
    // The method returns a reference to a <uvm_tr_stream>
    // object if successful, ~null~ otherwise.
    //
-   // This method will trigger a <do_open_stream> call.
+   // This method will trigger a <do_open_stream> call, and if a
+   // non ~null~ stream is returned, then <uvm_tr_stream::configure>
+   // will be called.
    //
    // Streams can only be opened if the database is
    // open (per <is_open>).  Otherwise the request will
    // be ignored, and ~null~ will be returned.
    function uvm_tr_stream open_stream(string name,
-                                         uvm_component cntxt=null,
-                                         string type_name="");
-      if (!is_open())
-        return null;
+                                      uvm_component cntxt=null,
+                                      string type_name="");
+      if (!open_db()) begin
+         return null;
+      end
       
       open_stream = do_open_stream(name, cntxt, type_name);
       if (open_stream != null) begin
          m_open_streams[open_stream] = 1;
+         open_stream.configure(this, cntxt, type_name);
       end
    endfunction : open_stream
 
@@ -155,6 +160,10 @@ virtual class uvm_tr_database extends uvm_object;
    // This method will trigger a <do_close_stream> call.
    function void close_stream (uvm_tr_stream stream);
       uvm_recorder tr_q[$];
+
+      if (!is_open())
+        return;
+      
       if (stream == null)
         return;
 
@@ -189,6 +198,10 @@ virtual class uvm_tr_database extends uvm_object;
    // This method will trigger a <do_free_stream> call.
    function void free_stream (uvm_tr_stream stream);
       uvm_recorder tr_q[$];
+
+      if (!is_open())
+        return;
+      
       if (stream == null)
         return;
 
@@ -200,21 +213,10 @@ virtual class uvm_tr_database extends uvm_object;
          return;
       end
 
+      stream.flush();
+
       do_free_stream(stream);
 
-      // Close and Free open recorders on the stream
-      if (stream.get_open_recorders(tr_q)) begin
-         foreach (tr_q[idx]) begin
-            stream.close_recorder(tr_q[idx]);
-         end
-      end
-      if (stream.get_closed_recorders(tr_q)) begin
-         foreach (tr_q[idx]) begin
-            stream.free_recorder(tr_q[idx]);
-         end
-      end
-
-      stream.flush();
    endfunction : free_stream
 
    // Function: get_open_streams
@@ -421,10 +423,10 @@ class uvm_text_tr_database extends uvm_tr_database;
    protected virtual function bit do_open_db();
       if (m_file == 0) begin
          m_file = $fopen(m_filename_dap.get(), "a+");
-         if (m_file > 0)
+         if (m_file != 0)
            m_filename_dap.lock();
       end
-      return (m_file > 0);
+      return (m_file != 0);
    endfunction : do_open_db
    
    // Function: do_close_db
@@ -454,18 +456,8 @@ class uvm_text_tr_database extends uvm_tr_database;
    protected virtual function uvm_tr_stream do_open_stream(string name,
                                                            uvm_component cntxt=null,
                                                            string type_name="");
-      if (open_db()) begin
-         uvm_text_tr_stream m_stream = uvm_text_tr_stream::type_id::create(name, cntxt);
-         m_stream.configure(this, cntxt, type_name);
-         $fdisplay(m_file, "  CREATE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",
-                   $time,
-                   name,
-                   type_name,
-                   (cntxt == null) ? "" : cntxt.get_full_name(),
-                   m_stream.get_handle());
-         return m_stream;
-      end // if (open_db())
-      return null;
+      uvm_text_tr_stream m_stream = uvm_text_tr_stream::type_id::create(name, cntxt);
+      return m_stream;
    endfunction : do_open_stream
 
    // Function: do_close_stream
@@ -473,15 +465,13 @@ class uvm_text_tr_database extends uvm_tr_database;
    //
    // Text-Backend implementation of <uvm_tr_database::close_stream>
    protected virtual function void do_close_stream(uvm_tr_stream stream);
-      if (open_db()) begin
-         uvm_component cntxt = stream.get_context();
-         $fdisplay(m_file, "  CLOSE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",
-                   $time,
-                   stream.get_name(),
-                   stream.get_stream_type_name(),
-                   (cntxt == null) ? "" : cntxt.get_full_name(),
-                   stream.get_handle());
-      end
+      uvm_component cntxt = stream.get_context();
+      $fdisplay(m_file, "  CLOSE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",
+                $time,
+                stream.get_name(),
+                stream.get_stream_type_name(),
+                (cntxt == null) ? "" : cntxt.get_full_name(),
+                stream.get_handle());
    endfunction : do_close_stream
    
    // Function: do_free_stream
@@ -489,15 +479,13 @@ class uvm_text_tr_database extends uvm_tr_database;
    //
    // Text-Backend implementation of <uvm_tr_database::free_stream>
    protected virtual function void do_free_stream(uvm_tr_stream stream);
-      if (open_db()) begin
-         uvm_component cntxt = stream.get_context();
-         $fdisplay(m_file, "  FREE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",
-                   $time,
-                   stream.get_name(),
-                   stream.get_stream_type_name(),
-                   (cntxt == null) ? "" : cntxt.get_full_name(),
-                   stream.get_handle());
-      end
+      uvm_component cntxt = stream.get_context();
+      $fdisplay(m_file, "  FREE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",
+                $time,
+                stream.get_name(),
+                stream.get_stream_type_name(),
+                (cntxt == null) ? "" : cntxt.get_full_name(),
+                stream.get_handle());
    endfunction : do_free_stream
    
    // Function: do_establish_link
@@ -505,38 +493,35 @@ class uvm_text_tr_database extends uvm_tr_database;
    //
    // Text-Backend implementation of <uvm_tr_database::establish_link>.
    protected virtual function void do_establish_link(uvm_link_base link);
-      if (open_db()) begin
-         uvm_recorder r_lhs, r_rhs;
-         uvm_object lhs = link.get_lhs();
-         uvm_object rhs = link.get_rhs();
-
-         void'($cast(r_lhs, lhs));
-         void'($cast(r_rhs, rhs));
-         
-         if ((r_lhs == null) ||
-             (r_rhs == null))
-           return;
-         else begin
-            uvm_parent_child_link pc_link;
-            uvm_related_link re_link;
-            if ($cast(pc_link, link)) begin
-               $fdisplay(m_file,"  LINK @%0t {TXH1:%0d TXH2:%0d RELATION=%0s}",
-                         $time,
-                         r_lhs.get_handle(),
-                         r_rhs.get_handle(),
-                         "child");
-                         
-            end
-            else if ($cast(re_link, link)) begin
-               $fdisplay(m_file,"  LINK @%0t {TXH1:%0d TXH2:%0d RELATION=%0s}",
-                         $time,
-                         r_lhs.get_handle(),
-                         r_rhs.get_handle(),
-                         "");
-               
-            end
+      uvm_recorder r_lhs, r_rhs;
+      uvm_object lhs = link.get_lhs();
+      uvm_object rhs = link.get_rhs();
+      
+      void'($cast(r_lhs, lhs));
+      void'($cast(r_rhs, rhs));
+      
+      if ((r_lhs == null) ||
+          (r_rhs == null))
+        return;
+      else begin
+         uvm_parent_child_link pc_link;
+         uvm_related_link re_link;
+         if ($cast(pc_link, link)) begin
+            $fdisplay(m_file,"  LINK @%0t {TXH1:%0d TXH2:%0d RELATION=%0s}",
+                      $time,
+                      r_lhs.get_handle(),
+                      r_rhs.get_handle(),
+                      "child");
+            
          end
-         
+         else if ($cast(re_link, link)) begin
+            $fdisplay(m_file,"  LINK @%0t {TXH1:%0d TXH2:%0d RELATION=%0s}",
+                      $time,
+                         r_lhs.get_handle(),
+                      r_rhs.get_handle(),
+                      "");
+            
+         end
       end
    endfunction : do_establish_link
 

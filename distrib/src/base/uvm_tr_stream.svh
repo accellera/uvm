@@ -200,10 +200,19 @@ virtual class uvm_tr_stream extends uvm_object;
    // Flushes the internal state of the stream.
    //
    // This method will be called automatically when the
-   // stream is ~freed~ on the database.
+   // stream is ~freed~ on the database.  Any open ~recorders~
+   // on the stream will be closed and freed.
    //
    // This method will trigger a <do_flush> call.
    function void flush();
+      // Close and Free open recorders on the stream
+      foreach (m_open_records[idx]) begin
+         this.close_recorder(idx);
+      end
+      foreach (m_closed_records[idx]) begin
+         this.free_recorder(idx);
+      end
+      
       m_cfg_dap = new("cfg_dap");
       m_warn_null_cfg = 1;
       // Backwards compat
@@ -270,8 +279,8 @@ virtual class uvm_tr_stream extends uvm_object;
                                        type_name);
 
       if (open_recorder != null) begin
-         open_recorder.configure(this, m_time, type_name);
          m_open_records[open_recorder] = m_time;
+         open_recorder.configure(this, m_time, type_name);
       end
    endfunction : open_recorder
 
@@ -342,7 +351,7 @@ virtual class uvm_tr_stream extends uvm_object;
    // If the record has already ended, then the second parameter to ~free_recorder~
    // will be ignored.
    //
-   // This method will trigger a call to <uvm_recorder::free_recorder>, followed by
+   // This method will trigger a call to <uvm_recorder::flush>, followed by
    // a call to <do_free_recorder>.
    //
    // An error will be asserted if:
@@ -370,12 +379,12 @@ virtual class uvm_tr_stream extends uvm_object;
          close_recorder(recorder, close_time);
       end
 
-      m_closed_records.delete(recorder);
-
       recorder.flush();
-      
+
       do_free_recorder(recorder);
 
+      m_closed_records.delete(recorder);
+      
    endfunction : free_recorder
 
    // Function: get_open_recorders
@@ -461,11 +470,12 @@ virtual class uvm_tr_stream extends uvm_object;
    // The value returned by a call to ~get_handle~ is implementation
    // specific, and is provided via the <do_get_handle> method.
    function integer get_handle();
-      if (!is_open() && !is_closed())
+      if (!is_open() && !is_closed()) begin
         return 0;
+      end
       else begin
          integer handle = do_get_handle();
-
+         
          // Check for the weird case where our handle changed.
          if (m_ids_by_stream.exists(this) && m_ids_by_stream[this] != handle)
            m_streams_by_id.delete(m_ids_by_stream[this]);
@@ -605,6 +615,13 @@ class uvm_text_tr_stream extends uvm_tr_stream;
                                                         uvm_component cntxt,
                                                         string stream_type_name);
       $cast(m_text_db, db);
+      $fdisplay(m_text_db.m_file, 
+                "  CREATE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",
+                $time,
+                this.get_name(),
+                stream_type_name,
+                (cntxt == null) ? "" : cntxt.get_full_name(),
+                this.get_handle());
    endfunction : do_configure
 
    // Function: do_flush
@@ -632,7 +649,6 @@ class uvm_text_tr_stream extends uvm_tr_stream;
          else
            m_recorder = new(name);
          
-         m_recorder.configure(this, open_time, type_name);
          return m_recorder;
       end
 
@@ -660,12 +676,6 @@ class uvm_text_tr_stream extends uvm_tr_stream;
    //
    // Text-backend specific implementation.
    protected virtual function void do_free_recorder(uvm_recorder recorder);
-      if (m_text_db.open_db()) begin
-         UVM_FILE file = m_text_db.m_file;
-         $fdisplay(file, "FREE @%0t {TXH:%0d}",
-                   $time,
-                   recorder.get_handle());
-      end
       // Arbitrary size, useful for example purposes
       if (m_free_recorders.size() < 8) begin
          uvm_text_recorder m_recorder;

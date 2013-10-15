@@ -2684,9 +2684,9 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
 
    if (tr == null)
      return 0;
-   
-   db = m_get_tr_database();
 
+   db = m_get_tr_database();
+   
    if (parent_handle != 0)
      parent_recorder = uvm_recorder::get_recorder_from_handle(parent_handle);
    
@@ -2717,10 +2717,9 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
      name = tr.get_type_name();
    
    if (uvm_verbosity'(recording_detail) != UVM_NONE) begin
-
       if ((stream_name == "") || (stream_name == "main")) begin
         if (m_main_stream == null)
-           m_main_stream = tr_database.open_stream("main", this, "TVM");
+           m_main_stream = db.open_stream("main", this, "TVM");
          stream = m_main_stream;
       end
       else
@@ -2732,7 +2731,7 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
          recorder = stream.open_recorder(name, begin_time, kind);
 
          if (recorder != null) begin
-            if (label != "")
+            if (label != "") 
               recorder.record_string("label", label);
             if (desc != "")
               recorder.record_string("desc", desc);
@@ -2749,7 +2748,7 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
             m_tr_h[tr] = recorder;
          end
       end
-
+      
       handle = (recorder == null) ? 0 : recorder.get_handle();
       do_begin_tr(tr, stream_name, handle); 
       

@@ -132,8 +132,9 @@ virtual class uvm_recorder extends uvm_object;
    //
    function bit is_open();
       uvm_tr_stream stream;
-      if (!m_stream_dap.try_get(stream))
+      if (!m_stream_dap.try_get(stream)) begin
         return 0;
+      end
 
       return stream.is_recorder_open(this);
    endfunction : is_open
@@ -144,8 +145,9 @@ virtual class uvm_recorder extends uvm_object;
    //
    function bit is_closed();
       uvm_tr_stream stream;
-      if (!m_stream_dap.try_get(stream))
+      if (!m_stream_dap.try_get(stream)) begin
         return 0;
+      end
 
       return stream.is_recorder_closed(this);
    endfunction : is_closed
@@ -192,12 +194,12 @@ virtual class uvm_recorder extends uvm_object;
   //
   // This method will trigger a <do_flush> call.
   function void flush();
+     do_flush();
      m_stream_dap = new("stream_dap");
      m_warn_null_stream = 1;
      // Backwards compat
      if (m_ids_by_recorder.exists(this))
        m_free_id(m_ids_by_recorder[this]);
-     do_flush();
   endfunction : flush
 
    // Group: Handles
@@ -244,8 +246,9 @@ virtual class uvm_recorder extends uvm_object;
    // The value returned by a call to ~get_handle~ is implementation
    // specific, and is provided via the <do_get_handle> method.
    function integer get_handle();
-      if (!is_open() && !is_closed())
-        return 0;
+      if (!is_open() && !is_closed()) begin
+         return 0;
+      end
       else begin
          integer handle = do_get_handle();
 
@@ -655,6 +658,12 @@ class uvm_text_recorder extends uvm_recorder;
    //
    // Text-backend specific implementation.
    protected virtual function void do_flush();
+      if (m_text_db.open_db()) begin
+         UVM_FILE file = m_text_db.m_file;
+         $fdisplay(file, "FREE @%0t {TXH:%0d}",
+                   $time,
+                   this.get_handle());
+      end
       m_text_db = null;
    endfunction : do_flush
    
@@ -757,10 +766,16 @@ class uvm_text_recorder extends uvm_recorder;
    protected virtual function void do_record_string(string name,
                                                     string value);
       scope.set_arg(name);
-      write_attribute(scope.get(), 
-                      uvm_string_to_bits(value),
-                      UVM_STRING, 
-                      8+value.len());
+      if (m_text_db.open_db()) begin
+         $fdisplay(m_text_db.m_file, 
+                   "  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%s   RADIX:%s BITS=%0d}",
+                   $time,
+                   this.get_handle(),
+                   scope.get(),
+                   value,
+                   "UVM_STRING",
+                   8+value.len());
+      end
    endfunction : do_record_string
 
    // Function: do_record_time
