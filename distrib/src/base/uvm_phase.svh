@@ -729,6 +729,12 @@ endclass
 
 class uvm_phase_cb extends uvm_callback;
 
+  // Function: new
+  // Constructor
+  function new(string name="unnamed-uvm_phase_cb");
+     super.new(name);
+  endfunction : new
+   
   // Function: phase_state_change
   //
   // Called whenever a ~phase~ changes state.
@@ -1320,10 +1326,12 @@ task uvm_phase::execute_phase();
   // Wait for phases with which we have a sync()
   // relationship to be ready. Sync can be 2-way -
   // this additional state avoids deadlock.
+  state_chg.m_prev_state = m_state;
+  m_state = UVM_PHASE_SYNCING;
+  `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
+  #0;
+   
   if (m_sync.size()) begin
-    state_chg.m_prev_state = m_state;
-    m_state = UVM_PHASE_SYNCING;
-    `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
     
     foreach (m_sync[i]) begin
       wait (m_sync[i].m_state >= UVM_PHASE_SYNCING);
@@ -1637,9 +1645,10 @@ task uvm_phase::execute_phase();
     // execute all the successors
     foreach (m_successors[succ]) begin
       if(succ.m_state < UVM_PHASE_SCHEDULED) begin
-        state_chg.m_prev_state = m_state;
+        state_chg.m_prev_state = succ.m_state;
+        state_chg.m_phase = succ;
         succ.m_state = UVM_PHASE_SCHEDULED;
-        `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
+        `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(succ, state_chg))
         #0; // LET ANY WAITERS WAKE UP
         void'(m_phase_hopper.try_put(succ));
         if (m_phase_trace)

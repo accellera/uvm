@@ -170,6 +170,9 @@ Mantis 4711: Fixed LRM violation
 
 Mantis 4731: Fixed initialization race introduced by Mantis 4606.
 
+Mantis 4732: Provides new phase state 'UVM_PHASE_UNINITIALIZED' to
+indicate phase state prior to a phase existing in a schedule.
+
 Mantis 4734: Fixed bug in uvm_reg_map::get_size()
 
 Mantis 4738: Fixed bug wherein messages from built-in UVM dpi code
