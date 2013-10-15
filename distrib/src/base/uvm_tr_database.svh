@@ -452,8 +452,8 @@ class uvm_text_tr_database extends uvm_tr_database;
    //
    // Text-Backend implementation of <uvm_tr_database::open_stream>
    protected virtual function uvm_tr_stream do_open_stream(string name,
-                                                              uvm_component cntxt=null,
-                                                              string type_name="");
+                                                           uvm_component cntxt=null,
+                                                           string type_name="");
       if (open_db()) begin
          uvm_text_tr_stream m_stream = uvm_text_tr_stream::type_id::create(name, cntxt);
          m_stream.configure(this, cntxt, type_name);

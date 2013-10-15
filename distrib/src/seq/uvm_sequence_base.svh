@@ -218,7 +218,10 @@ class uvm_sequence_base extends uvm_sequence_item;
   // child transactions when calling <uvm_component::begin_child_tr>.
 
   function integer get_tr_handle();
-    return m_tr_recorder.get_handle();
+     if (m_tr_recorder != null)
+       return m_tr_recorder.get_handle();
+     else
+       return 0;
   endfunction
 
 
