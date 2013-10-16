@@ -40,7 +40,7 @@ typedef class uvm_parent_child_link;
 // is deprecated. Its subtype, <uvm_sequence_item>, shall be used as the
 // base class for all user-defined transaction types. 
 // 
-// The intended use of this API is via a <uvm_driver> to call <uvm_component::accept_tr>,
+// The intended use of this API is via a <uvm_driver #(REQ,RSP)> to call <uvm_component::accept_tr>,
 // <uvm_component::begin_tr>, and <uvm_component::end_tr> during the course of
 // sequence item execution. These methods in the component base class will
 // call into the corresponding methods in this class to set the corresponding
@@ -53,7 +53,7 @@ typedef class uvm_parent_child_link;
 // While convenient, it is generally the responsibility of drivers to mark a
 // transaction's progress during execution.  To allow the driver or layering sequence
 // to control sequence item timestamps, events, and recording, you must call
-// <uvm_seq_item_pull_port #(REQ,RSP)::disable_auto_item_recording> at the begining
+// <uvm_sqr_if_base#(REQ,RSP)::disable_auto_item_recording> at the begining
 // of the run_phase() method.
 //
 // Users may also use the transaction's event pool, <events>,
@@ -134,7 +134,7 @@ virtual class uvm_transaction extends uvm_object;
   // Function: accept_tr
   //
   // Calling ~accept_tr~ indicates that the transaction item has been received by
-  // a consumer component. Typically a <uvm_driver> would call <uvm_component::accept_tr>,
+  // a consumer component. Typically a <uvm_driver #(REQ,RSP)> would call <uvm_component::accept_tr>,
   // which calls this method-- upon return from a get_next_item(), get(), or peek()
   // call on its sequencer port, <uvm_driver::seq_item_port>.
   //
@@ -174,7 +174,7 @@ virtual class uvm_transaction extends uvm_object;
   // the child of another transaction. Generally, a consumer component begins
   // execution of a transactions it receives. 
   //
-  // Typically a <uvm_driver> would call <uvm_component::begin_tr>, which
+  // Typically a <uvm_driver #(REQ,RSP)> would call <uvm_component::begin_tr>, which
   // calls this method, before actual execution of a sequence item transaction.
   // Sequence items received by a driver are always a child of a parent sequence.
   // In this case, begin_tr obtains the parent handle and delegates to <begin_child_tr>.
@@ -258,7 +258,7 @@ virtual class uvm_transaction extends uvm_object;
   // You must have previously called <begin_tr> or <begin_child_tr> for this
   // call to be successful.
   //
-  // Typically a <uvm_driver> would call <uvm_component::end_tr>, which
+  // Typically a <uvm_driver #(REQ,RSP)> would call <uvm_component::end_tr>, which
   // calls this method, upon completion of a sequence item transaction.
   // Sequence items received by a driver are always a child of a parent sequence.
   // In this case, begin_tr obtain the parent handle and delegate to <begin_child_tr>.

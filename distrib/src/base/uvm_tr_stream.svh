@@ -99,7 +99,7 @@ virtual class uvm_tr_stream extends uvm_object;
    // stream.
    //
    // A warning will be asserted if get_db is called prior to
-   // the stream being initialized via <configure>.
+   // the stream being initialized via <do_opened>.
    function uvm_tr_database get_db();
       m_uvm_tr_stream_cfg m_cfg;
       if (!m_cfg_dap.try_get(m_cfg)) begin
@@ -118,7 +118,7 @@ virtual class uvm_tr_stream extends uvm_object;
    // stream.
    //
    // A warning will be asserted if get_context is called prior to
-   // the stream being initialized via <configure>.
+   // the stream being initialized via <do_opened>.
    function uvm_component get_context();
       m_uvm_tr_stream_cfg m_cfg;
       if (!m_cfg_dap.try_get(m_cfg)) begin
@@ -137,7 +137,7 @@ virtual class uvm_tr_stream extends uvm_object;
    // stream.
    //
    // A warning will be asserted if get_stream_type_name is called prior to
-   // the stream being initialized via <configure>.
+   // the stream being initialized via <do_opened>.
    function string get_stream_type_name();
       m_uvm_tr_stream_cfg m_cfg;
       if (!m_cfg_dap.try_get(m_cfg)) begin
@@ -151,21 +151,21 @@ virtual class uvm_tr_stream extends uvm_object;
       return m_cfg.stream_type_name;
    endfunction : get_stream_type_name
 
-   // Function: configure
+   // Function- m_do_opened
    // Initializes the state of the stream
    //
-   // Parameters:
+   // Parameters-
    // db - Database which the stream belongs to
    // context - Optional component context
    // stream_type_name - Optional type name for the stream
    //
-   // This method will trigger a <do_configure> call.
+   // This method will trigger a <do_opened> call.
    //
-   // An error will be asserted if:
-   // - configure is called more than once without the stream
+   // An error will be asserted if-
+   // - m_do_opened is called more than once without the stream
    //   being ~freed~ between.
-   // - configure is passed a ~null~ db
-   function void configure(uvm_tr_database db,
+   // - m_do_opened is passed a ~null~ db
+   function void m_do_opened(uvm_tr_database db,
                            uvm_component cntxt=null,
                            string stream_type_name="");
       
@@ -180,7 +180,7 @@ virtual class uvm_tr_stream extends uvm_object;
 
       if (m_cfg_dap.try_get(m_cfg)) begin
          `uvm_error("UVM/REC_STR/RE_CFG",
-                    $sformatf("Illegal attempt to re-configure '%s'",
+                    $sformatf("Illegal attempt to re-open '%s'",
                               this.get_full_name()))
       end
       else begin
@@ -191,20 +191,31 @@ virtual class uvm_tr_stream extends uvm_object;
          m_cfg.stream_type_name = stream_type_name;
          m_cfg_dap.set(m_cfg);
 
-         do_configure(db, cntxt, stream_type_name);
+         do_opened(db, cntxt, stream_type_name);
       end
       
-   endfunction : configure
+   endfunction : m_do_opened
 
-   // Function: flush
+   // Function- m_do_closing
+   // Closes any open recorders within the stream
+   //
+   // This method will trigger a <do_closing> call.
+   function void m_do_closing();
+      foreach(m_open_records[idx])
+        close_recorder(idx);
+
+      do_closing();
+   endfunction : m_do_closing
+
+   // Function- m_do_freeing
    // Flushes the internal state of the stream.
    //
    // This method will be called automatically when the
    // stream is ~freed~ on the database.  Any open ~recorders~
    // on the stream will be closed and freed.
    //
-   // This method will trigger a <do_flush> call.
-   function void flush();
+   // This method will trigger a <do_freeing> call.
+   function void m_do_freeing();
       // Close and Free open recorders on the stream
       foreach (m_open_records[idx]) begin
          this.close_recorder(idx);
@@ -218,8 +229,8 @@ virtual class uvm_tr_stream extends uvm_object;
       // Backwards compat
       if (m_ids_by_stream.exists(this))
         m_free_id(m_ids_by_stream[this]);
-      do_flush();
-   endfunction : flush
+      do_freeing();
+   endfunction : m_do_freeing
    
    // Function: is_open
    // Returns true if this ~uvm_tr_stream~ was opened on the database,
@@ -259,7 +270,7 @@ virtual class uvm_tr_stream extends uvm_object;
    // the current time.
    //
    // This method will trigger a <do_open_recorder> call.  If ~do_open_recorder~
-   // returns a non-null value, then the <uvm_recorder::configure> method will
+   // returns a non-null value, then the <uvm_recorder::do_opened> method will
    // be called in the recorder.
    //
    // Transaction recorders can only be opened if the stream is
@@ -280,7 +291,7 @@ virtual class uvm_tr_stream extends uvm_object;
 
       if (open_recorder != null) begin
          m_open_records[open_recorder] = m_time;
-         open_recorder.configure(this, m_time, type_name);
+         open_recorder.m_do_opened(this, m_time, type_name);
       end
    endfunction : open_recorder
 
@@ -300,7 +311,8 @@ virtual class uvm_tr_stream extends uvm_object;
    // - ~tr~ was not generated by this stream
    // - the ~close_time~ is prior to the ~open_time~
    //
-   // This method will trigger a <do_close_recorder> call.
+   // This method will trigger a <uvm_recorder::do_closing> call, followed
+   // by a <do_close_recorder> call.
    function void close_recorder(uvm_recorder tr,
                             time close_time = 0);
       time m_time = (close_time == 0) ? $time : close_time;
@@ -334,6 +346,7 @@ virtual class uvm_tr_stream extends uvm_object;
       end
       m_open_records.delete(tr);
       m_closed_records[tr] = m_time;
+      tr.m_do_closing(m_time);
       do_close_recorder(tr, m_time);
    endfunction : close_recorder
 
@@ -351,7 +364,7 @@ virtual class uvm_tr_stream extends uvm_object;
    // If the record has already ended, then the second parameter to ~free_recorder~
    // will be ignored.
    //
-   // This method will trigger a call to <uvm_recorder::flush>, followed by
+   // This method will trigger a call to <uvm_recorder::do_freeing>, followed by
    // a call to <do_free_recorder>.
    //
    // An error will be asserted if:
@@ -379,7 +392,7 @@ virtual class uvm_tr_stream extends uvm_object;
          close_recorder(recorder, close_time);
       end
 
-      recorder.flush();
+      recorder.m_do_freeing();
 
       do_free_recorder(recorder);
 
@@ -521,34 +534,56 @@ virtual class uvm_tr_stream extends uvm_object;
    // Group: Implementation Agnostic API
    //
 
-   // Function: do_configure
-   // Initializes the state of the stream
+   // Function: do_opened
+   // Callback triggered via <uvm_tr_database::open_stream>.
    //
-   // Backend implementation of <configure>
-   pure virtual protected function void do_configure(uvm_tr_database db,
-                                                             uvm_component cntxt,
-                                                             string stream_type_name);
+   // Parameters:
+   // db - Database which the stream belongs to
+   // context - Optional component context
+   // stream_type_name - Optional type name for the stream
+   //
+   // The ~do_opened~ callback can be used to initialize any internal
+   // state within the stream, as well as providing a location to
+   // record any initial information about the stream.
+   protected virtual function void do_opened(uvm_tr_database db,
+                                             uvm_component cntxt,
+                                             string stream_type_name);
+   endfunction : do_opened
 
-   // Function: do_flush
-   // Flushes the internal state of the stream
+   // Function: do_closing
+   // Callback triggered via <uvm_tr_database::close_stream>.
    //
-   // Backend implementation of <flush>
-   pure virtual protected function void do_flush();
+   // The ~do_closing~ callback can be used to set internal state
+   // within the stream, as well as providing a location to
+   // record any closing information.
+   protected virtual function void do_closing();
+   endfunction : do_closing
+      
+   // Function: do_freeing
+   // Callback triggered via <uvm_tr_database::free_stream>.
+   //
+   // The ~do_freeing~ callback can be used to release the internal
+   // state within the stream, as well as providing a location
+   // to record any "freeing" information.
+   protected virtual function void do_freeing();
+   endfunction : do_freeing
 
    // Function: do_open_recorder
    // Marks the beginning of a new record in the stream.
    //
    // Backend implementation of <open_recorder>
-   pure virtual protected function uvm_recorder do_open_recorder(string name,
-                                                                time   open_time,
-                                                                string type_name);
+   protected virtual function uvm_recorder do_open_recorder(string name,
+                                                            time   open_time,
+                                                            string type_name);
+   endfunction : do_open_recorder
 
    // Function: do_close_recorder
    // Marks the end of a record in the stream
    //
    // Backend implementation of <close_recorder>
-   pure virtual protected function void do_close_recorder(uvm_recorder recorder,
-                                                      time close_time);
+   protected virtual function void do_close_recorder(uvm_recorder recorder,
+                                                     time close_time);
+   endfunction : do_close_recorder
 
    // Function: do_free_recorder
    // Indicates the stream and database can free any references to the recorder.
@@ -558,8 +593,8 @@ virtual class uvm_tr_stream extends uvm_object;
    // Note that unlike the <free_recorder> method, ~do_free_recorder~ does not
    // have the optional ~close_time~ argument.  The argument will be processed
    // by <free_recorder> prior to the ~do_free_recorder~ call.
-   pure virtual protected function void do_free_recorder(uvm_recorder recorder);
-
+   protected virtual function void do_free_recorder(uvm_recorder recorder);
+   endfunction : do_free_recorder
 
    // Function: do_get_handle
    // Returns a unique ID for this stream.
@@ -608,12 +643,12 @@ class uvm_text_tr_stream extends uvm_tr_stream;
 
    // Group: Implementation Agnostic API
 
-   // Function: do_configure
-   // Initiailizes the state of the stream
+   // Function: do_opened
+   // Callback triggered via <uvm_tr_database::open_stream>.
    //
-   protected virtual function void do_configure(uvm_tr_database db,
-                                                        uvm_component cntxt,
-                                                        string stream_type_name);
+   protected virtual function void do_opened(uvm_tr_database db,
+                                             uvm_component cntxt,
+                                             string stream_type_name);
       $cast(m_text_db, db);
       $fdisplay(m_text_db.m_file, 
                 "  CREATE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",
@@ -622,15 +657,36 @@ class uvm_text_tr_stream extends uvm_tr_stream;
                 stream_type_name,
                 (cntxt == null) ? "" : cntxt.get_full_name(),
                 this.get_handle());
-   endfunction : do_configure
+   endfunction : do_opened
 
-   // Function: do_flush
-   // Flushes the state of the stream
+   // Function: do_closing
+   // Callback triggered via <uvm_tr_database::close_stream>.
+   protected virtual function void do_closing();
+      uvm_component cntxt = get_context();
+      $fdisplay(m_text_db.m_file,
+                "  CLOSE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",
+                $time,
+                this.get_name(),
+                this.get_stream_type_name(),
+                (cntxt == null) ? "" : cntxt.get_full_name(),
+                this.get_handle());
+   endfunction : do_closing
+      
+   // Function: do_freeing
+   // Callback triggered via <uvm_tr_database::free_stream>.
    //
-   protected virtual function void do_flush();
+   protected virtual function void do_freeing();
+      uvm_component cntxt = get_context();
+      $fdisplay(m_text_db.m_file, 
+                "  FREE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",
+                $time,
+                this.get_name(),
+                this.get_stream_type_name(),
+                (cntxt == null) ? "" : cntxt.get_full_name(),
+                this.get_handle());
       m_text_db = null;
       return;
-   endfunction : do_flush
+   endfunction : do_freeing
    
    // Function: do_open_recorder
    // Marks the beginning of a new record in the stream
@@ -660,15 +716,8 @@ class uvm_text_tr_stream extends uvm_tr_stream;
    //
    // Text-backend specific implementation.
    protected virtual function void do_close_recorder(uvm_recorder recorder,
-                                                 time close_time);
-      if (m_text_db.open_db()) begin
-         UVM_FILE file = m_text_db.m_file;
-         $fdisplay(file, "END @%0t {TXH:%0d TIME=%0t}",
-                   $time,
-                   recorder.get_handle(),
-                   close_time);
-         
-      end
+                                                     time close_time);
+      // Text-backend doesn't do anything here
    endfunction : do_close_recorder
 
    // Function: do_free_recorder

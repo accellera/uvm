@@ -94,11 +94,17 @@ virtual class uvm_tr_database extends uvm_object;
    // Closing a database implicitly closes and
    // frees all <uvm_tr_streams> within the database.
    //
-   // This method will trigger a <do_close_db>
-   // call.
-   function void close_db();
-      if (m_is_opened)
-        do_close_db();
+   // If the database is already closed, then this
+   // method will return '1'.
+   // 
+   // Otherwise, this method will trigger a <do_close_db>
+   // call, and return the result.
+   function bit close_db();
+      if (m_is_opened) begin
+         if (do_close_db())
+           m_is_opened = 0;
+      end
+      return (m_is_opened == 0);
    endfunction : close_db
 
    // Function: is_open
@@ -128,7 +134,7 @@ virtual class uvm_tr_database extends uvm_object;
    // object if successful, ~null~ otherwise.
    //
    // This method will trigger a <do_open_stream> call, and if a
-   // non ~null~ stream is returned, then <uvm_tr_stream::configure>
+   // non ~null~ stream is returned, then <uvm_tr_stream::do_opened>
    // will be called.
    //
    // Streams can only be opened if the database is
@@ -144,7 +150,7 @@ virtual class uvm_tr_database extends uvm_object;
       open_stream = do_open_stream(name, cntxt, type_name);
       if (open_stream != null) begin
          m_open_streams[open_stream] = 1;
-         open_stream.configure(this, cntxt, type_name);
+         open_stream.m_do_opened(this, cntxt, type_name);
       end
    endfunction : open_stream
 
@@ -171,13 +177,9 @@ virtual class uvm_tr_database extends uvm_object;
          `uvm_warning("UVM/TR_DB/CLOSE_STREAM", $sformatf("ignoring attempt to close stream '%s' which is not open on database '%s'", stream.get_name(), this.get_name()))
          return;
       end
-      
-      do_close_stream(stream);
 
-      if (stream.get_open_recorders(tr_q)) begin
-         foreach (tr_q[idx])
-           stream.close_recorder(tr_q[idx]);
-      end
+      stream.m_do_closing();
+      do_close_stream(stream);
 
       m_open_streams.delete(stream);
       m_closed_streams[stream] = 1;
@@ -195,7 +197,8 @@ virtual class uvm_tr_database extends uvm_object;
    // not already been closed), as well as closing/freeing any <uvm_recorders>
    // on the stream.
    //
-   // This method will trigger a <do_free_stream> call.
+   // This method will trigger a <uvm_tr_stream::do_freeing>, followed by
+   // <do_free_stream> call.
    function void free_stream (uvm_tr_stream stream);
       uvm_recorder tr_q[$];
 
@@ -213,8 +216,7 @@ virtual class uvm_tr_database extends uvm_object;
          return;
       end
 
-      stream.flush();
-
+      stream.m_do_freeing();
       do_free_stream(stream);
 
    endfunction : free_stream
@@ -352,7 +354,7 @@ virtual class uvm_tr_database extends uvm_object;
 
    // Function: do_close_db
    // Backend implementation of <close_db>
-   pure virtual protected function void do_close_db();
+   pure virtual protected function bit do_close_db();
 
    // Function: do_open_stream
    // Backend implementation of <open_stream>
@@ -438,14 +440,14 @@ class uvm_text_tr_database extends uvm_tr_database;
    // if it is currently opened.
    //
    // This unlocks the ~file_name~, allowing it to be modified again.
-   protected virtual function void do_close_db();
+   protected virtual function bit do_close_db();
       if (m_file != 0) begin
          fork // Needed because $fclose is a task
             $fclose(m_file);
          join_none
          m_filename_dap.unlock();
       end
-      return;
+      return 1;
    endfunction : do_close_db
    
    // Function: do_open_stream
@@ -465,13 +467,6 @@ class uvm_text_tr_database extends uvm_tr_database;
    //
    // Text-Backend implementation of <uvm_tr_database::close_stream>
    protected virtual function void do_close_stream(uvm_tr_stream stream);
-      uvm_component cntxt = stream.get_context();
-      $fdisplay(m_file, "  CLOSE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",
-                $time,
-                stream.get_name(),
-                stream.get_stream_type_name(),
-                (cntxt == null) ? "" : cntxt.get_full_name(),
-                stream.get_handle());
    endfunction : do_close_stream
    
    // Function: do_free_stream
@@ -479,13 +474,6 @@ class uvm_text_tr_database extends uvm_tr_database;
    //
    // Text-Backend implementation of <uvm_tr_database::free_stream>
    protected virtual function void do_free_stream(uvm_tr_stream stream);
-      uvm_component cntxt = stream.get_context();
-      $fdisplay(m_file, "  FREE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",
-                $time,
-                stream.get_name(),
-                stream.get_stream_type_name(),
-                (cntxt == null) ? "" : cntxt.get_full_name(),
-                stream.get_handle());
    endfunction : do_free_stream
    
    // Function: do_establish_link

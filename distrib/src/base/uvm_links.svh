@@ -33,11 +33,11 @@
 //
 // CLASS: uvm_link_base
 //
-// The ~uvm_link_base~ class presents a simply API for defining a link between
+// The ~uvm_link_base~ class presents a simple API for defining a link between
 // any two objects.
 //
 // Using extensions of this class, a <uvm_tr_database> can determine the
-// type of links being passed, without relying on "magic string" names.
+// type of links being passed, without relying on "magic" string names.
 //
 // For example:
 // |
@@ -54,7 +54,7 @@
 // |   else begin
 // |      // Unsupported relationship!
 // |   end
-// | endufnction : do_establish_link
+// | endfunction : do_establish_link
 //
 virtual class uvm_link_base extends uvm_object;
 
