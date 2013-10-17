@@ -599,13 +599,16 @@ virtual class uvm_tr_stream extends uvm_object;
    // Function: do_get_handle
    // Returns a unique ID for this stream.
    //
-   // ~Optional~ Backend implementation for <get_handle>.
+   // The backend implementation is responsible for tracking integer-based
+   // 'handles' for each stream.  
    //
-   // By default, the unique <uvm_object::get_inst_id> will be
-   // used as a handle.
-   protected virtual function integer do_get_handle();
-      return this.get_inst_id();
-   endfunction : do_get_handle
+   // Requirements:
+   // - A stream handle of '0' is invalid.
+   // - A stream handle must be unique to the given stream while the
+   //   stream is between the ~open~ and ~freed~ states.  Once a stream
+   //   is freed, the implementation is free to reuse the handle (although
+   //   it is not a requirement that handles be reused).
+   pure virtual protected function integer do_get_handle();
    
    
 endclass : uvm_tr_stream
@@ -733,4 +736,11 @@ class uvm_text_tr_stream extends uvm_tr_stream;
       end
    endfunction : do_free_recorder
 
+   // Function: do_get_handle
+   // Returns a unique ID for this stream.
+   //
+   protected virtual function integer do_get_handle();
+      return this.get_inst_id();
+   endfunction : do_get_handle
+   
 endclass : uvm_text_tr_stream

@@ -518,13 +518,16 @@ virtual class uvm_recorder extends uvm_object;
    // Function: do_get_handle
    // Returns a unique ID for this recorder.
    //
-   // ~Optional~ Backend implementation for <get_handle>.
+   // The backend implementation is responsible for tracking integer-based
+   // 'handles' for each recorder.
    //
-   // By default, the unique <uvm_object::get_inst_id> will be
-   // used as a handle.
-   protected virtual function integer do_get_handle();
-      return this.get_inst_id();
-   endfunction : do_get_handle
+   // Requirements:
+   // - A recorder handle of '0' is invalid.
+   // - A recorder handle must be unique to the given recorder while the
+   //   the recorder is between the ~open~ and ~freed~ states.  Once a
+   //   recorder is freed, the implementation is free to reuse the handle
+   //   (althugh it is not a requirement that handles be reused).
+   pure virtual protected function integer do_get_handle();
    
    // The following code is primarily for backwards compat. purposes.  "Transaction
    // Handles" are useful when connecting to a backend, but when passing the information
@@ -655,7 +658,7 @@ class uvm_text_recorder extends uvm_recorder;
       super.new(name);
    endfunction : new
 
-   // Group: Implementation Specific API
+   // Group: Implementation Agnostic API
 
    // Function: do_opened
    // Callback triggered via <uvm_tr_stream::open_recorder>.
@@ -842,6 +845,16 @@ class uvm_text_recorder extends uvm_recorder;
                       8+value.len());
    endfunction : do_record_generic
 
+   // Function: do_get_handle
+   // Returns a unique ID for this stream.
+   //
+   // Text-backend specific implementation.
+   protected virtual function integer do_get_handle();
+      return this.get_inst_id();
+   endfunction : do_get_handle
+
+   // Group: Implementation Specific API
+   
    // Function: write_attribute
    // Outputs an integral attribute to the textual log
    //
