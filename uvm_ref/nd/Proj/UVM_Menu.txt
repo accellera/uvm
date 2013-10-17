@@ -57,12 +57,12 @@ Group: Release Notes  {
 
 Group: Base  {
 
-   File: Overview                     (no auto-title, UVM_ROOT/distrib/docs/html/src/overviews/base.txt)
-   File: uvm_void                     (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_misc.svh)
-   File: uvm_object                   (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_object.svh)
-   File: uvm_transaction              (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_transaction.svh)
-   File: uvm_root                     (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_root.svh)
-   File: uvm_port_base                (no auto-title, UVM_ROOT/distrib/docs/html/src/base/uvm_port_base.svh)
+   File: Overview                     (no auto-title, UVM_ROOT/uvm_ref/base.txt)
+   File: uvm_void                     (no auto-title, UVM_ROOT/distrib/src/base/uvm_misc.svh)
+   File: uvm_object                   (no auto-title, UVM_ROOT/distrib/src/base/uvm_object.svh)
+   File: uvm_transaction              (no auto-title, UVM_ROOT/distrib/src/base/uvm_transaction.svh)
+   File: uvm_root                     (no auto-title, UVM_ROOT/distrib/src/base/uvm_root.svh)
+   File: uvm_port_base                (no auto-title, UVM_ROOT/distrib/src/base/uvm_port_base.svh)
    }  # Group: Base
 
 Group: Reporting  {

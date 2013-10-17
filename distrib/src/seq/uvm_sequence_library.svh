@@ -746,12 +746,12 @@ endtask
 task uvm_sequence_library::execute(uvm_object_wrapper wrap);
 
   uvm_object obj;
-  uvm_factory factory;
   uvm_sequence_item seq_or_item;
   uvm_sequence_base seq_base;
   REQ req_item;
   
-  factory = uvm_coreservice.get_factory();
+  uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  uvm_factory factory=cs.get_factory();
 
   obj = factory.create_object_by_type(wrap,get_full_name(),
            $sformatf("%s:%0d",wrap.get_type_name(),sequences_executed+1));

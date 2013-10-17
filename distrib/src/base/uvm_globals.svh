@@ -140,6 +140,16 @@ function void uvm_report( uvm_severity severity,
   top.uvm_report(severity, id, message, verbosity, filename, line, context_name, report_enabled_checked);
 endfunction 
 
+// Undocumented DPI available version of uvm_report
+export "DPI-C" function m__uvm_report_dpi;
+function void m__uvm_report_dpi(int severity,
+                                string id,
+                                string message,
+                                int    verbosity,
+                                string filename,
+                                int    line);
+   uvm_report(uvm_severity'(severity), id, message, verbosity, filename, line);
+endfunction : m__uvm_report_dpi
 
 // Function: uvm_report_info
 
@@ -231,14 +241,15 @@ function automatic bit uvm_string_to_action (string action_str, output uvm_actio
   end
 endfunction
 
-
+  
+`ifndef UVM_NO_DEPRECATED
 //------------------------------------------------------------------------------
 //
-// Group: Configuration
+// Group- Configuration
 //
 //------------------------------------------------------------------------------
 
-// Function: set_config_int
+// Function- set_config_int
 //
 // This is the global version of set_config_int in <uvm_component>. This
 // function places the configuration setting for an integral field in a
@@ -250,12 +261,16 @@ function void  set_config_int  (string inst_name,
                                 string field_name,
                                 uvm_bitstream_t value);
   uvm_root top;
+  if (!uvm_component::m_config_deprecated_warned) begin
+     `uvm_warning("UVM/CFG/SET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
+     uvm_component::m_config_deprecated_warned = 1;
+  end
   top = uvm_coreservice.get_root();
   top.set_config_int(inst_name, field_name, value);
 endfunction
 
 
-// Function: set_config_object
+// Function- set_config_object
 //
 // This is the global version of set_config_object in <uvm_component>. This
 // function places the configuration setting for an object field in a
@@ -268,12 +283,16 @@ function void set_config_object (string inst_name,
                                  uvm_object value,
                                  bit clone=1);
   uvm_root top;
+  if (!uvm_component::m_config_deprecated_warned) begin
+     `uvm_warning("UVM/CFG/SET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
+     uvm_component::m_config_deprecated_warned = 1;
+  end
   top = uvm_coreservice.get_root();
   top.set_config_object(inst_name, field_name, value, clone);
 endfunction
 
 
-// Function: set_config_string
+// Function- set_config_string
 //
 // This is the global version of set_config_string in <uvm_component>. This
 // function places the configuration setting for an string field in a
@@ -285,10 +304,14 @@ function void set_config_string (string inst_name,
                                  string field_name,
                                  string value);
   uvm_root top;
+  if (!uvm_component::m_config_deprecated_warned) begin
+     `uvm_warning("UVM/CFG/SET/DPR", "get/set_config_* API has been deprecated. Use uvm_config_db instead.")
+     uvm_component::m_config_deprecated_warned = 1;
+  end
   top = uvm_coreservice.get_root();
   top.set_config_string(inst_name, field_name, value);
 endfunction
-
+`endif
 
 
 //----------------------------------------------------------------------------

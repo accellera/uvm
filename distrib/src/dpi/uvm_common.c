@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2010 Mentor Graphics Corporation
-//   Copyright 2007-2011 Cadence Design Systems, Inc.
 //   Copyright 2010 Synopsys, Inc.
+//   Copyright 2011 Mentor Graphics Corporation
+//   Copyright 2013 NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -19,29 +19,26 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef SIMPLE_SEQUENCER_SV
-`define SIMPLE_SEQUENCER_SV
+// Implementation of common methods for DPI
+
+extern void m__uvm_report_dpi(int,char*,char*,int,char*,int);
+
+void m_uvm_report_dpi(int severity,
+                      char* id,
+                      char* message,
+                      int verbosity,
+                      char* file,
+                      int linenum) {
+    svScope old_scope = svSetScope(svGetScopeFromName("uvm_pkg"));
+    m__uvm_report_dpi(severity, id, message, verbosity, file, linenum);
+    svSetScope(old_scope);
+}
 
 
-//------------------------------------------------------------------------------
-//
-// CLASS: simple_sequencer
-//
-// declaration
-//------------------------------------------------------------------------------
-
-class simple_sequencer extends uvm_sequencer #(simple_item);
-
-  // Constructor
-  function new (string name, uvm_component parent);
-    super.new(name, parent);
-    `uvm_update_sequence_lib_and_item(simple_item)
-  endfunction : new
-
-  // Provide implementations of virtual methods such as get_type_name and create
-  `uvm_sequencer_utils(simple_sequencer)
-
-endclass : simple_sequencer
-
-
-`endif // SIMPLE_SEQUENCER_SV
+int int_str_max ( int radix_bits ) {
+    int val = INT_MAX;
+    int ret = 1;
+    while (val = val /radix_bits)
+        ret++;
+    return ret;
+}

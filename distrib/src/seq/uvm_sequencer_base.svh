@@ -55,6 +55,9 @@ class uvm_sequencer_base extends uvm_component;
   protected int                 m_arb_size;       // used for waiting processes
   protected int                 m_wait_for_item_sequence_id,
                                 m_wait_for_item_transaction_id;
+  protected int                 m_wait_relevant_count = 0 ;
+  protected int                 m_max_zero_time_wait_relevant_count = 10;
+  protected time                m_last_wait_relevant_time = 0 ;
 
   local uvm_sequencer_arb_mode  m_arbitration = SEQ_ARB_FIFO;
   local static int              g_request_id;
@@ -357,6 +360,12 @@ class uvm_sequencer_base extends uvm_component;
                                             uvm_sequence_item t,
                                             bit rerandomize = 0);
 
+  // Function set_max_zero_time_wait_relevant_count
+  //
+  // Can be called at any time to change the maximum number of times 
+  // wait_for_relevant() can be called by the sequencer in zero time before
+  // an error is declared.  The default maximum is 10.
+  extern virtual function void set_max_zero_time_wait_relevant_count(int new_val) ;
 
 
   //----------------------------------------------------------------------------
@@ -411,6 +420,23 @@ class uvm_sequencer_base extends uvm_component;
 
   int m_is_relevant_completed;
 
+
+`ifdef UVM_DISABLE_AUTO_ITEM_RECORDING
+  local bit m_auto_item_recording = 0;
+`else
+  local bit m_auto_item_recording = 1;
+`endif
+
+
+  // Access to following internal methods provided via seq_item_export
+
+  virtual function void disable_auto_item_recording();
+    m_auto_item_recording = 0;
+  endfunction
+
+  virtual function bit is_auto_item_recording_enabled();
+    return m_auto_item_recording;
+  endfunction
 
   //----------------------------------------------------------------------------
   // DEPRECATED - DO NOT USE IN NEW DESIGNS - NOT PART OF UVM STANDARD
@@ -490,25 +516,25 @@ function void uvm_sequencer_base::build();
   `ifndef UVM_NO_DEPRECATED
   // deprecated parameters for sequencer. Use uvm_sequence_library class
   // for sequence library functionality.
-  if (get_config_string("default_sequence", default_sequence)) begin
+  if (uvm_config_string::get(this, "", "default_sequence", default_sequence)) begin
     `uvm_warning("UVM_DEPRECATED",{"default_sequence config parameter is deprecated and not ",
                  "part of the UVM standard. See documentation for uvm_sequencer_base::start_phase_sequence()."})
     this.m_default_seq_set = 1;
   end
-  if (get_config_int("count", count)) begin
+  if (uvm_config_int::get(this, "", "count", count)) begin
     `uvm_warning("UVM_DEPRECATED",{"count config parameter is deprecated and not ",
                  "part of the UVM standard"})
   end
-  if (get_config_int("max_random_count", max_random_count)) begin
+  if (uvm_config_int::get(this, "", "max_random_count", max_random_count)) begin
     `uvm_warning("UVM_DEPRECATED",{"count config parameter is deprecated and not ",
                  "part of the UVM standard"})
   end
-  if (get_config_int("max_random_depth", max_random_depth)) begin
+  if (uvm_config_int::get(this, "", "max_random_depth", max_random_depth)) begin
     `uvm_warning("UVM_DEPRECATED",{"max_random_depth config parameter is deprecated and not ",
                  "part of the UVM standard. Use 'uvm_sequence_library' class for ",
                  "sequence library functionality"})
   end
-  if (get_config_int("pound_zero_count", dummy))
+  if (uvm_config_int::get(this, "", "pound_zero_count", dummy))
     `uvm_warning("UVM_DEPRECATED",
       {"pound_zero_count was set but ignored. ",
        "Sequencer/driver synchronization now uses 'uvm_wait_for_nba_region'"})
@@ -889,7 +915,17 @@ task uvm_sequencer_base::m_wait_for_available_sequence();
                     
                   begin
                     arb_sequence_q[is_relevant_entries[k]].sequence_ptr.wait_for_relevant();
-                      m_is_relevant_completed = 1;
+                    if ($realtime != m_last_wait_relevant_time) begin
+                       m_last_wait_relevant_time = $realtime ;
+                       m_wait_relevant_count = 0 ;
+                    end
+                    else begin
+                       m_wait_relevant_count++ ;
+                       if (m_wait_relevant_count > m_max_zero_time_wait_relevant_count) begin
+                          `uvm_fatal("SEQRELEVANTLOOP",$sformatf("Zero time loop detected, passed wait_for_relevant %0d times without time advancing",m_wait_relevant_count))
+                       end
+                    end
+                    m_is_relevant_completed = 1;
                   end
                 join_none
                   
@@ -1375,6 +1411,14 @@ function void uvm_sequencer_base::send_request(uvm_sequence_base sequence_ptr,
 endfunction
 
 
+// set_max_zero_time_wait_relevant_count
+// ------------
+
+function void uvm_sequencer_base::set_max_zero_time_wait_relevant_count(int new_val) ;
+   m_max_zero_time_wait_relevant_count = new_val ;
+endfunction
+
+
 // start_phase_sequence
 // --------------------
 
@@ -1549,7 +1593,8 @@ endfunction
 
 task uvm_sequencer_base::start_default_sequence();
   uvm_sequence_base m_seq ;
-  uvm_factory factory=uvm_coreservice.get_factory();
+  uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+  uvm_factory factory=cs.get_factory();
 
   // Default sequence was cleared, or the count is zero
   if (default_sequence == "" || count == 0 ||

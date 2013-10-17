@@ -211,6 +211,17 @@ class uvm_sequence_base extends uvm_sequence_item;
   endtask
 
 
+  // Function: get_tr_handle
+  //
+  // Returns the integral recording transaction handle for this sequence.
+  // Can be used to associate sub-sequences and sequence items as
+  // child transactions when calling <uvm_component::begin_child_tr>.
+
+  function int get_tr_handle();
+    return m_tr_handle;
+  endfunction
+
+
   //--------------------------
   // Group: Sequence Execution
   //--------------------------
@@ -860,8 +871,9 @@ class uvm_sequence_base extends uvm_sequence_item;
   protected function uvm_sequence_item create_item(uvm_object_wrapper type_var, 
                                                    uvm_sequencer_base l_sequencer, string name);
 
-    uvm_factory f_ = uvm_coreservice.get_factory();
-    $cast(create_item,  f_.create_object_by_type( type_var, this.get_full_name(), name ));
+    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_factory factory=cs.get_factory();
+    $cast(create_item,  factory.create_object_by_type( type_var, this.get_full_name(), name ));
 
     create_item.set_item_context(this, l_sequencer);
   endfunction
@@ -913,10 +925,10 @@ class uvm_sequence_base extends uvm_sequence_item;
     
     sequencer.wait_for_grant(this, set_priority);
 
-    `ifndef UVM_DISABLE_AUTO_ITEM_RECORDING
+    if (sequencer.is_auto_item_recording_enabled()) begin
       void'(sequencer.begin_child_tr(item, m_tr_handle, item.get_root_sequence_name()));
-    `endif
-
+    end
+    
     pre_do(1);
 
   endtask  
@@ -944,9 +956,11 @@ class uvm_sequence_base extends uvm_sequence_item;
     mid_do(item);
     sequencer.send_request(this, item);
     sequencer.wait_for_item_done(this, -1);
-    `ifndef UVM_DISABLE_AUTO_ITEM_RECORDING
-    sequencer.end_tr(item);
-    `endif
+
+    if (sequencer.is_auto_item_recording_enabled()) begin
+      sequencer.end_tr(item);
+    end
+
     post_do(item);
 
   endtask
@@ -1208,7 +1222,8 @@ class uvm_sequence_base extends uvm_sequence_item;
   function uvm_sequence_base get_sequence(int unsigned req_kind);
     uvm_sequence_base m_seq;
     string m_seq_type;
-    uvm_factory factory = uvm_coreservice.get_factory();
+    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_factory factory=cs.get_factory();
     `uvm_warning("UVM_DEPRECATED",$sformatf("%m deprecated."))
     if (req_kind < 0 || req_kind >= m_sequencer.sequences.size()) begin
       uvm_report_error("SEQRNG", 
@@ -1234,7 +1249,8 @@ class uvm_sequence_base extends uvm_sequence_item;
   task do_sequence_kind(int unsigned req_kind);
     string m_seq_type;
     uvm_sequence_base m_seq;
-    uvm_factory factory = uvm_coreservice.get_factory();
+    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_factory factory=cs.get_factory();
     `uvm_warning("UVM_DEPRECATED",$sformatf("%m deprecated."))
     m_seq_type = m_sequencer.sequences[req_kind];
     if (!$cast(m_seq, factory.create_object_by_name(m_seq_type, get_full_name(), m_seq_type))) begin
@@ -1257,7 +1273,8 @@ class uvm_sequence_base extends uvm_sequence_item;
 
   function uvm_sequence_base get_sequence_by_name(string seq_name);
     uvm_sequence_base m_seq;
-    uvm_factory factory = uvm_coreservice.get_factory();
+    uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
+    uvm_factory factory=cs.get_factory();
     `uvm_warning("UVM_DEPRECATED",$sformatf("%m deprecated."))
     if (!$cast(m_seq, factory.create_object_by_name(seq_name, get_full_name(), seq_name))) begin
       uvm_report_fatal("FCTSEQ", 

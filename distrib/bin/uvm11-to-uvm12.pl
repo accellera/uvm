@@ -196,6 +196,10 @@ sub replace_trivial{
     $t =~ s/starting_phase\s*=\s*(\w+)/set_starting_phase($1)/g;
     # FIX Mantis 4431 (starting_phase.)
     $t =~ s/starting_phase\./get_starting_phase()./g;
+
+    # FIX Mantis 3472: set_config_*/get_config_* are deprecated
+    $t =~ s/set_config_((int)|(string)|(object))\(/uvm_config_$1::set(this, /g;
+    $t =~ s/get_config_((int)|(string)|(object))\(/uvm_config_$1::get(this, "", /g;
      
     $t;
 
@@ -302,6 +306,6 @@ standard usage model sv files only:
 4. inspect the MARKERS 
 
 
-usage: ovm2uvm.pl options* args*
+usage: uvm11-to-uvm12.pl options* args*
 
 example: uvm11-to-uvm12.pl --top_dir /xyz/abc/src

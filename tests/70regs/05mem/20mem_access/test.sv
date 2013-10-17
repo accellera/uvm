@@ -95,7 +95,6 @@ module tbtest();
      endfunction : new
   endclass : user_test_seq
 
-  // OVC Stuff...
   class user_transaction extends uvm_sequence_item;
     rand bit[31:0] addr;
     rand bit[63:0] data;
@@ -112,14 +111,14 @@ module tbtest();
 
   `uvm_blocking_put_imp_decl(_reg)
   
-  class user_ovc_sequencer extends uvm_sequencer#(user_transaction);
-    `uvm_component_utils(user_ovc_sequencer)
+  class user_sequencer extends uvm_sequencer#(user_transaction);
+    `uvm_sequencer_utils(user_sequencer)
     function new (string name, uvm_component parent);
       super.new(name, parent);
     endfunction : new
-  endclass : user_ovc_sequencer
+  endclass : user_sequencer
 
-  class user_ovc_driver extends uvm_driver#(user_transaction);
+  class user_driver extends uvm_driver#(user_transaction);
     task run();
       while(1) begin
         seq_item_port.get_next_item(req);
@@ -132,13 +131,13 @@ module tbtest();
         seq_item_port.item_done();
       end
     endtask
-    `uvm_component_utils(user_ovc_driver)
+    `uvm_component_utils(user_driver)
     function new (string name, uvm_component parent);
       super.new(name, parent);
     endfunction : new
   endclass
 
-  class reg2ovc_adapter extends uvm_reg_adapter;
+  class reg2bus_adapter extends uvm_reg_adapter;
   
     virtual function uvm_sequence_item reg2bus(const ref uvm_reg_bus_op rw);
       user_transaction txn = user_transaction::type_id::create("txn");
@@ -159,9 +158,9 @@ module tbtest();
       rw.data = txn.data;
       rw.status = UVM_IS_OK;
     endfunction
-    `uvm_object_utils(reg2ovc_adapter)
+    `uvm_object_utils(reg2bus_adapter)
 
-  function new(string name="reg2ovc_adapter");
+  function new(string name="reg2bus_adapter");
      super.new(name);
   endfunction
 
@@ -170,27 +169,24 @@ module tbtest();
   class test extends uvm_test;
   
     mmap_type model;
-    user_ovc_sequencer uos;
-    user_ovc_driver uod;
+    user_sequencer sqr;
+    user_driver drv;
     user_test_seq seq;
   
     virtual function void build();
-      set_config_int("uos", "count", 0);
       super.build();
       // Create register model
       model = mmap_type::type_id::create("model",this);
       model.build();
-      // Create OVC sequencer
-      uos = user_ovc_sequencer::type_id::create("uos", this);
-      // Create OVC driver
-      uod = user_ovc_driver::type_id::create("uod", this);
+      sqr = user_sequencer::type_id::create("sqr", this);
+      drv = user_driver::type_id::create("drv", this);
     endfunction
   
     virtual function void connect();
       // Set model's sequencer and adapter sequence
-      reg2ovc_adapter reg2ovc = new;
-      model.default_map.set_sequencer(uos, reg2ovc);
-      uod.seq_item_port.connect(uos.seq_item_export);
+      reg2bus_adapter reg2bus = new;
+      model.default_map.set_sequencer(sqr, reg2bus);
+      drv.seq_item_port.connect(sqr.seq_item_export);
     endfunction
 
     function void end_of_elaboration();
@@ -219,8 +215,7 @@ module tbtest();
 	uvm_report_server svr =  uvm_coreservice.get_report_server();
    if (svr.get_severity_count(UVM_FATAL) +
        svr.get_severity_count(UVM_ERROR) +
-       svr.get_severity_count(UVM_WARNING) == 1)
-       // accounts for deprecated WARNING for usage of 'count' variable in build()
+       svr.get_severity_count(UVM_WARNING) == 0)
       $write("** UVM TEST PASSED **\n");
    else
       $write("!! UVM TEST FAILED !!\n");

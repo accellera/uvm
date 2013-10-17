@@ -19,33 +19,27 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-`ifndef SIMPLE_ITEM_SV
-`define SIMPLE_ITEM_SV
+`ifndef SIMPLE_SEQUENCER_SV
+`define SIMPLE_SEQUENCER_SV
+
 
 //------------------------------------------------------------------------------
 //
-// CLASS: simple_item
+// CLASS: simple_sequencer
 //
 // declaration
 //------------------------------------------------------------------------------
 
-class simple_item extends uvm_sequence_item;
+class simple_sequencer extends uvm_sequencer #(simple_item);
 
-  rand int unsigned addr;
-    constraint c1 { addr < 16'h2000; }
-  rand int unsigned data;
-    constraint c2 { data < 16'h1000; }
+  `uvm_component_utils(simple_sequencer)
 
-  `uvm_object_utils_begin(simple_item)
-    `uvm_field_int(addr, UVM_ALL_ON)
-    `uvm_field_int(data, UVM_ALL_ON)
-  `uvm_object_utils_end
-
-  // new - constructor
-  function new (string name = "simple_item");
-    super.new(name);
+  // Constructor
+  function new (string name, uvm_component parent);
+    super.new(name, parent);
   endfunction : new
 
-endclass : simple_item
+endclass : simple_sequencer
 
-`endif // SIMPLE_ITEM_SV
+
+`endif // SIMPLE_SEQUENCER_SV
