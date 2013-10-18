@@ -24,12 +24,15 @@ import uvm_pkg::*;
 `include "uvm_macros.svh"
 
 
-class my_server extends uvm_default_report_server;
-  function new(string name = "my_server"); 
-    super.new(name);
-  endfunction
-endclass
+int cnt = 0;
 
+class my_server extends uvm_default_report_server;
+  virtual function string compose_report_message(uvm_report_message report_message);
+    cnt++;
+    compose_report_message = {"MY_SERVER: ", super.compose_report_message(report_message)};
+  endfunction
+
+endclass
 
 class test extends uvm_test;
    `uvm_component_utils(test)
@@ -57,7 +60,7 @@ class test extends uvm_test;
    virtual function void report();
      uvm_report_server serv;
      serv = uvm_report_server::get_server();
-     if(serv.get_id_count("MSG1") == 2 && serv.get_id_count("MSG2") == 2)
+     if(serv.get_id_count("MSG1") == 2 && serv.get_id_count("MSG2") == 2 && cnt == 2)
        $display("**** UVM TEST PASSED ****");
      else
        $display("**** UVM TEST FAILED ****");
