@@ -43,6 +43,8 @@ the Mantis id.
 
 In increasing Mantis numerical order:
 
+(+*) Mantis 3366: Per-phase timeout and deprecated uvm_root::set_timeout
+
 (+) Mantis 3407: uvm_event should be a param class
 
 (*) Mantis 3472: Deprecated set/get_config_int/string/object
