@@ -70,6 +70,7 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
       uvm_reg_data_t  dc_mask;
       uvm_reg_data_t  reset_val;
       int n_bits;
+      string field_access;
          
       if (rg == null) begin
          `uvm_error("uvm_reg_bit_bash_seq", "No register specified to run sequence on");
@@ -102,19 +103,20 @@ class uvm_reg_single_bit_bash_seq extends uvm_reg_sequence #(uvm_sequence #(uvm_
          foreach (fields[k]) begin
             int lsb, w, dc;
 
+            field_access = fields[k].get_access(maps[j]);
             dc = (fields[k].get_compare() == UVM_NO_CHECK);
             lsb = fields[k].get_lsb_pos();
             w   = fields[k].get_n_bits();
             // Ignore Write-only fields because
             // you are not supposed to read them
-            case (fields[k].get_access(maps[j]))
-             "WO", "WOC", "WOS", "WO1": dc = 1;
+            case (field_access)
+             "WO", "WOC", "WOS", "WO1", "NOACCESS": dc = 1;
             endcase
             // Any unused bits on the right side of the LSB?
             while (next_lsb < lsb) mode[next_lsb++] = "RO";
             
             repeat (w) begin
-               mode[next_lsb] = fields[k].get_access(maps[j]);
+               mode[next_lsb] = field_access;
                dc_mask[next_lsb] = dc;
                next_lsb++;
             end
