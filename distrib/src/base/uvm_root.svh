@@ -147,17 +147,12 @@ class uvm_root extends uvm_component;
   bit  finish_on_completion = 1;
 
 
-  // Variable- phase_timeout
+`ifndef UVM_NO_DEPRECATED
+  // Function- set_timeout (Deprecated)
   //
-  // Specifies the timeout for the run phase. Default is `UVM_DEFAULT_TIMEOUT
-
-
-  time phase_timeout = `UVM_DEFAULT_TIMEOUT;
-
-
-  // Function: set_timeout
-  //
-  // Specifies the timeout for the simulation. Default is <`UVM_DEFAULT_TIMEOUT>
+  // Specifies the timeout for the simulation.
+  // Default is <`UVM_DEFAULT_TIMEOUT>
+  // This method is deprecated in favor of uvm_phase::set_timeout().
   //
   // The timeout is simply the maximum absolute simulation time allowed before a
   // ~FATAL~ occurs.  If the timeout is set to 20ns, then the simulation must end
@@ -168,9 +163,8 @@ class uvm_root extends uvm_component;
   // essentially hung.
   //
   //
-   
-   
   extern function void set_timeout(time timeout, bit overridable=1);
+`endif
 
 
   // PRIVATE members
@@ -551,21 +545,19 @@ function void uvm_root::print_topology(uvm_printer printer=null);
 endfunction
 
 
+`ifndef UVM_NO_DEPRECATED
 // set_timeout
 // -----------
 
 function void uvm_root::set_timeout(time timeout, bit overridable=1);
-  static bit m_uvm_timeout_overridable = 1;
-  if (m_uvm_timeout_overridable == 0) begin
-    uvm_report_info("NOTIMOUTOVR",
-      $sformatf("The global timeout setting of %0d is not overridable to %0d due to a previous setting.",
-         phase_timeout, timeout), UVM_NONE);
-    return;
-  end
-  m_uvm_timeout_overridable = overridable;
-  phase_timeout = timeout;
-endfunction
+  uvm_domain common = uvm_domain::get_common_domain();
+  uvm_phase  run_ph = common.find(uvm_run_phase::get());
 
+  `uvm_warning("UVM/TOP/SETTMOUT", "uvm_root::set_timeout has been deprecated. Use uvm_phase::set_timeout() instead.");
+
+  run_ph.set_timeout(timeout, 0, overridable);
+endfunction
+`endif
 
 
 // m_find_all_recurse
@@ -661,9 +653,16 @@ function void uvm_root::m_do_timeout_settings();
   int timeout_count;
   time timeout_int;
   string override_spec;
+
+  uvm_domain common = uvm_domain::get_common_domain();
+  uvm_phase  run_ph = common.find(uvm_run_phase::get());
+
   timeout_count = clp.get_arg_values("+UVM_TIMEOUT=", timeout_settings);
-  if (timeout_count ==  0)
+
+  if (timeout_count ==  0) begin
+    run_ph.set_timeout(`UVM_DEFAULT_TIMEOUT, 1ns, 1);
     return;
+  end
   else begin
     timeout = timeout_settings[0];
     if (timeout_count > 1) begin
@@ -682,9 +681,9 @@ function void uvm_root::m_do_timeout_settings();
       $sformatf("'+UVM_TIMEOUT=%s' provided on the command line is being applied.", timeout), UVM_NONE);
       void'($sscanf(timeout,"%d,%s",timeout_int,override_spec));
     case(override_spec)
-      "YES"   : set_timeout(timeout_int, 1);
-      "NO"    : set_timeout(timeout_int, 0);
-      default : set_timeout(timeout_int, 1);
+      "YES"   : run_ph.set_timeout(timeout_int, 0, 1);
+      "NO"    : run_ph.set_timeout(timeout_int, 0, 0);
+      default : run_ph.set_timeout(timeout_int, 0, 1);
     endcase
   end
 endfunction

@@ -108,5 +108,11 @@ virtual class uvm_bottomup_phase extends uvm_phase;
     exec_func(comp,phase);
   endfunction
 
+  // Function phases cannot timeout
+  //
+  virtual function void set_timeout(time timeout, time ns, bit overridable=1);
+    `uvm_warning("UVM/PH/BU/TMOUT", {"Cannot set a timeout value of function phase ", get_name()})
+  endfunction
+  
 endclass
 

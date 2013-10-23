@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 //   Copyright 2007-2011 Mentor Graphics Corporation
 //   Copyright 2007-2010 Cadence Design Systems, Inc.
-//   Copyright 2010 Synopsys, Inc.
+//   Copyright 2010-2013 Synopsys, Inc.
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -233,8 +233,8 @@ endclass
 // 2. Timeout:
 //
 //   The phase ends if the timeout expires before all objections are dropped.
-//   By default, the timeout is set to 9200 seconds.
-//   You may override this via <uvm_root::set_timeout>.
+//   By default, the timeout is set to <`UVM_DEFAULT_TIMEOUT> seconds.
+//   You may override this via <set_timeout>.
 //
 //   If a timeout occurs in your simulation, or if simulation never
 //   ends despite completion of your test stimulus, then it usually indicates
@@ -252,7 +252,7 @@ class uvm_run_phase extends uvm_task_phase;
       return m_inst; 
    endfunction
    protected function new(string name="run"); 
-      super.new(name); 
+      super.new(name);
    endfunction
    virtual function string get_type_name(); 
       return type_name; 

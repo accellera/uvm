@@ -390,6 +390,35 @@ class uvm_phase extends uvm_object;
   //
   extern virtual function int get_objection_count( uvm_object obj=null );
    
+  // Function: set_timeout
+  //
+  // Specifies the timeout for the phase, as a scaled time literal value (e.g. "9200s").
+  // A timeout value of 0 means no timeout.
+  // The default is 0, except for the pre-defined run_phase,
+  // for which the default is <`UVM_DEFAULT_TIMEOUT>.
+  //
+  // The value of the ~ns~ argument MUST be specified as "1ns" to detect the case
+  // where the caller's timescale is different from the timescale of the UVM library.
+  //
+  // If the ~overridable~ argument is specified as FALSE, the timeout value for the
+  // phase can no longer be changed.
+  //
+  // The timeout must be set on the same phase object used to raise/drop objections.
+  //
+  //| uvm_domain common = uvm_domain::get_common_domain();
+  //| uvm_phase  run_ph = common.find(uvm_run_phase::get());
+  //| run_ph.set_timeout(1ms, 1ns);
+  //
+  //| uvm_domain runtime = uvm_domain::get_uvm_domain();
+  //| uvm_phase  main_ph = common.find(uvm_main_phase::get());
+  //| main_ph.set_timeout(500us, 1ns);
+  //
+  // The timeout is simply the maximum absolute simulation time allowed during the
+  // execution of the phase before a ~FATAL~ occurs.
+  // Setting a timeout value in a function phase has no effect.
+  //
+  extern virtual function void set_timeout(time timeout, time ns, bit overridable=1);
+   
   //-----------------------
   // Group: Synchronization
   //-----------------------
@@ -607,6 +636,9 @@ class uvm_phase extends uvm_object;
   // Implementation - Overall Control
   //---------------------------------
   local static mailbox #(uvm_phase) m_phase_hopper = new();
+
+  protected time m_timeout = 0;
+  local     bit  m_timeout_is_overridable = 1;
 
   extern static task m_run_phases();
   extern local task  execute_phase();
@@ -1440,54 +1472,19 @@ task uvm_phase::execute_phase();
   
              // TIMEOUT
              begin
-               if (this.get_name() == "run") begin
-                  if (top.phase_timeout == 0)
-                    wait(top.phase_timeout != 0);
-                  if (m_phase_trace)
-                    `UVM_PH_TRACE("PH/TRC/TO_WAIT", $sformatf("STARTING PHASE TIMEOUT WATCHDOG (timeout == %t)", top.phase_timeout), this, UVM_HIGH)
-                  `uvm_delay(top.phase_timeout)
-                  if ($time == `UVM_DEFAULT_TIMEOUT) begin
-                     if (m_phase_trace)
-                       `UVM_PH_TRACE("PH/TRC/TIMEOUT", "PHASE TIMEOUT WATCHDOG EXPIRED", this, UVM_LOW)
-                     foreach (m_executing_phases[p]) begin
-                        if ((p.phase_done != null) && (p.phase_done.get_objection_total() > 0)) begin
-                           if (m_phase_trace)
-                             `UVM_PH_TRACE("PH/TRC/TIMEOUT/OBJCTN", 
-                                           $sformatf("Phase '%s' has outstanding objections:\n%s", p.get_full_name(), p.phase_done.convert2string()),
-                                           this,
-                                           UVM_LOW)
-                        end
-                     end
-                        
-                     `uvm_fatal("PH_TIMEOUT",
-                                $sformatf("Default timeout of %0t hit, indicating a probable testbench issue",
-                                          `UVM_DEFAULT_TIMEOUT))
-                  end
-                  else begin
-                     if (m_phase_trace)
-                       `UVM_PH_TRACE("PH/TRC/TIMEOUT", "PHASE TIMEOUT WATCHDOG EXPIRED", this, UVM_LOW)
-                     foreach (m_executing_phases[p]) begin
-                        if ((p.phase_done != null) && (p.phase_done.get_objection_total() > 0)) begin
-                           if (m_phase_trace)
-                             `UVM_PH_TRACE("PH/TRC/TIMEOUT/OBJCTN", 
-                                           $sformatf("Phase '%s' has outstanding objections:\n%s", p.get_full_name(), p.phase_done.convert2string()),
-                                           this,
-                                           UVM_LOW)
-                        end
-                     end
-                        
-                     `uvm_fatal("PH_TIMEOUT",
-                                $sformatf("Explicit timeout of %0t hit, indicating a probable testbench issue",
-                                          top.phase_timeout))
-                  end
-                  if (m_phase_trace)
-                    `UVM_PH_TRACE("PH/TRC/EXE/3","PHASE EXIT TIMEOUT",this,UVM_DEBUG)
-               end // if (this.get_name() == "run")
-               else begin
-                  wait (0); // never unblock for non-run phase
-               end
-             end // if (m_phase_trace)
+               if (m_timeout == 0)
+                 wait(m_timeout != 0);
+                  
+               if (m_phase_trace)
+                 `UVM_PH_TRACE("PH/TRC/TO_WAIT", $sformatf("STARTING PHASE TIMEOUT WATCHDOG (timeout == %t)",
+                                                           m_timeout), this, UVM_HIGH)
 
+               #(m_timeout * 1ns);
+               
+               `uvm_fatal("PH_TIMEOUT",
+                          $sformatf("Timeout of %0dns for phase \"%s\" expired, indicating a probable testbench issue",
+                                    m_timeout, get_name()))
+             end
   
            join_any
            disable fork;
@@ -1844,6 +1841,25 @@ function int uvm_phase::get_objection_count (uvm_object obj=null);
       return 0;
    end
 endfunction : get_objection_count
+
+// set_timeout
+// --------------
+
+function void uvm_phase::set_timeout(time timeout, time ns, bit overridable);
+  // Special case so we can pass already-scaled timeout values
+  // e.g. from uvm-root::set_timeout
+  if (ns) timeout = timeout / ns;
+
+  if (!m_timeout_is_overridable) begin
+    uvm_report_info("NOTIMOUTOVR",
+      $sformatf("The timeout setting of %0d for phase \"%s\" is not overridable to %0d due to a previous setting.",
+         m_timeout, get_name(), timeout), UVM_NONE);
+    return;
+  end
+  m_timeout_is_overridable = overridable;
+  m_timeout                = timeout;
+endfunction
+
 
 // sync
 // ----
