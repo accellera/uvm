@@ -512,10 +512,11 @@ function string uvm_vector_to_string (uvm_bitstream_t value, int size,
     return $sformatf("%0d", value);
 
   if($isunknown(value)) begin
-  	q = new[size];
-  	{>>{q}} = value;
-  	value = {>>{q}};
-  	end
+	{>>{q}} = value;
+	q=new[size](q);
+	q=new[$bits(value)](q);
+	value={>>{q}};	
+  end
   else 
   	value &= (1 << size)-1;
 
