@@ -480,14 +480,12 @@ virtual class uvm_tr_stream extends uvm_object;
    // A value of ~0~ indicates that the recorder has been ~freed~,
    // and no longer has a valid ID.
    //
-   // The value returned by a call to ~get_handle~ is implementation
-   // specific, and is provided via the <do_get_handle> method.
    function integer get_handle();
       if (!is_open() && !is_closed()) begin
         return 0;
       end
       else begin
-         integer handle = do_get_handle();
+         integer handle = get_inst_id();
          
          // Check for the weird case where our handle changed.
          if (m_ids_by_stream.exists(this) && m_ids_by_stream[this] != handle)
@@ -499,6 +497,16 @@ virtual class uvm_tr_stream extends uvm_object;
          return handle;
       end
    endfunction : get_handle
+   
+   // Function- m_get_handle
+   // Provided to allow implementation-specific handles which are not
+   // identical to the built-in handles.
+   //
+   // This is an implementation detail of the UVM library, which allows
+   // for vendors to (optionally) put vendor-specific mehods into the library.
+   virtual function integer m_get_handle();
+      return get_handle();
+   endfunction : m_get_handle
    
    // Function: get_stream_from_handle
    // Static accessor, returns a stream reference for a given unique id.
@@ -596,21 +604,6 @@ virtual class uvm_tr_stream extends uvm_object;
    protected virtual function void do_free_recorder(uvm_recorder recorder);
    endfunction : do_free_recorder
 
-   // Function: do_get_handle
-   // Returns a unique ID for this stream.
-   //
-   // The backend implementation is responsible for tracking integer-based
-   // 'handles' for each stream.  
-   //
-   // Requirements:
-   // - A stream handle of '0' is invalid.
-   // - A stream handle must be unique to the given stream while the
-   //   stream is between the ~open~ and ~freed~ states.  Once a stream
-   //   is freed, the implementation is free to reuse the handle (although
-   //   it is not a requirement that handles be reused).
-   pure virtual protected function integer do_get_handle();
-   
-   
 endclass : uvm_tr_stream
 
 //------------------------------------------------------------------------------
@@ -736,11 +729,4 @@ class uvm_text_tr_stream extends uvm_tr_stream;
       end
    endfunction : do_free_recorder
 
-   // Function: do_get_handle
-   // Returns a unique ID for this stream.
-   //
-   protected virtual function integer do_get_handle();
-      return this.get_inst_id();
-   endfunction : do_get_handle
-   
 endclass : uvm_text_tr_stream

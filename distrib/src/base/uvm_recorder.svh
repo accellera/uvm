@@ -252,14 +252,12 @@ virtual class uvm_recorder extends uvm_object;
    // A value of ~0~ indicates that the recorder has been ~freed~,
    // and no longer has a valid ID.
    //
-   // The value returned by a call to ~get_handle~ is implementation
-   // specific, and is provided via the <do_get_handle> method.
    function integer get_handle();
       if (!is_open() && !is_closed()) begin
          return 0;
       end
       else begin
-         integer handle = do_get_handle();
+         integer handle = get_inst_id();
 
          // Check for the weird case where our handle changed.
          if (m_ids_by_recorder.exists(this) && m_ids_by_recorder[this] != handle)
@@ -272,6 +270,16 @@ virtual class uvm_recorder extends uvm_object;
       end
    endfunction : get_handle
 
+   // Function- m_get_handle
+   // Provided to allow implementation-specific handles which are not
+   // identical to the built-in handles.
+   //
+   // This is an implementation detail of the UVM library, which allows
+   // for vendors to (optionally) put vendor-specific mehods into the library.
+   virtual function integer m_get_handle();
+      return get_handle();
+   endfunction : m_get_handle
+   
    // Function: get_recorder_from_handle
    // Static accessor, returns a recorder reference for a given unique id.
    //
@@ -515,20 +523,6 @@ virtual class uvm_recorder extends uvm_object;
                                                           string type_name);
 
 
-   // Function: do_get_handle
-   // Returns a unique ID for this recorder.
-   //
-   // The backend implementation is responsible for tracking integer-based
-   // 'handles' for each recorder.
-   //
-   // Requirements:
-   // - A recorder handle of '0' is invalid.
-   // - A recorder handle must be unique to the given recorder while the
-   //   the recorder is between the ~open~ and ~freed~ states.  Once a
-   //   recorder is freed, the implementation is free to reuse the handle
-   //   (althugh it is not a requirement that handles be reused).
-   pure virtual protected function integer do_get_handle();
-   
    // The following code is primarily for backwards compat. purposes.  "Transaction
    // Handles" are useful when connecting to a backend, but when passing the information
    // back and forth within simulation, it is safer to user the ~recorder~ itself
@@ -844,14 +838,6 @@ class uvm_text_recorder extends uvm_recorder;
                       UVM_STRING, 
                       8+value.len());
    endfunction : do_record_generic
-
-   // Function: do_get_handle
-   // Returns a unique ID for this stream.
-   //
-   // Text-backend specific implementation.
-   protected virtual function integer do_get_handle();
-      return this.get_inst_id();
-   endfunction : do_get_handle
 
    // Group: Implementation Specific API
    
