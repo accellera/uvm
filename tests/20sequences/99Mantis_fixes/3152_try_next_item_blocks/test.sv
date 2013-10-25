@@ -54,14 +54,14 @@ module test();
       return p_sequencer.rel_var;
     endfunction
     task wait_for_relevant();
-      //MDS@(p_sequencer.rel_var);
+      @(p_sequencer.rel_var);
     endtask
   endclass
 
 
 
   class my_sequencer extends uvm_sequencer #(my_item);
-    bit rel_var = 0;//MDS1;
+    bit rel_var = 1;
     `uvm_component_utils(my_sequencer)
     function new(string name, uvm_component parent);
       super.new(name, parent);
@@ -81,7 +81,7 @@ module test();
       phase.raise_objection(this);
       #1;
       $display("%t calling try_next_item...", $time);
-      seq_item_port.get_next_item(req);//MDStry_next_item(req);
+      seq_item_port.try_next_item(req);
       $display("%t back from try_next_item...", $time);
       if (req != null) begin
         req.print();
