@@ -1,0 +1,93 @@
+//---------------------------------------------------------------------- 
+//   Copyright 2010 Synopsys, Inc. 
+//   Copyright 2011 Mentor Graphics Corporation
+//   All Rights Reserved Worldwide 
+// 
+//   Licensed under the Apache License, Version 2.0 (the 
+//   "License"); you may not use this file except in 
+//   compliance with the License.  You may obtain a copy of 
+//   the License at 
+// 
+//       http://www.apache.org/licenses/LICENSE-2.0 
+// 
+//   Unless required by applicable law or agreed to in 
+//   writing, software distributed under the License is 
+//   distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+//   CONDITIONS OF ANY KIND, either express or implied.  See 
+//   the License for the specific language governing 
+//   permissions and limitations under the License. 
+//----------------------------------------------------------------------
+
+//////////////distrib/src/base/uvm_object_globals.svh////////////////////////////
+//////// uvm_severity   
+////////
+///////typedef enum uvm_severity
+///////{
+///////  UVM_INFO,
+///////  UVM_WARNING,
+///////  UVM_ERROR,
+///////  UVM_FATAL
+/////////} uvm_severity;
+//////////////////////////
+
+
+///////uvm_misc.svh////////////
+/////////
+////// typedef enum {UVM_APPEND, UVM_PREPEND} uvm_apprepend;
+///////////////////////////////
+///////////////////////////////
+
+////`define uvm_info(ID, MSG, VERBOSITY)
+//// `define uvm_warning(ID,MSG)
+///// `define uvm_error(ID,MSG)
+///// `define uvm_fatal(ID,MSG)
+
+program top;
+
+import uvm_pkg::*;
+`include "uvm_macros.svh"
+
+class my_catcher extends uvm_report_catcher;
+   static int seen = 0;
+   virtual function action_e catch();
+      $write("Saw a message...\n");
+      seen++;
+      return THROW;
+   endfunction
+endclass
+
+class test extends uvm_test;
+
+   bit pass = 1;
+
+   `uvm_component_utils(test)
+
+   function new(string name, uvm_component parent = null);
+      super.new(name, parent);
+   endfunction
+
+   virtual task run_phase(uvm_phase phase);
+      my_catcher ctchr = new;
+      phase.raise_objection(this);
+      uvm_report_cb::add(null,ctchr);
+      uvm_dump_re_cache(); // This method results in an info statement
+      if (my_catcher::seen != 1) begin
+         $write("ERROR: Message was NOT caught with default catcher installed!\n");
+         pass = 0;
+      end
+      phase.drop_objection(this);
+   endtask
+
+   virtual function void report();
+      if (pass) $write("** UVM TEST PASSED **\n");
+      else $write("** UVM TEST FAILED! **\n");
+   endfunction
+endclass
+
+
+initial
+  begin
+     run_test();
+  end
+
+endprogram

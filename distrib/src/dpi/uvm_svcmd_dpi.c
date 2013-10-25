@@ -20,12 +20,8 @@
 //   permissions and limitations under the License.
 //------------------------------------------------------------------------------
 
-#include <string.h>
-#include <stdio.h>
-#include <malloc.h>
-#include <regex.h>
+#include "uvm_dpi.h"
 #include <assert.h>
-#include "vpi_user.h"
 
 #define ARGV_STACK_PTR_SIZE 32
 
@@ -104,8 +100,17 @@ extern regex_t* uvm_dpi_regcomp (char* pattern)
   int status = regcomp(re, pattern, REG_NOSUB|REG_EXTENDED);
   if(status)
   {
-    vpi_printf((char *)"Unable to compile regex: %s\n", pattern);
-    vpi_printf((char *)"Element 0 is: %c\n", pattern[0]);
+      const char * err_str = "uvm_dpi_regcomp : Unable to compile regex: |%s|, Element 0 is: %c";
+      char buffer[strlen(err_str) + strlen(pattern) + 1];
+      sprintf(buffer, err_str, pattern, pattern[0]);
+      m_uvm_report_dpi(M_UVM_ERROR,
+                       "UVM/DPI/REGCOMP",
+                       &buffer[0],
+                       M_UVM_NONE,
+                       __FILE__,
+                       __LINE__);
+      regfree(re);
+      free (re);
     return NULL;
   }
   return re;

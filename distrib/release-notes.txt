@@ -68,6 +68,8 @@ Mantis 4160: uvm_comparer not using verbosity setting for print_msg
 
 Mantis 4181: transaction order unclear and cant be changed when bus/reg size differ
 
+Mantis 4253: Volatile register fields will cause a write() even if mirrored and desired values are the same.
+
 (*) Mantis 4269: Added UVM_ prefix to enumerated values
 
 Mantis 4306: Correction of documentation record_field_int ->
@@ -138,6 +140,8 @@ Mantis 4533: static data in DPI may survive reset
 
 Mantis 4542: uvm_test_done is now const to prevent changes
 
+(+) Mantis 4553: Introduces NOACCESS field access in uvm_reg_field.svh; removed error msgs from get_access(), and augmented by using NOACCESS when map and field have conflicting access values. 
+
 Mantis 4548: cleanup dpi coding issues
 
 Mantis 4566: uvm_comparer now detects any queue size mismatch when comparer.show_max != 1
@@ -168,6 +172,6 @@ Mantis 4731: Fixed initialization race introduced by Mantis 4606.
 
 Mantis 4734: Fixed bug in uvm_reg_map::get_size()
 
-Mantis 4253: Volatile register fields will cause a write() even if mirrored and desired values are the same.
+Mantis 4738: Fixed bug wherein messages from built-in UVM dpi code
+were not being routed through standard UVM messaging.
 
-Mantis 4553: Introduces NOACCESS field access in uvm_reg_field.svh; removed error msgs from get_access(), and augmented by using NOACCESS when map and field have conflicting access values. 
