@@ -357,9 +357,14 @@ class uvm_report_message_element_container extends uvm_object;
   function void add_int(string name, uvm_bitstream_t value, 
                         int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
      process p = process::self();
-     string rand_state = p.get_randstate();
-     uvm_report_message_int_element urme = new();
-     p.set_randstate(rand_state);
+     string rand_state;
+     uvm_report_message_int_element urme;
+     
+     if(p)
+     	rand_state = p.get_randstate();
+     urme = new();
+     if(p)
+     	p.set_randstate(rand_state);
 
      urme.set_name(name);
      urme.set_value(value, size, radix);
@@ -377,9 +382,14 @@ class uvm_report_message_element_container extends uvm_object;
 
   function void add_string(string name, string value, bit print = 1, bit record = 1);
      process p = process::self();
-     string rand_state = p.get_randstate();
-     uvm_report_message_string_element urme = new();
-     p.set_randstate(rand_state);
+     string rand_state;
+     uvm_report_message_string_element urme;
+     
+     if(p)
+     	rand_state = p.get_randstate();
+     urme = new();
+     if(p)
+     	p.set_randstate(rand_state);
 
      urme.set_name(name);
      urme.set_value(value);
@@ -397,9 +407,15 @@ class uvm_report_message_element_container extends uvm_object;
 
   function void add_object(string name, uvm_object obj, bit print = 1, bit record = 1);
      process p = process::self();
-     string rand_state = p.get_randstate();
-     uvm_report_message_object_element urme = new();
-     p.set_randstate(rand_state);
+     string rand_state;
+     uvm_report_message_object_element urme;
+     
+     if(p)
+     	rand_state = p.get_randstate();
+     	
+     urme = new();
+     if(p)
+     	p.set_randstate(rand_state);
 
      urme.set_name(name);
      urme.set_value(obj);
@@ -506,9 +522,12 @@ class uvm_report_message extends uvm_object;
 
   static function uvm_report_message new_report_message(string name = "uvm_report_message");
     process p = process::self();
-    string rand_state = p.get_randstate();
+    string rand_state;
+    if(p)
+    	rand_state = p.get_randstate();
     new_report_message = new(name);
-    p.set_randstate(rand_state);
+    if(p)
+    	p.set_randstate(rand_state);
   endfunction
 
 

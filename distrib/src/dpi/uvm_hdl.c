@@ -42,8 +42,7 @@ static int uvm_hdl_max_width()
 {
   vpiHandle ms;
   s_vpi_value value_s = { vpiIntVal, { 0 } };
-  ms = vpi_handle_by_name(
-      (PLI_BYTE8*) "uvm_pkg::UVM_HDL_MAX_WIDTH", 0);
+  ms = vpi_handle_by_name((PLI_BYTE8*) "uvm_pkg::UVM_HDL_MAX_WIDTH", 0);
   if(ms == 0) 
     return 1024;  /* If nothing else is defined, 
                      this is the DEFAULT */
@@ -207,10 +206,10 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
       char buffer[strlen(err_str) + strlen(path)];
       sprintf(buffer, err_str, path);
       m_uvm_report_dpi(M_UVM_ERROR,
-                       "UVM/DPI/HDL_SET",
+                       (char*) "UVM/DPI/HDL_SET",
                        &buffer[0],
                        M_UVM_NONE,
-                       __FILE__,
+                       (char*)__FILE__,
                        __LINE__);
     return 0;
   }
@@ -279,10 +278,10 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
       char buffer[strlen(err_str) + strlen(path)];
       sprintf(buffer, err_str, path);
       m_uvm_report_dpi(M_UVM_ERROR,
-                       "UVM/DPI/HDL_GET",
+    		  (char*)"UVM/DPI/HDL_GET",
                        &buffer[0],
                        M_UVM_NONE,
-                       __FILE__,
+                       (char*)__FILE__,
                        __LINE__);
     // Exiting is too harsh. Just return instead.
     // tf_dofinish();
@@ -300,10 +299,10 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
       char buffer[strlen(err_str) + strlen(path) + (2*int_str_max(10))];
       sprintf(buffer, err_str, path, size, maxsize);
       m_uvm_report_dpi(M_UVM_ERROR,
-                       "UVM/DPI/HDL_SET",
+    		  (char*)"UVM/DPI/HDL_SET",
                        &buffer[0],
                        M_UVM_NONE,
-                       __FILE__,
+                       (char*)__FILE__,
                        __LINE__);
       //tf_dofinish();
 #ifndef VCS

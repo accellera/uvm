@@ -41,7 +41,7 @@ class my_server extends uvm_default_report_server;
 endclass
 
 class my_handler extends uvm_report_handler;
-  `uvm_object_utils(my_handler);
+  `uvm_object_utils(my_handler)
 
   function new(string name = "my_report_handler");
     super.new(name);
@@ -61,9 +61,9 @@ class test extends uvm_test;
      super.new(name, parent);
   endfunction
 
-  virtual function void uvm_process_report_message(uvm_report_message msg);
-    msg.add_string ("component_name", get_name());
-    super.uvm_process_report_message(msg);
+  virtual function void uvm_process_report_message(uvm_report_message report_message);
+    report_message.add_string ("component_name", get_name());
+    super.uvm_process_report_message(report_message);
   endfunction
 
 
