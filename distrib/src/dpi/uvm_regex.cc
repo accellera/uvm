@@ -57,10 +57,10 @@ int uvm_re_match(const char * re, const char *str)
       char buffer[strlen(err_str) + int_str_max(10) + strlen(re)];
       sprintf(buffer, err_str, UVM_REGEX_MAX_LENGTH, re);
       m_uvm_report_dpi(M_UVM_ERROR,
-                       "UVM/DPI/REGEX_MAX",
+                       (char*) "UVM/DPI/REGEX_MAX",
                        &buffer[0],
                        M_UVM_NONE,
-                       __FILE__,
+                       (char*)__FILE__,
                        __LINE__);
     return 1;
   }
@@ -76,10 +76,10 @@ int uvm_re_match(const char * re, const char *str)
 
   if (rexp == NULL) {
       m_uvm_report_dpi(M_UVM_ERROR,
-                       "UVM/DPI/REGEX_ALLOC",
-                       "uvm_re_match: internal memory allocation error",
+                       (char*) "UVM/DPI/REGEX_ALLOC",
+                       (char*) "uvm_re_match: internal memory allocation error",
                        M_UVM_NONE,
-                       __FILE__,
+                       (char*)__FILE__,
                        __LINE__);
     return 1;
   }
@@ -92,10 +92,10 @@ int uvm_re_match(const char * re, const char *str)
       char buffer[strlen(err_str) + strlen(re) + strlen(uvm_re)];
       sprintf(buffer, err_str, re, uvm_re);
       m_uvm_report_dpi(M_UVM_ERROR,
-                       "UVM/DPI/REGEX_INV",
+                       (char*) "UVM/DPI/REGEX_INV",
                        &buffer[0],
                        M_UVM_NONE,
-                       __FILE__,
+                       (char*)__FILE__,
                        __LINE__);
     regfree(rexp);
     free(rexp);
@@ -135,10 +135,10 @@ const char * uvm_glob_to_re(const char *glob)
       char buffer[strlen(err_str) + strlen(glob)];
       sprintf(buffer, err_str, glob);
       m_uvm_report_dpi(M_UVM_ERROR,
-                       "UVM/DPI/REGEX_MAX",
+                       (char*) "UVM/DPI/REGEX_MAX",
                        &buffer[0],
                        M_UVM_NONE,
-                       __FILE__,
+                       (char*)__FILE__,
                        __LINE__);
     return glob;
   }
@@ -247,10 +247,10 @@ const char * uvm_glob_to_re(const char *glob)
 void uvm_dump_re_cache()
 {
     m_uvm_report_dpi(M_UVM_INFO,
-                     "UVM/DPI/REGEX_MAX",
-                     "uvm_dump_re_cache: cache not implemented",
+                     (char*) "UVM/DPI/REGEX_MAX",
+                     (char*)  "uvm_dump_re_cache: cache not implemented",
                      M_UVM_LOW,
-                     __FILE__,
+                     (char*)__FILE__,
                      __LINE__);
 }
 
