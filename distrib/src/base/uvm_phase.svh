@@ -419,6 +419,8 @@ class uvm_phase extends uvm_object;
   // The timeout is simply the maximum absolute simulation time allowed during the
   // execution of the phase before a ~FATAL~ occurs.
   // Setting a timeout value in a function phase has no effect.
+  // Changing the timeout value once the timer has started has no effect until
+  // <reset_timer()> is called.
   //
   extern virtual function void set_timeout(time timeout, time ns, bit overridable=1);
    
