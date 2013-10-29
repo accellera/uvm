@@ -104,10 +104,10 @@ extern regex_t* uvm_dpi_regcomp (char* pattern)
       char buffer[strlen(err_str) + strlen(pattern) + 1];
       sprintf(buffer, err_str, pattern, pattern[0]);
       m_uvm_report_dpi(M_UVM_ERROR,
-                       "UVM/DPI/REGCOMP",
+    		  (char*)"UVM/DPI/REGCOMP",
                        &buffer[0],
                        M_UVM_NONE,
-                       __FILE__,
+                       (char*) __FILE__,
                        __LINE__);
       regfree(re);
       free (re);
