@@ -18,7 +18,7 @@
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
 
-// This test verifies that a timeout can be set from within the phase
+// This test verifies that a timeout can be reset
 
 module test;
   import uvm_pkg::*;
@@ -49,19 +49,19 @@ module test;
       uvm_report_cb::add(null,ctch);
     endfunction
 
-    task main_phase(uvm_phase phase);
+    task run_phase(uvm_phase phase);
       phase.raise_objection(this);
-      #500;
       phase.set_timeout(1000, 0);
-      #(`UVM_DEFAULT_TIMEOUT * 2);
-      phase.drop_objection(this);
+      #500;
+      phase.set_timeout(2000, 0);
+      phase.reset_timer();
     endtask
 
     function void report();
       uvm_report_server svr;
       svr = uvm_coreservice.get_report_server();
       
-      if (aborted && $time == 1500 &&
+      if (aborted && $time == 2500 &&
           svr.get_severity_count(UVM_FATAL) == 0 &&
           svr.get_severity_count(UVM_ERROR) == 0)
         $display("*** UVM TEST PASSED ***\n");
