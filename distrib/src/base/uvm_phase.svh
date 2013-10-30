@@ -1914,7 +1914,7 @@ endfunction : get_objection_count
 // set_timeout
 // --------------
 
-function void uvm_phase::set_timeout(time timeout, time ns, bit overridable);
+function void uvm_phase::set_timeout(time timeout, time ns, bit overridable=1);
   // Special case so we can pass already-scaled timeout values
   // e.g. from uvm_root::set_timeout
   if (ns) timeout = timeout / ns;
