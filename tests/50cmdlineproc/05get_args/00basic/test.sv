@@ -58,7 +58,7 @@ class test extends uvm_test;
        end
        "ncsim","ncsim(64)" : begin
          $display("Doing IUS checks");
-         if(!(raw_args.size() inside {16}) ) begin
+         if(!(raw_args.size() inside {16,17}) ) begin
            $display("  Incorrect number of arguments %0d found (expected 16)", raw_args.size());
            pass_the_test = pass_the_test & 0;
          end
@@ -72,7 +72,7 @@ class test extends uvm_test;
        "ModelSim SE-64": begin
          $display("Doing Questa checks");
          if(raw_args.size() != 16) begin
-           $display("  Incorrect number of arguments %0d found (expected 16)", raw_args.size());
+           $display("  Incorrect number of arguments %0d found (expected 16,17)", raw_args.size());
            pass_the_test = pass_the_test & 0;
          end
          else

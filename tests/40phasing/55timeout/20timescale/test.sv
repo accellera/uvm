@@ -20,6 +20,7 @@
 
 // This test verifies that a timeout can be set from a different timescale
 
+`define UVM_DEFAULT_TIMEOUT 9200s
 `timescale 1ps/1ps
 
 module test;

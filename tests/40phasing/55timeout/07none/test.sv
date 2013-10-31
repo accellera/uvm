@@ -20,6 +20,7 @@
 
 // This test verifies that there can be no timeout
 
+`define UVM_DEFAULT_TIMEOUT 9200s
 module test;
   import uvm_pkg::*;
   `include "uvm_macros.svh"

@@ -20,6 +20,7 @@
 
 // This test verifies that a timeout can be set from within the phase
 
+`define UVM_DEFAULT_TIMEOUT 9200s
 module test;
   import uvm_pkg::*;
   `include "uvm_macros.svh"

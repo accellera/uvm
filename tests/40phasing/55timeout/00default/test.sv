@@ -21,6 +21,7 @@
 // This test verifies that a fatal error is emitted if the simulation
 // runs away
 
+`define UVM_DEFAULT_TIMEOUT 9200s
 module test;
   import uvm_pkg::*;
   `include "uvm_macros.svh"
