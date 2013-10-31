@@ -660,7 +660,6 @@ function void uvm_root::m_do_timeout_settings();
   timeout_count = clp.get_arg_values("+UVM_TIMEOUT=", timeout_settings);
 
   if (timeout_count ==  0) begin
-    run_ph.set_timeout(`UVM_DEFAULT_TIMEOUT, 1ns, 1);
     return;
   end
   else begin
