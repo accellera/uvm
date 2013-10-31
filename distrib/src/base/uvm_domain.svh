@@ -134,6 +134,8 @@ class uvm_domain extends uvm_phase;
                      .with_phase(m_common_domain.find(uvm_run_phase::get())));
 
 
+    run_ph.set_timeout(`UVM_DEFAULT_TIMEOUT, 0, 1);
+    
     return m_common_domain;
 
   endfunction
