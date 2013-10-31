@@ -20,6 +20,7 @@
 
 // This test verifies that a a timeout can be set via the command line
 
+`define UVM_DEFAULT_TIMEOUT 9200s
 module test;
   import uvm_pkg::*;
   `include "uvm_macros.svh"

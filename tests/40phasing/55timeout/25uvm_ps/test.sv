@@ -21,6 +21,7 @@
 // This test verifies that the `UVM_DEFAULT_TIMEOUT value is correctly
 // interpreted when the UVM library is compiled with a 1ps/1ps timescale
 
+`define UVM_DEFAULT_TIMEOUT 9200s
 `timescale 1ns/1ns
 
 module test;
