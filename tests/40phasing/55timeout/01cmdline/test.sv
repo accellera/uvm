@@ -58,12 +58,12 @@ module test;
       uvm_report_server svr;
       svr = uvm_coreservice.get_report_server();
       
-      if (!aborted && $time != 100 &&
+      if (aborted && $time == 100 &&
           svr.get_severity_count(UVM_FATAL) == 0 &&
           svr.get_severity_count(UVM_ERROR) == 0)
-        $display("*** UVM TEST FAILED ***\n");
-      else
         $display("*** UVM TEST PASSED ***\n");
+      else
+        $display("*** UVM TEST FAILED ***\n");
     endfunction
   endclass
 

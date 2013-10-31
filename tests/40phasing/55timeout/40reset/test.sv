@@ -18,21 +18,20 @@
 //   permissions and limitations under the License. 
 //----------------------------------------------------------------------
 
-// This test verifies that a timeout valeu can be specified per phase
+// This test verifies that a timeout can be reset
 
-`define UVM_DEFAULT_TIMEOUT 9200s
 module test;
   import uvm_pkg::*;
   `include "uvm_macros.svh"
 
-  int aborted = 0;
+  bit aborted = 0;
 
   class catcher extends uvm_report_catcher;
      virtual function action_e catch();
         if(get_severity() == UVM_FATAL &&
            get_id() == "PH_TIMEOUT")
         begin
-          aborted++;
+          aborted = 1;
           set_severity(UVM_INFO);
           set_action(UVM_DISPLAY);
           return THROW;
@@ -48,34 +47,21 @@ module test;
     function new(string name, uvm_component parent);
       super.new(name, parent);
       uvm_report_cb::add(null,ctch);
-
-      // Out-of-phase timeout setting
-      begin
-        uvm_domain runtime = uvm_domain::get_uvm_domain();
-        uvm_phase  rst_ph  = runtime.find(uvm_reset_phase::get());
-        rst_ph.set_timeout(100, 0);
-      end
     endfunction
 
-    task reset_phase(uvm_phase phase);
+    task run_phase(uvm_phase phase);
       phase.raise_objection(this);
-      #1000;
-      phase.drop_objection(this);
-    endtask
-
-    task main_phase(uvm_phase phase);
-      phase.raise_objection(this);
-      // In-phase timeout setting
-      phase.set_timeout(50, 0);
-      #1000;
-      phase.drop_objection(this);
+      phase.set_timeout(1000, 0);
+      #500;
+      phase.set_timeout(2000, 0);
+      phase.reset_timer();
     endtask
 
     function void report();
       uvm_report_server svr;
       svr = uvm_coreservice.get_report_server();
       
-      if (aborted == 2 && $time == 150 &&
+      if (aborted && $time == 2500 &&
           svr.get_severity_count(UVM_FATAL) == 0 &&
           svr.get_severity_count(UVM_ERROR) == 0)
         $display("*** UVM TEST PASSED ***\n");

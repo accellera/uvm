@@ -50,23 +50,24 @@ module test;
       uvm_report_cb::add(null,ctch);
     endfunction
 
-    task run_phase(uvm_phase phase);
+    task main_phase(uvm_phase phase);
       phase.raise_objection(this);
       #500;
       phase.set_timeout(1000, 0);
       #(`UVM_DEFAULT_TIMEOUT * 2);
+      phase.drop_objection(this);
     endtask
 
     function void report();
       uvm_report_server svr;
       svr = uvm_coreservice.get_report_server();
       
-      if (!aborted && $time != 1500 &&
+      if (aborted && $time == 1500 &&
           svr.get_severity_count(UVM_FATAL) == 0 &&
           svr.get_severity_count(UVM_ERROR) == 0)
-        $display("*** UVM TEST FAILED ***\n");
-      else
         $display("*** UVM TEST PASSED ***\n");
+      else
+        $display("*** UVM TEST FAILED ***\n");
     endfunction
   endclass
 

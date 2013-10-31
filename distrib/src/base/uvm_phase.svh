@@ -409,15 +409,40 @@ class uvm_phase extends uvm_object;
   //| uvm_phase  run_ph = common.find(uvm_run_phase::get());
   //| run_ph.set_timeout(1ms, 1ns);
   //
-  //| uvm_domain runtime = uvm_domain::get_uvm_domain();
-  //| uvm_phase  main_ph = common.find(uvm_main_phase::get());
-  //| main_ph.set_timeout(500us, 1ns);
+  //| task main_phase(uvm_phase phase);
+  //|    phase.set_timeout(500us, 1ns);
+  //|    phase.raise_objection(this);
+  //|    ...
+  //|    phase.drop_objection(this);
+  //| endtask
   //
   // The timeout is simply the maximum absolute simulation time allowed during the
   // execution of the phase before a ~FATAL~ occurs.
   // Setting a timeout value in a function phase has no effect.
+  // Changing the timeout value once the timer has started has no effect until
+  // <reset_timer()> is called.
   //
   extern virtual function void set_timeout(time timeout, time ns, bit overridable=1);
+   
+  // Function: get_timeout
+  //
+  // Returns the timeout for the phase, in the current timescale.
+  // A timeout value of 0 means no timeout.
+  //
+  // The value of the ~ns~ argument MUST be specified as "1ns" to detect the case
+  // where the caller's timescale is different from the timescale of the UVM library.
+  //
+  //| uvm_domain common = uvm_domain::get_common_domain();
+  //| uvm_phase  run_ph = common.find(uvm_run_phase::get());
+  //| if (run_ph.get_timeout(1ns) < 100ms) run_ph.set_timeout(100ms, 1ns);
+  //
+  extern virtual function time get_timeout(time ns);
+
+  // Function: reset_timer
+  //
+  // Reset and restart the timeout timer, using the latest timeout value.
+  //
+  extern virtual function void reset_timer();
    
   //-----------------------
   // Group: Synchronization
@@ -637,8 +662,10 @@ class uvm_phase extends uvm_object;
   //---------------------------------
   local static mailbox #(uvm_phase) m_phase_hopper = new();
 
-  protected time m_timeout = 0;
-  local     bit  m_timeout_is_overridable = 1;
+  protected time  m_timeout = 0;
+  local     bit   m_timeout_is_overridable = 1;
+  local     event   m_reset_timer;
+  local     process m_timer_proc;
 
   extern static task m_run_phases();
   extern local task  execute_phase();
@@ -761,6 +788,12 @@ endclass
 
 class uvm_phase_cb extends uvm_callback;
 
+  // Function: new
+  // Constructor
+  function new(string name="unnamed-uvm_phase_cb");
+     super.new(name);
+  endfunction : new
+   
   // Function: phase_state_change
   //
   // Called whenever a ~phase~ changes state.
@@ -816,7 +849,12 @@ function uvm_phase::new(string name="uvm_phase",
   super.new(name);
   m_phase_type = phase_type;
 
-  m_state = UVM_PHASE_DORMANT;
+  // The common domain is the only thing that initializes m_state.  All
+  // other states are initialized by being 'added' to a schedule.
+  if ((name == "common") &&
+      (phase_type == UVM_PHASE_DOMAIN))
+    m_state = UVM_PHASE_DORMANT;
+   
   m_run_count = 0;
   m_parent = parent;
 
@@ -853,7 +891,9 @@ function void uvm_phase::add(uvm_phase phase,
                              uvm_phase with_phase=null,
                              uvm_phase after_phase=null,
                              uvm_phase before_phase=null);
-  uvm_phase new_node, begin_node, end_node;
+  uvm_phase new_node, begin_node, end_node, tmp_node;
+  uvm_phase_state_change state_chg;
+
   if (phase == null)
       `uvm_fatal("PH/NULL", "add: phase argument is null")
 
@@ -998,8 +1038,20 @@ function void uvm_phase::add(uvm_phase phase,
       after_phase.m_successors.delete(before_phase);
       before_phase.m_successors.delete(after_phase);
     end
-  end
+  end // if (before_phase != null && after_phase != null)
 
+  // Transition nodes to DORMANT state
+  if (new_node == null)
+    tmp_node = phase;
+  else
+    tmp_node = new_node;
+
+  state_chg = uvm_phase_state_change::type_id::create(tmp_node.get_name());
+  state_chg.m_phase = tmp_node;
+  state_chg.m_jump_to = null;
+  state_chg.m_prev_state = tmp_node.m_state;
+  tmp_node.m_state = UVM_PHASE_DORMANT;
+  `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(tmp_node, state_chg)) 
 endfunction
 
 
@@ -1333,10 +1385,12 @@ task uvm_phase::execute_phase();
   // Wait for phases with which we have a sync()
   // relationship to be ready. Sync can be 2-way -
   // this additional state avoids deadlock.
+  state_chg.m_prev_state = m_state;
+  m_state = UVM_PHASE_SYNCING;
+  `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
+  #0;
+   
   if (m_sync.size()) begin
-    state_chg.m_prev_state = m_state;
-    m_state = UVM_PHASE_SYNCING;
-    `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
     
     foreach (m_sync[i]) begin
       wait (m_sync[i].m_state >= UVM_PHASE_SYNCING);
@@ -1471,7 +1525,9 @@ task uvm_phase::execute_phase();
              end
   
              // TIMEOUT
-             begin
+             forever begin
+               bit expired;
+               
                if (m_timeout == 0)
                  wait(m_timeout != 0);
                   
@@ -1479,12 +1535,24 @@ task uvm_phase::execute_phase();
                  `UVM_PH_TRACE("PH/TRC/TO_WAIT", $sformatf("STARTING PHASE TIMEOUT WATCHDOG (timeout == %t)",
                                                            m_timeout), this, UVM_HIGH)
 
-               #(m_timeout * 1ns);
-               
-               `uvm_fatal("PH_TIMEOUT",
-                          $sformatf("Timeout of %0dns for phase \"%s\" expired, indicating a probable testbench issue",
-                                    m_timeout, get_name()))
-             end
+               expired = 0;
+               fork
+                 #(m_timeout * 1ns) expired = 1;
+                 @m_reset_timer;
+               join_any
+
+               if (expired) begin
+                 `uvm_fatal("PH_TIMEOUT",
+                            $sformatf("Timeout of %0dns for phase \"%s\" expired, indicating a probable testbench issue",
+                                      m_timeout, get_name()))
+                 break;
+               end
+
+               if (m_phase_trace)
+                 `UVM_PH_TRACE("PH/TRC/TO/RST",
+                               $sformatf("Timer for phase \"%s\" reset to %0dns",
+                                         get_name(), m_timeout), this, UVM_HIGH)
+             end // Forever -- reset timer
   
            join_any
            disable fork;
@@ -1615,9 +1683,10 @@ task uvm_phase::execute_phase();
     // execute all the successors
     foreach (m_successors[succ]) begin
       if(succ.m_state < UVM_PHASE_SCHEDULED) begin
-        state_chg.m_prev_state = m_state;
+        state_chg.m_prev_state = succ.m_state;
+        state_chg.m_phase = succ;
         succ.m_state = UVM_PHASE_SCHEDULED;
-        `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(this, state_chg))
+        `uvm_do_callbacks(uvm_phase, uvm_phase_cb, phase_state_change(succ, state_chg))
         #0; // LET ANY WAITERS WAKE UP
         void'(m_phase_hopper.try_put(succ));
         if (m_phase_trace)
@@ -1847,17 +1916,36 @@ endfunction : get_objection_count
 
 function void uvm_phase::set_timeout(time timeout, time ns, bit overridable=1);
   // Special case so we can pass already-scaled timeout values
-  // e.g. from uvm-root::set_timeout
+  // e.g. from uvm_root::set_timeout
   if (ns) timeout = timeout / ns;
 
   if (!m_timeout_is_overridable) begin
     uvm_report_info("NOTIMOUTOVR",
-      $sformatf("The timeout setting of %0d for phase \"%s\" is not overridable to %0d due to a previous setting.",
+      $sformatf("The timeout setting of %0d for phase \"%s\" is not overridable to %0d due to a previous setting that set the overridable bit to 0.",
          m_timeout, get_name(), timeout), UVM_NONE);
     return;
   end
   m_timeout_is_overridable = overridable;
   m_timeout                = timeout;
+endfunction
+
+
+// get_timeout
+// --------------
+
+function time uvm_phase::get_timeout(time ns);
+  // Special case so we get already-scaled timeout values
+  if (ns == 0) return m_timeout;
+
+  return m_timeout * ns;
+endfunction
+
+
+// reset_timer
+// --------------
+
+function void uvm_phase::reset_timer();
+  -> m_reset_timer;
 endfunction
 
 
