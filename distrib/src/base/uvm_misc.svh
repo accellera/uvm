@@ -482,7 +482,8 @@ function string uvm_vector_to_string (uvm_bitstream_t value, int size,
   if (radix == UVM_DEC && value[size-1] === 1)
     return $sformatf("%0d", value);
 
-  if($countbits(value,'z)) begin
+  // TODO $countbits(value,'z) would be even better
+  if($isunknown(value)) begin
 	  uvm_bitstream_t _t;
 	  _t=0;
 	  for(int idx=0;idx<size;idx++)
