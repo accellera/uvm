@@ -178,3 +178,5 @@ Mantis 4734: Fixed bug in uvm_reg_map::get_size()
 Mantis 4738: Fixed bug wherein messages from built-in UVM dpi code
 were not being routed through standard UVM messaging.
 
+Mantis 4772: separated hdl vendor dpi backends into one file per vendor
+
