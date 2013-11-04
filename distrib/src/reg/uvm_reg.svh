@@ -619,9 +619,9 @@ virtual class uvm_reg extends uvm_object;
 
    // Function: predict
    //
-   // Update the mirrored value for this register.
+   // Update the mirrored and desired value for this register.
    //
-   // Predict the mirror value of the fields in the register
+   // Predict the mirror (and desired) value of the fields in the register
    // based on the specified observed ~value~ on a specified adress ~map~,
    // or based on a calculated value.
    // See <uvm_reg_field::predict()> for more details.

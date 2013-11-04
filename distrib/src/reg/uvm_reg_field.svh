@@ -635,9 +635,9 @@ class uvm_reg_field extends uvm_object;
 
    // Function: predict
    //
-   // Update the mirrored value for this field.
+   // Update the mirrored and desired value for this field.
    //
-   // Predict the mirror value of the field based on the specified
+   // Predict the mirror and desired value of the field based on the specified
    // observed ~value~ on a bus using the specified address ~map~.
    //
    // If ~kind~ is specified as <UVM_PREDICT_READ>, the value
@@ -651,7 +651,7 @@ class uvm_reg_field extends uvm_object;
    // For example, the mirrored value of a read-only field is modified
    // by this method if ~kind~ is specified as <UVM_PREDICT_DIRECT>.
    //
-   // This method does not allow an update of the mirror
+   // This method does not allow an update of the mirror (or desired)
    // when the register containing this field is busy executing
    // a transaction because the results are unpredictable and
    // indicative of a race condition in the testbench.
