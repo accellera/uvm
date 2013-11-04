@@ -477,16 +477,17 @@ function string uvm_vector_to_string (uvm_bitstream_t value, int size,
                                       string radix_str="");
                                       
                                       uvm_bitstream_t v;
-                                      logic q[];
 
   // sign extend & don't show radix for negative values
   if (radix == UVM_DEC && value[size-1] === 1)
     return $sformatf("%0d", value);
 
-  if($isunknown(value)) begin
-  	q = new[size];
-  	{>>{q}} = value;
-  	value = {>>{q}};
+  if($countbits(value,'z)) begin
+	  uvm_bitstream_t _t;
+	  _t=0;
+	  for(int idx=0;idx<size;idx++)
+	  	_t[idx]=value[idx];
+	  value=_t;
   	end
   else 
   	value &= (1 << size)-1;
