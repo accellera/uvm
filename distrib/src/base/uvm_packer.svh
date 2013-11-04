@@ -58,6 +58,33 @@ class uvm_packer;
 
   extern virtual function void pack_field_int (logic[63:0] value, int size);
 
+  // Function: pack_field_stream
+  //
+  // Packs a stream of logic into the pack array.
+  //
+  // The stream of logic is appended to the internal pack array.  Unlike <pack_field>
+  // and <pack_field_int>, this method allows for fields of arbitrary length to be 
+  // passed in without expanding into a pre-defined integral type first.
+  //
+  // For example
+  // | begin
+  // |   logic my_stream[];
+  // |   {<<{my_stream}} = my_field;
+  // |   packer.pack_field_stream(my_stream);
+  // | end
+  //
+  // When appending the stream to the internal pack array, the packer will obey
+  // the value of <big_endian> (appending the array from MSB to LSB if set).
+  //
+  // An optional ~size~ parameter is provided, which defaults to '-1'.  If set
+  // to any value greater than '-1' (including 0), then the packer will use
+  // the size as the number of bits to pack, otherwise the packer will simply
+  // pack the entire stream.
+  //
+  // An error will be asserted if the ~size~ has been specified, and exceeds the
+  // size of the source array.
+
+  extern virtual function void pack_field_stream(ref logic value[], input int size = -1);
 
   // Function: pack_string
   //
@@ -121,6 +148,13 @@ class uvm_packer;
   extern virtual function bit is_null ();
 
 
+  // Function: unpack_field
+  //
+  // Unpacks bits from the pack array and returns the bit-stream that was
+  // unpacked. ~size~ is the number of bits to unpack; the maximum is 4096 bits.
+
+  extern virtual function uvm_bitstream_t unpack_field (int size);
+
   // Function: unpack_field_int
   //
   // Unpacks bits from the pack array and returns the bit-stream that was
@@ -132,14 +166,33 @@ class uvm_packer;
 
   extern virtual function logic[63:0] unpack_field_int (int size);
 
-
-  // Function: unpack_field
+  // Function: unpack_field_stream
   //
-  // Unpacks bits from the pack array and returns the bit-stream that was
-  // unpacked. ~size~ is the number of bits to unpack; the maximum is 4096 bits.
+  // Unpacks a stream of logic into the pack array.
+  //
+  // The stream of logic is unpacked from the internal pack array.  Unlike <unpack_field>
+  // and <unpack_field_int>, this method allows for fields of arbitrary length to be 
+  // passed in without expanding into a pre-defined integral type first.
+  //
+  // For example
+  // | begin
+  // |   logic my_stream[] = new[$bits(my_field)];
+  // |   packer.unpack_field_stream(my_stream);
+  // |   my_field = {<<{my_stream}};
+  // | end
+  //
+  // When unpacking the stream from the internal pack array, the packer will obey
+  // the value of <big_endian> (unpacking the array from MSB to LSB if set).
+  //
+  // An optional ~size~ parameter is provided, which defaults to '-1'.  If set
+  // to any value greater than '-1' (including 0), then the packer will use
+  // the size as the number of bits to unpack, otherwise the packer will simply
+  // unpack the entire stream.
+  //
+  // An error will be asserted if the ~size~ has been specified, and
+  // exceeds the size of the target array.
 
-  extern virtual function uvm_bitstream_t unpack_field (int size);
-
+  extern virtual function void unpack_field_stream(ref logic value[], input int size = -1);
 
   // Function: unpack_string
   //
@@ -617,6 +670,29 @@ function void uvm_packer::pack_field_int(logic [63:0] value, int size);
   count += size;
 endfunction
   
+// pack_field_stream
+// -----------------
+
+function void uvm_packer::pack_field_stream(ref logic value[], input int size = -1);
+   if (size < 0)
+     size = value.size();
+
+   if (size > value.size()) begin
+      `uvm_error("UVM/BASE/PACKER/BAD_SIZE",
+                 $sformatf("pack_field_stream called with size '%0d', which exceeds value.size() of '%0d'",
+                           size,
+                           value.size()))
+      return;
+   end
+   
+   for (int i=0; i<size; i++)
+     if (big_endian == 1)
+       m_bits[count+i] = value[size-1-i];
+     else
+       m_bits[count+i] = value[i];
+   count += size;
+endfunction 
+
 
 // pack_string
 // -----------
@@ -746,6 +822,31 @@ function logic[63:0] uvm_packer::unpack_field_int(int size);
   end
 endfunction
   
+// unpack_field_stream
+// -------------------
+
+function void uvm_packer::unpack_field_stream(ref logic value[], input int size = -1);
+   if (size < 0)
+     size = value.size();
+
+   if (size > value.size()) begin
+      `uvm_error("UVM/BASE/PACKER/BAD_SIZE",
+                 $sformatf("unpack_field_stream called with size '%0d', which exceeds value.size() of '%0d'",
+                           size,
+                           value.size()))
+      return;
+   end
+   
+   if (enough_bits(size, "integral")) begin
+      count += size;
+      for (int i=0; i<size; i++)
+        if (big_endian == 1)
+          value[i] = m_bits[count-i-1];
+        else
+          value[i] = m_bits[count-size+i];
+   end
+endfunction
+
 
 // unpack_string
 // -------------

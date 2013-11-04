@@ -3364,7 +3364,8 @@ endfunction \
 //|   `uvm_pack_array(data)
 //| endfunction
 //
-// The 'N' versions of these macros take a explicit size argument.
+// The 'N' versions of these macros take a explicit size argument, which must
+// be compile-time constant value greater than '0'.
 //------------------------------------------------------------------------------
 
 //--------------------------------
@@ -3378,14 +3379,12 @@ endfunction \
 //| `uvm_pack_intN(VAR,SIZE)
 //
 `define uvm_pack_intN(VAR,SIZE) \
-   begin \
-   if (packer.big_endian) \
-       packer.m_bits[packer.count +: SIZE] = { << {VAR} }; \
-   else \
-       packer.m_bits[packer.count +: SIZE] = VAR; \
-   \
-   packer.count += SIZE; \
-   end
+  begin \
+    logic m_uvm_tmp_stream[]; \
+    logic[SIZE-1:0] m_uvm_tmp_var = VAR; \
+    { << {m_uvm_tmp_stream} } = m_uvm_tmp_var; \
+    packer.pack_field_stream(m_uvm_tmp_stream, SIZE); \
+  end
 
 // Macro: `uvm_pack_enumN
 //
@@ -3529,7 +3528,8 @@ endfunction \
 //|   `uvm_unpack_array(data)
 //| endfunction
 //
-// The 'N' versions of these macros take a explicit size argument.
+// The 'N' versions of these macros take a explicit size argument, which must
+// be a compile-time constant value greater than '0'.
 //------------------------------------------------------------------------------
 
 //----------------------------------
@@ -3544,12 +3544,9 @@ endfunction \
 //
 `define uvm_unpack_intN(VAR,SIZE) \
    begin \
-   if (packer.big_endian) \
-     { << { VAR }} = packer.m_bits[packer.count +: SIZE];  \
-   else \
-     VAR = packer.m_bits[packer.count +: SIZE]; \
-   \
-   packer.count += SIZE; \
+     logic m_uvm_tmp_stream[] = new[SIZE]; \
+     packer.unpack_field_stream(m_uvm_tmp_stream, SIZE); \
+     VAR = { << {m_uvm_tmp_stream}}; \
    end
 
 
