@@ -182,7 +182,7 @@
 
 // MACRO- `uvm_info_context
 //
-//| `uvm_info_context(ID, MSG, VERBOSITY, RO, CNTXT_NAME)
+//| `uvm_info_context(ID, MSG, VERBOSITY, RO)
 //
 // Operates identically to `uvm_info but requires that the
 // context, or <uvm_report_object>, in which the message is printed be 
@@ -197,7 +197,7 @@
 
 // MACRO- `uvm_warning_context
 //
-//| `uvm_warning_context(ID, MSG, RO, CNTXT_NAME = "")
+//| `uvm_warning_context(ID, MSG, RO)
 //
 // Operates identically to `uvm_warning but requires that the
 // context, or <uvm_report_object>, in which the message is printed be
@@ -212,7 +212,7 @@
 
 // MACRO- `uvm_error_context
 //
-//| `uvm_error_context(ID, MSG, RO, CNTXT_NAME = "")
+//| `uvm_error_context(ID, MSG, RO)
 //
 // Operates identically to `uvm_error but requires that the
 // context, or <uvm_report_object> in which the message is printed be 
@@ -227,7 +227,7 @@
 
 // MACRO- `uvm_fatal_context
 //
-//| `uvm_fatal_context(ID, MSG, RO, CNTXT_NAME = "")
+//| `uvm_fatal_context(ID, MSG, RO)
 //
 // Operates identically to `uvm_fatal but requires that the
 // context, or <uvm_report_object>, in which the message is printed be 

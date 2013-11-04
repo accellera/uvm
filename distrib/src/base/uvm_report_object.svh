@@ -112,13 +112,13 @@ class uvm_report_object extends uvm_object;
   // Function: uvm_report_enabled
   //
   // Returns 1 if the configured verbosity for this severity/id is greater than 
-  // ~verbosity~ else returns 0.
+  // or equal to ~verbosity~ else returns 0.
   // 
   // See also <get_report_verbosity_level> and the global version of 
   // <uvm_report_enabled>.
 
   function int uvm_report_enabled(int verbosity, 
-    uvm_severity severity = UVM_INFO, string id = "");
+  				  uvm_severity severity = UVM_INFO, string id = "");
     if (get_report_verbosity_level(severity, id) < verbosity)
       return 0;
     return 1;
@@ -149,9 +149,13 @@ class uvm_report_object extends uvm_object;
 
   // Function: uvm_report_info
 
-  virtual function void uvm_report_info(string id, string message,
-    int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
-    string context_name = "", bit report_enabled_checked = 0);
+  virtual function void uvm_report_info( string id,
+					 string message,
+					 int verbosity = UVM_MEDIUM,
+					 string filename = "",
+					 int line = 0,
+    					 string context_name = "",
+					 bit report_enabled_checked = 0);
 
     uvm_report (UVM_INFO, id, message, verbosity, 
                 filename, line, context_name, report_enabled_checked);
@@ -159,9 +163,13 @@ class uvm_report_object extends uvm_object;
 
   // Function: uvm_report_warning
 
-  virtual function void uvm_report_warning( string id, string message,
-    int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
-    string context_name = "", bit report_enabled_checked = 0);
+  virtual function void uvm_report_warning( string id,
+					    string message,
+    					    int verbosity = UVM_MEDIUM,
+					    string filename = "",
+					    int line = 0,
+    					    string context_name = "",
+					    bit report_enabled_checked = 0);
 
     uvm_report (UVM_WARNING, id, message, verbosity,
                 filename, line, context_name, report_enabled_checked);
@@ -169,9 +177,13 @@ class uvm_report_object extends uvm_object;
 
   // Function: uvm_report_error
 
-  virtual function void uvm_report_error ( string id, string message,
-    int verbosity = UVM_LOW, string filename = "", int line = 0,
-    string context_name = "", bit report_enabled_checked = 0);
+  virtual function void uvm_report_error( string id,
+					  string message,
+   					  int verbosity = UVM_LOW,
+					  string filename = "",
+					  int line = 0,
+   					  string context_name = "",
+					  bit report_enabled_checked = 0);
 
     uvm_report (UVM_ERROR, id, message, verbosity,
                 filename, line, context_name, report_enabled_checked);
@@ -212,12 +224,17 @@ class uvm_report_object extends uvm_object;
   //               method, etc.
   //
   //   report_enabled_checked - (Optional) This bit indicates whether the
-  //               currently provided message has been check as to whether
-  //               the message should be processed.
+  //               currently provided message has been checked as to whether
+  //               the message should be processed. If it hasn't been checked, 
+  //               it will be checked inside the uvm_report function.
 
-  virtual function void uvm_report_fatal ( string id, string message,
-    int verbosity = UVM_NONE, string filename = "", int line = 0,
-    string context_name = "", bit report_enabled_checked = 0);
+  virtual function void uvm_report_fatal( string id,
+					  string message,
+   					  int verbosity = UVM_NONE,
+					  string filename = "",
+					  int line = 0,
+   					  string context_name = "",
+					  bit report_enabled_checked = 0);
 
     uvm_report (UVM_FATAL, id, message, verbosity,
                 filename, line, context_name, report_enabled_checked);
@@ -229,8 +246,7 @@ class uvm_report_object extends uvm_object;
   // the report object and passes it to the report handler for processing.
   // It is expected to be checked for verbosity and populated.
 
-  virtual function void uvm_process_report_message (
-    uvm_report_message report_message);
+  virtual function void uvm_process_report_message(uvm_report_message report_message);
     report_message.set_report_object(this);
     m_rh.process_report_message(report_message);
   endfunction
@@ -255,7 +271,9 @@ class uvm_report_object extends uvm_object;
 
   // Function: get_report_max_verbosity_level
   //
-  // Gets the max_verbosity level in effect for this report object.
+  // Gets the maximum verbosity level in effect for this report object.
+  // Any report from this component whose verbosity exceeds this maximum will
+  // be ignored.
 
   function int get_report_max_verbosity_level();
     return m_rh.m_max_verbosity_level;

@@ -274,21 +274,21 @@ typedef uvm_severity uvm_severity_type;
 //   UVM_CALL_HOOK - Callback the report hook methods 
 //   UVM_STOP      - Causes ~$stop~ to be executed, putting the simulation into
 //                   interactive mode.
+//   UVM_RM_RECORD - Sends the report to the recorder
 
 
 typedef int uvm_action;
 
 typedef enum
 {
-  UVM_NO_ACTION = 'b00000000,
-  UVM_DISPLAY   = 'b00000001,
-  UVM_LOG       = 'b00000010,
-  UVM_COUNT     = 'b00000100,
-  UVM_EXIT      = 'b00001000,
-  UVM_CALL_HOOK = 'b00010000,
-  UVM_STOP      = 'b00100000,
-  UVM_RM_RECORD = 'b01000000,
-  UVM_UNASSGND  = 'b10000000
+  UVM_NO_ACTION = 'b0000000,
+  UVM_DISPLAY   = 'b0000001,
+  UVM_LOG       = 'b0000010,
+  UVM_COUNT     = 'b0000100,
+  UVM_EXIT      = 'b0001000,
+  UVM_CALL_HOOK = 'b0010000,
+  UVM_STOP      = 'b0100000,
+  UVM_RM_RECORD = 'b1000000
 } uvm_action_type;
 
 

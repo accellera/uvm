@@ -340,7 +340,7 @@ class uvm_sequence_item extends uvm_transaction;
   endfunction
 
   function int uvm_report_enabled(int verbosity, 
-    uvm_severity severity=UVM_INFO, string id="");
+    				  uvm_severity severity=UVM_INFO, string id="");
     uvm_report_object l_report_object = uvm_get_report_object();
     if (l_report_object.get_report_verbosity_level(severity, id) < verbosity)
       return 0;
@@ -371,9 +371,13 @@ class uvm_sequence_item extends uvm_transaction;
     
   // Function: uvm_report_info
 
-  virtual function void uvm_report_info( string id, string message,
-    int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
-    string context_name = "", bit report_enabled_checked = 0);
+  virtual function void uvm_report_info( string id,
+					 string message,
+   					 int verbosity = UVM_MEDIUM,
+					 string filename = "",
+					 int line = 0,
+   					 string context_name = "",
+					 bit report_enabled_checked = 0);
 
     this.uvm_report(UVM_INFO, id, message, verbosity, filename, line,
                     context_name, report_enabled_checked);
@@ -381,9 +385,13 @@ class uvm_sequence_item extends uvm_transaction;
 
   // Function: uvm_report_warning
 
-  virtual function void uvm_report_warning( string id, string message,
-    int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
-    string context_name = "", bit report_enabled_checked = 0);
+  virtual function void uvm_report_warning( string id,
+					    string message,
+   					    int verbosity = UVM_MEDIUM,
+					    string filename = "",
+					    int line = 0,
+   					    string context_name = "",
+					    bit report_enabled_checked = 0);
 
     this.uvm_report(UVM_WARNING, id, message, verbosity, filename, line,
                     context_name, report_enabled_checked);
@@ -391,9 +399,13 @@ class uvm_sequence_item extends uvm_transaction;
 
   // Function: uvm_report_error
 
-  virtual function void uvm_report_error( string id, string message,
-    int verbosity = UVM_LOW, string filename = "", int line = 0,
-    string context_name = "", bit report_enabled_checked = 0);
+  virtual function void uvm_report_error( string id,
+					  string message,
+   					  int verbosity = UVM_LOW,
+					  string filename = "",
+					  int line = 0,
+   					  string context_name = "",
+					  bit report_enabled_checked = 0);
 
     this.uvm_report(UVM_ERROR, id, message, verbosity, filename, line,
                     context_name, report_enabled_checked);
@@ -406,16 +418,19 @@ class uvm_sequence_item extends uvm_transaction;
   // if they have one, or to the global reporter. See <uvm_report_object::Reporting>
   // for details on the messaging functions.
 
-  virtual function void uvm_report_fatal( string id, string message,
-    int verbosity = UVM_NONE, string filename = "", int line = 0,
-    string context_name = "", bit report_enabled_checked = 0);
+  virtual function void uvm_report_fatal( string id,
+					  string message,
+   					  int verbosity = UVM_NONE,
+					  string filename = "",
+					  int line = 0,
+   					  string context_name = "",
+					  bit report_enabled_checked = 0);
 
     this.uvm_report(UVM_FATAL, id, message, verbosity, filename, line,
                     context_name, report_enabled_checked);
   endfunction
 
-  virtual function void uvm_process_report_message (
-    uvm_report_message report_message);
+  virtual function void uvm_process_report_message (uvm_report_message report_message);
     uvm_report_object l_report_object = uvm_get_report_object();
     report_message.set_report_object(l_report_object);
     if (report_message.get_context() == "")

@@ -100,6 +100,11 @@ endfunction
 //----------------------------------------------------------------------------
 
 
+// Function: uvm_get_report_object
+//
+// Returns the nearest uvm_report_object when called.  
+// For the global version, it returns uvm_root.
+//
 function uvm_report_object uvm_get_report_object();
   return uvm_coreservice.get_root();
 endfunction
@@ -108,7 +113,7 @@ endfunction
 // Function: uvm_report_enabled
 //
 // Returns 1 if the configured verbosity in ~uvm_top~ for this 
-// severity/id is greater than ~verbosity~ else returns 0.
+// severity/id is greater than or equal to ~verbosity~ else returns 0.
 // 
 // See also <uvm_report_object::uvm_report_enabled>.
 //
@@ -118,7 +123,7 @@ endfunction
 // Static methods can not call non-static methods of the same class. 
 
 function int uvm_report_enabled (int verbosity,
-  uvm_severity severity=UVM_INFO, string id="");
+                                 uvm_severity severity=UVM_INFO, string id="");
   uvm_root top;
   top = uvm_coreservice.get_root();
   return top.uvm_report_enabled(verbosity,severity,id);
@@ -153,9 +158,13 @@ endfunction : m__uvm_report_dpi
 
 // Function: uvm_report_info
 
-function void uvm_report_info(string id, string message,
-  int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
-  string context_name = "", bit report_enabled_checked = 0);
+function void uvm_report_info(string id,
+			      string message,
+                              int verbosity = UVM_MEDIUM,
+			      string filename = "",
+			      int line = 0,
+                              string context_name = "",
+                              bit report_enabled_checked = 0);
   uvm_root top;
   top = uvm_coreservice.get_root();
   top.uvm_report_info(id, message, verbosity, filename, line, context_name,
@@ -165,9 +174,13 @@ endfunction
 
 // Function: uvm_report_warning
 
-function void uvm_report_warning(string id, string message,
-  int verbosity = UVM_MEDIUM, string filename = "", int line = 0,
-  string context_name = "", bit report_enabled_checked = 0);
+function void uvm_report_warning(string id,
+                                 string message,
+                                 int verbosity = UVM_MEDIUM,
+				 string filename = "",
+				 int line = 0,
+                                 string context_name = "",
+                                 bit report_enabled_checked = 0);
   uvm_root top;
   top = uvm_coreservice.get_root();
   top.uvm_report_warning(id, message, verbosity, filename, line, context_name,
@@ -177,9 +190,13 @@ endfunction
 
 // Function: uvm_report_error
 
-function void uvm_report_error(string id, string message,
-  int verbosity = UVM_LOW, string filename = "", int line = 0,
-  string context_name = "", bit report_enabled_checked = 0);
+function void uvm_report_error(string id,
+                               string message,
+                               int verbosity = UVM_LOW,
+			       string filename = "",
+			       int line = 0,
+                               string context_name = "",
+                               bit report_enabled_checked = 0);
   uvm_root top;
   top = uvm_coreservice.get_root();
   top.uvm_report_error(id, message, verbosity, filename, line, context_name,
@@ -198,9 +215,13 @@ endfunction
 // do not inadvertently filter them out. It remains in the methods for backward
 // compatibility.
 
-function void uvm_report_fatal(string id, string message,
-  int verbosity = UVM_NONE, string filename = "", int line = 0,
-  string context_name = "", bit report_enabled_checked = 0);
+function void uvm_report_fatal(string id,
+	                       string message,
+                               int verbosity = UVM_NONE,
+			       string filename = "",
+			       int line = 0,
+                               string context_name = "",
+                               bit report_enabled_checked = 0);
   uvm_root top;
   top = uvm_coreservice.get_root();
   top.uvm_report_fatal(id, message, verbosity, filename, line, context_name,
@@ -235,7 +256,6 @@ function automatic bit uvm_string_to_action (string action_str, output uvm_actio
       "UVM_CALL_HOOK": action |= UVM_CALL_HOOK;
       "UVM_STOP":      action |= UVM_STOP;
       "UVM_RM_RECORD": action |= UVM_RM_RECORD;
-      "UVM_UNASSGND":  action = UVM_UNASSGND;
       default: uvm_string_to_action = 0;
     endcase
   end

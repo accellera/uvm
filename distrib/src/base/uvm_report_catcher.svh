@@ -148,7 +148,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // Function: get_client
   //
   // Returns the <uvm_report_object> that has generated the message that
-  // is currently being processes.  This field is not modifiable.
+  // is currently being processed.
 
   function uvm_report_object get_client();
     return m_modified_report_message.get_report_object(); 
@@ -167,11 +167,10 @@ virtual class uvm_report_catcher extends uvm_callback;
   
   // Function: get_context
   //
-  // Returns the context (source) of the message that is currently being
+  // Returns the context name of the message that is currently being
   // processed. This is typically the full hierarchical name of the component
-  // that issued the message. However, when the message comes via a report
-  // handler that is not associated with a component, the context is
-  // user-defined.
+  // that issued the message. However, if user-defined context is set from
+  // a uvm_report_message, the user-defined context will be returned.
 
   function string get_context();
     string context_str;
@@ -320,8 +319,12 @@ virtual class uvm_report_catcher extends uvm_callback;
   // added element.
   //
 
-  protected function void add_int(string name, uvm_bitstream_t value,
-                        int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
+  protected function void add_int(string name,
+				  uvm_bitstream_t value,
+				  int size,
+				  uvm_radix_enum radix,
+				  bit print = 1,
+				  bit record = 1);
     this.m_modified_report_message.add_int(name, value, size, radix, print, record);
   endfunction
 
@@ -333,7 +336,10 @@ virtual class uvm_report_catcher extends uvm_callback;
   // added element.
   //
 
-  protected function void add_string(string name, string value, bit print = 1, bit record = 1);
+  protected function void add_string(string name,
+				     string value,
+				     bit print = 1,
+				     bit record = 1);
     this.m_modified_report_message.add_string(name, value, print, record);
   endfunction
 
@@ -345,7 +351,10 @@ virtual class uvm_report_catcher extends uvm_callback;
   // added element.
   //
 
-  protected function void add_object(string name, uvm_object obj, bit print = 1, bit record = 1);
+  protected function void add_object(string name,
+				     uvm_object obj,
+				     bit print = 1,
+				     bit record = 1);
     this.m_modified_report_message.add_object(name, obj, print, record);
   endfunction
 
@@ -432,9 +441,13 @@ virtual class uvm_report_catcher extends uvm_callback;
    // Issues a fatal message using the current message's report object.
    // This message will bypass any message catching callbacks.
    
-   protected function void uvm_report_fatal(string id, string message, 
-     int verbosity, string fname = "", int line = 0,
-     string context_name = "", bit report_enabled_checked = 0);
+   protected function void uvm_report_fatal(string id,
+					    string message, 
+					    int verbosity,
+					    string fname = "",
+					    int line = 0,
+					    string context_name = "",
+					    bit report_enabled_checked = 0);
 
      this.uvm_report(UVM_FATAL, id, message, UVM_NONE, fname, line,
                      context_name, report_enabled_checked);
@@ -446,9 +459,13 @@ virtual class uvm_report_catcher extends uvm_callback;
    // Issues a error message using the current message's report object.
    // This message will bypass any message catching callbacks.
    
-   protected function void uvm_report_error(string id, string message, 
-     int verbosity, string fname = "", int line = 0,
-     string context_name = "", bit report_enabled_checked = 0);
+   protected function void uvm_report_error(string id,
+					    string message, 
+					    int verbosity,
+					    string fname = "",
+					    int line = 0,
+					    string context_name = "",
+					    bit report_enabled_checked = 0);
 
      this.uvm_report(UVM_ERROR, id, message, UVM_NONE, fname, line,
                      context_name, report_enabled_checked);
@@ -460,9 +477,13 @@ virtual class uvm_report_catcher extends uvm_callback;
    // Issues a warning message using the current message's report object.
    // This message will bypass any message catching callbacks.
    
-   protected function void uvm_report_warning(string id, string message,
-     int verbosity, string fname = "", int line = 0, 
-     string context_name = "", bit report_enabled_checked = 0);
+   protected function void uvm_report_warning(string id,
+					      string message,
+					      int verbosity,
+					      string fname = "",
+					      int line = 0, 
+					      string context_name = "",
+					      bit report_enabled_checked = 0);
 
      this.uvm_report(UVM_WARNING, id, message, UVM_NONE, fname, line,
                      context_name, report_enabled_checked);
@@ -474,9 +495,13 @@ virtual class uvm_report_catcher extends uvm_callback;
    // Issues a info message using the current message's report object.
    // This message will bypass any message catching callbacks.
    
-   protected function void uvm_report_info(string id, string message, 
-     int verbosity, string fname = "", int line = 0,
-     string context_name = "", bit report_enabled_checked = 0);
+   protected function void uvm_report_info(string id,
+					   string message, 
+					   int verbosity,
+					   string fname = "",
+					   int line = 0,
+					   string context_name = "",
+					   bit report_enabled_checked = 0);
 
      this.uvm_report(UVM_INFO, id, message, verbosity, fname, line,
                      context_name, report_enabled_checked);
@@ -487,9 +512,14 @@ virtual class uvm_report_catcher extends uvm_callback;
    // Issues a message using the current message's report object.
    // This message will bypass any message catching callbacks.
 
-   protected function void uvm_report(uvm_severity severity, string id, string message,
-     int verbosity, string fname = "", int line = 0,
-     string context_name = "", bit report_enabled_checked = 0);
+   protected function void uvm_report(uvm_severity severity,
+				      string id,
+				      string message,
+				      int verbosity,
+				      string fname = "",
+				      int line = 0,
+				      string context_name = "",
+				      bit report_enabled_checked = 0);
 
      uvm_report_message l_report_message;
      if (report_enabled_checked == 0) begin
