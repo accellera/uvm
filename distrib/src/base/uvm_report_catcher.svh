@@ -323,9 +323,8 @@ virtual class uvm_report_catcher extends uvm_callback;
 				  uvm_bitstream_t value,
 				  int size,
 				  uvm_radix_enum radix,
-				  bit print = 1,
-				  bit record = 1);
-    this.m_modified_report_message.add_int(name, value, size, radix, print, record);
+				  uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
+    this.m_modified_report_message.add_int(name, value, size, radix, action);
   endfunction
 
 
@@ -338,9 +337,8 @@ virtual class uvm_report_catcher extends uvm_callback;
 
   protected function void add_string(string name,
 				     string value,
-				     bit print = 1,
-				     bit record = 1);
-    this.m_modified_report_message.add_string(name, value, print, record);
+                                     uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
+    this.m_modified_report_message.add_string(name, value, action);
   endfunction
 
 
@@ -353,9 +351,8 @@ virtual class uvm_report_catcher extends uvm_callback;
 
   protected function void add_object(string name,
 				     uvm_object obj,
-				     bit print = 1,
-				     bit record = 1);
-    this.m_modified_report_message.add_object(name, obj, print, record);
+                                     uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
+    this.m_modified_report_message.add_object(name, obj, action);
   endfunction
 
   

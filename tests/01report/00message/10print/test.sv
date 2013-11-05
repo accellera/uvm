@@ -58,8 +58,8 @@ class test extends uvm_test;
 
     `uvm_info_begin("TEST", "Testing message...", UVM_LOW, msg)
     `uvm_message_add_tag("my_color", "red")
-    `uvm_message_add_int(my_int, UVM_DEC,"",UVM_PRINT)
-    `uvm_message_add_string(my_string,UVM_PRINT|UVM_RM_RECORD)
+    `uvm_message_add_int(my_int, UVM_DEC,"",UVM_LOG)
+    `uvm_message_add_string(my_string,UVM_LOG|UVM_RM_RECORD)
     `uvm_message_add_object(my_obj)
     `uvm_info_end
 

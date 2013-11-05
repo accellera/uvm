@@ -38,12 +38,8 @@ typedef class uvm_root;
 //------------------------------------------------------------------------------
 
 virtual class uvm_report_message_element_base;
-   typedef enum {NONE = 0, 
-                 PRINT = 1, 
-                 RECORD = 2, 
-                 BOTH = 3} action_e;
-   protected action_e _action;
-   protected string       _name;
+   protected uvm_action_type _action;
+   protected string          _name;
 
 
    // Function: get_name
@@ -66,9 +62,8 @@ virtual class uvm_report_message_element_base;
    // Function: get_action
    // 
 
-   virtual function void get_action(output bit print, output bit record);
-     print = _action & PRINT;
-     record = _action & RECORD;
+   virtual function uvm_action_type get_action();
+     return _action;
    endfunction
 
    // Function: set_action
@@ -76,17 +71,17 @@ virtual class uvm_report_message_element_base;
    // Get or set the authorized action for the element
    //
 
-   virtual function void set_action(bit print, bit record);
-     _action = uvm_report_message_element_base::action_e'({record,print});
+   virtual function void set_action(uvm_action_type action);
+     _action = action;
    endfunction
      
      
    function void print(uvm_printer printer);
-      if (_action & PRINT)
+      if (_action & (UVM_LOG | UVM_DISPLAY))
         do_print(printer);
    endfunction : print
    function void record(uvm_recorder recorder);
-      if (_action & RECORD)
+      if (_action & UVM_RM_RECORD)
         do_record(recorder);
    endfunction : record
    function void copy(uvm_report_message_element_base rhs);
@@ -355,7 +350,8 @@ class uvm_report_message_element_container extends uvm_object;
   //
 
   virtual function void add_int(string name, uvm_bitstream_t value, 
-                        int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
+                                int size, uvm_radix_enum radix,
+			        uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
      process p = process::self();
      string rand_state = p.get_randstate();
      uvm_report_message_int_element urme = new();
@@ -363,7 +359,7 @@ class uvm_report_message_element_container extends uvm_object;
 
      urme.set_name(name);
      urme.set_value(value, size, radix);
-     urme.set_action(print, record);
+     urme.set_action(action);
      elements.push_back(urme);
   endfunction
 
@@ -375,7 +371,8 @@ class uvm_report_message_element_container extends uvm_object;
   // the element will be printed/recorded.
   //
 
-  virtual function void add_string(string name, string value, bit print = 1, bit record = 1);
+  virtual function void add_string(string name, string value, 
+                                   uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
      process p = process::self();
      string rand_state = p.get_randstate();
      uvm_report_message_string_element urme = new();
@@ -383,7 +380,7 @@ class uvm_report_message_element_container extends uvm_object;
 
      urme.set_name(name);
      urme.set_value(value);
-     urme.set_action(print, record);
+     urme.set_action(action);
      elements.push_back(urme);
   endfunction
 
@@ -395,7 +392,8 @@ class uvm_report_message_element_container extends uvm_object;
   // the element will be printed/recorded. 
   //
 
-  virtual function void add_object(string name, uvm_object obj, bit print = 1, bit record = 1);
+  virtual function void add_object(string name, uvm_object obj, 
+                                   uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
      process p = process::self();
      string rand_state = p.get_randstate();
      uvm_report_message_object_element urme = new();
@@ -403,7 +401,7 @@ class uvm_report_message_element_container extends uvm_object;
 
      urme.set_name(name);
      urme.set_value(obj);
-     urme.set_action(print,record);
+     urme.set_action(action);
      elements.push_back(urme);
   endfunction
 
@@ -936,8 +934,9 @@ class uvm_report_message extends uvm_object;
   //
 
   virtual function void add_int(string name, uvm_bitstream_t value, 
-                        int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
-    _report_message_element_container.add_int(name, value, size, radix, print, record);
+                                int size, uvm_radix_enum radix, 
+                                uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
+    _report_message_element_container.add_int(name, value, size, radix, action);
   endfunction
 
 
@@ -948,8 +947,9 @@ class uvm_report_message extends uvm_object;
   // the element will be printed/recorded.
   //
 
-  virtual function void add_string(string name, string value, bit print = 1, bit record = 1);
-    _report_message_element_container.add_string(name, value, print, record);
+  virtual function void add_string(string name, string value,
+                                   uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
+    _report_message_element_container.add_string(name, value, action);
   endfunction
 
 
@@ -960,8 +960,9 @@ class uvm_report_message extends uvm_object;
   // the element will be printed/recorded. 
   //
 
-  virtual function void add_object(string name, uvm_object obj, bit print = 1, bit record = 1);
-    _report_message_element_container.add_object(name, obj, print, record);
+  virtual function void add_object(string name, uvm_object obj,
+                                   uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
+    _report_message_element_container.add_object(name, obj, action);
   endfunction
 
 endclass

@@ -470,35 +470,35 @@
 
 // MACRO: `uvm_message_add_tag
 //
-// |`uvm_message_add_tag(NAME, VALUE, ACTION=(UVM_PRINT|UVM_RM_RECORD))
+// |`uvm_message_add_tag(NAME, VALUE, ACTION=(UVM_LOG|UVM_RM_RECORD))
 //
 
-`define uvm_message_add_tag(NAME, VALUE, ACTION=(UVM_PRINT|UVM_RM_RECORD)) \
-    __uvm_msg.add_string(NAME, VALUE, |(ACTION&UVM_PRINT), |(ACTION&UVM_RM_RECORD));
+`define uvm_message_add_tag(NAME, VALUE, ACTION=(UVM_LOG|UVM_RM_RECORD)) \
+    __uvm_msg.add_string(NAME, VALUE, ACTION);
 
 
 // MACRO: `uvm_message_add_int
 //
-// |`uvm_message_add_int(VAR, RADIX, LABEL = "", ACTION=(UVM_PRINT|UVM_RM_RECORD))
+// |`uvm_message_add_int(VAR, RADIX, LABEL = "", ACTION=(UVM_LOG|UVM_RM_RECORD))
 //
 
-`define uvm_message_add_int(VAR, RADIX, LABEL="", ACTION=(UVM_PRINT|UVM_RM_RECORD)) \
+`define uvm_message_add_int(VAR, RADIX, LABEL="", ACTION=(UVM_LOG|UVM_RM_RECORD)) \
     if (LABEL == "") \
-      __uvm_msg.add_int(`"VAR`", VAR, $bits(VAR), RADIX, |(ACTION&UVM_PRINT), |(ACTION&UVM_RM_RECORD)); \
+      __uvm_msg.add_int(`"VAR`", VAR, $bits(VAR), RADIX, ACTION); \
     else \
-      __uvm_msg.add_int(LABEL, VAR, $bits(VAR), RADIX, |(ACTION&UVM_PRINT), |(ACTION&UVM_RM_RECORD)); \
+      __uvm_msg.add_int(LABEL, VAR, $bits(VAR), RADIX, ACTION);
 
 
 // MACRO: `uvm_message_add_string
 //
-// |`uvm_message_add_string(VAR, LABEL = "", ACTION=(UVM_PRINT|UVM_RM_RECORD))
+// |`uvm_message_add_string(VAR, LABEL = "", ACTION=(UVM_LOG|UVM_RM_RECORD))
 //
 
-`define uvm_message_add_string(VAR, LABEL="", ACTION=(UVM_PRINT|UVM_RM_RECORD)) \
+`define uvm_message_add_string(VAR, LABEL="", ACTION=(UVM_LOG|UVM_RM_RECORD)) \
     if (LABEL == "") \
-      __uvm_msg.add_string(`"VAR`", VAR, |(ACTION&UVM_PRINT), |(ACTION&UVM_RM_RECORD)); \
+      __uvm_msg.add_string(`"VAR`", VAR, ACTION); \
     else \
-      __uvm_msg.add_string(LABEL, VAR, |(ACTION&UVM_PRINT), |(ACTION&UVM_RM_RECORD)); \
+      __uvm_msg.add_string(LABEL, VAR, ACTION);
 
 
 // MACRO: `uvm_message_add_object
@@ -510,16 +510,16 @@
 // using <`uvm_message_add_string> and <uvm_object>s using 
 // <`uvm_message_add_object>.
 //
-// |`uvm_message_add_object(VAR, LABEL = "", ACTION=(UVM_PRINT|UVM_RM_RECORD))
+// |`uvm_message_add_object(VAR, LABEL = "", ACTION=(UVM_LOG|UVM_RM_RECORD))
 //
 // Example usage is shown in <`uvm_info_end>.
 //
 
-`define uvm_message_add_object(VAR, LABEL="", ACTION=(UVM_PRINT|UVM_RM_RECORD)) \
+`define uvm_message_add_object(VAR, LABEL="", ACTION=(UVM_LOG|UVM_RM_RECORD)) \
     if (LABEL == "") \
-      __uvm_msg.add_object(`"VAR`", VAR, |(ACTION&UVM_PRINT), |(ACTION&UVM_RM_RECORD)); \
+      __uvm_msg.add_object(`"VAR`", VAR, ACTION); \
     else \
-      __uvm_msg.add_object(LABEL, VAR, |(ACTION&UVM_PRINT), |(ACTION&UVM_RM_RECORD)); \
+      __uvm_msg.add_object(LABEL, VAR, ACTION);
 
 
 `endif //UVM_MESSAGE_DEFINES_SVH
