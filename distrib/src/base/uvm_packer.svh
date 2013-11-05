@@ -56,7 +56,7 @@ class uvm_packer;
   // ~$bits~. This optimized version of <pack_field> is useful for sizes up
   // to 64 bits.
 
-  extern virtual function void pack_field_int (logic[63:0] value, int size);
+  extern virtual function void pack_field_int (uvm_integral_t value, int size);
 
 
   // Function: pack_string
@@ -130,7 +130,7 @@ class uvm_packer;
   // This is a more efficient variant than unpack_field when unpacking into
   // smaller vectors.
 
-  extern virtual function logic[63:0] unpack_field_int (int size);
+  extern virtual function uvm_integral_t unpack_field_int (int size);
 
 
   // Function: unpack_field
@@ -608,7 +608,7 @@ endfunction
 // pack_field_int
 // --------------
 
-function void uvm_packer::pack_field_int(logic [63:0] value, int size);
+function void uvm_packer::pack_field_int(uvm_integral_t value, int size);
   for (int i=0; i<size; i++)
     if(big_endian == 1)
       m_bits[count+i] = value[size-1-i];
@@ -734,7 +734,7 @@ endfunction
 // unpack_field_int
 // ----------------
 
-function logic[63:0] uvm_packer::unpack_field_int(int size);
+function uvm_integral_t uvm_packer::unpack_field_int(int size);
   unpack_field_int = 'b0;
   if (enough_bits(size,"integral")) begin
     count += size;

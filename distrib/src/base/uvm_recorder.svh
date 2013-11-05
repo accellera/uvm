@@ -139,6 +139,28 @@ class uvm_recorder extends uvm_object;
 
   endfunction
 
+  // Function: record_field_int
+  //
+  // Records an integral field (less than or equal to 64 bits). ~name~ is the
+  // name of the field. 
+  //
+  // ~value~ is the value of the field to record. ~size~ is the number of bits
+  // of the field which apply. ~radix~ is the <uvm_radix_enum> to use.
+
+  virtual function void record_field_int (string name, 
+                                          uvm_integral_t value, 
+                                          int size, 
+                                          uvm_radix_enum radix=UVM_NORADIX);
+    if(tr_handle==0) return;
+    scope.set_arg(name);
+
+    if(!radix)
+      radix = default_radix;
+
+    set_attribute(tr_handle, scope.get(), value, radix, size);
+
+  endfunction
+
 
   // Function: record_field_real
   //
