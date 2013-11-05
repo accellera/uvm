@@ -309,7 +309,7 @@ class uvm_report_message_element_container extends uvm_object;
   // Returns the size of the container, ie. the number of elements
   //
 
-  function int size();
+  virtual function int size();
     return elements.size();
   endfunction
 
@@ -319,7 +319,7 @@ class uvm_report_message_element_container extends uvm_object;
   // Delete the <index>-th element in the container
   //
 
-  function void delete(int index);
+  virtual function void delete(int index);
     elements.delete(index);
   endfunction
 
@@ -329,7 +329,7 @@ class uvm_report_message_element_container extends uvm_object;
   // Delete all the elements in the container
   //
 
-  function void delete_elements();
+  virtual function void delete_elements();
     elements.delete();
   endfunction
 
@@ -339,7 +339,7 @@ class uvm_report_message_element_container extends uvm_object;
   // Get all the elements from the container and put them in a queue
   //
 
-  function void get_elements(output uvm_report_message_element_base q[$]);
+  virtual function void get_elements(output uvm_report_message_element_base q[$]);
     for(int i = 0; i < elements.size(); i++)
       q.push_back(elements[i]);
   endfunction
@@ -354,7 +354,7 @@ class uvm_report_message_element_container extends uvm_object;
   // the element will be printed/recorded.
   //
 
-  function void add_int(string name, uvm_bitstream_t value, 
+  virtual function void add_int(string name, uvm_bitstream_t value, 
                         int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
      process p = process::self();
      string rand_state = p.get_randstate();
@@ -375,7 +375,7 @@ class uvm_report_message_element_container extends uvm_object;
   // the element will be printed/recorded.
   //
 
-  function void add_string(string name, string value, bit print = 1, bit record = 1);
+  virtual function void add_string(string name, string value, bit print = 1, bit record = 1);
      process p = process::self();
      string rand_state = p.get_randstate();
      uvm_report_message_string_element urme = new();
@@ -395,7 +395,7 @@ class uvm_report_message_element_container extends uvm_object;
   // the element will be printed/recorded. 
   //
 
-  function void add_object(string name, uvm_object obj, bit print = 1, bit record = 1);
+  virtual function void add_object(string name, uvm_object obj, bit print = 1, bit record = 1);
      process p = process::self();
      string rand_state = p.get_randstate();
      uvm_report_message_object_element urme = new();
@@ -407,21 +407,21 @@ class uvm_report_message_element_container extends uvm_object;
      elements.push_back(urme);
   endfunction
 
-  function void do_print(uvm_printer printer);
+  virtual function void do_print(uvm_printer printer);
     super.do_print(printer);
     for(int i = 0; i < elements.size(); i++) begin
        elements[i].print(printer);
     end 
   endfunction
 
-  function void do_record(uvm_recorder recorder);
+  virtual function void do_record(uvm_recorder recorder);
     super.do_record(recorder);
     for(int i = 0; i < elements.size(); i++) begin
        elements[i].record(recorder);
     end
   endfunction
 
-  function void do_copy(uvm_object rhs);
+  virtual function void do_copy(uvm_object rhs);
     uvm_report_message_element_container urme_container;
 
     super.do_copy(rhs);
@@ -537,7 +537,7 @@ class uvm_report_message extends uvm_object;
   //     bar            string             8     hi there
 
 
-  function void do_print(uvm_printer printer);
+  virtual function void do_print(uvm_printer printer);
     uvm_verbosity l_verbosity;
 
     super.do_print(printer);
@@ -619,7 +619,7 @@ class uvm_report_message extends uvm_object;
 
   // Function: get_report_object
 
-  function uvm_report_object get_report_object();
+  virtual function uvm_report_object get_report_object();
     return _report_object;
   endfunction
 
@@ -627,14 +627,14 @@ class uvm_report_message extends uvm_object;
   //
   // Get or set the uvm_report_object that originated the message.
 
-  function void set_report_object(uvm_report_object ro);
+  virtual function void set_report_object(uvm_report_object ro);
     _report_object = ro;
   endfunction
 
 
   // Function: get_report_handler
 
-  function uvm_report_handler get_report_handler();
+  virtual function uvm_report_handler get_report_handler();
     return _report_handler;
   endfunction
 
@@ -643,14 +643,14 @@ class uvm_report_message extends uvm_object;
   // Get or set the uvm_report_handler that is responsible for checking
   // whether the message is enabled, should be upgraded/downgraded, etc.
 
-  function void set_report_handler(uvm_report_handler rh);
+  virtual function void set_report_handler(uvm_report_handler rh);
     _report_handler = rh;
   endfunction
 
   
   // Function: get_report_server
 
-  function uvm_report_server get_report_server();
+  virtual function uvm_report_server get_report_server();
     return _report_server;
   endfunction
 
@@ -659,7 +659,7 @@ class uvm_report_message extends uvm_object;
   // Get or set the uvm_report_server that is responsible for servicing
   // the message's actions.  
 
-  function void set_report_server(uvm_report_server rs);
+  virtual function void set_report_server(uvm_report_server rs);
     _report_server = rs;
   endfunction
 
@@ -671,7 +671,7 @@ class uvm_report_message extends uvm_object;
 
   // Function: get_severity
 
-  function uvm_severity_type get_severity();
+  virtual function uvm_severity_type get_severity();
     return _severity;
   endfunction
 
@@ -681,14 +681,14 @@ class uvm_report_message extends uvm_object;
   // UVM_FATAL) of the message.  The value of this field is determined via
   // the API used (`uvm_info(), `uvm_waring(), etc.) and populated for the user.
 
-  function void set_severity(uvm_severity_type sev);
+  virtual function void set_severity(uvm_severity_type sev);
     _severity = sev;
   endfunction
 
 
   // Function: get_id
 
-  function string get_id();
+  virtual function string get_id();
     return _id;
   endfunction
 
@@ -699,14 +699,14 @@ class uvm_report_message extends uvm_object;
   // consistent convention.  Settings in the uvm_report_handler allow various
   // messaging controls based on this field.  See <uvm_report_handler>.
 
-  function void set_id(string id);
+  virtual function void set_id(string id);
     _id = id;
   endfunction
 
 
   // Function: get_message
 
-  function string get_message();
+  virtual function string get_message();
     return _message;
   endfunction
 
@@ -714,14 +714,14 @@ class uvm_report_message extends uvm_object;
   //
   // Get or set the user message content string.
 
-  function void set_message(string msg);
+  virtual function void set_message(string msg);
     _message = msg;
   endfunction
 
 
   // Function: get_verbosity
 
-  function int get_verbosity();
+  virtual function int get_verbosity();
     return _verbosity;
   endfunction
 
@@ -731,14 +731,14 @@ class uvm_report_message extends uvm_object;
   // against settings in the <uvm_report_handler> to determine whether this
   // message should be executed.
 
-  function void set_verbosity(int ver);
+  virtual function void set_verbosity(int ver);
     _verbosity = ver;
   endfunction
 
 
   // Function: get_filename
 
-  function string get_filename();
+  virtual function string get_filename();
     return _filename;
   endfunction
 
@@ -747,14 +747,14 @@ class uvm_report_message extends uvm_object;
   // Get or set the file from which the message originates.  This value
   // is automatically populated by the messaging macros.
 
-  function void set_filename(string fname);
+  virtual function void set_filename(string fname);
     _filename = fname;
   endfunction
 
 
   // Function: get_line
 
-  function int get_line();
+  virtual function int get_line();
     return _line;
   endfunction
 
@@ -763,14 +763,14 @@ class uvm_report_message extends uvm_object;
   // Get or set the line in the <file> from which the message originates.
   // This value is automatically populate by the messaging macros.
 
-  function void set_line(int ln);
+  virtual function void set_line(int ln);
     _line = ln;
   endfunction
 
 
   // Function: get_context
 
-  function string get_context();
+  virtual function string get_context();
     return _context_name;
   endfunction
 
@@ -780,14 +780,14 @@ class uvm_report_message extends uvm_object;
   // the context of the message.  It can be useful in scopes that are not
   // inherently UVM like modules, interfaces, etc.
 
-  function void set_context(string cn);
+  virtual function void set_context(string cn);
     _context_name = cn;
   endfunction
  
 
   // Function: get_action
 
-  function uvm_action get_action();
+  virtual function uvm_action get_action();
     return _action;
   endfunction
 
@@ -797,14 +797,14 @@ class uvm_report_message extends uvm_object;
   // for this message.  This field is populated by the uvm_report_handler during
   // message execution flow.
 
-  function void set_action(uvm_action act);
+  virtual function void set_action(uvm_action act);
     _action = act;
   endfunction
 
 
   // Function: get_file
 
-  function UVM_FILE get_file();
+  virtual function UVM_FILE get_file();
     return _file;
   endfunction
 
@@ -814,7 +814,7 @@ class uvm_report_message extends uvm_object;
   // message's action is UVM_LOG.  This field is populated by the 
   // uvm_report_handler during message execution flow.
 
-  function void set_file(UVM_FILE fl);
+  virtual function void set_file(UVM_FILE fl);
     _file = fl;
   endfunction
 
@@ -823,7 +823,7 @@ class uvm_report_message extends uvm_object;
   //
   // Get the element_container of the message
 
-  function uvm_report_message_element_container get_element_container();
+  virtual function uvm_report_message_element_container get_element_container();
     return _report_message_element_container;
   endfunction
 
@@ -833,9 +833,13 @@ class uvm_report_message extends uvm_object;
   // Set all the common fields of the report message in one shot.
   //
 
-  function void set_report_message(uvm_severity_type severity, 
-    string id, string message, int verbosity, 
-    string filename, int line, string context_name);
+  virtual function void set_report_message(uvm_severity_type severity, 
+    					   string id,
+					   string message,
+					   int verbosity, 
+    					   string filename,
+					   int line,
+					   string context_name);
     this._context_name = context_name;
     this._filename = filename;
     this._line = line;
@@ -907,7 +911,7 @@ class uvm_report_message extends uvm_object;
   endfunction
 
   // Not documented.
-  function void do_record(uvm_recorder recorder);
+  virtual function void do_record(uvm_recorder recorder);
 
     super.do_record(recorder);
 
@@ -931,7 +935,7 @@ class uvm_report_message extends uvm_object;
   // the element will be printed/recorded.
   //
 
-  function void add_int(string name, uvm_bitstream_t value, 
+  virtual function void add_int(string name, uvm_bitstream_t value, 
                         int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
     _report_message_element_container.add_int(name, value, size, radix, print, record);
   endfunction
@@ -944,7 +948,7 @@ class uvm_report_message extends uvm_object;
   // the element will be printed/recorded.
   //
 
-  function void add_string(string name, string value, bit print = 1, bit record = 1);
+  virtual function void add_string(string name, string value, bit print = 1, bit record = 1);
     _report_message_element_container.add_string(name, value, print, record);
   endfunction
 
@@ -956,7 +960,7 @@ class uvm_report_message extends uvm_object;
   // the element will be printed/recorded. 
   //
 
-  function void add_object(string name, uvm_object obj, bit print = 1, bit record = 1);
+  virtual function void add_object(string name, uvm_object obj, bit print = 1, bit record = 1);
     _report_message_element_container.add_object(name, obj, print, record);
   endfunction
 
