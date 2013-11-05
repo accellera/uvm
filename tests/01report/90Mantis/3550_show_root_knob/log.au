@@ -1,4 +1,4 @@
-UVM_INFO @ 0: reporter [UVMTOP] UVM testbench topology:
+UVM_INFO FILE-LINE @ 0: reporter [UVMTOP] UVM testbench topology:
 ---------------------------------
 Name            Type  Size  Value
 ---------------------------------

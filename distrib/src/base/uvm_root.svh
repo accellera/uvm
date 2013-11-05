@@ -531,8 +531,6 @@ function void uvm_root::print_topology(uvm_printer printer=null);
 
   string s;
 
-  uvm_report_info("UVMTOP", "UVM testbench topology:", UVM_LOW);
-
   if (m_children.num()==0) begin
     uvm_report_warning("EMTCOMP", "print_topology - No UVM components to print.", UVM_NONE);
     return;
@@ -546,7 +544,7 @@ function void uvm_root::print_topology(uvm_printer printer=null);
       printer.print_object("", m_children[c]);  
     end
   end
-  $display(printer.emit());
+  `uvm_info("UVMTOP",{"UVM testbench topology:\n",printer.emit()},UVM_NONE)
 
 endfunction
 
