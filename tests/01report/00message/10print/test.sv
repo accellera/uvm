@@ -78,4 +78,12 @@ initial
      run_test();
   end
 
+final
+  begin
+    uvm_report_server srvr;
+
+    srvr = uvm_report_server::get_server();
+    srvr.report_summarize();
+  end
+
 endprogram

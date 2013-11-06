@@ -41,7 +41,7 @@ class my_catcher extends uvm_report_catcher;
     uvm_report_message_element_base elements[$];
     uvm_report_message_element_container container = get_element_container();
 
-    container.get_elements(elements);
+    elements = container.get_elements();
     foreach (elements[idx]) begin
       uvm_report_message_object_element o_e;
 
@@ -62,7 +62,7 @@ class my_server extends uvm_default_report_server;
     uvm_report_message_element_base elements[$];
     uvm_report_message_element_container container = report_message.get_element_container();
 
-    container.get_elements(elements);
+    elements = container.get_elements();
     foreach (elements[idx]) begin
       uvm_report_message_string_element s_e;
 
@@ -87,7 +87,7 @@ class my_handler extends uvm_report_handler;
     uvm_report_message_element_base elements[$];
     uvm_report_message_element_container container = report_message.get_element_container();
 
-    container.get_elements(elements);
+    elements = container.get_elements();
     foreach (elements[idx]) begin
       uvm_report_message_string_element s_e;
 
@@ -117,7 +117,7 @@ class test extends uvm_test;
     int size;
     uvm_radix_enum radix;
 
-    container.get_elements(elements);
+    elements = container.get_elements();
     foreach (elements[idx]) begin
       uvm_report_message_int_element i_e;
       if ($cast(i_e, elements[idx])) begin

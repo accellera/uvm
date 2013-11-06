@@ -38,7 +38,7 @@ typedef class uvm_root;
 //------------------------------------------------------------------------------
 
 virtual class uvm_report_message_element_base;
-   protected uvm_action_type _action;
+   protected uvm_action _action;
    protected string          _name;
 
 
@@ -62,7 +62,7 @@ virtual class uvm_report_message_element_base;
    // Function: get_action
    // 
 
-   virtual function uvm_action_type get_action();
+   virtual function uvm_action get_action();
      return _action;
    endfunction
 
@@ -71,7 +71,7 @@ virtual class uvm_report_message_element_base;
    // Get or set the authorized action for the element
    //
 
-   virtual function void set_action(uvm_action_type action);
+   virtual function void set_action(uvm_action action);
      _action = action;
    endfunction
      
@@ -334,9 +334,9 @@ class uvm_report_message_element_container extends uvm_object;
   // Get all the elements from the container and put them in a queue
   //
 
-  virtual function void get_elements(output uvm_report_message_element_base q[$]);
-    for(int i = 0; i < elements.size(); i++)
-      q.push_back(elements[i]);
+  typedef uvm_report_message_element_base queue_of_element[$];
+  virtual function queue_of_element get_elements();
+    return elements;
   endfunction
 
 
@@ -351,11 +351,17 @@ class uvm_report_message_element_container extends uvm_object;
 
   virtual function void add_int(string name, uvm_bitstream_t value, 
                                 int size, uvm_radix_enum radix,
-			        uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
-     process p = process::self();
-     string rand_state = p.get_randstate();
-     uvm_report_message_int_element urme = new();
-     p.set_randstate(rand_state);
+			        uvm_action action = (UVM_LOG|UVM_RM_RECORD));
+     process p;
+     string rand_state;
+     uvm_report_message_int_element urme;
+
+     p = process::self();
+     if (p != null)
+       rand_state = p.get_randstate();
+     urme = new();
+     if (p != null)
+       p.set_randstate(rand_state);
 
      urme.set_name(name);
      urme.set_value(value, size, radix);
@@ -372,11 +378,17 @@ class uvm_report_message_element_container extends uvm_object;
   //
 
   virtual function void add_string(string name, string value, 
-                                   uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
-     process p = process::self();
-     string rand_state = p.get_randstate();
-     uvm_report_message_string_element urme = new();
-     p.set_randstate(rand_state);
+                                   uvm_action action = (UVM_LOG|UVM_RM_RECORD));
+     process p;
+     string rand_state;
+     uvm_report_message_string_element urme;
+
+     p = process::self();
+     if (p != null)
+       rand_state = p.get_randstate();
+     urme = new();
+     if (p != null)
+       p.set_randstate(rand_state);
 
      urme.set_name(name);
      urme.set_value(value);
@@ -393,11 +405,17 @@ class uvm_report_message_element_container extends uvm_object;
   //
 
   virtual function void add_object(string name, uvm_object obj, 
-                                   uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
-     process p = process::self();
-     string rand_state = p.get_randstate();
-     uvm_report_message_object_element urme = new();
-     p.set_randstate(rand_state);
+                                   uvm_action action = (UVM_LOG|UVM_RM_RECORD));
+     process p;
+     string rand_state;
+     uvm_report_message_object_element urme;
+
+     p = process::self();
+     if (p != null)
+       rand_state = p.get_randstate();
+     urme = new();
+     if (p != null)
+       p.set_randstate(rand_state);
 
      urme.set_name(name);
      urme.set_value(obj);
@@ -504,9 +522,12 @@ class uvm_report_message extends uvm_object;
 
   static function uvm_report_message new_report_message(string name = "uvm_report_message");
     process p = process::self();
-    string rand_state = p.get_randstate();
+    string rand_state;
+    if (p != null)
+      rand_state = p.get_randstate();
     new_report_message = new(name);
-    p.set_randstate(rand_state);
+    if (p != null)
+      p.set_randstate(rand_state);
   endfunction
 
 
@@ -935,7 +956,7 @@ class uvm_report_message extends uvm_object;
 
   virtual function void add_int(string name, uvm_bitstream_t value, 
                                 int size, uvm_radix_enum radix, 
-                                uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
+                                uvm_action action = (UVM_LOG|UVM_RM_RECORD));
     _report_message_element_container.add_int(name, value, size, radix, action);
   endfunction
 
@@ -948,7 +969,7 @@ class uvm_report_message extends uvm_object;
   //
 
   virtual function void add_string(string name, string value,
-                                   uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
+                                   uvm_action action = (UVM_LOG|UVM_RM_RECORD));
     _report_message_element_container.add_string(name, value, action);
   endfunction
 
@@ -961,7 +982,7 @@ class uvm_report_message extends uvm_object;
   //
 
   virtual function void add_object(string name, uvm_object obj,
-                                   uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
+                                   uvm_action action = (UVM_LOG|UVM_RM_RECORD));
     _report_message_element_container.add_object(name, obj, action);
   endfunction
 

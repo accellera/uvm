@@ -323,7 +323,7 @@ virtual class uvm_report_catcher extends uvm_callback;
 				  uvm_bitstream_t value,
 				  int size,
 				  uvm_radix_enum radix,
-				  uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
+				  uvm_action action = (UVM_LOG|UVM_RM_RECORD));
     this.m_modified_report_message.add_int(name, value, size, radix, action);
   endfunction
 
@@ -337,7 +337,7 @@ virtual class uvm_report_catcher extends uvm_callback;
 
   protected function void add_string(string name,
 				     string value,
-                                     uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
+                                     uvm_action action = (UVM_LOG|UVM_RM_RECORD));
     this.m_modified_report_message.add_string(name, value, action);
   endfunction
 
@@ -351,7 +351,7 @@ virtual class uvm_report_catcher extends uvm_callback;
 
   protected function void add_object(string name,
 				     uvm_object obj,
-                                     uvm_action_type action = (UVM_LOG|UVM_RM_RECORD));
+                                     uvm_action action = (UVM_LOG|UVM_RM_RECORD));
     this.m_modified_report_message.add_object(name, obj, action);
   endfunction
 
@@ -585,9 +585,12 @@ virtual class uvm_report_catcher extends uvm_callback;
     if (catcher != null) begin
       if(m_debug_flags & DO_NOT_MODIFY) begin
         process p = process::self(); // Keep random stability
-        string randstate = p.get_randstate();
+        string randstate;
+        if (p != null)
+          randstate = p.get_randstate();
         $cast(m_orig_report_message, rm.clone()); //have to clone, rm can be extended type
-        p.set_randstate(randstate);
+        if (p != null)
+          p.set_randstate(randstate);
       end
     end
     while(catcher != null) begin
