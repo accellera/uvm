@@ -3378,12 +3378,15 @@ endfunction \
 //
 //| `uvm_pack_intN(VAR,SIZE)
 //
+
 `define uvm_pack_intN(VAR,SIZE) \
   begin \
-    logic m_uvm_tmp_stream[]; \
-    logic[SIZE-1:0] m_uvm_tmp_var = VAR; \
-    { << {m_uvm_tmp_stream} } = m_uvm_tmp_var; \
-    packer.pack_field_stream(m_uvm_tmp_stream, SIZE); \
+   int __array[]; \
+   begin \
+     bit [SIZE-1:0] __vector = VAR; \
+     { << int { __array }} = {{($bits(int) - (SIZE % $bits(int))) {1'b0}}, __vector}; \
+   end \
+   packer.pack_ints(__array, SIZE); \
   end
 
 // Macro: `uvm_pack_enumN
@@ -3544,9 +3547,11 @@ endfunction \
 //
 `define uvm_unpack_intN(VAR,SIZE) \
    begin \
-     logic m_uvm_tmp_stream[] = new[SIZE]; \
-     packer.unpack_field_stream(m_uvm_tmp_stream, SIZE); \
-     VAR = { << {m_uvm_tmp_stream}}; \
+      int __array[] = new[(SIZE+31)/32]; \
+      bit [(((SIZE + 31) / 32) * 32) - 1:0] __var; \
+      packer.unpack_ints(__array, SIZE); \
+      __var = { << int { __array }}; \
+      VAR = __var; \
    end
 
 
