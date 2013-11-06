@@ -34,7 +34,7 @@ module test;
     task run_phase(uvm_phase phase);
       phase.raise_objection(this);
       phase.set_timeout(0, 0);
-      #(`UVM_DEFAULT_TIMEOUT * 100);
+      #(`UVM_DEFAULT_TIMEOUT +2s);
       phase.drop_objection(this);
     endtask
 
@@ -42,7 +42,7 @@ module test;
       uvm_report_server svr;
       svr = uvm_coreservice.get_report_server();
       
-      if ($time == 920000s &&
+      if ($time == 9202s &&
           svr.get_severity_count(UVM_FATAL) == 0 &&
           svr.get_severity_count(UVM_ERROR) == 0)
         $display("*** UVM TEST PASSED ***\n");

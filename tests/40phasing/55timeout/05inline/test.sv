@@ -54,7 +54,7 @@ module test;
       phase.raise_objection(this);
       #500;
       phase.set_timeout(1000, 0);
-      #(`UVM_DEFAULT_TIMEOUT * 2);
+      #(`UVM_DEFAULT_TIMEOUT +1s);
       phase.drop_objection(this);
     endtask
 
