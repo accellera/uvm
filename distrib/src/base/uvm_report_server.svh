@@ -130,7 +130,8 @@ virtual class uvm_report_server extends uvm_object;
         //
         // Expert users can overload this method to customize action processing.
 
-        pure virtual function void execute_report_message(uvm_report_message report_message);
+        pure virtual function void execute_report_message(uvm_report_message report_message,
+                                                          string composed_message);
 
 
         // Function: compose_report_message
@@ -140,7 +141,8 @@ virtual class uvm_report_server extends uvm_object;
         //
         // Expert users can overload this method to customize report formatting.
 
-        pure virtual function string compose_report_message(uvm_report_message report_message);
+        pure virtual function string compose_report_message(uvm_report_message report_message,
+                                                            string report_object_name = "");
 
 
         // Function: report_summarize
@@ -511,6 +513,9 @@ class uvm_default_report_server extends uvm_report_server;
     if(report_ok)
       report_ok = uvm_report_catcher::process_all_report_catchers(report_message);
 
+    if(uvm_action_type'(report_message.get_action()) == UVM_NO_ACTION)
+      report_ok = 0;
+
     if(report_ok) begin	
       string m;
 
@@ -520,21 +525,32 @@ class uvm_default_report_server extends uvm_report_server;
 `ifdef UVM_DEPRECATED_REPORTING
 
       // no need to compose when neither UVM_DISPLAY nor UVM_LOG is set
-      if(report_message.get_action() & (UVM_LOG|UVM_DISPLAY))
-        m = svr.compose_message(report_message.get_severity(), 
-          l_report_handler.get_full_name(), 
-          report_message.get_id(), report_message.get_message(), 
-          report_message.get_filename(), report_message.get_line()); 
-      svr.process_report(report_message.get_severity(), 
-        l_report_handler.get_full_name(),
-        report_message.get_id(), report_message.get_message(), 
-        report_message.get_action(), report_message.get_file(),
-        report_message.get_filename(), report_message.get_line(), m, 
-        report_message.get_verbosity(), report_message.get_report_object());
+      if (report_message.get_action() & (UVM_LOG|UVM_DISPLAY))
+        m = compose_message(report_message.get_severity(), 
+                              l_report_handler.get_full_name(), 
+			      report_message.get_id(),
+			      report_message.get_message(), 
+                              report_message.get_filename(),
+			      report_message.get_line()); 
+
+      process_report(report_message.get_severity(), 
+			 l_report_handler.get_full_name(),
+			 report_message.get_id(),
+		         report_message.get_message(), 
+			 report_message.get_action(),
+                         report_message.get_file(),
+			 report_message.get_filename(),
+		         report_message.get_line(),
+			 m, 
+			 report_message.get_verbosity(),
+			 report_message.get_report_object());
 
 `else
 
-      svr.execute_report_message(report_message);
+      // no need to compose when neither UVM_DISPLAY nor UVM_LOG is set
+      if (report_message.get_action() & (UVM_LOG|UVM_DISPLAY))
+        m = svr.compose_report_message(report_message);
+      svr.execute_report_message(report_message, m);
 
 `endif
 
@@ -554,10 +570,8 @@ class uvm_default_report_server extends uvm_report_server;
   //
   // Expert users can overload this method to customize action processing.
  
-  virtual function void execute_report_message(uvm_report_message report_message);
-
-    if(uvm_action_type'(report_message.get_action()) == UVM_NO_ACTION) 
-      return;
+  virtual function void execute_report_message(uvm_report_message report_message,
+                                               string composed_message);
 
     // Update counts 
     incr_severity_count(report_message.get_severity());
@@ -566,33 +580,28 @@ class uvm_default_report_server extends uvm_report_server;
     if (record_all_messages)
       report_message.set_action(report_message.get_action() | UVM_RM_RECORD);
 
-    // Process UVM_RM_RECORD action (send to recorder)
+    // UVM_RM_RECORD action
     if(report_message.get_action() & UVM_RM_RECORD) begin
       report_message.record_message(uvm_default_recorder);
     end
 
-    // Process UVM_DISPLAY and UVM_LOG action (send to logger)
-    if((report_message.get_action() & UVM_DISPLAY) || 
-       (report_message.get_action() & UVM_LOG)) begin
-      string out_str;
-      out_str = compose_report_message(report_message);
-      // DISPLAY action
-      if(report_message.get_action() & UVM_DISPLAY)
-        $display("%s", out_str);
-      // LOG action
-      // if log is set we need to send to the file but not resend to the
-      // display. So, we need to mask off stdout for an mcd or we need
-      // to ignore the stdout file handle for a file handle.
-      if(report_message.get_action() & UVM_LOG)
-        if( (report_message.get_file() == 0) || 
-          (report_message.get_file() != 32'h8000_0001) ) begin //ignore stdout handle
-          UVM_FILE tmp_file = report_message.get_file();
-          if((report_message.get_file() & 32'h8000_0000) == 0) begin //is an mcd so mask off stdout
-            tmp_file = report_message.get_file() & 32'hffff_fffe;
-          end
-        f_display(tmp_file, out_str);
-      end    
-    end
+    // DISPLAY action
+    if(report_message.get_action() & UVM_DISPLAY)
+      $display("%s", composed_message);
+
+    // LOG action
+    // if log is set we need to send to the file but not resend to the
+    // display. So, we need to mask off stdout for an mcd or we need
+    // to ignore the stdout file handle for a file handle.
+    if(report_message.get_action() & UVM_LOG)
+      if( (report_message.get_file() == 0) || 
+        (report_message.get_file() != 32'h8000_0001) ) begin //ignore stdout handle
+        UVM_FILE tmp_file = report_message.get_file();
+        if((report_message.get_file() & 32'h8000_0000) == 0) begin //is an mcd so mask off stdout
+          tmp_file = report_message.get_file() & 32'hffff_fffe;
+        end
+      f_display(tmp_file, composed_message);
+    end    
 
     // Process the UVM_COUNT action
     if(report_message.get_action() & UVM_COUNT) begin
@@ -625,7 +634,8 @@ class uvm_default_report_server extends uvm_report_server;
   //
   // Expert users can overload this method to customize report formatting.
 
-  virtual function string compose_report_message(uvm_report_message report_message);
+  virtual function string compose_report_message(uvm_report_message report_message,
+                                                 string report_object_name = "");
 
     string sev_string;
     uvm_severity_type l_severity;
@@ -639,7 +649,7 @@ class uvm_default_report_server extends uvm_report_server;
     string msg_body_str;
     uvm_report_message_element_container el_container;
     string prefix;
-    uvm_report_handler l_report_handler = report_message.get_report_handler();
+    uvm_report_handler l_report_handler;
 
     l_severity = report_message.get_severity();
     sev_string = l_severity.name();
@@ -676,8 +686,13 @@ class uvm_default_report_server extends uvm_report_server;
       uvm_default_printer.knobs.prefix = prefix;
     end
 
+    if (report_object_name == "") begin
+      l_report_handler = report_message.get_report_handler();
+      report_object_name = l_report_handler.get_full_name();
+    end
+
     compose_report_message = {sev_string, verbosity_str, " ", filename_line_string, "@ ", 
-      time_str, ": ", l_report_handler.get_full_name(), context_str,
+      time_str, ": ", report_object_name, context_str,
       " [", report_message.get_id(), "] ", msg_body_str, terminator_str};
 
   endfunction 
@@ -751,44 +766,18 @@ class uvm_default_report_server extends uvm_report_server;
       int verbosity_level,
       uvm_report_object client
       );
-    // update counts
-    incr_severity_count(severity);
-    incr_id_count(id);
+    uvm_report_message l_report_message;
 
-    if(action & UVM_DISPLAY)
-      $display("%s",composed_message);
+    l_report_message = uvm_report_message::new_report_message();
+    l_report_message.set_report_message(uvm_severity_type'(severity),
+      id, message, verbosity_level, filename, line, "");
+    l_report_message.set_report_object(client);
+    l_report_message.set_report_handler(client.get_report_handler());
+    l_report_message.set_file(file);
+    l_report_message.set_action(action);
+    l_report_message.set_report_server(this);
 
-    // if log is set we need to send to the file but not resend to the
-    // display. So, we need to mask off stdout for an mcd or we need
-    // to ignore the stdout file handle for a file handle.
-    if(action & UVM_LOG)
-      if( (file == 0) || (file != 32'h8000_0001) ) //ignore stdout handle
-      begin
-        UVM_FILE tmp_file = file;
-        if( (file&32'h8000_0000) == 0) //is an mcd so mask off stdout
-        begin
-           tmp_file = file & 32'hffff_fffe;
-        end
-        f_display(tmp_file,composed_message);
-      end    
-
-    if(action & UVM_EXIT) begin
-      uvm_root l_root = uvm_coreservice.get_root();
-      l_root.die();
-    end
-
-    if(action & UVM_COUNT) begin
-      if(get_max_quit_count() != 0) begin
-          incr_quit_count();
-        if(is_quit_count_reached()) begin
-          uvm_root l_root = uvm_coreservice.get_root();
-          l_root.die();
-        end
-      end  
-    end
-
-    if (action & UVM_STOP) $stop;
-
+    execute_report_message(l_report_message, composed_message);
   endfunction
 
   
@@ -807,29 +796,13 @@ class uvm_default_report_server extends uvm_report_server;
       string filename,
       int    line
       );
-    uvm_severity_type sv;
-    string time_str;
-    string line_str;
-    
-    sv = uvm_severity_type'(severity);
-    $swrite(time_str, "%0t", $realtime);
- 
-    case(1)
-      (name == "" && filename == ""):
-	       return {sv.name(), " @ ", time_str, " [", id, "] ", message};
-      (name != "" && filename == ""):
-	       return {sv.name(), " @ ", time_str, ": ", name, " [", id, "] ", message};
-      (name == "" && filename != ""):
-           begin
-               $swrite(line_str, "%0d", line);
-		 return {sv.name(), " ",filename, "(", line_str, ")", " @ ", time_str, " [", id, "] ", message};
-           end
-      (name != "" && filename != ""):
-           begin
-               $swrite(line_str, "%0d", line);
-	         return {sv.name(), " ", filename, "(", line_str, ")", " @ ", time_str, ": ", name, " [", id, "] ", message};
-           end
-    endcase
+    uvm_report_message l_report_message;
+
+    l_report_message = uvm_report_message::new_report_message();
+    l_report_message.set_report_message(uvm_severity_type'(severity),
+      id, message, UVM_NONE, filename, line, "");
+
+    return compose_report_message(l_report_message, name);
   endfunction 
 
 

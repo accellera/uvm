@@ -535,6 +535,7 @@ virtual class uvm_report_catcher extends uvm_callback;
      uvm_action a = ro.get_report_action(msg.get_severity(), msg.get_id());
 
      if(a) begin
+       string composed_message;
        uvm_report_server rs = m_modified_report_message.get_report_server();
 
        msg.set_report_object(ro);
@@ -542,7 +543,11 @@ virtual class uvm_report_catcher extends uvm_callback;
        msg.set_report_server(rs);
        msg.set_file(ro.get_report_file_handle(msg.get_severity(), msg.get_id()));
        msg.set_action(a);
-       rs.execute_report_message(msg);
+
+       // no need to compose when neither UVM_DISPLAY nor UVM_LOG is set
+       if (a & (UVM_LOG|UVM_DISPLAY))
+         composed_message = rs.compose_report_message(msg);
+       rs.execute_report_message(msg, composed_message);
      end
    endfunction
 
@@ -555,8 +560,16 @@ virtual class uvm_report_catcher extends uvm_callback;
   // times if the message is not ~CAUGHT~.
 
   protected function void issue();
+     string composed_message;
      uvm_report_server rs = m_modified_report_message.get_report_server();
-     rs.execute_report_message(m_modified_report_message);
+
+     if(uvm_action_type'(m_modified_report_message.get_action()) != UVM_NO_ACTION)
+     begin
+       // no need to compose when neither UVM_DISPLAY nor UVM_LOG is set
+       if (m_modified_report_message.get_action() & (UVM_LOG|UVM_DISPLAY))
+         composed_message = rs.compose_report_message(m_modified_report_message);
+       rs.execute_report_message(m_modified_report_message, composed_message);
+     end
   endfunction
 
 

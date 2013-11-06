@@ -33,10 +33,10 @@ class my_catcher extends uvm_report_catcher;
 endclass
 
 class my_server extends uvm_default_report_server;
-  virtual function string compose_report_message(uvm_report_message report_message);
+  virtual function string compose_report_message(uvm_report_message report_message, string report_object_name = "");
     report_message.add_string("server_name", get_name());
 
-    compose_report_message = super.compose_report_message(report_message);
+    compose_report_message = super.compose_report_message(report_message, report_object_name);
   endfunction
 endclass
 

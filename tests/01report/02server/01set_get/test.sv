@@ -26,9 +26,9 @@ import uvm_pkg::*;
 int cnt = 0;
 
 class my_server extends uvm_default_report_server;
-  virtual function string compose_report_message(uvm_report_message report_message);
+  virtual function string compose_report_message(uvm_report_message report_message, string report_object_name = "");
     cnt++;
-    compose_report_message = {"MY_SERVER: ", super.compose_report_message(report_message)};
+    compose_report_message = {"MY_SERVER: ", super.compose_report_message(report_message, report_object_name)};
   endfunction
 endclass
 
