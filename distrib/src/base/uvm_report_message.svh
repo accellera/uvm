@@ -130,7 +130,7 @@ class uvm_report_message_int_element extends uvm_report_message_element_base;
    // Get or set the value (integral type) of the element, with size and radix
    //
 
-   virtual function set_value(uvm_bitstream_t value,
+   virtual function void set_value(uvm_bitstream_t value,
                               int size, 
                               uvm_radix_enum radix);
      _size = size;
@@ -190,7 +190,7 @@ class uvm_report_message_string_element extends uvm_report_message_element_base;
    // Get or set the value (string type) of the element
    //
 
-   virtual function string set_value(string value);
+   virtual function void set_value(string value);
      _val = value;
    endfunction
 
@@ -239,16 +239,16 @@ class uvm_report_message_object_element extends uvm_report_message_element_base;
 
    virtual function uvm_object get_value();
      return _val;
-   endfunction;
+   endfunction
 
    // Function: set_value
    //
    // Get or set the value (object reference) of the element
    //
 
-   virtual function set_value(uvm_object value);
+   virtual function void set_value(uvm_object value);
      _val = value;
-   endfunction;
+   endfunction
 
 
    virtual function void do_print(uvm_printer printer);
@@ -349,6 +349,15 @@ class uvm_report_message_element_container extends uvm_object;
   // the element will be printed/recorded.
   //
 
+  function void add_int(string name, uvm_bitstream_t value, 
+                        int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
+     process p = process::self();
+     string rand_state = p.get_randstate();
+     uvm_report_message_int_element urme = new();
+     p.set_randstate(rand_state);
+  function void add_int(string name, uvm_bitstream_t value, 
+                        int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
+     process p = process::self();
   virtual function void add_int(string name, uvm_bitstream_t value, 
                                 int size, uvm_radix_enum radix,
 			        uvm_action action = (UVM_LOG|UVM_RM_RECORD));
