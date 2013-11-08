@@ -223,7 +223,13 @@ class tb_env extends uvm_env;
       regmodel.TxStatus.TxEn.set(1);
       regmodel.RxStatus.RxEn.set(1);
       
-      regmodel.update(status);
+      // update the settings BUT without writing the TxRx data register
+      // regmodel.update(status);
+	begin
+		uvm_reg n[]='{regmodel.IntSrc, regmodel.IntMask, regmodel.TxStatus, regmodel.RxStatus};
+		foreach(n[idx])
+			n[idx].update(status);
+	end	
 
       phase.drop_objection(this, "Everything is ready to go");
    endtask

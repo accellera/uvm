@@ -164,14 +164,21 @@ Mantis 4666: uvm_config_db::set expects to be invoked in process context
 
 Mantis 4677: uvm_global_copy_map removed
 
+(+) Mantis 4686: updated documentation to indicate the uvm_reg(_field)::predict is updating mirrored AND  desired values
+
 Mantis 4690: mehod -> method in uvm_sequence_base documentation
 
 Mantis 4711: Fixed LRM violation
 
 Mantis 4731: Fixed initialization race introduced by Mantis 4606.
 
+Mantis 4732: Provides new phase state 'UVM_PHASE_UNINITIALIZED' to
+indicate phase state prior to a phase existing in a schedule.
+
 Mantis 4734: Fixed bug in uvm_reg_map::get_size()
 
 Mantis 4738: Fixed bug wherein messages from built-in UVM dpi code
 were not being routed through standard UVM messaging.
+
+Mantis 4772: separated hdl vendor dpi backends into one file per vendor
 
