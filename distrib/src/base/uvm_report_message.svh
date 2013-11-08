@@ -349,15 +349,6 @@ class uvm_report_message_element_container extends uvm_object;
   // the element will be printed/recorded.
   //
 
-  function void add_int(string name, uvm_bitstream_t value, 
-                        int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
-     process p = process::self();
-     string rand_state = p.get_randstate();
-     uvm_report_message_int_element urme = new();
-     p.set_randstate(rand_state);
-  function void add_int(string name, uvm_bitstream_t value, 
-                        int size, uvm_radix_enum radix, bit print = 1, bit record = 1);
-     process p = process::self();
   virtual function void add_int(string name, uvm_bitstream_t value, 
                                 int size, uvm_radix_enum radix,
 			        uvm_action action = (UVM_LOG|UVM_RM_RECORD));
