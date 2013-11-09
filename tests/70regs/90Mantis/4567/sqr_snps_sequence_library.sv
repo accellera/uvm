@@ -46,10 +46,12 @@ class base_sequence extends uvm_sequence #(trans_snps);
     super.new(name);
   endfunction:new
   virtual task pre_body();
+      uvm_phase starting_phase = get_starting_phase();
     if (starting_phase != null)
       starting_phase.raise_objection(this);
   endtask:pre_body
   virtual task post_body();
+      uvm_phase starting_phase = get_starting_phase();
     if (starting_phase != null)
       starting_phase.drop_objection(this);
   endtask:post_body
@@ -77,6 +79,7 @@ class sequence_1 extends base_sequence;
   endfunction:new
   
   virtual task body();
+      uvm_phase starting_phase = get_starting_phase();
      `uvm_info("TRACE", $sformatf("%m"), UVM_HIGH);
      if (starting_phase != null)
        starting_phase.raise_objection(this);

@@ -44,6 +44,7 @@ class reg_seq extends uvm_reg_sequence #(uvm_sequence #(trans_snps));
       uvm_status_e status;
       uvm_status_e wr_status;
       uvm_reg_data_t data;
+      uvm_phase starting_phase = get_starting_phase();
         `uvm_info("TRACE", $sformatf("%m"), UVM_HIGH);
      if (starting_phase != null)
        starting_phase.raise_objection(this);

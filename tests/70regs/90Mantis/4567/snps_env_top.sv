@@ -59,7 +59,7 @@ module snps_env_top();
    end
 	 begin
       uvm_pkg::uvm_report_server svr;
-      svr = uvm_pkg::_global_reporter.get_report_server();
+      svr = uvm_pkg::uvm_coreservice.get_report_server();
 
       svr.summarize();
 
