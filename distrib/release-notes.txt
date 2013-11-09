@@ -146,6 +146,8 @@ Mantis 4548: cleanup dpi coding issues
 
 Mantis 4566: uvm_comparer now detects any queue size mismatch when comparer.show_max != 1
 
+Mantis 4567 : fixed do_predict call overwriting the NOT_OK status with OK status on backdoor writes to RO reg
+
 Mantis 4572: packing of ints with 64+bits and array unpack broken
 
 (*) Mantis 4606: uvm_report server is not chainable/extendable uvm_report_server can now be extended, chained using delegate pattern
