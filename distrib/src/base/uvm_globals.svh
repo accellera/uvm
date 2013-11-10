@@ -228,6 +228,21 @@ function void uvm_report_fatal(string id,
     report_enabled_checked);
 endfunction
 
+
+// Function: uvm_process_report_message
+//
+// This method, defined in package scope, is a convenience function that
+// delegate to the corresponding component method in ~uvm_top~. It can be
+// used in module-based code to use the same reporting mechanism as class-based
+// components. See <uvm_report_object> for details on the reporting mechanism.
+
+function void uvm_process_report_message(uvm_report_message report_message);
+  uvm_root top;
+  top = uvm_coreservice.get_root();
+  top.uvm_process_report_message(report_message);
+endfunction
+
+
 // TODO merge with uvm_enum_wrapper#(uvm_severity)
 function bit uvm_string_to_severity (string sev_str, output uvm_severity sev);
   case (sev_str)

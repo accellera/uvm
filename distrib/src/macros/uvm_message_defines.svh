@@ -111,11 +111,8 @@
 
 `define uvm_info(ID, MSG, VERBOSITY) \
    begin \
-     uvm_report_object l_report_object; \
-     l_report_object = uvm_get_report_object(); \
-     if (l_report_object.uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) \
-       l_report_object.uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line, \
-         "", 1); \
+     if (uvm_report_enabled(VERBOSITY,UVM_INFO,ID)) \
+       uvm_report_info (ID, MSG, VERBOSITY, `uvm_file, `uvm_line, "", 1); \
    end
 
 
@@ -131,11 +128,8 @@
 
 `define uvm_warning(ID, MSG) \
    begin \
-     uvm_report_object l_report_object; \
-     l_report_object = uvm_get_report_object(); \
-     if (l_report_object.uvm_report_enabled(UVM_NONE,UVM_WARNING,ID)) \
-       l_report_object.uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, \
-         "", 1); \
+     if (uvm_report_enabled(UVM_NONE,UVM_WARNING,ID)) \
+       uvm_report_warning (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", 1); \
    end
 
 
@@ -151,11 +145,8 @@
 
 `define uvm_error(ID, MSG) \
    begin \
-     uvm_report_object l_report_object; \
-     l_report_object = uvm_get_report_object(); \
-     if (l_report_object.uvm_report_enabled(UVM_NONE,UVM_ERROR,ID)) \
-       l_report_object.uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, \
-         "", 1); \
+     if (uvm_report_enabled(UVM_NONE,UVM_ERROR,ID)) \
+       uvm_report_error (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", 1); \
    end
 
 
@@ -171,11 +162,8 @@
 
 `define uvm_fatal(ID, MSG) \
    begin \
-     uvm_report_object l_report_object; \
-     l_report_object = uvm_get_report_object(); \
-     if (l_report_object.uvm_report_enabled(UVM_NONE,UVM_FATAL,ID)) \
-       l_report_object.uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, \
-         "", 1); \
+     if (uvm_report_enabled(UVM_NONE,UVM_FATAL,ID)) \
+       uvm_report_fatal (ID, MSG, UVM_NONE, `uvm_file, `uvm_line, "", 1); \
    end
 
 
@@ -251,12 +239,9 @@
 // Undocumented. Library internal use.
 //
 
-`define uvm_message_begin(SEVERITY, ID, MSG, VERBOSITY, FILE, LINE, RO, RM) \
+`define uvm_message_begin(SEVERITY, ID, MSG, VERBOSITY, FILE, LINE, RM) \
    begin \
-     uvm_report_object __report_object; \
-     __report_object = RO; \
-     if (RO == null) __report_object = uvm_get_report_object(); \
-     if (__report_object.uvm_report_enabled(VERBOSITY,SEVERITY,ID)) begin \
+     if (uvm_report_enabled(VERBOSITY,SEVERITY,ID)) begin \
        uvm_report_message __uvm_msg; \
        if (RM == null) RM = uvm_report_message::new_report_message(); \
        __uvm_msg = RM; \
@@ -270,6 +255,33 @@
 //
 
 `define uvm_message_end \
+       uvm_process_report_message(__uvm_msg); \
+     end \
+   end
+
+// MACRO- `uvm_message_context_begin
+//
+// Undocumented. Library internal use.
+//
+
+`define uvm_message_context_begin(SEVERITY, ID, MSG, VERBOSITY, FILE, LINE, RO, RM) \
+   begin \
+     uvm_report_object __report_object; \
+     __report_object = RO; \
+     if (__report_object.uvm_report_enabled(VERBOSITY,SEVERITY,ID)) begin \
+       uvm_report_message __uvm_msg; \
+       if (RM == null) RM = uvm_report_message::new_report_message(); \
+       __uvm_msg = RM; \
+       __uvm_msg.set_report_message(SEVERITY, ID, MSG, VERBOSITY, FILE, LINE, "");
+
+
+// MACRO- `uvm_message_context_end
+//
+// Undocumented. Library internal use.
+//
+//
+
+`define uvm_message_context_end \
        __report_object.uvm_process_report_message(__uvm_msg); \
      end \
    end
@@ -281,7 +293,7 @@
 //
 
 `define uvm_info_begin(ID, MSG, VERBOSITY, RM = __uvm_msg) \
-   `uvm_message_begin(UVM_INFO, ID, MSG, VERBOSITY, `uvm_file, `uvm_line, null, RM)
+   `uvm_message_begin(UVM_INFO, ID, MSG, VERBOSITY, `uvm_file, `uvm_line, RM)
 
 // MACRO: `uvm_info_end
 //
@@ -314,7 +326,7 @@
 //
 
 `define uvm_warning_begin(ID, MSG, RM = __uvm_msg) \
-   `uvm_message_begin(UVM_WARNING, ID, MSG, UVM_NONE, `uvm_file, `uvm_line, null, RM)
+   `uvm_message_begin(UVM_WARNING, ID, MSG, UVM_NONE, `uvm_file, `uvm_line, RM)
 
 // MACRO: `uvm_warning_end
 //
@@ -336,7 +348,7 @@
 //
 
 `define uvm_error_begin(ID, MSG, RM = __uvm_msg) \
-   `uvm_message_begin(UVM_ERROR, ID, MSG, UVM_NONE, `uvm_file, `uvm_line, null, RM)
+   `uvm_message_begin(UVM_ERROR, ID, MSG, UVM_NONE, `uvm_file, `uvm_line, RM)
 
 
 // MACRO: `uvm_error_end
@@ -359,7 +371,7 @@
 //
 
 `define uvm_fatal_begin(ID, MSG, RM = __uvm_msg) \
-   `uvm_message_begin(UVM_FATAL, ID, MSG, UVM_NONE, `uvm_file, `uvm_line, null, RM)
+   `uvm_message_begin(UVM_FATAL, ID, MSG, UVM_NONE, `uvm_file, `uvm_line, RM)
 
 
 // MACRO: `uvm_fatal_end
@@ -382,7 +394,7 @@
 //
 
 `define uvm_info_context_begin(ID, MSG, VERBOSITY, RO, RM = __uvm_msg) \
-   `uvm_message_begin(UVM_INFO, ID, MSG, VERBOSITY, `uvm_file, `uvm_line, RO, RM)
+   `uvm_message_context_begin(UVM_INFO, ID, MSG, VERBOSITY, `uvm_file, `uvm_line, RO, RM)
 
 
 // MACRO: `uvm_info_context_end
@@ -395,7 +407,7 @@
 //
 
 `define uvm_info_context_end \
-   `uvm_message_end
+   `uvm_message_context_end
 
  
 // MACRO: `uvm_warning_context_begin
@@ -404,7 +416,7 @@
 //
 
 `define uvm_warning_context_begin(ID, MSG, RO, RM = __uvm_msg) \
-   `uvm_message_begin(UVM_WARNING, ID, MSG, UVM_NONE, `uvm_file, `uvm_line, RO, RM)
+   `uvm_message_context_begin(UVM_WARNING, ID, MSG, UVM_NONE, `uvm_file, `uvm_line, RO, RM)
 
 // MACRO: `uvm_warning_context_end
 //
@@ -416,7 +428,7 @@
 //
 
 `define uvm_warning_context_end \
-   `uvm_message_end
+   `uvm_message_context_end
 
 
 // MACRO: `uvm_error_context_begin
@@ -425,7 +437,7 @@
 //
 
 `define uvm_error_context_begin(ID, MSG, RO, RM = __uvm_msg) \
-   `uvm_message_begin(UVM_ERROR, ID, MSG, UVM_NONE, `uvm_file, `uvm_line, RO, RM)
+   `uvm_message_context_begin(UVM_ERROR, ID, MSG, UVM_NONE, `uvm_file, `uvm_line, RO, RM)
 
 
 // MACRO: `uvm_error_context_end
@@ -438,7 +450,7 @@
 //
 
 `define uvm_error_context_end \
-   `uvm_message_end
+   `uvm_message_context_end
 
 
 // MACRO: `uvm_fatal_context_begin
@@ -447,7 +459,7 @@
 //
 
 `define uvm_fatal_context_begin(ID, MSG, RO, RM = __uvm_msg) \
-   `uvm_message_begin(UVM_FATAL, ID, MSG, UVM_NONE, `uvm_file, `uvm_line, RO, RM)
+   `uvm_message_context_begin(UVM_FATAL, ID, MSG, UVM_NONE, `uvm_file, `uvm_line, RO, RM)
 
 
 // MACRO: `uvm_fatal_context_end
@@ -460,7 +472,7 @@
 //
 
 `define uvm_fatal_context_end \
-   `uvm_message_end
+   `uvm_message_context_end
 
 
 //----------------------------------------------------------------------------
