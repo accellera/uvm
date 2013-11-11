@@ -521,8 +521,10 @@ class uvm_report_message extends uvm_object;
   //
 
   static function uvm_report_message new_report_message(string name = "uvm_report_message");
-    process p = process::self();
+    process p;
     string rand_state;
+
+    p = process::self();
     if (p != null)
       rand_state = p.get_randstate();
     new_report_message = new(name);
