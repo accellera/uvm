@@ -20,6 +20,8 @@
 // //
 // Template for UVM-compliant Program block
 
+`include "uvm_macros.svh"
+
 `ifndef PRG__SV
 `define PRG__SV
 `include "dut_if.sv"  

@@ -18,6 +18,7 @@
 //----------------------------------------------------------------------
 
 
+`include "uvm_macros.svh"
 `include "regmodel.sv"
 `include "tb_top.sv"
 module tb;

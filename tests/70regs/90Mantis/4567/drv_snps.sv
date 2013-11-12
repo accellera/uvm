@@ -48,7 +48,7 @@ class drv_snps extends uvm_driver # (trans_snps);
    
    typedef virtual dut_if.mst v_if; 
    v_if drv_if;
-   `uvm_register_cb(drv_snps,drv_snps_callbacks); 
+   `uvm_register_cb(drv_snps,drv_snps_callbacks) 
    
    extern function new(string name = "drv_snps",
                        uvm_component parent = null); 
