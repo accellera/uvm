@@ -3294,20 +3294,27 @@ endfunction \
 //
 // Vendor-independent macro to hide vendor-specific interface for
 // recording attributes (fields) to a transaction database.
+//
+// This method should not be called directly by the users.
+
+// Note on implementation by vendors-
+// if you're going to use a vendor-specific call for
+// recording the information passed through this macro,
+// it is suggested that you gate it with the type name.
+//
+// For example-
+// if (recorder.get_type_name() == "<your_type_name>")
+//   $special_call(...);
+// else
+//   recorder.record_generic(NAME, $sformatf("%p", VALUE));
 
 `ifndef uvm_record_attribute
-  `ifdef QUESTA
-    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
-      $add_attribute(TR_HANDLE,VALUE,NAME);
-  `elsif VCS
-    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
-      // need VCS call here
-  `elsif INCA
-    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
-      // need IUS call here
+ `ifdef QUESTA
+    `define uvm_record_attribute(NAME,VALUE) \
+      $add_attribute(recorder.tr_handle,VALUE,NAME);
   `else
-    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
-      // empty definition
+    `define uvm_record_attribute(NAME,VALUE) \
+      recorder.record_generic(NAME, $sformatf("%p", VALUE)); 
   `endif
 `endif
 
@@ -3322,10 +3329,10 @@ endfunction \
 `define uvm_record_field(NAME,VALUE) \
    if (recorder != null && recorder.tr_handle != 0) begin \
      if (recorder.get_type_name() != "uvm_recorder") begin \
-       `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+       `uvm_record_attribute(NAME,VALUE) \
      end \
      else \
-       recorder.m_set_attribute(recorder.tr_handle,NAME,$sformatf("%p",VALUE)); \
+       recorder.record_generic(NAME, $sformatf("%p", VALUE)); \
    end
 
 
