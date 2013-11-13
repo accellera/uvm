@@ -3283,12 +3283,126 @@ endfunction \
 // The recording macros assist users who implement the <uvm_object::do_record>
 // method. They help ensure that the fields are recorded using a vendor-
 // independent API. Unlike the <uvm_recorder> policy, fields recorded using
-// the <`uvm_record_field> macro do not lose type information--they are passed
+// the macros do not lose type information--they are passed
 // directly to the vendor-specific API. This results in more efficient recording
 // and no artificial limit on bit-widths. See your simulator vendor's 
 // documentation for more information on its transaction recording capabilities.
 //------------------------------------------------------------------------------
 
+// Macro: `uvm_record_int
+//
+//| `uvm_record_int(NAME,VALUE,SIZE[,RADIX])
+//
+// The ~`uvm_record_int~ macro takes the same arguments as
+// the <uvm_recorder::record_field> method (including the optional ~RADIX~).
+//
+// The default implementation will pass these values to
+// <uvm_recorder::record_field>, however vendors may override the
+// default definition to provide additional functionality.
+//
+
+`ifndef uvm_record_int
+ `ifdef QUESTA
+  `define uvm_record_int(NAME,VALUE,SIZE,RADIX = UVM_NORADIX) \
+    if (recorder != null && recorder.tr_handle != 0) begin \
+      if (recorder.get_type_name() != "uvm_recorder") \
+        $add_attribute(recorder.tr_handle,VALUE,NAME); \
+      else \
+        recorder.record_field(NAME, VALUE, SIZE, RADIX); \
+    end 
+ `else
+  `define uvm_record_int(NAME,VALUE,SIZE,RADIX = UVM_NORADIX) \
+    if (recorder != null && recorder.tr_handle != 0) begin \
+      recorder.record_field(NAME, VALUE, SIZE, RADIX); \
+    end
+ `endif
+`endif
+
+// Macro: `uvm_record_string
+//
+//| `uvm_record_string(NAME,VALUE)
+//
+// The ~`uvm_record_string~ macro takes the same arguments as
+// the <uvm_recorder::record_string> method.
+//
+// The default implementation will pass these values to
+// <uvm_recorder::record_string>, however vendors may override the
+// default definition to provide additional functionality.
+//
+
+`ifndef uvm_record_string
+ `ifdef QUESTA
+  `define uvm_record_string(NAME,VALUE) \
+    if (recorder != null && recorder.tr_handle != 0) begin \
+      if (recorder.get_type_name() != "uvm_recorder") \
+        $add_attribute(recorder.tr_handle,VALUE,NAME); \
+      else \
+        recorder.record_string(NAME,VALUE); \
+    end 
+ `else
+  `define uvm_record_string(NAME,VALUE) \
+    if (recorder != null && recorder.tr_handle != 0) begin \
+      recorder.record_string(NAME,VALUE); \
+    end
+ `endif
+`endif
+
+// Macro: `uvm_record_time
+//
+//| `uvm_record_time(NAME,VALUE)
+//
+// The ~`uvm_record_time~ macro takes the same arguments as
+// the <uvm_recorder::record_time> method.
+//
+// The default implementation will pass these values to
+// <uvm_recorder::record_time>, however vendors may override the
+// default definition to provide additional functionality.
+//
+`ifndef uvm_record_time
+ `ifdef QUESTA
+  `define uvm_record_time(NAME,VALUE) \
+    if (recorder != null && recorder.tr_handle != 0) begin \
+      if (recorder.get_type_name() != "uvm_recorder") \
+        $add_attribute(recorder.tr_handle,VALUE,NAME); \
+      else \
+        recorder.record_time(NAME,VALUE); \
+    end 
+ `else
+  `define uvm_record_time(NAME,VALUE) \
+    if (recorder != null && recorder.tr_handle != 0) begin \
+      recorder.record_time(NAME,VALUE); \
+    end
+ `endif
+`endif
+
+
+// Macro: `uvm_record_real
+//
+//| `uvm_record_real(NAME,VALUE)
+//
+// The ~`uvm_record_real~ macro takes the same arguments as
+// the <uvm_recorder::record_real> method.
+//
+// The default implementation will pass these values to
+// <uvm_recorder::record_time>, however vendors may override the
+// default definition to provide additional functionality.
+//
+`ifndef uvm_record_real
+ `ifdef QUESTA
+  `define uvm_record_real(NAME,VALUE) \
+    if (recorder != null && recorder.tr_handle != 0) begin \
+      if (recorder.get_type_name() != "uvm_recorder") \
+        $add_attribute(recorder.tr_handle,VALUE,NAME); \
+      else \
+        recorder.record_field_real(NAME,VALUE); \
+    end 
+ `else
+  `define uvm_record_real(NAME,VALUE) \
+    if (recorder != null && recorder.tr_handle != 0) begin \
+      recorder.record_field_real(NAME,VALUE); \
+    end
+ `endif
+`endif
 
 // Macro: `uvm_record_attribute
 //
@@ -3338,26 +3452,6 @@ endfunction \
    end
 
 
-
-// Use the following if the simulator's recording API can not
-// distinguish types.
-
-`define uvm_record_int(NAME,VALUE,SIZE,RADIX) \
-  recorder.m_set_attribute(recorder.tr_handle,NAME, \
-     $sformatf({"%0",uvm_radix_to_string(RADIX)},VALUE)); \
-
-`define uvm_record_string(NAME,VALUE) \
-  recorder.m_set_attribute(recorder.tr_handle,NAME,VALUE);
-
-`define uvm_record_time(NAME,VALUE) \
-  recorder.m_set_attribute(recorder.tr_handle,NAME, \
-     $sformatf("%0u",VALUE&((1<<64)-1))); \
-
-`define uvm_record_real(NAME,VALUE) \
-  begin \
-  bit[63:0] ival = $realtobits(VALUE); \
-  recorder.m_set_attribute(recorder.tr_handle,NAME,ival); \
-  end
 
   
 //------------------------------------------------------------------------------
