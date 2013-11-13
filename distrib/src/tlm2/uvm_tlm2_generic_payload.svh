@@ -564,18 +564,18 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
     if (!is_recording_enabled())
       return;
     super.do_record(recorder);
-    `uvm_record_field("address",m_address)
-    `uvm_record_field("command",m_command.name())
-    `uvm_record_field("data_length",m_length)
-    `uvm_record_field("byte_enable_length",m_length)
-    `uvm_record_field("response_status",m_response_status.name())
-    `uvm_record_field("streaming_width",m_streaming_width)
+    `uvm_record_int("address",m_address,$bits(m_address))
+    `uvm_record_string("command",m_command.name())
+    `uvm_record_int("data_length",m_length,$bits(m_length))
+    `uvm_record_int("byte_enable_length",m_byte_enable_length,$bits(m_byte_enable_length))
+    `uvm_record_string("response_status",m_response_status.name())
+    `uvm_record_int("streaming_width",m_streaming_width,$bits(m_streaming_width))
 
     for (int i=0; i < m_length; i++)
-      `uvm_record_field($sformatf("\\data[%0d] ", i), m_data[i])
+      `uvm_record_int($sformatf("\\data[%0d] ", i), m_data[i], $bits(m_data[i]))
 
     for (int i=0; i < m_byte_enable_length; i++)
-      `uvm_record_field($sformatf("\\byte_en[%0d] ", i), m_byte_enable[i])
+      `uvm_record_int($sformatf("\\byte_en[%0d] ", i), m_byte_enable[i], $bits(m_byte_enable[i]))
 
     foreach (m_extensions[ext])
       recorder.record_object(ext.get_name(),m_extensions[ext]);
