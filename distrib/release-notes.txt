@@ -146,7 +146,13 @@ Mantis 4548: cleanup dpi coding issues
 
 Mantis 4566: uvm_comparer now detects any queue size mismatch when comparer.show_max != 1
 
+Mantis 4567 : fixed do_predict call overwriting the NOT_OK status with OK status on backdoor writes to RO reg
+
 Mantis 4572: packing of ints with 64+bits and array unpack broken
+
+Mantis 4587: Added length, byte_enable, byte_length fixes for reg2bus to adhere to tlm_gp rules
+
+Mantis 4588: changes in hw_reset_seq to ensure sub-blocks are excluded when relevant NO_REG_TEST attribute is set
 
 (*) Mantis 4606: uvm_report server is not chainable/extendable uvm_report_server can now be extended, chained using delegate pattern
 
@@ -164,6 +170,8 @@ Mantis 4666: uvm_config_db::set expects to be invoked in process context
 
 Mantis 4677: uvm_global_copy_map removed
 
+(+) Mantis 4686: updated documentation to indicate the uvm_reg(_field)::predict is updating mirrored AND  desired values
+
 Mantis 4690: mehod -> method in uvm_sequence_base documentation
 
 Mantis 4711: Fixed LRM violation
@@ -177,6 +185,9 @@ Mantis 4734: Fixed bug in uvm_reg_map::get_size()
 
 Mantis 4738: Fixed bug wherein messages from built-in UVM dpi code
 were not being routed through standard UVM messaging.
+
+Mantis 4743: uvm_sequencer::get_next_item/try_next_item/item_done/get/peek/put
+may now be called directly.
 
 Mantis 4772: separated hdl vendor dpi backends into one file per vendor
 
