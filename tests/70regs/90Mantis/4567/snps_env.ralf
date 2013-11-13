@@ -1,0 +1,44 @@
+register CTRL_REG {
+  bytes 3;
+  field REG_VAL {
+    bits  8;
+    access rw;
+    reset  1'b0;
+  }
+}
+
+register DATA_REG {
+  bytes 3;
+  field REG_VAL {
+    bits  8;
+    access rw;
+    reset  1'b0;
+  }
+}
+
+register STATUS_REG {
+  bytes 3;
+  field WR_ERROR @0 {
+    bits  1;
+    access ro;
+    reset  1'b0;
+  }
+  field RD_ERROR @4 {
+    bits  1;
+    access ro;
+    reset  1'b0;
+  }
+}
+
+block DUT_BLK {
+  bytes 3;
+  register CTRL_REG (ctrl_reg) @'h00; 
+  register DATA_REG (data_reg) @'h01;
+  register STATUS_REG (status_reg) @'h02;
+}
+
+system DUT {
+  bytes 3;
+		block DUT_BLK;
+}
+
