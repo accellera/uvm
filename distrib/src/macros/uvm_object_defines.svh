@@ -3295,7 +3295,7 @@ endfunction \
 // Vendor-independent macro to hide tool-specific interface for
 // recording attributes (fields) to a transaction database.
 //
-//| `uvm_record_attribute(NAME, VALUE)
+//| `uvm_record_attribute(TR_HANDLE, NAME, VALUE)
 //
 // The default implementation of the macro passes ~NAME~ and
 // ~VALUE~ through to the <uvm_recorder::record_generic> method.
@@ -3307,10 +3307,10 @@ endfunction \
 
 `ifndef uvm_record_attribute
  `ifdef QUESTA
-    `define uvm_record_attribute(NAME,VALUE) \
-      $add_attribute(recorder.tr_handle,VALUE,NAME);
+    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
+      $add_attribute(TR_HANDLE,VALUE,NAME);
   `else
-    `define uvm_record_attribute(NAME,VALUE) \
+    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
       recorder.record_generic(NAME, $sformatf("%p", VALUE)); 
   `endif
 `endif
