@@ -3331,7 +3331,7 @@ endfunction \
 `define uvm_record_field(NAME,VALUE) \
    if (recorder != null && recorder.tr_handle != 0) begin \
      if (recorder.use_record_attribute()) begin \
-       `uvm_record_attribute(NAME,VALUE) \
+       `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
      end \
      else \
        recorder.record_generic(NAME, $sformatf("%p", VALUE)); \
