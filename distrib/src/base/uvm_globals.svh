@@ -134,6 +134,17 @@ function void uvm_report( uvm_severity severity,
   top.uvm_report(severity, id, message, verbosity, filename, line);
 endfunction 
 
+// Undocumented DPI available version of uvm_report
+export "DPI-C" function m__uvm_report_dpi;
+function void m__uvm_report_dpi(int severity,
+                                string id,
+                                string message,
+                                int    verbosity,
+                                string filename,
+                                int    line);
+   uvm_report(uvm_severity'(severity), id, message, verbosity, filename, line);
+endfunction : m__uvm_report_dpi
+
 // Function: uvm_report_info
 
 function void uvm_report_info(string id,

@@ -1574,6 +1574,7 @@ function void uvm_default_factory::print (int all_types=1);
 
   string key;
   uvm_factory_queue_class sorted_override_queues[string];
+  string qs[$];
 
   string tmp;
   int id;
@@ -1591,11 +1592,11 @@ function void uvm_default_factory::print (int all_types=1);
     sorted_override_queues[i] = m_inst_override_name_queues[i];
   end
 
-  $display("\n#### Factory Configuration (*)\n");
+  qs.push_back("\n#### Factory Configuration (*)\n\n");
 
   // print instance overrides
   if(!m_type_overrides.size() && !sorted_override_queues.num())
-    $display("  No instance or type overrides are registered with this factory");
+    qs.push_back("  No instance or type overrides are registered with this factory\n");
   else begin
     int max1,max2,max3;
     string dash = "---------------------------------------------------------------------------------------------------";
@@ -1603,7 +1604,7 @@ function void uvm_default_factory::print (int all_types=1);
 
     // print instance overrides
     if(!sorted_override_queues.num())
-      $display("No instance overrides are registered with this factory");
+      qs.push_back("No instance overrides are registered with this factory\n");
     else begin
       foreach(sorted_override_queues[j]) begin
         uvm_factory_queue_class qc = sorted_override_queues[j];
@@ -1620,29 +1621,29 @@ function void uvm_default_factory::print (int all_types=1);
       if (max2 < 13) max2 = 13;
       if (max3 < 13) max3 = 13;
 
-      $display("Instance Overrides:\n");
-      $display("  %0s%0s  %0s%0s  %0s%0s","Requested Type",space.substr(1,max1-14),
+      qs.push_back("Instance Overrides:\n\n");
+      qs.push_back($sformatf("  %0s%0s  %0s%0s  %0s%0s\n","Requested Type",space.substr(1,max1-14),
                                           "Override Path", space.substr(1,max2-13),
-                                          "Override Type", space.substr(1,max3-13));
-      $display("  %0s  %0s  %0s",dash.substr(1,max1),
+                                          "Override Type", space.substr(1,max3-13)));
+      qs.push_back($sformatf("  %0s  %0s  %0s\n",dash.substr(1,max1),
                                  dash.substr(1,max2),
-                                 dash.substr(1,max3));
+                                 dash.substr(1,max3)));
 
       foreach(sorted_override_queues[j]) begin
         uvm_factory_queue_class qc = sorted_override_queues[j];
         for (int i=0; i<qc.queue.size(); ++i) begin
-          $write("  %0s%0s",qc.queue[i].orig_type_name,
-                 space.substr(1,max1-qc.queue[i].orig_type_name.len()));
-          $write("  %0s%0s",  qc.queue[i].full_inst_path,
-                 space.substr(1,max2-qc.queue[i].full_inst_path.len()));
-          $display("  %0s",     qc.queue[i].ovrd_type_name);
+          qs.push_back($sformatf("  %0s%0s  %0s%0s",qc.queue[i].orig_type_name,
+                 space.substr(1,max1-qc.queue[i].orig_type_name.len()),
+                 qc.queue[i].full_inst_path,
+                 space.substr(1,max2-qc.queue[i].full_inst_path.len())));
+          qs.push_back($sformatf("  %0s\n",     qc.queue[i].ovrd_type_name));
         end
       end
     end
 
     // print type overrides
     if (!m_type_overrides.size())
-      $display("\nNo type overrides are registered with this factory");
+      qs.push_back("\nNo type overrides are registered with this factory\n");
     else begin
       // Resize for type overrides
       if (max1 < 14) max1 = 14;
@@ -1657,42 +1658,42 @@ function void uvm_default_factory::print (int all_types=1);
       end
       if (max1 < 14) max1 = 14;
       if (max2 < 13) max2 = 13;
-      $display("\nType Overrides:\n");
-      $display("  %0s%0s  %0s%0s","Requested Type",space.substr(1,max1-14),
-                                  "Override Type", space.substr(1,max2-13));
-      $display("  %0s  %0s",dash.substr(1,max1),
-                            dash.substr(1,max2));
+      qs.push_back("\nType Overrides:\n\n");
+      qs.push_back($sformatf("  %0s%0s  %0s%0s\n","Requested Type",space.substr(1,max1-14),
+                                  "Override Type", space.substr(1,max2-13)));
+      qs.push_back($sformatf("  %0s  %0s\n",dash.substr(1,max1),
+                            dash.substr(1,max2)));
       foreach (m_type_overrides[index]) 
-        $display("  %0s%0s  %0s",
+        qs.push_back($sformatf("  %0s%0s  %0s\n",
                  m_type_overrides[index].orig_type_name,
                  space.substr(1,max1-m_type_overrides[index].orig_type_name.len()),
-                 m_type_overrides[index].ovrd_type_name);
+                 m_type_overrides[index].ovrd_type_name));
     end
   end
 
   // print all registered types, if all_types >= 1 
   if (all_types >= 1 && m_type_names.first(key)) begin
     bit banner;
-    $display("\nAll types registered with the factory: %0d total",m_types.num());
-    $display("(types without type names will not be printed)\n");
+    qs.push_back($sformatf("\nAll types registered with the factory: %0d total\n",m_types.num()));
+    qs.push_back("(types without type names will not be printed)\n");
     do begin
       // filter out uvm_ classes (if all_types<2) and non-types (lookup strings)
       if (!(all_types < 2 && uvm_is_match("uvm_*",
            m_type_names[key].get_type_name())) &&
            key == m_type_names[key].get_type_name()) begin
         if (!banner) begin
-          $display("  Type Name");
-          $display("  ---------");
+          qs.push_back("  Type Name\n");
+          qs.push_back("  ---------\n");
           banner=1;
         end
-        $display("  ", m_type_names[key].get_type_name());
+        qs.push_back($sformatf("  %s\n", m_type_names[key].get_type_name()));
       end
     end while(m_type_names.next(key));
   end
 
-  $display("(*) Types with no associated type name will be printed as <unknown>");
+  qs.push_back("(*) Types with no associated type name will be printed as <unknown>\n\n####\n\n");
 
-  $display("\n####\n");
+  `uvm_info("UVM/FACTORY/PRINT",{>>{qs}},UVM_NONE)
 
 endfunction
 
@@ -1776,18 +1777,18 @@ function void  uvm_default_factory::m_debug_display (string requested_type_name,
   int    max1,max2,max3;
   string dash = "---------------------------------------------------------------------------------------------------";
   string space= "                                                                                                   ";
+  string qs[$];
 
-  $display("\n#### Factory Override Information (*)\n");
-  $write("Given a request for an object of type '",requested_type_name,
-         "' with an instance\npath of '",full_inst_path,
-         "', the factory encountered\n");
+  qs.push_back("\n#### Factory Override Information (*)\n\n");
+  qs.push_back(
+  	$sformatf("Given a request for an object of type '%s' with an instance\npath of '%s' the factory encountered\n\n",
+  		requested_type_name,full_inst_path));
 
   if (m_override_info.size() == 0)
-    $display("no relevant overrides.\n");
+    qs.push_back("no relevant overrides.\n\n");
   else begin
 
-    $display("the following relevant overrides. An 'x' next to a match indicates a",
-             "\nmatch that was ignored.\n");
+    qs.push_back("the following relevant overrides. An 'x' next to a match indicates a\nmatch that was ignored.\n\n");
 
     foreach (m_override_info[i]) begin
       if (m_override_info[i].orig_type_name.len() > max1)
@@ -1802,40 +1803,38 @@ function void  uvm_default_factory::m_debug_display (string requested_type_name,
     if (max2 < 13) max2 = 13;
     if (max3 < 13) max3 = 13;
 
-    $display("  %0s%0s", "Original Type", space.substr(1,max1-13),
-             "  %0s%0s", "Instance Path", space.substr(1,max2-13),
-             "  %0s%0s", "Override Type", space.substr(1,max3-13));
+    qs.push_back($sformatf("Original Type%0s  Instance Path%0s  Override Type%0s\n", 
+    	space.substr(1,max1-13),space.substr(1,max2-13),space.substr(1,max3-13)));
 
-    $display("  %0s  %0s  %0s",dash.substr(1,max1),
+    qs.push_back($sformatf("  %0s  %0s  %0s\n",dash.substr(1,max1),
                                dash.substr(1,max2),
-                               dash.substr(1,max3));
+                               dash.substr(1,max3)));
 
     foreach (m_override_info[i]) begin
-      $write("%s%0s%0s",
+      qs.push_back($sformatf("%s%0s%0s\n",
              m_override_info[i].selected ? "  " : "x ",
              m_override_info[i].orig_type_name,
-             space.substr(1,max1-m_override_info[i].orig_type_name.len()));
-      $write("  %0s%0s", m_override_info[i].full_inst_path,
-             space.substr(1,max2-m_override_info[i].full_inst_path.len()));
-      $write("  %0s%0s", m_override_info[i].ovrd_type_name,
-             space.substr(1,max3-m_override_info[i].ovrd_type_name.len()));
+             space.substr(1,max1-m_override_info[i].orig_type_name.len())));
+      qs.push_back($sformatf("  %0s%0s", m_override_info[i].full_inst_path,
+             space.substr(1,max2-m_override_info[i].full_inst_path.len())));
+      qs.push_back($sformatf("  %0s%0s", m_override_info[i].ovrd_type_name,
+             space.substr(1,max3-m_override_info[i].ovrd_type_name.len())));
       if (m_override_info[i].full_inst_path == "*")
-        $display("  <type override>");
+        qs.push_back("  <type override>");
       else
-        $display();
+        qs.push_back("\n");
     end
-    $display();
+    qs.push_back("\n");
   end
 
 
-  $display("Result:\n");
-  $display("  The factory will produce an object of type '%0s'", 
-           result == null ? requested_type_name : result.get_type_name());
+  qs.push_back("Result:\n\n");
+  qs.push_back($sformatf("  The factory will produce an object of type '%0s'\n", 
+           result == null ? requested_type_name : result.get_type_name()));
 
-  $display("\n(*) Types with no associated type name will be printed as <unknown>");
-
-  $display("\n####\n");
-
+  qs.push_back("\n(*) Types with no associated type name will be printed as <unknown>\n\n####\n\n");
+  
+  `uvm_info("UVM/FACTORY/DUMP",{>>{qs}},UVM_NONE)
 endfunction
 
 

@@ -1,23 +1,17 @@
-
+UVM_INFO FILE-LINE @ 0: reporter [UVM/FACTORY/PRINT] 
 #### Factory Configuration (*)
-
 Instance Overrides:
-
   Requested Type  Override Path                Override Type
   --------------  ---------------------------  -------------
   gen             uvm_test_top.env.gen1        mygen
   gen             uvm_test_top.env.generator2  mygen
-
 Type Overrides:
-
   Requested Type  Override Type              
   --------------  ---------------------------
   packet          mypacket
   mypacket        myreallybigtypenamepacket
-
 All types registered with the factory: 46 total
 (types without type names will not be printed)
-
   Type Name
   ---------
   env
@@ -28,6 +22,4 @@ All types registered with the factory: 46 total
   packet
   test
 (*) Types with no associated type name will be printed as <unknown>
-
 ####
-

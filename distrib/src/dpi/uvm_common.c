@@ -1,6 +1,7 @@
 //----------------------------------------------------------------------
 //   Copyright 2010 Synopsys, Inc.
 //   Copyright 2011 Mentor Graphics Corporation
+//   Copyright 2013 NVIDIA Corporation
 //   All Rights Reserved Worldwide
 //
 //   Licensed under the Apache License, Version 2.0 (the
@@ -18,26 +19,24 @@
 //   permissions and limitations under the License.
 //----------------------------------------------------------------------
 
-//
-// Top-level file that includes all of the C/C++ files required
-// by UVM
-//
-// The C code may be compiled by compiling this top file only,
-// or by compiling individual files then linking them together.
-//
+// Implementation of common methods for DPI
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+extern void m__uvm_report_dpi(int,const char*,const char*,int,const char*, int);
 
-#include <stdlib.h>
-#include "uvm_dpi.h"
-#include "uvm_common.c"
-#include "uvm_regex.cc"
-#include "uvm_hdl.c"
-#include "uvm_svcmd_dpi.c"
+void m_uvm_report_dpi( int severity,
+		char* id,
+		char* message,
+		int verbosity,
+		char* file,
+		int linenum) {
+    m__uvm_report_dpi(severity, id, message, verbosity, file, linenum);
+ }
 
-#ifdef __cplusplus
+
+int int_str_max ( int radix_bits ) {
+    int val = INT_MAX;
+    int ret = 1;
+    while ((val = (val /radix_bits)))
+        ret++;
+    return ret;
 }
-#endif
-
