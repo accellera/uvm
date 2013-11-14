@@ -118,7 +118,7 @@ class uvm_spell_chkr #(type T=int);
 	   	if(q.size())
 	   		void'(q.pop_back());
 	   		
-	   	`uvm_info("UVM/CONFIGDB/SPELLCHK",$sformatf("%s not located, did you mean %s", s, {>>{q}}),UVM_NONE)
+	   	`uvm_info("UVM/CONFIGDB/SPELLCHK",$sformatf("%s not located, did you mean %s", s, `UVM_STRING_QUEUE_STREAMING_PACK(q)),UVM_NONE)
     end	
     
     return 0;

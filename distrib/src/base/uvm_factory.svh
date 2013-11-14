@@ -1693,7 +1693,7 @@ function void uvm_default_factory::print (int all_types=1);
 
   qs.push_back("(*) Types with no associated type name will be printed as <unknown>\n\n####\n\n");
 
-  `uvm_info("UVM/FACTORY/PRINT",{>>{qs}},UVM_NONE)
+  `uvm_info("UVM/FACTORY/PRINT",`UVM_STRING_QUEUE_STREAMING_PACK(qs),UVM_NONE)
 
 endfunction
 
@@ -1834,7 +1834,7 @@ function void  uvm_default_factory::m_debug_display (string requested_type_name,
 
   qs.push_back("\n(*) Types with no associated type name will be printed as <unknown>\n\n####\n\n");
   
-  `uvm_info("UVM/FACTORY/DUMP",{>>{qs}},UVM_NONE)
+  `uvm_info("UVM/FACTORY/DUMP",`UVM_STRING_QUEUE_STREAMING_PACK(qs),UVM_NONE)
 endfunction
 
 

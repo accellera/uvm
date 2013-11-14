@@ -561,7 +561,7 @@ virtual class uvm_resource_base extends uvm_object;
                access_record.write_count,
                access_record.write_time));
     end
-    `uvm_info("UVM/RESOURCE/ACCESSOR",{>>{qs}},UVM_NONE)
+    `uvm_info("UVM/RESOURCE/ACCESSOR",`UVM_STRING_QUEUE_STREAMING_PACK(qs),UVM_NONE)
 
   endfunction
 
@@ -833,7 +833,7 @@ class uvm_resource_pool;
                ((success)?"success":"fail"),
                record.t));
     end
-    `uvm_info("UVM/RESOURCE/GETRECORD",{>>{qs}},UVM_NONE)
+    `uvm_info("UVM/RESOURCE/GETRECORD",`UVM_STRING_QUEUE_STREAMING_PACK(qs),UVM_NONE)
   endfunction
 
   //--------------

@@ -256,7 +256,7 @@ class uvm_reg_predictor #(type BUSTYPE=int) extends uvm_component;
             
     if (m_pending.num() > 0) begin
       `uvm_error("PENDING REG ITEMS",
-      	$sformatf("There are %0d incomplete register transactions still pending completion:%s",m_pending.num(),{>>{q}}))
+      	$sformatf("There are %0d incomplete register transactions still pending completion:%s",m_pending.num(),`UVM_STRING_QUEUE_STREAMING_PACK(q)))
 
     end
   endfunction

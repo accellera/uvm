@@ -425,7 +425,7 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
     foreach (cbq[i]) begin
       qs.push_back($sformatf("%s  %s %s on %s  %s\n", cbq[i], blanks.substr(0,max_cb_name-cbq[i].len()-1), inst_q[i], blanks.substr(0,max_inst_name - inst_q[i].len()-1), mode_q[i]));
     end
-    `uvm_info("UVM/CB/DISPLAY",{>>{qs}},UVM_NONE)
+    `uvm_info("UVM/CB/DISPLAY",`UVM_STRING_QUEUE_STREAMING_PACK(qs),UVM_NONE)
 
     m_tracing = 1; //allow tracing to be resumed
   endfunction

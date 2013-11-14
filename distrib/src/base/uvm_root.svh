@@ -367,11 +367,7 @@ function void uvm_root::report_header(UVM_FILE file = 0);
 	if(m_relnotes_done)
 		q.push_back("\n      (Specify +UVM_NO_RELNOTES to turn off this notice)\n");
 
-		begin
-			string msg;
-			msg={>>{q}};
-			`uvm_info("UVM/RELNOTES",msg,UVM_LOW)
-		end
+	`uvm_info("UVM/RELNOTES",`UVM_STRING_QUEUE_STREAMING_PACK(q),UVM_LOW)
 endfunction
 
 
