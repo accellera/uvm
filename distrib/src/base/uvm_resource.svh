@@ -441,7 +441,7 @@ virtual class uvm_resource_base extends uvm_object;
   // Implementation of do_print which is called by print().
 
   function void do_print (uvm_printer printer);
-    $display("%s [%s] : %s", get_name(), get_scope(), convert2string());
+    printer.print_string("",$sformatf("%s [%s] : %s", get_name(), get_scope(), convert2string()));
   endfunction
 
   //-------------------
@@ -547,24 +547,21 @@ virtual class uvm_resource_base extends uvm_object;
     string str;
     uvm_component comp;
     uvm_resource_types::access_t access_record;
-
+    string qs[$];
+    
     if(access.num() == 0)
       return;
 
-    $display("  --------");
-
     foreach (access[i]) begin
       str = i;
-      $write("  %s", str);
       access_record = access[str];
-      $display(" reads: %0d @ %0t  writes: %0d @ %0t",
+      qs.push_back($sformatf("%s reads: %0d @ %0t  writes: %0d @ %0t\n",str,
                access_record.read_count,
                access_record.read_time,
                access_record.write_count,
-               access_record.write_time);
+               access_record.write_time));
     end
-
-    $display();
+    `uvm_info("UVM/RESOURCE/ACCESSOR",`UVM_STRING_QUEUE_STREAMING_PACK(qs),UVM_NONE)
 
   endfunction
 
@@ -825,16 +822,18 @@ class uvm_resource_pool;
 
     get_t record;
     bit success;
+    string qs[$];
 
-    $display("--- resource get records ---");
+    qs.push_back("--- resource get records ---\n");
     foreach (get_record[i]) begin
       record = get_record[i];
       success = (record.rsrc != null);
-      $display("get: name=%s  scope=%s  %s @ %0t",
+      qs.push_back($sformatf("get: name=%s  scope=%s  %s @ %0t\n",
                record.name, record.scope,
                ((success)?"success":"fail"),
-               record.t);
+               record.t));
     end
+    `uvm_info("UVM/RESOURCE/GETRECORD",`UVM_STRING_QUEUE_STREAMING_PACK(qs),UVM_NONE)
   endfunction
 
   //--------------
@@ -1308,7 +1307,7 @@ class uvm_resource_pool;
     printer.knobs.reference=0;
 
     if(rq == null || rq.size() == 0) begin
-      $display("<none>");
+      `uvm_info("UVM/RESOURCE/PRINT","<none>",UVM_NONE)
       return;
     end
 
@@ -1334,14 +1333,14 @@ class uvm_resource_pool;
     uvm_resource_types::rsrc_q_t rq;
     string name;
 
-    $display("\n=== resource pool ===");
+    `uvm_info("UVM/RESOURCE/DUMP","\n=== resource pool ===",UVM_NONE)
 
     foreach (rtab[name]) begin
       rq = rtab[name];
       print_resources(rq, audit);
     end
 
-    $display("=== end of resource pool ===");
+    `uvm_info("UVM/RESOURCE/DUMP","=== end of resource pool ===",UVM_NONE)
 
   endfunction
   

@@ -101,18 +101,25 @@ class uvm_spell_chkr #(type T=int);
 
     end
 
-    $display("%s not located", s);
 
     // if (min == max) then the string table is empty
     if(min == max) begin
-      $display("  no alternatives to suggest");
-      return 0;
-    end
-
+	  `uvm_info("UVM/CONFIGDB/SPELLCHK",$sformatf("%s not located, no alternatives to suggest", s),UVM_NONE)
+    end	
+    else
     // dump all the alternatives with the minimum distance    
-    foreach(min_key[i]) begin
-      $display("  did you mean %s?", min_key[i]);
-    end
+    begin
+	   	string q[$];
+	    
+	   	foreach(min_key[i]) begin
+     			q.push_back(min_key[i]);
+     			q.push_back("|");
+	   	end
+	   	if(q.size())
+	   		void'(q.pop_back());
+	   		
+	   	`uvm_info("UVM/CONFIGDB/SPELLCHK",$sformatf("%s not located, did you mean %s", s, `UVM_STRING_QUEUE_STREAMING_PACK(q)),UVM_NONE)
+    end	
     
     return 0;
 

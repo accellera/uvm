@@ -1067,7 +1067,8 @@ class uvm_objection extends uvm_report_object;
   // output.
 
   function void display_objections(uvm_object obj=null, bit show_header=1);
-    $display(m_display_objections(obj,show_header));
+	string m = m_display_objections(obj,show_header);
+    `uvm_info("UVM/OBJ/DISPLAY",m,UVM_NONE)
   endfunction
 
 
@@ -1464,8 +1465,8 @@ endclass
 //|
 //|   virtual function void raised (uvm_objection objection, uvm_object obj, 
 //|       uvm_object source_obj, string description, int count);
-//|     $display("%0t: Objection %s: Raised for %s", $time, objection.get_name(),
-//|         obj.get_full_name());
+//|       `uvm_info("RAISED","%0t: Objection %s: Raised for %s", $time, objection.get_name(),
+//|       obj.get_full_name());
 //|   endfunction
 //| endclass
 //| ...

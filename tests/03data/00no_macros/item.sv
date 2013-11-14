@@ -52,9 +52,7 @@ class item extends uvm_sequence_item;
   rand byte unsigned     uint8;
   rand bit unsigned      uint1;
 
-`ifndef INCA
        shortreal         real32;
-`endif
 
        real              real64;
 
