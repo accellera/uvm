@@ -3292,21 +3292,18 @@ endfunction \
 
 // Macro: `uvm_record_attribute
 //
-// Vendor-independent macro to hide vendor-specific interface for
+// Vendor-independent macro to hide tool-specific interface for
 // recording attributes (fields) to a transaction database.
 //
-// This method should not be called directly by the users.
-
-// Note on implementation by vendors-
-// if you're going to use a vendor-specific call for
-// recording the information passed through this macro,
-// it is suggested that you gate it with the type name.
+//| `uvm_record_attribute(NAME, VALUE)
 //
-// For example-
-// if (recorder.get_type_name() == "<your_type_name>")
-//   $special_call(...);
-// else
-//   recorder.record_generic(NAME, $sformatf("%p", VALUE));
+// The default implementation of the macro passes ~NAME~ and
+// ~VALUE~ through to the <uvm_recorder::record_generic> method.
+//
+// This macro should not be called directly by the user, the
+// library will call it automatically if <uvm_recorder::use_record_attribute>
+// returns true.
+//
 
 `ifndef uvm_record_attribute
  `ifdef QUESTA
@@ -3318,17 +3315,22 @@ endfunction \
   `endif
 `endif
 
-  
-
 // Macro: `uvm_record_field
 //
 // Macro for recording name-value pairs into a transaction recording database.
 // Requires a valid transaction handle, as provided by the
 // <uvm_transaction::begin_tr> and <uvm_component::begin_tr> methods. 
-
+//
+//| `uvm_record_field(NAME, VALUE)
+//
+// If <uvm_recorder::use_record_attribute> returns true, then the
+// macro will send the ~NAME~/~VALUE~ pair through to the tool-specific
+// <`uvm_record_attribute> macro, otherwise they will be passed
+// through the <uvm_recorder::record_generic> method.
+//
 `define uvm_record_field(NAME,VALUE) \
    if (recorder != null && recorder.tr_handle != 0) begin \
-     if (recorder.get_type_name() != "uvm_recorder") begin \
+     if (recorder.use_record_attribute()) begin \
        `uvm_record_attribute(NAME,VALUE) \
      end \
      else \
