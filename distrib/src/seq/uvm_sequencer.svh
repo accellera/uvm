@@ -77,27 +77,25 @@ class uvm_sequencer #(type REQ=uvm_sequence_item, RSP=REQ)
   //
   extern virtual function void stop_sequences();
 
-
   extern virtual function string get_type_name();
 
-  
-  //-----------------
-  // Internal Methods
-  //-----------------
-  // Do not use directly; not part of standard
-
-  // Access to following internal methods provided via seq_item_export
+  // Access to following methods provided via seq_item_export
   extern virtual task          get_next_item (output REQ t);
   extern virtual task          try_next_item (output REQ t);
   extern virtual function void item_done     (RSP item = null);
   extern virtual task          put           (RSP t);
   extern task                  get           (output REQ t);
   extern task                  peek          (output REQ t);
+
+ //-----------------
+  // Internal Methods
+  //-----------------
+  // Do not use directly; not part of standard
+
   extern function void         item_done_trigger(RSP item = null);
   function RSP                 item_done_get_trigger_data();
     return last_rsp(0);
   endfunction
-
   extern protected virtual function int m_find_number_driver_connections();
 
 endclass  

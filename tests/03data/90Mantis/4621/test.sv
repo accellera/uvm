@@ -22,10 +22,14 @@ module test;
 initial begin
 		uvm_bitstream_t x;
 		string y;
-		x = 8'b01zx01zx;
+		x = 16'b10xz_10zx_10xz_10zx;
 		y=uvm_bitstream_to_string(x,$bits(x),UVM_BIN);
-		assert(y== "1zx01zx") else uvm_report_error("TEST",{"bits changed result is ",y});
-
+		assert(y== ":10xz10zx") else uvm_report_error("TEST",{"bits changed result is ",y});
+		$display("str=[%s]val=[%0b]",y,x);
+		
+		
+//		$display(uvm_vector_to_string('hdeadbeef,16,UVM_HEX));
+		
 		begin
 			uvm_report_server svr;
 			svr = uvm_report_server::get_server();

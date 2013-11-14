@@ -495,7 +495,12 @@ typedef enum { UVM_PHASE_IMP,
 // The set of possible states of a phase. This is an attribute of a schedule
 // node in the graph, not of a phase, to maintain independent per-domain state
 //
-//   UVM_PHASE_DORMANT -  Nothing has happened with the phase in this domain.
+//   UVM_PHASE_UNINITIALIZED - The state is uninitialized.  This is the default
+//             state for phases, and for nodes which have not yet been added to
+//             a schedule.
+//
+//   UVM_PHASE_DORMANT -  The schedule is not currently operating on the phase
+//             node, however it will be scheduled at some point in the future.
 //
 //   UVM_PHASE_SCHEDULED - At least one immediate predecessor has completed.
 //              Scheduled phases block until all predecessors complete or
@@ -532,12 +537,13 @@ typedef enum { UVM_PHASE_IMP,
 //
 //    The state transitions occur as follows:
 //
-//|   DORMANT -> SCHED -> SYNC -> START -> EXEC -> READY -> END -+-> CLEAN -> DONE
-//|      ^                                                       |
-//|      |                      <-- jump_to                      |
-//|      +-------------------------------------------- JUMPING< -+
+//|   UNINITIALIZED -> DORMANT -> SCHED -> SYNC -> START -> EXEC -> READY -> END -+-> CLEAN -> DONE
+//|                       ^                                                       |
+//|                       |                      <-- jump_to                      |
+//|                       +-------------------------------------------- JUMPING< -+
 
-   typedef enum { UVM_PHASE_DORMANT      = 1,
+   typedef enum { UVM_PHASE_UNINITIALIZED = 0,
+                  UVM_PHASE_DORMANT      = 1,
                   UVM_PHASE_SCHEDULED    = 2,
                   UVM_PHASE_SYNCING      = 4,
                   UVM_PHASE_STARTED      = 8,

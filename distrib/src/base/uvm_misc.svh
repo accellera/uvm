@@ -476,21 +476,21 @@ function string uvm_bitstream_to_string (uvm_bitstream_t value, int size,
                                          uvm_radix_enum radix=UVM_NORADIX,
                                          string radix_str="");
    
-   logic q[];
-
   // sign extend & don't show radix for negative values
   if (radix == UVM_DEC && value[size-1] === 1)
     return $sformatf("%0d", value);
 
+  // TODO $countbits(value,'z) would be even better
   if($isunknown(value)) begin
-     q = new[size];
-     {>>{q}} = value;
-     value = {>>{q}};
-  end
-  else begin
-     value &= (1 << size)-1;
-  end
-   
+	  uvm_bitstream_t _t;
+	  _t=0;
+	  for(int idx=0;idx<size;idx++)
+	  	_t[idx]=value[idx];
+	  value=_t;
+  	end
+  else 
+  	value &= (1 << size)-1;
+
   case(radix)
     UVM_BIN:      return $sformatf("%0s%0b", radix_str, value);
     UVM_OCT:      return $sformatf("%0s%0o", radix_str, value);

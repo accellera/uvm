@@ -179,10 +179,10 @@ virtual class uvm_printer;
                                            byte   scope_separator=".");
 
 
-  // Function: print_string
+  // Function: print_real
   //
-  // Prints a string field.
-
+  // Prints a real field.
+   
   extern virtual function void print_real (string  name, 
                                            real    value,
                                            byte    scope_separator=".");
