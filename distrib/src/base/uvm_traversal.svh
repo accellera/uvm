@@ -153,6 +153,7 @@ class uvm_component_name_check_visitor extends uvm_visitor#(uvm_component);
 	endfunction
 
 	virtual function void visit(NODE node);
+`ifndef UVM_NO_DPI
 		static chandle compiled_regex;
 		
 		if(compiled_regex==null)
@@ -164,7 +165,7 @@ class uvm_component_name_check_visitor extends uvm_visitor#(uvm_component);
 		if(_root != node)
 			if(uvm_dpi_regexec(compiled_regex, node.get_name())) 
 				`uvm_warning("UVM/COMP/NAME",$sformatf("the name \"%s\" of the component \"%s\" violates the uvm component name constraints",node.get_name(),node.get_full_name()))
-
+`endif
 	endfunction 
 	function new (string name = "");
 		super.new(name);
@@ -174,9 +175,14 @@ class uvm_component_name_check_visitor extends uvm_visitor#(uvm_component);
 		uvm_coreservice_t cs = uvm_coreservice_t::get();
    
 		_root =  cs.get_root();
+`ifdef UVM_NO_DPI
+		`uvm_info("UVM/COMP/NAMECHECK","This implementation of the component name checks requires DPI to be enabled",UVM_NONE)
+`endif
 	endfunction
 	virtual function void end_v(); 
+`ifndef UVM_NO_DPI
 		uvm_dpi_regfree(visit.compiled_regex);
 		visit.compiled_regex=null;  
+`endif
 	endfunction
 endclass    
