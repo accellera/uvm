@@ -2660,8 +2660,7 @@ function void uvm_component::free_tr_stream(uvm_tr_stream stream);
 
    // Finally, free the stream if necessary
    if (stream.is_open() || stream.is_closed()) begin
-      uvm_tr_database tr_db = stream.get_db();
-      tr_db.free_stream(stream);
+      stream.free();
    end
 endfunction : free_tr_stream
    
@@ -2771,7 +2770,6 @@ function void uvm_component::end_tr (uvm_transaction tr,
                                      bit free_handle=1);
    uvm_event#() e;
    uvm_recorder recorder;
-   uvm_tr_stream stream;
    uvm_tr_database db = m_get_tr_database();
 
    if (tr == null)
@@ -2791,12 +2789,10 @@ function void uvm_component::end_tr (uvm_transaction tr,
 
          tr.record(recorder);
 
-         stream = recorder.get_stream();
+         recorder.close(end_time);
 
-         stream.close_recorder(recorder, end_time);
-         
          if (free_handle)
-           stream.free_recorder(recorder);
+           recorder.free();
             
       end
       else begin
@@ -2854,11 +2850,11 @@ function integer uvm_component::record_error_tr (string stream_name="main",
            recorder.record_string("desc", desc);
          if (info!=null)
            info.record(recorder);
-         
-         stream.close_recorder(recorder, error_time);
+
+         recorder.close(error_time);
 
          if (keep_active == 0) begin
-            stream.free_recorder(recorder);
+            recorder.free();
          end
          else begin
             handle = recorder.get_handle();
@@ -2911,11 +2907,11 @@ function integer uvm_component::record_event_tr (string stream_name="main",
            recorder.record_string("desc", desc);
          if (info!=null)
            info.record(recorder);
-                                         
-         stream.close_recorder(recorder, event_time);
+                        
+         recorder.close(event_time);
 
          if (keep_active == 0) begin
-            stream.free_recorder(recorder);
+            recorder.free();
          end
          else begin
             handle = recorder.get_handle();

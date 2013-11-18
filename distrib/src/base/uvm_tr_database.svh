@@ -55,13 +55,9 @@ virtual class uvm_tr_database extends uvm_object;
    // Tracks the opened state of the database
    local bit m_is_opened;
 
-   // Variable- m_open_streams
-   // Used for tracking streams between the open..closed state
-   local bit m_open_streams[uvm_tr_stream];
-
-   // Variable- m_closed_streams
-   // Used for tracking streams between the closed..free state
-   local bit m_closed_streams[uvm_tr_stream];
+   // Variable- m_streams
+   // Used for tracking streams which are between the open and closed states
+   local bit m_streams[uvm_tr_stream];
    
    // Function: new
    // Constructor
@@ -149,135 +145,41 @@ virtual class uvm_tr_database extends uvm_object;
       
       open_stream = do_open_stream(name, cntxt, type_name);
       if (open_stream != null) begin
-         m_open_streams[open_stream] = 1;
-         open_stream.m_do_opened(this, cntxt, type_name);
+         m_streams[open_stream] = 1;
+         open_stream.m_do_open(this, cntxt, type_name);
       end
    endfunction : open_stream
 
-   // Function: close_stream
-   // Closes the ~stream~ within the database.
+   // Function- m_free_stream
+   // Removes stream from the internal array
+   function void m_free_stream(uvm_tr_stream stream);
+      if (m_streams.exists(stream))
+        m_streams.delete(stream);
+   endfunction : m_free_stream
+   
+   // Function: get_streams
+   // Provides a queue of all streams within the database.
    //
    // Parameters:
-   //   stream - The stream which is being closed.
+   // q - A reference to a queue of <uvm_tr_stream>s
    //
-   // Closing a stream implicitly closes all open <uvm_recorders>
-   // on the stream.
-   //
-   // This method will trigger a <do_close_stream> call.
-   function void close_stream (uvm_tr_stream stream);
-      uvm_recorder tr_q[$];
-
-      if (!is_open())
-        return;
-      
-      if (stream == null)
-        return;
-
-      if (!m_open_streams.exists(stream)) begin
-         `uvm_warning("UVM/TR_DB/CLOSE_STREAM", $sformatf("ignoring attempt to close stream '%s' which is not open on database '%s'", stream.get_name(), this.get_name()))
-         return;
-      end
-
-      stream.m_do_closing();
-      do_close_stream(stream);
-
-      m_open_streams.delete(stream);
-      m_closed_streams[stream] = 1;
-      
-   endfunction : close_stream
-
-   // Function: free_stream
-   // Indicates the database can free any references to the stream
-   // (including associated records).
-   //
-   // Parameters:
-   //   stream - The stream which is being freed.
-   //
-   // Freeing a stream implicitly closes the stream (if it has
-   // not already been closed), as well as closing/freeing any <uvm_recorders>
-   // on the stream.
-   //
-   // This method will trigger a <uvm_tr_stream::do_freeing>, followed by
-   // <do_free_stream> call.
-   function void free_stream (uvm_tr_stream stream);
-      uvm_recorder tr_q[$];
-
-      if (!is_open())
-        return;
-      
-      if (stream == null)
-        return;
-
-      if (m_open_streams.exists(stream))
-        close_stream(stream);
-      
-      if (!m_closed_streams.exists(stream)) begin
-         `uvm_warning("UVM/TR_DB/FREE_STREAM", $sformatf("ignoring attempt to close stream '%s' which is not on database '%s'", stream.get_name(), this.get_name()))
-         return;
-      end
-
-      stream.m_do_freeing();
-      do_free_stream(stream);
-
-   endfunction : free_stream
-
-   // Function: get_open_streams
-   // Provides a queue of all open streams within the database.
-   //
-   // Parameters:
-   //  q - A reference to a queue of <uvm_tr_stream>s
-   //
-   // The ~get_open_streams~ method returns the size of the queue,
+   // The ~get_streams~ method returns the size of the queue,
    // such that the user can conditionally process the elements.
    //
    // | uvm_tr_stream stream_q[$];
-   // | if (my_db.get_open_streams(stream_q)) begin
-   // |   // process the queue...
+   // | if (my_db.get_streams(stream_q)) begin
+   // |   // Process the queue...
    // | end
-   function unsigned get_open_streams(ref uvm_tr_stream q[$]);
+   function unsigned get_streams(ref uvm_tr_stream q[$]);
       // Clear out the queue first...
       q.delete();
       // Then fill in the values
-      foreach (m_open_streams[idx])
+      foreach (m_streams[idx])
         q.push_back(idx);
       // Finally, return the size of the queue
       return q.size();
-   endfunction : get_open_streams
-
-   // Function: get_closed_streams
-   // Provides a queue of all closed streams within the database.
-   //
-   // Parameters:
-   //  q - A reference to a queue of <uvm_tr_stream>s
-   //
-   // As with ~get_open_streams~, the ~get_closed_streams~ method returns
-   // the size of the queue, such that the user can conditionally process
-   // the elements.
-   //
-   function unsigned get_closed_streams(ref uvm_tr_stream q[$]);
-      // Clear out the queue first...
-      q.delete();
-      // Then fill in the values
-      foreach (m_closed_streams[idx])
-        q.push_back(idx);
-      // Finally, return the size of the queue
-      return q.size();
-   endfunction : get_closed_streams
-      
-   // Function: is_stream_open
-   // Returns true if the <uvm_tr_stream> has been ~opened~, but not ~closed~.
-   //
-   function bit is_stream_open(uvm_tr_stream stream);
-      return m_open_streams.exists(stream);
-   endfunction : is_stream_open
-
-   // Function: is_stream_closed
-   // Returns true if the <uvm_tr_stream> has been ~closed~, but not ~freed~.
-   //
-   function bit is_stream_closed(uvm_tr_stream stream);
-      return m_closed_streams.exists(stream);
-   endfunction : is_stream_closed
-
+   endfunction : get_streams
+   
    // Group: Link API
    
    // Function: establish_link
@@ -361,14 +263,6 @@ virtual class uvm_tr_database extends uvm_object;
    pure virtual protected function uvm_tr_stream do_open_stream(string name,
                                                                    uvm_component cntxt,
                                                                    string type_name);
-
-   // Function: do_close_stream
-   // Backend implementation of <close_stream>
-   pure virtual protected function void do_close_stream(uvm_tr_stream stream);
-
-   // Function: do_free_stream
-   // Backend implementation of <close_stream>
-   pure virtual protected function void do_free_stream(uvm_tr_stream stream);
 
    // Function: do_establish_link
    // Backend implementation of <establish_link>
@@ -462,20 +356,6 @@ class uvm_text_tr_database extends uvm_tr_database;
       return m_stream;
    endfunction : do_open_stream
 
-   // Function: do_close_stream
-   // Closes a stream in the database.
-   //
-   // Text-Backend implementation of <uvm_tr_database::close_stream>
-   protected virtual function void do_close_stream(uvm_tr_stream stream);
-   endfunction : do_close_stream
-   
-   // Function: do_free_stream
-   // Frees a stream in the database.
-   //
-   // Text-Backend implementation of <uvm_tr_database::free_stream>
-   protected virtual function void do_free_stream(uvm_tr_stream stream);
-   endfunction : do_free_stream
-   
    // Function: do_establish_link
    // Establishes a ~link~ between two elements in the database
    //

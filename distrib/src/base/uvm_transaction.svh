@@ -732,7 +732,10 @@ function integer uvm_transaction::m_begin_tr (time begin_time=0,
            db.establish_link(uvm_parent_child_link::get_link(parent_recorder, tr_recorder));
       end
 
-      m_begin_tr = tr_recorder.get_handle();
+      if (tr_recorder != null)
+        m_begin_tr = tr_recorder.get_handle();
+      else
+        m_begin_tr = 0;
    end
    else begin
       tr_recorder = null;
@@ -757,15 +760,15 @@ function void uvm_transaction::end_tr (time end_time=0, bit free_handle=1);
 
    do_end_tr(); // Callback prior to actual ending of transaction
 
-   if(is_recording_enabled()) begin
+   if(is_recording_enabled() && (tr_recorder != null)) begin
       record(tr_recorder);
 
-      stream_handle.close_recorder(tr_recorder, this.end_time);
+      tr_recorder.close(this.end_time);
 
       if(free_handle) 
         begin  
            // once freed, can no longer link to
-           stream_handle.free_recorder(tr_recorder);
+           tr_recorder.free();
         end
    end // if (is_active())
 

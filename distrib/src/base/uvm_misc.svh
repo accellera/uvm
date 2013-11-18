@@ -509,16 +509,16 @@ function string uvm_integral_to_string (uvm_integral_t value, int size,
                                          uvm_radix_enum radix=UVM_NORADIX,
                                          string radix_str="");
    
-   logic q[];
-
   // sign extend & don't show radix for negative values
   if (radix == UVM_DEC && value[size-1] === 1)
     return $sformatf("%0d", value);
 
   if($isunknown(value)) begin
-     q = new[size];
-     {>>{q}} = value;
-     value = {>>{q}};
+     uvm_integral_t _t;
+     _t = 0;
+     for(int idx=0;idx<size;idx++)
+       _t[idx]=value[idx];
+     value = _t;
   end
   else begin
      value &= (1 << size)-1;

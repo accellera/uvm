@@ -47,6 +47,24 @@ virtual class uvm_recorder extends uvm_object;
   // Variable- m_warn_null_stream
   // Used to limit the number of warnings 
   local bit m_warn_null_stream;
+
+  // Variable- m_is_opened
+  // Used to indicate recorder is open
+  local bit m_is_opened;
+   
+  // Variable- m_is_closed
+  // Used to indicate recorder is closed
+  local bit m_is_closed;
+
+  // !m_is_opened && !m_is_closed == m_is_freed
+
+  // Variable- m_open_time
+  // Used to store the open_time
+  local time m_open_time;
+
+  // Variable- m_close_time
+  // Used to store the close_time
+  local time m_close_time;
    
   // Variable- recording_depth
   int recording_depth;
@@ -107,14 +125,14 @@ virtual class uvm_recorder extends uvm_object;
      m_warn_null_stream = 1;
   endfunction
 
-   // Group: Transaction Recorder API
+   // Group: Configuration API
    
    // Function: get_stream
    // Returns a reference to the stream which created
    // this record.
    //
    // A warning will be asserted if get_stream is called prior
-   // to the record being initialized via <do_opened>.
+   // to the record being initialized via <do_open>.
    //
    function uvm_tr_stream get_stream();
       if (!m_stream_dap.try_get(get_stream)) begin
@@ -126,46 +144,123 @@ virtual class uvm_recorder extends uvm_object;
       end
    endfunction : get_stream
 
+   // Group: Transaction Recorder API
+   //
+   // Once a recorder has been opened via <uvm_tr_stream::open_recorder>, the user
+   // can ~close~ the recorder.
+   //
+   // Due to the fact that many database implementations will require crossing
+   // a language boundary, an additional step of ~freeing~ the recorder is required.
+   //
+   // A ~link~ can be established within the database any time between ~open~ and
+   // ~free~, however it is illegal to establish a link after ~freeing~ the recorder.
+   //
+
+   // Function: close
+   // Closes this recorder.
+   //
+   // Closing a recorder marks the end of the transaction in the stream.
+   //
+   // Parameters:
+   // close_time - Optional time to record as the closing time of this transaction.
+   //
+   // This method will trigger a <do_close> call.
+   function void close(time close_time = 0);
+      if (close_time == 0)
+        close_time = $realtime;
+
+      if (!is_open())
+        return;
+
+      do_close(close_time);
+      
+      m_is_opened = 0;
+      m_is_closed = 1;
+      m_close_time = close_time;
+   endfunction : close
+
+   // Function: free
+   // Frees this recorder
+   //
+   // Freeing a recorder indicates that the stream and database can release
+   // any references to the recorder.
+   //
+   // Parameters:
+   // close_time - Optional time to record as the closing time of this transaction.
+   //
+   // If a recorder has not yet been closed (via a call to <close>), then
+   // <close> will automatically be called, and passed the ~close_time~.  If the recorder
+   // has already been closed, then the ~close_time~ will be ignored.
+   //
+   // This method will trigger a <do_free> call.
+   function void free(time close_time = 0);
+      uvm_tr_stream stream;
+      if (!is_open() && !is_closed())
+        return;
+
+      if (is_open()) begin
+         close(close_time);
+      end
+
+      do_free();
+
+      // Clear out internal state
+      stream = get_stream();
+      
+      m_is_closed = 0;
+      m_stream_dap = new("stream_dap");
+      m_warn_null_stream = 1;
+      if (m_ids_by_recorder.exists(this))
+        m_free_id(m_ids_by_recorder[this]);
+
+      // Clear out stream state
+      if (stream != null)
+        stream.m_free_recorder(this);
+   endfunction : free
+      
    // Function: is_open
    // Returns true if this ~uvm_recorder~ was opened on its stream,
    // but has not yet been closed.
    //
    function bit is_open();
-      uvm_tr_stream stream;
-      if (!m_stream_dap.try_get(stream)) begin
-        return 0;
-      end
-
-      return stream.is_recorder_open(this);
+      return m_is_opened;
    endfunction : is_open
+
+   // Function: get_open_time
+   // Returns the ~open_time~
+   //
+   function time get_open_time();
+      return m_open_time;
+   endfunction : get_open_time
 
    // Function: is_closed
    // Returns true if this ~uvm_recorder~ was closed on its stream,
    // but has not yet been freed.
    //
    function bit is_closed();
-      uvm_tr_stream stream;
-      if (!m_stream_dap.try_get(stream)) begin
-        return 0;
-      end
-
-      return stream.is_recorder_closed(this);
+      return m_is_closed;
    endfunction : is_closed
     
+   // Function: get_close_time
+   // Returns the ~close_time~
+   //
+   function time get_close_time();
+      return m_close_time;
+   endfunction : get_close_time
 
-  // Function- m_do_opened
+  // Function- m_do_open
   // Initializes the internal state of the recorder.
   //
   // Parameters:
   // stream - The stream which spawned this recorder
   //
-  // This method will trigger a <do_opened> call.
+  // This method will trigger a <do_open> call.
   //
   // An error will be asserted if:
-  // - ~m_do_opened~ is called more than once without the
+  // - ~m_do_open~ is called more than once without the
   //  recorder being ~freed~ in between.
   // - ~stream~ is ~null~
-  function void m_do_opened(uvm_tr_stream stream, time open_time, string type_name);
+  function void m_do_open(uvm_tr_stream stream, time open_time, string type_name);
      uvm_tr_stream m_stream;
      if (stream == null) begin
         `uvm_error("UVM/REC/NULL_STREAM",
@@ -182,34 +277,11 @@ virtual class uvm_recorder extends uvm_object;
      end
 
      m_stream_dap.set(stream);
-
-     do_opened(stream, open_time, type_name);
-  endfunction : m_do_opened
-
-  // Function- m_do_closing
-  // Sets the internal state of the recorder to 'closed'
-  //
-  // This method will trigger a <do_closing> call.
-  function void m_do_closing(time close_time);
-
-     do_closing(close_time);
-  endfunction : m_do_closing
-   
-  // Function- m_do_freeing
-  // Flushes the internal state of the recorder.
-  //
-  // This method will be called automatically when the
-  // recorder is ~freed~ on the stream.
-  //
-  // This method will trigger a <do_flush> call.
-  function void m_do_freeing();
-     do_freeing();
-     m_stream_dap = new("stream_dap");
-     m_warn_null_stream = 1;
-     // Backwards compat
-     if (m_ids_by_recorder.exists(this))
-       m_free_id(m_ids_by_recorder[this]);
-  endfunction : m_do_freeing
+     m_open_time = open_time;
+     m_is_opened = 1;
+     
+     do_open(stream, open_time, type_name);
+  endfunction : m_do_open
 
    // Group: Handles
 
@@ -270,16 +342,6 @@ virtual class uvm_recorder extends uvm_object;
       end
    endfunction : get_handle
 
-   // Function- m_get_handle
-   // Provided to allow implementation-specific handles which are not
-   // identical to the built-in handles.
-   //
-   // This is an implementation detail of the UVM library, which allows
-   // for vendors to (optionally) put vendor-specific mehods into the library.
-   virtual function integer m_get_handle();
-      return get_handle();
-   endfunction : m_get_handle
-   
    // Function: get_recorder_from_handle
    // Static accessor, returns a recorder reference for a given unique id.
    //
@@ -306,6 +368,17 @@ virtual class uvm_recorder extends uvm_object;
       return m_recorders_by_id[id];
    endfunction : get_recorder_from_handle
 
+   // Function: get_record_attribute_handle
+   // Provides a tool-specific handle which is compatible with <`uvm_record_attribute>.
+   //
+   // By default, this method will return the same value as <get_handle>,
+   // however tool vendors can override this method to provide tool-specific handles
+   // which will be passed to the <`uvm_record_attribute> macro.
+   //
+   virtual function integer get_record_attribute_handle();
+      return get_handle();
+   endfunction : get_record_attribute_handle
+   
    // Group: Attribute Recording
    
    // Function: record_field
@@ -439,34 +512,34 @@ virtual class uvm_recorder extends uvm_object;
 
    // Group: Implementation Agnostic API
 
-   // Function: do_opened
+   // Function: do_open
    // Callback triggered via <uvm_tr_stream::open_recorder>.
    //
-   // The ~do_opened~ callback can be used to initialize any internal
+   // The ~do_open~ callback can be used to initialize any internal
    // state within the recorder, as well as providing a location to
    // record any initial information.
-   protected virtual function void do_opened(uvm_tr_stream stream,
+   protected virtual function void do_open(uvm_tr_stream stream,
                                              time open_time,
                                              string type_name);
-   endfunction : do_opened
+   endfunction : do_open
 
-   // Function: do_closing
-   // Callback triggered via <uvm_tr_stream::close_recorder>.
+   // Function: do_close
+   // Callback triggered via <close>.
    //
-   // The ~do_closing~ callback can be used to set internal state
+   // The ~do_close~ callback can be used to set internal state
    // within the recorder, as well as providing a location to
    // record any closing information.
-   protected virtual function void do_closing(time close_time);
-   endfunction : do_closing
+   protected virtual function void do_close(time close_time);
+   endfunction : do_close
 
-   // Function: do_freeing
-   // Callback triggered via <uvm_tr_stream::free_recorder>.
+   // Function: do_free
+   // Callback triggered via <free>.
    //
-   // The ~do_freeing~ callback can be used to release the internal
+   // The ~do_free~ callback can be used to release the internal
    // state within the recorder, as well as providing a location
    // to record any "freeing" information.
-   protected virtual function void do_freeing();
-   endfunction : do_freeing
+   protected virtual function void do_free();
+   endfunction : do_free
    
    // Function: do_record_field
    // Records an integral field (less than or equal to 4096 bits).
@@ -654,52 +727,53 @@ class uvm_text_recorder extends uvm_recorder;
 
    // Group: Implementation Agnostic API
 
-   // Function: do_opened
+   // Function: do_open
    // Callback triggered via <uvm_tr_stream::open_recorder>.
    //
    // Text-backend specific implementation.
-   protected virtual function void do_opened(uvm_tr_stream stream,
+   protected virtual function void do_open(uvm_tr_stream stream,
                                              time open_time,
                                              string type_name);
       $cast(m_text_db, stream.get_db());
-      $fdisplay(m_text_db.m_file, 
-                "BEGIN @%0t {TXH:%0d STREAM:%0d NAME:%s TIME:%0t TYPE=\"%0s\"}",
-                $time,
-                this.get_handle(),
-                stream.get_handle(),
-                this.get_name(),
-                open_time,
-                type_name);
-   endfunction : do_opened
+      if (m_text_db.open_db())
+        $fdisplay(m_text_db.m_file, 
+                  "    OPEN_RECORDER @%0t {TXH:%0d STREAM:%0d NAME:%s TIME:%0t TYPE=\"%0s\"}",
+                  $realtime,
+                  this.get_handle(),
+                  stream.get_handle(),
+                  this.get_name(),
+                  open_time,
+                  type_name);
+   endfunction : do_open
 
-   // Function: do_closing
-   // Callback triggered via <uvm_tr_stream::close_recorder>.
+   // Function: do_close
+   // Callback triggered via <close>.
    //
    // Text-backend specific implementation.
-   protected virtual function void do_closing(time close_time);
+   protected virtual function void do_close(time close_time);
       if (m_text_db.open_db()) begin
          $fdisplay(m_text_db.m_file, 
-                   "END @%0t {TXH:%0d TIME=%0t}",
-                   $time,
+                   "    CLOSE_RECORDER @%0t {TXH:%0d TIME=%0t}",
+                   $realtime,
                    this.get_handle(),
                    close_time);
          
       end
-   endfunction : do_closing
+   endfunction : do_close
 
-   // Function: do_freeing
-   // Callback triggered via <uvm_tr_stream::free_recorder>.
+   // Function: do_free
+   // Callback triggered via <free>.
    //
    // Text-backend specific implementation.
-   protected virtual function void do_freeing();
+   protected virtual function void do_free();
       if (m_text_db.open_db()) begin
          $fdisplay(m_text_db.m_file, 
-                   "FREE @%0t {TXH:%0d}",
-                   $time,
+                   "    FREE_RECORDER @%0t {TXH:%0d}",
+                   $realtime,
                    this.get_handle());
       end
       m_text_db = null;
-   endfunction : do_freeing
+   endfunction : do_free
    
    // Function: do_record_field
    // Records an integral field (less than or equal to 4096 bits).
@@ -750,10 +824,10 @@ class uvm_text_recorder extends uvm_recorder;
       bit [63:0] ival = $realtobits(value);
       scope.set_arg(name);
 
-      write_attribute(scope.get(),
-                      ival,
-                      UVM_REAL,
-                      64);
+      write_attribute_int(scope.get(),
+                          ival,
+                          UVM_REAL,
+                          64);
    endfunction : do_record_field_real
 
    // Function: do_record_object
@@ -775,10 +849,10 @@ class uvm_text_recorder extends uvm_recorder;
             v = str.atoi(); 
          end
          scope.set_arg(name);
-         write_attribute(scope.get(), 
-                         v, 
-                         UVM_DEC, 
-                         32);
+         write_attribute_int(scope.get(), 
+                             v, 
+                             UVM_DEC, 
+                             32);
       end
  
       if(policy != UVM_REFERENCE) begin
@@ -802,8 +876,8 @@ class uvm_text_recorder extends uvm_recorder;
       scope.set_arg(name);
       if (m_text_db.open_db()) begin
          $fdisplay(m_text_db.m_file, 
-                   "  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%s   RADIX:%s BITS=%0d}",
-                   $time,
+                   "      SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%s   RADIX:%s BITS=%0d}",
+                   $realtime,
                    this.get_handle(),
                    scope.get(),
                    value,
@@ -819,10 +893,10 @@ class uvm_text_recorder extends uvm_recorder;
    protected virtual function void do_record_time(string name,
                                                     time value);
       scope.set_arg(name);
-      write_attribute(scope.get(), 
-                      value,
-                      UVM_TIME, 
-                      64);
+      write_attribute_int(scope.get(), 
+                          value,
+                          UVM_TIME, 
+                          64);
    endfunction : do_record_time
 
    // Function: do_record_generic
@@ -855,8 +929,8 @@ class uvm_text_recorder extends uvm_recorder;
                                  integer numbits=$bits(uvm_bitstream_t));
       if (m_text_db.open_db()) begin
          $fdisplay(m_text_db.m_file, 
-                   "  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%s   RADIX:%s BITS=%0d}",
-                   $time,
+                   "      SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%s   RADIX:%s BITS=%0d}",
+                   $realtime,
                    this.get_handle(),
                    nm,
                    uvm_bitstream_to_string(value, numbits, radix),
@@ -879,8 +953,8 @@ class uvm_text_recorder extends uvm_recorder;
                                      integer numbits=$bits(uvm_bitstream_t));
       if (m_text_db.open_db()) begin
          $fdisplay(m_text_db.m_file, 
-                   "  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%0d   RADIX:%s BITS=%0d}",
-                   $time,
+                   "      SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%0d   RADIX:%s BITS=%0d}",
+                   $realtime,
                    this.get_handle(),
                    nm,
                    uvm_integral_to_string(value, numbits, radix),
@@ -939,7 +1013,7 @@ class uvm_text_recorder extends uvm_recorder;
                                  string value);
      if (open_file()) begin
         UVM_FILE file = m_text_db.m_file;
-        $fdisplay(file,"  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%s}", $time,txh,nm,value);
+        $fdisplay(file,"      SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%s}", $realtime,txh,nm,value);
      end
   endfunction
   
@@ -955,8 +1029,8 @@ class uvm_text_recorder extends uvm_recorder;
      if (open_file()) begin
         UVM_FILE file = m_text_db.m_file;
          $fdisplay(file, 
-                   "  SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%s   RADIX:%s BITS=%0d}",
-                   $time,
+                   "      SET_ATTR @%0t {TXH:%0d NAME:%s VALUE:%s   RADIX:%s BITS=%0d}",
+                   $realtime,
                    txh,
                    nm,
                    uvm_bitstream_to_string(value, numbits, radix),
@@ -1006,9 +1080,7 @@ class uvm_text_recorder extends uvm_recorder;
      if (open_file()) begin
         uvm_recorder record = uvm_recorder::get_recorder_from_handle(handle);
         if (record != null) begin
-           uvm_tr_stream stream = record.get_stream();
-           if (stream != null)
-             stream.close_recorder(record, end_time);
+           record.close(end_time);
         end
      end
   endfunction
@@ -1021,7 +1093,7 @@ class uvm_text_recorder extends uvm_recorder;
                                  integer h2,
                                  string relation="");
     if (open_file())
-      $fdisplay(m_text_db.m_file,"  LINK @%0t {TXH1:%0d TXH2:%0d RELATION=%0s}", $time,h1,h2,relation);
+      $fdisplay(m_text_db.m_file,"  LINK @%0t {TXH1:%0d TXH2:%0d RELATION=%0s}", $realtime,h1,h2,relation);
   endfunction
   
   
@@ -1033,9 +1105,7 @@ class uvm_text_recorder extends uvm_recorder;
      if (open_file()) begin
         uvm_recorder record = uvm_recorder::get_recorder_from_handle(handle);
         if (record != null) begin
-           uvm_tr_stream stream = record.get_stream();
-           if (stream != null)
-             stream.free_recorder(record);
+           record.free();
         end
      end
   endfunction // free_tr
