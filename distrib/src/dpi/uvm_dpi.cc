@@ -29,12 +29,19 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#ifdef VCSMX
+#define VCS
+#endif
 
 #include <stdlib.h>
 #include "uvm_dpi.h"
 #include "uvm_common.c"
 #include "uvm_regex.cc"
+#ifdef VCS
+#include "uvm_hdl_vcs.c"
+#else
 #include "uvm_hdl.c"
+#endif
 #include "uvm_svcmd_dpi.c"
 
 #ifdef __cplusplus
