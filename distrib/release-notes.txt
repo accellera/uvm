@@ -154,7 +154,7 @@ Mantis 4587: Added length, byte_enable, byte_length fixes for reg2bus to adhere 
 
 Mantis 4588: changes in hw_reset_seq to ensure sub-blocks are excluded when relevant NO_REG_TEST attribute is set
 
-Mantis 4588: impleemnted capability to allow VHDL REG backdoor access using VCS. Users need to pass elaboration swtich with arguments to enable Mixed-Language API's -cflags "-DVCSMX" 
+Mantis 4590: implemented capability to allow VHDL UVM_REG backdoor access using VCS. Users need to pass elaboration swtich with arguments to enable Mixed-Language API's -cflags "-DVCSMX" 
 
 (*) Mantis 4606: uvm_report server is not chainable/extendable uvm_report_server can now be extended, chained using delegate pattern
 

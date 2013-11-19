@@ -30,7 +30,7 @@ comp:
 	vlogan -q -ntb_opts uvm -sverilog
 	vhdlan zero.vhd
 	vlogan -q -ntb_opts uvm -sverilog test.sv 
-	vcs -q -nc -noIncrComp -timescale=1ns/1ns +acc +vpi -cflags -DVCS -ntb_opts uvm dut -top top
+	vcs -q -nc -noIncrComp -timescale=1ns/1ns +acc +vpi -cflags -DVCSMX -ntb_opts uvm dut -top top
 
 run:
 	$(SIMV) +UVM_TESTNAME=test
