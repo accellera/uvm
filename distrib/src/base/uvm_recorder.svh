@@ -108,14 +108,17 @@ class uvm_recorder extends uvm_object;
   endfunction
 
 
-  // Function: get_type_name
+  // Function: use_record_attribute
   //
-  // Returns type name of the recorder. Subtypes must override this method
-  // to enable the <`uvm_record_field> macro.
+  // Indicates that this recorder does (or does not) support usage of
+  // the <`uvm_record_attribute> macro.
   //
-  //| virtual function string get_type_name()
-
-
+  // The default return value is ~0~ (not supported), developers can
+  // optionally extend ~uvm_recorder~ and set the value to ~1~ if they
+  // support the <`uvm_record_attribute> macro.
+  virtual function bit use_record_attribute();
+     return 0;
+  endfunction : use_record_attribute
 
   // Function: record_field
   //

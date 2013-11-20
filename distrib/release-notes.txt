@@ -199,6 +199,13 @@ were not being routed through standard UVM messaging.
 Mantis 4743: uvm_sequencer::get_next_item/try_next_item/item_done/get/peek/put
 may now be called directly.
 
+(*) Mantis 4766: Fix broken `uvm_record_field / attribute interaction.
+  The fix for this mantis involved creating a new method
+  'use_record_attribute' in uvm_recorder.  The new method allows for a
+  conditional usage of the `uvm_record_attribute macro, allowing users
+  to create their own recorders without interfering with
+  vendor-specific recorders
+
 (+) Mantis 4767: Fixed the `uvm_pack and `uvm_unpack macros which
 bypassed the packer policy methods.  Additionally, added
 pack_bits/bytes/ints and unpack_bits/bytes/ints to allow easier
@@ -206,3 +213,4 @@ compatibility with the SystemVerilog stream operator.
 
 Mantis 4772: separated hdl vendor dpi backends into one file per vendor
 
+(+) Mantis 4784: documenting the `uvm_record_(int,string,real,time) macros
