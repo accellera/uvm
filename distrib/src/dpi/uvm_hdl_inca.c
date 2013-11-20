@@ -135,12 +135,12 @@ static int uvm_hdl_set_vhdl(char* path, p_vpi_vecval value, PLI_INT32 flag)
   size = vhpi_get(vhpiSizeP, r);
   if(size > maxsize)
   {
+    // FIXME report via uvm 
+
     //vpi_printf("*F,regmem : hdl path %s is %0d bits, but the maximum size is %0d, redefine using -define RGM_DWIDTH=<value>  \n", vhpi_get_str(vhpiFullNameP,r), size,maxsize);
     vpi_printf((PLI_BYTE8*) "UVM_ERROR: uvm_reg : hdl path '%s' is %0d bits,\n",path,size);
     vpi_printf((PLI_BYTE8*) " but the maximum size is %0d. You can increase the maximum\n",maxsize);
     vpi_printf((PLI_BYTE8*) " via a compile-time flag: +define+UVM_HDL_MAX_WIDTH=<value>\n");
-
-    // FIXME report via uvm 
 
     tf_dofinish();
   }

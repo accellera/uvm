@@ -98,7 +98,7 @@ begin
    #50; // get between updates to q
    op(DEPOSIT, "dut.q",       'h3F, 'h3F, `__LINE__);
 #5;
-   op(FORCE, "dut.z.ZERO",       'hFF, 'hA5, `__LINE__);
+   op(FORCE, "dut.z.ZERO",       'hFF, 'h0f, `__LINE__);
    op(READ, "dut.z.ZERO",       , 'h0F, `__LINE__);
 #5;
    op(DEPOSIT, "dut.z.b",       'hAB, 'hAB, `__LINE__);

@@ -157,12 +157,13 @@ begin
    op(READ,    ":w",           , 'hF0, `__LINE__);
 
    op(FORCE,   ":d",       'h0F, 'h0F, `__LINE__, 100); // d forced for 100, then released
+// #850
 
    op(READ,    ":q",           , 'h0F, `__LINE__); // q and w should be d
    op(READ,    ":w",           , 'h0F, `__LINE__);
 
    op(FORCE,   ":w",       'hAA, 'h0F, `__LINE__, 100); // w is driven to AA for 100, then released,
-                                                           // which immed re-evaluates to its q driver, which is 'h0F
+ // #950                                                          // which immed re-evaluates to its q driver, which is 'h0F
 
    // TODO: test undriven wire
    
