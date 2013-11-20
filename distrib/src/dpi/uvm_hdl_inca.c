@@ -36,8 +36,6 @@ static int is_verilog(char* path)
 {
   vhpiHandleT r = vhpi_handle_by_name(path, 0);
 
-  vpi_printf("handle is %x\n",r);
-
   if(r == 0)
   {
     return 1;
@@ -229,10 +227,8 @@ static int uvm_hdl_set_vhdl(char* path, p_vpi_vecval value, PLI_INT32 flag)
     }
   }
 
-  if(flag)
-    vhpi_put_value(r, &value_s, vhpiForcePropagate);  
-  else
-    vhpi_put_value(r, &value_s, vhpiDepositPropagate);  
+  vhpi_put_value(r, &value_s, flag);  
+
   if(value_s.format == vhpiEnumVecVal)
   {
     free(value_s.value.enumvs);
@@ -310,7 +306,7 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
   return 1;
 }
 
-static int uvm_hdl_get_vhdl(char* path, p_vpi_vecval value, PLI_INT32 flag)
+static int uvm_hdl_get_vhdl(char* path, p_vpi_vecval value)
 {
   static int maxsize = -1;
   int i, j, size, chunks, bit, aval, bval, rtn;
@@ -479,7 +475,7 @@ int uvm_hdl_check_path(char *path)
 int uvm_hdl_read(char *path, p_vpi_vecval value)
 {
   if(is_verilog(path)) return uvm_hdl_get_vlog(path, value, vpiNoDelay);
-  else return uvm_hdl_get_vhdl(path, value, vpiNoDelay);
+  else return uvm_hdl_get_vhdl(path, value);
 }
 
 /*
@@ -489,7 +485,7 @@ int uvm_hdl_read(char *path, p_vpi_vecval value)
 int uvm_hdl_deposit(char *path, p_vpi_vecval value)
 {
   if(is_verilog(path)) return uvm_hdl_set_vlog(path, value, vpiNoDelay);
-  else return uvm_hdl_set_vhdl(path, value, 0);
+  else return uvm_hdl_set_vhdl(path, value, vhpiDepositPropagate);
 }
 
 
@@ -500,7 +496,7 @@ int uvm_hdl_deposit(char *path, p_vpi_vecval value)
 int uvm_hdl_force(char *path, p_vpi_vecval value)
 {
   if(is_verilog(path)) return uvm_hdl_set_vlog(path, value, vpiForceFlag);
-  else return uvm_hdl_set_vhdl(path, value, vpiForceFlag);
+  else return uvm_hdl_set_vhdl(path, value, vhpiForcePropagate);
 }
 
 
@@ -510,8 +506,13 @@ int uvm_hdl_force(char *path, p_vpi_vecval value)
  */
 int uvm_hdl_release_and_read(char *path, p_vpi_vecval value)
 {
-  // FIXME missing
-    return uvm_hdl_set_vlog(path, value, vpiReleaseFlag);
+  if(is_verilog(path)) {
+    uvm_hdl_set_vlog(path, value, vpiReleaseFlag);
+    return uvm_hdl_get_vlog(path, value, vpiNoDelay);
+  } else {
+    uvm_hdl_set_vhdl(path, value, vhpiRelease);
+    return uvm_hdl_get_vhdl(path, value);
+  }
 }
 
 /*
@@ -520,9 +521,9 @@ int uvm_hdl_release_and_read(char *path, p_vpi_vecval value)
  */
 int uvm_hdl_release(char *path)
 {
-  // FIXME missing
   s_vpi_vecval value;
   p_vpi_vecval valuep = &value;
-  return uvm_hdl_set_vlog(path, valuep, vpiReleaseFlag);
+  if(is_verilog(path)) uvm_hdl_set_vlog(path, valuep, vpiReleaseFlag);
+  else return uvm_hdl_set_vhdl(path, valuep, vhpiRelease);
 }
 

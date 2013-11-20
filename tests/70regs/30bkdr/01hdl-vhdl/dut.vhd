@@ -15,9 +15,9 @@ begin  -- arch
   process
   begin
     loop
-    wait for 100 ns;
-    q <= d;
-  end loop;
-end process;
+      wait for 100 ns;
+      q <= d;
+    end loop;
+  end process;
 
 end arch;

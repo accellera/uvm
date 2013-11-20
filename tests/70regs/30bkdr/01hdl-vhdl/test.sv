@@ -31,7 +31,7 @@ task automatic op(op_e oper, string hdl, bit [7:0] wr_val=0, bit [7:0] exp_val, 
 
   bit [7:0] rd_val = 0;
 
-  $display("attempting line %0d",lineno);
+  `uvm_info("TEST",$sformatf("attempting line %0d",lineno),UVM_NONE)
 
   if (oper == DEPOSIT) begin
    if (!uvm_hdl_deposit(hdl,wr_val))
@@ -92,11 +92,11 @@ begin
    op(DEPOSIT, ":q[4]",    'h00, 'h00, `__LINE__);
    op(DEPOSIT, ":q[6]",    'h01, 'h01, `__LINE__);
 
-`ifndef INCA
+/*
    op(DEPOSIT, ":q[6:4]",  'h02, 'h02, `__LINE__);
    op(READ,    ":q",           , 'h2C, `__LINE__);
    op(DEPOSIT, ":q[7:4]",  'h06, 'h06, `__LINE__);
-`endif
+*/
    
    #0;
    op(READ,    ":w",           , 'h6C, `__LINE__); // w is now q
@@ -110,8 +110,8 @@ begin
    op(READ,    ":w",           , 'hA5, `__LINE__); // w is now q
 
 
-
-   #100; // d propagates to q,w
+   #100; // d propagates to q,w 
+//#150
 
    op(READ,    ":q",           , 'hF0, `__LINE__); // q and w are now d again
    op(READ,    ":w",           , 'hF0, `__LINE__); //
@@ -120,38 +120,39 @@ begin
    op(FORCE,   ":w",       'hA5, 'hA5, `__LINE__); //
 
    #200; // q = d should not "take"
+//#350
 
    op(READ,    ":q",           , 'h3C, `__LINE__); // q and w still forced, not d's value (F0)
    op(READ,    ":w",           , 'hA5, `__LINE__);
 
-   op(RELEASE, ":q",           , 'h3C, `__LINE__); // q stays until reassigned, should be C3?
+   op(RELEASE, ":q",           , 'hf0, `__LINE__); // q stays until reassigned, should be C3?
    op(RELEASE, ":w",           , 'h3C, `__LINE__); // w is re-evaluated, now q
 
-   op(READ,    ":q",           , 'h3C, `__LINE__); // read q just for chuckles
+   op(READ,    ":q",           , 'hf0, `__LINE__); // read q just for chuckles
 
    #100; // d propagates to q,w again
-
+//#450
    op(READ,    ":q",           , 'hF0, `__LINE__); // q and w are now d again
    op(READ,    ":w",           , 'hF0, `__LINE__); //
 
    op(FORCE,   ":d",       'hA5, 'hA5, `__LINE__); // force d
 
    #100; // d propagates to q,w again
-
+// #550
    op(READ,    ":q",           , 'hA5, `__LINE__); // q and w are now d
    op(READ,    ":w",           , 'hA5, `__LINE__); //
 
-   op(RELEASE, ":d",           , 'hA5, `__LINE__); // d released, stays the same
+// TODO   op(RELEASE, ":d",           , 'hA5, `__LINE__); // d released, stays the same
 
    #100; // d propagates to q,w again
-
+// #650
    op(READ,    ":q",           , 'hA5, `__LINE__); // q and w still d
    op(READ,    ":w",           , 'hA5, `__LINE__);
 
    op(FORCE,   ":d",       'hF0, 'hF0, `__LINE__); // force d back to F0
 
    #100; // d propagates to q,w again
-
+//#750
    op(READ,    ":q",           , 'hF0, `__LINE__); // q and w back to d
    op(READ,    ":w",           , 'hF0, `__LINE__);
 
