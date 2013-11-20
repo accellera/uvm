@@ -3177,13 +3177,13 @@ function void uvm_component::do_print(uvm_printer printer);
         $bits(recording_detail), "UVM_HIGH");
       UVM_FULL : printer.print_generic("recording_detail", "uvm_verbosity", 
         $bits(recording_detail), "UVM_FULL");
-      default : printer.print_int("recording_detail", recording_detail, 
+      default : printer.print_field_int("recording_detail", recording_detail, 
         $bits(recording_detail), UVM_DEC, , "integral");
     endcase
 
 `ifndef UVM_NO_DEPRECATED
   if (enable_stop_interrupt != 0) begin
-    printer.print_int("enable_stop_interrupt", enable_stop_interrupt,
+    printer.print_field_int("enable_stop_interrupt", enable_stop_interrupt,
                         $bits(enable_stop_interrupt), UVM_BIN, ".", "bit");
   end
  `endif
