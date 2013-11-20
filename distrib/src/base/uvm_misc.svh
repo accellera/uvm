@@ -698,7 +698,11 @@ endclass
 
 
 // NOTE: this is an internal function and provides a string join independent of a streaming pack
-function automatic string m_uvm_string_queue_join(ref string i[$]);	
+function automatic string m_uvm_string_queue_join(ref string i[$]);
+`ifndef QUESTA
+   m_uvm_string_queue_join = {>>{i}};
+`else
 	foreach(i[idx])
 		m_uvm_string_queue_join = {m_uvm_string_queue_join,i[idx]};
+`endif
 endfunction
