@@ -20,7 +20,7 @@
 //----------------------------------------------------------------------
 
 // hdl vendor backends are defined for VCS,QUESTA,INCA
-#ifdef VCS
+#if defined(VCS) || defined(VCSMX)
 #include "uvm_hdl_vcs.c"
 #else
 #ifdef QUESTA
