@@ -21,6 +21,9 @@ typedef class uvm_default_factory;
 typedef class uvm_report_server;
 typedef class uvm_default_report_server;
 typedef class uvm_root;
+typedef class uvm_visitor;
+typedef class uvm_component_name_check_visitor;
+typedef class uvm_component;
 
 
 `ifndef UVM_CORESERVICE_TYPE
@@ -47,11 +50,11 @@ virtual class uvm_coreservice_t;
 	// returns the currently enabled uvm factory, 
 	// when no factory has been set before instantiates a uvm_default_factory
 	pure virtual function uvm_factory get_factory();
-	
+
 	// Function: set_factory
 	//
 	// sets the current uvm factory
-	// please note: its upto the user to preserve the contents of the original factory or delegate calls to to the original factory	
+	// please note: its upto the user to preserve the contents of the original factory or delegate calls to to the original factory 
 	pure virtual function void set_factory(uvm_factory f);
 
 	// Function: get_report_server
@@ -59,16 +62,27 @@ virtual class uvm_coreservice_t;
 	// if no report server has been set before returns an instance of
 	// uvm_default_report_server
 	pure virtual function uvm_report_server get_report_server();
-	
+
 	// Function: set_report_server
 	// sets the central report server to ~server~
 	pure virtual function void set_report_server(uvm_report_server server);
+
+	// Function: set_component_visitor
+	// sets the component visitor to ~v~
+	// this visitor is being used for the traversal at end_of_elaboration_phase
+	// for instance for name checking
+	pure virtual function void set_component_visitor(uvm_visitor#(uvm_component) v);
 	
+	// Function: get_component_visitor
+	// retrieves the current component visitor 
+	// see set_component_visitor
+	pure virtual function uvm_visitor#(uvm_component) get_component_visitor();
+
 	// Function: get_root
 	//
 	// returns the uvm_root instance
 	pure virtual function uvm_root get_root();
-						
+
 	// Function: get
 	//
 	// returns an instance providing the uvm_coreservice_t interface
@@ -128,10 +142,27 @@ class uvm_default_coreservice_t extends uvm_coreservice_t;
 	virtual function void set_report_server(uvm_report_server server);
 		report_server=server;
 	endfunction 
-	
+
 	virtual function uvm_root get_root();
 		return uvm_root::get();
 	endfunction
+	
+	local uvm_visitor#(uvm_component) _visitor;
+	virtual function void set_component_visitor(uvm_visitor#(uvm_component) v);
+		_visitor=v;
+	endfunction
+	
+	// Function: get_component_visitor
+	// retrieves the current component visitor 
+	// if unset(or null) returns a uvm_component_name_check_visitor instance
+	virtual function uvm_visitor#(uvm_component) get_component_visitor();
+		if(_visitor==null) begin
+			uvm_component_name_check_visitor v = new("name-check-visitor");
+			_visitor=v;
+		end
+		return _visitor;
+	endfunction	
+	
 endclass
 
 //------------------------------------------------------------------------------

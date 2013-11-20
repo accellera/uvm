@@ -3439,7 +3439,8 @@ endfunction \
 //|   `uvm_pack_array(data)
 //| endfunction
 //
-// The 'N' versions of these macros take a explicit size argument.
+// The 'N' versions of these macros take a explicit size argument, which must
+// be compile-time constant value greater than '0'.
 //------------------------------------------------------------------------------
 
 //--------------------------------
@@ -3452,15 +3453,16 @@ endfunction \
 //
 //| `uvm_pack_intN(VAR,SIZE)
 //
+
 `define uvm_pack_intN(VAR,SIZE) \
+  begin \
+   int __array[]; \
    begin \
-   if (packer.big_endian) \
-       packer.m_bits[packer.count +: SIZE] = { << {VAR} }; \
-   else \
-       packer.m_bits[packer.count +: SIZE] = VAR; \
-   \
-   packer.count += SIZE; \
-   end
+     bit [SIZE-1:0] __vector = VAR; \
+     { << int { __array }} = {{($bits(int) - (SIZE % $bits(int))) {1'b0}}, __vector}; \
+   end \
+   packer.pack_ints(__array, SIZE); \
+  end
 
 // Macro: `uvm_pack_enumN
 //
@@ -3604,7 +3606,8 @@ endfunction \
 //|   `uvm_unpack_array(data)
 //| endfunction
 //
-// The 'N' versions of these macros take a explicit size argument.
+// The 'N' versions of these macros take a explicit size argument, which must
+// be a compile-time constant value greater than '0'.
 //------------------------------------------------------------------------------
 
 //----------------------------------
@@ -3619,12 +3622,11 @@ endfunction \
 //
 `define uvm_unpack_intN(VAR,SIZE) \
    begin \
-   if (packer.big_endian) \
-     { << { VAR }} = packer.m_bits[packer.count +: SIZE];  \
-   else \
-     VAR = packer.m_bits[packer.count +: SIZE]; \
-   \
-   packer.count += SIZE; \
+      int __array[] = new[(SIZE+31)/32]; \
+      bit [(((SIZE + 31) / 32) * 32) - 1:0] __var; \
+      packer.unpack_ints(__array, SIZE); \
+      __var = { << int { __array }}; \
+      VAR = __var; \
    end
 
 

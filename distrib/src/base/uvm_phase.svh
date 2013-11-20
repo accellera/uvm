@@ -1128,7 +1128,7 @@ function void uvm_phase::m_print_successors();
   static int level;
   if (m_phase_type == UVM_PHASE_DOMAIN)
     level = 0;
-  $display(spaces.substr(0,level*2),get_name(), " (",m_phase_type.name(),") id=%0d",get_inst_id());
+  `uvm_info("UVM/PHASE/SUCC",$sformatf("%s%s (%s) id=%0d",spaces.substr(0,level*2),get_name(), m_phase_type.name(),get_inst_id()),UVM_NONE)
   level++;
   foreach (m_successors[succ]) begin
     succ.m_print_successors();

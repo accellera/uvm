@@ -202,8 +202,8 @@ class uvm_comparer;
   // by <compare_field> if the operand size is less than or equal to 64.
 
   virtual function bit compare_field_int (string name, 
-                                          logic[63:0] lhs, 
-                                          logic[63:0] rhs, 
+                                          uvm_integral_t lhs, 
+                                          uvm_integral_t rhs, 
                                           int size,
                                           uvm_radix_enum radix=UVM_NORADIX); 
     logic [63:0] mask;
