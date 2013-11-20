@@ -85,7 +85,7 @@ class uvm_packer;
   // | begin
   // |   int my_stream[];
   // |   { << int {my_stream}} = my_field;
-  // |   packer.pack_bits(my_stream);
+  // |   packer.pack_ints(my_stream);
   // | end
   //
   // When appending the stream to the internal pack array, the packer will obey
@@ -203,9 +203,10 @@ class uvm_packer;
   // passed in without expanding into a pre-defined integral type first.
   //
   // For example
+  // | bit[511:0] my_field;
   // | begin
-  // |   logic my_stream[] = new[$bits(my_field)];
-  // |   packer.unpack_bits(my_stream);
+  // |   int my_stream[] = new[16]; // 512/32 = 16
+  // |   packer.unpack_ints(my_stream);
   // |   my_field = {<<{my_stream}};
   // | end
   //
