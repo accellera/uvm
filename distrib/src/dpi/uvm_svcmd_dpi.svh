@@ -57,4 +57,9 @@ function string uvm_dpi_get_tool_version();
   return "?";
 endfunction
 
+
+function chandle uvm_dpi_regcomp(string regex); return null; endfunction
+function int uvm_dpi_regexec(chandle preg, string str); return 0; endfunction
+function void uvm_dpi_regfree(chandle preg); endfunction
+
 `endif

@@ -900,7 +900,7 @@ virtual class uvm_component extends uvm_report_object;
   //|      super.build_phase(phase);
   //|      if(get_config_object("data", tmp))
   //|        if (!$cast(data, tmp))
-  //|          $display("error! config setting for 'data' not of type myobj_t");
+  //|          `uvm_error("CFGERR","error! config setting for 'data' not of type myobj_t")
   //|        endfunction
   //|      ...
   //

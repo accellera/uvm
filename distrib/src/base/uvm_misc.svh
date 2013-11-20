@@ -695,3 +695,10 @@ class process_container_c;
    endfunction
 endclass
 `endif
+
+
+// NOTE: this is an internal function and provides a string join independent of a streaming pack
+function automatic string m_uvm_string_queue_join(ref string i[$]);	
+	foreach(i[idx])
+		m_uvm_string_queue_join = {m_uvm_string_queue_join,i[idx]};
+endfunction
