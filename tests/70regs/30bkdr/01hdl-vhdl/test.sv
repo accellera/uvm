@@ -31,6 +31,8 @@ task automatic op(op_e oper, string hdl, bit [7:0] wr_val=0, bit [7:0] exp_val, 
 
   bit [7:0] rd_val = 0;
 
+  $display("attempting line %0d",lineno);
+
   if (oper == DEPOSIT) begin
    if (!uvm_hdl_deposit(hdl,wr_val))
       `uvm_error(hdl,"uvm_hdl_deposit returned FALSE")
@@ -86,13 +88,6 @@ begin
    op(READ,   ":w",            , 'h0F, `__LINE__);
    op(READ,   ":q[1]",         , 'h01, `__LINE__);
 
-/*
-    // check support for $root
-   op(READ,   "$root.:q",            , 'h0F, `__LINE__);
-   op(READ,   "$root.:w",            , 'h0F, `__LINE__);
-   op(READ,   "$root.:q[1]",         , 'h01, `__LINE__);   
-*/
-
    op(DEPOSIT, ":q",       'h3C, 'h3C, `__LINE__);
    op(DEPOSIT, ":q[4]",    'h00, 'h00, `__LINE__);
    op(DEPOSIT, ":q[6]",    'h01, 'h01, `__LINE__);
@@ -111,12 +106,9 @@ begin
    op(DEPOSIT, ":q",       'hA5, 'hA5, `__LINE__); // deposit on ':q'
 
    #0;
-   `ifdef QUESTA
-   // only bits of q that changed propagate to w
-   op(READ,    ":w",           , 'hB5, `__LINE__); // w is now q
-   `else
+
    op(READ,    ":w",           , 'hA5, `__LINE__); // w is now q
-   `endif
+
 
 
    #100; // d propagates to q,w

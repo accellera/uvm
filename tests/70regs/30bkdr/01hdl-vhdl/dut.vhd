@@ -5,9 +5,9 @@ entity dut is
 end dut;
 
 architecture arch of dut is
-  signal w,w_nodrv : natural range 0 to 255;
-  signal q : natural range 0 to 255 := 15;
-  signal d : natural range 0 to 255 := 240;
+  signal w,w_nodrv : std_ulogic_vector(7 downto 0);
+  signal q : std_ulogic_vector(7 downto 0) := X"0f";
+  signal d : std_ulogic_vector(7 downto 0) := X"f0";
 begin  -- arch
 
   w <= q;
@@ -15,8 +15,8 @@ begin  -- arch
   process
   begin
     loop
-    q <= d;
     wait for 100 ns;
+    q <= d;
   end loop;
 end process;
 

@@ -36,6 +36,8 @@ static int is_verilog(char* path)
 {
   vhpiHandleT r = vhpi_handle_by_name(path, 0);
 
+  vpi_printf("handle is %x\n",r);
+
   if(r == 0)
   {
     return 1;
