@@ -189,5 +189,10 @@ were not being routed through standard UVM messaging.
 Mantis 4743: uvm_sequencer::get_next_item/try_next_item/item_done/get/peek/put
 may now be called directly.
 
+(+) Mantis 4767: Fixed the `uvm_pack and `uvm_unpack macros which
+bypassed the packer policy methods.  Additionally, added
+pack_bits/bytes/ints and unpack_bits/bytes/ints to allow easier
+compatibility with the SystemVerilog stream operator.
+
 Mantis 4772: separated hdl vendor dpi backends into one file per vendor
 
