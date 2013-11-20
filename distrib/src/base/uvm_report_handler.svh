@@ -571,11 +571,7 @@ class uvm_report_handler;
     end
     
     q.push_back("----------------------------------------------------------------------\n");
-    begin
-			string msg;
-			msg={>>{q}};
-			`uvm_info("UVM/REPORT/HANDLER",msg,UVM_LOW)
-		end
+	`uvm_info("UVM/REPORT/HANDLER",`UVM_STRING_QUEUE_STREAMING_PACK(q),UVM_LOW)
   endfunction
 
 endclass : uvm_report_handler

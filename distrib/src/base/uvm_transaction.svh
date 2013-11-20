@@ -747,7 +747,7 @@ function integer uvm_transaction::m_begin_tr (time begin_time=0,
     m_recorder.tr_handle = tr_handle;
 
     if(m_recorder.check_handle_kind("Transaction", tr_handle)!=1)
-      $display("tr handle %0d not valid!",tr_handle);
+      `uvm_warning("UVM/TRANSACTION/HANDLE",$sformatf("tr handle %0d not valid!",tr_handle))
 
   end
   else 

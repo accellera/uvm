@@ -1,12 +1,13 @@
-UVM_INFO @ 0: reporter [UVMTOP] UVM testbench topology:
+UVM_INFO @ 0: reporter [RNTST] Running test test...
+UVM_INFO FILE-LINE @ 0: reporter [UVMTOP] UVM testbench topology:
 ---------------------------------
 Name          Type    Size  Value
 ---------------------------------
 t1            trunk   -     @X
-  b1          branch  -     @X
+  b1          branch  -     @X 
     l1        leaf    -     @X
     l2        leaf    -     @X
-  b2          branch  -     @X
+  b2          branch  -     @X 
     l1        leaf    -     @X
     l2        leaf    -     @X
 uvm_test_top  test    -     @X
@@ -17,3 +18,14 @@ uvm_test_top  test    -     @X
     l1        leaf    -     @X
     l2        leaf    -     @X
 ---------------------------------
+UVM_INFO FILE-LINE @ 0: reporter [UVM/REPORT/SERVER] 
+--- UVM Report Summary ---
+** Report counts by severity
+UVM_INFO :    3
+UVM_WARNING :    0
+UVM_ERROR :    0
+UVM_FATAL :    0
+** Report counts by id
+[RNTST]     1
+[UVM/RELNOTES]     1
+[UVMTOP]     1
