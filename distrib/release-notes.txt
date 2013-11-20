@@ -166,6 +166,16 @@ Mantis 4622: uvm_phase::unsync() now actually removes the sync relationship
 
 Mantis 4643: uvm_dpi_get_next_arg_c doesnt fully adhere to 1800lrm
 
+(*) Mantis 4649: Improve memory performance for 'bitstream' interfaces
+for report/record/compare/pack etc.  
+  The implementation now supports a less memory-expensive
+  uvm_integral_t which is sized as a 64b packed logic vector.  This
+  type is used in the "*_field_int()" methods for
+  reporting/recording/comparing and packing/unpacking.  
+  As a side effect, for consisteny "print_int" was renamed to
+  "print_field", however print_int is being left in the implementation
+  for backwards compatibility purposes.
+
 Mantis 4666: uvm_config_db::set expects to be invoked in process context
 
 Mantis 4677: uvm_global_copy_map removed
