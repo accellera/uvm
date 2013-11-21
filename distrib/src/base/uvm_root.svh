@@ -65,6 +65,8 @@
 
 typedef class uvm_test_done_objection;
 typedef class uvm_cmdline_processor;
+typedef class uvm_component_proxy;
+typedef class uvm_top_down_visitor_adapter;
 
 class uvm_root extends uvm_component;
 
@@ -262,7 +264,17 @@ class uvm_root extends uvm_component;
   endfunction
 `endif
 
-	static local bit m_relnotes_done=0;
+ static local bit m_relnotes_done=0;
+
+ function void end_of_elaboration_phase(uvm_phase phase);  
+	 uvm_component_proxy p = new("proxy");
+	 uvm_top_down_visitor_adapter#(uvm_component) adapter = new("adapter");
+	 uvm_coreservice_t cs = uvm_coreservice_t::get();
+	 uvm_visitor#(uvm_component) v = cs.get_component_visitor();
+	 adapter.accept(this, v, p);
+ endfunction
+
+
 endclass
 
 
@@ -360,11 +372,7 @@ function void uvm_root::report_header(UVM_FILE file = 0);
 	if(m_relnotes_done)
 		q.push_back("\n      (Specify +UVM_NO_RELNOTES to turn off this notice)\n");
 
-		begin
-			string msg;
-			msg={>>{q}};
-			`uvm_info("UVM/RELNOTES",msg,UVM_LOW)
-		end
+	`uvm_info("UVM/RELNOTES",`UVM_STRING_QUEUE_STREAMING_PACK(q),UVM_LOW)
 endfunction
 
 
@@ -537,8 +545,6 @@ function void uvm_root::print_topology(uvm_printer printer=null);
 
   string s;
 
-  uvm_report_info("UVMTOP", "UVM testbench topology:", UVM_LOW);
-
   if (m_children.num()==0) begin
     uvm_report_warning("EMTCOMP", "print_topology - No UVM components to print.", UVM_NONE);
     return;
@@ -552,7 +558,7 @@ function void uvm_root::print_topology(uvm_printer printer=null);
       printer.print_object("", m_children[c]);  
     end
   end
-  $display(printer.emit());
+  `uvm_info("UVMTOP",{"UVM testbench topology:\n",printer.emit()},UVM_NONE)
 
 endfunction
 

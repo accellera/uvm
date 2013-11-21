@@ -732,13 +732,7 @@ class uvm_default_report_server extends uvm_report_server;
         q.push_back($sformatf("[%s] %5d\n", id, m_id_count[id]));
     end
 
-    // now output
-    begin
-      string msg;
-      msg={>>{q}};
-      `uvm_info("UVM/REPORT/SERVER",msg,UVM_LOW)
-    end
-
+    `uvm_info("UVM/REPORT/SERVER",`UVM_STRING_QUEUE_STREAMING_PACK(q),UVM_LOW)
   endfunction
 
 

@@ -327,6 +327,7 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
     uvm_callback cb;
     string blanks = "                             ";
     uvm_object bobj = obj;
+    string qs[$];
 
     uvm_queue#(uvm_callback) q;
     string tname, str;
@@ -360,8 +361,8 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
         while(m_t_inst.m_pool.next(bobj));
       end
       if(me != null || m_t_inst.m_tw_cb_q.size()) begin
-        $display("Registered callbacks for all instances of %s", tname); 
-        $display("---------------------------------------------------------------");
+        qs.push_back($sformatf("Registered callbacks for all instances of %s\n", tname)); 
+        qs.push_back("---------------------------------------------------------------\n");
       end
       if(me != null) begin
         do begin
@@ -387,13 +388,13 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
         end while (m_t_inst.m_pool.next(bobj));
       end
       else begin
-        $display("No callbacks registered for any instances of type %s", tname);
+        qs.push_back($sformatf("No callbacks registered for any instances of type %s\n", tname));
       end
     end
     else begin
       if(m_t_inst.m_pool.exists(bobj) || m_t_inst.m_tw_cb_q.size()) begin
-        $display("Registered callbacks for instance %s of %s", obj.get_full_name(), tname); 
-        $display("---------------------------------------------------------------");
+       qs.push_back($sformatf("Registered callbacks for instance %s of %s\n", obj.get_full_name(), tname)); 
+       qs.push_back("---------------------------------------------------------------\n");
       end
       if(m_t_inst.m_pool.exists(bobj)) begin
         q = m_t_inst.m_pool.get(bobj);
@@ -418,12 +419,13 @@ class uvm_typed_callbacks#(type T=uvm_object) extends uvm_callbacks_base;
     if(!cbq.size()) begin
       if(obj == null) str = "*";
       else str = obj.get_full_name();
-      $display("No callbacks registered for instance %s of type %s", str, tname);
+      qs.push_back($sformatf("No callbacks registered for instance %s of type %s\n", str, tname));
     end
 
     foreach (cbq[i]) begin
-      $display("%s  %s on %s  %s", cbq[i], blanks.substr(0,max_cb_name-cbq[i].len()-1), inst_q[i], blanks.substr(0,max_inst_name - inst_q[i].len()-1), mode_q[i]);
+      qs.push_back($sformatf("%s  %s %s on %s  %s\n", cbq[i], blanks.substr(0,max_cb_name-cbq[i].len()-1), inst_q[i], blanks.substr(0,max_inst_name - inst_q[i].len()-1), mode_q[i]));
     end
+    `uvm_info("UVM/CB/DISPLAY",`UVM_STRING_QUEUE_STREAMING_PACK(qs),UVM_NONE)
 
     m_tracing = 1; //allow tracing to be resumed
   endfunction

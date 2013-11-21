@@ -37,7 +37,9 @@
 
 task run_test (string test_name="");
   uvm_root top;
-  top = uvm_coreservice.get_root();
+  uvm_coreservice_t cs;
+  cs = uvm_coreservice_t::get();
+  top = cs.get_root();
   top.run_test(test_name);
 endtask
 

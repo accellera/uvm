@@ -109,14 +109,17 @@ class uvm_recorder extends uvm_object;
   endfunction
 
 
-  // Function: get_type_name
+  // Function: use_record_attribute
   //
-  // Returns type name of the recorder. Subtypes must override this method
-  // to enable the <`uvm_record_field> macro.
+  // Indicates that this recorder does (or does not) support usage of
+  // the <`uvm_record_attribute> macro.
   //
-  //| virtual function string get_type_name()
-
-
+  // The default return value is ~0~ (not supported), developers can
+  // optionally extend ~uvm_recorder~ and set the value to ~1~ if they
+  // support the <`uvm_record_attribute> macro.
+  virtual function bit use_record_attribute();
+     return 0;
+  endfunction : use_record_attribute
 
   // Function: record_field
   //
@@ -130,6 +133,28 @@ class uvm_recorder extends uvm_object;
                                       uvm_bitstream_t value, 
                                       int size, 
                                       uvm_radix_enum  radix=UVM_NORADIX);
+    if(tr_handle==0) return;
+    scope.set_arg(name);
+
+    if(!radix)
+      radix = default_radix;
+
+    set_attribute(tr_handle, scope.get(), value, radix, size);
+
+  endfunction
+
+  // Function: record_field_int
+  //
+  // Records an integral field (less than or equal to 64 bits). ~name~ is the
+  // name of the field. 
+  //
+  // ~value~ is the value of the field to record. ~size~ is the number of bits
+  // of the field which apply. ~radix~ is the <uvm_radix_enum> to use.
+
+  virtual function void record_field_int (string name, 
+                                          uvm_integral_t value, 
+                                          int size, 
+                                          uvm_radix_enum radix=UVM_NORADIX);
     if(tr_handle==0) return;
     scope.set_arg(name);
 

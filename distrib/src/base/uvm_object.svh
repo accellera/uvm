@@ -304,7 +304,7 @@ virtual class uvm_object extends uvm_void;
   //|   int f1;
   //|   virtual function void do_print (uvm_printer printer);
   //|     super.do_print(printer);
-  //|     printer.print_int("f1", f1, $bits(f1), UVM_DEC);
+  //|     printer.print_field_int("f1", f1, $bits(f1), UVM_DEC);
   //|     printer.print_object("data", data);
   //|   endfunction
   //

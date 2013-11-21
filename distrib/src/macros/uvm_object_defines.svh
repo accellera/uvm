@@ -663,7 +663,10 @@ endfunction \
         `m_uvm_record_int(ARG, FLAG) \
       UVM_PRINT: \
         if(!((FLAG)&UVM_NOPRINT)) begin \
-          __m_uvm_status_container.printer.print_int(`"ARG`", ARG, $bits(ARG), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+          if ($bits(ARG) > 64) \
+            __m_uvm_status_container.printer.print_field(`"ARG`", ARG, $bits(ARG), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+          else \
+            __m_uvm_status_container.printer.print_field_int(`"ARG`", ARG, $bits(ARG), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
         end \
       UVM_SETINT: \
         begin \
@@ -2594,7 +2597,7 @@ endfunction \
 // m_uvm_record_int
 // ----------------
 
-// Purpose: provide print functionality for a specific integral field. This
+// Purpose: provide record functionality for a specific integral field. This
 // macro is available for user access. If used externally, a record_options
 // object must be avaialble and must have the name opt.
 // 
@@ -2602,7 +2605,10 @@ endfunction \
 
 `define m_uvm_record_int(ARG,FLAG) \
   if(!((FLAG)&UVM_NORECORD)) begin \
-    __m_uvm_status_container.recorder.record_field(`"ARG`", ARG,  $bits(ARG), uvm_radix_enum'((FLAG)&(UVM_RADIX))); \
+    if ($bits(ARG) > 64) \
+      __m_uvm_status_container.recorder.record_field(`"ARG`", ARG,  $bits(ARG), uvm_radix_enum'((FLAG)&(UVM_RADIX))); \
+    else \
+      __m_uvm_status_container.recorder.record_field_int(`"ARG`", ARG,  $bits(ARG), uvm_radix_enum'((FLAG)&(UVM_RADIX))); \
   end
 
 
@@ -2921,9 +2927,14 @@ endfunction \
             begin \
               foreach(ARG[_aa_key]) \
                begin \
-                  __m_uvm_status_container.printer.print_int( \
-                    {"[",_aa_key.name(),"]"}, ARG[_aa_key], $bits(ARG[_aa_key]), \
-                    uvm_radix_enum'((FLAG)&UVM_RADIX), "[" ); \
+                  if ($bits(ARG[_aa_key]) > 64) \
+                    __m_uvm_status_container.printer.print_field( \
+                      {"[",_aa_key.name(),"]"}, ARG[_aa_key], $bits(ARG[_aa_key]), \
+                      uvm_radix_enum'((FLAG)&UVM_RADIX), "[" ); \
+                  else \
+                    __m_uvm_status_container.printer.print_field_int( \
+                      {"[",_aa_key.name(),"]"}, ARG[_aa_key], $bits(ARG[_aa_key]), \
+                      uvm_radix_enum'((FLAG)&UVM_RADIX), "[" ); \
                 end \
             end \
             p__.print_array_footer(ARG.num()); \
@@ -3283,72 +3294,150 @@ endfunction \
 // The recording macros assist users who implement the <uvm_object::do_record>
 // method. They help ensure that the fields are recorded using a vendor-
 // independent API. Unlike the <uvm_recorder> policy, fields recorded using
-// the <`uvm_record_field> macro do not lose type information--they are passed
+// the macros do not lose type information--they are passed
 // directly to the vendor-specific API. This results in more efficient recording
 // and no artificial limit on bit-widths. See your simulator vendor's 
 // documentation for more information on its transaction recording capabilities.
 //------------------------------------------------------------------------------
 
-
 // Macro: `uvm_record_attribute
 //
-// Vendor-independent macro to hide vendor-specific interface for
+// Vendor-independent macro to hide tool-specific interface for
 // recording attributes (fields) to a transaction database.
+//
+//| `uvm_record_attribute(TR_HANDLE, NAME, VALUE)
+//
+// The default implementation of the macro passes ~NAME~ and
+// ~VALUE~ through to the <uvm_recorder::record_generic> method.
+//
+// This macro should not be called directly by the user, the
+// other recording macros will call it automatically if 
+// <uvm_recorder::use_record_attribute> returns true.
+//
 
 `ifndef uvm_record_attribute
-  `ifdef QUESTA
+ `ifdef QUESTA
     `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
       $add_attribute(TR_HANDLE,VALUE,NAME);
-  `elsif VCS
-    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
-      // need VCS call here
-  `elsif INCA
-    `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
-      // need IUS call here
   `else
     `define uvm_record_attribute(TR_HANDLE,NAME,VALUE) \
-      // empty definition
+      recorder.record_generic(NAME, $sformatf("%p", VALUE)); 
   `endif
 `endif
 
-  
+// Macro: `uvm_record_int
+//
+//| `uvm_record_int(NAME,VALUE,SIZE[,RADIX])
+//
+// The ~`uvm_record_int~ macro takes the same arguments as
+// the <uvm_recorder::record_field> method (including the optional ~RADIX~).
+//
+// The default implementation will pass the name/value pair to
+// <`uvm_record_attribute> if enabled, otherwise the information
+// will be passed to <uvm_recorder::record_field>.
+//
+
+`ifndef uvm_record_int
+  `define uvm_record_int(NAME,VALUE,SIZE,RADIX = UVM_NORADIX) \
+    if (recorder != null && recorder.tr_handle != 0) begin \
+      if (recorder.use_record_attribute()) \
+        `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+      else \
+        if (SIZE > 64) \
+          recorder.record_field(NAME, VALUE, SIZE, RADIX); \
+        else \
+          recorder.record_field_int(NAME, VALUE, SIZE, RADIX); \
+    end
+`endif
+
+// Macro: `uvm_record_string
+//
+//| `uvm_record_string(NAME,VALUE)
+//
+// The ~`uvm_record_string~ macro takes the same arguments as
+// the <uvm_recorder::record_string> method.
+//
+// The default implementation will pass the name/value pair to
+// <`uvm_record_attribute> if enabled, otherwise the information
+// will be passed to <uvm_recorder::record_string>.
+//
+
+`ifndef uvm_record_string
+  `define uvm_record_string(NAME,VALUE) \
+    if (recorder != null && recorder.tr_handle != 0) begin \
+      if (recorder.use_record_attribute()) \
+        `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+      else \
+        recorder.record_string(NAME,VALUE); \
+    end
+`endif
+
+// Macro: `uvm_record_time
+//
+//| `uvm_record_time(NAME,VALUE)
+//
+// The ~`uvm_record_time~ macro takes the same arguments as
+// the <uvm_recorder::record_time> method.
+//
+// The default implementation will pass the name/value pair to
+// <`uvm_record_attribute> if enabled, otherwise the information
+// will be passed to <uvm_recorder::record_time>.
+//
+`ifndef uvm_record_time
+  `define uvm_record_time(NAME,VALUE) \
+    if (recorder != null && recorder.tr_handle != 0) begin \
+      if (recorder.use_record_attribute()) \
+        `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+      else \
+         recorder.record_time(NAME,VALUE); \
+    end
+`endif
+
+
+// Macro: `uvm_record_real
+//
+//| `uvm_record_real(NAME,VALUE)
+//
+// The ~`uvm_record_real~ macro takes the same arguments as
+// the <uvm_recorder::record_real> method.
+//
+// The default implementation will pass the name/value pair to
+// <`uvm_record_attribute> if enabled, otherwise the information
+// will be passed to <uvm_recorder::record_field_real>.
+//
+`ifndef uvm_record_real
+  `define uvm_record_real(NAME,VALUE) \
+    if (recorder != null && recorder.tr_handle != 0) begin \
+      if (recorder.use_record_attribute()) \
+        `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+      else \
+        recorder.record_field_real(NAME,VALUE); \
+    end
+`endif
 
 // Macro: `uvm_record_field
 //
-// Macro for recording name-value pairs into a transaction recording database.
+// Macro for recording arbitrary name-value pairs into a transaction recording database.
 // Requires a valid transaction handle, as provided by the
 // <uvm_transaction::begin_tr> and <uvm_component::begin_tr> methods. 
-
+//
+//| `uvm_record_field(NAME, VALUE)
+//
+// The default implementation will pass the name/value pair to
+// <`uvm_record_attribute> if enabled, otherwise the information
+// will be passed to <uvm_recorder::record_generic>, with the
+// ~VALUE~ being converted to a string using "%p" notation.
+//
+// | recorder.record_generic(NAME,$sformatf("%p",VALUE));
+//
 `define uvm_record_field(NAME,VALUE) \
    if (recorder != null && recorder.tr_handle != 0) begin \
-     if (recorder.get_type_name() != "uvm_recorder") begin \
+     if (recorder.use_record_attribute()) begin \
        `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
      end \
      else \
-       recorder.m_set_attribute(recorder.tr_handle,NAME,$sformatf("%p",VALUE)); \
+       recorder.record_generic(NAME, $sformatf("%p", VALUE)); \
    end
-
-
-
-// Use the following if the simulator's recording API can not
-// distinguish types.
-
-`define uvm_record_int(NAME,VALUE,SIZE,RADIX) \
-  recorder.m_set_attribute(recorder.tr_handle,NAME, \
-     $sformatf({"%0",uvm_radix_to_string(RADIX)},VALUE)); \
-
-`define uvm_record_string(NAME,VALUE) \
-  recorder.m_set_attribute(recorder.tr_handle,NAME,VALUE);
-
-`define uvm_record_time(NAME,VALUE) \
-  recorder.m_set_attribute(recorder.tr_handle,NAME, \
-     $sformatf("%0u",VALUE&((1<<64)-1))); \
-
-`define uvm_record_real(NAME,VALUE) \
-  begin \
-  bit[63:0] ival = $realtobits(VALUE); \
-  recorder.m_set_attribute(recorder.tr_handle,NAME,ival); \
-  end
 
   
 //------------------------------------------------------------------------------
@@ -3364,7 +3453,8 @@ endfunction \
 //|   `uvm_pack_array(data)
 //| endfunction
 //
-// The 'N' versions of these macros take a explicit size argument.
+// The 'N' versions of these macros take a explicit size argument, which must
+// be compile-time constant value greater than '0'.
 //------------------------------------------------------------------------------
 
 //--------------------------------
@@ -3377,15 +3467,16 @@ endfunction \
 //
 //| `uvm_pack_intN(VAR,SIZE)
 //
+
 `define uvm_pack_intN(VAR,SIZE) \
+  begin \
+   int __array[]; \
    begin \
-   if (packer.big_endian) \
-       packer.m_bits[packer.count +: SIZE] = { << {VAR} }; \
-   else \
-       packer.m_bits[packer.count +: SIZE] = VAR; \
-   \
-   packer.count += SIZE; \
-   end
+     bit [SIZE-1:0] __vector = VAR; \
+     { << int { __array }} = {{($bits(int) - (SIZE % $bits(int))) {1'b0}}, __vector}; \
+   end \
+   packer.pack_ints(__array, SIZE); \
+  end
 
 // Macro: `uvm_pack_enumN
 //
@@ -3529,7 +3620,8 @@ endfunction \
 //|   `uvm_unpack_array(data)
 //| endfunction
 //
-// The 'N' versions of these macros take a explicit size argument.
+// The 'N' versions of these macros take a explicit size argument, which must
+// be a compile-time constant value greater than '0'.
 //------------------------------------------------------------------------------
 
 //----------------------------------
@@ -3544,12 +3636,11 @@ endfunction \
 //
 `define uvm_unpack_intN(VAR,SIZE) \
    begin \
-   if (packer.big_endian) \
-     { << { VAR }} = packer.m_bits[packer.count +: SIZE];  \
-   else \
-     VAR = packer.m_bits[packer.count +: SIZE]; \
-   \
-   packer.count += SIZE; \
+      int __array[] = new[(SIZE+31)/32]; \
+      bit [(((SIZE + 31) / 32) * 32) - 1:0] __var; \
+      packer.unpack_ints(__array, SIZE); \
+      __var = { << int { __array }}; \
+      VAR = __var; \
    end
 
 

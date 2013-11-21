@@ -101,5 +101,8 @@
 
   // Command Line Processor
   `include "base/uvm_cmdline_processor.svh"
+  
+  // traversal utilities
+  `include "base/uvm_traversal.svh"
 
 `endif // UVM_BASE_SVH
