@@ -460,7 +460,7 @@ class uvm_sequence_item extends uvm_transaction;
     int depth = get_depth();
     super.do_print(printer);
     if(print_sequence_info || m_use_sequence_info) begin
-      printer.print_int("depth", depth, $bits(depth), UVM_DEC, ".", "int");
+      printer.print_field_int("depth", depth, $bits(depth), UVM_DEC, ".", "int");
       if(m_parent_sequence != null) begin
         temp_str0 = m_parent_sequence.get_name();
         temp_str1 = m_parent_sequence.get_full_name();

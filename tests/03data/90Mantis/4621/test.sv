@@ -24,9 +24,12 @@ initial begin
 		string y;
 		x = 16'b10xz_10zx_10xz_10zx;
 		y=uvm_bitstream_to_string(x,$bits(x),UVM_BIN);
-		assert(y== ":10xz10zx") else uvm_report_error("TEST",{"bits changed result is ",y});
+		assert(y== "10xz10zx10xz10zx") else uvm_report_error("TEST",{"bits changed result is ",y});
 		$display("str=[%s]val=[%0b]",y,x);
 		
+		y=uvm_integral_to_string(x,$bits(x),UVM_BIN);
+		assert(y== "10xz10zx10xz10zx") else uvm_report_error("TEST",{"bits changed result is ",y});
+		$display("str=[%s]val=[%0b]",y,x);
 		
 //		$display(uvm_vector_to_string('hdeadbeef,16,UVM_HEX));
 		

@@ -784,10 +784,10 @@ endtask
 // --------
 
 function void uvm_sequence_library::do_print(uvm_printer printer);
-   printer.print_int("min_random_count",min_random_count,32,UVM_DEC,,"int unsigned");
-   printer.print_int("max_random_count",max_random_count,32,UVM_DEC,,"int unsigned");
+   printer.print_field_int("min_random_count",min_random_count,32,UVM_DEC,,"int unsigned");
+   printer.print_field_int("max_random_count",max_random_count,32,UVM_DEC,,"int unsigned");
    printer.print_generic("selection_mode","uvm_sequence_lib_mode",32,selection_mode.name());
-   printer.print_int("sequence_count",sequence_count,32,UVM_DEC,,"int unsigned");
+   printer.print_field_int("sequence_count",sequence_count,32,UVM_DEC,,"int unsigned");
 
    printer.print_array_header("typewide_sequences",m_typewide_sequences.size(),"queue_object_types");
    foreach (m_typewide_sequences[i])
@@ -801,7 +801,7 @@ function void uvm_sequence_library::do_print(uvm_printer printer);
 
    printer.print_array_header("seqs_distrib",seqs_distrib.num(),"as_int_string");
    foreach (seqs_distrib[typ]) begin
-     printer.print_int({"[",typ,"]"},seqs_distrib[typ],32,,UVM_DEC,"int unsigned");
+     printer.print_field_int({"[",typ,"]"},seqs_distrib[typ],32,,UVM_DEC,"int unsigned");
    end
    printer.print_array_footer();
 endfunction

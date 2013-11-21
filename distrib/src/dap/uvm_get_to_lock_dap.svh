@@ -142,7 +142,7 @@ class uvm_get_to_lock_dap#(type T=int) extends uvm_set_get_dap_base#(T);
    // Function- do_print
    virtual function void do_print(uvm_printer printer);
       super.do_print(printer);
-      printer.print_int("lock_state", m_locked, $bits(m_locked));
+      printer.print_field_int("lock_state", m_locked, $bits(m_locked));
       printer.print_generic("value", 
                             `uvm_typename(m_value), 
                             0, 

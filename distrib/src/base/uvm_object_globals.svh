@@ -74,11 +74,12 @@ typedef logic signed [UVM_STREAMBITS-1:0] uvm_bitstream_t;
 
 // Type: uvm_integral_t
 //
-// The integral type is used as an argument type for passing integral
-// values of 64 bits or less in such methods as ~print_field_int~,
-// ~record_field_int~, and ~pack/unpack_field_int~.
+// The integral type is used as a argument type for passing integral values
+// of 64 bits or less to report, record, compare, pack and unpack.
+//
 
 typedef logic signed [63:0] uvm_integral_t;
+
 
 
 // Enum: uvm_radix_enum

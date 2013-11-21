@@ -172,7 +172,7 @@ class uvm_set_before_get_dap#(type T=int) extends uvm_set_get_dap_base#(T);
    // Function- do_print
    virtual function void do_print(uvm_printer printer);
       super.do_print(printer);
-      printer.print_int("set_state", m_set, $bits(m_set));
+      printer.print_field_int("set_state", m_set, $bits(m_set));
       printer.print_generic("value", 
                             `uvm_typename(m_value), 
                             0, 

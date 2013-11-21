@@ -166,6 +166,16 @@ Mantis 4622: uvm_phase::unsync() now actually removes the sync relationship
 
 Mantis 4643: uvm_dpi_get_next_arg_c doesnt fully adhere to 1800lrm
 
+(*) Mantis 4649: Improve memory performance for 'bitstream' interfaces
+for report/record/compare/pack etc.  
+  The implementation now supports a less memory-expensive
+  uvm_integral_t which is sized as a 64b packed logic vector.  This
+  type is used in the "*_field_int()" methods for
+  reporting/recording/comparing and packing/unpacking.  
+  As a side effect, for consisteny "print_int" was renamed to
+  "print_field", however print_int is being left in the implementation
+  for backwards compatibility purposes.
+
 Mantis 4666: uvm_config_db::set expects to be invoked in process context
 
 Mantis 4677: uvm_global_copy_map removed
@@ -189,5 +199,18 @@ were not being routed through standard UVM messaging.
 Mantis 4743: uvm_sequencer::get_next_item/try_next_item/item_done/get/peek/put
 may now be called directly.
 
+(*) Mantis 4766: Fix broken `uvm_record_field / attribute interaction.
+  The fix for this mantis involved creating a new method
+  'use_record_attribute' in uvm_recorder.  The new method allows for a
+  conditional usage of the `uvm_record_attribute macro, allowing users
+  to create their own recorders without interfering with
+  vendor-specific recorders
+
+(+) Mantis 4767: Fixed the `uvm_pack and `uvm_unpack macros which
+bypassed the packer policy methods.  Additionally, added
+pack_bits/bytes/ints and unpack_bits/bytes/ints to allow easier
+compatibility with the SystemVerilog stream operator.
+
 Mantis 4772: separated hdl vendor dpi backends into one file per vendor
 
+(+) Mantis 4784: documenting the `uvm_record_(int,string,real,time) macros

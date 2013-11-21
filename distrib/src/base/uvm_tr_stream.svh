@@ -413,7 +413,7 @@ virtual class uvm_tr_stream extends uvm_object;
       if (id == 0)
         return null;
 
-      if (!m_streams_by_id.exists(id))
+      if ($isunknown(id) || !m_streams_by_id.exists(id))
         return null;
 
       return m_streams_by_id[id];
@@ -424,7 +424,7 @@ virtual class uvm_tr_stream extends uvm_object;
    //
    static function void m_free_id(integer id);
       uvm_tr_stream stream;
-      if (m_streams_by_id.exists(id))
+      if (!$isunknown(id) && m_streams_by_id.exists(id))
         stream = m_streams_by_id[id];
 
       if (stream != null) begin

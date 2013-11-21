@@ -2350,8 +2350,8 @@ endfunction
 function void uvm_mem::do_print (uvm_printer printer);
   super.do_print(printer);
   //printer.print_generic(" ", " ", -1, convert2string());
-  printer.print_int("n_bits",get_n_bits(),32, UVM_UNSIGNED);
-  printer.print_int("size",get_size(),32, UVM_UNSIGNED);
+  printer.print_field_int("n_bits",get_n_bits(),32, UVM_UNSIGNED);
+  printer.print_field_int("size",get_size(),32, UVM_UNSIGNED);
 endfunction
 
 

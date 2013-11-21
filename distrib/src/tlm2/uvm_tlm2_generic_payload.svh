@@ -386,11 +386,11 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
   function void do_print(uvm_printer printer);
     byte unsigned be;
     super.do_print(printer);
-    printer.print_int     ("address", m_address, 64, UVM_HEX);
+    printer.print_field_int     ("address", m_address, 64, UVM_HEX);
     printer.print_generic ("command", "uvm_tlm_command_e", 32, m_command.name());
     printer.print_generic ("response_status", "uvm_tlm_response_status_e",
                              32, m_response_status.name());
-    printer.print_int     ("streaming_width", m_streaming_width, 32, UVM_HEX);
+    printer.print_field_int     ("streaming_width", m_streaming_width, 32, UVM_HEX);
 
     printer.print_array_header("data", m_length, "darray(byte)");
     for (int i=0; i < m_length && i < m_data.size(); i++) begin
@@ -561,21 +561,21 @@ class uvm_tlm_generic_payload extends uvm_sequence_item;
   // Function- do_record
   //
   function void do_record(uvm_recorder recorder);
-     if (!is_recording_enabled())
-       return;
-     super.do_record(recorder);
-     recorder.record_field("address", m_address, $bits(m_address));
-     recorder.record_string("command", m_command.name());
-     recorder.record_field("data_length", m_length, $bits(m_length));
-     recorder.record_field("byte_enable_length", m_byte_enable_length, $bits(m_byte_enable_length));
-     recorder.record_string("response_status", m_response_status.name());
-     recorder.record_field("streaming_width", m_streaming_width, $bits(m_streaming_width));
+    if (!is_recording_enabled())
+      return;
+    super.do_record(recorder);
+    `uvm_record_int("address",m_address,$bits(m_address))
+    `uvm_record_string("command",m_command.name())
+    `uvm_record_int("data_length",m_length,$bits(m_length))
+    `uvm_record_int("byte_enable_length",m_byte_enable_length,$bits(m_byte_enable_length))
+    `uvm_record_string("response_status",m_response_status.name())
+    `uvm_record_int("streaming_width",m_streaming_width,$bits(m_streaming_width))
 
     for (int i=0; i < m_length; i++)
-      recorder.record_field($sformatf("\\data[%0d]", i), m_data[i], $bits(m_data[i]));
+      `uvm_record_int($sformatf("\\data[%0d] ", i), m_data[i], $bits(m_data[i]))
 
     for (int i=0; i < m_byte_enable_length; i++)
-      recorder.record_field($sformatf("\\byte_en[%0d]", i), m_byte_enable[i], $bits(m_byte_enable[i]));
+      `uvm_record_int($sformatf("\\byte_en[%0d] ", i), m_byte_enable[i], $bits(m_byte_enable[i]))
 
     foreach (m_extensions[ext])
       recorder.record_object(ext.get_name(),m_extensions[ext]);

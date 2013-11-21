@@ -135,7 +135,6 @@ virtual class uvm_printer;
                                                 uvm_radix_enum radix=UVM_NORADIX,
                                                 byte   scope_separator=".",
                                                 string type_name="");
-                                                
 
   // Function: print_object
   //
@@ -548,7 +547,7 @@ class uvm_printer_knobs;
   // Variable: default_radix
   //
   // This knob sets the default radix to use for integral values when no radix
-  // enum is explicitly supplied to the print_int() method.
+  // enum is explicitly supplied to the print_field() method.
 
   uvm_radix_enum default_radix = UVM_HEX;
 
@@ -882,7 +881,7 @@ function void uvm_printer::print_field (string name,
 
 endfunction
   
-// print_field
+// print_field_int
 // ---------
 
 function void uvm_printer::print_field_int (string name,

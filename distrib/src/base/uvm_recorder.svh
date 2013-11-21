@@ -309,7 +309,7 @@ virtual class uvm_recorder extends uvm_object;
    //
    static function void m_free_id(integer id);
       uvm_recorder recorder;
-      if (m_recorders_by_id.exists(id))
+      if ((!$isunknown(id)) && (m_recorders_by_id.exists(id)))
         recorder = m_recorders_by_id[id];
 
       if (recorder != null) begin
@@ -362,23 +362,12 @@ virtual class uvm_recorder extends uvm_object;
       if (id == 0)
         return null;
 
-      if (!m_recorders_by_id.exists(id))
+      if (($isunknown(id)) || (!m_recorders_by_id.exists(id)))
         return null;
 
       return m_recorders_by_id[id];
    endfunction : get_recorder_from_handle
 
-   // Function: get_record_attribute_handle
-   // Provides a tool-specific handle which is compatible with <`uvm_record_attribute>.
-   //
-   // By default, this method will return the same value as <get_handle>,
-   // however tool vendors can override this method to provide tool-specific handles
-   // which will be passed to the <`uvm_record_attribute> macro.
-   //
-   virtual function integer get_record_attribute_handle();
-      return get_handle();
-   endfunction : get_record_attribute_handle
-   
    // Group: Attribute Recording
    
    // Function: record_field
@@ -510,6 +499,29 @@ virtual class uvm_recorder extends uvm_object;
       do_record_generic(name, value, type_name);
    endfunction : record_generic
 
+  // Function: use_record_attribute
+  //
+  // Indicates that this recorder does (or does not) support usage of
+  // the <`uvm_record_attribute> macro.
+  //
+  // The default return value is ~0~ (not supported), developers can
+  // optionally extend ~uvm_recorder~ and set the value to ~1~ if they
+  // support the <`uvm_record_attribute> macro.
+  virtual function bit use_record_attribute();
+     return 0;
+  endfunction : use_record_attribute
+
+   // Function: get_record_attribute_handle
+   // Provides a tool-specific handle which is compatible with <`uvm_record_attribute>.
+   //
+   // By default, this method will return the same value as <get_handle>,
+   // however tool vendors can override this method to provide tool-specific handles
+   // which will be passed to the <`uvm_record_attribute> macro.
+   //
+   virtual function integer get_record_attribute_handle();
+      return get_handle();
+   endfunction : get_record_attribute_handle
+   
    // Group: Implementation Agnostic API
 
    // Function: do_open

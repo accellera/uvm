@@ -900,7 +900,7 @@ virtual class uvm_component extends uvm_report_object;
   //|      super.build_phase(phase);
   //|      if(get_config_object("data", tmp))
   //|        if (!$cast(data, tmp))
-  //|          $display("error! config setting for 'data' not of type myobj_t");
+  //|          `uvm_error("CFGERR","error! config setting for 'data' not of type myobj_t")
   //|        endfunction
   //|      ...
   //
@@ -3299,13 +3299,13 @@ function void uvm_component::do_print(uvm_printer printer);
         $bits(recording_detail), "UVM_HIGH");
       UVM_FULL : printer.print_generic("recording_detail", "uvm_verbosity", 
         $bits(recording_detail), "UVM_FULL");
-      default : printer.print_int("recording_detail", recording_detail, 
+      default : printer.print_field_int("recording_detail", recording_detail, 
         $bits(recording_detail), UVM_DEC, , "integral");
     endcase
 
 `ifndef UVM_NO_DEPRECATED
   if (enable_stop_interrupt != 0) begin
-    printer.print_int("enable_stop_interrupt", enable_stop_interrupt,
+    printer.print_field_int("enable_stop_interrupt", enable_stop_interrupt,
                         $bits(enable_stop_interrupt), UVM_BIN, ".", "bit");
   end
  `endif

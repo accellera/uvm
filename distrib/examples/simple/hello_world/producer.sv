@@ -55,7 +55,7 @@ class producer #(type T=packet) extends uvm_component;
       p.set_initiator(this);
 
       if (uvm_verbosity'(recording_detail)!=UVM_NONE)
-        p.enable_recording("packet_stream");
+        p.enable_recording(get_tr_stream("packet_stream"));
 
       void'(p.randomize());
 

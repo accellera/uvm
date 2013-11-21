@@ -475,7 +475,6 @@ endfunction
 function string uvm_bitstream_to_string (uvm_bitstream_t value, int size,
                                          uvm_radix_enum radix=UVM_NORADIX,
                                          string radix_str="");
-   
   // sign extend & don't show radix for negative values
   if (radix == UVM_DEC && value[size-1] === 1)
     return $sformatf("%0d", value);
@@ -485,7 +484,7 @@ function string uvm_bitstream_to_string (uvm_bitstream_t value, int size,
 	  uvm_bitstream_t _t;
 	  _t=0;
 	  for(int idx=0;idx<size;idx++)
-	  	_t[idx]=value[idx];
+	    _t[idx]=value[idx];
 	  value=_t;
   	end
   else 
@@ -508,22 +507,21 @@ endfunction
 function string uvm_integral_to_string (uvm_integral_t value, int size,
                                          uvm_radix_enum radix=UVM_NORADIX,
                                          string radix_str="");
-   
   // sign extend & don't show radix for negative values
   if (radix == UVM_DEC && value[size-1] === 1)
     return $sformatf("%0d", value);
 
+  // TODO $countbits(value,'z) would be even better
   if($isunknown(value)) begin
-     uvm_integral_t _t;
-     _t = 0;
-     for(int idx=0;idx<size;idx++)
-       _t[idx]=value[idx];
-     value = _t;
-  end
-  else begin
-     value &= (1 << size)-1;
-  end
-   
+	  uvm_integral_t _t;
+	  _t=0;
+	  for(int idx=0;idx<size;idx++)
+	  	_t[idx]=value[idx];
+	  value=_t;
+  	end
+  else 
+  	value &= (1 << size)-1;
+
   case(radix)
     UVM_BIN:      return $sformatf("%0s%0b", radix_str, value);
     UVM_OCT:      return $sformatf("%0s%0o", radix_str, value);
@@ -535,6 +533,13 @@ function string uvm_integral_to_string (uvm_integral_t value, int size,
   endcase
 endfunction
 
+// Backwards compat
+function string uvm_vector_to_string(uvm_bitstream_t value, int size,
+                                     uvm_radix_enum radix=UVM_NORADIX,
+                                     string radix_str="");
+   return uvm_bitstream_to_string(value,size,radix,radix_str);
+endfunction // uvm_vector_to_string
+   
 // Function- uvm_get_array_index_int
 //
 // The following functions check to see if a string is representing an array
@@ -725,3 +730,14 @@ class process_container_c;
    endfunction
 endclass
 `endif
+
+
+// NOTE: this is an internal function and provides a string join independent of a streaming pack
+function automatic string m_uvm_string_queue_join(ref string i[$]);
+`ifndef QUESTA
+   m_uvm_string_queue_join = {>>{i}};
+`else
+	foreach(i[idx])
+		m_uvm_string_queue_join = {m_uvm_string_queue_join,i[idx]};
+`endif
+endfunction
