@@ -47,6 +47,8 @@ In increasing Mantis numerical order:
 
 (*) Mantis 3472: Deprecated set/get_config_int/string/object
 
+Mantis 3557: Names of phases (e.g. "main" for main_phase) now documented
+
 (+) Mantis 3586: Added support for run-time disabling of auto item recording
 
 (+) Mantis 3693: Added uvm_enum_wrapper#(T) type, and functionality to set
