@@ -125,10 +125,10 @@ begin
    op(READ,    ":q",           , 'h3C, `__LINE__); // q and w still forced, not d's value (F0)
    op(READ,    ":w",           , 'hA5, `__LINE__);
 
-   op(RELEASE, ":q",           , 'hf0, `__LINE__); // q stays until reassigned, should be C3?
-   op(RELEASE, ":w",           , 'h3C, `__LINE__); // w is re-evaluated, now q
+   op(RELEASE, ":q",           , 'h3c, `__LINE__); // q stays until reassigned, should be C3?
+   op(RELEASE, ":w",           , 'ha5, `__LINE__); // w is re-evaluated, now q
 
-   op(READ,    ":q",           , 'hf0, `__LINE__); // read q just for chuckles
+   op(READ,    ":q",           , 'h3c, `__LINE__); // read q just for chuckles
 
    #100; // d propagates to q,w again
 //#450
@@ -142,7 +142,7 @@ begin
    op(READ,    ":q",           , 'hA5, `__LINE__); // q and w are now d
    op(READ,    ":w",           , 'hA5, `__LINE__); //
 
-// TODO   op(RELEASE, ":d",           , 'hA5, `__LINE__); // d released, stays the same
+   op(RELEASE, ":d",           , 'hA5, `__LINE__); // d released, stays the same
 
    #100; // d propagates to q,w again
 // #650
@@ -162,7 +162,7 @@ begin
    op(READ,    ":q",           , 'h0F, `__LINE__); // q and w should be d
    op(READ,    ":w",           , 'h0F, `__LINE__);
 
-   op(FORCE,   ":w",       'hAA, 'h0F, `__LINE__, 100); // w is driven to AA for 100, then released,
+   op(FORCE,   ":w",       'hAA, 'haa, `__LINE__, 100); // w is driven to AA for 100, then released,
  // #950                                                          // which immed re-evaluates to its q driver, which is 'h0F
 
    // TODO: test undriven wire
