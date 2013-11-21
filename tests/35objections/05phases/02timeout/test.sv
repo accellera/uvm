@@ -36,10 +36,9 @@ module test;
   endclass : simple_item
 
   class simple_sequencer extends uvm_sequencer #(simple_item);
-    `uvm_sequencer_utils(simple_sequencer)
+    `uvm_component_utils(simple_sequencer)
     function new (string name, uvm_component parent);
       super.new(name, parent);
-      `uvm_update_sequence_lib_and_item(simple_item)
     endfunction : new
   endclass : simple_sequencer
 
@@ -47,9 +46,12 @@ module test;
     function new(string name="simple_seq");
       super.new(name);
     endfunction
-    `uvm_sequence_utils(simple_seq, simple_sequencer)    
+    `uvm_object_utils(simple_seq)
+    `uvm_declare_p_sequencer(simple_sequencer)    
     virtual task body();
-      uvm_test_done.raise_objection(this);
+      uvm_domain _common_domain = uvm_domain::get_common_domain();
+      uvm_phase run_phase = _common_domain.find_by_name("run");
+      run_phase.raise_objection(this);
       p_sequencer.uvm_report_info("SEQ_BODY", "simple_seq body() is starting...", UVM_LOW);
       #50;
       // Raising one uvm_test_done objection
@@ -102,15 +104,22 @@ module test;
     endfunction : new
     `uvm_component_utils(test)
     function void build();
+      uvm_domain _common_domain = uvm_domain::get_common_domain();
+      uvm_phase run_phase = _common_domain.find_by_name("run");
+      uvm_objection l_run_phase_objection = run_phase.get_objection();
+      run_phase.raise_objection(this);
       super.build();
-      set_config_string("agent.sequencer", "default_sequence", "simple_seq");
       agent = simple_agent::type_id::create("agent", this);
-      uvm_test_done.set_drain_time(this, 93);
-      uvm_test_done.set_report_verbosity_level(UVM_FULL);
+      l_run_phase_objection.set_drain_time(this, 93);
+      l_run_phase_objection.set_report_verbosity_level(UVM_FULL);
     endfunction
     function void start_of_simulation();
       this.print();
     endfunction
+    task run_phase(uvm_phase phase);
+      simple_seq l_ss = simple_seq::type_id::create("l_ss", this);
+      l_ss.start(agent.sequencer);
+    endtask
     function void report();
       if($time != 1000) $display("** UVM TEST FAILED time: %0d  exp: 1000", $time);
       else  $display("** UVM TEST PASSED **");
@@ -129,8 +138,9 @@ module test;
   my_catcher ctchr = new;
 
   initial begin
+    uvm_root l_rt = uvm_root::get();
     uvm_report_cb::add(null,ctchr);
-    set_global_timeout(1000);
+    l_rt.set_timeout(1000);
     run_test("test");
   end
 

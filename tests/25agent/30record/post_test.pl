@@ -41,9 +41,9 @@ if (!open(L, ">$testdir/tr_db.post.log")) {
 }
 
 while ($_ = <DB>) {
-    print L $_ if m/^BEGIN /;
+    print L $_ if m/^\s+BEGIN /;
     print L $_ if m/^\s+LINK /;
-    print L $_ if m/^END /;
+    print L $_ if m/^\s+END /;
 }
 
 close(LOG);

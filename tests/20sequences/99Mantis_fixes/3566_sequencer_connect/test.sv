@@ -53,11 +53,13 @@ module top();
       super.new(name);
     endfunction
     task body();
+        uvm_domain _common_domain = uvm_domain::get_common_domain();
+        uvm_phase run_phase = _common_domain.find_by_name("run");
         my_item m;   
-        uvm_test_done.raise_objection(this);     
+        run_phase.raise_objection(this);     
         `uvm_create_on(m, target_sqr)
         `uvm_send(m)
-        uvm_test_done.drop_objection(this);     
+        run_phase.drop_objection(this);     
     endtask
   endclass
 
@@ -121,13 +123,13 @@ module top();
       `uvm_info(get_type_name(), $sformatf("The topology:\n%s", this.sprint()), UVM_HIGH)
     endfunction
 
-    task run();
+    task run_phase(uvm_phase phase);
       my_sequence the_0seq;
-      uvm_test_done.raise_objection(this);
+      phase.raise_objection(this);
       the_0seq = my_sequence::type_id::create("the_0seq", this);
       the_0seq.target_sqr = ma0.ms;
       the_0seq.start(ma0.vsqr);
-      uvm_test_done.drop_objection(this);
+      phase.drop_objection(this);
     endtask
   endclass
 

@@ -266,13 +266,11 @@ class test extends uvm_test;
    endtask
    
    function void final_phase(uvm_phase phase);
-      uvm_report_server svr;
+      uvm_report_server svr = uvm_report_server::get_server();
       
       super.final_phase(phase);
 
-      svr = uvm_coreservice.get_report_server();
-
-      svr.summarize();
+      svr.report_summarize();
 
       if (svr.get_id_count("RegModel") < 200 ||
           svr.get_severity_count(UVM_INFO) < 200) begin

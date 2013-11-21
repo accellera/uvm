@@ -101,21 +101,30 @@ endfunction
 //
 //----------------------------------------------------------------------------
 
+
+// Function: uvm_get_report_object
+//
+// Returns the nearest uvm_report_object when called.  
+// For the global version, it returns uvm_root.
+//
+function uvm_report_object uvm_get_report_object();
+  return uvm_coreservice.get_root();
+endfunction
+
+
 // Function: uvm_report_enabled
 //
-// Returns 1 if the configured verbosity in ~uvm_top~ is greater than 
-// ~verbosity~ and the action associated with the given ~severity~ and ~id~
-// is not UVM_NO_ACTION, else returns 0.
+// Returns 1 if the configured verbosity in ~uvm_top~ for this 
+// severity/id is greater than or equal to ~verbosity~ else returns 0.
 // 
 // See also <uvm_report_object::uvm_report_enabled>.
-//
 //
 // Static methods of an extension of uvm_report_object, e.g. uvm_compoent-based
 // objects, can not call ~uvm_report_enabled~ because the call will resolve to
 // the <uvm_report_object::uvm_report_enabled>, which is non-static.
 // Static methods can not call non-static methods of the same class. 
 
-function bit uvm_report_enabled (int verbosity,
+function int uvm_report_enabled (int verbosity,
                                  uvm_severity severity=UVM_INFO, string id="");
   uvm_root top;
   top = uvm_coreservice.get_root();
@@ -130,10 +139,12 @@ function void uvm_report( uvm_severity severity,
                           int verbosity = (severity == uvm_severity'(UVM_ERROR)) ? UVM_LOW :
                                           (severity == uvm_severity'(UVM_FATAL)) ? UVM_NONE : UVM_MEDIUM,
                           string filename = "",
-                          int line = 0);
+                          int line = 0,
+                          string context_name = "",
+                          bit report_enabled_checked = 0);
   uvm_root top;
   top = uvm_coreservice.get_root();
-  top.uvm_report(severity, id, message, verbosity, filename, line);
+  top.uvm_report(severity, id, message, verbosity, filename, line, context_name, report_enabled_checked);
 endfunction 
 
 // Undocumented DPI available version of uvm_report
@@ -153,10 +164,13 @@ function void uvm_report_info(string id,
 			      string message,
                               int verbosity = UVM_MEDIUM,
 			      string filename = "",
-			      int line = 0);
+			      int line = 0,
+                              string context_name = "",
+                              bit report_enabled_checked = 0);
   uvm_root top;
   top = uvm_coreservice.get_root();
-  top.uvm_report_info(id, message, verbosity, filename, line);
+  top.uvm_report_info(id, message, verbosity, filename, line, context_name,
+    report_enabled_checked);
 endfunction
 
 
@@ -166,10 +180,13 @@ function void uvm_report_warning(string id,
                                  string message,
                                  int verbosity = UVM_MEDIUM,
 				 string filename = "",
-				 int line = 0);
+				 int line = 0,
+                                 string context_name = "",
+                                 bit report_enabled_checked = 0);
   uvm_root top;
   top = uvm_coreservice.get_root();
-  top.uvm_report_warning(id, message, verbosity, filename, line);
+  top.uvm_report_warning(id, message, verbosity, filename, line, context_name,
+    report_enabled_checked);
 endfunction
 
 
@@ -179,10 +196,13 @@ function void uvm_report_error(string id,
                                string message,
                                int verbosity = UVM_LOW,
 			       string filename = "",
-			       int line = 0);
+			       int line = 0,
+                               string context_name = "",
+                               bit report_enabled_checked = 0);
   uvm_root top;
   top = uvm_coreservice.get_root();
-  top.uvm_report_error(id, message, verbosity, filename, line);
+  top.uvm_report_error(id, message, verbosity, filename, line, context_name,
+    report_enabled_checked);
 endfunction
 
 
@@ -201,11 +221,29 @@ function void uvm_report_fatal(string id,
 	                       string message,
                                int verbosity = UVM_NONE,
 			       string filename = "",
-			       int line = 0);
+			       int line = 0,
+                               string context_name = "",
+                               bit report_enabled_checked = 0);
   uvm_root top;
   top = uvm_coreservice.get_root();
-  top.uvm_report_fatal(id, message, verbosity, filename, line);
+  top.uvm_report_fatal(id, message, verbosity, filename, line, context_name,
+    report_enabled_checked);
 endfunction
+
+
+// Function: uvm_process_report_message
+//
+// This method, defined in package scope, is a convenience function that
+// delegate to the corresponding component method in ~uvm_top~. It can be
+// used in module-based code to use the same reporting mechanism as class-based
+// components. See <uvm_report_object> for details on the reporting mechanism.
+
+function void uvm_process_report_message(uvm_report_message report_message);
+  uvm_root top;
+  top = uvm_coreservice.get_root();
+  top.uvm_process_report_message(report_message);
+endfunction
+
 
 // TODO merge with uvm_enum_wrapper#(uvm_severity)
 function bit uvm_string_to_severity (string sev_str, output uvm_severity sev);
@@ -219,7 +257,8 @@ function bit uvm_string_to_severity (string sev_str, output uvm_severity sev);
   return 1;
 endfunction
 
- function automatic bit uvm_string_to_action (string action_str, output uvm_action action);
+
+function automatic bit uvm_string_to_action (string action_str, output uvm_action action);
   string actions[$];
   uvm_split_string(action_str,"|",actions);
   uvm_string_to_action = 1;
@@ -233,6 +272,7 @@ endfunction
       "UVM_EXIT":      action |= UVM_EXIT;
       "UVM_CALL_HOOK": action |= UVM_CALL_HOOK;
       "UVM_STOP":      action |= UVM_STOP;
+      "UVM_RM_RECORD": action |= UVM_RM_RECORD;
       default: uvm_string_to_action = 0;
     endcase
   end

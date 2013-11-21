@@ -1771,6 +1771,7 @@ function uvm_component::new (string name, uvm_component parent);
   if (!uvm_config_db #(uvm_bitstream_t)::get(this, "", "recording_detail", recording_detail))
         void'(uvm_config_db #(int)::get(this, "", "recording_detail", recording_detail));
 
+  m_rh.set_name(get_full_name());
   set_report_verbosity_level(parent.get_report_verbosity_level());
 
   m_set_cl_msg_args();

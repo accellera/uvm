@@ -146,10 +146,14 @@ program two_sequencers_with_same_map;
             `uvm_object_utils(write_some)
             
             virtual task pre_body();
-                uvm_test_done.raise_objection(this);
+               uvm_domain l_common_domain = uvm_domain::get_common_domain();
+               uvm_phase l_run_phase = l_common_domain.find_by_name("run");
+               l_run_phase.raise_objection(this);
             endtask
             virtual task post_body();
-                uvm_test_done.drop_objection(this);
+               uvm_domain l_common_domain = uvm_domain::get_common_domain();
+               uvm_phase l_run_phase = l_common_domain.find_by_name("run");
+               l_run_phase.drop_objection(this);
             endtask
                         
             virtual task body();

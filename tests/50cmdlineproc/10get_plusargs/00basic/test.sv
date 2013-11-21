@@ -84,8 +84,9 @@ class test extends uvm_test;
      endcase
    endfunction
 
-   virtual task run();
-      uvm_top.stop_request();
+   virtual task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
+      phase.drop_objection(this);
    endtask
 
    virtual function void report();

@@ -27,8 +27,13 @@ module top;
     `uvm_component_utils(comp)
     int rcount=0, dcount=0;
 
-    task run;
-      uvm_test_done.set_drain_time(this, 5);
+    uvm_phase l_run_phase;
+    uvm_objection l_run_objection;
+
+    task run_phase(uvm_phase phase);
+      l_run_phase = phase;
+      l_run_objection = phase.get_objection();
+      l_run_objection.set_drain_time(this, 5);
 
       repeat(3) begin
         for(int i=0;i<3; ++i) begin
@@ -43,11 +48,11 @@ module top;
 
     task doit(int v);
       uvm_report_info("DOIT", $sformatf("Calling doit with v = %0d", v));
-      uvm_test_done.raise_objection(this);
+      l_run_phase.raise_objection(this);
       ++rcount;
       #(v*10 + 1);
       ++dcount;
-      uvm_test_done.drop_objection(this);
+      l_run_phase.drop_objection(this);
       disable fork; 
     endtask
 

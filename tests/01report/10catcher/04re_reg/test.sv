@@ -46,21 +46,19 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
-      
+   virtual task run_phase(uvm_phase phase);
  
-  begin
-    $write("UVM TEST - WARNING expected since re_registering a default catcher\n");
-        
-    //add_report_default_catcher(uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
-    uvm_report_cb::add(null,ctchr);
-    uvm_report_cb::add(null,ctchr);
-    
-  end
+     phase.raise_objection(this);
+      
+     $write("UVM TEST - WARNING expected since re_registering a default catcher\n");
+         
+     //add_report_default_catcher(uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
+     uvm_report_cb::add(null,ctchr);
+     uvm_report_cb::add(null,ctchr);
   
-  uvm_report_cb::delete(null,ctchr);
+     uvm_report_cb::delete(null,ctchr);
   
-  uvm_top.stop_request();
+     phase.drop_objection(this);
   
    endtask
 

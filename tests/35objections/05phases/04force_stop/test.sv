@@ -27,13 +27,13 @@ module test;
       super.new(name, parent);
     endfunction : new
     `uvm_component_utils(simple_driver)
-    task run();
+    task run_phase(uvm_phase phase);
     uvm_report_info("DRIVER_STARTED",{"Driver '",get_full_name(),"' started;",
       " will raise an objection but never drop it"});
-      uvm_test_done.raise_objection(this);
+      phase.raise_objection(this);
       repeat(i) #10;
-      //uvm_test_done.drop_objection(this);
-    endtask: run
+      //phase.drop_objection(this);
+    endtask: run_phase
   endclass : simple_driver
 
   class test extends uvm_test;
@@ -60,7 +60,8 @@ module test;
     run_test("test");
   end
 
-  initial
+  initial begin
     #100 uvm_test_done.force_stop();
+  end
 
 endmodule

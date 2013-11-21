@@ -117,10 +117,10 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
       
+    phase.raise_objection(this);
  
-  begin
     $write("UVM TEST - Changing catcher severity, id, message, action, verbosity \n");
         
     //add_report_default_catcher(uvm_report_catcher catcher, uvm_apprepend ordering = UVM_APPEND);
@@ -143,10 +143,11 @@ class test extends uvm_test;
     `uvm_info("MyOtherID", "Message1 Sending a UVM_MEDIUM message", UVM_MEDIUM);
     `uvm_info("MyOtherID", "Message2 Sending a UVM_FULL message", UVM_FULL);
  
-      end
       
-      $write("UVM TEST EXPECT 2 UVM_ERROR\n");
-      uvm_top.stop_request();
+    $write("UVM TEST EXPECT 2 UVM_ERROR\n");
+
+    phase.drop_objection(this);
+
    endtask
 
    virtual function void report();

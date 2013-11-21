@@ -44,16 +44,20 @@ module test();
       super.new(name);
     endfunction
     task body();
+      uvm_domain _common_domain = uvm_domain::get_common_domain();
+      uvm_phase run_phase = _common_domain.find_by_name("run");
+      run_phase.raise_objection(this);
       `uvm_info(get_type_name(), $sformatf("body starting, raising my objection"), UVM_HIGH)
-      uvm_test_done.raise_objection(this);
       #1000;
       //`uvm_do(req)
       `uvm_info(get_type_name(), $sformatf("item done, sequence is finishing"), UVM_HIGH)
     endtask
     function void do_kill();
+      uvm_domain _common_domain = uvm_domain::get_common_domain();
+      uvm_phase run_phase = _common_domain.find_by_name("run");
       `uvm_info(get_type_name(), $sformatf("kill done, dropping my objection"), UVM_HIGH)
-      uvm_test_done.drop_objection(this);
       kill_test_bit = 1;
+      run_phase.drop_objection(this);
     endfunction
   endclass
 
@@ -111,9 +115,9 @@ module test();
     function void end_of_elaboration();
       `uvm_info(get_type_name(), $sformatf("The topology:\n%s", this.sprint()), UVM_HIGH)
     endfunction
-    task run();
+    task run_phase(uvm_phase phase);
       my_sequence the_0seq;
-      uvm_test_done.raise_objection(this);
+      phase.raise_objection(this);
       the_0seq = my_sequence::type_id::create("the_0seq", this);
       fork
         the_0seq.start(ma0.ms);
@@ -127,7 +131,7 @@ module test();
         `uvm_error("BADBIT", "kill_test_bit is not 1");
       end
       #1000;
-      uvm_test_done.drop_objection(this);
+      phase.drop_objection(this);
     endtask
     function void report();
       if(kill_test_bit == 1)

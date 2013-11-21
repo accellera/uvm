@@ -77,6 +77,16 @@ class uvm_root extends uvm_component;
 
   uvm_cmdline_processor clp;
 
+  virtual function string get_type_name();
+    return "uvm_root";
+  endfunction
+
+
+  //----------------------------------------------------------------------------
+  // Group: Simulation Control
+  //----------------------------------------------------------------------------
+
+
   // Task: run_test
   //
   // Phases all components through all registered phases. If the optional
@@ -89,6 +99,56 @@ class uvm_root extends uvm_component;
   // phasing completes.
 
   extern virtual task run_test (string test_name="");
+
+
+  // Function: die
+  //
+  // This method is called by the report server if a report reaches the maximum
+  // quit count or has an UVM_EXIT action associated with it, e.g., as with
+  // fatal errors.
+  //
+  // Calls the <uvm_component::pre_abort()> method
+  // on the entire <uvm_component> hierarchy in a bottom-up fashion.
+  // It then call calls <report_summarize> and terminates the simulation
+  // with ~$finish~.
+
+  virtual function void die();
+    uvm_report_server l_rs = uvm_report_server::get_server();
+    // do the pre_abort callbacks
+    m_do_pre_abort();
+
+    l_rs.report_summarize();
+    $finish;
+  endfunction
+
+
+  // Function: set_timeout
+  //
+  // Specifies the timeout for the simulation. Default is <`UVM_DEFAULT_TIMEOUT>
+  //
+  // The timeout is simply the maximum absolute simulation time allowed before a
+  // ~FATAL~ occurs.  If the timeout is set to 20ns, then the simulation must end
+  // before 20ns, or a ~FATAL~ timeout will occur.
+  //
+  // This is provided so that the user can prevent the simulation from potentially
+  // consuming too many resources (Disk, Memory, CPU, etc) when the testbench is
+  // essentially hung.
+  //
+  //
+
+  extern function void set_timeout(time timeout, bit overridable=1);
+
+
+  // Variable: finish_on_completion
+  //
+  // If set, then run_test will call $finish after all phases are executed. 
+
+  bit  finish_on_completion = 1;
+
+
+  //----------------------------------------------------------------------------
+  // Group: Topology
+  //----------------------------------------------------------------------------
 
 
   // Variable: top_levels
@@ -118,11 +178,6 @@ class uvm_root extends uvm_component;
                                  input uvm_component comp=null);
 
 
-  virtual function string get_type_name();
-    return "uvm_root";
-  endfunction
-
-
   // Function: print_topology
   //
   // Print the verification environment's component topology. The
@@ -141,38 +196,12 @@ class uvm_root extends uvm_component;
   bit  enable_print_topology = 0;
 
 
-  // Variable: finish_on_completion
-  //
-  // If set, then run_test will call $finish after all phases are executed. 
-
-
-  bit  finish_on_completion = 1;
-
-
   // Variable- phase_timeout
   //
   // Specifies the timeout for the run phase. Default is `UVM_DEFAULT_TIMEOUT
 
 
   time phase_timeout = `UVM_DEFAULT_TIMEOUT;
-
-
-  // Function: set_timeout
-  //
-  // Specifies the timeout for the simulation. Default is <`UVM_DEFAULT_TIMEOUT>
-  //
-  // The timeout is simply the maximum absolute simulation time allowed before a
-  // ~FATAL~ occurs.  If the timeout is set to 20ns, then the simulation must end
-  // before 20ns, or a ~FATAL~ timeout will occur.
-  //
-  // This is provided so that the user can prevent the simulation from potentially 
-  // consuming too many resources (Disk, Memory, CPU, etc) when the testbench is
-  // essentially hung.
-  //
-  //
-   
-   
-  extern function void set_timeout(time timeout, bit overridable=1);
 
 
   // PRIVATE members
@@ -209,10 +238,9 @@ class uvm_root extends uvm_component;
     if (phase == end_of_elaboration_ph) begin
       do_resolve_bindings(); 
       if (enable_print_topology) print_topology();
-      
       begin
-           uvm_report_server srvr;           
-          srvr = get_report_server();
+          uvm_report_server srvr;
+          srvr = uvm_report_server::get_server();
           if(srvr.get_severity_count(UVM_ERROR) > 0) begin
             uvm_report_fatal("BUILDERR", "stopping due to build errors", UVM_NONE);
           end
@@ -250,6 +278,10 @@ class uvm_root extends uvm_component;
 endclass
 
 
+//----------------------------------------------------------------------------
+// Group: Global Variables
+//----------------------------------------------------------------------------
+
 
 //------------------------------------------------------------------------------
 // Variable: uvm_top
@@ -259,30 +291,6 @@ endclass
 //------------------------------------------------------------------------------
 
 const uvm_root uvm_top = uvm_coreservice.get_root();
-
-
-//-----------------------------------------------------------------------------
-//
-// Class- uvm_root_report_handler
-//
-//-----------------------------------------------------------------------------
-// Root report has name "reporter"
-
-class uvm_root_report_handler extends uvm_report_handler;
-  virtual function void report(uvm_severity severity,
-                               string name,
-                               string id,
-                               string message,
-                               int verbosity_level=UVM_MEDIUM,
-                               string filename="",
-                               int line=0,
-                               uvm_report_object client=null);
-    if(name == "")
-      name = "reporter";
-    super.report(severity, name, id, message, verbosity_level, filename, line, client);
-  endfunction 
-endclass
-
 
 
 //-----------------------------------------------------------------------------
@@ -307,12 +315,9 @@ endfunction
 
 function uvm_root::new();
 
-  uvm_root_report_handler rh;
-
   super.new("__top__", null);
 
-  rh = new;
-  set_report_handler(rh);
+  m_rh.set_name("reporter");
 
   clp = uvm_cmdline_processor::get_inst();
 
@@ -377,6 +382,7 @@ endfunction
 
 task uvm_root::run_test(string test_name="");
 
+  uvm_report_server l_rs = uvm_report_server::get_server();
   uvm_coreservice_t cs = uvm_coreservice_t::get();                                                     
   uvm_factory factory=cs.get_factory();
   bit testname_plusarg;
@@ -487,7 +493,7 @@ task uvm_root::run_test(string test_name="");
   // clean up after ourselves
   phase_runner_proc.kill();
 
-  report_summarize();
+  l_rs.report_summarize();
 
   if (finish_on_completion)
     $finish;
@@ -896,7 +902,7 @@ function void uvm_root::m_do_max_quit_settings();
   string max_quit;
   string split_max_quit[$];
   int max_quit_int;
-  srvr = get_report_server();
+  srvr = uvm_report_server::get_server();
   max_quit_count = clp.get_arg_values("+UVM_MAX_QUIT_COUNT=", max_quit_settings);
   if (max_quit_count ==  0)
     return;

@@ -88,12 +88,13 @@ module test;
     function new(string name, uvm_component parent);
       super.new(name,parent);
     endfunction
-    task run;
-	uvm_default_printer.knobs.show_root=1;
-    $display("GOLD-FILE-START");
-    uvm_top.print_topology();
-    $display("GOLD-FILE-ENDS");
-      uvm_top.stop_request();
+    task run_phase(uvm_phase phase);
+       phase.raise_objection(this);
+       uvm_default_printer.knobs.show_root=1;
+       $display("GOLD-FILE-START");
+       uvm_top.print_topology();
+       $display("GOLD-FILE-ENDS");
+       phase.drop_objection(this);
     endtask
     function void report_phase(uvm_phase phase);
       super.report_phase(phase);

@@ -1,0 +1,42 @@
+------------------------------------------------------------------------------
+Name                        Type                Size  Value                   
+------------------------------------------------------------------------------
+uvm_test_top                uvm_report_handler  -     
+  max_verbosity_level       uvm_verbosity       32    UVM_FULL                
+  id_verbosities            uvm_pool            3     -                       
+    [ID1]                   uvm_verbosity       32    UVM_LOW                 
+    [ID2]                   uvm_verbosity       32    UVM_MEDIUM              
+    [ID3]                   int                 32    301                     
+  severity_id_verbosities   array               4     -                       
+    [UVM_INFO:ID4]          int                 32    501                     
+    [UVM_INFO:ID5]          uvm_verbosity       32    UVM_FULL                
+    [UVM_INFO:ID6]          uvm_verbosity       32    UVM_LOW                 
+    [UVM_WARNING:ID7]       uvm_verbosity       32    UVM_NONE                
+  id_actions                uvm_pool            2     -                       
+    [ACT_ID]                uvm_action          32    DISPLAY LOG COUNT       
+    [ACT_ID2]               uvm_action          32    DISPLAY                 
+  severity_actions          array               4     -                       
+    [UVM_INFO]              uvm_action          32    DISPLAY                 
+    [UVM_WARNING]           uvm_action          32    DISPLAY RM_RECORD COUNT 
+    [UVM_ERROR]             uvm_action          32    DISPLAY COUNT           
+    [UVM_FATAL]             uvm_action          32    DISPLAY EXIT            
+  severity_id_actions       array               1     -                       
+    [UVM_INFO:ID1]          uvm_action          32    DISPLAY COUNT           
+  sev_overrides             uvm_pool            1     -                       
+    [UVM_ERROR]             uvm_severity        32    UVM_FATAL               
+  sev_id_overrides          array               2     -                       
+    [UVM_INFO:ID8]          uvm_severity        32    UVM_ERROR               
+    [UVM_ERROR:ID9]         uvm_severity        32    UVM_WARNING             
+  default_file_handle       int                 32    'h1                     
+  id_file_handles           uvm_pool            2     -                       
+    [ID3]                   UVM_FILE            32    'h1d3                   
+    [ID7]                   UVM_FILE            32    'hf12f5                 
+  severity_file_handles     array               4     -                       
+    [UVM_INFO]              UVM_FILE            32    'h17                    
+    [UVM_WARNING]           UVM_FILE            32    'h0                     
+    [UVM_ERROR]             UVM_FILE            32    'h0                     
+    [UVM_FATAL]             UVM_FILE            32    'h3e9                   
+  severity_id_file_handles  array               2     -                       
+    [UVM_WARNING:ID207]     UVM_FILE            32    'h495d4                 
+    [UVM_ERROR:ID0]         UVM_FILE            32    'h7                     
+------------------------------------------------------------------------------

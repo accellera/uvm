@@ -112,18 +112,12 @@ virtual class uvm_report_catcher extends uvm_callback;
 
   typedef enum { UNKNOWN_ACTION, THROW, CAUGHT} action_e;
 
-  local static uvm_severity m_modified_severity;
-  local static int m_modified_verbosity;
-  local static string m_modified_id;
-  local static string m_modified_message;
-  local static string m_file_name;
-  local static int m_line_number;
-  local static uvm_report_object m_client;
-  local static uvm_action m_modified_action;
+  local static uvm_report_message m_modified_report_message;
+  local static uvm_report_message m_orig_report_message;
+
   local static bit m_set_action_called;
-  local static uvm_report_server m_server;
-  local static string m_name;
-  
+
+  // Counts for the demoteds and caughts
   local static int m_demoted_fatal;
   local static int m_demoted_error;
   local static int m_demoted_warning;
@@ -131,17 +125,13 @@ virtual class uvm_report_catcher extends uvm_callback;
   local static int m_caught_error;
   local static int m_caught_warning;
 
+  // Flag counts
   const static int DO_NOT_CATCH      = 1; 
   const static int DO_NOT_MODIFY     = 2; 
   local static int m_debug_flags;
 
-  local static  uvm_severity  m_orig_severity;
-  local static  uvm_action    m_orig_action;
-  local static  string        m_orig_id;
-  local static  int           m_orig_verbosity;
-  local static  string        m_orig_message;
-
   local static  bit do_report;
+
   
   // Function: new
   //
@@ -158,10 +148,10 @@ virtual class uvm_report_catcher extends uvm_callback;
   // Function: get_client
   //
   // Returns the <uvm_report_object> that has generated the message that
-  // is currently being processes.
+  // is currently being processed.
 
   function uvm_report_object get_client();
-    return this.m_client; 
+    return m_modified_report_message.get_report_object(); 
   endfunction
 
   // Function: get_severity
@@ -172,19 +162,26 @@ virtual class uvm_report_catcher extends uvm_callback;
   // severity is the modified value.
 
   function uvm_severity get_severity();
-    return this.m_modified_severity;
+    return this.m_modified_report_message.get_severity();
   endfunction
   
   // Function: get_context
   //
-  // Returns the context (source) of the message that is currently being
+  // Returns the context name of the message that is currently being
   // processed. This is typically the full hierarchical name of the component
-  // that issued the message. However, when the message comes via a report
-  // handler that is not associated with a component, the context is
-  // user-defined.
+  // that issued the message. However, if user-defined context is set from
+  // a uvm_report_message, the user-defined context will be returned.
 
   function string get_context();
-    return this.m_name;
+    string context_str;
+    
+    context_str = this.m_modified_report_message.get_context();
+    if (context_str == "") begin
+      uvm_report_handler rh = this.m_modified_report_message.get_report_handler();
+      context_str = rh.get_full_name();
+    end
+
+    return context_str;
   endfunction
   
   // Function: get_verbosity
@@ -195,7 +192,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // verbosity is the modified value.
   
   function int get_verbosity();
-    return this.m_modified_verbosity;
+    return this.m_modified_report_message.get_verbosity();
   endfunction
   
   // Function: get_id
@@ -206,7 +203,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // id is the modified value.
   
   function string get_id();
-    return this.m_modified_id;
+    return this.m_modified_report_message.get_id();
   endfunction
   
   // Function: get_message
@@ -217,7 +214,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // message is the modified value.
   
   function string get_message();
-     return this.m_modified_message;
+     return this.m_modified_report_message.get_message();
   endfunction
   
   // Function: get_action
@@ -228,7 +225,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // action is the modified value.
   
   function uvm_action get_action();
-    return this.m_modified_action;
+    return this.m_modified_report_message.get_action();
   endfunction
   
   // Function: get_fname
@@ -236,7 +233,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // Returns the file name of the message.
   
   function string get_fname();
-    return this.m_file_name;
+    return this.m_modified_report_message.get_filename();
   endfunction             
 
   // Function: get_line
@@ -244,8 +241,17 @@ virtual class uvm_report_catcher extends uvm_callback;
   // Returns the line number of the message.
 
   function int get_line();
-    return this.m_line_number;
+    return this.m_modified_report_message.get_line();
   endfunction
+
+  // Function: get_element_container
+  //
+  // Returns the element container of the message.
+
+  function uvm_report_message_element_container get_element_container();
+    return this.m_modified_report_message.get_element_container();
+  endfunction
+
   
   // Group: Change Message State
 
@@ -255,7 +261,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // report catchers will see the modified value.
   
   protected function void set_severity(uvm_severity severity);
-    this.m_modified_severity = severity;
+    this.m_modified_report_message.set_severity(uvm_severity_type'(severity));
   endfunction
   
   // Function: set_verbosity
@@ -264,7 +270,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // report catchers will see the modified value.
 
   protected function void set_verbosity(int verbosity);
-    this.m_modified_verbosity = verbosity;
+    this.m_modified_report_message.set_verbosity(verbosity);
   endfunction      
 
   // Function: set_id
@@ -273,7 +279,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // report catchers will see the modified value.
 
   protected function void set_id(string id);
-    this.m_modified_id = id;
+    this.m_modified_report_message.set_id(id);
   endfunction
   
   // Function: set_message
@@ -282,7 +288,7 @@ virtual class uvm_report_catcher extends uvm_callback;
   // report catchers will see the modified value.
 
   protected function void set_message(string message);
-    this.m_modified_message = message;
+    this.m_modified_report_message.set_message(message);
   endfunction
   
   // Function: set_action
@@ -291,9 +297,64 @@ virtual class uvm_report_catcher extends uvm_callback;
   // report catchers will see the modified value.
   
   protected function void set_action(uvm_action action);
-    this.m_modified_action = action;
+    this.m_modified_report_message.set_action(action);
     this.m_set_action_called = 1;
   endfunction
+
+  // Function: set_context
+  //
+  // Change the context of the message to ~context~. Any other
+  // report catchers will see the modified value.
+
+  protected function void set_context(string context_str);
+    this.m_modified_report_message.set_context(context_str);
+  endfunction
+
+  // Function: add_int
+  //
+  // Add an integral type of the name ~name~ and value ~value~ to
+  // the message.  The required ~size~ field indicates the size of ~value~.
+  // The required ~radix~ field determines how to display and
+  // record the field. Any other report catchers will see the newly
+  // added element.
+  //
+
+  protected function void add_int(string name,
+				  uvm_bitstream_t value,
+				  int size,
+				  uvm_radix_enum radix,
+				  uvm_action action = (UVM_LOG|UVM_RM_RECORD));
+    this.m_modified_report_message.add_int(name, value, size, radix, action);
+  endfunction
+
+
+  // Function: add_string
+  //
+  // Adds a string of the name ~name~ and value ~value~ to the
+  // message. Any other report catchers will see the newly
+  // added element.
+  //
+
+  protected function void add_string(string name,
+				     string value,
+                                     uvm_action action = (UVM_LOG|UVM_RM_RECORD));
+    this.m_modified_report_message.add_string(name, value, action);
+  endfunction
+
+
+  // Function: add_object
+  //
+  // Adds a uvm_object of the name ~name~ and reference ~obj~ to
+  // the message. Any other report catchers will see the newly
+  // added element.
+  //
+
+  protected function void add_object(string name,
+				     uvm_object obj,
+                                     uvm_action action = (UVM_LOG|UVM_RM_RECORD));
+    this.m_modified_report_message.add_object(name, obj, action);
+  endfunction
+
   
   // Group: Debug
      
@@ -373,19 +434,16 @@ virtual class uvm_report_catcher extends uvm_callback;
    // Issues a fatal message using the current message's report object.
    // This message will bypass any message catching callbacks.
    
-   protected function void uvm_report_fatal(string id, string message, int verbosity, string fname = "", int line = 0 );
-     string m;
-     uvm_action a;
-     UVM_FILE f;
-     uvm_report_handler rh;
-     
-     rh   = this.m_client.get_report_handler();
-     a    = rh.get_action(UVM_FATAL,id);
-     f    = rh.get_file_handle(UVM_FATAL,id);
-     
-     m    = this.m_server.compose_message(UVM_FATAL,this.m_name, id, message, fname, line);
-     this.m_server.process_report(UVM_FATAL, this.m_name, id, message, a, f, fname, line,
-                                  m, verbosity, this.m_client);
+   protected function void uvm_report_fatal(string id,
+					    string message, 
+					    int verbosity,
+					    string fname = "",
+					    int line = 0,
+					    string context_name = "",
+					    bit report_enabled_checked = 0);
+
+     this.uvm_report(UVM_FATAL, id, message, UVM_NONE, fname, line,
+                     context_name, report_enabled_checked);
    endfunction  
 
 
@@ -394,41 +452,34 @@ virtual class uvm_report_catcher extends uvm_callback;
    // Issues a error message using the current message's report object.
    // This message will bypass any message catching callbacks.
    
-   
-   protected function void uvm_report_error(string id, string message, int verbosity, string fname = "", int line = 0 );
-     string m;
-     uvm_action a;
-     UVM_FILE f;
-     uvm_report_handler rh;
-     
-     rh   = this.m_client.get_report_handler();
-     a    = rh.get_action(UVM_ERROR,id);
-     f    = rh.get_file_handle(UVM_ERROR,id);
-     
-     m    = this.m_server.compose_message(UVM_ERROR,this.m_name, id, message, fname, line);
-     this.m_server.process_report(UVM_ERROR, this.m_name, id, message, a, f, fname, line,
-                                  m, verbosity, this.m_client);
-   endfunction  
+   protected function void uvm_report_error(string id,
+					    string message, 
+					    int verbosity,
+					    string fname = "",
+					    int line = 0,
+					    string context_name = "",
+					    bit report_enabled_checked = 0);
 
+     this.uvm_report(UVM_ERROR, id, message, UVM_NONE, fname, line,
+                     context_name, report_enabled_checked);
+   endfunction  
+     
 
    // Function: uvm_report_warning
    //
    // Issues a warning message using the current message's report object.
    // This message will bypass any message catching callbacks.
    
-   protected function void uvm_report_warning(string id, string message, int verbosity, string fname = "", int line = 0 );
-     string m;
-     uvm_action a;
-     UVM_FILE f;
-     uvm_report_handler rh;
-     
-     rh   = this.m_client.get_report_handler();
-     a    = rh.get_action(UVM_WARNING,id);
-     f    = rh.get_file_handle(UVM_WARNING,id);
-     
-     m    = this.m_server.compose_message(UVM_WARNING,this.m_name, id, message, fname, line);
-     this.m_server.process_report(UVM_WARNING, this.m_name, id, message, a, f, fname, line,
-                                  m, verbosity, this.m_client);
+   protected function void uvm_report_warning(string id,
+					      string message,
+					      int verbosity,
+					      string fname = "",
+					      int line = 0, 
+					      string context_name = "",
+					      bit report_enabled_checked = 0);
+
+     this.uvm_report(UVM_WARNING, id, message, UVM_NONE, fname, line,
+                     context_name, report_enabled_checked);
    endfunction  
 
 
@@ -437,38 +488,65 @@ virtual class uvm_report_catcher extends uvm_callback;
    // Issues a info message using the current message's report object.
    // This message will bypass any message catching callbacks.
    
-   protected function void uvm_report_info(string id, string message, int verbosity, string fname = "", int line = 0 );
-     string m;
-     uvm_action a;
-     UVM_FILE f;
-     uvm_report_handler rh;
-     rh    = this.m_client.get_report_handler();
-     a    = rh.get_action(UVM_INFO,id);
-     f     = rh.get_file_handle(UVM_INFO,id);
-     
-     m     = this.m_server.compose_message(UVM_INFO,this.m_name, id, message, fname, line);
-     this.m_server.process_report(UVM_INFO, this.m_name, id, message, a, f, fname, line,
-                                  m, verbosity, this.m_client);
-   endfunction // uvm_report_info
+   protected function void uvm_report_info(string id,
+					   string message, 
+					   int verbosity,
+					   string fname = "",
+					   int line = 0,
+					   string context_name = "",
+					   bit report_enabled_checked = 0);
 
-    // Function: uvm_report
-    //
-    // Issues a message using the current message's report object.
-    // This message will bypass any message catching callbacks.
+     this.uvm_report(UVM_INFO, id, message, verbosity, fname, line,
+                     context_name, report_enabled_checked);
+   endfunction  
 
-    protected function void uvm_report(uvm_severity severity, string id, string message, int verbosity, string fname="", int line = 0);
-        string m;
-        uvm_action a;
-        UVM_FILE f;
-        uvm_report_handler rh;
-        rh = this.m_client.get_report_handler();
-        a = rh.get_action(severity, id);
-        f = rh.get_file_handle(severity, id);
+   // Function: uvm_report
+   //
+   // Issues a message using the current message's report object.
+   // This message will bypass any message catching callbacks.
 
-        m = this.m_server.compose_message(severity, this.m_name, id, message, fname, line);
-        this.m_server.process_report(severity, this.m_name, id, message, a , f, fname, line,
-                                     m, verbosity, this.m_client);
-    endfunction // uvm_report
+   protected function void uvm_report(uvm_severity severity,
+				      string id,
+				      string message,
+				      int verbosity,
+				      string fname = "",
+				      int line = 0,
+				      string context_name = "",
+				      bit report_enabled_checked = 0);
+
+     uvm_report_message l_report_message;
+     if (report_enabled_checked == 0) begin
+       if (!uvm_report_enabled(verbosity, severity, id))
+         return;
+     end
+
+     l_report_message = uvm_report_message::new_report_message();
+     l_report_message.set_report_message(uvm_severity_type'(severity),
+       id, message, verbosity, fname, line, context_name);
+     this.uvm_process_report_message(l_report_message);
+   endfunction
+
+   protected function void uvm_process_report_message(uvm_report_message msg);
+     uvm_report_object ro = m_modified_report_message.get_report_object();
+     uvm_action a = ro.get_report_action(msg.get_severity(), msg.get_id());
+
+     if(a) begin
+       string composed_message;
+       uvm_report_server rs = m_modified_report_message.get_report_server();
+
+       msg.set_report_object(ro);
+       msg.set_report_handler(m_modified_report_message.get_report_handler());
+       msg.set_report_server(rs);
+       msg.set_file(ro.get_report_file_handle(msg.get_severity(), msg.get_id()));
+       msg.set_action(a);
+
+       // no need to compose when neither UVM_DISPLAY nor UVM_LOG is set
+       if (a & (UVM_LOG|UVM_DISPLAY))
+         composed_message = rs.compose_report_message(msg);
+       rs.execute_report_message(msg, composed_message);
+     end
+   endfunction
+
 
   // Function: issue
   // Immediately issues the message which is currently being processed. This
@@ -478,23 +556,16 @@ virtual class uvm_report_catcher extends uvm_callback;
   // times if the message is not ~CAUGHT~.
 
   protected function void issue();
-     string m;
-     uvm_action a;
-     UVM_FILE f;
-     uvm_report_handler rh;
-     
-     rh = this.m_client.get_report_handler();
-     a  =  this.m_modified_action;
-     f  = rh.get_file_handle(this.m_modified_severity,this.m_modified_id);
-     
-     m  = this.m_server.compose_message(this.m_modified_severity, this.m_name,
-                                        this.m_modified_id,
-                                        this.m_modified_message,
-                                        this.m_file_name, this.m_line_number);
-     this.m_server.process_report(this.m_modified_severity, this.m_name,
-                                  this.m_modified_id, this.m_modified_message,
-                                  a, f, this.m_file_name, this.m_line_number,
-                                  m, this.m_modified_verbosity,this.m_client);
+     string composed_message;
+     uvm_report_server rs = m_modified_report_message.get_report_server();
+
+     if(uvm_action_type'(m_modified_report_message.get_action()) != UVM_NO_ACTION)
+     begin
+       // no need to compose when neither UVM_DISPLAY nor UVM_LOG is set
+       if (m_modified_report_message.get_action() & (UVM_LOG|UVM_DISPLAY))
+         composed_message = rs.compose_report_message(m_modified_report_message);
+       rs.execute_report_message(m_modified_report_message, composed_message);
+     end
   endfunction
 
 
@@ -502,23 +573,13 @@ virtual class uvm_report_catcher extends uvm_callback;
   //method called by report_server.report to process catchers
   //
 
-  static function int process_all_report_catchers( 
-    input uvm_report_server server,
-    input uvm_report_object client,
-    ref uvm_severity severity, 
-    input string name, 
-    ref string id,
-    ref string message,
-    ref int verbosity_level,
-    ref uvm_action action,
-    input string filename,
-    input int line 
-  );
+  static function int process_all_report_catchers(uvm_report_message rm);
     int iter;
     uvm_report_catcher catcher;
     int thrown = 1;
     uvm_severity orig_severity;
     static bit in_catcher;
+    uvm_report_object l_report_object = rm.get_report_object();
 
     if(in_catcher == 1) begin
         return 1;
@@ -526,44 +587,43 @@ virtual class uvm_report_catcher extends uvm_callback;
     in_catcher = 1;    
     uvm_callbacks_base::m_tracing = 0;  //turn off cb tracing so catcher stuff doesn't print
 
-    m_server             = server;
-    m_client             = client;
-    orig_severity        = severity;
-    m_name               = name;
-    m_file_name          = filename;
-    m_line_number        = line;
-    m_modified_id        = id;
-    m_modified_severity  = severity;
-    m_modified_message   = message;
-    m_modified_verbosity = verbosity_level;
-    m_modified_action    = action;
+    orig_severity = uvm_severity'(rm.get_severity());
+    m_modified_report_message = rm;
 
-    m_orig_severity  = severity;
-    m_orig_id        = id;
-    m_orig_verbosity = verbosity_level;
-    m_orig_action    = action;
-    m_orig_message   = message;      
-
-    catcher = uvm_report_cb::get_first(iter,client);
+    catcher = uvm_report_cb::get_first(iter,l_report_object);
+    if (catcher != null) begin
+      if(m_debug_flags & DO_NOT_MODIFY) begin
+        process p = process::self(); // Keep random stability
+        string randstate;
+        if (p != null)
+          randstate = p.get_randstate();
+        $cast(m_orig_report_message, rm.clone()); //have to clone, rm can be extended type
+        if (p != null)
+          p.set_randstate(randstate);
+      end
+    end
     while(catcher != null) begin
       uvm_severity prev_sev;
 
       if (!catcher.callback_mode()) begin
-        catcher = uvm_report_cb::get_next(iter,client);
+        catcher = uvm_report_cb::get_next(iter,l_report_object);
         continue;
       end
 
-      prev_sev = m_modified_severity;
+      prev_sev = m_modified_report_message.get_severity();
       m_set_action_called = 0;
       thrown = catcher.process_report_catcher();
 
       // Set the action to the default action for the new severity
       // if it is still at the default for the previous severity,
       // unless it was explicitly set.
-      if (!m_set_action_called &&
-          m_modified_severity != prev_sev &&
-          m_modified_action == m_client.get_report_action(prev_sev, "*@&*^*^*#")) begin
-         m_modified_action = m_client.get_report_action(m_modified_severity, "*@&*^*^*#");
+      if (!m_set_action_called && 
+          m_modified_report_message.get_severity() != prev_sev && 
+          m_modified_report_message.get_action() == 
+            l_report_object.get_report_action(prev_sev, "*@&*^*^*#")) begin
+
+         m_modified_report_message.set_action(
+           l_report_object.get_report_action(m_modified_report_message.get_severity(), "*@&*^*^*#"));
       end
 
       if(thrown == 0) begin 
@@ -574,30 +634,24 @@ virtual class uvm_report_catcher extends uvm_callback;
          endcase   
          break;
       end 
-      catcher = uvm_report_cb::get_next(iter,client);
+      catcher = uvm_report_cb::get_next(iter,l_report_object);
     end //while
 
     //update counters if message was returned with demoted severity
     case(orig_severity)
       UVM_FATAL:    
-        if(m_modified_severity < orig_severity)
+        if(m_modified_report_message.get_severity() < orig_severity)
           m_demoted_fatal++;
       UVM_ERROR:
-        if(m_modified_severity < orig_severity)
+        if(m_modified_report_message.get_severity() < orig_severity)
           m_demoted_error++;
       UVM_WARNING:
-        if(m_modified_severity < orig_severity)
+        if(m_modified_report_message.get_severity() < orig_severity)
           m_demoted_warning++;
     endcase
-   
+
     in_catcher = 0;
     uvm_callbacks_base::m_tracing = 1;  //turn tracing stuff back on
-
-    severity        = m_modified_severity;
-    id              = m_modified_id;
-    message         = m_modified_message;
-    verbosity_level = m_modified_verbosity;
-    action          = m_modified_action;
 
     return thrown; 
   endfunction
@@ -614,14 +668,11 @@ virtual class uvm_report_catcher extends uvm_callback;
     act = this.catch();
 
     if(act == UNKNOWN_ACTION)
-      this.uvm_report_error("RPTCTHR", {"uvm_report_this.catch() in catcher instance ", this.get_name(), " must return THROW or CAUGHT"}, UVM_NONE, `uvm_file, `uvm_line);
+      this.uvm_report_error("RPTCTHR", {"uvm_report_this.catch() in catcher instance ",
+        this.get_name(), " must return THROW or CAUGHT"}, UVM_NONE, `uvm_file, `uvm_line);
 
     if(m_debug_flags & DO_NOT_MODIFY) begin
-      m_modified_severity    = m_orig_severity;
-      m_modified_id          = m_orig_id;
-      m_modified_verbosity   = m_orig_verbosity;
-      m_modified_action      = m_orig_action;
-      m_modified_message     = m_orig_message;
+      m_modified_report_message.copy(m_orig_report_message);
     end     
 
     if(act == CAUGHT  && !(m_debug_flags & DO_NOT_CATCH)) begin

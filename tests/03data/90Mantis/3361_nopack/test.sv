@@ -121,7 +121,7 @@ class test extends uvm_test;
   `uvm_new_func
   `uvm_component_utils(test)
 
-  task run;
+  task run_phase(uvm_phase phase);
     my_class a, b;
     byte unsigned bytes_for_pack_copy [];
 
