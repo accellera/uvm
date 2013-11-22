@@ -1,5 +1,5 @@
 //----------------------------------------------------------------------
-//   Copyright 2007-2011 Cadence Design Systems, Inc.
+//   Copyright 2007-2013 Cadence Design Systems, Inc.
 //   Copyright 2009-2010 Mentor Graphics Corporation
 //   Copyright 2010-2011 Synopsys, Inc.
 //   All Rights Reserved Worldwide
@@ -20,7 +20,7 @@
 //----------------------------------------------------------------------
 
 // hdl vendor backends are defined for VCS,QUESTA,INCA
-#ifdef VCS
+#if defined(VCS) || defined(VCSMX)
 #include "uvm_hdl_vcs.c"
 #else
 #ifdef QUESTA
