@@ -216,3 +216,9 @@ compatibility with the SystemVerilog stream operator.
 Mantis 4772: separated hdl vendor dpi backends into one file per vendor
 
 (+) Mantis 4784: documenting the `uvm_record_(int,string,real,time) macros
+
+(+)(*) Mantis 4570: Messaging System Revamp
+   Makes message object-based and enable user to derive from the message
+   object and attach additional fields to messaging infrastructure and 
+   reporting format. In addition, an option is provided to record the 
+   messages and the attached fields.
