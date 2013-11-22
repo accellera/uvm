@@ -20,6 +20,15 @@
 //----------------------------------------------------------------------
 
 #include "uvm_dpi.h"
+#include <math.h>
+
+#include "svdpi.h"
+#include "vcsuser.h"
+
+#ifdef VCSMX
+#include "mhpi_user.h"
+#include "vhpi_user.h"
+#endif
 
 
 /* 
@@ -51,128 +60,6 @@ static int uvm_hdl_max_width()
 }
 
 
-#ifdef QUESTA
-static int uvm_hdl_set_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag);
-static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag);
-static int partsel = 0;
-
-/*
- * Given a path with part-select, break into individual bit accesses 
- * path = pointer to user string
- * value = pointer to logic vector
- * flag = deposit vs force/release options, etc
- */
-static int uvm_hdl_set_vlog_partsel(char *path, p_vpi_vecval value, PLI_INT32 flag)
-{
-  char *path_ptr = path;
-  int path_len, idx;
-  svLogicVecVal bit_value;
-
-  path_len = strlen(path);
-  path_ptr = (char*)(path+path_len-1);
-
-  if (*path_ptr != ']') 
-    return 0;
-
-  while(path_ptr != path && *path_ptr != ':' && *path_ptr != '[')
-    path_ptr--;
-
-  if (path_ptr == path || *path_ptr != ':') 
-    return 0;
-
-  while(path_ptr != path && *path_ptr != '[')
-    path_ptr--;
-
-  if (path_ptr == path || *path_ptr != '[') 
-    return 0;
-
-  int lhs, rhs, width, incr;
-
-  // extract range from path
-  if (sscanf(path_ptr,"[%u:%u]",&lhs, &rhs)) {
-    char index_str[20];
-    int i;
-    path_ptr++;
-    path_len = (path_len - (path_ptr - path));
-    incr = (lhs>rhs) ? 1 : -1;
-    width = (lhs>rhs) ? lhs-rhs+1 : rhs-lhs+1;
-
-    // perform set for each individual bit
-    for (i=0; i < width; i++) {
-      sprintf(index_str,"%u]",rhs);
-      strncpy(path_ptr,index_str,path_len);
-      svGetPartselLogic(&bit_value,value,i,1);
-      rhs += incr;
-      if (!uvm_hdl_set_vlog(path,&bit_value,flag))
-        return 0;
-    }
-    return 1;
-  }
-}
-
-
-/*
- * Given a path with part-select, break into individual bit accesses 
- * path = pointer to user string
- * value = pointer to logic vector
- * flag = deposit vs force/release options, etc
- */
-static int uvm_hdl_get_vlog_partsel(char *path, p_vpi_vecval value, PLI_INT32 flag)
-{
-  char *path_ptr = path;
-  int path_len, idx;
-  svLogicVecVal bit_value;
-
-  path_len = strlen(path);
-  path_ptr = (char*)(path+path_len-1);
-
-  if (*path_ptr != ']') 
-    return 0;
-
-  while(path_ptr != path && *path_ptr != ':' && *path_ptr != '[')
-    path_ptr--;
-
-  if (path_ptr == path || *path_ptr != ':') 
-    return 0;
-
-  while(path_ptr != path && *path_ptr != '[')
-    path_ptr--;
-
-  if (path_ptr == path || *path_ptr != '[') 
-    return 0;
-
-  int lhs, rhs, width, incr;
-
-  // extract range from path
-  if (sscanf(path_ptr,"[%u:%u]",&lhs, &rhs)) {
-    char index_str[20];
-    int i;
-    path_ptr++;
-    path_len = (path_len - (path_ptr - path));
-    incr = (lhs>rhs) ? 1 : -1;
-    width = (lhs>rhs) ? lhs-rhs+1 : rhs-lhs+1;
-    bit_value.aval = 0;
-    bit_value.bval = 0;
-    partsel = 1;
-    for (i=0; i < width; i++) {
-      int result;
-      svLogic logic_bit;
-      sprintf(index_str,"%u]",rhs);
-      strncpy(path_ptr,index_str,path_len);
-      result = uvm_hdl_get_vlog(path,&bit_value,flag);
-      logic_bit = svGetBitselLogic(&bit_value,0);
-      svPutPartselLogic(value,bit_value,i,1);
-      rhs += incr;
-      if (!result)
-        return 0;
-    }
-    partsel = 0;
-    return 1;
-  }
-}
-#endif
-
-
 /*
  * Given a path, look the path name up using the PLI,
  * and set it to 'value'.
@@ -186,18 +73,6 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
 
   //vpi_printf("uvm_hdl_set_vlog(%s,%0x)\n",path,value[0].aval);
 
-  #ifdef QUESTA
-  int result = 0;
-  result = uvm_hdl_set_vlog_partsel(path,value,flag);
-  if (result < 0)
-    return 0;
-  if (result == 1)
-    return 1;
-
-  if (!strncmp(path,"$root.",6))
-    r = vpi_handle_by_name(path+6, 0);
-  else
-  #endif
   r = vpi_handle_by_name(path, 0);
 
   if(r == 0)
@@ -232,9 +107,6 @@ static int uvm_hdl_set_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
       value = value_s.value.vector;
     }
   }
-#ifndef VCS
-  vpi_release_handle(r);
-#endif
   return 1;
 }
 
@@ -250,26 +122,6 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
   vpiHandle r;
   s_vpi_value value_s;
 
-  #ifdef QUESTA
-  if (!partsel) {
-    maxsize = uvm_hdl_max_width();
-    chunks = (maxsize-1)/32 + 1;
-    for(i=0;i<chunks-1; ++i) {
-      value[i].aval = 0;
-      value[i].bval = 0;
-    }
-  }
-  int result = 0;
-  result = uvm_hdl_get_vlog_partsel(path,value,flag);
-  if (result < 0)
-    return 0;
-  if (result == 1)
-    return 1;
-
-  if (!strncmp(path,"$root.",6))
-    r = vpi_handle_by_name(path+6, 0);
-  else
-  #endif
   r = vpi_handle_by_name(path, 0);
 
   if(r == 0)
@@ -304,10 +156,6 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
                        M_UVM_NONE,
                        (char*)__FILE__,
                        __LINE__);
-      //tf_dofinish();
-#ifndef VCS
-      vpi_release_handle(r);
-#endif
       return 0;
     }
     chunks = (size-1)/32 + 1;
@@ -322,9 +170,6 @@ static int uvm_hdl_get_vlog(char *path, p_vpi_vecval value, PLI_INT32 flag)
     }
   }
   //vpi_printf("uvm_hdl_get_vlog(%s,%0x)\n",path,value[0].aval);
-#ifndef VCS
-  vpi_release_handle(r);
-#endif
   return 1;
 }
 
@@ -340,12 +185,6 @@ int uvm_hdl_check_path(char *path)
 {
   vpiHandle r;
 
-  #ifdef QUESTA
-  if (!strncmp(path,"$root.",6)) {
-    r = vpi_handle_by_name(path+6, 0);
-  }
-  else
-  #endif
   r = vpi_handle_by_name(path, 0);
 
   if(r == 0)
@@ -354,39 +193,205 @@ int uvm_hdl_check_path(char *path)
     return 1;
 }
 
+/*
+ * convert binary to integer
+ */
+long int uvm_hdl_btoi(char *binVal) {
+  long int remainder, dec=0, j = 0;
+  unsigned long long int bin;
+  int i;
+  char *tmp = (char*)malloc(sizeof(char*));;
+
+  for(i= strlen(binVal) -1 ; i >= 0 ; i--) {
+    *tmp  = binVal[i];
+    bin = atoi(tmp);
+    dec = dec+(bin*(pow(2,j)));
+    j++;
+  }
+  return(dec);
+}
+
+
+/*
+ *decimal to hex conversion
+ */
+char *uvm_hdl_dtob(long int decimalNumber) {
+   int remainder, quotient;
+  int  i=0,j, length;
+  int binN[100];
+  char *binaryNumber_tmp;
+  char binaryNumber[32]="";
+  char *str = (char*) malloc(sizeof(char));
+
+  quotient = decimalNumber;
+
+  while(quotient!=0){
+    binN[i++] = quotient%2;
+    quotient = quotient/2;
+  }
+  length = i;
+
+  for (i=length-1; i>=0; i--) {
+       sprintf(str, "%d", binN[i]);
+       (void)strncat(binaryNumber, str, sizeof(binaryNumber) - strlen(binaryNumber) - 1);
+  }
+  binaryNumber_tmp = (char*)malloc(sizeof(char)*strlen(binaryNumber));
+  binaryNumber_tmp = (char*)binaryNumber;
+  return(binaryNumber_tmp);
+}
+
+
+/*
+ * Mixed lanaguage API Get calls
+ */
+#ifdef VCSMX
+int uvm_hdl_get_mhdl(char *path, p_vpi_vecval value) {
+
+  long int value_int;
+
+  char *binVal;
+  char *tmpbin = (char*)malloc(sizeof(char*)*8);
+  int i = 0;
+  vhpiValueT value1;
+  mhpi_initialize('/');
+  mhpiHandleT mhpiH = mhpi_handle_by_name(path, 0);
+  vhpiHandleT vhpiH = (long unsigned int *)mhpi_get_vhpi_handle(mhpiH);
+  value1.format=vhpiStrVal;
+  value1.bufSize = vhpi_get(vhpiSizeP, vhpiH);
+  value1.value.str = (char*)malloc(value1.bufSize*sizeof(char));
+
+
+  if (vhpi_get_value(vhpiH, &value1) == 0) {
+    binVal = value1.value.str;
+    tmpbin = binVal;
+    
+    value_int = uvm_hdl_btoi(binVal);
+    value->aval = (PLI_UINT32) value_int;
+    value->bval = 0;
+    mhpi_release_parent_handle(mhpiH);
+    return(1);
+    
+
+  } else {
+    mhpi_release_parent_handle(mhpiH);
+    return (0);
+  }
+
+}
+#endif
 
 /*
  * Given a path, look the path name up using the PLI
- * or the FLI, and return its 'value'.
+ * or the VHPI, and return its 'value'.
  */
 int uvm_hdl_read(char *path, p_vpi_vecval value)
 {
-    return uvm_hdl_get_vlog(path, value, vpiNoDelay);
+#ifndef VCSMX
+     return uvm_hdl_get_vlog(path, value, vpiNoDelay);
+#else
+    mhpi_initialize('/');
+    mhpiHandleT h = mhpi_handle_by_name(path, 0);
+    if (mhpi_get(mhpiPliP, h) == mhpiVpiPli) {
+    mhpi_release_parent_handle(h);
+      return uvm_hdl_get_vlog(path, value, vpiNoDelay);
+    }
+    else if (mhpi_get(mhpiPliP, h) == mhpiVhpiPli) {
+
+    mhpi_release_parent_handle(h);
+      return uvm_hdl_get_mhdl(path,value);
+    }
+#endif
 }
+
+
+/*
+ * Mixed Language API Set calls
+ */
+#ifdef VCSMX
+int uvm_hdl_set_mhdl(char *path, p_vpi_vecval value, mhpiPutValueFlagsT flags) 
+{
+    mhpi_initialize('/');
+    mhpiRealT forceDelay = 0;
+    mhpiRealT cancelDelay = -1;
+    mhpiReturnT ret;
+    mhpiHandleT h = mhpi_handle_by_name(path, 0);
+    mhpiHandleT mhpi_mhRegion = mhpi_handle(mhpiScope, h);
+    int val = value->aval;
+    char fin_value[32] = ""; 
+    char *force_value = "0";
+    if(val != 0) { 
+		force_value = uvm_hdl_dtob(val);
+	} 
+    
+    strcpy(fin_value, force_value);
+
+    ret = mhpi_force_value(path, mhpi_mhRegion, (char*)&fin_value, flags, forceDelay, cancelDelay); 
+    mhpi_release_parent_handle(h);
+    if (ret == mhpiRetOk) {
+      return(1);
+    }
+    else 
+      return(0);
+}
+#endif
 
 /*
  * Given a path, look the path name up using the PLI
- * or the FLI, and set it to 'value'.
+ * or the VHPI, and set it to 'value'.
  */
 int uvm_hdl_deposit(char *path, p_vpi_vecval value)
 {
-    return uvm_hdl_set_vlog(path, value, vpiNoDelay);
+#ifndef VCSMX
+     return uvm_hdl_set_vlog(path, value, vpiNoDelay);
+#else
+    mhpi_initialize('/');
+    mhpiHandleT h = mhpi_handle_by_name(path, 0);
+
+    if (mhpi_get(mhpiPliP, h) == mhpiVpiPli) {
+    mhpi_release_parent_handle(h);
+      return uvm_hdl_set_vlog(path, value, vpiNoDelay);
+    }
+    else if (mhpi_get(mhpiPliP, h) == mhpiVhpiPli) {
+      mhpi_release_parent_handle(h);
+      return uvm_hdl_set_mhdl(path, value, mhpiNoDelay);
+     }
+    else
+      return (0);
+#endif
 }
 
 
 /*
  * Given a path, look the path name up using the PLI
- * or the FLI, and set it to 'value'.
+ * or the VHPI, and set it to 'value'.
  */
 int uvm_hdl_force(char *path, p_vpi_vecval value)
 {
-    return uvm_hdl_set_vlog(path, value, vpiForceFlag);
+#ifndef VCSMX
+      return uvm_hdl_set_vlog(path, value, vpiForceFlag);
+#else
+    mhpi_initialize('/');
+    mhpiHandleT h = mhpi_handle_by_name(path, 0);
+
+    if (mhpi_get(mhpiPliP, h) == mhpiVpiPli) {
+    mhpi_release_parent_handle(h);
+      return uvm_hdl_set_vlog(path, value, vpiForceFlag);
+    }
+    else if (mhpi_get(mhpiPliP, h) == mhpiVhpiPli) {
+
+    mhpi_release_parent_handle(h);
+      return uvm_hdl_set_mhdl(path, value, mhpiForce);
+
+      }
+    else
+      return (0);
+#endif
 }
 
 
 /*
  * Given a path, look the path name up using the PLI
- * or the FLI, and release it.
+ * or the VHPI, and release it.
  */
 int uvm_hdl_release_and_read(char *path, p_vpi_vecval value)
 {
@@ -395,12 +400,34 @@ int uvm_hdl_release_and_read(char *path, p_vpi_vecval value)
 
 /*
  * Given a path, look the path name up using the PLI
- * or the FLI, and release it.
+ * or the VHPI, and release it.
  */
 int uvm_hdl_release(char *path)
 {
-  s_vpi_vecval value;
-  p_vpi_vecval valuep = &value;
-  return uvm_hdl_set_vlog(path, valuep, vpiReleaseFlag);
+    s_vpi_vecval value;
+    p_vpi_vecval valuep = &value;
+#ifndef VCSMX
+     return uvm_hdl_set_vlog(path, valuep, vpiReleaseFlag);
+#else
+    mhpi_initialize('/');
+    mhpiHandleT h = mhpi_handle_by_name(path, 0);
+    mhpiReturnT ret;
+
+    if (mhpi_get(mhpiPliP, h) == mhpiVpiPli) {
+      return uvm_hdl_set_vlog(path, valuep, vpiReleaseFlag);
+    }
+    else if (mhpi_get(mhpiPliP, h) == mhpiVhpiPli) {
+      mhpiHandleT mhpi_mhRegion = mhpi_handle(mhpiScope, h);
+      ret = mhpi_release_force(path, mhpi_mhRegion);
+      if (ret == mhpiRetOk) {
+        return(1);
+      }
+      else 
+        return(0);
+
+      }
+    else
+      return (0);
+#endif
 }
 
