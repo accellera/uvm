@@ -1562,7 +1562,7 @@ virtual class uvm_component extends uvm_report_object;
                                            bit    keep_active=0);
 
   // Function: get_tr_stream
-  // Returns a record stream with ~this~ component context.
+  // Returns a tr stream with ~this~ component's full name as a scope.
   //
   // Streams which are retrieved via this method will be stored internally,
   // such that later calls to ~get_tr_stream~ will return the same stream
@@ -1575,7 +1575,7 @@ virtual class uvm_component extends uvm_report_object;
   // name - Name for the stream
   // stream_type_name - Type name for the stream (Default = "")
   extern virtual function uvm_tr_stream get_tr_stream(string name,
-                                                       string stream_type_name="");
+                                                      string stream_type_name="");
 
   // Function: free_tr_stream
   // Frees the internal references associated with ~stream~.
@@ -1795,6 +1795,7 @@ function uvm_component::new (string name, uvm_component parent);
   if (!uvm_config_db #(uvm_bitstream_t)::get(this, "", "recording_detail", recording_detail))
         void'(uvm_config_db #(int)::get(this, "", "recording_detail", recording_detail));
 
+  m_rh.set_name(get_full_name());
   set_report_verbosity_level(parent.get_report_verbosity_level());
 
   m_set_cl_msg_args();
@@ -2633,7 +2634,7 @@ function uvm_tr_stream uvm_component::get_tr_stream( string name,
                                                       string stream_type_name="" );
    uvm_tr_database db = m_get_tr_database();
    if (!m_streams.exists(name) || !m_streams[name].exists(stream_type_name))
-     m_streams[name][stream_type_name] = db.open_stream(name, this, stream_type_name);
+     m_streams[name][stream_type_name] = db.open_stream(name, this.get_full_name(), stream_type_name);
    return m_streams[name][stream_type_name];
 endfunction : get_tr_stream
 
@@ -2718,7 +2719,7 @@ function integer uvm_component::m_begin_tr (uvm_transaction tr,
    if (uvm_verbosity'(recording_detail) != UVM_NONE) begin
       if ((stream_name == "") || (stream_name == "main")) begin
         if (m_main_stream == null)
-           m_main_stream = db.open_stream("main", this, "TVM");
+           m_main_stream = db.open_stream("main", this.get_full_name(), "TVM");
          stream = m_main_stream;
       end
       else
@@ -2830,7 +2831,7 @@ function integer uvm_component::record_error_tr (string stream_name="main",
 
    if ((stream_name=="") || (stream_name=="main")) begin
       if (m_main_stream == null)
-        m_main_stream = tr_database.open_stream("main", this, "TVM");
+        m_main_stream = tr_database.open_stream("main", this.get_full_name(), "TVM");
       stream = m_main_stream;
    end
    else
@@ -2888,7 +2889,7 @@ function integer uvm_component::record_event_tr (string stream_name="main",
    
    if ((stream_name=="") || (stream_name=="main")) begin
       if (m_main_stream == null)
-        m_main_stream = tr_database.open_stream("main", this, "TVM");
+        m_main_stream = tr_database.open_stream("main", this.get_full_name(), "TVM");
       stream = m_main_stream;
    end
    else

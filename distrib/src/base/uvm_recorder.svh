@@ -21,6 +21,8 @@
 //   permissions and limitations under the License.
 //-----------------------------------------------------------------------------
 
+typedef class uvm_report_message;
+
 // File: UVM Recorders
 //
 // The uvm_recorder class serves two purposes:
@@ -637,7 +639,7 @@ virtual class uvm_recorder extends uvm_object;
   //
   virtual function integer create_stream (string name,
                                           string t,
-                                          uvm_component cntxt);
+                                          string scope);
      return -1;
   endfunction
 
@@ -652,7 +654,6 @@ virtual class uvm_recorder extends uvm_object;
   
   
   // Function- set_attribute
-  //
   //
   virtual function void set_attribute (integer txh,
                                string nm,
@@ -1007,10 +1008,10 @@ class uvm_text_recorder extends uvm_recorder;
   //
   virtual function integer create_stream (string name,
                                           string t,
-                                          uvm_component cntxt);
+                                          string scope);
      uvm_text_tr_stream stream;
      if (open_file()) begin
-        $cast(stream,m_text_db.open_stream(name, cntxt, t));
+        $cast(stream,m_text_db.open_stream(name, scope, t));
         return stream.get_handle();
      end
      return 0;

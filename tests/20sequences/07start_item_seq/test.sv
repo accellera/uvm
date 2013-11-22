@@ -30,7 +30,7 @@ module top();
   class fatal_catcher extends uvm_report_catcher;
     function action_e catch();
       $display("** UVM TEST PASSED **");
-      uvm_report_fatal(get_id(), get_message(), get_severity());
+      uvm_report_fatal(get_id(), get_message(), UVM_NONE);
       return CAUGHT;
     endfunction
   endclass

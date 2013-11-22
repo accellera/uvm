@@ -52,16 +52,16 @@ class my_comp extends uvm_component;
         my_comp_h[i] = new ($sformatf("comp_%0d_%0d",depth,i), this);
   endfunction
 
-  task run();
+  task run_phase(uvm_phase phase);
     for (int i = 0; i < `NUM_LOOPS; i++) begin
       objection_counter++;
-      uvm_test_done.raise_objection(this);
+      phase.raise_objection(this);
       #1;
-      uvm_test_done.drop_objection(this);
+      phase.drop_objection(this);
       #1;
     end
     #100;
-    uvm_top.stop_request();
+    //uvm_top.stop_request();
   endtask
 
   function void report();
@@ -82,20 +82,26 @@ class test extends uvm_component;
   endfunction
   function void raised (uvm_objection objection, 
     uvm_object source_obj, string description, int count);
-    if (objection == uvm_test_done) begin
+    uvm_domain l_common_domain = uvm_domain::get_common_domain();
+    uvm_phase l_run_phase = l_common_domain.find_by_name("run");
+    uvm_objection l_run_phase_objection = l_run_phase.get_objection();
+    if (objection == l_run_phase_objection) begin
       counter++;
     end
   endfunction
   function void dropped (uvm_objection objection, 
     uvm_object source_obj, string description, int count);
-    if (objection == uvm_test_done) begin
+    uvm_domain l_common_domain = uvm_domain::get_common_domain();
+    uvm_phase l_run_phase = l_common_domain.find_by_name("run");
+    uvm_objection l_run_phase_objection = l_run_phase.get_objection();
+    if (objection == l_run_phase_objection) begin
       counter++;
     end
   endfunction
-  task run;
-    uvm_test_done.raise_objection(this);
+  task run_phase(uvm_phase phase);
+    phase.raise_objection(this);
     #20;
-    uvm_test_done.drop_objection(this);
+    phase.drop_objection(this);
   endtask
   function void report();
     //Run time for all components is `NUM_LOOPS * 2
@@ -120,7 +126,10 @@ endclass
 module top;
   initial begin
     `ifdef FLAT
-    uvm_test_done.hier_mode(0);
+    uvm_domain l_common_domain = uvm_domain::get_common_domain();
+    uvm_phase l_run_phase = l_common_domain.find_by_name("run");
+    uvm_objecton l_run_phase_objection = l_run_phase.get_objection();
+    l_run_phase_objection.hier_mode(0);
     `endif
     run_test();
   end

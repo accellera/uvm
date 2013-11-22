@@ -234,7 +234,7 @@ program top;
           uvm_report_server svr;
           svr = uvm_coreservice.get_report_server();
           
-          svr.summarize();
+          svr.report_summarize();
           
           if (svr.get_severity_count(UVM_FATAL) +
               svr.get_severity_count(UVM_ERROR) == 0)

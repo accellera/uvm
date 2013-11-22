@@ -33,9 +33,9 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
-     #100 uvm_test_done.raise_objection(this);
-     #200 uvm_test_done.drop_objection(this);
+   virtual task run_phase(uvm_phase phase);
+     phase.raise_objection(this);
+     #200 phase.drop_objection(this);
    endtask
 
    virtual function void report();

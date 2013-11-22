@@ -122,9 +122,9 @@ virtual class uvm_tr_database extends uvm_object;
    // Parameters:
    //   name - A string name for the stream.  This is the name associated
    //          with the stream in the database.
-   //   cntxt - A optional uvm_component context for the stream.
-   //   stream_type_name - An optional name describing the type of records which
-   //                      will be created in this stream.  
+   //   scope - An optional scope for the stream.
+   //   type_name - An optional name describing the type of records which
+   //               will be created in this stream.  
    //
    // The method returns a reference to a <uvm_tr_stream>
    // object if successful, ~null~ otherwise.
@@ -137,16 +137,28 @@ virtual class uvm_tr_database extends uvm_object;
    // open (per <is_open>).  Otherwise the request will
    // be ignored, and ~null~ will be returned.
    function uvm_tr_stream open_stream(string name,
-                                      uvm_component cntxt=null,
+                                      string scope="",
                                       string type_name="");
       if (!open_db()) begin
          return null;
       end
-      
-      open_stream = do_open_stream(name, cntxt, type_name);
-      if (open_stream != null) begin
-         m_streams[open_stream] = 1;
-         open_stream.m_do_open(this, cntxt, type_name);
+      else begin
+         process p = process::self();
+         string s;
+
+         if (p != null)
+           s = p.get_randstate();
+
+         open_stream = do_open_stream(name, scope, type_name);
+
+         if (p != null)
+           p.set_randstate(s);
+
+         if (open_stream != null) begin
+            m_streams[open_stream] = 1;
+            open_stream.m_do_open(this, scope, type_name);
+         end
+
       end
    endfunction : open_stream
 
@@ -261,8 +273,8 @@ virtual class uvm_tr_database extends uvm_object;
    // Function: do_open_stream
    // Backend implementation of <open_stream>
    pure virtual protected function uvm_tr_stream do_open_stream(string name,
-                                                                   uvm_component cntxt,
-                                                                   string type_name);
+                                                                string scope,
+                                                                string type_name);
 
    // Function: do_establish_link
    // Backend implementation of <establish_link>
@@ -350,9 +362,9 @@ class uvm_text_tr_database extends uvm_tr_database;
    //
    // Text-Backend implementation of <uvm_tr_database::open_stream>
    protected virtual function uvm_tr_stream do_open_stream(string name,
-                                                           uvm_component cntxt=null,
+                                                           string scope="",
                                                            string type_name="");
-      uvm_text_tr_stream m_stream = uvm_text_tr_stream::type_id::create(name, cntxt);
+      uvm_text_tr_stream m_stream = uvm_text_tr_stream::type_id::create(name);
       return m_stream;
    endfunction : do_open_stream
 

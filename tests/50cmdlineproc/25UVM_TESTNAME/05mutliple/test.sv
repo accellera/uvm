@@ -56,8 +56,9 @@ class test extends uvm_test;
        $display("  Correct number of +UVM_TESTNAME= values found");
    endfunction
 
-   virtual task run();
-      uvm_top.stop_request();
+   virtual task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
+      phase.drop_objection(this);
    endtask
 
    virtual function void report();

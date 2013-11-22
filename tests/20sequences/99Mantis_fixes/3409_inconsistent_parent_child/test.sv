@@ -124,13 +124,13 @@ module test();
     function void end_of_elaboration();
       `uvm_info(get_type_name(), $psprintf("The topology:\n%s", this.sprint()), UVM_HIGH)
     endfunction
-    task run();
+    task run_phase(uvm_phase phase);
       my_sequence msq;
-      uvm_test_done.raise_objection(this);
+      phase.raise_objection(this);
       msq = my_sequence::type_id::create("msq", this);
       msq.start(ma0.ms);
       #1000;
-      uvm_test_done.drop_objection(this);
+      phase.drop_objection(this);
     endtask // run
 
     function void report_phase(uvm_phase phase);

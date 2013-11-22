@@ -160,7 +160,7 @@ endclass
 
 initial begin
    tb_env env;
-   uvm_report_server svr;
+   uvm_report_server svr = uvm_report_server::get_server();
    
    env = new("env");
 

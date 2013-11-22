@@ -31,15 +31,16 @@ class test extends uvm_test;
       super.new(name, parent);
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
+      phase.raise_objection(this);
       `uvm_error("Test", "Error 1...");
       `uvm_error("Test", "Error 2...");
       `uvm_error("Test", "Error 3...");
       $write("UVM TEST EXPECT 3 UVM_ERROR\n");
-      uvm_top.stop_request();
+      phase.drop_objection(this);
    endtask
 
-   virtual function void report();
+   virtual function void report_phase(uvm_phase phase);
       $write("** UVM TEST PASSED **\n");
    endfunction
 endclass

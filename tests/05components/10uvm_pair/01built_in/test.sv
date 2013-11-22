@@ -54,6 +54,9 @@ else
 
 initial 
 begin
+
+  uvm_report_server l_rs = uvm_report_server::get_server();
+
   aa0["0"]=0;      aa0["1"]=1;
   aa1["foo"]=-30;  aa1["bar"]=-40;
   aa2["foo2"]=50;  aa2["bar2"]=60;
@@ -199,7 +202,7 @@ begin
  
  check();
  
- uvm_top.report_summarize();
+ l_rs.report_summarize();
  
  end
 

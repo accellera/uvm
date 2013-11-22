@@ -30,7 +30,7 @@
 // initialization values.
 class m_uvm_tr_stream_cfg;
    uvm_tr_database db;
-   uvm_component cntxt;
+   string scope;
    string stream_type_name;
 endclass : m_uvm_tr_stream_cfg
 
@@ -106,24 +106,23 @@ virtual class uvm_tr_stream extends uvm_object;
       return m_cfg.db;
    endfunction : get_db
       
-   // Function: get_context
-   // Returns a reference to the database which contains this
-   // stream.
+   // Function: get_scope
+   // Returns the ~scope~ supplied when opening this stream.
    //
-   // A warning will be asserted if get_context is called prior to
+   // A warning will be asserted if get_scope is called prior to
    // the stream being initialized via <do_open>.
-   function uvm_component get_context();
+   function string get_scope();
       m_uvm_tr_stream_cfg m_cfg;
       if (!m_cfg_dap.try_get(m_cfg)) begin
          if (m_warn_null_cfg == 1)
            `uvm_warning("UVM/REC_STR/NO_CFG",
-                        $sformatf("attempt to retrieve CONTEXT from '%s' before it was set!",
+                        $sformatf("attempt to retrieve scope from '%s' before it was set!",
                                   get_name()))
          m_warn_null_cfg = 0;
-         return null;
+         return "";
       end
-      return m_cfg.cntxt;
-   endfunction : get_context
+      return m_cfg.scope;
+   endfunction : get_scope
       
    // Function: get_stream_type_name
    // Returns a reference to the database which contains this
@@ -218,7 +217,7 @@ virtual class uvm_tr_stream extends uvm_object;
    //
    // Parameters-
    // db - Database which the stream belongs to
-   // context - Optional component context
+   // scope - Optional scope
    // stream_type_name - Optional type name for the stream
    //
    // This method will trigger a <do_open> call.
@@ -228,7 +227,7 @@ virtual class uvm_tr_stream extends uvm_object;
    //   being ~freed~ between.
    // - m_do_open is passed a ~null~ db
    function void m_do_open(uvm_tr_database db,
-                           uvm_component cntxt=null,
+                           string scope="",
                            string stream_type_name="");
       
       m_uvm_tr_stream_cfg m_cfg;
@@ -249,12 +248,12 @@ virtual class uvm_tr_stream extends uvm_object;
          // Never set before
          m_cfg = new();
          m_cfg.db = db;
-         m_cfg.cntxt = cntxt;
+         m_cfg.scope = scope;
          m_cfg.stream_type_name = stream_type_name;
          m_cfg_dap.set(m_cfg);
          m_is_opened = 1;
 
-         do_open(db, cntxt, stream_type_name);
+         do_open(db, scope, stream_type_name);
       end
       
    endfunction : m_do_open
@@ -309,14 +308,24 @@ virtual class uvm_tr_stream extends uvm_object;
       // Check to make sure we're open
       if (!is_open())
         return null;
-      
-      open_recorder = do_open_recorder(name,
-                                       m_time,
-                                       type_name);
+      else begin
+         process p = process::self();
+         string s;
 
-      if (open_recorder != null) begin
-         m_records[open_recorder] = 1;
-         open_recorder.m_do_open(this, m_time, type_name);
+         if (p != null)
+           s = p.get_randstate();
+         
+         open_recorder = do_open_recorder(name,
+                                          m_time,
+                                          type_name);
+
+         if (p != null)
+           p.set_randstate(s);
+         
+         if (open_recorder != null) begin
+            m_records[open_recorder] = 1;
+            open_recorder.m_do_open(this, m_time, type_name);
+         end
       end
    endfunction : open_recorder
 
@@ -441,15 +450,15 @@ virtual class uvm_tr_stream extends uvm_object;
    //
    // Parameters:
    // db - Database which the stream belongs to
-   // context - Optional component context
+   // scope - Optional scope
    // stream_type_name - Optional type name for the stream
    //
    // The ~do_open~ callback can be used to initialize any internal
    // state within the stream, as well as providing a location to
    // record any initial information about the stream.
    protected virtual function void do_open(uvm_tr_database db,
-                                             uvm_component cntxt,
-                                             string stream_type_name);
+                                           string scope,
+                                           string stream_type_name);
    endfunction : do_open
 
    // Function: do_close
@@ -514,8 +523,8 @@ class uvm_text_tr_stream extends uvm_tr_stream;
    // Callback triggered via <uvm_tr_database::open_stream>.
    //
    protected virtual function void do_open(uvm_tr_database db,
-                                             uvm_component cntxt,
-                                             string stream_type_name);
+                                           string scope,
+                                           string stream_type_name);
       $cast(m_text_db, db);
       if (m_text_db.open_db())
         $fdisplay(m_text_db.m_file, 
@@ -523,21 +532,20 @@ class uvm_text_tr_stream extends uvm_tr_stream;
                   $time,
                   this.get_name(),
                   stream_type_name,
-                  (cntxt == null) ? "" : cntxt.get_full_name(),
+                  scope,
                   this.get_handle());
    endfunction : do_open
 
    // Function: do_close
    // Callback triggered via <uvm_tr_database::close_stream>.
    protected virtual function void do_close();
-      uvm_component cntxt = get_context();
       if (m_text_db.open_db())
         $fdisplay(m_text_db.m_file,
                   "  CLOSE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",
                   $time,
                   this.get_name(),
                   this.get_stream_type_name(),
-                  (cntxt == null) ? "" : cntxt.get_full_name(),
+                  this.get_scope(),
                   this.get_handle());
    endfunction : do_close
       
@@ -545,14 +553,13 @@ class uvm_text_tr_stream extends uvm_tr_stream;
    // Callback triggered via <uvm_tr_database::free_stream>.
    //
    protected virtual function void do_free();
-      uvm_component cntxt = get_context();
       if (m_text_db.open_db())
         $fdisplay(m_text_db.m_file, 
                   "  FREE_STREAM @%0t {NAME:%s T:%s SCOPE:%s STREAM:%0d}",
                   $time,
                   this.get_name(),
                   this.get_stream_type_name(),
-                  (cntxt == null) ? "" : cntxt.get_full_name(),
+                  this.get_scope(),
                   this.get_handle());
       m_text_db = null;
       return;

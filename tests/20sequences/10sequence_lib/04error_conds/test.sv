@@ -255,8 +255,7 @@ module top;
      endtask
 
      virtual function void report();
-       uvm_root top = uvm_coreservice.get_root();
-       uvm_report_server svr = top.get_report_server();
+       uvm_report_server svr = uvm_report_server::get_server();
        $display("Checking report counts");
        if (!reports.exists("SEQLIB/NOSEQS")       || reports["SEQLIB/NOSEQS"]       != 1) failed = 1;
        if (!reports.exists("SEQLIB/BAD_SEQ_TYPE") || reports["SEQLIB/BAD_SEQ_TYPE"] != 2) failed = 1;

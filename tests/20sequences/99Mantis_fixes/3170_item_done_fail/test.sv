@@ -129,12 +129,12 @@ module top();
       `uvm_info(get_type_name(), $sformatf("The topology:\n%s", this.sprint()), UVM_HIGH)
     endfunction
 
-    task run();
+    task run_phase(uvm_phase phase);
       my_sequence the_0seq;
-      uvm_test_done.raise_objection(this);
+      phase.raise_objection(this);
       the_0seq = my_sequence::type_id::create("the_0seq", this);
       the_0seq.start(ma0.ms);
-      uvm_test_done.drop_objection(this);
+      phase.drop_objection(this);
     endtask
   endclass
 

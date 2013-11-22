@@ -75,9 +75,10 @@ class test extends base;
       bb = new("bb",this);
    endfunction
 
-   virtual task run();
+   virtual task run_phase(uvm_phase phase);
+      uvm_report_server l_rs = uvm_report_server::get_server();
       $display("UVM TEST EXPECT 1 UVM_ERROR");
-      set_report_max_quit_count(1);
+      l_rs.set_max_quit_count(1);
 
       `uvm_error("someerror", "Create an error condition")
    endtask
