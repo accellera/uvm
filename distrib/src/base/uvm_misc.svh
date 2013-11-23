@@ -475,9 +475,6 @@ endfunction
 function string uvm_bitstream_to_string (uvm_bitstream_t value, int size,
                                          uvm_radix_enum radix=UVM_NORADIX,
                                          string radix_str="");
-                                      
-                                      uvm_bitstream_t v;
-
   // sign extend & don't show radix for negative values
   if (radix == UVM_DEC && value[size-1] === 1)
     return $sformatf("%0d", value);
@@ -508,11 +505,8 @@ endfunction
 //
 //
 function string uvm_integral_to_string (uvm_integral_t value, int size,
-                                        uvm_radix_enum radix=UVM_NORADIX,
-                                        string radix_str="");
-                                      
-                                      uvm_integral_t v;
-
+                                         uvm_radix_enum radix=UVM_NORADIX,
+                                         string radix_str="");
   // sign extend & don't show radix for negative values
   if (radix == UVM_DEC && value[size-1] === 1)
     return $sformatf("%0d", value);

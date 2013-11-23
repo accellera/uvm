@@ -206,13 +206,6 @@ virtual class uvm_event_base extends uvm_object;
 	endfunction
 
 
-	virtual function uvm_object create(string name=""); 
-		uvm_event v;
-		v=new(name);
-		return v;
-	endfunction
-
-
 	virtual function string get_type_name();
 		return type_name;
 	endfunction
@@ -231,7 +224,7 @@ virtual class uvm_event_base extends uvm_object;
 
 
 	virtual function void do_copy (uvm_object rhs);
-		uvm_event e;
+		uvm_event_base e;
 		super.do_copy(rhs);
 		if(!$cast(e, rhs) || (e==null)) return;
 
@@ -375,9 +368,16 @@ class uvm_event#(type T=uvm_object) extends uvm_event_base;
 	endfunction
 	
 	virtual function void do_copy (uvm_object rhs);
-		uvm_event e;
+		uvm_event#(T) e;
 		super.do_copy(rhs);
 		if(!$cast(e, rhs) || (e==null)) return;
 		trigger_data = e.trigger_data;
+	endfunction // do_copy
+
+   	virtual function uvm_object create(string name=""); 
+		uvm_event#(T) v;
+		v=new(name);
+		return v;
 	endfunction
+
 endclass

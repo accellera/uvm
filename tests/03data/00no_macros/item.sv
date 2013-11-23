@@ -228,51 +228,52 @@ class item extends uvm_sequence_item;
   // ---------
 
   virtual function void do_record(uvm_recorder recorder);
-    if (!is_recording_enabled())
-      return;
-    super.do_record(recorder);
-    `uvm_record_int("int64", int64, $bits(int64))
-    `uvm_record_int("int32", int32, $bits(int32))
-    `uvm_record_int("int16", int16, $bits(int16))
-    `uvm_record_int("int8",  int8, $bits(int8))
-    `uvm_record_int("int1",  int1, $bits(int1))
-
-    `uvm_record_int("uint64", uint64, $bits(uint64))
-    `uvm_record_int("uint32", uint32, $bits(uint32))
-    `uvm_record_int("uint16", uint16, $bits(uint16))
-    `uvm_record_int("uint8",  uint8, $bits(uint8))
-    `uvm_record_int("uint1",  uint1, $bits(uint1))
-
-    `uvm_record_time("time64", time64)
-    `uvm_record_string("str", str)
-
-`ifdef INCA 
-    foreach(sa[i])
-      `uvm_record_int($sformatf("\\sa[%0d] ", i), sa[i], $bits(sa[i]))
-    // currently no support to store sa into db
-`elsif VCS
-    foreach(sa[i])
-      `uvm_record_int($sformatf("\\sa[%0d] ", i), sa[i], $bits(sa[i]))
-`else
-    `uvm_record_field("sa",sa);
-`endif    
-    foreach(da[i])
-      `uvm_record_int($sformatf("\\da[%0d] ", i), da[i], $bits(da[i]))
-
-    foreach(q[i])
-      `uvm_record_int($sformatf("\\q[%0d] ", i), q[i], $bits(q[i]))
-
-    foreach(aa[i])
-      `uvm_record_int($sformatf("\\aa[%0d] ", i), aa[i], $bits(aa[i]))
-
-    `uvm_record_real("real64",real64)
-`ifndef INCA    
-    `uvm_record_real("real32",real32)
-`endif
-    `uvm_record_int("bits",bits, $bits(bits))
-    `uvm_record_int("logics",logics, $bits(logics))
-
-  endfunction
+     if (!is_recording_enabled())
+       return;
+     
+     super.do_record(recorder);
+     `uvm_record_int("int64", int64, $bits(int64))
+     `uvm_record_int("int32", int32, $bits(int32))
+     `uvm_record_int("int16", int16, $bits(int16))
+     `uvm_record_int("int8",  int8, $bits(int8))
+     `uvm_record_int("int1",  int1, $bits(int1))
+     
+     `uvm_record_int("uint64", uint64, $bits(uint64))
+     `uvm_record_int("uint32", uint32, $bits(uint32))
+     `uvm_record_int("uint16", uint16, $bits(uint16))
+     `uvm_record_int("uint8",  uint8, $bits(uint8))
+     `uvm_record_int("uint1",  uint1, $bits(uint1))
+     
+     `uvm_record_time("time64", time64)
+     `uvm_record_string("str", str)
+     
+    `ifdef INCA 
+     foreach(sa[i])
+       `uvm_record_int($sformatf("\\sa[%0d] ", i), sa[i], $bits(sa[i]))
+     // currently no support to store sa into db
+    `elsif VCS
+     foreach(sa[i])
+       `uvm_record_int($sformatf("\\sa[%0d] ", i), sa[i], $bits(sa[i]))
+    `else
+     `uvm_record_field("sa",sa);
+    `endif    
+     foreach(da[i])
+       `uvm_record_int($sformatf("\\da[%0d] ", i), da[i], $bits(da[i]))
+     
+     foreach(q[i])
+       `uvm_record_int($sformatf("\\q[%0d] ", i), q[i], $bits(q[i]))
+     
+     foreach(aa[i])
+       `uvm_record_int($sformatf("\\aa[%0d] ", i), aa[i], $bits(aa[i]))
+     
+     `uvm_record_real("real64",real64)
+    `ifndef INCA    
+     `uvm_record_real("real32",real32)
+    `endif
+     `uvm_record_int("bits",bits, $bits(bits))
+     `uvm_record_int("logics",logics, $bits(logics))
+     
+endfunction
 
 
   // do_pack 

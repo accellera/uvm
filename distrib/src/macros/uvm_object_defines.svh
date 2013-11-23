@@ -662,12 +662,7 @@ endfunction \
       UVM_RECORD: \
         `m_uvm_record_int(ARG, FLAG) \
       UVM_PRINT: \
-        if(!((FLAG)&UVM_NOPRINT)) begin \
-          if ($bits(ARG) > 64) \
-            __m_uvm_status_container.printer.print_field(`"ARG`", ARG, $bits(ARG), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
-          else \
-            __m_uvm_status_container.printer.print_field_int(`"ARG`", ARG, $bits(ARG), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
-        end \
+        `m_uvm_print_int(ARG, FLAG) \
       UVM_SETINT: \
         begin \
           bit matched; \
@@ -2588,6 +2583,22 @@ endfunction \
   `M_UVM_FIELD_SET_AA_INT_ENUMTYPE(KEY, INT, ARG, __m_uvm_status_container.bitstream, FLAG)  \
   end
 
+// m_uvm_print_int
+
+// Purpose: provide print functionality for a specific integral field. This
+// macro is available for user access. If used externally, a record_options
+// object must be avaialble and must have the name opt.
+// 
+// Postcondition: ~ARG~ is printed using the format set by the FLAGS.
+
+`define m_uvm_print_int(ARG,FLAG) \
+  if(!((FLAG)&UVM_NOPRINT)) begin \
+     if ($bits(ARG) > 64) \
+      __m_uvm_status_container.printer.print_field(`"ARG`", ARG,  $bits(ARG), uvm_radix_enum'((FLAG)&(UVM_RADIX))); \
+     else \
+      __m_uvm_status_container.printer.print_field_int(`"ARG`", ARG,  $bits(ARG), uvm_radix_enum'((FLAG)&(UVM_RADIX))); \
+  end
+
 //-----------------------------------------------------------------------------
 //
 // MACROS- recording
@@ -2653,22 +2664,31 @@ endfunction \
     if(!((FLAG)&UVM_NORECORD)) begin \
       int sz__ = SZ; \
       if(sz__ == 0) begin \
-        __m_uvm_status_container.recorder.record_field(`"ARG`", 0, 32, UVM_DEC); \
+        __m_uvm_status_container.recorder.record_field_int(`"ARG`", 0, 32, UVM_DEC); \
       end \
       else if(sz__ < 10) begin \
         foreach(ARG[i]) begin \
            __m_uvm_status_container.scope.set_arg_element(`"ARG`",i); \
-           __m_uvm_status_container.recorder.record_field(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+           if ($bits(ARG[i]) > 64) \
+             __m_uvm_status_container.recorder.record_field(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+           else \
+             __m_uvm_status_container.recorder.record_field_int(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
         end \
       end \
       else begin \
         for(int i=0; i<5; ++i) begin \
            __m_uvm_status_container.scope.set_arg_element(`"ARG`", i); \
-           __m_uvm_status_container.recorder.record_field(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+           if ($bits(ARG[i]) > 64) \
+             __m_uvm_status_container.recorder.record_field(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+           else \
+             __m_uvm_status_container.recorder.record_field_int(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
         end \
         for(int i=sz__-5; i<sz__; ++i) begin \
            __m_uvm_status_container.scope.set_arg_element(`"ARG`", i); \
-           __m_uvm_status_container.recorder.record_field(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+           if ($bits(ARG[i]) > 64) \
+             __m_uvm_status_container.recorder.record_field(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
+           else \
+             __m_uvm_status_container.recorder.record_field_int(__m_uvm_status_container.scope.get(), ARG[i], $bits(ARG[i]), uvm_radix_enum'((FLAG)&UVM_RADIX)); \
         end \
       end \
     end \
@@ -2680,10 +2700,10 @@ endfunction \
 
 `define m_uvm_record_qda_enum(ARG, FLAG, SZ) \
   begin \
-    if(!((FLAG)&UVM_NORECORD) && (__m_uvm_status_container.recorder.tr_handle != 0)) begin \
+    if(!((FLAG)&UVM_NORECORD) && (__m_uvm_status_container.recorder != null)) begin \
       int sz__ = SZ; \
       if(sz__ == 0) begin \
-        __m_uvm_status_container.recorder.record_field(`"ARG``.size`", 0, 32, UVM_DEC); \
+        __m_uvm_status_container.recorder.record_field_int(`"ARG``.size`", 0, 32, UVM_DEC); \
       end \
       else if(sz__ < 10) begin \
         foreach(ARG[i]) begin \
@@ -2714,7 +2734,7 @@ endfunction \
       int sz__ = SZ; \
       string s; \
       if(sz__ == 0 ) begin \
-        __m_uvm_status_container.recorder.record_field(`"ARG``.size`", 0, 32, UVM_DEC); \
+        __m_uvm_status_container.recorder.record_field_int(`"ARG``.size`", 0, 32, UVM_DEC); \
       end \
       if(sz__ < 10) begin \
         foreach(ARG[i]) begin \
@@ -2744,7 +2764,7 @@ endfunction \
     int sz__ = SZ; \
     if(!((FLAG)&UVM_NORECORD)) begin \
       if(sz__ == 0) begin \
-        __m_uvm_status_container.recorder.record_field(`"ARG``.size`", 0, 32, UVM_DEC); \
+        __m_uvm_status_container.recorder.record_field_int(`"ARG``.size`", 0, 32, UVM_DEC); \
       end \
       else if(sz__ < 10) begin \
         foreach(ARG[i]) begin \
@@ -3339,9 +3359,9 @@ endfunction \
 
 `ifndef uvm_record_int
   `define uvm_record_int(NAME,VALUE,SIZE,RADIX = UVM_NORADIX) \
-    if (recorder != null && recorder.tr_handle != 0) begin \
+    if (recorder != null && recorder.is_open()) begin \
       if (recorder.use_record_attribute()) \
-        `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+        `uvm_record_attribute(recorder.get_record_attribute_handle(),NAME,VALUE) \
       else \
         if (SIZE > 64) \
           recorder.record_field(NAME, VALUE, SIZE, RADIX); \
@@ -3364,9 +3384,9 @@ endfunction \
 
 `ifndef uvm_record_string
   `define uvm_record_string(NAME,VALUE) \
-    if (recorder != null && recorder.tr_handle != 0) begin \
+    if (recorder != null && recorder.is_open()) begin \
       if (recorder.use_record_attribute()) \
-        `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+        `uvm_record_attribute(recorder.get_record_attribute_handle(),NAME,VALUE) \
       else \
         recorder.record_string(NAME,VALUE); \
     end
@@ -3385,9 +3405,9 @@ endfunction \
 //
 `ifndef uvm_record_time
   `define uvm_record_time(NAME,VALUE) \
-    if (recorder != null && recorder.tr_handle != 0) begin \
+    if (recorder != null && recorder.is_open()) begin \
       if (recorder.use_record_attribute()) \
-        `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+        `uvm_record_attribute(recorder.get_record_attribute_handle(),NAME,VALUE) \
       else \
          recorder.record_time(NAME,VALUE); \
     end
@@ -3407,9 +3427,9 @@ endfunction \
 //
 `ifndef uvm_record_real
   `define uvm_record_real(NAME,VALUE) \
-    if (recorder != null && recorder.tr_handle != 0) begin \
+    if (recorder != null && recorder.is_open()) begin \
       if (recorder.use_record_attribute()) \
-        `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+        `uvm_record_attribute(recorder.get_record_attribute_handle(),NAME,VALUE) \
       else \
         recorder.record_field_real(NAME,VALUE); \
     end
@@ -3431,9 +3451,9 @@ endfunction \
 // | recorder.record_generic(NAME,$sformatf("%p",VALUE));
 //
 `define uvm_record_field(NAME,VALUE) \
-   if (recorder != null && recorder.tr_handle != 0) begin \
+   if (recorder != null && recorder.is_open()) begin \
      if (recorder.use_record_attribute()) begin \
-       `uvm_record_attribute(recorder.tr_handle,NAME,VALUE) \
+       `uvm_record_attribute(recorder.get_record_attribute_handle(),NAME,VALUE) \
      end \
      else \
        recorder.record_generic(NAME, $sformatf("%p", VALUE)); \

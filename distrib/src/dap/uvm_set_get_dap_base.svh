@@ -77,7 +77,7 @@ virtual class uvm_set_get_dap_base#(type T=int) extends uvm_object;
    // the method will return '0', however no errors will be
    // reported.  Otherwise, the method will return '1', and will
    // be treated like a standard <get> call.
-   pure virtual function bit try_get(T value);
+   pure virtual function bit try_get(output T value);
 
 endclass : uvm_set_get_dap_base
 

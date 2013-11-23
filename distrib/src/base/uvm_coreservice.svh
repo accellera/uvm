@@ -25,7 +25,9 @@ typedef class uvm_visitor;
 typedef class uvm_component_name_check_visitor;
 typedef class uvm_component;
 
-
+typedef class uvm_tr_database;
+typedef class uvm_text_tr_database;
+   
 `ifndef UVM_CORESERVICE_TYPE
 `define UVM_CORESERVICE_TYPE uvm_default_coreservice_t
 `endif
@@ -67,6 +69,18 @@ virtual class uvm_coreservice_t;
 	// sets the central report server to ~server~
 	pure virtual function void set_report_server(uvm_report_server server);
 
+        // Function: get_default_tr_database
+        // returns the current default record database
+        //
+        // If no default record database has been set before this method is
+        // is called, returns an instance of <uvm_text_tr_database>
+        pure virtual function uvm_tr_database get_default_tr_database();
+
+        // Function: set_default_tr_database
+        // Sets the current default record database
+        //
+        pure virtual function void set_default_tr_database(uvm_tr_database db);
+   
 	// Function: set_component_visitor
 	// sets the component visitor to ~v~
 	// this visitor is being used for the traversal at end_of_elaboration_phase
@@ -101,7 +115,8 @@ virtual class uvm_coreservice_t;
 			inst=new;
 
 		return inst;
-	endfunction
+	endfunction // get
+
 endclass
 
 //----------------------------------------------------------------------
@@ -128,6 +143,19 @@ class uvm_default_coreservice_t extends uvm_coreservice_t;
 		factory = f;
 	endfunction 
 
+        local uvm_tr_database tr_database;
+        virtual function uvm_tr_database get_default_tr_database();
+           if (tr_database == null) begin
+              uvm_text_tr_database tx_db = new("default_tr_database");
+              tr_database = tx_db;
+           end
+           return tr_database;
+        endfunction : get_default_tr_database
+
+        virtual function void set_default_tr_database(uvm_tr_database db);
+           tr_database = db;
+        endfunction : set_default_tr_database
+   
 	local uvm_report_server report_server;
 	virtual function uvm_report_server get_report_server();
 		if(report_server==null) begin
