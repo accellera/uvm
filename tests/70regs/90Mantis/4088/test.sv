@@ -141,7 +141,7 @@ class info_error_catcher extends uvm_report_catcher;
   virtual function action_e catch();
 
     if (get_severity() == UVM_ERROR && get_id() == "RegModel" &&
-        get_message() == "Register \"blk.REG\" value read from DUT (0xffffffffffffffff) does not match mirrored value (0x000xXx0000000000)") begin
+        get_message() == "Register \"blk.REG\" value read from DUT (0xffffffffffffffff) does not match mirrored value (0x0000000000000000)") begin
       error_seen++;
       return CAUGHT;
     end else if (get_severity() == UVM_INFO && get_id() == "RegModel") begin

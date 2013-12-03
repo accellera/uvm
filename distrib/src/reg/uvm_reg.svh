@@ -2884,17 +2884,15 @@ function bit uvm_reg::do_check(input uvm_reg_data_t expected,
    foreach(m_fields[i]) begin
       string acc = m_fields[i].get_access(map);
       acc = acc.substr(0, 1);
-      if (m_fields[i].get_compare() == UVM_NO_CHECK ||
-          acc == "WO") begin
-         dc |= ((1 << m_fields[i].get_n_bits())-1)
-            << m_fields[i].get_lsb_pos();
+      if (!(m_fields[i].get_compare() == UVM_NO_CHECK ||acc == "WO")) begin
+         dc |= ((1 << m_fields[i].get_n_bits())-1)<< m_fields[i].get_lsb_pos();
       end
    end
 
-   if ((actual|dc) === (expected|dc)) return 1;
+   if ((actual&dc) === (expected&dc)) return 1;
    
    `uvm_error("RegModel", $sformatf("Register \"%s\" value read from DUT (0x%h) does not match mirrored value (0x%h)",
-                                    get_full_name(), actual, (expected ^ ('x & dc))));
+                                    get_full_name(), actual, expected))
                                      
    foreach(m_fields[i]) begin
       string acc = m_fields[i].get_access(map);
